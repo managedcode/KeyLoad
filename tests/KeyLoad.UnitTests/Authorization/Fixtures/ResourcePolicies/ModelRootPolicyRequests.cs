@@ -28,7 +28,7 @@ internal static class ModelRootPolicyRequests
         => new(fixture.Harness.Partition, new(ModelRootPolicyFixture.Source, "e",
             [new("/" + fixture.RootComponent + "/secret", "secret", "e"), new("/name", "name", "d")], Predicate(fixture),
             [new(fixture.ModelOrder, false)], 10, ModelSource: fixture.Model,
-            InnerJoin: new(ModelRootPolicyFixture.Target, "d", "/payload/to", "/entity_ref")), AllowFullScan: true, AstVersion: 2);
+            InnerJoin: new(ModelRootPolicyFixture.Target, "d", "/payload/to", "/entity_ref")), AllowFullScan: true, AstVersion: SqlOperationProtocol.DefaultQueryDialectVersion);
     private static Comparison Predicate(ModelRootPolicyFixture fixture)
         => new(new FieldOperand("/" + fixture.RootComponent + "/secret"), "=", ValueOperand.Create(fixture.RootValue));
 }

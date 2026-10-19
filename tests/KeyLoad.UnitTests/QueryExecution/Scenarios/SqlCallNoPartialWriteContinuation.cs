@@ -76,8 +76,8 @@ internal static class SqlCallNoPartialWriteContinuation
         };
 
     private static CommandRequest Decode(McpDecodedOperation operation)
-        => NativeSerialization.Deserialize<CommandRequest>(operation.Payload.Span,
-            global::KeyLoad.Features.InternalSerialization.NativeValidationProfile.PublicInputElements);
+        => OrleansSerialization.Deserialize<CommandRequest>(operation.Payload.Span,
+            global::KeyLoad.Features.InternalSerialization.ValidationProfile.PublicInputElements);
 
     private static async Task RefusedAsync(TestDatabase db, SqlOperationRequest request, ErrorCode code)
     {

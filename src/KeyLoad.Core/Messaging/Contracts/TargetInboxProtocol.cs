@@ -2,8 +2,8 @@ namespace KeyLoad.Core.Features.Messaging;
 
 internal static class TargetInboxProtocol
 {
-    internal const string RecordAlias = "keyload.core.target-inbox-record.v1";
-    internal const string CapacityAlias = "keyload.core.target-inbox-capacity.v1";
+    internal const string RecordAlias = "keyload.core.target-inbox-record";
+    internal const string CapacityAlias = "keyload.core.target-inbox-capacity";
     internal const string RecordSpace = "processing-inbox";
     internal const string CapacitySpace = "processing-inbox-capacity";
     internal const long EmptyCount = 0;

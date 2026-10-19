@@ -16,16 +16,16 @@ internal static class IdentityVersionRepairTrial
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            using var fixture = new NativeBackupCutFixture();
+            using var fixture = new BackupCutFixture();
             await ServerFailureObserver.ObserveAsync(() => ExerciseAsync(fixture, codecVersion, token), failures);
         }, failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    private static async Task ExerciseAsync(NativeBackupCutFixture fixture, bool codecVersion, CancellationToken token)
+    private static async Task ExerciseAsync(BackupCutFixture fixture, bool codecVersion, CancellationToken token)
     {
-        var source = NativeBackupJournalRepairAssertions.Read(fixture.Source, token);
-        var original = await NativeBackupJournalRepairAssertions.ArchiveAsync(fixture.Backup, token);
+        var source = BackupJournalRepairAssertions.Read(fixture.Source, token);
+        var original = await BackupJournalRepairAssertions.ArchiveAsync(fixture.Backup, token);
         var identityPath = Path.Combine(fixture.Backup, ZoneTreePersistenceFormat.IdentityFileName);
         var manifestPath = Path.Combine(fixture.Backup, ZoneTreePersistenceFormat.BackupManifestFileName);
         var failures = new List<Exception>();
@@ -34,13 +34,13 @@ internal static class IdentityVersionRepairTrial
             await File.WriteAllBytesAsync(identityPath, IdentityVersionRepairFault.Create(
                 original[ZoneTreePersistenceFormat.IdentityFileName], codecVersion), token);
             await MetadataTestFiles.UpdateManifestFileAsync(fixture.Backup, ZoneTreePersistenceFormat.IdentityFileName);
-            var faulted = await NativeBackupJournalRepairAssertions.ArchiveAsync(fixture.Backup, token);
+            var faulted = await BackupJournalRepairAssertions.ArchiveAsync(fixture.Backup, token);
             for (var repeat = 0; repeat < 2; repeat++)
             {
                 await RefusedAsync(fixture, token);
-                await NativeBackupJournalRepairAssertions.SameArchiveAsync(faulted, fixture.Backup, token);
-                await NativeBackupJournalRepairAssertions.SameCutAsync(source,
-                    NativeBackupJournalRepairAssertions.Read(fixture.Source, token));
+                await BackupJournalRepairAssertions.SameArchiveAsync(faulted, fixture.Backup, token);
+                await BackupJournalRepairAssertions.SameCutAsync(source,
+                    BackupJournalRepairAssertions.Read(fixture.Source, token));
             }
         }, failures);
         await ServerFailureObserver.ObserveAsync(() => File.WriteAllBytesAsync(identityPath,
@@ -54,7 +54,7 @@ internal static class IdentityVersionRepairTrial
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    private static async Task RefusedAsync(NativeBackupCutFixture fixture, CancellationToken token)
+    private static async Task RefusedAsync(BackupCutFixture fixture, CancellationToken token)
     {
         var error = Assert.ThrowsExactly<KeyLoadException>(() => ZoneTreeStore.VerifyBackup(fixture.Backup,
             UnitExecutionOptions.StorageExecution()));
@@ -71,29 +71,29 @@ internal static class IdentityVersionRepairTrial
         await Assert.That(Directory.Exists(fixture.Destination)).IsFalse();
     }
 
-    private static async Task HealthyAsync(NativeBackupCutFixture fixture,
+    private static async Task HealthyAsync(BackupCutFixture fixture,
         (StoreIdentity Identity, long Position, string[] Rows) source, Dictionary<string, byte[]> original,
         CancellationToken token)
     {
-        await NativeBackupJournalRepairAssertions.SameArchiveAsync(original, fixture.Backup, token);
+        await BackupJournalRepairAssertions.SameArchiveAsync(original, fixture.Backup, token);
         var verified = ZoneTreeStore.VerifyBackup(fixture.Backup, UnitExecutionOptions.StorageExecution(), token);
         await Assert.That(verified.Position).IsEqualTo(source.Position);
-        await Assert.That(NativeSerialization.Serialize(verified.Identity).AsSpan()
-            .SequenceEqual(NativeSerialization.Serialize(source.Identity))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(verified.Identity).AsSpan()
+            .SequenceEqual(OrleansSerialization.Serialize(source.Identity))).IsTrue();
         var result = await CliBackupRestoreProcess.RunAsync(CliBackupRestoreProcess.CaptureExecutionOptions(),
             ["restore", fixture.Backup, fixture.Destination], token);
         await CliBackupRestoreAssertions.SuccessfulProcessAsync(result);
-        var first = NativeBackupJournalRepairAssertions.Read(fixture.Destination, token);
-        await NativeBackupJournalRepairAssertions.RestoredAsync(fixture, first.Identity, first);
+        var first = BackupJournalRepairAssertions.Read(fixture.Destination, token);
+        await BackupJournalRepairAssertions.RestoredAsync(fixture, first.Identity, first);
         await CliBackupJournalRepairAssertions.ReceiptAsync(result, first.Identity);
         for (var cold = 0; cold < 2; cold++)
         {
-            var reopened = NativeBackupJournalRepairAssertions.Read(fixture.Destination, token);
-            await NativeBackupJournalRepairAssertions.SameCutAsync(first, reopened);
-            await NativeBackupJournalRepairAssertions.RestoredAsync(fixture, first.Identity, reopened);
+            var reopened = BackupJournalRepairAssertions.Read(fixture.Destination, token);
+            await BackupJournalRepairAssertions.SameCutAsync(first, reopened);
+            await BackupJournalRepairAssertions.RestoredAsync(fixture, first.Identity, reopened);
         }
-        await NativeBackupJournalRepairAssertions.SameCutAsync(source,
-            NativeBackupJournalRepairAssertions.Read(fixture.Source, token));
-        await NativeBackupJournalRepairAssertions.SameArchiveAsync(original, fixture.Backup, token);
+        await BackupJournalRepairAssertions.SameCutAsync(source,
+            BackupJournalRepairAssertions.Read(fixture.Source, token));
+        await BackupJournalRepairAssertions.SameArchiveAsync(original, fixture.Backup, token);
     }
 }

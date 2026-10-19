@@ -2,7 +2,7 @@ using System.Security.Cryptography;
 
 namespace KeyLoad.Server;
 
-/// <summary>Owns one fixed native buffer for sequential canonical JSON writes.</summary>
+/// <summary>Owns one fixed execution buffer for sequential canonical JSON writes.</summary>
 internal sealed class McpBoundedWriteStream : Stream
 {
     private const int SingleByteWidth = 1;

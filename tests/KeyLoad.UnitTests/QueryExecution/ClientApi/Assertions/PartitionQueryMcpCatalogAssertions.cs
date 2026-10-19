@@ -8,7 +8,7 @@ namespace KeyLoad.UnitTests.Features.QueryExecution;
 
 internal static class PartitionQueryMcpCatalogAssertions
 {
-    private const string Route = "/v1/query/partitions";
+    private const string Route = "/query/partitions";
     private const string Result = "result";
     private const string Reference = "reference";
     private const string Lifetime = "lifetime";

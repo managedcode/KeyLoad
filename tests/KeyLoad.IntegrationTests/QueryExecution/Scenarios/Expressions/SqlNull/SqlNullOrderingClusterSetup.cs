@@ -1,5 +1,5 @@
 using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.ClusterRouting;
+using KeyLoad.IntegrationTests.Features.OrleansExecution;
 namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 
 internal static class SqlNullOrderingClusterSetup

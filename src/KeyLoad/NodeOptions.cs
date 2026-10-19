@@ -3,7 +3,7 @@ using KeyLoad.Clustering;
 
 namespace KeyLoad.Server;
 
-/// <summary>Native Orleans hosting identity and physical storage access.</summary>
+/// <summary>Execution Orleans hosting identity and physical storage access.</summary>
 [ConfigurationOptions]
 internal sealed record NodeOptions
 {
@@ -12,7 +12,7 @@ internal sealed record NodeOptions
     private const string DefaultClusterId = "keyload";
     private const string LoopbackAddress = "127.0.0.1";
     private const string RootCredentialPrefix = "root.";
-    private const string InvalidIdentity = "The native silo identity or database credentials are invalid.";
+    private const string InvalidIdentity = "The execution silo identity or database credentials are invalid.";
     private const int InitialCount = 1;
     private const int DefaultSiloPort = 11_111;
     private const int SigningKeyBytes = 32;
@@ -22,9 +22,9 @@ internal sealed record NodeOptions
     public string DataDirectory { get; init; } = DefaultDirectory;
     /// <summary>Public API origin, independent of Orleans membership and data-copy selection.</summary>
     public string PublicEndpoint { get; init; } = DefaultPublicEndpoint;
-    /// <summary>Native Orleans silo name.</summary>
+    /// <summary>Execution Orleans silo name.</summary>
     public string SiloName { get; init; } = Environment.MachineName;
-    /// <summary>Native Orleans cluster identity.</summary>
+    /// <summary>Execution Orleans cluster identity.</summary>
     public string ClusterId { get; init; } = DefaultClusterId;
     /// <summary>Number of provisioned Orleans silos.</summary>
     public int SiloCount { get; init; } = InitialCount;
@@ -38,9 +38,9 @@ internal sealed record NodeOptions
     public string SigningKey { get; init; } = string.Empty;
     /// <summary>Initial root credential, used only when the canonical store is fresh.</summary>
     public string AdminKey { get; init; } = string.Empty;
-    /// <summary>Native Orleans silo port.</summary>
+    /// <summary>Execution Orleans silo port.</summary>
     public int SiloPort { get; init; } = DefaultSiloPort;
-    /// <summary>Routable native silo address.</summary>
+    /// <summary>Routable execution silo address.</summary>
     public string SiloAddress { get; init; } = LoopbackAddress;
     /// <summary>Bounded command admission.</summary>
     public CommandAdmissionLimits CommandAdmission { get; init; } = new();

@@ -38,7 +38,7 @@ internal sealed class VectorAttachmentAdmissionWholeFlowTests
     }
 
     [Test]
-    public async Task AttachmentItemBoundRejectsBeforeNativeReadAndHealthySearchStillWorks()
+    public async Task AttachmentItemBoundRejectsBeforeReadAndHealthySearchStillWorks()
     {
         using var db = new TestDatabase();
         AdapterVectorWholeFlow.Seed(db);

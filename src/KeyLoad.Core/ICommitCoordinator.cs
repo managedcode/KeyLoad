@@ -8,13 +8,13 @@ public interface ICommitCoordinator
     /// <summary>Submits one stable command identity and verified principal to the owning coordinator.</summary>
     /// <returns>The persisted command result or an explicit acceptance failure.</returns>
     Task<Result<object>> SubmitAsync(OperationKind kind, Guid id, string principalId, string payloadJson, CancellationToken cancellationToken = default);
-    /// <summary>Submits an attributed native command with an optional original call-local planning budget.</summary>
+    /// <summary>Submits an attributed execution command with an optional original call-local planning budget.</summary>
     /// <returns>The persisted typed command result or an explicit acceptance failure.</returns>
-    Task<Result<object>> SubmitNativeAsync(OperationKind kind, Guid id, string principalId,
+    Task<Result<object>> RuntimeSubmitAsync(OperationKind kind, Guid id, string principalId,
         ReadOnlyMemory<byte> payload, ReadExecutionBudget? sourcePlanningBudget = null,
         CancellationToken cancellationToken = default);
-    /// <summary>Submits a server-bound native command with its original prepared database facts.</summary>
-    /// <param name="operation">Owned native command whose subject was verified by the server.</param>
+    /// <summary>Submits a server-bound execution command with its original prepared database facts.</summary>
+    /// <param name="operation">Owned execution command whose subject was verified by the server.</param>
     /// <param name="cancellationToken">Original caller cancellation for admission and settlement.</param>
     /// <param name="sourcePlanningBudget">Original call-local planning budget, when supplied by its owner.</param>
     /// <returns>The original ordered coordinator result or explicit acceptance uncertainty.</returns>

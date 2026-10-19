@@ -7,8 +7,8 @@ internal static class MongoSessionQueryExecution
 {
     private const string CollectionUnavailable = "SessionDocumentCollectionUnavailable";
     private const string BodyHashIndex = "session_body_hash";
-    private const string IndexIdentityMismatch = "SessionNativeIndexIdentityMismatch";
-    private const string QueryCardinalityMismatch = "SessionNativeQueryCardinalityMismatch";
+    private const string IndexIdentityMismatch = "SessionIndexIdentityMismatch";
+    private const string QueryCardinalityMismatch = "SessionQueryCardinalityMismatch";
     private const int NextDocumentOffset = 1;
     private const int QueryLookaheadRows = 2;
     private const int ExpectedRows = 1;

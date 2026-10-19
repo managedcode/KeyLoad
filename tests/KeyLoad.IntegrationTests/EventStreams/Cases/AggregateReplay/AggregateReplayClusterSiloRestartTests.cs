@@ -1,8 +1,8 @@
 using Aspire.Hosting.ApplicationModel;
-using KeyLoad.AppHost.Features.ClusterReplication;
+using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.Client;
 using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.ClusterReplication;
+using KeyLoad.IntegrationTests.Features.StorageReplication;
 
 namespace KeyLoad.IntegrationTests.Features.EventStreams;
 
@@ -72,13 +72,13 @@ internal sealed class AggregateReplayClusterSiloRestartTests(ClusterFixture fixt
             await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
             await Assert.That(receipt.PersistedCopies).IsEqualTo(nodes.Length);
             await Assert.That(receipt.Mutations.Length).IsEqualTo(2);
-            await NativeSubmissionColdAssertions.ReceiptAsync(ClusterReplicationTestSupport.Success(
+            await SubmissionColdAssertions.ReceiptAsync(ClusterReplicationTestSupport.Success(
                 await clients[survivorIndex].CommitAsync(frozen, cancellationToken)), receipt);
             await Assert.That(Directory.Exists(Path.Combine(fixture.Root, stoppedNode))).IsTrue();
             await VerifyAllNodeParityAsync(scenario, nodes, clients, cancellationToken);
             if (interruptAcceptedRestart)
             {
-                await NativeRestartReadinessEvidenceAssertions.HealthyAsync(fixture, cancellationToken);
+                await RestartReadinessEvidenceAssertions.HealthyAsync(fixture, cancellationToken);
             }
         }
         catch (Exception failure) when (ClusterReplicationTestSupport.IsNonFatalCleanupFailure(failure))

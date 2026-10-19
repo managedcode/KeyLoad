@@ -4,6 +4,6 @@ namespace KeyLoad.UnitTests.Features.Messaging;
 internal sealed class MultiLaneConnectionOwnerWholeFlowTests
 {
     [Test]
-    public Task ParentAndSignedLeavesShareNativeOwnerReplayExactClaimsThenAckAndClose()
+    public Task ParentAndSignedLeavesShareOwnerReplayExactClaimsThenAckAndClose()
         => MultiLaneConnectionOwnerTrial.RunAsync();
 }

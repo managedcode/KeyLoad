@@ -20,8 +20,8 @@
     {
       "suite": "unit",
       "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryCancellationTests",
-      "methodName": "ObservedNativeReadProgressCancelsTheOriginalBudgetAndLeavesNoPartialResult",
-      "instanceName": "ObservedNativeReadProgressCancelsTheOriginalBudgetAndLeavesNoPartialResult",
+      "methodName": "ObservedReadProgressCancelsTheOriginalBudgetAndLeavesNoPartialResult",
+      "instanceName": "ObservedReadProgressCancelsTheOriginalBudgetAndLeavesNoPartialResult",
       "requirements": [
         "REQ-PQUERY-004"
       ],
@@ -31,13 +31,13 @@
       "executedModules": [
         "KeyLoad.Query"
       ],
-      "operationOutcomeAndState": "cancels after observed actual native bytes with original caller token; no page is returned and a subsequent one-row query succeeds"
+      "operationOutcomeAndState": "cancels after observed actual execution bytes with original caller token; no page is returned and a subsequent one-row query succeeds"
     },
     {
       "suite": "unit",
       "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryContractTests",
-      "methodName": "GeneratedPlanAndCompleteNativeResultRoundTripWithStableFields",
-      "instanceName": "GeneratedPlanAndCompleteNativeResultRoundTripWithStableFields",
+      "methodName": "GeneratedPlanAndCompleteResultRoundTripWithStableFields",
+      "instanceName": "GeneratedPlanAndCompleteResultRoundTripWithStableFields",
       "requirements": [
         "REQ-PQUERY-001"
       ],
@@ -47,7 +47,7 @@
       "executedModules": [
         "KeyLoad.Query"
       ],
-      "operationOutcomeAndState": "native plan and result round trip are checked alongside a real ZoneTree query, duplicate textual IDs/full partition identity, and exact rows"
+      "operationOutcomeAndState": "execution plan and result round trip are checked alongside a real ZoneTree query, duplicate textual IDs/full partition identity, and exact rows"
     },
     {
       "suite": "unit",
@@ -63,7 +63,7 @@
       "executedModules": [
         "KeyLoad.Query"
       ],
-      "operationOutcomeAndState": "The invalid leaf/request partition is rejected as Validation before native reads; seeded valid data is then read through QueryEngine on the same ZoneTree database, with exact full EntityRef, projected JSON/revision and unchanged committed position."
+      "operationOutcomeAndState": "The invalid leaf/request partition is rejected as Validation before execution reads; seeded valid data is then read through QueryEngine on the same ZoneTree database, with exact full EntityRef, projected JSON/revision and unchanged committed position."
     },
     {
       "suite": "unit",
@@ -84,8 +84,8 @@
     {
       "suite": "unit",
       "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryGrantTests",
-      "methodName": "ActualNativeReadBytesAndExaminedRecordsAdmitExactlyAndRejectOneLess",
-      "instanceName": "ActualNativeReadBytesAndExaminedRecordsAdmitExactlyAndRejectOneLess",
+      "methodName": "ActualReadBytesAndExaminedRecordsAdmitExactlyAndRejectOneLess",
+      "instanceName": "ActualReadBytesAndExaminedRecordsAdmitExactlyAndRejectOneLess",
       "requirements": [
         "REQ-PQUERY-004"
       ],
@@ -100,8 +100,8 @@
     {
       "suite": "unit",
       "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryGrantTests",
-      "methodName": "MaxBatchAdmitsTheCompleteNativeMergeAtItsExactBoundAndNoRowsBelowIt",
-      "instanceName": "MaxBatchAdmitsTheCompleteNativeMergeAtItsExactBoundAndNoRowsBelowIt",
+      "methodName": "MaxBatchAdmitsTheCompleteMergeAtItsExactBoundAndNoRowsBelowIt",
+      "instanceName": "MaxBatchAdmitsTheCompleteMergeAtItsExactBoundAndNoRowsBelowIt",
       "requirements": [
         "REQ-PQUERY-004"
       ],
@@ -116,8 +116,8 @@
     {
       "suite": "unit",
       "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryGrantTests",
-      "methodName": "OneNativeGrantChargesIndexRangeAndDocumentPointReadsTogether",
-      "instanceName": "OneNativeGrantChargesIndexRangeAndDocumentPointReadsTogether",
+      "methodName": "OneGrantChargesIndexRangeAndDocumentPointReadsTogether",
+      "instanceName": "OneGrantChargesIndexRangeAndDocumentPointReadsTogether",
       "requirements": [
         "REQ-PQUERY-004"
       ],
@@ -127,7 +127,7 @@
       "executedModules": [
         "KeyLoad.Query"
       ],
-      "operationOutcomeAndState": "native index range plus point read share the leaf allowance; exact bound passes and one-under examined cap rejects"
+      "operationOutcomeAndState": "execution index range plus point read share the leaf allowance; exact bound passes and one-under examined cap rejects"
     },
     {
       "suite": "unit",
@@ -257,7 +257,7 @@
       "executedModules": [
         "KeyLoad.Query"
       ],
-      "operationOutcomeAndState": "real query page round-trips through native codec; full references, per-leaf cuts/policy/schema/path and exact bytes are checked"
+      "operationOutcomeAndState": "real query page round-trips through execution codec; full references, per-leaf cuts/policy/schema/path and exact bytes are checked"
     },
     {
       "suite": "unit",
@@ -326,8 +326,8 @@
     {
       "suite": "unit",
       "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryMcpContractTests",
-      "methodName": "PublicAndNativeRequestBodiesRoundTripTheSameTypedValues",
-      "instanceName": "PublicAndNativeRequestBodiesRoundTripTheSameTypedValues",
+      "methodName": "PublicAndRequestBodiesRoundTripTheSameTypedValues",
+      "instanceName": "PublicAndRequestBodiesRoundTripTheSameTypedValues",
       "requirements": [
         "REQ-PQUERY-001"
       ],
@@ -337,13 +337,13 @@
       "executedModules": [
         "KeyLoad.Query"
       ],
-      "operationOutcomeAndState": "native and public request codecs preserve typed values; each decoded request executes and equal pages are checked"
+      "operationOutcomeAndState": "execution and public request codecs preserve typed values; each decoded request executes and equal pages are checked"
     },
     {
       "suite": "unit",
       "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryMcpContractTests",
-      "methodName": "PublicAndNativePageBodiesRoundTripRowsAndLeafWitnesses",
-      "instanceName": "PublicAndNativePageBodiesRoundTripRowsAndLeafWitnesses",
+      "methodName": "PublicAndPageBodiesRoundTripRowsAndLeafWitnesses",
+      "instanceName": "PublicAndPageBodiesRoundTripRowsAndLeafWitnesses",
       "requirements": [
         "REQ-PQUERY-005"
       ],
@@ -385,7 +385,7 @@
       "executedModules": [
         "KeyLoad.Query"
       ],
-      "operationOutcomeAndState": "public QueryEngine returns typed Validation and zero native read calls with unchanged position"
+      "operationOutcomeAndState": "public QueryEngine returns typed Validation and zero execution read calls with unchanged position"
     },
     {
       "suite": "unit",
@@ -401,7 +401,7 @@
       "executedModules": [
         "KeyLoad.Query"
       ],
-      "operationOutcomeAndState": "public QueryEngine returns typed UnsupportedCapability and zero native read calls with unchanged position"
+      "operationOutcomeAndState": "public QueryEngine returns typed UnsupportedCapability and zero execution read calls with unchanged position"
     },
     {
       "suite": "unit",
@@ -490,8 +490,8 @@
     {
       "suite": "unit",
       "className": "KeyLoad.UnitTests.Features.QueryExecution.SqlInnerJoinCancellationTests",
-      "methodName": "AcJoinCancellationAfterNativeRangeProgressSettlesTheOriginalReadAndKeepsTheStoreHealthy",
-      "instanceName": "AcJoinCancellationAfterNativeRangeProgressSettlesTheOriginalReadAndKeepsTheStoreHealthy",
+      "methodName": "AcJoinCancellationAfterRangeProgressSettlesTheOriginalReadAndKeepsTheStoreHealthy",
+      "instanceName": "AcJoinCancellationAfterRangeProgressSettlesTheOriginalReadAndKeepsTheStoreHealthy",
       "requirements": [
         "REQ-REL-004",
         "REQ-QUERY-007"
@@ -506,13 +506,13 @@
         "KeyLoad.Query",
         "KeyLoad.Storage.ZoneTree"
       ],
-      "operationOutcomeAndState": "cancels the original query token only after observed native range progress, asserts the same cancellation token and unchanged position, then verifies exact healthy joined rows and source revisions"
+      "operationOutcomeAndState": "cancels the original query token only after observed execution range progress, asserts the same cancellation token and unchanged position, then verifies exact healthy joined rows and source revisions"
     },
     {
       "suite": "unit",
       "className": "KeyLoad.UnitTests.Features.QueryExecution.SqlInnerJoinCancellationTests",
-      "methodName": "AcJoinDeadlineAfterNativeRangeProgressSettlesTheReadAndKeepsTheStoreHealthy",
-      "instanceName": "AcJoinDeadlineAfterNativeRangeProgressSettlesTheReadAndKeepsTheStoreHealthy",
+      "methodName": "AcJoinDeadlineAfterRangeProgressSettlesTheReadAndKeepsTheStoreHealthy",
+      "instanceName": "AcJoinDeadlineAfterRangeProgressSettlesTheReadAndKeepsTheStoreHealthy",
       "requirements": [
         "REQ-REL-004",
         "REQ-QUERY-007"
@@ -527,7 +527,7 @@
         "KeyLoad.Query",
         "KeyLoad.Storage.ZoneTree"
       ],
-      "operationOutcomeAndState": "expires the configured query deadline after observed native range progress, asserts BudgetExceeded and unchanged position, then verifies exact healthy joined rows and source revisions"
+      "operationOutcomeAndState": "expires the configured query deadline after observed execution range progress, asserts BudgetExceeded and unchanged position, then verifies exact healthy joined rows and source revisions"
     },
     {
       "suite": "unit",
@@ -1020,7 +1020,7 @@
     },
     {
       "suite": "unit",
-      "className": "KeyLoad.UnitTests.Features.StorageRecovery.NativeMaintenancePeriodicLifetimeTests",
+      "className": "KeyLoad.UnitTests.Features.StorageRecovery.MaintenancePeriodicLifetimeTests",
       "methodName": "AcStorageMaintenanceJoin002003ActualPeriodicCleanupJoinsBeforeOwnerFilesAndHealthyReopen",
       "instanceName": "AcStorageMaintenanceJoin002003ActualPeriodicCleanupJoinsBeforeOwnerFilesAndHealthyReopen(False)",
       "requirements": [
@@ -1032,11 +1032,11 @@
       "executedModules": [
         "KeyLoad.Storage.ZoneTree"
       ],
-      "operationOutcomeAndState": "Actual disk-backed native cleanup held after three native APIs; original worker and owner join before file release; full cold state and healthy write retained, including the original cleanup-fault flow."
+      "operationOutcomeAndState": "Actual disk-backed execution cleanup held after three execution APIs; original worker and owner join before file release; full cold state and healthy write retained, including the original cleanup-fault flow."
     },
     {
       "suite": "unit",
-      "className": "KeyLoad.UnitTests.Features.StorageRecovery.NativeMaintenancePeriodicLifetimeTests",
+      "className": "KeyLoad.UnitTests.Features.StorageRecovery.MaintenancePeriodicLifetimeTests",
       "methodName": "AcStorageMaintenanceJoin002003ActualPeriodicCleanupJoinsBeforeOwnerFilesAndHealthyReopen",
       "instanceName": "AcStorageMaintenanceJoin002003ActualPeriodicCleanupJoinsBeforeOwnerFilesAndHealthyReopen(True)",
       "requirements": [
@@ -1048,7 +1048,7 @@
       "executedModules": [
         "KeyLoad.Storage.ZoneTree"
       ],
-      "operationOutcomeAndState": "Actual disk-backed native cleanup held after three native APIs; original worker and owner join before file release; full cold state and healthy write retained, including the original cleanup-fault flow."
+      "operationOutcomeAndState": "Actual disk-backed execution cleanup held after three execution APIs; original worker and owner join before file release; full cold state and healthy write retained, including the original cleanup-fault flow."
     },
     {
       "suite": "unit",
@@ -1064,7 +1064,7 @@
       "executedModules": [
         "KeyLoad.Storage.ZoneTree"
       ],
-      "operationOutcomeAndState": "Invalid native maintenance duration rejects before physical ownership; same path accepts actual commit, complete cold state, healthy additional write and second cold reopen."
+      "operationOutcomeAndState": "Invalid execution maintenance duration rejects before physical ownership; same path accepts actual commit, complete cold state, healthy additional write and second cold reopen."
     },
     {
       "suite": "unit",
@@ -1080,7 +1080,7 @@
       "executedModules": [
         "KeyLoad.Storage.ZoneTree"
       ],
-      "operationOutcomeAndState": "Invalid native maintenance duration rejects before physical ownership; same path accepts actual commit, complete cold state, healthy additional write and second cold reopen."
+      "operationOutcomeAndState": "Invalid execution maintenance duration rejects before physical ownership; same path accepts actual commit, complete cold state, healthy additional write and second cold reopen."
     },
     {
       "suite": "unit",
@@ -1096,7 +1096,7 @@
       "executedModules": [
         "KeyLoad.Storage.ZoneTree"
       ],
-      "operationOutcomeAndState": "Invalid native maintenance duration rejects before physical ownership; same path accepts actual commit, complete cold state, healthy additional write and second cold reopen."
+      "operationOutcomeAndState": "Invalid execution maintenance duration rejects before physical ownership; same path accepts actual commit, complete cold state, healthy additional write and second cold reopen."
     },
     {
       "suite": "unit",
@@ -1112,7 +1112,7 @@
       "executedModules": [
         "KeyLoad.Storage.ZoneTree"
       ],
-      "operationOutcomeAndState": "Invalid native maintenance duration rejects before physical ownership; same path accepts actual commit, complete cold state, healthy additional write and second cold reopen."
+      "operationOutcomeAndState": "Invalid execution maintenance duration rejects before physical ownership; same path accepts actual commit, complete cold state, healthy additional write and second cold reopen."
     },
     {
       "suite": "unit",
@@ -1128,7 +1128,7 @@
       "executedModules": [
         "KeyLoad.Storage.ZoneTree"
       ],
-      "operationOutcomeAndState": "Invalid native maintenance duration rejects before physical ownership; same path accepts actual commit, complete cold state, healthy additional write and second cold reopen."
+      "operationOutcomeAndState": "Invalid execution maintenance duration rejects before physical ownership; same path accepts actual commit, complete cold state, healthy additional write and second cold reopen."
     },
     {
       "suite": "unit",
@@ -1144,7 +1144,7 @@
       "executedModules": [
         "KeyLoad.Storage.ZoneTree"
       ],
-      "operationOutcomeAndState": "Invalid native maintenance duration rejects before physical ownership; same path accepts actual commit, complete cold state, healthy additional write and second cold reopen."
+      "operationOutcomeAndState": "Invalid execution maintenance duration rejects before physical ownership; same path accepts actual commit, complete cold state, healthy additional write and second cold reopen."
     },
     {
       "suite": "unit",
@@ -1162,7 +1162,7 @@
       "executedModules": [
         "KeyLoad.Core"
       ],
-      "operationOutcomeAndState": "Actual bounded tenant/principal/node admission with fresh persisted principals and native canonical commits; capacity and cancellation refusals preserve complete state/cuts/reservations, released leases admit healthy work, literal receipts/models and same-ID replay survive joined native owner close and same-root cold continuation."
+      "operationOutcomeAndState": "Actual bounded tenant/principal/node admission with fresh persisted principals and execution canonical commits; capacity and cancellation refusals preserve complete state/cuts/reservations, released leases admit healthy work, literal receipts/models and same-ID replay survive joined execution owner close and same-root cold continuation."
     }
   ]
 }

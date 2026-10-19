@@ -6,7 +6,7 @@ namespace KeyLoad.Comparisons.Targets;
 
 internal static class MongoSeededCopies
 {
-    internal static async Task VerifyAsync(IEnumerable<IMongoClient> clients, string databaseName, IComparisonCorpus dataset, IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<NativeComparisonExecutionOptions> executionOptions, TimeProvider timeProvider, CancellationToken cancellationToken)
+    internal static async Task VerifyAsync(IEnumerable<IMongoClient> clients, string databaseName, IComparisonCorpus dataset, IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<ComparisonExecutionOptions> executionOptions, TimeProvider timeProvider, CancellationToken cancellationToken)
     {
         const int FirstElementIndex = 0;
 

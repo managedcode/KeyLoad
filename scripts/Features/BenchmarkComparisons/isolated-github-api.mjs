@@ -1,5 +1,5 @@
 import path from 'node:path';
-import { requestNative } from './isolated-github-transport.mjs';
+import { runtimeRequestCore } from './isolated-github-transport.mjs';
 import { readJson, writeJson } from './isolated-github-files.mjs';
 import { GH, requireGitHub } from './isolated-github-contract.mjs';
 import { flattenPages, validateJobIdentity, validateWorkflowRun } from './isolated-github-validation.mjs';
@@ -21,7 +21,7 @@ export function validateKnownCurrentJob(job, cohort, name, id) {
 
 export async function captureApi(endpoint, target, paginated, context, requestOptions = {}) {
   requireGitHub(paginated === false);
-  await requestNative(endpoint, target, GH.metadataBytes, GH.metadataTimeoutMs, context, requestOptions);
+  await runtimeRequestCore(endpoint, target, GH.metadataBytes, GH.metadataTimeoutMs, context, requestOptions);
   return readJson(target);
 }
 
@@ -82,5 +82,5 @@ export async function captureCurrentJobPages(directory, context, name) {
   requireGitHub(false);
 }
 
-export const downloadArtifact = (artifact, target, maximumBytes, context) => requestNative(
+export const downloadArtifact = (artifact, target, maximumBytes, context) => runtimeRequestCore(
   `${GH.api}/artifacts/${artifact.id}/zip`, target, maximumBytes, GH.downloadTimeoutMs, context);

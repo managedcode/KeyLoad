@@ -13,7 +13,7 @@ internal static class QueueStoredCapacityStateAssertions
         await Assert.That(owner.InspectMessage(QueueEnqueueColdProtocol.Root, lane, QueueEnqueueColdProtocol.Ready))
             .IsEqualTo(new MessageInspection(new(QueueEnqueueColdProtocol.Ready, MessageState.Leased, QueueEnqueueAuthorityProtocol.First, QueueEnqueueAuthorityProtocol.Second, QueueEnqueueAuthorityProtocol.First, null, null,
                 QueueEnqueueColdProtocol.Root, QueueEnqueueAuthorityProtocol.First, delivery.LeaseUntil), QueueEnqueueColdProtocol.ReadyJson, QueueEnqueueColdProtocol.Headers));
-        var bytes = NativeSerialization.Serialize(new MessageBody(QueueEnqueueColdProtocol.Ready, QueueEnqueueColdProtocol.ReadyJson,
+        var bytes = OrleansSerialization.Serialize(new MessageBody(QueueEnqueueColdProtocol.Ready, QueueEnqueueColdProtocol.ReadyJson,
             QueueEnqueueColdProtocol.Headers, null, JsonData.Fingerprint(new EnqueueMessage(lane.Queue, QueueEnqueueColdProtocol.Ready,
                 QueueEnqueueColdProtocol.ReadyJson, QueueEnqueueColdProtocol.Headers)))).LongLength;
         var scheduled = store.Read(view => view.ReadOwnedValue(KeySpace.Partition(QueueEnqueueColdProtocol.BodyFamily, partition, lane.Queue, QueueEnqueueColdProtocol.Scheduled)))!;
@@ -25,7 +25,7 @@ internal static class QueueStoredCapacityStateAssertions
         var row = await Assert.That(page.Records).HasSingleItem();
         await Assert.That(row.Key.ToArray()).IsEquivalentTo(KeySpace.Partition(QueueEnqueueAuthorityProtocol.LeaseFamily, partition, lane.Queue, delivery.LeaseUntil,
             QueueEnqueueColdProtocol.Ready), CollectionOrdering.Matching);
-        await Assert.That(NativeSerialization.Deserialize<string>(row.Value.Span)).IsEqualTo(QueueEnqueueColdProtocol.Ready);
+        await Assert.That(OrleansSerialization.Deserialize<string>(row.Value.Span)).IsEqualTo(QueueEnqueueColdProtocol.Ready);
     }
 
     internal static async Task TerminalAsync(DatabaseEngine owner, ZoneTreeStore store, PartitionRef partition)

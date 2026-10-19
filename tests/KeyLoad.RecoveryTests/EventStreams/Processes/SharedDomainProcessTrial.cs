@@ -31,10 +31,10 @@ internal static class SharedDomainProcessTrial
             child.ThrowStartupFailure();
             await child.WaitForAcknowledgementAsync(linked.Token);
             await child.StopAndJoinAsync(linked.Token);
-            RecoveryFileInventory.AssertNativeHandlesReleased(root);
-            child.CloseNativeProcessAfterJoin();
+            RecoveryFileInventory.AssertHandlesReleased(root);
+            child.CloseProcessAfterJoin();
             await SharedDomainRecoveryOracle.VerifyAsync(root, stage, linked.Token);
-            RecoveryFileInventory.AssertNativeHandlesReleased(root);
+            RecoveryFileInventory.AssertHandlesReleased(root);
         }
         catch (Exception failure) when (CommandIdempotencyProcessFailureHandling.IsNonFatal(failure))
         {

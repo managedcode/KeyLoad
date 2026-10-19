@@ -33,7 +33,7 @@ internal static class SqlNullDistinctClusterFlow
     private static async Task<SqlNullDistinctClusterState> WaveAsync(ClusterFixture fixture, SqlNullDistinctClusterState state, bool faults)
     {
         using var deadline = global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerDeadline.Create();
-        return await global::KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerProtocol.Node1, fixture.AdminKey, async root =>
+        return await global::KeyLoad.IntegrationTests.Features.OrleansExecution.RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerProtocol.Node1, fixture.AdminKey, async root =>
         {
             var before = await SqlNullDistinctClusterImage.ReadAsync(root, state, deadline.Token);
             await SqlNullDistinctClusterPages.HealthyAsync(fixture, state, deadline.Token);

@@ -1,7 +1,7 @@
 using KeyLoad.Clustering;
 using ManagedCode.Communication;
 using ManagedCode.Communication.CQRS;
-using static KeyLoad.UnitTests.Features.Search.NativeOnlineTextProgressFrames;
+using static KeyLoad.UnitTests.Features.Search.OnlineTextProgressFrames;
 using Chunk = ManagedCode.Communication.CQRS.CqrsStreamChunk<KeyLoad.Clustering.GrainRequestProgress, KeyLoad.Clustering.GrainOperationReply>;
 
 namespace KeyLoad.UnitTests.Features.Search;

@@ -11,12 +11,12 @@ namespace KeyLoad.UnitTests.Features.Messaging;
 internal static class QueueVisibilityBoundaryAssertions
 {
     internal static (long Position, byte[] Identity, string[] Bytes) Capture(ZoneTreeStore store)
-        => (store.Position, NativeSerialization.Serialize(store.Identity), QueueWholeFlowStorage.Bytes(store));
+        => (store.Position, OrleansSerialization.Serialize(store.Identity), QueueWholeFlowStorage.Bytes(store));
 
     internal static async Task SameAsync(ZoneTreeStore store, (long Position, byte[] Identity, string[] Bytes) cut)
     {
         await Assert.That(store.Position).IsEqualTo(cut.Position);
-        await Assert.That(NativeSerialization.Serialize(store.Identity).AsSpan().SequenceEqual(cut.Identity)).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(store.Identity).AsSpan().SequenceEqual(cut.Identity)).IsTrue();
         await Assert.That(QueueWholeFlowStorage.Bytes(store)).IsEquivalentTo(cut.Bytes, CollectionOrdering.Matching);
     }
 
@@ -47,7 +47,7 @@ internal static class QueueVisibilityBoundaryAssertions
         {
             if (original.Operation.Value!.Kind == OperationKind.Receive && Errors.Code(original.Result.Problem) is null)
             {
-                var request = NativeSerialization.Deserialize<ReceiveRequest>(original.Operation.Value!.Input.Span, NativeValidationProfile.PublicInputElements)
+                var request = OrleansSerialization.Deserialize<ReceiveRequest>(original.Operation.Value!.Input.Span, ValidationProfile.PublicInputElements)
                     ?? throw new InvalidOperationException("The original Receive request is absent.");
                 var current = original.Result.Get<ReceiveResult>().Deliveries.All(item => item.Token == activeToken);
                 await QueueReceiveReplayAssertions.SameAsync(store, request.Lane.Partition, original.Operation,
@@ -58,17 +58,17 @@ internal static class QueueVisibilityBoundaryAssertions
             var actual = owner.Apply(original.Operation);
             if (Errors.Code(original.Result.Problem) is not null)
             {
-                await Assert.That(NativeSerialization.Serialize(actual))
-                    .IsEquivalentTo(NativeSerialization.Serialize(original.Result), CollectionOrdering.Matching);
+                await Assert.That(OrleansSerialization.Serialize(actual))
+                    .IsEquivalentTo(OrleansSerialization.Serialize(original.Result), CollectionOrdering.Matching);
                 await Assert.That(Errors.Code(actual.Problem)).IsEqualTo(Errors.Code(original.Result.Problem));
                 await Assert.That(actual.Problem?.Detail).IsEqualTo(original.Result.Problem?.Detail);
-                await Assert.That(NativeSerialization.Serialize(actual).AsSpan()
-                    .SequenceEqual(NativeSerialization.Serialize(original.Result))).IsTrue();
+                await Assert.That(OrleansSerialization.Serialize(actual).AsSpan()
+                    .SequenceEqual(OrleansSerialization.Serialize(original.Result))).IsTrue();
                 await Assert.That(actual.Value).IsNull();
             }
             else
             {
-                await NativeReplayResultAssertions.Same<CommitReceipt>(actual, original.Result);
+                await ReplayResultAssertions.Same<CommitReceipt>(actual, original.Result);
             }
             await SameAsync(store, cut);
         }
@@ -89,7 +89,7 @@ internal static class QueueVisibilityBoundaryAssertions
             var message = new EnqueueMessage(lane.Queue, expected.Id, "{}");
             var literal = new MessageBody(expected.Id, "{}", "{}", null, JsonData.Fingerprint(message));
             var persisted = body ?? throw new InvalidOperationException("The complete boundary message body is absent.");
-            await Assert.That(NativeSerialization.Deserialize<MessageBody>(persisted)).IsEqualTo(literal);
+            await Assert.That(OrleansSerialization.Deserialize<MessageBody>(persisted)).IsEqualTo(literal);
             var saved = originalBody ?? throw new InvalidOperationException("The original producer-persisted body is absent.");
             await Assert.That(persisted.AsSpan().SequenceEqual(saved)).IsTrue();
         }
@@ -102,7 +102,7 @@ internal static class QueueVisibilityBoundaryAssertions
     internal static async Task DeliveryReceiptAsync((Command<DatabaseCommand> Operation, Result<object> Result) original,
         DeliveryAction action, string message, long version)
     {
-        var command = NativeSerialization.Deserialize<DeliveryCommand>(original.Operation.Value!.Input.Span, NativeValidationProfile.PublicInputElements)
+        var command = OrleansSerialization.Deserialize<DeliveryCommand>(original.Operation.Value!.Input.Span, ValidationProfile.PublicInputElements)
             ?? throw new InvalidOperationException("The original delivery command is absent.");
         var receipt = original.Result.Get<CommitReceipt>();
         await Assert.That(receipt.CommandId).IsEqualTo(command.CommandId);
@@ -121,7 +121,7 @@ internal static class QueueVisibilityBoundaryAssertions
         await Assert.That(preserved is not null && preserved.AsSpan().SequenceEqual(originalRow)).IsTrue();
         var counters = store.Read(view => view.ReadOwnedValue(KeySpace.Partition("queue-counters", lane.Partition, lane.Queue)));
         await Assert.That(counters is not null &&
-            counters.AsSpan().SequenceEqual(NativeSerialization.Serialize(new QueueCounters(0, 0, 0, 0, 5)))).IsTrue();
+            counters.AsSpan().SequenceEqual(OrleansSerialization.Serialize(new QueueCounters(0, 0, 0, 0, 5)))).IsTrue();
         foreach (var family in new[] { "ready", "scheduled", "lease", "message-body", "dead-letter", "queue-pending-dead-letter", "queue-dead-letter-order", "queue-order" })
         {
             var page = store.Read(view => view.Scan(KeySpace.Partition(family, lane.Partition, lane.Queue), 1));

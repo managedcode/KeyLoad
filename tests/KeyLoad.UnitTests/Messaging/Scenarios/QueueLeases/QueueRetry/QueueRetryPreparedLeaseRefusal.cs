@@ -15,8 +15,8 @@ internal static class QueueRetryPreparedLeaseRefusal
         var replay = database.Apply(original);
         await Assert.That(Errors.Code(replay.Problem)).IsEqualTo(Errors.Code(failed.Problem));
         await Assert.That(replay.Problem?.Detail).IsEqualTo(failed.Problem?.Detail);
-        await Assert.That(NativeSerialization.Serialize(replay).AsSpan()
-            .SequenceEqual(NativeSerialization.Serialize(failed))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(replay).AsSpan()
+            .SequenceEqual(OrleansSerialization.Serialize(failed))).IsTrue();
         await Assert.That(replay.Value).IsNull();
         await QueueOrderedRetryImage.SameAsync(database.Store, state.Lane, before);
     }

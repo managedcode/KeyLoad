@@ -45,7 +45,7 @@ internal static class HeavyRouteAdmissionFlow
         var governor = Governor();
         await HeavyRouteAdmissionReads.ObserveAsync(store, async () =>
         {
-            using (var held = governor.Begin("/v1/query/ast", 0, token))
+            using (var held = governor.Begin("/query/ast", 0, token))
             {
                 held.Bind(HeavyRouteAdmissionReads.Authenticate(database, store), token);
                 var before = governor.Status();
@@ -53,7 +53,7 @@ internal static class HeavyRouteAdmissionFlow
                 await Assert.That(refusal.Code).IsEqualTo(ErrorCode.ResourceExhausted);
                 await Assert.That(refusal.Message).IsEqualTo("The node, tenant or principal command admission budget is exhausted.");
                 await HeavyRouteAdmissionReads.EqualAsync(governor.Status(), before);
-                using var control = governor.Begin("/v1/admin/dispatch", 0, token);
+                using var control = governor.Begin("/admin/dispatch", 0, token);
                 control.Bind(HeavyRouteAdmissionReads.Authenticate(database, store), token);
                 await Assert.That(governor.Status().Node.ControlCommands).IsEqualTo(1);
             }

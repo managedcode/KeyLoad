@@ -9,7 +9,7 @@ namespace KeyLoad;
 /// <param name="ReadGeneration">Canonical replacement generation.</param>
 /// <param name="SchemaVersion">Current persisted collection schema version.</param>
 /// <param name="PolicyEpoch">Current persisted administrator policy epoch.</param>
-/// <param name="ResourceSha256">Exact native persisted resource identity digest.</param>
+/// <param name="ResourceSha256">Exact execution persisted resource identity digest.</param>
 [Orleans.GenerateSerializer, Orleans.Alias(TextIndexMaintenanceAliases.Cut)]
 public sealed record TextIndexSourceCut(
     [property: Orleans.Id(0)] Guid NodeId,

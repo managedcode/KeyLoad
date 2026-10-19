@@ -9,13 +9,13 @@ internal static class QueueViewLeaseIsolationImages
     internal static QueueViewLeaseIsolationImage Capture(DocumentPatchAtomicityOwner owner)
     {
         var cut = owner.ReadCut();
-        return new(NativeReadCutStoreStateAssertions.SnapshotIdentity(owner.Store), owner.Store.Position,
+        return new(ReadCutStoreStateAssertions.SnapshotIdentity(owner.Store), owner.Store.Position,
             QueueWholeFlowStorage.Bytes(owner.Store), cut.AppliedPosition, cut.StorePosition);
     }
 
     internal static async Task SameAsync(DocumentPatchAtomicityOwner owner, QueueViewLeaseIsolationImage expected)
     {
-        await NativeReadCutStoreStateAssertions.AssertIdentityAndPositionAsync(owner.Store, expected.Identity, expected.Position);
+        await ReadCutStoreStateAssertions.AssertIdentityAndPositionAsync(owner.Store, expected.Identity, expected.Position);
         await Assert.That(QueueWholeFlowStorage.Bytes(owner.Store).SequenceEqual(expected.Rows)).IsTrue();
         var cut = owner.ReadCut();
         await Assert.That(cut.AppliedPosition).IsEqualTo(expected.AppliedPosition);

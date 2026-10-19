@@ -8,14 +8,14 @@ internal static class SiteIsolatedGitHubArchivePaths
 {
     private const string SuiteFiles = "suiteFiles";
     private const string EntryPath = "path";
-    private const string RequestPattern = "^github/requests/request-[0-9]{5}\\.(headers|json|body|wait\\.json|native-process\\.json|body\\.native-process\\.json)$";
+    private const string RequestPattern = "^github/requests/request-[0-9]{5}\\.(headers|json|body|wait\\.json|execution-process\\.json|body\\.execution-process\\.json)$";
     private const string PagePattern = "^github/(jobs|artifacts)-page-[0-9]{2}\\.json$";
     private static readonly string[] ProviderFiles =
     [
         "proof.json", "github/workflow.json", "github/run-attempt.json", "github/jobs-pages.json",
         "github/artifacts-pages.json", "github/runtime/benchmark-runtime.json", "github/runtime/benchmark-runtime-files.json",
-        "github/functional/original.trx", "github/functional/native-process-startup.json",
-        "github/functional/native-process-before-shutdown.json", "github/functional/native-process-shutdown.json"
+        "github/functional/original.trx", "github/functional/execution-process-startup.json",
+        "github/functional/execution-process-before-shutdown.json", "github/functional/execution-process-shutdown.json"
     ];
 
     public static HashSet<string> ExpectedSuite(JsonObject metadata)

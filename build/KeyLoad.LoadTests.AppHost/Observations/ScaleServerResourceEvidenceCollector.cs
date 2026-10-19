@@ -32,16 +32,16 @@ internal sealed class ScaleServerResourceEvidenceCollector(
             throw new InvalidOperationException(MessageText);
         }
 
-        var native = resources.Where(resource => resource.Name != RunnerName
+        var execution = resources.Where(resource => resource.Name != RunnerName
             && !resource.Name.Contains(BootstrapFragment, StringComparison.Ordinal))
             .Take(ScaleServerResourceBounds.MaxContainers + Step).ToArray();
-        if (native.Length > ScaleServerResourceBounds.MaxContainers || native.Length != selection.NodeCount)
+        if (execution.Length > ScaleServerResourceBounds.MaxContainers || execution.Length != selection.NodeCount)
         {
             _missing.Add(ScaleServerResourceBounds.SamplingMissing);
         }
 
         var samplers = new List<ScaleServerResourceSampler>();
-        foreach (var resource in native.Take(ScaleServerResourceBounds.MaxContainers))
+        foreach (var resource in execution.Take(ScaleServerResourceBounds.MaxContainers))
         {
             var annotation = resource.Annotations.OfType<ContainerNameAnnotation>().SingleOrDefault();
             if (annotation is null)

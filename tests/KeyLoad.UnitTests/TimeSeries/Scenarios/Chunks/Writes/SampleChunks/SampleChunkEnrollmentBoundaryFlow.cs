@@ -9,7 +9,7 @@ namespace KeyLoad.UnitTests.Features.TimeSeries;
 internal static class SampleChunkEnrollmentBoundaryFlow
 {
     private const int OverlapMinutes = 30;
-    private const string ConflictDetail = "The native series chunk window overlaps retained data or an enrolled identity.";
+    private const string ConflictDetail = "The execution series chunk window overlaps retained data or an enrolled identity.";
 
     internal static async Task RunAsync()
     {

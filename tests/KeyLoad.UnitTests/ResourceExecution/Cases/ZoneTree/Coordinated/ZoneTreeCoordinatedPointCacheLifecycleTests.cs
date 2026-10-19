@@ -13,7 +13,7 @@ internal sealed class ZoneTreeCoordinatedPointCacheLifecycleTests
         ZoneTreePointCacheControl? Control);
 
     [Test]
-    public async Task ExplicitCloseIsTerminalAndLeavesTheNativeReadPathCorrect()
+    public async Task ExplicitCloseIsTerminalAndLeavesTheReadPathCorrect()
     {
         using var fixture = new ZoneTreeCoordinatedPointCacheFileFixture();
         await fixture.RunAsync(async () =>
@@ -29,17 +29,17 @@ internal sealed class ZoneTreeCoordinatedPointCacheLifecycleTests
             control.CloseAdmission();
             var closed = control.GetDiagnostics();
             var rejected = control.TryApply(receipt);
-            var native = store.Read(view => view.ReadOwnedValue(Key));
-            var afterNative = control.GetDiagnostics();
+            var execution = store.Read(view => view.ReadOwnedValue(Key));
+            var runtimeAfter = control.GetDiagnostics();
 
             await Assert.That(beforeClose.LiveEntries).IsEqualTo(1);
             await Assert.That(closed.Closed).IsTrue();
             await Assert.That(closed.Enabled).IsFalse();
             await Assert.That(rejected).IsEqualTo(ZoneTreePointCacheControlResult.Closed);
-            await Assert.That(native).IsNotNull();
-            await Assert.That(native!.SequenceEqual(Value)).IsTrue();
-            await Assert.That(afterNative.NativeLookups).IsEqualTo(beforeClose.NativeLookups + 1);
-            await Assert.That(afterNative.Hits).IsEqualTo(beforeClose.Hits);
+            await Assert.That(execution).IsNotNull();
+            await Assert.That(execution!.SequenceEqual(Value)).IsTrue();
+            await Assert.That(runtimeAfter.RuntimeLookups).IsEqualTo(beforeClose.RuntimeLookups + 1);
+            await Assert.That(runtimeAfter.Hits).IsEqualTo(beforeClose.Hits);
         });
     }
 

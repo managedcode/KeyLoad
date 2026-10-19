@@ -24,7 +24,7 @@ internal sealed class SampleRollupIntegrityTests
         await Assert.That(healthy).IsEqualTo(new SampleRollupResult(1, new(from, until, 2, null, new(0, 0, null, null, null))));
     }
     [Test]
-    public async Task AcSeries023UnsupportedNativeBucketFailsClosedWithoutReadEffectsAndRestoredReadIsHealthy()
+    public async Task AcSeries023UnsupportedBucketFailsClosedWithoutReadEffectsAndRestoredReadIsHealthy()
     {
         using var db = new TestDatabase();
         SampleRollupWholeFlow.Seed(db);

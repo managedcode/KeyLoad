@@ -8,21 +8,21 @@ internal static class Neo4jHarnessProtocolTests
     private const string InvalidResponse = Neo4jHarnessConstants.InvalidQueryResponse;
     private const string EmptySchemaWrite = "{\"data\":{\"fields\":[],\"values\":[]},\"queryType\":\"s\",\"bookmarks\":[]}";
 
-    public static async Task VerifyAsync(JsonElement successfulCreate, JsonElement duplicateCreate, string nativeCode)
+    public static async Task VerifyAsync(JsonElement successfulCreate, JsonElement duplicateCreate, string runtimeCode)
     {
-        await AssertNativeErrorAsync(duplicateCreate, nativeCode);
-        await AssertConstraintAcknowledgementAsync(duplicateCreate, "Neo4j:" + nativeCode);
-        await AssertNativeErrorAsync(successfulCreate, null);
+        await AssertErrorAsync(duplicateCreate, runtimeCode);
+        await AssertConstraintAcknowledgementAsync(duplicateCreate, "Neo4j:" + runtimeCode);
+        await AssertErrorAsync(successfulCreate, null);
         await AssertConstraintAcknowledgementAsync(successfulCreate, null);
         await AssertEmptyErrorsAcceptedAsync();
         await AssertInvalidErrorsAsync();
         await AssertInvalidConstraintAcknowledgementsAsync();
-        await AssertDuplicateCriticalPropertiesAsync(nativeCode);
-        await Assert.That(Neo4jQueryResponse.ReadNativeErrorCode(duplicateCreate) == nativeCode).IsTrue();
-        await VerifyHttpResponsesAsync(successfulCreate, duplicateCreate, nativeCode);
+        await AssertDuplicateCriticalPropertiesAsync(runtimeCode);
+        await Assert.That(Neo4jQueryResponse.RuntimeReadErrorCode(duplicateCreate) == runtimeCode).IsTrue();
+        await VerifyHttpResponsesAsync(successfulCreate, duplicateCreate, runtimeCode);
     }
 
-    private static async Task AssertNativeErrorAsync(JsonElement response, string? expectedCode)
+    private static async Task AssertErrorAsync(JsonElement response, string? expectedCode)
     {
         ComparisonFailureException? failure = null;
         try
@@ -63,13 +63,13 @@ internal static class Neo4jHarnessProtocolTests
         await AssertMalformedErrorsAsync("{\"errors\":[{\"code\":\"\"}]}");
         await AssertMalformedErrorsAsync("{\"errors\":[{\"code\":\"Neo.ClientError.Schema.Bad-Code\"}]}");
         await AssertMalformedErrorsAsync("{\"errors\":[{\"code\":\"Neo.ClientError.Schema.Schéma\"}]}");
-        await AssertMalformedErrorsAsync("{\"errors\":[{\"code\":\"Neo.ClientError.Schema." + new string('A', Neo4jHarnessConstants.MaximumNativeCodeLength) + "\"}]}");
+        await AssertMalformedErrorsAsync("{\"errors\":[{\"code\":\"Neo.ClientError.Schema." + new string('A', Neo4jHarnessConstants.MaximumCodeLength) + "\"}]}");
     }
 
     private static async Task AssertEmptyErrorsAcceptedAsync()
     {
-        await AssertNoNativeErrorAsync("{}");
-        await AssertNoNativeErrorAsync("{\"errors\":[]}");
+        await AssertNoErrorAsync("{}");
+        await AssertNoErrorAsync("{\"errors\":[]}");
     }
 
     private static async Task AssertInvalidConstraintAcknowledgementsAsync()
@@ -87,14 +87,14 @@ internal static class Neo4jHarnessProtocolTests
         await AssertMalformedConstraintAsync("{\"data\":{\"fields\":[],\"values\":[]},\"queryType\":\"s\",\"bookmarks\":[1]}");
     }
 
-    private static async Task AssertDuplicateCriticalPropertiesAsync(string nativeCode)
+    private static async Task AssertDuplicateCriticalPropertiesAsync(string runtimeCode)
     {
-        await AssertMalformedErrorsAsync("{\"errors\":[{\"code\":\"" + nativeCode + "\"}],\"errors\":[]}");
-        await AssertMalformedErrorsAsync("{\"errors\":[],\"errors\":[{\"code\":\"" + nativeCode + "\"}]}");
-        await AssertMalformedErrorsAsync("{\"errors\":[{\"code\":\"" + nativeCode + "\",\"code\":\"" + nativeCode + "\"}]}");
-        await AssertMalformedErrorsAsync("{\"errors\":[{\"code\":\"" + nativeCode + "\",\"code\":\"Neo.ClientError.General.UnknownError\"}]}");
+        await AssertMalformedErrorsAsync("{\"errors\":[{\"code\":\"" + runtimeCode + "\"}],\"errors\":[]}");
+        await AssertMalformedErrorsAsync("{\"errors\":[],\"errors\":[{\"code\":\"" + runtimeCode + "\"}]}");
+        await AssertMalformedErrorsAsync("{\"errors\":[{\"code\":\"" + runtimeCode + "\",\"code\":\"" + runtimeCode + "\"}]}");
+        await AssertMalformedErrorsAsync("{\"errors\":[{\"code\":\"" + runtimeCode + "\",\"code\":\"Neo.ClientError.General.UnknownError\"}]}");
         await AssertMalformedConstraintAsync("{\"errors\":[],\"errors\":[]," + EmptySchemaWrite[1..]);
-        await AssertMalformedConstraintAsync("{\"errors\":[{\"code\":\"" + nativeCode + "\"}],\"errors\":[]," + EmptySchemaWrite[1..]);
+        await AssertMalformedConstraintAsync("{\"errors\":[{\"code\":\"" + runtimeCode + "\"}],\"errors\":[]," + EmptySchemaWrite[1..]);
         await AssertMalformedConstraintAsync("{\"data\":{},\"data\":{},\"queryType\":\"s\",\"bookmarks\":[]}");
         await AssertMalformedConstraintAsync("{\"data\":null,\"data\":{},\"queryType\":\"s\",\"bookmarks\":[]}");
         await AssertMalformedConstraintAsync("{\"data\":{\"fields\":[],\"fields\":[],\"values\":[]},\"queryType\":\"s\",\"bookmarks\":[]}");
@@ -105,7 +105,7 @@ internal static class Neo4jHarnessProtocolTests
         await AssertMalformedConstraintAsync("{\"data\":{\"fields\":[],\"values\":[]},\"queryType\":\"s\",\"bookmarks\":[],\"bookmarks\":[\"opaque\"]}");
     }
 
-    private static async Task AssertNoNativeErrorAsync(string json)
+    private static async Task AssertNoErrorAsync(string json)
     {
         using var document = JsonDocument.Parse(json);
         ComparisonFailureException? failure = null;
@@ -148,12 +148,12 @@ internal static class Neo4jHarnessProtocolTests
         await Assert.That(failure?.Message == expected).IsTrue();
     }
 
-    private static async Task VerifyHttpResponsesAsync(JsonElement successful, JsonElement failed, string nativeCode)
+    private static async Task VerifyHttpResponsesAsync(JsonElement successful, JsonElement failed, string runtimeCode)
     {
         Neo4jQueryResponse.ValidateResponse(Neo4jHarnessConstants.AcceptedStatusCode, successful);
         foreach (var status in new[] { Neo4jHarnessConstants.AcceptedStatusCode, Neo4jHarnessConstants.QueryErrorStatusCode })
         {
-            await AssertInvalidAsync(() => Neo4jQueryResponse.ValidateResponse(status, failed), "Neo4j:" + nativeCode);
+            await AssertInvalidAsync(() => Neo4jQueryResponse.ValidateResponse(status, failed), "Neo4j:" + runtimeCode);
         }
 
         await AssertInvalidAsync(() => Neo4jQueryResponse.ValidateResponse(Neo4jHarnessConstants.QueryErrorStatusCode, successful), InvalidResponse);
@@ -181,7 +181,7 @@ internal static class Neo4jHarnessProtocolTests
             await AssertInvalidAsync(() => Neo4jQueryResponse.ValidateResponse(Neo4jHarnessConstants.QueryErrorStatusCode, document.RootElement), InvalidResponse);
         }
 
-        using var malformed = JsonDocument.Parse("{\"errors\":[{\"code\":\"" + nativeCode + "\"},{\"code\":null}]}");
+        using var malformed = JsonDocument.Parse("{\"errors\":[{\"code\":\"" + runtimeCode + "\"},{\"code\":null}]}");
         foreach (var status in new[] { Neo4jHarnessConstants.AcceptedStatusCode, Neo4jHarnessConstants.QueryErrorStatusCode })
         {
             await AssertInvalidAsync(() => Neo4jQueryResponse.ValidateResponse(status, malformed.RootElement), InvalidResponse);

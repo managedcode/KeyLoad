@@ -50,16 +50,16 @@ internal sealed class BenchmarkSessionLaneExecution(BenchmarkSessionContext cont
         }
         finally
         {
-            // Cancel unopened workers and join the original bounded cohort before releasing native clients.
+            // Cancel unopened workers and join the original bounded cohort before releasing execution clients.
             start.TrySetCanceled(token);
-            _ = await NativeComparisonFailure.ObserveAsync(joined).ConfigureAwait(false);
+            _ = await RuntimeComparisonFailure.ObserveAsync(joined).ConfigureAwait(false);
         }
     }
 
     private async Task ExecuteWorkerAsync(int worker, int clients, Task start, CancellationTokenSource stop)
     {
         await start.ConfigureAwait(false);
-        // Each client owns its first ordinal and a disjoint stride, even when every native await completes synchronously.
+        // Each client owns its first ordinal and a disjoint stride, even when every execution await completes synchronously.
         for (var ordinal = worker; ordinal < count && !stop.IsCancellationRequested; ordinal += clients)
         {
             await ExecuteAttemptAsync(worker, ordinal, stop).ConfigureAwait(false);

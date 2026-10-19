@@ -19,9 +19,9 @@ internal sealed class PostgresProtocolSession(IServiceProvider services, global:
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             writer.Integer(PostgresWireWriter.Authentication, PostgresMessageProtocol.PasswordChallenge);
-            await writer.FlushAsync(admissionLifetime.Token).ConfigureAwait(false);
-            identity = await ReadIdentityAsync(context, startup.Subject, admissionLifetime.Token).ConfigureAwait(false);
-            _ = await identity.VerifyAsync(services, owner, admissionLifetime.Token).ConfigureAwait(false);
+            await writer.FlushAsync(admissionLifetime.Token);
+            identity = await ReadIdentityAsync(context, startup.Subject, admissionLifetime.Token);
+            _ = await identity.VerifyAsync(services, owner, admissionLifetime.Token);
             backend = cancellations.Register();
             catalog = new PostgresSessionCatalog(configured, admission);
             writer.Integer(PostgresWireWriter.Authentication, PostgresMessageProtocol.AuthenticationOk);
@@ -32,14 +32,14 @@ internal sealed class PostgresProtocolSession(IServiceProvider services, global:
             PostgresSessionReplies.Parameter(writer, PostgresMessageProtocol.StandardStrings, PostgresMessageProtocol.StandardStringsOn);
             PostgresSessionReplies.Backend(writer, backend);
             writer.Ready();
-            await writer.FlushAsync(admissionLifetime.Token).ConfigureAwait(false);
-            await admissionLifetime.CompleteAsync().ConfigureAwait(false);
+            await writer.FlushAsync(admissionLifetime.Token);
+            await admissionLifetime.CompleteAsync();
             await new PostgresSessionLoop(services, configured, catalog, writer, admission).RunAsync(context,
-                owner, identity, startup.Partition, backend.Session).ConfigureAwait(false);
-        }, failures).ConfigureAwait(false);
+                owner, identity, startup.Partition, backend.Session);
+        }, failures);
         if (backend is not null)
         {
-            await ServerFailureObserver.ObserveAsync(() => cancellations.RemoveAsync(backend), failures).ConfigureAwait(false);
+            await ServerFailureObserver.ObserveAsync(() => cancellations.RemoveAsync(backend), failures);
         }
         if (catalog is not null)
         {
@@ -58,7 +58,7 @@ internal sealed class PostgresProtocolSession(IServiceProvider services, global:
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             using var password = await PostgresFrameReader.ReadAsync(context.Transport.Input, false,
-                Options.MaximumStartupBytes, admission, token).ConfigureAwait(false);
+                Options.MaximumStartupBytes, admission, token);
             await ServerFailureObserver.ObserveAsync(() =>
             {
                 if (password?.Type != PostgresMessageProtocol.Password)
@@ -67,8 +67,8 @@ internal sealed class PostgresProtocolSession(IServiceProvider services, global:
                 }
                 result = PostgresSessionIdentity.Create(subject, password.Payload, admission, Options.MaximumStartupBytes);
                 return Task.CompletedTask;
-            }, failures).ConfigureAwait(false);
-        }, failures).ConfigureAwait(false);
+            }, failures);
+        }, failures);
         if (failures.Count != PostgresProtocol.AllRows)
         {
             if (result is not null)

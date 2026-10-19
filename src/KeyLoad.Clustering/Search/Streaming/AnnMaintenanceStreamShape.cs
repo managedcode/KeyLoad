@@ -2,7 +2,7 @@ using ManagedCode.Communication.CQRS;
 
 namespace KeyLoad.Clustering;
 
-/// <summary>Validates the ordered ANN phases of one verified signed native maintenance operation.</summary>
+/// <summary>Validates the ordered ANN phases of one verified signed execution maintenance operation.</summary>
 internal sealed class AnnMaintenanceStreamShape(Guid requestId)
 {
     private AnnMaintenancePhase? phase;
@@ -32,8 +32,8 @@ internal sealed class AnnMaintenanceStreamShape(Guid requestId)
         (AnnMaintenancePhase.Configure, AnnMaintenancePhase.Capture) => true,
         (AnnMaintenancePhase.Capture or AnnMaintenancePhase.Replay, AnnMaintenancePhase.Replay) => true,
         (AnnMaintenancePhase.Capture or AnnMaintenancePhase.Replay, AnnMaintenancePhase.Verify) => true,
-        (AnnMaintenancePhase.Verify, AnnMaintenancePhase.NativeIndex) => true,
-        (AnnMaintenancePhase.NativeIndex, AnnMaintenancePhase.Publish) => true,
+        (AnnMaintenancePhase.Verify, AnnMaintenancePhase.RuntimeIndex) => true,
+        (AnnMaintenancePhase.RuntimeIndex, AnnMaintenancePhase.Publish) => true,
         (AnnMaintenancePhase.Publish, AnnMaintenancePhase.Checkpoint) => true,
         (AnnMaintenancePhase.Checkpoint, AnnMaintenancePhase.Completed) => true,
         _ => false

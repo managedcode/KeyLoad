@@ -13,7 +13,7 @@ internal static class QueueLifecycleAuthorityRefusal
         foreach (var bytesOverlap in new[] { false, true })
         {
             var original = store.Read(view => view.ReadOwnedValue(key))!;
-            var counters = NativeSerialization.Deserialize<QueueCounters>(original);
+            var counters = OrleansSerialization.Deserialize<QueueCounters>(original);
             var exact = QueueWholeFlowStorage.Bytes(store);
             var queue = QueueLifecycleImage.Capture(store, state.Lane);
             var corrupted = bytesOverlap ? counters with
@@ -24,10 +24,10 @@ internal static class QueueLifecycleAuthorityRefusal
                 {
                     InFlightMessages = QueueLifecycleTestProtocol.Three
                 };
-            store.Commit((tx, _) => { tx.Put(key, NativeSerialization.Serialize(corrupted)); return true; });
+            store.Commit((tx, _) => { tx.Put(key, OrleansSerialization.Serialize(corrupted)); return true; });
             var damaged = QueueWholeFlowStorage.Bytes(store);
             var position = store.Position;
-            var identity = NativeSerialization.Serialize(store.Identity);
+            var identity = OrleansSerialization.Serialize(store.Identity);
             var id = Guid.NewGuid();
             var command = new CommandRequest(id, state.Partition,
                 [new ParkPendingQueueMessage(state.Lane.Queue, QueueLifecycleTestProtocol.Pending,
@@ -52,8 +52,8 @@ internal static class QueueLifecycleAuthorityRefusal
             state.Failures.Add((operation, repaired));
             var receiptImage = QueueWholeFlowStorage.Bytes(store);
             var receiptPosition = store.Position;
-            await Assert.That(NativeSerialization.Serialize(state.SubmitOriginal(database, operation)))
-                .IsEquivalentTo(NativeSerialization.Serialize(repaired), TUnit.Assertions.Enums.CollectionOrdering.Matching);
+            await Assert.That(OrleansSerialization.Serialize(state.SubmitOriginal(database, operation)))
+                .IsEquivalentTo(OrleansSerialization.Serialize(repaired), TUnit.Assertions.Enums.CollectionOrdering.Matching);
             await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, receiptImage, receiptPosition, identity);
             await QueueLifecycleImage.SameAsync(store, state.Lane, queue);
             await QueueLifecycleAccountingAssertions.InitialAsync(store, state);

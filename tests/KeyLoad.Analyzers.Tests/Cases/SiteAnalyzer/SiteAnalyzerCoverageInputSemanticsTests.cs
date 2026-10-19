@@ -2,21 +2,21 @@ using System.Xml.Linq;
 
 namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
 
-/// <summary>AC-CQ-009 and AC-BC-027: validate native branch spellings and physical source-line bounds.</summary>
+/// <summary>AC-CQ-009 and AC-BC-027: validate execution branch spellings and physical source-line bounds.</summary>
 [NotInParallel(SiteAnalyzerCoverageTokens.ProcessIsolationKey)]
 internal sealed class SiteAnalyzerCoverageInputSemanticsTests
 {
     [Test]
-    public async Task NativeBranchBooleanCasingNormalizesBeforeDuplicateChecksAsync()
+    public async Task BranchBooleanCasingNormalizesBeforeDuplicateChecksAsync()
     {
         using var scope = new SiteAnalyzerCoverageTestScope();
         await scope.PrepareAsync();
-        await scope.WriteFixtureAsync(SiteAnalyzerCoverageFixture.NativeBranchBooleanCases);
-        var nativeCasing = await scope.RunAsync(SiteAnalyzerCoverageTokens.ModeVerify);
-        await Assert.That(nativeCasing.ExitCode).IsEqualTo(SiteAnalyzerCoverageTokens.SuccessExitCode);
-        using var nativeReport = SiteAnalyzerCoverageTestScope.ReadJson(scope.SummaryPath);
-        var nativeModule = nativeReport.RootElement.GetProperty(SiteAnalyzerCoverageTokens.JsonSummaryProperty);
-        await Assert.That(nativeModule.GetProperty(SiteAnalyzerCoverageTokens.JsonBranchesValid).GetInt64())
+        await scope.WriteFixtureAsync(SiteAnalyzerCoverageFixture.BranchBooleanCases);
+        var runtimeCasing = await scope.RunAsync(SiteAnalyzerCoverageTokens.ModeVerify);
+        await Assert.That(runtimeCasing.ExitCode).IsEqualTo(SiteAnalyzerCoverageTokens.SuccessExitCode);
+        using var runtimeReport = SiteAnalyzerCoverageTestScope.ReadJson(scope.SummaryPath);
+        var runtimeModule = runtimeReport.RootElement.GetProperty(SiteAnalyzerCoverageTokens.JsonSummaryProperty);
+        await Assert.That(runtimeModule.GetProperty(SiteAnalyzerCoverageTokens.JsonBranchesValid).GetInt64())
             .IsEqualTo(SiteAnalyzerCoverageTokens.BranchDenominator *
                 (SiteAnalyzerCoverageTokens.ExpectedSourceCount - SiteAnalyzerCoverageTokens.ExpectedDeclarationCount));
 

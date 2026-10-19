@@ -8,7 +8,7 @@ internal sealed class TypedSynchronizationTests
     [Arguments("System.Threading.Lock", "new()", "(object)gate")]
     [Arguments("string", "\"identity\"", "gate")]
     [Arguments("object", "new()", "this")]
-    public async Task NonNativeLockExpressionsAreRejectedAsync(string type, string initializer, string expression)
+    public async Task NonLockExpressionsAreRejectedAsync(string type, string initializer, string expression)
     {
         var source = $$"""
             internal sealed class Subject
@@ -31,13 +31,13 @@ internal sealed class TypedSynchronizationTests
     }
 
     [Test]
-    public async Task NativeLockAliasAndOrdinaryIdentityObjectsAreAllowedAsync()
+    public async Task LockAliasAndOrdinaryIdentityObjectsAreAllowedAsync()
     {
         const string source = """
-            using NativeGate = System.Threading.Lock;
+            using RuntimeGate = System.Threading.Lock;
             internal sealed class Subject
             {
-                private readonly NativeGate gate = new();
+                private readonly RuntimeGate gate = new();
                 private readonly object identity = new();
                 private int updates;
                 internal object Update()
@@ -89,7 +89,7 @@ internal sealed class TypedSynchronizationTests
     }
 
     [Test]
-    public async Task AwaitedSemaphoreAndNativeLockScopesAreAllowedOutsideGrainsAsync()
+    public async Task AwaitedSemaphoreAndLockScopesAreAllowedOutsideGrainsAsync()
     {
         const string source = """
             using System.Threading;

@@ -8,7 +8,7 @@ namespace KeyLoad.RecoveryTests.Features.StorageRecovery;
 internal static class SeededWalCorruptionEvidence
 {
     private const int SchemaVersion = 1;
-    private const string FaultClass = "complete-native-atomic-redo-payload-checksum";
+    private const string FaultClass = "complete-execution-atomic-redo-payload-checksum";
     private const string Solution = "KeyLoad.slnx";
     private const string Artifacts = "artifacts";
     private const string Qualification = "qualification";
@@ -26,7 +26,7 @@ internal static class SeededWalCorruptionEvidence
         }
         var directory = Path.Combine(repository.FullName, Artifacts, Qualification);
         Directory.CreateDirectory(directory);
-        var path = Path.Combine(directory, "native-wal-seeded-corruption-" + trial.Seed.ToString(System.Globalization.CultureInfo.InvariantCulture)
+        var path = Path.Combine(directory, "execution-wal-seeded-corruption-" + trial.Seed.ToString(System.Globalization.CultureInfo.InvariantCulture)
             + "-" + Guid.NewGuid().ToString("N") + ".json");
         var assemblies = new List<object>();
         foreach (var assembly in new[] { typeof(SeededWalCorruptionEvidence).Assembly,

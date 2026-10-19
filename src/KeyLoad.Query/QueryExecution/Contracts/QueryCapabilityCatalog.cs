@@ -6,9 +6,8 @@ namespace KeyLoad.Query.Features.QueryExecution;
 internal static class QueryCapabilityCatalog
 {
     private const int ManifestVersion = 1;
-    private const int Q1Version = 1;
-    private const int Q2Version = 2;
-    private const string NativeDialect = "TSQL.ScriptDOM180.v1";
+    private const int QueryVersion = SqlOperationProtocol.DefaultQueryDialectVersion;
+    private const string RuntimeDialect = "TSQL.ScriptDOM180";
     private const string Scope = "atomicPartition";
     private const string ScalarType = "decimal";
     private const string MissingSemantics = "distinctFromNull";
@@ -31,35 +30,35 @@ internal static class QueryCapabilityCatalog
     private const string Q1Profile = "Q1";
     private const string FeedProfile = "documentChangeFeed";
     private const string LiveProfile = "scalarLiveQuery";
-    private const string ModelProfile = "modelViewsV1";
-    private const string GraphSearchProfile = "graph-search-v1";
-    private const string AstExplainProfile = "AST.Explain.v1";
-    private const string JoinProfile = "Q2.InnerJoin.v1";
-    private const string LeftPredicateProfile = "Q2.InnerJoin.LeftPredicate.v1";
-    private const string QueueJoinProfile = "Q2.QueueEntityRefJoin.v1";
-    private const string EventJoinProfile = "Q2.EventEntityRefJoin.v1";
-    private const string Q1OffsetProfile = "Q1.Offset.v1";
-    private const string Q2OffsetProfile = "Q2.InnerJoin.Offset.v1";
-    private const string AstNullOrderingProfile = "Q1.NullOrdering.v1";
-    private const string NativeSyntaxProfile = "TSQL.ScriptDOM180.v1";
-    private const string TopProfile = "TSQL.Top.v1";
-    private const string OffsetFetchProfile = "TSQL.OffsetFetch.v1";
-    private const string DistinctProfile = "TSQL.NullDistinct.v1";
-    private const string AllProfile = "TSQL.SelectAll.v1";
-    private const string AliasProfile = "TSQL.ImplicitProjectionAlias.v1";
-    private const string DefaultJoinProfile = "TSQL.DefaultInnerJoin.v1";
-    private const string OrdinalProfile = "TSQL.OrdinalOrder.v1";
-    private const string NamedParameterProfile = "TSQL.NamedParameters.v1";
-    private const string WireSlotProfile = "TSQL.NativeSessionSlots.v1";
-    private const string DecimalProfile = "TSQL.DecimalScalar.v1";
-    private const string NationalStringProfile = "TSQL.NationalStringLiteral.v1";
-    private static readonly ImmutableArray<int> SupportedVersions = [Q1Version, Q2Version];
+    private const string ModelProfile = "modelViews";
+    private const string GraphSearchProfile = "graph-search";
+    private const string AstExplainProfile = "AST.Explain";
+    private const string JoinProfile = "Q2.InnerJoin";
+    private const string LeftPredicateProfile = "Q2.InnerJoin.LeftPredicate";
+    private const string QueueJoinProfile = "Q2.QueueEntityRefJoin";
+    private const string EventJoinProfile = "Q2.EventEntityRefJoin";
+    private const string Q1OffsetProfile = "Q1.Offset";
+    private const string Q2OffsetProfile = "Q2.InnerJoin.Offset";
+    private const string AstNullOrderingProfile = "Q1.NullOrdering";
+    private const string SyntaxProfile = "TSQL.ScriptDOM180";
+    private const string TopProfile = "TSQL.Top";
+    private const string OffsetFetchProfile = "TSQL.OffsetFetch";
+    private const string DistinctProfile = "TSQL.NullDistinct";
+    private const string AllProfile = "TSQL.SelectAll";
+    private const string AliasProfile = "TSQL.ImplicitProjectionAlias";
+    private const string DefaultJoinProfile = "TSQL.DefaultInnerJoin";
+    private const string OrdinalProfile = "TSQL.OrdinalOrder";
+    private const string NamedParameterProfile = "TSQL.NamedParameters";
+    private const string WireSlotProfile = "TSQL.SessionSlots";
+    private const string DecimalProfile = "TSQL.DecimalScalar";
+    private const string NationalStringProfile = "TSQL.NationalStringLiteral";
+    private static readonly ImmutableArray<int> SupportedVersions = [QueryVersion];
     internal static QueryCapabilityManifest Create(DatabaseLimits limits, QueryExecutionOptions execution) => new(
-        ManifestVersion, ManifestVersion, NativeDialect, Scope, ScalarType, MissingSemantics,
+        ManifestVersion, QueryVersion, RuntimeDialect, Scope, ScalarType, MissingSemantics,
         [SqlSurface, JsonSurface, CSharpSurface],
         [ComparisonCapability, AndCapability, OrCapability, NotCapability, InCapability, NotInCapability, BetweenCapability, NotBetweenCapability, NullCapability, NotNullCapability, DistinctCapability, NotDistinctCapability, AstMissingCapability],
         limits.MaxResults, limits.MaxScanRecords, QueryResultBudgetPolicy.Resolve(limits, execution), limits.MaxQueryDepth, true, true,
         limits.MaxQueryReadBytes,
-        [Q1Profile, FeedProfile, LiveProfile, ModelProfile, JoinProfile, LeftPredicateProfile, QueueJoinProfile, EventJoinProfile, Q1OffsetProfile, Q2OffsetProfile, AstNullOrderingProfile, NativeSyntaxProfile, TopProfile, OffsetFetchProfile, DistinctProfile, AllProfile, AliasProfile, DefaultJoinProfile, OrdinalProfile, NamedParameterProfile, WireSlotProfile, DecimalProfile, NationalStringProfile, GraphSearchProfile, AstExplainProfile],
+        [Q1Profile, FeedProfile, LiveProfile, ModelProfile, JoinProfile, LeftPredicateProfile, QueueJoinProfile, EventJoinProfile, Q1OffsetProfile, Q2OffsetProfile, AstNullOrderingProfile, SyntaxProfile, TopProfile, OffsetFetchProfile, DistinctProfile, AllProfile, AliasProfile, DefaultJoinProfile, OrdinalProfile, NamedParameterProfile, WireSlotProfile, DecimalProfile, NationalStringProfile, GraphSearchProfile, AstExplainProfile],
         SupportedVersions, SupportedVersions);
 }

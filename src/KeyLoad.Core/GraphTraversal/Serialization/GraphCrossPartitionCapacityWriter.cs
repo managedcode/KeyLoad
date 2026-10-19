@@ -22,7 +22,7 @@ internal static class GraphCrossPartitionCapacityWriter
         const int NoCapacityChange = 0;
 
         var counterKey = GraphCrossPartitionKeys.Capacity(partition, direction);
-        var counter = GraphCrossPartitionRecords.Read<GraphCrossPartitionCapacityV1>(transaction, counterKey);
+        var counter = GraphCrossPartitionRecords.Read<GraphCrossPartitionCapacity>(transaction, counterKey);
         if (counter is not null)
         {
             GraphCrossPartitionValidation.ValidateCapacity(counter, direction);
@@ -45,7 +45,7 @@ internal static class GraphCrossPartitionCapacityWriter
         PersistWrites(transaction, writes);
         if (delta.RecordCount != NoCapacityChange || delta.EncodedBytes != NoCapacityChange || counter is null)
         {
-            transaction.PutRecord(counterKey, new GraphCrossPartitionCapacityV1(
+            transaction.PutRecord(counterKey, new GraphCrossPartitionCapacity(
                 GraphCrossPartitionProtocol.CurrentVersion, direction, next.RecordCount, next.EncodedBytes));
         }
     }

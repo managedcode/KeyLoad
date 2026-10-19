@@ -11,6 +11,6 @@ namespace KeyLoad;
 /// <param name="RedactedFields">The field paths whose values were redacted.</param>
 /// <param name="Sources">Optional source identities for a Q2 joined pair.</param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.QueryRow)]
+[Orleans.Alias(ContractAliases.QueryRow)]
 public sealed record QueryRow([property: Orleans.Id(0)] string EntityId, [property: Orleans.Id(1)] long Revision, [property: Orleans.Id(2)] string Json, [property: Orleans.Id(3)] bool Redacted = false, [property: Orleans.Id(4)] ImmutableArray<string>? RedactedFields = null,
     [property: Orleans.Id(5), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] ImmutableArray<QueryRowSource>? Sources = null);

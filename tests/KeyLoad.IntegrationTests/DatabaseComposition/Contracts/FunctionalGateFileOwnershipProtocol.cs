@@ -1,6 +1,6 @@
 namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
 
-/// <summary>Finite evidence bounds for the actual native same-live-files refusal scenario.</summary>
+/// <summary>Finite evidence bounds for the actual execution same-live-files refusal scenario.</summary>
 internal static class FunctionalGateFileOwnershipProtocol
 {
     internal const int SiloCount = 3;
@@ -17,6 +17,6 @@ internal static class FunctionalGateFileOwnershipProtocol
     internal const string LogLineEnding = "\n";
     internal const char LogLineEndingCharacter = '\n';
     internal const string LogEvidenceKey = "KeyLoad.FileOwnership.OriginalLogPrefix";
-    internal const string Incomplete = "The original native file-ownership refusal evidence is incomplete.";
+    internal const string Incomplete = "The original execution file-ownership refusal evidence is incomplete.";
     internal static readonly TimeSpan ProbeTimeout = TimeSpan.FromMinutes(2);
 }

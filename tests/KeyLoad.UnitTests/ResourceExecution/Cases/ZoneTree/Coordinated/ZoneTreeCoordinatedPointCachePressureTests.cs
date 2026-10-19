@@ -63,7 +63,7 @@ internal sealed class ZoneTreeCoordinatedPointCachePressureTests
             var occupiedPool = fixture.Budget.GetSnapshot();
             var unavailable = secondControl.TryApply(secondReceipt);
             var whileFull = secondControl.GetDiagnostics();
-            var native = secondStore.Read(view => view.ReadOwnedValue(Key));
+            var execution = secondStore.Read(view => view.ReadOwnedValue(Key));
 
             fixture.CloseStore(firstStore);
             var retry = secondControl.TryApply(secondReceipt);
@@ -74,8 +74,8 @@ internal sealed class ZoneTreeCoordinatedPointCachePressureTests
             await Assert.That(occupiedPool.RetainedBytes).IsEqualTo(IndexCharge + entryCharge);
             await Assert.That(unavailable).IsEqualTo(ZoneTreePointCacheControlResult.Unavailable);
             await Assert.That(whileFull.Enabled).IsFalse();
-            await Assert.That(native).IsNotNull();
-            await Assert.That(native!.SequenceEqual(Value)).IsTrue();
+            await Assert.That(execution).IsNotNull();
+            await Assert.That(execution!.SequenceEqual(Value)).IsTrue();
             await Assert.That(retry).IsEqualTo(ZoneTreePointCacheControlResult.Applied);
             await Assert.That(ready.Enabled).IsTrue();
             await Assert.That(filled).IsNotNull();

@@ -10,14 +10,14 @@ internal sealed class Bm25PublicAdmissionTests
         {
             var id = Guid.NewGuid();
             var original = flow.Database.Database.CreateCommand(OperationKind.Batch, id, Bm25CorpusPublicationFlow.Root,
-                flow.Database.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(new CommandRequest(id,
+                flow.Database.Database.EvaluationClock.GetUtcNow(), OrleansSerialization.Serialize(new CommandRequest(id,
                     flow.Database.Partition, [new PutDocument(Bm25CorpusPublicationFlow.Collection, "bm25-boundary", "{\"value\":1}")])));
-            var payload = NativeSerialization.Serialize(new CommandRequest(original.CommandId, flow.Database.Partition,
+            var payload = OrleansSerialization.Serialize(new CommandRequest(original.CommandId, flow.Database.Partition,
                 [new PutDocument(Bm25CorpusPublicationFlow.Collection, "bm25-boundary", "{\"value\":1}")]));
             var before = CanonicalStoreCut.Read(flow.Database);
-            var native = Assert.ThrowsExactly<KeyLoadException>(() => flow.Database.Database.CreateCommand(
+            var execution = Assert.ThrowsExactly<KeyLoadException>(() => flow.Database.Database.CreateCommand(
                 OperationKind.Bm25CorpusPublicationPhase, original.CommandId, original.UserId!, new DateTimeOffset(original.Timestamp), payload));
-            await Assert.That(native.Code).IsEqualTo(ErrorCode.UnsupportedCapability);
+            await Assert.That(execution.Code).IsEqualTo(ErrorCode.UnsupportedCapability);
             var codec = new KeyLoad.Clustering.GrainRequestCodec(flow.Database.Database.Store.Identity.Incarnation, flow.Database.Database.Store.Identity.SigningKey,
             flow.Database.Database.OperationLimitsOptions, TimeProvider.System, UnitRoutingOptions.Routing());
             var generic = Assert.ThrowsExactly<KeyLoadException>(() => codec.CreateCommand(Guid.NewGuid(),
@@ -39,7 +39,7 @@ internal sealed class Bm25PublicAdmissionTests
             await Assert.That(codec.Verify(signed).Envelope.CommandKind).IsEqualTo(OperationKind.Batch);
             var result = flow.Database.SubmitIssued(original);
             await Assert.That(Errors.Code(result.Problem)).IsNull();
-            await NativeReplayResultAssertions.SameAsync(result,
+            await ReplayResultAssertions.SameAsync(result,
                 flow.Database.Database.ResolveOutcome(original));
             await Assert.That(flow.Database.Database.GetDocument(Bm25CorpusPublicationFlow.Root,
                 new(flow.Database.Partition, Bm25CorpusPublicationFlow.Collection, "bm25-boundary"))!.Json)

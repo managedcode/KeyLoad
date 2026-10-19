@@ -34,7 +34,7 @@ internal sealed class IsolatedAggregateNodeDeferredRelease
         await ObserveOriginalJoinAsync();
         await CaptureOriginalFailuresAsync();
         await IsolatedAggregateNodeGuardedInvocation.CaptureAsync(() => actualExit, Add);
-        await WaitForNativeExitAsync();
+        await RuntimeWaitForExitAsync();
         DisposeDeadline();
         DisposeProcess();
     }
@@ -51,7 +51,7 @@ internal sealed class IsolatedAggregateNodeDeferredRelease
         }
     }
 
-    private async Task WaitForNativeExitAsync()
+    private async Task RuntimeWaitForExitAsync()
     {
         while (true)
         {

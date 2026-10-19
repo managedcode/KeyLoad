@@ -13,7 +13,7 @@ internal static class QueueAccountingFaultAssertions
 {
     private const int NoResultError = -1;
     private const string UnexpectedReturnCounterDetail =
-        "Unexpected native queue return: error={0}; storedMessages={1}; storedBytes={2}; inFlightMessages={3}; inFlightBytes={4}.";
+        "Unexpected execution queue return: error={0}; storedMessages={1}; storedBytes={2}; inFlightMessages={3}; inFlightBytes={4}.";
     private static readonly CompositeFormat UnexpectedReturnCounterFormat = CompositeFormat.Parse(UnexpectedReturnCounterDetail);
 
     internal static async Task RefusedAsync(DatabaseEngine database, ZoneTreeStore store,

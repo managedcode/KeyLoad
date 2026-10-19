@@ -1,0 +1,60 @@
+namespace KeyLoad.Core.Features.RuntimeJournaling.Contracts;
+
+internal static class RuntimeJournalProtocol
+{
+    internal const int EmptyCount = 0;
+    internal const int FirstOrdinal = 1;
+    internal const int JournalCountIncrement = 1;
+    internal const int JournalCountDecrement = -1;
+    internal const int AppendBufferStartOffset = 0;
+    internal const long EmptyRevision = 0;
+    internal const long EmptyGeneration = 0;
+    internal const long EmptyLength = 0;
+    internal const long OwnerGenerationIncrement = 1;
+    internal const long ContentRevisionIncrement = 1;
+    internal const int CatalogHeaderProbeCount = 1;
+    internal const int ChunkKeyComponentCount = 5;
+    internal const int ChunkKeySpaceComponent = 0;
+    internal const int ChunkKeyVersionComponent = 1;
+    internal const int ChunkKeyKindComponent = 2;
+    internal const int ChunkKeyNameComponent = 3;
+    internal const int ChunkKeyIndexComponent = 4;
+    internal const int CeilingDivisionAdjustment = 1;
+    internal const string HeaderAlias = "keyload.runtime-journal.header";
+    internal const string ChunkAlias = "keyload.runtime-journal.chunk";
+    internal const string CatalogMarkerAlias = "keyload.runtime-journal.catalog-marker";
+    internal const string QuotaAlias = "keyload.runtime-journal.quota";
+    internal const string ReaderContractRequired = "Runtime journal ownership requires its persisted reader contract.";
+    internal const string AlreadyConfigured = "Runtime journal ownership has already been configured.";
+    internal const string NotConfigured = "Runtime journal ownership is not configured.";
+    internal const string InitialMetadataETagFormat = "N";
+    internal const int InitialMetadataETagLength = 32;
+    internal const int ChainedMetadataETagLength = 64;
+    internal const int CurrentVersion = 1;
+    internal const long InitialOwnerGeneration = FirstOrdinal;
+    internal const long InitialContentRevision = EmptyRevision;
+    internal const long InitialLength = EmptyLength;
+    internal const int InitialJournalCount = EmptyCount;
+    internal const long InitialTotalBytes = EmptyLength;
+    internal const long ProtectedPolicyEpoch = 1;
+    internal const string GuidFormat = "N";
+    internal const string Space = "runtime-journal";
+    internal const string IdentityId = "keyload-internal-runtime-journal";
+    internal const string SystemTenant = "system";
+    internal const string MarkerKey = "catalog";
+    internal const string QuotaKey = "quota";
+    internal const string HeaderKey = "header";
+    internal const string ChunkKey = "chunk";
+    internal const string OwnerProperty = "DurableJobsOwner";
+    internal const string PoisonedProperty = "DurableJobsPoisoned";
+    internal const string ClosedProperty = "DurableJobsClosed";
+    internal const string MembershipProperty = "DurableJobsMembershipVersion";
+    internal const string AdoptedProperty = "DurableJobsAdoptedCount";
+    internal const string MetadataPrefix = "DurableJobsMetadata_";
+
+    internal const string InvalidRequest = "The runtime journal request is invalid.";
+    internal const string InvalidState = "The committed runtime journal state is malformed.";
+    internal const string Missing = "The runtime journal does not exist.";
+    internal const string Conflict = "The runtime journal changed since it was observed.";
+    internal const string Capacity = "The runtime journal capacity is exhausted.";
+}

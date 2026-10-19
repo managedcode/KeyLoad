@@ -8,7 +8,7 @@ internal static class SampleRollupCrashState
     private const string SampleSpace = "sample";
     private const string IdentitySpace = "sample-id";
     private const string SequenceSpace = "sample-sequence";
-    private const string RetentionSpace = "sample-retention-v1";
+    private const string RetentionSpace = "sample-retention";
 
     internal static SampleRollupCrashSnapshot Capture(string directory, DatabaseEngine database)
         => new(database.ReadSamples(CrashFixtureValues.Principal, SampleRollupCrashContract.Partition,

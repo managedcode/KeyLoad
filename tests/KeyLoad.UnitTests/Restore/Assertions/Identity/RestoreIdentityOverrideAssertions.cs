@@ -18,7 +18,7 @@ internal static class RestoreIdentityOverrideAssertions
         await BackupIndexedDocumentDedupAssertions.AssertOldOutcomePreserved(fixture.Source.Store,
             fixture.Partition, RestoreIdentityOverrideState.SeedId, state.SeedOutcome);
         await BackupIndexedDocumentDedupAssertions.AssertArchiveUnchanged(fixture.BackupDirectory, state.Archive);
-        await NativeReplayResultAssertions.Same<CommitReceipt>(fixture.Source.Database.Apply(state.Seed), state.SeedResult);
+        await ReplayResultAssertions.Same<CommitReceipt>(fixture.Source.Database.Apply(state.Seed), state.SeedResult);
         await Assert.That(QueueWholeFlowStorage.Bytes(fixture.Source.Store))
             .IsEquivalentTo(state.SourceImage, CollectionOrdering.Matching);
     }
@@ -79,7 +79,7 @@ internal static class RestoreIdentityOverrideAssertions
     internal static async Task ReplayAsync(RestoreIdentityOverrideFixture fixture, DatabaseEngine database,
         ZoneTreeStore store, RestoreIdentityOverrideCurrent saved)
     {
-        await NativeReplayResultAssertions.Same<CommitReceipt>(database.Apply(saved.Operation), saved.Result);
+        await ReplayResultAssertions.Same<CommitReceipt>(database.Apply(saved.Operation), saved.Result);
         await Assert.That(store.Position).IsEqualTo(saved.Position);
         await Assert.That(QueueWholeFlowStorage.Bytes(store))
             .IsEquivalentTo(saved.Image, CollectionOrdering.Matching);

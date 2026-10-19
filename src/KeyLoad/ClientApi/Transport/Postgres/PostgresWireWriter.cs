@@ -22,7 +22,7 @@ internal sealed class PostgresWireWriter(PipeWriter output, int maximumFrameByte
     internal const int JsonbOid = 3802;
     private const int TypeAndLengthBytes = sizeof(byte) + sizeof(int);
     private const short OneColumn = 1;
-    private const string InvalidReply = "The native SQL reply exceeds its admitted byte grant.";
+    private const string InvalidReply = "The execution SQL reply exceeds its admitted byte grant.";
     private static readonly UTF8Encoding Utf8 = new(false, true);
 
     internal void Write(byte type, ReadOnlySpan<byte> payload)
@@ -101,7 +101,7 @@ internal sealed class PostgresWireWriter(PipeWriter output, int maximumFrameByte
 
     internal async ValueTask FlushAsync(CancellationToken token)
     {
-        var result = await output.FlushAsync(token).ConfigureAwait(false);
+        var result = await output.FlushAsync(token);
         if (result.IsCanceled)
         {
             token.ThrowIfCancellationRequested();

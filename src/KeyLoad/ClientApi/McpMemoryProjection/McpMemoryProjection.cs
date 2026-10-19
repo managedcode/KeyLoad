@@ -2,7 +2,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
 
-/// <summary>Projects conservative retained-memory peaks for MCP ingress, decoding, operation and native reply stages.</summary>
+/// <summary>Projects conservative retained-memory peaks for MCP ingress, decoding, operation and execution reply stages.</summary>
 internal sealed class McpMemoryProjection
 {
     private readonly McpExecutionOptions settings;
@@ -89,8 +89,8 @@ internal sealed class McpMemoryProjection
     /// <summary>Projects all overlapping retained input, principal, canonical-payload and pre-operation reply buffers.</summary>
     /// <param name="input">The immutable dimensions of the already inspected request and actual principal reply.</param>
     /// <param name="maximumReplyBytes">The canonical operation reply ceiling.</param>
-    /// <param name="protocolReply">Whether native protocol/SSE reply capacity must be charged before dispatch.</param>
-    /// <returns>The complete conservative byte charge held before invoking the native operation handler.</returns>
+    /// <param name="protocolReply">Whether execution protocol/SSE reply capacity must be charged before dispatch.</param>
+    /// <returns>The complete conservative byte charge held before invoking the execution operation handler.</returns>
     internal long BeforeOperation(McpInputMemory input, int maximumReplyBytes, bool protocolReply)
     {
         const long MaximumPayloadBytesScaleFactor = 2L;
@@ -99,31 +99,31 @@ internal sealed class McpMemoryProjection
 
         ValidateInput(input, maximumReplyBytes);
         var ingressAndPrincipal = Authentication(input.Capacity, input.AuthenticationBytes, input.AuthenticationShape);
-        var nativeUntypedMetadata = McpMemoryProjectionComponents.Metadata(input.WireBytes, input.Shape.TokenCount);
-        var nativeUntypedStructure = McpMemoryProjectionComponents.Structure(input.WireBytes,
+        var untypedMetadata = McpMemoryProjectionComponents.Metadata(input.WireBytes, input.Shape.TokenCount);
+        var untypedStructure = McpMemoryProjectionComponents.Structure(input.WireBytes,
             input.Shape.TokenCount, input.Shape.PropertyCount);
         var typedParameterMetadata = McpMemoryProjectionComponents.Metadata(input.WireBytes, input.Shape.TokenCount);
         var typedParameterStructure = McpMemoryProjectionComponents.Structure(input.WireBytes,
             input.Shape.TokenCount, input.Shape.PropertyCount);
         var expansionHint = InputExpansion(input.WireBytes);
-        var nativePayloadWriter = McpMemoryProjectionComponents.Writer(input.WireBytes, expansionHint);
+        var payloadWriter = McpMemoryProjectionComponents.Writer(input.WireBytes, expansionHint);
         var canonicalWriter = McpMemoryProjectionComponents.Writer(input.MaximumPayloadBytes, expansionHint);
         var canonicalEscaping = McpMemoryProjectionComponents.Escaping(input.MaximumPayloadBytes);
         var canonicalDtoStructure = McpMemoryProjectionComponents.Structure(input.MaximumPayloadBytes,
             input.Shape.TokenCount, input.Shape.PropertyCount);
         var canonicalBufferAndReturnedCopy = checked(MaximumPayloadBytesScaleFactor * input.MaximumPayloadBytes);
         var operationReply = maximumReplyBytes;
-        var nativeValidationCapacity = checked((long)maximumReplyBytes + settings.EnvelopeAllowanceBytes);
+        var validationCapacity = checked((long)maximumReplyBytes + settings.EnvelopeAllowanceBytes);
         var controlReplyPeak = protocolReply ? AfterReply(HeldEmptyCount, settings.MaximumControlReplyBytes,
             WorstShape(settings.MaximumControlReplyBytes)) : BeforeOperationAbsentCount;
 
-        return checked(ingressAndPrincipal + nativeUntypedMetadata + nativeUntypedStructure +
-            typedParameterMetadata + typedParameterStructure + nativePayloadWriter + canonicalWriter +
+        return checked(ingressAndPrincipal + untypedMetadata + untypedStructure +
+            typedParameterMetadata + typedParameterStructure + payloadWriter + canonicalWriter +
             canonicalEscaping + canonicalDtoStructure + canonicalBufferAndReturnedCopy +
-            operationReply + nativeValidationCapacity + controlReplyPeak);
+            operationReply + validationCapacity + controlReplyPeak);
     }
 
-    /// <summary>Grows retained ownership for the actual wrapped result and native SDK SSE serialization overlap.</summary>
+    /// <summary>Grows retained ownership for the actual wrapped result and execution SDK SSE serialization overlap.</summary>
     /// <param name="held">The existing reservation that must remain held throughout reply construction.</param>
     /// <param name="replyBytes">The actual bounded canonical reply length.</param>
     /// <param name="replyShape">The inspected reply token and property counts.</param>
@@ -139,16 +139,16 @@ internal sealed class McpMemoryProjection
 
         var wrapperCapacity = checked((long)replyBytes + settings.EnvelopeAllowanceBytes);
         var encodedUpper = checked(InputExpansionMultiplier * wrapperCapacity + settings.EnvelopeAllowanceBytes);
-        var wrapperTokens = checked((long)replyShape.TokenCount + settings.NativeEnvelopeItems);
-        var wrapperProperties = checked((long)replyShape.PropertyCount + settings.NativeEnvelopeItems);
-        var nativeMetadata = McpMemoryProjectionComponents.Metadata(encodedUpper, wrapperTokens);
-        var nativeStructure = McpMemoryProjectionComponents.Structure(encodedUpper, wrapperTokens, wrapperProperties);
-        var nativeWriter = McpMemoryProjectionComponents.Writer(wrapperCapacity, encodedUpper);
+        var wrapperTokens = checked((long)replyShape.TokenCount + settings.EnvelopeItems);
+        var wrapperProperties = checked((long)replyShape.PropertyCount + settings.EnvelopeItems);
+        var runtimeMetadata = McpMemoryProjectionComponents.Metadata(encodedUpper, wrapperTokens);
+        var runtimeStructure = McpMemoryProjectionComponents.Structure(encodedUpper, wrapperTokens, wrapperProperties);
+        var runtimeWriter = McpMemoryProjectionComponents.Writer(wrapperCapacity, encodedUpper);
         var escaping = McpMemoryProjectionComponents.Escaping(encodedUpper);
         var sseWriters = checked(WriterScaleFactor * McpMemoryProjectionComponents.Writer(encodedUpper, encodedUpper));
 
         var simultaneousWrapperOwners = checked(WrapperCapacityScaleFactor * wrapperCapacity + encodedUpper);
-        return checked(held + simultaneousWrapperOwners + nativeMetadata + nativeStructure + nativeWriter + escaping + sseWriters);
+        return checked(held + simultaneousWrapperOwners + runtimeMetadata + runtimeStructure + runtimeWriter + escaping + sseWriters);
     }
 
     internal long ProgressNotification(int bytes)

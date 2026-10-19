@@ -10,7 +10,7 @@ internal static class AnnPublicEligibility
     private const int Empty = 0;
     private const int Step = 1;
     private const ulong SetBit = 1;
-    private const string Missing = "The native ANN dependency history is unavailable; explicitly rebuild the generation.";
+    private const string Missing = "The execution ANN dependency history is unavailable; explicitly rebuild the generation.";
 
     internal static ulong[] Create(ImmutableArray<VectorRecord> source, AnnSeed caller,
         ImmutableArray<string>? allowed, AnnWorkBudget work)

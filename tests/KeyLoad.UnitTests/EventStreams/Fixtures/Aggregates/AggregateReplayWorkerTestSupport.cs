@@ -5,7 +5,7 @@ namespace KeyLoad.UnitTests.Features.EventStreams;
 
 internal static class AggregateReplayWorkerTestSupport
 {
-    internal const string ReducerVersion = "counter.reducer.v1";
+    internal const string ReducerVersion = "counter.reducer";
     internal const string EventType = "CounterChanged";
     private const string TotalField = "total";
     private const string IncrementField = "increment";

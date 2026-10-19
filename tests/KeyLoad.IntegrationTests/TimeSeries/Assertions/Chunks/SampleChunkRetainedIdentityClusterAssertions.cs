@@ -7,7 +7,7 @@ namespace KeyLoad.IntegrationTests.Features.TimeSeries;
 
 internal static class SampleChunkRetainedIdentityClusterAssertions
 {
-    private const string ConflictDetail = "The native series chunk window overlaps retained data or an enrolled identity.";
+    private const string ConflictDetail = "The execution series chunk window overlaps retained data or an enrolled identity.";
     private const string SafeDetail = "The database operation could not be completed.";
 
     internal static async Task RequireAsync(KeyLoadClient sdk, McpOfficialClient mcp,

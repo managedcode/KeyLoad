@@ -30,8 +30,8 @@ internal sealed class Bm25ConfiguredQuotaFlow(TestDatabase database)
                 await body(flow);
             }, failures);
         }
-        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
+        catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
+        catch (Exception error) when (!CqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
@@ -54,7 +54,7 @@ internal sealed class Bm25ConfiguredQuotaFlow(TestDatabase database)
             database.CreateReadWork(Token), UnitExecutionOptions.QueryExecution());
 
     internal static Bm25CorpusPublicationPhaseCommand Phase(Command<DatabaseCommand> operation)
-        => NativeSerialization.Deserialize<Bm25CorpusPublicationPhaseCommand>((operation).Value!.Input.Span);
+        => OrleansSerialization.Deserialize<Bm25CorpusPublicationPhaseCommand>((operation).Value!.Input.Span);
 
     internal Result<object> Publish(Command<DatabaseCommand> operation) => database.SubmitIssued(operation);
 

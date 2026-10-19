@@ -47,7 +47,7 @@ internal static class ChunkMultiblockPagedRetentionRows
         var remaining = ChunkMultiblockBoundaryData.Expected(healthy: false).Skip(checked((int)purged)).ToArray();
         for (var index = 0; index < remaining.Length; index++)
         {
-            var record = NativeSerialization.Deserialize<SampleRecord>(page.Records[index].Value.Span);
+            var record = OrleansSerialization.Deserialize<SampleRecord>(page.Records[index].Value.Span);
             await Assert.That(JsonSerializer.Serialize(record, JsonDefaults.Options)).IsEqualTo(JsonSerializer.Serialize(remaining[index], JsonDefaults.Options));
             var key = KeySpace.Partition(RawFamily, fixture.Partition, SampleChunkCanonicalFixture.Set,
                 SampleChunkCanonicalFixture.Series, remaining[index].Sample.Timestamp, remaining[index].Sequence);

@@ -8,6 +8,6 @@ internal sealed class TestDatabaseConcurrentCloseTests
     [Test]
     [Arguments(JoinBeforeDispose)]
     [Arguments(DisposeFromLiveOwner)]
-    public async Task NativeAcknowledgedFixtureConcurrentAndRepeatedSuccessfulCloseThenIndependentHealthyFixture(bool joinFirst)
+    public async Task AcknowledgedFixtureConcurrentAndRepeatedSuccessfulCloseThenIndependentHealthyFixture(bool joinFirst)
         => await TestDatabaseConcurrentCloseFlow.RunAsync(joinFirst, TestContext.Current!.Execution.CancellationToken);
 }

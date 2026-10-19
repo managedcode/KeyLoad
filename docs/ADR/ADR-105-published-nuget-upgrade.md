@@ -20,7 +20,7 @@ the five Microsoft.Orleans packages 10.4.0, both Microsoft.CodeAnalysis packages
 5.9.0, TUnit 1.72.16, StackExchange.Redis 3.3.1 and KurrentDB.Client 1.4.1.
 All remaining central pins and Aspire.AppHost.Sdk are already current.
 
-Retain central version management, native dependency APIs, .NET 10/C# 14,
+Retain central version management, dependency APIs, .NET 10/C# 14,
 warnings-as-errors and SDK-owned Roslyn compiler assets for analyzer tests.
 Keep all Orleans packages and Roslyn peer packages aligned. Update active
 version assertions and development-capture metadata with the selected packages;
@@ -45,14 +45,14 @@ flowchart LR
     Feed[Published NuGet versions] --> Pins[Central aligned pins]
     Pins --> Restore[Restore real dependency closure]
     Restore --> Build[Release build and formatter]
-    Build --> Tests[Aspire owned native suites]
+    Build --> Tests[Aspire owned suites]
     Tests --> Receipt[Actual outcomes and open gates]
 ```
 
 ## Implementation contract
 
 1. Audit current policies, the dirty manifest and all feed versions; identify active version checks and protected historical records. Reviewed exact paths join the change.
-2. Directory.Packages.props, this ADR, its index, RepositoryGovernance requirements and the refresh receipt carry the change. Update only selected version values, preserving concurrent package additions, together with the necessary TimeSeries comparison assertions and native Orleans development-capture metadata under their existing BenchmarkComparisons slices.
+2. Directory.Packages.props, this ADR, its index, RepositoryGovernance requirements and the refresh receipt carry the change. Update only selected version values, preserving concurrent package additions, together with the necessary TimeSeries comparison assertions and Orleans development-capture metadata under their existing BenchmarkComparisons slices.
 3. Restore, solution Release build, governance, formatter and Aspire-owned analyzers/unit/recovery/cluster suites; retain original failures and artifacts. Scope comparison regressions to changed version assertions through the same AppHost. Local evidence cannot qualify Linux GitHub runtime, public performance, endurance or power-loss durability.
 4. Inspect the combined diff, repeat the canonical Release build after final edits and formatting, record exact outcomes, and commit only this refresh stage when verified. Unrelated unfinished work remains with its author.
 

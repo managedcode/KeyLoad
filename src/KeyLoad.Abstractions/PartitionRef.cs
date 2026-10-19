@@ -9,7 +9,7 @@ namespace KeyLoad;
 /// <param name="TransactionDomainId">Identifies the transaction domain.</param>
 /// <param name="PartitionKey">Provides the caller-visible partition key.</param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.PartitionRef)]
+[Orleans.Alias(ContractAliases.PartitionRef)]
 public sealed record PartitionRef([property: Orleans.Id(0)] string TenantId, [property: Orleans.Id(1)] string DatabaseId, [property: Orleans.Id(2)] string TransactionDomainId, [property: Orleans.Id(3)] string PartitionKey)
 {
     /// <summary>Gets the stable hash of the partition identity.</summary>

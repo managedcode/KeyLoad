@@ -5,16 +5,16 @@ namespace KeyLoad.UnitTests.Features.InternalSerialization;
 
 internal sealed class CoreModelPersistenceTests
 {
-    private const string Collection = "native-documents";
-    private const string RecordId = "native-record";
-    private const string StreamSet = "native-streams";
-    private const string EventType = "NativeEvent";
-    private const string Purpose = "native-store-test";
+    private const string Collection = "execution-documents";
+    private const string RecordId = "execution-record";
+    private const string StreamSet = "execution-streams";
+    private const string EventType = "RuntimeEvent";
+    private const string Purpose = "execution-store-test";
     private const string RawJson = "{\"number\":1e+01,\"precise\":12345678901234567890123456789,\"text\":\"界λ\"}";
     private static readonly DateTimeOffset Timestamp = new(2026, 10, 3, 12, 0, 0, TimeSpan.Zero);
 
     [Test]
-    public async Task AcIs002DocumentsEventsAndMessagesKeepExactUserJsonInNativeRecords()
+    public async Task AcIs002DocumentsEventsAndMessagesKeepExactUserJsonInRecords()
     {
         using var database = new TestDatabase();
         var entity = new EntityRef(database.Partition, Collection, RecordId);
@@ -43,7 +43,7 @@ internal sealed class CoreModelPersistenceTests
             .IsEqualTo(BitConverter.DoubleToInt64Bits(sample.Sample.Value));
         var identity = new EventIdentity(RecordId, 1, 1);
         await Assert.That(RoundTrip(database, identity)).IsEqualTo(identity);
-        var head = new TopicHead(1, 1, 1, NativeSerialization.Measure(sample));
+        var head = new TopicHead(1, 1, 1, OrleansSerialization.Measure(sample));
         await Assert.That(RoundTrip(database, head)).IsEqualTo(head);
         await Assert.That(RoundTripScalar(database, Timestamp)).IsEqualTo(Timestamp);
         await Assert.That(RoundTripScalar(database, 1L)).IsEqualTo(1L);
@@ -51,7 +51,7 @@ internal sealed class CoreModelPersistenceTests
     }
 
     [Test]
-    public async Task AcIs002SearchAndResourceSchemaKeepNativeVectorAndJsonContracts()
+    public async Task AcIs002SearchAndResourceSchemaKeepVectorAndJsonContracts()
     {
         using var database = new TestDatabase();
         var space = new VectorSpace(RecordId, 2, DistanceMetric.Cosine, EventType, RecordId);
@@ -71,7 +71,7 @@ internal sealed class CoreModelPersistenceTests
     }
 
     [Test]
-    public async Task AcIs002MalformedNativeRecordFailsAtRealStoreReadThenRestores()
+    public async Task AcIs002MalformedRecordFailsAtRealStoreReadThenRestores()
     {
         using var database = new TestDatabase();
         database.Configure(Collection, ResourceKind.Collection);
@@ -94,7 +94,7 @@ internal sealed class CoreModelPersistenceTests
     {
         var key = KeyCodec.Encode(Purpose, typeof(T).FullName!);
         database.Store.Commit((transaction, _) => { transaction.PutRecord(key, value); return true; });
-        return database.Store.Read(view => NativeSerialization.Deserialize<T>(view.ReadOwnedValue(key)!));
+        return database.Store.Read(view => OrleansSerialization.Deserialize<T>(view.ReadOwnedValue(key)!));
     }
 
     private static T RoundTrip<T>(TestDatabase database, T value) where T : class

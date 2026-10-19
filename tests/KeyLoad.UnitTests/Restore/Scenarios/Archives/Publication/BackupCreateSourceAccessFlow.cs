@@ -15,7 +15,7 @@ internal static class BackupCreateSourceAccessFlow
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            using var fixture = new NativeBackupCutFixture();
+            using var fixture = new BackupCutFixture();
             await ServerFailureObserver.ObserveAsync(() => CompleteAsync(options, fixture, token), failures);
         }, failures);
         ServerFailureObserver.ThrowIfAny(failures);
@@ -23,10 +23,10 @@ internal static class BackupCreateSourceAccessFlow
 
     private static async Task CompleteAsync(
         global::Microsoft.Extensions.Options.IOptions<global::KeyLoad.AppHost.Features.TestInfrastructure.TestExecutionOptions> options,
-        NativeBackupCutFixture fixture, CancellationToken token)
+        BackupCutFixture fixture, CancellationToken token)
     {
-        var original = NativeBackupJournalRepairAssertions.Read(fixture.Source, token);
-        var archive = await NativeBackupJournalRepairAssertions.ArchiveAsync(fixture.Backup, token);
+        var original = BackupJournalRepairAssertions.Read(fixture.Source, token);
+        var archive = await BackupJournalRepairAssertions.ArchiveAsync(fixture.Backup, token);
         var candidate = fixture.Backup + CandidateSuffix;
         var rejectedDestination = fixture.Destination + CandidateSuffix;
         var failures = new List<Exception>();
@@ -58,8 +58,8 @@ internal static class BackupCreateSourceAccessFlow
             }, failures);
         }, failures);
         ServerFailureObserver.ThrowIfAny(failures);
-        await NativeBackupJournalRepairAssertions.SameCutAsync(original,
-            NativeBackupJournalRepairAssertions.Read(fixture.Source, token));
+        await BackupJournalRepairAssertions.SameCutAsync(original,
+            BackupJournalRepairAssertions.Read(fixture.Source, token));
         await BackupCreateSourceAccessAssertions.ReconcileOwnedPartialAsync(candidate);
         await CaptureAsync(fixture, candidate, original.Position, token);
         await CliBackupRestoreAssertions.FilesEqualAsync(archive, fixture.Backup, token);
@@ -67,20 +67,20 @@ internal static class BackupCreateSourceAccessFlow
             [RestoreCommand, candidate, fixture.Destination], token);
         await CliBackupRestoreAssertions.SuccessfulProcessAsync(result);
         await BackupCreateSourceAccessAssertions.RestoredAsync(fixture, result, token);
-        var restored = NativeBackupJournalRepairAssertions.Read(fixture.Destination, token);
-        await NativeBackupJournalRepairAssertions.SameCutAsync(restored,
-            NativeBackupJournalRepairAssertions.Read(fixture.Destination, token));
+        var restored = BackupJournalRepairAssertions.Read(fixture.Destination, token);
+        await BackupJournalRepairAssertions.SameCutAsync(restored,
+            BackupJournalRepairAssertions.Read(fixture.Destination, token));
         await BackupCreateSourceAccessAssertions.RestoredAsync(fixture, result, token);
-        await NativeBackupJournalRepairAssertions.SameCutAsync(restored,
-            NativeBackupJournalRepairAssertions.Read(fixture.Destination, token));
+        await BackupJournalRepairAssertions.SameCutAsync(restored,
+            BackupJournalRepairAssertions.Read(fixture.Destination, token));
         await BackupCreateSourceAccessAssertions.RestoredAsync(fixture, result, token);
-        await NativeBackupJournalRepairAssertions.SameCutAsync(original,
-            NativeBackupJournalRepairAssertions.Read(fixture.Source, token));
+        await BackupJournalRepairAssertions.SameCutAsync(original,
+            BackupJournalRepairAssertions.Read(fixture.Source, token));
         await CliBackupRestoreAssertions.FilesEqualAsync(archive, fixture.Backup, token);
         await CliBackupRestoreAssertions.FilesEqualAsync(archive, candidate, token);
     }
 
-    private static async Task CaptureAsync(NativeBackupCutFixture fixture, string candidate, long originalPosition,
+    private static async Task CaptureAsync(BackupCutFixture fixture, string candidate, long originalPosition,
         CancellationToken token)
     {
         var failures = new List<Exception>();

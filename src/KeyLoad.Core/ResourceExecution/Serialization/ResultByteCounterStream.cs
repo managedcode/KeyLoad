@@ -14,11 +14,11 @@ internal sealed class ResultByteCounterStream(long maximumBytes, Action check) :
         return counter.Length;
     }
 
-    internal static long MeasureNative<T>(ReadExecutionBudget budget, T result)
+    internal static long RuntimeMeasure<T>(ReadExecutionBudget budget, T result)
     {
         budget.Check();
         using var counter = new ResultByteCounterStream(budget.MaximumResultBytes, budget.Check);
-        NativeSerialization.Serialize(result, counter);
+        OrleansSerialization.Serialize(result, counter);
         budget.Check();
         return counter.Length;
     }

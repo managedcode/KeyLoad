@@ -17,7 +17,7 @@ internal static class SampleChunkCorrectionTagRows
     private const string Pointer = "/visible";
     private const string TaggedScalar = "23";
     private const string AbsentScalar = "99";
-    private const string Exhausted = "The native series chunk window exceeds its admitted bound.";
+    private const string Exhausted = "The execution series chunk window exceeds its admitted bound.";
     internal const string TaggedJson = "{\"visible\":\"23\"}";
     internal static SampleData Tagged => new("new-correction-tag", SampleChunkCanonicalFixture.Start.AddTicks(TaggedTicks), TaggedValue);
 

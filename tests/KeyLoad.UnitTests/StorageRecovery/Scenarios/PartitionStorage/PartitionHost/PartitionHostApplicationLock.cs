@@ -6,7 +6,7 @@ internal static class PartitionHostApplicationLock
 {
     internal static async Task RefuseAsync(PartitionHostApplicationSession session, string directory)
     {
-        var original = session.Owner.OpenAsync();
+        var original = session.Owner.OpenAsync(session.Context);
         var observed = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(() => original, observed).ConfigureAwait(false);
         if (observed.Count != PartitionHostApplicationProtocol.OneFailure ||
@@ -17,7 +17,7 @@ internal static class PartitionHostApplicationLock
         }
         session.ExpectedOpeningFailure = observed[PartitionHostApplicationProtocol.FailureIndex];
         await Assert.That(original.IsFaulted).IsTrue();
-        await Assert.That(ReferenceEquals(original, session.Owner.OpenAsync())).IsTrue();
+        await Assert.That(ReferenceEquals(original, session.Owner.OpenAsync(session.Context))).IsTrue();
         await Assert.That(ReferenceEquals(original, session.Owner.Opening)).IsTrue();
         Assert.ThrowsExactly<InvalidOperationException>(() => session.Owner.Borrow());
         await Assert.That(session.Owner.CanReleaseRoot).IsTrue();

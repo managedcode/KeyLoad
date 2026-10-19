@@ -4,13 +4,13 @@ namespace KeyLoad.Server;
 
 internal static class ChangeFeedApi
 {
-    private const string ReadPath = "/v1/changes/read";
-    private const string OutboxPath = "/v1/admin/outbox/status";
-    private const string PurgePath = "/v1/admin/outbox/purge";
-    private const string ConfigureProjectionPath = "/v1/admin/projections/configure";
-    private const string ReadProjectionPath = "/v1/admin/projections/read";
-    private const string CommitProjectionPath = "/v1/admin/projections/commit";
-    private const string ReleaseProjectionPath = "/v1/admin/projections/release";
+    private const string ReadPath = "/changes/read";
+    private const string OutboxPath = "/admin/outbox/status";
+    private const string PurgePath = "/admin/outbox/purge";
+    private const string ConfigureProjectionPath = "/admin/projections/configure";
+    private const string ReadProjectionPath = "/admin/projections/read";
+    private const string CommitProjectionPath = "/admin/projections/commit";
+    private const string ReleaseProjectionPath = "/admin/projections/release";
 
     internal static void Map(WebApplication app)
     {

@@ -1,4 +1,4 @@
-# ADR-104: Native ManagedCode gateway and graph-based MCP discovery
+# ADR-104: ManagedCode gateway and graph-based MCP discovery
 
 Status: Accepted for implementation; verification pending. Date:2026-10-05.
 Related: [ClientApi ToolDiscovery](../Features/ClientApi/ToolDiscovery.md),
@@ -10,7 +10,7 @@ REQ-MCPGW-001..007 / AC-MCPGW-001..007, [ADR-039](ADR-039-official-mcp-agent-api
 The owner requires our MCPGateway and Markdown-LD knowledge graph to make the
 large tool inventory usable. Expose the package's search/route/invoke meta-tool pattern as the public MCP
 entry point. Use the actual published
-ManagedCode.MCPGateway0.4.17 and ManagedCode.MarkdownLd.Kb0.2.10 native graph
+ManagedCode.MCPGateway0.4.17 and ManagedCode.MarkdownLd.Kb0.2.10 graph
 APIs. Keep the canonical operation inventory inside KeyLoad and return selected
 complete schemas/effect hints on demand.
 
@@ -18,27 +18,27 @@ Reuse KeyLoad's official stateless MCP host and fresh persisted authentication,
 bounded framing/admission, typed operation decoder, signed Orleans gateway and
 silo-local ZoneTree owners. The package's outbound OAuth is not incoming authentication.
 Its current aggregate MCP exporter lists every operation and normalizes results,
-so adopt native factory/search/invoke APIs rather than that exporter. This is a
+so adopt factory/search/invoke APIs rather than that exporter. This is a
 transport adapter over the original execution, not another operation dispatcher.
 
 ```mermaid
 sequenceDiagram
     participant Client as Official MCP client
     participant Host as KeyLoad authenticated MCP host
-    participant Graph as Native MCPGateway MarkdownLd index
+    participant Graph as MCPGateway MarkdownLd index
     participant Request as Separate Orleans request grain
     Client->>Host: List tools
     Host-->>Client: Search route invoke
     Client->>Host: Search task within query bounds
-    Host->>Graph: Native schema-aware search
+    Host->>Graph: schema-aware search
     Graph-->>Host: Bounded canonical matches
     Host-->>Client: Complete selected schemas and hints
     Client->>Host: Invoke toolId and canonical arguments
     Host->>Host: Select exact inner descriptor and admit its route
-    Host->>Graph: Native local AIFunction invocation
+    Host->>Graph: local AIFunction invocation
     Graph->>Request: Existing signed typed execution
     Request-->>Host: Original result error and execution GUID
-    Host-->>Client: Original bounded native CallToolResult
+    Host-->>Client: Original bounded CallToolResult
 ```
 
 The exact wire, metadata permission boundary, index/input/output bounds,
@@ -53,10 +53,10 @@ disposable metadata; ZoneTree remains canonical for every database model.
 
 ## Implementation contract
 
-Guidance (REQ/AC-MCPGW-007): the same official host exposes the one fixed Markdown resource and one static no-argument prompt specified in ToolDiscovery, without adding an operation tool. Fresh persisted authentication and existing control admission/output/privacy budgets apply. Native resource/prompt objects are fresh per call; unknown names, nonempty cursors and arguments fail before effects. Guidance is static source metadata, not model data, policy or credential state. Rollout/rollback moves guide, native handlers, registration and tests together; no data format changes. Build, normal/scalar and actual Aspire cluster tests must prove exact content, bounds, rejection and revoked credentials before this extension is qualified.
+Guidance (REQ/AC-MCPGW-007): the same official host exposes the one fixed Markdown resource and one static no-argument prompt specified in ToolDiscovery, without adding an operation tool. Fresh persisted authentication and existing control admission/output/privacy budgets apply. resource/prompt objects are fresh per call; unknown names, nonempty cursors and arguments fail before effects. Guidance is static source metadata, not model data, policy or credential state. Rollout/rollback moves guide, handlers, registration and tests together; no data format changes. Build, normal/scalar and actual Aspire cluster tests must prove exact content, bounds, rejection and revoked credentials before this extension is qualified.
 
 1. Pin only live-published packages; normal NuGet references, no local package or temporary project reference. Existing MCP/Orleans packages stay centrally pinned. Dependency defects follow the authorized owning repair, regression, patch/release/publication/feed-verification workflow.
-2. The server `Features/ClientApi/Discovery/` owns the native graph catalog, metadata hints and the local `AIFunction` adapter; relevant UnitTests live in `Features/ClientApi/{Cases,Helpers,Assertions}/`. It uses the frozen `McpToolDispatcher.InvokeCanonicalAsync` integration seam, not another engine.
+2. The server `Features/ClientApi/Discovery/` owns the graph catalog, metadata hints and the local `AIFunction` adapter; relevant UnitTests live in `Features/ClientApi/{Cases,Helpers,Assertions}/`. It uses the frozen `McpToolDispatcher.InvokeCanonicalAsync` integration seam, not another engine.
 3. Preserve whole-frame charging and actual typed `CallToolResult` lifetime. No catalog/graph-engine implementation.
 4. Source changes are not accepted until the combined build and actual caller gates succeed.
 5. Restore/Release build and analyzers; focused and related Aspire units, scalar,
@@ -65,7 +65,7 @@ Guidance (REQ/AC-MCPGW-007): the same official host exposes the one fixed Markdo
    source/version/job/artifact Linux qualification closes acceptance. No skipped
    suite, static check or package presence counts as a runtime pass.
 
-AppHost owns topology/test runner readiness, dependencies and shutdown. Every test maps to ToolDiscovery acceptance; no mock gateway or storage replaces real native libraries/cluster callers.
+AppHost owns topology/test runner readiness, dependencies and shutdown. Every test maps to ToolDiscovery acceptance; no mock gateway or storage replaces real libraries/cluster callers.
 
 ## Rollout, rollback and unresolved qualification
 
@@ -76,9 +76,9 @@ atomically and remove obsolete direct operation-tool routes. No second full
 catalog endpoint or compatibility fallback remains. Source-only rollback reverts
 the composition/caller changes together without touching data or receipts.
 
-Native graph cancellation cannot promise immediate SPARQL interruption; owners
+graph cancellation cannot promise immediate SPARQL interruption; owners
 remain held until actual work settles. Fixed metadata/count/source/reply bounds
-are required; total native index allocation/peak RAM, full operation parity,
+are required; total index allocation/peak RAM, full operation parity,
 revocation/concurrent identity, recovery/restart, genuine cluster and complete
 delivered-source Linux gates remain open. No production-readiness or performance
 claim follows from this decision. ADR remains Accepted until all mapped evidence

@@ -18,6 +18,6 @@ internal sealed record AnnProjectionSettlementClaims(
     [property: global::Orleans.Id(13)] DateTimeOffset ExpiresAt,
     [property: global::Orleans.Id(14)] Guid SettlementCommandId)
 {
-    internal const string ContractAlias = "keyload.core.ann-projection-settlement-claims.v1";
+    internal const string ContractAlias = "keyload.core.ann-projection-settlement-claims";
     internal const string SettlementPurpose = "ann-initial-settlement";
 }

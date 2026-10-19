@@ -21,7 +21,7 @@ internal static class VerifiedBackupMixedCutConservation
         await Assert.That(EventingArtifactState.FullBytes(fixture.Source.Store))
             .IsEquivalentTo(source, CollectionOrdering.Matching);
         await VerifiedBackupMixedCutState.StateAsync(fixture, fixture.Source.Database, secondDocument: true);
-        var original = global::KeyLoad.NativeSerialization.Deserialize<StoredOutcome>(
+        var original = global::KeyLoad.OrleansSerialization.Deserialize<StoredOutcome>(
             BackupIndexedDocumentDedupFixture.ReadOutcomeBytes(fixture.Source.Store,
                 fixture.Source.Partition, EventingArtifactFixture.Principal, fixture.Original.CommandId));
         await EventingArtifactState.SameResultAsync(original.Result,
@@ -38,7 +38,7 @@ internal static class VerifiedBackupMixedCutConservation
         {
             throw new InvalidOperationException(MissingSecondCut);
         }
-        var stored = global::KeyLoad.NativeSerialization.Deserialize<StoredOutcome>(
+        var stored = global::KeyLoad.OrleansSerialization.Deserialize<StoredOutcome>(
             BackupIndexedDocumentDedupFixture.ReadOutcomeBytes(fixture.Source.Store,
                 fixture.Source.Partition, EventingArtifactFixture.Principal, operation.CommandId));
         await EventingArtifactState.SameResultAsync(result, stored.Result);

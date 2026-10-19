@@ -45,11 +45,11 @@ async function prepareIsolated(args, input) {
   const manifestPath = join(input, 'aggregate.json');
   const manifest = await readBytes(manifestPath, 33_554_432);
   const projection = await produceIsolatedProjection({ input });
-  const qualification = { schemaVersion: 'session-v1', workers: projection.workers.length };
+  const qualification = { schemaVersion: 'session', workers: projection.workers.length };
   if (!manifest.equals(await readBytes(manifestPath, 33_554_432))) throw new Error(ERRORS.cohort);
   const bytes = Buffer.from(JSON.stringify(projection) + BUILD.newline);
   if (bytes.length > 33_554_432) throw new Error(ERRORS.budget);
-  const catalog = validateIsolatedCatalog({ schemaVersion: 'session-v1', generatedAt: new Date().toISOString(),
+  const catalog = validateIsolatedCatalog({ schemaVersion: 'session', generatedAt: new Date().toISOString(),
     siteSourceRevision: args[BUILD.site], measuredSourceRevision: projection.cohort.sourceRevision,
     evidenceUrl: 'https://github.com/managedcode/KeyLoad/actions/runs/' + projection.cohort.runId,
     cohort: projection.cohort, aggregate: { path: 'isolated/aggregate.json', sha256: hash(manifest) },
@@ -66,7 +66,7 @@ async function emitHtml(output, siteRevision, isolated) {
   html = html.replaceAll(BUILD.documentationBlob, `/blob/${siteRevision}/docs`)
     .replaceAll(BUILD.documentationTree, `/tree/${siteRevision}/docs`);
   if (!html.includes(BUILD.isolatedEvidence)) throw new Error(ERRORS.html);
-  const evidence = `<p><a href="./data/isolated/aggregate.json" download>Native comparison aggregate</a> · ` +
+  const evidence = `<p><a href="./data/isolated/aggregate.json" download>Execution comparison aggregate</a> · ` +
     `<a href="${isolated.catalog.evidenceUrl}">GitHub comparison run</a></p>`;
   html = html.replace(BUILD.isolatedEvidence, evidence);
   await writeFile(join(output, BUILD.html), html);

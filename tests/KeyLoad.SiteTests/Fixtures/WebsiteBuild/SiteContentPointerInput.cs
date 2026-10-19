@@ -13,7 +13,7 @@ internal static class SiteContentPointerInput
     private const string Button = "button";
     private const string Left = "left";
     private const string ClickCount = "clickCount";
-    private const string MissingTarget = "The native pointer target is not visible in the current viewport.";
+    private const string MissingTarget = "The execution pointer target is not visible in the current viewport.";
     private const int One = 1;
 
     internal static async Task ClickAsync(SiteBrowserCdpClient cdp, string selector, CancellationToken token)

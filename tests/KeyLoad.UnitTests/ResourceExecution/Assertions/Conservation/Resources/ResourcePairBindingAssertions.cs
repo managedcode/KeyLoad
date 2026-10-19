@@ -13,7 +13,7 @@ internal static class ResourcePairBindingAssertions
 
     internal static async Task FailureDeltaAsync(ZoneTreeStore store, string[] before, PartitionRef partition, Command<DatabaseCommand> original)
     {
-        var locator = KeySpace.OutcomeLocatorV2(partition, original.UserId!, original.CommandId);
+        var locator = KeySpace.OutcomeLocator(partition, original.UserId!, original.CommandId);
         await Assert.That(ResourceIncarnationAssertions.Bytes(store, locator).AsSpan()
             .SequenceEqual(KeySpace.PartitionOutcome(partition, original.UserId!, original.CommandId))).IsTrue();
         var allowed = new HashSet<string>(StringComparer.Ordinal)

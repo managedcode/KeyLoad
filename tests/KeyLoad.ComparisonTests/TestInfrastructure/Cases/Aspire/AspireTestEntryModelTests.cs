@@ -18,7 +18,7 @@ internal sealed class AspireTestEntryModelTests
     private const string ComparisonSuite = "comparison";
     private const string ComparisonMaximumParallelTests = "1";
     private const string ParallelismSetting = "KeyLoadTests:Execution:MaximumParallelTests";
-    private const string ComparisonIsolationMessage = "Comparison measurements require exactly one native test at a time.";
+    private const string ComparisonIsolationMessage = "Comparison measurements require exactly one execution test at a time.";
     private const string FilterArgument = "--KeyLoadTests:Filter=Suite.Filter";
     private static readonly (string Suite, string Project)[] Suites =
     [
@@ -31,12 +31,12 @@ internal sealed class AspireTestEntryModelTests
     ];
 
     [Test]
-    public async Task EveryClosedSuiteHasOneNativeRunnerAndOriginalTUnitArguments()
+    public async Task EveryClosedSuiteHasOneRunnerAndOriginalTUnitArguments()
     {
         foreach (var (suite, project) in Suites)
         {
             var builder = CreateBuilder($"--KeyLoadTests:Suite={suite}");
-            KeyLoadResources.AddKeyLoad(builder);
+            AppHostProgram.AddKeyLoad(builder);
             var app = builder.Build();
             try
             {
@@ -68,11 +68,11 @@ internal sealed class AspireTestEntryModelTests
     }
 
     [Test]
-    public async Task FilterIsOneNativeArgumentAndIsBoundedBeforeResourcesAreAdded()
+    public async Task FilterIsOneArgumentAndIsBoundedBeforeResourcesAreAdded()
     {
         await AssertRejectedBeforeResourcesAsync("--KeyLoadTests:Suite=unit-scalar");
         var builder = CreateBuilder("--KeyLoadTests:Suite=unit", FilterArgument);
-        KeyLoadResources.AddKeyLoad(builder);
+        AppHostProgram.AddKeyLoad(builder);
         var app = builder.Build();
         try
         {
@@ -101,13 +101,13 @@ internal sealed class AspireTestEntryModelTests
     }
 
     [Test]
-    public async Task ConfiguredParallelismUsesTheNativeArgumentAndInclusiveBoundaries()
+    public async Task ConfiguredParallelismUsesTheArgumentAndInclusiveBoundaries()
     {
         foreach (var parallelism in new[] { "1", "20", "50" })
         {
             var builder = CreateBuilder("--KeyLoadTests:Suite=unit",
                 "--KeyLoadTests:Execution:MaximumParallelTests=" + parallelism);
-            KeyLoadResources.AddKeyLoad(builder);
+            AppHostProgram.AddKeyLoad(builder);
             var app = builder.Build();
             try
             {
@@ -133,7 +133,7 @@ internal sealed class AspireTestEntryModelTests
         {
             var builder = CreateBuilder("--KeyLoadTests:Suite=unit",
                 "--KeyLoadTests:Execution:MaximumParallelTests=" + parallelism);
-            await Assert.That(() => KeyLoadResources.AddKeyLoad(builder)).Throws<OptionsValidationException>();
+            await Assert.That(() => AppHostProgram.AddKeyLoad(builder)).Throws<OptionsValidationException>();
             await Assert.That(builder.Resources.Select(resource => resource.Name)).IsEmpty();
         }
         await AssertRejectedBeforeResourcesAsync("--KeyLoadTests:Suite=unit",
@@ -144,7 +144,7 @@ internal sealed class AspireTestEntryModelTests
     public async Task AcTunitEntry013ComparisonModelRejectsOverlapThenCreatesHealthySingleRunner()
     {
         var rejected = CreateBuilder("--KeyLoadTests:Suite=comparison", "--KeyLoadTests:Execution:MaximumParallelTests=20");
-        var failure = Assert.ThrowsExactly<InvalidOperationException>(() => KeyLoadResources.AddKeyLoad(rejected));
+        var failure = Assert.ThrowsExactly<InvalidOperationException>(() => AppHostProgram.AddKeyLoad(rejected));
         await Assert.That(failure.Message).IsEqualTo(ComparisonIsolationMessage);
         await Assert.That(rejected.Resources).IsEmpty();
         await Assert.That(rejected.Configuration[ParallelismSetting]).IsEqualTo(ExplicitComparisonOverlap);
@@ -153,7 +153,7 @@ internal sealed class AspireTestEntryModelTests
             new[] { "--KeyLoadTests:Suite=comparison", "--KeyLoadTests:Execution:MaximumParallelTests=1" } })
         {
             var builder = CreateBuilder(args);
-            KeyLoadResources.AddKeyLoad(builder);
+            AppHostProgram.AddKeyLoad(builder);
             await using var app = builder.Build();
             var model = app.Services.GetRequiredService<DistributedApplicationModel>();
             var runner = model.Resources.OfType<ExecutableResource>().Single();
@@ -172,7 +172,7 @@ internal sealed class AspireTestEntryModelTests
     private static async Task AssertRejectedBeforeResourcesAsync(params string[] args)
     {
         var builder = CreateBuilder(args);
-        await Assert.That(() => KeyLoadResources.AddKeyLoad(builder)).Throws<InvalidOperationException>();
+        await Assert.That(() => AppHostProgram.AddKeyLoad(builder)).Throws<InvalidOperationException>();
         await Assert.That(builder.Resources.Select(resource => resource.Name)).IsEmpty();
     }
 

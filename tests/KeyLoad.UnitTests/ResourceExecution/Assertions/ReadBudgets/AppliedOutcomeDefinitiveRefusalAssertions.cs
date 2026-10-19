@@ -14,15 +14,15 @@ internal static class AppliedOutcomeDefinitiveRefusalAssertions
     {
         var bytes = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
-        var identity = NativeSerialization.Serialize(store.Identity);
+        var identity = OrleansSerialization.Serialize(store.Identity);
         for (var repeat = 0; repeat < 2; repeat++)
         {
             var local = db.Apply(changed);
             await RefusalAsync(local, ErrorCode.Conflict, "The command ID was already used with different content.");
             var resolved = db.ResolveAppliedSubmissionOutcome(changed);
             await RefusalAsync(resolved, ErrorCode.Conflict, "The command ID was already used with different content.");
-            await NativeReplayResultAssertions.Same<CommitReceipt>(db.ResolveAppliedSubmissionOutcome(original), committed);
-            await NativeReplayResultAssertions.Same<CommitReceipt>(db.Apply(original), committed);
+            await ReplayResultAssertions.Same<CommitReceipt>(db.ResolveAppliedSubmissionOutcome(original), committed);
+            await ReplayResultAssertions.Same<CommitReceipt>(db.Apply(original), committed);
             await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, bytes, position, identity);
         }
     }
@@ -34,16 +34,16 @@ internal static class AppliedOutcomeDefinitiveRefusalAssertions
             AppliedOutcomeDefinitiveRefusalFlow.Worker, original.CommandId);
         var saved = store.Read(view => view.ReadOwnedValue(key))
             ?? throw new InvalidOperationException("The genuine original ACK outcome is absent.");
-        var outcome = NativeSerialization.Deserialize<StoredOutcome>(saved);
+        var outcome = OrleansSerialization.Deserialize<StoredOutcome>(saved);
         try
         {
-            Put(store, key, NativeSerialization.Serialize(outcome with
+            Put(store, key, OrleansSerialization.Serialize(outcome with
             {
                 Incarnation = Guid.NewGuid()
             }));
             await ReadBoundaryAsync(db, store, original, ErrorCode.TokenInvalidated,
                 "The command belongs to an earlier incarnation.");
-            Put(store, key, NativeSerialization.Serialize(outcome with
+            Put(store, key, OrleansSerialization.Serialize(outcome with
             {
                 Partition = outcome.Partition! with
                 {
@@ -67,7 +67,7 @@ internal static class AppliedOutcomeDefinitiveRefusalAssertions
     {
         var bytes = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
-        var identity = NativeSerialization.Serialize(store.Identity);
+        var identity = OrleansSerialization.Serialize(store.Identity);
         await RefusalAsync(db.ResolveAppliedSubmissionOutcome(operation), code, detail);
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, bytes, position, identity);
     }
@@ -77,7 +77,7 @@ internal static class AppliedOutcomeDefinitiveRefusalAssertions
     {
         var bytes = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
-        var identity = NativeSerialization.Serialize(store.Identity);
+        var identity = OrleansSerialization.Serialize(store.Identity);
         var refusal = Assert.ThrowsExactly<KeyLoadException>(() => db.ResolveAppliedSubmissionOutcome(operation));
         await Assert.That(refusal.Code).IsEqualTo(code);
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, bytes, position, identity);
@@ -94,8 +94,8 @@ internal static class AppliedOutcomeDefinitiveRefusalAssertions
     internal static async Task ReceiptAsync(Result<object> result, Guid id, CommitToken token, string message)
     {
         var expected = new CommitReceipt(id, token, [new("Ack", AppliedOutcomeDefinitiveRefusalFlow.Queue, message, 3L)], DurabilityProfile.ProcessDurable, 1);
-        await Assert.That(NativeSerialization.Serialize(result.Get<CommitReceipt>()).AsSpan()
-            .SequenceEqual(NativeSerialization.Serialize(expected))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(result.Get<CommitReceipt>()).AsSpan()
+            .SequenceEqual(OrleansSerialization.Serialize(expected))).IsTrue();
     }
 
     internal static async Task CurrentAsync(DatabaseEngine db, ZoneTreeStore store, QueueLaneRef lane, bool completed)
@@ -115,7 +115,7 @@ internal static class AppliedOutcomeDefinitiveRefusalAssertions
         await Assert.That(store.Read(view => view.GetRecord<MessageMetadata>(KeySpace.Partition("message-meta", lane.Partition, lane.Queue, healthy.Id)))).IsEqualTo(healthy);
         await Assert.That(store.Read(view => view.GetRecord<MessageBody>(KeySpace.Partition("message-body", lane.Partition, lane.Queue, original.Id)))).IsNull();
         await Assert.That(store.Read(view => view.GetRecord<MessageBody>(KeySpace.Partition("message-body", lane.Partition, lane.Queue, healthy.Id)))).IsEqualTo(body);
-        var bytes = body is null ? 0 : NativeSerialization.Serialize(body).LongLength;
+        var bytes = body is null ? 0 : OrleansSerialization.Serialize(body).LongLength;
         await Assert.That(store.Read(view => view.GetRecord<QueueCounters>(KeySpace.Partition("queue-counters", lane.Partition, lane.Queue))))
             .IsEqualTo(new QueueCounters(completed ? 0 : 1, bytes, 0, 0, 2));
         var ready = store.Read(view => view.Scan(KeySpace.Partition("ready", lane.Partition, lane.Queue), 3));
@@ -124,7 +124,7 @@ internal static class AppliedOutcomeDefinitiveRefusalAssertions
         if (!completed)
         {
             await Assert.That(ready.Records[0].Key.Span.SequenceEqual(KeySpace.Partition("ready", lane.Partition, lane.Queue, 2L, healthy.Id))).IsTrue();
-            await Assert.That(NativeSerialization.Deserialize<string>(ready.Records[0].Value.Span)).IsEqualTo(healthy.Id);
+            await Assert.That(OrleansSerialization.Deserialize<string>(ready.Records[0].Value.Span)).IsEqualTo(healthy.Id);
         }
         foreach (var family in new[] { "lease", "scheduled" })
         {

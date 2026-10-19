@@ -26,7 +26,7 @@ internal static class OutboxDocumentMutationFixture
 
     internal static void Damage(TestDatabase database, ProjectionConsumerIdentityState state, int fault)
     {
-        var entry = NativeSerialization.Deserialize<OutboxEntry>(state.Original);
+        var entry = OrleansSerialization.Deserialize<OutboxEntry>(state.Original);
         var mutation = (PutDocument)entry.Mutation;
         var after = entry.After ?? throw new InvalidOperationException(Missing);
         var damaged = fault switch

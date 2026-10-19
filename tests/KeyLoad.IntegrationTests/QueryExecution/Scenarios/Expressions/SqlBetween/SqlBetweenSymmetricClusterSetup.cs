@@ -4,7 +4,7 @@ internal static class SqlBetweenSymmetricClusterSetup
 {
     internal static async Task<SqlNullOrderingClusterState> CreateAsync(ClusterFixture fixture, CancellationToken token)
     {
-        return await global::KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerProtocol.Node1,
+        return await global::KeyLoad.IntegrationTests.Features.OrleansExecution.RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerProtocol.Node1,
             fixture.AdminKey, async root =>
         {
             var partition = PostgresClusterState.Partition;
@@ -20,7 +20,7 @@ internal static class SqlBetweenSymmetricClusterSetup
                 Capability.DocumentsRead | Capability.Query, token, resource.Name);
             var seed = new CommandRequest(Guid.NewGuid(), partition,
                 [.. SqlBetweenSymmetricClusterState.Rows.Select(row => new PutDocument(resource.Name, row.Id, row.Json))]);
-            var receipt = await global::KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerProtocol.Node2,
+            var receipt = await global::KeyLoad.IntegrationTests.Features.OrleansExecution.RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerProtocol.Node2,
                 writer.Secret, async caller =>
             {
                 var committed = await global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.CommitAsync(seed, token));

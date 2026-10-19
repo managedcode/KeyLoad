@@ -8,9 +8,9 @@ internal sealed class IsolatedGitHubFailureDiagnosticsTests
     [Arguments("credential")]
     [Arguments("credential-tail")]
     [Arguments("retention-conflict")]
-    public async Task AcIso007FailedNativeChildRetainsBoundedPrivateEvidenceThenJoinsHealthyContinuation(string failure)
+    public async Task AcIso007FailedChildRetainsBoundedPrivateEvidenceThenJoinsHealthyContinuation(string failure)
     {
-        using var directory = new NativeArtifactTestDirectory();
+        using var directory = new ArtifactTestDirectory();
         try
         {
             var result = await SessionNodeProcess.RunAsync(

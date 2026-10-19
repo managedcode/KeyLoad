@@ -7,7 +7,7 @@ namespace KeyLoad.UnitTests.Features.ClientApi;
 internal sealed class KeyLoadClientNullWriteTests
 {
     private const string ApiKey = "null-write-test-key";
-    private const string CommandsPath = "/v1/commands";
+    private const string CommandsPath = "/commands";
     private const string CommandIdHeader = "X-KeyLoad-Command-Id";
     private const string JsonContentType = "application/json";
     private const string UnknownDetail = "The write response is unavailable. Retry the same command ID.";
@@ -197,7 +197,7 @@ internal sealed class KeyLoadClientNullWriteTests
         var retry = await client.CommitAsync(command, deadline.Token);
         observation.Record(KestrelObservationStage.SdkCompleted);
         await Assert.That(retry.IsSuccess).IsTrue();
-        await Assert.That(NativeSerialization.Serialize(retry.Value!).SequenceEqual(NativeSerialization.Serialize(receipt))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(retry.Value!).SequenceEqual(OrleansSerialization.Serialize(receipt))).IsTrue();
         await KeyLoadClientNullWriteReadAssertions.VerifyRequestsAndReadsAsync(client, command, requests, headers, reference, document, deadline.Token);
     }
 }

@@ -4,7 +4,7 @@ namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
-    /// <summary>Reads the current persisted native maintenance authority on one bounded view.</summary>
+    /// <summary>Reads the current persisted execution maintenance authority on one bounded view.</summary>
     /// <param name="consumer">The exact configured consumer scope.</param>
     /// <param name="generation">The immutable generation being dispatched.</param>
     /// <param name="budget">The original admitted read budget.</param>

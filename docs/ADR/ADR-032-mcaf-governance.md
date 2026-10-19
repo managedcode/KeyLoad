@@ -23,11 +23,11 @@ flowchart LR
     Source --> Evidence[Build and runtime qualification]
 ```
 
-Use native TUnit entry after build. Fixtures own Aspire resources and joined
+Use TUnit entry after build. Fixtures own Aspire resources and joined
 cleanup. Build and Tests, Benchmarks, Website and Release have separate delivery
 responsibilities. Structural checks do not qualify database behavior, public
 client interoperability, recovery or performance.
 
-The requirements, native tool and regression mapping are in
+The requirements, tool and regression mapping are in
 [RepositoryGovernance](../Features/RepositoryGovernance.md). Keep the
 [architecture map](../Architecture.md) and [root policy](../../AGENTS.md) current.

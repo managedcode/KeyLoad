@@ -71,10 +71,10 @@ internal static class Bm25ConfiguredQuotaTrial
             await Assert.That(Bm25ConfiguredQuotaBytes.Retained(flow.Database)).IsEqualTo(capacity);
         }
         var before = CanonicalStoreCut.Read(flow.Database);
-        var entry = NativeSerialization.Serialize(flow.Database.ReadStoredOutcome(healthy.CommandId));
+        var entry = OrleansSerialization.Serialize(flow.Database.ReadStoredOutcome(healthy.CommandId));
         var replay = flow.Database.Database.CreateVerifiedBm25CorpusPublication("root", Bm25ConfiguredQuotaFlow.Phase(healthy), flow.Database.CreateReadWork(Bm25ConfiguredQuotaFlow.Token));
-        await NativeReplayResultAssertions.SameAsync(result, flow.Publish(replay));
+        await ReplayResultAssertions.SameAsync(result, flow.Publish(replay));
         await before.RequireAsync(CanonicalStoreCut.Read(flow.Database));
-        await NativeReplayResultAssertions.BytesAsync(entry, NativeSerialization.Serialize(flow.Database.ReadStoredOutcome(healthy.CommandId)));
+        await ReplayResultAssertions.BytesAsync(entry, OrleansSerialization.Serialize(flow.Database.ReadStoredOutcome(healthy.CommandId)));
     }
 }

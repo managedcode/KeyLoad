@@ -43,13 +43,13 @@ internal static class StreamRecordKeyAuthorityFlow
             EventAppendWholeFlowFixture.Streams, EventAppendWholeFlowFixture.StreamId, 1L, 2L);
         var original = fixture.Database.Store.Read(view => view.ReadOwnedValue(key))
             ?? throw new InvalidOperationException("The original second event is absent.");
-        var record = NativeSerialization.Deserialize<EventRecord>(original);
+        var record = OrleansSerialization.Deserialize<EventRecord>(original);
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             fixture.Database.Store.Commit((tx, _) =>
             {
-                tx.Put(key, NativeSerialization.Serialize(record with
+                tx.Put(key, OrleansSerialization.Serialize(record with
                 {
                     Revision = revision
                 }));

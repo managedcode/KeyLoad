@@ -6,9 +6,9 @@ using MongoDB.Driver;
 namespace KeyLoad.Comparisons.Targets;
 
 internal sealed class MongoSession(MongoTarget target, IMongoCollection<BsonDocument> documents,
-    IMongoCollection<BsonDocument> edges, IMongoCollection<BsonDocument> events, int graphDepth, int corpusCount, IOptions<NativeComparisonExecutionOptions> executionOptions) : IComparisonSession
+    IMongoCollection<BsonDocument> edges, IMongoCollection<BsonDocument> events, int graphDepth, int corpusCount, IOptions<ComparisonExecutionOptions> executionOptions) : IComparisonSession
 {
-    private readonly NativeComparisonExecutionOptions execution = NativeComparisonExecutionOptions.Require(executionOptions).Value;
+    private readonly ComparisonExecutionOptions execution = ComparisonExecutionOptions.Require(executionOptions).Value;
 
     public async IAsyncEnumerable<FoundDocument> ReadCorpusAsync([EnumeratorCancellation] CancellationToken cancellationToken)
     {

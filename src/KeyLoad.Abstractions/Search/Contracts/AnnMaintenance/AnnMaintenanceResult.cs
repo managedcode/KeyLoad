@@ -6,8 +6,8 @@ namespace KeyLoad;
 /// <param name="IndexGeneration">Exact consumer generation.</param>
 /// <param name="Phase">Observed final phase.</param>
 /// <param name="Source">Exact admitted canonical upper source cut when a generation exists.</param>
-/// <param name="Count">Actual retained native vector count.</param>
-/// <param name="IndexSha256">Checksum of the actual immutable native index file.</param>
+/// <param name="Count">Actual retained execution vector count.</param>
+/// <param name="IndexSha256">Checksum of the actual immutable execution index file.</param>
 /// <param name="Checkpoint">Actual canonical child checkpoint result when one was returned.</param>
 [Orleans.GenerateSerializer, Orleans.Alias(AnnMaintenanceAliases.Result)]
 public sealed record AnnMaintenanceResult(

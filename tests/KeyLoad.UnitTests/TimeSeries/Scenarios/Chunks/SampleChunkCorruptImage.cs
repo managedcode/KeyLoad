@@ -39,8 +39,8 @@ internal sealed class SampleChunkCorruptImage
                     transaction.Delete(manifestKey);
                     break;
                 case SampleChunkCorruptionCut.ManifestDigest:
-                    var envelope = NativeSerialization.Deserialize<SampleChunkManifestEnvelope>(manifest);
-                    transaction.Put(manifestKey, NativeSerialization.Serialize(envelope with
+                    var envelope = OrleansSerialization.Deserialize<SampleChunkManifestEnvelope>(manifest);
+                    transaction.Put(manifestKey, OrleansSerialization.Serialize(envelope with
                     {
                         Digest = Flip(envelope.Digest.Span)
                     }));
@@ -59,8 +59,8 @@ internal sealed class SampleChunkCorruptImage
                     transaction.Delete(correctionKey);
                     break;
                 case SampleChunkCorruptionCut.CorrectionSequence:
-                    var row = NativeSerialization.Deserialize<SampleRecord>(correction);
-                    transaction.Put(correctionKey, NativeSerialization.Serialize(row with
+                    var row = OrleansSerialization.Deserialize<SampleRecord>(correction);
+                    transaction.Put(correctionKey, OrleansSerialization.Serialize(row with
                     {
                         Sequence = SampleChunkCanonicalFixture.InitialSequence
                     }));
@@ -83,8 +83,8 @@ internal sealed class SampleChunkCorruptImage
 
     private byte[] ChangedManifest(SampleChunkCorruptionCut cut)
     {
-        var envelope = NativeSerialization.Deserialize<SampleChunkManifestEnvelope>(manifest);
-        var actual = NativeSerialization.Deserialize<SampleChunkManifest>(envelope.Encoded.Span);
+        var envelope = OrleansSerialization.Deserialize<SampleChunkManifestEnvelope>(manifest);
+        var actual = OrleansSerialization.Deserialize<SampleChunkManifest>(envelope.Encoded.Span);
         var malformed = cut == SampleChunkCorruptionCut.ManifestVersion
             ? actual with
             {
@@ -94,8 +94,8 @@ internal sealed class SampleChunkCorruptImage
             {
                 Generation = SampleChunkCanonicalFixture.MergedGeneration
             };
-        var bytes = NativeSerialization.Serialize(malformed);
-        return NativeSerialization.Serialize(new SampleChunkManifestEnvelope(bytes, SHA256.HashData(bytes)));
+        var bytes = OrleansSerialization.Serialize(malformed);
+        return OrleansSerialization.Serialize(new SampleChunkManifestEnvelope(bytes, SHA256.HashData(bytes)));
     }
 
     private static byte[] Flip(ReadOnlySpan<byte> original)

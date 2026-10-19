@@ -7,7 +7,7 @@ namespace KeyLoad.Query.Features.Search;
 
 internal static class AnnPublicSearchExecutor
 {
-    private const string Missing = "The native ANN dependency history is unavailable; explicitly rebuild the generation.";
+    private const string Missing = "The execution ANN dependency history is unavailable; explicitly rebuild the generation.";
 
     internal static Task<AnnSearchPage> ExecuteAsync(DatabaseEngine database, IAnnProjection? projection,
         string principalId, ApproximateSearchRequest request, IOptions<QueryExecutionOptions> configured,

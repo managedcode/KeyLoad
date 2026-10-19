@@ -14,8 +14,8 @@ public sealed partial class SurrealDbTarget : IBenchmarkSessionQueries
     private const string SessionIndexesProperty = "indexes";
     private const string SessionKeyProperty = "key";
     private const string SessionPayloadProperty = "payload";
-    private const string SessionDefinitionMismatch = "SessionNativeIndexDefinitionMismatch";
-    private const string SessionCardinalityMismatch = "SessionNativeQueryCardinalityMismatch";
+    private const string SessionDefinitionMismatch = "SessionIndexDefinitionMismatch";
+    private const string SessionCardinalityMismatch = "SessionQueryCardinalityMismatch";
     private const int SessionRangeWidth = 1;
     private const int SessionExpectedRows = 1;
     private const int SessionFirstRow = 0;

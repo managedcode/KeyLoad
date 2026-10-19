@@ -8,7 +8,7 @@ internal static class RemoteTransferRepairColdProtocol
     internal const string Payload = "{\"repair\":true}";
     internal const string Headers = "{}";
     internal const string MalformedWitnessSuffix = ".invalid";
-    internal const string Missing = "The actual native transfer repair state is missing.";
+    internal const string Missing = "The actual execution transfer repair state is missing.";
     internal const int FullCeiling = 3;
     internal const int ExhaustedCeiling = 2;
     internal const long InitialEpoch = 1;

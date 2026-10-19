@@ -4,7 +4,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
 
-/// <summary>Truthful native metadata for the SQL adapter; callable targets remain canonical operations only.</summary>
+/// <summary>Truthful execution metadata for the SQL adapter; callable targets remain canonical operations only.</summary>
 internal static class SqlMcpCatalog
 {
     private const string Description = "Execute one bounded selected T-SQL SELECT, supported INSERT, CREATE TABLE, or EXEC of an exact public operation. "

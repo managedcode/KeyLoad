@@ -3,31 +3,31 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 
 namespace KeyLoad.Comparisons.Targets;
-/// <summary>Frames bounded native operation trees and requires durable write acknowledgements.</summary>
+/// <summary>Frames bounded execution operation trees and requires durable write acknowledgements.</summary>
 internal static class HelixDbProtocol
 {
     private const string HelixDbRequestFailed = "HelixDbRequestFailed:";
     private const string UniqueConstraintViolation = "unique_constraint_violation";
-    internal static async Task<JsonDocument> QueryAsync(HttpClient http, JsonObject root, bool write, NativeComparisonExecutionOptions policy, TimeProvider timeProvider, CancellationToken token, bool create = false)
+    internal static async Task<JsonDocument> QueryAsync(HttpClient http, JsonObject root, bool write, ComparisonExecutionOptions policy, TimeProvider timeProvider, CancellationToken token, bool create = false)
     {
         using var operationDeadline = new ComparisonCancellationSource(timeProvider, token);
         operationDeadline.CancelAfter(policy.OperationTimeout);
         token = operationDeadline.Token;
-        using var request = new HttpRequestMessage(HttpMethod.Post, HelixDbNativeTokens.TokenV2Query)
+        using var request = new HttpRequestMessage(HttpMethod.Post, HelixDbTokens.TokenV2Query)
         {
             Content = JsonContent.Create(root)
         };
         if (write)
         {
-            request.Headers.Add(HelixDbNativeTokens.TokenXHelixAwaitDurable, HelixDbNativeTokens.TokenTrue);
+            request.Headers.Add(HelixDbTokens.TokenXHelixAwaitDurable, HelixDbTokens.TokenTrue);
         }
 
         using var response = await http.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, token).ConfigureAwait(false);
         if (!response.IsSuccessStatusCode)
         {
-            using var error = await NativeComparisonResponse.ReadJsonAsync(response.Content, policy, token).ConfigureAwait(false);
+            using var error = await ComparisonResponse.ReadJsonAsync(response.Content, policy, token).ConfigureAwait(false);
             if (create && error.RootElement.ValueKind == JsonValueKind.Object
-                && error.RootElement.TryGetProperty(HelixDbNativeTokens.TokenError, out var code)
+                && error.RootElement.TryGetProperty(HelixDbTokens.TokenError, out var code)
                 && code.ValueKind == JsonValueKind.String && code.GetString() == UniqueConstraintViolation)
             {
                 throw new ComparisonFailureException(ComparisonMutationFailures.CreateConflict);
@@ -35,41 +35,41 @@ internal static class HelixDbProtocol
             throw new ComparisonFailureException(HelixDbRequestFailed + (int)response.StatusCode);
         }
 
-        var document = await NativeComparisonResponse.ReadJsonAsync(response.Content, policy, token).ConfigureAwait(false);
-        if (document.RootElement.ValueKind != JsonValueKind.Object || document.RootElement.TryGetProperty(HelixDbNativeTokens.TokenError, out _))
+        var document = await ComparisonResponse.ReadJsonAsync(response.Content, policy, token).ConfigureAwait(false);
+        if (document.RootElement.ValueKind != JsonValueKind.Object || document.RootElement.TryGetProperty(HelixDbTokens.TokenError, out _))
         {
             document.Dispose();
-            throw new ComparisonFailureException(HelixDbNativeTokens.TokenHelixDbInvalidResponse);
+            throw new ComparisonFailureException(HelixDbTokens.TokenHelixDbInvalidResponse);
         }
 
         return document;
     }
 
-    internal static JsonElement Rows(JsonDocument response, string name = HelixDbNativeTokens.TokenRows)
+    internal static JsonElement Rows(JsonDocument response, string name = HelixDbTokens.TokenRows)
     {
         var rows = response.RootElement.GetProperty(name);
         if (rows.ValueKind != JsonValueKind.Array)
         {
-            throw new ComparisonFailureException(HelixDbNativeTokens.TokenHelixDbInvalidRows);
+            throw new ComparisonFailureException(HelixDbTokens.TokenHelixDbInvalidRows);
         }
 
         return rows;
     }
 
-    internal static JsonObject Batch(JsonObject root, bool write, string name = HelixDbNativeTokens.TokenRows) => Batch([Entry(root, name)], write, [name]);
+    internal static JsonObject Batch(JsonObject root, bool write, string name = HelixDbTokens.TokenRows) => Batch([Entry(root, name)], write, [name]);
     internal static JsonObject Batch(JsonArray entries, bool write, JsonArray returns)
     {
-        var kind = write ? HelixDbNativeTokens.TokenWrite : HelixDbNativeTokens.TokenRead;
+        var kind = write ? HelixDbTokens.TokenWrite : HelixDbTokens.TokenRead;
         return new()
         {
-            [HelixDbNativeTokens.TokenRequestType] = kind,
-            [HelixDbNativeTokens.TokenSearchConsistency] = HelixDbNativeTokens.TokenStrong,
-            [HelixDbNativeTokens.TokenQuery] = new JsonObject
+            [HelixDbTokens.TokenRequestType] = kind,
+            [HelixDbTokens.TokenSearchConsistency] = HelixDbTokens.TokenStrong,
+            [HelixDbTokens.TokenQuery] = new JsonObject
             {
                 [kind] = new JsonObject
                 {
-                    [HelixDbNativeTokens.TokenEntries] = entries,
-                    [HelixDbNativeTokens.TokenReturns] = returns
+                    [HelixDbTokens.TokenEntries] = entries,
+                    [HelixDbTokens.TokenReturns] = returns
                 }
             }
         };
@@ -77,10 +77,10 @@ internal static class HelixDbProtocol
 
     internal static JsonObject Entry(JsonObject root, string name) => new()
     {
-        [HelixDbNativeTokens.TokenQuery] = new JsonObject
+        [HelixDbTokens.TokenQuery] = new JsonObject
         {
-            [HelixDbNativeTokens.TokenName] = name,
-            [HelixDbNativeTokens.TokenRoot] = root
+            [HelixDbTokens.TokenName] = name,
+            [HelixDbTokens.TokenRoot] = root
         }
     };
     internal static JsonObject Node(string operation, JsonObject fields) => new()
@@ -89,22 +89,22 @@ internal static class HelixDbProtocol
     };
     internal static JsonObject Value(string kind, JsonNode? value) => new()
     {
-        [HelixDbNativeTokens.TokenValue] = new JsonObject
+        [HelixDbTokens.TokenValue] = new JsonObject
         {
             [kind] = value
         }
     };
     internal static JsonObject Constant(string kind, JsonNode? value) => new()
     {
-        [HelixDbNativeTokens.TokenConstant] = new JsonObject
+        [HelixDbTokens.TokenConstant] = new JsonObject
         {
             [kind] = value
         }
     };
-    internal static JsonObject Compare(string operation, string property, string kind, JsonNode? value) => Node(operation, new() { [HelixDbNativeTokens.TokenLeft] = new JsonObject { [HelixDbNativeTokens.TokenProperty] = property }, [HelixDbNativeTokens.TokenRight] = Constant(kind, value) });
-    internal static JsonObject And(params JsonObject[] predicates) => Node(HelixDbNativeTokens.TokenAnd, new() { [HelixDbNativeTokens.TokenPredicates] = new JsonArray(predicates.Select(p => (JsonNode)p).ToArray()) });
-    internal static JsonObject Nodes(string label, JsonObject? predicate = null) => Node(HelixDbNativeTokens.TokenNodesWhere, new() { [HelixDbNativeTokens.TokenPredicate] = predicate is null ? Compare(HelixDbNativeTokens.TokenEq, HelixDbNativeTokens.MetaTokenLabel, HelixDbNativeTokens.TokenString, label) : And(Compare(HelixDbNativeTokens.TokenEq, HelixDbNativeTokens.MetaTokenLabel, HelixDbNativeTokens.TokenString, label), predicate) });
-    internal static JsonObject Project(JsonObject input, params string[] properties) => Node(HelixDbNativeTokens.TokenValueMap, new() { [HelixDbNativeTokens.TokenInput] = input, [HelixDbNativeTokens.TokenProperties] = new JsonArray(properties.Select(p => (JsonNode?)JsonValue.Create(p)).ToArray()) });
-    internal static JsonObject Limit(JsonObject input, int count) => Node(HelixDbNativeTokens.TokenLimit, new() { [HelixDbNativeTokens.TokenInput] = input, [HelixDbNativeTokens.TokenCount] = new JsonObject { [HelixDbNativeTokens.TokenLiteral] = count } });
-    internal static JsonObject Ordered(JsonObject input, string property) => Node(HelixDbNativeTokens.TokenOrderBy, new() { [HelixDbNativeTokens.TokenInput] = input, [HelixDbNativeTokens.TokenProperty] = property, [HelixDbNativeTokens.TokenOrder] = HelixDbNativeTokens.TokenAsc });
+    internal static JsonObject Compare(string operation, string property, string kind, JsonNode? value) => Node(operation, new() { [HelixDbTokens.TokenLeft] = new JsonObject { [HelixDbTokens.TokenProperty] = property }, [HelixDbTokens.TokenRight] = Constant(kind, value) });
+    internal static JsonObject And(params JsonObject[] predicates) => Node(HelixDbTokens.TokenAnd, new() { [HelixDbTokens.TokenPredicates] = new JsonArray(predicates.Select(p => (JsonNode)p).ToArray()) });
+    internal static JsonObject Nodes(string label, JsonObject? predicate = null) => Node(HelixDbTokens.TokenNodesWhere, new() { [HelixDbTokens.TokenPredicate] = predicate is null ? Compare(HelixDbTokens.TokenEq, HelixDbTokens.MetaTokenLabel, HelixDbTokens.TokenString, label) : And(Compare(HelixDbTokens.TokenEq, HelixDbTokens.MetaTokenLabel, HelixDbTokens.TokenString, label), predicate) });
+    internal static JsonObject Project(JsonObject input, params string[] properties) => Node(HelixDbTokens.TokenValueMap, new() { [HelixDbTokens.TokenInput] = input, [HelixDbTokens.TokenProperties] = new JsonArray(properties.Select(p => (JsonNode?)JsonValue.Create(p)).ToArray()) });
+    internal static JsonObject Limit(JsonObject input, int count) => Node(HelixDbTokens.TokenLimit, new() { [HelixDbTokens.TokenInput] = input, [HelixDbTokens.TokenCount] = new JsonObject { [HelixDbTokens.TokenLiteral] = count } });
+    internal static JsonObject Ordered(JsonObject input, string property) => Node(HelixDbTokens.TokenOrderBy, new() { [HelixDbTokens.TokenInput] = input, [HelixDbTokens.TokenProperty] = property, [HelixDbTokens.TokenOrder] = HelixDbTokens.TokenAsc });
 }

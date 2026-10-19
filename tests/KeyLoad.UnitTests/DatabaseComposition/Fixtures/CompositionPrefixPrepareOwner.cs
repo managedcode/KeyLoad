@@ -28,7 +28,7 @@ internal sealed class CompositionPrefixPrepareOwner
 
     [AllowNull]
     internal DatabaseEngine Database { get => originalJoined ? field! : Source.Database; private set; }
-    internal Dictionary<string, ResourceLifetimeV1> Lifetimes { get; } = new(StringComparer.Ordinal);
+    internal Dictionary<string, ResourceLifetime> Lifetimes { get; } = new(StringComparer.Ordinal);
     internal List<CompositionPrefixPrepareCommand> Commands { get; } = [];
 
     private CompositionPrefixPrepareOwner(DatabaseLimits? limits, CancellationToken token)
@@ -71,7 +71,7 @@ internal sealed class CompositionPrefixPrepareOwner
 
     internal (long AppliedPosition, long StorePosition) Cut()
         => Store.Read(view => (view.ReadOwnedValue(KeySpace.AppliedBytes) is { } bytes
-            ? NativeSerialization.Deserialize<long>(bytes) : default(long), Store.Position));
+            ? OrleansSerialization.Deserialize<long>(bytes) : default(long), Store.Position));
 
     internal Command<DatabaseCommand> Retained(Command<DatabaseCommand> original) => (originalJoined
         ? OutcomeStoreOracle.ReadStored(Store, original) ?? throw new InvalidOperationException("The exact stored command is missing.") : Source.ReadStoredOutcome(original)).PreparedCommand;

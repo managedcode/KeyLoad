@@ -2,9 +2,9 @@ namespace KeyLoad.Core.Features.Messaging;
 
 internal static class QueueRetryProtocol
 {
-    internal const string EnvelopeAlias = "keyload.core.queue-retry-decisions.v1";
-    internal const string DecisionAlias = "keyload.core.queue-retry-decision.v1";
-    internal const string SeedAlias = "keyload.core.queue-retry-seed.v1";
+    internal const string EnvelopeAlias = "keyload.core.queue-retry-decisions";
+    internal const string DecisionAlias = "keyload.core.queue-retry-decision";
+    internal const string SeedAlias = "keyload.core.queue-retry-seed";
     internal const int Initial = 0;
     internal const int Positive = 1;
     internal const int Version = 1;

@@ -24,10 +24,10 @@ internal static class RemoteTransferCapacityAuthorityImages
             fixture.DestinationQueue, transfer.Mutation.Message.MessageId), new MessageInspection(metadata, null, null));
         var body = KeySpace.Partition(Body, fixture.DestinationPartition, fixture.DestinationQueue.Queue, metadata.Id);
         await Assert.That(fixture.Store.Read(view => view.ReadOwnedValue(body))).IsNull();
-        await NativeRowsAsync(fixture, item);
+        await RuntimeRowsAsync(fixture, item);
     }
 
-    private static async Task NativeRowsAsync(RemoteTransferDatabase fixture, RemoteTransferCapacityAuthorityCompleted item)
+    private static async Task RuntimeRowsAsync(RemoteTransferDatabase fixture, RemoteTransferCapacityAuthorityCompleted item)
     {
         var transfer = item.Transfer;
         var placement = fixture.Database.ReadAtomicPartitionPlacement(RemoteTransferDatabase.RootPrincipal, fixture.DestinationPartition);
@@ -81,7 +81,7 @@ internal static class RemoteTransferCapacityAuthorityImages
             var key = KeySpace.Partition(Metadata, fixture.DestinationPartition, fixture.DestinationQueue.Queue, id);
             var value = new MessageMetadata(id, MessageState.Acked, First, Third,
                 item.ReadySequence, null, null, LeaseVersion: First);
-            return Convert.ToHexString(key) + ":" + Convert.ToHexString(NativeSerialization.Serialize(value));
+            return Convert.ToHexString(key) + ":" + Convert.ToHexString(OrleansSerialization.Serialize(value));
         });
         await Assert.That(page.Records.Select(row => Convert.ToHexString(row.Key.Span) + ":" + Convert.ToHexString(row.Value.Span)).Order())
             .IsEquivalentTo(expected.Order(), TUnit.Assertions.Enums.CollectionOrdering.Matching);
@@ -101,7 +101,7 @@ internal static class RemoteTransferCapacityAuthorityImages
             var extra = NoUsage;
             if (source)
             {
-                var record = NativeSerialization.Deserialize<RemoteTransferIntentRecord>(row.Value.Span);
+                var record = OrleansSerialization.Deserialize<RemoteTransferIntentRecord>(row.Value.Span);
                 extra = record.ReceiptReservationBytes - System.Text.Encoding.UTF8.GetByteCount(record.ReceiptToken!);
             }
             charged += row.Value.Length + extra;

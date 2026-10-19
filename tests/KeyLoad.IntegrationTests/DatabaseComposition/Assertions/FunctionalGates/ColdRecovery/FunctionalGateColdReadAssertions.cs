@@ -16,7 +16,7 @@ internal static class FunctionalGateColdReadAssertions
         var index = model.Index;
         var reference = context.Bind(new(context.Partition, FunctionalGateColdProtocol.Resource("docs", index), FunctionalGateColdProtocol.Id));
         var expected = new DocumentReadResult(new(reference, 1,
-            FunctionalGateColdProtocol.DocumentJson(context.Bind(context.Anchor), model.Blob.Begin.Blob), false, []));
+            FunctionalGateColdProtocol.DocumentJson(context.Bind(context.Anchor), model.Blob.Path), false, []));
         await SqlClusterProtocol.EqualAsync(expected, await context.SdkAsync(context.Reader.Sdk.GetAsync(reference, token)));
         await SqlClusterProtocol.EqualAsync(expected, await context.McpAsync<DocumentReadResult>(context.Reader,
             McpCallerTools.DocumentsGet, new GetDocumentRequest(reference), token));
@@ -40,7 +40,7 @@ internal static class FunctionalGateColdReadAssertions
         var aggregate = new AggregateSamplesRequest(context.Partition, raw.Set, raw.SeriesId, raw.From, raw.Until, 2);
         await SqlClusterProtocol.EqualAsync(new SampleAggregate(2, 6, 2, 4, 3), await context.SdkAsync(context.Reader.Sdk.AggregateSamplesAsync(aggregate, token)));
         await SqlClusterProtocol.EqualAsync(new SampleAggregate(2, 6, 2, 4, 3), await context.McpAsync<SampleAggregate>(context.Reader, McpCallerTools.SeriesAggregate, aggregate, token));
-        await FunctionalGateBlobAssertions.ContentAsync(context, model.Blob.Published.Value, model.Blob.Bytes, token);
+        await FunctionalGateFiles.VerifyAsync(context.Reader, model.Blob, token);
         await FunctionalGateColdHistory.VerifyAsync(context, model, token);
         await FunctionalGateColdSearch.VerifyAsync(context, model, token);
     }

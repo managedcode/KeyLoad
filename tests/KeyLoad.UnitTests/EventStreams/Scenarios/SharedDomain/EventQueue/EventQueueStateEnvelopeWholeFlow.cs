@@ -22,7 +22,7 @@ internal static class EventQueueStateEnvelopeWholeFlow
         await EventQueueStateEnvelopeKeyAssertions.CurrentAsync(fixture);
         await EventQueueStateEnvelopeProducer.SeedAsync(fixture, state, token);
         await EventQueueStateEnvelopeQueueAssertions.CurrentAsync(fixture, state, EventQueueStateEnvelopeStage.Produced);
-        await EventQueueStateEnvelopeBodyOwnershipAssertions.CallerBuffersCannotChangeNativeProducerBodiesAsync(fixture, state);
+        await EventQueueStateEnvelopeBodyOwnershipAssertions.CallerBuffersCannotChangeProducerBodiesAsync(fixture, state);
         await EventQueueStateEnvelopeQueueContinuation.ClaimAsync(fixture, state, scheduled: false);
         await EventQueueStateEnvelopeSubscriptionContinuation.ConfigureAsync(fixture, state);
         await EventQueueStateEnvelopeSubscriptionContinuation.ClaimAsync(fixture, state);

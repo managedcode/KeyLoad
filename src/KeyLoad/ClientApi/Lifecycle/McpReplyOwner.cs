@@ -5,7 +5,7 @@ using ModelContextProtocol.Protocol;
 
 namespace KeyLoad.Server;
 
-/// <summary>Owns one complete reply wrapper and its borrowed native structured-content document until response draining.</summary>
+/// <summary>Owns one complete reply wrapper and its borrowed execution structured-content document until response draining.</summary>
 internal sealed class McpReplyOwner : IDisposable
 {
     private const int ThrowIfDisposedEmptyRead = 0;
@@ -36,8 +36,8 @@ internal sealed class McpReplyOwner : IDisposable
     /// <param name="canonical">The borrowed complete canonical JSON value.</param>
     /// <param name="requestId">The actual database execution identity.</param>
     /// <param name="maximumBytes">The inclusive complete wrapper ceiling and private writer capacity.</param>
-    /// <param name="options">The centrally validated native MCP framing policy.</param>
-    /// <returns>An owner that must survive native response serialization and draining.</returns>
+    /// <param name="options">The centrally validated execution MCP framing policy.</param>
+    /// <returns>An owner that must survive execution response serialization and draining.</returns>
     internal static McpReplyOwner Success(ReadOnlyMemory<byte> canonical, Guid? requestId, int maximumBytes,
         IOptions<McpExecutionOptions> options)
     {
@@ -54,8 +54,8 @@ internal sealed class McpReplyOwner : IDisposable
     internal static McpReplyOwner Failure(ErrorCode code, Guid? requestId, int maximumBytes, string? ownedDetail = null)
         => Open(McpReplyWriter.Failure(code, requestId, maximumBytes, ownedDetail), isError: true);
 
-    /// <summary>Creates fresh native result and text objects while borrowing this owner's structured-content element.</summary>
-    /// <returns>A native tool result whose document must not outlive this owner.</returns>
+    /// <summary>Creates fresh execution result and text objects while borrowing this owner's structured-content element.</summary>
+    /// <returns>A execution tool result whose document must not outlive this owner.</returns>
     internal CallToolResult ToolResult()
     {
         ThrowIfDisposed();

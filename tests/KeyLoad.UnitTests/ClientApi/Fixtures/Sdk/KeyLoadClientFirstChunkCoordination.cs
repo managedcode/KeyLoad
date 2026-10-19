@@ -1,6 +1,6 @@
 namespace KeyLoad.UnitTests.Features.ClientApi;
 
-/// <summary>Joins the actual first-chunk/handler/native SDK race under its original caller-owned wait bound.</summary>
+/// <summary>Joins the actual first-chunk/handler/execution SDK race under its original caller-owned wait bound.</summary>
 internal static class KeyLoadClientFirstChunkCoordination
 {
     internal static async Task WaitForFirstChunkAsync(Task firstChunkWritten, Task handlerEntered,

@@ -43,7 +43,7 @@ internal static class CompositionLinkLifetimeJsonSeed
         var request = new CommandRequest(Guid.NewGuid(), owner.Source.Partition, mutations);
         var work = new ReadExecutionBudget(owner.Database.OperationLimitsOptions, owner.Database.EvaluationClock, token);
         return owner.Database.CreateCommand(OperationKind.Batch, request.CommandId, P.Root,
-            owner.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(request), work);
+            owner.Database.EvaluationClock.GetUtcNow(), OrleansSerialization.Serialize(request), work);
     }
 
     private static EntityRef Reference(SafeProjectorOperationDatabase owner, string name, string id)

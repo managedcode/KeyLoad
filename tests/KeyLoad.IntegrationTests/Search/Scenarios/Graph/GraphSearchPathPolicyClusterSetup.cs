@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
 using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.ClusterReplication;
-using KeyLoad.IntegrationTests.Features.ClusterRouting;
+using KeyLoad.IntegrationTests.Features.StorageReplication;
+using KeyLoad.IntegrationTests.Features.OrleansExecution;
 using KeyLoad.IntegrationTests.Features.Messaging;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
 using P = KeyLoad.IntegrationTests.Features.Search.GraphSearchPathPolicyClusterProtocol;
@@ -77,7 +77,7 @@ internal static class GraphSearchPathPolicyClusterSetup
         await Assert.That(receipt.Token.Position > 0L).IsTrue();
         var expected = new CommitReceipt(command.CommandId, new(receipt.Token.Incarnation, command.Partition.AtomicPartitionId,
             receipt.Token.Position), expectedMutations, DurabilityProfile.ProcessDurable, 3);
-        await NativeSubmissionColdAssertions.ReceiptAsync(receipt, expected);
+        await SubmissionColdAssertions.ReceiptAsync(receipt, expected);
         return receipt;
     }
 }

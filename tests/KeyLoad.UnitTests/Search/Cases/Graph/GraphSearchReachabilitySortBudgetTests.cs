@@ -13,7 +13,7 @@ internal sealed class GraphSearchReachabilitySortBudgetTests
     private const int SeedCount = 3;
 
     [Test]
-    public async Task NativeReachabilitySortPreservesCancellationAndDeadlineAndHealthyFollowup()
+    public async Task ReachabilitySortPreservesCancellationAndDeadlineAndHealthyFollowup()
     {
         using var database = new TestDatabase();
         GraphSearchTestSupport.Configure(database);

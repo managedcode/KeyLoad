@@ -7,7 +7,7 @@ internal sealed class SeededWalCorruptionTrial(int seed)
     private const string JournalName = "commands.wal";
     private const int MaximumJournalBytes = 1_048_576;
     private const int ByteBits = 8;
-    private const string Invalid = "The seeded native WAL original is unavailable or changed.";
+    private const string Invalid = "The seeded execution WAL original is unavailable or changed.";
     internal string Root { get; } = Path.Combine(Path.GetTempPath(), "keyload-seeded-wal-corruption-" + Guid.NewGuid().ToString("N"));
     internal int Seed { get; } = seed;
     internal byte[] Original { get; private set; } = [];
@@ -36,13 +36,13 @@ internal sealed class SeededWalCorruptionTrial(int seed)
         {
             throw new InvalidOperationException(Invalid);
         }
-        RecoveryFileInventory.AssertNativeHandlesReleased(Root);
+        RecoveryFileInventory.AssertHandlesReleased(Root);
         Original = await File.ReadAllBytesAsync(file.FullName, token);
         Position = SeededWalCorruptionFrame.Validate(Original);
-        var cut = NativeSerialization.Deserialize<NativeChecksumProfileCut>(await File.ReadAllBytesAsync(
-            Path.Combine(Root, NativeChecksumProfileProtocol.CutFile), token));
+        var cut = OrleansSerialization.Deserialize<ChecksumProfileCut>(await File.ReadAllBytesAsync(
+            Path.Combine(Root, ChecksumProfileProtocol.CutFile), token));
         await Assert.That(Position).IsEqualTo(cut.Position);
-        await Assert.That(cut.Rows.Length).IsGreaterThanOrEqualTo(NativeChecksumProfileProtocol.SeedRecords);
+        await Assert.That(cut.Rows.Length).IsGreaterThanOrEqualTo(ChecksumProfileProtocol.SeedRecords);
         OriginalFiles = await RecoveryFileInventory.CaptureAsync(Root, token);
         Damaged = Original.ToArray();
         Damaged[Offset] ^= Mask;
@@ -66,7 +66,7 @@ internal sealed class SeededWalCorruptionTrial(int seed)
     }
     private async Task WriteExactAsync(byte[] bytes, CancellationToken token)
     {
-        RecoveryFileInventory.AssertNativeHandlesReleased(Root);
+        RecoveryFileInventory.AssertHandlesReleased(Root);
         await using var file = new FileStream(Path.Combine(Root, JournalName), new FileStreamOptions
         {
             Mode = FileMode.Open,

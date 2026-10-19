@@ -2,6 +2,6 @@ namespace KeyLoad.Core.Features.Search;
 
 internal sealed record OnlineTextPreparedPublication(
     OnlineTextPublicationPhaseCommand Command,
-    NativeTextSeedCapture ValidatedSource,
+    TextSeedCapture ValidatedSource,
     CommitProjectionBatchRequest CheckpointIntent,
     DateTimeOffset OriginalExpiry);

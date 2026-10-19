@@ -13,8 +13,8 @@ internal static class TargetInboxCapacityAuthorityFixture
 
     internal static TargetInboxCapacityAuthorityState Seed(TestDatabase source, CancellationToken token)
     {
-        var seed = TargetInboxNativeSetup.Create(source, Capacity);
-        var original = TargetInboxNativeSetup.Apply(source.Database, seed.Request, token);
+        var seed = TargetInboxSetup.Create(source, Capacity);
+        var original = TargetInboxSetup.Apply(source.Database, seed.Request, token);
         original.Get<CommitInboxResult>();
         var second = seed.Request with
         {
@@ -22,7 +22,7 @@ internal static class TargetInboxCapacityAuthorityFixture
             ExecutionGeneration = SecondGeneration,
             Effects = []
         };
-        var secondResult = TargetInboxNativeSetup.Apply(source.Database, second, token);
+        var secondResult = TargetInboxSetup.Apply(source.Database, second, token);
         secondResult.Get<CommitInboxResult>();
         var ack = new DeliveryCommand(Guid.NewGuid(), seed.Source, seed.Delivery.Token, DeliveryAction.Ack);
         var ackResult = source.Submit(OperationKind.Delivery, ack, id: ack.CommandId);
@@ -69,7 +69,7 @@ internal static class TargetInboxCapacityAuthorityFixture
 
     private static TargetInboxCapacity DamagedCapacity(byte[] retained, int fault)
     {
-        var original = NativeSerialization.Deserialize<TargetInboxCapacity>(retained);
+        var original = OrleansSerialization.Deserialize<TargetInboxCapacity>(retained);
         return fault switch
         {
             1 => new TargetInboxCapacity(0L, 0L),

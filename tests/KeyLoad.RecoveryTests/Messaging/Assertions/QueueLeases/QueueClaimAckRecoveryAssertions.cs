@@ -20,7 +20,7 @@ internal static class QueueClaimAckRecoveryAssertions
         var enqueue = new EnqueueMessage(QueueClaimAckCrashProtocol.Queue, id, QueueClaimAckCrashProtocol.Payload,
             QueueClaimAckCrashProtocol.Headers);
         var body = new MessageBody(id, enqueue.PayloadJson, enqueue.HeadersJson, enqueue.OrderingKey, JsonData.Fingerprint(enqueue));
-        var bytes = NativeSerialization.Serialize(body).LongLength;
+        var bytes = OrleansSerialization.Serialize(body).LongLength;
         var lane = QueueClaimAckCrashProtocol.Lane;
         await Assert.That(database.Store.Read(view => view.GetRecord<MessageBody>(KeySpace.Partition("message-body", lane.Partition,
             lane.Queue, id)))).IsEqualTo(acked ? null : body);
@@ -45,7 +45,7 @@ internal static class QueueClaimAckRecoveryAssertions
         var page = database.Store.Read(view => view.Scan(KeySpace.Partition(space, lane.Partition, lane.Queue), 1));
         await Assert.That(page.HasMore).IsFalse();
         string[] expected = expectedKey is null ? []
-            : [Convert.ToHexString(expectedKey) + ":" + Convert.ToHexString(NativeSerialization.Serialize(id))];
+            : [Convert.ToHexString(expectedKey) + ":" + Convert.ToHexString(OrleansSerialization.Serialize(id))];
         var actual = page.Records.Select(row => Convert.ToHexString(row.Key.Span) + ":"
             + Convert.ToHexString(row.Value.Span)).ToArray();
         await Assert.That(actual).IsEquivalentTo(expected, TUnit.Assertions.Enums.CollectionOrdering.Matching);
@@ -65,7 +65,7 @@ internal static class QueueClaimAckRecoveryAssertions
     }
 
     internal static async Task EqualAsync<T>(T actual, T expected)
-        => await Assert.That(NativeSerialization.Serialize(actual).AsSpan().SequenceEqual(NativeSerialization.Serialize(expected))).IsTrue();
+        => await Assert.That(OrleansSerialization.Serialize(actual).AsSpan().SequenceEqual(OrleansSerialization.Serialize(expected))).IsTrue();
 
     internal static string[] Capture(ZoneTreeStore store) => store.Read(view =>
     {

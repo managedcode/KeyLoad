@@ -14,9 +14,9 @@ internal static class QueueWorkerClusterClaims
     {
         var expected = new DeliveryClaims(lane, messageId, principalId,
             QueueWorkerClusterProtocol.InitialLeaseVersion, QueueWorkerClusterProtocol.InitialDeliveryGeneration, incarnation);
-        await QueueWorkerClusterAssertions.EqualAsync(CoreNativeClaims.Verify<DeliveryClaims>(signingKey,
-            delivery.Token, new NativeClaimsExecutionOptions().MaximumTokenCharacters), expected);
-        await Assert.That(delivery.Token).IsEqualTo(CoreNativeClaims.Sign(signingKey, expected));
+        await QueueWorkerClusterAssertions.EqualAsync(CoreClaims.Verify<DeliveryClaims>(signingKey,
+            delivery.Token, new ClaimsExecutionOptions().MaximumTokenCharacters), expected);
+        await Assert.That(delivery.Token).IsEqualTo(CoreClaims.Sign(signingKey, expected));
     }
 
     internal static async Task LiteralAsync(QueueWorkerClusterSeed seed, Delivery delivery, CancellationToken token)

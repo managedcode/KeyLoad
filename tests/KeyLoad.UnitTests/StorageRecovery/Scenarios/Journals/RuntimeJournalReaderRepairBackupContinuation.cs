@@ -83,7 +83,7 @@ internal static class RuntimeJournalReaderRepairBackupContinuation
         if (restored)
         {
             expected.Add(Convert.ToHexString(KeyCodec.Encode(ZoneTreePersistenceFormat.SystemNamespace,
-                ZoneTreePersistenceFormat.DispatchPausedKey)), NativeSerialization.Serialize(true));
+                ZoneTreePersistenceFormat.DispatchPausedKey)), OrleansSerialization.Serialize(true));
         }
         var page = store.Read(view => view.Scan([], RestoredRows + 1));
         await Assert.That(page.HasMore).IsFalse();

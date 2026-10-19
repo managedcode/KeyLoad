@@ -5,7 +5,7 @@ namespace KeyLoad.Server;
 internal static class ScriptDomQueueToGraphInsert
 {
     internal static (Guid Id, Mutation Mutation) Read(Dom.QuerySpecification query,
-        ScriptDomCompositionParameters parameters, int version)
+        ScriptDomCompositionParameters parameters)
     {
         var values = ScriptDomInsertShape.Values(query, ValueCount);
         var id = parameters.Read<Guid>(values[CommandIndex]);
@@ -16,7 +16,7 @@ internal static class ScriptDomQueueToGraphInsert
         string queue;
         string? from = null;
         string? to = null;
-        if (version == SqlCompositionInsert.JoinedVersion)
+        if (table is Dom.QualifiedJoin)
         {
             (queue, from, to) = ScriptDomCompositionEndpointJoin.Read(table, parameters);
         }

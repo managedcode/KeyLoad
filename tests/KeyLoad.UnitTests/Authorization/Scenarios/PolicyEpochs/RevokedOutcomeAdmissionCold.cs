@@ -17,7 +17,7 @@ internal static class RevokedOutcomeAdmissionCold
         {
             image = QueueWholeFlowStorage.Bytes(fixture.Store);
             position = fixture.Store.Position;
-            identity = NativeReadCutStoreStateAssertions.SnapshotIdentity(fixture.Store);
+            identity = ReadCutStoreStateAssertions.SnapshotIdentity(fixture.Store);
         }, failures);
         ServerFailureObserver.Observe(fixture.Store.Dispose, failures);
         for (var cycle = 0; cycle < 2; cycle++)

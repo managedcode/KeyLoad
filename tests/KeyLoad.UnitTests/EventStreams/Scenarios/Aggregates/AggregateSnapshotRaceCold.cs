@@ -38,7 +38,7 @@ internal static class AggregateSnapshotRaceCold
         {
             var command = fixture.Healthy ?? throw new InvalidOperationException("The healthy snapshot command is absent.");
             var expected = fixture.HealthyResult ?? throw new InvalidOperationException("The healthy snapshot receipt is absent.");
-            await NativeReplayResultAssertions.Same<CommitReceipt>(fixture.Database.Apply(fixture.Operation(command)), expected);
+            await ReplayResultAssertions.Same<CommitReceipt>(fixture.Database.Apply(fixture.Operation(command)), expected);
             var raw = fixture.Store.Read(view => view.ReadOwnedValue(KeySpace.PartitionOutcome(fixture.Harness.Partition,
                 AggregateSnapshotRaceFixture.Worker, command.CommandId)));
             await Assert.That(raw is not null && raw.AsSpan().SequenceEqual(fixture.HealthyRaw)).IsTrue();

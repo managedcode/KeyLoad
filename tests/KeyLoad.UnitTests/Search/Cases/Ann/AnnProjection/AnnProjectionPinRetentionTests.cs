@@ -4,7 +4,7 @@ namespace KeyLoad.UnitTests.Features.Search;
 
 internal sealed class AnnProjectionPinRetentionTests
 {
-    private const string ConsumerName = "ann-pin-retention-v1";
+    private const string ConsumerName = "ann-pin-retention";
     private static readonly ImmutableArray<float> CapturedValues = [1.25f, 2.5f, 5f];
     private static readonly ImmutableArray<float> LaterValues = [9.25f, 8.5f, 7f];
 

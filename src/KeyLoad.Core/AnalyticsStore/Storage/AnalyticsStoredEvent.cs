@@ -7,5 +7,5 @@ internal sealed record AnalyticsStoredEvent(
     [property: Orleans.Id(1)] bool Deleted,
     [property: Orleans.Id(2)] DateTimeOffset UpdatedAt)
 {
-    internal const string Alias = "keyload.analytics-store.stored-event.v1";
+    internal const string Alias = "keyload.analytics-store.stored-event";
 }

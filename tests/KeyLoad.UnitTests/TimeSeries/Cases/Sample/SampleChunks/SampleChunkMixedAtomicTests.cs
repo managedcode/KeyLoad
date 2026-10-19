@@ -1,5 +1,7 @@
 using KeyLoad.Core;
-using KeyLoad.Core.Features.ClusterRouting.Contracts;
+using KeyLoad.Core.Features.CommandOutcomes.Contracts;
+using KeyLoad.Core.Features.RuntimeJournaling.Contracts;
+using KeyLoad.Core.Features.StoragePartitions.Contracts;
 using KeyLoad.Storage;
 
 namespace KeyLoad.UnitTests.Features.TimeSeries;
@@ -16,7 +18,7 @@ internal sealed class SampleChunkMixedAtomicTests
     private const long SealedRevision = 4;
     private const long SealedGeneration = 1;
     private const long SourceSequence = 2;
-    private const string MissingAppliedPosition = "The native fixture canonical applied position is absent.";
+    private const string MissingAppliedPosition = "The execution fixture canonical applied position is absent.";
 
     [Test]
     public async Task AcChunk008012DocumentAndChunkEffectsRollbackTogetherBeforeHealthyAtomicSeal()
@@ -68,7 +70,7 @@ internal sealed class SampleChunkMixedAtomicTests
     {
         var reference = new EntityRef(fixture.Owner.Partition, Collection, DocumentId);
         await Assert.That(receipt.CommandId).IsEqualTo(commandId);
-        var applied = fixture.Owner.Store.Read(view => NativeSerialization.Deserialize<long>(
+        var applied = fixture.Owner.Store.Read(view => OrleansSerialization.Deserialize<long>(
             view.ReadOwnedValue(KeySpace.AppliedBytes) ?? throw new InvalidOperationException(MissingAppliedPosition)));
         await Assert.That(receipt.Token.Position).IsEqualTo(applied);
         var stored = fixture.Owner.Store.Read(view => view.GetRecord<DocumentRecord>(

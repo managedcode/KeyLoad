@@ -10,12 +10,12 @@ internal static class CatalogIdentityFault
         var key = credential ? KeySpace.ApiKey(CatalogIdentityProtocol.Key) : KeySpace.Principal(CatalogIdentityProtocol.Reader);
         var original = db.Store.Read(view => view.ReadOwnedValue(key))
             ?? throw new InvalidOperationException("The original identity row must exist.");
-        var damaged = credential ? NativeSerialization.Serialize(NativeSerialization.Deserialize<ApiKeyRecord>(original)
+        var damaged = credential ? OrleansSerialization.Serialize(OrleansSerialization.Deserialize<ApiKeyRecord>(original)
             with
         {
             Id = "different-key"
         }) : db.Store.Read(view => view.ReadOwnedValue(KeySpace.Principal(CatalogIdentityProtocol.Root)))
-            ?? throw new InvalidOperationException("The actual privileged native donor row must exist.");
+            ?? throw new InvalidOperationException("The actual privileged execution donor row must exist.");
         var image = TeamRowPolicyAssertions.Image(db.Store);
         var cut = db.Store.Position;
         var failures = new List<Exception>();

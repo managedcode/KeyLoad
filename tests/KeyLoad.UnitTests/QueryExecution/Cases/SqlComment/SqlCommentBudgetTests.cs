@@ -17,7 +17,7 @@ internal sealed class SqlCommentBudgetTests
                     + new string(SqlCommentTestData.LongCommentCharacter, SqlCommentTestData.LongCommentSize)
                     + SqlCommentTestData.LongCommentSuffix + ScriptDomSelectPages.WindowSql;
                 var engine = new global::KeyLoad.Query.QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
-                await ScriptDomNativeParsingCancellation.RequireAsync(database, engine, sql);
+                await ScriptDomParsingCancellation.RequireAsync(database, engine, sql);
             }, failures);
         }, failures);
         global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);

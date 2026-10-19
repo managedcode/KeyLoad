@@ -1,5 +1,5 @@
 using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.ClusterRouting;
+using KeyLoad.IntegrationTests.Features.OrleansExecution;
 using KeyLoad.IntegrationTests.Features.Messaging;
 
 namespace KeyLoad.IntegrationTests.Features.Authorization;
@@ -25,7 +25,7 @@ internal static class EventMessageSensitivePublicReads
                 await Assert.That(record.Data.HeadersJson).IsEqualTo(headers);
                 await Assert.That(page.HasMore).IsFalse();
                 await Assert.That(page.CutPosition).IsGreaterThanOrEqualTo(state.OriginalPage!.CutPosition);
-                await Assert.That(NativeSerialization.Serialize(page.Head).SequenceEqual(NativeSerialization.Serialize(state.OriginalPage.Head))).IsTrue();
+                await Assert.That(OrleansSerialization.Serialize(page.Head).SequenceEqual(OrleansSerialization.Serialize(state.OriginalPage.Head))).IsTrue();
                 var expected = state.OriginalPage.Events.Single() with
                 {
                     Data = state.OriginalPage.Events.Single().Data with
@@ -34,7 +34,7 @@ internal static class EventMessageSensitivePublicReads
                         HeadersJson = headers
                     }
                 };
-                await Assert.That(NativeSerialization.Serialize(record).SequenceEqual(NativeSerialization.Serialize(expected))).IsTrue();
+                await Assert.That(OrleansSerialization.Serialize(record).SequenceEqual(OrleansSerialization.Serialize(expected))).IsTrue();
             }
             else
             {
@@ -49,7 +49,7 @@ internal static class EventMessageSensitivePublicReads
                 await Assert.That(inspection.HeadersJson).IsEqualTo(headers);
                 if (!dlq)
                 {
-                    await Assert.That(NativeSerialization.Serialize(inspection.Metadata).SequenceEqual(NativeSerialization.Serialize(state.OriginalInspection!.Metadata))).IsTrue();
+                    await Assert.That(OrleansSerialization.Serialize(inspection.Metadata).SequenceEqual(OrleansSerialization.Serialize(state.OriginalInspection!.Metadata))).IsTrue();
                 }
                 else
                 {
@@ -63,7 +63,7 @@ internal static class EventMessageSensitivePublicReads
                         SafeFailureCode = EventMessageSensitivePublicProtocol.AttemptsExhausted,
                         ParkedSequence = EventMessageSensitivePublicProtocol.InitialRevision
                     };
-                    await Assert.That(NativeSerialization.Serialize(inspection.Metadata).SequenceEqual(NativeSerialization.Serialize(expected))).IsTrue();
+                    await Assert.That(OrleansSerialization.Serialize(inspection.Metadata).SequenceEqual(OrleansSerialization.Serialize(expected))).IsTrue();
                 }
             }
         }

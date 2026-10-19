@@ -31,9 +31,9 @@ internal static class SubscriptionOldCutOutbox
         foreach (var entry in expected)
         {
             var raw = database.Store.Read(view => view.ReadOwnedValue(KeySpace.Partition("outbox", partition, entry.Sequence)))
-                ?? throw new InvalidOperationException("A committed native outbox entry is missing.");
+                ?? throw new InvalidOperationException("A committed execution outbox entry is missing.");
             bytes += raw.LongLength;
-            var actual = NativeSerialization.Deserialize<OutboxEntry>(raw);
+            var actual = OrleansSerialization.Deserialize<OutboxEntry>(raw);
             await SubscriptionOldCutAssertions.SameAsync(actual, entry);
             await Assert.That(actual.Receipt.CompositionReferences).IsEmpty();
         }

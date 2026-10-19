@@ -16,7 +16,7 @@ function render(state) {
   const rows = selectedIsolatedRows(state.projection, selected.scenario, selected.nodeCount,
     selected.repetition, selected.metric, selected.target);
   renderIsolatedView(state.elements.results, state.catalog, state.projection, rows, selected);
-  state.elements.announcement.textContent = `${rows.length} engine rows · ${selected.nodeCount} native nodes · ${selected.scenario}.`;
+  state.elements.announcement.textContent = `${rows.length} engine rows · ${selected.nodeCount} execution nodes · ${selected.scenario}.`;
 }
 
 function fail(state) {

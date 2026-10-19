@@ -36,7 +36,7 @@ internal static class AtomicTriadStagedIndexes
             var body = new MessageBody(message.MessageId, message.PayloadJson, message.HeadersJson, null, JsonData.Fingerprint(message));
             await AtomicTriadStagedCurrent.EqualAsync(state.Store.Read(view => view.GetRecord<MessageBody>(KeySpace.Partition(
                 BodyFamily, state.Partition, AtomicTriadStagedProtocol.Queue, message.MessageId))), body);
-            bodyBytes += NativeSerialization.Serialize(body).LongLength;
+            bodyBytes += OrleansSerialization.Serialize(body).LongLength;
         }
         await AtomicTriadStagedCurrent.EqualAsync(state.Store.Read(view => view.GetRecord<QueueCounters>(KeySpace.Partition(
             CountersFamily, state.Partition, AtomicTriadStagedProtocol.Queue))), new QueueCounters(2L, bodyBytes, 0L, 0L, 2L));
@@ -47,7 +47,7 @@ internal static class AtomicTriadStagedIndexes
             Convert.ToHexString(KeySpace.Partition(ReadyFamily, state.Partition, AtomicTriadStagedProtocol.Queue, 1L, AtomicTriadStagedProtocol.FirstMessage)),
             Convert.ToHexString(KeySpace.Partition(ReadyFamily, state.Partition, AtomicTriadStagedProtocol.Queue, 2L, AtomicTriadStagedProtocol.SecondMessage))
         });
-        await AtomicTriadStagedCurrent.EqualAsync(ready.Records.Select(row => NativeSerialization.Deserialize<string>(row.Value.Span)).ToArray(),
+        await AtomicTriadStagedCurrent.EqualAsync(ready.Records.Select(row => OrleansSerialization.Deserialize<string>(row.Value.Span)).ToArray(),
             new[] { AtomicTriadStagedProtocol.FirstMessage, AtomicTriadStagedProtocol.SecondMessage });
         foreach (var family in new[] { IndexFamily, UniqueFamily })
         {
@@ -58,7 +58,7 @@ internal static class AtomicTriadStagedIndexes
                 ? KeySpace.Partition(family, state.Partition, AtomicTriadStagedProtocol.Collection, AtomicTriadStagedProtocol.Index, 2m, AtomicTriadStagedProtocol.Entity)
                 : KeySpace.Partition(family, state.Partition, AtomicTriadStagedProtocol.Collection, AtomicTriadStagedProtocol.Index, 2m);
             await Assert.That(row.Key.Span.SequenceEqual(key)).IsTrue();
-            await Assert.That(NativeSerialization.Deserialize<string>(row.Value.Span)).IsEqualTo(AtomicTriadStagedProtocol.Entity);
+            await Assert.That(OrleansSerialization.Deserialize<string>(row.Value.Span)).IsEqualTo(AtomicTriadStagedProtocol.Entity);
         }
     }
 }

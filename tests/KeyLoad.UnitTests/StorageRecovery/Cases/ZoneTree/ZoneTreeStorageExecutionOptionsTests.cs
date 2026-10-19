@@ -33,10 +33,10 @@ internal sealed class ZoneTreeStorageExecutionOptionsTests
         await Assert.That(bounded.Code).IsEqualTo(ErrorCode.BudgetExceeded);
         await Assert.That(delivered).IsEqualTo(2);
         var invalid = Assert.ThrowsExactly<KeyLoadException>(() => fixture.Store.Read(view =>
-            fixture.Store.CaptureNativeReadCut(view, new(3, 32, TimeSpan.FromSeconds(1)), default)));
+            fixture.Store.CaptureReadCut(view, new(3, 32, TimeSpan.FromSeconds(1)), default)));
         await Assert.That(invalid.Code).IsEqualTo(ErrorCode.Validation);
 
-        using (var cut = fixture.Store.Read(view => fixture.Store.CaptureNativeReadCut(view,
+        using (var cut = fixture.Store.Read(view => fixture.Store.CaptureReadCut(view,
             new(2, 32, TimeSpan.FromSeconds(1)), default)))
         {
             delivered = 0;
@@ -49,7 +49,7 @@ internal sealed class ZoneTreeStorageExecutionOptionsTests
             await Assert.That(delivered).IsEqualTo(2);
         }
 
-        using var healthy = fixture.Store.Read(view => fixture.Store.CaptureNativeReadCut(view,
+        using var healthy = fixture.Store.Read(view => fixture.Store.CaptureReadCut(view,
             new(2, 32, TimeSpan.FromSeconds(1)), default));
         await Assert.That(healthy.VisitPrefix([], static (_, _) => false).Records).IsEqualTo(1);
     }
@@ -94,7 +94,7 @@ internal sealed class ZoneTreeStorageExecutionOptionsTests
     }
 
     [Test]
-    public async Task ConfiguredCheckpointBatchingChangesNativeFramesAndPreservesReopenedData()
+    public async Task ConfiguredCheckpointBatchingChangesFramesAndPreservesReopenedData()
     {
         using var fixture = new StorageExecutionFixture(new()
         {
@@ -113,7 +113,7 @@ internal sealed class ZoneTreeStorageExecutionOptionsTests
     }
 
     [Test]
-    public async Task InvalidNativePolicyFailsBeforeDirectoryOwnershipIsCreated()
+    public async Task InvalidPolicyFailsBeforeDirectoryOwnershipIsCreated()
     {
         var path = Path.Combine(Path.GetTempPath(), DirectoryPrefix + Guid.NewGuid().ToString("N"));
         var invalid = Options.Create(new ZoneTreeStorageExecutionOptions { CheckpointBatchRecords = 0 });
@@ -127,7 +127,7 @@ internal sealed class ZoneTreeStorageExecutionOptionsTests
     [Test]
     [Arguments(0)]
     [Arguments(4097)]
-    public async Task InvalidNativeStreamBufferFailsBeforeDirectoryOwnershipIsCreated(int bufferBytes)
+    public async Task InvalidStreamBufferFailsBeforeDirectoryOwnershipIsCreated(int bufferBytes)
     {
         var path = Path.Combine(Path.GetTempPath(), DirectoryPrefix + Guid.NewGuid().ToString("N"));
         var invalid = Options.Create(new ZoneTreeStorageExecutionOptions { StreamBufferBytes = bufferBytes });

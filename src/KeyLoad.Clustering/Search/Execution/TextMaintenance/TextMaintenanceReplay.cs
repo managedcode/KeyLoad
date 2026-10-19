@@ -50,7 +50,7 @@ internal static class TextMaintenanceReplay
     {
         var token = writer.CancellationToken;
         _ = await children.CapabilityAsync(request, TextMaintenanceCapabilityKind.ApplyIntent, token).ConfigureAwait(true);
-        await TextMaintenanceProgress.WriteAsync(writer, children.ParentRequestId, TextIndexMaintenancePhase.NativeIndex)
+        await TextMaintenanceProgress.WriteAsync(writer, children.ParentRequestId, TextIndexMaintenancePhase.RuntimeIndex)
             .ConfigureAwait(true);
         await TextMaintenanceProgress.WriteAsync(writer, children.ParentRequestId, TextIndexMaintenancePhase.Publish)
             .ConfigureAwait(true);

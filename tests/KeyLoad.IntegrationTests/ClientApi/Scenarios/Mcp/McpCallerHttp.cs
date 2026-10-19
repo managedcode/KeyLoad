@@ -11,8 +11,8 @@ namespace KeyLoad.IntegrationTests.Features.ClientApi;
 internal static class McpCallerHttp
 {
     /// <summary>Uses the actual Orleans endpoint while leaving request deadlines with the caller's token.</summary>
-    /// <param name="fixture">The initialized real native Aspire cluster.</param>
-    /// <param name="node">The native Aspire resource name.</param>
+    /// <param name="fixture">The initialized real execution Aspire cluster.</param>
+    /// <param name="node">The execution Aspire resource name.</param>
     /// <returns>The disposable actual HTTP client, with no substituted handler.</returns>
     internal static HttpClient Create(ClusterFixture fixture, string node)
     {
@@ -22,7 +22,7 @@ internal static class McpCallerHttp
 
     /// <summary>Uses an actual endpoint from the caller-owned Aspire application wave.</summary>
     /// <param name="app">The genuine initialized Aspire application.</param>
-    /// <param name="node">The native Aspire resource name.</param>
+    /// <param name="node">The execution Aspire resource name.</param>
     /// <returns>The disposable HTTP client backed by the actual endpoint.</returns>
     internal static HttpClient Create(DistributedApplication app, string node)
     {
@@ -32,7 +32,7 @@ internal static class McpCallerHttp
         http.Timeout = Timeout.InfiniteTimeSpan;
         return http;
     }
-    /// <summary>Uses the same native default factory chain and discovered endpoint with passive initialization observation.</summary>
+    /// <summary>Uses the same execution default factory chain and discovered endpoint with passive initialization observation.</summary>
     internal static HttpClient CreateObserved(DistributedApplication app, string node, out McpInitializeHttpObservation observation)
     {
         ArgumentNullException.ThrowIfNull(app);

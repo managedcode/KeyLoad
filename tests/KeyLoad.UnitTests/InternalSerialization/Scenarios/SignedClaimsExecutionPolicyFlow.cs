@@ -23,12 +23,12 @@ internal static class SignedClaimsExecutionPolicyFlow
             new ReceiveRequest(requestId, Lane(database)), id: requestId).Get<ReceiveResult>().Deliveries.Single();
     }
 
-    // This engine borrows the same genuine store; only its native claim admission snapshot differs.
-    internal static DatabaseEngine Borrow(TestDatabase database, IOptions<NativeClaimsExecutionOptions> claimsOptions)
+    // This engine borrows the same genuine store; only its execution claim admission snapshot differs.
+    internal static DatabaseEngine Borrow(TestDatabase database, IOptions<ClaimsExecutionOptions> claimsOptions)
         => new(database.Store, database.Database.Authorization, database.Database.OperationLimitsOptions,
             UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(),
             database.Database.GraphOptions, UnitExecutionOptions.ChangeFeedExecution(),
-            UnitExecutionOptions.BlobExecution(database.Database.BlobExecution), claimsOptions,
+            claimsOptions,
             UnitExecutionOptions.TimeSeriesExecution(), database.Database.EvaluationClock);
 
     internal static Result<object> Acknowledge(DatabaseEngine engine, QueueLaneRef lane, Delivery delivery)

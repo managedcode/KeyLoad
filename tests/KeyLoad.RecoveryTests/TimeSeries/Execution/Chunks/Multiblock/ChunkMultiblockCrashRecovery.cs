@@ -15,7 +15,7 @@ internal static class ChunkMultiblockCrashRecovery
         var merged = ChunkMultiblockCrashOperations.HealthyMerge(database, merge);
         merged.Get<CommitReceipt>();
         await ChunkMultiblockCrashState.WriteAsync(root, SampleChunkCrashContract.HealthyFile, database, merge, inflight,
-            Convert.ToHexString(NativeSerialization.Serialize(appended)), Convert.ToHexString(NativeSerialization.Serialize(merged))).ConfigureAwait(false);
+            Convert.ToHexString(OrleansSerialization.Serialize(appended)), Convert.ToHexString(OrleansSerialization.Serialize(merged))).ConfigureAwait(false);
     }
 
     internal static async Task VerifyAsync(string root, DatabaseEngine database, string mode, bool merge)
@@ -31,7 +31,7 @@ internal static class ChunkMultiblockCrashRecovery
     {
         var before = SampleChunkCrashState.Complete(database);
         var position = database.Store.Position;
-        var acknowledged = Convert.ToHexString(NativeSerialization.Serialize(SampleChunkCrashOperations.OriginalAcknowledged(database)));
+        var acknowledged = Convert.ToHexString(OrleansSerialization.Serialize(SampleChunkCrashOperations.OriginalAcknowledged(database)));
         var path = Path.Combine(root, SampleChunkCrashContract.OriginalReceiptFile);
         if (new FileInfo(path).Length > database.Limits.MaxBatchBytes)
         {

@@ -21,7 +21,7 @@ internal static class UserAnalyticsGenerationPaths
 
     internal static string Create(PartitionHost physical, AnalyticsAggregateSnapshot snapshot)
     {
-        var lifetime = Convert.ToHexString(SHA256.HashData(NativeSerialization.Serialize(snapshot.Lifetime)));
+        var lifetime = Convert.ToHexString(SHA256.HashData(OrleansSerialization.Serialize(snapshot.Lifetime)));
         return Path.Combine(physical.DirectoryPath, DirectoryName, lifetime,
             Guid.NewGuid().ToString(GenerationFormat));
     }

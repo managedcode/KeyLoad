@@ -7,7 +7,7 @@ namespace KeyLoad;
 /// <param name="MaxBytes">Limits returned payload bytes.</param>
 /// <param name="LeaseSeconds">Requests the message lease duration.</param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.ReceiveRequest)]
+[Orleans.Alias(ContractAliases.ReceiveRequest)]
 public sealed record ReceiveRequest([property: Orleans.Id(0)] Guid RequestId, [property: Orleans.Id(1)] QueueLaneRef Lane, [property: Orleans.Id(2)] int MaxMessages = ReceiveRequest.DefaultMaxMessages,
     [property: Orleans.Id(3)] int MaxBytes = ReceiveRequest.DefaultMaxBytes, [property: Orleans.Id(4)] int LeaseSeconds = ReceiveRequest.DefaultLeaseSeconds)
 {

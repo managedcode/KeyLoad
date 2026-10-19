@@ -8,7 +8,7 @@ namespace KeyLoad.ComparisonTests.Features.TestInfrastructure;
 internal sealed class AspireFailureStartupTests
 {
     [Test]
-    public async Task AcTest014RequiredFailureDuringNativeBeforeStartCancelsAndJoinsStartup()
+    public async Task AcTest014RequiredFailureDuringBeforeStartCancelsAndJoinsStartup()
     {
         using var deadline = AspireFailureAssertions.CreateDeadline();
         var entered = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -47,7 +47,7 @@ internal sealed class AspireFailureStartupTests
     }
 
     [Test]
-    public async Task AcTest014ActualNativeBeforeStartFileFailureRetainsOriginalExceptionAndJoinsObserver()
+    public async Task AcTest014ActualBeforeStartFileFailureRetainsOriginalExceptionAndJoinsObserver()
     {
         var directory = Directory.CreateTempSubdirectory("keyload-aspire-start-failure-");
         using var deadline = AspireFailureAssertions.CreateDeadline();

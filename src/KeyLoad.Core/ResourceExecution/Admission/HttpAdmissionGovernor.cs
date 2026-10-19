@@ -12,22 +12,20 @@ public sealed class HttpAdmissionGovernor
 
     private const string IngressIdentity = "http-ingress";
     private const string BodyLimitDetail = "The HTTP body exceeds its admission byte budget.";
-    private const string DeliveryPath = "/v1/queues/delivery";
-    private const string SubscriptionDeliveryPath = "/v1/subscriptions/delivery";
-    private const string DispatchPath = "/v1/admin/dispatch";
-    private const string AbortBlobPath = "/v1/blobs/uploads/abort";
-    private const string ReclaimBlobPath = "/v1/blobs/reclaim";
-    private const string QueryPath = "/v1/query";
-    private const string SearchPath = "/v1/search";
-    private const string GraphTraversalPath = "/v1/graph/traverse";
-    private const string GraphSearchPath = "/v1/search/graph";
-    private const string GraphShortestPath = "/v1/graph/shortest-path";
-    private const string GraphIncomingPath = "/v1/graph/incoming";
-    private const string SeriesReadPath = "/v1/series/read";
-    private const string StreamReadPath = "/v1/streams/read";
-    private const string EventReadPath = "/v1/events/read";
-    private const string ChangeReadPath = "/v1/changes/read";
-    private const string ProjectionReadPath = "/v1/admin/projections/read";
+    private const string DeliveryPath = "/queues/delivery";
+    private const string SubscriptionDeliveryPath = "/subscriptions/delivery";
+    private const string DispatchPath = "/admin/dispatch";
+    private const string QueryPath = "/query";
+    private const string SearchPath = "/search";
+    private const string GraphTraversalPath = "/graph/traverse";
+    private const string GraphSearchPath = "/search/graph";
+    private const string GraphShortestPath = "/graph/shortest-path";
+    private const string GraphIncomingPath = "/graph/incoming";
+    private const string SeriesReadPath = "/series/read";
+    private const string StreamReadPath = "/streams/read";
+    private const string EventReadPath = "/events/read";
+    private const string ChangeReadPath = "/changes/read";
+    private const string ProjectionReadPath = "/admin/projections/read";
 
     private static readonly PrincipalRecord Unverified = new(IngressIdentity, IngressIdentity, [], []);
     private readonly CommandAdmissionGovernor node;
@@ -85,9 +83,7 @@ public sealed class HttpAdmissionGovernor
     private static bool IsControlPath(string path)
         => path.Equals(DeliveryPath, StringComparison.OrdinalIgnoreCase)
            || path.Equals(SubscriptionDeliveryPath, StringComparison.OrdinalIgnoreCase)
-           || path.Equals(DispatchPath, StringComparison.OrdinalIgnoreCase)
-           || path.Equals(AbortBlobPath, StringComparison.OrdinalIgnoreCase)
-           || path.Equals(ReclaimBlobPath, StringComparison.OrdinalIgnoreCase);
+           || path.Equals(DispatchPath, StringComparison.OrdinalIgnoreCase);
 
     private static bool IsHeavyReadPath(string path)
         => path.StartsWith(QueryPath, StringComparison.OrdinalIgnoreCase)

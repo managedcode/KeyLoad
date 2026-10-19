@@ -7,7 +7,7 @@ namespace KeyLoad.Client;
 [ConfigurationBinding]
 public static class QueueWorkerOptionsRegistration
 {
-    /// <summary>Binds and validates the native caller policy without registering a server worker.</summary>
+    /// <summary>Binds and validates the execution caller policy without registering a server worker.</summary>
     /// <param name="services">Application service collection.</param>
     /// <param name="configuration">Application configuration.</param>
     /// <returns>The original service collection.</returns>

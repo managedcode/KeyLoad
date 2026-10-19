@@ -4,7 +4,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
 
-/// <summary>Binds the existing generated-runner environment names through native options.</summary>
+/// <summary>Binds the existing generated-runner environment names through execution options.</summary>
 [ConfigurationBinding]
 internal static class BenchmarkScenarioSelectionRegistration
 {

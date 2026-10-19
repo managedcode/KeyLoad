@@ -2,7 +2,7 @@ namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
 
 internal sealed class SiteIsolatedBuildRejectionTests
 {
-    /// <summary>AC-ISO-008: genuine native inputs cannot authorize unsafe or destructive output placement.</summary>
+    /// <summary>AC-ISO-008: genuine execution inputs cannot authorize unsafe or destructive output placement.</summary>
     [Test]
     [Arguments("existing")]
     [Arguments("inputChild")]

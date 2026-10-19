@@ -10,7 +10,7 @@ namespace KeyLoad.UnitTests.Features.Messaging;
 internal static class QueueLifecycleConditionAssertions
 {
     internal static QueueLifecycleConditionCut Capture(ZoneTreeStore store)
-        => new(store.Position, NativeSerialization.Serialize(store.Identity), QueueWholeFlowStorage.Bytes(store));
+        => new(store.Position, OrleansSerialization.Serialize(store.Identity), QueueWholeFlowStorage.Bytes(store));
     internal static async Task Same(ZoneTreeStore store, QueueLifecycleConditionCut expected)
     {
         var actual = Capture(store);
@@ -33,7 +33,7 @@ internal static class QueueLifecycleConditionAssertions
     {
         var before = Capture(store);
         var replay = owner.Apply(operation);
-        await Assert.That(NativeSerialization.Serialize(replay).SequenceEqual(NativeSerialization.Serialize(original))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(replay).SequenceEqual(OrleansSerialization.Serialize(original))).IsTrue();
         await Same(store, before);
     }
     internal static async Task Ready(DatabaseEngine owner, ZoneTreeStore store, QueueLifecycleTestState state)
@@ -51,7 +51,7 @@ internal static class QueueLifecycleConditionAssertions
         await Assert.That(body).IsEqualTo(expected);
         var counters = store.Read(view => view.GetRecord<QueueCounters>(KeySpace.Partition(
             QueueLifecycleTestProtocol.CounterSpace, state.Partition, state.Lane.Queue)));
-        await Assert.That(counters).IsEqualTo(new QueueCounters(1, NativeSerialization.Serialize(expected).LongLength, 0, 0, 1));
+        await Assert.That(counters).IsEqualTo(new QueueCounters(1, OrleansSerialization.Serialize(expected).LongLength, 0, 0, 1));
         await Same(store, before);
     }
     internal static async Task Terminal(DatabaseEngine owner, ZoneTreeStore store, QueueLifecycleTestState state)

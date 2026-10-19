@@ -49,7 +49,7 @@ internal sealed class McpReplyOwnerTests
         }
     }
 
-    /// <summary>Each native result and content collection is fresh while structured content borrows the same owned document.</summary>
+    /// <summary>Each execution result and content collection is fresh while structured content borrows the same owned document.</summary>
     [Test]
     public async Task ToolResultsAreFreshAndOwnerDisposalInvalidatesBorrowedDocument()
     {
@@ -103,9 +103,9 @@ internal sealed class McpReplyOwnerTests
 
     /// <summary>AC-FTS-SELECT-014: actual bounded output retains only the exact owned selected-generation failure.</summary>
     [Test]
-    public async Task SelectedTextMismatchHasClosedNativeWriterParityAndHealthyContinuation()
+    public async Task SelectedTextMismatchHasClosedWriterParityAndHealthyContinuation()
     {
-        const string mismatch = "The native text projection does not match the authorized source cut.";
+        const string mismatch = "The execution text projection does not match the authorized source cut.";
         const string generic = "The database operation could not be completed.";
         const int ProblemFieldCount = 5;
         using var accepted = McpReplyOwner.Failure(ErrorCode.HistoryUnavailable,
@@ -145,7 +145,7 @@ internal sealed class McpReplyOwnerTests
     }
     /// <summary>AC-DSTORE-002 / AC-MCP-005: the complete bounded public wrapper retains only the owned unique conflict.</summary>
     [Test]
-    public async Task UniqueIndexConflictHasClosedNativeWriterParityAndHealthyContinuation()
+    public async Task UniqueIndexConflictHasClosedWriterParityAndHealthyContinuation()
     {
         const string mismatch = "A partition-scoped unique index value is already present.";
         const string generic = "The database operation could not be completed.";

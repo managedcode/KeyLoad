@@ -19,7 +19,7 @@ public sealed record CommandInboxExecutionOptions
     /// <summary>Checks the original eight-command fairness ceiling.</summary>
     public bool IsValid() => MaximumControlBurst is >= MinimumControlBurst and <= DefaultMaximumControlBurst;
 
-    /// <summary>Rejects invalid scheduling before the inbox owns a native semaphore.</summary>
+    /// <summary>Rejects invalid scheduling before the inbox owns a execution semaphore.</summary>
     public void Validate()
     {
         if (!IsValid())

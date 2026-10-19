@@ -71,7 +71,7 @@ internal static class DeclarativeCompositionBudgetFlow
         return new(limited, exact, receipt, beforeFirst, beforeSecond, graph);
     }
 
-    internal static async Task ColdAsync(global::KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsClusterCallers callers, RelationalSqlClusterScenario scenario,
+    internal static async Task ColdAsync(global::KeyLoad.IntegrationTests.Features.OrleansExecution.RequestCqrsClusterCallers callers, RelationalSqlClusterScenario scenario,
         DeclarativeCompositionBudgetState state, CancellationToken token)
     {
         var exact = (QueueToGraph)state.Command.Mutations[0];

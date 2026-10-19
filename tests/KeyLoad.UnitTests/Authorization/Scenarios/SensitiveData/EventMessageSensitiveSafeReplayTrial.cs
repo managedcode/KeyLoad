@@ -40,7 +40,7 @@ internal static class EventMessageSensitiveSafeReplayTrial
     {
         var replay = EventMessageSensitiveReplayOperations.Apply(database, OperationKind.Receive,
             state.OriginalRequest, state.Caller, state.OriginalId, token);
-        await Assert.That(NativeSerialization.Serialize(replay).SequenceEqual(NativeSerialization.Serialize(state.Original))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(replay).SequenceEqual(OrleansSerialization.Serialize(state.Original))).IsTrue();
         await Assert.That(EventMessageSensitiveReplayOperations.Outcome(store, state).SequenceEqual(state.OriginalOutcome)).IsTrue();
         await ValueAsync(replay.Get<ReceiveResult>());
     }
@@ -69,7 +69,7 @@ internal static class EventMessageSensitiveSafeReplayTrial
         await Assert.That(fresh.Deliveries.Single().Id).IsEqualTo(EventMessageSensitiveReplayProtocol.Second);
         var replay = EventMessageSensitiveReplayOperations.Apply(database, OperationKind.Batch, producer,
             EventMessageSensitiveReplayProtocol.Root, producer.CommandId, token);
-        await Assert.That(NativeSerialization.Serialize(replay).SequenceEqual(NativeSerialization.Serialize(produced))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(replay).SequenceEqual(OrleansSerialization.Serialize(produced))).IsTrue();
         var finalAck = Guid.NewGuid();
         EventMessageSensitiveReplayOperations.Apply(database, OperationKind.Delivery,
             new DeliveryCommand(finalAck, state.Lane, fresh.Deliveries.Single().Token, DeliveryAction.Ack), state.Caller, finalAck, token).Get<CommitReceipt>();

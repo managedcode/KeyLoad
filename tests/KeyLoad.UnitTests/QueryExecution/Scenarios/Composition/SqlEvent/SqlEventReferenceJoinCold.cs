@@ -52,20 +52,20 @@ internal static class SqlEventReferenceJoinCold
                     await Assert.That(QueueWholeFlowStorage.Bytes(reopened)).IsEquivalentTo(before, CollectionOrdering.Matching);
                     await Assert.That(reopened.Position).IsEqualTo(position);
                 }
-                catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+                catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error))
                 {
                     failures.Add(error);
                 }
-                catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
+                catch (Exception error) when (!CqrsBoundaryErrors.IsNonFatal(error))
                 {
                     failures.Add(error);
                 }
             }
-            catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+            catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error))
             {
                 failures.Add(error);
             }
-            catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
+            catch (Exception error) when (!CqrsBoundaryErrors.IsNonFatal(error))
             {
                 failures.Add(error);
             }

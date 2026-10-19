@@ -26,8 +26,8 @@ internal sealed class PostgresTopology(IOptions<ComparisonLifecycleOptions> life
     private const string ReplicaFailure = "PostgresReplicationReceiptMissing";
     private const string ReplicatedAcknowledgement = "fsync=on; synchronous_commit=on; primary WAL flush plus one of two standby WAL flushes";
     private const string CopyObservation = "Named standbys flushed and replayed seeded corpus through WAL ";
-    private const string QuorumObservation = "Native ANY 1 waits for one standby WAL flush; untimed copy receipt covers every configured standby";
-    private const string MemberObservation = "Native standby identities=";
+    private const string QuorumObservation = "Execution ANY 1 waits for one standby WAL flush; untimed copy receipt covers every configured standby";
+    private const string MemberObservation = "Execution standby identities=";
     private const string IdentitySeparator = "@";
 
     internal async Task ConfigureReplicationAsync(NpgsqlConnection connection, ComparisonTopology topology,

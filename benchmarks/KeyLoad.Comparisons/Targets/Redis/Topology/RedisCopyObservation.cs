@@ -52,11 +52,11 @@ internal static class RedisCopyObservation
 
     private static async Task<bool> HasUpLinkAsync(IServer server, CancellationToken token)
     {
-        var info = await RedisNativeProtocol.ReadInfoAsync(server, RedisNativeProtocol.ReplicationSection,
+        var info = await RedisProtocol.ReadInfoAsync(server, RedisProtocol.ReplicationSection,
             CommandFlags.DemandReplica, token);
-        return info.GetValueOrDefault(RedisNativeProtocol.LinkField) switch
+        return info.GetValueOrDefault(RedisProtocol.LinkField) switch
         {
-            RedisNativeProtocol.LinkUp => true,
+            RedisProtocol.LinkUp => true,
             LinkDown => false,
             _ => throw new ComparisonFailureException(ErrorReplicaCopy)
         };

@@ -37,7 +37,7 @@ internal static class CommandIdempotencyCrashAssertions
     {
         const string RequireSameReceiptMessageText = "The replayed command receipt changed from its original bytes.";
 
-        if (!NativeSerialization.Serialize(actual).AsSpan().SequenceEqual(NativeSerialization.Serialize(expected)))
+        if (!OrleansSerialization.Serialize(actual).AsSpan().SequenceEqual(OrleansSerialization.Serialize(expected)))
         {
             throw new InvalidOperationException(RequireSameReceiptMessageText);
         }

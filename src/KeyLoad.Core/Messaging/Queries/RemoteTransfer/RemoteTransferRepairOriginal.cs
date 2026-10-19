@@ -24,7 +24,7 @@ public sealed partial class DatabaseEngine
             : new CompleteQueueTransfer(intent.Source, intent.TransferId, request.ReceiptToken!);
         var command = new CommandRequest(request.AcceptCommandId, partition, [mutation]);
         var original = CreateCommand(view, OperationKind.Batch, command.CommandId, principal.Id,
-            Clock.GetUtcNow(), NativeSerialization.Serialize(command));
+            Clock.GetUtcNow(), OrleansSerialization.Serialize(command));
         _ = AuthorizeOperation(view, principal, original);
         if (stage == QueueTransferRepairStage.Complete)
         {

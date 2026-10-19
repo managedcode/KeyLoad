@@ -3,14 +3,14 @@ using Aspire.Hosting.ApplicationModel;
 using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.Client;
 using KeyLoad.Clustering;
-using KeyLoad.IntegrationTests.Features.ClusterReplication;
+using KeyLoad.IntegrationTests.Features.StorageReplication;
 using KeyLoad.IntegrationTests.Features.Messaging;
 using KeyLoad.Query;
 using KeyLoad.Server;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using TUnit.Core.Interfaces;
-using static KeyLoad.IntegrationTests.Features.ClusterReplication.ClusterFixtureResourceCleanup;
+using static KeyLoad.IntegrationTests.Features.StorageReplication.ClusterFixtureResourceCleanup;
 
 namespace KeyLoad.IntegrationTests;
 
@@ -22,7 +22,7 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable, IKey
     private readonly long? commandBytes;
     private readonly Features.Authorization.FoundationOtlpClusterSelection? telemetry;
     private readonly Features.Messaging.QueueDeadlineClusterSelection? queueDeadline;
-    private readonly Features.QueryExecution.PostgresClusterFixtureOwnership nativeSql = new();
+    private readonly Features.QueryExecution.PostgresClusterFixtureOwnership runtimeSql = new();
     private readonly HttpAdmissionLimits? httpAdmission;
     private readonly DatabaseLimits? databaseLimits;
     private readonly QueryExecutionOptions? queryExecution;
@@ -30,7 +30,7 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable, IKey
     private ProcessRuntimeControl? processRuntime;
     private string? processEvidenceDirectory;
     private string[] resourceNames = [];
-    /// <summary>Receives the native keyed data-source identity before initialization.</summary>
+    /// <summary>Receives the execution keyed data-source identity before initialization.</summary>
     public string Key { get; set; } = string.Empty;
 
     /// <summary>Creates the standard Orleans fixture for the shared TUnit class data source.</summary>
@@ -48,7 +48,7 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable, IKey
         => this.queueDeadline = queueDeadline;
 
     internal ClusterFixture(Features.QueryExecution.PostgresClusterSelection selection)
-        => nativeSql = new(selection);
+        => runtimeSql = new(selection);
 
     /// <summary>Creates an Orleans fixture with a smaller command admission budget.</summary>
     /// <param name="commandBytes">The per-node retained command byte limit.</param>
@@ -103,7 +103,7 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable, IKey
             var builder = await ClusterFixtureComposition.CreateBuilderAsync(arguments, telemetry, timeout.Token);
             ClusterFixtureComposition.ConfigureTestOverrides(builder, commandBytes, httpAdmission, databaseLimits, queryExecution);
             queueDeadline?.Configure(builder);
-            nativeSql.Configure(builder, Root);
+            runtimeSql.Configure(builder, Root);
             RemoteTransferCoordinatorFixtureConfiguration.Configure(builder, transferCoordinator);
             resourceNames = ClusterFixtureComposition.GetResourceNames(builder);
             var repository = ClusterFixtureDiagnostics.FindRepositoryRoot();
@@ -144,7 +144,7 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable, IKey
     /// <summary>Restarts a previously killed Aspire-owned process and records its actual new generation.</summary>
     /// <param name="resourceName">The Aspire resource name to restart.</param>
     /// <param name="cancellationToken">The bounded test operation cancellation.</param>
-    /// <returns>The completed native Aspire resource start operation.</returns>
+    /// <returns>The completed execution Aspire resource start operation.</returns>
     public Task RestartServerAsync(string resourceName, CancellationToken cancellationToken)
         => ClusterFixtureRuntimeInvocation.RestartAsync(RequireProcessRuntime, resourceName, cancellationToken);
 
@@ -169,11 +169,11 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable, IKey
             {
                 await diagnostics.DisposeAsync().ConfigureAwait(false);
             }
-            catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure))
+            catch (Exception failure) when (CqrsBoundaryErrors.IsNonFatal(failure))
             {
                 failures.Add(failure);
             }
-            catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure))
+            catch (Exception failure) when (!CqrsBoundaryErrors.IsNonFatal(failure))
             {
                 failures.Add(failure);
             }

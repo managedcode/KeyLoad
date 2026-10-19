@@ -4,7 +4,7 @@ namespace KeyLoad.UnitTests.Features.TimeSeries;
 internal sealed class SampleRollupLeaseDropTests
 {
     [Test]
-    public async Task AcSeries022NativeQueuedDropWaitsForRealReadLeaseThenReplaysAndRecreatesHealthyBucket()
+    public async Task AcSeries022QueuedDropWaitsForRealReadLeaseThenReplaysAndRecreatesHealthyBucket()
     {
         using var db = new TestDatabase();
         SampleRollupWholeFlow.Seed(db);

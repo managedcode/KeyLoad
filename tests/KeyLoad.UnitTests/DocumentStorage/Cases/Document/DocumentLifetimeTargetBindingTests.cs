@@ -24,7 +24,7 @@ internal sealed class DocumentLifetimeTargetBindingTests
             var key = DocumentStorageKeys.RecordKey(A.Reference(fixture));
             var original = fixture.Store.Read(view => view.ReadOwnedValue(key))
                 ?? throw new InvalidOperationException(A.Collection);
-            var record = NativeSerialization.Deserialize<DocumentRecord>(original);
+            var record = OrleansSerialization.Deserialize<DocumentRecord>(original);
             await Assert.That(record.Reference.Lifetime).IsNotEqualTo(other);
             fixture.Store.Commit((tx, _) =>
             {

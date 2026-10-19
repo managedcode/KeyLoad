@@ -18,7 +18,7 @@ internal sealed class CliBackupRestoreInvalidCatalogTests
     private const string RestoreCommand = "restore";
 
     [Test]
-    public async Task AcBackup002CliRejectsNoncanonicalNativeArtifactThenRestoresOriginal()
+    public async Task AcBackup002CliRejectsNoncanonicalArtifactThenRestoresOriginal()
     {
         var options = CliBackupRestoreProcess.CaptureExecutionOptions();
         var cancellationToken = TestContext.Current!.Execution.CancellationToken;

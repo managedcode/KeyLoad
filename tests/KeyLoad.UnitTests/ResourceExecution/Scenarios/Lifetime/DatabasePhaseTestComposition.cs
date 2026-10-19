@@ -7,7 +7,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.UnitTests.Features.ResourceExecution;
 
-/// <summary>Projects centrally bound and validated native settings into independent BCL banks.</summary>
+/// <summary>Projects centrally bound and validated execution settings into independent BCL banks.</summary>
 [ConfigurationBinding]
 internal static class DatabasePhaseTestComposition
 {

@@ -86,8 +86,8 @@ internal static class QueueWorkerExecution
                 || bodyBytes > available.Bytes)
             {
                 session.KnownUnhandled(page.Deliveries);
-                session.Stop(bodyBytes > available.Bytes ? QueueWorkerStopReason.InFlightBytes : QueueWorkerStopReason.NativeReplyRejected);
-                return QueueWorkerStopReason.NativeReplyRejected;
+                session.Stop(bodyBytes > available.Bytes ? QueueWorkerStopReason.InFlightBytes : QueueWorkerStopReason.RuntimeReplyRejected);
+                return QueueWorkerStopReason.RuntimeReplyRejected;
             }
             foreach (var delivery in page.Deliveries)
             {

@@ -32,7 +32,7 @@ internal sealed class TestDatabase : IDisposable
     public PartitionRef Partition { get; } = new(TenantId, DatabaseId, TransactionDomainId, PartitionKey);
 
     public TestDatabase(DatabaseLimits? limits = null, string? directory = null,
-        BlobExecutionOptions? blobExecution = null, NativeClaimsExecutionOptions? claimsExecution = null,
+        ClaimsExecutionOptions? claimsExecution = null,
         TimeProvider? timeProvider = null, TimeSeriesExecutionOptions? timeSeriesExecution = null)
     {
         Directory = directory ?? Path.Combine(StorageTrialDirectory.ResolveExistingDirectory(new(Path.GetTempPath())),
@@ -47,14 +47,13 @@ internal sealed class TestDatabase : IDisposable
             var clock = timeProvider ?? TimeProvider.System;
             Store = acquired = new(new(Directory), StorageExecution, UnitExecutionOptions.PointCacheExecution(), timeProvider: clock);
             this.limits = UnitExecutionOptions.DatabaseLimits(limits);
-            createDatabase = TestDatabaseEngineFactory.Capture(this.limits, UnitExecutionOptions.BlobExecution(blobExecution),
-                UnitExecutionOptions.NativeClaimsExecution(claimsExecution), timeSeriesExecution, clock);
+            createDatabase = TestDatabaseEngineFactory.Capture(this.limits, UnitExecutionOptions.RuntimeClaimsExecution(claimsExecution), timeSeriesExecution, clock);
             Database = createDatabase(Store);
             TestDatabaseEngineFactory.Bootstrap(Database, RootPrincipalId, RootCredential);
         }
         catch (Exception primary)
         {
-            TestDatabaseNativeDisposal.Rollback(primary, acquired, nativeAcquisitionStarted: false, DeleteOwnedDirectory);
+            TestDatabaseDisposal.Rollback(primary, acquired, acquisitionStarted: false, DeleteOwnedDirectory);
             throw;
         }
     }
@@ -112,7 +111,7 @@ internal sealed class TestDatabase : IDisposable
 
     internal EntityRef ExpectedReference(EntityRef literal) => originalResources.Reference(literal);
 
-    internal ResourceLifetimeV1 ExpectedLifetime(string resourceName)
+    internal ResourceLifetime ExpectedLifetime(string resourceName)
         => originalResources.Lifetime(Partition.TenantId, Partition.DatabaseId, resourceName);
 
     internal CommitToken NextCommitToken(PartitionRef? partition = null)
@@ -125,7 +124,7 @@ internal sealed class TestDatabase : IDisposable
     internal DatabaseEngine CreateConfiguredDatabase(ZoneTreeStore ownedStore) => createDatabase(ownedStore);
     internal (long AppliedPosition, long StorePosition) ReadCanonicalCut()
         => Store.Read(view => (view.ReadOwnedValue(KeySpace.AppliedBytes) is { } bytes
-            ? NativeSerialization.Deserialize<long>(bytes) : default(long), Store.Position));
+            ? OrleansSerialization.Deserialize<long>(bytes) : default(long), Store.Position));
     internal ReadExecutionBudget CreateReadWork(CancellationToken cancellationToken)
         => new(limits, Database.EvaluationClock, cancellationToken);
 

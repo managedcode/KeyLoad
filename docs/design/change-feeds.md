@@ -29,7 +29,7 @@ External files must use a replay-safe journal or atomic generation manifest befo
 
 ## Protected document feed
 
-`POST /v1/changes/read` (`ReadChangesAsync`) requires `ChangesRead | DocumentsRead` on its collection. `Beginning` starts at the currently retained first position; `Now` captures the current tail. Every page, including an empty tail, returns a signed cursor. This profile polls bounded pages and creates no server subscription, lease or public retention pin.
+`POST /changes/read` (`ReadChangesAsync`) requires `ChangesRead | DocumentsRead` on its collection. `Beginning` starts at the currently retained first position; `Now` captures the current tail. Every page, including an empty tail, returns a signed cursor. This profile polls bounded pages and creates no server subscription, lease or public retention pin.
 
 A returned change contains the sequence/commit, entity reference, revision, deletion flag and safely projected before/after images. Before images require their historical row ACL; all images also require current row visibility and the after-image ACL. Deleted after images carry metadata and no document payload. Sensitive field classification uses the same secure projector as ordinary document reads. No raw outbox payload or unrelated resource identity is returned.
 
@@ -39,9 +39,9 @@ The cursor binds incarnation, partition, collection, principal, policy epoch, sc
 
 ## Scalar live-query profile
 
-`POST /v1/query/live/start` captures the complete initial Q1 result and outbox tail under one storage read gate. It requires query/document/change-read grants and ordinary predicate field-use grants. The query must be unordered, scalar and read-only, with no query continuation or `EXPLAIN`. A result larger than `Limit` or its byte budget fails rather than returning an incomplete subscription baseline.
+`POST /query/live/start` captures the complete initial Q1 result and outbox tail under one storage read gate. It requires query/document/change-read grants and ordinary predicate field-use grants. The query must be unordered, scalar and read-only, with no query continuation or `EXPLAIN`. A result larger than `Limit` or its byte budget fails rather than returning an incomplete subscription baseline.
 
-`POST /v1/query/live/read` binds the same normalized AST and evaluates each authorized before/after image with the ordinary Q1 evaluator. A matching after image emits `Upsert` using the ordinary query projector; an image leaving the predicate or being deleted emits `Remove` without a payload. Nonmatching changes still advance the cursor. Protected values can be used by a granted predicate while remaining omitted in returned rows.
+`POST /query/live/read` binds the same normalized AST and evaluates each authorized before/after image with the ordinary Q1 evaluator. A matching after image emits `Upsert` using the ordinary query projector; an image leaving the predicate or being deleted emits `Remove` without a payload. Nonmatching changes still advance the cursor. Protected values can be used by a granted predicate while remaining omitted in returned rows.
 
 The profile exposes a complete bounded initial snapshot and bounded delta pages. It retains no server result-set state; the application bounds its maintained set and polling rate. `ORDER BY`, top-k, aggregates, joins, graph and ANN subscriptions need separate cost/freshness profiles. Live-query calls share ordinary query admission, validation, deadline, candidate-byte and field-lineage controls. Starting at a different predicate/projection or changing policy/row visibility invalidates the cursor. Query snapshot plus tail removes the initial subscription race; it does not provide indefinite history retention or cross-partition coverage.
 

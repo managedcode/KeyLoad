@@ -1,5 +1,5 @@
 using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.ClusterRouting;
+using KeyLoad.IntegrationTests.Features.OrleansExecution;
 
 namespace KeyLoad.IntegrationTests.Features.Search;
 
@@ -27,7 +27,7 @@ internal static class EventProjectionLineageR41Trial
         }, token);
         for (var cold = 0; cold < 2; cold++)
         {
-            await NativeTextProtectedPublicColdRestart.RunAsync(fixture, token);
+            await TextProtectedPublicColdRestart.RunAsync(fixture, token);
             _ = await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey, async admin =>
             {
                 await WithActorsAsync(fixture, state, (worker, reader) => RetainedAsync(admin, worker, reader, state, token), token);

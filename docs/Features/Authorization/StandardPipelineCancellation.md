@@ -1,6 +1,6 @@
 # Standard pipeline cancellation within Authorization
 
-REQ-AUTH-ASPNET-001/003 and AC-AUTH-ASPNET-001/003 retain the original `McpDiscoveryTests.AcMcp005CancelledNativeReadDoesNotPreventTheNextRealCall` declaration, UID, deadline, actual official MCP client and pre-cancelled native read. This child records a test-oracle gap; no product defect or old failure is asserted.
+REQ-AUTH-ASPNET-001/003 and AC-AUTH-ASPNET-001/003 retain the original `McpDiscoveryTests.AcMcp005CancelledReadDoesNotPreventTheNextRealCall` declaration, UID, deadline, actual official MCP client and pre-cancelled read. This child records a test-oracle gap; no product defect or old failure is asserted.
 
 ## Contract
 
@@ -40,7 +40,7 @@ This is caller cancellation before an official invocation; it is NOT proof of se
   with both original bool arguments.
 - Missing/unconfigured and malformed persisted credential refusal, full no-effect
   image and cold healthy replay:
-  McpCredentialLifecycleTests.AcMcp002NativeDiscoveryRejectsMissingAndUnconfiguredCredentials
+  McpCredentialLifecycleTests.AcMcp002DiscoveryRejectsMissingAndUnconfiguredCredentials
   with both original bool arguments and MalformedCredentialAuthorityRefusals.
 - Public GET/HEAD static allowlist and protected POST/data boundary:
   AdminDashboardClusterTests.AcAd001CredentialFreeShellNeverExemptsDataOrUnknownAssets

@@ -8,7 +8,7 @@ internal sealed class EventMessageSensitivePublicState(PartitionRef partition, R
     internal PrincipalRecord Worker { get; } = worker;
     internal string Key { get; } = key;
     internal string InspectorId => Worker.Id + "-inspect";
-    internal string InspectorKey => InspectorId + ".keyload-native-sensitive-inspection-credential";
+    internal string InspectorKey => InspectorId + ".keyload-execution-sensitive-inspection-credential";
     internal MessageInspection? OriginalInspection
     {
         get; set;

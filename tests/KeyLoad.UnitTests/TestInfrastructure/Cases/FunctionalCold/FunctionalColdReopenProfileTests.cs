@@ -8,7 +8,7 @@ internal sealed class FunctionalColdReopenProfileTests
     [Arguments(1, true, true)]
     [Arguments(3, true, true)]
     [Arguments(0, false, true)]
-    public Task ActualNativeModelKeepsFaultCommandsExclusiveToSelectedProfiles(int nodes, bool cold, bool faults)
+    public Task ActualModelKeepsFaultCommandsExclusiveToSelectedProfiles(int nodes, bool cold, bool faults)
         => FunctionalColdReopenProfileModel.VerifyAsync(nodes, cold, faults);
 
     [Test]

@@ -1,10 +1,11 @@
-using KeyLoad.Core.Features.ClusterRouting.Validation;
+using KeyLoad.Core.Features.RuntimeJournaling.Validation;
+using KeyLoad.Core.Features.StoragePartitions.Validation;
 using KeyLoad.Features.InternalSerialization;
 using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.Core;
 
-/// <summary>Classifies only the exact bounded native runtime-journal identity bootstrap as control work.</summary>
+/// <summary>Classifies only the exact bounded execution runtime-journal identity bootstrap as control work.</summary>
 internal static class RuntimeJournalBootstrapAdmission
 {
     internal static bool IsControl(Command<DatabaseCommand> operation, int payloadJsonBytes, int maximumControlPayloadBytes)
@@ -36,8 +37,8 @@ internal static class RuntimeJournalBootstrapAdmission
             return false;
         }
 
-        var mutation = NativeSerialization.Deserialize<RuntimeJournalMutation>(inspectedPayload.Input.Span,
-            NativeValidationProfile.PublicInputElements);
+        var mutation = OrleansSerialization.Deserialize<RuntimeJournalMutation>(inspectedPayload.Input.Span,
+            ValidationProfile.PublicInputElements);
         if (mutation.Action != RuntimeJournalAction.BootstrapIdentity)
         {
             return false;
@@ -60,5 +61,5 @@ internal static class RuntimeJournalBootstrapAdmission
     private static bool WithinOuterControlBound(Command<DatabaseCommand> operation, int payloadJsonBytes,
         int maximumControlPayloadBytes)
         => payloadJsonBytes <= maximumControlPayloadBytes
-            && NativeSerialization.Measure(operation) <= maximumControlPayloadBytes;
+            && OrleansSerialization.Measure(operation) <= maximumControlPayloadBytes;
 }

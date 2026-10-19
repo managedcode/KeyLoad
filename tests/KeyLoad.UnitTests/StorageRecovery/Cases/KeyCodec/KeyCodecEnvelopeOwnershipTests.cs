@@ -10,7 +10,7 @@ internal sealed class KeyCodecEnvelopeOwnershipTests
     private const string DirectoryPrefix = "keycodec-owned-";
 
     [Test]
-    public async Task NativeStageEnvelopeAndReopenPreserveOwnedKeyAndValueBytes()
+    public async Task StageEnvelopeAndReopenPreserveOwnedKeyAndValueBytes()
     {
         var directory = Path.Combine(Path.GetTempPath(), DirectoryPrefix + Guid.NewGuid().ToString("N"));
         if (Directory.Exists(directory))
@@ -27,7 +27,7 @@ internal sealed class KeyCodecEnvelopeOwnershipTests
         {
             Array.Fill(value, (byte)0x36);
             var expectedValue = value.ToArray();
-            var envelope = NativeSerialization.Serialize(new[] { new StorageMutation(expectedKey, expectedValue) });
+            var envelope = OrleansSerialization.Serialize(new[] { new StorageMutation(expectedKey, expectedValue) });
             using (var store = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution()))
             {
                 store.Commit((transaction, _) => StageAndMutateInputs(transaction, key, value));
@@ -37,7 +37,7 @@ internal sealed class KeyCodecEnvelopeOwnershipTests
                 await VerifyCallerOwnedResultCannotChangeStoreAsync(store, expectedKey, expectedValue);
             }
 
-            var mutations = NativeSerialization.Deserialize<StorageMutation[]>(envelope);
+            var mutations = OrleansSerialization.Deserialize<StorageMutation[]>(envelope);
             await Assert.That(mutations.Length).IsEqualTo(1);
             await Assert.That(mutations[0].Key.Span.SequenceEqual(expectedKey)).IsTrue();
             await Assert.That(mutations[0].Value!.Value.Span.SequenceEqual(expectedValue)).IsTrue();

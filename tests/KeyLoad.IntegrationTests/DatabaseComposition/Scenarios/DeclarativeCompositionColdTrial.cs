@@ -9,11 +9,11 @@ internal static class DeclarativeCompositionColdTrial
         DeclarativeCompositionBudgetState budget, CancellationToken token)
     {
         await ModelSqlClusterCold.RunAsync(fixture, token);
-        await global::KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey,
+        await global::KeyLoad.IntegrationTests.Features.OrleansExecution.RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey,
             async admin => { await OriginalAsync(admin, state, budget, token); return true; }, token);
         var healthy = await CompositionSqlColdAuthority.RunAsync(fixture, state, token);
         await ModelSqlClusterCold.RunAsync(fixture, token);
-        await global::KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node3, fixture.AdminKey,
+        await global::KeyLoad.IntegrationTests.Features.OrleansExecution.RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node3, fixture.AdminKey,
             async admin =>
             {
                 await OriginalAsync(admin, state, budget, token);
@@ -23,7 +23,7 @@ internal static class DeclarativeCompositionColdTrial
                         CompositionSqlColdProtocol.OtherGraph, state.Scenario.First), token)));
                 return true;
             }, token);
-        await global::KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, healthy.Identity.Secret,
+        await global::KeyLoad.IntegrationTests.Features.OrleansExecution.RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, healthy.Identity.Secret,
             async callers =>
             {
                 await CompositionSqlColdAssertions.ReplayAsync(callers, healthy.Command, healthy.Receipt, token);
@@ -31,7 +31,7 @@ internal static class DeclarativeCompositionColdTrial
             }, token);
     }
 
-    private static async Task OriginalAsync(global::KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsClusterCallers callers, CompositionSqlColdState state,
+    private static async Task OriginalAsync(global::KeyLoad.IntegrationTests.Features.OrleansExecution.RequestCqrsClusterCallers callers, CompositionSqlColdState state,
         DeclarativeCompositionBudgetState budget, CancellationToken token)
     {
         await CompositionSqlColdAssertions.OriginalAsync(callers, state, token);

@@ -26,7 +26,7 @@ internal static class TestDatabaseConcurrentCloseSeeding
         await TestDatabaseConcurrentCloseAssertions.CurrentAsync(fixture.Database, fixture.Store, state);
         var replay = fixture.SubmitIssued(original);
         await TestDatabaseConcurrentCloseAssertions.ReceiptAsync(replay, expected);
-        await NativeReplayResultAssertions.Same<CommitReceipt>(replay, result);
+        await ReplayResultAssertions.Same<CommitReceipt>(replay, result);
         await TestDatabaseConcurrentCloseAssertions.CurrentAsync(fixture.Database, fixture.Store, state);
         return state;
     }

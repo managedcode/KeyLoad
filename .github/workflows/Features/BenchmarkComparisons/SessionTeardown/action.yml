@@ -1,5 +1,5 @@
-name: Native benchmark session shutdown
-description: Retain original native diagnostics after the fixture joins its client and disposes only its own Aspire resources.
+name: Execution benchmark session shutdown
+description: Retain original execution diagnostics after the fixture joins its client and disposes only its own Aspire resources.
 inputs:
   artifact-name:
     description: Exact unique qualification artifact name
@@ -7,7 +7,7 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Save native database logs and test results
+    - name: Save execution database logs and test results
       if: always()
       uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
       with:

@@ -4,9 +4,9 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons.Targets;
 
-internal sealed class KeyLoadOutboxDiagnosticLine(IOptions<NativeComparisonDiagnosticOptions> options)
+internal sealed class KeyLoadOutboxDiagnosticLine(IOptions<ComparisonDiagnosticOptions> options)
 {
-    private readonly NativeComparisonDiagnosticOptions settings = NativeComparisonDiagnosticOptions.Require(options).Value;
+    private readonly ComparisonDiagnosticOptions settings = ComparisonDiagnosticOptions.Require(options).Value;
     private const int NoObservedItems = 0;
     private const int SingleItemCount = 1;
     private const int AdjacentElementOffset = 1;

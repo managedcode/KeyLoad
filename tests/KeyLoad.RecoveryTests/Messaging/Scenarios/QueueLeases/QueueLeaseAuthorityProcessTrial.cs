@@ -12,25 +12,25 @@ internal static class QueueLeaseAuthorityProcessTrial
     {
         using var store = Open(root);
         var database = QueueLifecycleRecoveryAssertions.Open(store);
-        var original = NativeSerialization.Deserialize<Command<DatabaseCommand>>(await File.ReadAllBytesAsync(
+        var original = OrleansSerialization.Deserialize<Command<DatabaseCommand>>(await File.ReadAllBytesAsync(
             Path.Combine(root, QueueOrderedRetryCrashProtocol.OperationFile), token));
-        var delivery = NativeSerialization.Deserialize<Delivery>(await File.ReadAllBytesAsync(
+        var delivery = OrleansSerialization.Deserialize<Delivery>(await File.ReadAllBytesAsync(
             Path.Combine(root, QueueOrderedRetryCrashProtocol.DeliveryFile), token));
         await Assert.That(delivery).IsEqualTo(new Delivery(QueueOrderedRetryCrashProtocol.First,
             QueueOrderedRetryCrashProtocol.Payload, QueueOrderedRetryCrashProtocol.Headers, delivery.Token,
             1, delivery.LeaseUntil, 1, 1));
         var payload = original.Value!;
-        var decisions = NativeSerialization.Deserialize<QueueRetryDecisions>(payload.RetryDecisions.Span);
+        var decisions = OrleansSerialization.Deserialize<QueueRetryDecisions>(payload.RetryDecisions.Span);
         await QueueOrderedRetryRecoveryChoice.AssertAsync(store, original, decisions);
         await Assert.That(OutcomeStoreOracle.Read(store, original)).IsNull();
         await QueueOrderedRetryRecoveryImage.AssertAsync(database, delivery, decisions.Items.Single(), committed: false);
         var key = KeySpace.Partition("lease", QueueOrderedRetryCrashProtocol.Partition,
             QueueOrderedRetryCrashProtocol.Queue, delivery.LeaseUntil, delivery.Id);
         var row = store.Read(view => view.ReadOwnedValue(key))!;
-        await Assert.That(NativeSerialization.Deserialize<string>(row)).IsEqualTo(QueueOrderedRetryCrashProtocol.First);
+        await Assert.That(OrleansSerialization.Deserialize<string>(row)).IsEqualTo(QueueOrderedRetryCrashProtocol.First);
         var image = QueueLeaseAuthorityProcessImage.Capture(store);
         var position = store.Position;
-        var identity = NativeSerialization.Serialize(store.Identity);
+        var identity = OrleansSerialization.Serialize(store.Identity);
         store.Commit((tx, _) =>
         {
             if (foreignReference)
@@ -57,7 +57,7 @@ internal static class QueueLeaseAuthorityProcessTrial
         await QueueOrderedRetryRecoveryImage.AssertAsync(cold, delivery, decisions.Items.Single(), committed: false);
         var receipt = cold.Apply(original).Get<CommitReceipt>();
         await QueueOrderedRetryRecoveryImage.AssertAsync(cold, delivery, decisions.Items.Single(), committed: true);
-        await MessagingRecoveryReceiptAssertions.AssertSameNativeValueAsync(receipt, cold.ResolveOutcome(original).Get<CommitReceipt>());
+        await MessagingRecoveryReceiptAssertions.AssertSameValueAsync(receipt, cold.ResolveOutcome(original).Get<CommitReceipt>());
         var outcomes = await QueueLeaseAuthorityProcessHealthy.RunAsync(cold, original, receipt, decisions.Items.Single().RetryAt, token);
         var completed = QueueLeaseAuthorityProcessImage.Capture(reopened);
         var finalPosition = reopened.Position;

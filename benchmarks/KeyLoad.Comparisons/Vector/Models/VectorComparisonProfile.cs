@@ -19,12 +19,12 @@ public sealed record VectorComparisonProfile
     {
         get;
     }
-    /// <summary>Gets the number of native corpus records.</summary>
+    /// <summary>Gets the number of execution corpus records.</summary>
     public int RecordCount
     {
         get;
     }
-    /// <summary>Gets the native vector index method selected by this profile.</summary>
+    /// <summary>Gets the execution vector index method selected by this profile.</summary>
     public VectorIndexKind IndexKind
     {
         get;
@@ -36,7 +36,7 @@ public sealed record VectorComparisonProfile
     }
     /// <summary>Gets the fixed float32 vector dimension.</summary>
     public int Dimensions => VectorComparisonProfileValues.VectorDimensions;
-    /// <summary>Gets the vector metric used by native search and the oracle.</summary>
+    /// <summary>Gets the vector metric used by execution search and the oracle.</summary>
     public string Metric => VectorComparisonProfileValues.Cosine;
     /// <summary>Gets the fixed number of returned neighbors.</summary>
     public int TopK => VectorComparisonProfileValues.TopKNeighbors;
@@ -52,7 +52,7 @@ public sealed record VectorComparisonProfile
     public int MeasuredQueries => VectorComparisonProfileValues.Scale100kCount;
     /// <summary>Gets the closed-loop query concurrency.</summary>
     public int Concurrency => VectorComparisonProfileValues.QueryConcurrency;
-    /// <summary>Gets the per-native-request timeout in seconds.</summary>
+    /// <summary>Gets the per-execution-request timeout in seconds.</summary>
     public int TimeoutSeconds => VectorComparisonProfileValues.OperationTimeoutSeconds;
     /// <summary>Gets the number of evenly spaced latency observations retained.</summary>
     public int LatencySampleCount => VectorComparisonProfileValues.LatencySampleCount;
@@ -86,7 +86,7 @@ public sealed record VectorComparisonProfile
             VectorProfileTokens.ExactMethod => VectorIndexKind.Exact,
             VectorProfileTokens.HnswMethod => VectorIndexKind.Hnsw,
             VectorProfileTokens.IvfFlatMethod => VectorIndexKind.IvfFlat,
-            VectorProfileTokens.NativeMethod => VectorIndexKind.NativeAnn,
+            VectorProfileTokens.RuntimeMethod => VectorIndexKind.RuntimeAnn,
             _ => (VectorIndexKind?)null
         };
         var mode = parts[VectorComparisonProfileValues.ModePartIndex] switch
@@ -110,7 +110,7 @@ public sealed record VectorComparisonProfile
         get;
     } =
         (from scale in new[] { VectorProfileTokens.Scale100k, VectorProfileTokens.Scale1m }
-         from method in new[] { VectorProfileTokens.ExactMethod, VectorProfileTokens.HnswMethod, VectorProfileTokens.IvfFlatMethod, VectorProfileTokens.NativeMethod }
+         from method in new[] { VectorProfileTokens.ExactMethod, VectorProfileTokens.HnswMethod, VectorProfileTokens.IvfFlatMethod, VectorProfileTokens.RuntimeMethod }
          from mode in new[] { VectorProfileTokens.PlainMode, VectorProfileTokens.FilteredMode, VectorProfileTokens.MixedMode }
          select $"{VectorComparisonProfileValues.Vector}{scale}{VectorComparisonProfileValues.ProfileDelimiter}{method}{VectorComparisonProfileValues.ProfileDelimiter}{mode}{VectorComparisonProfileValues.C16}").ToArray();
 }

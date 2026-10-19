@@ -14,7 +14,7 @@ internal static class SharedDomainRecoveryHistoryAssertions
         {
             var rows = SharedDomainStoredImage.Capture(store);
             var position = store.Position;
-            var outcome = OutcomeStoreOracle.Read(store, entry.Operation) ?? throw new InvalidOperationException(MissingNative);
+            var outcome = OutcomeStoreOracle.Read(store, entry.Operation) ?? throw new InvalidOperationException(RuntimeMissing);
             await SharedDomainRecoveryValues.ResultAsync(outcome, entry.Result);
             if (entry.Operation.Value!.Kind == OperationKind.Receive)
             {

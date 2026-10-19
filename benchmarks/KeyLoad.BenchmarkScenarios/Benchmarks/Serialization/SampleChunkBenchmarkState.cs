@@ -7,7 +7,7 @@ namespace KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
 internal sealed class SampleChunkBenchmarkState
 {
     private readonly SampleRecord[] records;
-    private readonly byte[][] nativeValues;
+    private readonly byte[][] runtimeValues;
     private readonly byte[] chunk;
     private readonly IOptions<DatabaseLimits> limitsOptions;
     private readonly IOptions<TimeSeriesExecutionOptions> executionOptions;
@@ -20,19 +20,19 @@ internal sealed class SampleChunkBenchmarkState
         this.records = records;
         this.limitsOptions = limitsOptions;
         this.executionOptions = executionOptions;
-        nativeValues = NativeEncode();
+        runtimeValues = RuntimeEncode();
         chunk = ChunkEncode();
-        RequireExact(records, NativeDecode());
+        RequireExact(records, RuntimeDecode());
         RequireExact(records, ChunkDecode());
     }
 
-    internal long NativeBytes => nativeValues.Sum(value => (long)value.Length);
+    internal long RuntimeBytes => runtimeValues.Sum(value => (long)value.Length);
     internal int ChunkBytes => chunk.Length;
     internal int RecordCount => records.Length;
-    internal IReadOnlyList<byte[]> NativeValues => nativeValues;
+    internal IReadOnlyList<byte[]> RuntimeValues => runtimeValues;
     internal ReadOnlySpan<byte> ChunkValue => chunk;
 
-    internal byte[][] NativeEncode()
+    internal byte[][] RuntimeEncode()
     {
         const int IndexInitialValue = 0;
 
@@ -41,7 +41,7 @@ internal sealed class SampleChunkBenchmarkState
         for (var index = IndexInitialValue; index < records.Length; index++)
         {
             budget.Check();
-            values[index] = NativeSerialization.Serialize(records[index]);
+            values[index] = OrleansSerialization.Serialize(records[index]);
             budget.Check();
         }
         return values;
@@ -49,7 +49,7 @@ internal sealed class SampleChunkBenchmarkState
 
     internal byte[] ChunkEncode() => SampleChunkCodec.Encode(records, Budget(), executionOptions);
 
-    internal SampleRecord[] NativeDecode()
+    internal SampleRecord[] RuntimeDecode()
     {
         const int IndexInitialValue = 0;
 
@@ -57,8 +57,8 @@ internal sealed class SampleChunkBenchmarkState
         var decoded = new SampleRecord[records.Length];
         for (var index = IndexInitialValue; index < records.Length; index++)
         {
-            budget.ChargeBytes(nativeValues[index].Length);
-            decoded[index] = NativeSerialization.Deserialize<SampleRecord>(nativeValues[index]);
+            budget.ChargeBytes(runtimeValues[index].Length);
+            decoded[index] = OrleansSerialization.Deserialize<SampleRecord>(runtimeValues[index]);
             budget.Check();
         }
         return decoded;

@@ -23,8 +23,8 @@ internal static class SqlOffsetProtocol
     internal const int PageSize = 1;
     internal const int InitialOffset = 1;
     internal const int WindowBound = 4;
-    internal const int Q1 = 1;
-    internal const int Q2 = 2;
+    internal const int Q1 = SqlOperationProtocol.DefaultQueryDialectVersion;
+    internal const int Q2 = SqlOperationProtocol.DefaultQueryDialectVersion;
     internal const long InitialRevision = 1;
     internal const long GrantEpoch = 1;
     internal const long DenyEpoch = 2;

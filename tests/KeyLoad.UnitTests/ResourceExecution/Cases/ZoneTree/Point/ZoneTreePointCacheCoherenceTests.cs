@@ -27,7 +27,7 @@ internal sealed class ZoneTreePointCacheCoherenceTests
         var after = store.GetPointCacheDiagnostics();
 
         await Assert.That(after.Hits - before.Hits).IsEqualTo(1L);
-        await Assert.That(after.NativeLookups - before.NativeLookups).IsEqualTo(1L);
+        await Assert.That(after.RuntimeLookups - before.RuntimeLookups).IsEqualTo(1L);
         await Assert.That(after.Admissions - before.Admissions).IsEqualTo(1L);
         await Assert.That(after.LiveEntries).IsEqualTo(2);
     }
@@ -57,7 +57,7 @@ internal sealed class ZoneTreePointCacheCoherenceTests
         await Assert.That(afterReset.Admissions).IsEqualTo(before.Admissions);
         await Assert.That(afterReject.Admissions).IsEqualTo(before.Admissions);
         await Assert.That(afterReject.Hits).IsEqualTo(before.Hits);
-        await Assert.That(afterReject.NativeLookups - before.NativeLookups).IsEqualTo(0L);
+        await Assert.That(afterReject.RuntimeLookups - before.RuntimeLookups).IsEqualTo(0L);
     }
 
     [Test]
@@ -94,7 +94,7 @@ internal sealed class ZoneTreePointCacheCoherenceTests
         AssertValue(reopened, KeyB, ValueB);
         var reopenedRead = reopened.GetPointCacheDiagnostics();
         await Assert.That(cold.Hits).IsEqualTo(0L);
-        await Assert.That(reopenedRead.NativeLookups).IsEqualTo(1L);
+        await Assert.That(reopenedRead.RuntimeLookups).IsEqualTo(1L);
         await Assert.That(reopenedRead.Admissions).IsEqualTo(1L);
     }
 

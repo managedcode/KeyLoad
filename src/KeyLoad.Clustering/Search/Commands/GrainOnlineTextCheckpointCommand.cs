@@ -6,14 +6,14 @@ namespace KeyLoad.Clustering;
 internal static class GrainOnlineTextCheckpointCommand
 {
     internal static Task<Result<object>>? TrySubmit(DatabaseEngine database, ICommitCoordinator coordinator,
-        DecodedGrainRequest request, PrincipalRecord principal, INativeOnlineTextMaintenance? maintenance,
+        DecodedGrainRequest request, PrincipalRecord principal, IOnlineTextMaintenance? maintenance,
         TimeProvider clock, CancellationToken cancellationToken)
     {
         if (maintenance is null || request.Envelope.CommandKind != OperationKind.CommitProjectionBatch)
         {
             return null;
         }
-        var checkpoint = GrainNativePayload.ReadCommand<CommitProjectionBatchRequest>(request.Payload);
+        var checkpoint = GrainPayload.ReadCommand<CommitProjectionBatchRequest>(request.Payload);
         var work = maintenance.TryRequireCheckpointWork(checkpoint, principal.Id, request.Envelope.ExpiresAt);
         if (work is null)
         {

@@ -8,8 +8,8 @@ namespace KeyLoad.UnitTests.Features.EventStreams;
 internal sealed class EventFeedPubSubScratchFailureTests
 {
     private const int ScratchBytes = 256;
-    private const string Original = "original-native-advisory-state";
-    private const string Healthy = "healthy-native-advisory-state";
+    private const string Original = "original-execution-advisory-state";
+    private const string Healthy = "healthy-execution-advisory-state";
 
     [Test]
     [Arguments(false)]
@@ -53,22 +53,22 @@ internal sealed class EventFeedPubSubScratchFailureTests
                     await KeyLoad.Server.ServerFailureObserver.ObserveAsync(
                         () => RequireRegisteredAsync(storage, routing, token), storageFailures);
                 }
-                catch (Exception cleanup) when (NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
+                catch (Exception cleanup) when (CqrsBoundaryErrors.IsNonFatal(cleanup))
                 {
                     storageFailures.Add(cleanup);
                 }
-                catch (Exception cleanup) when (!NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
+                catch (Exception cleanup) when (!CqrsBoundaryErrors.IsNonFatal(cleanup))
                 {
                     storageFailures.Add(cleanup);
                 }
                 KeyLoad.Server.ServerFailureObserver.ThrowIfAny(storageFailures);
             }, failures);
         }
-        catch (Exception cleanup) when (NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
+        catch (Exception cleanup) when (CqrsBoundaryErrors.IsNonFatal(cleanup))
         {
             failures.Add(cleanup);
         }
-        catch (Exception cleanup) when (!NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
+        catch (Exception cleanup) when (!CqrsBoundaryErrors.IsNonFatal(cleanup))
         {
             failures.Add(cleanup);
         }
@@ -78,7 +78,7 @@ internal sealed class EventFeedPubSubScratchFailureTests
     private static async Task RequireRegisteredAsync(EventFeedPubSubStorage storage,
         IOptions<GrainRoutingOptions> routing, CancellationToken token)
     {
-        var id = NativeEventFeedPubSubFreshStateFixture.IdFor("/scratch-refusal");
+        var id = EventFeedPubSubFreshStateFixture.IdFor("/scratch-refusal");
         var original = new GrainState<List<string>>([Original]);
         await storage.WriteStateAsync(EventFeedPubSubProtocol.StateName, id, original, token);
         var originalTag = original.ETag;
@@ -110,12 +110,12 @@ internal sealed class EventFeedPubSubScratchFailureTests
         var retainedHealthy = healthy.State;
         await storage.ClearStateAsync(EventFeedPubSubProtocol.StateName, id, healthy, token);
         await Assert.That(ReferenceEquals(healthy.State, retainedHealthy)).IsFalse();
-        await Assert.That(NativeEventFeedPubSubFreshStateFixture.RequireState(healthy).Count).IsEqualTo(0);
+        await Assert.That(EventFeedPubSubFreshStateFixture.RequireState(healthy).Count).IsEqualTo(0);
         await Assert.That(healthy.ETag).IsNull();
         await Assert.That(healthy.RecordExists).IsFalse();
         var absent = new GrainState<List<string>>();
         await storage.ReadStateAsync(EventFeedPubSubProtocol.StateName, id, absent, token);
-        await Assert.That(NativeEventFeedPubSubFreshStateFixture.RequireState(absent).Count).IsEqualTo(0);
+        await Assert.That(EventFeedPubSubFreshStateFixture.RequireState(absent).Count).IsEqualTo(0);
         await Assert.That(absent.RecordExists).IsFalse();
         await Assert.That(absent.ETag).IsNull();
         var fresh = new GrainState<List<string>>([Original]);

@@ -1,7 +1,7 @@
 using Aspire.Hosting.ApplicationModel;
 using KeyLoad.Client;
 using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.ClusterReplication;
+using KeyLoad.IntegrationTests.Features.StorageReplication;
 
 namespace KeyLoad.IntegrationTests.Features.Search;
 
@@ -29,7 +29,7 @@ internal sealed class EventProjectionClusterSiloRestart(ClusterFixture fixture)
             restarted = true;
             var replay = ClusterReplicationTestSupport.Success(await clients.Callers[survivor].CommitAsync(
                 scenario.ApplyCommand(), cancellationToken));
-            await NativeSubmissionColdAssertions.ReceiptAsync(replay, original);
+            await SubmissionColdAssertions.ReceiptAsync(replay, original);
             await VerifyEveryNodeAsync(scenario, clients, nodes, cancellationToken);
         }
         catch (Exception failure) when (ClusterReplicationTestSupport.IsNonFatalCleanupFailure(failure))

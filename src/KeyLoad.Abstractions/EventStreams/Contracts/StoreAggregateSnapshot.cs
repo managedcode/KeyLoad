@@ -10,7 +10,7 @@ namespace KeyLoad;
 /// <param name="ExpectedSnapshotVersion">The prior version, or zero for an absent slot.</param>
 /// <param name="Generation">The current stream generation.</param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.StoreAggregateSnapshot)]
+[Orleans.Alias(ContractAliases.StoreAggregateSnapshot)]
 public sealed record StoreAggregateSnapshot([property: Orleans.Id(0)] string StreamSet,
     [property: Orleans.Id(1)] string StreamId, [property: Orleans.Id(2)] long SourceRevision,
     [property: Orleans.Id(3)] string ReducerVersion, [property: Orleans.Id(4)] int StateSchemaVersion,

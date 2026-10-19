@@ -12,7 +12,7 @@ internal sealed class GraphCrossPartitionReceiverTests
     private const string ConflictingFingerprint = "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
 
     [Test]
-    public async Task DuplicateTargetApplyIsAnIdempotentNativeNoOp()
+    public async Task DuplicateTargetApplyIsAnIdempotentNoOp()
     {
         using var database = GraphCrossPartitionTestSupport.CreateDatabase();
         var source = GraphCrossPartitionTestSupport.Partition(MachineKeySource);
@@ -47,7 +47,7 @@ internal sealed class GraphCrossPartitionReceiverTests
             new UpsertEdge(GraphCrossPartitionTestSupport.Graph, EdgeId, from, target, Label));
         var key = GraphCrossPartitionKeys.Reverse(target.Partition, GraphCrossPartitionTestSupport.Graph,
             target, source, EdgeId);
-        var conflicting = new GraphCrossPartitionReceiverStateV1(1, source,
+        var conflicting = new GraphCrossPartitionReceiverState(1, source,
             GraphCrossPartitionTestSupport.Graph, EdgeId, target, 1, false, ConflictingFingerprint);
         database.Store.Commit((transaction, _) =>
         {

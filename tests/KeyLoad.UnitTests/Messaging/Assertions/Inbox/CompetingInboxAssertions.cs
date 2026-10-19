@@ -59,7 +59,7 @@ internal static class CompetingInboxAssertions
     {
         var bytes = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
-        var identity = NativeReadCutStoreStateAssertions.SnapshotIdentity(store);
+        var identity = ReadCutStoreStateAssertions.SnapshotIdentity(store);
         for (var index = 0; index < state.Competitors.Length; index++)
         {
             var operation = state.Competitors[index];
@@ -69,12 +69,12 @@ internal static class CompetingInboxAssertions
             var replay = database.Apply(operation);
             if (Errors.Code(original.Problem) is null)
             {
-                await NativeReplayResultAssertions.Same<CommitReceipt>(replay, original);
+                await ReplayResultAssertions.Same<CommitReceipt>(replay, original);
             }
             else
             {
-                await Assert.That(NativeSerialization.Serialize(replay).AsSpan()
-                    .SequenceEqual(NativeSerialization.Serialize(original))).IsTrue();
+                await Assert.That(OrleansSerialization.Serialize(replay).AsSpan()
+                    .SequenceEqual(OrleansSerialization.Serialize(original))).IsTrue();
                 await Assert.That(replay.Value).IsNull();
                 await Assert.That(original.Value).IsNull();
             }

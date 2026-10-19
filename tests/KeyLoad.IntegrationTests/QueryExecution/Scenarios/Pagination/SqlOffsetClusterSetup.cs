@@ -1,5 +1,5 @@
 using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.ClusterRouting;
+using KeyLoad.IntegrationTests.Features.OrleansExecution;
 
 namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 
@@ -9,9 +9,9 @@ internal static class SqlOffsetClusterSetup
         CancellationToken token) => RunAsync(fixture, callers, null, token);
 
     internal static async Task<SqlOffsetClusterState> RunAsync(ClusterFixture fixture, RequestCqrsClusterCallers callers,
-        PartitionRef? nativePartition, CancellationToken token)
+        PartitionRef? runtimePartition, CancellationToken token)
     {
-        var partition = nativePartition ?? new PartitionRef("sql-offset-" + Guid.NewGuid().ToString("N"), "database", "domain", Guid.NewGuid().ToString("N"));
+        var partition = runtimePartition ?? new PartitionRef("sql-offset-" + Guid.NewGuid().ToString("N"), "database", "domain", Guid.NewGuid().ToString("N"));
         await ConfigureAsync(callers, partition, new(SqlOffsetClusterProtocol.Left, ResourceKind.Collection, partition.TransactionDomainId)
         {
             RelationalSchema = new(SqlOffsetClusterProtocol.Order, [new(SqlOffsetClusterProtocol.Order, RelationalColumnType.Text),

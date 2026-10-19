@@ -15,7 +15,7 @@ internal static class CliBackupRestoreUnsafeDestinationTrial
     private const string ErrorCodeProperty = "errorCode";
     private const string DetailProperty = "detail";
     private const string ConflictCode = "Conflict";
-    private const string ExpectedPathDetail = "The native backup destination is not a regular directory path.";
+    private const string ExpectedPathDetail = "The execution backup destination is not a regular directory path.";
     private const string ChangedLink = "The original fixture-owned destination link changed before cleanup.";
     private const string RestoreStagingPrefix = ".keyload-restore-";
     private const int FailedExit = 1;
@@ -116,6 +116,6 @@ internal static class CliBackupRestoreUnsafeDestinationTrial
     }
 
     private static async Task RequireLiteralAsync(ZoneTreeStore store)
-        => await Assert.That(store.Read(view => NativeSerialization.Deserialize<string>(
+        => await Assert.That(store.Read(view => OrleansSerialization.Deserialize<string>(
             view.ReadOwnedValue(CliBackupRestoreFixture.StoredKeyBytes)!))).IsEqualTo(CliBackupRestoreFixture.StoredValue);
 }

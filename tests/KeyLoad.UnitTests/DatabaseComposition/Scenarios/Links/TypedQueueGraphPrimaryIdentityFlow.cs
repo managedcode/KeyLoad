@@ -25,7 +25,7 @@ internal static class TypedQueueGraphPrimaryIdentityFlow
         };
         var record = from ? source.First : source.Second;
         await QueueGraphIdentityFlow.RunFaultAsync(source,
-            NativeSerialization.Serialize(record with
+            OrleansSerialization.Serialize(record with
             {
                 Json = json
             }));
@@ -67,7 +67,7 @@ internal static class TypedQueueGraphPrimaryIdentityFlow
                      new GraphToQueueMutation(QueueGraphIdentityState.Queue, QueueGraphIdentityState.Graph,
                         source.From, QueueGraphReplayState.NextPrefix)]),
                     new DateTimeOffset(reverse.Timestamp).AddSeconds(NextOffsetSeconds));
-                replay = new(source, reverse, NativeSerialization.Serialize(receipt), next, continuation);
+                replay = new(source, reverse, OrleansSerialization.Serialize(receipt), next, continuation);
                 await QueueGraphReplayAssertions.ContinueAsync(replay, engine, store);
                 source.ColdImage = global::KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(store);
                 source.ColdPosition = store.Position;

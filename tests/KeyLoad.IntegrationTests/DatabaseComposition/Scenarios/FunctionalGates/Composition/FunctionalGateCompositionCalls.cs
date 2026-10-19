@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
 using System.Text.Json;
 using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.ClusterReplication;
+using KeyLoad.IntegrationTests.Features.StorageReplication;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
 using P = KeyLoad.IntegrationTests.Features.DatabaseComposition.FunctionalGateCompositionProtocol;
 
@@ -37,7 +37,7 @@ internal static class FunctionalGateCompositionCalls
     {
         await Assert.That(actual.Token.AtomicPartitionId).IsEqualTo(context.Partition.AtomicPartitionId);
         await Assert.That(actual.Token.Position).IsGreaterThan(P.Absent);
-        await NativeSubmissionColdAssertions.ReceiptAsync(actual,
+        await SubmissionColdAssertions.ReceiptAsync(actual,
             new(commandId, actual.Token, effects, DurabilityProfile.ProcessDurable, context.ReplicaCount));
     }
 

@@ -4,7 +4,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
 
-/// <summary>Performs resource framing checks before the official SDK creates its native DOM.</summary>
+/// <summary>Performs resource framing checks before the official SDK creates its execution DOM.</summary>
 internal static class McpFrameBounds
 {
     private static readonly UTF8Encoding StrictUtf8 = new(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true);
@@ -12,7 +12,7 @@ internal static class McpFrameBounds
     /// <summary>Checks one object frame and returns its actual bounded structure counts.</summary>
     /// <param name="payload">The private complete UTF-8 wire buffer.</param>
     /// <param name="maximumBytes">The inclusive wire-byte ceiling.</param>
-    /// <param name="options">The centrally validated native MCP structural framing policy.</param>
+    /// <param name="options">The centrally validated execution MCP structural framing policy.</param>
     /// <returns>Counts used for retained-body admission.</returns>
     internal static McpFrameShape Inspect(ReadOnlySpan<byte> payload, int maximumBytes, IOptions<McpExecutionOptions> options)
         => InspectCore(payload, maximumBytes, options, requireObject: true);
@@ -20,16 +20,16 @@ internal static class McpFrameBounds
     /// <summary>Checks one arbitrary canonical result value using the same framing ceilings.</summary>
     /// <param name="payload">The owned complete canonical UTF-8 result.</param>
     /// <param name="maximumBytes">The inclusive byte ceiling for this result lane.</param>
-    /// <param name="options">The centrally validated native MCP structural framing policy.</param>
-    /// <returns>Counts used before native result DOM allocation.</returns>
+    /// <param name="options">The centrally validated execution MCP structural framing policy.</param>
+    /// <returns>Counts used before execution result DOM allocation.</returns>
     internal static McpFrameShape InspectValue(ReadOnlySpan<byte> payload, int maximumBytes, IOptions<McpExecutionOptions> options)
         => InspectCore(payload, maximumBytes, options, requireObject: false);
 
-    /// <summary>Checks a canonical result with room for the three native response wrappers.</summary>
+    /// <summary>Checks a canonical result with room for the three execution response wrappers.</summary>
     /// <param name="payload">The actual owned canonical result bytes.</param>
     /// <param name="maximumBytes">The inclusive canonical result ceiling.</param>
-    /// <param name="options">The centrally validated native MCP reply and framing policy.</param>
-    /// <returns>The bounded result shape before native output ownership is allocated.</returns>
+    /// <param name="options">The centrally validated execution MCP reply and framing policy.</param>
+    /// <returns>The bounded result shape before execution output ownership is allocated.</returns>
     internal static McpFrameShape InspectReply(ReadOnlySpan<byte> payload, int maximumBytes, IOptions<McpExecutionOptions> options)
     {
         var shape = InspectValue(payload, maximumBytes, options);

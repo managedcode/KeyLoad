@@ -117,7 +117,7 @@ internal sealed class LiveQueryExecutor(DatabaseEngine database, QueryEngine que
                 prepared.Paths) : null);
     }
 
-    private ResourceLifetimeV1 CaptureLifetime(IKeyValueView view, AstQueryRequest query,
+    private ResourceLifetime CaptureLifetime(IKeyValueView view, AstQueryRequest query,
         ResourceDefinition resource, ReadExecutionBudget budget)
         => budget.CaptureResourceLifetimes(database, view, query.Partition, [resource]).Lifetimes.Single();
 

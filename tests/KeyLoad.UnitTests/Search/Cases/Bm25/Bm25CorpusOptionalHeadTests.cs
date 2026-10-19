@@ -9,7 +9,7 @@ internal sealed class Bm25CorpusOptionalHeadTests
     [Test]
     [Arguments(false)]
     [Arguments(true)]
-    public Task InvalidOptionalNativeHeadDeclinesReuseWithoutChangingCanonicalSearchThenRestoredHeadIsHealthy(bool malformedBytes)
+    public Task InvalidOptionalHeadDeclinesReuseWithoutChangingCanonicalSearchThenRestoredHeadIsHealthy(bool malformedBytes)
         => Bm25CorpusPublicationFlow.RunAsync(async flow =>
         {
             var original = flow.Capture(Guid.NewGuid(), null);
@@ -19,7 +19,7 @@ internal sealed class Bm25CorpusOptionalHeadTests
             var bytes = flow.Database.Store.Read(view => view.ReadOwnedValue(key))
                 ?? throw new InvalidOperationException("The actual published head is missing.");
             var invalid = malformedBytes ? new byte[] { 0 }
-                : NativeSerialization.Serialize(current with
+                : OrleansSerialization.Serialize(current with
                 {
                     FormatVersion = 0
                 });
@@ -44,7 +44,7 @@ internal sealed class Bm25CorpusOptionalHeadTests
             }
             ServerFailureObserver.ThrowIfAny(failures);
             var restored = flow.Database.Store.Read(view => view.ReadOwnedValue(key))!;
-            await NativeReplayResultAssertions.BytesAsync(bytes, restored);
+            await ReplayResultAssertions.BytesAsync(bytes, restored);
             var healthyBefore = CanonicalStoreCut.Read(flow.Database);
             await Assert.That(flow.Current()!.DocumentCount).IsEqualTo(1);
             await Assert.That(flow.Current()!.TotalLength).IsEqualTo(1L);

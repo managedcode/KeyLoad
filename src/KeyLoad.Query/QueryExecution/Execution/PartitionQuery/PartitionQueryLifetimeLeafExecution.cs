@@ -3,31 +3,31 @@ using KeyLoad.Core.Features.ResourceExecution;
 
 namespace KeyLoad.Query.Features.QueryExecution;
 
-/// <summary>The selected V2 capability never accepts an old native root or manufactures source metadata.</summary>
+/// <summary>Executes the canonical leaf under mandatory source metadata and lifetime coverage.</summary>
 internal static class PartitionQueryLifetimeLeafExecution
 {
     private const string Invalid = "The partition query lifetime request is invalid.";
     private const string OwnerChanged = "The partition query receiving owner changed.";
 
-    internal static PartitionQueryLeafResultV1 ExecuteBound(QueryEngine engine, string principalId,
-        PartitionQueryOwnedLeafRequestV2 request, PhysicalShardRecord actualOwner, TimeProvider clock,
+    internal static PartitionQueryLeafResult ExecuteBound(QueryEngine engine, string principalId,
+        PartitionQueryOwnedLeafRequest request, PhysicalShardRecord actualOwner, TimeProvider clock,
         DateTimeOffset originalExpiry, IResourceLifetimeWorkBinding binding, CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(binding);
         return Execute(engine, principalId, request, actualOwner, clock, originalExpiry, token, binding);
     }
 
-    internal static PartitionQueryLeafResultV1 Execute(QueryEngine engine, string principalId,
-        PartitionQueryOwnedLeafRequestV2 request, PhysicalShardRecord actualOwner, TimeProvider clock,
+    internal static PartitionQueryLeafResult Execute(QueryEngine engine, string principalId,
+        PartitionQueryOwnedLeafRequest request, PhysicalShardRecord actualOwner, TimeProvider clock,
         DateTimeOffset originalExpiry, CancellationToken token, IResourceLifetimeWorkBinding? binding = null)
     {
         var database = engine.PartitionQueryOwner;
-        if (request is null || request.Original is null || request.Definition is null || request.Coverage is null
+        if (request is null || request.Definition is null || request.Coverage is null
             || request.Principal is null || request.Principal.Id != principalId)
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, Invalid);
         }
-        var original = request.Original;
+        var original = request;
         PartitionQueryOwnedLeafValidation.Validate(original, database.Limits, engine.Execution);
         database.VerifyStorageOwner(actualOwner, token);
         if (original.Owner != actualOwner)

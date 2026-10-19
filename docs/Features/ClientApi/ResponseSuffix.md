@@ -1,0 +1,22 @@
+# Complete response prefix with an invalid JSON suffix
+
+Applies to [ClientApi](../ClientApi.md), [SuccessfulResponseAdmission](SuccessfulResponseAdmission.md), [SuccessBodyRefusal](SuccessBodyRefusal.md), [ADR-035](../../ADR/ADR-035-memory-performance.md), [ADR-125](../../ADR/ADR-125-connection-owned-execution.md) and [ADR-117](../../ADR/ADR-117-tunit-ci-entry.md).
+
+REQ-EXECUTION-RESPONSE-SUFFIX-001 / AC-EXECUTION-RESPONSE-SUFFIX-001: ResponseSuffixTests.CompleteDtoWithTrailingJsonRefusesWholeResponseThenReplaysAndAdvancesHealthy executes the exact reviewed SuccessBody whole operation using an actual complete CommitReceipt or DocumentReadResult prefix followed by one space and a second JSON object. It exercises both explicit declared Content-Length and an undeclared Kestrel body. Each first faulty body is STRICTLY BELOW the same actual UnitClientOptions.MaximumResponseBodyBytes used by the real SDK. The entire selected body is written and CompleteAsync returns; there is no abort, withheld EOF, probe-byte overrun or fabricated DTO. The real SDK must reject the entire single-value response after its valid prefix, never return a partial successful DTO: write UnknownWriteOutcome and uncancelled read OwnershipLost, with complete independent public Problems and no value.
+
+REQ-EXECUTION-RESPONSE-SUFFIX-002 / AC-EXECUTION-RESPONSE-SUFFIX-002: Reuse the original complete eight-response operation, assertions and task ownership. A real signed Orleans command commits before the suffix response; original same-GUID replay returns the independently expected full receipt with complete literal revision1/current/outbox. A real signed read precedes its suffix response and healthy read follows. Same original GUID changed-content produces full Conflict with exact original canonical state; a fresh GUID commits literal revision2, its full independently built receipt and complete two-row outbox Before/After/token/time/sequence/head/no-consumer vector; healthy replay and final full document read preserve the complete canonical model and both original outcomes. Every response joins its actual SDK and handler task, and ProducerDisposed is observed. No new operation, fixture, provider, transport, model format, clock, resource policy or timeout is introduced.
+
+REQ-EXECUTION-RESPONSE-SUFFIX-003 / AC-EXECUTION-RESPONSE-SUFFIX-003: The explicit future-only two-image bridge keeps selected R156R2 Flow/Endpoint beforeimages and full postimages. Original null/{ callers use unchanged defaults appendPrefix=false and declareLength=true; their literal response bytes, operation order, full original goldens and cleanup remain intact. Nine other parent images remain byteexact. A new feature-local serialization helper owns only complete DTO/suffix byte composition; it adds no network/provider/fixture. The original literal refused-read branch remains lazy and does not decode its payload in the default false mode. One captured existing typed UnitClientOptions instance now supplies both endpoint cap and actual SDK, without changing its values. Existing Main held-EOF code and the current tracked files remain untouched.
+
+```mermaid
+flowchart LR
+ A[Actual commit or read] --> B[Complete DTO bytes]
+ B --> C[Space and second JSON root below actual cap]
+ C --> D[complete HTTP body]
+ D --> E[SDK whole-response safe refusal]
+ E --> F[Original full replay and current state]
+ F --> G[conflict then fresh revision2 and exact outbox]
+ G --> H[Original producer and owner joins]
+```
+
+This is distinct from declared/chunked premature EOF, opening malformed/null JSON, byte-cap overrun, held EOF and non2xx Problem-boundary controls. The invalid suffix is HTTP response transformation only; the actual database operation remains genuine. Prefix length metadata alone is not advertised as an independent receipt oracle: the unchanged whole operation independently verifies the complete original receipt and literal read/current model before any baseline freezes. The source bridge retains the exact original body-first error ledger, same original disposalTask, completion/TUnit token and shutdown policy. One actual Orleans test silo and real journal/materializer/storage are not cluster/multi-copy qualification. No SDK/build/test/parser/analyzer/style/preflight/Git/SourceY execution occurred.

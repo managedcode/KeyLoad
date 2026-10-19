@@ -19,8 +19,8 @@ internal static class AnnProviderQualificationProtocol
     internal const string HealthySnapshotFile = "ann-provider-qualification-healthy.bin";
     internal const string MissingOriginal = "The original ANN qualification history is missing.";
     internal const string WrongRoot = "The original ANN qualification root must remain canonical, existing and nonempty.";
-    internal const string MissingOwner = "The original ANN qualification native owner is closed.";
-    internal const string ExpectedRefusal = "The actual native ANN loader did not return its semantic refusal.";
+    internal const string MissingOwner = "The original ANN qualification execution owner is closed.";
+    internal const string ExpectedRefusal = "The actual execution ANN loader did not return its semantic refusal.";
     internal const string InvalidDamage = "The ANN qualification damage kind is invalid.";
     internal const string MissingContext = "The ANN qualification execution context is missing.";
     internal const int Dimension = 2;

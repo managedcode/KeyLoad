@@ -52,7 +52,7 @@ internal static class QueueReadyAuthorityHealthy
         var image = QueueWholeFlowStorage.Bytes(fixture.Store);
         var cut = fixture.ReadCanonicalCut();
         var replay = fixture.SubmitIssued(original).Get<CommitReceipt>();
-        await Assert.That(NativeSerialization.Serialize(replay)).IsEquivalentTo(NativeSerialization.Serialize(result), TUnit.Assertions.Enums.CollectionOrdering.Matching);
+        await Assert.That(OrleansSerialization.Serialize(replay)).IsEquivalentTo(OrleansSerialization.Serialize(result), TUnit.Assertions.Enums.CollectionOrdering.Matching);
         await Assert.That(QueueWholeFlowStorage.Bytes(fixture.Store)).IsEquivalentTo(image, TUnit.Assertions.Enums.CollectionOrdering.Matching);
         await Assert.That(fixture.ReadCanonicalCut()).IsEqualTo(cut);
         await Assert.That(fixture.Database.InspectMessage("root", lane, delivery.Id)!.Metadata.State).IsEqualTo(MessageState.Acked);

@@ -4,7 +4,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
 
-/// <summary>Adds explicit native HTTP/2 while retaining the original configured listener bindings.</summary>
+/// <summary>Adds explicit execution HTTP/2 while retaining the original configured listener bindings.</summary>
 [ConfigurationBinding]
 internal static class ServerConnectionTransportComposition
 {

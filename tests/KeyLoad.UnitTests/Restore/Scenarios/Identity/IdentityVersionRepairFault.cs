@@ -14,7 +14,7 @@ internal static class IdentityVersionRepairFault
         {
             throw new InvalidOperationException("The fixture original identity checksum is invalid.");
         }
-        var identity = NativeSerialization.Deserialize<StoreIdentity>(envelope.Payload);
+        var identity = OrleansSerialization.Deserialize<StoreIdentity>(envelope.Payload);
         var changed = codecVersion
             ? identity with
             {
@@ -24,7 +24,7 @@ internal static class IdentityVersionRepairFault
             {
                 FormatVersion = checked(identity.FormatVersion + 1)
             };
-        var payload = NativeSerialization.Serialize(changed);
+        var payload = OrleansSerialization.Serialize(changed);
         return ZoneTreeMetadataBinary.Write(new ZoneTreeIdentityEnvelope(payload, SHA256.HashData(payload)),
             ZoneTreeMetadataBinary.IdentityMagic);
     }

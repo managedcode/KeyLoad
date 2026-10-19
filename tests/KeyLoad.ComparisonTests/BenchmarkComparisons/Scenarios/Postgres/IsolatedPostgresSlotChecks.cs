@@ -3,7 +3,7 @@ using Npgsql;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
-/// <summary>AC-ISO-002/003/006: native slots remain bound to actual copies across WAL recycling checkpoints.</summary>
+/// <summary>AC-ISO-002/003/006: execution slots remain bound to actual copies across WAL recycling checkpoints.</summary>
 internal static class IsolatedPostgresSlotChecks
 {
     private const string Settings = "SELECT pg_size_bytes(current_setting('max_slot_wal_keep_size')), pg_is_in_recovery()";
@@ -75,7 +75,7 @@ internal static class IsolatedPostgresSlotChecks
 
     private static async Task WaitForCopiesAsync(NpgsqlConnection connection, int expected, string cut, CancellationToken token)
     {
-        using var deadlineTimeout = new CancellationTokenSource(NativeExecutionPolicyFixture.Harness().Value.PostgresSlotObservationTimeout, TimeProvider.System);
+        using var deadlineTimeout = new CancellationTokenSource(ExecutionPolicyFixture.Harness().Value.PostgresSlotObservationTimeout, TimeProvider.System);
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(token, deadlineTimeout.Token);
         while (true)
         {

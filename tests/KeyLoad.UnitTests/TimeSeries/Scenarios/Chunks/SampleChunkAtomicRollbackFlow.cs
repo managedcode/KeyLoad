@@ -11,7 +11,7 @@ internal static class SampleChunkAtomicRollbackFlow
     private const string AppendKind = "appendSamples";
     private const string SealKind = "sealSampleChunkWindow";
     private const string MergeKind = "mergeSampleChunkWindow";
-    private const string RevisionConflict = "The native series chunk window revision changed.";
+    private const string RevisionConflict = "The execution series chunk window revision changed.";
 
     internal static async Task RunAsync()
     {

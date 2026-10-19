@@ -7,7 +7,7 @@ namespace KeyLoad.IntegrationTests.Features.ResourceExecution;
 internal sealed class SlowBodyAdmissionReturnTransport : IDisposable
 {
     private const string SecondSocket = "The slow-body attempt unexpectedly opened a second socket.";
-    private const string MissingSocket = "No original native socket was connected.";
+    private const string MissingSocket = "No original execution socket was connected.";
     private readonly SocketsHttpHandler handler;
     private Socket? socket;
     internal HttpClient Client

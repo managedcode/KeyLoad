@@ -20,7 +20,7 @@ internal static class ComparisonExecutionIdentitySupport
     internal const string ImageDigest = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
     internal const string PrivateCanary = "private-provenance-canary-6af143";
 
-    internal static Dictionary<string, string> ValidSettings(string profile = "session-v1")
+    internal static Dictionary<string, string> ValidSettings(string profile = "session")
     {
         var settings = ComparisonHostBindingsSupport.ValidSettings();
         settings[GitHubActions] = "true";

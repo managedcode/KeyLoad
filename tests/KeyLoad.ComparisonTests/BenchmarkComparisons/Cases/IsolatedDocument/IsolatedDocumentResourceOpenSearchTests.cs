@@ -11,11 +11,11 @@ internal sealed class IsolatedDocumentResourceOpenSearchTests
     private const string Seeds = "discovery.seed_hosts";
     private const string Managers = "cluster.initial_cluster_manager_nodes";
 
-    /// <summary>AC-ISO-002/003/006: genuine native discovery, official entrypoint and fresh private volumes.</summary>
+    /// <summary>AC-ISO-002/003/006: genuine execution discovery, official entrypoint and fresh private volumes.</summary>
     [Test]
     [Arguments(1)]
     [Arguments(3)]
-    public async Task SelectedGroupUsesExactNativeDiscoveryAndExplicitUnauthenticatedProfile(int count)
+    public async Task SelectedGroupUsesExactDiscoveryAndExplicitUnauthenticatedProfile(int count)
     {
         await using var fixture = new IsolatedResourceTopologyFixture(Target, count);
         IsolatedOpenSearchResources.Add(fixture.Context);
@@ -43,6 +43,6 @@ internal sealed class IsolatedDocumentResourceOpenSearchTests
         var runner = await IsolatedResourceTopologyFixture.EnvironmentAsync(fixture.Context.Client);
         await Assert.That(runner[IsolatedDocumentResourceAssertions.Image]).IsEqualTo(
             "opensearchproject/opensearch:3.6.0@" + BenchmarkResources.OpenSearchDigest);
-        await Assert.That(runner.ContainsKey(IsolatedDocumentResourceAssertions.NativePrefix + T.NativePassword)).IsFalse();
+        await Assert.That(runner.ContainsKey(IsolatedDocumentResourceAssertions.RuntimePrefix + T.RuntimePassword)).IsFalse();
     }
 }

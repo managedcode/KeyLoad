@@ -42,14 +42,14 @@ internal static class QueueViewLeaseIsolationProtocol
     internal const string Star = "*";
     internal const string EnqueueKind = "enqueue";
     internal const string AppendKind = "appendEvents";
-    internal const string Absent = "The original native lease-view authority is absent.";
+    internal const string Absent = "The original execution lease-view authority is absent.";
     internal const string Equal = "=";
     internal const string PrivateValue = "private-queue-canary";
     internal const string PrivateField = "/payload/secret";
     internal const string RenewKind = "Renew";
     internal const string AckKind = "Ack";
     internal const string ExplainId = "explain";
-    internal const string WrongRoot = "The original native lease-view roots must exist and remain nonempty.";
+    internal const string WrongRoot = "The original execution lease-view roots must exist and remain nonempty.";
     internal const string MaskedNotBeforeJsonValue = "1970-01-01T00:00:00+00:00";
     internal const string CreatedValue = "created";
     internal const string PaidValue = "paid";

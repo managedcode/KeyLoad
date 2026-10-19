@@ -9,11 +9,11 @@ internal static class BenchmarkArtifactRegistration
 {
     private const string SettingSeparator = ":";
 
-    internal static IOptions<BenchmarkArtifactOptions> ReadNativeSerialization()
+    internal static IOptions<BenchmarkArtifactOptions> RuntimeReadSerialization()
         => Read(new Dictionary<string, string?>
         {
-            [Key(nameof(BenchmarkArtifactOptions.NativeSerializationDirectory))] =
-                Environment.GetEnvironmentVariable(NativeSerializationBenchmarkManifest.DirectoryVariable)
+            [Key(nameof(BenchmarkArtifactOptions.SerializationDirectory))] =
+                Environment.GetEnvironmentVariable(SerializationBenchmarkManifest.DirectoryVariable)
         });
 
     internal static IOptions<BenchmarkArtifactOptions> ReadSampleChunk()

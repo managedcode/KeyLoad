@@ -19,7 +19,7 @@ internal static class TargetInboxCapacityAuthorityFlow
     {
         var token = TestContext.Current!.Execution.CancellationToken;
         var state = TargetInboxCapacityAuthorityFixture.Seed(source, token);
-        await TargetInboxNativeAssertions.CapacityAsync(source.Store, state.Original,
+        await TargetInboxAssertions.CapacityAsync(source.Store, state.Original,
             TargetInboxCapacityAuthorityFixture.SecondGeneration);
         var original = QueueWholeFlowStorage.Bytes(source.Store);
         var position = source.Store.Position;

@@ -21,7 +21,7 @@ internal static class ScriptDomParameterLowering
         {
             throw ScriptDomErrors.Unsupported();
         }
-        if (!ScriptDomSyntax.TryGetNativeSessionSlot(literal, count, out var canonicalName))
+        if (!ScriptDomSyntax.TryGetSessionSlot(literal, count, out var canonicalName))
         {
             throw ScriptDomErrors.Invalid();
         }

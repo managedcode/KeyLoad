@@ -38,8 +38,8 @@ internal static class QueueLifecycleOperations
             var actual = state.SubmitOriginal(database, operation);
             await Assert.That(Errors.Code(actual.Problem)).IsEqualTo(Errors.Code(result.Problem));
             await Assert.That(actual.Problem?.Detail).IsEqualTo(result.Problem?.Detail);
-            await Assert.That(NativeSerialization.Serialize(actual).AsSpan()
-                .SequenceEqual(NativeSerialization.Serialize(result))).IsTrue();
+            await Assert.That(OrleansSerialization.Serialize(actual).AsSpan()
+                .SequenceEqual(OrleansSerialization.Serialize(result))).IsTrue();
             await Assert.That(actual.Value).IsNull();
             await QueueLifecycleReplayCutAssertions.SameAsync(database.Store, before);
         }
@@ -60,11 +60,11 @@ internal static class QueueLifecycleOperations
             }
             else if (operation.Value!.Kind == OperationKind.ConfigurePrincipal)
             {
-                await NativeReplayResultAssertions.Same<PrincipalRecord>(actual, result);
+                await ReplayResultAssertions.Same<PrincipalRecord>(actual, result);
             }
             else
             {
-                await NativeReplayResultAssertions.Same<CommitReceipt>(actual, result);
+                await ReplayResultAssertions.Same<CommitReceipt>(actual, result);
             }
             await QueueLifecycleReplayCutAssertions.SameAsync(database.Store, before);
         }
@@ -72,8 +72,8 @@ internal static class QueueLifecycleOperations
 
     private static async Task DispatchReplayAsync(Result<object> actual, Result<object> expected)
     {
-        await Assert.That(NativeSerialization.Serialize(actual).AsSpan()
-            .SequenceEqual(NativeSerialization.Serialize(expected))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(actual).AsSpan()
+            .SequenceEqual(OrleansSerialization.Serialize(expected))).IsTrue();
         await Assert.That(Errors.Code(actual.Problem)).IsEqualTo(Errors.Code(expected.Problem));
         await Assert.That(actual.Problem?.Detail).IsEqualTo(expected.Problem?.Detail);
         await Assert.That(actual.Value?.GetType()).IsEqualTo(typeof(bool));

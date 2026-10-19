@@ -4,7 +4,7 @@ using System.Text.Json.Schema;
 
 namespace KeyLoad.Server;
 
-/// <summary>Bounded format annotations and native metadata-preserving enum projection.</summary>
+/// <summary>Bounded format annotations and execution metadata-preserving enum projection.</summary>
 internal static class McpSchemaTransform
 {
     internal static JsonNode Input(JsonSchemaExporterContext context, JsonNode schema) => Transform(context, schema, true);

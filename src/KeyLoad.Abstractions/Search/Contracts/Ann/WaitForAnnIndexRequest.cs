@@ -1,6 +1,6 @@
 namespace KeyLoad;
 
-/// <summary>Requires an explicitly provisioned native ANN generation to cover an acknowledged minimum prefix.</summary>
+/// <summary>Requires an explicitly provisioned execution ANN generation to cover an acknowledged minimum prefix.</summary>
 [Orleans.GenerateSerializer, Orleans.Alias(WaitForAnnIndexProtocol.RequestAlias)]
 public sealed record WaitForAnnIndexRequest(
     [property: Orleans.Id(0)] PartitionRef Partition,

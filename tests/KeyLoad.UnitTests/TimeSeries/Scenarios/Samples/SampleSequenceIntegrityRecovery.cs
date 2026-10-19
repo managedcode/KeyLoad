@@ -6,7 +6,7 @@ namespace KeyLoad.UnitTests.Features.TimeSeries;
 
 internal static class SampleSequenceIntegrityRecovery
 {
-    private const string Missing = "The successful original native sequence outcome is absent.";
+    private const string Missing = "The successful original execution sequence outcome is absent.";
     private const string MissingOutcome = "The applied command has no durable outcome.";
 
     internal static async Task RunAsync(SampleSequenceIntegrityFixture fixture, byte[] counter, long persistedSequence,
@@ -15,10 +15,10 @@ internal static class SampleSequenceIntegrityRecovery
         var command = new CommandRequest(Guid.NewGuid(), fixture.Source.Owner.Partition,
             [SampleSequenceIntegrityFlow.Append()]);
         var issued = fixture.Database.CreateCommand(OperationKind.Batch, command.CommandId, P.Principal,
-            TimeProvider.System.GetUtcNow(), NativeSerialization.Serialize(command));
+            TimeProvider.System.GetUtcNow(), OrleansSerialization.Serialize(command));
         var image = SampleChunkCorrectionBoundColdAssertions.Image(fixture.Store);
         var cut = fixture.ReadCanonicalCut();
-        var identity = KeyLoad.UnitTests.Features.StorageRecovery.Assertions.NativeReadCutStoreStateAssertions.SnapshotIdentity(fixture.Store);
+        var identity = KeyLoad.UnitTests.Features.StorageRecovery.Assertions.ReadCutStoreStateAssertions.SnapshotIdentity(fixture.Store);
         var first = Assert.ThrowsExactly<KeyLoadException>(() => fixture.Database.ApplyEmbedded(issued, token));
         await Assert.That(first.Code).IsEqualTo(ErrorCode.Corruption);
         await RefusedAsync(fixture, issued, image, cut);
@@ -26,9 +26,9 @@ internal static class SampleSequenceIntegrityRecovery
         await Assert.That(repeated.Code).IsEqualTo(ErrorCode.Corruption);
         await Assert.That(repeated.Message).IsEqualTo(first.Message);
         await RefusedAsync(fixture, issued, image, cut);
-        await KeyLoad.UnitTests.Features.StorageRecovery.Assertions.NativeReadCutStoreStateAssertions.AssertIdentityAndPositionAsync(
+        await KeyLoad.UnitTests.Features.StorageRecovery.Assertions.ReadCutStoreStateAssertions.AssertIdentityAndPositionAsync(
             fixture.Store, identity, cut.StorePosition);
-        await SampleSequenceIntegrityAssertions.CounterAsync(fixture, NativeSerialization.Serialize(persistedSequence));
+        await SampleSequenceIntegrityAssertions.CounterAsync(fixture, OrleansSerialization.Serialize(persistedSequence));
         await SampleSequenceIntegrityAssertions.ReadRefusalAsync(fixture, token);
         fixture.PutCounter(counter);
         await SampleSequenceIntegrityAssertions.CounterAsync(fixture, counter);
@@ -57,12 +57,12 @@ internal static class SampleSequenceIntegrityRecovery
         var result = fixture.Database.ApplyEmbedded(issued, token);
         var outcomeBytes = fixture.Store.Read(view => view.ReadOwnedValue(OutcomeStoreOracle.Key(issued)))
             ?? throw new InvalidOperationException(Missing);
-        var recovered = NativeSerialization.Deserialize<StoredOutcome>(outcomeBytes);
+        var recovered = OrleansSerialization.Deserialize<StoredOutcome>(outcomeBytes);
         var original = recovered.PreparedCommand;
         var expectedSequence = cut.AppliedPosition + 1;
         await Assert.That(recovered.CanonicalSequence).IsEqualTo(expectedSequence);
         await SampleSequenceIntegrityAssertions.EqualAsync(command,
-            NativeSerialization.Deserialize<CommandRequest>(original.Value!.Input.Span, NativeValidationProfile.PublicInputElements));
+            OrleansSerialization.Deserialize<CommandRequest>(original.Value!.Input.Span, ValidationProfile.PublicInputElements));
         await Assert.That(original.CommandId).IsEqualTo(issued.CommandId);
         await Assert.That(original.UserId!).IsEqualTo(P.Principal);
         await Assert.That(original.Timestamp >= issued.Timestamp).IsTrue();

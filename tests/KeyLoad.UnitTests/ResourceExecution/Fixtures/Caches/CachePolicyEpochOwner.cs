@@ -9,7 +9,7 @@ namespace KeyLoad.UnitTests.Features.ResourceExecution;
 
 internal sealed class CachePolicyEpochOwner : IDisposable
 {
-    private readonly List<NativeStorageOwnerSettlement> attempts = [];
+    private readonly List<StorageOwnerSettlement> attempts = [];
     private readonly Func<ZoneTreeStore, DatabaseEngine> createDatabase;
     private ZoneTreeStore? store;
     private bool closeAttempted;
@@ -42,7 +42,7 @@ internal sealed class CachePolicyEpochOwner : IDisposable
     internal CachePolicyEpochOwner()
     {
         createDatabase = TestDatabaseEngineFactory.Capture(UnitExecutionOptions.DatabaseLimits(),
-            UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), null, TimeProvider.System);
+            UnitExecutionOptions.RuntimeClaimsExecution(), null, TimeProvider.System);
     }
 
     internal void Open(bool first)
@@ -52,7 +52,7 @@ internal sealed class CachePolicyEpochOwner : IDisposable
         {
             throw new InvalidOperationException(P.UnknownOwner);
         }
-        var attempt = new NativeStorageOwnerSettlement();
+        var attempt = new StorageOwnerSettlement();
         attempts.Add(attempt);
         closeAttempted = false;
         store = ZoneTreeStore.OpenOwned(new(Directory)

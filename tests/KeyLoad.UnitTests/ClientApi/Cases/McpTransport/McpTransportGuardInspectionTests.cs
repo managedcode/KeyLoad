@@ -7,8 +7,8 @@ namespace KeyLoad.UnitTests.Features.ClientApi;
 internal sealed class McpTransportGuardInspectionTests
 {
     /// <summary>A present target is selected by the body method even when the HTTP method header is absent.</summary>
-    /// <param name="method">The native method that selects name or URI.</param>
-    /// <param name="field">The native target parameter key.</param>
+    /// <param name="method">The execution method that selects name or URI.</param>
+    /// <param name="field">The execution target parameter key.</param>
     /// <param name="target">The exact target value.</param>
     [Test]
     [Arguments(RequestMethods.ToolsCall, McpTransportGuardTestData.NameField, McpTransportGuardTestData.Target)]
@@ -28,8 +28,8 @@ internal sealed class McpTransportGuardInspectionTests
     }
 
     /// <summary>A mismatched target is rejected according to the body-selected field even without a method header.</summary>
-    /// <param name="method">The native body method that selects the target field.</param>
-    /// <param name="field">The native target parameter key.</param>
+    /// <param name="method">The execution body method that selects the target field.</param>
+    /// <param name="field">The execution target parameter key.</param>
     [Test]
     [Arguments(RequestMethods.ToolsCall, McpTransportGuardTestData.NameField)]
     [Arguments(RequestMethods.PromptsGet, McpTransportGuardTestData.NameField)]
@@ -46,12 +46,12 @@ internal sealed class McpTransportGuardInspectionTests
         await Assert.That(error.Message).DoesNotContain(McpTransportGuardTestData.Marker);
     }
 
-    /// <summary>Absent or unrouted body methods do not invent target routing ahead of native protocol validation.</summary>
+    /// <summary>Absent or unrouted body methods do not invent target routing ahead of execution protocol validation.</summary>
     /// <param name="missingMethod">Whether to omit the body method rather than use a method without target routing.</param>
     [Test]
     [Arguments(true)]
     [Arguments(false)]
-    public async Task UnroutedBodyMethodLeavesNativeValidationIntact(bool missingMethod)
+    public async Task UnroutedBodyMethodLeavesValidationIntact(bool missingMethod)
     {
         var method = missingMethod ? null : RequestMethods.ServerDiscover;
         var wire = McpTransportGuardTestData.Frame(method, new()
@@ -63,7 +63,7 @@ internal sealed class McpTransportGuardInspectionTests
         await Assert.That(wire.AsSpan().SequenceEqual(snapshot)).IsTrue();
     }
 
-    /// <summary>Wrong type or mismatched transport fields use fixed safe Validation before native parsing.</summary>
+    /// <summary>Wrong type or mismatched transport fields use fixed safe Validation before execution parsing.</summary>
     /// <param name="fault">The concrete body mutation.</param>
     [Test]
     [Arguments(McpTransportFrameFault.MethodMismatch)]
@@ -88,7 +88,7 @@ internal sealed class McpTransportGuardInspectionTests
         await Assert.That(error.Message).DoesNotContain(McpTransportGuardTestData.Marker);
     }
 
-    /// <summary>Both native version locations match the pinned revision without altering the serialized payload.</summary>
+    /// <summary>Both execution version locations match the pinned revision without altering the serialized payload.</summary>
     [Test]
     public async Task MatchingProtocolFieldsPreserveExactWireBytes()
     {
@@ -103,7 +103,7 @@ internal sealed class McpTransportGuardInspectionTests
         await Assert.That(wire.AsSpan().SequenceEqual(snapshot)).IsTrue();
     }
 
-    /// <summary>Missing optional routing headers and protocol metadata are left for the native SDK.</summary>
+    /// <summary>Missing optional routing headers and protocol metadata are left for the execution SDK.</summary>
     [Test]
     public async Task AbsentOptionalTransportFieldsAreNotInvented()
     {

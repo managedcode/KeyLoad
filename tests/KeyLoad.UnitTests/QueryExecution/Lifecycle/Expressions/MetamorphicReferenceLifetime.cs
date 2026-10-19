@@ -10,7 +10,7 @@ internal static class MetamorphicReferenceLifetime
     {
         var image = SqlInnerJoinRetainedIdentityFlow.Image(store);
         var cut = store.Position;
-        var identity = NativeSerialization.Serialize(store.Identity);
+        var identity = OrleansSerialization.Serialize(store.Identity);
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(operation, failures);
         await ServerFailureObserver.ObserveAsync(() => ConserveAsync(store, image, cut, identity), failures);
@@ -22,7 +22,7 @@ internal static class MetamorphicReferenceLifetime
         await ServerFailureObserver.ObserveAsync(async () => await Assert.That(SqlInnerJoinRetainedIdentityFlow.Image(store)
             .SequenceEqual(image, StringComparer.Ordinal)).IsTrue(), failures);
         await ServerFailureObserver.ObserveAsync(async () => await Assert.That(store.Position).IsEqualTo(cut), failures);
-        await ServerFailureObserver.ObserveAsync(async () => await Assert.That(NativeSerialization.Serialize(store.Identity)
+        await ServerFailureObserver.ObserveAsync(async () => await Assert.That(OrleansSerialization.Serialize(store.Identity)
             .AsSpan().SequenceEqual(identity)).IsTrue(), failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }
@@ -32,7 +32,7 @@ internal static class MetamorphicReferenceLifetime
             var operation = database.CreateCommand(OperationKind.Batch, fixture.Seed.CommandId, "root", default, System.Text.Json.JsonSerializer.Serialize(fixture.Seed, JsonDefaults.Options));
             var actual = database.ApplyEmbedded(operation, token).Get<CommitReceipt>();
             await MetamorphicReferenceAssertions.EqualAsync(actual, fixture.Receipt);
-            await MetamorphicReferenceFixture.NativeReceiptAsync(actual);
+            await MetamorphicReferenceFixture.RuntimeReceiptAsync(actual);
             var bytes = store.Read(view => view.ReadOwnedValue(KeySpace.PartitionOutcome(fixture.Seed.Partition, "root", fixture.Seed.CommandId)))!;
             await Assert.That(bytes.AsSpan().SequenceEqual(fixture.Outcome)).IsTrue();
         });
@@ -43,7 +43,7 @@ internal static class MetamorphicReferenceLifetime
         var image = SqlInnerJoinRetainedIdentityFlow.Image(db.Store);
         var cut = db.Store.Position;
         var identity = db.Store.Identity;
-        var bytes = NativeSerialization.Serialize(identity);
+        var bytes = OrleansSerialization.Serialize(identity);
         db.JoinOwnedResources();
         var failures = new List<Exception>();
         for (var cycle = 0; cycle < 2; cycle++)

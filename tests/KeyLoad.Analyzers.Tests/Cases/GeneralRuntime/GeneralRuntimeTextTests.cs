@@ -4,7 +4,7 @@ namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
 internal sealed class GeneralRuntimeTextTests
 {
     [Test]
-    public async Task NativeFriendAssemblyIdentityIsCompilerMetadataAsync()
+    public async Task FriendAssemblyIdentityIsCompilerMetadataAsync()
     {
         const string source = """
             [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("KeyLoad.Analyzers.Tests")]
@@ -54,7 +54,7 @@ internal sealed class GeneralRuntimeTextTests
     [Arguments("return [|'x'|];")]
     [Arguments("return [|@\"raw\\text\"|];")]
     [Arguments("return [|\"\"\"raw\"\"\"|];")]
-    [Arguments("return [|\"native\"u8|].ToArray();")]
+    [Arguments("return [|\"execution\"u8|].ToArray();")]
     public async Task ReturnAndUtf8PayloadLiteralsRequireNamedIdentitiesAsync(string operation)
     {
         var source = $$"""

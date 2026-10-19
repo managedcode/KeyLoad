@@ -1,21 +1,21 @@
 using System.Collections.Immutable;
 using System.Text.Json;
-using KeyLoad.AppHost.Features.ClusterReplication;
+using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.Comparisons;
 using KeyLoad.Diagnostics.Features.ResourceExecution;
 using Microsoft.Extensions.Configuration;
 
 namespace KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
 
-/// <summary>Requires real native process identities before opening a KeyLoad workload client.</summary>
+/// <summary>Requires real execution process identities before opening a KeyLoad workload client.</summary>
 [ConfigurationBinding]
 internal static class BenchmarkSessionProcessEvidence
 {
-    internal const string ServerSetting = "Benchmarks:Native:Processes";
+    internal const string ServerSetting = "Benchmarks:Execution:Processes";
     private const string ClientName = "comparison-client";
     private const string KeyLoad = "KeyLoad";
-    private const string NativeServersRequired = "The KeyLoad workload requires observed native server processes.";
-    private const string NativeServerTopologyMismatch = "The observed native server process set does not match the selected topology.";
+    private const string ServersRequired = "The KeyLoad workload requires observed execution server processes.";
+    private const string ServerTopologyMismatch = "The observed execution server process set does not match the selected topology.";
     private const int MinimumProcessId = 1;
     private const int MaximumCharacters = 131_072;
     private static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web);
@@ -30,9 +30,9 @@ internal static class BenchmarkSessionProcessEvidence
         var text = configuration[ServerSetting];
         if (text is null || text.Length > MaximumCharacters)
         {
-            throw new InvalidDataException(NativeServersRequired);
+            throw new InvalidDataException(ServersRequired);
         }
-        var servers = JsonSerializer.Deserialize<ImmutableArray<NativeProcessEvidence>>(text, Json);
+        var servers = JsonSerializer.Deserialize<ImmutableArray<ProcessEvidence>>(text, Json);
         if (servers.IsDefault || servers.Length != selection.NodeCount
             || servers.Select(server => server.Name).Distinct(StringComparer.Ordinal).Count() != servers.Length
             || servers.Select(server => server.ProcessId).Distinct().Count() != servers.Length
@@ -41,7 +41,7 @@ internal static class BenchmarkSessionProcessEvidence
                 || server.AspireProcessStartedAtUtc is null
                 || server.AspireProcessStartedAtUtc > server.StartedAtUtc))
         {
-            throw new InvalidDataException(NativeServerTopologyMismatch);
+            throw new InvalidDataException(ServerTopologyMismatch);
         }
         foreach (var server in servers)
         {

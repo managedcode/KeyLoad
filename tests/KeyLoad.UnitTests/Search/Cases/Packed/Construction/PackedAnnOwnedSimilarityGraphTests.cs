@@ -8,7 +8,7 @@ internal sealed class PackedAnnOwnedSimilarityGraphTests
     private const int Dimension = 4;
 
     [Test]
-    public async Task AcAnn009DotProductRankSelectionKeepsUniqueBoundedNativeGraphAdjacency()
+    public async Task AcAnn009DotProductRankSelectionKeepsUniqueBoundedGraphAdjacency()
     {
         using var database = PackedAnnOwnedSimilarityTestSupport.CreateDatabase();
         const DistanceMetric metric = DistanceMetric.DotProduct;

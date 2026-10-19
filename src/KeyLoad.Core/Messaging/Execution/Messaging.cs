@@ -37,7 +37,7 @@ public sealed partial class DatabaseEngine
         return counters;
     }
     private bool DispatchPaused(IKeyValueView view) => view.ReadOwnedValue(KeyCodec.Encode(MessagingSystemKeySpace, MessagingDispatchPausedKey)) is { } value
-        ? NativeSerialization.Deserialize<bool>(value) : Store.Identity.DispatchPaused;
+        ? OrleansSerialization.Deserialize<bool>(value) : Store.Identity.DispatchPaused;
     private MutationReceipt Enqueue(IAtomicTransaction tx, PrincipalRecord principal, PartitionRef partition, EnqueueMessage message, DateTimeOffset now)
     {
         JsonData.Identifier(message.MessageId);
@@ -76,7 +76,7 @@ public sealed partial class DatabaseEngine
         ResourceDefinition resource, MessageBody body, DateTimeOffset now)
     {
         var counters = Counters(tx, lane);
-        var payload = NativeSerialization.Serialize(body);
+        var payload = OrleansSerialization.Serialize(body);
         var size = payload.LongLength;
         if (counters.StoredMessages >= resource.QueuePolicy.MaxStoredMessages
             || size > resource.QueuePolicy.MaxStoredBytes - counters.StoredBytes)
@@ -130,16 +130,16 @@ public sealed partial class DatabaseEngine
         return ClaimReadyMessages(tx, principal, request, resource, now, position);
     }
 
-    /// <summary>Signs versioned native claim bytes with the persisted store signing key.</summary>
+    /// <summary>Signs versioned execution claim bytes with the persisted store signing key.</summary>
     /// <typeparam name="T">Claim type.</typeparam>
     /// <param name="claims">Claim value to sign.</param>
     /// <returns>Signed URL-safe token.</returns>
     public string Sign<T>(T claims)
-        => CoreNativeClaims.Sign(Store.Identity.SigningKey.Span, claims);
-    /// <summary>Verifies a signed token and restores its native claims.</summary>
+        => CoreClaims.Sign(Store.Identity.SigningKey.Span, claims);
+    /// <summary>Verifies a signed token and restores its execution claims.</summary>
     /// <typeparam name="T">Claim type.</typeparam>
     /// <param name="token">Signed token.</param>
-    /// <returns>Verified claims admitted by the captured native execution policy.</returns>
+    /// <returns>Verified claims admitted by the captured execution execution policy.</returns>
     public T Verify<T>(string token) => Verify<T>(token, ClaimsExecution.MaximumTokenCharacters);
 
     /// <summary>Verifies a signed token using an explicitly bounded operand limit.</summary>
@@ -148,7 +148,7 @@ public sealed partial class DatabaseEngine
     /// <param name="maximumCharacters">Maximum accepted token length.</param>
     /// <returns>Verified claims.</returns>
     public T Verify<T>(string token, int maximumCharacters)
-        => CoreNativeClaims.Verify<T>(Store.Identity.SigningKey.Span, token, maximumCharacters);
+        => CoreClaims.Verify<T>(Store.Identity.SigningKey.Span, token, maximumCharacters);
     private ValidatedQueueLease Lease(IKeyValueView view, PrincipalRecord principal,
         QueueLaneRef lane, string token, DateTimeOffset now)
         => Lease(view, principal, lane, Verify<DeliveryClaims>(token), now);

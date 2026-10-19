@@ -12,7 +12,7 @@ internal static class SharedDomainBindingFlow
             foreach (var resource in scope.Resources)
             {
                 var key = KeySpace.Resource(scope.Partition.TenantId, scope.Partition.DatabaseId, resource.Name);
-                var original = SharedDomainNativeImage.Required(database.Store, key);
+                var original = SharedDomainImage.Required(database.Store, key);
                 var replacement = resource with
                 {
                     TransactionDomainId = resource.TransactionDomainId == FirstDomain ? SecondDomain : FirstDomain,
@@ -25,11 +25,11 @@ internal static class SharedDomainBindingFlow
                 var operation = SharedDomainOperations.Operation(database, OperationKind.ConfigureResource, Guid.NewGuid(), request, Root);
                 var result = SharedDomainOperations.Apply(database, operation, token);
                 await SharedDomainValueAssertions.FailureAsync(result, ErrorCode.UnsupportedCapability, BindingDetail);
-                await SharedDomainNativeImage.BytesAsync(database.Store, key, original);
-                var image = SharedDomainNativeImage.Capture(database.Store);
+                await SharedDomainImage.BytesAsync(database.Store, key, original);
+                var image = SharedDomainImage.Capture(database.Store);
                 var position = database.Store.Position;
                 await SharedDomainValueAssertions.EqualAsync(SharedDomainOperations.Apply(database, operation, token), result);
-                await SharedDomainNativeImage.SameAsync(database.Store, image, position);
+                await SharedDomainImage.SameAsync(database.Store, image, position);
             }
         }
         await SharedDomainModelAssertions.AllAsync(database, state, token);

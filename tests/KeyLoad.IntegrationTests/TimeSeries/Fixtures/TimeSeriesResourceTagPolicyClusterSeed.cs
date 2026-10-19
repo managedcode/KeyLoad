@@ -1,5 +1,5 @@
 using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.ClusterRouting;
+using KeyLoad.IntegrationTests.Features.OrleansExecution;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
 using KeyLoad.IntegrationTests.Features.Search;
 namespace KeyLoad.IntegrationTests.Features.TimeSeries;
@@ -44,7 +44,7 @@ internal static class TimeSeriesResourceTagPolicyClusterSeed
         var principal = new PrincipalRecord("series-resource-reader-" + Guid.NewGuid().ToString("N"),
             partition.TenantId, [new(partition.DatabaseId, TimeSeriesClusterScenario.Set, Capability.SeriesRead)],
             [TimeSeriesClusterScenario.SecretGrant]);
-        var identity = await NativeTextClusterScenario.ConfigureIdentityAsync(fixture, principal, token);
+        var identity = await TextClusterScenario.ConfigureIdentityAsync(fixture, principal, token);
         await SqlClusterProtocol.EqualAsync(principal, identity.Principal);
         var state = new TimeSeriesResourceTagPolicyClusterState(scenario, identity, definition, append, receipt, createId, opened.WindowId,
             [(opened.Request, opened.Receipt), sealedWindow])

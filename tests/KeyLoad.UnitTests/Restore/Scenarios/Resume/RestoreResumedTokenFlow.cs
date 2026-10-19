@@ -72,7 +72,7 @@ internal static class RestoreResumedTokenFlow
         await Assert.That(JsonSerializer.Serialize(target.Identity, JsonDefaults.Options)).IsEqualTo(restoredIdentity);
         var dispatch = target.Read(view => view.ReadOwnedValue(KeyCodec.Encode(SystemSpace, DispatchKey)))
             ?? throw new InvalidOperationException(MissingDispatch);
-        await Assert.That(NativeSerialization.Deserialize<bool>(dispatch)).IsFalse();
-        await Assert.That(dispatch.AsSpan().SequenceEqual(NativeSerialization.Serialize(false))).IsTrue();
+        await Assert.That(OrleansSerialization.Deserialize<bool>(dispatch)).IsFalse();
+        await Assert.That(dispatch.AsSpan().SequenceEqual(OrleansSerialization.Serialize(false))).IsTrue();
     }
 }

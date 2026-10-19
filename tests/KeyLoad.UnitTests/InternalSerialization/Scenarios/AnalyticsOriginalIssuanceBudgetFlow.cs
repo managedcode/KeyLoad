@@ -5,7 +5,7 @@ using KeyLoad.UnitTests.Features.GraphTraversal;
 using ManagedCode.Communication.Commands;
 using A = KeyLoad.UnitTests.Features.InternalSerialization.AnalyticsCommandIdentityAssertions;
 using D = KeyLoad.UnitTests.Features.InternalSerialization.AnalyticsCommandIdentityData;
-using O = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreNativeTestOperations;
+using O = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreTestOperations;
 
 namespace KeyLoad.UnitTests.Features.InternalSerialization;
 
@@ -27,11 +27,11 @@ internal static class AnalyticsOriginalIssuanceBudgetFlow
             var clock = new GraphTraversalDeadlineClock();
             var work = new ReadExecutionBudget(owner.Database.OperationLimitsOptions,
                 fault == AnalyticsIdentityBudgetFault.Expired ? clock : owner.Database.EvaluationClock, cancellation.Token);
-            work.ConstrainNativeWork(work.MaximumNativeReadBytes, work.MaximumNativeScanRecords);
+            work.ConstrainWork(work.RuntimeMaximumReadBytes, work.MaximumScanRecords);
             var principal = owner.Store.Read(view => work.ReadRecord<PrincipalRecord>(view, KeySpace.Principal(D.Root)));
             await Assert.That(principal!.Id).IsEqualTo(D.Root);
             var spentBytes = work.ReadBytes;
-            var spentRecords = work.ConstrainedNativeRecords;
+            var spentRecords = work.ConstrainedRecords;
             await Assert.That(spentBytes).IsGreaterThan(0);
             await Assert.That(spentRecords).IsGreaterThan(0);
             Constrain(fault, owner, work, clock, cancellation);
@@ -43,7 +43,7 @@ internal static class AnalyticsOriginalIssuanceBudgetFlow
                     or AnalyticsIdentityBudgetFault.Cancelled or AnalyticsIdentityBudgetFault.Expired)
                 {
                     await Assert.That(work.ReadBytes).IsEqualTo(spentBytes);
-                    await Assert.That(work.ConstrainedNativeRecords).IsEqualTo(spentRecords);
+                    await Assert.That(work.ConstrainedRecords).IsEqualTo(spentRecords);
                 }
             });
             if (fault == AnalyticsIdentityBudgetFault.Expired)
@@ -61,16 +61,16 @@ internal static class AnalyticsOriginalIssuanceBudgetFlow
         switch (fault)
         {
             case AnalyticsIdentityBudgetFault.SpentBytes:
-                work.ConstrainNativeWork(work.ReadBytes, work.MaximumNativeScanRecords);
+                work.ConstrainWork(work.ReadBytes, work.MaximumScanRecords);
                 break;
             case AnalyticsIdentityBudgetFault.SpentRecords:
-                work.ConstrainNativeWork(work.MaximumNativeReadBytes, work.ConstrainedNativeRecords);
+                work.ConstrainWork(work.RuntimeMaximumReadBytes, work.ConstrainedRecords);
                 break;
             case AnalyticsIdentityBudgetFault.Cancelled:
                 cancellation.Cancel();
                 break;
             case AnalyticsIdentityBudgetFault.Expired:
-                clock.ArmAfterNativeWork(() => work.ReadBytes > 0,
+                clock.ArmAfterWork(() => work.ReadBytes > 0,
                     TimeSpan.FromSeconds(owner.Database.OperationLimitsOptions.Value.QueryDeadlineSeconds).Add(TimeSpan.FromTicks(1)));
                 break;
         }
@@ -81,16 +81,16 @@ internal static class AnalyticsOriginalIssuanceBudgetFlow
     {
         Command<DatabaseCommand>? issued = null;
         Action issue = () => issued = owner.Database.CreateCommand(OperationKind.Batch, request.CommandId, D.Root,
-            owner.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(request), work);
+            owner.Database.EvaluationClock.GetUtcNow(), OrleansSerialization.Serialize(request), work);
         if (fault == AnalyticsIdentityBudgetFault.IdentityOutput)
         {
-            issue = () => NativeAnalyticsIdentity.Canonicalize(request, work, 1);
+            issue = () => AnalyticsIdentity.Canonicalize(request, work, 1);
         }
 
         if (fault == AnalyticsIdentityBudgetFault.MissingOriginalWork)
         {
             issue = () => issued = owner.Database.CreateCommand(OperationKind.Batch, request.CommandId, D.Root,
-                owner.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(request));
+                owner.Database.EvaluationClock.GetUtcNow(), OrleansSerialization.Serialize(request));
         }
 
         if (fault == AnalyticsIdentityBudgetFault.Cancelled)
@@ -112,7 +112,7 @@ internal static class AnalyticsOriginalIssuanceBudgetFlow
         var request = D.Request(owner.Source, Guid.NewGuid(), false, true);
         var work = new ReadExecutionBudget(owner.Database.OperationLimitsOptions, owner.Database.EvaluationClock, token);
         var issued = owner.Database.CreateCommand(OperationKind.Batch, request.CommandId, D.Root,
-            owner.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(request), work);
+            owner.Database.EvaluationClock.GetUtcNow(), OrleansSerialization.Serialize(request), work);
         await A.OrderAsync(issued, false);
         var expected = new CommitReceipt(request.CommandId, owner.NextToken(), [new("putDocument", D.Collection, D.Document, 1), new(AnalyticsStoreProtocol.UpsertKind, D.Store, D.Last, 1)], DurabilityProfile.ProcessDurable, 1);
         await A.ReceiptAsync(expected, owner.Submit(issued).Get<CommitReceipt>());

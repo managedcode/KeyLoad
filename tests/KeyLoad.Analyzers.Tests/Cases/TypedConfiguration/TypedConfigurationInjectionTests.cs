@@ -1,6 +1,6 @@
 namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
 
-/// <summary>AC-CQ-034/037: native IOptions is the execution owner's configuration boundary.</summary>
+/// <summary>AC-CQ-034/037: execution IOptions is the execution owner's configuration boundary.</summary>
 internal sealed class TypedConfigurationInjectionTests
 {
     [Test]
@@ -37,7 +37,7 @@ internal sealed class TypedConfigurationInjectionTests
     }
 
     [Test]
-    public async Task NativeOptionsValueCaptureAndPrivateSnapshotHelpersPreserveOwnershipAsync()
+    public async Task OptionsValueCaptureAndPrivateSnapshotHelpersPreserveOwnershipAsync()
     {
         const string source = """
             using Microsoft.Extensions.Options;
@@ -83,7 +83,7 @@ internal sealed class TypedConfigurationInjectionTests
     }
 
     [Test]
-    public async Task NativeOptionsCreateCannotHideAnUnownedPolicySnapshotAsync()
+    public async Task OptionsCreateCannotHideAnUnownedPolicySnapshotAsync()
     {
         const string source = """
             [KeyLoad.ConfigurationOptions]
@@ -99,7 +99,7 @@ internal sealed class TypedConfigurationInjectionTests
     }
 
     [Test]
-    public async Task NativeFactoryAndManagerRemainOwnedByActualBindingAsync()
+    public async Task FactoryAndManagerRemainOwnedByActualBindingAsync()
     {
         const string source = """
             [KeyLoad.ConfigurationOptions]

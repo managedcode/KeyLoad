@@ -21,7 +21,7 @@ internal static class GrainOnlineTextPublicationCommand
 
     internal static async Task<Result<object>> SubmitAsync(DatabaseEngine database,
         ICommitCoordinator coordinator, DecodedGrainRequest request, PrincipalRecord principal,
-        INativeOnlineTextMaintenance? maintenance, CancellationToken cancellationToken)
+        IOnlineTextMaintenance? maintenance, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         var operation = database.OwnCommand(Read(request));
@@ -45,7 +45,7 @@ internal static class GrainOnlineTextPublicationCommand
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
         }
-        var operation = GrainNativePayload.Read<Command<DatabaseCommand>>(request.Payload);
+        var operation = GrainPayload.Read<Command<DatabaseCommand>>(request.Payload);
         if (operation.Value!.Kind != OperationKind.OnlineTextPublicationPhase
             || operation.CommandId != request.Envelope.CommandId
             || operation.UserId != request.Envelope.PrincipalId)

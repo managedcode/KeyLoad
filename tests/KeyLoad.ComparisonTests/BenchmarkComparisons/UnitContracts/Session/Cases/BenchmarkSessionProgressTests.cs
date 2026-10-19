@@ -80,7 +80,7 @@ internal sealed class BenchmarkSessionProgressTests
     }
 
     private static BenchmarkSession Open(SessionChecksTarget target, int records, Action<DocumentComparisonProgress> progress)
-        => new(target, UnitBenchmarkOptions.Native(), new BenchmarkSessionOptions
+        => new(target, UnitBenchmarkOptions.Execution(), new BenchmarkSessionOptions
         {
             Records = records,
             Operations = Operations,

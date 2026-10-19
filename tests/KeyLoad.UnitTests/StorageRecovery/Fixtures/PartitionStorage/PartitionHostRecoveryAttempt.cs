@@ -5,7 +5,7 @@ namespace KeyLoad.UnitTests.Features.StorageRecovery;
 
 internal sealed class PartitionHostRecoveryAttempt
 {
-    private const string Unjoined = "An original native recovery owner is not known released; retain its root.";
+    private const string Unjoined = "An original execution recovery owner is not known released; retain its root.";
     private ExceptionDispatchInfo? originalFailure;
     internal PartitionHostOwnership Ownership { get; } = new();
     internal bool IsUncertain => originalFailure is not null && !Ownership.CanReleaseRoot;

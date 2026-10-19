@@ -22,7 +22,7 @@ internal sealed class MongoReadinessResourceTests
     [Test]
     [Arguments(1)]
     [Arguments(3)]
-    public async Task EveryNativeTopologyMountsReadinessSourceReadOnly(int nodes)
+    public async Task EveryTopologyMountsReadinessSourceReadOnly(int nodes)
     {
         await using var fixture = new IsolatedResourceTopologyFixture(Target, nodes);
         IsolatedMongoResources.Add(fixture.Context);
@@ -38,9 +38,9 @@ internal sealed class MongoReadinessResourceTests
         await Assert.That(File.Exists(client.Source)).IsTrue();
     }
 
-    /// <summary>AC-MR-031-003: missing genuine helper bytes fail composition before native resources start.</summary>
+    /// <summary>AC-MR-031-003: missing genuine helper bytes fail composition before execution resources start.</summary>
     [Test]
-    public async Task MissingReadinessSourceRejectsNativeComposition()
+    public async Task MissingReadinessSourceRejectsComposition()
     {
         var directory = Directory.CreateTempSubdirectory(TemporaryPrefix).FullName;
         try
@@ -59,11 +59,11 @@ internal sealed class MongoReadinessResourceTests
         }
     }
 
-    /// <summary>AC-MR-031-004: explicit native identity stays separate from the unchanged selected DNS membership.</summary>
+    /// <summary>AC-MR-031-004: explicit execution identity stays separate from the unchanged selected DNS membership.</summary>
     [Test]
     [Arguments(1)]
     [Arguments(3)]
-    public async Task NativeNodesHaveUniqueExplicitNamesWithinOnePrivateGroup(int count)
+    public async Task NodesHaveUniqueExplicitNamesWithinOnePrivateGroup(int count)
     {
         await using var fixture = new IsolatedResourceTopologyFixture(Target, count);
         IsolatedMongoResources.Add(fixture.Context);

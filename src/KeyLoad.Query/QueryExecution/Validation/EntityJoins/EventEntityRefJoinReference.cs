@@ -3,7 +3,7 @@ using KeyLoad.Core;
 
 namespace KeyLoad.Query.Features.QueryExecution;
 
-/// <summary>Validates the complete untrusted payload reference before selecting a native document key.</summary>
+/// <summary>Validates the complete untrusted payload reference before selecting a execution document key.</summary>
 internal static class EventEntityRefJoinReference
 {
     private const string PayloadField = "payload";

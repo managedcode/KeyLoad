@@ -19,7 +19,7 @@ internal static class RecurringSagaSchemaCanonical
             RecurringSagaStorage.SagaKey(lane, SagaId))), saga);
         await SafeProjectorOperationSeed.EqualAsync(owner.Store.Read(view => view.GetRecord<RecurringSagaCapacity>(
             RecurringSagaStorage.CapacityKey(lane))), new RecurringSagaCapacity(Two,
-                NativeSerialization.Serialize(schedule).LongLength + NativeSerialization.Serialize(saga).LongLength));
+                OrleansSerialization.Serialize(schedule).LongLength + OrleansSerialization.Serialize(saga).LongLength));
         await SafeProjectorOperationSeed.EqualAsync(owner.Store.Read(view => view.GetRecord<ResourceDefinition>(
             KeySpace.Resource(lane.Partition.TenantId, lane.Partition.DatabaseId, Queue))), state.Resource);
         await SafeProjectorOperationSeed.EqualAsync(owner.Store.Read(view => view.GetRecord<PrincipalRecord>(
@@ -65,12 +65,12 @@ internal static class RecurringSagaSchemaCanonical
         foreach (var (row, literal) in page.Records.Zip(expected))
         {
             await Assert.That(row.Key.Span.SequenceEqual(KeySpace.Partition(Outbox, partition, literal.Sequence))).IsTrue();
-            var actual = NativeSerialization.Deserialize<OutboxEntry>(row.Value.Span);
+            var actual = OrleansSerialization.Deserialize<OutboxEntry>(row.Value.Span);
             await SafeProjectorOperationSeed.EqualAsync(actual, literal);
             await Assert.That(actual.Receipt.CompositionReferences).IsEmpty();
         }
         await SafeProjectorOperationSeed.EqualAsync(owner.Store.Read(view => view.GetRecord<OutboxHead>(
             KeySpace.Partition(OutboxHeadSpace, partition))), new OutboxHead(Two, One, Two,
-                expected.Sum(row => NativeSerialization.Serialize(row).LongLength)));
+                expected.Sum(row => OrleansSerialization.Serialize(row).LongLength)));
     }
 }

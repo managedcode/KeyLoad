@@ -10,5 +10,5 @@ internal static class RemoteTransferRepairReferenceFields
     internal const uint Fingerprint = 5;
     internal const uint OutcomeDigest = 6;
     internal const uint WitnessToken = 7;
-    internal const string Alias = "keyload.core.queue-transfer.repair-reference.v1";
+    internal const string Alias = "keyload.core.queue-transfer.repair-reference";
 }

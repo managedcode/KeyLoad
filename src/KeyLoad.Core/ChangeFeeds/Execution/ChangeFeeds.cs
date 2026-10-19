@@ -12,7 +12,7 @@ public sealed partial class DatabaseEngine
 
     private const string DocumentChangeFeedCursorPurpose = "document-change-feed";
     private static long VisibilityEpoch(IKeyValueView view, PartitionRef partition, string collection)
-        => view.ReadOwnedValue(KeySpace.Partition(VisibilityEpochSpace, partition, collection)) is { } bytes ? NativeSerialization.Deserialize<long>(bytes) : InitialVisibilityEpoch;
+        => view.ReadOwnedValue(KeySpace.Partition(VisibilityEpochSpace, partition, collection)) is { } bytes ? OrleansSerialization.Deserialize<long>(bytes) : InitialVisibilityEpoch;
     private static void AdvanceVisibilityEpoch(IAtomicTransaction tx, PartitionRef partition, string collection)
         => tx.PutRecord(KeySpace.Partition(VisibilityEpochSpace, partition, collection), checked(VisibilityEpoch(tx, partition, collection) + AdvanceVisibilityEpochVisibilityEpochStep));
     private string ChangeCursor(IKeyValueView view, PrincipalRecord principal, ResourceDefinition resource, PartitionRef partition, long after)
@@ -45,7 +45,7 @@ public sealed partial class DatabaseEngine
     /// <summary>Reads one same-cut projected change page within the original caller budget.</summary>
     /// <param name="principalId">Persisted principal identifier.</param>
     /// <param name="request">Original bounded feed request and signed cursor.</param>
-    /// <param name="cancellationToken">Original caller cancellation across all native work.</param>
+    /// <param name="cancellationToken">Original caller cancellation across all execution work.</param>
     /// <returns>A complete projected page or a failure without a partial page.</returns>
     public ChangeFeedPage ReadChangeFeed(string principalId, ReadChangeFeedRequest request,
         CancellationToken cancellationToken)

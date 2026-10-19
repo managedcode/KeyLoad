@@ -3,7 +3,7 @@ $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 . (Join-Path $PSScriptRoot '../CodeQuality/functional-coverage.shared.ps1')
 . (Join-Path $PSScriptRoot '../CodeQuality/functional-coverage.parse.ps1')
-. (Join-Path $PSScriptRoot '../CodeQuality/functional-coverage.native-merge.trx.ps1')
+. (Join-Path $PSScriptRoot '../CodeQuality/functional-coverage.execution-merge.trx.ps1')
 $method = 'MillionAcknowledgedDocumentsRemainCorrectDuringSdkAndOfficialMcpReads'
 $expected = @([ordered]@{
     className = 'KeyLoad.IntegrationTests.Features.DocumentStorage.HeavyDocumentLoadClusterTests'
@@ -11,7 +11,7 @@ $expected = @([ordered]@{
     instanceName = $method
 })
 try {
-    $result = Read-FcNativeTrx $Path 'cluster-heavy-load' $expected
+    $result = Read-RuntimeFcTrx $Path 'cluster-heavy-load' $expected
     if ($result.testCount -ne 1) { throw 'The functional gate requires exactly one original test.' }
     $result | ConvertTo-Json -Depth 8 -Compress
 } catch {

@@ -38,7 +38,7 @@ internal static class BinderFieldLineagePages
                         AllowFullScan: true), cancellationToken: token),
                  () => engine.ExecuteAst(subject, ast, cancellationToken: token),
                  () => engine.ExecuteAst(subject, Q2CapabilityFixtures.JsonRoundTrip(ast), cancellationToken: token),
-                 () => engine.ExecuteAst(subject, Q2CapabilityFixtures.NativeRoundTrip(ast), cancellationToken: token)];
+                 () => engine.ExecuteAst(subject, Q2CapabilityFixtures.RuntimeRoundTrip(ast), cancellationToken: token)];
                 foreach (var call in calls)
                 {
                     if (shape != ProjectionOnly && (mode & UseOnly) == None)

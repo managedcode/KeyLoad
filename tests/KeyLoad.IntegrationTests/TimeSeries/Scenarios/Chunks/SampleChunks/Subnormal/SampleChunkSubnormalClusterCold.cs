@@ -1,5 +1,5 @@
 using Aspire.Hosting.ApplicationModel;
-using KeyLoad.IntegrationTests.Features.ClusterReplication;
+using KeyLoad.IntegrationTests.Features.StorageReplication;
 
 namespace KeyLoad.IntegrationTests.Features.TimeSeries;
 

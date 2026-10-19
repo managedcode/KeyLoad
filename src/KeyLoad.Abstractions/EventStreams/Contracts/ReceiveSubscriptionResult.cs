@@ -8,5 +8,5 @@ namespace KeyLoad;
 /// <param name="Status">The subscription status observed for the request.</param>
 /// <param name="Token">The commit token for the receive operation.</param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.ReceiveSubscriptionResult)]
+[Orleans.Alias(ContractAliases.ReceiveSubscriptionResult)]
 public sealed record ReceiveSubscriptionResult([property: Orleans.Id(0)] Guid RequestId, [property: Orleans.Id(1)] ImmutableArray<SubscriptionDelivery> Deliveries, [property: Orleans.Id(2)] SubscriptionInfo Status, [property: Orleans.Id(3)] CommitToken Token);

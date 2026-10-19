@@ -25,7 +25,7 @@ internal static class SiteProcessCleanup
         }
         catch (Win32Exception) when (process.HasExited)
         {
-            // The native process exited concurrently with termination.
+            // The execution process exited concurrently with termination.
         }
         catch (OperationCanceledException) when (deadline.IsCancellationRequested)
         {

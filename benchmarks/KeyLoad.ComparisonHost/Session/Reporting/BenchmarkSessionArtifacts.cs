@@ -7,7 +7,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
 
-/// <summary>Retains immutable original reports before their native test assertion can fail.</summary>
+/// <summary>Retains immutable original reports before their execution test assertion can fail.</summary>
 internal static class BenchmarkSessionArtifacts
 {
     internal const string StateFile = "session-state.json";

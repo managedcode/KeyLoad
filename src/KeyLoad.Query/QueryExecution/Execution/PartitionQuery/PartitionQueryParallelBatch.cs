@@ -2,7 +2,7 @@ using System.Runtime.ExceptionServices;
 
 namespace KeyLoad.Query.Features.QueryExecution;
 
-/// <summary>Joins a fixed admitted batch of independently authorized native children.</summary>
+/// <summary>Joins a fixed admitted batch of independently authorized execution children.</summary>
 internal static class PartitionQueryParallelBatch
 {
     private const int FirstTaskIndex = 0;
@@ -24,7 +24,7 @@ internal static class PartitionQueryParallelBatch
         }
         try
         {
-            return await Task.WhenAll(tasks).ConfigureAwait(false);
+            return await Task.WhenAll(tasks);
         }
         catch (Exception primary)
         {
@@ -49,13 +49,13 @@ internal static class PartitionQueryParallelBatch
         try
         {
             execution.Token.ThrowIfCancellationRequested();
-            return await run(leaf, execution.Token).ConfigureAwait(false);
+            return await run(leaf, execution.Token);
         }
         catch (Exception primary)
         {
             try
             {
-                await execution.CancelAsync().ConfigureAwait(false);
+                await execution.CancelAsync();
             }
             catch (Exception cleanup) { throw new AggregateException(primary, cleanup); }
             throw;

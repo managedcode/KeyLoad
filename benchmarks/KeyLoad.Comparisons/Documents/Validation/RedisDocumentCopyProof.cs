@@ -10,11 +10,11 @@ internal static class RedisDocumentCopyProof
     private const int PrimaryCopyCount = 1, PrimaryIdentityCount = 1, NoReplicas = 0, FirstReplicaIndex = 0;
     private const int ConfigPairWidth = 2, NoRemainder = 0, FirstConfigField = 0, ConfigValueOffset = 1;
     private const int ReceiptFieldCount = 2, LocalReceiptIndex = 0, ReplicaReceiptIndex = 1, RequiredLocalFsync = 1;
-    private const string SingleState = "single primary", ReplicatedState = "final native direct replicas";
+    private const string SingleState = "single primary", ReplicatedState = "final execution direct replicas";
     private const string ConfigCommand = "CONFIG", GetCommand = "GET", AofSetting = "appendonly", AofFlushSetting = "appendfsync";
     private const string AofEnabled = "yes", AofAlways = "always", ClientCommand = "CLIENT", ClientIdSubcommand = "ID", WaitAofCommand = "WAITAOF";
-    private const string FinalReplicaObservation = "Final replica state identity={0}; records={1}; sha256={2}; native DemandReplica full ordered readback";
-    private const string FinalFsyncObservation = "Final document state records={0}; every native replica full ordered readback; WAITAOF local=1 replicas={1}; final fence on unchanged CLIENT ID";
+    private const string FinalReplicaObservation = "Final replica state identity={0}; records={1}; sha256={2}; execution DemandReplica full ordered readback";
+    private const string FinalFsyncObservation = "Final document state records={0}; every execution replica full ordered readback; WAITAOF local=1 replicas={1}; final fence on unchanged CLIENT ID";
     private const string Failure = "RedisFinalDocumentCopyReceiptMissing";
     private static readonly CompositeFormat FinalReplicaObservationFormat = CompositeFormat.Parse(FinalReplicaObservation);
     private static readonly CompositeFormat FinalFsyncObservationFormat = CompositeFormat.Parse(FinalFsyncObservation);
@@ -26,7 +26,7 @@ internal static class RedisDocumentCopyProof
         using var deadline = new ComparisonCancellationSource(timeProvider, token);
         deadline.CancelAfter(lifecycleOptions.Value.ReadinessTimeout);
         var replicas = new List<ConnectionMultiplexer>(endpoints.Length);
-        var primaryEndpoint = RedisNativeProtocol.RequirePrimaryEndpoint(primary);
+        var primaryEndpoint = RedisProtocol.RequirePrimaryEndpoint(primary);
         var primaryServer = primary.GetServer(primaryEndpoint);
         var primaryIdentity = await JoinAsync(RedisNodeIdentity.ReadAsync(primaryServer, CommandFlags.DemandMaster, CancellationToken.None), deadline.Token).ConfigureAwait(false);
         var copies = ComparisonTopologies.NodeCount(topology);
@@ -87,15 +87,15 @@ internal static class RedisDocumentCopyProof
         RedisNodeIdentity primaryIdentity, string[] endpoints, List<ConnectionMultiplexer> replicas, CancellationToken token)
     {
         var identities = new List<RedisNodeIdentity>(endpoints.Length + PrimaryIdentityCount) { primaryIdentity };
-        var endpointIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { RedisNativeProtocol.EndpointIdentity(primaryEndpoint) };
+        var endpointIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { RedisProtocol.EndpointIdentity(primaryEndpoint) };
         foreach (var endpoint in endpoints)
         {
             token.ThrowIfCancellationRequested();
             var replica = await ConnectionMultiplexer.ConnectAsync(RedisReplicaProof.CreateOptions(endpoint)).ConfigureAwait(false);
             replicas.Add(replica);
             token.ThrowIfCancellationRequested();
-            var actualEndpoint = RedisNativeProtocol.ConfiguredEndpoint(replica, Failure);
-            if (!endpointIds.Add(RedisNativeProtocol.EndpointIdentity(actualEndpoint)))
+            var actualEndpoint = RedisProtocol.ConfiguredEndpoint(replica, Failure);
+            if (!endpointIds.Add(RedisProtocol.EndpointIdentity(actualEndpoint)))
             {
                 throw new ComparisonFailureException(Failure);
             }
@@ -116,7 +116,7 @@ internal static class RedisDocumentCopyProof
         {
             var readback = await DocumentComparisonOracle.VerifyAsync(readReplica(replicas[index], token), schedule.FinalDocuments(), token).ConfigureAwait(false);
             observations.Add(string.Format(System.Globalization.CultureInfo.InvariantCulture, FinalReplicaObservationFormat, identities[index + PrimaryIdentityCount].RunId, readback.Records, readback.ActualSha256));
-            var server = replicas[index].GetServer(RedisNativeProtocol.ConfiguredEndpoint(replicas[index], Failure));
+            var server = replicas[index].GetServer(RedisProtocol.ConfiguredEndpoint(replicas[index], Failure));
             await RequireReplicaAsync(server, primaryEndpoint, token).ConfigureAwait(false);
             RedisNodeIdentity.RequireUnchanged(await JoinAsync(RedisNodeIdentity.ReadAsync(server, CommandFlags.DemandReplica, CancellationToken.None), token).ConfigureAwait(false), identities[index + PrimaryIdentityCount]);
         }
@@ -146,15 +146,15 @@ internal static class RedisDocumentCopyProof
     }
     private static async Task RequireReplicaAsync(IServer server, System.Net.EndPoint primary, CancellationToken token)
     {
-        var info = await JoinAsync(RedisNativeProtocol.ReadInfoAsync(server, RedisNativeProtocol.ReplicationSection, CommandFlags.DemandReplica, CancellationToken.None), token).ConfigureAwait(false);
-        var role = await JoinAsync(RedisNativeProtocol.ReadRoleAsync(server, CommandFlags.DemandReplica, CancellationToken.None), token).ConfigureAwait(false);
-        var host = info.GetValueOrDefault(RedisNativeProtocol.MasterHostField);
-        var port = RedisNativeProtocol.ParseInteger(info, RedisNativeProtocol.MasterPortField);
-        if (info.GetValueOrDefault(RedisNativeProtocol.RoleField) != RedisNativeProtocol.ReplicaRole
-            || info.GetValueOrDefault(RedisNativeProtocol.LinkField) != RedisNativeProtocol.LinkUp || host is null
-            || !RedisNativeProtocol.EndpointMatches(primary, host, port) || role.Length < RedisNativeProtocol.RoleReplicaResponseLength
-            || role[RedisNativeProtocol.RoleNameIndex].ToString() != RedisNativeProtocol.ReplicaRole
-            || !StringComparer.OrdinalIgnoreCase.Equals(role[RedisNativeProtocol.RoleHostIndex].ToString(), host) || role[RedisNativeProtocol.RolePortIndex].ToString() != port.ToString(System.Globalization.CultureInfo.InvariantCulture))
+        var info = await JoinAsync(RedisProtocol.ReadInfoAsync(server, RedisProtocol.ReplicationSection, CommandFlags.DemandReplica, CancellationToken.None), token).ConfigureAwait(false);
+        var role = await JoinAsync(RedisProtocol.ReadRoleAsync(server, CommandFlags.DemandReplica, CancellationToken.None), token).ConfigureAwait(false);
+        var host = info.GetValueOrDefault(RedisProtocol.MasterHostField);
+        var port = RedisProtocol.ParseInteger(info, RedisProtocol.MasterPortField);
+        if (info.GetValueOrDefault(RedisProtocol.RoleField) != RedisProtocol.ReplicaRole
+            || info.GetValueOrDefault(RedisProtocol.LinkField) != RedisProtocol.LinkUp || host is null
+            || !RedisProtocol.EndpointMatches(primary, host, port) || role.Length < RedisProtocol.RoleReplicaResponseLength
+            || role[RedisProtocol.RoleNameIndex].ToString() != RedisProtocol.ReplicaRole
+            || !StringComparer.OrdinalIgnoreCase.Equals(role[RedisProtocol.RoleHostIndex].ToString(), host) || role[RedisProtocol.RolePortIndex].ToString() != port.ToString(System.Globalization.CultureInfo.InvariantCulture))
         {
             throw new ComparisonFailureException(Failure);
         }

@@ -12,7 +12,7 @@ export function validateSessionAggregate(value) {
   const jobs = new Set(), artifacts = new Set(), sessions = new Set();
   for (const [index, worker] of value.workers.entries()) {
     const row = sessionRows()[index];
-    require(exact(worker, ['id', 'target', 'nodeCount', 'job', 'artifact', 'sessionSha256', 'session', 'reports', 'native', 'qualification', 'resourceQualified', 'stateSha256'])
+    require(exact(worker, ['id', 'target', 'nodeCount', 'job', 'artifact', 'sessionSha256', 'session', 'reports', 'execution', 'qualification', 'resourceQualified', 'stateSha256'])
       && worker.id === row.id && worker.target === row.target && worker.nodeCount === row.nodeCount
       && ['success', 'failure'].includes(worker.job?.conclusion) && worker.artifact?.expired === false
       && /^sha256:[a-f0-9]{64}$/.test(worker.artifact?.digest ?? '')
@@ -21,13 +21,13 @@ export function validateSessionAggregate(value) {
     jobs.add(worker.job.id); artifacts.add(worker.artifact.id);
     const session = validateSessionEnvelope(worker.session, row, value.cohort, worker.job.id);
     require(!sessions.has(session.sessionId) && Array.isArray(worker.reports) && worker.reports.length === SESSION.caseIds.length
-      && Array.isArray(worker.native) && worker.native.length === SESSION.caseIds.length);
+      && Array.isArray(worker.execution) && worker.execution.length === SESSION.caseIds.length);
     require(session.outcome === 'failure' ? worker.job.conclusion === 'failure' : worker.job.conclusion === 'success');
-    validateSessionQualification(worker.qualification,session,worker.native);
+    validateSessionQualification(worker.qualification,session,worker.execution);
     sessions.add(session.sessionId);
     for (const [caseIndex, report] of worker.reports.entries()) require(report.caseId === SESSION.caseIds[caseIndex]
       && validateSessionCase(report, SESSION.caseIds[caseIndex], false));
-    validateSessionProfileAccounting(session,worker.reports,worker.native,worker.qualification);
+    validateSessionProfileAccounting(session,worker.reports,worker.execution,worker.qualification);
   }
   return value;
 }

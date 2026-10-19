@@ -22,21 +22,21 @@ internal static class SampleChunkRetentionClusterHealthy
                 scenario.Until.UtcTicks, [.. rows], original.OriginalAppendReceipt.Token.Position),
             original.OriginalAppendReceipt, token);
         await SampleChunkRetentionClusterReadOracle.RawAsync(sdk, mcp,
-            new(scenario.Native.Partition, TimeSeriesClusterScenario.Set, TimeSeriesClusterScenario.Series,
+            new(scenario.Execution.Partition, TimeSeriesClusterScenario.Set, TimeSeriesClusterScenario.Series,
                 scenario.From, until, SampleChunkClusterProtocol.OutputLimit), rows, token);
         await SampleChunkRetentionClusterReadOracle.RollupAsync(sdk, mcp,
-            new(scenario.Native.Partition, TimeSeriesClusterScenario.Set, TimeSeriesClusterScenario.Series, scenario.Until, until),
+            new(scenario.Execution.Partition, TimeSeriesClusterScenario.Set, TimeSeriesClusterScenario.Series, scenario.Until, until),
             new(SampleChunkRetentionClusterProtocol.FirstRevision,
                 new(scenario.Until, until, SampleChunkRetentionClusterProtocol.FreshSequence, scenario.Until,
                     new(SampleChunkRetentionClusterProtocol.RemainingCount, SampleChunkRetentionClusterProtocol.FreshValue,
                         SampleChunkRetentionClusterProtocol.FreshValue, SampleChunkRetentionClusterProtocol.FreshValue,
                         SampleChunkRetentionClusterProtocol.FreshValue))), token);
         await SampleChunkRetentionClusterReadOracle.RollupAsync(sdk, mcp,
-            new(scenario.Native.Partition, TimeSeriesClusterScenario.Set, TimeSeriesClusterScenario.Series,
+            new(scenario.Execution.Partition, TimeSeriesClusterScenario.Set, TimeSeriesClusterScenario.Series,
                 SampleChunkRetentionClusterSeed.Late(scenario).Timestamp, scenario.Until),
             new(SampleChunkRetentionClusterProtocol.DroppedRevision, null), token);
         await SampleChunkRetentionClusterDenialOracle.RollupAsync(sdk, mcp,
-            new(scenario.Native.Partition, TimeSeriesClusterScenario.Set, TimeSeriesClusterScenario.Series, scenario.From, scenario.Until), token);
+            new(scenario.Execution.Partition, TimeSeriesClusterScenario.Set, TimeSeriesClusterScenario.Series, scenario.From, scenario.Until), token);
         await SampleChunkRetentionClusterDenialOracle.WindowAsync(sdk, mcp, scenario.Request, token);
         await SampleChunkRetentionClusterWriteOracle.ReplayAsync(sdk, mcp, original.OriginalSourceRequest, original.OriginalSourceReceipt, token);
         await SampleChunkRetentionClusterWriteOracle.ReplayAsync(sdk, mcp, original.OriginalAppend, original.OriginalAppendReceipt, token);

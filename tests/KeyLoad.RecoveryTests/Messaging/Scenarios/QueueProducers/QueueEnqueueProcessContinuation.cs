@@ -76,7 +76,7 @@ internal static class QueueEnqueueProcessContinuation
         await Assert.That(store.Read(view => view.GetRecord<MessageBody>(KeySpace.Partition(QueueEnqueueCrashProtocol.BodyFamily, command.Partition,
             scheduled.Queue, scheduled.MessageId)))).IsEqualTo(body);
         await Assert.That(store.Read(view => view.GetRecord<QueueCounters>(KeySpace.Partition(QueueEnqueueCrashProtocol.CountersFamily, command.Partition, scheduled.Queue))))
-            .IsEqualTo(new QueueCounters(QueueEnqueueCrashProtocol.First, NativeSerialization.Serialize(body).LongLength, QueueEnqueueCrashProtocol.Initial, QueueEnqueueCrashProtocol.Initial, QueueEnqueueCrashProtocol.Second));
+            .IsEqualTo(new QueueCounters(QueueEnqueueCrashProtocol.First, OrleansSerialization.Serialize(body).LongLength, QueueEnqueueCrashProtocol.Initial, QueueEnqueueCrashProtocol.Initial, QueueEnqueueCrashProtocol.Second));
         await QueueEnqueueProcessAssertions.ReferencesAsync(store, QueueEnqueueCrashProtocol.ReadyFamily, []);
         await QueueEnqueueProcessAssertions.ReferencesAsync(store, QueueEnqueueCrashProtocol.LeaseFamily, []);
         await QueueEnqueueProcessAssertions.ReferencesAsync(store, QueueEnqueueCrashProtocol.ScheduledFamily,

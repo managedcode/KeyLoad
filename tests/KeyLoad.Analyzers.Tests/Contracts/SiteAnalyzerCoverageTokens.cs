@@ -48,7 +48,7 @@ internal static class SiteAnalyzerCoverageTokens
     internal const string JsonGateScripts = "gateScripts";
     internal const string JsonSettingsConfigPath = "settingsConfigPath";
     internal const string JsonSettingsConfigHash = "settingsConfigSha256";
-    internal const string JsonNativeReportHash = "nativeReportSha256";
+    internal const string JsonReportHash = "reportSha256";
     internal const string JsonLinesValid = "linesValid";
     internal const string JsonLinesCovered = "linesCovered";
     internal const string JsonBranchesCovered = "branchesCovered";
@@ -150,9 +150,9 @@ internal static class SiteAnalyzerCoverageTokens
     internal const string LineNumberZeroAttribute = "number=\"0\" hits=\"";
     internal const string LineHits = "\" hits=\"";
     internal const string BranchTrue = "\" branch=\"true\" condition-coverage=\"";
-    internal const string BranchTrueNative = "\" branch=\"True\" condition-coverage=\"";
+    internal const string RuntimeBranchTrue = "\" branch=\"True\" condition-coverage=\"";
     internal const string BranchFalseSuffix = "\" branch=\"false\"/>";
-    internal const string BranchFalseNativeSuffix = "\" branch=\"False\"/>";
+    internal const string RuntimeBranchFalseSuffix = "\" branch=\"False\"/>";
     internal const string CoveragePairOpen = "% (";
     internal const char PairSlash = '/';
     internal const string PairClose = ")\"/>";

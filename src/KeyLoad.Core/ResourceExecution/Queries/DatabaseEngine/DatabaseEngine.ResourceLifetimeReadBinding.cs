@@ -18,7 +18,7 @@ public sealed partial class DatabaseEngine
 
     /// <summary>Binds an already authenticated source pair without substituting the target's local catalog.</summary>
     internal static void BindAuthenticatedReadResourceLifetime(IKeyValueView view, PartitionRef partition,
-        ResourceDefinition definition, ResourceLifetimeV1 lifetime)
+        ResourceDefinition definition, ResourceLifetime lifetime)
     {
         ArgumentNullException.ThrowIfNull(view);
         ArgumentNullException.ThrowIfNull(definition);

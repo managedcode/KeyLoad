@@ -9,7 +9,7 @@ internal static class BackupUnsafeDestinationFlow
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            using var fixture = new NativeBackupCutFixture(checkpoint: true);
+            using var fixture = new BackupCutFixture(checkpoint: true);
             await ServerFailureObserver.ObserveAsync(
                 () => BackupUnsafeDestinationTrial.RunAsync(fixture, ancestorLink, token), failures);
         }, failures);

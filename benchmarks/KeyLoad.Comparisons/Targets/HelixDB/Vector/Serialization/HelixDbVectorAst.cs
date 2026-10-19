@@ -12,17 +12,17 @@ internal static class HelixDbVectorAst
     {
         var properties = new JsonArray
         {
-            new JsonArray(HelixDbNativeTokens.TokenNumber, HelixDbProtocol.Value(HelixDbNativeTokens.TokenI64, document.Number)),
-            new JsonArray(HelixDbNativeTokens.TokenId, HelixDbProtocol.Value(HelixDbNativeTokens.TokenString, document.Id)),
-            new JsonArray(HelixDbNativeTokens.TokenPayload, HelixDbProtocol.Value(HelixDbNativeTokens.TokenString, document.Payload)),
-            new JsonArray(HelixDbNativeTokens.TokenEmbedding, Vector(document.Embedding.Span)),
-            new JsonArray(HelixDbNativeTokens.TokenFiltered, HelixDbProtocol.Value(HelixDbNativeTokens.TokenBool, document.Number % FilteredCorpusModulo == EmptyResultCount)),
-            new JsonArray(HelixDbNativeTokens.TokenStable, HelixDbProtocol.Value(HelixDbNativeTokens.TokenBool, document.Number % CanonicalRecordIdWidth != ExcludedStableRemainder))
+            new JsonArray(HelixDbTokens.TokenNumber, HelixDbProtocol.Value(HelixDbTokens.TokenI64, document.Number)),
+            new JsonArray(HelixDbTokens.TokenId, HelixDbProtocol.Value(HelixDbTokens.TokenString, document.Id)),
+            new JsonArray(HelixDbTokens.TokenPayload, HelixDbProtocol.Value(HelixDbTokens.TokenString, document.Payload)),
+            new JsonArray(HelixDbTokens.TokenEmbedding, Vector(document.Embedding.Span)),
+            new JsonArray(HelixDbTokens.TokenFiltered, HelixDbProtocol.Value(HelixDbTokens.TokenBool, document.Number % FilteredCorpusModulo == EmptyResultCount)),
+            new JsonArray(HelixDbTokens.TokenStable, HelixDbProtocol.Value(HelixDbTokens.TokenBool, document.Number % CanonicalRecordIdWidth != ExcludedStableRemainder))
         };
-        return HelixDbProtocol.Node(HelixDbNativeTokens.TokenAddN, new()
+        return HelixDbProtocol.Node(HelixDbTokens.TokenAddN, new()
         {
-            [HelixDbNativeTokens.TokenLabel] = label,
-            [HelixDbNativeTokens.TokenProperties] = properties
+            [HelixDbTokens.TokenLabel] = label,
+            [HelixDbTokens.TokenProperties] = properties
         });
     }
 
@@ -34,39 +34,39 @@ internal static class HelixDbVectorAst
         }
         var fields = new JsonObject
         {
-            [HelixDbNativeTokens.TokenLabel] = label,
-            [HelixDbNativeTokens.TokenProperty] = HelixDbNativeTokens.TokenEmbedding,
-            [HelixDbNativeTokens.TokenQueryVector] = Vector(vector),
-            [HelixDbNativeTokens.TokenK] = new JsonObject
+            [HelixDbTokens.TokenLabel] = label,
+            [HelixDbTokens.TokenProperty] = HelixDbTokens.TokenEmbedding,
+            [HelixDbTokens.TokenQueryVector] = Vector(vector),
+            [HelixDbTokens.TokenK] = new JsonObject
             {
-                [HelixDbNativeTokens.TokenLiteral] = count
+                [HelixDbTokens.TokenLiteral] = count
             }
         };
-        var operation = HelixDbNativeTokens.TokenVectorSearchNodes;
+        var operation = HelixDbTokens.TokenVectorSearchNodes;
         if (mode != VectorQueryMode.Plain)
         {
-            fields[HelixDbNativeTokens.TokenInput] = HelixDbProtocol.Nodes(label, HelixDbProtocol.Compare(HelixDbNativeTokens.TokenEq, mode == VectorQueryMode.Filtered ? HelixDbNativeTokens.TokenFiltered : HelixDbNativeTokens.TokenStable, HelixDbNativeTokens.TokenBool, true));
-            operation = HelixDbNativeTokens.TokenVectorSearchNodesWithin;
+            fields[HelixDbTokens.TokenInput] = HelixDbProtocol.Nodes(label, HelixDbProtocol.Compare(HelixDbTokens.TokenEq, mode == VectorQueryMode.Filtered ? HelixDbTokens.TokenFiltered : HelixDbTokens.TokenStable, HelixDbTokens.TokenBool, true));
+            operation = HelixDbTokens.TokenVectorSearchNodesWithin;
         }
 
-        return HelixDbProtocol.Project(HelixDbProtocol.Node(operation, fields), HelixDbNativeTokens.TokenId, HelixDbNativeTokens.MetaTokenDistance);
+        return HelixDbProtocol.Project(HelixDbProtocol.Node(operation, fields), HelixDbTokens.TokenId, HelixDbTokens.MetaTokenDistance);
     }
 
-    internal static JsonObject Read(string label, string id) => HelixDbProtocol.Project(HelixDbProtocol.Nodes(label, HelixDbProtocol.Compare(HelixDbNativeTokens.TokenEq, HelixDbNativeTokens.TokenId, HelixDbNativeTokens.TokenString, id)), HelixDbNativeTokens.TokenId, HelixDbNativeTokens.TokenNumber, HelixDbNativeTokens.TokenEmbedding, HelixDbNativeTokens.TokenPayload);
-    internal static JsonObject Page(string label, int after, int count) => HelixDbProtocol.Project(HelixDbProtocol.Limit(HelixDbProtocol.Ordered(HelixDbProtocol.Nodes(label, HelixDbProtocol.Compare(HelixDbNativeTokens.TokenGt, HelixDbNativeTokens.TokenNumber, HelixDbNativeTokens.TokenI64, after)), HelixDbNativeTokens.TokenNumber), count), HelixDbNativeTokens.TokenId, HelixDbNativeTokens.TokenNumber, HelixDbNativeTokens.TokenEmbedding, HelixDbNativeTokens.TokenPayload);
-    internal static JsonObject Update(string label, VectorUpdate update) => HelixDbProtocol.Node(HelixDbNativeTokens.TokenSetProperty, new() { [HelixDbNativeTokens.TokenInput] = HelixDbProtocol.Nodes(label, HelixDbProtocol.Compare(HelixDbNativeTokens.TokenEq, HelixDbNativeTokens.TokenId, HelixDbNativeTokens.TokenString, update.Id)), [HelixDbNativeTokens.TokenName] = HelixDbNativeTokens.TokenEmbedding, [HelixDbNativeTokens.TokenValue] = Vector(update.Embedding.Span) });
+    internal static JsonObject Read(string label, string id) => HelixDbProtocol.Project(HelixDbProtocol.Nodes(label, HelixDbProtocol.Compare(HelixDbTokens.TokenEq, HelixDbTokens.TokenId, HelixDbTokens.TokenString, id)), HelixDbTokens.TokenId, HelixDbTokens.TokenNumber, HelixDbTokens.TokenEmbedding, HelixDbTokens.TokenPayload);
+    internal static JsonObject Page(string label, int after, int count) => HelixDbProtocol.Project(HelixDbProtocol.Limit(HelixDbProtocol.Ordered(HelixDbProtocol.Nodes(label, HelixDbProtocol.Compare(HelixDbTokens.TokenGt, HelixDbTokens.TokenNumber, HelixDbTokens.TokenI64, after)), HelixDbTokens.TokenNumber), count), HelixDbTokens.TokenId, HelixDbTokens.TokenNumber, HelixDbTokens.TokenEmbedding, HelixDbTokens.TokenPayload);
+    internal static JsonObject Update(string label, VectorUpdate update) => HelixDbProtocol.Node(HelixDbTokens.TokenSetProperty, new() { [HelixDbTokens.TokenInput] = HelixDbProtocol.Nodes(label, HelixDbProtocol.Compare(HelixDbTokens.TokenEq, HelixDbTokens.TokenId, HelixDbTokens.TokenString, update.Id)), [HelixDbTokens.TokenName] = HelixDbTokens.TokenEmbedding, [HelixDbTokens.TokenValue] = Vector(update.Embedding.Span) });
     internal static JsonObject Index(string label, int dimensions, bool drop = false)
     {
         var fields = new JsonObject
         {
-            [HelixDbNativeTokens.TokenSpec] = HelixDbProtocol.Node(HelixDbNativeTokens.TokenNodeVector, new() { [HelixDbNativeTokens.TokenLabel] = label, [HelixDbNativeTokens.TokenProperty] = HelixDbNativeTokens.TokenEmbedding, [HelixDbNativeTokens.TokenDimension] = dimensions, [HelixDbNativeTokens.TokenMetric] = HelixDbNativeTokens.TokenCosine })
+            [HelixDbTokens.TokenSpec] = HelixDbProtocol.Node(HelixDbTokens.TokenNodeVector, new() { [HelixDbTokens.TokenLabel] = label, [HelixDbTokens.TokenProperty] = HelixDbTokens.TokenEmbedding, [HelixDbTokens.TokenDimension] = dimensions, [HelixDbTokens.TokenMetric] = HelixDbTokens.TokenCosine })
         };
         if (!drop)
         {
-            fields[HelixDbNativeTokens.TokenIfNotExists] = false;
+            fields[HelixDbTokens.TokenIfNotExists] = false;
         }
 
-        return HelixDbProtocol.Node(drop ? HelixDbNativeTokens.TokenDropIndex : HelixDbNativeTokens.TokenCreateIndex, fields);
+        return HelixDbProtocol.Node(drop ? HelixDbTokens.TokenDropIndex : HelixDbTokens.TokenCreateIndex, fields);
     }
 
     private static JsonObject Vector(ReadOnlySpan<float> vector)
@@ -82,6 +82,6 @@ internal static class HelixDbVectorAst
             values.Add(value);
         }
 
-        return HelixDbProtocol.Value(HelixDbNativeTokens.TokenF32Array, values);
+        return HelixDbProtocol.Value(HelixDbTokens.TokenF32Array, values);
     }
 }

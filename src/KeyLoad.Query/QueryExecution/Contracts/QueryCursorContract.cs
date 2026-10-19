@@ -2,9 +2,9 @@ namespace KeyLoad.Query.Features.QueryExecution;
 
 internal static class QueryCursorContract
 {
-    internal const string Alias = "keyload.query.cursor.claims.v2";
+    internal const string Alias = "keyload.query.cursor.claims";
     internal const int CurrentVersion = 2;
-    internal const string Purpose = "query-page-v2";
+    internal const string Purpose = "query-page";
     internal const int PurposeField = 0;
     internal const int IncarnationField = 1;
     internal const int NodeIdField = 2;

@@ -26,7 +26,7 @@ public sealed partial class DatabaseEngine
             throw Errors.Fail(ErrorCode.Conflict, Bm25CorpusProtocol.Changed);
         }
         var key = Bm25CorpusKeys.Current(current);
-        var previous = transaction.GetRecord<Bm25CorpusCurrentV1>(key);
+        var previous = transaction.GetRecord<Bm25CorpusCurrent>(key);
         if (previous?.Generation != phase.ExpectedGeneration)
         {
             throw Errors.Fail(ErrorCode.Conflict, Bm25CorpusProtocol.Changed);

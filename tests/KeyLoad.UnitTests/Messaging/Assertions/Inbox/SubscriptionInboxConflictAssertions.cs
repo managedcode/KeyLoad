@@ -103,7 +103,7 @@ internal static class SubscriptionInboxConflictAssertions
     {
         var cut = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
-        var identity = NativeSerialization.Serialize(store.Identity);
+        var identity = OrleansSerialization.Serialize(store.Identity);
         var replay = db.Apply(entry.Operation);
         if (Errors.Code(entry.Result.Problem) is not null)
         {
@@ -113,15 +113,15 @@ internal static class SubscriptionInboxConflictAssertions
         }
         else if (entry.Result.Value is SubscriptionProcessingResult)
         {
-            await NativeReplayResultAssertions.Same<SubscriptionProcessingResult>(replay, entry.Result);
+            await ReplayResultAssertions.Same<SubscriptionProcessingResult>(replay, entry.Result);
         }
         else if (entry.Result.Value is SubscriptionInfo)
         {
-            await NativeReplayResultAssertions.Same<SubscriptionInfo>(replay, entry.Result);
+            await ReplayResultAssertions.Same<SubscriptionInfo>(replay, entry.Result);
         }
         else
         {
-            await NativeReplayResultAssertions.Same<CommitReceipt>(replay, entry.Result);
+            await ReplayResultAssertions.Same<CommitReceipt>(replay, entry.Result);
         }
         var saved = SubscriptionProcessingAtomicAssertions.OutcomeBytes(store, group, entry.Operation.CommandId);
         await Assert.That(saved.AsSpan().SequenceEqual(entry.Saved)).IsTrue();
@@ -133,7 +133,7 @@ internal static class SubscriptionInboxConflictAssertions
     {
         var cut = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
-        var identity = NativeSerialization.Serialize(store.Identity);
+        var identity = OrleansSerialization.Serialize(store.Identity);
         var replay = db.Apply(original.Operation);
         await Assert.That(Errors.Code(replay.Problem)).IsEqualTo(ErrorCode.TokenInvalidated);
         await Assert.That(replay.Problem?.Detail).IsEqualTo("The subscription token scope or generation is invalid.");
@@ -141,8 +141,8 @@ internal static class SubscriptionInboxConflictAssertions
         await Assert.That(replay.Value).IsNull();
         var retained = SubscriptionProcessingAtomicAssertions.OutcomeBytes(store, group, original.Operation.CommandId);
         await Assert.That(retained.AsSpan().SequenceEqual(original.Saved)).IsTrue();
-        await NativeReplayResultAssertions.Same<SubscriptionProcessingResult>(
-            NativeSerialization.Deserialize<StoredOutcome>(retained).Result, original.Result);
+        await ReplayResultAssertions.Same<SubscriptionProcessingResult>(
+            OrleansSerialization.Deserialize<StoredOutcome>(retained).Result, original.Result);
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, cut, position, identity);
     }
 

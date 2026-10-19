@@ -8,6 +8,6 @@ namespace KeyLoad;
 /// <param name="IndexCount">Number of configured resource indexes.</param>
 /// <param name="Paused">Persisted dispatch pause state.</param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.AdminResourceInfo)]
+[Orleans.Alias(ContractAliases.AdminResourceInfo)]
 public sealed record AdminResourceInfo([property: Orleans.Id(0)] string Name, [property: Orleans.Id(1)] ResourceKind Kind, [property: Orleans.Id(2)] string TransactionDomainId,
     [property: Orleans.Id(3)] long SchemaVersion, [property: Orleans.Id(4)] int IndexCount, [property: Orleans.Id(5)] bool Paused);

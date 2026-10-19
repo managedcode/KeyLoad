@@ -14,17 +14,17 @@ internal static class RemoteTransferRepairColdContinuation
             fixture.DestinationQueue, RemoteTransferRepairColdProtocol.Message), new MessageInspection(new(RemoteTransferRepairColdProtocol.Message,
                 MessageState.Ready, RemoteTransferRepairColdProtocol.NoAttempts, RemoteTransferRepairColdProtocol.InitialStateVersion,
                 RemoteTransferRepairColdProtocol.InitialReadySequence, null, null), RemoteTransferRepairColdProtocol.Payload, RemoteTransferRepairColdProtocol.Headers));
-        RemoteTransferRepairColdNative.Policy(fixture, fixture.SourceQueue, allow: false);
+        RemoteTransferRepairCold.Policy(fixture, fixture.SourceQueue, allow: false);
         var complete = new CommandRequest(RemoteTransferRepairIdentity.CommandId(hint, QueueTransferRepairStage.Complete),
             fixture.SourcePartition, [new CompleteQueueTransfer(fixture.SourceQueue, transfer.TransferId, proof.ReceiptToken)]);
-        var failed = RemoteTransferRepairColdNative.Apply(fixture, complete);
+        var failed = RemoteTransferRepairCold.Apply(fixture, complete);
         await Assert.That(Errors.Code(failed.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
 
         await Assert.That(failed.Value).IsNull();
-        var completeBytes = RemoteTransferRepairColdNative.Outcome(fixture, complete.CommandId, fixture.SourcePartition);
+        var completeBytes = RemoteTransferRepairCold.Outcome(fixture, complete.CommandId, fixture.SourcePartition);
         await RemoteTransferRepairColdAdvance.DeniedWithoutWitnessAsync(fixture, hint, original.IntentToken,
             QueueTransferRepairStage.Complete, proof.ReceiptToken);
-        RemoteTransferRepairColdNative.Policy(fixture, fixture.SourceQueue, allow: true);
+        RemoteTransferRepairCold.Policy(fixture, fixture.SourceQueue, allow: true);
         var advance = await RemoteTransferRepairColdAdvance.ApplyAsync(fixture, hint, original.IntentToken,
             QueueTransferRepairStage.Complete, proof.ReceiptToken);
         RemoteTransferRepairColdFailure? refused = null;
@@ -35,19 +35,19 @@ internal static class RemoteTransferRepairColdContinuation
 
             await Assert.That(advance.Result.Value).IsNull();
             refused = new(advance.Command, advance.Result,
-                RemoteTransferRepairColdNative.Outcome(fixture, advance.Command.CommandId, fixture.SourcePartition));
-            await Assert.That(RemoteTransferRepairColdNative.State(fixture, transfer.TransferId).CompleteGeneration)
+                RemoteTransferRepairCold.Outcome(fixture, advance.Command.CommandId, fixture.SourcePartition));
+            await Assert.That(RemoteTransferRepairCold.State(fixture, transfer.TransferId).CompleteGeneration)
                 .IsEqualTo(RemoteTransferRepairColdProtocol.FirstGeneration);
         }
         else
         {
             _ = advance.Result.Get<CommitReceipt>();
         }
-        hint = RemoteTransferRepairColdNative.Hint(fixture);
+        hint = RemoteTransferRepairCold.Hint(fixture);
         var id = ceiling == RemoteTransferRepairColdProtocol.ExhaustedCeiling ? Guid.NewGuid()
             : RemoteTransferRepairIdentity.CommandId(hint, QueueTransferRepairStage.Complete);
         var repaired = new CommandRequest(id, fixture.SourcePartition, complete.Mutations);
-        var delivered = RemoteTransferRepairColdNative.Apply(fixture, repaired).Get<CommitReceipt>();
+        var delivered = RemoteTransferRepairCold.Apply(fixture, repaired).Get<CommitReceipt>();
         await RemoteTransferRepairColdHealthy.ColdAsync(fixture, transfer, original, proof, deniedAccept, acceptBytes,
             complete, completeBytes, acceptedCommand, accepted, repaired, delivered, ceiling, refused);
     }

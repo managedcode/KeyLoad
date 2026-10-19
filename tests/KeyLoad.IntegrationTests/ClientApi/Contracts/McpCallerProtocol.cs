@@ -19,7 +19,7 @@ internal static class McpCallerProtocol
     internal const string MaximumResults = "maxResults";
     internal const string Matches = "matches";
     internal const string Tool = "tool";
-    internal const string MissingDiscoveredTool = "The native graph did not return the exact canonical tool.";
+    internal const string MissingDiscoveredTool = "The execution graph did not return the exact canonical tool.";
     internal const string HttpEndpoint = "http";
     internal const string Endpoint = "/mcp";
     internal const string ProtocolVersion = "2026-07-28";
@@ -40,7 +40,7 @@ internal static class McpCallerProtocol
     internal const string UnconfiguredCredentialPrefix = "unconfigured-mcp-key.";
     internal const string MissingClient = "The genuine MCP client has not connected.";
     internal const string MissingEndpoint = "The Aspire HTTP endpoint is unavailable.";
-    internal const string MissingStructuredResult = "The native tool result has no structured envelope.";
+    internal const string MissingStructuredResult = "The execution tool result has no structured envelope.";
     internal const string ProblemType = "type";
     internal const string ProblemTitle = "title";
     internal const string ProblemStatus = "status";
@@ -49,7 +49,7 @@ internal static class McpCallerProtocol
     internal const int ToolCount = 93;
     internal const int InitialToolCount = 3;
     internal const int MaximumSearchResults = 4;
-    internal const int AstVersion = 1;
+    internal const int AstVersion = SqlOperationProtocol.DefaultQueryDialectVersion;
     internal const int FirstRevision = 1;
     internal const int EpochIncrement = 1;
     internal const int SummaryByteLimit = 1_024;

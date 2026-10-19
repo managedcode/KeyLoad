@@ -10,7 +10,7 @@ AC-GRAPH-PATH-REBIND-001: own S/A/B/T literal documents and four edges 0-sa:S→
 
 REQ-GRAPH-PATH-REBIND-002: stale revision rejection and every original successful receipt replay leave current public model results unchanged; a refused fresh command may persist a legitimate failure outcome/clock. No raw journal/no-write claim follows from public reads.
 
-AC-GRAPH-PATH-REBIND-002: after revision2, actual ExpectedRevision1 fresh update refuses strict RevisionConflict through both clients. Each response is independently followed by current+healthy complete route matrix, before a later response can conceal it. Original full seed/revision2/revision3 receipts replay individually, each immediately followed by current matrix; verify original GUID, complete mutation output and durability. Retain original refusal identity/result where existing cached contracts permit; exact native revision and MCP safe-detail contracts require explicit proof before code readiness.
+AC-GRAPH-PATH-REBIND-002: after revision2, actual ExpectedRevision1 fresh update refuses strict RevisionConflict through both clients. Each response is independently followed by current+healthy complete route matrix, before a later response can conceal it. Original full seed/revision2/revision3 receipts replay individually, each immediately followed by current matrix; verify original GUID, complete mutation output and durability. Retain original refusal identity/result where existing cached contracts permit; exact revision and MCP safe-detail contracts require explicit proof before code readiness.
 
 REQ-GRAPH-PATH-REBIND-003: bounded original lifetime and current results survive actual joined cold restarts of the replicated cluster.
 
@@ -18,13 +18,13 @@ AC-GRAPH-PATH-REBIND-003: strengthen ONLY the existing shortest-path committed-m
 
 ## Independent bounded oracle
 
-Source BFS facts: adjacency candidates charged before labels/visited; canonical edge identity checked; first encountered target ends the level. Initial and revision2 S→T use MaxDepth2/MaxVertices4/MaxEdges3 exact enough; revision2 visit B's 0-sa to A before 3-bt to T. A MaxVertices3 control must refuse before T is admitted at revision2; immediately healthy max4. Revision3 needs two examined candidates S:1-sb and B:0-sa and uses max3 vertices. Exact independently computed counters remain source-stage arithmetic, not exported measured metrics or performance evidence. Incoming complete native rows/SourceCut and SQL request bindings must reuse confirmed typed contracts.
+Source BFS facts: adjacency candidates charged before labels/visited; canonical edge identity checked; first encountered target ends the level. Initial and revision2 S→T use MaxDepth2/MaxVertices4/MaxEdges3 exact enough; revision2 visit B's 0-sa to A before 3-bt to T. A MaxVertices3 control must refuse before T is admitted at revision2; immediately healthy max4. Revision3 needs two examined candidates S:1-sb and B:0-sa and uses max3 vertices. Exact independently computed counters remain source-stage arithmetic, not exported measured metrics or performance evidence. Incoming complete rows/SourceCut and SQL request bindings must reuse confirmed typed contracts.
 
 ## Coverage exclusion and scope
 
 Existing canonical vertex full flow rebinds/deletes/reinserts edge and checks both adjacency directions, but does not assert shortest tied route changes. Existing path parity is warm static paths; the node-loss case adds a NEW shortcut, with one stopped node, without same-ID endpoint replacement. Cycle/label packets qualify BFS visibility/filter/caps, field-use and RawRead packets policy/projection. This continuation preserves all those originals.
 
-New role targets planned under IntegrationTests/Features/GraphTraversal/{Models,Helpers,Assertions}; owning doc docs/Features/GraphTraversal/ShortestPathEndpointReplacementPublic.md. Root approval/source-N peer and native NF/checkOnly remain required before selection. Fresh source body prefix/full existing post UNKNOWN until actual Main native Y.
+New role targets planned under IntegrationTests/Features/GraphTraversal/{Models,Helpers,Assertions}; owning doc docs/Features/GraphTraversal/ShortestPathEndpointReplacementPublic.md. Root approval/source-N peer and NF/checkOnly remain required before selection. Fresh source body prefix/full existing post UNKNOWN until actual Main Y.
 
 ```mermaid
 flowchart LR
@@ -38,4 +38,4 @@ flowchart LR
   Replay --> Cold2[All3 joined cold + full current]
 ```
 
-SOURCE_N requirements only. SourceY, compiler, runtime, native UID and Linux qualification OPEN. No predicted PASS.
+SOURCE_N requirements only. SourceY, compiler, runtime, UID and Linux qualification OPEN. No predicted PASS.

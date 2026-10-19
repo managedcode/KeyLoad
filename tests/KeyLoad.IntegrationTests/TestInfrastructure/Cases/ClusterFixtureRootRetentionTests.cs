@@ -4,7 +4,7 @@ using KeyLoad.Storage.ZoneTree;
 
 namespace KeyLoad.IntegrationTests.Features.TestInfrastructure;
 
-/// <summary>Actual local root-release policy and native store ownership; no injected Aspire stop or Orleans proof.</summary>
+/// <summary>Actual local root-release policy and execution store ownership; no injected Aspire stop or Orleans proof.</summary>
 internal sealed class ClusterFixtureRootRetentionTests
 {
     private const string RootPrefix = "keyload-fixture-root-retention-";
@@ -14,7 +14,7 @@ internal sealed class ClusterFixtureRootRetentionTests
     private const string SentinelValue = "Retain the original failed-cleanup owner.";
     private const string FailureMarker = "Original fixture cleanup failure marker.";
     private const string LiveDeleteRefused = "The original live store must never reach root deletion.";
-    private const string ImageExceeded = "The original native fixture image exceeded its bound.";
+    private const string ImageExceeded = "The original execution fixture image exceeded its bound.";
     private const int MaximumRecords = 32;
     private const int NoDeletes = 0;
     private const int OneDelete = 1;
@@ -27,7 +27,7 @@ internal sealed class ClusterFixtureRootRetentionTests
     private static readonly byte[] Value = [StoredValue];
 
     [Test]
-    public async Task FailedCleanupRetainsNativeOwnerThenExactReopenAndHealthyRelease()
+    public async Task FailedCleanupRetainsOwnerThenExactReopenAndHealthyRelease()
     {
         var root = Path.Combine(Path.GetTempPath(), RootPrefix + Guid.NewGuid().ToString(GuidFormat));
         var directory = Path.Combine(root, StoreDirectory);

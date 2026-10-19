@@ -21,14 +21,14 @@ internal static class TransactionalReadViewValues
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () => await Assert.That(TransactionalReadViewCommands.QueueImage(state.Store))
             .IsEquivalentTo(image, CollectionOrdering.Matching), failures);
-        await ServerFailureObserver.ObserveAsync(() => NativeReadCutStoreStateAssertions.AssertIdentityAndPositionAsync(
+        await ServerFailureObserver.ObserveAsync(() => ReadCutStoreStateAssertions.AssertIdentityAndPositionAsync(
             state.Store, state.Identity, position), failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }
-    internal static async Task CutAsync(TransactionalReadViewState state, ZoneTreeNativeReadCut actual, long position)
+    internal static async Task CutAsync(TransactionalReadViewState state, ZoneTreeReadCut actual, long position)
     {
         var identity = state.Identity;
-        var expected = new ZoneTreeNativeReadCut(identity.FormatVersion, identity.KeyCodecVersion, identity.NodeId,
+        var expected = new ZoneTreeReadCut(identity.FormatVersion, identity.KeyCodecVersion, identity.NodeId,
             identity.Incarnation, identity.Durability, identity.DispatchPaused, identity.ReadGeneration, position);
         await Assert.That(actual).IsEqualTo(expected);
     }

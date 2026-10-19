@@ -20,9 +20,9 @@ internal static class BackupPieceBoundaryFlow
     private const string Below = "piece-below";
     private const string Exact = "piece-exact";
     private const string Above = "piece-above";
-    private const string NativeArtifactSuffix = ".native.ctg";
+    private const string RuntimeArtifactSuffix = ".execution.ctg";
     private const string CliArtifactSuffix = ".cli.ctg";
-    private const string NativeDirectorySuffix = "-native";
+    private const string DirectorySuffix = "-execution";
     private const string CliDirectorySuffix = "-cli";
 
     internal static async Task RunAsync(
@@ -30,28 +30,28 @@ internal static class BackupPieceBoundaryFlow
         CliBackupRestoreFixture fixture, IReadOnlyDictionary<string, byte[]> files, byte[] key,
         string payload, string environment, CancellationToken token)
     {
-        var original = NativeBackupJournalRepairAssertions.Read(fixture.SourceDirectory, token);
+        var original = BackupJournalRepairAssertions.Read(fixture.SourceDirectory, token);
         var length = files[JournalName].Length;
         await Assert.That(length).IsGreaterThan(MinimumPiece);
         foreach (var boundary in new[] { (-BoundaryStep, SplitPieces, Below),
             (ExactBoundary, SinglePiece, Exact), (BoundaryStep, SinglePiece, Above) })
         {
             var piece = checked(length + boundary.Item1);
-            await NativeAsync(options, fixture, files, key, payload, piece, boundary.Item2, boundary.Item3, token);
+            await RuntimeAsyncCore(options, fixture, files, key, payload, piece, boundary.Item2, boundary.Item3, token);
             await CliAsync(options, fixture, files, key, payload, environment, piece, boundary.Item2, boundary.Item3, token);
-            await NativeBackupJournalRepairAssertions.SameCutAsync(original,
-                NativeBackupJournalRepairAssertions.Read(fixture.SourceDirectory, token));
+            await BackupJournalRepairAssertions.SameCutAsync(original,
+                BackupJournalRepairAssertions.Read(fixture.SourceDirectory, token));
         }
     }
 
-    private static async Task NativeAsync(
+    private static async Task RuntimeAsyncCore(
         global::Microsoft.Extensions.Options.IOptions<global::KeyLoad.AppHost.Features.TestInfrastructure.TestExecutionOptions> options,
         CliBackupRestoreFixture fixture, IReadOnlyDictionary<string, byte[]> files, byte[] key, string payload,
         int piece, int journalPieces, string label, CancellationToken token)
     {
-        var artifact = fixture.ArtifactPath + label + NativeArtifactSuffix;
-        var unpacked = fixture.UnpackedDirectory + label + NativeDirectorySuffix;
-        var restored = fixture.RestoredDirectory + label + NativeDirectorySuffix;
+        var artifact = fixture.ArtifactPath + label + RuntimeArtifactSuffix;
+        var unpacked = fixture.UnpackedDirectory + label + DirectorySuffix;
+        var restored = fixture.RestoredDirectory + label + DirectorySuffix;
         var failure = Assert.ThrowsExactly<ArgumentOutOfRangeException>(() =>
             BackupArtifact.Pack(fixture.BackupDirectory, artifact, InvalidPiece));
         await Assert.That(failure!.ParamName).IsEqualTo(PieceParameter);

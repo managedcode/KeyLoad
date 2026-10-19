@@ -21,7 +21,7 @@ internal static class SqlNullOrderingPages
                 await ContinuationAsync(engine, partition, principal, descending, first, position);
                 if (first)
                 {
-                    await NativeContinuationAsync(engine, partition, principal, descending, position);
+                    await RuntimeContinuationAsync(engine, partition, principal, descending, position);
                 }
                 await SqlNullOrderingRefusals.UnchangedAsync(store, image, position, identity);
             }
@@ -61,28 +61,28 @@ internal static class SqlNullOrderingPages
         await EqualAsync(new([.. full.Rows.Skip(PageRows + PageRows)], null, cut, full.AccessPath), final);
     }
 
-    private static async Task NativeContinuationAsync(QueryEngine engine, PartitionRef partition,
+    private static async Task RuntimeContinuationAsync(QueryEngine engine, PartitionRef partition,
         string principal, bool descending, long cut)
     {
         string[] ids = descending ? ["high", "low"] : ["low", "high"];
         var full = new QueryPage([.. ids.Select(id => new QueryRow(id, 1,
             "{\"label\":\"" + id + "\"}", RedactedFields: []))], null, cut, "bounded-full-scan");
-        await EqualAsync(full, engine.Execute(principal, SqlNullOrderingProtocol.Native(partition, descending)));
-        await EqualAsync(full, engine.ExecuteAst(principal, SqlNullOrderingProtocol.NativeAst(partition, descending)));
-        var sql = SqlNullOrderingProtocol.Native(partition, descending, NativePageRows);
+        await EqualAsync(full, engine.Execute(principal, SqlNullOrderingProtocol.Execution(partition, descending)));
+        await EqualAsync(full, engine.ExecuteAst(principal, SqlNullOrderingProtocol.RuntimeAst(partition, descending)));
+        var sql = SqlNullOrderingProtocol.Execution(partition, descending, RuntimePageRows);
         var initial = engine.Execute(principal, sql);
         await Assert.That(initial.Cursor).IsNotNull();
         await EqualAsync(new([full.Rows[FirstRow]], initial.Cursor, cut, full.AccessPath), initial);
         var second = engine.ExecuteAst(principal,
-            SqlNullOrderingProtocol.NativeAst(partition, descending, NativePageRows) with
+            SqlNullOrderingProtocol.RuntimeAst(partition, descending, RuntimePageRows) with
             {
                 Cursor = initial.Cursor
             });
-        await EqualAsync(new([full.Rows[NativePageRows]], null, cut, full.AccessPath), second);
+        await EqualAsync(new([full.Rows[RuntimePageRows]], null, cut, full.AccessPath), second);
     }
 
     private const int FirstRow = 0;
-    private const int NativePageRows = 1;
+    private const int RuntimePageRows = 1;
 
     private const int PageRows = 2;
 

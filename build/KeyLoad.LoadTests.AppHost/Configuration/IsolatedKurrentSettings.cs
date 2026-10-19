@@ -22,9 +22,9 @@ internal static class IsolatedKurrentSettings
     private const string Enabled = "true";
     private const string Disabled = "false";
     private const string PortSeparator = ":";
-    private const string NativeHostSuffix = ".dev.internal";
+    private const string RuntimeHostSuffix = ".dev.internal";
 
-    internal static string NativeHost(string name) => name + NativeHostSuffix;
+    internal static string RuntimeHost(string name) => name + RuntimeHostSuffix;
 
     internal static void Configure(IResourceBuilder<ContainerResource> node, string name, string[] names)
     {
@@ -34,13 +34,13 @@ internal static class IsolatedKurrentSettings
         node.WithEnvironment(ClusterSize, names.Length.ToString(CultureInfo.InvariantCulture))
             .WithEnvironment(NodeIp, BindAll).WithEnvironment(NodePort, HttpPort)
             .WithEnvironment(ReplicationIp, BindAll).WithEnvironment(ReplicationPort, TcpPort)
-            .WithEnvironment(NodeAdvertise, NativeHost(name)).WithEnvironment(ReplicationAdvertise, NativeHost(name))
+            .WithEnvironment(NodeAdvertise, RuntimeHost(name)).WithEnvironment(ReplicationAdvertise, RuntimeHost(name))
             .WithEnvironment(Insecure, Enabled).WithEnvironment(DiscoverDns, Disabled)
             .WithEnvironment(Database, Data);
         if (names.Length > BoundaryValue)
         {
             node.WithEnvironment(GossipSeeds, string.Join(SeparatorCharacter, names.Where(peer => peer != name)
-                .Select(peer => NativeHost(peer) + PortSeparator + HttpPort)));
+                .Select(peer => RuntimeHost(peer) + PortSeparator + HttpPort)));
         }
     }
 }

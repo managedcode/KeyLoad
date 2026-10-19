@@ -4,16 +4,17 @@
   "concept": "Orleans owns all clustering and activation scaling. The API reaches one grain per connected client, logical database/partition grains, storage owners and bounded result aggregation. Shared volumes require one open owner per physical partition without copies; isolated volumes use typed Orleans calls between owners. Shared-volume ownership and distributed partition-query execution are not yet qualified.",
   "qualification": {
     "build": "Not recorded here. Run dotnet build KeyLoad.slnx -warnaserror.",
-    "unitTests": "open: full native execution is incomplete. The ZoneTree 2.0.1 synchronous maintainer wait can block the Orleans scheduler; upstream issue https://github.com/ZoneTree/ZoneTree/issues/190. Linux CI startup/cancellation failures also remain unresolved. Focused passes do not qualify the complete suite.",
+    "unitTests": "open: full execution execution is incomplete. The ZoneTree 2.0.1 synchronous maintainer wait can block the Orleans scheduler; upstream issue https://github.com/ZoneTree/ZoneTree/issues/190. Linux CI startup/cancellation failures also remain unresolved. Focused passes do not qualify the complete suite.",
     "processRecoveryTests": "open: all 234 existing process-recovery cases passed locally in Debug; exact delivered-source Linux qualification remains required",
     "aspireClusterSdkMcpTests": "open: the five selected public partition-query SDK/MCP cases passed locally in each configured three-silo SharedVolume and IsolatedVolumes run, with joined teardown; the complete exact-source Linux cluster suite and fault/endurance gates remain required",
     "coverage": "open: original Linux analyzer measurements exist; current source mapping and required numeric gates are not qualified. Functional coverage remains open.",
     "performance": "No published claim without authenticated GitHub Benchmarks evidence.",
     "powerLossDurability": "Not proven; process-kill tests do not prove it.",
     "endurance": "open",
-    "sharedVolumeStorage": "open: lazy single-owner sessions are in source; native runtime, owner loss/reopen and deployed filesystem locking/flush qualification remain required",
-    "distributedPartitionQueries": "open: native logical-partition dispatch is in source; exact owner, budget, authorization and aggregation behavior requires runtime and delivered-source qualification"
+    "sharedVolumeStorage": "open: lazy single-owner sessions are in source; execution runtime, owner loss/reopen and deployed filesystem locking/flush qualification remain required",
+    "distributedPartitionQueries": "open: execution logical-partition dispatch is in source; exact owner, budget, authorization and aggregation behavior requires runtime and delivered-source qualification",
+    "fileStorage": "open: the custom raw-part engine/API and rejected consumer IStorage adapter are removed. Compose the existing ManagedCode.Storage implementation directly, with KeyLoad authorization and ZoneTree metadata integration. Execution module wiring, replacement acceptance tests, physical restore, cleanup and shared-provider cluster qualification remain incomplete."
   },
   "evidence": "Qualification evidence lives only in GitHub Actions runs and their original artifacts for the exact delivered source.",
-  "implementation": "Orleans-native runtime integration is in progress. IsolatedVolumes uses silo-local full copies; SharedVolume acquires one physical session through an ordinary database activation and joins its borrowers before close. PartitionQuery and DistributedSearch dispatch bounded leaves through ordinary Orleans partition grains and pin one actual owner per logical partition. Workers and durable coordinators use typed owner reads. Complete runtime and delivered-source qualification is open."
+  "implementation": "Orleans-execution runtime integration is in progress. IsolatedVolumes uses silo-local full copies; SharedVolume acquires one physical session through an ordinary database activation and joins its borrowers before close. PartitionQuery and DistributedSearch dispatch bounded leaves through ordinary Orleans partition grains and pin one actual owner per logical partition. Workers and durable coordinators use typed owner reads. Complete runtime and delivered-source qualification is open."
 }

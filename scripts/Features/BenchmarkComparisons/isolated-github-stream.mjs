@@ -31,7 +31,7 @@ function monitor(child, state, timeoutMs) {
   });
 }
 
-function nativeProcessDiagnostic(state, result) {
+function processDiagnostic(state, result) {
   return state.diagnostic ??= { exitCode: result.code, signal: result.signal,
     timedOut: state.timedOut, exceeded: state.exceeded, spawnFailed: state.spawnFailed,
     cancelled: state.cancelled === true, stderrBytes: state.stderrBytes,
@@ -48,7 +48,7 @@ function containsCredential(bytes, token, truncated) {
   return false;
 }
 
-async function retainNativeFailure(target, state, result, failed, cleanupFailureCount) {
+async function retainFailure(target, state, result, failed, cleanupFailureCount) {
   if (!failed && result.code === 0 && result.signal === null) return;
   const original = Buffer.concat(state.stderrChunks, state.stderrCapturedBytes);
   const tokens = [process.env.GH_TOKEN, process.env.GITHUB_TOKEN].filter(value => typeof value === 'string' && value.length > 0);
@@ -56,7 +56,7 @@ async function retainNativeFailure(target, state, result, failed, cleanupFailure
   const credentialExcluded = tokens.some(value => containsCredential(original, value, truncated));
   const capturedBytes = credentialExcluded ? 0 : original.length;
   if (capturedBytes > 0) await writeCapture(target + '.stderr', original);
-  await writeJson(target + '.native-process.json', { ...nativeProcessDiagnostic(state, result),
+  await writeJson(target + '.execution-process.json', { ...processDiagnostic(state, result),
     stderrCapturedBytes: capturedBytes, stderrTruncated: truncated, cleanupFailureCount,
     credentialExcluded, stderrFile: capturedBytes > 0 ? target + '.stderr' : null });
 }
@@ -64,8 +64,8 @@ async function retainNativeFailure(target, state, result, failed, cleanupFailure
 async function copyBounded(child, handle, maximumBytes, state, decoder) {
   const hash = createHash('sha256');
   let bytes = 0;
-  for await (const nativeChunk of child.stdout) {
-    const chunk = decoder ? await decoder.decode(nativeChunk) : nativeChunk;
+  for await (const runtimeChunk of child.stdout) {
+    const chunk = decoder ? await decoder.decode(runtimeChunk) : runtimeChunk;
     bytes += chunk.length;
     const limit = decoder?.response?.status === 200 ? maximumBytes : decoder ? GH.metadataBytes : maximumBytes;
     if (bytes > limit) { state.exceeded = true; stopOwned(child, state); requireGitHub(false); }
@@ -108,11 +108,11 @@ async function captureStream(command, argv, target, maximumBytes, timeoutMs, cwd
     requireGitHub(result.signal === null && !state.timedOut && !state.exceeded && !state.spawnFailed && !state.cancelled);
     requireGitHub(decoder ? decoder.response !== undefined && [0, 1].includes(result.code) : result.code === 0);
     await handle.sync();
-    const nativeProcess = nativeProcessDiagnostic(state, result);
+    const runtimeProcess = processDiagnostic(state, result);
     const metadataInterrupted = decoder !== undefined && maximumBytes === GH.metadataBytes
-      && isInterruptedMetadataResponse({ response: decoder.response, nativeProcess, bytes: output.bytes },
+      && isInterruptedMetadataResponse({ response: decoder.response, runtimeProcess, bytes: output.bytes },
         Buffer.concat(state.stderrChunks, state.stderrCapturedBytes));
-    return { ...output, nativeProcess,
+    return { ...output, runtimeProcess,
       ...(decoder ? { response: decoder.response, exitCode: result.code, metadataInterrupted } : {}) };
   } catch (error) {
     primaryFailure = error;
@@ -128,7 +128,7 @@ async function captureStream(command, argv, target, maximumBytes, timeoutMs, cwd
     const cleanupFailures = [];
     try { await handle.chmod(0o400); } catch (error) { cleanupFailures.push(error); }
     try { await handle.close(); } catch (error) { cleanupFailures.push(error); }
-    try { await retainNativeFailure(target, state, result,
+    try { await retainFailure(target, state, result,
       primaryFailure !== undefined || cleanupFailures.length > 0, cleanupFailures.length); }
     catch (error) { cleanupFailures.push(error); }
     if (cleanupFailures.length > 0) {

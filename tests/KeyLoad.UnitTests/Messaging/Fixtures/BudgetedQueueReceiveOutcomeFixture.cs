@@ -62,13 +62,13 @@ internal sealed class BudgetedQueueReceiveOutcomeFixture : IDisposable
             [new EnqueueMessage(P.Queue, P.First, P.Payload, P.Headers),
                 new EnqueueMessage(P.Queue, P.Second, P.Payload, P.Headers)]);
         var original = Database.Database.OwnCommand(Database.Database.CreateCommand(OperationKind.Batch, command.CommandId, P.Root, Database.Database.EvaluationClock.GetUtcNow(), JsonSerializer.Serialize(command, JsonDefaults.Options)));
-        var originalBytes = NativeSerialization.Serialize(original);
-        var input = NativeSerialization.Deserialize<CommandRequest>((original).Value!.Input.Span);
+        var originalBytes = OrleansSerialization.Serialize(original);
+        var input = OrleansSerialization.Deserialize<CommandRequest>((original).Value!.Input.Span);
         await Assert.That(JsonSerializer.Serialize(input, JsonDefaults.Options))
             .IsEqualTo(JsonSerializer.Serialize(command, JsonDefaults.Options));
         var index = checked(Database.ReadCanonicalCut().AppliedPosition + P.Step);
         var produced = Database.SubmitIssuedEmbedded(original, token).Get<CommitReceipt>();
-        await Assert.That(NativeSerialization.Serialize(original).SequenceEqual(originalBytes)).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(original).SequenceEqual(originalBytes)).IsTrue();
         await BudgetedQueueReceiveOutcomeAssertions.EqualAsync(new CommitReceipt(command.CommandId, new(Database.Store.Identity.Incarnation, Database.Partition.AtomicPartitionId, index), [new(P.EnqueueKind, input.Mutations[FirstMutationIndex].Resource, P.First, P.Initial),
                 new(P.EnqueueKind, input.Mutations[SecondMutationIndex].Resource, P.Second, P.Initial)], DurabilityProfile.ProcessDurable, 1), produced);
         (OriginalIntent, Result, OriginalIntentBytes) = Receive();
@@ -80,10 +80,10 @@ internal sealed class BudgetedQueueReceiveOutcomeFixture : IDisposable
         var request = new ReceiveRequest(Guid.NewGuid(), Lane, MaxMessages: P.OneMessage,
             LeaseSeconds: Resource.QueuePolicy.MaxLeaseSeconds);
         var operation = Database.Database.CreateCommand(OperationKind.Receive, request.RequestId, P.Worker,
-            Database.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(request));
-        var signedIntent = NativeSerialization.Serialize(operation);
+            Database.Database.EvaluationClock.GetUtcNow(), OrleansSerialization.Serialize(request));
+        var signedIntent = OrleansSerialization.Serialize(operation);
         var result = Database.SubmitIssued(operation);
-        if (!NativeSerialization.Serialize(operation).SequenceEqual(signedIntent))
+        if (!OrleansSerialization.Serialize(operation).SequenceEqual(signedIntent))
         {
             throw new InvalidOperationException("The original signed receive intent was changed during submission.");
         }

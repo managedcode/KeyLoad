@@ -52,7 +52,7 @@ public sealed partial class DatabaseEngine
         var principal = Principal(view, operation.UserId!, Clock.GetUtcNow());
         Features.Search.AnnProjectionPinValidation.RequireOwner(this, view, principal,
             configure.Consumer.Partition, original);
-        if (NativeSerialization.Measure(original) > Limits.MaxBatchBytes)
+        if (OrleansSerialization.Measure(original) > Limits.MaxBatchBytes)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, InvalidMaintenanceProfile);
         }

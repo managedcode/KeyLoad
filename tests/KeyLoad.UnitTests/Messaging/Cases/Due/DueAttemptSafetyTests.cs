@@ -21,7 +21,7 @@ internal sealed class DueAttemptSafetyTests
         await Assert.That(Errors.Code(notDue.Problem)).IsNull();
         var storedNotDue = OutcomeStoreOracle.ReadPartition(fixture.Store, fixture.Partition, RecurringSagaDatabase.RootPrincipal, notDueCommand)
             ?? throw new InvalidOperationException("The original recurring outcome is absent.");
-        var storedNotDueReceiptBytes = NativeSerialization.Serialize(storedNotDue.Get<CommitReceipt>());
+        var storedNotDueReceiptBytes = OrleansSerialization.Serialize(storedNotDue.Get<CommitReceipt>());
         fixture.Reopen();
         var scheduleBeforeDue = Schedule(fixture, scheduleId);
         await Assert.That(scheduleBeforeDue.NextOrdinal).IsEqualTo(0);
@@ -30,12 +30,12 @@ internal sealed class DueAttemptSafetyTests
         var replayAtDue = Emit(fixture, scheduleId, 1, notDueCommand, firstDue);
         await Assert.That(Errors.Code(replayAtDue.Problem)).IsEqualTo(Errors.Code(notDue.Problem));
         await Assert.That(replayAtDue.Problem?.Detail).IsEqualTo(notDue.Problem?.Detail);
-        await Assert.That(NativeSerialization.Serialize(replayAtDue.Get<CommitReceipt>()).AsSpan()
-            .SequenceEqual(NativeSerialization.Serialize(notDue.Get<CommitReceipt>()).AsSpan())).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(replayAtDue.Get<CommitReceipt>()).AsSpan()
+            .SequenceEqual(OrleansSerialization.Serialize(notDue.Get<CommitReceipt>()).AsSpan())).IsTrue();
         var retainedNotDue = OutcomeStoreOracle.ReadPartition(fixture.Store, fixture.Partition,
             RecurringSagaDatabase.RootPrincipal, notDueCommand)
             ?? throw new InvalidOperationException("The original not-due outcome is absent.");
-        await Assert.That(NativeSerialization.Serialize(retainedNotDue.Get<CommitReceipt>()).AsSpan()
+        await Assert.That(OrleansSerialization.Serialize(retainedNotDue.Get<CommitReceipt>()).AsSpan()
             .SequenceEqual(storedNotDueReceiptBytes)).IsTrue();
         await Assert.That(Schedule(fixture, scheduleId).NextOrdinal).IsEqualTo(0);
         await Assert.That(Message(fixture, scheduleId, 1, 0)).IsNull();
@@ -98,8 +98,8 @@ internal sealed class DueAttemptSafetyTests
             ?? throw new InvalidOperationException("The original recurring outcome is absent.");
         await Assert.That(Errors.Code(retainedError.Problem)).IsEqualTo(Errors.Code(originalError.Problem));
         await Assert.That(retainedError.Problem?.Detail).IsEqualTo(originalError.Problem?.Detail);
-        await Assert.That(NativeSerialization.Serialize(retainedError).AsSpan()
-            .SequenceEqual(NativeSerialization.Serialize(originalError))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(retainedError).AsSpan()
+            .SequenceEqual(OrleansSerialization.Serialize(originalError))).IsTrue();
         await Assert.That(Schedule(fixture, scheduleId).NextOrdinal).IsEqualTo(0);
 
         var freshCommand = Guid.NewGuid();

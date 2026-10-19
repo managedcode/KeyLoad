@@ -7,7 +7,7 @@ namespace KeyLoad.UnitTests.Features.ClientApi;
 internal sealed class OperationHeaderRequestHandler(bool requireConcurrentRequests)
 {
     private const int ParallelRequestCount = 2;
-    private const string ResponseNotStarted = "The native response did not start before identity publication.";
+    private const string ResponseNotStarted = "The execution response did not start before identity publication.";
     private const string IdentityNotPublished = "The execution identity was not published.";
     private const string IdentityMismatch = "The published execution identity did not match the request.";
     private readonly TaskCompletionSource<bool>? parallelRequestsReady = requireConcurrentRequests
@@ -16,7 +16,7 @@ internal sealed class OperationHeaderRequestHandler(bool requireConcurrentReques
     private int parallelRequestArrivals;
 
     /// <summary>Handles the four explicit real-network test routes.</summary>
-    /// <param name="context">The current native Kestrel request.</param>
+    /// <param name="context">The current execution Kestrel request.</param>
     /// <returns>Completion after the caller-visible response body is written.</returns>
     internal async Task HandleRequestAsync(HttpContext context)
     {

@@ -9,7 +9,7 @@ internal static class PartitionQueryExecution
 {
     private const int FirstElementIndex = 0;
 
-    internal static PartitionQueryResultV1 ExecutePartitionQuery(this QueryEngine engine, string principalId, AstQueryRequest request,
+    internal static PartitionQueryResult ExecutePartitionQuery(this QueryEngine engine, string principalId, AstQueryRequest request,
         ImmutableArray<PartitionRef> partitions, TimeProvider? timeProvider = null,
         CancellationToken cancellationToken = default)
     {
@@ -19,7 +19,7 @@ internal static class PartitionQueryExecution
         return engine.ExecutePartitionQuery(principalId, request, partitions, budget);
     }
 
-    internal static PartitionQueryResultV1 ExecutePartitionQuery(this QueryEngine engine, string principalId, AstQueryRequest request,
+    internal static PartitionQueryResult ExecutePartitionQuery(this QueryEngine engine, string principalId, AstQueryRequest request,
         ImmutableArray<PartitionRef> partitions, ReadExecutionBudget budget)
     {
         ArgumentNullException.ThrowIfNull(engine);
@@ -34,8 +34,8 @@ internal static class PartitionQueryExecution
             measureInternalResult: true);
     }
 
-    internal static PartitionQueryResultV1 ExecutePartitionQuery(this QueryEngine engine, string principalId,
-        PartitionQueryRequestV1 request, ReadExecutionBudget budget, PhysicalShardRecord expectedOwner)
+    internal static PartitionQueryResult ExecutePartitionQuery(this QueryEngine engine, string principalId,
+        PartitionQueryRequest request, ReadExecutionBudget budget, PhysicalShardRecord expectedOwner)
     {
         ArgumentNullException.ThrowIfNull(engine);
         ArgumentNullException.ThrowIfNull(budget);
@@ -47,7 +47,7 @@ internal static class PartitionQueryExecution
             budget, expectedOwner, measureInternalResult: false);
     }
 
-    private static PartitionQueryResultV1 ExecuteNormalized(QueryEngine engine, string principalId,
+    private static PartitionQueryResult ExecuteNormalized(QueryEngine engine, string principalId,
         AstQueryRequest normalized, ImmutableArray<PartitionRef> partitions, ReadExecutionBudget budget,
         PhysicalShardRecord? expectedOwner, bool measureInternalResult)
     {
@@ -59,7 +59,7 @@ internal static class PartitionQueryExecution
             maximumResultBytes: budget.MaximumResultBytes);
         _ = PartitionQueryPlanValidation.Validate(plan, database.Limits, engine.Execution);
         var grants = ReserveGrants(budget, plan);
-        var results = ImmutableArray.CreateBuilder<PartitionQueryLeafResultV1>(plan.Leaves.Length);
+        var results = ImmutableArray.CreateBuilder<PartitionQueryLeafResult>(plan.Leaves.Length);
         var executor = new PartitionQueryLeafExecutor(engine, database, budget, expectedOwner);
         for (var index = FirstElementIndex; index < plan.Leaves.Length; index++)
         {
@@ -82,7 +82,7 @@ internal static class PartitionQueryExecution
     }
 
     private static ReadExecutionBudgetReadGrant[] ReserveGrants(ReadExecutionBudget budget,
-        PartitionQueryPlanV1 plan)
+        PartitionQueryPlan plan)
     {
         var grants = new ReadExecutionBudgetReadGrant[plan.Leaves.Length];
         for (var index = FirstElementIndex; index < grants.Length; index++)

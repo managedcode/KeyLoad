@@ -16,7 +16,7 @@ internal sealed class PostgresSessionLoop(IServiceProvider services, global::Mic
         while (true)
         {
             using var frame = await PostgresFrameReader.ReadAsync(context.Transport.Input, false,
-                Options.MaximumFrameBytes, admission, context.ConnectionClosed).ConfigureAwait(false);
+                Options.MaximumFrameBytes, admission, context.ConnectionClosed);
             if (frame is null)
             {
                 return;
@@ -38,32 +38,32 @@ internal sealed class PostgresSessionLoop(IServiceProvider services, global::Mic
                         Sync(frame.Payload, draining);
                         draining = false;
                         writer.Ready();
-                        await PostgresControlFlush.RunAsync(services, writer, context.ConnectionClosed).ConfigureAwait(false);
+                        await PostgresControlFlush.RunAsync(services, writer, context.ConnectionClosed);
                         break;
                     case PostgresMessageProtocol.Flush:
                         Empty(frame.Payload);
-                        await PostgresControlFlush.RunAsync(services, writer, context.ConnectionClosed).ConfigureAwait(false);
+                        await PostgresControlFlush.RunAsync(services, writer, context.ConnectionClosed);
                         break;
                     case PostgresMessageProtocol.QueryMessage:
                         catalog.BeginQueryMessage();
-                        await ExecuteQueryMessageAsync(frame.Payload, owner, identity, partition, cancellation, context.ConnectionClosed).ConfigureAwait(false);
+                        await ExecuteQueryMessageAsync(frame.Payload, owner, identity, partition, cancellation, context.ConnectionClosed);
                         writer.Ready();
-                        await PostgresControlFlush.RunAsync(services, writer, context.ConnectionClosed).ConfigureAwait(false);
+                        await PostgresControlFlush.RunAsync(services, writer, context.ConnectionClosed);
                         break;
                     case PostgresMessageProtocol.Execute:
                         await dispatch.ExecuteAsync(frame, owner, identity, partition, cancellation,
-                            context.ConnectionClosed).ConfigureAwait(false);
+                            context.ConnectionClosed);
                         break;
                     default:
                         dispatch.Prepare(frame, context.ConnectionClosed);
                         break;
                 }
             }
-            catch (Exception error) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error) && !context.ConnectionClosed.IsCancellationRequested)
+            catch (Exception error) when (global::KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(error) && !context.ConnectionClosed.IsCancellationRequested)
             {
                 var queryMessage = frame.Type == PostgresMessageProtocol.QueryMessage;
                 draining = !queryMessage;
-                await FailureAsync(error, queryMessage, context.ConnectionClosed).ConfigureAwait(false);
+                await FailureAsync(error, queryMessage, context.ConnectionClosed);
             }
         }
     }
@@ -89,8 +89,8 @@ internal sealed class PostgresSessionLoop(IServiceProvider services, global::Mic
             {
                 writer.Ready();
             }
-            await PostgresControlFlush.RunAsync(services, writer, closed).ConfigureAwait(false);
-        }, failures).ConfigureAwait(false);
+            await PostgresControlFlush.RunAsync(services, writer, closed);
+        }, failures);
         if (failures.Count != PostgresProtocol.AllRows)
         {
             failures.Insert(PostgresProtocol.FirstField, original);
@@ -114,7 +114,7 @@ internal sealed class PostgresSessionLoop(IServiceProvider services, global::Mic
         var portal = new PostgresBoundPortal(statement, new Dictionary<string, JsonElement>(StringComparer.Ordinal),
             PostgresProtocol.TextFormat, statement.RetainedBytes);
         await PostgresOperationDelivery.ExecuteAsync(services, writer, owner, identity, partition,
-            portal, PostgresProtocol.AllRows, cancellation, Options, admission, catalog, describe: true, closed).ConfigureAwait(false);
+            portal, PostgresProtocol.AllRows, cancellation, Options, admission, catalog, describe: true, closed);
     }
 
     private string ReadQueryText(ReadOnlySpan<byte> bytes)

@@ -18,7 +18,7 @@ internal static class AggregateReplayCrashScenario
     internal const string EventKeySpace = "event";
     internal const string EventIdentityKeySpace = "event-id";
     internal const string EventId = "aggregate-event-1";
-    internal const string Reducer = "orders.reducer.v1";
+    internal const string Reducer = "orders.reducer";
     internal const string EventType = "AccountChanged";
     internal const string EventIncrementProperty = "increment";
     internal const string EventPayloadJson = "{\"" + EventIncrementProperty + "\":1}";
@@ -49,7 +49,7 @@ internal static class AggregateReplayCrashScenario
         var command = new StoreAggregateSnapshot(StreamSet, StreamId, EmptySourceRevision, Reducer, InitialStateSchemaVersion, StateJson, NoSnapshotVersion, InitialGeneration);
         var request = new CommandRequest(SnapshotCommandId, Partition, [command]);
         var operation = CrashDatabase.Operation(database, OperationKind.Batch, request, SnapshotCommandId);
-        await File.WriteAllBytesAsync(Path.Combine(directory, OperationFile), NativeSerialization.Serialize(operation));
+        await File.WriteAllBytesAsync(Path.Combine(directory, OperationFile), OrleansSerialization.Serialize(operation));
         boundary.Position = store.Position + PositionStep;
         boundary.Armed = true;
         database.Apply(operation).Get<CommitReceipt>();

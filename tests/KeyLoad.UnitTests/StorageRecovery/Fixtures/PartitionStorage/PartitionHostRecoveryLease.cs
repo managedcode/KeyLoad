@@ -8,7 +8,7 @@ namespace KeyLoad.UnitTests.Features.StorageRecovery;
 internal sealed class PartitionHostRecoveryLease(PartitionHostRecoveryAttempt attempt) : IAsyncDisposable
 {
     private PartitionHost? host;
-    private RequestCqrsHostedRuntimeFixture? native;
+    private RequestCqrsHostedRuntimeFixture? execution;
     private Task? opening;
     private Task? closing;
     internal PartitionHost Host => host ?? throw new ObjectDisposedException(nameof(PartitionHostRecoveryLease));
@@ -20,11 +20,11 @@ internal sealed class PartitionHostRecoveryLease(PartitionHostRecoveryAttempt at
     {
         try
         {
-            native = new();
-            await native.InitializeAsync(TestContext.Current!.Execution.CancellationToken).ConfigureAwait(false);
+            execution = new();
+            await execution.InitializeAsync(TestContext.Current!.Execution.CancellationToken).ConfigureAwait(false);
             host = await PartitionHost.OpenAsync(ServerRuntimeTestOptions.Runtime(options), new AuthorizationPolicy(),
                 new CommandAdmissionGovernor(UnitAdmissionOptions.Command(options.CommandAdmission)), TimeProvider.System,
-                logger, native.Grains, attempt.Ownership).ConfigureAwait(false);
+                logger, execution.Grains, attempt.Ownership).ConfigureAwait(false);
         }
         catch (Exception failure)
         {
@@ -46,7 +46,7 @@ internal sealed class PartitionHostRecoveryLease(PartitionHostRecoveryAttempt at
         {
             await ServerFailureObserver.ObserveAsync(() => host.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
         }
-        await CloseNativeAsync(failures).ConfigureAwait(false);
+        await RuntimeCloseAsync(failures).ConfigureAwait(false);
         foreach (var failure in failures)
         {
             attempt.RecordFailure(failure);
@@ -55,20 +55,20 @@ internal sealed class PartitionHostRecoveryLease(PartitionHostRecoveryAttempt at
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    private async Task CloseNativeAsync(List<Exception> failures)
+    private async Task RuntimeCloseAsync(List<Exception> failures)
     {
         try
         {
-            if (native is not null)
+            if (execution is not null)
             {
-                await native.DisposeAsync().ConfigureAwait(false);
+                await execution.DisposeAsync().ConfigureAwait(false);
             }
         }
-        catch (Exception failure) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        catch (Exception failure) when (KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(failure))
         {
             failures.Add(failure);
         }
-        catch (Exception failure) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        catch (Exception failure) when (!KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(failure))
         {
             failures.Add(failure);
         }

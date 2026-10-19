@@ -89,14 +89,14 @@ internal sealed class KurrentStreamOwnershipTests
     [Test]
     public async Task IntensiveAndMaximumValidProfilesStayLazyAndHaveCheckedFiniteCapacity()
     {
-        var intensive = new KurrentStreamOwnership(NativeExecutionPolicyFixture.Workload(new ComparisonOptions
+        var intensive = new KurrentStreamOwnership(ExecutionPolicyFixture.Workload(new ComparisonOptions
         {
             Documents = 4_096,
             Repetitions = 5,
             Warmup = 256,
             Operations = 10_000
         }));
-        var maximum = new KurrentStreamOwnership(NativeExecutionPolicyFixture.Workload(new ComparisonOptions
+        var maximum = new KurrentStreamOwnership(ExecutionPolicyFixture.Workload(new ComparisonOptions
         {
             Documents = 1_000_000,
             Repetitions = 20,
@@ -120,7 +120,7 @@ internal sealed class KurrentStreamOwnershipTests
         ];
         foreach (var options in invalid)
         {
-            await Assert.That(() => { _ = new KurrentStreamOwnership(NativeExecutionPolicyFixture.Workload(options)); }).Throws<ArgumentOutOfRangeException>();
+            await Assert.That(() => { _ = new KurrentStreamOwnership(ExecutionPolicyFixture.Workload(options)); }).Throws<ArgumentOutOfRangeException>();
         }
     }
 
@@ -137,7 +137,7 @@ internal sealed class KurrentStreamOwnershipTests
     public async Task ConcurrentDistinctOriginalReservationsRetainEveryAcknowledgedCandidate()
     {
         const int workers = 16;
-        var ledger = new KurrentStreamOwnership(NativeExecutionPolicyFixture.Workload(new ComparisonOptions
+        var ledger = new KurrentStreamOwnership(ExecutionPolicyFixture.Workload(new ComparisonOptions
         {
             Documents = 1,
             TopK = 1,
@@ -159,5 +159,5 @@ internal sealed class KurrentStreamOwnershipTests
     }
 
     private static KurrentStreamOwnership Create()
-        => new(NativeExecutionPolicyFixture.Workload(new ComparisonOptions { Documents = 1, TopK = 1, Operations = 1, Warmup = 0, Repetitions = 1 }));
+        => new(ExecutionPolicyFixture.Workload(new ComparisonOptions { Documents = 1, TopK = 1, Operations = 1, Warmup = 0, Repetitions = 1 }));
 }

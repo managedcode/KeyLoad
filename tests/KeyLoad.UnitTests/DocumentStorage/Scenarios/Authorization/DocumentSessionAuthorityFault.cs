@@ -20,7 +20,7 @@ internal static class DocumentSessionAuthorityFault
         var changed = kind switch
         {
             Missing => null,
-            Negative => NativeSerialization.Serialize(InvalidPosition),
+            Negative => OrleansSerialization.Serialize(InvalidPosition),
             Truncated => original[..^RemovedByte],
             _ => throw new InvalidOperationException(Invalid)
         };

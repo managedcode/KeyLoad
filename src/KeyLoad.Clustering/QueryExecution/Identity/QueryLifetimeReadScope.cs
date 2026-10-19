@@ -4,7 +4,7 @@ internal static class QueryLifetimeReadScope
 {
     internal static bool Validate(GrainRequestEnvelope request)
     {
-        var selected = request.ReadKind is GrainReadKind.PartitionQueryLeafV2 or GrainReadKind.DistributedSearchLeafV2;
+        var selected = request.ReadKind is GrainReadKind.PartitionQueryLeaf or GrainReadKind.DistributedSearchLeaf;
         if (request.Purpose != QueryLifetimeReadProtocol.Purpose)
         {
             if (selected)

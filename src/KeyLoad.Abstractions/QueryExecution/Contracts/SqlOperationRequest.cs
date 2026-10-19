@@ -9,10 +9,10 @@ namespace KeyLoad;
 /// <param name="AllowFullScan">Explicit Q1 full-scan consent.</param>
 /// <param name="Cursor">Optional Q1 continuation; unavailable for CALL.</param>
 /// <param name="Version">Unified SQL envelope version.</param>
-/// <param name="QueryDialectVersion">The explicit query-language selector; 1 preserves Q1.</param>
+/// <param name="QueryDialectVersion">The current query-language format.</param>
 /// <param name="CommandId">Optional original caller-owned mutation identity; omitted for reads.</param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.SqlOperationRequest)]
+[Orleans.Alias(ContractAliases.SqlOperationRequest)]
 public sealed record SqlOperationRequest([property: Orleans.Id(0)] PartitionRef Partition, [property: Orleans.Id(1)] string Sql,
     [property: Orleans.Id(2)] Dictionary<string, JsonElement>? Parameters = null, [property: Orleans.Id(3)] bool AllowFullScan = false,
     [property: Orleans.Id(4)] string? Cursor = null, [property: Orleans.Id(5)] int Version = SqlOperationProtocol.Version,

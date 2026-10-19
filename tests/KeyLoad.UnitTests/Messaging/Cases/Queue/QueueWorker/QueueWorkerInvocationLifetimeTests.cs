@@ -6,7 +6,7 @@ namespace KeyLoad.UnitTests.Features.Messaging;
 internal sealed class QueueWorkerInvocationLifetimeTests
 {
     [Test]
-    public async Task ActualDisposedCallerTransportRetainsOriginalPreparedIdentityAndExceptionWithoutNativeResult()
+    public async Task ActualDisposedCallerTransportRetainsOriginalPreparedIdentityAndExceptionWithoutResult()
     {
         using var http = new HttpClient();
         var sdk = new KeyLoadClient(http, QueueWorkerUnitProtocol.UnusedCredential, UnitClientOptions.Execution());

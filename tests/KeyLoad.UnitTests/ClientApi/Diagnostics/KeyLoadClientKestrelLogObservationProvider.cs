@@ -2,7 +2,7 @@ using Microsoft.Extensions.Logging;
 
 namespace KeyLoad.UnitTests.Features.ClientApi;
 
-/// <summary>Observes only closed native host log identities under the original logging filters.</summary>
+/// <summary>Observes only closed execution host log identities under the original logging filters.</summary>
 internal sealed class KeyLoadClientKestrelLogObservationProvider(KeyLoadClientKestrelObservation observation) : ILoggerProvider
 {
     private const string Server = "Microsoft.AspNetCore.Server.Kestrel";
@@ -14,13 +14,13 @@ internal sealed class KeyLoadClientKestrelLogObservationProvider(KeyLoadClientKe
     private const string Quic = "Microsoft.AspNetCore.Server.Kestrel.Transport.Quic";
 
     public ILogger CreateLogger(string categoryName)
-        => new NativeLogger(observation, categoryName,
+        => new RuntimeLogger(observation, categoryName,
             categoryName is Server or Connections or BadRequests or Http2 or Http3 or Sockets or Quic);
 
     public void Dispose()
         => GC.SuppressFinalize(this);
 
-    private sealed class NativeLogger(KeyLoadClientKestrelObservation observation, string category, bool admitted) : ILogger
+    private sealed class RuntimeLogger(KeyLoadClientKestrelObservation observation, string category, bool admitted) : ILogger
     {
         public IDisposable? BeginScope<TState>(TState state) where TState : notnull
             => null;
@@ -33,7 +33,7 @@ internal sealed class KeyLoadClientKestrelLogObservationProvider(KeyLoadClientKe
         {
             if (IsEnabled(logLevel))
             {
-                observation.RecordNativeServerEvent(category, eventId.Id, logLevel.ToString());
+                observation.RecordServerEvent(category, eventId.Id, logLevel.ToString());
             }
         }
     }

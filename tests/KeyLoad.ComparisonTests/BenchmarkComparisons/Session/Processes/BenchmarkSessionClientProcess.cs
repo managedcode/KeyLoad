@@ -7,13 +7,13 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
-/// <summary>Owns the actual native workload child and joins its original process and output readers before returning.</summary>
+/// <summary>Owns the actual execution workload child and joins its original process and output readers before returning.</summary>
 internal static class BenchmarkSessionClientProcess
 {
     internal static async Task<int> RunAsync(IReadOnlyDictionary<string, string> environment,
         string evidence, IOptions<TestExecutionOptions> execution, CancellationToken token)
     {
-        const string ResultsDirectory = "NativeTestResults";
+        const string ResultsDirectory = "RuntimeTestResults";
         const string MinimumTests = "7";
         var info = ComparisonHostLaunchSettings.Create([], environment);
         foreach (var argument in new[] { "--report-trx", "--results-directory",
@@ -24,7 +24,7 @@ internal static class BenchmarkSessionClientProcess
         using var process = new Process { StartInfo = info };
         if (!process.Start())
         {
-            throw new InvalidOperationException("The native comparison client did not start.");
+            throw new InvalidOperationException("The execution comparison client did not start.");
         }
         var stdout = new ComparisonHostOutputCapture();
         var stderr = new ComparisonHostOutputCapture();

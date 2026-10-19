@@ -4,7 +4,7 @@ namespace KeyLoad.Comparisons;
 
 internal sealed class BenchmarkSessionContext
 {
-    internal BenchmarkSessionContext(IComparisonTarget target, IOptions<NativeComparisonExecutionOptions> executionOptions,
+    internal BenchmarkSessionContext(IComparisonTarget target, IOptions<ComparisonExecutionOptions> executionOptions,
         BenchmarkSessionOptions options, bool development, TimeProvider? provider, Action<DocumentComparisonProgress>? progress)
     {
         ArgumentNullException.ThrowIfNull(target);
@@ -12,7 +12,7 @@ internal sealed class BenchmarkSessionContext
         options.Validate(development);
         Target = target;
         Options = options;
-        ExecutionOptions = NativeComparisonExecutionOptions.Require(executionOptions);
+        ExecutionOptions = ComparisonExecutionOptions.Require(executionOptions);
         Clock = provider ?? TimeProvider.System;
         Progress = progress;
         Corpus = new(options.Records, options.Concurrency);
@@ -28,7 +28,7 @@ internal sealed class BenchmarkSessionContext
     {
         get;
     }
-    internal IOptions<NativeComparisonExecutionOptions> ExecutionOptions
+    internal IOptions<ComparisonExecutionOptions> ExecutionOptions
     {
         get;
     }

@@ -14,10 +14,10 @@ internal static class PostgresControlFlush
                 services.GetRequiredService<TimeProvider>(), closed);
             await ServerFailureObserver.ObserveAsync(async () =>
             {
-                await writer.FlushAsync(deadline.Token).ConfigureAwait(false);
+                await writer.FlushAsync(deadline.Token);
             },
-                failures).ConfigureAwait(false);
-        }, failures).ConfigureAwait(false);
+                failures);
+        }, failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }
 }

@@ -26,12 +26,12 @@ internal static class AuthorizationTelemetryPolicyRepair
         var commandId = Guid.NewGuid();
         var request = new global::KeyLoad.ConfigurePrincipalRequest(principal);
         var original = database.Submit(global::KeyLoad.OperationKind.ConfigurePrincipal, request, id: commandId);
-        await Assert.That(global::KeyLoad.NativeSerialization.Serialize(original.Get<global::KeyLoad.PrincipalRecord>())
-            .AsSpan().SequenceEqual(global::KeyLoad.NativeSerialization.Serialize(principal))).IsTrue();
+        await Assert.That(global::KeyLoad.OrleansSerialization.Serialize(original.Get<global::KeyLoad.PrincipalRecord>())
+            .AsSpan().SequenceEqual(global::KeyLoad.OrleansSerialization.Serialize(principal))).IsTrue();
         var image = Capture(database);
-        var originalBytes = global::KeyLoad.NativeSerialization.Serialize(original);
+        var originalBytes = global::KeyLoad.OrleansSerialization.Serialize(original);
         var replay = database.Submit(global::KeyLoad.OperationKind.ConfigurePrincipal, request, id: commandId);
-        await Assert.That(global::KeyLoad.NativeSerialization.Serialize(replay).AsSpan().SequenceEqual(originalBytes)).IsTrue();
+        await Assert.That(global::KeyLoad.OrleansSerialization.Serialize(replay).AsSpan().SequenceEqual(originalBytes)).IsTrue();
         await UnchangedAsync(database, image);
         return database.Database.LastApplied;
     }

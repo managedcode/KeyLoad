@@ -43,7 +43,7 @@ internal sealed class SampleChunkCodecTests
     }
 
     [Test]
-    public async Task AcChunk003NativeEnvelopeHonorsExactAndOneByteShortAdmission()
+    public async Task AcChunk003EnvelopeHonorsExactAndOneByteShortAdmission()
     {
         var expected = SampleChunkTestData.FixedRecords();
         var encoded = SampleChunkCodec.Encode(expected, SampleChunkTestData.Budget(), UnitExecutionOptions.TimeSeriesExecution());

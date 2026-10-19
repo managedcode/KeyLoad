@@ -80,11 +80,11 @@ internal sealed class PostgresClusterWireOwner : IAsyncDisposable
                 var terminal = tls.DisposeAsync().AsTask();
                 await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => terminal, failures);
             }
-            catch (Exception error) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+            catch (Exception error) when (global::KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(error))
             {
                 failures.Add(error);
             }
-            catch (Exception error) when (!global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+            catch (Exception error) when (!global::KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(error))
             {
                 failures.Add(error);
             }
@@ -96,11 +96,11 @@ internal sealed class PostgresClusterWireOwner : IAsyncDisposable
                 var terminal = network.DisposeAsync().AsTask();
                 await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => terminal, failures);
             }
-            catch (Exception error) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+            catch (Exception error) when (global::KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(error))
             {
                 failures.Add(error);
             }
-            catch (Exception error) when (!global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+            catch (Exception error) when (!global::KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(error))
             {
                 failures.Add(error);
             }
@@ -112,11 +112,11 @@ internal sealed class PostgresClusterWireOwner : IAsyncDisposable
                 socket.Dispose();
             }
         }
-        catch (Exception error) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+        catch (Exception error) when (global::KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(error))
         {
             failures.Add(error);
         }
-        catch (Exception error) when (!global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+        catch (Exception error) when (!global::KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(error))
         {
             failures.Add(error);
         }

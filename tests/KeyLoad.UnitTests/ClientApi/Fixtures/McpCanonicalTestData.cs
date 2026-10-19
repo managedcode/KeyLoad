@@ -5,7 +5,7 @@ using KeyLoad.UnitTests.Features.GraphTraversal;
 
 namespace KeyLoad.UnitTests.Features.ClientApi;
 
-/// <summary>Actual public contract instances for public JSON, native payload and stable-identity assertions.</summary>
+/// <summary>Actual public contract instances for public JSON, execution payload and stable-identity assertions.</summary>
 internal static class McpCanonicalTestData
 {
     internal const string RequestKey = "request";
@@ -94,7 +94,7 @@ internal static class McpCanonicalTestData
 
         Read(McpCatalogExpectations.StreamsRead, new ReadStreamRequest(new StreamRef(Partition, Resource, Entity))),
         Read(McpCatalogExpectations.StreamsReplay,
-            new ReadAggregateReplayRequest(new StreamRef(Partition, Resource, Entity), "worker.v1")),
+            new ReadAggregateReplayRequest(new StreamRef(Partition, Resource, Entity), "worker")),
         Read(McpCatalogExpectations.EventsRead, new ReadEventSourceRequest(Source)),
         Read(McpCatalogExpectations.SubscriptionsStatus, new GetSubscriptionRequest(Subscription)),
         Read(McpCatalogExpectations.MessagesInspect, new InspectMessageRequest(Lane, Entity)),
@@ -118,7 +118,7 @@ internal static class McpCanonicalTestData
         Read(McpCatalogExpectations.QuerySearch, new SqlGraphSearchRequest(1, new(Partition, GraphSearchSql, AllowFullScan: true))),
         Read(McpCatalogExpectations.QueryPartitions, PartitionQuery()),
         Read(McpCatalogExpectations.QueryDistributedSearch,
-            new DistributedSearchRequestV1(ContractVersion, [Partition], new SearchRequest(Partition, Resource))),
+            new DistributedSearchRequest(ContractVersion, [Partition], new SearchRequest(Partition, Resource))),
         Read(McpCatalogExpectations.QueryAst, Ast()),
         Read(McpCatalogExpectations.ChangesRead, new ReadChangeFeedRequest(Partition, Resource)),
         Read(McpCatalogExpectations.QueryLiveStart, new StartLiveQueryRequest(Ast())),
@@ -136,7 +136,7 @@ internal static class McpCanonicalTestData
         Read(McpCatalogExpectations.SeriesRetention, new ReadSampleRetentionRequest(Partition, Resource, Entity))
     ];
 
-    private static PartitionQueryRequestV1 PartitionQuery() => new(1, [Partition],
+    private static PartitionQueryRequest PartitionQuery() => new(1, [Partition],
         new SelectQuery(Resource, null, [new Selection(FieldPath, Field)], null, [], Limit),
         null, false, 1);
 
@@ -151,8 +151,8 @@ internal static class McpCanonicalTestData
     private static McpDecodeCase CreateCase<T>(string name, T request, Guid commandId, string? idMember) =>
         new(name, JsonSerializer.SerializeToElement(request, JsonDefaults.Options), commandId, idMember,
             element => element.Deserialize<T>(JsonDefaults.Options)!,
-            payload => NativeSerialization.Deserialize<T>(payload.Span)!,
-            value => NativeSerialization.Serialize((T)value),
-            (value, destination) => NativeSerialization.Serialize((T)value, destination),
+            payload => OrleansSerialization.Deserialize<T>(payload.Span)!,
+            value => OrleansSerialization.Serialize((T)value),
+            (value, destination) => OrleansSerialization.Serialize((T)value, destination),
             value => JsonSerializer.SerializeToElement((T)value, JsonDefaults.Options));
 }

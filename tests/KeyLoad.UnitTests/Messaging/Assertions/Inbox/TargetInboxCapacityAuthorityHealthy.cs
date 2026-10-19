@@ -34,7 +34,7 @@ internal static class TargetInboxCapacityAuthorityHealthy
         ImmutableArray<MutationReceipt> expected = [new("putDocument", TargetInboxUnitProtocol.Collection, TargetInboxCapacityAuthorityFixture.Healthy, 1L),
             new("appendEvents", TargetInboxUnitProtocol.Events, TargetInboxCapacityAuthorityFixture.Healthy, 1L),
             new("enqueue", TargetInboxUnitProtocol.Output, TargetInboxCapacityAuthorityFixture.Healthy, 1L)];
-        await TargetInboxNativeValueAssertions.EqualAsync(receipt.Mutations, expected);
+        await TargetInboxValueAssertions.EqualAsync(receipt.Mutations, expected);
         var document = database.GetDocument(TargetInboxUnitProtocol.Root,
             new(request.Target.Partition, TargetInboxUnitProtocol.Collection, TargetInboxCapacityAuthorityFixture.Healthy));
         await Assert.That(JsonDefaults.Serialize(document)).IsEquivalentTo(JsonDefaults.Serialize(new DocumentResult(
@@ -46,7 +46,7 @@ internal static class TargetInboxCapacityAuthorityHealthy
         await Assert.That(JsonDefaults.Serialize(message)).IsEquivalentTo(JsonDefaults.Serialize(new MessageInspection(
             new(TargetInboxCapacityAuthorityFixture.Healthy, MessageState.Ready, 0, 1L, 2L, null, null),
             TargetInboxUnitProtocol.Payload, "{}")), CollectionOrdering.Matching);
-        await TargetInboxNativeAssertions.CapacityAsync(store, request, TargetInboxCapacityAuthorityFixture.Capacity);
+        await TargetInboxAssertions.CapacityAsync(store, request, TargetInboxCapacityAuthorityFixture.Capacity);
         await TargetInboxCapacityAuthorityAssertions.SourceAsync(database, state);
     }
 
@@ -77,6 +77,6 @@ internal static class TargetInboxCapacityAuthorityHealthy
     }
 
     private static async Task ExactAsync<T>(T actual, T expected)
-        => await TargetInboxNativeValueAssertions.EqualAsync(actual, expected);
+        => await TargetInboxValueAssertions.EqualAsync(actual, expected);
 
 }

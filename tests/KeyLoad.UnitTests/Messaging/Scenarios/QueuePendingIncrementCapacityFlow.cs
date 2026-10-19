@@ -14,10 +14,10 @@ internal static class QueuePendingIncrementCapacityFlow
         using var fixture = new TestDatabase();
         QueueLifecycleProvisioning.Seed(fixture, byteSublimit: false);
         var lane = new QueueLaneRef(fixture.Partition, QueueLifecycleTestProtocol.Queue);
-        var recorder = new QueueLifecycleNativeRecorder(fixture.Database, lane, QueueLifecycleHealthy.Enqueue);
+        var recorder = new QueueLifecycleRecorder(fixture.Database, lane, QueueLifecycleHealthy.Enqueue);
         var state = new QueueLifecycleTestState(fixture.Partition, QueueWholeFlowStorage.Clock(fixture.Store))
         {
-            NativeSubmit = recorder.Apply
+            RuntimeSubmit = recorder.Apply
         };
         await QueueLifecycleInitialPhase.RunAsync(fixture.Database, fixture.Store, state, token);
         var cancel = state.CancelledCommand!;
@@ -32,12 +32,12 @@ internal static class QueuePendingIncrementCapacityFlow
     }
 
     private static async Task ColdAsync(TestDatabase fixture, QueueLifecycleTestState state,
-        QueueLifecycleNativeRecorder recorder, QueueLifecycleCeilingRows rows, Result<object> failed,
+        QueueLifecycleRecorder recorder, QueueLifecycleCeilingRows rows, Result<object> failed,
         string[] original, long originalPosition, CancellationToken token)
     {
         var image = QueueWholeFlowStorage.Bytes(fixture.Store);
         var position = fixture.Store.Position;
-        var identity = NativeSerialization.Serialize(fixture.Store.Identity);
+        var identity = OrleansSerialization.Serialize(fixture.Store.Identity);
         fixture.Store.Dispose();
         using var cold = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         var database = QueueWholeFlowStorage.Open(cold);
@@ -58,19 +58,19 @@ internal static class QueuePendingIncrementCapacityFlow
     }
 
     private static async Task FinalAsync(ZoneTreeStore store, string directory, QueueLifecycleTestState state,
-        QueueLifecycleNativeRecorder recorder, QueueLifecycleCeilingRows rows, Result<object> failed,
+        QueueLifecycleRecorder recorder, QueueLifecycleCeilingRows rows, Result<object> failed,
         CancellationToken token)
     {
         var image = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
-        var identity = NativeSerialization.Serialize(store.Identity);
+        var identity = OrleansSerialization.Serialize(store.Identity);
         store.Dispose();
         using var cold = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         var database = QueueWholeFlowStorage.Open(cold);
         recorder.Database = database;
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(cold, image, position, identity);
         await TerminalAsync(database, cold, state);
-        await QueueLifecycleNativeHistoryAssertions.ReplayAsync(recorder, state.Lane, token);
+        await QueueLifecycleHistoryAssertions.ReplayAsync(recorder, state.Lane, token);
         await QueueLifecycleCeilingFailureAssertions.ReplayAsync(database, rows, failed,
             QueueLifecycleTestProtocol.Administrator, state.Time, token);
         await TerminalAsync(database, cold, state);

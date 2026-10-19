@@ -6,7 +6,7 @@ internal static class ScaleServerResourceNodeProgram
         import { pathToFileURL } from 'node:url';
         const { validateServerResourceEvidence, requireComparableSessionResources } = await import(pathToFileURL(process.argv[1]));
         const scenario = process.argv[2];
-        const cell = { target: 'KeyLoad', nodeCount: 1, scenario: 'session', profile: 'session-v1' };
+        const cell = { target: 'KeyLoad', nodeCount: 1, scenario: 'session', profile: 'session' };
         const otherTargetCell = { ...cell, target: 'Redis' };
         const cohort = { sourceRevision: 'c'.repeat(40), runId: 123, attempt: 2 };
         const workerSha = 'a'.repeat(64);
@@ -21,20 +21,20 @@ internal static class ScaleServerResourceNodeProgram
           effectiveCpuQuota: '2', effectiveCpuSet: '0-1', effectiveMemoryLimitBytes: '8192',
           observedCpuUsageUsec: 30, maxObservedCgroupMemoryBytes: 512, maxObservedRssBytes: 256,
           sampleCount: 2, writableMounts: [mount] };
-        const evidence = () => ({ schema: 'server-resource-evidence.v2', sourceRevision: cohort.sourceRevision,
+        const evidence = () => ({ schema: 'server-resource-evidence', sourceRevision: cohort.sourceRevision,
           workflowRunId: String(cohort.runId), runAttempt: String(cohort.attempt), jobId: '456', target: cell.target,
           nodeCount: cell.nodeCount, scenario: cell.scenario, profile: cell.profile, workerSha256: workerSha,
           hardware: structuredClone(hardware), appHostEnvelope: structuredClone(envelope),
           containers: [structuredClone(container)], missingEvidence: [], qualified: true, observationPolicy: {
           cadenceMilliseconds:100,maximumObservationMilliseconds:1000,cleanupThresholdMilliseconds:1000,processSettlementMilliseconds:100,
           maxProcesses:16,maxMounts:2,maxFileBytes:512,minimumCommandBytes:8,maxHardwareBytes:1024,maxSampleMetadataBytes:2048,
-          maxSidecarBytes:8192,maxWorkerBytes:65536,maxSamples:10,maxCgroupAncestors:8,nativeReadBufferBytes:128,maxNativeOutputBytes:256,standardErrorOutputDivisor:4} });
-        const configuredEvidence = () => ({ ...evidence(), schema: 'server-resource-evidence.v2', observationPolicy: {
+          maxSidecarBytes:8192,maxWorkerBytes:65536,maxSamples:10,maxCgroupAncestors:8,runtimeReadBufferBytes:128,runtimeMaxOutputBytes:256,standardErrorOutputDivisor:4} });
+        const configuredEvidence = () => ({ ...evidence(), schema: 'server-resource-evidence', observationPolicy: {
           cadenceMilliseconds: 100, maximumObservationMilliseconds: 1000, cleanupThresholdMilliseconds: 1000,
           processSettlementMilliseconds: 100, maxProcesses: 16, maxMounts: 2, maxFileBytes: 512,
           minimumCommandBytes: 8, maxHardwareBytes: 1024, maxSampleMetadataBytes: 2048, maxSidecarBytes: 8192,
-          maxWorkerBytes: 65536, maxSamples: 10, maxCgroupAncestors: 8, nativeReadBufferBytes: 128,
-          maxNativeOutputBytes: 256, standardErrorOutputDivisor: 4 } });
+          maxWorkerBytes: 65536, maxSamples: 10, maxCgroupAncestors: 8, runtimeReadBufferBytes: 128,
+          runtimeMaxOutputBytes: 256, standardErrorOutputDivisor: 4 } });
         const expectRejected = value => {
           try { validateServerResourceEvidence(value, sidecarSha, workerSha, cell, cohort, 456, true); process.exitCode = 1; }
           catch (error) { if (error.message !== 'Isolated GitHub evidence rejected.') process.exitCode = 1; }

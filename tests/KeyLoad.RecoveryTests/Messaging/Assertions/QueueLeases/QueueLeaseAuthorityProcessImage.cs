@@ -20,7 +20,7 @@ internal static class QueueLeaseAuthorityProcessImage
     {
         await Assert.That(Capture(store).SequenceEqual(image)).IsTrue();
         await Assert.That(store.Position).IsEqualTo(position);
-        await Assert.That(NativeSerialization.Serialize(store.Identity).AsSpan().SequenceEqual(identity)).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(store.Identity).AsSpan().SequenceEqual(identity)).IsTrue();
     }
 
     internal static async Task EmptyIndexesAsync(DatabaseEngine database)

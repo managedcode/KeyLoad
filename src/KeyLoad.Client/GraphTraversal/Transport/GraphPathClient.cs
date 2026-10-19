@@ -5,7 +5,7 @@ namespace KeyLoad.Client;
 /// <summary>Executes bounded shortest-path reads through the shared authenticated SDK transport.</summary>
 public static class GraphPathClient
 {
-    private const string ShortestPathRoute = "/v1/graph/shortest-path";
+    private const string ShortestPathRoute = "/graph/shortest-path";
 
     /// <summary>Reads one authorized shortest path inside the requested graph partition.</summary>
     /// <param name="client">The authenticated KeyLoad client.</param>

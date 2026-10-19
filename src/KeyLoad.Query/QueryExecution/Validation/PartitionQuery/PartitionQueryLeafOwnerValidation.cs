@@ -7,7 +7,7 @@ internal static class PartitionQueryLeafOwnerValidation
     private const long InitialGeneration = 0;
     private const string InvalidOwnerDetail = "Partition query leaves do not share one owner and policy epoch.";
 
-    internal static void Validate(PartitionQueryLeafResultV1? result, PartitionRef partition,
+    internal static void Validate(PartitionQueryLeafResult? result, PartitionRef partition,
         StoreIdentity owner, PhysicalShardRecord? physicalOwner)
     {
         if (physicalOwner is not null)

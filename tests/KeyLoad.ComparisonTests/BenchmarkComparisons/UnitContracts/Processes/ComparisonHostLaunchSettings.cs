@@ -19,7 +19,7 @@ internal static class ComparisonHostLaunchSettings
     private const string BenchmarkColonEnvironmentPrefix = "Benchmarks:";
     private const string ConnectionColonEnvironmentPrefix = "ConnectionStrings:";
     private const string MissingRepositoryMessage = "The KeyLoad repository root is unavailable.";
-    private const string MissingHostMessage = "The native comparison host is not built.";
+    private const string MissingHostMessage = "The execution comparison host is not built.";
     private const string MaximumParallelTestsArgument = "--maximum-parallel-tests";
     private const string ExclusiveMeasurementParallelism = "1";
 
@@ -30,7 +30,7 @@ internal static class ComparisonHostLaunchSettings
             .GetCustomAttribute<AssemblyConfigurationAttribute>()?.Configuration;
         if (string.IsNullOrWhiteSpace(configuration))
         {
-            throw new InvalidOperationException("The native test assembly build configuration is absent.");
+            throw new InvalidOperationException("The execution test assembly build configuration is absent.");
         }
         var assembly = Path.Combine(root, BenchmarksDirectory, HostDirectory, BuildOutputDirectory,
             configuration, TargetFramework, HostAssemblyName);
@@ -72,7 +72,7 @@ internal static class ComparisonHostLaunchSettings
             var separator = argument.IndexOf('=', StringComparison.Ordinal);
             if (!argument.StartsWith("--", StringComparison.Ordinal) || separator <= 2)
             {
-                throw new InvalidOperationException("The native workload test requires configuration assignments.");
+                throw new InvalidOperationException("The execution workload test requires configuration assignments.");
             }
             startInfo.Environment[argument[2..separator].Replace(":", "__", StringComparison.Ordinal)] = argument[(separator + 1)..];
         }

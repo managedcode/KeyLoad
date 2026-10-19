@@ -4,7 +4,7 @@ using KeyLoad.IntegrationTests.Features.QueryExecution;
 
 namespace KeyLoad.IntegrationTests.Features.RelationalStorage;
 
-/// <summary>AC-AISQL-006: SQL preserves the same persisted read/write grants as native callers.</summary>
+/// <summary>AC-AISQL-006: SQL preserves the same persisted read/write grants as execution callers.</summary>
 [ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = McpCallerProtocol.FixtureKey)]
 [NotInParallel]
 internal sealed class RelationalSqlClusterAuthorizationTests(ClusterFixture fixture)

@@ -12,10 +12,10 @@ public sealed partial class SearchEngine
     private readonly QueryExecutionOptions execution;
     private readonly IOptions<QueryExecutionOptions> configuration;
 
-    /// <summary>Creates an authorized search owner with one frozen native execution policy.</summary>
+    /// <summary>Creates an authorized search owner with one frozen execution execution policy.</summary>
     /// <param name="database">Node-owned canonical database.</param>
     /// <param name="options">Centrally validated query and text execution budgets.</param>
-    /// <param name="textProjection">Optional native derived text projection.</param>
+    /// <param name="textProjection">Optional execution derived text projection.</param>
     public SearchEngine(DatabaseEngine database, IOptions<QueryExecutionOptions> options, ITextProjection? textProjection = null)
     {
         ArgumentNullException.ThrowIfNull(database);
@@ -42,7 +42,7 @@ public sealed partial class SearchEngine
         return SearchCore(principalId, request, budget);
     }
 
-    /// <summary>Runs exact search in the calling Orleans worker and returns the joined native result.</summary>
+    /// <summary>Runs exact search in the calling Orleans worker and returns the joined execution result.</summary>
     /// <param name="principalId">Persisted principal identity.</param>
     /// <param name="request">Search fields, query and result limit.</param>
     /// <param name="cancellationToken">Caller cancellation for admission and the complete worker.</param>
@@ -84,7 +84,7 @@ public sealed partial class SearchEngine
     private RankedDocument[] SearchCore(string principalId, SearchRequest request, ReadExecutionBudget budget)
         => ExactSearchExecution.Execute(database, textProjection, execution, principalId, request, budget);
 
-    /// <summary>Computes the selected vector metric using the same native SIMD blocks and bounded scalar tails as search.</summary>
+    /// <summary>Computes the selected vector metric using the same execution SIMD blocks and bounded scalar tails as search.</summary>
     /// <param name="left">Finite query vector.</param>
     /// <param name="right">Finite candidate vector.</param>
     /// <param name="metric">Typed distance metric.</param>

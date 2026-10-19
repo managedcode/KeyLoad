@@ -23,7 +23,7 @@ internal static class QueueDeadlineCapacityOperations
     }
 
     internal static Task ReceiptAsync(Result<object> actual, CommitReceipt expected)
-        => NativeReplayResultAssertions.Same<CommitReceipt>(actual, Result<object>.Succeed(expected));
+        => ReplayResultAssertions.Same<CommitReceipt>(actual, Result<object>.Succeed(expected));
 
     internal static long ParkedSequence(QueueDeadlineCapacityState state, MessageMetadata metadata)
         => state.Fault is QueueDeadlineCapacityFault.FullDeadLetterMaxPark or QueueDeadlineCapacityFault.ExpiryBeforeDeadLetterMaxPark

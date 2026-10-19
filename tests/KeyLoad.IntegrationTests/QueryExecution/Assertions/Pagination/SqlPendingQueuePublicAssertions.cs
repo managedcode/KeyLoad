@@ -1,6 +1,6 @@
 using System.Text.Json;
 using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.ClusterRouting;
+using KeyLoad.IntegrationTests.Features.OrleansExecution;
 using KeyLoad.IntegrationTests.Features.Messaging;
 
 namespace KeyLoad.IntegrationTests.Features.QueryExecution;
@@ -28,21 +28,21 @@ internal static class SqlPendingQueuePublicAssertions
         await Assert.That(page.CutPosition).IsGreaterThan(QueueLifecyclePublicProtocol.NoSequence);
         foreach (var row in page.Rows)
         {
-            var native = await PublicReadAssertions.MessageAsync(await callers.Sdk.InspectAsync(new(state.Lane, row.EntityId), token));
-            using var payload = native!.PayloadJson is null ? null : JsonDocument.Parse(native.PayloadJson);
-            using var headers = native.HeadersJson is null ? null : JsonDocument.Parse(native.HeadersJson);
+            var execution = await PublicReadAssertions.MessageAsync(await callers.Sdk.InspectAsync(new(state.Lane, row.EntityId), token));
+            using var payload = execution!.PayloadJson is null ? null : JsonDocument.Parse(execution.PayloadJson);
+            using var headers = execution.HeadersJson is null ? null : JsonDocument.Parse(execution.HeadersJson);
             var expected = JsonSerializer.Serialize(new
             {
-                id = native.Metadata.Id,
-                state = native.Metadata.State.ToString(),
-                attempts = native.Metadata.Attempts,
-                stateVersion = native.Metadata.StateVersion,
-                notBefore = native.Metadata.NotBefore,
-                expiresAt = native.Metadata.ExpiresAt,
+                id = execution.Metadata.Id,
+                state = execution.Metadata.State.ToString(),
+                attempts = execution.Metadata.Attempts,
+                stateVersion = execution.Metadata.StateVersion,
+                notBefore = execution.Metadata.NotBefore,
+                expiresAt = execution.Metadata.ExpiresAt,
                 payload = payload?.RootElement ?? (JsonElement?)null,
                 headers = headers?.RootElement ?? (JsonElement?)null
             }, JsonDefaults.Options);
-            await Assert.That(row.Revision).IsEqualTo(native.Metadata.StateVersion);
+            await Assert.That(row.Revision).IsEqualTo(execution.Metadata.StateVersion);
             await Assert.That(row.Json).IsEqualTo(expected);
             await Assert.That(row.Redacted).IsFalse();
             await Assert.That(row.RedactedFields.GetValueOrDefault().IsEmpty).IsTrue();

@@ -19,7 +19,7 @@ internal sealed class ScriptDomSlotVisitor(ScriptDomCheckedTokens bounds, int? p
     public override void ExplicitVisit(Dom.MoneyLiteral literal)
     {
         Visit((Dom.TSqlFragment)literal);
-        if (positionalCount is { } count && !ScriptDomNativeSlots.TryGet(literal, count, out _))
+        if (positionalCount is { } count && !ScriptDomSlots.TryGet(literal, count, out _))
         {
             throw ScriptDomErrors.Invalid();
         }

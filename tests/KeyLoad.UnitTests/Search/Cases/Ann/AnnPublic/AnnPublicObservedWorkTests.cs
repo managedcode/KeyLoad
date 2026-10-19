@@ -10,7 +10,7 @@ internal sealed class AnnPublicObservedWorkTests
     [Test]
     [Arguments(false)]
     [Arguments(true)]
-    public Task ActualAuthorizedNativeReadWorkCancelsOrExpiresWithoutPartialAndReleasesLeaseBeforeHealthy(bool cancel)
+    public Task ActualAuthorizedReadWorkCancelsOrExpiresWithoutPartialAndReleasesLeaseBeforeHealthy(bool cancel)
     {
         var clock = new AnnPublicObservedWorkClock();
         return AnnPublicWholeFlow.RunAsync(Threshold, Breadth, async (database, runtime, pin) =>
@@ -18,9 +18,9 @@ internal sealed class AnnPublicObservedWorkTests
             using var cancellation = new CancellationTokenSource();
             var request = AnnPublicWholeFlow.Request(database, pin);
             var engine = AnnPublicWholeFlow.Engine(database, runtime);
-            var image = NativeAnnMaintenanceTestData.Snapshot(database);
+            var image = AnnMaintenanceTestData.Snapshot(database);
             var cut = database.Store.Position;
-            var files = NativeAnnFixtureFileSnapshot.Capture(database.Directory);
+            var files = AnnFixtureFileSnapshot.Capture(database.Directory);
             var before = database.Store.GetReadDiagnostics().RangeExaminedBytes;
             clock.Arm(() => database.Store.GetReadDiagnostics().RangeExaminedBytes > before,
                 () =>
@@ -41,14 +41,14 @@ internal sealed class AnnPublicObservedWorkTests
                 {
                     var failure = await Assert.ThrowsExactlyAsync<OperationCanceledException>(async () =>
                         partial = await engine.ApproximateSearchAsync(AnnProjectionPinTestSupport.Principal, request, cancellation.Token))
-                        ?? throw new InvalidOperationException("The real native public read did not cancel.");
+                        ?? throw new InvalidOperationException("The real execution public read did not cancel.");
                     await Assert.That(failure.CancellationToken).IsEqualTo(cancellation.Token);
                 }
                 else
                 {
                     var failure = await Assert.ThrowsExactlyAsync<KeyLoadException>(async () =>
                         partial = await engine.ApproximateSearchAsync(AnnProjectionPinTestSupport.Principal, request, cancellation.Token))
-                        ?? throw new InvalidOperationException("The real native public read did not expire.");
+                        ?? throw new InvalidOperationException("The real execution public read did not expire.");
                     await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
                     await Assert.That(failure.Message).IsEqualTo(Deadline);
                 }
@@ -58,7 +58,7 @@ internal sealed class AnnPublicObservedWorkTests
             await Assert.That(database.Store.GetReadDiagnostics().RangeExaminedBytes).IsGreaterThan(before);
             await Assert.That(partial).IsNull();
             await AnnPublicWholeFlow.UnchangedAsync(database, image, cut);
-            await Assert.That(NativeAnnFixtureFileSnapshot.Capture(database.Directory))
+            await Assert.That(AnnFixtureFileSnapshot.Capture(database.Directory))
                 .IsEquivalentTo(files, TUnit.Assertions.Enums.CollectionOrdering.Matching);
             await AnnPublicWholeFlow.PageAsync(await engine.ApproximateSearchAsync(AnnProjectionPinTestSupport.Principal, request),
                 database, cut, AnnPageMode.Exact);

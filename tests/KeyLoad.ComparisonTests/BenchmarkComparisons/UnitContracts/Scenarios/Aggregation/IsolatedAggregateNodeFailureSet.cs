@@ -33,7 +33,7 @@ internal sealed class IsolatedAggregateNodeFailureSet
         }
         if (primary is not null || secondary.Length > 0)
         {
-            throw new AggregateException("Native Node operation and cleanup failed.",
+            throw new AggregateException("Execution Node operation and cleanup failed.",
                 primary is null ? secondary : [primary, .. secondary]);
         }
     }

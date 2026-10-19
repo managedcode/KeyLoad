@@ -6,7 +6,7 @@ using ModelContextProtocol.Protocol;
 
 namespace KeyLoad.UnitTests.Features.ClientApi;
 
-/// <summary>Owns concrete native headers and serialized wire data for transport-boundary checks.</summary>
+/// <summary>Owns concrete execution headers and serialized wire data for transport-boundary checks.</summary>
 internal static class McpTransportGuardTestData
 {
     internal const string RevisionHeader = "MCP-Protocol-Version";
@@ -40,7 +40,7 @@ internal static class McpTransportGuardTestData
     private const int MaximumWireBytes = 65_536;
     private const int WrongNumericField = 7;
 
-    /// <summary>Creates actual case-insensitive ASP.NET headers with one exact native revision.</summary>
+    /// <summary>Creates actual case-insensitive ASP.NET headers with one exact execution revision.</summary>
     /// <param name="method">The optional HTTP routing method.</param>
     /// <param name="name">The optional HTTP target name.</param>
     /// <returns>The concrete header dictionary used directly by the product guard.</returns>
@@ -58,7 +58,7 @@ internal static class McpTransportGuardTestData
         return headers;
     }
 
-    /// <summary>Creates an invalid native header set without replacing the production request type.</summary>
+    /// <summary>Creates an invalid execution header set without replacing the production request type.</summary>
     /// <param name="fault">The exact invalid transport-header condition.</param>
     /// <returns>Headers containing only the selected mutation.</returns>
     internal static HeaderDictionary InvalidHeaders(McpTransportHeaderFault fault)
@@ -102,7 +102,7 @@ internal static class McpTransportGuardTestData
     }
 
     /// <summary>Serializes actual UTF-8 JSON and verifies the guard's framing precondition.</summary>
-    /// <param name="method">The native body method, omitted when null and including genuine wrong-type cases.</param>
+    /// <param name="method">The execution body method, omitted when null and including genuine wrong-type cases.</param>
     /// <param name="parameters">The exact request parameters.</param>
     /// <returns>Owned, structurally checked wire bytes.</returns>
     internal static byte[] Frame(object? method, Dictionary<string, object?> parameters)

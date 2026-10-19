@@ -14,7 +14,7 @@ sweep forever.
 ## Decision
 
 Due queue deadlines, recurring schedules and saga timeouts are advanced by Orleans
-`[StatelessWorker]` grains. Their buffers and periodic flush callbacks belong to the native activation lifecycle.
+`[StatelessWorker]` grains. Their buffers and periodic flush callbacks belong to the activation lifecycle.
 
 1. A bounded number of StatelessWorker activations accept due hints (discovered from
    the canonical scheduled/lease/message-meta and schedule/saga records) and buffer
@@ -37,7 +37,7 @@ Implementation contract:
 
 1. Core owns Messaging Queries/Models/Validation; Orleans owns Messaging
    Grains/Contracts/Execution for the StatelessWorker, timer and batching; tests
-   live in the Messaging UnitTests slice. Native records keep their aliases and
+   live in the Messaging UnitTests slice. records keep their aliases and
    field IDs; new hint DTOs have explicit v1 aliases and stable generated IDs; no
    persisted or public discriminator changes.
 2. All writes use the existing connection-owned execution and the bounded
@@ -52,8 +52,8 @@ Implementation contract:
 4. The change is built, formatted and run through the Aspire suites, and exact-source Linux artifacts are retained before full closure. Scoped tests and code
    presence do not qualify the runtime.
 
-Dependencies: ADR-092, existing queue admission, native request and identity
-boundaries, [ADR-110](ADR-110-native-orleans-execution-primitives.md) and
+Dependencies: ADR-092, existing queue admission, request and identity
+boundaries, [ADR-110](ADR-110-orleans-execution-primitives.md) and
 [ADR-125](ADR-125-connection-owned-execution.md). Rollback stops due coordination
 while retaining all watermarks, outcomes, queues and saga state. Failed pages and
 jobs remain observable with safe structured errors; no raw retained templates,
@@ -84,8 +84,8 @@ aliases/IDs remain stable.
 ## Queue deadline advancement (REQ-MSG-004 / AC-MSG-004, REQ-MSG-DEADLINE-ADVANCE)
 
 The additive `AdvanceQueueDeadline` Batch mutation uses QueueConsume, fresh persisted
-worker-input permissions, the signed native EvaluatedAt and an exact
-state/version/lease/deadline/index CAS. Alias `keyload.mutation.advance-queue-deadline.v1`
+worker-input permissions, the signed EvaluatedAt and an exact
+state/version/lease/deadline/index CAS. Alias `keyload.mutation.advance-queue-deadline`
 with Id0..6; the JSON discriminator is `advanceQueueDeadline` and the kind property is
 `deadlineKind`; kinds are PromoteScheduled, ExpireLease and ExpireMessage. The
 mutation is a direct Batch only: nested processing, inbox or projection effects
@@ -99,7 +99,7 @@ dispatch and cached-result replay uses current permissions, and resource or disp
 pause prevents transitions. Discovery is read-only over canonical records with
 central record, byte and deadline budgets, fixed upper tails and store-incarnation
 and read-generation resets; it retains only bounded metadata hints and charges all
-native visited bytes, point reads and lookahead. No effect is credited merely from a
+visited bytes, point reads and lookahead. No effect is credited merely from a
 discovery hint. Configuration never grants roles.
 
 Acceptance requires the not-due Conflict, stale RevisionConflict, paused
@@ -107,5 +107,5 @@ DispatchPaused and revoked-policy refusals to retain complete message bodies,
 metadata, index and counters; the original successful receipt replays across cold
 reopen; process cuts recover whole bodies, counters and receipts. A null-selected
 principal produces no queue effects while ordinary recurring schedules keep working.
-Qualification remains open until the current-source native build, normal Unit,
+Qualification remains open until the current-source build, normal Unit,
 process recovery and Docker/Aspire SDK/MCP cluster runs execute.

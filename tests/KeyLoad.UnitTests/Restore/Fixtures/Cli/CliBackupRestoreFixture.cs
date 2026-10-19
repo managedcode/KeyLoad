@@ -63,7 +63,7 @@ internal sealed class CliBackupRestoreFixture
     internal async Task AssertSeedRemainsAsync()
     {
         using var store = new ZoneTreeStore(new(SourceDirectory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
-        var value = store.Read(view => NativeSerialization.Deserialize<string>(view.ReadOwnedValue(StoredKeyBytes)!));
+        var value = store.Read(view => OrleansSerialization.Deserialize<string>(view.ReadOwnedValue(StoredKeyBytes)!));
         await Assert.That(value).IsEqualTo(StoredValue);
     }
 

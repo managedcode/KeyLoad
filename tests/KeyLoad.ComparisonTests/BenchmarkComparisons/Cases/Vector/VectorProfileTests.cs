@@ -13,8 +13,8 @@ internal sealed class VectorProfileTests
         await Assert.That(VectorComparisonProfile.AllIds.Count).IsEqualTo(24);
         await Assert.That(VectorComparisonProfile.AllIds.All(id => id.Contains("-100k-", StringComparison.Ordinal)
             || id.Contains("-1m-", StringComparison.Ordinal))).IsTrue();
-        await Assert.That(VectorComparisonProfile.Parse("vector-1m-native-mixed-c16").IndexKind)
-            .IsEqualTo(VectorIndexKind.NativeAnn);
+        await Assert.That(VectorComparisonProfile.Parse("vector-1m-execution-mixed-c16").IndexKind)
+            .IsEqualTo(VectorIndexKind.RuntimeAnn);
         await Assert.That(() => VectorComparisonProfile.Parse("vector-5m-exact-plain-c16"))
             .Throws<ArgumentOutOfRangeException>();
         await Assert.That(() => ScaledComparisonProfileParser.Parse("scaled-5m-c16"))
@@ -37,7 +37,7 @@ internal sealed class VectorProfileTests
     public async Task CorpusUsesCanonicalLengthDeterministicNormalizedFloatVectorsAndExcludedMixedUpdates()
     {
         var profile = VectorComparisonProfile.Parse("vector-100k-exact-mixed-c16");
-        var corpus = new VectorComparisonCorpus(profile, NativeDatabaseFlowFixture.ExecutionOptions);
+        var corpus = new VectorComparisonCorpus(profile, DatabaseFlowFixture.ExecutionOptions);
         var first = corpus.Create(42);
         var same = corpus.Create(42);
         await Assert.That(first.Id).IsEqualTo("v000000042");
@@ -55,9 +55,9 @@ internal sealed class VectorProfileTests
     }
 
     [Test]
-    public async Task NativeExactOracleStreamsTheCorpusAndReturnsOrderedUniqueNeighbors()
+    public async Task ExactOracleStreamsTheCorpusAndReturnsOrderedUniqueNeighbors()
     {
-        var corpus = new VectorComparisonCorpus(VectorComparisonProfile.Parse("vector-100k-exact-filtered-c16"), NativeDatabaseFlowFixture.ExecutionOptions);
+        var corpus = new VectorComparisonCorpus(VectorComparisonProfile.Parse("vector-100k-exact-filtered-c16"), DatabaseFlowFixture.ExecutionOptions);
         var query = corpus.CreateQueries()[0];
         var expected = corpus.ExactNeighbors(query);
         await Assert.That(expected.Count).IsEqualTo(10);

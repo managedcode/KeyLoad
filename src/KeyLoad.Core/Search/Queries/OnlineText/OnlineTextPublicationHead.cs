@@ -15,7 +15,7 @@ public sealed partial class DatabaseEngine
         {
             return null;
         }
-        budget.ChargeBytes(NativeSerialization.Measure(current));
+        budget.ChargeBytes(OrleansSerialization.Measure(current));
         if (current.FormatVersion != OnlineTextPublicationProtocol.CurrentFormat
             || current.CommandId == Guid.Empty || current.Consumer != request.Consumer
             || current.ConsumerGeneration != request.ConsumerGeneration

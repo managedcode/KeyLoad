@@ -42,11 +42,11 @@ internal static class TenantAdmissionOperations
         var partition = principal == PrincipalA ? fixture.Partition : PartitionB(fixture);
         var request = new CommandRequest(commandId, partition, [new PutDocument(Collection, id, Body)]);
         return fixture.Database.CreateCommand(OperationKind.Batch, commandId, principal,
-            fixture.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(request));
+            fixture.Database.EvaluationClock.GetUtcNow(), OrleansSerialization.Serialize(request));
     }
 
     internal static CommandAdmissionLease Reserve(TestDatabase fixture, CommandAdmissionGovernor governor,
         Command<DatabaseCommand> operation, CancellationToken token)
         => governor.Reserve(operation, Principal(fixture, operation.UserId!),
-            checked((int)NativeSerialization.Measure(operation)), token);
+            checked((int)OrleansSerialization.Measure(operation)), token);
 }

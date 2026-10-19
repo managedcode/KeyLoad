@@ -6,7 +6,7 @@ internal static class SqlFetchCountClusterProtocol
     internal const string Collection = "fetch_count";
     internal const string Label = "label";
     internal const string LabelPath = "/label";
-    internal const string Profile = "SQL.FetchCount.v1";
+    internal const string Profile = "SQL.FetchCount";
     internal const string UnorderedOne = "SELECT label AS label FROM fetch_count FETCH FIRST ROW ONLY";
     internal const string FirstOne = "SELECT label AS label FROM fetch_count ORDER BY label ASC FETCH FIRST ROW ONLY";
     internal const string NextOne = "SELECT label AS label FROM fetch_count ORDER BY label ASC FETCH NEXT ROWS ONLY";

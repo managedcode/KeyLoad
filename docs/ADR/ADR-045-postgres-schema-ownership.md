@@ -11,14 +11,14 @@ from a source packet or development build.
 
 Keep the run Guid's existing bench_ schema name and exact measured workload. Add a
 private per-target Guid lifecycle marker stored as the schema comment. Constant
-client SQL binds native run/owner Guids, dimensions and deterministic namespace
+client SQL binds run/owner Guids, dimensions and deterministic namespace
 lock key. A short explicit transaction supplies only transaction-local settings,
 takes the namespace advisory lock and executes a constant server DO block with
 quoted identifiers, checked numeric typmod and atomic schema/marker creation.
 Cleanup takes the same lock and drops only a matching durable marker. It remains
 safe when setup fails because another target owns the same namespace or when the
 schema has already disappeared. Replication ALTER SYSTEM stays outside this DDL
-transaction; native graph SQL branches assign exact existing constant statements.
+transaction; graph SQL branches assign exact existing constant statements.
 
 Comments are visible lifecycle metadata, not secrets or database authorization.
 The real database owner may alter them; marker mismatch conservatively prevents

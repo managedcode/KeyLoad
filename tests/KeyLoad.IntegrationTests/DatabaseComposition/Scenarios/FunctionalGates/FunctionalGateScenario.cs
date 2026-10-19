@@ -1,4 +1,4 @@
-using KeyLoad.IntegrationTests.Features.ClusterRouting;
+using KeyLoad.IntegrationTests.Features.OrleansExecution;
 using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
@@ -98,7 +98,7 @@ internal static class FunctionalGateScenario
         await FunctionalGateSearch.InitializeAsync(context, token);
         await FunctionalGateEvents.InitializeAsync(context, token);
         await FunctionalGateQueues.InitializeAsync(context, token);
-        await FunctionalGateBlobs.InitializeAsync(context, token);
+        await FunctionalGateFiles.InitializeAsync(context, token);
         await FunctionalGateAnalytics.InitializeAsync(context, token);
         await FunctionalGateComposition.InitializeAsync(context, token);
     }

@@ -33,7 +33,7 @@ internal static class SafeProjectorOperationSeed
         Guid id, T request, string principal = SafeProjectorOperationProtocol.Root, long creatorEpoch = SafeProjectorOperationProtocol.RootPolicyEpoch)
     {
         var operation = owner.Database.CreateCommand(kind, id, principal,
-            owner.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(request));
+            owner.Database.EvaluationClock.GetUtcNow(), OrleansSerialization.Serialize(request));
         var expected = owner.NextToken();
         var result = owner.Submit(operation);
         var image = SafeProjectorOperationHistoryImages.Capture(owner, operation);

@@ -10,7 +10,7 @@ internal sealed class SignedEnvelopeTests
     private const char ReplacementSignatureCharacter = 'A';
     private const char AlternateSignatureCharacter = 'B';
 
-    private const string ClaimsAlias = "keyload.tests.v1.SignedEnvelopeClaims";
+    private const string ClaimsAlias = "keyload.tests.SignedEnvelopeClaims";
     private const uint PurposeId = 0;
     private const uint PayloadId = 1;
 

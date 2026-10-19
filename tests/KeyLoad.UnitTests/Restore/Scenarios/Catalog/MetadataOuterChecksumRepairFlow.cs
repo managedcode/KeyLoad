@@ -25,8 +25,8 @@ internal static class MetadataOuterChecksumRepairFlow
         global::Microsoft.Extensions.Options.IOptions<global::KeyLoad.AppHost.Features.TestInfrastructure.TestExecutionOptions> options,
         MetadataBackupFixture fixture, CancellationToken token)
     {
-        var source = NativeBackupJournalRepairAssertions.Read(fixture.SourceDirectory, token);
-        var original = await NativeBackupJournalRepairAssertions.ArchiveAsync(fixture.BackupDirectory, token);
+        var source = BackupJournalRepairAssertions.Read(fixture.SourceDirectory, token);
+        var original = await BackupJournalRepairAssertions.ArchiveAsync(fixture.BackupDirectory, token);
         var destination = Path.Combine(fixture.BackupDirectory, MetadataTestContract.IdentityChecksumRestorePath);
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(
@@ -35,10 +35,10 @@ internal static class MetadataOuterChecksumRepairFlow
             Path.Combine(fixture.BackupDirectory, MetadataTestContract.IdentityFileName),
             original[MetadataTestContract.IdentityFileName], CancellationToken.None), failures);
         await ServerFailureObserver.ObserveAsync(() =>
-            NativeBackupJournalRepairAssertions.SameArchiveAsync(original, fixture.BackupDirectory,
+            BackupJournalRepairAssertions.SameArchiveAsync(original, fixture.BackupDirectory,
                 CancellationToken.None), failures);
-        await ServerFailureObserver.ObserveAsync(() => NativeBackupJournalRepairAssertions.SameCutAsync(source,
-            NativeBackupJournalRepairAssertions.Read(fixture.SourceDirectory, CancellationToken.None)), failures);
+        await ServerFailureObserver.ObserveAsync(() => BackupJournalRepairAssertions.SameCutAsync(source,
+            BackupJournalRepairAssertions.Read(fixture.SourceDirectory, CancellationToken.None)), failures);
         ServerFailureObserver.ThrowIfAny(failures);
         var result = await CliBackupRestoreProcess.RunAsync(options,
             [RestoreCommand, fixture.BackupDirectory, destination], token);
@@ -47,8 +47,8 @@ internal static class MetadataOuterChecksumRepairFlow
         await MetadataOuterChecksumRepairCold.RunAsync(destination, token);
         await MetadataOuterChecksumRepairAssertions.OriginalArchiveAsync(original, fixture.BackupDirectory,
             destination, token);
-        await NativeBackupJournalRepairAssertions.SameCutAsync(source,
-            NativeBackupJournalRepairAssertions.Read(fixture.SourceDirectory, token));
+        await BackupJournalRepairAssertions.SameCutAsync(source,
+            BackupJournalRepairAssertions.Read(fixture.SourceDirectory, token));
     }
 
     private static async Task RefuseAsync(
@@ -68,14 +68,14 @@ internal static class MetadataOuterChecksumRepairFlow
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.Corruption);
         await Assert.That(failure.Message).IsEqualTo(MetadataTestContract.BackupFileVerificationFailedDetail);
         await Assert.That(Directory.Exists(destination)).IsFalse();
-        await NativeBackupJournalRepairAssertions.SameCutAsync(source,
-            NativeBackupJournalRepairAssertions.Read(fixture.SourceDirectory, token));
+        await BackupJournalRepairAssertions.SameCutAsync(source,
+            BackupJournalRepairAssertions.Read(fixture.SourceDirectory, token));
         await MetadataOuterChecksumRepairAssertions.RefusedCliAsync(
             await CliBackupRestoreProcess.RunAsync(options,
                 [RestoreCommand, fixture.BackupDirectory, destination], token), destination);
-        await NativeBackupJournalRepairAssertions.SameArchiveAsync(tampered, fixture.BackupDirectory, token);
-        await NativeBackupJournalRepairAssertions.SameCutAsync(source,
-            NativeBackupJournalRepairAssertions.Read(fixture.SourceDirectory, token));
+        await BackupJournalRepairAssertions.SameArchiveAsync(tampered, fixture.BackupDirectory, token);
+        await BackupJournalRepairAssertions.SameCutAsync(source,
+            BackupJournalRepairAssertions.Read(fixture.SourceDirectory, token));
         var root = Directory.GetParent(fixture.BackupDirectory)
             ?? throw new DirectoryNotFoundException();
         await Assert.That(Directory.EnumerateDirectories(root.FullName, RestoreStagingPattern,

@@ -8,14 +8,14 @@ internal static class BackupPieceBoundaryCold
     internal static async Task RunAsync(CliBackupRestoreFixture fixture, CliBackupRestoreProcessResult result,
         string restored, byte[] key, string payload, CancellationToken token)
     {
-        var original = NativeBackupJournalRepairAssertions.Read(restored, token);
+        var original = BackupJournalRepairAssertions.Read(restored, token);
         await ReadOwnedAsync(restored, key, payload);
-        await NativeBackupJournalRepairAssertions.SameCutAsync(original,
-            NativeBackupJournalRepairAssertions.Read(restored, token));
+        await BackupJournalRepairAssertions.SameCutAsync(original,
+            BackupJournalRepairAssertions.Read(restored, token));
         await CliBackupRestoreAssertions.RestoredStoreAsync(fixture, result, restored);
         await ReadOwnedAsync(restored, key, payload);
-        await NativeBackupJournalRepairAssertions.SameCutAsync(original,
-            NativeBackupJournalRepairAssertions.Read(restored, token));
+        await BackupJournalRepairAssertions.SameCutAsync(original,
+            BackupJournalRepairAssertions.Read(restored, token));
         await CliBackupRestoreAssertions.RestoredStoreAsync(fixture, result, restored);
     }
 
@@ -28,7 +28,7 @@ internal static class BackupPieceBoundaryCold
                 UnitExecutionOptions.PointCacheExecution());
             await ServerFailureObserver.ObserveAsync(async () =>
             {
-                var value = store.Read(view => global::KeyLoad.NativeSerialization.Deserialize<string>(view.ReadOwnedValue(key)!));
+                var value = store.Read(view => global::KeyLoad.OrleansSerialization.Deserialize<string>(view.ReadOwnedValue(key)!));
                 await Assert.That(value).IsEqualTo(payload);
             }, failures);
         }, failures);

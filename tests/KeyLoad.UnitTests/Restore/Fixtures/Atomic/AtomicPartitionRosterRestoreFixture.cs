@@ -29,7 +29,7 @@ internal sealed class AtomicPartitionRosterRestoreFixture
     internal ZoneTreeStore Target { get; private set; } = null!;
     internal DatabaseEngine Database { get; private set; } = null!;
     internal Command<DatabaseCommand> Original { get; private set; } = null!;
-    internal ResourceLifetimeV1 CollectionLifetime { get; private set; } = null!;
+    internal ResourceLifetime CollectionLifetime { get; private set; } = null!;
     internal byte[] OriginalOutcome { get; private set; } = null!;
     internal byte[] OriginalRoster { get; private set; } = null!;
     private string targetPath = null!;

@@ -2,7 +2,7 @@ using System.Collections.Immutable;
 using System.Text.Json;
 using KeyLoad.Client;
 using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.ClusterReplication;
+using KeyLoad.IntegrationTests.Features.StorageReplication;
 using KeyLoad.Query;
 
 namespace KeyLoad.IntegrationTests.Features.QueryExecution;
@@ -83,7 +83,7 @@ internal sealed class PartitionQueryPublicValidationTests(ClusterFixture fixture
     }
 
     private static async Task AssertFailureAsync(KeyLoadClient sdk, McpOfficialClient mcp,
-        PartitionQueryRequestV1 request, ErrorCode expected, CancellationToken cancellationToken)
+        PartitionQueryRequest request, ErrorCode expected, CancellationToken cancellationToken)
     {
         var result = await sdk.PartitionQueryAsync(request, cancellationToken).ConfigureAwait(false);
         await Assert.That(result.IsSuccess).IsFalse();
@@ -98,7 +98,7 @@ internal sealed class PartitionQueryPublicValidationTests(ClusterFixture fixture
         => known.AddRange(Enumerable.Range(0, PartitionQueryClusterProtocol.MaxPartitions - known.Length + 1)
             .Select(index => known[0] with { PartitionKey = "overflow-" + index.ToString(System.Globalization.CultureInfo.InvariantCulture) }));
 
-    private static PartitionQueryRequestV1 CreateOversizedRequest(PartitionQueryClusterScenario scenario)
+    private static PartitionQueryRequest CreateOversizedRequest(PartitionQueryClusterScenario scenario)
     {
         var largeText = new string('x', OversizedValueChars);
         var parameters = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
@@ -129,7 +129,7 @@ internal sealed class PartitionQueryPublicValidationTests(ClusterFixture fixture
         CancellationToken cancellationToken)
     {
         var request = scenario.Request([scenario.Partitions[1]]);
-        var receipt = await McpCallerAssertions.SuccessAsync<PartitionQueryPageV1>(await mcp.CallAsync(
+        var receipt = await McpCallerAssertions.SuccessAsync<PartitionQueryPage>(await mcp.CallAsync(
             PartitionQueryClusterProtocol.ToolName, request, cancellationToken).ConfigureAwait(false)).ConfigureAwait(false);
         await PartitionQueryClusterAssertions.AssertOracleAsync(receipt.Value, scenario, request.Partitions)
             .ConfigureAwait(false);

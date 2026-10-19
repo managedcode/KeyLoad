@@ -31,7 +31,7 @@ internal static class LiteralDeclarationOwnership
     internal static bool IsAssemblyIdentity(SyntaxNodeAnalysisContext context) =>
         context.Node.Ancestors().OfType<AttributeSyntax>().FirstOrDefault() is { } attribute &&
         context.SemanticModel.GetSymbolInfo(attribute, context.CancellationToken).Symbol is IMethodSymbol constructor &&
-        MagicRuntimeOperations.IsNativeType(context.Compilation, constructor.ContainingType, MagicRuntimeMetadataNames.FriendAssemblyAttribute);
+        MagicRuntimeOperations.IsType(context.Compilation, constructor.ContainingType, MagicRuntimeMetadataNames.FriendAssemblyAttribute);
 
     internal static bool IsOptionsDefault(SyntaxNodeAnalysisContext context)
     {

@@ -9,7 +9,7 @@ namespace KeyLoad;
 /// <param name="FailedRequests">Completed requests with an error status or aborted response.</param>
 /// <param name="ElapsedMilliseconds">Sum of measured request elapsed milliseconds.</param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.AdminHttpSnapshot)]
+[Orleans.Alias(ContractAliases.AdminHttpSnapshot)]
 public sealed record AdminHttpSnapshot([property: Orleans.Id(0)] DateTimeOffset StartedAt, [property: Orleans.Id(1)] Guid ProcessInstance, [property: Orleans.Id(2)] long CompletedRequests,
     [property: Orleans.Id(3)] long FailedRequests, [property: Orleans.Id(4)] double ElapsedMilliseconds)
 {

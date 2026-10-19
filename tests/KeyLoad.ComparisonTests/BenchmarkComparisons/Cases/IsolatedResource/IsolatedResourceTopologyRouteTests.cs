@@ -15,18 +15,18 @@ internal sealed class IsolatedResourceTopologyRouteTests
     private const string SiloCountSetting = "KeyLoad__SiloCount";
     private const string ReplicaCountSetting = "KeyLoad__ReplicaCount";
     private const string EnabledSetting = "Benchmarks:Enabled";
-    private const string EndpointsPrefix = IsolatedResourceTopologyFixture.NativePrefix + "Endpoints__";
+    private const string EndpointsPrefix = IsolatedResourceTopologyFixture.RuntimePrefix + "Endpoints__";
     private const string ScaleProfileEnvironment = "Benchmarks__ScaleProfile";
     private const string EvidenceProfileEnvironment = "Benchmarks__EvidenceProfile";
 
-    /// <summary>AC-ISO-001/003: the load AppHost selects the exact native database group for the external client.</summary>
+    /// <summary>AC-ISO-001/003: the load AppHost selects the exact execution database group for the external client.</summary>
     [Test]
     [Arguments(KeyLoad, 1)]
     [Arguments(KeyLoad, 3)]
     [Arguments(Redis, 1)]
     [Arguments(Redis, 3)]
     [Arguments(Neo4j, 1)]
-    public async Task SelectedEntryBuildsOnlyTheRequestedNativeGroupAndClientBindings(string target, int count)
+    public async Task SelectedEntryBuildsOnlyTheRequestedGroupAndClientBindings(string target, int count)
     {
         await using var model = new IsolatedResourceTopologyApplication();
         var resources = await model.BuildAsync(target, count);
@@ -63,13 +63,13 @@ internal sealed class IsolatedResourceTopologyRouteTests
         await Assert.That(model.Client.Resources).IsEmpty();
         await Assert.That(model.Client.CompletionResources).IsEmpty();
         var bindings = await IsolatedResourceTopologyFixture.EnvironmentAsync(model.Client);
-        await Assert.That(bindings.Keys.Count(key => key.StartsWith(IsolatedResourceTopologyFixture.NativePrefix,
+        await Assert.That(bindings.Keys.Count(key => key.StartsWith(IsolatedResourceTopologyFixture.RuntimePrefix,
             StringComparison.Ordinal))).IsEqualTo(0);
         await Assert.That(Directory.Exists(model.ProductionRoot)).IsFalse();
-        await Assert.That(Directory.Exists(Path.Combine(model.Root, "native"))).IsFalse();
+        await Assert.That(Directory.Exists(Path.Combine(model.Root, "execution"))).IsFalse();
     }
 
-    /// <summary>AC-ISO-003: invalid selection fails before cluster files, reports or native resources exist.</summary>
+    /// <summary>AC-ISO-003: invalid selection fails before cluster files, reports or execution resources exist.</summary>
     [Test]
     [Arguments(BenchmarkSessionSelection.TargetSetting, "Unknown")]
     [Arguments(BenchmarkSessionSelection.NodeCountSetting, "0")]
@@ -84,7 +84,7 @@ internal sealed class IsolatedResourceTopologyRouteTests
         await using var model = new IsolatedResourceTopologyApplication();
         await Assert.That(async () => { await model.BuildAsync(KeyLoad, 1, setting, value); }).Throws<Microsoft.Extensions.Options.OptionsValidationException>();
         await Assert.That(Directory.Exists(model.ProductionRoot)).IsFalse();
-        await Assert.That(Directory.Exists(Path.Combine(model.Root, "native"))).IsFalse();
+        await Assert.That(Directory.Exists(Path.Combine(model.Root, "execution"))).IsFalse();
         await Assert.That(Directory.Exists(model.Output)).IsFalse();
     }
 
@@ -107,17 +107,17 @@ internal sealed class IsolatedResourceTopologyRouteTests
         => await RejectAsync(KeyLoad, setting, value);
 
     [Test]
-    public async Task SessionRequiresExplicitBenchmarkModeBeforeNativeAllocation()
+    public async Task SessionRequiresExplicitBenchmarkModeBeforeAllocation()
     {
         await using var model = new IsolatedResourceTopologyApplication();
         await Assert.That(async () => { await model.BuildAsync(KeyLoad, 1, EnabledSetting, "false"); })
             .Throws<InvalidOperationException>();
-        await Assert.That(Directory.Exists(Path.Combine(model.Root, "native"))).IsFalse();
+        await Assert.That(Directory.Exists(Path.Combine(model.Root, "execution"))).IsFalse();
     }
 
-    /// <summary>AC-ISO-004: ordinary composition builds its configured native silo and data-copy counts.</summary>
+    /// <summary>AC-ISO-004: ordinary composition builds its configured execution silo and data-copy counts.</summary>
     [Test]
-    public async Task DefaultProductionEntryBuildsItsConfiguredNativeTopology()
+    public async Task DefaultProductionEntryBuildsItsConfiguredTopology()
     {
         await using var model = new IsolatedResourceTopologyApplication();
         var resources = await model.BuildAsync(null, 3);
@@ -141,7 +141,7 @@ internal sealed class IsolatedResourceTopologyRouteTests
         await using var model = new IsolatedResourceTopologyApplication();
         await Assert.That(async () => { await model.BuildAsync(target, 1, setting, value); }).Throws<Microsoft.Extensions.Options.OptionsValidationException>();
         await Assert.That(Directory.Exists(model.ProductionRoot)).IsFalse();
-        await Assert.That(Directory.Exists(Path.Combine(model.Root, "native"))).IsFalse();
+        await Assert.That(Directory.Exists(Path.Combine(model.Root, "execution"))).IsFalse();
         await Assert.That(Directory.Exists(model.Output)).IsFalse();
     }
 }

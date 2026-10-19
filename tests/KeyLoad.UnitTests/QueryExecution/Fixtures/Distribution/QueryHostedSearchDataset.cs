@@ -20,9 +20,9 @@ internal sealed class QueryHostedSearchDataset(RequestCqrsHostedCluster cluster)
     internal const string SourceProjected = "{\"title\":\"source\"}";
     internal PartitionRef First => cluster.Nodes[0].Database.Partition;
     internal PartitionRef Second => First with { PartitionKey = "customer-2" };
-    internal ResourceLifetimeV1 Creation { get; private set; } = null!;
+    internal ResourceLifetime Creation { get; private set; } = null!;
     internal PrincipalRecord Principal { get; private set; } = null!;
-    internal DistributedSearchRequestV1 Request => new(Version, [First, Second],
+    internal DistributedSearchRequest Request => new(Version, [First, Second],
         new(First, Collection, TextField: Title, Text: "source destination", Limit: Documents,
             FusionConstant: FusionConstant));
 
@@ -35,7 +35,7 @@ internal sealed class QueryHostedSearchDataset(RequestCqrsHostedCluster cluster)
         };
         var resource = new ConfigureResourceRequest(First.TenantId, First.DatabaseId, definition);
         var creation = owner.Database.CreateCommand(OperationKind.ConfigureResource, Guid.NewGuid(),
-            RequestCqrsHostedProfile.Root, owner.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(resource));
+            RequestCqrsHostedProfile.Root, owner.Database.EvaluationClock.GetUtcNow(), OrleansSerialization.Serialize(resource));
         _ = (await owner.Coordinator.SubmitVerifiedAsync(creation, token).ConfigureAwait(false)).Get<ResourceDefinition>();
         Creation = ResourceLifetimeIdentity.Create(creation, resource.TenantId, resource.DatabaseId, definition);
         Principal = new(Reader, First.TenantId,
@@ -57,7 +57,7 @@ internal sealed class QueryHostedSearchDataset(RequestCqrsHostedCluster cluster)
         var expected = new CommitReceipt(commandId,
             new(owner.Store.Identity.Incarnation, partition.AtomicPartitionId, expectedPosition),
             [new("putDocument", Collection, DocumentId, Version)], DurabilityProfile.ProcessDurable, Copies);
-        await Assert.That(NativeSerialization.Serialize(receipt).AsSpan()
-            .SequenceEqual(NativeSerialization.Serialize(expected))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(receipt).AsSpan()
+            .SequenceEqual(OrleansSerialization.Serialize(expected))).IsTrue();
     }
 }

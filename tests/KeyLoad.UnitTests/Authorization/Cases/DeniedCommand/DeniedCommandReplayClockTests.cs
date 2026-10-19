@@ -15,7 +15,7 @@ internal sealed class DeniedCommandReplayClockTests
     private const string ScopeDenied = "The principal cannot perform this operation in this scope.";
     private const string AdministrationRequired = "Cluster administration is required.";
     private const int MaximumRecords = 4_096;
-    private const string Overflow = "The denied-command replay fixture exceeded its fixed native inventory.";
+    private const string Overflow = "The denied-command replay fixture exceeded its fixed execution inventory.";
     private const string Separator = ":";
 
     [Test]
@@ -116,8 +116,8 @@ internal sealed class DeniedCommandReplayClockTests
     }
 
     private static async Task SameResultAsync(Result<object> expected, Result<object> actual)
-        => await Assert.That(Convert.ToHexString(NativeSerialization.Serialize(actual)))
-            .IsEqualTo(Convert.ToHexString(NativeSerialization.Serialize(expected)));
+        => await Assert.That(Convert.ToHexString(OrleansSerialization.Serialize(actual)))
+            .IsEqualTo(Convert.ToHexString(OrleansSerialization.Serialize(expected)));
     private static string[] Bytes(ZoneTreeStore store) => store.Read(view =>
     {
         var page = view.Scan([], MaximumRecords);

@@ -1,5 +1,5 @@
 using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.ClusterRouting;
+using KeyLoad.IntegrationTests.Features.OrleansExecution;
 
 namespace KeyLoad.IntegrationTests.Features.TimeSeries;
 
@@ -13,24 +13,24 @@ internal static class ChunkMultiblockClusterCurrent
     {
         var scenario = state.Scenario;
         await ChunkMultiblockClusterPages.RequireAsync(state, reader.Sdk, reader.Mcp, token);
-        var latest = new ReadLatestSampleRequest(scenario.Native.Partition, TimeSeriesClusterScenario.Set, TimeSeriesClusterScenario.Series);
+        var latest = new ReadLatestSampleRequest(scenario.Execution.Partition, TimeSeriesClusterScenario.Set, TimeSeriesClusterScenario.Series);
         var rows = ChunkMultiblockClusterExpected.Visible(state.Expired, state.Healthy, state.Opened);
         await BothAsync(reader, McpCallerTools.SeriesLatest, latest, new LatestSampleResult(state.Opened ? null : rows[^1]), ct => reader.Sdk.ReadLatestSampleAsync(latest, ct), token);
-        var aggregate = new AggregateSamplesRequest(scenario.Native.Partition, TimeSeriesClusterScenario.Set,
+        var aggregate = new AggregateSamplesRequest(scenario.Execution.Partition, TimeSeriesClusterScenario.Set,
             TimeSeriesClusterScenario.Series, scenario.From, scenario.Until, Limit);
         await BothAsync(reader, McpCallerTools.SeriesAggregate, aggregate, ChunkMultiblockClusterExpected.Aggregate(state.Expired, state.Healthy, state.Opened),
             ct => reader.Sdk.AggregateSamplesAsync(aggregate, ct), token);
-        var windows = new AggregateSampleWindowsRequest(scenario.Native.Partition, TimeSeriesClusterScenario.Set,
+        var windows = new AggregateSampleWindowsRequest(scenario.Execution.Partition, TimeSeriesClusterScenario.Set,
             TimeSeriesClusterScenario.Series, scenario.From, scenario.From.AddTicks(3), TimeSeriesClusterScenario.OneTick, Limit, 3);
         await BothAsync(reader, McpCallerTools.SeriesWindows, windows,
             ChunkMultiblockClusterExpected.Windows(state.Expired, state.Healthy, state.Opened), ct => reader.Sdk.AggregateSampleWindowsAsync(windows, ct), token);
-        var floor = new ReadSampleRetentionRequest(scenario.Native.Partition, TimeSeriesClusterScenario.Set, TimeSeriesClusterScenario.Series);
+        var floor = new ReadSampleRetentionRequest(scenario.Execution.Partition, TimeSeriesClusterScenario.Set, TimeSeriesClusterScenario.Series);
         await BothAsync(reader, McpCallerTools.SeriesRetention, floor,
             new SampleRetentionStatus(state.Expired ? scenario.From.AddTicks(1) : null, state.Purged, state.HasMore),
             ct => reader.Sdk.ReadSampleRetentionAsync(floor, ct), token);
-        var outbox = new GetOutboxStatusRequest(scenario.Native.Partition);
+        var outbox = new GetOutboxStatusRequest(scenario.Execution.Partition);
         await OutboxAsync(state, await McpCallerAssertions.SdkSuccessAsync(
-            await administrator.Sdk.OutboxStatusAsync(scenario.Native.Partition, token)));
+            await administrator.Sdk.OutboxStatusAsync(scenario.Execution.Partition, token)));
         await OutboxAsync(state, (await McpCallerAssertions.SuccessAsync<OutboxStatus>(
             await administrator.Mcp.CallAsync(McpCallerTools.OutboxStatus, outbox, token))).Value);
     }

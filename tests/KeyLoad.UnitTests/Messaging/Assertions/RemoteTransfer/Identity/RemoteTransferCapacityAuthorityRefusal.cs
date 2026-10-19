@@ -14,7 +14,7 @@ internal static class RemoteTransferCapacityAuthorityRefusal
             await Assert.That(error.Code).IsEqualTo(ErrorCode.Corruption);
             await Assert.That(error.Message).IsEqualTo(Corrupt);
             await RemoteTransferCapacityAuthorityStorage.ImageAsync(fixture, image, position);
-            await Assert.That(OutcomeStoreOracle.ReadPartition(RemoteTransferCapacityAuthorityStorage.Native(fixture), request.Partition,
+            await Assert.That(OutcomeStoreOracle.ReadPartition(RemoteTransferCapacityAuthorityStorage.Execution(fixture), request.Partition,
                 RemoteTransferDatabase.RootPrincipal, request.CommandId)).IsNull();
         }
         if (fault == RemoteTransferCapacityAuthorityFault.MissingRecords)

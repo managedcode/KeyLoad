@@ -58,7 +58,7 @@
       "classification": "executable"
     },
     {
-      "path": "analyzers/KeyLoad.Analyzers/Analyzers/NativeContracts/GrainInterfaceVersionAnalyzer.cs",
+      "path": "analyzers/KeyLoad.Analyzers/Analyzers/RuntimeContracts/GrainInterfaceVersionAnalyzer.cs",
       "classification": "executable"
     },
     {
@@ -94,11 +94,11 @@
       "classification": "executable"
     },
     {
-      "path": "analyzers/KeyLoad.Analyzers/Analyzers/NativeContracts/OrleansContractConstructorAnalyzer.cs",
+      "path": "analyzers/KeyLoad.Analyzers/Analyzers/RuntimeContracts/OrleansContractConstructorAnalyzer.cs",
       "classification": "executable"
     },
     {
-      "path": "analyzers/KeyLoad.Analyzers/Analyzers/NativeContracts/OrleansGenerateSerializerAnalyzer.cs",
+      "path": "analyzers/KeyLoad.Analyzers/Analyzers/RuntimeContracts/OrleansGenerateSerializerAnalyzer.cs",
       "classification": "executable"
     },
     {
@@ -106,11 +106,11 @@
       "classification": "declaration-only"
     },
     {
-      "path": "analyzers/KeyLoad.Analyzers/Analysis/NativeContracts/OrleansSerializerAnalysis.cs",
+      "path": "analyzers/KeyLoad.Analyzers/Analysis/RuntimeContracts/OrleansSerializerAnalysis.cs",
       "classification": "executable"
     },
     {
-      "path": "analyzers/KeyLoad.Analyzers/Analysis/NativeContracts/OrleansSerializerTypeGraph.cs",
+      "path": "analyzers/KeyLoad.Analyzers/Analysis/RuntimeContracts/OrleansSerializerTypeGraph.cs",
       "classification": "executable"
     },
     {
@@ -210,7 +210,7 @@
       "classification": "executable"
     },
     {
-      "path": "analyzers/KeyLoad.Analyzers/Analysis/RuntimePolicies/NativeTimerPolicy.cs",
+      "path": "analyzers/KeyLoad.Analyzers/Analysis/RuntimePolicies/TimerPolicy.cs",
       "classification": "executable"
     },
     {
@@ -250,11 +250,11 @@
       "classification": "declaration-only"
     },
     {
-      "path": "analyzers/KeyLoad.Analyzers/Analysis/NativeContracts/ZoneTreeDispatchAnalysis.cs",
+      "path": "analyzers/KeyLoad.Analyzers/Analysis/RuntimeContracts/ZoneTreeDispatchAnalysis.cs",
       "classification": "executable"
     },
     {
-      "path": "analyzers/KeyLoad.Analyzers/Analyzers/NativeContracts/SynchronousZoneTreeAccessAnalyzer.cs",
+      "path": "analyzers/KeyLoad.Analyzers/Analyzers/RuntimeContracts/SynchronousZoneTreeAccessAnalyzer.cs",
       "classification": "executable"
     },
     {
@@ -336,7 +336,7 @@
     {
       "diagnostic": "KLD0014",
       "sources": [
-        "analyzers/KeyLoad.Analyzers/Analyzers/NativeContracts/GrainInterfaceVersionAnalyzer.cs"
+        "analyzers/KeyLoad.Analyzers/Analyzers/RuntimeContracts/GrainInterfaceVersionAnalyzer.cs"
       ]
     },
     {
@@ -348,7 +348,7 @@
     {
       "diagnostic": "KLD0021",
       "sources": [
-        "analyzers/KeyLoad.Analyzers/Analyzers/NativeContracts/OrleansContractConstructorAnalyzer.cs",
+        "analyzers/KeyLoad.Analyzers/Analyzers/RuntimeContracts/OrleansContractConstructorAnalyzer.cs",
         "analyzers/KeyLoad.Analyzers/Contracts/CodeQualityAssemblyNames.cs"
       ]
     },
@@ -361,9 +361,9 @@
     {
       "diagnostic": "KLD0023",
       "sources": [
-        "analyzers/KeyLoad.Analyzers/Analyzers/NativeContracts/OrleansGenerateSerializerAnalyzer.cs",
-        "analyzers/KeyLoad.Analyzers/Analysis/NativeContracts/OrleansSerializerAnalysis.cs",
-        "analyzers/KeyLoad.Analyzers/Analysis/NativeContracts/OrleansSerializerTypeGraph.cs",
+        "analyzers/KeyLoad.Analyzers/Analyzers/RuntimeContracts/OrleansGenerateSerializerAnalyzer.cs",
+        "analyzers/KeyLoad.Analyzers/Analysis/RuntimeContracts/OrleansSerializerAnalysis.cs",
+        "analyzers/KeyLoad.Analyzers/Analysis/RuntimeContracts/OrleansSerializerTypeGraph.cs",
         "analyzers/KeyLoad.Analyzers/Contracts/CodeQualityAssemblyNames.cs"
       ]
     },
@@ -456,7 +456,7 @@
         "analyzers/KeyLoad.Analyzers/Analysis/Configuration/SerializedOptionsMetadata.cs",
         "analyzers/KeyLoad.Analyzers/Analysis/RuntimePolicies/HardcodedPolicyReturns.cs",
         "analyzers/KeyLoad.Analyzers/Analysis/RuntimePolicies/HardcodedPolicySearch.cs",
-        "analyzers/KeyLoad.Analyzers/Analysis/RuntimePolicies/NativeTimerPolicy.cs",
+        "analyzers/KeyLoad.Analyzers/Analysis/RuntimePolicies/TimerPolicy.cs",
         "analyzers/KeyLoad.Analyzers/Analysis/Configuration/OptionsSnapshotOverrides.cs",
         "analyzers/KeyLoad.Analyzers/Analysis/OwnedDiagnosticsPolicy.cs",
         "analyzers/KeyLoad.Analyzers/Analysis/Configuration/PolicyArgumentSources.cs"
@@ -477,13 +477,13 @@
     {
       "diagnostic": "KLD0039",
       "sources": [
-        "analyzers/KeyLoad.Analyzers/Analyzers/NativeContracts/SynchronousZoneTreeAccessAnalyzer.cs",
-        "analyzers/KeyLoad.Analyzers/Analysis/NativeContracts/ZoneTreeDispatchAnalysis.cs",
+        "analyzers/KeyLoad.Analyzers/Analyzers/RuntimeContracts/SynchronousZoneTreeAccessAnalyzer.cs",
+        "analyzers/KeyLoad.Analyzers/Analysis/RuntimeContracts/ZoneTreeDispatchAnalysis.cs",
         "analyzers/KeyLoad.Analyzers/Contracts/ZoneTreeAccessPolicy.cs"
       ]
     }
   ],
-  "nativeFormat": {
+  "runtimeFormat": {
     "packageSelector": "/coverage/packages/package",
     "packageName": "KeyLoad.Analyzers",
     "lineSelector": "classes/class/lines/line",
@@ -494,6 +494,6 @@
   "artifactNames": {
     "manifest": "source-manifest.json",
     "report": "report.json",
-    "nativeCoverage": "coverage.cobertura.xml"
+    "runtimeCoverage": "coverage.cobertura.xml"
   }
 }

@@ -16,12 +16,12 @@ internal static class QueryLifetimeReadCapability
         var owner = services.GetRequiredService<PhysicalShardRecord>();
         return request.Envelope.ReadKind switch
         {
-            GrainReadKind.PartitionQueryLeafV2 => PartitionQueryLifetimeLeafExecution.ExecuteBound(
+            GrainReadKind.PartitionQueryLeaf => PartitionQueryLifetimeLeafExecution.ExecuteBound(
                 services.GetRequiredService<QueryEngine>(), principal.Id,
-                GrainNativePayload.Read<PartitionQueryOwnedLeafRequestV2>(request.Payload), owner, clock,
+                GrainPayload.Read<PartitionQueryOwnedLeafRequest>(request.Payload), owner, clock,
                 request.Envelope.ExpiresAt, binding, token),
-            GrainReadKind.DistributedSearchLeafV2 => DistributedSearchOwnedLeafExecution.ExecuteV2Bound(database,
-                principal.Id, GrainNativePayload.Read<DistributedSearchOwnedLeafV2>(request.Payload), owner,
+            GrainReadKind.DistributedSearchLeaf => DistributedSearchOwnedLeafExecution.ExecuteBound(database,
+                principal.Id, GrainPayload.Read<DistributedSearchOwnedLeaf>(request.Payload), owner,
                 services.GetRequiredService<IOptions<QueryExecutionOptions>>(), clock,
                 request.Envelope.ExpiresAt, binding, token),
             _ => throw Errors.Fail(ErrorCode.UnsupportedCapability, GrainRoutingProtocol.InvalidRequest)

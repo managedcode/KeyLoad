@@ -5,9 +5,9 @@ namespace KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
 
 internal static class ScaledRawStorageVerification
 {
-    private const string MissingMessage = "A seeded scaled record is missing from the native engine.";
-    private const string PresentMessage = "The reserved scaled miss index is present in the native engine.";
-    private const string MismatchMessage = "The native value differs from the complete deterministic value.";
+    private const string MissingMessage = "A seeded scaled record is missing from the execution engine.";
+    private const string PresentMessage = "The reserved scaled miss index is present in the execution engine.";
+    private const string MismatchMessage = "The execution value differs from the complete deterministic value.";
     private const string DeadlineMessage = "The scaled fixture preparation deadline expired.";
 
     internal static ScaledRawStorageVerificationResult Run(ScaledRawStorageCorpus corpus, ScaledRawStorageZoneTreeEngine engine, byte[] expectedScratch, int recordCount, ref long readCalls, long deadlineStart, bool enforceBudget, IOptions<ScaledStorageExecutionOptions> executionOptions, TimeProvider timeProvider, CancellationToken token)

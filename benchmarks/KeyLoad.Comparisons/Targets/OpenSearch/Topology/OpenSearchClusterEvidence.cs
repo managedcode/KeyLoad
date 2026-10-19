@@ -7,19 +7,19 @@ namespace KeyLoad.Comparisons.Targets;
 internal static class OpenSearchClusterEvidence
 {
 
-    internal static string BuildHealthPath(string index, IOptions<NativeComparisonExecutionOptions> nativeExecutionOptions)
+    internal static string BuildHealthPath(string index, IOptions<ComparisonExecutionOptions> runtimeExecutionOptions)
     {
-        var executionOptions = NativeComparisonExecutionOptions.Require(nativeExecutionOptions).Value;
+        var executionOptions = ComparisonExecutionOptions.Require(runtimeExecutionOptions).Value;
         return OpenSearchNames.ClusterHealthPath + index + OpenSearchNames.HealthWaitParametersPrefix
             + executionOptions.OpenSearchHealthWaitTimeoutSeconds.ToString(CultureInfo.InvariantCulture)
             + OpenSearchNames.HealthWaitParametersSuffix;
     }
 
     internal static async Task<OpenSearchClusterObservation> ObserveAsync(HttpClient client, string index, int expectedCopies,
-        ComparisonTopology topology, IOptions<NativeComparisonExecutionOptions> nativeExecutionOptions, CancellationToken cancellationToken)
+        ComparisonTopology topology, IOptions<ComparisonExecutionOptions> runtimeExecutionOptions, CancellationToken cancellationToken)
     {
         using var healthResponse = await OpenSearchHttp.SendJsonAsync(client, HttpMethod.Get,
-            BuildHealthPath(index, nativeExecutionOptions), null, cancellationToken);
+            BuildHealthPath(index, runtimeExecutionOptions), null, cancellationToken);
         using var stateResponse = await OpenSearchHttp.SendJsonAsync(client, HttpMethod.Get,
             OpenSearchNames.ClusterStatePath + index, null, cancellationToken);
         using var nodesInfoResponse = await OpenSearchHttp.SendJsonAsync(client, HttpMethod.Get,

@@ -26,11 +26,11 @@ internal sealed class TextMaintenanceChildCalls(DecodedGrainRequest parent,
 
     internal Task<TResult> ReadAsync<TRequest, TResult>(GrainReadKind kind, TRequest request, CancellationToken token)
         where TResult : class
-        => DispatchAsync<TResult>(NativeSerialization.Serialize(request), kind, null, Guid.Empty, token);
+        => DispatchAsync<TResult>(OrleansSerialization.Serialize(request), kind, null, Guid.Empty, token);
 
     internal Task<TResult> CommandAsync<TRequest, TResult>(OperationKind kind, TRequest request,
         Guid commandId, CancellationToken token) where TResult : class
-        => DispatchAsync<TResult>(NativeSerialization.Serialize(request), null, kind, commandId, token);
+        => DispatchAsync<TResult>(OrleansSerialization.Serialize(request), null, kind, commandId, token);
 
     internal Task AbortAsync() => abort(SessionId);
 
@@ -75,7 +75,7 @@ internal sealed class TextMaintenanceChildCalls(DecodedGrainRequest parent,
         }
         try
         {
-            return NativeSerialization.Deserialize<GrainValue>(reply.Payload.Span).Value as TResult
+            return OrleansSerialization.Deserialize<GrainValue>(reply.Payload.Span).Value as TResult
                 ?? throw Errors.Fail(command is null ? ErrorCode.Corruption : ErrorCode.UnknownWriteOutcome,
                     TextIndexMaintenanceProtocol.Interrupted);
         }

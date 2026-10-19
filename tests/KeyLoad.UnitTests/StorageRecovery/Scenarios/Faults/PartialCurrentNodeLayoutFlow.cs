@@ -9,7 +9,7 @@ namespace KeyLoad.UnitTests.Features.StorageRecovery;
 internal static class PartialCurrentNodeLayoutFlow
 {
     private static readonly byte[] Key = KeyCodec.Encode("current-partial-layout", "healthy-write");
-    private static readonly byte[] Value = "native-current-prefix-write"u8.ToArray();
+    private static readonly byte[] Value = "execution-current-prefix-write"u8.ToArray();
     private const string Separator = ":";
 
     internal static async Task RunAsync()

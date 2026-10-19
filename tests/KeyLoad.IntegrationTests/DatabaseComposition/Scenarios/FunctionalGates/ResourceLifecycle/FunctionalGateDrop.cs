@@ -62,7 +62,7 @@ internal static class FunctionalGateDrop
     }
 
     private static async Task<FunctionalGateDropTable> RecreateAsync(FunctionalGateContext context, int index,
-        EntityRef original, Guid parent, DropTableResult dropped, EntityRefLifetimeV1 expectedLifetime, CancellationToken token)
+        EntityRef original, Guid parent, DropTableResult dropped, EntityRefLifetime expectedLifetime, CancellationToken token)
     {
         var reference = FunctionalGateDropRows.Reference(context, index, FunctionalGateDropRows.FreshId);
         var json = FunctionalGateDropRows.Json(context, index, reference.Id);

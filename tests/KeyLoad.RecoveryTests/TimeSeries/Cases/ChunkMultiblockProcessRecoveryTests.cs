@@ -3,7 +3,7 @@ namespace KeyLoad.RecoveryTests.Features.TimeSeries;
 
 internal sealed class ChunkMultiblockProcessRecoveryTests
 {
-    private const string RootPrefix = "keyload-native-multiblock-chunk-recovery-";
+    private const string RootPrefix = "keyload-execution-multiblock-chunk-recovery-";
 
     [Test]
     [Arguments(false, CommitStage.JournalFlushed)]

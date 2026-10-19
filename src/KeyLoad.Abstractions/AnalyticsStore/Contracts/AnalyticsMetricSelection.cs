@@ -3,7 +3,7 @@ namespace KeyLoad;
 /// <summary>Names one aggregate result and its declared metric.</summary>
 /// <param name="Name">Unique output metric name.</param>
 /// <param name="Metric">Declared source metric, or empty for Count.</param>
-/// <param name="Operation">Complete native aggregation.</param>
+/// <param name="Operation">Complete execution aggregation.</param>
 [Orleans.GenerateSerializer]
 [Orleans.Alias(AnalyticsStoreContractAliases.Selection)]
 public sealed record AnalyticsMetricSelection(

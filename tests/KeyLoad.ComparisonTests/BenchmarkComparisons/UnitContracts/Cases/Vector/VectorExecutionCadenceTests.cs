@@ -6,13 +6,13 @@ namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 internal sealed class VectorExecutionCadenceTests
 {
     [Test]
-    public async Task ConfiguredNativeCadenceKeepsCanonicalVectorsPayloadsAndExactOrdering()
+    public async Task ConfiguredCadenceKeepsCanonicalVectorsPayloadsAndExactOrdering()
     {
-        var baselinePolicy = UnitBenchmarkOptions.Native();
-        var configuredPolicy = UnitBenchmarkOptions.Native();
+        var baselinePolicy = UnitBenchmarkOptions.Execution();
+        var configuredPolicy = UnitBenchmarkOptions.Execution();
         configuredPolicy.Value.VectorCancellationCheckInterval = 8;
         configuredPolicy.Value.VectorYieldBatchSize = 4;
-        await Assert.That(NativeComparisonExecutionOptions.Require(configuredPolicy)).IsSameReferenceAs(configuredPolicy);
+        await Assert.That(ComparisonExecutionOptions.Require(configuredPolicy)).IsSameReferenceAs(configuredPolicy);
         var profile = VectorComparisonProfile.Parse("vector-100k-exact-filtered-c16");
         var baseline = new VectorComparisonCorpus(profile, baselinePolicy);
         var configured = new VectorComparisonCorpus(profile, configuredPolicy);
@@ -34,9 +34,9 @@ internal sealed class VectorExecutionCadenceTests
 
         var evidence = new Dictionary<string, string>(StringComparer.Ordinal);
         configuredPolicy.Value.RecordEvidence(evidence);
-        await Assert.That(evidence[nameof(NativeComparisonExecutionOptions.VectorCancellationCheckInterval)])
+        await Assert.That(evidence[nameof(ComparisonExecutionOptions.VectorCancellationCheckInterval)])
             .IsEqualTo(configuredPolicy.Value.VectorCancellationCheckInterval.ToString(CultureInfo.InvariantCulture));
-        await Assert.That(evidence[nameof(NativeComparisonExecutionOptions.VectorYieldBatchSize)])
+        await Assert.That(evidence[nameof(ComparisonExecutionOptions.VectorYieldBatchSize)])
             .IsEqualTo(configuredPolicy.Value.VectorYieldBatchSize.ToString(CultureInfo.InvariantCulture));
     }
 }

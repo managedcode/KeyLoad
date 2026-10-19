@@ -77,12 +77,12 @@ internal static class QueueGraphIdentityAssertions
         await Assert.That(JsonDefaults.Serialize(receipt).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
         await Assert.That(receipt.Mutations[0].CompositionReferences).IsEmpty();
         await Assert.That(receipt.Mutations[1].CompositionReferences.SequenceEqual([state.BoundFrom, state.BoundTo])).IsTrue();
-        state.HealthyReceipt = NativeSerialization.Serialize(receipt);
+        state.HealthyReceipt = OrleansSerialization.Serialize(receipt);
         var before = QueueWholeFlowStorage.Bytes(store);
         var replay = engine.Apply(state.Healthy).Get<CommitReceipt>();
         var resolved = engine.ResolveOutcome(state.Healthy).Get<CommitReceipt>();
-        await Assert.That(NativeSerialization.Serialize(replay).AsSpan().SequenceEqual(NativeSerialization.Serialize(receipt))).IsTrue();
-        await Assert.That(NativeSerialization.Serialize(resolved).AsSpan().SequenceEqual(NativeSerialization.Serialize(receipt))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(replay).AsSpan().SequenceEqual(OrleansSerialization.Serialize(receipt))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(resolved).AsSpan().SequenceEqual(OrleansSerialization.Serialize(receipt))).IsTrue();
         await Assert.That(QueueWholeFlowStorage.Bytes(store)).IsEquivalentTo(before,
             global::TUnit.Assertions.Enums.CollectionOrdering.Matching);
         await ModelsAsync(state, engine, store, healthy: true);

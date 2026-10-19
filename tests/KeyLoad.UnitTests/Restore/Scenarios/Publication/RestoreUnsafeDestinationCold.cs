@@ -12,7 +12,7 @@ internal static class RestoreUnsafeDestinationCold
     private const string HealthyKey = "healthy";
     private const string HealthyValue = "restored-path-healthy";
 
-    internal static async Task RunAsync(NativeBackupCutFixture fixture, string destination,
+    internal static async Task RunAsync(BackupCutFixture fixture, string destination,
         StoreIdentity identity, CancellationToken token)
     {
         await Assert.That(identity.Incarnation).IsNotEqualTo(fixture.Identity.Incarnation);
@@ -53,17 +53,17 @@ internal static class RestoreUnsafeDestinationCold
     {
         var expected = new List<string>
         {
-            Row(MetadataBackupFixture.StoredKeyBytes, NativeSerialization.Serialize(MetadataBackupFixture.ExpectedValue)),
+            Row(MetadataBackupFixture.StoredKeyBytes, OrleansSerialization.Serialize(MetadataBackupFixture.ExpectedValue)),
             Row(KeyCodec.Encode(ZoneTreePersistenceFormat.SystemNamespace, ZoneTreePersistenceFormat.LastAppliedKey),
-                NativeSerialization.Serialize(1L)),
+                OrleansSerialization.Serialize(1L)),
             Row(KeyCodec.Encode(ZoneTreePersistenceFormat.SystemNamespace, ZoneTreePersistenceFormat.ClockKey),
-                NativeSerialization.Serialize(1L)),
+                OrleansSerialization.Serialize(1L)),
             Row(KeyCodec.Encode(ZoneTreePersistenceFormat.SystemNamespace, ZoneTreePersistenceFormat.DispatchPausedKey),
-                NativeSerialization.Serialize(true))
+                OrleansSerialization.Serialize(true))
         };
         if (healthy)
         {
-            expected.Add(Row(KeyCodec.Encode(HealthyNamespace, HealthyKey), NativeSerialization.Serialize(HealthyValue)));
+            expected.Add(Row(KeyCodec.Encode(HealthyNamespace, HealthyKey), OrleansSerialization.Serialize(HealthyValue)));
         }
         var actual = QueueWholeFlowStorage.Bytes(store);
         await Assert.That(actual).IsEquivalentTo(expected);

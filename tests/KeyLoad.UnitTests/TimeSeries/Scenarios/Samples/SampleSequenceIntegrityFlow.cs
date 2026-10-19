@@ -5,7 +5,7 @@ namespace KeyLoad.UnitTests.Features.TimeSeries;
 
 internal static class SampleSequenceIntegrityFlow
 {
-    private const string Missing = "The native sequence operation did not retain its original outcome.";
+    private const string Missing = "The execution sequence operation did not retain its original outcome.";
     private const int ColdOwners = 2;
     internal static async Task RunAsync(long persistedSequence, CancellationToken token)
     {
@@ -43,9 +43,9 @@ internal static class SampleSequenceIntegrityFlow
             "sealSampleChunkWindow", 4, token);
         var counter = fixture.Store.Read(view => view.ReadOwnedValue(fixture.Counter))
             ?? throw new InvalidOperationException(Missing);
-        await Assert.That(NativeSerialization.Deserialize<long>(counter)).IsEqualTo(2L);
+        await Assert.That(OrleansSerialization.Deserialize<long>(counter)).IsEqualTo(2L);
         var healthyImage = SampleChunkCorrectionBoundColdAssertions.Image(fixture.Store);
-        fixture.PutCounter(NativeSerialization.Serialize(persistedSequence));
+        fixture.PutCounter(OrleansSerialization.Serialize(persistedSequence));
         await SampleSequenceIntegrityRecovery.RunAsync(fixture, counter, persistedSequence, healthyImage, token);
         await CommitAsync(fixture, new AppendSamples(P.Set, P.Series,
             [new("sequence-fresh", P.Start.AddTicks(2), 6d)], P.Tags), "appendSamples", 4, token);
@@ -55,13 +55,13 @@ internal static class SampleSequenceIntegrityFlow
         await WaveAsync(fixture, token);
         var image = SampleChunkCorrectionBoundColdAssertions.Image(fixture.Store);
         var cut = fixture.ReadCanonicalCut();
-        var identity = KeyLoad.UnitTests.Features.StorageRecovery.Assertions.NativeReadCutStoreStateAssertions.SnapshotIdentity(fixture.Store);
+        var identity = KeyLoad.UnitTests.Features.StorageRecovery.Assertions.ReadCutStoreStateAssertions.SnapshotIdentity(fixture.Store);
         for (var wave = 0; wave < ColdOwners; wave++)
         {
             token.ThrowIfCancellationRequested();
             fixture.Reopen();
             await Assert.That(SampleChunkCorrectionBoundColdAssertions.Image(fixture.Store)).IsEqualTo(image);
-            await KeyLoad.UnitTests.Features.StorageRecovery.Assertions.NativeReadCutStoreStateAssertions.AssertIdentityAndPositionAsync(
+            await KeyLoad.UnitTests.Features.StorageRecovery.Assertions.ReadCutStoreStateAssertions.AssertIdentityAndPositionAsync(
                 fixture.Store, identity, cut.StorePosition);
             await Assert.That(fixture.ReadCanonicalCut()).IsEqualTo(cut);
             await WaveAsync(fixture, token);
@@ -87,11 +87,11 @@ internal static class SampleSequenceIntegrityFlow
         var command = new CommandRequest(Guid.NewGuid(), fixture.Source.Owner.Partition, [mutation]);
         var cut = fixture.ReadCanonicalCut();
         var issued = fixture.Database.CreateCommand(OperationKind.Batch, command.CommandId, P.Principal,
-            TimeProvider.System.GetUtcNow(), NativeSerialization.Serialize(command));
+            TimeProvider.System.GetUtcNow(), OrleansSerialization.Serialize(command));
         var result = fixture.Database.ApplyEmbedded(issued, token);
         var outcomeBytes = fixture.Store.Read(view => view.ReadOwnedValue(OutcomeStoreOracle.Key(issued)))
             ?? throw new InvalidOperationException(Missing);
-        var outcome = NativeSerialization.Deserialize<KeyLoad.Core.StoredOutcome>(outcomeBytes);
+        var outcome = OrleansSerialization.Deserialize<KeyLoad.Core.StoredOutcome>(outcomeBytes);
         var operation = outcome.PreparedCommand;
         var expectedSequence = cut.AppliedPosition + 1;
         var expected = new CommitReceipt(command.CommandId,

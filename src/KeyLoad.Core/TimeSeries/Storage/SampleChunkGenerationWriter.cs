@@ -35,7 +35,7 @@ internal static class SampleChunkGenerationWriter
         {
             throw Errors.Fail(ErrorCode.Corruption, SampleChunkLifecycleProtocol.Corrupt);
         }
-        var bytes = NativeSerialization.Serialize(manifest);
+        var bytes = OrleansSerialization.Serialize(manifest);
         SampleChunkStorage.Write(tx, manifestKey, new SampleChunkManifestEnvelope(bytes, SHA256.HashData(bytes)), maximumBytes);
         return manifest;
     }

@@ -42,18 +42,6 @@ internal static class PublicReadAssertions
     internal static Task<McpCallReceipt<SagaInspection?>> SagaAsync(CallToolResult reply)
         => OfficialAsync<SagaReadResult, SagaInspection>(reply, "saga", response => response.Saga);
 
-    internal static Task<BlobMetadata?> MetadataAsync(Result<BlobMetadataReadResult> result)
-        => SdkAsync(result, response => response.Metadata);
-
-    internal static Task<McpCallReceipt<BlobMetadata?>> MetadataAsync(CallToolResult reply)
-        => OfficialAsync<BlobMetadataReadResult, BlobMetadata>(reply, "metadata", response => response.Metadata);
-
-    internal static Task<BlobUploadInfo?> UploadAsync(Result<BlobUploadInfoReadResult> result)
-        => SdkAsync(result, response => response.Upload);
-
-    internal static Task<McpCallReceipt<BlobUploadInfo?>> UploadAsync(CallToolResult reply)
-        => OfficialAsync<BlobUploadInfoReadResult, BlobUploadInfo>(reply, "upload", response => response.Upload);
-
     internal static Task<McpCallReceipt<DocumentResult>> RequiredDocumentAsync(CallToolResult reply)
         => RequireAsync(DocumentAsync(reply));
 
@@ -71,12 +59,6 @@ internal static class PublicReadAssertions
 
     internal static Task<McpCallReceipt<SagaInspection>> RequiredSagaAsync(CallToolResult reply)
         => RequireAsync(SagaAsync(reply));
-
-    internal static Task<McpCallReceipt<BlobMetadata>> RequiredMetadataAsync(CallToolResult reply)
-        => RequireAsync(MetadataAsync(reply));
-
-    internal static Task<McpCallReceipt<BlobUploadInfo>> RequiredUploadAsync(CallToolResult reply)
-        => RequireAsync(UploadAsync(reply));
 
     private static async Task<McpCallReceipt<T>> RequireAsync<T>(Task<McpCallReceipt<T?>> operation) where T : class
     {

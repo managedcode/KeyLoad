@@ -4,12 +4,12 @@ namespace KeyLoad.UnitTests.Features.TimeSeries;
 
 internal sealed class SampleRollupObservedWorkTests
 {
-    private const int NativePointThreshold = 3;
+    private const int PointThreshold = 3;
     private const int DeadlineSeconds = 1;
     private const int BeyondDeadlineSeconds = 2;
     private const string DeadlineDetail = "The read execution deadline is exceeded.";
     [Test]
-    public async Task AcSeries023OriginalCancellationAfterActualNativeWorkHasNoResultOrStoreEffect()
+    public async Task AcSeries023OriginalCancellationAfterActualWorkHasNoResultOrStoreEffect()
     {
         var clock = new SampleRollupWorkClock();
         using var db = new TestDatabase(timeProvider: clock);
@@ -20,7 +20,7 @@ internal sealed class SampleRollupObservedWorkTests
         var before = db.Store.GetReadDiagnostics();
         using var cancellation = new CancellationTokenSource();
         clock.Arm(() => db.Store.GetReadDiagnostics().BorrowedPointLookups >=
-            before.BorrowedPointLookups + NativePointThreshold, cancellation.Cancel);
+            before.BorrowedPointLookups + PointThreshold, cancellation.Cancel);
         SampleRollupResult? result = null;
         OperationCanceledException error;
         try
@@ -33,7 +33,7 @@ internal sealed class SampleRollupObservedWorkTests
         var after = db.Store.GetReadDiagnostics();
         await Assert.That(clock.Triggered).IsTrue();
         await Assert.That(result).IsNull();
-        await Assert.That(after.BorrowedPointLookups - before.BorrowedPointLookups).IsGreaterThanOrEqualTo(NativePointThreshold);
+        await Assert.That(after.BorrowedPointLookups - before.BorrowedPointLookups).IsGreaterThanOrEqualTo(PointThreshold);
         await Assert.That(after.PointExaminedBytes).IsGreaterThan(before.PointExaminedBytes);
         await Assert.That(error.CancellationToken).IsEqualTo(cancellation.Token);
         await Assert.That(SampleRollupWholeFlow.Image(db)).IsEqualTo(image);
@@ -41,7 +41,7 @@ internal sealed class SampleRollupObservedWorkTests
         await SampleRollupWholeFlow.Literal(SampleRollupWholeFlow.Read(db), 1, 6, 3, 12, 2, 6, 4);
     }
     [Test]
-    public async Task AcSeries023ElapsedDeadlineAfterActualNativeWorkHasNoResultOrStoreEffect()
+    public async Task AcSeries023ElapsedDeadlineAfterActualWorkHasNoResultOrStoreEffect()
     {
         var clock = new SampleRollupWorkClock();
         using var db = new TestDatabase(new DatabaseLimits { QueryDeadlineSeconds = DeadlineSeconds }, timeProvider: clock);
@@ -51,7 +51,7 @@ internal sealed class SampleRollupObservedWorkTests
         var position = db.Store.Position;
         var before = db.Store.GetReadDiagnostics();
         clock.Arm(() => db.Store.GetReadDiagnostics().BorrowedPointLookups >=
-            before.BorrowedPointLookups + NativePointThreshold, () => clock.Advance(TimeSpan.FromSeconds(BeyondDeadlineSeconds)));
+            before.BorrowedPointLookups + PointThreshold, () => clock.Advance(TimeSpan.FromSeconds(BeyondDeadlineSeconds)));
         SampleRollupResult? result = null;
         KeyLoadException error;
         try
@@ -62,7 +62,7 @@ internal sealed class SampleRollupObservedWorkTests
         var after = db.Store.GetReadDiagnostics();
         await Assert.That(clock.Triggered).IsTrue();
         await Assert.That(result).IsNull();
-        await Assert.That(after.BorrowedPointLookups - before.BorrowedPointLookups).IsGreaterThanOrEqualTo(NativePointThreshold);
+        await Assert.That(after.BorrowedPointLookups - before.BorrowedPointLookups).IsGreaterThanOrEqualTo(PointThreshold);
         await Assert.That(after.PointExaminedBytes).IsGreaterThan(before.PointExaminedBytes);
         await Assert.That(error.Code).IsEqualTo(ErrorCode.BudgetExceeded);
         await Assert.That(error.Message).IsEqualTo(DeadlineDetail);

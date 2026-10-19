@@ -2,7 +2,7 @@ namespace KeyLoad.UnitTests.Features.ChangeFeeds;
 
 internal static class ChangeFeedTestActions
 {
-    internal static ProjectionConsumerRef Consumer(TestDatabase db, string name = "text-v1") => new(db.Partition, name);
+    internal static ProjectionConsumerRef Consumer(TestDatabase db, string name = "text") => new(db.Partition, name);
     internal static ProjectionConsumerInfo Configure(TestDatabase db, ProjectionConsumerRef consumer, long? after = null)
     {
         var id = Guid.NewGuid();

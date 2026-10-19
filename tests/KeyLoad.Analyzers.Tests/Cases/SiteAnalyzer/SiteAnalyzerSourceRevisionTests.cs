@@ -1,6 +1,6 @@
 namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
 
-/// <summary>AC-CQ-028: site native coverage is tied to its selected source checkout.</summary>
+/// <summary>AC-CQ-028: site execution coverage is tied to its selected source checkout.</summary>
 [NotInParallel(SiteAnalyzerCoverageTokens.ProcessIsolationKey)]
 internal sealed class SiteAnalyzerSourceRevisionTests
 {

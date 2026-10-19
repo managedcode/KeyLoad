@@ -38,16 +38,16 @@ internal static class DocumentSessionAuthorityColdAssertions
     {
         var image = QueueWholeFlowStorage.Bytes(fixture.Store);
         var cut = fixture.ReadCut();
-        await DocumentPatchAtomicityAssertions.BytesAsync(NativeSerialization.Serialize(receipt),
-            NativeSerialization.Serialize(fixture.Submit(operation).Get<CommitReceipt>()));
-        await DocumentPatchAtomicityAssertions.BytesAsync(NativeSerialization.Serialize(receipt),
-            NativeSerialization.Serialize(fixture.Database.ResolveOutcome(operation).Get<CommitReceipt>()));
+        await DocumentPatchAtomicityAssertions.BytesAsync(OrleansSerialization.Serialize(receipt),
+            OrleansSerialization.Serialize(fixture.Submit(operation).Get<CommitReceipt>()));
+        await DocumentPatchAtomicityAssertions.BytesAsync(OrleansSerialization.Serialize(receipt),
+            OrleansSerialization.Serialize(fixture.Database.ResolveOutcome(operation).Get<CommitReceipt>()));
         await UnchangedAsync(fixture, image, cut.StorePosition);
         await Assert.That(fixture.ReadCut()).IsEqualTo(cut);
     }
 
     internal static async Task LiteralAsync(DocumentPatchAtomicityOwner fixture, CommitToken token, long revision)
         => await DocumentPatchAtomicityAssertions.BytesAsync(
-            NativeSerialization.Serialize(new DocumentResult(Reference(fixture), revision, Json, false, [])),
-            NativeSerialization.Serialize(Read(fixture, token)));
+            OrleansSerialization.Serialize(new DocumentResult(Reference(fixture), revision, Json, false, [])),
+            OrleansSerialization.Serialize(Read(fixture, token)));
 }

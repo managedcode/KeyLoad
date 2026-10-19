@@ -27,11 +27,11 @@ internal sealed class HttpTargetArgumentTests
         using var qdrantHttp = new HttpClient();
         using var kurrentHttp = new HttpClient();
         using var openSearchHttp = new HttpClient();
-        var keyLoad = new KeyLoadTarget(keyLoadHttp, ApiKey, RunId, UnitBenchmarkOptions.Lifecycle(), UnitBenchmarkOptions.Native(), UnitBenchmarkOptions.Diagnostics(), UnitBenchmarkOptions.KeyLoadAdmission(), UnitClientOptions.Execution(), UnitClientOptions.Translation(), KeyLoadImage);
-        var neo4j = new Neo4jTarget(neo4jHttp, RunId, Neo4jImage, UnitBenchmarkOptions.Lifecycle(), UnitBenchmarkOptions.Native());
-        var qdrant = new QdrantTarget(qdrantHttp, RunId, QdrantImage, UnitBenchmarkOptions.Native(), UnitBenchmarkOptions.Lifecycle());
+        var keyLoad = new KeyLoadTarget(keyLoadHttp, ApiKey, RunId, UnitBenchmarkOptions.Lifecycle(), UnitBenchmarkOptions.Execution(), UnitBenchmarkOptions.Diagnostics(), UnitBenchmarkOptions.KeyLoadAdmission(), UnitClientOptions.Execution(), UnitClientOptions.Translation(), KeyLoadImage);
+        var neo4j = new Neo4jTarget(neo4jHttp, RunId, Neo4jImage, UnitBenchmarkOptions.Lifecycle(), UnitBenchmarkOptions.Execution());
+        var qdrant = new QdrantTarget(qdrantHttp, RunId, QdrantImage, UnitBenchmarkOptions.Execution(), UnitBenchmarkOptions.Lifecycle());
         var kurrent = new KurrentTarget(KurrentConnection, [kurrentHttp], RunId, KurrentImage, ComparisonTopology.Standalone, UnitBenchmarkOptions.Lifecycle(), UnitBenchmarkOptions.Diagnostics());
-        var openSearch = new OpenSearchTarget(openSearchHttp, RunId, OpenSearchImage, ComparisonTopology.Standalone, UnitBenchmarkOptions.Lifecycle(), UnitBenchmarkOptions.Native());
+        var openSearch = new OpenSearchTarget(openSearchHttp, RunId, OpenSearchImage, ComparisonTopology.Standalone, UnitBenchmarkOptions.Lifecycle(), UnitBenchmarkOptions.Execution());
 
         await AssertMissingDatasetAsync(keyLoad, DatasetParameter, cancellationToken);
         await AssertMissingDatasetAsync(neo4j, DatasetParameter, cancellationToken);
@@ -59,11 +59,11 @@ internal sealed class HttpTargetArgumentTests
         using var openSearchHttp = new HttpClient();
         var targets = new IComparisonTarget[]
         {
-            new KeyLoadTarget(keyLoadHttp, ApiKey, RunId, UnitBenchmarkOptions.Lifecycle(), UnitBenchmarkOptions.Native(), UnitBenchmarkOptions.Diagnostics(), UnitBenchmarkOptions.KeyLoadAdmission(), UnitClientOptions.Execution(), UnitClientOptions.Translation(), KeyLoadImage, [keyLoadPeer]),
-            new Neo4jTarget(neo4jHttp, RunId, Neo4jImage, UnitBenchmarkOptions.Lifecycle(), UnitBenchmarkOptions.Native()),
-            new QdrantTarget(qdrantHttp, RunId, QdrantImage, UnitBenchmarkOptions.Native(), UnitBenchmarkOptions.Lifecycle(), nodeClients: [qdrantPeer]),
+            new KeyLoadTarget(keyLoadHttp, ApiKey, RunId, UnitBenchmarkOptions.Lifecycle(), UnitBenchmarkOptions.Execution(), UnitBenchmarkOptions.Diagnostics(), UnitBenchmarkOptions.KeyLoadAdmission(), UnitClientOptions.Execution(), UnitClientOptions.Translation(), KeyLoadImage, [keyLoadPeer]),
+            new Neo4jTarget(neo4jHttp, RunId, Neo4jImage, UnitBenchmarkOptions.Lifecycle(), UnitBenchmarkOptions.Execution()),
+            new QdrantTarget(qdrantHttp, RunId, QdrantImage, UnitBenchmarkOptions.Execution(), UnitBenchmarkOptions.Lifecycle(), nodeClients: [qdrantPeer]),
             new KurrentTarget(KurrentConnection, [kurrentHttp, kurrentPeer], RunId, KurrentImage, ComparisonTopology.Standalone, UnitBenchmarkOptions.Lifecycle(), UnitBenchmarkOptions.Diagnostics()),
-            new OpenSearchTarget(openSearchHttp, RunId, OpenSearchImage, ComparisonTopology.Standalone, UnitBenchmarkOptions.Lifecycle(), UnitBenchmarkOptions.Native())
+            new OpenSearchTarget(openSearchHttp, RunId, OpenSearchImage, ComparisonTopology.Standalone, UnitBenchmarkOptions.Lifecycle(), UnitBenchmarkOptions.Execution())
         };
 
         foreach (var target in targets)

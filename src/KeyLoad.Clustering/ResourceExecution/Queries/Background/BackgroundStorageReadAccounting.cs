@@ -29,7 +29,7 @@ internal static class BackgroundStorageReadAccounting
             dispatched = true;
             var response = await send(bounds, token).ConfigureAwait(true);
             Require(response, bounds);
-            var lifetimes = NativeSerialization.Deserialize<ImmutableArray<ResourceLifetimeV1>>(response.Lifetimes.Span);
+            var lifetimes = OrleansSerialization.Deserialize<ImmutableArray<ResourceLifetime>>(response.Lifetimes.Span);
             work.ImportSettledReadGrant(grant, response.ReadBytes, response.ExaminedRecords);
             binding.Bind(lifetimes);
             imported = true;
@@ -40,18 +40,18 @@ internal static class BackgroundStorageReadAccounting
             work.Check();
             result = ReadValue<T>(response.Result.Value, allowAbsent);
         }
-        catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        catch (Exception failure) when (CqrsBoundaryErrors.IsNonFatal(failure))
         {
             Record(work, failure, failures, dispatched, imported);
         }
-        catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        catch (Exception failure) when (!CqrsBoundaryErrors.IsNonFatal(failure))
         {
             Record(work, failure, failures, dispatched, imported);
         }
         try
         { work.CompleteSettledReadGrant(grant); }
-        catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
-        catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
+        catch (Exception failure) when (CqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
+        catch (Exception failure) when (!CqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
         AnnProjectionJobFailures.ThrowIfAny(failures);
         return result!;
     }
@@ -90,7 +90,7 @@ internal static class BackgroundStorageReadAccounting
             || response.Result.IsFailed && (Errors.Code(response.Result.Problem) is null
                 || string.IsNullOrEmpty(response.Result.Problem?.Detail))
             || response.Result.IsSuccess && response.Result.Problem is not null
-            || NativeSerialization.Measure(response) > bounds.MaximumResultBytes)
+            || OrleansSerialization.Measure(response) > bounds.MaximumResultBytes)
         {
             throw Errors.Fail(ErrorCode.Corruption, GrainRoutingProtocol.InvalidRequest);
         }

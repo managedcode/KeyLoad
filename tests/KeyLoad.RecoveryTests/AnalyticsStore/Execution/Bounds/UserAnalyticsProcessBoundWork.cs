@@ -7,13 +7,13 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.RecoveryTests.Features.AnalyticsStore;
 
-/// <summary>Actual physical-host work ownership for native component reads; no quorum claim.</summary>
+/// <summary>Actual physical-host work ownership for execution component reads; no quorum claim.</summary>
 internal sealed class UserAnalyticsProcessBoundWork : IAsyncDisposable
 {
-    private readonly NativeRequestWorkOwner owner;
+    private readonly RequestWorkOwner owner;
 
     private UserAnalyticsProcessBoundWork(IOptions<GrainRoutingOptions> routing)
-        => owner = new NativeRequestWorkOwner(routing);
+        => owner = new RequestWorkOwner(routing);
 
     internal static async Task<UserAnalyticsProcessBoundWork> OpenAsync(IOptions<GrainRoutingOptions> routing, CancellationToken token)
     {
@@ -23,36 +23,36 @@ internal sealed class UserAnalyticsProcessBoundWork : IAsyncDisposable
             token.ThrowIfCancellationRequested();
             return work;
         }
-        catch (Exception original) when (NativeCqrsBoundaryErrors.IsNonFatal(original))
+        catch (Exception original) when (CqrsBoundaryErrors.IsNonFatal(original))
         {
             var failures = new List<Exception> { original };
             try
             {
                 await work.DisposeAsync();
             }
-            catch (Exception cleanup) when (NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
+            catch (Exception cleanup) when (CqrsBoundaryErrors.IsNonFatal(cleanup))
             {
                 failures.Add(cleanup);
             }
-            catch (Exception cleanup) when (!NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
+            catch (Exception cleanup) when (!CqrsBoundaryErrors.IsNonFatal(cleanup))
             {
                 failures.Add(cleanup);
             }
             ServerFailureObserver.ThrowIfAny(failures);
             throw;
         }
-        catch (Exception original) when (!NativeCqrsBoundaryErrors.IsNonFatal(original))
+        catch (Exception original) when (!CqrsBoundaryErrors.IsNonFatal(original))
         {
             var failures = new List<Exception> { original };
             try
             {
                 await work.DisposeAsync();
             }
-            catch (Exception cleanup) when (NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
+            catch (Exception cleanup) when (CqrsBoundaryErrors.IsNonFatal(cleanup))
             {
                 failures.Add(cleanup);
             }
-            catch (Exception cleanup) when (!NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
+            catch (Exception cleanup) when (!CqrsBoundaryErrors.IsNonFatal(cleanup))
             {
                 failures.Add(cleanup);
             }
@@ -63,9 +63,9 @@ internal sealed class UserAnalyticsProcessBoundWork : IAsyncDisposable
 
     internal async Task AggregateAsync(PartitionHost host, UserAnalyticsRuntime runtime,
         AggregateAnalyticsRequest request, Func<AnalyticsAggregateResult, Task> consume,
-        CancellationToken token, bool cancelBeforeNative = false)
+        CancellationToken token, bool cancelBefore = false)
     {
-        var lease = owner.Acquire(Guid.NewGuid(), NativeRequestWorkKind.ReadCapability);
+        var lease = owner.Acquire(Guid.NewGuid(), RequestWorkKind.ReadCapability);
         ResourceLifetimeWorkResultRetention? attached = null;
         Exception? original = null;
         Exception? cleanup = null;
@@ -78,20 +78,20 @@ internal sealed class UserAnalyticsProcessBoundWork : IAsyncDisposable
             try
             {
                 attached = pending.TransferTo(lease);
-                await ExecuteNativeAsync(host, runtime, request, consume, lease, cancelBeforeNative, token);
+                await RuntimeExecuteAsync(host, runtime, request, consume, lease, cancelBefore, token);
             }
-            catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+            catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error))
             {
                 original = error;
                 failures.Add(error);
             }
-            catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
+            catch (Exception error) when (!CqrsBoundaryErrors.IsNonFatal(error))
             {
                 original = error;
                 failures.Add(error);
             }
         }
-        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+        catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error))
         {
             if (acquired)
             {
@@ -103,7 +103,7 @@ internal sealed class UserAnalyticsProcessBoundWork : IAsyncDisposable
             }
             failures.Add(error);
         }
-        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
+        catch (Exception error) when (!CqrsBoundaryErrors.IsNonFatal(error))
         {
             if (acquired)
             {
@@ -124,9 +124,9 @@ internal sealed class UserAnalyticsProcessBoundWork : IAsyncDisposable
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    private async Task ExecuteNativeAsync(PartitionHost host, UserAnalyticsRuntime runtime,
+    private async Task RuntimeExecuteAsync(PartitionHost host, UserAnalyticsRuntime runtime,
         AggregateAnalyticsRequest request, Func<AnalyticsAggregateResult, Task> consume,
-        NativeRequestWorkLease lease, bool cancelBeforeNative, CancellationToken token)
+        RequestWorkLease lease, bool cancelBefore, CancellationToken token)
     {
         using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(token, owner.ShutdownToken, lease.Cancellation);
         var work = new ReadExecutionBudget(host.Database.OperationLimitsOptions,
@@ -134,7 +134,7 @@ internal sealed class UserAnalyticsProcessBoundWork : IAsyncDisposable
         using var admission = host.Database.AdmitQuery(cancellation.Token);
         var snapshot = host.Database.CaptureAnalyticsAggregateBound(PartitionStoreProtocol.AdministratorId,
             request, work, lease);
-        if (cancelBeforeNative)
+        if (cancelBefore)
         {
             await cancellation.CancelAsync();
         }
@@ -151,39 +151,39 @@ internal sealed class UserAnalyticsProcessBoundWork : IAsyncDisposable
         {
             attached?.Dispose();
         }
-        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+        catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error))
         {
-            cleanup = NativeRequestWorkSettlement.Preserve(cleanup, error);
+            cleanup = RequestWorkSettlement.Preserve(cleanup, error);
             failures.Add(error);
         }
-        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
+        catch (Exception error) when (!CqrsBoundaryErrors.IsNonFatal(error))
         {
-            cleanup = NativeRequestWorkSettlement.Preserve(cleanup, error);
+            cleanup = RequestWorkSettlement.Preserve(cleanup, error);
             failures.Add(error);
         }
         return cleanup;
     }
 
-    private static async Task<Exception?> PrepareAsync(NativeRequestWorkLease lease, List<Exception> failures)
+    private static async Task<Exception?> PrepareAsync(RequestWorkLease lease, List<Exception> failures)
     {
         try
         {
             await lease.PrepareCompletionAsync();
             return null;
         }
-        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+        catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error))
         {
             failures.Add(error);
             return error;
         }
-        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
+        catch (Exception error) when (!CqrsBoundaryErrors.IsNonFatal(error))
         {
             failures.Add(error);
             return error;
         }
     }
 
-    private static Task SettleAsync(NativeRequestWorkLease lease, Exception? original, Exception? cleanup,
+    private static Task SettleAsync(RequestWorkLease lease, Exception? original, Exception? cleanup,
         List<Exception> failures)
         => ServerFailureObserver.ObserveAsync(async () =>
         {

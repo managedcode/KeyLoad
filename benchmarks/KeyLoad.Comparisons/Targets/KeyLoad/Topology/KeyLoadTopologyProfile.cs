@@ -15,8 +15,8 @@ internal static class KeyLoadTopologyProfile
     private const string ClusterAcknowledgement = "ProcessDurable; benchmark requires 3 persisted copies per write receipt; restart and power-loss qualification pending";
     private const string SingleReadContract = "authorized database read cut through Orleans; graph returns vertices and edges, projected to IDs";
     private const string ClusterReadContract = "authorized database read cut through Orleans; graph returns vertices and edges, projected to IDs";
-    private const string SingleClusterState = "One observed native Orleans silo and one configured data copy; write receipts separately prove persisted copies";
-    private const string ClusterClusterState = "Three observed native Orleans silos and three configured data copies; write receipts separately prove persisted copies";
+    private const string SingleClusterState = "One observed execution Orleans silo and one configured data copy; write receipts separately prove persisted copies";
+    private const string ClusterClusterState = "Three observed execution Orleans silos and three configured data copies; write receipts separately prove persisted copies";
 
     internal static int ValidateExpectedNodes(int expectedNodes)
     {

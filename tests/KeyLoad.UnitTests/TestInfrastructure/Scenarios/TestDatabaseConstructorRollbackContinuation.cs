@@ -21,12 +21,12 @@ internal static class TestDatabaseConstructorRollbackContinuation
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 await Assert.That(reopened.Position).IsEqualTo(EmptyPosition);
-                var identity = NativeSerialization.Serialize(reopened.Identity);
+                var identity = OrleansSerialization.Serialize(reopened.Identity);
                 await Assert.That(reopened.Identity.NodeId).IsNotEqualTo(Guid.Empty);
                 await Assert.That(reopened.Identity.Incarnation).IsNotEqualTo(Guid.Empty);
                 await Assert.That(reopened.Identity.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
                 await Assert.That(TenantAdmissionAssertions.State(reopened)).IsEmpty();
-                await Assert.That(NativeSerialization.Serialize(reopened.Identity).SequenceEqual(identity)).IsTrue();
+                await Assert.That(OrleansSerialization.Serialize(reopened.Identity).SequenceEqual(identity)).IsTrue();
                 await Assert.That(reopened.Position).IsEqualTo(EmptyPosition);
             }, failures);
             lifetime.Close(reopened, failures);

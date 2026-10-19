@@ -28,6 +28,6 @@ export function sessionSiteContext(environment, args, platform = process.platfor
     && path.isAbsolute(args.input ?? '') && ['publish', 'validate'].includes(args.mode)
     && (args.optional === undefined || args.optional === 'true' && args.mode === 'publish')
     && (args['requested-run'] === undefined || args.mode === 'validate' && /^[1-9]\d*$/.test(args['requested-run'])));
-  return { native: { workspace: root }, source: { website: args['site-revision'], control: args['workflow-revision'] },
+  return { execution: { workspace: root }, source: { website: args['site-revision'], control: args['workflow-revision'] },
     mode: args.mode, optional: args.optional === 'true', requestedRun: args['requested-run'] ?? null };
 }

@@ -5,5 +5,5 @@ namespace KeyLoad;
 /// <param name="EdgeId">Identifies the edge.</param>
 /// <param name="ExpectedRevision">Sets the optional revision precondition.</param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.DeleteEdge)]
+[Orleans.Alias(ContractAliases.DeleteEdge)]
 public sealed record DeleteEdge([property: Orleans.Id(0)] string Graph, [property: Orleans.Id(1)] string EdgeId, [property: Orleans.Id(2)] long? ExpectedRevision = null) : Mutation(Graph);

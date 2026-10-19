@@ -3,7 +3,7 @@ using KeyLoad.Server;
 
 namespace KeyLoad.RecoveryTests.Features.AnalyticsStore;
 
-/// <summary>Stable actual database identity and independent native loopback silo settings for the process fixture.</summary>
+/// <summary>Stable actual database identity and independent execution loopback silo settings for the process fixture.</summary>
 internal static class UserAnalyticsProcessOptions
 {
     private const string SettingPrefix = "--KeyLoad:";

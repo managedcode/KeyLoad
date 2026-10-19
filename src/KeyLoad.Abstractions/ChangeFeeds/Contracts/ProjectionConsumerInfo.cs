@@ -6,7 +6,7 @@ namespace KeyLoad;
 /// <param name="Checkpoint">The highest outbox sequence acknowledged by the consumer.</param>
 /// <param name="Released">Whether the consumer has been released.</param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.ProjectionConsumerInfo)]
+[Orleans.Alias(ContractAliases.ProjectionConsumerInfo)]
 public sealed record ProjectionConsumerInfo([property: Orleans.Id(0)] ProjectionConsumerRef Consumer, [property: Orleans.Id(1)] ProjectionConsumerDefinition Definition,
     [property: Orleans.Id(2)] long Checkpoint, [property: Orleans.Id(3)] bool Released)
 {
@@ -29,7 +29,7 @@ public sealed record ProjectionConsumerInfo([property: Orleans.Id(0)] Projection
     {
         get; init;
     }
-    /// <summary>Gets whether the exact initial native full result was acknowledged by canonical settlement.</summary>
+    /// <summary>Gets whether the exact initial execution full result was acknowledged by canonical settlement.</summary>
     [Orleans.Id(7), System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
     public bool InitialAnnMaintenanceSettled
     {

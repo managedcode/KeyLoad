@@ -3,8 +3,8 @@ using KeyLoad.Core;
 using KeyLoad.UnitTests.Features.Authorization;
 using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
-using D = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreNativeTestData;
-using O = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreNativeTestOperations;
+using D = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreTestData;
+using O = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreTestOperations;
 using P = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsCompositionData;
 
 namespace KeyLoad.UnitTests.Features.AnalyticsStore;
@@ -16,7 +16,7 @@ internal static class AnalyticsCompositionOperations
     {
         var work = new ReadExecutionBudget(owner.Database.OperationLimitsOptions, owner.Database.EvaluationClock, owner.CallerToken);
         return owner.Database.CreateCommand(kind, id, principal,
-            owner.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(payload), work);
+            owner.Database.EvaluationClock.GetUtcNow(), OrleansSerialization.Serialize(payload), work);
     }
 
     internal static async Task ConfigureAsync(SafeProjectorOperationDatabase owner)

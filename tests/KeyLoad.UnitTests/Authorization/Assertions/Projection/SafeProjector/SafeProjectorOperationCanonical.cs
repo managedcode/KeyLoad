@@ -42,7 +42,7 @@ internal static class SafeProjectorOperationCanonical
             KeySpace.Principal(SafeProjectorOperationProtocol.Reader))), principal);
         var encodedEpoch = owner.Store.Read(view => view.ReadOwnedValue(KeySpace.Partition(DocumentEpoch,
             owner.Source.Partition, SafeProjectorOperationProtocol.Collection))) ?? throw new InvalidOperationException(MissingEpoch);
-        await Assert.That(NativeSerialization.Deserialize<long>(encodedEpoch)).IsEqualTo(epoch);
+        await Assert.That(OrleansSerialization.Deserialize<long>(encodedEpoch)).IsEqualTo(epoch);
         await Assert.That(Rows(owner, Documents).Length).IsEqualTo(SafeProjectorOperationProtocol.BothRows);
         await Assert.That(Rows(owner, Unique)).IsEmpty();
         await Assert.That(Rows(owner, Indexes)).IsEquivalentTo(new[]
@@ -55,7 +55,7 @@ internal static class SafeProjectorOperationCanonical
     private static string Index(SafeProjectorOperationDatabase owner, string status, string id)
         => Convert.ToHexString(KeySpace.Partition(Indexes, owner.Source.Partition,
             SafeProjectorOperationProtocol.Collection, SafeProjectorOperationProtocol.Index, status, id))
-            + Separator + Convert.ToHexString(NativeSerialization.Serialize(id));
+            + Separator + Convert.ToHexString(OrleansSerialization.Serialize(id));
 
     private static string[] Rows(SafeProjectorOperationDatabase owner, string family) => owner.Store.Read(view =>
     {

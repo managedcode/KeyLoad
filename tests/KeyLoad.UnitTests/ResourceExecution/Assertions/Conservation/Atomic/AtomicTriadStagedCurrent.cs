@@ -71,7 +71,7 @@ internal static class AtomicTriadStagedCurrent
     {
         var bytes = QueueWholeFlowStorage.Bytes(state.Store);
         var position = state.Store.Position;
-        var identity = NativeSerialization.Serialize(state.Store.Identity);
+        var identity = OrleansSerialization.Serialize(state.Store.Identity);
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(action, failures);
         await ServerFailureObserver.ObserveAsync(async () =>
@@ -81,7 +81,7 @@ internal static class AtomicTriadStagedCurrent
         await ServerFailureObserver.ObserveAsync(async () =>
             await Assert.That(QueueWholeFlowStorage.Bytes(state.Store)).IsEquivalentTo(bytes, TUnit.Assertions.Enums.CollectionOrdering.Matching), failures);
         await ServerFailureObserver.ObserveAsync(async () =>
-            await Assert.That(NativeSerialization.Serialize(state.Store.Identity).AsSpan().SequenceEqual(identity)).IsTrue(), failures);
+            await Assert.That(OrleansSerialization.Serialize(state.Store.Identity).AsSpan().SequenceEqual(identity)).IsTrue(), failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }
 }

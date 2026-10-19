@@ -5,10 +5,16 @@ internal sealed class AdminHttpMetricsMiddleware(RequestDelegate next, TimeProvi
     private readonly TimeProvider time = clock ?? TimeProvider.System;
     private const int RouteTemplateGetEndpointEmptyCount = 0;
 
-    private const string ApiPrefix = "/v1";
+    private static readonly string[] ApiPrefixes =
+    [
+        "/commands", "/documents", "/streams", "/events", "/subscriptions", "/queues", "/inbox",
+        "/graph", "/search", "/series", "/query", "/admin/resources", "/admin/principals", "/admin/api-keys",
+        "/admin/outbox", "/admin/projections", "/admin/dispatch", "/admin/backup", "/admin/tables", "/auth", "/blobs", "/files",
+        "/changes", "/projections", "/backups", "/analytics", "/models", "/vectors", "/outbox"
+    ];
     private const string McpPrefix = "/mcp";
-    private const string AdmissionPath = "/v1/admin/admission";
-    private const string StatusPath = "/v1/status";
+    private const string AdmissionPath = "/admin/admission";
+    private const string StatusPath = "/status";
     private const int ErrorStatus = 400;
 
     private static readonly string[] RecognizedMethods =
@@ -21,14 +27,14 @@ internal sealed class AdminHttpMetricsMiddleware(RequestDelegate next, TimeProvi
     {
         if (!Included(context.Request.Path))
         {
-            await next(context).ConfigureAwait(false);
+            await next(context);
             return;
         }
         var started = time.GetTimestamp();
         var faulted = true;
         try
         {
-            await next(context).ConfigureAwait(false);
+            await next(context);
             faulted = false;
         }
         finally
@@ -38,7 +44,7 @@ internal sealed class AdminHttpMetricsMiddleware(RequestDelegate next, TimeProvi
     }
 
     internal static bool Included(PathString path) =>
-        (path.StartsWithSegments(ApiPrefix, StringComparison.OrdinalIgnoreCase) || path.StartsWithSegments(McpPrefix, StringComparison.OrdinalIgnoreCase))
+        (ApiPrefixes.Any(prefix => path.StartsWithSegments(prefix, StringComparison.OrdinalIgnoreCase)) || path.StartsWithSegments(McpPrefix, StringComparison.OrdinalIgnoreCase))
         && !path.StartsWithSegments(AdminDashboardProtocol.SnapshotPath, StringComparison.OrdinalIgnoreCase)
         && !path.Equals(new PathString(AdmissionPath), StringComparison.OrdinalIgnoreCase)
         && !path.Equals(new PathString(StatusPath), StringComparison.OrdinalIgnoreCase);

@@ -1,4 +1,4 @@
-// Controlled native evidence exercises the production validator, never authenticates GitHub or qualifies a workload.
+// Controlled execution evidence exercises the production validator, never authenticates GitHub or qualifies a workload.
 import path from 'node:path';
 import os from 'node:os';
 import { mkdtemp, mkdir, writeFile, appendFile, rm, realpath } from 'node:fs/promises';
@@ -6,7 +6,7 @@ import { pathToFileURL } from 'node:url';
 import { createHash } from 'node:crypto';
 import { FUNCTIONAL, validateDocumentFunctionalProof, selectDocumentFunctionalGate, parseDocumentFunctionalTrx,
   verifyDocumentFunctionalGate } from '../../../../../scripts/Features/BenchmarkComparisons/document-functional-gate.mjs';
-import { runBounded } from '../../../../../scripts/Features/BenchmarkComparisons/native-process.mjs';
+import { runBounded } from '../../../../../scripts/Features/BenchmarkComparisons/process.mjs';
 import { hashRegularFile } from '../../../../../scripts/Features/BenchmarkComparisons/isolated-github-files.mjs';
 
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');
@@ -91,7 +91,7 @@ async function probe() {
     }
     const archive = path.join(input, FUNCTIONAL.archive);
     const zipped = await runBounded('zip', ['-q', archive, ...entries], { cwd: source });
-    if (!zipped.success) throw new Error('Native ZIP fixture failed.');
+    if (!zipped.success) throw new Error('Execution ZIP fixture failed.');
     const raw = await hashRegularFile(archive, 33554432);
     proof.archive.bytes = raw.bytes; proof.archive.sha256 = raw.sha256;
     proof.artifact.sizeInBytes = raw.bytes; proof.artifact.digest = 'sha256:' + raw.sha256;

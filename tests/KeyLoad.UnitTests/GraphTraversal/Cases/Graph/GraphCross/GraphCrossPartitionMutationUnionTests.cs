@@ -20,8 +20,8 @@ internal sealed class GraphCrossPartitionMutationUnionTests
     private const string MachineKeyUnionCompleteTarget = "union-complete-target";
     private const string MachineKeyUnionSource = "union-source";
     private const string MachineKeyUnionTarget = "union-target";
-    private const string Graph = "native-union-graph";
-    private const string EdgeId = "native-union-edge";
+    private const string Graph = "execution-union-graph";
+    private const string EdgeId = "execution-union-edge";
     private const string ApplyKind = "applyCrossPartitionReverseEdge";
     private const string CompleteKind = "completeCrossPartitionReverseEdge";
     private static readonly Guid CommandId = new("96ad7626-83a8-4550-877b-4c5f393de112");
@@ -53,13 +53,13 @@ internal sealed class GraphCrossPartitionMutationUnionTests
     {
         await Assert.That(mutation.Resource).IsEqualTo(expected.Graph);
         var command = new CommandRequest(CommandId, batchPartition, [mutation]);
-        await AssertNativeAsync(command, expected);
+        await RuntimeAssertAsync(command, expected);
         await AssertJsonAsync(command, expectedKind, expected);
     }
 
-    private static async Task AssertNativeAsync(CommandRequest command, MutationExpectation expected)
+    private static async Task RuntimeAssertAsync(CommandRequest command, MutationExpectation expected)
     {
-        var actual = NativeSerialization.Deserialize<CommandRequest>(NativeSerialization.Serialize(command));
+        var actual = OrleansSerialization.Deserialize<CommandRequest>(OrleansSerialization.Serialize(command));
         await Assert.That(actual.CommandId).IsEqualTo(CommandId);
         await Assert.That(actual.Partition).IsEqualTo(command.Partition);
         await Assert.That(actual.Mutations).HasSingleItem();
@@ -110,7 +110,7 @@ internal sealed class GraphCrossPartitionMutationUnionTests
                 complete.ExpectedRevision, expected);
             return;
         }
-        throw new InvalidOperationException("The native mutation union returned an unexpected graph mutation.");
+        throw new InvalidOperationException("The execution mutation union returned an unexpected graph mutation.");
     }
 
     private static void AssertLocator(PartitionRef source, string graph, string edgeId,
@@ -119,7 +119,7 @@ internal sealed class GraphCrossPartitionMutationUnionTests
         if (source != expected.Source || graph != expected.Graph || edgeId != expected.EdgeId
             || destination != expected.Destination || revision != expected.Revision)
         {
-            throw new InvalidOperationException("The native graph mutation locator changed during round trip.");
+            throw new InvalidOperationException("The execution graph mutation locator changed during round trip.");
         }
     }
 

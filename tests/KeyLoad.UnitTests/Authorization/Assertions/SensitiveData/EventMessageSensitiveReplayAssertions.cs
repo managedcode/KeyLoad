@@ -11,8 +11,8 @@ internal static class EventMessageSensitiveReplayAssertions
         await Assert.That(Errors.Code(result.Problem)).IsEqualTo(code);
         await Assert.That(result.Value).IsNull();
 
-        await Assert.That(result.Problem?.Detail).DoesNotContain("SENSITIVE_BODY_NATIVE_CANARY");
-        await Assert.That(result.Problem?.Detail).DoesNotContain("SENSITIVE_HEADER_NATIVE_CANARY");
+        await Assert.That(result.Problem?.Detail).DoesNotContain("SENSITIVE_BODY__CANARY");
+        await Assert.That(result.Problem?.Detail).DoesNotContain("SENSITIVE_HEADER__CANARY");
     }
 
     internal static async Task RefusalAsync(DatabaseEngine database, ZoneTreeStore store,
@@ -26,8 +26,8 @@ internal static class EventMessageSensitiveReplayAssertions
     }
 
     internal static byte[] State(DatabaseEngine database, EventMessageSensitiveReplayState state)
-        => state.Subscription ? NativeSerialization.Serialize(database.GetSubscription(EventMessageSensitiveReplayProtocol.Root, state.OriginalGroup))
-            : NativeSerialization.Serialize(database.InspectMessage(EventMessageSensitiveReplayProtocol.Root, state.Lane, EventMessageSensitiveReplayProtocol.First)!);
+        => state.Subscription ? OrleansSerialization.Serialize(database.GetSubscription(EventMessageSensitiveReplayProtocol.Root, state.OriginalGroup))
+            : OrleansSerialization.Serialize(database.InspectMessage(EventMessageSensitiveReplayProtocol.Root, state.Lane, EventMessageSensitiveReplayProtocol.First)!);
 
     internal static async Task FullAsync(Result<object> result, EventMessageSensitiveReplayState state)
     {
@@ -75,10 +75,10 @@ internal static class EventMessageSensitiveReplayAssertions
     {
         var replay = EventMessageSensitiveReplayOperations.Apply(database, state.ReceiveKind,
             state.HealthyRequest, state.Caller, state.HealthyId, token);
-        await Assert.That(NativeSerialization.Serialize(replay).SequenceEqual(NativeSerialization.Serialize(state.Healthy))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(replay).SequenceEqual(OrleansSerialization.Serialize(state.Healthy))).IsTrue();
         var producerReplay = EventMessageSensitiveReplayOperations.Apply(database, OperationKind.Batch,
             state.Producer, EventMessageSensitiveReplayProtocol.Root, state.Producer.CommandId, token);
-        await Assert.That(NativeSerialization.Serialize(producerReplay).SequenceEqual(NativeSerialization.Serialize(state.Produced))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(producerReplay).SequenceEqual(OrleansSerialization.Serialize(state.Produced))).IsTrue();
         await FullAsync(replay, state);
     }
 }

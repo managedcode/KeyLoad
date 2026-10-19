@@ -4,17 +4,17 @@ using ModelContextProtocol.Protocol;
 
 namespace KeyLoad.Server;
 
-/// <summary>Projects native graph results to current canonical KeyLoad schemas and hints.</summary>
+/// <summary>Projects execution graph results to current canonical KeyLoad schemas and hints.</summary>
 internal static class McpGatewayMetaProjector
 {
-    private const string InvalidResult = "The native tool catalog returned an invalid result.";
+    private const string InvalidResult = "The execution tool catalog returned an invalid result.";
 
     internal static McpGatewaySearchProjection Search(McpGatewaySearchResult result, int maximumMatches)
     {
         ArgumentNullException.ThrowIfNull(result);
         if (result.Matches is null || result.Matches.Count > maximumMatches)
         {
-            throw InvalidNativeResult();
+            throw RuntimeInvalidResult();
         }
         var seen = new HashSet<string>(StringComparer.Ordinal);
         var matches = ImmutableArray.CreateBuilder<McpGatewayScoredTool>(maximumMatches);
@@ -38,7 +38,7 @@ internal static class McpGatewayMetaProjector
         ArgumentNullException.ThrowIfNull(result);
         if (result.Categories is null || result.Categories.Count > maximumCategories)
         {
-            throw InvalidNativeResult();
+            throw RuntimeInvalidResult();
         }
         var seen = new HashSet<string>(StringComparer.Ordinal);
         var categories = ImmutableArray.CreateBuilder<McpGatewayRouteCategoryProjection>(maximumCategories);
@@ -62,7 +62,7 @@ internal static class McpGatewayMetaProjector
         }
         if (seen.Count > checked(maximumCategories * maximumPerCategory))
         {
-            throw InvalidNativeResult();
+            throw RuntimeInvalidResult();
         }
         return new(categories.ToImmutable());
     }
@@ -72,7 +72,7 @@ internal static class McpGatewayMetaProjector
         if (string.IsNullOrWhiteSpace(name) || !McpOperationCatalog.TryGetTool(name, out var descriptor)
             || McpGatewayMetaProtocol.TryGetOperation(name, out _))
         {
-            throw InvalidNativeResult();
+            throw RuntimeInvalidResult();
         }
         return descriptor!.CreateTool();
     }
@@ -83,7 +83,7 @@ internal static class McpGatewayMetaProjector
             || !double.IsFinite(category.Score)
             || category.Tools is null || category.Tools.Count > maximumPerCategory)
         {
-            throw InvalidNativeResult();
+            throw RuntimeInvalidResult();
         }
     }
 
@@ -91,10 +91,10 @@ internal static class McpGatewayMetaProjector
     {
         if (!double.IsFinite(score))
         {
-            throw InvalidNativeResult();
+            throw RuntimeInvalidResult();
         }
     }
 
-    private static KeyLoadException InvalidNativeResult()
+    private static KeyLoadException RuntimeInvalidResult()
         => Errors.Fail(ErrorCode.RecoveryRequired, InvalidResult);
 }

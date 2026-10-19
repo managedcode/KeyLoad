@@ -47,7 +47,7 @@ internal static class TimeSeriesIntensivePinnedImageCleanup
         {
             return TimeSeriesIntensivePinnedImageInspection.ReadContainer(command.Output, name, nonce);
         }
-        catch (Exception error) when (primary is not null || TimeSeriesIntensivePinnedImageFailure.IsNative(error))
+        catch (Exception error) when (primary is not null || TimeSeriesIntensivePinnedImageFailure.RuntimeIs(error))
         {
             failures.Add(error.GetType().FullName ?? nameof(Exception));
             return null;
@@ -69,7 +69,7 @@ internal static class TimeSeriesIntensivePinnedImageCleanup
 
             return result;
         }
-        catch (Exception error) when (primary is not null || TimeSeriesIntensivePinnedImageFailure.IsNative(error))
+        catch (Exception error) when (primary is not null || TimeSeriesIntensivePinnedImageFailure.RuntimeIs(error))
         {
             failures.Add(label + ':' + (error.GetType().FullName ?? nameof(Exception)));
             return null;

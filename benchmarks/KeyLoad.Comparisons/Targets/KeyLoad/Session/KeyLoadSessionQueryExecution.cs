@@ -5,7 +5,7 @@ namespace KeyLoad.Comparisons.Targets;
 
 internal static class KeyLoadSessionQueryExecution
 {
-    private const string PostLoadIndexUnsupported = "NativePostLoadSecondaryIndexConstructionUnsupported";
+    private const string PostLoadIndexUnsupported = "PostLoadSecondaryIndexConstructionUnsupported";
     private const string IndexedReadCutMismatch = "SessionIndexedReadCutQueryMismatch";
     private const string EntityIdPath = "/@id";
     private const string NumberPath = "/number";
@@ -25,8 +25,8 @@ internal static class KeyLoadSessionQueryExecution
     internal static Task BuildIndexesAsync(CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        // Only existing native identical metadata or policy CAS is admitted after creation.
-        return Task.FromException(new BenchmarkSessionNativeCapabilityException(PostLoadIndexUnsupported));
+        // Only existing execution identical metadata or policy CAS is admitted after creation.
+        return Task.FromException(new BenchmarkSessionCapabilityException(PostLoadIndexUnsupported));
     }
 
     internal static async Task QueryAsync(KeyLoadClient client, PartitionRef partition, int ordinal,

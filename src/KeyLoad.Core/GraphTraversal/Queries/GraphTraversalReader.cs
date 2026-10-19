@@ -75,7 +75,7 @@ internal sealed class GraphTraversalReader(DatabaseEngine database, IKeyValueVie
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, EdgeVisitExceeded);
         }
-        var id = NativeSerialization.Deserialize<string>(value)
+        var id = OrleansSerialization.Deserialize<string>(value)
             ?? throw Errors.Fail(ErrorCode.Corruption, MissingEdge);
         var edge = budget.ReadRecord<EdgeRecord>(view, KeySpace.Partition(EdgeSpace, partition, graph, id))
             ?? throw Errors.Fail(ErrorCode.Corruption, MissingEdge);

@@ -12,13 +12,13 @@ internal static class ProjectionConsumerIdentityFixture
     internal const string ConsumerName = "canonical-projection";
     internal const string ConsumerSpace = "projection-consumer";
     private const string ForeignPartition = "foreign-partition";
-    internal const string MissingRow = "The native projection flow requires its original committed consumer.";
+    internal const string MissingRow = "The execution projection flow requires its original committed consumer.";
     internal const string Detail = "The committed projection consumer does not match its canonical identity.";
 
     internal static Command<DatabaseCommand> Operation<T>(DatabaseEngine owner, OperationKind kind, Guid id, T request,
         DateTimeOffset? evaluatedAt = null)
         => owner.CreateCommand(kind, id, Root, evaluatedAt ?? owner.EvaluationClock.GetUtcNow(),
-            NativeSerialization.Serialize(request));
+            OrleansSerialization.Serialize(request));
 
     internal static async Task<ProjectionConsumerIdentityState> SeedAsync(TestDatabase database, CancellationToken token)
     {

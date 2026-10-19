@@ -1,0 +1,7 @@
+namespace KeyLoad.Core;
+
+[global::Orleans.GenerateSerializer]
+[global::Orleans.Alias(global::KeyLoad.Core.Features.InternalSerialization.CoreAliases.InboxRecord)]
+internal sealed record InboxRecord(
+    [property: global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.InboxRecordFields.Fingerprint)] string Fingerprint,
+    [property: global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.InboxRecordFields.Receipt)] CommitReceipt Receipt);

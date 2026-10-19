@@ -14,11 +14,11 @@ internal sealed class PartitionQueryMcpContractTests
         using var fixture = new TestDatabase();
         var request = PartitionQueryMcpTestData.Request();
         var creation = PartitionQueryMcpTestData.Seed(fixture, request);
-        var nativeRequest = NativeSerialization.Deserialize<PartitionQueryRequestV1>(NativeSerialization.Serialize(request));
-        var page = await PartitionQueryMcpTestData.ExecuteAsync(fixture, nativeRequest, creation);
-        var nativePage = NativeSerialization.Deserialize<PartitionQueryPageV1>(NativeSerialization.Serialize(page));
-        await PartitionQueryMcpTestData.VerifyPageAsync(fixture, request, nativePage, fixture.Store.Position, creation);
-        await PartitionQueryMcpNativeAssertions.VerifyContractsAsync();
+        var runtimeRequest = OrleansSerialization.Deserialize<PartitionQueryRequest>(OrleansSerialization.Serialize(request));
+        var page = await PartitionQueryMcpTestData.ExecuteAsync(fixture, runtimeRequest, creation);
+        var runtimePage = OrleansSerialization.Deserialize<PartitionQueryPage>(OrleansSerialization.Serialize(page));
+        await PartitionQueryMcpTestData.VerifyPageAsync(fixture, request, runtimePage, fixture.Store.Position, creation);
+        await PartitionQueryMcpAssertions.VerifyContractsAsync();
     }
 
     [Test]
@@ -32,41 +32,41 @@ internal sealed class PartitionQueryMcpContractTests
     }
 
     [Test]
-    public async Task PublicAndNativeRequestBodiesRoundTripTheSameTypedValues()
+    public async Task PublicAndRequestBodiesRoundTripTheSameTypedValues()
     {
         var request = PartitionQueryMcpTestData.Request();
         using var fixture = new TestDatabase();
         var creation = PartitionQueryMcpTestData.Seed(fixture, request);
-        var bytes = NativeSerialization.Serialize(request);
-        var native = NativeSerialization.Deserialize<PartitionQueryRequestV1>(bytes)!;
+        var bytes = OrleansSerialization.Serialize(request);
+        var execution = OrleansSerialization.Deserialize<PartitionQueryRequest>(bytes)!;
         var publicBytes = JsonSerializer.SerializeToUtf8Bytes(request, JsonDefaults.Options);
-        var publicRoundTrip = JsonSerializer.Deserialize<PartitionQueryRequestV1>(publicBytes, JsonDefaults.Options)!;
-        await Assert.That(NativeSerialization.Serialize(native).AsSpan().SequenceEqual(bytes)).IsTrue();
+        var publicRoundTrip = JsonSerializer.Deserialize<PartitionQueryRequest>(publicBytes, JsonDefaults.Options)!;
+        await Assert.That(OrleansSerialization.Serialize(execution).AsSpan().SequenceEqual(bytes)).IsTrue();
         await Assert.That(JsonNode.DeepEquals(JsonNode.Parse(JsonDefaults.Serialize(request)),
-            JsonNode.Parse(JsonDefaults.Serialize(native)))).IsTrue();
+            JsonNode.Parse(JsonDefaults.Serialize(execution)))).IsTrue();
         await Assert.That(JsonNode.DeepEquals(JsonNode.Parse(JsonDefaults.Serialize(request)),
             JsonNode.Parse(JsonDefaults.Serialize(publicRoundTrip)))).IsTrue();
         await Assert.That(publicRoundTrip.Partitions.SequenceEqual([PartitionQueryMcpTestData.Partition])).IsTrue();
-        var nativePage = await PartitionQueryMcpTestData.ExecuteAsync(fixture, native, creation);
+        var runtimePage = await PartitionQueryMcpTestData.ExecuteAsync(fixture, execution, creation);
         var publicPage = await PartitionQueryMcpTestData.ExecuteAsync(fixture, publicRoundTrip, creation);
-        await Assert.That(JsonNode.DeepEquals(JsonNode.Parse(JsonDefaults.Serialize(nativePage)),
+        await Assert.That(JsonNode.DeepEquals(JsonNode.Parse(JsonDefaults.Serialize(runtimePage)),
             JsonNode.Parse(JsonDefaults.Serialize(publicPage)))).IsTrue();
     }
 
     [Test]
-    public async Task PublicAndNativePageBodiesRoundTripRowsAndLeafWitnesses()
+    public async Task PublicAndPageBodiesRoundTripRowsAndLeafWitnesses()
     {
         using var fixture = new TestDatabase();
         var request = PartitionQueryMcpTestData.Request();
         var creation = PartitionQueryMcpTestData.Seed(fixture, request);
         var page = await PartitionQueryMcpTestData.ExecuteAsync(fixture, request, creation);
-        var bytes = NativeSerialization.Serialize(page);
-        var native = NativeSerialization.Deserialize<PartitionQueryPageV1>(bytes)!;
-        var publicRoundTrip = JsonSerializer.Deserialize<PartitionQueryPageV1>(
+        var bytes = OrleansSerialization.Serialize(page);
+        var execution = OrleansSerialization.Deserialize<PartitionQueryPage>(bytes)!;
+        var publicRoundTrip = JsonSerializer.Deserialize<PartitionQueryPage>(
             JsonSerializer.SerializeToUtf8Bytes(page, JsonDefaults.Options), JsonDefaults.Options)!;
-        await PartitionQueryMcpTestData.VerifyPageAsync(fixture, request, native, fixture.Store.Position, creation);
+        await PartitionQueryMcpTestData.VerifyPageAsync(fixture, request, execution, fixture.Store.Position, creation);
         await PartitionQueryMcpTestData.VerifyPageAsync(fixture, request, publicRoundTrip, fixture.Store.Position, creation);
-        await Assert.That(NativeSerialization.Serialize(native).AsSpan().SequenceEqual(bytes)).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(execution).AsSpan().SequenceEqual(bytes)).IsTrue();
         await Assert.That(JsonNode.DeepEquals(JsonNode.Parse(JsonDefaults.Serialize(page)),
             JsonNode.Parse(JsonDefaults.Serialize(publicRoundTrip)))).IsTrue();
     }
@@ -76,9 +76,9 @@ internal sealed class PartitionQueryMcpContractTests
     {
         var item = McpCanonicalTestData.Reads().Single(value =>
             value.Name == McpCatalogExpectations.QueryPartitions);
-        var decoded = await McpNativePayloadAssertions.DecodeCanonical(item);
-        await McpNativePayloadAssertions.AssertNativeWritersAgree(item, decoded);
-        var request = (PartitionQueryRequestV1)decoded;
+        var decoded = await McpPayloadAssertions.DecodeCanonical(item);
+        await McpPayloadAssertions.AssertWritersAgree(item, decoded);
+        var request = (PartitionQueryRequest)decoded;
         using var fixture = new TestDatabase();
         var creation = PartitionQueryMcpTestData.Seed(fixture, request, McpCanonicalTestData.Entity);
         var position = fixture.Store.Position;
@@ -93,7 +93,7 @@ internal sealed class PartitionQueryMcpContractTests
                 AllowFullScan = true
             }, JsonDefaults.Options)
         };
-        var allowedRequest = (PartitionQueryRequestV1)await McpNativePayloadAssertions.DecodeCanonical(allowed);
+        var allowedRequest = (PartitionQueryRequest)await McpPayloadAssertions.DecodeCanonical(allowed);
         _ = await PartitionQueryMcpTestData.ExecuteAsync(fixture, allowedRequest, creation, McpCanonicalTestData.Entity);
     }
 

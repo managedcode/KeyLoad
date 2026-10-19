@@ -2,7 +2,7 @@ namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 
 internal static class SqlBetweenSymmetricClusterImage
 {
-    internal static async Task<string> ReadAsync(global::KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsClusterCallers root, SqlBetweenSymmetricClusterState state, CancellationToken token)
+    internal static async Task<string> ReadAsync(global::KeyLoad.IntegrationTests.Features.OrleansExecution.RequestCqrsClusterCallers root, SqlBetweenSymmetricClusterState state, CancellationToken token)
     {
         var documents = new List<DocumentReadResult>();
         foreach (var row in SqlBetweenSymmetricClusterState.Rows)

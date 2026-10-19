@@ -2,7 +2,7 @@ using System.Text;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
-/// <summary>Bounded native readers keep draining without retaining oversized or secret-bearing process output.</summary>
+/// <summary>Bounded execution readers keep draining without retaining oversized or secret-bearing process output.</summary>
 internal sealed record IsolatedKeyLoadFaultChecksOutput(string Text, bool Oversized)
 {
     internal static async Task<IsolatedKeyLoadFaultChecksOutput> ReadAsync(StreamReader reader, int limit)

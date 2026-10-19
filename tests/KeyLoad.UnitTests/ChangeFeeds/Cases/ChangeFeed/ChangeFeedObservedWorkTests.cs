@@ -14,7 +14,7 @@ internal sealed class ChangeFeedObservedWorkTests
     [Test]
     [Arguments(false)]
     [Arguments(true)]
-    public async Task OriginalObservedNativeFeedWorkRejectsWithoutPartialThenCompleteLiteralHealthy(bool cancel)
+    public async Task OriginalObservedFeedWorkRejectsWithoutPartialThenCompleteLiteralHealthy(bool cancel)
     {
         var clock = new QueryObservedWorkClock();
         using var database = new TestDatabase(new DatabaseLimits { QueryDeadlineSeconds = DeadlineSeconds }, timeProvider: clock);

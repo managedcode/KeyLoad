@@ -10,7 +10,7 @@ the prepared manual workflow. Provider qualification remains deferred.
 ## Decision and implementation contract
 
 Build and Tests combines build/ordinary tests for PR/main/manual; Benchmarks owns
-all load/native comparison measurement and its final dispatch to the independent
+all load/comparison measurement and its final dispatch to the independent
 Website workflow; Website owns its qualification and Pages deployment;
 Release is a prepared manual workflow; execute packaging or publication only
 after product readiness or an explicit owner release request. When authorized, it
@@ -21,7 +21,7 @@ isolated Linux cells and all product/site qualification requirements.
 ```mermaid
 flowchart TD
     CI[Build and Tests unit scalar recovery cluster] --> Gate[Exact-source successful CI]
-    B[Benchmarks all native cells] --> A[Complete same-run aggregate]
+    B[Benchmarks all cells] --> A[Complete same-run aggregate]
     A --> Trigger[Final Benchmarks Website dispatch]
     Trigger --> Q[Independent Website qualification]
     Q --> D[Pages deployment]
@@ -33,14 +33,14 @@ flowchart TD
 
 1. The workflow YAML, central version, Dockerfiles/distribution, policies,
    source-closure integration and durable docs are one coherent change with its
-   final evidence. Approved acceptance precedes implementation. Local development uses only the native TUnit entry; exact-source Linux delivery gates remain required.
+   final evidence. Approved acceptance precedes implementation. Local development uses only the TUnit entry; exact-source Linux delivery gates remain required.
 2. Build and Tests retains analyzer/full build/format/governance/unit/scalar/
    process recovery and genuine Docker/Aspire SDK/MCP cluster under main/PR/manual.
    Every suite enters the intended AppHost and uses its discovered endpoints;
    failures remain visible and no required suite is skipped to publish a release.
 3. Benchmarks retains the complete canonical per-database matrices, isolated Linux
-   cells, native image checks, same-source original results and authenticated final
-   aggregation. Each supported native topology and current 100K/1M scale has its
+   cells, image checks, same-source original results and authenticated final
+   aggregation. Each supported topology and current 100K/1M scale has its
    declared ACK, accuracy, correctness, resource and workload contract.
 4. Website is Website/website.yml, independently triggered by its own source push
    or manual dispatch. Benchmarks' final settled join dispatches it on trusted main.
@@ -70,7 +70,7 @@ flowchart TD
    retains recoverable evidence; do not mark partial output successful. Credentials
    stay in GitHub job context. No DNS or NuGet feed publication is added.
 8. TUnit role/version/current-producer/nonproducer regressions join the change;
-   exact original native jobs are inspected, static scoped inventory is validated,
+   exact original jobs are inspected, static scoped inventory is validated,
    and actual CI/Benchmarks/Release jobs/artifacts are checked.
    Current pre-existing SDK-status/cluster/Timescale/full-archive gaps remain explicit.
    Accepted cannot become Implemented without all required delivery evidence.
@@ -100,7 +100,7 @@ Stages: regression first; move actual pinned-image test/facts into common images
 rename every authored job/step with exact-source displayed-name validation updates;
 review combined diffs; static governance; scoped main delivery; exact-SHA CI and
 Benchmarks evidence. Preserve the complete canonical current planned-cell inventory and all preflights;
-intensive TimeSeries and other native families retain their separate actual delivery gates. Failed/missing inputs still block publication. Rollback
+intensive TimeSeries and other families retain their separate actual delivery gates. Failed/missing inputs still block publication. Rollback
 reverts scoped source, retaining all historical raw records. ADR remains Accepted.
 The latest parallelism correction removes mutual preparation dependencies and
 cross-matrix sequencing/caps; aggregation explicitly includes build and every current database group. GitHub schedules independent isolated Linux jobs within account capacity.

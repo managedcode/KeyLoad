@@ -71,7 +71,7 @@ internal sealed class ResourcePolicyUpdateFixture : IDisposable
             ExpectedSchemaVersion = expectedSchemaVersion
         };
         return Database.CreateCommand(OperationKind.ConfigureResource, operationId ?? Guid.NewGuid(), principalId,
-            TimeProvider.System.GetUtcNow(), NativeSerialization.Serialize(payload));
+            TimeProvider.System.GetUtcNow(), OrleansSerialization.Serialize(payload));
     }
 
     internal Result<object> Apply(Command<DatabaseCommand> operation) => Database.Apply(operation);
@@ -132,7 +132,7 @@ internal sealed class ResourcePolicyUpdateFixture : IDisposable
             throw new InvalidOperationException("The resource policy fixture must own a fresh directory.");
         }
         Store = new(new(DirectoryPath), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
-        Database = new(Store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
+        Database = new(Store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
         opened = true;
     }
 }

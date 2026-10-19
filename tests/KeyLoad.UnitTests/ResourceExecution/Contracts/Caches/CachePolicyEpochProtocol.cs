@@ -17,7 +17,7 @@ internal static class CachePolicyEpochProtocol
     internal const string Hidden = """{"public":"visible"}""";
     internal const string UpdatedHidden = """{"public":"changed"}""";
     internal const string ScopeDenied = "The principal cannot perform this operation in this scope.";
-    internal const string UnknownOwner = "A prior native cache owner has not released its original resources.";
+    internal const string UnknownOwner = "A prior execution cache owner has not released its original resources.";
     internal const int Entries = 64;
     internal const int PoolEntries = 128;
     internal const int MaxValueBytes = 8192;

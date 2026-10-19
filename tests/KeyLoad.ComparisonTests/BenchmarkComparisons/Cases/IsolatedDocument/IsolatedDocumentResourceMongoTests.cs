@@ -14,11 +14,11 @@ internal sealed class IsolatedDocumentResourceMongoTests
     private const string Script = "/bootstrap/isolated-mongo.sh";
     private const string BootstrapScript = "/bootstrap/isolated-mongo.js";
     private const string ReadinessScript = "/bootstrap/isolated-mongo-readiness.js";
-    /// <summary>AC-ISO-002/003/005/006: exact native nodes and a bounded authenticated bootstrap completion barrier.</summary>
+    /// <summary>AC-ISO-002/003/005/006: exact execution nodes and a bounded authenticated bootstrap completion barrier.</summary>
     [Test]
     [Arguments(1)]
     [Arguments(3)]
-    public async Task NativeGroupUsesSameImageSecretKeyAndBoundedBootstrapBarrier(int count)
+    public async Task GroupUsesSameImageSecretKeyAndBoundedBootstrapBarrier(int count)
     {
         await using var fixture = new IsolatedResourceTopologyFixture(Target, count);
         IsolatedMongoResources.Add(fixture.Context);

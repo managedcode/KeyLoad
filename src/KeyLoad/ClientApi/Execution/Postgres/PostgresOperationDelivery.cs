@@ -20,18 +20,18 @@ internal static class PostgresOperationDelivery
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 var reply = await PostgresOperationExecutor.ExecuteAsync(services, owner, identity,
-                    partition, portal, rows, admission, catalog, deadline.Token).ConfigureAwait(false);
+                    partition, portal, rows, admission, catalog, deadline.Token);
                 delivering = true;
                 await PostgresSessionReplies.ResultAsync(writer, reply, portal.ResultFormat, options,
                     services.GetRequiredService<IOptions<McpExecutionOptions>>().Value.IngressScratchBytes,
-                    describe, deadline.Token).ConfigureAwait(false);
-            }, failures).ConfigureAwait(false);
-        }, failures).ConfigureAwait(false);
+                    describe, deadline.Token);
+            }, failures);
+        }, failures);
         if (delivering && failures.Count != PostgresProtocol.AllRows)
         {
             ServerFailureObserver.Observe(owner.RequestClose, failures);
         }
-        await ServerFailureObserver.ObserveAsync(cancellation.EndAsync, failures).ConfigureAwait(false);
+        await ServerFailureObserver.ObserveAsync(cancellation.EndAsync, failures);
         if (failures.Count != PostgresProtocol.AllRows)
         {
             ServerFailureObserver.Observe(catalog.ClearMutationIdentity, failures);

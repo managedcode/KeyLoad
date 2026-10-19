@@ -1,13 +1,13 @@
 <p align="center">
-  <img src="site/favicon.svg" width="88" height="88" alt="KeyLoad, the AI-native database for AI agents">
+  <img src="site/favicon.svg" width="88" height="88" alt="KeyLoad, the AI database for AI agents">
 </p>
 
 <h1 align="center">KeyLoad</h1>
 
 <p align="center">
-  <strong>The AI-native database. One database for AI agents.</strong><br>
+  <strong>The AI database. One database for AI agents.</strong><br>
   Your agent's context, relationships and next action. Together.<br>
-  SQL · Native MCP · .NET SDK
+  SQL · MCP · .NET SDK
 </p>
 
 <p align="center">
@@ -27,7 +27,7 @@
 
 ---
 
-## Why an AI-native database?
+## Why an AI database?
 
 At [Managed Code](https://www.managed-code.com/), we've spent years building agents. Different projects. Same story: the agent always needs more than the database we started with.
 
@@ -37,7 +37,7 @@ Every requirement makes sense. Put them together, and suddenly you're running a 
 
 **Agents shouldn't need a dozen databases.**
 
-We came to a simple conclusion: we need an **AI-native database** that keeps the agent's context, relationships and work together. With **MCP built in**, so the agent can actually use it.
+We came to a simple conclusion: we need an **AI database** that keeps the agent's context, relationships and work together. With **MCP built in**, so the agent can actually use it.
 
 **Meet KeyLoad. One database for AI agents.**
 
@@ -51,7 +51,7 @@ Documents, typed tables, graphs, vectors/search, blobs, queues, events and time 
 |---|---|
 | **Keep context together** | Search, relationships, files and history connect to the same entities |
 | **Keep work next to the data** | A document, event, graph edge and queued task in one partition commit together |
-| **Give agents a native way in** | MCP discovery finds the relevant tools; SQL and the SDK use the same operations |
+| **Give agents a way in** | MCP discovery finds the relevant tools; SQL and the SDK use the same operations |
 | **Keep permissions in the database** | Persisted keys and row/field policies apply across every caller |
 
 ### Why we think this is the future
@@ -69,7 +69,7 @@ That's what we're building: **one place for context, one place for the work that
 | Run **reliable agent workflows** | Queues with scheduling, leases, retries and dead letters, stored next to the data they change |
 | Make **event-driven** apps | Ordered event history, durable subscriptions, change feeds and projections |
 | Analyze **time series** | Timestamped samples, range reads, aggregates, time windows and retention |
-| Store **files** for agents | Chunked uploads and partial reads of large blobs |
+| Store **files** for agents | ManagedCode.Storage contracts and physical providers; KeyLoad integration is incomplete |
 
 ## Project status
 
@@ -86,7 +86,7 @@ flowchart LR
 
 **Accepted** = criteria passed for a recorded source. **In source** = implemented, with qualification open. Later changes require fresh checks.
 
-Current focus: removing the self-written cluster code so that Orleans alone runs the cluster ([ADR-136](docs/ADR/ADR-136-native-orleans-partition-ownership.md)).
+Current focus: removing the self-written cluster code so that Orleans alone runs the cluster ([ADR-136](docs/ADR/ADR-136-orleans-partition-ownership.md)).
 
 [.NET profiling](docs/Features/BenchmarkComparisons/DotnetProfiling.md) with `dotnet-diagnostics-mcp` guides measured bottleneck repairs.
 
@@ -103,7 +103,7 @@ Current focus: removing the self-written cluster code so that Orleans alone runs
 | **Queues & events** | Leases, history and queue ↔ graph flows drive agent work | ◐ In source | [Failure, security and recovery checks](docs/Features/Messaging.md) |
 | **SDK & MCP** | SDK, tool discovery, CLI and admin connect callers | ◐ In source | [Gateway and official MCP cluster checks](docs/Features/ClientApi/ToolDiscovery.md) |
 | **Authorization** | ASP.NET Core authentication and persisted row/field policies protect context | ◐ In source | [Adversarial and revocation checks](docs/Features/Authorization.md) |
-| **Orleans cluster** | Orleans runs the cluster and copies data to the configured number of replicas | ◐ In source | [Remove self-written cluster code; fault and restart checks](docs/Features/ClusterRouting.md) |
+| **Orleans cluster** | Orleans runs the cluster and copies data to the configured number of replicas | ◐ In source | [Remove self-written cluster code; fault and restart checks](docs/Features/OrleansExecution.md) |
 | **RAM & SIMD** | Bounded caches and CPU vectorization target lower memory/latency | ◐ In progress | [Comparable Linux measurements](docs/implementation/memory-performance.md) |
 | **Production** | Qualified database and operator guidance | ○ Gated | Full SIMD-enabled unit, recovery, cluster, coverage, performance, endurance and power-loss gates |
 
@@ -126,7 +126,7 @@ Complete Linux cluster, recovery, fault and coverage qualification remains open;
 | **Queues & topics** | Scheduling, leases, ACK, retries, dead letters and peek | Enqueue/publish |
 | **Events** | Append, replay and durable subscriptions | Append with expected revision |
 | **Time series** | Ranges, aggregates, windows and retention | Append samples |
-| **Files & blobs** | Chunked uploads and byte-range reads | Separate upload/publication |
+| **Files & blobs** | ManagedCode.Storage owns physical bytes; ZoneTree owns metadata | integration and qualification open |
 | **Change feeds** | Resumable feeds and projections | Record document changes |
 
 Atomic batches share one partition. T-SQL `SELECT` reads supported documents, typed rows and model views; `EXEC` reaches the shared operation catalog. MCP discovers those operations on demand. [SQL syntax](docs/Features/QueryExecution.md) · [API and tool catalog](docs/Features/ClientApi.md).
@@ -151,8 +151,8 @@ The current composition API uses .NET `CommitAsync`, SQL `EXEC keyload_documents
 |---|---|
 | Atomicity | The same atomic partition and transaction domain (`PartitionRef`); the batch succeeds or rolls back together |
 | Queue reads | Composition does not lease or ACK messages |
-| Files | Blobs remain part of the same database, with separate upload and publication operations |
-| Preview limits | Full declarative SQL, the native SQL-client protocol and cross-partition composition are still in development; production guarantees remain under qualification |
+| Files | ManagedCode.Storage owns physical files; ZoneTree stores authorized metadata and object references. integration remains incomplete |
+| Preview limits | Full declarative SQL, the SQL-client protocol and cross-partition composition are still in development; production guarantees remain under qualification |
 
 Details: [composition guide](docs/Features/DatabaseComposition.md) · [transaction contract](docs/ADR/ADR-067-composable-agent-database.md).
 
@@ -167,7 +167,7 @@ flowchart LR
     Partition --> N3[("Node 3<br/>ZoneTree")]
 ```
 
-Each actual connection reuses one Orleans grain and admits bounded parallel operations and commands. Every operation has its own signed identity, fresh persisted authorization, cancellation and stream cleanup; completed requests are not retained. Disconnect or idle expiry closes admission, joins the original work and requests native deactivation.
+Each actual connection reuses one Orleans grain and admits bounded parallel operations and commands. Every operation has its own signed identity, fresh persisted authorization, cancellation and stream cleanup; completed requests are not retained. Disconnect or idle expiry closes admission, joins the original work and requests deactivation.
 
 Orleans owns membership, discovery, placement, activation migration, communication
 between silos and scaling. `IsolatedVolumes` keeps separate files on each silo;
@@ -176,18 +176,18 @@ configured path and one open physical owner, reached through Orleans, without
 copying data. It requires `ReplicaCount=1`. Receipts report persisted copies
 separately from durability. Open handles stay with their actual local owner.
 Background queues, ANN and time-series work use Orleans stateless workers with
-bounded buffers and native timers. See [ADR-136](docs/ADR/ADR-136-native-orleans-partition-ownership.md)
+bounded buffers and timers. See [ADR-136](docs/ADR/ADR-136-orleans-partition-ownership.md)
 for ownership, distributed queries and open qualification gates.
 
 ## Why .NET, Orleans and ZoneTree
 
 | Foundation | Why we use it |
 |---|---|
-| [.NET 10](https://github.com/dotnet/runtime) | C# end to end, pooled buffers, `Span<T>` and native SIMD intrinsics; speedups need measurements |
+| [.NET 10](https://github.com/dotnet/runtime) | C# end to end, pooled buffers, `Span<T>` and SIMD intrinsics; speedups need measurements |
 | [Orleans](https://github.com/dotnet/orleans) | The whole cluster: membership, routing, placement, migration, communication, data copies through grain calls and generated binary serialization |
 | [ZoneTree](https://github.com/ZoneTree/ZoneTree) | Embedded ordered storage and a write-ahead log for every model; data stays on its node |
-| [ZoneTree.FullTextSearch](https://github.com/ZoneTree/ZoneTree.FullTextSearch) | Native full-text indexing on the same storage foundation |
-| [Aspire](https://github.com/dotnet/aspire) | Owns native server startup, required infrastructure, readiness and cleanup |
+| [ZoneTree.FullTextSearch](https://github.com/ZoneTree/ZoneTree.FullTextSearch) | full-text indexing on the same storage foundation |
+| [Aspire](https://github.com/dotnet/aspire) | Owns server startup, required infrastructure, readiness and cleanup |
 
 **Orleans runs the cluster; ZoneTree keeps each node's data in place.**
 
@@ -212,9 +212,9 @@ aspire start --apphost build/KeyLoad.AppHost/KeyLoad.AppHost.csproj --no-build -
 ```
 
 The server executable project is [`KeyLoad`](src/KeyLoad/KeyLoad.csproj).
-Aspire starts native `KeyLoad` .NET project processes and Azurite for
+Aspire starts execution `KeyLoad` .NET project processes and Azurite for
 Orleans membership. Ordinary build, development and tests do not publish or run
-KeyLoad Docker images. Native SDK `PublishContainer` belongs to explicit releases.
+KeyLoad Docker images. SDK `PublishContainer` belongs to explicit releases.
 The separate `build/KeyLoad.LoadTests.AppHost` owns selected comparison database
 infrastructure; its workload client runs outside the Aspire resource graph.
 
@@ -231,14 +231,14 @@ KeyLoad__SiloCount=5 KeyLoad__ReplicaCount=3 aspire start --apphost build/KeyLoa
 copies of the data and must be between one and `SiloCount`. A write requires
 every configured copy: one of one, both of two, all three of three, or all five
 of five. A missing required copy blocks successful writes; available owners can
-still serve earlier committed data after native Orleans membership settles.
+still serve earlier committed data after Orleans membership settles.
 
 Both values are read at startup; there is no live resizing or data movement.
 Node data and private development credentials remain in `data/cluster/`.
 HTTP ports start at `5101`; keep the data directory between restarts.
 Stop owned resources with `aspire stop --non-interactive`.
 
-For one shared volume, configure the same storage path on all silos. The native
+For one shared volume, configure the same storage path on all silos. The execution
 AppHost supplies `DataRoot/shared` to each server:
 
 ```bash
@@ -316,7 +316,7 @@ SELECT e.eventType FROM EVENTS('events', 'stream-a', 3) AS e
 EXEC keyload_documents_commit @arguments
 ```
 
-Model views (`QUEUE_MESSAGES`, `EVENTS`) and unindexed filters require `AllowFullScan: true`, and model views don't support cursors. Closed same-partition INNER JOIN and queue/graph INSERT profiles are in source. Complete T-SQL execution, foreign keys and native-client qualification remain open. The bounded PostgreSQL wire/Npgsql session is a separate transport contract; it does not promise PostgreSQL grammar or SQL Server TDS compatibility. The [query guide](docs/Features/QueryExecution.md) lists the supported syntax, and the [compatibility inventory](docs/implementation/sql-client-conformance.json) tracks the rest.
+Model views (`QUEUE_MESSAGES`, `EVENTS`) and unindexed filters require `AllowFullScan: true`, and model views don't support cursors. Closed same-partition INNER JOIN and queue/graph INSERT profiles are in source. Complete T-SQL execution, foreign keys and client qualification remain open. The bounded PostgreSQL wire/Npgsql session is a separate transport contract; it does not promise PostgreSQL grammar or SQL Server TDS compatibility. The [query guide](docs/Features/QueryExecution.md) lists the supported syntax, and the [compatibility inventory](docs/implementation/sql-client-conformance.json) tracks the rest.
 
 ### From an AI agent (MCP)
 
@@ -367,7 +367,7 @@ Feature code uses `Features/<SliceName>/<Responsibility>/` across the solution.
 | [`src/KeyLoad`](src/KeyLoad) | The database server: HTTP API, MCP server and admin console |
 | [`src/KeyLoad.Client`](src/KeyLoad.Client) | The .NET SDK |
 | [`src/KeyLoad.Cli`](src/KeyLoad.Cli) | Command-line tool for operators and workers |
-| [`build/KeyLoad.AppHost`](build/KeyLoad.AppHost) | Native KeyLoad development and functional-test host, with Azurite membership |
+| [`build/KeyLoad.AppHost`](build/KeyLoad.AppHost) | KeyLoad development and functional-test host, with Azurite membership |
 | [`build/KeyLoad.LoadTests.AppHost`](build/KeyLoad.LoadTests.AppHost) | Selected load-test database infrastructure and owned cleanup |
 | [`src/KeyLoad.Abstractions`](src/KeyLoad.Abstractions) | Shared public contracts |
 | `src/KeyLoad.Core`, `Query`, `Clustering`, `Storage.ZoneTree`, `Diagnostics` | Database engine, SQL, Orleans grains, replica calls, storage and phase telemetry |
@@ -388,7 +388,7 @@ node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=unit
 dotnet format KeyLoad.slnx --verify-no-changes --no-restore
 ```
 
-Native TUnit fixtures own Aspire startup and cleanup; the `cluster` suite uses real .NET and official MCP clients against the Aspire-owned Docker cluster (three silos by default). Benchmark builds, checks and measurements run exclusively in GitHub's Benchmarks workflow.
+TUnit fixtures own Aspire startup and cleanup; the `cluster` suite uses real .NET and official MCP clients against the Aspire-owned Docker cluster (three silos by default). Benchmark builds, checks and measurements run exclusively in GitHub's Benchmarks workflow.
 
 </details>
 
@@ -400,7 +400,7 @@ KeyLoad is licensed under the [Elastic License 2.0](LICENSE). Use it in your own
 
 KeyLoad is built by [Managed Code](https://www.managed-code.com/). We get to build it because other people built great tools first. **Thank you to their authors and contributors.**
 
-A special thanks to **[ZoneTree](https://github.com/ZoneTree/ZoneTree)** and **[ZoneTree.FullTextSearch](https://github.com/ZoneTree/ZoneTree.FullTextSearch)** for the storage and text-index foundation, **[Orleans](https://github.com/dotnet/orleans)** for the cluster runtime, and the **[MCP C# SDK](https://github.com/modelcontextprotocol/csharp-sdk)** team for the native agent connection.
+A special thanks to **[ZoneTree](https://github.com/ZoneTree/ZoneTree)** and **[ZoneTree.FullTextSearch](https://github.com/ZoneTree/ZoneTree.FullTextSearch)** for the storage and text-index foundation, **[Orleans](https://github.com/dotnet/orleans)** for the cluster runtime, and the **[MCP C# SDK](https://github.com/modelcontextprotocol/csharp-sdk)** team for the agent connection.
 
 | Project | How KeyLoad uses it |
 |---|---|
@@ -413,7 +413,7 @@ A special thanks to **[ZoneTree](https://github.com/ZoneTree/ZoneTree)** and **[
 | [ManagedCode.Storage](https://github.com/managedcode/Storage) | File-system storage and backup transfer support |
 | [ManagedCode.TimeSeries](https://github.com/managedcode/TimeSeries) | Time-series aggregation |
 | [ManagedCode.Orleans.Graph](https://github.com/managedcode/Orleans.Graph) | Grain call relationship policies |
-| [ManagedCode.Orleans.Identity](https://github.com/managedcode/Orleans.Identity) | Native Orleans request identity context |
+| [ManagedCode.Orleans.Identity](https://github.com/managedcode/Orleans.Identity) | Orleans request identity context |
 | [ManagedCode.MCPGateway](https://github.com/managedcode/MCPGateway) | Agent authentication and on-demand tool discovery |
 | [ManagedCode.MarkdownLd.Kb](https://github.com/managedcode/markdown-ld-kb) | Knowledge-graph search over tool metadata |
 | [Cartograph](https://github.com/angelhernandezm/Cartograph) | Segmented backup archives and catalogs |
@@ -425,7 +425,7 @@ A special thanks to **[ZoneTree](https://github.com/ZoneTree/ZoneTree)** and **[
 | [Roslyn](https://github.com/dotnet/roslyn) · [BenchmarkDotNet](https://github.com/dotnet/BenchmarkDotNet) | Repository analyzers and microbenchmarks |
 | [Three.js](https://github.com/mrdoob/three.js) | Website cluster illustration |
 
-The comparison suite uses free community editions and real native clients:
+The comparison suite uses free community editions and real clients:
 
 | Workload family | Comparison projects | Client projects |
 |---|---|---|
@@ -435,7 +435,7 @@ The comparison suite uses free community editions and real native clients:
 | Graphs & connected models | [Neo4j](https://github.com/neo4j/neo4j), [SurrealDB](https://github.com/surrealdb/surrealdb), [HelixDB](https://github.com/helixdb/helix-db) | — |
 | Time series | [TimescaleDB](https://github.com/timescale/timescaledb) | — |
 
-Active scale: **100,000 and 1,000,000 records**, at native **1 or 3 nodes** where supported. New adapters remain under qualification. The [vector comparison contract](docs/Features/BenchmarkComparisons/VectorQualification.md) defines accuracy, latency, index cost and memory checks; only qualified original GitHub results become public figures.
+Active scale: **100,000 and 1,000,000 records**, at **1 or 3 nodes** where supported. New adapters remain under qualification. The [vector comparison contract](docs/Features/BenchmarkComparisons/VectorQualification.md) defines accuracy, latency, index cost and memory checks; only qualified original GitHub results become public figures.
 
 ---
 

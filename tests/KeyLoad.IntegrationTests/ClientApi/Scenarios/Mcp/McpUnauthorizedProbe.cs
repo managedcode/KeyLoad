@@ -8,9 +8,9 @@ namespace KeyLoad.IntegrationTests.Features.ClientApi;
 /// <summary>Observes the actual pre-handler HTTP authentication boundary without hand-building an MCP message.</summary>
 internal static class McpUnauthorizedProbe
 {
-    /// <summary>Checks native HTTP 401, absence of any operation GUID and the canonical safe Problem.</summary>
+    /// <summary>Checks execution HTTP 401, absence of any operation GUID and the canonical safe Problem.</summary>
     /// <param name="fixture">The actual Orleans application.</param>
-    /// <param name="node">The native Aspire endpoint resource.</param>
+    /// <param name="node">The execution Aspire endpoint resource.</param>
     /// <param name="key">The rejected credential or absent bearer.</param>
     /// <param name="cancellationToken">The external bounded caller token.</param>
     /// <returns>The completed real HTTP response assertions.</returns>

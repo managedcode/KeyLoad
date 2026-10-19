@@ -16,7 +16,7 @@ internal static class SampleChunkCrashContract
     internal const string RecoveredFile = "sample-chunk-recovered.json";
     internal const string HealthyFile = "sample-chunk-healthy.json";
     internal const string FinalFile = "sample-chunk-final.json";
-    internal const string Invalid = "The native chunk recovered state or original receipt is inconsistent.";
+    internal const string Invalid = "The execution chunk recovered state or original receipt is inconsistent.";
     internal const string Set = "chunk-process-metrics";
     internal const string Series = "chunk-process-series";
     internal const string Tags = "{\"unit\":\"literal\"}";

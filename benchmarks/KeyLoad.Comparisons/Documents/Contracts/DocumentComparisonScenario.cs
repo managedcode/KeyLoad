@@ -1,6 +1,6 @@
 namespace KeyLoad.Comparisons;
 
-/// <summary>The canonical document-v1 schedules, independent of native adapter operation names.</summary>
+/// <summary>The canonical document schedules, independent of execution adapter operation names.</summary>
 public enum DocumentComparisonScenario
 {
     /// <summary>Reads identities in ascending order.</summary>

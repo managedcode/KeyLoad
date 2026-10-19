@@ -56,7 +56,7 @@ internal sealed class MissingBackupManifestTests
         await Assert.That(reopened.Identity.Incarnation).IsEqualTo(fixture.OriginalIdentity.Incarnation);
         await Assert.That(reopened.Identity.DispatchPaused).IsEqualTo(fixture.OriginalIdentity.DispatchPaused);
         await Assert.That(reopened.Identity.SigningKey.Span.SequenceEqual(fixture.OriginalIdentity.SigningKey.Span)).IsTrue();
-        await Assert.That(reopened.Read(view => NativeSerialization.Deserialize<string>(
+        await Assert.That(reopened.Read(view => OrleansSerialization.Deserialize<string>(
                 view.ReadOwnedValue(MetadataBackupFixture.StoredKeyBytes)!)))
             .IsEqualTo(MetadataBackupFixture.ExpectedValue);
     }

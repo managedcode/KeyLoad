@@ -8,6 +8,6 @@ namespace KeyLoad;
 /// <param name="ActiveTenantScopes">Number of tenants with active admission scopes.</param>
 /// <param name="ActivePrincipalScopes">Number of principals with active admission scopes.</param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.CommandAdmissionSnapshot)]
+[Orleans.Alias(ContractAliases.CommandAdmissionSnapshot)]
 public sealed record CommandAdmissionSnapshot([property: Orleans.Id(0)] int Commands, [property: Orleans.Id(1)] long RetainedBytes, [property: Orleans.Id(2)] int ControlCommands, [property: Orleans.Id(3)] long ControlRetainedBytes,
     [property: Orleans.Id(4)] int ActiveTenantScopes, [property: Orleans.Id(5)] int ActivePrincipalScopes);

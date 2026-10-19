@@ -46,7 +46,7 @@ internal sealed class SqlOperationCompilerTests
             var expected = SqlOperationTestData.Find(item.Name).Decode(arguments);
             var compiled = SqlOperationTestData.Compile(request);
             await SqlOperationTestData.Same(compiled, expected);
-            _ = await McpNativePayloadAssertions.AssertFullPublicPayload(item, compiled.Payload);
+            _ = await McpPayloadAssertions.AssertFullPublicPayload(item, compiled.Payload);
             await Assert.That(JsonSerializer.Serialize(arguments, JsonDefaults.Options)).IsEqualTo(before);
         }
     }
@@ -73,7 +73,7 @@ internal sealed class SqlOperationCompilerTests
         var supported = SqlOperationTestData.Call(McpCatalogExpectations.QueryCapabilities);
         var request = supported with
         {
-            QueryDialectVersion = 2
+            QueryDialectVersion = SqlOperationProtocol.DefaultQueryDialectVersion
         };
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => SqlOperationTestData.Compile(request));
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.UnsupportedCapability);
@@ -95,6 +95,6 @@ internal sealed class SqlOperationCompilerTests
         }
         await Assert.That(compiled.CommandId).IsEqualTo(item.CommandId);
         await Assert.That(compiled.Payload.Span.SequenceEqual(copiedWhileDocumentWasAlive)).IsTrue();
-        _ = await McpNativePayloadAssertions.AssertFullPublicPayload(item, compiled.Payload);
+        _ = await McpPayloadAssertions.AssertFullPublicPayload(item, compiled.Payload);
     }
 }

@@ -3,7 +3,7 @@
 Canonical slice: BenchmarkComparisons. This is the pure-report stage of
 [ScaledWorkloads](ScaledWorkloads.md), AC-SCALE-005/006, under
 [Accepted ADR-069](../../ADR/ADR-069-representative-scaled-workloads.md).
-The parent feature owns the binary inputs, native resources, BDN job and complete
+The parent feature owns the binary inputs, resources, BDN job and complete
 8-cell ZoneTree profile. Each selected-count report has four cells: two payload sizes
 by two read methods. This document owns only the strict local full-JSON validator.
 It does not authenticate a provider or produce measurements.
@@ -36,7 +36,7 @@ flowchart LR
 |REQ-SCALE-RPT-001|AC-SCALE-RPT-001|Accept one complete four-cell selected-engine/selected-count report with the parent's exact job, operation, duration and retained-sample contract; reject a tiny, mixed, incomplete or failed report|
 |REQ-SCALE-RPT-002|AC-SCALE-RPT-002|Accept exactly two complete ZoneTree/count reports forming the parent's 8-cell matrix; reject missing, duplicate, extra or mismatched entries and host metadata|
 |REQ-SCALE-RPT-003|AC-SCALE-RPT-003|Validate without mutation, I/O, child launch or network; errors name fixed schema fields and do not echo supplied values|
-|REQ-SCALE-RPT-004|AC-SCALE-RPT-004|Exercise the real module in bounded actual Node processes through TUnit; controlled vectors never become native or provider proof|
+|REQ-SCALE-RPT-004|AC-SCALE-RPT-004|Exercise the real module in bounded actual Node processes through TUnit; controlled vectors never become or provider proof|
 
 The module path is `scripts/Features/BenchmarkComparisons/scaled-storage-report.mjs`;
 its implementation and execution are open acceptance gates. It exports:
@@ -84,7 +84,7 @@ Workload/Result row's nanoseconds divided by operations within four machine
 epsilons times max(1, absolute expected value). This checks normalized units;
 it does not invent or replace statistics. Memory must contain nonnegative finite
 bytes allocated per operation, nonnegative integer Gen0/1/2 collections and
-TotalOperations exactly1M. Managed allocation metadata is not native heap/RSS.
+TotalOperations exactly1M. Managed allocation metadata is not heap/RSS.
 Missing, failed, short, control, duplicate or extra cells fail the report.
 
 ### AC-SCALE-RPT-002: complete cohort
@@ -120,13 +120,13 @@ task, sharing its run/cancellation deadline. That original task participates in
 success, failure, cleanup and deferred release with the exit/output/error tasks;
 do not dispose its process or pipe before all originals settle.
 The child's real exit/stdout/stderr, input preservation and every case assertion
-must be checked. No fake HTTP/native provider, fake process or skipped case.
+must be checked. No fake HTTP/provider, fake process or skipped case.
 
 ## Test mapping and ordered execution
 
 |Acceptance|Automated scenarios and assertions|Exception and required evidence|
 |---|---|---|
-|001|ZoneTree at both record counts, N8/N10, both runtime forms; wrong selectors/job/shape; missing/duplicate/extra cells; wrong or missing rows/operations/durations/launches/statistics/memory; normalized-unit mismatch|Actual generated BDN originals and cold native values/resources remain parent gates|
+|001|ZoneTree at both record counts, N8/N10, both runtime forms; wrong selectors/job/shape; missing/duplicate/extra cells; wrong or missing rows/operations/durations/launches/statistics/memory; normalized-unit mismatch|Actual generated BDN originals and cold values/resources remain parent gates|
 |002|Complete two-entry matrix; missing/extra/duplicate/unsupported pairs; mixed host/runtime; nested invalid report|Equality of supplied host descriptors alone is not actual hardware/provenance proof|
 |003|Success and every rejection preserve input; nonfinite values; sentinel diagnostics stay bounded and safe|Pure parsing cannot authenticate a provider or measured source|
 |004|Real TUnit launches owned Node, verifies exit/stdout/stderr/exact case set; bounded stdin request over256KiB succeeds and oversize request rejects before launch; cancellation/input failure uses the same original-task owner|Coverage collector/baseline is unavailable; no numeric coverage claim|
@@ -135,7 +135,7 @@ Use TUnit/Microsoft.Testing.Platform and .NET 10, never VSTest filters. The real
 focused `/*/*/*ScaledRawStorageReport*/*` filter runs after a fresh Release build,
 followed by the related/full gates and formatter. Local results are development
 evidence; delivered-source CI remains mandatory, and originals are preserved.
-Implementers cannot invent fields, alter native workload/profile/settings, change
+Implementers cannot invent fields, alter workload/profile/settings, change
 controls or publish values. Rollback removes only this parser and its tests together;
 no product/persisted migration is involved. The tests, module and execution are open
 acceptance gates.

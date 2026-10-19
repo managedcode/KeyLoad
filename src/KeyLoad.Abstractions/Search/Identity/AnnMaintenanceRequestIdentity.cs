@@ -4,8 +4,8 @@ internal static class AnnMaintenanceRequestIdentity
 {
     internal static bool Same(AnnMaintenanceRequest first, AnnMaintenanceRequest second)
     {
-        _ = NativeSerialization.Measure(first);
-        _ = NativeSerialization.Measure(second);
+        _ = OrleansSerialization.Measure(first);
+        _ = OrleansSerialization.Measure(second);
         return first.CommandId == second.CommandId && first.Consumer == second.Consumer
             && first.Collection == second.Collection && first.Field == second.Field
             && first.Space == second.Space && first.IndexGeneration == second.IndexGeneration

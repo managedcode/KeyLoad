@@ -6,7 +6,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.IntegrationTests;
 
-/// <summary>Explicit native options composition for standalone database and query fixtures.</summary>
+/// <summary>Explicit execution options composition for standalone database and query fixtures.</summary>
 internal static class IntegrationExecutionOptions
 {
     internal static IOptions<ZoneTreeStorageExecutionOptions> StorageExecution(ZoneTreeStorageExecutionOptions? configured = null)
@@ -65,16 +65,9 @@ internal static class IntegrationExecutionOptions
         return Options.Create(value);
     }
 
-    internal static IOptions<KeyLoad.Core.BlobExecutionOptions> BlobExecution(KeyLoad.Core.BlobExecutionOptions? configured = null)
+    internal static IOptions<ClaimsExecutionOptions> RuntimeClaimsExecution(ClaimsExecutionOptions? configured = null)
     {
-        var value = configured ?? new KeyLoad.Core.BlobExecutionOptions();
-        value.Validate();
-        return Options.Create(value);
-    }
-
-    internal static IOptions<NativeClaimsExecutionOptions> NativeClaimsExecution(NativeClaimsExecutionOptions? configured = null)
-    {
-        var value = configured ?? new NativeClaimsExecutionOptions();
+        var value = configured ?? new ClaimsExecutionOptions();
         value.Validate();
         return Options.Create(value);
     }

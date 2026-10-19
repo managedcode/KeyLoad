@@ -45,8 +45,6 @@ internal readonly record struct McpToolHints(bool ReadOnly, bool Idempotent, boo
         GrainReadKind.NodeStatus => new(true, true, false),
         GrainReadKind.AdminDashboard or GrainReadKind.AdminResources or GrainReadKind.AdminQueue
             => new(true, true, false),
-        GrainReadKind.BlobMetadata or GrainReadKind.BlobUploadInfo or GrainReadKind.BlobRange or GrainReadKind.BlobList
-            => new(true, true, false),
         _ => throw new ArgumentOutOfRangeException(nameof(kind), McpCatalogProtocol.InvalidOperation)
     };
 
@@ -76,10 +74,6 @@ internal readonly record struct McpToolHints(bool ReadOnly, bool Idempotent, boo
         OperationKind.CommitProjectionBatch => new(false, true, true),
         OperationKind.ReleaseProjectionConsumer => new(false, true, true),
         OperationKind.PurgeOutbox => new(false, true, true),
-        OperationKind.BeginBlobUpload or OperationKind.WriteBlobPart or OperationKind.AbortBlobUpload
-            => new(false, true, false),
-        OperationKind.CompleteBlobUpload or OperationKind.DeleteBlob or OperationKind.ReclaimBlob
-            => new(false, true, true),
         _ => throw new ArgumentOutOfRangeException(nameof(kind), McpCatalogProtocol.InvalidOperation)
     };
 }

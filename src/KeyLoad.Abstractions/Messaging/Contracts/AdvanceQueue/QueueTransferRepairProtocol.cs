@@ -2,7 +2,7 @@ namespace KeyLoad;
 
 internal static class QueueTransferRepairProtocol
 {
-    internal const string Alias = "keyload.queue-transfer.advance-repair.v1";
+    internal const string Alias = "keyload.queue-transfer.advance-repair";
     internal const string Kind = "advanceQueueTransferRepair";
     internal const uint SourceQueue = 0;
     internal const uint TransferId = 1;

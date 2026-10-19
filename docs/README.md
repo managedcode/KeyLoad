@@ -2,7 +2,7 @@
 
 KeyLoad is one database for AI agents: documents, typed tables, graphs, blobs, queues, events, search and time series live in one database and reference one another. SQL is the shared language for combining them; the .NET SDK and the built-in MCP server reach the same authorized operations.
 
-The cluster is Microsoft Orleans. Orleans does membership, placement, activation migration, communication between silos and scaling, and data is copied to replicas through ordinary Orleans calls. Every silo has its own ZoneTree that owns its files. A public request goes to one Orleans grain per connected client, which calls the ZoneTree owner on its own node or on other nodes, gathers the results and returns them. See [ADR-136](ADR/ADR-136-native-orleans-partition-ownership.md).
+The cluster is Microsoft Orleans. Orleans does membership, placement, activation migration, communication between silos and scaling, and data is copied to replicas through ordinary Orleans calls. Every silo has its own ZoneTree that owns its files. A public request goes to one Orleans grain per connected client, which calls the ZoneTree owner on its own node or on other nodes, gathers the results and returns them. See [ADR-136](ADR/ADR-136-orleans-partition-ownership.md).
 
 Start with the [architecture map](Architecture.md). The [product specification](design/product-specification.md) describes the whole product; the [repository rules](../AGENTS.md) take precedence.
 
@@ -37,8 +37,8 @@ flowchart LR
 
 | Feature | Contract |
 |---|---|
-| [ClusterRouting](Features/ClusterRouting.md) | Orleans does all clustering: one grain per connection, partition grains, calls to the silo-local ZoneTree owner on any node, stateless workers for background work |
-| [ClusterReplication](Features/ClusterReplication.md) | Copies through Orleans Grain Service calls to `ReplicaCount` silos found through native membership, acknowledgement from every configured copy, catch-up through Orleans |
+| [OrleansExecution](Features/OrleansExecution.md) | Orleans does all clustering: one grain per connection, partition grains, calls to the silo-local ZoneTree owner on any node, stateless workers for background work |
+| [StorageReplication](Features/StorageReplication.md) | Copies through Orleans Grain Service calls to `ReplicaCount` silos found through membership, acknowledgement from every configured copy, catch-up through Orleans |
 | [StorageRecovery](Features/StorageRecovery.md) | The silo-local ZoneTree owner: stores, journals, locks, ordered apply, read lifetimes and process recovery |
 | [BackupRestore](Features/BackupRestore.md) | Verified backup of a node's ZoneTree files and clean-target restore |
 | [InternalSerialization](Features/InternalSerialization.md) | Generated Orleans serialization and the current internal binary formats |

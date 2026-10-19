@@ -15,18 +15,18 @@ internal static class AnalyticsExpectedResourceCreation
             new ConfigureResourceRequest(fixture.Partition.TenantId, fixture.Partition.DatabaseId, definition),
             id: commandId).Get<ResourceDefinition>();
 
-    internal static ResourceLifetimeV1 Lifetime(TestDatabase fixture, Guid commandId)
+    internal static ResourceLifetime Lifetime(TestDatabase fixture, Guid commandId)
     {
         var original = fixture.ReadStoredOutcome(commandId).PreparedCommand
             ?? throw new InvalidOperationException("The original analytics fixture resource creation is missing.");
-        var request = NativeSerialization.Deserialize<ConfigureResourceRequest>((original).Value!.Input.Span);
+        var request = OrleansSerialization.Deserialize<ConfigureResourceRequest>((original).Value!.Input.Span);
         return ResourceLifetimeIdentity.Create(original, request.TenantId, request.DatabaseId, request.Definition);
     }
 
     internal static EntityRef Bind(TestDatabase fixture, EntityRef literal, Guid commandId)
         => Bind(Lifetime(fixture, commandId), literal);
 
-    internal static EntityRef Bind(ResourceLifetimeV1 lifetime, EntityRef literal)
+    internal static EntityRef Bind(ResourceLifetime lifetime, EntityRef literal)
     {
         if (literal.Partition.TenantId != lifetime.TenantId || literal.Partition.DatabaseId != lifetime.DatabaseId
             || literal.Partition.TransactionDomainId != lifetime.TransactionDomainId || literal.Collection != lifetime.ResourceName

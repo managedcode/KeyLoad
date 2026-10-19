@@ -29,7 +29,7 @@ internal static class QueuePendingAuthorityLeased
         var counters = store.Read(view => view.GetRecord<QueueCounters>(QueuePendingAuthorityOperations.Key(state.Flow,
             QueueLifecycleTestProtocol.CounterSpace)))!;
         await Assert.That(counters.InFlightMessages).IsEqualTo(1);
-        await Assert.That(counters.InFlightBytes).IsEqualTo(NativeSerialization.Serialize(body).LongLength);
+        await Assert.That(counters.InFlightBytes).IsEqualTo(OrleansSerialization.Serialize(body).LongLength);
         await QueuePendingAuthorityHistory.SameAsync(store, original);
     }
 }

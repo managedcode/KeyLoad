@@ -30,7 +30,7 @@ internal static class CompetingInboxFlow
             {
                 bytes = QueueWholeFlowStorage.Bytes(fixture.Store);
                 position = fixture.Store.Position;
-                identity = NativeReadCutStoreStateAssertions.SnapshotIdentity(fixture.Store);
+                identity = ReadCutStoreStateAssertions.SnapshotIdentity(fixture.Store);
             }, failures);
             ServerFailureObserver.Observe(fixture.Store.Dispose, failures);
             if (bytes.Length > 0)

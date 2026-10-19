@@ -12,7 +12,7 @@ internal static class IsolatedRedisResources
     private const string Version = "8.4.0";
     private const string ImagePrefix = "docker.io/library/redis:";
     private const string Primary = "primary";
-    private const string NativePrimaryHost = "primary.dev.internal";
+    private const string RuntimePrimaryHost = "primary.dev.internal";
     private const string PasswordParameter = "redis-password";
     private const string PasswordEnvironment = "KEYLOAD_REDIS_PASSWORD";
     private const string PrimaryEnvironment = "KEYLOAD_REDIS_PRIMARY";
@@ -58,7 +58,7 @@ internal static class IsolatedRedisResources
             }
             else
             {
-                node.WithEnvironment(PrimaryEnvironment, NativePrimaryHost).WaitFor(primary!);
+                node.WithEnvironment(PrimaryEnvironment, RuntimePrimaryHost).WaitFor(primary!);
                 context.BindSetting(ReplicaSettingPrefix + (index - Step).ToString(CultureInfo.InvariantCulture),
                     node.Resource.ConnectionStringExpression);
             }
@@ -75,7 +75,7 @@ internal static class IsolatedRedisResources
         var name = NodeNames[index];
         var directory = context.DataDirectory(name);
         ClusterProfileStore.PrepareDirectory(directory);
-        var node = UseNativeTcp(context.Builder.AddRedis(name, password: password))
+        var node = UseTcp(context.Builder.AddRedis(name, password: password))
             .WithImageTag(Version).WithImageSHA256(BenchmarkResources.RedisDigest[ElementIndex..])
             .WithContainerNetworkAlias(name).WithDataBindMount(directory)
             .WithBindMount(script, ScriptTarget, isReadOnly: true).WithEntrypoint(Shell)
@@ -88,9 +88,9 @@ internal static class IsolatedRedisResources
         return node;
     }
 
-    private static IResourceBuilder<RedisResource> UseNativeTcp(IResourceBuilder<RedisResource> node)
+    private static IResourceBuilder<RedisResource> UseTcp(IResourceBuilder<RedisResource> node)
     {
-        // ADR-080: the owned authenticated bootstrap and replica links use native TCP on port 6379.
+        // ADR-080: the owned authenticated bootstrap and replica links use execution TCP on port 6379.
 #pragma warning disable ASPIRECERTIFICATES001
         return node.WithoutHttpsCertificate();
 #pragma warning restore ASPIRECERTIFICATES001

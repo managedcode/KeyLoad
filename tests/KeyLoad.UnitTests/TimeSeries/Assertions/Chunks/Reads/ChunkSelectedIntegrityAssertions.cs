@@ -54,7 +54,7 @@ internal static class ChunkSelectedIntegrityAssertions
         foreach (var original in fixture.Successes)
         {
             var replay = fixture.Owner.Apply(original.Operation).Get<CommitReceipt>();
-            await Assert.That(NativeSerialization.Serialize(replay).SequenceEqual(NativeSerialization.Serialize(original.Receipt))).IsTrue();
+            await Assert.That(OrleansSerialization.Serialize(replay).SequenceEqual(OrleansSerialization.Serialize(original.Receipt))).IsTrue();
             await SampleRawIntegrityAssertions.UnchangedAsync(fixture.Store, cut);
         }
     }
@@ -69,7 +69,7 @@ internal static class ChunkSelectedIntegrityAssertions
         await Assert.That(actual.Length).IsEqualTo(expected.Length);
         for (var index = 0; index < expected.Length; index++)
         {
-            await Assert.That(NativeSerialization.Serialize(actual[index]).SequenceEqual(NativeSerialization.Serialize(expected[index]))).IsTrue();
+            await Assert.That(OrleansSerialization.Serialize(actual[index]).SequenceEqual(OrleansSerialization.Serialize(expected[index]))).IsTrue();
         }
     }
 }

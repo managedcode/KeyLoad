@@ -27,7 +27,7 @@ Related: `REQ-DSTORE-001/AC-DSTORE-001`, `REQ-DSTORE-004/AC-DSTORE-004`, `REQ-EV
 
 1. Freeze catalog binding, atomic key identity, and cross-resource failure semantics.
 2. Test same/different-domain resources, duplicate literal keys, failed mixed batches, and recovery using real stores and the replicated cluster.
-3. Implement binding and compiler checks in DocumentStorage/Core, with routing owned by ClusterRouting.
+3. Implement binding and compiler checks in DocumentStorage/Core, with routing owned by OrleansExecution.
 4. Verify catalog bindings before routing; never merge domains.
 5. Qualify exact source through GitHub unit, process-recovery, and three-node SDK/MCP tests before claiming replicated-cluster atomicity.
 

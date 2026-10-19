@@ -24,7 +24,7 @@ internal static class CliBackupRestore
     private const string BackupMissingRequiredFileMessageKey = "BackupMissingRequiredFile";
     private const string BackupSourceUnavailableDetail = "The offline backup source could not be opened.";
     private const int RequiredRestoreAccessDeniedErrno = 13;
-    private const string NativeFileAccessFailure = "Offline filesystem operation failed.";
+    private const string FileAccessFailure = "Offline filesystem operation failed.";
     private const string RestoreInputUnavailableDetail = "A required restore file could not be read.";
     private static readonly ResourceManager Messages = new(
         MessagesBaseName,
@@ -113,7 +113,7 @@ internal static class CliBackupRestore
         }
         catch (IOException original) when (original.InnerException is Win32Exception
         { NativeErrorCode: RequiredRestoreAccessDeniedErrno }
-            && string.Equals(original.Message, NativeFileAccessFailure, StringComparison.Ordinal))
+            && string.Equals(original.Message, FileAccessFailure, StringComparison.Ordinal))
         {
             throw Errors.Fail(ErrorCode.RecoveryRequired, RestoreInputUnavailableDetail, original);
         }

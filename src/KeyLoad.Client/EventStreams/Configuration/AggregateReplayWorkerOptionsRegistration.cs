@@ -3,11 +3,11 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace KeyLoad.Client;
 
-/// <summary>Binds replay budgets at the native caller composition boundary.</summary>
+/// <summary>Binds replay budgets at the execution caller composition boundary.</summary>
 [ConfigurationBinding]
 public static class AggregateReplayWorkerOptionsRegistration
 {
-    /// <summary>Registers native replay worker options with startup validation.</summary>
+    /// <summary>Registers execution replay worker options with startup validation.</summary>
     /// <param name="services">The caller's service collection.</param>
     /// <param name="configuration">The caller's configuration sources.</param>
     /// <returns>The same service collection.</returns>

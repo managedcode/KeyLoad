@@ -2,7 +2,7 @@ namespace KeyLoad;
 
 /// <summary>Defines storage, delivery, lease, and retry limits for a work queue.</summary>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.QueuePolicy)]
+[Orleans.Alias(ContractAliases.QueuePolicy)]
 public sealed record QueuePolicy
 {
     private const int DefaultMaxAttempts = 5;

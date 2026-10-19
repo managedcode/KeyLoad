@@ -3,13 +3,13 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons;
 
-/// <summary>Creates the actual standalone workload snapshot through native binding and validation.</summary>
+/// <summary>Creates the actual standalone workload snapshot through execution binding and validation.</summary>
 [ConfigurationBinding]
 public static class ComparisonOptionsRegistration
 {
     /// <summary>Binds the established benchmark section without allocating execution resources.</summary>
-    /// <param name="configuration">The native host configuration with established precedence.</param>
-    /// <returns>The same validated native snapshot used throughout a comparison operation.</returns>
+    /// <param name="configuration">The execution host configuration with established precedence.</param>
+    /// <returns>The same validated execution snapshot used throughout a comparison operation.</returns>
     public static IOptions<ComparisonOptions> Read(IConfiguration configuration)
     {
         ArgumentNullException.ThrowIfNull(configuration);

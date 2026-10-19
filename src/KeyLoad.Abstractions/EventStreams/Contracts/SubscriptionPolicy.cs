@@ -2,7 +2,7 @@ namespace KeyLoad;
 
 /// <summary>Configures retry and lease behavior for a subscription.</summary>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.SubscriptionPolicy)]
+[Orleans.Alias(ContractAliases.SubscriptionPolicy)]
 public sealed record SubscriptionPolicy
 {
     private const int DefaultMaxWindow = 1_024;

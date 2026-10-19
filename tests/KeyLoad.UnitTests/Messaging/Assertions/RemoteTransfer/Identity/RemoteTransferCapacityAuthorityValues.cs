@@ -18,7 +18,7 @@ internal static class RemoteTransferCapacityAuthorityValues
             checked(fixture.Store.Position + First));
         var expected = new CommitReceipt(request.CommandId, token, [.. request.Mutations.Select(mutation => ExpectedMutation(fixture, mutation, token, originalAcceptPosition))], DurabilityProfile.ProcessDurable, 1);
         var result = fixture.Apply(OperationKind.Batch, request);
-        await NativeReplayResultAssertions.Same<CommitReceipt>(result, Result<object>.Succeed(expected));
+        await ReplayResultAssertions.Same<CommitReceipt>(result, Result<object>.Succeed(expected));
         return result;
     }
 
@@ -33,14 +33,14 @@ internal static class RemoteTransferCapacityAuthorityValues
                 originalAcceptPosition ?? token.Position),
             CompleteQueueTransfer complete => new(RemoteTransferProtocol.CompleteReceiptKind, complete.SourceQueue.Queue,
                 complete.TransferId.ToString(RemoteTransferProtocol.TransferIdFormat), SecondValue),
-            _ => throw new InvalidOperationException(MissingNativeRow)
+            _ => throw new InvalidOperationException(RuntimeMissingRow)
         };
 
     internal static async Task ReplayAsync(RemoteTransferDatabase fixture, CommandRequest request, Result<object> original)
     {
         var image = RemoteTransferCapacityAuthorityStorage.Capture(fixture);
         var position = fixture.Store.Position;
-        await NativeReplayResultAssertions.Same<CommitReceipt>(fixture.Apply(OperationKind.Batch, request), original);
+        await ReplayResultAssertions.Same<CommitReceipt>(fixture.Apply(OperationKind.Batch, request), original);
         await RemoteTransferCapacityAuthorityStorage.ImageAsync(fixture, image, position);
     }
 }

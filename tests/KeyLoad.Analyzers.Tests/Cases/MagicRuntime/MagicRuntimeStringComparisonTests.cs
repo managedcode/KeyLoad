@@ -1,6 +1,6 @@
 namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
 
-/// <summary>AC-CQ-030 and AC-CQ-031: native string discrimination requires named constants.</summary>
+/// <summary>AC-CQ-030 and AC-CQ-031: execution string discrimination requires named constants.</summary>
 internal sealed class MagicRuntimeStringComparisonTests
 {
     [Test]
@@ -12,7 +12,7 @@ internal sealed class MagicRuntimeStringComparisonTests
     [Arguments("value is [|\"ready\"|]")]
     [Arguments("value is not [|\"ready\"|]")]
     [Arguments("value switch { [|\"ready\"|] => true, _ => false }")]
-    public async Task NativeEqualityAndConstantPatternsRejectStringTokensAsync(string expression)
+    public async Task EqualityAndConstantPatternsRejectStringTokensAsync(string expression)
     {
         var source = $$"""
             internal static class Subject
@@ -27,20 +27,20 @@ internal sealed class MagicRuntimeStringComparisonTests
     [Test]
     [Arguments("value.Equals([|\"ready\"|], StringComparison.Ordinal)")]
     [Arguments("[|\"ready\"|].Equals(value, StringComparison.Ordinal)")]
-    [Arguments("NativeString.Equals(value, [|\"ready\"|], StringComparison.Ordinal)")]
-    [Arguments("NativeString.Compare(value, [|\"next\"|], StringComparison.Ordinal)")]
-    [Arguments("NativeString.CompareOrdinal(value, [|\"last\"|])")]
+    [Arguments("RuntimeString.Equals(value, [|\"ready\"|], StringComparison.Ordinal)")]
+    [Arguments("RuntimeString.Compare(value, [|\"next\"|], StringComparison.Ordinal)")]
+    [Arguments("RuntimeString.CompareOrdinal(value, [|\"last\"|])")]
     [Arguments("value.StartsWith([|\"prefix\"|], StringComparison.Ordinal)")]
     [Arguments("value.EndsWith([|\"suffix\"|], StringComparison.Ordinal)")]
     [Arguments("value.Contains([|\"token\"|], StringComparison.Ordinal)")]
     [Arguments("value.IndexOf([|\"entry\"|], StringComparison.Ordinal)")]
     [Arguments("value.LastIndexOf([|\"entry\"|], StringComparison.Ordinal)")]
     [Arguments("value.IndexOf(value: [|\"entry\"|], startIndex: 0, count: 1, comparisonType: StringComparison.Ordinal)")]
-    public async Task NativeComparisonOverloadsAndAliasesRejectInlinePolicyAsync(string expression)
+    public async Task ComparisonOverloadsAndAliasesRejectInlinePolicyAsync(string expression)
     {
         var source = $$"""
             using System;
-            using NativeString = System.String;
+            using RuntimeString = System.String;
             internal static class Subject
             {
                 internal static object Execute(string value) => {{expression}};

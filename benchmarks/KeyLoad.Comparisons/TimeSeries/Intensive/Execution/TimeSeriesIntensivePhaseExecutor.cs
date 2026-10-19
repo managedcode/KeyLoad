@@ -4,7 +4,7 @@ namespace KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries.Intensive
 
 internal sealed class TimeSeriesIntensivePhaseExecutor(ITimeSeriesIntensiveTarget target,
     TimeSeriesIntensiveExpectations expected, TimeSeriesIntensivePreparedPhase phase,
-    TimeSeriesIntensiveAttemptLedger ledger, IOptions<NativeComparisonExecutionOptions> executionOptions, CancellationToken cellCancellation, TimeProvider? provider = null) : IAsyncDisposable
+    TimeSeriesIntensiveAttemptLedger ledger, IOptions<ComparisonExecutionOptions> executionOptions, CancellationToken cellCancellation, TimeProvider? provider = null) : IAsyncDisposable
 {
     private readonly TimeProvider timeProvider = provider ?? TimeProvider.System;
     private readonly TimeSeriesIntensivePhaseWorkers workers = new(cellCancellation);

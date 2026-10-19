@@ -3,7 +3,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Query.Features.QueryExecution;
 
-/// <summary>Compiles only the frozen Q1.GraphPath.v1 expression into the canonical Core request.</summary>
+/// <summary>Compiles only the frozen Q1.GraphPath expression into the canonical Core request.</summary>
 internal static class SqlGraphPathParser
 {
     internal static GraphShortestPathRequest Parse(SqlGraphPathRequest request, IOptions<DatabaseLimits> limitsOptions,

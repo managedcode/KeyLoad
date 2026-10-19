@@ -13,7 +13,7 @@ internal static class VerifiedBackupMixedCutTransfer
         var after = await MetadataTestFiles.ReadManifestAsync(selected.Path);
         await Assert.That(after.Position).IsEqualTo(before.Position);
         await Assert.That(after.Version).IsEqualTo(before.Version);
-        return await NativeRestoreCancellationFlow.ArchiveAsync(selected.Path, token);
+        return await RestoreCancellationFlow.ArchiveAsync(selected.Path, token);
     }
 
     internal static async Task RepairAsync(VerifiedBackupCutSnapshot selected)

@@ -19,7 +19,7 @@ internal static class SampleChunkBenchmarkRejectionOracle
         RequireEvidencePath(root, evidence);
         var capture = CreateCaptureDirectory(root);
         var startInfo = CreateStartInfo(root, evidence);
-        var exitCode = await NativeSerializationBenchmarkProcess.RunProcessAsync(startInfo, capture,
+        var exitCode = await SerializationBenchmarkProcess.RunProcessAsync(startInfo, capture,
             cancellationToken);
         if (exitCode != 0)
         {

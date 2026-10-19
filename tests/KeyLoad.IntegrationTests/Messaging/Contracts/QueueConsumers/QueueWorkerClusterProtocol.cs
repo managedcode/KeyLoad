@@ -18,7 +18,7 @@ internal static class QueueWorkerClusterProtocol
     internal const string Headers = "{\"origin\":\"worker\"}";
     internal const string Enqueue = "enqueue";
     internal const string DataDirectory = "data";
-    internal const string Missing = "The native worker predecessor was not established.";
+    internal const string Missing = "The execution worker predecessor was not established.";
     internal const int NoDeliveries = 0;
     internal const int NoAcknowledgements = 0;
     internal const int NoLeaseVersion = 0;

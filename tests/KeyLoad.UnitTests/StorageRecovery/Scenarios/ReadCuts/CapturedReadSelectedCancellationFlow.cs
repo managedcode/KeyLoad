@@ -1,6 +1,6 @@
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
-using static KeyLoad.UnitTests.Features.StorageRecovery.NativeCapturedReadScopeScenario;
+using static KeyLoad.UnitTests.Features.StorageRecovery.CapturedReadScopeScenario;
 
 namespace KeyLoad.UnitTests.Features.StorageRecovery;
 
@@ -11,17 +11,17 @@ internal static class CapturedReadSelectedCancellationFlow
 
     internal static async Task RunAsync()
     {
-        NativeReadCutFixture? fixture = null;
+        ReadCutFixture? fixture = null;
         ZoneTreeReadCutLease? lease = null;
         ZoneTreeCapturedReadView? frozen = null;
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            fixture = new NativeReadCutFixture();
+            fixture = new ReadCutFixture();
             Seed(fixture.Store);
-            var identity = Assertions.NativeReadCutStoreStateAssertions.SnapshotIdentity(fixture.Store);
+            var identity = Assertions.ReadCutStoreStateAssertions.SnapshotIdentity(fixture.Store);
             var originalPosition = fixture.Store.Position;
-            lease = fixture.Capture(NativeReadCutFixture.Limits(MaximumRecords, MaximumBytes));
+            lease = fixture.Capture(ReadCutFixture.Limits(MaximumRecords, MaximumBytes));
             Change(fixture.Store);
             frozen = Capture(lease);
             await RequireCutAsync(lease.Cut, identity, originalPosition);

@@ -17,8 +17,8 @@ internal sealed class SeededWalCorruptionProcessOwner(SeededWalCorruptionTrial t
         {
             throw new InvalidOperationException("The previous original corruption-trial child is not closed.");
         }
-        var signal = phase == NativeChecksumProfileProtocol.CorruptionRefusal
-            ? NativeChecksumProfileProtocol.CorruptionRefusedSignal : NativeChecksumProfileProtocol.CompletionSignalPrefix + phase;
+        var signal = phase == ChecksumProfileProtocol.CorruptionRefusal
+            ? ChecksumProfileProtocol.CorruptionRefusedSignal : ChecksumProfileProtocol.CompletionSignalPrefix + phase;
         var child = CommandIdempotencyProcessChild.Create(CommandIdempotencyProcess.OutputLimitCharacters, signal);
         Active = child;
         child.Start(Start(phase));
@@ -41,7 +41,7 @@ internal sealed class SeededWalCorruptionProcessOwner(SeededWalCorruptionTrial t
             Active = null;
         }
         await ServerFailureObserver.ObserveAsync(() => KilledProcessFileReadiness.WaitAsync(trial.Root, cleanup.Token), failures);
-        ServerFailureObserver.Observe(() => RecoveryFileInventory.AssertNativeHandlesReleased(trial.Root), failures);
+        ServerFailureObserver.Observe(() => RecoveryFileInventory.AssertHandlesReleased(trial.Root), failures);
         await ServerFailureObserver.ObserveAsync(async () => await Assert.That(exit).IsEqualTo(0), failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }
@@ -54,7 +54,7 @@ internal sealed class SeededWalCorruptionProcessOwner(SeededWalCorruptionTrial t
             UseShellExecute = false
         };
         foreach (var argument in new[] { typeof(CrashScenarioDispatcher).Assembly.Location, CrashFixtureValues.ProcessMode,
-            NativeChecksumProfileProtocol.Mode, trial.Root, phase })
+            ChecksumProfileProtocol.Mode, trial.Root, phase })
         {
             info.ArgumentList.Add(argument);
         }

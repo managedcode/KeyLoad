@@ -13,9 +13,9 @@ internal sealed class IsolatedGitHubFileTests
     [Arguments("duplicate-entry")]
     [Arguments("missing-entry")]
     [Arguments("unsafe-entry")]
-    public async Task AcIso007RealNativeFileStreamAndInventoryRejectChangedOrUnsafeEvidence(string corruption)
+    public async Task AcIso007RealFileStreamAndInventoryRejectChangedOrUnsafeEvidence(string corruption)
     {
-        using var directory = new NativeArtifactTestDirectory();
+        using var directory = new ArtifactTestDirectory();
         var result = await SessionNodeProcess.RunAsync(
             ["--input-type=module", "-e", IsolatedGitHubFileProgram.Source,
                 SessionNodeProcess.Module("isolated-github-stream.mjs"), directory.Root, corruption],
@@ -32,10 +32,10 @@ internal sealed class IsolatedGitHubFileTests
     [Arguments(1048576, "sync")]
     [Arguments(8388608, "async")]
     [Arguments(8388608, "sync")]
-    public async Task AcIso007LargeNativeStreamRetainsOriginalBytesRefusesOneOverAndJoinsHealthyContinuation(
+    public async Task AcIso007LargeStreamRetainsOriginalBytesRefusesOneOverAndJoinsHealthyContinuation(
         int length, string writer)
     {
-        using var directory = new NativeArtifactTestDirectory();
+        using var directory = new ArtifactTestDirectory();
         try
         {
             var result = await SessionNodeProcess.RunAsync(

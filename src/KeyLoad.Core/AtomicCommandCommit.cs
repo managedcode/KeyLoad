@@ -1,10 +1,13 @@
 using System.Text.Json;
 using KeyLoad.Core.Features.BackupRestore.Execution;
-using KeyLoad.Core.Features.BlobStorage;
-using KeyLoad.Core.Features.ClusterRouting.Contracts;
-using KeyLoad.Core.Features.ClusterRouting.Execution;
-using KeyLoad.Core.Features.ClusterRouting.Identity;
-using KeyLoad.Core.Features.ClusterRouting.Serialization;
+using KeyLoad.Core.Features.CommandOutcomes.Contracts;
+using KeyLoad.Core.Features.RuntimeJournaling.Contracts;
+using KeyLoad.Core.Features.StoragePartitions.Contracts;
+using KeyLoad.Core.Features.CommandOutcomes.Execution;
+using KeyLoad.Core.Features.RuntimeJournaling.Execution;
+using KeyLoad.Core.Features.CommandOutcomes.Identity;
+using KeyLoad.Core.Features.RuntimeJournaling.Identity;
+using KeyLoad.Core.Features.CommandOutcomes.Serialization;
 using KeyLoad.Storage;
 using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
@@ -33,7 +36,7 @@ public sealed partial class DatabaseEngine
             var now = EvaluationClock.GetUtcNow();
             if (view.ReadOwnedValue(KeySpace.ClockBytes) is { } encoded)
             {
-                var committed = NativeSerialization.Deserialize<DateTimeOffset>(encoded);
+                var committed = OrleansSerialization.Deserialize<DateTimeOffset>(encoded);
                 now = now < committed ? committed : now;
             }
             return PrepareQueueRetryInView(view, EvaluateCommand(verified, now));
@@ -99,7 +102,6 @@ public sealed partial class DatabaseEngine
         persistOutcome = false;
         var authorizationPending = false;
         long policyEpoch = AtomicCommandCommitInitialSequence;
-        BlobOutcomeAuthority? blobAuthority = null;
         var onlineTextAuthority = CaptureOnlineTextOutcomeAuthority(operation);
         global::KeyLoad.Core.Features.Messaging.RemoteTransferAcceptFailureAuthority? transferFailure = null;
         Result<object> result;
@@ -125,7 +127,6 @@ public sealed partial class DatabaseEngine
             RequireOriginalEffectAdmission(transaction, principal, operation);
             ValidateCommandClock(transaction, operation.Timestamp);
             ValidateQueueRetryDecisions(transaction, principal, operation);
-            blobAuthority = CaptureBlobOutcomeAuthority(transaction, principal, operation);
             transferFailure = CaptureRemoteTransferFailureAuthority(transaction, principal, operation);
             result = Execute(transaction, principal, operation, replicationIndex > AtomicCommandCommitInitialSequence ? replicationIndex : position,
                 placement, cancellationToken);
@@ -149,25 +150,18 @@ public sealed partial class DatabaseEngine
             replayed = false;
             result = ManagedCode.Communication.Result<object>.Fail(Errors.Problem(ErrorCode.Validation, InvalidCommandJsonMessage));
         }
-        return BuildStoredOutcome(operation, fingerprint, policyEpoch, result, blobAuthority, compositionAuthority,
+        return BuildStoredOutcome(operation, fingerprint, policyEpoch, result, compositionAuthority,
             partitionScope, onlineTextAuthority, transferFailure,
             selection.Outcome?.CanonicalSequence ?? (persistOutcome ? replicationIndex : ReadCanonicalSequence(transaction)));
     }
 
-    private BlobOutcomeAuthority? CaptureBlobOutcomeAuthority(IAtomicTransaction transaction,
-        PrincipalRecord principal, Command<DatabaseCommand> operation)
-        => BlobStorageOperations.Handles(operation.Value!.Kind)
-            ? new BlobStorageOperations(this).CaptureOutcomeAuthority(transaction, principal, operation) : null;
-
     private StoredOutcome BuildStoredOutcome(Command<DatabaseCommand> operation, string fingerprint, long policyEpoch, Result<object> result,
-        BlobOutcomeAuthority? blobAuthority,
         global::KeyLoad.Core.Features.DatabaseComposition.CompositionOutcomeAuthority? compositionAuthority,
         CommandOutcomePartitionScope partitionScope,
         global::KeyLoad.Core.Features.Search.OnlineTextOutcomeAuthority? onlineTextAuthority,
         global::KeyLoad.Core.Features.Messaging.RemoteTransferAcceptFailureAuthority? transferFailure, long canonicalSequence)
         => new(fingerprint, Store.Identity.Incarnation, policyEpoch, result, operation)
         {
-            BlobAuthority = Errors.Code(result.Problem) is null ? blobAuthority : null,
             CompositionAuthority = Errors.Code(result.Problem) is null ? compositionAuthority : null,
             ScopeKind = partitionScope.Kind,
             Partition = partitionScope.Partition,
@@ -196,7 +190,7 @@ public sealed partial class DatabaseEngine
 
     private static void ValidateCommandClock(AtomicPartitionRosterTransaction view, DateTimeOffset evaluatedAt)
     {
-        if (view.ReadOwnedValue(KeySpace.ClockBytes) is { } clock && evaluatedAt < NativeSerialization.Deserialize<DateTimeOffset>(clock))
+        if (view.ReadOwnedValue(KeySpace.ClockBytes) is { } clock && evaluatedAt < OrleansSerialization.Deserialize<DateTimeOffset>(clock))
         {
             throw Errors.Fail(ErrorCode.ClockUncertain, CommittedClockAheadMessage);
         }
@@ -229,7 +223,7 @@ public sealed partial class DatabaseEngine
             return;
         }
         if (transaction.ReadOwnedValue(KeySpace.ClockBytes) is not { } clock
-            || operation.Timestamp >= NativeSerialization.Deserialize<DateTimeOffset>(clock))
+            || operation.Timestamp >= OrleansSerialization.Deserialize<DateTimeOffset>(clock))
         {
             transaction.PutRecord(KeySpace.ClockBytes, (DateTimeOffset)operation.Timestamp);
         }
@@ -253,7 +247,6 @@ public sealed partial class DatabaseEngine
             var actualFailure = outcome with
             {
                 Result = failure,
-                BlobAuthority = null,
                 CompositionAuthority = null,
                 RemoteTransferFailureAuthority = null
             };

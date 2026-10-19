@@ -20,7 +20,7 @@ internal static class GraphShortestPathCorruptionFlow
     private const int OneHop = 1;
     private const int TwoVertices = 2;
     private const int WrongAdjacencyValue = 7;
-    private const byte InvalidNativeByte = byte.MaxValue;
+    private const byte InvalidByte = byte.MaxValue;
     private const long InitialRevision = 1;
 
     internal static EdgeRecord Seed(TestDatabase database)
@@ -48,11 +48,11 @@ internal static class GraphShortestPathCorruptionFlow
             }
             else if (testCase == GraphShortestPathCorruptionCase.MalformedAdjacency)
             {
-                transaction.Put(AdjacencyKey(expected), [InvalidNativeByte]);
+                transaction.Put(AdjacencyKey(expected), [InvalidByte]);
             }
             else if (testCase == GraphShortestPathCorruptionCase.WrongAdjacencyType)
             {
-                transaction.Put(AdjacencyKey(expected), NativeSerialization.Serialize(WrongAdjacencyValue));
+                transaction.Put(AdjacencyKey(expected), OrleansSerialization.Serialize(WrongAdjacencyValue));
             }
             else
             {

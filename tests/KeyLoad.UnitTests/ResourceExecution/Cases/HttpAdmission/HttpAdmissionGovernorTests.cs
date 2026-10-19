@@ -24,15 +24,15 @@ internal sealed class HttpAdmissionGovernorTests
     public async Task KnownBodiesAndChunkedBodiesReserveTheirFramingBoundsBeforeAuthentication()
     {
         var governor = new HttpAdmissionGovernor(UnitAdmissionOptions.Http(Small()));
-        var known = Begin(governor, "/v1/commands", 100);
+        var known = Begin(governor, "/commands", 100);
         await Assert.That(governor.Status().Node.RetainedBytes).IsEqualTo(4_496);
         await Assert.That(governor.Status().VerifiedScopes.Commands).IsEqualTo(0);
         known.Dispose();
         known.Dispose();
-        using var chunked = Begin(governor, "/v1/commands", null);
+        using var chunked = Begin(governor, "/commands", null);
         await Assert.That(governor.Status().Node.RetainedBytes).IsEqualTo(8_192);
         await Assert.That(chunked.MaxBodyBytes).IsEqualTo(1_024);
-        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => Begin(governor, "/v1/commands", 1_025)).Code).IsEqualTo(ErrorCode.ResourceExhausted);
+        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => Begin(governor, "/commands", 1_025)).Code).IsEqualTo(ErrorCode.ResourceExhausted);
         await Assert.That(governor.Status().Node.Commands).IsEqualTo(1);
     }
     [Test]
@@ -44,8 +44,8 @@ internal sealed class HttpAdmissionGovernorTests
         }));
         var query = Begin(governor, "/V1/QUERY/AST/");
         await Assert.That(governor.Status().Node.RetainedBytes).IsEqualTo(20_480);
-        var paths = new[] { "/v1/search", "/v1/graph/traverse", "/v1/changes/read",
-            "/v1/search/graph", AnnSearchProtocol.Route, "/v1/graph/shortest-path", "/v1/graph/incoming",
+        var paths = new[] { "/search", "/graph/traverse", "/changes/read",
+            "/search/graph", AnnSearchProtocol.Route, "/graph/shortest-path", "/graph/incoming",
             SampleChunkProtocol.ReadRoute, SampleRollupProtocol.ReadRoute,
             "/V1/SERIES/CHUNKS/WINDOW/", "/V1/SERIES/ROLLUPS/READ/" };
         foreach (var path in paths)
@@ -62,7 +62,7 @@ internal sealed class HttpAdmissionGovernorTests
                 .IsEqualTo(new CommandAdmissionSnapshot(1, 20_480, 0, 0, 1, 1));
             await Assert.That(governor.Status().VerifiedScopes)
                 .IsEqualTo(new CommandAdmissionSnapshot(1, 4_096, 0, 0, 1, 1));
-            await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => Begin(governor, "/v1/query/ast")).Code)
+            await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => Begin(governor, "/query/ast")).Code)
                 .IsEqualTo(ErrorCode.ResourceExhausted);
             admitted.Dispose();
             admitted.Dispose();
@@ -71,7 +71,7 @@ internal sealed class HttpAdmissionGovernorTests
             await Assert.That(governor.Status().VerifiedScopes)
                 .IsEqualTo(new CommandAdmissionSnapshot(0, 0, 0, 0, 0, 0));
         }
-        using var search = Begin(governor, "/v1/search");
+        using var search = Begin(governor, "/search");
         await Assert.That(governor.Status().Node.RetainedBytes).IsEqualTo(20_480);
     }
     [Test]
@@ -82,14 +82,14 @@ internal sealed class HttpAdmissionGovernorTests
             MaxPrincipalRequests = 1,
             MaxTenantRequests = 2
         }));
-        using var first = Begin(governor, "/v1/documents/get");
+        using var first = Begin(governor, "/documents/get");
         Bind(first, Principal());
-        using var unverified = Begin(governor, "/v1/documents/get");
+        using var unverified = Begin(governor, "/documents/get");
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => Bind(unverified, Principal())).Code).IsEqualTo(ErrorCode.ResourceExhausted);
         await Assert.That(governor.Status().VerifiedScopes.Commands).IsEqualTo(1);
-        using var second = Begin(governor, "/v1/documents/get");
+        using var second = Begin(governor, "/documents/get");
         Bind(second, Principal("second"));
-        using var third = Begin(governor, "/v1/documents/get");
+        using var third = Begin(governor, "/documents/get");
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => Bind(third, Principal("third"))).Code).IsEqualTo(ErrorCode.ResourceExhausted);
         Bind(third, Principal("third", "other"));
         await Assert.That(governor.Status().VerifiedScopes.ActiveTenantScopes).IsEqualTo(2);
@@ -109,14 +109,14 @@ internal sealed class HttpAdmissionGovernorTests
             MaxRequests = 1,
             MaxPrincipalRequests = 1
         }));
-        using var data = Begin(governor, "/v1/queues/process");
+        using var data = Begin(governor, "/queues/process");
         Bind(data, Principal());
         using var control = Begin(governor, "/V1/QUEUES/DELIVERY/", 256);
         Bind(control, Principal());
         await Assert.That(control.MaxBodyBytes).IsEqualTo(256);
         await Assert.That(governor.Status().Node.ControlCommands).IsEqualTo(1);
-        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => Begin(governor, "/v1/subscriptions/process")).Code).IsEqualTo(ErrorCode.ResourceExhausted);
-        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => Begin(governor, "/v1/subscriptions/delivery", 257)).Code).IsEqualTo(ErrorCode.ResourceExhausted);
+        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => Begin(governor, "/subscriptions/process")).Code).IsEqualTo(ErrorCode.ResourceExhausted);
+        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => Begin(governor, "/subscriptions/delivery", 257)).Code).IsEqualTo(ErrorCode.ResourceExhausted);
         data.Dispose();
         control.Dispose();
         await Assert.That(governor.Status().Node.ControlRetainedBytes).IsEqualTo(0);
@@ -128,8 +128,8 @@ internal sealed class HttpAdmissionGovernorTests
         var governor = new HttpAdmissionGovernor(UnitAdmissionOptions.Http(Small()));
         using var cancelled = new CancellationTokenSource();
         await cancelled.CancelAsync();
-        Assert.ThrowsExactly<OperationCanceledException>(() => governor.Begin("/v1/commands", 0, cancelled.Token));
-        var lease = Begin(governor, "/v1/commands");
+        Assert.ThrowsExactly<OperationCanceledException>(() => governor.Begin("/commands", 0, cancelled.Token));
+        var lease = Begin(governor, "/commands");
         Assert.ThrowsExactly<OperationCanceledException>(() => lease.Bind(Principal(), cancelled.Token));
         await Assert.That(governor.Status().Node.Commands).IsEqualTo(1);
         await Assert.That(governor.Status().VerifiedScopes.Commands).IsEqualTo(0);

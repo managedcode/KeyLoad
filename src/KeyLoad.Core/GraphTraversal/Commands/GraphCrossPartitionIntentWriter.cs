@@ -41,7 +41,7 @@ internal static class GraphCrossPartitionIntentWriter
         var scan = transaction.VisitRange(prefix, limits.MaxScanRecords, (key, bytes) =>
         {
             AcceptRowBytes(key, bytes, limits.MaxBatchBytes, ref encodedBytes);
-            var intent = GraphCrossPartitionRecords.Decode<GraphCrossPartitionDeliveryIntentV1>(bytes)
+            var intent = GraphCrossPartitionRecords.Decode<GraphCrossPartitionDeliveryIntent>(bytes)
                 ?? throw Errors.Fail(ErrorCode.Corruption, InvalidIntentKey);
             GraphCrossPartitionValidation.ValidateIntent(intent, source, graph, edgeId,
                 intent.Destination, limits);
@@ -123,7 +123,7 @@ internal static class GraphCrossPartitionIntentWriter
 
         var fingerprint = GraphCrossPartitionRecords.Fingerprint(source, graph, edge.Id,
             target, edge.Revision, deleted, edge);
-        var intent = new GraphCrossPartitionDeliveryIntentV1(GraphCrossPartitionProtocol.CurrentVersion,
+        var intent = new GraphCrossPartitionDeliveryIntent(GraphCrossPartitionProtocol.CurrentVersion,
             source, graph, edge.Id, target, edge.Revision, deleted, edge, principal.Id,
             principal.PolicyEpoch, fingerprint);
         var key = GraphCrossPartitionKeys.Intent(intent);

@@ -5,8 +5,8 @@ namespace KeyLoad.RecoveryTests;
 
 internal static class QueueLifecycleCrashSeed
 {
-    private const string NativeReferenceOrderingKey = "native-reference";
-    private const string UnexpectedDeliveryOrder = "The native lifecycle seed delivery order differs.";
+    private const string ReferenceOrderingKey = "execution-reference";
+    private const string UnexpectedDeliveryOrder = "The execution lifecycle seed delivery order differs.";
     internal static DatabaseEngine Seed(ZoneTreeStore store)
     {
         var database = CrashDatabase.Create(store, tenantId: QueueLifecycleCrashProtocol.Partition.TenantId);
@@ -32,7 +32,7 @@ internal static class QueueLifecycleCrashSeed
     }
 
     internal static EnqueueMessage Enqueue(string id) => new(QueueLifecycleCrashProtocol.Queue, id,
-        QueueLifecycleCrashProtocol.Payload, QueueLifecycleCrashProtocol.Headers, OrderingKey: NativeReferenceOrderingKey);
+        QueueLifecycleCrashProtocol.Payload, QueueLifecycleCrashProtocol.Headers, OrderingKey: ReferenceOrderingKey);
 
     private static void Exhaust(DatabaseEngine database, string expected)
     {

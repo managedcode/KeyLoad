@@ -20,7 +20,7 @@ Implementation contract and join points:
 
 1. Generated v1 DTOs/aliases/Ids, the next unused SchedulerManage capability, discriminator/structure/apply/replay and the HTTP/SDK/official MCP joins are frozen in the linked feature.
 2. Existing transfer F1 remains frozen; helpers may call the established private Enqueue through a narrow DatabaseEngine partial.
-3. The canonical record contract writes canonical native state and enqueue in one transaction and authors independent recurrence/CAS/restart/auth/quota tests.
+3. The canonical record contract writes canonical state and enqueue in one transaction and authors independent recurrence/CAS/restart/auth/quota tests.
 4. Autonomous due evaluation runs in Orleans StatelessWorker grains that buffer due hints and write batches on an Orleans timer ([ADR-094](ADR-094-orleans-due-coordination.md)); it builds real process and genuine cluster SDK/MCP fault fixtures and completes the original acceptance.
 
 Dependencies: existing queue readiness/inbox. The feature

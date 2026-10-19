@@ -36,7 +36,7 @@ internal static class RetainedAppendIdentityCold
             {
                 fixture.ColdImage = QueueWholeFlowStorage.Bytes(store);
                 fixture.ColdPosition = store.Position;
-                fixture.ColdIdentity = NativeReadCutStoreStateAssertions.SnapshotIdentity(store);
+                fixture.ColdIdentity = ReadCutStoreStateAssertions.SnapshotIdentity(store);
             }, failures);
             ServerFailureObserver.Observe(store.Dispose, failures);
         }

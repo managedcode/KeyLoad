@@ -46,7 +46,7 @@ internal static class RevokedOutcomeAdmissionModel
                 var raw = fixture.Store.Read(view => view.ReadOwnedValue(KeySpace.Partition("outbox", fixture.Harness.Partition, sequence)))
                     ?? throw new InvalidOperationException("A literal producer outbox entry is missing.");
                 bytes += raw.LongLength;
-                var actual = NativeSerialization.Deserialize<OutboxEntry>(raw);
+                var actual = OrleansSerialization.Deserialize<OutboxEntry>(raw);
                 await RevokedOutcomeAdmissionValues.EqualAsync(actual, expected);
                 await Assert.That(actual.Receipt.CompositionReferences).IsEmpty();
             }

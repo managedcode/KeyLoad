@@ -11,7 +11,7 @@ namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 internal sealed class SqlClusterModelParityTests(ClusterFixture fixture)
 {
     [Test]
-    public async Task AcAisql006SqlAtomicCommandAndNativeRetryExposeTheSameEventsAndNonconsumingQueue()
+    public async Task AcAisql006SqlAtomicCommandAndRetryExposeTheSameEventsAndNonconsumingQueue()
     {
         using var deadline = McpCallerDeadline.Create();
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
@@ -21,16 +21,16 @@ internal sealed class SqlClusterModelParityTests(ClusterFixture fixture)
         var sql = SqlClusterProtocol.Call(scenario.Partition, McpCallerTools.DocumentsCommit, command);
         var receipt = await SqlClusterProtocol.SdkAsync<CommitReceipt>(sdk, sql, deadline.Token);
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node3, fixture.AdminKey, deadline.Token);
-        var nativeRetry = await McpCallerAssertions.SuccessAsync<CommitReceipt>(
+        var runtimeRetry = await McpCallerAssertions.SuccessAsync<CommitReceipt>(
             await mcp.CallAsync(McpCallerTools.DocumentsCommit, command, deadline.Token));
-        await SqlClusterProtocol.EqualAsync(receipt, nativeRetry.Value);
+        await SqlClusterProtocol.EqualAsync(receipt, runtimeRetry.Value);
         await SqlClusterProtocol.EqualAsync(receipt, await SqlClusterProtocol.McpAsync<CommitReceipt>(mcp, sql, deadline.Token));
         await VerifyStreamAsync(sdk, mcp, scenario, receipt.Token.Position, deadline.Token);
         await VerifyQueueAsync(sdk, mcp, scenario, deadline.Token);
     }
 
     [Test]
-    public async Task AcAisql004SqlAndNativeClientsShareTypedTableGraphVectorsAndSamples()
+    public async Task AcAisql004SqlAndClientsShareTypedTableGraphVectorsAndSamples()
     {
         using var deadline = McpCallerDeadline.Create();
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
@@ -39,17 +39,17 @@ internal sealed class SqlClusterModelParityTests(ClusterFixture fixture)
         await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(scenario.LinkedModelsCommand(), deadline.Token));
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node2, fixture.AdminKey, deadline.Token);
         var traverse = new TraverseRequest(scenario.Partition, RelationalSqlClusterTokens.Graph, scenario.First);
-        var nativeGraph = await McpCallerAssertions.SdkSuccessAsync(await sdk.TraverseAsync(traverse, deadline.Token));
+        var runtimeGraph = await McpCallerAssertions.SdkSuccessAsync(await sdk.TraverseAsync(traverse, deadline.Token));
         var sqlGraph = await SqlClusterProtocol.SdkAsync<global::KeyLoad.GraphTraversal>(sdk,
             SqlClusterProtocol.Call(scenario.Partition, McpCallerTools.GraphTraverse, traverse), deadline.Token);
         var officialGraph = await SqlClusterProtocol.McpAsync<global::KeyLoad.GraphTraversal>(mcp,
             SqlClusterProtocol.Call(scenario.Partition, McpCallerTools.GraphTraverse, traverse), deadline.Token);
-        await Assert.That(nativeGraph.Vertices.Length).IsEqualTo(RelationalSqlClusterTokens.RootAndNeighbor);
-        await Assert.That(nativeGraph.Vertices).Contains(scenario.First);
-        await Assert.That(nativeGraph.Vertices).Contains(scenario.Second);
-        await Assert.That(nativeGraph.Edges).HasSingleItem();
-        await SqlClusterProtocol.EqualAsync(nativeGraph, sqlGraph);
-        await SqlClusterProtocol.EqualAsync(nativeGraph, officialGraph);
+        await Assert.That(runtimeGraph.Vertices.Length).IsEqualTo(RelationalSqlClusterTokens.RootAndNeighbor);
+        await Assert.That(runtimeGraph.Vertices).Contains(scenario.First);
+        await Assert.That(runtimeGraph.Vertices).Contains(scenario.Second);
+        await Assert.That(runtimeGraph.Edges).HasSingleItem();
+        await SqlClusterProtocol.EqualAsync(runtimeGraph, sqlGraph);
+        await SqlClusterProtocol.EqualAsync(runtimeGraph, officialGraph);
         await VerifySearchAsync(sdk, mcp, scenario, deadline.Token);
         await VerifySamplesAsync(sdk, mcp, scenario, deadline.Token);
     }

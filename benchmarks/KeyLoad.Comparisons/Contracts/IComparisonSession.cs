@@ -3,7 +3,7 @@ namespace KeyLoad.Comparisons;
 /// <summary>Executes workload operations within one comparison target session.</summary>
 public interface IComparisonSession : IAsyncDisposable
 {
-    private const string NativeOrderedCorpusReadbackIsUnavailableDetail = "Native ordered corpus readback is unavailable.";
+    private const string OrderedCorpusReadbackIsUnavailableDetail = "Execution ordered corpus readback is unavailable.";
 
     /// <summary>Executes the selected workload operation for a document.</summary>
     /// <param name="scenario">The workload operation to execute.</param>
@@ -22,5 +22,5 @@ public interface IComparisonSession : IAsyncDisposable
     /// <returns>A task whose result is the found event, or <see langword="null"/> when it is absent.</returns>
     Task<FoundEvent?> ReadEventAsync(BenchmarkDocument document, CancellationToken cancellationToken) => throw new NotSupportedException();
     /// <summary>Reads all actual target corpus records once in bounded ascending identifier order.</summary>
-    IAsyncEnumerable<FoundDocument> ReadCorpusAsync(CancellationToken cancellationToken) => throw new NotSupportedException(NativeOrderedCorpusReadbackIsUnavailableDetail);
+    IAsyncEnumerable<FoundDocument> ReadCorpusAsync(CancellationToken cancellationToken) => throw new NotSupportedException(OrderedCorpusReadbackIsUnavailableDetail);
 }

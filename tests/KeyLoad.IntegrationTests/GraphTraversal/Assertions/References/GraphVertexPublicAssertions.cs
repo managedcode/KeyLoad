@@ -1,5 +1,5 @@
 using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.ClusterRouting;
+using KeyLoad.IntegrationTests.Features.OrleansExecution;
 using KeyLoad.IntegrationTests.Features.Messaging;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
 
@@ -26,13 +26,13 @@ internal static class GraphVertexPublicAssertions
             await Assert.That(sdk.Edges.SequenceEqual(expectedEdges)).IsTrue();
             await Assert.That(sdk.Vertices.SequenceEqual(expectedVertices)).IsTrue();
             await SqlClusterProtocol.EqualAsync(sdk, mcp);
-            var incomingRequest = new ReadIncomingGraphEdgesRequestV1(Version, start, state.Seed.Graph, MaximumEdges);
+            var incomingRequest = new ReadIncomingGraphEdgesRequest(Version, start, state.Seed.Graph, MaximumEdges);
             var incoming = await McpCallerAssertions.SdkSuccessAsync(await global::KeyLoad.Client.GraphIncomingEdgesClient.IncomingEdgesAsync(callers.Sdk, incomingRequest, token));
             var expectedIncoming = state.Edges.Where(edge => edge.To == start).OrderBy(edge => edge.From.Collection, StringComparer.Ordinal)
                 .ThenBy(edge => edge.From.Id, StringComparer.Ordinal).ThenBy(edge => edge.Id, StringComparer.Ordinal)
-                .Select(edge => new GraphIncomingEdgeRowV1(edge, 0L)).ToArray();
+                .Select(edge => new GraphIncomingEdgeRow(edge, 0L)).ToArray();
             await Assert.That(incoming.Rows.SequenceEqual(expectedIncoming)).IsTrue();
-            var mcpIncoming = (await McpCallerAssertions.SuccessAsync<GraphIncomingEdgesPageV1>(
+            var mcpIncoming = (await McpCallerAssertions.SuccessAsync<GraphIncomingEdgesPage>(
                 await callers.Mcp.CallAsync(McpCallerTools.GraphIncomingEdges, incomingRequest, token))).Value;
             await SqlClusterProtocol.EqualAsync(incoming.Rows, mcpIncoming.Rows);
             await Assert.That(incoming.Version).IsEqualTo(Version);

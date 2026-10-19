@@ -45,7 +45,7 @@ AC-AUTH-ASPNET-001: genuine SDK/MCP valid, absent, malformed, revoked and expire
 REQ-AUTH-ASPNET-002: standard authorization requires an authenticated identity on the public database/MCP boundary. The static GET/HEAD allowlist and health endpoints keep their exact existing scope.
 AC-AUTH-ASPNET-002: supplied role headers or a ClaimsPrincipal cannot create database authority; persisted revoke/repair affects the same SDK/MCP connection; health or internal visibility cannot grant public data access.
 
-REQ-AUTH-ASPNET-003: signed Core authorization, the current policy epoch and native Orleans RequestContext remain authoritative for every operation.
+REQ-AUTH-ASPNET-003: signed Core authorization, the current policy epoch and Orleans RequestContext remain authoritative for every operation.
 AC-AUTH-ASPNET-003: the exact denied business outcome, unchanged canonical models and receipt, authorized repair, fresh operation, original replay and same-volume cold restart remain complete independent oracles.
 
 ASP.NET authentication is HTTP admission only; tickets never cache persisted permissions. The scheme is registered with `AddAuthentication`/`AddAuthorization` on the root builder, with `UseAuthentication` after the owned identity admission and `UseAuthorization` after the exempt-path branch. No new package, persisted field, public route, issuer, user store, Azure Identity, parallel policy dispatcher or role authority is introduced.

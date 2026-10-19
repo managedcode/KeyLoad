@@ -14,23 +14,23 @@ internal static class TenantShutdownWholeFlow
         var original = TenantAdmissionOperations.Create(fixture, TenantAdmissionOperations.PrincipalA, "a1");
         var state = TenantAdmissionAssertions.State(fixture.Store);
         var cut = fixture.ReadCanonicalCut();
-        await using var owner = new NativeRequestWorkOwner(UnitRoutingOptions.Routing());
-        await using var selected = owner.Acquire(original.CommandId, NativeRequestWorkKind.CommandCapability);
+        await using var owner = new RequestWorkOwner(UnitRoutingOptions.Routing());
+        await using var selected = owner.Acquire(original.CommandId, RequestWorkKind.CommandCapability);
         using var admission = TenantAdmissionOperations.Reserve(fixture, governor, original, token);
         var cancelled = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         using var registration = selected.Cancellation.Register(() => cancelled.TrySetResult());
         var drain = owner.DrainAsync();
-        await cancelled.Task.WaitAsync(new NativeRuntimeTestOptions().CompletionTimeout, token);
+        await cancelled.Task.WaitAsync(new RuntimeTestOptions().CompletionTimeout, token);
         await Assert.That(drain.IsCompleted).IsFalse();
         Assert.ThrowsExactly<OperationCanceledException>(() =>
             fixture.SubmitIssuedEmbedded(original, selected.Cancellation));
         var refused = Assert.ThrowsExactly<KeyLoadException>(() =>
-            owner.Acquire(Guid.NewGuid(), NativeRequestWorkKind.CommandCapability));
+            owner.Acquire(Guid.NewGuid(), RequestWorkKind.CommandCapability));
         await Assert.That(refused.Code).IsEqualTo(ErrorCode.OwnershipLost);
         await TenantAdmissionAssertions.UnchangedAsync(fixture, state, cut);
         selected.PrepareDisposal(null, null);
         await selected.DisposeAsync();
-        await drain.WaitAsync(new NativeRuntimeTestOptions().CompletionTimeout, token);
+        await drain.WaitAsync(new RuntimeTestOptions().CompletionTimeout, token);
         await Assert.That(owner.IsJoined).IsTrue();
         admission.Dispose();
         admission.Dispose();

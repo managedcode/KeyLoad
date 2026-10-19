@@ -5,8 +5,8 @@ namespace KeyLoad.Server;
 [ConfigurationOptions]
 internal sealed class PostgresSessionOptions
 {
-    internal const string Section = "KeyLoad:NativeSql";
-    private const string Invalid = "Native SQL TLS endpoint and session limits are invalid.";
+    internal const string Section = "KeyLoad:RuntimeSql";
+    private const string Invalid = "Execution SQL TLS endpoint and session limits are invalid.";
     private const int MaximumPort = 65535;
     private const int MaximumSlots = 8;
     private const int MaximumStartup = 65536;
@@ -15,7 +15,7 @@ internal sealed class PostgresSessionOptions
     private const long MaximumTotalRetained = 134217728;
     private const int Minimum = 1;
     private const int MinimumFrame = 256;
-    internal const int RelationalDialect = 2;
+    internal const int RelationalDialect = SqlOperationProtocol.DefaultQueryDialectVersion;
 
     public int Port
     {
@@ -44,7 +44,7 @@ internal sealed class PostgresSessionOptions
             || MaximumPortals is < Minimum or > MaximumSlots
             || MaximumRetainedBytes is < Minimum or > MaximumRetained
             || MaximumTotalRetainedBytes is < Minimum or > MaximumTotalRetained
-            || QueryDialectVersion is not (SqlOperationProtocol.DefaultQueryDialectVersion or RelationalDialect)
+            || QueryDialectVersion != SqlOperationProtocol.DefaultQueryDialectVersion
             || MaximumRetainedBytes > MaximumTotalRetainedBytes || Databases.Count is < Minimum or > MaximumSlots
             || Databases.Any(item => string.IsNullOrWhiteSpace(item.Key) || item.Value is null
                 || string.IsNullOrWhiteSpace(item.Value.TenantId) || string.IsNullOrWhiteSpace(item.Value.DatabaseId)

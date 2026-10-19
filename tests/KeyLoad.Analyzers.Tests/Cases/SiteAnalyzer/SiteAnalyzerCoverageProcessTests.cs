@@ -88,7 +88,7 @@ internal sealed class SiteAnalyzerCoverageProcessTests
         await Assert.That(result.ExitCode).IsNotEqualTo(SiteAnalyzerCoverageTokens.SuccessExitCode);
         using var failureReport = SiteAnalyzerCoverageTestScope.ReadJson(scope.SummaryPath);
         await Assert.That(failureReport.RootElement.GetProperty(SiteAnalyzerCoverageTokens.JsonPassedProperty).GetBoolean()).IsFalse();
-        await Assert.That(failureReport.RootElement.GetProperty(SiteAnalyzerCoverageTokens.JsonNativeReportHash).ValueKind)
+        await Assert.That(failureReport.RootElement.GetProperty(SiteAnalyzerCoverageTokens.JsonReportHash).ValueKind)
             .IsEqualTo(System.Text.Json.JsonValueKind.Null);
         await Assert.That(failureReport.RootElement.GetProperty(SiteAnalyzerCoverageTokens.JsonSummaryProperty).ValueKind)
             .IsEqualTo(System.Text.Json.JsonValueKind.Null);
@@ -98,7 +98,7 @@ internal sealed class SiteAnalyzerCoverageProcessTests
     }
 
     [Test]
-    public async Task MissingManifestRetainsFailureAndNativeReportHashAsync()
+    public async Task MissingManifestRetainsFailureAndReportHashAsync()
     {
         using var scope = new SiteAnalyzerCoverageTestScope();
         await scope.WriteFixtureAsync(SiteAnalyzerCoverageFixture.Valid);
@@ -106,7 +106,7 @@ internal sealed class SiteAnalyzerCoverageProcessTests
         await Assert.That(result.ExitCode).IsNotEqualTo(SiteAnalyzerCoverageTokens.SuccessExitCode);
         using var failureReport = SiteAnalyzerCoverageTestScope.ReadJson(scope.SummaryPath);
         await Assert.That(failureReport.RootElement.GetProperty(SiteAnalyzerCoverageTokens.JsonPassedProperty).GetBoolean()).IsFalse();
-        await Assert.That(failureReport.RootElement.GetProperty(SiteAnalyzerCoverageTokens.JsonNativeReportHash).GetString()!.Length)
+        await Assert.That(failureReport.RootElement.GetProperty(SiteAnalyzerCoverageTokens.JsonReportHash).GetString()!.Length)
             .IsEqualTo(SiteAnalyzerCoverageTokens.HashLength);
     }
 

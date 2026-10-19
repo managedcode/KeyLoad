@@ -1,5 +1,5 @@
 using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.ClusterRouting;
+using KeyLoad.IntegrationTests.Features.OrleansExecution;
 
 namespace KeyLoad.IntegrationTests.Features.Authorization;
 
@@ -22,7 +22,7 @@ internal static class EventMessageSensitivePublicSeed
         resource = await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.ConfigureResourceAsync(Guid.NewGuid(),
             new(partition.TenantId, partition.DatabaseId, resource), token));
         var id = "sensitive-worker-" + suffix;
-        var key = id + ".keyload-native-sensitive-credential";
+        var key = id + ".keyload-execution-sensitive-credential";
         var worker = new PrincipalRecord(id, partition.TenantId,
             [new(partition.DatabaseId, resource.Name, Capability.QueueConsume | Capability.QueueAck | Capability.QueueInspect
                 | Capability.DeadLettersRead | Capability.TopicsRead | Capability.SubscriptionsConsume | Capability.SubscriptionsAck)],

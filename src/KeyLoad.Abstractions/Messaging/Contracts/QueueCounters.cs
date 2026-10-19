@@ -11,7 +11,7 @@ namespace KeyLoad;
 /// <param name="NextParkedSequence">The next monotonically increasing dead-letter ordering sequence.</param>
 /// <param name="NextOrderSequence">The next monotonically increasing strict-order admission or redrive sequence.</param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.QueueCounters)]
+[Orleans.Alias(ContractAliases.QueueCounters)]
 public sealed record QueueCounters([property: Orleans.Id(0)] long StoredMessages, [property: Orleans.Id(1)] long StoredBytes, [property: Orleans.Id(2)] long InFlightMessages, [property: Orleans.Id(3)] long InFlightBytes, [property: Orleans.Id(4)] long NextReadySequence,
     [property: Orleans.Id(5)] long DeadLetterMessages = QueueCounterDefaults.NoUsage, [property: Orleans.Id(6)] long DeadLetterBytes = QueueCounterDefaults.NoUsage,
     [property: Orleans.Id(7)] long NextParkedSequence = QueueCounterDefaults.NoUsage,

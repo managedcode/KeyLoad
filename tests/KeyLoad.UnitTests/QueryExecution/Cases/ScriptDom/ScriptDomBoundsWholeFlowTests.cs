@@ -19,7 +19,7 @@ internal sealed class ScriptDomBoundsWholeFlowTests
                 var (seed, receipt) = SqlOffsetFixture.Seed(database);
                 await SqlOffsetFixture.PolicyAsync(database, SqlOffsetProtocol.GrantEpoch, true);
                 await ScriptDomBoundsControls.RequireAsync(database);
-                await ScriptDomNativeParsingCancellation.RequireAsync(database,
+                await ScriptDomParsingCancellation.RequireAsync(database,
                     new global::KeyLoad.Query.QueryEngine(database.Database, UnitExecutionOptions.QueryExecution()));
                 await ScriptDomMoneyModePages.RequireAsync(database);
                 await SqlOffsetPages.ReplayAsync(database.Database, seed, receipt);

@@ -1,7 +1,9 @@
 using KeyLoad.Core;
 using KeyLoad.Core.Features.BackupRestore.Execution;
 using KeyLoad.Core.Features.BackupRestore.Serialization;
-using KeyLoad.Core.Features.ClusterRouting.Contracts;
+using KeyLoad.Core.Features.CommandOutcomes.Contracts;
+using KeyLoad.Core.Features.RuntimeJournaling.Contracts;
+using KeyLoad.Core.Features.StoragePartitions.Contracts;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.UnitTests.Features.BackupRestore;
@@ -125,7 +127,7 @@ internal sealed class AtomicPartitionRosterBudgetTests
                 AtomicPartitionRosterFixture.Collection, CandidateDocumentId), [FirstStagedValue]);
             bounded.Reset();
             bounded.Put(KeySpace.Partition(PartitionRecordFamilies.Document, second,
-                AtomicPartitionRosterFixture.Collection, CandidateDocumentId), NativeSerialization.Serialize(secondRecord));
+                AtomicPartitionRosterFixture.Collection, CandidateDocumentId), OrleansSerialization.Serialize(secondRecord));
             bounded.PersistCandidates();
             bounded.ValidateCommit();
             return true;

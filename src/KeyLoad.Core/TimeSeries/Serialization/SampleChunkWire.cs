@@ -8,7 +8,7 @@ internal static class SampleChunkWire
     private const int Int64SignBitIndex = 63;
     private const int ZigZagSignFlagMask = 1;
 
-    internal const string PayloadAlias = "keyload.core.v1.SampleChunkPayload";
+    internal const string PayloadAlias = "keyload.core.SampleChunkPayload";
     internal const int CurrentVersion = 1;
     internal const int MaximumRecords = 256;
     internal const int MaximumEncodedBytes = 8_388_608;

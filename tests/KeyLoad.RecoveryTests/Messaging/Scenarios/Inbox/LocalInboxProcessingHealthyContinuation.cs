@@ -18,7 +18,7 @@ internal static class LocalInboxProcessingHealthyContinuation
 
     internal static async Task<(Command<DatabaseCommand> Operation, Result<object> Result)> RunAsync(DatabaseEngine database,
         ZoneTreeStore store, Command<DatabaseCommand> original, List<(Command<DatabaseCommand>, Result<object>)> history,
-        (byte[] Key, byte[] Value)[] originalRows, EntityRefLifetimeV1 lifetime)
+        (byte[] Key, byte[] Value)[] originalRows, EntityRefLifetime lifetime)
     {
         var receive = new ReceiveRequest(Guid.NewGuid(), LocalInboxProcessingCrashContract.OutputLane);
         var receiveOperation = database.CreateCommand(OperationKind.Receive, receive.RequestId, original.UserId!, database.EvaluationClock.GetUtcNow(), JsonSerializer.Serialize(receive, JsonDefaults.Options));

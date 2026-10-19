@@ -55,7 +55,7 @@ internal static class FeedVertexAuthorityFixture
     {
         if (historicalFault is { } selected)
         {
-            var entry = NativeSerialization.Deserialize<OutboxEntry>(state.Original) ?? throw new InvalidOperationException(MissingRow);
+            var entry = OrleansSerialization.Deserialize<OutboxEntry>(state.Original) ?? throw new InvalidOperationException(MissingRow);
             var after = entry.After ?? throw new InvalidOperationException(MissingRow);
             var damaged = selected switch
             {
@@ -90,7 +90,7 @@ internal static class FeedVertexAuthorityFixture
             database.Store.Commit((transaction, _) => { transaction.PutRecord(state.Key, damaged); return true; });
             return;
         }
-        var row = NativeSerialization.Deserialize<DocumentRecord>(state.Original) ?? throw new InvalidOperationException(MissingRow);
+        var row = OrleansSerialization.Deserialize<DocumentRecord>(state.Original) ?? throw new InvalidOperationException(MissingRow);
         database.Store.Commit((transaction, _) =>
         {
             transaction.PutRecord(state.Key, row with

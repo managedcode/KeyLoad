@@ -24,7 +24,7 @@ internal static class PostgresOperationExecutor
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             var options = services.GetRequiredService<IOptions<McpExecutionOptions>>().Value;
-            var principal = await identity.VerifyAsync(services, owner, token).ConfigureAwait(false);
+            var principal = await identity.VerifyAsync(services, owner, token);
             var profile = services.GetRequiredService<IOptions<PostgresSessionOptions>>().Value;
             result = PostgresEncodedReply.Admit(profile, options,
                 admission, out var maximumJsonBytes);
@@ -33,7 +33,7 @@ internal static class PostgresOperationExecutor
                 QueryDialectVersion: portal.Statement.Rows || portal.Statement.UsesProfileDialect
                     ? profile.QueryDialectVersion : SqlOperationProtocol.DefaultQueryDialectVersion,
                 CommandId: mutationIdentity);
-            var compilation = SqlOperationCompiler.CompileNativeSessionPlan(request, services.GetRequiredService<IOptions<DatabaseLimits>>(),
+            var compilation = SqlOperationCompiler.CompileSessionPlan(request, services.GetRequiredService<IOptions<DatabaseLimits>>(),
                 options.MaximumCanonicalPayloadBytes, services.GetRequiredService<IOptions<QueryExecutionOptions>>(),
                 portal.Statement.ParameterOids.Length, token);
             if (TryCompleteControl(compilation, catalog, result, maximumJsonBytes, portal, token))
@@ -48,18 +48,18 @@ internal static class PostgresOperationExecutor
                 throw Errors.Fail(ErrorCode.UnsupportedCapability, PostgresProtocol.Unsupported);
             }
             result.PossibleWrite = operation.CommandKind is OperationKind.Batch or OperationKind.CreateTable or OperationKind.DropTable;
-            var value = await CanonicalConnectionDispatch.ExecuteAsync(services, owner, principal, operation, token).ConfigureAwait(false);
+            var value = await CanonicalConnectionDispatch.ExecuteAsync(services, owner, principal, operation, token);
             try
             {
                 result.Payload = McpBoundedJson.Serialize(value, maximumJsonBytes);
                 token.ThrowIfCancellationRequested();
             }
-            catch (Exception failure) when (result.PossibleWrite && global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+            catch (Exception failure) when (result.PossibleWrite && global::KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(failure))
             {
                 throw Errors.Fail(ErrorCode.UnknownWriteOutcome, PostgresProtocol.InterruptedReply, failure);
             }
             portal.Completed = true;
-        }, failures).ConfigureAwait(false);
+        }, failures);
         CompleteFailure(catalog, result, failures);
         return result ?? throw Errors.Fail(ErrorCode.Corruption, PostgresProtocol.Invalid);
     }
@@ -76,7 +76,7 @@ internal static class PostgresOperationExecutor
         }
     }
 
-    private static bool TryCompleteControl(SqlNativeSessionCompilation compilation, PostgresSessionCatalog catalog,
+    private static bool TryCompleteControl(SqlSessionCompilation compilation, PostgresSessionCatalog catalog,
         PostgresEncodedReply reply, int maximumJsonBytes, PostgresBoundPortal portal, CancellationToken token)
     {
         if (compilation.ContextCommandId is not { } contextId)

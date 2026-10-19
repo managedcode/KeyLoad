@@ -1,7 +1,7 @@
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
-/// <summary>Supplies current native session startup and reusable metadata-parser settings.</summary>
+/// <summary>Supplies current execution session startup and reusable metadata-parser settings.</summary>
 internal static class ComparisonHostBindingsSupport
 {
     internal const string KeyLoadEndpoint = "Benchmarks__KeyLoadEndpoint";
@@ -16,7 +16,7 @@ internal static class ComparisonHostBindingsSupport
         var output = result.Stdout + result.Stderr;
         await Assert.That(result.ExitCode).IsNotEqualTo(0);
         await Assert.That(output).Contains(expectedDetail);
-        await Assert.That(output).Contains(SessionHostStartupSupport.NativeNames[0]);
+        await Assert.That(output).Contains(SessionHostStartupSupport.RuntimeNames[0]);
         await Assert.That(output.Contains(SessionHostStartupSupport.Canary, StringComparison.Ordinal)).IsFalse();
     }
 }

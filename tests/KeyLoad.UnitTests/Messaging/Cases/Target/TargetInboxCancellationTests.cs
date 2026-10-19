@@ -8,10 +8,10 @@ namespace KeyLoad.UnitTests.Features.Messaging;
 internal sealed class TargetInboxCancellationTests
 {
     [Test]
-    public async Task CancelledTargetAdmissionHasNoNativeCommitThenSameOriginalOperationAndSourceAckComplete()
+    public async Task CancelledTargetAdmissionHasNoCommitThenSameOriginalOperationAndSourceAckComplete()
     {
         using var fixture = new TestDatabase();
-        var seed = TargetInboxNativeSetup.Create(fixture);
+        var seed = TargetInboxSetup.Create(fixture);
         var before = QueueWholeFlowStorage.Bytes(fixture.Store);
         var position = fixture.Store.Position;
         using var caller = new CancellationTokenSource();
@@ -28,11 +28,11 @@ internal sealed class TargetInboxCancellationTests
         var actual = await coordinator.SubmitAsync(OperationKind.CommitInbox, seed.Request.CommandId, TargetInboxUnitProtocol.Root,
             JsonSerializer.Serialize(seed.Request, JsonDefaults.Options));
         await Assert.That(actual.Get<CommitInboxResult>().AlreadyProcessed).IsFalse();
-        await TargetInboxNativeAssertions.EffectsAsync(fixture.Database, seed.Request);
+        await TargetInboxAssertions.EffectsAsync(fixture.Database, seed.Request);
         var after = QueueWholeFlowStorage.Bytes(fixture.Store);
         var replay = await coordinator.SubmitAsync(OperationKind.CommitInbox, seed.Request.CommandId, TargetInboxUnitProtocol.Root,
             JsonSerializer.Serialize(seed.Request, JsonDefaults.Options));
-        await NativeReplayResultAssertions.Same<CommitInboxResult>(replay, actual);
+        await ReplayResultAssertions.Same<CommitInboxResult>(replay, actual);
         await Assert.That(QueueWholeFlowStorage.Bytes(fixture.Store)).IsEquivalentTo(after, CollectionOrdering.Matching);
         var ack = new DeliveryCommand(Guid.NewGuid(), seed.Source, seed.Delivery.Token, DeliveryAction.Ack);
         _ = fixture.Submit(OperationKind.Delivery, ack, id: ack.CommandId).Get<CommitReceipt>();

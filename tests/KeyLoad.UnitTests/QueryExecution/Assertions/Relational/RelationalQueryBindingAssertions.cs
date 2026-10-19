@@ -19,7 +19,7 @@ internal static class RelationalQueryBindingAssertions
         var request = Invalid(partition).First();
         var image = SqlInnerJoinRetainedIdentityFlow.Image(store);
         var cut = store.Position;
-        var identity = NativeSerialization.Serialize(store.Identity);
+        var identity = OrleansSerialization.Serialize(store.Identity);
         var before = store.GetReadDiagnostics();
         foreach (var call in Calls(engine, partition, request, token))
         {
@@ -34,7 +34,7 @@ internal static class RelationalQueryBindingAssertions
     {
         var image = SqlInnerJoinRetainedIdentityFlow.Image(store);
         var cut = store.Position;
-        var identity = NativeSerialization.Serialize(store.Identity);
+        var identity = OrleansSerialization.Serialize(store.Identity);
         var before = store.GetReadDiagnostics();
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
@@ -58,7 +58,7 @@ internal static class RelationalQueryBindingAssertions
                 request.Ast.Parameters, AllowFullScan: true), cancellationToken: token),
             () => engine.ExecuteAst(Reader, request.Ast, cancellationToken: token),
             () => engine.ExecuteAst(Reader, Q2CapabilityFixtures.JsonRoundTrip(request.Ast), cancellationToken: token),
-            () => engine.ExecuteAst(Reader, Q2CapabilityFixtures.NativeRoundTrip(request.Ast), cancellationToken: token)];
+            () => engine.ExecuteAst(Reader, Q2CapabilityFixtures.RuntimeRoundTrip(request.Ast), cancellationToken: token)];
 
     private static async Task RefusalAsync(Func<QueryPage> execute, ErrorCode code, string detail)
     {
@@ -73,7 +73,7 @@ internal static class RelationalQueryBindingAssertions
     {
         var image = SqlInnerJoinRetainedIdentityFlow.Image(store);
         var cut = store.Position;
-        var identity = NativeSerialization.Serialize(store.Identity);
+        var identity = OrleansSerialization.Serialize(store.Identity);
         var field = new FieldOperand(Total);
         var healthy = new (string Suffix, AstQueryRequest Ast, bool Found)[]
         {
@@ -127,6 +127,6 @@ internal static class RelationalQueryBindingAssertions
         await BinderFieldLineagePages.EqualAsync(expected, sql);
         await BinderFieldLineagePages.EqualAsync(expected, engine.ExecuteAst(Reader, request, cancellationToken: token));
         await BinderFieldLineagePages.EqualAsync(expected, engine.ExecuteAst(Reader, Q2CapabilityFixtures.JsonRoundTrip(request), cancellationToken: token));
-        await BinderFieldLineagePages.EqualAsync(expected, engine.ExecuteAst(Reader, Q2CapabilityFixtures.NativeRoundTrip(request), cancellationToken: token));
+        await BinderFieldLineagePages.EqualAsync(expected, engine.ExecuteAst(Reader, Q2CapabilityFixtures.RuntimeRoundTrip(request), cancellationToken: token));
     }
 }

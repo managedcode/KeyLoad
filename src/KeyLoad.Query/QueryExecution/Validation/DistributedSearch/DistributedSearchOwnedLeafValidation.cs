@@ -13,7 +13,7 @@ internal static class DistributedSearchOwnedLeafValidation
     private const string InvalidBudget = "The distributed search receiving phase exceeds its original grant.";
     private const string CanonicalTextRequired = "The distributed statistics require the canonical text profile.";
 
-    internal static void Require(DistributedSearchOwnedLeafV1 request, DatabaseLimits limits,
+    internal static void Require(DistributedSearchOwnedLeaf request, DatabaseLimits limits,
         QueryExecutionOptions execution, ReadExecutionBudget budget)
     {
         ArgumentNullException.ThrowIfNull(request);
@@ -49,7 +49,7 @@ internal static class DistributedSearchOwnedLeafValidation
         budget.Check();
     }
 
-    private static bool ValidSlots(DistributedSearchOwnedLeafV1 request)
+    private static bool ValidSlots(DistributedSearchOwnedLeaf request)
         => request.Phase switch
         {
             DistributedSearchPhase.Statistics => request.Witness is null && request.Statistics is null

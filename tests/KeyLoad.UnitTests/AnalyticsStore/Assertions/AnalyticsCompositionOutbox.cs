@@ -1,6 +1,6 @@
 using KeyLoad.UnitTests.Features.Authorization;
 using KeyLoad.UnitTests.Features.Messaging;
-using D = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreNativeTestData;
+using D = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreTestData;
 using P = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsCompositionData;
 
 namespace KeyLoad.UnitTests.Features.AnalyticsStore;
@@ -13,7 +13,7 @@ internal static class AnalyticsCompositionOutbox
             AnalyticsExpectedResourceCreation.Lifetime(owner.Source, AnalyticsExpectedResourceCreation.Anchor));
 
     internal static async Task RequireAsync(SafeProjectorOperationDatabase owner, AnalyticsCompositionCommit anchor,
-        IReadOnlyList<AnalyticsCompositionCommit> commits, ResourceLifetimeV1 anchorLifetime)
+        IReadOnlyList<AnalyticsCompositionCommit> commits, ResourceLifetime anchorLifetime)
     {
         var partition = owner.Source.Partition;
         var anchorReference = AnalyticsExpectedResourceCreation.Bind(anchorLifetime, new(partition, D.AnchorCollection, D.AnchorId));
@@ -24,7 +24,7 @@ internal static class AnalyticsCompositionOutbox
             After: new(anchorReference, 1, D.AnchorJson, new(), time)) };
         foreach (var commit in commits)
         {
-            var request = NativeSerialization.Deserialize<CommandRequest>((commit.Operation).Value!.Input.Span);
+            var request = OrleansSerialization.Deserialize<CommandRequest>((commit.Operation).Value!.Input.Span);
             time = new DateTimeOffset(commit.Operation.Timestamp);
             for (var ordinal = 0; ordinal < request.Mutations.Length; ordinal++)
             {

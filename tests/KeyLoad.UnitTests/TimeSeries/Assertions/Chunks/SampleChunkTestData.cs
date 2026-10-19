@@ -12,7 +12,7 @@ internal static class SampleChunkTestData
     internal const string OtherSeries = "other-series";
     internal const int MaximumRecords = 256;
     internal const int MaximumBytes = 8_388_608;
-    private const string ChecksumDomain = "keyload.sample-chunk.v1";
+    private const string ChecksumDomain = "keyload.sample-chunk";
     private static readonly DateTimeOffset Epoch = new(2026, 1, 1, 0, 0, 0, TimeSpan.Zero);
 
     internal static SampleRecord[] FixedRecords()
@@ -113,16 +113,16 @@ internal static class SampleChunkTestData
     internal static byte[] Rechecksum(SampleChunkPayload payload)
     {
         var checksum = ComputeChecksum(payload);
-        return NativeSerialization.Serialize(payload with
+        return OrleansSerialization.Serialize(payload with
         {
             Checksum = checksum
         });
     }
 
     internal static SampleChunkPayload Payload(ReadOnlySpan<byte> encoded)
-        => NativeSerialization.Deserialize<SampleChunkPayload>(encoded);
+        => OrleansSerialization.Deserialize<SampleChunkPayload>(encoded);
 
-    internal static byte[] Serialize(SampleChunkPayload payload) => NativeSerialization.Serialize(payload);
+    internal static byte[] Serialize(SampleChunkPayload payload) => OrleansSerialization.Serialize(payload);
 
     private static byte[] ComputeChecksum(SampleChunkPayload payload)
     {

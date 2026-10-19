@@ -6,7 +6,7 @@ namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
-    internal DistributedTextStatisticsV1? ReadBm25CorpusCurrent(IKeyValueView view, PrincipalRecord principal,
+    internal DistributedTextStatistics? ReadBm25CorpusCurrent(IKeyValueView view, PrincipalRecord principal,
         ResourceDefinition resource, PartitionRef partition, string collection, string field,
         string tokenizer, IReadOnlyList<string> terms, ReadExecutionBudget work)
     {
@@ -14,7 +14,7 @@ public sealed partial class DatabaseEngine
         Authorization.RequireFieldUse(principal, resource, field);
         var bounded = work.CreateView(view);
         var key = Bm25CorpusKeys.Current(partition, collection, field, tokenizer, principal.Id);
-        Bm25CorpusCurrentV1? current = null;
+        Bm25CorpusCurrent? current = null;
         bounded.ReadValue(key, bytes =>
         {
             try
@@ -43,7 +43,7 @@ public sealed partial class DatabaseEngine
         {
             return null;
         }
-        work.ChargeBytes(NativeSerialization.Measure(current.Statistics));
+        work.ChargeBytes(OrleansSerialization.Measure(current.Statistics));
         return current.Statistics;
     }
 }

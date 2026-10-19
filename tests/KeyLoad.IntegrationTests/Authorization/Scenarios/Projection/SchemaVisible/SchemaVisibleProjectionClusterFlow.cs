@@ -1,6 +1,6 @@
 using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.ClusterReplication;
-using KeyLoad.IntegrationTests.Features.ClusterRouting;
+using KeyLoad.IntegrationTests.Features.StorageReplication;
+using KeyLoad.IntegrationTests.Features.OrleansExecution;
 using P = KeyLoad.IntegrationTests.Features.Authorization.SchemaVisibleProjectionClusterProtocol;
 using S = KeyLoad.IntegrationTests.Features.Authorization.SafeProjectorOperationClusterProtocol;
 
@@ -16,7 +16,7 @@ internal static class SchemaVisibleProjectionClusterFlow
         var history = await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey, async root =>
         {
             var state = new SafeProjectorOperationClusterHistory(await SafeProjectorOperationClusterSeed.CreateAsync(root, partition, deadline.Token));
-            await NativeSubmissionColdAssertions.ReceiptAsync(state.State.SeedReceipt,
+            await SubmissionColdAssertions.ReceiptAsync(state.State.SeedReceipt,
                 new CommitReceipt(state.State.Seed.CommandId, state.State.SeedReceipt.Token,
                 [
                     new(S.PutKind, state.State.Collection, S.First, S.InitialRevision),

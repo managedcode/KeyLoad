@@ -9,7 +9,7 @@ internal sealed class ResourcePolicyUpdateTests
     private const string UseGrant = "record.secret.use";
 
     [Test]
-    public async Task AcRpol001PolicyOnlyApplySurvivesNativeReopenAndReusesItsOriginalReceipt()
+    public async Task AcRpol001PolicyOnlyApplySurvivesReopenAndReusesItsOriginalReceipt()
     {
         using var fixture = new ResourcePolicyUpdateFixture();
         var previous = fixture.Resource();
@@ -40,7 +40,7 @@ internal sealed class ResourcePolicyUpdateTests
         await Assert.That(documentBytesAfter.SequenceEqual(documentBytesBefore)).IsTrue();
         await Assert.That(fixture.DocumentBytes()!.SequenceEqual(documentBytesBefore)).IsTrue();
         await Assert.That(Errors.Code(retry.Problem)).IsEqualTo(Errors.Code(first.Problem));
-        await Assert.That(NativeSerialization.Serialize(retry).AsSpan().SequenceEqual(NativeSerialization.Serialize(first))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(retry).AsSpan().SequenceEqual(OrleansSerialization.Serialize(first))).IsTrue();
         await Assert.That(fixture.OutcomeBytes(operation.CommandId)!.SequenceEqual(receiptBytes)).IsTrue();
     }
 

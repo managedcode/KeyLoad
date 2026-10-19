@@ -2,8 +2,8 @@ namespace KeyLoad.Server;
 
 internal static class SearchApi
 {
-    private const string SearchPath = "/v1/search";
-    private const string GraphSearchPath = "/v1/search/graph";
+    private const string SearchPath = "/search";
+    private const string GraphSearchPath = "/search/graph";
 
     internal static void Map(WebApplication app)
     {

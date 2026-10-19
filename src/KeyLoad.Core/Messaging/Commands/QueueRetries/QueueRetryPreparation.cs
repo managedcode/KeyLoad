@@ -1,7 +1,9 @@
 using System.Collections.Immutable;
 using System.Security.Cryptography;
-using KeyLoad.Core.Features.ClusterRouting.Execution;
-using KeyLoad.Core.Features.ClusterRouting.Identity;
+using KeyLoad.Core.Features.CommandOutcomes.Execution;
+using KeyLoad.Core.Features.RuntimeJournaling.Execution;
+using KeyLoad.Core.Features.CommandOutcomes.Identity;
+using KeyLoad.Core.Features.RuntimeJournaling.Identity;
 using KeyLoad.Core.Features.Messaging;
 using KeyLoad.Storage;
 using ManagedCode.Communication.Commands;
@@ -73,11 +75,11 @@ public sealed partial class DatabaseEngine
             var delay = ChooseQueueRetryDelay(operation, input.Lane, input.Policy, input.Metadata);
             choices.Add(new(input.Lane, input.Metadata.Id, input.Metadata.StateVersion, input.Metadata.LeaseVersion,
                 input.Metadata.DeliveryGeneration, input.Metadata.Attempts, input.DueIndexKey,
-                SHA256.HashData(NativeSerialization.Serialize(input.Policy)), delay, operation.Timestamp.AddMilliseconds(delay)));
+                SHA256.HashData(OrleansSerialization.Serialize(input.Policy)), delay, operation.Timestamp.AddMilliseconds(delay)));
         }
-        var decisions = NativeSerialization.Serialize(new QueueRetryDecisions(QueueRetryProtocol.Version,
+        var decisions = OrleansSerialization.Serialize(new QueueRetryDecisions(QueueRetryProtocol.Version,
             operation.Timestamp, choices.MoveToImmutable()));
-        RequireNativeBudget(decisions.Length);
+        RequireBudget(decisions.Length);
         var payload = operation.Value!;
         var prepared = OwnCommand(operation);
         prepared.Value = payload with { RetryDecisions = decisions };

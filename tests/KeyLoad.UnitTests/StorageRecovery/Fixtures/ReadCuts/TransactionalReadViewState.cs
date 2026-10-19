@@ -42,7 +42,7 @@ internal sealed class TransactionalReadViewState : IDisposable
     internal byte[] WriterOutcome { get; set; } = [];
     internal byte[] HealthyOutcome { get; set; } = [];
     internal ZoneTreeReadCutLease Capture(CancellationToken token = default)
-        => Store.Read(view => Store.CaptureNativeReadCut(view, new(MaximumRows, MaximumBytes, TimeSpan.FromMinutes(1)), token));
+        => Store.Read(view => Store.CaptureReadCut(view, new(MaximumRows, MaximumBytes, TimeSpan.FromMinutes(1)), token));
     internal void Reopen()
     {
         ObjectDisposedException.ThrowIf(disposed, this);
@@ -55,12 +55,12 @@ internal sealed class TransactionalReadViewState : IDisposable
         {
             coldStore = new(options, execution, cache);
         }
-        catch (Exception failure) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        catch (Exception failure) when (KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(failure))
         {
             originalAcquisitionFailure = ExceptionDispatchInfo.Capture(failure);
             throw;
         }
-        catch (Exception failure) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        catch (Exception failure) when (!KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(failure))
         {
             originalAcquisitionFailure = ExceptionDispatchInfo.Capture(failure);
             throw;
@@ -78,11 +78,11 @@ internal sealed class TransactionalReadViewState : IDisposable
         {
             CloseCurrent();
         }
-        catch (Exception failure) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        catch (Exception failure) when (KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(failure))
         {
             failures.Add(failure);
         }
-        catch (Exception failure) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        catch (Exception failure) when (!KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(failure))
         {
             failures.Add(failure);
         }
@@ -92,11 +92,11 @@ internal sealed class TransactionalReadViewState : IDisposable
             {
                 Harness.Dispose();
             }
-            catch (Exception failure) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+            catch (Exception failure) when (KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(failure))
             {
                 failures.Add(failure);
             }
-            catch (Exception failure) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+            catch (Exception failure) when (!KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(failure))
             {
                 failures.Add(failure);
             }
@@ -133,12 +133,12 @@ internal sealed class TransactionalReadViewState : IDisposable
             }
             closeReturned = true;
         }
-        catch (Exception failure) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        catch (Exception failure) when (KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(failure))
         {
             originalCloseFailure = ExceptionDispatchInfo.Capture(failure);
             throw;
         }
-        catch (Exception failure) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        catch (Exception failure) when (!KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(failure))
         {
             originalCloseFailure = ExceptionDispatchInfo.Capture(failure);
             throw;

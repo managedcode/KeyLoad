@@ -10,7 +10,7 @@ internal static class SampleChunkManifestReader
         var envelope = SampleChunkStorage.Require<SampleChunkManifestEnvelope>(view,
             SampleChunkKeys.Manifest(partition, set, series, window.WindowId, window.Generation), charge);
         SampleChunkEncodedDigest.Require(envelope.Encoded.Span, envelope.Digest.Span, work, options.Value.HashChunkBytes);
-        var manifest = NativeSerialization.Deserialize<SampleChunkManifest>(envelope.Encoded.Span);
+        var manifest = OrleansSerialization.Deserialize<SampleChunkManifest>(envelope.Encoded.Span);
         if (manifest.Version != SampleChunkLifecycleProtocol.Version)
         {
             throw Errors.Fail(ErrorCode.FormatUnsupported, SampleChunkLifecycleProtocol.Unsupported);

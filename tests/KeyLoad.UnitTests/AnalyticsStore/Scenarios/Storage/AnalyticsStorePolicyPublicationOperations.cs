@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
 using KeyLoad.Core;
-using D = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreNativeTestData;
-using O = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreNativeTestOperations;
+using D = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreTestData;
+using O = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreTestOperations;
 using S = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStorePolicyPublicationData;
 
 namespace KeyLoad.UnitTests.Features.AnalyticsStore;
@@ -30,7 +30,7 @@ internal static class AnalyticsStorePolicyPublicationOperations
             [new PutDocument(S.OtherCollection, S.OtherId, S.OtherJson, ExpectedRevision: S.Absent)]);
         var expectedIndex = db.ReadCanonicalCut().AppliedPosition + S.Revision;
         var issued = db.Database.CreateCommand(OperationKind.Batch, command.CommandId, D.Root,
-            db.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(command));
+            db.Database.EvaluationClock.GetUtcNow(), OrleansSerialization.Serialize(command));
         var outcome = db.SubmitIssuedEmbedded(issued, token);
         await O.EqualAsync(new CommitReceipt(command.CommandId, new(db.Store.Identity.Incarnation, db.Partition.AtomicPartitionId, expectedIndex), [new(PutKind, S.OtherCollection, S.OtherId, S.Revision)], DurabilityProfile.ProcessDurable, 1),
             outcome.Get<CommitReceipt>());

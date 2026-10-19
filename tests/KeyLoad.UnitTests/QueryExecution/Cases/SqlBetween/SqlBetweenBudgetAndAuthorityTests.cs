@@ -179,7 +179,7 @@ internal sealed class SqlBetweenBudgetAndAuthorityTests
 
     private static AstQueryRequest Request(Predicate filter)
         => new(new(Tenant, Database, SqlBetweenTestData.Collection, Partition),
-            new(SqlBetweenTestData.Collection, null, [new("*", "*")], filter, [], 100), AstVersion: 1);
+            new(SqlBetweenTestData.Collection, null, [new("*", "*")], filter, [], 100), AstVersion: SqlOperationProtocol.DefaultQueryDialectVersion);
 
     private static void ConfigureReader(TestDatabase database)
         => database.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(new(Reader, Tenant,

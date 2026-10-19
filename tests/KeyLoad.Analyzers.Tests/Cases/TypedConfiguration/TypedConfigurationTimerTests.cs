@@ -1,13 +1,13 @@
 namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
 
-/// <summary>AC-CQ-034/037: exact native timer intervals are configured execution policy.</summary>
+/// <summary>AC-CQ-034/037: exact execution timer intervals are configured execution policy.</summary>
 internal sealed class TypedConfigurationTimerTests
 {
     [Test]
-    public async Task NativeTimerConstructorsChangeAndIntervalSettersRejectConstPolicyAsync()
+    public async Task TimerConstructorsChangeAndIntervalSettersRejectConstPolicyAsync()
     {
         const string source = """
-            using NativeTimer = System.Threading.Timer;
+            using RuntimeTimer = System.Threading.Timer;
             internal static class Subject
             {
                 private const int DeadlineMilliseconds = 15;
@@ -16,7 +16,7 @@ internal sealed class TypedConfigurationTimerTests
                 private static readonly System.TimeSpan CorpusWidth = System.TimeSpan.FromMilliseconds(DeadlineMilliseconds);
                 internal static void Execute(System.Threading.TimerCallback callback)
                 {
-                    using var timer = [|new NativeTimer(callback, PayloadIdentity,
+                    using var timer = [|new RuntimeTimer(callback, PayloadIdentity,
                         dueTime: DeadlineMilliseconds, period: DeadlineMilliseconds)|];
                     [|timer.Change(CorpusWidth, CorpusWidth)|];
                     using var periodic = [|new System.Threading.PeriodicTimer(CorpusWidth)|];
@@ -31,7 +31,7 @@ internal sealed class TypedConfigurationTimerTests
     }
 
     [Test]
-    public async Task CapturedOptionsReachEveryNativeTimerWithoutTreatingStateAsPolicyAsync()
+    public async Task CapturedOptionsReachEveryTimerWithoutTreatingStateAsPolicyAsync()
     {
         const string source = """
             [KeyLoad.ConfigurationOptions]
@@ -87,7 +87,7 @@ internal sealed class TypedConfigurationTimerTests
     }
 
     [Test]
-    public async Task NativeDisabledTimerIdentityDoesNotBecomeADeploymentDeadlineAsync()
+    public async Task DisabledTimerIdentityDoesNotBecomeADeploymentDeadlineAsync()
     {
         const string source = """
             internal static class Subject

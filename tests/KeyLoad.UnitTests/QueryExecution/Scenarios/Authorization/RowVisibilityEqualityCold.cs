@@ -22,7 +22,7 @@ internal static class RowVisibilityEqualityCold
             try
             {
                 var create = TestDatabaseEngineFactory.Capture(UnitExecutionOptions.DatabaseLimits(),
-                    UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), null, db.Database.EvaluationClock);
+                    UnitExecutionOptions.RuntimeClaimsExecution(), null, db.Database.EvaluationClock);
                 var database = create(cold);
                 var engine = new QueryEngine(database, UnitExecutionOptions.QueryExecution());
                 await Assert.That(cold.Identity.NodeId).IsEqualTo(identity.NodeId);

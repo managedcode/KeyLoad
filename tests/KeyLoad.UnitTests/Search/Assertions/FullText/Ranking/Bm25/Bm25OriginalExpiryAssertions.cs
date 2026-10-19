@@ -8,9 +8,9 @@ namespace KeyLoad.UnitTests.Features.Search;
 internal static class Bm25OriginalExpiryAssertions
 {
     internal static async Task PhaseAsync(Command<DatabaseCommand> original, Command<DatabaseCommand> actual)
-        => await NativeReplayResultAssertions.BytesAsync(
-            NativeSerialization.Serialize(NativeSerialization.Deserialize<Bm25CorpusPublicationPhaseCommand>((original).Value!.Input.Span)),
-            NativeSerialization.Serialize(NativeSerialization.Deserialize<Bm25CorpusPublicationPhaseCommand>((actual).Value!.Input.Span)));
+        => await ReplayResultAssertions.BytesAsync(
+            OrleansSerialization.Serialize(OrleansSerialization.Deserialize<Bm25CorpusPublicationPhaseCommand>((original).Value!.Input.Span)),
+            OrleansSerialization.Serialize(OrleansSerialization.Deserialize<Bm25CorpusPublicationPhaseCommand>((actual).Value!.Input.Span)));
 
     internal static string[] Family(Bm25OriginalPhaseRecoveryFlow flow)
     {
@@ -36,8 +36,8 @@ internal static class Bm25OriginalExpiryAssertions
         await Assert.That(result.Problem?.Detail).IsEqualTo(Bm25CorpusProtocol.Changed);
 
         await Assert.That(result.Value).IsNull();
-        await NativeReplayResultAssertions.BytesAsync(NativeSerialization.Serialize(family),
-            NativeSerialization.Serialize(Family(flow)));
+        await ReplayResultAssertions.BytesAsync(OrleansSerialization.Serialize(family),
+            OrleansSerialization.Serialize(Family(flow)));
         var after = Bm25OriginalPhaseRecoveryState.Read(flow.Owner);
         await Assert.That(after.NodeId).IsEqualTo(before.NodeId);
         await Assert.That(after.Incarnation).IsEqualTo(before.Incarnation);
@@ -45,7 +45,7 @@ internal static class Bm25OriginalExpiryAssertions
         await Assert.That(after.Applied).IsEqualTo(before.Applied);
         await Assert.That(flow.Owner.Entry(operation.CommandId).CanonicalSequence).IsEqualTo(0L);
         await PhaseAsync(operation, flow.Owner.Entry(operation.CommandId).PreparedCommand!);
-        await NativeReplayResultAssertions.SameAsync(result,
+        await ReplayResultAssertions.SameAsync(result,
             flow.Owner.Database.ResolveSubmissionOutcome(operation));
     }
 
@@ -56,8 +56,8 @@ internal static class Bm25OriginalExpiryAssertions
         var reissued = flow.Reissue(original);
         await Assert.That(new DateTimeOffset(reissued.Timestamp) >= expiry).IsTrue();
         await PhaseAsync(original, reissued);
-        await NativeReplayResultAssertions.SameAsync(expected, flow.Publish(reissued));
-        await NativeReplayResultAssertions.SameAsync(expected,
+        await ReplayResultAssertions.SameAsync(expected, flow.Publish(reissued));
+        await ReplayResultAssertions.SameAsync(expected,
             flow.Owner.Database.ResolveSubmissionOutcome(original));
         await before.RequireAsync(Bm25OriginalPhaseRecoveryState.Read(flow.Owner));
         await Bm25OriginalPhaseRecoveryState.RequireRetainedAsync(flow.Owner, original, entry);

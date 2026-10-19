@@ -84,32 +84,32 @@ internal static class ResourcePairBindingQuery
             return Project(state, database, view, principal, resource);
         }
         var baseline = new ReadExecutionBudget(database.OperationLimitsOptions, database.EvaluationClock, token);
-        baseline.ConstrainNativeWork(database.Limits.MaxQueryReadBytes, database.Limits.MaxScanRecords);
+        baseline.ConstrainWork(database.Limits.MaxQueryReadBytes, database.Limits.MaxScanRecords);
         var expected = database.WithQueryView(QueryUser, state.Source.Partition, Documents, Capability.VectorSearch, Read, baseline);
         await Assert.That(entered).IsTrue();
         var lifetimeCharge = ResourcePairBindingFlow.LifetimeKey(state.Source.Partition, Documents).Length
             + (long)state.Pairs[Documents].Lifetime.Length;
         await Assert.That(baseline.ReadBytes).IsGreaterThan(lifetimeCharge);
-        await Assert.That(baseline.ConstrainedNativeRecords).IsGreaterThan(One);
+        await Assert.That(baseline.ConstrainedRecords).IsGreaterThan(One);
         var limits = UnitExecutionOptions.DatabaseLimits(new()
         {
             MaxQueryReadBytes = baseline.ReadBytes - One
         });
         var limited = new ReadExecutionBudget(limits, database.EvaluationClock, token);
-        limited.ConstrainNativeWork(limits.Value.MaxQueryReadBytes, limits.Value.MaxScanRecords);
+        limited.ConstrainWork(limits.Value.MaxQueryReadBytes, limits.Value.MaxScanRecords);
         entered = false;
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => database.WithQueryView(QueryUser, state.Source.Partition,
             Documents, Capability.VectorSearch, Read, limited));
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
         await Assert.That(entered).IsFalse();
         await Assert.That(limited.ReadBytes).IsEqualTo(baseline.ReadBytes - lifetimeCharge);
-        await Assert.That(limited.ConstrainedNativeRecords).IsEqualTo(baseline.ConstrainedNativeRecords - One);
+        await Assert.That(limited.ConstrainedRecords).IsEqualTo(baseline.ConstrainedRecords - One);
         var healthy = new ReadExecutionBudget(database.OperationLimitsOptions, database.EvaluationClock, token);
-        healthy.ConstrainNativeWork(database.Limits.MaxQueryReadBytes, database.Limits.MaxScanRecords);
+        healthy.ConstrainWork(database.Limits.MaxQueryReadBytes, database.Limits.MaxScanRecords);
         await ResourceIncarnationAssertions.EqualAsync(expected, database.WithQueryView(QueryUser, state.Source.Partition,
             Documents, Capability.VectorSearch, Read, healthy));
         await Assert.That(healthy.ReadBytes).IsEqualTo(baseline.ReadBytes);
-        await Assert.That(healthy.ConstrainedNativeRecords).IsEqualTo(baseline.ConstrainedNativeRecords);
+        await Assert.That(healthy.ConstrainedRecords).IsEqualTo(baseline.ConstrainedRecords);
         await ResourceIncarnationAssertions.UnchangedAsync(state.Source.Store, image, position);
     }
 

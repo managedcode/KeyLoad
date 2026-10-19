@@ -4,7 +4,7 @@ Decision: [ADR-087](../../ADR/ADR-087-filtered-retrieval.md). Filtered retrieval
 
 ## Public allowlist and acceptance
 
-`SearchRequest.AllowedIds`, native field11, is an optional immutable array of
+`SearchRequest.AllowedIds`, field11, is an optional immutable array of
 canonical document IDs in the request's existing partition/collection. Null
 preserves existing exact search. An empty array selects nothing. Duplicates are
 normalized with ordinal identity; unknown, hidden, deleted and stale entities
@@ -23,7 +23,7 @@ Persisted authorization remains required even for an empty allowlist.
 
 ## Stages
 
-1. The public allowlist appends the shared SearchRequest field with JSON/native ingress; no older node may silently ignore a filter. SearchEngine, VectorRanker and the FilteredSearch/FilteredVectorPlanner helpers apply eligibility before branch ranks and fusion; lexical corpus statistics keep using the authorized corpus, not a caller-controlled IDF corpus, and the canonical visible-vector/document checks and rank/fusion contracts are reused.
+1. The public allowlist appends the shared SearchRequest field with JSON/ingress; no older node may silently ignore a filter. SearchEngine, VectorRanker and the FilteredSearch/FilteredVectorPlanner helpers apply eligibility before branch ranks and fusion; lexical corpus statistics keep using the authorized corpus, not a caller-controlled IDF corpus, and the canonical visible-vector/document checks and rank/fusion contracts are reused.
 2. The adaptive planner layer adds the computational adaptive planner over the existing packed ANN candidate with actual charged eligibility/cardinality/expansion/fallback counters. A graph is never rebuilt from the output-filtered set and complete public exact rankings are not silently replaced by an ANN/windowed reply.
 3. The public approximation depends on ADR-019's accepted durable generation/replay and explicit public approximation contract; the allowlist and planner do not close AC-ANN-007/008.
 
@@ -101,7 +101,7 @@ and position after each refusal. Repair the reader through the existing real
 ConfigurePrincipal operation, retain the separately revoked principal, and
 verify an independently literal complete eligible vector result.
 
-Join the original native owner before each of two same-root cold opens. Reuse
+Join the original owner before each of two same-root cold opens. Reuse
 its validated storage options and actual configured DatabaseEngine factory;
 require unchanged node/incarnation and complete canonical inventory. On each
 opened owner, the still-revoked principal must remain Unauthenticated, the
@@ -118,33 +118,33 @@ result after an exhausted adaptive traversal is compared with an independent
 exhaustive eligible ranking, never solely with an earlier executor return.
 AC-FILTER-FALLBACK-ORACLE-001 maps to the unchanged original
 `AdaptiveFilteredPlannerTests.AcFilter004InsufficientAdaptiveCandidatesUseChargedExactFallbackThenHealthySearch`.
-Keep its actual 100 bottom-ranked eligible records, real 10,000-record native
+Keep its actual 100 bottom-ranked eligible records, real 10,000-record execution
 seed, original index options, original budgets and N-1 typed BudgetExceeded.
 The original measured and subsequent healthy result must each equal the
 independent complete eligible order and every candidate ID, revision and score;
 retain mode/expansion/fallback/total distance and work assertions. Capture the
-original native position and complete authorized canonical vector model before
+original position and complete authorized canonical vector model before
 querying and compare after refusal and healthy continuation. No query effect
 or incomplete exact result is accepted.
 
 REQ-FILTER-PUBLIC-SPARSE-001 refines REQ-FILTER-001/003/004: the admitted
 public ANN operation must deduplicate an allowlist, ignore unknown IDs and
-exclude every disallowed navigation vertex before native rank fusion. The
+exclude every disallowed navigation vertex before rank fusion. The
 original eligible result capacity is bounded by actual admitted cardinality.
 The page must retain its requested mode, actual execution mode, completeness,
 generation and same authorized cut; filtered reads cannot alter canonical
-records, native files or the store position.
+records, files or the store position.
 
 AC-FILTER-PUBLIC-SPARSE-001 maps to
 AnnPublicWholeFlowTests.ActualProvisionedFilteredSearchDeduplicatesUnknownIdsWithoutReturningNavigationNodesAndRemainsHealthy:
-the existing genuine three-row native publication receives the literal
+the existing genuine three-row publication receives the literal
 allowlist seed-00000, missing-ann-id, seed-00000. Both actual full-breadth
 Approximate and insufficient-candidate ExactFallback paths return exactly the
 independently expected seed-00000 reference, revision1, original document body,
 redaction metadata and rank1 contribution1/61. The repeated filtered request
 and subsequent original complete unfiltered page remain healthy; complete
 canonical rows, position and owned file evidence remain unchanged. Existing
-native fixture admission, publication, producer/lease cleanup and failure
+fixture admission, publication, producer/lease cleanup and failure
 aggregation remain intact.
 
 This is a three-row functional control through SearchEngine.ApproximateSearchAsync,

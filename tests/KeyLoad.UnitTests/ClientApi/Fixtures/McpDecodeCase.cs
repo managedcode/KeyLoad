@@ -4,8 +4,8 @@ namespace KeyLoad.UnitTests.Features.ClientApi;
 
 /// <summary>Owned public JSON and its independent actual-type decoding operations.</summary>
 internal sealed record McpDecodeCase(string Name, JsonElement Request, Guid CommandId, string? IdMember,
-    Func<JsonElement, object> DeserializePublic, Func<ReadOnlyMemory<byte>, object> DeserializeNative,
-    Func<object, byte[]> SerializeNative, Action<object, Stream> SerializeNativeToStream,
+    Func<JsonElement, object> DeserializePublic, Func<ReadOnlyMemory<byte>, object> RuntimeDeserialize,
+    Func<object, byte[]> RuntimeSerialize, Action<object, Stream> SerializeToStream,
     Func<object, JsonElement> SerializePublic)
 {
     internal IDictionary<string, JsonElement> Arguments()

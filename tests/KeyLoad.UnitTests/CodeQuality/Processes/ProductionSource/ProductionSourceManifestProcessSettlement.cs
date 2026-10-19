@@ -5,11 +5,11 @@ namespace KeyLoad.UnitTests.Features.CodeQuality.Processes;
 
 internal static class ProductionSourceManifestProcessSettlement
 {
-    internal static async Task<NativeProcessCleanupDeadline> JoinAsync(Process process, bool processStarted,
+    internal static async Task<ProcessCleanupDeadline> JoinAsync(Process process, bool processStarted,
         Task original, TimeSpan settlementTimeout, TimeProvider timeProvider, TimeSpan terminationGrace,
         List<Exception> failures)
     {
-        var deadline = new NativeProcessCleanupDeadline(settlementTimeout, timeProvider);
+        var deadline = new ProcessCleanupDeadline(settlementTimeout, timeProvider);
         try
         {
             await JoinOriginalAsync(process, processStarted, original, deadline, terminationGrace, failures)
@@ -28,7 +28,7 @@ internal static class ProductionSourceManifestProcessSettlement
     }
 
     private static async Task JoinOriginalAsync(Process process, bool processStarted, Task original,
-        NativeProcessCleanupDeadline deadline, TimeSpan terminationGrace, List<Exception> failures)
+        ProcessCleanupDeadline deadline, TimeSpan terminationGrace, List<Exception> failures)
     {
         if (NeedsCleanup(original, failures) && processStarted)
         {
@@ -42,7 +42,7 @@ internal static class ProductionSourceManifestProcessSettlement
             }
             if (!await deadline.TryJoinAsync(original).ConfigureAwait(false))
             {
-                NativeProcessCleanupDeadline.FailStop();
+                ProcessCleanupDeadline.FailStop();
             }
         }
     }

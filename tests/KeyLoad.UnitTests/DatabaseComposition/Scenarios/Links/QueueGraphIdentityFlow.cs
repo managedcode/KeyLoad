@@ -23,7 +23,7 @@ internal static class QueueGraphIdentityFlow
             _ => throw new ArgumentOutOfRangeException(nameof(component))
         };
         var record = from ? state.First : state.Second;
-        var corrupted = NativeSerialization.Serialize(record with
+        var corrupted = OrleansSerialization.Serialize(record with
         {
             Reference = mismatched
         });
@@ -39,7 +39,7 @@ internal static class QueueGraphIdentityFlow
         var key = KeySpace.Partition("message-meta", db.Partition,
             QueueGraphIdentityState.Queue, QueueGraphIdentityState.Message);
         var original = db.Store.Read(view => view.ReadOwnedValue(key))!;
-        var metadata = NativeSerialization.Deserialize<MessageMetadata>(original);
+        var metadata = OrleansSerialization.Deserialize<MessageMetadata>(original);
         var changed = metadata with
         {
             ReadySequence = metadata.ReadySequence + 1
@@ -55,7 +55,7 @@ internal static class QueueGraphIdentityFlow
             FailureCode = ErrorCode.RecoveryRequired,
             FailureDetail = "The recorded queue retry decision no longer matches its input."
         };
-        await RunFaultAsync(state, NativeSerialization.Serialize(changed));
+        await RunFaultAsync(state, OrleansSerialization.Serialize(changed));
     }
 
     internal static async Task RunFaultAsync(QueueGraphIdentityState state, byte[] corrupted)
@@ -135,11 +135,11 @@ internal static class QueueGraphIdentityFlow
         await Assert.That(compiled.CommandKind).IsEqualTo(OperationKind.Batch);
         await Assert.That(compiled.ReadKind).IsNull();
         await Assert.That(compiled.CommandId).IsEqualTo(command.CommandId);
-        var decoded = NativeSerialization.Deserialize<CommandRequest>(compiled.Payload.Span);
+        var decoded = OrleansSerialization.Deserialize<CommandRequest>(compiled.Payload.Span);
         await Assert.That(JsonDefaults.Serialize(decoded).AsSpan().SequenceEqual(JsonDefaults.Serialize(command))).IsTrue();
         var work = new ReadExecutionBudget(engine.OperationLimitsOptions, engine.EvaluationClock,
             TestContext.Current!.Execution.CancellationToken);
         return engine.CreateCommand(OperationKind.Batch, command.CommandId, QueueGraphIdentityState.Root, at,
-            NativeSerialization.Serialize(decoded), work);
+            OrleansSerialization.Serialize(decoded), work);
     }
 }

@@ -17,7 +17,7 @@ internal static class QueueLeaseAuthorityProcessHealthy
         }
         await QueueOrderedRetryRecoveryTerminal.AssertAsync(database, healthy: false);
         var commandId = Guid.NewGuid();
-        var producer = database.OwnCommand(database.CreateCommand(OperationKind.Batch, commandId, CrashFixtureValues.Principal, retryAt, NativeSerialization.Serialize(new CommandRequest(commandId, QueueOrderedRetryCrashProtocol.Partition,
+        var producer = database.OwnCommand(database.CreateCommand(OperationKind.Batch, commandId, CrashFixtureValues.Principal, retryAt, OrleansSerialization.Serialize(new CommandRequest(commandId, QueueOrderedRetryCrashProtocol.Partition,
                 [QueueOrderedRetryCrashSeed.Enqueue(QueueOrderedRetryCrashProtocol.Healthy)]))));
         outcomes.Add((producer, database.Apply(producer).Get<CommitReceipt>()));
         await QueueOrderedRetryRecoveryImage.MessageAsync(database,
@@ -35,8 +35,8 @@ internal static class QueueLeaseAuthorityProcessHealthy
     {
         foreach (var item in outcomes)
         {
-            await MessagingRecoveryReceiptAssertions.AssertSameNativeValueAsync(item.Receipt, database.Apply(item.Operation).Get<CommitReceipt>());
-            await MessagingRecoveryReceiptAssertions.AssertSameNativeValueAsync(item.Receipt, database.ResolveOutcome(item.Operation).Get<CommitReceipt>());
+            await MessagingRecoveryReceiptAssertions.AssertSameValueAsync(item.Receipt, database.Apply(item.Operation).Get<CommitReceipt>());
+            await MessagingRecoveryReceiptAssertions.AssertSameValueAsync(item.Receipt, database.ResolveOutcome(item.Operation).Get<CommitReceipt>());
         }
     }
 
@@ -45,13 +45,13 @@ internal static class QueueLeaseAuthorityProcessHealthy
     {
         var request = new ReceiveRequest(Guid.NewGuid(), new(QueueOrderedRetryCrashProtocol.Partition, QueueOrderedRetryCrashProtocol.Queue), MaxMessages: 1);
         var operation = database.PrepareQueueRetryOperation(database.OwnCommand(
-            database.CreateCommand(OperationKind.Receive, request.RequestId, CrashFixtureValues.Principal, at, NativeSerialization.Serialize(request))));
+            database.CreateCommand(OperationKind.Receive, request.RequestId, CrashFixtureValues.Principal, at, OrleansSerialization.Serialize(request))));
         var delivery = await Assert.That(database.Apply(operation).Get<ReceiveResult>().Deliveries).HasSingleItem();
         await Assert.That(delivery.Id).IsEqualTo(id);
         await Assert.That(delivery.PayloadJson).IsEqualTo(QueueOrderedRetryCrashProtocol.Payload);
         await Assert.That(delivery.HeadersJson).IsEqualTo(QueueOrderedRetryCrashProtocol.Headers);
         var command = new DeliveryCommand(Guid.NewGuid(), request.Lane, delivery.Token, DeliveryAction.Ack);
-        var acknowledged = database.OwnCommand(database.CreateCommand(OperationKind.Delivery, command.CommandId, CrashFixtureValues.Principal, at, NativeSerialization.Serialize(command)));
+        var acknowledged = database.OwnCommand(database.CreateCommand(OperationKind.Delivery, command.CommandId, CrashFixtureValues.Principal, at, OrleansSerialization.Serialize(command)));
         outcomes.Add((acknowledged, database.Apply(acknowledged).Get<CommitReceipt>()));
     }
 }

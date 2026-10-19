@@ -20,7 +20,7 @@ internal static class McpGatewayCaller
             [McpCallerProtocol.Arguments] = arguments ?? new Dictionary<string, object?>(StringComparer.Ordinal)
         }, cancellationToken: cancellationToken);
 
-    /// <summary>Searches the actual native graph and requires the exact selected operation metadata.</summary>
+    /// <summary>Searches the actual execution graph and requires the exact selected operation metadata.</summary>
     internal static async Task<Tool> DiscoverKeyLoadToolAsync(this McpClient client, string toolName,
         CancellationToken cancellationToken)
     {

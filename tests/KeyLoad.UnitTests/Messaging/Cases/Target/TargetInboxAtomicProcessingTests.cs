@@ -10,7 +10,7 @@ internal sealed class TargetInboxAtomicProcessingTests
     {
         var token = TestContext.Current!.Execution.CancellationToken;
         using var fixture = new TestDatabase();
-        var seed = TargetInboxNativeSetup.Create(fixture);
+        var seed = TargetInboxSetup.Create(fixture);
         var failed = seed.Request with
         {
             CommandId = Guid.NewGuid(),
@@ -18,22 +18,22 @@ internal sealed class TargetInboxAtomicProcessingTests
             [new PutDocument(TargetInboxUnitProtocol.Collection, TargetInboxUnitProtocol.Document,
                 TargetInboxUnitProtocol.Payload, TargetInboxUnitProtocol.BadRevision)]
         };
-        await TargetInboxNativeAssertions.RefusedAsync(fixture.Database, fixture.Store, failed, ErrorCode.RevisionConflict, token);
-        var originalResult = TargetInboxNativeSetup.Apply(fixture.Database, seed.Request, token);
+        await TargetInboxAssertions.RefusedAsync(fixture.Database, fixture.Store, failed, ErrorCode.RevisionConflict, token);
+        var originalResult = TargetInboxSetup.Apply(fixture.Database, seed.Request, token);
         var original = originalResult.Get<CommitInboxResult>();
         await Assert.That(original.AlreadyProcessed).IsFalse();
         await Assert.That(fixture.Database.InspectMessage(TargetInboxUnitProtocol.Root, seed.Source,
             TargetInboxUnitProtocol.Message)!.Metadata.State).IsEqualTo(MessageState.Leased);
-        await TargetInboxNativeAssertions.EffectsAsync(fixture.Database, seed.Request);
-        await TargetInboxNativeAssertions.CapacityAsync(fixture.Store, seed.Request, TargetInboxUnitProtocol.FirstRevision);
-        var image = TargetInboxNativeAssertions.Image(fixture.Store, seed.Source.Partition, seed.Target.Partition);
+        await TargetInboxAssertions.EffectsAsync(fixture.Database, seed.Request);
+        await TargetInboxAssertions.CapacityAsync(fixture.Store, seed.Request, TargetInboxUnitProtocol.FirstRevision);
+        var image = TargetInboxAssertions.Image(fixture.Store, seed.Source.Partition, seed.Target.Partition);
         fixture.Store.Dispose();
         using var first = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         var database = QueueWholeFlowStorage.Open(first);
-        await NativeReplayResultAssertions.Same<CommitInboxResult>(TargetInboxNativeSetup.Apply(database, seed.Request, token), originalResult);
-        await Assert.That(TargetInboxNativeAssertions.Image(first, seed.Source.Partition, seed.Target.Partition)).IsEquivalentTo(image, CollectionOrdering.Matching);
-        await TargetInboxNativePermissions.ReplayAsync(database, first, seed.Request, original, token);
-        await TargetInboxNativeAssertions.RefusedAsync(database, first, seed.Request with
+        await ReplayResultAssertions.Same<CommitInboxResult>(TargetInboxSetup.Apply(database, seed.Request, token), originalResult);
+        await Assert.That(TargetInboxAssertions.Image(first, seed.Source.Partition, seed.Target.Partition)).IsEquivalentTo(image, CollectionOrdering.Matching);
+        await TargetInboxPermissions.ReplayAsync(database, first, seed.Request, original, token);
+        await TargetInboxAssertions.RefusedAsync(database, first, seed.Request with
         {
             CommandId = Guid.NewGuid(),
             Effects =
@@ -44,12 +44,12 @@ internal sealed class TargetInboxAtomicProcessingTests
         _ = ackResult.Get<CommitReceipt>();
         await Assert.That(database.InspectMessage(TargetInboxUnitProtocol.Root, seed.Source,
             TargetInboxUnitProtocol.Message)!.Metadata.State).IsEqualTo(MessageState.Acked);
-        image = TargetInboxNativeAssertions.Image(first, seed.Source.Partition, seed.Target.Partition);
+        image = TargetInboxAssertions.Image(first, seed.Source.Partition, seed.Target.Partition);
         first.Dispose();
         using var second = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         var cold = QueueWholeFlowStorage.Open(second);
-        await NativeReplayResultAssertions.Same<CommitInboxResult>(TargetInboxNativeSetup.Apply(cold, seed.Request, token), originalResult);
-        await Assert.That(TargetInboxNativeAssertions.Image(second, seed.Source.Partition, seed.Target.Partition)).IsEquivalentTo(image, CollectionOrdering.Matching);
-        await TargetInboxNativeQuota.ContinueAsync(cold, second, seed.Request, token);
+        await ReplayResultAssertions.Same<CommitInboxResult>(TargetInboxSetup.Apply(cold, seed.Request, token), originalResult);
+        await Assert.That(TargetInboxAssertions.Image(second, seed.Source.Partition, seed.Target.Partition)).IsEquivalentTo(image, CollectionOrdering.Matching);
+        await TargetInboxQuota.ContinueAsync(cold, second, seed.Request, token);
     }
 }

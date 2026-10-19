@@ -37,7 +37,7 @@ internal static class ProjectionCheckpointRetentionSettlement
         var healthy = ProjectionConsumerIdentityFixture.Operation(owner, OperationKind.Batch, healthyId,
             new CommandRequest(healthyId, source.Partition, [mutation]), source.Time);
         token.ThrowIfCancellationRequested();
-        var produced = FeedNativeHealthyAdmission.Submit(owner, healthy, explicitTime: true, token);
+        var produced = FeedHealthyAdmission.Submit(owner, healthy, explicitTime: true, token);
         await ProjectionConsumerIdentityAssertions.ReceiptAsync(healthy, produced.Get<CommitReceipt>(),
             new MutationReceipt(PutKind, ProjectionConsumerIdentityFixture.Source, ProjectionCheckpointRetentionAssertions.HealthySource, 1L));
         var provisional = new ProjectionCheckpointRetentionContinuation(original, refused, completed, filtered, advanced,

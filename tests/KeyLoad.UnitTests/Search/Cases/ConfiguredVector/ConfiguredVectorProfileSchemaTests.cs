@@ -53,7 +53,7 @@ internal sealed class ConfiguredVectorProfileSchemaTests
         var position = database.Store.Position;
         var complete = QueueWholeFlowStorage.Bytes(database.Store);
         var replay = database.Submit(OperationKind.ConfigureResource, request, id: id);
-        await Assert.That(NativeSerialization.Serialize(replay).SequenceEqual(NativeSerialization.Serialize(original))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(replay).SequenceEqual(OrleansSerialization.Serialize(original))).IsTrue();
         await Assert.That(database.Store.Position).IsEqualTo(position);
         await Assert.That(QueueWholeFlowStorage.Bytes(database.Store)).IsEquivalentTo(complete, CollectionOrdering.Matching);
         var healthy = request with
@@ -65,9 +65,9 @@ internal sealed class ConfiguredVectorProfileSchemaTests
             }
         };
         var committed = database.Submit(OperationKind.ConfigureResource, healthy).Get<ResourceDefinition>();
-        await Assert.That(NativeSerialization.Serialize(committed).SequenceEqual(NativeSerialization.Serialize(healthy.Definition))).IsTrue();
-        await Assert.That(NativeSerialization.Serialize(database.Store.Read(view => view.GetRecord<ResourceDefinition>(key))!)
-            .SequenceEqual(NativeSerialization.Serialize(healthy.Definition))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(committed).SequenceEqual(OrleansSerialization.Serialize(healthy.Definition))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(database.Store.Read(view => view.GetRecord<ResourceDefinition>(key))!)
+            .SequenceEqual(OrleansSerialization.Serialize(healthy.Definition))).IsTrue();
     }
 
     private static string ExpectedDetail(string failure) => failure switch
@@ -76,7 +76,7 @@ internal sealed class ConfiguredVectorProfileSchemaTests
         NonCanonical => "Field paths must be bounded JSON pointers.",
         Model => "An identifier is missing, too long or contains control characters.",
         Budget => "The configured vector field profiles exceed their budget.",
-        _ => throw new InvalidOperationException("The native schema case is undefined.")
+        _ => throw new InvalidOperationException("The execution schema case is undefined.")
     };
 
     private static ImmutableArray<VectorFieldProfile> InvalidProfiles(string failure) => failure switch
@@ -92,6 +92,6 @@ internal sealed class ConfiguredVectorProfileSchemaTests
         Model => [new(ConfiguredVectorProfileFlow.Field, ConfiguredVectorProfileFlow.Space with { Model = string.Empty })],
         Budget => [.. Enumerable.Range(0, OverProfileBudget).Select(index => new VectorFieldProfile("/field" + index,
             ConfiguredVectorProfileFlow.Space))],
-        _ => throw new InvalidOperationException("The native schema case is undefined.")
+        _ => throw new InvalidOperationException("The execution schema case is undefined.")
     };
 }

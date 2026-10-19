@@ -46,7 +46,7 @@ internal static class ConfiguredVectorProfileClusterFlow
         var configured = await SqlClusterProtocol.SdkAsync<ResourceDefinition>(sdk, SqlClusterProtocol.Call(partition,
             McpCallerTools.ResourcesConfigure, new ConfigureResourceRequest(partition.TenantId, partition.DatabaseId, definition),
             Guid.NewGuid()), token);
-        await Assert.That(NativeSerialization.Serialize(configured).SequenceEqual(NativeSerialization.Serialize(definition))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(configured).SequenceEqual(OrleansSerialization.Serialize(definition))).IsTrue();
         var seed = new CommandRequest(Guid.NewGuid(), partition, [new PutDocument(Collection, Target, OriginalJson),
             new PutDocument(Collection, Rival, OriginalJson), new PutVector(Collection, Target, Field, [1, 0], Space, InitialRevision),
             new PutVector(Collection, Rival, Field, [0.5f, 0.5f], Space, InitialRevision)]);
@@ -62,7 +62,7 @@ internal static class ConfiguredVectorProfileClusterFlow
         var healthy = Command(partition, Space);
         var receipt = await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(healthy, token));
         var replay = await McpCallerAssertions.SuccessAsync<CommitReceipt>(await mcp.CallAsync(McpCallerTools.DocumentsCommit, healthy, token));
-        await Assert.That(NativeSerialization.Serialize(replay.Value).SequenceEqual(NativeSerialization.Serialize(receipt))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(replay.Value).SequenceEqual(OrleansSerialization.Serialize(receipt))).IsTrue();
         await VerifyAsync(sdk, mcp, partition, changed: true, token);
     }
     private static CommandRequest Command(PartitionRef partition, VectorSpace space)
@@ -113,7 +113,7 @@ internal static class ConfiguredVectorProfileClusterFlow
         var request = new SearchRequest(partition, Collection, VectorField: Field, Vector: [1, 0], Space: Space);
         var rows = await McpCallerAssertions.SdkSuccessAsync(await sdk.SearchAsync(request, token));
         var official = await McpCallerAssertions.SuccessAsync<RankedDocument[]>(await mcp.CallAsync(McpCallerTools.SearchExecute, request, token));
-        await Assert.That(NativeSerialization.Serialize(rows).SequenceEqual(NativeSerialization.Serialize(official.Value))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(rows).SequenceEqual(OrleansSerialization.Serialize(official.Value))).IsTrue();
         await Assert.That(rows.Select(row => row.Document.Reference.Id)).IsEquivalentTo(
             changed ? new[] { Rival, Target } : new[] { Target, Rival }, CollectionOrdering.Matching);
         await Assert.That(rows.Select(row => row.Score)).IsEquivalentTo(new[] { FirstRank, SecondRank }, CollectionOrdering.Matching);
@@ -122,7 +122,7 @@ internal static class ConfiguredVectorProfileClusterFlow
             var updated = changed && row.Document.Reference.Id == Target;
             var expected = new DocumentResult(new(partition, Collection, row.Document.Reference.Id),
                 updated ? UpdatedRevision : InitialRevision, updated ? UpdatedJson : OriginalJson, false, []);
-            await Assert.That(NativeSerialization.Serialize(row.Document).SequenceEqual(NativeSerialization.Serialize(expected))).IsTrue();
+            await Assert.That(OrleansSerialization.Serialize(row.Document).SequenceEqual(OrleansSerialization.Serialize(expected))).IsTrue();
         }
     }
 }

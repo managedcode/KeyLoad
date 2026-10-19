@@ -43,7 +43,7 @@ internal sealed class PostgresCancellationSession
         var failures = new List<Exception>();
         if (originalCancel is not null)
         {
-            await ServerFailureObserver.ObserveAsync(() => originalCancel, failures).ConfigureAwait(false);
+            await ServerFailureObserver.ObserveAsync(() => originalCancel, failures);
         }
         if (original is not null)
         {
@@ -59,8 +59,8 @@ internal sealed class PostgresCancellationSession
             closing = true;
         }
         var failures = new List<Exception>();
-        await ServerFailureObserver.ObserveAsync(CancelAsync, failures).ConfigureAwait(false);
-        await ServerFailureObserver.ObserveAsync(EndAsync, failures).ConfigureAwait(false);
+        await ServerFailureObserver.ObserveAsync(CancelAsync, failures);
+        await ServerFailureObserver.ObserveAsync(EndAsync, failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }
 }

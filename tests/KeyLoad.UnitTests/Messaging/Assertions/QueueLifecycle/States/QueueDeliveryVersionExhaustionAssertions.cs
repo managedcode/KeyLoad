@@ -25,7 +25,7 @@ internal static class QueueDeliveryVersionExhaustionAssertions
             .IsEqualTo(new MessageInspection(metadata, data.Body.PayloadJson, data.Body.HeadersJson));
         await Assert.That(store.Read(view => view.GetRecord<MessageBody>(KeySpace.Partition(QueueClaimVersionExhaustionProtocol.BodySpace,
             data.Lane.Partition, data.Lane.Queue, data.Body.Id)))).IsEqualTo(data.Body);
-        var bytes = NativeSerialization.Serialize(data.Body).LongLength;
+        var bytes = OrleansSerialization.Serialize(data.Body).LongLength;
         await Assert.That(store.Read(view => view.GetRecord<QueueCounters>(KeySpace.Partition(QueueClaimVersionExhaustionProtocol.CounterSpace,
             data.Lane.Partition, data.Lane.Queue)))).IsEqualTo(new QueueCounters(1, bytes, 1, bytes, 1));
         await Assert.That(store.Read(view => view.GetRecord<string>(KeySpace.Partition(QueueClaimVersionExhaustionProtocol.LeaseSpace,
@@ -45,7 +45,7 @@ internal static class QueueDeliveryVersionExhaustionAssertions
         var data = state.Data;
         await Assert.That(database.InspectMessage(QueueClaimVersionExhaustionProtocol.Root, data.Lane, data.Body.Id))
             .IsEqualTo(new MessageInspection(metadata, data.Body.PayloadJson, data.Body.HeadersJson));
-        var bytes = NativeSerialization.Serialize(data.Body).LongLength;
+        var bytes = OrleansSerialization.Serialize(data.Body).LongLength;
         await Assert.That(store.Read(view => view.GetRecord<QueueCounters>(KeySpace.Partition(QueueClaimVersionExhaustionProtocol.CounterSpace,
             data.Lane.Partition, data.Lane.Queue)))).IsEqualTo(new QueueCounters(1, bytes, 0, 0, 1));
         await Assert.That(store.Read(view => view.GetRecord<string>(KeySpace.Partition(QueueClaimVersionExhaustionProtocol.ScheduledSpace,

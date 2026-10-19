@@ -11,7 +11,7 @@ internal static class MixedEventingRetentionBackupContinuation
         await EventingArtifactFences.FailedAsync(fixture, OperationKind.Delivery, oldAck, oldAck.CommandId,
             ErrorCode.TokenInvalidated, "The signed token is invalid.");
         var cut = fixture.Target!.Position;
-        await Assert.That(Errors.Code(TargetInboxNativeSetup.Apply(fixture.Database, state.Inbox, token).Problem)).IsEqualTo(ErrorCode.TokenInvalidated);
+        await Assert.That(Errors.Code(TargetInboxSetup.Apply(fixture.Database, state.Inbox, token).Problem)).IsEqualTo(ErrorCode.TokenInvalidated);
         await Assert.That(fixture.Target.Position).IsEqualTo(cut);
         await Assert.That(Errors.Code(fixture.Database.Apply(fixture.Operation(OperationKind.Batch, state.Purge,
             state.Purge.CommandId)).Problem)).IsEqualTo(ErrorCode.TokenInvalidated);
@@ -20,7 +20,7 @@ internal static class MixedEventingRetentionBackupContinuation
         await MixedEventingRetentionBackupHeldLease.RequireNaturalExpiryAsync(fixture, state, token);
         state.RestoredQueue = new(state.Queue.Partition, state.Queue.Time)
         {
-            NativeSubmit = operation => fixture.SubmitIssued(fixture.Database, operation, explicitTime: false, token)
+            RuntimeSubmit = operation => fixture.SubmitIssued(fixture.Database, operation, explicitTime: false, token)
         };
         await QueueLifecycleRestoredContinuation.RunAsync(fixture.Database, fixture.Target, state.RestoredQueue, token);
         await GroupsAsync(fixture);
@@ -31,8 +31,8 @@ internal static class MixedEventingRetentionBackupContinuation
             }, token).Get<CommitInboxResult>();
         await Assert.That(current.AlreadyProcessed).IsTrue();
         await Assert.That(current.OriginalEffectsToken).IsEqualTo(state.InboxResult.OriginalEffectsToken);
-        await TargetInboxNativeAssertions.CapacityAsync(fixture.Target, state.Inbox, TargetInboxUnitProtocol.FirstRevision);
-        await TargetInboxNativePermissions.ReplayAsync(fixture.Database, fixture.Target, state.Inbox, state.InboxResult, token);
+        await TargetInboxAssertions.CapacityAsync(fixture.Target, state.Inbox, TargetInboxUnitProtocol.FirstRevision);
+        await TargetInboxPermissions.ReplayAsync(fixture.Database, fixture.Target, state.Inbox, state.InboxResult, token);
         await MixedEventingRetentionBackupHealthy.RunAsync(fixture, state, token);
     }
 

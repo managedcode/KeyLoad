@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging.EventSource;
 
 namespace KeyLoad.UnitTests.Features.ClientApi;
 
-/// <summary>Keeps this native provider's closed category admission local to its owning factory.</summary>
+/// <summary>Keeps this execution provider's closed category admission local to its owning factory.</summary>
 internal static class RequestFailureDiagnosticLoggerFactory
 {
     private const string Category = "KeyLoad.Server.ServerErrorMiddleware";

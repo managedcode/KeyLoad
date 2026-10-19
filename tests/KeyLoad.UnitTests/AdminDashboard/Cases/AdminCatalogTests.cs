@@ -88,8 +88,7 @@ internal sealed class AdminCatalogTests
         using var db = new TestDatabase();
         db.Configure(First, ResourceKind.Collection);
         var readOwner = TestDatabaseEngineFactory.Capture(
-            UnitExecutionOptions.DatabaseLimits(new() { MaxQueryReadBytes = 1 }), UnitExecutionOptions.BlobExecution(),
-            UnitExecutionOptions.NativeClaimsExecution(), null, db.Database.EvaluationClock)(db.Store);
+            UnitExecutionOptions.DatabaseLimits(new() { MaxQueryReadBytes = 1 }), UnitExecutionOptions.RuntimeClaimsExecution(), null, db.Database.EvaluationClock)(db.Store);
         var error = Assert.ThrowsExactly<KeyLoadException>(() => new AdminCatalogReader(readOwner).Read(Administrator,
             new(db.Partition.TenantId, db.Partition.DatabaseId), CancellationToken.None));
         await Assert.That(error.Code).IsEqualTo(ErrorCode.BudgetExceeded);

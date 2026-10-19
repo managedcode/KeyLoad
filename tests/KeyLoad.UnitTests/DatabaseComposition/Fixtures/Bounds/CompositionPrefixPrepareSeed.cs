@@ -19,11 +19,11 @@ internal static class CompositionPrefixPrepareSeed
             };
             var request = new ConfigureResourceRequest(owner.Source.Partition.TenantId, owner.Source.Partition.DatabaseId, definition);
             var original = owner.Database.CreateCommand(OperationKind.ConfigureResource, Guid.NewGuid(), D.Root,
-                owner.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(request));
+                owner.Database.EvaluationClock.GetUtcNow(), OrleansSerialization.Serialize(request));
             var lifetime = ResourceLifetimeIdentity.Create(original, request.TenantId, request.DatabaseId, definition);
-            var bytes = NativeSerialization.Serialize(original);
+            var bytes = OrleansSerialization.Serialize(original);
             await CompositionPrefixPrepareAssertions.EqualAsync(definition, owner.Submit(original).Get<ResourceDefinition>());
-            await Assert.That(NativeSerialization.Serialize(owner.Retained(original)).SequenceEqual(bytes)).IsTrue();
+            await Assert.That(OrleansSerialization.Serialize(owner.Retained(original)).SequenceEqual(bytes)).IsTrue();
             owner.Lifetimes.Add(name, lifetime);
             await CompositionPrefixPrepareAssertions.EqualAsync(lifetime, owner.Store.Read(view =>
                 ResourceLifetimeCatalog.Read(view, request.TenantId, request.DatabaseId, name, definition)));
@@ -43,7 +43,7 @@ internal static class CompositionPrefixPrepareSeed
             ClusterAdministrator = true
         };
         var original = owner.Database.CreateCommand(OperationKind.ConfigurePrincipal, Guid.NewGuid(), D.Root,
-            owner.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(new ConfigurePrincipalRequest(administrator)));
+            owner.Database.EvaluationClock.GetUtcNow(), OrleansSerialization.Serialize(new ConfigurePrincipalRequest(administrator)));
         await CompositionPrefixPrepareAssertions.EqualAsync(administrator, owner.Submit(original).Get<PrincipalRecord>());
         return administratorId;
     }

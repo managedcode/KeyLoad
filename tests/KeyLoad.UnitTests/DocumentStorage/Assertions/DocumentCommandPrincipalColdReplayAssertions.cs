@@ -10,8 +10,8 @@ internal static class DocumentCommandPrincipalColdReplayAssertions
         await ReceiptAsync(owner, first, FirstDocument, 1);
         await ReceiptAsync(owner, second, SecondDocument, 1);
         await Assert.That(first.Entry.CanonicalSequence == second.Entry.CanonicalSequence).IsFalse();
-        await Assert.That(NativeSerialization.Serialize(first.Result)
-            .AsSpan().SequenceEqual(NativeSerialization.Serialize(second.Result))).IsFalse();
+        await Assert.That(OrleansSerialization.Serialize(first.Result)
+            .AsSpan().SequenceEqual(OrleansSerialization.Serialize(second.Result))).IsFalse();
         await ReplayAsync(owner, first);
         await ReplayAsync(owner, second);
         await Assert.That(owner.Database.GetOutboxStatus("root", owner.Source.Partition).Head.Tail).IsEqualTo(tail);
@@ -50,11 +50,11 @@ internal static class DocumentCommandPrincipalColdReplayAssertions
         var before = DocumentPatchAtomicityState.Read(owner);
         var stored = OutcomeStoreOracle.ReadPartition(owner.Store, owner.Source.Partition, operation.UserId!, operation.CommandId)
             ?? throw new InvalidOperationException("The original scoped outcome is missing.");
-        await DocumentPatchAtomicityAssertions.BytesAsync(NativeSerialization.Serialize(original.Result), NativeSerialization.Serialize(stored));
-        await DocumentPatchAtomicityAssertions.BytesAsync(NativeSerialization.Serialize(original.Result), NativeSerialization.Serialize(owner.Submit(operation)));
+        await DocumentPatchAtomicityAssertions.BytesAsync(OrleansSerialization.Serialize(original.Result), OrleansSerialization.Serialize(stored));
+        await DocumentPatchAtomicityAssertions.BytesAsync(OrleansSerialization.Serialize(original.Result), OrleansSerialization.Serialize(owner.Submit(operation)));
         var resolved = owner.Database.ResolveOutcome(operation);
-        await DocumentPatchAtomicityAssertions.BytesAsync(NativeSerialization.Serialize(original.Result), NativeSerialization.Serialize(resolved));
-        await DocumentPatchAtomicityAssertions.BytesAsync(NativeSerialization.Serialize(original.Entry), NativeSerialization.Serialize(owner.Entry(operation)));
+        await DocumentPatchAtomicityAssertions.BytesAsync(OrleansSerialization.Serialize(original.Result), OrleansSerialization.Serialize(resolved));
+        await DocumentPatchAtomicityAssertions.BytesAsync(OrleansSerialization.Serialize(original.Entry), OrleansSerialization.Serialize(owner.Entry(operation)));
         await before.RequireAsync(DocumentPatchAtomicityState.Read(owner));
     }
 

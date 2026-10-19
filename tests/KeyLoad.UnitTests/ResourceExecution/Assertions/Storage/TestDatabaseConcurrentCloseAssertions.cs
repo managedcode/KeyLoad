@@ -13,8 +13,8 @@ internal static class TestDatabaseConcurrentCloseAssertions
         await Assert.That(actual.Problem?.Detail).IsNull();
 
         await Assert.That(actual.Value?.GetType()).IsEqualTo(typeof(CommitReceipt));
-        await Assert.That(NativeSerialization.Serialize(actual.Get<CommitReceipt>())
-            .SequenceEqual(NativeSerialization.Serialize(expected))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(actual.Get<CommitReceipt>())
+            .SequenceEqual(OrleansSerialization.Serialize(expected))).IsTrue();
     }
 
     internal static async Task CurrentAsync(DatabaseEngine owner, ZoneTreeStore store, TestDatabaseConcurrentCloseSeed state)
@@ -33,9 +33,9 @@ internal static class TestDatabaseConcurrentCloseAssertions
         await Assert.That(page.Records.Length).IsEqualTo(TestDatabaseConcurrentCloseProtocol.OneRecord);
         var record = page.Records.Single();
         await Assert.That(record.Key.Span.SequenceEqual(DocumentStorageKeys.RecordKey(reference))).IsTrue();
-        await Assert.That(record.Value.Span.SequenceEqual(NativeSerialization.Serialize(expectedRecord))).IsTrue();
-        await Assert.That(NativeSerialization.Serialize(store.Identity)
-            .SequenceEqual(NativeSerialization.Serialize(state.Identity))).IsTrue();
+        await Assert.That(record.Value.Span.SequenceEqual(OrleansSerialization.Serialize(expectedRecord))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(store.Identity)
+            .SequenceEqual(OrleansSerialization.Serialize(state.Identity))).IsTrue();
         await Assert.That(store.Position).IsEqualTo(state.LocalPosition);
         await Assert.That(TenantAdmissionAssertions.State(store).SequenceEqual(state.Canonical)).IsTrue();
     }

@@ -6,25 +6,25 @@ internal sealed class SiteIsolatedCoverageInventoryTests
     [Test]
     [Arguments(IsolatedPath, true)]
     [Arguments(IsolatedPath, false)]
-    public async Task AC_ISO_009_NativeCoverageRequiresCurrentEvidenceToolInventory(string relative, bool inventoried)
+    public async Task AC_ISO_009_CoverageRequiresCurrentEvidenceToolInventory(string relative, bool inventoried)
     {
         var token = TestContext.Current!.Execution.CancellationToken;
         await using var temporary = new SiteCoverageFixtureDirectory();
         await temporary.CreateAsync(token);
         Directory.CreateDirectory(Path.GetDirectoryName(Path.Combine(temporary.Root, relative))!);
-        var bytes = await temporary.WriteSourceAsync(relative, SiteCoverageNativeTestSupport.FixtureSource, token);
-        var receipt = await SiteCoverageNativeTestSupport.RunNodeCoverageForAsync(temporary,
-            SiteCoverageNativeTestSupport.TrueArgument, relative, token);
+        var bytes = await temporary.WriteSourceAsync(relative, SiteCoverageTestSupport.FixtureSource, token);
+        var receipt = await SiteCoverageTestSupport.RunNodeCoverageForAsync(temporary,
+            SiteCoverageTestSupport.TrueArgument, relative, token);
         var sources = new Dictionary<string, SiteCoverageSourceEntry>(StringComparer.Ordinal);
         if (inventoried)
         {
             sources.Add(relative, new(relative, SiteCoverageSourceManifestWriter.Hash(bytes),
-                SiteCoverageNativeTestSupport.FixtureSource.Length));
+                SiteCoverageTestSupport.FixtureSource.Length));
         }
 
         if (inventoried)
         {
-            var snapshots = SiteCoverageNativeTestSupport.ParseSnapshots(receipt, temporary.Root, sources);
+            var snapshots = SiteCoverageTestSupport.ParseSnapshots(receipt, temporary.Root, sources);
             await Assert.That(snapshots.Count).IsEqualTo(SiteCoverageTokens.One);
         }
         else
@@ -32,7 +32,7 @@ internal sealed class SiteIsolatedCoverageInventoryTests
             var rejected = false;
             try
             {
-                _ = SiteCoverageNativeTestSupport.ParseSnapshots(receipt, temporary.Root, sources);
+                _ = SiteCoverageTestSupport.ParseSnapshots(receipt, temporary.Root, sources);
             }
             catch (InvalidDataException error)
             {

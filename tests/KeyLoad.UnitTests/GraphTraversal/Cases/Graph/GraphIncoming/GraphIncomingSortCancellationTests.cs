@@ -14,7 +14,7 @@ internal sealed class GraphIncomingSortCancellationTests
     private const int IncomingCount = 8;
 
     [Test]
-    public async Task FullNativePageSortPreservesCancellationAndDeadlineAndHealthyReadFollows()
+    public async Task FullPageSortPreservesCancellationAndDeadlineAndHealthyReadFollows()
     {
         using var database = GraphCrossPartitionTestSupport.CreateDatabase(
             new DatabaseLimits { MaxResults = IncomingCount });
@@ -33,7 +33,7 @@ internal sealed class GraphIncomingSortCancellationTests
     }
 
     private static async Task AssertCancellationPreservedAsync(TestDatabase database,
-        GraphIncomingEdgesPageV1 page, EntityRef target)
+        GraphIncomingEdgesPage page, EntityRef target)
     {
         using var cancellation = new CancellationTokenSource();
         var clock = new GraphIncomingSortCancellationTimeProvider(cancellation);
@@ -47,7 +47,7 @@ internal sealed class GraphIncomingSortCancellationTests
     }
 
     private static async Task AssertDeadlinePreservedAsync(TestDatabase database,
-        GraphIncomingEdgesPageV1 page, EntityRef target)
+        GraphIncomingEdgesPage page, EntityRef target)
     {
         using var cancellation = new CancellationTokenSource();
         var clock = new GraphIncomingSortCancellationTimeProvider(cancellation);
@@ -69,7 +69,7 @@ internal sealed class GraphIncomingSortCancellationTests
         }), clock, cancellationToken);
 
     private static GraphIncomingEdgesPageBuilder CreateBuilder(TestDatabase database,
-        GraphIncomingEdgesPageV1 page, EntityRef target, ReadExecutionBudget budget)
+        GraphIncomingEdgesPage page, EntityRef target, ReadExecutionBudget budget)
     {
         var (principal, graph) = ReadProjectionScope(database, budget, target.Partition);
         var builder = new GraphIncomingEdgesPageBuilder(database.Database, principal,
@@ -81,9 +81,9 @@ internal sealed class GraphIncomingSortCancellationTests
         return builder;
     }
 
-    private static GraphIncomingEdgesPageV1 ReadPage(TestDatabase database, EntityRef target)
+    private static GraphIncomingEdgesPage ReadPage(TestDatabase database, EntityRef target)
         => database.Database.ReadIncomingGraphEdges(GraphCrossPartitionTestSupport.Root,
-            new ReadIncomingGraphEdgesRequestV1(1, target, GraphCrossPartitionTestSupport.Graph, IncomingCount));
+            new ReadIncomingGraphEdgesRequest(1, target, GraphCrossPartitionTestSupport.Graph, IncomingCount));
 
     private static EntityRef[] CreateSources(PartitionRef partition)
     {
@@ -126,7 +126,7 @@ internal sealed class GraphIncomingSortCancellationTests
             return (principal, graph);
         });
 
-    private static async Task AssertOrderedSourcesAsync(GraphIncomingEdgesPageV1 page,
+    private static async Task AssertOrderedSourcesAsync(GraphIncomingEdgesPage page,
         EntityRef[] inputSources)
     {
         var expected = inputSources.OrderBy(source => source.Id, StringComparer.Ordinal).ToArray();

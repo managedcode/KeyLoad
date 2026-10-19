@@ -4,7 +4,7 @@ namespace KeyLoad;
 /// <param name="State">Describes the expected stream state.</param>
 /// <param name="Revision">Identifies the document, stream, or edge revision.</param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.ExpectedStreamRevision)]
+[Orleans.Alias(ContractAliases.ExpectedStreamRevision)]
 public sealed record ExpectedStreamRevision([property: Orleans.Id(0)] ExpectedStreamState State, [property: Orleans.Id(1)] long Revision = ExpectedStreamRevision.DefaultRevision)
 {
     private const int DefaultRevision = 0;

@@ -19,11 +19,11 @@ internal static class InitialCredentialAuthorityClients
                 await session.Client.ListToolsAsync(cancellationToken: token);
                 await WithHttpAsync(fixture, session, state, invalidKey, token);
             }
-            catch (Exception original) when (NativeCqrsBoundaryErrors.IsNonFatal(original)) { failures.Add(original); }
-            catch (Exception original) when (!NativeCqrsBoundaryErrors.IsNonFatal(original)) { failures.Add(original); }
+            catch (Exception original) when (CqrsBoundaryErrors.IsNonFatal(original)) { failures.Add(original); }
+            catch (Exception original) when (!CqrsBoundaryErrors.IsNonFatal(original)) { failures.Add(original); }
         }
-        catch (Exception cleanup) when (NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
-        catch (Exception cleanup) when (!NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
+        catch (Exception cleanup) when (CqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
+        catch (Exception cleanup) when (!CqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
@@ -43,11 +43,11 @@ internal static class InitialCredentialAuthorityClients
                 await InitialCredentialAuthorityValues.ReplayAsync(root, state, token);
                 await InitialCredentialAuthorityValues.HealthyAsync(root, reader, session, state, token);
             }
-            catch (Exception original) when (NativeCqrsBoundaryErrors.IsNonFatal(original)) { failures.Add(original); }
-            catch (Exception original) when (!NativeCqrsBoundaryErrors.IsNonFatal(original)) { failures.Add(original); }
+            catch (Exception original) when (CqrsBoundaryErrors.IsNonFatal(original)) { failures.Add(original); }
+            catch (Exception original) when (!CqrsBoundaryErrors.IsNonFatal(original)) { failures.Add(original); }
         }
-        catch (Exception cleanup) when (NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
-        catch (Exception cleanup) when (!NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
+        catch (Exception cleanup) when (CqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
+        catch (Exception cleanup) when (!CqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 }

@@ -8,9 +8,9 @@ internal static class SampleChunkSubnormalClusterSeed
     internal static async Task<SampleChunkSubnormalClusterState> RunAsync(ClusterFixture fixture,
         KeyLoadClient sdk, McpOfficialClient mcp, CancellationToken token)
     {
-        var native = await TimeSeriesClusterScenario.CreateAsync(fixture, token).ConfigureAwait(false);
+        var execution = await TimeSeriesClusterScenario.CreateAsync(fixture, token).ConfigureAwait(false);
         var from = TimeProvider.System.GetUtcNow();
-        var scenario = new SampleChunkClusterScenario(native, Guid.NewGuid(), from,
+        var scenario = new SampleChunkClusterScenario(execution, Guid.NewGuid(), from,
             from.AddHours(SampleChunkClusterProtocol.WindowHours));
         var open = Request(scenario, new OpenSampleChunkWindow(TimeSeriesClusterScenario.Set,
             TimeSeriesClusterScenario.Series, scenario.WindowId, scenario.From, scenario.Until));
@@ -47,7 +47,7 @@ internal static class SampleChunkSubnormalClusterSeed
     }
 
     internal static CommandRequest Request(SampleChunkClusterScenario scenario, Mutation mutation)
-        => new(Guid.NewGuid(), scenario.Native.Partition, [mutation]);
+        => new(Guid.NewGuid(), scenario.Execution.Partition, [mutation]);
     internal static async Task<CommitReceipt> CommitAsync(KeyLoadClient sdk, CommandRequest request, CancellationToken token)
         => await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(request, token).ConfigureAwait(false));
 }

@@ -7,7 +7,7 @@ internal sealed class SiteIsolatedArithmeticTests
     private const long ObservationMaximumBytes = 24_000_000;
     private static readonly string[] Metrics = ["throughput", "p50", "p95", "p99", "errors", "enqueue", "receive", "ack", "cpu", "alloc", "rss", "duration"];
 
-    /// <summary>AC-ISO-009: independent C# arithmetic covers all current cases, both native topologies and original session results.</summary>
+    /// <summary>AC-ISO-009: independent C# arithmetic covers all current cases, both execution topologies and original session results.</summary>
     [Test]
     public async Task AC_ISO_009_EveryMetricMatchesItsOwnWorkerWithoutCrossNodePooling()
     {
@@ -16,7 +16,7 @@ internal sealed class SiteIsolatedArithmeticTests
         using var projection = JsonDocument.Parse(await File.ReadAllBytesAsync(fixture.Projection, token));
         var selections = Selections();
         await using var temporary = SiteTempDirectory.Create();
-        var output = Path.Combine(temporary.Path, "native-observations.json");
+        var output = Path.Combine(temporary.Path, "execution-observations.json");
         var response = await SiteIsolatedNodeProcess.RunAsync(fixture.Inputs.Site, new
         {
             operation = "rowsBatch",

@@ -7,7 +7,7 @@ namespace KeyLoad.Query.Features.QueryExecution;
 internal static class DistributedSearchCanonicalText
 {
     internal static GlobalBranchWindow Capture(DatabaseEngine database, IKeyValueView view,
-        PrincipalRecord principal, SearchRequest request, DistributedTextStatisticsV1 statistics,
+        PrincipalRecord principal, SearchRequest request, DistributedTextStatistics statistics,
         GlobalBranchScope scope, string sourceWindowId, QueryExecutionOptions execution,
         FilteredSearchEligibility eligibility, ReadExecutionBudget budget, PrincipalRecord? sourcePrincipal = null)
     {

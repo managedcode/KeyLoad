@@ -64,7 +64,7 @@ internal static class AppliedOutcomeDefinitiveRefusalFlow
     {
         var bytes = QueueWholeFlowStorage.Bytes(fixture.Store);
         var position = fixture.Store.Position;
-        var identity = NativeSerialization.Serialize(fixture.Store.Identity);
+        var identity = OrleansSerialization.Serialize(fixture.Store.Identity);
         fixture.Store.Dispose();
         token.ThrowIfCancellationRequested();
         using var cold = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
@@ -83,7 +83,7 @@ internal static class AppliedOutcomeDefinitiveRefusalFlow
     {
         var bytes = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
-        var identity = NativeSerialization.Serialize(store.Identity);
+        var identity = OrleansSerialization.Serialize(store.Identity);
         store.Dispose();
         token.ThrowIfCancellationRequested();
         using var cold = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
@@ -108,7 +108,7 @@ internal static class AppliedOutcomeDefinitiveRefusalFlow
         var expected = ExpectedCanonicalCommit.Next(db, lane.Partition);
         var committed = db.Apply(issued);
         await AppliedOutcomeDefinitiveRefusalAssertions.ReceiptAsync(committed, ack.CommandId, expected, Healthy);
-        await NativeReplayResultAssertions.Same<CommitReceipt>(db.ResolveAppliedSubmissionOutcome(issued), committed);
+        await ReplayResultAssertions.Same<CommitReceipt>(db.ResolveAppliedSubmissionOutcome(issued), committed);
         request = request with
         {
             RequestId = Guid.NewGuid()
@@ -117,5 +117,5 @@ internal static class AppliedOutcomeDefinitiveRefusalFlow
     }
 
     internal static Command<DatabaseCommand> Issue<T>(DatabaseEngine db, OperationKind kind, T payload, Guid id)
-        => db.CreateCommand(kind, id, Worker, db.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(payload));
+        => db.CreateCommand(kind, id, Worker, db.EvaluationClock.GetUtcNow(), OrleansSerialization.Serialize(payload));
 }

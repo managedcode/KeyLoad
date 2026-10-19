@@ -15,7 +15,7 @@ internal static class ScaleServerResourceBoundsFlow
         using var timeout = new CancellationTokenSource(budget.Settings.CleanupThreshold, budget.TimeProvider);
         using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(testToken, timeout.Token);
         var state = new State();
-        var failures = new NativeSerializationBenchmarkFailures();
+        var failures = new SerializationBenchmarkFailures();
         try
         {
             await IsolatedAggregateNodeGuardedInvocation.CaptureAsync(
@@ -25,11 +25,11 @@ internal static class ScaleServerResourceBoundsFlow
         {
             await IsolatedAggregateNodeGuardedInvocation.CaptureAsync(cancellation.CancelAsync, failures.Add);
             await IsolatedAggregateNodeGuardedInvocation.CaptureAsync(
-                () => ScaleServerResourceBoundsNativeFixture.StopChildAsync(state.Child), failures.Add);
+                () => ScaleServerResourceBoundsFixture.StopChildAsync(state.Child), failures.Add);
             await ObserveAsync(state.Original, state.ExpectedFailure, failures);
             await ObserveAsync(state.Healthy, expected: null, failures);
             IsolatedAggregateNodeGuardedInvocation.Capture(
-                () => ScaleServerResourceBoundsNativeFixture.DeleteOwnedDirectory(state.Directory), failures.Add);
+                () => ScaleServerResourceBoundsFixture.DeleteOwnedDirectory(state.Directory), failures.Add);
         }
 
         failures.ThrowIfAny();
@@ -39,31 +39,31 @@ internal static class ScaleServerResourceBoundsFlow
         CancellationTokenSource timeout, CancellationToken token)
     {
         Directory.CreateDirectory(state.Directory);
-        var original = ScaleServerResourceProcess.RunAsync(ScaleServerResourceBoundsNativeFixture.ShellProcess,
-            ScaleServerResourceBoundsNativeFixture.Arguments(state.Marker, state.Gate, diagnostic), budget, token);
+        var original = ScaleServerResourceProcess.RunAsync(ScaleServerResourceBoundsFixture.ShellProcess,
+            ScaleServerResourceBoundsFixture.Arguments(state.Marker, state.Gate, diagnostic), budget, token);
         state.Original = original;
-        state.Child = await ScaleServerResourceCancellationNativeFixture.WaitForStartedChildAsync(state.Marker, budget, token);
-        await Assert.That(ScaleServerResourceCancellationNativeFixture.IsOriginalChildRunning(state.Child.Value)).IsTrue();
+        state.Child = await ScaleServerResourceCancellationFixture.WaitForStartedChildAsync(state.Marker, budget, token);
+        await Assert.That(ScaleServerResourceCancellationFixture.IsOriginalChildRunning(state.Child.Value)).IsTrue();
         await File.WriteAllTextAsync(state.Gate, string.Empty, token);
         state.ExpectedFailure = await Assert.ThrowsExactlyAsync<InvalidDataException>(() => original);
-        var expected = diagnostic ? ScaleServerResourceBoundsNativeFixture.ErrorBoundMessage : ScaleServerResourceBoundsNativeFixture.OutputBoundMessage;
+        var expected = diagnostic ? ScaleServerResourceBoundsFixture.ErrorBoundMessage : ScaleServerResourceBoundsFixture.OutputBoundMessage;
         await Assert.That(state.ExpectedFailure?.Message).IsEqualTo(expected);
         await Assert.That(original.IsFaulted).IsTrue();
         await Assert.That(timeout.IsCancellationRequested).IsFalse();
-        await Assert.That(ScaleServerResourceCancellationNativeFixture.IsOriginalChildRunning(state.Child.Value)).IsFalse();
+        await Assert.That(ScaleServerResourceCancellationFixture.IsOriginalChildRunning(state.Child.Value)).IsFalse();
         await HealthyAsync(state, token);
     }
 
     private static async Task HealthyAsync(State state, CancellationToken token)
     {
-        var healthy = ScaleServerResourceProcess.RunAsync(ScaleServerResourceBoundsNativeFixture.HealthyProcess,
-            [ScaleServerResourceBoundsNativeFixture.HealthyOutput], UnitAppHostResourceOptions.Budget(SampleByteGrant), token);
+        var healthy = ScaleServerResourceProcess.RunAsync(ScaleServerResourceBoundsFixture.HealthyProcess,
+            [ScaleServerResourceBoundsFixture.HealthyOutput], UnitAppHostResourceOptions.Budget(SampleByteGrant), token);
         state.Healthy = healthy;
-        await Assert.That(await healthy).IsEqualTo(ScaleServerResourceBoundsNativeFixture.HealthyOutput);
+        await Assert.That(await healthy).IsEqualTo(ScaleServerResourceBoundsFixture.HealthyOutput);
         await Assert.That(healthy.IsCompletedSuccessfully).IsTrue();
     }
 
-    private static async Task ObserveAsync(Task? original, Exception? expected, NativeSerializationBenchmarkFailures failures)
+    private static async Task ObserveAsync(Task? original, Exception? expected, SerializationBenchmarkFailures failures)
     {
         if (original is null)
         {
@@ -90,7 +90,7 @@ internal static class ScaleServerResourceBoundsFlow
     private sealed class State
     {
         internal string Directory { get; } = Path.Combine(Path.GetTempPath(), DirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
-        internal string Marker => Path.Combine(Directory, ScaleServerResourceCancellationNativeFixture.StartMarkerName);
+        internal string Marker => Path.Combine(Directory, ScaleServerResourceCancellationFixture.StartMarkerName);
         internal string Gate => Path.Combine(Directory, StartGateName);
         internal ScaleServerResourceChildIdentity? Child
         {

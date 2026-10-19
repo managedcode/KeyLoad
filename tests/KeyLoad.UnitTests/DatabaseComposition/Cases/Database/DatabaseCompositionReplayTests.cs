@@ -122,9 +122,9 @@ internal sealed class DatabaseCompositionReplayTests
         await Assert.That(receipt.Mutations.Length).IsEqualTo(2);
         await Assert.That(receipt.Mutations[0].CompositionReferences).IsEmpty();
         await Assert.That(receipt.Mutations[1].CompositionReferences.Length).IsEqualTo(2);
-        var native = NativeSerialization.Deserialize<CommitReceipt>(NativeSerialization.Serialize(receipt));
-        await Assert.That(native.Mutations[0].CompositionReferences).IsEmpty();
-        await Assert.That(native.Mutations[1].CompositionReferences.SequenceEqual(receipt.Mutations[1].CompositionReferences))
+        var execution = OrleansSerialization.Deserialize<CommitReceipt>(OrleansSerialization.Serialize(receipt));
+        await Assert.That(execution.Mutations[0].CompositionReferences).IsEmpty();
+        await Assert.That(execution.Mutations[1].CompositionReferences.SequenceEqual(receipt.Mutations[1].CompositionReferences))
             .IsTrue();
         var publicJson = JsonSerializer.Serialize(receipt, JsonDefaults.Options);
         await Assert.That(publicJson.Contains("CompositionReferences", StringComparison.Ordinal))
@@ -186,7 +186,7 @@ internal sealed class DatabaseCompositionReplayTests
             var original = db.Database.Apply(operation).Get<CommitReceipt>();
             db.Store.Dispose();
             using var reopened = new ZoneTreeStore(new(db.Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
-            var engine = new DatabaseEngine(reopened, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
+            var engine = new DatabaseEngine(reopened, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
 
             var retry = engine.Apply(operation).Get<CommitReceipt>();
             var resolved = engine.ResolveOutcome(operation).Get<CommitReceipt>();

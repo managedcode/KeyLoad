@@ -20,7 +20,7 @@ internal sealed class AnnSeedCutTests
             var identity = database.Store.Identity;
             var head = database.Database.ReadOutboxHead(view, database.Partition);
             var applied = view.ReadOwnedValue(KeySpace.Applied.ToArray()) is { } bytes
-                ? NativeSerialization.Deserialize<long>(bytes) : 0;
+                ? OrleansSerialization.Deserialize<long>(bytes) : 0;
             return (identity.NodeId, identity.Incarnation, identity.FormatVersion, identity.KeyCodecVersion,
                 identity.ReadGeneration, database.Store.Position, applied, head.Tail, head.FirstAvailable);
         });
@@ -77,7 +77,7 @@ internal sealed class AnnSeedCutTests
             view.VisitRange(KeySpace.Partition("vector", database.Partition, AnnSeedTestSupport.Collection,
                 AnnSeedTestSupport.Field), 4, (key, value) =>
             {
-                ids.Add(NativeSerialization.Deserialize<VectorRecord>(value).DocumentId);
+                ids.Add(OrleansSerialization.Deserialize<VectorRecord>(value).DocumentId);
                 return true;
             });
             return ids.ToArray();

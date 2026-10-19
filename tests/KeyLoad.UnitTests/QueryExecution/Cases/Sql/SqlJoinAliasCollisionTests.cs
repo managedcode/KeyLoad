@@ -13,11 +13,11 @@ internal sealed class SqlJoinAliasCollisionTests
             using var database = new TestDatabase();
             await ServerFailureObserver.ObserveAsync(() => RunAsync(database), failures);
         }
-        catch (Exception error) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+        catch (Exception error) when (global::KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(error))
         {
             failures.Add(error);
         }
-        catch (Exception error) when (!global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+        catch (Exception error) when (!global::KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(error))
         {
             failures.Add(error);
         }

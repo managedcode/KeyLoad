@@ -11,7 +11,7 @@ internal sealed record ServerRuntimeOptions(
     IOptions<NodeOptions> Node,
     IOptions<ReplicaCopyOptions> Copies,
     IOptions<DueCoordinationOptions> DueCoordination,
-    IOptions<NativeDurableJobOptions> DurableJobs,
+    IOptions<RuntimeDurableJobOptions> DurableJobs,
     IOptions<CommandAdmissionLimits> CommandAdmission,
     IOptions<HttpAdmissionLimits> HttpAdmission,
     IOptions<McpMemoryLimits> McpMemory,
@@ -20,8 +20,8 @@ internal sealed record ServerRuntimeOptions(
     IOptions<ZoneTreePointCacheExecutionOptions> PointCache,
     IOptions<GrainRoutingOptions> GrainRouting,
     IOptions<AdminObservationOptions> AdminObservation,
-    IOptions<NativeTextExecutionOptions> NativeText,
-    IOptions<NativeAnnExecutionOptions> NativeAnn,
+    IOptions<TextExecutionOptions> RuntimeText,
+    IOptions<AnnExecutionOptions> RuntimeAnn,
     IOptions<ServerExecutionOptions> ServerExecution,
     IOptions<DatabasePhaseExecutionOptions> DatabasePhaseExecution,
     CoreRuntimeOptions Core)
@@ -40,8 +40,8 @@ internal sealed record ServerRuntimeOptions(
         _ = PointCache.Value;
         _ = GrainRouting.Value;
         _ = AdminObservation.Value;
-        _ = NativeText.Value;
-        _ = NativeAnn.Value;
+        _ = RuntimeText.Value;
+        _ = RuntimeAnn.Value;
         _ = ServerExecution.Value;
         _ = DatabasePhaseExecution.Value;
         Core.ValidateBeforePhysicalOwnership();

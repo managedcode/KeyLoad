@@ -14,8 +14,8 @@ internal static class ChunkSelectedIntegrityDamage
     internal static byte[] Inject(ChunkSelectedIntegrityFixture fixture, ChunkSelectedIntegrityFault fault)
     {
         var original = fixture.Store.Read(view => view.ReadOwnedValue(Key(fixture)))!;
-        var envelope = NativeSerialization.Deserialize<SampleChunkManifestEnvelope>(original);
-        var manifest = NativeSerialization.Deserialize<SampleChunkManifest>(envelope.Encoded.Span);
+        var envelope = OrleansSerialization.Deserialize<SampleChunkManifestEnvelope>(original);
+        var manifest = OrleansSerialization.Deserialize<SampleChunkManifest>(envelope.Encoded.Span);
         var changed = fault switch
         {
             ChunkSelectedIntegrityFault.WindowIdentity => manifest with { WindowId = Guid.NewGuid() },
@@ -23,8 +23,8 @@ internal static class ChunkSelectedIntegrityDamage
             ChunkSelectedIntegrityFault.SourceSequence => manifest with { SourceSequence = 0 },
             _ => throw new ArgumentOutOfRangeException(nameof(fault))
         };
-        var bytes = NativeSerialization.Serialize(changed);
-        Put(fixture, NativeSerialization.Serialize(new SampleChunkManifestEnvelope(bytes, SHA256.HashData(bytes))));
+        var bytes = OrleansSerialization.Serialize(changed);
+        Put(fixture, OrleansSerialization.Serialize(new SampleChunkManifestEnvelope(bytes, SHA256.HashData(bytes))));
         return original;
     }
 

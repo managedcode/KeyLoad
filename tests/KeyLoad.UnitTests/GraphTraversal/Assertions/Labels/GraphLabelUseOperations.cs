@@ -54,7 +54,7 @@ internal static class GraphLabelUseOperations
     {
         var image = CanonicalStoreImage.Bytes(store);
         var position = store.Position;
-        var identity = NativeSerialization.Serialize(store.Identity);
+        var identity = OrleansSerialization.Serialize(store.Identity);
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(operation, failures);
         await ServerFailureObserver.ObserveAsync(() => ConserveAsync(store, image, position, identity), failures);
@@ -74,7 +74,7 @@ internal static class GraphLabelUseOperations
         }, failures);
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            await Assert.That(NativeSerialization.Serialize(store.Identity).AsSpan().SequenceEqual(identity)).IsTrue();
+            await Assert.That(OrleansSerialization.Serialize(store.Identity).AsSpan().SequenceEqual(identity)).IsTrue();
         }, failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }

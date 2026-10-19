@@ -93,7 +93,7 @@ internal sealed class OnlineTextChildCalls(DecodedGrainRequest parent, string si
         {
             throw Errors.Fail(failure, reply.SafeDetail ?? GrainRoutingProtocol.InvalidRequest);
         }
-        return NativeSerialization.Deserialize<GrainValue>(reply.Payload.Span).Value as TResult
+        return OrleansSerialization.Deserialize<GrainValue>(reply.Payload.Span).Value as TResult
             ?? throw Errors.Fail(commandId == Guid.Empty ? ErrorCode.Corruption : ErrorCode.UnknownWriteOutcome,
                 TextIndexMaintenanceProtocol.Interrupted);
     }

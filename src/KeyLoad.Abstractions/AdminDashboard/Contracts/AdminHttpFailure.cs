@@ -8,6 +8,6 @@ namespace KeyLoad;
 /// <param name="Aborted">Whether the caller aborted the request before completion.</param>
 /// <param name="ElapsedMilliseconds">Measured request elapsed milliseconds.</param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.AdminHttpFailure)]
+[Orleans.Alias(ContractAliases.AdminHttpFailure)]
 public sealed record AdminHttpFailure([property: Orleans.Id(0)] DateTimeOffset At, [property: Orleans.Id(1)] string Method, [property: Orleans.Id(2)] string Route, [property: Orleans.Id(3)] int StatusCode, [property: Orleans.Id(4)] bool Aborted,
     [property: Orleans.Id(5)] double ElapsedMilliseconds);

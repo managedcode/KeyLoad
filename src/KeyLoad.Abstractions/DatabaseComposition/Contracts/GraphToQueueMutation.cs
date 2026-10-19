@@ -9,7 +9,7 @@ namespace KeyLoad;
 /// <param name="MaxVertices">Bounds retained visible entities.</param>
 /// <param name="MaxEdges">Bounds examined edges and derived messages.</param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.GraphToQueueMutation)]
+[Orleans.Alias(ContractAliases.GraphToQueueMutation)]
 public sealed record GraphToQueueMutation([property: Orleans.Id(0)] string Queue,
     [property: Orleans.Id(1)] string Graph, [property: Orleans.Id(2)] EntityRef Start,
     [property: Orleans.Id(3)] string MessageIdPrefix,

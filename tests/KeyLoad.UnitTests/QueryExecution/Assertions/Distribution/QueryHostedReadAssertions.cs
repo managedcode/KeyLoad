@@ -2,7 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace KeyLoad.UnitTests.Features.QueryExecution;
 
-/// <summary>Checks genuine progress on every observed native physical owner in the original cluster.</summary>
+/// <summary>Checks genuine progress on every observed execution physical owner in the original cluster.</summary>
 internal static class QueryHostedReadAssertions
 {
     internal static async Task ProgressAsync(RequestCqrsHostedCluster cluster, QueryHostedReadObservation read)

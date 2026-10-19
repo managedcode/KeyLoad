@@ -2,7 +2,7 @@ namespace KeyLoad.Clustering;
 
 internal static class Bm25RequestScope
 {
-    internal const string Purpose = "keyload-bm25-corpus-publication-verified-v1";
+    internal const string Purpose = "keyload-bm25-corpus-publication-verified";
 
     internal static bool Validate(GrainRequestEnvelope request)
     {

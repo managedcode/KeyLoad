@@ -8,7 +8,7 @@ namespace KeyLoad.UnitTests.Features.Messaging;
 internal static class BudgetedQueueReceiveOutcomeAssertions
 {
     internal static async Task EqualAsync<T>(T expected, T actual)
-        => await Assert.That(NativeSerialization.Serialize(actual).SequenceEqual(NativeSerialization.Serialize(expected))).IsTrue();
+        => await Assert.That(OrleansSerialization.Serialize(actual).SequenceEqual(OrleansSerialization.Serialize(expected))).IsTrue();
 
     internal static async Task ReceiveAsync(BudgetedQueueReceiveOutcomeFixture fixture,
         Command<DatabaseCommand> operation, Result<object> result, string messageId)
@@ -17,7 +17,7 @@ internal static class BudgetedQueueReceiveOutcomeAssertions
         var delivery = await Assert.That(actual.Deliveries).HasSingleItem();
         await Assert.That(delivery.Token).IsNotEmpty();
         var entry = fixture.Database.ReadStoredOutcome(operation);
-        var appended = entry.PreparedCommand ?? throw new InvalidOperationException("The native receive entry is absent.");
+        var appended = entry.PreparedCommand ?? throw new InvalidOperationException("The execution receive entry is absent.");
         await Assert.That(appended.Value!.Kind).IsEqualTo(operation.Value!.Kind);
         await Assert.That(appended.UserId!).IsEqualTo(operation.UserId!);
         await Assert.That(appended.Value!.Input.Span.SequenceEqual(operation.Value!.Input.Span)).IsTrue();
@@ -34,19 +34,19 @@ internal static class BudgetedQueueReceiveOutcomeAssertions
     internal static async Task UnchangedAsync(BudgetedQueueReceiveOutcomeFixture fixture, Func<Task> body)
     {
         var database = fixture.Database;
-        var identity = NativeSerialization.Serialize(database.Store.Identity);
+        var identity = OrleansSerialization.Serialize(database.Store.Identity);
         var rows = TeamRowPolicyAssertions.Image(database.Store);
         var position = database.Store.Position;
         var applied = database.Database.LastApplied;
         var journal = database.ReadCanonicalCut();
         var outbox = database.Database.GetOutboxStatus(P.Root, database.Partition);
         var outcome = OutcomeBytes(fixture);
-        await Assert.That(NativeSerialization.Serialize(fixture.OriginalIntent)
+        await Assert.That(OrleansSerialization.Serialize(fixture.OriginalIntent)
             .SequenceEqual(fixture.OriginalIntentBytes)).IsTrue();
         await body();
-        await Assert.That(NativeSerialization.Serialize(fixture.OriginalIntent)
+        await Assert.That(OrleansSerialization.Serialize(fixture.OriginalIntent)
             .SequenceEqual(fixture.OriginalIntentBytes)).IsTrue();
-        await Assert.That(NativeSerialization.Serialize(database.Store.Identity).SequenceEqual(identity)).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(database.Store.Identity).SequenceEqual(identity)).IsTrue();
         await Assert.That(TeamRowPolicyAssertions.Image(database.Store).SequenceEqual(rows, StringComparer.Ordinal)).IsTrue();
         await Assert.That(database.Store.Position).IsEqualTo(position);
         await Assert.That(database.Database.LastApplied).IsEqualTo(applied);

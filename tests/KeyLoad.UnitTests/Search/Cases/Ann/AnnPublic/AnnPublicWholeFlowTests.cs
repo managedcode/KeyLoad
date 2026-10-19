@@ -18,7 +18,7 @@ internal sealed class AnnPublicWholeFlowTests
     public Task ActualProvisionedSearchReportsModeOrBoundedRefusalThenHealthyAndEmptyPages(int threshold, int breadth, AnnPageMode mode)
         => AnnPublicWholeFlow.RunAsync(threshold, breadth, async (database, runtime, pin) =>
         {
-            var image = NativeAnnMaintenanceTestData.Snapshot(database);
+            var image = AnnMaintenanceTestData.Snapshot(database);
             var cut = database.Store.Position;
             var request = AnnPublicWholeFlow.Request(database, pin);
             var engine = AnnPublicWholeFlow.Engine(database, runtime);
@@ -48,9 +48,9 @@ internal sealed class AnnPublicWholeFlowTests
     public Task ActualDisabledMissingGenerationAndResultBudgetFailWithoutProvisioningOrPartialThenHealthyPage()
         => AnnPublicWholeFlow.RunAsync(ExactThreshold, FullBreadth, async (database, runtime, pin) =>
         {
-            var image = NativeAnnMaintenanceTestData.Snapshot(database);
+            var image = AnnMaintenanceTestData.Snapshot(database);
             var cut = database.Store.Position;
-            var files = NativeAnnFixtureFileSnapshot.Capture(database.Directory);
+            var files = AnnFixtureFileSnapshot.Capture(database.Directory);
             var request = AnnPublicWholeFlow.Request(database, pin);
             await FailureAsync(() => AnnPublicWholeFlow.Engine(database, runtime, enabled: false)
                 .ApproximateSearchAsync(AnnProjectionPinTestSupport.Principal, request), ErrorCode.UnsupportedCapability);
@@ -63,7 +63,7 @@ internal sealed class AnnPublicWholeFlowTests
             await FailureAsync(() => AnnPublicWholeFlow.Engine(database, runtime, bytes: TooSmallResult)
                 .ApproximateSearchAsync(AnnProjectionPinTestSupport.Principal, request), ErrorCode.BudgetExceeded);
             await AnnPublicWholeFlow.UnchangedAsync(database, image, cut);
-            await Assert.That(NativeAnnFixtureFileSnapshot.Capture(database.Directory)).IsEquivalentTo(files, CollectionOrdering.Matching);
+            await Assert.That(AnnFixtureFileSnapshot.Capture(database.Directory)).IsEquivalentTo(files, CollectionOrdering.Matching);
             await AnnPublicWholeFlow.PageAsync(await engine.ApproximateSearchAsync(AnnProjectionPinTestSupport.Principal, request),
                 database, cut, AnnPageMode.Exact);
             await AnnPublicWholeFlow.UnchangedAsync(database, image, cut);
@@ -75,9 +75,9 @@ internal sealed class AnnPublicWholeFlowTests
     public Task ActualFilteredSearchDeduplicatesIdsOrRefusesInsufficientBreadthThenRemainsHealthy(int breadth, AnnPageMode mode)
         => AnnPublicWholeFlow.RunAsync(ApproximateThreshold, breadth, async (database, runtime, pin) =>
         {
-            var image = NativeAnnMaintenanceTestData.Snapshot(database);
+            var image = AnnMaintenanceTestData.Snapshot(database);
             var cut = database.Store.Position;
-            var files = NativeAnnFixtureFileSnapshot.Capture(database.Directory);
+            var files = AnnFixtureFileSnapshot.Capture(database.Directory);
             var original = AnnPublicWholeFlow.Request(database, pin);
             var request = original with
             {
@@ -107,14 +107,14 @@ internal sealed class AnnPublicWholeFlowTests
             var healthy = await engine.ApproximateSearchAsync(AnnProjectionPinTestSupport.Principal, original, token);
             await AnnPublicWholeFlow.PageAsync(healthy, database, cut, mode);
             await AnnPublicWholeFlow.UnchangedAsync(database, image, cut);
-            await Assert.That(NativeAnnFixtureFileSnapshot.Capture(database.Directory))
+            await Assert.That(AnnFixtureFileSnapshot.Capture(database.Directory))
                 .IsEquivalentTo(files, CollectionOrdering.Matching);
         });
 
-    private static async Task BoundedThenHealthyAsync(TestDatabase database, NativeAnnMaintenanceTestRuntime runtime,
+    private static async Task BoundedThenHealthyAsync(TestDatabase database, AnnMaintenanceTestRuntime runtime,
         AnnMaintenanceRequest pin, ApproximateSearchRequest request)
     {
-        var image = NativeAnnMaintenanceTestData.Snapshot(database);
+        var image = AnnMaintenanceTestData.Snapshot(database);
         var cut = database.Store.Position;
         var engine = AnnPublicWholeFlow.Engine(database, runtime);
         await FailureAsync(() => engine.ApproximateSearchAsync(AnnProjectionPinTestSupport.Principal, request), ErrorCode.BudgetExceeded);
@@ -136,7 +136,7 @@ internal sealed class AnnPublicWholeFlowTests
     {
         AnnSearchPage? partial = null;
         var failure = await Assert.ThrowsExactlyAsync<KeyLoadException>(async () => partial = await operation())
-            ?? throw new InvalidOperationException("The real native ANN operation did not fail.");
+            ?? throw new InvalidOperationException("The real execution ANN operation did not fail.");
         await Assert.That(failure.Code).IsEqualTo(code);
         await Assert.That(partial).IsNull();
     }

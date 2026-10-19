@@ -35,7 +35,7 @@ internal sealed class OrleansWalLifecycleTests
             await Assert.That(BinaryPrimitives.ReadUInt64LittleEndian(checkpoint))
                 .IsEqualTo(CheckpointMagic);
             var payloadLength = BinaryPrimitives.ReadInt32LittleEndian(checkpoint.AsSpan(PayloadLengthOffset));
-            var metadata = NativeSerialization.Deserialize<ZoneTreeCheckpointMetadata>(
+            var metadata = OrleansSerialization.Deserialize<ZoneTreeCheckpointMetadata>(
                 checkpoint.AsSpan(WalFileFixture.HeaderBytes, payloadLength));
             await Assert.That(metadata.Version).IsEqualTo(CheckpointVersion);
             await WalFileFixture.AssertPreservedIdentity(original, store.Identity);

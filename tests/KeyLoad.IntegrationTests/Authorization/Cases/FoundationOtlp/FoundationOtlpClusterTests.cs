@@ -7,7 +7,7 @@ internal sealed class FoundationOtlpClusterTests
 {
     [Test]
     [NotInParallel]
-    public async Task NativeDashboardReceivesActualClusterSdkMcpPolicyRepairTracesAndPrivateFreeRejectionLogs()
+    public async Task DashboardReceivesActualClusterSdkMcpPolicyRepairTracesAndPrivateFreeRejectionLogs()
     {
         var token = TestContext.Current!.Execution.CancellationToken;
         var clock = TimeProvider.System;

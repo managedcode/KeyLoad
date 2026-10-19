@@ -31,9 +31,9 @@ internal static class SharedDomainRecoveryImage
         var appliedKey = Convert.ToHexString(KeySpace.AppliedBytes) + RowSeparator;
         var expected = WithoutScope(input.SeedImage, original).Select(row =>
             row.StartsWith(appliedKey, StringComparison.Ordinal)
-                ? appliedKey + Convert.ToHexString(NativeSerialization.Serialize(expectedApplied)) : row);
-        await Assert.That(store.Read(view => NativeSerialization.Deserialize<long>(view.ReadOwnedValue(KeySpace.AppliedBytes)
-            ?? throw new InvalidOperationException(MissingNative)))).IsEqualTo(expectedApplied);
+                ? appliedKey + Convert.ToHexString(OrleansSerialization.Serialize(expectedApplied)) : row);
+        await Assert.That(store.Read(view => OrleansSerialization.Deserialize<long>(view.ReadOwnedValue(KeySpace.AppliedBytes)
+            ?? throw new InvalidOperationException(RuntimeMissing)))).IsEqualTo(expectedApplied);
         await Assert.That(WithoutScope(SharedDomainStoredImage.Capture(store), original))
             .IsEquivalentTo(expected, TUnit.Assertions.Enums.CollectionOrdering.Matching);
     }

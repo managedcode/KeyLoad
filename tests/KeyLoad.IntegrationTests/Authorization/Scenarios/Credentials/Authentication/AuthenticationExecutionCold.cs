@@ -1,5 +1,5 @@
 using KeyLoad.Client;
-using KeyLoad.RecoveryTests.Features.ClusterRouting;
+using KeyLoad.RecoveryTests.Features.OrleansExecution;
 using KeyLoad.Server;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -15,7 +15,7 @@ internal static class AuthenticationExecutionCold
         {
             var originalOwners = hosts.Nodes.Select(host => host.Services.GetRequiredService<PartitionHostApplicationOwner>()).ToArray();
             var originalNodes = hosts.Nodes.Select(host => host.Services.GetRequiredService<OrleansNode>()).ToArray();
-            var identities = hosts.Nodes.Select(host => NativeSerialization.Serialize(host.Database.Store.Identity)).ToArray();
+            var identities = hosts.Nodes.Select(host => OrleansSerialization.Serialize(host.Database.Store.Identity)).ToArray();
             await hosts.StopAsync(token);
             await Assert.That(originalOwners.All(owner => owner.Closing is { IsCompletedSuccessfully: true } && owner.CanReleaseRoot)).IsTrue();
             await Assert.That(originalNodes.All(node => node.Closing is { IsCompletedSuccessfully: true } && node.HasJoinedRequestWork)).IsTrue();
@@ -23,7 +23,7 @@ internal static class AuthenticationExecutionCold
             await Assert.That(hosts.Nodes.Length).IsEqualTo(originalOwners.Length);
             for (var index = AuthenticationExecutionProtocol.NoEvents; index < identities.Length; index++)
             {
-                await Assert.That(NativeSerialization.Serialize(hosts.Nodes[index].Database.Store.Identity).AsSpan().SequenceEqual(identities[index])).IsTrue();
+                await Assert.That(OrleansSerialization.Serialize(hosts.Nodes[index].Database.Store.Identity).AsSpan().SequenceEqual(identities[index])).IsTrue();
             }
             var source = hosts.Nodes[AuthenticationExecutionProtocol.NoEvents];
             using var rootHttp = new HttpClient { BaseAddress = source.PublicEndpoint, Timeout = Timeout.InfiniteTimeSpan };

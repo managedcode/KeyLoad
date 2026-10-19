@@ -47,7 +47,7 @@ internal static class UserAnalyticsHostRuntimeTrial
     {
         var cut = UserAnalyticsHostAssertions.Capture(host, [], []);
         await Assert.ThrowsAsync<OperationCanceledException>(() => bound.Work.AggregateAsync(host,
-            bound.Runtime, P.Query(), _ => Task.CompletedTask, token, cancelBeforeNative: true));
+            bound.Runtime, P.Query(), _ => Task.CompletedTask, token, cancelBefore: true));
         await Assert.That(token.IsCancellationRequested).IsFalse();
         await UserAnalyticsHostAssertions.CutAsync(host, cut);
         await UserAnalyticsHostAssertions.EmptyAsync(host, bound.Runtime);

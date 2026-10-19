@@ -23,7 +23,7 @@ internal sealed class OptionsSnapshotCaptureTests
     }
 
     [Test]
-    public async Task AnUnassignedLocalAliasAndReadonlyRecordCloneRetainTheNativeValueSourceAsync()
+    public async Task AnUnassignedLocalAliasAndReadonlyRecordCloneRetainTheValueSourceAsync()
     {
         const string source = """
             [KeyLoad.ConfigurationOptions]

@@ -4,7 +4,7 @@ namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
 
 internal sealed class SiteIsolatedBrowserTests
 {
-    /// <summary>AC-ISO-009: actual emitted page exposes all native dimensions with exact worker/artifact links.</summary>
+    /// <summary>AC-ISO-009: actual emitted page exposes all execution dimensions with exact worker/artifact links.</summary>
     [Test]
     public async Task AC_ISO_009_RealChromeSelectsEveryEngineNodeScenarioAndRepetition()
     {
@@ -14,7 +14,7 @@ internal sealed class SiteIsolatedBrowserTests
         await using var browser = await SiteIsolatedBrowserStartup.StartAsync(fixture, token);
         await SiteIsolatedBrowserAssertions.WaitAsync(browser.Chrome.Cdp, token);
         await AssertAccessibilityAsync(browser.Chrome.Cdp, token);
-        await SiteIsolatedBrowserKeyboardAssertions.AssertNativeNodeSelectionAsync(browser.Chrome.Cdp, projection.RootElement, token);
+        await SiteIsolatedBrowserKeyboardAssertions.AssertNodeSelectionAsync(browser.Chrome.Cdp, projection.RootElement, token);
         foreach (var scenario in SiteIsolatedOracle.Cases)
         {
             await SiteIsolatedBrowserAssertions.SelectAsync(browser.Chrome.Cdp, "scenario", scenario, token);

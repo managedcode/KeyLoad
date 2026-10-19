@@ -54,7 +54,7 @@ internal static class ScriptDomJoinLowering
     }
     private const int PayloadIndex = 1;
     private const int TargetIndex = 2;
-    private const int JoinDialectVersion = 2;
+    private const int JoinDialectVersion = SqlOperationProtocol.DefaultQueryDialectVersion;
     private const int QualifiedSegments = 2;
     private const int ReferenceSegments = 3;
     private const string Payload = "payload";

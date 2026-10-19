@@ -4,28 +4,28 @@ namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 
 internal static class SqlNullDistinctClusterCases
 {
-    internal const string NumericSeparatorProfile = "SQL.NumericDigitSeparators.v1";
+    internal const string NumericSeparatorProfile = "SQL.NumericDigitSeparators";
     internal const string NumericSeparatorClause = "score = 1_0e-1";
     internal const string NumericRadixSeparatorClause = "score = 0b_1";
     internal const string NumericOctalSeparatorClause = "score = 0o_1";
-    internal const string Profile = "SQL.NullDistinct.v1";
-    internal const string NullSynonymProfile = "SQL.NullPredicateSynonyms.v1";
+    internal const string Profile = "SQL.NullDistinct";
+    internal const string NullSynonymProfile = "SQL.NullPredicateSynonyms";
     internal const string NullClause = "score ISNULL";
     internal const string NotNullClause = "score NOTNULL";
-    internal const string PositiveProfile = "SQL.PositiveNumericLiteral.v1";
+    internal const string PositiveProfile = "SQL.PositiveNumericLiteral";
     internal const string PositiveClause = "score = +1";
-    internal const string LeadingProfile = "SQL.LeadingDecimalLiteral.v1";
+    internal const string LeadingProfile = "SQL.LeadingDecimalLiteral";
     internal const string LeadingClause = "score > .5";
-    internal const string HexProfile = "SQL.HexadecimalIntegerLiteral.v1";
+    internal const string HexProfile = "SQL.HexadecimalIntegerLiteral";
     internal const string HexClause = "score = 0x1";
-    internal const string UnicodeProfile = "SQL.UnicodeStringLiteral.v1";
+    internal const string UnicodeProfile = "SQL.UnicodeStringLiteral";
     internal const string UnicodeClause = "score = 1 AND label = U&'l\\006fw'";
     internal const string UnicodeCustomClause = "score = 1 AND label = U&'l#006fw' UESCAPE '#'";
-    internal const string BinaryOctalProfile = "SQL.BinaryOctalIntegerLiteral.v1";
+    internal const string BinaryOctalProfile = "SQL.BinaryOctalIntegerLiteral";
     internal const string BinaryClause = "score = 0b1";
     internal const string OctalClause = "score = 0o1";
-    internal const string EscapeProfile = "SQL.EscapeStringLiteral.v1";
-    internal const string DollarProfile = "SQL.DollarQuotedString.v1";
+    internal const string EscapeProfile = "SQL.EscapeStringLiteral";
+    internal const string DollarProfile = "SQL.DollarQuotedString";
     internal const string DollarClause = "score = 1 AND label = $tag$low$tag$";
     internal const string EscapeClause = "score = 1 AND label = E'low'";
     internal const string ContinuationClause = "score = 1 AND label = 'lo'\n'w'";

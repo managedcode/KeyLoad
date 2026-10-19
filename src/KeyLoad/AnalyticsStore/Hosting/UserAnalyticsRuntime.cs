@@ -6,7 +6,7 @@ using Microsoft.Extensions.Options;
 namespace KeyLoad.Server;
 
 /// <summary>Retains bounded original derived generations inside the existing physical host lifetime.</summary>
-internal sealed class UserAnalyticsRuntime(IOptions<DatabaseLimits> options) : INativeUserAnalytics, IAsyncDisposable
+internal sealed class UserAnalyticsRuntime(IOptions<DatabaseLimits> options) : IUserAnalytics, IAsyncDisposable
 {
     private const int NoCleanupFailures = 0;
     private const string Unavailable = "The user analytics physical owner is unavailable.";
@@ -43,7 +43,7 @@ internal sealed class UserAnalyticsRuntime(IOptions<DatabaseLimits> options) : I
         }
     }
 
-    public Task<NativeAnalyticsAggregate> AggregateAsync(AnalyticsAggregateSnapshot snapshot,
+    public Task<RuntimeAnalyticsAggregate> AggregateAsync(AnalyticsAggregateSnapshot snapshot,
         IResourceLifetimeWorkBinding binding, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(snapshot);
@@ -93,8 +93,8 @@ internal sealed class UserAnalyticsRuntime(IOptions<DatabaseLimits> options) : I
         var failures = new List<Exception>();
         foreach (var work in originals)
         {
-            // The connection owns its query outcome; this owner separately retains every native cleanup failure.
-            await work.Original.ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
+            // The connection owns its query outcome; this owner separately retains every execution cleanup failure.
+            await work.Original.ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing | ConfigureAwaitOptions.ContinueOnCapturedContext);
             failures.AddRange(work.Execution.CleanupFailures);
         }
         if (!CanReleasePhysical)

@@ -1,5 +1,5 @@
 using KeyLoad.Storage;
-using static KeyLoad.UnitTests.Features.StorageRecovery.NativeCapturedReadScopeScenario;
+using static KeyLoad.UnitTests.Features.StorageRecovery.CapturedReadScopeScenario;
 
 namespace KeyLoad.UnitTests.Features.StorageRecovery;
 
@@ -17,16 +17,16 @@ internal sealed class LiveRangeCancellationCallbacks(CancellationTokenSource sel
 
     internal static void Stage(IAtomicTransaction tx)
     {
-        tx.Put(NativeReadCutFixture.Key(First), NativeReadCutFixture.Value(StagedFirst));
-        tx.Put(NativeReadCutFixture.Key(Second), NativeReadCutFixture.Value(StagedSecond));
-        tx.Delete(NativeReadCutFixture.Key(Point));
+        tx.Put(ReadCutFixture.Key(First), ReadCutFixture.Value(StagedFirst));
+        tx.Put(ReadCutFixture.Key(Second), ReadCutFixture.Value(StagedSecond));
+        tx.Delete(ReadCutFixture.Key(Point));
     }
 
     internal StorageScanResult Visit(IKeyValueView view)
         => reverse
-            ? view.VisitReverseRange(NativeReadCutFixture.Key(Group), MaximumRecords,
+            ? view.VisitReverseRange(ReadCutFixture.Key(Group), MaximumRecords,
                 Deliver, observer: Observe, cancellationToken: selected.Token)
-            : view.VisitRange(NativeReadCutFixture.Key(Group), MaximumRecords,
+            : view.VisitRange(ReadCutFixture.Key(Group), MaximumRecords,
                 Deliver, observer: Observe, cancellationToken: selected.Token);
 
     private void Observe(long bytes)
@@ -42,9 +42,9 @@ internal sealed class LiveRangeCancellationCallbacks(CancellationTokenSource sel
 
     private bool Deliver(ReadOnlySpan<byte> key, ReadOnlySpan<byte> value)
     {
-        var expectedKey = NativeReadCutFixture.Key(reverse ? Second : First);
+        var expectedKey = ReadCutFixture.Key(reverse ? Second : First);
         var text = staged ? reverse ? StagedSecond : StagedFirst : reverse ? OldSecond : OldFirst;
-        if (!key.SequenceEqual(expectedKey) || !value.SequenceEqual(NativeReadCutFixture.Value(text)))
+        if (!key.SequenceEqual(expectedKey) || !value.SequenceEqual(ReadCutFixture.Value(text)))
         {
             throw new InvalidDataException(UnexpectedRow);
         }

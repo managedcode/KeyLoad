@@ -7,5 +7,5 @@ namespace KeyLoad;
 /// <param name="Model">Identifies the embedding model.</param>
 /// <param name="Version">Identifies the embedding model version.</param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.VectorSpace)]
+[Orleans.Alias(ContractAliases.VectorSpace)]
 public sealed record VectorSpace([property: Orleans.Id(0)] string Id, [property: Orleans.Id(1)] int Dimension, [property: Orleans.Id(2)] DistanceMetric Metric, [property: Orleans.Id(3)] string Model, [property: Orleans.Id(4)] string Version);

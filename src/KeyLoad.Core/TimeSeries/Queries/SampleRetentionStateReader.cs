@@ -6,7 +6,7 @@ namespace KeyLoad.Core.Features.TimeSeries;
 internal static class SampleRetentionStateReader
 {
     internal const int CurrentFormatVersion = 1;
-    private const string RetentionSpace = "sample-retention-v1";
+    private const string RetentionSpace = "sample-retention";
     private const string UnsupportedFormat = "The time-series retention format is unsupported.";
     private const string CorruptState = "The time-series retention state is corrupt.";
 
@@ -36,7 +36,7 @@ internal static class SampleRetentionStateReader
         SampleRetentionState state;
         try
         {
-            state = NativeSerialization.Deserialize<SampleRetentionState>(value);
+            state = OrleansSerialization.Deserialize<SampleRetentionState>(value);
         }
         catch (KeyLoadException error) when (error.Code == ErrorCode.Corruption)
         {

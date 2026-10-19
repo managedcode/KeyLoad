@@ -63,7 +63,7 @@ internal sealed class SafeProjectorOperationDatabase
 
     internal (long AppliedPosition, long StorePosition) ReadCanonicalCut()
         => Store.Read(view => (view.ReadOwnedValue(KeySpace.AppliedBytes) is { } bytes
-            ? NativeSerialization.Deserialize<long>(bytes) : default(long), Store.Position));
+            ? OrleansSerialization.Deserialize<long>(bytes) : default(long), Store.Position));
 
     internal CommitToken NextToken()
         => new(Store.Identity.Incarnation, Source.Partition.AtomicPartitionId,
@@ -77,8 +77,8 @@ internal sealed class SafeProjectorOperationDatabase
         {
             Incarnation = canonicalIdentity.Incarnation
         }, canonicalIdentity.NodeId, Source.StorageExecution);
-        await Assert.That(NativeSerialization.Serialize(coldStore.Identity).AsSpan()
-            .SequenceEqual(NativeSerialization.Serialize(canonicalIdentity))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(coldStore.Identity).AsSpan()
+            .SequenceEqual(OrleansSerialization.Serialize(canonicalIdentity))).IsTrue();
         Database = Source.CreateConfiguredDatabase(coldStore);
     }
 

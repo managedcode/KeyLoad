@@ -31,13 +31,13 @@ public sealed record QueryExecutionOptions
     private const int MaximumCursorLifetimeDays = 365;
     private static readonly TimeSpan MaximumCursorLifetime = TimeSpan.FromDays(MaximumCursorLifetimeDays);
 
-    /// <summary>Explicitly enables the qualified provisioned vector-only native ANN read surface.</summary>
+    /// <summary>Explicitly enables the qualified provisioned vector-only execution ANN read surface.</summary>
     public bool EnableApproximateSearch
     {
         get; init;
     }
 
-    /// <summary>Gets an additional complete query/read result byte ceiling; null retains the native batch ceiling.</summary>
+    /// <summary>Gets an additional complete query/read result byte ceiling; null retains the execution batch ceiling.</summary>
     public int? MaximumResultBytes
     {
         get; init;

@@ -1,6 +1,8 @@
 using System.Text.Json;
 using KeyLoad.Core;
-using KeyLoad.Core.Features.ClusterRouting.Contracts;
+using KeyLoad.Core.Features.CommandOutcomes.Contracts;
+using KeyLoad.Core.Features.RuntimeJournaling.Contracts;
+using KeyLoad.Core.Features.StoragePartitions.Contracts;
 using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
@@ -40,9 +42,9 @@ internal static class CompositionPrefixPrepareAssertions
         var position = owner.Store.Position;
         foreach (var command in owner.Commands)
         {
-            await Assert.That(NativeSerialization.Serialize(command.Original).SequenceEqual(command.OriginalBytes)).IsTrue();
-            await Assert.That(NativeSerialization.Serialize(owner.Retained(command.Original)).SequenceEqual(command.OriginalBytes)).IsTrue();
-            await EqualAsync(command.Request, NativeSerialization.Deserialize<CommandRequest>((command.Original).Value!.Input.Span));
+            await Assert.That(OrleansSerialization.Serialize(command.Original).SequenceEqual(command.OriginalBytes)).IsTrue();
+            await Assert.That(OrleansSerialization.Serialize(owner.Retained(command.Original)).SequenceEqual(command.OriginalBytes)).IsTrue();
+            await EqualAsync(command.Request, OrleansSerialization.Deserialize<CommandRequest>((command.Original).Value!.Input.Span));
             await ResultAsync(command, owner.Submit(command.Original));
             await ResultAsync(command, owner.Database.ResolveOutcome(command.Original));
             var stored = OutcomeStoreOracle.ReadStored(owner.Store, command.Original)!;

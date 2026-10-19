@@ -6,5 +6,5 @@ internal static class RemoteTransferRepairStateFields
     internal const uint AcceptPolicyGeneration = 1;
     internal const uint CompleteGeneration = 2;
     internal const uint History = 3;
-    internal const string Alias = "keyload.core.queue-transfer.repair-state.v1";
+    internal const string Alias = "keyload.core.queue-transfer.repair-state";
 }

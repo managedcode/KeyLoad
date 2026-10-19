@@ -12,7 +12,7 @@ internal static class ExternalQueueWorkerCrashScenario
             return false;
         }
         var frame = await ReadFrameAsync().ConfigureAwait(false);
-        var input = NativeSerialization.Deserialize<ExternalQueueWorkerCrashInput>(Convert.FromBase64String(frame));
+        var input = OrleansSerialization.Deserialize<ExternalQueueWorkerCrashInput>(Convert.FromBase64String(frame));
         using var http = new HttpClient { BaseAddress = new Uri(input.Endpoint), Timeout = Timeout.InfiniteTimeSpan };
         var sdk = new KeyLoadClient(http, input.Credential, CrashExecutionOptions.ClientExecution());
         var policy = CrashExecutionOptions.ExternalQueueWorker();
@@ -35,7 +35,7 @@ internal static class ExternalQueueWorkerCrashScenario
             throw new InvalidOperationException(ExternalQueueWorkerCrashProtocol.InvalidInput);
         }
         var actual = new ExternalQueueWorkerCrashClaim(context.Delivery, context.AcknowledgementId, context.FirstRenewalId);
-        var frame = Convert.ToBase64String(NativeSerialization.Serialize(actual));
+        var frame = Convert.ToBase64String(OrleansSerialization.Serialize(actual));
         await Console.Out.WriteLineAsync(ExternalQueueWorkerCrashProtocol.Marker + frame).ConfigureAwait(false);
         await Console.Out.FlushAsync(token).ConfigureAwait(false);
         await Task.Delay(Timeout.InfiniteTimeSpan, token).ConfigureAwait(false);

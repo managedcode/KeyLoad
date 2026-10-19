@@ -1,6 +1,6 @@
 namespace KeyLoad.UnitTests.Features.Search;
 
-/// <summary>AC-SEARCH-WAIT-001: real minimum/applied authority rejection precedes complete literal native continuation.</summary>
+/// <summary>AC-SEARCH-WAIT-001: real minimum/applied authority rejection precedes complete literal execution continuation.</summary>
 internal sealed class SearchWaitAuthorityTests
 {
     [Test]
@@ -23,6 +23,6 @@ internal sealed class SearchWaitAuthorityTests
     public Task MissingOrNegativeAppliedAuthorityReturnsNoPartialAndExactRepairPermitsLiteralHealthy(bool missing)
         => SearchWaitAuthorityTrial.AppliedAsync(missing, TestContext.Current!.Execution.CancellationToken);
     [Test]
-    public Task AbsentNativeProviderReturnsNoPartialThenActualProviderReturnsLiteralHealthy()
+    public Task AbsentProviderReturnsNoPartialThenActualProviderReturnsLiteralHealthy()
         => SearchWaitAuthorityTrial.ProviderAsync(TestContext.Current!.Execution.CancellationToken);
 }

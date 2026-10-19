@@ -8,7 +8,7 @@ internal static class SqlModelParserConservation
     private const string ImageBound = "The complete parser model fixture image exceeds its bound.";
 
     internal static SqlModelParserStoreCut Capture(SqlModelParserOperationFixture fixture)
-        => new(fixture.Store.Position, NativeSerialization.Serialize(fixture.Store.Identity), fixture.Store.Read(view =>
+        => new(fixture.Store.Position, OrleansSerialization.Serialize(fixture.Store.Identity), fixture.Store.Read(view =>
         {
             var page = view.Scan([], Bound);
             if (page.HasMore)
@@ -30,7 +30,7 @@ internal static class SqlModelParserConservation
         var before = Capture(fixture);
         await Assert.That(fixture.Original.CommandId).IsEqualTo(fixture.Seed.CommandId);
         var replay = fixture.Owner.Apply(fixture.Seed).Get<CommitReceipt>();
-        await Assert.That(NativeSerialization.Serialize(replay).SequenceEqual(NativeSerialization.Serialize(fixture.Original))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(replay).SequenceEqual(OrleansSerialization.Serialize(fixture.Original))).IsTrue();
         await SameAsync(fixture, before);
     }
 }

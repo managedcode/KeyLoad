@@ -2,7 +2,7 @@
 
 Each cluster node admits commands before enqueueing them or sending them through Orleans. `CommandAdmissionGovernor` bounds the count and retained payload bytes of queued **and active** commands, with separate tenant and principal counts. The scope comes from the node's verified principal catalog, rather than tenant or role claims in the submitted JSON. Multiple API keys for the same principal share its budget.
 
-The default data lane permits 256 commands and 128 MiB of retained payload accounting, with caps of 128 per tenant and 64 per principal. Accounting includes the UTF-16 payload, twice its UTF-8 byte count for serialization/escaping in the command envelope and 4 KiB of envelope overhead. This measures the admitted command payload model, not total process RSS or native storage allocations.
+The default data lane permits 256 commands and 128 MiB of retained payload accounting, with caps of 128 per tenant and 64 per principal. Accounting includes the UTF-16 payload, twice its UTF-8 byte count for serialization/escaping in the command envelope and 4 KiB of envelope overhead. This measures the admitted command payload model, not total process RSS or storage allocations.
 
 Queue ACK/NACK/renew, subscription delivery commands and dispatch control use an independent reserve: 16 commands and 2 MiB, with eight commands per tenant/principal and a 64 KiB maximum UTF-8 control payload. Processing effects and projection effects use the data lane. Both lanes remain bounded. A single apply worker selects control work first, then selects a waiting data command after at most eight consecutive control commands. Each lane preserves FIFO. An active copy to the `ReplicaCount` ZoneTree owners cannot be preempted; its existing deadline still applies. Internal Orleans calls between silos do not enter this command queue.
 
@@ -10,7 +10,7 @@ Admission failure returns `ResourceExhausted` before this attempt takes the comm
 
 Configure a node through `KeyLoad:CommandAdmission:<property>` or equivalent environment variables, such as `KeyLoad__CommandAdmission__MaxRetainedBytes`. The AppHost forwards configured values to every node. These **local** admission limits may differ between nodes. Canonical mutation/outbox/transaction limits must remain identical between copies; local throttling never changes the apply decision for an already committed entry.
 
-Cluster administrators can inspect `GET /v1/admin/admission` or `KeyLoadClient.AdmissionStatusAsync`, which returns the configured limits and current data/control usage. The endpoint uses the normal authenticated read path.
+Cluster administrators can inspect `GET /admin/admission` or `KeyLoadClient.AdmissionStatusAsync`, which returns the configured limits and current data/control usage. The endpoint uses the normal authenticated read path.
 
 Unit tests cover concurrent count/byte limits, tenant/principal isolation, control reservation, bounded scheduling, cancellation and shutdown. A separate Aspire cluster test exhausts the entire data-byte budget, verifies that catalog writes remain unpublished, and commits dispatch control under the rejected command IDs. Continued routing and that ID reuse prove rejection before canonical acceptance. The normal cluster suite independently exercises queue and subscription ACK/processing.
 
@@ -22,4 +22,4 @@ Queue/subscription delivery and dispatch routes have an independent 16-slot, 8 M
 
 Configure `KeyLoad:HttpAdmission:<property>` or matching environment variables; the AppHost forwards these settings. `AdmissionStatusAsync` includes HTTP node accounting and verified scope accounting. The node accounting uses a synthetic ingress scope before authentication; actual tenant/principal scope counts are in `VerifiedScopes`. Limits are local to a node and do not change deterministic apply. Unit regressions cover shared read accounting, unverified/verified scope boundaries, reserve independence, cancellation and disposal. An Aspire cluster regression checks both declared and chunked body limits, then commits control work under each rejected command ID.
 
-Native cache/memtable limits, disk-floor throttling, rebuild/compaction reserves, automatic retention and sustained RSS/endurance qualification remain tracked work. These admission governors alone do not qualify those resources.
+cache/memtable limits, disk-floor throttling, rebuild/compaction reserves, automatic retention and sustained RSS/endurance qualification remain tracked work. These admission governors alone do not qualify those resources.

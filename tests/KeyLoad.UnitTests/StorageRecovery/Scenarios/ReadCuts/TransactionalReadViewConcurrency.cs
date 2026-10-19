@@ -22,7 +22,7 @@ internal static class TransactionalReadViewConcurrency
             scan = Task.Run(() => ReadHeld(original, entered, release, token));
             if (!entered.Wait(TransactionalReadViewState.Deadline, token))
             {
-                throw new TimeoutException("The original native snapshot never reached its first delivered row.");
+                throw new TimeoutException("The original execution snapshot never reached its first delivered row.");
             }
             writer = Task.Run(() => state.Database.ApplyEmbedded(state.Writer, token).Get<CommitReceipt>());
             var receipt = await writer.WaitAsync(TransactionalReadViewState.Deadline, TimeProvider.System, token);
@@ -44,7 +44,7 @@ internal static class TransactionalReadViewConcurrency
                 var observed = await scan;
                 await Assert.That(observed.Rows).IsEquivalentTo(state.OldImage, CollectionOrdering.Matching);
                 await Assert.That(observed.Result.Records).IsEqualTo(state.OldImage.Length);
-                await Assert.That(observed.Result.NativeAdvances).IsEqualTo((long)state.OldImage.Length + 1L);
+                await Assert.That(observed.Result.RuntimeAdvances).IsEqualTo((long)state.OldImage.Length + 1L);
                 await Assert.That(observed.Result.HasMore).IsFalse();
                 await Assert.That(observed.Result.StoppedByVisitor).IsFalse();
             }, failures);
@@ -69,7 +69,7 @@ internal static class TransactionalReadViewConcurrency
                 entered.Set();
                 if (!release.Wait(TransactionalReadViewState.Deadline, token))
                 {
-                    throw new TimeoutException("The original native snapshot visitor was not released.");
+                    throw new TimeoutException("The original execution snapshot visitor was not released.");
                 }
             }
             return true;

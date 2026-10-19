@@ -58,7 +58,7 @@ internal sealed class TransactionProtocolTests
                 MaxFrameBytes = 4_096
             }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution()))
             {
-                var database = new DatabaseEngine(store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
+                var database = new DatabaseEngine(store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
                 database.Bootstrap(new("root", "system", [new("*", "*", Capability.All)], ["*"])
                 {
                     ClusterAdministrator = true
@@ -80,7 +80,7 @@ internal sealed class TransactionProtocolTests
                 var image = QueueWholeFlowStorage.Bytes(store);
                 var position = store.Position;
                 var replay = Submit(OperationKind.Batch, rejectedId, rejected);
-                await Assert.That(NativeSerialization.Serialize(replay).SequenceEqual(NativeSerialization.Serialize(original))).IsTrue();
+                await Assert.That(OrleansSerialization.Serialize(replay).SequenceEqual(OrleansSerialization.Serialize(original))).IsTrue();
                 await Assert.That(QueueWholeFlowStorage.Bytes(store).SequenceEqual(image)).IsTrue();
                 await Assert.That(store.Position).IsEqualTo(position);
                 await Assert.That(database.LastApplied).IsEqualTo(2);
@@ -93,7 +93,7 @@ internal sealed class TransactionProtocolTests
             {
                 MaxFrameBytes = 4_096
             }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
-            var recovered = new DatabaseEngine(reopened, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
+            var recovered = new DatabaseEngine(reopened, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
             await Assert.That(recovered.LastApplied).IsEqualTo(3);
             var retained = OutcomeStoreOracle.ReadPartition(reopened,
                 new PartitionRef("tenant", "database", "orders", PartitionId), "root", rejectedId)

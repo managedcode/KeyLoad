@@ -12,7 +12,7 @@ internal static class EarlyAdmissionQualificationProtocol
     internal const string SecondJson = """{"value":2}""";
     internal const string Query = "SELECT * FROM early_sql_admission ORDER BY id";
     internal const string InvalidQuery = "SELECT FROM";
-    internal const string QueryRoute = "/v1/query";
+    internal const string QueryRoute = "/query";
     internal const string Scan = "bounded-full-scan";
     internal const string Put = "putDocument";
     internal const string InvalidDetail = "The SQL syntax or query arguments are invalid.";

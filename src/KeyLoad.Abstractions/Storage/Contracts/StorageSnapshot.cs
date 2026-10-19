@@ -6,5 +6,5 @@ namespace KeyLoad.Storage;
 /// <param name="AppliedPosition">Replicated operation position captured in the cut.</param>
 /// <param name="RecordCount">Number of logical records included in the snapshot.</param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.StorageSnapshot)]
+[Orleans.Alias(ContractAliases.StorageSnapshot)]
 public sealed record StorageSnapshot([property: Orleans.Id(0)] Guid Incarnation, [property: Orleans.Id(1)] long Position, [property: Orleans.Id(2)] long AppliedPosition, [property: Orleans.Id(3)] long RecordCount);

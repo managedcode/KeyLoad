@@ -2,7 +2,7 @@ namespace KeyLoad.RecoveryTests;
 
 internal static class TopicPurgeCrashContract
 {
-    internal const string Mode = "topic-purge-native-crash";
+    internal const string Mode = "topic-purge-execution-crash";
     internal const string Topic = "purge-topic";
     internal const string Documents = "purge-documents";
     internal const string Queue = "purge-work";

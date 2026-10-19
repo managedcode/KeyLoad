@@ -22,7 +22,7 @@ internal sealed class IsolatedResourceTopologySelectionTests
         await VerifyUnallocatedAsync(fixture);
     }
 
-    /// <summary>AC-ISO-003/004: invalid native counts never construct an unqualified substitute group.</summary>
+    /// <summary>AC-ISO-003/004: invalid execution counts never construct an unqualified substitute group.</summary>
     [Test]
     [Arguments(KeyLoad, 0)]
     [Arguments(KeyLoad, 4)]
@@ -30,14 +30,14 @@ internal sealed class IsolatedResourceTopologySelectionTests
     [Arguments(Redis, 4)]
     [Arguments(Neo4j, 0)]
     [Arguments(Neo4j, 4)]
-    public async Task HelpersRejectOutOfContractNativeCountsBeforeAllocation(string helper, int count)
+    public async Task HelpersRejectOutOfContractCountsBeforeAllocation(string helper, int count)
     {
         await using var fixture = new IsolatedResourceTopologyFixture(helper, count);
         await Assert.That(() => Add(helper, fixture.Context)).Throws<ArgumentOutOfRangeException>();
         await VerifyUnallocatedAsync(fixture);
     }
 
-    /// <summary>AC-ISO-003/005: missing owned Redis bootstrap fails before password or native allocation.</summary>
+    /// <summary>AC-ISO-003/005: missing owned Redis bootstrap fails before password or execution allocation.</summary>
     [Test]
     public async Task RedisRequiresTheActualSourceControlledBootstrapFile()
     {

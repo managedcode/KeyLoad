@@ -23,7 +23,7 @@ internal sealed class SerializedOptionsSnapshotTests
     }
 
     [Test]
-    public async Task AGeneralSerializationAnnotationCannotGrantTheNativeContractBoundaryAsync()
+    public async Task AGeneralSerializationAnnotationCannotGrantTheContractBoundaryAsync()
     {
         const string source = """
             [KeyLoad.ConfigurationOptions]

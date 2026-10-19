@@ -35,7 +35,7 @@ public sealed partial class QueryEngine
         ArgumentNullException.ThrowIfNull(binding);
         return liveQueries.Read(principalId, request, timeProvider, cancellationToken, binding);
     }
-    internal PartitionQueryPageV1 QueryPartitionsBound(string principalId, PartitionQueryRequestV1 request,
+    internal PartitionQueryPage QueryPartitionsBound(string principalId, PartitionQueryRequest request,
         PhysicalShardRecord expectedOwner, TimeProvider? timeProvider, IResourceLifetimeWorkBinding binding,
         CancellationToken cancellationToken)
     {

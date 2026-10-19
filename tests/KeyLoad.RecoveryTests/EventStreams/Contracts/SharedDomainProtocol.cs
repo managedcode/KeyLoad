@@ -34,7 +34,7 @@ internal static class SharedDomainProtocol
     internal const string IdentitySeparator = ":";
     internal const string DomainDetail = "The resource belongs to a different transaction domain.";
     internal const string BindingDetail = "The requested resource definition change is unsupported.";
-    internal const string MissingNative = "The original native shared-domain row is absent.";
+    internal const string RuntimeMissing = "The original execution shared-domain row is absent.";
     internal const string ImageLimit = "The genuine shared-domain image exceeded its bounded scan.";
     internal const int ImageBound = 4096;
     internal const int FirstIndex = 0;

@@ -1,5 +1,5 @@
 using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.ClusterRouting;
+using KeyLoad.IntegrationTests.Features.OrleansExecution;
 
 namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 
@@ -26,7 +26,7 @@ internal static class TopicSqlClusterRoutes
         };
     }
 
-    internal static async Task<EventSourcePage> NativeAsync(RequestCqrsClusterCallers callers, int route,
+    internal static async Task<EventSourcePage> RuntimeAsyncCore(RequestCqrsClusterCallers callers, int route,
         TopicSqlClusterState state, CancellationToken token)
         => route switch
         {

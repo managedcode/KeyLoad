@@ -1,13 +1,14 @@
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Authorization;
 using KeyLoad.Server;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 
 namespace KeyLoad.UnitTests.Features.StorageRecovery;
 
 internal sealed class PartitionHostApplicationSession : IAsyncDisposable
 {
-    private readonly RequestCqrsHostedRuntimeFixture native = new();
+    private readonly RequestCqrsHostedRuntimeFixture execution = new();
     private PartitionHostApplicationOwner? owner;
     private readonly Lock lifecycle = new();
     private Task? closing;
@@ -19,10 +20,10 @@ internal sealed class PartitionHostApplicationSession : IAsyncDisposable
         var session = new PartitionHostApplicationSession();
         try
         {
-            await session.native.InitializeAsync(TestContext.Current!.Execution.CancellationToken).ConfigureAwait(false);
+            await session.execution.InitializeAsync(TestContext.Current!.Execution.CancellationToken).ConfigureAwait(false);
             session.owner = new(ServerRuntimeTestOptions.Runtime(options), new AuthorizationPolicy(),
                 new CommandAdmissionGovernor(UnitAdmissionOptions.Command(options.CommandAdmission)),
-                TimeProvider.System, NullLogger<PartitionHost>.Instance, session.native.Grains);
+                TimeProvider.System, NullLogger<PartitionHost>.Instance, session.execution.Grains);
             return session;
         }
         catch (Exception failure)
@@ -32,11 +33,11 @@ internal sealed class PartitionHostApplicationSession : IAsyncDisposable
             {
                 await session.DisposeAsync().ConfigureAwait(false);
             }
-            catch (Exception cleanup) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
+            catch (Exception cleanup) when (KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(cleanup))
             {
                 failures.Add(cleanup);
             }
-            catch (Exception cleanup) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
+            catch (Exception cleanup) when (!KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(cleanup))
             {
                 failures.Add(cleanup);
             }
@@ -44,6 +45,8 @@ internal sealed class PartitionHostApplicationSession : IAsyncDisposable
             throw;
         }
     }
+
+    internal IGrainContext Context => execution.Services.GetRequiredService<PartitionHostApplicationOwner>().Session.OwnerContext.Context;
 
     internal PartitionHostApplicationOwner Owner => owner
         ?? throw new InvalidOperationException(nameof(PartitionHostApplicationOwner));
@@ -82,13 +85,13 @@ internal sealed class PartitionHostApplicationSession : IAsyncDisposable
         }
         try
         {
-            await native.DisposeAsync().ConfigureAwait(false);
+            await execution.DisposeAsync().ConfigureAwait(false);
         }
-        catch (Exception cleanup) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
+        catch (Exception cleanup) when (KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(cleanup))
         {
             failures.Add(cleanup);
         }
-        catch (Exception cleanup) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
+        catch (Exception cleanup) when (!KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(cleanup))
         {
             failures.Add(cleanup);
         }

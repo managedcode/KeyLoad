@@ -11,6 +11,6 @@ namespace KeyLoad;
 /// <param name="HasMore">Whether additional changes are available.</param>
 /// <param name="CutPosition">The committed position at which the page was read.</param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.ChangeFeedPage)]
+[Orleans.Alias(ContractAliases.ChangeFeedPage)]
 public sealed record ChangeFeedPage([property: Orleans.Id(0)] ImmutableArray<DocumentChange> Changes, [property: Orleans.Id(1)] string Cursor, [property: Orleans.Id(2)] long ThroughSequence, [property: Orleans.Id(3)] long Tail,
     [property: Orleans.Id(4)] long FirstAvailable, [property: Orleans.Id(5)] bool HasMore, [property: Orleans.Id(6)] long CutPosition);

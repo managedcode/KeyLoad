@@ -1,6 +1,6 @@
 namespace KeyLoad.Server;
 
-/// <summary>Stable native MCP resource and prompt identity for the static agent guide.</summary>
+/// <summary>Stable execution MCP resource and prompt identity for the static agent guide.</summary>
 internal static class McpAgentGuideContract
 {
     internal const string ResourceUri = "keyload://guides/agent-quickstart";

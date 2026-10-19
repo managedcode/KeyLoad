@@ -8,6 +8,6 @@ internal enum SampleRawIntegrityFault
     NonpositiveSequence,
     NonfiniteValue,
     MissingSample,
-    WrongNativeRoot,
-    MalformedNative
+    RuntimeWrongRoot,
+    RuntimeMalformed
 }

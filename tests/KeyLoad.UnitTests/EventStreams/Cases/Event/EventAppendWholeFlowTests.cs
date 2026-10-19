@@ -40,7 +40,7 @@ internal sealed class EventAppendWholeFlowTests
         {
             if (index == winner)
             {
-                await NativeReplayResultAssertions.Same<CommitReceipt>(fixture.Submit(commands[index]), results[index]);
+                await ReplayResultAssertions.Same<CommitReceipt>(fixture.Submit(commands[index]), results[index]);
             }
             else
             {

@@ -11,7 +11,7 @@ internal sealed class GlobalBranchWindowMergeBudgetTests
     private const int SelectedLimit = 1;
 
     [Test]
-    public async Task AcRank003ExactNativeByteBoundaryChargesEveryExaminedDuplicate()
+    public async Task AcRank003ExactByteBoundaryChargesEveryExaminedDuplicate()
     {
         var candidate = GlobalBranchTestSupport.Candidate("shared", 0.8);
         var lower = GlobalBranchTestSupport.Candidate("lower", 0.7);
@@ -19,7 +19,7 @@ internal sealed class GlobalBranchWindowMergeBudgetTests
         var windows = ImmutableArray.Create(
             GlobalBranchTestSupport.Window("left", [candidate, lower]),
             GlobalBranchTestSupport.Window("right", [candidate]));
-        var exactBytes = GlobalBranchTestSupport.NativeInputBytes(request, windows);
+        var exactBytes = GlobalBranchTestSupport.InputBytes(request, windows);
         var limits = new DatabaseLimits
         {
             MaxBatchBytes = checked((int)exactBytes),
@@ -38,12 +38,12 @@ internal sealed class GlobalBranchWindowMergeBudgetTests
     }
 
     [Test]
-    public async Task AcRank003OneByteBelowNativeReadOrBatchBoundaryFailsBeforeResult()
+    public async Task AcRank003OneByteBelowReadOrBatchBoundaryFailsBeforeResult()
     {
         var candidate = GlobalBranchTestSupport.Candidate("a", 1);
         var request = GlobalBranchTestSupport.Request(["w"], limit: MaximumCandidates);
         var windows = ImmutableArray.Create(GlobalBranchTestSupport.Window("w", [candidate]));
-        var exactBytes = GlobalBranchTestSupport.NativeInputBytes(request, windows);
+        var exactBytes = GlobalBranchTestSupport.InputBytes(request, windows);
         var readLimits = new DatabaseLimits
         {
             MaxBatchBytes = checked((int)exactBytes),
@@ -67,12 +67,12 @@ internal sealed class GlobalBranchWindowMergeBudgetTests
     }
 
     [Test]
-    public async Task AcRank003MalformedExaminedCandidateStillConsumesItsNativeBytes()
+    public async Task AcRank003MalformedExaminedCandidateStillConsumesItsBytes()
     {
         var request = GlobalBranchTestSupport.Request(["w"], limit: SelectedLimit);
         var windows = ImmutableArray.Create(GlobalBranchTestSupport.Window("w",
             [GlobalBranchTestSupport.Candidate("bad", double.NaN)]));
-        var exactBytes = GlobalBranchTestSupport.NativeInputBytes(request, windows);
+        var exactBytes = GlobalBranchTestSupport.InputBytes(request, windows);
         var limits = new DatabaseLimits
         {
             MaxBatchBytes = checked((int)exactBytes),

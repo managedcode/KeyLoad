@@ -13,7 +13,7 @@ internal sealed class PostgresSslNegotiation(global::Microsoft.Extensions.Option
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             using var frame = await PostgresFrameReader.ReadAsync(context.Transport.Input, true,
-                Options.MaximumStartupBytes, admission, token).ConfigureAwait(false);
+                Options.MaximumStartupBytes, admission, token);
             await ServerFailureObserver.ObserveAsync(() =>
             {
                 if (frame is null || !RequireSsl(frame.Payload))
@@ -21,17 +21,17 @@ internal sealed class PostgresSslNegotiation(global::Microsoft.Extensions.Option
                     throw Errors.Fail(ErrorCode.Unauthenticated, ServerProtocol.MissingCredential);
                 }
                 return Task.CompletedTask;
-            }, failures).ConfigureAwait(false);
-        }, failures).ConfigureAwait(false);
+            }, failures);
+        }, failures);
         ServerFailureObserver.ThrowIfAny(failures);
         context.Transport.Output.Write(SslAccepted);
-        var flushed = await context.Transport.Output.FlushAsync(token).ConfigureAwait(false);
+        var flushed = await context.Transport.Output.FlushAsync(token);
         if (flushed.IsCompleted || flushed.IsCanceled)
         {
             token.ThrowIfCancellationRequested();
             throw new EndOfStreamException();
         }
-        await next(context).ConfigureAwait(false);
+        await next(context);
     }
 
     private static bool RequireSsl(ReadOnlySpan<byte> payload)

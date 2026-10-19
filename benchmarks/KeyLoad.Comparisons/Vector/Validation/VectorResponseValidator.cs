@@ -1,11 +1,11 @@
 namespace KeyLoad.Comparisons;
 
-/// <summary>Validates native vector responses against an independent canonical exact reference.</summary>
+/// <summary>Validates execution vector responses against an independent canonical exact reference.</summary>
 public static class VectorResponseValidator
 {
-    /// <summary>Validates native neighbor identity, eligibility, ordering and exact accuracy.</summary>
+    /// <summary>Validates execution neighbor identity, eligibility, ordering and exact accuracy.</summary>
     /// <param name="corpus">The immutable canonical corpus.</param>
-    /// <param name="actual">The actual native top-k response.</param>
+    /// <param name="actual">The actual execution top-k response.</param>
     /// <param name="expected">The independent exact reference neighbors.</param>
     /// <returns>Recall against the independent exact oracle.</returns>
     public static double CalculateRecall(VectorComparisonCorpus corpus, IReadOnlyList<VectorNeighbor> actual,
@@ -21,7 +21,7 @@ public static class VectorResponseValidator
             throw new InvalidDataException(VectorResponseValidatorValues.AVectorResponseWasUnderfilledOr);
         }
 
-        ValidateNative(corpus, actual);
+        RuntimeValidate(corpus, actual);
         var matching = VectorResponseValidatorValues.FirstIndex;
         foreach (var item in actual)
         {
@@ -43,7 +43,7 @@ public static class VectorResponseValidator
         return recall;
     }
 
-    private static void ValidateNative(VectorComparisonCorpus corpus, IReadOnlyList<VectorNeighbor> actual)
+    private static void RuntimeValidate(VectorComparisonCorpus corpus, IReadOnlyList<VectorNeighbor> actual)
     {
         VectorNeighbor? previous = null;
         for (var index = VectorResponseValidatorValues.FirstIndex; index < actual.Count; index++)
@@ -53,13 +53,13 @@ public static class VectorResponseValidator
             if (previous is not null && (neighbor.Distance < previous.Distance
                 || (neighbor.Distance == previous.Distance && string.CompareOrdinal(neighbor.Id, previous.Id) < VectorResponseValidatorValues.FirstIndex)))
             {
-                throw new InvalidDataException(VectorResponseValidatorValues.ANativeVectorResponseIsNot);
+                throw new InvalidDataException(VectorResponseValidatorValues.AVectorResponseIsNot);
             }
             for (var prior = VectorResponseValidatorValues.FirstIndex; prior < index; prior++)
             {
                 if (actual[prior].Id == neighbor.Id)
                 {
-                    throw new InvalidDataException(VectorResponseValidatorValues.ANativeVectorResponseContainsDuplicate);
+                    throw new InvalidDataException(VectorResponseValidatorValues.AVectorResponseContainsDuplicate);
                 }
             }
             previous = neighbor;
@@ -71,14 +71,14 @@ public static class VectorResponseValidator
         if (neighbor is null || string.IsNullOrEmpty(neighbor.Id) || !double.IsFinite(neighbor.Distance)
             || neighbor.Distance < -VectorResponseValidatorValues.CosineTolerance || neighbor.Distance > VectorResponseValidatorValues.MaximumCosineWithTolerance)
         {
-            throw new InvalidDataException(VectorResponseValidatorValues.ANativeVectorResponseContainsMissing);
+            throw new InvalidDataException(VectorResponseValidatorValues.AVectorResponseContainsMissing);
         }
         if (neighbor.Id.Length != VectorResponseValidatorValues.IdCharacterCount || neighbor.Id[VectorResponseValidatorValues.FirstIndex] != VectorResponseValidatorValues.VectorIdPrefixCharacter
             || !int.TryParse(neighbor.Id.AsSpan(VectorResponseValidatorValues.SingleElementOffset), System.Globalization.NumberStyles.None,
                 System.Globalization.CultureInfo.InvariantCulture, out var number)
             || (uint)number >= (uint)corpus.Profile.RecordCount || !corpus.Eligible(number))
         {
-            throw new InvalidDataException(VectorResponseValidatorValues.ANativeVectorResponseIncludedAn);
+            throw new InvalidDataException(VectorResponseValidatorValues.AVectorResponseIncludedAn);
         }
     }
 }

@@ -31,7 +31,7 @@ internal static class SqlEventReferenceJoinFixture
         {
             [MinimumParameter] = JsonSerializer.SerializeToElement(7)
         },
-            AllowFullScan: true, QueryDialectVersion: 2);
+            AllowFullScan: true, QueryDialectVersion: SqlOperationProtocol.DefaultQueryDialectVersion);
 
     internal static AstQueryRequest Ast(PartitionRef partition)
         => new(partition, new SelectQuery(StreamSet, "e",
@@ -42,7 +42,7 @@ internal static class SqlEventReferenceJoinFixture
             new()
             {
                 [MinimumParameter] = JsonSerializer.SerializeToElement(7)
-            }, AllowFullScan: true, AstVersion: 2);
+            }, AllowFullScan: true, AstVersion: SqlOperationProtocol.DefaultQueryDialectVersion);
 
     internal static string Payload(PartitionRef partition, string id, int score)
         => JsonSerializer.Serialize(new

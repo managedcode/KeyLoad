@@ -5,11 +5,11 @@ namespace KeyLoad.UnitTests.Features.AnalyticsStore;
 internal sealed class AnalyticsSharedIntegrationTests
 {
     [Test]
-    public Task NativeMixedBatchBindsLinksAndRetainsAtomicRollbackOutboxAndReplay()
+    public Task MixedBatchBindsLinksAndRetainsAtomicRollbackOutboxAndReplay()
         => AnalyticsSharedFlow.MixedAsync(TestContext.Current!.Execution.CancellationToken);
 
     [Test]
-    public Task NativeAnalyticsOnlyWriteRegistersPartitionAndExportsBothCanonicalFamilies()
+    public Task AnalyticsOnlyWriteRegistersPartitionAndExportsBothCanonicalFamilies()
         => AnalyticsSharedFamilies.RunAsync(TestContext.Current!.Execution.CancellationToken);
     [Test]
     public async Task PolicyOnlySchemaCasCannotChangeAnalyticsStoreShape()

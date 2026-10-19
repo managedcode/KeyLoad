@@ -15,7 +15,7 @@ public sealed class EmbeddedCoordinator(DatabaseEngine database) : ICommitCoordi
     }
 
     /// <inheritdoc />
-    public Task<Result<object>> SubmitNativeAsync(OperationKind kind, Guid id, string principalId,
+    public Task<Result<object>> RuntimeSubmitAsync(OperationKind kind, Guid id, string principalId,
         ReadOnlyMemory<byte> payload, ReadExecutionBudget? sourcePlanningBudget = null,
         CancellationToken cancellationToken = default)
     {

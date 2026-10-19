@@ -45,11 +45,11 @@ internal sealed class FoundationOtlpClusterReceiver : IDisposable
             receiver = new(pendingClient, browserToken, apiKey, settings);
             pendingClient = null;
         }
-        catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        catch (Exception failure) when (CqrsBoundaryErrors.IsNonFatal(failure))
         {
             failures.Add(failure);
         }
-        catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        catch (Exception failure) when (!CqrsBoundaryErrors.IsNonFatal(failure))
         {
             failures.Add(failure);
         }
@@ -59,11 +59,11 @@ internal sealed class FoundationOtlpClusterReceiver : IDisposable
             {
                 pendingClient?.Dispose();
             }
-            catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure))
+            catch (Exception failure) when (CqrsBoundaryErrors.IsNonFatal(failure))
             {
                 failures.Add(failure);
             }
-            catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure))
+            catch (Exception failure) when (!CqrsBoundaryErrors.IsNonFatal(failure))
             {
                 failures.Add(failure);
             }
@@ -71,11 +71,11 @@ internal sealed class FoundationOtlpClusterReceiver : IDisposable
             {
                 pendingHandler?.Dispose();
             }
-            catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure))
+            catch (Exception failure) when (CqrsBoundaryErrors.IsNonFatal(failure))
             {
                 failures.Add(failure);
             }
-            catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure))
+            catch (Exception failure) when (!CqrsBoundaryErrors.IsNonFatal(failure))
             {
                 failures.Add(failure);
             }

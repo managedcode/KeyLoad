@@ -109,7 +109,7 @@ internal sealed class AnnSeedReadBudgetTests
             view.VisitRange(KeySpace.Partition("vector", database.Partition, AnnSeedTestSupport.Collection,
                 AnnSeedTestSupport.Field), maxScanRecords ?? database.Database.Limits.MaxScanRecords, (_, value) =>
                 {
-                    var vector = NativeSerialization.Deserialize<VectorRecord>(value);
+                    var vector = OrleansSerialization.Deserialize<VectorRecord>(value);
                     CountRead(view, DocumentStorageKeys.RecordKey(database.Partition, AnnSeedTestSupport.Collection,
                         vector.DocumentId), counter);
                     var document = view.GetRecord<DocumentRecord>(DocumentStorageKeys.RecordKey(database.Partition,

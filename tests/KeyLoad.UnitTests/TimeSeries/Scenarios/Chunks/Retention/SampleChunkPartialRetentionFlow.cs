@@ -12,8 +12,8 @@ internal static class SampleChunkPartialRetentionFlow
             using var fixture = new SampleChunkPartialRetentionFixture();
             await KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => RunOwnedAsync(fixture), failures);
         }
-        catch (Exception failure) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
-        catch (Exception failure) when (!global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
+        catch (Exception failure) when (global::KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
+        catch (Exception failure) when (!global::KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
         KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
     }
 

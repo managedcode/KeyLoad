@@ -43,9 +43,9 @@ internal static class OnlineTextParentFlow
     private static void RequireOriginal(OnlineTextIndexMaintenanceResult result,
         OnlineTextIndexMaintenanceResult? original, long maximumBytes)
     {
-        if (original is null || NativeSerialization.Measure(result) > maximumBytes
-            || NativeSerialization.Measure(original) > maximumBytes
-            || !NativeSerialization.Serialize(result).AsSpan().SequenceEqual(NativeSerialization.Serialize(original)))
+        if (original is null || OrleansSerialization.Measure(result) > maximumBytes
+            || OrleansSerialization.Measure(original) > maximumBytes
+            || !OrleansSerialization.Serialize(result).AsSpan().SequenceEqual(OrleansSerialization.Serialize(original)))
         {
             throw Errors.Fail(ErrorCode.UnknownWriteOutcome, TextIndexMaintenanceProtocol.Interrupted);
         }

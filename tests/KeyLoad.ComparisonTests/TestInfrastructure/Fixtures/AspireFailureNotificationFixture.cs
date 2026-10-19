@@ -77,7 +77,7 @@ internal sealed class AspireFailureNotificationFixture : IAsyncDisposable
             State = state,
             ExitCode = exit
         })
-            .WithHealthReports(health is { } status ? [new("native-health", status, null, null)] : []));
+            .WithHealthReports(health is { } status ? [new("execution-health", status, null, null)] : []));
 
     internal void StopHost() => Application.Services.GetRequiredService<IHostApplicationLifetime>().StopApplication();
 

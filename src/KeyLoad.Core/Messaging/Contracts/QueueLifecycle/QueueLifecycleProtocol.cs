@@ -7,8 +7,8 @@ internal static class QueueLifecycleProtocol
     internal const string RedriveKind = "redriveQueueMessage";
     internal const string CancelKind = "cancelQueueMessage";
     internal const string ParkKind = "parkPendingQueueMessage";
-    internal const string PendingAlias = "keyload.core.queue-pending-dead-letter-reference.v1";
-    internal const string ParkedAlias = "keyload.core.queue-dead-letter-reference.v1";
+    internal const string PendingAlias = "keyload.core.queue-pending-dead-letter-reference";
+    internal const string ParkedAlias = "keyload.core.queue-dead-letter-reference";
     internal const int Initial = 0;
     internal const int Increment = 1;
     internal const string MissingBody = "The queue lifecycle body is unavailable.";

@@ -6,6 +6,6 @@ namespace KeyLoad;
 /// <param name="AfterName">Exclusive resource-name continuation, or null for the first page.</param>
 /// <param name="Limit">Maximum returned metadata items.</param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.AdminResourcesRequest)]
+[Orleans.Alias(ContractAliases.AdminResourcesRequest)]
 public sealed record AdminResourcesRequest([property: Orleans.Id(0)] string TenantId, [property: Orleans.Id(1)] string DatabaseId, [property: Orleans.Id(2)] string? AfterName = null,
     [property: Orleans.Id(3)] int Limit = AdminDashboardProtocol.DefaultPageSize);

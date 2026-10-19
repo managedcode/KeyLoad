@@ -39,7 +39,7 @@ function Read-PsmProductContributorRegistry([string] $Root) {
         }
         $candidate = [ordered]@{ contributors = [object[]]@($registry.contributors) }
         $bounds = [ordered]@{ maximumFiles = $script:Psm.MaximumSources }
-        $null = Read-FcNativeContributors $candidate $bounds ([string[]]@(Get-FcCompiledProjectRoster $Root | Where-Object role -CEQ 'production' | ForEach-Object name))
+        $null = Read-FcContributors $candidate $bounds ([string[]]@(Get-FcCompiledProjectRoster $Root | Where-Object role -CEQ 'production' | ForEach-Object name))
         return [object[]]@($registry.contributors)
     }
     catch [System.Text.Json.JsonException] {

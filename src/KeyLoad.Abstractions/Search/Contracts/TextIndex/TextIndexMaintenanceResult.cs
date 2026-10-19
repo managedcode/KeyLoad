@@ -7,7 +7,7 @@ namespace KeyLoad;
 /// <param name="Phase">Actual final phase.</param>
 /// <param name="Source">Admitted canonical source cut, when a generation exists.</param>
 /// <param name="TrackedRecords">Actual bounded stable-ID map count, including revision tombstones.</param>
-/// <param name="IndexSha256">Actual published complete native inventory identity.</param>
+/// <param name="IndexSha256">Actual published complete execution inventory identity.</param>
 /// <param name="Checkpoint">Actual final canonical checkpoint child result, when returned.</param>
 /// <param name="IndexedThroughSequence">Actual published prefix, distinct from the observed canonical upper; null after release.</param>
 /// <param name="ReleasedConsumer">Actual immutable canonical release child result, when returned.</param>

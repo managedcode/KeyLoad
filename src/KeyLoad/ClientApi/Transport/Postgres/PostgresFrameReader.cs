@@ -13,7 +13,7 @@ internal static class PostgresFrameReader
         int maximumBytes, PostgresRetainedAdmission admission, CancellationToken token)
     {
         var header = new byte[startup ? LengthBytes : TypedHeaderBytes];
-        if (!await FillAsync(input, header, allowEmpty: true, token).ConfigureAwait(false))
+        if (!await FillAsync(input, header, allowEmpty: true, token))
         {
             return null;
         }
@@ -32,7 +32,7 @@ internal static class PostgresFrameReader
         try
         {
             frame = new(startup ? PostgresProtocol.StartupMessage : header[PostgresProtocol.FirstField], new byte[count], admission);
-            _ = await FillAsync(input, frame.Payload, allowEmpty: false, token).ConfigureAwait(false);
+            _ = await FillAsync(input, frame.Payload, allowEmpty: false, token);
             return frame;
         }
         catch (Exception primary)
@@ -60,7 +60,7 @@ internal static class PostgresFrameReader
         var copied = PostgresProtocol.AllRows;
         while (copied < target.Length)
         {
-            var read = await input.ReadAsync(token).ConfigureAwait(false);
+            var read = await input.ReadAsync(token);
             var buffer = read.Buffer;
             if (read.IsCanceled)
             {

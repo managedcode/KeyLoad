@@ -1,0 +1,157 @@
+using System.Security.Cryptography;
+using KeyLoad.Core.Features.DocumentStorage;
+using KeyLoad.Storage;
+
+namespace KeyLoad.Core.Features.Search;
+
+internal static partial class TextSeedCollector
+{
+    private const long EmptyPosition = 0;
+    private const string InvalidScope = "The text projection source scope is inconsistent.";
+    private const string OwnerLost = "The text projection owner no longer matches the canonical placement.";
+    private const string SeedExceeded = "The text projection seed exceeds its record budget.";
+    private static readonly string[] MutationKinds = [MutationDiscriminatorNames.PutDocument,
+        MutationDiscriminatorNames.PatchDocument, MutationDiscriminatorNames.DeleteDocument];
+
+    internal static TextSeedCapture Capture(DatabaseEngine database, string principalId,
+        TextSeedPin pin, ReadExecutionBudget budget)
+    {
+        ArgumentNullException.ThrowIfNull(database);
+        ArgumentNullException.ThrowIfNull(pin);
+        ArgumentNullException.ThrowIfNull(budget);
+        budget.Check();
+        return database.Store.Read(view => CaptureView(database, view, principalId, pin, budget));
+    }
+
+    internal static TextSeedCapture CaptureView(DatabaseEngine database, IKeyValueView raw,
+        string principalId, TextSeedPin pin, ReadExecutionBudget budget)
+    {
+        var metadata = CaptureMetadataView(database, raw, principalId, pin, budget);
+        var partition = pin.Consumer.Partition;
+        var documents = new List<DocumentRecord>();
+        var range = budget.VisitRange(raw, DocumentStorageKeys.Prefix(partition, pin.Collection),
+            database.Limits.MaxScanRecords, (key, value) =>
+            {
+                budget.ChargeBytes(value.Length);
+                var document = OrleansSerialization.Deserialize<DocumentRecord>(value);
+                if (document.Reference.Partition != partition || document.Reference.Collection != pin.Collection
+                    || document.Revision <= EmptyPosition
+                    || !key.SequenceEqual(DocumentStorageKeys.RecordKey(document.Reference)))
+                {
+                    throw Errors.Fail(ErrorCode.Corruption, InvalidScope);
+                }
+                documents.Add(document);
+                return true;
+            });
+        if (range.HasMore)
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, SeedExceeded);
+        }
+        budget.Check();
+        return metadata with
+        {
+            Documents = documents.ToArray()
+        };
+    }
+
+    internal static T CaptureOnlinePinned<T>(DatabaseEngine database, string principalId,
+        TextSeedPin pin, ReadExecutionBudget budget,
+        Func<IKeyValueView, TextSeedCapture, T> capture)
+    {
+        ArgumentNullException.ThrowIfNull(database);
+        ArgumentNullException.ThrowIfNull(pin);
+        ArgumentNullException.ThrowIfNull(budget);
+        ArgumentNullException.ThrowIfNull(capture);
+        budget.Check();
+        return database.Store.Read(raw =>
+        {
+            var current = database.Principal(budget.CreateView(raw), principalId, database.EvaluationClock.GetUtcNow());
+            if (!current.ClusterAdministrator)
+            {
+                throw Errors.Fail(ErrorCode.PermissionDenied, OnlineTextAdministratorRequired);
+            }
+            var metadata = CaptureMetadataView(database, raw, principalId, pin, budget);
+            budget.Check();
+            return capture(raw, metadata);
+        });
+    }
+
+    private const string OnlineTextAdministratorRequired = "Online text maintenance requires current administrator authority.";
+
+    internal static TextSeedCapture CaptureMetadataView(DatabaseEngine database, IKeyValueView raw,
+        string principalId, TextSeedPin pin, ReadExecutionBudget budget)
+    {
+        var view = budget.CreateView(raw);
+        var principal = database.Principal(view, principalId, database.EvaluationClock.GetUtcNow());
+        var partition = pin.Consumer.Partition;
+        var consumer = DatabaseEngine.RequireActiveProjectionConsumer(view, principal, pin.Consumer, pin.Generation);
+        if (!consumer.Definition.Resources.SequenceEqual([pin.Collection], StringComparer.Ordinal)
+            || !consumer.Definition.MutationKinds.SequenceEqual(MutationKinds, StringComparer.Ordinal))
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, InvalidScope);
+        }
+        RequireOwner(database, view, principalId, pin);
+        database.Authorization.Require(principal, partition, pin.Collection, Capability.Query | Capability.DocumentsRead);
+        var resource = DatabaseEngine.BindAuthorizedReadResource(view, partition, pin.Collection, ResourceKind.Collection);
+        database.Authorization.RequireFieldUse(principal, resource, pin.Field);
+        var head = database.ReadOutboxHead(view, partition);
+        DatabaseEngine.RequireTextProjectionHistory(head, consumer.Checkpoint);
+        var appliedBytes = view.ReadOwnedValue(KeySpace.AppliedBytes) ?? throw Errors.Fail(ErrorCode.Corruption, InvalidScope);
+        var applied = OrleansSerialization.Deserialize<long>(appliedBytes);
+        if (applied < EmptyPosition || consumer.Checkpoint > head.Tail)
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidScope);
+        }
+        budget.Check();
+        var identity = database.Store.Identity;
+        return new(principal.Id, principal.PolicyEpoch, resource.SchemaVersion,
+            database.Store.Position, applied, head.Tail, head.FirstAvailable, consumer.Checkpoint,
+            identity.Incarnation, identity.FormatVersion, identity.ReadGeneration, ResourceDigest(resource, budget), []);
+    }
+
+    internal static void RequireReleased(DatabaseEngine database, string principalId,
+        TextSeedPin pin, ReadExecutionBudget budget)
+    {
+        budget.Check();
+        _ = database.Store.Read(view =>
+        {
+            var bounded = budget.CreateView(view);
+            var principal = database.Principal(bounded, principalId, database.EvaluationClock.GetUtcNow());
+            var state = DatabaseEngine.RequireReleasedProjectionConsumer(bounded, principal, pin.Consumer, pin.Generation);
+            if (!state.Definition.Resources.SequenceEqual([pin.Collection], StringComparer.Ordinal)
+                || !state.Definition.MutationKinds.SequenceEqual(MutationKinds, StringComparer.Ordinal))
+            {
+                throw Errors.Fail(ErrorCode.TokenInvalidated, InvalidScope);
+            }
+            RequireOwner(database, bounded, principalId, pin);
+            if (bounded is KeyLoad.Core.Features.ResourceExecution.IResourceLifetimeReadBindingView)
+            {
+                _ = DatabaseEngine.BindAuthorizedReadResource(bounded, pin.Consumer.Partition, pin.Collection, ResourceKind.Collection);
+            }
+            budget.Check();
+            return true;
+        });
+    }
+
+    private static string ResourceDigest(ResourceDefinition resource, ReadExecutionBudget budget)
+    {
+        budget.ChargeBytes(OrleansSerialization.Measure(resource));
+        budget.ChargeBytes(SHA256.HashSizeInBytes);
+        var bytes = OrleansSerialization.Serialize(resource);
+        budget.Check();
+        return Convert.ToHexStringLower(SHA256.HashData(bytes));
+    }
+
+    private static void RequireOwner(DatabaseEngine database, IKeyValueView view,
+        string principalId, TextSeedPin pin)
+    {
+        var actual = database.ReadAtomicPartitionPlacement(view, principalId, pin.Consumer.Partition);
+        var expected = pin.Placement;
+        if (database.Store.Identity.NodeId != pin.NodeId
+            || database.Store.Identity.Incarnation != expected.Incarnation
+            || actual.PhysicalShardId != expected.PhysicalShardId || actual.Incarnation != expected.Incarnation)
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, OwnerLost);
+        }
+    }
+}

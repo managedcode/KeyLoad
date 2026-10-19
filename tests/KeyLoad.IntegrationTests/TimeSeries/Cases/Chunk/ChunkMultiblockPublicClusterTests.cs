@@ -7,7 +7,7 @@ namespace KeyLoad.IntegrationTests.Features.TimeSeries;
 internal sealed class ChunkMultiblockPublicClusterTests(ClusterFixture fixture)
 {
     [Test]
-    public async Task IndependentlyAuthored257RowsCrossNativeBlocksThenPagedExpiryPolicyRepairReplayAndTwoCold()
+    public async Task IndependentlyAuthored257RowsCrossBlocksThenPagedExpiryPolicyRepairReplayAndTwoCold()
     {
         var failures = new List<Exception>();
         McpCallerDeadline? deadline = null;

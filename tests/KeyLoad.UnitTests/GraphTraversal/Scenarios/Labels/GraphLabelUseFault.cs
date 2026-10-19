@@ -12,11 +12,11 @@ internal static class GraphLabelUseFault
             ?? throw new InvalidOperationException("The original canonical graph vertex must exist.");
         var image = CanonicalStoreImage.Bytes(db.Store);
         var position = db.Store.Position;
-        var identity = NativeSerialization.Serialize(db.Store.Identity);
+        var identity = OrleansSerialization.Serialize(db.Store.Identity);
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            var damaged = NativeSerialization.Serialize("wrong-native-vertex-type");
+            var damaged = OrleansSerialization.Serialize("wrong-execution-vertex-type");
             Write(db, key, damaged);
             var encoded = Convert.ToHexString(key) + ":";
             var originalRow = encoded + Convert.ToHexString(original);

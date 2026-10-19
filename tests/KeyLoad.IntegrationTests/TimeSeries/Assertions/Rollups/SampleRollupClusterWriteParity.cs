@@ -27,11 +27,11 @@ internal static class SampleRollupClusterWriteParity
         var official = await McpCallerAssertions.SuccessAsync<CommitReceipt>(
             await mcp.CallAsync(McpCallerTools.DocumentsCommit, original, cancellation));
         var finalSdk = await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(original, cancellation));
-        var expected = Convert.ToHexString(NativeSerialization.Serialize(receipt));
-        await Assert.That(Convert.ToHexString(NativeSerialization.Serialize(sqlReceipt))).IsEqualTo(expected);
-        await Assert.That(Convert.ToHexString(NativeSerialization.Serialize(officialSql.Value))).IsEqualTo(expected);
-        await Assert.That(Convert.ToHexString(NativeSerialization.Serialize(official.Value))).IsEqualTo(expected);
-        await Assert.That(Convert.ToHexString(NativeSerialization.Serialize(finalSdk))).IsEqualTo(expected);
+        var expected = Convert.ToHexString(OrleansSerialization.Serialize(receipt));
+        await Assert.That(Convert.ToHexString(OrleansSerialization.Serialize(sqlReceipt))).IsEqualTo(expected);
+        await Assert.That(Convert.ToHexString(OrleansSerialization.Serialize(officialSql.Value))).IsEqualTo(expected);
+        await Assert.That(Convert.ToHexString(OrleansSerialization.Serialize(official.Value))).IsEqualTo(expected);
+        await Assert.That(Convert.ToHexString(OrleansSerialization.Serialize(finalSdk))).IsEqualTo(expected);
         var after = await McpCallerAssertions.SdkSuccessAsync(await sdk.ReadSamplesAsync(rawRequest, cancellation));
         var mcpRaw = await McpCallerAssertions.SuccessAsync<SampleRecord[]>(
             await mcp.CallAsync(McpCallerTools.SeriesRead, rawRequest, cancellation));

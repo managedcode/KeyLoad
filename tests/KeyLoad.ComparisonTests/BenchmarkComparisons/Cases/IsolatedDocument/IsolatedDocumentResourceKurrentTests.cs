@@ -8,17 +8,17 @@ internal sealed class IsolatedDocumentResourceKurrentTests
 {
     private const string Target = "KurrentDB";
     private const string Prefix = "isolated-kurrent-";
-    private const string NativeHostSuffix = ".dev.internal";
+    private const string RuntimeHostSuffix = ".dev.internal";
     private const string ConnectionPrefix = "esdb://";
     private const string ConnectionOptions = "?tls=false&nodePreference=leader";
     private const string PortSeparator = ":";
-    private const int NativeHttpPort = 2113;
+    private const int RuntimeHttpPort = 2113;
 
-    /// <summary>AC-ISO-002/003/005/006: native gossip/replication matches actual direct endpoints for every member.</summary>
+    /// <summary>AC-ISO-002/003/005/006: execution gossip/replication matches actual direct endpoints for every member.</summary>
     [Test]
     [Arguments(1)]
     [Arguments(3)]
-    public async Task SelectedGroupHasExactNativeSizeAndReplicationAdvertisedEndpoints(int count)
+    public async Task SelectedGroupHasExactSizeAndReplicationAdvertisedEndpoints(int count)
     {
         await using var fixture = new IsolatedResourceTopologyFixture(Target, count);
         IsolatedKurrentResources.Add(fixture.Context);
@@ -36,14 +36,14 @@ internal sealed class IsolatedDocumentResourceKurrentTests
             await Assert.That(environment[T.ReplicationIp]).IsEqualTo(T.BindAll);
             await Assert.That(environment[T.ReplicationPort]).IsEqualTo(T.TcpPort);
             await Assert.That(environment[T.NodePort]).IsEqualTo(T.HttpPort);
-            await Assert.That(environment[T.NodeAdvertise]).IsEqualTo(node.Name + NativeHostSuffix);
-            await Assert.That(environment[T.ReplicationAdvertise]).IsEqualTo(node.Name + NativeHostSuffix);
-            await Assert.That(node.Annotations.OfType<EndpointAnnotation>().Single().TargetPort).IsEqualTo(NativeHttpPort);
+            await Assert.That(environment[T.NodeAdvertise]).IsEqualTo(node.Name + RuntimeHostSuffix);
+            await Assert.That(environment[T.ReplicationAdvertise]).IsEqualTo(node.Name + RuntimeHostSuffix);
+            await Assert.That(node.Annotations.OfType<EndpointAnnotation>().Single().TargetPort).IsEqualTo(RuntimeHttpPort);
             await Assert.That(environment[T.Insecure]).IsEqualTo(T.Enabled);
             await Assert.That(environment[T.DiscoverDns]).IsEqualTo(T.Disabled);
             await Assert.That(environment.GetValueOrDefault(T.GossipSeeds)).IsEqualTo(count == 1 ? null :
                 string.Join(',', nodes.Where(other => other != node)
-                    .Select(other => other.Name + NativeHostSuffix + PortSeparator + T.HttpPort)));
+                    .Select(other => other.Name + RuntimeHostSuffix + PortSeparator + T.HttpPort)));
             await Assert.That(node.Entrypoint).IsNull();
             await Assert.That(node.Annotations.OfType<WaitAnnotation>()).IsEmpty();
             await Assert.That(node.Annotations.OfType<HealthCheckAnnotation>().Count()).IsEqualTo(1);
@@ -53,6 +53,6 @@ internal sealed class IsolatedDocumentResourceKurrentTests
             "docker.io/kurrentplatform/kurrentdb:26.1.2@" + BenchmarkResources.KurrentDigest);
         await Assert.That(runner[IsolatedDocumentResourceAssertions.Connection].Contains("tls=false", StringComparison.Ordinal)).IsTrue();
         await Assert.That(runner[IsolatedDocumentResourceAssertions.Connection]).IsEqualTo(ConnectionPrefix +
-            string.Join(',', nodes.Select(node => node.Name + NativeHostSuffix + PortSeparator + T.HttpPort)) + ConnectionOptions);
+            string.Join(',', nodes.Select(node => node.Name + RuntimeHostSuffix + PortSeparator + T.HttpPort)) + ConnectionOptions);
     }
 }

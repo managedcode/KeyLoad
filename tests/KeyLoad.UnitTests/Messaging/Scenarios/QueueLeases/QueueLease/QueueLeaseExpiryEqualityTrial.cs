@@ -12,7 +12,7 @@ internal static class QueueLeaseExpiryEqualityTrial
         using var fixture = new TestDatabase();
         fixture.Configure("jobs", ResourceKind.WorkQueue);
         var state = await SeedExpiredAsync(fixture);
-        var identity = NativeSerialization.Serialize(fixture.Store.Identity);
+        var identity = OrleansSerialization.Serialize(fixture.Store.Identity);
         var firstBytes = QueueWholeFlowStorage.Bytes(fixture.Store);
         var firstPosition = fixture.Store.Position;
         fixture.Store.Dispose();
@@ -27,8 +27,8 @@ internal static class QueueLeaseExpiryEqualityTrial
         using var second = Open(fixture.Directory);
         var restored = QueueWholeFlowStorage.Open(second);
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(second, secondBytes, secondPosition, identity);
-        await NativeReplayResultAssertions.Same<CommitReceipt>(Apply(restored, ack, state.Boundary), acked);
-        await NativeReplayResultAssertions.Same<CommitReceipt>(Batch(restored, state.Producer, state.Boundary), state.Produced);
+        await ReplayResultAssertions.Same<CommitReceipt>(Apply(restored, ack, state.Boundary), acked);
+        await ReplayResultAssertions.Same<CommitReceipt>(Batch(restored, state.Producer, state.Boundary), state.Produced);
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(second, secondBytes, secondPosition, identity);
         var (producer, produced, healthyAck, healthyReceipt) = await HealthyAsync(restored, state);
         var finalBytes = QueueWholeFlowStorage.Bytes(second);
@@ -37,8 +37,8 @@ internal static class QueueLeaseExpiryEqualityTrial
         using var final = Open(fixture.Directory);
         var completed = QueueWholeFlowStorage.Open(final);
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(final, finalBytes, finalPosition, identity);
-        await NativeReplayResultAssertions.Same<CommitReceipt>(Apply(completed, healthyAck, state.Boundary), healthyReceipt);
-        await NativeReplayResultAssertions.Same<CommitReceipt>(Batch(completed, producer, state.Boundary), produced);
+        await ReplayResultAssertions.Same<CommitReceipt>(Apply(completed, healthyAck, state.Boundary), healthyReceipt);
+        await ReplayResultAssertions.Same<CommitReceipt>(Batch(completed, producer, state.Boundary), produced);
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(final, finalBytes, finalPosition, identity);
         await Assert.That(completed.InspectMessage("root", state.Lane, "input")!.Metadata.State).IsEqualTo(MessageState.Acked);
         await Assert.That(completed.InspectMessage("root", state.Lane, "healthy")!.Metadata.State).IsEqualTo(MessageState.Acked);

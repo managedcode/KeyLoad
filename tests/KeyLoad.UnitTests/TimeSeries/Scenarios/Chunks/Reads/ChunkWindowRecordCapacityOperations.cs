@@ -13,7 +13,7 @@ internal static class ChunkWindowRecordCapacityOperations
     private const string MergeKind = "mergeSampleChunkWindow";
     private const string DropKind = "dropSampleChunkWindow";
     private const string ExpireKind = "expireSamples";
-    private const string Exhausted = "The native series chunk window exceeds its admitted bound.";
+    private const string Exhausted = "The execution series chunk window exceeds its admitted bound.";
     private const int PageLimit = 128;
     private const int WindowHours = 1;
     private const long CorrectedRevision = 259;

@@ -10,8 +10,8 @@ namespace KeyLoad.UnitTests.Features.Search;
 
 internal static class Bm25RestoredEligibilityPolicy
 {
-    internal static async Task<(Command<DatabaseCommand> Operation, CommitReceipt Receipt, Bm25CorpusCurrentV1 Head, byte[] Bytes)>
-        RepairAsync(EventingArtifactFixture fixture, Bm25CorpusCurrentV1 originalHead, CancellationToken token)
+    internal static async Task<(Command<DatabaseCommand> Operation, CommitReceipt Receipt, Bm25CorpusCurrent Head, byte[] Bytes)>
+        RepairAsync(EventingArtifactFixture fixture, Bm25CorpusCurrent originalHead, CancellationToken token)
     {
         var original = fixture.Database.WithQueryView(Bm25PortableFamilyBackupSeed.FirstSubject,
             fixture.Source.Partition, Bm25PortableFamilyBackupSeed.Collection, (_, principal, _) => principal);
@@ -52,7 +52,7 @@ internal static class Bm25RestoredEligibilityPolicy
                 .Add(UnitRoutingOptions.Routing().Value.RequestLifetime), fixture.Source.CreateReadWork(token), UnitExecutionOptions.QueryExecution());
         var receipt = fixture.SubmitIssued(fixture.Database, operation, cancellationToken: token).Get<CommitReceipt>();
         var bytes = fixture.Target!.Read(view => view.ReadOwnedValue(Bm25CorpusKeys.Current(originalHead)))!;
-        var head = NativeSerialization.Deserialize<Bm25CorpusCurrentV1>(bytes);
+        var head = OrleansSerialization.Deserialize<Bm25CorpusCurrent>(bytes);
         await Assert.That(head.PolicyEpoch).IsEqualTo(restored.PolicyEpoch);
         await Assert.That(head.Incarnation).IsEqualTo(fixture.Target.Identity.Incarnation);
         await Assert.That(head.Generation).IsEqualTo(operation.CommandId);

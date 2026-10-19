@@ -9,7 +9,7 @@ namespace KeyLoad;
 /// <param name="ExpiresAt">Sets the optional expiration time.</param>
 /// <param name="OrderingKey">Groups messages that must retain their ordering.</param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.EnqueueMessage)]
+[Orleans.Alias(ContractAliases.EnqueueMessage)]
 public sealed record EnqueueMessage([property: Orleans.Id(0)] string Queue, [property: Orleans.Id(1)] string MessageId, [property: Orleans.Id(2)] string PayloadJson, [property: Orleans.Id(3)] string HeadersJson = EnqueueMessage.DefaultHeadersJson,
     [property: Orleans.Id(4)] DateTimeOffset? NotBefore = null, [property: Orleans.Id(5)] DateTimeOffset? ExpiresAt = null, [property: Orleans.Id(6)] string? OrderingKey = null) : Mutation(Queue)
 {

@@ -1,6 +1,6 @@
 namespace KeyLoad.Query.Features.QueryExecution;
 
-/// <summary>Separates one actual bounded native child from serialized parent accounting.</summary>
+/// <summary>Separates one actual bounded execution child from serialized parent accounting.</summary>
 internal sealed class PartitionQueryPreparedLeaf(
     Func<CancellationToken, Task<PartitionQueryOwnedLeaf>> run,
     Func<PartitionQueryOwnedLeaf, CancellationToken, Task> complete)

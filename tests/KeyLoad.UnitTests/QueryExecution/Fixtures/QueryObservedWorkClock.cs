@@ -1,6 +1,6 @@
 namespace KeyLoad.UnitTests.Features.QueryExecution;
 
-/// <summary>Operation clock observing actual work in the owning native store.</summary>
+/// <summary>Operation clock observing actual work in the owning execution store.</summary>
 internal sealed class QueryObservedWorkClock : TimeProvider
 {
     private Func<bool>? observedWork;

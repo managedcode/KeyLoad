@@ -5,7 +5,7 @@ namespace KeyLoad.UnitTests.Features.Search;
 internal sealed class AnnPartialWriteWholeFlowTests
 {
     [Test]
-    public async Task ActualCompletedNativeFrameWriteCancellationLeavesNoPublicationOrAckAndHealthySameSessionPublishesLiteralPage()
+    public async Task ActualCompletedFrameWriteCancellationLeavesNoPublicationOrAckAndHealthySameSessionPublishesLiteralPage()
     {
         var clock = new AnnPublicObservedWorkClock();
         var failures = new List<Exception>();
@@ -14,8 +14,8 @@ internal sealed class AnnPartialWriteWholeFlowTests
             using var database = AnnSeedTestSupport.Create(AnnPublicWholeFlow.Count, timeProvider: clock);
             await ServerFailureObserver.ObserveAsync(async () =>
             {
-                var request = NativeAnnMaintenanceTestData.Pin(database);
-                await using var runtime = new NativeAnnMaintenanceTestRuntime(database, clock);
+                var request = AnnMaintenanceTestData.Pin(database);
+                await using var runtime = new AnnMaintenanceTestRuntime(database, clock);
                 await ServerFailureObserver.ObserveAsync(async () =>
                 {
                     await AnnPartialWriteAssertions.PrepareAsync(database, runtime, request);

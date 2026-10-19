@@ -4,7 +4,7 @@ namespace KeyLoad;
 public static class SampleRollupProtocol
 {
     /// <summary>Identifies the bounded public HTTP rollup read.</summary>
-    public const string ReadRoute = "/v1/series/rollups/read";
+    public const string ReadRoute = "/series/rollups/read";
     /// <summary>Identifies the canonical MCP rollup read operation.</summary>
     public const string ReadTool = "keyload_series_read_rollup";
     /// <summary>Identifies explicit derived-bucket refresh mutations.</summary>

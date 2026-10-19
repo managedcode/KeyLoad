@@ -9,13 +9,13 @@ internal sealed class DatabaseIdentityMiddleware(RequestDelegate next)
     {
         if (!DatabaseAuthenticationComposition.IsProtected(context.Request))
         {
-            await next(context).ConfigureAwait(false);
+            await next(context);
             return;
         }
         OperationResponseHeaders.Register(context);
         if (context.Request.Path.StartsWithSegments(McpFramingProtocol.Path, StringComparison.OrdinalIgnoreCase))
         {
-            await McpHttpPipeline.RunAsync(context, next).ConfigureAwait(false);
+            await McpHttpPipeline.RunAsync(context, next);
             return;
         }
         using var incoming = context.RequestServices.GetRequiredService<HttpAdmissionGovernor>().Begin(
@@ -24,13 +24,13 @@ internal sealed class DatabaseIdentityMiddleware(RequestDelegate next)
         {
             body.MaxRequestBodySize = incoming.MaxBodyBytes;
         }
-        var principal = await DatabaseAuthenticationComposition.AuthenticateAsync(context).ConfigureAwait(false);
+        var principal = await DatabaseAuthenticationComposition.AuthenticateAsync(context);
         incoming.Bind(principal, context.RequestAborted);
         context.Items[ServerProtocol.PrincipalItem] = principal;
-        await next(context).ConfigureAwait(false);
+        await next(context);
         if (context.Response.StatusCode == StatusCodes.Status413PayloadTooLarge && !context.Response.HasStarted)
         {
-            await ServerErrorMiddleware.WriteAsync(context, ErrorCode.ResourceExhausted, ServerProtocol.BodyExceeded).ConfigureAwait(false);
+            await ServerErrorMiddleware.WriteAsync(context, ErrorCode.ResourceExhausted, ServerProtocol.BodyExceeded);
         }
     }
 

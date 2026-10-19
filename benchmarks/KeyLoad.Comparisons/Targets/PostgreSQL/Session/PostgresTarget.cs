@@ -4,8 +4,8 @@ public sealed partial class PostgresTarget : IBenchmarkSessionQueries
 {
     private const string SessionIndexSql = "CREATE INDEX session_number_idx ON documents (((body->>'number')::integer)); ANALYZE documents";
     private const string SessionReadSql = "SELECT id,body::text FROM documents WHERE id=$1 AND (body->>'number')::integer >= $2 AND (body->>'number')::integer < $3 ORDER BY id LIMIT 2";
-    private const string MissingSessionRow = "SessionNativeQueryMissingRow";
-    private const string ExtraSessionRow = "SessionNativeQueryExtraRow";
+    private const string MissingSessionRow = "SessionQueryMissingRow";
+    private const string ExtraSessionRow = "SessionQueryExtraRow";
     private const int SessionRangeWidth = 1;
     private const int SessionIdColumn = 0;
     private const int SessionPayloadColumn = 1;

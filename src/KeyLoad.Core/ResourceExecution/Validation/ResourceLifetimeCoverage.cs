@@ -1,5 +1,7 @@
 using System.Collections.Immutable;
-using KeyLoad.Core.Features.ClusterRouting.Contracts;
+using KeyLoad.Core.Features.CommandOutcomes.Contracts;
+using KeyLoad.Core.Features.RuntimeJournaling.Contracts;
+using KeyLoad.Core.Features.StoragePartitions.Contracts;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core.Features.ResourceExecution;
@@ -8,25 +10,25 @@ internal static class ResourceLifetimeCoverage
 {
     private const int FirstResourceIndex = 0;
 
-    internal static ResourceLifetimeCoverageV1 Capture(IKeyValueView view, PartitionRef partition,
+    internal static ResourceLifetimeCoverage Capture(IKeyValueView view, PartitionRef partition,
         ImmutableArray<ResourceDefinition> definitions, int maximumBytes)
     {
         if (definitions.IsDefault)
         {
             throw Errors.Fail(ErrorCode.Corruption, ResourceLifetimeValidationMessages.Invalid);
         }
-        var values = ImmutableArray.CreateBuilder<ResourceLifetimeV1>(definitions.Length);
+        var values = ImmutableArray.CreateBuilder<ResourceLifetime>(definitions.Length);
         foreach (var definition in definitions)
         {
             values.Add(ResourceLifetimeCatalog.Read(view, partition.TenantId, partition.DatabaseId,
                 definition.Name, definition) ?? throw Errors.Fail(ErrorCode.Corruption, ResourceLifetimeValidationMessages.MissingAuthority));
         }
-        var result = new ResourceLifetimeCoverageV1(partition, values.MoveToImmutable());
+        var result = new ResourceLifetimeCoverage(partition, values.MoveToImmutable());
         Require(result, partition, definitions, maximumBytes);
         return result;
     }
 
-    internal static void Require(ResourceLifetimeCoverageV1 coverage, PartitionRef partition,
+    internal static void Require(ResourceLifetimeCoverage coverage, PartitionRef partition,
         ImmutableArray<ResourceDefinition> definitions, int maximumBytes)
     {
         if (coverage is null || coverage.Partition != partition || coverage.Lifetimes.IsDefault
@@ -46,7 +48,7 @@ internal static class ResourceLifetimeCoverage
             ResourceLifetimeIdentity.Validate(coverage.Lifetimes[index], partition.TenantId,
                 partition.DatabaseId, definition);
         }
-        if (NativeSerialization.Measure(coverage) > maximumBytes)
+        if (OrleansSerialization.Measure(coverage) > maximumBytes)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, ResourceLifetimeValidationMessages.Capacity);
         }

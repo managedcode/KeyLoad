@@ -5,7 +5,7 @@ using Orleans.Concurrency;
 
 namespace KeyLoad.Clustering;
 
-/// <summary>Buffers time-series hints per native stateless worker activation and flushes on a grain timer.</summary>
+/// <summary>Buffers time-series hints per execution stateless worker activation and flushes on a grain timer.</summary>
 [StatelessWorker]
 internal sealed class SampleChunkWorkerGrain(BackgroundStorageClient storage,
     IOptions<BackgroundWorkerOptions> batching, ILogger<SampleChunkWorkerGrain> diagnostics)

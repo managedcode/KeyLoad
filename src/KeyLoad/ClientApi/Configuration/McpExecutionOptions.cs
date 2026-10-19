@@ -23,7 +23,7 @@ internal sealed class McpExecutionOptions
     private const int MaximumTransportMethodCharactersCeiling = 64;
     private const int MaximumTransportNameCharactersCeiling = 256;
     private const int MinimumPositiveBudget = 1;
-    private const int NativeReplyWrapperDepth = 3;
+    private const int ReplyWrapperDepth = 3;
     private const int MaximumDepthCeiling = 64;
     private const int MaximumReplyDepthCeiling = 61;
     private const int MaximumIdentifierByteCeiling = 256;
@@ -52,7 +52,7 @@ internal sealed class McpExecutionOptions
     public int MaximumCanonicalPayloadBytes { get; set; } = MaximumRequestByteCeiling;
     public int IngressScratchBytes { get; set; } = MaximumScratchByteCeiling;
     public int SafeFailureBytes { get; set; } = MaximumFailureByteCeiling;
-    public int NativeEnvelopeItems { get; set; } = MaximumEnvelopeItemCeiling;
+    public int EnvelopeItems { get; set; } = MaximumEnvelopeItemCeiling;
 
     public int MaximumCatalogOperations { get; set; } = MaximumCatalogOperationsCeiling;
     public int MaximumCatalogMetadataBytes { get; set; } = MaximumCatalogMetadataBytesCeiling;
@@ -71,7 +71,7 @@ internal sealed class McpExecutionOptions
 
     internal bool IsValid() => Bounded(MaximumDepth, MaximumDepthCeiling)
         && Bounded(MaximumReplyDepth, MaximumReplyDepthCeiling)
-        && MaximumReplyDepth <= MaximumDepth - NativeReplyWrapperDepth
+        && MaximumReplyDepth <= MaximumDepth - ReplyWrapperDepth
         && Bounded(MaximumIdentifierBytes, MaximumIdentifierByteCeiling)
         && Bounded(MaximumTokens, MaximumTokenCeiling) && Bounded(MaximumProperties, MaximumPropertyCeiling)
         && MaximumProperties <= MaximumTokens
@@ -86,7 +86,7 @@ internal sealed class McpExecutionOptions
         && MaximumCanonicalPayloadBytes <= MaximumRequestCapacityBytes
         && Bounded(IngressScratchBytes, MaximumScratchByteCeiling)
         && Bounded(SafeFailureBytes, MaximumFailureByteCeiling)
-        && Bounded(NativeEnvelopeItems, MaximumEnvelopeItemCeiling)
+        && Bounded(EnvelopeItems, MaximumEnvelopeItemCeiling)
         && Bounded(MaximumCatalogOperations, MaximumCatalogOperationsCeiling)
         && Bounded(MaximumCatalogMetadataBytes, MaximumCatalogMetadataBytesCeiling)
         && Bounded(MaximumDescriptorCharacters, MaximumDescriptorCharactersCeiling)

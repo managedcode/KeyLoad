@@ -11,16 +11,16 @@ internal static class EventProjectionProcessRecoveryAssertions
         CancellationToken cancellationToken)
     {
         using var store = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
-        var database = new DatabaseEngine(store, new AuthorizationPolicy(), RecoveryExecutionOptions.DatabaseLimits(), RecoveryExecutionOptions.DueWork(), RecoveryExecutionOptions.EventSource(), RecoveryExecutionOptions.Messaging(), RecoveryExecutionOptions.GraphExecution(), RecoveryExecutionOptions.ChangeFeedExecution(), RecoveryExecutionOptions.BlobExecution(), RecoveryExecutionOptions.NativeClaimsExecution(), RecoveryExecutionOptions.TimeSeriesExecution());
-        var operation = NativeSerialization.Deserialize<Command<DatabaseCommand>>(await File.ReadAllBytesAsync(
+        var database = new DatabaseEngine(store, new AuthorizationPolicy(), RecoveryExecutionOptions.DatabaseLimits(), RecoveryExecutionOptions.DueWork(), RecoveryExecutionOptions.EventSource(), RecoveryExecutionOptions.Messaging(), RecoveryExecutionOptions.GraphExecution(), RecoveryExecutionOptions.ChangeFeedExecution(), RecoveryExecutionOptions.RuntimeClaimsExecution(), RecoveryExecutionOptions.TimeSeriesExecution());
+        var operation = OrleansSerialization.Deserialize<Command<DatabaseCommand>>(await File.ReadAllBytesAsync(
             Path.Combine(root, EventProjectionCrashScenario.OperationFile), cancellationToken));
         var projection = EventProjectionRecoveryStoreOracle.ReadProjection(operation);
         var before = await EventProjectionRecoveryStoreOracle.ReadBeforeOutboxHeadAsync(root, cancellationToken);
         var beforeHead = before.Head;
         var beforePositionBytes = await File.ReadAllBytesAsync(Path.Combine(root,
             EventProjectionCrashScenario.PositionFile), cancellationToken);
-        var beforePosition = NativeSerialization.Deserialize<long>(beforePositionBytes);
-        var expectedToken = NativeSerialization.Deserialize<CommitToken>(await File.ReadAllBytesAsync(
+        var beforePosition = OrleansSerialization.Deserialize<long>(beforePositionBytes);
+        var expectedToken = OrleansSerialization.Deserialize<CommitToken>(await File.ReadAllBytesAsync(
             Path.Combine(root, EventProjectionCrashScenario.TargetTokenFile), cancellationToken));
         var cut = EventProjectionRecoveryStoreOracle.CaptureCut(store, operation, projection, beforeHead.Tail);
         var committed = cut.Vector is not null;

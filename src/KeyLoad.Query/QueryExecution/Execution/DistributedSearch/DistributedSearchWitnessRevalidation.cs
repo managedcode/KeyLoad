@@ -8,13 +8,13 @@ internal static class DistributedSearchWitnessRevalidation
 {
     private const string ReceivingPrincipalChanged = "The distributed search receiving principal changed.";
 
-    internal static DistributedTextWitnessV1 Execute(DatabaseEngine database, string principalId,
-        SearchRequest request, string tenant, DistributedTextWitnessV1 witness,
+    internal static DistributedTextWitness Execute(DatabaseEngine database, string principalId,
+        SearchRequest request, string tenant, DistributedTextWitness witness,
         ReadExecutionBudget budget, ReadExecutionBudgetReadGrant grant, PartitionQueryLifetimeMetadata? metadata = null)
     {
         using var admission = database.AdmitQuery(budget.Cancellation);
         using var charged = budget.EnterReadGrant(grant);
-        Func<IKeyValueView, PrincipalRecord, ResourceDefinition, string, DistributedTextWitnessV1> read =
+        Func<IKeyValueView, PrincipalRecord, ResourceDefinition, string, DistributedTextWitness> read =
             (view, principal, resource, digest) =>
             {
                 budget.Check();

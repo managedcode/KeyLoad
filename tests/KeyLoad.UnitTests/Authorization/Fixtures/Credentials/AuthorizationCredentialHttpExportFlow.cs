@@ -35,7 +35,7 @@ internal static class AuthorizationCredentialHttpExportFlow
         using var deadline = fixture.Deadline();
         using (var caller = new AuthorizationTelemetryCallerActivities(AuthorizationUnsafeSpanState.None))
         {
-            await AuthorizationTelemetryNativeAssertions.CallerAsync(caller);
+            await RuntimeAuthorizationTelemetryAssertions.CallerAsync(caller);
             using var denied = await SendAsync(fixture, payload, deadline.Token);
             await AuthorizationCredentialHttpExportAssertions.ProblemAsync(denied, deadline.Token);
         }
@@ -45,7 +45,7 @@ internal static class AuthorizationCredentialHttpExportFlow
         var position = fixture.Database.Database.LastApplied;
         using (var caller = new AuthorizationTelemetryCallerActivities(AuthorizationUnsafeSpanState.None))
         {
-            await AuthorizationTelemetryNativeAssertions.CallerAsync(caller);
+            await RuntimeAuthorizationTelemetryAssertions.CallerAsync(caller);
             using var healthy = await SendAsync(fixture, payload with
             {
                 AfterName = null

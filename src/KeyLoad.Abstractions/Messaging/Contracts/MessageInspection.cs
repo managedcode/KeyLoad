@@ -5,5 +5,5 @@ namespace KeyLoad;
 /// <param name="PayloadJson">Contains the optional message payload.</param>
 /// <param name="HeadersJson">Contains optional JSON headers.</param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.MessageInspection)]
+[Orleans.Alias(ContractAliases.MessageInspection)]
 public sealed record MessageInspection([property: Orleans.Id(0)] MessageMetadata Metadata, [property: Orleans.Id(1)] string? PayloadJson, [property: Orleans.Id(2)] string? HeadersJson);

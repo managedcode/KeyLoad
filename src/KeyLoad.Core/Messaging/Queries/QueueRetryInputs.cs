@@ -62,7 +62,7 @@ public sealed partial class DatabaseEngine
             {
                 break;
             }
-            var id = NativeSerialization.Deserialize<string>(row.Value.Span);
+            var id = OrleansSerialization.Deserialize<string>(row.Value.Span);
             var metadata = view.GetRecord<MessageMetadata>(QueueKey(MessageMetadataSpace, lane, id))
                 ?? throw Errors.Fail(ErrorCode.Corruption, MissingIndexedMetadata);
             RequireCurrentQueueDueEntry(lane, metadata, now, leased: true, row.Key.Span);

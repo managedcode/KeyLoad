@@ -9,18 +9,18 @@ using KurrentEventData = KurrentDB.Client.EventData;
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 internal sealed class IsolatedKurrentVolumeChecksFixture(Uri endpoint, ComparisonOptions options,
-    IOptions<NativeComparisonHarnessOptions> harnessOptions)
+    IOptions<ComparisonHarnessOptions> harnessOptions)
 {
     private const int CanonicalCount = 55_378;
     private readonly Guid scope = Guid.NewGuid();
     private readonly List<KurrentDBClient> clients = [];
-    private readonly KurrentStreamOwnership ownership = new(NativeExecutionPolicyFixture.Workload(options));
+    private readonly KurrentStreamOwnership ownership = new(ExecutionPolicyFixture.Workload(options));
     private readonly KurrentEventData[] expectedEvents = new KurrentEventData[CanonicalCount];
     private KurrentDBClient? writer;
     private string[] streams = [];
     private string foreign = string.Empty;
     private KurrentEventData? foreignEvent;
-    private IsolatedKurrentOwnershipChecksNative.Snapshot? foreignBefore;
+    private RuntimeIsolatedKurrentOwnershipChecks.Snapshot? foreignBefore;
     private bool foreignAcknowledged;
     private bool cleanupAttempted;
 
@@ -28,7 +28,7 @@ internal sealed class IsolatedKurrentVolumeChecksFixture(Uri endpoint, Compariso
     {
         var independentlyDerived = checked(options.Documents + options.Repetitions * checked(options.Warmup + options.Operations)
             + 2);
-        await Assert.That(IsolatedKurrentVolumeChecksNative.ReadOwnershipProbeCount()).IsEqualTo(2);
+        await Assert.That(RuntimeIsolatedKurrentVolumeChecks.ReadOwnershipProbeCount()).IsEqualTo(2);
         await Assert.That(independentlyDerived).IsEqualTo(CanonicalCount);
         await Assert.That(ownership.Capacity).IsEqualTo(independentlyDerived);
         writer = CreateClient();
@@ -42,7 +42,7 @@ internal sealed class IsolatedKurrentVolumeChecksFixture(Uri endpoint, Compariso
             throw new ComparisonFailureException(KurrentConstants.AppendAcknowledgementMissing);
         }
         foreignAcknowledged = true;
-        foreignBefore = await IsolatedKurrentOwnershipChecksNative.ReadOriginalAsync(CreateClient(), foreign, token);
+        foreignBefore = await RuntimeIsolatedKurrentOwnershipChecks.ReadOriginalAsync(CreateClient(), foreign, token);
         streams = Enumerable.Range(0, ownership.Capacity)
             .Select(index => Prefix + index.ToString(CultureInfo.InvariantCulture)).ToArray();
         await IsolatedKurrentVolumeChecksWorkers.RunAsync(streams.Length, SeedOneAsync, harnessOptions, token);
@@ -63,12 +63,12 @@ internal sealed class IsolatedKurrentVolumeChecksFixture(Uri endpoint, Compariso
         cleanupAttempted = true;
         var cleanupWriter = writer;
         writer = null;
-        var diagnostic = await KurrentOwnedStreamCleanup.RunAsync(cleanupWriter, acknowledged, originalClients, [], NativeExecutionPolicyFixture.Lifecycle(), NativeExecutionPolicyFixture.ReadDiagnostics(), TimeProvider.System, CancellationToken.None);
-        await IsolatedKurrentVolumeChecksNative.RequireCompleteAsync(diagnostic, ownership.Capacity);
+        var diagnostic = await KurrentOwnedStreamCleanup.RunAsync(cleanupWriter, acknowledged, originalClients, [], ExecutionPolicyFixture.Lifecycle(), ExecutionPolicyFixture.ReadDiagnostics(), TimeProvider.System, CancellationToken.None);
+        await RuntimeIsolatedKurrentVolumeChecks.RequireCompleteAsync(diagnostic, ownership.Capacity);
         writer = null;
         var reader = CreateClient();
         await IsolatedKurrentVolumeChecksWorkers.RunAsync(acknowledged.Length,
-            (index, workerToken) => IsolatedKurrentVolumeChecksNative.RequireDeletedAsync(reader,
+            (index, workerToken) => RuntimeIsolatedKurrentVolumeChecks.RequireDeletedAsync(reader,
                 acknowledged[index], workerToken), harnessOptions, token);
         await RequireForeignUnchangedAsync(reader, token);
     }
@@ -85,7 +85,7 @@ internal sealed class IsolatedKurrentVolumeChecksFixture(Uri endpoint, Compariso
                 var cleanupWriter = writer;
                 writer = null;
                 var diagnostic = await TransferCleanupAsync(cleanupWriter, acknowledged);
-                await IsolatedKurrentVolumeChecksNative.RequireCompleteAsync(diagnostic, acknowledged.Length);
+                await RuntimeIsolatedKurrentVolumeChecks.RequireCompleteAsync(diagnostic, acknowledged.Length);
             });
         }
 
@@ -96,7 +96,7 @@ internal sealed class IsolatedKurrentVolumeChecksFixture(Uri endpoint, Compariso
             {
                 var foreignWriter = CreateClient();
                 var foreignDiagnostic = await TransferCleanupAsync(foreignWriter, [foreign]);
-                await IsolatedKurrentVolumeChecksNative.RequireCompleteAsync(foreignDiagnostic, 1);
+                await RuntimeIsolatedKurrentVolumeChecks.RequireCompleteAsync(foreignDiagnostic, 1);
             });
         }
 
@@ -105,7 +105,7 @@ internal sealed class IsolatedKurrentVolumeChecksFixture(Uri endpoint, Compariso
             await failures.AttemptCleanupAsync(async () =>
             {
                 var disposalDiagnostic = await TransferCleanupAsync(null, []);
-                await IsolatedKurrentVolumeChecksNative.RequireCompleteAsync(disposalDiagnostic, 0);
+                await RuntimeIsolatedKurrentVolumeChecks.RequireCompleteAsync(disposalDiagnostic, 0);
             });
         }
         failures.ThrowAfterCleanup(primary);
@@ -117,7 +117,7 @@ internal sealed class IsolatedKurrentVolumeChecksFixture(Uri endpoint, Compariso
     {
         var ownedClients = clients.ToArray();
         clients.Clear();
-        return await KurrentOwnedStreamCleanup.RunAsync(cleanupWriter, streamsToDelete, ownedClients, [], NativeExecutionPolicyFixture.Lifecycle(), NativeExecutionPolicyFixture.ReadDiagnostics(), TimeProvider.System, CancellationToken.None);
+        return await KurrentOwnedStreamCleanup.RunAsync(cleanupWriter, streamsToDelete, ownedClients, [], ExecutionPolicyFixture.Lifecycle(), ExecutionPolicyFixture.ReadDiagnostics(), TimeProvider.System, CancellationToken.None);
     }
 
     private async Task SeedOneAsync(int index, CancellationToken token)
@@ -137,9 +137,9 @@ internal sealed class IsolatedKurrentVolumeChecksFixture(Uri endpoint, Compariso
     private async Task RequireOriginalAsync(KurrentDBClient reader, int index, CancellationToken token)
     {
         var expected = expectedEvents[index];
-        var actual = await IsolatedKurrentOwnershipChecksNative.ReadOriginalAsync(reader, streams[index], token);
+        var actual = await RuntimeIsolatedKurrentOwnershipChecks.ReadOriginalAsync(reader, streams[index], token);
         await Assert.That(actual.EventId).IsEqualTo(expected.EventId.ToGuid());
-        await Assert.That(actual.Revision).IsEqualTo(KurrentConstants.NativeFirstRevision);
+        await Assert.That(actual.Revision).IsEqualTo(KurrentConstants.RuntimeFirstRevision);
         await Assert.That(actual.Data.AsSpan().SequenceEqual(expected.Data.ToArray())).IsTrue();
         await Assert.That(actual.Type).IsEqualTo(KurrentConstants.EventType);
         await Assert.That(actual.ContentType).IsEqualTo(KurrentConstants.EventJson);
@@ -152,15 +152,15 @@ internal sealed class IsolatedKurrentVolumeChecksFixture(Uri endpoint, Compariso
         {
             throw new ComparisonFailureException(KurrentConstants.AppendAcknowledgementMissing);
         }
-        var after = await IsolatedKurrentOwnershipChecksNative.ReadOriginalAsync(reader, foreign, token);
-        await IsolatedKurrentOwnershipChecksNative.RequireUnchangedAsync(foreignBefore, after);
+        var after = await RuntimeIsolatedKurrentOwnershipChecks.ReadOriginalAsync(reader, foreign, token);
+        await RuntimeIsolatedKurrentOwnershipChecks.RequireUnchangedAsync(foreignBefore, after);
         await Assert.That(after.EventId).IsEqualTo(foreignEvent.EventId.ToGuid());
         await Assert.That(after.Data.AsSpan().SequenceEqual(foreignEvent.Data.ToArray())).IsTrue();
     }
 
     private KurrentDBClient CreateClient()
     {
-        var client = IsolatedKurrentCleanupChecksNative.CreateClient(endpoint);
+        var client = RuntimeIsolatedKurrentCleanupChecks.CreateClient(endpoint);
         clients.Add(client);
         return client;
     }
@@ -171,6 +171,6 @@ internal sealed class IsolatedKurrentVolumeChecksFixture(Uri endpoint, Compariso
     private string Prefix => KurrentConstants.StreamPrefix + scope.ToString(KurrentConstants.GuidFormat)
         + KurrentConstants.StreamSeparator;
 
-    private static KurrentEventData CreateEvent() => IsolatedKurrentVolumeChecksNative.CreateEvent();
-    private static KurrentEventData CreateForeignEvent() => IsolatedKurrentVolumeChecksNative.CreateForeignEvent();
+    private static KurrentEventData CreateEvent() => RuntimeIsolatedKurrentVolumeChecks.CreateEvent();
+    private static KurrentEventData CreateForeignEvent() => RuntimeIsolatedKurrentVolumeChecks.CreateForeignEvent();
 }

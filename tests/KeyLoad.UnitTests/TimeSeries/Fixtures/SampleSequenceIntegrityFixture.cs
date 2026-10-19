@@ -9,8 +9,8 @@ namespace KeyLoad.UnitTests.Features.TimeSeries;
 
 internal sealed class SampleSequenceIntegrityFixture : IDisposable
 {
-    private const string Unknown = "The original native sequence fixture owner has not released.";
-    private readonly List<NativeStorageOwnerSettlement> attempts = [];
+    private const string Unknown = "The original execution sequence fixture owner has not released.";
+    private readonly List<StorageOwnerSettlement> attempts = [];
     private ZoneTreeStore? cold;
     private bool sourceJoined;
     private bool closeAttempted;
@@ -31,7 +31,7 @@ internal sealed class SampleSequenceIntegrityFixture : IDisposable
     internal void RetainEvidence() => preserve = true;
     internal (long AppliedPosition, long StorePosition) ReadCanonicalCut()
         => Store.Read(view => (view.ReadOwnedValue(KeySpace.AppliedBytes) is { } bytes
-            ? NativeSerialization.Deserialize<long>(bytes) : default(long), Store.Position));
+            ? OrleansSerialization.Deserialize<long>(bytes) : default(long), Store.Position));
 
     internal void Reopen()
     {
@@ -42,7 +42,7 @@ internal sealed class SampleSequenceIntegrityFixture : IDisposable
         {
             throw new InvalidOperationException(Unknown);
         }
-        var attempt = new NativeStorageOwnerSettlement();
+        var attempt = new StorageOwnerSettlement();
         attempts.Add(attempt);
         cold = ZoneTreeStore.OpenOwned(new(Source.Owner.Directory)
         {
@@ -110,11 +110,11 @@ internal sealed class SampleSequenceIntegrityFixture : IDisposable
         {
             CloseCold();
         }
-        catch (Exception failure) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        catch (Exception failure) when (KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(failure))
         {
             failures.Add(failure);
         }
-        catch (Exception failure) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        catch (Exception failure) when (!KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(failure))
         {
             failures.Add(failure);
         }
@@ -129,11 +129,11 @@ internal sealed class SampleSequenceIntegrityFixture : IDisposable
             {
                 Source.Dispose();
             }
-            catch (Exception failure) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+            catch (Exception failure) when (KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(failure))
             {
                 failures.Add(failure);
             }
-            catch (Exception failure) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+            catch (Exception failure) when (!KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(failure))
             {
                 failures.Add(failure);
             }

@@ -14,7 +14,7 @@ internal sealed class SqlInnerJoinRowAuthorizationTests
     private const string Sql = "SELECT TOP (10) l.order_id AS order_id, r.name AS name "
         + "FROM orders AS l INNER JOIN customers AS r ON l.customer_id = r.id "
         + "ORDER BY l.order_id ASC";
-    private const int Dialect = 2;
+    private const int Dialect = SqlOperationProtocol.DefaultQueryDialectVersion;
 
     [Test]
     public async Task AcJoinOmitsRowsDeniedOnEitherSideAndSucceedsAfterPersistedOwnershipChanges()

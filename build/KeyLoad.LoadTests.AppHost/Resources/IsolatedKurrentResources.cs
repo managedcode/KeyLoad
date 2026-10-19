@@ -50,7 +50,7 @@ internal static class IsolatedKurrentResources
             context.BindEndpoint(index, node, Http);
         }
         context.BindSetting(Connection, ConnectionPrefix +
-            string.Join(SeparatorCharacter, names.Select(name => IsolatedKurrentSettings.NativeHost(name) + NodePort)) + ConnectionOptions);
+            string.Join(SeparatorCharacter, names.Select(name => IsolatedKurrentSettings.RuntimeHost(name) + NodePort)) + ConnectionOptions);
         context.BindImage(Registry + Image + TagSeparator + Tag + DigestSeparator + BenchmarkResources.KurrentDigest);
     }
 }

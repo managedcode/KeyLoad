@@ -8,7 +8,7 @@ internal static class SampleChunkRetentionClusterPartial
     internal static async Task RunAsync(SampleChunkClusterScenario scenario, KeyLoadClient sdk,
         McpOfficialClient mcp, CancellationToken token)
     {
-        var full = new ReadSampleRollupRequest(scenario.Native.Partition, TimeSeriesClusterScenario.Set,
+        var full = new ReadSampleRollupRequest(scenario.Execution.Partition, TimeSeriesClusterScenario.Set,
             TimeSeriesClusterScenario.Series, scenario.From, scenario.Until);
         await RefreshAsync(scenario, sdk, mcp, scenario.From, false, token);
         await SampleChunkRetentionClusterReadOracle.RollupAsync(sdk, mcp, full,
@@ -28,7 +28,7 @@ internal static class SampleChunkRetentionClusterPartial
                 SampleChunkClusterProtocol.MergedRevision, SampleChunkClusterProtocol.CorrectedSequence, late.Timestamp.UtcTicks,
                 [new(TimeSeriesClusterScenario.Series, late, SampleChunkClusterProtocol.CorrectedSequence,
                     TimeSeriesClusterScenario.PrivateTags)], expired.Token.Position), expired, token);
-        await SampleChunkRetentionClusterReadOracle.RawAsync(sdk, mcp, new(scenario.Native.Partition,
+        await SampleChunkRetentionClusterReadOracle.RawAsync(sdk, mcp, new(scenario.Execution.Partition,
             TimeSeriesClusterScenario.Set, TimeSeriesClusterScenario.Series, scenario.From, scenario.Until, SampleChunkClusterProtocol.OutputLimit),
             [new(TimeSeriesClusterScenario.Series, late, SampleChunkClusterProtocol.CorrectedSequence, TimeSeriesClusterScenario.PrivateTags)], token);
         await SampleChunkRetentionClusterDenialOracle.RollupAsync(sdk, mcp, full, token);

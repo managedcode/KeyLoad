@@ -4,7 +4,7 @@ namespace KeyLoad.Core.Features.Search;
 
 /// <summary>Records only source identity, policy provenance and reducer metadata beside a derived vector.</summary>
 [global::Orleans.GenerateSerializer]
-[global::Orleans.Alias(VectorProjectionNativeAliases.Lineage)]
+[global::Orleans.Alias(VectorProjectionAliases.Lineage)]
 internal sealed record VectorProjectionLineage(
     [property: global::Orleans.Id(VectorProjectionLineageFields.SourceStream)] StreamRef SourceStream,
     [property: global::Orleans.Id(VectorProjectionLineageFields.SourceEventRevision)] long SourceEventRevision,

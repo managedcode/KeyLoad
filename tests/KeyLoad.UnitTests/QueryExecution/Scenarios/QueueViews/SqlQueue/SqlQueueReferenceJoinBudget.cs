@@ -32,8 +32,7 @@ internal static class SqlQueueReferenceJoinBudget
         var owner = new DatabaseEngine(database.Store, database.Database.Authorization,
             UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.DueWork(),
             UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(),
-            UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(),
-            UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
+            UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
         return new(owner, UnitExecutionOptions.QueryExecution());
     }
 }

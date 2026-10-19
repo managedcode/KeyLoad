@@ -22,7 +22,7 @@ internal static class Bm25PrivateAdmissionAssertions
         await Assert.That(database.Store.Position).IsEqualTo(expected.Token.Position);
         var expectedReceipt = new CommitReceipt(phase.CommandId, expected.Token, [],
             database.Database.Durability, database.Database.AcknowledgedPersistedCopies);
-        await NativeReplayResultAssertions.BytesAsync(NativeSerialization.Serialize(expectedReceipt), NativeSerialization.Serialize(receipt));
+        await ReplayResultAssertions.BytesAsync(OrleansSerialization.Serialize(expectedReceipt), OrleansSerialization.Serialize(receipt));
         await Assert.That(receipt.Durability).IsEqualTo(database.Database.Durability);
         await Assert.That(receipt.Mutations).IsEmpty();
         await Assert.That(phase.Current.Generation).IsEqualTo(phase.CommandId);
@@ -34,8 +34,8 @@ internal static class Bm25PrivateAdmissionAssertions
         await Assert.That(phase.Current.Statistics.DocumentFrequencies).IsEquivalentTo([1], CollectionOrdering.Matching);
         var stored = database.Store.Read(view => view.ReadOwnedValue(Bm25CorpusKeys.Current(phase.Current)))
             ?? throw new InvalidOperationException("The actual private corpus publication is missing.");
-        await NativeReplayResultAssertions.BytesAsync(NativeSerialization.Serialize(phase.Current), stored);
-        await NativeReplayResultAssertions.SameAsync(result, database.Database.ResolveSubmissionOutcome(
+        await ReplayResultAssertions.BytesAsync(OrleansSerialization.Serialize(phase.Current), stored);
+        await ReplayResultAssertions.SameAsync(result, database.Database.ResolveSubmissionOutcome(
             database.ReadStoredOutcome(phase.CommandId).PreparedCommand!));
     }
 }

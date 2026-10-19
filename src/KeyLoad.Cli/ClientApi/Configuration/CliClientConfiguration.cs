@@ -5,7 +5,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Cli.Features.ClientApi;
 
-/// <summary>Resolves the standalone command's sources into validated native options.</summary>
+/// <summary>Resolves the standalone command's sources into validated execution options.</summary>
 [ConfigurationBinding]
 internal static class CliClientConfiguration
 {

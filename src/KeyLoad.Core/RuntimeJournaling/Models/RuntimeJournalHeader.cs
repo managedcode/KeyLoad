@@ -1,0 +1,17 @@
+using KeyLoad.Core.Features.CommandOutcomes.Contracts;
+using KeyLoad.Core.Features.RuntimeJournaling.Contracts;
+using KeyLoad.Core.Features.StoragePartitions.Contracts;
+
+namespace KeyLoad.Core.Features.RuntimeJournaling.Models;
+
+[Orleans.GenerateSerializer]
+[Orleans.Alias(RuntimeJournalProtocol.HeaderAlias)]
+internal sealed record RuntimeJournalHeader(
+    [property: Orleans.Id(0)] int Version,
+    [property: Orleans.Id(1)] string Name,
+    [property: Orleans.Id(2)] Guid InstanceId,
+    [property: Orleans.Id(3)] long OwnerGeneration,
+    [property: Orleans.Id(4)] long ContentRevision,
+    [property: Orleans.Id(5)] long Length,
+    [property: Orleans.Id(6)] string MetadataETag,
+    [property: Orleans.Id(7)] Dictionary<string, string> Properties);

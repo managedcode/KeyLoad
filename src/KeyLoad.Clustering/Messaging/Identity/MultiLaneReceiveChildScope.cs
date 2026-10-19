@@ -2,7 +2,7 @@ namespace KeyLoad.Clustering;
 
 internal static class MultiLaneReceiveChildScope
 {
-    internal const string Purpose = "keyload-multilane-receive-child-v1";
+    internal const string Purpose = "keyload-multilane-receive-child";
 
     internal static bool IsSelected(GrainRequestEnvelope request)
         => request.Purpose == Purpose && request.CommandKind == OperationKind.Receive

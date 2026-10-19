@@ -5,7 +5,7 @@ using KeyLoad.Core.Features.ResourceExecution;
 
 namespace KeyLoad.Core.Features.GraphTraversal;
 
-/// <summary>Validates shortest-path caller shapes and native graph records.</summary>
+/// <summary>Validates shortest-path caller shapes and execution graph records.</summary>
 internal static class GraphShortestPathValidation
 {
     private const int FirstElementIndex = 0;

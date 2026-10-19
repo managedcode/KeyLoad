@@ -6,7 +6,7 @@ namespace KeyLoad.IntegrationTests.Features.GraphTraversal;
 
 internal static class GraphIncomingPublicImages
 {
-    internal static async Task<(DocumentResult[] Documents, OutboxStatus[] Outbox, GraphIncomingEdgesPageV1 Incoming)>
+    internal static async Task<(DocumentResult[] Documents, OutboxStatus[] Outbox, GraphIncomingEdgesPage Incoming)>
         CaptureAsync(KeyLoadClient administrator, GraphIncomingClusterSeed seed, CancellationToken token)
     {
         var documents = new List<DocumentResult>();
@@ -25,8 +25,8 @@ internal static class GraphIncomingPublicImages
     }
 
     internal static async Task SameAsync(
-        (DocumentResult[] Documents, OutboxStatus[] Outbox, GraphIncomingEdgesPageV1 Incoming) before,
-        (DocumentResult[] Documents, OutboxStatus[] Outbox, GraphIncomingEdgesPageV1 Incoming) after)
+        (DocumentResult[] Documents, OutboxStatus[] Outbox, GraphIncomingEdgesPage Incoming) before,
+        (DocumentResult[] Documents, OutboxStatus[] Outbox, GraphIncomingEdgesPage Incoming) after)
     {
         await SqlClusterProtocol.EqualAsync(before.Documents, after.Documents);
         await SqlClusterProtocol.EqualAsync(before.Outbox, after.Outbox);

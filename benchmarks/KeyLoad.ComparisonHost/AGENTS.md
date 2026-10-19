@@ -2,9 +2,9 @@
 
 ## Purpose, entry points and ownership
 
-- Owns the native TUnit comparison executable and helpers in root responsibility folders.
+- Owns the TUnit comparison executable and helpers in root responsibility folders.
 - Read root AGENTS.md, docs/Architecture.md, BenchmarkComparisons feature, ADR-033/034/043 and comparison-host acceptance/plan before implementation.
-- The selected load-test AppHost owns only database infrastructure. This native client process runs outside the resource graph and owns workload, measurements, original reports, and joined client lifetime. Never replace the required KeyLoad topology.
+- The selected load-test AppHost owns only database infrastructure. This client process runs outside the resource graph and owns workload, measurements, original reports, and joined client lifetime. Never replace the required KeyLoad topology.
 - Capture actual source/DLL/PDB/process identities. Local execution has no fabricated GitHub IDs and remains unqualified for public figures. Publication independently requires original authenticated GitHub source/run/attempt/job artifacts and matched resources. Ordinary execution has no KeyLoad server or client Docker image prerequisite.
 - Keep Program composition-only and feature behavior under the canonical slice. No new package, duplicate entry, compatibility shim, suppression or hardcoded machine keys.
 - Apply the installed Orleans and Aspire skills when their runtime or composition boundaries are involved.
@@ -13,7 +13,7 @@
 
 ## Boundaries and protected risks
 
-Follow the [root policy](../../AGENTS.md) and the owning feature specification. Keep changes in their actual owner, preserve unrelated work, and remove replaced code together with exclusive callers and fixtures. Use native Orleans calls for distributed execution and silo-local ZoneTree owners for files. Preserve persisted authorization, operation correctness, resource bounds, cancellation and joined shutdown. Never turn a static check or focused test into a claim of complete runtime qualification.
+Follow the [root policy](../../AGENTS.md) and the owning feature specification. Keep changes in their actual owner, preserve unrelated work, and remove replaced code together with exclusive callers and fixtures. Use Orleans calls for distributed execution and silo-local ZoneTree owners for files. Preserve persisted authorization, operation correctness, resource bounds, cancellation and joined shutdown. Never turn a static check or focused test into a claim of complete runtime qualification.
 
 ## Commands and verification
 
@@ -23,7 +23,7 @@ From the repository root:
 dotnet build KeyLoad.slnx --no-restore -warnaserror
 ```
 
-Use the root's complete solution, native TUnit, real process recovery and Aspire SDK/MCP gates as applicable. Local checks are development evidence; delivered-source qualification and public measurements require exact-source Linux GitHub artifacts. Do not weaken compiler, analyzer, source-identity, coverage or runtime assertions.
+Use the root's complete solution, TUnit, real process recovery and Aspire SDK/MCP gates as applicable. Local checks are development evidence; delivered-source qualification and public measurements require exact-source Linux GitHub artifacts. Do not weaken compiler, analyzer, source-identity, coverage or runtime assertions.
 
 ## Skills
 

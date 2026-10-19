@@ -10,11 +10,11 @@ public static class DistributedSearchClient
     /// <param name="request">Exact public partitions and existing canonical search shape.</param>
     /// <param name="cancellationToken">Original caller cancellation covering all phases and joins.</param>
     /// <returns>The complete page with scoped witnesses and an opaque statistics epoch.</returns>
-    public static Task<Result<DistributedSearchPageV1>> DistributedSearchAsync(this KeyLoadClient client,
-        DistributedSearchRequestV1 request, CancellationToken cancellationToken = default)
+    public static Task<Result<DistributedSearchPage>> DistributedSearchAsync(this KeyLoadClient client,
+        DistributedSearchRequest request, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(client);
         ArgumentNullException.ThrowIfNull(request);
-        return client.Send<DistributedSearchPageV1>(DistributedSearchProtocol.Route, request, false, null, cancellationToken);
+        return client.Send<DistributedSearchPage>(DistributedSearchProtocol.Route, request, false, null, cancellationToken);
     }
 }

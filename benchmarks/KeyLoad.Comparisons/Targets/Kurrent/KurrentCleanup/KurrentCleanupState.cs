@@ -4,7 +4,7 @@ using Microsoft.Extensions.Options;
 namespace KeyLoad.Comparisons.Targets;
 
 internal sealed class KurrentCleanupState(int tracked, IOptions<ComparisonLifecycleOptions> options,
-    IOptions<NativeComparisonDiagnosticOptions> diagnosticOptions, TimeProvider? provider = null)
+    IOptions<ComparisonDiagnosticOptions> diagnosticOptions, TimeProvider? provider = null)
 {
     private readonly KurrentCleanupDiagnostics diagnostics = new(diagnosticOptions);
     private readonly ComparisonLifecycleOptions settings = options.Value;

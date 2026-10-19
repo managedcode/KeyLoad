@@ -5,7 +5,7 @@ namespace KeyLoad.Core.Features.Search;
 internal static class Bm25CorpusDependencies
 {
     internal static bool Matches(DatabaseEngine database, IKeyValueView view, PrincipalRecord principal,
-        ResourceDefinition resource, Bm25CorpusCurrentV1 current, AtomicPartitionPlacementResolution placement,
+        ResourceDefinition resource, Bm25CorpusCurrent current, AtomicPartitionPlacementResolution placement,
         long maximumBytes, ReadExecutionBudget? work = null)
     {
         var owner = database.Store.Identity;

@@ -12,7 +12,7 @@ internal static class ScopedCommandIdentityClusterWorkflow
     private const string SecondJson = "{\"value\":\"partition-b-original\"}";
     private const string ChangedFirstJson = "{\"value\":\"partition-a-changed\"}";
     private const string ChangedSecondJson = "{\"value\":\"partition-b-changed\"}";
-    private const string RestartScenario = "dstore-outcome-v2-reopen";
+    private const string RestartScenario = "dstore-outcome-reopen";
     private static readonly string[] Nodes = [McpCallerProtocol.Node1, McpCallerProtocol.Node2, McpCallerProtocol.Node3];
 
     internal static async Task RunAsync(ClusterFixture fixture, ScopedCommandIdentityClusterScenario scenario,

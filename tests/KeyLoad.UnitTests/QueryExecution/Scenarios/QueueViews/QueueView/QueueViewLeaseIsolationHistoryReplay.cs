@@ -48,7 +48,7 @@ internal static class QueueViewLeaseIsolationHistoryReplay
             && actual.UserId == expected.UserId && actual.Timestamp == expected.Timestamp).IsTrue();
         await Assert.That(actual.Value!.Input.Span.SequenceEqual(expected.Value!.Input.Span)).IsTrue();
         await Assert.That(actual.Value.Fingerprint).IsEqualTo(expected.Value.Fingerprint);
-        var stored = NativeSerialization.Deserialize<StoredOutcome>(retained.Outcome);
+        var stored = OrleansSerialization.Deserialize<StoredOutcome>(retained.Outcome);
         await QueueViewLeaseIsolationResults.SameAsync(stored.Result, retained.Result);
     }
 }

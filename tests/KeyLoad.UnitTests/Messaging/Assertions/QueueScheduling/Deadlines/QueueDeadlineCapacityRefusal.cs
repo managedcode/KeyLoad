@@ -21,12 +21,12 @@ internal static class QueueDeadlineCapacityRefusal
             state.Fault == QueueDeadlineCapacityFault.ParkedSequence ? long.MaxValue : state.Counters.NextParkedSequence);
         var image = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
-        var identity = NativeSerialization.Serialize(store.Identity);
+        var identity = OrleansSerialization.Serialize(store.Identity);
         var original = OutcomeStoreOracle.Read(store, state.Attempt)
             ?? throw new InvalidOperationException("The failed outcome is absent.");
-        await Assert.That(NativeSerialization.Serialize(original)).IsEquivalentTo(NativeSerialization.Serialize(refusal),
+        await Assert.That(OrleansSerialization.Serialize(original)).IsEquivalentTo(OrleansSerialization.Serialize(refusal),
             TUnit.Assertions.Enums.CollectionOrdering.Matching);
-        var locator = store.Read(view => view.ReadOwnedValue(KeySpace.OutcomeLocatorV2(state.Lane.Partition,
+        var locator = store.Read(view => view.ReadOwnedValue(KeySpace.OutcomeLocator(state.Lane.Partition,
             state.Attempt.UserId!, state.Attempt.CommandId)));
         await Assert.That(locator).IsNotNull();
         await Assert.That(locator!).IsEquivalentTo(KeySpace.PartitionOutcome(state.Lane.Partition,
@@ -40,15 +40,15 @@ internal static class QueueDeadlineCapacityRefusal
             token.ThrowIfCancellationRequested();
             var stored = OutcomeStoreOracle.Read(store, item.Operation)
                 ?? throw new InvalidOperationException("The original outcome is absent.");
-            await Assert.That(NativeSerialization.Serialize(stored))
-                .IsEquivalentTo(NativeSerialization.Serialize(item.Result), TUnit.Assertions.Enums.CollectionOrdering.Matching);
+            await Assert.That(OrleansSerialization.Serialize(stored))
+                .IsEquivalentTo(OrleansSerialization.Serialize(item.Result), TUnit.Assertions.Enums.CollectionOrdering.Matching);
         }
     }
 
     internal static string[] Domain(ZoneTreeStore store, QueueLaneRef lane, Command<DatabaseCommand> operation)
     {
         var outcome = Convert.ToHexString(OutcomeStoreOracle.Key(operation)) + QueueDeadlineCapacityProtocol.ByteSeparator;
-        var locator = Convert.ToHexString(KeySpace.OutcomeLocatorV2(lane.Partition, operation.UserId!,
+        var locator = Convert.ToHexString(KeySpace.OutcomeLocator(lane.Partition, operation.UserId!,
             operation.CommandId)) + QueueDeadlineCapacityProtocol.ByteSeparator;
         var clock = Convert.ToHexString(KeySpace.ClockBytes) + QueueDeadlineCapacityProtocol.ByteSeparator;
         return QueueWholeFlowStorage.Bytes(store).Where(row => !row.StartsWith(outcome, StringComparison.Ordinal)

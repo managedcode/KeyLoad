@@ -17,11 +17,11 @@ internal sealed class IsolatedDocumentResourcePostgresTests
     private const string StandbyCount = "KEYLOAD_POSTGRES_STANDBYS";
     private const string SlotRetention = "max_slot_wal_keep_size=512MB";
 
-    /// <summary>AC-ISO-002/003/006: authentic PG18 bootstrap, private native copies and secret-only authentication.</summary>
+    /// <summary>AC-ISO-002/003/006: authentic PG18 bootstrap, private execution copies and secret-only authentication.</summary>
     [Test]
     [Arguments(1)]
     [Arguments(3)]
-    public async Task NativeGroupHasExactPrimaryAndNamedPhysicalStandbys(int count)
+    public async Task GroupHasExactPrimaryAndNamedPhysicalStandbys(int count)
     {
         await using var fixture = new IsolatedResourceTopologyFixture(Target, count);
         IsolatedPostgresResources.Add(fixture.Context);

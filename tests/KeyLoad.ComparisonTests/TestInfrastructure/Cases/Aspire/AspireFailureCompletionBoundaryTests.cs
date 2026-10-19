@@ -44,7 +44,7 @@ internal sealed class AspireFailureCompletionBoundaryTests
     }
 
     [Test]
-    public async Task AcTest014NativeFailureDiagnosticNamesOnlyTheOwnedResourceAndClosedState()
+    public async Task AcTest014FailureDiagnosticNamesOnlyTheOwnedResourceAndClosedState()
     {
         await using var fixture = new AspireFailureNotificationFixture();
         using var deadline = AspireFailureAssertions.CreateDeadline();
@@ -65,7 +65,7 @@ internal sealed class AspireFailureCompletionBoundaryTests
     }
 
     [Test]
-    public async Task AcTest013QueuedPostRunnerFaultDoesNotRetroactivelyInvalidateNativeExit()
+    public async Task AcTest013QueuedPostRunnerFaultDoesNotRetroactivelyInvalidateExit()
     {
         await using var fixture = new AspireFailureNotificationFixture();
         using var deadline = AspireFailureAssertions.CreateDeadline();

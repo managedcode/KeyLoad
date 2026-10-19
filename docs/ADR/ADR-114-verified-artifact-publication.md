@@ -8,7 +8,7 @@ Related: REQ-BACKUP-002/006 and AC-BACKUP-002/006 in
 ## Problem and scope
 
 The current two-argument `BackupArtifact.Unpack` writes canonical payload files
-into the caller destination before checking native Cartograph's returned length.
+into the caller destination before checking Cartograph's returned length.
 A last-entry rejection can therefore occur after all canonical payloads were
 written. This is a confirmed source-ordering hazard; the actual failed-output
 restore result remains unverified. Keep that distinction in final evidence.
@@ -25,7 +25,7 @@ publication proof does not establish power-loss durability.
 
 ## Decision and boundaries
 
-Stream native Cartograph payloads into an operation-owned sibling staging
+Stream Cartograph payloads into an operation-owned sibling staging
 directory on the destination volume. Validate the complete canonical layout and
 every returned payload length; close every payload and archive handle before
 publishing the stage. A rejected extraction must not put its payload files in
@@ -35,7 +35,7 @@ Claim staging with an exclusive create-new sibling marker; a non-exclusive
 `Directory.CreateDirectory` call alone is not an ownership claim. Reject an
 already occupied stage name. Track exact created payload files. Cleanup removes
 only those files and empty owned directories, never a recursive foreign tree.
-Unexpected entries and cleanup failures remain visible. Reuse native Cartograph
+Unexpected entries and cleanup failures remain visible. Reuse Cartograph
 and `System.IO`; Artifacts must not depend on Server or duplicate storage code.
 
 The destination is caller-owned and offline. An absent destination is published
@@ -58,7 +58,7 @@ the stated empty-state/private-permission contract.
 
 ```mermaid
 flowchart LR
-    CLI[Offline CLI] --> Catalog[Native canonical catalog]
+    CLI[Offline CLI] --> Catalog[canonical catalog]
     Catalog --> Stage[Owned sibling staging]
     Stage --> Check[Copy and verify every length]
     Check --> Close[Close handles and settle preparation]
@@ -88,12 +88,12 @@ flowchart LR
 The offline restore error join is required by
 REQ-BACKUP-002/006 and AC-BACKUP-002/006. The retained original run confirms
 bounded CLI output overflow but lacks the actual stderr bytes. Source and the
-embedded missing-file regression establish the expected native missing-input
+embedded missing-file regression establish the expected missing-input
 exceptions; the CLI owns their user-facing serialization.
 
-1. Embedded storage exception behavior, archive/metadata formats and resource bounds remain unchanged. Preserve the concurrently joined native missing manifest/directory FormatUnsupported Problem with its fixed detail `The backup manifest is unsupported.`. Length-mismatch rejected restores and missing-manifest cases assert that native Problem; missing identity or journal cases exercise the CLI mapping. Other failures retain their contracts.
+1. Embedded storage exception behavior, archive/metadata formats and resource bounds remain unchanged. Preserve the concurrently joined missing manifest/directory FormatUnsupported Problem with its fixed detail `The backup manifest is unsupported.`. Length-mismatch rejected restores and missing-manifest cases assert that Problem; missing identity or journal cases exercise the CLI mapping. Other failures retain their contracts.
 2. No shared builds, live checkout mutations, global catch or consumer-side prevalidation is allowed. Preserve every actual operation/state/byte and healthy-follow-up assertion; every child and reader settles within its bounds.
-3. Then run scalar/functional coverage, required recovery/cluster and exact-source Linux gates. The prior overflow cause stays unproven until this native flow demonstrates the intended behavior; no authored mapping is acceptance proof.
+3. Then run scalar/functional coverage, required recovery/cluster and exact-source Linux gates. The prior overflow cause stays unproven until this flow demonstrates the intended behavior; no authored mapping is acceptance proof.
 
 Rollback removes this coherent CLI/test join before delivery and preserves
 original evidence. No database or archive data-format change is introduced. This extension
@@ -106,7 +106,7 @@ Rollback is the scoped source/test change before delivery, not reactivation of
 the unsafe path as a runtime fallback. Existing archive transfer, invalid catalog,
 nonempty destination, checksum restore, process-recovery and cluster gates remain.
 
-Required proof includes native first/last length rejection, absent and initially
+Required proof includes first/last length rejection, absent and initially
 empty targets, no usable failed output, unchanged source/archive/backup bytes,
 healthy follow-up, private permissions, and original child/resource cleanup.
 Unexercised filesystem race/cleanup faults must be reported as pending with

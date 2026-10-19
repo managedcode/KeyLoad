@@ -6,7 +6,7 @@ internal static class QueueWorkerUnitProtocol
     internal const int ExceedsUncertainty = 2;
     internal const int ExceedsLease = 301;
     internal const int ExtraByte = 1;
-    internal const string UnusedCredential = "unused-native-client-no-io";
+    internal const string UnusedCredential = "unused-execution-client-no-io";
     internal const string CallbackMustNotRun = "Invalid or pre-cancelled worker admission must not run a handler.";
     internal const string Tenant = "worker-policy";
     internal const string Database = "database";

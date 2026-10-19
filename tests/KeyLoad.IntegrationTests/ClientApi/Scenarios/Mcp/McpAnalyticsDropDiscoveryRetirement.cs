@@ -1,5 +1,5 @@
 using KeyLoad.Client;
-using KeyLoad.IntegrationTests.Features.ClusterRouting;
+using KeyLoad.IntegrationTests.Features.OrleansExecution;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
 using KeyLoad.IntegrationTests.Features.RelationalStorage;
 using A = KeyLoad.IntegrationTests.Features.ClientApi.McpAnalyticsDropDiscoveryAssertions;
@@ -61,7 +61,7 @@ internal static class McpAnalyticsDropDiscoveryRetirement
         await Assert.That(actual.Receipt.CommandId).IsNotEqualTo(Guid.Empty);
         await Assert.That(actual.Receipt.CommandId).IsNotEqualTo(parent);
         await Assert.That(actual.Receipt.Token.Incarnation).IsNotEqualTo(Guid.Empty);
-        await Assert.That(actual.Receipt.Token.AtomicPartitionId).IsEqualTo(NativeCatalogRoute.PartitionId);
+        await Assert.That(actual.Receipt.Token.AtomicPartitionId).IsEqualTo(CatalogRoute.PartitionId);
         await Assert.That(actual.Receipt.Token.Position).IsGreaterThan(0);
         await Assert.That(actual.Receipt.PersistedCopies).IsEqualTo(3);
         await Assert.That(actual.Receipt.Mutations.IsEmpty).IsTrue();

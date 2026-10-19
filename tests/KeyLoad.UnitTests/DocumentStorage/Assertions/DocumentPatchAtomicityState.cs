@@ -23,7 +23,7 @@ internal sealed record DocumentPatchAtomicityState(long Position, long Applied, 
             return (Rows: rows, Domain: domain);
         });
         return new(owner.Store.Position, owner.Database.LastApplied, image.Rows,
-            NativeSerialization.Serialize(owner.Store.Identity), image.Domain);
+            OrleansSerialization.Serialize(owner.Store.Identity), image.Domain);
     }
 
     private static byte[] Scan(KeyLoad.Storage.IKeyValueView view, byte[] prefix,
@@ -34,7 +34,7 @@ internal sealed record DocumentPatchAtomicityState(long Position, long Applied, 
         {
             throw new InvalidOperationException("The genuine document fixture exceeded its bounded complete inventory.");
         }
-        return NativeSerialization.Serialize(page);
+        return OrleansSerialization.Serialize(page);
     }
 
     internal async Task RequireDomainAsync(DocumentPatchAtomicityState actual)

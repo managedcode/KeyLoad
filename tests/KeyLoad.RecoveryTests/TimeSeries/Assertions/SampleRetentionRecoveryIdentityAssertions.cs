@@ -20,7 +20,7 @@ internal static class SampleRetentionRecoveryIdentityAssertions
         var duplicate = Append(database, SampleRetentionCrashScenario.EventId(0),
             SampleRetentionCrashScenario.Timestamp(0), SampleRetentionCrashScenario.Value(0));
         _ = database.Apply(duplicate).Get<CommitReceipt>();
-        var afterDuplicate = store.Read(view => NativeSerialization.Deserialize<long>(
+        var afterDuplicate = store.Read(view => OrleansSerialization.Deserialize<long>(
             view.ReadOwnedValue(SampleRetentionCrashScenario.SequenceKey())!));
         await Assert.That(afterDuplicate).IsEqualTo(SampleRetentionCrashScenario.SampleCount);
 

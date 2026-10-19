@@ -3,7 +3,7 @@ import { captureOutputFiles, readBoundedRegularFile } from './sample-chunk-devel
 
 export const CorpusNames = Object.freeze(['regular', 'late-equal', 'deterministic-random']);
 export const RecordCounts = Object.freeze([1, 32, 256]);
-export const BenchmarkMethods = Object.freeze(['NativeRecordsEncode', 'ChunkEncode', 'NativeRecordsDecode', 'ChunkDecode']);
+export const BenchmarkMethods = Object.freeze(['RecordsEncode', 'ChunkEncode', 'RecordsDecode', 'ChunkDecode']);
 const BENCHMARK_TYPE = 'SampleChunkSerializationBenchmarks';
 const BENCHMARK_NAMESPACE = 'KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons';
 const FIXTURE = 'SampleChunkSerializationBenchmarks';
@@ -209,7 +209,7 @@ function validateManifest(value, name, sourceHead, sourceInventorySha256) {
     corpusGenerator: CORPUS_GENERATOR,
     actualRecordCount: count,
     correctness: 'every_field_original_offset_and_IEEE_bits_verified_before_timing',
-    accounting: 'complete_native_value_envelopes_excluding_keys_WAL_replication_indexes_and_storage_overhead',
+    accounting: 'complete__value_envelopes_excluding_keys_WAL_replication_indexes_and_storage_overhead',
     databaseScaleEvidence: false,
     githubQualified: false,
     canonicalChunkStorage: false,
@@ -219,12 +219,12 @@ function validateManifest(value, name, sourceHead, sourceInventorySha256) {
   for (const [key, expectedValue] of Object.entries(expected)) {
     if (value?.[key] !== expectedValue) throw new Error(`Corpus manifest ${name} has invalid ${key}.`);
   }
-  for (const key of ['nativeValueBytes', 'chunkValueBytes', 'nativeValueBytesPerSample', 'chunkValueBytesPerSample']) {
+  for (const key of ['runtimeValueBytes', 'chunkValueBytes', 'valueBytesPerSample', 'chunkValueBytesPerSample']) {
     if (!Number.isFinite(value[key]) || value[key] <= 0) throw new Error(`Corpus manifest ${name} has invalid ${key}.`);
   }
-  if (value.nativeValueBytesPerSample !== value.nativeValueBytes / count
+  if (value.valueBytesPerSample !== value.runtimeValueBytes / count
       || value.chunkValueBytesPerSample !== value.chunkValueBytes / count
-      || !SHA256.test(value.orderedNativeValuesSha256) || !SHA256.test(value.chunkValueSha256)) {
+      || !SHA256.test(value.orderedValuesSha256) || !SHA256.test(value.chunkValueSha256)) {
     throw new Error(`Corpus manifest ${name} has inconsistent byte counts or hashes.`);
   }
   if (typeof value.machineName !== 'string' || !value.machineName || !Number.isInteger(value.processorCount)

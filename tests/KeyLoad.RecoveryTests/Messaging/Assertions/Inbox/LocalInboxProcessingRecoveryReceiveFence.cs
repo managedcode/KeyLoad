@@ -18,7 +18,7 @@ internal static class LocalInboxProcessingRecoveryReceiveFence
         await Assert.That(refused.Value).IsNull();
         await Assert.That(store.Position).IsEqualTo(position);
         await Assert.That(LocalInboxProcessingRecoveryImage.All(store)).IsEquivalentTo(image, CollectionOrdering.Matching);
-        await Assert.That(NativeSerialization.Serialize(OutcomeStoreOracle.Read(store, state.Receive)))
-            .IsEquivalentTo(NativeSerialization.Serialize(state.Received), CollectionOrdering.Matching);
+        await Assert.That(OrleansSerialization.Serialize(OutcomeStoreOracle.Read(store, state.Receive)))
+            .IsEquivalentTo(OrleansSerialization.Serialize(state.Received), CollectionOrdering.Matching);
     }
 }

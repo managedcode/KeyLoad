@@ -8,7 +8,7 @@ internal sealed class BenchmarkArtifactOptions
     internal const string InvalidSource = "The sample chunk measurement source identity is missing or malformed.";
     private const int GitShaLength = 40;
     private const int Sha256Length = 64;
-    public string? NativeSerializationDirectory
+    public string? SerializationDirectory
     {
         get; set;
     }

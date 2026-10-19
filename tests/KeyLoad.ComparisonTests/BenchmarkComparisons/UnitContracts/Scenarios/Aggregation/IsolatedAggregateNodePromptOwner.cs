@@ -4,7 +4,7 @@ namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 internal sealed class IsolatedAggregateNodePromptOwner : IAsyncDisposable
 {
-    private const string ReleaseFailure = "Native Node prompt release failed.";
+    private const string ReleaseFailure = "Execution Node prompt release failed.";
     private readonly string directory;
     private readonly List<IsolatedAggregateNodeIdentity> identities;
     private readonly TestElapsedClock timer;

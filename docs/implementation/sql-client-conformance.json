@@ -9,22 +9,22 @@
     "package": "Microsoft.SqlServer.TransactSql.ScriptDom",
     "version": "180.140.0",
     "versionAuthority": "Existing centrally pinned owner-selected ADR-130 contract; this doc packet does not change/adopt a package.",
-    "role": "native parser and AST, not executor or TDS implementation"
+    "role": "execution parser and AST, not executor or TDS implementation"
   },
   "fullSqlComplete": false,
-  "nativeClientProtocolQualified": false,
+  "clientProtocolQualified": false,
   "currentTransport": [
     "HTTP JSON",
     "official MCP Streamable HTTP",
-    "source-integrated bounded PostgreSQL3.0 TLS/API-key native session; independent qualification OPEN"
+    "source-integrated bounded PostgreSQL3.0 TLS/API-key execution session; independent qualification OPEN"
   ],
-  "nativeWireTarget": {
+  "wireTarget": {
     "initial": "3.0",
     "laterNegotiation": "3.2",
     "implementation": "closed PostgreSQL3.0 TLS/API-key session source; qualification pending",
     "initialProfile": {
-      "name": "native-sql-v1-jsonb-result",
-      "transport": "native Kestrel TLS ConnectionContext/Pipelines; not HTTP",
+      "name": "execution-sql-jsonb-result",
+      "transport": "execution Kestrel TLS ConnectionContext/Pipelines; not HTTP",
       "authentication": "same persisted API-key verifier, verified subject only, fresh credential/policy every Execute",
       "result": "one JSONB keyload_result containing entire canonical result",
       "queryDialects": [
@@ -41,7 +41,7 @@
         "Flush",
         "Terminate"
       ],
-      "limits": "eight statements/eight portals, current native query/JSON/frame/output and shared retained byte grants",
+      "limits": "eight statements/eight portals, current execution query/JSON/frame/output and shared retained byte grants",
       "driver": "Npgsql10.0.3 VerifyFull/root CA; GSS encryption disabled; pooling false; built-in-only type loading; no parameter logging",
       "qualification": "pending exact-source Linux Aspire CLUSTER original artifacts",
       "int16ParameterSourceContract": "Guarded next source: exact signedInt16 int2 OID21 text/two-byte binary using original canonical numeric parameters. Wrong width/syntax/overflow Validation, no new grants/SQLgrammar/fallback; genuine Npgsql/SDK/MCP complete operation source and exact Linux qualification pending.",
@@ -116,9 +116,9 @@
       "requirement": "REQ-SQLC-006 / AC-SQLC-006",
       "acceptance": "Complete independently literal success/refusal\u2192healthy operation, current authority, original receipts, bounds/cancellation, recovery and CLUSTER evidence required; unsupported AST cannot be ignored.",
       "ordinaryInsertCandidate": {
-        "profile": "TSQL.InsertValues.v1",
+        "profile": "TSQL.InsertValues",
         "contract": "docs/Features/RelationalStorage/OrdinarySqlInsert.md",
-        "identity": "Original SqlOperationRequest.CommandId / unchanged one-shot native connection arm",
+        "identity": "Original SqlOperationRequest.CommandId / unchanged one-shot execution connection arm",
         "atomicity": "Current persisted schema, Text PK, DocsWrite/field/index/row authorization and create-only absence inside original Batch apply gate; complete multirow rollback and original outcomes",
         "tests": [
           "SqlTypedInsertWholeFlowTests"
@@ -144,13 +144,13 @@
       "requirement": "REQ-SQLC-006 / AC-SQLC-006",
       "acceptance": "Complete independently literal success/refusal\u2192healthy operation, current authority, original receipts, bounds/cancellation, recovery and CLUSTER evidence required; unsupported AST cannot be ignored.",
       "createTableCandidate": {
-        "profile": "TSQL.CreateTable.v1",
+        "profile": "TSQL.CreateTable",
         "types": [
           "NVARCHAR(MAX)",
           "BIT",
           "BIGINT"
         ],
-        "identity": "Explicit original SqlOperationRequest.CommandId; restricted native SET CONTEXT_INFO arm; original EXEC identity must agree",
+        "identity": "Explicit original SqlOperationRequest.CommandId; restricted execution SET CONTEXT_INFO arm; original EXEC identity must agree",
         "atomicity": "Create-only inside existing node-local command transaction, original successful/failed outcome replay and current policy fencing",
         "tests": [
           "SqlCreateTableWholeFlowTests"
@@ -168,7 +168,7 @@
           "computed/generated/identity columns",
           "storage/index/view/type/sequence/database DDL"
         ],
-        "ordinaryRowSqlInsert": "SOURCE CANDIDATE TSQL.InsertValues.v1; owning canonical ordinary typed INSERT contract, whole runtime/Linux qualification OPEN"
+        "ordinaryRowSqlInsert": "SOURCE CANDIDATE TSQL.InsertValues; owning canonical ordinary typed INSERT contract, whole runtime/Linux qualification OPEN"
       }
     },
     {
@@ -200,7 +200,7 @@
     },
     {
       "id": "SQLC-SESSION",
-      "name": "session settings, native prepared statements and portals",
+      "name": "session settings, execution prepared statements and portals",
       "grammarOwner": "Microsoft ScriptDOM T-SQL AST",
       "execution": "OPEN: no complete family execution claim",
       "qualified": false,
@@ -245,9 +245,9 @@
     }
   ],
   "qualification": {
-    "currentSelectedDialect": "OPEN; exact-source Linux build/analyzer/native discovery/Unit/Recovery/Aspire CLUSTER and resource/cancellation originals required",
+    "currentSelectedDialect": "OPEN; exact-source Linux build/analyzer/execution discovery/Unit/Recovery/Aspire CLUSTER and resource/cancellation originals required",
     "syntaxAcceptanceIsExecution": false,
-    "fullNativeClientEvidence": null,
+    "fullClientEvidence": null,
     "completePerformanceCohort": null
   },
   "commandInventory": null,
@@ -262,15 +262,15 @@
       "closed same-partition queue/graph INSERT",
       "closed graph/model-source plans"
     ],
-    "unsupportedPolicy": "Valid unhandled native AST => UnsupportedCapability before effect/view admission; malformed => bounded Validation. No fallback grammar.",
+    "unsupportedPolicy": "Valid unhandled execution AST => UnsupportedCapability before effect/view admission; malformed => bounded Validation. No fallback grammar.",
     "fullSqlComplete": false,
-    "nativeClientProtocolQualified": false
+    "clientProtocolQualified": false
   },
   "textIndexFoundation": {
     "repository": "https://github.com/ZoneTree/ZoneTree.FullTextSearch",
     "decision": "selected by owner on2026-10-03",
-    "ownership": "native node-local full-text index over canonical ZoneTree records; not an SQL parser or replacement canonical database",
-    "integration": "existing native selected provider; its scoped tests and qualification remain in Search/FullTextNative",
+    "ownership": "execution node-local full-text index over canonical ZoneTree records; not an SQL parser or replacement canonical database",
+    "integration": "existing execution selected provider; its scoped tests and qualification remain in Search/RuntimeFullText",
     "performanceQualification": "open; SQL conformance does not qualify comparative search performance"
   },
   "primarySources": [
@@ -285,12 +285,12 @@
     },
     {
       "url": "https://github.com/microsoft/SqlScriptDOM/blob/main/SqlScriptDom/Parser/TSql/Ast.xml",
-      "claim": "Native AST has separate query, execute and insert nodes; native syntax coverage does not imply supported KeyLoad execution."
+      "claim": "Execution AST has separate query, execute and insert nodes; execution syntax coverage does not imply supported KeyLoad execution."
     }
   ],
-  "benchmarkBoundary": "PostgreSQL remains an actual native comparison database; this syntax selection changes no competitor, topology, workload or evidence.",
+  "benchmarkBoundary": "PostgreSQL remains an actual execution comparison database; this syntax selection changes no competitor, topology, workload or evidence.",
   "schemaContract": {
-    "id": "KeyLoad.SqlConformance.Inventory.v2",
+    "id": "KeyLoad.SqlConformance.Inventory",
     "readerContract": "Require schemaVersion 2 and all named required fields. Reject unknown schemas. Parsing is separate from executable semantics and client-protocol qualification."
   }
 }

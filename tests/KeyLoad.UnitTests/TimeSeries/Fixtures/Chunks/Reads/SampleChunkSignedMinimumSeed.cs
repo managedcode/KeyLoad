@@ -1,15 +1,15 @@
-using KeyLoad.UnitTests.Features.ClusterRouting;
+using KeyLoad.UnitTests.Features.OrleansExecution;
 
 namespace KeyLoad.UnitTests.Features.TimeSeries;
 
 internal static class SampleChunkSignedMinimumSeed
 {
-    private const string ReaderId = "native-signed-chunk-minimum-reader";
+    private const string ReaderId = "execution-signed-chunk-minimum-reader";
     private const long NextPosition = 1;
     private const int AppendIndex = 1;
     private const string AppendKind = "appendSamples";
 
-    internal static async Task<SampleChunkSignedMinimumState> RunAsync(ConnectionNativeServerDatabase owner)
+    internal static async Task<SampleChunkSignedMinimumState> RunAsync(ConnectionServerDatabase owner)
     {
         owner.Configure(SampleAggregateTestData.Set, ResourceKind.TimeSeries);
         var window = Guid.NewGuid();

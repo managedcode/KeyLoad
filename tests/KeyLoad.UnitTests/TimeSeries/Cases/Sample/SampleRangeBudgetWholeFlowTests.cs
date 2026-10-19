@@ -7,7 +7,7 @@ internal sealed class SampleRangeBudgetWholeFlowTests
     [Arguments(SampleRangeBudgetFault.ZeroLimit)]
     [Arguments(SampleRangeBudgetFault.ExcessLimit)]
     [Arguments(SampleRangeBudgetFault.CumulativeResponse)]
-    public Task AcMp005Series005RefusedRangePreservesNativeAuthorityAcrossColdReplayAndHealthyAppend(
+    public Task AcMp005Series005RefusedRangePreservesAuthorityAcrossColdReplayAndHealthyAppend(
         SampleRangeBudgetFault fault)
         => SampleRangeBudgetWholeFlow.RunAsync(fault);
 }

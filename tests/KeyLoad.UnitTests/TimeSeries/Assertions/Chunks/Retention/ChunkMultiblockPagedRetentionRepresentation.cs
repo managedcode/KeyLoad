@@ -27,11 +27,11 @@ internal static class ChunkMultiblockPagedRetentionRepresentation
     internal static async Task RecordsAsync(SampleChunkPartialRetentionFixture fixture, bool healthy)
     {
         var expected = ChunkMultiblockBoundaryData.Expected(healthy);
-        var native = Capture(fixture, healthy ? ChunkMultiblockBoundaryData.HealthyGeneration : ChunkMultiblockBoundaryData.InitialGeneration);
+        var execution = Capture(fixture, healthy ? ChunkMultiblockBoundaryData.HealthyGeneration : ChunkMultiblockBoundaryData.InitialGeneration);
         var records = new List<SampleRecord>();
         for (var ordinal = 0; ordinal < BlockCount; ordinal++)
         {
-            var decoded = SampleChunkCodec.DecodeOrdered(native[ordinal + 1], UnitExecutionOptions.TimeSeriesExecution(), SampleChunkCodec.MaximumEncodedBytes);
+            var decoded = SampleChunkCodec.DecodeOrdered(execution[ordinal + 1], UnitExecutionOptions.TimeSeriesExecution(), SampleChunkCodec.MaximumEncodedBytes);
             await Assert.That(decoded.Length).IsEqualTo(ordinal == FirstOrdinal ? FirstBlockRecords : expected.Length - FirstBlockRecords);
             records.AddRange(decoded);
         }

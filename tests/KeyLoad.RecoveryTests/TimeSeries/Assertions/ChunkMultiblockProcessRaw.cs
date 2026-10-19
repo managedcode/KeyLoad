@@ -13,10 +13,10 @@ internal static class ChunkMultiblockProcessRaw
         var records = ChunkMultiblockCrashData.Expected(healthy, prepared, merge: false);
         var points = records.Select(record => Pair(KeySpace.Partition(Samples, SampleChunkCrashContract.Partition,
             SampleChunkCrashContract.Set, SampleChunkCrashContract.Series, record.Sample.Timestamp, record.Sequence),
-            NativeSerialization.Serialize(record))).OrderBy(row => row[0], StringComparer.Ordinal);
+            OrleansSerialization.Serialize(record))).OrderBy(row => row[0], StringComparer.Ordinal);
         var identities = records.Select(record => Pair(KeySpace.Partition(Identities, SampleChunkCrashContract.Partition,
             SampleChunkCrashContract.Set, SampleChunkCrashContract.Series, record.Sample.EventId),
-            NativeSerialization.Serialize(JsonData.Fingerprint(new
+            OrleansSerialization.Serialize(JsonData.Fingerprint(new
             {
                 sample = record.Sample,
                 Tags = SampleChunkCrashContract.Tags
@@ -25,7 +25,7 @@ internal static class ChunkMultiblockProcessRaw
         var sequence = prepared ? ChunkMultiblockCrashProtocol.PreparedAutomaticSealSequence
             : healthy ? ChunkMultiblockCrashProtocol.HealthySequence : ChunkMultiblockCrashProtocol.PreparedSequence;
         string[][] expected = [.. points, .. identities, Pair(KeySpace.Partition(Sequence, SampleChunkCrashContract.Partition,
-            SampleChunkCrashContract.Set, SampleChunkCrashContract.Series), NativeSerialization.Serialize(sequence))];
+            SampleChunkCrashContract.Set, SampleChunkCrashContract.Series), OrleansSerialization.Serialize(sequence))];
         await Assert.That(actual.RawImage).IsEqualTo(Convert.ToHexString(JsonDefaults.Serialize(expected)));
     }
 

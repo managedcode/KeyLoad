@@ -3,7 +3,7 @@ namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 internal sealed class ScaleServerResourceBoundsTests
 {
     [Test]
-    public async Task AcScale016NativeProbeStopsAndJoinsWhenItsByteGrantIsExceeded()
+    public async Task AcScale016ProbeStopsAndJoinsWhenItsByteGrantIsExceeded()
     {
         if (!OperatingSystem.IsLinux())
         {
@@ -14,7 +14,7 @@ internal sealed class ScaleServerResourceBoundsTests
     }
 
     [Test]
-    public async Task AcScale016NativeProbeStopsAndJoinsWhenItsDiagnosticByteGrantIsExceeded()
+    public async Task AcScale016ProbeStopsAndJoinsWhenItsDiagnosticByteGrantIsExceeded()
     {
         if (!OperatingSystem.IsLinux())
         {

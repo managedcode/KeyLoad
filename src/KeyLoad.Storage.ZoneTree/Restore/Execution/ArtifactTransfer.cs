@@ -31,6 +31,6 @@ public static class ArtifactTransfer
             Directory.CreateDirectory(destinationRoot, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
         }
         using var storage = new FileSystemStorage(new FileSystemStorageOptions { BaseFolder = Path.GetFullPath(destinationRoot) });
-        return await storage.UploadAsync(file, new UploadOptions(file.Name, mimeType: ArchiveMimeType), cancellationToken).ConfigureAwait(false);
+        return await storage.UploadAsync(file, new UploadOptions(file.Name, mimeType: ArchiveMimeType), cancellationToken);
     }
 }

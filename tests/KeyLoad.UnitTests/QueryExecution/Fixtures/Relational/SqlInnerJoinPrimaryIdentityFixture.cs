@@ -59,11 +59,11 @@ internal static class SqlInnerJoinPrimaryIdentityFixture
             var key = global::KeyLoad.Core.Features.DocumentStorage.DocumentStorageKeys.RecordKey(database.Partition,
                 left ? Left : Right, left ? LastLeft : LastRight);
             var bytes = database.Store.Read(view => view.ReadOwnedValue(key)) ?? throw new InvalidOperationException(MissingOriginal);
-            var row = global::KeyLoad.NativeSerialization.Deserialize<global::KeyLoad.DocumentRecord>(bytes);
+            var row = global::KeyLoad.OrleansSerialization.Deserialize<global::KeyLoad.DocumentRecord>(bytes);
             foreach (var json in left ? new[] { ForeignOrder, MissingOrder, NonTextOrder, MalformedRow, NonObjectRow, DuplicateOrder }
                 : new[] { ForeignCustomer, MissingCustomer, NonTextCustomer, MalformedRow, NonObjectRow, DuplicateCustomer })
             {
-                faults.Add(new(key, bytes, global::KeyLoad.NativeSerialization.Serialize(row with
+                faults.Add(new(key, bytes, global::KeyLoad.OrleansSerialization.Serialize(row with
                 {
                     Json = json
                 }), left));

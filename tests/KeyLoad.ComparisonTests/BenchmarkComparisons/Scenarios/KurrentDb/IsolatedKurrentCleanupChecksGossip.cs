@@ -9,14 +9,14 @@ namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 internal static class IsolatedKurrentCleanupChecksGossip
 {
-    private const string NodePrefix = "isolated-kurrent-", NativeSuffix = ".dev.internal", Http = "http";
-    private const string InvalidGossip = "KurrentCleanupNativeGossipMismatch";
-    private const int NativePort = 2113;
+    private const string NodePrefix = "isolated-kurrent-", RuntimeSuffix = ".dev.internal", Http = "http";
+    private const string InvalidGossip = "KurrentCleanupGossipMismatch";
+    private const int RuntimePort = 2113;
 
     internal static async Task<Uri> ReadLeaderAsync(DistributedApplication app, int nodeCount, CancellationToken token)
     {
         var topology = ComparisonTopologies.FromNodeCount(nodeCount);
-        var policy = NativeExecutionPolicyFixture.Harness().Value;
+        var policy = ExecutionPolicyFixture.Harness().Value;
         var names = Enumerable.Range(1, nodeCount).Select(index => NodePrefix + index.ToString(CultureInfo.InvariantCulture)).ToArray();
         var views = new KurrentGossipView[nodeCount];
         var endpoints = new Uri[nodeCount];
@@ -33,10 +33,10 @@ internal static class IsolatedKurrentCleanupChecksGossip
                 HttpCompletionOption.ResponseHeadersRead, token);
             response.EnsureSuccessStatusCode();
             using var json = await ReadBoundedAsync(response.Content, policy.KurrentGossipMaximumResponseBytes, token);
-            views[index] = ParseView(json.RootElement, names[index] + NativeSuffix);
+            views[index] = ParseView(json.RootElement, names[index] + RuntimeSuffix);
         }
         if (!KurrentClusterMembers.IsReady(views, topology) || views.Any(view => view.Members.Any(member =>
-            member.HttpEndpointPort != NativePort || !names.Any(name => member.HttpEndpointIp == name + NativeSuffix))))
+            member.HttpEndpointPort != RuntimePort || !names.Any(name => member.HttpEndpointIp == name + RuntimeSuffix))))
         {
             throw new ComparisonFailureException(InvalidGossip);
         }
@@ -44,17 +44,17 @@ internal static class IsolatedKurrentCleanupChecksGossip
         return leader >= 0 ? endpoints[leader] : throw new ComparisonFailureException(InvalidGossip);
     }
 
-    private static KurrentGossipView ParseView(JsonElement root, string nativeHost)
+    private static KurrentGossipView ParseView(JsonElement root, string runtimeHost)
     {
         var serverIp = Property(root, KurrentConstants.ServerIpField).GetString();
         var serverPort = Property(root, KurrentConstants.ServerPortField).GetInt32();
         var members = Property(root, KurrentConstants.MembersField).EnumerateArray().Select(ParseMember).ToArray();
-        var local = members.Where(member => member.HttpEndpointIp == nativeHost && member.HttpEndpointPort == NativePort).ToArray();
-        if (serverIp != nativeHost || serverPort != NativePort || local.Length != 1)
+        var local = members.Where(member => member.HttpEndpointIp == runtimeHost && member.HttpEndpointPort == RuntimePort).ToArray();
+        if (serverIp != runtimeHost || serverPort != RuntimePort || local.Length != 1)
         {
             throw new ComparisonFailureException(InvalidGossip);
         }
-        // These are original native identities; the mapped transport endpoint is kept separately.
+        // These are original execution identities; the mapped transport endpoint is kept separately.
         return new(serverIp, serverPort, members, local[0]);
     }
 

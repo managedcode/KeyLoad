@@ -1,5 +1,5 @@
 using System.Runtime.CompilerServices;
-using KeyLoad.AppHost.Features.ClusterReplication;
+using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.AppHost.Features.TestInfrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -7,7 +7,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.AppHost.Hosting;
 
-/// <summary>Owns native typed options before Aspire build-time resource selection and shares them with runtime DI.</summary>
+/// <summary>Owns execution typed options before Aspire build-time resource selection and shares them with runtime DI.</summary>
 [ConfigurationBinding]
 internal static class AppHostOptionsRegistration
 {

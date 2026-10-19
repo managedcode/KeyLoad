@@ -63,10 +63,10 @@ internal static class SqlPendingQueueAuthorityFlow
         var position = store.Position;
         var sql = Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute(Reader, request, cancellationToken: token));
         var ast = Assert.ThrowsExactly<KeyLoadException>(() => engine.ExecuteAst(Reader, Ast(state), cancellationToken: token));
-        var native = Assert.ThrowsExactly<KeyLoadException>(() => database.InspectMessage(Reader, state.Lane, QueueLifecycleTestProtocol.Pending));
+        var execution = Assert.ThrowsExactly<KeyLoadException>(() => database.InspectMessage(Reader, state.Lane, QueueLifecycleTestProtocol.Pending));
         await Assert.That(sql.Code).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(ast.Code).IsEqualTo(ErrorCode.PermissionDenied);
-        await Assert.That(native.Code).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(execution.Code).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(store.Position).IsEqualTo(position);
         await QueueLifecycleImage.SameAsync(store, state.Lane, image);
     }

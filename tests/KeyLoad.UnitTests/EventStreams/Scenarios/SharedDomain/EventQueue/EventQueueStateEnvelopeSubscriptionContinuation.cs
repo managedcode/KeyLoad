@@ -8,7 +8,7 @@ internal static class EventQueueStateEnvelopeSubscriptionContinuation
 {
     private const string DeliveryPurpose = "subscription-delivery";
     private const string FirstPositionIdentity = "1";
-    private const string MissingClaim = "The original native subscription claim is unavailable.";
+    private const string MissingClaim = "The original execution subscription claim is unavailable.";
 
     internal static async Task ConfigureAsync(EventQueueStateEnvelopeFixture fixture, EventQueueStateEnvelopeState state)
     {

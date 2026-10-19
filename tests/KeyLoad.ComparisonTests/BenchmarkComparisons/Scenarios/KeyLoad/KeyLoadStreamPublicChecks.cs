@@ -29,7 +29,7 @@ internal static class KeyLoadStreamPublicChecks
             }
             var peers = clients.Select(client => client!).ToArray();
             await using var target = new KeyLoadTarget(peers[0], adminKey, Guid.NewGuid().ToString("N"),
-                NativeExecutionPolicyFixture.Lifecycle(), NativeExecutionPolicyFixture.Read(), NativeExecutionPolicyFixture.ReadDiagnostics(), NativeExecutionPolicyFixture.Admission(),
+                ExecutionPolicyFixture.Lifecycle(), ExecutionPolicyFixture.Read(), ExecutionPolicyFixture.ReadDiagnostics(), ExecutionPolicyFixture.Admission(),
                 ComparisonClientOptions.Execution(), ComparisonClientOptions.Translation(), peers: peers, expectedNodes: nodeCount);
             ownershipTransferred = true;
             await VerifyTargetAsync(target, cancellationToken);

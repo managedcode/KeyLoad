@@ -11,9 +11,9 @@ internal static class BackupUnsafeDestinationTrial
     private const string LinkName = "backup-create-link";
     private const string EmptyTargetName = "backup-create-empty";
     private const string ChildName = "archive";
-    private const string InvalidTarget = "The native backup destination is not a regular directory path.";
+    private const string InvalidTarget = "The execution backup destination is not a regular directory path.";
 
-    internal static async Task RunAsync(NativeBackupCutFixture fixture, bool ancestorLink,
+    internal static async Task RunAsync(BackupCutFixture fixture, bool ancestorLink,
         CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
@@ -35,7 +35,7 @@ internal static class BackupUnsafeDestinationTrial
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    private static async Task OwnedAsync(NativeBackupCutFixture fixture, ZoneTreeStore source,
+    private static async Task OwnedAsync(BackupCutFixture fixture, ZoneTreeStore source,
         string link, string target, string destination, string[] archive, CancellationToken token)
     {
         var before = QueueWholeFlowStorage.Bytes(source);

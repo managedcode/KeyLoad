@@ -16,7 +16,7 @@ internal sealed class TopicRetentionIdentityCorruptionTests
         fixture.Submit(fixture.Purge()).Get<CommitReceipt>();
         var key = DigestKey(fixture, "event1");
         var original = fixture.Store.Read(view => view.ReadOwnedValue(key))!;
-        var state = NativeSerialization.Deserialize<RetainedTopicEventIdentity>(original);
+        var state = OrleansSerialization.Deserialize<RetainedTopicEventIdentity>(original);
         var bad = kind switch
         {
             "nonhex" => state with { ContentDigest = new string('g', 64) },
@@ -24,12 +24,12 @@ internal sealed class TopicRetentionIdentityCorruptionTests
             "position" => state with { Position = 3 },
             _ => state
         };
-        Write(fixture, key, kind == "alias" ? NativeSerialization.Serialize(1L) : NativeSerialization.Serialize(bad));
+        Write(fixture, key, kind == "alias" ? OrleansSerialization.Serialize(1L) : OrleansSerialization.Serialize(bad));
         var request = new CommandRequest(Guid.NewGuid(), fixture.Owner.Partition, [new PublishTopic("topic", [new("event1", "Created", "{\"n\":1}")])]);
         await TopicRetentionCorruptionAssertions.RejectAsync(fixture, request);
         Write(fixture, key, original);
         await TopicRetentionAssertions.Reject(fixture, request, ErrorCode.DuplicateEventId);
-        await TopicRetentionNativeState.VerifyAsync(fixture);
+        await TopicRetentionState.VerifyAsync(fixture);
         await HealthyAsync(fixture);
     }
     [Test]
@@ -38,7 +38,7 @@ internal sealed class TopicRetentionIdentityCorruptionTests
         using var fixture = new TopicRetentionFixture();
         fixture.ReleasePins();
         var key = DigestKey(fixture, "event1");
-        Write(fixture, key, NativeSerialization.Serialize(new RetainedTopicEventIdentity(new string('0', 64), 1, 1)));
+        Write(fixture, key, OrleansSerialization.Serialize(new RetainedTopicEventIdentity(new string('0', 64), 1, 1)));
         var command = fixture.Purge();
         await TopicRetentionCorruptionAssertions.RejectAsync(fixture, command);
         Delete(fixture, key);

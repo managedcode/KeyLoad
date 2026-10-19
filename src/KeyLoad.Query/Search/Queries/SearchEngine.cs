@@ -5,11 +5,11 @@ namespace KeyLoad.Query;
 
 public sealed partial class SearchEngine
 {
-    /// <summary>Publishes the eligible native text generation at one acknowledged authorized read cut.</summary>
+    /// <summary>Publishes the eligible execution text generation at one acknowledged authorized read cut.</summary>
     /// <param name="principalId">Fresh persisted principal identity.</param>
     /// <param name="request">Collection, field and acknowledged minimum token.</param>
     /// <param name="cancellationToken">Original admission and complete worker cancellation.</param>
-    /// <returns>The observed applied cut after joined native generation settlement.</returns>
+    /// <returns>The observed applied cut after joined execution generation settlement.</returns>
     public Task<WaitForIndexResult> WaitForIndexAsync(string principalId, WaitForIndexRequest request,
         CancellationToken cancellationToken = default)
     {

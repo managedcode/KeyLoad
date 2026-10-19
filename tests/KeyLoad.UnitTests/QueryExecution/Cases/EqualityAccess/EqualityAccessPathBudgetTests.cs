@@ -16,7 +16,7 @@ internal sealed class EqualityAccessPathBudgetTests
     [Arguments(false, true)]
     [Arguments(true, false)]
     [Arguments(true, true)]
-    public async Task AcAisql008ReversedNativeLookupChargesTheSameRawDocumentAndIndexReadBudget(bool indexed, bool parameterized)
+    public async Task AcAisql008ReversedLookupChargesTheSameRawDocumentAndIndexReadBudget(bool indexed, bool parameterized)
     {
         using var db = new TestDatabase(new()
         {

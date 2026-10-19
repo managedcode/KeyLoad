@@ -8,6 +8,6 @@ namespace KeyLoad;
 /// <param name="Access">Provides optional row access metadata.</param>
 /// <param name="ExplicitReplacement">Allows an explicit replacement when true.</param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.PutDocument)]
+[Orleans.Alias(ContractAliases.PutDocument)]
 public sealed record PutDocument([property: Orleans.Id(0)] string Collection, [property: Orleans.Id(1)] string Id, [property: Orleans.Id(2)] string Json, [property: Orleans.Id(3)] long? ExpectedRevision = null,
     [property: Orleans.Id(4)] RowAccess? Access = null, [property: Orleans.Id(5)] bool ExplicitReplacement = false) : Mutation(Collection);

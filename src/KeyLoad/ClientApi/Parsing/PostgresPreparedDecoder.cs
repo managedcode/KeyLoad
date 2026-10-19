@@ -35,7 +35,7 @@ internal static class PostgresPreparedDecoder
     {
         var syntax = global::KeyLoad.Features.QueryExecution.ScriptDomSyntax.Parse(sql, limitsOptions,
             token.ThrowIfCancellationRequested, token);
-        global::KeyLoad.Features.QueryExecution.ScriptDomSyntax.ValidateNativeSessionSlots(syntax,
+        global::KeyLoad.Features.QueryExecution.ScriptDomSyntax.ValidateSessionSlots(syntax,
             positionalParameterCount, token.ThrowIfCancellationRequested, token);
         var rows = global::KeyLoad.Features.QueryExecution.ScriptDomSyntax.HasQueryRows(syntax);
         switch (syntax)

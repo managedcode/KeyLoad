@@ -7,7 +7,7 @@ internal sealed class PackedAnnDeleteReinsertStressTests
     [Arguments(DistanceMetric.Cosine)]
     [Arguments(DistanceMetric.Euclidean)]
     [Arguments(DistanceMetric.DotProduct)]
-    public async Task RepeatedNativeDeleteReinsertRejectsFailedRebuildThenColdRestoresExactCandidates(
+    public async Task RepeatedDeleteReinsertRejectsFailedRebuildThenColdRestoresExactCandidates(
         DistanceMetric metric)
     {
         using var database = new TestDatabase();

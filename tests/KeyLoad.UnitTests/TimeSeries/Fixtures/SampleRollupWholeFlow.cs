@@ -15,7 +15,7 @@ internal static class SampleRollupWholeFlow
     internal const string StateBound = "The complete canonical state exceeds the fixture bound.";
     private const int MaximumRecords = 4096;
 
-    internal static string Outcome(Result<object> result) => Convert.ToHexString(NativeSerialization.Serialize(result));
+    internal static string Outcome(Result<object> result) => Convert.ToHexString(OrleansSerialization.Serialize(result));
 
     internal static Result<object> Commit(TestDatabase db, Guid id, Mutation mutation, string principal = Root)
         => db.Submit(OperationKind.Batch, new CommandRequest(id, db.Partition, [mutation]), principal, id);

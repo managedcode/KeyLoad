@@ -23,7 +23,7 @@ internal static class QueueExpiredReadyVersionExhaustionContinuation
                 tx.Put(state.MetadataKey, state.OriginalMetadata);
                 return true;
             });
-            var repaired = NativeSerialization.Deserialize<MessageMetadata>(state.OriginalMetadata);
+            var repaired = OrleansSerialization.Deserialize<MessageMetadata>(state.OriginalMetadata);
             await QueueExpiredReadyVersionExhaustionAssertions.CurrentAsync(database, store, state.Lane, repaired, state.Body, 1);
             await QueueClaimVersionExhaustionAssertions.ReplayAsync(database, store, state, original);
             var request = new ReceiveRequest(Guid.NewGuid(), state.Lane, MaxMessages: 1,

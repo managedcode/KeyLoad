@@ -41,7 +41,7 @@ there is no older-evidence fallback. The optional dispatch run ID is only a
 bounded completion-wait target and never chooses metric authority.
 
 Measured qualification preserves the current original-input, archive/provenance,
-source-closure, complete TUnit/no-skip, native coverage, browser, bounded-builder,
+source-closure, complete TUnit/no-skip, coverage, browser, bounded-builder,
 and predeployment source/selected-tuple freshness requirements in
 [BenchmarkComparisons](../Features/BenchmarkComparisons.md) and [ADR-112](ADR-112-independent-website-publication.md).
 Before the builder runs, it snapshots an immutable regular archive receipt no
@@ -51,7 +51,7 @@ checks the emitted aggregate bytes against the validated input. Measured
 `data/publication.json` remains schema version 2 and records website/measured/
 control revisions plus original test, coverage, job and isolated-archive receipts;
 content-only publication remains its separately scoped schema version 3. All
-current authored sources remain in the native source/coverage inventories and the
+current authored sources remain in the source/coverage inventories and the
 current thresholds remain 80% aggregate lines, 70% aggregate branches and 90%
 for critical validators. Real browser assertions and no-skip checks remain
 mandatory. Predeployment rechecks source and the exact selected tuple. Pages
@@ -68,12 +68,12 @@ immutable evidence references, not as active producer or workflow instructions.
 1. The feature contract and canonical plan define current cells, accepted terminal
    dispositions, current source and required evidence. Stable mappings are
    REQ/AC-BC-CURRENT-001..004 and REQ/AC-BC-WEB-001..007.
-2. The benchmark producer owns the current plan, per-cell native jobs, authenticated
+2. The benchmark producer owns the current plan, per-cell jobs, authenticated
    aggregation and original result archives. The workflow contract is
    `.github/workflows/benchmarks.yml`; its source plan and composite inventory are
    `scripts/Features/BenchmarkComparisons/isolated-plan*.mjs`,
    `scaled-isolated-plan.mjs`, `vector-isolated-plan.mjs` and
-   `composite-site-contract.mjs`. Preserve every current matrix, native image
+   `composite-site-contract.mjs`. Preserve every current matrix, image
    check, workload, acknowledgement/correctness/resource contract and failed/null
    accounting rule.
 3. The Website producer-selection and bounded builder own optional metrics,
@@ -87,7 +87,7 @@ immutable evidence references, not as active producer or workflow instructions.
    original-input immutability, applicable TUnit/coverage/browser gates, and
    least-privilege Pages deployment.
 4. Source, feature/ADR mappings, four workflow
-   identities, workflow permissions, full native inventories and exact-source
+   identities, workflow permissions, full inventories and exact-source
    receipts. Verification includes static workflow/source checks, full build and
    formatting, complete Aspire-owned site tests with no skips, authenticated
    current-cohort evidence, Linux coverage/browser qualification, predeploy
@@ -103,7 +103,7 @@ website publication.
 
 ```mermaid
 flowchart LR
-    Plan[330 control + 264 scaled + 792 vector cells] --> Jobs[Isolated native jobs]
+    Plan[330 control + 264 scaled + 792 vector cells] --> Jobs[Isolated jobs]
     Jobs --> Accounting[Authenticated complete accounting]
     Accounting --> Aggregate[Current source-bound aggregate]
     Source[Website source or manual dispatch] --> Website[Independent Website workflow]
@@ -117,6 +117,6 @@ flowchart LR
     Fresh --> Pages[Needs-gated Pages publication]
 ```
 
-## Current native1/3 methodology extension, 2026-10-09
+## Current execution1/3 methodology extension, 2026-10-09
 
 ADR-122 removes every active two-node measurement and adds a separate418-cell common document family with original pure/mixed/ingestion records. That new family is authenticated and aggregated independently inside the same final producer aggregation job; it cannot silently enter the existing website profile renderer. The source closure expands with actual transitive execution inputs; strict source and coverage thresholds remain mandatory. Historical original archive bytes remain immutable and cannot qualify the new current inventory.

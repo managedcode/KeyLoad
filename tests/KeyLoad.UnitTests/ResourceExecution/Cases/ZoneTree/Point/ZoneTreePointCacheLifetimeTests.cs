@@ -41,7 +41,7 @@ internal sealed class ZoneTreePointCacheLifetimeTests
         await Assert.That(afterReaderFailure.InFlightEntries).IsEqualTo(0);
         await Assert.That(final.ActivePins).IsEqualTo(0);
         await Assert.That(final.InFlightEntries).IsEqualTo(0);
-        await Assert.That(final.NativeLookups).IsEqualTo(2L);
+        await Assert.That(final.RuntimeLookups).IsEqualTo(2L);
     }
 
     [Test]
@@ -67,11 +67,11 @@ internal sealed class ZoneTreePointCacheLifetimeTests
         {
             await entered.Task.WaitAsync(WaitLimit, TimeProvider.System);
             var beforeDisable = await Task.Run(store.GetPointCacheDiagnostics).WaitAsync(WaitLimit, TimeProvider.System);
-            var nativeValue = store.Read(view => view.ReadOwnedValue(KeyA));
+            var runtimeValue = store.Read(view => view.ReadOwnedValue(KeyA));
             var afterPinLimit = await Task.Run(store.GetPointCacheDiagnostics).WaitAsync(WaitLimit, TimeProvider.System);
-            await Assert.That(nativeValue).IsEquivalentTo(ValueA);
+            await Assert.That(runtimeValue).IsEquivalentTo(ValueA);
             await Assert.That(afterPinLimit.ReadBypasses - beforeDisable.ReadBypasses).IsEqualTo(1L);
-            await Assert.That(afterPinLimit.NativeLookups - beforeDisable.NativeLookups).IsEqualTo(1L);
+            await Assert.That(afterPinLimit.RuntimeLookups - beforeDisable.RuntimeLookups).IsEqualTo(1L);
             disabling = Task.Run(store.DisablePointCache);
             await disabling.WaitAsync(WaitLimit, TimeProvider.System);
             var retired = await Task.Run(store.GetPointCacheDiagnostics).WaitAsync(WaitLimit, TimeProvider.System);

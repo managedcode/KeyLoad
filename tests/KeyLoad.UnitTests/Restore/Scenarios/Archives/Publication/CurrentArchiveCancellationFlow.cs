@@ -10,16 +10,16 @@ internal static class CurrentArchiveCancellationFlow
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            using var fixture = new NativeBackupCutFixture(checkpoint);
+            using var fixture = new BackupCutFixture(checkpoint);
             await ServerFailureObserver.ObserveAsync(() => CompleteAsync(fixture, existingEmpty, token), failures);
         }, failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    private static async Task CompleteAsync(NativeBackupCutFixture fixture, bool existingEmpty, CancellationToken token)
+    private static async Task CompleteAsync(BackupCutFixture fixture, bool existingEmpty, CancellationToken token)
     {
-        var source = NativeBackupJournalRepairAssertions.Read(fixture.Source, token);
-        var archive = await NativeBackupJournalRepairAssertions.ArchiveAsync(fixture.Backup, token);
+        var source = BackupJournalRepairAssertions.Read(fixture.Source, token);
+        var archive = await BackupJournalRepairAssertions.ArchiveAsync(fixture.Backup, token);
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(() => CurrentArchiveCancellationPublication.RunAsync(fixture, token), failures);
         await ServerFailureObserver.ObserveAsync(() => CurrentArchiveCancellationRefusal.RunAsync(fixture, existingEmpty, token), failures);
@@ -33,8 +33,8 @@ internal static class CurrentArchiveCancellationFlow
             await BackupPersistedPolicyAssertions.SameAsync(source.Identity, verified.Identity);
             await Assert.That(verified.Position).IsEqualTo(source.Position);
             var identity = ZoneTreeStore.Restore(fixture.Backup, fixture.Destination, UnitExecutionOptions.StorageExecution());
-            await NativeBackupJournalRepairAssertions.RestoredAsync(fixture, identity,
-                NativeBackupJournalRepairAssertions.Read(fixture.Destination, token));
+            await BackupJournalRepairAssertions.RestoredAsync(fixture, identity,
+                BackupJournalRepairAssertions.Read(fixture.Destination, token));
             await CurrentArchiveCancellationHealthy.RunAsync(fixture.Destination, token);
         }, failures);
         await ServerFailureObserver.ObserveAsync(() => SourceAsync(source, fixture.Source, token), failures);
@@ -46,7 +46,7 @@ internal static class CurrentArchiveCancellationFlow
     private static async Task SourceAsync((KeyLoad.Storage.StoreIdentity Identity, long Position, string[] Rows) original,
         string directory, CancellationToken token)
     {
-        var current = NativeBackupJournalRepairAssertions.Read(directory, token);
+        var current = BackupJournalRepairAssertions.Read(directory, token);
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
@@ -54,8 +54,8 @@ internal static class CurrentArchiveCancellationFlow
         }, failures);
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            await Assert.That(NativeSerialization.Serialize(current.Identity).AsSpan()
-                .SequenceEqual(NativeSerialization.Serialize(original.Identity))).IsTrue();
+            await Assert.That(OrleansSerialization.Serialize(current.Identity).AsSpan()
+                .SequenceEqual(OrleansSerialization.Serialize(original.Identity))).IsTrue();
         }, failures);
         await ServerFailureObserver.ObserveAsync(async () =>
         {
@@ -66,7 +66,7 @@ internal static class CurrentArchiveCancellationFlow
 
     internal static async Task ArchiveAsync(Dictionary<string, byte[]> original, string directory, CancellationToken token)
     {
-        var current = await NativeBackupJournalRepairAssertions.ArchiveAsync(directory, token);
+        var current = await BackupJournalRepairAssertions.ArchiveAsync(directory, token);
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {

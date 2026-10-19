@@ -5,6 +5,6 @@ internal sealed class SdkResponseAdmissionTests
     [Test]
     [Arguments(false)]
     [Arguments(true)]
-    public Task NativeWriteReceiptAndDocumentResponseRespectInclusiveSdkAdmission(bool contentLength)
+    public Task WriteReceiptAndDocumentResponseRespectInclusiveSdkAdmission(bool contentLength)
         => SdkResponseAdmissionFlow.RunAsync(contentLength);
 }

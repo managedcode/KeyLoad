@@ -2,7 +2,7 @@ using System.Collections.Immutable;
 
 namespace KeyLoad;
 
-/// <summary>Complete native scope and watermark of one authorized chunk window read cut.</summary>
+/// <summary>Complete execution scope and watermark of one authorized chunk window read cut.</summary>
 [Orleans.GenerateSerializer, Orleans.Alias(SampleChunkContractAliases.Result)]
 public sealed record SampleChunkWindowResult([property: Orleans.Id(0)] Guid WindowId,
     [property: Orleans.Id(1)] DateTimeOffset From, [property: Orleans.Id(2)] DateTimeOffset Until,

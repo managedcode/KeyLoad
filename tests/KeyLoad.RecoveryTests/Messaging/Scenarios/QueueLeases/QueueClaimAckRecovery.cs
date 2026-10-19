@@ -13,15 +13,15 @@ internal static class QueueClaimAckRecovery
         token.ThrowIfCancellationRequested();
         using var store = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
         var database = QueueLifecycleRecoveryAssertions.Open(store);
-        var operation = NativeSerialization.Deserialize<Command<DatabaseCommand>>(await File.ReadAllBytesAsync(
+        var operation = OrleansSerialization.Deserialize<Command<DatabaseCommand>>(await File.ReadAllBytesAsync(
             Path.Combine(root, QueueClaimAckCrashProtocol.OperationFile), token));
-        var original = ack ? NativeSerialization.Deserialize<Delivery>(await File.ReadAllBytesAsync(
+        var original = ack ? OrleansSerialization.Deserialize<Delivery>(await File.ReadAllBytesAsync(
             Path.Combine(root, QueueClaimAckCrashProtocol.DeliveryFile), token)) : null;
-        var target = NativeSerialization.Deserialize<CommitToken>(await File.ReadAllBytesAsync(
+        var target = OrleansSerialization.Deserialize<CommitToken>(await File.ReadAllBytesAsync(
             Path.Combine(root, QueueClaimAckCrashProtocol.TargetFile), token));
-        var physicalTarget = NativeSerialization.Deserialize<long>(await File.ReadAllBytesAsync(
+        var physicalTarget = OrleansSerialization.Deserialize<long>(await File.ReadAllBytesAsync(
             Path.Combine(root, QueueClaimAckCrashProtocol.PhysicalTargetFile), token));
-        var baseline = NativeSerialization.Deserialize<string[]>(await File.ReadAllBytesAsync(
+        var baseline = OrleansSerialization.Deserialize<string[]>(await File.ReadAllBytesAsync(
             Path.Combine(root, QueueClaimAckCrashProtocol.BaselineFile), token));
         await AssertOriginalAsync(database, operation, target, ack, original);
         var recovered = await RecoveredCutAsync(database, store, operation, stage, ack, original, target, physicalTarget, baseline, token);
@@ -128,12 +128,12 @@ internal static class QueueClaimAckRecovery
         await Assert.That(target.Position).IsGreaterThan(0L);
         if (ack)
         {
-            await QueueClaimAckRecoveryAssertions.EqualAsync(NativeSerialization.Deserialize<DeliveryCommand>(operation.Value!.Input.Span, NativeValidationProfile.PublicInputElements),
+            await QueueClaimAckRecoveryAssertions.EqualAsync(OrleansSerialization.Deserialize<DeliveryCommand>(operation.Value!.Input.Span, ValidationProfile.PublicInputElements),
                 new DeliveryCommand(operation.CommandId, QueueClaimAckCrashProtocol.Lane, delivery!.Token, DeliveryAction.Ack));
         }
         else
         {
-            await QueueClaimAckRecoveryAssertions.EqualAsync(NativeSerialization.Deserialize<ReceiveRequest>(operation.Value!.Input.Span, NativeValidationProfile.PublicInputElements), new ReceiveRequest(operation.CommandId,
+            await QueueClaimAckRecoveryAssertions.EqualAsync(OrleansSerialization.Deserialize<ReceiveRequest>(operation.Value!.Input.Span, ValidationProfile.PublicInputElements), new ReceiveRequest(operation.CommandId,
                 QueueClaimAckCrashProtocol.Lane, MaxMessages: 1, LeaseSeconds: QueueClaimAckCrashProtocol.LeaseSeconds));
         }
     }

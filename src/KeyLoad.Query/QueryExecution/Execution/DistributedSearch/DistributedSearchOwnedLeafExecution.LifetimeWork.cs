@@ -6,12 +6,12 @@ namespace KeyLoad.Query.Features.QueryExecution;
 
 internal static partial class DistributedSearchOwnedLeafExecution
 {
-    internal static DistributedSearchLeafResultV1 ExecuteV2Bound(DatabaseEngine database, string principalId,
-        DistributedSearchOwnedLeafV2 request, PhysicalShardRecord actualOwner,
+    internal static DistributedSearchLeafResult ExecuteBound(DatabaseEngine database, string principalId,
+        DistributedSearchOwnedLeaf request, PhysicalShardRecord actualOwner,
         IOptions<QueryExecutionOptions> options, TimeProvider clock, DateTimeOffset originalExpiry,
         IResourceLifetimeWorkBinding binding, CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(binding);
-        return ExecuteV2(database, principalId, request, actualOwner, options, clock, originalExpiry, token, binding);
+        return Execute(database, principalId, request, actualOwner, options, clock, originalExpiry, token, binding);
     }
 }

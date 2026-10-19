@@ -5,6 +5,6 @@ namespace KeyLoad;
 /// <param name="PurgedCount">Cumulative expired records removed by committed pages.</param>
 /// <param name="HasMore">Whether the latest page observed more expired records.</param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.SampleRetentionStatus)]
+[Orleans.Alias(ContractAliases.SampleRetentionStatus)]
 public sealed record SampleRetentionStatus([property: Orleans.Id(0)] DateTimeOffset? Before,
     [property: Orleans.Id(1)] long PurgedCount, [property: Orleans.Id(2)] bool HasMore);

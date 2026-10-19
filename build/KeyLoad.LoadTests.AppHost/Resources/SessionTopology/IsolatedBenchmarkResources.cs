@@ -1,6 +1,6 @@
 namespace KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
 
-/// <summary>Admits only the shared native multi-test session entry point.</summary>
+/// <summary>Admits only the shared execution multi-test session entry point.</summary>
 internal static class IsolatedBenchmarkResources
 {
     internal static void Add(IDistributedApplicationBuilder builder)

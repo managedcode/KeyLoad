@@ -15,7 +15,7 @@ public static class RelationalRowValidation
     private const string PayloadLimitDetail = "The relational value exceeds its byte limit.";
     private const string NullJson = "null";
 
-    /// <summary>Validates a new resource's optional typed-row schema and native index bindings.</summary>
+    /// <summary>Validates a new resource's optional typed-row schema and execution index bindings.</summary>
     /// <param name="definition">Resource definition to validate before catalog publication.</param>
     public static void ValidateSchema(ResourceDefinition definition)
     {
@@ -27,7 +27,7 @@ public static class RelationalRowValidation
         RelationalSchemaRules.Indexes(definition, RelationalSchemaRules.Columns(definition));
     }
 
-    /// <summary>Validates the exact final row image before canonicalization or native index writes.</summary>
+    /// <summary>Validates the exact final row image before canonicalization or execution index writes.</summary>
     /// <param name="definition">Persisted authoritative resource schema.</param>
     /// <param name="id">Canonical entity identifier required to equal the primary-key value.</param>
     /// <param name="json">Original final-image JSON, preserving numeric precision.</param>

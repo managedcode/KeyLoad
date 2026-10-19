@@ -8,12 +8,12 @@ using SessionFields = KeyLoad.ComparisonTests.Features.BenchmarkComparisons.Benc
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
-/// <summary>Joins native runtime identities, immutable case bytes and the completed original TUnit report.</summary>
+/// <summary>Joins execution runtime identities, immutable case bytes and the completed original TUnit report.</summary>
 internal static class BenchmarkSessionManifest
 {
     private const string State = "session-state.json";
     private const string Manifest = "session.json";
-    private const string NativeResults = "NativeTestResults";
+    private const string RuntimeResults = "RuntimeTestResults";
     private const string RuntimeImport = "runtime-import.json";
     private const string Resources = "session-resource-evidence.json";
     private const string ImagesField = "images";
@@ -23,7 +23,7 @@ internal static class BenchmarkSessionManifest
     private const string Invalid = "BenchmarkSessionOriginalEvidenceInvalid";
     private static readonly string[] CaseIds =
         ["load-million", "index", "sequential-read", "random-read", "search", "mixed", "verify-final"];
-    private static readonly string[] NativeNames =
+    private static readonly string[] RuntimeNames =
         ["LoadMillion", "BuildIndexes", "SequentialRead", "RandomRead", "Search", "Mixed", "VerifyFinalState"];
 
     internal static async Task WriteAsync(string root, BenchmarkSessionCallerOptions selected, int exit, bool qualificationFailed, CancellationToken token)
@@ -38,7 +38,7 @@ internal static class BenchmarkSessionManifest
             var runtimeImport = await ReadAsync(Path.Combine(root, RuntimeImport), token);
             state[SessionFields.OuterRuntime] = new JsonObject { [SessionFields.Path] = RuntimeImport, [SessionFields.Sha256] = Hash(runtimeImport) };
         }
-        state[SessionFields.NativeReport] = await NativeReportAsync(root, exit, token);
+        state[SessionFields.RuntimeReport] = await RuntimeReportAsync(root, exit, token);
         var qualification = await ReadAsync(Path.Combine(root, BenchmarkSessionQualifications.FileName), token);
         state[SessionFields.QualificationReport] = new JsonObject
         {
@@ -57,12 +57,12 @@ internal static class BenchmarkSessionManifest
         if (qualificationFailed)
         {
             state[SessionFields.Outcome] = "failure";
-            state[SessionFields.Reason] = "NativeSessionQualificationFailed";
+            state[SessionFields.Reason] = "SessionQualificationFailed";
         }
         if (exit != 0)
         {
             state[SessionFields.Outcome] = "failure";
-            state[SessionFields.Reason] = "NativeSessionTestFailure";
+            state[SessionFields.Reason] = "SessionTestFailure";
         }
         var output = JsonSerializer.SerializeToUtf8Bytes(state);
         await using var file = new FileStream(Path.Combine(root, Manifest), FileMode.CreateNew, FileAccess.Write, FileShare.None,
@@ -74,7 +74,7 @@ internal static class BenchmarkSessionManifest
     private static void ValidateCohort(JsonObject state, BenchmarkSessionCallerOptions selected)
     {
         var provenance = BenchmarkProvenanceRegistration.Bind().Value;
-        Require(state[SessionFields.SchemaVersion]?.GetValue<string>() == "session-v1"
+        Require(state[SessionFields.SchemaVersion]?.GetValue<string>() == "session"
             && state[SessionFields.SessionId]?.GetValue<string>() == selected.SessionId
             && state[SessionFields.Target]?.GetValue<string>() == selected.Target
             && state[SessionFields.NodeCount]?.GetValue<int>() == selected.NodeCount);
@@ -93,22 +93,22 @@ internal static class BenchmarkSessionManifest
             && state[SessionFields.Workflow]?.GetValue<string>() == provenance.Workflow);
     }
 
-    private static async Task<JsonObject> NativeReportAsync(string root, int exit, CancellationToken token)
+    private static async Task<JsonObject> RuntimeReportAsync(string root, int exit, CancellationToken token)
     {
-        var native = Directory.EnumerateFiles(Path.Combine(root, NativeResults), "*.trx", SearchOption.AllDirectories)
+        var execution = Directory.EnumerateFiles(Path.Combine(root, RuntimeResults), "*.trx", SearchOption.AllDirectories)
             .Take(2).ToArray();
-        Require(native.Length == 1);
-        var reportBytes = await ReadAsync(native[0], token);
+        Require(execution.Length == 1);
+        var reportBytes = await ReadAsync(execution[0], token);
         using var source = new MemoryStream(reportBytes, writable: false);
         var report = XDocument.Load(source);
-        var outcomes = report.Descendants().Where(element => element.Name.LocalName == SessionFields.NativeResultElement).ToArray();
-        Require(outcomes.Length == NativeNames.Length && NativeNames.All(name =>
-            outcomes.Count(result => result.Attribute(SessionFields.NativeTestName)?.Value == name) == 1));
+        var outcomes = report.Descendants().Where(element => element.Name.LocalName == SessionFields.ResultElement).ToArray();
+        Require(outcomes.Length == RuntimeNames.Length && RuntimeNames.All(name =>
+            outcomes.Count(result => result.Attribute(SessionFields.RuntimeTestName)?.Value == name) == 1));
         var success = outcomes.All(result => result.Attribute(SessionFields.Outcome)?.Value == "Passed");
         Require(exit != 0 || success);
         return new JsonObject
         {
-            [SessionFields.Path] = Path.GetRelativePath(root, native[0]).Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar),
+            [SessionFields.Path] = Path.GetRelativePath(root, execution[0]).Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar),
             [SessionFields.Sha256] = Hash(reportBytes)
         };
     }

@@ -19,9 +19,9 @@ internal sealed class IsolatedSurrealDbResourceTests
         await IsolatedResourceTopologyFixture.VerifyWaitsAsync(runner, [node]);
         await VerifyNodeAsync(node);
         var runnerEnvironment = await IsolatedResourceTopologyFixture.EnvironmentAsync(runner);
-        await Assert.That(runnerEnvironment[IsolatedResourceTopologyFixture.NativePrefix + "Endpoints__0"])
+        await Assert.That(runnerEnvironment[IsolatedResourceTopologyFixture.RuntimePrefix + "Endpoints__0"])
             .IsEqualTo("{isolated-surrealdb.bindings.http.url}");
-        await Assert.That(runnerEnvironment[IsolatedResourceTopologyFixture.NativePrefix + "Image"])
+        await Assert.That(runnerEnvironment[IsolatedResourceTopologyFixture.RuntimePrefix + "Image"])
             .IsEqualTo("docker.io/surrealdb/surrealdb:v3.2.4@" + BenchmarkResources.SurrealDbDigest);
         var password = fixture.Context.Builder.Resources.OfType<ParameterResource>().Single();
         await Assert.That(password.Secret).IsTrue();
@@ -35,7 +35,7 @@ internal sealed class IsolatedSurrealDbResourceTests
         await Assert.That(() => IsolatedSurrealDbResources.Add(fixture.Context)).Throws<InvalidOperationException>();
         await Assert.That(fixture.Build().Length).IsEqualTo(0);
         await Assert.That(fixture.Context.Builder.Resources.OfType<ParameterResource>().Any()).IsFalse();
-        await Assert.That(Directory.Exists(Path.Combine(fixture.Context.Root, "native"))).IsFalse();
+        await Assert.That(Directory.Exists(Path.Combine(fixture.Context.Root, "execution"))).IsFalse();
     }
 
     internal static async Task VerifyNodeAsync(ContainerResource node)

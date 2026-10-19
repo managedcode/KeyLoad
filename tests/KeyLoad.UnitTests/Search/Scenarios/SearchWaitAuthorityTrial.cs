@@ -5,12 +5,12 @@ using KeyLoad.Server.Features.Search;
 
 namespace KeyLoad.UnitTests.Features.Search;
 
-/// <summary>Owns actual replica-applied seed, precisely damaged native authority and failure-preserving original cleanup.</summary>
+/// <summary>Owns actual replica-applied seed, precisely damaged execution authority and failure-preserving original cleanup.</summary>
 internal static class SearchWaitAuthorityTrial
 {
     private const string TokenDetail = "The index wait token belongs to another incarnation, atomic partition or placement.";
     private const string AppliedDetail = "The canonical applied position is invalid.";
-    private const string ProviderDetail = "Native text index waiting is unavailable.";
+    private const string ProviderDetail = "Execution text index waiting is unavailable.";
     private const long NegativeAppliedPosition = -1;
 
     internal static Task TokenAsync(Func<CommitToken, CommitToken> damage, CancellationToken cancellationToken)
@@ -47,7 +47,7 @@ internal static class SearchWaitAuthorityTrial
                 }
                 else
                 {
-                    transaction.Put(KeySpace.AppliedBytes, NativeSerialization.Serialize(NegativeAppliedPosition));
+                    transaction.Put(KeySpace.AppliedBytes, OrleansSerialization.Serialize(NegativeAppliedPosition));
                 }
                 return true;
             });
@@ -73,7 +73,7 @@ internal static class SearchWaitAuthorityTrial
         CancellationToken cancellationToken)
     {
         CanonicalReadCutFixture? fixture = null;
-        NativeTextProjection? projection = null;
+        RuntimeTextProjection? projection = null;
         var failures = new List<Exception>();
         try
         {
@@ -81,11 +81,11 @@ internal static class SearchWaitAuthorityTrial
             {
                 fixture = new CanonicalReadCutFixture();
                 var database = fixture.Canonical;
-                database.Configure(NativeTextBilingualAudit.Collection, ResourceKind.Collection);
-                var receipt = await NativeTextWaitSeed.CommitAsync(fixture, cancellationToken);
-                projection = NativeTextBilingualAudit.Open(database);
+                database.Configure(TextBilingualAudit.Collection, ResourceKind.Collection);
+                var receipt = await TextWaitSeed.CommitAsync(fixture, cancellationToken);
+                projection = TextBilingualAudit.Open(database);
                 var search = new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), projection);
-                var request = new WaitForIndexRequest(database.Partition, NativeTextBilingualAudit.Collection,
+                var request = new WaitForIndexRequest(database.Partition, TextBilingualAudit.Collection,
                     SearchWaitAuthorityState.TextField, receipt.Token);
                 await operation(fixture, search, request);
             }, failures);

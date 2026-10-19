@@ -3,7 +3,7 @@ namespace KeyLoad.UnitTests.Features.ClientApi;
 internal static class QueueDispatchMcpCatalogAssertions
 {
     internal const string Tool = "keyload_queue_dispatch_control";
-    internal const string Route = "/v1/admin/queues/dispatch";
+    internal const string Route = "/admin/queues/dispatch";
     private const int Kind = 50;
     private const int FirstField = 0;
     private const int FirstSuccessBranch = 0;

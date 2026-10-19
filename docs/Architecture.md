@@ -53,7 +53,7 @@ classDiagram
 ## Cluster and execution concept
 
 Microsoft Orleans is the cluster
-([ADR-136](ADR/ADR-136-native-orleans-partition-ownership.md),
+([ADR-136](ADR/ADR-136-orleans-partition-ownership.md),
 [ADR-036](ADR/ADR-036-orleans-foundation.md)). Orleans does all of the
 clustering: membership, silo discovery, failure detection, the distributed grain
 directory, placement, activation migration and repartitioning, internal
@@ -72,11 +72,11 @@ own; scaling means adding silos to the Orleans cluster.
 - **Silo-local ZoneTree owner.** Each silo hosts a Grain Service; typed Orleans
   calls can address it on another silo. The physical owner retains ZoneTree,
   WAL/journals, locks and ordered apply. Local scoped services borrow that exact
-  open session through DI. Isolated stores open during native silo startup.
+  open session through DI. Isolated stores open during silo startup.
   Shared storage opens lazily for its ordinary database grain and closes after
   that activation's original work and borrowers join. Open handles never move
   with activations.
-- **Copies.** The writer finds the target silos through native Orleans
+- **Copies.** The writer finds the target silos through Orleans
   membership (`IClusterMembershipService` / `IManagementGrain`) and sends the
   write through ordinary Orleans calls to the ZoneTree owner Grain Services on
   `KeyLoad:ReplicaCount` silos. The write is acknowledged after every configured
@@ -106,7 +106,7 @@ flowchart LR
     Api --> Connection[Connection grain one per client]
     Connection --> Partition[Logical partition grain]
     Connection --> Gather[Gather results from several partitions]
-    Partition -.->|finds target silos| Membership[Native Orleans membership]
+    Partition -.->|finds target silos| Membership[Orleans membership]
     Partition -->|Orleans call| OwnerA[ZoneTree owner on silo A]
     Partition -->|Orleans call| OwnerB[ZoneTree owner on silo B]
     Partition -->|Orleans call| OwnerC[ZoneTree owner on silo C]
@@ -125,7 +125,7 @@ Two storage modes are required. With a **shared volume**, all silos can reach th
 configured partition paths without copying data. One ordinary Orleans grain owns
 each open physical partition; the other silos call it. Orleans owns activation
 placement and movement. The storage owner closes its actual handles before another
-activation reopens that partition. ZoneTree's native WAL opens with exclusive file
+activation reopens that partition. ZoneTree's WAL opens with exclusive file
 sharing, so several live writable instances over the same files are unsupported.
 The actual filesystem must preserve the required locking and flush semantics.
 
@@ -145,19 +145,19 @@ runtime and exact-source Linux qualification, including the deployed shared
 volume's locking and flush behavior.
 
 Sources: [Orleans stateless workers](https://learn.microsoft.com/en-us/dotnet/orleans/grains/stateless-worker-grains),
-[native grain directory](https://learn.microsoft.com/en-us/dotnet/orleans/host/grain-directory),
+[grain directory](https://learn.microsoft.com/en-us/dotnet/orleans/host/grain-directory),
 and [the pinned ZoneTree WAL open contract](https://github.com/ZoneTree/ZoneTree/blob/ec774af2223bd87457a0aa985908f0b4e508e4c8/src/ZoneTree/WAL/Sync/SyncFileSystemWriteAheadLog.cs#L55-L63).
 
 Credentials and authorization policies are persisted in the database; callers
 never supply trusted roles. Standard ASP.NET Core authentication admits HTTP,
 SDK and MCP callers, and ManagedCode.Orleans.Identity carries the verified
 call-local identity between grains. OpenTelemetry logs, traces and metrics come
-from the native Orleans, ASP.NET Core and Aspire integrations without
-credentials, payloads or unbounded labels. Native Orleans execution and
+from the Orleans, ASP.NET Core and Aspire integrations without
+credentials, payloads or unbounded labels. Orleans execution and
 scheduling choices are mapped per grain and method in
-[ExecutionPrimitives](Features/ClusterRouting/ExecutionPrimitives.md) and
-[ADR-110](ADR/ADR-110-native-orleans-execution-primitives.md); the broader
-[Orleans capability review](Features/ClusterRouting/CapabilityReview.md) covers
+[ExecutionPrimitives](Features/OrleansExecution/ExecutionPrimitives.md) and
+[ADR-110](ADR/ADR-110-orleans-execution-primitives.md); the broader
+[Orleans capability review](Features/OrleansExecution/CapabilityReview.md) covers
 Streams, transactions, durable jobs and per-silo services. Orleans
 transactional grain state does not by itself make ZoneTree writes atomic; it
 needs a provider that participates in the canonical ZoneTree commit.
@@ -168,8 +168,8 @@ Runtime projects under `src/` have distinct consumers and responsibilities:
 Abstractions (shared contracts), Client (external SDK), Cli (operator
 executable), Core (database semantics and authorization evaluation), Query (SQL
 compilation, search and change feeds), Clustering (Orleans grains, routing and
-copies through native calls to `ReplicaCount` silo-local ZoneTree owners),
-Storage.ZoneTree (physical storage, local archive transfer and native file IO),
+copies through calls to `ReplicaCount` silo-local ZoneTree owners),
+Storage.ZoneTree (physical storage, local archive transfer and file IO),
 Server (host composition, public API, health, service discovery, resilience and
 OpenTelemetry) and Diagnostics (BCL-only bounded phase telemetry shared by
 storage and replication). Diagnostics stays independent so low-level storage
@@ -177,9 +177,9 @@ does not depend on domain execution or the server host.
 
 `src/` contains runtime product code only. Compiler rules live in `analyzers/`;
 the Aspire AppHost and shared build targets live in `build/`; tests and
-benchmarks keep their own roots. Recovery tests own their native child-process
+benchmarks keep their own roots. Recovery tests own their child-process
 scenarios in the same test assembly. Compiler analyzers, the AppHost, benchmark
-entry, generated-consumer fixtures, the native
+entry, generated-consumer fixtures, the execution
 comparison library and the TUnit comparison host keep their distinct execution
 boundaries.
 
@@ -190,7 +190,7 @@ Runtime code reads time through an owned `TimeProvider`
 [ADR-115](ADR/ADR-115-time-provider.md)), operational policy through validated
 typed options ([ADR-113](ADR/ADR-113-centralized-runtime-options.md)), runtime
 identities through named constants ([ADR-111](ADR/ADR-111-magic-runtime-values.md))
-and synchronization through native Orleans turns, `System.Threading.Lock` or
+and synchronization through Orleans turns, `System.Threading.Lock` or
 `SemaphoreSlim.WaitAsync` ([ADR-108](ADR/ADR-108-typed-synchronization.md)).
 
 ## Complete repository boundary
@@ -203,23 +203,23 @@ NuGet publication follow root policy.
 | Project/module | Purpose and entry points | Canonical slices / protected boundary |
 |---|---|---|
 | src/KeyLoad.Abstractions | CommandRequest.cs, PartitionRef.cs, Mutation.cs and `<SliceName>/` contract folders | Shared public and storage contracts for every canonical slice. |
-| src/KeyLoad.Core | DatabaseEngine.cs, AtomicCommandCommit.cs, DocumentStorage/Execution/Documents.cs, Messaging/Execution/Messaging.cs, GraphTraversal/, TimeSeries/, Search/ | Node-local engine, authorization evaluation and atomic transactions; model effects share the ordered native commit. |
-| src/KeyLoad.Diagnostics | ResourceExecution/Models/DatabasePhaseKind.cs, ResourceExecution/Models/DatabasePhaseSnapshot.cs | ResourceExecution; BCL-only callback-free scalar phase observations, with no database state, public control endpoint or framework dependency. |
-| src/KeyLoad.Storage.ZoneTree | ZoneTreeStore.cs, StorageRecovery/Execution/ZoneTreeStoreRuntime.cs, StorageRecovery/Recovery/ZoneTreeCheckpointManager.cs | StorageRecovery and Restore; files, WAL, checkpoints and local archives stay with the silo-local ZoneTree owner. |
+| src/KeyLoad.Core | DatabaseEngine.cs, AtomicCommandCommit.cs, DocumentStorage/Execution/Documents.cs, Messaging/Execution/Messaging.cs, GraphTraversal/, TimeSeries/, Search/ | Node-local engine, authorization evaluation and atomic transactions; model effects share the ordered commit. |
+| src/KeyLoad.Diagnostics | Models/DatabasePhaseKind.cs, Models/DatabasePhaseSnapshot.cs | BCL-only scalar phase observations, with no database state, public control endpoint or framework dependency. |
+| src/KeyLoad.Storage.ZoneTree | ZoneTreeStore.cs, StorageEngine/Execution/ZoneTreeStoreRuntime.cs, StorageEngine/Recovery/ZoneTreeCheckpointManager.cs | StorageEngine, PointCache and Restore; files, WAL, checkpoints and local archives stay with the silo-local ZoneTree owner. |
 | src/KeyLoad.Query | QueryExecution/Queries/QueryEngine.cs, QueryExecution/Execution/SqlParser.cs, Search/Queries/QueryExecution/SearchEngine.cs, ChangeFeeds/Queries/LiveQueryExecutor.cs | QueryExecution, Search, ChangeFeeds; one authorized typed AST and bounded read cut. |
-| src/KeyLoad.Clustering | ClusterRouting/Grains/ConnectionGrain.cs, ClusterRouting/Grains/CommandPartitionGrain.cs, ClusterRouting/Queries/Connections/ConnectionReadExecution.cs, `<SliceName>/GrainServices/` | ClusterRouting; connection and partition grains route through Orleans to the silo-local ZoneTree owners. |
-| src/KeyLoad | Program.cs, NodeOptions.cs, ClientApi/, ClusterRouting/Hosting/SiloHosting/OrleansNode.cs | Composition root, Orleans host and public API; caller identity never supplies trusted roles. |
+| src/KeyLoad.Clustering | RequestExecution/Grains/ConnectionGrain.cs, RequestExecution/Grains/CommandPartitionGrain.cs, RequestExecution/Queries/Connections/ConnectionReadExecution.cs, `<SliceName>/GrainServices/` | OrleansExecution; connection and partition grains route through Orleans to the silo-local ZoneTree owners. |
+| src/KeyLoad | Program.cs, NodeOptions.cs, ClientApi/, OrleansHosting/Hosting/OrleansNode.Composition.cs | Composition root, Orleans host and public API; caller identity never supplies trusted roles. |
 | src/KeyLoad.Client | ClientApi/Transport/KeyLoadClient.cs, QueryExecution/Queries/KeyLoadQuery.cs | ClientApi transport; business operations mirror the same canonical slices as core, contracts, API and tests. |
 | src/KeyLoad.Cli | Program.cs, ClientApi/Transport/CliClientApi.cs, Restore/Commands/CliBackupRestore.cs | Administrative entry point with typed ClientApi and backup/restore owners. |
-| build/KeyLoad.AppHost | Program.cs, BenchmarkComparisons/Resources/SessionTopology/BenchmarkResources.cs | ClusterReplication, ClusterRouting, TestInfrastructure, BenchmarkComparisons and CodeQuality; Aspire owns cluster resources, readiness, test dependencies and shutdown. |
+| build/KeyLoad.AppHost | Program.cs, Hosting/, OrleansHosting/Resources/ClusterTelemetryResources.cs, TestInfrastructure/ | Aspire owns cluster resources, readiness, test dependencies, scoped process faults and joined shutdown. |
 | tests/KeyLoad.UnitTests | TestDatabase.cs and `<SliceName>/` folders | Matching product slices; contract and engine regressions. |
-| tests/KeyLoad.RecoveryTests | Program.cs, StorageRecovery/Cases/, feature-owned Processes/ and Execution/ | Native TUnit recovery tests and their real child-process scenarios in the same test assembly. |
-| tests/KeyLoad.IntegrationTests | ClusterFixture.cs, ClusterReplication/Cases/Cluster/ClusterTests.cs, ResourceExecution/Cases/AdmissionClusterTests.cs | Aspire-owned cluster fixtures; business cases mirror their owning slices through the real .NET SDK and official MCP client. |
+| tests/KeyLoad.RecoveryTests | Program.cs, StorageRecovery/Cases/, feature-owned Processes/ and Execution/ | TUnit recovery tests and their real child-process scenarios in the same test assembly. |
+| tests/KeyLoad.IntegrationTests | ClusterFixture.cs, StorageReplication/Cases/Cluster/ClusterTests.cs, ResourceExecution/Cases/AdmissionClusterTests.cs | Aspire-owned cluster fixtures; business cases mirror their owning slices through the real .NET SDK and official MCP client. |
 | tests/KeyLoad.ComparisonTests | BenchmarkComparisons/ | BenchmarkComparisons; real engine/container correctness and measurements. |
 | benchmarks/KeyLoad.Benchmarks | Program.cs | BenchmarkComparisons; embedded microbenchmark development, no public claim without CI evidence. |
 | benchmarks/KeyLoad.BenchmarkScenarios | Benchmarks/EmbeddedBenchmarks.cs | BenchmarkComparisons; [ADR-047](ADR/ADR-047-embedded-benchmark-host.md) public fixture library for the external generated consumer. |
 | benchmarks/KeyLoad.Comparisons | Session/, Targets/ | BenchmarkComparisons; public library with shared workload/oracle and official engine clients. |
-| benchmarks/KeyLoad.ComparisonHost | Session/ | BenchmarkComparisons; native TUnit C# client workload container under [ADR-117](ADR/ADR-117-native-tunit-ci-entry.md). |
+| benchmarks/KeyLoad.ComparisonHost | Session/ | BenchmarkComparisons; TUnit C# client workload container under [ADR-117](ADR/ADR-117-tunit-ci-entry.md). |
 | site | Features/BenchmarkComparisons/index.html, bootstrap.mjs; scripts/build.mjs | BenchmarkComparisons; product introduction and public views of qualified GitHub JSON. |
 | tests/KeyLoad.SiteTests | KeyLoad.SiteTests.csproj, Cases/, Fixtures/ | BenchmarkComparisons; TUnit suite over the actual Node modules and authentic GitHub report files. |
 | .github/workflows | build-and-tests.yml, benchmarks.yml, website.yml, release.yml | RepositoryGovernance, BenchmarkComparisons, ReleaseDelivery; separate build/test, benchmark, website and release workflows. |
@@ -262,7 +262,7 @@ in [RepositoryGovernance](Features/RepositoryGovernance.md) and
 Canonical slice names use PascalCase consistently: RepositoryGovernance,
 BenchmarkComparisons, DatabaseComposition, DocumentStorage, RelationalStorage,
 EventStreams, Messaging, GraphTraversal, TimeSeries, Search, QueryExecution,
-Authorization, ChangeFeeds, StorageRecovery, ClusterReplication, ClusterRouting,
+Authorization, ChangeFeeds, StorageRecovery, StorageReplication, OrleansExecution,
 ClientApi, BackupRestore (project folder `Restore/`), BlobStorage,
 ResourceExecution, InternalSerialization, AdminDashboard, AnalyticsStore,
 CodeQuality, ReleaseDelivery and TestInfrastructure. Their owning contracts and
@@ -319,13 +319,13 @@ through ManagedCode.MCPGateway and ManagedCode.MarkdownLd.Kb tool-metadata graph
 [ADR-104](ADR/ADR-104-mcp-gateway-tool-discovery.md)); the graph holds public
 operation documentation only. Streamed results and long operations use
 ManagedCode.Communication CQRS `IAsyncEnumerable` contracts through Orleans
-([NativeCqrs](Features/ClusterRouting/NativeCqrs.md),
-[ADR-082](ADR/ADR-082-native-cqrs-streams.md)). Native enumeration does not move
+([RuntimeCqrs](Features/OrleansExecution/RuntimeCqrs.md),
+[ADR-082](ADR/ADR-082-cqrs-streams.md)). enumeration does not move
 node-owned storage or replace persisted authority.
 
 ## SQL and relational model
 
-[ADR-132](ADR/ADR-132-native-create-table-command-identity.md) defines the
+[ADR-132](ADR/ADR-132-create-table-command-identity.md) defines the
 [bounded CREATE TABLE operation](Features/RelationalStorage/CreateTable.md) with a
 caller-stable SQL command identity on the connection-owned execution path.
 Canonical typed resources stay in ZoneTree behind the ordered apply gate. The
@@ -334,7 +334,7 @@ PostgreSQL grammar or SQL Server TDS promise.
 
 ```mermaid
 classDiagram
-    ScriptDomSyntax --> TSqlParser : bounded native grammar
+    ScriptDomSyntax --> TSqlParser : bounded grammar
     SqlOperationCompiler --> ScriptDomSyntax : selected syntax
     SqlOperationCompiler --> SqlOriginalMutationIdentity : original command identity
     SqlOperationCompiler --> McpDecodedOperation : canonical typed plan
@@ -370,15 +370,24 @@ existing cursors and index fences, and physical schema changes stay separate.
 
 ## Storage, atomic commit and recovery
 
+File API contracts and server transfers use ManagedCode.Storage. ZoneTree stores
+file metadata, access policy, publication state and physical-storage references;
+provider-owned physical files contain the payload bytes. Database command and
+replica journals carry metadata, never file content. See
+[ADR-038](ADR/ADR-038-chunked-blob-storage.md) and
+[BlobStorage](Features/BlobStorage.md) for the publication boundary and open
+physical-provider qualification gates.
+
+
 ZoneTree is the canonical storage for every KeyLoad-owned model and
 ZoneTree.FullTextSearch is the selected derived text index
 ([ADR-071](ADR/ADR-071-canonical-zonetree-providers.md),
-[NativeFullTextProjection](Features/Search/NativeFullTextProjection.md)). The
-silo-local ZoneTree owner keeps native WAL, ordered apply and file ownership on
+[FullTextProjection](Features/Search/FullTextProjection.md)). The
+silo-local ZoneTree owner keeps WAL, ordered apply and file ownership on
 its node. Current storage accepts only the formats in
 [CurrentFormat](Features/StorageRecovery/CurrentFormat.md) and rejects
 unsupported or corrupt versions before effects
-([ADR-011](ADR/ADR-011-current-native-format.md),
+([ADR-011](ADR/ADR-011-current-format.md),
 [ADR-116](ADR/ADR-116-first-release-current-format.md)). Process-kill recovery
 tests do not prove power-loss durability.
 
@@ -414,8 +423,8 @@ classDiagram
     ZoneTreeStoreInitializer --> ZoneTreeIdentityFile : current format writer fence
 ```
 
-[NativeReadCuts](Features/StorageRecovery/NativeReadCuts.md) under
-[ADR-097](ADR/ADR-097-native-read-cut-leases.md) supplies provider-owned snapshot
+[RuntimeReadCuts](Features/StorageRecovery/RuntimeReadCuts.md) under
+[ADR-097](ADR/ADR-097-read-cut-leases.md) supplies provider-owned snapshot
 lifetimes for bounded reads. A real-process inspector checks an original store
 without the normal runtime, then releases it for a normal reopen:
 
@@ -438,33 +447,33 @@ separate storage protocol.
 
 ## Internal serialization
 
-[ADR-060](ADR/ADR-060-native-internal-serialization.md) and
-[InternalSerialization](Features/InternalSerialization.md) require native
+[ADR-060](ADR/ADR-060-internal-serialization.md) and
+[InternalSerialization](Features/InternalSerialization.md) require execution
 generated Orleans payloads with stable aliases and field IDs across owned
 persistence, grain requests/replies, copies sent to ZoneTree owners and signed
 claims. Public HTTP/MCP JSON, exact user content, frozen canonical fingerprint
 identities, sortable keys, raw ZoneTree values, fixed checksum framing and blob
-bytes keep their concrete protocols. Native generated bytes are not canonical
+bytes keep their concrete protocols. generated bytes are not canonical
 hashes for unordered values. Readers reject unsupported formats before effects.
 
 ```mermaid
 flowchart LR
     Public[Public JSON protocol] --> Typed[Attributed owned DTOs]
-    Typed --> Native[Cached Orleans codecs and pooled sessions]
-    Native --> Records[Typed records and versioned metadata]
-    Native --> Calls[Grain call payloads and copies]
-    Native --> Claims[Signed native claims]
+    Typed --> Execution[Cached Orleans codecs and pooled sessions]
+    Execution --> Records[Typed records and versioned metadata]
+    Execution --> Calls[Grain call payloads and copies]
+    Execution --> Claims[Signed claims]
     Records --> Files[Node local ZoneTree and atomic WAL]
     Typed --> Identity[Frozen canonical fingerprint material]
 ```
 
 ```mermaid
 classDiagram
-    NativeSerialization --> NativePayload : versioned generated root
-    NativeSerialization --> NativeSerializerProviders : cached official providers
-    NativePayload --> NativeJsonValue : structural DOM surrogate
+    OrleansSerialization --> RuntimePayload : versioned generated root
+    OrleansSerialization --> SerializerProviders : cached official providers
+    RuntimePayload --> RuntimeJsonValue : structural DOM surrogate
     ZoneTreeIdentityFile --> ZoneTreeMetadataBinary : explicit format fence
-    GrainRequestEnvelope --> GrainValue : attributed native boundary
+    GrainRequestEnvelope --> GrainValue : attributed boundary
 ```
 
 ## Query, search and read budgets
@@ -517,14 +526,14 @@ classDiagram
     ZoneTreeStoreRuntime --> ZoneTreeBackupRestore : verified local backup
 ```
 
-Native search scheduling follows
-[ADR-081](ADR/ADR-081-awaited-native-search-execution.md): one analytical
-reservation spans the complete awaited read and native settlement while the
-connection grain yields. Index generations have bounded native leases and
+search scheduling follows
+[ADR-081](ADR/ADR-081-awaited-search-execution.md): one analytical
+reservation spans the complete awaited read and settlement while the
+connection grain yields. Index generations have bounded leases and
 retirement ([OnlineGenerationLifetime](Features/Search/OnlineGenerationLifetime.md));
 global retrieval merges bounded per-modality windows before RRF
 ([GlobalBranchWindows](Features/Search/GlobalBranchWindows.md)). SIMD execution
-uses native .NET vector intrinsics with scalar code only for bounded tails and
+uses execution .NET vector intrinsics with scalar code only for bounded tails and
 independent correctness oracles ([Search](Features/Search.md)); acceleration
 claims need comparable GitHub measurements.
 
@@ -572,7 +581,7 @@ classDiagram
     TimeSeriesReadOperations --> SampleAggregateReader
     TimeSeriesReadOperations --> SampleAggregateWindowReader
     SampleLatestReader --> ZoneTreeRangeReader : descending first live key
-    SampleAggregateReader --> SampleAggregateAccumulator : published native sums
+    SampleAggregateReader --> SampleAggregateAccumulator : published sums
     SampleAggregateWindowReader --> SampleAggregateAccumulator : bounded windows
 ```
 
@@ -688,10 +697,10 @@ classDiagram
 
 [Shared benchmark sessions](Features/BenchmarkComparisons/SessionExecution.md)
 under [ADR-142](ADR/ADR-142-shared-live-benchmark-sessions.md) run exactly two
-measurement jobs per database: one native node and three native nodes. Each job
-owns one live Aspire topology and runs separate real native TUnit cases against
+measurement jobs per database: one node and three nodes. Each job
+owns one live Aspire topology and runs separate real TUnit cases against
 it, starting with a measured million-record load. Original per-case outcomes,
-native TRX, runtime/image identities and resource observations feed one
+TRX, runtime/image identities and resource observations feed one
 authenticated complete-cohort aggregation; failed or incomplete cohorts cannot
 refresh published metrics. Scales are exactly 100,000 and 1,000,000 records
 ([ScaledWorkloads](Features/BenchmarkComparisons/ScaledWorkloads.md),
@@ -701,9 +710,9 @@ refresh published metrics. Scales are exactly 100,000 and 1,000,000 records
 ```mermaid
 flowchart LR
     Plan[Canonical session inventory] --> Prepare[Common compiled runner and images]
-    Prepare --> Worker[One database and native node count per job]
+    Prepare --> Worker[One database and node count per job]
     Worker --> Aspire[One owned live Aspire topology]
-    Aspire --> Tests[Separate native TUnit workload cases]
+    Aspire --> Tests[Separate TUnit workload cases]
     Tests --> Originals[Original reports, TRX and runtime evidence]
     Originals --> Aggregate[Complete authenticated cohort]
     Aggregate --> Site[Qualified website metrics]
@@ -736,7 +745,7 @@ classDiagram
     class Neo4jQueryResponse
     ComparisonTests --> Neo4jHarnessRegression : existing Aspire endpoint
     Neo4jHarnessRegression --> BenchmarkSession : real load and failed prerequisites
-    BenchmarkSession --> Neo4jTarget : native target contract
+    BenchmarkSession --> Neo4jTarget : target contract
     Neo4jTarget --> Neo4jQueryResponse : parsed acknowledgement
 ```
 
@@ -760,7 +769,7 @@ classDiagram
     class EmbeddedBenchmarks
     class GeneratedBenchmarkRunner
     class ZoneTreeStore
-    BenchmarkProgram --> EmbeddedBenchmarks : native BenchmarkSwitcher selects assembly
+    BenchmarkProgram --> EmbeddedBenchmarks : BenchmarkSwitcher selects assembly
     GeneratedBenchmarkRunner --|> EmbeddedBenchmarks : upstream generated inheritance
     EmbeddedBenchmarks --> ZoneTreeStore : owns actual embedded fixture storage
 ```
@@ -771,7 +780,7 @@ a failed job stays failed, has a null report and shows no numeric result.
 
 ```mermaid
 flowchart LR
-  Job[Independent native Aspire cell] --> Result[Measured or failed null report]
+  Job[Independent Aspire cell] --> Result[Measured or failed null report]
   GitHub[Actual job steps and immutable artifact] --> Proof[Same source run attempt validation]
   Result --> Proof
   Proof --> Aggregate[Complete planned-cell aggregate]
@@ -786,7 +795,7 @@ flowchart LR
 `build-and-tests.yml` (`Build and Tests`) owns PR/main/manual build, format,
 rules, analyzers, unit, process recovery and Docker/Aspire cluster SDK/MCP tests;
 benchmark contracts run only in Benchmarks
-([ADR-117](ADR/ADR-117-native-tunit-ci-entry.md)). `benchmarks.yml`
+([ADR-117](ADR/ADR-117-tunit-ci-entry.md)). `benchmarks.yml`
 (`Benchmarks`) owns the isolated Linux database groups and authenticated
 aggregation and ends with a bounded dispatch of `website.yml` (`Website`).
 Website publishes independently on trusted main changes or manual dispatch and
@@ -800,7 +809,7 @@ target. Packaging does not establish runtime or endurance qualification.
 ```mermaid
 flowchart LR
     Source[PR or main source] --> CI[Build and Tests]
-    Main[Main source] --> Benchmarks[All isolated native benchmarks]
+    Main[Main source] --> Benchmarks[All isolated benchmarks]
     Benchmarks --> Aggregate[Complete authenticated JSON]
     Aggregate --> Dispatch[Settled final Website dispatch]
     Dispatch --> Site[Website gates and Pages publication]

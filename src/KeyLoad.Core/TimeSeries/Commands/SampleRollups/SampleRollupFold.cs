@@ -12,7 +12,7 @@ internal static class SampleRollupFold
         var scan = view.VisitRange(SampleReadKeys.Prefix(partition, request.SeriesSet, request.SeriesId),
             request.MaxSamples, (key, value) =>
             {
-                var record = NativeSerialization.Deserialize<SampleRecord>(value);
+                var record = OrleansSerialization.Deserialize<SampleRecord>(value);
                 Validate(key, record, partition, request, sequence);
                 accumulator.Add(record);
                 return true;
@@ -35,7 +35,7 @@ internal static class SampleRollupFold
         {
             throw Errors.Fail(ErrorCode.Corruption, SampleRollupProtocol.Corrupt);
         }
-        var canonical = KeySpace.Partition(KeyLoad.Core.Features.ClusterRouting.Contracts.PartitionRecordFamilies.Sample, partition,
+        var canonical = KeySpace.Partition(KeyLoad.Core.Features.StoragePartitions.Contracts.PartitionRecordFamilies.Sample, partition,
             request.SeriesSet, request.SeriesId, record.Sample.Timestamp, record.Sequence);
         if (!key.SequenceEqual(canonical))
         {

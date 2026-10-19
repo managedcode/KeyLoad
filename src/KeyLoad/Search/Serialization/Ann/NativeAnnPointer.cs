@@ -1,7 +1,0 @@
-namespace KeyLoad.Server.Features.Search;
-
-[global::Orleans.GenerateSerializer, global::Orleans.Alias(NativeAnnProtocol.PointerAlias)]
-internal sealed record NativeAnnPointer(
-    [property: global::Orleans.Id(0)] int Version,
-    [property: global::Orleans.Id(1)] string GenerationLeaf,
-    [property: global::Orleans.Id(2)] byte[] ManifestSha256);

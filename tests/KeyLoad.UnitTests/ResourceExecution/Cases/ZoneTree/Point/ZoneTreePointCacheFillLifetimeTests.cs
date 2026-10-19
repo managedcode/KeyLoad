@@ -59,11 +59,11 @@ internal sealed class ZoneTreePointCacheFillLifetimeTests
         await Assert.That(completed.LiveEntries).IsEqualTo(1);
         await Assert.That(completed.ChargedEntries).IsEqualTo(1);
         await Assert.That(completed.Admissions).IsEqualTo(1L);
-        await Assert.That(completed.NativeLookups).IsEqualTo(2L);
+        await Assert.That(completed.RuntimeLookups).IsEqualTo(2L);
     }
 
     [Test]
-    public async Task PinnedLruVictimStaysChargedAndNewValueFallsBackToNative()
+    public async Task PinnedLruVictimStaysChargedAndNewValueFallsBackTo()
     {
         using var fixture = new ZoneTreePointCacheFileFixture();
         using var store = fixture.OpenStore(maxEntries: 1);
@@ -86,9 +86,9 @@ internal sealed class ZoneTreePointCacheFillLifetimeTests
         {
             await entered.Task.WaitAsync(WaitLimit, TimeProvider.System);
             var before = await Task.Run(store.GetPointCacheDiagnostics).WaitAsync(WaitLimit, TimeProvider.System);
-            var nativeValue = store.Read(view => view.ReadOwnedValue(KeyB));
+            var runtimeValue = store.Read(view => view.ReadOwnedValue(KeyB));
             var pressure = await Task.Run(store.GetPointCacheDiagnostics).WaitAsync(WaitLimit, TimeProvider.System);
-            await Assert.That(nativeValue).IsEquivalentTo(ValueB);
+            await Assert.That(runtimeValue).IsEquivalentTo(ValueB);
             await Assert.That(pressure.RetiredPinnedEntries).IsEqualTo(1);
             await Assert.That(pressure.AdmissionBypasses).IsEqualTo(before.AdmissionBypasses + 1);
             await Assert.That(pressure.RetainedBytes).IsEqualTo(before.RetainedBytes);

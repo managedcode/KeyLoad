@@ -19,7 +19,7 @@ internal static class SqlWriteClassifier
         var limits = KeyLoadClientExecutionOptions.SqlInspection(bounds);
         if (cancellationToken.IsCancellationRequested)
         {
-            return NativeCancelledSqlInspection.MayWrite(sql, bounds.SqlBudgetCheckInterval, limits);
+            return CancelledSqlInspection.MayWrite(sql, bounds.SqlBudgetCheckInterval, limits);
         }
         try
         {

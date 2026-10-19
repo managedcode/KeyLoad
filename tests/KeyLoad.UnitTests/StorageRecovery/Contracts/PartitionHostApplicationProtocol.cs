@@ -13,9 +13,9 @@ internal static class PartitionHostApplicationProtocol
     internal const long NextPosition = 1;
     internal const string OwnershipFile = "node.owner.lock";
     internal const string Separator = ":";
-    internal const string LockWasNotExclusive = "The original native node owner did not exclude a second acquisition.";
+    internal const string LockWasNotExclusive = "The original execution node owner did not exclude a second acquisition.";
     internal const string MissingFailure = "The real held node lock did not reject physical opening.";
-    internal const string IncompleteCut = "The complete native host cut exceeded the configured record bound.";
+    internal const string IncompleteCut = "The complete execution host cut exceeded the configured record bound.";
     internal static byte[] FirstKey => [0xFE, 0x31, 0x00];
     internal static byte[] FirstValue => [0x80, 0x00, 0x7F];
     internal static byte[] SecondKey => [0xFE, 0x32, 0x00];

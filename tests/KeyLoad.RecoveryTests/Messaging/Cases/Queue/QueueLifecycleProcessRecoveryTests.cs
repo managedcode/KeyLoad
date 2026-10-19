@@ -13,7 +13,7 @@ internal sealed class QueueLifecycleProcessRecoveryTests
     [Arguments(CommitStage.JournalFlushed)]
     [Arguments(CommitStage.MutationApplied)]
     [Arguments(CommitStage.ApplyCompleted)]
-    public Task CancelParkRedriveProcessKillHasOneCompleteNativeCutAndSameIdHealthyContinuation(CommitStage stage)
+    public Task CancelParkRedriveProcessKillHasOneCompleteCutAndSameIdHealthyContinuation(CommitStage stage)
         => MessagingCrashTrial.RunAsync(TrialPrefix, QueueLifecycleCrashProtocol.Mode, stage, FirstMutation,
             QueueLifecycleRecoveryAssertions.VerifyAsync, TestContext.Current!.Execution.CancellationToken);
 }

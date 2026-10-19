@@ -15,7 +15,7 @@ internal sealed class RelationalSqlClusterJoinCancellationTests(ClusterFixture f
     private const string QueryText = "SELECT l.key AS order_key, r.name AS customer_name, l.title AS customer_id "
         + "FROM agentrows AS l INNER JOIN joincustomers AS r ON l.title = r.id "
         + "ORDER BY l.key ASC LIMIT 10";
-    private const int QueryDialectVersion = 2;
+    private const int QueryDialectVersion = SqlOperationProtocol.DefaultQueryDialectVersion;
     private const string OrderId = "cancelled-join-order";
     private const string CustomerId = "cancelled-join-customer";
 

@@ -51,10 +51,10 @@ internal static class ResourceIncarnationLiteral
 
     internal static string CreationJson(Command<DatabaseCommand> original)
         => original.Value!.Kind == OperationKind.ConfigureResource ? RawCreate
-            : JsonSerializer.Serialize(NativeSerialization.Deserialize<CreateTableRequest>(original.Value.Input.Span), JsonDefaults.Options);
+            : JsonSerializer.Serialize(OrleansSerialization.Deserialize<CreateTableRequest>(original.Value.Input.Span), JsonDefaults.Options);
 
     internal static byte[] LifetimeKey(PartitionRef partition, string name = Table)
-        => KeyCodec.Encode("resource-lifetime-v1", partition.TenantId, partition.DatabaseId, name);
+        => KeyCodec.Encode("resource-lifetime", partition.TenantId, partition.DatabaseId, name);
 
     internal static string Row(long value) => "{\"id\":\"one\",\"value\":"
         + value.ToString(System.Globalization.CultureInfo.InvariantCulture) + ",\"secret\":\"kept\"}";

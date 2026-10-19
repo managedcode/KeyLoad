@@ -29,7 +29,7 @@ internal sealed record ChunkMultiblockReadByteRecipe(long FirstBytes, long Total
         var bytes = NoReadBytes;
         var present = view.ReadValue(key, value =>
         {
-            var payload = NativeSerialization.Deserialize<SampleChunkPayload>(value);
+            var payload = OrleansSerialization.Deserialize<SampleChunkPayload>(value);
             if (payload.RecordCount != expectedCount)
             {
                 throw new InvalidOperationException(CountMismatch);

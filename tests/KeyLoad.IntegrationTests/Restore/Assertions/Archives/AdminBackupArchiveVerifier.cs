@@ -10,7 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace KeyLoad.IntegrationTests.Features.BackupRestore.Helpers;
 
-/// <summary>Finds and restores an administrator backup through current native storage ownership.</summary>
+/// <summary>Finds and restores an administrator backup through current execution storage ownership.</summary>
 internal static class AdminBackupArchiveVerifier
 {
     private const string BackupDirectoryName = "backups";
@@ -72,8 +72,8 @@ internal static class AdminBackupArchiveVerifier
             await Assert.That(record.Deleted).IsFalse();
             var (verifiedIdentityAfterRestore, verifiedPositionAfterRestore) =
                 ZoneTreeStore.VerifyBackup(archiveDirectory, policy);
-            var unchangedIdentity = NativeSerialization.Serialize(verifiedIdentityAfterRestore).AsSpan()
-                .SequenceEqual(NativeSerialization.Serialize(originalIdentity));
+            var unchangedIdentity = OrleansSerialization.Serialize(verifiedIdentityAfterRestore).AsSpan()
+                .SequenceEqual(OrleansSerialization.Serialize(originalIdentity));
             await Assert.That(unchangedIdentity).IsTrue();
             await Assert.That(verifiedPositionAfterRestore).IsEqualTo(receipt.Position);
             var manifestDigestAfterRestore = await AdminBackupArchiveIntegrity.CaptureManifestDigestAsync(

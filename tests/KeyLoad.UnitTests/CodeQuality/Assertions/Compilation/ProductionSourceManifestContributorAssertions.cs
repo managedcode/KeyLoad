@@ -40,7 +40,7 @@ internal static class ProductionSourceManifestContributorAssertions
     private static readonly string[] Suites = [UnitSuite, RecoverySuite, ClusterSuite];
     private static readonly Dictionary<string, string> StrengthenedQueryOperations = new(StringComparer.Ordinal)
     {
-        [MismatchedLeafMethod] = "The invalid leaf/request partition is rejected as Validation before native reads; seeded valid data is then read through QueryEngine on the same ZoneTree database, with exact full EntityRef, projected JSON/revision and unchanged committed position.",
+        [MismatchedLeafMethod] = "The invalid leaf/request partition is rejected as Validation before execution reads; seeded valid data is then read through QueryEngine on the same ZoneTree database, with exact full EntityRef, projected JSON/revision and unchanged committed position.",
         [PartitionSetMethod] = "Empty, over-eight and null leaf sets remain Validation with unchanged position; an actual valid QueryEngine request on the seeded same database returns the expected full reference, projected JSON/revision, with position preserved.",
         [OwnershipMethod] = "A wrong server-owned physical tuple returns OwnershipLost with unchanged position, then the correct owner reads the exact row. A protected sort-field denial returns PermissionDenied with unchanged position; a valid same-reader query returns the visible projection and exact persisted-redaction metadata.",
         [InvalidRequestMethod] = "Default/empty/duplicate/over-eight/unsupported/version/AST inputs retain their typed errors and unchanged committed position on a seeded fixture; a valid same-fixture query then returns the complete expected page, full EntityRef, projected JSON and revision."

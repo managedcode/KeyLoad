@@ -16,7 +16,7 @@ internal sealed class EventProjectionInputTests
         var receipt = fixture.Apply(request);
         var originalVector = fixture.VectorBytes()!;
         var lineage = fixture.Lineage()!;
-        var nativeLineage = Encoding.UTF8.GetString(NativeSerialization.Serialize(lineage));
+        var runtimeLineage = Encoding.UTF8.GetString(OrleansSerialization.Serialize(lineage));
 
         var retry = fixture.Apply(request);
         var search = await fixture.SearchAsync();
@@ -29,9 +29,9 @@ internal sealed class EventProjectionInputTests
         await Assert.That(lineage.SourceDocumentRevision).IsEqualTo(1L);
         await Assert.That(lineage.InputField).IsEqualTo(EventProjectionFixture.InputField);
         await Assert.That(lineage.ReducerGeneration).IsEqualTo(1L);
-        await Assert.That(nativeLineage.Contains(EventProjectionFixture.Secret, StringComparison.Ordinal)).IsFalse();
-        await Assert.That(NativeSerialization.Serialize(retry).AsSpan()
-            .SequenceEqual(NativeSerialization.Serialize(receipt))).IsTrue();
+        await Assert.That(runtimeLineage.Contains(EventProjectionFixture.Secret, StringComparison.Ordinal)).IsFalse();
+        await Assert.That(OrleansSerialization.Serialize(retry).AsSpan()
+            .SequenceEqual(OrleansSerialization.Serialize(receipt))).IsTrue();
         await Assert.That(fixture.VectorBytes()!.SequenceEqual(originalVector)).IsTrue();
         await Assert.That(search.Select(result => result.Document.Reference.Id).ToArray())
             .IsEquivalentTo(new[] { EventProjectionFixture.TargetId }, CollectionOrdering.Matching);

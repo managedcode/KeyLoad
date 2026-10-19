@@ -5,12 +5,12 @@ namespace KeyLoad.Comparisons.Targets;
 internal static class KurrentCleanupLifetime
 {
     internal static Task[] StartDisposals(KurrentCleanupState state,
-        IReadOnlyList<KurrentDBClient> nativeClients, IReadOnlyList<HttpClient> httpClients)
+        IReadOnlyList<KurrentDBClient> runtimeClients, IReadOnlyList<HttpClient> httpClients)
     {
-        var disposals = new List<Task>(nativeClients.Count + httpClients.Count);
-        foreach (var client in nativeClients)
+        var disposals = new List<Task>(runtimeClients.Count + httpClients.Count);
+        foreach (var client in runtimeClients)
         {
-            disposals.Add(Task.Run(() => DisposeNativeAsync(state, client), CancellationToken.None));
+            disposals.Add(Task.Run(() => RuntimeDisposeAsync(state, client), CancellationToken.None));
         }
         foreach (var client in httpClients)
         {
@@ -62,12 +62,12 @@ internal static class KurrentCleanupLifetime
         }
         catch (Exception error)
         {
-            state.RecordFailure(error, KurrentCleanupStage.NativeDispose, disposal: true);
+            state.RecordFailure(error, KurrentCleanupStage.RuntimeDisposeCore, disposal: true);
             throw;
         }
     }
 
-    private static async Task DisposeNativeAsync(KurrentCleanupState state, KurrentDBClient client)
+    private static async Task RuntimeDisposeAsync(KurrentCleanupState state, KurrentDBClient client)
     {
         try
         {
@@ -75,7 +75,7 @@ internal static class KurrentCleanupLifetime
         }
         catch (Exception error)
         {
-            state.RecordFailure(error, KurrentCleanupStage.NativeDispose, disposal: true);
+            state.RecordFailure(error, KurrentCleanupStage.RuntimeDisposeCore, disposal: true);
             throw;
         }
     }

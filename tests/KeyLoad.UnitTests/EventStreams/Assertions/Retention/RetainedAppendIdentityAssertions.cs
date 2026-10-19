@@ -22,6 +22,6 @@ internal static class RetainedAppendIdentityAssertions
     internal static async Task ConservedAsync(ZoneTreeStore store, string[] image, long position, StoreIdentity identity)
     {
         await Assert.That(KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(store)).IsEquivalentTo(image, CollectionOrdering.Matching);
-        await NativeReadCutStoreStateAssertions.AssertIdentityAndPositionAsync(store, identity, position);
+        await ReadCutStoreStateAssertions.AssertIdentityAndPositionAsync(store, identity, position);
     }
 }

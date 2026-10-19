@@ -41,12 +41,12 @@ internal sealed class ZoneTreeCoordinatedPointCacheReadTests
             await Assert.That(warm).IsNotNull();
             await Assert.That(warm!.SequenceEqual(Value)).IsTrue();
             await Assert.That(afterCold.Admissions).IsEqualTo(1L);
-            await Assert.That(afterCold.NativeLookups).IsEqualTo(1L);
+            await Assert.That(afterCold.RuntimeLookups).IsEqualTo(1L);
             await Assert.That(afterIdempotentApply.Admissions).IsEqualTo(afterCold.Admissions);
             await Assert.That(afterIdempotentApply.RetainedBytes).IsEqualTo(afterCold.RetainedBytes);
-            await Assert.That(afterIdempotentApply.NativeLookups).IsEqualTo(afterCold.NativeLookups);
+            await Assert.That(afterIdempotentApply.RuntimeLookups).IsEqualTo(afterCold.RuntimeLookups);
             await Assert.That(afterWarm.Hits).IsEqualTo(1L);
-            await Assert.That(afterWarm.NativeLookups).IsEqualTo(1L);
+            await Assert.That(afterWarm.RuntimeLookups).IsEqualTo(1L);
             await Assert.That(afterWarm.RetainedBytes).IsEqualTo(afterCold.RetainedBytes);
         });
     }
@@ -75,7 +75,7 @@ internal sealed class ZoneTreeCoordinatedPointCacheReadTests
             await Assert.That(result).IsEqualTo(ZoneTreePointCacheControlResult.Applied);
             await Assert.That(after.Enabled).IsTrue();
             await Assert.That(after.Hits).IsEqualTo(before.Hits);
-            await Assert.That(after.NativeLookups).IsEqualTo(before.NativeLookups);
+            await Assert.That(after.RuntimeLookups).IsEqualTo(before.RuntimeLookups);
             await Assert.That(after.RetainedBytes).IsEqualTo(before.RetainedBytes);
             await Assert.That(warm).IsNotNull();
             await Assert.That(warm!.SequenceEqual(Value)).IsTrue();
@@ -85,7 +85,7 @@ internal sealed class ZoneTreeCoordinatedPointCacheReadTests
 
     [Test]
     [NotInParallel]
-    public async Task ExpiredWarmReceiptFallsBackToOneNativeReadWithIdenticalBytes()
+    public async Task ExpiredWarmReceiptFallsBackToOneReadWithIdenticalBytes()
     {
         using var fixture = new ZoneTreeCoordinatedPointCacheFileFixture();
         await fixture.RunAsync(async () =>
@@ -123,7 +123,7 @@ internal sealed class ZoneTreeCoordinatedPointCacheReadTests
             await Assert.That(expiredRevision).IsEqualTo(0);
             await Assert.That(expiredValue).IsNotNull();
             await Assert.That(expiredValue!.SequenceEqual(Value)).IsTrue();
-            await Assert.That(after.NativeLookups).IsEqualTo(warm.NativeLookups + 1);
+            await Assert.That(after.RuntimeLookups).IsEqualTo(warm.RuntimeLookups + 1);
             await Assert.That(after.Hits).IsEqualTo(warm.Hits);
             await Assert.That(after.Enabled).IsFalse();
         });

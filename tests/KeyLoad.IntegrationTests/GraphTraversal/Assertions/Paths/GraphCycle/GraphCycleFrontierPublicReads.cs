@@ -1,5 +1,5 @@
 using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.ClusterRouting;
+using KeyLoad.IntegrationTests.Features.OrleansExecution;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
 
 namespace KeyLoad.IntegrationTests.Features.GraphTraversal;
@@ -54,21 +54,21 @@ internal static class GraphCycleFrontierPublicReads
     private static async Task IncomingAsync(RequestCqrsClusterCallers admin, RequestCqrsClusterCallers reader,
         GraphCycleFrontierPublicState state, EntityRef vertex, CancellationToken token)
     {
-        var request = new ReadIncomingGraphEdgesRequestV1(1, vertex, state.Seed.Graph, 7);
+        var request = new ReadIncomingGraphEdgesRequest(1, vertex, state.Seed.Graph, 7);
         var expected = state.Edges.Where(edge => edge.To == vertex && (!state.Hidden || edge.From != state.A))
             .OrderBy(edge => edge.From.Collection, StringComparer.Ordinal).ThenBy(edge => edge.From.Id, StringComparer.Ordinal)
-            .ThenBy(edge => edge.Id, StringComparer.Ordinal).Select(edge => new GraphIncomingEdgeRowV1(edge, 0L)).ToArray();
+            .ThenBy(edge => edge.Id, StringComparer.Ordinal).Select(edge => new GraphIncomingEdgeRow(edge, 0L)).ToArray();
         var sdk = await McpCallerAssertions.SdkSuccessAsync(await global::KeyLoad.Client.GraphIncomingEdgesClient.IncomingEdgesAsync(
             reader.Sdk, request, token));
         await PageAsync(sdk, expected);
         await GraphCycleFrontierPublicCurrent.ObserveAsync(admin, state, token);
         var reply = await reader.Mcp.CallAsync(McpCallerTools.GraphIncomingEdges, request, token);
-        await PageAsync((await McpCallerAssertions.SuccessAsync<GraphIncomingEdgesPageV1>(reply)).Value, expected);
+        await PageAsync((await McpCallerAssertions.SuccessAsync<GraphIncomingEdgesPage>(reply)).Value, expected);
         await McpCallerAssertions.DoesNotDiscloseAsync(reply, state.Seed.Reader.Secret, GraphIncomingClusterScenario.PrivateMarker);
         await GraphCycleFrontierPublicCurrent.ObserveAsync(admin, state, token);
     }
 
-    private static async Task PageAsync(GraphIncomingEdgesPageV1 page, GraphIncomingEdgeRowV1[] rows)
+    private static async Task PageAsync(GraphIncomingEdgesPage page, GraphIncomingEdgeRow[] rows)
     {
         await SqlClusterProtocol.EqualAsync(rows, page.Rows.ToArray());
         await Assert.That(page.Version).IsEqualTo(1);

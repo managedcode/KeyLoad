@@ -7,7 +7,7 @@ namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 internal static class Neo4jHarnessChecks
 {
-    private const string SafeNativePrefix = "Neo4j:";
+    private const string SafePrefix = "Neo4j:";
 
     public static async Task VerifyAsync(string endpoint, string password, string image, CancellationToken cancellationToken)
     {
@@ -24,27 +24,27 @@ internal static class Neo4jHarnessChecks
         CancellationToken cancellationToken)
     {
         using var duplicate = await fixture.ProbeDuplicateConstraintAsync(cancellationToken);
-        var nativeCode = Neo4jQueryResponse.ReadNativeErrorCode(duplicate.Document.RootElement);
-        await Assert.That(!nativeCode.Contains(password, StringComparison.Ordinal)).IsTrue();
-        await Assert.That(!nativeCode.Contains(fixture.RunId, StringComparison.Ordinal)).IsTrue();
+        var runtimeCode = Neo4jQueryResponse.RuntimeReadErrorCode(duplicate.Document.RootElement);
+        await Assert.That(!runtimeCode.Contains(password, StringComparison.Ordinal)).IsTrue();
+        await Assert.That(!runtimeCode.Contains(fixture.RunId, StringComparison.Ordinal)).IsTrue();
         Console.WriteLine(string.Create(CultureInfo.InvariantCulture,
-            $"{Neo4jHarnessConstants.DuplicateHttpDiagnosticPrefix}{duplicate.StatusCode}{Neo4jHarnessConstants.NativeCodeDiagnosticSeparator}{nativeCode}"));
+            $"{Neo4jHarnessConstants.DuplicateHttpDiagnosticPrefix}{duplicate.StatusCode}{Neo4jHarnessConstants.CodeDiagnosticSeparator}{runtimeCode}"));
         await Assert.That(duplicate.StatusCode is Neo4jHarnessConstants.AcceptedStatusCode or Neo4jHarnessConstants.QueryErrorStatusCode).IsTrue();
         var error = duplicate.Document.RootElement.GetProperty(Neo4jHarnessConstants.ErrorsProperty)[0];
-        var nativeMessage = error.GetProperty(Neo4jHarnessConstants.ErrorMessageProperty).GetString() ?? string.Empty;
-        await Assert.That(nativeCode.Length > 0).IsTrue();
-        await Assert.That(nativeMessage.Length > 0).IsTrue();
+        var runtimeMessage = error.GetProperty(Neo4jHarnessConstants.ErrorMessageProperty).GetString() ?? string.Empty;
+        await Assert.That(runtimeCode.Length > 0).IsTrue();
+        await Assert.That(runtimeMessage.Length > 0).IsTrue();
         using var successful = JsonDocument.Parse(fixture.ConstraintAcknowledgementJson);
-        await Neo4jHarnessProtocolTests.VerifyAsync(successful.RootElement, duplicate.Document.RootElement, nativeCode);
-        await VerifyFailedTargetKeepsFixtureAsync(fixture, endpoint, password, image, nativeCode, nativeMessage, cancellationToken);
-        await VerifyRunnerSetupFailureAsync(fixture, endpoint, password, image, nativeCode, nativeMessage, cancellationToken);
+        await Neo4jHarnessProtocolTests.VerifyAsync(successful.RootElement, duplicate.Document.RootElement, runtimeCode);
+        await VerifyFailedTargetKeepsFixtureAsync(fixture, endpoint, password, image, runtimeCode, runtimeMessage, cancellationToken);
+        await VerifyRunnerSetupFailureAsync(fixture, endpoint, password, image, runtimeCode, runtimeMessage, cancellationToken);
     }
 
     private static async Task VerifyFailedTargetKeepsFixtureAsync(Neo4jHarnessSchemaFixture fixture, Uri endpoint,
-        string password, string image, string nativeCode, string nativeMessage, CancellationToken cancellationToken)
+        string password, string image, string runtimeCode, string runtimeMessage, CancellationToken cancellationToken)
     {
         using var client = Neo4jHarnessQueryClient.CreateClient(endpoint, password);
-        var target = new Neo4jTarget(client, fixture.RunId, image, NativeExecutionPolicyFixture.Lifecycle(), NativeExecutionPolicyFixture.Read());
+        var target = new Neo4jTarget(client, fixture.RunId, image, ExecutionPolicyFixture.Lifecycle(), ExecutionPolicyFixture.Read());
         await using (target)
         {
             ComparisonFailureException? failure = null;
@@ -58,8 +58,8 @@ internal static class Neo4jHarnessChecks
             }
 
             await Assert.That(failure is not null).IsTrue();
-            await Assert.That(failure!.Message == SafeNativePrefix + nativeCode).IsTrue();
-            await Assert.That(!failure.Message.Contains(nativeMessage, StringComparison.Ordinal)).IsTrue();
+            await Assert.That(failure!.Message == SafePrefix + runtimeCode).IsTrue();
+            await Assert.That(!failure.Message.Contains(runtimeMessage, StringComparison.Ordinal)).IsTrue();
             await Assert.That(!failure.Message.Contains(password, StringComparison.Ordinal)).IsTrue();
             await Assert.That(!failure.Message.Contains(fixture.RunId, StringComparison.Ordinal)).IsTrue();
         }
@@ -68,17 +68,17 @@ internal static class Neo4jHarnessChecks
     }
 
     private static async Task VerifyRunnerSetupFailureAsync(Neo4jHarnessSchemaFixture fixture, Uri endpoint,
-        string password, string image, string nativeCode, string nativeMessage, CancellationToken cancellationToken)
+        string password, string image, string runtimeCode, string runtimeMessage, CancellationToken cancellationToken)
     {
         using var client = Neo4jHarnessQueryClient.CreateClient(endpoint, password);
-        var target = new Neo4jTarget(client, fixture.RunId, image, NativeExecutionPolicyFixture.Lifecycle(), NativeExecutionPolicyFixture.Read());
+        var target = new Neo4jTarget(client, fixture.RunId, image, ExecutionPolicyFixture.Lifecycle(), ExecutionPolicyFixture.Read());
         await using (target)
         {
-            var session = new BenchmarkSession(target, NativeExecutionPolicyFixture.Read(),
+            var session = new BenchmarkSession(target, ExecutionPolicyFixture.Read(),
                 new BenchmarkSessionOptions { Records = 600, Operations = 100, Concurrency = 16 }, development: true);
             var load = await session.LoadAsync(cancellationToken);
             await Assert.That(load.Status).IsEqualTo("failed");
-            await Assert.That(load.Detail).IsEqualTo(SafeNativePrefix + nativeCode);
+            await Assert.That(load.Detail).IsEqualTo(SafePrefix + runtimeCode);
             await Assert.That(load.VerifiedRecords).IsEqualTo(0);
             await Assert.That(load.Lanes).IsEmpty();
             foreach (var operation in new Func<CancellationToken, Task<BenchmarkSessionCaseReport>>[]
@@ -91,7 +91,7 @@ internal static class Neo4jHarnessChecks
                 await Assert.That(report.Status).IsEqualTo("failed");
                 await Assert.That(report.Detail).IsEqualTo("LiveSessionPrerequisiteFailedOrNotExecuted");
                 await Assert.That(report.Lanes).IsEmpty();
-                await Assert.That(report.Detail!.Contains(nativeMessage, StringComparison.Ordinal)).IsFalse();
+                await Assert.That(report.Detail!.Contains(runtimeMessage, StringComparison.Ordinal)).IsFalse();
                 await Assert.That(report.Detail.Contains(password, StringComparison.Ordinal)).IsFalse();
                 await Assert.That(report.Detail.Contains(fixture.RunId, StringComparison.Ordinal)).IsFalse();
             }

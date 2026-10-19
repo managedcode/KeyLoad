@@ -35,12 +35,12 @@ internal static class CurrentSnapshotFenceAssertions
         var expected = new Dictionary<string, byte[]>(StringComparer.Ordinal);
         if (installed)
         {
-            expected.Add(Convert.ToHexString(KeyCodec.Encode("new")), NativeSerialization.Serialize("value"));
-            expected.Add(Convert.ToHexString(KeyCodec.Encode("system", "last-applied")), NativeSerialization.Serialize(8L));
+            expected.Add(Convert.ToHexString(KeyCodec.Encode("new")), OrleansSerialization.Serialize("value"));
+            expected.Add(Convert.ToHexString(KeyCodec.Encode("system", "last-applied")), OrleansSerialization.Serialize(8L));
         }
         if (healthy)
         {
-            expected.Add(Convert.ToHexString(KeyCodec.Encode("followup")), NativeSerialization.Serialize("current-fence"));
+            expected.Add(Convert.ToHexString(KeyCodec.Encode("followup")), OrleansSerialization.Serialize("current-fence"));
         }
         var rows = store.Read(view => view.Scan([], 4));
         await Assert.That(rows.HasMore).IsFalse();

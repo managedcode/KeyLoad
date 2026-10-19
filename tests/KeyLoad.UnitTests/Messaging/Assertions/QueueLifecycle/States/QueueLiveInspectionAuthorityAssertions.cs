@@ -41,8 +41,8 @@ internal static class QueueLiveInspectionAuthorityAssertions
             await Assert.That(inspection.HeadersJson).IsEqualTo(message.HeadersJson);
             var body = new MessageBody(message.MessageId, message.PayloadJson, message.HeadersJson, null, JsonData.Fingerprint(message));
             var key = KeySpace.Partition("message-body", lane.Partition, lane.Queue, message.MessageId);
-            await Assert.That(store.Read(view => view.ReadOwnedValue(key))!.SequenceEqual(NativeSerialization.Serialize(body))).IsTrue();
-            bytes += NativeSerialization.Serialize(body).LongLength;
+            await Assert.That(store.Read(view => view.ReadOwnedValue(key))!.SequenceEqual(OrleansSerialization.Serialize(body))).IsTrue();
+            bytes += OrleansSerialization.Serialize(body).LongLength;
             var family = scheduled ? "scheduled" : "ready";
             object deadline = scheduled ? message.NotBefore!.Value : 1L;
             await Assert.That(store.Read(view => view.GetRecord<string>(KeySpace.Partition(family, lane.Partition, lane.Queue,
@@ -51,7 +51,7 @@ internal static class QueueLiveInspectionAuthorityAssertions
         await Assert.That(QueueLeaseAuthoritySetup.Counters(store, lane)).IsEqualTo(new QueueCounters(2, bytes, 0, 0, 1));
         var replay = QueueWholeFlowStorage.Apply(owner, OperationKind.Batch, positive.Producer,
             positive.Producer.CommandId, state.Start);
-        await Assert.That(NativeSerialization.Serialize(replay).SequenceEqual(NativeSerialization.Serialize(positive.Result))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(replay).SequenceEqual(OrleansSerialization.Serialize(positive.Result))).IsTrue();
         await QueuePendingAuthorityHistory.SameAsync(store, before);
     }
 
@@ -108,7 +108,7 @@ internal static class QueueLiveInspectionAuthorityAssertions
         {
             var saved = Outcome(store, state, operation.CommandId)!;
             await Assert.That(saved.Incarnation).IsEqualTo(store.Identity.Incarnation);
-            await Assert.That(NativeSerialization.Serialize(saved.Result).SequenceEqual(NativeSerialization.Serialize(result))).IsTrue();
+            await Assert.That(OrleansSerialization.Serialize(saved.Result).SequenceEqual(OrleansSerialization.Serialize(result))).IsTrue();
             var replay = owner.Apply(operation);
             if (operation.Value!.Kind == OperationKind.Receive)
             {
@@ -118,14 +118,14 @@ internal static class QueueLiveInspectionAuthorityAssertions
             }
             else
             {
-                await Assert.That(NativeSerialization.Serialize(replay).SequenceEqual(NativeSerialization.Serialize(result))).IsTrue();
+                await Assert.That(OrleansSerialization.Serialize(replay).SequenceEqual(OrleansSerialization.Serialize(result))).IsTrue();
             }
         }
         var produced = QueueWholeFlowStorage.Apply(owner, OperationKind.Batch, state.Producer,
             state.Producer.CommandId, state.Start);
-        await Assert.That(NativeSerialization.Serialize(produced).SequenceEqual(NativeSerialization.Serialize(state.Produced))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(produced).SequenceEqual(OrleansSerialization.Serialize(state.Produced))).IsTrue();
         var producerOutcome = Outcome(store, state, state.Producer.CommandId)!;
-        await Assert.That(NativeSerialization.Serialize(producerOutcome.Result).SequenceEqual(NativeSerialization.Serialize(state.Produced))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(producerOutcome.Result).SequenceEqual(OrleansSerialization.Serialize(state.Produced))).IsTrue();
         await QueuePendingAuthorityHistory.SameAsync(store, before);
     }
 
@@ -152,7 +152,7 @@ internal static class QueueLiveInspectionAuthorityAssertions
             lane.Queue, sibling.MessageId)))).IsEqualTo(body);
         var replay = QueueWholeFlowStorage.Apply(owner, OperationKind.Batch, positive.Producer,
             positive.Producer.CommandId, state.Start);
-        await Assert.That(NativeSerialization.Serialize(replay).SequenceEqual(NativeSerialization.Serialize(positive.Result))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(replay).SequenceEqual(OrleansSerialization.Serialize(positive.Result))).IsTrue();
         await QueuePendingAuthorityHistory.SameAsync(store, damaged);
     }
 

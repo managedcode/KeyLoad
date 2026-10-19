@@ -47,7 +47,7 @@ internal sealed class IsolatedMutationCorpusTests
     }
 
     [Test]
-    public async Task AcIso005ExistingWriteInputsAndSharedHashRemainStableAcrossNativeCounts()
+    public async Task AcIso005ExistingWriteInputsAndSharedHashRemainStableAcrossCounts()
     {
         var data = new BenchmarkDataset(Microsoft.Extensions.Options.Options.Create(ComparisonHarnessInputs.Small));
         var expected = data.CreateDocument(data.Options.Documents + data.Options.Warmup);

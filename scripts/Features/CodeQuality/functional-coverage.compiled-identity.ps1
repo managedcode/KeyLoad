@@ -9,9 +9,9 @@ $script:FcCompiledIdentity = [ordered]@{
     InvalidDocument = 'A compiled source document is duplicated, unsupported or outside the owned checkout.'
     SourceDrift = 'Compiled source bytes do not match the current source inventory.'
     DeterministicPathMapPrefix = '/_/'
-    GeneratedDisposition = 'generated; retained native checksum, excluded from inventoried product-source binding'
+    GeneratedDisposition = 'generated; retained execution checksum, excluded from inventoried product-source binding'
     MissingDisposition = 'unmeasured; no portable-PDB document binds this source'
-    UninventoriedDisposition = 'unmeasured; native document is outside the declared source inventory'
+    UninventoriedDisposition = 'unmeasured; execution document is outside the declared source inventory'
 }
 $script:FcCompiledIdentityToolPath = $PSCommandPath
 
@@ -120,9 +120,9 @@ function Read-FcPdbDocuments([string] $Root, [object] $Reader, [string] $Compila
                 throw $script:FcCompiledIdentity.InvalidDocument
             }
         }
-        $disposition = if ($external) { 'external PDB document; retained native checksum, path replaced by bounded digest' }
+        $disposition = if ($external) { 'external PDB document; retained execution checksum, path replaced by bounded digest' }
             elseif ($generated) { $script:FcCompiledIdentity.GeneratedDisposition }
-            else { 'native source document' }
+            else { 'execution source document' }
         $documents.Add([ordered]@{ path = $path; sha256 = [Convert]::ToHexString($checksum).ToLowerInvariant(); generated = $generated; disposition = $disposition })
     }
     @($documents | Sort-Object path)
@@ -209,6 +209,6 @@ function Read-FcCompiledIdentity([string] $Root, [string] $Dll, [string] $Pdb, [
         mvid = $identity.mvid; pdbGuid = $identity.pdbGuid; pdbStamp = $identity.pdbStamp
         documents = $documents; sourceFilesWithoutPdbDocuments = $missing
         compiledSourceBindingComplete = $missing.Count -eq 0
-        qualification = 'static native identity inspection only; no test, coverage or build qualification'
+        qualification = 'static execution identity inspection only; no test, coverage or build qualification'
     }
 }

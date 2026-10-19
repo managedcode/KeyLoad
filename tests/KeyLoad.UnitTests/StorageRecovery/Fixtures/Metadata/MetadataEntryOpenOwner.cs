@@ -6,7 +6,7 @@ namespace KeyLoad.UnitTests.Features.StorageRecovery;
 /// <summary>Keeps the original metadata fixture quarantined after an uncertain inspection or store close.</summary>
 internal sealed class MetadataEntryOpenOwner
 {
-    private const string Unsettled = "The original metadata inspection or native store is not confirmed settled.";
+    private const string Unsettled = "The original metadata inspection or execution store is not confirmed settled.";
     private readonly StorageFailureOwnerLifetime stores = new();
     private bool IsInspectionUncertain
     {

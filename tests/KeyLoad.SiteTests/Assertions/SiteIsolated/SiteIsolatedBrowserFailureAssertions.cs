@@ -27,7 +27,7 @@ internal static class SiteIsolatedBrowserFailureAssertions
             await File.AppendAllTextAsync(projection, " ", token);
             await NavigateAndAssertFailureAsync(browser, token);
             await File.WriteAllBytesAsync(projection, projectionBytes, token);
-            // Two native click events overlap fetches; only the final owned generation may publish.
+            // Two execution click events overlap fetches; only the final owned generation may publish.
             await RetryAsync(browser.Chrome.Cdp, token);
             await SiteIsolatedBrowserAssertions.WaitAsync(browser.Chrome.Cdp, token);
         }

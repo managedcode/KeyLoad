@@ -120,7 +120,7 @@ internal sealed class GraphShortestPathBudgetTests
             MaxQueryReadBytes = readBytes,
             MaxBatchBytes = responseBytes
         };
-        var exactEngine = new DatabaseEngine(database.Store, database.Database.Authorization, UnitExecutionOptions.DatabaseLimits(exactLimits), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
+        var exactEngine = new DatabaseEngine(database.Store, database.Database.Authorization, UnitExecutionOptions.DatabaseLimits(exactLimits), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
         var exactBudget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(exactLimits));
         var exact = exactEngine.ShortestPath(GraphShortestPathTestSupport.RootPrincipal, request, exactBudget);
 

@@ -8,7 +8,7 @@ internal static class ExpectedCanonicalCommit
     {
         var placement = database.ReadAtomicPartitionPlacement(view, "root", partition);
         var applied = view.ReadOwnedValue(KeySpace.AppliedBytes) is { } bytes
-            ? NativeSerialization.Deserialize<long>(bytes) : 0L;
+            ? OrleansSerialization.Deserialize<long>(bytes) : 0L;
         return new(placement.Incarnation, partition.AtomicPartitionId, checked(applied + 1L));
     });
 }

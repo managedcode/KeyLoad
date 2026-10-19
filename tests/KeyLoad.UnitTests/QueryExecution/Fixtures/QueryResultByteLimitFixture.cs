@@ -10,7 +10,7 @@ internal static class QueryResultByteLimitFixture
     internal const string Right = "resultcustomers";
     private const string IdColumn = "id";
     internal const int ResultCap = 4_096;
-    internal const int NativeCap = 8_192;
+    internal const int RuntimeCap = 8_192;
     internal const int LargerCap = 16_384;
 
     internal static void Seed(TestDatabase database, int payloadCharacters)
@@ -44,7 +44,7 @@ internal static class QueryResultByteLimitFixture
         return new(database.Partition, new SelectQuery(Left, join ? "l" : null,
             join && !compact ? [projection, new("/payload", "right_payload", "r")] : [projection], null,
             [new("/id", false)], 2, InnerJoin: join ? new(Right, "r", "/customer_id", "/id") : null),
-            AllowFullScan: true, AstVersion: join ? 2 : 1);
+            AllowFullScan: true, AstVersion: SqlOperationProtocol.DefaultQueryDialectVersion);
     }
 
     internal static QueryRequest Sql(TestDatabase database, bool join, bool compact)
@@ -53,7 +53,7 @@ internal static class QueryResultByteLimitFixture
             : (join ? "l.payload AS payload, r.payload AS right_payload" : "payload AS payload");
         var from = join ? Left + " AS l INNER JOIN " + Right + " AS r ON l.customer_id = r.id" : Left;
         return new(database.Partition, "SELECT TOP (2) " + columns + " FROM " + from + " ORDER BY "
-            + (join ? "l.id" : "id") + " ASC", AllowFullScan: true, QueryDialectVersion: join ? 2 : 1);
+            + (join ? "l.id" : "id") + " ASC", AllowFullScan: true, QueryDialectVersion: SqlOperationProtocol.DefaultQueryDialectVersion);
     }
 
     internal static byte[] Sources(TestDatabase database)

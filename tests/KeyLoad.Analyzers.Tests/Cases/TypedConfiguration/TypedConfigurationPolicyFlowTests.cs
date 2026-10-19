@@ -4,7 +4,7 @@ namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
 internal sealed class TypedConfigurationPolicyFlowTests
 {
     [Test]
-    public async Task AnActuallyOmittedOptionalMethodDeadlineIsRejectedAtItsNativeSinkAsync()
+    public async Task AnActuallyOmittedOptionalMethodDeadlineIsRejectedAtItsSinkAsync()
     {
         const string source = """
             internal static class Subject
@@ -20,7 +20,7 @@ internal sealed class TypedConfigurationPolicyFlowTests
     }
 
     [Test]
-    public async Task AnActuallyOmittedConstructorDeadlineIsRejectedAtItsNativeSinkAsync()
+    public async Task AnActuallyOmittedConstructorDeadlineIsRejectedAtItsSinkAsync()
     {
         const string source = """
             internal sealed class Subject
@@ -106,7 +106,7 @@ internal sealed class TypedConfigurationPolicyFlowTests
     }
 
     [Test]
-    public async Task SourceCyclesDoNotInventAConstantAndNativeSentinelReturnsKeepTheirMeaningAsync()
+    public async Task SourceCyclesDoNotInventAConstantAndSentinelReturnsKeepTheirMeaningAsync()
     {
         const string source = """
             internal static class Subject

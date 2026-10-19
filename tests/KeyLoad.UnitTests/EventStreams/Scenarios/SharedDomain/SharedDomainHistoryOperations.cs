@@ -1,5 +1,7 @@
 using KeyLoad.Core;
-using KeyLoad.Core.Features.ClusterRouting.Contracts;
+using KeyLoad.Core.Features.CommandOutcomes.Contracts;
+using KeyLoad.Core.Features.RuntimeJournaling.Contracts;
+using KeyLoad.Core.Features.StoragePartitions.Contracts;
 using KeyLoad.Storage;
 using KeyLoad.UnitTests.Features.ResourceExecution;
 using ManagedCode.Communication;
@@ -19,27 +21,26 @@ internal static class SharedDomainHistoryOperations
         Command<DatabaseCommand> operation, Result<object> result)
     {
         var key = KeySpace.PartitionOutcome(partition, Writer, operation.CommandId);
-        var locator = KeySpace.OutcomeLocatorV2(partition, Writer, operation.CommandId);
-        var bytes = SharedDomainNativeImage.Required(store, key);
-        var pointer = SharedDomainNativeImage.Required(store, locator);
+        var locator = KeySpace.OutcomeLocator(partition, Writer, operation.CommandId);
+        var bytes = SharedDomainImage.Required(store, key);
+        var pointer = SharedDomainImage.Required(store, locator);
         await Assert.That(pointer.AsSpan().SequenceEqual(key)).IsTrue();
-        var outcome = NativeSerialization.Deserialize<StoredOutcome>(bytes);
+        var outcome = OrleansSerialization.Deserialize<StoredOutcome>(bytes);
         await Assert.That(outcome.Incarnation).IsEqualTo(store.Identity.Incarnation);
         await Assert.That(outcome.PolicyEpoch).IsEqualTo(state.PolicyEpoch);
         await Assert.That(outcome.ScopeKind).IsEqualTo(CommandOutcomeScopeKind.Partition);
         await Assert.That(outcome.Partition).IsEqualTo(partition);
         await Assert.That(outcome.Fingerprint.Length).IsEqualTo(FingerprintCharacters);
         await Assert.That(outcome.Fingerprint.All(char.IsAsciiHexDigit)).IsTrue();
-        await Assert.That(outcome.BlobAuthority).IsNull();
         await Assert.That(outcome.OnlineTextAuthority).IsNull();
         await Assert.That(outcome.RemoteTransferFailureAuthority).IsNull();
         if (result.Value is ReceiveResult)
         {
-            await NativeReplayResultAssertions.Same<ReceiveResult>(outcome.Result, result);
+            await ReplayResultAssertions.Same<ReceiveResult>(outcome.Result, result);
         }
         else if (Errors.Code(result.Problem) is null)
         {
-            await NativeReplayResultAssertions.Same<CommitReceipt>(outcome.Result, result);
+            await ReplayResultAssertions.Same<CommitReceipt>(outcome.Result, result);
         }
         else
         {
@@ -53,18 +54,18 @@ internal static class SharedDomainHistoryOperations
         foreach (var item in state.History)
         {
             token.ThrowIfCancellationRequested();
-            var before = SharedDomainNativeImage.Capture(store);
+            var before = SharedDomainImage.Capture(store);
             var position = store.Position;
             await ReleaseAsync(database, state, item, token);
-            await SharedDomainNativeImage.BytesAsync(store, item.OutcomeKey, item.OutcomeBytes);
-            await SharedDomainNativeImage.BytesAsync(store, item.LocatorKey, item.LocatorBytes);
-            await SharedDomainNativeImage.SameAsync(store, before, position);
+            await SharedDomainImage.BytesAsync(store, item.OutcomeKey, item.OutcomeBytes);
+            await SharedDomainImage.BytesAsync(store, item.LocatorKey, item.LocatorBytes);
+            await SharedDomainImage.SameAsync(store, before, position);
         }
     }
 
     private static async Task ReleaseAsync(DatabaseEngine database, SharedDomainState state, SharedDomainHistory item, CancellationToken token)
     {
-        var outcome = NativeSerialization.Deserialize<StoredOutcome>(item.OutcomeBytes);
+        var outcome = OrleansSerialization.Deserialize<StoredOutcome>(item.OutcomeBytes);
         if (state.Denied)
         {
             await SharedDomainValueAssertions.FailureAsync(database.ResolveOutcome(item.Operation), ErrorCode.PermissionDenied, ScopeDenied);
@@ -94,7 +95,7 @@ internal static class SharedDomainHistoryOperations
     {
         if (Errors.Code(expected.Problem) is null)
         {
-            await NativeReplayResultAssertions.Same<CommitReceipt>(actual, expected);
+            await ReplayResultAssertions.Same<CommitReceipt>(actual, expected);
         }
         else
         {

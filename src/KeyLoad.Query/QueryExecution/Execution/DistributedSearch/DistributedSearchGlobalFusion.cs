@@ -41,7 +41,7 @@ internal static class DistributedSearchGlobalFusion
             budget.Check();
             var revision = Revision(score.Reference, textCandidates, vectorCandidates, budget);
             var candidate = new GlobalBranchCandidate(score.Reference, revision, score.Score);
-            admission.Accept(NativeSerialization.Measure(candidate));
+            admission.Accept(OrleansSerialization.Measure(candidate));
             result.Add(candidate);
         }
         return result.MoveToImmutable();

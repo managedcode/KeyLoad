@@ -21,7 +21,7 @@ internal sealed class SqlInnerJoinBudgetTests
     private const string HealthySql = "SELECT TOP (10) l.order_id AS order_id, r.name AS name "
         + "FROM healthyorders AS l INNER JOIN customers AS r ON l.customer_id = r.id "
         + "ORDER BY l.order_id ASC";
-    private const int Dialect = 2;
+    private const int Dialect = SqlOperationProtocol.DefaultQueryDialectVersion;
     private const int ExactWork = 5;
     private const int ExpectedLeftRows = 3;
     private const int ExpectedRightProbes = 3;
@@ -73,7 +73,7 @@ internal sealed class SqlInnerJoinBudgetTests
             new PutDocument(Left, "z", "{\"order_id\":\"z\",\"customer_id\":\"z\"}"),
             new PutDocument(Right, "a", "{\"id\":\"a\",\"name\":\"Ada\"}"),
             new PutDocument(Right, "z", "{\"id\":\"z\",\"name\":\"Lin\"}"));
-        var measured = SqlInnerJoinNativeReadMeasurement.Measure(database, Left, Right,
+        var measured = SqlInnerJoinReadMeasurement.Measure(database, Left, Right,
             FirstCustomer, MissingCustomer, LastCustomer);
         var exactReadBytes = checked(measured.LeftScanBytes + measured.RightProbeBytes);
         var exact = Engine(database, database.Database.Limits with
@@ -195,7 +195,7 @@ internal sealed class SqlInnerJoinBudgetTests
         var owner = new DatabaseEngine(database.Store, database.Database.Authorization,
             UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(),
             UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(),
-            UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
+            UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
         return new(owner, UnitExecutionOptions.QueryExecution());
     }
 

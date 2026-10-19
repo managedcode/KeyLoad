@@ -5,6 +5,6 @@ namespace KeyLoad;
 /// <param name="ProjectId">Identifies the optional project.</param>
 /// <param name="TeamId">Optional tenant-scoped team identity requiring persisted membership.</param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.RowAccess)]
+[Orleans.Alias(ContractAliases.RowAccess)]
 public sealed record RowAccess([property: Orleans.Id(0)] string? OwnerId = null, [property: Orleans.Id(1)] string? ProjectId = null,
     [property: Orleans.Id(2)] string? TeamId = null);

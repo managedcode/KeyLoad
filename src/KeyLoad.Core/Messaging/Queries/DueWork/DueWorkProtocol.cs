@@ -10,7 +10,7 @@ internal static class DueWorkProtocol
     internal const string InvalidWakeInstant = "The due-work wake instant must be UTC.";
     internal const string InvalidCursor = "The due-work cursor is inconsistent.";
     internal const string KeyExceedsBound = "A due-work key exceeds the bounded cursor size.";
-    internal const string RangeBytesExceeded = "The due-work native range exceeds its fixed byte ceiling.";
+    internal const string RangeBytesExceeded = "The due-work execution range exceeds its fixed byte ceiling.";
     internal const string InvalidRecord = "A persisted due-work record is inconsistent.";
     internal const string DeadlineExceeded = "The due-work discovery deadline is exceeded.";
 }

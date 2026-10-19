@@ -43,7 +43,7 @@ internal static class QueueStrictHeadBodyAssertions
             }
             else if (operation.Value!.Kind is OperationKind.Batch or OperationKind.Delivery)
             {
-                await NativeReplayResultAssertions.Same<CommitReceipt>(owner.Apply(operation), result);
+                await ReplayResultAssertions.Same<CommitReceipt>(owner.Apply(operation), result);
             }
             else
             {

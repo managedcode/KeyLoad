@@ -16,11 +16,11 @@ internal static class QueueEmptyReceiveReplayWholeFlow
             await KeyLoad.Server.ServerFailureObserver.ObserveAsync(
                 () => CompleteAsync(fixture, failures, token), failures);
         }
-        catch (Exception error) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+        catch (Exception error) when (global::KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(error))
         {
             failures.Add(error);
         }
-        catch (Exception error) when (!global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+        catch (Exception error) when (!global::KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(error))
         {
             failures.Add(error);
         }
@@ -111,7 +111,7 @@ internal static class QueueEmptyReceiveReplayWholeFlow
             QueueLifecycleTestProtocol.BodySpace, state.Partition, state.Lane.Queue, literal.MessageId)))).IsEqualTo(body);
         await Assert.That(store.Read(view => view.GetRecord<QueueCounters>(KeySpace.Partition(
             QueueLifecycleTestProtocol.CounterSpace, state.Partition, state.Lane.Queue))))
-            .IsEqualTo(new QueueCounters(1, NativeSerialization.Serialize(body).LongLength, 0, 0, 2));
+            .IsEqualTo(new QueueCounters(1, OrleansSerialization.Serialize(body).LongLength, 0, 0, 2));
         await QueueLifecycleConditionAssertions.Same(store, before);
     }
 }

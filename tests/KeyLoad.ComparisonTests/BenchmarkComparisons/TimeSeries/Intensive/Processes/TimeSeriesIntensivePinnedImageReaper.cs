@@ -13,7 +13,7 @@ internal static class TimeSeriesIntensivePinnedImageReaper
         {
             Kill(process);
         }
-        catch (Exception kill) when (TimeSeriesIntensivePinnedImageFailure.IsNative(kill))
+        catch (Exception kill) when (TimeSeriesIntensivePinnedImageFailure.RuntimeIs(kill))
         {
             failure = kill;
         }
@@ -24,7 +24,7 @@ internal static class TimeSeriesIntensivePinnedImageReaper
         {
             await process.WaitForExitAsync(cleanup.Token);
         }
-        catch (Exception wait) when (failure is not null || TimeSeriesIntensivePinnedImageFailure.IsNative(wait))
+        catch (Exception wait) when (failure is not null || TimeSeriesIntensivePinnedImageFailure.RuntimeIs(wait))
         {
             failure ??= wait;
         }
@@ -46,7 +46,7 @@ internal static class TimeSeriesIntensivePinnedImageReaper
         }
         catch (InvalidOperationException) when (process.HasExited)
         {
-            // The owned native child exited during observation.
+            // The owned execution child exited during observation.
         }
         catch (Win32Exception) when (process.HasExited)
         {

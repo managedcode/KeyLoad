@@ -1,6 +1,6 @@
 namespace KeyLoad;
 
-/// <summary>Selects native maintenance of already committed canonical vectors.</summary>
+/// <summary>Selects execution maintenance of already committed canonical vectors.</summary>
 [global::Orleans.GenerateSerializer]
 [global::Orleans.Alias(AnnProjectionMaintenanceAliases.Profile)]
 public sealed record AnnProjectionMaintenanceProfile(

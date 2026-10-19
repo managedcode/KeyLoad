@@ -11,7 +11,7 @@ internal sealed class KeyLoadTimeSeriesIntensiveTopologyTests
     private const string PartitionKey = "partition";
 
     [Test]
-    public async Task AcTsi003OneAndThreeSiloInputsPreserveNativeMembershipObservations()
+    public async Task AcTsi003OneAndThreeSiloInputsPreserveMembershipObservations()
     {
         foreach (var count in new[] { 1, 3 })
         {
@@ -58,7 +58,7 @@ internal sealed class KeyLoadTimeSeriesIntensiveTopologyTests
     }
 
     [Test]
-    public async Task AcTsi003DashboardMustReportTheExpectedNativeSiloAndMembership()
+    public async Task AcTsi003DashboardMustReportTheExpectedSiloAndMembership()
     {
         var silos = Silos(3);
         var status = Statuses(silos)[0];

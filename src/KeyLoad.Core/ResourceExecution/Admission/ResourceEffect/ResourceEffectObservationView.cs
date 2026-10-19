@@ -6,8 +6,8 @@ namespace KeyLoad.Core.Features.ResourceExecution;
 internal class ResourceEffectObservationView(IKeyValueView inner, ResourceEffectBindingScope scope)
     : IKeyValueView, IResourceEffectObservation
 {
-    public void ObserveLifetime(ResourceLifetimeV1 lifetime) => scope.ObserveLifetime(lifetime);
-    public void ObserveResource(PartitionRef partition, ResourceLifetimeV1 lifetime) => scope.Observe(partition, lifetime);
+    public void ObserveLifetime(ResourceLifetime lifetime) => scope.ObserveLifetime(lifetime);
+    public void ObserveResource(PartitionRef partition, ResourceLifetime lifetime) => scope.Observe(partition, lifetime);
     public int MaximumRangeRecords => inner.MaximumRangeRecords;
 
     public byte[]? ReadOwnedValue(byte[] key)

@@ -19,7 +19,7 @@ internal sealed class AnnPublicPersistedCallerTests
             AnnSeedTestSupport.Persist(database, Denied, Capability.None, []);
             AnnSeedTestSupport.Persist(database, AnnSeedTestSupport.Principal, PublicRead,
                 [AnnSeedTestSupport.FieldUse], owner: AnnSeedTestSupport.Owner, restrictRows: true, policyEpoch: PublicPolicy);
-            var image = NativeAnnMaintenanceTestData.Snapshot(database);
+            var image = AnnMaintenanceTestData.Snapshot(database);
             var cut = database.Store.Position;
             var request = AnnPublicWholeFlow.Request(database, pin);
             var engine = AnnPublicWholeFlow.Engine(database, runtime);
@@ -39,7 +39,7 @@ internal sealed class AnnPublicPersistedCallerTests
             await AnnPublicWholeFlow.UnchangedAsync(database, image, cut);
             AnnSeedTestSupport.Persist(database, AnnSeedTestSupport.Principal, PublicRead,
                 [AnnSeedTestSupport.FieldUse], owner: RivalOwner, restrictRows: true, policyEpoch: ChangedPolicy);
-            image = NativeAnnMaintenanceTestData.Snapshot(database);
+            image = AnnMaintenanceTestData.Snapshot(database);
             cut = database.Store.Position;
             actual = await engine.ApproximateSearchAsync(AnnSeedTestSupport.Principal, request);
             await AnnPublicWholeFlow.PageAsync(actual, database, cut, AnnPageMode.Exact, empty: true);

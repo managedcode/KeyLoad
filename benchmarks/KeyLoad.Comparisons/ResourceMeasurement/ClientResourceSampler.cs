@@ -7,7 +7,7 @@ namespace KeyLoad.Comparisons;
 internal sealed class ClientResourceSampler : IAsyncDisposable
 {
     private readonly TimeProvider timeProvider;
-    private readonly NativeComparisonExecutionOptions settings;
+    private readonly ComparisonExecutionOptions settings;
     private const int NoResources = 0;
     private readonly System.Threading.Lock gate = new();
     private readonly Process process = Process.GetCurrentProcess();
@@ -17,7 +17,7 @@ internal sealed class ClientResourceSampler : IAsyncDisposable
     private readonly Task sampler;
     private long peak;
 
-    public ClientResourceSampler(IOptions<NativeComparisonExecutionOptions> options, TimeProvider? provider = null)
+    public ClientResourceSampler(IOptions<ComparisonExecutionOptions> options, TimeProvider? provider = null)
     {
         timeProvider = provider ?? TimeProvider.System;
         settings = options.Value;

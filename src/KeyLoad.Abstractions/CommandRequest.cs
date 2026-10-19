@@ -7,5 +7,5 @@ namespace KeyLoad;
 /// <param name="Partition">Identifies the atomic partition containing the resource.</param>
 /// <param name="Mutations">Lists committed mutation results or requested mutations.</param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.CommandRequest)]
+[Orleans.Alias(ContractAliases.CommandRequest)]
 public sealed record CommandRequest([property: Orleans.Id(0)] Guid CommandId, [property: Orleans.Id(1)] PartitionRef Partition, [property: Orleans.Id(2)] ImmutableArray<Mutation> Mutations);

@@ -3,6 +3,6 @@ namespace KeyLoad.RecoveryTests.Features.AnalyticsStore;
 internal sealed class UserAnalyticsDerivedProcessRecoveryTests
 {
     [Test]
-    public async Task KilledRealNativeGenerationReopensSamePhysicalRootPreservingCanonicalReceiptAndHealthyAnalytics()
+    public async Task KilledRealGenerationReopensSamePhysicalRootPreservingCanonicalReceiptAndHealthyAnalytics()
         => await UserAnalyticsDerivedProcessTrial.RunAsync(TestContext.Current!.Execution.CancellationToken);
 }

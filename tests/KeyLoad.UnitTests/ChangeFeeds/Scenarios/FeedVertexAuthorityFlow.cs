@@ -4,7 +4,7 @@ namespace KeyLoad.UnitTests.Features.ChangeFeeds;
 
 internal static class FeedVertexAuthorityFlow
 {
-    private const string MissingColdResult = "The completed native cold operation must retain its original result.";
+    private const string MissingColdResult = "The completed execution cold operation must retain its original result.";
 
     internal static async Task RunAsync(int? historicalFault = null)
     {

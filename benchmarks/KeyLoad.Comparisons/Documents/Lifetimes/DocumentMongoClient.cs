@@ -10,7 +10,7 @@ internal sealed class DocumentMongoClient : IAsyncDisposable
     private MongoSession? session;
     private Exception? primary;
     internal static async Task<IDocumentComparisonSession> OpenAsync(MongoTarget target, MongoClientSettings settings,
-        string databaseName, int graphDepth, IOptions<NativeComparisonExecutionOptions> options, CancellationToken token)
+        string databaseName, int graphDepth, IOptions<ComparisonExecutionOptions> options, CancellationToken token)
     {
         await using var owner = new DocumentMongoClient();
         try
@@ -20,7 +20,7 @@ internal sealed class DocumentMongoClient : IAsyncDisposable
         catch (Exception failure) { owner.primary = failure; throw; }
     }
     private async Task<IDocumentComparisonSession> AcquireAsync(MongoTarget target, MongoClientSettings settings,
-        string databaseName, int graphDepth, IOptions<NativeComparisonExecutionOptions> options, CancellationToken token)
+        string databaseName, int graphDepth, IOptions<ComparisonExecutionOptions> options, CancellationToken token)
     {
         var identity = Guid.NewGuid();
         settings.ApplicationName = DocumentProtocolText.KeyloadDocument + identity.ToString(DocumentProtocolText.N);
@@ -28,7 +28,7 @@ internal sealed class DocumentMongoClient : IAsyncDisposable
         var database = actual.GetDatabase(databaseName);
         _ = await database.RunCommandAsync<BsonDocument>(new BsonDocument(DocumentProtocolText.Ping, DocumentMeasurementValues.SingleItemCount), cancellationToken: token).ConfigureAwait(false);
         session = Session(target, database, graphDepth, options);
-        var result = new DocumentOwnedSession(session, identity, session.ReadCorpusAsync, () => ValueTask.CompletedTask, nativeClient: actual);
+        var result = new DocumentOwnedSession(session, identity, session.ReadCorpusAsync, () => ValueTask.CompletedTask, runtimeClient: actual);
         actual = null;
         session = null;
         return result;
@@ -36,17 +36,17 @@ internal sealed class DocumentMongoClient : IAsyncDisposable
     public async ValueTask DisposeAsync()
     {
         var cleanup = new List<Exception>();
-        if (session is not null && await NativeComparisonFailure.ObserveAsync(DisposeSessionAsync()).ConfigureAwait(false) is { } sessionFailure)
+        if (session is not null && await RuntimeComparisonFailure.ObserveAsync(DisposeSessionAsync()).ConfigureAwait(false) is { } sessionFailure)
         {
             cleanup.Add(sessionFailure);
         }
 
-        if (actual is not null && await NativeComparisonFailure.ObserveAsync(DisposeClientAsync()).ConfigureAwait(false) is { } clientFailure)
+        if (actual is not null && await RuntimeComparisonFailure.ObserveAsync(DisposeClientAsync()).ConfigureAwait(false) is { } clientFailure)
         {
             cleanup.Add(clientFailure);
         }
 
-        var combined = NativeComparisonFailure.Combine(primary, [.. cleanup]);
+        var combined = RuntimeComparisonFailure.Combine(primary, [.. cleanup]);
         if (cleanup.Count != DocumentMeasurementValues.NoObservedItems && combined is not null)
         {
             System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(combined).Throw();
@@ -59,7 +59,7 @@ internal sealed class DocumentMongoClient : IAsyncDisposable
         actual!.Dispose();
     }
     internal static async Task VerifyCopiesAsync(MongoTarget target, IEnumerable<IMongoClient> clients,
-        string databaseName, int graphDepth, IOptions<NativeComparisonExecutionOptions> options,
+        string databaseName, int graphDepth, IOptions<ComparisonExecutionOptions> options,
         DocumentComparisonSchedule schedule, CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(schedule);
@@ -81,7 +81,7 @@ internal sealed class DocumentMongoClient : IAsyncDisposable
         }
     }
     private static MongoSession Session(MongoTarget target, IMongoDatabase database, int graphDepth,
-        IOptions<NativeComparisonExecutionOptions> options) => new(target,
+        IOptions<ComparisonExecutionOptions> options) => new(target,
             database.GetCollection<BsonDocument>(MongoSchema.DocumentsCollection), database.GetCollection<BsonDocument>(MongoSchema.EdgesCollection),
-            database.GetCollection<BsonDocument>(MongoSchema.EventsCollection), graphDepth, DocumentMeasurementValues.NativeActualEnumeration, options);
+            database.GetCollection<BsonDocument>(MongoSchema.EventsCollection), graphDepth, DocumentMeasurementValues.ActualEnumeration, options);
 }

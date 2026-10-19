@@ -1,16 +1,16 @@
-using KeyLoad.AppHost.Features.ClusterReplication;
+using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.AppHost.Hosting;
 using Microsoft.Extensions.Configuration;
 
 namespace KeyLoad.AppHost.Features.TestInfrastructure;
 
-/// <summary>Admits native faults only for an explicit cold functional test topology.</summary>
+/// <summary>Admits execution faults only for an explicit cold functional test topology.</summary>
 [ConfigurationBinding]
 internal static class FunctionalColdReopenProfile
 {
     internal const string Setting = "KeyLoadTests:FunctionalColdReopen";
     internal const string EnabledArgument = "--KeyLoadTests:FunctionalColdReopen=true";
-    internal const string Invalid = "The functional cold-reopen selection requires explicit one or three silo native process faults.";
+    internal const string Invalid = "The functional cold-reopen selection requires explicit one or three silo execution process faults.";
     private const string FunctionalNodes = "KeyLoadTests:FunctionalNodeCount";
     private const string Enabled = "true";
     private const string Single = "1";

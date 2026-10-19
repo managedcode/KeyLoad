@@ -1,4 +1,6 @@
-using KeyLoad.Core.Features.ClusterRouting.Contracts;
+using KeyLoad.Core.Features.CommandOutcomes.Contracts;
+using KeyLoad.Core.Features.RuntimeJournaling.Contracts;
+using KeyLoad.Core.Features.StoragePartitions.Contracts;
 
 namespace KeyLoad.Core.Features.GraphTraversal.Serialization;
 
@@ -20,7 +22,7 @@ internal static class GraphCrossPartitionKeys
     internal static byte[] IntentEdgePrefix(PartitionRef source, string graph, string edgeId)
         => KeySpace.Partition(PartitionRecordFamilies.GraphCrossPartitionIntent, source, graph, edgeId);
 
-    internal static byte[] Intent(GraphCrossPartitionDeliveryIntentV1 intent)
+    internal static byte[] Intent(GraphCrossPartitionDeliveryIntent intent)
         => KeySpace.Partition(PartitionRecordFamilies.GraphCrossPartitionIntent, intent.SourcePartition, intent.Graph, intent.EdgeId,
             intent.Destination.Partition.TenantId, intent.Destination.Partition.DatabaseId,
             intent.Destination.Partition.TransactionDomainId, intent.Destination.Partition.PartitionKey,

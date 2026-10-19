@@ -8,7 +8,7 @@ internal sealed class TimeSeriesIntensiveObservedFailureTests
     [Test]
     public async Task AcTsi004OnTimeFailureKeepsTheOriginalExceptionAndFacts()
     {
-        foreach (var original in NativeErrors())
+        foreach (var original in RuntimeErrors())
         {
             var observed = TimeSeriesIntensiveObservedFailureException.Observe(TimeSeriesIntensiveOutcome.Succeeded, original);
             await Assert.That(observed).IsSameReferenceAs(original);
@@ -17,9 +17,9 @@ internal sealed class TimeSeriesIntensiveObservedFailureTests
     }
 
     [Test]
-    public async Task AcTsi004ObservedDeadlineKeepsTheOriginalNativeFailureFacts()
+    public async Task AcTsi004ObservedDeadlineKeepsTheOriginalFailureFacts()
     {
-        foreach (var original in NativeErrors())
+        foreach (var original in RuntimeErrors())
         {
             var observed = TimeSeriesIntensiveObservedFailureException.Observe(TimeSeriesIntensiveOutcome.DeadlineExceeded, original);
             await Assert.That(observed.InnerException).IsSameReferenceAs(original);
@@ -30,9 +30,9 @@ internal sealed class TimeSeriesIntensiveObservedFailureTests
     }
 
     [Test]
-    public async Task AcTsi004ObservedCallerCancellationKeepsTheOriginalNativeFacts()
+    public async Task AcTsi004ObservedCallerCancellationKeepsTheOriginalFacts()
     {
-        foreach (var original in NativeErrors())
+        foreach (var original in RuntimeErrors())
         {
             var observed = TimeSeriesIntensiveObservedFailureException.Observe(TimeSeriesIntensiveOutcome.Cancelled, original);
             await Assert.That(observed.InnerException).IsSameReferenceAs(original);
@@ -69,7 +69,7 @@ internal sealed class TimeSeriesIntensiveObservedFailureTests
     }
 
     [Test]
-    public async Task AcTsi004NestedObservationKeepsTheActualNativeCodeAndLatestOutcome()
+    public async Task AcTsi004NestedObservationKeepsTheActualCodeAndLatestOutcome()
     {
         var original = new KeyLoadException(ErrorCode.UnknownWriteOutcome, "private fixture detail", 503);
         var deadline = TimeSeriesIntensiveObservedFailureException.Observe(TimeSeriesIntensiveOutcome.DeadlineExceeded, original);
@@ -81,7 +81,7 @@ internal sealed class TimeSeriesIntensiveObservedFailureTests
     }
 
     [Test]
-    public async Task AcTsi004StandardConstructionRemainsUnexpectedWithoutInventedNativeFacts()
+    public async Task AcTsi004StandardConstructionRemainsUnexpectedWithoutInventedFacts()
     {
         foreach (var original in new[] { new TimeSeriesIntensiveObservedFailureException(),
             new TimeSeriesIntensiveObservedFailureException("private fixture detail"),
@@ -95,7 +95,7 @@ internal sealed class TimeSeriesIntensiveObservedFailureTests
     }
 
     [Test]
-    public async Task AcTsi004MalformedNativeCodeCannotEraseTheObservedDeadline()
+    public async Task AcTsi004MalformedCodeCannotEraseTheObservedDeadline()
     {
         var original = new PostgresException("private fixture detail", "ERROR", "ERROR", "xx000");
         var observed = TimeSeriesIntensiveObservedFailureException.Observe(TimeSeriesIntensiveOutcome.DeadlineExceeded, original);
@@ -107,7 +107,7 @@ internal sealed class TimeSeriesIntensiveObservedFailureTests
         await Assert.That(TimeSeriesIntensiveFailure.Capture(original).Outcome).IsEqualTo(TimeSeriesIntensiveOutcome.UnexpectedFailure);
     }
 
-    private static Exception[] NativeErrors() => [
+    private static Exception[] RuntimeErrors() => [
         new KeyLoadException(ErrorCode.UnknownWriteOutcome, "private fixture detail", 503),
         new PostgresException("private fixture detail", "ERROR", "ERROR", "23505"),
         new HttpRequestException("private fixture detail", null, System.Net.HttpStatusCode.BadGateway),

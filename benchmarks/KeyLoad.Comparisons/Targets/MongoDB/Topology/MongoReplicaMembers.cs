@@ -19,8 +19,8 @@ internal static class MongoReplicaMembers
         var set = status.GetValue(MongoSchema.ReplicaStatusSetField, BsonNull.Value);
         if (!set.IsString || string.IsNullOrWhiteSpace(set.AsString) || expectedSet is not null && set.AsString != expectedSet ||
             members.Length != nodes || members.Count(IsPrimary) != SingleNodeTopology || members.Count(IsSecondary) != nodes - AdjacentElementOffset ||
-            !NativeCountIs(status, MongoSchema.VotingMembersField, nodes) || !NativeCountIs(status, MongoSchema.WritableVotingMembersField, nodes) ||
-            !NativeCountIs(status, MongoSchema.VoteMajorityField, nodes / MajorityDivisor + MajorityVoteOffset) || !NativeCountIs(status, MongoSchema.WriteMajorityField, nodes / MajorityDivisor + MajorityVoteOffset) ||
+            !CountIs(status, MongoSchema.VotingMembersField, nodes) || !CountIs(status, MongoSchema.WritableVotingMembersField, nodes) ||
+            !CountIs(status, MongoSchema.VoteMajorityField, nodes / MajorityDivisor + MajorityVoteOffset) || !CountIs(status, MongoSchema.WriteMajorityField, nodes / MajorityDivisor + MajorityVoteOffset) ||
             members.Select(member => member[MongoSchema.MemberIdField].ToInt32()).Distinct().Count() != nodes ||
             members.Any(member => string.IsNullOrWhiteSpace(member[MongoSchema.MemberHostField].AsString)) ||
             members.Select(member => member[MongoSchema.MemberHostField].AsString).Distinct(StringComparer.OrdinalIgnoreCase).Count() != nodes)
@@ -54,7 +54,7 @@ internal static class MongoReplicaMembers
         => member.GetValue(MongoSchema.MemberHealthField).ToInt32() == MongoSchema.HealthyMemberValue
            && !member.GetValue(MongoSchema.MemberArbiterField, false).ToBoolean();
 
-    private static bool NativeCountIs(BsonDocument status, string field, int expected)
+    private static bool CountIs(BsonDocument status, string field, int expected)
     {
         var value = status.GetValue(field, BsonNull.Value);
         return (value.IsInt32 || value.IsInt64) && value.ToInt64() == expected;

@@ -77,7 +77,7 @@ internal static class SampleRollupProcessAssertions
             _ => throw new InvalidOperationException(SampleRollupCrashContract.Invalid)
         };
         await Assert.That(actual.Position).IsEqualTo(expectedPosition);
-        var receipt = NativeSerialization.Deserialize<CommitReceipt>(originalReceipt);
+        var receipt = OrleansSerialization.Deserialize<CommitReceipt>(originalReceipt);
         await Assert.That(receipt.CommandId).IsEqualTo(SampleRollupCrashContract.AcknowledgedId);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(SampleRollupCrashContract.Partition.AtomicPartitionId);
         var expectedToken = SampleChunkSnapshotFile.ReadExpectedToken(root, SampleRollupCrashContract.AcknowledgedId,
@@ -89,8 +89,8 @@ internal static class SampleRollupProcessAssertions
         await Assert.That(receipt.Mutations.Length).IsEqualTo(SampleRollupCrashContract.PositionStep);
         var expectedMutation = new MutationReceipt(SampleRollupProtocol.RefreshKind,
             SampleRollupCrashContract.Set, SampleRollupCrashContract.Series, InitialRevision);
-        await Assert.That(NativeSerialization.Serialize(receipt.Mutations[SampleRollupCrashContract.MutationIndex])
-            .SequenceEqual(NativeSerialization.Serialize(expectedMutation))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(receipt.Mutations[SampleRollupCrashContract.MutationIndex])
+            .SequenceEqual(OrleansSerialization.Serialize(expectedMutation))).IsTrue();
     }
 
     private static async Task<SampleRollupCrashSnapshot> ReadAsync(string root, string file, CancellationToken token)

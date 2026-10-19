@@ -47,5 +47,5 @@ namespace KeyLoad;
 [JsonDerivedType(typeof(CompareExchangeSaga), MutationDiscriminatorNames.CompareExchangeSaga)]
 [JsonDerivedType(typeof(ExpireSaga), MutationDiscriminatorNames.ExpireSaga)]
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.Mutation)]
+[Orleans.Alias(ContractAliases.Mutation)]
 public abstract record Mutation([property: Orleans.Id(0)] string Resource);

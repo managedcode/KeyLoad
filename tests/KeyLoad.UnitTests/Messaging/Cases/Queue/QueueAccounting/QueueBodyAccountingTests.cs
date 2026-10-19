@@ -116,7 +116,7 @@ internal sealed class QueueBodyAccountingTests
     [Test]
     [Arguments(false)]
     [Arguments(true)]
-    public async Task AcMp006_MissingAndMalformedStoredBodiesStillRejectThenRecover(bool nativeTruncation)
+    public async Task AcMp006_MissingAndMalformedStoredBodiesStillRejectThenRecover(bool runtimeTruncation)
     {
         using var db = new TestDatabase();
         db.Configure(QueueName, ResourceKind.WorkQueue);
@@ -127,7 +127,7 @@ internal sealed class QueueBodyAccountingTests
         var readyKey = db.Store.Read(view => view.Scan(ReadyPrefix(db), SingleReadyRecord).Records.Single().Key.ToArray());
         db.Store.Commit((tx, _) => { tx.Delete(key); return true; });
         await QueueBodyFailureAssertions.RejectWithoutEffects(db, lane, Guid.NewGuid(), key, readyKey, null);
-        var malformed = nativeTruncation ? original[..^1] : Encoding.UTF8.GetBytes(MalformedStoredJson);
+        var malformed = runtimeTruncation ? original[..^1] : Encoding.UTF8.GetBytes(MalformedStoredJson);
         db.Store.Commit((tx, _) => { tx.Put(key, malformed); return true; });
         var malformedId = Guid.NewGuid();
         await QueueBodyFailureAssertions.RejectWithoutEffects(db, lane, malformedId, key, readyKey, malformed);

@@ -19,8 +19,8 @@ internal static class TargetInboxCapacityAuthorityCold
             }, source.Store.Identity.NodeId, source.StorageExecution);
             await ServerFailureObserver.ObserveAsync(async () =>
             {
-                await Assert.That(NativeSerialization.Serialize(store.Identity).AsSpan()
-                    .SequenceEqual(NativeSerialization.Serialize(source.Store.Identity))).IsTrue();
+                await Assert.That(OrleansSerialization.Serialize(store.Identity).AsSpan()
+                    .SequenceEqual(OrleansSerialization.Serialize(source.Store.Identity))).IsTrue();
                 result = await operation(source.CreateConfiguredDatabase(store), store);
             }, failures);
         }, failures);

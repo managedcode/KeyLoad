@@ -12,7 +12,7 @@
     <SkipAutoProperties>False</SkipAutoProperties>
     <EnableDynamicManagedInstrumentation>False</EnableDynamicManagedInstrumentation>
     <EnableStaticManagedInstrumentation>True</EnableStaticManagedInstrumentation>
-    <EnableDynamicNativeInstrumentation>False</EnableDynamicNativeInstrumentation>
-    <EnableStaticNativeInstrumentation>False</EnableStaticNativeInstrumentation>
+    <EnableDynamicInstrumentation>False</EnableDynamicInstrumentation>
+    <EnableStaticInstrumentation>False</EnableStaticInstrumentation>
   </CodeCoverage>
 </Configuration>

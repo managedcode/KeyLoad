@@ -17,14 +17,14 @@ internal static class SubscriptionOldCutReplay
         {
             var bytes = QueueWholeFlowStorage.Bytes(store);
             var position = store.Position;
-            var identity = NativeReadCutStoreStateAssertions.SnapshotIdentity(store);
+            var identity = ReadCutStoreStateAssertions.SnapshotIdentity(store);
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 var key = KeySpace.PartitionOutcome(state.Group.Source.Partition, item.Key.UserId!, item.Key.CommandId);
                 var raw = store.Read(view => view.ReadOwnedValue(key))
                     ?? throw new InvalidOperationException("The original outcome is missing.");
                 var replay = database.Apply(item.Key);
-                var stored = NativeSerialization.Deserialize<StoredOutcome>(raw).Result;
+                var stored = OrleansSerialization.Deserialize<StoredOutcome>(raw).Result;
                 if (item.Key.Value!.Kind == OperationKind.SubscriptionProcessing)
                 {
                     await SameProcessingAsync(replay, item.Value);
@@ -32,8 +32,8 @@ internal static class SubscriptionOldCutReplay
                 }
                 else
                 {
-                    await NativeReplayResultAssertions.Same<CommitReceipt>(replay, item.Value);
-                    await NativeReplayResultAssertions.Same<CommitReceipt>(stored, item.Value);
+                    await ReplayResultAssertions.Same<CommitReceipt>(replay, item.Value);
+                    await ReplayResultAssertions.Same<CommitReceipt>(stored, item.Value);
                 }
                 await Assert.That(store.Read(view => view.ReadOwnedValue(key))!.AsSpan().SequenceEqual(raw)).IsTrue();
             }, failures);
@@ -44,7 +44,7 @@ internal static class SubscriptionOldCutReplay
     }
     private static async Task SameProcessingAsync(Result<object> actual, Result<object> expected)
     {
-        await NativeReplayResultAssertions.Same<SubscriptionProcessingResult>(actual, expected);
-        await NativeReplayResultAssertions.Same<CommitReceipt>(Result<object>.Succeed(actual.Get<SubscriptionProcessingResult>().Receipt), Result<object>.Succeed(expected.Get<SubscriptionProcessingResult>().Receipt));
+        await ReplayResultAssertions.Same<SubscriptionProcessingResult>(actual, expected);
+        await ReplayResultAssertions.Same<CommitReceipt>(Result<object>.Succeed(actual.Get<SubscriptionProcessingResult>().Receipt), Result<object>.Succeed(expected.Get<SubscriptionProcessingResult>().Receipt));
     }
 }

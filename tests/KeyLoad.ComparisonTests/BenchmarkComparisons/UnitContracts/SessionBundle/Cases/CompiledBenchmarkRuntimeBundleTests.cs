@@ -15,8 +15,8 @@ internal sealed class CompiledBenchmarkRuntimeBundleTests
     [Arguments("foreign-workspace")]
     [Arguments("foreign-dll")]
     [Arguments("foreign-pdb")]
-    [Arguments("foreign-native")]
-    [Arguments("missing-native")]
+    [Arguments("foreign-execution")]
+    [Arguments("missing-execution")]
     public async Task RuntimeAdmissionRejectsCorruptionAndPreservesTheOriginalHealthyIdentity(string variant)
     {
         var result = await SessionNodeProcess.RunAsync(
@@ -33,7 +33,7 @@ internal sealed class CompiledBenchmarkRuntimeBundleTests
     [Arguments("foreign-target")]
     [Arguments("stale-version")]
     [Arguments("arbitrary-link")]
-    public async Task NativeAspireBundleLinkIsOmittedWhileForeignRuntimeLinksAreRejected(string variant)
+    public async Task AspireBundleLinkIsOmittedWhileForeignRuntimeLinksAreRejected(string variant)
     {
         var result = await SessionNodeProcess.RunAsync(
             ["--input-type=module", "-e", CompiledBenchmarkRuntimeInventoryProgram.Program,

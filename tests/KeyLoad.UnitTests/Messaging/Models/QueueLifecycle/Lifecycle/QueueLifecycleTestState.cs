@@ -7,12 +7,12 @@ namespace KeyLoad.UnitTests.Features.Messaging;
 
 internal sealed record QueueLifecycleTestState(PartitionRef Partition, DateTimeOffset Time)
 {
-    internal Func<Command<DatabaseCommand>, Result<object>>? NativeSubmit
+    internal Func<Command<DatabaseCommand>, Result<object>>? RuntimeSubmit
     {
         get; init;
     }
     internal Result<object> SubmitOriginal(DatabaseEngine database, Command<DatabaseCommand> operation)
-        => NativeSubmit is { } submit ? submit(operation) : database.Apply(operation);
+        => RuntimeSubmit is { } submit ? submit(operation) : database.Apply(operation);
 
     internal QueueLaneRef Lane => new(Partition, QueueLifecycleTestProtocol.Queue);
     internal List<(Command<DatabaseCommand> Operation, Result<object> Result)> Successes { get; } = [];

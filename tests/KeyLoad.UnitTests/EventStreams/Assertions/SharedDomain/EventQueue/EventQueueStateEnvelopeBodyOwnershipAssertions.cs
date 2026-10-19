@@ -7,7 +7,7 @@ namespace KeyLoad.UnitTests.Features.EventStreams;
 
 internal static class EventQueueStateEnvelopeBodyOwnershipAssertions
 {
-    internal static async Task CallerBuffersCannotChangeNativeProducerBodiesAsync(EventQueueStateEnvelopeFixture fixture,
+    internal static async Task CallerBuffersCannotChangeProducerBodiesAsync(EventQueueStateEnvelopeFixture fixture,
         EventQueueStateEnvelopeState state)
     {
         var image = QueueWholeFlowStorage.Bytes(fixture.Store);

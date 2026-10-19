@@ -49,7 +49,7 @@ internal static class EventMessageSensitiveReplayContinuation
         var kind = state.Subscription ? OperationKind.SubscriptionDelivery : OperationKind.Delivery;
         var receipt = EventMessageSensitiveReplayOperations.Apply(database, kind, request, state.Caller, id, token).Get<CommitReceipt>();
         var replay = EventMessageSensitiveReplayOperations.Apply(database, kind, request, state.Caller, id, token).Get<CommitReceipt>();
-        await Assert.That(NativeSerialization.Serialize(replay).SequenceEqual(NativeSerialization.Serialize(receipt))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(replay).SequenceEqual(OrleansSerialization.Serialize(receipt))).IsTrue();
         var emptyId = Guid.NewGuid();
         var empty = EventMessageSensitiveReplayOperations.Apply(database, state.ReceiveKind,
             EventMessageSensitiveReplayOperations.Receive(state, emptyId, true), state.Caller, emptyId, token);

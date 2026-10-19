@@ -7,6 +7,6 @@ namespace KeyLoad;
 /// <param name="Start">The source position policy to apply.</param>
 /// <param name="Cursor">The position cursor when <paramref name="Start"/> is <see cref="SubscriptionStart.FromCursor"/>.</param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.SeekSubscriptionRequest)]
+[Orleans.Alias(ContractAliases.SeekSubscriptionRequest)]
 public sealed record SeekSubscriptionRequest([property: Orleans.Id(0)] Guid CommandId, [property: Orleans.Id(1)] SubscriptionRef Subscription, [property: Orleans.Id(2)] long ExpectedGeneration,
     [property: Orleans.Id(3)] SubscriptionStart Start, [property: Orleans.Id(4)] string? Cursor = null);

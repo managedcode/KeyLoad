@@ -34,7 +34,7 @@ internal sealed class SqlInnerJoinOrdinalOrderTests
             new PutDocument(Right, CustomerId, "{\"id\":\"customer\",\"name\":\"Name\"}"));
 
         var page = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution())
-            .Execute("root", new(database.Partition, Sql, AllowFullScan: true, QueryDialectVersion: 2));
+            .Execute("root", new(database.Partition, Sql, AllowFullScan: true, QueryDialectVersion: SqlOperationProtocol.DefaultQueryDialectVersion));
 
         await Assert.That(page.Rows.Select(row => row.EntityId).SequenceEqual([AstralId, PrivateUseId])).IsTrue();
     }

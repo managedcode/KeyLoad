@@ -51,7 +51,7 @@ public sealed partial class DatabaseEngine
         var removedBytes = NoRetainedBytes;
         var found = tx.ReadValue(key, value =>
         {
-            record = NativeSerialization.Deserialize<SourceEventRecord>(value);
+            record = OrleansSerialization.Deserialize<SourceEventRecord>(value);
             removedBytes = value.Length;
         }, budget.ObserveBytes);
         if (!found || record is null || record.Source != source || record.Position != position)
@@ -60,7 +60,7 @@ public sealed partial class DatabaseEngine
         }
         var identityKey = KeySpace.Partition(TopicEventIdKeySpace, source.Partition, source.Resource, source.Generation, record.Data.EventId);
         var indexedPosition = NoRetainedBytes;
-        if (!tx.ReadValue(identityKey, value => indexedPosition = NativeSerialization.Deserialize<long>(value), budget.ObserveBytes)
+        if (!tx.ReadValue(identityKey, value => indexedPosition = OrleansSerialization.Deserialize<long>(value), budget.ObserveBytes)
             || indexedPosition != position)
         {
             throw Errors.Fail(ErrorCode.Corruption, EventSourceRetainedHistoryDetail);

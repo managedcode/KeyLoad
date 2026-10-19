@@ -80,10 +80,10 @@ internal sealed class SampleRetentionClusterTests(ClusterFixture fixture)
         var request = new ReadSampleRetentionRequest(scenario.Partition, TimeSeriesClusterScenario.Set,
             TimeSeriesClusterScenario.Series);
         var actual = await McpCallerAssertions.SdkSuccessAsync(await reader.ReadSampleRetentionAsync(request, token));
-        var native = await McpCallerAssertions.SuccessAsync<SampleRetentionStatus>(
+        var execution = await McpCallerAssertions.SuccessAsync<SampleRetentionStatus>(
             await mcp.CallAsync(McpCallerTools.SeriesRetention, request, token));
         await Assert.That(actual).IsEqualTo(expected);
-        await Assert.That(native.Value).IsEqualTo(expected);
+        await Assert.That(execution.Value).IsEqualTo(expected);
     }
 
     private static async Task AssertSurvivorsAsync(KeyLoadClient reader, McpOfficialClient mcp,
@@ -92,11 +92,11 @@ internal sealed class SampleRetentionClusterTests(ClusterFixture fixture)
         var request = new ReadSamplesRequest(scenario.Partition, TimeSeriesClusterScenario.Set, TimeSeriesClusterScenario.Series,
             TimeSeriesClusterScenario.Start, TimeSeriesClusterScenario.Start.AddMinutes(5), 10);
         var samples = await McpCallerAssertions.SdkSuccessAsync(await reader.ReadSamplesAsync(request, token));
-        var native = await McpCallerAssertions.SuccessAsync<SampleRecord[]>(
+        var execution = await McpCallerAssertions.SuccessAsync<SampleRecord[]>(
             await mcp.CallAsync(McpCallerTools.SeriesRead, request, token));
         await Assert.That(samples.Select(sample => sample.Sample.EventId)).IsEquivalentTo(
             new[] { "retention-3", "retention-4" }, CollectionOrdering.Matching);
-        await Assert.That(native.Value.Select(sample => sample.Sample.EventId)).IsEquivalentTo(
+        await Assert.That(execution.Value.Select(sample => sample.Sample.EventId)).IsEquivalentTo(
             new[] { "retention-3", "retention-4" }, CollectionOrdering.Matching);
     }
 }

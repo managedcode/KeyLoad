@@ -3,7 +3,7 @@ namespace KeyLoad.Core.Features.Search;
 internal static class OnlineTextPublicationValidation
 {
     internal static void LocalSource(OnlineTextPublicationPhaseCommand command,
-        NativeTextSeedCapture current, NativeTextSeedCapture validated)
+        TextSeedCapture current, TextSeedCapture validated)
     {
         var source = command.Result.PublishedCut;
         if (command.Request.CommandId != command.Result.CommandId || command.SessionId == Guid.Empty

@@ -6,7 +6,7 @@ namespace KeyLoad.UnitTests.Features.Search;
 
 internal static class AnnSeedDigestOracle
 {
-    private const string Domain = "keyload.ann.seed.corpus.v1";
+    private const string Domain = "keyload.ann.seed.corpus";
     private static readonly UTF8Encoding StrictUtf8 = new(false, true);
 
     internal static string Compute(string field, VectorSpace space, IReadOnlyList<VectorRecord> records)

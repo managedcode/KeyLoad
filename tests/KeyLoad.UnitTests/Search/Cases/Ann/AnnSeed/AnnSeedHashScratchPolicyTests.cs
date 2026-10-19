@@ -18,7 +18,7 @@ internal sealed class AnnSeedHashScratchPolicyTests
     [Arguments(256)]
     [Arguments(257)]
     [Arguments(4096)]
-    public async Task NativeBoundScratchFitsMaximumIdentifiersAndPreservesIndependentCorpusAndAccountingAsync(int scratchBytes)
+    public async Task BoundScratchFitsMaximumIdentifiersAndPreservesIndependentCorpusAndAccountingAsync(int scratchBytes)
     {
         using var database = AnnSeedTestSupport.Create(0);
         var id = new string('é', 128);
@@ -63,7 +63,7 @@ internal sealed class AnnSeedHashScratchPolicyTests
     [Arguments(-1)]
     [Arguments(255)]
     [Arguments(4097)]
-    public async Task NativeBindingRejectsUnsafeScratchBeforeCaptureAsync(int scratchBytes)
+    public async Task BindingRejectsUnsafeScratchBeforeCaptureAsync(int scratchBytes)
     {
         var failure = Assert.ThrowsExactly<OptionsValidationException>(() => Bind(scratchBytes));
         await Assert.That(failure.OptionsName).IsEqualTo(Options.DefaultName);
@@ -76,7 +76,7 @@ internal sealed class AnnSeedHashScratchPolicyTests
     [Arguments(-1)]
     [Arguments(255)]
     [Arguments(4097)]
-    public async Task InvalidStandaloneScratchRejectsBeforeNativeReadAndWorkChargingAsync(int scratchBytes)
+    public async Task InvalidStandaloneScratchRejectsBeforeReadAndWorkChargingAsync(int scratchBytes)
     {
         using var database = AnnSeedTestSupport.Create(1);
         var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits));

@@ -54,7 +54,7 @@ internal sealed class OutboxPurgeTests
         database.Commit(new PutDocument("orders", "first", "{}"));
         var entryKey = EntryKey(database.Partition, 1);
         var bytes = database.Store.Read(view => view.ReadOwnedValue(entryKey)!);
-        var entry = NativeSerialization.Deserialize<OutboxEntry>(bytes);
+        var entry = OrleansSerialization.Deserialize<OutboxEntry>(bytes);
         var wrongPartition = entry with
         {
             Commit = entry.Commit with
@@ -64,7 +64,7 @@ internal sealed class OutboxPurgeTests
         };
         database.Store.Commit((transaction, _) =>
         {
-            transaction.Put(entryKey, NativeSerialization.Serialize(wrongPartition));
+            transaction.Put(entryKey, OrleansSerialization.Serialize(wrongPartition));
             return 0;
         });
         var before = database.Database.GetOutboxStatus("root", database.Partition).Head;
@@ -99,7 +99,7 @@ internal sealed class OutboxPurgeTests
 
         database.Store.Dispose();
         using var reopenedStore = new ZoneTreeStore(new(database.Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
-        var reopenedDatabase = new DatabaseEngine(reopenedStore, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
+        var reopenedDatabase = new DatabaseEngine(reopenedStore, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
         var recovered = reopenedDatabase.GetOutboxStatus("root", database.Partition).Head;
         await Assert.That(recovered).IsEqualTo(purged);
         var commandId = Guid.NewGuid();
@@ -192,13 +192,13 @@ internal sealed class OutboxPurgeTests
         else
         {
             var bytes = database.Store.Read(view => view.ReadOwnedValue(key)!);
-            var entry = NativeSerialization.Deserialize<OutboxEntry>(bytes) with
+            var entry = OrleansSerialization.Deserialize<OutboxEntry>(bytes) with
             {
                 Sequence = 3
             };
             database.Store.Commit((transaction, _) =>
             {
-                transaction.Put(key, NativeSerialization.Serialize(entry));
+                transaction.Put(key, OrleansSerialization.Serialize(entry));
                 return 0;
             });
         }

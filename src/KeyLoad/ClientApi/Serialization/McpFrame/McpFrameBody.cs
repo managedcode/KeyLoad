@@ -3,7 +3,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
 
-/// <summary>Owns a bounded private wire buffer through native protocol replay and response draining.</summary>
+/// <summary>Owns a bounded private wire buffer through execution protocol replay and response draining.</summary>
 internal sealed class McpFrameBody : IDisposable
 {
     private readonly MemoryStream buffer;
@@ -37,7 +37,7 @@ internal sealed class McpFrameBody : IDisposable
         }
     }
 
-    /// <summary>Gets the checked structural counts before native SDK parsing allocates its DOM.</summary>
+    /// <summary>Gets the checked structural counts before execution SDK parsing allocates its DOM.</summary>
     internal McpFrameShape Shape
     {
         get
@@ -62,9 +62,9 @@ internal sealed class McpFrameBody : IDisposable
     /// <param name="source">The actual request body stream; ownership stays with the caller.</param>
     /// <param name="declaredLength">The optional transport declaration, checked against actual bytes.</param>
     /// <param name="maximumBytes">The inclusive positive wire-byte ceiling.</param>
-    /// <param name="options">The centrally validated native MCP ingress and framing policy.</param>
+    /// <param name="options">The centrally validated execution MCP ingress and framing policy.</param>
     /// <param name="cancellationToken">Cancels the read without converting cancellation to a protocol failure.</param>
-    /// <returns>A private owner that clears its bytes after the native request and response drain.</returns>
+    /// <returns>A private owner that clears its bytes after the execution request and response drain.</returns>
     internal static async Task<McpFrameBody> ReadAsync(Stream source, long? declaredLength,
         int maximumBytes, IOptions<McpExecutionOptions> options, CancellationToken cancellationToken = default)
     {
@@ -88,7 +88,7 @@ internal sealed class McpFrameBody : IDisposable
         try
         {
             await ReadBoundedAsync(source, retained, checked((int)(declaredLength ?? maximumBytes)),
-                maximumBytes, !declaredLength.HasValue, settings.IngressScratchBytes, cancellationToken).ConfigureAwait(false);
+                maximumBytes, !declaredLength.HasValue, settings.IngressScratchBytes, cancellationToken);
             if (declaredLength.HasValue && declaredLength.Value != retained.Length)
             {
                 throw Errors.Fail(ErrorCode.Validation, McpFramingProtocol.InvalidFrame);
@@ -107,7 +107,7 @@ internal sealed class McpFrameBody : IDisposable
         }
     }
 
-    /// <summary>Rewinds native replay using a read-only view and closes any preceding view.</summary>
+    /// <summary>Rewinds execution replay using a read-only view and closes any preceding view.</summary>
     /// <returns>The current owner-managed reader; closing it does not close the private buffer.</returns>
     internal Stream OpenReader()
     {
@@ -146,7 +146,7 @@ internal sealed class McpFrameBody : IDisposable
                 cancellationToken.ThrowIfCancellationRequested();
                 var remaining = wireLimitBytes - retained.Length;
                 var count = checked((int)Math.Min(scratch.Length, remaining + RemainingStep));
-                var read = await source.ReadAsync(scratch.AsMemory(StartEmptyCount, count), cancellationToken).ConfigureAwait(false);
+                var read = await source.ReadAsync(scratch.AsMemory(StartEmptyCount, count), cancellationToken);
                 if (read == EmptyRead)
                 {
                     return;

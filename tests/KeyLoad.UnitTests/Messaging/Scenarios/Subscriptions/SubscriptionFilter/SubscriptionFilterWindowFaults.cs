@@ -16,7 +16,7 @@ internal static class SubscriptionFilterWindowFaults
         var prefix = KeySpace.Partition(SubscriptionFilterProtocol.Window, group.Source.Partition,
             group.Source.Resource, group.Source.Kind.ToString(), group.Source.StreamId,
             group.Source.Generation, group.GroupId, SubscriptionFilterProtocol.FirstGeneration);
-        var original = SubscriptionFilterNativeAssertions.Image(store, group.Source.Partition);
+        var original = SubscriptionFilterAssertions.Image(store, group.Source.Partition);
         var row = store.Read(view => view.Scan(prefix, SubscriptionFilterProtocol.WindowSize).Records.First());
         var wrong = KeySpace.Partition(SubscriptionFilterProtocol.Window, group.Source.Partition,
             group.Source.Resource, group.Source.Kind.ToString(), group.Source.StreamId,
@@ -25,16 +25,16 @@ internal static class SubscriptionFilterWindowFaults
             group.Source.Resource, group.Source.Kind.ToString(), group.Source.StreamId,
             group.Source.Generation, group.GroupId, SubscriptionFilterProtocol.FirstGeneration, ExcessPosition);
         store.Commit((tx, _) => { tx.Put(wrong, row.Value.ToArray()); return true; });
-        await SubscriptionFilterNativeAssertions.RefusedAsync(db, store, replacement with
+        await SubscriptionFilterAssertions.RefusedAsync(db, store, replacement with
         {
             CommandId = Guid.NewGuid()
         }, ErrorCode.Corruption, token);
         store.Commit((tx, _) => { tx.Put(excess, row.Value.ToArray()); return true; });
-        await SubscriptionFilterNativeAssertions.RefusedAsync(db, store, replacement with
+        await SubscriptionFilterAssertions.RefusedAsync(db, store, replacement with
         {
             CommandId = Guid.NewGuid()
         }, ErrorCode.Corruption, token);
         store.Commit((tx, _) => { tx.Delete(wrong); tx.Delete(excess); return true; });
-        await Assert.That(SubscriptionFilterNativeAssertions.Image(store, group.Source.Partition)).IsEquivalentTo(original, CollectionOrdering.Matching);
+        await Assert.That(SubscriptionFilterAssertions.Image(store, group.Source.Partition)).IsEquivalentTo(original, CollectionOrdering.Matching);
     }
 }

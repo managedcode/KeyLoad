@@ -6,7 +6,7 @@ namespace KeyLoad.UnitTests.Features.EventStreams;
 internal sealed class TopicRetentionOperationTests
 {
     [Test]
-    public async Task AcEventRetention001PinsAtomicPurgeReplayAndNativeReopenKeepEveryOtherModel()
+    public async Task AcEventRetention001PinsAtomicPurgeReplayAndReopenKeepEveryOtherModel()
     {
         using var fixture = new TopicRetentionFixture();
         await Assert.That(fixture.Database.GetSubscription("root", fixture.First).Checkpoint).IsEqualTo(1L);
@@ -24,7 +24,7 @@ internal sealed class TopicRetentionOperationTests
         await Assert.That(receipt.Mutations.Single()).IsEqualTo(new MutationReceipt("purgeTopic", "topic", "2", 2));
         await Assert.That(TopicRetentionAssertions.ProtectedBytes(fixture)).IsEquivalentTo(protectedState, CollectionOrdering.Matching);
         await TopicRetentionAssertions.RetainedTail(fixture);
-        await TopicRetentionNativeState.VerifyAsync(fixture);
+        await TopicRetentionState.VerifyAsync(fixture);
         var cut = fixture.Store.Position;
         var snapshot = QueueWholeFlowStorage.Bytes(fixture.Store);
         var replay = fixture.Submit(command).Get<CommitReceipt>();
@@ -34,7 +34,7 @@ internal sealed class TopicRetentionOperationTests
         fixture.Reopen();
         await Assert.That(QueueWholeFlowStorage.Bytes(fixture.Store)).IsEquivalentTo(snapshot, CollectionOrdering.Matching);
         await TopicRetentionAssertions.RetainedTail(fixture);
-        await TopicRetentionNativeState.VerifyAsync(fixture);
+        await TopicRetentionState.VerifyAsync(fixture);
         await Assert.That(fixture.Database.GetSubscription("root", fixture.First).Checkpoint).IsEqualTo(3L);
         await Assert.That(fixture.Database.GetSubscription("root", fixture.Second).Checkpoint).IsEqualTo(3L);
         var reopenedReplay = fixture.Submit(command).Get<CommitReceipt>();

@@ -5,9 +5,9 @@ using NpgsqlTypes;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons.TimeSeries.Intensive;
 
-/// <summary>Preserves the actual native Timescale ownership checks for future family integration.</summary>
+/// <summary>Preserves the actual execution Timescale ownership checks for future family integration.</summary>
 /// <remarks>Pending: the retired TimeSeries Aspire benchmark caller no longer invokes this helper.
-/// The session-v1 PostgreSQL image is pgvector, so it cannot qualify this Timescale-only behavior.</remarks>
+/// The session PostgreSQL image is pgvector, so it cannot qualify this Timescale-only behavior.</remarks>
 internal static class TimescaleTimeSeriesIntensiveSchemaAtomicityChecks
 {
     private const string SchemaExistsSql = "SELECT EXISTS(SELECT 1 FROM pg_catalog.pg_namespace WHERE nspname = $1)";
@@ -15,14 +15,14 @@ internal static class TimescaleTimeSeriesIntensiveSchemaAtomicityChecks
     private const string HealthySuffix = "-healthy";
     private const string CurrentRoleSql = "SELECT current_user";
 
-    /// <summary>AC-TSI-003: genuine native installer denial must roll back CREATE SCHEMA.</summary>
+    /// <summary>AC-TSI-003: genuine execution installer denial must roll back CREATE SCHEMA.</summary>
     internal static async Task VerifyAsync(string connectionString, CancellationToken token)
     {
         await using var fixture = await TimescaleTimeSeriesIntensiveSchemaFailureFixture.CreateAsync(connectionString, token)
             .ConfigureAwait(false);
         try
         {
-            await VerifyNativeDenialAsync(fixture, token).ConfigureAwait(false);
+            await VerifyDenialAsync(fixture, token).ConfigureAwait(false);
             await VerifyHealthyFollowupAsync(fixture, token).ConfigureAwait(false);
         }
         catch (Exception error)
@@ -32,7 +32,7 @@ internal static class TimescaleTimeSeriesIntensiveSchemaAtomicityChecks
         }
     }
 
-    private static async Task VerifyNativeDenialAsync(TimescaleTimeSeriesIntensiveSchemaFailureFixture fixture,
+    private static async Task VerifyDenialAsync(TimescaleTimeSeriesIntensiveSchemaFailureFixture fixture,
         CancellationToken token)
     {
         await using var observer = new NpgsqlConnection(fixture.PrivilegedConnectionString);
@@ -49,7 +49,7 @@ internal static class TimescaleTimeSeriesIntensiveSchemaAtomicityChecks
         }
         var schema = TimescaleSchemaLifecycle.SchemaName(fixture.RunId);
         var ownerId = Guid.NewGuid();
-        var denial = await CaptureNativeDenialAsync(fixture.RestrictedConnectionString, schema, ownerId, token)
+        var denial = await CaptureDenialAsync(fixture.RestrictedConnectionString, schema, ownerId, token)
             .ConfigureAwait(false);
         await Assert.That(denial).IsNotNull();
         await Assert.That(denial!.SqlState).IsEqualTo(PostgresErrorCodes.InsufficientPrivilege);
@@ -78,7 +78,7 @@ internal static class TimescaleTimeSeriesIntensiveSchemaAtomicityChecks
         return await command.ExecuteScalarAsync(token).ConfigureAwait(false) is true;
     }
 
-    private static async Task<PostgresException?> CaptureNativeDenialAsync(string connectionString,
+    private static async Task<PostgresException?> CaptureDenialAsync(string connectionString,
         string schema, Guid ownerId, CancellationToken token)
     {
         try

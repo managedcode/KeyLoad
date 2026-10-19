@@ -35,7 +35,7 @@ internal static class DistributedSearchCandidateWindow
                 throw Errors.Fail(ErrorCode.HistoryUnavailable, MissingDocument);
             }
             var candidate = new GlobalBranchCandidate(document.Reference, document.Revision, score.Score);
-            admission.Accept(NativeSerialization.Measure(candidate));
+            admission.Accept(OrleansSerialization.Measure(candidate));
             candidates.Add(candidate);
         }
         var result = new GlobalBranchWindow(branchName, kind, sourceWindowId, scope,

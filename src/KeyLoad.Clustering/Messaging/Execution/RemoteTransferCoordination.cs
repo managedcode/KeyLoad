@@ -78,7 +78,7 @@ internal static class RemoteTransferCoordination
         RemoteTransferCoordinationHint hint, CancellationToken token)
     {
         var source = await execution.ReadAsync<QueueTransferInspection>(hint.PrincipalId, GrainReadKind.QueueTransfer,
-            NativeSerialization.Serialize(new InspectQueueTransferRequest(hint.Source, hint.TransferId)), token).ConfigureAwait(true);
+            OrleansSerialization.Serialize(new InspectQueueTransferRequest(hint.Source, hint.TransferId)), token).ConfigureAwait(true);
         if (source is not null && (source.SourceQueue != hint.Source || source.Destination != hint.Destination
             || source.TransferId != hint.TransferId || RemoteTransferCoordinationIdentity.IntentDigest(source.IntentToken) != hint.IntentDigest))
         {
@@ -91,7 +91,7 @@ internal static class RemoteTransferCoordination
         RemoteTransferCoordinationHint hint, CancellationToken token)
     {
         var receipt = await execution.ReadAsync<QueueTransferReceiptInspection>(hint.PrincipalId, GrainReadKind.QueueTransferReceipt,
-            NativeSerialization.Serialize(new InspectQueueTransferReceiptRequest(hint.Destination, hint.Source, hint.TransferId)), token).ConfigureAwait(true);
+            OrleansSerialization.Serialize(new InspectQueueTransferReceiptRequest(hint.Destination, hint.Source, hint.TransferId)), token).ConfigureAwait(true);
         if (receipt is not null && (receipt.SourceQueue != hint.Source || receipt.DestinationQueue != hint.Destination || receipt.TransferId != hint.TransferId))
         {
             throw Errors.Fail(ErrorCode.Corruption, RemoteTransferCoordinationProtocol.InvalidResult);

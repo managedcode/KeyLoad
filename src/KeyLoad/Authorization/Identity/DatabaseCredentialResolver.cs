@@ -3,10 +3,10 @@ using KeyLoad.Diagnostics.Features.ResourceExecution;
 
 namespace KeyLoad.Server;
 
-/// <summary>Resolves the current persisted identity through the native signed authentication read.</summary>
+/// <summary>Resolves the current persisted identity through the execution signed authentication read.</summary>
 internal static class DatabaseCredentialResolver
 {
-    /// <summary>Fetches the owned native principal envelope without publishing an operation execution identity.</summary>
+    /// <summary>Fetches the owned execution principal envelope without publishing an operation execution identity.</summary>
     /// <param name="context">The actual authenticated public request and services.</param>
     /// <param name="executionObserver">The optional borrowed execution observer; no credentials are exposed.</param>
     /// <returns>The current persisted principal reply, decoded by the owning adapter.</returns>
@@ -39,7 +39,7 @@ internal static class DatabaseCredentialResolver
                     executionObserver.Started(context.TraceIdentifier, requestId);
                     observedExecution = true;
                 }
-            }).ConfigureAwait(false);
+            });
             outcome = DatabasePhaseOutcome.Completed;
         }
         catch (Exception failure) when (failure is OperationCanceledException or KeyLoadException { Code: ErrorCode.Cancelled })

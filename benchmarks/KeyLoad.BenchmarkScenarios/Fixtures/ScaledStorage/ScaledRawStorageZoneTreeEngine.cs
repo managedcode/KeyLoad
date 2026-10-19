@@ -50,7 +50,7 @@ internal sealed class ScaledRawStorageZoneTreeEngine : IDisposable
 
     public string? Directory => _directory;
 
-    internal ZoneTreeOptions<Memory<byte>, Memory<byte>> CloneNativeOptions()
+    internal ZoneTreeOptions<Memory<byte>, Memory<byte>> RuntimeCloneOptions()
         => _tree!.Maintenance.CloneOptions();
 
     public bool TryRead(int index, out ReadOnlyMemory<byte> value)
@@ -84,7 +84,7 @@ internal sealed class ScaledRawStorageZoneTreeEngine : IDisposable
         GC.KeepAlive(_arena);
     }
 
-    public ScaledRawStorageNativeSnapshot Capture()
+    public RuntimeScaledRawStorageSnapshot Capture()
     {
         const int EmptyReadOnlySegmentsCount = 0;
         const int EmptyReadOnlySegmentsRecordCount = 0;
@@ -100,7 +100,7 @@ internal sealed class ScaledRawStorageZoneTreeEngine : IDisposable
             throw new InvalidOperationException(ResidenceMessage);
         }
 
-        return new ScaledRawStorageNativeSnapshot(resident);
+        return new RuntimeScaledRawStorageSnapshot(resident);
     }
 
     public void Dispose()

@@ -14,8 +14,8 @@ internal static class EventMessageSensitiveReplayProtocol
     internal const string SecretPath = "/secret";
     internal const string Classification = "private-sensitive";
     internal const string EventType = "SensitiveInput";
-    internal const string Payload = "{\"public\":{\"items\":[1,null,2]},\"secret\":\"SENSITIVE_BODY_NATIVE_CANARY\"}";
-    internal const string Headers = "{\"public\":\"correlation\",\"secret\":\"SENSITIVE_HEADER_NATIVE_CANARY\"}";
+    internal const string Payload = "{\"public\":{\"items\":[1,null,2]},\"secret\":\"SENSITIVE_BODY__CANARY\"}";
+    internal const string Headers = "{\"public\":\"correlation\",\"secret\":\"SENSITIVE_HEADER__CANARY\"}";
     internal const string RedactedPayload = "{\"public\":{\"items\":[1,null,2]}}";
     internal const string RedactedHeaders = "{\"public\":\"correlation\"}";
     internal const string MissingPath = "/absent";

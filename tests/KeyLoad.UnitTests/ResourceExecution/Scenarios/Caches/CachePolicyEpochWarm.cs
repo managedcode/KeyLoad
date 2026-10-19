@@ -59,11 +59,11 @@ internal static class CachePolicyEpochWarm
                 }, failures);
             }
         }
-        catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        catch (Exception failure) when (CqrsBoundaryErrors.IsNonFatal(failure))
         {
             failures.Add(failure);
         }
-        catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        catch (Exception failure) when (!CqrsBoundaryErrors.IsNonFatal(failure))
         {
             failures.Add(failure);
         }
@@ -94,11 +94,11 @@ internal static class CachePolicyEpochWarm
                 }, failures);
             }
         }
-        catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        catch (Exception failure) when (CqrsBoundaryErrors.IsNonFatal(failure))
         {
             failures.Add(failure);
         }
-        catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        catch (Exception failure) when (!CqrsBoundaryErrors.IsNonFatal(failure))
         {
             failures.Add(failure);
         }

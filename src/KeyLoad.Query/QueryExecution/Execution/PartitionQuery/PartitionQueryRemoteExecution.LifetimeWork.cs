@@ -6,8 +6,8 @@ namespace KeyLoad.Query.Features.QueryExecution;
 
 internal static partial class PartitionQueryRemoteExecution
 {
-    internal static Task<PartitionQueryPageV1> ExecuteBoundAsync(QueryEngine engine, PartitionQueryRequestV1 request,
-        Func<PartitionQueryLeafPlanV1, ReadExecutionBudgetReadGrant, ReadExecutionBudget, CancellationToken,
+    internal static Task<PartitionQueryPage> ExecuteBoundAsync(QueryEngine engine, PartitionQueryRequest request,
+        Func<PartitionQueryLeafPlan, ReadExecutionBudgetReadGrant, ReadExecutionBudget, CancellationToken,
             Task<PartitionQueryPreparedLeaf>> prepare,
         Func<CancellationToken, Task> revalidate, TimeProvider clock, DateTimeOffset originalExpiry,
         IResourceLifetimeWorkBinding binding,

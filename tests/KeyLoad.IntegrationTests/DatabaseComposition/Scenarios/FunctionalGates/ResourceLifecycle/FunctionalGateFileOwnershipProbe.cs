@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using Aspire.Hosting.ApplicationModel;
 using KeyLoad.AppHost.Features.StorageRecovery;
-using KeyLoad.IntegrationTests.Features.ClusterReplication;
+using KeyLoad.IntegrationTests.Features.StorageReplication;
 using KeyLoad.Server;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;

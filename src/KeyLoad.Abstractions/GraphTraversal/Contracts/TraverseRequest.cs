@@ -11,7 +11,7 @@ namespace KeyLoad;
 /// <param name="MaxEdges">The maximum number of edges to return.</param>
 /// <param name="Labels">Optional edge labels used to constrain traversal.</param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.TraverseRequest)]
+[Orleans.Alias(ContractAliases.TraverseRequest)]
 public sealed record TraverseRequest([property: Orleans.Id(0)] PartitionRef Partition, [property: Orleans.Id(1)] string Graph, [property: Orleans.Id(2)] EntityRef Start, [property: Orleans.Id(3)] int MaxDepth = TraverseRequest.DefaultMaxDepth,
     [property: Orleans.Id(4)] int MaxVertices = TraverseRequest.DefaultMaxVertices, [property: Orleans.Id(5)] int MaxEdges = TraverseRequest.DefaultMaxEdges, [property: Orleans.Id(6)] ImmutableArray<string>? Labels = null)
 {

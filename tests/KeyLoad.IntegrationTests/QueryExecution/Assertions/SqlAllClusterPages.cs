@@ -9,7 +9,7 @@ internal static class SqlAllClusterPages
     internal const string DuplicateSql = "SELECT ALL TOP (5) score AS score FROM null_ordering WHERE score IS NULL ORDER BY label ASC";
     internal static string Explicit(string sql) => Keyword + sql[DefaultKeyword.Length..];
 
-    internal static async Task DuplicatesAsync(global::KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsClusterCallers caller,
+    internal static async Task DuplicatesAsync(global::KeyLoad.IntegrationTests.Features.OrleansExecution.RequestCqrsClusterCallers caller,
         PostgresClusterCaller wire, CancellationToken token)
     {
         foreach (var sql in new[] { DuplicateSql, DuplicateSql.Replace(Keyword, DefaultKeyword, StringComparison.Ordinal) })

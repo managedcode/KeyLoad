@@ -11,7 +11,7 @@ internal static class McpGatewayDiscoveryAssertions
     private static readonly string[] Names =
         [McpCallerProtocol.GatewaySearch, McpCallerProtocol.GatewayRoute, McpCallerProtocol.GatewayInvoke];
 
-    /// <summary>Requires exactly three native tools with strict input schemas and conservative effect hints.</summary>
+    /// <summary>Requires exactly three execution tools with strict input schemas and conservative effect hints.</summary>
     internal static async Task VerifyAsync(IEnumerable<Tool> tools)
     {
         var actual = tools.ToArray();

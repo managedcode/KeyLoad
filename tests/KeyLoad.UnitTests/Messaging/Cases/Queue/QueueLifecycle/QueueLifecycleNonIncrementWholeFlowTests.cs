@@ -6,7 +6,7 @@ internal sealed class QueueLifecycleNonIncrementWholeFlowTests
     [Arguments(QueueLifecycleNonIncrementControl.BlockRedriveKeepsOrder)]
     [Arguments(QueueLifecycleNonIncrementControl.ScheduledRedriveKeepsReady)]
     [Arguments(QueueLifecycleNonIncrementControl.FullDeadLetterKeepsParked)]
-    public Task AcMsg088MaximumUnusedSequencePreservesNativeSuccessTwoColdAndHealthy(
+    public Task AcMsg088MaximumUnusedSequencePreservesSuccessTwoColdAndHealthy(
         QueueLifecycleNonIncrementControl control)
         => control == QueueLifecycleNonIncrementControl.FullDeadLetterKeepsParked
             ? QueueFullDeadLetterSequenceControl.RunAsync(TestContext.Current!.Execution.CancellationToken)

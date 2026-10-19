@@ -5,7 +5,7 @@ logical model resources reference and use one another. [ADR-067](ADR-067-composa
 adds bounded queue-to-entity-to-graph and graph-to-queue server derivation inside
 the existing atomic command/CALL. This extends the initial invocation stage below;
 the no-multiple-statements/no-recursive-CALL contract holds. Full declarative
-composition and native clients remain mandatory under ADR-065.
+composition and clients remain mandatory under ADR-065.
 
 Status: Accepted; implementation/qualification pending.
 
@@ -49,7 +49,7 @@ flowchart LR
 
 REQ-AISQL-001/003/004 -> AC-AISQL-001/005–010 in this ADR and
 [QueryExecution](../Features/QueryExecution.md);
-QueryExecution owns language, existing model slices own effects. The ordered contract is: freeze DTOs/grammar; author strict compiler tests and the compiler; preserve native equality planner efficiency; then join endpoint, SDK, official MCP, conservative admission and replicated-cluster differential tests. Shared transport and authority are not altered by the compiler work.
+QueryExecution owns language, existing model slices own effects. The ordered contract is: freeze DTOs/grammar; author strict compiler tests and the compiler; preserve equality planner efficiency; then join endpoint, SDK, official MCP, conservative admission and replicated-cluster differential tests. Shared transport and authority are not altered by the compiler work.
 
 The shared SQL operation contracts live in Abstractions/Features/QueryExecution/SqlOperationContracts.cs; the compiler helpers and matching SqlOperation* unit files are new Server/Features/QueryExecution/Sql* files; the server query/catalog/admission joins and Client/Features/QueryExecution/ complete the surface. Existing DTOs/route values retain semantics. The adapter rejects unsupported versions and invalid CALL grammar, targets or argument envelopes before routing. SELECT/EXPLAIN grammar is validated once by the authorized Q1 request path before a scan or effect; the adapter does not repeat parsing. Deployment is additive; rollback removes advertisement/new route, existing Q1 remains.
 

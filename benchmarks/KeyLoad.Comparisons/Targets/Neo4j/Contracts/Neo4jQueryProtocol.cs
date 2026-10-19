@@ -17,9 +17,9 @@ internal static class Neo4jQueryProtocol
 
     private const int AcceptedStatusCode = 202;
     private const int QueryErrorStatusCode = 400;
-    private const int MaximumNativeCodeLength = 256;
-    private const int NativeCodeComponentCount = 4;
-    private const string NativeCodePrefix = "Neo";
+    private const int MaximumCodeLength = 256;
+    private const int CodeComponentCount = 4;
+    private const string CodePrefix = "Neo";
     private const string FailurePrefix = "Neo4j:";
     private const string InvalidResponse = "Neo4j:InvalidQueryResponse";
     private const string ErrorsProperty = "errors";
@@ -53,14 +53,14 @@ internal static class Neo4jQueryProtocol
 
     internal static void ValidateErrors(JsonElement response)
     {
-        var code = ReadFirstNativeErrorCode(response);
+        var code = ReadFirstErrorCode(response);
         if (code is not null)
         {
             throw new ComparisonFailureException(FailurePrefix + code);
         }
     }
 
-    internal static string ReadNativeErrorCode(JsonElement response) => ReadFirstNativeErrorCode(response) ?? throw Invalid();
+    internal static string RuntimeReadErrorCode(JsonElement response) => ReadFirstErrorCode(response) ?? throw Invalid();
 
     internal static void ValidateConstraintCreation(JsonElement response)
     {
@@ -101,7 +101,7 @@ internal static class Neo4jQueryProtocol
         }
     }
 
-    private static string? ReadFirstNativeErrorCode(JsonElement response)
+    private static string? ReadFirstErrorCode(JsonElement response)
     {
         if (!TryGetUniqueProperty(response, ErrorsProperty, out var errors, out var duplicate))
         {
@@ -131,7 +131,7 @@ internal static class Neo4jQueryProtocol
     private static string ReadErrorCode(JsonElement error)
     {
         var code = RequiredProperty(error, CodeProperty);
-        if (code.ValueKind != JsonValueKind.String || !IsNativeCode(code.GetString()!))
+        if (code.ValueKind != JsonValueKind.String || !IsCode(code.GetString()!))
         {
             throw Invalid();
         }
@@ -182,18 +182,18 @@ internal static class Neo4jQueryProtocol
     private static bool IsStringArray(JsonElement element) => element.ValueKind == JsonValueKind.Array
         && element.EnumerateArray().All(item => item.ValueKind == JsonValueKind.String);
 
-    private static bool IsNativeCode(string value)
+    private static bool IsCode(string value)
     {
         const char VersionSeparator = '.';
         const int FirstElementIndex = 0;
 
-        if (value.Length > MaximumNativeCodeLength)
+        if (value.Length > MaximumCodeLength)
         {
             return false;
         }
 
         var parts = value.Split(VersionSeparator);
-        return parts.Length == NativeCodeComponentCount && parts[FirstElementIndex] == NativeCodePrefix && parts.All(IsIdentifier);
+        return parts.Length == CodeComponentCount && parts[FirstElementIndex] == CodePrefix && parts.All(IsIdentifier);
     }
 
     private static bool IsIdentifier(string value) => value.Length > NoItems && IsAsciiLetter(value[FirstElementIndex])

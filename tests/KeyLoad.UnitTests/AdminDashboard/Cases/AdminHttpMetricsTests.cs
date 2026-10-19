@@ -9,7 +9,7 @@ internal sealed class AdminHttpMetricsTests
     private const int FailureBaseStatus = 400;
     private const int SuccessesPerFailure = 3;
     private const string FailureMethod = "POST";
-    private const string FailureRoute = "/v1/documents/get";
+    private const string FailureRoute = "/documents/get";
 
     [Test]
     public async Task AcAd003ConcurrentObservationsPreserveCountersAndProcessIdentity()

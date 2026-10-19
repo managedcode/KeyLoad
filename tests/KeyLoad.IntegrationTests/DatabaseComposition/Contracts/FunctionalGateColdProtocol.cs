@@ -15,7 +15,7 @@ internal static class FunctionalGateColdProtocol
     internal const string Vector = "{\"state\":\"retained\"}";
     internal static readonly DateTimeOffset Start = new(2026, 10, 16, 0, 0, 0, TimeSpan.Zero);
     internal static string Resource(string model, int index) => "cold_" + model + "_" + index.ToString(CultureInfo.InvariantCulture);
-    internal static string DocumentJson(EntityRef anchor, BlobRef blob)
+    internal static string DocumentJson(EntityRef anchor, string blob)
         => JsonSerializer.Serialize(new
         {
             anchor,
@@ -44,6 +44,6 @@ internal static class FunctionalGateColdProtocol
             {
                 [IdColumn] = JsonSerializer.SerializeToElement(Id, JsonDefaults.Options)
             },
-            AllowFullScan: true, QueryDialectVersion: 2);
+            AllowFullScan: true, QueryDialectVersion: SqlOperationProtocol.DefaultQueryDialectVersion);
     internal static SampleData[] Samples => [new("sample-a", Start, 2), new("sample-b", Start.AddMinutes(1), 4)];
 }

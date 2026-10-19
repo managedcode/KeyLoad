@@ -14,7 +14,7 @@ internal static class DistributedSearchStatisticsEpoch
     private const int HexCharactersPerByte = 2;
     private const string InvalidScope = "The distributed search statistics scope is incomplete or incomparable.";
 
-    internal static string Create(string requestDigest, ImmutableArray<DistributedTextWitnessV1> witnesses,
+    internal static string Create(string requestDigest, ImmutableArray<DistributedTextWitness> witnesses,
         IOptions<QueryExecutionOptions> options, ReadExecutionBudget budget)
     {
         ArgumentNullException.ThrowIfNull(options);
@@ -38,10 +38,10 @@ internal static class DistributedSearchStatisticsEpoch
             }
             DistributedTextStatisticsValidation.Require(witness.Statistics, witness.Statistics.Terms, budget);
         }
-        var input = new DistributedSearchEpochInputV1(VersionOne, requestDigest, witnesses);
+        var input = new DistributedSearchEpochInput(VersionOne, requestDigest, witnesses);
         var admission = new GlobalBranchByteAdmission(budget.MaximumResultBytes, budget);
-        admission.Accept(NativeSerialization.Measure(input));
-        var bytes = NativeSerialization.Serialize(input);
+        admission.Accept(OrleansSerialization.Measure(input));
+        var bytes = OrleansSerialization.Serialize(input);
         budget.Check();
         return Convert.ToHexStringLower(SHA256.HashData(bytes));
     }

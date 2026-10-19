@@ -72,7 +72,7 @@ internal static class StoredOutboxReader
             if (!view.ReadValue(key, value =>
             {
                 storedBytes = value.Length;
-                entry = NativeSerialization.Deserialize<OutboxEntry>(value);
+                entry = OrleansSerialization.Deserialize<OutboxEntry>(value);
             }) || entry is null || entry.Sequence != sequence
                 || entry.Commit.AtomicPartitionId != partitionId)
             {

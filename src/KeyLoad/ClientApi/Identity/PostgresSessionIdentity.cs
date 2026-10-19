@@ -27,15 +27,15 @@ internal sealed class PostgresSessionIdentity(string subject, byte[] credential,
             using var connection = owner.Acquire(token);
             await ServerFailureObserver.ObserveAsync(async () =>
             {
-                var reply = await CanonicalCredentialDispatch.ReadAsync(node, signed, connection, requestId).ConfigureAwait(false);
-                principal = McpNativeAuthentication.ReadPrincipal(reply.Payload.Span,
+                var reply = await CanonicalCredentialDispatch.ReadAsync(node, signed, connection, requestId);
+                principal = McpAuthentication.ReadPrincipal(reply.Payload.Span,
                     services.GetRequiredService<IOptions<McpExecutionOptions>>(), connection.Token);
                 if (!StringComparer.Ordinal.Equals(principal.Id, Subject))
                 {
                     throw Errors.Fail(ErrorCode.Unauthenticated, ServerProtocol.MissingCredential);
                 }
-            }, failures).ConfigureAwait(false);
-        }, failures).ConfigureAwait(false);
+            }, failures);
+        }, failures);
         ServerFailureObserver.ThrowIfAny(failures);
         return principal ?? throw Errors.Fail(ErrorCode.Unauthenticated, ServerProtocol.MissingCredential);
     }

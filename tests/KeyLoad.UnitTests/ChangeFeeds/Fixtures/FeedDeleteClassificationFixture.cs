@@ -2,7 +2,7 @@ namespace KeyLoad.UnitTests.Features.ChangeFeeds;
 
 internal static class FeedDeleteClassificationFixture
 {
-    internal const string MissingEntry = "The complete native deletion flow requires its original retained tombstone entry.";
+    internal const string MissingEntry = "The complete execution deletion flow requires its original retained tombstone entry.";
     internal const string DeleteKind = "deleteDocument";
     internal const string Id = "b";
     internal const string TombstoneJson = "{}";
@@ -21,7 +21,7 @@ internal static class FeedDeleteClassificationFixture
         var original = database.Store.Read(view => view.ReadOwnedValue(key)) ?? throw new InvalidOperationException(MissingEntry);
         var state = new FeedDeleteClassificationState(source, command, deleted, key, original, [], 0L);
         await FeedDeleteClassificationAssertions.HealthyAsync(database.Database, database.Store, state, null, token);
-        var entry = NativeSerialization.Deserialize<OutboxEntry>(original) ?? throw new InvalidOperationException(MissingEntry);
+        var entry = OrleansSerialization.Deserialize<OutboxEntry>(original) ?? throw new InvalidOperationException(MissingEntry);
         var after = entry.After ?? throw new InvalidOperationException(MissingEntry);
         var reference = source.Creation.ExpectedReference(new(source.Seed.Partition, FeedVertexAuthorityFixture.Collection, Id));
         await ProjectionConsumerIdentityAssertions.ExactAsync(entry, new OutboxEntry(4L, 0, deleted.Token,

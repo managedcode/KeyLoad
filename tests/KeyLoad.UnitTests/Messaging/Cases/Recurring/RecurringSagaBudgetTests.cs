@@ -39,7 +39,7 @@ internal sealed class RecurringSagaBudgetTests
     }
 
     [Test]
-    public async Task RetainedNativeBytesAreAdmittedAtomicallyAgainstCombinedLaneLimit()
+    public async Task RetainedBytesAreAdmittedAtomicallyAgainstCombinedLaneLimit()
     {
         using var fixture = new RecurringSagaDatabase(new()
         {

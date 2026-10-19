@@ -45,7 +45,7 @@ internal static class RetainedAppendIdentityModel
             var raw = store.Read(view => view.ReadOwnedValue(KeySpace.Partition("outbox", fixture.Stream.Partition, entry.Sequence)))
                 ?? throw new InvalidOperationException("A literal outbox entry is missing.");
             bytes += raw.LongLength;
-            var actual = NativeSerialization.Deserialize<OutboxEntry>(raw);
+            var actual = OrleansSerialization.Deserialize<OutboxEntry>(raw);
             await RetainedAppendIdentityAssertions.SameAsync(actual, entry);
             await Assert.That(actual.Receipt.CompositionReferences).IsEmpty();
         }

@@ -4,11 +4,11 @@ namespace KeyLoad;
 public static class AdminDashboardProtocol
 {
     /// <summary>Physical node observation route.</summary>
-    public const string SnapshotPath = "/v1/admin/dashboard";
+    public const string SnapshotPath = "/admin/dashboard";
     /// <summary>Database resource metadata page route.</summary>
-    public const string ResourcesPath = "/v1/admin/dashboard/resources";
+    public const string ResourcesPath = "/admin/dashboard/resources";
     /// <summary>Non-consuming queue metadata page route.</summary>
-    public const string QueuePath = "/v1/admin/dashboard/queue";
+    public const string QueuePath = "/admin/dashboard/queue";
     /// <summary>Official MCP node observation tool.</summary>
     public const string SnapshotTool = "keyload_admin_dashboard";
     /// <summary>Official MCP catalog page tool.</summary>

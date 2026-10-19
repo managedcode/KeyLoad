@@ -5,7 +5,7 @@ using Microsoft.Extensions.Hosting;
 
 namespace KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
 
-/// <summary>Composes selected database infrastructure and exposes native endpoints to a separately owned workload client.</summary>
+/// <summary>Composes selected database infrastructure and exposes execution endpoints to a separately owned workload client.</summary>
 internal static class BenchmarkSessionResources
 {
     private const string ClientSession = "Benchmarks__Session";
@@ -53,7 +53,7 @@ internal static class BenchmarkSessionResources
         {
             return;
         }
-        IsolatedNativeDispatcher.Add(context);
+        IsolatedDispatcher.Add(context);
         LoadTestResourceLifetime.Apply(builder);
     }
 }

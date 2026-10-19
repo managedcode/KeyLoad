@@ -5,7 +5,7 @@ internal static class SqlBetweenSymmetricClusterRefusals
     internal static async Task RejectAsync(ClusterFixture fixture, SqlBetweenSymmetricClusterState state, string clause,
         ErrorCode code, CancellationToken token, bool ast = false, bool healthy = false)
     {
-        await global::KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerProtocol.Node2, state.Seed.Reader.Secret, async caller =>
+        await global::KeyLoad.IntegrationTests.Features.OrleansExecution.RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerProtocol.Node2, state.Seed.Reader.Secret, async caller =>
         {
             var sql = SqlBetweenSymmetricClusterCases.Prefix + clause + SqlBetweenSymmetricClusterCases.Tail;
             var request = SqlNullOrderingClusterProtocol.Operation(sql);
@@ -47,7 +47,7 @@ internal static class SqlBetweenSymmetricClusterRefusals
     }
 
     internal static async Task InvalidAsync(ClusterFixture fixture, SqlBetweenSymmetricClusterState state,
-        global::KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsClusterCallers root, CancellationToken token)
+        global::KeyLoad.IntegrationTests.Features.OrleansExecution.RequestCqrsClusterCallers root, CancellationToken token)
     {
         var before = await SqlBetweenSymmetricClusterImage.ReadAsync(root, state, token);
         foreach (var clause in new[] { "score BETWEEN SYMMETRIC 2 1", "score BETWEEN SYMMETRIC 2 OR 1",

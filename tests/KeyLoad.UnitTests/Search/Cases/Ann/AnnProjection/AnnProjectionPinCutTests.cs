@@ -4,7 +4,7 @@ namespace KeyLoad.UnitTests.Features.Search;
 
 internal sealed class AnnProjectionPinCutTests
 {
-    private const string ConsumerName = "ann-pin-cut-v1";
+    private const string ConsumerName = "ann-pin-cut";
     private static readonly ImmutableArray<float> BeforeSeedValues = [11.25f, -2.5f, 0.75f];
     private static readonly ImmutableArray<float> AfterSeedValues = [-0f, 7.125f, 3.5f];
 

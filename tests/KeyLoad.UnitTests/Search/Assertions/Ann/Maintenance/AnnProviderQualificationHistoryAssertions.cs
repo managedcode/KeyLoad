@@ -1,5 +1,7 @@
 using KeyLoad.Core;
-using KeyLoad.Core.Features.ClusterRouting.Contracts;
+using KeyLoad.Core.Features.CommandOutcomes.Contracts;
+using KeyLoad.Core.Features.RuntimeJournaling.Contracts;
+using KeyLoad.Core.Features.StoragePartitions.Contracts;
 using KeyLoad.UnitTests.Features.ResourceExecution;
 using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
@@ -12,22 +14,22 @@ internal static class AnnProviderQualificationHistoryAssertions
     internal static async Task SaveAsync<T>(AnnProviderQualificationOwner owner, AnnProviderQualificationState state,
         Command<DatabaseCommand> issued, Result<object> result, T expected) where T : class
     {
-        await NativeReplayResultAssertions.Same<T>(result, Result<object>.Succeed(expected));
+        await ReplayResultAssertions.Same<T>(result, Result<object>.Succeed(expected));
         var entry = owner.ReadStoredOutcome(issued.CommandId);
         var operation = entry.PreparedCommand ?? throw new InvalidOperationException(MissingOriginal);
         var global = operation.Value!.Kind == OperationKind.ConfigureResource;
         var key = global ? KeySpace.GlobalOutcome(Root, operation.CommandId)
             : KeySpace.PartitionOutcome(owner.Source.Partition, Root, operation.CommandId);
-        var locatorKey = KeySpace.OutcomeLocatorV2(owner.Source.Partition, Root, operation.CommandId);
+        var locatorKey = KeySpace.OutcomeLocator(owner.Source.Partition, Root, operation.CommandId);
         var outcome = Required(owner, key);
         var locator = owner.Store.Read(view => view.ReadOwnedValue(locatorKey));
         await LocatorAsync(locator, global ? null : key);
-        var stored = NativeSerialization.Deserialize<StoredOutcome>(outcome);
+        var stored = OrleansSerialization.Deserialize<StoredOutcome>(outcome);
         await Assert.That(stored.Incarnation).IsEqualTo(owner.Store.Identity.Incarnation);
         await Assert.That(stored.PolicyEpoch).IsEqualTo(PolicyEpoch);
         await Assert.That(stored.ScopeKind).IsEqualTo(global ? CommandOutcomeScopeKind.Global : CommandOutcomeScopeKind.Partition);
         await Assert.That(stored.Partition).IsEqualTo(global ? null : owner.Source.Partition);
-        await NativeReplayResultAssertions.Same<T>(stored.Result, result);
+        await ReplayResultAssertions.Same<T>(stored.Result, result);
         state.History.Add(new(operation, result, entry.CanonicalSequence, operation.Value!.Input.ToArray(),
             key, outcome, locatorKey, locator));
     }
@@ -52,11 +54,11 @@ internal static class AnnProviderQualificationHistoryAssertions
     {
         if (expected.Value is ResourceDefinition)
         {
-            await NativeReplayResultAssertions.Same<ResourceDefinition>(actual, expected);
+            await ReplayResultAssertions.Same<ResourceDefinition>(actual, expected);
         }
         else
         {
-            await NativeReplayResultAssertions.Same<CommitReceipt>(actual, expected);
+            await ReplayResultAssertions.Same<CommitReceipt>(actual, expected);
         }
     }
 

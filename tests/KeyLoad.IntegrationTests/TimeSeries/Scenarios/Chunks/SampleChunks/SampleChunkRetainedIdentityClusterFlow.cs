@@ -40,7 +40,7 @@ internal static class SampleChunkRetainedIdentityClusterFlow
         await ServerFailureObserver.ObserveAsync(() => SampleChunkRetentionClusterDenialOracle.WindowAsync(sdk, mcp,
             scenario.Request, token), failures);
         await ServerFailureObserver.ObserveAsync(() => SampleChunkRetentionClusterReadOracle.RawAsync(sdk, mcp,
-            new(scenario.Native.Partition, TimeSeriesClusterScenario.Set, TimeSeriesClusterScenario.Series, scenario.From,
+            new(scenario.Execution.Partition, TimeSeriesClusterScenario.Set, TimeSeriesClusterScenario.Series, scenario.From,
                 scenario.Until.AddHours(SampleChunkClusterProtocol.WindowHours), SampleChunkClusterProtocol.OutputLimit), [], token), failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }

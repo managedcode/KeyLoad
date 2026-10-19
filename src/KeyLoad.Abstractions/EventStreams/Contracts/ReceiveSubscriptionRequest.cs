@@ -7,7 +7,7 @@ namespace KeyLoad;
 /// <param name="MaxBytes">The maximum payload bytes to return.</param>
 /// <param name="LeaseSeconds">The requested delivery lease duration in seconds.</param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.ReceiveSubscriptionRequest)]
+[Orleans.Alias(ContractAliases.ReceiveSubscriptionRequest)]
 public sealed record ReceiveSubscriptionRequest([property: Orleans.Id(0)] Guid RequestId, [property: Orleans.Id(1)] SubscriptionRef Subscription, [property: Orleans.Id(2)] int MaxEvents = ReceiveSubscriptionRequest.DefaultMaxEvents,
     [property: Orleans.Id(3)] int MaxBytes = ReceiveSubscriptionRequest.DefaultMaxBytes, [property: Orleans.Id(4)] int LeaseSeconds = ReceiveSubscriptionRequest.DefaultLeaseSeconds)
 {

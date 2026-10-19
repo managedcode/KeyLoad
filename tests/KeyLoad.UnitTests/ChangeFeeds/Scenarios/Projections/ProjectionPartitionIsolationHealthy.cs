@@ -16,7 +16,7 @@ internal static class ProjectionPartitionIsolationHealthy
         var operation = ProjectionConsumerIdentityFixture.Operation(owner, OperationKind.Batch, id,
             new CommandRequest(id, source.Partition, [mutation]), source.Time);
         token.ThrowIfCancellationRequested();
-        var produced = FeedNativeHealthyAdmission.Submit(owner, operation, explicitTime: true, token);
+        var produced = FeedHealthyAdmission.Submit(owner, operation, explicitTime: true, token);
         var receipt = produced.Get<CommitReceipt>();
         await ProjectionConsumerIdentityAssertions.ReceiptAsync(operation, receipt,
             new MutationReceipt(ProjectionPartitionIsolationFixture.PutKind, mutation.Collection, mutation.Id, 1L));
@@ -32,7 +32,7 @@ internal static class ProjectionPartitionIsolationHealthy
             new CommitProjectionBatchRequest(effectId, source.Consumer, batch.Token,
                 [new PutDocument(ProjectionConsumerIdentityFixture.Target, ProjectionPartitionIsolationFixture.HealthyEffect,
                     ProjectionPartitionIsolationFixture.HealthyJson, 0L)]));
-        var completed = FeedNativeHealthyAdmission.Submit(owner, effect, explicitTime: false, token);
+        var completed = FeedHealthyAdmission.Submit(owner, effect, explicitTime: false, token);
         var result = completed.Get<ProjectionBatchResult>();
         await ProjectionConsumerIdentityAssertions.ReceiptAsync(effect, result.Receipt,
             new MutationReceipt(ProjectionPartitionIsolationFixture.PutKind, ProjectionConsumerIdentityFixture.Target,

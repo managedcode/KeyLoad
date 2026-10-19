@@ -68,7 +68,7 @@ public sealed partial class DatabaseEngine
     {
         var key = AnalyticsStoreKeys.Generation(partition, store);
         var previous = transaction.ReadOwnedValue(key);
-        var generation = checked((previous is null ? AnalyticsAbsentGeneration : NativeSerialization.Deserialize<long>(previous)) + AnalyticsGenerationStep);
+        var generation = checked((previous is null ? AnalyticsAbsentGeneration : OrleansSerialization.Deserialize<long>(previous)) + AnalyticsGenerationStep);
         transaction.PutRecord(key, generation);
         return new(kind, store, id, generation);
     }

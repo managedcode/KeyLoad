@@ -5,12 +5,12 @@ namespace KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries.Intensive
 internal sealed class TimeSeriesIntensiveCallScope : IDisposable
 {
     private readonly TimeProvider timeProvider;
-    private readonly NativeComparisonExecutionOptions execution;
+    private readonly ComparisonExecutionOptions execution;
     private readonly CancellationToken cellCancellation;
     private readonly CancellationTokenSource deadline;
     private long started;
 
-    internal TimeSeriesIntensiveCallScope(IOptions<NativeComparisonExecutionOptions> executionOptions, CancellationToken cellCancellation, TimeProvider? provider = null)
+    internal TimeSeriesIntensiveCallScope(IOptions<ComparisonExecutionOptions> executionOptions, CancellationToken cellCancellation, TimeProvider? provider = null)
     {
         timeProvider = provider ?? TimeProvider.System;
         execution = executionOptions.Value;

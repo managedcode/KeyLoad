@@ -33,7 +33,7 @@ internal static class ProjectionCancelledCommitAssertions
         var mutation = new PutDocument(ProjectionConsumerIdentityFixture.Source, "c", "{\"n\":3}", 0L);
         var source = ProjectionConsumerIdentityFixture.Operation(owner, OperationKind.Batch, id,
             new CommandRequest(id, state.Partition, [mutation]));
-        var original = FeedNativeHealthyAdmission.Submit(owner, source, explicitTime: false, token);
+        var original = FeedHealthyAdmission.Submit(owner, source, explicitTime: false, token);
         var receipt = original.Get<CommitReceipt>();
         await ProjectionConsumerIdentityAssertions.ReceiptAsync(source, receipt,
             new MutationReceipt("putDocument", ProjectionConsumerIdentityFixture.Source, "c", 1L));

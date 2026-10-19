@@ -112,7 +112,7 @@ public class ScaledStorageReadBenchmarks : IDisposable
     /// <summary>Returns the active fixture's immutable cold snapshot to the friend test assembly.</summary>
     internal ScaledRawStorageSnapshot Capture() => RequireFixture().Capture();
 
-    /// <summary>Performs a full native verification and closes every retained owner.</summary>
+    /// <summary>Performs a full execution verification and closes every retained owner.</summary>
     [GlobalCleanup]
     public void Cleanup() => Dispose();
 

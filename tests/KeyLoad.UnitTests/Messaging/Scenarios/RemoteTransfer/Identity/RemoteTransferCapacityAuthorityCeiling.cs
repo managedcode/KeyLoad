@@ -21,8 +21,8 @@ internal static class RemoteTransferCapacityAuthorityCeiling
         var key = RemoteTransferStorage.SourceCapacityKey(fixture.SourceQueue);
         var original = fixture.Store.Commit((tx, _) =>
         {
-            var bytes = tx.ReadOwnedValue(key) ?? throw new InvalidOperationException(MissingNativeRow);
-            var counter = NativeSerialization.Deserialize<RemoteTransferCapacity>(bytes);
+            var bytes = tx.ReadOwnedValue(key) ?? throw new InvalidOperationException(RuntimeMissingRow);
+            var counter = OrleansSerialization.Deserialize<RemoteTransferCapacity>(bytes);
             tx.PutRecord(key, counter with
             {
                 StoredBytes = long.MaxValue
@@ -40,9 +40,9 @@ internal static class RemoteTransferCapacityAuthorityCeiling
         await Assert.That(fixture.Store.Position).IsEqualTo(position + First);
         await Assert.That(Domain(fixture, request.CommandId)).IsEquivalentTo(before, TUnit.Assertions.Enums.CollectionOrdering.Matching);
         await RequireLocatorAsync(fixture, request.CommandId);
-        await Assert.That(QueueWholeFlowStorage.Clock(RemoteTransferCapacityAuthorityStorage.Native(fixture))).IsEqualTo(time);
+        await Assert.That(QueueWholeFlowStorage.Clock(RemoteTransferCapacityAuthorityStorage.Execution(fixture))).IsEqualTo(time);
         var failureKey = KeySpace.PartitionOutcome(fixture.SourcePartition, RemoteTransferDatabase.RootPrincipal, request.CommandId);
-        var retained = fixture.Store.Read(view => view.ReadOwnedValue(failureKey)) ?? throw new InvalidOperationException(MissingNativeRow);
+        var retained = fixture.Store.Read(view => view.ReadOwnedValue(failureKey)) ?? throw new InvalidOperationException(RuntimeMissingRow);
         await FailureReplayAsync(fixture, request, failed, retained);
         var coldImage = RemoteTransferCapacityAuthorityStorage.Capture(fixture);
         var coldPosition = fixture.Store.Position;
@@ -67,7 +67,7 @@ internal static class RemoteTransferCapacityAuthorityCeiling
     {
         var image = RemoteTransferCapacityAuthorityStorage.Capture(fixture);
         var position = fixture.Store.Position;
-        var stored = OutcomeStoreOracle.ReadPartition(RemoteTransferCapacityAuthorityStorage.Native(fixture), request.Partition,
+        var stored = OutcomeStoreOracle.ReadPartition(RemoteTransferCapacityAuthorityStorage.Execution(fixture), request.Partition,
             RemoteTransferDatabase.RootPrincipal, request.CommandId);
         await Assert.That(stored).IsEqualTo(original);
         await Assert.That(fixture.Apply(OperationKind.Batch, request)).IsEqualTo(original);
@@ -81,7 +81,7 @@ internal static class RemoteTransferCapacityAuthorityCeiling
     private static string[] Domain(RemoteTransferDatabase fixture, Guid id)
     {
         var outcome = Convert.ToHexString(KeySpace.PartitionOutcome(fixture.SourcePartition, RemoteTransferDatabase.RootPrincipal, id)) + ":";
-        var locator = Convert.ToHexString(KeySpace.OutcomeLocatorV2(fixture.SourcePartition, RemoteTransferDatabase.RootPrincipal, id)) + ":";
+        var locator = Convert.ToHexString(KeySpace.OutcomeLocator(fixture.SourcePartition, RemoteTransferDatabase.RootPrincipal, id)) + ":";
         var clock = Convert.ToHexString(KeySpace.ClockBytes) + ":";
         return RemoteTransferCapacityAuthorityStorage.Capture(fixture).Where(row => !row.StartsWith(outcome, StringComparison.Ordinal)
             && !row.StartsWith(locator, StringComparison.Ordinal) && !row.StartsWith(clock, StringComparison.Ordinal)).ToArray();
@@ -89,7 +89,7 @@ internal static class RemoteTransferCapacityAuthorityCeiling
 
     private static async Task RequireLocatorAsync(RemoteTransferDatabase fixture, Guid id)
     {
-        var key = KeySpace.OutcomeLocatorV2(fixture.SourcePartition, RemoteTransferDatabase.RootPrincipal, id);
+        var key = KeySpace.OutcomeLocator(fixture.SourcePartition, RemoteTransferDatabase.RootPrincipal, id);
         var value = fixture.Store.Read(view => view.ReadOwnedValue(key));
         var expected = KeySpace.PartitionOutcome(fixture.SourcePartition, RemoteTransferDatabase.RootPrincipal, id);
         await Assert.That(value).IsNotNull();

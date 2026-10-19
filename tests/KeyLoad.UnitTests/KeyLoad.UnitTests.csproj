@@ -6,11 +6,11 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
-    <AssemblyMetadata Include="KeyLoadNativeCoverageToolVersion" Value="$(KeyLoadNativeCoverageToolVersion)" />
-    <AssemblyMetadata Include="KeyLoadNativeCoveragePackageRoot" Value="$([System.IO.Path]::Combine('$(NuGetPackageRoot)', 'dotnet-coverage', '$(KeyLoadNativeCoverageToolVersion)'))" />
-    <PackageDownload Include="dotnet-coverage" Version="[$(KeyLoadNativeCoverageToolVersion)]" />
+    <AssemblyMetadata Include="KeyLoadCoverageToolVersion" Value="$(KeyLoadCoverageToolVersion)" />
+    <AssemblyMetadata Include="KeyLoadCoveragePackageRoot" Value="$([System.IO.Path]::Combine('$(NuGetPackageRoot)', 'dotnet-coverage', '$(KeyLoadCoverageToolVersion)'))" />
+    <PackageDownload Include="dotnet-coverage" Version="[$(KeyLoadCoverageToolVersion)]" />
     <Using Include="KeyLoad.Features.InternalSerialization" />
-    <Using Include="KeyLoad.RecoveryTests.Features.ClusterRouting" />
+    <Using Include="KeyLoad.RecoveryTests.Features.OrleansExecution" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../../src/KeyLoad.Storage.ZoneTree/KeyLoad.Storage.ZoneTree.csproj" />

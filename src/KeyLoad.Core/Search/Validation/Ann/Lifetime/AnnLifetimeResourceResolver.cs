@@ -1,4 +1,6 @@
-using KeyLoad.Core.Features.ClusterRouting.Contracts;
+using KeyLoad.Core.Features.CommandOutcomes.Contracts;
+using KeyLoad.Core.Features.RuntimeJournaling.Contracts;
+using KeyLoad.Core.Features.StoragePartitions.Contracts;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core.Features.Search;
@@ -22,7 +24,7 @@ internal sealed class AnnLifetimeResourceResolver(AnnReadLifetimeMetadata metada
                 }
                 var lifetime = metadata.Coverage.Lifetimes.Single(value => value.ResourceName == definition.Name);
                 budget.CaptureAuthenticatedResourceLifetimes(database, view,
-                    new ResourceLifetimeCoverageV1(partition, [lifetime]), [definition]);
+                    new ResourceLifetimeCoverage(partition, [lifetime]), [definition]);
                 return definition;
             }
         }

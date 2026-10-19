@@ -8,7 +8,7 @@ namespace KeyLoad.UnitTests.Features.QueryExecution;
 
 internal static class SqlCompositionParameterAssertions
 {
-    internal static async Task NativeReceiptAsync(CommitReceipt actual, CommitReceipt expected)
+    internal static async Task RuntimeReceiptAsync(CommitReceipt actual, CommitReceipt expected)
     {
         await EqualAsync(actual, expected);
         await Assert.That(actual.Mutations.Length).IsEqualTo(expected.Mutations.Length);
@@ -23,7 +23,7 @@ internal static class SqlCompositionParameterAssertions
     {
         await Assert.That(QueueWholeFlowStorage.Bytes(fixture.Store)).IsEquivalentTo(image,
             TUnit.Assertions.Enums.CollectionOrdering.Matching);
-        await NativeReadCutStoreStateAssertions.AssertIdentityAndPositionAsync(fixture.Store, identity, position);
+        await ReadCutStoreStateAssertions.AssertIdentityAndPositionAsync(fixture.Store, identity, position);
     }
 
     internal static async Task ModelsAsync(SqlCompositionParameterFixture fixture)
@@ -58,7 +58,7 @@ internal static class SqlCompositionParameterAssertions
     internal static async Task OutboxAsync(SqlCompositionParameterFixture fixture)
     {
         var seed = fixture.Seed;
-        var command = NativeSerialization.Deserialize<CommandRequest>(seed.Seed.Value!.Input.Span);
+        var command = OrleansSerialization.Deserialize<CommandRequest>(seed.Seed.Value!.Input.Span);
         var expected = new List<OutboxEntry>
         {
             new(1L, 0, seed.SeedReceipt.Token, new DateTimeOffset(seed.Seed.Timestamp), command.Mutations[0], seed.SeedReceipt.Mutations[0], null, seed.First),
@@ -76,7 +76,7 @@ internal static class SqlCompositionParameterAssertions
         await Assert.That(page.Records.Length).IsEqualTo(expected.Count);
         for (var index = 0; index < expected.Count; index++)
         {
-            var actual = NativeSerialization.Deserialize<OutboxEntry>(page.Records[index].Value.Span);
+            var actual = OrleansSerialization.Deserialize<OutboxEntry>(page.Records[index].Value.Span);
             await EqualAsync(actual, expected[index]);
             await Assert.That(actual.Mutation.GetType()).IsEqualTo(expected[index].Mutation.GetType());
             await Assert.That(actual.Commit).IsEqualTo(expected[index].Commit);

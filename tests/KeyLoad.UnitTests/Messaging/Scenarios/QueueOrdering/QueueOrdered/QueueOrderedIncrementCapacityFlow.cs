@@ -25,7 +25,7 @@ internal static class QueueOrderedIncrementCapacityFlow
             RetryJitter = QueueRetryJitter.Full
         });
         var lane = new QueueLaneRef(fixture.Partition, QueueOrderedRetryProtocol.Queue);
-        var recorder = new QueueLifecycleNativeRecorder(fixture.Database, lane, id => QueueOrderedRetryOperations.Literal(id));
+        var recorder = new QueueLifecycleRecorder(fixture.Database, lane, id => QueueOrderedRetryOperations.Literal(id));
         var state = new QueueOrderedRetryState(fixture.Partition, QueueWholeFlowStorage.Clock(fixture.Store), QueueParkedHeadPolicy.Continue)
         {
             BeforeApply = recorder.Observe
@@ -42,12 +42,12 @@ internal static class QueueOrderedIncrementCapacityFlow
     }
 
     private static async Task ColdAsync(TestDatabase fixture, QueueOrderedRetryState state,
-        QueueLifecycleNativeRecorder recorder, QueueLifecycleCeilingRows rows, Result<object> failed,
+        QueueLifecycleRecorder recorder, QueueLifecycleCeilingRows rows, Result<object> failed,
         string[] original, long originalPosition, QueueLifecycleCeilingFault fault, CancellationToken token)
     {
         var image = QueueWholeFlowStorage.Bytes(fixture.Store);
         var position = fixture.Store.Position;
-        var identity = NativeSerialization.Serialize(fixture.Store.Identity);
+        var identity = OrleansSerialization.Serialize(fixture.Store.Identity);
         fixture.Store.Dispose();
         using var cold = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         var database = QueueWholeFlowStorage.Open(cold);
@@ -74,19 +74,19 @@ internal static class QueueOrderedIncrementCapacityFlow
     }
 
     private static async Task FinalAsync(ZoneTreeStore store, string directory, QueueOrderedRetryState state,
-        QueueLifecycleNativeRecorder recorder, QueueLifecycleCeilingRows rows, Result<object> failed,
+        QueueLifecycleRecorder recorder, QueueLifecycleCeilingRows rows, Result<object> failed,
         QueueLifecycleCeilingFault fault, CancellationToken token)
     {
         await TerminalAsync(recorder.Database, state, fault);
         var image = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
-        var identity = NativeSerialization.Serialize(store.Identity);
+        var identity = OrleansSerialization.Serialize(store.Identity);
         store.Dispose();
         using var cold = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         recorder.Database = QueueWholeFlowStorage.Open(cold);
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(cold, image, position, identity);
         await TerminalAsync(recorder.Database, state, fault);
-        await QueueLifecycleNativeHistoryAssertions.ReplayAsync(recorder, state.Lane, token);
+        await QueueLifecycleHistoryAssertions.ReplayAsync(recorder, state.Lane, token);
         await QueueLifecycleCeilingFailureAssertions.ReplayAsync(recorder.Database, rows, failed, state.Principal, state.Time, token);
         await TerminalAsync(recorder.Database, state, fault);
     }

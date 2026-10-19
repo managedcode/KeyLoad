@@ -14,7 +14,7 @@ internal static class AnalyticsSharedFlow
         var actual = fixture.Submit(OperationKind.ConfigureResource,
             new ConfigureResourceRequest(fixture.Partition.TenantId, fixture.Partition.DatabaseId, definition),
             id: AnalyticsExpectedResourceCreation.SharedStore).Get<ResourceDefinition>();
-        if (!NativeSerialization.Serialize(definition).AsSpan().SequenceEqual(NativeSerialization.Serialize(actual)))
+        if (!OrleansSerialization.Serialize(definition).AsSpan().SequenceEqual(OrleansSerialization.Serialize(actual)))
         {
             throw new InvalidOperationException("The actual analytics resource definition differs.");
         }

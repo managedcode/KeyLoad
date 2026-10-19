@@ -6,7 +6,7 @@ namespace KeyLoad.Core.Features.Search;
 
 internal static class AnnDependencyIdentity
 {
-    private const string Domain = "keyload.ann.native-policy.v1";
+    private const string Domain = "keyload.ann.execution-policy";
     private const int DigestBytes = 32;
     private const string InvalidIdentity = "The canonical ANN dependency identity is inconsistent.";
     private const string ScanExceeded = "The canonical ANN dependency scope exceeds its budget.";
@@ -20,7 +20,7 @@ internal static class AnnDependencyIdentity
             database.Limits.MaxScanRecords, (key, value) =>
             {
                 work.Charge();
-                var resource = NativeSerialization.Deserialize<ResourceDefinition>(value);
+                var resource = OrleansSerialization.Deserialize<ResourceDefinition>(value);
                 if (!key.SequenceEqual(KeySpace.Resource(partition.TenantId, partition.DatabaseId, resource.Name)))
                 {
                     throw Errors.Fail(ErrorCode.Corruption, InvalidIdentity);

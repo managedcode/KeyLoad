@@ -5,8 +5,8 @@ namespace KeyLoad.Client;
 /// <summary>Exposes current-policy inspection of retained schedule and saga state.</summary>
 public static class RecurringSagaClientExtensions
 {
-    private const string SchedulePath = "/v1/queues/schedules/inspect";
-    private const string SagaPath = "/v1/queues/sagas/inspect";
+    private const string SchedulePath = "/queues/schedules/inspect";
+    private const string SagaPath = "/queues/sagas/inspect";
 
     /// <summary>Reads a response whose Schedule field contains projected recurring state, or null when absent.</summary>
     public static Task<Result<RecurringScheduleReadResult>> InspectRecurringScheduleAsync(this KeyLoadClient client,

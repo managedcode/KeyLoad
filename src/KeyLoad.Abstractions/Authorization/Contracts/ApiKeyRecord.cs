@@ -7,5 +7,5 @@ namespace KeyLoad;
 /// <param name="ExpiresAt">Sets the optional expiration time.</param>
 /// <param name="Revoked">Marks the identity as revoked when true.</param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.ApiKeyRecord)]
+[Orleans.Alias(ContractAliases.ApiKeyRecord)]
 public sealed record ApiKeyRecord([property: Orleans.Id(0)] string Id, [property: Orleans.Id(1)] string PrincipalId, [property: Orleans.Id(2)] string Verifier, [property: Orleans.Id(3)] DateTimeOffset? ExpiresAt = null, [property: Orleans.Id(4)] bool Revoked = false);

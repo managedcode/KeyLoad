@@ -5,7 +5,7 @@ namespace KeyLoad.Client;
 /// <summary>Reads an already provisioned generation through current persisted vector authorization.</summary>
 public static class ApproximateSearchClient
 {
-    /// <summary>Returns the complete admitted page and actual native mode at one authorized cut.</summary>
+    /// <summary>Returns the complete admitted page and actual execution mode at one authorized cut.</summary>
     /// <param name="client">Authenticated actual SDK owner.</param>
     /// <param name="request">Versioned explicit generation and bounded vector scope.</param>
     /// <param name="cancellationToken">Original caller cancellation.</param>

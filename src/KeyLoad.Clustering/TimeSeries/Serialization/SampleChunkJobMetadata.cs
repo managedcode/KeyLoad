@@ -9,7 +9,7 @@ internal static class SampleChunkJobMetadata
     internal static ScheduleJobRequest Create(GrainId target, DateTimeOffset dueAt,
         SampleChunkWorkHint hint, int maximumBytes)
     {
-        if (NativeSerialization.Measure(hint) > maximumBytes)
+        if (OrleansSerialization.Measure(hint) > maximumBytes)
         {
             throw Errors.Fail(ErrorCode.ResourceExhausted, SampleChunkJobProtocol.Exhausted);
         }
@@ -20,7 +20,7 @@ internal static class SampleChunkJobMetadata
             DueTime = dueAt,
             Metadata = new Dictionary<string, string>(StringComparer.Ordinal)
             {
-                [SampleChunkJobProtocol.HintKey] = Convert.ToBase64String(NativeSerialization.Serialize(hint))
+                [SampleChunkJobProtocol.HintKey] = Convert.ToBase64String(OrleansSerialization.Serialize(hint))
             },
             TraceParent = string.Empty,
             TraceState = string.Empty
@@ -48,6 +48,6 @@ internal static class SampleChunkJobMetadata
         {
             throw Errors.Fail(ErrorCode.ResourceExhausted, SampleChunkJobProtocol.Exhausted);
         }
-        return NativeSerialization.Deserialize<SampleChunkWorkHint>(bytes);
+        return OrleansSerialization.Deserialize<SampleChunkWorkHint>(bytes);
     }
 }

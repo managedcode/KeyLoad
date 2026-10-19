@@ -40,25 +40,13 @@ public enum OperationKind
     ReleaseProjectionConsumer = 17,
     /// <summary>The purge outbox value.</summary>
     PurgeOutbox = 18,
-    /// <summary>Begins a reserved binary upload lifetime.</summary>
-    BeginBlobUpload = 19,
-    /// <summary>Accepts one bounded binary part.</summary>
-    WriteBlobPart = 20,
-    /// <summary>Publishes an accepted binary upload through revision CAS.</summary>
-    CompleteBlobUpload = 21,
-    /// <summary>Aborts a binary upload and releases unused reservation.</summary>
-    AbortBlobUpload = 22,
-    /// <summary>Publishes a binary object revision tombstone.</summary>
-    DeleteBlob = 23,
-    /// <summary>Reclaims eligible binary parts through a bounded command.</summary>
-    ReclaimBlob = 24,
-    /// <summary>Changes private native runtime journal infrastructure through replicated.</summary>
+    /// <summary>Changes private execution runtime journal infrastructure through replicated.</summary>
     RuntimeJournal = 27,
     /// <summary>Composes independent queue receives through request grains; never replicated as one command.</summary>
     ReceiveAcrossLanes = 28,
-    /// <summary>Runs administrator-only native ANN generation maintenance through independently authorized child requests.</summary>
+    /// <summary>Runs administrator-only execution ANN generation maintenance through independently authorized child requests.</summary>
     MaintainAnnIndex = 30,
-    /// <summary>Runs protected native text generation maintenance through independently authorized child requests.</summary>
+    /// <summary>Runs protected execution text generation maintenance through independently authorized child requests.</summary>
     MaintainTextIndex = 31,
     /// <summary>Maintains an administrator-authorized online text generation through separate request grains.</summary>
     MaintainOnlineTextIndex = 34,
@@ -72,6 +60,6 @@ public enum OperationKind
     SetQueueDispatch = 50,
     /// <summary>Atomically creates one absent canonical typed table with an original caller identity.</summary>
     CreateTable = 51,
-    /// <summary>Native all-owner table retirement and logical removal through the authenticated request grain.</summary>
+    /// <summary>Execution all-owner table retirement and logical removal through the authenticated request grain.</summary>
     DropTable = 53,
 }

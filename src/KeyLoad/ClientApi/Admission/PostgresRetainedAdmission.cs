@@ -4,7 +4,7 @@ namespace KeyLoad.Server;
 
 internal sealed class PostgresRetainedAdmission(IOptions<PostgresSessionOptions> options)
 {
-    private const string Exhausted = "The native SQL retained-session byte grant is exhausted.";
+    private const string Exhausted = "The execution SQL retained-session byte grant is exhausted.";
     private readonly Lock gate = new();
     private long reserved;
 

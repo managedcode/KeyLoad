@@ -88,7 +88,7 @@ internal static class SampleChunkExplicitMinimumUnitReads
         var actual = database.ReadSampleChunkWindow(principal, request, token);
         if (actual.CutPosition <= NoPosition)
         {
-            throw new InvalidOperationException("The genuine chunk read has no native cut.");
+            throw new InvalidOperationException("The genuine chunk read has no execution cut.");
         }
         var expected = new SampleChunkWindowResult(request.WindowId, SampleChunkCanonicalFixture.Start,
             SampleChunkCanonicalFixture.Until, SampleChunkCanonicalFixture.FirstGeneration,

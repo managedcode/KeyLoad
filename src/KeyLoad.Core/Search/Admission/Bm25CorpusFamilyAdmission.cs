@@ -8,10 +8,10 @@ internal static class Bm25CorpusFamilyAdmission
     private const int ProposedRecordCount = 1;
     private const int RetainedRecordIncrement = 1;
 
-    internal static void Require(IKeyValueView view, byte[] key, Bm25CorpusCurrentV1 current,
+    internal static void Require(IKeyValueView view, byte[] key, Bm25CorpusCurrent current,
         DatabaseLimits limits)
     {
-        var bytes = checked(key.Length + NativeSerialization.Measure(current));
+        var bytes = checked(key.Length + OrleansSerialization.Measure(current));
         var examinedBytes = InitialExaminedBytes;
         var records = ProposedRecordCount;
         var scan = view.VisitRange(Bm25CorpusKeys.Prefix(current.Partition), limits.MaxScanRecords,

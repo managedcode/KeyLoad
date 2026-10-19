@@ -1,5 +1,5 @@
 using System.Collections.Immutable;
-using KeyLoad.Core.Features.ClusterRouting.Queries;
+using KeyLoad.Core.Features.StoragePartitions.Queries;
 using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Storage;
 

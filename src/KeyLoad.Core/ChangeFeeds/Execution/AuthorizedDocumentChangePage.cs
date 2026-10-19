@@ -13,7 +13,7 @@ namespace KeyLoad.Core;
 /// <param name="CutPosition">Storage position represented by this page.</param>
 
 [global::Orleans.GenerateSerializer]
-[global::Orleans.Alias(global::KeyLoad.Core.Features.InternalSerialization.CoreNativeAliases.AuthorizedDocumentChangePage)]
+[global::Orleans.Alias(global::KeyLoad.Core.Features.InternalSerialization.CoreAliases.AuthorizedDocumentChangePage)]
 public sealed record AuthorizedDocumentChangePage<T>(
     [property: global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.AuthorizedDocumentChangePageFields.Changes)] ImmutableArray<T> Changes,
     [property: global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.AuthorizedDocumentChangePageFields.Cursor)] string Cursor,

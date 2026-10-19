@@ -6,7 +6,7 @@ internal static class PostgresClusterCommands
 {
     private const string JoinedSql = "SELECT l.order_id AS order_id, l.detail AS left_detail, r.name AS right_name, r.id AS customer_id FROM budgetorders AS l INNER JOIN budgetcustomers AS r ON l.customer_id = r.id ORDER BY l.order_id ASC LIMIT 10";
     private const string UnsupportedSql = "BEGIN";
-    private const string InvalidCommand = "The native SQL checks command is outside its frozen literal inventory.";
+    private const string InvalidCommand = "The execution SQL checks command is outside its frozen literal inventory.";
 
     internal static NpgsqlCommand Create(string sql, NpgsqlConnection connection)
         => sql switch
@@ -77,13 +77,13 @@ internal static class PostgresClusterCommands
     {
         First, Second, Third, Fourth, Fifth, Sixth, Seventh, Eighth
     }
-    private const string First = " /* native-plan-0 */";
-    private const string Second = " /* native-plan-1 */";
-    private const string Third = " /* native-plan-2 */";
-    private const string Fourth = " /* native-plan-3 */";
-    private const string Fifth = " /* native-plan-4 */";
-    private const string Sixth = " /* native-plan-5 */";
-    private const string Seventh = " /* native-plan-6 */";
-    private const string Eighth = " /* native-plan-7 */";
-    private const string Refused = " /* native-plan-refused */";
+    private const string First = " /* execution-plan-0 */";
+    private const string Second = " /* execution-plan-1 */";
+    private const string Third = " /* execution-plan-2 */";
+    private const string Fourth = " /* execution-plan-3 */";
+    private const string Fifth = " /* execution-plan-4 */";
+    private const string Sixth = " /* execution-plan-5 */";
+    private const string Seventh = " /* execution-plan-6 */";
+    private const string Eighth = " /* execution-plan-7 */";
+    private const string Refused = " /* execution-plan-refused */";
 }

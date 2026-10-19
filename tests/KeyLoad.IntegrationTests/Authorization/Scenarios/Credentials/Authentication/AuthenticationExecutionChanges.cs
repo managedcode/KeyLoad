@@ -1,7 +1,7 @@
 using KeyLoad.Client;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
-using KeyLoad.RecoveryTests.Features.ClusterRouting;
+using KeyLoad.RecoveryTests.Features.OrleansExecution;
 
 namespace KeyLoad.IntegrationTests.Features.Authorization;
 

@@ -3,7 +3,7 @@ using KeyLoad.Storage;
 using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
 using A = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsEntityLinkLifetimeAssertions;
-using D = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreNativeTestData;
+using D = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreTestData;
 using F = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsEntityLinkLifetimeFixture;
 
 namespace KeyLoad.UnitTests.Features.AnalyticsStore;
@@ -21,7 +21,7 @@ internal static class AnalyticsEntityLinkLifetimeFlow
             var retained = fixture.Owner.ReadOutcome(original).PreparedCommand;
             await Assert.That(retained.Value!.Input.Span.SequenceEqual(original.Value!.Input.Span)).IsTrue();
             var payload = retained.Value!;
-            var input = NativeSerialization.Deserialize<CommandRequest>(payload.Input.Span);
+            var input = OrleansSerialization.Deserialize<CommandRequest>(payload.Input.Span);
             await A.EqualAsync(fixture.Plain, ((UpsertAnalyticsEvents)input.Mutations.Single()).Events.Single().Links.Single());
         });
         var bound = await CommitAsync(fixture, fixture.Bound, 1, token);
@@ -57,10 +57,10 @@ internal static class AnalyticsEntityLinkLifetimeFlow
             Links = [link]
         };
         var request = new CommandRequest(id, owner.Source.Partition,
-            [new UpsertAnalyticsEvents(D.Store, [value], AnalyticsStoreNativeTestOperations.Revisions((D.First, revision)))]);
+            [new UpsertAnalyticsEvents(D.Store, [value], AnalyticsStoreTestOperations.Revisions((D.First, revision)))]);
         var work = new ReadExecutionBudget(owner.Database.OperationLimitsOptions, owner.Database.EvaluationClock, token);
         return owner.Database.CreateCommand(OperationKind.Batch, id, D.Root, owner.Database.EvaluationClock.GetUtcNow(),
-            NativeSerialization.Serialize(request), work);
+            OrleansSerialization.Serialize(request), work);
     }
 
     private static async Task<Command<DatabaseCommand>> CommitAsync(F fixture, EntityRef link, long revision, CancellationToken token)
@@ -85,7 +85,7 @@ internal static class AnalyticsEntityLinkLifetimeFlow
         await Assert.That(owner.ReadCanonicalCut().AppliedPosition).IsEqualTo(index);
         await Assert.That(owner.Database.LastApplied).IsEqualTo(index);
         await Assert.That(owner.Store.Position).IsEqualTo(position + 1);
-        // Failed command metadata is a legitimate native commit, not a business mutation.
+        // Failed command metadata is a legitimate execution commit, not a business mutation.
         var key = OutcomeStoreOracle.PartitionKey(owner.Source.Partition, D.Root, original.CommandId);
         var stored = owner.Store.Read(view => view.GetRecord<StoredOutcome>(key))!;
         await A.EqualAsync(result, stored.Result);

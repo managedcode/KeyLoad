@@ -14,7 +14,7 @@ internal static class GraphIncomingRowAuthorityAssertions
     private const string EdgeId = "private-edge";
     private const string Label = "links";
     private const string EmptyJson = "{}";
-    private const string Projection = "eventual-reverse.v1";
+    private const string Projection = "eventual-reverse";
 
     internal static async Task HealthyAsync(DatabaseEngine engine, ZoneTreeStore store,
         EntityRef source, EntityRef target, string reader, bool repairedTarget)
@@ -22,8 +22,8 @@ internal static class GraphIncomingRowAuthorityAssertions
         var image = CanonicalStoreImage.Bytes(store);
         var cut = store.Position;
         var actual = engine.ReadIncomingGraphEdges(reader,
-            new ReadIncomingGraphEdgesRequestV1(PageVersion, target, Graph, IncomingLimit));
-        var expected = new GraphIncomingEdgesPageV1(PageVersion,
+            new ReadIncomingGraphEdgesRequest(PageVersion, target, Graph, IncomingLimit));
+        var expected = new GraphIncomingEdgesPage(PageVersion,
             [new(new EdgeRecord(EdgeId, source, target, Label, EmptyJson, EdgeRevision), EdgeRevision)],
             cut, Projection);
         await Assert.That(JsonSerializer.Serialize(actual, JsonDefaults.Options))
@@ -40,7 +40,7 @@ internal static class GraphIncomingRowAuthorityAssertions
         var image = CanonicalStoreImage.Bytes(store);
         var cut = store.Position;
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => engine.ReadIncomingGraphEdges(reader,
-            new ReadIncomingGraphEdgesRequestV1(PageVersion, target, Graph, IncomingLimit)));
+            new ReadIncomingGraphEdgesRequest(PageVersion, target, Graph, IncomingLimit)));
         await Assert.That(failure.Code).IsEqualTo(expected);
         await Assert.That(CanonicalStoreImage.Bytes(store)).IsEquivalentTo(image);
         await Assert.That(store.Position).IsEqualTo(cut);

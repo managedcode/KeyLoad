@@ -39,7 +39,7 @@ internal sealed class SampleRollupLimitTests
         await SampleRollupWholeFlow.Literal(SampleRollupWholeFlow.Read(db), 2, 6, 3, 12, 2, 6, 4);
     }
     [Test]
-    public async Task AcSeries023ChargedNativeRawBytesRejectWholeBucketAndSmallerRangeRemainsHealthy()
+    public async Task AcSeries023ChargedRawBytesRejectWholeBucketAndSmallerRangeRemainsHealthy()
     {
         using var db = new TestDatabase(new DatabaseLimits { MaxQueryReadBytes = ReadByteLimit });
         SampleAggregateTestData.Configure(db);
@@ -57,8 +57,7 @@ internal sealed class SampleRollupLimitTests
     private static DatabaseEngine Engine(TestDatabase db, TimeSeriesExecutionOptions options)
         => new(db.Store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(),
             UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(),
-            UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(),
-            UnitExecutionOptions.NativeClaimsExecution(), Options.Create(options), db.Database.EvaluationClock);
+            UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), Options.Create(options), db.Database.EvaluationClock);
     private static Result<object> Apply(DatabaseEngine engine, PartitionRef partition, Mutation mutation)
     {
         var id = Guid.NewGuid();

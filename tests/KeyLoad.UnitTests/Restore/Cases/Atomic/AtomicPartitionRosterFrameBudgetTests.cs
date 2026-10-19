@@ -72,7 +72,7 @@ internal sealed class AtomicPartitionRosterFrameBudgetTests
             offset = checked(payloadStart + payloadLength);
         }
 
-        return latest ?? throw new InvalidDataException("The native journal contains no committed frame.");
+        return latest ?? throw new InvalidDataException("The execution journal contains no committed frame.");
     }
 
 }

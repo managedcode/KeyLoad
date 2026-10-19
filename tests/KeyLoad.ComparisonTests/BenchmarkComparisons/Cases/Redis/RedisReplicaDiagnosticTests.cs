@@ -7,11 +7,11 @@ namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 internal sealed class RedisReplicaDiagnosticTests
 {
-    private readonly RedisReplicaDiagnostics diagnostics = new(NativeExecutionPolicyFixture.ReadDiagnostics());
+    private readonly RedisReplicaDiagnostics diagnostics = new(ExecutionPolicyFixture.ReadDiagnostics());
 
     private const string PrimaryHost = "primary";
     private const string ReplicaHost = "replica1";
-    private const string NativeHost = "primary.dev.internal";
+    private const string RuntimeHost = "primary.dev.internal";
     private const string Secret = "credential-marker";
     private const string PredicateField = nameof(RedisReplicaDiagnostic.Predicate), RoleCountField = nameof(RedisReplicaDiagnostic.RoleCount);
     private const string PrimaryHostField = nameof(RedisReplicaDiagnostic.PrimaryHost), InfoHostField = nameof(RedisReplicaDiagnostic.InfoHost);
@@ -44,26 +44,26 @@ internal sealed class RedisReplicaDiagnosticTests
     {
         var info = Info();
         var role = Role();
-        var primary = new DnsEndPoint(NativeHost, Port);
+        var primary = new DnsEndPoint(RuntimeHost, Port);
         switch (predicate)
         {
             case "InfoRole":
-                info[RedisNativeProtocol.RoleField] = RedisNativeProtocol.MasterRole;
+                info[RedisProtocol.RoleField] = RedisProtocol.MasterRole;
                 break;
             case "InfoLink":
-                info[RedisNativeProtocol.LinkField] = "down";
+                info[RedisProtocol.LinkField] = "down";
                 break;
             case "InfoHost":
-                info.Remove(RedisNativeProtocol.MasterHostField);
+                info.Remove(RedisProtocol.MasterHostField);
                 break;
             case "InfoPort":
-                info[RedisNativeProtocol.MasterPortField] = "invalid";
+                info[RedisProtocol.MasterPortField] = "invalid";
                 break;
             case "RoleCardinality":
-                role = [RedisResult.Create((RedisValue)RedisNativeProtocol.ReplicaRole)];
+                role = [RedisResult.Create((RedisValue)RedisProtocol.ReplicaRole)];
                 break;
             case "RoleName":
-                role[0] = RedisResult.Create((RedisValue)RedisNativeProtocol.MasterRole);
+                role[0] = RedisResult.Create((RedisValue)RedisProtocol.MasterRole);
                 break;
             case "HostAgreement":
                 role[1] = RedisResult.Create((RedisValue)ReplicaHost);
@@ -82,15 +82,15 @@ internal sealed class RedisReplicaDiagnosticTests
     }
 
     [Test]
-    public async Task RetainsNativeAliasAndPortsWithoutNormalizingConfiguredIdentity()
+    public async Task RetainsAliasAndPortsWithoutNormalizingConfiguredIdentity()
     {
         using var projection = JsonDocument.Parse(diagnostics.Project(
             new DnsEndPoint(ReplicaHost, Port), new DnsEndPoint(PrimaryHost, Port), Info(), Role()));
         var root = projection.RootElement;
         await Assert.That(root.GetProperty(PredicateField).GetString()).IsEqualTo("ConfiguredPrimary");
         await Assert.That(root.GetProperty(PrimaryHostField).GetString()).IsEqualTo(PrimaryHost);
-        await Assert.That(root.GetProperty(InfoHostField).GetString()).IsEqualTo(NativeHost);
-        await Assert.That(root.GetProperty(RoleHostField).GetString()).IsEqualTo(NativeHost);
+        await Assert.That(root.GetProperty(InfoHostField).GetString()).IsEqualTo(RuntimeHost);
+        await Assert.That(root.GetProperty(RoleHostField).GetString()).IsEqualTo(RuntimeHost);
         await Assert.That(root.GetProperty(InfoPortField).GetInt32()).IsEqualTo(Port);
         await Assert.That(root.GetProperty(RolePortField).GetInt32()).IsEqualTo(Port);
         await Assert.That(root.GetProperty(RoleStateField).GetString()).IsEqualTo("connected");
@@ -100,12 +100,12 @@ internal sealed class RedisReplicaDiagnosticTests
     [Arguments("credential-marker")]
     [Arguments("redis://user:credential-marker@primary:6379")]
     [Arguments("primary\ncredential-marker")]
-    public async Task UnknownNativeTextAndUnrelatedInfoAreNeverExported(string unsafeValue)
+    public async Task UnknownTextAndUnrelatedInfoAreNeverExported(string unsafeValue)
     {
         var info = Info();
-        info[RedisNativeProtocol.MasterHostField] = unsafeValue;
-        info[RedisNativeProtocol.RoleField] = unsafeValue;
-        info[RedisNativeProtocol.LinkField] = unsafeValue;
+        info[RedisProtocol.MasterHostField] = unsafeValue;
+        info[RedisProtocol.RoleField] = unsafeValue;
+        info[RedisProtocol.LinkField] = unsafeValue;
         info[UnrelatedField] = Secret;
         var role = Role();
         role[0] = RedisResult.Create((RedisValue)unsafeValue);
@@ -114,7 +114,7 @@ internal sealed class RedisReplicaDiagnosticTests
         var text = diagnostics.Project(new DnsEndPoint(ReplicaHost, Port), new DnsEndPoint(PrimaryHost, Port), info, role);
         using var projection = JsonDocument.Parse(text);
         await Assert.That(text.Contains(Secret, StringComparison.Ordinal)).IsFalse();
-        await Assert.That(text.Length <= NativeExecutionPolicyFixture.ReadDiagnostics().Value.RedisReplicaMaximumCharacters).IsTrue();
+        await Assert.That(text.Length <= ExecutionPolicyFixture.ReadDiagnostics().Value.RedisReplicaMaximumCharacters).IsTrue();
         await Assert.That(projection.RootElement.GetProperty(InfoHostField).ValueKind).IsEqualTo(JsonValueKind.Null);
         await Assert.That(projection.RootElement.GetProperty(RoleStateField).ValueKind).IsEqualTo(JsonValueKind.Null);
     }
@@ -123,14 +123,14 @@ internal sealed class RedisReplicaDiagnosticTests
     public async Task OversizedAndInvalidPortsRemainBoundedNullObservations()
     {
         var info = Info();
-        info[RedisNativeProtocol.MasterHostField] = new string('x', 8192);
-        info[RedisNativeProtocol.MasterPortField] = "65536";
+        info[RedisProtocol.MasterHostField] = new string('x', 8192);
+        info[RedisProtocol.MasterPortField] = "65536";
         var role = Role();
         role[1] = RedisResult.Create((RedisValue)new string('x', 8192));
         role[2] = RedisResult.Create((RedisValue)65536);
         var text = diagnostics.Project(new DnsEndPoint(ReplicaHost, Port), new DnsEndPoint(PrimaryHost, Port), info, role);
         using var projection = JsonDocument.Parse(text);
-        await Assert.That(text.Length <= NativeExecutionPolicyFixture.ReadDiagnostics().Value.RedisReplicaMaximumCharacters).IsTrue();
+        await Assert.That(text.Length <= ExecutionPolicyFixture.ReadDiagnostics().Value.RedisReplicaMaximumCharacters).IsTrue();
         await Assert.That(projection.RootElement.GetProperty(InfoPortField).ValueKind).IsEqualTo(JsonValueKind.Null);
         await Assert.That(projection.RootElement.GetProperty(RolePortField).ValueKind).IsEqualTo(JsonValueKind.Null);
         await Assert.That(projection.RootElement.GetProperty(PredicateField).GetString()).IsEqualTo("ConfiguredPrimary");
@@ -140,9 +140,9 @@ internal sealed class RedisReplicaDiagnosticTests
     public async Task SuccessfulPredicateAndCaseInsensitiveAgreementAreDiagnosticOnly()
     {
         var info = Info();
-        info[RedisNativeProtocol.MasterHostField] = NativeHost.ToUpperInvariant();
+        info[RedisProtocol.MasterHostField] = RuntimeHost.ToUpperInvariant();
         using var projection = JsonDocument.Parse(diagnostics.Project(
-            new DnsEndPoint(ReplicaHost, Port), new DnsEndPoint(NativeHost, Port), info, Role()));
+            new DnsEndPoint(ReplicaHost, Port), new DnsEndPoint(RuntimeHost, Port), info, Role()));
         await Assert.That(projection.RootElement.GetProperty(PredicateField).GetString()).IsEqualTo("None");
     }
 
@@ -172,15 +172,15 @@ internal sealed class RedisReplicaDiagnosticTests
 
     private static Dictionary<string, string> Info() => new(StringComparer.Ordinal)
     {
-        [RedisNativeProtocol.RoleField] = RedisNativeProtocol.ReplicaRole,
-        [RedisNativeProtocol.LinkField] = RedisNativeProtocol.LinkUp,
-        [RedisNativeProtocol.MasterHostField] = NativeHost,
-        [RedisNativeProtocol.MasterPortField] = "6379",
+        [RedisProtocol.RoleField] = RedisProtocol.ReplicaRole,
+        [RedisProtocol.LinkField] = RedisProtocol.LinkUp,
+        [RedisProtocol.MasterHostField] = RuntimeHost,
+        [RedisProtocol.MasterPortField] = "6379",
     };
 
     private static RedisResult[] Role() =>
     [
-        RedisResult.Create((RedisValue)RedisNativeProtocol.ReplicaRole), RedisResult.Create((RedisValue)NativeHost),
+        RedisResult.Create((RedisValue)RedisProtocol.ReplicaRole), RedisResult.Create((RedisValue)RuntimeHost),
         RedisResult.Create((RedisValue)Port), RedisResult.Create((RedisValue)"connected"), RedisResult.Create((RedisValue)1),
     ];
 }

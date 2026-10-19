@@ -32,7 +32,7 @@ internal static class SubscriptionContinuationAssertions
         var row = store.Read(view => view.ReadOwnedValue(
             SubscriptionCheckpointAuthorityFlow.WindowKey(group, source.Position)));
         await Assert.That(row).IsNotNull();
-        await EqualAsync(NativeSerialization.Deserialize<GroupDelivery>(row!),
+        await EqualAsync(OrleansSerialization.Deserialize<GroupDelivery>(row!),
             new(source.Position, GroupDeliveryState.Leased, attempt, version,
                 LeaseUntil: time.AddSeconds(LeaseSeconds), PrincipalId: Subject));
         await SubscriptionCheckpointAuthorityAssertions.StatusAsync(db, group, checkpoint, issued, tail);
@@ -50,7 +50,7 @@ internal static class SubscriptionContinuationAssertions
         token.ThrowIfCancellationRequested();
         var image = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
-        var identity = NativeSerialization.Serialize(store.Identity);
+        var identity = OrleansSerialization.Serialize(store.Identity);
         var actual = QueueWholeFlowStorage.Apply(db, entry.Kind, entry.Request, entry.Id, time);
         if (Errors.Code(entry.Result.Problem) is not null)
         {
@@ -60,11 +60,11 @@ internal static class SubscriptionContinuationAssertions
         }
         else if (entry.Result.Value is CommitReceipt)
         {
-            await NativeReplayResultAssertions.Same<CommitReceipt>(actual, entry.Result);
+            await ReplayResultAssertions.Same<CommitReceipt>(actual, entry.Result);
         }
         else
         {
-            await NativeReplayResultAssertions.Same<ReceiveSubscriptionResult>(actual, entry.Result);
+            await ReplayResultAssertions.Same<ReceiveSubscriptionResult>(actual, entry.Result);
         }
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, image, position, identity);
     }
@@ -90,28 +90,28 @@ internal static class SubscriptionContinuationAssertions
         var prefix = KeySpace.Partition(SourceFamily, source.Partition, source.Resource, source.Generation);
         var page = store.Read(view => view.Scan(prefix, Window + SingleEventCount + ScanLookahead));
         await Assert.That(page.HasMore).IsFalse();
-        await Assert.That(page.Records.Select(row => NativeSerialization.Deserialize<SourceEventRecord>(row.Value.Span)))
+        await Assert.That(page.Records.Select(row => OrleansSerialization.Deserialize<SourceEventRecord>(row.Value.Span)))
             .IsEquivalentTo(expected, CollectionOrdering.Matching);
         foreach (var record in expected)
         {
             var key = KeySpace.Partition(SourceFamily, source.Partition, source.Resource, source.Generation, record.Position);
             var bytes = store.Read(view => view.ReadOwnedValue(key));
             await Assert.That(bytes).IsNotNull();
-            await EqualAsync(NativeSerialization.Deserialize<SourceEventRecord>(bytes!), record);
+            await EqualAsync(OrleansSerialization.Deserialize<SourceEventRecord>(bytes!), record);
             var id = KeySpace.Partition(SourceIdentityFamily, source.Partition, source.Resource, source.Generation, record.Data.EventId);
             var identity = store.Read(view => view.ReadOwnedValue(id));
             await Assert.That(identity).IsNotNull();
-            await EqualAsync(NativeSerialization.Deserialize<long>(identity!), record.Position);
+            await EqualAsync(OrleansSerialization.Deserialize<long>(identity!), record.Position);
         }
         var headKey = KeySpace.Partition(SourceHeadFamily, source.Partition, source.Resource);
         var head = store.Read(view => view.ReadOwnedValue(headKey));
         await Assert.That(head).IsNotNull();
         var storedBytes = page.Records.Sum(row => (long)row.Value.Length);
-        await EqualAsync(NativeSerialization.Deserialize<TopicHead>(head!),
+        await EqualAsync(OrleansSerialization.Deserialize<TopicHead>(head!),
             new(HealthyPosition, RetainedFloor, source.Generation, storedBytes));
         var sequence = store.Read(view => view.ReadOwnedValue(KeySpace.Partition(SourceSequenceFamily, source.Partition)));
         await Assert.That(sequence).IsNotNull();
-        await EqualAsync(NativeSerialization.Deserialize<long>(sequence!), HealthyPosition);
+        await EqualAsync(OrleansSerialization.Deserialize<long>(sequence!), HealthyPosition);
     }
 
     internal static async Task WindowAsync(ZoneTreeStore store, SubscriptionRef group, long checkpoint,
@@ -122,7 +122,7 @@ internal static class SubscriptionContinuationAssertions
             source.Kind.ToString(), source.StreamId, source.Generation, group.GroupId);
         var state = store.Read(view => view.ReadOwnedValue(key));
         await Assert.That(state).IsNotNull();
-        await EqualAsync(NativeSerialization.Deserialize<GroupState>(state!),
+        await EqualAsync(OrleansSerialization.Deserialize<GroupState>(state!),
             new(new(Subject)
             {
                 Policy = new()
@@ -136,11 +136,11 @@ internal static class SubscriptionContinuationAssertions
         var expected = deliveries.Select(delivery => new GroupDelivery(delivery.Event.Position,
             GroupDeliveryState.Leased, delivery.Attempt, delivery.LeaseVersion,
             LeaseUntil: delivery.LeaseUntil, PrincipalId: Subject)).ToArray();
-        await Assert.That(page.Records.Select(row => NativeSerialization.Deserialize<GroupDelivery>(row.Value.Span)))
+        await Assert.That(page.Records.Select(row => OrleansSerialization.Deserialize<GroupDelivery>(row.Value.Span)))
             .IsEquivalentTo(expected, CollectionOrdering.Matching);
         foreach (var row in page.Records)
         {
-            var delivery = NativeSerialization.Deserialize<GroupDelivery>(row.Value.Span);
+            var delivery = OrleansSerialization.Deserialize<GroupDelivery>(row.Value.Span);
             await Assert.That(row.Key.Span.SequenceEqual(
                 SubscriptionCheckpointAuthorityFlow.WindowKey(group, delivery.Position))).IsTrue();
         }
@@ -156,7 +156,7 @@ internal static class SubscriptionContinuationAssertions
         await EqualAsync(original.Get<ReceiveSubscriptionResult>(), entry.Result.Get<ReceiveSubscriptionResult>());
         var image = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
-        var identity = NativeSerialization.Serialize(store.Identity);
+        var identity = OrleansSerialization.Serialize(store.Identity);
         var refused = QueueWholeFlowStorage.Apply(db, entry.Kind, entry.Request, entry.Id, time);
         await Assert.That(Errors.Code(refused.Problem)).IsEqualTo(ErrorCode.StaleLease);
         await Assert.That(refused.Problem?.Detail).IsEqualTo(StaleDetail);
@@ -167,6 +167,6 @@ internal static class SubscriptionContinuationAssertions
 
     private static async Task EqualAsync<T>(T actual, T expected)
     {
-        await SubscriptionNativeValueAssertions.EqualAsync(actual, expected);
+        await SubscriptionValueAssertions.EqualAsync(actual, expected);
     }
 }

@@ -11,7 +11,7 @@ public static class QueueDispatchClient
     /// <param name="client">The authenticated existing client.</param>
     /// <param name="commandId">The original stable command identity used for replay.</param>
     /// <param name="request">The selected queue, desired pause state and expected version.</param>
-    /// <param name="cancellationToken">Cancellation for the complete native operation.</param>
+    /// <param name="cancellationToken">Cancellation for the complete execution operation.</param>
     /// <returns>The complete committed resource definition or the original typed failure.</returns>
     public static Task<Result<ResourceDefinition>> SetQueueDispatchAsync(this KeyLoadClient client,
         Guid commandId, QueueDispatchControlRequest request, CancellationToken cancellationToken = default)

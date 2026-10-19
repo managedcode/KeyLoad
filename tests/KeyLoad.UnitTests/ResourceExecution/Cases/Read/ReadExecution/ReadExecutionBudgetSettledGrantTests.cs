@@ -9,7 +9,7 @@ internal sealed class ReadExecutionBudgetSettledGrantTests
         => await ReadGrantFailureSettlementFlow.RunAsync();
 
     [Test]
-    public async Task SettledNativeReadReturnsOnlyUnusedReservationAndPreservesConsumedLedger()
+    public async Task SettledReadReturnsOnlyUnusedReservationAndPreservesConsumedLedger()
     {
         var firstBytes = ReadExecutionBudgetGrantSeed.FirstKey.Length + ReadExecutionBudgetGrantSeed.FirstValue.Length;
         var secondBytes = ReadExecutionBudgetGrantSeed.SecondKey.Length + ReadExecutionBudgetGrantSeed.SecondValue.Length;
@@ -39,7 +39,7 @@ internal sealed class ReadExecutionBudgetSettledGrantTests
     }
 
     [Test]
-    public async Task ClosedGrantCannotReadNativeDataOrReturnItsReservationTwice()
+    public async Task ClosedGrantCannotReadDataOrReturnItsReservationTwice()
     {
         using var database = ReadExecutionBudgetGrantSeed.CreateDatabase();
         var result = database.Store.Read(view =>
@@ -63,7 +63,7 @@ internal sealed class ReadExecutionBudgetSettledGrantTests
     }
 
     [Test]
-    public async Task CompletionDoesNotReleaseAnotherUnsettledNativeChildReservation()
+    public async Task CompletionDoesNotReleaseAnotherUnsettledChildReservation()
     {
         var maximum = ReadExecutionBudgetGrantSeed.FirstKey.Length + ReadExecutionBudgetGrantSeed.FirstValue.Length;
         using var database = ReadExecutionBudgetGrantSeed.CreateDatabase(new()

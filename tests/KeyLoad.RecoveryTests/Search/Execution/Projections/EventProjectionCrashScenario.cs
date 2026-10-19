@@ -158,10 +158,10 @@ internal static class EventProjectionCrashScenario
     {
         const string PreserveBeforeCutAsyncMessageText = "The projection target unexpectedly had a vector before the crash cut.";
 
-        await File.WriteAllBytesAsync(Path.Combine(directory, OperationFile), NativeSerialization.Serialize(operation));
-        await File.WriteAllBytesAsync(Path.Combine(directory, PositionFile), NativeSerialization.Serialize(store.Position));
+        await File.WriteAllBytesAsync(Path.Combine(directory, OperationFile), OrleansSerialization.Serialize(operation));
+        await File.WriteAllBytesAsync(Path.Combine(directory, PositionFile), OrleansSerialization.Serialize(store.Position));
         await File.WriteAllBytesAsync(Path.Combine(directory, TargetTokenFile),
-            NativeSerialization.Serialize(CrashDatabase.NextCommitToken(database, Partition)));
+            OrleansSerialization.Serialize(CrashDatabase.NextCommitToken(database, Partition)));
         await SaveRecordAsync(directory, store, OutboxHeadFile, OutboxHeadKey());
         await SaveRecordAsync(directory, store, SourceDocumentFile, DocumentKey(SourceId));
         await SaveRecordAsync(directory, store, TargetDocumentFile, DocumentKey(TargetId));

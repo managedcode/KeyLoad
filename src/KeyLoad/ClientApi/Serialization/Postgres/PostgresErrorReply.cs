@@ -44,5 +44,5 @@ internal static class PostgresErrorReply
     private const string MessageField = "\0M";
     private const string EndFields = "\0\0";
     private const string ErrorSeverity = "ERROR";
-    private const string InternalMessage = "NativeOperationFailed";
+    private const string InternalMessage = "OperationFailed";
 }

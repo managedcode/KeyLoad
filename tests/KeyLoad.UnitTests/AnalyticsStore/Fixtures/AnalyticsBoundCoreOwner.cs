@@ -3,13 +3,13 @@ using KeyLoad.Core;
 using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.RecoveryTests.Features.ResourceExecution;
 using KeyLoad.Server;
-using D = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreNativeTestData;
+using D = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreTestData;
 
 namespace KeyLoad.UnitTests.Features.AnalyticsStore;
 
 internal static class AnalyticsBoundCoreOwner
 {
-    internal static async Task RunAsync(Func<TestDatabase, NativeRequestWorkOwner, CancellationToken, Task> body,
+    internal static async Task RunAsync(Func<TestDatabase, RequestWorkOwner, CancellationToken, Task> body,
         CancellationToken token)
     {
         using var fixture = new TestDatabase();
@@ -17,14 +17,14 @@ internal static class AnalyticsBoundCoreOwner
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            await using var owner = new NativeRequestWorkOwner(UnitRoutingOptions.Routing());
+            await using var owner = new RequestWorkOwner(UnitRoutingOptions.Routing());
             await ServerFailureObserver.ObserveAsync(() => body(fixture, owner, token), failures);
         }, failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    internal static async Task LeaseAsync(TestDatabase fixture, NativeRequestWorkOwner owner,
-        Func<NativeRequestWorkLease, ResourceLifetimeWorkResultRetention, ReadExecutionBudget, Task> body,
+    internal static async Task LeaseAsync(TestDatabase fixture, RequestWorkOwner owner,
+        Func<RequestWorkLease, ResourceLifetimeWorkResultRetention, ReadExecutionBudget, Task> body,
         CancellationToken token)
     {
         var failures = new List<Exception>();
@@ -34,7 +34,7 @@ internal static class AnalyticsBoundCoreOwner
             using var pending = new PendingResultRetention(fixture.Database.OperationLimitsOptions);
             try
             {
-                var lease = owner.Acquire(Guid.NewGuid(), NativeRequestWorkKind.ReadCapability);
+                var lease = owner.Acquire(Guid.NewGuid(), RequestWorkKind.ReadCapability);
                 ServerFailureObserver.Observe(() =>
                 {
                     ledger = pending.TransferTo(lease);
@@ -50,27 +50,27 @@ internal static class AnalyticsBoundCoreOwner
                 }
                 await FinishAsync(lease, ledger, failures);
             }
-            catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+            catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error))
             {
                 failures.Add(error);
             }
-            catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
+            catch (Exception error) when (!CqrsBoundaryErrors.IsNonFatal(error))
             {
                 failures.Add(error);
             }
         }
-        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+        catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error))
         {
             failures.Add(error);
         }
-        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
+        catch (Exception error) when (!CqrsBoundaryErrors.IsNonFatal(error))
         {
             failures.Add(error);
         }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    private static async Task FinishAsync(NativeRequestWorkLease lease,
+    private static async Task FinishAsync(RequestWorkLease lease,
         ResourceLifetimeWorkResultRetention? ledger, List<Exception> failures)
     {
         var primary = failures.FirstOrDefault();

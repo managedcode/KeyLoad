@@ -1,5 +1,5 @@
 using System.Text.Json;
-using KeyLoad.IntegrationTests.Features.ClusterReplication;
+using KeyLoad.IntegrationTests.Features.StorageReplication;
 using KeyLoad.IntegrationTests.Features.RelationalStorage;
 
 namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
@@ -35,7 +35,7 @@ internal static class FunctionalGateColdRetainedHealthy
         foreach (var route in Enum.GetValues<DropLifecycleClusterRoute>())
         {
             var replay = await FunctionalGateColdRetainedCalls.CommitAsync(context, command, route, token);
-            await NativeSubmissionColdAssertions.ReceiptAsync(replay, originalReceipt);
+            await SubmissionColdAssertions.ReceiptAsync(replay, originalReceipt);
             await FunctionalGateColdRetainedRows.ReadAsync(context, expected, token);
             await unchanged(context);
         }

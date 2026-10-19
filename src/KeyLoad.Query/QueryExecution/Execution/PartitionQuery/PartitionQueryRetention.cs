@@ -17,7 +17,7 @@ internal static class PartitionQueryRetention
     internal const long RootDescriptorBytes = 128;
     internal const long LeafDescriptorBytes = 256;
 
-    internal static long CandidateBytes(PartitionQueryCandidateV1 candidate)
+    internal static long CandidateBytes(PartitionQueryCandidate candidate)
         => CandidateBytes(candidate.Reference, candidate.Row, candidate.OrderKeys);
 
     internal static long CandidateBytes(EntityRef reference, QueryRow row,
@@ -77,7 +77,7 @@ internal static class PartitionQueryRetention
         return bytes;
     }
 
-    internal static long RootMergeReserve(PartitionQueryPlanV1 plan)
+    internal static long RootMergeReserve(PartitionQueryPlan plan)
     {
         long candidates = InitialSequence;
         foreach (var leaf in plan.Leaves)

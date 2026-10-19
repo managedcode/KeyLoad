@@ -46,19 +46,19 @@ export async function verifySessionSiteInputs({ input, receipt: receiptPath }) {
   if (receipt.mode === 'publish') requirePublishableSessionMeasurements(aggregate);
   const aggregateHash = await hashRegularFile(aggregateFile, SESSION.aggregateBytes);
   requireSession(isDeepStrictEqual(sessionSuiteFiles(aggregate, aggregateHash.sha256), receipt.suiteFiles));
-  for (const [index, original] of selected.native.workers.entries()) {
+  for (const [index, original] of selected.execution.workers.entries()) {
     const worker = aggregate.workers[index];
     requireSession(worker.id === original.row.id && worker.job.id === original.job.id && worker.artifact.id === original.artifact.id
       && worker.artifact.digest === original.artifact.digest);
   }
   const providerRoot = path.join(input, 'input', 'provider');
-  requireSession(isDeepStrictEqual(receipt.preparation.job, projectJob(selected.native.preparation, receipt.cohort, SESSION.prepareSteps))
-    && isDeepStrictEqual(receipt.preparation.compiledArtifact, projectArtifact(selected.native.compiledArtifact))
+  requireSession(isDeepStrictEqual(receipt.preparation.job, projectJob(selected.execution.preparation, receipt.cohort, SESSION.prepareSteps))
+    && isDeepStrictEqual(receipt.preparation.compiledArtifact, projectArtifact(selected.execution.compiledArtifact))
     && isDeepStrictEqual(receipt.preparation.job, aggregate.preparation.job)
     && isDeepStrictEqual(receipt.preparation.compiledArtifact, aggregate.preparation.compiledArtifact));
   const runtimeIdentity = await readSessionRuntimeIdentity(path.join(providerRoot, 'github', 'runtime'), receipt.cohort);
   requireSession(isDeepStrictEqual(receipt.runtimeIdentity.artifact, aggregate.preparation.runtimeIdentity.artifact)
-    && receipt.runtimeIdentity.artifact.id === selected.native.runtimeArtifact.id
+    && receipt.runtimeIdentity.artifact.id === selected.execution.runtimeArtifact.id
     && runtimeIdentity.descriptorSha256 === aggregate.preparation.runtimeIdentity.descriptorSha256
     && runtimeIdentity.inventorySha256 === aggregate.preparation.runtimeIdentity.inventorySha256);
   for (const worker of aggregate.workers) {
@@ -74,7 +74,7 @@ export async function verifySessionSiteInputs({ input, receipt: receiptPath }) {
   const proof = await readJson(path.join(input, 'input', 'provider', 'proof.json'));
   requireSession(isDeepStrictEqual(proof.cohort, aggregate.cohort)
     && isDeepStrictEqual(proof.preparation, aggregate.preparation)
-    && isDeepStrictEqual(proof.workers, aggregate.workers.map(({session,reports,native,qualification,resourceQualified,stateSha256,...worker}) => worker)));
+    && isDeepStrictEqual(proof.workers, aggregate.workers.map(({session,reports,execution,qualification,resourceQualified,stateSha256,...worker}) => worker)));
   return { workers: aggregate.workers.length, files: receipt.inputFiles.length };
 }
 function identity(receipt) {

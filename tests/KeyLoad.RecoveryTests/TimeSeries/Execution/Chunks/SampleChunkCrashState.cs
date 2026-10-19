@@ -7,7 +7,7 @@ internal static class SampleChunkCrashState
     private const string Samples = "sample";
     private const string SampleIdentities = "sample-id";
     private const string SampleSequence = "sample-sequence";
-    private const string SampleRetention = "sample-retention-v1";
+    private const string SampleRetention = "sample-retention";
     private static readonly string[] RawFamilies = [Samples, SampleIdentities, SampleSequence, SampleRetention];
 
     internal static async Task WriteAsync(string root, string name, DatabaseEngine database,

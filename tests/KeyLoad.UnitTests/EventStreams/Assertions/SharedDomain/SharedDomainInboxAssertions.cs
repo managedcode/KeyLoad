@@ -17,7 +17,7 @@ internal static class SharedDomainInboxAssertions
         await Assert.That(page.Records.Length).IsEqualTo(SingleInput);
         var key = KeySpace.Partition(Inbox, request.Lane.Partition, request.Lane.Queue, Item, request.HandlerScope, request.ExecutionGeneration);
         await Assert.That(page.Records.Single().Key.Span.SequenceEqual(key)).IsTrue();
-        var inbox = NativeSerialization.Deserialize<InboxRecord>(page.Records.Single().Value.Span);
+        var inbox = OrleansSerialization.Deserialize<InboxRecord>(page.Records.Single().Value.Span);
         var fingerprint = JsonData.Fingerprint(new
         {
             request.Lane,

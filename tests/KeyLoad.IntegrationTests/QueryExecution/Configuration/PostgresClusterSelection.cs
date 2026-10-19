@@ -2,13 +2,13 @@ using System.Globalization;
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.Testing;
-using KeyLoad.IntegrationTests.Features.ClusterReplication;
+using KeyLoad.IntegrationTests.Features.StorageReplication;
 
 namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 
 internal sealed record PostgresClusterSelection(int QueryDialect)
 {
-    private const string Prefix = "KeyLoad__NativeSql__";
+    private const string Prefix = "KeyLoad__Sql__";
     private const string Tcp = "tcp";
     private const string True = "true";
 

@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 
 namespace KeyLoad.UnitTests.Features.ClientApi;
 
-/// <summary>AC-CRS-003/004: the actual outer HTTP boundary preserves native fatal exceptions.</summary>
+/// <summary>AC-CRS-003/004: the actual outer HTTP boundary preserves execution fatal exceptions.</summary>
 [NotInParallel(LoggingEventSourceIsolation.Key)]
 internal sealed class RequestCqrsPublicFatalMiddlewareTests
 {
@@ -21,7 +21,7 @@ internal sealed class RequestCqrsPublicFatalMiddlewareTests
     private const string NoFatalObserved = "The middleware continuation did not propagate its configured fatal.";
 
     [Test]
-    public async Task AcCrs003004HttpBoundaryPreservesNativeFatalIdentityAndAllowsNextRequest()
+    public async Task AcCrs003004HttpBoundaryPreservesFatalIdentityAndAllowsNextRequest()
     {
         using var capture = new RequestFailureDiagnosticEventSourceCapture();
         using var factory = RequestFailureDiagnosticLoggerFactory.Create();
@@ -107,7 +107,7 @@ internal sealed class RequestCqrsPublicFatalMiddlewareTests
         {
             await operation;
         }
-        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
+        catch (Exception error) when (!CqrsBoundaryErrors.IsNonFatal(error))
         {
             return error;
         }

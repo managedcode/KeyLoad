@@ -1,0 +1,27 @@
+# text wait observer failure regression
+
+The unchanged real wait validates persisted principal, Query/DocumentsRead, FieldUse, actual commit token and provider before capture; provider cleanup occurs inside the owning view and callback publication occurs after read exit. This note adds no product observer, trusted role, serializer, context, routing or transport substitute.
+
+REQ-FTS-OBSERVER-FAIL-001 maps to AC-FTS-OBSERVER-FAIL-001: the genuine post-gate callback first reads the complete original canonical image through the selected TextWaitObservationObserver (actual Scan with original 4096-row bound and explicit HasMore failure), then throws one exact owned IOException. The awaited wait must expose that same exception reference; the complete canonical rows and position must remain unchanged. The same original provider and fixture then perform a fresh ordinary healthy wait with the full original receipt token and independent literal schema/policy 1, and return exact Ukrainian and English pages, JSON/revision/reference/score. No successful result is fabricated from the failed wait.
+
+AC-FTS-OBSERVER-FAIL-001 maps to TextWaitThrowingObservationTests.ActualPostReadObserverFailureRetainsIdentityAndCompleteImageThenSameProviderRemainsHealthy. Actual original TextWaitSeed commits its genuine Batch through log/materializer; TextBilingualAudit owns the same real projection. The optional test observer decorates the existing bounded full-image capture, not the storage/provider/transport. Original FTS41 three cases remain unchanged.
+
+Canonical Search map: observer role tests/KeyLoad.UnitTests/Search/Observations/FullText/Lifecycle/TextWaitThrowingObservationObserver.cs; complete operation/cleanup role Helpers/TextWaitThrowingObservationTrial.cs; case role Cases/TextWaitThrowingObservationTests.cs. Core/projection/query owners remain the unchanged original fixtures and coherent FTS41. Backend and public contracts have no additional change; frontend, benchmark and deployment are N/A for this test supplement.
+
+Original token/cancellation and complete fixture/projection disposal are observed with the actual ServerFailureObserver ordered ledger, preserving body and cleanup exceptions and joining original resources. A following successful wait exercises the same provider after the production-owned lease disposal; this is not an independently instrumented disposal-fault proof. kernel source coverage is separate from the replicated cluster, cold/process, real public SDK/official MCP, power-loss and performance qualification.
+
+```mermaid
+sequenceDiagram
+    participant RuntimeWait
+    participant View
+    participant Provider
+    participant Observer
+    RuntimeWait->>View: actual current authorized read
+    View->>Provider: original wait and joined lease cleanup
+    View-->>RuntimeWait: complete result plus immutable metadata
+    RuntimeWait->>Observer: post-read callback
+    Observer->>View: genuine complete image read
+    Observer-->>RuntimeWait: exact original IOException
+    RuntimeWait->>View: same provider fresh healthy wait
+    View-->>RuntimeWait: full original token and literal bilingual pages
+```

@@ -41,7 +41,7 @@ internal static class SampleRangeBudgetWholeFlow
             }),
             UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(),
             UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(),
-            UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(),
+            UnitExecutionOptions.RuntimeClaimsExecution(),
             UnitExecutionOptions.TimeSeriesExecution(), timeProvider: fixture.Owner.EvaluationClock);
 
     internal static SampleRecord[] ReadPair(SampleRawIntegrityFixture fixture, DatabaseEngine owner,

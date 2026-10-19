@@ -12,7 +12,7 @@ internal sealed class OpenSearchVectorResponseTests
     private const string PrecisionRows = "[{\"id\":\"d000002289\",\"score\":0.27605485016755293,\"payload\":{\"value\":2289}},{\"id\":\"d000001272\",\"score\":0.2760548285997265,\"payload\":{\"value\":1272}}]";
     private const string ProjectionRows = "[{\"id\":\"a\",\"score\":-0.5,\"payload\":" + Projected + "},{\"id\":\"b\",\"score\":-0.5,\"payload\":{}}]";
 
-    /// <summary>AC-BC-FAIL-010: native double distinctions survive reading and projection retains nested JSON values.</summary>
+    /// <summary>AC-BC-FAIL-010: execution double distinctions survive reading and projection retains nested JSON values.</summary>
     [Test]
     public async Task ResponsePreservesDoubleOrderingAndExactJsonProjection()
     {
@@ -27,7 +27,7 @@ internal sealed class OpenSearchVectorResponseTests
         await Assert.That(BenchmarkDataset.SameJson(projected[0].Json, Projected)).IsTrue();
     }
 
-    /// <summary>AC-BC-FAIL-010: authentic empty native states produce no neighbors, without inventing a score.</summary>
+    /// <summary>AC-BC-FAIL-010: authentic empty execution states produce no neighbors, without inventing a score.</summary>
     [Test]
     public async Task ResponseAcceptsEmptyNeighbors()
     {
@@ -44,7 +44,7 @@ internal sealed class OpenSearchVectorResponseTests
         await Assert.That(neighbors.Select(row => row.Id).SequenceEqual(["a", "b"], StringComparer.Ordinal)).IsTrue();
     }
 
-    /// <summary>AC-BC-FAIL-010: corrupt native aggregation rows never become measured neighbors.</summary>
+    /// <summary>AC-BC-FAIL-010: corrupt execution aggregation rows never become measured neighbors.</summary>
     [Test]
     [Arguments("null")]
     [Arguments("{}")]
@@ -73,7 +73,7 @@ internal sealed class OpenSearchVectorResponseTests
         await Assert.That(() => OpenSearchSearchResponse.Read(json.RootElement, 1)).Throws<ComparisonFailureException>();
     }
 
-    /// <summary>AC-BC-FAIL-010: incomplete, timed-out or failed native shard responses retain their failure contract.</summary>
+    /// <summary>AC-BC-FAIL-010: incomplete, timed-out or failed execution shard responses retain their failure contract.</summary>
     [Test]
     [Arguments("{}")]
     [Arguments("{\"timed_out\":true}")]
@@ -82,7 +82,7 @@ internal sealed class OpenSearchVectorResponseTests
     [Arguments("{\"timed_out\":false,\"_shards\":{\"failed\":0,\"successful\":-1}}")]
     [Arguments("{\"timed_out\":false,\"_shards\":{\"failed\":0,\"successful\":1}}")]
     [Arguments("{\"timed_out\":false,\"_shards\":{\"failed\":0,\"successful\":1},\"aggregations\":{}}")]
-    public async Task ResponseRejectsIncompleteOrFailedNativeEnvelope(string response)
+    public async Task ResponseRejectsIncompleteOrFailedEnvelope(string response)
     {
         using var json = JsonDocument.Parse(response);
         await Assert.That(() => OpenSearchSearchResponse.Read(json.RootElement, 2)).Throws<ComparisonFailureException>();

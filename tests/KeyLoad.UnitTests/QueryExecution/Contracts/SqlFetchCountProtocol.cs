@@ -8,7 +8,7 @@ internal static class SqlFetchCountProtocol
     internal const string Reader = "fetch_count_reader";
     internal const string Label = "/label";
     internal const string LabelName = "label";
-    internal const string Profile = "TSQL.OffsetFetch.v1";
+    internal const string Profile = "TSQL.OffsetFetch";
     internal const string Prefix = "SELECT label AS label FROM fetch_count ORDER BY label ASC ";
     internal const int ResultCount = 3;
     internal const int ColdCuts = 2;

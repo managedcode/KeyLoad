@@ -65,7 +65,7 @@ internal static class CliBackupRestoreAssertions
         await Assert.That(reopened.Identity.NodeId).IsEqualTo(restoredNode);
         await Assert.That(reopened.Identity.Incarnation).IsEqualTo(restoredIncarnation);
         await Assert.That(reopened.Identity.DispatchPaused).IsTrue();
-        var value = reopened.Read(view => NativeSerialization.Deserialize<string>(view.ReadOwnedValue(CliBackupRestoreFixture.StoredKeyBytes)!));
+        var value = reopened.Read(view => OrleansSerialization.Deserialize<string>(view.ReadOwnedValue(CliBackupRestoreFixture.StoredKeyBytes)!));
         await Assert.That(value).IsEqualTo(CliBackupRestoreFixture.StoredValue);
     }
 

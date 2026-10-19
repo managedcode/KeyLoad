@@ -17,7 +17,7 @@ internal static class KurrentClusterVerifier
         {
             foreach (var client in httpClients)
             {
-                nodeClients.Add(new KurrentDBClient(KurrentNativeSettings.CreateDirectNode(connectionString, client.BaseAddress!)));
+                nodeClients.Add(new KurrentDBClient(KurrentSettings.CreateDirectNode(connectionString, client.BaseAddress!)));
             }
 
             return new KurrentClusterProof(nodeClients.ToArray());

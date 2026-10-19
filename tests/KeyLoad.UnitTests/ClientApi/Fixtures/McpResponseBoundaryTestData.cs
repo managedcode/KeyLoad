@@ -65,7 +65,7 @@ internal static class McpResponseBoundaryTestData
     internal static byte[] IdentifierFrame(string encoded, bool escapedKey = false)
         => Encoding.UTF8.GetBytes((escapedKey ? EscapedIdentifierPrefix : IdentifierPrefix) + encoded + IdentifierSuffix);
 
-    /// <summary>Serializes missing or wrong native parameter fields using the actual canonical serializer.</summary>
+    /// <summary>Serializes missing or wrong execution parameter fields using the actual canonical serializer.</summary>
     /// <param name="method">The body method, omitted when null.</param>
     /// <param name="parameters">The concrete JSON parameter value, including null or a nonobject.</param>
     /// <param name="omitParameters">Whether to omit the property completely.</param>
@@ -87,8 +87,8 @@ internal static class McpResponseBoundaryTestData
     }
 
     /// <summary>Creates one concrete missing-target or invalid-parameter condition.</summary>
-    /// <param name="method">The routed native body method.</param>
-    /// <param name="field">The native target parameter key.</param>
+    /// <param name="method">The routed execution body method.</param>
+    /// <param name="field">The execution target parameter key.</param>
     /// <param name="fault">The precise absence or type failure.</param>
     /// <returns>The real serialized frame used directly by the guard.</returns>
     internal static byte[] InvalidTargetFrame(string method, string field, McpMissingTargetFault fault)

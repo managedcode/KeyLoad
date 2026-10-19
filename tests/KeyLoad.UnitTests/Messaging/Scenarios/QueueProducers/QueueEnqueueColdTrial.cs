@@ -31,7 +31,7 @@ internal static class QueueEnqueueColdTrial
         using var reopened = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution(),
             UnitExecutionOptions.PointCacheExecution());
         var database = QueueWholeFlowStorage.Open(reopened);
-        await NativeReplayResultAssertions.Same<CommitReceipt>(Apply(database, command, QueueEnqueueColdProtocol.Root, token), original);
+        await ReplayResultAssertions.Same<CommitReceipt>(Apply(database, command, QueueEnqueueColdProtocol.Root, token), original);
         await Assert.That(QueueEnqueueColdAssertions.LaneBytes(reopened, fixture.Partition)).IsEquivalentTo(image, CollectionOrdering.Matching);
         await QueueEnqueueColdAssertions.RequireInitialAsync(database, fixture.Partition, scheduledAt);
         await RefusalsAsync(database, fixture.Partition, command, image, token);
@@ -52,8 +52,8 @@ internal static class QueueEnqueueColdTrial
         reopened.Dispose();
         using var cold = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         var restored = QueueWholeFlowStorage.Open(cold);
-        await NativeReplayResultAssertions.Same<CommitReceipt>(Apply(restored, command, QueueEnqueueColdProtocol.Root, token), original);
-        await NativeReplayResultAssertions.Same<CommitReceipt>(Apply(restored, healthy, QueueEnqueueColdProtocol.Publisher, token), healthyResult);
+        await ReplayResultAssertions.Same<CommitReceipt>(Apply(restored, command, QueueEnqueueColdProtocol.Root, token), original);
+        await ReplayResultAssertions.Same<CommitReceipt>(Apply(restored, healthy, QueueEnqueueColdProtocol.Publisher, token), healthyResult);
         await Assert.That(QueueEnqueueColdAssertions.LaneBytes(cold, fixture.Partition)).IsEquivalentTo(healthyImage, CollectionOrdering.Matching);
         await QueueEnqueueColdAssertions.RequireHealthyAsync(restored, fixture.Partition, scheduledAt);
         await QueueEnqueueColdAssertions.RequireProducerAsync(restored, fixture.Partition);

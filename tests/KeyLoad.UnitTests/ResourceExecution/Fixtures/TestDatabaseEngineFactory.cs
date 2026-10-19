@@ -11,11 +11,11 @@ internal static class TestDatabaseEngineFactory
     private const string AllFields = "*";
 
     internal static Func<ZoneTreeStore, DatabaseEngine> Capture(IOptions<DatabaseLimits> limits,
-        IOptions<BlobExecutionOptions> blob, IOptions<NativeClaimsExecutionOptions> claims,
+        IOptions<ClaimsExecutionOptions> claims,
         TimeSeriesExecutionOptions? timeSeries, TimeProvider clock)
         => store => new DatabaseEngine(store, new AuthorizationPolicy(), limits,
             UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(),
-            UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), blob, claims,
+            UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), claims,
             UnitExecutionOptions.TimeSeriesExecution(timeSeries), clock);
 
     internal static void Bootstrap(DatabaseEngine database, string principalId, string credential)

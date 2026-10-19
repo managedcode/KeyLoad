@@ -1,13 +1,13 @@
 using KeyLoad.Client;
 using KeyLoad.Server;
-using KeyLoad.UnitTests.Features.ClusterRouting;
+using KeyLoad.UnitTests.Features.OrleansExecution;
 using KeyLoad.UnitTests.Features.Messaging;
 
 namespace KeyLoad.UnitTests.Features.ClientApi;
 
 internal static class CommittedResponseFlow
 {
-    internal static async Task RunAsync(ConnectionNativeScenario scenario, bool callerCancellation)
+    internal static async Task RunAsync(ConnectionScenario scenario, bool callerCancellation)
     {
         await scenario.InitializeAsync(TestContext.Current!.Execution.CancellationToken);
         using var deadline = new CancellationTokenSource(scenario.Timing.CompletionTimeout, TimeProvider.System);
@@ -37,7 +37,7 @@ internal static class CommittedResponseFlow
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    private static async Task ExecuteAsync(ConnectionNativeScenario scenario, KeyLoadClientKestrelServer server,
+    private static async Task ExecuteAsync(ConnectionScenario scenario, KeyLoadClientKestrelServer server,
         CommittedResponseEndpoint endpoint, CommandRequest command, CommitReceipt expected,
         bool callerCancellation, CancellationToken token)
     {
@@ -81,7 +81,7 @@ internal static class CommittedResponseFlow
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    private static async Task ContinueAsync(ConnectionNativeScenario scenario, KeyLoadClient client,
+    private static async Task ContinueAsync(ConnectionScenario scenario, KeyLoadClient client,
         CommittedResponseEndpoint endpoint, CommandRequest command, CommitReceipt expected, CancellationToken token)
     {
         var bytes = QueueWholeFlowStorage.Bytes(scenario.Fixture.Database.Store);
@@ -92,7 +92,7 @@ internal static class CommittedResponseFlow
         await CommittedResponseAssertions.UnchangedAsync(scenario, bytes, position);
         var changed = command with
         {
-            Mutations = [new PutDocument(ConnectionNativeProtocol.Collection,
+            Mutations = [new PutDocument(ConnectionProtocol.Collection,
             CommittedResponseProtocol.Document, CommittedResponseProtocol.ChangedJson, CommittedResponseProtocol.FirstRevision)]
         };
         var refused = await client.CommitAsync(changed, token);
@@ -116,10 +116,10 @@ internal static class CommittedResponseFlow
         await Assert.That(repeated.IsSuccess).IsTrue();
         await CommittedResponseAssertions.ReceiptAsync(repeated.Value, expectedHealthy);
         await CommittedResponseAssertions.UnchangedAsync(scenario, current, currentPosition);
-        var replies = endpoint.NativeReplies.ToArray();
+        var replies = endpoint.Replies.ToArray();
         await Assert.That(replies.Length).IsEqualTo(CommittedResponseProtocol.SuccessfulRequests);
-        await Assert.That(endpoint.OriginalNativeReply).IsNotNull();
-        var originalReply = endpoint.OriginalNativeReply
+        await Assert.That(endpoint.OriginalReply).IsNotNull();
+        var originalReply = endpoint.OriginalReply
             ?? throw new InvalidOperationException(CommittedResponseProtocol.UnexpectedRequest);
         await Assert.That(replies[CommittedResponseProtocol.InitialIndex].SequenceEqual(originalReply)).IsTrue();
         await Assert.That(replies[CommittedResponseProtocol.ReplayIndex].SequenceEqual(originalReply)).IsTrue();

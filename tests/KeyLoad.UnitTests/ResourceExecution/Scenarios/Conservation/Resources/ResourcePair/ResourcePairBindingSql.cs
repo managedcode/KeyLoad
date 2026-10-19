@@ -16,7 +16,7 @@ internal static class ResourcePairBindingSql
             source.Database.OperationLimitsOptions, source.Database.Limits.MaxBatchBytes, UnitExecutionOptions.QueryExecution(), token);
         await Assert.That(compiled.CommandKind).IsEqualTo(OperationKind.Batch);
         await Assert.That(compiled.CommandId).IsEqualTo(id);
-        var request = NativeSerialization.Deserialize<CommandRequest>(compiled.Payload.Span);
+        var request = OrleansSerialization.Deserialize<CommandRequest>(compiled.Payload.Span);
         await ResourceIncarnationAssertions.EqualAsync(new CommandRequest(id, source.Partition, [new InsertTypedRow(Table, TypedJson)]), request);
         var issued = source.Database.CreateCommand(OperationKind.Batch, id, Root,
             source.Database.EvaluationClock.GetUtcNow(), compiled.Payload);

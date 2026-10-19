@@ -13,7 +13,7 @@ internal sealed class RuntimeJournalReaderFixture : IDisposable
     internal const string RuntimeJournalNamespace = StoreReaderContract.RuntimeJournalKeySpace;
     internal const string PayloadName = "reader-contract-test";
     internal const string RootPrefix = "keyload-runtime-journal-reader-";
-    private const string InvalidCurrentIdentity = "The current native identity envelope is invalid.";
+    private const string InvalidCurrentIdentity = "The current execution identity envelope is invalid.";
 
     private readonly string root = Path.Combine(Path.GetTempPath(), RootPrefix + Guid.NewGuid().ToString(GuidFormat));
 
@@ -34,12 +34,12 @@ internal sealed class RuntimeJournalReaderFixture : IDisposable
     {
         var path = IdentityPath(directory);
         var bytes = await File.ReadAllBytesAsync(path);
-        var envelope = NativeSerialization.Deserialize<ZoneTreeIdentityEnvelope>(bytes.AsSpan(sizeof(ulong)));
-        var identity = NativeSerialization.Deserialize<StoreIdentity>(envelope.Payload) with
+        var envelope = OrleansSerialization.Deserialize<ZoneTreeIdentityEnvelope>(bytes.AsSpan(sizeof(ulong)));
+        var identity = OrleansSerialization.Deserialize<StoreIdentity>(envelope.Payload) with
         {
             MinimumReaderContract = capability
         };
-        var payload = NativeSerialization.Serialize(identity);
+        var payload = OrleansSerialization.Serialize(identity);
         var changed = ZoneTreeMetadataBinary.Write(new ZoneTreeIdentityEnvelope(payload, SHA256.HashData(payload)),
             ZoneTreeMetadataBinary.IdentityMagic);
         await File.WriteAllBytesAsync(path, changed);
@@ -50,17 +50,17 @@ internal sealed class RuntimeJournalReaderFixture : IDisposable
         var path = IdentityPath(directory);
         var maximumBytes = UnitExecutionOptions.StorageExecution().Value.MaximumIdentityFileBytes;
         var original = RequireCurrentEnvelope(await File.ReadAllBytesAsync(path), maximumBytes);
-        var identity = NativeSerialization.Deserialize<StoreIdentity>(original.Payload);
+        var identity = OrleansSerialization.Deserialize<StoreIdentity>(original.Payload);
         if (identity.MinimumReaderContract != StoreReaderContract.RuntimeJournal)
         {
             throw new InvalidDataException(InvalidCurrentIdentity);
         }
-        var payload = NativeIdentityCapabilityOmission.SerializeWithoutCapability(identity, maximumBytes);
+        var payload = IdentityCapabilityOmission.SerializeWithoutCapability(identity, maximumBytes);
         var changed = ZoneTreeMetadataBinary.Write(new ZoneTreeIdentityEnvelope(payload, SHA256.HashData(payload)),
             ZoneTreeMetadataBinary.IdentityMagic);
         await File.WriteAllBytesAsync(path, changed);
         var rewritten = RequireCurrentEnvelope(await File.ReadAllBytesAsync(path), maximumBytes);
-        NativeIdentityCapabilityOmission.VerifyCapabilityOmitted(rewritten.Payload);
+        IdentityCapabilityOmission.VerifyCapabilityOmitted(rewritten.Payload);
     }
 
     private static ZoneTreeIdentityEnvelope RequireCurrentEnvelope(byte[] bytes, int maximumBytes)
@@ -70,7 +70,7 @@ internal sealed class RuntimeJournalReaderFixture : IDisposable
         {
             throw new InvalidDataException(InvalidCurrentIdentity);
         }
-        var envelope = NativeSerialization.Deserialize<ZoneTreeIdentityEnvelope>(bytes.AsSpan(sizeof(ulong)));
+        var envelope = OrleansSerialization.Deserialize<ZoneTreeIdentityEnvelope>(bytes.AsSpan(sizeof(ulong)));
         if (!CryptographicOperations.FixedTimeEquals(SHA256.HashData(envelope.Payload), envelope.Checksum))
         {
             throw new InvalidDataException(InvalidCurrentIdentity);

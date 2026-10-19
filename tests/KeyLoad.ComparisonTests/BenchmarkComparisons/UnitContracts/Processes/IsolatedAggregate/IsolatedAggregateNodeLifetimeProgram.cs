@@ -14,7 +14,7 @@ internal static class IsolatedAggregateNodeLifetimeProgram
     internal const string OutputLimitMessage = "Isolated aggregate child output exceeded its bound.";
     internal const string OriginalDidNotCancel = "The original Node operation did not preserve cancellation.";
     internal const string OriginalDidNotSettle = "The original Node operation did not settle within cleanup.";
-    internal const string IdentityReceiptInvalid = "The native child process identity receipt was invalid.";
+    internal const string IdentityReceiptInvalid = "The execution child process identity receipt was invalid.";
     internal const string Source = """
         const { spawn } = require('node:child_process');
         const fs = require('node:fs');
@@ -45,7 +45,7 @@ internal static class IsolatedAggregateNodeLifetimeProgram
           fs.renameSync(temporaryPath, receiptPath);
           setInterval(() => {}, 1000);
         } else {
-          throw new Error('Unknown native child scenario.');
+          throw new Error('Unknown execution child scenario.');
         }
         """;
     internal const int NonzeroExitCode = 23;

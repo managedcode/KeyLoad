@@ -25,7 +25,7 @@ internal static class Bm25RequestEnvelopes
             PrincipalId = verified.UserId,
             CommandKind = verified.Value!.Kind,
             CommandId = verified.CommandId,
-            Payload = GrainNativePayload.Copy(NativeSerialization.Serialize(verified), scope.Limits.MaxBatchBytes),
+            Payload = GrainPayload.Copy(OrleansSerialization.Serialize(verified), scope.Limits.MaxBatchBytes),
             ExpiresAt = expiry
         };
     }

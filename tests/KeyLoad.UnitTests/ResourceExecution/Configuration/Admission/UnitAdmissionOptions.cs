@@ -2,7 +2,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.UnitTests;
 
-/// <summary>Explicit validated native options for admission and cache policy fixtures.</summary>
+/// <summary>Explicit validated execution options for admission and cache policy fixtures.</summary>
 internal static class UnitAdmissionOptions
 {
 

@@ -44,7 +44,7 @@ public sealed partial class QueryEngine
             global::KeyLoad.Features.QueryExecution.ScriptDomSyntax.Parse(request.Sql, database.OperationLimitsOptions, budget.Check, cancellationToken),
             request, database.OperationLimitsOptions, executionOptions, budget, cancellationToken), timeProvider, cancellationToken);
 
-    /// <summary>Executes a bounded Q1.Search.v1 statement through the canonical graph-search engine.</summary>
+    /// <summary>Executes a bounded Q1.Search statement through the canonical graph-search engine.</summary>
     /// <param name="principalId">Persisted database principal identifier.</param>
     /// <param name="request">Versioned SQL graph-search request.</param>
     /// <param name="cancellationToken">Caller cancellation for bounded parse and search work.</param>

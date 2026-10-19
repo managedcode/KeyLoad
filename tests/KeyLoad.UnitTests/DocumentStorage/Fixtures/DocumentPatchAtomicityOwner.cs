@@ -12,7 +12,7 @@ namespace KeyLoad.UnitTests.Features.DocumentStorage;
 internal sealed class DocumentPatchAtomicityOwner
 {
     private const string DirectoryPrefix = "keyload-document-patch-atomic-";
-    private const string MissingOwner = "The original document native owner is not open.";
+    private const string MissingOwner = "The original document execution owner is not open.";
     private readonly StoreIdentity originalIdentity;
     private bool originalJoined;
     private ZoneTreeStore? coldStore;
@@ -73,7 +73,7 @@ internal sealed class DocumentPatchAtomicityOwner
 
     internal (long AppliedPosition, long StorePosition) ReadCut()
         => Store.Read(view => (view.ReadOwnedValue(KeySpace.AppliedBytes) is { } bytes
-            ? NativeSerialization.Deserialize<long>(bytes) : default(long), Store.Position));
+            ? OrleansSerialization.Deserialize<long>(bytes) : default(long), Store.Position));
 
     internal async Task ReopenAsync()
     {
@@ -82,8 +82,8 @@ internal sealed class DocumentPatchAtomicityOwner
         {
             Incarnation = originalIdentity.Incarnation
         }, originalIdentity.NodeId, Source.StorageExecution);
-        await DocumentPatchAtomicityAssertions.BytesAsync(NativeSerialization.Serialize(originalIdentity),
-            NativeSerialization.Serialize(coldStore.Identity));
+        await DocumentPatchAtomicityAssertions.BytesAsync(OrleansSerialization.Serialize(originalIdentity),
+            OrleansSerialization.Serialize(coldStore.Identity));
         Database = Source.CreateConfiguredDatabase(coldStore);
     }
 

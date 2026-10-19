@@ -35,7 +35,7 @@ internal static class QueueDeadlineRecoveryImage
             QueueDeadlineCrashProtocol.First, null, expiry));
         await Assert.That(counters).IsEqualTo(new QueueCounters(
             committed ? QueueDeadlineCrashProtocol.Initial : QueueDeadlineCrashProtocol.First,
-            committed ? QueueDeadlineCrashProtocol.Initial : NativeSerialization.Serialize(expectedBody).LongLength,
+            committed ? QueueDeadlineCrashProtocol.Initial : OrleansSerialization.Serialize(expectedBody).LongLength,
             QueueDeadlineCrashProtocol.Initial, QueueDeadlineCrashProtocol.Initial, QueueDeadlineCrashProtocol.First));
         await Assert.That(counters.StoredMessages).IsEqualTo(committed ? QueueDeadlineCrashProtocol.Initial : QueueDeadlineCrashProtocol.First);
         await Assert.That(counters.InFlightMessages).IsEqualTo(QueueDeadlineCrashProtocol.Initial);

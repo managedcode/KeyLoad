@@ -3,56 +3,11 @@ using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Core.Features.Search;
 using KeyLoad.Query;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Clustering;
 
-internal static class AnnProjectionObservationRead
+internal static partial class AnnProjectionObservationRead
 {
-    internal static async Task<AnnProjectionObservationResult> ExecuteAsync(DatabaseEngine database,
-        IServiceProvider services, TimeProvider clock, PrincipalRecord principal,
-        DecodedGrainRequest original, IResourceLifetimeWorkBinding binding, CancellationToken cancellationToken)
-    {
-        ArgumentNullException.ThrowIfNull(binding);
-        if (original.Envelope.ReadKind == GrainReadKind.AnnProjectionObservationV2)
-        {
-            return await AnnProjectionLifetimeObservationRead.ExecuteAsync(database, services, clock,
-                principal, original, binding, cancellationToken).ConfigureAwait(true);
-        }
-        cancellationToken.ThrowIfCancellationRequested();
-        if (!services.GetRequiredService<IOptions<QueryExecutionOptions>>().Value.EnableApproximateSearch)
-        {
-            throw Errors.Fail(ErrorCode.UnsupportedCapability, AnnSearchProtocol.Disabled);
-        }
-        var request = GrainNativePayload.Read<AnnProjectionObservationRequest>(original.Payload);
-        RequireRequest(request);
-        if (request.Kind != AnnProjectionObservationKind.Identity)
-        {
-            throw Errors.Fail(ErrorCode.PermissionDenied, GrainRoutingProtocol.AdministrationRequired);
-        }
-        var work = new ReadExecutionBudget(database.OperationLimitsOptions, clock, cancellationToken);
-        work.AttachResourceLifetimeBinding(binding);
-        work.ConstrainLifetime(original.Envelope.ExpiresAt);
-        work.ConstrainNativeWork(request.MaximumReadBytes, request.MaximumRecords);
-        work.ChargeBytes(original.Payload.Length);
-        var admitted = RequireScope(database, services, principal, request, work, binding: binding);
-        var current = GrainRequestAuthority.ReloadForRequest(database, original.Envelope, clock);
-        if (current.Id != principal.Id || current.PolicyEpoch != principal.PolicyEpoch)
-        {
-            throw Errors.Fail(ErrorCode.TokenInvalidated, AnnProjectionObservationProtocol.Invalid);
-        }
-        if (RequireScope(database, services, current, request, work, binding: binding) != admitted)
-        {
-            throw Errors.Fail(ErrorCode.TokenInvalidated, AnnProjectionObservationProtocol.Invalid);
-        }
-        var actual = database.Store.Identity;
-        work.Check();
-        var result = new AnnProjectionObservationResult(AnnProjectionObservationProtocol.Version, actual.NodeId, actual.ReadGeneration, null,
-            work.ReadBytes, work.ConstrainedNativeRecords, null);
-        work.CheckResult(result);
-        return result;
-    }
-
     internal static void RequireRequest(AnnProjectionObservationRequest request)
     {
         if (request is null || request.Version != AnnProjectionObservationProtocol.Version

@@ -5,12 +5,12 @@ namespace KeyLoad.Features.QueryExecution;
 
 internal static class ScriptDomSyntax
 {
-    /// <summary>Parses exactly one native T-SQL statement inside the existing operation lifetime.</summary>
+    /// <summary>Parses exactly one execution T-SQL statement inside the existing operation lifetime.</summary>
     /// <param name="sql">Original bounded SQL text.</param>
     /// <param name="limitsOptions">Validated operation limits.</param>
     /// <param name="checkBudget">Original operation deadline and work callback.</param>
     /// <param name="cancellationToken">Original caller token.</param>
-    /// <returns>The native statement; successful parsing does not authorize its execution.</returns>
+    /// <returns>The execution statement; successful parsing does not authorize its execution.</returns>
     internal static Dom.TSqlStatement Parse(string sql, global::Microsoft.Extensions.Options.IOptions<DatabaseLimits> limitsOptions, Action checkBudget, CancellationToken cancellationToken)
         => Parse(sql, limitsOptions, checkBudget, null, cancellationToken);
 
@@ -69,7 +69,7 @@ internal static class ScriptDomSyntax
         Check();
         return statement;
     }
-    internal static void ValidateNativeSessionSlots(Dom.TSqlStatement statement, int positionalParameterCount,
+    internal static void ValidateSessionSlots(Dom.TSqlStatement statement, int positionalParameterCount,
         Action checkBudget, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(statement);
@@ -84,8 +84,8 @@ internal static class ScriptDomSyntax
         cancellationToken.ThrowIfCancellationRequested();
         checkBudget();
     }
-    internal static bool TryGetNativeSessionSlot(Dom.MoneyLiteral literal, int positionalParameterCount, out string canonicalName)
-        => ScriptDomNativeSlots.TryGet(literal, positionalParameterCount, out canonicalName);
+    internal static bool TryGetSessionSlot(Dom.MoneyLiteral literal, int positionalParameterCount, out string canonicalName)
+        => ScriptDomSlots.TryGet(literal, positionalParameterCount, out canonicalName);
     private static ScriptDomCheckedTokens RequireOrigin(Dom.TSqlStatement statement)
         => statement.ScriptTokenStream as ScriptDomCheckedTokens ?? throw ScriptDomErrors.Unsupported();
     internal static bool IsReadOnlySelect(Dom.TSqlStatement statement)

@@ -8,7 +8,7 @@ namespace KeyLoad;
 /// <param name="Limit">The maximum number of changes to return.</param>
 /// <param name="MaxBytes">The maximum page size in bytes.</param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.ReadChangeFeedRequest)]
+[Orleans.Alias(ContractAliases.ReadChangeFeedRequest)]
 public sealed record ReadChangeFeedRequest([property: Orleans.Id(0)] PartitionRef Partition, [property: Orleans.Id(1)] string Collection, [property: Orleans.Id(2)] string? Cursor = null,
     [property: Orleans.Id(3)] ChangeFeedStart Start = ChangeFeedStart.Beginning, [property: Orleans.Id(4)] int Limit = ReadChangeFeedRequest.DefaultLimit, [property: Orleans.Id(5)] int MaxBytes = ReadChangeFeedRequest.DefaultMaxBytes)
 {

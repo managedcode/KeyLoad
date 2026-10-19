@@ -24,7 +24,7 @@ internal static class EventAppendCrashScenario
         var seed = new CommandRequest(EventAppendCrashContract.SeedCommandId, EventAppendCrashContract.Partition,
             [new AppendEvents(EventAppendCrashContract.Streams, EventAppendCrashContract.StreamId,
                 [EventAppendCrashContract.Event(EventAppendCrashContract.SeedId)], ExpectedStreamRevision.NoStream)]);
-        database.Apply(database.CreateCommand(OperationKind.Batch, seed.CommandId, CrashFixtureValues.Principal, new DateTimeOffset(operation.Timestamp), NativeSerialization.Serialize(seed))).Get<CommitReceipt>();
+        database.Apply(database.CreateCommand(OperationKind.Batch, seed.CommandId, CrashFixtureValues.Principal, new DateTimeOffset(operation.Timestamp), OrleansSerialization.Serialize(seed))).Get<CommitReceipt>();
         await CommandIdempotencyCrashData.SaveEvidenceAsync(directory, EventAppendCrashContract.OperationFile, operation);
         await CommandIdempotencyCrashData.SaveEvidenceAsync(directory, EventAppendCrashContract.SeedPositionFile, store.Position);
         await CommandIdempotencyCrashData.SaveEvidenceAsync(directory, EventAppendCrashContract.TargetFile,

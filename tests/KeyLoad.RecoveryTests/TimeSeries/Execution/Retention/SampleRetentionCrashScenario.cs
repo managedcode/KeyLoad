@@ -68,7 +68,7 @@ internal static class SampleRetentionCrashScenario
         var command = new CommandRequest(ExpiryCommandId, Partition,
             [new ExpireSamples(SeriesSet, SeriesId, Cutoff, FirstPageDeletes)]);
         var operation = CrashDatabase.Operation(database, OperationKind.Batch, command, ExpiryCommandId);
-        await File.WriteAllBytesAsync(Path.Combine(directory, OperationFile), NativeSerialization.Serialize(operation));
+        await File.WriteAllBytesAsync(Path.Combine(directory, OperationFile), OrleansSerialization.Serialize(operation));
         boundary.Position = checked(store.Position + PositionStep);
         boundary.Armed = true;
         _ = database.Apply(operation).Get<CommitReceipt>();

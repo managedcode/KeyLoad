@@ -27,7 +27,7 @@ internal static class CurrentArchiveCancellationHealthy
             await Assert.That(store.Position).IsEqualTo(originalPosition + 1L);
             await ValuesAsync(store);
             image = EventingArtifactState.FullBytes(store);
-            identity = NativeSerialization.Serialize(store.Identity);
+            identity = OrleansSerialization.Serialize(store.Identity);
             position = store.Position;
         }, token);
         var coldFailures = new List<Exception>();
@@ -46,7 +46,7 @@ internal static class CurrentArchiveCancellationHealthy
                 }, failures);
                 await ServerFailureObserver.ObserveAsync(async () =>
                 {
-                    await Assert.That(NativeSerialization.Serialize(store.Identity).AsSpan().SequenceEqual(identity)).IsTrue();
+                    await Assert.That(OrleansSerialization.Serialize(store.Identity).AsSpan().SequenceEqual(identity)).IsTrue();
                 }, failures);
                 await ServerFailureObserver.ObserveAsync(() => ValuesAsync(store), failures);
                 ServerFailureObserver.ThrowIfAny(failures);
@@ -71,15 +71,15 @@ internal static class CurrentArchiveCancellationHealthy
         string[] expected =
         [
             Convert.ToHexString(MetadataBackupFixture.StoredKeyBytes) + ":" +
-                Convert.ToHexString(NativeSerialization.Serialize(MetadataBackupFixture.ExpectedValue)),
+                Convert.ToHexString(OrleansSerialization.Serialize(MetadataBackupFixture.ExpectedValue)),
             Convert.ToHexString(KeyCodec.Encode(HealthyKey)) + ":" +
-                Convert.ToHexString(NativeSerialization.Serialize(HealthyValue)),
+                Convert.ToHexString(OrleansSerialization.Serialize(HealthyValue)),
             Convert.ToHexString(KeyCodec.Encode(ZoneTreePersistenceFormat.SystemNamespace,
-                ZoneTreePersistenceFormat.LastAppliedKey)) + ":" + Convert.ToHexString(NativeSerialization.Serialize(1L)),
+                ZoneTreePersistenceFormat.LastAppliedKey)) + ":" + Convert.ToHexString(OrleansSerialization.Serialize(1L)),
             Convert.ToHexString(KeyCodec.Encode(ZoneTreePersistenceFormat.SystemNamespace,
-                ZoneTreePersistenceFormat.ClockKey)) + ":" + Convert.ToHexString(NativeSerialization.Serialize(1L)),
+                ZoneTreePersistenceFormat.ClockKey)) + ":" + Convert.ToHexString(OrleansSerialization.Serialize(1L)),
             Convert.ToHexString(KeyCodec.Encode(ZoneTreePersistenceFormat.SystemNamespace,
-                ZoneTreePersistenceFormat.DispatchPausedKey)) + ":" + Convert.ToHexString(NativeSerialization.Serialize(true))
+                ZoneTreePersistenceFormat.DispatchPausedKey)) + ":" + Convert.ToHexString(OrleansSerialization.Serialize(true))
         ];
         await ServerFailureObserver.ObserveAsync(async () =>
         {

@@ -3,14 +3,14 @@ using KeyLoad.Client;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
-/// <summary>Captures native Orleans membership and each silo's actual physical and process identity.</summary>
+/// <summary>Captures execution Orleans membership and each silo's actual physical and process identity.</summary>
 internal sealed record IsolatedKeyLoadFaultChecksMembership(int Index, string NodeId, Guid Incarnation,
     string SiloName, string[] ActiveSilos, long Position, int ProcessId, Guid ProcessInstance)
 {
     internal static async Task<IsolatedKeyLoadFaultChecksMembership[]> WaitAsync(DistributedApplication app,
         int nodeCount, string admin, CancellationToken token)
     {
-        using var deadline = IsolatedKeyLoadFaultChecksProtocol.Deadline(NativeExecutionPolicyFixture.Harness().Value.KeyLoadFaultReadinessTimeout, token);
+        using var deadline = IsolatedKeyLoadFaultChecksProtocol.Deadline(ExecutionPolicyFixture.Harness().Value.KeyLoadFaultReadinessTimeout, token);
         while (true)
         {
             deadline.Token.ThrowIfCancellationRequested();
@@ -19,7 +19,7 @@ internal sealed record IsolatedKeyLoadFaultChecksMembership(int Index, string No
             {
                 return [.. nodes.OrderBy(item => item.Index)];
             }
-            await Task.Delay(NativeExecutionPolicyFixture.Harness().Value.KeyLoadFaultPollInterval, TimeProvider.System, deadline.Token);
+            await Task.Delay(ExecutionPolicyFixture.Harness().Value.KeyLoadFaultPollInterval, TimeProvider.System, deadline.Token);
         }
     }
 
@@ -31,7 +31,7 @@ internal sealed record IsolatedKeyLoadFaultChecksMembership(int Index, string No
         for (var index = 1; index <= nodeCount; index++)
         {
             using var http = IsolatedKeyLoadPublicChecksProtocol.CreateHttp(app, index);
-            using var attempt = IsolatedKeyLoadFaultChecksProtocol.Deadline(NativeExecutionPolicyFixture.Harness().Value.KeyLoadFaultAttemptTimeout, token);
+            using var attempt = IsolatedKeyLoadFaultChecksProtocol.Deadline(ExecutionPolicyFixture.Harness().Value.KeyLoadFaultAttemptTimeout, token);
             var result = await new KeyLoadClient(http, admin, ComparisonClientOptions.Execution()).DashboardAsync(attempt.Token);
             attempt.Token.ThrowIfCancellationRequested();
             if (!result.IsSuccess)

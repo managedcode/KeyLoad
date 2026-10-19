@@ -88,7 +88,7 @@ internal static class ChunkMultiblockProcessAssertions
         var expectedToken = SampleChunkSnapshotFile.ReadExpectedToken(root, command,
             RecoveryExecutionOptions.DatabaseLimits().Value.MaxBatchBytes);
         var expected = new CommitReceipt(command, expectedToken, [new(kind, SampleChunkCrashContract.Set, SampleChunkCrashContract.Series, revision)], authority.StorageDurability, (authority.StorageDurability == DurabilityProfile.Buffered ? 0 : 1));
-        var actual = NativeSerialization.Deserialize<Result<object>>(Convert.FromHexString(bytes)).Get<CommitReceipt>();
+        var actual = OrleansSerialization.Deserialize<Result<object>>(Convert.FromHexString(bytes)).Get<CommitReceipt>();
         await Assert.That(JsonSerializer.Serialize(actual, JsonDefaults.Options))
             .IsEqualTo(JsonSerializer.Serialize(expected, JsonDefaults.Options));
     }

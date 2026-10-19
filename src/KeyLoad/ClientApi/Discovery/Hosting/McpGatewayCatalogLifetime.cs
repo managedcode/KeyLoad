@@ -4,7 +4,7 @@ using ManagedCode.MCPGateway.Abstractions;
 
 namespace KeyLoad.Server;
 
-/// <summary>Drains active graph calls before disposing the factory-owned native gateway instance.</summary>
+/// <summary>Drains active graph calls before disposing the factory-owned execution gateway instance.</summary>
 internal sealed class McpGatewayCatalogLifetime : IAsyncDisposable
 {
     private const string IndexUnavailable = "The canonical MCP metadata index is unavailable.";
@@ -59,7 +59,7 @@ internal sealed class McpGatewayCatalogLifetime : IAsyncDisposable
 
     private async Task InitializeCoreAsync(CancellationToken cancellationToken)
     {
-        var instance = await _createInstance(cancellationToken).ConfigureAwait(false);
+        var instance = await _createInstance(cancellationToken);
         bool rejected;
         lock (_sync)
         {
@@ -72,7 +72,7 @@ internal sealed class McpGatewayCatalogLifetime : IAsyncDisposable
 
         if (rejected)
         {
-            await instance.DisposeAsync().ConfigureAwait(false);
+            await instance.DisposeAsync();
             ObjectDisposedException.ThrowIf(true, this);
         }
     }
@@ -95,14 +95,14 @@ internal sealed class McpGatewayCatalogLifetime : IAsyncDisposable
         if (initialization is not null)
         {
             // Startup owns nonfatal initialization errors; disposal still joins the original task.
-            await initialization.ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
+            await initialization.ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing | ConfigureAwaitOptions.ContinueOnCapturedContext);
             if (initialization.Exception is { } error && CqrsRuntimeFailures.FindFatal(error) is { } fatal)
             {
                 ExceptionDispatchInfo.Capture(fatal).Throw();
             }
         }
 
-        await drained.ConfigureAwait(false);
+        await drained;
         IMcpGatewayInstance? instance;
         lock (_sync)
         {
@@ -112,7 +112,7 @@ internal sealed class McpGatewayCatalogLifetime : IAsyncDisposable
 
         if (instance is not null)
         {
-            await instance.DisposeAsync().ConfigureAwait(false);
+            await instance.DisposeAsync();
         }
     }
 

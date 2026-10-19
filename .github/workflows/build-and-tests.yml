@@ -124,17 +124,17 @@ jobs:
       - name: Build KeyLoad
         id: build
         run: dotnet build KeyLoad.slnx --no-restore -warnaserror
-      - name: Prepare native source and native test assembly identity receipts
-        id: native-source-identity
+      - name: Prepare execution source and execution test assembly identity receipts
+        id: execution-source-identity
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         shell: pwsh
         run: |
           $root = $env:GITHUB_WORKSPACE
-          $evidence = Join-Path $root 'TestResults/native-source-identity'
+          $evidence = Join-Path $root 'TestResults/execution-source-identity'
           & pwsh -NoLogo -NoProfile -File scripts/Features/CodeQuality/functional-coverage.production-source-manifest.ps1 `
             -Mode prepare -Root $root -EvidenceRoot $evidence
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-      - name: Verify the pinned native full-text package
+      - name: Verify the pinned execution full-text package
         run: |
           node --input-type=module <<'JS'
           import fs from 'node:fs';
@@ -146,54 +146,54 @@ jobs:
           if (!cache.startsWith(prefix) || cache.includes('\n')) throw new Error('Ambiguous NuGet package cache.');
           const packagePath = path.join(cache.slice(prefix.length), 'zonetree.fulltextsearch', '1.0.9', 'zonetree.fulltextsearch.1.0.9.nupkg');
           const digest = crypto.createHash('sha256').update(fs.readFileSync(packagePath)).digest('hex');
-          if (digest !== '7ea1fbb7aba0ad00391d78d2f414166b500335f5b1affe43c305d861b55719ff') throw new Error('Native FTS package differs from ADR-078.');
+          if (digest !== '7ea1fbb7aba0ad00391d78d2f414166b500335f5b1affe43c305d861b55719ff') throw new Error('Execution FTS package differs from ADR-078.');
           const verification = spawnSync('dotnet', ['nuget', 'verify', packagePath, '--all'], { encoding: 'utf8', maxBuffer: 1048576 });
           fs.mkdirSync('artifacts/qualification', { recursive: true });
-          fs.writeFileSync('artifacts/qualification/native-full-text-package-signature.log', `Package SHA256: ${digest}\n${verification.stdout ?? ''}${verification.stderr ?? ''}`);
+          fs.writeFileSync('artifacts/qualification/execution-full-text-package-signature.log', `Package SHA256: ${digest}\n${verification.stdout ?? ''}${verification.stderr ?? ''}`);
           process.stdout.write(verification.stdout ?? '');
           process.stderr.write(verification.stderr ?? '');
-          if (verification.error || verification.status !== 0) throw verification.error ?? new Error('Native FTS package signature verification failed.');
+          if (verification.error || verification.status !== 0) throw verification.error ?? new Error('Execution FTS package signature verification failed.');
           JS
-      - name: Build current Debug analyzer for native formatting
+      - name: Build current Debug analyzer for execution formatting
         run: dotnet build analyzers/KeyLoad.Analyzers/KeyLoad.Analyzers.csproj --no-restore --configuration Debug -warnaserror
       - name: Check code formatting
         run: dotnet format KeyLoad.slnx --verify-no-changes --no-restore
       - name: Check repository rules
         run: node scripts/Features/RepositoryGovernance/verify.mjs
-      - name: Test native coverage source ownership
+      - name: Test execution coverage source ownership
         id: source-ownership
-        run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=unit '--KeyLoadTests:Filter=/*/*/(NativePathMapCompilerTests)|(ProductionSourceManifestSettlementTests)|(NativeSourceManifestChildSettlementTests)|(ProductionSourceManifestOperationTests)/*' --KeyLoadTests:ResultsDirectory=TestResults/native-source-ownership --KeyLoadTests:ReportTrx=true
+        run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=unit '--KeyLoadTests:Filter=/*/*/(PathMapCompilerTests)|(ProductionSourceManifestSettlementTests)|(SourceManifestChildSettlementTests)|(ProductionSourceManifestOperationTests)/*' --KeyLoadTests:ResultsDirectory=TestResults/execution-source-ownership --KeyLoadTests:ReportTrx=true
       - name: Verify original source ownership test receipt
         if: ${{ !cancelled() && steps.source-ownership.outcome != 'skipped' }}
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
           Set-StrictMode -Version Latest
-          $reports = @(Get-ChildItem TestResults/native-source-ownership -Filter '*.trx' -Recurse -File)
+          $reports = @(Get-ChildItem TestResults/execution-source-ownership -Filter '*.trx' -Recurse -File)
           if ($reports.Count -ne 1) { throw 'Exactly one original source ownership TRX is required.' }
           [xml] $trx = Get-Content -LiteralPath $reports[0].FullName -Raw
           $counters = $trx.TestRun.ResultSummary.Counters
           if ([int] $counters.total -ne 10 -or [int] $counters.executed -ne 10 -or
               [int] $counters.passed -ne 10 -or [int] $counters.failed -ne 0) {
-            throw 'Every native source ownership case must execute and pass.'
+            throw 'Every execution source ownership case must execute and pass.'
           }
           $receipt = [ordered]@{
             source = $env:GITHUB_SHA; total = 10; executed = 10; passed = 10
             originalTrxSha256 = (Get-FileHash -LiteralPath $reports[0].FullName -Algorithm SHA256).Hash.ToLowerInvariant()
           }
-          $receipt | ConvertTo-Json | Set-Content TestResults/native-source-ownership/test-receipt.json
+          $receipt | ConvertTo-Json | Set-Content TestResults/execution-source-ownership/test-receipt.json
       - name: Run unit tests
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=unit --KeyLoadTests:ReportTrx=true
       - name: Test recovery after process crashes
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=recovery --KeyLoadTests:ReportTrx=true
-      - name: Verify native source and native test assembly identity receipts
-        if: ${{ !cancelled() && steps.build.outcome == 'success' && steps.native-source-identity.outcome == 'success' }}
+      - name: Verify execution source and execution test assembly identity receipts
+        if: ${{ !cancelled() && steps.build.outcome == 'success' && steps.execution-source-identity.outcome == 'success' }}
         shell: pwsh
         run: |
           $root = $env:GITHUB_WORKSPACE
-          $evidence = Join-Path $root 'TestResults/native-source-identity'
+          $evidence = Join-Path $root 'TestResults/execution-source-identity'
           & pwsh -NoLogo -NoProfile -File scripts/Features/CodeQuality/functional-coverage.production-source-manifest.ps1 `
             -Mode verify -Root $root -EvidenceRoot $evidence
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
@@ -236,9 +236,9 @@ jobs:
           printf 'KEYLOAD_ADMIN_CHROME_PATH=%s\n' "$admin_chrome" >> "$GITHUB_ENV"
       - name: Restore .NET packages
         run: dotnet restore KeyLoad.slnx
-      - name: Build the complete native coverage cohort
+      - name: Build the complete execution coverage cohort
         run: dotnet build KeyLoad.slnx --no-restore -warnaserror
-      - name: Prepare original source and native test assembly receipts
+      - name: Prepare original source and execution test assembly receipts
         id: coverage-source
         shell: pwsh
         run: |
@@ -257,21 +257,21 @@ jobs:
         run: |
           evidence="TestResults/functional-gates/single"
           mkdir -p "$TMPDIR" "$evidence"
-          if node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=cluster '--KeyLoadTests:Filter=/*/*/FunctionalDatabaseGateTests/SingleInstanceRunsEveryModelThroughSdkMcpAndSqlWithPersistedUsers' --KeyLoadTests:Execution:MaximumParallelTests=50 --KeyLoadTests:ResultsDirectory=TestResults/functional-gates/single --KeyLoadTests:ReportTrx=true > "$evidence/native.stdout.original.txt" 2> "$evidence/native.stderr.original.txt"; then
-            native_exit=0
+          if node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=cluster '--KeyLoadTests:Filter=/*/*/FunctionalDatabaseGateTests/SingleInstanceRunsEveryModelThroughSdkMcpAndSqlWithPersistedUsers' --KeyLoadTests:Execution:MaximumParallelTests=50 --KeyLoadTests:ResultsDirectory=TestResults/functional-gates/single --KeyLoadTests:ReportTrx=true > "$evidence/execution.stdout.original.txt" 2> "$evidence/execution.stderr.original.txt"; then
+            _exit=0
           else
-            native_exit=$?
+            _exit=$?
           fi
-          printf '%s\n' "$native_exit" > "$evidence/native-exit-code.txt"
-          tail -c 65536 "$evidence/native.stdout.original.txt"
-          tail -c 65536 "$evidence/native.stderr.original.txt" >&2
-          exit "$native_exit"
+          printf '%s\n' "$_exit" > "$evidence/execution-exit-code.txt"
+          tail -c 65536 "$evidence/execution.stdout.original.txt"
+          tail -c 65536 "$evidence/execution.stderr.original.txt" >&2
+          exit "$_exit"
       - name: Verify original single functional gate receipt
         id: functional-single-receipt
         if: ${{ !cancelled() && inputs.mode == 'functional-gates' && (steps.functional-single.outcome == 'success' || steps.functional-single.outcome == 'failure') }}
         shell: pwsh
         env:
-          NATIVE_OUTCOME: ${{ steps.functional-single.outcome }}
+          _OUTCOME: ${{ steps.functional-single.outcome }}
         run: |
           $ErrorActionPreference = 'Stop'
           Set-StrictMode -Version Latest
@@ -286,8 +286,8 @@ jobs:
           $counts = $trx.SelectSingleNode('/t:TestRun/t:ResultSummary/t:Counters', $ns)
           $results = @($trx.SelectNodes('/t:TestRun/t:Results/t:UnitTestResult', $ns))
           $definitions = @($trx.SelectNodes('/t:TestRun/t:TestDefinitions/t:UnitTest', $ns))
-          $nativeExit = (Get-Content -LiteralPath (Join-Path $directory 'native-exit-code.txt') -Raw).Trim()
-          $valid = $env:NATIVE_OUTCOME -ceq 'success' -and $nativeExit -ceq '0' -and $null -ne $counts -and
+          $runtimeExit = (Get-Content -LiteralPath (Join-Path $directory 'execution-exit-code.txt') -Raw).Trim()
+          $valid = $env:_OUTCOME -ceq 'success' -and $runtimeExit -ceq '0' -and $null -ne $counts -and
             $results.Count -eq 1 -and $definitions.Count -eq 1
           $valid = $valid -and [int]$counts.total -eq 1 -and [int]$counts.executed -eq 1 -and [int]$counts.passed -eq 1
           foreach ($counter in $counts.Attributes) {
@@ -297,18 +297,18 @@ jobs:
           $valid = $valid -and $results[0].outcome -ceq 'Passed' -and $results[0].testName -ceq $method -and
             $results[0].testId -ceq $definitions[0].id -and $definitions[0].TestMethod.name -ceq $method -and
             $definitions[0].TestMethod.className -ceq 'KeyLoad.IntegrationTests.Features.DatabaseComposition.FunctionalDatabaseGateTests'
-          $nativeProcessEvidence = & pwsh -NoLogo -NoProfile -File scripts/Features/CodeQuality/functional-coverage.process-lifecycle.ps1 `
+          $processEvidence = & pwsh -NoLogo -NoProfile -File scripts/Features/CodeQuality/functional-coverage.process-lifecycle.ps1 `
             -Repository $env:GITHUB_WORKSPACE -ResultsDirectory $directory `
             -SourceManifestPath $env:KEYLOAD_PRODUCT_COVERAGE_SOURCE_MANIFEST | ConvertFrom-Json
-          if ($LASTEXITCODE -ne 0) { throw 'Original native process lifecycle verification failed.' }
+          if ($LASTEXITCODE -ne 0) { throw 'Original execution process lifecycle verification failed.' }
           [ordered]@{
             sourceRevision = $env:GITHUB_SHA; runId = $env:GITHUB_RUN_ID; runAttempt = $env:GITHUB_RUN_ATTEMPT
-            method = $method; nodes = 1; maximumParallelTests = 50; nativeOutcome = $env:NATIVE_OUTCOME; nativeExitCode = $nativeExit; accepted = $valid
-            stdoutSha256 = (Get-FileHash -LiteralPath (Join-Path $directory 'native.stdout.original.txt') -Algorithm SHA256).Hash.ToLowerInvariant()
-            stderrSha256 = (Get-FileHash -LiteralPath (Join-Path $directory 'native.stderr.original.txt') -Algorithm SHA256).Hash.ToLowerInvariant()
+            method = $method; nodes = 1; maximumParallelTests = 50; runtimeOutcome = $env:_OUTCOME; runtimeExitCode = $runtimeExit; accepted = $valid
+            stdoutSha256 = (Get-FileHash -LiteralPath (Join-Path $directory 'execution.stdout.original.txt') -Algorithm SHA256).Hash.ToLowerInvariant()
+            stderrSha256 = (Get-FileHash -LiteralPath (Join-Path $directory 'execution.stderr.original.txt') -Algorithm SHA256).Hash.ToLowerInvariant()
             trxSha256 = (Get-FileHash -LiteralPath $reports[0].FullName -Algorithm SHA256).Hash.ToLowerInvariant()
             sourceManifestSha256 = (Get-FileHash -LiteralPath $env:KEYLOAD_PRODUCT_COVERAGE_SOURCE_MANIFEST -Algorithm SHA256).Hash.ToLowerInvariant()
-            nativeProcessEvidence = $nativeProcessEvidence
+            processEvidence = $processEvidence
           } | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath (Join-Path $directory 'functional-gate-receipt.json') -Encoding utf8NoBOM
           if (-not $valid) { throw 'The exact original functional case must execute once and pass without skips.' }
       - name: Test functional database gate with 3 node(s)
@@ -320,21 +320,21 @@ jobs:
         run: |
           evidence="TestResults/functional-gates/three"
           mkdir -p "$TMPDIR" "$evidence"
-          if node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=cluster '--KeyLoadTests:Filter=/*/*/FunctionalDatabaseGateTests/ThreeNodeClusterRunsSameEveryModelScenarioThroughSdkMcpAndSql' --KeyLoadTests:Execution:MaximumParallelTests=50 --KeyLoadTests:ResultsDirectory=TestResults/functional-gates/three --KeyLoadTests:ReportTrx=true > "$evidence/native.stdout.original.txt" 2> "$evidence/native.stderr.original.txt"; then
-            native_exit=0
+          if node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=cluster '--KeyLoadTests:Filter=/*/*/FunctionalDatabaseGateTests/ThreeNodeClusterRunsSameEveryModelScenarioThroughSdkMcpAndSql' --KeyLoadTests:Execution:MaximumParallelTests=50 --KeyLoadTests:ResultsDirectory=TestResults/functional-gates/three --KeyLoadTests:ReportTrx=true > "$evidence/execution.stdout.original.txt" 2> "$evidence/execution.stderr.original.txt"; then
+            _exit=0
           else
-            native_exit=$?
+            _exit=$?
           fi
-          printf '%s\n' "$native_exit" > "$evidence/native-exit-code.txt"
-          tail -c 65536 "$evidence/native.stdout.original.txt"
-          tail -c 65536 "$evidence/native.stderr.original.txt" >&2
-          exit "$native_exit"
+          printf '%s\n' "$_exit" > "$evidence/execution-exit-code.txt"
+          tail -c 65536 "$evidence/execution.stdout.original.txt"
+          tail -c 65536 "$evidence/execution.stderr.original.txt" >&2
+          exit "$_exit"
       - name: Verify original three functional gate receipt
         id: functional-three-receipt
         if: ${{ !cancelled() && inputs.mode == 'functional-gates' && (steps.functional-three.outcome == 'success' || steps.functional-three.outcome == 'failure') }}
         shell: pwsh
         env:
-          NATIVE_OUTCOME: ${{ steps.functional-three.outcome }}
+          _OUTCOME: ${{ steps.functional-three.outcome }}
         run: |
           $ErrorActionPreference = 'Stop'
           Set-StrictMode -Version Latest
@@ -349,8 +349,8 @@ jobs:
           $counts = $trx.SelectSingleNode('/t:TestRun/t:ResultSummary/t:Counters', $ns)
           $results = @($trx.SelectNodes('/t:TestRun/t:Results/t:UnitTestResult', $ns))
           $definitions = @($trx.SelectNodes('/t:TestRun/t:TestDefinitions/t:UnitTest', $ns))
-          $nativeExit = (Get-Content -LiteralPath (Join-Path $directory 'native-exit-code.txt') -Raw).Trim()
-          $valid = $env:NATIVE_OUTCOME -ceq 'success' -and $nativeExit -ceq '0' -and $null -ne $counts -and
+          $runtimeExit = (Get-Content -LiteralPath (Join-Path $directory 'execution-exit-code.txt') -Raw).Trim()
+          $valid = $env:_OUTCOME -ceq 'success' -and $runtimeExit -ceq '0' -and $null -ne $counts -and
             $results.Count -eq 1 -and $definitions.Count -eq 1
           $valid = $valid -and [int]$counts.total -eq 1 -and [int]$counts.executed -eq 1 -and [int]$counts.passed -eq 1
           foreach ($counter in $counts.Attributes) {
@@ -360,42 +360,42 @@ jobs:
           $valid = $valid -and $results[0].outcome -ceq 'Passed' -and $results[0].testName -ceq $method -and
             $results[0].testId -ceq $definitions[0].id -and $definitions[0].TestMethod.name -ceq $method -and
             $definitions[0].TestMethod.className -ceq 'KeyLoad.IntegrationTests.Features.DatabaseComposition.FunctionalDatabaseGateTests'
-          $nativeProcessEvidence = & pwsh -NoLogo -NoProfile -File scripts/Features/CodeQuality/functional-coverage.process-lifecycle.ps1 `
+          $processEvidence = & pwsh -NoLogo -NoProfile -File scripts/Features/CodeQuality/functional-coverage.process-lifecycle.ps1 `
             -Repository $env:GITHUB_WORKSPACE -ResultsDirectory $directory `
             -SourceManifestPath $env:KEYLOAD_PRODUCT_COVERAGE_SOURCE_MANIFEST | ConvertFrom-Json
-          if ($LASTEXITCODE -ne 0) { throw 'Original native process lifecycle verification failed.' }
+          if ($LASTEXITCODE -ne 0) { throw 'Original execution process lifecycle verification failed.' }
           [ordered]@{
             sourceRevision = $env:GITHUB_SHA; runId = $env:GITHUB_RUN_ID; runAttempt = $env:GITHUB_RUN_ATTEMPT
-            method = $method; nodes = 3; maximumParallelTests = 50; nativeOutcome = $env:NATIVE_OUTCOME; nativeExitCode = $nativeExit; accepted = $valid
-            stdoutSha256 = (Get-FileHash -LiteralPath (Join-Path $directory 'native.stdout.original.txt') -Algorithm SHA256).Hash.ToLowerInvariant()
-            stderrSha256 = (Get-FileHash -LiteralPath (Join-Path $directory 'native.stderr.original.txt') -Algorithm SHA256).Hash.ToLowerInvariant()
+            method = $method; nodes = 3; maximumParallelTests = 50; runtimeOutcome = $env:_OUTCOME; runtimeExitCode = $runtimeExit; accepted = $valid
+            stdoutSha256 = (Get-FileHash -LiteralPath (Join-Path $directory 'execution.stdout.original.txt') -Algorithm SHA256).Hash.ToLowerInvariant()
+            stderrSha256 = (Get-FileHash -LiteralPath (Join-Path $directory 'execution.stderr.original.txt') -Algorithm SHA256).Hash.ToLowerInvariant()
             trxSha256 = (Get-FileHash -LiteralPath $reports[0].FullName -Algorithm SHA256).Hash.ToLowerInvariant()
             sourceManifestSha256 = (Get-FileHash -LiteralPath $env:KEYLOAD_PRODUCT_COVERAGE_SOURCE_MANIFEST -Algorithm SHA256).Hash.ToLowerInvariant()
-            nativeProcessEvidence = $nativeProcessEvidence
+            processEvidence = $processEvidence
           } | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath (Join-Path $directory 'functional-gate-receipt.json') -Encoding utf8NoBOM
           if (-not $valid) { throw 'The exact original functional case must execute once and pass without skips.' }
-      - name: Test native cold profile and selector preconditions
+      - name: Test execution cold profile and selector preconditions
         id: functional-cold-preconditions
         if: ${{ success() && github.event_name == 'workflow_dispatch' && inputs.mode == 'functional-gates' && steps.functional-three-receipt.outcome == 'success' }}
         shell: bash
         run: |
           evidence="TestResults/functional-gates/cold-preconditions"
           mkdir -p "$evidence"
-          if node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=unit '--KeyLoadTests:Filter=/*/*/(FunctionalColdReopenProfileTests|NativeTUnitSelectionTests)/*' --KeyLoadTests:Execution:MaximumParallelTests=50 --KeyLoadTests:ResultsDirectory=TestResults/functional-gates/cold-preconditions --KeyLoadTests:ReportTrx=true > "$evidence/native.stdout.original.txt" 2> "$evidence/native.stderr.original.txt"; then
-            native_exit=0
+          if node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=unit '--KeyLoadTests:Filter=/*/*/(FunctionalColdReopenProfileTests|TUnitSelectionTests)/*' --KeyLoadTests:Execution:MaximumParallelTests=50 --KeyLoadTests:ResultsDirectory=TestResults/functional-gates/cold-preconditions --KeyLoadTests:ReportTrx=true > "$evidence/execution.stdout.original.txt" 2> "$evidence/execution.stderr.original.txt"; then
+            _exit=0
           else
-            native_exit=$?
+            _exit=$?
           fi
-          printf '%s\n' "$native_exit" > "$evidence/native-exit-code.txt"
-          tail -c 65536 "$evidence/native.stdout.original.txt"
-          tail -c 65536 "$evidence/native.stderr.original.txt" >&2
-          exit "$native_exit"
-      - name: Verify original native cold precondition receipt
+          printf '%s\n' "$_exit" > "$evidence/execution-exit-code.txt"
+          tail -c 65536 "$evidence/execution.stdout.original.txt"
+          tail -c 65536 "$evidence/execution.stderr.original.txt" >&2
+          exit "$_exit"
+      - name: Verify original execution cold precondition receipt
         id: functional-cold-preconditions-receipt
         if: ${{ !cancelled() && inputs.mode == 'functional-gates' && (steps.functional-cold-preconditions.outcome == 'success' || steps.functional-cold-preconditions.outcome == 'failure') }}
         shell: pwsh
         env:
-          NATIVE_OUTCOME: ${{ steps.functional-cold-preconditions.outcome }}
+          _OUTCOME: ${{ steps.functional-cold-preconditions.outcome }}
         run: |
           $ErrorActionPreference = 'Stop'
           Set-StrictMode -Version Latest
@@ -410,17 +410,17 @@ jobs:
           $counts = $trx.SelectSingleNode('/t:TestRun/t:ResultSummary/t:Counters', $ns)
           $results = @($trx.SelectNodes('/t:TestRun/t:Results/t:UnitTestResult', $ns))
           $definitions = @($trx.SelectNodes('/t:TestRun/t:TestDefinitions/t:UnitTest', $ns))
-          $nativeExit = (Get-Content -LiteralPath (Join-Path $directory 'native-exit-code.txt') -Raw).Trim()
-          $valid = $env:NATIVE_OUTCOME -ceq 'success' -and $nativeExit -ceq '0' -and $null -ne $counts -and
+          $runtimeExit = (Get-Content -LiteralPath (Join-Path $directory 'execution-exit-code.txt') -Raw).Trim()
+          $valid = $env:_OUTCOME -ceq 'success' -and $runtimeExit -ceq '0' -and $null -ne $counts -and
             $results.Count -eq 10 -and $definitions.Count -eq 10
           $valid = $valid -and [int]$counts.total -eq 10 -and [int]$counts.executed -eq 10 -and [int]$counts.passed -eq 10
           foreach ($counter in $counts.Attributes) {
             if ($counter.Name -notin @('total','executed','passed') -and [long]$counter.Value -ne 0) { $valid = $false }
           }
           $expected = [ordered]@{
-            'FunctionalColdReopenProfileTests.ActualNativeModelKeepsFaultCommandsExclusiveToSelectedProfiles' = 5
+            'FunctionalColdReopenProfileTests.ActualModelKeepsFaultCommandsExclusiveToSelectedProfiles' = 5
             'FunctionalColdReopenProfileTests.InvalidColdAndConflictingSelectionsRefuseBeforeResourcesThenHealthyModelWorks' = 1
-            'NativeTUnitSelectionTests.NativeEntryPreservesOriginalTUnitArgumentsAndRejectsInvalidSelections' = 4
+            'TUnitSelectionTests.EntryPreservesOriginalTUnitArgumentsAndRejectsInvalidSelections' = 4
           }
           $observed = [Collections.Generic.Dictionary[string,int]]::new([StringComparer]::Ordinal)
           $resultIds = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
@@ -447,9 +447,9 @@ jobs:
           }
           [ordered]@{
             sourceRevision = $env:GITHUB_SHA; runId = $env:GITHUB_RUN_ID; runAttempt = $env:GITHUB_RUN_ATTEMPT
-            methods = $expected; maximumParallelTests = 50; nativeOutcome = $env:NATIVE_OUTCOME; nativeExitCode = $nativeExit; accepted = $valid
-            stdoutSha256 = (Get-FileHash -LiteralPath (Join-Path $directory 'native.stdout.original.txt') -Algorithm SHA256).Hash.ToLowerInvariant()
-            stderrSha256 = (Get-FileHash -LiteralPath (Join-Path $directory 'native.stderr.original.txt') -Algorithm SHA256).Hash.ToLowerInvariant()
+            methods = $expected; maximumParallelTests = 50; runtimeOutcome = $env:_OUTCOME; runtimeExitCode = $runtimeExit; accepted = $valid
+            stdoutSha256 = (Get-FileHash -LiteralPath (Join-Path $directory 'execution.stdout.original.txt') -Algorithm SHA256).Hash.ToLowerInvariant()
+            stderrSha256 = (Get-FileHash -LiteralPath (Join-Path $directory 'execution.stderr.original.txt') -Algorithm SHA256).Hash.ToLowerInvariant()
             trxSha256 = (Get-FileHash -LiteralPath $reports[0].FullName -Algorithm SHA256).Hash.ToLowerInvariant()
             sourceManifestSha256 = (Get-FileHash -LiteralPath $env:KEYLOAD_PRODUCT_COVERAGE_SOURCE_MANIFEST -Algorithm SHA256).Hash.ToLowerInvariant()
           } | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $directory 'functional-gate-receipt.json') -Encoding utf8NoBOM
@@ -463,21 +463,21 @@ jobs:
         run: |
           evidence="TestResults/functional-gates/cold-single"
           mkdir -p "$TMPDIR" "$evidence"
-          if node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=cluster '--KeyLoadTests:Filter=/*/*/FunctionalDatabaseColdReopenTests/SingleInstanceColdReopensAllModelsAndReplaysOriginalPublicCommands' --KeyLoadTests:Execution:MaximumParallelTests=50 --KeyLoadTests:ResultsDirectory=TestResults/functional-gates/cold-single --KeyLoadTests:ReportTrx=true > "$evidence/native.stdout.original.txt" 2> "$evidence/native.stderr.original.txt"; then
-            native_exit=0
+          if node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=cluster '--KeyLoadTests:Filter=/*/*/FunctionalDatabaseColdReopenTests/SingleInstanceColdReopensAllModelsAndReplaysOriginalPublicCommands' --KeyLoadTests:Execution:MaximumParallelTests=50 --KeyLoadTests:ResultsDirectory=TestResults/functional-gates/cold-single --KeyLoadTests:ReportTrx=true > "$evidence/execution.stdout.original.txt" 2> "$evidence/execution.stderr.original.txt"; then
+            _exit=0
           else
-            native_exit=$?
+            _exit=$?
           fi
-          printf '%s\n' "$native_exit" > "$evidence/native-exit-code.txt"
-          tail -c 65536 "$evidence/native.stdout.original.txt"
-          tail -c 65536 "$evidence/native.stderr.original.txt" >&2
-          exit "$native_exit"
+          printf '%s\n' "$_exit" > "$evidence/execution-exit-code.txt"
+          tail -c 65536 "$evidence/execution.stdout.original.txt"
+          tail -c 65536 "$evidence/execution.stderr.original.txt" >&2
+          exit "$_exit"
       - name: Verify original single cold functional gate receipt
         id: functional-cold-single-receipt
         if: ${{ !cancelled() && inputs.mode == 'functional-gates' && (steps.functional-cold-single.outcome == 'success' || steps.functional-cold-single.outcome == 'failure') }}
         shell: pwsh
         env:
-          NATIVE_OUTCOME: ${{ steps.functional-cold-single.outcome }}
+          _OUTCOME: ${{ steps.functional-cold-single.outcome }}
         run: |
           $ErrorActionPreference = 'Stop'
           Set-StrictMode -Version Latest
@@ -492,8 +492,8 @@ jobs:
           $counts = $trx.SelectSingleNode('/t:TestRun/t:ResultSummary/t:Counters', $ns)
           $results = @($trx.SelectNodes('/t:TestRun/t:Results/t:UnitTestResult', $ns))
           $definitions = @($trx.SelectNodes('/t:TestRun/t:TestDefinitions/t:UnitTest', $ns))
-          $nativeExit = (Get-Content -LiteralPath (Join-Path $directory 'native-exit-code.txt') -Raw).Trim()
-          $valid = $env:NATIVE_OUTCOME -ceq 'success' -and $nativeExit -ceq '0' -and $null -ne $counts -and
+          $runtimeExit = (Get-Content -LiteralPath (Join-Path $directory 'execution-exit-code.txt') -Raw).Trim()
+          $valid = $env:_OUTCOME -ceq 'success' -and $runtimeExit -ceq '0' -and $null -ne $counts -and
             $results.Count -eq 1 -and $definitions.Count -eq 1
           $valid = $valid -and [int]$counts.total -eq 1 -and [int]$counts.executed -eq 1 -and [int]$counts.passed -eq 1
           foreach ($counter in $counts.Attributes) {
@@ -503,18 +503,18 @@ jobs:
           $valid = $valid -and $results[0].outcome -ceq 'Passed' -and $results[0].testName -ceq $method -and
             $results[0].testId -ceq $definitions[0].id -and $definitions[0].TestMethod.name -ceq $method -and
             $definitions[0].TestMethod.className -ceq 'KeyLoad.IntegrationTests.Features.DatabaseComposition.FunctionalDatabaseColdReopenTests'
-          $nativeProcessEvidence = & pwsh -NoLogo -NoProfile -File scripts/Features/CodeQuality/functional-coverage.process-lifecycle.ps1 `
+          $processEvidence = & pwsh -NoLogo -NoProfile -File scripts/Features/CodeQuality/functional-coverage.process-lifecycle.ps1 `
             -Repository $env:GITHUB_WORKSPACE -ResultsDirectory $directory `
             -SourceManifestPath $env:KEYLOAD_PRODUCT_COVERAGE_SOURCE_MANIFEST | ConvertFrom-Json
-          if ($LASTEXITCODE -ne 0) { throw 'Original native process lifecycle verification failed.' }
+          if ($LASTEXITCODE -ne 0) { throw 'Original execution process lifecycle verification failed.' }
           [ordered]@{
             sourceRevision = $env:GITHUB_SHA; runId = $env:GITHUB_RUN_ID; runAttempt = $env:GITHUB_RUN_ATTEMPT
-            method = $method; nodes = 1; maximumParallelTests = 50; nativeOutcome = $env:NATIVE_OUTCOME; nativeExitCode = $nativeExit; accepted = $valid
-            stdoutSha256 = (Get-FileHash -LiteralPath (Join-Path $directory 'native.stdout.original.txt') -Algorithm SHA256).Hash.ToLowerInvariant()
-            stderrSha256 = (Get-FileHash -LiteralPath (Join-Path $directory 'native.stderr.original.txt') -Algorithm SHA256).Hash.ToLowerInvariant()
+            method = $method; nodes = 1; maximumParallelTests = 50; runtimeOutcome = $env:_OUTCOME; runtimeExitCode = $runtimeExit; accepted = $valid
+            stdoutSha256 = (Get-FileHash -LiteralPath (Join-Path $directory 'execution.stdout.original.txt') -Algorithm SHA256).Hash.ToLowerInvariant()
+            stderrSha256 = (Get-FileHash -LiteralPath (Join-Path $directory 'execution.stderr.original.txt') -Algorithm SHA256).Hash.ToLowerInvariant()
             trxSha256 = (Get-FileHash -LiteralPath $reports[0].FullName -Algorithm SHA256).Hash.ToLowerInvariant()
             sourceManifestSha256 = (Get-FileHash -LiteralPath $env:KEYLOAD_PRODUCT_COVERAGE_SOURCE_MANIFEST -Algorithm SHA256).Hash.ToLowerInvariant()
-            nativeProcessEvidence = $nativeProcessEvidence
+            processEvidence = $processEvidence
           } | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath (Join-Path $directory 'functional-gate-receipt.json') -Encoding utf8NoBOM
           if (-not $valid) { throw 'The exact original functional case must execute once and pass without skips.' }
       - name: Test cold functional database gate with 3 node(s)
@@ -526,21 +526,21 @@ jobs:
         run: |
           evidence="TestResults/functional-gates/cold-three"
           mkdir -p "$TMPDIR" "$evidence"
-          if node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=cluster '--KeyLoadTests:Filter=/*/*/FunctionalDatabaseColdReopenTests/ThreeNodeColdReopensAllModelsAndReplaysOriginalPublicCommands' --KeyLoadTests:Execution:MaximumParallelTests=50 --KeyLoadTests:ResultsDirectory=TestResults/functional-gates/cold-three --KeyLoadTests:ReportTrx=true > "$evidence/native.stdout.original.txt" 2> "$evidence/native.stderr.original.txt"; then
-            native_exit=0
+          if node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=cluster '--KeyLoadTests:Filter=/*/*/FunctionalDatabaseColdReopenTests/ThreeNodeColdReopensAllModelsAndReplaysOriginalPublicCommands' --KeyLoadTests:Execution:MaximumParallelTests=50 --KeyLoadTests:ResultsDirectory=TestResults/functional-gates/cold-three --KeyLoadTests:ReportTrx=true > "$evidence/execution.stdout.original.txt" 2> "$evidence/execution.stderr.original.txt"; then
+            _exit=0
           else
-            native_exit=$?
+            _exit=$?
           fi
-          printf '%s\n' "$native_exit" > "$evidence/native-exit-code.txt"
-          tail -c 65536 "$evidence/native.stdout.original.txt"
-          tail -c 65536 "$evidence/native.stderr.original.txt" >&2
-          exit "$native_exit"
+          printf '%s\n' "$_exit" > "$evidence/execution-exit-code.txt"
+          tail -c 65536 "$evidence/execution.stdout.original.txt"
+          tail -c 65536 "$evidence/execution.stderr.original.txt" >&2
+          exit "$_exit"
       - name: Verify original three cold functional gate receipt
         id: functional-cold-three-receipt
         if: ${{ !cancelled() && inputs.mode == 'functional-gates' && (steps.functional-cold-three.outcome == 'success' || steps.functional-cold-three.outcome == 'failure') }}
         shell: pwsh
         env:
-          NATIVE_OUTCOME: ${{ steps.functional-cold-three.outcome }}
+          _OUTCOME: ${{ steps.functional-cold-three.outcome }}
         run: |
           $ErrorActionPreference = 'Stop'
           Set-StrictMode -Version Latest
@@ -555,8 +555,8 @@ jobs:
           $counts = $trx.SelectSingleNode('/t:TestRun/t:ResultSummary/t:Counters', $ns)
           $results = @($trx.SelectNodes('/t:TestRun/t:Results/t:UnitTestResult', $ns))
           $definitions = @($trx.SelectNodes('/t:TestRun/t:TestDefinitions/t:UnitTest', $ns))
-          $nativeExit = (Get-Content -LiteralPath (Join-Path $directory 'native-exit-code.txt') -Raw).Trim()
-          $valid = $env:NATIVE_OUTCOME -ceq 'success' -and $nativeExit -ceq '0' -and $null -ne $counts -and
+          $runtimeExit = (Get-Content -LiteralPath (Join-Path $directory 'execution-exit-code.txt') -Raw).Trim()
+          $valid = $env:_OUTCOME -ceq 'success' -and $runtimeExit -ceq '0' -and $null -ne $counts -and
             $results.Count -eq 1 -and $definitions.Count -eq 1
           $valid = $valid -and [int]$counts.total -eq 1 -and [int]$counts.executed -eq 1 -and [int]$counts.passed -eq 1
           foreach ($counter in $counts.Attributes) {
@@ -566,21 +566,21 @@ jobs:
           $valid = $valid -and $results[0].outcome -ceq 'Passed' -and $results[0].testName -ceq $method -and
             $results[0].testId -ceq $definitions[0].id -and $definitions[0].TestMethod.name -ceq $method -and
             $definitions[0].TestMethod.className -ceq 'KeyLoad.IntegrationTests.Features.DatabaseComposition.FunctionalDatabaseColdReopenTests'
-          $nativeProcessEvidence = & pwsh -NoLogo -NoProfile -File scripts/Features/CodeQuality/functional-coverage.process-lifecycle.ps1 `
+          $processEvidence = & pwsh -NoLogo -NoProfile -File scripts/Features/CodeQuality/functional-coverage.process-lifecycle.ps1 `
             -Repository $env:GITHUB_WORKSPACE -ResultsDirectory $directory `
             -SourceManifestPath $env:KEYLOAD_PRODUCT_COVERAGE_SOURCE_MANIFEST | ConvertFrom-Json
-          if ($LASTEXITCODE -ne 0) { throw 'Original native process lifecycle verification failed.' }
+          if ($LASTEXITCODE -ne 0) { throw 'Original execution process lifecycle verification failed.' }
           [ordered]@{
             sourceRevision = $env:GITHUB_SHA; runId = $env:GITHUB_RUN_ID; runAttempt = $env:GITHUB_RUN_ATTEMPT
-            method = $method; nodes = 3; maximumParallelTests = 50; nativeOutcome = $env:NATIVE_OUTCOME; nativeExitCode = $nativeExit; accepted = $valid
-            stdoutSha256 = (Get-FileHash -LiteralPath (Join-Path $directory 'native.stdout.original.txt') -Algorithm SHA256).Hash.ToLowerInvariant()
-            stderrSha256 = (Get-FileHash -LiteralPath (Join-Path $directory 'native.stderr.original.txt') -Algorithm SHA256).Hash.ToLowerInvariant()
+            method = $method; nodes = 3; maximumParallelTests = 50; runtimeOutcome = $env:_OUTCOME; runtimeExitCode = $runtimeExit; accepted = $valid
+            stdoutSha256 = (Get-FileHash -LiteralPath (Join-Path $directory 'execution.stdout.original.txt') -Algorithm SHA256).Hash.ToLowerInvariant()
+            stderrSha256 = (Get-FileHash -LiteralPath (Join-Path $directory 'execution.stderr.original.txt') -Algorithm SHA256).Hash.ToLowerInvariant()
             trxSha256 = (Get-FileHash -LiteralPath $reports[0].FullName -Algorithm SHA256).Hash.ToLowerInvariant()
             sourceManifestSha256 = (Get-FileHash -LiteralPath $env:KEYLOAD_PRODUCT_COVERAGE_SOURCE_MANIFEST -Algorithm SHA256).Hash.ToLowerInvariant()
-            nativeProcessEvidence = $nativeProcessEvidence
+            processEvidence = $processEvidence
           } | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath (Join-Path $directory 'functional-gate-receipt.json') -Encoding utf8NoBOM
           if (-not $valid) { throw 'The exact original functional case must execute once and pass without skips.' }
-      - name: Test distinct native files and exclusive-owner refusal with 3 nodes
+      - name: Test distinct execution files and exclusive-owner refusal with 3 nodes
         id: functional-file-ownership-three
         if: ${{ success() && github.event_name == 'workflow_dispatch' && inputs.mode == 'functional-gates' && steps.functional-cold-three-receipt.outcome == 'success' }}
         shell: bash
@@ -589,21 +589,21 @@ jobs:
         run: |
           evidence="TestResults/functional-gates/file-ownership-three"
           mkdir -p "$TMPDIR" "$evidence"
-          if node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=cluster '--KeyLoadTests:Filter=/*/*/FunctionalFileOwnershipClusterTests/DistinctNativeFilesRetainAllModelsAcrossCompetingOwnersAndTwoColdReopens' --KeyLoadTests:Execution:MaximumParallelTests=50 --KeyLoadTests:ResultsDirectory=TestResults/functional-gates/file-ownership-three --KeyLoadTests:ReportTrx=true > "$evidence/native.stdout.original.txt" 2> "$evidence/native.stderr.original.txt"; then
-            native_exit=0
+          if node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=cluster '--KeyLoadTests:Filter=/*/*/FunctionalFileOwnershipClusterTests/DistinctFilesRetainAllModelsAcrossCompetingOwnersAndTwoColdReopens' --KeyLoadTests:Execution:MaximumParallelTests=50 --KeyLoadTests:ResultsDirectory=TestResults/functional-gates/file-ownership-three --KeyLoadTests:ReportTrx=true > "$evidence/execution.stdout.original.txt" 2> "$evidence/execution.stderr.original.txt"; then
+            _exit=0
           else
-            native_exit=$?
+            _exit=$?
           fi
-          printf '%s\n' "$native_exit" > "$evidence/native-exit-code.txt"
-          tail -c 65536 "$evidence/native.stdout.original.txt"
-          tail -c 65536 "$evidence/native.stderr.original.txt" >&2
-          exit "$native_exit"
+          printf '%s\n' "$_exit" > "$evidence/execution-exit-code.txt"
+          tail -c 65536 "$evidence/execution.stdout.original.txt"
+          tail -c 65536 "$evidence/execution.stderr.original.txt" >&2
+          exit "$_exit"
       - name: Verify original distinct-files and exclusive-owner refusal receipt
         id: functional-file-ownership-three-receipt
         if: ${{ !cancelled() && github.event_name == 'workflow_dispatch' && inputs.mode == 'functional-gates' && steps.functional-cold-three-receipt.outcome == 'success' && (steps.functional-file-ownership-three.outcome == 'success' || steps.functional-file-ownership-three.outcome == 'failure') }}
         shell: pwsh
         env:
-          NATIVE_OUTCOME: ${{ steps.functional-file-ownership-three.outcome }}
+          _OUTCOME: ${{ steps.functional-file-ownership-three.outcome }}
         run: |
           $ErrorActionPreference = 'Stop'
           Set-StrictMode -Version Latest
@@ -618,29 +618,29 @@ jobs:
           $counts = $trx.SelectSingleNode('/t:TestRun/t:ResultSummary/t:Counters', $ns)
           $results = @($trx.SelectNodes('/t:TestRun/t:Results/t:UnitTestResult', $ns))
           $definitions = @($trx.SelectNodes('/t:TestRun/t:TestDefinitions/t:UnitTest', $ns))
-          $nativeExit = (Get-Content -LiteralPath (Join-Path $directory 'native-exit-code.txt') -Raw).Trim()
-          $valid = $env:NATIVE_OUTCOME -ceq 'success' -and $nativeExit -ceq '0' -and $null -ne $counts -and
+          $runtimeExit = (Get-Content -LiteralPath (Join-Path $directory 'execution-exit-code.txt') -Raw).Trim()
+          $valid = $env:_OUTCOME -ceq 'success' -and $runtimeExit -ceq '0' -and $null -ne $counts -and
             $results.Count -eq 1 -and $definitions.Count -eq 1
           $valid = $valid -and [int]$counts.total -eq 1 -and [int]$counts.executed -eq 1 -and [int]$counts.passed -eq 1
           foreach ($counter in $counts.Attributes) {
             if ($counter.Name -notin @('total','executed','passed') -and [long]$counter.Value -ne 0) { $valid = $false }
           }
-          $method = 'DistinctNativeFilesRetainAllModelsAcrossCompetingOwnersAndTwoColdReopens'
+          $method = 'DistinctFilesRetainAllModelsAcrossCompetingOwnersAndTwoColdReopens'
           $valid = $valid -and $results[0].outcome -ceq 'Passed' -and $results[0].testName -ceq $method -and
             $results[0].testId -ceq $definitions[0].id -and $definitions[0].TestMethod.name -ceq $method -and
             $definitions[0].TestMethod.className -ceq 'KeyLoad.IntegrationTests.Features.DatabaseComposition.FunctionalFileOwnershipClusterTests'
-          $nativeProcessEvidence = & pwsh -NoLogo -NoProfile -File scripts/Features/CodeQuality/functional-coverage.process-lifecycle.ps1 `
+          $processEvidence = & pwsh -NoLogo -NoProfile -File scripts/Features/CodeQuality/functional-coverage.process-lifecycle.ps1 `
             -Repository $env:GITHUB_WORKSPACE -ResultsDirectory $directory `
             -SourceManifestPath $env:KEYLOAD_PRODUCT_COVERAGE_SOURCE_MANIFEST | ConvertFrom-Json
-          if ($LASTEXITCODE -ne 0) { throw 'Original native process lifecycle verification failed.' }
+          if ($LASTEXITCODE -ne 0) { throw 'Original execution process lifecycle verification failed.' }
           [ordered]@{
             sourceRevision = $env:GITHUB_SHA; runId = $env:GITHUB_RUN_ID; runAttempt = $env:GITHUB_RUN_ATTEMPT
-            method = $method; nodes = 3; maximumParallelTests = 50; nativeOutcome = $env:NATIVE_OUTCOME; nativeExitCode = $nativeExit; accepted = $valid
-            stdoutSha256 = (Get-FileHash -LiteralPath (Join-Path $directory 'native.stdout.original.txt') -Algorithm SHA256).Hash.ToLowerInvariant()
-            stderrSha256 = (Get-FileHash -LiteralPath (Join-Path $directory 'native.stderr.original.txt') -Algorithm SHA256).Hash.ToLowerInvariant()
+            method = $method; nodes = 3; maximumParallelTests = 50; runtimeOutcome = $env:_OUTCOME; runtimeExitCode = $runtimeExit; accepted = $valid
+            stdoutSha256 = (Get-FileHash -LiteralPath (Join-Path $directory 'execution.stdout.original.txt') -Algorithm SHA256).Hash.ToLowerInvariant()
+            stderrSha256 = (Get-FileHash -LiteralPath (Join-Path $directory 'execution.stderr.original.txt') -Algorithm SHA256).Hash.ToLowerInvariant()
             trxSha256 = (Get-FileHash -LiteralPath $reports[0].FullName -Algorithm SHA256).Hash.ToLowerInvariant()
             sourceManifestSha256 = (Get-FileHash -LiteralPath $env:KEYLOAD_PRODUCT_COVERAGE_SOURCE_MANIFEST -Algorithm SHA256).Hash.ToLowerInvariant()
-            nativeProcessEvidence = $nativeProcessEvidence
+            processEvidence = $processEvidence
           } | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath (Join-Path $directory 'functional-gate-receipt.json') -Encoding utf8NoBOM
           if (-not $valid) { throw 'The exact original functional case must execute once and pass without skips.' }
       - name: Test three-node database with .NET and MCP clients
@@ -665,8 +665,8 @@ jobs:
             TestResults/cluster-required/**
             TestResults/functional-coverage/cluster/**
           if-no-files-found: error
-      - name: Reconcile original native full and five-group discovery in both modes
-        id: native-census
+      - name: Reconcile original execution full and five-group discovery in both modes
+        id: execution-census
         if: ${{ inputs.mode != 'functional-gates' && !cancelled() && steps.coverage-source.outcome == 'success' }}
         shell: pwsh
         run: |
@@ -676,7 +676,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Execute full censuses and twelve original covered suite inputs
         id: functional-coverage
-        if: ${{ inputs.mode != 'functional-gates' && !cancelled() && steps.native-census.outcome == 'success' }}
+        if: ${{ inputs.mode != 'functional-gates' && !cancelled() && steps.execution-census.outcome == 'success' }}
         shell: pwsh
         run: |
           & pwsh -NoLogo -NoProfile -File scripts/Features/CodeQuality/functional-coverage.workflow-collect.ps1 `
@@ -684,7 +684,7 @@ jobs:
             -EvidenceRoot (Join-Path $env:GITHUB_WORKSPACE 'TestResults/functional-coverage/cluster') `
             -SourceManifestPath $env:KEYLOAD_PRODUCT_COVERAGE_SOURCE_MANIFEST
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-      - name: Verify original coverage source and native test assembly receipts after all children settle
+      - name: Verify original coverage source and execution test assembly receipts after all children settle
         id: coverage-source-after
         if: ${{ !cancelled() && steps.coverage-source.outcome == 'success' }}
         shell: pwsh
@@ -701,7 +701,7 @@ jobs:
           RECOVERY_EXIT_CODE: ${{ steps.functional-coverage.outputs.recovery_exit_code }}
           CLUSTER_EXIT_CODE: ${{ steps.functional-coverage.outputs.cluster_exit_code }}
         run: |
-          & pwsh -NoLogo -NoProfile -File scripts/Features/CodeQuality/functional-coverage.native-product-descriptor.ps1 `
+          & pwsh -NoLogo -NoProfile -File scripts/Features/CodeQuality/functional-coverage.execution-product-descriptor.ps1 `
             -Repository $env:GITHUB_WORKSPACE `
             -SourceManifestPath $env:KEYLOAD_PRODUCT_COVERAGE_SOURCE_MANIFEST `
             -ResultsRoot (Join-Path $env:GITHUB_WORKSPACE 'TestResults/functional-coverage/cluster') `
@@ -712,18 +712,18 @@ jobs:
         id: product-admission
         if: ${{ inputs.mode != 'functional-gates' && success() }}
         env:
-          KEYLOAD_NATIVE_PRODUCT_ADMISSION_REQUIRED: 'true'
-          KEYLOAD_NATIVE_PRODUCT_DESCRIPTOR_PATH: ${{ github.workspace }}/TestResults/functional-coverage/cluster/functional-coverage.native-product-descriptor.v1.json
-        run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=unit '--KeyLoadTests:Filter=/*/*/NativeCoverageMergeTests/*' --KeyLoadTests:ResultsDirectory=TestResults/native-product-admission --KeyLoadTests:ReportTrx=true
+          KEYLOAD__PRODUCT_ADMISSION_REQUIRED: 'true'
+          KEYLOAD__PRODUCT_DESCRIPTOR_PATH: ${{ github.workspace }}/TestResults/functional-coverage/cluster/functional-coverage.execution-product-descriptor.v1.json
+        run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=unit '--KeyLoadTests:Filter=/*/*/CoverageMergeTests/*' --KeyLoadTests:ResultsDirectory=TestResults/execution-product-admission --KeyLoadTests:ReportTrx=true
       - name: Verify original product-admission test and closed phase receipt
         if: ${{ inputs.mode != 'functional-gates' && !cancelled() && steps.product-admission.outcome != 'skipped' }}
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
           Set-StrictMode -Version Latest
-          $directory = Join-Path $env:GITHUB_WORKSPACE 'TestResults/native-product-admission'
+          $directory = Join-Path $env:GITHUB_WORKSPACE 'TestResults/execution-product-admission'
           $reports = @(Get-ChildItem -LiteralPath $directory -Filter '*.trx' -File -Recurse)
-          $receipts = @(Get-ChildItem -LiteralPath $directory -Filter 'native-product-admission-phase.v1.json' -File -Recurse)
+          $receipts = @(Get-ChildItem -LiteralPath $directory -Filter 'execution-product-admission-phase.v1.json' -File -Recurse)
           if ($reports.Count -ne 1 -or $receipts.Count -ne 1 -or $receipts[0].Length -le 0 -or $receipts[0].Length -gt 65536) {
             throw 'Exactly one original TRX and bounded product-admission receipt are required.'
           }
@@ -732,40 +732,40 @@ jobs:
           if ([int] $counts.total -ne 1 -or [int] $counts.executed -ne 1 -or [int] $counts.passed -ne 1 -or [int] $counts.failed -ne 0) {
             throw 'The real product-admission whole operation must execute and pass.'
           }
-          . ./scripts/Features/CodeQuality/functional-coverage.native-merge.inputs.ps1
+          . ./scripts/Features/CodeQuality/functional-coverage.execution-merge.inputs.ps1
           $bytes = [IO.File]::ReadAllBytes($receipts[0].FullName)
           $document = [Text.Json.JsonDocument]::Parse([ReadOnlyMemory[byte]]::new($bytes))
-          try { Assert-FcNativeJsonUnique $document.RootElement }
+          try { Assert-FcJsonUnique $document.RootElement }
           finally { $document.Dispose() }
           $phase = ConvertFrom-Json ([Text.Encoding]::UTF8.GetString($bytes)) -AsHashtable
-          Assert-FcNativeExactKeys $phase @('schemaVersion','phase','descriptorSha256','healthyAdmissions','rejectedAdmissions','rejectedOutcome')
-          $descriptor = Join-Path $env:GITHUB_WORKSPACE 'TestResults/functional-coverage/cluster/functional-coverage.native-product-descriptor.v1.json'
+          Assert-FcExactKeys $phase @('schemaVersion','phase','descriptorSha256','healthyAdmissions','rejectedAdmissions','rejectedOutcome')
+          $descriptor = Join-Path $env:GITHUB_WORKSPACE 'TestResults/functional-coverage/cluster/functional-coverage.execution-product-descriptor.v1.json'
           foreach ($name in @('schemaVersion','healthyAdmissions','rejectedAdmissions')) {
             if ($phase[$name] -isnot [int] -and $phase[$name] -isnot [long]) { throw 'Invalid product phase integer.' }
           }
           if ($phase.schemaVersion -ne 1 -or $phase.phase -cne 'product-admission' -or
               $phase.descriptorSha256 -cne (Get-FileHash $descriptor -Algorithm SHA256).Hash.ToLowerInvariant() -or
               $phase.healthyAdmissions -ne 2 -or $phase.rejectedAdmissions -ne 1 -or
-              $phase.rejectedOutcome -cne 'An original native test outcome report does not match the exact contributor inventory.') {
+              $phase.rejectedOutcome -cne 'An original execution test outcome report does not match the exact contributor inventory.') {
             throw 'The product-admission phase does not bind the original descriptor and complete flow.'
           }
-      - name: Validate and merge native product coverage
+      - name: Validate and merge execution product coverage
         if: ${{ inputs.mode != 'functional-gates' && success() }}
         shell: pwsh
         run: |
           $root = $env:GITHUB_WORKSPACE
           $evidence = Join-Path $root 'TestResults/functional-coverage/cluster'
-          $descriptorPath = Join-Path $evidence 'functional-coverage.native-product-descriptor.v1.json'
-          $boundsPath = Join-Path $evidence 'functional-coverage.native-options.v1.json'
+          $descriptorPath = Join-Path $evidence 'functional-coverage.execution-product-descriptor.v1.json'
+          $boundsPath = Join-Path $evidence 'functional-coverage.execution-options.v1.json'
           $descriptor = Get-Content -LiteralPath $descriptorPath -Raw | ConvertFrom-Json
-          $nativeOptions = Get-Content -LiteralPath $boundsPath -Raw
-          & pwsh -NoLogo -NoProfile -File scripts/Features/CodeQuality/functional-coverage.native-merge.ps1 `
+          $runtimeOptionsCore = Get-Content -LiteralPath $boundsPath -Raw
+          & pwsh -NoLogo -NoProfile -File scripts/Features/CodeQuality/functional-coverage.execution-merge.ps1 `
             -Mode Product -Repository $root -EvidenceRoot $evidence -DescriptorPath $descriptorPath `
             -ToolPackageRoot $descriptor.tool.packageRoot -ToolVersion $descriptor.tool.version `
-            -NativeOptionsJson $nativeOptions
+            -OptionsJson $runtimeOptionsCore
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-      - name: Verify original native process teardown evidence
-        id: native-cleanup
+      - name: Verify original execution process teardown evidence
+        id: execution-cleanup
         if: ${{ always() && steps.coverage-source.outcome == 'success' }}
         shell: pwsh
         run: |
@@ -791,7 +791,7 @@ jobs:
           COLD_THREE_OUTCOME: ${{ steps.functional-cold-three.outcome }}
           COLD_THREE_RECEIPT: ${{ steps.functional-cold-three-receipt.outcome }}
           SOURCE_VERIFY: ${{ steps.coverage-source-after.outcome }}
-          NATIVE_CLEANUP: ${{ steps.native-cleanup.outcome }}
+          _CLEANUP: ${{ steps.execution-cleanup.outcome }}
         run: |
           $directory = Join-Path $env:GITHUB_WORKSPACE 'TestResults/functional-gates'
           New-Item -ItemType Directory -Path $directory -Force | Out-Null
@@ -803,11 +803,11 @@ jobs:
             coldPreconditions = $env:COLD_PRECONDITIONS_OUTCOME; coldPreconditionsReceipt = $env:COLD_PRECONDITIONS_RECEIPT
             coldSingle = $env:COLD_SINGLE_OUTCOME; coldSingleReceipt = $env:COLD_SINGLE_RECEIPT
             coldThree = $env:COLD_THREE_OUTCOME; coldThreeReceipt = $env:COLD_THREE_RECEIPT
-            sourceVerify = $env:SOURCE_VERIFY; nativeCleanup = $env:NATIVE_CLEANUP
+            sourceVerify = $env:SOURCE_VERIFY; runtimeCleanup = $env:_CLEANUP
           }
           $outcomes | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $directory 'functional-gates-outcomes.json') -Encoding utf8NoBOM
-          foreach ($name in @('single','singleReceipt','three','threeReceipt','fileOwnershipThree','fileOwnershipThreeReceipt','coldPreconditions','coldPreconditionsReceipt','coldSingle','coldSingleReceipt','coldThree','coldThreeReceipt','sourceVerify','nativeCleanup')) {
-            if ($outcomes[$name] -cne 'success') { throw 'Both original normal gates, native file-ownership gate and receipt, cold preconditions, both cold gates and joined identity/cleanup checks must pass.' }
+          foreach ($name in @('single','singleReceipt','three','threeReceipt','fileOwnershipThree','fileOwnershipThreeReceipt','coldPreconditions','coldPreconditionsReceipt','coldSingle','coldSingleReceipt','coldThree','coldThreeReceipt','sourceVerify','runtimeCleanup')) {
+            if ($outcomes[$name] -cne 'success') { throw 'Both original normal gates, execution file-ownership gate and receipt, cold preconditions, both cold gates and joined identity/cleanup checks must pass.' }
           }
       - name: Save three-node database test results
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -816,7 +816,7 @@ jobs:
           name: ${{ inputs.mode == 'functional-gates' && 'functional-gates-qualification' || 'aspire-cluster-qualification' }}
           path: |
             TestResults/**
-            ${{ runner.temp }}/functional-gates/**/native-resource-logs/**
+            ${{ runner.temp }}/functional-gates/**/execution-resource-logs/**
             tests/KeyLoad.IntegrationTests/**/TestResults/**
             artifacts/qualification/**
           if-no-files-found: error

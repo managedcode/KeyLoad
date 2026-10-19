@@ -14,7 +14,7 @@ internal sealed class McpSchemaReferenceTests
     private const string ExpectedDataRef = "#/application/value";
     private const string ExpectedExampleRef = "#/application/example";
 
-    /// <summary>Every native reference resolves after its canonical graph is embedded in the wrapper.</summary>
+    /// <summary>Every execution reference resolves after its canonical graph is embedded in the wrapper.</summary>
     [Test]
     public async Task AcMcp003AllCatalogSchemaReferencesResolveInsideTheirWrappedDocuments()
     {

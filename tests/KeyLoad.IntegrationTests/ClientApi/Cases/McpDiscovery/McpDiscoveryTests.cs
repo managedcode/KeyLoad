@@ -1,5 +1,5 @@
 using System.Net;
-using KeyLoad.IntegrationTests.Features.ClusterRouting;
+using KeyLoad.IntegrationTests.Features.OrleansExecution;
 using KeyLoad.IntegrationTests.Features.DocumentStorage;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
 using KeyLoad.Query;
@@ -8,12 +8,12 @@ using ModelContextProtocol.Protocol;
 namespace KeyLoad.IntegrationTests.Features.ClientApi;
 
 /// <summary>AC-MCPGW-001/002/004: compact discovery resolves canonical capabilities through the genuine official client.</summary>
-/// <param name="fixture">The initialized actual native Aspire Orleans application.</param>
+/// <param name="fixture">The initialized actual execution Aspire Orleans application.</param>
 [ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = McpCallerProtocol.FixtureKey)]
 [NotInParallel]
 internal sealed class McpDiscoveryTests(ClusterFixture fixture)
 {
-    /// <summary>Both native listing APIs expose three meta tools and graph search retains every canonical schema.</summary>
+    /// <summary>Both execution listing APIs expose three meta tools and graph search retains every canonical schema.</summary>
     [Test]
     public async Task AcMcp001OfficialClientDiscoversMetaToolsAndSearchesCanonicalSchemasAndHints()
     {
@@ -33,7 +33,7 @@ internal sealed class McpDiscoveryTests(ClusterFixture fixture)
             await Assert.That(discovered.Add(tool.Name)).IsTrue();
             if (tool.Name == McpCallerProtocol.GraphShortestPath)
             {
-                await NativeMcpSchemaEvidence.RetainGraphShortestPathAsync(tool, deadline.Token);
+                await McpSchemaEvidence.RetainGraphShortestPathAsync(tool, deadline.Token);
             }
             await McpDiscoveryAssertions.VerifyAsync(tool);
         }
@@ -106,7 +106,7 @@ internal sealed class McpDiscoveryTests(ClusterFixture fixture)
 
     /// <summary>Caller cancellation before a read does not fabricate a result or prevent a subsequent genuine request.</summary>
     [Test]
-    public async Task AcMcp005CancelledNativeReadDoesNotPreventTheNextRealCall()
+    public async Task AcMcp005CancelledReadDoesNotPreventTheNextRealCall()
     {
         using var deadline = McpCallerDeadline.Create();
         var scenario = await McpDocumentScenario.CreateAsync(fixture, deadline.Token);

@@ -7,18 +7,18 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries;
 
-internal sealed class KeyLoadTimeSeriesTarget(HttpClient http, string apiKey, IOptions<KeyLoadClientExecutionOptions> clientOptions, IOptions<NativeComparisonExecutionOptions> executionOptions, string? image = null)
+internal sealed class KeyLoadTimeSeriesTarget(HttpClient http, string apiKey, IOptions<KeyLoadClientExecutionOptions> clientOptions, IOptions<ComparisonExecutionOptions> executionOptions, string? image = null)
     : ITimeSeriesPersistentTarget
 {
-    private const string PersistedTimeSeriesToken = "Persisted time-series through native Orleans";
+    private const string PersistedTimeSeriesToken = "Persisted time-series through execution Orleans";
     private const int RequiredCopies = 3;
 
     private const string TargetName = "KeyLoad TimeSeries";
-    private const string StorageGuarantee = "Native silo-local ZoneTree process durability; power-loss qualification pending";
+    private const string StorageGuarantee = "Execution silo-local ZoneTree process durability; power-loss qualification pending";
     private const string AcknowledgementGuarantee = "Requires 3 persisted data copies in public SDK write receipts";
     private const string ConfigureCommandPurpose = "configure-resource";
     private const string SeedCommandPurpose = "seed-samples";
-    private readonly NativeComparisonExecutionOptions execution = NativeComparisonExecutionOptions.Require(executionOptions).Value;
+    private readonly ComparisonExecutionOptions execution = ComparisonExecutionOptions.Require(executionOptions).Value;
     private readonly KeyLoadClient client = new(http, apiKey, clientOptions);
 
     public TimeSeriesTargetMetadata Metadata

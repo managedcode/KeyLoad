@@ -35,19 +35,19 @@ internal static class QueueInvalidDeliveryActionTrial
                 var image = QueueWholeFlowStorage.Bytes(fixture.Store);
                 var cut = fixture.ReadCanonicalCut();
                 var original = fixture.ReadStoredOutcome(id).PreparedCommand
-                    ?? throw new InvalidOperationException("The actual native delivery command was not retained.");
+                    ?? throw new InvalidOperationException("The actual execution delivery command was not retained.");
                 var replay = fixture.SubmitIssued(original);
                 await RequireRefusalAsync(replay);
-                await Assert.That(Convert.ToHexString(NativeSerialization.Serialize(replay)))
-                    .IsEqualTo(Convert.ToHexString(NativeSerialization.Serialize(rejected)));
+                await Assert.That(Convert.ToHexString(OrleansSerialization.Serialize(replay)))
+                    .IsEqualTo(Convert.ToHexString(OrleansSerialization.Serialize(rejected)));
                 await Assert.That(QueueWholeFlowStorage.Bytes(fixture.Store)).IsEquivalentTo(image, TUnit.Assertions.Enums.CollectionOrdering.Matching);
                 await Assert.That(fixture.ReadCanonicalCut()).IsEqualTo(cut);
                 token.ThrowIfCancellationRequested();
                 await CompleteAsync(fixture, lane, delivery, now, before);
             }, owningFailures);
         }
-        catch (Exception error) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error)) { owningFailures.Add(error); }
-        catch (Exception error) when (!global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error)) { owningFailures.Add(error); }
+        catch (Exception error) when (global::KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(error)) { owningFailures.Add(error); }
+        catch (Exception error) when (!global::KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(error)) { owningFailures.Add(error); }
         KeyLoad.Server.ServerFailureObserver.ThrowIfAny(owningFailures);
     }
 
@@ -106,10 +106,10 @@ internal static class QueueInvalidDeliveryActionTrial
         var image = QueueWholeFlowStorage.Bytes(fixture.Store);
         var cut = fixture.ReadCanonicalCut();
         var original = fixture.ReadStoredOutcome(id).PreparedCommand
-            ?? throw new InvalidOperationException("The actual native Processing command was not retained.");
+            ?? throw new InvalidOperationException("The actual execution Processing command was not retained.");
         var replayed = fixture.SubmitIssued(original).Get<CommitReceipt>();
-        await Assert.That(Convert.ToHexString(NativeSerialization.Serialize(replayed)))
-            .IsEqualTo(Convert.ToHexString(NativeSerialization.Serialize(completed)));
+        await Assert.That(Convert.ToHexString(OrleansSerialization.Serialize(replayed)))
+            .IsEqualTo(Convert.ToHexString(OrleansSerialization.Serialize(completed)));
         await Assert.That(QueueWholeFlowStorage.Bytes(fixture.Store)).IsEquivalentTo(image, TUnit.Assertions.Enums.CollectionOrdering.Matching);
         await Assert.That(fixture.ReadCanonicalCut()).IsEqualTo(cut);
         var next = Guid.NewGuid();
@@ -118,8 +118,8 @@ internal static class QueueInvalidDeliveryActionTrial
             CommandId = next
         },
             principal: Worker, id: next, time: now).Get<CommitReceipt>();
-        await Assert.That(Convert.ToHexString(NativeSerialization.Serialize(sameHandler)))
-            .IsEqualTo(Convert.ToHexString(NativeSerialization.Serialize(completed)));
+        await Assert.That(Convert.ToHexString(OrleansSerialization.Serialize(sameHandler)))
+            .IsEqualTo(Convert.ToHexString(OrleansSerialization.Serialize(completed)));
         await QueueOrderedRetryImage.SameAsync(fixture.Store, lane, terminal);
         await Assert.That(fixture.Database.InspectMessage("root", lane, Input)!.Metadata.State).IsEqualTo(MessageState.Acked);
         await Assert.That(fixture.Database.InspectMessage("root", lane, Input)!.PayloadJson).IsNull();

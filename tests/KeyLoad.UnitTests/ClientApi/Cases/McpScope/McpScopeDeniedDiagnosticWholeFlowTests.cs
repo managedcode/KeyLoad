@@ -50,12 +50,12 @@ internal sealed class McpScopeDeniedDiagnosticWholeFlowTests
         };
         var actualPrincipal = database.Submit(OperationKind.ConfigurePrincipal,
             new ConfigurePrincipalRequest(granted)).Get<PrincipalRecord>();
-        await Assert.That(NativeSerialization.Serialize(actualPrincipal).SequenceEqual(NativeSerialization.Serialize(granted))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(actualPrincipal).SequenceEqual(OrleansSerialization.Serialize(granted))).IsTrue();
         var healthyState = QueueWholeFlowStorage.Bytes(database.Store);
         var healthyPosition = database.Store.Position;
         var healthy = database.Database.GetDocument(Reader, reference, receipt.Token);
         var expected = new DocumentResult(database.ExpectedReference(reference), First, OriginalJson, false, []);
-        await Assert.That(NativeSerialization.Serialize(healthy).SequenceEqual(NativeSerialization.Serialize(expected))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(healthy).SequenceEqual(OrleansSerialization.Serialize(expected))).IsTrue();
         await Assert.That(QueueWholeFlowStorage.Bytes(database.Store)).IsEquivalentTo(healthyState, CollectionOrdering.Matching);
         await Assert.That(database.Store.Position).IsEqualTo(healthyPosition);
     }

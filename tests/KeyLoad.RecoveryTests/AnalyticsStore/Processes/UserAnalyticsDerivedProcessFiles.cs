@@ -13,7 +13,7 @@ internal static class UserAnalyticsDerivedProcessFiles
         token.ThrowIfCancellationRequested();
         using var ownership = new FileStream(Path.Combine(physical, PartitionStoreProtocol.OwnershipFile),
             FileMode.Open, FileAccess.ReadWrite, FileShare.None);
-        RecoveryFileInventory.AssertNativeHandlesReleased(physical);
+        RecoveryFileInventory.AssertHandlesReleased(physical);
     }
 
     internal static void RequireDerived(string root, bool abandoned)

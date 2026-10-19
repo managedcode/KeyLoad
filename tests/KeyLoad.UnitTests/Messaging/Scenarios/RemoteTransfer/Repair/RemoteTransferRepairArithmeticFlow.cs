@@ -17,7 +17,7 @@ internal static class RemoteTransferRepairArithmeticFlow
         var key = original.IntentKey;
         fixture.Store.Commit((tx, _) =>
         {
-            var record = NativeSerialization.Deserialize<RemoteTransferIntentRecord>(original.IntentBytes);
+            var record = OrleansSerialization.Deserialize<RemoteTransferIntentRecord>(original.IntentBytes);
             var state = record.Repairs ?? throw new InvalidOperationException(RemoteTransferRepairColdProtocol.Missing);
             var corrupted = exchangedGenerations
                 ? state with
@@ -38,7 +38,7 @@ internal static class RemoteTransferRepairArithmeticFlow
         });
         var faultImage = QueueWholeFlowStorage.Bytes((ZoneTreeStore)fixture.Store);
         var position = fixture.Store.Position;
-        var identity = NativeSerialization.Serialize(fixture.Store.Identity);
+        var identity = OrleansSerialization.Serialize(fixture.Store.Identity);
         await RemoteTransferRepairArithmeticAssertions.RefuseAsync(fixture, original, faultImage, position, identity);
         await RemoteTransferRepairArithmeticAssertions.RefuseAsync(fixture, original, faultImage, position, identity);
         fixture.Reopen();
@@ -46,13 +46,13 @@ internal static class RemoteTransferRepairArithmeticFlow
         await RemoteTransferRepairArithmeticAssertions.RefuseAsync(fixture, original, faultImage, position, identity);
         fixture.Store.Commit((tx, _) => { tx.Put(key, original.IntentBytes); return true; });
         await RemoteTransferRepairArithmeticAssertions.RestoredAsync(fixture, original, advancedHistory);
-        var completed = RemoteTransferRepairColdNative.Apply(fixture, original.Complete).Get<CommitReceipt>();
+        var completed = RemoteTransferRepairCold.Apply(fixture, original.Complete).Get<CommitReceipt>();
         await RemoteTransferRepairArithmeticAssertions.CompletedAsync(fixture, original, completed);
-        await RemoteTransferAttemptColdNative.AckAsync(fixture, RemoteTransferRepairColdProtocol.Message);
+        await RemoteTransferAttemptCold.AckAsync(fixture, RemoteTransferRepairColdProtocol.Message);
         await RemoteTransferRepairArithmeticAssertions.SettledAsync(fixture, original, completed, advancedHistory);
         var settled = QueueWholeFlowStorage.Bytes((ZoneTreeStore)fixture.Store);
         position = fixture.Store.Position;
-        identity = NativeSerialization.Serialize(fixture.Store.Identity);
+        identity = OrleansSerialization.Serialize(fixture.Store.Identity);
         fixture.Reopen();
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync((ZoneTreeStore)fixture.Store, settled, position, identity);
         await RemoteTransferRepairArithmeticAssertions.SettledAsync(fixture, original, completed, advancedHistory);
@@ -73,34 +73,34 @@ internal static class RemoteTransferRepairArithmeticFlow
         var transfer = new CreateQueueTransfer(fixture.SourceQueue, Guid.NewGuid(), fixture.DestinationQueue,
             new(fixture.DestinationQueue.Queue, RemoteTransferRepairColdProtocol.Message, RemoteTransferRepairColdProtocol.Payload));
         var create = new CommandRequest(Guid.NewGuid(), fixture.SourcePartition, [transfer]);
-        var created = RemoteTransferRepairColdNative.Apply(fixture, create).Get<CommitReceipt>();
-        var createBytes = RemoteTransferRepairColdNative.Outcome(fixture, create.CommandId, fixture.SourcePartition);
+        var created = RemoteTransferRepairCold.Apply(fixture, create).Get<CommitReceipt>();
+        var createBytes = RemoteTransferRepairCold.Outcome(fixture, create.CommandId, fixture.SourcePartition);
         var intent = fixture.Database.InspectQueueTransfer(RemoteTransferRepairColdProtocol.Subject, fixture.SourceQueue, transfer.TransferId)
             ?? throw new InvalidOperationException(RemoteTransferRepairColdProtocol.Missing);
-        var hint = RemoteTransferRepairColdNative.Hint(fixture);
-        RemoteTransferRepairColdNative.Policy(fixture, fixture.DestinationQueue, allow: false);
+        var hint = RemoteTransferRepairCold.Hint(fixture);
+        RemoteTransferRepairCold.Policy(fixture, fixture.DestinationQueue, allow: false);
         var denied = new CommandRequest(RemoteTransferRepairIdentity.CommandId(hint, QueueTransferRepairStage.Accept),
             fixture.DestinationPartition, [new AcceptQueueTransfer(fixture.DestinationQueue, intent.IntentToken)]);
-        var failure = RemoteTransferRepairColdNative.Apply(fixture, denied);
+        var failure = RemoteTransferRepairCold.Apply(fixture, denied);
         await Assert.That(Errors.Code(failure.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
 
         await Assert.That(failure.Value).IsNull();
-        var deniedBytes = RemoteTransferRepairColdNative.Outcome(fixture, denied.CommandId, fixture.DestinationPartition);
+        var deniedBytes = RemoteTransferRepairCold.Outcome(fixture, denied.CommandId, fixture.DestinationPartition);
         await RemoteTransferRepairColdAdvance.DeniedWithoutWitnessAsync(fixture, hint, intent.IntentToken, QueueTransferRepairStage.Accept, null);
-        RemoteTransferRepairColdNative.Policy(fixture, fixture.DestinationQueue, allow: true);
+        RemoteTransferRepairCold.Policy(fixture, fixture.DestinationQueue, allow: true);
         if (advancedHistory)
         {
             var advance = await RemoteTransferRepairColdAdvance.ApplyAsync(fixture, hint, intent.IntentToken, QueueTransferRepairStage.Accept, null);
             var receipt = advance.Result.Get<CommitReceipt>();
-            await RemoteTransferCoordinationColdAssertions.EqualAsync(RemoteTransferRepairColdNative.Apply(fixture, advance.Command).Get<CommitReceipt>(), receipt);
+            await RemoteTransferCoordinationColdAssertions.EqualAsync(RemoteTransferRepairCold.Apply(fixture, advance.Command).Get<CommitReceipt>(), receipt);
         }
-        hint = RemoteTransferRepairColdNative.Hint(fixture);
+        hint = RemoteTransferRepairCold.Hint(fixture);
         var accepted = denied with
         {
             CommandId = advancedHistory
             ? RemoteTransferRepairIdentity.CommandId(hint, QueueTransferRepairStage.Accept) : Guid.NewGuid()
         };
-        var acceptance = RemoteTransferRepairColdNative.Apply(fixture, accepted).Get<CommitReceipt>();
+        var acceptance = RemoteTransferRepairCold.Apply(fixture, accepted).Get<CommitReceipt>();
         var proof = fixture.Database.InspectQueueTransferReceipt(RemoteTransferRepairColdProtocol.Subject,
             fixture.DestinationQueue, fixture.SourceQueue, transfer.TransferId)
             ?? throw new InvalidOperationException(RemoteTransferRepairColdProtocol.Missing);

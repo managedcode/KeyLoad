@@ -3,7 +3,7 @@ namespace KeyLoad.UnitTests.Features.DatabaseComposition;
 internal sealed class GraphMutationEffectClosureTests
 {
     [Test]
-    public Task NativeGraphUpsertBindsBothEndpointLifetimesAndReplaysCold()
+    public Task GraphUpsertBindsBothEndpointLifetimesAndReplaysCold()
         => GraphMutationEffectClosureFlow.RunAsync(false, TestContext.Current!.Execution.CancellationToken);
 
     [Test]

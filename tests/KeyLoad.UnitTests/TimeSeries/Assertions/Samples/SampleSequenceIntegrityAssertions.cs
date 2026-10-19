@@ -35,8 +35,8 @@ internal static class SampleSequenceIntegrityAssertions
         var image = SampleChunkCorrectionBoundColdAssertions.Image(fixture.Store);
         var cut = fixture.ReadCanonicalCut();
         var actual = fixture.Database.ApplyEmbedded(original, token);
-        await NativeReplayResultAssertions.Same<CommitReceipt>(actual, expected);
-        await NativeReplayResultAssertions.Same<CommitReceipt>(fixture.Database.ResolveOutcome(original), expected);
+        await ReplayResultAssertions.Same<CommitReceipt>(actual, expected);
+        await ReplayResultAssertions.Same<CommitReceipt>(fixture.Database.ResolveOutcome(original), expected);
         var retained = fixture.Store.Read(view => view.ReadOwnedValue(OutcomeStoreOracle.Key(original)));
         await Assert.That(retained).IsNotNull();
         await Assert.That(retained!.AsSpan().SequenceEqual(outcomeBytes)).IsTrue();
@@ -64,7 +64,7 @@ internal static class SampleSequenceIntegrityAssertions
         await EqualAsync(new SampleChunkWindowResult(fixture.Source.WindowId, P.Start, P.Until,
             merged ? 2 : 1, merged ? 7 : 6, 4, null, [.. rows], position),
             fixture.Database.ReadSampleChunkWindow(P.Principal, fixture.Source.Request, token));
-        await CounterAsync(fixture, NativeSerialization.Serialize(4L));
+        await CounterAsync(fixture, OrleansSerialization.Serialize(4L));
         await OutboxAsync(fixture);
         await Assert.That(SampleChunkCorrectionBoundColdAssertions.Image(fixture.Store)).IsEqualTo(image);
         await Assert.That(fixture.Store.Position).IsEqualTo(position);
@@ -82,7 +82,7 @@ internal static class SampleSequenceIntegrityAssertions
             var original = originals[index];
             var expected = new OutboxEntry(index + 1L, 0, original.Expected.Token,
                 new DateTimeOffset(original.Operation.Timestamp), original.Command.Mutations[0], original.Expected.Mutations[0]);
-            var actual = NativeSerialization.Deserialize<OutboxEntry>(page.Records[index].Value.Span);
+            var actual = OrleansSerialization.Deserialize<OutboxEntry>(page.Records[index].Value.Span);
             await EqualAsync(expected, actual);
             await Assert.That(actual.Commit).IsEqualTo(expected.Commit);
             await Assert.That(actual.Mutation.GetType()).IsEqualTo(expected.Mutation.GetType());
@@ -93,7 +93,7 @@ internal static class SampleSequenceIntegrityAssertions
         await Assert.That(headBytes).IsNotNull();
         var expectedHead = new OutboxHead(originals.Length, 1L, originals.Length,
             page.Records.Sum(row => (long)row.Value.Length));
-        await EqualAsync(expectedHead, NativeSerialization.Deserialize<OutboxHead>(headBytes!));
+        await EqualAsync(expectedHead, OrleansSerialization.Deserialize<OutboxHead>(headBytes!));
         await EqualAsync(new OutboxStatus(expectedHead, []), fixture.Database.GetOutboxStatus(P.Principal,
             fixture.Source.Owner.Partition));
     }

@@ -21,20 +21,20 @@ internal sealed class SqlEventReferenceJoinTests
                 var repair = await SqlEventReferenceJoinPolicy.RunAsync(database);
                 await SqlEventReferenceJoinCold.RunAsync(database, seed.Command, seed.Receipt, repair.Command, repair.Receipt);
             }
-            catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+            catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error))
             {
                 failures.Add(error);
             }
-            catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
+            catch (Exception error) when (!CqrsBoundaryErrors.IsNonFatal(error))
             {
                 failures.Add(error);
             }
         }
-        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+        catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error))
         {
             failures.Add(error);
         }
-        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
+        catch (Exception error) when (!CqrsBoundaryErrors.IsNonFatal(error))
         {
             failures.Add(error);
         }

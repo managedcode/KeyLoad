@@ -24,10 +24,10 @@ internal sealed record Bm25ConfiguredQuotaRetainedEntries(byte[][] Entries)
                 || operation.Value!.Kind != original.Value!.Kind
                 || !operation.Value!.Input.Span.SequenceEqual(original.Value!.Input.Span))
             {
-                throw new InvalidOperationException("The admitted native entry is not its actual original publication.");
+                throw new InvalidOperationException("The admitted execution entry is not its actual original publication.");
             }
-            work.ChargeBytes(NativeSerialization.Measure(entry));
-            entries[index] = NativeSerialization.Serialize(entry);
+            work.ChargeBytes(OrleansSerialization.Measure(entry));
+            entries[index] = OrleansSerialization.Serialize(entry);
         }
         return new(entries);
     }
@@ -38,7 +38,7 @@ internal sealed record Bm25ConfiguredQuotaRetainedEntries(byte[][] Entries)
         await Assert.That(current.Entries.Length).IsEqualTo(Entries.Length);
         for (var index = 0; index < Entries.Length; index++)
         {
-            await NativeReplayResultAssertions.BytesAsync(Entries[index], current.Entries[index]);
+            await ReplayResultAssertions.BytesAsync(Entries[index], current.Entries[index]);
         }
     }
 }

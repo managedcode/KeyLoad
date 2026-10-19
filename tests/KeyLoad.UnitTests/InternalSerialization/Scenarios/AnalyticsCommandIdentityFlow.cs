@@ -3,7 +3,7 @@ using KeyLoad.UnitTests.Features.Authorization;
 using ManagedCode.Communication.Commands;
 using A = KeyLoad.UnitTests.Features.InternalSerialization.AnalyticsCommandIdentityAssertions;
 using D = KeyLoad.UnitTests.Features.InternalSerialization.AnalyticsCommandIdentityData;
-using O = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreNativeTestOperations;
+using O = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreTestOperations;
 
 namespace KeyLoad.UnitTests.Features.InternalSerialization;
 
@@ -71,6 +71,6 @@ internal static class AnalyticsCommandIdentityFlow
     {
         var work = new ReadExecutionBudget(owner.Database.OperationLimitsOptions, owner.Database.EvaluationClock, owner.CallerToken);
         return owner.Database.CreateCommand(OperationKind.Batch, request.CommandId, D.Root,
-            owner.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(request), work);
+            owner.Database.EvaluationClock.GetUtcNow(), OrleansSerialization.Serialize(request), work);
     }
 }

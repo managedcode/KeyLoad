@@ -28,8 +28,8 @@ internal static class QueueTerminalInspectionAssertions
         };
         var expected = new MessageBody(literal.MessageId, literal.PayloadJson, literal.HeadersJson,
             literal.OrderingKey, JsonData.Fingerprint(literal));
-        await Assert.That(NativeSerialization.Deserialize<MessageBody>(row)).IsEqualTo(expected);
-        await Assert.That(row).IsEquivalentTo(NativeSerialization.Serialize(expected), CollectionOrdering.Matching);
+        await Assert.That(OrleansSerialization.Deserialize<MessageBody>(row)).IsEqualTo(expected);
+        await Assert.That(row).IsEquivalentTo(OrleansSerialization.Serialize(expected), CollectionOrdering.Matching);
     }
 
     internal static async Task RefusalAsync(DatabaseEngine owner, ZoneTreeStore store,
@@ -59,7 +59,7 @@ internal static class QueueTerminalInspectionAssertions
             }
             else
             {
-                await NativeReplayResultAssertions.Same<CommitReceipt>(owner.Apply(operation), result);
+                await ReplayResultAssertions.Same<CommitReceipt>(owner.Apply(operation), result);
             }
             await QueueLifecycleConditionAssertions.Same(store, before);
         }

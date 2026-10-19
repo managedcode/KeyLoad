@@ -37,7 +37,7 @@ internal sealed class ScaledRawStorageFixtureTests
                 await Assert.That(before.PayloadBytes).IsEqualTo(payloadBytes);
                 await Assert.That(before.VerifiedRecords).IsEqualTo(MiniRecordCount);
                 await Assert.That(before.VerificationPasses).IsEqualTo(OneVerificationPass);
-                await Assert.That(before.NativeReadCalls).IsEqualTo(MiniRecordCount + ReservedMissCount);
+                await Assert.That(before.RuntimeReadCalls).IsEqualTo(MiniRecordCount + ReservedMissCount);
                 await Assert.That(before.RetainedKeyBytes).IsEqualTo((long)(MiniRecordCount + 1) * KeyBytes);
                 await Assert.That(before.RetainedValueBytes).IsEqualTo(
                     ExpectedRetainedValueBytes(MiniRecordCount, payloadBytes));
@@ -52,7 +52,7 @@ internal sealed class ScaledRawStorageFixtureTests
                 var after = fixture.Capture();
                 await Assert.That(after.VerifiedRecords).IsEqualTo(MiniRecordCount);
                 await Assert.That(after.VerificationPasses).IsEqualTo(TwoVerificationPasses);
-                await Assert.That(after.NativeReadCalls - before.NativeReadCalls)
+                await Assert.That(after.RuntimeReadCalls - before.RuntimeReadCalls)
                     .IsEqualTo(MiniRecordCount + ReservedMissCount);
                 await Assert.That(after.FullValueDigest).IsEqualTo(before.FullValueDigest);
                 await Assert.That(fixture.Read(FirstRecordIndex)).IsEqualTo((ulong)FirstRecordIndex);
@@ -62,10 +62,10 @@ internal sealed class ScaledRawStorageFixtureTests
                 fixture.VerifyAll();
                 var afterPostReadVerification = fixture.Capture();
                 await Assert.That(afterPostReadVerification.VerificationPasses).IsEqualTo(ThreeVerificationPasses);
-                await Assert.That(afterPostReadVerification.NativeReadCalls - beforePostReadVerification.NativeReadCalls)
+                await Assert.That(afterPostReadVerification.RuntimeReadCalls - beforePostReadVerification.RuntimeReadCalls)
                     .IsEqualTo(MiniRecordCount + ReservedMissCount);
                 await Assert.That(afterPostReadVerification.FullValueDigest).IsEqualTo(before.FullValueDigest);
-                await ScaledRawStorageFixtureOracleTests.AssertNativeResidenceAsync(
+                await ScaledRawStorageFixtureOracleTests.AssertResidenceAsync(
                     afterPostReadVerification, MiniRecordCount);
             });
     }
@@ -85,7 +85,7 @@ internal sealed class ScaledRawStorageFixtureTests
                 await Assert.That(seeded.SuccessfulSeedWrites).IsEqualTo(ScaledRecordCount);
                 await Assert.That(seeded.VerifiedRecords).IsEqualTo(ScaledRecordCount);
                 await Assert.That(seeded.VerificationPasses).IsEqualTo(OneVerificationPass);
-                await Assert.That(seeded.NativeReadCalls).IsEqualTo(ScaledRecordCount + ReservedMissCount);
+                await Assert.That(seeded.RuntimeReadCalls).IsEqualTo(ScaledRecordCount + ReservedMissCount);
                 await Assert.That(seeded.RetainedKeyBytes).IsEqualTo((long)(ScaledRecordCount + 1) * KeyBytes);
                 await Assert.That(seeded.RetainedValueBytes).IsEqualTo(
                     ExpectedRetainedValueBytes(ScaledRecordCount, payloadBytes));
@@ -99,7 +99,7 @@ internal sealed class ScaledRawStorageFixtureTests
                 var verified = fixture.Capture();
                 await Assert.That(verified.VerifiedRecords).IsEqualTo(ScaledRecordCount);
                 await Assert.That(verified.VerificationPasses).IsEqualTo(TwoVerificationPasses);
-                await Assert.That(verified.NativeReadCalls - seeded.NativeReadCalls)
+                await Assert.That(verified.RuntimeReadCalls - seeded.RuntimeReadCalls)
                     .IsEqualTo(ScaledRecordCount + ReservedMissCount);
                 await Assert.That(verified.FullValueDigest).IsEqualTo(seeded.FullValueDigest);
                 await ScaledRawStorageFixtureOracleTests.AssertFixtureOrdersAsync(fixture, ScaledRecordCount);
@@ -107,10 +107,10 @@ internal sealed class ScaledRawStorageFixtureTests
                 fixture.VerifyAll();
                 var afterPostReadVerification = fixture.Capture();
                 await Assert.That(afterPostReadVerification.VerificationPasses).IsEqualTo(ThreeVerificationPasses);
-                await Assert.That(afterPostReadVerification.NativeReadCalls - beforePostReadVerification.NativeReadCalls)
+                await Assert.That(afterPostReadVerification.RuntimeReadCalls - beforePostReadVerification.RuntimeReadCalls)
                     .IsEqualTo(ScaledRecordCount + ReservedMissCount);
                 await Assert.That(afterPostReadVerification.FullValueDigest).IsEqualTo(seeded.FullValueDigest);
-                await ScaledRawStorageFixtureOracleTests.AssertNativeResidenceAsync(
+                await ScaledRawStorageFixtureOracleTests.AssertResidenceAsync(
                     afterPostReadVerification, ScaledRecordCount);
             });
     }

@@ -13,7 +13,7 @@ internal static class CapabilityOutputOperations
     {
         var image = SqlInnerJoinRetainedIdentityFlow.Image(store);
         var position = store.Position;
-        var identity = NativeSerialization.Serialize(store.Identity);
+        var identity = OrleansSerialization.Serialize(store.Identity);
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(() => ExecutePagesAsync(engine, partition, mode, position, token), failures);
         await ServerFailureObserver.ObserveAsync(() => ConserveAsync(store, image, position, identity), failures);
@@ -24,7 +24,7 @@ internal static class CapabilityOutputOperations
         long position, CancellationToken token)
     {
         var manifest = engine.Capabilities;
-        foreach (var version in new[] { 1, 2 })
+        foreach (var version in new[] { 1 })
         {
             await RejectAsync(() => engine.Execute(CapabilityOutputFixture.Reader,
                 CapabilityOutputFixture.Sql(partition, false, version), cancellationToken: token), ErrorCode.BudgetExceeded);
@@ -37,11 +37,11 @@ internal static class CapabilityOutputOperations
             var request = CapabilityOutputFixture.Ast(partition, true, version);
             var ast = engine.ExecuteAst(CapabilityOutputFixture.Reader, Q2CapabilityFixtures.JsonRoundTrip(request),
                 cancellationToken: token);
-            var native = engine.ExecuteAst(CapabilityOutputFixture.Reader, Q2CapabilityFixtures.NativeRoundTrip(request),
+            var execution = engine.ExecuteAst(CapabilityOutputFixture.Reader, Q2CapabilityFixtures.RuntimeRoundTrip(request),
                 cancellationToken: token);
             await EqualAsync(expected, sql);
             await EqualAsync(expected, ast);
-            await EqualAsync(expected, native);
+            await EqualAsync(expected, execution);
             await Assert.That(JsonDefaults.Serialize(sql).Length).IsLessThanOrEqualTo(manifest.MaxBytes);
         }
         await RejectAsync(() => engine.ExecuteAst(CapabilityOutputFixture.Reader,
@@ -50,10 +50,10 @@ internal static class CapabilityOutputOperations
             CapabilityOutputFixture.Sql(partition, true, 3), cancellationToken: token), ErrorCode.UnsupportedCapability);
         await Assert.That(manifest.MaxBytes).IsEqualTo(CapabilityOutputFixture.ExpectedBytes(mode));
         await Assert.That(manifest.MaxBytes).IsNotEqualTo(CapabilityOutputFixture.RequestBytes);
-        await Assert.That(manifest.SqlDialect).IsEqualTo("TSQL.ScriptDOM180.v1");
+        await Assert.That(manifest.SqlDialect).IsEqualTo("TSQL.ScriptDOM180");
         await Assert.That(manifest.AstVersion).IsEqualTo(1);
-        await Assert.That(manifest.SupportedAstVersions).IsEquivalentTo(new[] { 1, 2 }, CollectionOrdering.Matching);
-        await Assert.That(manifest.SupportedQueryDialectVersions).IsEquivalentTo(new[] { 1, 2 }, CollectionOrdering.Matching);
+        await Assert.That(manifest.SupportedAstVersions).IsEquivalentTo(new[] { 1 }, CollectionOrdering.Matching);
+        await Assert.That(manifest.SupportedQueryDialectVersions).IsEquivalentTo(new[] { 1 }, CollectionOrdering.Matching);
     }
 
     internal static async Task ConserveAsync(ZoneTreeStore store, string[] image, long position, byte[] identity)
@@ -69,7 +69,7 @@ internal static class CapabilityOutputOperations
         }, failures);
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            await Assert.That(NativeSerialization.Serialize(store.Identity).AsSpan().SequenceEqual(identity)).IsTrue();
+            await Assert.That(OrleansSerialization.Serialize(store.Identity).AsSpan().SequenceEqual(identity)).IsTrue();
         }, failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }

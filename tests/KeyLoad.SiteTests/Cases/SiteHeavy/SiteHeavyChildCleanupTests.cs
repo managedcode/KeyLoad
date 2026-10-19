@@ -5,7 +5,7 @@ namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
 internal sealed class SiteHeavyChildCleanupTests
 {
     [Test]
-    public async Task AC_BC_FAIL_014_NativeStartFailureReleasesSafeLease()
+    public async Task AC_BC_FAIL_014_StartFailureReleasesSafeLease()
     {
         var token = TestContext.Current!.Execution.CancellationToken;
         var admission = NewAdmission();
@@ -29,7 +29,7 @@ internal sealed class SiteHeavyChildCleanupTests
     [Test]
     [Arguments(false)]
     [Arguments(true)]
-    public async Task AC_BC_FAIL_014_CallerCancellationWaitsForNativeExitBeforeSuccessorStarts(bool github)
+    public async Task AC_BC_FAIL_014_CallerCancellationWaitsForExitBeforeSuccessorStarts(bool github)
     {
         var token = TestContext.Current!.Execution.CancellationToken;
         var admission = NewAdmission();

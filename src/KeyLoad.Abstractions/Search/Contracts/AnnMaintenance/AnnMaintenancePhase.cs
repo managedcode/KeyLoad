@@ -7,8 +7,8 @@ public enum AnnMaintenancePhase
     Configure,
     /// <summary>Retain one complete bounded canonical seed and release the raw read view.</summary>
     Capture,
-    /// <summary>Load or construct exact native arrays.</summary>
-    NativeIndex,
+    /// <summary>Load or construct exact execution arrays.</summary>
+    RuntimeIndex,
     /// <summary>Apply only the admitted signed outbox interval.</summary>
     Replay,
     /// <summary>Verify the exact canonical upper source cut.</summary>

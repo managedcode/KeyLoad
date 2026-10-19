@@ -19,11 +19,11 @@ internal static class PartitionQueryMcpTestData
     private const string Root = "root";
     internal static readonly PartitionRef Partition = new(Tenant, Database, Domain, PartitionKey);
 
-    internal static PartitionQueryRequestV1 Request() => new(1, [Partition],
+    internal static PartitionQueryRequest Request() => new(1, [Partition],
         new SelectQuery(Collection, null, [new Selection("/name", "name")], null, [], 4),
-        null, true, 1);
+        null, true, SqlOperationProtocol.DefaultQueryDialectVersion);
 
-    internal static ResourceLifetimeV1 Seed(TestDatabase fixture, PartitionQueryRequestV1 request,
+    internal static ResourceLifetime Seed(TestDatabase fixture, PartitionQueryRequest request,
         string entityId = EntityId)
     {
         var partition = request.Partitions.Single();
@@ -38,7 +38,7 @@ internal static class PartitionQueryMcpTestData
         return creation;
     }
 
-    internal static PartitionQueryRequestV1 Decode(PartitionQueryRequestV1 request)
+    internal static PartitionQueryRequest Decode(PartitionQueryRequest request)
     {
         if (!McpOperationCatalog.TryGet(McpCatalogExpectations.QueryPartitions, out var descriptor))
         {
@@ -49,11 +49,11 @@ internal static class PartitionQueryMcpTestData
         {
             [McpCanonicalTestData.RequestKey] = JsonSerializer.SerializeToElement(request, JsonDefaults.Options)
         }).Payload;
-        return NativeSerialization.Deserialize<PartitionQueryRequestV1>(payload.Span);
+        return OrleansSerialization.Deserialize<PartitionQueryRequest>(payload.Span);
     }
 
-    internal static async Task<PartitionQueryPageV1> ExecuteAsync(TestDatabase fixture,
-        PartitionQueryRequestV1 request, ResourceLifetimeV1 creation, string entityId = EntityId)
+    internal static async Task<PartitionQueryPage> ExecuteAsync(TestDatabase fixture,
+        PartitionQueryRequest request, ResourceLifetime creation, string entityId = EntityId)
     {
         var position = fixture.Store.Position;
         var page = new QueryEngine(fixture.Database, UnitExecutionOptions.QueryExecution()).QueryPartitions(Root, request,
@@ -62,8 +62,8 @@ internal static class PartitionQueryMcpTestData
         return page;
     }
 
-    internal static async Task VerifyPageAsync(TestDatabase fixture, PartitionQueryRequestV1 request,
-        PartitionQueryPageV1 page, long position, ResourceLifetimeV1 creation, string entityId = EntityId)
+    internal static async Task VerifyPageAsync(TestDatabase fixture, PartitionQueryRequest request,
+        PartitionQueryPage page, long position, ResourceLifetime creation, string entityId = EntityId)
     {
         var partition = request.Partitions.Single();
         var reference = PartitionQueryCreationOracle.Reference(creation, partition, entityId);

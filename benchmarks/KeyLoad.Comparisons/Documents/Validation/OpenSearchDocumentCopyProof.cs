@@ -15,14 +15,14 @@ internal static class OpenSearchDocumentCopyProof
     private const string FinalFlushSuffix = "/_flush?wait_if_ongoing=true&force=true";
     private const string CopySearchSuffix = "/_search?allow_partial_search_results=false&preference=";
     private const string OnlyNodePreference = "_only_nodes:";
-    private const string FinalCopyObservation = "Final document shard copy node={0}; records={1}; sha256={2}; native _only_nodes full ordered readback";
-    private const string FinalFlushObservation = "Final native flush and refresh acknowledged all {0} shard copies after joined measured operations and primary oracle";
+    private const string FinalCopyObservation = "Final document shard copy node={0}; records={1}; sha256={2}; execution _only_nodes full ordered readback";
+    private const string FinalFlushObservation = "Final execution flush and refresh acknowledged all {0} shard copies after joined measured operations and primary oracle";
     private const string Failure = "OpenSearchFinalDocumentCopyReceiptMissing";
     private static readonly CompositeFormat FinalCopyObservationFormat = CompositeFormat.Parse(FinalCopyObservation);
     private static readonly CompositeFormat FinalFlushObservationFormat = CompositeFormat.Parse(FinalFlushObservation);
     internal static async Task<ClusterEvidence> VerifyAsync(HttpClient client, string index, int copies,
         ComparisonTopology topology, TargetProfile initial, DocumentComparisonSchedule schedule,
-        IOptions<NativeComparisonExecutionOptions> executionOptions, CancellationToken token)
+        IOptions<ComparisonExecutionOptions> executionOptions, CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(schedule);
         var before = await OpenSearchClusterEvidence.ObserveAsync(client, index, copies, topology, executionOptions, token).ConfigureAwait(false);

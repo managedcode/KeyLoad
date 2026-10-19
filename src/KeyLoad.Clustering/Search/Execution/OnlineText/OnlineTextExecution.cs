@@ -15,7 +15,7 @@ internal static class OnlineTextExecution
         ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer, IResourceLifetimeWorkBinding binding)
     {
         ArgumentNullException.ThrowIfNull(binding);
-        var request = GrainNativePayload.ReadCommand<OnlineTextIndexMaintenanceRequest>(parent.Payload);
+        var request = GrainPayload.ReadCommand<OnlineTextIndexMaintenanceRequest>(parent.Payload);
         var frames = new OnlineTextFrameAccounting(routing);
         var children = new OnlineTextChildCalls(parent, signedParent, executeChild, abort,
             services, codec, diagnostics, frames, context, binding);

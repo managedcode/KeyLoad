@@ -5,9 +5,9 @@ using StackExchange.Redis;
 
 namespace KeyLoad.Comparisons.Targets;
 
-internal sealed class RedisReplicaDiagnostics(IOptions<NativeComparisonDiagnosticOptions> options)
+internal sealed class RedisReplicaDiagnostics(IOptions<ComparisonDiagnosticOptions> options)
 {
-    private readonly NativeComparisonDiagnosticOptions settings = NativeComparisonDiagnosticOptions.Require(options).Value;
+    private readonly ComparisonDiagnosticOptions settings = ComparisonDiagnosticOptions.Require(options).Value;
     private const string KnownHostsLocalhostText = "localhost";
     private const string KnownStatesUnknownText = "unknown";
 
@@ -53,14 +53,14 @@ internal sealed class RedisReplicaDiagnostics(IOptions<NativeComparisonDiagnosti
     {
         const int MissingItemIndex = -1;
 
-        var infoHost = info.GetValueOrDefault(RedisNativeProtocol.MasterHostField);
-        var roleHost = RoleText(role, RedisNativeProtocol.RoleHostIndex);
+        var infoHost = info.GetValueOrDefault(RedisProtocol.MasterHostField);
+        var roleHost = RoleText(role, RedisProtocol.RoleHostIndex);
         var projection = new RedisReplicaDiagnostic(
             FailedPredicate(primary, info, role).ToString(), Host(primary), Port(primary), Host(replica), Port(replica),
-            KnownRole(info.GetValueOrDefault(RedisNativeProtocol.RoleField)), KnownLink(info.GetValueOrDefault(RedisNativeProtocol.LinkField)),
-            KnownHost(infoHost, primary, replica), ValidPort(RedisNativeProtocol.ParseInteger(info, RedisNativeProtocol.MasterPortField)), role.Length,
-            KnownRole(RoleText(role, RedisNativeProtocol.RoleNameIndex)), KnownHost(roleHost, primary, replica),
-            ValidPort(int.TryParse(RoleText(role, RedisNativeProtocol.RolePortIndex), out var port) ? port : MissingItemIndex),
+            KnownRole(info.GetValueOrDefault(RedisProtocol.RoleField)), KnownLink(info.GetValueOrDefault(RedisProtocol.LinkField)),
+            KnownHost(infoHost, primary, replica), ValidPort(RedisProtocol.ParseInteger(info, RedisProtocol.MasterPortField)), role.Length,
+            KnownRole(RoleText(role, RedisProtocol.RoleNameIndex)), KnownHost(roleHost, primary, replica),
+            ValidPort(int.TryParse(RoleText(role, RedisProtocol.RolePortIndex), out var port) ? port : MissingItemIndex),
             KnownStates.Contains(RoleText(role, RoleStateIndex), StringComparer.Ordinal) ? RoleText(role, RoleStateIndex) : null);
         var json = JsonSerializer.Serialize(projection);
         return json.Length <= settings.RedisReplicaMaximumCharacters ? json : Overflow;
@@ -68,13 +68,13 @@ internal sealed class RedisReplicaDiagnostics(IOptions<NativeComparisonDiagnosti
 
     private static RedisReplicaFailedPredicate FailedPredicate(EndPoint primary, Dictionary<string, string> info, RedisResult[] role)
     {
-        var host = info.GetValueOrDefault(RedisNativeProtocol.MasterHostField);
-        var port = RedisNativeProtocol.ParseInteger(info, RedisNativeProtocol.MasterPortField);
-        if (info.GetValueOrDefault(RedisNativeProtocol.RoleField) != RedisNativeProtocol.ReplicaRole)
+        var host = info.GetValueOrDefault(RedisProtocol.MasterHostField);
+        var port = RedisProtocol.ParseInteger(info, RedisProtocol.MasterPortField);
+        if (info.GetValueOrDefault(RedisProtocol.RoleField) != RedisProtocol.ReplicaRole)
         {
             return RedisReplicaFailedPredicate.InfoRole;
         }
-        if (info.GetValueOrDefault(RedisNativeProtocol.LinkField) != RedisNativeProtocol.LinkUp)
+        if (info.GetValueOrDefault(RedisProtocol.LinkField) != RedisProtocol.LinkUp)
         {
             return RedisReplicaFailedPredicate.InfoLink;
         }
@@ -86,19 +86,19 @@ internal sealed class RedisReplicaDiagnostics(IOptions<NativeComparisonDiagnosti
         {
             return RedisReplicaFailedPredicate.InfoPort;
         }
-        if (role.Length < RedisNativeProtocol.RoleReplicaResponseLength)
+        if (role.Length < RedisProtocol.RoleReplicaResponseLength)
         {
             return RedisReplicaFailedPredicate.RoleCardinality;
         }
-        if (role[RedisNativeProtocol.RoleNameIndex].ToString() != RedisNativeProtocol.ReplicaRole)
+        if (role[RedisProtocol.RoleNameIndex].ToString() != RedisProtocol.ReplicaRole)
         {
             return RedisReplicaFailedPredicate.RoleName;
         }
-        if (!StringComparer.OrdinalIgnoreCase.Equals(host, role[RedisNativeProtocol.RoleHostIndex].ToString()))
+        if (!StringComparer.OrdinalIgnoreCase.Equals(host, role[RedisProtocol.RoleHostIndex].ToString()))
         {
             return RedisReplicaFailedPredicate.HostAgreement;
         }
-        if (!int.TryParse(role[RedisNativeProtocol.RolePortIndex].ToString(), out var rolePort))
+        if (!int.TryParse(role[RedisProtocol.RolePortIndex].ToString(), out var rolePort))
         {
             return RedisReplicaFailedPredicate.RolePort;
         }
@@ -106,17 +106,17 @@ internal sealed class RedisReplicaDiagnostics(IOptions<NativeComparisonDiagnosti
         {
             return RedisReplicaFailedPredicate.PortAgreement;
         }
-        return RedisNativeProtocol.EndpointMatches(primary, host, port) ? RedisReplicaFailedPredicate.None : RedisReplicaFailedPredicate.ConfiguredPrimary;
+        return RedisProtocol.EndpointMatches(primary, host, port) ? RedisReplicaFailedPredicate.None : RedisReplicaFailedPredicate.ConfiguredPrimary;
     }
 
     private static string? RoleText(RedisResult[] role, int index)
         => index < role.Length && !role[index].IsNull && role[index].Length < NoItems ? role[index].ToString() : null;
 
     private static string? KnownRole(string? value)
-        => value is RedisNativeProtocol.MasterRole or RedisNativeProtocol.ReplicaRole ? value : null;
+        => value is RedisProtocol.MasterRole or RedisProtocol.ReplicaRole ? value : null;
 
     private static string? KnownLink(string? value)
-        => value is RedisNativeProtocol.LinkUp or LinkDown ? value : null;
+        => value is RedisProtocol.LinkUp or LinkDown ? value : null;
 
     private static string? KnownHost(string? value, EndPoint primary, EndPoint replica)
     {

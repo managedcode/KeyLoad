@@ -10,7 +10,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.UnitTests.Features.QueryExecution;
 
-/// <summary>AC-CQ-034/035 and AC-SQLC-004/005: native SQL work and conservative cancellation policy.</summary>
+/// <summary>AC-CQ-034/035 and AC-SQLC-004/005: execution SQL work and conservative cancellation policy.</summary>
 internal sealed class SqlTriviaExecutionPolicyTests
 {
     private const string Trivia = " \r\n-- ignored ; CALL\r\n/* outer /* inner */ tail */";
@@ -26,7 +26,7 @@ internal sealed class SqlTriviaExecutionPolicyTests
     private const int TokenLimit = 16;
 
     [Test]
-    public async Task OmittedNativeSettingsRetainTheIndependentOriginalDefault()
+    public async Task OmittedSettingsRetainTheIndependentOriginalDefault()
     {
         var configuration = Configuration(null);
         using var configurationLifetime = configuration as IDisposable;
@@ -64,7 +64,7 @@ internal sealed class SqlTriviaExecutionPolicyTests
     [Arguments(2)]
     [Arguments(3)]
     [Arguments(OriginalInterval)]
-    public async Task NativeConfiguredQueryAndServerOwnersPreserveTokensAndCanonicalPayload(int interval)
+    public async Task ConfiguredQueryAndServerOwnersPreserveTokensAndCanonicalPayload(int interval)
     {
         var configuration = Configuration(interval);
         using var configurationLifetime = configuration as IDisposable;
@@ -96,7 +96,7 @@ internal sealed class SqlTriviaExecutionPolicyTests
     [Arguments(16, Explain, ErrorCode.Cancelled)]
     [Arguments(8, "  SELECT * FROM orders", ErrorCode.UnknownWriteOutcome)]
     [Arguments(8, " SELECT * FROM orders", ErrorCode.Cancelled)]
-    public async Task NativeSdkUsesTheSameBoundPrefixAndKeywordBoundary(int interval, string sql, ErrorCode expected)
+    public async Task SdkUsesTheSameBoundPrefixAndKeywordBoundary(int interval, string sql, ErrorCode expected)
     {
         var failures = new List<Exception>();
         await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
@@ -143,7 +143,7 @@ internal sealed class SqlTriviaExecutionPolicyTests
     [Test]
     [Arguments(0)]
     [Arguments(257)]
-    public async Task InvalidNativeClientCadenceFailsStartupBeforeInspection(int interval)
+    public async Task InvalidClientCadenceFailsStartupBeforeInspection(int interval)
     {
         var configuration = Configuration(interval, includeQuery: false);
         using var configurationLifetime = configuration as IDisposable;

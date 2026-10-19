@@ -36,11 +36,11 @@ internal sealed class QueryReadCutObservationCapture : IQueryReadCutObserver
             using var db = new TestDatabase();
             await ServerFailureObserver.ObserveAsync(() => body(db), failures);
         }
-        catch (Exception failure) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        catch (Exception failure) when (global::KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(failure))
         {
             failures.Add(failure);
         }
-        catch (Exception failure) when (!global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        catch (Exception failure) when (!global::KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(failure))
         {
             failures.Add(failure);
         }

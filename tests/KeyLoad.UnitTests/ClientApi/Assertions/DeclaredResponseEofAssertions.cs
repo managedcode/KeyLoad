@@ -1,4 +1,4 @@
-using KeyLoad.UnitTests.Features.ClusterRouting;
+using KeyLoad.UnitTests.Features.OrleansExecution;
 using KeyLoad.UnitTests.Features.DocumentStorage;
 using KeyLoad.UnitTests.Features.Messaging;
 using ManagedCode.Communication;
@@ -8,11 +8,11 @@ namespace KeyLoad.UnitTests.Features.ClientApi;
 
 internal static class DeclaredResponseEofAssertions
 {
-    internal static Task EmptyAsync(ConnectionNativeScenario scenario)
+    internal static Task EmptyAsync(ConnectionScenario scenario)
         => EqualAsync(new OutboxStatus(new(Empty, FirstSequence, Empty, Empty), []),
             scenario.Fixture.Database.Database.GetOutboxStatus(Root, scenario.Fixture.Database.Partition));
 
-    internal static async Task<CommitReceipt> FirstAsync(ConnectionNativeScenario scenario,
+    internal static async Task<CommitReceipt> FirstAsync(ConnectionScenario scenario,
         PrincipalRecord principal, CommandRequest command, CommitReceipt? original,
         AtomicPartitionPlacementResolution placement)
     {
@@ -22,8 +22,8 @@ internal static class DeclaredResponseEofAssertions
         await Assert.That(operation.CommandId).IsEqualTo(command.CommandId);
         await Assert.That(operation.Value!.Kind).IsEqualTo(OperationKind.Batch);
         await Assert.That(operation.UserId!).IsEqualTo(principal.Id);
-        await EqualAsync(command, NativeSerialization.Deserialize<CommandRequest>((operation).Value!.Input.Span));
-        var expected = new CommitReceipt(command.CommandId, new(placement.Incarnation, command.Partition.AtomicPartitionId, entry.CanonicalSequence), [new(PutKind, ConnectionNativeProtocol.Collection, Document, Revision)], DurabilityProfile.ProcessDurable, 2);
+        await EqualAsync(command, OrleansSerialization.Deserialize<CommandRequest>((operation).Value!.Input.Span));
+        var expected = new CommitReceipt(command.CommandId, new(placement.Incarnation, command.Partition.AtomicPartitionId, entry.CanonicalSequence), [new(PutKind, ConnectionProtocol.Collection, Document, Revision)], DurabilityProfile.ProcessDurable, 2);
         await EqualAsync(expected, original);
         await Assert.That(original!.Mutations.All(value => value.CompositionReferences.IsEmpty)).IsTrue();
         await DocumentAsync(scenario);
@@ -33,16 +33,16 @@ internal static class DeclaredResponseEofAssertions
         var expectedEntry = new OutboxEntry(FirstSequence, OriginalOrdinal, expected.Token, new DateTimeOffset(operation.Timestamp),
             command.Mutations[OriginalOrdinal], expected.Mutations[OriginalOrdinal], Before: null, After: after);
         var payload = outbox.EntryBytes[OriginalOrdinal];
-        var actual = NativeSerialization.Deserialize<OutboxEntry>(payload);
+        var actual = OrleansSerialization.Deserialize<OutboxEntry>(payload);
         await EqualAsync(expectedEntry, actual);
         await Assert.That(actual.Receipt.CompositionReferences.IsEmpty).IsTrue();
         var head = new OutboxHead(FirstSequence, FirstSequence, OneEntry, payload.Length);
-        await EqualAsync(head, NativeSerialization.Deserialize<OutboxHead>(outbox.HeadBytes!));
+        await EqualAsync(head, OrleansSerialization.Deserialize<OutboxHead>(outbox.HeadBytes!));
         await EqualAsync(new OutboxStatus(head, []), database.Database.GetOutboxStatus(Root, database.Partition));
         return expected;
     }
 
-    internal static DeclaredResponseEofCut Capture(ConnectionNativeScenario scenario, PrincipalRecord principal,
+    internal static DeclaredResponseEofCut Capture(ConnectionScenario scenario, PrincipalRecord principal,
         CommandRequest command)
     {
         var database = scenario.Fixture.Database;
@@ -53,7 +53,7 @@ internal static class DeclaredResponseEofAssertions
             DocumentCommandOutcomeTestSupport.CaptureOutbox(database.Store, database.Database, database.Partition), outcome);
     }
 
-    internal static async Task CurrentAsync(ConnectionNativeScenario scenario, PrincipalRecord principal,
+    internal static async Task CurrentAsync(ConnectionScenario scenario, PrincipalRecord principal,
         CommandRequest command, DeclaredResponseEofCut original)
     {
         await DocumentAsync(scenario);
@@ -65,7 +65,7 @@ internal static class DeclaredResponseEofAssertions
         await Assert.That(DocumentCommandOutcomeTestSupport.OutboxEqual(actual.Outbox, original.Outbox)).IsTrue();
     }
 
-    internal static Task DocumentAsync(ConnectionNativeScenario scenario)
+    internal static Task DocumentAsync(ConnectionScenario scenario)
         => EqualAsync(new DocumentResult(scenario.Reference(Document), Revision, OriginalJson, false, []), scenario.Stored(Document));
 
     internal static Task ProblemAsync(Problem? actual, ErrorCode code, string detail)

@@ -11,8 +11,8 @@ internal static class SdkResponseAdmissionProtocol
     internal const string PutKind = "putDocument";
     internal const string Root = "root";
     internal const string Credential = "response-admission-credential";
-    internal const string Commands = "/v1/commands";
-    internal const string Documents = "/v1/documents/get";
+    internal const string Commands = "/commands";
+    internal const string Documents = "/documents/get";
     internal const string CommandHeader = "X-KeyLoad-Command-Id";
     internal const string JsonType = "application/json";
     internal const string Collection = "response-admission";

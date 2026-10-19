@@ -16,7 +16,7 @@ internal sealed class AdapterVectorAttachmentWholeFlowTests
         var token = TestContext.Current!.Execution.CancellationToken;
         var image = QueueWholeFlowStorage.Bytes(database.Store);
         var position = database.Store.Position;
-        var originalNativeWork = database.Store.GetReadDiagnostics();
+        var runtimeOriginalWork = database.Store.GetReadDiagnostics();
         GraphSearchResult? rejectedResult = null;
         var sqlFailure = (await Assert.ThrowsExactlyAsync<KeyLoadException>(async () =>
             rejectedResult = await query.SearchSqlAsync("root", AdapterVectorWholeFlow.SqlRequest(database, invalid: true), token)))
@@ -34,7 +34,7 @@ internal sealed class AdapterVectorAttachmentWholeFlowTests
             await Assert.That(failure.Message).IsEqualTo("A finite vector and a matching typed vector space are required.");
         }
         await Assert.That(rejectedResult).IsNull();
-        await Assert.That(database.Store.GetReadDiagnostics()).IsEqualTo(originalNativeWork);
+        await Assert.That(database.Store.GetReadDiagnostics()).IsEqualTo(runtimeOriginalWork);
         await Assert.That(database.Store.Position).IsEqualTo(position);
         await Assert.That(QueueWholeFlowStorage.Bytes(database.Store)).IsEquivalentTo(image, CollectionOrdering.Matching);
         await AdapterVectorWholeFlow.HealthyAsync(database, query, search, token);

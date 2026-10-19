@@ -4,7 +4,7 @@ namespace KeyLoad.Core.Features.BackupRestore.Validation;
 
 internal static class AtomicPartitionRosterEntryValidation
 {
-    internal static void Validate(AtomicPartitionCatalogEntryV1? entry, PartitionRef expectedPartition,
+    internal static void Validate(AtomicPartitionCatalogEntry? entry, PartitionRef expectedPartition,
         long currentStorePosition, long currentAppliedIndex)
     {
         if (entry is null || entry.Version != AtomicPartitionRosterProtocol.CurrentVersion
@@ -14,7 +14,7 @@ internal static class AtomicPartitionRosterEntryValidation
         }
     }
 
-    private static bool HasValidFirstSeenPosition(AtomicPartitionCatalogEntryV1 entry,
+    private static bool HasValidFirstSeenPosition(AtomicPartitionCatalogEntry entry,
         long currentStorePosition, long currentAppliedIndex)
     {
         var localPosition = entry.FirstSeenAppliedIndex == AtomicPartitionRosterProtocol.NoCanonicalSequence

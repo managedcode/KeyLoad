@@ -46,7 +46,7 @@
     <ContainerPort Include="11111" Type="tcp" />
   </ItemGroup>
   <ItemGroup Condition="'$(MSBuildProjectName)' == 'KeyLoad.ComparisonHost'">
-    <ContainerAppCommandArgs Include="--output;Detailed;--maximum-parallel-tests;1;--report-trx;--results-directory;/reports/NativeTestResults" />
+    <ContainerAppCommandArgs Include="--output;Detailed;--maximum-parallel-tests;1;--report-trx;--results-directory;/reports/RuntimeTestResults" />
   </ItemGroup>
   <ItemGroup Condition="'$(MSBuildProjectName)' == 'KeyLoad' or '$(MSBuildProjectName)' == 'KeyLoad.ComparisonHost'">
     <ContainerLabel Include="io.keyload.local.source-context-sha256" Value="$(KeyLoadContainerSourceDigest)" Condition="'$(KeyLoadContainerSourceDigest)' != ''" />

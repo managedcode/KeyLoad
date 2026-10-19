@@ -27,7 +27,7 @@ internal static class QueueLeaseAuthorityIndices
             + QueueLeaseAuthorityProtocol.RowSeparator + Convert.ToHexString(row.Value.Span)).ToArray();
         string[] expected = deadline is { } time
             ? [Convert.ToHexString(KeySpace.Partition(family, lane.Partition, lane.Queue, time, messageId))
-                + QueueLeaseAuthorityProtocol.RowSeparator + Convert.ToHexString(NativeSerialization.Serialize(messageId))] : [];
+                + QueueLeaseAuthorityProtocol.RowSeparator + Convert.ToHexString(OrleansSerialization.Serialize(messageId))] : [];
         await Assert.That(actual).IsEquivalentTo(expected, CollectionOrdering.Matching);
     }
 }

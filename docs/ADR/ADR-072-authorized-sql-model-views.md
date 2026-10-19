@@ -2,18 +2,18 @@
 
 Status: Accepted bounded implementation contract; qualification pending.
 Date: 2026-10-03. Related: REQ/AC-SQLVIEW-001..005 in [QueryExecution](../Features/QueryExecution.md).
-Extends ADR-065/067; does not complete full SQL, JOIN or native client transport.
+Extends ADR-065/067; does not complete full SQL, JOIN or client transport.
 
 ## Decision and scope
 
-Extend the existing normalized SelectQuery with optional ModelSource at native
+Extend the existing normalized SelectQuery with optional ModelSource at execution
 field7, omitted from public JSON when null. Collection remains the configured
 resource name. ModelQuerySource has kind Events or QueueMessages, Item (stream
 ID or the same queue resource name) and Generation (positive event generation;
 exactly1 for queues). A queue lane is the existing `(Partition, Queue)` identity;
 there is no separate SQL lane axis or new persisted queue identity.
-All old AST fields, JSON meanings, native aliases and capability values remain.
-This additive AST1 extension is advertised separately as modelViewsV1.
+All old AST fields, JSON meanings, aliases and capability values remain.
+This additive AST1 extension is advertised separately as modelViews.
 
 Grammar: `FROM EVENTS('streamSet', 'streamId' [, generation])` or
 `FROM QUEUE_MESSAGES('queue')`. Arguments are bounded literal strings and
@@ -46,7 +46,7 @@ Returned values must match independently projected SDK records for the same cut.
 
 ## Resource, error and continuation contract
 
-Model scans require AllowFullScan. Use native borrowed ordered visits under one
+Model scans require AllowFullScan. Use borrowed ordered visits under one
 ReadExecutionBudget for principal/catalog/head/metadata/body/lookahead and exact
 output bytes. Scan <= configured MaxScanRecords; additional retained records
 reject the complete request with BudgetExceeded rather than imply completeness.
@@ -68,17 +68,17 @@ Unknown source kind, arguments and mutations reject before scanning.
 
 ## Implementation and verification
 
-1. Shared ModelQuerySource/native aliases and the optional SelectQuery field carry the accepted REQ/AC and source/format contracts.
+1. Shared ModelQuerySource/aliases and the optional SelectQuery field carry the accepted REQ/AC and source/format contracts.
 2. Query SqlParser/QueryValidation/QueryEngine, new Query QueryExecution ModelQuery* helpers and new Core QueryExecution ModelQuery* read helpers implement the feature, with real-store/parser/AST/security/budget tests in UnitTests QueryExecution SqlModelView*. Core owns key/record interpretation; Query owns parsing, binding and evaluation. No other model writer, storage provider, central config or shared contracts change.
-3. .NET and official MCP cluster cases live in the matching IntegrationTests slice; the native TUnit test entry launches and cleans the real topology.
+3. .NET and official MCP cluster cases live in the matching IntegrationTests slice; the TUnit test entry launches and cleans the real topology.
 4. After code, tests and self-review, run the integrated Release/analyzer/format/governance, focused and full TUnit, process recovery, Docker/Aspire cluster and exact-source Linux CI. No source-only assertion closes parent acceptance or measures performance.
 
 ## Rollout and rollback
 
-The native generated query DTOs use stable field identities. Roll back parser,
+The generated query DTOs use stable field identities. Roll back parser,
 AST source metadata and executor together if this feature is withdrawn. Document
 queries retain their defined semantics, and unsupported model sources fail
-explicitly rather than being treated as document collections. Full SQL/native
+explicitly rather than being treated as document collections. Full SQL/execution
 session and cross-partition contracts remain required later ADR-065 stages.
 UI: N/A, existing programmable SQL/SDK/MCP surfaces suffice. No new package.
 

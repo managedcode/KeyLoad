@@ -3,7 +3,7 @@ using KeyLoad.Clustering;
 
 namespace KeyLoad.Server;
 
-/// <summary>Strict native argument framing, attributed typed native payloads and stable caller command identity.</summary>
+/// <summary>Strict execution argument framing, attributed typed execution payloads and stable caller command identity.</summary>
 internal static class McpArgumentDecoder
 {
     internal static McpDecodedOperation Read<TRequest>(IDictionary<string, JsonElement>? arguments, GrainReadKind kind,
@@ -13,8 +13,8 @@ internal static class McpArgumentDecoder
                 or GrainReadKind.Traverse or GrainReadKind.GraphShortestPath or GrainReadKind.GraphIncomingEdges
                 or GrainReadKind.SqlGraphPath
                 or GrainReadKind.PartitionQuery
-                ? InternalNativePayload.SerializePublicInput(Request<TRequest>(arguments, false), maximumPayloadBytes)
-                : InternalNativePayload.Serialize(Request<TRequest>(arguments, false), maximumPayloadBytes));
+                ? InternalPayload.SerializePublicInput(Request<TRequest>(arguments, false), maximumPayloadBytes)
+                : InternalPayload.Serialize(Request<TRequest>(arguments, false), maximumPayloadBytes));
 
     internal static McpDecodedOperation NoBody(IDictionary<string, JsonElement>? arguments, GrainReadKind kind,
         int maximumPayloadBytes)
@@ -26,7 +26,7 @@ internal static class McpArgumentDecoder
         {
             throw InvalidArguments();
         }
-        return new McpDecodedOperation(kind, null, Guid.Empty, InternalNativePayload.Serialize(ValueEmptyCount, maximumPayloadBytes));
+        return new McpDecodedOperation(kind, null, Guid.Empty, InternalPayload.Serialize(ValueEmptyCount, maximumPayloadBytes));
     }
 
     internal static McpDecodedOperation Command<TRequest>(IDictionary<string, JsonElement>? arguments,
@@ -35,7 +35,7 @@ internal static class McpArgumentDecoder
         var request = Request<TRequest>(arguments, false);
         var stableId = commandId(request);
         RequireIdentity(stableId);
-        return new McpDecodedOperation(null, kind, stableId, InternalNativePayload.SerializePublicInput(request, maximumPayloadBytes));
+        return new McpDecodedOperation(null, kind, stableId, InternalPayload.SerializePublicInput(request, maximumPayloadBytes));
     }
 
     internal static McpDecodedOperation HeaderCommand<TRequest>(IDictionary<string, JsonElement>? arguments, OperationKind kind,
@@ -49,7 +49,7 @@ internal static class McpArgumentDecoder
         }
         RequireIdentity(stableId);
         var request = Request<TRequest>(arguments, true);
-        return new McpDecodedOperation(null, kind, stableId, InternalNativePayload.SerializePublicInput(request, maximumPayloadBytes));
+        return new McpDecodedOperation(null, kind, stableId, InternalPayload.SerializePublicInput(request, maximumPayloadBytes));
     }
 
     internal static TRequest Request<TRequest>(IDictionary<string, JsonElement>? arguments, bool headerCommand)

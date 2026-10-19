@@ -1,4 +1,3 @@
-using KeyLoad.Core.Features.BlobStorage;
 using KeyLoad.Storage;
 using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
@@ -43,8 +42,6 @@ public sealed partial class DatabaseEngine
             OperationKind.ConfigureApiKey => ExecuteConfigureApiKey(transaction, operation),
             OperationKind.RuntimeJournal => Result(RuntimeJournal.Execute(transaction, principal, Payload<RuntimeJournalMutation>(operation))),
             OperationKind.SetDispatch => ExecuteDispatchState(transaction, operation),
-            _ when BlobStorageOperations.Handles(operation.Value!.Kind)
-                => new BlobStorageOperations(this).Execute(transaction, principal, operation, position),
             _ => throw Errors.Fail(ErrorCode.UnsupportedCapability, UnsupportedOperationMessage)
         };
 

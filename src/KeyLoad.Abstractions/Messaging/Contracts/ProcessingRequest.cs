@@ -10,6 +10,6 @@ namespace KeyLoad;
 /// <param name="ExecutionGeneration">Identifies the handler execution generation.</param>
 /// <param name="Effects">Lists mutations committed with handler processing.</param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.ProcessingRequest)]
+[Orleans.Alias(ContractAliases.ProcessingRequest)]
 public sealed record ProcessingRequest([property: Orleans.Id(0)] Guid CommandId, [property: Orleans.Id(1)] QueueLaneRef Lane, [property: Orleans.Id(2)] string Token, [property: Orleans.Id(3)] string HandlerScope,
     [property: Orleans.Id(4)] long ExecutionGeneration, [property: Orleans.Id(5)] ImmutableArray<Mutation> Effects);

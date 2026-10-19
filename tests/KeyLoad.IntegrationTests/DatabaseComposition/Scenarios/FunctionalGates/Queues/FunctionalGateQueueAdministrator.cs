@@ -1,11 +1,11 @@
 using System.Globalization;
 using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.ClusterRouting;
+using KeyLoad.IntegrationTests.Features.OrleansExecution;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
 
 namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
 
-/// <summary>Creates the real tenant-local privileged operator required by native queue lifecycle administration.</summary>
+/// <summary>Creates the real tenant-local privileged operator required by execution queue lifecycle administration.</summary>
 internal static class FunctionalGateQueueAdministrator
 {
     private const int ResourceCount = 3;

@@ -41,7 +41,7 @@ internal static class ChunkMultiblockCrashState
         {
             throw new InvalidOperationException(SampleChunkCrashContract.Invalid);
         }
-        return Convert.ToHexString(NativeSerialization.Serialize(result));
+        return Convert.ToHexString(OrleansSerialization.Serialize(result));
     }
 
     private static string[][] Blocks(DatabaseEngine database, long generation)

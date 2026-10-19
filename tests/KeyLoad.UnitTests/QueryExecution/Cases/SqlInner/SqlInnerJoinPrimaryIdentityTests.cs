@@ -3,7 +3,7 @@ namespace KeyLoad.UnitTests.Features.QueryExecution;
 internal sealed class SqlInnerJoinPrimaryIdentityTests
 {
     [Test]
-    public async Task RetainedJsonPrimaryKeysCannotContradictNativeIdentityAndRepairAcrossTwoDirtyAndHealthyColdOwners()
+    public async Task RetainedJsonPrimaryKeysCannotContradictIdentityAndRepairAcrossTwoDirtyAndHealthyColdOwners()
     {
         var failures = new List<Exception>();
         await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>

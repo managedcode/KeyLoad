@@ -7,7 +7,7 @@ using Microsoft.CodeAnalysis.Operations;
 
 namespace KeyLoad.Analyzers.Features.CodeQuality;
 
-/// <summary>Requires native typed synchronization outside Orleans activation-owned state.</summary>
+/// <summary>Requires execution typed synchronization outside Orleans activation-owned state.</summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class TypedSynchronizationAnalyzer : DiagnosticAnalyzer
 {

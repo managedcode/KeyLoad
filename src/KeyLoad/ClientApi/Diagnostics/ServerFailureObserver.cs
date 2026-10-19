@@ -19,17 +19,17 @@ internal static class ServerFailureObserver
         {
             terminal = stage();
         }
-        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+        catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error))
         {
             failures.Add(error);
             return;
         }
-        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
+        catch (Exception error) when (!CqrsBoundaryErrors.IsNonFatal(error))
         {
             failures.Add(error);
             return;
         }
-        await terminal.ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
+        await terminal.ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing | ConfigureAwaitOptions.ContinueOnCapturedContext);
         if (terminal.Exception is { } terminalFailure)
         {
             failures.AddRange(terminalFailure.InnerExceptions);
@@ -38,7 +38,7 @@ internal static class ServerFailureObserver
         {
             try
             {
-                await terminal.ConfigureAwait(false);
+                await terminal;
             }
             catch (OperationCanceledException error)
             {
@@ -58,11 +58,11 @@ internal static class ServerFailureObserver
         {
             stage();
         }
-        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+        catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error))
         {
             failures.Add(error);
         }
-        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
+        catch (Exception error) when (!CqrsBoundaryErrors.IsNonFatal(error))
         {
             failures.Add(error);
         }

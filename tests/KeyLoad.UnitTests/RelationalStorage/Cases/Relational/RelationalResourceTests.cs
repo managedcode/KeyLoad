@@ -43,7 +43,7 @@ internal sealed class RelationalResourceTests
     [Test]
     [Arguments(false)]
     [Arguments(true)]
-    public async Task AcAisql004NativeNullableUniquePolicyRemainsExplicit(bool includeNull)
+    public async Task AcAisql004NullableUniquePolicyRemainsExplicit(bool includeNull)
     {
         using var database = new TestDatabase();
         var definition = RelationalTestData.Definition() with

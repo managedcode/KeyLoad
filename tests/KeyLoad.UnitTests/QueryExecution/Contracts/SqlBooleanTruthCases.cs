@@ -4,8 +4,8 @@ namespace KeyLoad.UnitTests.Features.QueryExecution;
 
 internal static class SqlBooleanTruthCases
 {
-    internal const string Profile = "TSQL.NamedParameters.v1";
-    internal const string OperandProfile = "SQL.BooleanPredicate.v1";
+    internal const string Profile = "TSQL.NamedParameters";
+    internal const string OperandProfile = "SQL.BooleanPredicate";
     internal const string BareClause = "score = @truth /* original bare */";
     internal const string NegatedBareClause = "NOT (score = @truth) /* original bare */";
     internal const string Prefix = "SELECT TOP (5) label AS label FROM null_ordering WHERE ";

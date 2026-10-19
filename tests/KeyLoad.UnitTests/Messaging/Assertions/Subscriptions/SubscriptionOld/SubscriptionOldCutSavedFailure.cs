@@ -1,5 +1,7 @@
 using KeyLoad.Core;
-using KeyLoad.Core.Features.ClusterRouting.Contracts;
+using KeyLoad.Core.Features.CommandOutcomes.Contracts;
+using KeyLoad.Core.Features.RuntimeJournaling.Contracts;
+using KeyLoad.Core.Features.StoragePartitions.Contracts;
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
 using KeyLoad.UnitTests.Features.StorageRecovery.Assertions;
@@ -17,7 +19,7 @@ internal static class SubscriptionOldCutSavedFailure
         var expected = QueueWholeFlowStorage.Bytes(store).ToDictionary(row => row[..row.IndexOf(':', StringComparison.Ordinal)],
             row => row[(row.IndexOf(':', StringComparison.Ordinal) + 1)..], StringComparer.Ordinal);
         var position = store.Position;
-        var identity = NativeReadCutStoreStateAssertions.SnapshotIdentity(store);
+        var identity = ReadCutStoreStateAssertions.SnapshotIdentity(store);
         var outcomeKey = KeySpace.PartitionOutcome(partition, operation.UserId!, operation.CommandId);
         var fingerprint = operation.Value!.Fingerprint;
         var next = checked(database.LastApplied + 1);
@@ -28,10 +30,10 @@ internal static class SubscriptionOldCutSavedFailure
             CanonicalSequence = next
         };
 
-        expected.Add(Convert.ToHexString(KeySpace.OutcomeLocatorV2(partition, operation.UserId!, operation.CommandId)),
+        expected.Add(Convert.ToHexString(KeySpace.OutcomeLocator(partition, operation.UserId!, operation.CommandId)),
             Convert.ToHexString(outcomeKey));
-        expected[Convert.ToHexString(KeySpace.AppliedBytes)] = Convert.ToHexString(NativeSerialization.Serialize(next));
-        expected[Convert.ToHexString(KeySpace.ClockBytes)] = Convert.ToHexString(NativeSerialization.Serialize(new DateTimeOffset(operation.Timestamp)));
+        expected[Convert.ToHexString(KeySpace.AppliedBytes)] = Convert.ToHexString(OrleansSerialization.Serialize(next));
+        expected[Convert.ToHexString(KeySpace.ClockBytes)] = Convert.ToHexString(OrleansSerialization.Serialize(new DateTimeOffset(operation.Timestamp)));
         var failures = new List<Exception>();
         byte[]? raw = null;
         for (var repeat = 0; repeat < 2; repeat++)
@@ -43,7 +45,7 @@ internal static class SubscriptionOldCutSavedFailure
                     ?? throw new InvalidOperationException("The original failure outcome is missing.");
                 Retain(store, state, operation, current);
                 raw ??= current;
-                await OutcomeAsync(NativeSerialization.Deserialize<StoredOutcome>(current), outcome);
+                await OutcomeAsync(OrleansSerialization.Deserialize<StoredOutcome>(current), outcome);
                 await Assert.That(current.AsSpan().SequenceEqual(raw)).IsTrue();
             }, failures);
             if (raw is not null)
@@ -72,7 +74,6 @@ internal static class SubscriptionOldCutSavedFailure
         await ResultAsync(actual.Result, Errors.Code(expected.Result.Problem)!.Value, expected.Result.Problem?.Detail!);
         await Assert.That(actual.ScopeKind).IsEqualTo(expected.ScopeKind);
         await Assert.That(actual.Partition).IsEqualTo(expected.Partition);
-        await Assert.That(actual.BlobAuthority).IsNull();
         await Assert.That(actual.CompositionAuthority).IsNull();
         await Assert.That(actual.OnlineTextAuthority).IsNull();
     }
@@ -83,7 +84,7 @@ internal static class SubscriptionOldCutSavedFailure
         {
             state.DeniedOperation = operation;
             state.DeniedOutcome = bytes.ToArray();
-            state.DeniedLocator = store.Read(view => view.ReadOwnedValue(KeySpace.OutcomeLocatorV2(
+            state.DeniedLocator = store.Read(view => view.ReadOwnedValue(KeySpace.OutcomeLocator(
                 state.Group.Source.Partition, operation.UserId!, operation.CommandId)))
                 ?? throw new InvalidOperationException("The original failure locator is missing.");
         }
@@ -93,7 +94,7 @@ internal static class SubscriptionOldCutSavedFailure
         var operation = state.DeniedOperation ?? throw new InvalidOperationException("The original denial was not retained.");
         var image = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
-        var identity = NativeReadCutStoreStateAssertions.SnapshotIdentity(store);
+        var identity = ReadCutStoreStateAssertions.SnapshotIdentity(store);
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(() => OriginalBytesAsync(store, state, operation), failures);
         await ServerFailureObserver.ObserveAsync(() => ResultAsync(database.Apply(operation), ErrorCode.PermissionDenied,
@@ -108,7 +109,7 @@ internal static class SubscriptionOldCutSavedFailure
         await Assert.That(state.DeniedOutcome.Length > 0 && state.DeniedLocator.Length > 0).IsTrue();
         var key = KeySpace.PartitionOutcome(state.Group.Source.Partition, operation.UserId!, operation.CommandId);
         var raw = store.Read(view => view.ReadOwnedValue(key));
-        var locator = store.Read(view => view.ReadOwnedValue(KeySpace.OutcomeLocatorV2(
+        var locator = store.Read(view => view.ReadOwnedValue(KeySpace.OutcomeLocator(
             state.Group.Source.Partition, operation.UserId!, operation.CommandId)));
         await Assert.That(raw).IsNotNull();
         await Assert.That(locator).IsNotNull();

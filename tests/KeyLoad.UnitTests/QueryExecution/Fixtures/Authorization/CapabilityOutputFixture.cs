@@ -6,7 +6,7 @@ internal static class CapabilityOutputFixture
 {
     internal const string Collection = "manifest_output";
     internal const string Reader = "manifest-output-reader";
-    internal const int NativeBytes = 8192;
+    internal const int RuntimeBytes = 8192;
     internal const int RequestBytes = 32768;
     internal const int LowerBytes = 4096;
     internal const int LargerBytes = 16384;
@@ -20,7 +20,7 @@ internal static class CapabilityOutputFixture
             _ => throw new ArgumentOutOfRangeException(nameof(mode))
         }
     };
-    internal static int ExpectedBytes(int mode) => mode == 1 ? LowerBytes : NativeBytes;
+    internal static int ExpectedBytes(int mode) => mode == 1 ? LowerBytes : RuntimeBytes;
     internal static (CommandRequest Command, CommitReceipt Receipt)[] Seed(TestDatabase database)
     {
         database.Configure(Collection, ResourceKind.Collection);

@@ -4,7 +4,7 @@ using ModelContextProtocol.Protocol;
 
 namespace KeyLoad.Server;
 
-/// <summary>Builds the fixed three-tool gateway entry page within the native response ceiling.</summary>
+/// <summary>Builds the fixed three-tool gateway entry page within the execution response ceiling.</summary>
 internal static class McpGatewayToolPagination
 {
     private const string PageExceeded = "The gateway tool page exceeds the MCP response budget.";

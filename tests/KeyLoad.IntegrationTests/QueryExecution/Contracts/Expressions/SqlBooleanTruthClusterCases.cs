@@ -4,8 +4,8 @@ namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 
 internal static class SqlBooleanTruthClusterCases
 {
-    internal const string Profile = "SQL.BooleanTruth.v1";
-    internal const string OperandProfile = "SQL.BooleanPredicate.v1";
+    internal const string Profile = "SQL.BooleanTruth";
+    internal const string OperandProfile = "SQL.BooleanPredicate";
     internal const string BareClause = "score";
     internal const string NegatedBareClause = "NOT score";
     internal const string Prefix = "SELECT label AS label FROM null_ordering WHERE ";

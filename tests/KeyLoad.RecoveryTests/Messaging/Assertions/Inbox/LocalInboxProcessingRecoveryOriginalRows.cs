@@ -20,7 +20,7 @@ internal static class LocalInboxProcessingRecoveryOriginalRows
         {
             LocalInboxProcessingRecoveryImage.InboxKey(),
             KeySpace.PartitionOutcome(partition, original.UserId!, original.CommandId),
-            KeySpace.OutcomeLocatorV2(partition, original.UserId!, original.CommandId)
+            KeySpace.OutcomeLocator(partition, original.UserId!, original.CommandId)
         };
         for (var ordinal = FirstMutationOrdinal; ordinal < LocalInboxProcessingCrashContract.MutationCount; ordinal++)
         {

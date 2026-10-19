@@ -3,7 +3,7 @@ namespace KeyLoad.UnitTests.Features.ChangeFeeds;
 
 internal static class ProjectionProgressOperations
 {
-    internal static ProjectionConsumerRef Configure(TestDatabase db, string name = "projection-v1")
+    internal static ProjectionConsumerRef Configure(TestDatabase db, string name = "projection")
     {
         var consumer = new ProjectionConsumerRef(db.Partition, name);
         var id = Guid.NewGuid();

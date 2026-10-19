@@ -46,7 +46,7 @@ internal sealed class CliBackupExecutionPolicyTests
             await CliBackupRestoreAssertions.RestoredStoreAsync(fixture, restored, fixture.RestoredDirectory);
             using var reopened = new ZoneTreeStore(new(fixture.RestoredDirectory),
                 UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
-            var value = reopened.Read(view => NativeSerialization.Deserialize<string>(view.ReadOwnedValue(key)!));
+            var value = reopened.Read(view => OrleansSerialization.Deserialize<string>(view.ReadOwnedValue(key)!));
             await Assert.That(value).IsEqualTo(payload);
             await BackupPieceBoundaryFlow.RunAsync(options, fixture, files, key, payload, PieceBytesEnvironment, token);
         }, token);

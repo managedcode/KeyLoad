@@ -6,7 +6,7 @@ namespace KeyLoad;
 /// <param name="MaxBytes">The maximum batch size in bytes.</param>
 /// <param name="ThroughSequence">Optional inclusive retained upper sequence; null reads through the current head.</param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.ReadProjectionBatchRequest)]
+[Orleans.Alias(ContractAliases.ReadProjectionBatchRequest)]
 public sealed record ReadProjectionBatchRequest([property: Orleans.Id(0)] ProjectionConsumerRef Consumer, [property: Orleans.Id(1)] int Limit = ReadProjectionBatchRequest.DefaultLimit, [property: Orleans.Id(2)] int MaxBytes = ReadProjectionBatchRequest.DefaultMaxBytes,
     [property: Orleans.Id(3), System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] long? ThroughSequence = null)
 {

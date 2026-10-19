@@ -48,7 +48,7 @@ internal static class QueueOrderedRetryRecoveryImage
         await Assert.That(database.Store.Read(view => view.GetRecord<MessageBody>(KeySpace.Partition("message-body", lane.Partition, lane.Queue, expected.Id))))
             .IsEqualTo(retained ? Literal(expected.Id) : null);
     }
-    private static long Bytes(string id) => NativeSerialization.Serialize(Literal(id)).LongLength;
+    private static long Bytes(string id) => OrleansSerialization.Serialize(Literal(id)).LongLength;
     private static MessageBody Literal(string id)
     {
         var message = QueueOrderedRetryCrashSeed.Enqueue(id);

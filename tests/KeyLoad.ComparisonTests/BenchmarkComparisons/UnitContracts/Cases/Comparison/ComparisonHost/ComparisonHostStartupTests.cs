@@ -2,20 +2,20 @@ using SessionFields = KeyLoad.ComparisonTests.Features.BenchmarkComparisons.Benc
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
-/// <summary>The native entry discovers shared-session cases and refuses invalid startup cohorts.</summary>
+/// <summary>The execution entry discovers shared-session cases and refuses invalid startup cohorts.</summary>
 internal sealed class ComparisonHostStartupTests
 {
     [Test]
-    public async Task NativeSessionDiscoveryListsSevenDistinctMeasuredTestsWithoutOpeningClients()
+    public async Task SessionDiscoveryListsSevenDistinctMeasuredTestsWithoutOpeningClients()
     {
         var result = await ComparisonHostProcess.RunAsync(["--list-tests"],
             cancellationToken: TestContext.Current!.Execution.CancellationToken);
         await Assert.That(result.ExitCode).IsEqualTo(0).Because(result.Stdout + result.Stderr);
-        foreach (var name in SessionHostStartupSupport.NativeNames)
+        foreach (var name in SessionHostStartupSupport.RuntimeNames)
         {
             await Assert.That(result.Stdout).Contains(name);
         }
-        await Assert.That(result.Stdout.Contains("NativeClientWorkloadProducesSuccessfulOriginalReports", StringComparison.Ordinal)).IsFalse();
+        await Assert.That(result.Stdout.Contains("ClientWorkloadProducesSuccessfulOriginalReports", StringComparison.Ordinal)).IsFalse();
     }
 
     [Test]
@@ -25,7 +25,7 @@ internal sealed class ComparisonHostStartupTests
     [Arguments("missing-session")]
     [Arguments("operation-override")]
     [Arguments("warmup-override")]
-    public Task NativeSessionRefusesIncompleteOrUnknownStartupBeforeTheMeasuredLoad(string corruption)
+    public Task SessionRefusesIncompleteOrUnknownStartupBeforeTheMeasuredLoad(string corruption)
     {
         var settings = SessionHostStartupSupport.ValidSettings();
         var detail = SessionHostStartupSupport.Invalid;
@@ -33,7 +33,7 @@ internal sealed class ComparisonHostStartupTests
         {
             case "session-disabled":
                 settings[SessionHostStartupSupport.Session] = "false";
-                detail = "session-v1";
+                detail = "session";
                 break;
             case "missing-target":
                 settings.Remove(SessionHostStartupSupport.Target);
@@ -47,11 +47,11 @@ internal sealed class ComparisonHostStartupTests
                 break;
             case "operation-override":
                 settings[SessionFields.OperationsEnvironment] = "1";
-                detail = "session-v1";
+                detail = "session";
                 break;
             case "warmup-override":
                 settings[SessionFields.WarmupEnvironment] = "1";
-                detail = "session-v1";
+                detail = "session";
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(corruption));

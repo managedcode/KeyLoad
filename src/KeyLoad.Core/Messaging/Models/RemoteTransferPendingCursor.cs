@@ -9,5 +9,5 @@ public sealed record RemoteTransferPendingCursor([property: Orleans.Id(0)] Guid 
     [property: Orleans.Id(2)] ImmutableArray<byte>? UpperKey,
     [property: Orleans.Id(3)] ImmutableArray<byte>? LastKey)
 {
-    internal const string SerializerAlias = "keyload.core.queue-transfer-pending-cursor.v1";
+    internal const string SerializerAlias = "keyload.core.queue-transfer-pending-cursor";
 }

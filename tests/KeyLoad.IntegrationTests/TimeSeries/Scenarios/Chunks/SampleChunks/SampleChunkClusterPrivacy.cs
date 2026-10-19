@@ -11,7 +11,7 @@ internal static class SampleChunkClusterPrivacy
     internal static async Task ExecuteAsync(ClusterFixture fixture, SampleChunkClusterScenario scenario,
         KeyLoadClient administrator, CommitReceipt minimum, CancellationToken token)
     {
-        var identity = await McpPersistedIdentity.CreateAsync(fixture, scenario.Native.Partition,
+        var identity = await McpPersistedIdentity.CreateAsync(fixture, scenario.Execution.Partition,
             TimeSeriesClusterScenario.Set, Capability.SeriesRead | Capability.Query, token).ConfigureAwait(false);
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node2);
         var sdk = new KeyLoadClient(http, identity.Secret, IntegrationClientOptions.Execution());
@@ -63,7 +63,7 @@ internal static class SampleChunkClusterPrivacy
             {
                 CutPosition = official.CutPosition
             })));
-        var call = SqlClusterProtocol.Call(scenario.Native.Partition, SampleChunkProtocol.ReadTool, scenario.Request);
+        var call = SqlClusterProtocol.Call(scenario.Execution.Partition, SampleChunkProtocol.ReadTool, scenario.Request);
         var sql = await SqlClusterProtocol.SdkAsync<SampleChunkWindowResult>(sdk, call, token).ConfigureAwait(false);
         var sqlOfficial = await SqlClusterProtocol.McpAsync<SampleChunkWindowResult>(mcp, call, token).ConfigureAwait(false);
         foreach (var row in new[] { sql, sqlOfficial })
@@ -88,7 +88,7 @@ internal static class SampleChunkClusterPrivacy
         var official = await mcp.CallAsync(SampleChunkProtocol.ReadTool, request, token).ConfigureAwait(false);
         await McpCallerAssertions.ErrorAsync(official, ErrorCode.PermissionDenied, dispatched: true);
         await McpCallerAssertions.DoesNotDiscloseAsync(official, TimeSeriesClusterScenario.PrivateTags, PrivateTagValue);
-        var call = SqlClusterProtocol.Call(scenario.Native.Partition, SampleChunkProtocol.ReadTool, request);
+        var call = SqlClusterProtocol.Call(scenario.Execution.Partition, SampleChunkProtocol.ReadTool, request);
         var sql = await sdk.ExecuteSqlAsync(call, token).ConfigureAwait(false);
         await Assert.That(sql.IsSuccess).IsFalse();
         await Assert.That(sql.Value.ValueKind).IsEqualTo(System.Text.Json.JsonValueKind.Undefined);

@@ -9,7 +9,7 @@ internal static class SampleChunkPendingBoundFlow
 {
     private const string AppendKind = "appendSamples";
     private const string MergeKind = "mergeSampleChunkWindow";
-    private const string Exhausted = "The native series chunk window exceeds its admitted bound.";
+    private const string Exhausted = "The execution series chunk window exceeds its admitted bound.";
 
     internal static async Task RunAsync()
     {

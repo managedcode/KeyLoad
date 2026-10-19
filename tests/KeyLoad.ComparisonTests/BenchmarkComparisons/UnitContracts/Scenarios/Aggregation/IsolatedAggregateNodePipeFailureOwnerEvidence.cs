@@ -5,7 +5,7 @@ internal static class IsolatedAggregateNodePipeFailureOwnerEvidence
     private const string MissingOutputFailure = "The real Node pipe did not exceed its configured output bound.";
     internal const string MissingAggregate = "The owning cleanup path did not retain both actual pipe failures.";
 
-    internal static T InvokeNative<T>(Func<T> operation)
+    internal static T RuntimeInvoke<T>(Func<T> operation)
     {
         try
         {

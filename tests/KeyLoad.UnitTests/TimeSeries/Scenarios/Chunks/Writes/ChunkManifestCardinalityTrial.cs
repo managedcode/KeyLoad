@@ -46,15 +46,15 @@ internal static class ChunkManifestCardinalityTrial
     private static async Task<byte[]> Inject(ChunkSelectedIntegrityFixture fixture)
     {
         var original = fixture.Store.Read(view => view.ReadOwnedValue(ChunkSelectedIntegrityDamage.Key(fixture)))!;
-        var envelope = NativeSerialization.Deserialize<SampleChunkManifestEnvelope>(original);
-        var manifest = NativeSerialization.Deserialize<SampleChunkManifest>(envelope.Encoded.Span);
+        var envelope = OrleansSerialization.Deserialize<SampleChunkManifestEnvelope>(original);
+        var manifest = OrleansSerialization.Deserialize<SampleChunkManifest>(envelope.Encoded.Span);
         await Assert.That(manifest.RecordCount).IsEqualTo(2);
-        var bytes = NativeSerialization.Serialize(manifest with
+        var bytes = OrleansSerialization.Serialize(manifest with
         {
             RecordCount = 1
         });
         ChunkSelectedIntegrityDamage.Put(fixture,
-            NativeSerialization.Serialize(new SampleChunkManifestEnvelope(bytes, SHA256.HashData(bytes))));
+            OrleansSerialization.Serialize(new SampleChunkManifestEnvelope(bytes, SHA256.HashData(bytes))));
         return original;
     }
 }

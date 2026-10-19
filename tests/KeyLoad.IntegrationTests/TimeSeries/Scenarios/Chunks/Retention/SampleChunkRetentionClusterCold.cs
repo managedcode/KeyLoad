@@ -1,6 +1,6 @@
 using Aspire.Hosting.ApplicationModel;
 using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.ClusterReplication;
+using KeyLoad.IntegrationTests.Features.StorageReplication;
 
 namespace KeyLoad.IntegrationTests.Features.TimeSeries;
 
@@ -27,7 +27,7 @@ internal static class SampleChunkRetentionClusterCold
         {
             await fixture.App.ResourceNotifications.WaitForResourceHealthyAsync(node, WaitBehavior.WaitOnResourceUnavailable, token).ConfigureAwait(false);
         }
-        await global::KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsClusterCallers.RunOwnedAsync(
+        await global::KeyLoad.IntegrationTests.Features.OrleansExecution.RequestCqrsClusterCallers.RunOwnedAsync(
             fixture.App, McpCallerProtocol.Node1, fixture.AdminKey, async callers =>
             {
                 var sdk = callers.Sdk;

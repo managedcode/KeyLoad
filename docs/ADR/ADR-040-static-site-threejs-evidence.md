@@ -21,7 +21,7 @@ replicated cluster topology. Logical partitions remain distinct from the silo-lo
 ZoneTree owners that own node-local storage.
 
 Use the pinned same-origin Three.js 0.186.1 MIT distribution, one lazy
-WebGPURenderer and its native WebGL2 backend selection; use public lifecycle/error
+WebGPURenderer and its WebGL2 backend selection; use public lifecycle/error
 APIs and no CDN or compatibility shim. Keep procedural geometry only. Bound the
 renderer to one canvas, DPR <= 1.5, <= 1,000,000 drawing-buffer pixels, <= 30 draw
 calls and <= 120,000 triangles. The owner explicitly requests sufficient polygons
@@ -44,9 +44,9 @@ rapidly superseded or failed loads; stale generations cannot republish. The
 published output must not contain synthetic, mixed, partial, stale or
 unauthenticated measurements. An unavailable metrics cohort produces an accurate
 content-only site with no numeric catalogue, aggregate or figures. Ready metrics
-enrich content only after the original run, exact source, artifacts, real native
+enrich content only after the original run, exact source, artifacts, real execution
 image identities, actual caller workload and all current provenance checks
-authenticate successfully. The native engine and caller evidence remains bound to
+authenticate successfully. The engine and caller evidence remains bound to
 the measurement itself under the current comparison contract; the website never
 infers it from a label, source setting or synthetic row.
 
@@ -57,15 +57,15 @@ separately. Authored modules, static assets, builder output, source identities,
 renderer usage and measured inputs are validated by the existing site tests and
 evidence contracts. Confine same-origin report/run paths, require unique identities
 and exact raw SHA-256, and do not treat a supplied run URL as authentication. The
-browser and coverage collectors must use real generated files and native Node/Chrome
+browser and coverage collectors must use real generated files and Node/Chrome
 observations, not a DOM/fetch mock or fabricated receipt.
 
 REQ-BC-024 / AC-BC-024 requires exact-source authored JavaScript coverage of at
 least 80% executable lines and 70% available V8 block outcomes, plus at least 90%
 line coverage for every current critical measurement, validation, build and
-provenance module. Missing source, range, browser-session mapping or native report
+provenance module. Missing source, range, browser-session mapping or report
 fails closed. Each browser session needs its own mapped authored evidence; one
-session cannot hide another session's empty or unmapped receipt. Native V8 ranges,
+session cannot hide another session's empty or unmapped receipt. V8 ranges,
 source hashes, runtime identity and branch interpretation remain independently
 bound. Functional coverage excludes load, stress, performance and comparison
 runs. Source-mapped CRAP and existing no-decrease/code-quality gates remain
@@ -74,7 +74,7 @@ complete functional coverage and same-cohort complexity evidence exist.
 
 REQ-BC-025 / AC-BC-025 requires the real available Chrome process, BCL CDP and
 WebSocket, isolated emitted site files/HTTP, actual controls and visible
-caller-facing outcomes, native coverage, bounded diagnostics and joined child
+caller-facing outcomes, coverage, bounded diagnostics and joined child
 process/readers. Browser startup, CDP, coverage shutdown and original process exit
 are one owned lifetime. Missing Chrome, incomplete source coverage or unexpected
 console errors fail. Visual composition and physically unavailable graphics-loss
@@ -132,11 +132,11 @@ flowchart LR
 | REQ-BC-017 | Centrally pinned TUnit site suite with real bounded Node process; only exact-source GitHub execution qualifies |
 | REQ-BC-018 | Exact site/measured source and evidence provenance; no inference from an old source or incomplete producer |
 | REQ-BC-024 | >=80% authored JS lines, >=70% available V8 block outcomes, >=90% lines for each critical module, source-mapped CRAP and no-decrease gates |
-| REQ-BC-025 | Real available Chrome/CDP against emitted files, actual browser controls and per-session mapped native coverage |
+| REQ-BC-025 | Real available Chrome/CDP against emitted files, actual browser controls and per-session mapped coverage |
 | REQ-BC-027 | Current pinned website analyzer dependency and exact source/pipeline validation |
 | REQ-BC-028 | Optional authenticated current aggregate, complete archive/source/freshness and publication authority |
 | REQ-BC-029 | Current shared KeyLoad visual identity without changing evidence semantics |
-| REQ-BC-PRESENTATION-005 | Original-artwork native composition, eight model platforms, one agent, eight cables, no generic clients/scene logo; exact original static fallback and meaningful native/browser/owner proof |
+| REQ-BC-PRESENTATION-005 | Original-artwork composition, eight model platforms, one agent, eight cables, no generic clients/scene logo; exact original static fallback and meaningful execution/browser/owner proof |
 | REQ-BC-WEB-001..007 | Independent Website source/manual runs; optional ready metrics or accurate content-only output; bounded final Benchmarks dispatch; complete mode-specific qualification, freshness and provider publication |
 
 The feature specification owns detailed contracts, module inventory, executable
@@ -167,10 +167,10 @@ REQ/AC-BC-PRESENTATION-005 in the Feature specification defines the hero illustr
 a central three-layer steel/glass database, human agent above it, upper-left
 table/SQL, upper-right graph, left-middle time series, right-middle vector cloud,
 lower-left event orbits, front-left queued cards, front-right file folders and
-lower-right document pages. Eight actual native cables join the eight model
+lower-right document pages. Eight actual cables join the eight model
 platforms to the database. Preserve detailed smooth geometry, finished bevels,
 studio lighting and peach/lilac/periwinkle reflections within the updated
-120,000-triangle bound. The live canvas uses procedural native geometry, never a
+120,000-triangle bound. The live canvas uses procedural geometry, never a
 raster plane. The original artwork supplies the accessible static fallback.
 No generic client boxes, repeated scene logo, visible client/silo captions or
 alternative silo/grain interpretation remain in this current contract.
@@ -179,19 +179,19 @@ The actual geometry graph supplies `data-scene-models=8`, `data-scene-agents=1`,
 `data-scene-links=8` and `data-scene-clients=0`; attributes do not fabricate cluster
 membership state. All nine model names remain in a semantic sr-only list, with SQL
 combined visually with the table. Existing renderer/vendor fidelity, no external
-requests, native motion/pause/visibility/disposal, responsive accessibility and
+requests, motion/pause/visibility/disposal, responsive accessibility and
 coverage gates remain unchanged. No packages are added. Database cluster topology,
 connection grains, silo-local storage, SQL conformance and measurement semantics
 are outside this presentation task.
 
 Implementation contract:
 
-1. Native geometry is constructed and batched in `scene-geometry.mjs`, semantics are
+1. geometry is constructed and batched in `scene-geometry.mjs`, semantics are
    integrated in `index.html`/`scene.css` and actual graph attributes through
    `scene-lifecycle.mjs`/`scene-observers.mjs`; existing lifecycle behavior remains.
 2. The canonical builder asset inventory and original fallback path, and the existing
-   native BenchmarkComparisons TUnit/Chrome scene/asset assertions, are updated with it.
-3. Native tests inspect actual rendered desktop/mobile frames, geometry counts,
+   BenchmarkComparisons TUnit/Chrome scene/asset assertions, are updated with it.
+3. tests inspect actual rendered desktop/mobile frames, geometry counts,
    original fallback delivery, accessible names, motion/pause and renderer budgets.
    Screenshot/motion judgment remains the explicit visual-composition exception.
 4. Show the completed local animated preview and obtain owner approval before
@@ -200,20 +200,20 @@ Implementation contract:
 
 ```mermaid
 flowchart LR
-    Reference[Original artwork and frozen Feature contract] --> Geometry[Native scene and semantic names]
+    Reference[Original artwork and frozen Feature contract] --> Geometry[scene and semantic names]
     Reference --> Fallback[Exact original static image]
-    Geometry --> Join[Native browser/assets/budget and coverage checks]
+    Geometry --> Join[browser/assets/budget and coverage checks]
     Fallback --> Join
     Join --> Owner[Completed animated preview and owner approval]
     Owner --> Website[Scoped commit then genuine Website and Pages gates]
 ```
 
-Rollback restores the coherent reviewed native scene, accessible semantics,
+Rollback restores the coherent reviewed scene, accessible semantics,
 fallback inventory and matching assertions through a source revert while preserving
 unrelated work, immutable original evidence and all publication/coverage gates.
 It does not retain a second renderer or use a still image as the live scene.
 
-Current stage: native implementation and the exact original-artwork fallback are
+Current stage: implementation and the exact original-artwork fallback are
 present. The 2026-10-09 owner-requested Website build repair aligns the existing
 asset and browser assertions with this composition while preserving motion,
 fallback, accessibility, coverage and publication gates. Manual browser evidence
@@ -221,7 +221,7 @@ and successful scoped compilation/static building are recorded in the Feature.
 Content-only Linux qualification and Pages publication passed for revision
 `1963cd255c538a2577bb9e582c761c1ade9d6f33` in
 [Website run 37987385285](https://github.com/managedcode/KeyLoad/actions/runs/37987385285),
-with all five native site cases passing and the same revision in the live
+with all five site cases passing and the same revision in the live
 publication receipt. Owner visual approval remains separate. Neither this
 content-only publication nor earlier local results qualify database behavior or
 benchmark measurements.

@@ -15,9 +15,9 @@ internal static class HybridQualityCorpus
     internal const int ResultLimit = 32;
     internal const int FusionConstant = 60;
     internal const double BranchWeight = 1;
-    internal const string ScoreProfile = "hybrid-quality-current-v1";
-    internal const string CorpusScope = "hybrid-quality-fixed32-v1";
-    internal const string StatisticsEpoch = "fixture-cut-v1";
+    internal const string ScoreProfile = "hybrid-quality-current";
+    internal const string CorpusScope = "hybrid-quality-fixed32";
+    internal const string StatisticsEpoch = "fixture-cut";
     internal const string WindowId = "complete-observation";
 
     internal static VectorSpace Space

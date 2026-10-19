@@ -21,7 +21,7 @@ internal static class Bm25ConfiguredQuotaBytes
     internal static long Candidate(Command<DatabaseCommand> operation)
     {
         var current = Bm25ConfiguredQuotaFlow.Phase(operation).Current;
-        return checked((long)Bm25CorpusKeys.Current(current).Length + NativeSerialization.Serialize(current).Length);
+        return checked((long)Bm25CorpusKeys.Current(current).Length + OrleansSerialization.Serialize(current).Length);
     }
 
     internal static async Task RequireStoredAsync(TestDatabase database, Command<DatabaseCommand> operation, Result<object> result,
@@ -37,14 +37,14 @@ internal static class Bm25ConfiguredQuotaBytes
         await Assert.That(database.Store.Position).IsEqualTo(expected.Token.Position);
         var expectedReceipt = new CommitReceipt(operation.CommandId, expected.Token, [],
             database.Database.Durability, database.Database.AcknowledgedPersistedCopies);
-        await NativeReplayResultAssertions.BytesAsync(NativeSerialization.Serialize(expectedReceipt), NativeSerialization.Serialize(receipt));
+        await ReplayResultAssertions.BytesAsync(OrleansSerialization.Serialize(expectedReceipt), OrleansSerialization.Serialize(receipt));
         await Assert.That(receipt.Token.Incarnation).IsEqualTo(database.Store.Identity.Incarnation);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(database.Partition.AtomicPartitionId);
         await Assert.That(receipt.Durability).IsEqualTo(database.Database.Durability);
         var actual = database.Store.Read(view => view.ReadOwnedValue(Bm25CorpusKeys.Current(phase.Current)))
             ?? throw new InvalidOperationException("The genuinely published corpus head is missing.");
-        await NativeReplayResultAssertions.BytesAsync(NativeSerialization.Serialize(phase.Current), actual);
-        await NativeReplayResultAssertions.SameAsync(result, database.Database.ResolveSubmissionOutcome(
+        await ReplayResultAssertions.BytesAsync(OrleansSerialization.Serialize(phase.Current), actual);
+        await ReplayResultAssertions.SameAsync(result, database.Database.ResolveSubmissionOutcome(
             database.ReadStoredOutcome(operation.CommandId).PreparedCommand!));
     }
 }

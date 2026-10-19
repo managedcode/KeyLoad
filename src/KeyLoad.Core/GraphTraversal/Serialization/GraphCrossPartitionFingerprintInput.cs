@@ -1,9 +1,9 @@
 namespace KeyLoad.Core.Features.GraphTraversal.Serialization;
 
-/// <summary>Builds a fixed native tuple tree independent of the caller's CLR reference sharing.</summary>
+/// <summary>Builds a fixed execution tuple tree independent of the caller's CLR reference sharing.</summary>
 internal static class GraphCrossPartitionFingerprintInput
 {
-    internal static GraphCrossPartitionFingerprintV1 Create(PartitionRef source, string graph,
+    internal static GraphCrossPartitionFingerprint Create(PartitionRef source, string graph,
         string edgeId, EntityRef destination, long revision, bool deleted, EdgeRecord edge)
         => new(GraphCrossPartitionProtocol.CurrentVersion, Copy(source), Copy(graph), Copy(edgeId),
             Copy(destination), revision, deleted,

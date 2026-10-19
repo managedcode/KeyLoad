@@ -12,7 +12,7 @@ internal static class RecurringScheduleRecoveryAssertions
     internal static async Task VerifyAsync(string root, CommitStage stage, CancellationToken cancellationToken)
     {
         using var store = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
-        var database = new DatabaseEngine(store, new AuthorizationPolicy(), RecoveryExecutionOptions.DatabaseLimits(), RecoveryExecutionOptions.DueWork(), RecoveryExecutionOptions.EventSource(), RecoveryExecutionOptions.Messaging(), RecoveryExecutionOptions.GraphExecution(), RecoveryExecutionOptions.ChangeFeedExecution(), RecoveryExecutionOptions.BlobExecution(), RecoveryExecutionOptions.NativeClaimsExecution(), RecoveryExecutionOptions.TimeSeriesExecution());
+        var database = new DatabaseEngine(store, new AuthorizationPolicy(), RecoveryExecutionOptions.DatabaseLimits(), RecoveryExecutionOptions.DueWork(), RecoveryExecutionOptions.EventSource(), RecoveryExecutionOptions.Messaging(), RecoveryExecutionOptions.GraphExecution(), RecoveryExecutionOptions.ChangeFeedExecution(), RecoveryExecutionOptions.RuntimeClaimsExecution(), RecoveryExecutionOptions.TimeSeriesExecution());
         var operation = await ReadOperationAsync(root, cancellationToken);
         var seedTail = await ReadSeedTailAsync(root, cancellationToken);
         var inspection = Inspect(database);
@@ -108,7 +108,7 @@ internal static class RecurringScheduleRecoveryAssertions
         if (recoveredOutcome is not null)
         {
             await Assert.That(receipt.Token).IsEqualTo(recoveredOutcome.Token);
-            await MessagingRecoveryReceiptAssertions.AssertSameNativeValueAsync(recoveredOutcome, receipt);
+            await MessagingRecoveryReceiptAssertions.AssertSameValueAsync(recoveredOutcome, receipt);
         }
     }
 
@@ -119,8 +119,8 @@ internal static class RecurringScheduleRecoveryAssertions
         var resolved = database.ResolveOutcome(operation).Get<CommitReceipt>();
         await Assert.That(repeated.Token).IsEqualTo(first.Token);
         await Assert.That(resolved.Token).IsEqualTo(first.Token);
-        await MessagingRecoveryReceiptAssertions.AssertSameNativeValueAsync(first, repeated);
-        await MessagingRecoveryReceiptAssertions.AssertSameNativeValueAsync(first, resolved);
+        await MessagingRecoveryReceiptAssertions.AssertSameValueAsync(first, repeated);
+        await MessagingRecoveryReceiptAssertions.AssertSameValueAsync(first, resolved);
         await Assert.That(database.GetOutboxStatus(CrashFixtureValues.Principal,
             RecurringScheduleCrashScenario.Partition).Head.Tail).IsEqualTo(seedTail + 1);
         var lane = new QueueLaneRef(RecurringScheduleCrashScenario.Partition, RecurringScheduleCrashScenario.Queue);

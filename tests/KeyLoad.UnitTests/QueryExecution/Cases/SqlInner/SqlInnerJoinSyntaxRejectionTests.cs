@@ -35,18 +35,18 @@ internal sealed class SqlInnerJoinSyntaxRejectionTests
     [Arguments(Prefix + Join + Order + " FOR JSON AUTO", ErrorCode.UnsupportedCapability)]
     [Arguments("SELECT TOP (10) l.order_id AS order_id FROM events('orders', 'stream') AS l " + Join + Order, ErrorCode.UnsupportedCapability)]
     [Arguments("SELECT TOP (10) l.order_id AS order_id FROM queue_messages('queue') AS l " + Join + Order, ErrorCode.UnsupportedCapability)]
-    public async Task ClosedSqlFormRejectsWithoutNativeScanOrStateChangeAndSameEngineRemainsHealthy(string sql, ErrorCode code)
+    public async Task ClosedSqlFormRejectsWithoutScanOrStateChangeAndSameEngineRemainsHealthy(string sql, ErrorCode code)
     {
         using var database = new TestDatabase();
         SqlInnerJoinRejectionFixture.Seed(database);
         var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
         var before = JsonDefaults.Serialize(engine.Execute(SqlInnerJoinRejectionFixture.Root,
-            new(database.Partition, SqlInnerJoinRejectionFixture.HealthySql, AllowFullScan: true, QueryDialectVersion: 2)));
+            new(database.Partition, SqlInnerJoinRejectionFixture.HealthySql, AllowFullScan: true, QueryDialectVersion: SqlOperationProtocol.DefaultQueryDialectVersion)));
         var position = database.Store.Position;
         var diagnostics = database.Store.GetReadDiagnostics();
 
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute(SqlInnerJoinRejectionFixture.Root,
-            new(database.Partition, sql, AllowFullScan: true, QueryDialectVersion: 2)));
+            new(database.Partition, sql, AllowFullScan: true, QueryDialectVersion: SqlOperationProtocol.DefaultQueryDialectVersion)));
 
         await Assert.That(failure.Code).IsEqualTo(code);
         await Assert.That(database.Store.GetReadDiagnostics().RangeExaminedBytes).IsEqualTo(diagnostics.RangeExaminedBytes);
@@ -56,13 +56,13 @@ internal sealed class SqlInnerJoinSyntaxRejectionTests
     [Test]
     [Arguments(1)]
     [Arguments(3)]
-    public async Task UnselectedOrUnknownSqlDialectRejectsBeforeNativeScanAndHealthyQ2Follows(int dialect)
+    public async Task UnselectedOrUnknownSqlDialectRejectsBeforeScanAndHealthyQ2Follows(int dialect)
     {
         using var database = new TestDatabase();
         SqlInnerJoinRejectionFixture.Seed(database);
         var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
         var before = JsonDefaults.Serialize(engine.Execute(SqlInnerJoinRejectionFixture.Root,
-            new(database.Partition, SqlInnerJoinRejectionFixture.HealthySql, AllowFullScan: true, QueryDialectVersion: 2)));
+            new(database.Partition, SqlInnerJoinRejectionFixture.HealthySql, AllowFullScan: true, QueryDialectVersion: SqlOperationProtocol.DefaultQueryDialectVersion)));
         var position = database.Store.Position;
         var diagnostics = database.Store.GetReadDiagnostics();
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute(SqlInnerJoinRejectionFixture.Root,

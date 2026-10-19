@@ -4,8 +4,8 @@ namespace KeyLoad.Comparisons.Targets;
 
 internal static class RedisSessionQueryExecution
 {
-    private const string SessionIndexUnavailable = "SelectedRedisNativeProfileHasNoSecondaryIndexLifecycle";
-    private const string SessionPrimaryUnavailable = "SessionNativeRedisPrimaryUnavailable";
+    private const string SessionIndexUnavailable = "SelectedRedisProfileHasNoSecondaryIndexLifecycle";
+    private const string SessionPrimaryUnavailable = "SessionRedisPrimaryUnavailable";
     private const string SessionReadCommand = "EVAL_RO";
     private const int SessionKeyCount = 1;
     private const int SessionRangeWidth = 1;
@@ -23,7 +23,7 @@ internal static class RedisSessionQueryExecution
     internal static Task BuildIndexesAsync(CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        return Task.FromException(new BenchmarkSessionNativeCapabilityException(SessionIndexUnavailable));
+        return Task.FromException(new BenchmarkSessionCapabilityException(SessionIndexUnavailable));
     }
 
     /// <inheritdoc/>
@@ -36,7 +36,7 @@ internal static class RedisSessionQueryExecution
             throw new InvalidOperationException(SessionPrimaryUnavailable);
         }
         var expected = BenchmarkSessionQueryContract.Expected(ordinal, stableStart, stableCount);
-        // Join the original native request, matching this target's existing document-session cancellation contract.
+        // Join the original execution request, matching this target's existing document-session cancellation contract.
         var result = await connection.GetDatabase().ExecuteAsync(SessionReadCommand,
             new object[] { SessionQuery, SessionKeyCount, prefix + expected.Id, expected.Id, expected.Number, expected.Number + SessionRangeWidth },
             CommandFlags.DemandMaster).ConfigureAwait(false);

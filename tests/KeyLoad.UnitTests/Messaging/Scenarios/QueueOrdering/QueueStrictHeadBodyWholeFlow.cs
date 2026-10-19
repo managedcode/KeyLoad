@@ -18,11 +18,11 @@ internal static class QueueStrictHeadBodyWholeFlow
                 await QueueStrictHeadBodyContinuation.RunAsync(fixture, state, failures, token);
             }, failures);
         }
-        catch (Exception error) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+        catch (Exception error) when (global::KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(error))
         {
             failures.Add(error);
         }
-        catch (Exception error) when (!global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+        catch (Exception error) when (!global::KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(error))
         {
             failures.Add(error);
         }
@@ -59,13 +59,13 @@ internal static class QueueStrictHeadBodyWholeFlow
         var row = fixture.Store.Read(view => view.ReadOwnedValue(key))!;
         var expectedBody = new MessageBody(literal.MessageId, literal.PayloadJson, literal.HeadersJson,
             literal.OrderingKey, JsonData.Fingerprint(literal));
-        await Assert.That(row.SequenceEqual(NativeSerialization.Serialize(expectedBody))).IsTrue();
+        await Assert.That(row.SequenceEqual(OrleansSerialization.Serialize(expectedBody))).IsTrue();
         var request = new ReceiveRequest(Guid.NewGuid(), state.Lane, MaxMessages: 1, LeaseSeconds: 30);
         var operation = fixture.Database.OwnCommand(fixture.Database.CreateCommand(OperationKind.Receive, request.RequestId, state.Principal, state.Time, JsonSerializer.Serialize(request, JsonDefaults.Options)));
         operation = fixture.Database.PrepareQueueRetryOperation(operation);
         var original = QueueLifecycleConditionAssertions.Capture(fixture.Store);
         QueueLifecycleConditionOperations.Restore(fixture.Store, key,
-            NativeSerialization.Serialize(expectedBody with
+            OrleansSerialization.Serialize(expectedBody with
             {
                 Id = "foreign-strict-head"
             }));

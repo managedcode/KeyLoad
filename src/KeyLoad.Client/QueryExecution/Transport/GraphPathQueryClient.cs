@@ -5,7 +5,7 @@ namespace KeyLoad.Client;
 /// <summary>Executes bounded SQL shortest-path reads through the shared authenticated SDK transport.</summary>
 public static class GraphPathQueryClient
 {
-    private const string GraphPathRoute = "/v1/query/graph-path";
+    private const string GraphPathRoute = "/query/graph-path";
 
     /// <summary>Executes the versioned SQL shortest-path profile and returns the typed graph path.</summary>
     /// <param name="client">The authenticated KeyLoad client.</param>

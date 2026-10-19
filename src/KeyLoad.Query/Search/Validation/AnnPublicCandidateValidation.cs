@@ -11,7 +11,7 @@ internal static class AnnPublicCandidateValidation
     private const int BitmapWordBits = 64;
     private const int BitmapRemainder = 63;
     private const ulong SetBitmapBit = 1UL;
-    private const string Invalid = "The native ANN generation is corrupt.";
+    private const string Invalid = "The execution ANN generation is corrupt.";
 
     internal static SearchScore[] Scores(SearchRequest request, AnnSeed caller,
         ImmutableArray<VectorRecord> source, ReadOnlySpan<ulong> eligible, AnnCandidate[] candidates, AnnWorkBudget work)

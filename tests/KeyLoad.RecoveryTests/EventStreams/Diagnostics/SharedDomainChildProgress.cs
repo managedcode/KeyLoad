@@ -10,9 +10,9 @@ internal sealed class SharedDomainChildProgress(string directory, ZoneTreeStore 
     internal void Record(SharedDomainChildProgressPhase phase,
         int seedOrdinal = SharedDomainChildProgressProtocol.InitialOrdinal)
     {
-        var witness = new SharedDomainChildProgressV1(SharedDomainChildProgressProtocol.Version, phase,
+        var witness = new SharedDomainChildProgress(SharedDomainChildProgressProtocol.Version, phase,
             seedOrdinal, TimeProvider.System.GetElapsedTime(started).TotalMilliseconds, store.Position);
-        var bytes = NativeSerialization.Serialize(witness);
+        var bytes = OrleansSerialization.Serialize(witness);
         if (bytes.Length > SharedDomainChildProgressProtocol.MaximumBytes)
         {
             throw new InvalidDataException(SharedDomainChildProgressProtocol.Invalid);

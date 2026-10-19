@@ -23,7 +23,7 @@ internal static class QueueDeadlinePoisonPrefixImage
                     NotBefore: value.Id == QueueDeadlinePoisonPrefixProtocol.ScheduledMessage ? originalDue : null);
                 var body = new MessageBody(value.Id, QueueDeadlinePoisonPrefixProtocol.Json, new string(QueueDeadlinePoisonPrefixProtocol.Json.AsSpan()), null, JsonData.Fingerprint(seed));
                 Add(rows, KeySpace.Partition(QueueDeadlinePoisonPrefixProtocol.Body, lane.Partition, lane.Queue, value.Id), body);
-                var bytes = NativeSerialization.Serialize(body).LongLength;
+                var bytes = OrleansSerialization.Serialize(body).LongLength;
                 storedBytes += bytes;
                 if (value.State == MessageState.Leased)
                 {
@@ -60,5 +60,5 @@ internal static class QueueDeadlinePoisonPrefixImage
     }
 
     private static void Add<T>(List<string> rows, byte[] key, T value)
-        => rows.Add(Convert.ToHexString(key) + QueueDeadlinePoisonPrefixProtocol.ByteSeparator + Convert.ToHexString(NativeSerialization.Serialize(value)));
+        => rows.Add(Convert.ToHexString(key) + QueueDeadlinePoisonPrefixProtocol.ByteSeparator + Convert.ToHexString(OrleansSerialization.Serialize(value)));
 }

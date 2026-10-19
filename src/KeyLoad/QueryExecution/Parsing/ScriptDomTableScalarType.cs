@@ -9,20 +9,20 @@ internal static class ScriptDomTableScalarType
     internal static RelationalColumnType Read(Dom.DataTypeReference dataType, ScriptDomTableLoweringContext context)
     {
         context.Check();
-        if (dataType is not Dom.SqlDataTypeReference native)
+        if (dataType is not Dom.SqlDataTypeReference execution)
         {
             throw ScriptDomOperationErrors.Unsupported();
         }
-        if (native.SqlDataTypeOption == Dom.SqlDataTypeOption.NVarChar
-            && native.Parameters.Count == SingleParameter && native.Parameters[FirstParameter] is Dom.MaxLiteral)
+        if (execution.SqlDataTypeOption == Dom.SqlDataTypeOption.NVarChar
+            && execution.Parameters.Count == SingleParameter && execution.Parameters[FirstParameter] is Dom.MaxLiteral)
         {
             return RelationalColumnType.Text;
         }
-        if (native.Parameters.Count != EmptyCount)
+        if (execution.Parameters.Count != EmptyCount)
         {
             throw ScriptDomOperationErrors.Unsupported();
         }
-        return native.SqlDataTypeOption switch
+        return execution.SqlDataTypeOption switch
         {
             Dom.SqlDataTypeOption.Bit => RelationalColumnType.Boolean,
             Dom.SqlDataTypeOption.BigInt => RelationalColumnType.WholeNumber,

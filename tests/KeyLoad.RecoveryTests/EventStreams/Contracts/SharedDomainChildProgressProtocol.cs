@@ -3,8 +3,8 @@ namespace KeyLoad.RecoveryTests.Features.EventStreams;
 internal static class SharedDomainChildProgressProtocol
 {
     internal const string FileName = "child-progress.bin";
-    internal const string Alias = "keyload.test.shared-domain-child-progress.v1";
-    internal const string PhaseAlias = "keyload.test.shared-domain-child-progress-phase.v1";
+    internal const string Alias = "keyload.test.shared-domain-child-progress";
+    internal const string PhaseAlias = "keyload.test.shared-domain-child-progress-phase";
     internal const string Invalid = "The original shared-domain child progress witness is invalid.";
     internal const int Version = 1;
     internal const int MaximumBytes = 1024;

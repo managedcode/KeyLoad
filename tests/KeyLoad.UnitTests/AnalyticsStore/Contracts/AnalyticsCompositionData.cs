@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 using KeyLoad.UnitTests.Features.Authorization;
-using D = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreNativeTestData;
+using D = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreTestData;
 
 namespace KeyLoad.UnitTests.Features.AnalyticsStore;
 
@@ -39,7 +39,7 @@ internal static class AnalyticsCompositionData
     internal static ImmutableArray<Mutation> Mutations(SafeProjectorOperationDatabase owner, string id, bool invalid = false)
         => [new PutDocument(D.AnchorCollection, id, Json, 0),
             new UpsertAnalyticsEvents(D.Store, [D.Event(owner.Source, id, D.Alpha, 7)],
-                AnalyticsStoreNativeTestOperations.Revisions((id, invalid ? 1 : 0))),
+                AnalyticsStoreTestOperations.Revisions((id, invalid ? 1 : 0))),
             new UpsertEdge(Graph, id, new(owner.Source.Partition, D.AnchorCollection, id),
                 new(owner.Source.Partition, D.AnchorCollection, D.AnchorId), Label, EmptyJson, 0),
             new AppendEvents(Events, id, [new(id, Created, EmptyJson)], ExpectedStreamRevision.NoStream)];

@@ -7,7 +7,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../.
 const defaultMaximumParallelTests = 50;
 const maximumParallelTests = 50;
 const comparisonParallelTests = 1;
-const nativeSimdOptions = ['DOTNET_EnableHWIntrinsic', 'COMPlus_EnableHWIntrinsic',
+const simdOptions = ['DOTNET_EnableHWIntrinsic', 'COMPlus_EnableHWIntrinsic',
   'DOTNET_EnableSIMD', 'COMPlus_EnableSIMD'];
 const heavyLoadEnabledOption = 'HeavyLoad:Enabled';
 const heavyLoadFilter = '/*/*/HeavyDocumentLoadClusterTests/*';
@@ -24,34 +24,34 @@ const mapped = new Map([
   ['CoverageFormat', '--coverage-output-format'], ['Execution:MaximumParallelTests', '--maximum-parallel-tests']
 ]);
 // Selection only: workloads and Aspire resource lifetimes belong to the C# TUnit tests.
-export function nativeSelection(input, inherited = process.env) {
-  if (nativeSimdOptions.some(key => inherited[key] !== undefined && inherited[key] !== '' && inherited[key] !== '1')) {
-    throw new Error('Native SIMD must remain enabled.');
+export function runtimeSelection(input, inherited = process.env) {
+  if (simdOptions.some(key => inherited[key] !== undefined && inherited[key] !== '' && inherited[key] !== '1')) {
+    throw new Error('Execution SIMD must remain enabled.');
   }
   const values = new Map();
   for (const argument of input) {
     const match = /^--KeyLoadTests:([^=]+)=(.+)$/u.exec(argument);
-    if (!match || values.has(match[1])) throw new Error('Invalid or duplicate native test selection.');
-    if (match[2].length > 4096) throw new Error('Native test argument exceeds its bound.');
+    if (!match || values.has(match[1])) throw new Error('Invalid or duplicate execution test selection.');
+    if (match[2].length > 4096) throw new Error('Execution test argument exceeds its bound.');
     values.set(match[1], match[2]);
   }
   const suite = values.get('Suite');
   const project = projects.get(suite);
-  if (!project) throw new Error('Unsupported native TUnit suite.');
+  if (!project) throw new Error('Unsupported execution TUnit suite.');
   const heavyLoad = values.has(heavyLoadEnabledOption);
   if (!heavyLoad && values.get('Filter') === heavyLoadFilter) {
     throw new Error('Heavy CLUSTER load requires its explicit enabled selection.');
   }
   if (heavyLoad && (values.get(heavyLoadEnabledOption) !== 'true' || suite !== 'cluster'
     || values.get('Filter') !== heavyLoadFilter || values.has('CoverageSettings')
-    || [...values.keys()].some(key => key.startsWith('NativeCoverage:')))) {
+    || [...values.keys()].some(key => key.startsWith('RuntimeCoverage:')))) {
     throw new Error('Heavy CLUSTER load requires its exact exclusive functional selection.');
   }
   const parallel = Number(values.get('Execution:MaximumParallelTests')
     ?? (suite === 'comparison' || heavyLoad ? comparisonParallelTests : defaultMaximumParallelTests));
-  if (!Number.isInteger(parallel) || parallel < 1 || parallel > maximumParallelTests) throw new Error('Invalid native parallelism.');
+  if (!Number.isInteger(parallel) || parallel < 1 || parallel > maximumParallelTests) throw new Error('Invalid execution parallelism.');
   if ((suite === 'comparison' || heavyLoad) && parallel !== comparisonParallelTests) {
-    throw new Error('Comparison measurements and heavy load require exactly one native test at a time.');
+    throw new Error('Comparison measurements and heavy load require exactly one execution test at a time.');
   }
   if (suite === 'cluster' && !values.has('Filter')) values.set('Filter', ordinaryClusterFilter);
   if (suite === 'unit' && !values.has('Filter')) values.set('Filter', ordinaryUnitFilter);
@@ -63,12 +63,12 @@ export function nativeSelection(input, inherited = process.env) {
       try {
         const selected = environment[key] || fallback;
         if (!path.isAbsolute(selected)) throw new Error('Relative directory.');
-        const physical = realpathSync.native(selected);
+        const physical = realpathSync.execution(selected);
         if (!statSync(physical).isDirectory()) throw new Error('Not a directory.');
         accessSync(physical, constants.R_OK | constants.W_OK | constants.X_OK);
         environment[key] = physical;
       } catch {
-        throw new Error(`Invalid native macOS ${key} directory.`);
+        throw new Error(`Invalid execution macOS ${key} directory.`);
       }
     }
   }
@@ -85,13 +85,13 @@ export function nativeSelection(input, inherited = process.env) {
       if (value === 'true') args.push('--report-trx');
     } else if (key === 'TimeoutMinutes') {
       const minutes = Number(value);
-      if (!Number.isInteger(minutes) || minutes < 1 || minutes > 180) throw new Error('Invalid native timeout.');
+      if (!Number.isInteger(minutes) || minutes < 1 || minutes > 180) throw new Error('Invalid execution timeout.');
 
     } else if (mapped.has(key)) {
       args.push(mapped.get(key), key.startsWith('Coverage') && key !== 'CoverageFormat' ? path.resolve(root, value) : value);
     } else if (key === heavyLoadEnabledOption) {
       environment.KeyLoadTests__HeavyLoad__Enabled = value;
-    } else throw new Error('Unsupported native test argument.');
+    } else throw new Error('Unsupported execution test argument.');
   }
   const coverageSettings = values.has('CoverageSettings');
   if (coverageSettings !== values.has('CoverageOutput')) throw new Error('Coverage settings and output must be selected together.');
@@ -103,7 +103,7 @@ export function nativeSelection(input, inherited = process.env) {
 }
 
 export async function runTests(input) {
-  const selection = nativeSelection(input);
+  const selection = runtimeSelection(input);
   const child = spawn('dotnet', selection.args, { cwd: root, env: selection.environment, stdio: 'inherit' });
   const interrupt = () => child.kill('SIGINT');
   const terminate = () => child.kill('SIGTERM');

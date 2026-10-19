@@ -5,7 +5,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
 
-/// <summary>Binds the actual generated runner's environment to native fixture policies.</summary>
+/// <summary>Binds the actual generated runner's environment to execution fixture policies.</summary>
 [ConfigurationBinding]
 internal static class EmbeddedBenchmarkRuntimeRegistration
 {
@@ -26,10 +26,8 @@ internal static class EmbeddedBenchmarkRuntimeRegistration
                 settings => settings.IsValid(), GraphExecutionOptions.ValidationMessage),
             BenchmarkScenarioOptionsRegistration.Read<ChangeFeedExecutionOptions>(configuration, ChangeFeedExecutionOptions.SectionName,
                 settings => settings.IsValid(), ChangeFeedExecutionOptions.ValidationMessage),
-            BenchmarkScenarioOptionsRegistration.Read<BlobExecutionOptions>(configuration, BlobExecutionOptions.SectionName,
-                settings => settings.IsValid(), BlobExecutionOptions.ValidationMessage),
-            BenchmarkScenarioOptionsRegistration.Read<NativeClaimsExecutionOptions>(configuration, NativeClaimsExecutionOptions.SectionName,
-                settings => settings.IsValid(), NativeClaimsExecutionOptions.ValidationMessage),
+            BenchmarkScenarioOptionsRegistration.Read<ClaimsExecutionOptions>(configuration, ClaimsExecutionOptions.SectionName,
+                settings => settings.IsValid(), ClaimsExecutionOptions.ValidationMessage),
             BenchmarkScenarioOptionsRegistration.Read<TimeSeriesExecutionOptions>(configuration, TimeSeriesExecutionOptions.SectionName,
                 settings => settings.IsValid(), TimeSeriesExecutionOptions.ValidationMessage),
             BenchmarkScenarioOptionsRegistration.Read<ZoneTreeStorageExecutionOptions>(configuration, ZoneTreeStorageExecutionOptions.SectionName,

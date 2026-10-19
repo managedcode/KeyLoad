@@ -5,7 +5,7 @@ using KeyLoad.IntegrationTests.Features.ClientApi;
 
 namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
 
-/// <summary>Exercises persisted native series through the same SDK and official MCP callers.</summary>
+/// <summary>Exercises persisted execution series through the same SDK and official MCP callers.</summary>
 internal static class FunctionalGateAnalytics
 {
     private const int First = 0;

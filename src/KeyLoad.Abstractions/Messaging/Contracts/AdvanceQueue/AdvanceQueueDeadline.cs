@@ -1,6 +1,6 @@
 namespace KeyLoad;
 
-/// <summary>Conditionally advances a canonical queue deadline using native command time.</summary>
+/// <summary>Conditionally advances a canonical queue deadline using execution command time.</summary>
 /// <param name="Queue">The owning queue.</param>
 /// <param name="MessageId">The retained message identity.</param>
 /// <param name="ExpectedState">The exact current pending state.</param>

@@ -23,6 +23,6 @@ internal static class ExternalQueueWorkerCrashProtocol
     internal const int MaximumFrameCharacters = 65_536;
     internal const int LeaseSeconds = 300;
     internal const int RenewalSeconds = 299;
-    internal const string InputAlias = "keyload.tests.external-worker.input.v1";
-    internal const string ClaimAlias = "keyload.tests.external-worker.claim.v1";
+    internal const string InputAlias = "keyload.tests.external-worker.input";
+    internal const string ClaimAlias = "keyload.tests.external-worker.claim";
 }

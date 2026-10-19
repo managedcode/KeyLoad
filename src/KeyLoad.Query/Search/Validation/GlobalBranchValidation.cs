@@ -29,7 +29,7 @@ internal static class GlobalBranchValidation
             throw Errors.Fail(ErrorCode.BudgetExceeded, ResourceExceeded);
         }
         PreflightIdentifiers(request, windows, budget);
-        bytes.Accept(NativeSerialization.Measure(request));
+        bytes.Accept(OrleansSerialization.Measure(request));
         PreflightWindowHeaders(windows, budget, bytes);
         var expected = ValidateExpectedIds(request.ExpectedWindowIds, budget);
         return ValidateWindowHeaders(request, windows, expected, budget);
@@ -68,7 +68,7 @@ internal static class GlobalBranchValidation
             {
                 throw Errors.Fail(ErrorCode.Corruption, InvalidWindow);
             }
-            bytes.Accept(NativeSerialization.Measure(window with
+            bytes.Accept(OrleansSerialization.Measure(window with
             {
                 Candidates = []
             }));

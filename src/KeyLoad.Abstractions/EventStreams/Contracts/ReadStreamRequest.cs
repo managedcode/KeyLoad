@@ -8,7 +8,7 @@ namespace KeyLoad;
 /// <param name="MaxBytes">The complete result byte limit; zero selects the existing configured maximum.</param>
 /// <param name="Cursor">The signed original traversal continuation; AfterRevision must be zero when supplied.</param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.ReadStreamRequest)]
+[Orleans.Alias(ContractAliases.ReadStreamRequest)]
 public sealed record ReadStreamRequest([property: Orleans.Id(0)] StreamRef Stream, [property: Orleans.Id(1)] long AfterRevision = ReadStreamRequest.DefaultAfterRevision, [property: Orleans.Id(2)] int Limit = ReadStreamRequest.DefaultLimit,
     [property: Orleans.Id(3)] StreamReadDirection Direction = StreamReadDirection.Forward,
     [property: Orleans.Id(4)] int MaxBytes = ReadStreamRequest.UseConfiguredMaximum,

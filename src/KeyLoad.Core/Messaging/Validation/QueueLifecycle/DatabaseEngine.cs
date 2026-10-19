@@ -18,7 +18,7 @@ public sealed partial class DatabaseEngine
         void Observe(long bytes)
         {
             examined = checked(examined + bytes);
-            RequireNativeBudget(examined);
+            RequireBudget(examined);
         }
         var metadata = view.VisitRange(KeyCodec.Encode([MessageMetadataSpace, request.TenantId, request.DatabaseId]),
             messagingExecution.QueueScanPageSize, (key, value) =>
@@ -28,7 +28,7 @@ public sealed partial class DatabaseEngine
                 {
                     return true;
                 }
-                var item = NativeSerialization.Deserialize<MessageMetadata>(value);
+                var item = OrleansSerialization.Deserialize<MessageMetadata>(value);
                 if (item.Id != (string)parts[QueueOrderProtocol.MessageKeyComponent]!)
                 {
                     throw Errors.Fail(ErrorCode.RecoveryRequired, QueueOrderProtocol.InvalidAuthority);

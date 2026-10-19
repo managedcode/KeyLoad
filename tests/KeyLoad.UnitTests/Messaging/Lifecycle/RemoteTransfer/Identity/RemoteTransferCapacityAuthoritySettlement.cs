@@ -33,7 +33,7 @@ internal static class RemoteTransferCapacityAuthoritySettlement
         var token = new CommitToken(placement.Incarnation, fixture.DestinationPartition.AtomicPartitionId,
             checked(fixture.Store.Position + First));
         var acked = fixture.Apply(OperationKind.Delivery, ack, id: ack.CommandId);
-        await NativeReplayResultAssertions.Same<CommitReceipt>(acked, Result<object>.Succeed(new CommitReceipt(ack.CommandId, token, [new(nameof(DeliveryAction.Ack), fixture.DestinationQueue.Queue, transfer.Mutation.Message.MessageId, Third)], DurabilityProfile.ProcessDurable, 1)));
+        await ReplayResultAssertions.Same<CommitReceipt>(acked, Result<object>.Succeed(new CommitReceipt(ack.CommandId, token, [new(nameof(DeliveryAction.Ack), fixture.DestinationQueue.Queue, transfer.Mutation.Message.MessageId, Third)], DurabilityProfile.ProcessDurable, 1)));
         var result = new RemoteTransferCapacityAuthorityCompleted(transfer, accepted.Request, accepted.Result, accepted.Proof,
             complete, completed, received.Request, received.Result, ack, acked, sequence);
         await RemoteTransferCapacityAuthorityImages.CompletedAsync(fixture, result);
@@ -54,7 +54,7 @@ internal static class RemoteTransferCapacityAuthoritySettlement
             [new(transfer.Mutation.Message.MessageId, Payload, Headers, fixture.Database.Sign(claims), First,
                 time.AddSeconds(LeaseSeconds), First, First)], token);
         var result = fixture.Apply(OperationKind.Receive, request, id: request.RequestId, time: time);
-        await NativeReplayResultAssertions.Same<ReceiveResult>(result, Result<object>.Succeed(expected));
+        await ReplayResultAssertions.Same<ReceiveResult>(result, Result<object>.Succeed(expected));
         await RemoteTransferCapacityAuthorityValues.EqualAsync(fixture.Database.Verify<DeliveryClaims>(expected.Deliveries.Single().Token), claims);
         return (request, result);
     }

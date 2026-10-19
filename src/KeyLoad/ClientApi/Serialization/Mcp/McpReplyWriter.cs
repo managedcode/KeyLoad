@@ -2,7 +2,7 @@ using System.Text.Json;
 
 namespace KeyLoad.Server;
 
-/// <summary>Writes complete bounded wrappers through the native writer without normalizing canonical result bytes.</summary>
+/// <summary>Writes complete bounded wrappers through the execution writer without normalizing canonical result bytes.</summary>
 internal static class McpReplyWriter
 {
     /// <summary>Writes already checked canonical JSON without a parsed-value copy or number normalization.</summary>

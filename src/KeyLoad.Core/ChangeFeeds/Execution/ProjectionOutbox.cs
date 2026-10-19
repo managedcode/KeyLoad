@@ -43,7 +43,7 @@ public sealed partial class DatabaseEngine
         {
             Sequence = checked(head.Tail + TailStep)
         };
-        var payload = NativeSerialization.Serialize(entry);
+        var payload = OrleansSerialization.Serialize(entry);
         var maxRecords = checked(Limits.MaxOutboxRecords + (allowProgressReserve ? Limits.ReservedOutboxRecords : NoProgressReserveRecords));
         var maxBytes = checked(Limits.MaxOutboxBytes + (allowProgressReserve ? Limits.ReservedOutboxBytes : NoProgressReserveRecords));
         if (head.StoredRecords >= maxRecords || payload.Length > maxBytes - head.StoredBytes)
@@ -97,7 +97,7 @@ public sealed partial class DatabaseEngine
             MaintenanceAuthority = authority,
             InitialAnnMaintenance = request.InitialAnnMaintenance
         };
-        if (NativeSerialization.Measure(state) > Limits.MaxBatchBytes)
+        if (OrleansSerialization.Measure(state) > Limits.MaxBatchBytes)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, InvalidMaintenanceProfile);
         }
@@ -261,7 +261,7 @@ public sealed partial class DatabaseEngine
                 {
                     InitialAnnMaintenanceSettled = true
                 };
-                if (NativeSerialization.Measure(settled) > Limits.MaxBatchBytes)
+                if (OrleansSerialization.Measure(settled) > Limits.MaxBatchBytes)
                 {
                     throw Errors.Fail(ErrorCode.BudgetExceeded, InvalidAnnSettlement);
                 }

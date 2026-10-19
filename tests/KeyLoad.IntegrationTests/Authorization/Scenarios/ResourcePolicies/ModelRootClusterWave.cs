@@ -1,5 +1,5 @@
 using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.ClusterRouting;
+using KeyLoad.IntegrationTests.Features.OrleansExecution;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
 using KeyLoad.Server;
 
@@ -10,7 +10,7 @@ internal static class ModelRootClusterWave
     internal static async Task RunAsync(RequestCqrsClusterCallers root, RequestCqrsClusterCallers reader,
         ModelRootClusterState state, bool use, bool read, CancellationToken token)
     {
-        await ModelRootClusterNative.RunAsync(root, reader, state, read, token);
+        await ModelRootCluster.RunAsync(root, reader, state, read, token);
         foreach (var explicitValue in new[] { false, true })
         {
             await ObserveAsync(root, state, async () => await ModelRootClusterResults.PageAsync(

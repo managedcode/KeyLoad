@@ -12,5 +12,5 @@ internal static class RemoteTransferAcceptFailureAuthorityFields
     internal const uint CommandFingerprint = 7;
     internal const uint TargetIncarnation = 8;
     internal const uint Dependency = 9;
-    internal const string Alias = "keyload.core.queue-transfer.accept-failure-authority.v1";
+    internal const string Alias = "keyload.core.queue-transfer.accept-failure-authority";
 }

@@ -26,7 +26,7 @@ internal static class GraphCrossPartitionRecords
 
     internal static byte[] Encode<T>(T record, int maximumBytes)
     {
-        var bytes = NativeSerialization.Serialize(record);
+        var bytes = OrleansSerialization.Serialize(record);
         if (bytes.Length > maximumBytes)
         {
             throw Errors.Fail(ErrorCode.ResourceExhausted, CapacityExceeded);
@@ -37,7 +37,7 @@ internal static class GraphCrossPartitionRecords
     internal static string Fingerprint(PartitionRef source, string graph, string edgeId,
         EntityRef destination, long revision, bool deleted, EdgeRecord edge)
     {
-        var bytes = NativeSerialization.Serialize(GraphCrossPartitionFingerprintInput.Create(
+        var bytes = OrleansSerialization.Serialize(GraphCrossPartitionFingerprintInput.Create(
             source, graph, edgeId, destination, revision, deleted, edge));
         return Convert.ToHexStringLower(SHA256.HashData(bytes));
     }
@@ -46,7 +46,7 @@ internal static class GraphCrossPartitionRecords
     {
         try
         {
-            return NativeSerialization.Deserialize<T>(bytes);
+            return OrleansSerialization.Deserialize<T>(bytes);
         }
         catch (KeyLoadException exception) when (exception.Code == ErrorCode.FormatUnsupported)
         {

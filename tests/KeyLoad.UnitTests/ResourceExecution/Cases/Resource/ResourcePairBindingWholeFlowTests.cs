@@ -7,7 +7,7 @@ internal sealed class ResourcePairBindingWholeFlowTests
     [Arguments(ResourcePairBindingFault.MalformedLifetime)]
     [Arguments(ResourcePairBindingFault.ConflictingLifetime)]
     [Arguments(ResourcePairBindingFault.MissingDefinition)]
-    public Task NativeMixedModelsBlobAndSqlRefuseDamagedResourcePairsThenRecoverSameEntriesAcrossTwoColdOwners(ResourcePairBindingFault fault)
+    public Task MixedModelsBlobAndSqlRefuseDamagedResourcePairsThenRecoverSameEntriesAcrossTwoColdOwners(ResourcePairBindingFault fault)
         => ResourceIncarnationOwner.RunAsync(source => ResourcePairBindingFlow.RunAsync(new(source, fault),
             TestContext.Current!.Execution.CancellationToken));
 }

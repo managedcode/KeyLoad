@@ -29,12 +29,12 @@ internal static class QueueStoredCapacityWholeFlow
         fixture.Store.Dispose();
         using var cold = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution, UnitExecutionOptions.PointCacheExecution());
         var owner = fixture.CreateConfiguredDatabase(cold);
-        await NativeReadCutStoreStateAssertions.AssertIdentityAndPositionAsync(cold, identity, position + QueueEnqueueAuthorityProtocol.First);
+        await ReadCutStoreStateAssertions.AssertIdentityAndPositionAsync(cold, identity, position + QueueEnqueueAuthorityProtocol.First);
         await QueueStoredCapacityAssertions.RefuseAsync(owner, cold, fixture.Partition, state, fault, position + QueueEnqueueAuthorityProtocol.First, damagedImage);
         QueueStoredCapacityRows.Repair(cold, rows);
         await QueueStoredCapacityAssertions.ImageAsync(cold, position + QueueEnqueueAuthorityProtocol.Second, originalImage);
         await QueueEnqueueColdAssertions.RequireInitialAsync(owner, fixture.Partition, state.ScheduledAt);
-        await NativeReplayResultAssertions.Same<CommitReceipt>(owner.Apply(QueueStoredCapacitySetup.Operation(
+        await ReplayResultAssertions.Same<CommitReceipt>(owner.Apply(QueueStoredCapacitySetup.Operation(
             owner, OperationKind.Batch, state.Producer, state.Producer.CommandId, new DateTimeOffset(state.Enqueue.Timestamp))), state.Original);
         await QueueStoredCapacityAssertions.ImageAsync(cold, position + QueueEnqueueAuthorityProtocol.Second, originalImage);
         await ContinueAsync(fixture, cold, owner, state, identity, token);
@@ -52,7 +52,7 @@ internal static class QueueStoredCapacityWholeFlow
         await QueueStoredCapacityReceipts.FailureAsync(owner, cold, fixture.Partition, state.Enqueue, rejected);
         var rejectedImage = QueueWholeFlowStorage.Bytes(cold);
         var rejectedPosition = cold.Position;
-        await Assert.That(NativeSerialization.Serialize(owner.Apply(state.Enqueue)).SequenceEqual(NativeSerialization.Serialize(rejected))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(owner.Apply(state.Enqueue)).SequenceEqual(OrleansSerialization.Serialize(rejected))).IsTrue();
         await QueueStoredCapacityAssertions.ImageAsync(cold, rejectedPosition, rejectedImage);
         var expectedClaim = await QueueStoredCapacityReceipts.NextAsync(owner, cold, fixture.Partition);
         var claimed = owner.Apply(state.Receive);
@@ -96,14 +96,14 @@ internal static class QueueStoredCapacityWholeFlow
         using var second = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution, UnitExecutionOptions.PointCacheExecution());
         var secondOwner = fixture.CreateConfiguredDatabase(second);
         token.ThrowIfCancellationRequested();
-        await NativeReadCutStoreStateAssertions.AssertIdentityAndPositionAsync(second, identity, finalPosition);
+        await ReadCutStoreStateAssertions.AssertIdentityAndPositionAsync(second, identity, finalPosition);
         await QueueStoredCapacityAssertions.ImageAsync(second, finalPosition, finalImage);
         await QueueEnqueueColdAssertions.RequireHealthyAsync(secondOwner, fixture.Partition, state.ScheduledAt);
         await QueueStoredCapacityStateAssertions.TerminalAsync(secondOwner, second, fixture.Partition);
-        await Assert.That(NativeSerialization.Serialize(secondOwner.Apply(state.Enqueue)).SequenceEqual(NativeSerialization.Serialize(rejected))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(secondOwner.Apply(state.Enqueue)).SequenceEqual(OrleansSerialization.Serialize(rejected))).IsTrue();
         await QueueStoredCapacityReceipts.FailureAsync(secondOwner, second, fixture.Partition, state.Enqueue, rejected);
-        await NativeReplayResultAssertions.Same<CommitReceipt>(secondOwner.Apply(healthyOperation), healthyResult);
-        await NativeReplayResultAssertions.Same<CommitReceipt>(secondOwner.Apply(ackOperation), acknowledgement);
+        await ReplayResultAssertions.Same<CommitReceipt>(secondOwner.Apply(healthyOperation), healthyResult);
+        await ReplayResultAssertions.Same<CommitReceipt>(secondOwner.Apply(ackOperation), acknowledgement);
         await QueueStoredCapacityAssertions.ImageAsync(second, finalPosition, finalImage);
     }
 }

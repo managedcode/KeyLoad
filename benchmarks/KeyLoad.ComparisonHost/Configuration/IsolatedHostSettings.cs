@@ -4,11 +4,11 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
 
-/// <summary>Authenticated native bindings for one living multi-test database session.</summary>
+/// <summary>Authenticated execution bindings for one living multi-test database session.</summary>
 [KeyLoad.ConfigurationBinding]
 internal sealed record IsolatedHostSettings(BenchmarkSessionSelection Selection, ComparisonExecutionIdentity Identity,
     BenchmarkSessionWorker Worker, string OutputDirectory, string Storage, string RunId,
-    string? UnsupportedReason, IsolatedHostNativeSettings? Native, IOptions<ComparisonHostExecutionOptions> HostExecution)
+    string? UnsupportedReason, RuntimeIsolatedHostSettings? Execution, IOptions<ComparisonHostExecutionOptions> HostExecution)
 {
     internal static string Required(IConfiguration configuration, string key)
         => string.IsNullOrWhiteSpace(configuration[key])

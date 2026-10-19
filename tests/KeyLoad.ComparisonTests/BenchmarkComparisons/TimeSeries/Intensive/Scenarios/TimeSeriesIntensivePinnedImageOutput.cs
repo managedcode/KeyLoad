@@ -40,7 +40,7 @@ internal sealed class TimeSeriesIntensivePinnedImageOutput : IDisposable
                 TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
             return timeout;
         }
-        catch (Exception error) when (primary is not null || TimeSeriesIntensivePinnedImageFailure.IsNative(error))
+        catch (Exception error) when (primary is not null || TimeSeriesIntensivePinnedImageFailure.RuntimeIs(error))
         {
             failures.Add(error.GetType().FullName ?? nameof(Exception));
             return error;

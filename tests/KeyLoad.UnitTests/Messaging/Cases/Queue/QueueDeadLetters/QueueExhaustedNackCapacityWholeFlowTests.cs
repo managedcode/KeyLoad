@@ -3,6 +3,6 @@ namespace KeyLoad.UnitTests.Features.Messaging;
 internal sealed class QueueExhaustedNackCapacityWholeFlowTests
 {
     [Test]
-    public Task AcMsg088ExhaustedNativeNackParkedSequenceMaximumImmutableFailureTwoColdRepairAndHealthy()
+    public Task AcMsg088ExhaustedNackParkedSequenceMaximumImmutableFailureTwoColdRepairAndHealthy()
         => QueueExhaustedNackCapacityFlow.RunAsync(TestContext.Current!.Execution.CancellationToken);
 }

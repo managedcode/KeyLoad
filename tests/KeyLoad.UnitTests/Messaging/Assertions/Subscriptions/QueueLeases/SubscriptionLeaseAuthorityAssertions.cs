@@ -15,7 +15,7 @@ internal static class SubscriptionLeaseAuthorityAssertions
     {
         var bytes = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
-        var identity = NativeSerialization.Serialize(store.Identity);
+        var identity = OrleansSerialization.Serialize(store.Identity);
         var outcomeKey = KeySpace.PartitionOutcome(original.Get<ReceiveSubscriptionResult>().Status.Subscription.Source.Partition,
             "root", claim.CommandId);
         var saved = store.Read(view => view.ReadOwnedValue(outcomeKey))
@@ -34,8 +34,8 @@ internal static class SubscriptionLeaseAuthorityAssertions
             }
             await Assert.That(store.Read(view => view.GetRecord<StoredOutcome>(
                 KeySpace.PartitionOutcome(subscription.Source.Partition, "root", freshClaim.CommandId)))).IsNull();
-            await NativeReplayResultAssertions.Same<ReceiveSubscriptionResult>(
-                NativeSerialization.Deserialize<StoredOutcome>(saved).Result, original);
+            await ReplayResultAssertions.Same<ReceiveSubscriptionResult>(
+                OrleansSerialization.Deserialize<StoredOutcome>(saved).Result, original);
             await Assert.That(store.Read(view => view.ReadOwnedValue(outcomeKey))!.AsSpan().SequenceEqual(saved)).IsTrue();
             await Assert.That(store.Read(view => view.GetRecord<StoredOutcome>(
                 KeySpace.PartitionOutcome(original.Get<ReceiveSubscriptionResult>().Status.Subscription.Source.Partition,
@@ -64,11 +64,11 @@ internal static class SubscriptionLeaseAuthorityAssertions
         {
             var bytes = QueueWholeFlowStorage.Bytes(store);
             var position = store.Position;
-            var identity = NativeSerialization.Serialize(store.Identity);
+            var identity = OrleansSerialization.Serialize(store.Identity);
             var replay = db.Apply(receipt.Operation);
-            await NativeReplayResultAssertions.Same<CommitReceipt>(replay, receipt.Result);
-            await Assert.That(NativeSerialization.Serialize(replay).AsSpan()
-                .SequenceEqual(NativeSerialization.Serialize(receipt.Result))).IsTrue();
+            await ReplayResultAssertions.Same<CommitReceipt>(replay, receipt.Result);
+            await Assert.That(OrleansSerialization.Serialize(replay).AsSpan()
+                .SequenceEqual(OrleansSerialization.Serialize(receipt.Result))).IsTrue();
             await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, bytes, position, identity);
         }
         await SettledClaimAsync(db, store, group, claim, original);
@@ -85,11 +85,11 @@ internal static class SubscriptionLeaseAuthorityAssertions
         var key = KeySpace.PartitionOutcome(group.Source.Partition, "root", claim.CommandId);
         var saved = store.Read(view => view.ReadOwnedValue(key))
             ?? throw new InvalidOperationException("The original successful Receive history is absent.");
-        await NativeReplayResultAssertions.Same<ReceiveSubscriptionResult>(
-            NativeSerialization.Deserialize<StoredOutcome>(saved).Result, original);
+        await ReplayResultAssertions.Same<ReceiveSubscriptionResult>(
+            OrleansSerialization.Deserialize<StoredOutcome>(saved).Result, original);
         var bytes = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
-        var identity = NativeSerialization.Serialize(store.Identity);
+        var identity = OrleansSerialization.Serialize(store.Identity);
         var replay = db.Apply(claim);
         await Assert.That(Errors.Code(replay.Problem)).IsEqualTo(ErrorCode.StaleLease);
         await Assert.That(replay.Problem?.Detail).IsEqualTo("The subscription delivery lease is stale.");

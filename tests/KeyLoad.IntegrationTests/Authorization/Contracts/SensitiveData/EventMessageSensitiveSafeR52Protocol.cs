@@ -16,7 +16,7 @@ internal static class EventMessageSensitiveSafeR52Protocol
     internal const string Database = "database";
     internal const string Domain = "messaging";
     internal const string WorkerPrefix = "safe-sensitive-worker-";
-    internal const string CredentialSuffix = ".keyload-native-sensitive-credential";
+    internal const string CredentialSuffix = ".keyload-execution-sensitive-credential";
     internal const string SubscriptionChangedDetail = "A subscription principal policy changed after delivery.";
     internal const string McpUnavailableDetail = "The request has no valid database credential.";
     internal const string McpDeniedDetail = "The authenticated principal is not permitted to perform this operation.";

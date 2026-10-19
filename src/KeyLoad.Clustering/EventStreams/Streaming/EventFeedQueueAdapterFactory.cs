@@ -12,7 +12,7 @@ internal sealed class EventFeedQueueAdapterFactory(
 
     public async Task<IQueueAdapter> CreateAdapter(CancellationToken cancellationToken)
     {
-        var adapter = await original.CreateAdapter(cancellationToken).ConfigureAwait(false);
+        var adapter = await original.CreateAdapter(cancellationToken);
         return new EventFeedQueueAdapter(adapter, admission);
     }
 

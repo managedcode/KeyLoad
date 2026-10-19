@@ -1,0 +1,17 @@
+using KeyLoad.Server;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace KeyLoad.UnitTests.Features.StorageRecovery;
+
+/// <summary>Borrowed actual services captured before their application provider is disposed.</summary>
+internal sealed record PartitionStorageApplicationDisposeCapture(
+    PartitionHostApplicationOwner Owner, OrleansNode Node, ServerConnectionRegistry Connections,
+    string Directory)
+{
+    internal static PartitionStorageApplicationDisposeCapture Read(IServiceProvider services)
+    {
+        var owner = services.GetRequiredService<PartitionHostApplicationOwner>();
+        return new(owner, services.GetRequiredService<OrleansNode>(),
+            services.GetRequiredService<ServerConnectionRegistry>(), owner.Borrow().DirectoryPath);
+    }
+}

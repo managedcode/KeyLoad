@@ -20,7 +20,7 @@ internal static class SearchMaintenanceRequestIssuance
             ReadKind = readKind,
             CommandKind = commandKind,
             CommandId = commandId,
-            Payload = GrainNativePayload.Copy(payload, context.Scope.Limits.MaxBatchBytes),
+            Payload = GrainPayload.Copy(payload, context.Scope.Limits.MaxBatchBytes),
             ExpiresAt = expiry
         };
         _ = AnnMaintenanceChildScope.Validate(envelope);
@@ -43,7 +43,7 @@ internal static class SearchMaintenanceRequestIssuance
             ReadKind = readKind,
             CommandKind = commandKind,
             CommandId = commandId,
-            Payload = GrainNativePayload.Copy(payload, context.Scope.Limits.MaxBatchBytes),
+            Payload = GrainPayload.Copy(payload, context.Scope.Limits.MaxBatchBytes),
             ExpiresAt = expiry
         };
         _ = TextMaintenanceChildScope.Validate(envelope);

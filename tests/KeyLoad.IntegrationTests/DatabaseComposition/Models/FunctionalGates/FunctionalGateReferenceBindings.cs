@@ -5,7 +5,7 @@ internal sealed class FunctionalGateReferenceBindings
 {
     private const int MaximumResources = 128;
     private readonly Lock gate = new();
-    private readonly Dictionary<(string Tenant, string Database, string Domain, string Collection), EntityRefLifetimeV1> bindings = [];
+    private readonly Dictionary<(string Tenant, string Database, string Domain, string Collection), EntityRefLifetime> bindings = [];
 
     internal EntityRef Bind(EntityRef reference)
     {
@@ -25,10 +25,10 @@ internal sealed class FunctionalGateReferenceBindings
 
     internal void Capture(EntityRef actual) => Retain(Key(actual), RequireLifetime(actual));
 
-    internal void ExpectCreation(PartitionRef partition, string collection, EntityRefLifetimeV1 expected)
+    internal void ExpectCreation(PartitionRef partition, string collection, EntityRefLifetime expected)
         => Retain((partition.TenantId, partition.DatabaseId, partition.TransactionDomainId, collection), expected);
 
-    private void Retain((string Tenant, string Database, string Domain, string Collection) key, EntityRefLifetimeV1 lifetime)
+    private void Retain((string Tenant, string Database, string Domain, string Collection) key, EntityRefLifetime lifetime)
     {
         lock (gate)
         {
@@ -64,7 +64,7 @@ internal sealed class FunctionalGateReferenceBindings
         }
     }
 
-    private static EntityRefLifetimeV1 RequireLifetime(EntityRef reference)
+    private static EntityRefLifetime RequireLifetime(EntityRef reference)
         => reference.Lifetime is { } lifetime && !string.IsNullOrWhiteSpace(lifetime.Incarnation)
             ? lifetime : throw Invalid();
 

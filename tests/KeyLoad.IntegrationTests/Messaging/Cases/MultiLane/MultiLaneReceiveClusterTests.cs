@@ -33,9 +33,9 @@ internal sealed class MultiLaneReceiveClusterTests(ClusterFixture fixture)
         await MultiLaneReceiveClusterFlow.CommittedAsync(administrator, original.Outcomes[0], request.Requests[0], deadline.Token);
         await MultiLaneReceiveClusterFlow.CommittedAsync(administrator, original.Outcomes[2], request.Requests[2], deadline.Token);
         await AssertDeniedAsync(original.Outcomes[1], request.Requests[1]);
-        var native = await McpCallerAssertions.SuccessAsync<MultiLaneReceiveResult>(await mcp.CallAsync(
+        var execution = await McpCallerAssertions.SuccessAsync<MultiLaneReceiveResult>(await mcp.CallAsync(
             MultiLaneReceiveClusterFlow.Tool, request, deadline.Token));
-        await MultiLaneReceiveClusterFlow.EquivalentAsync(native.Value, original);
+        await MultiLaneReceiveClusterFlow.EquivalentAsync(execution.Value, original);
         var sql = await McpCallerAssertions.SdkSuccessAsync(await worker.ExecuteSqlAsync(MultiLaneReceiveClusterFlow.Sql(request), deadline.Token));
         await MultiLaneReceiveClusterFlow.EquivalentAsync(sql.Deserialize<MultiLaneReceiveResult>(JsonDefaults.Options)!, original);
         var sqlMcp = await McpCallerAssertions.SuccessAsync<MultiLaneReceiveResult>(await mcp.CallAsync(

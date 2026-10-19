@@ -22,10 +22,10 @@ internal static class CheckpointFooterRepairFault
             var end = checked(offset + ZoneTreePersistenceFormat.HeaderLength + length);
             if (BinaryPrimitives.ReadUInt64LittleEndian(header) == ZoneTreePersistenceFormat.CheckpointEndMagic)
             {
-                var footer = NativeSerialization.Deserialize<ZoneTreeCheckpointFooter>(original.AsSpan(
+                var footer = OrleansSerialization.Deserialize<ZoneTreeCheckpointFooter>(original.AsSpan(
                     offset + ZoneTreePersistenceFormat.HeaderLength, length));
                 var sequence = BinaryPrimitives.ReadInt64LittleEndian(header[ZoneTreePersistenceFormat.SequenceOffset..]);
-                var replacement = WalFileFixture.CreateFrame(NativeSerialization.Serialize(
+                var replacement = WalFileFixture.CreateFrame(OrleansSerialization.Serialize(
                     footer with
                     {
                         Records = checked(footer.Records + 1L)

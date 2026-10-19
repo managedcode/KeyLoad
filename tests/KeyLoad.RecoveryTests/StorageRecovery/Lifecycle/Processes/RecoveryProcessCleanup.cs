@@ -51,7 +51,7 @@ internal static class RecoveryProcessCleanup
         if (processSettled && Directory.Exists(source))
         {
             await ObserveAsync(() => KilledProcessFileReadiness.WaitAsync(source, cancellationToken), failures);
-            Observe(() => RecoveryFileInventory.AssertNativeHandlesReleased(source), failures);
+            Observe(() => RecoveryFileInventory.AssertHandlesReleased(source), failures);
         }
         if (allowDelete && processSettled && failures.Count == NoCleanupFailures && Directory.Exists(root))
         {

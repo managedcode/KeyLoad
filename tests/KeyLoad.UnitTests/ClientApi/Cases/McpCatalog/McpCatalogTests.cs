@@ -83,9 +83,9 @@ internal sealed class McpCatalogTests
         await Assert.That(resource.Destructive).IsFalse();
     }
 
-    /// <summary>Caller changes to one native Tool and its annotations cannot mutate catalog metadata.</summary>
+    /// <summary>Caller changes to one execution Tool and its annotations cannot mutate catalog metadata.</summary>
     [Test]
-    public async Task AcMcp007DiscoveryCreatesFreshNativeToolsAndAnnotations()
+    public async Task AcMcp007DiscoveryCreatesFreshToolsAndAnnotations()
     {
         var descriptor = Find(McpCatalogExpectations.DocumentsGet);
         var first = descriptor.CreateTool();
@@ -110,7 +110,7 @@ internal sealed class McpCatalogTests
     }
 
     [Test]
-    public async Task AcMcp006MessagingInspectionAndGraphSearchAdvertiseReadOnlyNativeTools()
+    public async Task AcMcp006MessagingInspectionAndGraphSearchAdvertiseReadOnlyTools()
     {
         string[] names = [McpCatalogExpectations.QueueTransferInspect, McpCatalogExpectations.QueueTransferReceipt,
             McpCatalogExpectations.ScheduleInspect, McpCatalogExpectations.SagaInspect,

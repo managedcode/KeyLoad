@@ -24,7 +24,7 @@ internal static class InitialPrincipalEpochAssertions
     {
         var image = Image(store);
         var position = store.Position;
-        var identity = NativeSerialization.Serialize(store.Identity);
+        var identity = OrleansSerialization.Serialize(store.Identity);
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(action, failures);
         await ServerFailureObserver.ObserveAsync(() => ConserveAsync(store, image, position, identity), failures);
@@ -35,7 +35,7 @@ internal static class InitialPrincipalEpochAssertions
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () => await Assert.That(Image(store).SequenceEqual(image)).IsTrue(), failures);
         await ServerFailureObserver.ObserveAsync(async () => await Assert.That(store.Position).IsEqualTo(position), failures);
-        await ServerFailureObserver.ObserveAsync(async () => await Assert.That(NativeSerialization.Serialize(store.Identity)
+        await ServerFailureObserver.ObserveAsync(async () => await Assert.That(OrleansSerialization.Serialize(store.Identity)
             .AsSpan().SequenceEqual(identity)).IsTrue(), failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }

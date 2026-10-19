@@ -1,6 +1,6 @@
 namespace KeyLoad;
 
-/// <summary>Defines bounded native time-series retention pages.</summary>
+/// <summary>Defines bounded execution time-series retention pages.</summary>
 public static class SampleRetentionDefaults
 {
     /// <summary>Gets the default number of expired records removed by one command.</summary>

@@ -28,7 +28,7 @@ internal static class QueryRuleOptimizationData
     internal const int UnifiedMcpRoute = 3;
     internal const int AstSdkRoute = 4;
     internal const int AstMcpRoute = 5;
-    internal const int NativeRouteCount = 2;
+    internal const int RuntimeRouteCount = 2;
 
     internal const string Reader = "rule-optimization-reader";
     internal const string ReadGrant = "optimizer.read";

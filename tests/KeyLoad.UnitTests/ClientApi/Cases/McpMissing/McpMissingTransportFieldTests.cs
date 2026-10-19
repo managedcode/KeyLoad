@@ -3,7 +3,7 @@ using ModelContextProtocol.Protocol;
 
 namespace KeyLoad.UnitTests.Features.ClientApi;
 
-/// <summary>AC-MCP-003/005: missing compared fields cannot reach native reflected-header errors.</summary>
+/// <summary>AC-MCP-003/005: missing compared fields cannot reach execution reflected-header errors.</summary>
 internal sealed class McpMissingTransportFieldTests
 {
     /// <summary>A present method with no body method uses the fixed safe transport failure.</summary>
@@ -16,8 +16,8 @@ internal sealed class McpMissingTransportFieldTests
         await AssertSafeValidationAsync(error);
     }
 
-    /// <summary>A present name rejects every absent or nonstring routed target before native header comparison.</summary>
-    /// <param name="method">The native method selecting the name or URI parameter.</param>
+    /// <summary>A present name rejects every absent or nonstring routed target before execution header comparison.</summary>
+    /// <param name="method">The execution method selecting the name or URI parameter.</param>
     /// <param name="field">The routed target field.</param>
     /// <param name="includeMethod">Whether the optional HTTP method header is also present.</param>
     [Test]
@@ -39,14 +39,14 @@ internal sealed class McpMissingTransportFieldTests
         }
     }
 
-    /// <summary>Absent optional headers keep missing targets and parameters available for native validation.</summary>
-    /// <param name="method">The native body method selecting the target.</param>
-    /// <param name="field">The corresponding native target parameter key.</param>
+    /// <summary>Absent optional headers keep missing targets and parameters available for execution validation.</summary>
+    /// <param name="method">The execution body method selecting the target.</param>
+    /// <param name="field">The corresponding execution target parameter key.</param>
     [Test]
     [Arguments(RequestMethods.ToolsCall, McpTransportGuardTestData.NameField)]
     [Arguments(RequestMethods.PromptsGet, McpTransportGuardTestData.NameField)]
     [Arguments(RequestMethods.ResourcesRead, McpTransportGuardTestData.UriField)]
-    public async Task AbsentRoutingHeadersLeaveMissingFieldsToNative(string method, string field)
+    public async Task AbsentRoutingHeadersLeaveMissingFieldsTo(string method, string field)
     {
         var headers = McpTransportGuard.ReadHeaders(McpTransportGuardTestData.Headers(null, null), UnitMcpOptions.Execution());
         foreach (var fault in Enum.GetValues<McpMissingTargetFault>())

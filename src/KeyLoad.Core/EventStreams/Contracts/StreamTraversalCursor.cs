@@ -17,5 +17,5 @@ internal sealed record StreamTraversalCursor(
     [property: Orleans.Id(StreamTraversalCursorFields.NextExclusive)] long NextExclusiveRevision,
     [property: Orleans.Id(StreamTraversalCursorFields.ExpiresAt)] DateTimeOffset ExpiresAt)
 {
-    internal const string SerializerAlias = "keyload.core.stream-traversal-cursor.v1";
+    internal const string SerializerAlias = "keyload.core.stream-traversal-cursor";
 }

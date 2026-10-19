@@ -1,5 +1,5 @@
 using KeyLoad.Clustering;
-using KeyLoad.UnitTests.Features.ClusterRouting;
+using KeyLoad.UnitTests.Features.OrleansExecution;
 using TUnit.Assertions.Enums;
 
 namespace KeyLoad.UnitTests.Features.Messaging;
@@ -11,22 +11,22 @@ internal static class MultiLaneConnectionOwnerTrial
     private const string HealthyDocument = "multi-lane-call-local-healthy";
     private const string MessageId = "message";
 
-    internal static Task RunAsync() => ConnectionNativeScenario.RunAsync(async scenario =>
+    internal static Task RunAsync() => ConnectionScenario.RunAsync(async scenario =>
     {
         using var timeout = new CancellationTokenSource(scenario.Timing.CompletionTimeout, TimeProvider.System);
         var token = timeout.Token;
         await scenario.InitializeAsync(token);
-        var lanes = MultiLaneReceiveNativeFlow.Seed(scenario.Fixture, LaneCount);
+        var lanes = MultiLaneReceiveFlow.Seed(scenario.Fixture, LaneCount);
         var request = new MultiLaneReceiveRequest(Guid.NewGuid(),
             [new(Guid.NewGuid(), lanes[0]), new(Guid.NewGuid(), lanes[1])]);
         var reply = await InvokeAsync(scenario, OperationKind.ReceiveAcrossLanes, request.RequestId, request, token);
         await Assert.That(reply.Error).IsNull();
-        var result = MultiLaneReceiveNativeFlow.Value(reply);
+        var result = MultiLaneReceiveFlow.Value(reply);
         await Assert.That(result.Outcomes.Length).IsEqualTo(LaneCount);
         await RequireOwnersAsync(scenario, request, token);
         for (var index = 0; index < LaneCount; index++)
         {
-            await MultiLaneReceiveNativeFlow.CommittedAsync(result.Outcomes[index], request.Requests[index]);
+            await MultiLaneReceiveFlow.CommittedAsync(result.Outcomes[index], request.Requests[index]);
         }
         await ReplayAsync(scenario, request, result, token);
         await AckAsync(scenario, request, result, token);
@@ -34,19 +34,19 @@ internal static class MultiLaneConnectionOwnerTrial
         await scenario.CloseAsync(token);
     });
 
-    private static async Task<GrainOperationReply> InvokeAsync<T>(ConnectionNativeScenario scenario,
+    private static async Task<GrainOperationReply> InvokeAsync<T>(ConnectionScenario scenario,
         OperationKind kind, Guid commandId, T request, CancellationToken token)
     {
         var fixture = scenario.Fixture;
-        var principal = GrainRequestAuthority.Reload(fixture.Database.Database, ConnectionNativeProtocol.Root,
+        var principal = GrainRequestAuthority.Reload(fixture.Database.Database, ConnectionProtocol.Root,
             fixture.Clock);
         var actor = Guid.NewGuid();
         var signed = fixture.Codec.CreateCommand(actor, principal.Id, kind, commandId,
-            NativeSerialization.Serialize(request));
+            OrleansSerialization.Serialize(request));
         return await scenario.InvokeAsync(principal, actor, commandId, signed, token);
     }
 
-    private static async Task RequireOwnersAsync(ConnectionNativeScenario scenario,
+    private static async Task RequireOwnersAsync(ConnectionScenario scenario,
         MultiLaneReceiveRequest request, CancellationToken token)
     {
         var parent = scenario.Observation.ForCommand(request.RequestId);
@@ -59,13 +59,13 @@ internal static class MultiLaneConnectionOwnerTrial
             await Assert.That(child.ActivationId).IsEqualTo(parent.ActivationId);
             await Assert.That(child.Identity.RequestId).IsNotEqualTo(parent.Identity.RequestId);
             await Assert.That(child.Identity.CommandKind).IsEqualTo(OperationKind.Receive);
-            await Assert.That(child.Identity.PrincipalId).IsEqualTo(ConnectionNativeProtocol.Root);
+            await Assert.That(child.Identity.PrincipalId).IsEqualTo(ConnectionProtocol.Root);
             await child.Disposed.Task.WaitAsync(token);
         }
-        await scenario.AssertActivationCountAsync(ConnectionNativeProtocol.OneConnection, token);
+        await scenario.AssertActivationCountAsync(ConnectionProtocol.OneConnection, token);
     }
 
-    private static async Task ReplayAsync(ConnectionNativeScenario scenario, MultiLaneReceiveRequest request,
+    private static async Task ReplayAsync(ConnectionScenario scenario, MultiLaneReceiveRequest request,
         MultiLaneReceiveResult original, CancellationToken token)
     {
         var store = scenario.Fixture.Database.Store;
@@ -77,13 +77,13 @@ internal static class MultiLaneConnectionOwnerTrial
         };
         var reply = await InvokeAsync(scenario, OperationKind.ReceiveAcrossLanes, retry.RequestId, retry, token);
         await Assert.That(reply.Error).IsNull();
-        await Assert.That(NativeSerialization.Serialize(MultiLaneReceiveNativeFlow.Value(reply).Outcomes)
-            .SequenceEqual(NativeSerialization.Serialize(original.Outcomes))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(MultiLaneReceiveFlow.Value(reply).Outcomes)
+            .SequenceEqual(OrleansSerialization.Serialize(original.Outcomes))).IsTrue();
         await Assert.That(store.Position).IsEqualTo(position);
         await Assert.That(QueueWholeFlowStorage.Bytes(store)).IsEquivalentTo(bytes, CollectionOrdering.Matching);
     }
 
-    private static async Task AckAsync(ConnectionNativeScenario scenario, MultiLaneReceiveRequest request,
+    private static async Task AckAsync(ConnectionScenario scenario, MultiLaneReceiveRequest request,
         MultiLaneReceiveResult original, CancellationToken token)
     {
         for (var index = 0; index < LaneCount; index++)
@@ -93,20 +93,20 @@ internal static class MultiLaneConnectionOwnerTrial
             var command = new DeliveryCommand(id, request.Requests[index].Lane, delivery.Token, DeliveryAction.Ack);
             var reply = await InvokeAsync(scenario, OperationKind.Delivery, id, command, token);
             await Assert.That(reply.Error).IsNull();
-            var inspected = scenario.Fixture.Database.Database.InspectMessage(ConnectionNativeProtocol.Root,
+            var inspected = scenario.Fixture.Database.Database.InspectMessage(ConnectionProtocol.Root,
                 request.Requests[index].Lane, MessageId)!;
             await Assert.That(inspected.Metadata.State).IsEqualTo(MessageState.Acked);
         }
     }
 
-    private static async Task HealthyAsync(ConnectionNativeScenario scenario, CancellationToken token)
+    private static async Task HealthyAsync(ConnectionScenario scenario, CancellationToken token)
     {
-        var principal = GrainRequestAuthority.Reload(scenario.Fixture.Database.Database, ConnectionNativeProtocol.Root,
+        var principal = GrainRequestAuthority.Reload(scenario.Fixture.Database.Database, ConnectionProtocol.Root,
             scenario.Fixture.Clock);
         var command = scenario.Command(HealthyDocument);
         var reply = await scenario.CommandAsync(principal, Guid.NewGuid(), command, token);
         await Assert.That(reply.Error).IsNull();
-        await Assert.That(ConnectionNativeAssertions.Value<CommitReceipt>(reply).CommandId).IsEqualTo(command.CommandId);
-        await ConnectionNativeAssertions.StoredAsync(scenario, HealthyDocument, HealthyRevision, ConnectionNativeProtocol.FirstJson);
+        await Assert.That(ConnectionAssertions.Value<CommitReceipt>(reply).CommandId).IsEqualTo(command.CommandId);
+        await ConnectionAssertions.StoredAsync(scenario, HealthyDocument, HealthyRevision, ConnectionProtocol.FirstJson);
     }
 }

@@ -5,7 +5,7 @@ namespace KeyLoad.UnitTests.Features.Messaging;
 
 internal sealed class MultiLaneReceiveFailureCapture(int maximumRecords) : ILoggerProvider
 {
-    private const int NativeFailureEventId = 3;
+    private const int RuntimeFailureEventId = 3;
     private const string StageKey = "Stage";
     private const string CategoryKey = "Category";
     private const string ErrorCodeKey = "ErrorCode";
@@ -46,7 +46,7 @@ internal sealed class MultiLaneReceiveFailureCapture(int maximumRecords) : ILogg
 
     private void Capture<TState>(EventId id, TState state)
     {
-        if (id.Id != NativeFailureEventId
+        if (id.Id != RuntimeFailureEventId
             || state is not IEnumerable<KeyValuePair<string, object?>> fields)
         {
             return;
@@ -95,7 +95,7 @@ internal sealed class MultiLaneReceiveFailureCapture(int maximumRecords) : ILogg
             var detail = reply.SafeDetail;
             var safeDetail = detail is null || detail.Length <= maximumDetailCharacters
                 ? detail : InvalidReplyDetail;
-            Summary = FormattableString.Invariant($"MultiLane native reply Error={reply.Error}; SafeDetail={safeDetail}; Event3Exhausted={exhausted}; ")
+            Summary = FormattableString.Invariant($"MultiLane execution reply Error={reply.Error}; SafeDetail={safeDetail}; Event3Exhausted={exhausted}; ")
                 + string.Join(Separator, records.Skip(originalCount).Select(static item =>
                     FormattableString.Invariant($"stage={item.Stage}/category={item.Category}/code={item.Code}")));
         }

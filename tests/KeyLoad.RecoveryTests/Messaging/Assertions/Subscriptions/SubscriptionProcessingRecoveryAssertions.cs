@@ -41,7 +41,7 @@ internal static class SubscriptionProcessingRecoveryAssertions
         await Assert.That(actual.Checkpoint).IsEqualTo(committed ? 1L : 0L);
         await Assert.That(actual.Paused).IsFalse();
         await Assert.That(actual.SafeFailureCode).IsNull();
-        var request = NativeSerialization.Deserialize<SubscriptionProcessingRequest>(original.Value!.Input.Span, NativeValidationProfile.PublicInputElements);
+        var request = OrleansSerialization.Deserialize<SubscriptionProcessingRequest>(original.Value!.Input.Span, ValidationProfile.PublicInputElements);
         var rows = store.Read(view => new
         {
             Window = view.GetRecord<GroupDelivery>(SubscriptionProcessingRecoveryContinuation.Key("subscription-window", group, 1L, 1L)),
@@ -60,8 +60,8 @@ internal static class SubscriptionProcessingRecoveryAssertions
             await Assert.That(rows.Completion).IsEqualTo(new SubscriptionCompletion(1L, 1L, "Acked", 1L));
             var result = rows.Outcome!.Result.Get<SubscriptionProcessingResult>();
             await ReceiptAsync(result, original.CommandId);
-            await Assert.That(NativeSerialization.Serialize(rows.Inbox!.Receipt).AsSpan()
-                .SequenceEqual(NativeSerialization.Serialize(result.Receipt))).IsTrue();
+            await Assert.That(OrleansSerialization.Serialize(rows.Inbox!.Receipt).AsSpan()
+                .SequenceEqual(OrleansSerialization.Serialize(result.Receipt))).IsTrue();
         }
         else
         {

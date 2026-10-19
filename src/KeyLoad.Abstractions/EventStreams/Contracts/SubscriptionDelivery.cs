@@ -7,5 +7,5 @@ namespace KeyLoad;
 /// <param name="LeaseUntil">The lease expiration time.</param>
 /// <param name="Attempt">The one-based delivery attempt number.</param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.SubscriptionDelivery)]
+[Orleans.Alias(ContractAliases.SubscriptionDelivery)]
 public sealed record SubscriptionDelivery([property: Orleans.Id(0)] SourceEventRecord Event, [property: Orleans.Id(1)] string Token, [property: Orleans.Id(2)] long LeaseVersion, [property: Orleans.Id(3)] DateTimeOffset LeaseUntil, [property: Orleans.Id(4)] int Attempt);

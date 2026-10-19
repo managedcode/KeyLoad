@@ -14,12 +14,12 @@ internal static class QueueReceiveReplayAssertions
         var key = KeySpace.PartitionOutcome(partition, operation.UserId!, operation.CommandId);
         var row = store.Read(view => view.ReadOwnedValue(key))
             ?? throw new InvalidOperationException("The original Receive outcome was not committed.");
-        var stored = NativeSerialization.Deserialize<StoredOutcome>(row);
-        await NativeReplayResultAssertions.Same<ReceiveResult>(stored.Result, original);
+        var stored = OrleansSerialization.Deserialize<StoredOutcome>(row);
+        await ReplayResultAssertions.Same<ReceiveResult>(stored.Result, original);
         var actual = replay();
         if (original.Get<ReceiveResult>().Deliveries.IsEmpty || leaseCurrent)
         {
-            await NativeReplayResultAssertions.Same<ReceiveResult>(actual, original);
+            await ReplayResultAssertions.Same<ReceiveResult>(actual, original);
         }
         else
         {

@@ -17,7 +17,7 @@ internal sealed class HardcodedPolicySearch(Compilation compilation, Cancellatio
     private bool Search(IOperation operation, int depth, Dictionary<ISymbol, IOperation> arguments)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        if (depth <= 0 || HardcodedDurationPolicy.IsFixedNativeIdentity(compilation, operation))
+        if (depth <= 0 || HardcodedDurationPolicy.IsFixedIdentity(compilation, operation))
         {
             return false;
         }
@@ -38,7 +38,7 @@ internal sealed class HardcodedPolicySearch(Compilation compilation, Cancellatio
                 SearchReturns(property.Property, depth, arguments),
             IInvocationOperation invocation => SearchInvocation(invocation, depth, arguments),
             IObjectCreationOperation { Constructor: { } constructor } creation when HardcodedDurationPolicy.IsDurationMethod(compilation, constructor) =>
-                creation.Arguments.Any(argument => NativeTimerPolicy.IsDurationArgument(compilation, constructor, argument) &&
+                creation.Arguments.Any(argument => TimerPolicy.IsDurationArgument(compilation, constructor, argument) &&
                     Search(argument.Value, depth - 1, arguments)),
             IConditionalOperation conditional => conditional.WhenTrue is { } whenTrue && Search(whenTrue, depth - 1, arguments)
                 || conditional.WhenFalse is { } whenFalse && Search(whenFalse, depth - 1, arguments),
@@ -57,7 +57,7 @@ internal sealed class HardcodedPolicySearch(Compilation compilation, Cancellatio
     {
         if (HardcodedDurationPolicy.IsDurationMethod(compilation, invocation.TargetMethod))
         {
-            return invocation.Arguments.Any(argument => NativeTimerPolicy.IsDurationArgument(compilation, invocation.TargetMethod, argument) &&
+            return invocation.Arguments.Any(argument => TimerPolicy.IsDurationArgument(compilation, invocation.TargetMethod, argument) &&
                 Search(argument.Value, depth - 1, arguments));
         }
         if (invocation.TargetMethod.DeclaringSyntaxReferences.IsEmpty)

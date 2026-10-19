@@ -19,7 +19,7 @@ internal static class CompositeIndexCrashOperations
     private const int PositionStep = 1;
     private const int EmptyEvidenceBytes = 0;
     private const string EvidenceBoundMessage = "The composite-index process evidence exceeded its existing fixed bound.";
-    private const string IndexPathMessage = "Scalar-index recovery observation did not use the declared native index.";
+    private const string IndexPathMessage = "Scalar-index recovery observation did not use the declared execution index.";
     private static readonly string[] Values = [CompositeIndexCrashContract.ValueAlpha, CompositeIndexCrashContract.ValueBeta,
         CompositeIndexCrashContract.ValueGamma, CompositeIndexCrashContract.ValueDelta, CompositeIndexCrashContract.ValueEpsilon,
         CompositeIndexCrashContract.ValueRollback, CompositeIndexCrashContract.ValueZeta,

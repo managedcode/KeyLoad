@@ -12,14 +12,14 @@ internal sealed record McpDocumentScenario(PartitionRef Partition)
     internal EntityRef Reference => new(Partition, McpDocumentProtocol.Collection, McpDocumentProtocol.Entity);
 
     /// <summary>Creates a real resource in a unique tenant without changing cluster configuration.</summary>
-    /// <param name="fixture">The actual native Aspire Orleans application.</param>
+    /// <param name="fixture">The actual execution Aspire Orleans application.</param>
     /// <param name="cancellationToken">The bounded external caller lifetime.</param>
     /// <returns>The configured real document scenario.</returns>
     internal static Task<McpDocumentScenario> CreateAsync(ClusterFixture fixture, CancellationToken cancellationToken)
         => ConfigureAsync(fixture, [], cancellationToken);
 
     /// <summary>Creates a real collection with persisted sensitive-field projection and write restrictions.</summary>
-    /// <param name="fixture">The actual native Aspire Orleans application.</param>
+    /// <param name="fixture">The actual execution Aspire Orleans application.</param>
     /// <param name="cancellationToken">The bounded external caller lifetime.</param>
     /// <returns>The actual protected collection scenario.</returns>
     internal static Task<McpDocumentScenario> CreateProtectedAsync(ClusterFixture fixture, CancellationToken cancellationToken)

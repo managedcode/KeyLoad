@@ -329,7 +329,7 @@ function New-CoverageReport([object[]] $Files, [object[]] $Pipelines, [object] $
     $report = [ordered]@{}
     $report[$tokens.JsonSchemaVersion] = $tokens.SchemaVersion
     $report[$tokens.JsonSourceRevision] = $Revision
-    $report[$tokens.JsonNativeReportHash] = $ReportHash
+    $report[$tokens.JsonReportHash] = $ReportHash
     $report[$tokens.JsonModule] = $module
     $report[$tokens.JsonFiles] = $Files
     $report[$tokens.JsonCriticalPipelines] = $Pipelines
@@ -355,7 +355,7 @@ function New-CoberturaFailureReport([object] $Revision, [object] $ReportHash, [o
     $report = [ordered]@{}
     $report[$tokens.JsonSchemaVersion] = $tokens.SchemaVersion
     $report[$tokens.JsonSourceRevision] = $Revision
-    $report[$tokens.JsonNativeReportHash] = $ReportHash
+    $report[$tokens.JsonReportHash] = $ReportHash
     $report[$tokens.JsonModule] = $null
     $report[$tokens.JsonFiles] = @()
     $report[$tokens.JsonCriticalPipelines] = @()

@@ -44,8 +44,8 @@ internal static class QueueRetainedInboxAuthorityAssertions
         var lane = QueueLifecycleImage.Capture(store, state.Flow.Lane);
         var before = store.Position;
         var result = owner.Apply(equivalent);
-        await Assert.That(NativeSerialization.Serialize(result.Get<CommitReceipt>())
-            .SequenceEqual(NativeSerialization.Serialize(history.Receipt))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(result.Get<CommitReceipt>())
+            .SequenceEqual(OrleansSerialization.Serialize(history.Receipt))).IsTrue();
         await Assert.That(result.Get<CommitReceipt>().CommandId).IsEqualTo(history.Request.CommandId);
         await Assert.That(store.Position).IsEqualTo(before + 1);
         await Assert.That(Outcome(store, state, equivalent)).IsNotNull();
@@ -79,8 +79,8 @@ internal static class QueueRetainedInboxAuthorityAssertions
         var before = QueuePendingAuthorityHistory.Capture(store);
         var saved = Outcome(store, state, operation)!;
         await Assert.That(saved.Incarnation).IsEqualTo(store.Identity.Incarnation);
-        await Assert.That(NativeSerialization.Serialize(saved.Result).SequenceEqual(NativeSerialization.Serialize(failed))).IsTrue();
-        await Assert.That(NativeSerialization.Serialize(owner.Apply(operation)).SequenceEqual(NativeSerialization.Serialize(failed))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(saved.Result).SequenceEqual(OrleansSerialization.Serialize(failed))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(owner.Apply(operation)).SequenceEqual(OrleansSerialization.Serialize(failed))).IsTrue();
         await QueuePendingAuthorityHistory.SameAsync(store, before);
         var history = state.Processed.First();
         await Assert.That(store.Read(view => view.GetRecord<InboxRecord>(QueuePendingAuthorityOperations.Key(state.Flow,

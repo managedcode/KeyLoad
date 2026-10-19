@@ -17,9 +17,9 @@ internal static class ChunkWatermarkGapAssertions
             .IsEqualTo(Convert.ToHexString(JsonDefaults.Serialize(expected)));
         var key = SampleChunkKeys.Manifest(fixture.Partition, SampleChunkCanonicalFixture.Set,
             SampleChunkCanonicalFixture.Series, fixture.WindowId, 2);
-        var envelope = NativeSerialization.Deserialize<SampleChunkManifestEnvelope>(
+        var envelope = OrleansSerialization.Deserialize<SampleChunkManifestEnvelope>(
             fixture.Store.Read(view => view.ReadOwnedValue(key))!);
-        var manifest = NativeSerialization.Deserialize<SampleChunkManifest>(envelope.Encoded.Span);
+        var manifest = OrleansSerialization.Deserialize<SampleChunkManifest>(envelope.Encoded.Span);
         await Assert.That(manifest.SourceSequence).IsEqualTo(4);
         await Assert.That(manifest.RecordCount).IsEqualTo(3);
         await ChunkSelectedIntegrityAssertions.Raw(fixture, final: false);
@@ -39,8 +39,8 @@ internal static class ChunkWatermarkGapAssertions
         await Assert.That(actual.Length).IsEqualTo(expected.Length);
         for (var index = 0; index < expected.Length; index++)
         {
-            await Assert.That(NativeSerialization.Serialize(actual[index])
-                .SequenceEqual(NativeSerialization.Serialize(expected[index]))).IsTrue();
+            await Assert.That(OrleansSerialization.Serialize(actual[index])
+                .SequenceEqual(OrleansSerialization.Serialize(expected[index]))).IsTrue();
         }
     }
 }

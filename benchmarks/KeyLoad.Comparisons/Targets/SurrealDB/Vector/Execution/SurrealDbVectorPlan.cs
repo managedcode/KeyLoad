@@ -3,11 +3,11 @@ using System.Text.Json;
 
 namespace KeyLoad.Comparisons.Targets;
 
-/// <summary>Requires the pinned provider's actual native ANN operator and pushed predicate.</summary>
+/// <summary>Requires the pinned provider's actual execution ANN operator and pushed predicate.</summary>
 internal static class SurrealDbVectorPlan
 {
     private const string Operator = "operator";
-    private const string NativeKnnScan = "KnnScan";
+    private const string RuntimeKnnScan = "KnnScan";
     private const string Attributes = "attributes";
     private const string Index = "index";
     private const string Ef = "ef";
@@ -18,17 +18,17 @@ internal static class SurrealDbVectorPlan
 
     internal static void Validate(JsonElement plan, string index, int ef, int dimensions, VectorQueryMode mode)
     {
-        if (!HasNativeScan(plan, index, ef, dimensions, mode))
+        if (!HasScan(plan, index, ef, dimensions, mode))
         {
-            throw new ComparisonFailureException(SurrealDbNativeTokens.TokenSurrealDbHnswPlanNotProven);
+            throw new ComparisonFailureException(SurrealDbTokens.TokenSurrealDbHnswPlanNotProven);
         }
     }
 
-    private static bool HasNativeScan(JsonElement node, string index, int ef, int dimensions, VectorQueryMode mode)
+    private static bool HasScan(JsonElement node, string index, int ef, int dimensions, VectorQueryMode mode)
     {
         if (node.ValueKind == JsonValueKind.Object)
         {
-            if (node.TryGetProperty(Operator, out var operation) && operation.GetString() == NativeKnnScan)
+            if (node.TryGetProperty(Operator, out var operation) && operation.GetString() == RuntimeKnnScan)
             {
                 var attributes = node.GetProperty(Attributes);
                 return attributes.GetProperty(Index).GetString() == index
@@ -38,8 +38,8 @@ internal static class SurrealDbVectorPlan
                     && (mode == VectorQueryMode.Plain || attributes.TryGetProperty(Predicate, out var predicate)
                         && !string.IsNullOrWhiteSpace(predicate.GetString()));
             }
-            return node.EnumerateObject().Any(property => HasNativeScan(property.Value, index, ef, dimensions, mode));
+            return node.EnumerateObject().Any(property => HasScan(property.Value, index, ef, dimensions, mode));
         }
-        return node.ValueKind == JsonValueKind.Array && node.EnumerateArray().Any(child => HasNativeScan(child, index, ef, dimensions, mode));
+        return node.ValueKind == JsonValueKind.Array && node.EnumerateArray().Any(child => HasScan(child, index, ef, dimensions, mode));
     }
 }

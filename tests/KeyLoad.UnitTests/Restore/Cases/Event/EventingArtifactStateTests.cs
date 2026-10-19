@@ -13,8 +13,8 @@ internal sealed class EventingArtifactStateTests
     [Test]
     [Arguments(false)]
     [Arguments(true)]
-    public async Task NativeRestorePreCancellationPreservesArchiveThenSamePathRepairAndTwoColdOwners(bool existingEmpty)
-        => await NativeRestoreCancellationFlow.RunAsync(existingEmpty,
+    public async Task RestorePreCancellationPreservesArchiveThenSamePathRepairAndTwoColdOwners(bool existingEmpty)
+        => await RestoreCancellationFlow.RunAsync(existingEmpty,
             TestContext.Current!.Execution.CancellationToken).ConfigureAwait(false);
 
     private const int PieceBytes = 1_024;

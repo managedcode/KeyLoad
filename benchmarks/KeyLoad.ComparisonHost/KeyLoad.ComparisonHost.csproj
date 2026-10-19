@@ -8,7 +8,7 @@
     <PackageReference Include="TUnit" />
     <ProjectReference Include="../KeyLoad.Comparisons/KeyLoad.Comparisons.csproj" />
     <ProjectReference Include="../../build/KeyLoad.AppHost/KeyLoad.AppHost.csproj" IsAspireProjectResource="false" />
-    <Content Include="Configuration/native-execution.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="Configuration/execution.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 </Project>

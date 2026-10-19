@@ -50,11 +50,11 @@ export const Config = Object.freeze({
 });
 
 export const Api = Object.freeze({
-    snapshot: '/v1/admin/dashboard',
-    resources: '/v1/admin/dashboard/resources',
-    queue: '/v1/admin/dashboard/queue',
-    query: '/v1/query/ast',
-    blobs: '/v1/blobs/list',
+    snapshot: '/admin/dashboard',
+    resources: '/admin/dashboard/resources',
+    queue: '/admin/dashboard/queue',
+    query: '/query/ast',
+    blobs: '/blobs/list',
     get: 'GET',
     post: 'POST',
     contentType: 'Content-Type',

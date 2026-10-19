@@ -12,7 +12,7 @@ internal sealed class ZoneTreeCoordinatedPointCacheExceptionTests
     private static readonly byte[] Value = [3, 6, 9, 12];
 
     [Test]
-    public async Task RetiredBorrowerExceptionReleasesItsPinAndHealthyNativeReadStillWorks()
+    public async Task RetiredBorrowerExceptionReleasesItsPinAndHealthyReadStillWorks()
     {
         using var fixture = new ZoneTreeCoordinatedPointCacheFileFixture();
         await fixture.RunAsync(async () =>
@@ -80,6 +80,6 @@ internal sealed class ZoneTreeCoordinatedPointCacheExceptionTests
         await Assert.That(snapshot.RetainedBytes).IsEqualTo(fixture.CreateOptions().IndexChargeBytes);
         await Assert.That(healthy).IsNotNull();
         await Assert.That(healthy!.SequenceEqual(Value)).IsTrue();
-        await Assert.That(control.GetDiagnostics().NativeLookups).IsEqualTo(2L);
+        await Assert.That(control.GetDiagnostics().RuntimeLookups).IsEqualTo(2L);
     }
 }

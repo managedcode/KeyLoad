@@ -1,5 +1,5 @@
 using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.ClusterRouting;
+using KeyLoad.IntegrationTests.Features.OrleansExecution;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
 
 namespace KeyLoad.IntegrationTests.Features.Search;
@@ -22,13 +22,13 @@ internal static class EventProjectionLineageR41Seed
         var events = new ResourceDefinition(EventProjectionLineageR41Protocol.Events, ResourceKind.StreamSet, p.TransactionDomainId);
         await SqlClusterProtocol.EqualAsync(events, await McpCallerAssertions.SdkSuccessAsync(await admin.Sdk.ConfigureResourceAsync(
          Guid.NewGuid(), new(p.TenantId, p.DatabaseId, events), token)));
-        var worker = await NativeTextClusterScenario.ConfigureIdentityAsync(fixture, new("lineage-worker-" + Guid.NewGuid().ToString("N"), p.TenantId,
+        var worker = await TextClusterScenario.ConfigureIdentityAsync(fixture, new("lineage-worker-" + Guid.NewGuid().ToString("N"), p.TenantId,
          [new(p.DatabaseId, resource.Name, Capability.DocumentsRead | Capability.DocumentsWrite), new(p.DatabaseId, events.Name, Capability.EventsRead)],
          [EventProjectionLineageR41Protocol.InputUse, EventProjectionLineageR41Protocol.VectorUse, EventProjectionLineageR41Protocol.VectorWrite])
         {
             PolicyEpoch = 1L
         }, token);
-        var reader = await NativeTextClusterScenario.ConfigureIdentityAsync(fixture, new("lineage-reader-" + Guid.NewGuid().ToString("N"), p.TenantId,
+        var reader = await TextClusterScenario.ConfigureIdentityAsync(fixture, new("lineage-reader-" + Guid.NewGuid().ToString("N"), p.TenantId,
          [new(p.DatabaseId, resource.Name, Capability.Query | Capability.DocumentsRead | Capability.VectorSearch)],
          [EventProjectionLineageR41Protocol.InputUse, EventProjectionLineageR41Protocol.VectorUse])
         {

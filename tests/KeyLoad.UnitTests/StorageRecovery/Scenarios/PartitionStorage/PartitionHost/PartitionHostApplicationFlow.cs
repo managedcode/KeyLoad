@@ -61,22 +61,22 @@ internal static class PartitionHostApplicationFlow
     {
         var session = await PartitionHostApplicationSession.CreateAsync(fixture.Options).ConfigureAwait(false);
         sessions.Add(session);
-        var host = await PartitionHostApplicationConcurrency.OpenAsync(session.Owner).ConfigureAwait(false);
+        var host = await PartitionHostApplicationConcurrency.OpenAsync(session.Owner, session.Context).ConfigureAwait(false);
         await PartitionHostApplicationLock.ExcludedAsync(fixture.Options.DataDirectory);
         var cut = PartitionHostApplicationCut.Capture(host.Database.Store);
         cut = await cut.CommitAsync(host.Database.Store, PartitionHostApplicationProtocol.FirstKey,
             PartitionHostApplicationProtocol.FirstValue).ConfigureAwait(false);
         cut = await cut.CommitAsync(host.Database.Store, PartitionHostApplicationProtocol.SecondKey,
             PartitionHostApplicationProtocol.SecondValue).ConfigureAwait(false);
-        await PartitionHostApplicationConcurrency.CloseAsync(session.Owner).ConfigureAwait(false);
+        await PartitionHostApplicationConcurrency.CloseAsync(session.Owner, session.Context).ConfigureAwait(false);
         for (var cold = PartitionHostApplicationProtocol.FirstCold; cold < PartitionHostApplicationProtocol.ColdCycles; cold++)
         {
             var reopened = await PartitionHostApplicationSession.CreateAsync(fixture.Options).ConfigureAwait(false);
             sessions.Add(reopened);
-            var recovered = await PartitionHostApplicationConcurrency.OpenAsync(reopened.Owner).ConfigureAwait(false);
+            var recovered = await PartitionHostApplicationConcurrency.OpenAsync(reopened.Owner, reopened.Context).ConfigureAwait(false);
             await cut.RequireAsync(recovered.Database.Store).ConfigureAwait(false);
             await PartitionHostApplicationLock.ExcludedAsync(fixture.Options.DataDirectory);
-            await PartitionHostApplicationConcurrency.CloseAsync(reopened.Owner).ConfigureAwait(false);
+            await PartitionHostApplicationConcurrency.CloseAsync(reopened.Owner, reopened.Context).ConfigureAwait(false);
         }
     }
 }

@@ -1,6 +1,8 @@
 using System.Text.Json;
 using KeyLoad.Core;
-using KeyLoad.Core.Features.ClusterRouting.Contracts;
+using KeyLoad.Core.Features.CommandOutcomes.Contracts;
+using KeyLoad.Core.Features.RuntimeJournaling.Contracts;
+using KeyLoad.Core.Features.StoragePartitions.Contracts;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 using KeyLoad.UnitTests.Features.Messaging;
@@ -12,8 +14,8 @@ internal static class MixedEventingRetentionBackupOracle
 {
     internal static string[] Rows(IAtomicStore store, PartitionRef partition, bool includeOutcomes = true)
         => store.Read(view => PartitionRecordFamilies.All.Where(family => includeOutcomes ||
-            family is not PartitionRecordFamilies.OutcomeV2 and not PartitionRecordFamilies.OutcomeLocator
-                and not PartitionRecordFamilies.OutcomeLocatorV2).SelectMany(family =>
+            family is not PartitionRecordFamilies.Outcome and not PartitionRecordFamilies.OutcomeLocator
+                and not PartitionRecordFamilies.OutcomeLocator).SelectMany(family =>
         {
             var page = view.Scan(KeySpace.Partition(family, partition), QueueLifecycleTestProtocol.ImageRecords);
             if (page.HasMore)
@@ -37,8 +39,8 @@ internal static class MixedEventingRetentionBackupOracle
         await QueueLifecycleImage.BodyAsync(database, state.Queue, QueueLifecycleTestProtocol.Pending,
             MessageState.PendingDeadLetter, QueueLifecycleTestProtocol.Three, QueueLifecycleTestProtocol.One, QueueLifecycleTestProtocol.None);
         await QueueLifecycleAccountingAssertions.InitialAsync((ZoneTreeStore)database.Store, state.Queue);
-        await TargetInboxNativeAssertions.EffectsAsync(database, state.Inbox);
-        await TargetInboxNativeAssertions.CapacityAsync((ZoneTreeStore)database.Store, state.Inbox, TargetInboxUnitProtocol.FirstRevision);
+        await TargetInboxAssertions.EffectsAsync(database, state.Inbox);
+        await TargetInboxAssertions.CapacityAsync((ZoneTreeStore)database.Store, state.Inbox, TargetInboxUnitProtocol.FirstRevision);
         await RetainedIdentityAsync(database.Store, state, MixedEventingRetentionBackupProtocol.First, 1);
         await RetainedIdentityAsync(database.Store, state, MixedEventingRetentionBackupProtocol.Second, 2);
     }

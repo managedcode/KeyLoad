@@ -7,7 +7,7 @@ printf '%s\n' 'host replication postgres all scram-sha-256' >> "$PGDATA/pg_hba.c
 : "${KEYLOAD_POSTGRES_STANDBYS:?Postgres standby count environment required}"
 case "$KEYLOAD_POSTGRES_STANDBYS" in
     0|1|2) ;;
-    *) printf '%s\n' 'PostgresNativeStandbyCountInvalid' >&2; exit 1 ;;
+    *) printf '%s\n' 'PostgresStandbyCountInvalid' >&2; exit 1 ;;
 esac
 
 # Reserve before TCP readiness: parallel base backups must retain their starting WAL.

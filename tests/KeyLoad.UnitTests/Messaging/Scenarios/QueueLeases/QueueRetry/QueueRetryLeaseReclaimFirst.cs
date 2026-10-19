@@ -11,7 +11,7 @@ internal static class QueueRetryLeaseReclaimFirst
         state.Time = original.LeaseUntil;
         await Assert.That(QueueOrderedRetryOperations.Receive(database, state).Deliveries).IsEmpty();
         var wrapper = state.Outcomes.Last().Operation.Value!;
-        var choices = NativeSerialization.Deserialize<QueueRetryDecisions>(wrapper.RetryDecisions.Span);
+        var choices = OrleansSerialization.Deserialize<QueueRetryDecisions>(wrapper.RetryDecisions.Span);
         var choice = await Assert.That(choices.Items).HasSingleItem();
         await Assert.That(choice.DueIndexKey.ToArray()).IsEquivalentTo(KeySpace.Partition("lease", state.Partition,
             state.Lane.Queue, original.LeaseUntil, original.Id), TUnit.Assertions.Enums.CollectionOrdering.Matching);

@@ -41,7 +41,7 @@ internal static class QueueDeadlinePoisonPrefixSeed
         var result = database.Apply(operation);
         await Assert.That(Errors.Code(result.Problem)).IsNull();
 
-        await NativeReplayResultAssertions.Same<CommitReceipt>(result, Result<object>.Succeed(expected));
+        await ReplayResultAssertions.Same<CommitReceipt>(result, Result<object>.Succeed(expected));
         return (operation, result);
     }
 }

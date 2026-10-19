@@ -2,7 +2,7 @@ using System.Globalization;
 using System.Text.Json;
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
-using KeyLoad.AppHost.Features.ClusterReplication;
+using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.Diagnostics.Features.ResourceExecution;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -12,7 +12,7 @@ namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 internal static class IsolatedKeyLoadFaultChecksProcessCommand
 {
     internal static async Task<ProcessFaultCommandProtocol.Result> KillAsync(DistributedApplication app,
-        NativeProcessEvidence before, CancellationToken token)
+        ProcessEvidence before, CancellationToken token)
     {
         var expected = new ProcessFaultCommandProtocol.Identity(before.Name, before.ProcessId,
             (before.AspireStartedAtUtc ?? throw new InvalidOperationException(IsolatedKeyLoadFaultChecksProtocol.Failure)).Ticks,

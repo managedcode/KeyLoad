@@ -9,7 +9,7 @@ internal static class Neo4jQueryResponse
 
     public static void ValidateResponse(int statusCode, JsonElement response) => Neo4jQueryProtocol.ValidateResponse(statusCode, response);
 
-    public static string ReadNativeErrorCode(JsonElement response) => Neo4jQueryProtocol.ReadNativeErrorCode(response);
+    public static string RuntimeReadErrorCode(JsonElement response) => Neo4jQueryProtocol.RuntimeReadErrorCode(response);
 
     public static void ValidateConstraintCreation(JsonElement response) => Neo4jQueryProtocol.ValidateConstraintCreation(response);
 }

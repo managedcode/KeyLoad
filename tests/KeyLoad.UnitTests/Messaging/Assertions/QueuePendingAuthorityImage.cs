@@ -32,7 +32,7 @@ internal static class QueuePendingAuthorityImage
             await MessageAsync(owner, store, state, new(QueuePendingAuthorityProtocol.Healthy, MessageState.Acked, 1, 3, 5,
                 null, null, LeaseVersion: 1));
         }
-        var bytes = NativeSerialization.Serialize(Body(QueueLifecycleTestProtocol.Pending)).LongLength;
+        var bytes = OrleansSerialization.Serialize(Body(QueueLifecycleTestProtocol.Pending)).LongLength;
         var expected = phase switch
         {
             QueuePendingAuthorityPhase.Pending => new QueueCounters(1, bytes, 0, 0, 3, 0, 0, 1),

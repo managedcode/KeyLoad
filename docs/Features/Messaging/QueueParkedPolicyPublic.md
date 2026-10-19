@@ -1,6 +1,6 @@
 # Current queue profile change through public callers
 
-This acceptance flow extends REQ-MSG-001/004/005 and the existing strict-order delivery contract. It changes no product policy, schema, clock, quota or endpoint. Native queue profile CAS requires bounded complete body absence; retained terminal metadata is allowed. The public flow independently verifies complete exposed state, not raw storage or lane counters.
+This acceptance flow extends REQ-MSG-001/004/005 and the existing strict-order delivery contract. It changes no product policy, schema, clock, quota or endpoint. queue profile CAS requires bounded complete body absence; retained terminal metadata is allowed. The public flow independently verifies complete exposed state, not raw storage or lane counters.
 
 ## Requirements and acceptance
 
@@ -23,8 +23,8 @@ flowchart LR
 
 `NonemptyProfileRefusalThenEmptyCasChangesOnlyFreshKeyedDeliveryAcrossTwoColdOwners` (QueueParkedPolicyClusterTests, no arguments) adds the missing SDK/MCP current profile CAS whole flow; the existing static Continue/Block cases and the unit empty-profile case are unchanged.
 
-## Native boundary and limits
+## boundary and limits
 
-Native ResourcePolicyUpdates permits only declared ordering/parked/jitter policy differences under exact schema CAS. RequireQueueDeliveryPolicyChange and RequireQueuePolicyBodyAbsence refuse every matching retained body using existing bounded scans; this flow does not bypass them. MaxAttempts, quotas and retry values remain unchanged. The original one-hour future horizon is borrowed from QueueScheduledCancelPublicFlow and is request data, not a test timeout or worker authority; no wait/sleep or fake clock is added. Successful empty resource CAS itself proves native admission ran; public null payload terminal state does not independently prove raw body absence. Receive replay is successful only while its original lease is current; completed lease history is not replayed as live.
+ResourcePolicyUpdates permits only declared ordering/parked/jitter policy differences under exact schema CAS. RequireQueueDeliveryPolicyChange and RequireQueuePolicyBodyAbsence refuse every matching retained body using existing bounded scans; this flow does not bypass them. MaxAttempts, quotas and retry values remain unchanged. The original one-hour future horizon is borrowed from QueueScheduledCancelPublicFlow and is request data, not a test timeout or worker authority; no wait/sleep or fake clock is added. Successful empty resource CAS itself proves admission ran; public null payload terminal state does not independently prove raw body absence. Receive replay is successful only while its original lease is current; completed lease history is not replayed as live.
 
 Full fresh resource verification is a genuine idempotent configuration WRITE, not a read-only snapshot or old creation reply. Each verification retains its own immutable GUID/result and replays before declaring a baseline.

@@ -141,7 +141,7 @@ internal static class AggregateReplayReader
         var scan = budget.VisitRange(view, prefix, scanLimit, (key, value) =>
         {
             var expectedRevision = checked(afterRevision + records.Count + VisitorSingleItemCount);
-            var record = NativeSerialization.Deserialize<EventRecord>(value);
+            var record = OrleansSerialization.Deserialize<EventRecord>(value);
             ValidateEvent(record, key, stream, expectedRevision, head, limits);
             if (records.Count > VisitorEmptyCount && record.EventSequence <= records[^LastReplayEventOffset].EventSequence)
             {

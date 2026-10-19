@@ -41,7 +41,7 @@ internal sealed class QueueDeadlineSiloClusterOwnership(QueueDeadlineSiloCluster
             }
             await Task.Delay(DueRecurringClusterProtocol.PollInterval, TimeProvider.System, token);
         }
-        throw new TimeoutException("Native Orleans membership did not observe the available silos before the deadline.");
+        throw new TimeoutException("Execution Orleans membership did not observe the available silos before the deadline.");
     }
 
     internal async Task RequireRejoinedAsync(ClusterFixture fixture, CancellationToken token)

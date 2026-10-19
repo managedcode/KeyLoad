@@ -42,7 +42,7 @@ internal sealed record McpOperationDescriptor
         this.decoder = decoder;
     }
 
-    /// <summary>Stable version-one native tool name.</summary>
+    /// <summary>Stable version-one execution tool name.</summary>
     internal string Name
     {
         get;
@@ -99,7 +99,7 @@ internal sealed record McpOperationDescriptor
     }
 
     /// <summary>Decodes strict outer arguments using the actual canonical JSON contract.</summary>
-    /// <param name="arguments">Native SDK arguments, inspected without mutation.</param>
+    /// <param name="arguments">Execution SDK arguments, inspected without mutation.</param>
     /// <param name="maximumPayloadBytes">The actual canonical lane ceiling, reserved before decode.</param>
     /// <returns>Owned canonical operation bytes and caller write identity.</returns>
     internal McpDecodedOperation Decode(IDictionary<string, JsonElement>? arguments,
@@ -110,7 +110,7 @@ internal sealed record McpOperationDescriptor
             : throw new InvalidOperationException(McpCatalogProtocol.InvalidOperation);
     }
 
-    /// <summary>Creates fresh native mutable discovery metadata without exposing shared mutable tools.</summary>
+    /// <summary>Creates fresh execution mutable discovery metadata without exposing shared mutable tools.</summary>
     /// <returns>A new official SDK tool and annotation object.</returns>
     internal Tool CreateTool() => new()
     {

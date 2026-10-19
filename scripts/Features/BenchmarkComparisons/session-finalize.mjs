@@ -6,7 +6,7 @@ import { hashRegularFile } from './isolated-github-files.mjs';
 import { createSessionContext, selectSession } from './session-github-context.mjs';
 import { SESSION, requireSession } from './session-contract.mjs';
 
-// Native fixture outcomes are retained verbatim. Missing native output is never manufactured as unavailable.
+// Execution fixture outcomes are retained verbatim. Missing execution output is never manufactured as unavailable.
 export async function finalizeSession(environment = process.env, argv = process.argv.slice(2)) {
   requireSession(argv.length === 0);
   const context = createSessionContext(environment, process.platform);
@@ -15,8 +15,8 @@ export async function finalizeSession(environment = process.env, argv = process.
     && ['success', 'failure'].includes(environment.KEYLOAD_WORKLOAD_OUTCOME));
   const jobId = Number(environment.KEYLOAD_COMPARISON_JOB_ID);
   const relative = `artifacts/comparisons/sessions/workers/${row.id}`;
-  const directory = path.join(context.native.workspace, relative);
-  requireSession(path.resolve(context.native.workspace, environment.KEYLOAD_COMPARISON_EVIDENCE_DIRECTORY ?? '')
+  const directory = path.join(context.execution.workspace, relative);
+  requireSession(path.resolve(context.execution.workspace, environment.KEYLOAD_COMPARISON_EVIDENCE_DIRECTORY ?? '')
     === path.resolve(directory));
   const session = await readJson(path.join(directory, 'session.json'), SESSION.sessionBytes);
   const raw = await hashRegularFile(path.join(directory, 'session.json'), SESSION.sessionBytes);

@@ -28,7 +28,7 @@ internal static class QueueProducerClusterProtocol
     internal const string HealthyPayload = "{\"work\":2}";
     internal const string Headers = "{\"producer\":true}";
     internal const string CommandHeader = "X-KeyLoad-Command-Id";
-    internal const string CommandPath = "/v1/commands";
+    internal const string CommandPath = "/commands";
     internal const string ColdScenario = "producer-batch-cold";
     internal const string MissingState = "The actual producer state was not observed.";
     internal const int FutureHours = 1;

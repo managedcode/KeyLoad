@@ -44,7 +44,7 @@ internal static class QueueLifecycleRecoveryImage
             .IsEqualTo(expectedCounters);
     }
 
-    private static long Bytes(string id) => NativeSerialization.Serialize(Literal(id)).LongLength;
+    private static long Bytes(string id) => OrleansSerialization.Serialize(Literal(id)).LongLength;
     private static MessageBody Literal(string id)
     {
         var message = QueueLifecycleCrashSeed.Enqueue(id);

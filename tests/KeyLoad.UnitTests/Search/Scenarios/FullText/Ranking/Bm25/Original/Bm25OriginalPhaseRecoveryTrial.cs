@@ -10,7 +10,7 @@ internal static class Bm25OriginalPhaseRecoveryTrial
         var original = flow.Capture(null);
         var originalResult = flow.Publish(original);
         await flow.RequireHealthyAsync(original, originalResult);
-        var originalEntry = NativeSerialization.Serialize(flow.Owner.Entry(original.CommandId));
+        var originalEntry = OrleansSerialization.Serialize(flow.Owner.Entry(original.CommandId));
         await RequireColdReplayAsync(flow, original, originalResult, originalEntry);
         flow.RevokeAdministrator();
         await Assert.That(flow.Administrator.PolicyEpoch).IsEqualTo(2L);
@@ -30,7 +30,7 @@ internal static class Bm25OriginalPhaseRecoveryTrial
         var repairedSubject = flow.Capture(repairedAdmin.CommandId);
         var subjectResult = flow.Publish(repairedSubject);
         await flow.RequireHealthyAsync(repairedSubject, subjectResult);
-        var subjectEntry = NativeSerialization.Serialize(flow.Owner.Entry(repairedSubject.CommandId));
+        var subjectEntry = OrleansSerialization.Serialize(flow.Owner.Entry(repairedSubject.CommandId));
         await RequireColdReplayAsync(flow, repairedSubject, subjectResult, subjectEntry);
         await Bm25OriginalPhaseRecoveryState.RequireRetainedAsync(flow.Owner, original, originalEntry);
         var healthy = flow.Capture(repairedSubject.CommandId);
@@ -45,9 +45,9 @@ internal static class Bm25OriginalPhaseRecoveryTrial
         await before.RequireAsync(Bm25OriginalPhaseRecoveryState.Read(flow.Owner));
         await Bm25OriginalPhaseRecoveryState.RequireRetainedAsync(flow.Owner, original, entry);
         var replay = flow.Publish(flow.Reissue(original));
-        await NativeReplayResultAssertions.SameAsync(expected, replay);
-        await NativeReplayResultAssertions.BytesAsync(NativeSerialization.Serialize(expected.Get<CommitReceipt>()),
-            NativeSerialization.Serialize(replay.Get<CommitReceipt>()));
+        await ReplayResultAssertions.SameAsync(expected, replay);
+        await ReplayResultAssertions.BytesAsync(OrleansSerialization.Serialize(expected.Get<CommitReceipt>()),
+            OrleansSerialization.Serialize(replay.Get<CommitReceipt>()));
         await before.RequireAsync(Bm25OriginalPhaseRecoveryState.Read(flow.Owner));
         await Bm25OriginalPhaseRecoveryState.RequireRetainedAsync(flow.Owner, original, entry);
         await flow.RequireHealthyAsync(original, replay);

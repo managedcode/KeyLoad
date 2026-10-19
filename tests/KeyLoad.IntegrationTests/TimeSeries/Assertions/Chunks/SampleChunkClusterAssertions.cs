@@ -10,7 +10,7 @@ internal static class SampleChunkClusterAssertions
         SampleChunkWindowResult actual, CommitReceipt minimum)
     {
         await Assert.That(actual.CutPosition).IsGreaterThan(0L);
-        await Assert.That(minimum.Token.AtomicPartitionId).IsEqualTo(scenario.Native.Partition.AtomicPartitionId);
+        await Assert.That(minimum.Token.AtomicPartitionId).IsEqualTo(scenario.Execution.Partition.AtomicPartitionId);
         var expected = new SampleChunkWindowResult(scenario.WindowId, scenario.From, scenario.Until,
             SampleChunkClusterProtocol.MergedGeneration, SampleChunkClusterProtocol.MergedRevision,
             SampleChunkClusterProtocol.CorrectedSequence, null, [.. scenario.Expected], actual.CutPosition);
@@ -31,7 +31,7 @@ internal static class SampleChunkClusterAssertions
         var mcpResult = (await McpCallerAssertions.SuccessAsync<SampleChunkWindowResult>(
             await mcp.CallAsync(SampleChunkProtocol.ReadTool, request, token).ConfigureAwait(false))).Value;
         await CompleteAsync(scenario, mcpResult, minimum);
-        var call = SqlClusterProtocol.Call(scenario.Native.Partition, SampleChunkProtocol.ReadTool, request);
+        var call = SqlClusterProtocol.Call(scenario.Execution.Partition, SampleChunkProtocol.ReadTool, request);
         var sql = await SqlClusterProtocol.SdkAsync<SampleChunkWindowResult>(sdk, call, token).ConfigureAwait(false);
         await CompleteAsync(scenario, sql, minimum);
         var sqlMcp = (await McpCallerAssertions.SuccessAsync<SampleChunkWindowResult>(

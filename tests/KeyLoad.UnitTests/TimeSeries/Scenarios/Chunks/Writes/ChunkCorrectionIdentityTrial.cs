@@ -45,10 +45,10 @@ internal static class ChunkCorrectionIdentityTrial
     private static async Task<byte[]> Inject(ChunkSelectedIntegrityFixture fixture)
     {
         var original = fixture.Store.Read(view => view.ReadOwnedValue(Key(fixture)))!;
-        var record = NativeSerialization.Deserialize<SampleRecord>(original);
+        var record = OrleansSerialization.Deserialize<SampleRecord>(original);
         await Assert.That(record.Sequence).IsEqualTo(3);
         await Assert.That(record.Sample.EventId).IsEqualTo("late");
-        Put(fixture, NativeSerialization.Serialize(record with
+        Put(fixture, OrleansSerialization.Serialize(record with
         {
             Sample = record.Sample with
             {

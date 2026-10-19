@@ -1,4 +1,4 @@
-// UI identity and bounded browser errors; session-v1 owns the only measurement wire schema.
+// UI identity and bounded browser errors; session owns the only measurement wire schema.
 export const ISOLATED = Object.freeze({ repository: 'managedcode/KeyLoad', ref: 'refs/heads/main', workflow: 'Benchmarks',
   error: 'E_ISOLATED_EVIDENCE', failed: 'failed', failure: 'failure', success: 'success' });
 export const DOM = Object.freeze({

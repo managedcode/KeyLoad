@@ -1,6 +1,6 @@
 # Family-owned ScriptDOM graph parameter diagnostics
 
-Canonical slice: QueryExecution; GraphTraversal is the linked capability. This preserves REQ/AC-QUERY-004/005/006 and the existing Q1.GraphPath.v1/graph-search error contracts during ADR-130 native AST replacement.
+Canonical slice: QueryExecution; GraphTraversal is the linked capability. This preserves REQ/AC-QUERY-004/005/006 and the existing Q1.GraphPath.v1/graph-search error contracts during ADR-130 AST replacement.
 
 | Requirement | Measurable acceptance |
 |---|---|

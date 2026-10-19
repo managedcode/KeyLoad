@@ -38,12 +38,12 @@ internal static class TimeSeriesChunkQualificationClusterData
     internal const string Reader = "chunk-qualification-reader";
     internal const string ReadGrant = "chunk.private.read";
     internal const string UseGrant = "chunk.private.use";
-    internal const string Missing = "The native series chunk window is unavailable.";
+    internal const string Missing = "The execution series chunk window is unavailable.";
     internal const long MergedRevision = 6L;
     internal const long DroppedRevision = 7L;
     internal const long SourceSequence = 3L;
     internal const int RefusedReadLimit = 2;
-    internal const string ReadBoundExceeded = "The native series chunk window exceeds its admitted bound.";
+    internal const string ReadBoundExceeded = "The execution series chunk window exceeds its admitted bound.";
     internal const string SafeBoundExceeded = "The operation exceeds the available resource capacity.";
     internal const int ReadLimit = 3;
     private const int BaseTicks = 10;

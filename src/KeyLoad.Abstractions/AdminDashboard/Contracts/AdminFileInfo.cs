@@ -5,5 +5,5 @@ namespace KeyLoad;
 /// <param name="Category">Canonical, replica, backup or other physical file category.</param>
 /// <param name="Bytes">Observed file length, not allocated disk blocks.</param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.AdminFileInfo)]
+[Orleans.Alias(ContractAliases.AdminFileInfo)]
 public sealed record AdminFileInfo([property: Orleans.Id(0)] string Path, [property: Orleans.Id(1)] string Category, [property: Orleans.Id(2)] long Bytes);

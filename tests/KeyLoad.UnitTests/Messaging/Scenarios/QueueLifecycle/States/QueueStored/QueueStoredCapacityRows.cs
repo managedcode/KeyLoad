@@ -23,7 +23,7 @@ internal static class QueueStoredCapacityRows
                 }
                 else
                 {
-                    transaction.PutRecord(row.Key, DamagedCounters(NativeSerialization.Deserialize<QueueCounters>(row.Original), fault));
+                    transaction.PutRecord(row.Key, DamagedCounters(OrleansSerialization.Deserialize<QueueCounters>(row.Original), fault));
                 }
             }
             return true;

@@ -6,7 +6,7 @@ using Microsoft.Extensions.Options;
 namespace KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
 
 /// <summary>Emits bounded live progress from original settled operation outcomes.</summary>
-internal sealed class DocumentHostProgress(IOptions<NativeComparisonExecutionOptions> execution, TimeProvider clock)
+internal sealed class DocumentHostProgress(IOptions<ComparisonExecutionOptions> execution, TimeProvider clock)
 {
     private const int NoRepetition = -1;
     private const string ProgressFormat = "KeyLoadBenchmarkProgress phase=measure repetition={0} completed={1} total={2} failed={3} elapsedSeconds={4:F3}";

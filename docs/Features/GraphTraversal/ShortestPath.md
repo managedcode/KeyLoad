@@ -16,7 +16,7 @@ borrows that original budget without restarting or disposing it.
 Find one shortest directed outgoing path between full document EntityRef values
 inside one atomic partition and one current persisted-authorized committed
 ZoneTree read cut. Explicit breadth-first depth frontiers execute in the
-node-local storage owner. Orleans routes the request from the client's connection grain with native ManagedCode
+node-local storage owner. Orleans routes the request from the client's connection grain with ManagedCode
 CQRS. No per-edge RPC or borrowed storage value escapes the gate.
 
 `GraphShortestPathRequest` version1 generated IDs: 0 Version, 1 Partition,
@@ -29,7 +29,7 @@ the operation returns `PermissionDenied` before adjacency traversal.
 Version/shape/identifier/label errors are Validation; invalid numeric caps are
 BudgetExceeded; a foreign endpoint partition is UnsupportedCapability.
 Existing request/read/result byte caps, deadline and cancellation apply.
-Alias: `keyload.contract.graph-shortest-path-request.v1`.
+Alias: `keyload.contract.graph-shortest-path-request`.
 
 `GraphShortestPathResult` generated IDs: 0 Version=1, 1 Found, 2 nullable Hops,
 3 immutable ordered Vertices, 4 immutable ordered projected Edges, 5 CutPosition.
@@ -37,9 +37,9 @@ Found means Vertices.Length=Edges.Length+1 and Hops=Edges.Length. Vertices run
 From..To; each edge connects neighboring vertices. Authorized From=To returns
 one vertex, no edges, Hops=0. No path returns Found=false, Hops=null, empty arrays.
 CutPosition is the actual store position captured inside the same read gate.
-Alias: `keyload.contract.graph-shortest-path-result.v1`. Existing IDs stay stable.
+Alias: `keyload.contract.graph-shortest-path-result`. Existing IDs stay stable.
 
-SQL profile `Q1.GraphPath.v1`, capability `graph-path-v1`, compiles to the same
+SQL profile `Q1.GraphPath.v1`, capability `graph-path`, compiles to the same
 typed operator/result:
 
 ```sql
@@ -53,7 +53,7 @@ exact scalar type. Eight initial arguments are mandatory; trailing labels are
 optional/bounded. Reject cursor, projection, join, ordering, predicates, extra
 statements, expressions and alternate grammar. `SqlGraphPathRequest` carries
 Version/QueryRequest at generated IDs0/1 and alias
-`keyload.contract.sql-graph-path-request.v1`; Cursor must be null and
+`keyload.contract.sql-graph-path-request`; Cursor must be null and
 AllowFullScan=true. Parsing, validation, reads and exact output share one
 ReadExecutionBudget started before parsing. Do not reset the deadline at the
 Core join. This explicit bounded profile does not claim full SQL/protocol support.
@@ -66,10 +66,10 @@ foreign endpoint, which fails UnsupportedCapability.
 
 | Requirement | Measurable acceptance and automated mapping |
 |---|---|
-| REQ-GRAPH-007: shortest path and explicit depth frontiers | AC-GRAPH-006: independent input-model BFS agrees on ordered full EntityRef vertices and edges for direct/longer/converging paths, shuffled insertion, overlapping IDs across collections, cycles/self-loops, unreachable and depth0/exact/one-short cases. Equal-hop ties follow frontier discovery order then native ordinal edge-ID order. GraphShortestPathTests and independent GraphPath reference oracle. |
+| REQ-GRAPH-007: shortest path and explicit depth frontiers | AC-GRAPH-006: independent input-model BFS agrees on ordered full EntityRef vertices and edges for direct/longer/converging paths, shuffled insertion, overlapping IDs across collections, cycles/self-loops, unreachable and depth0/exact/one-short cases. Equal-hop ties follow frontier discovery order then ordinal edge-ID order. GraphShortestPathTests and independent GraphPath reference oracle. |
 | REQ-GRAPH-008: one authorized current read cut | AC-GRAPH-007: denied graph/source collection propagates PermissionDenied; missing/hidden/deleted source is NotFound. Hidden/missing/denied/deleted target and hidden intermediate give the same closed no-path result. A nonempty label filter requires the persisted graph `/label` field policy `RawUseGrant`; `RawReadGrant` is distinct and does not authorize filter use. A missing use grant returns `PermissionDenied` before adjacency traversal; null/empty labels do not apply this field-use check. Edge `AttributesJson` is projected by current persisted graph policy. Actual-store revocation/read-cut plus SDK/official MCP Linux cluster failover cases exclude stale/hidden payload. |
 | REQ-GRAPH-009: finite node/edge/time/byte work | AC-GRAPH-008: charge every examined candidate before label/visibility filtering. Exact required node/edge cap succeeds; one less throws BudgetExceeded without partial success. Check cancellation/deadline during every frontier, scan, dereference, predecessor walk and output. Retention is admitted before insertion; exact output includes protocol metadata. Real during-work cancellation and healthy follow-up preserve committed position. |
-| REQ-GRAPH-010: shared SQL/SDK/MCP execution | AC-GRAPH-009: literal/parameter SQL matches direct result/CutPosition/errors. Reject malformed versions/syntax/parameters, extra statements, foreign partitions and exhausted bounds. Real Aspire replicated-cluster SDK/official MCP preserve the connection-grain and native CQRS lifecycle; official discovery verifies both `keyload_graph_shortest_path` and `keyload_query_graph_path`, exact typed request/result schemas, and read-only/idempotent/non-destructive hints against the independent ClientApi oracle. Nested `PartitionRef` has exactly its four identity fields plus computed `atomicPartitionId`; only the four identity fields are required. |
+| REQ-GRAPH-010: shared SQL/SDK/MCP execution | AC-GRAPH-009: literal/parameter SQL matches direct result/CutPosition/errors. Reject malformed versions/syntax/parameters, extra statements, foreign partitions and exhausted bounds. Real Aspire replicated-cluster SDK/official MCP preserve the connection-grain and CQRS lifecycle; official discovery verifies both `keyload_graph_shortest_path` and `keyload_query_graph_path`, exact typed request/result schemas, and read-only/idempotent/non-destructive hints against the independent ClientApi oracle. Nested `PartitionRef` has exactly its four identity fields plus computed `atomicPartitionId`; only the four identity fields are required. |
 
 ## Execution and bounds
 
@@ -77,7 +77,7 @@ foreign endpoint, which fails UnsupportedCapability.
 maps REQ-GRAPH-010 / AC-GRAPH-009 to one complete real-ZoneTree flow: reject an
 extra statement, preserve committed position, then retry valid SQL on the same
 engine and compare the independently expected ordered path and read cut with
-the direct typed operation. Native normal/scalar execution and compiled-source
+the direct typed operation. normal/scalar execution and compiled-source
 coverage binding remain required before this case contributes to coverage.
 
 REQ-GRAPH-010 / AC-GRAPH-009 also replace the existing combined version/cursor/
@@ -89,9 +89,9 @@ and the original read cut. The alternate-projection and malformed-parameter
 cases retain every existing invalid input and require the same unchanged-state
 and healthy-retry assertions after each rejection. Keep the two positive parity
 cases and the separate extra-statement complete flow. Remove the replaced
-rejection-only methods; admit replacements only after native normal/scalar runs.
+rejection-only methods; admit replacements only after normal/scalar runs.
 
-Expand one explicit depth frontier and collect only the next. Visit each native
+Expand one explicit depth frontier and collect only the next. Visit each execution
 adjacency prefix in ordinal order without materializing high-degree pages.
 Visited identity is the complete EntityRef. Keep only first predecessor edge
 ID/reference/depth, and stop at the first minimum-depth target; later equal-hop
@@ -100,7 +100,7 @@ read/retention/deadline exhaustion throws. Validate adjacency/edge ID/from/parti
 agreement as Corruption. Re-read only final path edges through charged reads,
 then project attributes; retain neither all explored edge payloads nor documents.
 
-Reuse GraphVertexVisibility's native policy/boolean caches. Optional
+Reuse GraphVertexVisibility's policy/boolean caches. Optional
 feature-local admission callbacks charge each new vertex/collection decision
 before insertion; existing callers keep their behavior. Before retaining any
 decision, predecessor or frontier, reserve conservative modeled metadata against
@@ -133,10 +133,10 @@ aggregate RSS bound.
    SqlGraphPathRequest request, TimeProvider? timeProvider=null,
    CancellationToken cancellationToken=default), returning GraphShortestPathResult.
    It starts one budget before parse/admission and calls the internal Core
-   budget-taking entry. QueryEngine's existing capability list and native dispatch
+   budget-taking entry. QueryEngine's existing capability list and dispatch
    are the only join points.
 4. Orleans read-kind/capability/result dispatch is appended; Server
-   POST /v1/graph/shortest-path and POST /v1/query/graph-path; official MCP catalog
+   POST /graph/shortest-path and POST /query/graph-path; official MCP catalog
    and tools follow the existing naming/schema contract; typed Client calls;
    IntegrationTests real SDK/official MCP graph/SQL revocation/failover cases.
    Frozen tools are keyload_graph_shortest_path and
@@ -163,21 +163,21 @@ flowchart LR
     SQL[Bounded SQL compile] --> Request[Client connection grain]
     SDK[SDK or official MCP] --> Request
     Request --> Owner[Authorized node-local committed read]
-    Owner --> Frontier[Depth frontiers and charged native adjacency]
+    Owner --> Frontier[Depth frontiers and charged adjacency]
     Frontier --> Path[First predecessor path and projected edges]
-    Path --> Result[Bounded native CQRS result]
+    Path --> Result[Bounded CQRS result]
 ```
 
 
 ## Actual persisted adjacency refusal
 
-REQ-GRAPH-008/009 and AC-GRAPH-007/008 additionally map to native shortest-path
+REQ-GRAPH-008/009 and AC-GRAPH-007/008 additionally map to shortest-path
 corruption flows in `GraphShortestPathCorruptionTests`. Seed genuine documents
 and a canonical directed edge, verify the independently expected path, then
 inject one fixture-owned missing or inconsistent canonical/adjacency row.
 The actual path operation must return Corruption before returning a partial
-result and preserve the complete native store image and position. Repeat that
+result and preserve the complete store image and position. Repeat that
 operation after joined close/reopen, then restore only the injected row and
 verify the full healthy path, edge fields and unchanged read cut/store image.
 Cases cover absent edge, changed edge identity/source/foreign target, invalid
-stored label/target identifier, malformed adjacency and the wrong native root type.
+stored label/target identifier, malformed adjacency and the wrong root type.

@@ -15,7 +15,7 @@ internal static class SampleChunkRetentionClusterFull
             [SampleChunkRetentionClusterSeed.Mutation(SampleChunkRetentionClusterProtocol.ExpireKind,
                 SampleChunkRetentionClusterProtocol.FullPurged)], false, token);
         await SampleChunkRetentionClusterDenialOracle.RollupAsync(sdk, mcp,
-            new(scenario.Native.Partition, TimeSeriesClusterScenario.Set, TimeSeriesClusterScenario.Series,
+            new(scenario.Execution.Partition, TimeSeriesClusterScenario.Set, TimeSeriesClusterScenario.Series,
                 SampleChunkRetentionClusterSeed.Late(scenario).Timestamp, scenario.Until), token);
         await SampleChunkRetentionClusterWriteOracle.CommitAsync(sdk, mcp,
             SampleChunkRetentionClusterSeed.Request(scenario, new DropSampleChunkWindow(TimeSeriesClusterScenario.Set,

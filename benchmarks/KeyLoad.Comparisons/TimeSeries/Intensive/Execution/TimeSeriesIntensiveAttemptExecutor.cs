@@ -6,7 +6,7 @@ internal static class TimeSeriesIntensiveAttemptExecutor
 {
     private const int NoObservedItems = 0;
 
-    internal static async Task<TimeSeriesIntensiveAttempt?> ExecuteAsync(ITimeSeriesIntensiveTarget target, TimeSeriesIntensiveExpectations expected, TimeSeriesIntensivePreparedPhase phase, int index, int worker, TimeSeriesIntensiveConcurrency concurrency, IOptions<NativeComparisonExecutionOptions> executionOptions, TimeProvider timeProvider, CancellationToken cellCancellation)
+    internal static async Task<TimeSeriesIntensiveAttempt?> ExecuteAsync(ITimeSeriesIntensiveTarget target, TimeSeriesIntensiveExpectations expected, TimeSeriesIntensivePreparedPhase phase, int index, int worker, TimeSeriesIntensiveConcurrency concurrency, IOptions<ComparisonExecutionOptions> executionOptions, TimeProvider timeProvider, CancellationToken cellCancellation)
     {
         const int NoItems = 0;
         const int NoObservedItems = 0;

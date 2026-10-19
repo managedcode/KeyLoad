@@ -13,8 +13,8 @@ internal static class DistributedSearchProjectionExecution
     private const string ReceivingPrincipalChanged = "The distributed search receiving principal changed.";
     private const long NoResultBytes = 0;
 
-    internal static DistributedSearchProjectionLeafV1 Execute(DatabaseEngine database, string principalId,
-        SearchRequest request, string tenant, DistributedTextWitnessV1 witness,
+    internal static DistributedSearchProjectionLeaf Execute(DatabaseEngine database, string principalId,
+        SearchRequest request, string tenant, DistributedTextWitness witness,
         ImmutableArray<GlobalBranchCandidate> selected, ReadExecutionBudget budget, ReadExecutionBudgetReadGrant grant, PartitionQueryLifetimeMetadata? metadata = null)
     {
         ArgumentNullException.ThrowIfNull(database);
@@ -29,7 +29,7 @@ internal static class DistributedSearchProjectionExecution
         }
         using var admission = database.AdmitQuery(budget.Cancellation);
         using var charged = budget.EnterReadGrant(grant);
-        Func<IKeyValueView, PrincipalRecord, ResourceDefinition, string, DistributedSearchProjectionLeafV1> read =
+        Func<IKeyValueView, PrincipalRecord, ResourceDefinition, string, DistributedSearchProjectionLeaf> read =
             (view, principal, resource, digest) => Project(database, view, principal, resource, digest,
                 request, tenant, witness, selected, budget, grant, metadata);
         return metadata is null
@@ -38,9 +38,9 @@ internal static class DistributedSearchProjectionExecution
                 grant, budget, metadata, read);
     }
 
-    private static DistributedSearchProjectionLeafV1 Project(DatabaseEngine database, IKeyValueView view,
+    private static DistributedSearchProjectionLeaf Project(DatabaseEngine database, IKeyValueView view,
         PrincipalRecord principal, ResourceDefinition resource, string digest, SearchRequest request,
-        string tenant, DistributedTextWitnessV1 witness, ImmutableArray<GlobalBranchCandidate> selected,
+        string tenant, DistributedTextWitness witness, ImmutableArray<GlobalBranchCandidate> selected,
         ReadExecutionBudget budget, ReadExecutionBudgetReadGrant grant, PartitionQueryLifetimeMetadata? metadata)
     {
         budget.Check();
@@ -83,7 +83,7 @@ internal static class DistributedSearchProjectionExecution
             projectedBytes += bytes;
             hits.Add(hit);
         }
-        var result = new DistributedSearchProjectionLeafV1(witness, hits.MoveToImmutable(), grant.ReadBytes, grant.ExaminedRecords);
+        var result = new DistributedSearchProjectionLeaf(witness, hits.MoveToImmutable(), grant.ReadBytes, grant.ExaminedRecords);
         budget.CheckResult(result);
         return result;
     }

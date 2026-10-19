@@ -24,15 +24,15 @@ internal static class ModelJoinAliasAdmissionFlow
                     Alias = alias
                 }
             };
-            foreach (var request in new[] { Q2CapabilityFixtures.JsonRoundTrip(invalid), Q2CapabilityFixtures.NativeRoundTrip(invalid) })
+            foreach (var request in new[] { Q2CapabilityFixtures.JsonRoundTrip(invalid), Q2CapabilityFixtures.RuntimeRoundTrip(invalid) })
             {
-                var native = store.GetReadDiagnostics();
+                var execution = store.GetReadDiagnostics();
                 global::KeyLoad.QueryPage? result = null;
                 var failure = Assert.ThrowsExactly<global::KeyLoad.KeyLoadException>(() => result = engine.ExecuteAst(SqlJoinSourceBindingFixture.Root, request));
                 await Assert.That(result).IsNull();
                 await Assert.That(failure.Code).IsEqualTo(global::KeyLoad.ErrorCode.Validation);
                 await Assert.That(failure.Message).IsEqualTo(IdentifierFailure);
-                await Assert.That(store.GetReadDiagnostics()).IsEqualTo(native);
+                await Assert.That(store.GetReadDiagnostics()).IsEqualTo(execution);
                 await SqlJoinSourceBindingFlow.UnchangedAsync(store, before, position, identity);
                 await SqlJoinSourceBindingAssertions.PageAsync(engine.ExecuteAst(SqlJoinSourceBindingFixture.Root, healthy), kind, position, repaired);
                 await SqlJoinSourceBindingAssertions.PageAsync(engine.Execute(SqlJoinSourceBindingFixture.Root,

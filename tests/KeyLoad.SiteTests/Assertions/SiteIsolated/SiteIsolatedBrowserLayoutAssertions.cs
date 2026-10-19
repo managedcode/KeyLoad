@@ -31,7 +31,7 @@ internal static class SiteIsolatedBrowserLayoutAssertions
         })()
         """;
 
-    /// <summary>AC-ISO-009/011R: genuine Chrome retains nine native rows and long provenance at every supported viewport.</summary>
+    /// <summary>AC-ISO-009/011R: genuine Chrome retains nine execution rows and long provenance at every supported viewport.</summary>
     public static async Task AssertAsync(SiteBrowserCdpClient cdp, JsonElement projection, CancellationToken token)
     {
         await cdp.EvaluateAsync(OpenWorkers, false, token);

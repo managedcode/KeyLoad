@@ -1,0 +1,110 @@
+using System.Collections.Immutable;
+using System.Net.Http.Headers;
+using System.Runtime.ExceptionServices;
+using System.Text;
+using Aspire.Hosting;
+using Aspire.Hosting.ApplicationModel;
+using Aspire.Hosting.Testing;
+using KeyLoad.Comparisons;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
+
+/// <summary>Starts only the selected real database with the owning load-infrastructure AppHost.</summary>
+internal sealed class DatabaseFlowFixture(DistributedApplication application, string root, string target) : IAsyncDisposable
+{
+    private const string HttpEndpoint = "http";
+    private const string Surreal = "SurrealDB";
+    private const string SurrealNode = "isolated-surrealdb";
+    private const string HelixNode = "isolated-helixdb";
+    private const string PasswordParameter = "isolated-surrealdb-password";
+    private const string Basic = "Basic";
+    private const string User = "root:";
+    private static TimeSpan Deadline => ExecutionPolicyFixture.Harness().Value.DatabaseFlowTimeout;
+
+    internal static IOptions<ComparisonExecutionOptions> ExecutionOptions => ExecutionPolicyFixture.Read();
+    internal string Image => target == Surreal ? "docker.io/surrealdb/surrealdb:v3.2.4@" + BenchmarkResources.SurrealDbDigest : "ghcr.io/helixdb/helixdb:v0.0.10@" + BenchmarkResources.HelixDbDigest;
+
+    internal static async Task<DatabaseFlowFixture> CreateAsync(string target, CancellationToken token)
+    {
+        var root = Path.Combine(Path.GetTempPath(), "keyload-execution-flow-" + Guid.NewGuid().ToString("N"));
+        try
+        {
+            return await RuntimeStartApplicationAsync(target, root, token);
+        }
+        catch (Exception failure)
+        {
+            await CleanupFlowAsync(null, root, failure);
+            throw;
+        }
+    }
+
+    private static async Task<DistributedApplication> BuildApplicationAsync(string target, string root, CancellationToken token)
+    {
+        var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.KeyLoad_LoadTests_AppHost>(
+            ["--Benchmarks:Enabled=true", "--" + BenchmarkSessionSelection.TargetSetting + "=" + target,
+                "--" + BenchmarkSessionSelection.NodeCountSetting + "=1", "--Benchmarks:Session=true",
+                "--Benchmarks:SessionId=execution-flow", "--Benchmarks:EvidenceProfile=" + BenchmarkSessionContract.Profile,
+                "--Benchmarks:DataRoot=" + root, "--Benchmarks:Output=" + Path.Combine(root, "reports")], token);
+        try
+        {
+            return await builder.BuildAsync(token);
+        }
+        catch (Exception failure)
+        {
+            await CleanupFlowAsync(builder, null, failure);
+            throw;
+        }
+    }
+
+    private static async Task<DatabaseFlowFixture> RuntimeStartApplicationAsync(string target, string root, CancellationToken token)
+    {
+        var app = await BuildApplicationAsync(target, root, token);
+        try
+        {
+            await app.StartAsync(token);
+            await app.ResourceNotifications.WaitForResourceHealthyAsync(target == Surreal ? SurrealNode : HelixNode, token).WaitAsync(Deadline, TimeProvider.System, token);
+            return new(app, root, target);
+        }
+        catch (Exception failure)
+        {
+            await CleanupFlowAsync(app, null, failure);
+            throw;
+        }
+    }
+    internal async Task<HttpClient> ClientAsync(CancellationToken token)
+    {
+        var client = application.CreateHttpClient(target == Surreal ? SurrealNode : HelixNode, HttpEndpoint);
+        client.Timeout = Deadline;
+        if (target == Surreal)
+        {
+            var password = await application.Services.GetRequiredService<DistributedApplicationModel>().Resources
+                .OfType<ParameterResource>().Single(parameter => parameter.Name == PasswordParameter).GetValueAsync(token);
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(Basic, Convert.ToBase64String(Encoding.UTF8.GetBytes(User + password)));
+        }
+        return client;
+    }
+    public async ValueTask DisposeAsync() => await CleanupFlowAsync(application, root, null);
+
+    private static async Task CleanupFlowAsync(IAsyncDisposable? owner, string? directory, Exception? primary)
+    {
+        var failures = new List<Exception>();
+        if (owner is not null)
+        {
+            await IsolatedTeardownSupport.CollectFailureAsync(() => owner.DisposeAsync().AsTask(), failures);
+        }
+        await IsolatedTeardownSupport.CollectFailureAsync(() =>
+        {
+            if (directory is not null && Directory.Exists(directory))
+            {
+                Directory.Delete(directory, recursive: true);
+            }
+            return Task.CompletedTask;
+        }, failures);
+        if (RuntimeComparisonFailure.Combine(primary, failures.ToImmutableArray()) is { } failure)
+        {
+            ExceptionDispatchInfo.Capture(failure).Throw();
+        }
+    }
+}

@@ -1,6 +1,6 @@
 namespace KeyLoad;
 
-/// <summary>Requires native lexical publication at an acknowledged minimum applied cut.</summary>
+/// <summary>Requires execution lexical publication at an acknowledged minimum applied cut.</summary>
 [Orleans.GenerateSerializer]
 [Orleans.Alias(WaitForIndexProtocol.RequestAlias)]
 public sealed record WaitForIndexRequest(

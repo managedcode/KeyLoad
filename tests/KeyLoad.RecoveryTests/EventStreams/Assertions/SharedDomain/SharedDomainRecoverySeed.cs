@@ -40,7 +40,7 @@ internal static class SharedDomainRecoverySeed
             {
                 await AckAsync(operation, input.SeedResults[index], scope, position, store.Identity.Incarnation);
             }
-            var actual = OutcomeStoreOracle.Read(store, operation) ?? throw new InvalidOperationException(MissingNative);
+            var actual = OutcomeStoreOracle.Read(store, operation) ?? throw new InvalidOperationException(RuntimeMissing);
             await SharedDomainRecoveryValues.ResultAsync(actual, input.SeedResults[index]);
             var entry = Capture(store, operation, actual, scope.Partition);
             await Assert.That(entry.OutcomeBytes.AsSpan().SequenceEqual(OriginalBytes(input.SeedImage, entry.OutcomeKey))).IsTrue();
@@ -77,7 +77,7 @@ internal static class SharedDomainRecoverySeed
     internal static SharedDomainRecoveryHistory Capture(IAtomicStore store, Command<DatabaseCommand> operation, Result<object> result, PartitionRef partition)
     {
         var key = KeySpace.PartitionOutcome(partition, Writer, operation.CommandId);
-        var locator = KeySpace.OutcomeLocatorV2(partition, Writer, operation.CommandId);
+        var locator = KeySpace.OutcomeLocator(partition, Writer, operation.CommandId);
         return new(operation, result, partition, key, Required(store, key), locator, Required(store, locator));
     }
 
@@ -89,7 +89,7 @@ internal static class SharedDomainRecoverySeed
     private const string RowSeparator = ":";
 
     internal static byte[] Required(IAtomicStore store, byte[] key)
-        => store.Read(view => view.ReadOwnedValue(key)) ?? throw new InvalidOperationException(MissingNative);
+        => store.Read(view => view.ReadOwnedValue(key)) ?? throw new InvalidOperationException(RuntimeMissing);
 
     internal static long AppliedPosition(SharedDomainRecoveryInput input)
         => input.SeedResults[SeedOperations - SecondIndex].Get<CommitReceipt>().Token.Position;

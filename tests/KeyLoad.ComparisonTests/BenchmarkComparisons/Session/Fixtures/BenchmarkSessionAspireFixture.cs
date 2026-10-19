@@ -2,7 +2,7 @@ using System.Runtime.ExceptionServices;
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.Testing;
-using KeyLoad.AppHost.Features.ClusterReplication;
+using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.AppHost.Hosting;
 using KeyLoad.Comparisons;
 using KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
@@ -12,12 +12,12 @@ using Microsoft.Extensions.Logging;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
-/// <summary>Owns the single Aspire deployment, native workload runner and original artifact lifetime.</summary>
+/// <summary>Owns the single Aspire deployment, execution workload runner and original artifact lifetime.</summary>
 internal static class BenchmarkSessionAspireFixture
 {
     private const string Enabled = "--Benchmarks:Enabled=true";
     private const string Session = "--Benchmarks:Session=true";
-    private const string Profile = "--Benchmarks:EvidenceProfile=session-v1";
+    private const string Profile = "--Benchmarks:EvidenceProfile=session";
     private const string RootArgument = "--Benchmarks:DataRoot=";
     private const string OutputArgument = "--Benchmarks:Output=";
     private const string IdentityArgument = "--Benchmarks:SessionId=";
@@ -35,7 +35,7 @@ internal static class BenchmarkSessionAspireFixture
         var evidence = Path.GetFullPath(selected.EvidenceDirectory);
         Directory.CreateDirectory(evidence);
         var execution = AppHostOptionsRegistration.BindTestExecution(configuration);
-        using var deadline = new CancellationTokenSource(execution.Value.NativeScaledTimeout, TimeProvider.System);
+        using var deadline = new CancellationTokenSource(execution.Value.ScaledTimeout, TimeProvider.System);
         using var lifetime = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, deadline.Token);
         var arguments = new List<string> { Enabled, Session, Profile, RootArgument + root, OutputArgument + evidence,
             IdentityArgument + selected.SessionId };
@@ -55,12 +55,12 @@ internal static class BenchmarkSessionAspireFixture
     {
         var containers = application.Services.GetRequiredService<DistributedApplicationModel>()
             .Resources.OfType<ContainerResource>().ToArray();
-        var execution = NativeExecutionPolicyFixture.Harness();
-        var work = new IsolatedNativeOwnedWork(execution);
+        var execution = ExecutionPolicyFixture.Harness();
+        var work = new IsolatedOwnedWork(execution);
         Exception? primary = null;
         try
         {
-            await IsolatedNativeReportAssertions.VerifyModelAsync(
+            await IsolatedReportAssertions.VerifyModelAsync(
                 application.Services.GetRequiredService<DistributedApplicationModel>().Resources, selection, token);
             work.BeginCapture(application, application.Services.GetRequiredService<DistributedApplicationModel>().Resources
                 .Where(resource => resource is ContainerResource or ProjectResource).Select(resource => resource.Name),
@@ -98,7 +98,7 @@ internal static class BenchmarkSessionAspireFixture
         }
         finally
         {
-            var teardown = IsolatedNativeTeardown.CompleteAsync(application, evidence, evidence, root,
+            var teardown = IsolatedTeardown.CompleteAsync(application, evidence, evidence, root,
                 containers, work, primary);
             try
             {
@@ -106,7 +106,7 @@ internal static class BenchmarkSessionAspireFixture
             }
             finally
             {
-                await IsolatedNativeTeardown.SettleOwnerDisposalAsync(teardown, work.DisposeAsync().AsTask());
+                await IsolatedTeardown.SettleOwnerDisposalAsync(teardown, work.DisposeAsync().AsTask());
             }
         }
     }

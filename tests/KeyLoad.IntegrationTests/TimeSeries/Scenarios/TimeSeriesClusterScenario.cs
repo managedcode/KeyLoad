@@ -4,7 +4,7 @@ using KeyLoad.IntegrationTests.Features.ClientApi;
 
 namespace KeyLoad.IntegrationTests.Features.TimeSeries;
 
-/// <summary>Creates caller-visible TimeSeries state on the actual native Orleans cluster.</summary>
+/// <summary>Creates caller-visible TimeSeries state on the actual execution Orleans cluster.</summary>
 internal sealed record TimeSeriesClusterScenario(PartitionRef Partition)
 {
     internal const string Set = "metrics";

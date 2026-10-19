@@ -2,7 +2,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Client;
 
-/// <summary>Bounds successful HTTP JSON input and retained HTTP problem bodies in the native SDK transport.</summary>
+/// <summary>Bounds successful HTTP JSON input and retained HTTP problem bodies in the execution SDK transport.</summary>
 [ConfigurationOptions]
 public sealed class KeyLoadClientExecutionOptions
 {
@@ -40,7 +40,7 @@ public sealed class KeyLoadClientExecutionOptions
 
     /// <summary>Maps the validated SDK snapshot to the selected parser's local inspection policy.</summary>
     /// <param name="configured">The original centrally snapshotted SDK execution bounds.</param>
-    /// <returns>Validated native parser limits with the unchanged client byte and nesting ceilings.</returns>
+    /// <returns>Validated execution parser limits with the unchanged client byte and nesting ceilings.</returns>
     [ConfigurationBinding]
     internal static IOptions<DatabaseLimits> SqlInspection(KeyLoadClientExecutionOptions configured)
     {

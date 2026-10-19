@@ -31,15 +31,15 @@ internal sealed class ZoneTreePointCacheReadTests
         var logicalAfter = store.GetReadDiagnostics();
 
         await Assert.That(repeated).IsEquivalentTo(ValueBytes);
-        await Assert.That(afterCold.NativeLookups).IsEqualTo(1L);
+        await Assert.That(afterCold.RuntimeLookups).IsEqualTo(1L);
         await Assert.That(afterCold.Admissions).IsEqualTo(1L);
         await Assert.That(afterCold.RetainedBytes).IsEqualTo(OwnerIndexCharge
             + EntryMetadataBytes + RoundToEight(KeyBytes.Length) + RoundToEight(ValueBytes.Length));
         await Assert.That(afterWarm.Hits).IsEqualTo(1L);
-        await Assert.That(afterWarm.NativeLookups).IsEqualTo(1L);
+        await Assert.That(afterWarm.RuntimeLookups).IsEqualTo(1L);
         await Assert.That(afterWarm.RetainedBytes).IsEqualTo(afterCold.RetainedBytes);
         await Assert.That(afterRepeated.Hits).IsEqualTo(2L);
-        await Assert.That(afterRepeated.NativeLookups).IsEqualTo(1L);
+        await Assert.That(afterRepeated.RuntimeLookups).IsEqualTo(1L);
         await Assert.That(afterRepeated.RetainedBytes).IsEqualTo(afterCold.RetainedBytes);
         await Assert.That(logicalAfter.OwnedPointLookups - logicalBefore.OwnedPointLookups).IsEqualTo(3L);
         await Assert.That(logicalAfter.PointExaminedBytes - logicalBefore.PointExaminedBytes)
@@ -68,16 +68,16 @@ internal sealed class ZoneTreePointCacheReadTests
 
         await Assert.That(value).IsEquivalentTo(ValueBytes);
         await Assert.That(observed).IsEqualTo(2L * (KeyBytes.Length + ValueBytes.Length));
-        await Assert.That(first.NativeLookups).IsEqualTo(1L);
+        await Assert.That(first.RuntimeLookups).IsEqualTo(1L);
         await Assert.That(second.Hits).IsEqualTo(1L);
-        await Assert.That(second.NativeLookups).IsEqualTo(1L);
+        await Assert.That(second.RuntimeLookups).IsEqualTo(1L);
         await Assert.That(logicalAfter.BorrowedPointLookups - logicalBefore.BorrowedPointLookups).IsEqualTo(2L);
         await Assert.That(logicalAfter.PointExaminedBytes - logicalBefore.PointExaminedBytes)
             .IsEqualTo(2L * (KeyBytes.Length + ValueBytes.Length));
     }
 
     [Test]
-    public async Task EmptyPositiveValueWarmsWhileMissingAndTombstoneRemainNativeMisses()
+    public async Task EmptyPositiveValueWarmsWhileMissingAndTombstoneRemainMisses()
     {
         using var fixture = new ZoneTreePointCacheFileFixture();
         var store = fixture.OpenStore();
@@ -103,7 +103,7 @@ internal sealed class ZoneTreePointCacheReadTests
         await Assert.That(absentFirst).IsNull();
         await Assert.That(absentSecond).IsNull();
         await Assert.That(snapshot.Admissions).IsEqualTo(1L);
-        await Assert.That(snapshot.NativeMisses).IsEqualTo(2L);
+        await Assert.That(snapshot.RuntimeMisses).IsEqualTo(2L);
         await Assert.That(snapshot.Hits).IsEqualTo(1L);
     }
 

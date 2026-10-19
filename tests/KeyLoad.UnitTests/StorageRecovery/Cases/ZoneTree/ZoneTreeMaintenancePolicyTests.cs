@@ -22,8 +22,8 @@ internal sealed class ZoneTreeMaintenancePolicyTests
         var path = Path.Combine(Path.GetTempPath(), DirectoryPrefix + Guid.NewGuid().ToString("N"));
         var invalid = Options.Create(new ZoneTreeStorageExecutionOptions
         {
-            NativeMaintenanceInterval = TimeSpan.FromTicks(intervalTicks),
-            NativeBlockCacheLifetime = TimeSpan.FromTicks(lifetimeTicks)
+            MaintenanceInterval = TimeSpan.FromTicks(intervalTicks),
+            BlockCacheLifetime = TimeSpan.FromTicks(lifetimeTicks)
         });
         Assert.ThrowsExactly<InvalidOperationException>(() =>
         {

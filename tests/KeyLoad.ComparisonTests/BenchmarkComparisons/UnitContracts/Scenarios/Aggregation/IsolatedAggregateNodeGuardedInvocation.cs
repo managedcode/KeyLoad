@@ -2,7 +2,7 @@ namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 internal static class IsolatedAggregateNodeGuardedInvocation
 {
-    private const string CaptureEnvelope = "A guarded native operation failed.";
+    private const string CaptureEnvelope = "A guarded execution operation failed.";
 
     internal static void Capture(Action operation, Action<Exception> record)
     {

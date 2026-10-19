@@ -7,13 +7,13 @@ namespace KeyLoad.Comparisons.Targets;
 
 internal static class MongoReplicaVerifier
 {
-    public static async Task<MongoReplicaProof> VerifyAsync(string connectionString, IMongoDatabase adminDatabase, IMongoDatabase database, IMongoCollection<BsonDocument> documents, ComparisonTopology topology, IComparisonCorpus dataset, IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<NativeComparisonExecutionOptions> executionOptions, TimeProvider timeProvider, CancellationToken cancellationToken)
+    public static async Task<MongoReplicaProof> VerifyAsync(string connectionString, IMongoDatabase adminDatabase, IMongoDatabase database, IMongoCollection<BsonDocument> documents, ComparisonTopology topology, IComparisonCorpus dataset, IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<ComparisonExecutionOptions> executionOptions, TimeProvider timeProvider, CancellationToken cancellationToken)
     {
         const int SingleItemCount = 1;
         const int FirstElementIndex = 0;
         const int NoObservedItems = 0;
 
-        _ = NativeComparisonExecutionOptions.Require(executionOptions);
+        _ = ComparisonExecutionOptions.Require(executionOptions);
         var status = await adminDatabase.RunCommandAsync<BsonDocument>(
             new BsonDocument(MongoSchema.ReplicaSetStatusCommand, MongoSchema.CommandEnabledValue),
             ReadPreference.Primary, cancellationToken);
@@ -112,7 +112,7 @@ internal static class MongoReplicaVerifier
         }
     }
 
-    private static async Task VerifyCopiedProbeAsync(IMongoCollection<BsonDocument> primary, IMongoClient[] secondaries, string databaseName, IOptions<NativeComparisonExecutionOptions> executionOptions, TimeSpan pollInterval, TimeProvider timeProvider, CancellationToken cancellationToken)
+    private static async Task VerifyCopiedProbeAsync(IMongoCollection<BsonDocument> primary, IMongoClient[] secondaries, string databaseName, IOptions<ComparisonExecutionOptions> executionOptions, TimeSpan pollInterval, TimeProvider timeProvider, CancellationToken cancellationToken)
     {
         var probeId = MongoSchema.CollectionProbePrefix + Guid.NewGuid().ToString(MongoSchema.GuidFormat);
         var body = MongoSchema.ProbeJsonPrefix + probeId + MongoSchema.ProbeJsonSuffix;

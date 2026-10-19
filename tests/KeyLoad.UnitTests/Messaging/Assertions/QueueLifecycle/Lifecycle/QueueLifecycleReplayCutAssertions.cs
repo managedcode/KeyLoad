@@ -17,7 +17,7 @@ internal static class QueueLifecycleReplayCutAssertions
             return page.Records.Select(row => Convert.ToHexString(row.Key.Span) + ":" +
                 Convert.ToHexString(row.Value.Span)).ToArray();
         });
-        return new(store.Position, NativeSerialization.Serialize(store.Identity), image);
+        return new(store.Position, OrleansSerialization.Serialize(store.Identity), image);
     }
 
     internal static async Task SameAsync(IAtomicStore store, QueueLifecycleConditionCut expected)

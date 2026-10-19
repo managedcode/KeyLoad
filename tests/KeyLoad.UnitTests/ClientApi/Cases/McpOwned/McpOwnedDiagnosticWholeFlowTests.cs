@@ -48,12 +48,12 @@ internal sealed class McpOwnedDiagnosticWholeFlowTests
             await Assert.That(QueueWholeFlowStorage.Bytes(database.Store)).IsEquivalentTo(before, CollectionOrdering.Matching);
             await Assert.That(database.Store.Position).IsEqualTo(position);
             var next = database.Database.GetDocument(Root, reference, receipt.Token);
-            await Assert.That(NativeSerialization.Serialize(next).SequenceEqual(NativeSerialization.Serialize(
+            await Assert.That(OrleansSerialization.Serialize(next).SequenceEqual(OrleansSerialization.Serialize(
                 new DocumentResult(database.ExpectedReference(reference), First, Json, false, [])))).IsTrue();
         }
         var healthy = database.Database.GetDocument(Root, reference, receipt.Token);
         var expected = new DocumentResult(database.ExpectedReference(reference), First, Json, false, []);
-        await Assert.That(NativeSerialization.Serialize(healthy).SequenceEqual(NativeSerialization.Serialize(expected))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(healthy).SequenceEqual(OrleansSerialization.Serialize(expected))).IsTrue();
         using var response = KeyLoad.Server.McpReplyOwner.Success(JsonDefaults.Serialize(healthy), Guid.NewGuid(),
             McpOutputTestData.MaximumBytes, UnitMcpOptions.Execution());
         await Assert.That(JsonElement.DeepEquals(response.ToolResult().StructuredContent!.Value
@@ -84,7 +84,7 @@ internal sealed class McpOwnedDiagnosticWholeFlowTests
             .IsEquivalentTo(model, CollectionOrdering.Matching);
         var retained = QueueWholeFlowStorage.Bytes(database.Store);
         var replay = database.Submit(OperationKind.Batch, rejectedCommand, id: rejectedCommand.CommandId);
-        await Assert.That(NativeSerialization.Serialize(replay).SequenceEqual(NativeSerialization.Serialize(rejected))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(replay).SequenceEqual(OrleansSerialization.Serialize(rejected))).IsTrue();
         await Assert.That(QueueWholeFlowStorage.Bytes(database.Store)).IsEquivalentTo(retained, CollectionOrdering.Matching);
         await Assert.That(database.Store.Position).IsEqualTo(position + CommitAdvance);
         var healthyCommand = ConfiguredVectorProfileFlow.Command(database, projection, wrongModel: false);

@@ -21,7 +21,7 @@ internal static class TenantAdmissionCold
             [new PutDocument(TenantAdmissionOperations.Collection, "cold-healthy", TenantAdmissionOperations.Body)]);
         var fresh = database.CreateCommand(OperationKind.Batch, id,
             TenantAdmissionOperations.PrincipalA, database.EvaluationClock.GetUtcNow(),
-            global::KeyLoad.NativeSerialization.Serialize(request));
+            global::KeyLoad.OrleansSerialization.Serialize(request));
         database.Apply(fresh).Get<CommitReceipt>();
         await TenantAdmissionAssertions.RecordAsync(database, fresh, fixture.Partition, "cold-healthy");
     }
@@ -36,7 +36,7 @@ internal static class TenantAdmissionCold
         for (var index = 0; index < operations.Length; index++)
         {
             token.ThrowIfCancellationRequested();
-            await NativeReplayResultAssertions.Same<CommitReceipt>(replay(operations[index]), results[index]);
+            await ReplayResultAssertions.Same<CommitReceipt>(replay(operations[index]), results[index]);
             var partition = operations[index].UserId! == TenantAdmissionOperations.PrincipalA
                 ? firstPartition : firstPartition with
                 {

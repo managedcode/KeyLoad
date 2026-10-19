@@ -7,7 +7,7 @@
 - BCL-only shared implementation; no ASP.NET/Orleans/provider/product/package dependency except the existing centrally attached analyzer.
 - Keep diagnostic implementation in its actual role folder; shared assembly friend metadata belongs to the project composition owner.
 - Preserve both authorized cuts, node-local ZoneTree ownership, all existing gates/async originals/ACK/WAL. This project owns no database state, file, credential, role or protocol.
-- Ten current phase boundaries retain their native IDs within a fixed32-slot capacity, with6 outcomes/16 buckets/four stripes, startup bank128KiB, record maximum4 CAS attempts and sticky degradation; undefined phase slots are invalid inputs. No hot callbacks, logging/export, allocations, gates, ambient state, per-request identifiers, reset or live mode changes.
+- Ten current phase boundaries retain their IDs within a fixed32-slot capacity, with6 outcomes/16 buckets/four stripes, startup bank128KiB, record maximum4 CAS attempts and sticky degradation; undefined phase slots are invalid inputs. No hot callbacks, logging/export, allocations, gates, ambient state, per-request identifiers, reset or live mode changes.
 - Only root freezes public shared signatures/project references and mode/export composition; workers may not invent broader telemetry/control architecture.
 - No project-local skill installed; do not install tools/skills or modify global configuration. Installed authorized Orleans guidance applies to unchanged producer lifecycles outside this BCL project.
 - Unknown/partial/degraded measurements are unavailable evidence, never zero or a performance winner. Snapshot reads are non-atomic; overlapping phases and whole-process samples are not request attribution.
@@ -15,7 +15,7 @@
 
 ## Boundaries and protected risks
 
-Follow the [root policy](../../AGENTS.md) and the owning feature specification. Keep changes in their actual owner, preserve unrelated work, and remove replaced code together with exclusive callers and fixtures. Use native Orleans calls for distributed execution and silo-local ZoneTree owners for files. Preserve persisted authorization, operation correctness, resource bounds, cancellation and joined shutdown. Never turn a static check or focused test into a claim of complete runtime qualification.
+Follow the [root policy](../../AGENTS.md) and the owning feature specification. Keep changes in their actual owner, preserve unrelated work, and remove replaced code together with exclusive callers and fixtures. Use Orleans calls for distributed execution and silo-local ZoneTree owners for files. Preserve persisted authorization, operation correctness, resource bounds, cancellation and joined shutdown. Never turn a static check or focused test into a claim of complete runtime qualification.
 
 ## Commands and verification
 
@@ -25,7 +25,7 @@ From the repository root:
 dotnet build KeyLoad.slnx --no-restore -warnaserror
 ```
 
-Use the root's complete solution, native TUnit, real process recovery and Aspire SDK/MCP gates as applicable. Local checks are development evidence; delivered-source qualification and public measurements require exact-source Linux GitHub artifacts. Do not weaken compiler, analyzer, source-identity, coverage or runtime assertions.
+Use the root's complete solution, TUnit, real process recovery and Aspire SDK/MCP gates as applicable. Local checks are development evidence; delivered-source qualification and public measurements require exact-source Linux GitHub artifacts. Do not weaken compiler, analyzer, source-identity, coverage or runtime assertions.
 
 ## Skills
 

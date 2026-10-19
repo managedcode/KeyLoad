@@ -8,19 +8,19 @@ namespace KeyLoad.Comparisons.Targets;
 /// <param name="http">The primary HTTP client used by the KeyLoad SDK client; target disposal disposes it.</param>
 /// <param name="apiKey">The credential passed to the KeyLoad SDK client for authenticated operations.</param>
 /// <param name="runId">Run identifier used to derive the isolated benchmark partition.</param>
-/// <param name="lifecycleOptions">Centrally validated native lifecycle policy.</param>
-/// <param name="nativeExecutionOptions">Centrally validated native adapter execution policy.</param>
+/// <param name="lifecycleOptions">Centrally validated execution lifecycle policy.</param>
+/// <param name="runtimeExecutionOptions">Centrally validated execution adapter execution policy.</param>
 /// <param name="diagnosticOptions">Centrally validated privacy-preserving diagnostic bounds.</param>
 /// <param name="admissionOptions">Centrally validated isolated node and observer admission profile.</param>
 /// <param name="clientOptions">Centrally validated SDK transport budget.</param>
 /// <param name="translationOptions">Centrally validated SDK expression budgets.</param>
 /// <param name="image">Optional database image reference included in the initial target profile.</param>
 /// <param name="peers">Optional peer HTTP clients used to observe replica copies; the target disposes distinct clients.</param>
-/// <param name="expectedNodes">Expected native silos and persisted copies for the selected comparison cell.</param>
+/// <param name="expectedNodes">Expected execution silos and persisted copies for the selected comparison cell.</param>
 /// <param name="provider">Borrowed clock; defaults to the system provider.</param>
 public sealed partial class KeyLoadTarget(HttpClient http, string apiKey, string runId,
-    IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<NativeComparisonExecutionOptions> nativeExecutionOptions,
-    IOptions<NativeComparisonDiagnosticOptions> diagnosticOptions,
+    IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<ComparisonExecutionOptions> runtimeExecutionOptions,
+    IOptions<ComparisonDiagnosticOptions> diagnosticOptions,
     IOptions<IsolatedKeyLoadAdmissionOptions> admissionOptions, IOptions<KeyLoadClientExecutionOptions> clientOptions,
     IOptions<QueryTranslationOptions> translationOptions, string? image = null,
     HttpClient[]? peers = null, int expectedNodes = KeyLoadTarget.ExpectedNodesDefault, TimeProvider? provider = null) : IDocumentComparisonTarget
@@ -43,7 +43,7 @@ public sealed partial class KeyLoadTarget(HttpClient http, string apiKey, string
     private const string SeedDocumentsAsyncSeedDocumentsText = "SeedDocuments";
     private const string SeedGraphAsyncSeedGraphText = "SeedGraph";
 
-    private readonly NativeComparisonExecutionOptions execution = NativeComparisonExecutionOptions.Require(nativeExecutionOptions).Value;
+    private readonly ComparisonExecutionOptions execution = ComparisonExecutionOptions.Require(runtimeExecutionOptions).Value;
 
     private readonly IOptions<HttpAdmissionLimits> httpAdmissionOptions = IsolatedKeyLoadAdmissionOptions.CreateHttpOptions(admissionOptions);
     private const string TransactionDomainId = "shared";
@@ -71,7 +71,7 @@ public sealed partial class KeyLoadTarget(HttpClient http, string apiKey, string
     public bool Supports(Scenario scenario) => scenario is Scenario.PointRead or Scenario.DocumentWrite or Scenario.VectorExact
         or Scenario.QueueCycle or Scenario.GraphNeighbors or Scenario.GraphTraverse or Scenario.StreamAppend or Scenario.StreamRead
         or Scenario.DocumentUpdate or Scenario.DocumentDelete;
-    /// <summary>Requires the selected native topology, checks persisted copy receipts and reads through every endpoint.</summary>
+    /// <summary>Requires the selected execution topology, checks persisted copy receipts and reads through every endpoint.</summary>
     /// <param name="dataset">The deterministic documents, vectors, graph edges, and workload options to provision.</param>
     /// <param name="cancellationToken">A token that cancels status checks and database operations.</param>
     /// <returns>A task that completes after seeding and replica observation.</returns>
@@ -138,7 +138,7 @@ public sealed partial class KeyLoadTarget(HttpClient http, string apiKey, string
     {
         if (scaled)
         {
-            await KeyLoadScaledCorpusSeeder.SeedAsync(client, partition, dataset.Documents, expectedNodeCount, nativeExecutionOptions, cancellationToken);
+            await KeyLoadScaledCorpusSeeder.SeedAsync(client, partition, dataset.Documents, expectedNodeCount, runtimeExecutionOptions, cancellationToken);
             return;
         }
         foreach (var document in dataset.Documents)
@@ -169,7 +169,7 @@ public sealed partial class KeyLoadTarget(HttpClient http, string apiKey, string
     /// <returns>A comparison session bound to this target and its benchmark partition.</returns>
     public Task<IComparisonSession> OpenSessionAsync(CancellationToken cancellationToken)
         => Task.FromResult<IComparisonSession>(new KeyLoadComparisonSession(client, partition, space, topK,
-            graphDepth, graphVertices, graphEdges, expectedCorpusCount, expectedNodeCount, lifecycleOptions, nativeExecutionOptions, translationOptions, provider: timeProvider));
+            graphDepth, graphVertices, graphEdges, expectedCorpusCount, expectedNodeCount, lifecycleOptions, runtimeExecutionOptions, translationOptions, provider: timeProvider));
     /// <summary>Disposes the distinct HTTP clients owned by this target.</summary>
     /// <returns>A value task that completes after client disposal.</returns>
     public async ValueTask DisposeAsync()

@@ -1,6 +1,6 @@
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree.IO;
-using KeyLoad.UnitTests.Features.ClusterRouting;
+using KeyLoad.UnitTests.Features.OrleansExecution;
 using TUnit.Assertions.Enums;
 
 namespace KeyLoad.UnitTests.Features.StorageRecovery;
@@ -29,7 +29,7 @@ internal static class MetadataEntryOpenFlow
         var files = owner.Files;
         var original = await files.CaptureStoreEntriesAsync();
         var path = files.HideFile(ZoneTreeExistingStoreFixture.IdentityFile);
-        RequestCqrsProbeNativeFifo.Create(path);
+        RequestCqrsProbeFifo.Create(path);
         var entry = OperatingSystem.IsMacOS() ? OfflineMacFileSystem.InspectPath(path) : OfflineLinuxFileSystem.InspectPath(path);
         var entries = Directory.GetFileSystemEntries(files.DirectoryPath);
         var mode = ReadUnixMode(path);

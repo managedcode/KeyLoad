@@ -7,15 +7,15 @@ namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 
 internal static class SqlModelViewClusterParityAssertions
 {
-    internal static async Task AssertEventRowsAsync(ImmutableArray<EventRecord> native, QueryPage page)
+    internal static async Task AssertEventRowsAsync(ImmutableArray<EventRecord> execution, QueryPage page)
     {
-        await Assert.That(native.Length).IsEqualTo(SqlModelViewClusterScenario.ExpectedEvents.Length);
-        await Assert.That(page.Rows.Length).IsEqualTo(native.Length);
+        await Assert.That(execution.Length).IsEqualTo(SqlModelViewClusterScenario.ExpectedEvents.Length);
+        await Assert.That(page.Rows.Length).IsEqualTo(execution.Length);
         await Assert.That(page.Cursor).IsNull();
         await Assert.That(page.AccessPath).IsEqualTo("model-scan:events");
-        for (var index = 0; index < native.Length; index++)
+        for (var index = 0; index < execution.Length; index++)
         {
-            var record = native[index];
+            var record = execution[index];
             var row = page.Rows[index];
             var expected = SqlModelViewClusterScenario.ExpectedEvents[index];
             await Assert.That(record.Data).IsEqualTo(expected);
@@ -43,9 +43,9 @@ internal static class SqlModelViewClusterParityAssertions
     }
 
     internal static async Task AssertQueueRowsAsync(
-        (MessageInspection First, MessageInspection Second) native, QueryPage page)
+        (MessageInspection First, MessageInspection Second) execution, QueryPage page)
     {
-        var expected = new[] { native.First, native.Second };
+        var expected = new[] { execution.First, execution.Second };
         await Assert.That(page.Rows.Length).IsEqualTo(expected.Length);
         await Assert.That(page.Cursor).IsNull();
         await Assert.That(page.AccessPath).IsEqualTo("model-scan:queue-messages");

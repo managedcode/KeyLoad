@@ -3,7 +3,7 @@ namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 internal static class SqlUnicodeStringClusterControls
 {
     internal static async Task InvalidAsync(ClusterFixture fixture, SqlNullDistinctClusterState state,
-        global::KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsClusterCallers root, CancellationToken token)
+        global::KeyLoad.IntegrationTests.Features.OrleansExecution.RequestCqrsClusterCallers root, CancellationToken token)
     {
         var before = await SqlNullDistinctClusterImage.ReadAsync(root, state, token);
         foreach (var clause in new[] { "label = U&'\\123'",
@@ -29,7 +29,7 @@ internal static class SqlUnicodeStringClusterControls
     }
 
     internal static async Task RequireAsync(ClusterFixture fixture, SqlNullDistinctClusterState state,
-        global::KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsClusterCallers root,
+        global::KeyLoad.IntegrationTests.Features.OrleansExecution.RequestCqrsClusterCallers root,
         ErrorCode code, CancellationToken token)
     {
         var before = await SqlNullDistinctClusterImage.ReadAsync(root, state, token);

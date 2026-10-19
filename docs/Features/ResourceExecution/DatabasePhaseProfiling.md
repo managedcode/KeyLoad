@@ -1,20 +1,20 @@
 # DatabasePhaseProfiling within ResourceExecution
 
-Status: Accepted contract; implementation and native measurements pending.
+Status: Accepted contract; implementation and measurements pending.
 Decision [ADR-063](../../ADR/ADR-063-bounded-database-phase-profiling.md).
 Requirements and acceptance: this Feature and the ADR-063 implementation contract.
 REQ-RESOURCE-003 actual preserved phase ownership → AC-DBPROF-001/003.
 REQ-RESOURCE-004 bounded callback-free bank → AC-DBPROF-002/004.
 REQ-RESOURCE-005 private honest node capture → AC-DBPROF-005/007.
 REQ-RESOURCE-006 correctness/measured overhead → AC-DBPROF-006/008.
-Existing REQ-RESOURCE-002 and REQ-MP-005 require actual native evidence.
+Existing REQ-RESOURCE-002 and REQ-MP-005 require actual evidence.
 
 REQ-CQ-013 / AC-CQ-034/035/038 map to this
-primitive's operational reservation and retry policy. ADR-113 freezes native
+primitive's operational reservation and retry policy. ADR-113 freezes execution
 DatabasePhaseExecutionOptions registration, pre-ownership validation and explicit
 BCL scalar projection: disabled mode by default, stripes1/2/4 (default4), attempts
 1..4 (default4), no primitive fallback. DatabasePhase* TUnit cases cover nondefault
-native binding, invalid admission, actual bounded allocation, concurrency and
+binding, invalid admission, actual bounded allocation, concurrency and
 unchanged snapshots. Fixed bank dimensions, metadata and128KiB remain upper guarantees;
 enabled-startup/overhead/export/cluster qualification remains separately pending.
 
@@ -23,7 +23,7 @@ sequenceDiagram
     participant Operation as Actual operation owner
     participant Bank as Fixed callback-free bank
     participant Export as Independent cold exporter
-    participant Evidence as Native fixture evidence
+    participant Evidence as fixture evidence
     Operation->>Bank: Begin and one completed phase update
     Export->>Bank: Bounded cumulative non-atomic snapshot
     Bank-->>Export: Immutable counters timing bounds quality
@@ -53,14 +53,14 @@ A replicated write is ordinary Orleans calls to the ZoneTree owners on ReplicaCo
 |---|---|
 |00 PublicAuthenticationDispatch|CredentialResolver actual node ExecuteRead await; exclude next middleware.|
 |01 PublicOperationDispatch|CanonicalOperationGateway actual node Execute await.|
-|02 AuthorizedAuthenticationBarrier|Verified authentication's native coordinator ReadBarrierAsync await.|
-|03 AuthorizedOperationBarrier|Verified operation's separate native coordinator ReadBarrierAsync await.|
+|02 AuthorizedAuthenticationBarrier|Verified authentication's coordinator ReadBarrierAsync await.|
+|03 AuthorizedOperationBarrier|Verified operation's separate coordinator ReadBarrierAsync await.|
 |04 AuthorizedReadCapability|Verified grain capability call/result; excludes encoding.|
 |27 ProviderReadGateWait|Actual Store.Read EnterReadLock to acquire/failure.|
 |28 ProviderWriteGateWait|Actual Store.Commit EnterWriteLock to acquire/failure.|
 |29 ProviderWriteGateHold|Commit acquire through original ExitWriteLock; no-change calls included.|
 |30 AtomicJournalWriteFlush|Existing header/payload writes through Flush(true), inside original poison try.|
-|31 NativeTreeMutation|Actual Runtime.Apply cache/value/native Sync-WAL/tree work; not isolated native fsync.|
+|31 TreeMutation|Actual Runtime.Apply cache/value/Sync-WAL/tree work; not isolated fsync.|
 
 ## Acceptance, methodology and evidence
 

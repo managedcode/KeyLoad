@@ -6,7 +6,7 @@ using Orleans.Concurrency;
 
 namespace KeyLoad.Clustering;
 
-/// <summary>Bounded queue events are flushed by native timers; persisted due records survive activation loss.</summary>
+/// <summary>Bounded queue events are flushed by execution timers; persisted due records survive activation loss.</summary>
 [StatelessWorker]
 internal sealed class RecurringDueWorkerGrain(BackgroundStorageClient storage,
     TimeProvider clock, IOptions<DueCoordinationOptions> options, IOptions<BackgroundWorkerOptions> batching,

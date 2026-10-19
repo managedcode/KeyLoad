@@ -18,11 +18,11 @@ One codec enables deterministic storage ordering, scans, and independent provide
 
 1. Freeze namespace allocation, type ordering, escaping, null/missing representation, and version vectors before introducing a new key family.
 2. Add golden ordering/round-trip/collision tests for each current resource key plus unknown-version rejection; include range lower/upper-bound and malformed-input cases. Tests exercise only the accepted current format.
-3. Implement codec changes only in `src/KeyLoad.Abstractions/Storage/` and shared Core key builders in `src/KeyLoad.Core/StorageRecovery/`; feature-owned key construction stays in its slice.
+3. Implement codec changes only in `src/KeyLoad.Abstractions/Storage/` and shared Core key builders in `src/KeyLoad.Core/StorageExecution/`; feature-owned key construction stays in its slice.
 4. The current codec has one reader and writer. Unsupported versions and malformed encodings fail closed; no alternate reader or rewrite path is permitted.
 5. GitHub CI runs storage TUnit and recovery/open-existing-store checks; feature and storage owners join on golden fixtures and exact format IDs.
 
-Dependencies: [ADR-001](ADR-001-partition-identity-affinity.md), [ADR-006](ADR-006-strict-derived-indexes.md), and [ADR-008](ADR-008-backup-log-retention.md). Stop if ordering or current bytes are uncertain. Do not export provider-native types or infer qualification from source presence.
+Dependencies: [ADR-001](ADR-001-partition-identity-affinity.md), [ADR-006](ADR-006-strict-derived-indexes.md), and [ADR-008](ADR-008-backup-log-retention.md). Stop if ordering or current bytes are uncertain. Do not export provider-types or infer qualification from source presence.
 
 ```mermaid
 flowchart LR
@@ -38,7 +38,7 @@ flowchart LR
 This decision adds REQ-KEYCODEC-001..004 and AC-KEYCODEC-001..004 in
 [StorageRecovery](../Features/StorageRecovery.md). This freezes validation of
 the existing format; every byte emitted for a supported valid existing key
-remains unchanged. Identity digests, native aliases/Ids, current data epoch7, journals,
+remains unchanged. Identity digests, aliases/Ids, current data epoch7, journals,
 cluster and public wire DTOs remain unchanged. Unsupported data epochs fail closed.
 
 The v1 type order is missing10, null11, bool20, int64/normalized int30, decimal31,
@@ -78,7 +78,7 @@ owned key/value bytes at staging and preserves their committed content across
 caller/pool reuse and returned-result mutation. Its existing carriers are
 StorageMutation and KeyValueRecord with permanent aliases/Ids. The read result
 is an independently owned copy; this does not promise a deeply immutable CLR
-backing array. Test the actual authoritative storage isolation, native envelope
+backing array. Test the actual authoritative storage isolation, envelope
 roundtrip and reopen, rather than changing those carriers or adding a new API.
 
 Rollout is a homogeneous current-format build after qualification. No canonical

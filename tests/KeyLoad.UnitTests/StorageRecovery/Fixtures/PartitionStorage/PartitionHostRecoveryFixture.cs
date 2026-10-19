@@ -15,7 +15,7 @@ internal sealed class PartitionHostRecoveryFixture : IDisposable
     private const string AdminPrefix = "root.";
     private const int SecretBytes = 32;
     private const int NoFailures = 0;
-    private const string UncertainPriorOwner = "A prior native owner attempt is uncertain; retain its root.";
+    private const string UncertainPriorOwner = "A prior execution owner attempt is uncertain; retain its root.";
     private readonly List<PartitionHostRecoveryAttempt> attempts = [];
     private bool retainRoot;
     private readonly string directory;
@@ -110,11 +110,11 @@ internal sealed class PartitionHostRecoveryFixture : IDisposable
         {
             logging.Dispose();
         }
-        catch (Exception failure) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        catch (Exception failure) when (KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(failure))
         {
             failures.Add(failure);
         }
-        catch (Exception failure) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        catch (Exception failure) when (!KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(failure))
         {
             failures.Add(failure);
         }

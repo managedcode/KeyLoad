@@ -6,8 +6,8 @@ namespace KeyLoad.UnitTests;
 internal sealed record CanonicalStoreCut(byte[] Identity, long Position, long Applied, string[] Rows)
 {
     internal static CanonicalStoreCut Read(TestDatabase database) => database.Store.Read(view =>
-        new CanonicalStoreCut(NativeSerialization.Serialize(database.Store.Identity), database.Store.Position,
-            view.ReadOwnedValue(KeySpace.AppliedBytes) is { } bytes ? NativeSerialization.Deserialize<long>(bytes) : 0L,
+        new CanonicalStoreCut(OrleansSerialization.Serialize(database.Store.Identity), database.Store.Position,
+            view.ReadOwnedValue(KeySpace.AppliedBytes) is { } bytes ? OrleansSerialization.Deserialize<long>(bytes) : 0L,
             CanonicalStoreImage.Bytes(view)));
 
     internal async Task RequireAsync(CanonicalStoreCut actual)

@@ -7,7 +7,7 @@ namespace KeyLoad.ComparisonTests.Features.TestInfrastructure;
 internal sealed class AspireFailureCancellationTests
 {
     [Test]
-    public async Task AcTest013TransientHealthAndNonterminalStatesPreserveNativeRunnerExit()
+    public async Task AcTest013TransientHealthAndNonterminalStatesPreserveRunnerExit()
     {
         await using var fixture = new AspireFailureNotificationFixture();
         using var deadline = AspireFailureAssertions.CreateDeadline();
@@ -34,7 +34,7 @@ internal sealed class AspireFailureCancellationTests
     [Test]
     [Arguments(false)]
     [Arguments(true)]
-    public async Task AcTest014CallerCancellationAndHostStoppingTerminateAndJoinNativeObservation(bool hostStopping)
+    public async Task AcTest014CallerCancellationAndHostStoppingTerminateAndJoinObservation(bool hostStopping)
     {
         await using var fixture = new AspireFailureNotificationFixture();
         using var deadline = AspireFailureAssertions.CreateDeadline();

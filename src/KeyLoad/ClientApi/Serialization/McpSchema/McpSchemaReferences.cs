@@ -3,7 +3,7 @@ using System.Text.Json.Nodes;
 
 namespace KeyLoad.Server;
 
-/// <summary>Relocates native exporter local references only through JSON Schema positions.</summary>
+/// <summary>Relocates execution exporter local references only through JSON Schema positions.</summary>
 internal static class McpSchemaReferences
 {
     private static readonly FrozenSet<string> Maps =
@@ -19,7 +19,7 @@ internal static class McpSchemaReferences
             McpSchemaKeywords.ContentSchema }.ToFrozenSet(StringComparer.Ordinal);
 
     /// <summary>Rebases one exported graph; default/const/enum/examples remain untouched application data.</summary>
-    /// <param name="schema">Native exported schema graph to relocate.</param>
+    /// <param name="schema">Execution exported schema graph to relocate.</param>
     /// <param name="prefix">Root-local pointer at which the graph will be embedded.</param>
     internal static void Rebase(JsonNode schema, string prefix)
     {

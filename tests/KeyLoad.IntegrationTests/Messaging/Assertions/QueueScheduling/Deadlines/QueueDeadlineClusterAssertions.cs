@@ -1,5 +1,5 @@
 using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.ClusterRouting;
+using KeyLoad.IntegrationTests.Features.OrleansExecution;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
 
 namespace KeyLoad.IntegrationTests.Features.Messaging;
@@ -39,6 +39,6 @@ internal static class QueueDeadlineClusterAssertions
             await Assert.That(actual.Metadata.State).IsEqualTo(MessageState.Scheduled);
             await Task.Delay(DueRecurringClusterProtocol.PollInterval, TimeProvider.System, token);
         }
-        throw new TimeoutException("The authorized native queue deadline did not advance within its original due progress window.");
+        throw new TimeoutException("The authorized execution queue deadline did not advance within its original due progress window.");
     }
 }

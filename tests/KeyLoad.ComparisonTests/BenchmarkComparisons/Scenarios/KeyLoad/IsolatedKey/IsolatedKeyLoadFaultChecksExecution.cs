@@ -2,7 +2,7 @@ using KeyLoad.Comparisons;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
-/// <summary>Keeps native phase and cleanup failures coded while preserving each evidence and restoration attempt.</summary>
+/// <summary>Keeps execution phase and cleanup failures coded while preserving each evidence and restoration attempt.</summary>
 internal static class IsolatedKeyLoadFaultChecksExecution
 {
     internal static async Task RunAsync(Func<Task> action)

@@ -1,10 +1,10 @@
 namespace KeyLoad.Storage.ZoneTree;
 
-/// <summary>Rejects files and symbolic links in the owned native backup destination path.</summary>
+/// <summary>Rejects files and symbolic links in the owned execution backup destination path.</summary>
 internal static class ZoneTreeBackupPathValidation
 {
     private const int NoFileAttributes = 0;
-    private const string InvalidTarget = "The native backup destination is not a regular directory path.";
+    private const string InvalidTarget = "The execution backup destination is not a regular directory path.";
 
     internal static void Require(string target)
     {

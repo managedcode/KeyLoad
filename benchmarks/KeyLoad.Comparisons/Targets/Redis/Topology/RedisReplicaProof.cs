@@ -14,7 +14,7 @@ internal static class RedisReplicaProof
     private const string ErrorReplicaDistinct = "RedisReplicaEndpointsNotDistinct";
     private const string ErrorAof = "RedisAofAlwaysRequired";
     private const string SingleState = "single primary";
-    private const string ReplicatedState = "single primary with verified native direct replicas";
+    private const string ReplicatedState = "single primary with verified execution direct replicas";
 
     public static ConfigurationOptions CreateOptions(string connectionString)
     {
@@ -26,7 +26,7 @@ internal static class RedisReplicaProof
     public static Task<RedisNodeIdentity> ReadIdentityAsync(ConnectionMultiplexer connection, EndPoint endpoint, CancellationToken token)
         => RedisNodeIdentity.ReadAsync(connection.GetServer(endpoint), CommandFlags.DemandMaster, token);
 
-    public static async Task<ClusterEvidence> VerifyAsync(ConnectionMultiplexer primary, string[] replicaStrings, ComparisonTopology topology, RedisNodeIdentity primaryIdentity, string probeKey, string payload, IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<NativeComparisonDiagnosticOptions> diagnosticOptions, TimeProvider timeProvider, CancellationToken token)
+    public static async Task<ClusterEvidence> VerifyAsync(ConnectionMultiplexer primary, string[] replicaStrings, ComparisonTopology topology, RedisNodeIdentity primaryIdentity, string probeKey, string payload, IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<ComparisonDiagnosticOptions> diagnosticOptions, TimeProvider timeProvider, CancellationToken token)
     {
         const int AdjacentElementOffset = 1;
         const int NoObservedItems = 0;
@@ -41,7 +41,7 @@ internal static class RedisReplicaProof
             throw new ComparisonFailureException(ErrorEndpoints);
         }
 
-        var primaryEndpoint = RedisNativeProtocol.RequirePrimaryEndpoint(primary);
+        var primaryEndpoint = RedisProtocol.RequirePrimaryEndpoint(primary);
         var primaryServer = primary.GetServer(primaryEndpoint);
         await VerifyAofAsync(primaryServer, CommandFlags.DemandMaster, token);
         await VerifyPrimaryAsync(primaryServer, requiredReplicas, token);
@@ -82,7 +82,7 @@ internal static class RedisReplicaProof
     {
         const int SingleItemCount = 1;
 
-        var endpoint = RedisNativeProtocol.RequirePrimaryEndpoint(connection);
+        var endpoint = RedisProtocol.RequirePrimaryEndpoint(connection);
         await VerifyPrimaryAsync(connection.GetServer(endpoint), ComparisonTopologies.NodeCount(topology) - SingleItemCount, token);
     }
 
@@ -105,11 +105,11 @@ internal static class RedisReplicaProof
     {
         const int NoItems = 0;
 
-        var info = await RedisNativeProtocol.ReadInfoAsync(server, RedisNativeProtocol.ReplicationSection, CommandFlags.DemandMaster, token);
-        var role = await RedisNativeProtocol.ReadRoleAsync(server, CommandFlags.DemandMaster, token);
-        if (info.GetValueOrDefault(RedisNativeProtocol.RoleField) != RedisNativeProtocol.MasterRole ||
-            RedisNativeProtocol.ParseInteger(info, RedisNativeProtocol.ReplicaCountField) != expectedReplicas ||
-            role.Length == NoItems || role[RedisNativeProtocol.RoleNameIndex].ToString() != RedisNativeProtocol.MasterRole)
+        var info = await RedisProtocol.ReadInfoAsync(server, RedisProtocol.ReplicationSection, CommandFlags.DemandMaster, token);
+        var role = await RedisProtocol.ReadRoleAsync(server, CommandFlags.DemandMaster, token);
+        if (info.GetValueOrDefault(RedisProtocol.RoleField) != RedisProtocol.MasterRole ||
+            RedisProtocol.ParseInteger(info, RedisProtocol.ReplicaCountField) != expectedReplicas ||
+            role.Length == NoItems || role[RedisProtocol.RoleNameIndex].ToString() != RedisProtocol.MasterRole)
         {
             throw new ComparisonFailureException(ErrorPrimaryRole);
         }
@@ -147,9 +147,9 @@ internal static class RedisReplicaProof
 
     private static EndPoint[] VerifyReplicaEndpoints(EndPoint primary, ConnectionMultiplexer[] replicas)
     {
-        var endpoints = replicas.Select(connection => RedisNativeProtocol.ConfiguredEndpoint(connection, ErrorReplicaEndpoint)).ToArray();
-        if (endpoints.Select(RedisNativeProtocol.EndpointIdentity).Distinct(StringComparer.OrdinalIgnoreCase).Count() != replicas.Length ||
-            endpoints.Any(endpoint => RedisNativeProtocol.SameEndpoint(endpoint, primary)))
+        var endpoints = replicas.Select(connection => RedisProtocol.ConfiguredEndpoint(connection, ErrorReplicaEndpoint)).ToArray();
+        if (endpoints.Select(RedisProtocol.EndpointIdentity).Distinct(StringComparer.OrdinalIgnoreCase).Count() != replicas.Length ||
+            endpoints.Any(endpoint => RedisProtocol.SameEndpoint(endpoint, primary)))
         {
             throw new ComparisonFailureException(ErrorReplicaDistinct);
         }
@@ -166,7 +166,7 @@ internal static class RedisReplicaProof
         for (var index = FirstElementIndex; index < replicas.Length; index++)
         {
             var endpoint = endpoints[index];
-            if (RedisNativeProtocol.SameEndpoint(endpoint, primary))
+            if (RedisProtocol.SameEndpoint(endpoint, primary))
             {
                 throw new ComparisonFailureException(ErrorReplicaIsPrimary);
             }
@@ -199,22 +199,22 @@ internal static class RedisReplicaProof
     {
         const int SingleItemCount = 1;
 
-        if (RedisNativeProtocol.SameEndpoint(endpoint, primary))
+        if (RedisProtocol.SameEndpoint(endpoint, primary))
         {
             throw new ComparisonFailureException(ErrorReplicaIsPrimary);
         }
 
         await VerifyAofAsync(server, CommandFlags.DemandReplica, token);
-        var info = await RedisNativeProtocol.ReadInfoAsync(server, RedisNativeProtocol.ReplicationSection, CommandFlags.DemandReplica, token);
-        var role = await RedisNativeProtocol.ReadRoleAsync(server, CommandFlags.DemandReplica, token);
-        var host = info.GetValueOrDefault(RedisNativeProtocol.MasterHostField);
-        var port = RedisNativeProtocol.ParseInteger(info, RedisNativeProtocol.MasterPortField);
-        if (info.GetValueOrDefault(RedisNativeProtocol.RoleField) != RedisNativeProtocol.ReplicaRole ||
-            info.GetValueOrDefault(RedisNativeProtocol.LinkField) != RedisNativeProtocol.LinkUp || host is null || port < SingleItemCount ||
-            role.Length < RedisNativeProtocol.RoleReplicaResponseLength || role[RedisNativeProtocol.RoleNameIndex].ToString() != RedisNativeProtocol.ReplicaRole ||
-            !StringComparer.OrdinalIgnoreCase.Equals(host, role[RedisNativeProtocol.RoleHostIndex].ToString()) ||
-            !int.TryParse(role[RedisNativeProtocol.RolePortIndex].ToString(), out var rolePort) || rolePort != port ||
-            !RedisNativeProtocol.EndpointMatches(primary, host, port))
+        var info = await RedisProtocol.ReadInfoAsync(server, RedisProtocol.ReplicationSection, CommandFlags.DemandReplica, token);
+        var role = await RedisProtocol.ReadRoleAsync(server, CommandFlags.DemandReplica, token);
+        var host = info.GetValueOrDefault(RedisProtocol.MasterHostField);
+        var port = RedisProtocol.ParseInteger(info, RedisProtocol.MasterPortField);
+        if (info.GetValueOrDefault(RedisProtocol.RoleField) != RedisProtocol.ReplicaRole ||
+            info.GetValueOrDefault(RedisProtocol.LinkField) != RedisProtocol.LinkUp || host is null || port < SingleItemCount ||
+            role.Length < RedisProtocol.RoleReplicaResponseLength || role[RedisProtocol.RoleNameIndex].ToString() != RedisProtocol.ReplicaRole ||
+            !StringComparer.OrdinalIgnoreCase.Equals(host, role[RedisProtocol.RoleHostIndex].ToString()) ||
+            !int.TryParse(role[RedisProtocol.RolePortIndex].ToString(), out var rolePort) || rolePort != port ||
+            !RedisProtocol.EndpointMatches(primary, host, port))
         {
             diagnostics.WriteFailure(endpoint, primary, info, role);
             throw new ComparisonFailureException(ErrorReplicaIdentity);

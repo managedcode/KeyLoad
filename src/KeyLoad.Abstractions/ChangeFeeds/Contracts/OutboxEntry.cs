@@ -11,6 +11,6 @@ namespace KeyLoad;
 /// <param name="After">The resulting document value when the mutation targets a document.</param>
 /// <remarks>The system outbox is separate from business topics, event streams, and the private redo journal.</remarks>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.OutboxEntry)]
+[Orleans.Alias(ContractAliases.OutboxEntry)]
 public sealed record OutboxEntry([property: Orleans.Id(0)] long Sequence, [property: Orleans.Id(1)] int Ordinal, [property: Orleans.Id(2)] CommitToken Commit, [property: Orleans.Id(3)] DateTimeOffset CommittedAt,
     [property: Orleans.Id(4)] Mutation Mutation, [property: Orleans.Id(5)] MutationReceipt Receipt, [property: Orleans.Id(6)] DocumentRecord? Before = null, [property: Orleans.Id(7)] DocumentRecord? After = null);

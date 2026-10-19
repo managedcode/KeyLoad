@@ -22,7 +22,7 @@ internal sealed class QueryObservedWorkBudgetTests
     [Arguments(true, false, true)]
     [Arguments(true, true, false)]
     [Arguments(true, true, true)]
-    public async Task AcMp003ObservedNativeQueryWorkRejectsWithoutPartialPageThenReturnsCompleteHealthyPage(
+    public async Task AcMp003ObservedQueryWorkRejectsWithoutPartialPageThenReturnsCompleteHealthyPage(
         bool typed, bool indexed, bool cancel)
     {
         var clock = new QueryObservedWorkClock();

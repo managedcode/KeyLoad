@@ -42,9 +42,9 @@ internal static class OpenSearchIndex
     }
 
     internal static async Task SeedAsync(HttpClient client, string index, IReadOnlyList<BenchmarkDocument> documents, int expectedCopies,
-        IOptions<NativeComparisonExecutionOptions> executionOptions, CancellationToken cancellationToken)
+        IOptions<ComparisonExecutionOptions> executionOptions, CancellationToken cancellationToken)
     {
-        var batchSize = NativeComparisonExecutionOptions.Require(executionOptions).Value.OpenSearchBulkBatchSize;
+        var batchSize = ComparisonExecutionOptions.Require(executionOptions).Value.OpenSearchBulkBatchSize;
         foreach (var batch in documents.Chunk(batchSize))
         {
             var lines = new List<string>(batch.Length * BulkLinesPerDocument);

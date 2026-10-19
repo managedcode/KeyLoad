@@ -9,7 +9,7 @@ internal static class EventQueueStateEnvelopeQueueContinuation
     private const string PutMutation = "putDocument";
     private const string InboxFamily = "inbox";
     private const string RowSeparator = ":";
-    private const string MissingReceive = "The original native receive is absent from its retained history.";
+    private const string MissingReceive = "The original execution receive is absent from its retained history.";
 
     internal static async Task ClaimAsync(EventQueueStateEnvelopeFixture fixture, EventQueueStateEnvelopeState state,
         bool scheduled)
@@ -87,7 +87,7 @@ internal static class EventQueueStateEnvelopeQueueContinuation
     private static string[] Domain(EventQueueStateEnvelopeFixture fixture, Guid id)
     {
         var outcome = Convert.ToHexString(KeySpace.PartitionOutcome(fixture.Partition, Root, id)) + RowSeparator;
-        var locator = Convert.ToHexString(KeySpace.OutcomeLocatorV2(fixture.Partition, Root, id)) + RowSeparator;
+        var locator = Convert.ToHexString(KeySpace.OutcomeLocator(fixture.Partition, Root, id)) + RowSeparator;
         var clock = Convert.ToHexString(KeySpace.Clock.Span) + RowSeparator;
         return KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(fixture.Store)
             .Where(row => !row.StartsWith(outcome, StringComparison.Ordinal)

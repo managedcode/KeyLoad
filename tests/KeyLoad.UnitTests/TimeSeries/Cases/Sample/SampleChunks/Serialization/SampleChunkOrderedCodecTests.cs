@@ -5,7 +5,7 @@ namespace KeyLoad.UnitTests.Features.TimeSeries;
 internal sealed class SampleChunkOrderedCodecTests
 {
     [Test]
-    public async Task AcChunk001010OrderedApplyAndObservedReaderPreserveOriginalNativeWireAndAllValueBits()
+    public async Task AcChunk001010OrderedApplyAndObservedReaderPreserveOriginalWireAndAllValueBits()
     {
         var rows = SampleChunkTestData.FixedRecords();
         var options = UnitExecutionOptions.TimeSeriesExecution();

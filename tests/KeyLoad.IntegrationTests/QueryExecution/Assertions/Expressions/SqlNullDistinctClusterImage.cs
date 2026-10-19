@@ -2,7 +2,7 @@ namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 
 internal static class SqlNullDistinctClusterImage
 {
-    internal static async Task<string> ReadAsync(global::KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsClusterCallers root, SqlNullDistinctClusterState state, CancellationToken token)
+    internal static async Task<string> ReadAsync(global::KeyLoad.IntegrationTests.Features.OrleansExecution.RequestCqrsClusterCallers root, SqlNullDistinctClusterState state, CancellationToken token)
     {
         var documents = new List<DocumentReadResult>();
         foreach (var row in SqlNullOrderingClusterState.Rows)

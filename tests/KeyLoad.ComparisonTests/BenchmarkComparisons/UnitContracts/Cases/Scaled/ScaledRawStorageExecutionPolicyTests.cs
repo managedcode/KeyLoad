@@ -6,7 +6,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
-/// <summary>AC-CQ-034: observes configured mutable capacity on a genuine native ZoneTree owner.</summary>
+/// <summary>AC-CQ-034: observes configured mutable capacity on a genuine execution ZoneTree owner.</summary>
 [NotInParallel]
 internal sealed class ScaledRawStorageExecutionPolicyTests
 {
@@ -17,7 +17,7 @@ internal sealed class ScaledRawStorageExecutionPolicyTests
     [Arguments(1000, 1, null, 1002)]
     [Arguments(1000, 1, 1, 1001)]
     [Arguments(4, 1000, 1, 1000)]
-    public async Task BoundSlackReachesNativeCapacityAndPreservesAllSeededValuesAndResidenceAsync(
+    public async Task BoundSlackReachesCapacityAndPreservesAllSeededValuesAndResidenceAsync(
         int recordCount, int minimumRecords, int? slackRecords, int expectedCapacity)
     {
         var options = Bind(minimumRecords, slackRecords);
@@ -31,7 +31,7 @@ internal sealed class ScaledRawStorageExecutionPolicyTests
             engine.Initialize();
             directory = engine.Directory!;
             await Assert.That(Directory.Exists(directory)).IsTrue();
-            await Assert.That(engine.CloneNativeOptions().MutableSegmentMaxItemCount).IsEqualTo(expectedCapacity);
+            await Assert.That(engine.RuntimeCloneOptions().MutableSegmentMaxItemCount).IsEqualTo(expectedCapacity);
             for (var index = 0; index < recordCount; index++)
             {
                 engine.Upsert(index, arena.Value(index));
@@ -54,7 +54,7 @@ internal sealed class ScaledRawStorageExecutionPolicyTests
     [Arguments(0)]
     [Arguments(-1)]
     [Arguments(3)]
-    public async Task InvalidNativeSlackBindingRejectsBeforeOwnerFileIoAsync(int slackRecords)
+    public async Task InvalidSlackBindingRejectsBeforeOwnerFileIoAsync(int slackRecords)
     {
         var failure = Assert.ThrowsExactly<OptionsValidationException>(() => Bind(1, slackRecords));
         await Assert.That(failure.OptionsName).IsEqualTo(Options.DefaultName);
@@ -66,7 +66,7 @@ internal sealed class ScaledRawStorageExecutionPolicyTests
     [Arguments(0)]
     [Arguments(-1)]
     [Arguments(3)]
-    public async Task StandaloneNativeOwnerRejectsInvalidSlackBeforeInitializationAsync(int slackRecords)
+    public async Task StandaloneOwnerRejectsInvalidSlackBeforeInitializationAsync(int slackRecords)
     {
         var validOptions = Bind(1, null);
         var corpus = new ScaledRawStorageCorpus(RecordCount, PayloadBytes, validOptions);

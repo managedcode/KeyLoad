@@ -20,7 +20,7 @@ public sealed partial class DatabaseEngine
         var expectedExclusiveRevision = cursor.NextExclusiveRevision;
         bool Visit(ReadOnlySpan<byte> key, ReadOnlySpan<byte> value)
         {
-            var record = NativeSerialization.Deserialize<EventRecord>(value);
+            var record = OrleansSerialization.Deserialize<EventRecord>(value);
             if (record.Stream != stream || record.Revision <= lower || record.Revision >= upper
                 || record.Revision != expectedExclusiveRevision + (backward
                     ? -StreamTraversalProtocol.FirstRevision : StreamTraversalProtocol.FirstRevision)

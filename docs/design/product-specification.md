@@ -32,7 +32,7 @@ node-local journals.
 ## Cluster and execution concept
 
 The KeyLoad cluster is Microsoft Orleans
-([ADR-136](../ADR/ADR-136-native-orleans-partition-ownership.md)). Orleans does
+([ADR-136](../ADR/ADR-136-orleans-partition-ownership.md)). Orleans does
 all of the clustering: membership, silo discovery, failure detection, the
 distributed grain directory, placement, activation migration and repartitioning,
 internal communication (grain calls, Grain Service calls, Orleans streams),
@@ -50,9 +50,9 @@ membership, transport, placement or movement mechanism of its own.
   local files and typed Orleans calls between owners. Shared volumes expose the
   same paths to participating silos and require one open owner per mutable
   physical partition, joined close before reopening and no data copying.
-  [ADR-136](../ADR/ADR-136-native-orleans-partition-ownership.md) defines these
+  [ADR-136](../ADR/ADR-136-orleans-partition-ownership.md) defines these
   contracts and their open runtime and delivered-source qualification gates.
-- **Copies.** The writer finds the target silos through native Orleans membership
+- **Copies.** The writer finds the target silos through Orleans membership
   (`IClusterMembershipService` / `IManagementGrain`) and sends the write through
   ordinary Orleans calls to the ZoneTree owner Grain Services on
   `KeyLoad:ReplicaCount` silos. The write is acknowledged after every configured
@@ -109,7 +109,7 @@ Baseline end-to-end scenario: `Company → Project → Document → Chunk`. A do
 | Single node | One Orleans silo and one copy (`KeyLoad:SiloCount=1`, `KeyLoad:ReplicaCount=1`), local data directory | Development and single-node configurations without copy fault tolerance |
 | Cluster | `KeyLoad:SiloCount` Orleans silos, `KeyLoad:ReplicaCount` data copies (default 3), a ZoneTree owner on every silo | Main server topology, scaling and fault tolerance |
 
-External PostgreSQL, Redis, Elasticsearch, Kafka or a separate vector server are not required dependencies. PostgreSQL is used as a benchmark competitor. Optional embedded libraries may keep their own files in the KeyLoad directory. The base configuration is managed-first; a managed ANN implementation is qualified. USearch, with a C++ core and a C# binding, stays an optional research baseline. Transitive/native dependencies are checked separately. [S11][S12]
+External PostgreSQL, Redis, Elasticsearch, Kafka or a separate vector server are not required dependencies. PostgreSQL is used as a benchmark competitor. Optional embedded libraries may keep their own files in the KeyLoad directory. The base configuration is managed-first; a managed ANN implementation is qualified. USearch, with a C++ core and a C# binding, stays an optional research baseline. Transitive/dependencies are checked separately. [S11][S12]
 
 ### First release scope
 
@@ -141,7 +141,7 @@ Orleans offers distributed transactions for transactional grain state; integrati
 
 `ZoneTree.FullTextSearch` is the selected text index. It documents token/record indexing and boolean search; the reviewed README does not confirm BM25, so BM25 ranking is KeyLoad's responsibility on top of it. [S9]
 
-USearch has a C# SDK, vector search and save/load/view over a native C++ core. It stays a research baseline. The base managed-first deployment requires qualifying a separate managed ANN implementation; API, deletion, concurrency, persistence and memory ownership are verified against pinned source/package versions. [S11][S12]
+USearch has a C# SDK, vector search and save/load/view over a C++ core. It stays a research baseline. The base managed-first deployment requires qualifying a separate managed ANN implementation; API, deletion, concurrency, persistence and memory ownership are verified against pinned source/package versions. [S11][S12]
 
 RRF merges ranked results from different retrievers. It is a suitable starting scheme for KeyLoad hybrid ranking; specific weights and candidate windows are set by relevance tests. [S15]
 
@@ -194,7 +194,7 @@ reopen the shared files after actual release. Deactivation never deletes data.
 
 `CatalogService` stores collection/event/message schemas, TransactionDomain bindings, queue/subscription configuration, index generations and format versions as canonical database records; they are copied to the ZoneTree owners by the same path as other data.
 
-Orleans `[StatelessWorker]` grains run interchangeable leaf work and buffered pre-aggregation. Orleans creates and retires activations automatically for a logical pool key; individual activations are not addressable. Each activation may buffer events and flush on its typed native grain timer through the normal storage path. Multi-stage sessions and response streams belong to ordinary identities or actual storage owners. An in-memory buffer does not supply durable delivery. Nothing checks leadership.
+Orleans `[StatelessWorker]` grains run interchangeable leaf work and buffered pre-aggregation. Orleans creates and retires activations automatically for a logical pool key; individual activations are not addressable. Each activation may buffer events and flush on its typed grain timer through the normal storage path. Multi-stage sessions and response streams belong to ordinary identities or actual storage owners. An in-memory buffer does not supply durable delivery. Nothing checks leadership.
 
 One shared helper per identity kind creates every grain key and every object, counter and storage-key identifier; keys are case-sensitive.
 
@@ -202,9 +202,9 @@ One shared helper per identity kind creates every grain key and every object, co
 
 Every node starts as an Orleans silo with `KeyLoad:SiloCount`,
 `KeyLoad:ReplicaCount`, `KeyLoad:StorageMode`, its configured data path and the
-native clustering provider configured by Aspire. Orleans owns membership,
+clustering provider configured by Aspire. Orleans owns membership,
 discovery, failure detection, directory and placement. Isolated owners recover
-their files during native silo initialization. Shared storage opens only at its
+their files during silo initialization. Shared storage opens only at its
 ordinary database owner; other API nodes can route there without opening files.
 Database readiness checks the canonical owner through Orleans. Scaling adds
 silos; startup copy settings describe independent persisted stores. Shared mode
@@ -313,15 +313,15 @@ results and preserve their read cuts. These are approved contracts with open
 implementation and qualification gates, as recorded in
 [status.json](../implementation/status.json).
 
-Only ordinary Orleans calls copy isolated data. A partition grain applies its partition's commands in a defined order, finds the target silos through native Orleans membership (`IClusterMembershipService` / `IManagementGrain`) and sends every command to the ZoneTree owner Grain Services on `KeyLoad:ReplicaCount` silos. A write is acknowledged after durable local apply on every configured copy; for `ReplicaCount=3` all three must confirm, and `ReplicaCount=1` gives no copy fault tolerance ([ADR-143](../ADR/ADR-143-independent-silo-replica-topology.md)).
+Only ordinary Orleans calls copy isolated data. A partition grain applies its partition's commands in a defined order, finds the target silos through Orleans membership (`IClusterMembershipService` / `IManagementGrain`) and sends every command to the ZoneTree owner Grain Services on `KeyLoad:ReplicaCount` silos. A write is acknowledged after durable local apply on every configured copy; for `ReplicaCount=3` all three must confirm, and `ReplicaCount=1` gives no copy fault tolerance ([ADR-143](../ADR/ADR-143-independent-silo-replica-topology.md)).
 
-A native `ManagedCode.Communication.Command<DatabaseCommand>` has one stable `CommandId`, server-bound `UserId`, UTC `Timestamp` and generated canonical input. State-dependent CAS and unique checks run deterministically in apply order, so every copy gets the same result. A business-operation rejection is a stored result of a committed command.
+A execution `ManagedCode.Communication.Command<DatabaseCommand>` has one stable `CommandId`, server-bound `UserId`, UTC `Timestamp` and generated canonical input. State-dependent CAS and unique checks run deterministically in apply order, so every copy gets the same result. A business-operation rejection is a stored result of a committed command.
 
 A copy confirms a write only after its ZoneTree owner's required persistence barrier. One flush on one node is not enough for `LocalDurable`. Without confirmation from every configured copy the write is not acknowledged; a client timeout means an unknown outcome, which is checked or retried with the same CommandId.
 
 ### Activations and files
 
-Orleans placement, the distributed grain directory and activation migration/repartitioning manage only activations. Files, WAL/journals and file locks stay with their silo's ZoneTree owner; a migrated grain calls the ZoneTree owners through Orleans again. Grains that need locality use native `[Immovable]`; the rest keep native migration. Orleans does all clustering; KeyLoad adds no coordination protocol of its own.
+Orleans placement, the distributed grain directory and activation migration/repartitioning manage only activations. Files, WAL/journals and file locks stay with their silo's ZoneTree owner; a migrated grain calls the ZoneTree owners through Orleans again. Grains that need locality use execution `[Immovable]`; the rest keep migration. Orleans does all clustering; KeyLoad adds no coordination protocol of its own.
 
 ### Recovery and catch-up
 
@@ -367,7 +367,7 @@ Every vector field has Dimensions, Metric, ModelId/ModelVersion and NumericRepre
 
 Canonical vector bytes live next to the entity in the transactional storage namespace. The ANN structure is a derived projection. This allows rebuild, re-quantization and library replacement without losing the original vectors. Orleans `[StatelessWorker]` grains update the ANN projection: they buffer committed outbox events and on an Orleans timer write a batch through the normal grain → ZoneTree owner path, without checking leadership.
 
-Algorithms: exact SIMD search for ground truth, small collections and selective allowlists; a managed HNSW candidate with verified layout, save/load, concurrency, delete/reinsert and filtered retrieval. USearch may be an optional external comparison; its native core is not a mandatory dependency of the base configuration. Implementations and platform dependencies are qualified separately. [S11][S12][S42]
+Algorithms: exact SIMD search for ground truth, small collections and selective allowlists; a managed HNSW candidate with verified layout, save/load, concurrency, delete/reinsert and filtered retrieval. USearch may be an optional external comparison; its core is not a mandatory dependency of the base configuration. Implementations and platform dependencies are qualified separately. [S11][S12][S42]
 
 Raw float32 memory: `N × dimensions × 4 bytes`. For 1 000 000 vectors of 1536 components this is 6 144 000 000 bytes, about 5.72 GiB per copy. Three copies need about 17.17 GiB for raw vectors alone. The ANN graph, identifiers, documents, caches, segment metadata and temporary rebuild state come on top. This is a size calculation, independent of benchmark results.
 
@@ -478,9 +478,9 @@ Tenant isolation starts in KeyCodec, routing and query planning. Transport authe
 
 Request limits: document/request size, number of batch operations, fan-out, scanned records, top-k, vector dimensions, graph traversal, query memory, deadline. Reaching a limit yields an explicit outcome. An expensive full scan requires explicit opt-in or an administrative policy.
 
-Node budgets: total managed/native memory, WAL backlog, projection lag, compaction work, free disk headroom, open files, pending write queue, CPU concurrency. Admission control engages before OOM or a full disk. Every maintainer registers with the node-level scheduler.
+Node budgets: total managed/memory, WAL backlog, projection lag, compaction work, free disk headroom, open files, pending write queue, CPU concurrency. Admission control engages before OOM or a full disk. Every maintainer registers with the node-level scheduler.
 
-Observability: end-to-end p50/p95/p99, allocs/op, GC pause, CPU, RSS/native memory, bytes read/written, compaction amplification, copy lag, apply lag, projection lag, retry/conflict rate, recovery time and corruption indicators. By default, logs must not contain document/event/message payloads, raw sensitive headers or secrets. ACK/renew and delivery have resource reservations; messaging quotas complement query limits.
+Observability: end-to-end p50/p95/p99, allocs/op, GC pause, CPU, RSS/memory, bytes read/written, compaction amplification, copy lag, apply lag, projection lag, retry/conflict rate, recovery time and corruption indicators. By default, logs must not contain document/event/message payloads, raw sensitive headers or secrets. ACK/renew and delivery have resource reservations; messaging quotas complement query limits.
 
 Offline backup: stop admission → drain transactions/jobs → flush → close engine/maintainer → copy all authoritative files → manifest/checksum → reopen. Restore is tested into a clean directory, verifying canonical records and index invariants. A replicated cluster is backed up by the same local backup on each silo; a globally consistent cut across silos is not part of the current design.
 
@@ -532,7 +532,7 @@ KeyLoad's product hypothesis: shared API, routing and security, and one self-con
 
 The idea of "Erlang hosting the clients" is carried forward here with Microsoft Orleans. Erlang/BEAM is a separate technology and is not part of KeyLoad's target stack. ASP.NET Core accepts network connections; Orleans runs the internal actor operations.
 
-KeyLoad's base configuration is managed-first: storage, query planner, permissions, graph and search logic are in C#/.NET. For ANN, a managed implementation that passes separate quality and concurrency checks takes priority. USearch, with its C++ core, stays in the research matrix as an external reference. Shipping a native index/ML library in the distribution requires a separate decision. Transitive dependencies and compression providers are reviewed too; managed-first does not mean every package has already been audited. [S11][S12]
+KeyLoad's base configuration is managed-first: storage, query planner, permissions, graph and search logic are in C#/.NET. For ANN, a managed implementation that passes separate quality and concurrency checks takes priority. USearch, with its C++ core, stays in the research matrix as an external reference. Shipping a index/ML library in the distribution requires a separate decision. Transitive dependencies and compression providers are reviewed too; managed-first does not mean every package has already been audited. [S11][S12]
 
 ### 21.2. What we build on
 
@@ -599,11 +599,11 @@ SQL-like frontends have practical precedents: RavenDB RQL and SurrealQL. They sh
 | Q2 | Budgeted GROUP BY/aggregates; time windows; graph operators; authorized EVENTS/QUEUE_MESSAGES views |
 | Q3 | SEARCH HYBRID, named retrieval branches, RRF, candidate limits, index freshness and ranking diagnostics |
 | Q4 | Bounded equijoins, CTEs, prepared statements, query profiles, a meaningful set of SQL write statements |
-| Separate scopes outside these levels | Full T-SQL semantics, a native SQL wire protocol, ODBC/JDBC, arbitrary recursive SQL, global distributed joins and arbitrary UDFs |
+| Separate scopes outside these levels | Full T-SQL semantics, a SQL wire protocol, ODBC/JDBC, arbitrary recursive SQL, global distributed joins and arbitrary UDFs |
 
 A construct the parser accepts still passes a server-side capability check. An unsupported function, join or recursive query returns a diagnostic before execution. Automatically downloading a whole collection to the client for LINQ evaluation is forbidden.
 
-SQL text compatibility, SQL semantics, the native SQL wire protocol and BI-driver compatibility have separate acceptance suites. The first release claims only the explicitly implemented subset of KeyLoad SQL.
+SQL text compatibility, SQL semantics, the SQL wire protocol and BI-driver compatibility have separate acceptance suites. The first release claims only the explicitly implemented subset of KeyLoad SQL.
 
 ### 23.3. Parser
 
@@ -749,9 +749,9 @@ Each connected client has one connection grain ([ADR-125](../ADR/ADR-125-connect
 
 An Orleans activation runs one turn at a time. By default a request holds a non-reentrant activation until it completes; an await alone does not open the activation to the next request. Reentrancy allows turns to interleave; it does not create CPU parallelism inside one activation. [S18][S19]
 
-The connection grain therefore runs independent operations in bounded call-local contexts, and native scheduling is chosen per method ([ADR-110](../ADR/ADR-110-native-orleans-execution-primitives.md)). One slow request must not delay all of that client's requests.
+The connection grain therefore runs independent operations in bounded call-local contexts, and scheduling is chosen per method ([ADR-110](../ADR/ADR-110-orleans-execution-primitives.md)). One slow request must not delay all of that client's requests.
 
-StatelessWorker grains use one helper-created logical key per pool. Orleans automatically creates and retires local activations with load; individual activations are not addressable. They handle interchangeable work and activation-local buffered batches flushed on native timers. Storage access follows the typed grain → ZoneTree owner path. [S20]
+StatelessWorker grains use one helper-created logical key per pool. Orleans automatically creates and retires local activations with load; individual activations are not addressable. They handle interchangeable work and activation-local buffered batches flushed on timers. Storage access follows the typed grain → ZoneTree owner path. [S20]
 
 ### 24.4. Response and cursor
 
@@ -769,7 +769,7 @@ The internal model separates `UnboundQuery`, `BoundQuery`, `AuthorizedLogicalPla
 
 `IQueryBinder` binds names/paths to catalog field IDs. `IQueryAuthorizer` checks field use and adds the trusted row policy. `IQueryPlanner` selects the operations. `IShardQueryExecutor` runs a fragment over a leased committed view. `IResultProjector` applies the permitted projection and masking. `IQueryGovernor` controls actual cost.
 
-`Candidate` contains the EntityRef, document revision, branch ID, native score and the source generation/position. A shard-local ordinal is valid only inside a fragment and its generation. External results and cross-shard merges use the full EntityRef.
+`Candidate` contains the EntityRef, document revision, branch ID, score and the source generation/position. A shard-local ordinal is valid only inside a fragment and its generation. External results and cross-shard merges use the full EntityRef.
 
 ### 25.2. Physical operators
 
@@ -980,7 +980,7 @@ Tenant + database + catalog resource binding + partition key
                          │
                 Logical partition grain
                          │
-       Native Orleans membership → ReplicaCount silos
+       Orleans membership → ReplicaCount silos
                          │
            Orleans calls → ZoneTree owners on those silos
 ```
@@ -1166,7 +1166,7 @@ A client-provided sensitivity hint may raise classification only under a defined
 
 A schema classification change invalidates query plans and the affected projection generations. Sensitive text that has already entered postings/stored snippets is removed, or gets a separate authorized index, before serving. Derived embeddings carry source-field lineage; an unsafe space stops serving until a rebuild or a permission correction.
 
-Raw data may remain in the WAL, older revisions, snapshots and backups until retention/purge. Administrative logical deletion does not promise immediate physical erasure of every copy. Purge jobs have a scope, retention status and audit. Field masking is not applied as a transformation of data copies; copies travel only through native Orleans calls, and the raw backup destination has a privileged authenticated boundary.
+Raw data may remain in the WAL, older revisions, snapshots and backups until retention/purge. Administrative logical deletion does not promise immediate physical erasure of every copy. Purge jobs have a scope, retention status and audit. Field masking is not applied as a transformation of data copies; copies travel only through Orleans calls, and the raw backup destination has a privileged authenticated boundary.
 
 ### 30.7. Minimal privacy test suite
 
@@ -1188,7 +1188,7 @@ First remove unnecessary fan-out and redundant reads. Then reduce materializatio
 
 Late materialization passes IDs, revisions and scores between operators. JSON is read only for final hits or for an allowed residual predicate. Index covering fields are used only when their classification allows that use.
 
-A `RecordBatch` executor may hold the required typed columns for a few hundred rows. This is an execution layout; the canonical payload stays JSON. Batch sizes 128/256/512 are benchmark candidates. Large buffers have lifetime/lease contracts; native/managed RSS and allocation pressure are measured together.
+A `RecordBatch` executor may hold the required typed columns for a few hundred rows. This is an execution layout; the canonical payload stays JSON. Batch sizes 128/256/512 are benchmark candidates. Large buffers have lifetime/lease contracts; execution/managed RSS and allocation pressure are measured together.
 
 The plan cache key contains the normalized AST, schema/index versions, field-policy shape and ranking profile. Principal-specific allowlists are stored separately with the policy epoch. The plan cache holds no literal PII and never carries grants between principals.
 
@@ -1304,9 +1304,9 @@ The arrows show logical relations; the compile-time dependency graph is enforced
 
 ### 34.2. Startup
 
-Each node: read configuration (`KeyLoad:SiloCount`, `KeyLoad:ReplicaCount`, data directory) → start the Orleans silo with the native clustering provider → in the native silo lifecycle, the ZoneTree owner Grain Service takes the exclusive data lock, checks the format and recovers canonical storage → load catalog/security → recover index generations → ready endpoints. Readiness is reported separately for canonical CRUD and for each search capability; public listening and accepted data traffic have different readiness checks. Orleans provides membership, discovery and the directory; there is no separate metadata transport.
+Each node: read configuration (`KeyLoad:SiloCount`, `KeyLoad:ReplicaCount`, data directory) → start the Orleans silo with the clustering provider → in the silo lifecycle, the ZoneTree owner Grain Service takes the exclusive data lock, checks the format and recovers canonical storage → load catalog/security → recover index generations → ready endpoints. Readiness is reported separately for canonical CRUD and for each search capability; public listening and accepted data traffic have different readiness checks. Orleans provides membership, discovery and the directory; there is no separate metadata transport.
 
-Native silo lifecycle stages and `IHostedService` components have a defined start/stop order. Shutdown stops admission, drains bounded jobs, completes writers/readers, persists checkpoints, and closes the maintainer and files. A shutdown timeout returns an explicit state; recovery on the next start does not rely on a clean shutdown.
+silo lifecycle stages and `IHostedService` components have a defined start/stop order. Shutdown stops admission, drains bounded jobs, completes writers/readers, persists checkpoints, and closes the maintainer and files. A shutdown timeout returns an explicit state; recovery on the next start does not rely on a clean shutdown.
 
 ## 36. ADRs and open engineering decisions
 
@@ -1317,7 +1317,7 @@ Native silo lifecycle stages and `IHostedService` components have a defined star
 | ADR-014 | RBAC + bounded row/field-use policies | Cross-interface enforcement |
 | ADR-015 | Sensitive fields omitted by default + derived lineage | Masks, mutation safety, index/reranker privacy |
 | ADR-018 | Global per-modality windows → weightedRrfV1 | Statistics scope, ties, candidate completeness |
-| ADR-019 | Managed-first ANN; exact oracle mandatory | Qualified library/code, native dependency audit |
+| ADR-019 | Managed-first ANN; exact oracle mandatory | Qualified library/code, dependency audit |
 | ADR-020 | One connection grain per client, independent query contexts | No per-client head-of-line blocking, bounded CPU |
 | ADR-021 | PostgreSQL as the primary performance baseline | Comparable quality/durability/security evidence |
 | ADR-022 | Current policy epoch at the request/page boundary | Revocation ACK, fail-closed cache proof |
@@ -1926,4 +1926,4 @@ The sources describe public capabilities; production qualification uses separate
 
 The sources are official documentation and selected GitHub README files. For ACORN, HNSW and NaviX only the abstracts are used; the paper experiments are not reproduced and their implementations are not audited. Online documentation can change, and publication/version labels do not replace pinned package/source qualification. Release pins and license checks are fixed in the central manifests.
 
-The sources do not establish performance, fault guarantees, the native dependency matrix or interoperability; these require running the systems. SDK/SQL examples are proposed designs. A framework's word-level exactly-once claim does not extend to arbitrary external effects; KeyLoad's contract is defined in Section 41.3.
+The sources do not establish performance, fault guarantees, the dependency matrix or interoperability; these require running the systems. SDK/SQL examples are proposed designs. A framework's word-level exactly-once claim does not extend to arbitrary external effects; KeyLoad's contract is defined in Section 41.3.

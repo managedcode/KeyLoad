@@ -33,15 +33,15 @@ internal static class ImplementationTermSymbols
             ? model.GetDeclaredSymbol(node, cancellationToken) : null;
     }
 
-    internal static bool Native(ISymbol? symbol) => symbol is not null &&
+    internal static bool Execution(ISymbol? symbol) => symbol is not null &&
         symbol.Locations.All(static location => !location.IsInSource) &&
-        ImplementationTermCatalog.NativeNamespace(symbol.ContainingNamespace?.ToDisplayString() ?? string.Empty);
+        ImplementationTermCatalog.RuntimeNamespace(symbol.ContainingNamespace?.ToDisplayString() ?? string.Empty);
 
-    internal static bool NativeLoggingProcessor(ISymbol? symbol) => symbol is not null &&
+    internal static bool LoggingProcessor(ISymbol? symbol) => symbol is not null &&
         symbol.Locations.All(static location => !location.IsInSource) &&
-        symbol.ContainingAssembly?.Name == ImplementationTermCatalog.NativeLoggingProcessorAssembly &&
-        ((symbol as INamedTypeSymbol ?? symbol.ContainingType)?.ToDisplayString() == ImplementationTermCatalog.NativeLoggingProcessorType ||
-         (symbol as INamedTypeSymbol ?? symbol.ContainingType)?.ToDisplayString() == ImplementationTermCatalog.NativeActivityProcessorType);
+        symbol.ContainingAssembly?.Name == ImplementationTermCatalog.LoggingProcessorAssembly &&
+        ((symbol as INamedTypeSymbol ?? symbol.ContainingType)?.ToDisplayString() == ImplementationTermCatalog.LoggingProcessorType ||
+         (symbol as INamedTypeSymbol ?? symbol.ContainingType)?.ToDisplayString() == ImplementationTermCatalog.ActivityProcessorType);
 
     internal static bool HasPath(ISymbol? symbol, string segment) => symbol is not null &&
         (symbol is INamedTypeSymbol { DeclaringSyntaxReferences.Length: > 0 } type
@@ -160,11 +160,11 @@ internal static class ImplementationTermSymbols
         }
         return type is INamedTypeSymbol named &&
             (named.TypeArguments.Any(argument => TypeMeans(argument, accepts, visited)) ||
-             named.AllInterfaces.Where(NativeModelContract).SelectMany(static contract => contract.TypeArguments)
+             named.AllInterfaces.Where(ModelContract).SelectMany(static contract => contract.TypeArguments)
                  .Any(argument => TypeMeans(argument, accepts, visited)));
     }
 
-    private static bool NativeModelContract(INamedTypeSymbol contract) =>
-        Native(contract) && Array.Exists(ImplementationTermCatalog.NativeModelContracts,
+    private static bool ModelContract(INamedTypeSymbol contract) =>
+        Execution(contract) && Array.Exists(ImplementationTermCatalog.ModelContracts,
             name => name == contract.ContainingNamespace.ToDisplayString() + "." + contract.MetadataName);
 }

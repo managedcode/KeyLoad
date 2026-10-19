@@ -40,7 +40,7 @@ internal static class CompositeIndexCrashScenario
         => new(store, new AuthorizationPolicy(), CrashExecutionOptions.DatabaseLimits(),
             CrashExecutionOptions.DueWork(), CrashExecutionOptions.EventSource(), CrashExecutionOptions.Messaging(),
             CrashExecutionOptions.GraphExecution(), CrashExecutionOptions.ChangeFeedExecution(),
-            CrashExecutionOptions.BlobExecution(), CrashExecutionOptions.NativeClaimsExecution(),
+            CrashExecutionOptions.RuntimeClaimsExecution(),
             CrashExecutionOptions.TimeSeriesExecution());
 
     private static async Task PrepareAsync(string directory, DatabaseEngine database)

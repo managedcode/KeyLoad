@@ -17,11 +17,11 @@ internal static class QueueMissingMetadataWholeFlow
             await KeyLoad.Server.ServerFailureObserver.ObserveAsync(
                 () => CompleteAsync(fixture, failures, token), failures);
         }
-        catch (Exception error) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+        catch (Exception error) when (global::KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(error))
         {
             failures.Add(error);
         }
-        catch (Exception error) when (!global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+        catch (Exception error) when (!global::KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(error))
         {
             failures.Add(error);
         }
@@ -35,7 +35,7 @@ internal static class QueueMissingMetadataWholeFlow
         var key = KeySpace.Partition(QueueLifecycleTestProtocol.MetadataSpace, state.Partition,
             state.Lane.Queue, QueueLifecycleConditionOperations.Source);
         var row = fixture.Store.Read(view => view.ReadOwnedValue(key))!;
-        await Assert.That(row.SequenceEqual(NativeSerialization.Serialize(new MessageMetadata(
+        await Assert.That(row.SequenceEqual(OrleansSerialization.Serialize(new MessageMetadata(
             QueueLifecycleConditionOperations.Source, MessageState.Ready, 0, 1, 1, null, null)))).IsTrue();
         var request = new ReceiveRequest(Guid.NewGuid(), state.Lane, MaxMessages: 1, LeaseSeconds: 30);
         var operation = fixture.Database.CreateCommand(OperationKind.Receive, request.RequestId, QueueLifecycleTestProtocol.Administrator, state.Time, JsonSerializer.Serialize(request, JsonDefaults.Options));

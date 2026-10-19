@@ -59,7 +59,7 @@ internal static class GraphIncomingRowAuthorityCold
     private static DatabaseEngine CreateOriginalEngine(TestDatabase database, ZoneTreeStore store)
     {
         var create = TestDatabaseEngineFactory.Capture(UnitExecutionOptions.DatabaseLimits(),
-            UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), null, database.Database.EvaluationClock);
+            UnitExecutionOptions.RuntimeClaimsExecution(), null, database.Database.EvaluationClock);
         return create(store);
     }
 

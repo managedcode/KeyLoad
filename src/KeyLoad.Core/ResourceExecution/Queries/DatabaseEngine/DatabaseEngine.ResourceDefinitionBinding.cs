@@ -5,12 +5,12 @@ namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
-    /// <summary>Resolves the current definition and its validated lifetime in the caller's existing native view.</summary>
+    /// <summary>Resolves the current definition and its validated lifetime in the caller's existing execution view.</summary>
     internal static ResourceDefinition BindResourceDefinition(IKeyValueView view, PartitionRef partition,
         string name, ResourceKind? kind = null)
         => ReadBoundResourcePair(view, partition, name, kind).Definition;
 
-    private static (ResourceDefinition Definition, ResourceLifetimeV1 Lifetime) ReadBoundResourcePair(
+    private static (ResourceDefinition Definition, ResourceLifetime Lifetime) ReadBoundResourcePair(
         IKeyValueView view, PartitionRef partition, string name, ResourceKind? kind)
     {
         ArgumentNullException.ThrowIfNull(partition);
@@ -23,7 +23,7 @@ public sealed partial class DatabaseEngine
         return pair;
     }
 
-    private static (ResourceDefinition Definition, ResourceLifetimeV1 Lifetime) ReadBoundResourceMetadataPair(
+    private static (ResourceDefinition Definition, ResourceLifetime Lifetime) ReadBoundResourceMetadataPair(
         IKeyValueView view, string tenantId, string databaseId, string transactionDomainId,
         string name, ResourceKind? kind)
     {

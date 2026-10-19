@@ -9,7 +9,7 @@ internal sealed class LargeStreamCleanupPermissionTrial
     private const string HealthyCapture = "healthy.bin";
     private const string Accepted = "accepted-large";
     private static readonly string[] OriginalFiles =
-        ["complete.bin", "complete.pid", "one-over.bin", "one-over.pid", "one-over.bin.native-process.json",
+        ["complete.bin", "complete.pid", "one-over.bin", "one-over.pid", "one-over.bin.execution-process.json",
             "healthy.bin", "healthy.pid"];
     private const UnixFileMode OwnedMode = UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute;
     private const UnixFileMode RefusalMode = UnixFileMode.UserRead | UnixFileMode.UserExecute;
@@ -49,7 +49,7 @@ internal sealed class LargeStreamCleanupPermissionTrial
         UnauthorizedAccessException? surfaced = null;
         try
         {
-            using var directory = new NativeArtifactTestDirectory();
+            using var directory = new ArtifactTestDirectory();
             root = directory.Root;
             try
             {
@@ -117,7 +117,7 @@ internal sealed class LargeStreamCleanupPermissionTrial
             initiating = error;
             throw;
         }
-        throw new InvalidOperationException("The native sealed-file permission refusal was not observed.");
+        throw new InvalidOperationException("The execution sealed-file permission refusal was not observed.");
     }
 
     private static async Task<Dictionary<string, (byte[] Bytes, UnixFileMode Mode)>> CaptureAsync(string root, CancellationToken token)
@@ -127,7 +127,7 @@ internal sealed class LargeStreamCleanupPermissionTrial
         if (entries.Length != OriginalFiles.Length || !entries.Order(StringComparer.Ordinal)
             .SequenceEqual(OriginalFiles.Order(StringComparer.Ordinal), StringComparer.Ordinal))
         {
-            throw new InvalidOperationException("The original native stream fixture inventory changed.");
+            throw new InvalidOperationException("The original execution stream fixture inventory changed.");
         }
         var files = new Dictionary<string, (byte[] Bytes, UnixFileMode Mode)>(StringComparer.Ordinal);
         foreach (var name in OriginalFiles)
@@ -137,7 +137,7 @@ internal sealed class LargeStreamCleanupPermissionTrial
             if ((File.GetAttributes(file) & (FileAttributes.ReparsePoint | FileAttributes.Directory)) != 0
                 || new FileInfo(file).LinkTarget is not null)
             {
-                throw new InvalidOperationException("The original native capture is not a regular owned file.");
+                throw new InvalidOperationException("The original execution capture is not a regular owned file.");
             }
             files.Add(name, (await File.ReadAllBytesAsync(file, token).ConfigureAwait(false), File.GetUnixFileMode(file)));
         }

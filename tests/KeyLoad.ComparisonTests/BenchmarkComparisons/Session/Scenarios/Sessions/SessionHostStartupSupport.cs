@@ -8,13 +8,13 @@ internal static class SessionHostStartupSupport
     internal const string Session = "Benchmarks__Session";
     internal const string Target = "Benchmarks__Target";
     internal const string Nodes = "Benchmarks__NodeCount";
-    internal const string Endpoints = "Benchmarks__Native__Endpoints__";
-    internal const string Connection = "Benchmarks__Native__ConnectionString";
-    internal const string Image = "Benchmarks__Native__Image";
-    internal const string User = "Benchmarks__Native__User";
-    internal const string Password = "Benchmarks__Native__Password";
-    internal const string Canary = "native-session-private-canary";
-    internal static readonly string[] NativeNames =
+    internal const string Endpoints = "Benchmarks__Execution__Endpoints__";
+    internal const string Connection = "Benchmarks__Execution__ConnectionString";
+    internal const string Image = "Benchmarks__Execution__Image";
+    internal const string User = "Benchmarks__Execution__User";
+    internal const string Password = "Benchmarks__Execution__Password";
+    internal const string Canary = "execution-session-private-canary";
+    internal static readonly string[] RuntimeNames =
         ["LoadMillion", "BuildIndexes", "SequentialRead", "RandomRead", "Search", "Mixed", "VerifyFinalState"];
 
     internal static Dictionary<string, string> ValidSettings() => new(StringComparer.OrdinalIgnoreCase)
@@ -23,12 +23,12 @@ internal static class SessionHostStartupSupport
         [Target] = "KeyLoad",
         [Nodes] = "3",
         [SessionFields.SessionEnvironment] = "keyload-n3",
-        [SessionFields.ProfileEnvironment] = "session-v1",
+        [SessionFields.ProfileEnvironment] = "session",
         [SessionFields.SourceEnvironment] = ComparisonExecutionIdentitySupport.Revision,
         [SessionFields.AdminEnvironment] = Canary,
         [SessionFields.OutputEnvironment] = Path.Combine(SessionNodeProcess.RepositoryRoot(), "artifacts", "qualification",
             "session-startup-" + Guid.NewGuid().ToString("N")),
-        [SessionFields.StorageEnvironment] = "native-session-startup-contract",
+        [SessionFields.StorageEnvironment] = "execution-session-startup-contract",
         [Endpoints + "0"] = "http://127.0.0.1:1",
         [Endpoints + "1"] = "http://127.0.0.1:2",
         [Endpoints + "2"] = "http://127.0.0.1:3",
@@ -49,7 +49,7 @@ internal static class SessionHostStartupSupport
         var text = result.Stdout + result.Stderr;
         await Assert.That(result.ExitCode).IsNotEqualTo(0);
         await Assert.That(text).Contains(detail);
-        await Assert.That(text).Contains(NativeNames[0]);
+        await Assert.That(text).Contains(RuntimeNames[0]);
         await Assert.That(text.Contains(Canary, StringComparison.Ordinal)).IsFalse();
         await Assert.That(File.Exists(Path.Combine(output, "reports", "load-million.json"))).IsFalse();
     }

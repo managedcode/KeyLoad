@@ -42,8 +42,7 @@ internal static class SqlEventReferenceJoinBudget
         var owner = new DatabaseEngine(database.Store, database.Database.Authorization,
             UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.DueWork(),
             UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(),
-            UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(),
-            UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
+            UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
         return new(owner, UnitExecutionOptions.QueryExecution(execution));
     }
     private static async Task BytesAsync(TestDatabase database)
@@ -51,7 +50,7 @@ internal static class SqlEventReferenceJoinBudget
         var before = QueueWholeFlowStorage.Bytes(database.Store);
         var position = database.Store.Position;
         await ResultBytesAsync(database, position);
-        await NativeReadBytesAsync(database, position);
+        await ReadBytesAsync(database, position);
         await Assert.That(database.Store.Position).IsEqualTo(position);
         await Assert.That(QueueWholeFlowStorage.Bytes(database.Store)).IsEquivalentTo(before, CollectionOrdering.Matching);
     }
@@ -76,7 +75,7 @@ internal static class SqlEventReferenceJoinBudget
             () => oneLess.ExecuteAst("root", SqlEventReferenceJoinFixture.Ast(database.Partition)), ErrorCode.BudgetExceeded);
     }
 
-    private static async Task NativeReadBytesAsync(TestDatabase database, long position)
+    private static async Task ReadBytesAsync(TestDatabase database, long position)
     {
         var ast = SqlEventReferenceJoinFixture.Ast(database.Partition);
         var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits));

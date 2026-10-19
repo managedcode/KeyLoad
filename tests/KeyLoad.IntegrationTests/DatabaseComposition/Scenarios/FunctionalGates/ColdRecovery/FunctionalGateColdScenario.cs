@@ -1,4 +1,4 @@
-using KeyLoad.IntegrationTests.Features.ClusterRouting;
+using KeyLoad.IntegrationTests.Features.OrleansExecution;
 using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
@@ -40,7 +40,7 @@ internal static class FunctionalGateColdScenario
                         return true;
                     }, lifetime.Token);
                 }
-                // All original SDK and MCP caller scopes have joined disposal before any native node kill.
+                // All original SDK and MCP caller scopes have joined disposal before any execution node kill.
                 await FunctionalGateColdReopen.RunAsync(fixture, lifetime.Token);
                 await FunctionalGateAnalyticsCold.VerifyAllNodesAsync(fixture, state, lifetime.Token);
                 await FunctionalGateColdCallers.RunAsync(fixture, state, async context =>

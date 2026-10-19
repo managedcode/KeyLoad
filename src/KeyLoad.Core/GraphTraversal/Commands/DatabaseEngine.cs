@@ -42,9 +42,9 @@ public sealed partial class DatabaseEngine
 
     private MutationReceipt ApplyCurrentIntent(IAtomicTransaction tx, PrincipalRecord principal,
         PartitionRef targetPartition, ApplyCrossPartitionReverseEdge request,
-        GraphCrossPartitionDeliveryIntentV1 intent)
+        GraphCrossPartitionDeliveryIntent intent)
     {
-        var owner = GraphCrossPartitionRecords.Read<GraphEdgeOwnerVersionV1>(tx,
+        var owner = GraphCrossPartitionRecords.Read<GraphEdgeOwnerVersion>(tx,
             GraphCrossPartitionKeys.OwnerVersion(request.SourcePartition, request.Graph, request.EdgeId));
         GraphCrossPartitionValidation.ValidateOwnerVersion(owner);
         var canonical = tx.GetRecord<EdgeRecord>(EdgeKey(request.SourcePartition, request.Graph, request.EdgeId));
@@ -56,7 +56,7 @@ public sealed partial class DatabaseEngine
         }
         var key = GraphCrossPartitionKeys.Reverse(targetPartition, request.Graph, request.Destination,
             request.SourcePartition, request.EdgeId);
-        var current = GraphCrossPartitionRecords.Read<GraphCrossPartitionReceiverStateV1>(tx, key);
+        var current = GraphCrossPartitionRecords.Read<GraphCrossPartitionReceiverState>(tx, key);
         if (current is not null)
         {
             GraphCrossPartitionValidation.ValidateReceiver(current, request.SourcePartition,
@@ -74,7 +74,7 @@ public sealed partial class DatabaseEngine
                 return NoChange(ApplyNoChangeReceipt, request.Graph, request.EdgeId, current.Revision);
             }
         }
-        var state = new GraphCrossPartitionReceiverStateV1(GraphCrossPartitionProtocol.CurrentVersion,
+        var state = new GraphCrossPartitionReceiverState(GraphCrossPartitionProtocol.CurrentVersion,
             request.SourcePartition, request.Graph, request.EdgeId, request.Destination,
             intent.Revision, intent.Deleted, intent.Fingerprint);
         var encoded = GraphCrossPartitionRecords.Encode(state, Limits.MaxBatchBytes);
@@ -107,14 +107,14 @@ public sealed partial class DatabaseEngine
         {
             Destination = intent.Destination
         };
-        var owner = GraphCrossPartitionRecords.Read<GraphEdgeOwnerVersionV1>(tx,
+        var owner = GraphCrossPartitionRecords.Read<GraphEdgeOwnerVersion>(tx,
             GraphCrossPartitionKeys.OwnerVersion(sourcePartition, request.Graph, request.EdgeId));
         GraphCrossPartitionValidation.ValidateOwnerVersion(owner);
         var canonical = tx.GetRecord<EdgeRecord>(EdgeKey(sourcePartition, request.Graph, request.EdgeId));
         VerifyCurrentIntent(intent, owner!, canonical);
         var receiverKey = GraphCrossPartitionKeys.Reverse(request.Destination.Partition, request.Graph,
             request.Destination, sourcePartition, request.EdgeId);
-        var receiver = GraphCrossPartitionRecords.Read<GraphCrossPartitionReceiverStateV1>(tx, receiverKey)
+        var receiver = GraphCrossPartitionRecords.Read<GraphCrossPartitionReceiverState>(tx, receiverKey)
             ?? throw Errors.Fail(ErrorCode.Conflict, ReceiverNotCommitted);
         GraphCrossPartitionValidation.ValidateReceiver(receiver, sourcePartition, request.Graph,
             request.EdgeId, request.Destination);
@@ -139,11 +139,11 @@ public sealed partial class DatabaseEngine
         _ = Resource(view, destination, graph, ResourceKind.Graph);
     }
 
-    private static GraphCrossPartitionDeliveryIntentV1? CurrentIntent(IKeyValueView view,
+    private static GraphCrossPartitionDeliveryIntent? CurrentIntent(IKeyValueView view,
         PartitionRef source, string graph, string edgeId, EntityRef destination, DatabaseLimits limits)
     {
         var key = GraphCrossPartitionKeys.Intent(source, graph, edgeId, destination);
-        var intent = GraphCrossPartitionRecords.Read<GraphCrossPartitionDeliveryIntentV1>(view, key);
+        var intent = GraphCrossPartitionRecords.Read<GraphCrossPartitionDeliveryIntent>(view, key);
         if (intent is not null)
         {
             var definition = BindResourceDefinition(view, destination.Partition, destination.Collection, ResourceKind.Collection);
@@ -154,8 +154,8 @@ public sealed partial class DatabaseEngine
         return intent;
     }
 
-    private void VerifyCurrentIntent(GraphCrossPartitionDeliveryIntentV1 intent,
-        GraphEdgeOwnerVersionV1 owner, EdgeRecord? canonical)
+    private void VerifyCurrentIntent(GraphCrossPartitionDeliveryIntent intent,
+        GraphEdgeOwnerVersion owner, EdgeRecord? canonical)
     {
         var canonicalDeleted = owner.Deleted && canonical is null;
         var canonicalActive = !owner.Deleted && canonical is not null
@@ -170,16 +170,16 @@ public sealed partial class DatabaseEngine
         }
     }
 
-    private bool CanonicalMatchesOwner(EdgeRecord canonical, GraphCrossPartitionDeliveryIntentV1 intent,
-        GraphEdgeOwnerVersionV1 owner)
+    private bool CanonicalMatchesOwner(EdgeRecord canonical, GraphCrossPartitionDeliveryIntent intent,
+        GraphEdgeOwnerVersion owner)
     {
         GraphCrossPartitionValidation.ValidateEdge(canonical, Limits);
         return canonical.Id == intent.EdgeId && canonical.From.Partition == intent.SourcePartition
             && canonical.Revision == owner.Revision;
     }
 
-    private static bool IntentMatchesCanonical(GraphCrossPartitionDeliveryIntentV1 intent,
-        GraphEdgeOwnerVersionV1 owner, EdgeRecord? canonical)
+    private static bool IntentMatchesCanonical(GraphCrossPartitionDeliveryIntent intent,
+        GraphEdgeOwnerVersion owner, EdgeRecord? canonical)
     {
         if (!intent.Deleted)
         {

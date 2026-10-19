@@ -11,12 +11,12 @@ internal static class AspireStartupReadiness
         using var lifetime = CancellationTokenSource.CreateLinkedTokenSource(token,
             app.Services.GetRequiredService<IHostApplicationLifetime>().ApplicationStopping);
         lifetime.Token.ThrowIfCancellationRequested();
-        var waits = names.Select(name => WaitForNativeHealthyAsync(app, name, lifetime.Token)).ToArray();
+        var waits = names.Select(name => RuntimeWaitForHealthyAsync(app, name, lifetime.Token)).ToArray();
         var primary = await AspireOwnedTaskJoin.FirstFailureOrAllAsync(waits).ConfigureAwait(false);
         await AspireOwnedTaskJoin.CompleteAsync(lifetime, waits, primary).ConfigureAwait(false);
     }
 
-    private static async Task WaitForNativeHealthyAsync(DistributedApplication app, string name, CancellationToken token)
+    private static async Task RuntimeWaitForHealthyAsync(DistributedApplication app, string name, CancellationToken token)
         => await app.ResourceNotifications.WaitForResourceHealthyAsync(name,
             WaitBehavior.StopOnResourceUnavailable, token).ConfigureAwait(false);
 }

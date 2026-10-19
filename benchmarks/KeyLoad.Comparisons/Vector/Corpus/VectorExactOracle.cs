@@ -5,10 +5,10 @@ namespace KeyLoad.Comparisons;
 internal static class VectorExactOracle
 {
     internal static IReadOnlyList<IReadOnlyList<VectorNeighbor>> Compute(VectorComparisonCorpus corpus,
-        IReadOnlyList<ReadOnlyMemory<float>> queries, IOptions<NativeComparisonExecutionOptions> executionOptions,
+        IReadOnlyList<ReadOnlyMemory<float>> queries, IOptions<ComparisonExecutionOptions> executionOptions,
         CancellationToken cancellationToken)
     {
-        var cancellationMask = NativeComparisonExecutionOptions.Require(executionOptions).Value.VectorCancellationCheckMask;
+        var cancellationMask = ComparisonExecutionOptions.Require(executionOptions).Value.VectorCancellationCheckMask;
         ArgumentNullException.ThrowIfNull(queries);
         if (queries.Count == VectorExactOracleValues.FirstIndex || queries.Count > corpus.Profile.QueryVectorCount)
         {

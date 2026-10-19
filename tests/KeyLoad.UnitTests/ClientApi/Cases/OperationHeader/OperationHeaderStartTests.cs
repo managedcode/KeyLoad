@@ -3,7 +3,7 @@ using KeyLoad.Server;
 
 namespace KeyLoad.UnitTests.Features.ClientApi;
 
-/// <summary>AC-MCP-003/005/007 and AC-ROUTE-001: native response start safely publishes request identities.</summary>
+/// <summary>AC-MCP-003/005/007 and AC-ROUTE-001: execution response start safely publishes request identities.</summary>
 internal sealed class OperationHeaderStartTests
 {
     internal const int OperationTimeoutSeconds = 10;
@@ -13,7 +13,7 @@ internal sealed class OperationHeaderStartTests
     internal const string ParallelPathPrefix = "/parallel/";
     internal const string ResponseBody = "operation-response";
 
-    /// <summary>An identity published before native response start matches the caller-visible body and header.</summary>
+    /// <summary>An identity published before execution response start matches the caller-visible body and header.</summary>
     [Test]
     public async Task ExecutionIdentityBeforeStartCorrelatesHeaderAndBody()
     {
@@ -43,7 +43,7 @@ internal sealed class OperationHeaderStartTests
         await Assert.That(OperationHeaderTestServer.RequestIdHeader(response)).IsNull();
     }
 
-    /// <summary>Publishing after native headers start preserves the response body and does not mutate committed headers.</summary>
+    /// <summary>Publishing after execution headers start preserves the response body and does not mutate committed headers.</summary>
     [Test]
     public async Task StartedResponseRemainsHealthyWhenIdentityArrivesLater()
     {
@@ -59,7 +59,7 @@ internal sealed class OperationHeaderStartTests
         await Assert.That(OperationHeaderTestServer.RequestIdHeader(response)).IsNull();
     }
 
-    /// <summary>Overlapping native requests each return only their own published ID in the body and header.</summary>
+    /// <summary>Overlapping execution requests each return only their own published ID in the body and header.</summary>
     [Test]
     public async Task ConcurrentResponsesKeepRequestIdentitiesIsolated()
     {

@@ -6,7 +6,7 @@ namespace KeyLoad.Core.Features.ResourceExecution;
 /// <summary>Owns the adjacent typed lifetime metadata inside the original catalog transaction.</summary>
 internal static class ResourceLifetimeCatalog
 {
-    private const string LifetimeSpace = "resource-lifetime-v1";
+    private const string LifetimeSpace = "resource-lifetime";
     private const string InvalidPair = "The resource definition and lifetime metadata do not form a valid pair.";
     private const string AlreadyCreated = "The resource already has a persisted lifetime.";
 
@@ -16,11 +16,11 @@ internal static class ResourceLifetimeCatalog
         => KeyCodec.Encode(LifetimeSpace, tenantId, databaseId, resourceName);
 
     /// <summary>Reads a validated pair; only the complete absence of both records is an absent resource.</summary>
-    internal static ResourceLifetimeV1? Read(IKeyValueView view, string tenantId, string databaseId,
+    internal static ResourceLifetime? Read(IKeyValueView view, string tenantId, string databaseId,
         string resourceName, ResourceDefinition? definition)
     {
         ArgumentNullException.ThrowIfNull(view);
-        var lifetime = view.GetRecord<ResourceLifetimeV1>(Key(tenantId, databaseId, resourceName));
+        var lifetime = view.GetRecord<ResourceLifetime>(Key(tenantId, databaseId, resourceName));
         if (definition is null && lifetime is null)
         {
             return null;
@@ -35,7 +35,7 @@ internal static class ResourceLifetimeCatalog
     }
 
     /// <summary>Stages a new server-derived lifetime; the caller stages its definition in this same transaction.</summary>
-    internal static ResourceLifetimeV1 Create(IAtomicTransaction transaction, Command<DatabaseCommand> original,
+    internal static ResourceLifetime Create(IAtomicTransaction transaction, Command<DatabaseCommand> original,
         string tenantId, string databaseId, ResourceDefinition definition)
     {
         ArgumentNullException.ThrowIfNull(transaction);

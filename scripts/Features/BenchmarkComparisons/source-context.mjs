@@ -1,5 +1,5 @@
 import path from 'node:path';
-import { directoryName, envName, message, operatingSystem, validation } from './native-process-contracts.mjs';
+import { directoryName, envName, message, operatingSystem, validation } from './process-contracts.mjs';
 
 const emptyValue = '';
 

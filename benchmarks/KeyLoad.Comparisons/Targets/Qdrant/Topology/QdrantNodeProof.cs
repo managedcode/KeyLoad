@@ -73,13 +73,13 @@ internal static class QdrantNodeProof
         JsonElement root, JsonElement cluster, JsonElement collection, JsonElement local,
         int expectedPoints, ComparisonTopology topology)
     {
-        const string QdrantNativeTopologyMismatchDetail = "QdrantNativeTopologyMismatch";
+        const string QdrantTopologyMismatchDetail = "QdrantTopologyMismatch";
 
         VerifyCollectionPolicy(collection, topology);
         var result = cluster.GetProperty(ResultField);
         if (result.GetProperty(StatusField).GetString() != EnabledState)
         {
-            throw new ComparisonFailureException(QdrantNativeTopologyMismatchDetail);
+            throw new ComparisonFailureException(QdrantTopologyMismatchDetail);
         }
         var version = root.GetProperty(VersionField).GetString() ?? string.Empty;
         var peer = result.GetProperty(PeerIdField).ToString();

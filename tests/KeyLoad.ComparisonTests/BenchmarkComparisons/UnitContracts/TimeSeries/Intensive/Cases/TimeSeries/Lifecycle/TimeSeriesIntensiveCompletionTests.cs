@@ -15,7 +15,7 @@ internal sealed class TimeSeriesIntensiveCompletionTests
     public async Task PostcommitFailureRetainsActualAckWithoutCountOrDigest()
     {
         var ack = TimeSeriesIntensiveAcknowledgement.FromReceipt(new(ActualCommand, ActualSequence));
-        var cleanup = Native(PostgresErrorCodes.ConnectionFailure);
+        var cleanup = Execution(PostgresErrorCodes.ConnectionFailure);
         var error = TimeSeriesIntensiveTargetCompletionException.Join(null, cleanup, ack)!;
         var attempt = Capture(error);
         await Assert.That(attempt.Outcome).IsEqualTo(TimeSeriesIntensiveOutcome.TargetFailure);
@@ -27,10 +27,10 @@ internal sealed class TimeSeriesIntensiveCompletionTests
     }
 
     [Test]
-    public async Task UnknownCommitPreservesPrimaryNativeFactAndSeparateCleanup()
+    public async Task UnknownCommitPreservesPrimaryFactAndSeparateCleanup()
     {
-        var original = Native(PostgresErrorCodes.SerializationFailure);
-        var cleanup = Native(PostgresErrorCodes.ConnectionFailure);
+        var original = Execution(PostgresErrorCodes.SerializationFailure);
+        var cleanup = Execution(PostgresErrorCodes.ConnectionFailure);
         var error = TimeSeriesIntensiveTargetCompletionException.Join(original, cleanup, null)!;
         var attempt = Capture(error);
         await Assert.That(error.InnerException).IsSameReferenceAs(original);
@@ -43,10 +43,10 @@ internal sealed class TimeSeriesIntensiveCompletionTests
     [Test]
     [Arguments(TimeSeriesIntensiveOutcome.DeadlineExceeded)]
     [Arguments(TimeSeriesIntensiveOutcome.Cancelled)]
-    public async Task InterruptedOutcomeRetainsIndependentNativeCleanupAndAckFacts(TimeSeriesIntensiveOutcome outcome)
+    public async Task InterruptedOutcomeRetainsIndependentCleanupAndAckFacts(TimeSeriesIntensiveOutcome outcome)
     {
         var ack = TimeSeriesIntensiveAcknowledgement.FromReceipt(new(ActualCommand, ActualSequence));
-        var error = TimeSeriesIntensiveTargetCompletionException.Join(null, Native(PostgresErrorCodes.ConnectionFailure), ack)!;
+        var error = TimeSeriesIntensiveTargetCompletionException.Join(null, Execution(PostgresErrorCodes.ConnectionFailure), ack)!;
         var observed = TimeSeriesIntensiveObservedFailureException.Observe(outcome, error);
         var attempt = Capture(observed);
         await Assert.That(attempt.Outcome).IsEqualTo(outcome);
@@ -61,13 +61,13 @@ internal sealed class TimeSeriesIntensiveCompletionTests
         var primary = RuntimeOversizeFailure();
         var cleanup = RuntimeOversizeFailure();
         await Assert.That(TimeSeriesIntensiveTargetCompletionException.Join(primary, cleanup, null)).IsSameReferenceAs(primary);
-        await Assert.That(TimeSeriesIntensiveTargetCompletionException.Join(Native(PostgresErrorCodes.QueryCanceled), cleanup, null)).IsSameReferenceAs(cleanup);
+        await Assert.That(TimeSeriesIntensiveTargetCompletionException.Join(Execution(PostgresErrorCodes.QueryCanceled), cleanup, null)).IsSameReferenceAs(cleanup);
     }
 
     [Test]
     public async Task SuccessfulCompletionAndSingleFailureDoNotInventFacts()
     {
-        var original = Native(PostgresErrorCodes.QueryCanceled);
+        var original = Execution(PostgresErrorCodes.QueryCanceled);
         await Assert.That(TimeSeriesIntensiveTargetCompletionException.Join(null, null, null)).IsNull();
         await Assert.That(TimeSeriesIntensiveTargetCompletionException.Join(original, null, null)).IsSameReferenceAs(original);
         await Assert.That(Capture(original).Acknowledgement).IsNull();
@@ -82,7 +82,7 @@ internal sealed class TimeSeriesIntensiveCompletionTests
         await Assert.That(() => TimeSeriesIntensiveAcknowledgement.FromReceipt(new(ActualCommand, -1))).Throws<ArgumentOutOfRangeException>();
     }
 
-    private static PostgresException Native(string code) => new(PrivateDetail, Severity, Severity, code);
+    private static PostgresException Execution(string code) => new(PrivateDetail, Severity, Severity, code);
 
     private static OutOfMemoryException RuntimeOversizeFailure()
     {

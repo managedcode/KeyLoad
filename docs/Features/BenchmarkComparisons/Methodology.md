@@ -1,48 +1,48 @@
-# Comparable native database benchmark methodology
+# Comparable database benchmark methodology
 
 This methodology is the shared live-session contract of
 [ADR-142](../../ADR/ADR-142-shared-live-benchmark-sessions.md) and
 [SessionExecution](SessionExecution.md): no per-scenario workers, warmup namespaces or
-fresh repetition resets. Native one-node/three-node topology and the
+fresh repetition resets. one-node/three-node topology and the
 fairness/correctness requirements of
-[ADR-122](../../ADR/ADR-122-native-benchmark-methodology.md) apply. Implementation and
+[ADR-122](../../ADR/ADR-122-benchmark-methodology.md) apply. Implementation and
 exact-source Linux qualification are separate acceptance gates. Original reports retain
 their actual settings and are never relabelled.
 
 ## Execution unit and timing
 
-Each database has two isolated Linux measurement jobs: native one node and native
+Each database has two isolated Linux measurement jobs: one node and execution
 three nodes. Different databases/topologies never share a runner, containers,
 volumes or measurement session. One Aspire-owned deployment lives for the entire
-job. Many separate real native TUnit tests share its fixture; only one workload
+job. Many separate real TUnit tests share its fixture; only one workload
 test executes at a time, with the declared concurrent clients inside that test.
 The common preparation builds the runner and images once; each worker imports
-and verifies the same-source binaries, native tools and image identities.
+and verifies the same-source binaries, tools and image identities.
 
 ```mermaid
 flowchart LR
     Ready[Aspire readiness and actual membership] --> Load[Measure initial million writes]
-    Load --> Index[Measure native index construction]
+    Load --> Index[Measure index construction]
     Index --> Operations[Separate read search and query tests]
     Operations --> Mixed[Concurrent create delete update read search]
-    Mixed --> Verify[Full final content and native replica verification]
+    Mixed --> Verify[Full final content and replica verification]
     Verify --> Original[Original per-test reports samples and TRX]
     Original --> Aggregate[Authenticate all database and topology jobs]
 ```
 
-The initial 1,000,000-record load is a measured native test. Setup contains no
+The initial 1,000,000-record load is a measured test. Setup contains no
 hidden corpus insertion. There is no warmup and no per-case reset, cleanup,
 reseed or restart. The state of the runtime, cache, storage and indexes evolves
 naturally during the declared operation order; this does not claim cold-cache
-measurements. Native index construction and settlement have their own measured
+measurements. index construction and settlement have their own measured
 result where the database exposes an equivalent operation. Intrinsic index
-maintenance remains in measured writes. Missing native capabilities are explicit
+maintenance remains in measured writes. Missing capabilities are explicit
 unavailable results with no numeric substitute.
 
 Initial load, operation lanes and the wall time of a concurrent mixed test are
 separate measurements. Readiness and full correctness/replica verification are
-outside operation latency. Actual caller-native acknowledgement defines write
-completion. No extra read is silently included in a measured write. A native
+outside operation latency. Actual caller-acknowledgement defines write
+completion. No extra read is silently included in a measured write. A execution
 batch acknowledgement records its real batch size and duration; it cannot be
 expanded into invented per-record latency samples.
 
@@ -53,20 +53,20 @@ counts and client limits are identical across applicable adapters. The initial
 corpus has 1,000,000 records. The production session uses 16 bounded clients;
 operation tests perform at least 100,000 original requests per applicable lane.
 One client has one outstanding original call unless an explicitly equivalent
-native batching/pipelining contract is part of the shared case.
+batching/pipelining contract is part of the shared case.
 
 | Test | Measured work and correctness contract |
 |---|---|
 | Initial load | 1,000,000 distinct actual writes, followed by independent complete identity/body verification. |
-| Index | Actual native build/settlement on the retained corpus; unavailable when no equivalent native lifecycle exists. |
+| Index | Actual build/settlement on the retained corpus; unavailable when no equivalent lifecycle exists. |
 | Sequential read | 100,000 stable-group keys in identity order, validating returned content. |
 | Random read | 100,000 seed-bound stable-group keys in deterministic order, validating returned content. |
-| Search/query | 100,000 equivalent native predicates with bounded results and exact content oracles. Range/complex-query expansion remains separately tracked. |
+| Search/query | 100,000 equivalent predicates with bounded results and exact content oracles. Range/complex-query expansion remains separately tracked. |
 | Mixed | Concurrent lanes: 100,000 creates, 100,000 deletes, 100,000 updates, 100,000 reads and 100,000 search requests. Each lane retains its actual outcomes and timestamps. |
-| Final verification | Exactly 900,000 retained original keys plus 100,000 new keys; correct replacements and absence of deleted keys, with actual native replica proofs. |
+| Final verification | Exactly 900,000 retained original keys plus 100,000 new keys; correct replacements and absence of deleted keys, with actual replica proofs. |
 
 Delete, update and stable-read key groups are disjoint. Creates use new keys.
-The mixed test starts admitted native clients through a common barrier and proves
+The mixed test starts admitted clients through a common barrier and proves
 observed overlap from original timestamps; it does not serialize the lanes and
 label them concurrent. The final cardinality remains 1,000,000. Count alone is
 insufficient: complete bounded readback verifies identities, bodies and mutation
@@ -75,25 +75,25 @@ merely to schedule the work.
 
 ## Other required families and functional load
 
-The full product comparison still requires native vectors/search accuracy,
+The full product comparison still requires vectors/search accuracy,
 graphs, queues, event streams, time series, ordered/range and complex queries,
 plus ingestion at 1/10/500 clients. These run as additional real cases on the same
 database/topology infrastructure. A seven-case document session does not qualify
-that complete inventory. Unsupported native functionality is distinguished from
+that complete inventory. Unsupported functionality is distinguished from
 an unimplemented adapter or failed prerequisite; implementation gaps must not be
-reported as native absence.
+reported as absence.
 
 Every family uses the same canonical scenario, corpus/seed, operation order,
 counts, metric/filter, accuracy target, resource limits and effective durability
 contract across applicable databases. Vector indexes retain exact/HNSW/IVFFlat,
-filtered/concurrent-update and recall requirements where natively supported.
-Native batching, index build and accuracy are declared explicitly. Closed-loop
+filtered/concurrent-update and recall requirements where ly supported.
+batching, index build and accuracy are declared explicitly. Closed-loop
 request timings do not prove scheduled-arrival/open-loop or endurance behavior.
 
 The existing exclusive functional cluster million-record ingestion gate remains
 mandatory and separate from numerical benchmark publication. Its actual .NET
 SDK and official MCP callers operate while ingestion is active. Heavy-load
-admission still requires explicit enabled settings, the exact native class
+admission still requires explicit enabled settings, the exact class
 filter, one-test parallelism and disabled coverage; missing/false/broad/duplicate
 filters, coverage or wrong parallelism fail before resources are acquired.
 Normal functional concurrency and all process-recovery/cluster gates are unchanged.
@@ -109,7 +109,7 @@ Client CPU/allocations/working set and server per-node CPU/RAM observations stay
 separate. Missing instrumentation is explicit and cannot become a zero result.
 
 Record exact source/run/attempt/job/artifact identities, Linux/runtime/CPU,
-DLL/PDB hashes, native images, observed membership/data copies, resource limits,
+DLL/PDB hashes, images, observed membership/data copies, resource limits,
 filesystem, transport, read consistency, index settings and effective ACK/durability.
 A node count alone does not establish equivalent guarantees. A KeyLoad write is
 acknowledged by every configured copy (three of three by default). The
@@ -117,14 +117,14 @@ one-node KeyLoad arm has a single copy. Unequal contracts prohibit a
 performance-winner claim.
 
 Cancellation stops admission, cancels and joins original calls, then disposes
-native clients and the Aspire deployment. Preserve the primary and shutdown
+clients and the Aspire deployment. Preserve the primary and shutdown
 failures and completed original reports. A failed load poisons dependent tests;
 they retain real failed prerequisite outcomes rather than invented measurements.
 No automatic measurement retry repairs the statistics. No skipped, missing,
 corrupt or mixed-cohort original is accepted as a complete session.
 
 Aggregation authenticates all 22 database/topology jobs, their exact planned
-native cases, original reports and TRX, same-source images, compiled-runtime
+cases, original reports and TRX, same-source images, compiled-runtime
 identity/import receipts and statistics. Actual failed cases retain null metrics
 and original provenance. Website independently qualifies its source, archives,
 real browser and coverage before rendering these results; content-only publication
@@ -137,7 +137,7 @@ fixture, measured load, mixed work, shared build, no warmup/reset, authenticated
 accounting and exact-source Linux completion. Authored source, controlled
 rejection inputs, an upstream benchmark or a local build closes none of the
 performance gates. All benchmark-stage builds, checks, tests and workloads run
-in Linux GitHub Actions. Full model-family completion, actual native execution,
+in Linux GitHub Actions. Full model-family completion, actual execution,
 fault/endurance, resource fairness and website qualification remain open until
 their original evidence exists. No power-loss or production-readiness claim
 follows from process-kill tests or this redesign.

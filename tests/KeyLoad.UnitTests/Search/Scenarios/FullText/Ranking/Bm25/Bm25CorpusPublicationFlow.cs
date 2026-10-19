@@ -31,8 +31,8 @@ internal sealed class Bm25CorpusPublicationFlow(TestDatabase database)
                 await execute(flow);
             }, failures);
         }
-        catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
-        catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
+        catch (Exception failure) when (CqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
+        catch (Exception failure) when (!CqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
@@ -54,11 +54,11 @@ internal sealed class Bm25CorpusPublicationFlow(TestDatabase database)
             database.CreateReadWork(Token), UnitExecutionOptions.QueryExecution());
 
     internal static Bm25CorpusPublicationPhaseCommand Phase(Command<DatabaseCommand> operation)
-        => NativeSerialization.Deserialize<Bm25CorpusPublicationPhaseCommand>((operation).Value!.Input.Span);
+        => OrleansSerialization.Deserialize<Bm25CorpusPublicationPhaseCommand>((operation).Value!.Input.Span);
 
     internal CommitReceipt Publish(Command<DatabaseCommand> operation) => database.SubmitIssued(operation).Get<CommitReceipt>();
 
-    internal KeyLoad.Query.Features.QueryExecution.DistributedTextStatisticsV1? Current(string term = Term)
+    internal KeyLoad.Query.Features.QueryExecution.DistributedTextStatistics? Current(string term = Term)
         => database.Database.WithQueryView(Subject, database.Partition, Collection,
             (view, principal, resource) => database.Database.ReadBm25CorpusCurrent(view, principal, resource,
                 database.Partition, Collection, Field, TextProjectionProtocol.TokenizerVersion, [term], database.CreateReadWork(Token)));
@@ -67,7 +67,7 @@ internal sealed class Bm25CorpusPublicationFlow(TestDatabase database)
         => new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution()).SearchAsync(Subject,
             new(database.Partition, Collection, Field, Term), Token);
 
-    internal void RequireAdmission(Bm25CorpusCurrentV1 current, DatabaseLimits limits)
+    internal void RequireAdmission(Bm25CorpusCurrent current, DatabaseLimits limits)
     {
         limits.Validate();
         database.Store.Read(view =>

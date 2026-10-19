@@ -6,7 +6,7 @@ internal static class SqlBooleanTruthClusterRefusals
         ErrorCode code, CancellationToken token, bool ast = false, bool healthy = false,
         SqlBooleanTruthClusterCase? astCase = null)
     {
-        await global::KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerProtocol.Node2, state.Seed.Reader.Secret, async caller =>
+        await global::KeyLoad.IntegrationTests.Features.OrleansExecution.RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerProtocol.Node2, state.Seed.Reader.Secret, async caller =>
         {
             var sql = SqlBooleanTruthClusterCases.Prefix + clause + SqlBooleanTruthClusterCases.Tail;
             var request = SqlNullOrderingClusterProtocol.Operation(sql);
@@ -49,7 +49,7 @@ internal static class SqlBooleanTruthClusterRefusals
     }
 
     internal static async Task InvalidAsync(ClusterFixture fixture, SqlBooleanTruthClusterState state,
-        global::KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsClusterCallers root, CancellationToken token)
+        global::KeyLoad.IntegrationTests.Features.OrleansExecution.RequestCqrsClusterCallers root, CancellationToken token)
     {
         var before = await SqlBooleanTruthClusterImage.ReadAsync(root, state, token);
         await SqlBooleanOperandClusterControls.InvalidAsync(fixture, state, root, token);

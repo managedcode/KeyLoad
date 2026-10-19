@@ -2,7 +2,7 @@ using KeyLoad.Core;
 
 namespace KeyLoad.UnitTests.Features.InternalSerialization;
 
-/// <summary>AC-CQ-034: native signed claim admission retains real leases and canonical claim bytes.</summary>
+/// <summary>AC-CQ-034: execution signed claim admission retains real leases and canonical claim bytes.</summary>
 internal sealed class SignedClaimsExecutionPolicyTests
 {
     [Test]
@@ -15,7 +15,7 @@ internal sealed class SignedClaimsExecutionPolicyTests
         var lane = SignedClaimsExecutionPolicyFlow.Lane(database);
         var before = SignedClaimsExecutionPolicyFlow.CaptureLease(database, delivery);
         var inspection = database.Database.InspectMessage(SignedClaimsExecutionPolicyFlow.PrincipalId, lane, delivery.Id)!;
-        var shortOptions = UnitExecutionOptions.NativeClaimsExecution(new()
+        var shortOptions = UnitExecutionOptions.RuntimeClaimsExecution(new()
         {
             MaximumTokenCharacters = delivery.Token.Length - 1
         });
@@ -35,8 +35,8 @@ internal sealed class SignedClaimsExecutionPolicyTests
         await Assert.That(inspection.PayloadJson).IsEqualTo(SignedClaimsExecutionPolicyFlow.Payload);
         await Assert.That(inspection.HeadersJson).IsEqualTo(SignedClaimsExecutionPolicyFlow.Headers);
 
-        var healthyOptions = UnitExecutionOptions.NativeClaimsExecution(useDefault ? null
-            : new NativeClaimsExecutionOptions { MaximumTokenCharacters = delivery.Token.Length });
+        var healthyOptions = UnitExecutionOptions.RuntimeClaimsExecution(useDefault ? null
+            : new ClaimsExecutionOptions { MaximumTokenCharacters = delivery.Token.Length });
         var healthy = SignedClaimsExecutionPolicyFlow.Borrow(database, healthyOptions);
         await Assert.That(healthy.Store).IsSameReferenceAs(database.Store);
         await Assert.That(healthy.ClaimsExecution).IsSameReferenceAs(healthyOptions.Value);
@@ -67,12 +67,12 @@ internal sealed class SignedClaimsExecutionPolicyTests
     }
 
     [Test]
-    public async Task ExplicitOperandKeepsNativeClaimsContractUnderLowerImplicitAdmissionAsync()
+    public async Task ExplicitOperandKeepsClaimsContractUnderLowerImplicitAdmissionAsync()
     {
         using var database = new TestDatabase();
         var delivery = SignedClaimsExecutionPolicyFlow.Lease(database);
         var lower = SignedClaimsExecutionPolicyFlow.Borrow(database,
-            UnitExecutionOptions.NativeClaimsExecution(new()
+            UnitExecutionOptions.RuntimeClaimsExecution(new()
             {
                 MaximumTokenCharacters = 1
             }));
@@ -100,17 +100,17 @@ internal sealed class SignedClaimsExecutionPolicyTests
                     MaximumTokenCharacters = maximumCharacters
                 });
         });
-        await Assert.That(failure.Message).IsEqualTo(NativeClaimsExecutionOptions.ValidationMessage);
+        await Assert.That(failure.Message).IsEqualTo(ClaimsExecutionOptions.ValidationMessage);
         await Assert.That(Directory.Exists(directory)).IsFalse();
     }
 
     [Test]
     public async Task CanonicalDefaultAndInclusivePolicyBoundariesAreValidatedAsync()
     {
-        await Assert.That(UnitExecutionOptions.NativeClaimsExecution().Value.MaximumTokenCharacters).IsEqualTo(8192);
+        await Assert.That(UnitExecutionOptions.RuntimeClaimsExecution().Value.MaximumTokenCharacters).IsEqualTo(8192);
         foreach (var maximumCharacters in new[] { 1, 8192 })
         {
-            var options = UnitExecutionOptions.NativeClaimsExecution(new()
+            var options = UnitExecutionOptions.RuntimeClaimsExecution(new()
             {
                 MaximumTokenCharacters = maximumCharacters
             });

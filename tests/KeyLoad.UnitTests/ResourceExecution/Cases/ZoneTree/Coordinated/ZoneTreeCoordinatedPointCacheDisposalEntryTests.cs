@@ -106,7 +106,7 @@ internal sealed class ZoneTreeCoordinatedPointCacheDisposalEntryTests
         await Assert.That(after.RetainedBytes).IsGreaterThan(0L);
         await Assert.That(after.Hits).IsEqualTo(before.Hits);
         await Assert.That(after.Misses).IsEqualTo(before.Misses);
-        await Assert.That(after.NativeLookups).IsEqualTo(before.NativeLookups);
+        await Assert.That(after.RuntimeLookups).IsEqualTo(before.RuntimeLookups);
         await Assert.That(after.Admissions).IsEqualTo(before.Admissions);
         await Assert.That(after.Evictions).IsEqualTo(before.Evictions);
         await Assert.That(initial).IsNotNull();
@@ -114,7 +114,7 @@ internal sealed class ZoneTreeCoordinatedPointCacheDisposalEntryTests
         await Assert.That(warm).IsNotNull();
         await Assert.That(warm!.SequenceEqual(Value)).IsTrue();
         await Assert.That(afterWarm.Hits).IsEqualTo(before.Hits + 1);
-        await Assert.That(afterWarm.NativeLookups).IsEqualTo(before.NativeLookups);
+        await Assert.That(afterWarm.RuntimeLookups).IsEqualTo(before.RuntimeLookups);
         await Assert.That(afterWarm.RetainedBytes).IsEqualTo(before.RetainedBytes);
     }
 }

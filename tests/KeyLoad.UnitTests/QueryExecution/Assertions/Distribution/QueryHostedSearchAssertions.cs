@@ -10,7 +10,7 @@ internal static class QueryHostedSearchAssertions
     private const int FirstRank = 1;
     private const int SecondRank = 2;
     private const int HexCharactersPerByte = 2;
-    private const string AccessPath = "distributedCanonicalSearchV1";
+    private const string AccessPath = "distributedCanonicalSearch";
 
     internal static QueryHostedStoreImage[] Capture(RequestCqrsHostedCluster cluster)
         => cluster.Nodes.Select(node => node.Database.Store.Read(view =>
@@ -18,12 +18,12 @@ internal static class QueryHostedSearchAssertions
             var page = view.Scan([], MaximumRecords);
             if (page.HasMore)
             {
-                throw new InvalidOperationException("The complete native query image exceeds its record bound.");
+                throw new InvalidOperationException("The complete execution query image exceeds its record bound.");
             }
             var records = page.Records.Select(record => Convert.ToHexString(record.Key.Span) + ":" +
                 Convert.ToHexString(record.Value.Span)).ToArray();
             var applied = view.ReadOwnedValue(KeySpace.AppliedBytes) is { } bytes
-                ? NativeSerialization.Deserialize<long>(bytes) : default(long);
+                ? OrleansSerialization.Deserialize<long>(bytes) : default(long);
             return new QueryHostedStoreImage(applied, node.Database.Store.Position, records);
         })).ToArray();
 
@@ -39,10 +39,10 @@ internal static class QueryHostedSearchAssertions
         }
     }
 
-    internal static async Task PageAsync(DistributedSearchPageV1 page, QueryHostedSearchDataset data,
+    internal static async Task PageAsync(DistributedSearchPage page, QueryHostedSearchDataset data,
         QueryHostedStoreImage image)
     {
-        var lifetime = new EntityRefLifetimeV1(data.Creation.Incarnation.Value);
+        var lifetime = new EntityRefLifetime(data.Creation.Incarnation.Value);
         RankedDocument[] expected =
         [
             new(new(new(data.First, QueryHostedSearchDataset.Collection, QueryHostedSearchDataset.DocumentId)
@@ -54,7 +54,7 @@ internal static class QueryHostedSearchAssertions
                 QueryHostedSearchDataset.SourceProjected, true, [QueryHostedSearchDataset.Secret]),
                 1d / (QueryHostedSearchDataset.FusionConstant + SecondRank))
         ];
-        PartitionQueryLeafWitnessV1[] leaves =
+        PartitionQueryLeafWitness[] leaves =
         [
             new(data.First, image.StorePosition, QueryHostedSearchDataset.Version, QueryHostedSearchDataset.Version, AccessPath),
             new(data.Second, image.StorePosition, QueryHostedSearchDataset.Version, QueryHostedSearchDataset.Version, AccessPath)

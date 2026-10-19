@@ -48,7 +48,7 @@ internal static class PartitionQueryOrder
         return result;
     }
 
-    internal static int Compare(PartitionQueryCandidateV1 left, PartitionQueryCandidateV1 right,
+    internal static int Compare(PartitionQueryCandidate left, PartitionQueryCandidate right,
         IReadOnlyList<Ordering> order)
     {
         for (var index = FirstElementIndex; index < order.Count; index++)

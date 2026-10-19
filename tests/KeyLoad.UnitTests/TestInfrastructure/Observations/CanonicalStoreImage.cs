@@ -3,7 +3,7 @@ using KeyLoad.Storage.ZoneTree;
 
 namespace KeyLoad.UnitTests;
 
-/// <summary>Complete bounded native pagination under one canonical store read cut.</summary>
+/// <summary>Complete bounded execution pagination under one canonical store read cut.</summary>
 internal static class CanonicalStoreImage
 {
     private const int PageRecords = 4_096;
@@ -23,7 +23,7 @@ internal static class CanonicalStoreImage
             {
                 if (after is not null && row.Key.Span.SequenceCompareTo(after) <= EqualKeys)
                 {
-                    throw new InvalidOperationException("The native full-store continuation did not advance.");
+                    throw new InvalidOperationException("The execution full-store continuation did not advance.");
                 }
                 image.Add(Convert.ToHexString(row.Key.Span) + ":" + Convert.ToHexString(row.Value.Span));
                 after = row.Key.ToArray();
@@ -34,9 +34,9 @@ internal static class CanonicalStoreImage
             }
             if (page.Records.IsEmpty)
             {
-                throw new InvalidOperationException("The native full-store page reported continuation without records.");
+                throw new InvalidOperationException("The execution full-store page reported continuation without records.");
             }
         }
-        throw new InvalidOperationException("The native full-store image exceeded its bounded page count.");
+        throw new InvalidOperationException("The execution full-store image exceeded its bounded page count.");
     }
 }

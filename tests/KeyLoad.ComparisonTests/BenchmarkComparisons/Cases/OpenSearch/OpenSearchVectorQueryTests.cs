@@ -14,7 +14,7 @@ internal sealed class OpenSearchVectorQueryTests
     private const string Parameters = "params", QueryValue = "query_value", TopK = "top_k";
     private const string Language = "lang", Painless = "painless", Source = "source";
     private const string FloatQueryCast = "(double)(float)params.query_value[i]";
-    private const string NativeVector = "doc['vector'].value";
+    private const string RuntimeVector = "doc['vector'].value";
     private const string FloatScore = "script_score", ClientSort = "sort";
     private static readonly string[] Scripts = ["init_script", "map_script", "combine_script", "reduce_script"];
 
@@ -34,9 +34,9 @@ internal sealed class OpenSearchVectorQueryTests
         await Assert.That(oracle[5].Id).IsEqualTo(dataset.Documents[LowerNeighbor].Id);
     }
 
-    /// <summary>AC-BC-FAIL-010: one native aggregation uses actual vector doc values, bounded TopK and float32 query semantics.</summary>
+    /// <summary>AC-BC-FAIL-010: one execution aggregation uses actual vector doc values, bounded TopK and float32 query semantics.</summary>
     [Test]
-    public async Task QueryUsesNativeAggregationWithoutFloatScoreOrClientSort()
+    public async Task QueryUsesAggregationWithoutFloatScoreOrClientSort()
     {
         var dataset = WitnessDataset();
         using var json = JsonSerializer.SerializeToDocument(OpenSearchVectorQuery.Create(dataset.Documents[WitnessQuery].Vector, 10), OpenSearchHttp.JsonOptions);
@@ -54,10 +54,10 @@ internal sealed class OpenSearchVectorQueryTests
             await Assert.That(string.IsNullOrWhiteSpace(metric.GetProperty(script).GetProperty(Source).GetString())).IsFalse();
         }
         await Assert.That(metric.GetProperty(Scripts[0]).GetProperty(Source).GetString()!).Contains(FloatQueryCast);
-        await Assert.That(metric.GetProperty(Scripts[1]).GetProperty(Source).GetString()!).Contains(NativeVector);
+        await Assert.That(metric.GetProperty(Scripts[1]).GetProperty(Source).GetString()!).Contains(RuntimeVector);
     }
 
-    /// <summary>AC-BC-FAIL-010: the existing canonical native TopK and dimension budgets cannot be expanded by a query.</summary>
+    /// <summary>AC-BC-FAIL-010: the existing canonical execution TopK and dimension budgets cannot be expanded by a query.</summary>
     [Test]
     [Arguments(0)]
     [Arguments(101)]

@@ -2,7 +2,7 @@ using System.Globalization;
 using System.Security.Cryptography;
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
-using KeyLoad.AppHost.Features.ClusterReplication;
+using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.AppHost.Hosting;
 using Microsoft.Extensions.Options;
 
@@ -24,7 +24,7 @@ internal sealed class ClusterPublishedPortPolicyTests
         var root = NewRoot();
         try
         {
-            var nodes = ClusterResources.Add(builder, CreateProfile(), root, ephemeral);
+            var nodes = KeyLoad.AppHost.Hosting.AppHostProgram.AddCluster(builder, CreateProfile(), root, ephemeral);
             await Assert.That(nodes.Length).IsEqualTo(3);
             for (var index = 0; index < nodes.Length; index++)
             {
@@ -60,7 +60,7 @@ internal sealed class ClusterPublishedPortPolicyTests
         builder.Configuration[ClusterDeploymentOptions.FirstPublicPortKey] = firstPort.ToString(CultureInfo.InvariantCulture);
         var root = NewRoot();
         var failure = Assert.ThrowsExactly<OptionsValidationException>(
-            () => ClusterResources.Add(builder, CreateProfile(), root, ephemeral: false));
+            () => KeyLoad.AppHost.Hosting.AppHostProgram.AddCluster(builder, CreateProfile(), root, ephemeral: false));
         await Assert.That(failure.OptionsType).IsEqualTo(typeof(ClusterDeploymentOptions));
         await Assert.That(builder.Resources.Count).IsEqualTo(0);
         await Assert.That(Directory.Exists(root)).IsFalse();

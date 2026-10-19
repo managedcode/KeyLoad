@@ -28,15 +28,15 @@ internal sealed class PartitionQueryPublicTestSupport : IDisposable
             new(fixture.Partition.TenantId, fixture.Partition.DatabaseId, definition));
     }
 
-    internal ResourceLifetimeV1 Creation { get; }
+    internal ResourceLifetime Creation { get; }
     internal DatabaseEngine Database => fixture.Database;
     internal PartitionRef First => fixture.Partition with { PartitionKey = FirstKey };
     internal PartitionRef Second => fixture.Partition with { PartitionKey = SecondKey };
     internal PhysicalShardRecord ExpectedOwner => new(fixture.Store.Identity.NodeId, fixture.Store.Identity.Incarnation);
 
-    internal static PartitionQueryRequestV1 Request(ImmutableArray<PartitionRef> partitions, int limit = 8,
+    internal static PartitionQueryRequest Request(ImmutableArray<PartitionRef> partitions, int limit = 8,
         SelectQuery? query = null)
-        => new(1, partitions, query ?? Query(limit), null, true, 1);
+        => new(1, partitions, query ?? Query(limit), null, true, SqlOperationProtocol.DefaultQueryDialectVersion);
 
     internal static SelectQuery Query(int limit = 8)
         => new(Collection, null, [new("/label", "label")], null,

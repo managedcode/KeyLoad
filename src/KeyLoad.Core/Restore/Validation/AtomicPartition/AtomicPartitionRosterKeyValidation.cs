@@ -1,5 +1,7 @@
 using KeyLoad.Core.Features.BackupRestore.Serialization;
-using KeyLoad.Core.Features.ClusterRouting.Contracts;
+using KeyLoad.Core.Features.CommandOutcomes.Contracts;
+using KeyLoad.Core.Features.RuntimeJournaling.Contracts;
+using KeyLoad.Core.Features.StoragePartitions.Contracts;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core.Features.BackupRestore.Validation;
@@ -26,7 +28,7 @@ internal static class AtomicPartitionRosterKeyValidation
             return false;
         }
 
-        if (StringComparer.Ordinal.Equals(family, PartitionRecordFamilies.OutcomeV2)
+        if (StringComparer.Ordinal.Equals(family, PartitionRecordFamilies.Outcome)
             && IsCanonicalGlobalOutcome(components, key))
         {
             return false;

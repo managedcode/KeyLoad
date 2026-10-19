@@ -38,7 +38,7 @@ internal static class UserAnalyticsDerivedProcessTrial
                 await CompleteAsync(active, killed, linked.Token);
                 await UserAnalyticsDerivedProcessFiles.RequireReleasedAsync(root, linked.Token);
                 UserAnalyticsDerivedProcessFiles.RequireDerived(root, abandoned: killed);
-                active.CloseNativeProcessAfterJoin();
+                active.CloseProcessAfterJoin();
                 active = null;
             }
         }

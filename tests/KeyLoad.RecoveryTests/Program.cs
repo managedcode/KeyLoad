@@ -1,7 +1,6 @@
 using System.Globalization;
 using KeyLoad.RecoveryTests;
 using KeyLoad.RecoveryTests.Features.AnalyticsStore;
-using KeyLoad.RecoveryTests.Features.BlobStorage;
 using KeyLoad.RecoveryTests.Features.Messaging;
 using KeyLoad.RecoveryTests.Features.Search;
 using KeyLoad.Storage.ZoneTree;
@@ -31,12 +30,11 @@ if (await SampleChunkCrashScenario.TryRunAsync(args))
     return Environment.ExitCode;
 }
 
-if (await BlobCommitCutScenario.TryRunAsync(args)
-    || await UserAnalyticsProcessScenario.TryRunAsync(args)
-    || await NativeChecksumProfileScenario.TryRunAsync(args)
-    || await NativeTextOnlineCrashScenario.TryRunAsync(args)
-    || await NativeTextIncrementalCrashScenario.TryRunAsync(args)
-    || await NativeTextCrashScenario.TryRunAsync(args)
+if (await UserAnalyticsProcessScenario.TryRunAsync(args)
+    || await ChecksumProfileScenario.TryRunAsync(args)
+    || await TextOnlineCrashScenario.TryRunAsync(args)
+    || await TextIncrementalCrashScenario.TryRunAsync(args)
+    || await TextCrashScenario.TryRunAsync(args)
     || await ExistingStoreInspector.TryRunAsync(args)
     || await ExternalQueueWorkerCrashScenario.TryRunAsync(args))
 {

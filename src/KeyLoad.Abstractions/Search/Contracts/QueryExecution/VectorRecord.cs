@@ -9,5 +9,5 @@ namespace KeyLoad;
 /// <param name="Values">Contains vector components.</param>
 /// <param name="DocumentRevision">Identifies the associated document revision.</param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.VectorRecord)]
+[Orleans.Alias(ContractAliases.VectorRecord)]
 public sealed record VectorRecord([property: Orleans.Id(0)] string DocumentId, [property: Orleans.Id(1)] string Field, [property: Orleans.Id(2)] VectorSpace Space, [property: Orleans.Id(3)] ImmutableArray<float> Values, [property: Orleans.Id(4)] long DocumentRevision);

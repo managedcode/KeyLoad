@@ -25,8 +25,8 @@ internal sealed class McpCommandDecodeTests
             await Assert.That(decoded.CommandId).IsEqualTo(item.CommandId);
             await Assert.That(decoded.ReadKind).IsNull();
             await Assert.That(decoded.CommandKind).IsEqualTo(Find(item.Name).CommandKind);
-            var native = await McpNativePayloadAssertions.AssertFullPublicPayload(item, decoded.Payload);
-            await McpNativePayloadAssertions.AssertNativeWritersAgree(item, native);
+            var execution = await McpPayloadAssertions.AssertFullPublicPayload(item, decoded.Payload);
+            await McpPayloadAssertions.AssertWritersAgree(item, execution);
             await Assert.That(arguments.Count).IsEqualTo(count);
             await Assert.That(arguments[McpCanonicalTestData.RequestKey].GetRawText()).IsEqualTo(item.Request.GetRawText());
         }
@@ -87,7 +87,7 @@ internal sealed class McpCommandDecodeTests
         }
     }
 
-    /// <summary>Owned canonical operation bytes outlive the native argument document.</summary>
+    /// <summary>Owned canonical operation bytes outlive the execution argument document.</summary>
     [Test]
     public async Task AcMcp003DecodedPayloadSurvivesDisposalOfItsOriginalJsonDocument()
     {
@@ -103,7 +103,7 @@ internal sealed class McpCommandDecodeTests
             copiedWhileDocumentWasAlive = decoded.Payload.ToArray();
         }
         await Assert.That(decoded.Payload.Span.SequenceEqual(copiedWhileDocumentWasAlive)).IsTrue();
-        var actual = await McpNativePayloadAssertions.AssertFullPublicPayload(item, decoded.Payload);
+        var actual = await McpPayloadAssertions.AssertFullPublicPayload(item, decoded.Payload);
         await Assert.That(((CommandRequest)actual).CommandId).IsEqualTo(item.CommandId);
     }
 

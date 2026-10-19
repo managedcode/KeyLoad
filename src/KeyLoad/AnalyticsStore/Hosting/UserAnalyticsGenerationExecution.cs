@@ -5,23 +5,23 @@ using KeyLoad.Core.Features.ResourceExecution;
 
 namespace KeyLoad.Server;
 
-/// <summary>Runs native work outside the canonical read gate and joins it before publishing or releasing its directory.</summary>
+/// <summary>Runs execution work outside the canonical read gate and joins it before publishing or releasing its directory.</summary>
 internal sealed class UserAnalyticsGenerationExecution(PartitionHost physical)
 {
     private const int NoCleanupFailures = 0;
     private const int PrimaryFailureIndex = 0;
-    private AnalyticsStoreNativeGeneration? retainedGeneration;
+    private AnalyticsStoreGeneration? retainedGeneration;
     private readonly List<Exception> cleanup = [];
     internal IReadOnlyList<Exception> CleanupFailures => cleanup;
     internal bool HasUnjoinedEngine => retainedGeneration is { HasJoinedEngine: false };
 
-    internal NativeAnalyticsAggregate Execute(AnalyticsAggregateSnapshot snapshot,
+    internal RuntimeAnalyticsAggregate Execute(AnalyticsAggregateSnapshot snapshot,
         IResourceLifetimeWorkBinding binding, CancellationToken cancellationToken)
     {
         snapshot.Work.RequireResourceLifetimeBinding(binding);
         physical.Database.ValidateAnalyticsAggregatePublication(snapshot);
         var directory = UserAnalyticsGenerationPaths.Create(physical, snapshot);
-        AnalyticsStoreNativeGeneration? generation = null;
+        AnalyticsStoreGeneration? generation = null;
         AnalyticsAggregateResult? result = null;
         Exception? failure = null;
         try
@@ -30,11 +30,11 @@ internal sealed class UserAnalyticsGenerationExecution(PartitionHost physical)
             retainedGeneration = generation;
             result = generation.Query(cancellationToken);
         }
-        catch (Exception original) when (NativeCqrsBoundaryErrors.IsNonFatal(original))
+        catch (Exception original) when (CqrsBoundaryErrors.IsNonFatal(original))
         {
             failure = original;
         }
-        catch (Exception original) when (!NativeCqrsBoundaryErrors.IsNonFatal(original))
+        catch (Exception original) when (!CqrsBoundaryErrors.IsNonFatal(original))
         {
             failure = original;
         }
@@ -63,5 +63,5 @@ internal sealed class UserAnalyticsGenerationExecution(PartitionHost physical)
         return new(result ?? throw Errors.Fail(ErrorCode.Corruption, MissingResult), snapshot);
     }
 
-    private const string MissingResult = "The native analytics result is missing.";
+    private const string MissingResult = "The execution analytics result is missing.";
 }

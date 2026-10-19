@@ -9,7 +9,7 @@ namespace KeyLoad.RecoveryTests.Features.Messaging;
 internal static class LocalInboxProcessingRecoveryReceipt
 {
     internal static async Task RequireAsync(ZoneTreeStore store, Command<DatabaseCommand> operation,
-        CommitReceipt receipt, CommitToken expectedToken, long seedTail, EntityRefLifetimeV1 lifetime)
+        CommitReceipt receipt, CommitToken expectedToken, long seedTail, EntityRefLifetime lifetime)
     {
         ImmutableArray<MutationReceipt> expected = [new("putDocument", LocalInboxProcessingCrashContract.Documents, LocalInboxProcessingCrashContract.Effect, 1L),
             new("appendEvents", LocalInboxProcessingCrashContract.Events, LocalInboxProcessingCrashContract.Effect, 1L),
@@ -19,7 +19,7 @@ internal static class LocalInboxProcessingRecoveryReceipt
         var inbox = store.Read(view => view.GetRecord<InboxRecord>(LocalInboxProcessingRecoveryImage.InboxKey()))!;
         await Assert.That(string.IsNullOrEmpty(inbox.Fingerprint)).IsFalse();
         await LocalInboxProcessingRecoveryImage.ExactAsync(inbox.Receipt, receipt);
-        var request = NativeSerialization.Deserialize<ProcessingRequest>(operation.Value!.Input.Span, NativeValidationProfile.PublicInputElements);
+        var request = OrleansSerialization.Deserialize<ProcessingRequest>(operation.Value!.Input.Span, ValidationProfile.PublicInputElements);
         for (var ordinal = 0; ordinal < request.Effects.Length; ordinal++)
         {
             var sequence = seedTail + ordinal + 1L;

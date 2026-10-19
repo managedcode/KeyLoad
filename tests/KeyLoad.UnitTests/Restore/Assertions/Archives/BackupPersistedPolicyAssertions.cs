@@ -96,6 +96,6 @@ internal static class BackupPersistedPolicyAssertions
     }
 
     internal static async Task SameAsync<T>(T expected, T actual)
-        => await Assert.That(NativeSerialization.Serialize(actual).AsSpan()
-            .SequenceEqual(NativeSerialization.Serialize(expected))).IsTrue();
+        => await Assert.That(OrleansSerialization.Serialize(actual).AsSpan()
+            .SequenceEqual(OrleansSerialization.Serialize(expected))).IsTrue();
 }

@@ -2,11 +2,11 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons;
 
-/// <summary>Bound readiness, lease polling and cleanup policy for native comparison targets.</summary>
+/// <summary>Bound readiness, lease polling and cleanup policy for execution comparison targets.</summary>
 [ConfigurationOptions]
 public sealed class ComparisonLifecycleOptions
 {
-    /// <summary>The optional section for native lifecycle overrides.</summary>
+    /// <summary>The optional section for execution lifecycle overrides.</summary>
     public const string SectionName = "ComparisonLifecycle";
     /// <summary>The rejection for invalid lifecycle timing.</summary>
     public const string ValidationMessage = "Comparison lifecycle deadlines and polling intervals must be positive, bounded and consistent.";
@@ -34,13 +34,13 @@ public sealed class ComparisonLifecycleOptions
     private const int EmptyCapacity = 0;
     private static readonly TimeSpan MaximumDeadline = TimeSpan.FromMinutes(MaximumDeadlineMinutes);
 
-    /// <summary>The deadline for observing all required native replica copies.</summary>
+    /// <summary>The deadline for observing all required execution replica copies.</summary>
     public TimeSpan ReadinessTimeout { get; set; } = TimeSpan.FromSeconds(ReadinessSeconds);
     /// <summary>The cadence for observing KeyLoad applied positions.</summary>
     public TimeSpan KeyLoadReadinessPollInterval { get; set; } = TimeSpan.FromMilliseconds(KeyLoadPollMilliseconds);
     /// <summary>The cadence for observing PostgreSQL replication state.</summary>
     public TimeSpan PostgresReadinessPollInterval { get; set; } = TimeSpan.FromMilliseconds(PostgresPollMilliseconds);
-    /// <summary>The cadence for Qdrant and RabbitMQ native readiness requests.</summary>
+    /// <summary>The cadence for Qdrant and RabbitMQ execution readiness requests.</summary>
     public TimeSpan HttpReadinessPollInterval { get; set; } = TimeSpan.FromMilliseconds(HttpPollMilliseconds);
     /// <summary>The cadence for direct Redis replica probes.</summary>
     public TimeSpan RedisReadinessPollInterval { get; set; } = TimeSpan.FromMilliseconds(RedisPollMilliseconds);
@@ -52,7 +52,7 @@ public sealed class ComparisonLifecycleOptions
     public TimeSpan QueueLeaseDuration { get; set; } = TimeSpan.FromSeconds(QueueLeaseSeconds);
     /// <summary>The deadline for private KeyLoad failure observation.</summary>
     public TimeSpan FailureObservationTimeout { get; set; } = TimeSpan.FromSeconds(DiagnosticSeconds);
-    /// <summary>The native Redis fsync receipt deadline.</summary>
+    /// <summary>The execution Redis fsync receipt deadline.</summary>
     public TimeSpan RedisReceiptTimeout { get; set; } = TimeSpan.FromSeconds(ReceiptSeconds);
     /// <summary>The expiry for the transient Redis replication probe key.</summary>
     public TimeSpan RedisProbeExpiry { get; set; } = TimeSpan.FromMinutes(ProbeExpiryMinutes);
@@ -68,14 +68,14 @@ public sealed class ComparisonLifecycleOptions
     public TimeSpan TimescaleCleanupTimeout { get; set; } = TimeSpan.FromSeconds(TimescaleCleanupSeconds);
     /// <summary>The deadline for deleting streams acknowledged to the current Kurrent run.</summary>
     public TimeSpan KurrentCleanupTimeout { get; set; } = TimeSpan.FromSeconds(KurrentCleanupSeconds);
-    /// <summary>The total Kurrent cleanup and native-client disposal deadline.</summary>
+    /// <summary>The total Kurrent cleanup and execution-client disposal deadline.</summary>
     public TimeSpan KurrentCleanupHostTimeout { get; set; } = TimeSpan.FromSeconds(KurrentCleanupHostSeconds);
-    /// <summary>The cadence for observing native Kurrent gossip and replica copies.</summary>
+    /// <summary>The cadence for observing execution Kurrent gossip and replica copies.</summary>
     public TimeSpan KurrentReadinessPollInterval { get; set; } = TimeSpan.FromMilliseconds(KurrentPollMilliseconds);
     /// <summary>The bounded number of concurrent owned-stream deletions.</summary>
     public int KurrentCleanupConcurrency { get; set; } = KurrentDeleteConcurrency;
 
-    /// <summary>Checks native deadline bounds and prevents a poll interval from exceeding readiness.</summary>
+    /// <summary>Checks execution deadline bounds and prevents a poll interval from exceeding readiness.</summary>
     /// <returns>Whether every lifecycle value is usable.</returns>
     public bool IsValid() => Deadline(ReadinessTimeout) && Poll(KeyLoadReadinessPollInterval)
         && Poll(PostgresReadinessPollInterval) && Poll(HttpReadinessPollInterval)

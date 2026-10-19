@@ -33,10 +33,10 @@ flowchart LR
     Operation --> Audit[Safe outcome without protected payload]
 ```
 
-## Native refusal-envelope preflight correction
+## refusal-envelope preflight correction
 
 Actual existing SqlModelViewClusterAuthorizationAssertions.AssertDeniedAsync establishes that a revoked persisted credential reaches MCP HTTP authentication before tool dispatch: official Client CallAsync throws HttpRequestException with HTTP401; no structured dispatched error is fabricated. Preserve both genuine official direct/Q1 denied calls, exact Unauthorized status, and bounded original McpUnauthorizedProbe safe Problem/no operation header under the same credential/node. Capability refusals remain dispatched PermissionDenied structured envelopes. SDK generic result no-body assertions distinguish reference Value null from JsonElement Undefined/Null, preserving the actual ExecuteSqlAsync<Result<JsonElement>> type. No fallback or accepted-success branch.
 
-## Native target collection privacy fence
+## target collection privacy fence
 
-GraphIncomingEdgesReader.RequireVisible→TryRequireVisible catches target collection PermissionDenied as hidden visibility and returns exact NotFound. Epoch3 target DocumentsRead reduction requires NotFound/no page, independently from preserved original target GraphRead PermissionDenied. Source GraphRead absence omits remote rows. Original principals/policies and all native public codes stay unchanged.
+GraphIncomingEdgesReader.RequireVisible→TryRequireVisible catches target collection PermissionDenied as hidden visibility and returns exact NotFound. Epoch3 target DocumentsRead reduction requires NotFound/no page, independently from preserved original target GraphRead PermissionDenied. Source GraphRead absence omits remote rows. Original principals/policies and all public codes stay unchanged.

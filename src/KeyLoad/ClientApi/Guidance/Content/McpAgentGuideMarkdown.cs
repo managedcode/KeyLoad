@@ -1,6 +1,6 @@
 namespace KeyLoad.Server;
 
-/// <summary>Static operator guidance returned identically by the native resource and prompt.</summary>
+/// <summary>Static operator guidance returned identically by the execution resource and prompt.</summary>
 internal static class McpAgentGuideMarkdown
 {
     internal const string Text = """

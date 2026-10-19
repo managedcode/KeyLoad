@@ -6,7 +6,7 @@ namespace KeyLoad.UnitTests.Features.Messaging;
 
 internal static class QueueLifecycleBackupRestore
 {
-    private const string Prefix = "keyload-native-lifecycle-backup-";
+    private const string Prefix = "keyload-execution-lifecycle-backup-";
     private const string Backup = "backup";
     private const string Target = "target";
 

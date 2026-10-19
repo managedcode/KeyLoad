@@ -62,5 +62,5 @@ internal static class PartialCurrentNodeLayoutPrefix
 
     private static string Path(PartitionHostRecoveryFixture fixture)
         => System.IO.Path.Combine(fixture.Options.DataDirectory, PartitionHostRecoveryFixture.CanonicalDirectory);
-    private const string MissingIdentity = "The genuine empty native prefix identity is required.";
+    private const string MissingIdentity = "The genuine empty execution prefix identity is required.";
 }

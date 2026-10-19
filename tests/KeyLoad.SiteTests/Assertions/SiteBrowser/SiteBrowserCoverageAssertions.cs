@@ -3,7 +3,7 @@ namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
 /// <summary>AC-BC-024/025/028: independently reads genuine Node and Chrome receipts through the final converter.</summary>
 internal static class SiteBrowserCoverageAssertions
 {
-    public static async Task AssertNativeConversionAsync(string baseUrl, SiteTestInputs inputs,
+    public static async Task AssertConversionAsync(string baseUrl, SiteTestInputs inputs,
         CancellationToken cancellationToken)
     {
         await AssertAuthenticSessionAsync(baseUrl, inputs, cancellationToken);
@@ -101,7 +101,7 @@ internal static class SiteBrowserCoverageAssertions
         var actual = await ReadAsync(fixture, inputs, cancellationToken);
         await AssertValidSessionSurvivesAsync(actual, fixture);
         await AssertBadReceiptErrorAsync(actual, fixture, id, missingResult ? SiteCoverageTokens.JsonFailure :
-            SiteCoverageTokens.EmptyNativeFileFailure);
+            SiteCoverageTokens.EmptyFileFailure);
     }
 
     private static async Task AssertForeignOriginRejectedAsync(string baseUrl, SiteTestInputs inputs,
@@ -130,7 +130,7 @@ internal static class SiteBrowserCoverageAssertions
         fixture.ReplaceNodeWithEmptyResult();
         var actual = await ReadAsync(fixture, inputs, cancellationToken);
         await Assert.That(actual.Errors.Any(error => error.Contains(fixture.NodeReceiptPath, StringComparison.Ordinal) &&
-            error.Contains(SiteCoverageTokens.EmptyNativeFileFailure, StringComparison.Ordinal))).IsTrue();
+            error.Contains(SiteCoverageTokens.EmptyFileFailure, StringComparison.Ordinal))).IsTrue();
         await Assert.That(actual.Receipts.Any(receipt => receipt.Runtime == SiteCoverageTokens.BrowserRuntime &&
             receipt.MappedFunctions > SiteCoverageTokens.Zero)).IsTrue();
     }

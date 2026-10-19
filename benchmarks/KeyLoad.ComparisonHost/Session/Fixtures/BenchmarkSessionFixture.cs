@@ -7,7 +7,7 @@ using TUnit.Core.Interfaces;
 
 namespace KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
 
-/// <summary>Owns one native target for all measured tests; setup opens clients without loading the corpus.</summary>
+/// <summary>Owns one execution target for all measured tests; setup opens clients without loading the corpus.</summary>
 internal sealed class BenchmarkSessionFixture : IAsyncInitializer, IAsyncDisposable
 {
     internal const string Measured = "measured";
@@ -17,8 +17,8 @@ internal sealed class BenchmarkSessionFixture : IAsyncInitializer, IAsyncDisposa
     private const double NoElapsedMeasurement = 0;
     private const string Success = "success";
     private const string Failure = "failure";
-    private const string TopologyUnavailable = "NativeTopologyUnavailable";
-    private const string CapabilitiesUnavailable = "NativeSessionCapabilitiesUnavailable";
+    private const string TopologyUnavailable = "RuntimeTopologyUnavailable";
+    private const string CapabilitiesUnavailable = "SessionCapabilitiesUnavailable";
     internal const string LoadCase = "load-million";
     internal const string IndexCase = "index";
     internal const string SequentialReadCase = "sequential-read";
@@ -59,21 +59,21 @@ internal sealed class BenchmarkSessionFixture : IAsyncInitializer, IAsyncDisposa
     {
         var input = new ConfigurationManager();
         configuration = input;
-        input.AddJsonFile(Path.Combine(AppContext.BaseDirectory, NativeComparisonExecutionRegistration.ConfigurationPath), optional: false);
+        input.AddJsonFile(Path.Combine(AppContext.BaseDirectory, ComparisonExecutionRegistration.ConfigurationPath), optional: false);
         input.AddEnvironmentVariables();
         settings = BenchmarkSessionHostSettings.Read(input);
         assemblies = BenchmarkSessionArtifacts.Assemblies();
-        processes = BenchmarkSessionProcessEvidence.Read(input, settings.Native.Selection);
-        if (settings.Native.UnsupportedReason is null)
+        processes = BenchmarkSessionProcessEvidence.Read(input, settings.Execution.Selection);
+        if (settings.Execution.UnsupportedReason is null)
         {
-            owner = new(NativeComparisonExecutionRegistration.Read(input),
-                NativeComparisonExecutionRegistration.ReadDiagnostics(input),
-                NativeComparisonExecutionRegistration.ReadIsolatedAdmission(input),
-                NativeComparisonExecutionRegistration.ReadLifecycle(input),
-                NativeComparisonExecutionRegistration.ReadClient(input),
-                NativeComparisonExecutionRegistration.ReadTranslation(input), TimeProvider.System);
+            owner = new(ComparisonExecutionRegistration.Read(input),
+                ComparisonExecutionRegistration.ReadDiagnostics(input),
+                ComparisonExecutionRegistration.ReadIsolatedAdmission(input),
+                ComparisonExecutionRegistration.ReadLifecycle(input),
+                ComparisonExecutionRegistration.ReadClient(input),
+                ComparisonExecutionRegistration.ReadTranslation(input), TimeProvider.System);
             var progress = new DocumentHostProgress(owner.ExecutionOptions, owner.Clock);
-            session = CreateSession(owner, settings.Native, progress.Observe);
+            session = CreateSession(owner, settings.Execution, progress.Observe);
         }
     }
 
@@ -86,7 +86,7 @@ internal sealed class BenchmarkSessionFixture : IAsyncInitializer, IAsyncDisposa
         }
         catch (Exception failure) when (CqrsRuntimeFailures.FindFatal(failure) is null)
         {
-            // Native connection parsers may include credentials in their original exception messages.
+            // Execution connection parsers may include credentials in their original exception messages.
             throw new ComparisonFailureException(IsolatedHostConstants.Failure);
         }
     }
@@ -98,7 +98,7 @@ internal sealed class BenchmarkSessionFixture : IAsyncInitializer, IAsyncDisposa
         BenchmarkSessionCaseReport report;
         try
         {
-            report = input.Native.UnsupportedReason is { } reason
+            report = input.Execution.UnsupportedReason is { } reason
                 ? new(id, Unavailable, reason, UnverifiedRecords, new BenchmarkSessionOptions().Records, UnverifiedRecords, [], NoElapsedMeasurement)
                 : await operation(session ?? throw new InvalidOperationException(BenchmarkSessionHostSettings.Profile), token);
         }
@@ -119,7 +119,7 @@ internal sealed class BenchmarkSessionFixture : IAsyncInitializer, IAsyncDisposa
         {
             throw new InvalidOperationException(BenchmarkSessionHostSettings.Profile);
         }
-        artifacts.Add(await BenchmarkSessionArtifacts.WriteCaseAsync(settings!.Native.OutputDirectory, report, settings.Native.HostExecution));
+        artifacts.Add(await BenchmarkSessionArtifacts.WriteCaseAsync(settings!.Execution.OutputDirectory, report, settings.Execution.HostExecution));
     }
 
     public async ValueTask DisposeAsync()
@@ -134,8 +134,8 @@ internal sealed class BenchmarkSessionFixture : IAsyncInitializer, IAsyncDisposa
         {
             return;
         }
-        var worker = input.Native.Worker;
-        var unavailable = input.Native.UnsupportedReason;
+        var worker = input.Execution.Worker;
+        var unavailable = input.Execution.UnsupportedReason;
         var capabilitiesUnavailable = unavailable is null && outcomes.Count == CaseIds.Length
             && outcomes.Values.All(status => status == Unavailable);
         var reason = unavailable is not null ? TopologyUnavailable : capabilitiesUnavailable ? CapabilitiesUnavailable : null;
@@ -146,15 +146,15 @@ internal sealed class BenchmarkSessionFixture : IAsyncInitializer, IAsyncDisposa
         {
             profile = null;
         }
-        await BenchmarkSessionArtifacts.WriteStateAsync(input.Native.OutputDirectory,
+        await BenchmarkSessionArtifacts.WriteStateAsync(input.Execution.OutputDirectory,
             new(BenchmarkSessionHostSettings.Profile, input.SessionId, worker.Target, worker.NodeCount,
                 worker.SourceRevision, worker.RunId, worker.Attempt, worker.JobId,
                 worker.Repository, worker.Ref, worker.Workflow,
-                new(unavailable is null ? input.Native.Native?.Image : null),
+                new(unavailable is null ? input.Execution.Execution?.Image : null),
                 processes ?? throw new InvalidOperationException(BenchmarkSessionHostSettings.Profile), profile,
                 new(RuntimeInformation.OSDescription, RuntimeInformation.ProcessArchitecture.ToString(),
-                    Environment.ProcessorCount, RuntimeInformation.FrameworkDescription, input.Native.Storage), assemblies,
-                artifacts.ToImmutableArray(), outcome, reason), input.Native.HostExecution);
+                    Environment.ProcessorCount, RuntimeInformation.FrameworkDescription, input.Execution.Storage), assemblies,
+                artifacts.ToImmutableArray(), outcome, reason), input.Execution.HostExecution);
     }
 
     private ValueTask ReleaseAsync(Task original)

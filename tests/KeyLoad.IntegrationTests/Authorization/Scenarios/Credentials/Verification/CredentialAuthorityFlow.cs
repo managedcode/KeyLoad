@@ -68,11 +68,11 @@ internal static class CredentialAuthorityFlow
                 var q1 = await McpCallerAssertions.StatusAsync(await administrator.CallAsync(SqlOperationProtocol.ToolName, call, token));
                 await Assert.That(q1).IsNotEqualTo(direct);
             }
-            catch (Exception original) when (NativeCqrsBoundaryErrors.IsNonFatal(original)) { failures.Add(original); }
-            catch (Exception original) when (!NativeCqrsBoundaryErrors.IsNonFatal(original)) { failures.Add(original); }
+            catch (Exception original) when (CqrsBoundaryErrors.IsNonFatal(original)) { failures.Add(original); }
+            catch (Exception original) when (!CqrsBoundaryErrors.IsNonFatal(original)) { failures.Add(original); }
         }
-        catch (Exception acquisitionOrCleanup) when (NativeCqrsBoundaryErrors.IsNonFatal(acquisitionOrCleanup)) { failures.Add(acquisitionOrCleanup); }
-        catch (Exception acquisitionOrCleanup) when (!NativeCqrsBoundaryErrors.IsNonFatal(acquisitionOrCleanup)) { failures.Add(acquisitionOrCleanup); }
+        catch (Exception acquisitionOrCleanup) when (CqrsBoundaryErrors.IsNonFatal(acquisitionOrCleanup)) { failures.Add(acquisitionOrCleanup); }
+        catch (Exception acquisitionOrCleanup) when (!CqrsBoundaryErrors.IsNonFatal(acquisitionOrCleanup)) { failures.Add(acquisitionOrCleanup); }
         ServerFailureObserver.ThrowIfAny(failures);
         await SqlClusterProtocol.EqualAsync(before, await DiscoveryAuthorityValues.ImageAsync(root, state.Document, token));
     }

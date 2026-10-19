@@ -8,7 +8,7 @@ namespace KeyLoad.UnitTests.Features.Messaging;
 internal static class QueuePendingAuthorityHistory
 {
     internal static QueuePendingAuthorityCut Capture(ZoneTreeStore store)
-        => new(store.Position, NativeSerialization.Serialize(store.Identity), QueueWholeFlowStorage.Bytes(store));
+        => new(store.Position, OrleansSerialization.Serialize(store.Identity), QueueWholeFlowStorage.Bytes(store));
 
     internal static async Task SameAsync(ZoneTreeStore store, QueuePendingAuthorityCut expected)
     {
@@ -42,7 +42,7 @@ internal static class QueuePendingAuthorityHistory
             var saved = store.Read(view => view.GetRecord<StoredOutcome>(KeySpace.PartitionOutcome(
                 state.Flow.Partition, QueueLifecycleTestProtocol.Administrator, operation.CommandId)))!;
             await Assert.That(saved.Incarnation).IsEqualTo(store.Identity.Incarnation);
-            await Assert.That(NativeSerialization.Serialize(saved.Result).SequenceEqual(NativeSerialization.Serialize(result))).IsTrue();
+            await Assert.That(OrleansSerialization.Serialize(saved.Result).SequenceEqual(OrleansSerialization.Serialize(result))).IsTrue();
             var replay = owner.Apply(operation);
             if (operation.Value!.Kind == OperationKind.Receive)
             {
@@ -52,7 +52,7 @@ internal static class QueuePendingAuthorityHistory
             }
             else
             {
-                await Assert.That(NativeSerialization.Serialize(replay).SequenceEqual(NativeSerialization.Serialize(result))).IsTrue();
+                await Assert.That(OrleansSerialization.Serialize(replay).SequenceEqual(OrleansSerialization.Serialize(result))).IsTrue();
             }
         }
         await SameAsync(store, original);

@@ -4,7 +4,7 @@ using ModelContextProtocol.Server;
 
 namespace KeyLoad.Server;
 
-/// <summary>Native official MCP handlers registered by the shared server composition root.</summary>
+/// <summary>Execution official MCP handlers registered by the shared server composition root.</summary>
 internal static class McpAgentGuideHandlers
 {
     internal static ValueTask<ListResourcesResult> ListResourcesAsync(RequestContext<ListResourcesRequestParams> request, IOptions<McpExecutionOptions> executionOptions, CancellationToken cancellationToken)

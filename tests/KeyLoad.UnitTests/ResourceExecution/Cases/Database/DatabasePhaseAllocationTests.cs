@@ -42,8 +42,8 @@ internal sealed class DatabasePhaseAllocationTests
         for (var index = 0; index < MeasuredRecords; index++)
         {
             var started = bank.Begin();
-            bank.End(DatabasePhaseKind.NativeTreeMutation, DatabasePhaseOutcome.Completed, started);
-            bank.RecordBusy(DatabasePhaseKind.NativeTreeMutation);
+            bank.End(DatabasePhaseKind.TreeMutation, DatabasePhaseOutcome.Completed, started);
+            bank.RecordBusy(DatabasePhaseKind.TreeMutation);
         }
         var recordBytes = GC.GetAllocatedBytesForCurrentThread() - recordStart;
         _ = bank.Capture();
@@ -53,7 +53,7 @@ internal sealed class DatabasePhaseAllocationTests
     }
 
     [Test]
-    public async Task LowerStripeReservationsReduceActualNativeArrayAllocation()
+    public async Task LowerStripeReservationsReduceActualArrayAllocation()
     {
         var maximumCasAttempts = DatabasePhaseTestComposition.Bind().Value.MaximumCasAttempts;
         var single = DatabasePhaseTestComposition.Bind(true, 1, maximumCasAttempts).Value;
@@ -75,7 +75,7 @@ internal sealed class DatabasePhaseAllocationTests
     {
         var bank = DatabasePhaseTestComposition.Create(false);
         var started = bank.Begin();
-        bank.End(DatabasePhaseKind.NativeTreeMutation, DatabasePhaseOutcome.Completed, ZeroStart);
+        bank.End(DatabasePhaseKind.TreeMutation, DatabasePhaseOutcome.Completed, ZeroStart);
         var snapshot = bank.Capture();
 
         await Assert.That(started).IsEqualTo(ZeroStart);
@@ -95,8 +95,8 @@ internal sealed class DatabasePhaseAllocationTests
     private static void WarmRecords(DatabasePhaseBank bank)
     {
         var started = bank.Begin();
-        bank.End(DatabasePhaseKind.NativeTreeMutation, DatabasePhaseOutcome.Completed, started);
-        bank.RecordBusy(DatabasePhaseKind.NativeTreeMutation);
+        bank.End(DatabasePhaseKind.TreeMutation, DatabasePhaseOutcome.Completed, started);
+        bank.RecordBusy(DatabasePhaseKind.TreeMutation);
         _ = bank.Capture();
     }
 }

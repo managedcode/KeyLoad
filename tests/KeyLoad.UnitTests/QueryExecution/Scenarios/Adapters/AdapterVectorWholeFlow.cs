@@ -48,7 +48,7 @@ internal static class AdapterVectorWholeFlow
         if (!string.Equals(firstJson, FirstJson, StringComparison.Ordinal)
             || !string.Equals(secondJson, SecondJson, StringComparison.Ordinal))
         {
-            throw new InvalidOperationException("The typed native seed must retain the complete literal document bytes.");
+            throw new InvalidOperationException("The typed execution seed must retain the complete literal document bytes.");
         }
         database.Commit(new PutDocument(Collection, "a", firstJson), new PutDocument(Collection, "b", secondJson),
             new PutVector(Collection, "a", "/embedding", [1, 0], Space(), 1), new PutVector(Collection, "b", "/embedding", [0, 1], Space(), 1));

@@ -140,7 +140,7 @@ internal static class KurrentReplicaProbe
         }
 
         var actual = items[FirstElementIndex].OriginalEvent;
-        if (items[FirstElementIndex].OriginalEventNumber.ToUInt64() != KurrentConstants.NativeFirstRevision ||
+        if (items[FirstElementIndex].OriginalEventNumber.ToUInt64() != KurrentConstants.RuntimeFirstRevision ||
             actual.EventId != expected.EventId || !actual.Data.Span.SequenceEqual(expected.Data.Span))
         {
             throw new ComparisonFailureException(KurrentConstants.ProbeEventMismatch);

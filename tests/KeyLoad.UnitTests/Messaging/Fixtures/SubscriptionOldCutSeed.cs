@@ -61,9 +61,9 @@ internal static class SubscriptionOldCutSeed
         }
         var bytes = QueueWholeFlowStorage.Bytes(fixture.Store);
         var cut = fixture.Store.Position;
-        var identity = NativeReadCutStoreStateAssertions.SnapshotIdentity(fixture.Store);
+        var identity = ReadCutStoreStateAssertions.SnapshotIdentity(fixture.Store);
         var original = state.Successes.Single(pair => pair.Key.Value!.Kind == OperationKind.ReceiveSubscription);
-        await NativeReplayResultAssertions.Same<ReceiveSubscriptionResult>(fixture.Database.Apply(original.Key), original.Value);
+        await ReplayResultAssertions.Same<ReceiveSubscriptionResult>(fixture.Database.Apply(original.Key), original.Value);
         await SubscriptionOldCutAssertions.ConservedAsync(fixture.Store, bytes, cut, identity);
     }
 

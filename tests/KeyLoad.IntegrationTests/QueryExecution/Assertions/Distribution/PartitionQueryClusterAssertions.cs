@@ -6,7 +6,7 @@ namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 /// <summary>Checks public pages against seed inputs, never against another returned page.</summary>
 internal static class PartitionQueryClusterAssertions
 {
-    internal static async Task AssertOracleAsync(PartitionQueryPageV1 page,
+    internal static async Task AssertOracleAsync(PartitionQueryPage page,
         PartitionQueryClusterScenario scenario, ImmutableArray<PartitionRef> selected)
     {
         await Assert.That(page.Version).IsEqualTo(PartitionQueryClusterProtocol.Version);
@@ -25,8 +25,8 @@ internal static class PartitionQueryClusterAssertions
             .IsEqualTo(expectedDuplicates);
     }
 
-    internal static async Task AssertSameLogicalRowsAsync(PartitionQueryPageV1 expected,
-        PartitionQueryPageV1 actual)
+    internal static async Task AssertSameLogicalRowsAsync(PartitionQueryPage expected,
+        PartitionQueryPage actual)
     {
         await Assert.That(actual.Version).IsEqualTo(expected.Version);
         await Assert.That(actual.Complete).IsEqualTo(expected.Complete);
@@ -54,7 +54,7 @@ internal static class PartitionQueryClusterAssertions
         await Assert.That(expected.RedactedFields!.Value.IsEmpty).IsTrue();
     }
 
-    private static async Task AssertRowAsync(PartitionQueryRowV1 actual,
+    private static async Task AssertRowAsync(PartitionQueryRow actual,
         PartitionQueryClusterInputRow expected, EntityRef expectedReference)
     {
         await Assert.That(actual.Reference).IsEqualTo(expectedReference);
@@ -70,7 +70,7 @@ internal static class PartitionQueryClusterAssertions
         await Assert.That(root.TryGetProperty(PartitionQueryClusterProtocol.RankJsonProperty, out _)).IsFalse();
     }
 
-    private static async Task AssertLeavesAsync(ImmutableArray<PartitionQueryLeafWitnessV1> leaves,
+    private static async Task AssertLeavesAsync(ImmutableArray<PartitionQueryLeafWitness> leaves,
         ImmutableArray<PartitionRef> selected)
     {
         var expected = selected.OrderBy(partition => partition.TenantId, StringComparer.Ordinal)

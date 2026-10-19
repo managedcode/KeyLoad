@@ -4,7 +4,7 @@ namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 internal sealed class IsolatedAggregateNodePipeFailureOwner : IAsyncDisposable
 {
-    private const string ProcessReleaseFailure = "Native Node child process release failed.";
+    private const string ProcessReleaseFailure = "Execution Node child process release failed.";
     private readonly CancellationToken testToken;
     private readonly IsolatedAggregateNodeFailureSet failures = new();
     private readonly IsolatedAggregateNodeDeadlineOwner deadlineOwner;
@@ -100,17 +100,17 @@ internal sealed class IsolatedAggregateNodePipeFailureOwner : IAsyncDisposable
 
     private void RegisterOriginalOperations()
     {
-        actualExit = IsolatedAggregateNodePipeFailureOwnerEvidence.InvokeNative(
+        actualExit = IsolatedAggregateNodePipeFailureOwnerEvidence.RuntimeInvoke(
             () => process!.WaitForExitAsync(CancellationToken.None));
         var runToken = deadlineOwner.Start(
             TimeSpan.FromSeconds(SessionNodeProcess.TimeoutSeconds), testToken);
-        var activeOutput = IsolatedAggregateNodePipeFailureOwnerEvidence.InvokeNative(
+        var activeOutput = IsolatedAggregateNodePipeFailureOwnerEvidence.RuntimeInvoke(
             () => IsolatedAggregateNodeOutput.ReadAsync(process!.StandardOutput, runToken));
         output = activeOutput;
-        var activeError = IsolatedAggregateNodePipeFailureOwnerEvidence.InvokeNative(
+        var activeError = IsolatedAggregateNodePipeFailureOwnerEvidence.RuntimeInvoke(
             () => IsolatedAggregateNodeOutput.ReadAsync(process!.StandardError, runToken));
         error = activeError;
-        var activeWait = IsolatedAggregateNodePipeFailureOwnerEvidence.InvokeNative(
+        var activeWait = IsolatedAggregateNodePipeFailureOwnerEvidence.RuntimeInvoke(
             () => process!.WaitForExitAsync(runToken));
         wait = activeWait;
     }

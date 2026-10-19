@@ -53,7 +53,7 @@ internal static class AnnMaintenanceParentFlow
         await AnnMaintenanceProgress.WriteAsync(writer, children.ParentRequestId, AnnMaintenancePhase.Verify).ConfigureAwait(true);
         state = await children.CapabilityAsync(request, AnnMaintenanceCapabilityKind.Publish, token,
             intent: replayed.EmptyIntent).ConfigureAwait(true);
-        await AnnMaintenanceProgress.WriteAsync(writer, children.ParentRequestId, AnnMaintenancePhase.NativeIndex).ConfigureAwait(true);
+        await AnnMaintenanceProgress.WriteAsync(writer, children.ParentRequestId, AnnMaintenancePhase.RuntimeIndex).ConfigureAwait(true);
         await AnnMaintenanceProgress.WriteAsync(writer, children.ParentRequestId, AnnMaintenancePhase.Publish).ConfigureAwait(true);
         if (replayed.EmptyIntent is { } empty)
         {

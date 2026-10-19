@@ -16,7 +16,7 @@ internal static class EntityReferenceLifetime
     internal static void RequireStored(IKeyValueView view, EntityRef reference, ResourceDefinition definition)
         => RequireStored(reference, Read(view, reference, definition));
 
-    internal static EntityRef Bind(EntityRef reference, ResourceLifetimeV1 authenticatedActual)
+    internal static EntityRef Bind(EntityRef reference, ResourceLifetime authenticatedActual)
     {
         RequireScope(reference, authenticatedActual);
         if (reference.Lifetime is not null)
@@ -30,7 +30,7 @@ internal static class EntityReferenceLifetime
         };
     }
 
-    internal static void RequireStored(EntityRef reference, ResourceLifetimeV1 authenticatedActual)
+    internal static void RequireStored(EntityRef reference, ResourceLifetime authenticatedActual)
     {
         RequireBound(reference);
         RequireScope(reference, authenticatedActual);
@@ -49,7 +49,7 @@ internal static class EntityReferenceLifetime
         }
     }
 
-    internal static void RequireAdmitted(EntityRef admitted, EntityRef original, ResourceLifetimeV1 authenticatedActual)
+    internal static void RequireAdmitted(EntityRef admitted, EntityRef original, ResourceLifetime authenticatedActual)
     {
         RequireStored(admitted, authenticatedActual);
         if (Bind(original, authenticatedActual) != admitted)
@@ -58,7 +58,7 @@ internal static class EntityReferenceLifetime
         }
     }
 
-    internal static void RequireDocument(DocumentRecord? record, ResourceLifetimeV1 authenticatedActual)
+    internal static void RequireDocument(DocumentRecord? record, ResourceLifetime authenticatedActual)
     {
         if (record is not null)
         {
@@ -66,14 +66,14 @@ internal static class EntityReferenceLifetime
         }
     }
 
-    private static ResourceLifetimeV1 Read(IKeyValueView view, EntityRef reference, ResourceDefinition definition)
+    private static ResourceLifetime Read(IKeyValueView view, EntityRef reference, ResourceDefinition definition)
     {
         RequireReference(reference);
         return ResourceLifetimeCatalog.Read(view, reference.Partition.TenantId, reference.Partition.DatabaseId,
             reference.Collection, definition) ?? throw Errors.Fail(ErrorCode.NotFound, MissingResource);
     }
 
-    private static void RequireScope(EntityRef reference, ResourceLifetimeV1 actual)
+    private static void RequireScope(EntityRef reference, ResourceLifetime actual)
     {
         RequireReference(reference);
         ArgumentNullException.ThrowIfNull(actual);

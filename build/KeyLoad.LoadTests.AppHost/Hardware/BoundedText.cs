@@ -9,7 +9,7 @@ internal static class BoundedText
         try
         {
             await using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite,
-                budget.Settings.NativeReadBufferBytes, FileOptions.Asynchronous | FileOptions.SequentialScan);
+                budget.Settings.RuntimeReadBufferBytes, FileOptions.Asynchronous | FileOptions.SequentialScan);
             var limit = Math.Min(maximum, budget.Remaining);
             if (limit < BoundaryValue || !stream.CanSeek || stream.Length > limit)
             {

@@ -19,26 +19,26 @@ internal sealed class ComparisonTestLogCapture : IAsyncDisposable
     private readonly ConcurrentDictionary<string, Task> logCaptures = new(StringComparer.Ordinal);
     private readonly Task capture;
     private readonly ComparisonProgressFile? progress;
-    private readonly Action<string>? nativeLineObserver;
+    private readonly Action<string>? lineObserver;
     private readonly System.Threading.Lock stopGate = new();
     private readonly System.Threading.Lock disposeGate = new();
     private Task? stopping;
     private Task? disposing;
 
-    public ComparisonTestLogCapture(DistributedApplication application, IOptions<NativeComparisonHarnessOptions> executionOptions,
+    public ComparisonTestLogCapture(DistributedApplication application, IOptions<ComparisonHarnessOptions> executionOptions,
         IEnumerable<string>? selectedResources = null,
-        string? progressPath = null, Action<string>? nativeLineObserver = null)
+        string? progressPath = null, Action<string>? lineObserver = null)
     {
         ArgumentNullException.ThrowIfNull(executionOptions);
         var execution = executionOptions.Value;
         execution.Validate();
         this.application = application;
-        this.nativeLineObserver = nativeLineObserver;
+        this.lineObserver = lineObserver;
         var names = (selectedResources ?? []).Append(ComparisonResourceName).Distinct(StringComparer.Ordinal).ToArray();
         if (names.Any(name => name.Length == 0 || name.Length > execution.MaximumResourceLogNameCharacters || name.Any(character =>
             !char.IsAsciiLetterOrDigit(character) && character != '-')))
         {
-            throw new ArgumentException("Resource log names must be confined native identifiers.", nameof(selectedResources));
+            throw new ArgumentException("Resource log names must be confined execution identifiers.", nameof(selectedResources));
         }
         logs = names.ToDictionary(name => name, name => new ComparisonResourceLogBuffer(
             name == ComparisonResourceName ? execution.MaximumRetainedComparisonLogLines : execution.MaximumRetainedNodeLogLines,
@@ -138,7 +138,7 @@ internal sealed class ComparisonTestLogCapture : IAsyncDisposable
     }
 
     private static Task CollectFailureAsync(Func<Task> operation, List<Exception> failures)
-        => IsolatedNativeTeardownNativeSupport.CollectFailureAsync(operation, failures);
+        => IsolatedTeardownSupport.CollectFailureAsync(operation, failures);
 
     private static void ThrowFailures(List<Exception> failures)
     {
@@ -211,9 +211,9 @@ internal sealed class ComparisonTestLogCapture : IAsyncDisposable
         logs[name].Add(line);
         if (name == ComparisonResourceName)
         {
-            nativeLineObserver?.Invoke(line);
+            lineObserver?.Invoke(line);
         }
-        if (name == ComparisonResourceName && ComparisonProgressLine.TryFromNativeLog(line, out var marker))
+        if (name == ComparisonResourceName && ComparisonProgressLine.TryFromLog(line, out var marker))
         {
             progress?.Observe(marker);
         }

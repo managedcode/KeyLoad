@@ -28,7 +28,7 @@ internal static class SqlJoinSourceBindingFixture
     private const string NameOutput = "customer_name";
     private const string Sql = "SELECT TOP (10) r.name AS customer_name FROM orders AS l INNER JOIN customers AS r ON l.customer_id = r.id ORDER BY l.order_id ASC";
     private const string ModelSelect = "SELECT TOP (10) d.name AS customer_name FROM ";
-    private const int Dialect = 2;
+    private const int Dialect = SqlOperationProtocol.DefaultQueryDialectVersion;
     private const int Limit = 10;
 
     internal static (global::KeyLoad.CommandRequest Command, global::KeyLoad.CommitReceipt Receipt) Seed(TestDatabase database, string kind)

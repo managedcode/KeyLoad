@@ -4,7 +4,7 @@ using KeyLoad.Storage;
 namespace KeyLoad.Core.Features.AnalyticsStore;
 
 internal sealed record AnalyticsStoreReadScope(PrincipalRecord Principal, ResourceDefinition Resource,
-    ResourceLifetimeV1 Lifetime)
+    ResourceLifetime Lifetime)
 {
     private const long AbsentGeneration = 0;
     internal static AnalyticsStoreReadScope Open(DatabaseEngine database, IKeyValueView view,
@@ -24,7 +24,7 @@ internal sealed record AnalyticsStoreReadScope(PrincipalRecord Principal, Resour
     internal static long Generation(IKeyValueView view, PartitionRef partition, string store)
     {
         var raw = view.ReadOwnedValue(AnalyticsStoreKeys.Generation(partition, store));
-        var value = raw is null ? AbsentGeneration : NativeSerialization.Deserialize<long>(raw);
+        var value = raw is null ? AbsentGeneration : OrleansSerialization.Deserialize<long>(raw);
         if (value < AbsentGeneration)
         {
             throw Errors.Fail(ErrorCode.Corruption, AnalyticsStoreValidation.Invalid);

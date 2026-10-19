@@ -4,16 +4,16 @@ namespace KeyLoad.Server;
 
 internal static class MessagingApi
 {
-    private const string ReceivePath = "/v1/queues/receive";
-    private const string DeliveryPath = "/v1/queues/delivery";
-    private const string InboxPath = "/v1/inbox/commit";
-    private const string ProcessPath = "/v1/queues/process";
-    private const string InspectPath = "/v1/queues/inspect";
-    private const string TransferPath = "/v1/queues/transfers/inspect";
-    private const string TransferReceiptPath = "/v1/queues/transfers/receipt";
-    private const string SchedulePath = "/v1/queues/schedules/inspect";
-    private const string SagaPath = "/v1/queues/sagas/inspect";
-    private const string DispatchPath = "/v1/admin/dispatch";
+    private const string ReceivePath = "/queues/receive";
+    private const string DeliveryPath = "/queues/delivery";
+    private const string InboxPath = "/inbox/commit";
+    private const string ProcessPath = "/queues/process";
+    private const string InspectPath = "/queues/inspect";
+    private const string TransferPath = "/queues/transfers/inspect";
+    private const string TransferReceiptPath = "/queues/transfers/receipt";
+    private const string SchedulePath = "/queues/schedules/inspect";
+    private const string SagaPath = "/queues/sagas/inspect";
+    private const string DispatchPath = "/admin/dispatch";
 
     internal static void Map(WebApplication app)
     {

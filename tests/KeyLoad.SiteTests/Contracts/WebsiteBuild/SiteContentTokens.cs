@@ -23,14 +23,14 @@ internal static class SiteContentTokens
     public const string Width = "innerWidth";
     public const string MobilePosterSuffix = "agent-context.png";
     public const string DesktopPosterSuffix = "agent-context.png";
-    public const string ProductTitle = "KeyLoad — the AI-native database for AI agents";
+    public const string ProductTitle = "KeyLoad — the AI-execution database for AI agents";
     public const string TitleField = "title";
     public const string StaticStatus = "Static illustration.";
     public const string BenchmarksSection = "benchmarks";
     public const string SceneElement = "cluster-scene";
     public const string SceneStatusSelector = "[data-scene-status]";
     public const string RootMetaCanonical = "<link rel=\"canonical\" href=\"https://www.keyload.cloud/\">";
-    public const string DescriptionMeta = "<meta name=\"description\" content=\"Source-available AI-native database";
+    public const string DescriptionMeta = "<meta name=\"description\" content=\"Source-available AI-execution database";
     public const string JsonLdType = "application/ld+json";
     public const string ContentMode = "none";
     public const string BenchmarkSource = "none";

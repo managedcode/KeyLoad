@@ -8,13 +8,13 @@ Feature: BenchmarkComparisons, REQ/AC-BC-WEB-001..007.
 Website/website.yml owns website source qualification and Pages publication.
 Its executor accepts trusted own-main push and workflow_dispatch. Build and Tests
 retains every build/analyzer/unit/scalar/recovery/cluster gate independently.
-Benchmarks owns native measurements and the final settled aggregate; its final
+Benchmarks owns measurements and the final settled aggregate; its final
 website-trigger job dispatches Website on main only after every preparation/build
 job, every database matrix and the aggregate succeeded (any failed, skipped or
 cancelled prerequisite prevents dispatch), with exact trusted repository/event
 admission. Only that job has actions:write; database jobs remain read-only.
 Trigger failure is visible. Website's push trigger is filtered to `site/**`, its
-native site tests, site-specific scripts/composites and shared build inputs; there
+site tests, site-specific scripts/composites and shared build inputs; there
 is no `workflow_run` subscription, alternate executor or measurement bypass.
 
 Optional benchmark_run_id authenticates the original own-repository main run,
@@ -37,7 +37,7 @@ publication has its own closed SiteContent TUnit selection through the same
 Aspire site entry and proves every emitted/executed asset, browser action/result
 and source path with applicable coverage thresholds, including critical90.
 Measurement/archive numeric proof is N/A for an artifact that contains no metrics;
-content-only success cannot be advertised as measured qualification. Native TRX
+content-only success cannot be advertised as measured qualification. TRX
 has no skipped cases, owned resources settle, and fresh source/control identities
 and selected tuple (including null) are checked again before deployment.
 Pages/OIDC writes are confined to the needs-gated deploy job.
@@ -58,9 +58,9 @@ flowchart TD
 ## Ordered implementation and delivery
 
 1. REQ/AC, policies, exact workflows/events and the ownership split are frozen before code.
-2. Selection owns site-isolated-github capture/runs/contract; the builder owns site/Features/BenchmarkComparisons/build-site.mjs. Preserve exact original artifacts, bounded native calls and source closure. Capture is limited to the current executor and REST selection/wait inputs; it has no event-file parsing, preserving REST workflow_runs and artifact.workflow_run provenance, actual authenticated capture and latest-selection operation flows.
-3. Qualification owns SiteContent cases/helpers/contracts and the current coverage/source inventory joins. Native file/Node/Chrome flows prove successful admission, absence, foreign executor, corrupt evidence and healthy follow-up. Workflow-shape review uses actionlint/YAML and is not product runtime proof.
-4. Workflows/composites, native dispatch/admission/wait, tests, inventories and docs join once; verify build/format/governance, Aspire cases and actual exact-source Linux Website/Pages/freshness evidence. Release context consumes Build and Tests with its actual four job labels and all source/attempt/success protections.
+2. Selection owns site-isolated-github capture/runs/contract; the builder owns site/Features/BenchmarkComparisons/build-site.mjs. Preserve exact original artifacts, bounded calls and source closure. Capture is limited to the current executor and REST selection/wait inputs; it has no event-file parsing, preserving REST workflow_runs and artifact.workflow_run provenance, actual authenticated capture and latest-selection operation flows.
+3. Qualification owns SiteContent cases/helpers/contracts and the current coverage/source inventory joins. file/Node/Chrome flows prove successful admission, absence, foreign executor, corrupt evidence and healthy follow-up. Workflow-shape review uses actionlint/YAML and is not product runtime proof.
+4. Workflows/composites, dispatch/admission/wait, tests, inventories and docs join once; verify build/format/governance, Aspire cases and actual exact-source Linux Website/Pages/freshness evidence. Release context consumes Build and Tests with its actual four job labels and all source/attempt/success protections.
 5. All REQ/AC-WEB gates retain original failing and passing results. A commit or successful trigger alone does not qualify Website publication or the database.
 
 Dependencies are official Pages actions, GitHub REST, Node, Chrome, TUnit/MTP and
@@ -73,6 +73,6 @@ until actual measured and content-only qualification, freshness and Pages proof 
 
 REQ/AC-BC-WEB-008: Website's push trigger and Benchmarks' final dispatch follow the decision above. Verification: push path matches and dependency outcome rejection are source checks; GitHub scheduling, a successful producer dispatch and rejection of a failed producer in actual Linux execution are required provider evidence, not claims from static inspection. Independent site changes can still publish without benchmark figures when no authenticated producer is ready. Rollback preserves the independent Website executor and all source/metric/coverage/browser/freshness/permission checks.
 
-REQ/AC-BC-WEB-003: the native menu action and restored fragment finish their actual CSS-adjusted target scroll, clamped to the document's real scroll range, before subsequent hero navigation. The actual Chrome/CDP caller clicks the observed visible menu toggle and link centers through native mouse press/release rather than DOM `.click()`. Test helpers own bounded observation of location and geometry; they cannot force renderer state or focus, accept paused output, increase timeouts or lower coverage. Popover closure, repeated opening/viewport closure, scene lifecycle and joined child cleanup remain mandatory. `SiteContentBrowserTests` retains the full action chain with genuine pointer inputs; failure diagnostics additionally retain active-element tag/id and real scroll bounds, never credentials or user payload. No new dependency or provider boundary.
+REQ/AC-BC-WEB-003: the menu action and restored fragment finish their actual CSS-adjusted target scroll, clamped to the document's real scroll range, before subsequent hero navigation. The actual Chrome/CDP caller clicks the observed visible menu toggle and link centers through mouse press/release rather than DOM `.click()`. Test helpers own bounded observation of location and geometry; they cannot force renderer state or focus, accept paused output, increase timeouts or lower coverage. Popover closure, repeated opening/viewport closure, scene lifecycle and joined child cleanup remain mandatory. `SiteContentBrowserTests` retains the full action chain with genuine pointer inputs; failure diagnostics additionally retain active-element tag/id and real scroll bounds, never credentials or user payload. No new dependency or provider boundary.
 
-REQ/AC-BC-NATIVE-FAILURE-DIAGNOSTICS-001: capture retains bounded native process diagnostics after joined cleanup, with credential exclusion and unchanged safe public envelopes. This refines the current capture ownership and fail-closed contract and adds no provider, retry or fallback decision.
+REQ/AC-BC-EXECUTION-FAILURE-DIAGNOSTICS-001: capture retains bounded process diagnostics after joined cleanup, with credential exclusion and unchanged safe public envelopes. This refines the current capture ownership and fail-closed contract and adds no provider, retry or fallback decision.

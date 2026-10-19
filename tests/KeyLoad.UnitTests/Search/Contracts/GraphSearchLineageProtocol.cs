@@ -26,7 +26,7 @@ internal static class GraphSearchLineageProtocol
     internal const string Model = "lineage-model";
     internal const string ModelVersion = "1";
     internal const string DocumentFamily = "document";
-    internal const string WrongRow = "wrong-native-lineage-vertex-type";
+    internal const string WrongRow = "wrong-execution-lineage-vertex-type";
     internal const string Denied = "The query requires a protected field-use grant.";
     internal const string Missing = "The genuine graph-search lineage operation did not settle.";
     internal const int Version = 1;

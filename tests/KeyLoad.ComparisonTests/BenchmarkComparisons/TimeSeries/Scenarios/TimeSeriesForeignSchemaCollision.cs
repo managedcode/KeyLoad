@@ -5,9 +5,9 @@ using Npgsql;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons.TimeSeries;
 
-/// <summary>Preserves the actual native Timescale ownership checks for future family integration.</summary>
+/// <summary>Preserves the actual execution Timescale ownership checks for future family integration.</summary>
 /// <remarks>Pending: the retired TimeSeries Aspire benchmark caller no longer invokes this helper.
-/// The session-v1 PostgreSQL image is pgvector, so it cannot qualify this Timescale-only behavior.</remarks>
+/// The session PostgreSQL image is pgvector, so it cannot qualify this Timescale-only behavior.</remarks>
 internal static class TimeSeriesForeignSchemaCollision
 {
     private const string SchemaPrefix = "keyload_tsc_";
@@ -71,7 +71,7 @@ internal static class TimeSeriesForeignSchemaCollision
         CancellationToken cancellationToken)
     {
         var workload = TimeSeriesComparisonWorkloadFactory.Create(runId);
-        await using var target = new TimescaleTimeSeriesTarget(connectionString, NativeExecutionPolicyFixture.Lifecycle());
+        await using var target = new TimescaleTimeSeriesTarget(connectionString, ExecutionPolicyFixture.Lifecycle());
         InvalidOperationException? failure = null;
         try
         {

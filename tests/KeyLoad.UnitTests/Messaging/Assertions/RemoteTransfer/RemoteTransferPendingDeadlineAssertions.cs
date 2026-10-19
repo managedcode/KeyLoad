@@ -10,21 +10,21 @@ internal static class RemoteTransferPendingDeadlineAssertions
     internal static async Task RequireAsync(RemoteTransferDatabase fixture, RemoteTransferDiscoveryClock clock)
     {
         var image = Image(fixture);
-        var identity = NativeSerialization.Serialize(fixture.Store.Identity);
+        var identity = OrleansSerialization.Serialize(fixture.Store.Identity);
         var position = fixture.Store.Position;
-        var native = (ZoneTreeStore)fixture.Store;
-        var baseline = native.GetReadDiagnostics().RangeExaminedBytes;
-        clock.Arm(() => native.GetReadDiagnostics().RangeExaminedBytes > baseline,
+        var execution = (ZoneTreeStore)fixture.Store;
+        var baseline = execution.GetReadDiagnostics().RangeExaminedBytes;
+        clock.Arm(() => execution.GetReadDiagnostics().RangeExaminedBytes > baseline,
             fixture.Database.DueDiscoveryDeadline);
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => RemoteTransferPendingDiscovery.Read(
             fixture.Database, RemoteTransferDatabase.RootPrincipal, null, CancellationToken.None));
-        await Assert.That(clock.ExpiredAfterNativeProgress).IsTrue();
+        await Assert.That(clock.ExpiredAfterProgress).IsTrue();
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
         await Assert.That(failure.Message).IsEqualTo(DueWorkProtocol.DeadlineExceeded);
         clock.Disarm();
         await Assert.That(Image(fixture).SequenceEqual(image)).IsTrue();
         await Assert.That(fixture.Store.Position).IsEqualTo(position);
-        await Assert.That(NativeSerialization.Serialize(fixture.Store.Identity).SequenceEqual(identity)).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(fixture.Store.Identity).SequenceEqual(identity)).IsTrue();
     }
 
     private static string[] Image(RemoteTransferDatabase fixture) => fixture.Store.Read(view =>

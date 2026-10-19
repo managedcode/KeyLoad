@@ -9,7 +9,7 @@ internal sealed class KeyLoadClientTransportTests
 {
     private const string ApiKey = "client-api-test-key";
     private const string BearerScheme = "Bearer";
-    private const string CommandsPath = "/v1/commands";
+    private const string CommandsPath = "/commands";
     private const string JsonContentType = "application/json";
     private const string CommandIdHeader = "X-KeyLoad-Command-Id";
     private const string TenantId = "tenant";

@@ -10,12 +10,12 @@ namespace KeyLoad.Storage.ZoneTree;
 /// </summary>
 public sealed class ZoneTreeStore : IAtomicStore, IKeyValueView
 {
-    private const string InvalidNativeReadCutContextMessage = "A native read cut must be captured inside this store's gated read callback.";
+    private const string InvalidReadCutContextMessage = "A execution read cut must be captured inside this store's gated read callback.";
 
     private readonly ZoneTreeStoreRuntime runtime;
     private readonly ZoneTreeStorageExecutionOptions? executionPolicy;
     private readonly ZoneTreePointCacheExecutionOptions? cacheExecutionPolicy;
-    private const string CacheExecutionPolicyRequired = "A public native storage owner must configure point-cache execution policy before cache admission.";
+    private const string CacheExecutionPolicyRequired = "A public execution storage owner must configure point-cache execution policy before cache admission.";
 
     /// <summary>Gets the store's persisted identity with privately owned signing material.</summary>
     public StoreIdentity Identity => runtime.Identity;
@@ -25,7 +25,7 @@ public sealed class ZoneTreeStore : IAtomicStore, IKeyValueView
     /// <summary>Validates current identity admission without creating or recovering a store.</summary>
     /// <param name="options">The same directory and identity requirements used by the future owner.</param>
     /// <param name="executionOptions">The centrally validated storage execution policy.</param>
-    /// <remarks>The caller retains node ownership; actual store open repeats all native checks.</remarks>
+    /// <remarks>The caller retains node ownership; actual store open repeats all execution checks.</remarks>
     public static void ValidateIdentityBeforeOpen(ZoneTreeStoreOptions options,
         IOptions<ZoneTreeStorageExecutionOptions> executionOptions)
         => ZoneTreeIdentityPreflight.Validate(options, executionOptions);
@@ -34,22 +34,22 @@ public sealed class ZoneTreeStore : IAtomicStore, IKeyValueView
     /// <param name="options">Store directory, identity and persistence budgets.</param>
     /// <param name="executionOptions">Centrally validated storage execution policy, frozen before files are opened.</param>
     /// <param name="cacheExecutionOptions">Centrally validated cache policy, frozen before any optional memory admission.</param>
-    /// <param name="timeProvider">Borrowed clock for native read-cut elapsed budgets; defaults to the system provider.</param>
+    /// <param name="timeProvider">Borrowed clock for execution read-cut elapsed budgets; defaults to the system provider.</param>
     public ZoneTreeStore(ZoneTreeStoreOptions options, IOptions<ZoneTreeStorageExecutionOptions> executionOptions,
         IOptions<ZoneTreePointCacheExecutionOptions> cacheExecutionOptions, TimeProvider? timeProvider = null)
-        : this(options, executionOptions, cacheExecutionOptions, timeProvider, new NativeStorageOwnerSettlement())
+        : this(options, executionOptions, cacheExecutionOptions, timeProvider, new StorageOwnerSettlement())
     {
     }
 
     internal static ZoneTreeStore OpenOwned(ZoneTreeStoreOptions options,
         IOptions<ZoneTreeStorageExecutionOptions> executionOptions,
         IOptions<ZoneTreePointCacheExecutionOptions> cacheExecutionOptions,
-        NativeStorageOwnerSettlement settlement, TimeProvider? timeProvider = null)
+        StorageOwnerSettlement settlement, TimeProvider? timeProvider = null)
         => new(options, executionOptions, cacheExecutionOptions, timeProvider, settlement);
 
     private ZoneTreeStore(ZoneTreeStoreOptions options, IOptions<ZoneTreeStorageExecutionOptions> executionOptions,
         IOptions<ZoneTreePointCacheExecutionOptions> cacheExecutionOptions, TimeProvider? timeProvider,
-        NativeStorageOwnerSettlement settlement)
+        StorageOwnerSettlement settlement)
     {
         var frozen = ZoneTreeStoreOpeningOptions.Freeze(options, executionOptions, cacheExecutionOptions);
         executionPolicy = frozen.Execution.Value;
@@ -100,15 +100,15 @@ public sealed class ZoneTreeStore : IAtomicStore, IKeyValueView
     public T Commit<T>(Func<IAtomicTransaction, long, T> compile)
         => ZoneTreeStoreCommitExecution.Commit(runtime, compile);
 
-    internal ZoneTreeReadCutLease CaptureNativeReadCut(IKeyValueView view, ZoneTreeReadCutLimits limits,
+    internal ZoneTreeReadCutLease CaptureReadCut(IKeyValueView view, ZoneTreeReadCutLimits limits,
         CancellationToken cancellationToken)
     {
         if (!ReferenceEquals(view, this) || !runtime.Gate.IsReadLockHeld || runtime.Gate.IsWriteLockHeld)
         {
-            throw Errors.Fail(ErrorCode.Validation, InvalidNativeReadCutContextMessage);
+            throw Errors.Fail(ErrorCode.Validation, InvalidReadCutContextMessage);
         }
 
-        return runtime.NativeReadCuts.Capture(runtime, limits, cancellationToken);
+        return runtime.RuntimeReadCuts.Capture(runtime, limits, cancellationToken);
     }
 
     byte[]? IKeyValueView.ReadOwnedValue(byte[] key) => runtime.View.ReadOwnedValue(key);
@@ -168,14 +168,14 @@ public sealed class ZoneTreeStore : IAtomicStore, IKeyValueView
 
     /// <summary>Copies the canonical journal and identity into a private verified backup directory.</summary>
     /// <param name="directory">Destination directory that must be empty.</param>
-    /// <param name="cancellationToken">Cancellation checked during native copying and verification.</param>
+    /// <param name="cancellationToken">Cancellation checked during execution copying and verification.</param>
     /// <returns>The captured local journal position.</returns>
     public long CreateBackup(string directory, CancellationToken cancellationToken = default)
         => runtime.Backups.CreateBackup(directory, cancellationToken);
 
-    /// <summary>Validates the original identity, checksums, native journal and committed cut of a backup.</summary>
+    /// <summary>Validates the original identity, checksums, execution journal and committed cut of a backup.</summary>
     /// <param name="directory">The private immutable backup directory.</param>
-    /// <param name="executionOptions">Validated native storage verification policy.</param>
+    /// <param name="executionOptions">Validated execution storage verification policy.</param>
     /// <param name="cancellationToken">Cancellation checked while reading and validating the original cut.</param>
     /// <returns>The original persisted identity and verified local journal position.</returns>
     public static (StoreIdentity Identity, long Position) VerifyBackup(string directory,
@@ -209,9 +209,9 @@ public sealed class ZoneTreeStore : IAtomicStore, IKeyValueView
     /// <returns>An immutable snapshot without keys, payloads, credentials or storage paths.</returns>
     public ZoneTreeReadSnapshot GetReadDiagnostics() => runtime.ReadCounters.Snapshot();
 
-    /// <summary>Observes native write-gate contention without acquiring that gate.</summary>
+    /// <summary>Observes execution write-gate contention without acquiring that gate.</summary>
     /// <remarks>Read only while the owner is open. Counts include maintenance, are transient and confer no authority.</remarks>
-    /// <returns>Only the ephemeral store session and native pending writer count; no data or secrets.</returns>
+    /// <returns>Only the ephemeral store session and execution pending writer count; no data or secrets.</returns>
     public ZoneTreeGateSnapshot GateDiagnostics
         => new(runtime.ReadCounters.SessionId, runtime.Gate.WaitingWriteCount);
 
@@ -237,6 +237,11 @@ public sealed class ZoneTreeStore : IAtomicStore, IKeyValueView
     /// <summary>Disables acceleration and retires entries, preserving charges held by active readers.</summary>
     /// <remarks>Does not acquire the store gate, wait for callbacks or change durable data.</remarks>
     public void DisablePointCache() => runtime.CacheLifecycle.DisableAdmission();
+
+    internal ZoneTreeMaintenanceLifetime Maintenance => runtime.Maintenance!;
+
+    internal ZoneTreeMaintenanceSweep SweepMaintenance()
+        => Read(_ => runtime.Maintenance!.Sweep());
 
     /// <summary>Closes the store handles and releases its exclusive directory lock.</summary>
     public void Dispose() => runtime.Dispose();

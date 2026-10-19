@@ -1,9 +1,9 @@
-// Loaded only by same-image native mongosh composition and its genuine native regression.
+// Loaded only by same-image execution mongosh composition and its genuine execution regression.
 const MongoReadiness = Object.freeze({
     zero: 0, one: 1, two: 2, maximumNodes: 3, commandMs: 2000, pollMs: 500,
     int32Minimum: -2147483648, int32Maximum: 2147483647,
     number: 'number', primary: 'PRIMARY', secondary: 'SECONDARY', set: 'benchmark',
-    timeout: 'MongoNativeBootstrapTimeout', invalid: 'MongoNativeReadinessInvalid'
+    timeout: 'MongoBootstrapTimeout', invalid: 'MongoReadinessInvalid'
 });
 const MongoReadinessHosts = Object.freeze(['isolated-mongo-1:27017', 'isolated-mongo-2:27017', 'isolated-mongo-3:27017']);
 
@@ -12,22 +12,22 @@ function mongoReadinessInt32(value) {
         && value >= MongoReadiness.int32Minimum && value <= MongoReadiness.int32Maximum;
 }
 
-function mongoReadinessNative(value) {
+function mongoReadiness(value) {
     return value instanceof Long && Object.getPrototypeOf(value) === Long.prototype && value.unsigned === false
         && mongoReadinessInt32(value.low) && mongoReadinessInt32(value.high);
 }
 
 function mongoReadinessInteger(value, minimum, allowInt32) {
-    if (!mongoReadinessNative(minimum)) return null;
+    if (!mongoReadiness(minimum)) return null;
     let copied;
-    if (mongoReadinessNative(value)) copied = Long.fromBits(value.low, value.high, false);
+    if (mongoReadiness(value)) copied = Long.fromBits(value.low, value.high, false);
     else if (allowInt32 && mongoReadinessInt32(value)) copied = Long.fromInt(value, false);
     else return null;
     return Long.prototype.lessThan.call(copied, minimum) ? null : copied;
 }
 
 function mongoReadinessEqual(left, right) {
-    return mongoReadinessNative(left) && mongoReadinessNative(right) && Long.prototype.equals.call(left, right);
+    return mongoReadiness(left) && mongoReadiness(right) && Long.prototype.equals.call(left, right);
 }
 
 function mongoReadinessTime(deadline) {
@@ -117,29 +117,29 @@ function mongoReadinessSameRound(left, right) {
         });
 }
 
-async function mongoReadinessStandalone(hosts, deadline, nativeAdmin) {
+async function mongoReadinessStandalone(hosts, deadline, runtimeAdmin) {
     const host = hosts[MongoReadiness.zero];
-    const ping = await mongoReadinessCommand(host, deadline, nativeAdmin, { ping: MongoReadiness.one });
-    const hello = await mongoReadinessCommand(host, deadline, nativeAdmin, { hello: MongoReadiness.one });
+    const ping = await mongoReadinessCommand(host, deadline, runtimeAdmin, { ping: MongoReadiness.one });
+    const hello = await mongoReadinessCommand(host, deadline, runtimeAdmin, { hello: MongoReadiness.one });
     mongoReadinessTime(deadline);
     return ping.ok === MongoReadiness.one && hello.ok === MongoReadiness.one && hello.isWritablePrimary === true
         && hello.setName === undefined && hello.hosts === undefined ? { standalone: true, primary: hosts[MongoReadiness.zero] } : null;
 }
 
-async function mongoReadinessCommand(host, deadline, nativeAdmin, command) {
+async function mongoReadinessCommand(host, deadline, runtimeAdmin, command) {
     mongoReadinessTime(deadline);
-    const database = await nativeAdmin(host);
+    const database = await runtimeAdmin(host);
     return await database.runCommand({ ...command, maxTimeMS: mongoReadinessTime(deadline) });
 }
 
-async function mongoReadinessProbeRound(hosts, set, deadline, nativeAdmin) {
+async function mongoReadinessProbeRound(hosts, set, deadline, runtimeAdmin) {
     mongoReadinessSelection(hosts, set);
-    if (hosts.length === MongoReadiness.one) return await mongoReadinessStandalone(hosts, deadline, nativeAdmin);
+    if (hosts.length === MongoReadiness.one) return await mongoReadinessStandalone(hosts, deadline, runtimeAdmin);
     let result = null;
     for (const host of hosts) {
-        const status = await mongoReadinessCommand(host, deadline, nativeAdmin, { replSetGetStatus: MongoReadiness.one });
-        const hello = await mongoReadinessCommand(host, deadline, nativeAdmin, { hello: MongoReadiness.one });
-        const configured = await mongoReadinessCommand(host, deadline, nativeAdmin, { replSetGetConfig: MongoReadiness.one });
+        const status = await mongoReadinessCommand(host, deadline, runtimeAdmin, { replSetGetStatus: MongoReadiness.one });
+        const hello = await mongoReadinessCommand(host, deadline, runtimeAdmin, { hello: MongoReadiness.one });
+        const configured = await mongoReadinessCommand(host, deadline, runtimeAdmin, { replSetGetConfig: MongoReadiness.one });
         if (configured.ok !== MongoReadiness.one) return null;
         const current = mongoReadinessTuple(status, hello, configured.config, hosts, host);
         if (current === null || result !== null && !mongoReadinessSameRound(result, current)) return null;
@@ -149,15 +149,15 @@ async function mongoReadinessProbeRound(hosts, set, deadline, nativeAdmin) {
     return result;
 }
 
-async function mongoReadinessWaitReady(hosts, set, deadline, nativeAdmin) {
+async function mongoReadinessWaitReady(hosts, set, deadline, runtimeAdmin) {
     let previous = null;
     while (Date.now() < deadline) {
         try {
-            const current = await mongoReadinessProbeRound(hosts, set, deadline, nativeAdmin);
+            const current = await mongoReadinessProbeRound(hosts, set, deadline, runtimeAdmin);
             if (current !== null && mongoReadinessSameRound(previous, current)) return current;
             previous = current;
         } catch {
-            // Only untimed native admission polling; no exception message or credentials are emitted.
+            // Only untimed execution admission polling; no exception message or credentials are emitted.
             previous = null;
         }
         const remaining = deadline - Date.now();

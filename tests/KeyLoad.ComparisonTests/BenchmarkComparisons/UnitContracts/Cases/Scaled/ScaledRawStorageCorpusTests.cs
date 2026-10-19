@@ -3,7 +3,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
-/// <summary>Checks compact scale-v1 keys and complete binary value headers against literals.</summary>
+/// <summary>Checks compact scale keys and complete binary value headers against literals.</summary>
 internal sealed class ScaledRawStorageCorpusTests
 {
     private static readonly IOptions<ScaledStorageExecutionOptions> ExecutionOptions = UnitBenchmarkOptions.ScaledPreparation;

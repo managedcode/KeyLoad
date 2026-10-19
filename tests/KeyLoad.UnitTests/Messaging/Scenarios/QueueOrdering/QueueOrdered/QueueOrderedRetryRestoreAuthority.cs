@@ -23,8 +23,8 @@ internal static class QueueOrderedRetryRestoreAuthority
         token.ThrowIfCancellationRequested();
         var previous = database.Store.Read(view => view.GetRecord<PrincipalRecord>(KeySpace.Principal(state.Principal)))
             ?? throw new InvalidOperationException(HistoricalMissing);
-        await Assert.That(NativeSerialization.Serialize(previous)).IsEquivalentTo(
-            NativeSerialization.Serialize(Expected(state, QueueOrderedRetryProtocol.One)), CollectionOrdering.Matching);
+        await Assert.That(OrleansSerialization.Serialize(previous)).IsEquivalentTo(
+            OrleansSerialization.Serialize(Expected(state, QueueOrderedRetryProtocol.One)), CollectionOrdering.Matching);
         CaptureHistorical(database, state, original);
         var image = QueueOrderedRetryImage.Capture(database.Store, state.Lane);
         var denied = Expected(state, QueueOrderedRetryProtocol.Two) with
@@ -63,8 +63,8 @@ internal static class QueueOrderedRetryRestoreAuthority
     internal static async Task RequireAsync(DatabaseEngine database, QueueOrderedRetryState state)
     {
         var principal = database.Store.Read(view => view.GetRecord<PrincipalRecord>(KeySpace.Principal(state.Principal)));
-        await Assert.That(NativeSerialization.Serialize(principal)).IsEquivalentTo(
-            NativeSerialization.Serialize(Expected(state, QueueOrderedRetryProtocol.Three)), CollectionOrdering.Matching);
+        await Assert.That(OrleansSerialization.Serialize(principal)).IsEquivalentTo(
+            OrleansSerialization.Serialize(Expected(state, QueueOrderedRetryProtocol.Three)), CollectionOrdering.Matching);
         var resource = database.Store.Read(view => view.ReadOwnedValue(
             KeySpace.Resource(state.Partition.TenantId, state.Partition.DatabaseId, state.Lane.Queue)));
         await Assert.That(resource).IsEquivalentTo(state.RestoredResourceBytes!, CollectionOrdering.Matching);
@@ -90,12 +90,12 @@ internal static class QueueOrderedRetryRestoreAuthority
         var request = new ConfigurePrincipalRequest(principal);
         var operation = database.OwnCommand(database.CreateCommand(OperationKind.ConfigurePrincipal, Guid.NewGuid(), QueueOrderedRetryProtocol.Root, state.Time, JsonSerializer.Serialize(request, JsonDefaults.Options)));
         var result = database.Apply(operation);
-        await Assert.That(NativeSerialization.Serialize(result.Get<PrincipalRecord>())).IsEquivalentTo(
-            NativeSerialization.Serialize(principal), CollectionOrdering.Matching);
-        await Assert.That(NativeSerialization.Serialize(database.Store.Read(view => view.GetRecord<PrincipalRecord>(KeySpace.Principal(principal.Id)))))
-            .IsEquivalentTo(NativeSerialization.Serialize(principal), CollectionOrdering.Matching);
+        await Assert.That(OrleansSerialization.Serialize(result.Get<PrincipalRecord>())).IsEquivalentTo(
+            OrleansSerialization.Serialize(principal), CollectionOrdering.Matching);
+        await Assert.That(OrleansSerialization.Serialize(database.Store.Read(view => view.GetRecord<PrincipalRecord>(KeySpace.Principal(principal.Id)))))
+            .IsEquivalentTo(OrleansSerialization.Serialize(principal), CollectionOrdering.Matching);
         state.Outcomes.Add((operation, result));
-        await NativeReplayResultAssertions.Same<PrincipalRecord>(database.Apply(operation), result);
+        await ReplayResultAssertions.Same<PrincipalRecord>(database.Apply(operation), result);
     }
 
     private static async Task RefusedAsync(DatabaseEngine database, QueueOrderedRetryState state,

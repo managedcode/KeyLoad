@@ -24,8 +24,8 @@ internal static class CommandIdempotencyProcess
             await active.WaitForAcknowledgementAsync(timeout.Token);
             await active.StopAndJoinAsync(timeout.Token);
             await KilledProcessFileReadiness.WaitAsync(root, timeout.Token);
-            RecoveryFileInventory.AssertNativeHandlesReleased(root);
-            active.CloseNativeProcessAfterJoin();
+            RecoveryFileInventory.AssertHandlesReleased(root);
+            active.CloseProcessAfterJoin();
             active = null;
 
             active = CommandIdempotencyProcessChild.Create(OutputLimitCharacters, expectAcknowledgement: false);
@@ -37,9 +37,9 @@ internal static class CommandIdempotencyProcess
                 throw new InvalidOperationException("The post-restart command verification process failed.");
             }
             await KilledProcessFileReadiness.WaitAsync(root, timeout.Token);
-            RecoveryFileInventory.AssertNativeHandlesReleased(root);
+            RecoveryFileInventory.AssertHandlesReleased(root);
             await CommandIdempotencyRecoveryAssertions.AssertRecoveredStoreAsync(root, timeout.Token);
-            active.CloseNativeProcessAfterJoin();
+            active.CloseProcessAfterJoin();
             active = null;
         }
         catch (Exception failure) when (CommandIdempotencyProcessFailureHandling.IsNonFatal(failure))
@@ -98,7 +98,7 @@ internal static class CommandIdempotencyProcess
         {
             try
             {
-                active.CloseNativeProcessAfterJoin();
+                active.CloseProcessAfterJoin();
             }
             catch (Exception failure) when (CommandIdempotencyProcessFailureHandling.IsNonFatal(failure))
             {

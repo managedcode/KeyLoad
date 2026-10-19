@@ -12,7 +12,7 @@ internal static class EventingRequiredClaimInbox
         => RequiredProcessingPolicyAssertions.ObserveAsync(store, async () =>
         {
             const string handler = "throw new InvalidOperationException(\"HANDLER-INJECTION-CANARY\")";
-            var request = NativeSerialization.Deserialize<ProcessingRequest>(operation.Value!.Input.Span, NativeValidationProfile.PublicInputElements)!;
+            var request = OrleansSerialization.Deserialize<ProcessingRequest>(operation.Value!.Input.Span, ValidationProfile.PublicInputElements)!;
             await Assert.That(request.HandlerScope).IsEqualTo(handler);
             var key = KeySpace.Partition("inbox", fixture.Harness.Partition, RequiredProcessingPolicyFixture.Queue,
                 "first", handler, 1L);

@@ -7,9 +7,9 @@ public enum DatabasePhaseKind
     PublicAuthenticationDispatch = 0,
     /// <summary>The operation gateway's real node dispatch.</summary>
     PublicOperationDispatch = 1,
-    /// <summary>The authorized authentication branch's native read barrier.</summary>
+    /// <summary>The authorized authentication branch's execution read barrier.</summary>
     AuthorizedAuthenticationBarrier = 2,
-    /// <summary>The authorized operation branch's separate native read barrier.</summary>
+    /// <summary>The authorized operation branch's separate execution read barrier.</summary>
     AuthorizedOperationBarrier = 3,
     /// <summary>The authorized read capability invocation.</summary>
     AuthorizedReadCapability = 4,
@@ -21,6 +21,6 @@ public enum DatabasePhaseKind
     ProviderWriteGateHold = 29,
     /// <summary>Existing atomic redo writes through their Flush(true).</summary>
     AtomicJournalWriteFlush = 30,
-    /// <summary>Actual cache/value/native Sync-WAL/tree mutation work.</summary>
-    NativeTreeMutation = 31
+    /// <summary>Actual cache/value/execution Sync-WAL/tree mutation work.</summary>
+    TreeMutation = 31
 }

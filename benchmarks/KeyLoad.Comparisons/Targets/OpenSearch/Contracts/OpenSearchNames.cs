@@ -32,7 +32,7 @@ internal static class OpenSearchNames
     internal const string ReplicatedTopology = "3 connected data/manager nodes; 1 primary shard, 2 replicas";
     internal const string SingleAcknowledgement = "index.translog.durability=request; wait_for_active_shards=all; checked write shard results (1 copy)";
     internal const string ReplicatedAcknowledgement = "index.translog.durability=request; wait_for_active_shards=all; checked write shard results (3 copies)";
-    internal const string RealtimeReadContract = "real-time document GET; native scripted_metric exact float32-input/double-cosine scan; bounded shard TopK and native merge; cosine descending then ordinal ID ascending";
+    internal const string RealtimeReadContract = "real-time document GET; execution scripted_metric exact float32-input/double-cosine scan; bounded shard TopK and execution merge; cosine descending then ordinal ID ascending";
     internal const string TcpTransport = "OpenSearch REST/HTTP JSON";
     internal const string TlsTransport = "OpenSearch REST/HTTPS JSON";
     internal const string EvidenceVersion = "Observed OpenSearch version ";

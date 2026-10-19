@@ -8,7 +8,7 @@ internal sealed class KeyLoadClientKestrelObservation
 {
     private const int MaximumRecords = 64;
     private const int SchemaVersion = 1;
-    private const string Kind = "NativeKestrelFailureObservation";
+    private const string Kind = "KestrelFailureObservation";
     private const string None = "None";
     private const string Cancelled = "Cancelled";
     private const string Http = "HttpRequest";
@@ -19,7 +19,7 @@ internal sealed class KeyLoadClientKestrelObservation
     private readonly long started;
     private readonly List<object> records = [];
     private bool saturated;
-    private bool nativeServerEventsObserved;
+    private bool serverEventsObserved;
 
     internal KeyLoadClientKestrelObservation()
     {
@@ -59,11 +59,11 @@ internal sealed class KeyLoadClientKestrelObservation
         }
     }
 
-    internal void RecordNativeServerEvent(string category, int eventId, string level)
+    internal void RecordServerEvent(string category, int eventId, string level)
     {
         lock (gate)
         {
-            nativeServerEventsObserved = true;
+            serverEventsObserved = true;
             if (records.Count == MaximumRecords)
             {
                 saturated = true;
@@ -71,9 +71,9 @@ internal sealed class KeyLoadClientKestrelObservation
             }
             records.Add(new
             {
-                nativeCategory = category,
-                nativeEventId = eventId,
-                nativeLogLevel = level,
+                runtimeCategory = category,
+                runtimeEventId = eventId,
+                runtimeLogLevel = level,
                 elapsedMilliseconds = clock.GetElapsedTime(started).TotalMilliseconds
             });
         }
@@ -90,8 +90,8 @@ internal sealed class KeyLoadClientKestrelObservation
                 schemaVersion = SchemaVersion,
                 kind = Kind,
                 saturated,
-                nativeServerEventsObserved,
-                nativeServerLogLevelOverride = false,
+                serverEventsObserved,
+                serverLogLevelOverride = false,
                 records
             })), failures);
         }

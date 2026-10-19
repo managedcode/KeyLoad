@@ -3,7 +3,7 @@ namespace KeyLoad.Core.Features.Messaging;
 internal static class QueueOrderProtocol
 {
     internal const string Space = "queue-order";
-    internal const string Alias = "keyload.core.queue-order-reference.v1";
+    internal const string Alias = "keyload.core.queue-order-reference";
     internal const int DomainKeyComponent = 3;
     internal const int PartitionKeyComponent = 4;
     internal const int ResourceKeyComponent = 5;

@@ -11,10 +11,10 @@ internal static class EventMessageSensitivePublicProtocol
     internal const string GrantAfter = "sensitive.read.after";
     internal const string Path = "/secret";
     internal const string Classification = "private-sensitive";
-    internal const string BodyCanary = "SENSITIVE_CLUSTER_BODY_NATIVE_CANARY";
-    internal const string HeaderCanary = "SENSITIVE_CLUSTER_HEADER_NATIVE_CANARY";
-    internal const string Payload = "{\"public\":{\"items\":[1,null,2]},\"secret\":\"SENSITIVE_CLUSTER_BODY_NATIVE_CANARY\"}";
-    internal const string Headers = "{\"public\":\"correlation\",\"secret\":\"SENSITIVE_CLUSTER_HEADER_NATIVE_CANARY\"}";
+    internal const string BodyCanary = "SENSITIVE_CLUSTER_BODY__CANARY";
+    internal const string HeaderCanary = "SENSITIVE_CLUSTER_HEADER__CANARY";
+    internal const string Payload = "{\"public\":{\"items\":[1,null,2]},\"secret\":\"SENSITIVE_CLUSTER_BODY__CANARY\"}";
+    internal const string Headers = "{\"public\":\"correlation\",\"secret\":\"SENSITIVE_CLUSTER_HEADER__CANARY\"}";
     internal const string RedactedPayload = "{\"public\":{\"items\":[1,null,2]}}";
     internal const string RedactedHeaders = "{\"public\":\"correlation\"}";
     internal const int SingleAttempt = 1;

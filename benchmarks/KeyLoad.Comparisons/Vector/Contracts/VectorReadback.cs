@@ -1,6 +1,6 @@
 namespace KeyLoad.Comparisons;
 
-/// <summary>Native vector and payload values read back from persisted database state.</summary>
+/// <summary>Execution vector and payload values read back from persisted database state.</summary>
 /// <param name="Number">The persisted corpus number.</param>
 /// <param name="Id">The persisted record ID.</param>
 /// <param name="Dimensions">The persisted vector dimension.</param>

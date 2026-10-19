@@ -27,7 +27,7 @@ internal sealed class EventProjectionFixture : IDisposable
     {
         get;
     } = new("projection-space", 2, DistanceMetric.Cosine,
-        "projection-model", "projection-v1");
+        "projection-model", "projection");
 
     internal EventProjectionHarness Harness
     {

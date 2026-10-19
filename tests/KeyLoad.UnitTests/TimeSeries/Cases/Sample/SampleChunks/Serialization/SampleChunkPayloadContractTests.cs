@@ -7,7 +7,7 @@ namespace KeyLoad.UnitTests.Features.TimeSeries;
 
 internal sealed class SampleChunkPayloadContractTests
 {
-    private const string ExpectedAlias = "keyload.core.v1.SampleChunkPayload";
+    private const string ExpectedAlias = "keyload.core.SampleChunkPayload";
 
     [Test]
     public async Task AcChunk004PayloadAliasAndFieldIdsRemainFrozen()

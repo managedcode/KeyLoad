@@ -8,5 +8,5 @@ public sealed record SampleChunkWorkPage([property: Orleans.Id(0)] ImmutableArra
     [property: Orleans.Id(1)] ImmutableArray<byte>? AfterKey,
     [property: Orleans.Id(2)] bool HasMore)
 {
-    internal const string SerializerAlias = "keyload.core.sample-chunk-work-page.v1";
+    internal const string SerializerAlias = "keyload.core.sample-chunk-work-page";
 }

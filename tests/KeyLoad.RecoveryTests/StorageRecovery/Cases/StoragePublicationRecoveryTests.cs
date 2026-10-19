@@ -88,7 +88,7 @@ internal sealed class StoragePublicationRecoveryTests
 
     private static int[] ReadCheckpointValues(ZoneTreeStore store) =>
         store.Read(view => Enumerable.Range(0, 3).Select(index =>
-            NativeSerialization.Deserialize<int>(view.ReadOwnedValue(KeyCodec.Encode("item", (long)index))!)).ToArray());
+            OrleansSerialization.Deserialize<int>(view.ReadOwnedValue(KeyCodec.Encode("item", (long)index))!)).ToArray());
 
     private static bool IsCheckpointGenerationInstalled(string mode, CommitStage stage) =>
         mode == "install" && stage == CommitStage.JournalSwapped;
@@ -98,7 +98,7 @@ internal sealed class StoragePublicationRecoveryTests
         var obsoleteExists = store.Read(view => view.ReadOwnedValue(KeyCodec.Encode("obsolete")) is not null);
         await Assert.That(obsoleteExists).IsEqualTo(!installed);
         var lastApplied = store.Read(view => view.ReadOwnedValue(KeyCodec.Encode("system", "last-applied")) is { } bytes
-            ? NativeSerialization.Deserialize<long>(bytes) : 0);
+            ? OrleansSerialization.Deserialize<long>(bytes) : 0);
         await Assert.That(lastApplied).IsEqualTo(installed ? 9 : 0);
     }
 
@@ -180,7 +180,7 @@ internal sealed class StoragePublicationRecoveryTests
                 await Assert.That(File.GetUnixFileMode(restored)).IsEqualTo(privateMode);
             }
             using var recovered = new ZoneTreeStore(new(restored), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
-            await Assert.That(recovered.Read(view => NativeSerialization.Deserialize<string>(view.ReadOwnedValue(KeyCodec.Encode("key"))!))).IsEqualTo("value");
+            await Assert.That(recovered.Read(view => OrleansSerialization.Deserialize<string>(view.ReadOwnedValue(KeyCodec.Encode("key"))!))).IsEqualTo("value");
             var tampered = await File.ReadAllBytesAsync(Path.Combine(backup, "commands.wal"));
             tampered[^1] ^= 1;
             await File.WriteAllBytesAsync(Path.Combine(backup, "commands.wal"), tampered);

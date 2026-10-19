@@ -32,7 +32,7 @@ public sealed partial class DatabaseEngine
     }
 
     private void RequireCompositionEndpointPolicy(PrincipalRecord principal, Command<DatabaseCommand> operation,
-        ResourceLifetimeV1 lifetime)
+        ResourceLifetime lifetime)
     {
         var partition = Payload<CommandRequest>(operation).Partition;
         if (lifetime.TenantId != partition.TenantId || lifetime.DatabaseId != partition.DatabaseId

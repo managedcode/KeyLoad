@@ -27,7 +27,7 @@ internal sealed class GraphTraversalDeadlineTests
     [Test]
     [Arguments(2)]
     [Arguments(3)]
-    public async Task ElapsedCapDuringNativeAdjacencyWorkRejectsWithoutPartialPageAndHealthyTraversalFollows(int examinedEdges)
+    public async Task ElapsedCapDuringAdjacencyWorkRejectsWithoutPartialPageAndHealthyTraversalFollows(int examinedEdges)
     {
         var clock = new GraphTraversalDeadlineClock();
         using var database = new TestDatabase(new()
@@ -53,7 +53,7 @@ internal sealed class GraphTraversalDeadlineTests
         await Assert.That(position).IsEqualTo(commit.Token.Position);
         var reads = database.Store.GetReadDiagnostics();
         var rangeThreshold = reads.RangeBaselineEntries + reads.RangeStagedEntries + examinedEdges;
-        clock.ArmAfterNativeWork(() =>
+        clock.ArmAfterWork(() =>
         {
             var current = database.Store.GetReadDiagnostics();
             return current.RangeBaselineEntries + current.RangeStagedEntries >= rangeThreshold;

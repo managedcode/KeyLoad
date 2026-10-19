@@ -3,7 +3,7 @@ using KeyLoad.Server;
 
 namespace KeyLoad.UnitTests.Features.ClientApi;
 
-/// <summary>AC-MCP-003/005/007: canonical replies leave room for the three native envelope containers.</summary>
+/// <summary>AC-MCP-003/005/007: canonical replies leave room for the three execution envelope containers.</summary>
 internal sealed class McpReplyFramingTests
 {
     private const int MaximumWireBytes = 65_536;
@@ -36,7 +36,7 @@ internal sealed class McpReplyFramingTests
         await Assert.That(shape.Depth).IsEqualTo(depth);
     }
 
-    /// <summary>The exact reply depth succeeds and the next depth exhausts capacity before native wrapping.</summary>
+    /// <summary>The exact reply depth succeeds and the next depth exhausts capacity before execution wrapping.</summary>
     [Test]
     public async Task ReplyDepthAccepts61AndRejects62()
     {

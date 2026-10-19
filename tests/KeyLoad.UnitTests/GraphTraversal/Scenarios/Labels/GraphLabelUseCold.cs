@@ -10,7 +10,7 @@ internal static class GraphLabelUseCold
         var image = CanonicalStoreImage.Bytes(fixture.Store);
         var position = fixture.Store.Position;
         var identity = fixture.Store.Identity;
-        var bytes = NativeSerialization.Serialize(identity);
+        var bytes = OrleansSerialization.Serialize(identity);
         fixture.JoinOwnedResources();
         var failures = new List<Exception>();
         for (var cold = 0; cold < 2; cold++)

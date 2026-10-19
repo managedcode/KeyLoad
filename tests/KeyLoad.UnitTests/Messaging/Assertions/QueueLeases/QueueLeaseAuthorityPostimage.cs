@@ -52,7 +52,7 @@ internal static class QueueLeaseAuthorityPostimage
         {
             return;
         }
-        var request = NativeSerialization.Deserialize<ProcessingRequest>(state.Original.Value!.Input.Span);
+        var request = OrleansSerialization.Deserialize<ProcessingRequest>(state.Original.Value!.Input.Span);
         var document = database.GetDocument(QueueLeaseAuthorityProtocol.Root,
             new(state.Lane.Partition, QueueLeaseAuthorityProtocol.Collection, QueueLeaseAuthorityProtocol.Document))!;
         await Assert.That(document.Reference).IsEqualTo(new EntityRef(state.Lane.Partition,

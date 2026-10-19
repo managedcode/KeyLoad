@@ -2,19 +2,19 @@
 
 ## Purpose, entry points and ownership
 
-Own exactly the infrastructure for one selected database and native topology.
+Own exactly the infrastructure for one selected database and topology.
 `Program.cs` visibly composes, builds, runs and disposes this Aspire application.
 The ordinary development and functional-test host is `../KeyLoad.AppHost`.
 Do not introduce another AppHost, resource runner or forwarding project.
 
-External databases use the selected pinned images and their native entry points.
-KeyLoad uses native `AddProject<KeyLoad>` processes and required Azurite
+External databases use the selected pinned images and their entry points.
+KeyLoad uses execution `AddProject<KeyLoad>` processes and required Azurite
 membership storage. Ordinary build, startup, functional tests and load execution
-never publish or start a KeyLoad server or workload image. Native .NET SDK
+never publish or start a KeyLoad server or workload image. Execution .NET SDK
 `PublishContainer` belongs only to explicit release/publication.
 
 Aspire exposes actual selected endpoints, readiness and completion barriers to the
-separate native workload client. The client owns corpus loading, measured
+separate workload client. The client owns corpus loading, measured
 operations, result verification and its actual process/output-reader lifetime.
 Do not add that workload to the resource graph or run database work in AppHost.
 Use the installed Aspire and Orleans skills for their respective boundaries.
@@ -22,7 +22,7 @@ Use the installed Aspire and Orleans skills for their respective boundaries.
 ## Boundaries and protected risks
 
 Each selected database/scenario has a fresh owned lifecycle. Containers use session
-lifetime and writable anonymous native volumes; image-native user defaults own
+lifetime and writable anonymous volumes; image-user defaults own
 their storage. Retain readonly bootstrap/configuration mounts where required.
 On completion or failure, join the original client and observers, dispose the
 actual Aspire application, and remove only run-owned resources. Preserve unrelated
@@ -34,7 +34,7 @@ Capture actual source/DLL/PDB/process identities without substituting image fiel
 Local execution has no invented GitHub provenance and cannot authorize public
 figures. Publication independently requires authenticated original GitHub
 source/run/attempt/job artifacts, matched resources and complete workload/result
-oracles. Native-process resource equivalence and external advertised-endpoint
+oracles. process resource equivalence and external advertised-endpoint
 reachability require real qualification; never weaken gates to describe them as
 complete. Keep current qualification limits explicit.
 
@@ -52,7 +52,7 @@ dotnet build build/KeyLoad.LoadTests.AppHost/KeyLoad.LoadTests.AppHost.csproj --
 ```
 
 The lead coordinates execution windows. Every build uses `-warnaserror`.
-Formatting, strict complete-solution build, native TUnit lifecycle/cancellation
+Formatting, strict complete-solution build, TUnit lifecycle/cancellation
 checks and real selected-database execution are distinct gates. Source inspection
 or a graph model alone proves no runtime, performance or publication qualification.
 

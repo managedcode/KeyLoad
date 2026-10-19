@@ -14,7 +14,7 @@ internal static class PartitionQueryPublicMapper
     private const int WitnessDescriptorBytes = 64;
     private const string MappingBudgetExceeded = "The public partition query page exceeds its retained-byte budget.";
 
-    internal static PartitionQueryPageV1 MapPublic(PartitionQueryResultV1 result, DatabaseLimits limits,
+    internal static PartitionQueryPage MapPublic(PartitionQueryResult result, DatabaseLimits limits,
         ReadExecutionBudget budget)
     {
         ArgumentNullException.ThrowIfNull(result);
@@ -29,7 +29,7 @@ internal static class PartitionQueryPublicMapper
 
         var rows = MapRows(result.Rows, budget);
         var leaves = MapLeaves(result.Leaves, budget);
-        var page = new PartitionQueryPageV1(VersionOne, rows, leaves, true);
+        var page = new PartitionQueryPage(VersionOne, rows, leaves, true);
         budget.CheckResult(page);
         return page;
     }
@@ -43,10 +43,10 @@ internal static class PartitionQueryPublicMapper
         return checked(PageDescriptorBytes + rows + leaves);
     }
 
-    private static ImmutableArray<PartitionQueryRowV1> MapRows(
-        ImmutableArray<PartitionQueryCandidateV1> candidates, ReadExecutionBudget budget)
+    private static ImmutableArray<PartitionQueryRow> MapRows(
+        ImmutableArray<PartitionQueryCandidate> candidates, ReadExecutionBudget budget)
     {
-        var rows = ImmutableArray.CreateBuilder<PartitionQueryRowV1>(candidates.Length);
+        var rows = ImmutableArray.CreateBuilder<PartitionQueryRow>(candidates.Length);
         foreach (var candidate in candidates)
         {
             budget.Check();
@@ -55,10 +55,10 @@ internal static class PartitionQueryPublicMapper
         return rows.MoveToImmutable();
     }
 
-    private static ImmutableArray<PartitionQueryLeafWitnessV1> MapLeaves(
-        ImmutableArray<PartitionQueryLeafResultV1> results, ReadExecutionBudget budget)
+    private static ImmutableArray<PartitionQueryLeafWitness> MapLeaves(
+        ImmutableArray<PartitionQueryLeafResult> results, ReadExecutionBudget budget)
     {
-        var leaves = ImmutableArray.CreateBuilder<PartitionQueryLeafWitnessV1>(results.Length);
+        var leaves = ImmutableArray.CreateBuilder<PartitionQueryLeafWitness>(results.Length);
         foreach (var result in results)
         {
             budget.Check();

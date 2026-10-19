@@ -32,8 +32,8 @@ internal sealed class RecurringOccurrenceTests
         await AssertMessage(fixture, id, 0, firstDue, TimeSpan.FromMinutes(1));
         await AssertMessage(fixture, id, 1, firstDue.AddSeconds(1), TimeSpan.FromMinutes(1));
         var replay = Emit(fixture, id, 1, 2, RecurringSagaDatabase.Epoch.AddSeconds(2), commandId);
-        await Assert.That(NativeSerialization.Serialize(replay.Mutations[0]).AsSpan()
-            .SequenceEqual(NativeSerialization.Serialize(due.Mutations[0]))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(replay.Mutations[0]).AsSpan()
+            .SequenceEqual(OrleansSerialization.Serialize(due.Mutations[0]))).IsTrue();
         await Assert.That(replay.Token).IsEqualTo(due.Token);
         _ = Emit(fixture, id, 1, 2, RecurringSagaDatabase.Epoch.AddSeconds(2));
         await Assert.That(Message(fixture, id, 2)).IsNull();

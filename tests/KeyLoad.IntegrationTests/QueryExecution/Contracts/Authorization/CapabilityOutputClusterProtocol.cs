@@ -5,9 +5,9 @@ namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 internal static class CapabilityOutputClusterProtocol
 {
     internal const string Collection = "manifest_output";
-    internal const int NativeBytes = 8192;
+    internal const int RuntimeBytes = 8192;
     internal const int RequestBytes = 32768;
-    internal static int Expected(int mode) => mode == 1 ? 4096 : NativeBytes;
+    internal static int Expected(int mode) => mode == 1 ? 4096 : RuntimeBytes;
     internal static QueryExecutionOptions Options(int mode) => new()
     {
         MaximumResultBytes = mode switch

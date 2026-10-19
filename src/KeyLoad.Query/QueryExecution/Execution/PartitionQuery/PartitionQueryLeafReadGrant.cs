@@ -9,7 +9,7 @@ internal sealed class PartitionQueryLeafReadGrant(ReadExecutionBudgetReadGrant g
 
     internal int ExaminedRecords => grant.ExaminedRecords;
     internal long ReadBytes => grant.ReadBytes;
-    internal ReadExecutionBudgetReadGrant NativeGrant => grant;
+    internal ReadExecutionBudgetReadGrant RuntimeGrant => grant;
 
     internal StorageScanResult VisitRange(IKeyValueView view, byte[] prefix, StorageRecordVisitor visitor)
     {

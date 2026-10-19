@@ -73,7 +73,7 @@ internal static class MixedEventingJournalRecovery
         Command<DatabaseCommand> operation, List<Exception> originalFailures, string[] corruptRaw, long position)
     {
         var cut = source.ReadCanonicalCut();
-        var identity = NativeSerialization.Serialize(source.Store.Identity);
+        var identity = OrleansSerialization.Serialize(source.Store.Identity);
         var repeated = Assert.ThrowsExactly<KeyLoadException>(() => source.SubmitIssued(operation));
         originalFailures.Add(repeated);
         await Assert.That(repeated.Code).IsEqualTo(ErrorCode.RecoveryRequired);
@@ -83,7 +83,7 @@ internal static class MixedEventingJournalRecovery
         await Assert.That(source.Store.Read(view => view.ReadOwnedValue(
             KeySpace.PartitionOutcome(state.Partition, operation.UserId!, operation.CommandId)))).IsNull();
         await Assert.That(source.Store.Read(view => view.ReadOwnedValue(
-            KeySpace.OutcomeLocatorV2(state.Partition, operation.UserId!, operation.CommandId)))).IsNull();
+            KeySpace.OutcomeLocator(state.Partition, operation.UserId!, operation.CommandId)))).IsNull();
     }
 
     private static async Task RequireOutcomeAsync(TestDatabase source, QueueLifecycleTestState state,

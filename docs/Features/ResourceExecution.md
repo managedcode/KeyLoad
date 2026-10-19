@@ -2,9 +2,9 @@
 
 ResourceExecution owns bounded operation admission, canonical resource lifetimes,
 shared result retention and joined ownership. Orleans owns cluster and activation
-lifecycle; the silo-local ZoneTree owner retains files and native engine handles.
+lifecycle; the silo-local ZoneTree owner retains files and engine handles.
 [AnalyticsStore](AnalyticsStore.md) owns user analytics requirements and its
-bounded derived native generations. Native OpenTelemetry owns instrumentation.
+bounded derived generations. OpenTelemetry owns instrumentation.
 
 Actual database phase diagnostics are specified in
 [DatabasePhaseProfiling](ResourceExecution/DatabasePhaseProfiling.md) under
@@ -23,7 +23,7 @@ following operations after failure. Architecture choices do not establish
 maximum throughput, physical I/O, process RSS or numeric coverage.
 
 AC-MP-009/010/012 fixture flow under [ADR-035](../ADR/ADR-035-memory-performance.md):
-a dedicated real-file growth observer is armed before native async report writing,
+a dedicated real-file growth observer is armed before async report writing,
 retaining the corpus, 10-second deadline, quarter-output cutoff, OCE and
 no-later-file assertions. One bounded second real Kestrel partial-body write
 follows the cancelled client result while preserving actual RequestAborted,
@@ -52,7 +52,7 @@ public database operations remain the visible boundary.
 | REQ-CACHE-004: bounded node-local cache policy coordination through ordinary Orleans calls | AC-CACHE-007/011 | Orleans grain/service restart and activation-movement tests on a replicated cluster |
 | REQ-CACHE-005: current grants, barriers and field/tenant decisions | AC-CACHE-008 | current public SDK/MCP authorization flows |
 | REQ-CACHE-006: honest closed resource metrics and comparable benefit | AC-CACHE-009 | repeated GitHub cache-on/off resource JSON |
-| REQ-CACHE-007: complete delivered-source/native qualification | AC-CACHE-010 | build/format/analyzers/complexity/governance + unit/scalar/recovery/cluster and real coverage |
+| REQ-CACHE-007: complete delivered-source/qualification | AC-CACHE-010 | build/format/analyzers/complexity/governance + unit/scalar/recovery/cluster and real coverage |
 
 ### Cache acceptance and testing methodology
 
@@ -60,8 +60,8 @@ AC-CACHE-011 adds the exact local provider binding under ADR-058. An actual
 opened store creates one configured-cold control with no index charge. Embedded
 or existing owners reject another configuration; held/same-thread storage gates
 return Busy, and permanent close cannot reopen. Real one-index-budget and
-pressure-release cases must progress without lost native data. Withdraw in an actual
-native observer must perform one lookup/charge/callback and publish no candidate;
+pressure-release cases must progress without lost data. Withdraw in an actual
+observer must perform one lookup/charge/callback and publish no candidate;
 already admitted pinned readers retain charges until completion or exception.
 Actual Dispose publishes admission-close before draining its held reader; all
 owned charges release after the real drain. Dispose inside the same
@@ -79,7 +79,7 @@ Closed means permanent admission closure; retained pinned/index bytes remain
 visible until actual release. Current-helper counters reset on cold replacement
 and have no-helper gaps; Hits counts successful pins, including rejected pins.
 Store diagnostics remain cumulative logical read work across both cache hits and
-native reads. Production composition remains cold.
+reads. Production composition remains cold.
 
 - AC-CACHE-001 passes only when one shared node pool atomically reserves validated
   positive modeled bytes/nonnegative entries before optional owned allocations;
@@ -92,7 +92,7 @@ native reads. Production composition remains cold.
   and genuine pinned-store callbacks prove cleanup on success and exceptions.
 - AC-CACHE-003 requires privately owned positive bytes keyed by complete encoded
   content, physical runtime and ReadGeneration. Every Apply invalidates before
-  native mutation; unrelated commits retain coherent entries. Real staged
+  mutation; unrelated commits retain coherent entries. Real staged
   put/delete/reset/rejection, multi-key commits, tombstones/reinsert and replay
   tests fail if staged or old data appears as a committed hit.
 - AC-CACHE-004 requires independent Clear before authority/tree replacement,
@@ -108,10 +108,10 @@ native reads. Production composition remains cold.
   lifetime rather than inferring it from final occupancy.
 - AC-CACHE-006 requires the sole StoreGate -> CacheGate -> budget order and no
   cross-store callbacks/eviction. Admission checks current revision/generation,
-  makes at most16 local victim attempts and preserves native results when full,
+  makes at most16 local victim attempts and preserves results when full,
   oversized, disabled, pin-limited or unavailable. Logical charges/observer order
   and typed errors remain exact; unexpected invalidation failures fail closed.
-  Real native diagnostics and shared-store pressure cases prove these conditions.
+  Real diagnostics and shared-store pressure cases prove these conditions.
 - AC-CACHE-007 requires cache policy to reach each silo through ordinary Orleans
   calls. Every silo-local cache starts cold, stays bounded and disposable, and
   is never the authority for data, files or access. A silo without the current
@@ -127,7 +127,7 @@ native reads. Production composition remains cold.
   authority changes and cross-tenant/hidden-field/error flows must keep exact results.
 - AC-CACHE-009 requires closed data-free counters and repeated matched exact-SHA
   on/off cold/warm/mixed/pressure GitHub profiles with the same topology/ACK/read
-  contracts. Retained modeled bytes, allocations/GC, per-node RSS, native lookups,
+  contracts. Retained modeled bytes, allocations/GC, per-node RSS, lookups,
   latency, throughput, contention and backlog remain distinct. Missing or mixed
   measurements fail any speed/RSS claim; a build is never measurement evidence.
 - AC-CACHE-010 requires the delivered-SHA full build/format/governance/analyzer,
@@ -139,7 +139,7 @@ Automated sources live in matching ResourceExecution tests; storage/domain tests
 retain their original owners. Unit execution is through `build-and-tests.yml` normal/scalar;
 recovery and cluster execute their real process/container projects in that workflow.
 Lock order, secret-free metadata and physical ownership have a source-review
-exception requiring independent inspection; it does not replace native cases.
+exception requiring independent inspection; it does not replace cases.
 Rollback disables ephemeral admission, drains readers and removes optional joins
 together. No persisted format, authorization, ACK or production cluster migration.
 
@@ -172,7 +172,7 @@ qualify the current delivered source.
 | REQ-RESOURCE-003/004 / AC-DBPROF-001..004 | `DatabasePhaseSchemaTests`; `DatabasePhaseBankTests`; `DatabasePhaseBankConcurrencyTests`; `DatabasePhaseArithmeticTests`; `DatabasePhaseAllocationTests` | Fixed bank shape, independent lanes, bounded arithmetic/contention/saturation, detached snapshots and configured primitive allocation. These do not prove all production phase boundaries, private capture or overhead/benefit (AC-DBPROF-005..008). |
 | REQ-RESOURCE-003 / REQ-CQ-013; AC-DBPROF-002 / AC-CQ-034/035 | `DatabasePhaseExecutionOptionsTests` | Actual central options binding/validation and bank-construction ordering, including malformed/unknown/scalar settings and allowed bounds. This does not qualify enabled production startup or profiling output. |
 | REQ-AISQL-003 / AC-AISQL-007 | `SqlAdmissionTests` | Actual HTTP governor treats SQL as heavy data work, reserves before verified-scope binding, preserves direct-control progress during data saturation and exposes nonrecursive dynamic-effect discovery. Unit evidence does not replace the official .NET/MCP cluster flow. |
-| REQ-DSTORE-001/002/004; REQ-EVENT-004; REQ-MSG-005; REQ-ROUTE-004; REQ-AUTH-004/005 | `TransactionTests.DocumentEventAndQueueCommitTogetherAndCommandRetryDoesNotRepeatEffects`; `UniqueConflictRollsBackDocumentIndexEventAndEnqueue`; `ConcurrentCompareAndSwapHasOneWinner`; `SameLiteralPartitionKeyCannotCrossTransactionDomains`; `TransactionAuthorizationTests` | Preserve the existing many-to-many associations in DocumentStorage, EventStreams, Messaging, ClusterRouting and Authorization. These are actual single-partition DatabaseEngine operations with narrow effects/denial assertions; they do not prove cross-partition atomicity or cluster. `TransactionProtocolTests.MalformedMutationElementsBecomePersistedRejectionsRatherThanApplyExceptions` has per-argument candidate rows for document patch, event revision, topic, and sample negatives in the JSON sidecar; each is a narrow malformed-input persisted-rejection subflow, not its owning feature’s complete AC. The null generic mutation and oversized-frame scenario retain their separate proposals/unmapped reason. |
+| REQ-DSTORE-001/002/004; REQ-EVENT-004; REQ-MSG-005; REQ-ROUTE-004; REQ-AUTH-004/005 | `TransactionTests.DocumentEventAndQueueCommitTogetherAndCommandRetryDoesNotRepeatEffects`; `UniqueConflictRollsBackDocumentIndexEventAndEnqueue`; `ConcurrentCompareAndSwapHasOneWinner`; `SameLiteralPartitionKeyCannotCrossTransactionDomains`; `TransactionAuthorizationTests` | Preserve the existing many-to-many associations in DocumentStorage, EventStreams, Messaging, OrleansExecution and Authorization. These are actual single-partition DatabaseEngine operations with narrow effects/denial assertions; they do not prove cross-partition atomicity or cluster. `TransactionProtocolTests.MalformedMutationElementsBecomePersistedRejectionsRatherThanApplyExceptions` has per-argument candidate rows for document patch, event revision, topic, and sample negatives in the JSON sidecar; each is a narrow malformed-input persisted-rejection subflow, not its owning feature’s complete AC. The null generic mutation and oversized-frame scenario retain their separate proposals/unmapped reason. |
 
 The following cases remain deliberately unmapped: core null-argument guards without a
 current feature AC; the inbox allocation-window control without a declared numeric
@@ -188,7 +188,7 @@ unit subflows pass.
 Common storage/resource primitives are shared building blocks. Feature behavior
 stays in its canonical slice: StorageRecovery, QueryExecution, Search,
 DocumentStorage, EventStreams, TimeSeries, GraphTraversal, Messaging, ChangeFeeds,
-ClusterReplication, ClusterRouting, ClientApi and BenchmarkComparisons. New helper
+StorageReplication, OrleansExecution, ClientApi and BenchmarkComparisons. New helper
 and test files use matching Features paths; flat existing paths remain ADR-032
 migration debt and may be repaired without expanding that debt.
 
@@ -255,9 +255,9 @@ direct pointer/patch acceptance cases join existing real-document regressions.
 ## Benchmark report output
 
 Shared benchmark sessions ([ADR-142](../ADR/ADR-142-shared-live-benchmark-sessions.md))
-retain original per-case reports and samples through native asynchronous file
+retain original per-case reports and samples through asynchronous file
 serialization. They must preserve bounded output, cancellation, exact
-source/image/runtime provenance and meaningful native correctness assertions.
+source/image/runtime provenance and meaningful correctness assertions.
 Successful compilation and current Linux output/resource qualification remain
 separate gates.
 
@@ -338,7 +338,7 @@ true live result-limit lookahead. Never-fetched staged peeks and iterator keys
 outside the range are not examined payloads. Existing StorageScanResult.ReadBytes
 remains accepted budget work and is distinct from these total attempted counters.
 
-This observes logical provider operations only; native iterator/cache/seek and OS
+This observes logical provider operations only; iterator/cache/seek and OS
 physical I/O remain unmeasured. No keys, paths, identities, payloads or credentials
 are recorded. Reopen starts a new session; diagnostics do not alter durable data,
 authorization, gates or wire. Public node/report telemetry is a separate contract, with canonical and replica store scopes separate.
@@ -362,33 +362,33 @@ Business work and the matching tests stay in the owning `<SliceName>/` slice. Co
 
 ## Independent query output ceiling
 
-REQ-QUERY-007 / AC-QUERY-007-JOIN-001 and AC-REL-004-JOIN-004/006 require the literal 4096 complete joined-result rejection without applying that ceiling to native journal quotas: a journal limit cannot fit a ceiling smaller than the required envelope metadata. Raising 4096 or reducing journal quotas is inadmissible.
+REQ-QUERY-007 / AC-QUERY-007-JOIN-001 and AC-REL-004-JOIN-004/006 require the literal 4096 complete joined-result rejection without applying that ceiling to journal quotas: a journal limit cannot fit a ceiling smaller than the required envelope metadata. Raising 4096 or reducing journal quotas is inadmissible.
 
-QueryExecutionOptions.MaximumResultBytes is nullable and positive; null applies the existing MaxBatchBytes ceiling, explicit values add a ceiling min(configured, native MaxBatchBytes), never expand it. This is server-owned typed query/read output configuration, not a caller request field, native command budget or persisted format. Existing Core ReadExecutionBudget adds a monotonic result-byte constraint over its original captured limits, cancellation and deadline. It changes only bounded exact UTF8 output counting; it does not restart a clock, native read/work grant, admission lease, authorization or read cut. Default null preserves original calls and clock checks. Callback/page state and complete response accounting remain shared across SQL/AST/SDK/official MCP execution.
+QueryExecutionOptions.MaximumResultBytes is nullable and positive; null applies the existing MaxBatchBytes ceiling, explicit values add a ceiling min(configured, MaxBatchBytes), never expand it. This is server-owned typed query/read output configuration, not a caller request field, command budget or persisted format. Existing Core ReadExecutionBudget adds a monotonic result-byte constraint over its original captured limits, cancellation and deadline. It changes only bounded exact UTF8 output counting; it does not restart a clock, read/work grant, admission lease, authorization or read cut. Default null preserves original calls and clock checks. Callback/page state and complete response accounting remain shared across SQL/AST/SDK/official MCP execution.
 
-All existing output owners share one bound: QueryEngine scalar/Q2/model/explain and GraphPath SQL, live-query snapshot/delta, partition query plan/leaf retained grants/merge/public mapping, SearchEngine text/vector/hybrid/graph results and SQL graph search consume the same bound. Existing cumulative selected-result/retained byte checks use the constrained budget; native store scanned-byte/record limits remain unchanged. Exact final serializer accounting includes response metadata and must throw existing BudgetExceeded without a successful partial result. No serialization alias/field IDs, policy/authority, cursors, native journal limits, HTTP input admission or database MaxBatchBytes changes. Existing server native QueryExecutionOptions binding/Validate remains configuration authority.
+All existing output owners share one bound: QueryEngine scalar/Q2/model/explain and GraphPath SQL, live-query snapshot/delta, partition query plan/leaf retained grants/merge/public mapping, SearchEngine text/vector/hybrid/graph results and SQL graph search consume the same bound. Existing cumulative selected-result/retained byte checks use the constrained budget; store scanned-byte/record limits remain unchanged. Exact final serializer accounting includes response metadata and must throw existing BudgetExceeded without a successful partial result. No serialization alias/field IDs, policy/authority, cursors, journal limits, HTTP input admission or database MaxBatchBytes changes. Existing server QueryExecutionOptions binding/Validate remains configuration authority.
 
-Core ReadExecutionBudget owns the monotonic counter constraint; Query QueryExecution/Validation/QuerySemantics/QueryResultBudgetPolicy.cs resolves and composes the typed ceiling; existing feature execution owners consume it. The Aspire test fixture accepts an explicitly validated query-options overload and applies only the explicit MaximumResultBytes environment setting to every owned node. Existing twenty DatabaseLimits properties are unchanged. The result-budget replicated-cluster case keeps 4096 and all original source/payload/no-effect/error/healthy SDK/official MCP assertions, configuring only the independent query cap with default valid native batch/journal limits. Existing work/read-byte cases remain unchanged.
+Core ReadExecutionBudget owns the monotonic counter constraint; Query QueryExecution/Validation/QuerySemantics/QueryResultBudgetPolicy.cs resolves and composes the typed ceiling; existing feature execution owners consume it. The Aspire test fixture accepts an explicitly validated query-options overload and applies only the explicit MaximumResultBytes environment setting to every owned node. Existing twenty DatabaseLimits properties are unchanged. The result-budget replicated-cluster case keeps 4096 and all original source/payload/no-effect/error/healthy SDK/official MCP assertions, configuring only the independent query cap with default valid batch/journal limits. Existing work/read-byte cases remain unchanged.
 
-Native QueryExecution QueryResultByteLimitTests must execute real scalar and Q2 SQL/AST large-page rejection at 4096, default successful baseline, complete persisted-source equivalence and a complete healthy smaller projection with unchanged position; null/default and explicit larger cap cannot expand native MaxBatchBytes. The shared constraint uses the original token/deadline with no reset. Rollback removes this query configuration and its consumer composition, never changes stored bytes, native admission or old outcomes. No performance, durability or readiness claim follows.
+QueryExecution QueryResultByteLimitTests must execute real scalar and Q2 SQL/AST large-page rejection at 4096, default successful baseline, complete persisted-source equivalence and a complete healthy smaller projection with unchanged position; null/default and explicit larger cap cannot expand MaxBatchBytes. The shared constraint uses the original token/deadline with no reset. Rollback removes this query configuration and its consumer composition, never changes stored bytes, admission or old outcomes. No performance, durability or readiness claim follows.
 
 
-Composition: REQ-QUERY-007 and AC-QUERY-007-GRAPH-002 require SQL graph parsing, graph owner admission, native graph reachability, selected document/context projection and final protocol serialization to share the original ReadExecutionBudget. QueryEngine may receive a SearchEngine with different frozen options: effective output/retained cap is the monotonic minimum of the original native ceiling, SQL owner configured cap and SearchEngine configured cap. No new clock/start, token, examined-record/read-byte grants or task boundary may replace that parser budget. The public SearchEngine GraphSearchAsync entry still creates its original budget, then delegates to one feature-local internal owned-budget overload; that overload constrains its own frozen output policy, admits with the original initiating token, awaits the original worker, and disposes its actual admission. SQL delegates to that same overload and retains existing final checks. No duplicated dispatcher or worker exists.
+Composition: REQ-QUERY-007 and AC-QUERY-007-GRAPH-002 require SQL graph parsing, graph owner admission, graph reachability, selected document/context projection and final protocol serialization to share the original ReadExecutionBudget. QueryEngine may receive a SearchEngine with different frozen options: effective output/retained cap is the monotonic minimum of the original ceiling, SQL owner configured cap and SearchEngine configured cap. No new clock/start, token, examined-record/read-byte grants or task boundary may replace that parser budget. The public SearchEngine GraphSearchAsync entry still creates its original budget, then delegates to one feature-local internal owned-budget overload; that overload constrains its own frozen output policy, admits with the original initiating token, awaits the original worker, and disposes its actual admission. SQL delegates to that same overload and retains existing final checks. No duplicated dispatcher or worker exists.
 
-AC-QUERY-007-GRAPH-002 maps to SqlGraphSearchResultCompositionTests: actual persisted ZoneTree documents and graph, mismatched caps in both directions, exact projected-search cumulative BudgetExceeded diagnostic before final graph serialization, no returned partial result, complete ordered raw native record bytes and commit position unchanged, then literal healthy graph hit/entity/revision/JSON/rank/empty-expansion oracle under the same owners. This specifically distinguishes early retained projection enforcement from post-allocation wrapper rejection. Rollback removes the shared-budget composition and regression coherently with its accepted query-cap contract; native journal/auth/storage/SQL dialect contracts remain unchanged.
+AC-QUERY-007-GRAPH-002 maps to SqlGraphSearchResultCompositionTests: actual persisted ZoneTree documents and graph, mismatched caps in both directions, exact projected-search cumulative BudgetExceeded diagnostic before final graph serialization, no returned partial result, complete ordered raw record bytes and commit position unchanged, then literal healthy graph hit/entity/revision/JSON/rank/empty-expansion oracle under the same owners. This specifically distinguishes early retained projection enforcement from post-allocation wrapper rejection. Rollback removes the shared-budget composition and regression coherently with its accepted query-cap contract; journal/auth/storage/SQL dialect contracts remain unchanged.
 
 
 ## Live delta retained output composition
 
 REQ-QUERY-001/003, AC-MP-003/012 and REQ/AC-FEED-002/003 under ADR-004/010/013/022/118 require the existing constrained result budget to admit each retained selected live delta before retention. Core keeps its existing public ReadChangeFeedView signature and adds an internal synchronous before-retain overload, invoked only after original request.MaxBytes admits the change and before changes.Add/checkpoint advancement. LiveQueryResultByteAdmission uses exact original budget.MeasureResult and cumulative MaximumResultBytes; overflow is existing QueryEngine.ResultLimitExceeded BudgetExceeded, not partial success. Full wrapper serializer check remains. No operation clock/token/read grants/admission/read cut reset or new request/serialization/persistence field. Install this additional callback only for an explicit configured result cap; null/default preserves old feed behavior.
 
-LiveQueryResultCompositionTests use actual ZoneTree Start->multirow mutation->Read, individually fitting changes whose combined output exceeds4096, exact terminal error/noPartial/fullnative store bytes and position invariance, healthy smaller literal projection and complete checkpoint/cut/receipt/row metadata. A separate original request.MaxBytes page/resume flow proves candidates excluded by original pagination are not charged against retained query cap. Rollback removes internal callback, live admission helper and matching cases together; default cap/native journal/auth contracts remain unchanged.
+LiveQueryResultCompositionTests use actual ZoneTree Start->multirow mutation->Read, individually fitting changes whose combined output exceeds4096, exact terminal error/noPartial/runtimeFull store bytes and position invariance, healthy smaller literal projection and complete checkpoint/cut/receipt/row metadata. A separate original request.MaxBytes page/resume flow proves candidates excluded by original pagination are not charged against retained query cap. Rollback removes internal callback, live admission helper and matching cases together; default cap/journal/auth contracts remain unchanged.
 
 ### Database phase bank invalid-construction flow
 
 REQ-RESOURCE-003/004 and AC-DBPROF-002 map `DatabasePhaseExecutionOptionsTests.StandaloneBclBoundaryRejectsBeforeEnabledOrDisabledCounterReservation` to actual BCL invalid stripe/CAS rejection with exact ArgumentOutOfRangeException.ParamName in BOTH enabled and disabled modes. Each measured rejected construction independently remains below the unchanged MinimumStripeCounterBytes counter-array lower bound. Runtime exception allocation need not be identical between modes. Preserve every existing invalid-input case. No threshold growth, added prewarming, retry, skip or product/configuration change is permitted.
 
-After both real rejected constructions, centrally bound valid disabled/enabled banks execute native Begin/End and RecordBusy and capture concrete counters: disabled remains empty/unavailable; enabled records exactly one completed scope and one admission rejection in the actual phase, with unchanged quality and detached cumulative capture. This is the invalid-to-healthy bank subflow only, not production startup, cluster, measured overhead or full AC qualification. ADR-063/113 retain the original ownership and fixed bounds.
+After both real rejected constructions, centrally bound valid disabled/enabled banks execute Begin/End and RecordBusy and capture concrete counters: disabled remains empty/unavailable; enabled records exactly one completed scope and one admission rejection in the actual phase, with unchanged quality and detached cumulative capture. This is the invalid-to-healthy bank subflow only, not production startup, cluster, measured overhead or full AC qualification. ADR-063/113 retain the original ownership and fixed bounds.
 
 
 ## Bounded tenant admission
@@ -397,7 +397,7 @@ REQ-RESOURCE-TENANT-001 / AC-RESOURCE-TENANT-001 requires the node-local
 `CommandAdmissionGovernor` to enforce its configured node, tenant, principal and
 retained-byte ceilings atomically. A reservation uses the current persisted
 principal and its tenant. Refused or already-cancelled admission preserves the
-complete capacity snapshot, canonical records and native journal cut. Each
+complete capacity snapshot, canonical records and journal cut. Each
 accepted lease remains owned until its actual operation settles and the owner
 disposes that lease. Disposing a lease again releases no additional capacity.
 Orleans owns activation scheduling and request execution.
@@ -409,25 +409,25 @@ Three A reservations and one B reservation coexist. A further A reservation is
 refused with `ResourceExhausted`; a pre-cancelled B reservation throws the original
 `OperationCanceledException`. Both failures preserve the full governor snapshot,
 raw canonical image and applied/store positions and leave their documents absent.
-The original four native commands then commit under their owned leases; releasing
+The original four commands then commit under their owned leases; releasing
 them admits a healthy subsequent command and returns every reservation counter
 to zero. These are bounds and effect oracles, not a measured scheduling guarantee.
 
-The receipt oracle independently checks every native mutation field:
+The receipt oracle independently checks every mutation field:
 Kind/Resource/Id/Revision and complete CompositionReferences. Document results and
 canonical records retain their complete Reference/Revision/Json, redaction and
-access fields, native command timestamp and deletion state. The exact commit
-token, durability and persisted copy count are checked against the owning native
+access fields, command timestamp and deletion state. The exact commit
+token, durability and persisted copy count are checked against the owning execution
 store. The stored prepared command retains its stable ID, subject, input bytes and
 fingerprint. Same-ID replay preserves the original full receipt and canonical
 image without advancing the physical position. Failures retain their original
-native problem before any result-value assertion.
+problem before any result-value assertion.
 
 REQ-RESOURCE-TENANT-SHUTDOWN-001 / AC-RESOURCE-TENANT-SHUTDOWN-001 requires the
-operation owner to settle all accepted native commands, dispose their leases and
+operation owner to settle all accepted commands, dispose their leases and
 join the actual storage owner before reopening that same root. The same existing
 case checks a zero governor snapshot, verifies complete warm replay, calls
-`TestDatabase.JoinOwnedResources`, then opens a new native store at the original
+`TestDatabase.JoinOwnedResources`, then opens a new store at the original
 path. Complete original receipts, literal A/B documents and immutable replay
 survive that close/reopen, and a fresh command commits a healthy literal document.
 No public contract, capacity value, deadline or persisted format is changed by
@@ -435,47 +435,47 @@ this ownership contract.
 
 The source maps these oracles to `TenantAdmissionWholeFlow`,
 `TenantAdmissionRefusals`, `TenantAdmissionAssertions` and `TenantAdmissionCold`.
-An actual native run is required to qualify them. Sustained SDK/MCP overload,
+An actual run is required to qualify them. Sustained SDK/MCP overload,
 Orleans request shutdown under in-flight distributed work, physical CPU/RSS/disk
 liveness and delivered-source qualification remain open; this focused local
 operation alone establishes none of those gates. Modeled retained bytes are not
 process RSS.
 
 
-## Native failed-reader grant settlement
+## failed-reader grant settlement
 
 REQ-MP-002/005, AC-MP-004/005/012.
-The original scoped native grant retains its unused bytes/records while the real borrowed callback and scope own the read. CompleteSettledReadGrant rejects an active scope without mutation. A consumer IOException retains its original identity; native accepted bytes/record stay charged. After the original scope has exited, original caller cancellation rejects ordinary completion; cancellation-independent settled completion returns only the actual unused reservation, once. A fresh independent operation reads both original literal records under its unchanged aggregate ceiling. Full raw image and committed position remain unchanged throughout refusal/cleanup/healthy reads and same-root cold reopen.
+The original scoped grant retains its unused bytes/records while the real borrowed callback and scope own the read. CompleteSettledReadGrant rejects an active scope without mutation. A consumer IOException retains its original identity; accepted bytes/record stay charged. After the original scope has exited, original caller cancellation rejects ordinary completion; cancellation-independent settled completion returns only the actual unused reservation, once. A fresh independent operation reads both original literal records under its unchanged aggregate ceiling. Full raw image and committed position remain unchanged throughout refusal/cleanup/healthy reads and same-root cold reopen.
 
 This is one complete Unit ZoneTree read/lifetime acceptance flow, not a new governor policy or proven production defect. No cancellation reset, deadline renewal, quota change, storage mutation, wire/schema/alias/API change, public transport, cluster or physical-memory claim. Cross-owner ordinary CompleteReadGrant active-scope semantics remain untouched.
 
 
-Native declaration: `ReadExecutionBudgetSettledGrantTests.AcMp004005012FailedBorrowedReaderSettlesOnlyAfterScopeExitThenCancelledCleanupAndColdHealthyRead`; the existing three settled-grant cases and all cancellation/scoped-grant cases remain mandatory.
+declaration: `ReadExecutionBudgetSettledGrantTests.AcMp004005012FailedBorrowedReaderSettlesOnlyAfterScopeExitThenCancelledCleanupAndColdHealthyRead`; the existing three settled-grant cases and all cancellation/scoped-grant cases remain mandatory.
 
 ## Original analytical byte-budget continuation
 
-REQ-MP-002 / AC-MP-004/012: the original AcMp012_ReadBudgetFailureReleasesAllowanceForFollowingSearch cannot expect nontrivial text metadata reads to fit one byte. Configure its fixture-only allowance from independent original Resource key/native payload plus absent BM25-head key bytes. Keep the populated original search BudgetExceeded, identical original safe detail, same-owner allowance release and same-term empty-collection healthy continuation, original cancellation identity, complete raw rows/position and same-root cold repetition. Production byte limits, charging and APIs are unchanged.
+REQ-MP-002 / AC-MP-004/012: the original AcMp012_ReadBudgetFailureReleasesAllowanceForFollowingSearch cannot expect nontrivial text metadata reads to fit one byte. Configure its fixture-only allowance from independent original Resource key/payload plus absent BM25-head key bytes. Keep the populated original search BudgetExceeded, identical original safe detail, same-owner allowance release and same-term empty-collection healthy continuation, original cancellation identity, complete raw rows/position and same-root cold repetition. Production byte limits, charging and APIs are unchanged.
 
 
 ## Original analytical admission healthy T-SQL continuation
 
-REQ-MP-002/005 and AC-MP-004/011/012, with REQ/AC-TSQL-001/002/006, require the existing AcMp004_RealStoreWaitSharesOneAdmissionAcrossAllAnalyticalEntries healthy SQL continuation to use selected native T-SQL: SELECT TOP (1) * FROM orders. The original malformed SQL used during saturation remains unchanged, so admission still refuses before parsing/storage while the actual held search owns the reservation. All six saturated entries, complete read diagnostics, independent database, original gate release and worker joins, zero final reservations, empty healthy result and ten-second coordination limit remain unchanged. LIMIT is retired syntax, so the healthy query uses T-SQL TOP; this is a fixture language choice, not an admission or parser workaround. Original test declaration and arguments remain.
+REQ-MP-002/005 and AC-MP-004/011/012, with REQ/AC-TSQL-001/002/006, require the existing AcMp004_RealStoreWaitSharesOneAdmissionAcrossAllAnalyticalEntries healthy SQL continuation to use selected T-SQL: SELECT TOP (1) * FROM orders. The original malformed SQL used during saturation remains unchanged, so admission still refuses before parsing/storage while the actual held search owns the reservation. All six saturated entries, complete read diagnostics, independent database, original gate release and worker joins, zero final reservations, empty healthy result and ten-second coordination limit remain unchanged. LIMIT is retired syntax, so the healthy query uses T-SQL TOP; this is a fixture language choice, not an admission or parser workaround. Original test declaration and arguments remain.
 
 
-## Complete typed native HTTP admission projection
+## Complete typed HTTP admission projection
 
-REQ-HTTP-FIXTURE-PROJECTION-001: when ClusterFixture receives an HttpAdmissionLimits snapshot, validate it with the existing HttpAdmissionLimits.Validate contract and project all twelve numeric properties to each of the same three actual Aspire ContainerResources. Keep the existing late WithEnvironment seam: AppHost construction has already captured its own options and emitted its initial node environment. Do not replace the supplied snapshot with production defaults, mutate the cached AppHost options, use reflection, add another options provider or change native governor policy.
+REQ-HTTP-FIXTURE-PROJECTION-001: when ClusterFixture receives an HttpAdmissionLimits snapshot, validate it with the existing HttpAdmissionLimits.Validate contract and project all twelve numeric properties to each of the same three actual Aspire ContainerResources. Keep the existing late WithEnvironment seam: AppHost construction has already captured its own options and emitted its initial node environment. Do not replace the supplied snapshot with production defaults, mutate the cached AppHost options, use reflection, add another options provider or change governor policy.
 
 AC-HTTP-FIXTURE-PROJECTION-001 maps to the existing `SlowBodyAdmissionReturnTests.CanceledAndDisconnectedSlowBodiesReturnCapacityThenBothCallersAndTwoCold`. The complete genuine cluster operation must reach its first resource configuration and seed, both caller-cancellation and actual physical-disconnect slow-body modes, exact complete admission counters, fresh persisted authorization, original outcomes/replay, healthy SDK/official MCP continuation and both original cold stages, with every original producer/caller/socket/fixture cleanup retained. Preserve its supplied MaxReservedBytes=130000, OtherReservedBytes=0, ReservedControlBytes=20000 and all other supplied values. No limit, timeout, policy, case or oracle is relaxed.
 
-The fixture must project all twelve properties: omitting OtherReservedBytes and ReservedControlBytes would leave the earlier AppHost snapshot values, and under the default OtherReservedBytes=8388608 even a zero-body ordinary request needs at least 8392704 reserved bytes including the native envelope, exceeding the supplied 130000 ceiling.
+The fixture must project all twelve properties: omitting OtherReservedBytes and ReservedControlBytes would leave the earlier AppHost snapshot values, and under the default OtherReservedBytes=8388608 even a zero-body ordinary request needs at least 8392704 reserved bytes including the envelope, exceeding the supplied 130000 ceiling.
 
 ```mermaid
 flowchart TD
     A[AppHost captures validated production options] --> B[Original three node environment]
     B --> C[Fixture validates supplied HTTP snapshot]
     C --> D[Project all twelve exact numeric fields]
-    D --> E[Native node options and unchanged governors]
+    D --> E[node options and unchanged governors]
     E --> F[Original seed and slow-body whole flow]
     F --> G[Both original cold stages and healthy replay]
 ```

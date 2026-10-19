@@ -12,7 +12,7 @@ internal static class IsolatedGitHubFailureDiagnosticsProgram
         const { GH } = await import(pathToFileURL(path.join(path.dirname(modulePath), 'isolated-github-contract.mjs')));
         if (!['exit', 'stderr-bound', 'credential', 'credential-tail', 'retention-conflict'].includes(failure)) throw new Error('invalid cell');
         const binary = Buffer.from([0, 255, 128, 10, 1, 2, 3, 4]);
-        const canary = 'private-native-stderr-canary';
+        const canary = 'private-execution-stderr-canary';
         const oversized = ['stderr-bound', 'credential-tail'].includes(failure);
         const excluded = ['credential', 'credential-tail'].includes(failure);
         const stderr = failure === 'stderr-bound' ? Buffer.alloc(GH.stderrBytes + 1, 65)
@@ -24,16 +24,16 @@ internal static class IsolatedGitHubFailureDiagnosticsProgram
         const child = String.raw`const { writeFileSync } = require('node:fs');
           const [marker, mode, limit] = process.argv.slice(1); writeFileSync(marker, String(process.pid));
           const done = () => process.stdout.write(Buffer.from([0,255,128,10,1,2,3,4]), () => { process.exitCode = mode === 'healthy' ? 0 : 1; });
-          const token = Buffer.from('private-native-stderr-canary');
+          const token = Buffer.from('private-execution-stderr-canary');
           const diagnostic = mode === 'stderr-bound' ? Buffer.alloc(Number(limit) + 1, 65)
             : mode === 'credential-tail' ? Buffer.concat([Buffer.alloc(Number(limit) - 10, 65), token, Buffer.from('\n')])
-            : Buffer.from('private-native-stderr-canary\nunexpected EOF\n');
+            : Buffer.from('private-execution-stderr-canary\nunexpected EOF\n');
           if (mode !== 'healthy') process.stderr.write(diagnostic, done); else done();`;
         async function joined(marker) {
           const pid = Number(await readFile(marker, 'utf8'));
-          if (!Number.isSafeInteger(pid) || pid <= 0) throw new Error('missing native child');
+          if (!Number.isSafeInteger(pid) || pid <= 0) throw new Error('missing execution child');
           try { process.kill(pid, 0); } catch (error) { if (error.code === 'ESRCH') return; throw error; }
-          throw new Error('native child retained');
+          throw new Error('execution child retained');
         }
         async function absent(file) {
           try { await access(file); } catch (error) { if (error.code === 'ENOENT') return; throw error; }
@@ -52,9 +52,9 @@ internal static class IsolatedGitHubFailureDiagnosticsProgram
             if (!(originalFailure instanceof AggregateError) || originalFailure.errors.length !== 2
               || originalFailure.errors[0].message !== GH.failure || originalFailure.errors[1].code !== 'EEXIST'
               || !(await readFile(file + '.stderr')).equals(prior)) throw new Error('primary or retained failure overwritten');
-            await absent(file + '.native-process.json');
+            await absent(file + '.execution-process.json');
           } else {
-          diagnosticBytes = await readFile(file + '.native-process.json');
+          diagnosticBytes = await readFile(file + '.execution-process.json');
           const diagnostic = JSON.parse(diagnosticBytes);
           if (original.length > binary.length || !original.equals(binary.subarray(0, original.length))
             || diagnostic.stderrBytes <= 0 || !/^[a-f0-9]{64}$/.test(diagnostic.stderrSha256)
@@ -70,7 +70,7 @@ internal static class IsolatedGitHubFailureDiagnosticsProgram
             if (diagnostic.credentialExcluded || !(await readFile(file + '.stderr')).equals(stderr.subarray(0, diagnostic.stderrCapturedBytes))
               || ((await stat(file + '.stderr')).mode & 0o777) !== 0o400) throw new Error('private stderr changed');
           }
-          if (((await stat(file + '.native-process.json')).mode & 0o777) !== 0o400) throw new Error('diagnostic file not sealed');
+          if (((await stat(file + '.execution-process.json')).mode & 0o777) !== 0o400) throw new Error('diagnostic file not sealed');
           }
           if (((await stat(file)).mode & 0o777) !== 0o400) throw new Error('failure file not sealed');
           const healthyFile = path.join(root, 'healthy.bin'); const healthyMarker = path.join(root, 'healthy.pid');
@@ -78,8 +78,8 @@ internal static class IsolatedGitHubFailureDiagnosticsProgram
           await joined(healthyMarker);
           if (!(await readFile(healthyFile)).equals(binary) || healthy.bytes !== binary.length
             || healthy.sha256 !== createHash('sha256').update(binary).digest('hex') || !(await readFile(file)).equals(original)
-            || (diagnosticBytes !== undefined && !(await readFile(file + '.native-process.json')).equals(diagnosticBytes))) throw new Error('healthy continuation changed original evidence');
-          await absent(healthyFile + '.stderr'); await absent(healthyFile + '.native-process.json');
+            || (diagnosticBytes !== undefined && !(await readFile(file + '.execution-process.json')).equals(diagnosticBytes))) throw new Error('healthy continuation changed original evidence');
+          await absent(healthyFile + '.stderr'); await absent(healthyFile + '.execution-process.json');
           if (failure === 'retention-conflict' && !(await readFile(file + '.stderr')).equals(prior)) throw new Error('healthy replaced prior failure');
           if (['SIGTERM', 'SIGINT'].some((signal, index) => process.listenerCount(signal) !== listeners[index])) throw new Error('listener retained');
           process.stdout.write('accepted-diagnostic\n');

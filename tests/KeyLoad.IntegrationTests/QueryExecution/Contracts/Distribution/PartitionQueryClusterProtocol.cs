@@ -18,7 +18,7 @@ internal static class PartitionQueryClusterProtocol
     internal const string SecondPartition = "b-second";
     internal const string EmptyPartition = "c-empty";
     internal const int Version = 1;
-    internal const int AstVersion = 1;
+    internal const int AstVersion = SqlOperationProtocol.DefaultQueryDialectVersion;
     internal const int Limit = 100;
     internal const int MaxPartitions = 8;
     internal const int MaxResults = 1_000;

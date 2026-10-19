@@ -5,8 +5,8 @@ namespace KeyLoad.UnitTests.Features.InternalSerialization;
 
 internal sealed class CoreSignedClaimsTests
 {
-    private const string Queue = "native-claims-queue";
-    private const string MessageId = "native-claims-message";
+    private const string Queue = "execution-claims-queue";
+    private const string MessageId = "execution-claims-message";
     private const string PrincipalId = "root";
     private const char Separator = '.';
     private const char SignatureA = 'A';
@@ -18,12 +18,12 @@ internal sealed class CoreSignedClaimsTests
     private const char UrlUnderscore = '_';
 
     [Test]
-    public async Task AcIs007NativeClaimsRoundTripAndTamperingOrWrongKeyRejects()
+    public async Task AcIs007ClaimsRoundTripAndTamperingOrWrongKeyRejects()
     {
         using var database = new TestDatabase();
         var claims = Claims(database);
         var token = database.Database.Sign(claims);
-        await Assert.That(token.StartsWith(CoreNativeClaims.Prefix, StringComparison.Ordinal)).IsTrue();
+        await Assert.That(token.StartsWith(CoreClaims.Prefix, StringComparison.Ordinal)).IsTrue();
         await Assert.That(database.Database.Verify<DeliveryClaims>(token)).IsEqualTo(claims);
         var signature = token.LastIndexOf(Separator) + 1;
         var replacement = token[signature] == SignatureA ? SignatureB : SignatureA;
@@ -36,7 +36,7 @@ internal sealed class CoreSignedClaimsTests
     }
 
     [Test]
-    public async Task AcIs007OldValidJsonTokenAndRemovedNativePrefixInvalidateExplicitly()
+    public async Task AcIs007OldValidJsonTokenAndRemovedPrefixInvalidateExplicitly()
     {
         using var database = new TestDatabase();
         var bytes = JsonDefaults.Serialize(Claims(database));
@@ -44,9 +44,9 @@ internal sealed class CoreSignedClaimsTests
             + Base64Url(HMACSHA256.HashData(database.Store.Identity.SigningKey.Span, bytes));
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => database.Database.Verify<DeliveryClaims>(old)).Code)
             .IsEqualTo(ErrorCode.TokenInvalidated);
-        var native = database.Database.Sign(Claims(database));
+        var execution = database.Database.Sign(Claims(database));
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() =>
-            database.Database.Verify<DeliveryClaims>(native[CoreNativeClaims.Prefix.Length..])).Code)
+            database.Database.Verify<DeliveryClaims>(execution[CoreClaims.Prefix.Length..])).Code)
             .IsEqualTo(ErrorCode.TokenInvalidated);
     }
 

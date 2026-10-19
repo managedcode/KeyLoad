@@ -7,7 +7,7 @@ internal static class ProjectionEmptyTailFixture
     internal static Command<DatabaseCommand> Operation<T>(global::KeyLoad.Core.DatabaseEngine owner,
         OperationKind kind, Guid id, T request, DateTimeOffset? evaluatedAt = null)
         => owner.CreateCommand(kind, id, ProjectionEmptyTailAssertions.Root,
-            evaluatedAt ?? owner.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(request));
+            evaluatedAt ?? owner.EvaluationClock.GetUtcNow(), OrleansSerialization.Serialize(request));
 
     internal static Command<DatabaseCommand> Complete(global::KeyLoad.Core.DatabaseEngine owner,
         ProjectionConsumerRef consumer, string token, params Mutation[] effects)

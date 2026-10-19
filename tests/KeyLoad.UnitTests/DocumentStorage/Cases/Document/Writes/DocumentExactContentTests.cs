@@ -11,7 +11,7 @@ internal sealed class DocumentExactContentTests
     [Test]
     [Arguments(LiteralJson)]
     [Arguments(EscapedJson)]
-    public async Task AcDstore008PutNativeRecordAndSameCommandReplayRetainExactCallerText(string json)
+    public async Task AcDstore008PutRecordAndSameCommandReplayRetainExactCallerText(string json)
     {
         using var database = new TestDatabase();
         database.Configure(Collection, ResourceKind.Collection);
@@ -21,12 +21,12 @@ internal sealed class DocumentExactContentTests
             [new PutDocument(Collection, DocumentId, json, 0)]);
         var receipt = database.Submit(OperationKind.Batch, command, id: id).Get<CommitReceipt>();
         var record = DocumentCrudFixture.ReadRecord(database, reference)!;
-        var native = NativeSerialization.Deserialize<DocumentRecord>(NativeSerialization.Serialize(record));
+        var execution = OrleansSerialization.Deserialize<DocumentRecord>(OrleansSerialization.Serialize(record));
         var outbox = DocumentCommandOutcomeTestSupport.CaptureOutbox(database);
 
         await Assert.That(database.Database.GetDocument(Root, reference)!.Json).IsEqualTo(json);
         await Assert.That(record.Json).IsEqualTo(json);
-        await Assert.That(native.Json).IsEqualTo(json);
+        await Assert.That(execution.Json).IsEqualTo(json);
         var replay = database.Submit(OperationKind.Batch, command, id: id).Get<CommitReceipt>();
         await Assert.That(replay.CommandId).IsEqualTo(receipt.CommandId);
         await Assert.That(replay.Token).IsEqualTo(receipt.Token);

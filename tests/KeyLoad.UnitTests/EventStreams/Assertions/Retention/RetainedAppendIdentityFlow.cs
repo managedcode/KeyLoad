@@ -28,7 +28,7 @@ internal static class RetainedAppendIdentityFlow
         var store = fixture.Harness.Store;
         var original = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
-        var identity = NativeReadCutStoreStateAssertions.SnapshotIdentity(store);
+        var identity = ReadCutStoreStateAssertions.SnapshotIdentity(store);
         var command = fixture.Producer("repaired", RetainedAppendIdentityFixture.Candidate, ExpectedStreamRevision.Exact(1));
         var fault = new RetainedAppendIdentityFault(fixture, kind);
         fault.Damage(store);

@@ -22,13 +22,13 @@ internal static class CanonicalConnectionDispatch
                 await ServerFailureObserver.ObserveAsync(async () =>
                 {
                     var reply = await node.ExecuteAsync(actual.RequestId, actual.SignedRequest, actual.Command,
-                        connection.Token).ConfigureAwait(false);
-                    var value = NativeSerialization.Deserialize<GrainValue>(reply.Payload.Span).Value;
+                        connection.Token);
+                    var value = OrleansSerialization.Deserialize<GrainValue>(reply.Payload.Span).Value;
                     connection.Token.ThrowIfCancellationRequested();
                     result = PublicReadResponse.Create(operation.ReadKind, operation.CommandKind, value);
-                }, failures).ConfigureAwait(false);
-            }, failures).ConfigureAwait(false);
-        }, failures).ConfigureAwait(false);
+                }, failures);
+            }, failures);
+        }, failures);
         ServerFailureObserver.ThrowIfAny(failures);
         return result;
     }

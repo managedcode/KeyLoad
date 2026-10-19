@@ -6,12 +6,12 @@ namespace KeyLoad.Comparisons;
 
 /// <summary>Produces profile-bound vectors and the independent streaming exact-search oracle.</summary>
 /// <param name="profile">The exact immutable profile.</param>
-/// <param name="executionOptions">The same native execution policy used by preparation and the exact oracle.</param>
-public sealed class VectorComparisonCorpus(VectorComparisonProfile profile, IOptions<NativeComparisonExecutionOptions> executionOptions)
+/// <param name="executionOptions">The same execution execution policy used by preparation and the exact oracle.</param>
+public sealed class VectorComparisonCorpus(VectorComparisonProfile profile, IOptions<ComparisonExecutionOptions> executionOptions)
 {
     /// <summary>Gets the profile that defines this corpus.</summary>
     public VectorComparisonProfile Profile { get; } = profile ?? throw new ArgumentNullException(nameof(profile));
-    private readonly IOptions<NativeComparisonExecutionOptions> executionOptions = NativeComparisonExecutionOptions.Require(executionOptions);
+    private readonly IOptions<ComparisonExecutionOptions> executionOptions = ComparisonExecutionOptions.Require(executionOptions);
 
     /// <summary>Creates one deterministic record without retaining it in the corpus.</summary>
     /// <param name="number">The zero-based record number.</param>

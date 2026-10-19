@@ -4,7 +4,7 @@ using T = KeyLoad.ComparisonTests.Features.BenchmarkComparisons.IsolatedQuorumRe
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
-/// <summary>AC-ISO-001/003: real Aspire model selects exact native Qdrant members and private bootstrap wiring.</summary>
+/// <summary>AC-ISO-001/003: real Aspire model selects exact execution Qdrant members and private bootstrap wiring.</summary>
 internal sealed class IsolatedQuorumResourceQdrantTests
 {
     [Test]
@@ -34,7 +34,7 @@ internal sealed class IsolatedQuorumResourceQdrantTests
     [Test]
     [Arguments(1)]
     [Arguments(3)]
-    public async Task AcIso003QdrantBootstrapPreservesDisabledSingletonAndAdvertisesNativePeerUris(int count)
+    public async Task AcIso003QdrantBootstrapPreservesDisabledSingletonAndAdvertisesPeerUris(int count)
     {
         using var model = new IsolatedQuorumResourceModel();
         model.Add(T.Qdrant, count);

@@ -33,7 +33,7 @@ internal static class AtomicTriadStagedOutbox
             var raw = state.Store.Read(view => view.ReadOwnedValue(KeySpace.Partition(OutboxFamily, state.Partition, sequence)))
                 ?? throw new InvalidOperationException(AtomicTriadStagedProtocol.Missing);
             bytes += raw.LongLength;
-            var entry = NativeSerialization.Deserialize<OutboxEntry>(raw);
+            var entry = OrleansSerialization.Deserialize<OutboxEntry>(raw);
             var before = ordinal == AtomicTriadStagedProtocol.ReplacementOrdinal ? first : null;
             var after = ordinal == 0 ? first : ordinal == AtomicTriadStagedProtocol.ReplacementOrdinal ? second : null;
             await AtomicTriadStagedCurrent.EqualAsync(entry, new OutboxEntry(sequence, ordinal, state.Receipt.Token,
@@ -42,7 +42,7 @@ internal static class AtomicTriadStagedOutbox
         }
         await AtomicTriadStagedCurrent.EqualAsync(state.Owner.GetOutboxStatus(AtomicTriadStagedProtocol.Root, state.Partition),
             new OutboxStatus(new(6L, 1L, 6L, bytes), []));
-        await Assert.That(state.Store.Read(view => NativeSerialization.Deserialize<long>(view.ReadOwnedValue(
+        await Assert.That(state.Store.Read(view => OrleansSerialization.Deserialize<long>(view.ReadOwnedValue(
             KeySpace.Partition(DocumentEpochFamily, state.Partition, AtomicTriadStagedProtocol.Collection))!))).IsEqualTo(1L);
     }
 }

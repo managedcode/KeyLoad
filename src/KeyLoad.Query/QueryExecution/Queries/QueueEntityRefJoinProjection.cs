@@ -6,7 +6,7 @@ using KeyLoad.Storage;
 
 namespace KeyLoad.Query.Features.QueryExecution;
 
-/// <summary>Combines only separately authorized native projections from the same committed view.</summary>
+/// <summary>Combines only separately authorized execution projections from the same committed view.</summary>
 internal static class QueueEntityRefJoinProjection
 {
     private const char LeadingSeparator = '/';

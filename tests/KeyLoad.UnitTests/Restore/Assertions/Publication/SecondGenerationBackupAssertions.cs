@@ -16,13 +16,13 @@ internal static class SecondGenerationBackupAssertions
     {
         string[] expected =
         [
-            Convert.ToHexString(MetadataBackupFixture.StoredKeyBytes) + ":" + Convert.ToHexString(NativeSerialization.Serialize(CurrentValue)),
+            Convert.ToHexString(MetadataBackupFixture.StoredKeyBytes) + ":" + Convert.ToHexString(OrleansSerialization.Serialize(CurrentValue)),
             Convert.ToHexString(KeyCodec.Encode(ZoneTreePersistenceFormat.SystemNamespace,
-                ZoneTreePersistenceFormat.LastAppliedKey)) + ":" + Convert.ToHexString(NativeSerialization.Serialize(1L)),
+                ZoneTreePersistenceFormat.LastAppliedKey)) + ":" + Convert.ToHexString(OrleansSerialization.Serialize(1L)),
             Convert.ToHexString(KeyCodec.Encode(ZoneTreePersistenceFormat.SystemNamespace,
-                ZoneTreePersistenceFormat.ClockKey)) + ":" + Convert.ToHexString(NativeSerialization.Serialize(1L)),
+                ZoneTreePersistenceFormat.ClockKey)) + ":" + Convert.ToHexString(OrleansSerialization.Serialize(1L)),
             Convert.ToHexString(KeyCodec.Encode(ZoneTreePersistenceFormat.SystemNamespace,
-                ZoneTreePersistenceFormat.DispatchPausedKey)) + ":" + Convert.ToHexString(NativeSerialization.Serialize(true))
+                ZoneTreePersistenceFormat.DispatchPausedKey)) + ":" + Convert.ToHexString(OrleansSerialization.Serialize(true))
         ];
         await Assert.That(actual.Rows).IsEquivalentTo(expected.Order(StringComparer.Ordinal), CollectionOrdering.Matching);
         await Assert.That(actual.Identity.DispatchPaused).IsTrue();
@@ -56,7 +56,7 @@ internal static class SecondGenerationBackupAssertions
         {
             throw new InvalidOperationException("The original checkpoint metadata exceeds its retained frame.");
         }
-        return NativeSerialization.Deserialize<ZoneTreeCheckpointMetadata>(journal.AsSpan(
+        return OrleansSerialization.Deserialize<ZoneTreeCheckpointMetadata>(journal.AsSpan(
             ZoneTreePersistenceFormat.HeaderLength, length));
     }
 
@@ -74,8 +74,8 @@ internal static class SecondGenerationBackupAssertions
         await Assert.That(result.StandardOutput).IsEmpty();
         using var problem = JsonDocument.Parse(result.StandardError);
         await Assert.That(problem.RootElement.GetProperty(ErrorCodeKey).GetString()).IsEqualTo(nameof(ErrorCode.Conflict));
-        await NativeBackupJournalRepairAssertions.SameCutAsync(current, NativeBackupJournalRepairAssertions.Read(target, token));
-        await NativeBackupJournalRepairAssertions.SameArchiveAsync(captured, archive, token);
+        await BackupJournalRepairAssertions.SameCutAsync(current, BackupJournalRepairAssertions.Read(target, token));
+        await BackupJournalRepairAssertions.SameArchiveAsync(captured, archive, token);
     }
 
     internal static async Task RestoredAsync((StoreIdentity Identity, long Position, string[] Rows) source,

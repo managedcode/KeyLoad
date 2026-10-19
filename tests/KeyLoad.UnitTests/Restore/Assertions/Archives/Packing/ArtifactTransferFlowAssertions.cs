@@ -57,10 +57,10 @@ internal static class ArtifactTransferFlowAssertions
         await Assert.That(identity.DispatchPaused).IsTrue();
         using var reopened = new ZoneTreeStore(new(fixture.RestoredDirectory),
             UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
-        var restored = reopened.Read(view => NativeSerialization.Deserialize<string>(
+        var restored = reopened.Read(view => OrleansSerialization.Deserialize<string>(
             view.ReadOwnedValue(ArtifactTransferFlowFixture.LargePayloadKeyBytes)!));
         await Assert.That(restored).IsEqualTo(ArtifactTransferFlowFixture.LargePayload);
-        var seeded = reopened.Read(view => NativeSerialization.Deserialize<string>(
+        var seeded = reopened.Read(view => OrleansSerialization.Deserialize<string>(
             view.ReadOwnedValue(CliBackupRestoreFixture.StoredKeyBytes)!));
         await Assert.That(seeded).IsEqualTo(CliBackupRestoreFixture.StoredValue);
         await Assert.That(reopened.Identity.Incarnation).IsEqualTo(identity.Incarnation);

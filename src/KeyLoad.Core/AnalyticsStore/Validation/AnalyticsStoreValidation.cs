@@ -90,7 +90,7 @@ internal static class AnalyticsStoreValidation
         }
 
         JsonData.Identifier(value.Id);
-        if (NativeSerialization.Measure(value) > limits.MaxDocumentBytes)
+        if (OrleansSerialization.Measure(value) > limits.MaxDocumentBytes)
         {
             throw Errors.Fail(ErrorCode.ResourceExhausted, Budget);
         }

@@ -6,7 +6,7 @@ internal sealed class IsolatedGitHubMetadataTests
     [Test]
     [Arguments("valid")]
     [Arguments("valid-legacy-url")]
-    [Arguments("valid-native-no-attempt")]
+    [Arguments("valid-execution-no-attempt")]
     [Arguments("source")]
     [Arguments("run")]
     [Arguments("attempt")]
@@ -36,7 +36,7 @@ internal sealed class IsolatedGitHubMetadataTests
             ["--input-type=module", "-e", IsolatedGitHubNodeProgram.Metadata,
                 SessionNodeProcess.Module("isolated-github-validation.mjs"), corruption],
             TestContext.Current!.Execution.CancellationToken);
-        var accepted = corruption is "valid" or "valid-native-no-attempt";
+        var accepted = corruption is "valid" or "valid-execution-no-attempt";
         await Assert.That(result.ExitCode).IsEqualTo(accepted ? 0 : 1);
         await Assert.That(result.Output.Trim()).IsEqualTo(accepted ? "accepted" : "rejected");
         await Assert.That(result.Error).IsEmpty();

@@ -9,7 +9,7 @@ internal static class RemoteTransferAttemptProcessRecovery
     internal static async Task VerifyAsync(string root, CommitStage stage, CancellationToken token)
     {
         var operation = JsonDefaults.Deserialize<Command<DatabaseCommand>>(await File.ReadAllBytesAsync(Path.Combine(root, RemoteTransferAttemptCrashProtocol.OperationFile), token));
-        var advance = NativeSerialization.Deserialize<CommandRequest>(operation.Value!.Input.Span, NativeValidationProfile.PublicInputElements);
+        var advance = OrleansSerialization.Deserialize<CommandRequest>(operation.Value!.Input.Span, ValidationProfile.PublicInputElements);
         var failedAccept = JsonDefaults.Deserialize<CommandRequest>(await File.ReadAllBytesAsync(Path.Combine(root, RemoteTransferAttemptCrashProtocol.AcceptFile), token));
         var failedBytes = await File.ReadAllBytesAsync(Path.Combine(root, RemoteTransferAttemptCrashProtocol.FailureFile), token);
         CommitReceipt? advanced = null;

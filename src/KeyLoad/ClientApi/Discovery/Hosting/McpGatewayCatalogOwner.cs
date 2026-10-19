@@ -5,12 +5,12 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
 
-/// <summary>Owns one bounded native graph instance over immutable canonical operation metadata.</summary>
+/// <summary>Owns one bounded execution graph instance over immutable canonical operation metadata.</summary>
 internal sealed class McpGatewayCatalogOwner : IAsyncDisposable
 {
     private const string SourceId = "keyload";
     private const string IndexFailure = "The canonical MCP metadata index could not be initialized.";
-    private const string InvocationFailure = "The canonical MCP operation did not produce a native result.";
+    private const string InvocationFailure = "The canonical MCP operation did not produce a execution result.";
     private readonly IOptions<McpExecutionOptions> executionOptions;
     private readonly IMcpGatewayFactory _factory;
     private readonly IHttpContextAccessor _httpContextAccessor;
@@ -39,8 +39,7 @@ internal sealed class McpGatewayCatalogOwner : IAsyncDisposable
         McpGatewayCatalogRequestValidation.ValidateSearchLimit(limit: maxResults, executionOptions: executionOptions);
         using var lease = _lifetime.Acquire();
         var result = await lease.Instance.Gateway.SearchAsync(
-            new McpGatewaySearchRequest(Query: query, MaxResults: maxResults), cancellationToken)
-            .ConfigureAwait(false);
+            new McpGatewaySearchRequest(Query: query, MaxResults: maxResults), cancellationToken);
         cancellationToken.ThrowIfCancellationRequested();
         return result with
         {
@@ -63,8 +62,7 @@ internal sealed class McpGatewayCatalogOwner : IAsyncDisposable
                 Query: query,
                 MaxCategories: maxCategories,
                 MaxToolsPerCategory: maxToolsPerCategory,
-                PreferReadOnly: preferReadOnly), cancellationToken)
-            .ConfigureAwait(false);
+                PreferReadOnly: preferReadOnly), cancellationToken);
         cancellationToken.ThrowIfCancellationRequested();
         return result with
         {
@@ -85,8 +83,7 @@ internal sealed class McpGatewayCatalogOwner : IAsyncDisposable
 
         using var lease = _lifetime.Acquire();
         var result = await lease.Instance.Gateway.InvokeAsync(
-            new McpGatewayInvokeRequest(ToolId: toolId, Arguments: arguments), cancellationToken)
-            .ConfigureAwait(false);
+            new McpGatewayInvokeRequest(ToolId: toolId, Arguments: arguments), cancellationToken);
         cancellationToken.ThrowIfCancellationRequested();
         if (!result.IsSuccess || result.McpResult is null)
         {
@@ -107,7 +104,7 @@ internal sealed class McpGatewayCatalogOwner : IAsyncDisposable
         var instance = _factory.Create(CreateOptions(entries));
         try
         {
-            var result = await instance.Gateway.BuildIndexAsync(cancellationToken).ConfigureAwait(false);
+            var result = await instance.Gateway.BuildIndexAsync(cancellationToken);
             cancellationToken.ThrowIfCancellationRequested();
             if (!result.IsGraphSearchEnabled || result.ToolCount != entries.Length || result.GraphNodeCount == EmptyGraphNodeCount)
             {
@@ -120,7 +117,7 @@ internal sealed class McpGatewayCatalogOwner : IAsyncDisposable
         {
             try
             {
-                await instance.DisposeAsync().ConfigureAwait(false);
+                await instance.DisposeAsync();
             }
             catch (Exception cleanupFailure)
             {

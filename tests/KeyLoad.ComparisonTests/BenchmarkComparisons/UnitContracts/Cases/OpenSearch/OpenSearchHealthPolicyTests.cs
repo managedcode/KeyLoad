@@ -10,18 +10,18 @@ internal sealed class OpenSearchHealthPolicyTests
     [Test]
     public async Task OpenSearchHealthUriUsesConfiguredInvariantWholeSecondsAndRecordsPolicy()
     {
-        var options = UnitBenchmarkOptions.Native();
-        options.Value.OpenSearchHealthWaitTimeoutSeconds = new NativeComparisonExecutionOptions().OpenSearchHealthWaitTimeoutSeconds;
-        await Assert.That(OpenSearchClusterEvidence.BuildHealthPath("native-index", options))
-            .IsEqualTo("/_cluster/health/native-index?wait_for_status=green&wait_for_active_shards=all&timeout=60s&level=shards");
+        var options = UnitBenchmarkOptions.Execution();
+        options.Value.OpenSearchHealthWaitTimeoutSeconds = new ComparisonExecutionOptions().OpenSearchHealthWaitTimeoutSeconds;
+        await Assert.That(OpenSearchClusterEvidence.BuildHealthPath("execution-index", options))
+            .IsEqualTo("/_cluster/health/execution-index?wait_for_status=green&wait_for_active_shards=all&timeout=60s&level=shards");
 
         options.Value.OpenSearchHealthWaitTimeoutSeconds = 7;
         var previousCulture = CultureInfo.CurrentCulture;
         try
         {
             CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("fr-FR");
-            await Assert.That(OpenSearchClusterEvidence.BuildHealthPath("native-index", options))
-                .IsEqualTo("/_cluster/health/native-index?wait_for_status=green&wait_for_active_shards=all&timeout=7s&level=shards");
+            await Assert.That(OpenSearchClusterEvidence.BuildHealthPath("execution-index", options))
+                .IsEqualTo("/_cluster/health/execution-index?wait_for_status=green&wait_for_active_shards=all&timeout=7s&level=shards");
         }
         finally
         {
@@ -38,10 +38,10 @@ internal sealed class OpenSearchHealthPolicyTests
     [Arguments(61)]
     public async Task InvalidOpenSearchHealthTimeoutFailsBeforeObservation(int timeoutSeconds)
     {
-        var options = UnitBenchmarkOptions.Native();
+        var options = UnitBenchmarkOptions.Execution();
         options.Value.OpenSearchHealthWaitTimeoutSeconds = timeoutSeconds;
         using var client = new HttpClient();
         await Assert.ThrowsExactlyAsync<OptionsValidationException>(() => OpenSearchClusterEvidence.ObserveAsync(
-            client, "native-index", 1, ComparisonTopology.Standalone, options, CancellationToken.None));
+            client, "execution-index", 1, ComparisonTopology.Standalone, options, CancellationToken.None));
     }
 }

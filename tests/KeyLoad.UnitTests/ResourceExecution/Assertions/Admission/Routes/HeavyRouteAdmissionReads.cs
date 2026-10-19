@@ -34,7 +34,7 @@ internal static class HeavyRouteAdmissionReads
             var operation = database.CreateCommand(OperationKind.Batch, fixture.Seed.CommandId, "root", default, System.Text.Json.JsonSerializer.Serialize(fixture.Seed, JsonDefaults.Options));
             var replay = database.ApplyEmbedded(operation, token).Get<CommitReceipt>();
             await EqualAsync(replay, fixture.Receipt);
-            await HeavyRouteAdmissionFixture.NativeReceiptAsync(replay);
+            await HeavyRouteAdmissionFixture.RuntimeReceiptAsync(replay);
             var bytes = store.Read(view => view.ReadOwnedValue(KeySpace.PartitionOutcome(fixture.Seed.Partition, "root", fixture.Seed.CommandId)))!;
             await Assert.That(bytes.AsSpan().SequenceEqual(fixture.Outcome)).IsTrue();
         });
@@ -42,7 +42,7 @@ internal static class HeavyRouteAdmissionReads
     {
         var image = SqlInnerJoinRetainedIdentityFlow.Image(store);
         var cut = store.Position;
-        var identity = NativeSerialization.Serialize(store.Identity);
+        var identity = OrleansSerialization.Serialize(store.Identity);
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(operation, failures);
         await ServerFailureObserver.ObserveAsync(() => ConserveAsync(store, image, cut, identity), failures);
@@ -54,7 +54,7 @@ internal static class HeavyRouteAdmissionReads
         await ServerFailureObserver.ObserveAsync(async () => await Assert.That(
             SqlInnerJoinRetainedIdentityFlow.Image(store).SequenceEqual(image, StringComparer.Ordinal)).IsTrue(), failures);
         await ServerFailureObserver.ObserveAsync(async () => await Assert.That(store.Position).IsEqualTo(cut), failures);
-        await ServerFailureObserver.ObserveAsync(async () => await Assert.That(NativeSerialization.Serialize(store.Identity)
+        await ServerFailureObserver.ObserveAsync(async () => await Assert.That(OrleansSerialization.Serialize(store.Identity)
             .AsSpan().SequenceEqual(identity)).IsTrue(), failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }

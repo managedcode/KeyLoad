@@ -9,19 +9,19 @@ internal sealed class JsonElementSurrogateConverter : Orleans.IConverter<JsonEle
     public JsonElementSurrogate ConvertToSurrogate(in JsonElement value)
         => new()
         {
-            Root = NativeDomProjection.Create(value)
+            Root = DomProjection.Create(value)
         };
 
     public JsonElement ConvertFromSurrogate(in JsonElementSurrogate surrogate)
     {
         try
         {
-            NativeDomPreflight.Validate(surrogate.Root);
-            return NativeDomWriter.Materialize(surrogate.Root!);
+            DomPreflight.Validate(surrogate.Root);
+            return DomWriter.Materialize(surrogate.Root!);
         }
         catch (JsonException)
         {
-            throw Errors.Fail(ErrorCode.Corruption, NativePayloadVersion.InvalidPayload);
+            throw Errors.Fail(ErrorCode.Corruption, PayloadVersion.InvalidPayload);
         }
     }
 

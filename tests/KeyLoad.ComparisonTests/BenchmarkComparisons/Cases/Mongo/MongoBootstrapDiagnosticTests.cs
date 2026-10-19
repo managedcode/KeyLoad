@@ -10,7 +10,7 @@ internal sealed class MongoBootstrapDiagnosticTests
         const fs = require('node:fs');
         const vm = require('node:vm');
         const source = fs.readFileSync(process.argv[1], 'utf8');
-        const boundary = source.indexOf('// Native bootstrap composition.');
+        const boundary = source.indexOf('// Execution bootstrap composition.');
         if (boundary < 0) throw new Error('MongoDiagnosticBoundaryMissing');
         vm.runInThisContext(source.slice(0, boundary));
         const hosts = ['isolated-mongo-1:27017', 'isolated-mongo-2:27017'];
@@ -38,7 +38,7 @@ internal sealed class MongoBootstrapDiagnosticTests
             case 'AbsentCount': delete status.votingMembersCount; break;
             case 'BooleanCount': status.votingMembersCount = true; break;
             case 'NegativeCount': status.votingMembersCount = -1; break;
-            case 'NativeException': error = {code: 94, codeName: 'NotYetInitialized', message: 'credential-marker', stack: 'credential-marker'}; break;
+            case 'RuntimeException': error = {code: 94, codeName: 'NotYetInitialized', message: 'credential-marker', stack: 'credential-marker'}; break;
             case 'UnknownException': error = {code: 94, codeName: 'credential-marker', message: 'credential-marker', stack: 'credential-marker'}; break;
             case 'UnsafeCode': error = {code: 'credential-marker', codeName: 'NotYetInitialized', message: 'credential-marker'}; break;
             case 'UnsafeMembers': status.members[1] = {_id: 'credential-marker', name: 'mongodb://user:credential-marker@foreign', health: 'credential-marker', stateStr: 'credential-marker'}; break;
@@ -63,7 +63,7 @@ internal sealed class MongoBootstrapDiagnosticTests
     [Arguments("VotingCount", "VotingCount")]
     [Arguments("WritableVotingCount", "WritableVotingCount")]
     [Arguments("WriteMajorityCount", "WriteMajorityCount")]
-    [Arguments("NativeException", "NativeException")]
+    [Arguments("RuntimeException", "RuntimeException")]
     public async Task ProjectsOriginalReadinessFailure(string scenario, string expected)
     {
         using var projection = JsonDocument.Parse(await MongoDiagnosticProcess.RunAsync(ProjectionHarness, scenario));
@@ -93,7 +93,7 @@ internal sealed class MongoBootstrapDiagnosticTests
     [Arguments("UnsafeCode")]
     [Arguments("Oversized")]
     [Arguments("UnknownStage")]
-    public async Task UnknownNativeTextUrisAndOversizedObservationsAreNeverExported(string scenario)
+    public async Task UnknownTextUrisAndOversizedObservationsAreNeverExported(string scenario)
     {
         var text = await MongoDiagnosticProcess.RunAsync(ProjectionHarness, scenario);
         using var projection = JsonDocument.Parse(text);
@@ -104,9 +104,9 @@ internal sealed class MongoBootstrapDiagnosticTests
     }
 
     [Test]
-    public async Task NativeNumericCodeHasOnlyItsValidatedPinnedCodeName()
+    public async Task NumericCodeHasOnlyItsValidatedPinnedCodeName()
     {
-        using var known = JsonDocument.Parse(await MongoDiagnosticProcess.RunAsync(ProjectionHarness, "NativeException"));
+        using var known = JsonDocument.Parse(await MongoDiagnosticProcess.RunAsync(ProjectionHarness, "RuntimeException"));
         using var unknown = JsonDocument.Parse(await MongoDiagnosticProcess.RunAsync(ProjectionHarness, "UnknownException"));
         await Assert.That(known.RootElement.GetProperty(CodeField).GetInt32()).IsEqualTo(94);
         await Assert.That(known.RootElement.GetProperty(CodeNameField).GetString()).IsEqualTo("NotYetInitialized");

@@ -45,7 +45,7 @@ internal sealed class ImmutableTemporalDataTests
     }
 
     [Test]
-    public async Task RealMarkerRequiresStaticReadonlyNativeTimeSpanFieldAsync()
+    public async Task RealMarkerRequiresStaticReadonlyTimeSpanFieldAsync()
     {
         const string source = """
             internal sealed class Corpus
@@ -66,7 +66,7 @@ internal sealed class ImmutableTemporalDataTests
     }
 
     [Test]
-    public async Task MarkedTemporalDataUsedAsDeadlineRemainsHardcodedAtEveryNativeSinkAsync()
+    public async Task MarkedTemporalDataUsedAsDeadlineRemainsHardcodedAtEverySinkAsync()
     {
         const string source = """
             internal static class Corpus

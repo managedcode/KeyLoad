@@ -2,7 +2,7 @@ using KeyLoad.Core;
 
 namespace KeyLoad.Clustering;
 
-/// <summary>Creates the single native grain key for a complete, case-sensitive logical partition.</summary>
+/// <summary>Creates the single execution grain key for a complete, case-sensitive logical partition.</summary>
 internal static class PartitionQueryGrainIdentity
 {
     internal const int InterfaceVersion = 1;

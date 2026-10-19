@@ -28,7 +28,7 @@ $script:FcTestIdentity = [ordered]@{
     IncompleteBinding = 'The UnitTests portable PDB does not bind every inventoried project source.'
     InvalidManifest = 'The UnitTests image identity manifest is malformed, stale or unsupported.'
     Drift = 'The UnitTests source, build inputs or compiled image changed during identity capture.'
-    Qualification = 'static native UnitTests image identity only; no build, test or coverage qualification'
+    Qualification = 'static execution UnitTests image identity only; no build, test or coverage qualification'
 }
 
 function Resolve-FcTestIdentityRoot([string] $Root) {

@@ -9,7 +9,7 @@ namespace KeyLoad.UnitTests.Features.TimeSeries;
 
 internal static class SampleChunkPendingWindowEnrollmentBound
 {
-    private const string Exhausted = "The native series chunk window exceeds its admitted bound.";
+    private const string Exhausted = "The execution series chunk window exceeds its admitted bound.";
 
     internal static async Task RefuseAsync(SampleChunkCanonicalFixture fixture, SampleChunkPendingBoundTrial trial,
         List<(Command<DatabaseCommand> Operation, Result<object> Result)> originals)

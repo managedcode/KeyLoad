@@ -69,7 +69,7 @@ public sealed partial class DatabaseEngine
     private QueueCounters ApplyDueEntry(IAtomicTransaction tx, QueueLaneRef lane, QueuePolicy policy,
         DateTimeOffset now, bool leased, KeyValueRecord item, QueueCounters? counters, Command<DatabaseCommand> operation)
     {
-        var id = NativeSerialization.Deserialize<string>(item.Value.Span);
+        var id = OrleansSerialization.Deserialize<string>(item.Value.Span);
         var metadataKey = QueueKey(MessageMetadataSpace, lane, id);
         var metadata = tx.GetRecord<MessageMetadata>(metadataKey)
             ?? throw Errors.Fail(ErrorCode.Corruption, MissingIndexedMetadata);

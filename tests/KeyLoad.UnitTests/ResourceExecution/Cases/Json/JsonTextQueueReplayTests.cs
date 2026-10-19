@@ -36,7 +36,7 @@ internal sealed class JsonTextQueueReplayTests
         await Assert.That(deliveries.Length).IsEqualTo(MultiDeliveryCount);
         await Assert.That(deliveries[0].Id).IsEqualTo(FirstMessageId);
         await Assert.That(deliveries[1].Id).IsEqualTo(SecondMessageId);
-        await NativeReplayResultAssertions.Same<ReceiveResult>(replay, original);
+        await ReplayResultAssertions.Same<ReceiveResult>(replay, original);
         await Assert.That(Errors.Code(conflict.Problem)).IsEqualTo(ErrorCode.Conflict);
 
         var ack = Guid.NewGuid();
@@ -61,7 +61,7 @@ internal sealed class JsonTextQueueReplayTests
         var replay = db.Submit(OperationKind.Receive, request, principal: WorkerPrincipal, id: id, time: now);
 
         await Assert.That(original.Get<ReceiveResult>().Deliveries).IsEmpty();
-        await NativeReplayResultAssertions.Same<ReceiveResult>(replay, original);
+        await ReplayResultAssertions.Same<ReceiveResult>(replay, original);
 
         db.Submit(OperationKind.ConfigurePrincipal,
             new ConfigurePrincipalRequest(worker with
@@ -99,7 +99,7 @@ internal sealed class JsonTextQueueReplayTests
             },
             _ => throw new ArgumentOutOfRangeException(nameof(field))
         };
-        await Assert.ThrowsExactlyAsync<AssertionException>(() => NativeReplayResultAssertions.Same<ReceiveResult>(
+        await Assert.ThrowsExactlyAsync<AssertionException>(() => ReplayResultAssertions.Same<ReceiveResult>(
             original with
             {
                 Value = changed

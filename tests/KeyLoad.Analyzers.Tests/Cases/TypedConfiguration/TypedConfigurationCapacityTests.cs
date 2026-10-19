@@ -1,6 +1,6 @@
 namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
 
-/// <summary>AC-CQ-034/037: native admission, channel and transport bounds use configured policy.</summary>
+/// <summary>AC-CQ-034/037: execution admission, channel and transport bounds use configured policy.</summary>
 internal sealed class TypedConfigurationCapacityTests
 {
     [Test]
@@ -41,7 +41,7 @@ internal sealed class TypedConfigurationCapacityTests
     }
 
     [Test]
-    public async Task NativeHttpTimeoutAndConnectionCapacityConstAssignmentsAreRejectedAsync()
+    public async Task HttpTimeoutAndConnectionCapacityConstAssignmentsAreRejectedAsync()
     {
         const string source = """
             internal static class Subject
@@ -62,7 +62,7 @@ internal sealed class TypedConfigurationCapacityTests
     }
 
     [Test]
-    public async Task ActualOptionsValuesReachNativeAdmissionAndTransportOperationsAsync()
+    public async Task ActualOptionsValuesReachAdmissionAndTransportOperationsAsync()
     {
         const string source = """
             [KeyLoad.ConfigurationOptions]

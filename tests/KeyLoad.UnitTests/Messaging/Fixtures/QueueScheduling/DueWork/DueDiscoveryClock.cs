@@ -7,7 +7,7 @@ internal sealed class DueDiscoveryClock : TimeProvider
     private long elapsedTicks;
     private long deadlineTicks;
 
-    internal bool ExpiredAfterNativeProgress
+    internal bool ExpiredAfterProgress
     {
         get; private set;
     }
@@ -18,7 +18,7 @@ internal sealed class DueDiscoveryClock : TimeProvider
         if (observedProgress is { } progress && progress())
         {
             observedProgress = null;
-            ExpiredAfterNativeProgress = true;
+            ExpiredAfterProgress = true;
             elapsedTicks = checked(elapsedTicks + deadlineTicks + BoundaryCrossingTicks);
         }
         return elapsedTicks;

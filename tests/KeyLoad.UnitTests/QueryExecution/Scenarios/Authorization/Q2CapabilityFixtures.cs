@@ -20,7 +20,7 @@ internal static class Q2CapabilityFixtures
 
     internal static AstQueryRequest Unsupported(AstQueryRequest request, string kind) => kind switch
     {
-        "ast1" => request with { AstVersion = 1 },
+        "ast-other" => request with { AstVersion = 2 },
         "ast3" => request with { AstVersion = 3 },
         "filter" => request with { Query = request.Query with { Filter = new Comparison(new FieldOperand("/r/name"), "=", ValueOperand.Create("Ada")) } },
         "explain" => request with { Query = request.Query with { Explain = true } },
@@ -32,6 +32,6 @@ internal static class Q2CapabilityFixtures
     internal static AstQueryRequest JsonRoundTrip(AstQueryRequest request)
         => JsonSerializer.Deserialize<AstQueryRequest>(JsonDefaults.Serialize(request), JsonDefaults.Options)!;
 
-    internal static AstQueryRequest NativeRoundTrip(AstQueryRequest request)
-        => NativeSerialization.Deserialize<AstQueryRequest>(NativeSerialization.Serialize(request));
+    internal static AstQueryRequest RuntimeRoundTrip(AstQueryRequest request)
+        => OrleansSerialization.Deserialize<AstQueryRequest>(OrleansSerialization.Serialize(request));
 }

@@ -5,7 +5,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
-/// <summary>Startup keeps native silo count separate from the required number of persisted copies.</summary>
+/// <summary>Startup keeps execution silo count separate from the required number of persisted copies.</summary>
 internal sealed class BenchmarkTopologyConfigurationTests
 {
     private const string ConfigurationSection = "KeyLoad";
@@ -46,7 +46,7 @@ internal sealed class BenchmarkTopologyConfigurationTests
     }
 
     [Test]
-    public void NativeHostingAndCredentialValidationRemainRequired()
+    public void HostingAndCredentialValidationRemainRequired()
     {
         var options = BenchmarkTopologyConfigurationFixture.Node(3, 2);
         NodeOptions[] invalid =

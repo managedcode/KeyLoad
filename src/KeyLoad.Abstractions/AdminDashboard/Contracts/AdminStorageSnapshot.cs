@@ -11,6 +11,6 @@ namespace KeyLoad;
 /// <param name="Files">Finite display subset; its sum need not equal total observed bytes.</param>
 /// <param name="Notice">Safe incomplete/unavailable reason without sensitive filesystem details.</param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.AdminStorageSnapshot)]
+[Orleans.Alias(ContractAliases.AdminStorageSnapshot)]
 public sealed record AdminStorageSnapshot([property: Orleans.Id(0)] long? CanonicalBytes, [property: Orleans.Id(2)] long? BackupBytes,
     [property: Orleans.Id(3)] long? TotalBytes, [property: Orleans.Id(4)] int ObservedFiles, [property: Orleans.Id(5)] bool Complete, [property: Orleans.Id(6)] ImmutableArray<AdminFileInfo> Files, [property: Orleans.Id(7)] string? Notice);

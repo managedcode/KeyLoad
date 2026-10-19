@@ -10,7 +10,7 @@ using Microsoft.Extensions.Logging;
 
 namespace KeyLoad.UnitTests.Features.ClientApi;
 
-/// <summary>Owns the real ephemeral Kestrel host, caller, and request handler for native header-start checks.</summary>
+/// <summary>Owns the real ephemeral Kestrel host, caller, and request handler for execution header-start checks.</summary>
 internal sealed class OperationHeaderTestServer : IAsyncDisposable
 {
     private const string RequestIdHeaderName = ServerProtocol.RequestHeader;

@@ -15,15 +15,15 @@ internal sealed class PostgresVectorPayloadContractTests
     [Test]
     public async Task JsonbFieldReconstructionPreservesActualContentAndExcludesServerWhitespace()
     {
-        var corpus = new VectorComparisonCorpus(VectorComparisonProfile.Parse("vector-100k-exact-plain-c16"), UnitBenchmarkOptions.Native());
+        var corpus = new VectorComparisonCorpus(VectorComparisonProfile.Parse("vector-100k-exact-plain-c16"), UnitBenchmarkOptions.Execution());
         var document = corpus.Create(42);
         using var fields = JsonDocument.Parse(document.Payload);
         var id = fields.RootElement.GetProperty(IdField).GetString()!;
         var number = fields.RootElement.GetProperty(NumberField).GetInt32();
         var padding = fields.RootElement.GetProperty(PaddingField).GetString()!;
-        var canonical = PostgresNativeVectorStorage.CanonicalPayload(id, number, padding);
+        var canonical = PostgresVectorStorage.CanonicalPayload(id, number, padding);
         await Assert.That(Hash(canonical)).IsEqualTo(Hash(document.Payload));
-        var mutated = PostgresNativeVectorStorage.CanonicalPayload(id, number, 'z' + padding[1..]);
+        var mutated = PostgresVectorStorage.CanonicalPayload(id, number, 'z' + padding[1..]);
         await Assert.That(Hash(mutated) == Hash(document.Payload)).IsFalse();
         await Assert.That(Encoding.UTF8.GetByteCount(mutated)).IsEqualTo(1024);
     }
@@ -31,9 +31,9 @@ internal sealed class PostgresVectorPayloadContractTests
     [Test]
     public async Task InconsistentReadbackShapeOrLengthIsRejected()
     {
-        await Assert.That(() => PostgresNativeVectorStorage.CanonicalPayload("bad-id", 42, "x"))
+        await Assert.That(() => PostgresVectorStorage.CanonicalPayload("bad-id", 42, "x"))
             .Throws<InvalidDataException>();
-        await Assert.That(() => PostgresNativeVectorStorage.CanonicalPayload("v000000042", 42, "x"))
+        await Assert.That(() => PostgresVectorStorage.CanonicalPayload("v000000042", 42, "x"))
             .Throws<InvalidDataException>();
     }
 

@@ -39,7 +39,7 @@ internal static class ChunkMultiblockCrashScenario
         {
             ChunkMultiblockCrashOperations.Seed(root, database, merge);
             await File.WriteAllBytesAsync(Path.Combine(root, SampleChunkCrashContract.OriginalReceiptFile),
-                NativeSerialization.Serialize(SampleChunkCrashOperations.OriginalAcknowledged(database))).ConfigureAwait(false);
+                OrleansSerialization.Serialize(SampleChunkCrashOperations.OriginalAcknowledged(database))).ConfigureAwait(false);
             await ChunkMultiblockCrashState.WriteAsync(root, SampleChunkCrashContract.PreparedFile, database, merge).ConfigureAwait(false);
             await RecoveryProcessPause.WaitForKillAsync();
         }
@@ -62,7 +62,7 @@ internal static class ChunkMultiblockCrashScenario
         var request = new CommandRequest(SampleChunkCrashContract.InflightId, SampleChunkCrashContract.Partition,
             [ChunkMultiblockCrashOperations.Intended(merge)]);
         var original = CrashDatabase.Operation(database, OperationKind.Batch, request, request.CommandId);
-        await File.WriteAllBytesAsync(Path.Combine(root, SampleChunkCrashContract.OriginalOperationFile), NativeSerialization.Serialize(original)).ConfigureAwait(false);
+        await File.WriteAllBytesAsync(Path.Combine(root, SampleChunkCrashContract.OriginalOperationFile), OrleansSerialization.Serialize(original)).ConfigureAwait(false);
         SampleChunkSnapshotFile.CaptureExpectedToken(root, request.CommandId, database, request.Partition);
         boundary.Position = checked(database.Store.Position + SampleChunkCrashContract.PositionStep);
         boundary.Armed = true;

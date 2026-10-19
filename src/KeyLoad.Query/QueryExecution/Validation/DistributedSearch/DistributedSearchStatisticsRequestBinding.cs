@@ -10,7 +10,7 @@ internal static class DistributedSearchStatisticsRequestBinding
     private const int FirstTerm = 0;
     private const string InvalidTerms = "The distributed statistics terms differ from the original canonical request.";
 
-    internal static void Require(SearchRequest request, ImmutableArray<DistributedTextWitnessV1> witnesses,
+    internal static void Require(SearchRequest request, ImmutableArray<DistributedTextWitness> witnesses,
         IOptions<QueryExecutionOptions> options, ReadExecutionBudget budget)
     {
         if (request.Text is null)

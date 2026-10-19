@@ -10,7 +10,7 @@ internal static class DistributedSearchPhaseBatch
 {
     private const int FirstLeaf = 0;
 
-    internal static async Task<ImmutableArray<DistributedSearchLeafResultV1>> RunAsync(
+    internal static async Task<ImmutableArray<DistributedSearchLeafResult>> RunAsync(
         ImmutableArray<DistributedSearchPhaseWork> work, ReadExecutionBudgetReadGrant[] grants,
         int grantOffset, IOptions<QueryExecutionOptions> options, ReadExecutionBudget budget,
         Func<DistributedSearchPhaseWork, ReadExecutionBudgetReadGrant, ReadExecutionBudget, CancellationToken,
@@ -36,12 +36,12 @@ internal static class DistributedSearchPhaseBatch
             prepared[index] = await prepare(work[index], grants[grantOffset + index], budget,
                 execution.Token).ConfigureAwait(true);
         }
-        var leaves = ImmutableArray.CreateBuilder<DistributedSearchLeafResultV1>(work.Length);
+        var leaves = ImmutableArray.CreateBuilder<DistributedSearchLeafResult>(work.Length);
         var concurrency = Math.Min(policy.MaximumConcurrentPartitionLeaves, work.Length);
         for (var offset = FirstLeaf; offset < work.Length; offset += concurrency)
         {
             budget.Check();
-            var actual = await PartitionQueryParallelBatch.RunAsync<DistributedSearchPreparedLeaf, DistributedSearchLeafResultV1>(
+            var actual = await PartitionQueryParallelBatch.RunAsync<DistributedSearchPreparedLeaf, DistributedSearchLeafResult>(
                 prepared, offset, Math.Min(concurrency, work.Length - offset), execution,
                 static (leaf, token) => leaf.RunAsync(token)).ConfigureAwait(true);
             for (var index = FirstLeaf; index < actual.Length; index++)
@@ -53,7 +53,7 @@ internal static class DistributedSearchPhaseBatch
                 budget.Check();
                 budget.CompleteReadGrant(grants[grantOffset + offset + index]);
                 var retained = new GlobalBranchByteAdmission(budget.MaximumResultBytes, budget);
-                retained.Accept(NativeSerialization.Measure(actual[index]));
+                retained.Accept(OrleansSerialization.Measure(actual[index]));
                 leaves.Add(actual[index]);
             }
         }

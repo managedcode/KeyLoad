@@ -43,7 +43,7 @@ internal static class SampleChunkRetainedBudgetTrial
     {
         var budget = new global::KeyLoad.Core.ReadExecutionBudget(
             UnitExecutionOptions.DatabaseLimits(fixture.Owner.Limits), fixture.Clock);
-        budget.ConstrainNativeWork(maximumBytes, maximumRecords);
+        budget.ConstrainWork(maximumBytes, maximumRecords);
         var result = fixture.Store.Read(view =>
         {
             if (precedingRead)
@@ -57,7 +57,7 @@ internal static class SampleChunkRetainedBudgetTrial
                 budget.CreateView(view), SampleChunkCanonicalFixture.Principal, request, budget,
                 UnitExecutionOptions.TimeSeriesExecution(), fixture.Store.Position);
         });
-        return new(result, budget.ReadBytes, budget.ConstrainedNativeRecords);
+        return new(result, budget.ReadBytes, budget.ConstrainedRecords);
     }
 
     private static async Task RefuseAsync(SampleChunkPartialRetentionFixture fixture, long maximumBytes,

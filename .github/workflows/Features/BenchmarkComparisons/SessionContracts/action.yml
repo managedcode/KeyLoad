@@ -1,9 +1,9 @@
-name: Native benchmark preparation contracts
-description: Run the complete native preparation checks once before database sessions.
+name: Execution benchmark preparation contracts
+description: Run the complete execution preparation checks once before database sessions.
 runs:
   using: composite
   steps:
-    - name: Check native KurrentDB discovery settings
+    - name: Check execution KurrentDB discovery settings
       shell: bash
       run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/IsolatedKurrentDiscoverySettingsTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-runtime/kurrent-discovery
     - name: Check exact OpenSearch vector query contract
@@ -21,7 +21,7 @@ runs:
       if: always()
       uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
       with:
-        name: timeseries-native-pinned-image-facts
+        name: timeseries-execution-pinned-image-facts
         path: |
           ${{ runner.temp }}/keyload-timeseries-image-facts/**
           **/TestResults/**
@@ -31,9 +31,9 @@ runs:
     - name: Test database cluster resource models
       shell: bash
       run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/Isolated*Resource*/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-runtime/resource-models
-    - name: Test native session shutdown and original failure retention
+    - name: Test execution session shutdown and original failure retention
       shell: bash
-      run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/(IsolatedNativeTeardownSuccessTests|IsolatedNativeTeardownFailureTests|IsolatedNativeLogCaptureConcurrentDisposeTests)/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-runtime/session-shutdown --KeyLoadTests:ReportTrx=true
+      run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/(IsolatedTeardownSuccessTests|IsolatedTeardownFailureTests|IsolatedLogCaptureConcurrentDisposeTests)/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-runtime/session-shutdown --KeyLoadTests:ReportTrx=true
     - name: Test MongoDB readiness configuration
       shell: bash
       run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/MongoReadinessResourceTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-runtime/mongo-resource
@@ -55,18 +55,18 @@ runs:
     - name: Test live benchmark progress capture
       shell: bash
       run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/ComparisonProgress*/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-runtime/live-progress
-    - name: Test shared native session entry and safe failures
+    - name: Test shared execution session entry and safe failures
       shell: bash
-      run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/(ComparisonHostStartupTests|ComparisonHostCleanupTests|BenchmarkSessionNativeParserTests)/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-runtime/live-entry
+      run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/(ComparisonHostStartupTests|ComparisonHostCleanupTests|BenchmarkSessionParserTests)/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-runtime/live-entry
     - name: Test shared session live acknowledgement and cancellation counters
       shell: bash
       run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/BenchmarkSessionProgressTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-runtime/live-counters
-    - name: Test document resource budgets and current native topology
+    - name: Test document resource budgets and current execution topology
       shell: bash
-      run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/(DocumentResourceBudgetTests|NativeTopologyAdmissionTests)/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-runtime/document-admission --KeyLoadTests:ReportTrx=true
-    - name: Test controlled native shared-session operations and cancellation
+      run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/(DocumentResourceBudgetTests|TopologyAdmissionTests)/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-runtime/document-admission --KeyLoadTests:ReportTrx=true
+    - name: Test controlled execution shared-session operations and cancellation
       shell: bash
-      run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/DocumentComparisonNativeTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-runtime/document-native --KeyLoadTests:ReportTrx=true
+      run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/DocumentComparisonTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-runtime/document-execution --KeyLoadTests:ReportTrx=true
     - name: Test KeyLoad replay admission
       shell: bash
       run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/IsolatedKeyLoadReplayAdmissionTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-runtime/replay-admission

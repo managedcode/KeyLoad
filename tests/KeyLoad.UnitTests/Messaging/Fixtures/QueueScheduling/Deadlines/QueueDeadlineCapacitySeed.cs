@@ -53,7 +53,7 @@ internal static class QueueDeadlineCapacitySeed
             };
         }
         var body = new MessageBody(Message, QueueDeadlineCapacityProtocol.Json, new string(QueueDeadlineCapacityProtocol.Json.AsSpan()), null, JsonData.Fingerprint(input));
-        var bytes = NativeSerialization.Serialize(body).LongLength;
+        var bytes = OrleansSerialization.Serialize(body).LongLength;
         var counters = new QueueCounters(SingleMessageCount, bytes, kind == QueueDeadlineKind.ExpireLease ? SingleMessageCount : NoUsage,
             kind == QueueDeadlineKind.ExpireLease ? bytes : NoUsage, metadata.ReadySequence);
         await QueueDeadlineCapacityImage.RequireAsync(fixture.Database, lane, [(input, metadata)], counters.NextReadySequence);

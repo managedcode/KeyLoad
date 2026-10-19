@@ -10,7 +10,7 @@ internal static class SampleChunkCrashRecovery
         var outcome = await ReplayOriginalAsync(root, database).ConfigureAwait(false);
         await SampleChunkCrashState.WriteAsync(root, SampleChunkCrashContract.RecoveredFile, database, outcome)
             .ConfigureAwait(false);
-        var acknowledged = Convert.ToHexString(NativeSerialization.Serialize(
+        var acknowledged = Convert.ToHexString(OrleansSerialization.Serialize(
             SampleChunkCrashOperations.OriginalAcknowledged(database)));
         var receiptPath = Path.Combine(root, SampleChunkCrashContract.OriginalReceiptFile);
         if (new FileInfo(receiptPath).Length > database.Limits.MaxBatchBytes)
@@ -51,7 +51,7 @@ internal static class SampleChunkCrashRecovery
             throw new InvalidOperationException(SampleChunkCrashContract.Invalid);
         }
         var bytes = await File.ReadAllBytesAsync(path).ConfigureAwait(false);
-        var original = NativeSerialization.Deserialize<Command<DatabaseCommand>>(bytes);
+        var original = OrleansSerialization.Deserialize<Command<DatabaseCommand>>(bytes);
         var before = SampleChunkCrashState.Complete(database);
         var position = database.Store.Position;
         var replay = database.ApplyEmbedded(original, cancellationToken: default);
@@ -60,6 +60,6 @@ internal static class SampleChunkCrashRecovery
         {
             throw new InvalidOperationException(SampleChunkCrashContract.Invalid);
         }
-        return Convert.ToHexString(NativeSerialization.Serialize(replay));
+        return Convert.ToHexString(OrleansSerialization.Serialize(replay));
     }
 }

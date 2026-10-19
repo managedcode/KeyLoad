@@ -4,8 +4,8 @@ using KeyLoad.IntegrationTests.Features.DocumentStorage;
 
 namespace KeyLoad.IntegrationTests.Features.ClientApi;
 
-/// <summary>AC-MCP-002: real native callers cannot retain authority from an earlier discovery request.</summary>
-/// <param name="fixture">The initialized actual native Aspire Orleans application.</param>
+/// <summary>AC-MCP-002: real execution callers cannot retain authority from an earlier discovery request.</summary>
+/// <param name="fixture">The initialized actual execution Aspire Orleans application.</param>
 [ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = McpCallerProtocol.FixtureKey)]
 [NotInParallel]
 internal sealed class McpCredentialLifecycleTests(ClusterFixture fixture)
@@ -26,12 +26,12 @@ internal sealed class McpCredentialLifecycleTests(ClusterFixture fixture)
         await CredentialAuthorityFlow.RunAsync(fixture, state, expire, deadline.Token);
     }
 
-    /// <summary>Missing and unconfigured credentials fail during native discovery with safe HTTP rejection.</summary>
+    /// <summary>Missing and unconfigured credentials fail during execution discovery with safe HTTP rejection.</summary>
     /// <param name="missing">Selects an absent bearer header instead of a fresh unknown key.</param>
     [Test]
     [Arguments(false)]
     [Arguments(true)]
-    public async Task AcMcp002NativeDiscoveryRejectsMissingAndUnconfiguredCredentials(bool missing)
+    public async Task AcMcp002DiscoveryRejectsMissingAndUnconfiguredCredentials(bool missing)
     {
         using var deadline = McpCallerDeadline.Create();
         var key = missing ? null : McpCallerProtocol.UnconfiguredCredentialPrefix + Guid.NewGuid().ToString(McpCallerProtocol.GuidFormat);

@@ -2,14 +2,14 @@ using System.Text.Json;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons.Targets;
-/// <summary>Runs SurrealDB's native brute-force and HNSW vector paths over its persistent RocksDB backend.</summary>
-/// <param name = "http">Owned native HTTP client.</param>
-/// <param name = "image">The immutable native server image.</param>
+/// <summary>Runs SurrealDB's execution brute-force and HNSW vector paths over its persistent RocksDB backend.</summary>
+/// <param name = "http">Owned execution HTTP client.</param>
+/// <param name = "image">The immutable execution server image.</param>
 /// <param name = "runId">Unique corpus scope.</param>
 /// <param name = "executionOptions">The required operational Policy.</param>
-/// <param name="serializationOptions">The required native SQL builder reservations.</param>
+/// <param name="serializationOptions">The required execution SQL builder reservations.</param>
 /// <param name="provider">Borrowed clock; defaults to the system provider.</param>
-public sealed class SurrealDbVectorTarget(HttpClient http, string image, string runId, IOptions<NativeComparisonExecutionOptions> executionOptions, IOptions<NativeComparisonSerializationOptions> serializationOptions, TimeProvider? provider = null) : IVectorComparisonTarget
+public sealed class SurrealDbVectorTarget(HttpClient http, string image, string runId, IOptions<ComparisonExecutionOptions> executionOptions, IOptions<ComparisonSerializationOptions> serializationOptions, TimeProvider? provider = null) : IVectorComparisonTarget
 {
     private readonly TimeProvider timeProvider = provider ?? TimeProvider.System;
     private const string SurrealDBCommunityOnePersistentRocksDBNode = "SurrealDB Community; one persistent RocksDB node";
@@ -20,21 +20,21 @@ public sealed class SurrealDbVectorTarget(HttpClient http, string image, string 
     private const int SingleResultCardinality = 1;
     private const string SingleSurrealDBCommunityNodeNoReplicationConfigured = "single SurrealDB Community node; no replication configured";
     private const string PersistentRocksDBPath = "persistent RocksDB path";
-    private const string NativeDEFINETABLEIFNOTEXISTSSCHEMALESSFormatTemplate = "DEFINE TABLE IF NOT EXISTS {0} SCHEMALESS;";
-    private static readonly System.Text.CompositeFormat NativeDEFINETABLEIFNOTEXISTSSCHEMALESSFormat = System.Text.CompositeFormat.Parse(NativeDEFINETABLEIFNOTEXISTSSCHEMALESSFormatTemplate);
+    private const string DEFINETABLEIFNOTEXISTSSCHEMALESSFormatTemplate = "DEFINE TABLE IF NOT EXISTS {0} SCHEMALESS;";
+    private static readonly System.Text.CompositeFormat DEFINETABLEIFNOTEXISTSSCHEMALESSFormat = System.Text.CompositeFormat.Parse(DEFINETABLEIFNOTEXISTSSCHEMALESSFormatTemplate);
     private const int EmptyResultCount = 0;
     private const char VectorRecordPrefix = 'v';
     private const string HTTPSqlRocksDBPersistentBackend = "; HTTP /sql; RocksDB persistent backend";
     private const string SurrealDBProfileIsUnavailable = "SurrealDB profile is unavailable.";
     private const string NoANNIndexSurrealDBBruteForceKNN = "no ANN index; SurrealDB brute-force KNN";
-    private const string SurrealDBSupportsOnlyExactAndNativeHNSWProfiles = "SurrealDB supports only exact and native HNSW profiles.";
-    private const string NativeREMOVEINDEXONTABLEFormatTemplate = "REMOVE INDEX {0} ON TABLE {1};";
-    private static readonly System.Text.CompositeFormat NativeREMOVEINDEXONTABLEFormat = System.Text.CompositeFormat.Parse(NativeREMOVEINDEXONTABLEFormatTemplate);
-    private const string NativeDELETEFROMREMOVETABLEFormatTemplate = "DELETE FROM {0}; REMOVE TABLE {1};";
-    private static readonly System.Text.CompositeFormat NativeDELETEFROMREMOVETABLEFormat = System.Text.CompositeFormat.Parse(NativeDELETEFROMREMOVETABLEFormatTemplate);
-    private readonly IOptions<NativeComparisonExecutionOptions> execution = NativeComparisonExecutionOptions.Require(executionOptions);
-    private NativeComparisonExecutionOptions Policy => execution.Value;
-    private readonly NativeComparisonSerializationOptions serialization = NativeComparisonSerializationOptions.Require(serializationOptions).Value;
+    private const string SurrealDBSupportsOnlyExactAndHNSWProfiles = "SurrealDB supports only exact and execution HNSW profiles.";
+    private const string REMOVEINDEXONTABLEFormatTemplate = "REMOVE INDEX {0} ON TABLE {1};";
+    private static readonly System.Text.CompositeFormat REMOVEINDEXONTABLEFormat = System.Text.CompositeFormat.Parse(REMOVEINDEXONTABLEFormatTemplate);
+    private const string DELETEFROMREMOVETABLEFormatTemplate = "DELETE FROM {0}; REMOVE TABLE {1};";
+    private static readonly System.Text.CompositeFormat DELETEFROMREMOVETABLEFormat = System.Text.CompositeFormat.Parse(DELETEFROMREMOVETABLEFormatTemplate);
+    private readonly IOptions<ComparisonExecutionOptions> execution = ComparisonExecutionOptions.Require(executionOptions);
+    private ComparisonExecutionOptions Policy => execution.Value;
+    private readonly ComparisonSerializationOptions serialization = ComparisonSerializationOptions.Require(serializationOptions).Value;
     private const string RunIdentityFormat = "N";
     private const string Table = "vector_doc";
     private const string InvalidResponse = "SurrealDbInvalidResponse";
@@ -42,21 +42,21 @@ public sealed class SurrealDbVectorTarget(HttpClient http, string image, string 
     private const string DistanceKey = "distance";
     private const string IndexNamePrefix = "keyload_hnsw_";
     private const int HnswEf = 200;
-    private readonly string table = Table + SurrealDbNativeTokens.Token + Guid.Parse(runId).ToString(RunIdentityFormat);
+    private readonly string table = Table + SurrealDbTokens.Token + Guid.Parse(runId).ToString(RunIdentityFormat);
     private readonly string index = IndexNamePrefix + Guid.Parse(runId).ToString(RunIdentityFormat);
     private int corpusCount;
-    private string databaseVersion = SurrealDbNativeTokens.TokenUnverified;
+    private string databaseVersion = SurrealDbTokens.TokenUnverified;
     private bool ownsData;
     private string? readbackIndexDefinition;
-    private const string ReadbackIndexEvidence = "nativeReadbackNumberIndex";
+    private const string ReadbackIndexEvidence = "readbackNumberIndex";
     private bool ownsIndex;
     /// <inheritdoc/>
-    public string Name => SurrealDbNativeTokens.TokenSurrealDB;
+    public string Name => SurrealDbTokens.TokenSurrealDB;
     /// <inheritdoc/>
     public TargetProfile Profile
     {
         get; private set;
-    } = new(SurrealDbNativeTokens.TokenSurrealDB, SurrealDbNativeTokens.TokenUnverified, SurrealDBCommunityOnePersistentRocksDBNode, SingleNodeAcknowledgedWriteCommitDurabilityNotFault, SingleNodeCommittedReads, SurrealDBHTTPSqlJSON, RootBasicAuthentication, image)
+    } = new(SurrealDbTokens.TokenSurrealDB, SurrealDbTokens.TokenUnverified, SurrealDBCommunityOnePersistentRocksDBNode, SingleNodeAcknowledgedWriteCommitDurabilityNotFault, SingleNodeCommittedReads, SurrealDBHTTPSqlJSON, RootBasicAuthentication, image)
     {
         Cluster = new(SingleResultCardinality, SingleResultCardinality, SingleSurrealDBCommunityNodeNoReplicationConfigured, [PersistentRocksDBPath])
     };
@@ -68,7 +68,7 @@ public sealed class SurrealDbVectorTarget(HttpClient http, string image, string 
     {
         ArgumentNullException.ThrowIfNull(documents);
         await VerifyServerAsync(cancellationToken).ConfigureAwait(false);
-        await SurrealDbSqlTransport.ExecuteAsync(http, string.Format(System.Globalization.CultureInfo.InvariantCulture, NativeDEFINETABLEIFNOTEXISTSSCHEMALESSFormat, table), Policy, cancellationToken: cancellationToken, timeProvider: timeProvider).ConfigureAwait(false);
+        await SurrealDbSqlTransport.ExecuteAsync(http, string.Format(System.Globalization.CultureInfo.InvariantCulture, DEFINETABLEIFNOTEXISTSSCHEMALESSFormat, table), Policy, cancellationToken: cancellationToken, timeProvider: timeProvider).ConfigureAwait(false);
         ownsData = true;
         readbackIndexDefinition = await SurrealDbReadbackIndex.CreateAsync(http, table, Policy, token: cancellationToken, timeProvider: timeProvider).ConfigureAwait(false);
         var batch = new List<VectorDocument>(Policy.WriteBatchCapacity);
@@ -77,7 +77,7 @@ public sealed class SurrealDbVectorTarget(HttpClient http, string image, string 
         {
             if (document.Embedding.Length == EmptyResultCount || document.Number < EmptyResultCount || !document.Id.StartsWith(VectorRecordPrefix))
             {
-                throw new InvalidDataException(SurrealDbNativeTokens.TokenSurrealDbInvalidSeedDocument);
+                throw new InvalidDataException(SurrealDbTokens.TokenSurrealDbInvalidSeedDocument);
             }
 
             batch.Add(document);
@@ -123,7 +123,7 @@ public sealed class SurrealDbVectorTarget(HttpClient http, string image, string 
 
         if (profile.IndexKind != VectorIndexKind.Hnsw)
         {
-            throw new NotSupportedException(SurrealDBSupportsOnlyExactAndNativeHNSWProfiles);
+            throw new NotSupportedException(SurrealDBSupportsOnlyExactAndHNSWProfiles);
         }
 
         ownsIndex = true;
@@ -158,12 +158,12 @@ public sealed class SurrealDbVectorTarget(HttpClient http, string image, string 
     {
         var sql = SurrealDbVectorProtocol.ExplainSql(table, query.Span, mode, ProfileIndex, HnswEf, serialization.SurrealDbVectorComponentBuilderCapacity);
         using var response = await SurrealDbSqlTransport.QueryAsync(http, sql, Policy, cancellationToken: cancellationToken, timeProvider: timeProvider).ConfigureAwait(false);
-        var nativePlan = SurrealDbVectorProtocol.SingleResult(response.RootElement);
+        var runtimePlan = SurrealDbVectorProtocol.SingleResult(response.RootElement);
         if (ProfileIndex == VectorIndexKind.Hnsw)
         {
-            SurrealDbVectorPlan.Validate(nativePlan, index, HnswEf, query.Length, mode);
+            SurrealDbVectorPlan.Validate(runtimePlan, index, HnswEf, query.Length, mode);
         }
-        return nativePlan.GetRawText();
+        return runtimePlan.GetRawText();
     }
 
     /// <inheritdoc/>
@@ -189,10 +189,10 @@ public sealed class SurrealDbVectorTarget(HttpClient http, string image, string 
                 using var timeout = new CancellationTokenSource(Policy.CleanupTimeout, timeProvider);
                 if (ownsIndex)
                 {
-                    await SurrealDbSqlTransport.ExecuteAsync(http, string.Format(System.Globalization.CultureInfo.InvariantCulture, NativeREMOVEINDEXONTABLEFormat, index, table), Policy, cancellationToken: timeout.Token, timeProvider: timeProvider).ConfigureAwait(false);
+                    await SurrealDbSqlTransport.ExecuteAsync(http, string.Format(System.Globalization.CultureInfo.InvariantCulture, REMOVEINDEXONTABLEFormat, index, table), Policy, cancellationToken: timeout.Token, timeProvider: timeProvider).ConfigureAwait(false);
                 }
 
-                await SurrealDbSqlTransport.ExecuteAsync(http, string.Format(System.Globalization.CultureInfo.InvariantCulture, NativeDELETEFROMREMOVETABLEFormat, table, table), Policy, cancellationToken: timeout.Token, timeProvider: timeProvider).ConfigureAwait(false);
+                await SurrealDbSqlTransport.ExecuteAsync(http, string.Format(System.Globalization.CultureInfo.InvariantCulture, DELETEFROMREMOVETABLEFormat, table, table), Policy, cancellationToken: timeout.Token, timeProvider: timeProvider).ConfigureAwait(false);
             }
         }
         finally

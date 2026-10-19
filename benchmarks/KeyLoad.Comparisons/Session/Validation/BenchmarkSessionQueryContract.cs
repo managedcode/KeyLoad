@@ -1,6 +1,6 @@
 namespace KeyLoad.Comparisons;
 
-/// <summary>Common indexed lookup plus stable numeric predicates and complete-body oracle for every native adapter.</summary>
+/// <summary>Common indexed lookup plus stable numeric predicates and complete-body oracle for every execution adapter.</summary>
 public static class BenchmarkSessionQueryContract
 {
     private static readonly DocumentComparisonCorpus Corpus = new(BenchmarkSessionLimits.NoObservedItems, BenchmarkSessionLimits.Clients);
@@ -17,7 +17,7 @@ public static class BenchmarkSessionQueryContract
     {
         if (!BenchmarkDataset.SameDocument(actual, expected))
         {
-            throw new ComparisonFailureException(BenchmarkSessionProtocol.SessionNativeQueryResultMismatch);
+            throw new ComparisonFailureException(BenchmarkSessionProtocol.SessionQueryResultMismatch);
         }
     }
 }

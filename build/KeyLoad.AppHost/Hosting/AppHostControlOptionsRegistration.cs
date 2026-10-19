@@ -1,4 +1,4 @@
-using KeyLoad.AppHost.Features.ClusterReplication;
+using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.AppHost.Features.StorageRecovery;
 using KeyLoad.AppHost.Features.TestInfrastructure;
 using Microsoft.Extensions.Configuration;
@@ -6,7 +6,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.AppHost.Hosting;
 
-/// <summary>Runs strict control parsers inside the single native startup options factory.</summary>
+/// <summary>Runs strict control parsers inside the single execution startup options factory.</summary>
 [ConfigurationBinding]
 internal static class AppHostControlOptionsRegistration
 {

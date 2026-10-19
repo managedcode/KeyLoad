@@ -13,10 +13,10 @@ internal static class LocalInboxProcessingRecoveryContinuation
     private const string StaleDetail = "The delivery lease is stale.";
 
     internal static async Task<LocalInboxProcessingRecoveryState> RunAsync(DatabaseEngine database, ZoneTreeStore store,
-        Command<DatabaseCommand> original, Result<object> result, (byte[] Key, byte[] Value)[] originalRows, EntityRefLifetimeV1 lifetime)
+        Command<DatabaseCommand> original, Result<object> result, (byte[] Key, byte[] Value)[] originalRows, EntityRefLifetime lifetime)
     {
         var history = new List<(Command<DatabaseCommand>, Result<object>)> { (original, result) };
-        var request = NativeSerialization.Deserialize<ProcessingRequest>(original.Value!.Input.Span, NativeValidationProfile.PublicInputElements);
+        var request = OrleansSerialization.Deserialize<ProcessingRequest>(original.Value!.Input.Span, ValidationProfile.PublicInputElements);
         var duplicate = Operation(database, original, request with
         {
             CommandId = Guid.NewGuid()

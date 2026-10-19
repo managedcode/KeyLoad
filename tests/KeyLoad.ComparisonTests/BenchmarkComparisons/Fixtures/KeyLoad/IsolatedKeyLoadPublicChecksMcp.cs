@@ -4,7 +4,7 @@ using ModelContextProtocol.Client;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
-/// <summary>Owns native official MCP APIs and their actual Aspire HTTP connection without implementing transport semantics.</summary>
+/// <summary>Owns execution official MCP APIs and their actual Aspire HTTP connection without implementing transport semantics.</summary>
 internal sealed class IsolatedKeyLoadPublicChecksMcp : IAsyncDisposable
 {
     private const string Endpoint = "/mcp";
@@ -74,8 +74,8 @@ internal sealed class IsolatedKeyLoadPublicChecksMcp : IAsyncDisposable
 
     private async Task<ModelContextProtocol.Protocol.CallToolResult> CallAsync(string operation, object request, CancellationToken token)
     {
-        var native = client ?? throw new InvalidOperationException("The actual MCP client is not connected.");
-        return await native.CallToolAsync(GatewayInvoke, new Dictionary<string, object?>(StringComparer.Ordinal)
+        var execution = client ?? throw new InvalidOperationException("The actual MCP client is not connected.");
+        return await execution.CallToolAsync(GatewayInvoke, new Dictionary<string, object?>(StringComparer.Ordinal)
         {
             [ToolId] = operation,
             [Arguments] = new Dictionary<string, object?>(StringComparer.Ordinal)
@@ -86,23 +86,23 @@ internal sealed class IsolatedKeyLoadPublicChecksMcp : IAsyncDisposable
             cancellationToken: token);
     }
 
-    /// <summary>Closes every owned native resource, with bounded SDK disposal even on failure.</summary>
+    /// <summary>Closes every owned execution resource, with bounded SDK disposal even on failure.</summary>
     public async ValueTask DisposeAsync()
     {
         try
         {
-            if (client is { } native)
+            if (client is { } execution)
             {
-                await CloseAsync(native.DisposeAsync());
+                await CloseAsync(execution.DisposeAsync());
             }
         }
         finally
         {
             try
             {
-                if (transport is { } nativeTransport)
+                if (transport is { } runtimeTransport)
                 {
-                    await CloseAsync(nativeTransport.DisposeAsync());
+                    await CloseAsync(runtimeTransport.DisposeAsync());
                 }
             }
             finally
@@ -117,7 +117,7 @@ internal sealed class IsolatedKeyLoadPublicChecksMcp : IAsyncDisposable
         var cleanup = pending.AsTask();
         try
         {
-            await cleanup.WaitAsync(NativeExecutionPolicyFixture.Harness().Value.KeyLoadMcpCleanupTimeout, TimeProvider.System);
+            await cleanup.WaitAsync(ExecutionPolicyFixture.Harness().Value.KeyLoadMcpCleanupTimeout, TimeProvider.System);
         }
         catch (Exception)
         {

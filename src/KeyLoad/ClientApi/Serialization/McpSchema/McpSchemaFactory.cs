@@ -4,7 +4,7 @@ using System.Text.Json.Schema;
 
 namespace KeyLoad.Server;
 
-/// <summary>Native canonical metadata projection and exact version-one wrapper schemas.</summary>
+/// <summary>Execution canonical metadata projection and exact version-one wrapper schemas.</summary>
 internal static class McpSchemaFactory
 {
     private static readonly JsonSerializerOptions Projection = McpSchemaProjection.Create();

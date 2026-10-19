@@ -5,7 +5,7 @@ namespace KeyLoad.UnitTests.Features.GraphTraversal;
 internal sealed class GraphStorageMutationReferenceTests
 {
     [Test]
-    public async Task SeededMutationsAndRetriesMatchIndependentAdjacencyStateBeforeAndAfterNativeReopen()
+    public async Task SeededMutationsAndRetriesMatchIndependentAdjacencyStateBeforeAndAfterReopen()
     {
         using var database = new TestDatabase();
         GraphStorageReferenceFixture.Configure(database);

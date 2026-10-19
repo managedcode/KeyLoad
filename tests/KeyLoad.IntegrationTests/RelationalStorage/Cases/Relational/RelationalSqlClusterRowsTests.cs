@@ -11,7 +11,7 @@ namespace KeyLoad.IntegrationTests.Features.RelationalStorage;
 internal sealed class RelationalSqlClusterRowsTests(ClusterFixture fixture)
 {
     [Test]
-    public async Task AcAisql004SqlTypedPutRetriesAndPatchShareNativeReceiptsAndIndexedSelect()
+    public async Task AcAisql004SqlTypedPutRetriesAndPatchShareReceiptsAndIndexedSelect()
     {
         using var deadline = McpCallerDeadline.Create();
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
@@ -22,9 +22,9 @@ internal sealed class RelationalSqlClusterRowsTests(ClusterFixture fixture)
             RelationalSqlClusterTokens.FirstRow));
         var sql = SqlClusterProtocol.Call(scenario.Partition, McpCallerTools.DocumentsCommit, command);
         var first = await SqlClusterProtocol.SdkAsync<CommitReceipt>(sdk, sql, deadline.Token);
-        var nativeRetry = await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(command, deadline.Token));
+        var runtimeRetry = await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(command, deadline.Token));
         var sqlRetry = await SqlClusterProtocol.McpAsync<CommitReceipt>(mcp, sql, deadline.Token);
-        await SqlClusterProtocol.EqualAsync(first, nativeRetry);
+        await SqlClusterProtocol.EqualAsync(first, runtimeRetry);
         await SqlClusterProtocol.EqualAsync(first, sqlRetry);
         await Assert.That(first.CommandId).IsEqualTo(command.CommandId);
         await Assert.That(first.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
@@ -67,19 +67,19 @@ internal sealed class RelationalSqlClusterRowsTests(ClusterFixture fixture)
     {
         var request = new SqlOperationRequest(scenario.Partition, SqlClusterProtocol.TableSelect);
         var sql = await SqlClusterProtocol.SdkAsync<QueryPage>(sdk, request, cancellationToken);
-        var native = await McpCallerAssertions.SdkSuccessAsync(await sdk.QueryAsync(
+        var execution = await McpCallerAssertions.SdkSuccessAsync(await sdk.QueryAsync(
             new(scenario.Partition, SqlClusterProtocol.TableSelect), cancellationToken));
         var official = await SqlClusterProtocol.McpAsync<QueryPage>(mcp, request, cancellationToken);
         await Assert.That(sql.AccessPath).IsEqualTo(SqlClusterProtocol.IndexPath);
         await Assert.That(sql.Rows).HasSingleItem();
         await Assert.That(sql.Rows[0].EntityId).IsEqualTo(RelationalSqlClusterTokens.FirstId);
         await Assert.That(sql.Rows[0].Revision).IsEqualTo(RelationalSqlClusterTokens.PatchedRevision);
-        await SqlClusterProtocol.EqualAsync(sql.Rows, native.Rows);
+        await SqlClusterProtocol.EqualAsync(sql.Rows, execution.Rows);
         await SqlClusterProtocol.EqualAsync(sql.Rows, official.Rows);
-        await Assert.That(native.AccessPath).IsEqualTo(sql.AccessPath);
+        await Assert.That(execution.AccessPath).IsEqualTo(sql.AccessPath);
         await Assert.That(official.AccessPath).IsEqualTo(sql.AccessPath);
         await Assert.That(sql.CutPosition).IsGreaterThanOrEqualTo(committedPosition);
-        await Assert.That(native.CutPosition).IsGreaterThanOrEqualTo(committedPosition);
+        await Assert.That(execution.CutPosition).IsGreaterThanOrEqualTo(committedPosition);
         await Assert.That(official.CutPosition).IsGreaterThanOrEqualTo(committedPosition);
     }
 }

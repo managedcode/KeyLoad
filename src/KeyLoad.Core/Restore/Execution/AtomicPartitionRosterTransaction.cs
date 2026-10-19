@@ -77,10 +77,10 @@ internal sealed partial class AtomicPartitionRosterTransaction : IAtomicTransact
 
     public void ValidateCommit() => inner.ValidateCommit();
 
-    void IResourceEffectObservation.ObserveLifetime(ResourceLifetimeV1 lifetime)
+    void IResourceEffectObservation.ObserveLifetime(ResourceLifetime lifetime)
         => EffectAdmission.ObserveLifetime(lifetime);
 
-    void IResourceEffectObservation.ObserveResource(PartitionRef partition, ResourceLifetimeV1 lifetime)
+    void IResourceEffectObservation.ObserveResource(PartitionRef partition, ResourceLifetime lifetime)
         => EffectAdmission.Observe(partition, lifetime);
 
     internal void PersistCandidates()
@@ -93,11 +93,11 @@ internal sealed partial class AtomicPartitionRosterTransaction : IAtomicTransact
         var appliedBytes = inner.ReadOwnedValue(KeySpace.AppliedBytes);
         var currentAppliedIndex = appliedBytes is null
             ? AtomicPartitionRosterProtocol.NoCanonicalSequence
-            : NativeSerialization.Deserialize<long>(appliedBytes);
+            : OrleansSerialization.Deserialize<long>(appliedBytes);
         foreach (var candidate in candidates)
         {
             var existingBytes = inner.ReadOwnedValue(candidate.Value);
-            var existing = existingBytes is null ? null : NativeSerialization.Deserialize<AtomicPartitionCatalogEntryV1>(existingBytes);
+            var existing = existingBytes is null ? null : OrleansSerialization.Deserialize<AtomicPartitionCatalogEntry>(existingBytes);
             if (existing is not null)
             {
                 AtomicPartitionRosterEntryValidation.Validate(existing, candidate.Key, storePosition,
@@ -112,9 +112,9 @@ internal sealed partial class AtomicPartitionRosterTransaction : IAtomicTransact
 
             var firstSeenStorePosition = appliedIndex > AtomicPartitionRosterProtocol.NoCanonicalSequence
                 ? AtomicPartitionRosterProtocol.NoStorePosition : storePosition;
-            var entry = new AtomicPartitionCatalogEntryV1(AtomicPartitionRosterProtocol.CurrentVersion,
+            var entry = new AtomicPartitionCatalogEntry(AtomicPartitionRosterProtocol.CurrentVersion,
                 candidate.Key, firstSeenStorePosition, appliedIndex);
-            var bytes = NativeSerialization.Serialize(entry);
+            var bytes = OrleansSerialization.Serialize(entry);
             if (bytes.Length > limits.Value.MaxBatchBytes)
             {
                 throw Errors.Fail(ErrorCode.ResourceExhausted, AtomicPartitionRosterProtocol.CandidateBudgetExhausted);

@@ -7,8 +7,8 @@ internal static class PartitionQueryPublicExecution
 {
     private const string InvalidOwner = "The server physical owner identity is invalid.";
 
-    internal static PartitionQueryPageV1 Execute(QueryEngine engine, string principalId,
-        PartitionQueryRequestV1 request, PhysicalShardRecord expectedOwner,
+    internal static PartitionQueryPage Execute(QueryEngine engine, string principalId,
+        PartitionQueryRequest request, PhysicalShardRecord expectedOwner,
         TimeProvider? timeProvider, CancellationToken cancellationToken, IResourceLifetimeWorkBinding? binding = null)
     {
         ArgumentNullException.ThrowIfNull(engine);

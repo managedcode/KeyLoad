@@ -10,7 +10,7 @@ namespace KeyLoad.UnitTests.Features.Messaging;
 internal sealed class DueCoordinationOptionsTests
 {
     [Test]
-    public async Task CentralBindingPublishesConfiguredNativeOptionsAfterStartupValidation()
+    public async Task CentralBindingPublishesConfiguredOptionsAfterStartupValidation()
     {
         using var host = CreateHost(new Dictionary<string, string?>
         {

@@ -7,5 +7,5 @@ namespace KeyLoad;
 /// <param name="Maximum">Maximum sample value, or null when empty.</param>
 /// <param name="Average">Sum divided by raw Count, or null when empty.</param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.SampleAggregate)]
+[Orleans.Alias(ContractAliases.SampleAggregate)]
 public sealed record SampleAggregate([property: Orleans.Id(0)] long Count, [property: Orleans.Id(1)] double Sum, [property: Orleans.Id(2)] double? Minimum, [property: Orleans.Id(3)] double? Maximum, [property: Orleans.Id(4)] double? Average);

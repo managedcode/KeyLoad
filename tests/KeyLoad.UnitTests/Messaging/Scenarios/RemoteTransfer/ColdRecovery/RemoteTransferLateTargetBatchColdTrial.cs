@@ -1,5 +1,7 @@
 using KeyLoad.Core;
-using KeyLoad.Core.Features.ClusterRouting.Contracts;
+using KeyLoad.Core.Features.CommandOutcomes.Contracts;
+using KeyLoad.Core.Features.RuntimeJournaling.Contracts;
+using KeyLoad.Core.Features.StoragePartitions.Contracts;
 
 namespace KeyLoad.UnitTests.Features.Messaging;
 
@@ -12,7 +14,7 @@ internal static class RemoteTransferLateTargetBatchColdTrial
     internal const string TransferPayload = "{\"atomic\":true}";
     internal const string DerivedPayload = "{\"derived\":true}";
     internal const string Headers = "{}";
-    private const string Missing = "The original native queue counter is missing.";
+    private const string Missing = "The original execution queue counter is missing.";
 
     internal static async Task RunAsync()
     {
@@ -29,7 +31,7 @@ internal static class RemoteTransferLateTargetBatchColdTrial
         var failure = fixture.Apply(OperationKind.Batch, failedRequest);
         await Assert.That(Errors.Code(failure.Problem)).IsEqualTo(ErrorCode.Conflict);
         var state = new RemoteTransferLateTargetBatchState(transfer, pending, failedRequest, failure,
-            RemoteTransferAttemptColdNative.Outcome(fixture, failedRequest.CommandId, fixture.DestinationPartition), counters);
+            RemoteTransferAttemptCold.Outcome(fixture, failedRequest.CommandId, fixture.DestinationPartition), counters);
         await RemoteTransferLateTargetBatchColdAssertions.DeniedAsync(fixture, state);
         fixture.Reopen();
         await RemoteTransferLateTargetBatchColdAssertions.DeniedAsync(fixture, state);

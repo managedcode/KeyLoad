@@ -21,7 +21,7 @@
     <CollectFromChildProcesses>True</CollectFromChildProcesses>
     <EnableDynamicManagedInstrumentation>True</EnableDynamicManagedInstrumentation>
     <EnableStaticManagedInstrumentation>True</EnableStaticManagedInstrumentation>
-    <EnableDynamicNativeInstrumentation>False</EnableDynamicNativeInstrumentation>
-    <EnableStaticNativeInstrumentation>False</EnableStaticNativeInstrumentation>
+    <EnableDynamicInstrumentation>False</EnableDynamicInstrumentation>
+    <EnableStaticInstrumentation>False</EnableStaticInstrumentation>
   </CodeCoverage>
 </Configuration>

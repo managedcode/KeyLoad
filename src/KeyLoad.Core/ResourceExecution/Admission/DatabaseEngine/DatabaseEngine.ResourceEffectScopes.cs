@@ -1,4 +1,3 @@
-using KeyLoad.Core.Features.BlobStorage;
 using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Core.Features.Search;
 using KeyLoad.Storage;
@@ -11,10 +10,6 @@ public sealed partial class DatabaseEngine
     private void ObserveAdditionalResourceEffects(IKeyValueView view, PrincipalRecord principal,
         Command<DatabaseCommand> operation)
     {
-        if (BlobStorageOperations.Handles(operation.Value!.Kind))
-        {
-            return;
-        }
         switch (operation.Value!.Kind)
         {
             case OperationKind.Batch:
@@ -46,7 +41,7 @@ public sealed partial class DatabaseEngine
                 return;
             default:
                 if (ObserveCatalogResourceEffect(view, operation) || ObserveProjectionResourceEffects(view, principal, operation)
-                    || IsResourceFreeNativeOperation(operation.Value!.Kind))
+                    || IsResourceFreeOperation(operation.Value!.Kind))
                 {
                     return;
                 }

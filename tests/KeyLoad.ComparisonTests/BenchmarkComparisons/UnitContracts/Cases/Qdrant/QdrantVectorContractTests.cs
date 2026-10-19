@@ -15,7 +15,7 @@ internal sealed class QdrantVectorContractTests
     private const string PayloadFieldKey = "key";
 
     [Test]
-    public async Task AcVq002ExactAndHnswNativeRequestsCarryActualMethodAndServerPredicate()
+    public async Task AcVq002ExactAndHnswRequestsCarryActualMethodAndServerPredicate()
     {
         var query = new float[128];
         using var exact = JsonSerializer.SerializeToDocument(QdrantVectorQueries.Request(query, 10,
@@ -39,11 +39,11 @@ internal sealed class QdrantVectorContractTests
     }
 
     [Test]
-    public async Task AcVq001NativeReadbackValidatesIdentityFilterMetadataAndObservedVectorBytes()
+    public async Task AcVq001ReadbackValidatesIdentityFilterMetadataAndObservedVectorBytes()
     {
-        var corpus = new VectorComparisonCorpus(VectorComparisonProfile.Parse("vector-100k-exact-filtered-c16"), UnitBenchmarkOptions.Native());
+        var corpus = new VectorComparisonCorpus(VectorComparisonProfile.Parse("vector-100k-exact-filtered-c16"), UnitBenchmarkOptions.Execution());
         var input = corpus.Create(100);
-        using var native = JsonSerializer.SerializeToDocument(new
+        using var execution = JsonSerializer.SerializeToDocument(new
         {
             id = 101,
             vector = input.Embedding.ToArray(),
@@ -56,7 +56,7 @@ internal sealed class QdrantVectorContractTests
                 mixed = true
             }
         });
-        var actual = QdrantVectorReadback.Parse(native.RootElement);
+        var actual = QdrantVectorReadback.Parse(execution.RootElement);
         await Assert.That(actual.Id).IsEqualTo("v000000100");
         await Assert.That(actual.Number).IsEqualTo(100);
         await Assert.That(actual.VectorSha256).IsEqualTo(VectorComparisonCorpus.HashVector(input.Embedding.Span));
@@ -77,20 +77,20 @@ internal sealed class QdrantVectorContractTests
     }
 
     [Test]
-    public async Task AcVq002NativeIndexAdmissionRequiresCompleteHnswAndActualCosineSettings()
+    public async Task AcVq002IndexAdmissionRequiresCompleteHnswAndActualCosineSettings()
     {
         var profile = VectorComparisonProfile.Parse("vector-100k-hnsw-plain-c16");
-        using var complete = NativeState(100_000, 16, "Cosine");
-        using var incomplete = NativeState(99_999, 16, "Cosine");
-        using var exact = NativeState(100_000, 0, "Cosine");
-        using var wrongMetric = NativeState(100_000, 16, "Dot");
+        using var complete = RuntimeState(100_000, 16, "Cosine");
+        using var incomplete = RuntimeState(99_999, 16, "Cosine");
+        using var exact = RuntimeState(100_000, 0, "Cosine");
+        using var wrongMetric = RuntimeState(100_000, 16, "Dot");
         await Assert.That(QdrantVectorIndexValidation.Ready(complete.RootElement, profile)).IsTrue();
         await Assert.That(QdrantVectorIndexValidation.Ready(incomplete.RootElement, profile)).IsFalse();
         Assert.ThrowsExactly<ComparisonFailureException>(() => QdrantVectorIndexValidation.Ready(exact.RootElement, profile));
         Assert.ThrowsExactly<ComparisonFailureException>(() => QdrantVectorIndexValidation.Ready(wrongMetric.RootElement, profile));
     }
 
-    private static JsonDocument NativeState(int indexed, int m, string metric)
+    private static JsonDocument RuntimeState(int indexed, int m, string metric)
         => JsonSerializer.SerializeToDocument(new
         {
             status = "green",

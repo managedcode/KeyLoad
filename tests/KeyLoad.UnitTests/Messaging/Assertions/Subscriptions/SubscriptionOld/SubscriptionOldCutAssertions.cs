@@ -36,7 +36,7 @@ internal static class SubscriptionOldCutAssertions
     internal static async Task ConservedAsync(ZoneTreeStore store, string[] bytes, long position, StoreIdentity identity)
     {
         await Assert.That(QueueWholeFlowStorage.Bytes(store)).IsEquivalentTo(bytes, CollectionOrdering.Matching);
-        await NativeReadCutStoreStateAssertions.AssertIdentityAndPositionAsync(store, identity, position);
+        await ReadCutStoreStateAssertions.AssertIdentityAndPositionAsync(store, identity, position);
     }
     internal static async Task ReceiptAsync(CommitReceipt receipt, Guid id, ZoneTreeStore store, PartitionRef partition,
         long position, params MutationReceipt[] mutations)

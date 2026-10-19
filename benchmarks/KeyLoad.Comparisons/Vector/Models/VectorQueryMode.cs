@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace KeyLoad.Comparisons;
 
-/// <summary>The native vector query workload applied by a vector profile.</summary>
+/// <summary>The execution vector query workload applied by a vector profile.</summary>
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum VectorQueryMode
 {

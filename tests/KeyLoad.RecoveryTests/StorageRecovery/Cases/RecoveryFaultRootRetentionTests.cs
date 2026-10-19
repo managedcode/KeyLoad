@@ -4,7 +4,7 @@ namespace KeyLoad.RecoveryTests.Features.StorageRecovery;
 internal sealed class RecoveryFaultRootRetentionTests
 {
     [Test]
-    public async Task ActualFailedNativeAppendRetainsDamagedRootThenExactUndoHealthyReplayAndCold()
+    public async Task ActualFailedAppendRetainsDamagedRootThenExactUndoHealthyReplayAndCold()
     {
         var token = TestContext.Current!.Execution.CancellationToken;
         using var admission = await StorageTrialLease.AcquireAsync(token);

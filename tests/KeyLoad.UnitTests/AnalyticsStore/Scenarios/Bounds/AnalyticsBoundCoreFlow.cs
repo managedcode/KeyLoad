@@ -1,7 +1,7 @@
 using KeyLoad.Clustering;
 using KeyLoad.Core.Features.ResourceExecution;
-using D = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreNativeTestData;
-using O = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreNativeTestOperations;
+using D = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreTestData;
+using O = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreTestOperations;
 
 namespace KeyLoad.UnitTests.Features.AnalyticsStore;
 
@@ -10,9 +10,9 @@ internal static class AnalyticsBoundCoreFlow
     internal static Task HealthyAsync(CancellationToken token)
         => AnalyticsBoundCoreOwner.RunAsync(HealthyAsync, token);
 
-    internal static Task HealthyAsync(TestDatabase fixture, NativeRequestWorkOwner owner, CancellationToken token)
+    internal static Task HealthyAsync(TestDatabase fixture, RequestWorkOwner owner, CancellationToken token)
         => AnalyticsBoundCoreOwner.LeaseAsync(fixture, owner, async (lease, ledger, work) =>
-            await AnalyticsBoundsNative.UnchangedAsync(fixture, async () =>
+            await RuntimeAnalyticsBounds.UnchangedAsync(fixture, async () =>
             {
                 var expected = new AnalyticsEventsPage([new(D.First, D.From.AddMinutes(1),
                     System.Collections.Immutable.ImmutableDictionary<string, string>.Empty.Add(D.Kind, D.Alpha),
@@ -23,14 +23,14 @@ internal static class AnalyticsBoundCoreFlow
                     ?? throw new InvalidOperationException("The actual analytics lifetime is absent.");
                 await Assert.That(lease.Dependencies.SetEquals([lifetime])).IsTrue();
                 await Assert.That(ledger.RetainedEntries).IsEqualTo(1);
-                await Assert.That(ledger.RetainedEncodedBytes).IsEqualTo((long)NativeSerialization.Measure(lifetime));
+                await Assert.That(ledger.RetainedEncodedBytes).IsEqualTo((long)OrleansSerialization.Measure(lifetime));
                 var before = work.ReadBytes;
                 var snapshot = fixture.Database.CaptureAnalyticsAggregateBound(D.Root, D.Query(fixture), work, lease);
                 await Assert.That(ReferenceEquals(snapshot.Work, work)).IsTrue();
                 await Assert.That(work.ReadBytes).IsGreaterThan(before);
-                await AnalyticsStoreNativeTestProjection.RunAsync(snapshot, new([D.Row(D.Alpha, 1, 2, 2, 2, 2)], 1), token);
+                await AnalyticsStoreTestProjection.RunAsync(snapshot, new([D.Row(D.Alpha, 1, 2, 2, 2, 2)], 1), token);
                 fixture.Database.ValidateAnalyticsAggregatePublication(snapshot);
                 await Assert.That(ledger.RetainedEntries).IsEqualTo(1);
-                await Assert.That(ledger.RetainedEncodedBytes).IsEqualTo((long)NativeSerialization.Measure(lifetime));
+                await Assert.That(ledger.RetainedEncodedBytes).IsEqualTo((long)OrleansSerialization.Measure(lifetime));
             }), token);
 }

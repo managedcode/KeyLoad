@@ -19,7 +19,7 @@ internal static class QueueDeadLetterSelectedHistory
                 state.Lane.Partition, QueueDeadLetterSelectedProtocol.Administrator, saved.Operation.CommandId)))!;
             if (saved.Operation.Value!.Kind == OperationKind.Receive)
             {
-                await NativeReplayResultAssertions.Same<ReceiveResult>(retained.Result, saved.Result);
+                await ReplayResultAssertions.Same<ReceiveResult>(retained.Result, saved.Result);
                 var stale = database.Apply(saved.Operation);
                 await Assert.That(Errors.Code(stale.Problem)).IsEqualTo(ErrorCode.StaleLease);
 
@@ -27,8 +27,8 @@ internal static class QueueDeadLetterSelectedHistory
             }
             else
             {
-                await NativeReplayResultAssertions.Same<CommitReceipt>(retained.Result, saved.Result);
-                await NativeReplayResultAssertions.Same<CommitReceipt>(database.Apply(saved.Operation), saved.Result);
+                await ReplayResultAssertions.Same<CommitReceipt>(retained.Result, saved.Result);
+                await ReplayResultAssertions.Same<CommitReceipt>(database.Apply(saved.Operation), saved.Result);
             }
         }
         await Assert.That(store.Position).IsEqualTo(position);

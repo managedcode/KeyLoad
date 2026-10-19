@@ -37,7 +37,7 @@ internal static class CommandIdempotencyCrashData
         const int IndexEmptyCount = 0;
         const int ExpectedRevisionEmptyCount = 0;
 
-        var command = NativeSerialization.Deserialize<CommandRequest>(operation.Value!.Input.Span, NativeValidationProfile.PublicInputElements);
+        var command = OrleansSerialization.Deserialize<CommandRequest>(operation.Value!.Input.Span, ValidationProfile.PublicInputElements);
         var changed = command.Mutations.SetItem(IndexEmptyCount,
             new PutDocument(CommandIdempotencyCrashContract.Collection, CommandIdempotencyCrashContract.DocumentId, CommandIdempotencyCrashContract.ChangedDocumentJson, ExpectedRevisionEmptyCount));
         var payload = JsonSerializer.Serialize(command with
@@ -63,7 +63,7 @@ internal static class CommandIdempotencyCrashData
         const int BytesLengthEmptyCount = 0;
         const string SaveEvidenceAsyncMessageText = "Command restart evidence exceeded its fixed bound.";
 
-        var bytes = NativeSerialization.Serialize(value);
+        var bytes = OrleansSerialization.Serialize(value);
         if (bytes.Length is <= BytesLengthEmptyCount or > CommandIdempotencyCrashContract.EvidenceMaximumBytes)
         {
             throw new InvalidOperationException(SaveEvidenceAsyncMessageText);
@@ -81,7 +81,7 @@ internal static class CommandIdempotencyCrashData
         {
             throw new InvalidOperationException(ReadEvidenceAsyncMessageText);
         }
-        return NativeSerialization.Deserialize<T>(await File.ReadAllBytesAsync(path, cancellationToken));
+        return OrleansSerialization.Deserialize<T>(await File.ReadAllBytesAsync(path, cancellationToken));
     }
 
     internal static EntityRef ExpectedDocumentReference(DatabaseEngine database, string id)

@@ -1,5 +1,5 @@
 name: Functional CLUSTER heavy-load setup
-description: Build the real native functional cluster tests; Aspire launches server projects and membership storage.
+description: Build the real execution functional cluster tests; Aspire launches server projects and membership storage.
 runs:
   using: composite
   steps:

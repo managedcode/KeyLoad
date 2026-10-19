@@ -3,11 +3,11 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Clustering;
 
-/// <summary>Owns one original durable-job invocation and its existing native child settlement.</summary>
+/// <summary>Owns one original durable-job invocation and its existing execution child settlement.</summary>
 internal static class AnnProjectionJobOperation
 {
     internal static async Task<T> RunAsync<T>(IServiceProvider services, IOptions<DatabaseLimits> limits,
-        Func<NativeCapabilityWorkLifetime, Task<T>> execute, CancellationToken token)
+        Func<CapabilityWorkLifetime, Task<T>> execute, CancellationToken token)
     {
         T result = default!;
         await RunAsync(services, limits, async binding =>
@@ -18,22 +18,22 @@ internal static class AnnProjectionJobOperation
     }
 
     internal static async Task RunAsync(IServiceProvider services, IOptions<DatabaseLimits> limits,
-        Func<NativeCapabilityWorkLifetime, Task> execute, CancellationToken token)
+        Func<CapabilityWorkLifetime, Task> execute, CancellationToken token)
     {
-        var owner = services.GetRequiredService<Func<NativeRequestWorkOwner>>()();
-        await using var lifetime = NativeCapabilityWorkLifetime.Acquire(owner, Guid.NewGuid(),
-            NativeRequestWorkKind.RequestProducer, limits, token)
+        var owner = services.GetRequiredService<Func<RequestWorkOwner>>()();
+        await using var lifetime = CapabilityWorkLifetime.Acquire(owner, Guid.NewGuid(),
+            RequestWorkKind.RequestProducer, limits, token)
             ?? throw Errors.Fail(ErrorCode.OwnershipLost, AnnProjectionJobProtocol.Invalid);
         try
         {
             await execute(lifetime).ConfigureAwait(true);
         }
-        catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        catch (Exception failure) when (CqrsBoundaryErrors.IsNonFatal(failure))
         {
             lifetime.PrimaryError = failure;
             throw;
         }
-        catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        catch (Exception failure) when (!CqrsBoundaryErrors.IsNonFatal(failure))
         {
             lifetime.PrimaryError = failure;
             throw;

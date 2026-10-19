@@ -5,7 +5,7 @@ using ModelContextProtocol.Protocol;
 
 namespace KeyLoad.UnitTests.Features.ClientApi;
 
-/// <summary>AC-MCPGW-007: native resource and prompt replies have one exact bounded static guide.</summary>
+/// <summary>AC-MCPGW-007: execution resource and prompt replies have one exact bounded static guide.</summary>
 internal sealed class McpAgentGuideContractTests
 {
     private const int MaximumBytes = 8192;
@@ -15,7 +15,7 @@ internal sealed class McpAgentGuideContractTests
     private const string UnexpectedArgument = "unexpected";
 
     [Test]
-    public async Task ResourceAndPromptReturnFreshNativeObjectsWithIdenticalContent()
+    public async Task ResourceAndPromptReturnFreshObjectsWithIdenticalContent()
     {
         var resourceList = McpAgentGuideQuery.ListResources(null, UnitMcpOptions.Execution(), CancellationToken.None);
         var promptList = McpAgentGuideQuery.ListPrompts(null, UnitMcpOptions.Execution(), CancellationToken.None);

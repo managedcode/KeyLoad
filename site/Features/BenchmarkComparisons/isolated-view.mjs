@@ -2,8 +2,8 @@ import { metrics } from './measurements.mjs';
 import { ISOLATED, artifactUrl, runUrl } from './isolated-contracts.mjs';
 
 const STATUS = Object.freeze({ measured: 'Measured', unsupported: 'Unsupported scenario',
-  unsupportedTopology: 'Unsupported native topology', failed: 'Benchmark failed · no data' });
-const HEADINGS = Object.freeze(['Engine', 'Native nodes', 'Status', 'Selected metric', 'Attempts', 'Successes', 'Failures', 'GitHub run']);
+  unsupportedTopology: 'Unsupported execution topology', failed: 'Benchmark failed · no data' });
+const HEADINGS = Object.freeze(['Engine', 'Execution nodes', 'Status', 'Selected metric', 'Attempts', 'Successes', 'Failures', 'GitHub run']);
 const FORMAT = new Intl.NumberFormat('en', { maximumFractionDigits: 3 });
 
 function element(document, tag, text) {
@@ -24,7 +24,7 @@ const display = (value, metric) => Number.isFinite(value) ? FORMAT.format(value)
 function renderChart(document, rows, metric) {
   const list = element(document, 'ul');
   list.className = 'isolated-chart';
-  list.setAttribute('aria-label', metric.title + ' by engine at the selected native node count');
+  list.setAttribute('aria-label', metric.title + ' by engine at the selected execution node count');
   const maximum = Math.max(1, ...rows.map(row => row.value).filter(Number.isFinite));
   for (const row of rows) {
     const item = element(document, 'li', row.name + ' · ' + display(row.value, metric));
@@ -50,7 +50,7 @@ function renderEvidence(document, worker, cohort) {
 
 function renderTable(document, rows, metric, cohort) {
   const table = element(document, 'table');
-  table.append(element(document, 'caption', metric.title + ' · ' + metric.direction + ' · one native node count'));
+  table.append(element(document, 'caption', metric.title + ' · ' + metric.direction + ' · one execution node count'));
   const head = element(document, 'thead');
   const header = element(document, 'tr');
   for (const heading of HEADINGS) {
@@ -84,7 +84,7 @@ function renderWorker(document, worker) {
   const details = element(document, 'details');
   details.className = 'isolated-worker';
   details.dataset.workerId = worker.id;
-  details.append(element(document, 'summary', worker.target + ' · ' + worker.nodeCount + ' native nodes · worker provenance'));
+  details.append(element(document, 'summary', worker.target + ' · ' + worker.nodeCount + ' execution nodes · worker provenance'));
   const fields = [['Worker', worker.id], ['Raw envelope SHA256', worker.rawSha256], ['Artifact ID', worker.artifact.id],
     ['Artifact name', worker.artifact.name], ['Artifact digest', worker.artifact.digest], ['Session outcome', worker.session.outcome]];
   if (worker.session.reason !== null) fields.push(['Session reason', worker.session.reason]);
@@ -97,14 +97,14 @@ function renderWorker(document, worker) {
       ['Runtime', report.runtime], ['Storage', report.storage],
       ['Workload client PID', report.client.processId], ['Workload client DLL SHA-256', report.client.binary.assemblySha256],
       ['Workload client PDB SHA-256', report.client.binary.pdbSha256],
-      ['Server version', target.version], ['Native topology', target.topology],
+      ['Server version', target.version], ['Execution topology', target.topology],
       ['Data copies', target.cluster.dataCopies], ['Write acknowledgement', target.writeAcknowledgement],
       ['Read contract', target.readContract], ['Transport', target.transport], ['Authorization', target.authorization],
-      ['Native observations', target.cluster.observations.join('; ')]);
+      ['Execution observations', target.cluster.observations.join('; ')]);
     if (report.serverProcesses.length > 0) fields.push(['KeyLoad server processes', report.serverProcesses.map(process =>
       process.name + ': PID ' + process.processId + ', DLL ' + process.binary.assemblySha256
       + ', PDB ' + process.binary.pdbSha256).join('; ')]);
-    if (report.nativeServerImage !== null) fields.push(['External database image', report.nativeServerImage]);
+    if (report.serverImage !== null) fields.push(['External database image', report.serverImage]);
   }
   const list = element(document, 'dl');
   for (const [name, value] of fields) list.append(element(document, 'dt', name), element(document, 'dd', String(value)));
@@ -116,8 +116,8 @@ export function renderIsolatedView(container, catalog, projection, rows, selecti
   const document = container.ownerDocument;
   const metric = metrics[selection.metric];
   const fragment = document.createDocumentFragment();
-  fragment.append(element(document, 'h3', metric.title + ' · ' + selection.nodeCount + ' native nodes'),
-    element(document, 'p', selection.scenario + ' · ' + (selection.repetition === 'session' ? 'Original native test result from the shared session' :
+  fragment.append(element(document, 'h3', metric.title + ' · ' + selection.nodeCount + ' execution nodes'),
+    element(document, 'p', selection.scenario + ' · ' + (selection.repetition === 'session' ? 'Original execution test result from the shared session' :
       'Unrecognized session selection') + ' · ' + metric.direction),
     element(document, 'p', 'Derived compact projection; raw samples remain in the linked GitHub artifacts. Process CPU, allocation and peak RAM are observed over the selected lane interval, including concurrent lanes; they are not exclusive operation costs and must not be summed. Server resource observations cover the session lifetime.'),
     element(document, 'p', `Profile ${projection.profile}; operations ${projection.options.operations}; concurrency ${projection.options.concurrency}; ` +

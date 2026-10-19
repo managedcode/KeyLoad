@@ -3,7 +3,7 @@ using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
-using KeyLoad.UnitTests.Features.ClusterRouting;
+using KeyLoad.UnitTests.Features.OrleansExecution;
 
 namespace KeyLoad.UnitTests.Features.TimeSeries;
 
@@ -12,7 +12,7 @@ internal static class SampleChunkSignedMinimumCold
     private const int FirstWave = 0;
     private const int ColdWaves = 2;
 
-    internal static async Task RunAsync(ConnectionNativeColdSource owner, SampleChunkSignedMinimumState state,
+    internal static async Task RunAsync(ConnectionColdSource owner, SampleChunkSignedMinimumState state,
         SampleRawIntegrityCut expected, CancellationToken token)
     {
         for (var wave = FirstWave; wave < ColdWaves; wave++)

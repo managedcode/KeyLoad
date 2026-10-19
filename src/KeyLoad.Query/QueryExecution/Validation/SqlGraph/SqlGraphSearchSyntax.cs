@@ -1,7 +1,7 @@
 
 namespace KeyLoad.Query.Features.QueryExecution;
 
-/// <summary>Stable tokens and validation diagnostics for Q1.Search.v1.</summary>
+/// <summary>Stable tokens and validation diagnostics for Q1.Search.</summary>
 internal static class SqlGraphSearchSyntax
 {
     internal const string Search = "SEARCH";
@@ -25,10 +25,10 @@ internal static class SqlGraphSearchSyntax
     internal const string Fusion = "FUSION";
     internal const string VectorSpaceDetail = "A valid vector space and matching finite vector parameter are required.";
     internal const string ParameterDetail = "A named SQL graph-search parameter is missing or has the wrong type.";
-    internal const string InvalidDetail = "The SQL graph-search statement is invalid for Q1.Search.v1.";
+    internal const string InvalidDetail = "The SQL graph-search statement is invalid for Q1.Search.";
     internal const string WrapperDetail = "The SQL graph-search request is invalid or exceeds its configured bound.";
     internal const string ParameterBudgetDetail = "The SQL graph-search parameter budget is exceeded.";
-    internal const string ProfileName = "graph-search-v1";
+    internal const string ProfileName = "graph-search";
     internal const int Version = 1;
     internal const int DefaultLimit = 10;
     internal const int DefaultFusion = 60;

@@ -11,10 +11,10 @@ internal static class QueryCursorExecution
     private const int InitialCursorOffset = 0;
     private const string QueryCursorNoLongerHasAValidAuthorizedReadCutDetail = "The query cursor no longer has a valid authorized read cut.";
 
-    internal readonly record struct State(int Offset, long Cut, long SourceEpoch, ResourceLifetimeV1 Lifetime);
+    internal readonly record struct State(int Offset, long Cut, long SourceEpoch, ResourceLifetime Lifetime);
 
     internal static State Resolve(DatabaseEngine database, IKeyValueView view, PrincipalRecord principal, ResourceDefinition resource,
-        AstQueryRequest request, string hash, TimeProvider clock, ResourceLifetimeV1 lifetime)
+        AstQueryRequest request, string hash, TimeProvider clock, ResourceLifetime lifetime)
     {
         var offset = request.Query.Offset;
         var cut = database.Store.Position;
@@ -37,7 +37,7 @@ internal static class QueryCursorExecution
         return new(offset, cut, sourceEpoch, lifetime);
     }
 
-    private static QueryCursorClaims? ReadClaims(DatabaseEngine database, string? token, ResourceLifetimeV1 lifetime)
+    private static QueryCursorClaims? ReadClaims(DatabaseEngine database, string? token, ResourceLifetime lifetime)
     {
         if (token is null)
         {

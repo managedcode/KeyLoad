@@ -11,7 +11,7 @@ internal static class SampleRollupRecords
         SampleRollupState? state = null;
         view.ReadValue(SampleRollupKeys.Bucket(partition, set, series, from, until), value =>
         {
-            state = NativeSerialization.Deserialize<SampleRollupState>(value)
+            state = OrleansSerialization.Deserialize<SampleRollupState>(value)
                 ?? throw Errors.Fail(ErrorCode.Corruption, SampleRollupProtocol.Corrupt);
             SampleRollupValidation.State(state, from, until);
         }, observer);
@@ -23,7 +23,7 @@ internal static class SampleRollupRecords
     {
         var sequence = EmptySequence;
         view.ReadValue(SampleRollupKeys.Sequence(partition, set, series),
-            value => sequence = NativeSerialization.Deserialize<long>(value), observer);
+            value => sequence = OrleansSerialization.Deserialize<long>(value), observer);
         long? floor = null;
         view.ReadValue(SampleRetentionStateReader.Key(partition, set, series),
             value => floor = SampleRetentionStateReader.Decode(value).BeforeUtcTicks, observer);

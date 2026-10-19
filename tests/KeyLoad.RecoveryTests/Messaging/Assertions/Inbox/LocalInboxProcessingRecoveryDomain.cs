@@ -16,7 +16,7 @@ internal static class LocalInboxProcessingRecoveryDomain
         var page = view.Scan(KeySpace.Partition(family, LocalInboxProcessingCrashContract.Partition), MaximumRows);
         if (page.HasMore)
         {
-            throw new InvalidOperationException("The local processing domain exceeded its complete bounded native image.");
+            throw new InvalidOperationException("The local processing domain exceeded its complete bounded execution image.");
         }
         return page.Records.Select(row => Convert.ToHexString(row.Key.Span) + ":" + Convert.ToHexString(row.Value.Span));
     }).ToArray());

@@ -14,9 +14,9 @@ scripts/Features/BenchmarkComparisons/isolated-github-stream.mjs
 scripts/Features/BenchmarkComparisons/isolated-github-transport.mjs
 scripts/Features/BenchmarkComparisons/isolated-github-validation.mjs
 scripts/Features/BenchmarkComparisons/isolated-github-zip.mjs
-scripts/Features/BenchmarkComparisons/native-files.mjs
-scripts/Features/BenchmarkComparisons/native-process-contracts.mjs
-scripts/Features/BenchmarkComparisons/native-process.mjs
+scripts/Features/BenchmarkComparisons/files.mjs
+scripts/Features/BenchmarkComparisons/process-contracts.mjs
+scripts/Features/BenchmarkComparisons/process.mjs
 scripts/Features/BenchmarkComparisons/server-resource-evidence.mjs
 scripts/Features/BenchmarkComparisons/session-aggregate-contract.mjs
 scripts/Features/BenchmarkComparisons/session-aggregate.mjs
@@ -36,7 +36,7 @@ scripts/Features/BenchmarkComparisons/site-session-github.mjs
 scripts/Features/BenchmarkComparisons/site-session-proof.mjs
 scripts/Features/BenchmarkComparisons/site-session-receipt.mjs
 scripts/Features/BenchmarkComparisons/site-session-selection.mjs
-scripts/Features/CodeQuality/functional-coverage.native-merge.trx.ps1
+scripts/Features/CodeQuality/functional-coverage.execution-merge.trx.ps1
 scripts/Features/CodeQuality/functional-coverage.parse.ps1
 scripts/Features/CodeQuality/functional-coverage.shared.ps1
 site/Features/BenchmarkComparisons/bootstrap.mjs

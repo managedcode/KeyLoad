@@ -8,6 +8,6 @@ namespace KeyLoad;
 /// <param name="LeaseSeconds">Requests the message lease duration.</param>
 /// <param name="FailureCode">Provides a safe handler failure code.</param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.DeliveryCommand)]
+[Orleans.Alias(ContractAliases.DeliveryCommand)]
 public sealed record DeliveryCommand([property: Orleans.Id(0)] Guid CommandId, [property: Orleans.Id(1)] QueueLaneRef Lane, [property: Orleans.Id(2)] string Token, [property: Orleans.Id(3)] DeliveryAction Action,
     [property: Orleans.Id(4)] int? LeaseSeconds = null, [property: Orleans.Id(5)] string? FailureCode = null);

@@ -7,9 +7,11 @@ This decision remains Accepted until delivered-source qualification is complete.
 
 Maintenance disposal joins (REQ-STORAGE-MAINTENANCE-JOIN-001..003 and
 AC-STORAGE-MAINTENANCE-JOIN-001..003 / AC-STORAGE-MAINTENANCE-SNAPSHOT-005 in
-StorageRecovery) require the silo-local ZoneTree owner to join its tracked native
-merge thread and periodic cleanup task before releasing tree, journal and owner
-file handles.
+StorageRecovery) require the silo-local ZoneTree owner to join its tracked execution
+merge threads and retire its Orleans maintenance timer before releasing
+tree, journal and owner file handles. cleanup calls and physical session
+close execute on the same captured Orleans owner context; no periodic Task or
+synchronous Task join schedules engine work outside that context.
 
 ## Retired generation ownership repair
 
@@ -26,7 +28,7 @@ maintainer/tree/journal/ownership orders, independently required cleanup,
 generation/identity publication, journal swap, poison and recovery semantics.
 No swallowed ObjectDisposedException, diagnostics waiver, new callback, data or
 deployment change. Rollback both product
-helpers together after drain; retain the regression and native failure evidence.
+helpers together after drain; retain the regression and failure evidence.
 The decision remains Accepted until actual qualification; process kills do not
 qualify power-loss durability.
 
@@ -41,8 +43,8 @@ Ordered stages are: hold the actual parent store; launch and settle a denied
 child with exact safe I/O failure and unchanged canonical identity/journal/value/
 position; verify a healthy parent commit/read; reject and settle another child;
 dispose the parent; verify successful child inspection and exact ordinary reopen.
-Preserve original process, pipe, outer-owner and deadline bounds. Native normal/scalar plus current-source Linux full
-recovery run with source, compiled identity and original native receipts retained. Native
+Preserve original process, pipe, outer-owner and deadline bounds. normal/scalar plus current-source Linux full
+recovery run with source, compiled identity and original receipts retained. Execution
 storage-module coverage is supporting evidence; all other lifetime and product
 gates stay open until actually qualified. No production, format, dependency,
 public API or deployment change is permitted by this test-only stage. Rollback

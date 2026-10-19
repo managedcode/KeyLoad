@@ -58,7 +58,7 @@ public sealed record ComparisonOptions : IComparisonSettings
 
     /// <summary>Reads and validates benchmark settings from the <c>Benchmarks</c> configuration section.</summary>
     /// <param name="configuration">The configuration source containing benchmark settings.</param>
-    /// <returns>The validated native snapshot, retaining canonical defaults for omitted configuration.</returns>
+    /// <returns>The validated execution snapshot, retaining canonical defaults for omitted configuration.</returns>
     public static IOptions<ComparisonOptions> Read(IConfiguration configuration)
         => ComparisonOptionsRegistration.Read(configuration);
 
@@ -70,7 +70,7 @@ public sealed record ComparisonOptions : IComparisonSettings
             throw new ArgumentOutOfRangeException(nameof(ComparisonOptions), ValidationMessage);
         }
     }
-    /// <summary>Checks the unchanged admitted workload ranges before native execution.</summary>
+    /// <summary>Checks the unchanged admitted workload ranges before execution execution.</summary>
     /// <returns>Whether every configured workload budget is supported.</returns>
     public bool IsValid() => Enum.IsDefined(Topology)
         && Documents is >= MinimumCount and <= MaximumDocuments

@@ -50,7 +50,7 @@ internal static class AnnMaintenanceChildDispatch
         }
         try
         {
-            return NativeSerialization.Deserialize<GrainValue>(reply.Payload.Span).Value as TResult
+            return OrleansSerialization.Deserialize<GrainValue>(reply.Payload.Span).Value as TResult
                 ?? throw Errors.Fail(command is null ? ErrorCode.Corruption : ErrorCode.UnknownWriteOutcome,
                     AnnMaintenanceProtocol.Interrupted);
         }

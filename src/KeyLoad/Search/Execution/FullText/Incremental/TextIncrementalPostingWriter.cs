@@ -1,0 +1,54 @@
+using KeyLoad.Core;
+using ZoneTree.FullTextSearch.Index;
+
+namespace KeyLoad.Server.Features.Search;
+
+internal static class TextIncrementalPostingWriter
+{
+    private const ulong InvalidRecord = 0;
+
+    internal static void Apply(IndexOfTokenRecordPreviousToken<ulong, ulong> index,
+        TextIncrementalPosting[] removals, TextIncrementalPosting[] additions,
+        ReadExecutionBudget budget, Action? firstPosting = null,
+        Action? firstDeletion = null, Action? firstAddition = null)
+    {
+        Require(removals, budget);
+        Require(additions, budget);
+        foreach (var posting in removals)
+        {
+            budget.Check();
+            index.DeleteRecord(posting.Token, posting.Record, posting.PreviousToken);
+            firstDeletion?.Invoke();
+            firstDeletion = null;
+            firstPosting?.Invoke();
+            firstPosting = null;
+        }
+        foreach (var posting in additions)
+        {
+            budget.Check();
+            index.UpsertRecord(posting.Token, posting.Record, posting.PreviousToken);
+            firstAddition?.Invoke();
+            firstAddition = null;
+            firstPosting?.Invoke();
+            firstPosting = null;
+        }
+        budget.Check();
+    }
+
+    private static void Require(TextIncrementalPosting[] postings, ReadExecutionBudget budget)
+    {
+        if (postings is null)
+        {
+            throw TextErrors.Corrupt();
+        }
+        foreach (var posting in postings)
+        {
+            budget.ChargeBytes(TextProtocol.PostingBytes);
+            if (posting is null || posting.Record == InvalidRecord)
+            {
+                throw TextErrors.Corrupt();
+            }
+        }
+        budget.Check();
+    }
+}

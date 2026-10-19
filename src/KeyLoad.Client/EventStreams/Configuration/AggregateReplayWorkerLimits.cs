@@ -13,7 +13,7 @@ public sealed record AggregateReplayWorkerLimits
     private const int MaximumJsonDepthCeiling = 64;
     /// <summary>Canonical caller configuration section.</summary>
     public const string SectionName = "KeyLoad:AggregateReplayWorker";
-    /// <summary>Validation failure retained by replay workers and native binding.</summary>
+    /// <summary>Validation failure retained by replay workers and execution binding.</summary>
     public const string ValidationMessage = "Replay worker limits must be positive and within their hard ceilings.";
     /// <summary>Maximum number of event records accepted by one worker invocation.</summary>
     public int MaximumEvents { get; init; } = 4096;

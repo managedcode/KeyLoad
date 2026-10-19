@@ -130,7 +130,7 @@ internal static class BudgetedQueueReceiveOutcomeFlow
         var request = new DeliveryCommand(Guid.NewGuid(), fixture.Lane, delivery.Token, DeliveryAction.Ack);
         var index = checked(fixture.Database.ReadCanonicalCut().AppliedPosition + P.Step);
         var operation = fixture.Database.Database.CreateCommand(OperationKind.Delivery, request.CommandId,
-            P.Worker, fixture.Database.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(request));
+            P.Worker, fixture.Database.Database.EvaluationClock.GetUtcNow(), OrleansSerialization.Serialize(request));
         var receipt = fixture.Database.SubmitIssued(operation).Get<CommitReceipt>();
         await A.EqualAsync(new CommitReceipt(request.CommandId, new(fixture.Database.Store.Identity.Incarnation, fixture.Database.Partition.AtomicPartitionId, index), [new(P.AckKind, P.Queue, P.First, P.Acknowledged)], DurabilityProfile.ProcessDurable, 1), receipt);
         var following = fixture.Receive();

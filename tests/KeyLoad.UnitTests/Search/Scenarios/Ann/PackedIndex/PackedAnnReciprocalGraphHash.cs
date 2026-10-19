@@ -10,7 +10,7 @@ internal static class PackedAnnReciprocalGraphHash
     internal static string Compute(PackedAnnState state, int[][][] adjacency)
     {
         using var hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
-        hash.AppendData("keyload.ann.graph.v1"u8);
+        hash.AppendData("keyload.ann.graph"u8);
         AppendInt(hash, state.Count);
         AppendInt(hash, state.EntryPoint);
         AppendInt(hash, state.MaximumLevel);

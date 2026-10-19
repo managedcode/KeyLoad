@@ -9,7 +9,7 @@ internal sealed class TimeSeriesIntensiveCallScopeTests
     [Test]
     public async Task AcTsi004OriginalOnTimeTaskFaultStopsTheClockAndKeepsTheError()
     {
-        using var call = new TimeSeriesIntensiveCallScope(UnitBenchmarkOptions.Native(), TestContext.Current!.Execution.CancellationToken);
+        using var call = new TimeSeriesIntensiveCallScope(UnitBenchmarkOptions.Execution(), TestContext.Current!.Execution.CancellationToken);
         var primary = new InvalidOperationException("private fixture detail");
         var original = Task.FromException(primary);
         call.Start();
@@ -25,7 +25,7 @@ internal sealed class TimeSeriesIntensiveCallScopeTests
     {
         using var lifetimeTimeout = new CancellationTokenSource(TestLifetime, TimeProvider.System);
         using var lifetime = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current!.Execution.CancellationToken, lifetimeTimeout.Token);
-        using var call = new TimeSeriesIntensiveCallScope(UnitBenchmarkOptions.Native(), lifetime.Token);
+        using var call = new TimeSeriesIntensiveCallScope(UnitBenchmarkOptions.Execution(), lifetime.Token);
         call.Start();
         var original = Task.Delay(Timeout.InfiniteTimeSpan, TimeProvider.System, call.Token);
         var observed = await ObserveAsync(original, call);
@@ -40,7 +40,7 @@ internal sealed class TimeSeriesIntensiveCallScopeTests
     public async Task AcTsi004OriginalTaskCallerCancellationKeepsTheObservedCause()
     {
         using var cell = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current!.Execution.CancellationToken);
-        using var call = new TimeSeriesIntensiveCallScope(UnitBenchmarkOptions.Native(), cell.Token);
+        using var call = new TimeSeriesIntensiveCallScope(UnitBenchmarkOptions.Execution(), cell.Token);
         call.Start();
         var original = Task.Delay(Timeout.InfiniteTimeSpan, TimeProvider.System, call.Token);
         await cell.CancelAsync();
@@ -56,7 +56,7 @@ internal sealed class TimeSeriesIntensiveCallScopeTests
     {
         using var cell = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current!.Execution.CancellationToken);
         await cell.CancelAsync();
-        using var call = new TimeSeriesIntensiveCallScope(UnitBenchmarkOptions.Native(), cell.Token);
+        using var call = new TimeSeriesIntensiveCallScope(UnitBenchmarkOptions.Execution(), cell.Token);
         await Assert.That(call.AcceptInvocation()).IsFalse();
         await Assert.That(call.LatencyTicks).IsEqualTo(0L);
         await Assert.That(call.Completion).IsEqualTo(TimeSeriesIntensiveOutcome.NotStarted);
@@ -66,7 +66,7 @@ internal sealed class TimeSeriesIntensiveCallScopeTests
     public async Task AcTsi004CancellationAfterAcceptedEntryRecordsAnOriginalCallerTask()
     {
         using var cell = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current!.Execution.CancellationToken);
-        using var call = new TimeSeriesIntensiveCallScope(UnitBenchmarkOptions.Native(), cell.Token);
+        using var call = new TimeSeriesIntensiveCallScope(UnitBenchmarkOptions.Execution(), cell.Token);
         await Assert.That(call.AcceptInvocation()).IsTrue();
         await cell.CancelAsync();
         call.Start();

@@ -1,5 +1,5 @@
 using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.ClusterReplication;
+using KeyLoad.IntegrationTests.Features.StorageReplication;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
 using P = KeyLoad.IntegrationTests.Features.DatabaseComposition.FunctionalGateRelationalProtocol;
 
@@ -17,7 +17,7 @@ internal static class FunctionalGateDropAssertions
         await SqlClusterProtocol.EqualAsync(new DropTableResult(request.TenantId, request.DatabaseId,
             request.ResourceName, new(actual.Receipt.CommandId, actual.Receipt.Token, [],
                 DurabilityProfile.ProcessDurable, context.ReplicaCount)), actual);
-        await NativeSubmissionColdAssertions.ReceiptAsync(actual.Receipt,
+        await SubmissionColdAssertions.ReceiptAsync(actual.Receipt,
             new(actual.Receipt.CommandId, actual.Receipt.Token, [], DurabilityProfile.ProcessDurable, context.ReplicaCount));
     }
 

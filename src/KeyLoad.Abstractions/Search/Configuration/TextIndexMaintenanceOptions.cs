@@ -12,7 +12,7 @@ public sealed record TextIndexMaintenanceOptions
     private const int MaximumPages = 64;
     private const int MinimumPages = 1;
 
-    /// <summary>Maximum actual native page/ACK stages before bounded rejection.</summary>
+    /// <summary>Maximum actual execution page/ACK stages before bounded rejection.</summary>
     public int MaximumReplayPages { get; init; } = DefaultPages;
 
     /// <summary>Checks the finite feature ceiling before physical ownership.</summary>

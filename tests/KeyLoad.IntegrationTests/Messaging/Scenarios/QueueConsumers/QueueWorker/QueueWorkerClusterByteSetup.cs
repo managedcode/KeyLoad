@@ -2,7 +2,7 @@ using System.Text;
 using KeyLoad.Client;
 using KeyLoad.Core;
 using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.ClusterReplication;
+using KeyLoad.IntegrationTests.Features.StorageReplication;
 
 namespace KeyLoad.IntegrationTests.Features.Messaging;
 
@@ -30,16 +30,16 @@ internal static class QueueWorkerClusterByteSetup
         var profile = ClusterFixtureProfile.ReadProfile(fixture.Root);
         var sdk = new KeyLoadClient(http, identity.Secret, IntegrationClientOptions.Execution());
         var receipt = await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(producer, token));
-        var native = new QueueWorkerClusterSeed(lane, identity, producer, receipt, Convert.FromBase64String(profile.SigningKey));
-        await QueueWorkerClusterAssertions.ReceiptAsync(receipt, producer.CommandId, native,
+        var execution = new QueueWorkerClusterSeed(lane, identity, producer, receipt, Convert.FromBase64String(profile.SigningKey));
+        await QueueWorkerClusterAssertions.ReceiptAsync(receipt, producer.CommandId, execution,
             [.. QueueWorkerClusterProtocol.Messages.Select(id => new MutationReceipt(QueueWorkerClusterProtocol.Enqueue,
                 lane.Queue, id, QueueWorkerClusterProtocol.ReadyStateVersion))]);
-        var sizes = producer.Mutations.Cast<EnqueueMessage>().Select(message => NativeSerialization.Serialize(new MessageBody(
+        var sizes = producer.Mutations.Cast<EnqueueMessage>().Select(message => OrleansSerialization.Serialize(new MessageBody(
             message.MessageId, message.PayloadJson, message.HeadersJson, message.OrderingKey, JsonData.Fingerprint(message))).Length).ToArray();
         await Assert.That(sizes.Max()).IsLessThanOrEqualTo(QueueWorkerClusterByteProtocol.BudgetBytes);
         await Assert.That(sizes.Min() * QueueWorkerClusterByteProtocol.CompetingDeliveries).IsGreaterThan(QueueWorkerClusterByteProtocol.BudgetBytes);
         var projected = Encoding.UTF8.GetByteCount(QueueWorkerClusterByteProtocol.Projected) + Encoding.UTF8.GetByteCount(QueueWorkerClusterProtocol.Headers);
         await Assert.That(projected).IsGreaterThan(QueueWorkerClusterByteProtocol.BudgetBytes);
-        return new(native, QueueWorkerClusterByteProtocol.Payload, QueueWorkerClusterByteProtocol.Projected, projected);
+        return new(execution, QueueWorkerClusterByteProtocol.Payload, QueueWorkerClusterByteProtocol.Projected, projected);
     }
 }

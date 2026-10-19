@@ -2,8 +2,8 @@ namespace KeyLoad;
 
 internal static class ResourceLifetimeContract
 {
-    internal const string IncarnationAlias = "keyload.resource-incarnation.v1";
-    internal const string LifetimeAlias = "keyload.resource-lifetime.v1";
+    internal const string IncarnationAlias = "keyload.resource-incarnation";
+    internal const string LifetimeAlias = "keyload.resource-lifetime";
     internal const int IncarnationValueField = 0;
     internal const int TenantField = 0;
     internal const int DatabaseField = 1;

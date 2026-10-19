@@ -3,7 +3,7 @@ using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Authorization;
 using KeyLoad.Diagnostics.Features.ResourceExecution;
-using KeyLoad.Server.Features.ClusterRouting;
+using KeyLoad.Server.Features.OrleansHosting;
 using KeyLoad.Storage.ZoneTree;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Options;
@@ -14,7 +14,33 @@ namespace KeyLoad.Server;
 internal static class ServerConfiguration
 {
     internal static async Task<WebApplication> BuildAsync(string[] args,
-        NativeLocalhostClusteringOptions? localhostClustering = null,
+        LocalhostClusteringOptions? localhostClustering = null,
+        IDatabaseAuthenticationExecutionObserver? authenticationExecutionObserver = null,
+        Func<IServiceProvider, ILifecycleParticipant<ISiloLifecycle>>? lifecycleParticipantFactory = null,
+        IGrainRequestPhaseObserver? phaseObserver = null, IGrainRequestPurposeObserver? purposeObserver = null,
+        Action<IServiceCollection, NodeOptions>? configureServices = null,
+        CancellationToken startupCancellation = default)
+    {
+        var builder = WebApplication.CreateBuilder(args);
+        await ConfigureBuilderAsync(builder, localhostClustering, authenticationExecutionObserver,
+            lifecycleParticipantFactory, phaseObserver, purposeObserver, configureServices, startupCancellation);
+        var app = builder.Build();
+        try
+        {
+            ConfigureApplication(app);
+            return app;
+        }
+        catch (Exception primary)
+        {
+            var failures = new List<Exception> { primary };
+            await ServerFailureObserver.ObserveAsync(() => app.DisposeAsync().AsTask(), failures);
+            ServerFailureObserver.ThrowIfAny(failures);
+            throw;
+        }
+    }
+
+    internal static async Task ConfigureBuilderAsync(WebApplicationBuilder builder,
+        LocalhostClusteringOptions? localhostClustering = null,
         IDatabaseAuthenticationExecutionObserver? authenticationExecutionObserver = null,
         Func<IServiceProvider, ILifecycleParticipant<ISiloLifecycle>>? lifecycleParticipantFactory = null,
         IGrainRequestPhaseObserver? phaseObserver = null, IGrainRequestPurposeObserver? purposeObserver = null,
@@ -22,18 +48,24 @@ internal static class ServerConfiguration
         CancellationToken startupCancellation = default)
     {
         startupCancellation.ThrowIfCancellationRequested();
-        var builder = WebApplication.CreateBuilder(args);
         builder.AddServiceDefaults();
         builder.Services.AddRuntimeOptions(builder.Configuration);
         var node = ServerNodeOptionsComposition.Read(builder.Configuration);
-        var address = await OrleansNodeAddressResolver.ResolveAsync(node.Value, startupCancellation).ConfigureAwait(false);
+        var address = await OrleansNodeAddressResolver.ResolveAsync(node.Value, startupCancellation);
         builder.Services.AddSingleton<IOptions<NodeOptions>>(node);
         ServerConnectionTransportComposition.Configure(builder);
         ConfigureTransportOptions(builder);
         Register(builder.Services, localhostClustering);
-        PostgresNativeComposition.Register(builder.Services, builder.Configuration);
+        PostgresComposition.Register(builder.Services, builder.Configuration);
         RegisterObservers(builder.Services, authenticationExecutionObserver, phaseObserver, purposeObserver);
         OrleansSiloConfiguration.Register(builder, node, address, localhostClustering);
+        builder.Services.AddHostedService(provider => provider.GetRequiredService<OrleansNodeLifecycle>());
+        builder.Services.AddOptions<HostOptions>().Configure<IOptions<ServerExecutionOptions>>((host, execution) =>
+        {
+            host.ShutdownTimeout = execution.Value.ShutdownTimeout;
+            host.ServicesStartConcurrently = false;
+            host.ServicesStopConcurrently = false;
+        });
         if (lifecycleParticipantFactory is not null)
         {
             builder.Services.AddSingleton<ILifecycleParticipant<ISiloLifecycle>>(lifecycleParticipantFactory);
@@ -41,24 +73,6 @@ internal static class ServerConfiguration
         DatabaseAuthenticationComposition.Register(builder.Services);
         McpServerComposition.Register(builder);
         configureServices?.Invoke(builder.Services, node.Value);
-        var app = builder.Build();
-        try
-        {
-            var runtime = app.Services.GetRequiredService<ServerRuntimeOptions>();
-            runtime.ValidateBeforePhysicalOwnership();
-            var phases = runtime.DatabasePhaseExecution.Value;
-            DatabasePhaseTelemetry.Initialize(phases.Enabled, phases.StripeCount, phases.MaximumCasAttempts,
-                TimeProvider.System);
-            ConfigureApplication(app);
-            return app;
-        }
-        catch (Exception primary)
-        {
-            var failures = new List<Exception> { primary };
-            await ServerFailureObserver.ObserveAsync(() => app.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
-            ServerFailureObserver.ThrowIfAny(failures);
-            throw;
-        }
     }
 
     private static void RegisterObservers(IServiceCollection services,
@@ -79,8 +93,13 @@ internal static class ServerConfiguration
         }
     }
 
-    private static void ConfigureApplication(WebApplication app)
+    internal static void ConfigureApplication(WebApplication app)
     {
+        var runtime = app.Services.GetRequiredService<ServerRuntimeOptions>();
+        runtime.ValidateBeforePhysicalOwnership();
+        var phases = runtime.DatabasePhaseExecution.Value;
+        DatabasePhaseTelemetry.Initialize(phases.Enabled, phases.StripeCount, phases.MaximumCasAttempts,
+            TimeProvider.System);
         app.UseMiddleware<AdminHttpMetricsMiddleware>();
         app.Use(next => new ServerErrorMiddleware(next,
             app.Services.GetRequiredService<ILogger<ServerErrorMiddleware>>(), app.Services.GetRequiredService<TimeProvider>()).InvokeAsync);
@@ -160,7 +179,7 @@ internal static class ServerConfiguration
         }
     }
 
-    private static void Register(IServiceCollection services, NativeLocalhostClusteringOptions? localhostClustering)
+    private static void Register(IServiceCollection services, LocalhostClusteringOptions? localhostClustering)
     {
         if (localhostClustering is not null)
         {

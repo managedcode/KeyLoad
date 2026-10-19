@@ -30,7 +30,7 @@ internal static class CatalogArrayPathLifetime
     {
         var image = TeamRowPolicyAssertions.Image(db.Store);
         var cut = db.Store.Position;
-        var identity = NativeSerialization.Serialize(db.Store.Identity);
+        var identity = OrleansSerialization.Serialize(db.Store.Identity);
         db.Store.Dispose();
         for (var cycle = 0; cycle < 2; cycle++)
         {
@@ -41,7 +41,7 @@ internal static class CatalogArrayPathLifetime
                 cold = new(new(db.Directory), db.StorageExecution, UnitExecutionOptions.PointCacheExecution(),
                     timeProvider: db.Database.EvaluationClock);
                 await ServerFailureObserver.ObserveAsync(async () =>
-                    await Assert.That(NativeSerialization.Serialize(cold.Identity).AsSpan().SequenceEqual(identity)).IsTrue(), failures);
+                    await Assert.That(OrleansSerialization.Serialize(cold.Identity).AsSpan().SequenceEqual(identity)).IsTrue(), failures);
                 await ServerFailureObserver.ObserveAsync(() => ConserveAsync(cold, image, cut), failures);
                 var database = db.CreateConfiguredDatabase(cold);
                 await ServerFailureObserver.ObserveAsync(() => CatalogArrayPathAssertions.CheckAsync(db, database, cold,

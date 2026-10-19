@@ -1,13 +1,13 @@
 # QueryExecution bounded SQL BETWEEN
 
-Existing Q1 semantics remain the target. Full SQL syntax/semantics and native client sessions are separate mandatory unfinished stages.
+Existing Q1 semantics remain the target. Full SQL syntax/semantics and client sessions are separate mandatory unfinished stages.
 
 |Requirement|Acceptance and evidence mapping|
 |---|---|
 |REQ-SQLC-006 typed expressions|AC-SQLC-006A: lower scalar/field/parameter `BETWEEN` inclusively to existing >=/<= AND; `NOT BETWEEN` negates the whole result. NEW SqlBetween grammar and real-ZoneTree tests plus cluster SDK/official MCP fixtures.|
 |REQ-SQLC-003 authority and equivalence|006A independently expected rows, exact AST/SQL rows/order/access path/explain and cursor compatibility. Every field including both bounds uses persisted authorization. No new plan effects/trusted roles.|
 |REQ-SQLC-004 bounds and recovery|006A tests expanded7node/depth3 and8node/depth4 boundaries separately from SQL UTF8/token/normalized bytes, cancellation, denied field, malformed/missing/non-scalar/type errors and next successful request.|
-|REQ-SQLC-001 honest conformance|006A capability lists only source-supported Q1 operators; full SQL and native protocol remain false until their complete inventories qualify.|
+|REQ-SQLC-001 honest conformance|006A capability lists only source-supported Q1 operators; full SQL and protocol remain false until their complete inventories qualify.|
 |REQ-SQLC-009 measured operation efficiency|Fixed bounded lowering, existing evaluator/read cut/admission. No index-range, speed, allocations, scale or portability improvement claim without authentic comparative GitHub evidence.|
 
 Existing eager three-valued conjunction applies. Only TRUE survives WHERE. Null/missing value makes both comparisons UNKNOWN before type checks. Null bound with a false other comparator yields FALSE; its negation yields TRUE. Null bound with a true other comparator stays UNKNOWN. Both null bounds remain UNKNOWN. Reversed non-null same-type bounds yield FALSE and their negation TRUE. Non-null mismatched scalar types still fail even when the other comparison is false; non-scalar and missing-parameter failures preserve current exact codes. Strings/booleans retain current KeyCodec order; there is no PG collation/coercion.
@@ -22,7 +22,7 @@ flowchart LR
     View --> Rows[Independent expected result and cursor parity]
 ```
 
-Canonical map: parser/token constants under src/KeyLoad.Query/ QueryExecution; existing QueryEngine capability entry; NEW tests/KeyLoad.UnitTests/ Features/QueryExecution/SqlBetween-prefixed files and IntegrationTests matching slice SqlClusterBetweenTests/helper. Strongest source review precedes code and final join. Backend storage/DDL/DML/ security mutation, frontend, migrations and dependency changes are N/A because this stage reuses the same readonly AST, budgets, resource and native contracts.
+Canonical map: parser/token constants under src/KeyLoad.Query/ QueryExecution; existing QueryEngine capability entry; NEW tests/KeyLoad.UnitTests/ Features/QueryExecution/SqlBetween-prefixed files and IntegrationTests matching slice SqlClusterBetweenTests/helper. Strongest source review precedes code and final join. Backend storage/DDL/DML/ security mutation, frontend, migrations and dependency changes are N/A because this stage reuses the same readonly AST, budgets, resource and contracts.
 
 Test methodology: first-author TUnit grammar/real-store tests from006A; independent literal IDs and hand-built ASTs, exact malformed/budget/error assertions, current normal/scalar plus real cluster SDK/official MCP results. Genuine faults remain failures; no mocks or runtime exceptions are waived. Full Release build, canonical formatter/static governance and independent diff review precede scoped delivery. CI authentic original source/run/attempt/job/report evidence proves execution; coverage remains an open mandatory gate until its collector is configured. Rollback the parser, additive capability values and fixtures together.
 
@@ -39,7 +39,7 @@ The actor is an authenticated existing SDK or official MCP caller. Persisted dat
 |006A-R cluster public flow|Genuine Aspire/Docker cluster SDK and official MCP return independent inclusive, NOT and partial-null IDs over the same committed corpus. Equality group index supplies the asserted path. Both clients expose exactly the prior Q1 predicate list plus BETWEEN/NOT BETWEEN, read-only and full-scan consent. Malformed, typed and parameter failures retain exact codes and a following valid request succeeds.|SqlClusterBetweenTests and SqlClusterBetweenScenario.|
 |006A-Q delivery|Full solution Release, canonical formatter, static governance, independent combined source review, then original delivered-source CI normal/scalar/recovery/cluster/analyzer reports with exact source/run/attempt/job/artifact/case bindings pass. Development builds/source review cannot satisfy runtime, coverage or performance gates.|CI original reports; manual independent diff review is the explicit source-review exception.|
 
-No new DDL/DML, AST DTO/version, serializer, evaluator, client session, public route, package, tokenizer, storage or native wire behavior is in scope. No data migration is needed. CPU/memory admission, cancellation, read cut and cursor lifetime reuse their existing bounded contracts. Full SQL, native protocol, coverage collector, FTS selection, scale measurements and production endurance remain independent open requirements. There is no performance improvement claim.
+No new DDL/DML, AST DTO/version, serializer, evaluator, client session, public route, package, tokenizer, storage or wire behavior is in scope. No data migration is needed. CPU/memory admission, cancellation, read cut and cursor lifetime reuse their existing bounded contracts. Full SQL, protocol, coverage collector, FTS selection, scale measurements and production endurance remain independent open requirements. There is no performance improvement claim.
 
 ## Functional operation flows
 
@@ -59,4 +59,4 @@ Three actual caller workflows cover REQ-SQLC-003/004/006, AC-SQLC-006A-T/B/C and
   already persisted administrator returns the seeded row; persisted data and
   position remain intact. Caller-supplied roles are not introduced.
 
-These are complete functional operation contributors; property/reflection-only or parser-shape checks cannot establish this evidence. A position comparison proves no committed write, not absence of reads. Historical Stage89 PartitionQuery-only reports contain no BETWEEN IDs and therefore cannot answer coverage of this compiler flow. The fresh source/test/helper/DLL/PDB manifest and native measured profile must name actual contributors.
+These are complete functional operation contributors; property/reflection-only or parser-shape checks cannot establish this evidence. A position comparison proves no committed write, not absence of reads. Historical Stage89 PartitionQuery-only reports contain no BETWEEN IDs and therefore cannot answer coverage of this compiler flow. The fresh source/test/helper/DLL/PDB manifest and measured profile must name actual contributors.

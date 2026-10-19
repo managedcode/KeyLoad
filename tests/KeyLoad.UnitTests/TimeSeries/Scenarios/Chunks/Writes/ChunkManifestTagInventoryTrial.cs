@@ -46,16 +46,16 @@ internal static class ChunkManifestTagInventoryTrial
     private static async Task<byte[]> Inject(ChunkSelectedIntegrityFixture fixture)
     {
         var original = fixture.Store.Read(view => view.ReadOwnedValue(ChunkSelectedIntegrityDamage.Key(fixture)))!;
-        var envelope = NativeSerialization.Deserialize<SampleChunkManifestEnvelope>(original);
-        var manifest = NativeSerialization.Deserialize<SampleChunkManifest>(envelope.Encoded.Span);
+        var envelope = OrleansSerialization.Deserialize<SampleChunkManifestEnvelope>(original);
+        var manifest = OrleansSerialization.Deserialize<SampleChunkManifest>(envelope.Encoded.Span);
         await Assert.That(manifest.TagJsonValues.Length).IsEqualTo(1);
         await Assert.That(manifest.TagJsonValues[0]).IsEqualTo(SampleChunkCanonicalFixture.Tags);
-        var bytes = NativeSerialization.Serialize(manifest with
+        var bytes = OrleansSerialization.Serialize(manifest with
         {
             TagJsonValues = ["{\"visible\":18}"]
         });
         ChunkSelectedIntegrityDamage.Put(fixture,
-            NativeSerialization.Serialize(new SampleChunkManifestEnvelope(bytes, SHA256.HashData(bytes))));
+            OrleansSerialization.Serialize(new SampleChunkManifestEnvelope(bytes, SHA256.HashData(bytes))));
         return original;
     }
 }

@@ -1,0 +1,38 @@
+{
+  "ComparisonExecution": {
+    "OperationTimeout": "00:00:30",
+    "PostgresMaxPoolSize": 24,
+    "PostgresMaxAutoPrepare": 32,
+    "PostgresAutoPrepareMinUsages": 1,
+    "MongoPoolSessionMargin": 4,
+    "MongoPoolMinimumSize": 16,
+    "ReadBufferBytes": 8192,
+    "MaxResponseBytes": 8388608,
+    "WriteBatchCapacity": 24,
+    "ReadbackBatchCapacity": 256,
+    "KeyLoadTimeSeriesReadLimit": 1000,
+    "OpenSearchHealthWaitTimeoutSeconds": 60,
+    "CleanupTimeout": "00:00:30",
+    "DocumentClientMaxConnections": 1,
+    "DocumentVerificationConnectionReserve": 1,
+    "DocumentCleanupTimeout": "00:20:00",
+    "IndexBuildTimeout": "00:20:00",
+    "IndexPollInterval": "00:00:00.200"
+  },
+  "ComparisonSerialization": {
+    "SurrealDbBatchRecordBuilderCapacity": 12000,
+    "SurrealDbVectorComponentBuilderCapacity": 12,
+    "PostgresVectorComponentBuilderCapacity": 14
+  },
+  "ComparisonDiagnostics": {
+    "KurrentSetupMaximumCauses": 3,
+    "KurrentSetupMaximumFramesPerCause": 8,
+    "KurrentSetupMaximumIdentifierCharacters": 64,
+    "KurrentSetupBuilderCapacity": 4096,
+    "KurrentCleanupMaximumExceptionDepth": 8,
+    "KurrentCleanupMaximumCharacters": 4096,
+    "RedisReplicaMaximumCharacters": 4096,
+    "KeyLoadOutboxMaximumBytes": 512,
+    "KeyLoadOutboxMaximumConsumers": 64
+  }
+}

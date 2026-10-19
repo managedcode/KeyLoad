@@ -6,7 +6,7 @@ namespace KeyLoad.Client;
 [ConfigurationOptions]
 public sealed record QueueWorkerOptions
 {
-    /// <summary>The native caller composition section.</summary>
+    /// <summary>The execution caller composition section.</summary>
     public const string SectionName = "KeyLoad:QueueWorker";
     /// <summary>Safe failure before any worker operation.</summary>
     public const string ValidationMessage = "Queue worker budgets must be positive and bounded; renewal must precede the requested lease.";
@@ -36,9 +36,9 @@ public sealed record QueueWorkerOptions
     public int MaximumRenewalCalls { get; init; } = DefaultCalls;
     /// <summary>Retained active UTF8 payload and header bytes; this is not measured CLR RAM.</summary>
     public int MaximumInFlightBytes { get; init; } = DefaultBytes;
-    /// <summary>Additional native receive byte request ceiling.</summary>
+    /// <summary>Additional execution receive byte request ceiling.</summary>
     public int MaximumReceiveBytes { get; init; } = DefaultBytes;
-    /// <summary>Requested native lease duration; stricter resource policies may refuse.</summary>
+    /// <summary>Requested execution lease duration; stricter resource policies may refuse.</summary>
     public int LeaseSeconds { get; init; } = DefaultLeaseSeconds;
     /// <summary>Cadence of the single bounded renewal owner.</summary>
     public TimeSpan RenewalInterval { get; init; } = TimeSpan.FromSeconds(DefaultRenewalSeconds);
@@ -47,7 +47,7 @@ public sealed record QueueWorkerOptions
     /// <summary>Exact same-ID attempts allowed after an actual unknown write.</summary>
     public int UncertaintyRetries { get; init; } = MaximumUncertaintyRetries;
 
-    /// <summary>Checks count, byte and renewal inequalities before native IO.</summary>
+    /// <summary>Checks count, byte and renewal inequalities before execution IO.</summary>
     public bool IsValid() => MaximumConcurrentHandlers is > PositiveBudgetBoundary and <= HandlerCeiling
         && MaximumDeliveries is > PositiveBudgetBoundary and <= InvocationCountCeiling
         && MaximumReceiveCalls is > PositiveBudgetBoundary and <= InvocationCountCeiling
@@ -60,7 +60,7 @@ public sealed record QueueWorkerOptions
         && EmptyPollDelay > TimeSpan.Zero && EmptyPollDelay.TotalSeconds <= MaximumPollSeconds
         && UncertaintyRetries is >= NoUncertaintyRetries and <= MaximumUncertaintyRetries;
 
-    /// <summary>Rejects invalid invocation configuration before native IO.</summary>
+    /// <summary>Rejects invalid invocation configuration before execution IO.</summary>
     public void Validate()
     {
         if (!IsValid())

@@ -3,7 +3,7 @@ using KeyLoad.Comparisons.Targets;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
-/// <summary>Executes native corruption and corrected readback directly, without an obsolete benchmark runner.</summary>
+/// <summary>Executes execution corruption and corrected readback directly, without an obsolete benchmark runner.</summary>
 internal static class Neo4jHarnessMismatchChecks
 {
     private const int Records = 16;
@@ -45,7 +45,7 @@ internal static class Neo4jHarnessMismatchChecks
         {
             return failure;
         }
-        throw new InvalidOperationException("The native read accepted the corrupted body.");
+        throw new InvalidOperationException("The execution read accepted the corrupted body.");
     }
 
     private static Neo4jTarget CreateTarget(Uri endpoint, string password, string runId, string image)
@@ -54,7 +54,7 @@ internal static class Neo4jHarnessMismatchChecks
         try
         {
             client = Neo4jHarnessQueryClient.CreateClient(endpoint, password);
-            var target = new Neo4jTarget(client, runId, image, NativeExecutionPolicyFixture.Lifecycle(), NativeExecutionPolicyFixture.Read());
+            var target = new Neo4jTarget(client, runId, image, ExecutionPolicyFixture.Lifecycle(), ExecutionPolicyFixture.Read());
             client = null;
             return target;
         }

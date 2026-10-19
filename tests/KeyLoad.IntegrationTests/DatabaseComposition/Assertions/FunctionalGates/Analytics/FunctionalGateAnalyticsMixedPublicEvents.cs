@@ -32,7 +32,7 @@ internal static class FunctionalGateAnalyticsMixedPublicEvents
             await Assert.That(row.EventSequence).IsGreaterThan(P.Empty);
             await Assert.That(row.RecordedAt).IsNotEqualTo(default(DateTimeOffset));
             await FunctionalGateUserAnalyticsAssertions.EqualAsync(row.Data, state.Appended);
-            // Native sequence/time are assigned by commit; preserve them exactly across all transports.
+            // Execution sequence/time are assigned by commit; preserve them exactly across all transports.
             retained ??= new(state.Stream, P.Created, row.EventSequence, state.Appended, row.RecordedAt);
             await FunctionalGateUserAnalyticsAssertions.EqualAsync(row, retained);
         }

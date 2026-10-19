@@ -10,7 +10,7 @@ internal sealed class AspireFailureReadinessTests
     [Arguments(nameof(KnownResourceStates.FailedToStart))]
     [Arguments(nameof(KnownResourceStates.RuntimeUnhealthy))]
     [Arguments(nameof(KnownResourceStates.Exited))]
-    public async Task AcTest014NativeReadinessFailureCancelsAndJoinsStartingSibling(string state)
+    public async Task AcTest014ReadinessFailureCancelsAndJoinsStartingSibling(string state)
     {
         await using var fixture = new AspireFailureNotificationFixture();
         using var deadline = AspireFailureAssertions.CreateDeadline();
@@ -35,7 +35,7 @@ internal sealed class AspireFailureReadinessTests
     [Test]
     [Arguments(false)]
     [Arguments(true)]
-    public async Task AcTest014ReadinessCallerCancellationAndHostStopSettleEveryNativeWait(bool hostStopping)
+    public async Task AcTest014ReadinessCallerCancellationAndHostStopSettleEveryWait(bool hostStopping)
     {
         await using var fixture = new AspireFailureNotificationFixture();
         using var deadline = AspireFailureAssertions.CreateDeadline();

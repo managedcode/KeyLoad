@@ -2,17 +2,17 @@ using System.Net;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
-using KeyLoad.IntegrationTests.Features.ClusterReplication;
+using KeyLoad.IntegrationTests.Features.StorageReplication;
 
 namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 
 internal sealed record PostgresClusterCertificate(string Directory, string RootCertificate)
 {
-    private const string DirectoryName = "native-sql";
+    private const string DirectoryName = "execution-sql";
     private const string RootName = "root.pem";
     private const string ServerName = "server.pfx";
     internal string ServerPath => Path.Combine(Directory, ServerName);
-    private const string RootSubject = "CN=KeyLoad Orleans native SQL test root";
+    private const string RootSubject = "CN=KeyLoad Orleans execution SQL test root";
     private const string ServerSubject = "CN=localhost";
     private const string ServerAuthentication = "1.3.6.1.5.5.7.3.1";
     private const int SerialBytes = 16;

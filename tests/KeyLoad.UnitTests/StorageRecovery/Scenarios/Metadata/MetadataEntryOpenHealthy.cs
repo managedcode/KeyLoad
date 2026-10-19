@@ -53,8 +53,8 @@ internal static class MetadataEntryOpenHealthy
         {
             await ServerFailureObserver.ObserveAsync(async () =>
             {
-                await Assert.That(NativeSerialization.Serialize(store.Identity))
-                    .IsEquivalentTo(NativeSerialization.Serialize(files.Identity), CollectionOrdering.Matching);
+                await Assert.That(OrleansSerialization.Serialize(store.Identity))
+                    .IsEquivalentTo(OrleansSerialization.Serialize(files.Identity), CollectionOrdering.Matching);
                 await Assert.That(store.Position).IsEqualTo(CommittedPosition);
                 await Assert.That(store.Read(view => view.ReadOwnedValue(files.Key)))
                     .IsEquivalentTo(files.Value, CollectionOrdering.Matching);

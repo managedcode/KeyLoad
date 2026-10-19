@@ -4,7 +4,7 @@ using ModelContextProtocol.Protocol;
 
 namespace KeyLoad.Server;
 
-/// <summary>Owns one stateless HTTP body, current identity and borrowed structured reply through native draining.</summary>
+/// <summary>Owns one stateless HTTP body, current identity and borrowed structured reply through execution draining.</summary>
 internal sealed class McpRequestState : IDisposable
 {
     private readonly McpRequestAdmission admission;
@@ -25,9 +25,9 @@ internal sealed class McpRequestState : IDisposable
         admission = new(governor: governor, memory: memory, capacity: capacity, cancellationToken: cancellationToken, options: options);
     }
 
-    /// <summary>Gets the current database-resolved principal; native sessions cannot cache it.</summary>
+    /// <summary>Gets the current database-resolved principal; execution sessions cannot cache it.</summary>
     internal PrincipalRecord Principal { get; private set; } = null!;
-    /// <summary>Gets the exact public capability selected before native typed decoding.</summary>
+    /// <summary>Gets the exact public capability selected before execution typed decoding.</summary>
     internal McpOperationDescriptor? Operation
     {
         get; private set;
@@ -47,10 +47,10 @@ internal sealed class McpRequestState : IDisposable
     internal void Authenticate(ReadOnlyMemory<byte> reply, CancellationToken cancellationToken)
     {
         admission.CoverAuthenticationScan(capacity, reply.Length, cancellationToken);
-        authenticationShape = McpNativeAuthentication.Inspect(payload: reply.Span, cancellationToken: cancellationToken, options: options);
+        authenticationShape = McpAuthentication.Inspect(payload: reply.Span, cancellationToken: cancellationToken, options: options);
         admission.CoverAuthentication(capacity, reply.Length, authenticationShape, cancellationToken);
         authentication = reply;
-        Principal = McpNativeAuthentication.ReadAdmittedPrincipal(payload: reply.Span, cancellationToken: cancellationToken, options: options);
+        Principal = McpAuthentication.ReadAdmittedPrincipal(payload: reply.Span, cancellationToken: cancellationToken, options: options);
     }
 
     internal McpMemoryLease ReserveProgress(int bytes, CancellationToken cancellationToken)
@@ -68,7 +68,7 @@ internal sealed class McpRequestState : IDisposable
         body = ownedBody;
     }
 
-    /// <summary>Admits one raw native message before typed parameter conversion.</summary>
+    /// <summary>Admits one raw execution message before typed parameter conversion.</summary>
     internal void Admit(McpGatewayMetaSelection selection, CancellationToken cancellationToken)
     {
         const int BodyWireBytesValidationBoundary = 0;
@@ -83,7 +83,7 @@ internal sealed class McpRequestState : IDisposable
         MetaOperation = selection.Operation;
     }
 
-    /// <summary>Grows before creating a canonical success wrapper and retains its borrowed native element.</summary>
+    /// <summary>Grows before creating a canonical success wrapper and retains its borrowed execution element.</summary>
     internal CallToolResult Success(DispatchedOperationReply reply, CancellationToken cancellationToken)
     {
         admission.CoverReplyScan(reply.Payload.Length, cancellationToken);

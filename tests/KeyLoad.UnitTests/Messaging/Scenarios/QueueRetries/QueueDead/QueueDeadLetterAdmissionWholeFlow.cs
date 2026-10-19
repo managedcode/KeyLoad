@@ -12,7 +12,7 @@ internal static class QueueDeadLetterAdmissionWholeFlow
             QueueDeadLetterSelectedFault.IndexAlias);
         var originalImage = QueueWholeFlowStorage.Bytes(fixture.Store);
         var originalPosition = fixture.Store.Position;
-        var identity = NativeSerialization.Serialize(fixture.Store.Identity);
+        var identity = OrleansSerialization.Serialize(fixture.Store.Identity);
         var row = QueueDeadLetterAdmissionRows.Damage(fixture.Store, state, fault);
         var damagedImage = QueueWholeFlowStorage.Bytes(fixture.Store);
         await QueueDeadLetterAdmissionAssertions.Image(fixture.Store, originalPosition + 1, damagedImage);
@@ -26,7 +26,7 @@ internal static class QueueDeadLetterAdmissionWholeFlow
         using (var cold = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution, UnitExecutionOptions.PointCacheExecution()))
         {
             var owner = fixture.CreateConfiguredDatabase(cold);
-            await Assert.That(NativeSerialization.Serialize(cold.Identity).SequenceEqual(identity)).IsTrue();
+            await Assert.That(OrleansSerialization.Serialize(cold.Identity).SequenceEqual(identity)).IsTrue();
             await QueueDeadLetterAdmissionAssertions.Refuse(owner, cold, state, fault, originalPosition + 1, damagedImage);
             QueueDeadLetterAdmissionRows.Repair(cold, row);
             await QueueDeadLetterAdmissionAssertions.Image(cold, originalPosition + 2, originalImage);
@@ -41,7 +41,7 @@ internal static class QueueDeadLetterAdmissionWholeFlow
         }
         using var second = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution, UnitExecutionOptions.PointCacheExecution());
         var secondOwner = fixture.CreateConfiguredDatabase(second);
-        await Assert.That(NativeSerialization.Serialize(second.Identity).SequenceEqual(identity)).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(second.Identity).SequenceEqual(identity)).IsTrue();
         await QueueDeadLetterAdmissionAssertions.Image(second, finalPosition, finalImage);
         await QueueDeadLetterSelectedImage.RequireAsync(secondOwner, second, state, settled: true, healthy: true);
         await QueueDeadLetterSelectedHistory.ReplayAsync(secondOwner, second, state, history);

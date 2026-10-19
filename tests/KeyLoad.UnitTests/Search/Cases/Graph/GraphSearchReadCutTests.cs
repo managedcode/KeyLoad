@@ -7,7 +7,7 @@ internal sealed class GraphSearchReadCutTests
     private const string RootPrincipal = "root";
 
     [Test]
-    public async Task RetrieverAndExpansionShareOneNativeStoreReadGate()
+    public async Task RetrieverAndExpansionShareOneStoreReadGate()
     {
         using var store = new ReadCountingZoneTreeStore();
         var root = new EntityRef(store.Partition, GraphSearchTestSupport.Projects, GraphSearchTestSupport.Root);

@@ -36,13 +36,13 @@ internal static class SampleChunkCodec
             Checksum = SampleChunkChecksum.Compute(unsealed, budget, execution.HashChunkBytes)
         };
         budget.Check();
-        var measured = NativeSerialization.Measure(payload);
+        var measured = OrleansSerialization.Measure(payload);
         budget.Check();
         if (measured > maximumBytes)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, SampleChunkWire.ExcessBytes);
         }
-        var encoded = NativeSerialization.Serialize(payload);
+        var encoded = OrleansSerialization.Serialize(payload);
         budget.Check();
         if (encoded.Length > maximumBytes || encoded.Length != measured)
         {
@@ -78,7 +78,7 @@ internal static class SampleChunkCodec
             throw Errors.Fail(ErrorCode.BudgetExceeded, SampleChunkWire.ExcessBytes);
         }
         budget.Check();
-        var payload = NativeSerialization.Deserialize<SampleChunkPayload>(bytes);
+        var payload = OrleansSerialization.Deserialize<SampleChunkPayload>(bytes);
         budget.Check();
         if (payload.FormatVersion != SampleChunkWire.CurrentVersion)
         {

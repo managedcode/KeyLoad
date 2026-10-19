@@ -94,7 +94,7 @@ internal static class TimeSeriesIntensivePinnedImageQualification
             arguments, seconds, token, evidence, label);
         if (command.ExitCode != 0)
         {
-            throw new InvalidOperationException(TimeSeriesIntensivePinnedImageProtocol.NativeFailure);
+            throw new InvalidOperationException(TimeSeriesIntensivePinnedImageProtocol.RuntimeFailure);
         }
 
         return command;
@@ -118,7 +118,7 @@ internal static class TimeSeriesIntensivePinnedImageQualification
                     });
             }
         }
-        catch (Exception persistence) when (primary is not null || TimeSeriesIntensivePinnedImageFailure.IsNative(persistence))
+        catch (Exception persistence) when (primary is not null || TimeSeriesIntensivePinnedImageFailure.RuntimeIs(persistence))
         {
             primary ??= persistence;
         }

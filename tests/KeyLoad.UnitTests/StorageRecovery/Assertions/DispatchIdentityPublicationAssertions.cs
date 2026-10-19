@@ -27,11 +27,11 @@ internal static class DispatchIdentityPublicationAssertions
 
     internal static async Task IdentityAsync(ZoneTreeStore store, string path, StoreIdentity expected)
     {
-        var expectedBytes = NativeSerialization.Serialize(expected);
-        await Assert.That(NativeSerialization.Serialize(store.Identity).AsSpan().SequenceEqual(expectedBytes)).IsTrue();
+        var expectedBytes = OrleansSerialization.Serialize(expected);
+        await Assert.That(OrleansSerialization.Serialize(store.Identity).AsSpan().SequenceEqual(expectedBytes)).IsTrue();
         var originalFile = await File.ReadAllBytesAsync(path);
         var persisted = ZoneTreeIdentityFile.Read(originalFile);
-        await Assert.That(NativeSerialization.Serialize(persisted).AsSpan().SequenceEqual(expectedBytes)).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(persisted).AsSpan().SequenceEqual(expectedBytes)).IsTrue();
     }
 
     internal static async Task RowsAsync(ZoneTreeStore store, ZoneTreeExistingStoreFixture files, bool healthy)

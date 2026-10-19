@@ -65,5 +65,5 @@ internal static class AnnProviderQualificationProducer
 
     private static Command<DatabaseCommand> Create<T>(AnnProviderQualificationOwner owner, OperationKind kind, Guid id, T request)
         => owner.Database.CreateCommand(kind, id, Root, owner.Database.EvaluationClock.GetUtcNow(),
-            NativeSerialization.Serialize(request));
+            OrleansSerialization.Serialize(request));
 }

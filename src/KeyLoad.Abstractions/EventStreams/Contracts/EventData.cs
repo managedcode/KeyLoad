@@ -10,7 +10,7 @@ namespace KeyLoad;
 /// <param name="CorrelationId">Carries the optional correlation identifier.</param>
 /// <param name="CausationId">Carries the optional causation identifier.</param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.EventData)]
+[Orleans.Alias(ContractAliases.EventData)]
 public sealed record EventData([property: Orleans.Id(0)] string EventId, [property: Orleans.Id(1)] string EventType, [property: Orleans.Id(2)] string PayloadJson, [property: Orleans.Id(3)] string HeadersJson = EventData.DefaultHeadersJson,
     [property: Orleans.Id(4)] int SchemaVersion = EventData.InitialSchemaVersion, [property: Orleans.Id(5)] DateTimeOffset? OccurredAt = null, [property: Orleans.Id(6)] string? CorrelationId = null, [property: Orleans.Id(7)] string? CausationId = null)
 {

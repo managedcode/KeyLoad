@@ -25,7 +25,7 @@ internal static class VisibleDocumentReads
         var range = budget.VisitRange(view, DocumentStorageKeys.Prefix(partition, collection),
             database.Limits.MaxScanRecords, (key, value) =>
             {
-                var document = NativeSerialization.Deserialize<DocumentRecord>(value);
+                var document = OrleansSerialization.Deserialize<DocumentRecord>(value);
                 EntityReferenceLifetime.RequireStored(document.Reference, lifetime);
                 if (!document.Deleted && database.Authorization.CanReadRow(principal, document.Access))
                 {

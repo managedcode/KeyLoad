@@ -30,7 +30,7 @@ internal static class SeriesPortableBackupTrial
             fixture.Partition, SeriesPortableBackupSeed.Root, original.Operation.CommandId)).ToArray();
         await SeriesPortableBackupAssertions.ReplayAsync(fixture.Source.Database, originals, token);
         await Assert.That(fixture.CreateBackup()).IsEqualTo(source.Position);
-        var archive = await NativeBackupJournalRepairAssertions.ArchiveAsync(fixture.BackupDirectory, token);
+        var archive = await BackupJournalRepairAssertions.ArchiveAsync(fixture.BackupDirectory, token);
         var verified = ZoneTreeStore.VerifyBackup(fixture.BackupDirectory, UnitExecutionOptions.StorageExecution(), token);
         await BackupPersistedPolicyAssertions.SameAsync(fixture.Source.Store.Identity, verified.Identity);
         await Assert.That(verified.Position).IsEqualTo(source.Position);
@@ -54,7 +54,7 @@ internal static class SeriesPortableBackupTrial
         var target = await ContinueAsync(fixture, database, token);
         await ColdAsync(fixture, database, originals, outcomes, target, token);
         await BackupPersistedPolicyAssertions.UnchangedAsync(fixture.Source.Store, source);
-        await NativeBackupJournalRepairAssertions.SameArchiveAsync(archive, fixture.BackupDirectory, token);
+        await BackupJournalRepairAssertions.SameArchiveAsync(archive, fixture.BackupDirectory, token);
     }
 
     private static async Task<(Command<DatabaseCommand> Operation, Result<object> Result)[]> ContinueAsync(

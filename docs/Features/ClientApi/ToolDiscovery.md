@@ -7,7 +7,7 @@ Decision: [ADR-104](../../ADR/ADR-104-mcp-gateway-tool-discovery.md).
 
 The official MCP client initially receives exactly three tools:
 `gateway_tools_search`, `gateway_tools_route`, and `gateway_tool_invoke`.
-Search and routing use our published ManagedCode.MCPGateway and its native
+Search and routing use our published ManagedCode.MCPGateway and its execution
 ManagedCode.MarkdownLd.Kb graph index. Relevant operation metadata, exact typed
 schemas and effect hints are returned on demand. All canonical operations remain
 in the server's single internal operation inventory; listing them all is removed
@@ -31,15 +31,15 @@ through the canonical execution path, including administrator operations.
 flowchart LR
     Caller[Official MCP client] --> Auth[Current persisted KeyLoad identity]
     Auth --> Meta[Three bounded gateway tools]
-    Meta --> Search[Native MCPGateway MarkdownLd tool graph]
+    Meta --> Search[MCPGateway MarkdownLd tool graph]
     Search --> Schema[Relevant canonical schema and hints]
     Meta --> Admission[Exact selected operation admission]
-    Admission --> Invoke[Native gateway local AIFunction]
+    Admission --> Invoke[gateway local AIFunction]
     Invoke --> Existing[Existing typed signed Orleans execution]
     Existing --> Owners[Silo local ZoneTree owners]
 ```
 
-## Frozen wire and native integration contract
+## Frozen wire and integration contract
 
 - `tools/list` returns the three fixed meta tools with independent exact schemas
   and annotations. It does not paginate the internal operation inventory. An
@@ -58,7 +58,7 @@ flowchart LR
   `{ commandId, request }`, or `{}` as prescribed by the operation. Unknown
   targets and direct calls to the removed public operation-tool names fail
   before effects. The invocation cannot recursively target a gateway meta tool.
-- The native incoming message filter selects the inner canonical descriptor
+- The incoming message filter selects the inner canonical descriptor
   before typed argument conversion. One original route-specific HTTP admission
   lease charges the entire outer frame and authenticated identity. Control
   search/route/list calls retain the existing control lane. The outer meta call
@@ -69,24 +69,24 @@ flowchart LR
   captures no principal or caller arguments. It invokes the existing
   `McpToolDispatcher.InvokeCanonicalAsync(arguments, cancellationToken)` seam.
   A mismatch with that request's selected descriptor fails before dispatch.
-- The factory-backed catalog owner exposes native `SearchAsync(query, limit,
+- The factory-backed catalog owner exposes execution `SearchAsync(query, limit,
   cancellationToken)`, `RouteAsync(query, categories, toolsPerCategory,
   preferReadOnly, cancellationToken)` and `InvokeAsync(toolId, arguments,
   cancellationToken)`; it does not recreate the gateway's graph/search engine.
-- Configure graph strategy, generated tool graph, native schema-aware search,
-  disabled query translation, four native search matches and finite descriptor
+- Configure graph strategy, generated tool graph, schema-aware search,
+  disabled query translation, four search matches and finite descriptor
   text. No search cache or embedding/model service is registered. Canonical
   hints add bounded feature/category and operation aliases to the graph.
 - Search/route success retains the existing `{ result, requestId }` envelope;
   `requestId` is null because no database operation has executed. Results map
-  only native matches back to current canonical tools, including exact input
+  only matches back to current canonical tools, including exact input
   and output schemas, annotations and finite score. Raw provider diagnostics,
   exception text, generated SPARQL and query echoes are not public results.
   The existing inclusive control reply byte ceiling remains mandatory; no
   partial schema is returned to fit it.
-- Invoke calls the actual native gateway with only the host-admitted target and
+- Invoke calls the actual gateway with only the host-admitted target and
   canonical argument dictionary. A successful local adapter returns the existing
-  native `CallToolResult` object. Preserve its exact result/error, real execution
+  execution `CallToolResult` object. Preserve its exact result/error, real execution
   GUID and borrowed reply owner through draining. Gateway status is not a
   replacement for `CallToolResult.IsError`; unexpected non-result output fails
   closed with the existing safe error. Do not serialize an alternate gateway
@@ -97,7 +97,7 @@ flowchart LR
 
 ## Bounds, lifetime, migration and observability
 
-REQ/AC-MCPGW-007: the same native MCP server lists
+REQ/AC-MCPGW-007: the same MCP server lists
 one static Markdown resource `keyload://guides/agent-quickstart` (`text/markdown`)
 and one no-argument prompt `keyload_agent_quickstart`. Both return the same
 guidance, at most 8192 UTF8 bytes: what the development-preview database is,
@@ -108,33 +108,33 @@ do not invent typed data mutations or advertise unfinished conformance.
 Fresh persisted authentication and the existing control admission/reply budgets
 apply to list/read/get on every request. These static surfaces expose no data,
 resource inventories, credentials or principal context, and introduce no extra
-operation tool. Return fresh native resource/prompt objects; terminal list cursors
+operation tool. Return fresh resource/prompt objects; terminal list cursors
 are null. Reject nonempty cursors, unknown URI/name, and prompt arguments before
 any database execution. No resource templates or subscriptions are advertised.
-Native official SDK list/read/get, content equality, byte bounds, cancellation,
+official SDK list/read/get, content equality, byte bounds, cancellation,
 unknown inputs and revoked credentials are mapped tests; source text alone is
 not protocol proof. The ClientApi Guidance subfeature owns content, query
-validation and native transport handlers.
+validation and transport handlers.
 
 The metadata index admits at most 256 canonical operations and at most 4 MiB of
-serialized immutable operation metadata before native graph construction. Native
+serialized immutable operation metadata before graph construction. Execution
 descriptor search text is at most 4096 characters. These bound inputs and catalog
 growth; measured total graph allocation/peak RAM is a separate acceptance gate,
 not inferred from a result-count setting. Node control/data/ingress budgets,
 payload/reply bounds, concurrency, scope quotas and cancellation remain intact.
 
-Warm the real native graph once as host-owned startup work; native failure fails
+Warm the real graph once as host-owned startup work; failure fails
 startup/readiness instead of publishing a healthy empty index. Rebuild after
 restart derives solely from canonical source metadata. No persisted format,
 database journal or credential migration occurs. Retain active search/invocation
 owners until work settles; dispose the factory instance after host requests drain.
-Cancellation/deadline is threaded into native work and rechecked after completion.
+Cancellation/deadline is threaded into work and rechecked after completion.
 The graph package does not promise immediate interruption of an already-running
 SPARQL processor; do not detach that work or release its owners early.
 
 Only closed method/stage/error categories and execution GUIDs may be recorded.
-Do not emit search text, arguments, native exception messages or identity into
-diagnostics. Existing native-package logging policy applies. Dependency defects
+Do not emit search text, arguments, exception messages or identity into
+diagnostics. Existing package logging policy applies. Dependency defects
 are repaired and published in their owner, never hidden by a consumer fallback.
 
 This intentionally replaces the public all-operation discovery contract in
@@ -149,14 +149,14 @@ failed graph index is a failure, never permission to revive the previous route.
 | Requirement | Measurable acceptance and negative/edge flows | Automated evidence |
 |---|---|---|
 | REQ-MCPGW-001 compact official discovery | AC-MCPGW-001: real official client lists exactly the three names, valid strict schemas/hints, no canonical tool page; nonempty cursor and direct/recursive/unknown invocation fail before effects | UnitTests ClientApi gateway catalog/oracles; IntegrationTests ClientApi real discovery |
-| REQ-MCPGW-002 native graph relevance | AC-MCPGW-002: actual graph index resolves exact names and document/graph/blob/queue/series/SQL tasks to actual relevant canonical tools; unique bounded output, exact schemas and effect hints; no invented operation or numeric score; malformed/oversized query/limits reject | Native gateway graph cases over real canonical metadata; official search-to-invoke scenarios |
+| REQ-MCPGW-002 graph relevance | AC-MCPGW-002: actual graph index resolves exact names and document/graph/blob/queue/series/SQL tasks to actual relevant canonical tools; unique bounded output, exact schemas and effect hints; no invented operation or numeric score; malformed/oversized query/limits reject | gateway graph cases over real canonical metadata; official search-to-invoke scenarios |
 | REQ-MCPGW-003 fresh persisted authority | AC-MCPGW-003: invalid/revoked/expired credentials fail; caller role/context fields cannot elevate; existing policy/row/field denials remain; grants revoked between discovery and invoke take effect; discovery exposes no data/resource/identity | Aspire cluster official SDK grant/credential/revocation and canary cases |
 | REQ-MCPGW-004 one canonical execution | AC-MCPGW-004: every inner route uses original admission/quotas and a fresh signed connection-grain operation; typed success/error/requestId unchanged; same-ID write replay/conflict/unknown-outcome semantics preserved; SDK and gateway effects/results agree | Unit admission/selection/result-owner assertions; real .NET/MCP cluster reads/writes/backup/blob/SQL |
-| REQ-MCPGW-005 bounded graph and lifecycle | AC-MCPGW-005: catalog/query/count/reply thresholds pass exact limit and reject excess before unsafe allocation/effect; startup index failure is fatal; cancellation drains and releases owners with healthy follow-up; concurrent identities do not cross; cold restart rebuilds metadata and preserves data | Real native index/owner/bounds cases; Aspire cluster cancellation/concurrency/restart; measured index allocation/RAM retained separately |
-| REQ-MCPGW-006 privacy and delivery | AC-MCPGW-006: provider/search exceptions produce safe existing failures; diagnostic canaries never appear; only published centrally pinned packages are consumed; Release build/analyzers/formatter, full relevant normal/scalar/recovery and genuine cluster pass with exact source evidence | Source/privacy review, native EventSource/Kestrel cases, actual NuGet restore and Linux CI artifacts |
+| REQ-MCPGW-005 bounded graph and lifecycle | AC-MCPGW-005: catalog/query/count/reply thresholds pass exact limit and reject excess before unsafe allocation/effect; startup index failure is fatal; cancellation drains and releases owners with healthy follow-up; concurrent identities do not cross; cold restart rebuilds metadata and preserves data | Real index/owner/bounds cases; Aspire cluster cancellation/concurrency/restart; measured index allocation/RAM retained separately |
+| REQ-MCPGW-006 privacy and delivery | AC-MCPGW-006: provider/search exceptions produce safe existing failures; diagnostic canaries never appear; only published centrally pinned packages are consumed; Release build/analyzers/formatter, full relevant normal/scalar/recovery and genuine cluster pass with exact source evidence | Source/privacy review, EventSource/Kestrel cases, actual NuGet restore and Linux CI artifacts |
 | REQ-MCPGW-007 agent orientation | AC-MCPGW-007: official SDK lists exactly one guide and one no-argument prompt, reads/gets identical valid Markdown <=8192 UTF8 bytes with actual discovery/invocation instructions; fresh authentication, safe unknown/cursor/argument rejection, cancellation and mutable-object isolation pass | UnitTests ClientApi guidance cases; IntegrationTests ClientApi official resource/prompt and credential cases |
 
 Frontend and .NET business SDK API: N/A, official MCP protocol adapter and
-examples change; data and native Orleans contract migration: N/A, canonical
+examples change; data and Orleans contract migration: N/A, canonical
 execution/persistence stay exact. AppHost owns real runtime/test resources and
 shutdown. No unit fake gateway, in-memory database or self-proxy is acceptance.

@@ -4,7 +4,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
 
-/// <summary>Generates compact immutable scale-v1 keys and deterministic values for one dataset.</summary>
+/// <summary>Generates compact immutable scale keys and deterministic values for one dataset.</summary>
 internal sealed class ScaledRawStorageCorpus
 {
     private const int KeyBytes = 16;

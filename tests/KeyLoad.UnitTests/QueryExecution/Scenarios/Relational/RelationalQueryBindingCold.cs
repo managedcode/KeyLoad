@@ -13,7 +13,7 @@ internal static class RelationalQueryBindingCold
         var image = SqlInnerJoinRetainedIdentityFlow.Image(fixture.Store);
         var cut = fixture.Store.Position;
         var identity = fixture.Store.Identity;
-        var identityBytes = NativeSerialization.Serialize(identity);
+        var identityBytes = OrleansSerialization.Serialize(identity);
         fixture.JoinOwnedResources();
         var failures = new List<Exception>();
         for (var cold = 0; cold < ColdOpens; cold++)

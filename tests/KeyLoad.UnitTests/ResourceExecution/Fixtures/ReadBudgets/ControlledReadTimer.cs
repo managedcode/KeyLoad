@@ -1,6 +1,6 @@
 namespace KeyLoad.UnitTests.Features.ResourceExecution;
 
-/// <summary>Native ITimer ownership for the explicit controlled test clock.</summary>
+/// <summary>Execution ITimer ownership for the explicit controlled test clock.</summary>
 internal sealed class ControlledReadTimer(ControlledReadClock clock, TimerCallback callback, object? state) : ITimer
 {
     private long dueAt = long.MaxValue;

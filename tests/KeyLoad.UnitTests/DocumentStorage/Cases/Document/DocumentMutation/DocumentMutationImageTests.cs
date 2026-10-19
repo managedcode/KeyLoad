@@ -43,7 +43,7 @@ internal sealed class DocumentMutationImageTests
                 mutations[ordinal], receipt.Mutations[ordinal], ordinal == 0 ? null : images[ordinal - 1], images[ordinal]);
             var bytes = db.Store.Read(view => view.ReadOwnedValue(
                 KeySpace.Partition(OutboxSpace, db.Partition, ordinal + FirstSequence))!);
-            var actual = NativeSerialization.Deserialize<OutboxEntry>(bytes);
+            var actual = OrleansSerialization.Deserialize<OutboxEntry>(bytes);
 
             await Assert.That(actual.Sequence).IsEqualTo(expected.Sequence);
             await Assert.That(actual.Ordinal).IsEqualTo(expected.Ordinal);
@@ -53,7 +53,7 @@ internal sealed class DocumentMutationImageTests
             await AssertMutationReceiptEqual(actual.Receipt, expected.Receipt);
             await Assert.That(actual.Before).IsEqualTo(expected.Before);
             await Assert.That(actual.After).IsEqualTo(expected.After);
-            await Assert.That(bytes.SequenceEqual(NativeSerialization.Serialize(actual))).IsTrue();
+            await Assert.That(bytes.SequenceEqual(OrleansSerialization.Serialize(actual))).IsTrue();
         }
 
         await Assert.That(db.Database.GetDocument("root", reference)).IsNull();

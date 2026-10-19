@@ -15,9 +15,9 @@ internal static class OwnedDiagnosticsPolicy
     internal static bool IsMethod(Compilation compilation, IMethodSymbol method) =>
         method.ContainingAssembly.Name == AssemblyName &&
         (method.MethodKind == MethodKind.Constructor &&
-            MagicRuntimeOperations.IsNativeMetadataType(compilation, method.ContainingType, Bank) ||
+            MagicRuntimeOperations.IsMetadataType(compilation, method.ContainingType, Bank) ||
          method.Name == Initialize &&
-            MagicRuntimeOperations.IsNativeMetadataType(compilation, method.ContainingType, Telemetry));
+            MagicRuntimeOperations.IsMetadataType(compilation, method.ContainingType, Telemetry));
 
     internal static bool IsArgument(IArgumentOperation argument) =>
         argument.Parameter is { Type.SpecialType: SpecialType.System_Int32 } parameter &&

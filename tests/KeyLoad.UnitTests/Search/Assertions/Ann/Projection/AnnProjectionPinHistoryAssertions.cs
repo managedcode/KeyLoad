@@ -25,11 +25,11 @@ internal static class AnnProjectionPinHistoryAssertions
     {
         var key = KeySpace.Partition(OutboxSpace, database.Partition, sequence);
         var original = database.Store.Read(view => view.ReadOwnedValue(key)!);
-        var entry = NativeSerialization.Deserialize<OutboxEntry>(original) with
+        var entry = OrleansSerialization.Deserialize<OutboxEntry>(original) with
         {
             Sequence = sequence + 1
         };
-        var malformed = NativeSerialization.Serialize(entry);
+        var malformed = OrleansSerialization.Serialize(entry);
         var consumerBytes = AnnProjectionPinTestSupport.StoredConsumer(database, consumer);
         database.Store.Commit((transaction, _) =>
         {

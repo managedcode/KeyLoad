@@ -4,23 +4,23 @@ using KeyLoad.Comparisons;
 
 namespace KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
 
-/// <summary>Joins the original session operation and each actual native lifetime before rethrowing their retained failures.</summary>
+/// <summary>Joins the original session operation and each actual execution lifetime before rethrowing their retained failures.</summary>
 internal static class BenchmarkSessionFixtureDisposal
 {
-    internal static async ValueTask CompleteAsync(Task original, IAsyncDisposable? nativeOwner, IDisposable? configuration)
+    internal static async ValueTask CompleteAsync(Task original, IAsyncDisposable? runtimeOwner, IDisposable? configuration)
     {
         ArgumentNullException.ThrowIfNull(original);
-        var primary = await NativeComparisonFailure.ObserveAsync(original);
+        var primary = await RuntimeComparisonFailure.ObserveAsync(original);
         var cleanup = ImmutableArray.CreateBuilder<Exception>();
-        if (await NativeComparisonFailure.ObserveAsync(DisposeNativeAsync(nativeOwner)) is { } nativeFailure)
+        if (await RuntimeComparisonFailure.ObserveAsync(RuntimeDisposeAsync(runtimeOwner)) is { } runtimeFailure)
         {
-            cleanup.Add(nativeFailure);
+            cleanup.Add(runtimeFailure);
         }
-        if (await NativeComparisonFailure.ObserveAsync(DisposeConfigurationAsync(configuration)) is { } configurationFailure)
+        if (await RuntimeComparisonFailure.ObserveAsync(DisposeConfigurationAsync(configuration)) is { } configurationFailure)
         {
             cleanup.Add(configurationFailure);
         }
-        if (NativeComparisonFailure.Combine(primary, cleanup.ToImmutable()) is { } combined)
+        if (RuntimeComparisonFailure.Combine(primary, cleanup.ToImmutable()) is { } combined)
         {
             ExceptionDispatchInfo.Capture(combined).Throw();
         }
@@ -30,17 +30,17 @@ internal static class BenchmarkSessionFixtureDisposal
     {
         ArgumentNullException.ThrowIfNull(original);
         ArgumentNullException.ThrowIfNull(retention);
-        var retentionFailure = await NativeComparisonFailure.ObserveAsync(retention);
-        var combined = NativeComparisonFailure.Combine(original,
+        var retentionFailure = await RuntimeComparisonFailure.ObserveAsync(retention);
+        var combined = RuntimeComparisonFailure.Combine(original,
             retentionFailure is null ? [] : [retentionFailure]);
         ExceptionDispatchInfo.Capture(combined!).Throw();
     }
 
-    private static async Task DisposeNativeAsync(IAsyncDisposable? nativeOwner)
+    private static async Task RuntimeDisposeAsync(IAsyncDisposable? runtimeOwner)
     {
-        if (nativeOwner is not null)
+        if (runtimeOwner is not null)
         {
-            await nativeOwner.DisposeAsync();
+            await runtimeOwner.DisposeAsync();
         }
     }
 

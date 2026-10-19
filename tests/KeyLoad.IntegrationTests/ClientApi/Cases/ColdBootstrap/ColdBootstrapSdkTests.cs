@@ -36,7 +36,7 @@ internal sealed class ColdBootstrapSdkTests
     {
         await fixture.InitializeAsync().ConfigureAwait(false);
         var cold = fixture.ColdStartObservation
-            ?? throw new InvalidOperationException("The selected native fixture cold-start observation was absent.");
+            ?? throw new InvalidOperationException("The selected execution fixture cold-start observation was absent.");
         await Assert.That(cold.DirectoryExisted || cold.FileExisted).IsFalse();
         await Assert.That(fixture.Root).IsEqualTo(cold.Root);
         await ColdBootstrapSdkFlow.RunAsync(fixture, TestContext.Current!.Execution.CancellationToken)

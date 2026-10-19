@@ -8,11 +8,11 @@ internal sealed class SampleAggregateAccumulator
     private const int EmptySampleCount = 0;
     private const int EmptySum = 0;
 
-    private const int OneNativeBucket = 1;
+    private const int RuntimeOneBucket = 1;
     private const string NonFiniteAggregate = "The time-series aggregate is not finite.";
-    private readonly DoubleTimeSeriesSummer sum = new(TimeSpan.MaxValue, OneNativeBucket, Strategy.Sum);
-    private readonly DoubleTimeSeriesSummer minimum = new(TimeSpan.MaxValue, OneNativeBucket, Strategy.Min);
-    private readonly DoubleTimeSeriesSummer maximum = new(TimeSpan.MaxValue, OneNativeBucket, Strategy.Max);
+    private readonly DoubleTimeSeriesSummer sum = new(TimeSpan.MaxValue, RuntimeOneBucket, Strategy.Sum);
+    private readonly DoubleTimeSeriesSummer minimum = new(TimeSpan.MaxValue, RuntimeOneBucket, Strategy.Min);
+    private readonly DoubleTimeSeriesSummer maximum = new(TimeSpan.MaxValue, RuntimeOneBucket, Strategy.Max);
     private double finiteGuardSum;
 
     internal static SampleAggregate Empty => new(EmptySampleCount, EmptySum, null, null, null);

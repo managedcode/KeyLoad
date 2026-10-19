@@ -89,6 +89,6 @@ internal static class ProjectionDigestWholeFlow
         => await ProjectionDigestImage.ObserveAsync(fixture, async () =>
         {
             var replay = fixture.Harness.Submit(OperationKind.Batch, command, EventProjectionFixture.WorkerId, command.CommandId);
-            await Assert.That(NativeSerialization.Serialize(replay).AsSpan().SequenceEqual(NativeSerialization.Serialize(result))).IsTrue();
+            await Assert.That(OrleansSerialization.Serialize(replay).AsSpan().SequenceEqual(OrleansSerialization.Serialize(result))).IsTrue();
         });
 }

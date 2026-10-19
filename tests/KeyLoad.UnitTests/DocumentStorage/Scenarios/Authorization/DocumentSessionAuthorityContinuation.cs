@@ -25,12 +25,12 @@ internal static class DocumentSessionAuthorityContinuation
         var request = new CommandRequest(id, fixture.Source.Partition,
             [new PutDocument(A.Collection, A.Id, A.Json, 1, ExplicitReplacement: true)]);
         var operation = fixture.Database.CreateCommand(OperationKind.Batch, id, A.Root,
-            fixture.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(request));
+            fixture.Database.EvaluationClock.GetUtcNow(), OrleansSerialization.Serialize(request));
         var expected = new CommitReceipt(id, new(fixture.Store.Identity.Incarnation,
             fixture.Source.Partition.AtomicPartitionId, next), [new("putDocument", A.Collection, A.Id, 2)],
             DurabilityProfile.ProcessDurable, 1);
-        await DocumentPatchAtomicityAssertions.BytesAsync(NativeSerialization.Serialize(expected),
-            NativeSerialization.Serialize(fixture.Submit(operation).Get<CommitReceipt>()));
+        await DocumentPatchAtomicityAssertions.BytesAsync(OrleansSerialization.Serialize(expected),
+            OrleansSerialization.Serialize(fixture.Submit(operation).Get<CommitReceipt>()));
         await A.ReplayAsync(fixture, operation, expected);
         await fixture.ReopenAsync();
         await A.LiteralAsync(fixture, first.Token, 2);

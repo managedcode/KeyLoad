@@ -33,7 +33,7 @@ internal static class QueueEnqueueSequenceAssertions
             .IsEqualTo(counters with
             {
                 StoredMessages = QueueEnqueueAuthorityProtocol.First,
-                StoredBytes = NativeSerialization.Serialize(body).LongLength
+                StoredBytes = OrleansSerialization.Serialize(body).LongLength
             });
         var document = owner.GetDocument(QueueEnqueueColdProtocol.Root, new(lane.Partition, QueueEnqueueColdProtocol.Collection, QueueEnqueueColdProtocol.Document))!;
         await Assert.That(document.Json).IsEqualTo(message.PayloadJson);
@@ -55,7 +55,7 @@ internal static class QueueEnqueueSequenceAssertions
         await Assert.That(store.Read(view => view.GetRecord<string>(key))).IsEqualTo(message.MessageId);
         var opposite = store.Read(view => view.Scan(KeySpace.Partition(scheduled ? QueueEnqueueColdProtocol.ReadyFamily : QueueEnqueueColdProtocol.ScheduledFamily, lane.Partition, lane.Queue), QueueClaimVersionExhaustionProtocol.ImageRecords));
         await Assert.That(opposite.HasMore).IsFalse();
-        await Assert.That(opposite.Records.Any(row => NativeSerialization.Deserialize<string>(row.Value.Span) == message.MessageId)).IsFalse();
+        await Assert.That(opposite.Records.Any(row => OrleansSerialization.Deserialize<string>(row.Value.Span) == message.MessageId)).IsFalse();
         await Assert.That(store.Read(view => view.Scan(KeySpace.Partition(QueueEnqueueAuthorityProtocol.LeaseFamily, lane.Partition, lane.Queue), QueueClaimVersionExhaustionProtocol.ImageRecords).Records)).IsEmpty();
         var orders = store.Read(view => view.Scan(KeySpace.Partition(QueueEnqueueAuthorityProtocol.OrderFamily, lane.Partition, lane.Queue), QueueClaimVersionExhaustionProtocol.ImageRecords));
         await Assert.That(orders.HasMore).IsFalse();
@@ -68,7 +68,7 @@ internal static class QueueEnqueueSequenceAssertions
             var row = await Assert.That(orders.Records).HasSingleItem();
             await Assert.That(row.Key.ToArray()).IsEquivalentTo(KeySpace.Partition(QueueEnqueueAuthorityProtocol.OrderFamily, lane.Partition, lane.Queue,
                 message.OrderingKey, metadata.ActiveOrderSequence, message.MessageId), CollectionOrdering.Matching);
-            await Assert.That(NativeSerialization.Deserialize<QueueOrderReference>(row.Value.Span))
+            await Assert.That(OrleansSerialization.Deserialize<QueueOrderReference>(row.Value.Span))
                 .IsEqualTo(new QueueOrderReference(message.MessageId, QueueEnqueueAuthorityProtocol.First, QueueEnqueueAuthorityProtocol.First));
         }
     }

@@ -36,7 +36,7 @@ internal sealed class AnnProviderQualificationOwner : IDisposable
 
     internal (long AppliedPosition, long StorePosition) ReadCanonicalCut()
         => Store.Read(view => (view.ReadOwnedValue(KeySpace.AppliedBytes) is { } bytes
-            ? NativeSerialization.Deserialize<long>(bytes) : default(long), Store.Position));
+            ? OrleansSerialization.Deserialize<long>(bytes) : default(long), Store.Position));
 
     internal void Reopen()
     {

@@ -7,13 +7,13 @@ using ModelContextProtocol.Protocol;
 
 namespace KeyLoad.IntegrationTests.Features.ClientApi;
 
-/// <summary>Owns the actual official SDK client, native HTTP transport and Aspire HTTP connection.</summary>
+/// <summary>Owns the actual official SDK client, execution HTTP transport and Aspire HTTP connection.</summary>
 internal sealed class McpOfficialClient : IAsyncDisposable
 {
     private readonly HttpClient http;
     private readonly HttpClientTransport transport;
     private readonly McpInitializeHttpObservation observation;
-    private readonly NativeMcpInitializeLogObservation nativeObservation = new();
+    private readonly McpInitializeLogObservation runtimeObservation = new();
     private McpClient? client;
 
     private McpOfficialClient(HttpClient http, HttpClientTransport transport, McpInitializeHttpObservation observation)
@@ -44,18 +44,18 @@ internal sealed class McpOfficialClient : IAsyncDisposable
     /// <param name="node">The actual Aspire endpoint resource.</param>
     /// <param name="key">The persisted credential used at the public boundary.</param>
     /// <param name="cancellationToken">The bounded caller lifetime.</param>
-    /// <returns>The actual native SDK, transport and HTTP resource owner.</returns>
+    /// <returns>The actual execution SDK, transport and HTTP resource owner.</returns>
     internal static Task<McpOfficialClient> ConnectAsync(DistributedApplication app, string node,
         string? key, CancellationToken cancellationToken)
         => ConnectAsync(app, node, key, McpCallerProtocol.ProtocolVersion, cancellationToken);
 
-    /// <summary>Submits an explicit official protocol revision without changing native transport validation.</summary>
+    /// <summary>Submits an explicit official protocol revision without changing execution transport validation.</summary>
     /// <param name="app">The actual running Aspire application.</param>
     /// <param name="node">The discovered resource endpoint.</param>
     /// <param name="key">The actual persisted credential.</param>
     /// <param name="protocolVersion">The exact revision offered by the official SDK.</param>
     /// <param name="cancellationToken">The original bounded caller lifetime.</param>
-    /// <returns>The connected native owner after successful official admission.</returns>
+    /// <returns>The connected execution owner after successful official admission.</returns>
     internal static async Task<McpOfficialClient> ConnectAsync(DistributedApplication app, string node,
         string? key, string protocolVersion, CancellationToken cancellationToken)
     {
@@ -119,19 +119,19 @@ internal sealed class McpOfficialClient : IAsyncDisposable
     {
         try
         {
-            nativeObservation.Start();
+            runtimeObservation.Start();
             client = await McpClient.CreateAsync(transport, new McpClientOptions { ProtocolVersion = protocolVersion },
-                loggerFactory: nativeObservation, cancellationToken: cancellationToken).ConfigureAwait(false);
-            nativeObservation.ThrowIfAny();
+                loggerFactory: runtimeObservation, cancellationToken: cancellationToken).ConfigureAwait(false);
+            runtimeObservation.ThrowIfAny();
         }
         catch (Exception original)
         {
-            observation.WriteAndThrow(original, node, nativeObservation);
+            observation.WriteAndThrow(original, node, runtimeObservation);
             throw;
         }
         finally
         {
-            nativeObservation.Stop();
+            runtimeObservation.Stop();
             observation.Stop();
         }
     }
@@ -145,7 +145,7 @@ internal sealed class McpOfficialClient : IAsyncDisposable
     internal Task<CallToolResult> CallAsync<T>(string toolName, T request, CancellationToken cancellationToken)
         => Client.InvokeKeyLoadToolAsync(toolName, Arguments(request), cancellationToken).AsTask();
 
-    /// <summary>Invokes a bodyless native operation with its exact empty argument contract.</summary>
+    /// <summary>Invokes a bodyless execution operation with its exact empty argument contract.</summary>
     /// <param name="toolName">The frozen public bodyless operation name.</param>
     /// <param name="cancellationToken">The bounded external caller token.</param>
     /// <returns>The official SDK's actual tool result.</returns>
@@ -156,20 +156,20 @@ internal sealed class McpOfficialClient : IAsyncDisposable
     /// <summary>Builds only public tool arguments from the exact canonical serializer.</summary>
     /// <typeparam name="T">The actual canonical request type.</typeparam>
     /// <param name="request">The public request, without trusted caller roles.</param>
-    /// <returns>The argument dictionary passed directly to the native client.</returns>
+    /// <returns>The argument dictionary passed directly to the execution client.</returns>
     internal static Dictionary<string, object?> Arguments<T>(T request) => new(StringComparer.Ordinal)
     {
         [McpCallerProtocol.Request] = JsonSerializer.SerializeToElement(request, JsonDefaults.Options)
     };
 
-    /// <summary>Drains the actual native client before disposing its transport and real HTTP connection.</summary>
-    /// <returns>The completed native resource cleanup.</returns>
+    /// <summary>Drains the actual execution client before disposing its transport and real HTTP connection.</summary>
+    /// <returns>The completed execution resource cleanup.</returns>
     public async ValueTask DisposeAsync()
     {
         var failures = new List<Exception>();
-        if (client is { } native)
+        if (client is { } execution)
         {
-            await ServerFailureObserver.ObserveAsync(() => native.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+            await ServerFailureObserver.ObserveAsync(() => execution.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
         }
         await ServerFailureObserver.ObserveAsync(() => transport.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
         ServerFailureObserver.Observe(http.Dispose, failures);
@@ -177,14 +177,14 @@ internal sealed class McpOfficialClient : IAsyncDisposable
         {
             observation.Dispose();
         }
-        catch (Exception cleanup) when (NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
-        catch (Exception cleanup) when (!NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
+        catch (Exception cleanup) when (CqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
+        catch (Exception cleanup) when (!CqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
         try
         {
-            nativeObservation.Dispose();
+            runtimeObservation.Dispose();
         }
-        catch (Exception cleanup) when (NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
-        catch (Exception cleanup) when (!NativeCqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
+        catch (Exception cleanup) when (CqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
+        catch (Exception cleanup) when (!CqrsBoundaryErrors.IsNonFatal(cleanup)) { failures.Add(cleanup); }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 }

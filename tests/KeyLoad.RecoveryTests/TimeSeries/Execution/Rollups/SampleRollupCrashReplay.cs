@@ -18,9 +18,9 @@ internal static class SampleRollupCrashReplay
         var position = database.Store.Position;
         var acknowledged = SampleRollupCrashOperations.Commit(database, SampleRollupCrashContract.AcknowledgedId,
             SampleRollupCrashContract.Refresh(InitialRevision)).Get<CommitReceipt>();
-        RequireEqual(NativeSerialization.Serialize(acknowledged),
+        RequireEqual(OrleansSerialization.Serialize(acknowledged),
             File.ReadAllBytes(Path.Combine(directory, SampleRollupCrashContract.AcknowledgedReceiptFile)));
-        var operation = NativeSerialization.Deserialize<Command<DatabaseCommand>>(
+        var operation = OrleansSerialization.Deserialize<Command<DatabaseCommand>>(
             File.ReadAllBytes(Path.Combine(directory, SampleRollupCrashContract.OperationFile)));
         var first = database.ApplyEmbedded(operation, cancellationToken: default).Get<CommitReceipt>();
         var kind = drop ? SampleRollupProtocol.DropKind : SampleRollupProtocol.RefreshKind;
@@ -28,14 +28,14 @@ internal static class SampleRollupCrashReplay
         if (first.CommandId != SampleRollupCrashContract.InflightId || first.Token != expectedToken
             || first.Token.AtomicPartitionId != SampleRollupCrashContract.Partition.AtomicPartitionId
             || first.Durability != DurabilityProfile.ProcessDurable || first.Mutations.Length != OneMutation
-            || !NativeSerialization.Serialize(first.Mutations[FirstMutation]).SequenceEqual(
-                NativeSerialization.Serialize(new MutationReceipt(kind, SampleRollupCrashContract.Set,
+            || !OrleansSerialization.Serialize(first.Mutations[FirstMutation]).SequenceEqual(
+                OrleansSerialization.Serialize(new MutationReceipt(kind, SampleRollupCrashContract.Set,
                     SampleRollupCrashContract.Series, ExpectedInflightRevision))))
         {
             throw new InvalidOperationException(SampleRollupCrashContract.Invalid);
         }
         var retry = database.ApplyEmbedded(operation, cancellationToken: default).Get<CommitReceipt>();
-        RequireEqual(NativeSerialization.Serialize(first), NativeSerialization.Serialize(retry));
+        RequireEqual(OrleansSerialization.Serialize(first), OrleansSerialization.Serialize(retry));
         RequireUnchanged(database, before, position);
         VerifyChangedPayload(database, drop);
         RequireEqual(SampleRollupCrashState.Raw(database), File.ReadAllBytes(Path.Combine(directory, SampleRollupCrashContract.RawFile)));
@@ -58,7 +58,7 @@ internal static class SampleRollupCrashReplay
         var before = SampleRollupCrashState.All(database);
         var position = database.Store.Position;
         var retry = SampleRollupCrashOperations.Commit(database, SampleRollupCrashContract.InflightId, changed);
-        RequireEqual(NativeSerialization.Serialize(failure), NativeSerialization.Serialize(retry));
+        RequireEqual(OrleansSerialization.Serialize(failure), OrleansSerialization.Serialize(retry));
         RequireUnchanged(database, before, position);
         RequireEqual(raw, SampleRollupCrashState.Raw(database));
         var after = database.ReadSampleRollup(CrashFixtureValues.Principal, new(SampleRollupCrashContract.Partition,

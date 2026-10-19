@@ -4,7 +4,7 @@ using KeyLoad.IntegrationTests.Features.ClientApi;
 namespace KeyLoad.IntegrationTests.Features.EventStreams;
 
 /// <summary>AC-MCP-002/005/007 and AC-EVENT-004/005/006 real Orleans EventStreams parity.</summary>
-/// <param name="fixture">The initialized actual native Aspire Orleans application.</param>
+/// <param name="fixture">The initialized actual execution Aspire Orleans application.</param>
 [ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = McpCallerProtocol.FixtureKey)]
 [NotInParallel]
 internal sealed class McpEventStreamTests(ClusterFixture fixture)

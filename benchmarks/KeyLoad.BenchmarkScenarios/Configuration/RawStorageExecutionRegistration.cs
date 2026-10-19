@@ -3,7 +3,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
 
-/// <summary>Binds raw-fixture admission through the native generated runner's environment.</summary>
+/// <summary>Binds raw-fixture admission through the execution generated runner's environment.</summary>
 [ConfigurationBinding]
 internal static class RawStorageExecutionRegistration
 {

@@ -9,17 +9,17 @@ instance followed by the same scenario on three cluster nodes, with three resour
 per supported catalog model, eight workload users, one queue operator and at least 10,000
 successful public operations per topology.
 
-- AC-DBGATE-001: the single-instance native TUnit case executes once without
+- AC-DBGATE-001: the single-instance TUnit case executes once without
   skips and passes its complete state, authorization and joined-cleanup checks.
 - AC-DBGATE-002: the three-node case passes after Gate1 on the same source,
-  executable and image-input cohort, including native SQL Queue-to-Graph and
+  executable and image-input cohort, including SQL Queue-to-Graph and
   Graph-to-Queue effects and stable-command SDK/MCP replay.
 - AC-DBGATE-003: an original failed operation, wrong result, unauthorized effect
   or failed cleanup keeps the corresponding gate open.
 
 These criteria map to both cases in
 [FunctionalDatabaseGateTests](../../../tests/KeyLoad.IntegrationTests/DatabaseComposition/Cases/FunctionalDatabase/FunctionalDatabaseGateTests.cs),
-under [ADR-136](../../ADR/ADR-136-native-orleans-partition-ownership.md).
+under [ADR-136](../../ADR/ADR-136-orleans-partition-ownership.md).
 Original local results below retain their original scenario identities; a
 scenario or product repair requires a new matched pair.
 
@@ -50,24 +50,24 @@ sets, blob stores, vector-profile collections, full-text-search collections and
 AnalyticsStore resources.
 Time-series reads and aggregate operations use the three persisted time-series
 sets. User analytics uses three independent canonical AnalyticsStore resources,
-with each bounded native aggregate built from currently authorized event rows.
+with each bounded aggregate built from currently authorized event rows.
 The complete contract remains [AnalyticsStore](../AnalyticsStore.md).
 Use independent data and canonical entity references between models in one database.
 Create eight persisted workload users with writer and reader permissions. A
-separate persisted tenant-local operator has the native administrative role and
+separate persisted tenant-local operator has the administrative role and
 explicit grants for the three queues, as required for dead-letter redrive.
 Verify that ordinary writers cannot redrive and that their refused attempts
 leave the parked message unchanged. Do not trust caller-supplied roles or
 introduce a separate authentication store.
 
 Each model initializer creates its resources once. Whole-operation exercises
-then interleave real SDK, official MCP and native T-SQL operations: create, read,
+then interleave real SDK, official MCP and T-SQL operations: create, read,
 query, update, link, unlink and delete, with literal expected values, reference
 integrity and current persisted authorization assertions. The document initializer
 creates `gate_docs_0/anchor` before dependent models initialize. Iteration IDs are
 unique across workers; each topology owns fresh storage and credentials.
 
-After the parallel model workers join, a native T-SQL request derives a graph
+After the parallel model workers join, a T-SQL request derives a graph
 edge from a ready queue message. A reverse request derives a message in a
 second queue from that edge. SDK and official MCP clients replay both stable
 commands and verify complete receipts, payloads and links. Both messages are
@@ -91,7 +91,7 @@ effect, unknown cleanup outcome or skipped scenario keeps its gate open.
 
 Gate 1 must pass on the genuine single-instance Aspire topology before Gate 2
 runs the same scenario on the genuine three-node cluster. Both gates retain
-original native TUnit results, source and executable identities, model/operation
+original TUnit results, source and executable identities, model/operation
 counts, actual node count, failures and resource cleanup evidence. Source
 presence, a successful build or successful startup alone cannot pass either gate.
 

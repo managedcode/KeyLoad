@@ -15,7 +15,7 @@ internal static class CrashDatabase
     {
         var database = new DatabaseEngine(store, new AuthorizationPolicy(), configuredLimits is null ? CrashExecutionOptions.DatabaseLimits(boundOutbox) : CrashExecutionOptions.DatabaseLimits(configuredLimits),
             CrashExecutionOptions.DueWork(), CrashExecutionOptions.EventSource(), CrashExecutionOptions.Messaging(),
-            CrashExecutionOptions.GraphExecution(), CrashExecutionOptions.ChangeFeedExecution(), CrashExecutionOptions.BlobExecution(), CrashExecutionOptions.NativeClaimsExecution(), CrashExecutionOptions.TimeSeriesExecution());
+            CrashExecutionOptions.GraphExecution(), CrashExecutionOptions.ChangeFeedExecution(), CrashExecutionOptions.RuntimeClaimsExecution(), CrashExecutionOptions.TimeSeriesExecution());
         database.Bootstrap(new(CrashFixtureValues.Principal, tenantId,
                 [new(CrashFixtureValues.Wildcard, CrashFixtureValues.Wildcard, Capability.All)], [CrashFixtureValues.Wildcard])
         {
@@ -36,11 +36,11 @@ internal static class CrashDatabase
         {
             var placement = database.ReadAtomicPartitionPlacement(view, CrashFixtureValues.Principal, partition);
             var applied = view.ReadOwnedValue(KeySpace.AppliedBytes) is { } bytes
-                ? NativeSerialization.Deserialize<long>(bytes) : 0L;
+                ? OrleansSerialization.Deserialize<long>(bytes) : 0L;
             return new(placement.Incarnation, partition.AtomicPartitionId, checked(applied + 1L));
         });
 
     internal static long AppliedPosition(IAtomicStore store)
         => store.Read(view => view.ReadOwnedValue(KeySpace.AppliedBytes) is { } bytes
-            ? NativeSerialization.Deserialize<long>(bytes) : 0L);
+            ? OrleansSerialization.Deserialize<long>(bytes) : 0L);
 }

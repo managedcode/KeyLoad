@@ -8,7 +8,7 @@ namespace KeyLoad;
 /// <param name="Kind">Identifies the trusted operation kind.</param>
 /// <param name="TransactionDomainId">Identifies the transaction domain.</param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.ResourceDefinition)]
+[Orleans.Alias(ContractAliases.ResourceDefinition)]
 public sealed record ResourceDefinition([property: Orleans.Id(0)] string Name, [property: Orleans.Id(1)] ResourceKind Kind, [property: Orleans.Id(2)] string TransactionDomainId)
 {
     private const int InitialSchemaVersion = 1;
@@ -40,13 +40,6 @@ public sealed record ResourceDefinition([property: Orleans.Id(0)] string Name, [
     /// <summary>Gets whether dispatch is paused.</summary>
     [Orleans.Id(10)]
     public bool Paused
-    {
-        get; init;
-    }
-    /// <summary>Gets optional version-one binary limits; null selects immutable blob defaults.</summary>
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    [Orleans.Id(11)]
-    public BlobPolicy? BlobPolicy
     {
         get; init;
     }

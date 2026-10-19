@@ -20,7 +20,7 @@ internal static class SubscriptionProcessingRecoveryContinuation
     {
         var group = SubscriptionCrashScenario.Subscription;
         await ReplayAsync(db, store, original, first, token);
-        var request = NativeSerialization.Deserialize<SubscriptionProcessingRequest>(original.Value!.Input.Span, NativeValidationProfile.PublicInputElements);
+        var request = OrleansSerialization.Deserialize<SubscriptionProcessingRequest>(original.Value!.Input.Span, ValidationProfile.PublicInputElements);
         var retry = request with
         {
             CommandId = Guid.NewGuid()
@@ -29,12 +29,12 @@ internal static class SubscriptionProcessingRecoveryContinuation
             .Get<SubscriptionProcessingResult>();
         await Assert.That(reused.AlreadyProcessed).IsTrue();
         await Assert.That(reused.OriginalEffectsToken).IsEqualTo(first.OriginalEffectsToken);
-        await Assert.That(NativeSerialization.Serialize(reused.Receipt).AsSpan()
-            .SequenceEqual(NativeSerialization.Serialize(first.Receipt))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(reused.Receipt).AsSpan()
+            .SequenceEqual(OrleansSerialization.Serialize(first.Receipt))).IsTrue();
         await HealthyAsync(db, token);
         await ReplayAsync(db, store, original, first, token);
         var position = store.Position;
-        var identity = NativeSerialization.Serialize(store.Identity);
+        var identity = OrleansSerialization.Serialize(store.Identity);
         var outcomeKey = KeySpace.PartitionOutcome(group.Source.Partition, CrashFixtureValues.Principal, original.CommandId);
         var inboxKey = Key("subscription-inbox", group, 1L, CrashFixtureValues.Handler, 1L);
         var outcome = store.Read(view => view.ReadOwnedValue(outcomeKey))!;
@@ -45,11 +45,11 @@ internal static class SubscriptionProcessingRecoveryContinuation
             RecoveryExecutionOptions.PointCacheExecution());
         var reopened = TargetInboxRecoveryDatabase.Open(cold);
         await Assert.That(cold.Position).IsEqualTo(position);
-        await Assert.That(NativeSerialization.Serialize(cold.Identity).AsSpan().SequenceEqual(identity)).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(cold.Identity).AsSpan().SequenceEqual(identity)).IsTrue();
         await Assert.That(cold.Read(view => view.ReadOwnedValue(outcomeKey))!.AsSpan().SequenceEqual(outcome)).IsTrue();
         await Assert.That(cold.Read(view => view.ReadOwnedValue(inboxKey))!.AsSpan().SequenceEqual(inbox)).IsTrue();
-        await Assert.That(NativeSerialization.Serialize(reopened.ReadEventSource(CrashFixtureValues.Principal,
-            new(group.Source), token).Events).AsSpan().SequenceEqual(NativeSerialization.Serialize(source))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(reopened.ReadEventSource(CrashFixtureValues.Principal,
+            new(group.Source), token).Events).AsSpan().SequenceEqual(OrleansSerialization.Serialize(source))).IsTrue();
         await ReplayAsync(reopened, cold, original, first, token);
         await SourceAsync(reopened, true, token);
         await Assert.That(reopened.GetSubscription(CrashFixtureValues.Principal, SubscriptionCrashScenario.Subscription).Checkpoint).IsEqualTo(2L);
@@ -60,15 +60,15 @@ internal static class SubscriptionProcessingRecoveryContinuation
     {
         var key = KeySpace.PartitionOutcome(SubscriptionCrashScenario.Partition, CrashFixtureValues.Principal, original.CommandId);
         var saved = store.Read(view => view.ReadOwnedValue(key))
-            ?? throw new InvalidOperationException("The original native processing receipt is absent.");
+            ?? throw new InvalidOperationException("The original execution processing receipt is absent.");
         var inboxKey = Key("subscription-inbox", SubscriptionCrashScenario.Subscription, 1L, CrashFixtureValues.Handler, 1L);
         var inbox = store.Read(view => view.ReadOwnedValue(inboxKey))
-            ?? throw new InvalidOperationException("The original native processing inbox is absent.");
+            ?? throw new InvalidOperationException("The original execution processing inbox is absent.");
         var position = store.Position;
         for (var repeat = 0; repeat < 2; repeat++)
         {
             var result = db.Apply(original).Get<SubscriptionProcessingResult>();
-            await Assert.That(NativeSerialization.Serialize(result).AsSpan().SequenceEqual(NativeSerialization.Serialize(expected))).IsTrue();
+            await Assert.That(OrleansSerialization.Serialize(result).AsSpan().SequenceEqual(OrleansSerialization.Serialize(expected))).IsTrue();
             await Assert.That(store.Position).IsEqualTo(position);
             await Assert.That(store.Read(view => view.ReadOwnedValue(key))!.AsSpan().SequenceEqual(saved)).IsTrue();
             await Assert.That(store.Read(view => view.ReadOwnedValue(inboxKey))!.AsSpan().SequenceEqual(inbox)).IsTrue();

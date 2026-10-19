@@ -25,11 +25,11 @@ internal static class SdkResponseAdmissionAssertions
         var expected = new OutboxEntry(FirstSequence, FirstOrdinal, owner.ExpectedToken,
             DateTimeOffset.UnixEpoch, mutation, effect, Before: null, After: after);
         var payload = snapshot.EntryBytes[FirstOrdinal];
-        var actual = NativeSerialization.Deserialize<OutboxEntry>(payload);
+        var actual = OrleansSerialization.Deserialize<OutboxEntry>(payload);
         await EqualAsync(actual, expected);
         await Assert.That(actual.Receipt.CompositionReferences.IsEmpty).IsTrue();
         var head = new OutboxHead(FirstSequence, FirstSequence, SingleEntry, payload.Length);
-        await EqualAsync(NativeSerialization.Deserialize<OutboxHead>(snapshot.HeadBytes!), head);
+        await EqualAsync(OrleansSerialization.Deserialize<OutboxHead>(snapshot.HeadBytes!), head);
         await EqualAsync(database.Database.GetOutboxStatus(Root, database.Partition), new OutboxStatus(head, []));
     }
 

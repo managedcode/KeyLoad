@@ -16,12 +16,12 @@ public sealed partial class ReadExecutionBudget
     private ReadExecutionBudgetScopedReadGrants? readGrants;
     private ReadExecutionBudgetLifetime executionLifetime;
     private long bytes;
-    private ReadExecutionBudgetNativeWork nativeWork;
+    private ReadExecutionBudgetWork runtimeWork;
     private int resultBytesLimit;
     private long textTokens;
 
     /// <summary>Starts a budget for one operation; the clock does not alter the hosting runtime.</summary>
-    /// <param name="options">Native centrally validated operation limits, captured once for this read.</param>
+    /// <param name="options">Execution centrally validated operation limits, captured once for this read.</param>
     /// <param name="cancellationToken">Caller cancellation for all subsequent work.</param>
     /// <param name="timeProvider">Optional operation clock, defaulting to system time.</param>
     public ReadExecutionBudget(IOptions<DatabaseLimits> options, TimeProvider? timeProvider = null, CancellationToken cancellationToken = default)
@@ -31,7 +31,7 @@ public sealed partial class ReadExecutionBudget
         limits.Validate();
         var lifetimeBound = TimeSpan.FromSeconds(limits.QueryDeadlineSeconds);
         resultBytesLimit = limits.MaxBatchBytes;
-        nativeWork = new(limits.MaxQueryReadBytes, limits.MaxScanRecords);
+        runtimeWork = new(limits.MaxQueryReadBytes, limits.MaxScanRecords);
         executionLifetime = new(lifetimeBound, timeProvider, cancellationToken);
     }
 
@@ -48,24 +48,24 @@ public sealed partial class ReadExecutionBudget
     internal CancellationToken Cancellation => executionLifetime.Cancellation;
     internal int MaximumResultBytes => lifetimeBindings?.AvailableResultBytes(resultBytesLimit) ?? resultBytesLimit;
     internal int LifetimeResultBytesLimit => resultBytesLimit;
-    internal long MaximumNativeReadBytes => nativeWork.MaximumBytes;
-    internal int MaximumNativeScanRecords => nativeWork.MaximumRecords;
-    internal int ConstrainedNativeRecords => nativeWork.ExaminedRecords + (readGrants?.ExaminedRecords ?? EmptyClaimedRecords);
+    internal long RuntimeMaximumReadBytes => runtimeWork.MaximumBytes;
+    internal int MaximumScanRecords => runtimeWork.MaximumRecords;
+    internal int ConstrainedRecords => runtimeWork.ExaminedRecords + (readGrants?.ExaminedRecords ?? EmptyClaimedRecords);
 
-    internal void ConstrainNativeWork(long maximumBytes, int maximumRecords)
+    internal void ConstrainWork(long maximumBytes, int maximumRecords)
     {
         Check();
-        nativeWork.Constrain(maximumBytes, maximumRecords, bytes + (readGrants?.ReservedBytes ?? NoReservedReadBytes),
+        runtimeWork.Constrain(maximumBytes, maximumRecords, bytes + (readGrants?.ReservedBytes ?? NoReservedReadBytes),
             readGrants?.ClaimedRecords ?? EmptyClaimedRecords);
     }
 
-    internal void ImportNativeObservation(long observedBytes, int observedRecords)
+    internal void ImportObservation(long observedBytes, int observedRecords)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(observedBytes);
         Check();
-        nativeWork.RequireObservation(observedRecords, RemainingReadGrantRecords);
+        runtimeWork.RequireObservation(observedRecords, RemainingReadGrantRecords);
         ChargeBytes(observedBytes);
-        nativeWork.Record(observedRecords);
+        runtimeWork.Record(observedRecords);
     }
 
     internal void ConstrainResultBytes(int maximumBytes)
@@ -103,7 +103,7 @@ public sealed partial class ReadExecutionBudget
     {
         Check();
         ArgumentOutOfRangeException.ThrowIfNegative(count);
-        if (count > nativeWork.MaximumBytes - bytes - (readGrants?.ReservedBytes ?? NoReservedReadBytes))
+        if (count > runtimeWork.MaximumBytes - bytes - (readGrants?.ReservedBytes ?? NoReservedReadBytes))
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, ReadBytesExceeded);
         }
@@ -170,8 +170,8 @@ public sealed partial class ReadExecutionBudget
     public long MeasureResult<T>(T result)
         => ResultByteCounterStream.Measure(this, result);
     private ReadExecutionBudgetScopedReadGrants ReadGrants => readGrants ??= new(this);
-    internal long RemainingReadGrantBytes => nativeWork.MaximumBytes - bytes - (readGrants?.ReservedBytes ?? NoReservedReadBytes);
-    internal int RemainingReadGrantRecords => nativeWork.MaximumRecords - nativeWork.ExaminedRecords - (readGrants?.ClaimedRecords ?? EmptyClaimedRecords);
+    internal long RemainingReadGrantBytes => runtimeWork.MaximumBytes - bytes - (readGrants?.ReservedBytes ?? NoReservedReadBytes);
+    internal int RemainingReadGrantRecords => runtimeWork.MaximumRecords - runtimeWork.ExaminedRecords - (readGrants?.ClaimedRecords ?? EmptyClaimedRecords);
     private const int EmptyClaimedRecords = 0;
     internal void AcceptReadGrantBytes(long count) => bytes += count;
     internal void CompleteReadGrant(ReadExecutionBudgetReadGrant grant) => ReadGrants.CompleteReadGrant(grant);
@@ -187,23 +187,23 @@ public sealed partial class ReadExecutionBudget
     internal void ChargeReadGrant(ReadExecutionBudgetReadGrant grant, long count) => ReadGrants.ChargeReadGrant(grant, count);
     internal void ImportReadGrant(ReadExecutionBudgetReadGrant grant, long count, int records)
         => ReadGrants.ImportReadGrant(grant, count, records);
-    internal void ChargeNativeReadRecord(long count)
+    internal void ChargeReadRecord(long count)
     {
         if (readGrants is { } grants)
         {
-            grants.ChargeNativeReadRecord(count);
+            grants.ChargeReadRecord(count);
         }
         else
         {
-            ChargeUnscopedNativeRecord(count);
+            ChargeUnscopedRecord(count);
         }
     }
 
-    internal void ChargeUnscopedNativeRecord(long count)
+    internal void ChargeUnscopedRecord(long count)
     {
-        nativeWork.RequireRecord(RemainingReadGrantRecords);
+        runtimeWork.RequireRecord(RemainingReadGrantRecords);
         ChargeBytes(count);
-        nativeWork.Record(ReadExecutionBudgetNativeWork.SingleRecord);
+        runtimeWork.Record(ReadExecutionBudgetWork.SingleRecord);
     }
 
 }

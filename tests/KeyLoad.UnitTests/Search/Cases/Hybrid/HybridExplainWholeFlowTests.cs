@@ -51,8 +51,8 @@ internal sealed class HybridExplainWholeFlowTests
         await Assert.That(error.Code).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(error.Message).IsEqualTo(FieldDenied);
         using var canceled = new CancellationTokenSource();
-        var nativeBefore = db.Store.GetReadDiagnostics();
-        clock.Arm(() => db.Store.GetReadDiagnostics().RangeExaminedBytes > nativeBefore.RangeExaminedBytes,
+        var runtimeBeforeCore = db.Store.GetReadDiagnostics();
+        clock.Arm(() => db.Store.GetReadDiagnostics().RangeExaminedBytes > runtimeBeforeCore.RangeExaminedBytes,
             canceled.Cancel);
         GraphSearchResult? partial = null;
         OperationCanceledException cancellation;
@@ -64,7 +64,7 @@ internal sealed class HybridExplainWholeFlowTests
         }
         finally { clock.Disarm(); }
         await Assert.That(clock.Triggered).IsTrue();
-        await Assert.That(db.Store.GetReadDiagnostics().RangeExaminedBytes).IsGreaterThan(nativeBefore.RangeExaminedBytes);
+        await Assert.That(db.Store.GetReadDiagnostics().RangeExaminedBytes).IsGreaterThan(runtimeBeforeCore.RangeExaminedBytes);
         await Assert.That(cancellation.CancellationToken).IsEqualTo(canceled.Token);
         await Assert.That(partial).IsNull();
         await Assert.That(HybridExplainWholeFlow.Snapshot(db)).IsEquivalentTo(before, CollectionOrdering.Matching);

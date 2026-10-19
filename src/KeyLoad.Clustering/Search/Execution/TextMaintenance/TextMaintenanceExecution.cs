@@ -12,10 +12,10 @@ internal static class TextMaintenanceExecution
         Func<string, CancellationToken, Task<GrainOperationReply>> executeChild, Func<Guid, Task> abort,
         IServiceProvider services, GrainRequestCodec codec,
         IOptions<GrainRoutingOptions> routing, ILogger diagnostics,
-        ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer, NativeCqrsStreamPurpose purpose, IResourceLifetimeWorkBinding binding)
+        ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer, CqrsStreamPurpose purpose, IResourceLifetimeWorkBinding binding)
     {
         ArgumentNullException.ThrowIfNull(binding);
-        var request = GrainNativePayload.ReadCommand<TextIndexMaintenanceRequest>(parent.Payload);
+        var request = GrainPayload.ReadCommand<TextIndexMaintenanceRequest>(parent.Payload);
         purpose.EnableTextMaintenance(request.Mode);
         var children = new TextMaintenanceChildCalls(parent, executeChild, abort, services, codec, diagnostics, binding);
         TextIndexMaintenanceResult result;

@@ -29,7 +29,7 @@ internal static class AggregateSnapshotRaceValues
         await ServerFailureObserver.ObserveAsync(async () =>
             await Assert.That(KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(fixture.Store))
                 .IsEquivalentTo(image, CollectionOrdering.Matching), failures);
-        await ServerFailureObserver.ObserveAsync(() => NativeReadCutStoreStateAssertions.AssertIdentityAndPositionAsync(
+        await ServerFailureObserver.ObserveAsync(() => ReadCutStoreStateAssertions.AssertIdentityAndPositionAsync(
             fixture.Store, identity, position), failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }
@@ -49,7 +49,7 @@ internal static class AggregateSnapshotRaceValues
         var expected = new CommitReceipt(fixture.SeedOperation.CommandId, new(fixture.Store.Identity.Incarnation, fixture.Harness.Partition.AtomicPartitionId, fixture.SeedPosition), [new("appendEvents", AggregateSnapshotRaceFixture.StreamSet, AggregateSnapshotRaceFixture.StreamId, 3)], DurabilityProfile.ProcessDurable, 1);
         await EqualAsync(fixture.SeedResult.Get<CommitReceipt>(), expected);
         await Assert.That(fixture.SeedResult.Get<CommitReceipt>().Mutations.Single().CompositionReferences).IsEmpty();
-        await NativeReplayResultAssertions.Same<CommitReceipt>(fixture.Database.Apply(fixture.SeedOperation), fixture.SeedResult);
+        await ReplayResultAssertions.Same<CommitReceipt>(fixture.Database.Apply(fixture.SeedOperation), fixture.SeedResult);
         var raw = fixture.Store.Read(view => view.ReadOwnedValue(KeySpace.PartitionOutcome(
             fixture.Harness.Partition, "root", fixture.SeedOperation.CommandId)));
         await Assert.That(raw is not null && raw.AsSpan().SequenceEqual(fixture.SeedRaw)).IsTrue();
@@ -71,7 +71,7 @@ internal static class AggregateSnapshotRaceValues
                 }
                 else if (Errors.Code(original.Result.Problem) is null)
                 {
-                    await NativeReplayResultAssertions.Same<CommitReceipt>(actual, original.Result);
+                    await ReplayResultAssertions.Same<CommitReceipt>(actual, original.Result);
                 }
                 else
                 {

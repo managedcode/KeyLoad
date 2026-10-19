@@ -13,7 +13,7 @@ internal sealed class AggregateSnapshotRaceFixture : IDisposable
     internal const string StreamSet = "snapshot-race-events";
     internal const string StreamId = "counter";
     internal const string Worker = "snapshot-race-worker";
-    internal const string Reducer = "counter.reducer.v1";
+    internal const string Reducer = "counter.reducer";
     internal const string PayloadRead = "race.payload.read";
     internal const string PayloadUse = "race.payload.use";
     internal const string HeaderRead = "race.header.read";

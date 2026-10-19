@@ -2,7 +2,7 @@ namespace KeyLoad;
 
 /// <summary>Contains database input and original facts prepared before ordered atomic application.</summary>
 /// <param name="Kind">The typed database operation.</param>
-/// <param name="Input">The generated native encoding of that operation's business input.</param>
+/// <param name="Input">The generated execution encoding of that operation's business input.</param>
 /// <param name="Fingerprint">The immutable fingerprint of the original public input and command identity.</param>
 /// <param name="RetryDecisions">Original bounded queue retry choices, when required.</param>
 /// <param name="ResourceAdmission">Original resource lifetimes captured for the operation.</param>

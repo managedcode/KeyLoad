@@ -16,11 +16,11 @@ internal static class QueueTerminalInspectionWholeFlow
             await KeyLoad.Server.ServerFailureObserver.ObserveAsync(
                 () => CompleteAsync(fixture, terminalState, foreignBody, failures, token), failures);
         }
-        catch (Exception error) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+        catch (Exception error) when (global::KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(error))
         {
             failures.Add(error);
         }
-        catch (Exception error) when (!global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+        catch (Exception error) when (!global::KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(error))
         {
             failures.Add(error);
         }
@@ -41,7 +41,7 @@ internal static class QueueTerminalInspectionWholeFlow
         await QueueTerminalInspectionAssertions.ReplayAsync(fixture.Database, fixture.Store, state);
         var original = QueueLifecycleConditionAssertions.Capture(fixture.Store);
         var injected = foreignBody
-            ? NativeSerialization.Serialize(NativeSerialization.Deserialize<MessageBody>(body) with
+            ? OrleansSerialization.Serialize(OrleansSerialization.Deserialize<MessageBody>(body) with
             {
                 Id = "foreign-terminal-body"
             })

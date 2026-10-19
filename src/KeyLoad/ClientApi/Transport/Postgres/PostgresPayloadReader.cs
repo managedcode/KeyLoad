@@ -6,7 +6,7 @@ namespace KeyLoad.Server;
 internal ref struct PostgresPayloadReader(ReadOnlySpan<byte> bytes)
 {
     private static readonly UTF8Encoding Utf8 = new(false, true);
-    private const string InvalidPayload = "The native SQL payload is invalid.";
+    private const string InvalidPayload = "The execution SQL payload is invalid.";
     private ReadOnlySpan<byte> remaining = bytes;
 
     internal int Int32()

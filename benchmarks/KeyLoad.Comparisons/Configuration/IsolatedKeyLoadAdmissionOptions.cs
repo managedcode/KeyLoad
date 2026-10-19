@@ -42,7 +42,7 @@ public sealed class IsolatedKeyLoadAdmissionOptions
 
     /// <summary>Derives the exact HTTP admission options from the bound scenario policy.</summary>
     /// <param name="options">The validated isolated scenario policy.</param>
-    /// <returns>The validated native HTTP options used by nodes and observers.</returns>
+    /// <returns>The validated execution HTTP options used by nodes and observers.</returns>
     [ConfigurationBinding]
     public static IOptions<HttpAdmissionLimits> CreateHttpOptions(IOptions<IsolatedKeyLoadAdmissionOptions> options)
     {

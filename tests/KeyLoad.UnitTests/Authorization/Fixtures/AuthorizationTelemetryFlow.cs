@@ -23,7 +23,7 @@ internal static class AuthorizationTelemetryFlow
         var ambient = Activity.Current;
         using (var callers = new AuthorizationTelemetryCallerActivities(state))
         {
-            await AuthorizationTelemetryNativeAssertions.CallerAsync(callers);
+            await RuntimeAuthorizationTelemetryAssertions.CallerAsync(callers);
             var caller = callers.Current;
             await Assert.That(caller!.Recorded).IsTrue();
             var unsafeParent = state is AuthorizationUnsafeSpanState.InheritedParentBaggage or AuthorizationUnsafeSpanState.ExcessParentLinks;
@@ -50,7 +50,7 @@ internal static class AuthorizationTelemetryFlow
         fixture.UnsafeState = AuthorizationUnsafeSpanState.None;
         using (var healthyCaller = new AuthorizationTelemetryCallerActivities(AuthorizationUnsafeSpanState.None))
         {
-            await AuthorizationTelemetryNativeAssertions.CallerAsync(healthyCaller);
+            await RuntimeAuthorizationTelemetryAssertions.CallerAsync(healthyCaller);
             using var healthy = await SendAsync(fixture, repairPersistedMember
                 ? AuthorizationTelemetryTestProtocol.MemberKey : AuthorizationTelemetryTestProtocol.AdministratorKey,
                 request with

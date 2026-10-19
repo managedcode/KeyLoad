@@ -2,7 +2,7 @@ using System.Text.Json;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
-/// <summary>Closed pinned-DCP alias acceptance data; no native provider or election proof.</summary>
+/// <summary>Closed pinned-DCP alias acceptance data; no execution provider or election proof.</summary>
 internal sealed class MongoReadinessIdentityTests
 {
     private const string Node = "isolated-mongo-1";
@@ -10,7 +10,7 @@ internal sealed class MongoReadinessIdentityTests
     private const string Image = "mongo:8.3.9@sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
     private const string Id = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
     private const string ShortId = "aaaaaaaaaaaa";
-    private const string NativeAlias = "isolated-mongo-1.dev.internal";
+    private const string RuntimeAlias = "isolated-mongo-1.dev.internal";
     private const string Network = "aspire-session-network-accepted";
     private const string IdKey = "id";
     private const string NameKey = "name";
@@ -22,9 +22,9 @@ internal sealed class MongoReadinessIdentityTests
 
     [Test]
     [Arguments(1)]
-    public async Task PinnedDcpResourceMultiplicityAndExactNativeAliasesAreAccepted(int count)
+    public async Task PinnedDcpResourceMultiplicityAndExactAliasesAreAccepted(int count)
     {
-        var aliases = Enumerable.Repeat(Node, count).Concat([NativeAlias, Name, Id, ShortId]).ToArray();
+        var aliases = Enumerable.Repeat(Node, count).Concat([RuntimeAlias, Name, Id, ShortId]).ToArray();
         var actual = Read(aliases);
         actual.RequireNode(Name, Image, Node);
         await Assert.That(actual.Name).IsEqualTo(Name);
@@ -33,7 +33,7 @@ internal sealed class MongoReadinessIdentityTests
 
     [Test]
     [Arguments("resource")]
-    [Arguments("native")]
+    [Arguments("execution")]
     [Arguments("name")]
     [Arguments("id")]
     [Arguments("short")]
@@ -42,10 +42,10 @@ internal sealed class MongoReadinessIdentityTests
     {
         List<string> aliases =
         [
-            Node, NativeAlias, Name, Id, ShortId,
+            Node, RuntimeAlias, Name, Id, ShortId,
             category switch
             {
-                "resource" => Node, "native" => NativeAlias, "name" => Name, "id" => Id,
+                "resource" => Node, "execution" => RuntimeAlias, "name" => Name, "id" => Id,
                 "short" => ShortId, _ => "isolated-mongo-2"
             }
         ];
@@ -60,13 +60,13 @@ internal sealed class MongoReadinessIdentityTests
     [Test]
     [Arguments(false)]
     [Arguments(true)]
-    public async Task BothSelectedResourceAndNativeDcpAliasAreRequired(bool omitResource)
+    public async Task BothSelectedResourceAndDcpAliasAreRequired(bool omitResource)
     {
-        var actual = Read(omitResource ? [NativeAlias, Name] : [Node, Name]);
+        var actual = Read(omitResource ? [RuntimeAlias, Name] : [Node, Name]);
         await Assert.That(() => actual.RequireNode(Name, Image, Node)).Throws<InvalidOperationException>();
     }
 
-    private static MongoNativeReadinessChecksIdentity Read(string[] aliases)
+    private static MongoReadinessChecksIdentity Read(string[] aliases)
     {
         var input = new Dictionary<string, object>(StringComparer.Ordinal)
         {
@@ -80,6 +80,6 @@ internal sealed class MongoReadinessIdentityTests
             },
             [LabelsKey] = new Dictionary<string, string>(StringComparer.Ordinal)
         };
-        return MongoNativeReadinessChecksIdentity.Parse(JsonSerializer.Serialize(input));
+        return MongoReadinessChecksIdentity.Parse(JsonSerializer.Serialize(input));
     }
 }

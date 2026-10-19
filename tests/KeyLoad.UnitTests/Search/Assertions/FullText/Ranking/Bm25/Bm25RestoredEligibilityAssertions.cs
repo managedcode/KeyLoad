@@ -14,7 +14,7 @@ internal static class Bm25RestoredEligibilityAssertions
         (long AppliedPosition, long StorePosition) CanonicalCut, string[] Rows) Cut(
         IAtomicStore store, DatabaseEngine database,
         (long AppliedPosition, long StorePosition) canonicalCut, CancellationToken token)
-        => (NativeSerialization.Serialize(store.Identity), store.Position, database.LastApplied, canonicalCut,
+        => (OrleansSerialization.Serialize(store.Identity), store.Position, database.LastApplied, canonicalCut,
             Bm25PortableFamilyBytes.Complete(store, database.EvaluationClock, token));
 
     internal static async Task SameAsync(
@@ -28,7 +28,7 @@ internal static class Bm25RestoredEligibilityAssertions
         await Bm25PortableFamilyBytes.SameAsync(expected.Rows, actual.Rows);
     }
 
-    internal static DistributedTextStatisticsV1? Current(EventingArtifactFixture fixture, string subject)
+    internal static DistributedTextStatistics? Current(EventingArtifactFixture fixture, string subject)
         => fixture.Database.WithQueryView(subject, fixture.Source.Partition, Bm25PortableFamilyBackupSeed.Collection,
             (view, principal, resource) => fixture.Database.ReadBm25CorpusCurrent(view, principal, resource,
                 fixture.Source.Partition, Bm25PortableFamilyBackupSeed.Collection, Bm25PortableFamilyBackupSeed.Field,
@@ -60,8 +60,8 @@ internal static class Bm25RestoredEligibilityAssertions
             : fixture.ReadTargetIssuedOperation(operation.CommandId);
         await Assert.That(retained.Value!.Input.Span.SequenceEqual(operation.Value!.Input.Span)).IsTrue();
         await Assert.That(operation.Value!.Input.IsEmpty).IsFalse();
-        await Assert.That(NativeSerialization.Serialize(retained).AsSpan()
-            .SequenceEqual(NativeSerialization.Serialize(operation))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(retained).AsSpan()
+            .SequenceEqual(OrleansSerialization.Serialize(operation))).IsTrue();
         var actual = fixture.SubmitIssued(database, operation, cancellationToken: token).Get<CommitReceipt>();
         await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(receipt))).IsTrue();
         var stored = OutcomeStoreOracle.ReadPartition(store, fixture.Source.Partition,

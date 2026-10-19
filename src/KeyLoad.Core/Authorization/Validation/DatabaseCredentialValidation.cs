@@ -6,8 +6,8 @@ namespace KeyLoad.Core;
 internal static class DatabaseCredentialValidation
 {
     internal const string UnavailableCredentialDetail = "The credential is unavailable or expired.";
-    private const string NativeCredentialVerifierInvalid = "A credential verifier is invalid.";
-    private const int NativeCredentialDigestBytes = 32;
+    private const string CredentialVerifierInvalid = "A credential verifier is invalid.";
+    private const int CredentialDigestBytes = 32;
     private const string CredentialIdentityInvalid = "The authenticated credential identity is inconsistent.";
     private const string PrincipalIdentityInvalid = "The persisted principal identity is inconsistent.";
 
@@ -18,13 +18,13 @@ internal static class DatabaseCredentialValidation
         byte[] verifier;
         try
         {
-            verifier = key is null ? new byte[NativeCredentialDigestBytes] : Convert.FromHexString(key.Verifier);
+            verifier = key is null ? new byte[CredentialDigestBytes] : Convert.FromHexString(key.Verifier);
         }
         catch (FormatException)
         {
-            throw Errors.Fail(ErrorCode.Corruption, NativeCredentialVerifierInvalid);
+            throw Errors.Fail(ErrorCode.Corruption, CredentialVerifierInvalid);
         }
-        if (witness.Digest.Length != NativeCredentialDigestBytes || key is null
+        if (witness.Digest.Length != CredentialDigestBytes || key is null
             || !CryptographicOperations.FixedTimeEquals(witness.Digest.Span, verifier)
             || key.Revoked || key.ExpiresAt <= now || expectedPrincipal is not null && key.PrincipalId != expectedPrincipal)
         {

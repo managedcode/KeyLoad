@@ -91,8 +91,8 @@ internal static class SampleRangeBudgetAssertions
         var nextPosition = checked(previousPosition + 1);
         await Assert.That(fixture.Store.Position).IsEqualTo(nextPosition);
         var expected = new CommitReceipt(operation.CommandId, new(fixture.Store.Identity.Incarnation, fixture.Partition.AtomicPartitionId, nextPosition), [new(AppendKind, SampleAggregateTestData.Set, SampleAggregateTestData.Series, AppendedMaximumSequence)], DurabilityProfile.ProcessDurable, 1);
-        await Assert.That(NativeSerialization.Serialize(receipt).SequenceEqual(
-            NativeSerialization.Serialize(expected))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(receipt).SequenceEqual(
+            OrleansSerialization.Serialize(expected))).IsTrue();
     }
 
     private static async Task SameRowsAsync(SampleRecord[] actual, SampleRecord[] expected)
@@ -100,8 +100,8 @@ internal static class SampleRangeBudgetAssertions
         await Assert.That(actual.Length).IsEqualTo(expected.Length);
         for (var index = 0; index < expected.Length; index++)
         {
-            await Assert.That(NativeSerialization.Serialize(actual[index]).SequenceEqual(
-                NativeSerialization.Serialize(expected[index]))).IsTrue();
+            await Assert.That(OrleansSerialization.Serialize(actual[index]).SequenceEqual(
+                OrleansSerialization.Serialize(expected[index]))).IsTrue();
         }
     }
 }

@@ -5,7 +5,7 @@ namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 internal sealed class IsolatedResourceLogCaptureStopFixture : IAsyncDisposable
 {
-    private static TimeSpan DisposalDeadline => NativeExecutionPolicyFixture.Harness().Value.FixtureDisposalTimeout;
+    private static TimeSpan DisposalDeadline => ExecutionPolicyFixture.Harness().Value.FixtureDisposalTimeout;
 
     private IsolatedResourceLogCaptureStopFixture(DistributedApplication application,
         ContainerResource resource, ContainerResource comparisonResource, string resourceName)
@@ -13,7 +13,7 @@ internal sealed class IsolatedResourceLogCaptureStopFixture : IAsyncDisposable
         Application = application;
         Resource = resource;
         ComparisonResource = comparisonResource;
-        Capture = new ComparisonTestLogCapture(Application, NativeExecutionPolicyFixture.Harness(), [resourceName]);
+        Capture = new ComparisonTestLogCapture(Application, ExecutionPolicyFixture.Harness(), [resourceName]);
     }
 
     internal DistributedApplication Application

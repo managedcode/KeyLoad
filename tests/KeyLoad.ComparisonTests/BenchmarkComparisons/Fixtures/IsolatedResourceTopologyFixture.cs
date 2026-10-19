@@ -11,7 +11,7 @@ internal sealed class IsolatedResourceTopologyFixture : IAsyncDisposable
 {
     internal const string RunnerName = "comparisons";
     internal const string DataMount = "/data";
-    internal const string NativePrefix = "Benchmarks__Native__";
+    internal const string RuntimePrefix = "Benchmarks__Execution__";
     private const string TemporaryPrefix = "keyload-isolated-model-";
     private const string SolutionFile = "KeyLoad.slnx";
     private const string AppHostDirectory = "build/KeyLoad.LoadTests.AppHost";

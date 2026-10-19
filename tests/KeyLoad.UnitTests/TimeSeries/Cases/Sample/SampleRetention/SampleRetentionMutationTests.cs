@@ -135,8 +135,8 @@ internal sealed class SampleRetentionMutationTests
             await Assert.That(actualMutation.CompositionReferences.ToArray()).IsEquivalentTo(
                 expectedMutation.CompositionReferences.ToArray(), TUnit.Assertions.Enums.CollectionOrdering.Matching);
         }
-        await Assert.That(NativeSerialization.Serialize(actual)).IsEquivalentTo(
-            NativeSerialization.Serialize(expected), TUnit.Assertions.Enums.CollectionOrdering.Matching);
+        await Assert.That(OrleansSerialization.Serialize(actual)).IsEquivalentTo(
+            OrleansSerialization.Serialize(expected), TUnit.Assertions.Enums.CollectionOrdering.Matching);
     }
 
     private static CommitReceipt Expire(TestDatabase db, DateTimeOffset before, int maximumDeletes,

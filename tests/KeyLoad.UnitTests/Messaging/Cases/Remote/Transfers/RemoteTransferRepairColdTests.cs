@@ -3,10 +3,10 @@ namespace KeyLoad.UnitTests.Features.Messaging;
 internal sealed class RemoteTransferRepairColdTests
 {
     [Test]
-    public Task NativeDeniedAcceptAndCompleteRequireFreshPolicyRepairAndBoundedSourceCasAcrossTwoColdCuts()
+    public Task DeniedAcceptAndCompleteRequireFreshPolicyRepairAndBoundedSourceCasAcrossTwoColdCuts()
         => RemoteTransferRepairColdTrial.RunAsync(RemoteTransferRepairColdProtocol.FullCeiling);
 
     [Test]
-    public Task NativeRepairCeilingRetainsOriginalDenialsThenExplicitOperatorCompleteSurvivesTwoColdCuts()
+    public Task RepairCeilingRetainsOriginalDenialsThenExplicitOperatorCompleteSurvivesTwoColdCuts()
         => RemoteTransferRepairColdTrial.RunAsync(RemoteTransferRepairColdProtocol.ExhaustedCeiling);
 }

@@ -4,7 +4,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Core.Features.GraphTraversal;
 
-/// <summary>Runs explicit bounded breadth-first depth frontiers over native adjacency ranges.</summary>
+/// <summary>Runs explicit bounded breadth-first depth frontiers over execution adjacency ranges.</summary>
 internal sealed class GraphShortestPathReader
 {
     private const int ZeroHops = 0;
@@ -110,7 +110,7 @@ internal sealed class GraphShortestPathReader
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, EdgeBudgetExceeded);
         }
-        var edgeId = NativeSerialization.Deserialize<string>(value)
+        var edgeId = OrleansSerialization.Deserialize<string>(value)
             ?? throw Errors.Fail(ErrorCode.Corruption, MissingEdge);
         var edge = budget.ReadRecord<EdgeRecord>(view, KeySpace.Partition(EdgeSpace,
             request.Partition, request.Graph, edgeId));

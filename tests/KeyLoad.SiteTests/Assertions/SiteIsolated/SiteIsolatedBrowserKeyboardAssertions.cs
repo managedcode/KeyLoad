@@ -16,7 +16,7 @@ internal static class SiteIsolatedBrowserKeyboardAssertions
         "active:!!e&&document.activeElement===e,value:typeof e?.value==='string'?e.value.slice(0,8):''," +
         "index:e?.selectedIndex??-1}})()";
 
-    public static async Task AssertNativeNodeSelectionAsync(SiteBrowserCdpClient cdp, JsonElement projection, CancellationToken token)
+    public static async Task AssertNodeSelectionAsync(SiteBrowserCdpClient cdp, JsonElement projection, CancellationToken token)
     {
         const string focus = "(()=>{const e=document.querySelector('#isolated-node-count');e.focus();return document.activeElement===e;})()";
         await Assert.That((await cdp.EvaluateAsync(focus, false, token)).GetBoolean()).IsTrue();
@@ -24,7 +24,7 @@ internal static class SiteIsolatedBrowserKeyboardAssertions
         KeyboardObservation? popupArrowUp = null;
         if (!arrowUp.Active && arrowUp.Value == "3" && arrowUp.Index == 1)
         {
-            // Linux Chrome opens the native select popup before moving its highlighted option.
+            // Linux Chrome opens the execution select popup before moving its highlighted option.
             popupArrowUp = await KeyAsync(cdp, ArrowUpKey, 38, token);
         }
         var enter = await KeyAsync(cdp, EnterKey, 13, token);
@@ -64,7 +64,7 @@ internal static class SiteIsolatedBrowserKeyboardAssertions
         KeyboardObservation? popupArrowUp)
     {
         var popup = popupArrowUp is null ? string.Empty : $"; popup:{Format(popupArrowUp)}";
-        var detail = $"Native keyboard select failed; expected=1; {Format(arrowUp)}{popup}; {Format(enter)}";
+        var detail = $"Execution keyboard select failed; expected=1; {Format(arrowUp)}{popup}; {Format(enter)}";
         return detail[..Math.Min(detail.Length, MaximumFailureEvidenceCharacters)];
     }
 

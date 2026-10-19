@@ -16,7 +16,7 @@ internal static class AnalyticsSharedAssertions
             AnalyticsExpectedResourceCreation.Lifetime(fixture, AnalyticsExpectedResourceCreation.SharedDocuments)
         }.OrderBy(lifetime => lifetime.ResourceName, StringComparer.Ordinal).ToArray();
         await Assert.That(captured.Error).IsNull();
-        await AnalyticsStoreNativeTestOperations.EqualAsync(expected, captured.Bindings.ToArray());
+        await AnalyticsStoreTestOperations.EqualAsync(expected, captured.Bindings.ToArray());
     }
 
     internal static async Task PageAsync(TestDatabase fixture, AnalyticsEventData expected, CancellationToken token)
@@ -25,10 +25,10 @@ internal static class AnalyticsSharedAssertions
         var image = KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(fixture.Store);
         var page = fixture.Database.ReadAnalyticsEvents(P.Root,
             new(fixture.Partition, P.Store, P.Epoch.AddSeconds(-1), P.Epoch.AddSeconds(1), 10, null), token);
-        await AnalyticsStoreNativeTestOperations.EqualAsync(new AnalyticsEventsPage([new(expected.Id, expected.Timestamp, expected.Dimensions,
+        await AnalyticsStoreTestOperations.EqualAsync(new AnalyticsEventsPage([new(expected.Id, expected.Timestamp, expected.Dimensions,
             expected.Metrics, null, [.. expected.Links.Select(link => AnalyticsExpectedResourceCreation.Bind(fixture, link,
                 AnalyticsExpectedResourceCreation.SharedDocuments))], 1)], false, null), page);
-        var generation = fixture.Store.Read(view => NativeSerialization.Deserialize<long>(
+        var generation = fixture.Store.Read(view => OrleansSerialization.Deserialize<long>(
             view.ReadOwnedValue(AnalyticsStoreKeys.Generation(fixture.Partition, P.Store))!));
         await Assert.That(generation).IsEqualTo(1L);
         await Assert.That(fixture.Store.Position).IsEqualTo(position);
@@ -52,6 +52,6 @@ internal static class AnalyticsSharedAssertions
                 AnalyticsExpectedResourceCreation.SharedDocuments), 1, P.Json, new(), evaluatedAt));
 
     internal static async Task SameAsync<T>(T expected, T actual)
-        => await Assert.That(Convert.ToHexString(NativeSerialization.Serialize(actual)))
-            .IsEqualTo(Convert.ToHexString(NativeSerialization.Serialize(expected)));
+        => await Assert.That(Convert.ToHexString(OrleansSerialization.Serialize(actual)))
+            .IsEqualTo(Convert.ToHexString(OrleansSerialization.Serialize(expected)));
 }

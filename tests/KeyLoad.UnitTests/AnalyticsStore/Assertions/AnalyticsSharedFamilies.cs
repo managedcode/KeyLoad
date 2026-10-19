@@ -1,7 +1,9 @@
 using KeyLoad.Core.Features.AnalyticsStore;
 using KeyLoad.Core.Features.BackupRestore.Serialization;
-using KeyLoad.Core.Features.ClusterRouting.Contracts;
-using KeyLoad.Core.Features.ClusterRouting.Queries;
+using KeyLoad.Core.Features.CommandOutcomes.Contracts;
+using KeyLoad.Core.Features.RuntimeJournaling.Contracts;
+using KeyLoad.Core.Features.StoragePartitions.Contracts;
+using KeyLoad.Core.Features.StoragePartitions.Queries;
 using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Storage;
 using P = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsSharedProtocol;
@@ -22,8 +24,8 @@ internal static class AnalyticsSharedFamilies
         var command = new CommandRequest(Guid.NewGuid(), partition, [upsert]);
         var receipt = await AnalyticsSharedFlow.CommitAsync(fixture, command,
             [new(AnalyticsStoreProtocol.UpsertKind, P.Store, P.EventId, 1)]);
-        var roster = fixture.Store.Read(view => view.GetRecord<AtomicPartitionCatalogEntryV1>(AtomicPartitionRosterKeys.Partition(partition)));
-        await AnalyticsSharedAssertions.SameAsync(new AtomicPartitionCatalogEntryV1(1, partition, 0, receipt.Token.Position), roster);
+        var roster = fixture.Store.Read(view => view.GetRecord<AtomicPartitionCatalogEntry>(AtomicPartitionRosterKeys.Partition(partition)));
+        await AnalyticsSharedAssertions.SameAsync(new AtomicPartitionCatalogEntry(1, partition, 0, receipt.Token.Position), roster);
         var lifetime = fixture.Store.Read(view => ResourceLifetimeCatalog.Read(view, partition.TenantId, partition.DatabaseId,
             P.Store, fixture.Database.Resource(view, partition, P.Store)))!;
         await Assert.That(lifetime.ResourceName).IsEqualTo(P.Store);
@@ -32,9 +34,9 @@ internal static class AnalyticsSharedFamilies
         var evaluatedAt = new DateTimeOffset(fixture.ReadStoredOutcome(command.CommandId).PreparedCommand!.Timestamp);
         var row = new AnalyticsStoredEvent(new(P.EventId, P.Epoch, P.Dimensions, P.Metrics, null, [], 1), false, evaluatedAt);
         await PageAsync(fixture, partition, PartitionRecordFamilies.AnalyticsEvent,
-            AnalyticsStoreKeys.Event(partition, P.Store, P.EventId), NativeSerialization.Serialize(row), token);
+            AnalyticsStoreKeys.Event(partition, P.Store, P.EventId), OrleansSerialization.Serialize(row), token);
         await PageAsync(fixture, partition, PartitionRecordFamilies.AnalyticsGeneration,
-            AnalyticsStoreKeys.Generation(partition, P.Store), NativeSerialization.Serialize(1L), token);
+            AnalyticsStoreKeys.Generation(partition, P.Store), OrleansSerialization.Serialize(1L), token);
         await Assert.That(PartitionRecordFamilies.All.SequenceEqual(PartitionRecordFamilies.All.Order(StringComparer.Ordinal))).IsTrue();
         await ProjectionAsync(fixture, partition, upsert, receipt, evaluatedAt);
     }
@@ -51,7 +53,7 @@ internal static class AnalyticsSharedFamilies
         await AnalyticsSharedAssertions.SameAsync(definition, configured.Definition);
         var batch = fixture.Database.ReadProjectionBatch(P.Root, new(consumer));
         await Assert.That(batch.Entries.Length).IsEqualTo(1);
-        await AnalyticsStoreNativeTestOperations.EqualAsync(new OutboxEntry(1, 0, receipt.Token, evaluatedAt, upsert,
+        await AnalyticsStoreTestOperations.EqualAsync(new OutboxEntry(1, 0, receipt.Token, evaluatedAt, upsert,
             new(AnalyticsStoreProtocol.UpsertKind, P.Store, P.EventId, 1)), batch.Entries.Single());
         await Assert.That(batch.Entries.Single().Receipt.CompositionReferences).IsEmpty();
     }

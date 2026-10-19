@@ -9,7 +9,7 @@ internal sealed class RuntimeJournalReaderLifecycleTests
     private const long ExpectedSecondPosition = 2;
 
     [Test]
-    public async Task AcNative001BornCurrentStoreReplaysCompactsBacksUpRestoresAndContinues()
+    public async Task Ac001BornCurrentStoreReplaysCompactsBacksUpRestoresAndContinues()
     {
         using var fixture = new RuntimeJournalReaderFixture();
         using (var store = fixture.Open(fixture.CanonicalPath))
@@ -42,7 +42,7 @@ internal sealed class RuntimeJournalReaderLifecycleTests
     }
 
     [Test]
-    public async Task AcNative001CurrentSnapshotInstallPreservesCurrentCapabilityAndExactState()
+    public async Task Ac001CurrentSnapshotInstallPreservesCurrentCapabilityAndExactState()
     {
         using var fixture = new RuntimeJournalReaderFixture();
         using (var source = fixture.Open(fixture.CanonicalPath))

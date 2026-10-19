@@ -33,7 +33,7 @@ Tests must reject raster/executable/external poster payloads and exercise real
 ready/resize/pointer/reduced-motion/offscreen/restoration flows at DPR2.
 An actual favicon404 keeps the poster; both mobile and desktop retain all model cards.
 The complete
-GitHub SiteTests, native coverage, parity/build and existing renderer assertions
+GitHub SiteTests, coverage, parity/build and existing renderer assertions
 remain mandatory. Design judgment uses the existing ADR-040 manual exception;
 static builds and screenshots do not establish GitHub qualification/publication.
 Keep source and measured revisions separate. Rollback restores the coherent
@@ -45,7 +45,7 @@ presentation source, never archived reports or database formats.
 | AC-VEC-002 | Exactly one decorative live image loads the unchanged favicon outside the GPU buffer, with contained central bounds and projected CSS sizing. Missing, duplicated, unloaded or oversized rasterized logo fails. | Real Chrome ready/pointer/resize assertions at DPR2; manual sharpness review. |
 | AC-VEC-003 | Loading/no-JS/error/zero-size/offscreen/disposed retains the poster and hides the live image; ready shows the loaded SVG. Favicon404 never reaches ready. Pause/reduced motion/restoration preserves the lifecycle. | Existing real browser lifecycle flow, Retina resize/pose checks and SiteVectorAssetBrowserTests actual HTTP404 failure. Hardware device-loss qualification remains open. |
 | AC-VEC-004 | Existing DPR1.5/1M-pixel/30-draw/5K-triangle budgets, movement, accessibility and responsive overflow bounds hold. | Existing real renderer/responsive assertions plus recorded manual GPU observations. |
-| AC-VEC-005 | The real builder emits both posters and canonical assets with unchanged brand parity and benchmark provenance. | Complete SiteTests, source/output byte parity, native coverage and Pages gates in GitHub at the exact source revision. |
+| AC-VEC-005 | The real builder emits both posters and canonical assets with unchanged brand parity and benchmark provenance. | Complete SiteTests, source/output byte parity, coverage and Pages gates in GitHub at the exact source revision. |
 
 GitHub-only TUnit/MTP qualification remains required for every automated criterion.
 Development checks and the manual preview are recorded separately from publication.

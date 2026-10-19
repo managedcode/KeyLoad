@@ -32,7 +32,7 @@ internal sealed class JsonTextProtocolTests
             var actual = JsonDefaults.Deserialize<string>(json);
             await Assert.That(actual).IsEqualTo(expected);
             var result = Result<object>.Succeed(actual);
-            var restored = NativeSerialization.Deserialize<Result<object>>(NativeSerialization.Serialize(result));
+            var restored = OrleansSerialization.Deserialize<Result<object>>(OrleansSerialization.Serialize(result));
             await Assert.That(restored.Get<string>()).IsEqualTo(expected);
         }
 
@@ -61,7 +61,7 @@ internal sealed class JsonTextProtocolTests
     }
 
     [Test]
-    public async Task AcMp006StoredErrorPrecedesWrongNativeValueAndAbsentResultRemainsCorruption()
+    public async Task AcMp006StoredErrorPrecedesWrongValueAndAbsentResultRemainsCorruption()
     {
         var stored = Result<object>.Fail(Errors.Problem(ErrorCode.PermissionDenied, StoredErrorDetail));
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => stored.Get<ResourceDefinition>());

@@ -7,7 +7,7 @@ internal static class ScaledRawStorageOwnership
     private static ScaledRawStorageFixture? _fixture;
     private static bool _failedConstruction;
     private static bool _closeInProgress;
-    private const string ActiveMessage = "A scaled native fixture already owns this diagnostic process.";
+    private const string ActiveMessage = "A scaled execution fixture already owns this diagnostic process.";
     private const string OwnershipMessage = "The scaled fixture does not own the process slot.";
 
     internal static bool HasRetainedFailedOwner

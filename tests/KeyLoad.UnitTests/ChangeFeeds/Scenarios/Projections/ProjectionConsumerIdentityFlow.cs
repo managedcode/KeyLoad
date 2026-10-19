@@ -4,7 +4,7 @@ namespace KeyLoad.UnitTests.Features.ChangeFeeds;
 
 internal static class ProjectionConsumerIdentityFlow
 {
-    private const string MissingResult = "The native projection cold flow must retain its complete original continuation.";
+    private const string MissingResult = "The execution projection cold flow must retain its complete original continuation.";
 
     internal static async Task RunAsync(bool foreignPartition)
     {

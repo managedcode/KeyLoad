@@ -1,5 +1,5 @@
 using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.ClusterRouting;
+using KeyLoad.IntegrationTests.Features.OrleansExecution;
 
 namespace KeyLoad.IntegrationTests.Features.TimeSeries;
 
@@ -11,7 +11,7 @@ internal static class ChunkMultiblockClusterRefusal
     internal static async Task RunAsync(RequestCqrsClusterCallers administrator, RequestCqrsClusterCallers reader,
         ChunkMultiblockClusterState state, CancellationToken token)
     {
-        state.Conflict ??= new(Guid.NewGuid(), state.Scenario.Native.Partition,
+        state.Conflict ??= new(Guid.NewGuid(), state.Scenario.Execution.Partition,
             [new AppendSamples(TimeSeriesClusterScenario.Set, TimeSeriesClusterScenario.Series,
                 [ChunkMultiblockClusterData.Original[FirstIndex] with { Value = ChangedValue }], TimeSeriesClusterScenario.PublicTags)]);
         var result = await administrator.Sdk.CommitAsync(state.Conflict, token);

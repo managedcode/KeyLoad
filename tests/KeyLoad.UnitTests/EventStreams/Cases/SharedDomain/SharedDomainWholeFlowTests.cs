@@ -3,6 +3,6 @@ namespace KeyLoad.UnitTests.Features.EventStreams;
 internal sealed class SharedDomainWholeFlowTests
 {
     [Test]
-    public async Task SameLiteralAndOriginalCommandAcrossFiveActiveScopesRetainNativeProducerConsumerAuthorityAndTwoColdOwners()
+    public async Task SameLiteralAndOriginalCommandAcrossFiveActiveScopesRetainProducerConsumerAuthorityAndTwoColdOwners()
         => await SharedDomainWholeFlow.RunAsync(TestContext.Current!.Execution.CancellationToken);
 }

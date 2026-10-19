@@ -1,6 +1,6 @@
 namespace KeyLoad.Comparisons;
 
-/// <summary>Frozen production session counts, with bounded outstanding native requests.</summary>
+/// <summary>Frozen production session counts, with bounded outstanding execution requests.</summary>
 public sealed record BenchmarkSessionOptions
 {
     /// <summary>The initial acknowledged and independently verified corpus size.</summary>
@@ -9,7 +9,7 @@ public sealed record BenchmarkSessionOptions
     public int Operations { get; init; } = BenchmarkSessionLimits.StreamOperations;
     /// <summary>The total admitted clients across concurrent streams.</summary>
     public int Concurrency { get; init; } = BenchmarkSessionLimits.Clients;
-    /// <summary>The deadline for each actual native operation.</summary>
+    /// <summary>The deadline for each actual execution operation.</summary>
     public int TimeoutSeconds { get; init; } = BenchmarkSessionLimits.TimeoutSeconds;
 
     internal void Validate(bool development)

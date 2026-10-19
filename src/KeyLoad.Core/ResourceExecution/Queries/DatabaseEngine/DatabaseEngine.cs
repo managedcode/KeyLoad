@@ -5,7 +5,7 @@ namespace KeyLoad.Core;
 public sealed partial class DatabaseEngine
 {
     /// <summary>Resolves the actual reauthorized outcome inside the original publication read budget.</summary>
-    /// <param name="operation">Unchanged original native command identity and content.</param>
+    /// <param name="operation">Unchanged original execution command identity and content.</param>
     /// <param name="work">The same original bounded read execution and cancellation.</param>
     /// <returns>The complete canonical result after all existing current authority checks.</returns>
     internal Result<object> ResolveSubmissionOutcome(Command<DatabaseCommand> operation, ReadExecutionBudget work)

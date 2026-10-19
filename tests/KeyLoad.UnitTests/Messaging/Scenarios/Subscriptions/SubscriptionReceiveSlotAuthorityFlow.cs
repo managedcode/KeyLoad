@@ -23,7 +23,7 @@ internal static class SubscriptionReceiveSlotAuthorityFlow
         var deliveries = original.Get<ReceiveSubscriptionResult>().Deliveries;
         await Assert.That(deliveries.Select(d => d.Event.Position)).IsEquivalentTo(
             new long[] { 1, 2, 3 }, CollectionOrdering.Matching);
-        await NativeReplayResultAssertions.Same<ReceiveSubscriptionResult>(
+        await ReplayResultAssertions.Same<ReceiveSubscriptionResult>(
             Apply(fixture.Database, OperationKind.ReceiveSubscription, claimRequest, claimRequest.RequestId, token), original);
         var third = new SubscriptionDeliveryCommand(Guid.NewGuid(), group, deliveries[2].Token, DeliveryAction.Ack);
         var thirdResult = Apply(fixture.Database, OperationKind.SubscriptionDelivery, third, third.CommandId, token);
@@ -34,13 +34,13 @@ internal static class SubscriptionReceiveSlotAuthorityFlow
             ?? throw new InvalidOperationException("The genuine completed receive slot is absent.");
         var originalBytes = QueueWholeFlowStorage.Bytes(fixture.Store);
         var originalPosition = fixture.Store.Position;
-        var row = NativeSerialization.Deserialize<GroupDelivery>(saved);
+        var row = OrleansSerialization.Deserialize<GroupDelivery>(saved);
         fixture.Store.Commit((tx, _) => { tx.PutRecord(key, row with { Position = 99, State = completedState }); return true; });
         var request = new ReceiveSubscriptionRequest(Guid.NewGuid(), group, MaxEvents: 3);
         await SubscriptionReceiveSlotAuthorityAssertions.RefusalAsync(fixture.Database, fixture.Store, request, token);
         var bytes = QueueWholeFlowStorage.Bytes(fixture.Store);
         var position = fixture.Store.Position;
-        var identity = NativeSerialization.Serialize(fixture.Store.Identity);
+        var identity = OrleansSerialization.Serialize(fixture.Store.Identity);
         fixture.Store.Dispose();
         token.ThrowIfCancellationRequested();
         using var first = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution(),
@@ -77,7 +77,7 @@ internal static class SubscriptionReceiveSlotAuthorityFlow
             claimRequest, original, receipts, token);
         var bytes = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
-        var identity = NativeSerialization.Serialize(store.Identity);
+        var identity = OrleansSerialization.Serialize(store.Identity);
         store.Dispose();
         token.ThrowIfCancellationRequested();
         using var second = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution(),

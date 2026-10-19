@@ -6,11 +6,11 @@ namespace KeyLoad.Comparisons.Targets;
 internal static class KurrentOwnedStreamCleanup
 {
     internal static async Task<KurrentCleanupDiagnostic> RunAsync(KurrentDBClient? writer, string[] streams,
-        IReadOnlyList<KurrentDBClient> nativeClients, IReadOnlyList<HttpClient> httpClients, IOptions<ComparisonLifecycleOptions> options,
-        IOptions<NativeComparisonDiagnosticOptions> diagnosticOptions, TimeProvider timeProvider, CancellationToken token)
+        IReadOnlyList<KurrentDBClient> runtimeClients, IReadOnlyList<HttpClient> httpClients, IOptions<ComparisonLifecycleOptions> options,
+        IOptions<ComparisonDiagnosticOptions> diagnosticOptions, TimeProvider timeProvider, CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(streams);
-        ArgumentNullException.ThrowIfNull(nativeClients);
+        ArgumentNullException.ThrowIfNull(runtimeClients);
         ArgumentNullException.ThrowIfNull(httpClients);
         using var cleanup = new KurrentCleanupOperation(streams: streams, token: token, options: options, diagnosticOptions: diagnosticOptions, provider: timeProvider);
         KurrentCleanupDiagnostic diagnostic;
@@ -20,7 +20,7 @@ internal static class KurrentOwnedStreamCleanup
         }
         finally
         {
-            var disposals = cleanup.StartDisposals(nativeClients, httpClients);
+            var disposals = cleanup.StartDisposals(runtimeClients, httpClients);
             diagnostic = await cleanup.FinishAsync(disposals, Task.CompletedTask);
         }
         return diagnostic;

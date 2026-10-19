@@ -9,34 +9,34 @@ namespace KeyLoad.UnitTests.Features.ClientApi;
 // Author real array boundaries because generated surrogate Values bypasses provider overrides.
 internal static class McpAuthenticationMalformedFixture
 {
-    internal const string Item = "native-auth-array-item";
+    internal const string Item = "execution-auth-array-item";
 
     internal static byte[] Array(PrincipalRecord principal, McpAuthenticationArrayFault fault) => Write(principal, fault);
     internal static byte[] Valid(PrincipalRecord principal) => Write(principal, null);
 
     internal static byte[] DefaultArray(PrincipalRecord principal)
-        => NativeSerializerProviders.Get(typeof(GrainValue)).Serializer.SerializeToArray(new NativePayload
+        => SerializerProviders.Get(typeof(GrainValue)).Serializer.SerializeToArray(new RuntimePayload
         {
-            Version = NativePayloadVersion.Current,
+            Version = PayloadVersion.Current,
             Value = new GrainValue(principal with { FieldGrants = default })
         });
 
     internal static byte[] DefaultTeams(PrincipalRecord principal)
-        => NativeSerializerProviders.Get(typeof(GrainValue)).Serializer.SerializeToArray(new NativePayload
+        => SerializerProviders.Get(typeof(GrainValue)).Serializer.SerializeToArray(new RuntimePayload
         {
-            Version = NativePayloadVersion.Current,
+            Version = PayloadVersion.Current,
             Value = new GrainValue(principal with { Teams = default })
         });
 
     private static byte[] Write(PrincipalRecord principal, McpAuthenticationArrayFault? fault)
     {
-        using var session = NativeSerializerProviders.Get(typeof(GrainValue)).Sessions.GetSession();
+        using var session = SerializerProviders.Get(typeof(GrainValue)).Sessions.GetSession();
         var writer = Writer.CreatePooled(session);
         try
         {
             var grain = new GrainValue(principal);
-            Begin(ref writer, 0, typeof(NativePayload), new NativePayload { Version = NativePayloadVersion.Current, Value = grain });
-            UInt32Codec.WriteField(ref writer, 0, NativePayloadVersion.Current);
+            Begin(ref writer, 0, typeof(RuntimePayload), new RuntimePayload { Version = PayloadVersion.Current, Value = grain });
+            UInt32Codec.WriteField(ref writer, 0, PayloadVersion.Current);
             Begin(ref writer, 1, typeof(object), grain);
             writer.WriteEndBase();
             Begin(ref writer, 0, typeof(object), principal);

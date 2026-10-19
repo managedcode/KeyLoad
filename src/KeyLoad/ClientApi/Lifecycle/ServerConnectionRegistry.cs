@@ -27,8 +27,8 @@ internal sealed class ServerConnectionRegistry(IServiceProvider services,
             transport.Features.Set(feature);
         }
         var failures = new List<Exception>();
-        await ServerFailureObserver.ObserveAsync(next, failures).ConfigureAwait(false);
-        await ServerFailureObserver.ObserveAsync(() => feature.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+        await ServerFailureObserver.ObserveAsync(next, failures);
+        await ServerFailureObserver.ObserveAsync(() => feature.DisposeAsync().AsTask(), failures);
         ServerFailureObserver.Observe(() => transport.Features.Set<ServerConnectionFeature>(null), failures);
         lock (gate)
         {
@@ -67,7 +67,7 @@ internal sealed class ServerConnectionRegistry(IServiceProvider services,
             ServerFailureObserver.Observe(connection.RequestClose, failures);
         }
         await ServerFailureObserver.ObserveAsync(() => Task.WhenAll(
-            owned.Select(connection => connection.Completion.Task)), failures).ConfigureAwait(false);
+            owned.Select(connection => connection.Completion.Task)), failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }
 }

@@ -13,5 +13,5 @@ internal static class RemoteTransferCoordinationReadRequestFields
     internal const uint PolicyGeneration = 8;
     internal const uint CompleteGeneration = 9;
     internal const uint ReceiptToken = 10;
-    internal const string Alias = "keyload.core.queue-transfer.coordination-read.v1";
+    internal const string Alias = "keyload.core.queue-transfer.coordination-read";
 }

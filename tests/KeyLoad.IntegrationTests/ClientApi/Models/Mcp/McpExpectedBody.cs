@@ -1,6 +1,6 @@
 namespace KeyLoad.IntegrationTests.Features.ClientApi;
 
-/// <summary>The public canonical request root, independent of any native schema implementation.</summary>
+/// <summary>The public canonical request root, independent of any execution schema implementation.</summary>
 internal enum McpExpectedBody
 {
     /// <summary>The tool accepts no arguments.</summary>

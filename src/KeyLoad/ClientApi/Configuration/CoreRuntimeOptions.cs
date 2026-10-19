@@ -12,8 +12,7 @@ internal sealed record CoreRuntimeOptions(
     IOptions<MessagingExecutionOptions> Messaging,
     IOptions<GraphExecutionOptions> GraphExecution,
     IOptions<ChangeFeedExecutionOptions> ChangeFeedExecution,
-    IOptions<BlobExecutionOptions> BlobExecution,
-    IOptions<NativeClaimsExecutionOptions> NativeClaimsExecution,
+    IOptions<ClaimsExecutionOptions> RuntimeClaimsExecution,
     IOptions<TimeSeriesExecutionOptions> TimeSeriesExecution,
     IOptions<KeyLoad.Query.Features.Search.PackedAnnOptions> PackedAnn,
     IOptions<KeyLoad.Core.Features.Search.AnnSeedOptions> AnnSeed,
@@ -33,8 +32,7 @@ internal sealed record CoreRuntimeOptions(
         _ = Messaging.Value;
         _ = GraphExecution.Value;
         _ = ChangeFeedExecution.Value;
-        _ = BlobExecution.Value;
-        _ = NativeClaimsExecution.Value;
+        _ = RuntimeClaimsExecution.Value;
         _ = TimeSeriesExecution.Value;
         _ = PackedAnn.Value;
         _ = AnnSeed.Value;

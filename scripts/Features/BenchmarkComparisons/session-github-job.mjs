@@ -3,7 +3,7 @@ import { open } from 'node:fs/promises';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { verifySourceCheckout } from './source-checkout.mjs';
-import { createDirectory, requireOutputFile } from './native-files.mjs';
+import { createDirectory, requireOutputFile } from './files.mjs';
 import { captureCurrentJobPages, validateKnownCurrentJob } from './isolated-github-api.mjs';
 import { captureFreshCurrentJob } from './isolated-current-job.mjs';
 import { writeJson } from './isolated-github-files.mjs';
@@ -18,8 +18,8 @@ export async function captureSessionJob(environment = process.env, argv = proces
     ? { jobName: SESSION.prepareJob } : selectSession(environment);
   requireSession(typeof environment.GITHUB_ENV === 'string' && path.isAbsolute(environment.GITHUB_ENV));
   await requireOutputFile(environment.GITHUB_ENV);
-  await verifySourceCheckout(context.native);
-  const directory = await createDirectory(path.join(context.native.runnerTemp, 'keyload-session-github'));
+  await verifySourceCheckout(context.execution);
+  const directory = await createDirectory(path.join(context.execution.runnerTemp, 'keyload-session-github'));
   await initializeTransport(context, directory, directory);
   const discovered = await captureCurrentJobPages(directory, context, row.jobName);
   const job = await captureFreshCurrentJob(discovered, directory, context, row.jobName);
@@ -28,7 +28,7 @@ export async function captureSessionJob(environment = process.env, argv = proces
   await writeJson(path.join(directory, 'cohort.json'), context.cohort);
   const handle = await open(environment.GITHUB_ENV, constants.O_WRONLY | constants.O_APPEND | (constants.O_NOFOLLOW ?? 0));
   try {
-    const evidence = row.id === undefined ? '' : `KEYLOAD_COMPARISON_EVIDENCE_DIRECTORY=${path.join(context.native.workspace, 'artifacts/comparisons/sessions/workers', row.id)}\n`;
+    const evidence = row.id === undefined ? '' : `KEYLOAD_COMPARISON_EVIDENCE_DIRECTORY=${path.join(context.execution.workspace, 'artifacts/comparisons/sessions/workers', row.id)}\n`;
     await handle.writeFile(`KEYLOAD_COMPARISON_JOB_ID=${job.id}\n${evidence}`);
     await handle.sync();
   } finally { await handle.close(); }

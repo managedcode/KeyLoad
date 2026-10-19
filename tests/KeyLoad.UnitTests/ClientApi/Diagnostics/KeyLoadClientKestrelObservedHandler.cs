@@ -1,6 +1,6 @@
 namespace KeyLoad.UnitTests.Features.ClientApi;
 
-/// <summary>Passes original requests, tokens and unconsumed responses through the default native HTTP chain.</summary>
+/// <summary>Passes original requests, tokens and unconsumed responses through the default execution HTTP chain.</summary>
 internal sealed class KeyLoadClientKestrelObservedHandler(KeyLoadClientKestrelObservation observation) : DelegatingHandler
 {
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)

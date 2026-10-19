@@ -20,7 +20,7 @@ internal static class QueueDeadlineRecoveryHealthy
         await Assert.That(delivery.HeadersJson).IsEqualTo(QueueDeadlineCrashProtocol.Headers);
         var ack = new DeliveryCommand(Guid.NewGuid(), lane, delivery.Token, DeliveryAction.Ack);
         var receipt = CrashDatabase.Submit(database, OperationKind.Delivery, ack, ack.CommandId).Get<CommitReceipt>();
-        await MessagingRecoveryReceiptAssertions.AssertSameNativeValueAsync(receipt,
+        await MessagingRecoveryReceiptAssertions.AssertSameValueAsync(receipt,
             CrashDatabase.Submit(database, OperationKind.Delivery, ack, ack.CommandId).Get<CommitReceipt>());
         var inspection = database.InspectMessage(CrashFixtureValues.Principal, lane, delivery.Id);
         await Assert.That(inspection).IsEqualTo(new MessageInspection(new MessageMetadata(delivery.Id, MessageState.Acked,

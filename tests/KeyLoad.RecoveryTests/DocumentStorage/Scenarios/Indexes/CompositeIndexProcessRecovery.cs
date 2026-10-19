@@ -107,16 +107,16 @@ internal static class CompositeIndexProcessRecovery
     {
         await child.StopAndJoinAsync(cancellationToken);
         await KilledProcessFileReadiness.WaitAsync(root, cancellationToken);
-        RecoveryFileInventory.AssertNativeHandlesReleased(root);
-        child.CloseNativeProcessAfterJoin();
+        RecoveryFileInventory.AssertHandlesReleased(root);
+        child.CloseProcessAfterJoin();
     }
 
     private static async Task ReleaseAfterExitAsync(CommandIdempotencyProcessChild child, string root,
         CancellationToken cancellationToken)
     {
         await KilledProcessFileReadiness.WaitAsync(root, cancellationToken);
-        RecoveryFileInventory.AssertNativeHandlesReleased(root);
-        child.CloseNativeProcessAfterJoin();
+        RecoveryFileInventory.AssertHandlesReleased(root);
+        child.CloseProcessAfterJoin();
     }
 
     private static void RequireSuccessfulExit(CommandIdempotencyProcessChild child)

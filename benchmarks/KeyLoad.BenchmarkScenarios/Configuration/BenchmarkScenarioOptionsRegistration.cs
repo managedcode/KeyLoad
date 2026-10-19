@@ -3,7 +3,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
 
-/// <summary>Binds standalone native fixtures before they acquire storage ownership.</summary>
+/// <summary>Binds standalone execution fixtures before they acquire storage ownership.</summary>
 [ConfigurationBinding]
 internal static class BenchmarkScenarioOptionsRegistration
 {

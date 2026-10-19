@@ -6,7 +6,7 @@ namespace KeyLoad;
 /// <param name="Version">The current page contract version.</param>
 /// <param name="Documents">Fully projected authorized documents and vector rank-fusion scores.</param>
 /// <param name="Position">The canonical position of the same authorized read cut.</param>
-/// <param name="Mode">The actual completed native search mode.</param>
+/// <param name="Mode">The actual completed execution search mode.</param>
 /// <param name="CompleteTopK">True only when the eligible top-k was exhaustively ranked.</param>
 /// <param name="RequestedMode">The validated explicit request intent, independent from actual execution mode.</param>
 /// <param name="IndexGeneration">The requested and validated provisioned generation.</param>

@@ -5,10 +5,10 @@ namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 internal static class IsolatedDocumentResourceAssertions
 {
-    internal const string NativePrefix = "Benchmarks__Native__";
-    internal const string Endpoints = NativePrefix + "Endpoints__";
-    internal const string Image = NativePrefix + "Image";
-    internal const string Connection = NativePrefix + "ConnectionString";
+    internal const string RuntimePrefix = "Benchmarks__Execution__";
+    internal const string Endpoints = RuntimePrefix + "Endpoints__";
+    internal const string Image = RuntimePrefix + "Image";
+    internal const string Connection = RuntimePrefix + "ConnectionString";
     private const string MissingSecret = "IsolatedDocumentResourceSecretMissing";
 
     internal static async Task VerifyNodesAsync(ContainerResource[] nodes, int count, string prefix, string digest)

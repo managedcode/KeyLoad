@@ -1,6 +1,6 @@
 namespace KeyLoad;
 
-/// <summary>Reports the acquired native generation's actual indexed prefix under current authorization.</summary>
+/// <summary>Reports the acquired execution generation's actual indexed prefix under current authorization.</summary>
 [Orleans.GenerateSerializer, Orleans.Alias(WaitForAnnIndexProtocol.ResultAlias)]
 public sealed record WaitForAnnIndexResult(
     [property: Orleans.Id(0)] CommitToken IndexedToken,

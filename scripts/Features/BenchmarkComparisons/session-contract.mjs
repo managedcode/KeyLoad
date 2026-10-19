@@ -1,6 +1,6 @@
-// Current session cohort only. Physical isolation is database × native topology.
+// Current session cohort only. Physical isolation is database × execution topology.
 export const SESSION = Object.freeze({
-  schema: 'session-v1', profile: 'session-v1', repository: 'managedcode/KeyLoad',
+  schema: 'session', profile: 'session', repository: 'managedcode/KeyLoad',
   ref: 'refs/heads/main', workflow: 'Benchmarks', workers: 22,
   records: 1_000_000, operations: 100_000, concurrency: 16, warmup: 0,
   caseIds: Object.freeze(['load-million', 'index', 'sequential-read', 'random-read', 'search', 'mixed', 'verify-final']),
@@ -8,12 +8,12 @@ export const SESSION = Object.freeze({
   aggregateJob: 'Combine benchmark results', prepareJob: 'Prepare comparison runtime',
   prepareSteps: Object.freeze(['Build the complete solution once', 'Check code formatting', 'Check repository rules',
     'Test benchmark contracts', 'Test canonical benchmark worker selection',
-    'Test prompt termination on Aspire resource failures', 'Check native benchmark preparation contracts',
+    'Test prompt termination on Aspire resource failures', 'Check execution benchmark preparation contracts',
     'Verify GitHub job identity', 'Save compiled runtime identities', 'Save the compiled benchmark runtime']),
   workerSteps: Object.freeze(['Run database workload', 'Save benchmark results']),
-  reportBytes: 268_435_456, nativeBytes: 16_777_216, sessionBytes: 4_194_304,
+  reportBytes: 268_435_456, runtimeBytesCore: 16_777_216, sessionBytes: 4_194_304,
   aggregateBytes: 33_554_432, archiveBytes: 536_870_912, allArchiveBytes: 11_811_160_064,
-  capabilitiesUnavailable: 'NativeSessionCapabilitiesUnavailable', topologyUnavailable: 'NativeTopologyUnavailable',
+  capabilitiesUnavailable: 'SessionCapabilitiesUnavailable', topologyUnavailable: 'RuntimeTopologyUnavailable',
   unavailableTopologyTargets: Object.freeze(['Neo4j','SurrealDB','HelixDB']),
   failure: 'Benchmark session evidence rejected.',
 });

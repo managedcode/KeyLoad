@@ -1,6 +1,6 @@
 namespace KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
 
-/// <summary>Records distinct native outcomes while every test uses the same live database.</summary>
+/// <summary>Records distinct execution outcomes while every test uses the same live database.</summary>
 [ClassDataSource<BenchmarkSessionFixture>(Shared = SharedType.PerTestSession)]
 [NotInParallel]
 internal sealed class BenchmarkSessionWorkloadTests(BenchmarkSessionFixture fixture)

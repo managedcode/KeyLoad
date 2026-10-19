@@ -34,11 +34,11 @@ internal static class SqlInnerJoinRejectionFixture
     internal static AstQueryRequest Ast(TestDatabase database)
         => new(database.Partition, new SelectQuery("orders", "l", [new("/order_id", "order_id", "l")],
             null, [new("/order_id", false)], 10, InnerJoin: new("customers", "r", "/customer_id", "/id")),
-            AllowFullScan: true, AstVersion: 2);
+            AllowFullScan: true, AstVersion: SqlOperationProtocol.DefaultQueryDialectVersion);
 
     internal static async Task VerifyHealthyAsync(TestDatabase database, QueryEngine engine, byte[] before, long position)
     {
-        var page = engine.Execute(Root, new(database.Partition, HealthySql, AllowFullScan: true, QueryDialectVersion: 2));
+        var page = engine.Execute(Root, new(database.Partition, HealthySql, AllowFullScan: true, QueryDialectVersion: SqlOperationProtocol.DefaultQueryDialectVersion));
         await Assert.That(page.Rows).HasSingleItem();
         await Assert.That(page.AccessPath).IsEqualTo("bounded-primary-key-inner-join");
         await Assert.That(page.Cursor).IsNull();

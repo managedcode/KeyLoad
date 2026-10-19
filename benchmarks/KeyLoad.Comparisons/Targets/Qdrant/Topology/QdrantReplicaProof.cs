@@ -125,14 +125,14 @@ internal static class QdrantReplicaProof
     {
         const int MajorityDivisor = 2;
         const int MajorityVoteOffset = 1;
-        const string HealthyNativeClusterToken = "healthy native cluster";
+        const string HealthyClusterToken = "healthy execution cluster";
         const int FirstElementIndex = 0;
 
         var observations = proofs.Select(proof =>
             $"{BuildResultPeerText}{proof.Peer}{BuildResultShardText}{proof.Shard}{BuildResultLocalActiveCopiesText}{proof.Copies}{BuildResultPointsText}{expectedPoints}")
             .Append($"{BuildResultRFText}{nodes}{BuildResultWriteConsistencyFactorText}{nodes / MajorityDivisor + MajorityVoteOffset}")
             .ToArray();
-        var evidence = new ClusterEvidence(nodes, nodes, HealthyNativeClusterToken,
+        var evidence = new ClusterEvidence(nodes, nodes, HealthyClusterToken,
             ImmutableCollectionsMarshal.AsImmutableArray(observations));
         return new(proofs[FirstElementIndex].Version, evidence);
     }

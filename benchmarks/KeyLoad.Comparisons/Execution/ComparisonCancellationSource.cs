@@ -1,6 +1,6 @@
 namespace KeyLoad.Comparisons;
 
-/// <summary>Owns native provider timer cancellation and the incoming token registration.</summary>
+/// <summary>Owns execution provider timer cancellation and the incoming token registration.</summary>
 internal sealed class ComparisonCancellationSource : CancellationTokenSource
 {
     private readonly CancellationTokenRegistration incoming;

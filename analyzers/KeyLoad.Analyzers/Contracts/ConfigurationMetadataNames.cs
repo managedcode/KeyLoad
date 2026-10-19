@@ -3,7 +3,7 @@ namespace KeyLoad.Analyzers.Features.CodeQuality;
 internal static class ConfigurationMetadataNames
 {
     internal const string OwnerAssembly = "KeyLoad.Abstractions";
-    internal const string NativeOrleansAssembly = "Orleans.Serialization.Abstractions";
+    internal const string OrleansAssembly = "Orleans.Serialization.Abstractions";
     internal const string OrleansAlias = "Orleans.AliasAttribute";
     internal const int SingleSnapshotAssignment = 1;
     internal const string OptionsOwner = "KeyLoad.ConfigurationOptionsAttribute";

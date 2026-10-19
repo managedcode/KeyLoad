@@ -1,5 +1,7 @@
 using KeyLoad.Core.Features.BackupRestore.Serialization;
-using KeyLoad.Core.Features.ClusterRouting.Contracts;
+using KeyLoad.Core.Features.CommandOutcomes.Contracts;
+using KeyLoad.Core.Features.RuntimeJournaling.Contracts;
+using KeyLoad.Core.Features.StoragePartitions.Contracts;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core.Features.RelationalStorage;
@@ -18,14 +20,14 @@ internal static class TableDataCleanup
         PartitionRecordFamilies.Bm25CorpusCurrent, PartitionRecordFamilies.OnlineTextCurrent
     ];
 
-    internal static List<byte[]> Capture(IKeyValueView view, ResourceLifetimeV1 lifetime,
+    internal static List<byte[]> Capture(IKeyValueView view, ResourceLifetime lifetime,
         ReadExecutionBudget work, DatabaseLimits limits)
     {
         var partitions = new List<PartitionRef>();
         var inventory = work.VisitRange(view, AtomicPartitionRosterKeys.Prefix(),
             limits.MaxScanRecords, (key, value) =>
             {
-                var entry = NativeSerialization.Deserialize<AtomicPartitionCatalogEntryV1>(value);
+                var entry = OrleansSerialization.Deserialize<AtomicPartitionCatalogEntry>(value);
                 DatabaseEngine.ValidatePartition(entry.Partition);
                 if (entry.Version != AtomicPartitionRosterProtocol.CurrentVersion
                     || !key.SequenceEqual(AtomicPartitionRosterKeys.Partition(entry.Partition)))
@@ -46,7 +48,7 @@ internal static class TableDataCleanup
         return CaptureKeys(view, lifetime, partitions, work, limits);
     }
 
-    private static List<byte[]> CaptureKeys(IKeyValueView view, ResourceLifetimeV1 lifetime,
+    private static List<byte[]> CaptureKeys(IKeyValueView view, ResourceLifetime lifetime,
         List<PartitionRef> partitions, ReadExecutionBudget work, DatabaseLimits limits)
     {
         var keys = new List<byte[]>();

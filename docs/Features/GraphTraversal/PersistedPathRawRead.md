@@ -16,7 +16,7 @@ AuthorizationPolicy and GraphShortestPathResultProjector apply fresh principal f
 
 ## Canonical map and limits
 
-Existing Case remains in `tests/KeyLoad.IntegrationTests/GraphTraversal/Cases/`. New Models/State, Helpers/Commands+Replay+Trial, Assertions/Current+Reads remain feature-local. Specification: `docs/Features/GraphTraversal/PersistedPathRawRead.md`; canonical root `../GraphTraversal.md`. Existing ADR-010/014/098/117/125 govern authorization, bounded reads, native caller entry and connection-owned execution. UI N/A; this is database public caller acceptance, not a UI. New product/backend/shared fixture/library work N/A.
+Existing Case remains in `tests/KeyLoad.IntegrationTests/GraphTraversal/Cases/`. New Models/State, Helpers/Commands+Replay+Trial, Assertions/Current+Reads remain feature-local. Specification: `docs/Features/GraphTraversal/PersistedPathRawRead.md`; canonical root `../GraphTraversal.md`. Existing ADR-010/014/098/117/125 govern authorization, bounded reads, caller entry and connection-owned execution. UI N/A; this is database public caller acceptance, not a UI. New product/backend/shared fixture/library work N/A.
 
 ```mermaid
 flowchart LR
@@ -29,4 +29,4 @@ flowchart LR
   Repair --> Cold2[All three cold and fresh callers: full]
 ```
 
-Authored code; compilation, actual native UID/census, original-deadline execution and exact-source Linux cluster qualification remain separate pending gates. No raw store/journal or cross-node cut equality, power-loss, performance or readiness claim. The original callback/cleanup ledger and all owned resources remain joined.
+Authored code; compilation, actual UID/census, original-deadline execution and exact-source Linux cluster qualification remain separate pending gates. No raw store/journal or cross-node cut equality, power-loss, performance or readiness claim. The original callback/cleanup ledger and all owned resources remain joined.

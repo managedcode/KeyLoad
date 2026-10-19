@@ -1,7 +1,7 @@
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
-/// <summary>Rejects invalid native session cohorts before any measured request.</summary>
+/// <summary>Rejects invalid execution session cohorts before any measured request.</summary>
 internal sealed class ComparisonHostBindingsTests
 {
     [Test]
@@ -13,7 +13,7 @@ internal sealed class ComparisonHostBindingsTests
     [Arguments("userinfo")]
     [Arguments("query")]
     [Arguments("fragment")]
-    public Task NativeSessionEndpointCohortRejectsInvalidIdentityBeforeClients(string corruption)
+    public Task SessionEndpointCohortRejectsInvalidIdentityBeforeClients(string corruption)
     {
         var settings = SessionHostStartupSupport.ValidSettings();
         var key = SessionHostStartupSupport.Endpoints + "1";
@@ -54,7 +54,7 @@ internal sealed class ComparisonHostBindingsTests
     [Arguments("missing-password")]
     [Arguments("invalid-user")]
     [Arguments("missing-connection")]
-    public Task NativeSessionAuthenticatedTargetRejectsInvalidCredentialsBeforeClients(string corruption)
+    public Task SessionAuthenticatedTargetRejectsInvalidCredentialsBeforeClients(string corruption)
     {
         var settings = SessionHostStartupSupport.ValidSettings();
         settings[SessionHostStartupSupport.Target] = "RabbitMQ";

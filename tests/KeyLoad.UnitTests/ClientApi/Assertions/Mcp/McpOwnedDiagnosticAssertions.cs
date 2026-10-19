@@ -48,7 +48,7 @@ internal static class McpOwnedDiagnosticAssertions
         ];
         for (var index = 0; index < ExpectedCount; index++)
         {
-            await Assert.That(NativeSerialization.Serialize(actual.Mutations[index]).SequenceEqual(NativeSerialization.Serialize(expected[index]))).IsTrue();
+            await Assert.That(OrleansSerialization.Serialize(actual.Mutations[index]).SequenceEqual(OrleansSerialization.Serialize(expected[index]))).IsTrue();
         }
     }
 }

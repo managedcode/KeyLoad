@@ -4,12 +4,12 @@ namespace KeyLoad.UnitTests.Features.Messaging;
 
 internal static class RemoteTransferAttemptColdRefusals
 {
-    private const string InvalidNativePrefix = "invalid-";
+    private const string InvalidPrefix = "invalid-";
 
     internal static async Task BeforeAdvanceAsync(RemoteTransferDatabase fixture, CreateQueueTransfer transfer,
         QueueTransferInspection original, RemoteTransferCoordinationReadRequest request, string witness)
     {
-        var state = RemoteTransferAttemptColdNative.State(fixture, transfer.TransferId);
+        var state = RemoteTransferAttemptCold.State(fixture, transfer.TransferId);
         var source = fixture.SourceCapacity(fixture.SourceQueue);
         var target = fixture.TargetCapacity(fixture.DestinationQueue);
         var unknown = request with
@@ -17,18 +17,18 @@ internal static class RemoteTransferAttemptColdRefusals
             AcceptCommandId = Guid.NewGuid()
         };
         var position = fixture.Store.Position;
-        var missing = Assert.ThrowsExactly<KeyLoadException>(() => RemoteTransferAttemptColdNative.Read(fixture, unknown));
+        var missing = Assert.ThrowsExactly<KeyLoadException>(() => RemoteTransferAttemptCold.Read(fixture, unknown));
         await Assert.That(missing.Code).IsEqualTo(ErrorCode.RecoveryRequired);
         await Assert.That(fixture.Store.Position).IsEqualTo(position);
         var malformed = new CommandRequest(Guid.NewGuid(), fixture.SourcePartition,
             [new AdvanceQueueTransferAttempt(fixture.SourceQueue, transfer.TransferId,
-                RemoteTransferAttemptColdProtocol.FirstGeneration, InvalidNativePrefix + witness)]);
+                RemoteTransferAttemptColdProtocol.FirstGeneration, InvalidPrefix + witness)]);
         await Assert.That(Errors.Code(fixture.Apply(OperationKind.Batch, malformed).Problem)).IsEqualTo(ErrorCode.TokenInvalidated);
         var stale = new CommandRequest(Guid.NewGuid(), fixture.SourcePartition,
             [new AdvanceQueueTransferAttempt(fixture.SourceQueue, transfer.TransferId,
                 RemoteTransferAttemptColdProtocol.SecondGeneration, witness)]);
         await Assert.That(Errors.Code(fixture.Apply(OperationKind.Batch, stale).Problem)).IsEqualTo(ErrorCode.RevisionConflict);
-        await RemoteTransferCoordinationColdAssertions.EqualAsync(RemoteTransferAttemptColdNative.State(fixture, transfer.TransferId), state);
+        await RemoteTransferCoordinationColdAssertions.EqualAsync(RemoteTransferAttemptCold.State(fixture, transfer.TransferId), state);
         await RemoteTransferCoordinationColdAssertions.EqualAsync(fixture.SourceCapacity(fixture.SourceQueue), source);
         await RemoteTransferCoordinationColdAssertions.EqualAsync(fixture.TargetCapacity(fixture.DestinationQueue), target);
         await RemoteTransferCoordinationColdAssertions.EqualAsync(fixture.Database.InspectQueueTransfer(

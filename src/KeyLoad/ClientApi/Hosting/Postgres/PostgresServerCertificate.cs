@@ -26,5 +26,5 @@ internal sealed class PostgresServerCertificate : IDisposable
         get;
     }
     public void Dispose() => Value.Dispose();
-    private const string CertificateInvalid = "Native SQL requires an owned TLS certificate with a private key.";
+    private const string CertificateInvalid = "Execution SQL requires an owned TLS certificate with a private key.";
 }

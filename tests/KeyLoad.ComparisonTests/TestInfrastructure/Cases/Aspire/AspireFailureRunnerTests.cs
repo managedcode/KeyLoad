@@ -30,7 +30,7 @@ internal sealed class AspireFailureRunnerTests
     [Test]
     [Arguments(0)]
     [Arguments(17)]
-    public async Task AcTest014NoDependencyRunnerRetainsItsOriginalNativeExit(int exit)
+    public async Task AcTest014NoDependencyRunnerRetainsItsOriginalExit(int exit)
     {
         await using var fixture = new AspireFailureNotificationFixture(includeDependencies: false);
         using var deadline = AspireFailureAssertions.CreateDeadline();

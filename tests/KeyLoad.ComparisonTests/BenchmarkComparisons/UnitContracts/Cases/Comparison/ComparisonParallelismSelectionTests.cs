@@ -6,7 +6,7 @@ internal sealed class ComparisonParallelismSelectionTests
 {
     private const string ComparisonProject = "tests/KeyLoad.ComparisonTests";
     private const string SelectedFilter = "/*/*/ActualComparison/*";
-    private const string NodeIsolationMessage = "Comparison measurements and heavy load require exactly one native test at a time.";
+    private const string NodeIsolationMessage = "Comparison measurements and heavy load require exactly one execution test at a time.";
     private const string ModuleArgument = "--input-type=module";
     private const string EvaluationArgument = "-e";
     private const string ScriptsDirectory = "scripts";

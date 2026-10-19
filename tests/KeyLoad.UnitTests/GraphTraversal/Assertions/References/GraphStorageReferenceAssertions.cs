@@ -11,7 +11,7 @@ internal static class GraphStorageReferenceAssertions
         {
             var records = new List<EdgeRecord>();
             var scan = view.VisitRange(KeySpace.Partition("edge", partition, GraphStorageReferenceFixture.Graph), 100,
-                (_, bytes) => { records.Add(NativeSerialization.Deserialize<EdgeRecord>(bytes)!); return true; });
+                (_, bytes) => { records.Add(OrleansSerialization.Deserialize<EdgeRecord>(bytes)!); return true; });
             if (scan.HasMore)
             {
                 throw new InvalidOperationException("The graph oracle range is incomplete.");
@@ -30,7 +30,7 @@ internal static class GraphStorageReferenceAssertions
                 GraphStorageReferenceFixture.Graph, vertex, maxDepth: 1);
             await CompareAsync(outgoing.Edges, expected.Values.Where(edge => edge.From == id), partition);
             var incoming = owner.ReadIncomingGraphEdges(GraphStorageReferenceFixture.Root,
-                new ReadIncomingGraphEdgesRequestV1(1, vertex, GraphStorageReferenceFixture.Graph, 100));
+                new ReadIncomingGraphEdgesRequest(1, vertex, GraphStorageReferenceFixture.Graph, 100));
             await CompareAsync(incoming.Rows.Select(row => row.Edge), expected.Values.Where(edge => edge.To == id), partition);
             await Assert.That(incoming.Rows.All(row => row.DeliveredRevision == 0)).IsTrue();
         }

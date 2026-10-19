@@ -4,7 +4,7 @@
   </PropertyGroup>
   <ItemGroup>
     <EmbeddedResource Include="AdminDashboard/Assets/**/*" LogicalName="KeyLoad.AdminDashboard.%(Filename)%(Extension)" />
-    <Content Include="ResourceExecution/Analytics/Assets/ZoneTree.Analytics.LICENSE.txt" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="AnalyticsStore/Assets/ZoneTree.Analytics.LICENSE.txt" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
   <ItemGroup>
     <InternalsVisibleTo Include="KeyLoad.UnitTests" />
@@ -22,6 +22,8 @@
     <PackageReference Include="OpenTelemetry.Instrumentation.Http" />
     <PackageReference Include="OpenTelemetry.Instrumentation.Runtime" />
     <PackageReference Include="ManagedCode.Communication.AspNetCore" />
+    <PackageReference Include="ManagedCode.Storage.Server" />
+    <PackageReference Include="ManagedCode.Storage.FileSystem" />
     <PackageReference Include="ManagedCode.MCPGateway" />
     <PackageReference Include="ManagedCode.MarkdownLd.Kb" />
     <PackageReference Include="Microsoft.Extensions.AI" />

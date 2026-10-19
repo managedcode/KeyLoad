@@ -2,16 +2,16 @@
 
 Canonical slice: BenchmarkComparisons. Related REQ/AC-SCALE-003,
 [ScaledWorkloads](ScaledWorkloads.md) and [ADR-069](../../ADR/ADR-069-representative-scaled-workloads.md).
-Scope: legal native diagnostic settings and truthful cold process-memory observations.
-Production ZoneTree/WAL/cluster, public APIs, persistence formats, native tiers and public
+Scope: legal diagnostic settings and truthful cold process-memory observations.
+Production ZoneTree/WAL/cluster, public APIs, persistence formats, tiers and public
 comparison pipelines are unchanged. Frontend/public contracts: N/A, diagnostic only.
 The macOS-specific peak reader supports local diagnostics; required qualification remains Linux-only and this path adds no macOS gate.
 
 |Requirement|Acceptance|Pass/fail and proof|
 |---|---|---|
-|REQ-SCALE-RT-001|AC-SCALE-RT-001|Use native mutable max(1000,N+2); existing genuine mini/100K tests must seed/read/close normally, full qualification counts retainN+2 and actualN mutable/no frozen/disk records|
-|REQ-SCALE-RT-002|AC-SCALE-RT-002|Every capacity/capture/final-oracle path reads genuine positive lifetime peak bytes; macOS64 reads successful RUSAGE_SELF ru_maxrss, other platforms use native BCL peak; unavailable/nonpositive/error data fails closed|
-|REQ-SCALE-RT-003|AC-SCALE-RT-003|Cold native read has no timed-path I/O, samples are current-process only; real local normal/scalar tests and exact-source Linux CI remain separate from performance/publication/fault proof|
+|REQ-SCALE-RT-001|AC-SCALE-RT-001|Use mutable max(1000,N+2); existing genuine mini/100K tests must seed/read/close normally, full qualification counts retainN+2 and actualN mutable/no frozen/disk records|
+|REQ-SCALE-RT-002|AC-SCALE-RT-002|Every capacity/capture/final-oracle path reads genuine positive lifetime peak bytes; macOS64 reads successful RUSAGE_SELF ru_maxrss, other platforms use BCL peak; unavailable/nonpositive/error data fails closed|
+|REQ-SCALE-RT-003|AC-SCALE-RT-003|Cold read has no timed-path I/O, samples are current-process only; real local normal/scalar tests and exact-source Linux CI remain separate from performance/publication/fault proof|
 
 macOS .NET10 ProcessManager populates resident WorkingSet but leaves PeakWorkingSet
 unset. Apple's current getrusage manpage defines ru_maxrss in bytes; its Darwin64
@@ -20,7 +20,7 @@ Use source-generated LibraryImport only for macOS64, the absolute system library
 /usr/lib/libSystem.B.dylib, explicit SafeDirectories import policy,
 getrusage(RUSAGE_SELF=0), SetLastError=true, and a blittable explicit144-byte buffer.
 Refresh the supplied current-process observation before reading BCL data.
-On native failure retain the actual errno through Win32Exception. No current-RSS,
+On failure retain the actual errno through Win32Exception. No current-RSS,
 managed-heap, configured log-size or sampled maximum may be substituted for lifetime
 peak. Nonpositive/unavailable measurements throw InvalidDataException in both
 reader and observation guard; genuine ceiling/headroom failures retain the existing
@@ -48,9 +48,9 @@ Testing methodology: the real-ZoneTree mini flows are the regression proof for
 AC-SCALE-RT-001; the positive-peak assertions and real current-process positive,
 byte-scale and monotonic observations cover AC-SCALE-RT-002/003. The tests also reject
 zero/negative guard input as invalid data, without replacing an actual OS provider.
-No injected native failure or fake peak is permitted. Native getrusage errno and
+No injected failure or fake peak is permitted. getrusage errno and
 unsupported64-bit fault occurrence remain unobserved manual limits, never simulated
-qualification. Native ABI size/offset is checked against the installed SDK header.
+qualification. ABI size/offset is checked against the installed SDK header.
 Full formatter/build/governance, focused normal/scalar, broader unit regressions,
 then sequential actual100K/1M BDN original output are the ordered gates.
 Delivered-source Linux CI/recovery/cluster, coverage, endurance, powerloss and full
@@ -65,5 +65,5 @@ Primary sources: [dotnet10 ProcessManager.OSX](https://github.com/dotnet/runtime
 [Darwin getrusage units](https://github.com/apple/darwin-xnu/blob/main/bsd/man/man2/getrusage.2).
 
 Required qualification is Linux-only; macOS peak readings are local diagnostics. Broader
-tests, exact-source Linux delivery, native errno/platform faults and all-scale
+tests, exact-source Linux delivery, errno/platform faults and all-scale
 measurement qualification remain open.

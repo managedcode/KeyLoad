@@ -33,7 +33,7 @@ public sealed partial class DatabaseEngine
         var ids = new List<(string Id, byte[] ReadyKey)>();
         var result = budget.VisitRange(tx, QueueKey(ReadyQueueSpace, lane), command.MaxMessages, (key, value) =>
         {
-            ids.Add((NativeSerialization.Deserialize<string>(value), key.ToArray()));
+            ids.Add((OrleansSerialization.Deserialize<string>(value), key.ToArray()));
             return true;
         });
         if (result.HasMore)

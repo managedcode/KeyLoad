@@ -1,6 +1,6 @@
 namespace KeyLoad.UnitTests.Features.GraphTraversal;
 
-/// <summary>Advances the permitted operation clock after real native adjacency work has started.</summary>
+/// <summary>Advances the permitted operation clock after real execution adjacency work has started.</summary>
 internal sealed class GraphTraversalDeadlineClock : TimeProvider
 {
     private static readonly DateTimeOffset Epoch = new(2040, 1, 1, 0, 0, 0, TimeSpan.Zero);
@@ -26,7 +26,7 @@ internal sealed class GraphTraversalDeadlineClock : TimeProvider
         return Interlocked.Read(ref timestamp);
     }
 
-    internal void ArmAfterNativeWork(Func<bool> observedWork, TimeSpan elapsed)
+    internal void ArmAfterWork(Func<bool> observedWork, TimeSpan elapsed)
     {
         ArgumentNullException.ThrowIfNull(observedWork);
         ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(elapsed, TimeSpan.Zero);

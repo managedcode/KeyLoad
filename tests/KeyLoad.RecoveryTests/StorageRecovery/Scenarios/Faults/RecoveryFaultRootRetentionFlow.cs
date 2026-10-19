@@ -15,7 +15,7 @@ internal static class RecoveryFaultRootRetentionFlow
     private const string SidecarSuffix = ".failed-append.json";
     private const string ChildRetentionKey = "RecoveryFaultRootRetentionOriginalChild";
     private const string MissingCompletion = "The original document recovery child did not emit its required boundary signal.";
-    private const string UnknownChild = "The failed native append retained its original unsettled child.";
+    private const string UnknownChild = "The failed execution append retained its original unsettled child.";
 
     internal static async Task RunAsync(CancellationToken callerToken)
     {
@@ -48,19 +48,19 @@ internal static class RecoveryFaultRootRetentionFlow
     private static async Task OwnedAsync(SeededWalCorruptionTrial trial, SeededWalCorruptionProcessOwner owner,
         FailedAttempt attempt, CancellationToken token)
     {
-        await owner.PhaseAsync(NativeChecksumProfileProtocol.Seed, token);
+        await owner.PhaseAsync(ChecksumProfileProtocol.Seed, token);
         await trial.CaptureAsync(token);
         await trial.DamageAsync(token);
-        await owner.PhaseAsync(NativeChecksumProfileProtocol.CorruptionRefusal, token);
+        await owner.PhaseAsync(ChecksumProfileProtocol.CorruptionRefusal, token);
         await SeededWalCorruptionFiles.RequireFaultedAsync(trial, token);
         await FailedAppendAsync(trial, attempt, token);
         await RetainBothAsync(trial, attempt.Failure!, token);
-        await owner.PhaseAsync(NativeChecksumProfileProtocol.CorruptionRefusal, token);
+        await owner.PhaseAsync(ChecksumProfileProtocol.CorruptionRefusal, token);
         await SeededWalCorruptionFiles.RequireFaultedAsync(trial, token);
         await trial.RepairAsync(token);
         await SeededWalCorruptionFiles.RequireRestoredAsync(trial, token);
-        foreach (var phase in new[] { NativeChecksumProfileProtocol.FirstAppend,
-            NativeChecksumProfileProtocol.SecondAppend, NativeChecksumProfileProtocol.Cold })
+        foreach (var phase in new[] { ChecksumProfileProtocol.FirstAppend,
+            ChecksumProfileProtocol.SecondAppend, ChecksumProfileProtocol.Cold })
         {
             await owner.PhaseAsync(phase, token);
             await SeededWalCorruptionFiles.RequireOriginalAuthorityAsync(trial, token);
@@ -100,7 +100,7 @@ internal static class RecoveryFaultRootRetentionFlow
         }
         if (child.IsSettled)
         {
-            ServerFailureObserver.Observe(child.CloseNativeProcessAfterJoin, failures);
+            ServerFailureObserver.Observe(child.CloseProcessAfterJoin, failures);
         }
         await ServerFailureObserver.ObserveAsync(async () =>
         {
@@ -131,8 +131,8 @@ internal static class RecoveryFaultRootRetentionFlow
     private static async Task SaveEvidenceAsync(SeededWalCorruptionTrial trial, SeededWalCorruptionProcessOwner owner,
         FailedAttempt attempt, List<Exception> failures, CancellationToken token)
     {
-        var nativeEvidence = await SeededWalCorruptionEvidence.SaveAsync(trial, owner, failures, token);
-        await using var output = new FileStream(nativeEvidence + SidecarSuffix, new FileStreamOptions
+        var runtimeEvidence = await SeededWalCorruptionEvidence.SaveAsync(trial, owner, failures, token);
+        await using var output = new FileStream(runtimeEvidence + SidecarSuffix, new FileStreamOptions
         {
             Mode = FileMode.CreateNew,
             Access = FileAccess.Write,
@@ -141,8 +141,8 @@ internal static class RecoveryFaultRootRetentionFlow
         });
         await JsonSerializer.SerializeAsync(output, new
         {
-            NativeEvidence = nativeEvidence,
-            Phase = NativeChecksumProfileProtocol.FirstAppend,
+            RuntimeEvidenceCore = runtimeEvidence,
+            Phase = ChecksumProfileProtocol.FirstAppend,
             attempt.Signal,
             attempt.Started,
             attempt.Signaled,
@@ -150,7 +150,7 @@ internal static class RecoveryFaultRootRetentionFlow
             attempt.Accepted,
             attempt.NaturalExitAndReadersJoinedBeforeCleanup,
             OriginalExitAndBothReadersJoined = attempt.Child?.IsSettled,
-            NativeProcessClosed = attempt.Child?.IsDisposed,
+            ProcessClosed = attempt.Child?.IsDisposed,
             FailureType = attempt.Failure?.GetType().FullName,
             FailureMessage = attempt.Failure?.Message,
             ProcessKillIsNaturalExitEvidence = false,
@@ -169,7 +169,7 @@ internal static class RecoveryFaultRootRetentionFlow
             UseShellExecute = false
         };
         foreach (var argument in new[] { typeof(CrashScenarioDispatcher).Assembly.Location, CrashFixtureValues.ProcessMode,
-            NativeChecksumProfileProtocol.Mode, root, NativeChecksumProfileProtocol.FirstAppend })
+            ChecksumProfileProtocol.Mode, root, ChecksumProfileProtocol.FirstAppend })
         {
             start.ArgumentList.Add(argument);
         }
@@ -181,7 +181,7 @@ internal static class RecoveryFaultRootRetentionFlow
         internal string Signal
         {
             get;
-        } = NativeChecksumProfileProtocol.CompletionSignalPrefix + NativeChecksumProfileProtocol.FirstAppend;
+        } = ChecksumProfileProtocol.CompletionSignalPrefix + ChecksumProfileProtocol.FirstAppend;
         internal CommandIdempotencyProcessChild? Child
         {
             get; set;

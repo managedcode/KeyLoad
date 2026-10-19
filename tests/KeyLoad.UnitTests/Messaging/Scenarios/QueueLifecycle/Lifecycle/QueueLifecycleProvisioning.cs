@@ -9,7 +9,7 @@ internal static class QueueLifecycleProvisioning
         var literal = new EnqueueMessage(QueueLifecycleTestProtocol.Queue, QueueLifecycleTestProtocol.Parked,
             QueueLifecycleTestProtocol.Payload, QueueLifecycleTestProtocol.Headers, OrderingKey: QueueLifecycleTestProtocol.OrderingKey);
         var body = new MessageBody(literal.MessageId, literal.PayloadJson, literal.HeadersJson, literal.OrderingKey, JsonData.Fingerprint(literal));
-        var bytes = NativeSerialization.Serialize(body).LongLength;
+        var bytes = OrleansSerialization.Serialize(body).LongLength;
         if (QueueLifecycleAccountingAssertions.BodyBytes(QueueLifecycleTestProtocol.Pending) != bytes)
         {
             throw new InvalidOperationException(QueueLifecycleTestProtocol.BodyFixtureMismatch);

@@ -1,7 +1,7 @@
 # RemoteTransfers within Messaging
 
 Decision: [ADR-088](../../ADR/ADR-088-remote-queue-transfers.md). Cluster concept:
-[ADR-136](../../ADR/ADR-136-native-orleans-partition-ownership.md).
+[ADR-136](../../ADR/ADR-136-orleans-partition-ownership.md).
 
 A remote transfer is a durable queue-to-queue output within one tenant/database.
 Source and destination atomic partitions differ, and each side commits on its own.
@@ -20,7 +20,7 @@ and exact EnqueueMessage fingerprint are retained with the source intent. A
 same-ID/same-body retry returns its existing outcome; different content conflicts.
 The source is OutputPending until a destination receipt is verified and committed.
 
-Core signs native-generated versioned intent claims using the database signing key.
+Core signs generated versioned intent claims using the database signing key.
 Claims bind purpose, database incarnation, complete source and target, TransferId,
 original persisted principal ID and exact message/fingerprint. Target requires the
 current authenticated principal to match, reauthorizes QueuePublish and all target
@@ -45,7 +45,7 @@ cannot undo a committed enqueue. A remote DLQ is an ordinary durable destination
 queue.
 
 The accepted caps per source/destination lane are MaxScanRecords retained records
-and MaxBatchBytes native retained-state bytes, with atomic counters. Encoded
+and MaxBatchBytes retained-state bytes, with atomic counters. Encoded
 intent-token bytes also fit MaxBatchBytes before source admission; never commit an
 intent which the destination cannot accept under its token contract. Administrator
 status is checked on the original persisted principal; data/field/header checks
@@ -70,7 +70,7 @@ before using this proof to complete the source.
 
 ## Ordered execution and ownership
 
-1. Abstractions and Core Messaging own the QueueTransfer contracts, native claims,
+1. Abstractions and Core Messaging own the QueueTransfer contracts, claims,
    state and helpers; the engine reuses existing Enqueue, Sign/Verify, policy and
    transactions.
 2. Central mutation discrimination, validation, authorization and apply joins,
@@ -117,7 +117,7 @@ Stages: commit stable source Create with its immutable intent and cold-restart t
 cluster; verify OutputPending and no target. Reject a tampered intent, a conflicting
 source body and a freshly revoked target publisher through every existing route,
 leaving target metadata and receipt absent and the source exactly as committed.
-Restore the persisted publisher, commit target Accept, retain the original native
+Restore the persisted publisher, commit target Accept, retain the original execution
 receipt and signed target proof, and cold-restart with the source still
 OutputPending. Complete only from that actual target receipt; cold-restart and
 verify Delivered plus the original command receipts on every route. ACK the target
@@ -139,7 +139,7 @@ One persisted technical principal may be selected by the nullable
 an existing subject only, never creates credentials or grants roles, and that subject
 must equal the retained source creator and tenant and is freshly authorized for each
 signed source/target inspection and Batch. Silo-local discovery of pending intents is
-bounded by the operation's native count, byte and work ceilings and a fixed tail; the
+bounded by the operation's count, byte and work ceilings and a fixed tail; the
 cursor resets on the store incarnation. It emits pending-transfer events to Orleans
 `[StatelessWorker]` grains, which buffer them in memory and, on an Orleans timer
 whose interval is a typed option, submit the batch. No worker checks leadership or
@@ -163,7 +163,7 @@ ID, and an authorized operator uses the public Accept/Complete.
 positive and no larger than MaxScanRecords. A newly created source intent reserves
 its immutable ceiling; only a genuine no-effect ResourceExhausted outcome of a
 single Accept can retain the original failure authority. The source batch
-`AdvanceQueueTransferAttempt` (alias `keyload.queue-transfer.advance-attempt.v1`)
+`AdvanceQueueTransferAttempt` (alias `keyload.queue-transfer.advance-attempt`)
 verifies the signed failure witness and the exact immutable intent, then appends one
 history reference and increments the generation in one transaction, charging one
 record plus its exact bytes. A target receipt that already exists always wins and an

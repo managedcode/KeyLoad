@@ -1,7 +1,7 @@
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.ClusterRouting;
+using KeyLoad.IntegrationTests.Features.OrleansExecution;
 using KeyLoad.Server;
 using static KeyLoad.IntegrationTests.Features.ResourceExecution.EarlyAdmissionQualificationProtocol;
 
@@ -11,7 +11,7 @@ internal static class EarlyAdmissionQualificationHeld
 {
     private const string ContentType = "application/json";
     private const string Bearer = "Bearer";
-    private const string ControlRoute = "/v1/admin/dispatch?paused=false";
+    private const string ControlRoute = "/admin/dispatch?paused=false";
     internal static async Task RunAsync(ClusterFixture fixture, RequestCqrsClusterCallers root,
         RequestCqrsClusterCallers reader, EarlyAdmissionQualificationState state, CancellationToken token)
     {

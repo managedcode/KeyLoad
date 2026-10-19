@@ -6,7 +6,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
 
-/// <summary>The single configuration binding boundary for server and native silo execution.</summary>
+/// <summary>The single configuration binding boundary for server and execution silo execution.</summary>
 [ConfigurationBinding]
 internal static class ServerRuntimeOptionsRegistration
 {
@@ -29,8 +29,8 @@ internal static class ServerRuntimeOptionsRegistration
         services.AddOptions<BackgroundWorkerOptions>().Bind(configuration.GetSection(BackgroundWorkerOptions.SectionName))
             .Validate(options => options.FlushInterval > TimeSpan.Zero && options.MaximumBufferedEvents > NoCount,
                 BackgroundWorkerOptions.SectionName).ValidateOnStart();
-        services.AddOptions<NativeDurableJobOptions>().Bind(configuration.GetSection(NativeDurableJobOptions.SectionName))
-            .Validate(options => options.IsValid(), NativeDurableJobOptions.ValidationMessage).ValidateOnStart();
+        services.AddOptions<RuntimeDurableJobOptions>().Bind(configuration.GetSection(RuntimeDurableJobOptions.SectionName))
+            .Validate(options => options.IsValid(), RuntimeDurableJobOptions.ValidationMessage).ValidateOnStart();
         services.AddOptions<ReplicaCopyOptions>().Bind(configuration.GetSection(ReplicaCopyOptions.SectionName))
             .Validate(options => options.IsValid(), InvalidCopies).ValidateOnStart();
         services.AddOptions<GrainRoutingOptions>()
@@ -44,10 +44,10 @@ internal static class ServerRuntimeOptionsRegistration
             .Validate(options => options.IsValid(), ZoneTreeStorageExecutionOptions.ValidationMessage).ValidateOnStart();
         services.AddOptions<ZoneTreePointCacheExecutionOptions>().Bind(configuration.GetSection(ZoneTreePointCacheExecutionOptions.SectionName))
             .Validate(options => options.IsValid(), ZoneTreePointCacheExecutionOptions.ValidationMessage).ValidateOnStart();
-        services.AddOptions<NativeAnnExecutionOptions>().Bind(configuration.GetSection(NativeAnnExecutionOptions.SectionName))
-            .Validate(options => options.IsValid(), NativeAnnExecutionOptions.ValidationMessage).ValidateOnStart();
-        services.AddOptions<NativeTextExecutionOptions>().Bind(configuration.GetSection(NativeTextExecutionOptions.SectionName))
-            .Validate(options => options.IsValid(), NativeTextExecutionOptions.ValidationMessage).ValidateOnStart();
+        services.AddOptions<AnnExecutionOptions>().Bind(configuration.GetSection(AnnExecutionOptions.SectionName))
+            .Validate(options => options.IsValid(), AnnExecutionOptions.ValidationMessage).ValidateOnStart();
+        services.AddOptions<TextExecutionOptions>().Bind(configuration.GetSection(TextExecutionOptions.SectionName))
+            .Validate(options => options.IsValid(), TextExecutionOptions.ValidationMessage).ValidateOnStart();
     }
 
     private static void RegisterHostExecution(IServiceCollection services, IConfiguration configuration)

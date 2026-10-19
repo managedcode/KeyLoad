@@ -9,14 +9,14 @@ internal static class AnnProviderQualificationImages
 {
     internal static (StoreIdentity Identity, long Position, string[] Rows,
         (long AppliedPosition, long StorePosition) CanonicalCut) Capture(AnnProviderQualificationOwner owner)
-        => (NativeReadCutStoreStateAssertions.SnapshotIdentity(owner.Store), owner.Store.Position,
+        => (ReadCutStoreStateAssertions.SnapshotIdentity(owner.Store), owner.Store.Position,
             QueueWholeFlowStorage.Bytes(owner.Store), owner.ReadCanonicalCut());
 
     internal static async Task SameAsync(AnnProviderQualificationOwner owner,
         (StoreIdentity Identity, long Position, string[] Rows,
         (long AppliedPosition, long StorePosition) CanonicalCut) expected)
     {
-        await NativeReadCutStoreStateAssertions.AssertIdentityAndPositionAsync(owner.Store, expected.Identity, expected.Position);
+        await ReadCutStoreStateAssertions.AssertIdentityAndPositionAsync(owner.Store, expected.Identity, expected.Position);
         await Assert.That(QueueWholeFlowStorage.Bytes(owner.Store)).IsEquivalentTo(expected.Rows, CollectionOrdering.Matching);
         await Assert.That(owner.ReadCanonicalCut()).IsEqualTo(expected.CanonicalCut);
     }

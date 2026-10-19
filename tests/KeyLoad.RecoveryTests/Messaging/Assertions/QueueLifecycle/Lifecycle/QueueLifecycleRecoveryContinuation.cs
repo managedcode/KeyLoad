@@ -21,14 +21,14 @@ internal static class QueueLifecycleRecoveryContinuation
         var ack = new DeliveryCommand(Guid.NewGuid(), lane, delivery.Token, DeliveryAction.Ack);
         var ackOperation = CrashDatabase.Operation(database, OperationKind.Delivery, ack, ack.CommandId);
         var acknowledged = database.Apply(ackOperation).Get<CommitReceipt>();
-        await MessagingRecoveryReceiptAssertions.AssertSameNativeValueAsync(receipt, database.Apply(original).Get<CommitReceipt>());
+        await MessagingRecoveryReceiptAssertions.AssertSameValueAsync(receipt, database.Apply(original).Get<CommitReceipt>());
         var image = Capture(store, lane);
         store.Dispose();
         using var reopened = new ZoneTreeStore(new(directory), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
         var cold = QueueLifecycleRecoveryAssertions.Open(reopened);
         await Assert.That(Capture(reopened, lane)).IsEquivalentTo(image, TUnit.Assertions.Enums.CollectionOrdering.Matching);
-        await MessagingRecoveryReceiptAssertions.AssertSameNativeValueAsync(receipt, cold.Apply(original).Get<CommitReceipt>());
-        await MessagingRecoveryReceiptAssertions.AssertSameNativeValueAsync(acknowledged, cold.Apply(ackOperation).Get<CommitReceipt>());
+        await MessagingRecoveryReceiptAssertions.AssertSameValueAsync(receipt, cold.Apply(original).Get<CommitReceipt>());
+        await MessagingRecoveryReceiptAssertions.AssertSameValueAsync(acknowledged, cold.Apply(ackOperation).Get<CommitReceipt>());
         var commandId = Guid.NewGuid();
         _ = CrashDatabase.Submit(cold, OperationKind.Batch, new CommandRequest(commandId, lane.Partition,
             [QueueLifecycleCrashSeed.Enqueue(QueueLifecycleCrashProtocol.Healthy)]), commandId).Get<CommitReceipt>();

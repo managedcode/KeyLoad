@@ -2,7 +2,7 @@ using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.Testing;
 using KeyLoad.AppHost.Features.TestInfrastructure;
-using KeyLoad.IntegrationTests.Features.ClusterReplication;
+using KeyLoad.IntegrationTests.Features.StorageReplication;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
@@ -91,7 +91,7 @@ internal sealed partial class FunctionalGateFixture : IAsyncDisposable
         processEvidenceDirectory = new ClusterFailureReceipts().RequireRunOutput(TestContext.ResultsDirectory);
         Directory.CreateDirectory(processEvidenceDirectory);
         _ = await ClusterFixtureApplicationStartup.CaptureAsync(App, NodeNames, processEvidenceDirectory,
-            "native-process-startup.json", startup.Token).ConfigureAwait(false);
+            "execution-process-startup.json", startup.Token).ConfigureAwait(false);
         started = true;
         PhysicalFiles = await FunctionalGatePhysicalFileAssertions.CaptureLiveAsync(this, startup.Token).ConfigureAwait(false);
     }

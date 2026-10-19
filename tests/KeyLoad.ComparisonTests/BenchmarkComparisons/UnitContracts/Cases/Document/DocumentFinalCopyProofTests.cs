@@ -3,7 +3,7 @@ using KeyLoad.Comparisons.Targets;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
-/// <summary>AC-METH-004: final native CLUSTER copy proof rejects stale membership and incomplete final durability/readback.</summary>
+/// <summary>AC-METH-004: final execution CLUSTER copy proof rejects stale membership and incomplete final durability/readback.</summary>
 internal sealed class DocumentFinalCopyProofTests
 {
     [Test]
@@ -26,7 +26,7 @@ internal sealed class DocumentFinalCopyProofTests
         try
         {
             evidence = await OpenSearchDocumentCopyProof.VerifyAsync(client, DocumentFinalOpenSearchHandler.Index, 3,
-                ComparisonTopology.Replicated, initial, schedule, UnitBenchmarkOptions.Native(),
+                ComparisonTopology.Replicated, initial, schedule, UnitBenchmarkOptions.Execution(),
                 TestContext.Current!.Execution.CancellationToken);
         }
         catch (ComparisonFailureException error) { failure = error; }
@@ -34,7 +34,7 @@ internal sealed class DocumentFinalCopyProofTests
         await Assert.That(handler.FlushRequests).IsEqualTo(1);
         if (qualified)
         {
-            var actual = evidence ?? throw new InvalidOperationException("Final native copy proof is missing.");
+            var actual = evidence ?? throw new InvalidOperationException("Final execution copy proof is missing.");
             await Assert.That(actual.Nodes).IsEqualTo(3);
             await Assert.That(actual.DataCopies).IsEqualTo(3);
             await Assert.That(handler.ReadCopies.Order(StringComparer.Ordinal)).IsEquivalentTo(new[] { "n1", "n2", "n3" }, TUnit.Assertions.Enums.CollectionOrdering.Matching);
@@ -43,7 +43,7 @@ internal sealed class DocumentFinalCopyProofTests
     }
 
     [Test]
-    public async Task AcMeth004RedisAllReplicaFsyncAndStableNativeIdentitiesAreRequired()
+    public async Task AcMeth004RedisAllReplicaFsyncAndStableIdentitiesAreRequired()
     {
         RedisDocumentCopyProof.RequireFsyncReceipt([1, 2], 2);
         await Assert.That(() => RedisDocumentCopyProof.RequireFsyncReceipt([1, 1], 2)).Throws<ComparisonFailureException>();
@@ -63,7 +63,7 @@ internal sealed class DocumentFinalCopyProofTests
         var schedule = new DocumentComparisonSchedule(DocumentComparisonScenario.Delete, new DocumentComparisonCorpus(100, 16), 100);
         var initial = new TargetProfile("PostgreSQL + pgvector", "controlled", "controlled", "controlled", "controlled", "TCP", "controlled", "controlled")
         {
-            Cluster = new(3, 3, "controlled", ["Native standby identities=benchmark_standby1@one,benchmark_standby2@two"])
+            Cluster = new(3, 3, "controlled", ["Execution standby identities=benchmark_standby1@one,benchmark_standby2@two"])
         };
         var observed = initial with
         {
@@ -80,7 +80,7 @@ internal sealed class DocumentFinalCopyProofTests
         {
             Cluster = observed.Cluster! with
             {
-                Observations = observed.Cluster!.Observations.SetItem(0, "Native standby identities=foreign")
+                Observations = observed.Cluster!.Observations.SetItem(0, "Execution standby identities=foreign")
             }
         };
         await Assert.That(() => PostgresDocumentCopyProof.BindFinalState(changed, initial, schedule)).Throws<ComparisonFailureException>();

@@ -7,5 +7,5 @@ namespace KeyLoad;
 /// <param name="Deliveries">Contains leased messages.</param>
 /// <param name="Token">Carries the delivery token.</param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.ReceiveResult)]
+[Orleans.Alias(ContractAliases.ReceiveResult)]
 public sealed record ReceiveResult([property: Orleans.Id(0)] Guid RequestId, [property: Orleans.Id(1)] ImmutableArray<Delivery> Deliveries, [property: Orleans.Id(2)] CommitToken Token);

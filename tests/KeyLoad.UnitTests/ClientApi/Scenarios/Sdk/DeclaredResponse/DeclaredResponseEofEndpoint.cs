@@ -1,12 +1,12 @@
 using System.Text.Json;
-using KeyLoad.UnitTests.Features.ClusterRouting;
+using KeyLoad.UnitTests.Features.OrleansExecution;
 using Microsoft.AspNetCore.Http;
 using static KeyLoad.UnitTests.Features.ClientApi.DeclaredResponseEofProtocol;
 using P = KeyLoad.UnitTests.Features.ClientApi.DeclaredResponseEofProtocol;
 
 namespace KeyLoad.UnitTests.Features.ClientApi;
 
-internal sealed class DeclaredResponseEofEndpoint(ConnectionNativeScenario scenario, PrincipalRecord principal,
+internal sealed class DeclaredResponseEofEndpoint(ConnectionScenario scenario, PrincipalRecord principal,
     DeclaredResponseEofTasks tasks)
 {
     private int writes;
@@ -91,7 +91,7 @@ internal sealed class DeclaredResponseEofEndpoint(ConnectionNativeScenario scena
         var reply = await scenario.CommandAsync(principal, requestId, Command, context.RequestAborted);
         await scenario.Observation.Read(requestId).Disposed.Task.WaitAsync(context.RequestAborted);
         await Assert.That(reply.Error).IsNull();
-        var receipt = ConnectionNativeAssertions.Value<CommitReceipt>(reply);
+        var receipt = ConnectionAssertions.Value<CommitReceipt>(reply);
         Original ??= receipt;
         return JsonSerializer.SerializeToUtf8Bytes(receipt, JsonDefaults.Options);
     }
@@ -107,7 +107,7 @@ internal sealed class DeclaredResponseEofEndpoint(ConnectionNativeScenario scena
         await scenario.Observation.Read(requestId).Disposed.Task.WaitAsync(context.RequestAborted);
         await Assert.That(reply.Error).IsNull();
         return JsonSerializer.SerializeToUtf8Bytes(new DocumentReadResult(
-            ConnectionNativeAssertions.Value<DocumentResult>(reply)), JsonDefaults.Options);
+            ConnectionAssertions.Value<DocumentResult>(reply)), JsonDefaults.Options);
     }
 
     private static async Task AbortDeclaredAsync(HttpContext context, byte[] bytes, DeclaredResponseEofBoundary boundary)

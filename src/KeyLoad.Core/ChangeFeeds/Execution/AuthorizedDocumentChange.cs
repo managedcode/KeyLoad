@@ -8,7 +8,7 @@ namespace KeyLoad.Core;
 /// <param name="After">Visible document after the mutation.</param>
 
 [global::Orleans.GenerateSerializer]
-[global::Orleans.Alias(global::KeyLoad.Core.Features.InternalSerialization.CoreNativeAliases.AuthorizedDocumentChange)]
+[global::Orleans.Alias(global::KeyLoad.Core.Features.InternalSerialization.CoreAliases.AuthorizedDocumentChange)]
 public sealed record AuthorizedDocumentChange(
     [property: global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.AuthorizedDocumentChangeFields.Sequence)] long Sequence,
     [property: global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.AuthorizedDocumentChangeFields.Commit)] CommitToken Commit,

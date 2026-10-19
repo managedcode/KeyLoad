@@ -68,12 +68,12 @@ internal sealed class McpIdentifierFramingTests
         await Assert.That(document.RootElement.GetProperty(ParametersField).GetProperty(IdentifierField).GetString()).IsEqualTo(value);
     }
 
-    /// <summary>Numeric and null identifier semantics remain with the native SDK.</summary>
+    /// <summary>Numeric and null identifier semantics remain with the execution SDK.</summary>
     /// <param name="json">The genuine scalar identifier frame.</param>
     [Test]
     [Arguments(ScalarIdentifierJson)]
     [Arguments(NullIdentifierJson)]
-    public async Task ScalarIdentifierSemanticsRemainNative(string json)
+    public async Task ScalarIdentifierSemanticsRemain(string json)
     {
         var shape = McpFrameBounds.Inspect(Encoding.UTF8.GetBytes(json), MaximumWireBytes, UnitMcpOptions.Execution());
         await Assert.That(shape.PropertyCount).IsEqualTo(1);

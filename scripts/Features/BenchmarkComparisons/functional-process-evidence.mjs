@@ -1,6 +1,6 @@
 import { isDeepStrictEqual } from 'node:util';
 import { exactSession as exact, requireSession as require, sessionText } from './session-contract.mjs';
-import { validateNativeProcess } from './session-process-identity.mjs';
+import { validateProcess } from './session-process-identity.mjs';
 
 const processFields = ['Name', 'ProcessId', 'StartedAtUtc', 'AspireStartedAtUtc',
   'AspireProcessId', 'AspireProcessStartedAtUtc', 'Binary'];
@@ -11,13 +11,13 @@ const resourceFields = ['Name', 'ProcessId', 'StartedAtUtc', 'AspireStartedAtUtc
   'StartTimeStamp', 'StopTimeStamp', 'State'];
 const stamp = value => typeof value === 'string' && Number.isFinite(Date.parse(value)) && Date.parse(value) > 0;
 
-function nativeProcesses(value, identity) {
+function runtimeProcesses(value, identity) {
   require(Array.isArray(value) && value.length === 3);
   const pids = new Set();
   return value.map((original, index) => {
     require(exact(original, processFields) && exact(original.Binary, binaryFields));
     const binary = original.Binary;
-    const observed = validateNativeProcess({ name: original.Name, processId: original.ProcessId,
+    const observed = validateProcess({ name: original.Name, processId: original.ProcessId,
       startedAtUtc: original.StartedAtUtc, aspireStartedAtUtc: original.AspireStartedAtUtc,
       aspireProcessId: original.AspireProcessId, aspireProcessStartedAtUtc: original.AspireProcessStartedAtUtc,
       binary: { executablePath: binary.ExecutablePath, executableSha256: binary.ExecutableSha256,
@@ -34,7 +34,7 @@ function nativeProcesses(value, identity) {
 
 // Integration emits these exact three originals using its owning default Pascal-case serializer.
 export function validateFunctionalProcesses(startup, beforeShutdown, shutdown, identity) {
-  const processes = nativeProcesses(startup, identity);
+  const processes = runtimeProcesses(startup, identity);
   require(isDeepStrictEqual(startup, beforeShutdown) && exact(shutdown, ['JoinedAtUtc', 'Processes', 'Resources'])
     && stamp(shutdown.JoinedAtUtc) && isDeepStrictEqual(shutdown.Processes, beforeShutdown)
     && Array.isArray(shutdown.Resources) && shutdown.Resources.length === processes.length);

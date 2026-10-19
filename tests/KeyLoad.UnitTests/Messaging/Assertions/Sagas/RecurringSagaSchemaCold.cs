@@ -16,7 +16,7 @@ internal static class RecurringSagaSchemaCold
             var position = owner.Store.Position;
             var applied = owner.Database.LastApplied;
             var cut = owner.ReadCanonicalCut();
-            var identity = NativeSerialization.Serialize(owner.Store.Identity);
+            var identity = OrleansSerialization.Serialize(owner.Store.Identity);
             await owner.ReopenAsync();
             var failures = new List<Exception>();
             await ServerFailureObserver.ObserveAsync(async () =>
@@ -25,7 +25,7 @@ internal static class RecurringSagaSchemaCold
                 await Assert.That(owner.Store.Position).IsEqualTo(position);
                 await Assert.That(owner.Database.LastApplied).IsEqualTo(applied);
                 await Assert.That(owner.ReadCanonicalCut()).IsEqualTo(cut);
-                await Assert.That(NativeSerialization.Serialize(owner.Store.Identity).AsSpan().SequenceEqual(identity)).IsTrue();
+                await Assert.That(OrleansSerialization.Serialize(owner.Store.Identity).AsSpan().SequenceEqual(identity)).IsTrue();
             }, failures);
             await ServerFailureObserver.ObserveAsync(() => RecurringSagaSchemaCanonical.CurrentAsync(owner, state), failures);
             await ServerFailureObserver.ObserveAsync(() => RecurringSagaSchemaProjection.AllAsync(owner, state,

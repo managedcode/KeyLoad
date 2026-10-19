@@ -13,7 +13,7 @@ internal static class PartitionQueryReferenceSizing
     private const long RootHeader = 128;
     private const long LeafHeader = 256;
 
-    internal static long MinimumSingleLeafBatchBytes(PartitionQueryResultV1 result, int limit)
+    internal static long MinimumSingleLeafBatchBytes(PartitionQueryResult result, int limit)
     {
         if (result.Leaves.Length != 1)
         {
@@ -30,7 +30,7 @@ internal static class PartitionQueryReferenceSizing
         return checked(mergeReserve + leafPeak);
     }
 
-    internal static long RetainedBytes(PartitionQueryResultV1 result)
+    internal static long RetainedBytes(PartitionQueryResult result)
     {
         var bytes = checked(RootHeader + (long)LeafHeader * result.Leaves.Length
             + (long)HeapSlot * result.Leaves.Length + ArrayBytes(result.Rows.Length));
@@ -47,7 +47,7 @@ internal static class PartitionQueryReferenceSizing
         return checked(bytes + (long)ReferenceSlot * candidateCount);
     }
 
-    private static long CandidateBytes(PartitionQueryCandidateV1 candidate)
+    private static long CandidateBytes(PartitionQueryCandidate candidate)
     {
         var reference = candidate.Reference;
         var bytes = CandidateHeader;

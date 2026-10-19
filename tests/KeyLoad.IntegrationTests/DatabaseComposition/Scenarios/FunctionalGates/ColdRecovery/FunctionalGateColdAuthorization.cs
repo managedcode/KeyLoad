@@ -39,7 +39,7 @@ internal static class FunctionalGateColdAuthorization
         }
     }
 
-    private static async Task RefuseAsync(KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsClusterCallers caller,
+    private static async Task RefuseAsync(KeyLoad.IntegrationTests.Features.OrleansExecution.RequestCqrsClusterCallers caller,
         CommandRequest command, CancellationToken token)
     {
         var denied = await caller.Sdk.CommitAsync(command, token);

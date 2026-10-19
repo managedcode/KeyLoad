@@ -6,22 +6,22 @@ namespace KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries.Intensive
 internal sealed class TimescaleTimeSeriesIntensiveSession : IAsyncDisposable
 {
     private readonly NpgsqlDataSource dataSource;
-    private readonly NativeComparisonExecutionOptions execution;
+    private readonly ComparisonExecutionOptions execution;
 
     internal int InitialReadCapacity => execution.TimeSeriesInitialReadCapacity;
 
-    internal TimescaleTimeSeriesIntensiveSession(string connectionString, string schemaName, IOptions<NativeComparisonExecutionOptions> executionOptions)
+    internal TimescaleTimeSeriesIntensiveSession(string connectionString, string schemaName, IOptions<ComparisonExecutionOptions> executionOptions)
     {
         execution = executionOptions.Value;
         execution.Validate();
         dataSource = NpgsqlDataSource.Create(CreateConnectionSettings(connectionString, schemaName, executionOptions));
     }
 
-    internal static NpgsqlConnectionStringBuilder CreateConnectionSettings(string connectionString, string schemaName, IOptions<NativeComparisonExecutionOptions> executionOptions)
+    internal static NpgsqlConnectionStringBuilder CreateConnectionSettings(string connectionString, string schemaName, IOptions<ComparisonExecutionOptions> executionOptions)
     {
         const string PgCatalogPgTempToken = ",pg_catalog,pg_temp";
 
-        var execution = NativeComparisonExecutionOptions.Require(executionOptions).Value;
+        var execution = ComparisonExecutionOptions.Require(executionOptions).Value;
         ArgumentException.ThrowIfNullOrWhiteSpace(connectionString);
         TimescaleSchemaLifecycle.ValidateSchemaName(schemaName);
         return new NpgsqlConnectionStringBuilder(connectionString)

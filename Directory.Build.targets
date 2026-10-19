@@ -15,6 +15,6 @@
   <Target Name="ValidateKeyLoadSdkContainer" BeforeTargets="PublishContainer" Condition="'$(MSBuildProjectName)' == 'KeyLoad' or '$(MSBuildProjectName)' == 'KeyLoad.ComparisonHost'">
     <Error Condition="'$(NETCoreSdkVersion)' != '10.0.401'" Text="KeyLoad container publishing requires the SDK pinned in global.json." />
     <Error Condition="'$(ContainerBaseImage)' != 'mcr.microsoft.com/dotnet/aspnet:10.0.12@sha256:222759b391a1aaf241166672c8f99b2d4ada452e7b5319f3c6e8f265a37b5ad4'" Text="KeyLoad container publishing requires the source-pinned runtime image." />
-    <Error Condition="'$(ContainerUser)' != 'app'" Text="KeyLoad product images must retain the native non-root app user." />
+    <Error Condition="'$(ContainerUser)' != 'app'" Text="KeyLoad product images must retain the non-root app user." />
   </Target>
 </Project>

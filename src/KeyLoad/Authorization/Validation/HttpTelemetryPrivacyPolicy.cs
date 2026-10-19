@@ -46,11 +46,11 @@ internal static class HttpTelemetryPrivacyPolicy
     internal const long CounterIncrement = 1;
     private const int MaximumMethodCharacters = 7;
     private const int MaximumProtocolCharacters = 3;
-    private const int MaximumNativeLinks = 1;
-    private const int InitialNativeLinkCount = 0;
+    private const int MaximumLinks = 1;
+    private const int InitialLinkCount = 0;
     internal static string? LinkSuppressionReason(Activity activity)
     {
-        var count = InitialNativeLinkCount;
+        var count = InitialLinkCount;
         foreach (var link in activity.Links)
         {
             if (activity.Source.Name != ClientSource || activity.OperationName != ClientOperation || activity.Kind != ActivityKind.Client
@@ -60,7 +60,7 @@ internal static class HttpTelemetryPrivacyPolicy
             {
                 return UnsafeStateReason;
             }
-            if (++count > MaximumNativeLinks)
+            if (++count > MaximumLinks)
             {
                 return ExcessStateReason;
             }

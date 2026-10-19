@@ -11,19 +11,19 @@ internal static class RemoteTransferAttemptColdContinuation
         RemoteTransferAcceptFailureClaims claims)
     {
         fixture.Reopen();
-        var state = RemoteTransferAttemptColdNative.State(fixture, transfer.TransferId);
+        var state = RemoteTransferAttemptCold.State(fixture, transfer.TransferId);
         await Assert.That(state.Generation).IsEqualTo(RemoteTransferAttemptColdProtocol.SecondGeneration);
         await Assert.That(fixture.SourceCapacity(fixture.SourceQueue).StoredRecords).IsEqualTo(RemoteTransferAttemptColdProtocol.TwoRetainedRecords);
         await Assert.That(state.Ceiling).IsEqualTo(RemoteTransferAttemptColdProtocol.Ceiling);
         var reference = await Assert.That(state.History).HasSingleItem();
         await Assert.That(reference.Generation).IsEqualTo(RemoteTransferAttemptColdProtocol.FirstGeneration);
         await Assert.That(reference.WitnessToken).IsEqualTo(((AdvanceQueueTransferAttempt)advance.Mutations.Single()).FailureWitness);
-        await RemoteTransferAttemptColdNative.AccountingAsync(fixture, transfer.TransferId, RemoteTransferAttemptColdProtocol.TwoRetainedRecords);
+        await RemoteTransferAttemptCold.AccountingAsync(fixture, transfer.TransferId, RemoteTransferAttemptColdProtocol.TwoRetainedRecords);
         await Assert.That(reference.AcceptCommandId).IsEqualTo(firstAccept.CommandId);
         await Assert.That(reference.OutcomeDigest).IsEqualTo(claims.OutcomeDigest);
         await RemoteTransferCoordinationColdAssertions.EqualAsync(fixture.Apply(OperationKind.Batch, advance).Get<CommitReceipt>(), advanced);
         await RemoteTransferCoordinationColdAssertions.EqualAsync(fixture.Apply(OperationKind.Batch, firstAccept), failed);
-        await Assert.That(RemoteTransferAttemptColdNative.Outcome(fixture, firstAccept.CommandId,
+        await Assert.That(RemoteTransferAttemptCold.Outcome(fixture, firstAccept.CommandId,
             fixture.DestinationPartition).AsSpan().SequenceEqual(failureBytes)).IsTrue();
         var acceptedRequest = new CommandRequest(RemoteTransferAttemptIdentity.AcceptId(hint, state.Generation),
             fixture.DestinationPartition, [new AcceptQueueTransfer(fixture.DestinationQueue, original.IntentToken)]);
@@ -39,11 +39,11 @@ internal static class RemoteTransferAttemptColdContinuation
             new MessageInspection(new(RemoteTransferAttemptColdProtocol.OriginalMessage, MessageState.Ready,
                 RemoteTransferAttemptColdProtocol.InitialAttempts, RemoteTransferAttemptColdProtocol.InitialStateVersion,
                 RemoteTransferAttemptColdProtocol.SecondReadySequence, null, null), RemoteTransferAttemptColdProtocol.Payload, RemoteTransferAttemptColdProtocol.Headers));
-        await RemoteTransferAttemptColdNative.AckAsync(fixture, RemoteTransferAttemptColdProtocol.OriginalMessage);
+        await RemoteTransferAttemptCold.AckAsync(fixture, RemoteTransferAttemptColdProtocol.OriginalMessage);
         var acked = fixture.Database.InspectMessage(RemoteTransferDatabase.RootPrincipal, fixture.DestinationQueue,
             RemoteTransferAttemptColdProtocol.OriginalMessage)!;
         await Assert.That(acked.Metadata.State).IsEqualTo(MessageState.Acked);
-        await Assert.That(RemoteTransferAttemptColdNative.Read(fixture, RemoteTransferAttemptColdNative.Request(fixture,
+        await Assert.That(RemoteTransferAttemptCold.Read(fixture, RemoteTransferAttemptCold.Request(fixture,
             transfer, original.IntentToken, firstAccept.CommandId, RemoteTransferAttemptProtocol.FailureReadPurpose)).TargetReceipt)
             .IsEqualTo(receipt);
         fixture.Reopen();
@@ -51,8 +51,8 @@ internal static class RemoteTransferAttemptColdContinuation
         await RemoteTransferCoordinationColdAssertions.EqualAsync(fixture.Apply(OperationKind.Batch, complete).Get<CommitReceipt>(), completed);
         await RemoteTransferCoordinationColdAssertions.EqualAsync(fixture.Database.InspectMessage(RemoteTransferDatabase.RootPrincipal,
             fixture.DestinationQueue, RemoteTransferAttemptColdProtocol.OriginalMessage), acked);
-        await RemoteTransferCoordinationColdAssertions.EqualAsync(RemoteTransferAttemptColdNative.State(fixture, transfer.TransferId), state);
-        await RemoteTransferAttemptColdNative.AccountingAsync(fixture, transfer.TransferId, RemoteTransferAttemptColdProtocol.TwoRetainedRecords);
+        await RemoteTransferCoordinationColdAssertions.EqualAsync(RemoteTransferAttemptCold.State(fixture, transfer.TransferId), state);
+        await RemoteTransferAttemptCold.AccountingAsync(fixture, transfer.TransferId, RemoteTransferAttemptColdProtocol.TwoRetainedRecords);
         await RemoteTransferCoordinationColdAssertions.EqualAsync(fixture.Database.InspectQueueTransfer(RemoteTransferDatabase.RootPrincipal,
             fixture.SourceQueue, transfer.TransferId), original with
             {
@@ -61,7 +61,7 @@ internal static class RemoteTransferAttemptColdContinuation
             });
         await RemoteTransferCoordinationColdAssertions.EqualAsync(fixture.Database.InspectQueueTransferReceipt(RemoteTransferDatabase.RootPrincipal,
             fixture.DestinationQueue, fixture.SourceQueue, transfer.TransferId), receipt);
-        await Assert.That(RemoteTransferAttemptColdNative.Outcome(fixture, firstAccept.CommandId,
+        await Assert.That(RemoteTransferAttemptCold.Outcome(fixture, firstAccept.CommandId,
             fixture.DestinationPartition).AsSpan().SequenceEqual(failureBytes)).IsTrue();
     }
 }

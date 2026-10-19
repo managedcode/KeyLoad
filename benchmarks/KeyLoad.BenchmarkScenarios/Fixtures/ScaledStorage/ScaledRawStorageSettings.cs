@@ -10,8 +10,8 @@ internal static class ScaledRawStorageSettings
     private const int ReservedMissKeyCount = 1;
     private const int OrderBytes = sizeof(int);
     private const int ScratchCopies = 3;
-    private const string InvalidCountMessage = "The scaled native fixture count is unsupported.";
-    private const string InvalidPayloadMessage = "The scaled native fixture payload size is unsupported.";
+    private const string InvalidCountMessage = "The scaled execution fixture count is unsupported.";
+    private const string InvalidPayloadMessage = "The scaled execution fixture payload size is unsupported.";
     private const string InsufficientMemoryMessage = "The process does not have the frozen capacity and headroom for this scaled fixture.";
 
     internal static void ValidateInput(int recordCount, int payloadBytes)

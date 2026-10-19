@@ -12,7 +12,7 @@ internal static class DistributedSearchValidation
     private const string InvalidShape = "The distributed search shape or partition set is invalid.";
     private const string SelectedGenerationUnsupported = "Selected generations require their owning search operation.";
 
-    internal static ImmutableArray<PartitionRef> Require(DistributedSearchRequestV1 request,
+    internal static ImmutableArray<PartitionRef> Require(DistributedSearchRequest request,
         DatabaseLimits limits, IOptions<QueryExecutionOptions> options, ReadExecutionBudget budget)
     {
         ArgumentNullException.ThrowIfNull(request);

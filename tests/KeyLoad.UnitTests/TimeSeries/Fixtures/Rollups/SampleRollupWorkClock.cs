@@ -1,6 +1,6 @@
 namespace KeyLoad.UnitTests.Features.TimeSeries;
 
-/// <summary>Owner-authorized operation clock; observes real native work without substituting storage.</summary>
+/// <summary>Owner-authorized operation clock; observes real execution work without substituting storage.</summary>
 internal sealed class SampleRollupWorkClock : TimeProvider
 {
     private readonly DateTimeOffset epoch = TimeProvider.System.GetUtcNow();

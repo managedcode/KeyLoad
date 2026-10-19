@@ -42,28 +42,28 @@ internal static class RabbitQuorumProbe
         JsonElement detail, string queue, ComparisonTopology topology)
     {
         const int SingleItemCount = 1;
-        const string HealthyNativeQuorumClusterToken = "healthy native quorum cluster";
-        const string SingleNativeQuorumNodeToken = "single native quorum node";
+        const string HealthyQuorumClusterToken = "healthy execution quorum cluster";
+        const string SingleQuorumNodeToken = "single execution quorum node";
         const char MemberSeparator = ',';
         const int MajorityDivisor = 2;
         const int MajorityVoteOffset = 1;
 
         var expected = ComparisonTopologies.NodeCount(topology);
-        var nativeNodes = nodesJson.EnumerateArray().ToArray();
-        var nodes = nativeNodes.Select(node => node.GetProperty(NameField).GetString() ?? string.Empty)
+        var runtimeNodes = nodesJson.EnumerateArray().ToArray();
+        var nodes = runtimeNodes.Select(node => node.GetProperty(NameField).GetString() ?? string.Empty)
             .Order(StringComparer.Ordinal).ToArray();
         var version = overview.GetProperty(VersionField).GetString() ?? string.Empty;
         var members = ReadNames(detail, MembersField);
         var online = ReadNames(detail, OnlineField);
-        if (!IsReady(nativeNodes, nodes, members, online, detail, version, expected) ||
+        if (!IsReady(runtimeNodes, nodes, members, online, detail, version, expected) ||
             detail.GetProperty(NameField).GetString() != queue)
         {
             return null;
         }
 
         var state = expected > SingleItemCount
-            ? HealthyNativeQuorumClusterToken
-            : SingleNativeQuorumNodeToken;
+            ? HealthyQuorumClusterToken
+            : SingleQuorumNodeToken;
         var evidence = new ClusterEvidence(expected, expected, state,
             [$"{ReadReadyConnectedRunningDiscNodesText}{nodes.Length}", $"{ReadReadyQuorumMembersOnlineText}{online.Length}", $"{ReadReadyQueueTypeText}{QuorumType}",
                 $"{ReadReadyRunningNodesText}{string.Join(MemberSeparator, nodes)}", $"{ReadReadyQueueMembersText}{string.Join(MemberSeparator, members)}",
@@ -78,14 +78,14 @@ internal static class RabbitQuorumProbe
         return await JsonDocument.ParseAsync(await response.Content.ReadAsStreamAsync(token), cancellationToken: token);
     }
 
-    private static bool IsReady(JsonElement[] nativeNodes, string[] nodes, string[] members, string[] online,
+    private static bool IsReady(JsonElement[] runtimeNodes, string[] nodes, string[] members, string[] online,
         JsonElement detail, string version, int expected)
         => nodes.Length == expected && nodes.All(node => node.Length != NoItems) &&
            nodes.Distinct(StringComparer.Ordinal).Count() == expected &&
            members.Length == expected && members.SequenceEqual(nodes, StringComparer.Ordinal) &&
            online.SequenceEqual(members, StringComparer.Ordinal) && detail.GetProperty(TypeField).GetString() == QuorumType &&
            detail.GetProperty(DurableField).GetBoolean() &&
-           nativeNodes.All(node => node.GetProperty(RunningField).GetBoolean() &&
+           runtimeNodes.All(node => node.GetProperty(RunningField).GetBoolean() &&
                node.GetProperty(NodeTypeField).GetString() == DiskNodeType) && version.Length != NoItems;
 
     private static string[] ReadNames(JsonElement detail, string field)

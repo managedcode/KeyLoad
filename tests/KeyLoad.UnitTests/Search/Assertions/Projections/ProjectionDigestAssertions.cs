@@ -104,7 +104,7 @@ internal static class ProjectionDigestAssertions
             var identity = fixture.Harness.Store.Identity;
             var head = fixture.Database.ReadOutboxHead(view, fixture.Partition);
             var applied = view.ReadOwnedValue(KeySpace.AppliedBytes) is { } bytes
-                ? NativeSerialization.Deserialize<long>(bytes) : 0L;
+                ? OrleansSerialization.Deserialize<long>(bytes) : 0L;
             return new AnnSeedCut(identity.NodeId, identity.Incarnation, identity.FormatVersion,
                 identity.KeyCodecVersion, identity.ReadGeneration, fixture.Harness.Store.Position,
                 applied, head.Tail, head.FirstAvailable);
@@ -118,5 +118,5 @@ internal static class ProjectionDigestAssertions
             Options.Create(new AnnSeedOptions()), new(UnitExecutionOptions.DatabaseLimits(fixture.Database.Limits)));
 
     internal static async Task EqualAsync<T>(T actual, T expected)
-        => await Assert.That(NativeSerialization.Serialize(actual).AsSpan().SequenceEqual(NativeSerialization.Serialize(expected))).IsTrue();
+        => await Assert.That(OrleansSerialization.Serialize(actual).AsSpan().SequenceEqual(OrleansSerialization.Serialize(expected))).IsTrue();
 }

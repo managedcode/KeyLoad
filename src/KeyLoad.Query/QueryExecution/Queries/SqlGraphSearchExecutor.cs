@@ -19,7 +19,7 @@ internal static class SqlGraphSearchExecutor
         budget.Check();
         var graphRequest = SqlGraphSearchParser.Parse(request, database.OperationLimitsOptions, budget, execution.MaximumParameters);
         budget.Check();
-        var result = await search.GraphSearchAsync(principalId, graphRequest, budget, cancellationToken).ConfigureAwait(false);
+        var result = await search.GraphSearchAsync(principalId, graphRequest, budget, cancellationToken);
         if (execution.MaximumResultBytes is not null)
         {
             budget.CheckResult(result);

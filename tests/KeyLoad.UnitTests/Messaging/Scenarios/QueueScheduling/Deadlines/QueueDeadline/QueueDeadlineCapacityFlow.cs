@@ -14,7 +14,7 @@ internal static class QueueDeadlineCapacityFlow
             state.Counters.NextReadySequence, long.MaxValue);
         var image = QueueWholeFlowStorage.Bytes(fixture.Store);
         var position = fixture.Store.Position;
-        var identity = NativeSerialization.Serialize(fixture.Store.Identity);
+        var identity = OrleansSerialization.Serialize(fixture.Store.Identity);
         fixture.Store.Dispose();
         token.ThrowIfCancellationRequested();
         using var cold = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
@@ -29,12 +29,12 @@ internal static class QueueDeadlineCapacityFlow
         token.ThrowIfCancellationRequested();
         using var fixture = new TestDatabase();
         var state = await QueueDeadlineCapacitySeed.RunAsync(fixture, kind, sweep, jitter, fault, token);
-        var identity = NativeSerialization.Serialize(fixture.Store.Identity);
+        var identity = OrleansSerialization.Serialize(fixture.Store.Identity);
         var beforePosition = fixture.Store.Position;
         var domain = QueueDeadlineCapacityRefusal.Domain(fixture.Store, state.Lane, state.Attempt);
         var result = fixture.Database.Apply(state.Attempt);
         await Assert.That(fixture.Store.Position).IsEqualTo(beforePosition + CommitPositionStep);
-        await Assert.That(NativeSerialization.Serialize(fixture.Store.Identity)).IsEquivalentTo(identity,
+        await Assert.That(OrleansSerialization.Serialize(fixture.Store.Identity)).IsEquivalentTo(identity,
             TUnit.Assertions.Enums.CollectionOrdering.Matching);
         await Assert.That(QueueDeadlineCapacityRefusal.Domain(fixture.Store, state.Lane, state.Attempt)).IsEquivalentTo(domain,
             TUnit.Assertions.Enums.CollectionOrdering.Matching);

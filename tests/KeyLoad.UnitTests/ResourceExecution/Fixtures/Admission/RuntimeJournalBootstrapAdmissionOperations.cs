@@ -19,7 +19,7 @@ internal static class RuntimeJournalBootstrapAdmissionOperations
     internal static Command<DatabaseCommand> Issue<T>(TestDatabase database, OperationKind kind, T payload,
         string principal = Root, Guid? commandId = null)
         => database.Database.CreateCommand(kind, commandId ?? Guid.NewGuid(), principal,
-            database.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(payload));
+            database.Database.EvaluationClock.GetUtcNow(), OrleansSerialization.Serialize(payload));
 
     internal static Command<DatabaseCommand> DocumentCommand(TestDatabase database, string id)
     {
@@ -33,7 +33,7 @@ internal static class RuntimeJournalBootstrapAdmissionOperations
     {
         var principal = database.Store.Read(view => database.Database.Principal(view, operation.UserId!,
             database.Database.EvaluationClock.GetUtcNow()));
-        return governor.Reserve(operation, principal, checked((int)NativeSerialization.Measure(operation)), token);
+        return governor.Reserve(operation, principal, checked((int)OrleansSerialization.Measure(operation)), token);
     }
 
     internal static async Task RefusedAsync(TestDatabase database, CommandAdmissionGovernor governor,

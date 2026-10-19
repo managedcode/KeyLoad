@@ -1,6 +1,6 @@
 namespace KeyLoad.Core;
 
-/// <summary>Stores the native-format discriminator and checksummed public snapshot contract.</summary>
+/// <summary>Stores the execution-format discriminator and checksummed public snapshot contract.</summary>
 [Orleans.GenerateSerializer]
 [Orleans.Alias(AggregateSnapshotPersistence.SnapshotEnvelopeAlias)]
 internal sealed record AggregateSnapshotEnvelope(

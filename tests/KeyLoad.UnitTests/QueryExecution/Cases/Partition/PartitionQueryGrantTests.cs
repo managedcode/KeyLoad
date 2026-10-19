@@ -8,7 +8,7 @@ internal sealed class PartitionQueryGrantTests
     private const int SeedCount = 2;
 
     [Test]
-    public async Task ActualNativeReadBytesAndExaminedRecordsAdmitExactlyAndRejectOneLess()
+    public async Task ActualReadBytesAndExaminedRecordsAdmitExactlyAndRejectOneLess()
     {
         using var measured = PartitionQueryTestSupport.Create();
         var partitions = PartitionQueryTestSupport.EqualLengthPartitions(measured);
@@ -47,7 +47,7 @@ internal sealed class PartitionQueryGrantTests
     }
 
     [Test]
-    public async Task MaxBatchAdmitsTheCompleteNativeMergeAtItsExactBoundAndNoRowsBelowIt()
+    public async Task MaxBatchAdmitsTheCompleteMergeAtItsExactBoundAndNoRowsBelowIt()
     {
         using var measured = PartitionQueryTestSupport.Create();
         PartitionQueryTestSupport.AddRows(measured, measured.Partition, SeedRows());
@@ -73,7 +73,7 @@ internal sealed class PartitionQueryGrantTests
     }
 
     [Test]
-    public async Task OneNativeGrantChargesIndexRangeAndDocumentPointReadsTogether()
+    public async Task OneGrantChargesIndexRangeAndDocumentPointReadsTogether()
     {
         using var measured = PartitionQueryTestSupport.CreateIndexed();
         PartitionQueryTestSupport.AddIndexedRows(measured, measured.Partition);
@@ -104,15 +104,15 @@ internal sealed class PartitionQueryGrantTests
     private static PartitionQuerySeed[] SeedRows()
         => [new("budget-a", 2, "alpha"), new("budget-b", 1, "beta")];
 
-    private static PartitionQueryResultV1 Run(TestDatabase database)
+    private static PartitionQueryResult Run(TestDatabase database)
         => new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution()).ExecutePartitionQuery(PartitionQueryTestSupport.Principal,
             PartitionQueryTestSupport.Request(database, SeedCount), [database.Partition]);
 
-    private static PartitionQueryResultV1 Run(TestDatabase database, PartitionRef[] partitions)
+    private static PartitionQueryResult Run(TestDatabase database, PartitionRef[] partitions)
         => new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution()).ExecutePartitionQuery(PartitionQueryTestSupport.Principal,
             PartitionQueryTestSupport.Request(database, SeedCount), [.. partitions]);
 
-    private static PartitionQueryResultV1 RunIndexed(TestDatabase database, DatabaseLimits? limits = null)
+    private static PartitionQueryResult RunIndexed(TestDatabase database, DatabaseLimits? limits = null)
         => PartitionQueryTestSupport.ReadEngine(database, limits).ExecutePartitionQuery(PartitionQueryTestSupport.Principal,
             PartitionQueryTestSupport.IndexedRequest(database, 2), [database.Partition]);
 

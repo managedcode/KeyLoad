@@ -34,21 +34,21 @@ internal static class RemoteTransferAttemptColdTrial
         await Assert.That(failed.Value).IsNull();
         await RemoteTransferCoordinationColdAssertions.EqualAsync(fixture.SourceCapacity(fixture.SourceQueue), sourceCapacity);
         await RemoteTransferCoordinationColdAssertions.EqualAsync(fixture.TargetCapacity(fixture.DestinationQueue), targetCapacity);
-        var bytes = RemoteTransferAttemptColdNative.Outcome(fixture, accept.CommandId, fixture.DestinationPartition);
-        var request = RemoteTransferAttemptColdNative.Request(fixture, transfer, original.IntentToken,
+        var bytes = RemoteTransferAttemptCold.Outcome(fixture, accept.CommandId, fixture.DestinationPartition);
+        var request = RemoteTransferAttemptCold.Request(fixture, transfer, original.IntentToken,
             accept.CommandId, RemoteTransferAttemptProtocol.FailureReadPurpose);
         var before = fixture.Store.Position;
-        var unchanged = Assert.ThrowsExactly<KeyLoadException>(() => RemoteTransferAttemptColdNative.Read(fixture, request));
+        var unchanged = Assert.ThrowsExactly<KeyLoadException>(() => RemoteTransferAttemptCold.Read(fixture, request));
         await Assert.That(unchanged.Code).IsEqualTo(ErrorCode.RevisionConflict);
         await Assert.That(fixture.Store.Position).IsEqualTo(before);
         await RemoteTransferCoordinationColdAssertions.EqualAsync(fixture.Database.InspectQueueTransfer(
             RemoteTransferDatabase.RootPrincipal, fixture.SourceQueue, transfer.TransferId), original);
         await Assert.That(fixture.Database.InspectMessage(RemoteTransferDatabase.RootPrincipal,
             fixture.DestinationQueue, RemoteTransferAttemptColdProtocol.OriginalMessage)).IsNull();
-        await Assert.That(RemoteTransferAttemptColdNative.State(fixture, transfer.TransferId).Generation)
+        await Assert.That(RemoteTransferAttemptCold.State(fixture, transfer.TransferId).Generation)
             .IsEqualTo(RemoteTransferAttemptColdProtocol.FirstGeneration);
-        await RemoteTransferAttemptColdNative.AckAsync(fixture, RemoteTransferAttemptColdProtocol.FillerMessage);
-        var witness = RemoteTransferAttemptColdNative.Read(fixture, request).FailureWitness
+        await RemoteTransferAttemptCold.AckAsync(fixture, RemoteTransferAttemptColdProtocol.FillerMessage);
+        var witness = RemoteTransferAttemptCold.Read(fixture, request).FailureWitness
             ?? throw new InvalidOperationException(RemoteTransferAttemptColdProtocol.Missing);
         await RemoteTransferAttemptColdRefusals.BeforeAdvanceAsync(fixture, transfer, original, request, witness);
         var claims = fixture.Database.Verify<RemoteTransferAcceptFailureClaims>(witness, fixture.Database.Limits.MaxBatchBytes);

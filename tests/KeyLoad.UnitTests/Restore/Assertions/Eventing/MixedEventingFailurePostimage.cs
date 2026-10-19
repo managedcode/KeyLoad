@@ -13,7 +13,7 @@ internal static class MixedEventingFailurePostimage
         Command<DatabaseCommand> operation, string[] corruptRaw, byte[] restoredKey, byte[] restoredValue,
         byte[] outcomeKey, long repairedCut, long appliedIndex)
     {
-        var locator = KeySpace.OutcomeLocatorV2(state.Partition, operation.UserId!, operation.CommandId);
+        var locator = KeySpace.OutcomeLocator(state.Partition, operation.UserId!, operation.CommandId);
         var admitted = new[] { outcomeKey, locator, KeySpace.AppliedBytes, KeySpace.ClockBytes }
             .Select(static key => Convert.ToHexString(key) + ":").ToArray();
         var original = corruptRaw.Append(Convert.ToHexString(restoredKey) + ":" + Convert.ToHexString(restoredValue));
@@ -22,7 +22,7 @@ internal static class MixedEventingFailurePostimage
         await Assert.That(source.Store.Position).IsEqualTo(checked(repairedCut + SingleFailureCommit));
         await Assert.That(source.Store.Read(view => view.ReadOwnedValue(locator)))
             .IsEquivalentTo(outcomeKey, CollectionOrdering.Matching);
-        await Assert.That(source.Store.Read(view => NativeSerialization.Deserialize<long>(view.ReadOwnedValue(KeySpace.AppliedBytes)!)))
+        await Assert.That(source.Store.Read(view => OrleansSerialization.Deserialize<long>(view.ReadOwnedValue(KeySpace.AppliedBytes)!)))
             .IsEqualTo(appliedIndex);
         await Assert.That(QueueWholeFlowStorage.Clock(source.Store)).IsEqualTo(new DateTimeOffset(operation.Timestamp));
     }

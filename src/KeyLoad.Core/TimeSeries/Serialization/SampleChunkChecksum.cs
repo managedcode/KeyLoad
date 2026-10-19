@@ -6,7 +6,7 @@ namespace KeyLoad.Core.Features.TimeSeries;
 
 internal static class SampleChunkChecksum
 {
-    private const string DomainText = "keyload.sample-chunk.v1";
+    private const string DomainText = "keyload.sample-chunk";
     private static readonly byte[] Domain = Encoding.ASCII.GetBytes(DomainText);
 
     internal static byte[] Compute(SampleChunkPayload payload, SampleChunkWork budget, int hashChunkBytes)

@@ -11,7 +11,7 @@ internal sealed class SqlClusterAdmissionTests
 {
     private const long DataBytes = 536_870_912;
     private const long HeavyReadBytes = 1_073_741_824;
-    private const string DispatchRoute = "/v1/admin/dispatch?paused=false";
+    private const string DispatchRoute = "/admin/dispatch?paused=false";
     private const string CommandIdHeader = "X-KeyLoad-Command-Id";
     private const string TenantPrefix = "sql-admission-";
     private const string Database = "agentdb";

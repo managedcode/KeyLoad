@@ -3,7 +3,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
 
-/// <summary>Enforces the bounded native search/route surface even when called outside protocol validation.</summary>
+/// <summary>Enforces the bounded execution search/route surface even when called outside protocol validation.</summary>
 internal static class McpGatewayCatalogRequestValidation
 {
     private const int MinimumResultCount = 1;

@@ -11,17 +11,17 @@ internal static class QueueReadyAuthorityFaultRow
         {
             var body = fault == QueueReadyAuthorityFault.BodyIdentity;
             var key = KeySpace.Partition(body ? "message-body" : "message-meta", lane.Partition, lane.Queue, "input");
-            var original = tx.ReadOwnedValue(key) ?? throw new InvalidOperationException("The original native fault-owned row is absent.");
+            var original = tx.ReadOwnedValue(key) ?? throw new InvalidOperationException("The original execution fault-owned row is absent.");
             if (body)
             {
-                tx.PutRecord(key, NativeSerialization.Deserialize<MessageBody>(original) with
+                tx.PutRecord(key, OrleansSerialization.Deserialize<MessageBody>(original) with
                 {
                     Id = "foreign"
                 });
             }
             else
             {
-                var metadata = NativeSerialization.Deserialize<MessageMetadata>(original);
+                var metadata = OrleansSerialization.Deserialize<MessageMetadata>(original);
                 var changed = fault switch
                 {
                     QueueReadyAuthorityFault.ScheduledState => metadata with { State = MessageState.Scheduled },
@@ -31,7 +31,7 @@ internal static class QueueReadyAuthorityFaultRow
                     QueueReadyAuthorityFault.NonPositiveStateVersion => metadata with { StateVersion = 0 },
                     QueueReadyAuthorityFault.NegativeLeaseVersion => metadata with { LeaseVersion = -1 },
                     QueueReadyAuthorityFault.NonPositiveDeliveryGeneration => metadata with { DeliveryGeneration = 0 },
-                    _ => throw new InvalidOperationException("The native ready authority fault is invalid.")
+                    _ => throw new InvalidOperationException("The execution ready authority fault is invalid.")
                 };
                 tx.PutRecord(key, changed);
             }

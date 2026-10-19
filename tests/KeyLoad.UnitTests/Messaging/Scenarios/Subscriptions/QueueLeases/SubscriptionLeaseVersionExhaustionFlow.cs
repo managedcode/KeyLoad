@@ -34,7 +34,7 @@ internal static class SubscriptionLeaseVersionExhaustionFlow
         var key = SubscriptionCheckpointAuthorityFlow.WindowKey(group, FirstPosition);
         var saved = fixture.Store.Read(view => view.ReadOwnedValue(key))
             ?? throw new InvalidOperationException(MissingPending);
-        var pending = NativeSerialization.Deserialize<GroupDelivery>(saved);
+        var pending = OrleansSerialization.Deserialize<GroupDelivery>(saved);
         await Assert.That(pending.State).IsEqualTo(GroupDeliveryState.Pending);
         var due = pending.AvailableAt!.Value;
         fixture.Store.Commit((tx, _) =>
@@ -61,7 +61,7 @@ internal static class SubscriptionLeaseVersionExhaustionFlow
     {
         var image = QueueWholeFlowStorage.Bytes(fixture.Store);
         var position = fixture.Store.Position;
-        var identity = NativeSerialization.Serialize(fixture.Store.Identity);
+        var identity = OrleansSerialization.Serialize(fixture.Store.Identity);
         fixture.Store.Dispose();
         using var cold = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution(),
             UnitExecutionOptions.PointCacheExecution());

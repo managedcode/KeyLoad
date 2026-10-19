@@ -61,7 +61,7 @@ internal sealed class MetadataBoundaryTests
         await File.WriteAllBytesAsync(identityPath, originalBytes);
         using var reopened = new ZoneTreeStore(new(fixture.SourceDirectory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         await Assert.That(reopened.Identity.Incarnation).IsEqualTo(fixture.OriginalIdentity.Incarnation);
-        await Assert.That(reopened.Read(view => NativeSerialization.Deserialize<string>(
+        await Assert.That(reopened.Read(view => OrleansSerialization.Deserialize<string>(
                 view.ReadOwnedValue(MetadataBackupFixture.StoredKeyBytes)!)))
             .IsEqualTo(MetadataBackupFixture.ExpectedValue);
     }

@@ -12,18 +12,18 @@ namespace KeyLoad.UnitTests.Features.Search;
 
 internal sealed class HybridQualityRealStoreTests
 {
-    private const string ProjectionFolder = "hybrid-quality-native-text";
+    private const string ProjectionFolder = "hybrid-quality-execution-text";
     private const string ObservationKind = "controlled-search-quality";
 
     [Test]
-    public async Task AcSearch007FixedQrelsMeasureRealNativeThreeWaySearchAndWindowSensitivity()
+    public async Task AcSearch007FixedQrelsMeasureRealThreeWaySearchAndWindowSensitivity()
     {
         using var database = new TestDatabase();
         HybridQualityCorpus.ValidateDefinitions();
         HybridQualityCorpus.Seed(database);
         using var projection = CreateProjection(database);
         var exactEngine = new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution());
-        var nativeEngine = new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), projection);
+        var runtimeEngine = new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), projection);
         var initialPosition = database.Store.Position;
         var initialAuthority = CaptureAuthority(database);
         string? generation = null;
@@ -31,7 +31,7 @@ internal sealed class HybridQualityRealStoreTests
 
         foreach (var query in HybridQualityCorpus.Queries)
         {
-            await EvaluateQueryAsync(database, exactEngine, nativeEngine, query, initialPosition,
+            await EvaluateQueryAsync(database, exactEngine, runtimeEngine, query, initialPosition,
                 initialAuthority, generation is null ? value => generation = value : null, token);
         }
 
@@ -42,32 +42,32 @@ internal sealed class HybridQualityRealStoreTests
     }
 
     private static async Task EvaluateQueryAsync(TestDatabase database, SearchEngine exactEngine,
-        SearchEngine nativeEngine, HybridQualityQuery query, long expectedPosition,
+        SearchEngine runtimeEngine, HybridQualityQuery query, long expectedPosition,
         byte[] expectedAuthority, Action<string>? recordGeneration, CancellationToken token)
     {
-        var nativeBranches = await HybridQualityBranchCapture.CaptureAsync(nativeEngine, database, query, token);
+        var runtimeBranches = await HybridQualityBranchCapture.CaptureAsync(runtimeEngine, database, query, token);
         var exactBranches = await HybridQualityBranchCapture.CaptureAsync(exactEngine, database, query, token);
-        await HybridQualityAssertions.AssertBranchesEquivalentAsync(exactBranches, nativeBranches);
+        await HybridQualityAssertions.AssertBranchesEquivalentAsync(exactBranches, runtimeBranches);
         var request = HybridQualityCorpus.GraphRequest(database, query);
         var exact = await exactEngine.GraphSearchAsync(HybridQualityCorpus.PrincipalId, request, token);
-        var native = await nativeEngine.GraphSearchAsync(HybridQualityCorpus.PrincipalId, request, token);
-        var repeated = await nativeEngine.GraphSearchAsync(HybridQualityCorpus.PrincipalId, request, token);
-        await HybridQualityAssertions.AssertEquivalentAsync(exact.Hits, native.Hits);
-        await HybridQualityAssertions.AssertEquivalentAsync(native.Hits, repeated.Hits);
-        await HybridQualityAssertions.AssertEligibleAsync(nativeBranches, query);
-        await AssertQueryShapeAsync(database, nativeBranches, native.Hits, query);
+        var execution = await runtimeEngine.GraphSearchAsync(HybridQualityCorpus.PrincipalId, request, token);
+        var repeated = await runtimeEngine.GraphSearchAsync(HybridQualityCorpus.PrincipalId, request, token);
+        await HybridQualityAssertions.AssertEquivalentAsync(exact.Hits, execution.Hits);
+        await HybridQualityAssertions.AssertEquivalentAsync(execution.Hits, repeated.Hits);
+        await HybridQualityAssertions.AssertEligibleAsync(runtimeBranches, query);
+        await AssertQueryShapeAsync(database, runtimeBranches, execution.Hits, query);
         var judgments = HybridQualityCorpus.Judgments(query);
         var metrics = HybridQualityMetricOracle.Compute(
-            native.Hits.Select(hit => hit.Document.Reference.Id).ToArray(), judgments, query.EligibleIds);
+            execution.Hits.Select(hit => hit.Document.Reference.Id).ToArray(), judgments, query.EligibleIds);
         await HybridQualityAssertions.AssertMetricsInRangeAsync(metrics);
-        var windows = HybridQualityWindowHarness.Evaluate(nativeBranches, query, judgments, database.Database.Limits);
+        var windows = HybridQualityWindowHarness.Evaluate(runtimeBranches, query, judgments, database.Database.Limits);
         var full = windows.Single(observation => observation.Width == 32);
-        await HybridQualityAssertions.AssertProductionMatchesWindow32Async(full, native.Hits);
-        await AssertWindowObservationsAsync(windows, nativeBranches, query);
+        await HybridQualityAssertions.AssertProductionMatchesWindow32Async(full, execution.Hits);
+        await AssertWindowObservationsAsync(windows, runtimeBranches, query);
         await Assert.That(database.Store.Position).IsEqualTo(expectedPosition);
         await Assert.That(CaptureAuthority(database).AsSpan().SequenceEqual(expectedAuthority)).IsTrue();
         recordGeneration?.Invoke(CurrentGeneration(database));
-        WriteObservation(query, expectedPosition, nativeBranches, native.Hits, metrics, windows);
+        WriteObservation(query, expectedPosition, runtimeBranches, execution.Hits, metrics, windows);
     }
 
     private static async Task AssertQueryShapeAsync(TestDatabase database, ImmutableArray<HybridQualityBranch> branches,
@@ -112,19 +112,19 @@ internal sealed class HybridQualityRealStoreTests
         await Assert.That(full.CandidateRecall).IsEqualTo(expectedRecall);
     }
 
-    private static NativeTextProjection CreateProjection(TestDatabase database)
+    private static RuntimeTextProjection CreateProjection(TestDatabase database)
         => new(Path.Combine(database.Directory, ProjectionFolder), UnitExecutionOptions.DatabaseLimits(database.Database.Limits),
-            database.Store.Identity.NodeId, UnitNativeTextOptions.Execution());
+            database.Store.Identity.NodeId, UnitTextOptions.Execution());
 
     private static byte[] CaptureAuthority(TestDatabase database)
     {
         var records = database.Store.Read(view => new[]
         {
-            NativeSerialization.Serialize(view.GetRecord<PrincipalRecord>(
+            OrleansSerialization.Serialize(view.GetRecord<PrincipalRecord>(
                 KeySpace.Principal(HybridQualityCorpus.PrincipalId))!),
-            NativeSerialization.Serialize(view.GetRecord<ResourceDefinition>(KeySpace.Resource(
+            OrleansSerialization.Serialize(view.GetRecord<ResourceDefinition>(KeySpace.Resource(
                 database.Partition.TenantId, database.Partition.DatabaseId, HybridQualityCorpus.Collection))!),
-            NativeSerialization.Serialize(view.GetRecord<ResourceDefinition>(KeySpace.Resource(
+            OrleansSerialization.Serialize(view.GetRecord<ResourceDefinition>(KeySpace.Resource(
                 database.Partition.TenantId, database.Partition.DatabaseId, HybridQualityCorpus.Graph))!)
         });
         var total = records.Sum(record => sizeof(int) + record.Length);
@@ -143,7 +143,7 @@ internal sealed class HybridQualityRealStoreTests
     private static string CurrentGeneration(TestDatabase database)
         => Directory.EnumerateDirectories(Path.Combine(database.Directory, ProjectionFolder))
             .Select(Path.GetFileName)
-            .Single(name => name!.StartsWith(NativeTextProtocol.GenerationPrefix, StringComparison.Ordinal))!;
+            .Single(name => name!.StartsWith(TextProtocol.GenerationPrefix, StringComparison.Ordinal))!;
 
     private static void WriteObservation(HybridQualityQuery query, long position,
         ImmutableArray<HybridQualityBranch> branches, IReadOnlyList<RankedDocument> production,

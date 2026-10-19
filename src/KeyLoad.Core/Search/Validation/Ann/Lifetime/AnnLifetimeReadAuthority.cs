@@ -1,4 +1,6 @@
-using KeyLoad.Core.Features.ClusterRouting.Contracts;
+using KeyLoad.Core.Features.CommandOutcomes.Contracts;
+using KeyLoad.Core.Features.RuntimeJournaling.Contracts;
+using KeyLoad.Core.Features.StoragePartitions.Contracts;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core.Features.Search;
@@ -8,7 +10,7 @@ internal static class AnnLifetimeReadAuthority
     private const string Invalid = "The ANN source lifetime authority is invalid.";
     private const string FieldUnavailable = "The requested ANN field binding is unavailable.";
 
-    internal static ResourceLifetimeV1 Require(DatabaseEngine database, IKeyValueView view, PrincipalRecord target,
+    internal static ResourceLifetime Require(DatabaseEngine database, IKeyValueView view, PrincipalRecord target,
         ResourceDefinition targetResource, PartitionRef partition, string collection, string field,
         AnnReadLifetimeMetadata source, ReadExecutionBudget budget)
     {
@@ -33,7 +35,7 @@ internal static class AnnLifetimeReadAuthority
         database.Authorization.RequireFieldUse(target, targetResource, field);
         var sourceLifetime = source.Coverage.Lifetimes.Single(value => value.ResourceName == source.Definition.Name);
         budget.CaptureAuthenticatedResourceLifetimes(database, metadata,
-            new ResourceLifetimeCoverageV1(partition, [sourceLifetime]), [source.Definition]);
+            new ResourceLifetimeCoverage(partition, [sourceLifetime]), [source.Definition]);
         return lifetime;
     }
 

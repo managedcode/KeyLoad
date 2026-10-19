@@ -11,7 +11,7 @@ internal sealed class OfflineRegularFileDuplicateLockTests
     [Arguments(FileShare.None, true)]
     [Arguments(FileShare.Read, false)]
     [Arguments(FileShare.Read, true)]
-    public async Task AcEpoch012FinishedOwnerUnlocksWhileNativeDuplicateRemainsAlive(FileShare share, bool useAsync)
+    public async Task AcEpoch012FinishedOwnerUnlocksWhileDuplicateRemainsAlive(FileShare share, bool useAsync)
     {
         await WithFileAsync(async path =>
         {
@@ -19,7 +19,7 @@ internal sealed class OfflineRegularFileDuplicateLockTests
             var bufferBytes = UnitExecutionOptions.StorageExecution().Value.StreamBufferBytes;
             using var owner = OfflineRegularFile.Open(path, FileAccess.ReadWrite, share, bufferBytes);
             var originalHandle = owner.SafeFileHandle;
-            using var duplicate = OfflineNativeDescriptorDuplicate.Create(originalHandle);
+            using var duplicate = OfflineDescriptorDuplicate.Create(originalHandle);
             AssertLiveOwnerExcludesIndependentOpen(path, bufferBytes);
             await owner.WriteAsync(expected, TestContext.Current!.Execution.CancellationToken);
 
@@ -63,17 +63,17 @@ internal sealed class OfflineRegularFileDuplicateLockTests
     [Test]
     [Arguments(FileShare.None)]
     [Arguments(FileShare.Read)]
-    public async Task AcEpoch012FailedStreamTransferUnlocksBeforeClosingTheNativeLease(FileShare share)
+    public async Task AcEpoch012FailedStreamTransferUnlocksBeforeClosingTheLease(FileShare share)
     {
         await WithFileAsync(async path =>
         {
             byte[] expected = [0x31, 0x42, 0x53];
             var bufferBytes = UnitExecutionOptions.StorageExecution().Value.StreamBufferBytes;
             using var original = OfflineRegularFile.Open(path, FileAccess.ReadWrite, share, bufferBytes);
-            using var leaseHandle = OfflineNativeDescriptorDuplicate.Create(original.SafeFileHandle);
+            using var leaseHandle = OfflineDescriptorDuplicate.Create(original.SafeFileHandle);
             DisposeSynchronous(original);
-            using var retainedDuplicate = OfflineNativeDescriptorDuplicate.Create(leaseHandle);
-            using (var lease = new OfflineNativeHandleLease(leaseHandle))
+            using var retainedDuplicate = OfflineDescriptorDuplicate.Create(leaseHandle);
+            using (var lease = new OfflineHandleLease(leaseHandle))
             {
                 lease.AcquireLock(share);
                 AssertLiveOwnerExcludesIndependentOpen(path, bufferBytes);

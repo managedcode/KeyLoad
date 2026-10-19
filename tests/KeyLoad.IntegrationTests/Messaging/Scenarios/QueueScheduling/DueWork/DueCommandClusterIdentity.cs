@@ -6,7 +6,7 @@ namespace KeyLoad.IntegrationTests.Features.Messaging;
 /// <summary>Stable caller-chosen command IDs for recurring schedule Orleans cases.</summary>
 internal static class DueCommandClusterIdentity
 {
-    private const string Domain = "keyload-due-command-v1";
+    private const string Domain = "keyload-due-command";
     private const string GuidFormat = "N";
 
     internal static Guid Schedule(QueueLaneRef lane, Guid scheduleId)

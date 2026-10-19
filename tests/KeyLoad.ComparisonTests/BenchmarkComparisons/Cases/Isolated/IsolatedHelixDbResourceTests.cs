@@ -7,7 +7,7 @@ internal sealed class IsolatedHelixDbResourceTests
 {
     private const string HelixDataDirectorySetting = "HELIX_DATA_DIR";
     [Test]
-    public async Task HelixDbUsesPinnedServerWithNativeDirectoryPersistence()
+    public async Task HelixDbUsesPinnedServerWithDirectoryPersistence()
     {
         await using var fixture = new IsolatedResourceTopologyFixture("HelixDB", 1);
         IsolatedHelixDbResources.Add(fixture.Context);
@@ -29,9 +29,9 @@ internal sealed class IsolatedHelixDbResourceTests
         var environment = await IsolatedResourceTopologyFixture.EnvironmentAsync(node);
         await Assert.That(environment[HelixDataDirectorySetting]).IsEqualTo("/var/lib/helix");
         var runnerEnvironment = await IsolatedResourceTopologyFixture.EnvironmentAsync(runner);
-        await Assert.That(runnerEnvironment[IsolatedResourceTopologyFixture.NativePrefix + "Endpoints__0"])
+        await Assert.That(runnerEnvironment[IsolatedResourceTopologyFixture.RuntimePrefix + "Endpoints__0"])
             .IsEqualTo("{isolated-helixdb.bindings.http.url}");
-        await Assert.That(runnerEnvironment[IsolatedResourceTopologyFixture.NativePrefix + "Image"])
+        await Assert.That(runnerEnvironment[IsolatedResourceTopologyFixture.RuntimePrefix + "Image"])
             .IsEqualTo("ghcr.io/helixdb/helixdb:v0.0.10@" + BenchmarkResources.HelixDbDigest);
     }
 
@@ -42,6 +42,6 @@ internal sealed class IsolatedHelixDbResourceTests
         await using var fixture = new IsolatedResourceTopologyFixture("HelixDB", count);
         await Assert.That(() => IsolatedHelixDbResources.Add(fixture.Context)).Throws<InvalidOperationException>();
         await Assert.That(fixture.Build().Length).IsEqualTo(0);
-        await Assert.That(Directory.Exists(Path.Combine(fixture.Context.Root, "native"))).IsFalse();
+        await Assert.That(Directory.Exists(Path.Combine(fixture.Context.Root, "execution"))).IsFalse();
     }
 }

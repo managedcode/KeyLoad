@@ -7,7 +7,7 @@ internal static class SampleChunkStorage
     internal static T? Read<T>(IKeyValueView view, byte[] key, SampleChunkReadCharge charge) where T : class
     {
         T? value = null;
-        view.ReadValue(key, bytes => value = NativeSerialization.Deserialize<T>(bytes), charge.Charge);
+        view.ReadValue(key, bytes => value = OrleansSerialization.Deserialize<T>(bytes), charge.Charge);
         return value;
     }
 
@@ -16,7 +16,7 @@ internal static class SampleChunkStorage
 
     internal static void Write<T>(IAtomicTransaction tx, byte[] key, T value, int maximumBytes)
     {
-        if (NativeSerialization.Measure(value) > maximumBytes)
+        if (OrleansSerialization.Measure(value) > maximumBytes)
         {
             throw Errors.Fail(ErrorCode.ResourceExhausted, SampleChunkLifecycleProtocol.Exhausted);
         }
@@ -30,7 +30,7 @@ internal static class SampleChunkStorage
         var scan = view.VisitRange(SampleChunkKeys.Windows(partition, set, series), options.MaximumChunkWindows,
             (key, value) =>
             {
-                var window = NativeSerialization.Deserialize<SampleChunkWindow>(value);
+                var window = OrleansSerialization.Deserialize<SampleChunkWindow>(value);
                 SampleChunkWindowValidation.State(window, window.WindowId,
                     options.MaximumChunkWindowRecords, options.MaximumChunkCorrections);
                 if (!key.SequenceEqual(SampleChunkKeys.Window(partition, set, series, window.WindowId)))

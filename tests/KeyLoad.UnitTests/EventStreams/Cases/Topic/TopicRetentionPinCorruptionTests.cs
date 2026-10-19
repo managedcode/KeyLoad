@@ -12,13 +12,13 @@ internal sealed class TopicRetentionPinCorruptionTests
     [Arguments("policy")]
     [Arguments("alias")]
     [Arguments("key")]
-    public async Task AcEventRetention005MalformedNativePinsCannotAdmitPurgeOrMutateAnyModel(string kind)
+    public async Task AcEventRetention005MalformedPinsCannotAdmitPurgeOrMutateAnyModel(string kind)
     {
         using var fixture = new TopicRetentionFixture();
         fixture.ReleasePins();
         var key = GroupKey(fixture);
         var original = fixture.Store.Read(view => view.ReadOwnedValue(key))!;
-        var state = NativeSerialization.Deserialize<GroupState>(original);
+        var state = OrleansSerialization.Deserialize<GroupState>(original);
         var corrupt = kind switch
         {
             "checkpoint" => state with { Checkpoint = 4, IssuedPosition = 4 },
@@ -32,7 +32,7 @@ internal sealed class TopicRetentionPinCorruptionTests
         {
             key = KeySpace.Partition("subscription", fixture.Owner.Partition, "topic", "Topic", null, 1L, "first", "extra");
         }
-        Write(fixture, key, kind == "alias" ? NativeSerialization.Serialize(new TopicHead(3, 1, 1, 0)) : NativeSerialization.Serialize(corrupt));
+        Write(fixture, key, kind == "alias" ? OrleansSerialization.Serialize(new TopicHead(3, 1, 1, 0)) : OrleansSerialization.Serialize(corrupt));
         var command = fixture.Purge();
         await TopicRetentionCorruptionAssertions.RejectAsync(fixture, command);
         if (kind == "key")

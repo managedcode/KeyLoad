@@ -32,7 +32,7 @@ internal sealed class RecurringDueCoordinatorGrain(GrainRequestCodec codec, Back
         {
             if (principal is not null)
             {
-                var schedule = NativeSagaTimeoutJobContract.CreateScheduleRequest(this.GetGrainId(),
+                var schedule = SagaTimeoutJobContract.CreateScheduleRequest(this.GetGrainId(),
                     clock.GetUtcNow(), hint);
                 await durableJobs.ScheduleJobAsync(schedule, token).ConfigureAwait(true);
             }
@@ -43,7 +43,7 @@ internal sealed class RecurringDueCoordinatorGrain(GrainRequestCodec codec, Back
         var creator = principal ?? throw Errors.Fail(ErrorCode.Corruption, DueCoordinatorFields.InvalidHint);
         var commandId = Guid.NewGuid();
         var mutation = RecurringDueCommand.Create(hint);
-        var payload = NativeSerialization.Serialize(new CommandRequest(commandId, hint.Lane.Partition, [mutation]));
+        var payload = OrleansSerialization.Serialize(new CommandRequest(commandId, hint.Lane.Partition, [mutation]));
         var result = await DispatchWithOneUncertaintyRetry(creator, commandId, payload, token).ConfigureAwait(true);
         return new(result.Error);
     }
@@ -60,9 +60,9 @@ internal sealed class RecurringDueCoordinatorGrain(GrainRequestCodec codec, Back
     public Task ExecuteJobAsync(IJobRunContext context, CancellationToken attemptCancellationToken)
         => RequestContextHelper.RunWithCurrentCallerAsync(typeof(RecurringDueCoordinatorGrain).FullName!,
             nameof(IDurableJobHandler.ExecuteJobAsync),
-            () => ExecuteNativeTimeoutAsync(context, attemptCancellationToken));
+            () => ExecuteTimeoutAsync(context, attemptCancellationToken));
 
-    private async Task ExecuteNativeTimeoutAsync(IJobRunContext context, CancellationToken attemptCancellationToken)
+    private async Task ExecuteTimeoutAsync(IJobRunContext context, CancellationToken attemptCancellationToken)
     {
         var hint = DecodeJob(context);
         using var timeout = new CancellationTokenSource(options.Value.DispatchDeadline, clock);
@@ -74,35 +74,35 @@ internal sealed class RecurringDueCoordinatorGrain(GrainRequestCodec codec, Back
             return;
         }
 
-        var result = await DispatchNativeTimeoutAsync(hint, principal, token).ConfigureAwait(true);
-        await SettleNativeTimeoutResultAsync(hint, result, token).ConfigureAwait(true);
+        var result = await DispatchTimeoutAsync(hint, principal, token).ConfigureAwait(true);
+        await SettleTimeoutResultAsync(hint, result, token).ConfigureAwait(true);
     }
 
     private DueWorkHint DecodeJob(IJobRunContext context)
     {
         ArgumentNullException.ThrowIfNull(context);
         var job = context.Job;
-        if (job is null || job.Name != NativeSagaTimeoutJobContract.JobName
+        if (job is null || job.Name != SagaTimeoutJobContract.JobName
             || job.TargetGrainId != this.GetGrainId())
         {
-            throw Errors.Fail(ErrorCode.Validation, NativeSagaTimeoutJobContract.InvalidJob);
+            throw Errors.Fail(ErrorCode.Validation, SagaTimeoutJobContract.InvalidJob);
         }
 
-        var hint = NativeSagaTimeoutJobContract.Parse(job.Metadata);
+        var hint = SagaTimeoutJobContract.Parse(job.Metadata);
         ValidateHint(hint);
         return hint;
     }
 
-    private Task<GrainOperationReply> DispatchNativeTimeoutAsync(DueWorkHint hint,
+    private Task<GrainOperationReply> DispatchTimeoutAsync(DueWorkHint hint,
         PrincipalRecord principal, CancellationToken cancellationToken)
     {
         var commandId = Guid.NewGuid();
-        var payload = NativeSerialization.Serialize(new CommandRequest(commandId, hint.Lane.Partition,
+        var payload = OrleansSerialization.Serialize(new CommandRequest(commandId, hint.Lane.Partition,
             [new ExpireSaga(hint.Lane, hint.Id, hint.Revision)]));
         return DispatchWithOneUncertaintyRetry(principal, commandId, payload, cancellationToken);
     }
 
-    private async Task SettleNativeTimeoutResultAsync(DueWorkHint hint, GrainOperationReply result,
+    private async Task SettleTimeoutResultAsync(DueWorkHint hint, GrainOperationReply result,
         CancellationToken cancellationToken)
     {
         if (result.Error is null)
@@ -127,8 +127,8 @@ internal sealed class RecurringDueCoordinatorGrain(GrainRequestCodec codec, Back
         var detail = result.Error switch
         {
             ErrorCode.RevisionConflict => RecurringSagaProtocol.RevisionConflict,
-            ErrorCode.UnknownWriteOutcome => NativeSagaTimeoutJobContract.UnresolvedOutcome,
-            _ => result.SafeDetail ?? NativeSagaTimeoutJobContract.InvalidJob
+            ErrorCode.UnknownWriteOutcome => SagaTimeoutJobContract.UnresolvedOutcome,
+            _ => result.SafeDetail ?? SagaTimeoutJobContract.InvalidJob
         };
         throw Errors.Fail(result.Error.Value, detail);
     }
@@ -151,7 +151,7 @@ internal sealed class RecurringDueCoordinatorGrain(GrainRequestCodec codec, Back
     private async Task<GrainOperationReply> Dispatch(PrincipalRecord principal, Guid requestId,
         Guid commandId, ReadOnlyMemory<byte> payload, CancellationToken cancellationToken)
     {
-        var connectionId = NativeConnectionExecutionIdentity.Resolve(services);
+        var connectionId = ConnectionExecutionIdentity.Resolve(services);
         using var identity = new GrainRequestIdentityScope(services, principal, requestId, commandId, cancellationToken, connectionId: connectionId);
         var signed = codec.CreateCommand(requestId, principal.Id, OperationKind.Batch, commandId, payload);
         var request = GrainFactory.GetGrain<IConnectionGrain>(connectionId);

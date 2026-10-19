@@ -17,7 +17,7 @@ internal static class MultiLaneReceiveExecution
         ILogger diagnostics, IResourceLifetimeWorkBinding binding,
         CancellationToken token)
     {
-        var request = GrainNativePayload.ReadCommand<MultiLaneReceiveRequest>(parent.Payload);
+        var request = GrainPayload.ReadCommand<MultiLaneReceiveRequest>(parent.Payload);
         ArgumentNullException.ThrowIfNull(binding);
         var limits = services.GetRequiredService<IOptions<DatabaseLimits>>().Value;
         var incarnation = codec.Incarnation;
@@ -62,7 +62,7 @@ internal static class MultiLaneReceiveExecution
         IResourceLifetimeWorkBinding binding, Guid incarnation, int precedingOutcomes, CancellationToken token)
     {
         var actorId = Guid.NewGuid();
-        var payload = NativeSerialization.Serialize(leaf);
+        var payload = OrleansSerialization.Serialize(leaf);
         var invoked = false;
         var transferred = false;
         try
@@ -139,7 +139,7 @@ internal static class MultiLaneReceiveExecution
         }
         try
         {
-            var result = NativeSerialization.Deserialize<GrainValue>(reply.Payload.Span).Value as ReceiveResult
+            var result = OrleansSerialization.Deserialize<GrainValue>(reply.Payload.Span).Value as ReceiveResult
                 ?? throw Errors.Fail(ErrorCode.UnknownWriteOutcome, GrainRoutingProtocol.InvalidRequest);
             if (result.RequestId != leaf.RequestId)
             {

@@ -26,14 +26,13 @@ internal sealed class DistributedSearchRemoteExecution(DatabaseEngine database, 
                 Principal: principal), parent);
         var target = grains.GetGrain<IPartitionQueryGrain>(PartitionQueryGrainIdentity.For(phase.Search.Partition));
         var selected = await ResolveOwnerAsync(target, phase, parent, token).ConfigureAwait(true);
-        var request = new DistributedSearchOwnedLeafV1(ContractVersion, phase.Phase, phase.Search,
+        var request = new DistributedSearchOwnedLeaf(ContractVersion, phase.Phase, phase.Search,
             selected.Owner, phase.Search.Partition.TenantId, grant.RemainingBytes, grant.RemainingRecords,
-            phase.MaxResultBytes, phase.Witness, phase.Statistics, phase.Scope, phase.SourceWindowId, phase.Selected);
-        var metadata = new DistributedSearchOwnedLeafV2(request, source.Definition, source.Coverage, source.Principal);
-        parent.ChargeBytes(NativeSerialization.Measure(metadata));
+            phase.MaxResultBytes, phase.Witness, phase.Statistics, phase.Scope, phase.SourceWindowId, phase.Selected, source.Definition, source.Coverage, source.Principal);
+        parent.ChargeBytes(OrleansSerialization.Measure(request));
         var childId = Guid.NewGuid();
-        var signed = codec.CreateDistributedSearchLeafV2(childId, principalId,
-            NativeSerialization.Serialize(metadata), parent.ExpiresAt);
+        var signed = codec.CreateDistributedSearchLeaf(childId, principalId,
+            OrleansSerialization.Serialize(request), parent.ExpiresAt);
         parent.ChargeBytes(checked((long)sizeof(char) * signed.Length));
         return new(request, childToken => RunAsync(target, selected.Address, signed, childId, childToken),
             (result, childToken) => Complete(parent, grant, result, childToken));
@@ -69,7 +68,7 @@ internal sealed class DistributedSearchRemoteExecution(DatabaseEngine database, 
         return retained;
     }
 
-    private async Task<DistributedSearchLeafResultV1> RunAsync(IPartitionQueryGrain target, SiloAddress owner,
+    private async Task<DistributedSearchLeafResult> RunAsync(IPartitionQueryGrain target, SiloAddress owner,
         string signed, Guid childId, CancellationToken token)
     {
         using var identity = GrainRequestIdentityScope.ForChild(services, original.Envelope,
@@ -80,12 +79,12 @@ internal sealed class DistributedSearchRemoteExecution(DatabaseEngine database, 
         {
             throw Errors.Fail(error, reply.SafeDetail ?? GrainRoutingProtocol.InvalidRequest);
         }
-        return GrainNativePayload.Read<GrainValue>(reply.Payload).Value as DistributedSearchLeafResultV1
+        return GrainPayload.Read<GrainValue>(reply.Payload).Value as DistributedSearchLeafResult
             ?? throw Errors.Fail(ErrorCode.Corruption, GrainRoutingProtocol.InvalidRequest);
     }
 
     private static Task Complete(ReadExecutionBudget parent, ReadExecutionBudgetReadGrant grant,
-        DistributedSearchLeafResultV1 result, CancellationToken token)
+        DistributedSearchLeafResult result, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
         parent.ImportReadGrant(grant, result.ReadBytes, result.ExaminedRecords);

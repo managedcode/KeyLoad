@@ -28,7 +28,7 @@ public sealed partial class DatabaseEngine
         }
         var bytes = view.ReadOwnedValue(KeySpace.AppliedBytes)
             ?? throw Errors.Fail(ErrorCode.Corruption, DocumentTokenCorruptPosition);
-        var applied = NativeSerialization.Deserialize<long>(bytes);
+        var applied = OrleansSerialization.Deserialize<long>(bytes);
         if (applied < DocumentTokenInitialPosition)
         {
             throw Errors.Fail(ErrorCode.Corruption, DocumentTokenCorruptPosition);

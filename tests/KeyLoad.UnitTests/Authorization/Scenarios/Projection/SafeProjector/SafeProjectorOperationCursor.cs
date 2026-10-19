@@ -7,7 +7,7 @@ namespace KeyLoad.UnitTests.Features.Authorization;
 
 internal static class SafeProjectorOperationCursor
 {
-    private const string Purpose = "query-page-v2";
+    private const string Purpose = "query-page";
     private const int CursorVersion = 2;
     private const string FullScan = "bounded-full-scan";
     private const string MissingCursor = "The real safe projector bounded query cursor is absent.";
@@ -79,7 +79,7 @@ internal static class SafeProjectorOperationCursor
                     SafeProjectorOperationProtocol.SecondJson, !raw, paths)], null, cut, FullScan));
         });
 
-    private static (long Cut, ResourceLifetimeV1 Lifetime) ExpectedLifetime(SafeProjectorOperationDatabase owner)
+    private static (long Cut, ResourceLifetime Lifetime) ExpectedLifetime(SafeProjectorOperationDatabase owner)
         => owner.Store.Read(view =>
         {
             var partition = owner.Source.Partition;

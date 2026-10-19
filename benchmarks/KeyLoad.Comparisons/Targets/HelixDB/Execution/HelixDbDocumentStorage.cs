@@ -5,8 +5,8 @@ namespace KeyLoad.Comparisons.Targets;
 internal static class HelixDbDocumentStorage
 {
     private const char IdentitySeparator = '-';
-    private const char NativeIdentitySeparator = '_';
-    internal static async Task SeedAsync(HttpClient http, string label, IComparisonCorpus dataset, NativeComparisonExecutionOptions policy, TimeProvider timeProvider, CancellationToken token)
+    private const char RuntimeIdentitySeparator = '_';
+    internal static async Task SeedAsync(HttpClient http, string label, IComparisonCorpus dataset, ComparisonExecutionOptions policy, TimeProvider timeProvider, CancellationToken token)
     {
         foreach (var batch in dataset.Documents.Chunk(policy.WriteBatchCapacity))
         {
@@ -28,26 +28,26 @@ internal static class HelixDbDocumentStorage
         }
     }
 
-    private static async Task SeedEdgesAsync(HttpClient http, string label, BenchmarkEdge[] edges, NativeComparisonExecutionOptions policy, TimeProvider timeProvider, CancellationToken token)
+    private static async Task SeedEdgesAsync(HttpClient http, string label, BenchmarkEdge[] edges, ComparisonExecutionOptions policy, TimeProvider timeProvider, CancellationToken token)
     {
         var entries = new JsonArray();
         var names = new JsonArray();
         foreach (var edge in edges)
         {
-            var suffix = edge.Id.Replace(IdentitySeparator, NativeIdentitySeparator);
-            var from = HelixDbNativeTokens.TokenFrom + suffix;
-            var to = HelixDbNativeTokens.TokenToVariablePrefix + suffix;
+            var suffix = edge.Id.Replace(IdentitySeparator, RuntimeIdentitySeparator);
+            var from = HelixDbTokens.TokenFrom + suffix;
+            var to = HelixDbTokens.TokenToVariablePrefix + suffix;
             entries.Add(HelixDbProtocol.Entry(HelixDbDocumentAst.Lookup(label, edge.From), from));
             entries.Add(HelixDbProtocol.Entry(HelixDbDocumentAst.Lookup(label, edge.To), to));
-            var relation = HelixDbProtocol.Node(HelixDbNativeTokens.TokenAddE, new()
+            var relation = HelixDbProtocol.Node(HelixDbTokens.TokenAddE, new()
             {
-                [HelixDbNativeTokens.TokenInput] = HelixDbProtocol.Node(HelixDbNativeTokens.TokenNodes, new()
+                [HelixDbTokens.TokenInput] = HelixDbProtocol.Node(HelixDbTokens.TokenNodes, new()
                 {
-                    [HelixDbNativeTokens.TokenReference] = new JsonObject { [HelixDbNativeTokens.TokenVar] = from }
+                    [HelixDbTokens.TokenReference] = new JsonObject { [HelixDbTokens.TokenVar] = from }
                 }),
-                [HelixDbNativeTokens.TokenLabel] = label + HelixDbNativeTokens.TokenLinks,
-                [HelixDbNativeTokens.TokenTo] = new JsonObject { [HelixDbNativeTokens.TokenVar] = to },
-                [HelixDbNativeTokens.TokenProperties] = new JsonArray()
+                [HelixDbTokens.TokenLabel] = label + HelixDbTokens.TokenLinks,
+                [HelixDbTokens.TokenTo] = new JsonObject { [HelixDbTokens.TokenVar] = to },
+                [HelixDbTokens.TokenProperties] = new JsonArray()
             });
             entries.Add(HelixDbProtocol.Entry(relation, suffix));
             names.Add(suffix);

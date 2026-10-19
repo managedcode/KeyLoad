@@ -30,7 +30,7 @@ internal sealed class ResourcePairBindingState(TestDatabase source, ResourcePair
     internal const string Utc = "UTC";
     internal const string DeniedDetail = "The principal cannot perform this operation in this scope.";
     internal const string QueryUser = "pair-query-reader";
-    internal const string LifetimeSpace = "resource-lifetime-v1";
+    internal const string LifetimeSpace = "resource-lifetime";
     internal const string DocumentJson = """{ "amount": 17, "raw": "\u0061" }""";
     internal const string EventJson = """{"kind":"Created","amount":17}""";
     internal const string StoredEventJson = """{"amount":17,"kind":"Created"}""";
@@ -46,7 +46,7 @@ internal sealed class ResourcePairBindingState(TestDatabase source, ResourcePair
     internal const string Invalid = "The genuine resource pair whole-operation state is incomplete.";
     internal const string RowSeparator = ":";
     internal const string BlobId = "pair-object";
-    internal const string ChainDomain = "blob-chain-v1";
+    internal const string ChainDomain = "blob-chain";
     internal const string SqlInsert = "INSERT INTO [pair-typed] (id,amount) VALUES ('typed-one',17)";
     internal const string SqlAccessPath = "bounded-full-scan";
     internal const string SqlSelect = "SELECT id,amount FROM [pair-typed]";
@@ -79,7 +79,6 @@ internal sealed class ResourcePairBindingState(TestDatabase source, ResourcePair
     internal List<(Command<DatabaseCommand> Original, Result<object> Result, byte[] Outcome)> Originals { get; } = [];
     internal List<(string Id, long Sequence, DateTimeOffset Time)> Mixed { get; } = [];
     internal List<(string Id, string Json)> Rows { get; } = [];
-    internal List<BlobMetadata> BlobHeads { get; } = [];
     internal Dictionary<string, (byte[] Definition, byte[] Lifetime)> Pairs { get; } = new(StringComparer.Ordinal);
 
     internal void Remember(Command<DatabaseCommand> original, Result<object> result, ZoneTreeStore? store = null)

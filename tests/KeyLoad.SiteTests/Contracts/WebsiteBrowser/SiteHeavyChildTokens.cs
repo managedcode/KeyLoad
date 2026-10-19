@@ -6,7 +6,7 @@ internal static class SiteHeavyChildTokens
     internal const int MaximumQueued = 64;
     internal const int AdmissionMinutes = 20;
     internal const string QueueFull = "The heavy site child admission queue is full.";
-    internal const string UnsafeOwnership = "Heavy site child admission stopped because native ownership did not settle.";
+    internal const string UnsafeOwnership = "Heavy site child admission stopped because execution ownership did not settle.";
     internal const string Operation = "operation";
     internal const string Arguments = "arguments";
     internal const string Produce = "produce";

@@ -7,7 +7,7 @@ internal sealed class AuthenticatedResourceLifetimeReadView(IKeyValueView view, 
     : IKeyValueView, IResourceLifetimeReadBindingView
 {
     void IResourceLifetimeReadBindingView.BindResourceLifetime(PartitionRef partition,
-        ResourceDefinition definition, ResourceLifetimeV1 lifetime)
+        ResourceDefinition definition, ResourceLifetime lifetime)
         => binding.ObserveAuthenticated(partition, lifetime);
 
     public int MaximumRangeRecords => view.MaximumRangeRecords;

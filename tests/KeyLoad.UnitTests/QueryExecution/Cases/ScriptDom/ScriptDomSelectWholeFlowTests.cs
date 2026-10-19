@@ -3,7 +3,7 @@ namespace KeyLoad.UnitTests.Features.QueryExecution;
 internal sealed class ScriptDomSelectWholeFlowTests
 {
     [Test]
-    public async Task AcTsql002NativeSelectPredicateJoinWindowsRefuseRepairReplayAndTwoColdOwners()
+    public async Task AcTsql002SelectPredicateJoinWindowsRefuseRepairReplayAndTwoColdOwners()
     {
         var failures = new List<Exception>();
         await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>

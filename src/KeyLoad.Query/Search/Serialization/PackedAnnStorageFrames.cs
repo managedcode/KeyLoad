@@ -7,21 +7,21 @@ internal static class PackedAnnStorageFrames
 {
     internal const int CurrentVersion = 1;
     internal const int MaximumChunkBytes = 65_536;
-    internal const string InvalidSnapshot = "The packed ANN native snapshot is invalid.";
-    internal const string SnapshotExceeded = "The packed ANN native snapshot reservation is exceeded.";
+    internal const string InvalidSnapshot = "The packed ANN execution snapshot is invalid.";
+    internal const string SnapshotExceeded = "The packed ANN execution snapshot reservation is exceeded.";
     internal const int DigestBytes = 32;
     private const int Empty = 0;
 
     internal static void Write<T>(Stream destination, T value, PackedAnnStorageOptions options, AnnWorkBudget budget)
     {
         budget.Check();
-        var measured = NativeSerialization.Measure(value);
+        var measured = OrleansSerialization.Measure(value);
         budget.Charge(measured);
         if (measured > MaximumChunkBytes || checked(destination.Position + sizeof(int) + measured) > options.MaxFileBytes)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, SnapshotExceeded);
         }
-        var payload = NativeSerialization.Serialize(value);
+        var payload = OrleansSerialization.Serialize(value);
         if (payload.Length != measured || payload.Length > MaximumChunkBytes
             || checked(destination.Position + sizeof(int) + payload.Length) > options.MaxFileBytes)
         {
@@ -50,7 +50,7 @@ internal static class PackedAnnStorageFrames
         var payload = new byte[count];
         ReadExactly(source, payload);
         budget.Check();
-        return NativeSerialization.Deserialize<T>(payload);
+        return OrleansSerialization.Deserialize<T>(payload);
     }
 
     private static void ReadExactly(Stream source, Span<byte> target)

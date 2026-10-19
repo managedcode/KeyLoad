@@ -63,7 +63,7 @@ internal static class LocalInboxProcessingProcessRecovery
 
     private static async Task VerifyColdAsync(string root, LocalInboxProcessingRecoveryState state,
         string[] image, long finalPosition, StoreIdentity identity, (byte[] Key, byte[] Value)[] originalRows,
-        EntityRefLifetimeV1 lifetime, List<Exception> failures)
+        EntityRefLifetime lifetime, List<Exception> failures)
     {
         await ServerFailureObserver.ObserveAsync(async () =>
         {
@@ -87,7 +87,7 @@ internal static class LocalInboxProcessingProcessRecovery
     }
 
     private static async Task VerifyContinuationAsync(KeyLoad.Core.DatabaseEngine database, ZoneTreeStore store,
-        LocalInboxProcessingRecoveryState state, (byte[] Key, byte[] Value)[] originalRows, EntityRefLifetimeV1 lifetime)
+        LocalInboxProcessingRecoveryState state, (byte[] Key, byte[] Value)[] originalRows, EntityRefLifetime lifetime)
     {
         foreach (var item in state.History)
         {

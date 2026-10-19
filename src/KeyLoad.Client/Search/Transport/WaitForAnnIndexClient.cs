@@ -2,7 +2,7 @@ using ManagedCode.Communication;
 
 namespace KeyLoad.Client;
 
-/// <summary>Reads an actual provisioned native ANN generation's minimum-prefix fence.</summary>
+/// <summary>Reads an actual provisioned execution ANN generation's minimum-prefix fence.</summary>
 public static class WaitForAnnIndexClient
 {
     /// <summary>Requires the indexed prefix without provisioning, rebuilding or retrying.</summary>

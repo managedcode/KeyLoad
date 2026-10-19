@@ -30,8 +30,8 @@ internal static class PostgresProtocol
     internal const string CommandSeparator = " ";
     internal const int MaximumParameters = 64;
     internal const char ParameterPrefix = 'p';
-    internal const string Invalid = "The native SQL message is invalid.";
-    internal const string Unsupported = "The native SQL capability is unsupported.";
-    internal const string Duplicate = "The named native SQL statement or portal already exists.";
-    internal const string InterruptedReply = "The native SQL write receipt could not be delivered; resolve its original command identity.";
+    internal const string Invalid = "The execution SQL message is invalid.";
+    internal const string Unsupported = "The execution SQL capability is unsupported.";
+    internal const string Duplicate = "The named execution SQL statement or portal already exists.";
+    internal const string InterruptedReply = "The execution SQL write receipt could not be delivered; resolve its original command identity.";
 }

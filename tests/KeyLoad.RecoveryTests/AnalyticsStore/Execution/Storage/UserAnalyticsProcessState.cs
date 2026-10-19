@@ -52,7 +52,7 @@ internal static class UserAnalyticsProcessState
 
     internal static void Equal<T>(T expected, T actual)
     {
-        if (!NativeSerialization.Serialize(expected).AsSpan().SequenceEqual(NativeSerialization.Serialize(actual)))
+        if (!OrleansSerialization.Serialize(expected).AsSpan().SequenceEqual(OrleansSerialization.Serialize(actual)))
         {
             throw new InvalidOperationException(P.Invalid);
         }
@@ -60,7 +60,7 @@ internal static class UserAnalyticsProcessState
 
     internal static async Task WriteAsync(string root, UserAnalyticsProcessOriginal value, CancellationToken token)
     {
-        var bytes = NativeSerialization.Serialize(value);
+        var bytes = OrleansSerialization.Serialize(value);
         if (bytes.Length is <= EmptyLength or > MaximumEvidenceBytes)
         {
             throw new InvalidOperationException(P.Invalid);
@@ -80,6 +80,6 @@ internal static class UserAnalyticsProcessState
 
         var bytes = new byte[checked((int)input.Length)];
         await input.ReadExactlyAsync(bytes, token);
-        return NativeSerialization.Deserialize<UserAnalyticsProcessOriginal>(bytes);
+        return OrleansSerialization.Deserialize<UserAnalyticsProcessOriginal>(bytes);
     }
 }

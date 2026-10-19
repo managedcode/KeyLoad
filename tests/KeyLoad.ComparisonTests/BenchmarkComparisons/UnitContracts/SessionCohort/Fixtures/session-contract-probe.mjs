@@ -21,7 +21,7 @@ const processes = (target, count) => ({ client: { name: 'comparison-client', pro
   servers: target === 'KeyLoad' ? Array.from({length: count}, (_, index) => ({name: 'node' + (index + 1),
     processId: 100 + index, startedAtUtc: '2026-10-09T10:01:00Z', aspireStartedAtUtc: '2026-10-09T10:00:59Z',
     aspireProcessId: 200 + index, aspireProcessStartedAtUtc: '2026-10-09T10:00:59Z', binary })) : [] });
-const pendingResources = { id: 'matched-native-process-resources', status: 'notExecuted', failureType: 'MatchedProcessResourceQualificationOpen' };
+const pendingResources = { id: 'matched-execution-process-resources', status: 'notExecuted', failureType: 'MatchedProcessResourceQualificationOpen' };
 const cohort = { sourceRevision: 'a'.repeat(40), runId: 12345, attempt: 2,
   repository: contract.SESSION.repository, ref: contract.SESSION.ref,
   workflow: contract.SESSION.workflow, profile: contract.SESSION.profile };
@@ -56,13 +56,13 @@ if (scenario === 'plan') {
     value => value.lanes[0].samples.pop(), value => value.caseId = 'unknown']) {
     const altered = clone(report); change(altered); reject(() => reports.validateSessionCase(altered, report.caseId));
   }
-  const native = '<TestRun>' + contract.SESSION.caseIds.map(id => ({'load-million':'LoadMillion',index:'BuildIndexes',
+  const execution = '<TestRun>' + contract.SESSION.caseIds.map(id => ({'load-million':'LoadMillion',index:'BuildIndexes',
     'sequential-read':'SequentialRead','random-read':'RandomRead',search:'Search',mixed:'Mixed','verify-final':'VerifyFinalState'})[id])
     .map(name => `<UnitTestResult testName="${name}" outcome="Passed"/>`).join('') + '</TestRun>';
   const cases = contract.SESSION.caseIds.map(caseId => ({caseId,status:'measured'}));
-  reports.validateSessionNativeResults(native,cases);
-  reject(() => reports.validateSessionNativeResults(native.replace('LoadMillion','Other'),cases));
-  reject(() => reports.validateSessionNativeResults(native.replace('outcome="Passed"','outcome="Failed"'),cases));
+  reports.validateSessionResults(execution,cases);
+  reject(() => reports.validateSessionResults(execution.replace('LoadMillion','Other'),cases));
+  reject(() => reports.validateSessionResults(execution.replace('outcome="Passed"','outcome="Failed"'),cases));
 } else if (scenario === 'profile-accounting') {
   const hash='1'.repeat(64),server='sha256:'+'2'.repeat(64);
   const methods={'load-million':'LoadMillion',index:'BuildIndexes','sequential-read':'SequentialRead',
@@ -70,101 +70,101 @@ if (scenario === 'plan') {
   const originalReports=contract.SESSION.caseIds.map(caseId=>({caseId,status:'unavailable',
     detail:"Outside this target's shared contract.",initialRecords:caseId==='load-million'?0:contract.SESSION.records,
     expectedRecords:contract.SESSION.records,verifiedRecords:0,lanes:[],elapsedSeconds:0}));
-  const nativeXml=outcome=>'<TestRun>'+contract.SESSION.caseIds.map(id=>
+  const runtimeXml=outcome=>'<TestRun>'+contract.SESSION.caseIds.map(id=>
     `<UnitTestResult testName="${methods[id]}" outcome="${outcome}"/>`).join('')+'</TestRun>';
   const selected=contract.sessionRows().filter(row=>['Qdrant','RabbitMQ','KurrentDB'].includes(row.target));
   let capabilitySession;
   for(const row of selected) {
     const session={schemaVersion:contract.SESSION.schema,sessionId:row.id,target:row.target,nodeCount:row.nodeCount,
       ...cohort,jobId:10,images:{server},processes:processes(row.target,row.nodeCount),targetProfile:null,
-      runtime:{operatingSystem:'Linux',architecture:'X64',logicalProcessors:4,framework:'.NET 10',storage:'native bound mount'},
+      runtime:{operatingSystem:'Linux',architecture:'X64',logicalProcessors:4,framework:'.NET 10',storage:'execution bound mount'},
       assemblies:[{path:'ComparisonHost.dll',sha256:hash,pdbSha256:hash},{path:'Comparisons.dll',sha256:hash,pdbSha256:hash}],
       cases:contract.SESSION.caseIds.map(id=>({id,path:`reports/${id}.json`,sha256:hash})),
-      nativeReport:{path:'NativeTestResults/original.trx',sha256:hash},outerRuntime:{path:'runtime-import.json',sha256:hash},
+      runtimeReport:{path:'RuntimeTestResults/original.trx',sha256:hash},outerRuntime:{path:'runtime-import.json',sha256:hash},
       qualificationReport:{path:'session-qualification.json',sha256:hash},
       resourceReport:{path:'session-resource-evidence.json',sha256:hash},
       outcome:'unavailable',reason:contract.SESSION.capabilitiesUnavailable};
     delete session.profile;
     capabilitySession=clone(session);
-    const qualification={schemaVersion:1,sessionId:row.id,target:row.target,nodeCount:row.nodeCount,nativeExitCode:0,
+    const qualification={schemaVersion:1,sessionId:row.id,target:row.target,nodeCount:row.nodeCount,runtimeExitCode:0,
       status:'passed',reason:null,steps:[{id:'server-resource-cancellation',status:row.nodeCount===1?'passed':'notApplicable',failureType:null},
-        {id:'native-correctness',status:row.target==='KurrentDB'?'passed':'notApplicable',failureType:null}]};
-    const native=reports.validateSessionNativeResults(nativeXml('Passed'),originalReports);
+        {id:'execution-correctness',status:row.target==='KurrentDB'?'passed':'notApplicable',failureType:null}]};
+    const execution=reports.validateSessionResults(runtimeXml('Passed'),originalReports);
     originalReports.forEach(report=>reports.validateSessionCase(report,report.caseId));
     reports.validateSessionEnvelope(session,row,cohort,10);
-    reports.validateSessionQualification(qualification,session,native);
-    reports.validateSessionProfileAccounting(session,originalReports,native,qualification);accepted=true;
-    reject(()=>reports.validateSessionProfileAccounting(session,originalReports.slice(1),native,qualification));
+    reports.validateSessionQualification(qualification,session,execution);
+    reports.validateSessionProfileAccounting(session,originalReports,execution,qualification);accepted=true;
+    reject(()=>reports.validateSessionProfileAccounting(session,originalReports.slice(1),execution,qualification));
     reject(()=>reports.validateSessionProfileAccounting(session,originalReports,
-      native.map((test,index)=>index===0?{...test,outcome:'Failed'}:test),qualification));
+      execution.map((test,index)=>index===0?{...test,outcome:'Failed'}:test),qualification));
     for(const change of [v=>v.images.server=null,v=>v.resourceReport=null,
       v=>v.reason=contract.SESSION.topologyUnavailable,v=>v.targetProfile={name:row.target,version:'unverified',
-        topology:'unverified native topology',writeAcknowledgement:'native',readContract:'native',transport:'native',
-        authorization:'native',image:null,cluster:null}]) {
+        topology:'unverified execution topology',writeAcknowledgement:'execution',readContract:'execution',transport:'execution',
+        authorization:'execution',image:null,cluster:null}]) {
       const altered=clone(session);change(altered);reject(()=>reports.validateSessionEnvelope(altered,row,cohort,10));
     }
     const measured=clone(originalReports);measured[1]={...measured[1],status:'measured',detail:null,elapsedSeconds:1};
     reports.validateSessionCase(measured[1],'index');
-    reject(()=>reports.validateSessionProfileAccounting(session,measured,native,qualification));
-    const altered=clone(originalReports);altered[0].detail='NativeAdapterSessionQueryLifecycleUnavailable';
-    reject(()=>reports.validateSessionProfileAccounting(session,altered,native,qualification));
+    reject(()=>reports.validateSessionProfileAccounting(session,measured,execution,qualification));
+    const altered=clone(originalReports);altered[0].detail='AdapterSessionQueryLifecycleUnavailable';
+    reject(()=>reports.validateSessionProfileAccounting(session,altered,execution,qualification));
   }
   for(const [target,detail] of [
-    ['Neo4j',"Neo4j Community does not provide native clustering; Enterprise licensing is excluded."],
-    ['SurrealDB',"SurrealDB Community's experimental TiKV clustering is outside the qualified native topology; only the persistent standalone server is measured."],
-    ['HelixDB',"The self-hosted HelixDB server is standalone; managed cloud high availability is outside this native comparison."]]) {
+    ['Neo4j',"Neo4j Community does not provide execution clustering; Enterprise licensing is excluded."],
+    ['SurrealDB',"SurrealDB Community's experimental TiKV clustering is outside the qualified execution topology; only the persistent standalone server is measured."],
+    ['HelixDB',"The self-hosted HelixDB server is standalone; managed cloud high availability is outside this execution comparison."]]) {
     const row=contract.sessionRows().find(row=>row.target===target&&row.nodeCount===3);
     const session={...capabilitySession,sessionId:row.id,target,nodeCount:3,images:{server:null},
       resourceReport:null,reason:contract.SESSION.topologyUnavailable};
     const cases=originalReports.map(report=>({...report,detail}));
-    const native=reports.validateSessionNativeResults(nativeXml('Passed'),cases);
-    const qualification={schemaVersion:1,sessionId:row.id,target,nodeCount:3,nativeExitCode:0,
+    const execution=reports.validateSessionResults(runtimeXml('Passed'),cases);
+    const qualification={schemaVersion:1,sessionId:row.id,target,nodeCount:3,runtimeExitCode:0,
       status:'notApplicable',reason:contract.SESSION.topologyUnavailable,steps:[]};
     cases.forEach(report=>reports.validateSessionCase(report,report.caseId));
     reports.validateSessionEnvelope(session,row,cohort,10);
-    reports.validateSessionQualification(qualification,session,native);
-    reports.validateSessionProfileAccounting(session,cases,native,qualification);
+    reports.validateSessionQualification(qualification,session,execution);
+    reports.validateSessionProfileAccounting(session,cases,execution,qualification);
     reject(()=>reports.validateSessionEnvelope({...session,images:{server}},row,cohort,10));
-    const cleanupFailure={...session,outcome:'failure',reason:'NativeSessionTestFailure'};
-    const failedExit={...qualification,nativeExitCode:1,status:'notExecuted',reason:'NativeClientFailed'};
+    const cleanupFailure={...session,outcome:'failure',reason:'SessionTestFailure'};
+    const failedExit={...qualification,runtimeExitCode:1,status:'notExecuted',reason:'ClientFailed'};
     reports.validateSessionEnvelope(cleanupFailure,row,cohort,10);
-    reports.validateSessionQualification(failedExit,cleanupFailure,native);
-    reports.validateSessionProfileAccounting(cleanupFailure,cases,native,failedExit);
+    reports.validateSessionQualification(failedExit,cleanupFailure,execution);
+    reports.validateSessionProfileAccounting(cleanupFailure,cases,execution,failedExit);
     const wrongRow=contract.sessionRows().find(item=>item.target==='KeyLoad'&&item.nodeCount===3);
     reject(()=>reports.validateSessionEnvelope({...cleanupFailure,sessionId:wrongRow.id,target:wrongRow.target},wrongRow,cohort,10));
-    reject(()=>reports.validateSessionProfileAccounting({...cleanupFailure,nodeCount:1},cases,native,failedExit));
+    reject(()=>reports.validateSessionProfileAccounting({...cleanupFailure,nodeCount:1},cases,execution,failedExit));
     reject(()=>reports.validateSessionProfileAccounting(cleanupFailure,cases,
-      native.map((test,index)=>index===0?{...test,outcome:'Failed'}:test),failedExit));
-    reject(()=>reports.validateSessionProfileAccounting(cleanupFailure,cases,native,{...failedExit,nativeExitCode:0}));
+      execution.map((test,index)=>index===0?{...test,outcome:'Failed'}:test),failedExit));
+    reject(()=>reports.validateSessionProfileAccounting(cleanupFailure,cases,execution,{...failedExit,runtimeExitCode:0}));
 
   }
-  const qualifierFailure={...capabilitySession,outcome:'failure',reason:'NativeSessionQualificationFailed'};
+  const qualifierFailure={...capabilitySession,outcome:'failure',reason:'SessionQualificationFailed'};
   const failedQualifier={schemaVersion:1,sessionId:qualifierFailure.sessionId,target:qualifierFailure.target,
-    nodeCount:qualifierFailure.nodeCount,nativeExitCode:0,status:'failed',reason:'NativeSessionQualificationFailed',
+    nodeCount:qualifierFailure.nodeCount,runtimeExitCode:0,status:'failed',reason:'SessionQualificationFailed',
     steps:[{id:'server-resource-cancellation',status:'notApplicable',failureType:null},
-      {id:'native-correctness',status:'failed',failureType:'ComparisonFailureException'}]};
-  const passed=reports.validateSessionNativeResults(nativeXml('Passed'),originalReports);
+      {id:'execution-correctness',status:'failed',failureType:'ComparisonFailureException'}]};
+  const passed=reports.validateSessionResults(runtimeXml('Passed'),originalReports);
   reports.validateSessionEnvelope(qualifierFailure,selected.at(-1),cohort,10);
   reports.validateSessionQualification(failedQualifier,qualifierFailure,passed);
   reports.validateSessionProfileAccounting(qualifierFailure,originalReports,passed,failedQualifier);
   const row=contract.sessionRows().find(row=>row.target==='KeyLoad'&&row.nodeCount===1);
   const failure={...capabilitySession,sessionId:row.id,target:row.target,nodeCount:1,targetProfile:null,images:{server:null},processes:processes('KeyLoad',1),
-    resourceReport:null,outcome:'failure',reason:'NativeSessionTestFailure'};
-  const failed=originalReports.map(report=>({...report,status:'failed',detail:'NativeInitializationFailed'}));
+    resourceReport:null,outcome:'failure',reason:'SessionTestFailure'};
+  const failed=originalReports.map(report=>({...report,status:'failed',detail:'InitializationFailed'}));
   failed[0].elapsedSeconds=1;
   failed[0].lanes=[{id:'create',firstStartedMs:0,lastCompletedMs:1,samples:[
     {operation:0,worker:0,startedMs:0,completedMs:1,success:true,error:null},
-    {operation:1,worker:1,startedMs:0,completedMs:1,success:false,error:'NativeOperationFailed'}],
+    {operation:1,worker:1,startedMs:0,completedMs:1,success:false,error:'OperationFailed'}],
     measurement:{attempts:2,successes:1,failures:1,elapsedSeconds:1,usefulOperationsPerSecond:1,
       latency:{p50Ms:1,p95Ms:1,p99Ms:1},uniqueCompletedMessages:0,enqueue:null,receive:null,ack:null,clientResources:null}}];
   failed.forEach(report=>reports.validateSessionCase(report,report.caseId));
   reports.validateSessionEnvelope(failure,row,cohort,10);
-  const native=reports.validateSessionNativeResults(nativeXml('Failed'),failed);
-  const qualification={schemaVersion:1,sessionId:row.id,target:row.target,nodeCount:1,nativeExitCode:1,
-    status:'notExecuted',reason:'NativeClientFailed',steps:[pendingResources]};
-  reports.validateSessionQualification(qualification,failure,native);
-  reports.validateSessionProfileAccounting(failure,failed,native,qualification);
-  reject(()=>reports.validateSessionProfileAccounting(failure,failed,native,{...qualification,nativeExitCode:0,status:'passed'}));
+  const execution=reports.validateSessionResults(runtimeXml('Failed'),failed);
+  const qualification={schemaVersion:1,sessionId:row.id,target:row.target,nodeCount:1,runtimeExitCode:1,
+    status:'notExecuted',reason:'ClientFailed',steps:[pendingResources]};
+  reports.validateSessionQualification(qualification,failure,execution);
+  reports.validateSessionProfileAccounting(failure,failed,execution,qualification);
+  reject(()=>reports.validateSessionProfileAccounting(failure,failed,execution,{...qualification,runtimeExitCode:0,status:'passed'}));
 } else if (scenario === 'publication') {
   const {validateSessionProducer,requirePublishableSessionMeasurements} = await import(new URL('site-session-selection.mjs',base));
   const workflow={id:10,path:'.github/workflows/benchmarks.yml',name:contract.SESSION.workflow,state:'active'};
@@ -180,21 +180,21 @@ if (scenario === 'plan') {
     const unavailable=['Qdrant','RabbitMQ','KurrentDB'].includes(row.target);
     return {job:{conclusion:'success'},session:{outcome:unavailable?'unavailable':'success',
       reason:unavailable?contract.SESSION.capabilitiesUnavailable:null,
-      targetProfile:unavailable?null:{version:'1.0',topology:'native cluster',cluster:{state:'healthy'}}},
+      targetProfile:unavailable?null:{version:'1.0',topology:'execution cluster',cluster:{state:'healthy'}}},
       qualification:{status:'passed'},resourceQualified:!unavailable,
-      native:contract.SESSION.caseIds.map(()=>({outcome:'Passed'})),
+      execution:contract.SESSION.caseIds.map(()=>({outcome:'Passed'})),
       reports:contract.SESSION.caseIds.map(caseId=>({caseId,status:unavailable?'unavailable':'measured'}))};
   })};
   requirePublishableSessionMeasurements(value);accepted=true;
   for(const change of [v=>v.workers.pop(),v=>v.workers[0].job.conclusion='failure',
-    v=>v.workers[0].qualification.status='failed',v=>v.workers[0].native[0].outcome='Failed',
+    v=>v.workers[0].qualification.status='failed',v=>v.workers[0].execution[0].outcome='Failed',
     v=>v.workers[0].reports[0].status='failed',v=>v.workers[0].reports[0].status='notQualified',
     v=>v.workers[0].resourceQualified=false]) {
     const altered=clone(value);change(altered);reject(()=>requirePublishableSessionMeasurements(altered));
   }
   const measured=clone(value);measured.workers[0].resourceQualified=true;
   measured.workers[0].reports[0].status='measured';
-  measured.workers[0].session.targetProfile={version:'1.0',topology:'native cluster',cluster:{state:'healthy'}};
+  measured.workers[0].session.targetProfile={version:'1.0',topology:'execution cluster',cluster:{state:'healthy'}};
   requirePublishableSessionMeasurements(measured);
   measured.workers[0].session.targetProfile.version='unverified';
   reject(()=>requirePublishableSessionMeasurements(measured));
@@ -233,19 +233,19 @@ if (scenario === 'plan') {
   }
 } else if (scenario === 'qualification') {
   const session = {sessionId:'redis-n1',target:'Redis',nodeCount:1,targetProfile:{},outcome:'success',reason:null};
-  const native = contract.SESSION.caseIds.map(() => ({outcome:'Passed'}));
-  const value = {schemaVersion:1,sessionId:session.sessionId,target:session.target,nodeCount:1,nativeExitCode:0,
-    status:'passed',reason:null,steps:['server-resource-cancellation','native-correctness'].map(id => ({id,status:'passed',failureType:null}))};
-  reports.validateSessionQualification(value,session,native);accepted=true;
-  for (const change of [v=>v.steps.pop(),v=>v.steps[0].status='notApplicable',v=>v.nativeExitCode=1,
+  const execution = contract.SESSION.caseIds.map(() => ({outcome:'Passed'}));
+  const value = {schemaVersion:1,sessionId:session.sessionId,target:session.target,nodeCount:1,runtimeExitCode:0,
+    status:'passed',reason:null,steps:['server-resource-cancellation','execution-correctness'].map(id => ({id,status:'passed',failureType:null}))};
+  reports.validateSessionQualification(value,session,execution);accepted=true;
+  for (const change of [v=>v.steps.pop(),v=>v.steps[0].status='notApplicable',v=>v.runtimeExitCode=1,
     v=>v.steps[0].failureType='fake',v=>v.sessionId='redis-n3',v=>v.steps.reverse()]) {
-    const altered=clone(value);change(altered);reject(()=>reports.validateSessionQualification(altered,session,native));
+    const altered=clone(value);change(altered);reject(()=>reports.validateSessionQualification(altered,session,execution));
   }
-  const cleanup={...value,nativeExitCode:1,status:'notExecuted',reason:'NativeClientFailed',steps:[]};
-  reports.validateSessionQualification(cleanup,{...session,outcome:'failure',reason:'NativeSessionTestFailure'},native);
-  const failed=clone(value);failed.status='failed';failed.reason='NativeSessionQualificationFailed';
+  const cleanup={...value,runtimeExitCode:1,status:'notExecuted',reason:'ClientFailed',steps:[]};
+  reports.validateSessionQualification(cleanup,{...session,outcome:'failure',reason:'SessionTestFailure'},execution);
+  const failed=clone(value);failed.status='failed';failed.reason='SessionQualificationFailed';
   failed.steps[0]={...failed.steps[0],status:'failed',failureType:'ActualControlledException'};
-  reports.validateSessionQualification(failed,{...session,outcome:'failure',reason:failed.reason},native);
+  reports.validateSessionQualification(failed,{...session,outcome:'failure',reason:failed.reason},execution);
 } else if (scenario === 'environment') {
   const { selectSession } = await import(new URL('session-github-context.mjs', base));
   const row = contract.sessionRows()[0];

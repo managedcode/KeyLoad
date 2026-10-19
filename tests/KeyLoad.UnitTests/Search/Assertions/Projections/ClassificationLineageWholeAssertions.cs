@@ -40,7 +40,7 @@ internal static class ClassificationLineageWholeAssertions
             CollectionOrdering.Matching);
     }
 
-    internal static async Task HealthyAsync(EventProjectionFixture fixture, NativeTextProjection projection)
+    internal static async Task HealthyAsync(EventProjectionFixture fixture, RuntimeTextProjection projection)
     {
         var before = QueueWholeFlowStorage.Bytes(fixture.Harness.Store);
         var cut = fixture.Harness.Store.Position;
@@ -49,14 +49,14 @@ internal static class ClassificationLineageWholeAssertions
         await UnchangedAsync(fixture, before, cut);
     }
 
-    internal static async Task RefusedAsync(EventProjectionFixture fixture, NativeTextProjection projection)
+    internal static async Task RefusedAsync(EventProjectionFixture fixture, RuntimeTextProjection projection)
     {
         var before = QueueWholeFlowStorage.Bytes(fixture.Harness.Store);
         var cut = fixture.Harness.Store.Position;
         var vector = await Assert.ThrowsExactlyAsync<KeyLoadException>(fixture.SearchAsync)
             ?? throw new InvalidOperationException("The revoked vector reader was accepted.");
         var text = await Assert.ThrowsExactlyAsync<KeyLoadException>(() => TextAsync(fixture, projection))
-            ?? throw new InvalidOperationException("The revoked native text reader was accepted.");
+            ?? throw new InvalidOperationException("The revoked execution text reader was accepted.");
         await Assert.That(vector.Code).IsEqualTo(ErrorCode.Unauthenticated);
         await Assert.That(text.Code).IsEqualTo(ErrorCode.Unauthenticated);
         await UnchangedAsync(fixture, before, cut);
@@ -73,11 +73,11 @@ internal static class ClassificationLineageWholeAssertions
         await Assert.That(fixture.VectorBytes()).IsEquivalentTo(vector, CollectionOrdering.Matching);
         var actual = fixture.Harness.Store.Read(view => view.ReadOwnedValue(fixture.LineageKey()));
         await Assert.That(actual).IsEquivalentTo(lineage, CollectionOrdering.Matching);
-        var record = fixture.Lineage() ?? throw new InvalidOperationException("The retained native lineage is missing.");
+        var record = fixture.Lineage() ?? throw new InvalidOperationException("The retained execution lineage is missing.");
         await LineageAsync(fixture, record);
         var expected = new VectorRecord(EventProjectionFixture.TargetId, EventProjectionFixture.VectorField,
             EventProjectionFixture.Space, [1, 0], DocumentRevision);
-        var actualVector = NativeSerialization.Deserialize<VectorRecord>(vector);
+        var actualVector = OrleansSerialization.Deserialize<VectorRecord>(vector);
         await Assert.That(actualVector.DocumentId).IsEqualTo(expected.DocumentId);
         await Assert.That(actualVector.Field).IsEqualTo(expected.Field);
         await Assert.That(actualVector.Space).IsEqualTo(expected.Space);
@@ -108,7 +108,7 @@ internal static class ClassificationLineageWholeAssertions
         await Assert.That(record.TargetClassifications).IsEquivalentTo(new[] { EventProjectionFixture.SourceClass }, CollectionOrdering.Matching);
     }
 
-    private static Task<RankedDocument[]> TextAsync(EventProjectionFixture fixture, NativeTextProjection projection)
+    private static Task<RankedDocument[]> TextAsync(EventProjectionFixture fixture, RuntimeTextProjection projection)
         => new SearchEngine(fixture.Database, UnitExecutionOptions.QueryExecution(), projection).SearchAsync(
             EventProjectionFixture.ReaderId, new(fixture.Partition, fixture.TargetCollection,
                 EventProjectionFixture.InputField, Query), TestContext.Current!.Execution.CancellationToken);

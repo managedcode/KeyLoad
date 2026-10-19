@@ -20,7 +20,7 @@ public sealed partial class DatabaseEngine
             Limits.MaxScanRecords, (key, value) =>
             {
                 budget.ChargeBytes(value.Length);
-                var current = NativeSerialization.Deserialize<OnlineTextCurrentPublication>(value);
+                var current = OrleansSerialization.Deserialize<OnlineTextCurrentPublication>(value);
                 var request = new OnlineTextIndexMaintenanceRequest(current.CommandId, current.Consumer,
                     current.Authority.Collection, current.Authority.Field, current.ConsumerGeneration,
                     current.PublishedCut.NodeId, current.Authority.Placement);

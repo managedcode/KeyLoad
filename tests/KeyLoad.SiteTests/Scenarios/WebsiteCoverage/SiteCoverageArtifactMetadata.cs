@@ -18,17 +18,17 @@ internal static class SiteCoverageArtifactMetadata
     {
         using var document = JsonDocument.Parse(bytes, SiteCoverageTokens.JsonDocumentOptions);
         var root = document.RootElement;
-        SiteCoverageNativeJson.RequireObject(root, MetadataRequired, EmptySet.Value);
+        SiteCoverageJson.RequireObject(root, MetadataRequired, EmptySet.Value);
         if (ReadInt32(root, SiteCoverageTokens.SchemaVersion) != SiteCoverageTokens.Schema ||
-            SiteCoverageNativeJson.GetString(root, SiteCoverageTokens.SourceRevision) != manifest.SourceRevision)
+            SiteCoverageJson.GetString(root, SiteCoverageTokens.SourceRevision) != manifest.SourceRevision)
         {
-            throw SiteCoverageNativeJson.Invalid(SiteCoverageTokens.InvalidMetadataFailure);
+            throw SiteCoverageJson.Invalid(SiteCoverageTokens.InvalidMetadataFailure);
         }
 
-        var browserVersion = SiteCoverageNativeJson.GetString(root, SiteCoverageTokens.BrowserVersion);
+        var browserVersion = SiteCoverageJson.GetString(root, SiteCoverageTokens.BrowserVersion);
         if (browserVersion.Length == SiteCoverageTokens.Zero)
         {
-            throw SiteCoverageNativeJson.Invalid(SiteCoverageTokens.InvalidMetadataFailure);
+            throw SiteCoverageJson.Invalid(SiteCoverageTokens.InvalidMetadataFailure);
         }
 
         var origins = ReadOrigins(root.GetProperty(SiteCoverageTokens.Origins));
@@ -41,7 +41,7 @@ internal static class SiteCoverageArtifactMetadata
     {
         if (value.ValueKind != JsonValueKind.Array || value.GetArrayLength() == SiteCoverageTokens.Zero)
         {
-            throw SiteCoverageNativeJson.Invalid(SiteCoverageTokens.InvalidMetadataFailure);
+            throw SiteCoverageJson.Invalid(SiteCoverageTokens.InvalidMetadataFailure);
         }
 
         var origins = new HashSet<string>(StringComparer.Ordinal);
@@ -50,7 +50,7 @@ internal static class SiteCoverageArtifactMetadata
             if (item.ValueKind != JsonValueKind.String || item.GetString() is not { } text || !IsLoopbackOrigin(text) ||
                 !origins.Add(text))
             {
-                throw SiteCoverageNativeJson.Invalid(SiteCoverageTokens.InvalidMetadataFailure);
+                throw SiteCoverageJson.Invalid(SiteCoverageTokens.InvalidMetadataFailure);
             }
         }
 
@@ -62,18 +62,18 @@ internal static class SiteCoverageArtifactMetadata
     {
         if (value.ValueKind != JsonValueKind.Array || value.GetArrayLength() != expected.Count)
         {
-            throw SiteCoverageNativeJson.Invalid(SiteCoverageTokens.InvalidMetadataFailure);
+            throw SiteCoverageJson.Invalid(SiteCoverageTokens.InvalidMetadataFailure);
         }
 
         var actual = new HashSet<string>(StringComparer.Ordinal);
         foreach (var source in value.EnumerateArray())
         {
-            SiteCoverageNativeJson.RequireObject(source, SourceRequired, EmptySet.Value);
-            var path = SiteCoverageNativeJson.GetString(source, SiteCoverageTokens.Path);
-            var hash = SiteCoverageNativeJson.GetString(source, SiteCoverageTokens.Sha256);
+            SiteCoverageJson.RequireObject(source, SourceRequired, EmptySet.Value);
+            var path = SiteCoverageJson.GetString(source, SiteCoverageTokens.Path);
+            var hash = SiteCoverageJson.GetString(source, SiteCoverageTokens.Sha256);
             if (!expected.TryGetValue(path, out var entry) || entry.Sha256 != hash || !actual.Add(path))
             {
-                throw SiteCoverageNativeJson.Invalid(SiteCoverageTokens.InvalidMetadataFailure);
+                throw SiteCoverageJson.Invalid(SiteCoverageTokens.InvalidMetadataFailure);
             }
         }
     }
@@ -82,7 +82,7 @@ internal static class SiteCoverageArtifactMetadata
     {
         if (value.ValueKind != JsonValueKind.Array || value.GetArrayLength() == SiteCoverageTokens.Zero)
         {
-            throw SiteCoverageNativeJson.Invalid(SiteCoverageTokens.InvalidMetadataFailure);
+            throw SiteCoverageJson.Invalid(SiteCoverageTokens.InvalidMetadataFailure);
         }
 
         var names = new HashSet<string>(StringComparer.Ordinal);
@@ -94,7 +94,7 @@ internal static class SiteCoverageArtifactMetadata
                 name.Contains(SiteCoverageTokens.ParentSegmentMarker, StringComparison.Ordinal) ||
                 name.Contains(SiteCoverageTokens.Backslash, StringComparison.Ordinal) || !names.Add(name))
             {
-                throw SiteCoverageNativeJson.Invalid(SiteCoverageTokens.ExtensionFailure);
+                throw SiteCoverageJson.Invalid(SiteCoverageTokens.ExtensionFailure);
             }
         }
 
@@ -107,7 +107,7 @@ internal static class SiteCoverageArtifactMetadata
                 SearchOption.TopDirectoryOnly).Select(Path.GetFileName).ToHashSet(StringComparer.Ordinal);
         if (!actualFiles.SetEquals(listedNames.Append(SiteCoverageTokens.MetadataFile)))
         {
-            throw SiteCoverageNativeJson.Invalid(SiteCoverageTokens.InvalidMetadataFailure);
+            throw SiteCoverageJson.Invalid(SiteCoverageTokens.InvalidMetadataFailure);
         }
     }
 
@@ -115,17 +115,17 @@ internal static class SiteCoverageArtifactMetadata
     {
         var required = runtime == SiteCoverageTokens.NodeRuntime ? NodeEnvelopeRequired : BrowserEnvelopeRequired;
         var optional = runtime == SiteCoverageTokens.NodeRuntime ? NodeEnvelopeOptional : BrowserEnvelopeOptional;
-        SiteCoverageNativeJson.RequireObject(value, required, optional);
+        SiteCoverageJson.RequireObject(value, required, optional);
         if (value.TryGetProperty(SiteCoverageTokens.Timestamp, out var timestamp) &&
             (timestamp.ValueKind != JsonValueKind.Number || !timestamp.TryGetDouble(out var time) || !double.IsFinite(time)))
         {
-            throw SiteCoverageNativeJson.Invalid(SiteCoverageTokens.JsonFailure);
+            throw SiteCoverageJson.Invalid(SiteCoverageTokens.JsonFailure);
         }
 
         if (runtime == SiteCoverageTokens.NodeRuntime && value.TryGetProperty(SiteCoverageTokens.SourceMapCache, out var cache) &&
             (cache.ValueKind != JsonValueKind.Object || cache.EnumerateObject().Any()))
         {
-            throw SiteCoverageNativeJson.Invalid(SiteCoverageTokens.SourceMapUnsupportedFailure);
+            throw SiteCoverageJson.Invalid(SiteCoverageTokens.SourceMapUnsupportedFailure);
         }
     }
 
@@ -138,7 +138,7 @@ internal static class SiteCoverageArtifactMetadata
     private static int ReadInt32(JsonElement value, string property)
     {
         var item = value.GetProperty(property);
-        return item.TryGetInt32(out var number) ? number : throw SiteCoverageNativeJson.Invalid(SiteCoverageTokens.JsonFailure);
+        return item.TryGetInt32(out var number) ? number : throw SiteCoverageJson.Invalid(SiteCoverageTokens.JsonFailure);
     }
 
     private static HashSet<string> Set(params string[] fields) => new(fields, StringComparer.Ordinal);

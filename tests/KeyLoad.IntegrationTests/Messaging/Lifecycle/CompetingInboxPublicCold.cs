@@ -1,6 +1,6 @@
 using System.Security.Cryptography;
 using Aspire.Hosting.ApplicationModel;
-using KeyLoad.IntegrationTests.Features.ClusterReplication;
+using KeyLoad.IntegrationTests.Features.StorageReplication;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
 using KeyLoad.Server;
 

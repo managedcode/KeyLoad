@@ -2,7 +2,7 @@ using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Features.DocumentStorage;
 
-/// <summary>AC-METH-005: exclusive native Orleans correctness during one million acknowledged creates.</summary>
+/// <summary>AC-METH-005: exclusive execution Orleans correctness during one million acknowledged creates.</summary>
 [Category(HeavyDocumentLoadProtocol.Category)]
 [NotInParallel]
 internal sealed class HeavyDocumentLoadClusterTests : IAsyncDisposable

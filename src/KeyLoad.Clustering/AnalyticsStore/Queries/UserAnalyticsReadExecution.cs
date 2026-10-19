@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace KeyLoad.Clustering;
 
-/// <summary>Uses one signed connection read budget and its original resource binding through native publication.</summary>
+/// <summary>Uses one signed connection read budget and its original resource binding through execution publication.</summary>
 internal static class UserAnalyticsReadExecution
 {
     private const string DeadlineExceeded = "The read execution deadline is exceeded.";
@@ -23,9 +23,9 @@ internal static class UserAnalyticsReadExecution
         return kind switch
         {
             GrainReadKind.AnalyticsEvents => database.ReadAnalyticsEventsBound(principal.Id,
-                GrainNativePayload.Read<ReadAnalyticsEventsRequest>(request.Payload), work, binding),
+                GrainPayload.Read<ReadAnalyticsEventsRequest>(request.Payload), work, binding),
             GrainReadKind.AnalyticsAggregate => await AggregateAsync(database, services, principal,
-                GrainNativePayload.Read<AggregateAnalyticsRequest>(request.Payload), work, binding, token).ConfigureAwait(true),
+                GrainPayload.Read<AggregateAnalyticsRequest>(request.Payload), work, binding, token).ConfigureAwait(true),
             _ => throw Errors.Fail(ErrorCode.UnsupportedCapability, GrainRoutingProtocol.InvalidRequest)
         };
     }
@@ -36,7 +36,7 @@ internal static class UserAnalyticsReadExecution
     {
         using var admission = database.AdmitQuery(token);
         var snapshot = database.CaptureAnalyticsAggregateBound(principal.Id, request, work, binding);
-        using var original = await services.GetRequiredService<INativeUserAnalytics>()
+        using var original = await services.GetRequiredService<IUserAnalytics>()
             .AggregateAsync(snapshot, binding, token).ConfigureAwait(true);
         work.RequireResourceLifetimeBinding(binding);
         using var deadline = new CancellationTokenSource(work.RemainingLifetime, snapshot.Clock);

@@ -32,7 +32,7 @@ internal static class ResourceIncarnationRefusals
         await PrincipalAsync(fixture, state, token);
         await CorruptAsync(fixture, state, null);
         await CorruptAsync(fixture, state, [1, 2, 3]);
-        await CorruptAsync(fixture, state, NativeSerialization.Serialize(state.Lifetime with
+        await CorruptAsync(fixture, state, OrleansSerialization.Serialize(state.Lifetime with
         {
             ResourceName = "alien"
         }));

@@ -1,5 +1,5 @@
 using System.Text.Json;
-using KeyLoad.IntegrationTests.Features.ClusterReplication;
+using KeyLoad.IntegrationTests.Features.StorageReplication;
 
 namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
 
@@ -16,7 +16,7 @@ internal static class FunctionalGateUserAnalyticsAssertions
             .Because($"actual={Bounded(observed)} expected={Bounded(required)}");
         if (actual is CommitReceipt actualReceipt && expected is CommitReceipt expectedReceipt)
         {
-            await NativeSubmissionColdAssertions.ReceiptAsync(actualReceipt, expectedReceipt);
+            await SubmissionColdAssertions.ReceiptAsync(actualReceipt, expectedReceipt);
         }
     }
 

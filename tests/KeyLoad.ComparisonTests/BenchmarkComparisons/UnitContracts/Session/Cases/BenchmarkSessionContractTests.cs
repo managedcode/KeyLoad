@@ -5,7 +5,7 @@ namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 internal sealed class BenchmarkSessionContractTests
 {
     private static BenchmarkSession Open(SessionChecksTarget target, int concurrency = 5)
-        => new(target, UnitBenchmarkOptions.Native(), new()
+        => new(target, UnitBenchmarkOptions.Execution(), new()
         {
             Records = 400,
             Operations = 100,
@@ -13,7 +13,7 @@ internal sealed class BenchmarkSessionContractTests
         }, true);
 
     [Test]
-    public async Task NativeSessionContractKeepsOneDatasetAndMeasuresEveryInitialWriteWithoutWarmup()
+    public async Task SessionContractKeepsOneDatasetAndMeasuresEveryInitialWriteWithoutWarmup()
     {
         await using var target = new SessionChecksTarget();
         var session = Open(target);
@@ -102,9 +102,9 @@ internal sealed class BenchmarkSessionContractTests
     }
 
     [Test]
-    public async Task GenuineNativeIndexAbsenceLeavesTheLoadedSessionAvailableForReadsAndQueries()
+    public async Task GenuineIndexAbsenceLeavesTheLoadedSessionAvailableForReadsAndQueries()
     {
-        await using var target = new SessionQueryChecksTarget { NativeIndexUnavailable = true };
+        await using var target = new SessionQueryChecksTarget { RuntimeIndexUnavailable = true };
         var session = Open(target);
         var token = TestContext.Current!.Execution.CancellationToken;
         await Assert.That((await session.LoadAsync(token)).Status).IsEqualTo("measured");
@@ -130,17 +130,17 @@ internal sealed class BenchmarkSessionContractTests
     }
 
     [Test]
-    public async Task ProductionSessionRejectsNoncanonicalConcurrencyBeforeNativeInitialization()
+    public async Task ProductionSessionRejectsNoncanonicalConcurrencyBeforeInitialization()
     {
         await using var target = new SessionChecksTarget();
-        await Assert.That(() => new BenchmarkSession(target, UnitBenchmarkOptions.Native(),
+        await Assert.That(() => new BenchmarkSession(target, UnitBenchmarkOptions.Execution(),
             new BenchmarkSessionOptions { Concurrency = 17 })).Throws<InvalidOperationException>();
         await Assert.That(target.Initializations).IsEqualTo(0);
         await Assert.That(target.Writes).IsEqualTo(0);
     }
 
     [Test]
-    public async Task SynchronousNativeOperationsStillUseEveryConfiguredClientAndItsDisjointOrdinals()
+    public async Task SynchronousOperationsStillUseEveryConfiguredClientAndItsDisjointOrdinals()
     {
         await using var target = new SessionQueryChecksTarget { SynchronousOperations = true };
         var session = Open(target, concurrency: 16);

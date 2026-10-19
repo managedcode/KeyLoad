@@ -27,8 +27,8 @@ internal static class JournalOriginalFailureRecovery
         {
             await ServerFailureObserver.ObserveAsync(async () =>
             {
-                await Assert.That(NativeSerialization.Serialize(store.Identity)
-                    .AsSpan().SequenceEqual(NativeSerialization.Serialize(files.Identity))).IsTrue();
+                await Assert.That(OrleansSerialization.Serialize(store.Identity)
+                    .AsSpan().SequenceEqual(OrleansSerialization.Serialize(files.Identity))).IsTrue();
                 if (commitHealthy)
                 {
                     await JournalOriginalFailureCut.RowsAsync(store, files, healthy: false);

@@ -6,7 +6,7 @@ internal sealed class SqlInnerJoinSourceBindingAdmissionTests
     [Arguments(SqlJoinSourceBindingFixture.Typed)]
     [Arguments(SqlJoinSourceBindingFixture.Queue)]
     [Arguments(SqlJoinSourceBindingFixture.Events)]
-    public async Task UnboundDeclaredProjectionRefusesBeforeNativeReadsThenRepairsReplaysAcrossTwoColdOwners(string kind)
+    public async Task UnboundDeclaredProjectionRefusesBeforeReadsThenRepairsReplaysAcrossTwoColdOwners(string kind)
     {
         var failures = new List<Exception>();
         await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>

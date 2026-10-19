@@ -25,7 +25,7 @@ internal static class DatabaseAuthenticationComposition
 
     internal static async Task<PrincipalRecord> AuthenticateAsync(HttpContext context)
     {
-        var result = await context.AuthenticateAsync(Scheme).ConfigureAwait(false);
+        var result = await context.AuthenticateAsync(Scheme);
         if (!result.Succeeded || result.Principal is null
             || context.Features.Get<DatabaseAuthenticatedPrincipal>() is not { } admitted
             || !string.Equals(result.Principal.FindFirstValue(ClaimTypes.NameIdentifier),

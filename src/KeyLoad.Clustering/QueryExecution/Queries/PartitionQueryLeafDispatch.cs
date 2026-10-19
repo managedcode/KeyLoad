@@ -5,13 +5,13 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace KeyLoad.Clustering;
 
-/// <summary>Prepares one original request's bounded leaves for their actual native storage owners.</summary>
+/// <summary>Prepares one original request's bounded leaves for their actual execution storage owners.</summary>
 internal sealed class PartitionQueryLeafDispatch(DatabaseEngine database, string principalId, IServiceProvider services,
     GrainRequestCodec codec, DecodedGrainRequest original)
 {
     private readonly IGrainFactory grains = services.GetRequiredService<IGrainFactory>();
 
-    internal async Task<PartitionQueryPreparedLeaf> PrepareAsync(PartitionQueryLeafPlanV1 plan,
+    internal async Task<PartitionQueryPreparedLeaf> PrepareAsync(PartitionQueryLeafPlan plan,
         ReadExecutionBudgetReadGrant grant, ReadExecutionBudget parent, CancellationToken token)
     {
         parent.Check();
@@ -29,18 +29,18 @@ internal sealed class PartitionQueryLeafDispatch(DatabaseEngine database, string
             MaxReadBytes = grant.RemainingBytes,
             MaxExaminedRecords = grant.RemainingRecords
         };
-        var metadata = new PartitionQueryOwnedLeafRequestV2(new(downward, selected.Owner, plan.Partition.TenantId),
+        var metadata = new PartitionQueryOwnedLeafRequest(downward, selected.Owner, plan.Partition.TenantId,
             source.Definition, source.Coverage, source.Principal);
-        parent.ChargeBytes(NativeSerialization.Measure(metadata));
+        parent.ChargeBytes(OrleansSerialization.Measure(metadata));
         var childId = Guid.NewGuid();
-        var signed = codec.CreatePartitionQueryLeafV2(childId, principalId,
-            NativeSerialization.Serialize(metadata), parent.ExpiresAt);
+        var signed = codec.CreatePartitionQueryLeaf(childId, principalId,
+            OrleansSerialization.Serialize(metadata), parent.ExpiresAt);
         parent.ChargeBytes(checked((long)sizeof(char) * signed.Length));
         return new(childToken => RunAsync(target, selected.Address, selected.Owner, signed, childId, childToken),
             (result, childToken) => Complete(parent, grant, result, childToken));
     }
 
-    private PartitionQueryLifetimeMetadata CaptureMetadata(PartitionQueryLeafPlanV1 plan,
+    private PartitionQueryLifetimeMetadata CaptureMetadata(PartitionQueryLeafPlan plan,
         ReadExecutionBudgetReadGrant grant, ReadExecutionBudget parent)
     {
         using var scope = parent.EnterReadGrant(grant);
@@ -60,7 +60,7 @@ internal sealed class PartitionQueryLeafDispatch(DatabaseEngine database, string
         {
             throw Errors.Fail(error, reply.SafeDetail ?? GrainRoutingProtocol.InvalidRequest);
         }
-        var result = GrainNativePayload.Read<GrainValue>(reply.Payload).Value as PartitionQueryLeafResultV1
+        var result = GrainPayload.Read<GrainValue>(reply.Payload).Value as PartitionQueryLeafResult
             ?? throw Errors.Fail(ErrorCode.Corruption, GrainRoutingProtocol.InvalidRequest);
         return new(owner, result);
     }

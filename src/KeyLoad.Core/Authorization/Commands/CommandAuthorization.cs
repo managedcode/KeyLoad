@@ -1,5 +1,5 @@
-using KeyLoad.Core.Features.BlobStorage;
-using KeyLoad.Core.Features.ClusterRouting.Identity;
+using KeyLoad.Core.Features.CommandOutcomes.Identity;
+using KeyLoad.Core.Features.RuntimeJournaling.Identity;
 using KeyLoad.Storage;
 using ManagedCode.Communication.Commands;
 
@@ -18,11 +18,6 @@ public sealed partial class DatabaseEngine
             operation.Value!.Kind == OperationKind.RuntimeJournal ? Payload<RuntimeJournalMutation>(operation) : null);
         if (operation.Value!.Kind == OperationKind.RuntimeJournal)
         {
-            return null;
-        }
-        if (BlobStorageOperations.Handles(operation.Value!.Kind))
-        {
-            new BlobStorageOperations(this).Authorize(view, principal, operation);
             return null;
         }
         if (operation.Value!.Kind is OperationKind.ConfigureSubscription or OperationKind.SeekSubscription

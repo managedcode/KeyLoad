@@ -25,7 +25,7 @@ internal static class TestDatabaseDeleteFailureFiles
             var attributes = File.GetAttributes(path);
             if ((attributes & FileAttributes.ReparsePoint) != default)
             {
-                throw new InvalidOperationException(TestDatabaseDeleteFailureProtocol.NativeEntryRequired);
+                throw new InvalidOperationException(TestDatabaseDeleteFailureProtocol.EntryRequired);
             }
             var relative = Path.GetRelativePath(fixture.Directory, path);
             modes.Add(relative, File.GetUnixFileMode(path));
@@ -41,7 +41,7 @@ internal static class TestDatabaseDeleteFailureFiles
     {
         if ((File.GetAttributes(root) & FileAttributes.ReparsePoint) != default)
         {
-            throw new InvalidOperationException(TestDatabaseDeleteFailureProtocol.NativeEntryRequired);
+            throw new InvalidOperationException(TestDatabaseDeleteFailureProtocol.EntryRequired);
         }
         var paths = new List<string>();
         var pending = new Queue<string>();
@@ -55,7 +55,7 @@ internal static class TestDatabaseDeleteFailureFiles
                 var attributes = File.GetAttributes(path);
                 if ((attributes & FileAttributes.ReparsePoint) != default)
                 {
-                    throw new InvalidOperationException(TestDatabaseDeleteFailureProtocol.NativeEntryRequired);
+                    throw new InvalidOperationException(TestDatabaseDeleteFailureProtocol.EntryRequired);
                 }
                 paths.Add(path);
                 if (paths.Count >= refusalCount)

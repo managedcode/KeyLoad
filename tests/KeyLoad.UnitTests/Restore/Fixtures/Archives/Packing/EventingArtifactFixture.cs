@@ -10,7 +10,7 @@ namespace KeyLoad.UnitTests.Features.BackupRestore;
 
 internal sealed class EventingArtifactFixture
 {
-    private const string OriginalEngineRequired = "The mixed command requires its original owned native engine.";
+    private const string OriginalEngineRequired = "The mixed command requires its original owned execution engine.";
     private const string Prefix = "keyload-eventing-artifact-";
     internal const string Principal = "root";
     internal const string Topic = "backup-topic";
@@ -68,7 +68,7 @@ internal sealed class EventingArtifactFixture
     }
     internal (long AppliedPosition, long StorePosition) ReadTargetCut()
         => Database.Store.Read(view => (view.ReadOwnedValue(KeySpace.AppliedBytes) is { } bytes
-            ? NativeSerialization.Deserialize<long>(bytes) : default(long), Database.Store.Position));
+            ? OrleansSerialization.Deserialize<long>(bytes) : default(long), Database.Store.Position));
 
     internal Command<DatabaseCommand> ReadTargetIssuedOperation(Guid originalId)
         => OutcomeStoreOracle.ReadStored(Database, originalId, CancellationToken.None).PreparedCommand;

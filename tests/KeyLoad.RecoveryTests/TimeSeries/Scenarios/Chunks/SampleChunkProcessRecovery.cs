@@ -9,7 +9,7 @@ namespace KeyLoad.RecoveryTests.Features.TimeSeries;
 internal static class SampleChunkProcessRecovery
 {
     private const string DotnetHost = "dotnet";
-    private const string FailedChild = "The native chunk process child exited unsuccessfully.";
+    private const string FailedChild = "The execution chunk process child exited unsuccessfully.";
     private const int SuccessExit = 0;
 
     internal static Task RunAsync(string root, bool merge, CancellationToken callerToken)
@@ -79,8 +79,8 @@ internal static class SampleChunkProcessRecovery
             }
         }
         await KilledProcessFileReadiness.WaitAsync(root, token);
-        RecoveryFileInventory.AssertNativeHandlesReleased(root);
-        child.CloseNativeProcessAfterJoin();
+        RecoveryFileInventory.AssertHandlesReleased(root);
+        child.CloseProcessAfterJoin();
     }
 
     private static ProcessStartInfo CreateStart(string root, string mode, CommitStage stage)

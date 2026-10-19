@@ -29,11 +29,11 @@ internal static class Bm25InvalidationDependencyFlow
             using var database = new TestDatabase();
             await ServerFailureObserver.ObserveAsync(() => ExecuteAsync(database), failures);
         }
-        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+        catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error))
         {
             failures.Add(error);
         }
-        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
+        catch (Exception error) when (!CqrsBoundaryErrors.IsNonFatal(error))
         {
             failures.Add(error);
         }
@@ -177,7 +177,7 @@ internal static class Bm25InvalidationDependencyFlow
             var page = budget.Scan(view, [], UnitExecutionOptions.DatabaseLimits().Value.MaxScanRecords);
             if (page.HasMore)
             {
-                throw new InvalidOperationException("The full native dependency image exceeded its original scan budget.");
+                throw new InvalidOperationException("The full execution dependency image exceeded its original scan budget.");
             }
             var rows = page.Records.Select(row =>
                 Convert.ToHexString(row.Key.Span) + ":" + Convert.ToHexString(row.Value.Span)).ToArray();

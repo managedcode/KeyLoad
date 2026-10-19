@@ -42,7 +42,7 @@ internal static class McpTransportGuard
             ReadTargetHeader(headers, bounds.MaximumTransportNameCharacters));
     }
 
-    /// <summary>Compares bounded hints and version fields without changing business arguments or native message identity.</summary>
+    /// <summary>Compares bounded hints and version fields without changing business arguments or execution message identity.</summary>
     /// <param name="checkedBody">Already framing-checked bytes held under the ingress memory lease.</param>
     /// <param name="headers">Previously checked routing hints.</param>
     internal static void Inspect(ReadOnlyMemory<byte> checkedBody, McpTransportHeaders headers)

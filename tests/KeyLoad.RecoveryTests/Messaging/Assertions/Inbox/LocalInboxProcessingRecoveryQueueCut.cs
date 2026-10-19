@@ -44,7 +44,7 @@ internal static class LocalInboxProcessingRecoveryQueueCut
         await RowsAsync(store, input, CountersFamily, [Row(Key(input, CountersFamily),
             new QueueCounters(EmptyUsage, EmptyUsage, EmptyUsage, EmptyUsage, FirstReadySequence))]);
         await RowsAsync(store, output, CountersFamily, [Row(Key(output, CountersFamily),
-            new QueueCounters(StoredOutputCount, NativeSerialization.Serialize(body).LongLength,
+            new QueueCounters(StoredOutputCount, OrleansSerialization.Serialize(body).LongLength,
                 EmptyUsage, EmptyUsage, FirstReadySequence))]);
         await RowsAsync(store, input, ReadyFamily, []);
         await RowsAsync(store, output, ReadyFamily, [Row(Key(output, ReadyFamily, FirstReadySequence, id), id)]);
@@ -69,7 +69,7 @@ internal static class LocalInboxProcessingRecoveryQueueCut
         => KeySpace.Partition(family, lane.Partition, new object?[] { lane.Queue }.Concat(tail).ToArray());
 
     private static string Row<T>(byte[] key, T value)
-        => Convert.ToHexString(key) + ":" + Convert.ToHexString(NativeSerialization.Serialize(value));
+        => Convert.ToHexString(key) + ":" + Convert.ToHexString(OrleansSerialization.Serialize(value));
 
     private static async Task RowsAsync(IAtomicStore store, QueueLaneRef lane, string family, string[] expected)
     {

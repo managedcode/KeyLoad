@@ -85,7 +85,7 @@ internal sealed class TemporaryGitCheckout : IAsyncDisposable
                 var arguments = new[]
                 {
                     "--input-type=module", "-e", SetupProgram,
-                    SessionNodeProcess.Module("native-process.mjs"),
+                    SessionNodeProcess.Module("process.mjs"),
                     Path.Combine(repository, ".gitignore"), root
                 };
                 var result = await SessionNodeProcess.RunAsync(arguments, token);

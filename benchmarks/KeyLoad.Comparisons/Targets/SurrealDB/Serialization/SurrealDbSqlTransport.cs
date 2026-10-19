@@ -2,7 +2,7 @@ using System.Text;
 using System.Text.Json;
 
 namespace KeyLoad.Comparisons.Targets;
-/// <summary>Owns SurrealDB HTTP framing and its native response-envelope validation.</summary>
+/// <summary>Owns SurrealDB HTTP framing and its execution response-envelope validation.</summary>
 internal static class SurrealDbSqlTransport
 {
     private const int EmptyResultCount = 0;
@@ -16,18 +16,18 @@ internal static class SurrealDbSqlTransport
     private const string ResultKey = "result";
     private const string ExistingRecordPrefix = "Database record `";
     private const string ExistingRecordSuffix = "` already exists";
-    internal static async Task<JsonDocument> QueryAsync(HttpClient http, string sql, NativeComparisonExecutionOptions policy, TimeProvider timeProvider, CancellationToken cancellationToken, bool create = false)
+    internal static async Task<JsonDocument> QueryAsync(HttpClient http, string sql, ComparisonExecutionOptions policy, TimeProvider timeProvider, CancellationToken cancellationToken, bool create = false)
     {
         using var operationDeadline = new ComparisonCancellationSource(timeProvider, cancellationToken);
         operationDeadline.CancelAfter(policy.OperationTimeout);
         cancellationToken = operationDeadline.Token;
         using var request = new HttpRequestMessage(HttpMethod.Post, ApiPath)
         {
-            Content = new StringContent(sql, Encoding.UTF8, SurrealDbNativeTokens.TokenTextPlain)
+            Content = new StringContent(sql, Encoding.UTF8, SurrealDbTokens.TokenTextPlain)
         };
-        request.Headers.TryAddWithoutValidation(SurrealDbNativeTokens.TokenSurrealNS, Namespace);
-        request.Headers.TryAddWithoutValidation(SurrealDbNativeTokens.TokenDatabaseHeader, Database);
-        request.Headers.Accept.ParseAdd(SurrealDbNativeTokens.TokenApplicationJson);
+        request.Headers.TryAddWithoutValidation(SurrealDbTokens.TokenSurrealNS, Namespace);
+        request.Headers.TryAddWithoutValidation(SurrealDbTokens.TokenDatabaseHeader, Database);
+        request.Headers.Accept.ParseAdd(SurrealDbTokens.TokenApplicationJson);
         using var response = await http.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
         if (!response.IsSuccessStatusCode)
         {
@@ -37,7 +37,7 @@ internal static class SurrealDbSqlTransport
         JsonDocument? document = null;
         try
         {
-            document = await NativeComparisonResponse.ReadJsonAsync(response.Content, policy, cancellationToken).ConfigureAwait(false);
+            document = await ComparisonResponse.ReadJsonAsync(response.Content, policy, cancellationToken).ConfigureAwait(false);
             ValidateResponse(document.RootElement, create);
             return document;
         }
@@ -53,7 +53,7 @@ internal static class SurrealDbSqlTransport
         }
     }
 
-    internal static async Task ExecuteAsync(HttpClient http, string sql, NativeComparisonExecutionOptions policy, TimeProvider timeProvider, CancellationToken cancellationToken)
+    internal static async Task ExecuteAsync(HttpClient http, string sql, ComparisonExecutionOptions policy, TimeProvider timeProvider, CancellationToken cancellationToken)
     {
         using var response = await QueryAsync(http, sql, policy, cancellationToken: cancellationToken, timeProvider: timeProvider).ConfigureAwait(false);
     }
@@ -78,7 +78,7 @@ internal static class SurrealDbSqlTransport
                 {
                     throw new ComparisonFailureException(ComparisonMutationFailures.CreateConflict);
                 }
-                throw new InvalidDataException(SurrealDbNativeTokens.TokenSurrealDbStatementFailed);
+                throw new InvalidDataException(SurrealDbTokens.TokenSurrealDbStatementFailed);
             }
 
             _ = statement.GetProperty(ResultKey);

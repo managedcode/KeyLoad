@@ -7,7 +7,7 @@ using KeyLoad.Storage;
 
 namespace KeyLoad.Query.Features.QueryExecution;
 
-/// <summary>Reads event reference candidates and native typed documents through one authorized bounded view.</summary>
+/// <summary>Reads event reference candidates and execution typed documents through one authorized bounded view.</summary>
 internal static class EventEntityRefJoinExecutor
 {
     private const string CorruptReference = "The event join selected a document with an inconsistent stored identity.";

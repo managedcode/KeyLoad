@@ -23,7 +23,7 @@ internal sealed class AdminNodeObserver(PartitionHost partition, CommandAdmissio
         }
         try
         {
-            var node = await services.GetRequiredService<INodeAdministration>().StatusAsync(cancellationToken).ConfigureAwait(false);
+            var node = await services.GetRequiredService<INodeAdministration>().StatusAsync(cancellationToken);
             var storage = AdminStorageObserver.Read(directory: partition.DirectoryPath, cancellationToken: cancellationToken,
                 options: observationOptions, clock: clock);
             return new(clock.GetUtcNow(), node, new(commands.Limits, commands.Snapshot())

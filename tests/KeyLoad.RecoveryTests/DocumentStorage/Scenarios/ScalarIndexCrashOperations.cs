@@ -18,7 +18,7 @@ internal static class ScalarIndexCrashOperations
     private const string ConflictOutcomeMessage = "The unique-index conflict batch did not return its canonical conflict outcome.";
     private const string ConflictMutationMessage = "The rejected unique-index batch changed canonical document state.";
     private const string EvidenceBoundMessage = "The scalar-index process evidence exceeded its existing fixed bound.";
-    private const string IndexPathMessage = "Scalar-index recovery observation did not use the declared native index.";
+    private const string IndexPathMessage = "Scalar-index recovery observation did not use the declared execution index.";
     private static readonly string[] Values = [ScalarIndexCrashContract.ValueAlpha, ScalarIndexCrashContract.ValueBeta,
         ScalarIndexCrashContract.ValueGamma, ScalarIndexCrashContract.ValueDelta, ScalarIndexCrashContract.ValueEpsilon,
         ScalarIndexCrashContract.ValueRollback, ScalarIndexCrashContract.ValueZeta,

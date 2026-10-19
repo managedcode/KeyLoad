@@ -37,9 +37,9 @@ internal static class QdrantVectorProtocol
     internal const string IdentityNumberFormat = "D9";
     internal const string TargetName = "Qdrant";
     internal const string Unverified = "unverified";
-    internal const string InitialReadContract = "native cosine vectors; bounded numeric predicate metadata";
-    internal const string NativeReadPrefix = "native ";
-    internal const string CosineReadDescription = " cosine; native ";
+    internal const string InitialReadContract = "execution cosine vectors; bounded numeric predicate metadata";
+    internal const string ReadPrefix = "execution ";
+    internal const string CosineReadDescription = " cosine; execution ";
     internal const string PredicateReadDescription = " predicate; ";
     internal const string Transport = "HTTP JSON";
     internal const string Authentication = "Aspire API key";
@@ -59,16 +59,16 @@ internal static class QdrantVectorProtocol
     internal const string ReadbackCursor = "QdrantVectorReadbackCursor";
     internal const string ResultLimit = "QdrantVectorResultLimit";
     internal const string InvalidUpdate = "Invalid mixed vector update.";
-    internal const string PlanObservation = "Native collection configuration; Qdrant has no SQL EXPLAIN endpoint.";
+    internal const string PlanObservation = "Execution collection configuration; Qdrant has no SQL EXPLAIN endpoint.";
     internal const string ReplyLimit = "QdrantVectorReplyLimit";
-    internal const string MetricMismatch = "QdrantVectorNativeMetricMismatch";
-    internal const string ExactMismatch = "QdrantExactNativeIndexMismatch";
-    internal const string HnswMismatch = "QdrantHnswNativeIndexMismatch";
+    internal const string MetricMismatch = "QdrantVectorMetricMismatch";
+    internal const string ExactMismatch = "QdrantExactIndexMismatch";
+    internal const string HnswMismatch = "QdrantHnswIndexMismatch";
     internal const string ReadbackIdentity = "QdrantVectorReadbackIdentity";
     internal const string ReadbackDimensions = "QdrantVectorReadbackDimensions";
     internal const string ReadbackPayload = "QdrantVectorReadbackPayload";
     internal const string InvalidIdentity = "Invalid vector document identity.";
-    internal const string PlannerContract = "native collection config plus explicit exact/indexed_only query parameters";
+    internal const string PlannerContract = "execution collection config plus explicit exact/indexed_only query parameters";
     internal const string ConnectionsText = "16";
     internal const string DisabledText = "0";
     internal const string BreadthText = "200";
@@ -91,6 +91,6 @@ internal static class QdrantVectorProtocol
     internal const int IdentityDigitsOffset = 1;
     internal const char IdentityFirstCharacter = 'v';
     internal const double CosineUnit = 1d;
-    internal const string MissingExecutionPolicy = "Native Qdrant execution policy is required.";
+    internal const string MissingExecutionPolicy = "Execution Qdrant execution policy is required.";
     internal const string ExecutionPolicyKey = "executionPolicy";
 }

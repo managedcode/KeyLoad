@@ -78,7 +78,7 @@ public sealed partial class DatabaseEngine
                 break;
         }
         budget.ChargeBytes(checked(Encoding.UTF8.GetByteCount(principalId)
-            + NativeSerialization.Serialize(request).LongLength));
+            + OrleansSerialization.Serialize(request).LongLength));
     }
 
     private static void ValidateRecurringReadIdentity(QueueLaneRef lane, Guid id)

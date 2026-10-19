@@ -19,7 +19,7 @@ internal static class SiteIsolatedGitHubNodeProcess
         using var requestDocument = JsonDocument.Parse(requestBytes);
         var admission = SiteHeavyChildClassification.IsArchive(requestDocument.RootElement)
             ? SiteHeavyChildAdmission.Shared : null;
-        var result = await SiteIsolatedGitHubNativeProcess.RunProbeAsync(
+        var result = await SiteIsolatedGitHubProcess.RunProbeAsync(
             CreateStart(repository, script, requestPath, captureCoverage), token, admission);
         if (result.ExitCode != 0 || result.StandardError.Length != 0)
         {

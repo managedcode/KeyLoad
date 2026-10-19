@@ -4,7 +4,7 @@ using KeyLoad.IntegrationTests.Features.ClientApi;
 namespace KeyLoad.IntegrationTests.Features.DocumentStorage;
 
 /// <summary>AC-MCP-005/007 and AC-DSTORE-001: real Orleans MCP and HTTP clients share canonical document outcomes.</summary>
-/// <param name="fixture">The initialized actual native Aspire Orleans application.</param>
+/// <param name="fixture">The initialized actual execution Aspire Orleans application.</param>
 [ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = McpCallerProtocol.FixtureKey)]
 [NotInParallel]
 internal sealed class McpDocumentParityTests(ClusterFixture fixture)
@@ -23,21 +23,21 @@ internal sealed class McpDocumentParityTests(ClusterFixture fixture)
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node3);
         var sdk = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         var httpRetry = await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(command, deadline.Token));
-        var nativeRetry = await McpCallerAssertions.SuccessAsync<CommitReceipt>(await session.CallAsync(McpCallerTools.DocumentsCommit,
+        var runtimeRetry = await McpCallerAssertions.SuccessAsync<CommitReceipt>(await session.CallAsync(McpCallerTools.DocumentsCommit,
             command, deadline.Token));
         await Assert.That(first.Value.CommandId).IsEqualTo(command.CommandId);
         await Assert.That(first.Value.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
         await Assert.That(first.Value.PersistedCopies).IsEqualTo(3);
         await Assert.That(httpRetry.Token).IsEqualTo(first.Value.Token);
-        await Assert.That(nativeRetry.Value.Token).IsEqualTo(first.Value.Token);
-        await Assert.That(JsonDefaults.Serialize(nativeRetry.Value).AsSpan().SequenceEqual(JsonDefaults.Serialize(httpRetry))).IsTrue();
-        await Assert.That(first.RequestId).IsNotEqualTo(nativeRetry.RequestId);
+        await Assert.That(runtimeRetry.Value.Token).IsEqualTo(first.Value.Token);
+        await Assert.That(JsonDefaults.Serialize(runtimeRetry.Value).AsSpan().SequenceEqual(JsonDefaults.Serialize(httpRetry))).IsTrue();
+        await Assert.That(first.RequestId).IsNotEqualTo(runtimeRetry.RequestId);
         var document = await PublicReadAssertions.RequiredDocumentAsync(await session.CallAsync(McpCallerTools.DocumentsGet,
             new GetDocumentRequest(scenario.Reference), deadline.Token));
         var httpDocument = await PublicReadAssertions.DocumentAsync(await sdk.GetAsync(scenario.Reference, deadline.Token));
         await Assert.That(document.Value.Revision).IsEqualTo(McpCallerProtocol.FirstRevision);
         await Assert.That(JsonDefaults.Serialize(document.Value).AsSpan().SequenceEqual(JsonDefaults.Serialize(httpDocument))).IsTrue();
-        await Assert.That(new[] { first.RequestId, nativeRetry.RequestId, document.RequestId }.Distinct().Count())
+        await Assert.That(new[] { first.RequestId, runtimeRetry.RequestId, document.RequestId }.Distinct().Count())
             .IsEqualTo(McpDocumentProtocol.ObservedOperationCount);
     }
 
@@ -70,9 +70,9 @@ internal sealed class McpDocumentParityTests(ClusterFixture fixture)
             .IsEqualTo(committed.Token);
     }
 
-    /// <summary>An absent document returns canonical null from the native and HTTP SDKs rather than a fabricated row.</summary>
+    /// <summary>An absent document returns canonical null from the execution and HTTP SDKs rather than a fabricated row.</summary>
     [Test]
-    public async Task AcMcp007MissingDocumentIsCanonicalNullWithFreshNativeExecutionIds()
+    public async Task AcMcp007MissingDocumentIsCanonicalNullWithFreshExecutionIds()
     {
         using var deadline = McpCallerDeadline.Create();
         var scenario = await McpDocumentScenario.CreateAsync(fixture, deadline.Token);

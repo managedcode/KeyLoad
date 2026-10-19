@@ -4,7 +4,7 @@ using TUnit.Assertions.Enums;
 
 namespace KeyLoad.UnitTests.Features.Search;
 
-/// <summary>Independent full wait/result and bilingual canonical/native-page oracles around actual native failure and recovery.</summary>
+/// <summary>Independent full wait/result and bilingual canonical/execution-page oracles around actual execution failure and recovery.</summary>
 internal static class SearchWaitAuthorityState
 {
     internal const string ForeignAtomicPartition = "wrong-atomic-wait-authority";
@@ -38,7 +38,7 @@ internal static class SearchWaitAuthorityState
         var actual = await search.WaitForIndexAsync(Root, original, cancellationToken);
         var expected = new WaitForIndexResult(original.MinimumToken, OriginalSchemaVersion, OriginalPolicyEpoch);
         await Assert.That(JsonDefaults.Serialize(actual).SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
-        await NativeTextBilingualAudit.VerifyAsync(search, database.Partition, cancellationToken);
+        await TextBilingualAudit.VerifyAsync(search, database.Partition, cancellationToken);
         await Assert.That(database.Store.Position).IsEqualTo(position);
         await Assert.That(QueueWholeFlowStorage.Bytes(database.Store)).IsEquivalentTo(image, CollectionOrdering.Matching);
     }

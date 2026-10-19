@@ -4,7 +4,7 @@ internal static class Bm25CorpusShape
 {
     private const long UninitializedPublicationVersion = 0;
     private const long InitialPolicyEpoch = 0;
-    private const long MinimumNativeCut = 0;
+    private const long MinimumCut = 0;
     private const long MinimumOutboxTail = 0;
     private const int MinimumDocumentCount = 0;
     private const long MinimumCorpusLength = 0;
@@ -16,7 +16,7 @@ internal static class Bm25CorpusShape
     private const char LowestHexLetter = 'a';
     private const char HighestHexLetter = 'f';
 
-    internal static void Require(Bm25CorpusCurrentV1 current, DatabaseLimits limits)
+    internal static void Require(Bm25CorpusCurrent current, DatabaseLimits limits)
     {
         if (current is null || current.Partition is null || current.SourceOwner is null
             || current.Statistics is null || current.FormatVersion != Bm25CorpusProtocol.Format
@@ -24,8 +24,8 @@ internal static class Bm25CorpusShape
             || current.SourceOwner.Incarnation != current.Incarnation
             || current.SourceOwner.PhysicalShardId == Guid.Empty
             || current.PolicyEpoch < InitialPolicyEpoch || current.SchemaVersion <= UninitializedPublicationVersion
-            || current.SourceOutboxTail < MinimumOutboxTail || current.CapturePosition < MinimumNativeCut || current.CaptureApplied < MinimumNativeCut
-            || current.CaptureReadGeneration < MinimumNativeCut || string.IsNullOrWhiteSpace(current.Field)
+            || current.SourceOutboxTail < MinimumOutboxTail || current.CapturePosition < MinimumCut || current.CaptureApplied < MinimumCut
+            || current.CaptureReadGeneration < MinimumCut || string.IsNullOrWhiteSpace(current.Field)
             || string.IsNullOrWhiteSpace(current.TokenizerVersion) || !Digest(current.ResourcePolicyDigest)
             || !Digest(current.PayloadDigest))
         {
@@ -78,14 +78,14 @@ internal static class Bm25CorpusShape
         }
     }
 
-    internal static Bm25CorpusCurrentV1 RequireRecord(ReadOnlySpan<byte> key, ReadOnlySpan<byte> value,
+    internal static Bm25CorpusCurrent RequireRecord(ReadOnlySpan<byte> key, ReadOnlySpan<byte> value,
         PartitionRef partition, DatabaseLimits limits)
     {
         if (checked((long)key.Length + value.Length) > limits.MaxBatchBytes)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, Bm25CorpusProtocol.Capacity);
         }
-        var current = NativeSerialization.Deserialize<Bm25CorpusCurrentV1>(value);
+        var current = OrleansSerialization.Deserialize<Bm25CorpusCurrent>(value);
         Require(current, limits);
         if (current.Partition != partition || !key.SequenceEqual(Bm25CorpusKeys.Current(current)))
         {

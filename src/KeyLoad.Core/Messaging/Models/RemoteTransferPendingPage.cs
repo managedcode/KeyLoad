@@ -7,5 +7,5 @@ namespace KeyLoad.Core;
 public sealed record RemoteTransferPendingPage([property: Orleans.Id(0)] RemoteTransferCoordinationHint? Hint,
     [property: Orleans.Id(1)] RemoteTransferPendingCursor Cursor)
 {
-    internal const string SerializerAlias = "keyload.core.queue-transfer-pending-page.v1";
+    internal const string SerializerAlias = "keyload.core.queue-transfer-pending-page";
 }

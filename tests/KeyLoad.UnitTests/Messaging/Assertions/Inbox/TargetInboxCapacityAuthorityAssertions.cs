@@ -21,7 +21,7 @@ internal static class TargetInboxCapacityAuthorityAssertions
         var position = store.Position;
         Result<object>? result = null;
         var failure = Assert.ThrowsExactly<KeyLoadException>(() =>
-            result = TargetInboxNativeSetup.Apply(database, request, token));
+            result = TargetInboxSetup.Apply(database, request, token));
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.Corruption);
         await Assert.That(failure.Message).IsEqualTo("The retained target inbox is inconsistent.");
         await Assert.That(result).IsNull();
@@ -35,7 +35,7 @@ internal static class TargetInboxCapacityAuthorityAssertions
     {
         var image = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
-        await NativeReplayResultAssertions.Same<CommitInboxResult>(TargetInboxNativeSetup.Apply(database, request, token), expected);
+        await ReplayResultAssertions.Same<CommitInboxResult>(TargetInboxSetup.Apply(database, request, token), expected);
         await SameAsync(store, image, position);
     }
 
@@ -46,7 +46,7 @@ internal static class TargetInboxCapacityAuthorityAssertions
         await ReplayAsync(database, store, state.Second, state.SecondResult, token);
         var image = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
-        await NativeReplayResultAssertions.Same<CommitReceipt>(QueueWholeFlowStorage.Apply(database, OperationKind.Delivery,
+        await ReplayResultAssertions.Same<CommitReceipt>(QueueWholeFlowStorage.Apply(database, OperationKind.Delivery,
             state.SourceAck, state.SourceAck.CommandId, QueueWholeFlowStorage.Clock(store)), state.SourceAckResult);
         await SameAsync(store, image, position);
     }
@@ -57,6 +57,6 @@ internal static class TargetInboxCapacityAuthorityAssertions
         await Assert.That(source.Metadata.State).IsEqualTo(MessageState.Acked);
         await Assert.That(source.PayloadJson).IsNull();
         await Assert.That(source.HeadersJson).IsNull();
-        await TargetInboxNativeAssertions.EffectsAsync(database, state.Original);
+        await TargetInboxAssertions.EffectsAsync(database, state.Original);
     }
 }

@@ -4,7 +4,7 @@ namespace KeyLoad;
 /// <summary>Defines server-side limits applied to database operations.</summary>
 [ConfigurationOptions]
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.DatabaseLimits)]
+[Orleans.Alias(ContractAliases.DatabaseLimits)]
 public sealed record DatabaseLimits
 {
     /// <summary>The section bound by the server composition root.</summary>

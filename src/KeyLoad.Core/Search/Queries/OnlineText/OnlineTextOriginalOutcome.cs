@@ -1,6 +1,9 @@
 using System.Security.Cryptography;
-using KeyLoad.Core.Features.ClusterRouting.Contracts;
-using KeyLoad.Core.Features.ClusterRouting.Execution;
+using KeyLoad.Core.Features.CommandOutcomes.Contracts;
+using KeyLoad.Core.Features.RuntimeJournaling.Contracts;
+using KeyLoad.Core.Features.StoragePartitions.Contracts;
+using KeyLoad.Core.Features.CommandOutcomes.Execution;
+using KeyLoad.Core.Features.RuntimeJournaling.Execution;
 using KeyLoad.Core.Features.Search;
 using KeyLoad.Storage;
 using ManagedCode.Communication;
@@ -90,8 +93,8 @@ public sealed partial class DatabaseEngine
         }
         var original = previous.Result.Get<OnlineTextIndexMaintenanceResult>();
         var resource = Resource(view, request.Consumer.Partition, request.Collection, ResourceKind.Collection);
-        budget?.ChargeBytes(NativeSerialization.Measure(resource));
-        var sha = Convert.ToHexStringLower(SHA256.HashData(NativeSerialization.Serialize(resource)));
+        budget?.ChargeBytes(OrleansSerialization.Measure(resource));
+        var sha = Convert.ToHexStringLower(SHA256.HashData(OrleansSerialization.Serialize(resource)));
         if (original.CommandId != request.CommandId || original.Consumer != request.Consumer
             || original.ConsumerGeneration != request.ConsumerGeneration
             || original.PublishedCut.ResourceSha256 != sha

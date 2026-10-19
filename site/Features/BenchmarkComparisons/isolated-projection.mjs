@@ -17,7 +17,7 @@ export async function produceIsolatedProjection({ input }) {
     const compact = original.reports.map(report => ({ ...report,
       lanes: report.lanes.map(({ samples, ...lane }) => lane) }));
     requireSession(isDeepStrictEqual(original.session, worker.session) && isDeepStrictEqual(compact, worker.reports)
-      && isDeepStrictEqual(original.native, worker.native) && isDeepStrictEqual(original.qualification,worker.qualification) && original.stateSha256 === worker.stateSha256
+      && isDeepStrictEqual(original.execution, worker.execution) && isDeepStrictEqual(original.qualification,worker.qualification) && original.stateSha256 === worker.stateSha256
       && (original.resources?.observations.qualified ?? false) === worker.resourceQualified);
   }
   requireComparableSessionResources(resources);

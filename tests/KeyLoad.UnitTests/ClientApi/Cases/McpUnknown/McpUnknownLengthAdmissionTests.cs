@@ -21,7 +21,7 @@ internal sealed class McpUnknownLengthAdmissionTests
     {
         using var database = new TestDatabase();
         var principal = database.Store.Read(view => view.GetRecord<PrincipalRecord>(KeySpace.Principal(RootPrincipalId)))!;
-        var principalBytes = NativeSerialization.Serialize(new GrainValue(principal));
+        var principalBytes = OrleansSerialization.Serialize(new GrainValue(principal));
         var limits = new McpMemoryLimits();
         var memory = new McpMemoryBudget(Microsoft.Extensions.Options.Options.Create(new KeyLoad.Server.McpMemoryLimits { DataBytes = limits.DataBytes, ControlBytes = limits.ControlBytes, IngressBytes = limits.IngressBytes }));
         var governor = new HttpAdmissionGovernor(UnitAdmissionOptions.Http());

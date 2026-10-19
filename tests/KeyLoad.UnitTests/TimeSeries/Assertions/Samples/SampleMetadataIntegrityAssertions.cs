@@ -10,7 +10,7 @@ internal static class SampleMetadataIntegrityAssertions
 {
     private const int MaximumRecords = 4096;
     internal static SampleMetadataIntegrityCut Capture(ZoneTreeStore store)
-        => new(store.Position, NativeSerialization.Serialize(store.Identity), store.Read(view =>
+        => new(store.Position, OrleansSerialization.Serialize(store.Identity), store.Read(view =>
         {
             var page = view.Scan([], MaximumRecords);
             if (page.HasMore)
@@ -56,7 +56,7 @@ internal static class SampleMetadataIntegrityAssertions
     {
         var cut = Capture(fixture.Store);
         var actual = fixture.Apply(operation);
-        await Assert.That(NativeSerialization.Serialize(actual).SequenceEqual(NativeSerialization.Serialize(receipt))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(actual).SequenceEqual(OrleansSerialization.Serialize(receipt))).IsTrue();
         await Unchanged(fixture, cut);
     }
     internal static async Task Healthy(SampleMetadataIntegrityFixture fixture, long revision, bool appended)
@@ -72,8 +72,8 @@ internal static class SampleMetadataIntegrityAssertions
         await Assert.That(actualRows.Length).IsEqualTo(expectedRows.Length);
         for (var index = 0; index < expectedRows.Length; index++)
         {
-            await Assert.That(NativeSerialization.Serialize(actualRows[index]).SequenceEqual(
-                NativeSerialization.Serialize(expectedRows[index]))).IsTrue();
+            await Assert.That(OrleansSerialization.Serialize(actualRows[index]).SequenceEqual(
+                OrleansSerialization.Serialize(expectedRows[index]))).IsTrue();
         }
         await Assert.That(SampleMetadataIntegrityScenario.Latest(fixture).Sample).IsEqualTo(expectedRows[^1]);
         await Assert.That(SampleMetadataIntegrityScenario.Aggregate(fixture)).IsEqualTo(expectedAggregate);
@@ -95,9 +95,9 @@ internal static class SampleMetadataIntegrityAssertions
             var expectedKey = KeySpace.Partition("sample", fixture.Partition, SampleAggregateTestData.Set,
                 SampleAggregateTestData.Series, expectedRows[index].Sample.Timestamp, expectedRows[index].Sequence);
             await Assert.That(raw.Records[index].Key.Span.SequenceEqual(expectedKey)).IsTrue();
-            await Assert.That(raw.Records[index].Value.Span.SequenceEqual(NativeSerialization.Serialize(expectedRows[index]))).IsTrue();
+            await Assert.That(raw.Records[index].Value.Span.SequenceEqual(OrleansSerialization.Serialize(expectedRows[index]))).IsTrue();
         }
-        var sequence = NativeSerialization.Deserialize<long>(fixture.Store.Read(view => view.ReadOwnedValue(
+        var sequence = OrleansSerialization.Deserialize<long>(fixture.Store.Read(view => view.ReadOwnedValue(
             SampleRollupKeys.Sequence(fixture.Partition, SampleAggregateTestData.Set, SampleAggregateTestData.Series)))!);
         await Assert.That(sequence).IsEqualTo(appended ? 5L : 4L);
         await Unchanged(fixture, cut);

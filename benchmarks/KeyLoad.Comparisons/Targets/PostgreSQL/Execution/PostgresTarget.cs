@@ -7,12 +7,12 @@ namespace KeyLoad.Comparisons.Targets;
 /// <param name="connectionString">The PostgreSQL connection string used to create the pooled data source.</param>
 /// <param name="runId">Guid-formatted run identifier used to isolate the schema name.</param>
 /// <param name="image">Database image reference recorded in the target profile.</param>
-/// <param name="executionOptions">Centrally validated native connection capacities.</param>
-/// <param name="lifecycleOptions">Centrally validated native lifecycle policy.</param>
+/// <param name="executionOptions">Centrally validated execution connection capacities.</param>
+/// <param name="lifecycleOptions">Centrally validated execution lifecycle policy.</param>
 /// <param name="topology">The expected topology used by replication setup and copy observation.</param>
 /// <param name="provider">Borrowed clock; defaults to the system provider.</param>
 public sealed partial class PostgresTarget(string connectionString, string runId, string image,
-    IOptions<NativeComparisonExecutionOptions> executionOptions, IOptions<ComparisonLifecycleOptions> lifecycleOptions,
+    IOptions<ComparisonExecutionOptions> executionOptions, IOptions<ComparisonLifecycleOptions> lifecycleOptions,
     ComparisonTopology topology = ComparisonTopology.Standalone, TimeProvider? provider = null) : IDocumentComparisonTarget
 {
     private readonly TimeProvider timeProvider = provider ?? TimeProvider.System;
@@ -52,7 +52,7 @@ public sealed partial class PostgresTarget(string connectionString, string runId
     /// <returns>A task that completes after schema creation, seeding, and copy observation.</returns>
     public async Task InitializeAsync(IComparisonCorpus dataset, CancellationToken cancellationToken)
     {
-        const string DocumentOnlyReadCommittedContract = "READ COMMITTED primary document reads; S1 keeps the native nullable embedding column NULL";
+        const string DocumentOnlyReadCommittedContract = "READ COMMITTED primary document reads; S1 keeps the execution nullable embedding column NULL";
         const string PublicToken = ",public";
 
         ArgumentNullException.ThrowIfNull(dataset);

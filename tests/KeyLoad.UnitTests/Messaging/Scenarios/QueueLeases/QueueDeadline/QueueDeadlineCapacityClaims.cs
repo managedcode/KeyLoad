@@ -33,7 +33,7 @@ internal static class QueueDeadlineCapacityClaims
 
     internal static async Task RequireAsync(DatabaseEngine database, ReceiveResult actual, ReceiveResult expected, QueueLaneRef lane)
     {
-        await NativeReplayResultAssertions.Same<ReceiveResult>(Result<object>.Succeed(actual), Result<object>.Succeed(expected));
+        await ReplayResultAssertions.Same<ReceiveResult>(Result<object>.Succeed(actual), Result<object>.Succeed(expected));
         foreach (var delivery in expected.Deliveries)
         {
             await Assert.That(database.Verify<DeliveryClaims>(delivery.Token)).IsEqualTo(new DeliveryClaims(lane,

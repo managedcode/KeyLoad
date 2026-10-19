@@ -32661,28 +32661,28 @@ class CubicBezierCurve extends Curve {
 		 *
 		 * @type {Vector2}
 		 */
-		this.v0 = v0;
+		this = v0;
 
 		/**
 		 * The first control point.
 		 *
 		 * @type {Vector2}
 		 */
-		this.v1 = v1;
+		this = v1;
 
 		/**
 		 * The second control point.
 		 *
 		 * @type {Vector2}
 		 */
-		this.v2 = v2;
+		this = v2;
 
 		/**
 		 * The end point.
 		 *
 		 * @type {Vector2}
 		 */
-		this.v3 = v3;
+		this = v3;
 
 	}
 
@@ -32697,7 +32697,7 @@ class CubicBezierCurve extends Curve {
 
 		const point = optionalTarget;
 
-		const v0 = this.v0, v1 = this.v1, v2 = this.v2, v3 = this.v3;
+		const v0 = this, v1 = this, v2 = this, v3 = this;
 
 		point.set(
 			CubicBezier( t, v0.x, v1.x, v2.x, v3.x ),
@@ -32712,10 +32712,10 @@ class CubicBezierCurve extends Curve {
 
 		super.copy( source );
 
-		this.v0.copy( source.v0 );
-		this.v1.copy( source.v1 );
-		this.v2.copy( source.v2 );
-		this.v3.copy( source.v3 );
+		this.copy( source );
+		this.copy( source );
+		this.copy( source );
+		this.copy( source );
 
 		return this;
 
@@ -32725,10 +32725,10 @@ class CubicBezierCurve extends Curve {
 
 		const data = super.toJSON();
 
-		data.v0 = this.v0.toArray();
-		data.v1 = this.v1.toArray();
-		data.v2 = this.v2.toArray();
-		data.v3 = this.v3.toArray();
+		data = this.toArray();
+		data = this.toArray();
+		data = this.toArray();
+		data = this.toArray();
 
 		return data;
 
@@ -32738,10 +32738,10 @@ class CubicBezierCurve extends Curve {
 
 		super.fromJSON( json );
 
-		this.v0.fromArray( json.v0 );
-		this.v1.fromArray( json.v1 );
-		this.v2.fromArray( json.v2 );
-		this.v3.fromArray( json.v3 );
+		this.fromArray( json );
+		this.fromArray( json );
+		this.fromArray( json );
+		this.fromArray( json );
 
 		return this;
 
@@ -32784,28 +32784,28 @@ class CubicBezierCurve3 extends Curve {
 		 *
 		 * @type {Vector3}
 		 */
-		this.v0 = v0;
+		this = v0;
 
 		/**
 		 * The first control point.
 		 *
 		 * @type {Vector3}
 		 */
-		this.v1 = v1;
+		this = v1;
 
 		/**
 		 * The second control point.
 		 *
 		 * @type {Vector3}
 		 */
-		this.v2 = v2;
+		this = v2;
 
 		/**
 		 * The end point.
 		 *
 		 * @type {Vector3}
 		 */
-		this.v3 = v3;
+		this = v3;
 
 	}
 
@@ -32820,7 +32820,7 @@ class CubicBezierCurve3 extends Curve {
 
 		const point = optionalTarget;
 
-		const v0 = this.v0, v1 = this.v1, v2 = this.v2, v3 = this.v3;
+		const v0 = this, v1 = this, v2 = this, v3 = this;
 
 		point.set(
 			CubicBezier( t, v0.x, v1.x, v2.x, v3.x ),
@@ -32836,10 +32836,10 @@ class CubicBezierCurve3 extends Curve {
 
 		super.copy( source );
 
-		this.v0.copy( source.v0 );
-		this.v1.copy( source.v1 );
-		this.v2.copy( source.v2 );
-		this.v3.copy( source.v3 );
+		this.copy( source );
+		this.copy( source );
+		this.copy( source );
+		this.copy( source );
 
 		return this;
 
@@ -32849,10 +32849,10 @@ class CubicBezierCurve3 extends Curve {
 
 		const data = super.toJSON();
 
-		data.v0 = this.v0.toArray();
-		data.v1 = this.v1.toArray();
-		data.v2 = this.v2.toArray();
-		data.v3 = this.v3.toArray();
+		data = this.toArray();
+		data = this.toArray();
+		data = this.toArray();
+		data = this.toArray();
 
 		return data;
 
@@ -32862,10 +32862,10 @@ class CubicBezierCurve3 extends Curve {
 
 		super.fromJSON( json );
 
-		this.v0.fromArray( json.v0 );
-		this.v1.fromArray( json.v1 );
-		this.v2.fromArray( json.v2 );
-		this.v3.fromArray( json.v3 );
+		this.fromArray( json );
+		this.fromArray( json );
+		this.fromArray( json );
+		this.fromArray( json );
 
 		return this;
 
@@ -32906,14 +32906,14 @@ class LineCurve extends Curve {
 		 *
 		 * @type {Vector2}
 		 */
-		this.v1 = v1;
+		this = v1;
 
 		/**
 		 * The end point.
 		 *
 		 * @type {Vector2}
 		 */
-		this.v2 = v2;
+		this = v2;
 
 	}
 
@@ -32930,12 +32930,12 @@ class LineCurve extends Curve {
 
 		if ( t === 1 ) {
 
-			point.copy( this.v2 );
+			point.copy( this );
 
 		} else {
 
-			point.copy( this.v2 ).sub( this.v1 );
-			point.multiplyScalar( t ).add( this.v1 );
+			point.copy( this ).sub( this );
+			point.multiplyScalar( t ).add( this );
 
 		}
 
@@ -32952,7 +32952,7 @@ class LineCurve extends Curve {
 
 	getTangent( t, optionalTarget = new Vector2() ) {
 
-		return optionalTarget.subVectors( this.v2, this.v1 ).normalize();
+		return optionalTarget.subVectors( this, this ).normalize();
 
 	}
 
@@ -32966,8 +32966,8 @@ class LineCurve extends Curve {
 
 		super.copy( source );
 
-		this.v1.copy( source.v1 );
-		this.v2.copy( source.v2 );
+		this.copy( source );
+		this.copy( source );
 
 		return this;
 
@@ -32977,8 +32977,8 @@ class LineCurve extends Curve {
 
 		const data = super.toJSON();
 
-		data.v1 = this.v1.toArray();
-		data.v2 = this.v2.toArray();
+		data = this.toArray();
+		data = this.toArray();
 
 		return data;
 
@@ -32988,8 +32988,8 @@ class LineCurve extends Curve {
 
 		super.fromJSON( json );
 
-		this.v1.fromArray( json.v1 );
-		this.v2.fromArray( json.v2 );
+		this.fromArray( json );
+		this.fromArray( json );
 
 		return this;
 
@@ -33030,14 +33030,14 @@ class LineCurve3 extends Curve {
 		 *
 		 * @type {Vector3}
 		 */
-		this.v1 = v1;
+		this = v1;
 
 		/**
 		 * The end point.
 		 *
 		 * @type {Vector2}
 		 */
-		this.v2 = v2;
+		this = v2;
 
 	}
 
@@ -33054,12 +33054,12 @@ class LineCurve3 extends Curve {
 
 		if ( t === 1 ) {
 
-			point.copy( this.v2 );
+			point.copy( this );
 
 		} else {
 
-			point.copy( this.v2 ).sub( this.v1 );
-			point.multiplyScalar( t ).add( this.v1 );
+			point.copy( this ).sub( this );
+			point.multiplyScalar( t ).add( this );
 
 		}
 
@@ -33076,7 +33076,7 @@ class LineCurve3 extends Curve {
 
 	getTangent( t, optionalTarget = new Vector3() ) {
 
-		return optionalTarget.subVectors( this.v2, this.v1 ).normalize();
+		return optionalTarget.subVectors( this, this ).normalize();
 
 	}
 
@@ -33090,8 +33090,8 @@ class LineCurve3 extends Curve {
 
 		super.copy( source );
 
-		this.v1.copy( source.v1 );
-		this.v2.copy( source.v2 );
+		this.copy( source );
+		this.copy( source );
 
 		return this;
 
@@ -33101,8 +33101,8 @@ class LineCurve3 extends Curve {
 
 		const data = super.toJSON();
 
-		data.v1 = this.v1.toArray();
-		data.v2 = this.v2.toArray();
+		data = this.toArray();
+		data = this.toArray();
 
 		return data;
 
@@ -33112,8 +33112,8 @@ class LineCurve3 extends Curve {
 
 		super.fromJSON( json );
 
-		this.v1.fromArray( json.v1 );
-		this.v2.fromArray( json.v2 );
+		this.fromArray( json );
+		this.fromArray( json );
 
 		return this;
 
@@ -33171,21 +33171,21 @@ class QuadraticBezierCurve extends Curve {
 		 *
 		 * @type {Vector2}
 		 */
-		this.v0 = v0;
+		this = v0;
 
 		/**
 		 * The control point.
 		 *
 		 * @type {Vector2}
 		 */
-		this.v1 = v1;
+		this = v1;
 
 		/**
 		 * The end point.
 		 *
 		 * @type {Vector2}
 		 */
-		this.v2 = v2;
+		this = v2;
 
 	}
 
@@ -33200,7 +33200,7 @@ class QuadraticBezierCurve extends Curve {
 
 		const point = optionalTarget;
 
-		const v0 = this.v0, v1 = this.v1, v2 = this.v2;
+		const v0 = this, v1 = this, v2 = this;
 
 		point.set(
 			QuadraticBezier( t, v0.x, v1.x, v2.x ),
@@ -33215,9 +33215,9 @@ class QuadraticBezierCurve extends Curve {
 
 		super.copy( source );
 
-		this.v0.copy( source.v0 );
-		this.v1.copy( source.v1 );
-		this.v2.copy( source.v2 );
+		this.copy( source );
+		this.copy( source );
+		this.copy( source );
 
 		return this;
 
@@ -33227,9 +33227,9 @@ class QuadraticBezierCurve extends Curve {
 
 		const data = super.toJSON();
 
-		data.v0 = this.v0.toArray();
-		data.v1 = this.v1.toArray();
-		data.v2 = this.v2.toArray();
+		data = this.toArray();
+		data = this.toArray();
+		data = this.toArray();
 
 		return data;
 
@@ -33239,9 +33239,9 @@ class QuadraticBezierCurve extends Curve {
 
 		super.fromJSON( json );
 
-		this.v0.fromArray( json.v0 );
-		this.v1.fromArray( json.v1 );
-		this.v2.fromArray( json.v2 );
+		this.fromArray( json );
+		this.fromArray( json );
+		this.fromArray( json );
 
 		return this;
 
@@ -33283,21 +33283,21 @@ class QuadraticBezierCurve3 extends Curve {
 		 *
 		 * @type {Vector3}
 		 */
-		this.v0 = v0;
+		this = v0;
 
 		/**
 		 * The control point.
 		 *
 		 * @type {Vector3}
 		 */
-		this.v1 = v1;
+		this = v1;
 
 		/**
 		 * The end point.
 		 *
 		 * @type {Vector3}
 		 */
-		this.v2 = v2;
+		this = v2;
 
 	}
 
@@ -33312,7 +33312,7 @@ class QuadraticBezierCurve3 extends Curve {
 
 		const point = optionalTarget;
 
-		const v0 = this.v0, v1 = this.v1, v2 = this.v2;
+		const v0 = this, v1 = this, v2 = this;
 
 		point.set(
 			QuadraticBezier( t, v0.x, v1.x, v2.x ),
@@ -33328,9 +33328,9 @@ class QuadraticBezierCurve3 extends Curve {
 
 		super.copy( source );
 
-		this.v0.copy( source.v0 );
-		this.v1.copy( source.v1 );
-		this.v2.copy( source.v2 );
+		this.copy( source );
+		this.copy( source );
+		this.copy( source );
 
 		return this;
 
@@ -33340,9 +33340,9 @@ class QuadraticBezierCurve3 extends Curve {
 
 		const data = super.toJSON();
 
-		data.v0 = this.v0.toArray();
-		data.v1 = this.v1.toArray();
-		data.v2 = this.v2.toArray();
+		data = this.toArray();
+		data = this.toArray();
+		data = this.toArray();
 
 		return data;
 
@@ -33352,9 +33352,9 @@ class QuadraticBezierCurve3 extends Curve {
 
 		super.fromJSON( json );
 
-		this.v0.fromArray( json.v0 );
-		this.v1.fromArray( json.v1 );
-		this.v2.fromArray( json.v2 );
+		this.fromArray( json );
+		this.fromArray( json );
+		this.fromArray( json );
 
 		return this;
 

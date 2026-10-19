@@ -7,8 +7,8 @@ namespace KeyLoad.UnitTests.Features.QueryExecution;
 internal sealed class PartitionQueryCancellationObserver
 {
     private const string ThreadName = "partition-query-cancellation-observer";
-    private const string ProgressTimeoutMessage = "The partition query did not charge native read bytes before the observer bound.";
-    private const string EarlyCompletionMessage = "The partition query completed before cancellation was observed on charged native reads.";
+    private const string ProgressTimeoutMessage = "The partition query did not charge execution read bytes before the observer bound.";
+    private const string EarlyCompletionMessage = "The partition query completed before cancellation was observed on charged execution reads.";
     private const string JoinTimeoutMessage = "The partition-query observer exceeded its initial join bound.";
     internal const int TimeoutSeconds = 15;
 
@@ -43,7 +43,7 @@ internal sealed class PartitionQueryCancellationObserver
         threadStarted = true;
         if (!armed.Wait(TimeSpan.FromSeconds(TimeoutSeconds)))
         {
-            throw new TimeoutException("The native partition-query observer did not arm within its bound.");
+            throw new TimeoutException("The execution partition-query observer did not arm within its bound.");
         }
     }
 

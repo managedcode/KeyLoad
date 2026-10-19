@@ -52,7 +52,7 @@ internal static class TargetInboxCapacityAuthorityCompletion
             await AckAsync(database, store, output, delivery);
         }
         await TerminalAsync(store, output);
-        await TargetInboxNativeAssertions.CapacityAsync(store, state.Original, TargetInboxCapacityAuthorityFixture.Capacity);
+        await TargetInboxAssertions.CapacityAsync(store, state.Original, TargetInboxCapacityAuthorityFixture.Capacity);
         await TargetInboxCapacityAuthorityAssertions.HistoryAsync(database, store, state, token);
     }
 
@@ -92,5 +92,5 @@ internal static class TargetInboxCapacityAuthorityCompletion
     }
 
     private static async Task ExactAsync<T>(T actual, T expected)
-        => await TargetInboxNativeValueAssertions.EqualAsync(actual, expected);
+        => await TargetInboxValueAssertions.EqualAsync(actual, expected);
 }

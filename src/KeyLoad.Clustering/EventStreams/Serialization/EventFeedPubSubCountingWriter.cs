@@ -7,7 +7,7 @@ internal sealed class EventFeedPubSubCountingWriter(int maximum,
     IOptions<GrainRoutingOptions> routing, CancellationToken cancellationToken) : IBufferWriter<byte>, IDisposable
 {
     private const int UnspecifiedSizeHint = 0;
-    private readonly GrainNativeCountingWriter original = new(maximum, routing, cancellationToken);
+    private readonly GrainCountingWriter original = new(maximum, routing, cancellationToken);
     internal long Length => original.Length;
     public Memory<byte> GetMemory(int sizeHint = UnspecifiedSizeHint)
     {

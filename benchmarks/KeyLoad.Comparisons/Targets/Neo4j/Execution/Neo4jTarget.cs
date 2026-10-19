@@ -10,15 +10,15 @@ namespace KeyLoad.Comparisons.Targets;
 /// <param name="http">The authenticated Neo4j Query API client; the target disposes it.</param>
 /// <param name="runId">Guid-formatted run identifier used to isolate node labels and constraints.</param>
 /// <param name="image">Neo4j image reference recorded in the target profile.</param>
-/// <param name="lifecycleOptions">Centrally validated native lifecycle policy.</param>
-/// <param name="nativeExecutionOptions">Centrally validated native adapter execution policy.</param>
+/// <param name="lifecycleOptions">Centrally validated execution lifecycle policy.</param>
+/// <param name="runtimeExecutionOptions">Centrally validated execution adapter execution policy.</param>
 /// <param name="provider">Borrowed clock; defaults to the system provider.</param>
 public sealed partial class Neo4jTarget(HttpClient http, string runId, string image,
-    IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<NativeComparisonExecutionOptions> nativeExecutionOptions, TimeProvider? provider = null) : IDocumentComparisonTarget
+    IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<ComparisonExecutionOptions> runtimeExecutionOptions, TimeProvider? provider = null) : IDocumentComparisonTarget
 {
     private readonly TimeProvider timeProvider = provider ?? TimeProvider.System;
 
-    private readonly NativeComparisonExecutionOptions execution = NativeComparisonExecutionOptions.Require(nativeExecutionOptions).Value;
+    private readonly ComparisonExecutionOptions execution = ComparisonExecutionOptions.Require(runtimeExecutionOptions).Value;
 
     private const string BenchmarkToken = "Benchmark_";
     private const string Neo4jToken = "Neo4j";
@@ -33,7 +33,7 @@ public sealed partial class Neo4jTarget(HttpClient http, string runId, string im
 
     private const string CommunityEdition = "community";
     private const string CommunityRequired = "Neo4jCommunityEditionRequired";
-    private const string SingleCommunityState = "single native Community node";
+    private const string SingleCommunityState = "single execution Community node";
     private readonly string label = BenchmarkToken + Guid.Parse(runId).ToString(RunIdentityFormat);
     private bool ownsConstraint;
     private int depth;
@@ -117,7 +117,7 @@ public sealed partial class Neo4jTarget(HttpClient http, string runId, string im
 
     private Task<JsonDocument> QueryAsync(string statement, object? parameters, CancellationToken cancellationToken)
         => QueryWithClientAsync(http, statement, parameters, cancellationToken);
-    private HttpClient NativeHttp => http;
+    private HttpClient RuntimeHttp => http;
     private Task<JsonDocument> QueryWithClientAsync(HttpClient operationClient, string statement, object? parameters, CancellationToken cancellationToken)
         => DocumentNeo4jProtocol.QueryAsync(operationClient, statement, parameters, execution, cancellationToken);
     private async Task ExecuteAsync(string statement, object? parameters, CancellationToken cancellationToken)
@@ -220,7 +220,7 @@ public sealed partial class Neo4jTarget(HttpClient http, string runId, string im
             }
         }
         private Task<JsonDocument> QueryAsync(string statement, object? parameters, CancellationToken token)
-            => target.QueryWithClientAsync(operationClient ?? target.NativeHttp, statement, parameters, token);
+            => target.QueryWithClientAsync(operationClient ?? target.RuntimeHttp, statement, parameters, token);
         public ValueTask DisposeAsync() => ValueTask.CompletedTask;
     }
 }

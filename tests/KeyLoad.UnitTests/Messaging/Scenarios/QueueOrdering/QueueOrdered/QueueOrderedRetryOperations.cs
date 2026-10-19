@@ -41,7 +41,7 @@ internal static class QueueOrderedRetryOperations
         {
             await Assert.That(Errors.Code(actual.Problem)).IsEqualTo(Errors.Code(original.Problem));
             await Assert.That(actual.Problem?.Detail).IsEqualTo(original.Problem?.Detail);
-            await Assert.That(NativeSerialization.Serialize(actual)).IsEquivalentTo(NativeSerialization.Serialize(original),
+            await Assert.That(OrleansSerialization.Serialize(actual)).IsEquivalentTo(OrleansSerialization.Serialize(original),
                 TUnit.Assertions.Enums.CollectionOrdering.Matching);
             await Assert.That(actual.Value).IsNull();
             return;
@@ -49,22 +49,22 @@ internal static class QueueOrderedRetryOperations
         switch (operation.Value!.Kind)
         {
             case OperationKind.ConfigureResource:
-                await NativeReplayResultAssertions.Same<ResourceDefinition>(actual, original);
+                await ReplayResultAssertions.Same<ResourceDefinition>(actual, original);
                 break;
             case OperationKind.ConfigurePrincipal:
-                await NativeReplayResultAssertions.Same<PrincipalRecord>(actual, original);
+                await ReplayResultAssertions.Same<PrincipalRecord>(actual, original);
                 break;
             case OperationKind.SetDispatch:
                 await DispatchReplayAsync(actual, original);
                 break;
             default:
-                await NativeReplayResultAssertions.Same<CommitReceipt>(actual, original);
+                await ReplayResultAssertions.Same<CommitReceipt>(actual, original);
                 break;
         }
     }
     private static async Task DispatchReplayAsync(Result<object> actual, Result<object> expected)
     {
-        await Assert.That(NativeSerialization.Serialize(actual)).IsEquivalentTo(NativeSerialization.Serialize(expected),
+        await Assert.That(OrleansSerialization.Serialize(actual)).IsEquivalentTo(OrleansSerialization.Serialize(expected),
             TUnit.Assertions.Enums.CollectionOrdering.Matching);
         await Assert.That(Errors.Code(actual.Problem)).IsEqualTo(Errors.Code(expected.Problem));
         await Assert.That(actual.Problem?.Detail).IsEqualTo(expected.Problem?.Detail);

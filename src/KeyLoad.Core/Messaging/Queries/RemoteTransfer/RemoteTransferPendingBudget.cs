@@ -33,9 +33,9 @@ internal sealed class RemoteTransferPendingBudget : IDisposable
         deadline = database.DueDiscoveryDeadline;
         budget = original;
         grant = coordination
-            ? budget.CreateReadGrant(budget.MaximumNativeReadBytes, budget.MaximumNativeScanRecords)
-            : budget.CreateReadGrant(Math.Min(database.DueExecution.MaximumRangeBytes, budget.MaximumNativeReadBytes),
-                Math.Min(database.DueExecution.MaximumRecordsPerPage, budget.MaximumNativeScanRecords));
+            ? budget.CreateReadGrant(budget.RuntimeMaximumReadBytes, budget.MaximumScanRecords)
+            : budget.CreateReadGrant(Math.Min(database.DueExecution.MaximumRangeBytes, budget.RuntimeMaximumReadBytes),
+                Math.Min(database.DueExecution.MaximumRecordsPerPage, budget.MaximumScanRecords));
         lease = budget.EnterReadGrant(grant);
     }
     internal int Remaining => grant.RemainingRecords;

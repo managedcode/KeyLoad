@@ -1,6 +1,6 @@
 namespace KeyLoad.Clustering;
 
-/// <summary>Addresses bounded reads for one canonical logical partition through native Orleans placement.</summary>
+/// <summary>Addresses bounded reads for one canonical logical partition through execution Orleans placement.</summary>
 [Orleans.CodeGeneration.Version(PartitionQueryGrainIdentity.InterfaceVersion)]
 internal interface IPartitionQueryGrain : IGrainWithStringKey
 {

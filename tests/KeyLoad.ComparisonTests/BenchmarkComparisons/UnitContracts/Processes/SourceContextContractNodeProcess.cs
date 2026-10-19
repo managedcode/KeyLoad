@@ -3,7 +3,7 @@ using System.Text.Json;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
-/// <summary>Uses the existing bounded, joined native Node lifetime for source-contract inputs.</summary>
+/// <summary>Uses the existing bounded, joined execution Node lifetime for source-contract inputs.</summary>
 internal static class SourceContextContractNodeProcess
 {
     private const int MaximumInputBytes = 64 * 1024;

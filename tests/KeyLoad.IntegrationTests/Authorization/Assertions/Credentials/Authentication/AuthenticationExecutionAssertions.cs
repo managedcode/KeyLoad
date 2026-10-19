@@ -52,6 +52,6 @@ internal static class AuthenticationExecutionAssertions
         await Assert.That(claim.Issuer).IsEqualTo(ClaimsIdentity.DefaultIssuer);
         await Assert.That(claim.OriginalIssuer).IsEqualTo(ClaimsIdentity.DefaultIssuer);
         await Assert.That(claim.PropertyCount).IsEqualTo(AuthenticationExecutionProtocol.NoEvents);
-        await Assert.That(claim.MatchesNativeSubject).IsTrue();
+        await Assert.That(claim.MatchesSubject).IsTrue();
     }
 }

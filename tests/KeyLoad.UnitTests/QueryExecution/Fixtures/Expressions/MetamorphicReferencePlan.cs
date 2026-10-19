@@ -10,7 +10,7 @@ internal sealed record MetamorphicReferencePlan(QueryRequest Sql, AstQueryReques
         var parsed = new AstQueryRequest(partition,
             new SqlParser(sql.Sql, UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.QueryExecution()).Parse(),
             sql.Parameters, AllowFullScan: true);
-        parsed = NativeSerialization.Deserialize<AstQueryRequest>(NativeSerialization.Serialize(parsed));
+        parsed = OrleansSerialization.Deserialize<AstQueryRequest>(OrleansSerialization.Serialize(parsed));
         return new(sql, parsed, MetamorphicReferenceRequests.Json(partition, shape, descending, offset),
             MetamorphicReferenceRequests.CSharp(partition, shape, descending, offset));
     }

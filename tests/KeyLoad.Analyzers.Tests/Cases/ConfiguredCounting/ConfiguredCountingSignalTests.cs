@@ -4,7 +4,7 @@ namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
 internal sealed class ConfiguredCountingSignalTests
 {
     [Test]
-    public async Task AConfiguredMaximumAllowsAnInitiallyEmptyNativeSignalAsync()
+    public async Task AConfiguredMaximumAllowsAnInitiallyEmptySignalAsync()
     {
         const string source = """
             [KeyLoad.ConfigurationOptions]
@@ -21,7 +21,7 @@ internal sealed class ConfiguredCountingSignalTests
     }
 
     [Test]
-    public async Task APrivateSaturatedHelperReadsTheNativeValueBackedReadonlyExportAsync()
+    public async Task APrivateSaturatedHelperReadsTheValueBackedReadonlyExportAsync()
     {
         const string source = """
             [KeyLoad.ConfigurationOptions]

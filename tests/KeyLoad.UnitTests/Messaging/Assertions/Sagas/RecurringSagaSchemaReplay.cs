@@ -1,5 +1,7 @@
 using KeyLoad.Core;
-using KeyLoad.Core.Features.ClusterRouting.Contracts;
+using KeyLoad.Core.Features.CommandOutcomes.Contracts;
+using KeyLoad.Core.Features.RuntimeJournaling.Contracts;
+using KeyLoad.Core.Features.StoragePartitions.Contracts;
 using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.Storage;
 using KeyLoad.UnitTests.Features.Authorization;
@@ -12,7 +14,7 @@ internal static class RecurringSagaSchemaReplay
 {
     private const string MissingStored = "The original Saga schema outcome is absent.";
     private const string MissingOperation = "The original Saga schema operation is absent.";
-    private const string UnsupportedResult = "The Saga schema outcome has an unexpected native type.";
+    private const string UnsupportedResult = "The Saga schema outcome has an unexpected execution type.";
 
     internal static async Task AllAsync(SafeProjectorOperationDatabase owner, RecurringSagaSchemaState state)
     {
@@ -52,7 +54,6 @@ internal static class RecurringSagaSchemaReplay
         await Assert.That(stored.Incarnation).IsEqualTo(command.ExpectedToken.Incarnation);
         await Assert.That(stored.ScopeKind).IsEqualTo(global ? CommandOutcomeScopeKind.Global : CommandOutcomeScopeKind.Partition);
         await Assert.That(stored.Partition).IsEqualTo(global ? null : owner.Source.Partition);
-        await Assert.That(stored.BlobAuthority is null).IsTrue();
         await Assert.That(stored.CompositionAuthority is null).IsTrue();
         await Assert.That(stored.OnlineTextAuthority is null).IsTrue();
         await Assert.That(stored.RemoteTransferFailureAuthority is null).IsTrue();
@@ -74,15 +75,15 @@ internal static class RecurringSagaSchemaReplay
         switch (expected.Value)
         {
             case CommitReceipt:
-                await NativeReplayResultAssertions.Same<CommitReceipt>(actual, expected);
+                await ReplayResultAssertions.Same<CommitReceipt>(actual, expected);
                 await RecurringSagaSchemaCanonical.PrivateReferencesAsync(actual.Get<CommitReceipt>());
                 await RecurringSagaSchemaCanonical.PrivateReferencesAsync(expected.Get<CommitReceipt>());
                 break;
             case PrincipalRecord:
-                await NativeReplayResultAssertions.Same<PrincipalRecord>(actual, expected);
+                await ReplayResultAssertions.Same<PrincipalRecord>(actual, expected);
                 break;
             case ResourceDefinition:
-                await NativeReplayResultAssertions.Same<ResourceDefinition>(actual, expected);
+                await ReplayResultAssertions.Same<ResourceDefinition>(actual, expected);
                 break;
             default:
                 throw new InvalidOperationException(UnsupportedResult);

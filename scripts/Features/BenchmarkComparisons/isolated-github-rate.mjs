@@ -18,20 +18,20 @@ function retryAfter(value, nowMs) {
 }
 
 export function isInterruptedMetadataResponse(result, stderr) {
-  const native = result?.nativeProcess;
+  const execution = result?.runtimeProcess;
   if (result?.response?.status !== 200 || !Number.isSafeInteger(result.bytes)
-    || result.bytes < 0 || result.bytes > GH.metadataBytes || native?.exitCode !== 1
-    || native.signal !== null || native.timedOut !== false || native.exceeded !== false
-    || native.spawnFailed !== false || native.cancelled !== false
+    || result.bytes < 0 || result.bytes > GH.metadataBytes || execution?.exitCode !== 1
+    || execution.signal !== null || execution.timedOut !== false || execution.exceeded !== false
+    || execution.spawnFailed !== false || execution.cancelled !== false
     || !Buffer.isBuffer(stderr) || stderr.length === 0 || stderr.length > GH.stderrBytes
-    || native.stderrBytes !== stderr.length
-    || native.stderrSha256 !== createHash('sha256').update(stderr).digest('hex')) return false;
+    || execution.stderrBytes !== stderr.length
+    || execution.stderrSha256 !== createHash('sha256').update(stderr).digest('hex')) return false;
   return /^stream error: stream ID [1-9]\d*; CANCEL; received from peer\r?\n?$/u.test(stderr.toString('utf8'));
 }
 
-export function retryDelay(response, nowMs, waitedMs, repeats, nativeInterrupted = false) {
-  requireGitHub(typeof nativeInterrupted === 'boolean');
-  const transient = transientStatuses.includes(response?.status) || nativeInterrupted && response?.status === 200;
+export function retryDelay(response, nowMs, waitedMs, repeats, runtimeInterrupted = false) {
+  requireGitHub(typeof runtimeInterrupted === 'boolean');
+  const transient = transientStatuses.includes(response?.status) || runtimeInterrupted && response?.status === 200;
   requireGitHub(([403, 429].includes(response?.status) || transient) && Number.isSafeInteger(nowMs)
     && Number.isSafeInteger(waitedMs) && waitedMs >= 0 && Number.isSafeInteger(repeats) && repeats >= 0 && repeats < GH.rateRepeats);
   const headers = response.headers;

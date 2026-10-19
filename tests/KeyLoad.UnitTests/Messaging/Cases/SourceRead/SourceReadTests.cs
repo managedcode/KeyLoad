@@ -74,7 +74,7 @@ internal sealed class SourceReadTests
         var key = TopicEventKey(database, 1);
         var original = database.Store.Read(view => view.ReadOwnedValue(key))!;
         var wrongSource = new EventSourceRef(database.Partition, OtherTopicName, EventSourceKind.Topic);
-        var record = NativeSerialization.Deserialize<SourceEventRecord>(original.AsSpan());
+        var record = OrleansSerialization.Deserialize<SourceEventRecord>(original.AsSpan());
 
         database.Store.Commit((transaction, _) =>
         {
@@ -111,7 +111,7 @@ internal sealed class SourceReadTests
         var source = new EventSourceRef(database.Partition, StreamSetName, EventSourceKind.Stream, StreamId);
         var key = StreamEventKey(database, 1);
         var original = database.Store.Read(view => view.ReadOwnedValue(key))!;
-        var record = NativeSerialization.Deserialize<EventRecord>(original.AsSpan());
+        var record = OrleansSerialization.Deserialize<EventRecord>(original.AsSpan());
 
         database.Store.Commit((transaction, _) =>
         {

@@ -10,7 +10,7 @@ namespace KeyLoad.IntegrationTests.Features.AdminDashboard;
 internal sealed class AdminDashboardClusterTests(ClusterFixture fixture)
 {
     private const string TraversalPath = "/admin/unknown.js";
-    private const string DocumentGetRoute = "/v1/documents/get";
+    private const string DocumentGetRoute = "/documents/get";
     private const string QueryMarker = "?";
     private const int ErrorStatus = 400;
 
@@ -66,13 +66,13 @@ internal sealed class AdminDashboardClusterTests(ClusterFixture fixture)
             await Assert.That(first.Storage.Files.All(file => !Path.IsPathRooted(file.Path) && file.Bytes >= 0)).IsTrue();
             await Assert.That(first.Storage.Complete || !string.IsNullOrWhiteSpace(first.Storage.Notice)).IsTrue();
             await using var mcp = await McpOfficialClient.ConnectAsync(fixture, node, fixture.AdminKey, deadline.Token);
-            var native = await McpCallerAssertions.SuccessAsync<AdminNodeSnapshot>(await mcp.Client.InvokeKeyLoadToolAsync(
+            var execution = await McpCallerAssertions.SuccessAsync<AdminNodeSnapshot>(await mcp.Client.InvokeKeyLoadToolAsync(
                 AdminDashboardProtocol.SnapshotTool, cancellationToken: deadline.Token));
-            await Assert.That(native.Value.Node.NodeId).IsEqualTo(first.Node.NodeId);
-            await Assert.That(native.Value.Node.Incarnation).IsEqualTo(first.Node.Incarnation);
-            await Assert.That(native.Value.Http.ProcessInstance).IsEqualTo(first.Http.ProcessInstance);
-            await Assert.That(native.Value.SiloName).IsEqualTo(first.SiloName);
-            await Assert.That(native.Value.ActiveSilos.SequenceEqual(first.ActiveSilos)).IsTrue();
+            await Assert.That(execution.Value.Node.NodeId).IsEqualTo(first.Node.NodeId);
+            await Assert.That(execution.Value.Node.Incarnation).IsEqualTo(first.Node.Incarnation);
+            await Assert.That(execution.Value.Http.ProcessInstance).IsEqualTo(first.Http.ProcessInstance);
+            await Assert.That(execution.Value.SiloName).IsEqualTo(first.SiloName);
+            await Assert.That(execution.Value.ActiveSilos.SequenceEqual(first.ActiveSilos)).IsTrue();
         }
     }
 

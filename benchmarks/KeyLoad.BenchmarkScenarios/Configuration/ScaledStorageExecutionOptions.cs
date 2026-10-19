@@ -6,7 +6,7 @@ namespace KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
 [ConfigurationOptions]
 public sealed class ScaledStorageExecutionOptions
 {
-    /// <summary>The native benchmark execution section.</summary>
+    /// <summary>The execution benchmark execution section.</summary>
     public const string SectionName = "ScaledStorageExecution";
     /// <summary>Safe rejection before scaled-fixture admission.</summary>
     public const string ValidationMessage = "Scaled storage preparation, memory and mutable-segment budgets must be positive and consistent.";
@@ -24,23 +24,23 @@ public sealed class ScaledStorageExecutionOptions
 
     /// <summary>The full preparation deadline including capacity admission and verification.</summary>
     public TimeSpan PreparationTimeout { get; set; } = TimeSpan.FromMinutes(DefaultPreparationMinutes);
-    /// <summary>The observed process memory ceiling for native scaled fixtures.</summary>
+    /// <summary>The observed process memory ceiling for execution scaled fixtures.</summary>
     public long MaximumProcessBytes { get; set; } = DefaultMaximumProcessBytes;
     /// <summary>The available process memory reserved beyond measured retention.</summary>
     public long RequiredHeadroomBytes { get; set; } = DefaultRequiredHeadroomBytes;
     /// <summary>The available memory required for qualification-sized fixture admission.</summary>
     public long MinimumQualificationCapacityBytes { get; set; } = DefaultQualificationCapacityBytes;
-    /// <summary>The minimum native mutable-segment capacity before corpus-based sizing.</summary>
+    /// <summary>The minimum execution mutable-segment capacity before corpus-based sizing.</summary>
     public int MinimumMutableSegmentRecords { get; set; } = DefaultMutableSegmentRecords;
-    /// <summary>The extra native mutable-segment records retained beyond the corpus.</summary>
+    /// <summary>The extra execution mutable-segment records retained beyond the corpus.</summary>
     public int MutableSegmentSlackRecords { get; set; } = DefaultMutableSegmentSlackRecords;
     /// <summary>The maximum operations between preparation cancellation checks.</summary>
     public int CancellationCheckInterval { get; set; } = MaximumCancellationCheckInterval;
     /// <summary>The bounded number of values retained in one contiguous allocation.</summary>
     public int RecordsPerValueChunk { get; set; } = MaximumRecordsPerValueChunk;
 
-    /// <summary>Checks consistent, positive memory admission and a native timer-safe deadline.</summary>
-    /// <returns>Whether native fixture ownership can begin.</returns>
+    /// <summary>Checks consistent, positive memory admission and a execution timer-safe deadline.</summary>
+    /// <returns>Whether execution fixture ownership can begin.</returns>
     public bool IsValid() => PreparationTimeout > TimeSpan.Zero
         && PreparationTimeout <= MaximumPreparationTimeout
         && MaximumProcessBytes > MinimumPositiveBudget && RequiredHeadroomBytes > MinimumPositiveBudget

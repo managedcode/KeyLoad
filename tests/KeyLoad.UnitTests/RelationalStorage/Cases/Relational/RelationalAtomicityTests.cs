@@ -50,7 +50,7 @@ internal sealed class RelationalAtomicityTests
     }
 
     [Test]
-    public async Task AcAisql004PatchConflictAndDeleteRetainNativeUniqueAndRevisionContract()
+    public async Task AcAisql004PatchConflictAndDeleteRetainUniqueAndRevisionContract()
     {
         using var database = new TestDatabase();
         RelationalTestData.Configure(database);
@@ -78,7 +78,7 @@ internal sealed class RelationalAtomicityTests
         database.Commit(new PutDocument(RelationalTestData.Table, RelationalTestData.First, RelationalTestData.Row()));
         database.Store.Dispose();
         using var reopened = new ZoneTreeStore(new(database.Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
-        var engine = new DatabaseEngine(reopened, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
+        var engine = new DatabaseEngine(reopened, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
         var configured = reopened.Read(view => engine.Resource(view, database.Partition, RelationalTestData.Table));
         await Assert.That(configured.RelationalSchema!.PrimaryKey).IsEqualTo(RelationalTestData.Key);
         var id = Guid.NewGuid();

@@ -28,8 +28,8 @@ internal sealed class ProjectionReadWorkTests
 
         var key = KeySpace.Partition(OutboxSpace, database.Partition, 1);
         var stored = database.Store.Read(view => view.ReadOwnedValue(key))!;
-        var entry = NativeSerialization.Deserialize<OutboxEntry>(stored)!;
-        var serialized = NativeSerialization.Serialize(entry);
+        var entry = OrleansSerialization.Deserialize<OutboxEntry>(stored)!;
+        var serialized = OrleansSerialization.Serialize(entry);
         var storedBytesMatchCanonical = stored.AsSpan().SequenceEqual(serialized);
         await Assert.That(storedBytesMatchCanonical).IsTrue();
 

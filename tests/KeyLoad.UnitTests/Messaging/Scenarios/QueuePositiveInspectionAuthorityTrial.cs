@@ -19,7 +19,7 @@ internal static class QueuePositiveInspectionAuthorityTrial
             QueueLiveInspectionAuthorityAssertions.PositiveQueue, target);
         var exact = fixture.Store.Read(view => view.ReadOwnedValue(key))!;
         var original = QueuePendingAuthorityHistory.Capture(fixture.Store);
-        var foreign = NativeSerialization.Serialize(NativeSerialization.Deserialize<MessageBody>(exact)
+        var foreign = OrleansSerialization.Serialize(OrleansSerialization.Deserialize<MessageBody>(exact)
             with
         {
             Id = QueueLeaseAuthorityProtocol.Foreign

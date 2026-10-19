@@ -51,7 +51,7 @@ internal sealed class PostgresCancellationRegistry(IOptions<GrainRoutingOptions>
         }
         try
         {
-            await registration.Session.CloseAsync().ConfigureAwait(false);
+            await registration.Session.CloseAsync();
         }
         finally { CryptographicOperations.ZeroMemory(registration.Secret); }
     }

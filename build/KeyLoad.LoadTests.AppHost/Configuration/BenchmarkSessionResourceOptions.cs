@@ -4,7 +4,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
 
-/// <summary>Selects one live native database for the complete measured session.</summary>
+/// <summary>Selects one live execution database for the complete measured session.</summary>
 [ConfigurationOptions]
 internal sealed class BenchmarkSessionResourceOptions
 {

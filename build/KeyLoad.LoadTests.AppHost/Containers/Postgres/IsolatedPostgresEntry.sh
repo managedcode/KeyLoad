@@ -15,13 +15,13 @@ if [ -n "${KEYLOAD_POSTGRES_PRIMARY:-}" ] && [ ! -s "$PGDATA/PG_VERSION" ]; then
     : "${PGAPPNAME:?Postgres standby identity environment required}"
     case "$PGAPPNAME" in
         benchmark_standby1|benchmark_standby2) ;;
-        *) printf '%s\n' 'PostgresNativeStandbyIdentityInvalid' >&2; exit 1 ;;
+        *) printf '%s\n' 'PostgresStandbyIdentityInvalid' >&2; exit 1 ;;
     esac
     attempts=0
     until pg_isready -h "$KEYLOAD_POSTGRES_PRIMARY" -p 5432 -U postgres -t 1 >/dev/null 2>&1; do
         attempts=$((attempts + 1))
         if [ "$attempts" -ge 120 ]; then
-            printf '%s\n' 'PostgresNativeBootstrapTimeout' >&2
+            printf '%s\n' 'PostgresBootstrapTimeout' >&2
             exit 1
         fi
         sleep 1

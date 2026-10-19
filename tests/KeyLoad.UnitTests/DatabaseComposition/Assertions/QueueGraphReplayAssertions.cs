@@ -23,8 +23,8 @@ internal static class QueueGraphReplayAssertions
             await Assert.That(store.Position).IsEqualTo(position);
             var outcome = engine.ResolveOutcome(operation);
             var expected = Result<object>.Fail(Errors.Problem(ErrorCode.Corruption, state.Source.FailureDetail));
-            await Assert.That(NativeSerialization.Serialize(outcome).AsSpan()
-                .SequenceEqual(NativeSerialization.Serialize(expected))).IsTrue();
+            await Assert.That(OrleansSerialization.Serialize(outcome).AsSpan()
+                .SequenceEqual(OrleansSerialization.Serialize(expected))).IsTrue();
             await Assert.That(QueueWholeFlowStorage.Bytes(store)).IsEquivalentTo(before,
                 global::TUnit.Assertions.Enums.CollectionOrdering.Matching);
             await Assert.That(store.Position).IsEqualTo(position);
@@ -48,15 +48,15 @@ internal static class QueueGraphReplayAssertions
         {
             var receipt = engine.Apply(operation).Get<CommitReceipt>();
             var resolved = engine.ResolveOutcome(operation).Get<CommitReceipt>();
-            await Assert.That(NativeSerialization.Serialize(receipt).AsSpan().SequenceEqual(bytes)).IsTrue();
-            await Assert.That(NativeSerialization.Serialize(resolved).AsSpan().SequenceEqual(bytes)).IsTrue();
+            await Assert.That(OrleansSerialization.Serialize(receipt).AsSpan().SequenceEqual(bytes)).IsTrue();
+            await Assert.That(OrleansSerialization.Serialize(resolved).AsSpan().SequenceEqual(bytes)).IsTrue();
             await Assert.That(QueueWholeFlowStorage.Bytes(store)).IsEquivalentTo(before,
                 global::TUnit.Assertions.Enums.CollectionOrdering.Matching);
             await Assert.That(store.Position).IsEqualTo(position);
         }
         var seed = engine.Apply(state.Source.Seed).Get<CommitReceipt>();
-        await Assert.That(NativeSerialization.Serialize(seed).AsSpan()
-            .SequenceEqual(NativeSerialization.Serialize(state.Source.SeedReceipt))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(seed).AsSpan()
+            .SequenceEqual(OrleansSerialization.Serialize(state.Source.SeedReceipt))).IsTrue();
         await ModelsAsync(state, engine, store, continued);
         await Assert.That(JsonDefaults.Serialize(store.Identity).AsSpan().SequenceEqual(identity)).IsTrue();
         await Assert.That(QueueWholeFlowStorage.Bytes(store)).IsEquivalentTo(before,
@@ -74,7 +74,7 @@ internal static class QueueGraphReplayAssertions
         await Assert.That(JsonDefaults.Serialize(receipt).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
         await Assert.That(receipt.Mutations[0].CompositionReferences).IsEmpty();
         await Assert.That(receipt.Mutations[1].CompositionReferences.SequenceEqual([state.Source.BoundFrom, state.Source.BoundTo])).IsTrue();
-        state.NextReceipt = NativeSerialization.Serialize(receipt);
+        state.NextReceipt = OrleansSerialization.Serialize(receipt);
         await ReplaysAsync(state, engine, store, continued: true);
     }
 

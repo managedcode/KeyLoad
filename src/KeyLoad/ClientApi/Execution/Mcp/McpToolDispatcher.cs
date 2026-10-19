@@ -15,7 +15,7 @@ internal sealed class McpToolDispatcher(HttpContext context, McpRequestState sta
     private static readonly Action<ILogger, string, Exception?> LogFailure = LoggerMessage.Define<string>(LogLevel.Error,
         new EventId(FailureEventId), FailureLog);
 
-    /// <summary>Dispatches one admitted gateway meta operation, preserving native canonical results.</summary>
+    /// <summary>Dispatches one admitted gateway meta operation, preserving execution canonical results.</summary>
     internal async ValueTask<CallToolResult> CallAsync(RequestContext<CallToolRequestParams> request,
         CancellationToken cancellationToken)
     {
@@ -30,9 +30,9 @@ internal sealed class McpToolDispatcher(HttpContext context, McpRequestState sta
             var meta = McpGatewayMetaArgumentReader.Read(state.MetaOperation, parameters.Arguments, state.ExecutionOptions);
             return state.MetaOperation switch
             {
-                McpGatewayMetaOperation.Search => await SearchAsync(meta, cancellationToken).ConfigureAwait(false),
-                McpGatewayMetaOperation.Route => await RouteAsync(meta, cancellationToken).ConfigureAwait(false),
-                McpGatewayMetaOperation.Invoke => await InvokeAsync(meta, cancellationToken).ConfigureAwait(false),
+                McpGatewayMetaOperation.Search => await SearchAsync(meta, cancellationToken),
+                McpGatewayMetaOperation.Route => await RouteAsync(meta, cancellationToken),
+                McpGatewayMetaOperation.Invoke => await InvokeAsync(meta, cancellationToken),
                 _ => throw Errors.Fail(ErrorCode.UnsupportedCapability, McpCatalogProtocol.InvalidOperation)
             };
         }
@@ -45,7 +45,7 @@ internal sealed class McpToolDispatcher(HttpContext context, McpRequestState sta
             return state.Failure(ErrorCode.Validation, CanonicalOperationGateway.RequestId(context));
         }
         catch (Exception error) when ((error is not OperationCanceledException || !cancellationToken.IsCancellationRequested)
-            && NativeCqrsBoundaryErrors.IsNonFatal(error))
+            && CqrsBoundaryErrors.IsNonFatal(error))
         {
             LogFailure(context.RequestServices.GetRequiredService<ILogger<McpToolDispatcher>>(),
                 error.GetType().FullName ?? error.GetType().Name, null);
@@ -53,7 +53,7 @@ internal sealed class McpToolDispatcher(HttpContext context, McpRequestState sta
         }
     }
 
-    /// <summary>Invokes the selected typed canonical operation from the native local AIFunction adapter.</summary>
+    /// <summary>Invokes the selected typed canonical operation from the execution local AIFunction adapter.</summary>
     internal async ValueTask<CallToolResult> InvokeCanonicalAsync(
         IDictionary<string, JsonElement>? arguments, CancellationToken cancellationToken)
     {
@@ -70,7 +70,7 @@ internal sealed class McpToolDispatcher(HttpContext context, McpRequestState sta
                     context.RequestServices.GetRequiredService<IOptions<QueryExecutionOptions>>(), cancellationToken)
                 : descriptor.Decode(arguments, state.MaximumPayloadBytes);
             var reply = await CanonicalOperationGateway.ExecuteAsync(context, operation.ReadKind,
-                operation.CommandKind, operation.CommandId, operation.Payload, cancellationToken).ConfigureAwait(false);
+                operation.CommandKind, operation.CommandId, operation.Payload, cancellationToken);
             return state.Success(reply, cancellationToken);
         }
         catch (KeyLoadException error)
@@ -82,7 +82,7 @@ internal sealed class McpToolDispatcher(HttpContext context, McpRequestState sta
             return state.Failure(ErrorCode.Validation, CanonicalOperationGateway.RequestId(context));
         }
         catch (Exception error) when ((error is not OperationCanceledException || !cancellationToken.IsCancellationRequested)
-            && NativeCqrsBoundaryErrors.IsNonFatal(error))
+            && CqrsBoundaryErrors.IsNonFatal(error))
         {
             LogFailure(context.RequestServices.GetRequiredService<ILogger<McpToolDispatcher>>(),
                 error.GetType().FullName ?? error.GetType().Name, null);
@@ -101,7 +101,7 @@ internal sealed class McpToolDispatcher(HttpContext context, McpRequestState sta
     private async ValueTask<CallToolResult> SearchAsync(McpGatewayMetaRequest request, CancellationToken cancellationToken)
     {
         var gateway = context.RequestServices.GetRequiredService<McpGatewayCatalogOwner>();
-        var result = await gateway.SearchAsync(request.Query!, request.SearchLimit, cancellationToken).ConfigureAwait(false);
+        var result = await gateway.SearchAsync(request.Query!, request.SearchLimit, cancellationToken);
         var projection = McpGatewayMetaProjector.Search(result, request.SearchLimit);
         var bytes = McpGatewayMetaResultWriter.Serialize(projection, state.MaximumReplyBytes);
         return state.MetaSuccess(bytes, cancellationToken);
@@ -111,7 +111,7 @@ internal sealed class McpToolDispatcher(HttpContext context, McpRequestState sta
     {
         var gateway = context.RequestServices.GetRequiredService<McpGatewayCatalogOwner>();
         var result = await gateway.RouteAsync(request.Query!, request.CategoryLimit, request.ToolsPerCategory,
-            request.PreferReadOnly, cancellationToken).ConfigureAwait(false);
+            request.PreferReadOnly, cancellationToken);
         var projection = McpGatewayMetaProjector.Route(result, request.CategoryLimit, request.ToolsPerCategory);
         var bytes = McpGatewayMetaResultWriter.Serialize(projection, state.MaximumReplyBytes);
         return state.MetaSuccess(bytes, cancellationToken);
@@ -124,10 +124,10 @@ internal sealed class McpToolDispatcher(HttpContext context, McpRequestState sta
             throw Errors.Fail(ErrorCode.Validation, McpGatewayMetaProtocol.InvalidArguments);
         }
         var gateway = context.RequestServices.GetRequiredService<McpGatewayCatalogOwner>();
-        var result = await gateway.InvokeAsync(request.ToolId!, request.Arguments!, cancellationToken).ConfigureAwait(false);
-        if (McpGatewayNativeResult.GetOriginal(result) is { } native)
+        var result = await gateway.InvokeAsync(request.ToolId!, request.Arguments!, cancellationToken);
+        if (McpGatewayResult.GetOriginal(result) is { } execution)
         {
-            return native;
+            return execution;
         }
         return state.Failure(ErrorCode.RecoveryRequired, CanonicalOperationGateway.RequestId(context));
     }

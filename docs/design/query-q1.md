@@ -2,7 +2,7 @@
 
 Protocol 1 exposes read-only queries over one collection in one atomic partition. SQL and the C# expression builder lower into AST version 1. JSON supplies that AST directly. All three adapters enter the same admission gate, structural validator, authorization binder, access-path planner and executor. Unsupported constructs produce an explicit error.
 
-`GET /v1/query/capabilities` requires an authenticated caller and reports the dialect, AST version, supported predicate families and configured budgets. `POST /v1/query` accepts SQL; `POST /v1/query/ast` accepts `AstQueryRequest` from `KeyLoad.Abstractions`.
+`GET /query/capabilities` requires an authenticated caller and reports the dialect, AST version, supported predicate families and configured budgets. `POST /query` accepts SQL; `POST /query/ast` accepts `AstQueryRequest` from `KeyLoad.Abstractions`.
 
 ```json
 {

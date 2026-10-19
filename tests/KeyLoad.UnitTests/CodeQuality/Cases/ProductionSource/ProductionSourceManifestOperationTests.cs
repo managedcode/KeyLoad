@@ -6,7 +6,7 @@ namespace KeyLoad.UnitTests.Features.CodeQuality.Cases;
 internal sealed class ProductionSourceManifestOperationTests
 {
     [Test]
-    public async Task NativeImagesProduceClosedManifestAndRejectTamperingWithoutReplacingEvidence()
+    public async Task ImagesProduceClosedManifestAndRejectTamperingWithoutReplacingEvidence()
     {
         await ProductionSourceManifestScenario.RunOwnedAsync(TestContext.Current!.Execution.CancellationToken);
     }

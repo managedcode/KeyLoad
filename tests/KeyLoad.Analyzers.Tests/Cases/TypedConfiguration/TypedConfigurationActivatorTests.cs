@@ -1,16 +1,16 @@
 namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
 
-/// <summary>AC-CQ-035/037: known native reflection construction cannot bypass owned options.</summary>
+/// <summary>AC-CQ-035/037: known execution reflection construction cannot bypass owned options.</summary>
 internal sealed class TypedConfigurationActivatorTests
 {
     [Test]
     [Arguments("[|System.Activator.CreateInstance<Policy>()|]")]
     [Arguments("[|System.Activator.CreateInstance(typeof(Policy))|]")]
-    [Arguments("[|NativeActivator.CreateInstance(type: typeof(Policy))|]")]
-    public async Task NativeActivatorRejectsActualKnownOptionsTypesAsync(string expression)
+    [Arguments("[|RuntimeActivator.CreateInstance(type: typeof(Policy))|]")]
+    public async Task ActivatorRejectsActualKnownOptionsTypesAsync(string expression)
     {
         var source = $$"""
-            using NativeActivator = System.Activator;
+            using RuntimeActivator = System.Activator;
             [KeyLoad.ConfigurationOptions]
             internal sealed class Policy { public int Capacity { get; init; } = 64; }
             internal static class Subject
@@ -23,7 +23,7 @@ internal sealed class TypedConfigurationActivatorTests
     }
 
     [Test]
-    public async Task NativeCentralBindingOwnsKnownOptionsReflectionConstructionAsync()
+    public async Task CentralBindingOwnsKnownOptionsReflectionConstructionAsync()
     {
         const string source = """
             [KeyLoad.ConfigurationOptions]

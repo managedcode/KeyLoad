@@ -16,7 +16,7 @@ internal static class GraphIncomingMcpTestData
     internal const string SourcePartitionKey = "incoming-source-partition";
     internal const string Label = "references";
     internal const string AttributesJson = "{\"weight\":2}";
-    internal const string Projection = "eventual-reverse.v1";
+    internal const string Projection = "eventual-reverse";
     internal const long SourceRevision = 4;
     internal const long CrossSourceRevision = 7;
     internal const long LocalDeliveredRevision = 0;
@@ -29,14 +29,14 @@ internal static class GraphIncomingMcpTestData
     internal static readonly EntityRef CrossSource = new(SourcePartition, Collection, CrossSourceId);
     internal static readonly EntityRef Target = new(Partition, Collection, TargetId);
 
-    internal static ReadIncomingGraphEdgesRequestV1 Request() => new(1, Target, Graph, Limit);
+    internal static ReadIncomingGraphEdgesRequest Request() => new(1, Target, Graph, Limit);
 
-    internal static GraphIncomingEdgesPageV1 Page()
+    internal static GraphIncomingEdgesPage Page()
     {
-        var local = new GraphIncomingEdgeRowV1(
+        var local = new GraphIncomingEdgeRow(
             new EdgeRecord(EdgeId, Source, Target, Label, AttributesJson, SourceRevision), LocalDeliveredRevision);
-        var cross = new GraphIncomingEdgeRowV1(
+        var cross = new GraphIncomingEdgeRow(
             new EdgeRecord(CrossEdgeId, CrossSource, Target, Label, AttributesJson, CrossSourceRevision), DeliveredRevision);
-        return new GraphIncomingEdgesPageV1(1, [local, cross], CutPosition, Projection);
+        return new GraphIncomingEdgesPage(1, [local, cross], CutPosition, Projection);
     }
 }

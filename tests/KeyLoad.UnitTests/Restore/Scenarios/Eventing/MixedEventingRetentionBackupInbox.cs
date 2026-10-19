@@ -67,7 +67,7 @@ internal static class MixedEventingRetentionBackupInbox
         await Assert.That(document.Json).IsEqualTo(TargetInboxUnitProtocol.Payload);
         await Assert.That(document.Redacted).IsFalse();
         await Assert.That(document.RedactedFields).IsEmpty();
-        await TargetInboxNativeAssertions.CapacityAsync(fixture.Target, state.Inbox, TargetInboxUnitProtocol.ReceiptCapacity);
+        await TargetInboxAssertions.CapacityAsync(fixture.Target, state.Inbox, TargetInboxUnitProtocol.ReceiptCapacity);
         state.HealthyInbox = request;
         state.HealthyInboxResult = original;
     }

@@ -7,7 +7,7 @@ internal static class ScriptDomGraphToQueueInsert
     internal static (Guid Id, Mutation Mutation) Read(Dom.QuerySpecification query,
         ScriptDomCompositionParameters parameters, int version)
     {
-        if (version != DefaultVersion)
+        if (version != SqlOperationProtocol.DefaultQueryDialectVersion)
         {
             throw ScriptDomOperationErrors.Unsupported();
         }
@@ -20,7 +20,6 @@ internal static class ScriptDomGraphToQueueInsert
             parameters.Read<EntityRef>(source.Parameters[EntityIndex]), prefix, parameters.Read<int>(source.Parameters[DepthIndex]),
             parameters.Read<int>(source.Parameters[VerticesIndex]), parameters.Read<int>(source.Parameters[EdgesIndex])));
     }
-    private const int DefaultVersion = 1;
     private const int ValueCount = 3;
     private const int SourceCount = 5;
     private const int CommandIndex = 0;

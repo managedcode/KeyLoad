@@ -2,13 +2,13 @@
 
 Status: Accepted; implementation and complete qualification remain pending. Related requirements, acceptance criteria and current slice ownership are canonical in [CodeQuality](../Features/CodeQuality.md).
 
-The three genuine packed-ANN stress arguments remain required and execute exclusively through native TUnit scheduling; their results cannot contribute ordinary product coverage or performance figures (REQ-CQ-009 and AC-CQ-018/019/039).
+The three genuine packed-ANN stress arguments remain required and execute exclusively through TUnit scheduling; their results cannot contribute ordinary product coverage or performance figures (REQ-CQ-009 and AC-CQ-018/019/039).
 
-## Native failure constructor classification, 2026-10-09
+## failure constructor classification, 2026-10-09
 
-REQ/AC-CQ-NATIVE-EXCEPTION-001 under ADR-125 require existing KeyLoadException constructors to remain intact with native generated serialization. KLD0021 governs Orleans DTO constructors; a native System.Exception hierarchy is a runtime failure, not a DTO. The analyzer classifies actual direct or indirect Exception inheritance in analyzers/KeyLoad.Analyzers/Analyzers/NativeContracts/OrleansContractConstructorAnalyzer.cs using the active compilation symbol and SymbolEqualityComparer, with real framework Roslyn inputs in the existing OrleansContractConstructorTests. No name/namespace-based whitelist, suppression, severity change or ordinary DTO-constructor exemption is allowed; existing positive/negative cases and compiler-success assertions remain mandatory.
+REQ/AC-CQ-EXECUTION-EXCEPTION-001 under ADR-125 require existing KeyLoadException constructors to remain intact with generated serialization. KLD0021 governs Orleans DTO constructors; a System.Exception hierarchy is a runtime failure, not a DTO. The analyzer classifies actual direct or indirect Exception inheritance in analyzers/KeyLoad.Analyzers/Analyzers/RuntimeContracts/OrleansContractConstructorAnalyzer.cs using the active compilation symbol and SymbolEqualityComparer, with real framework Roslyn inputs in the existing OrleansContractConstructorTests. No name/namespace-based whitelist, suppression, severity change or ordinary DTO-constructor exemption is allowed; existing positive/negative cases and compiler-success assertions remain mandatory.
 
-This does not change persisted/public formats or add a runtime dependency. Rollout is one coherent analyzer/regression source stage. Rollback restores those changes together; removing legitimate constructors or silencing the diagnostic cannot substitute for qualification. Analyzer tests run in their original GitHub gate; actual native Serializer<Exception> and capacity/wrong-owner RPC execution independently verify the repaired runtime failure path.
+This does not change persisted/public formats or add a runtime dependency. Rollout is one coherent analyzer/regression source stage. Rollback restores those changes together; removing legitimate constructors or silencing the diagnostic cannot substitute for qualification. Analyzer tests run in their original GitHub gate; actual Serializer<Exception> and capacity/wrong-owner RPC execution independently verify the repaired runtime failure path.
 
 ## Decision
 
@@ -18,13 +18,13 @@ REQ/AC-CQ-ROS-001..003 implementation contract in
 [CodeQuality](../Features/CodeQuality.md#roslynk-semantic-tooling-owner-direction-2026-10-09)
 owns installation, actual MCP interoperability, complete workspace loading,
 located diagnostics, reviewed fixes, rollback and the final verification join.
-Use its native semantic APIs while retaining the selected analyzer catalog,
+Use its semantic APIs while retaining the selected analyzer catalog,
 EditorConfig and every independent build/format/TUnit/Aspire/Linux gate.
 Upstream advice to replace builds with workspace diagnostics does not apply.
 The tool and disposable loopback workspace own no database execution or storage.
 
 Use the repository EditorConfig unchanged, the .NET SDK analyzers at `latest-all`, build-time style checks and warnings-as-errors across every solution project. Keep the eight applicable imported rules, excluding the four whose contracts do not apply to KeyLoad. Own editable Roslyn rules in the central source analyzer project and test them through actual SDK Roslyn compilations with TUnit. Keep compiler SARIF 2.1 reports available for successful and failed builds. Preserve the pinned compiler-host package selection; analyzer tests use SDK Roslyn references rather than a second loader.
-Keep `GenerateDocumentationFile` enabled for the native IDE0005 build diagnostic.
+Keep `GenerateDocumentationFile` enabled for the IDE0005 build diagnostic.
 Missing public documentation remains an error; no imported suppression list is permitted.
 
 The exact analyzer catalog, semantic rules, test boundaries and source ownership live in the CodeQuality feature specification. Tests execute real product operations or the real compiler/analyzer and assert observable state or diagnostics. Reading implementation source and asserting tokens or implementation shape is not functional proof. Do not use mocks, fakes, stubs or service doubles to replace actual behavior. Generated-code policy, public contracts, error identity, authorization, cancellation, resource bounds and existing operation order remain enforced.
@@ -33,7 +33,7 @@ The exact analyzer catalog, semantic rules, test boundaries and source ownership
 flowchart LR
     Policy[EditorConfig and typed quality rules] --> Build[Strict solution build]
     Source[Product and test source] --> Build
-    Build --> Reports[SARIF and original native results]
+    Build --> Reports[SARIF and original results]
     Operations[Real complete operations through Aspire] --> Coverage[Source-bound functional coverage]
     Coverage --> Gates[Quality and qualification gates]
     Reports --> Gates
@@ -62,10 +62,10 @@ The CodeQuality feature is the canonical requirements-to-test map. This ADR reta
 
 The executable maintainability limits remain 400 source lines per file, 200 code lines per type, 64 code lines per executable unit, and nesting depth 3. KLD0030–KLD0033 remain enabled errors at those boundaries. The numeric compiler fixtures verify the exact legal and rejected boundary and diagnostic span; the same current limit applies to every qualified source cohort.
 
-Functional coverage includes only complete functional operations. Load, stress, performance, and database-comparison tests do not contribute. Preserve the 80% module line, 70% module branch, 90% critical-pipeline thresholds, module no-decrease rule, and source-mapped CRAP requirements. CRAP combines native source-mapped complexity and functional coverage from the same source/build cohort. Missing, stale, skipped, failed, unbound, mixed-cohort, or incomplete results are unmeasured or failed, never zero-filled or relabelled.
+Functional coverage includes only complete functional operations. Load, stress, performance, and database-comparison tests do not contribute. Preserve the 80% module line, 70% module branch, 90% critical-pipeline thresholds, module no-decrease rule, and source-mapped CRAP requirements. CRAP combines source-mapped complexity and functional coverage from the same source/build cohort. Missing, stale, skipped, failed, unbound, mixed-cohort, or incomplete results are unmeasured or failed, never zero-filled or relabelled.
 
-Original MTP/TUnit reports, source and compiled identities, module and image identities, settings, failures, and coverage exports remain immutable evidence. Coverage requires the exact source inventory and matching DLL/PDB/MVID/portable-PDB identity; cluster server contribution comes from the three actual AppHost-owned server processes. Line hits may be unioned only for matching source identities. Native branch outcomes are merged only when original reports identify each outcome; coarse covered/total fractions remain per-run evidence and merged branch coverage stays unmeasured otherwise. Healthy and rejected operations must preserve their original state, errors, cancellation identity, owned-process settlement and cleanup behavior.
-Retain the existing evidence admission bounds: native XML is at most 32 MiB, the source inventory at most 5,000 files, and the distinct source-line inventory at most 100,000 locations. Source and run manifests retain their separate 64 MiB and 4 MiB ceilings, and native output retains its 64 KiB bound. Reject DTD/external resolution, paths outside the captured source root, duplicate conflicts, absent identities and invalid counts before producing derived coverage. These limits remain distinct from configurable stream buffers and manifest policy.
+Original MTP/TUnit reports, source and compiled identities, module and image identities, settings, failures, and coverage exports remain immutable evidence. Coverage requires the exact source inventory and matching DLL/PDB/MVID/portable-PDB identity; cluster server contribution comes from the three actual AppHost-owned server processes. Line hits may be unioned only for matching source identities. branch outcomes are merged only when original reports identify each outcome; coarse covered/total fractions remain per-run evidence and merged branch coverage stays unmeasured otherwise. Healthy and rejected operations must preserve their original state, errors, cancellation identity, owned-process settlement and cleanup behavior.
+Retain the existing evidence admission bounds: XML is at most 32 MiB, the source inventory at most 5,000 files, and the distinct source-line inventory at most 100,000 locations. Source and run manifests retain their separate 64 MiB and 4 MiB ceilings, and output retains its 64 KiB bound. Reject DTD/external resolution, paths outside the captured source root, duplicate conflicts, absent identities and invalid counts before producing derived coverage. These limits remain distinct from configurable stream buffers and manifest policy.
 
 ## Execution and ownership
 

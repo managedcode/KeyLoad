@@ -5,7 +5,7 @@ using KeyLoad.Query;
 
 namespace KeyLoad.IntegrationTests.Features.DocumentStorage;
 
-/// <summary>Untimed complete ordered native readback and stable original operation oracles.</summary>
+/// <summary>Untimed complete ordered execution readback and stable original operation oracles.</summary>
 internal static class HeavyDocumentLoadReadback
 {
     private const int SentinelOrdinal = 0;

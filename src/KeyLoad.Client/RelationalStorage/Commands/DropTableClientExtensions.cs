@@ -3,7 +3,7 @@ using ManagedCode.Communication;
 
 namespace KeyLoad.Client;
 
-/// <summary>Calls the canonical native table retirement operation through the existing authenticated SDK transport.</summary>
+/// <summary>Calls the canonical execution table retirement operation through the existing authenticated SDK transport.</summary>
 public static class DropTableClientExtensions
 {
     /// <summary>Drops one table after all required owner fences, owned work joins and canonical cleanup complete.</summary>

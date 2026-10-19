@@ -7,13 +7,13 @@ internal sealed class IsolatedKurrentVolumeChecksWorkers
     private readonly int count;
     private readonly Func<int, CancellationToken, Task> operation;
     private readonly CancellationToken token;
-    private readonly NativeComparisonHarnessOptions policy;
+    private readonly ComparisonHarnessOptions policy;
     private readonly CancellationTokenSource cancellation;
     private readonly IsolatedKurrentVolumeWorkerFailures failures = new();
     private int next = -1;
 
     private IsolatedKurrentVolumeChecksWorkers(int count, Func<int, CancellationToken, Task> operation,
-        IOptions<NativeComparisonHarnessOptions> harnessOptions, CancellationToken token)
+        IOptions<ComparisonHarnessOptions> harnessOptions, CancellationToken token)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(count);
         ArgumentNullException.ThrowIfNull(operation);
@@ -27,7 +27,7 @@ internal sealed class IsolatedKurrentVolumeChecksWorkers
     }
 
     internal static Task RunAsync(int count, Func<int, CancellationToken, Task> operation,
-        IOptions<NativeComparisonHarnessOptions> harnessOptions, CancellationToken token)
+        IOptions<ComparisonHarnessOptions> harnessOptions, CancellationToken token)
         => new IsolatedKurrentVolumeChecksWorkers(count, operation, harnessOptions, token).RunAsyncCore();
 
     private async Task RunAsyncCore()

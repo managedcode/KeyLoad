@@ -12,7 +12,7 @@ const entries = [
   'scripts/Features/BenchmarkComparisons/document-functional-trx.ps1',
   'scripts/Features/CodeQuality/functional-coverage.shared.ps1',
   'scripts/Features/CodeQuality/functional-coverage.parse.ps1',
-  'scripts/Features/CodeQuality/functional-coverage.native-merge.trx.ps1',
+  'scripts/Features/CodeQuality/functional-coverage.execution-merge.trx.ps1',
   ...['bootstrap', 'cluster-scene', 'scene-geometry', 'scene-lifecycle', 'scene-observers',
     'contracts', 'build-site', 'measured-build', 'isolated-contracts', 'isolated-http', 'isolated-loader',
     'isolated-projection', 'isolated-measurements', 'isolated-controls', 'isolated-lab', 'isolated-view',

@@ -7,8 +7,8 @@ internal sealed class AnnPublicMaintenanceReservationTests
 {
     private const int Threshold = 3;
     private const int Breadth = 3;
-    private const string Bound = "The native ANN generation reservation is exceeded.";
-    private const string Missing = "The actual concurrent native public read did not reject its resident admission.";
+    private const string Bound = "The execution ANN generation reservation is exceeded.";
+    private const string Missing = "The actual concurrent execution public read did not reject its resident admission.";
 
     [Test]
     public Task ActualMaintenanceReadReservationRejectsConcurrentPublicFrameThenSettledStageReturnsLiteralHealthyPage()
@@ -18,9 +18,9 @@ internal sealed class AnnPublicMaintenanceReservationTests
         {
             var request = AnnPublicWholeFlow.Request(database, pin);
             var engine = AnnPublicWholeFlow.Engine(database, runtime);
-            var image = NativeAnnMaintenanceTestData.Snapshot(database);
+            var image = AnnMaintenanceTestData.Snapshot(database);
             var cut = database.Store.Position;
-            var files = NativeAnnFixtureFileSnapshot.Capture(database.Directory);
+            var files = AnnFixtureFileSnapshot.Capture(database.Directory);
             var before = database.Store.GetReadDiagnostics().RangeExaminedBytes;
             var token = TestContext.Current!.Execution.CancellationToken;
             KeyLoadException? rejected = null;
@@ -48,7 +48,7 @@ internal sealed class AnnPublicMaintenanceReservationTests
             await Assert.That(failure.Message).IsEqualTo(Bound);
             await Assert.That(partial).IsNull();
             await AnnPublicWholeFlow.UnchangedAsync(database, image, cut);
-            await Assert.That(NativeAnnFixtureFileSnapshot.Capture(database.Directory)).IsEquivalentTo(files, CollectionOrdering.Matching);
+            await Assert.That(AnnFixtureFileSnapshot.Capture(database.Directory)).IsEquivalentTo(files, CollectionOrdering.Matching);
             await AnnPublicWholeFlow.PageAsync(await engine.ApproximateSearchAsync(AnnProjectionPinTestSupport.Principal,
                 request, token), database, cut, AnnPageMode.Exact);
             await AnnPublicWholeFlow.UnchangedAsync(database, image, cut);

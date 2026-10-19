@@ -9,7 +9,7 @@ Global modality windows precede ranks/RRF, complete identities define tie order,
 duplicates must agree, scores share exact profile/corpus/statistics witnesses,
 and missing/approximate/truncated sources cannot masquerade as exhaustive output.
 
-Multi-partition claims additionally require native bounded fan-out across partition grains, a per-partition read-cut vector, current persisted policy and strict text statistics generation.
+Multi-partition claims additionally require bounded fan-out across partition grains, a per-partition read-cut vector, current persisted policy and strict text statistics generation.
 
 No public client or persisted format changes are accepted; generated
 internal aliases/IDs are frozen before any future inter-grain publication. Single-partition strict text remains valid

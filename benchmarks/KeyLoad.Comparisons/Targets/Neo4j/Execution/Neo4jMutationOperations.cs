@@ -10,7 +10,7 @@ internal static class Neo4jMutationOperations
     private const string ExecuteAsyncIdIdSETNJsonJsonRETURNCountNText = " {id:$id}) SET n.json=$json RETURN count(n)";
     private const string ExecuteAsyncIdIdWITHNNIdASDeletedIdDETACHDELETENRETURNCountDeletedIdText = " {id:$id}) WITH n,n.id AS deletedId DETACH DELETE n RETURN count(deletedId)";
 
-    private const string NativeConstraintConflict = "Neo4j:Neo.ClientError.Schema.ConstraintValidationFailed";
+    private const string ConstraintConflict = "Neo4j:Neo.ClientError.Schema.ConstraintValidationFailed";
     private const string DataProperty = "data";
     private const string ValuesProperty = "values";
 
@@ -34,7 +34,7 @@ internal static class Neo4jMutationOperations
             }, token);
             RequireAffected(response.RootElement.GetProperty(DataProperty).GetProperty(ValuesProperty), scenario);
         }
-        catch (ComparisonFailureException error) when (scenario == Scenario.DocumentWrite && error.Message == NativeConstraintConflict)
+        catch (ComparisonFailureException error) when (scenario == Scenario.DocumentWrite && error.Message == ConstraintConflict)
         {
             throw new ComparisonFailureException(ComparisonMutationFailures.CreateConflict);
         }

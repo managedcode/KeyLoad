@@ -29,14 +29,14 @@ internal static class CompositeIndexReplayAssertions
                     CompositeIndexCrashContract.Partition.DatabaseId, resource), Guid.NewGuid()).Get<ResourceDefinition>();
         }
         var original = ReplaySuccess(database);
-        File.WriteAllBytes(Path.Combine(directory, OriginalFile), NativeSerialization.Serialize(original.Get<CommitReceipt>()));
+        File.WriteAllBytes(Path.Combine(directory, OriginalFile), OrleansSerialization.Serialize(original.Get<CommitReceipt>()));
         var before = CompositeIndexCrashOperations.Capture(database);
         var failure = ApplyConflict(database);
         if (Errors.Code(failure.Problem) != ErrorCode.Conflict)
         {
             throw new InvalidOperationException(Invalid);
         }
-        File.WriteAllBytes(Path.Combine(directory, FailureFile), NativeSerialization.Serialize(failure));
+        File.WriteAllBytes(Path.Combine(directory, FailureFile), OrleansSerialization.Serialize(failure));
         RequireEffectsUnchanged(database, before);
         Verify(directory, database);
     }
@@ -45,12 +45,12 @@ internal static class CompositeIndexReplayAssertions
     {
         var before = CaptureAll(database);
         var position = database.Store.Position;
-        var original = NativeSerialization.Serialize(ReplaySuccess(database).Get<CommitReceipt>());
+        var original = OrleansSerialization.Serialize(ReplaySuccess(database).Get<CommitReceipt>());
         if (!original.AsSpan().SequenceEqual(File.ReadAllBytes(Path.Combine(directory, OriginalFile))))
         {
             throw new InvalidOperationException(Invalid);
         }
-        var failed = NativeSerialization.Serialize(ApplyConflict(database));
+        var failed = OrleansSerialization.Serialize(ApplyConflict(database));
         if (!failed.AsSpan().SequenceEqual(File.ReadAllBytes(Path.Combine(directory, FailureFile))) ||
             database.Store.Position != position || !before.AsSpan().SequenceEqual(CaptureAll(database)))
         {

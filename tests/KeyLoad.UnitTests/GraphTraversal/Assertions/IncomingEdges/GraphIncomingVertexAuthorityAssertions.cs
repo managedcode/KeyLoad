@@ -23,10 +23,10 @@ internal static class GraphIncomingVertexAuthorityAssertions
         var image = CanonicalStoreImage.Bytes(store);
         var cut = store.Position;
         var actual = Read(owner, state.DamagedEdge.To, token);
-        GraphIncomingEdgeRowV1[] rows = continuation is null
+        GraphIncomingEdgeRow[] rows = continuation is null
             ? [new(state.HealthyEdge, 0L), new(state.DamagedEdge, 0L)]
             : [new(state.HealthyEdge, 0L), new(state.DamagedEdge, 0L), new(continuation, 0L)];
-        var expected = new GraphIncomingEdgesPageV1(1, [.. rows], cut, "eventual-reverse.v1");
+        var expected = new GraphIncomingEdgesPage(1, [.. rows], cut, "eventual-reverse");
         await Assert.That(JsonSerializer.Serialize(actual, JsonDefaults.Options))
             .IsEqualTo(JsonSerializer.Serialize(expected, JsonDefaults.Options));
         await GraphTraversalIntegrityAssertions.Image(store, image, cut);
@@ -47,7 +47,7 @@ internal static class GraphIncomingVertexAuthorityAssertions
             .IsEqualTo(JsonSerializer.Serialize(new DocumentResult(reference, 1L, "{}", false, []), JsonDefaults.Options));
     }
 
-    private static GraphIncomingEdgesPageV1 Read(DatabaseEngine owner, EntityRef target, CancellationToken token)
+    private static GraphIncomingEdgesPage Read(DatabaseEngine owner, EntityRef target, CancellationToken token)
         => owner.ReadIncomingGraphEdges(GraphTraversalIntegrityFixture.Root,
             new(1, target, GraphTraversalIntegrityFixture.Graph, 4), cancellationToken: token);
 }

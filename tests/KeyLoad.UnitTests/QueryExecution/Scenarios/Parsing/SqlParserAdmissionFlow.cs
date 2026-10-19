@@ -23,7 +23,7 @@ internal static class SqlParserAdmissionFlow
         {
             await SqlParserAdmissionWave.RunAsync(fixture, db.Database, db.Store, token);
             await ScriptDomSelectCancellation.RequireAsync(db, new(db.Database, UnitExecutionOptions.QueryExecution()));
-            await ScriptDomNativeParsingCancellation.RequireAsync(db, new(db.Database, UnitExecutionOptions.QueryExecution()));
+            await ScriptDomParsingCancellation.RequireAsync(db, new(db.Database, UnitExecutionOptions.QueryExecution()));
             await fixture.PolicyAsync(2L, false);
             foreach (var sql in new[] { "SELECT TOP (1) title FROM offsetleft ORDER BY order_id",
                 "SELECT TOP (10) payload.value AS value FROM EVENTS('parser-events','source',+1) ORDER BY revision",

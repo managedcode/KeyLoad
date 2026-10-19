@@ -88,11 +88,11 @@ public sealed partial class DatabaseEngine
             }
             if (tx.ReadOwnedValue(idKey) is { } retained)
             {
-                RejectDuplicateEvent(SourceRecord(tx, source, NativeSerialization.Deserialize<long>(retained)).Data, data);
+                RejectDuplicateEvent(SourceRecord(tx, source, OrleansSerialization.Deserialize<long>(retained)).Data, data);
             }
 
             var record = new SourceEventRecord(source, checked(++tail), checked(++sequence), data, now);
-            var payload = NativeSerialization.Serialize(record);
+            var payload = OrleansSerialization.Serialize(record);
             storedBytes = checked(storedBytes + payload.LongLength);
             if (tail - firstAvailablePosition + TopicPublishReadsAdjacentElementOffset > resource.EventRetention.MaxEvents
                 || storedBytes > resource.EventRetention.MaxBytes)

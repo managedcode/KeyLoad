@@ -8,6 +8,6 @@ namespace KeyLoad;
 /// <param name="DeliveryGeneration">Identifies the delivery generation.</param>
 /// <param name="Incarnation">Identifies the issuing storage incarnation.</param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.DeliveryClaims)]
+[Orleans.Alias(ContractAliases.DeliveryClaims)]
 public sealed record DeliveryClaims([property: Orleans.Id(0)] QueueLaneRef Lane, [property: Orleans.Id(1)] string MessageId, [property: Orleans.Id(2)] string PrincipalId, [property: Orleans.Id(3)] long LeaseVersion,
     [property: Orleans.Id(4)] long DeliveryGeneration, [property: Orleans.Id(5)] Guid Incarnation);

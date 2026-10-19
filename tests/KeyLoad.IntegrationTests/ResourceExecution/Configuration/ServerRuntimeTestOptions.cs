@@ -5,7 +5,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.IntegrationTests;
 
-/// <summary>Explicit standalone native options composition for physical server checks.</summary>
+/// <summary>Explicit standalone execution options composition for physical server checks.</summary>
 internal static class ServerRuntimeTestOptions
 {
     internal static ServerRuntimeOptions Runtime(NodeOptions node)

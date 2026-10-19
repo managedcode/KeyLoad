@@ -13,7 +13,7 @@ internal static class SqlModelEventRecordIntegrityCold
     {
         foreach (var record in damaged)
         {
-            await FaultAsync(database, key, original, NativeSerialization.Serialize(record));
+            await FaultAsync(database, key, original, OrleansSerialization.Serialize(record));
         }
     }
 

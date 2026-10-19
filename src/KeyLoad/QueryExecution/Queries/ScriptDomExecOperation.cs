@@ -72,7 +72,7 @@ internal static class ScriptDomExecOperation
     {
         if (positionalParameterCount is { } count)
         {
-            if (value is MoneyLiteral slot && ScriptDomSyntax.TryGetNativeSessionSlot(slot, count, out var name))
+            if (value is MoneyLiteral slot && ScriptDomSyntax.TryGetSessionSlot(slot, count, out var name))
             {
                 return name;
             }

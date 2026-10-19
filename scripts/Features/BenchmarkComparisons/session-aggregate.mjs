@@ -4,7 +4,7 @@ import path from 'node:path';
 import { link, readdir } from 'node:fs/promises';
 import { isDeepStrictEqual } from 'node:util';
 import { readBytes, parseBytes, hashBytes } from './aggregate-files.mjs';
-import { createDirectory } from './native-files.mjs';
+import { createDirectory } from './files.mjs';
 import { readJson, writeJson, hashRegularFile } from './isolated-github-files.mjs';
 import { projectJob, projectArtifact } from './isolated-github-validation.mjs';
 import { validateWorkflowRun, flattenPages } from './isolated-github-validation.mjs';
@@ -16,7 +16,7 @@ export { validateSessionAggregate } from './session-aggregate-contract.mjs';
 import { SESSION, exactSession as exact, requireSession as require, sessionRows, sessionHash,
   validateSessionCohort } from './session-contract.mjs';
 import { validateServerResourceEvidence, requireComparableSessionResources } from './server-resource-evidence.mjs';
-import { validateSessionCase, validateSessionEnvelope, validateSessionNativeResults, validateSessionQualification, validateSessionProfileAccounting } from './session-report-validation.mjs';
+import { validateSessionCase, validateSessionEnvelope, validateSessionResults, validateSessionQualification, validateSessionProfileAccounting } from './session-report-validation.mjs';
 
 const compactCase = report => ({ ...report, lanes: report.lanes.map(({ samples, ...lane }) => lane) });
 export async function readOriginalSession(directory, row, cohort, metadata, runtimeIdentity = null) {
@@ -32,36 +32,36 @@ export async function readOriginalSession(directory, row, cohort, metadata, runt
     require(hashBytes(raw) === record.sha256);
     reports.push(validateSessionCase(parseBytes(raw), record.id));
   }
-  const nativeBytes = await readBytes(path.join(directory, session.nativeReport.path), SESSION.nativeBytes);
-  require(hashBytes(nativeBytes) === session.nativeReport.sha256);
-  const native = validateSessionNativeResults(nativeBytes.toString('utf8'), reports);
+  const runtimeBytesCore = await readBytes(path.join(directory, session.runtimeReport.path), SESSION.runtimeBytesCore);
+  require(hashBytes(runtimeBytesCore) === session.runtimeReport.sha256);
+  const execution = validateSessionResults(runtimeBytesCore.toString('utf8'), reports);
   const qualificationBytes = await readBytes(path.join(directory, session.qualificationReport.path), SESSION.sessionBytes);
   require(hashBytes(qualificationBytes) === session.qualificationReport.sha256);
-  const qualification = validateSessionQualification(parseBytes(qualificationBytes),session,native);
-  validateSessionProfileAccounting(session,reports,native,qualification);
-  const failed = qualification.nativeExitCode !== 0 || qualification.status === 'failed' || reports.some(report => ['failed', 'notQualified'].includes(report.status)) || native.some(item => item.outcome === 'Failed');
+  const qualification = validateSessionQualification(parseBytes(qualificationBytes),session,execution);
+  validateSessionProfileAccounting(session,reports,execution,qualification);
+  const failed = qualification.runtimeExitCode !== 0 || qualification.status === 'failed' || reports.some(report => ['failed', 'notQualified'].includes(report.status)) || execution.some(item => item.outcome === 'Failed');
   require(session.outcome === (failed ? 'failure' : session.targetProfile === null ? 'unavailable' : 'success')
     && (failed ? metadata.job.conclusion === 'failure' : metadata.job.conclusion === 'success'));
   let resources = null;
   const stateBytes = await readBytes(path.join(directory, 'session-state.json'), SESSION.sessionBytes);
   const stateSha256 = hashBytes(stateBytes);
   const state = parseBytes(stateBytes);
-  const { nativeReport, resourceReport, outerRuntime, qualificationReport, ...body } = session;
+  const { runtimeReport, resourceReport, outerRuntime, qualificationReport, ...body } = session;
   require(isDeepStrictEqual({ ...state, outcome: body.outcome, reason: body.reason }, body));
   let resourceProof = null;
   if (session.resourceReport !== null) {
-    const raw = await readBytes(path.join(directory, session.resourceReport.path), SESSION.nativeBytes);
+    const raw = await readBytes(path.join(directory, session.resourceReport.path), SESSION.runtimeBytesCore);
     require(hashBytes(raw) === session.resourceReport.sha256);
     resources = parseBytes(raw);
     require(exact(resources, ['schemaVersion', 'sessionId', 'sourceRevision', 'runId', 'attempt', 'jobId', 'target', 'nodeCount', 'sessionStateSha256', 'observations'])
-      && resources.schemaVersion === 'session-resource-evidence.v1' && resources.sessionId === session.sessionId
+      && resources.schemaVersion === 'session-resource-evidence' && resources.sessionId === session.sessionId
       && resources.sourceRevision === cohort.sourceRevision && resources.runId === String(cohort.runId)
       && resources.attempt === String(cohort.attempt) && resources.jobId === String(session.jobId)
       && resources.target === row.target && resources.nodeCount === row.nodeCount
       && typeof resources.observations?.qualified === 'boolean');
     require(exact(resources.observations, ['hardware', 'appHostEnvelope', 'containers', 'missingEvidence', 'qualified', 'observationPolicy']));
-    // Reuse the native observation contract; this maps field names, never manufactures a sample.
-    resourceProof = validateServerResourceEvidence({ schema: 'server-resource-evidence.v2',
+    // Reuse the execution observation contract; this maps field names, never manufactures a sample.
+    resourceProof = validateServerResourceEvidence({ schema: 'server-resource-evidence',
       sourceRevision: resources.sourceRevision, workflowRunId: resources.runId, runAttempt: resources.attempt,
       jobId: resources.jobId, target: resources.target, nodeCount: resources.nodeCount, scenario: 'session',
       profile: SESSION.profile, workerSha256: resources.sessionStateSha256, ...resources.observations },
@@ -69,7 +69,7 @@ export async function readOriginalSession(directory, row, cohort, metadata, runt
       cohort, session.jobId, true);
     require(stateSha256 === resources.sessionStateSha256);
   }
-  return { session, reports, native, resources, stateSha256, resourceProof, qualification };
+  return { session, reports, execution, resources, stateSha256, resourceProof, qualification };
 }
 async function authenticateProof(input, proof) {
   require(exact(proof, ['schemaVersion', 'cohort', 'workers', 'preparation']) && proof.schemaVersion === SESSION.schema);
@@ -119,12 +119,12 @@ export async function aggregateSessions({ input, output }) {
     const original = await readOriginalSession(path.join(input, 'workers', row.id), row, proof.cohort, metadata, runtimeIdentity);
     const prefix = `workers/${row.id}/`;
     const references = [{entry:'session.json',path:prefix+'session.json',sha256:metadata.sessionSha256},
-      ...[...original.session.cases,original.session.nativeReport,original.session.outerRuntime,original.session.qualificationReport,
+      ...[...original.session.cases,original.session.runtimeReport,original.session.outerRuntime,original.session.qualificationReport,
         {path:'session-state.json',sha256:original.stateSha256}, ...(original.session.resourceReport ? [original.session.resourceReport] : [])]
         .map(file => ({...file,entry:file.path,path:prefix+file.path}))];
     await verifySessionOriginalArchive(input,path.join(input,'archives',row.id+'.zip'),metadata.artifact,references,SESSION.archiveBytes);
     if (original.resourceProof !== null) comparableResources.push({nodeCount:row.nodeCount,proof:original.resourceProof});
-    workers.push({ ...metadata, session: original.session, reports: original.reports.map(compactCase), native: original.native, qualification: original.qualification, resourceQualified: original.resources?.observations.qualified ?? false, stateSha256: original.stateSha256 });
+    workers.push({ ...metadata, session: original.session, reports: original.reports.map(compactCase), execution: original.execution, qualification: original.qualification, resourceQualified: original.resources?.observations.qualified ?? false, stateSha256: original.stateSha256 });
     originals.push(original.session);
   }
   requireComparableSessionResources(comparableResources);
@@ -134,7 +134,7 @@ export async function aggregateSessions({ input, output }) {
   await createDirectory(path.join(output, 'workers'));
   for (const [index, row] of rows.entries()) {
     const target = await createDirectory(path.join(output, 'workers', row.id));
-    const paths = ['session.json', 'session-state.json', ...originals[index].cases.map(record => record.path), originals[index].nativeReport.path, originals[index].outerRuntime.path, originals[index].qualificationReport.path,
+    const paths = ['session.json', 'session-state.json', ...originals[index].cases.map(record => record.path), originals[index].runtimeReport.path, originals[index].outerRuntime.path, originals[index].qualificationReport.path,
       ...(originals[index].resourceReport ? [originals[index].resourceReport.path] : [])];
     const directories = new Set([target]);
     for (const relative of paths) {
@@ -144,7 +144,7 @@ export async function aggregateSessions({ input, output }) {
         if (!directories.has(parent)) { await createDirectory(parent); directories.add(parent); }
       }
       const original = path.join(input, 'workers', row.id, relative);
-      await hashRegularFile(original, relative.endsWith('.trx') ? SESSION.nativeBytes : SESSION.reportBytes);
+      await hashRegularFile(original, relative.endsWith('.trx') ? SESSION.runtimeBytesCore : SESSION.reportBytes);
       await link(original, path.join(target, relative));
     }
   }

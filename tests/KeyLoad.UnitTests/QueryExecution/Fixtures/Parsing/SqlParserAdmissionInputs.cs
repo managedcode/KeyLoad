@@ -15,7 +15,7 @@ internal static class SqlParserAdmissionInputs
         for (var index = FirstCase; index < LexicalCases; index++)
         {
             var suffix = Convert.ToHexString(global::System.Security.Cryptography.SHA256.HashData(
-                global::System.Text.Encoding.UTF8.GetBytes("native-parser-" + index.ToString(global::System.Globalization.CultureInfo.InvariantCulture))));
+                global::System.Text.Encoding.UTF8.GetBytes("execution-parser-" + index.ToString(global::System.Globalization.CultureInfo.InvariantCulture))));
             yield return ("SELECT title FROM offsetleft WHERE title = '" + Secret + suffix, ErrorCode.Validation, Invalid);
         }
         yield return ("SELECT title FROM offsetleft WHERE title = @" + Secret + " AND", ErrorCode.Validation, Invalid);

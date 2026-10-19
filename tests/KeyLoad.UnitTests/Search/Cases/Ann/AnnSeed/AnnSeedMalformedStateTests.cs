@@ -34,7 +34,7 @@ internal sealed class AnnSeedMalformedStateTests
             new(new(null!, database.Partition.DatabaseId, database.Partition.TransactionDomainId,
                 database.Partition.PartitionKey), AnnSeedTestSupport.Collection, AnnSeedTestSupport.Id(0)),
             1, "{}", new(AnnSeedTestSupport.Owner), DateTimeOffset.UnixEpoch);
-        using var serializer = new NativeSerializerFixture();
+        using var serializer = new SerializerFixture();
         var corrupted = serializer.Encode(document);
         database.Store.Commit((transaction, _) =>
         {
@@ -102,7 +102,7 @@ internal sealed class AnnSeedMalformedStateTests
         using var database = AnnSeedTestSupport.Create(1);
         database.Store.Commit((transaction, _) =>
         {
-            transaction.Put(KeySpace.AppliedBytes, NativeSerialization.Serialize(-1L));
+            transaction.Put(KeySpace.AppliedBytes, OrleansSerialization.Serialize(-1L));
             return true;
         });
         var position = database.Store.Position;

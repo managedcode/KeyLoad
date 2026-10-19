@@ -17,21 +17,20 @@ internal sealed class PostgresConnectionHandler(IServiceProvider services, IOpti
         }
         try
         {
-            var request = await ReadStartupAsync(context, options).ConfigureAwait(false);
+            var request = await ReadStartupAsync(context, options);
             if (request is null)
             {
                 return;
             }
             if (request.Cancel is { } cancel)
             {
-                await cancellations.CancelAsync(cancel.Id, cancel.Secret).ConfigureAwait(false);
+                await cancellations.CancelAsync(cancel.Id, cancel.Secret);
                 return;
             }
             await new PostgresProtocolSession(services, configured, admission, cancellations)
-                .RunAsync(context, request.Startup ?? throw Errors.Fail(ErrorCode.Validation, PostgresProtocol.Invalid))
-                .ConfigureAwait(false);
+                .RunAsync(context, request.Startup ?? throw Errors.Fail(ErrorCode.Validation, PostgresProtocol.Invalid));
         }
-        catch (Exception error) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error) && !context.ConnectionClosed.IsCancellationRequested
+        catch (Exception error) when (global::KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(error) && !context.ConnectionClosed.IsCancellationRequested
             && (PostgresAdmissionLifetime.Require(context).Completed || !PostgresAdmissionLifetime.Require(context).Token.IsCancellationRequested))
         {
             var failures = new List<Exception> { error };
@@ -44,9 +43,9 @@ internal sealed class PostgresConnectionHandler(IServiceProvider services, IOpti
                 {
                     var writer = new PostgresWireWriter(context.Transport.Output, options.MaximumFrameBytes);
                     PostgresErrorReply.Write(writer, error);
-                    await writer.FlushAsync(deadline.Token).ConfigureAwait(false);
-                }, failures).ConfigureAwait(false);
-            }, failures).ConfigureAwait(false);
+                    await writer.FlushAsync(deadline.Token);
+                }, failures);
+            }, failures);
             ServerFailureObserver.ThrowIfAny(failures);
         }
     }
@@ -58,7 +57,7 @@ internal sealed class PostgresConnectionHandler(IServiceProvider services, IOpti
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             using var frame = await PostgresFrameReader.ReadAsync(context.Transport.Input, true,
-                options.MaximumStartupBytes, admission, PostgresAdmissionLifetime.Require(context).Token).ConfigureAwait(false);
+                options.MaximumStartupBytes, admission, PostgresAdmissionLifetime.Require(context).Token);
             await ServerFailureObserver.ObserveAsync(() =>
             {
                 if (frame is not null)
@@ -68,8 +67,8 @@ internal sealed class PostgresConnectionHandler(IServiceProvider services, IOpti
                         : new(PostgresStartupDecoder.Read(frame.Payload, options), null);
                 }
                 return Task.CompletedTask;
-            }, failures).ConfigureAwait(false);
-        }, failures).ConfigureAwait(false);
+            }, failures);
+        }, failures);
         ServerFailureObserver.ThrowIfAny(failures);
         return result;
     }

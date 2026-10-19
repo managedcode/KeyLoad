@@ -30,7 +30,7 @@ public sealed partial class DatabaseEngine
         var currentCapacity = TargetInboxStorage.Capacity(transaction, request.Target, required: retained is not null);
         if (retained is not null)
         {
-            var existing = NativeSerialization.Deserialize<TargetInboxRecord>(retained);
+            var existing = OrleansSerialization.Deserialize<TargetInboxRecord>(retained);
             TargetInboxStorage.RequireSelectedCapacity(currentCapacity, checked(key.LongLength + retained.LongLength));
             if (existing.IdentityFingerprint != identity || existing.Receipt is null || string.IsNullOrEmpty(existing.EffectsFingerprint))
             {
@@ -45,7 +45,7 @@ public sealed partial class DatabaseEngine
         }
         var effects = ApplyMutations(transaction, principal, request.Target.Partition, request.Effects, now, position);
         var receipt = new CommitReceipt(request.CommandId, Token(transaction, request.Target.Partition, position), effects, Durability, AcknowledgedPersistedCopies);
-        var record = NativeSerialization.Serialize(new TargetInboxRecord(identity, fingerprint, receipt));
+        var record = OrleansSerialization.Serialize(new TargetInboxRecord(identity, fingerprint, receipt));
         var bytes = checked(key.LongLength + record.LongLength);
         var capacity = TargetInboxStorage.Add(currentCapacity,
             bytes, resource.InboxPolicy!);

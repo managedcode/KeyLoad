@@ -1,6 +1,6 @@
 namespace KeyLoad;
 
-/// <summary>Reports the applied cut whose eligible native lexical generation completed publication.</summary>
+/// <summary>Reports the applied cut whose eligible execution lexical generation completed publication.</summary>
 [Orleans.GenerateSerializer]
 [Orleans.Alias(WaitForIndexProtocol.ResultAlias)]
 public sealed record WaitForIndexResult(

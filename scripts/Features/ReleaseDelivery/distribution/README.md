@@ -18,7 +18,7 @@ docker compose logs --tail=100
 The server image reference is the immutable release version. The release also
 contains exported server/benchmark image archives that can be loaded with
 `docker load --input <archive>` when registry access is unavailable. Public HTTP
-ports bind to localhost:5101, :5102 and :5103. Native silo traffic remains inside
+ports bind to localhost:5101, :5102 and :5103. silo traffic remains inside
 the Docker network. An external listener requires an explicitly secured deployment.
 
 Keep `.env` private and preserve it with all three named volumes. Stop and restart

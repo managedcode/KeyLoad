@@ -17,7 +17,7 @@ internal static class SampleChunkBenchmarkManifest
     internal const string SourceInventoryEnvironment = "KEYLOAD_CHUNK_SOURCE_INVENTORY_SHA256";
 
     private const string CorrectnessContract = "every_field_original_offset_and_IEEE_bits_verified_before_timing";
-    private const string AccountingContract = "complete_native_value_envelopes_excluding_keys_WAL_replication_indexes_and_storage_overhead";
+    private const string AccountingContract = "complete__value_envelopes_excluding_keys_WAL_replication_indexes_and_storage_overhead";
 
     internal static void Write(int records, string corpus, SampleChunkBenchmarkState state,
         IOptions<BenchmarkArtifactOptions> artifactOptions)
@@ -62,11 +62,11 @@ internal static class SampleChunkBenchmarkManifest
             seed = SampleChunkBenchmarkCorpus.Seed,
             corpusGenerator = DescribeDescribeResultText,
             actualRecordCount = records,
-            nativeValueBytes = state.NativeBytes,
+            runtimeValueBytes = state.RuntimeBytes,
             chunkValueBytes = state.ChunkBytes,
-            nativeValueBytesPerSample = (double)state.NativeBytes / state.RecordCount,
+            valueBytesPerSample = (double)state.RuntimeBytes / state.RecordCount,
             chunkValueBytesPerSample = (double)state.ChunkBytes / state.RecordCount,
-            orderedNativeValuesSha256 = HashNative(state.NativeValues),
+            orderedValuesSha256 = RuntimeHash(state.RuntimeValues),
             chunkValueSha256 = Convert.ToHexStringLower(SHA256.HashData(state.ChunkValue)),
             correctness = CorrectnessContract,
             accounting = AccountingContract,
@@ -82,7 +82,7 @@ internal static class SampleChunkBenchmarkManifest
             correctionRecoveryQualified = false
         };
 
-    private static string HashNative(IReadOnlyList<byte[]> values)
+    private static string RuntimeHash(IReadOnlyList<byte[]> values)
     {
         using var hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
         Span<byte> length = stackalloc byte[sizeof(int)];

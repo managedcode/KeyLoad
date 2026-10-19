@@ -14,7 +14,7 @@ internal sealed class BenchmarkSessionClientLease(BenchmarkSessionContext contex
             sessions.Add(session);
             if (!session.SingleOperationTiming)
             {
-                throw new InvalidOperationException(BenchmarkSessionProtocol.SessionRequiresSingleNativeOperationTiming);
+                throw new InvalidOperationException(BenchmarkSessionProtocol.SessionRequiresSingleOperationTiming);
             }
         }
     }

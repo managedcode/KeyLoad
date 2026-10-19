@@ -2,8 +2,8 @@ namespace KeyLoad.Server;
 
 internal static class DocumentApi
 {
-    private const string CommandPath = "/v1/commands";
-    private const string GetPath = "/v1/documents/get";
+    private const string CommandPath = "/commands";
+    private const string GetPath = "/documents/get";
 
     internal static bool IsCommandPath(PathString path) => path == CommandPath;
 

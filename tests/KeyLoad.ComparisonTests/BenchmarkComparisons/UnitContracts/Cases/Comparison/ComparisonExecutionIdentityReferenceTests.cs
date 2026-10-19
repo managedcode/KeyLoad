@@ -11,7 +11,7 @@ internal sealed class ComparisonExecutionIdentityReferenceTests
         var result = await RunAsync("registry.invalid:badport/keyload/server:tag@" + Digest);
 
         await ComparisonExecutionIdentitySupport.AssertSafeFailureAsync(result,
-            "session-v1");
+            "session");
     }
 
     [Test]
@@ -20,7 +20,7 @@ internal sealed class ComparisonExecutionIdentityReferenceTests
         var result = await RunAsync("registry.invalid:70000/keyload/server:tag@" + Digest);
 
         await ComparisonExecutionIdentitySupport.AssertSafeFailureAsync(result,
-            "session-v1");
+            "session");
     }
 
     [Test]
@@ -29,7 +29,7 @@ internal sealed class ComparisonExecutionIdentityReferenceTests
         var result = await RunAsync("registry.invalid//keyload/server:tag@" + Digest);
 
         await ComparisonExecutionIdentitySupport.AssertSafeFailureAsync(result,
-            "session-v1");
+            "session");
     }
 
     [Test]
@@ -38,7 +38,7 @@ internal sealed class ComparisonExecutionIdentityReferenceTests
         var result = await RunAsync("registry.invalid:5000:6000/keyload/server:tag@" + Digest);
 
         await ComparisonExecutionIdentitySupport.AssertSafeFailureAsync(result,
-            "session-v1");
+            "session");
     }
 
     [Test]
@@ -48,7 +48,7 @@ internal sealed class ComparisonExecutionIdentityReferenceTests
         var result = await RunAsync(oversizedRegistry + "/keyload/server:tag@" + Digest);
 
         await ComparisonExecutionIdentitySupport.AssertSafeFailureAsync(result,
-            "session-v1");
+            "session");
     }
 
     private static Task<ComparisonHostExit> RunAsync(string image)

@@ -26,8 +26,8 @@ internal static class IsolatedKeyLoadResources
             throw new InvalidOperationException(InvalidTarget);
         }
         var directory = context.DataDirectory(DataDirectory);
-        var profile = ClusterProfileStore.Open(directory, runtime.Native.Profile);
-        var nodes = ClusterResources.Add(context.Builder, profile, directory, ephemeral: true,
+        var profile = ClusterProfileStore.Open(directory, runtime.Execution.Profile);
+        var nodes = KeyLoad.AppHost.Hosting.AppHostProgram.AddCluster(context.Builder, profile, directory, ephemeral: true,
             benchmarkNodeCount: context.Selection.NodeCount);
         var admin = context.Builder.Resources.OfType<ParameterResource>().Single(parameter => parameter.Name == AdminParameter);
         context.Client.Set(AdminEnvironment, admin);

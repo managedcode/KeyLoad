@@ -14,7 +14,7 @@ internal static class SampleRawIntegrityAssertions
     private const string ExpiryKind = "expireSamples";
 
     internal static SampleRawIntegrityCut Capture(ZoneTreeStore store)
-        => new(store.Position, NativeSerialization.Serialize(store.Identity), store.Read(view =>
+        => new(store.Position, OrleansSerialization.Serialize(store.Identity), store.Read(view =>
         {
             var page = view.Scan([], MaximumImageRecords);
             if (page.HasMore)
@@ -58,7 +58,7 @@ internal static class SampleRawIntegrityAssertions
     {
         var cut = Capture(fixture.Store);
         var replay = fixture.Apply(operation);
-        await Assert.That(NativeSerialization.Serialize(replay).SequenceEqual(NativeSerialization.Serialize(original))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(replay).SequenceEqual(OrleansSerialization.Serialize(original))).IsTrue();
         await UnchangedAsync(fixture.Store, cut);
     }
 
@@ -70,8 +70,8 @@ internal static class SampleRawIntegrityAssertions
         await Assert.That(receipt.Token.Position).IsEqualTo(fixture.Store.Position);
         await Assert.That(receipt.Mutations.Length).IsEqualTo(OneMutation);
         var expected = new MutationReceipt(ExpiryKind, SampleAggregateTestData.Set, SampleAggregateTestData.Series, 3);
-        await Assert.That(NativeSerialization.Serialize(receipt.Mutations[0]).SequenceEqual(
-            NativeSerialization.Serialize(expected))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(receipt.Mutations[0]).SequenceEqual(
+            OrleansSerialization.Serialize(expected))).IsTrue();
     }
 
     internal static async Task HealthyAsync(SampleRawIntegrityFixture fixture, bool final)
@@ -84,8 +84,8 @@ internal static class SampleRawIntegrityAssertions
         await Assert.That(actualRows.Length).IsEqualTo(expectedRows.Length);
         for (var index = 0; index < expectedRows.Length; index++)
         {
-            await Assert.That(NativeSerialization.Serialize(actualRows[index]).SequenceEqual(
-                NativeSerialization.Serialize(expectedRows[index]))).IsTrue();
+            await Assert.That(OrleansSerialization.Serialize(actualRows[index]).SequenceEqual(
+                OrleansSerialization.Serialize(expectedRows[index]))).IsTrue();
         }
         var latest = fixture.Owner.ReadLatestSample(SampleAggregateTestData.RootPrincipal,
             SampleRawIntegrityScenario.Latest(fixture, final));
@@ -119,9 +119,9 @@ internal static class SampleRawIntegrityAssertions
         await Assert.That(raw.Records.Length).IsEqualTo(expected.Length);
         for (var index = 0; index < expected.Length; index++)
         {
-            await Assert.That(raw.Records[index].Value.Span.SequenceEqual(NativeSerialization.Serialize(expected[index]))).IsTrue();
+            await Assert.That(raw.Records[index].Value.Span.SequenceEqual(OrleansSerialization.Serialize(expected[index]))).IsTrue();
         }
-        var sequence = NativeSerialization.Deserialize<long>(fixture.Store.Read(view => view.ReadOwnedValue(
+        var sequence = OrleansSerialization.Deserialize<long>(fixture.Store.Read(view => view.ReadOwnedValue(
             SampleRollupKeys.Sequence(fixture.Partition, SampleAggregateTestData.Set, SampleAggregateTestData.Series)))!);
         await Assert.That(sequence).IsEqualTo(final ? 5L : 4L);
     }

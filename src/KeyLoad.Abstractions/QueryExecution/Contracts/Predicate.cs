@@ -10,5 +10,5 @@ namespace KeyLoad.Query;
 [JsonDerivedType(typeof(NullTest), QueryAstDiscriminatorNames.NullTest)]
 [JsonDerivedType(typeof(InPredicate), QueryAstDiscriminatorNames.In)]
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.Predicate)]
+[Orleans.Alias(ContractAliases.Predicate)]
 public abstract record Predicate;

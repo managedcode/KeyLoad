@@ -44,7 +44,7 @@ internal static class GraphCrossPartitionValidation
         }
     }
 
-    internal static void ValidateIncoming(ReadIncomingGraphEdgesRequestV1 request, DatabaseLimits limits,
+    internal static void ValidateIncoming(ReadIncomingGraphEdgesRequest request, DatabaseLimits limits,
         ReadExecutionBudget budget)
     {
         const int MinimumResultCount = 1;
@@ -80,7 +80,7 @@ internal static class GraphCrossPartitionValidation
         }
     }
 
-    internal static void ValidateOwnerVersion(GraphEdgeOwnerVersionV1? record)
+    internal static void ValidateOwnerVersion(GraphEdgeOwnerVersion? record)
     {
         if (record is null || record.Version != GraphCrossPartitionProtocol.CurrentVersion || record.Revision <= AbsentRevision)
         {
@@ -88,7 +88,7 @@ internal static class GraphCrossPartitionValidation
         }
     }
 
-    internal static void ValidateIntent(GraphCrossPartitionDeliveryIntentV1? intent,
+    internal static void ValidateIntent(GraphCrossPartitionDeliveryIntent? intent,
         PartitionRef source, string graph, string edgeId, EntityRef destination, DatabaseLimits limits)
     {
         if (HasInvalidIntentIdentity(intent, source, graph, edgeId, destination)
@@ -103,7 +103,7 @@ internal static class GraphCrossPartitionValidation
         ValidateEdge(intent.Edge, limits);
     }
 
-    private static bool HasInvalidIntentIdentity(GraphCrossPartitionDeliveryIntentV1? intent,
+    private static bool HasInvalidIntentIdentity(GraphCrossPartitionDeliveryIntent? intent,
         PartitionRef source, string graph, string edgeId, EntityRef destination)
         => intent is null || intent.Version != GraphCrossPartitionProtocol.CurrentVersion
             || intent.SourcePartition != source || intent.Graph != graph || intent.EdgeId != edgeId
@@ -113,17 +113,17 @@ internal static class GraphCrossPartitionValidation
             || intent.Destination.Id is null || intent.Revision <= AbsentRevision || intent.Edge is null
             || intent.SourcePartition == intent.Destination.Partition;
 
-    private static bool HasInvalidIntentPolicy(GraphCrossPartitionDeliveryIntentV1 intent)
+    private static bool HasInvalidIntentPolicy(GraphCrossPartitionDeliveryIntent intent)
         => string.IsNullOrWhiteSpace(intent.OriginalPrincipalId) || intent.OriginalPolicyEpoch < MinimumPolicyEpoch
             || !ValidFingerprint(intent.Fingerprint);
 
-    private static bool HasInvalidIntentEdge(GraphCrossPartitionDeliveryIntentV1 intent,
+    private static bool HasInvalidIntentEdge(GraphCrossPartitionDeliveryIntent intent,
         PartitionRef source, string edgeId, EntityRef destination)
         => intent.Edge.Id != edgeId
             || intent.Edge.From?.Partition != source || intent.Edge.To != destination
             || intent.Edge.Revision != intent.Revision;
 
-    internal static void ValidateReceiver(GraphCrossPartitionReceiverStateV1? state,
+    internal static void ValidateReceiver(GraphCrossPartitionReceiverState? state,
         PartitionRef source, string graph, string edgeId, EntityRef destination)
     {
         if (state is null || state.Version != GraphCrossPartitionProtocol.CurrentVersion
@@ -140,7 +140,7 @@ internal static class GraphCrossPartitionValidation
             state.Destination, state.Revision);
     }
 
-    internal static void ValidateCapacity(GraphCrossPartitionCapacityV1? capacity,
+    internal static void ValidateCapacity(GraphCrossPartitionCapacity? capacity,
         GraphCrossPartitionCapacityDirection direction)
     {
         if (capacity is null || capacity.Version != GraphCrossPartitionProtocol.CurrentVersion

@@ -5,7 +5,7 @@ namespace KeyLoad.Core.Features.DocumentStorage;
 /// <param name="Before">The decoded image observed before handler validation.</param>
 
 [global::Orleans.GenerateSerializer]
-[global::Orleans.Alias(global::KeyLoad.Core.Features.InternalSerialization.CoreNativeAliases.DocumentMutationContext)]
+[global::Orleans.Alias(global::KeyLoad.Core.Features.InternalSerialization.CoreAliases.DocumentMutationContext)]
 internal readonly record struct DocumentMutationContext(
     [property: global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.DocumentMutationContextFields.Key)] byte[] Key,
     [property: global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.DocumentMutationContextFields.Before)] DocumentRecord? Before);

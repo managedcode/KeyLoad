@@ -9,7 +9,7 @@ namespace KeyLoad;
 /// <param name="Events">Every subsequent revision through the captured tail.</param>
 /// <param name="CutPosition">The committed storage position under the read gate.</param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.AggregateReplayPage)]
+[Orleans.Alias(ContractAliases.AggregateReplayPage)]
 public sealed record AggregateReplayPage([property: Orleans.Id(0)] StreamRef Stream,
     [property: Orleans.Id(1)] StreamHead Head, [property: Orleans.Id(2)] AggregateSnapshotState? Snapshot,
     [property: Orleans.Id(3)] ImmutableArray<EventRecord> Events, [property: Orleans.Id(4)] long CutPosition);

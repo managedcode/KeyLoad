@@ -76,7 +76,7 @@ internal static class SiteIsolatedGitHubTokens
     public const int BufferBytes = 65_536;
     public const int MaximumEntries = 8192;
     public const int DeadlineSeconds = 300;
-    public const int NativeDeadlineMinutes = 120;
+    public const int DeadlineMinutes = 120;
     public const long JsonBytes = 33_554_432;
     public const long MetadataBytes = 16_777_216;
     public const long RawBytes = 268_435_456;

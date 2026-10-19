@@ -1,5 +1,5 @@
 using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.ClusterRouting;
+using KeyLoad.IntegrationTests.Features.OrleansExecution;
 using KeyLoad.Query;
 
 namespace KeyLoad.IntegrationTests.Features.QueryExecution;
@@ -16,7 +16,7 @@ internal static class CapabilityOutputClusterPages
             }, token))).Value;
         await SqlClusterProtocol.EqualAsync(state.Manifest, sdkManifest);
         await SqlClusterProtocol.EqualAsync(state.Manifest, officialManifest);
-        foreach (var version in new[] { 1, 2 })
+        foreach (var version in new[] { 1 })
         {
             await RefuseAsync(caller, false, version, ErrorCode.BudgetExceeded, token);
             await HealthyAsync(caller, version, sdkManifest.MaxBytes, token);
@@ -25,11 +25,11 @@ internal static class CapabilityOutputClusterPages
         await HealthyAsync(caller, 1, sdkManifest.MaxBytes, token);
         await Assert.That(sdkManifest.MaxBytes).IsEqualTo(CapabilityOutputClusterProtocol.Expected(mode));
         await Assert.That(sdkManifest.MaxBytes).IsNotEqualTo(CapabilityOutputClusterProtocol.RequestBytes);
-        await Assert.That(sdkManifest.SqlDialect).IsEqualTo("TSQL.ScriptDOM180.v1");
+        await Assert.That(sdkManifest.SqlDialect).IsEqualTo("TSQL.ScriptDOM180");
         await Assert.That(sdkManifest.AstVersion).IsEqualTo(1);
-        await Assert.That(sdkManifest.SupportedAstVersions).IsEquivalentTo(new[] { 1, 2 },
+        await Assert.That(sdkManifest.SupportedAstVersions).IsEquivalentTo(new[] { 1 },
             TUnit.Assertions.Enums.CollectionOrdering.Matching);
-        await Assert.That(sdkManifest.SupportedQueryDialectVersions).IsEquivalentTo(new[] { 1, 2 },
+        await Assert.That(sdkManifest.SupportedQueryDialectVersions).IsEquivalentTo(new[] { 1 },
             TUnit.Assertions.Enums.CollectionOrdering.Matching);
     }
 

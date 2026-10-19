@@ -15,11 +15,11 @@ internal static class QueueUnknownStateInspectionWholeFlow
             await KeyLoad.Server.ServerFailureObserver.ObserveAsync(
                 () => CompleteAsync(fixture, persistedState, failures, token), failures);
         }
-        catch (Exception error) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+        catch (Exception error) when (global::KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(error))
         {
             failures.Add(error);
         }
-        catch (Exception error) when (!global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+        catch (Exception error) when (!global::KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(error))
         {
             failures.Add(error);
         }
@@ -39,9 +39,9 @@ internal static class QueueUnknownStateInspectionWholeFlow
         var key = KeySpace.Partition(QueueLifecycleTestProtocol.MetadataSpace, state.Partition,
             state.Lane.Queue, QueueLifecycleConditionOperations.Source);
         var row = fixture.Store.Read(view => view.ReadOwnedValue(key))!;
-        var metadata = NativeSerialization.Deserialize<MessageMetadata>(row);
+        var metadata = OrleansSerialization.Deserialize<MessageMetadata>(row);
         QueueLifecycleConditionOperations.Restore(fixture.Store, key,
-            NativeSerialization.Serialize(metadata with
+            OrleansSerialization.Serialize(metadata with
             {
                 State = (MessageState)persistedState
             }));

@@ -11,7 +11,7 @@ internal static class CorruptSubscriptionProcessingAssertions
         var key = SubscriptionCheckpointAuthorityFlow.WindowKey(group, 1);
         var original = fixture.Store.Read(view => view.ReadOwnedValue(key))
             ?? throw new InvalidOperationException("The genuine processing lease is missing.");
-        var row = NativeSerialization.Deserialize<GroupDelivery>(original);
+        var row = OrleansSerialization.Deserialize<GroupDelivery>(original);
         fixture.Store.Commit((tx, _) =>
         {
             SubscriptionDeliveryAuthorityFaults.Stage(tx, key, row, fault);
@@ -19,7 +19,7 @@ internal static class CorruptSubscriptionProcessingAssertions
         });
         var bytes = QueueWholeFlowStorage.Bytes(fixture.Store);
         var position = fixture.Store.Position;
-        var identity = NativeSerialization.Serialize(fixture.Store.Identity);
+        var identity = OrleansSerialization.Serialize(fixture.Store.Identity);
         for (var repeat = 0; repeat < 2; repeat++)
         {
             var failure = Assert.ThrowsExactly<KeyLoadException>(() => fixture.Database.Apply(operation));

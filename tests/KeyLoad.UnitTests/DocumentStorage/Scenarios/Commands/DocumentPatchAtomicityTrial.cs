@@ -22,8 +22,8 @@ internal static class DocumentPatchAtomicityTrial
         var operation = Batch(owner, fault, secondRevision: 1);
         var failed = owner.Submit(operation);
         var retained = owner.Entry(operation.CommandId);
-        await DocumentPatchAtomicityAssertions.BytesAsync(NativeSerialization.Serialize(operation),
-            NativeSerialization.Serialize(retained.PreparedCommand));
+        await DocumentPatchAtomicityAssertions.BytesAsync(OrleansSerialization.Serialize(operation),
+            OrleansSerialization.Serialize(retained.PreparedCommand));
         await DocumentPatchAtomicityAssertions.FailureAsync(failed, fault);
         await before.RequireDomainAsync(DocumentPatchAtomicityState.Read(owner));
         await Assert.That(retained.CanonicalSequence).IsEqualTo(before.Applied + 1L);
@@ -43,8 +43,8 @@ internal static class DocumentPatchAtomicityTrial
         var fresh = Batch(owner, fault, secondRevision: 2);
         var healthy = owner.Submit(fresh);
         var healthyEntry = owner.Entry(fresh.CommandId);
-        await DocumentPatchAtomicityAssertions.BytesAsync(NativeSerialization.Serialize(fresh),
-            NativeSerialization.Serialize(healthyEntry.PreparedCommand));
+        await DocumentPatchAtomicityAssertions.BytesAsync(OrleansSerialization.Serialize(fresh),
+            OrleansSerialization.Serialize(healthyEntry.PreparedCommand));
         await DocumentPatchAtomicityAssertions.HealthyAsync(owner, fault, healthyEntry, healthy, originalTail + 3L);
         await DocumentPatchAtomicityAssertions.ReplayAsync(owner, retained, failed);
         var healthyState = DocumentPatchAtomicityState.Read(owner);
@@ -66,6 +66,6 @@ internal static class DocumentPatchAtomicityTrial
         var id = Guid.NewGuid();
         var request = new CommandRequest(id, owner.Source.Partition, [.. mutations]);
         return owner.Database.CreateCommand(OperationKind.Batch, id, Root,
-            owner.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(request));
+            owner.Database.EvaluationClock.GetUtcNow(), OrleansSerialization.Serialize(request));
     }
 }

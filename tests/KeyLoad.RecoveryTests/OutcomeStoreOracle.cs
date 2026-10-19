@@ -8,7 +8,7 @@ namespace KeyLoad.RecoveryTests;
 
 internal static class OutcomeStoreOracle
 {
-    private const string ScopedOutcomeSpace = "outcome-v2";
+    private const string ScopedOutcomeSpace = "outcome";
     private const string GlobalOutcomeScope = "global";
     private const string UnknownOutcomeScope = "unknown";
 
@@ -59,7 +59,7 @@ internal static class OutcomeStoreOracle
             {
                 throw Errors.Fail(ErrorCode.BudgetExceeded, "The outcome oracle scan exceeded its record bound.");
             }
-            var matches = page.Records.Select(row => NativeSerialization.Deserialize<StoredOutcome>(row.Value.Span))
+            var matches = page.Records.Select(row => OrleansSerialization.Deserialize<StoredOutcome>(row.Value.Span))
                 .Where(outcome => outcome.PreparedCommand.CommandId == commandId).ToArray();
             if (matches.Length != 1)
             {
@@ -89,12 +89,6 @@ internal static class OutcomeStoreOracle
                 OperationKind.ConfigureProjectionConsumer => Partition<ConfigureProjectionConsumerRequest>(operation, static request => request.Consumer?.Partition),
                 OperationKind.CommitProjectionBatch => Partition<CommitProjectionBatchRequest>(operation, static request => request.Consumer?.Partition),
                 OperationKind.ReleaseProjectionConsumer => Partition<ReleaseProjectionConsumerRequest>(operation, static request => request.Consumer?.Partition),
-                OperationKind.BeginBlobUpload => Partition<BeginBlobUploadRequest>(operation, static request => request.Blob?.Partition),
-                OperationKind.WriteBlobPart => Partition<WriteBlobPartRequest>(operation, static request => request.Blob?.Partition),
-                OperationKind.CompleteBlobUpload => Partition<CompleteBlobUploadRequest>(operation, static request => request.Blob?.Partition),
-                OperationKind.AbortBlobUpload => Partition<AbortBlobUploadRequest>(operation, static request => request.Blob?.Partition),
-                OperationKind.DeleteBlob => Partition<DeleteBlobRequest>(operation, static request => request.Blob?.Partition),
-                OperationKind.ReclaimBlob => Partition<ReclaimBlobRequest>(operation, static request => request.Blob?.Partition),
                 _ => null
             };
             if (Valid(partition))
@@ -125,19 +119,19 @@ internal static class OutcomeStoreOracle
 
     private static bool IsBoolean(ReadOnlyMemory<byte> input)
     {
-        _ = NativeSerialization.Deserialize<bool>(input.Span);
+        _ = OrleansSerialization.Deserialize<bool>(input.Span);
         return true;
     }
 
     private static PartitionRef? Partition<T>(Command<DatabaseCommand> operation, Func<T, PartitionRef?> select)
         where T : class
     {
-        var request = NativeSerialization.Deserialize<T>(operation.Value!.Input.Span, NativeValidationProfile.PublicInputElements);
+        var request = OrleansSerialization.Deserialize<T>(operation.Value!.Input.Span, ValidationProfile.PublicInputElements);
         return request is null ? null : select(request);
     }
 
     private static bool IsNonNull<T>(Command<DatabaseCommand> operation) where T : class
-        => NativeSerialization.Deserialize<T>(operation.Value!.Input.Span, NativeValidationProfile.PublicInputElements) is not null;
+        => OrleansSerialization.Deserialize<T>(operation.Value!.Input.Span, ValidationProfile.PublicInputElements) is not null;
 
     private static bool Valid(PartitionRef? partition)
         => partition is not null && !string.IsNullOrWhiteSpace(partition.TenantId)

@@ -8,5 +8,5 @@ namespace KeyLoad;
 /// <param name="CutPosition">The committed position at which the query snapshot was taken.</param>
 /// <param name="AccessPath">The access path used to execute the query.</param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.QueryPage)]
+[Orleans.Alias(ContractAliases.QueryPage)]
 public sealed record QueryPage([property: Orleans.Id(0)] ImmutableArray<QueryRow> Rows, [property: Orleans.Id(1)] string? Cursor, [property: Orleans.Id(2)] long CutPosition, [property: Orleans.Id(3)] string AccessPath);

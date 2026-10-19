@@ -10,7 +10,7 @@ internal static class DistributedSearchWorkFactory
 
     internal static ImmutableArray<DistributedSearchPhaseWork> Create(DistributedSearchPhase phase,
         ImmutableArray<PartitionRef> partitions, SearchRequest search,
-        ImmutableArray<DistributedTextWitnessV1> witnesses, DistributedTextStatisticsV1? statistics,
+        ImmutableArray<DistributedTextWitness> witnesses, DistributedTextStatistics? statistics,
         GlobalBranchScope? scope, ImmutableArray<string> windows,
         ImmutableArray<GlobalBranchCandidate> selected, ReadExecutionBudget budget)
     {

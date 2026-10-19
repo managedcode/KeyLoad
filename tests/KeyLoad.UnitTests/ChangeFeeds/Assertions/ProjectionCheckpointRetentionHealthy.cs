@@ -6,7 +6,7 @@ namespace KeyLoad.UnitTests.Features.ChangeFeeds;
 internal static class ProjectionCheckpointRetentionHealthy
 {
     private const string OutboxSpace = "outbox";
-    private const string MissingEntry = "The healthy retained native source requires its original committed entry.";
+    private const string MissingEntry = "The healthy retained execution source requires its original committed entry.";
     private const string PutKind = "putDocument";
 
     internal static async Task AssertAsync(DatabaseEngine owner, ZoneTreeStore store,

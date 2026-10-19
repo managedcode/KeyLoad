@@ -14,10 +14,10 @@ internal static class QueueOrderedRetryJitterAssertions
     {
         var operation = state.Outcomes.Last().Operation;
         var wrapper = operation.Value!;
-        var actual = NativeSerialization.Deserialize<QueueRetryDecisions>(wrapper.RetryDecisions.Span);
+        var actual = OrleansSerialization.Deserialize<QueueRetryDecisions>(wrapper.RetryDecisions.Span);
         var policy = database.Store.Read(view => view.GetRecord<ResourceDefinition>(KeySpace.Resource(
             state.Partition.TenantId, state.Partition.DatabaseId, state.Lane.Queue)))!.QueuePolicy;
-        var seed = NativeSerialization.Serialize(new QueueRetrySeed(operation.CommandId, state.Lane, QueueOrderedRetryProtocol.First,
+        var seed = OrleansSerialization.Serialize(new QueueRetrySeed(operation.CommandId, state.Lane, QueueOrderedRetryProtocol.First,
             QueueOrderedRetryProtocol.One, QueueOrderedRetryProtocol.One, QueueOrderedRetryProtocol.Two));
         var digest = HMACSHA256.HashData(database.Store.Identity.SigningKey.Span, seed);
         var delay = QueueOrderedRetryProtocol.One + (int)(BinaryPrimitives.ReadUInt64BigEndian(digest) % (ulong)policy.RetryBaseMilliseconds);
@@ -25,8 +25,8 @@ internal static class QueueOrderedRetryJitterAssertions
         var expected = new QueueRetryDecisions(QueueOrderedRetryProtocol.One, new DateTimeOffset(operation.Timestamp),
             ImmutableArray.Create(new QueueRetryDecision(state.Lane, QueueOrderedRetryProtocol.First, QueueOrderedRetryProtocol.Two,
                 QueueOrderedRetryProtocol.One, QueueOrderedRetryProtocol.One, QueueOrderedRetryProtocol.One, ReadOnlyMemory<byte>.Empty,
-                SHA256.HashData(NativeSerialization.Serialize(policy)), delay, at)));
-        await Assert.That(NativeSerialization.Serialize(actual)).IsEquivalentTo(NativeSerialization.Serialize(expected), CollectionOrdering.Matching);
+                SHA256.HashData(OrleansSerialization.Serialize(policy)), delay, at)));
+        await Assert.That(OrleansSerialization.Serialize(actual)).IsEquivalentTo(OrleansSerialization.Serialize(expected), CollectionOrdering.Matching);
         await QueueOrderedRetryAssertions.MessageAsync(database, state, new(QueueOrderedRetryProtocol.First, MessageState.Scheduled,
             QueueOrderedRetryProtocol.One, QueueOrderedRetryProtocol.Three, QueueOrderedRetryProtocol.One, at, null,
             LeaseVersion: QueueOrderedRetryProtocol.One, SafeFailureCode: "RetryRequested",

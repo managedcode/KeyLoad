@@ -11,7 +11,7 @@ internal sealed class BenchmarkSessionDocumentWorkload(BenchmarkSessionContext c
         {
             return state.Report(BenchmarkSessionProtocol.LoadMillion, BenchmarkSessionProtocol.Failed, BenchmarkSessionProtocol.SessionLoadAlreadyAttempted, BenchmarkSessionLimits.NoObservedItems, [], BenchmarkSessionLimits.NoObservedItems);
         }
-        if (context.Target is not IDocumentComparisonTarget native || !context.Target.Supports(Scenario.DocumentWrite))
+        if (context.Target is not IDocumentComparisonTarget execution || !context.Target.Supports(Scenario.DocumentWrite))
         {
             state.UnsupportedDocumentContract = context.Target.UnsupportedReason;
             return state.Unavailable(BenchmarkSessionProtocol.LoadMillion, state.UnsupportedDocumentContract);
@@ -20,7 +20,7 @@ internal sealed class BenchmarkSessionDocumentWorkload(BenchmarkSessionContext c
         ImmutableArray<BenchmarkSessionLaneReport> retained = [];
         try
         {
-            await native.InitializeDocumentsAsync(new(new DocumentComparisonCorpus(BenchmarkSessionLimits.NoObservedItems, context.Options.Concurrency), false,
+            await execution.InitializeDocumentsAsync(new(new DocumentComparisonCorpus(BenchmarkSessionLimits.NoObservedItems, context.Options.Concurrency), false,
                 checked(context.Options.Records + context.Options.Operations)), token).ConfigureAwait(false);
             var lane = await context.Measurement.MeasureAsync(BenchmarkSessionProtocol.Create, context.Options.Records, context.Options.Concurrency,
                 (client, ordinal, cancellation) => BenchmarkSessionDocumentOperation.ExecuteAsync(client, Scenario.DocumentWrite,

@@ -5,5 +5,5 @@ namespace KeyLoad;
 /// <param name="Type">Exact scalar type.</param>
 /// <param name="Nullable">Whether absent and explicit null values are allowed.</param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.RelationalColumn)]
+[Orleans.Alias(ContractAliases.RelationalColumn)]
 public sealed record RelationalColumn([property: Orleans.Id(0)] string Name, [property: Orleans.Id(1)] RelationalColumnType Type, [property: Orleans.Id(2)] bool Nullable = false);

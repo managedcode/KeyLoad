@@ -1,6 +1,6 @@
 using KeyLoad.Client;
 using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.ClusterRouting;
+using KeyLoad.IntegrationTests.Features.OrleansExecution;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
 
 namespace KeyLoad.IntegrationTests.Features.Messaging;
@@ -69,7 +69,7 @@ internal static class NullQueueDeadlineClusterObservation
             await Assert.That(actual.NextOrdinal).IsEqualTo(FirstOrdinal);
             await Task.Delay(DueRecurringClusterProtocol.PollInterval, TimeProvider.System, token);
         }
-        throw new TimeoutException("The native recurring control did not emit within its original progress window.");
+        throw new TimeoutException("The execution recurring control did not emit within its original progress window.");
     }
 
     private static async Task RequireScheduleAsync(RequestCqrsClusterCallers admin,

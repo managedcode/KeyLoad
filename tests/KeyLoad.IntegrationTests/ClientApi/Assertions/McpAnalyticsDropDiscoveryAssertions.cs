@@ -1,5 +1,5 @@
-using KeyLoad.IntegrationTests.Features.ClusterReplication;
-using KeyLoad.IntegrationTests.Features.ClusterRouting;
+using KeyLoad.IntegrationTests.Features.StorageReplication;
+using KeyLoad.IntegrationTests.Features.OrleansExecution;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
 using P = KeyLoad.IntegrationTests.Features.ClientApi.McpAnalyticsDropDiscoveryProtocol;
 
@@ -49,9 +49,9 @@ internal static class McpAnalyticsDropDiscoveryAssertions
     internal static async Task ReceiptAsync(CommandRequest command,
         CommitReceipt actual, MutationReceipt[] effects)
     {
-        await NativeSubmissionColdAssertions.AtomicPartitionAsync(command, actual);
+        await SubmissionColdAssertions.AtomicPartitionAsync(command, actual);
         await Assert.That(actual.Token.Position).IsGreaterThan(0);
-        await NativeSubmissionColdAssertions.ReceiptAsync(actual,
+        await SubmissionColdAssertions.ReceiptAsync(actual,
             new(command.CommandId, actual.Token, [.. effects], DurabilityProfile.ProcessDurable, 3));
     }
 }

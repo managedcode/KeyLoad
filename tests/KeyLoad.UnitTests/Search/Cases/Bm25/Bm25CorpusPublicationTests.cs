@@ -18,7 +18,7 @@ internal sealed class Bm25CorpusPublicationTests
             await Assert.That(flow.Current()).IsNull();
             var before = CanonicalStoreCut.Read(flow.Database);
             var replay = flow.Publish(original);
-            await NativeReplayResultAssertions.BytesAsync(NativeSerialization.Serialize(receipt), NativeSerialization.Serialize(replay));
+            await ReplayResultAssertions.BytesAsync(OrleansSerialization.Serialize(receipt), OrleansSerialization.Serialize(replay));
             await before.RequireAsync(CanonicalStoreCut.Read(flow.Database));
             var next = flow.Capture(Guid.NewGuid(), original.CommandId);
             flow.Publish(next);
@@ -78,7 +78,7 @@ internal sealed class Bm25CorpusPublicationTests
             var replacement = Bm25CorpusPublicationFlow.Phase(flow.Capture(Guid.NewGuid(), original.CommandId)).Current;
             var prior = Bm25CorpusPublicationFlow.Phase(original).Current;
             var key = Bm25CorpusKeys.Current(replacement);
-            var replacementBytes = NativeSerialization.Serialize(replacement);
+            var replacementBytes = OrleansSerialization.Serialize(replacement);
             var priorBytes = flow.Database.Store.Read(view => view.ReadOwnedValue(Bm25CorpusKeys.Current(prior)))
                 ?? throw new InvalidOperationException("The actual original retained head is missing.");
             var exact = checked(key.Length + replacementBytes.Length);

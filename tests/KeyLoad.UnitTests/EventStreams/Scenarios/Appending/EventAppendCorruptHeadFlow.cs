@@ -41,8 +41,8 @@ internal static class EventAppendCorruptHeadFlow
         var key = KeySpace.Partition(HeadSpace, fixture.Database.Partition,
             EventAppendWholeFlowFixture.Streams, EventAppendWholeFlowFixture.StreamId);
         var original = fixture.Database.Store.Read(view => view.ReadOwnedValue(key))
-            ?? throw new InvalidOperationException("The original native stream head is absent.");
-        var head = NativeSerialization.Deserialize<StreamHead>(original);
+            ?? throw new InvalidOperationException("The original execution stream head is absent.");
+        var head = OrleansSerialization.Deserialize<StreamHead>(original);
         var command = fixture.Producer(RejectedProducer, ExpectedStreamRevision.Any,
             EventAppendWholeFlowFixture.Data(RejectedEvent));
         var failures = new List<Exception>();
@@ -51,7 +51,7 @@ internal static class EventAppendCorruptHeadFlow
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 token.ThrowIfCancellationRequested();
-                Replace(fixture, key, NativeSerialization.Serialize(head with
+                Replace(fixture, key, OrleansSerialization.Serialize(head with
                 {
                     TailRevision = tail,
                     FirstAvailableRevision = first
@@ -83,8 +83,8 @@ internal static class EventAppendCorruptHeadFlow
         var acceptedBytes = QueueWholeFlowStorage.Bytes(fixture.Database.Store);
         var acceptedPosition = fixture.Database.Store.Position;
         var replay = fixture.Submit(command);
-        await Assert.That(NativeSerialization.Serialize(replay))
-            .IsEquivalentTo(NativeSerialization.Serialize(accepted), TUnit.Assertions.Enums.CollectionOrdering.Matching);
+        await Assert.That(OrleansSerialization.Serialize(replay))
+            .IsEquivalentTo(OrleansSerialization.Serialize(accepted), TUnit.Assertions.Enums.CollectionOrdering.Matching);
         await Assert.That(fixture.Database.Store.Position).IsEqualTo(acceptedPosition);
         await Assert.That(QueueWholeFlowStorage.Bytes(fixture.Database.Store))
             .IsEquivalentTo(acceptedBytes, TUnit.Assertions.Enums.CollectionOrdering.Matching);

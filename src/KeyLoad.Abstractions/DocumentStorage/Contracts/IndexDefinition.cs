@@ -9,5 +9,5 @@ namespace KeyLoad;
 /// <param name="IncludeNull">Includes explicit null values when true.</param>
 /// <param name="IncludeMissing">Includes missing field values when true.</param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.IndexDefinition)]
+[Orleans.Alias(ContractAliases.IndexDefinition)]
 public sealed record IndexDefinition([property: Orleans.Id(0)] string Name, [property: Orleans.Id(1)] ImmutableArray<string> Fields, [property: Orleans.Id(2)] bool Unique = false, [property: Orleans.Id(3)] bool IncludeNull = true, [property: Orleans.Id(4)] bool IncludeMissing = false);

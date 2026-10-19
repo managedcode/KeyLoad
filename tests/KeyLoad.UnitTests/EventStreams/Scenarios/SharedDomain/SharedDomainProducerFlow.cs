@@ -12,14 +12,14 @@ internal static class SharedDomainProducerFlow
         foreach (var scope in state.Scopes)
         {
             var other = state.Scopes.Where(candidate => candidate != scope).ToDictionary(candidate => candidate.Partition,
-                candidate => SharedDomainNativeImage.Capture(database.Store, candidate.Partition));
+                candidate => SharedDomainImage.Capture(database.Store, candidate.Partition));
             var command = SharedDomainCorpus.Producer(scope, id, healthy ? Healthy : Item);
             var position = database.Store.Position + FirstRevision;
             var operation = SharedDomainOperations.Operation(database, OperationKind.Batch, command.CommandId, command);
             var result = SharedDomainOperations.Apply(database, operation, token);
             await SharedDomainValueAssertions.ReceiptAsync(result, command, database.Store.Identity, position);
             state.Recorded.Add(scope.Partition.AtomicPartitionId + IdentitySeparator + (healthy ? Healthy : Item),
-                SharedDomainNativeImage.Clock(database.Store));
+                SharedDomainImage.Clock(database.Store));
             await SharedDomainHistoryOperations.SaveAsync(database.Store, state, scope.Partition, operation, result);
             if (healthy)
             {
@@ -31,7 +31,7 @@ internal static class SharedDomainProducerFlow
             }
             foreach (var pair in other)
             {
-                await SharedDomainNativeImage.ScopeAsync(database.Store, pair.Key, pair.Value);
+                await SharedDomainImage.ScopeAsync(database.Store, pair.Key, pair.Value);
             }
         }
         await SharedDomainModelAssertions.AllAsync(database, state, token);

@@ -1,5 +1,5 @@
 using KeyLoad.Server;
-using KeyLoad.UnitTests.Features.ClusterRouting;
+using KeyLoad.UnitTests.Features.OrleansExecution;
 
 namespace KeyLoad.UnitTests.Features.TimeSeries;
 
@@ -8,7 +8,7 @@ internal static class SampleChunkSignedMinimumFlow
     private const long RevokedEpoch = 2;
     private const long RepairedEpoch = 3;
 
-    internal static async Task RunAsync(ConnectionNativeScenario scenario, CancellationToken token)
+    internal static async Task RunAsync(ConnectionScenario scenario, CancellationToken token)
     {
         await scenario.InitializeAsync(token);
         var owner = scenario.Fixture.Database;
@@ -44,7 +44,7 @@ internal static class SampleChunkSignedMinimumFlow
             () => SampleChunkSignedMinimumAssertions.HealthyAsync(scenario, state, token));
         await SampleChunkSignedMinimumCold.ReplayAsync(owner.Database, owner.Store, state, token);
         var cold = SampleRawIntegrityAssertions.Capture(owner.Store);
-        var coldSource = new ConnectionNativeColdSource(scenario.Fixture.Source);
+        var coldSource = new ConnectionColdSource(scenario.Fixture.Source);
         await scenario.CloseAsync(token);
         await scenario.Fixture.Hosts.StopAsync(token);
         await SampleChunkSignedMinimumCold.RunAsync(coldSource, state, cold, token);

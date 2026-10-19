@@ -10,6 +10,6 @@ namespace KeyLoad;
 /// <param name="Attempt">Specifies the attempt value.</param>
 /// <param name="DeliveryGeneration">Identifies the delivery generation.</param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.Delivery)]
+[Orleans.Alias(ContractAliases.Delivery)]
 public sealed record Delivery([property: Orleans.Id(0)] string Id, [property: Orleans.Id(1)] string PayloadJson, [property: Orleans.Id(2)] string HeadersJson, [property: Orleans.Id(3)] string Token, [property: Orleans.Id(4)] long LeaseVersion,
     [property: Orleans.Id(5)] DateTimeOffset LeaseUntil, [property: Orleans.Id(6)] int Attempt, [property: Orleans.Id(7)] long DeliveryGeneration);

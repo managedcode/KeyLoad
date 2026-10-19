@@ -25,10 +25,10 @@ internal static class QueueEnqueueCrashScenario
         var operation = database.OwnCommand(CrashDatabase.Operation(database, OperationKind.Batch, command, command.CommandId));
         var target = CrashDatabase.NextCommitToken(database, QueueEnqueueCrashProtocol.Partition);
         var physicalTarget = checked(store.Position + QueueEnqueueCrashProtocol.AdjacentPosition);
-        await File.WriteAllBytesAsync(Path.Combine(directory, QueueEnqueueCrashProtocol.OperationFile), NativeSerialization.Serialize(operation));
-        await File.WriteAllBytesAsync(Path.Combine(directory, QueueEnqueueCrashProtocol.TargetFile), NativeSerialization.Serialize(target));
-        await File.WriteAllBytesAsync(Path.Combine(directory, QueueEnqueueCrashProtocol.PhysicalTargetFile), NativeSerialization.Serialize(physicalTarget));
-        await File.WriteAllBytesAsync(Path.Combine(directory, QueueEnqueueCrashProtocol.BaselineFile), NativeSerialization.Serialize(Capture(store)));
+        await File.WriteAllBytesAsync(Path.Combine(directory, QueueEnqueueCrashProtocol.OperationFile), OrleansSerialization.Serialize(operation));
+        await File.WriteAllBytesAsync(Path.Combine(directory, QueueEnqueueCrashProtocol.TargetFile), OrleansSerialization.Serialize(target));
+        await File.WriteAllBytesAsync(Path.Combine(directory, QueueEnqueueCrashProtocol.PhysicalTargetFile), OrleansSerialization.Serialize(physicalTarget));
+        await File.WriteAllBytesAsync(Path.Combine(directory, QueueEnqueueCrashProtocol.BaselineFile), OrleansSerialization.Serialize(Capture(store)));
         boundary.Position = physicalTarget;
         boundary.Armed = true;
         _ = database.Apply(operation);

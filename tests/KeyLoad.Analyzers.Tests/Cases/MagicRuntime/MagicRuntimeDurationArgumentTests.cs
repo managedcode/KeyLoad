@@ -1,6 +1,6 @@
 namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
 
-/// <summary>AC-CQ-029 and AC-CQ-031: native duration policy literals produce exact located errors.</summary>
+/// <summary>AC-CQ-029 and AC-CQ-031: execution duration policy literals produce exact located errors.</summary>
 internal sealed class MagicRuntimeDurationArgumentTests
 {
     [Test]
@@ -14,7 +14,7 @@ internal sealed class MagicRuntimeDurationArgumentTests
     [Arguments("TimeSpan.FromMinutes([|0d|])")]
     [Arguments("TimeSpan.FromDays([|1d|])")]
     [Arguments("TimeSpan.FromMicroseconds([|1d|])")]
-    public async Task TimeSpanConstructorsAndNativeFactoriesRejectInlineValuesAsync(string operation)
+    public async Task TimeSpanConstructorsAndFactoriesRejectInlineValuesAsync(string operation)
     {
         var source = $$"""
             using TimeSpan = System.TimeSpan;
@@ -41,7 +41,7 @@ internal sealed class MagicRuntimeDurationArgumentTests
     [Arguments("gate.WaitAsync(TimeSpan.FromSeconds([|1d|]), cancellationToken)")]
     [Arguments("new CancellationTokenSource(millisecondsDelay: [|0|])")]
     [Arguments("new CancellationTokenSource(TimeSpan.FromMilliseconds([|1d|]))")]
-    public async Task NativeTimeoutOverloadsBindAliasesCancellationAndArithmeticAsync(string operation)
+    public async Task TimeoutOverloadsBindAliasesCancellationAndArithmeticAsync(string operation)
     {
         var source = $$"""
             using System;
@@ -63,7 +63,7 @@ internal sealed class MagicRuntimeDurationArgumentTests
     [Test]
     [Arguments("source.CancelAfter(millisecondsDelay: [|1|])")]
     [Arguments("source.CancelAfter(TimeSpan.FromMilliseconds([|1d|] + [|0d|]))")]
-    public async Task NativeCancelAfterRejectsDirectAndNestedInlinePolicyAsync(string operation)
+    public async Task CancelAfterRejectsDirectAndNestedInlinePolicyAsync(string operation)
     {
         var source = $$"""
             using System;
@@ -78,7 +78,7 @@ internal sealed class MagicRuntimeDurationArgumentTests
     }
 
     [Test]
-    public async Task NamedZeroOneAndArithmeticConstantsPreserveNativeOverloadCallsAsync()
+    public async Task NamedZeroOneAndArithmeticConstantsPreserveOverloadCallsAsync()
     {
         const string source = """
             using System;

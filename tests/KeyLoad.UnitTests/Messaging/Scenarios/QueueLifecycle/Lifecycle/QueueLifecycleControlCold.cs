@@ -21,19 +21,19 @@ internal static class QueueLifecycleControlCold
     }
 
     internal static async Task FinalAsync(ZoneTreeStore store, string directory,
-        QueueLifecycleNativeRecorder recorder, QueueLaneRef lane, Func<DatabaseEngine, Task> terminal,
+        QueueLifecycleRecorder recorder, QueueLaneRef lane, Func<DatabaseEngine, Task> terminal,
         CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
         var image = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
-        var identity = NativeSerialization.Serialize(store.Identity);
+        var identity = OrleansSerialization.Serialize(store.Identity);
         store.Dispose();
         using var cold = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         recorder.Database = QueueWholeFlowStorage.Open(cold);
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(cold, image, position, identity);
         await terminal(recorder.Database);
-        await QueueLifecycleNativeHistoryAssertions.ReplayAsync(recorder, lane, token);
+        await QueueLifecycleHistoryAssertions.ReplayAsync(recorder, lane, token);
         await terminal(recorder.Database);
     }
 }

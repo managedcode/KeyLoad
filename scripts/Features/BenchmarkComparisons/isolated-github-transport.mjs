@@ -1,8 +1,8 @@
 import { link, unlink } from 'node:fs/promises';
 import path from 'node:path';
 import { setTimeout as wait } from 'node:timers/promises';
-import { runBounded } from './native-process.mjs';
-import { createDirectory } from './native-files.mjs';
+import { runBounded } from './process.mjs';
+import { createDirectory } from './files.mjs';
 import { GH, requireGitHub } from './isolated-github-contract.mjs';
 import { writeCapture, writeJson } from './isolated-github-files.mjs';
 import { streamHttpToFile } from './isolated-github-stream.mjs';
@@ -12,14 +12,14 @@ export const isAllowedGitHubEndpoint = endpoint => typeof endpoint === 'string' 
 
 export async function initializeTransport(context, root, directory) {
   const requests = await createDirectory(path.join(directory, 'requests'));
-  const help = await runBounded('gh', ['api', '--help'], { cwd: context.native.workspace,
+  const help = await runBounded('gh', ['api', '--help'], { cwd: context.execution.workspace,
     timeoutMs: GH.metadataTimeoutMs, maximumOutputBytes: GH.stderrBytes });
   requireGitHub(help.success);
   await writeCapture(path.join(directory, 'gh-api-help.txt'), Buffer.from(help.stdout));
   context.transport = { root, requests, sequence: 0, waitedMs: 0, allowBinary: help.stdout.includes('--allow-escape-sequences') };
 }
 
-export function nativeArguments(endpoint, context, currentJobId) {
+export function runtimeArguments(endpoint, context, currentJobId) {
   const args = ['api', '--hostname', GH.host, '--method', 'GET', '--include',
     '-H', 'Accept: application/vnd.github+json', '-H', `X-GitHub-Api-Version: ${GH.apiVersion}`];
   if (currentJobId !== undefined) {
@@ -36,7 +36,7 @@ function remainingMilliseconds(deadline) {
   return Number((deadline - process.hrtime.bigint()) / 1000000n);
 }
 
-export async function requestNative(endpoint, target, maximumBytes, timeoutMs, context, options = {}) {
+export async function runtimeRequestCore(endpoint, target, maximumBytes, timeoutMs, context, options = {}) {
   requireGitHub(isAllowedGitHubEndpoint(endpoint) && context.transport !== undefined);
   requireGitHub(options.deadline === undefined || typeof options.deadline === 'bigint');
   requireGitHub(options.signal === undefined || typeof options.signal.aborted === 'boolean');
@@ -51,8 +51,8 @@ export async function requestNative(endpoint, target, maximumBytes, timeoutMs, c
     const name = `request-${String(state.sequence).padStart(5, '0')}`;
     const body = path.join(state.requests, `${name}.body`);
     const headers = path.join(state.requests, `${name}.headers`);
-    const result = await streamHttpToFile('gh', nativeArguments(endpoint, context, options.currentJobId), body, headers,
-      maximumBytes, requestTimeout, context.native.workspace, options.signal);
+    const result = await streamHttpToFile('gh', runtimeArguments(endpoint, context, options.currentJobId), body, headers,
+      maximumBytes, requestTimeout, context.execution.workspace, options.signal);
     const successful = result.response.status === 200 && result.exitCode === 0;
     let delay = 0;
     try {
@@ -61,8 +61,8 @@ export async function requestNative(endpoint, target, maximumBytes, timeoutMs, c
     } finally {
       await writeJson(path.join(state.requests, `${name}.json`), { endpoint, repeat, status: result.response.status,
         body: path.relative(state.root, successful ? target : body), headers: path.relative(state.root, headers),
-        bytes: result.bytes, sha256: result.sha256, nativeProcess: result.nativeProcess,
-        nativeFailure: successful ? null : path.relative(state.root, body + '.native-process.json'),
+        bytes: result.bytes, sha256: result.sha256, runtimeProcess: result.runtimeProcess,
+        runtimeFailure: successful ? null : path.relative(state.root, body + '.execution-process.json'),
         waitMs: delay, plannedAccumulatedWaitMs: state.waitedMs + delay });
     }
     if (successful) {

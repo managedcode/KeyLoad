@@ -1,5 +1,5 @@
 using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.ClusterRouting;
+using KeyLoad.IntegrationTests.Features.OrleansExecution;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
 
 namespace KeyLoad.IntegrationTests.Features.GraphTraversal;
@@ -28,17 +28,17 @@ internal static class GraphPathRebindR44Current
     private static async Task IncomingAsync(RequestCqrsClusterCallers admin, GraphPathRebindR44State state,
         EntityRef vertex, CancellationToken token)
     {
-        var request = new ReadIncomingGraphEdgesRequestV1(1, vertex, GraphPathClusterScenario.Graph, 4);
+        var request = new ReadIncomingGraphEdgesRequest(1, vertex, GraphPathClusterScenario.Graph, 4);
         var rows = state.Edges.Where(edge => edge.To == vertex).OrderBy(edge => edge.From.Collection, StringComparer.Ordinal)
             .ThenBy(edge => edge.From.Id, StringComparer.Ordinal).ThenBy(edge => edge.Id, StringComparer.Ordinal)
-            .Select(edge => new GraphIncomingEdgeRowV1(edge, 0L)).ToArray();
+            .Select(edge => new GraphIncomingEdgeRow(edge, 0L)).ToArray();
         await PageAsync(await McpCallerAssertions.SdkSuccessAsync(await global::KeyLoad.Client.GraphIncomingEdgesClient.IncomingEdgesAsync(
             admin.Sdk, request, token)), rows);
-        await PageAsync((await McpCallerAssertions.SuccessAsync<GraphIncomingEdgesPageV1>(await admin.Mcp.CallAsync(
+        await PageAsync((await McpCallerAssertions.SuccessAsync<GraphIncomingEdgesPage>(await admin.Mcp.CallAsync(
             McpCallerTools.GraphIncomingEdges, request, token))).Value, rows);
     }
 
-    private static async Task PageAsync(GraphIncomingEdgesPageV1 page, GraphIncomingEdgeRowV1[] rows)
+    private static async Task PageAsync(GraphIncomingEdgesPage page, GraphIncomingEdgeRow[] rows)
     {
         await SqlClusterProtocol.EqualAsync(rows, page.Rows.ToArray());
         await Assert.That(page.Version).IsEqualTo(1);

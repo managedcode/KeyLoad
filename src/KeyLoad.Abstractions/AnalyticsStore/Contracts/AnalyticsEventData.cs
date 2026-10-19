@@ -2,7 +2,7 @@ using System.Collections.Immutable;
 
 namespace KeyLoad;
 
-/// <summary>One canonical event revision input; native analytics indexes are derived from committed events.</summary>
+/// <summary>One canonical event revision input; execution analytics indexes are derived from committed events.</summary>
 /// <param name="Id">Stable event identity within the store and atomic partition.</param>
 /// <param name="Timestamp">UTC event time.</param>
 /// <param name="Dimensions">Schema-declared bounded dimension values.</param>

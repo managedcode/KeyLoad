@@ -3,7 +3,7 @@ namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 internal static class SqlBooleanOperandClusterControls
 {
     internal static async Task InvalidAsync(ClusterFixture fixture, SqlBooleanTruthClusterState state,
-        global::KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsClusterCallers root, CancellationToken token)
+        global::KeyLoad.IntegrationTests.Features.OrleansExecution.RequestCqrsClusterCallers root, CancellationToken token)
     {
         var before = await SqlBooleanTruthClusterImage.ReadAsync(root, state, token);
         foreach (var clause in new[] { "score TRUE", "score =", "1", "'true'", "@absent", "NOT" })
@@ -14,7 +14,7 @@ internal static class SqlBooleanOperandClusterControls
     }
 
     internal static async Task RequireAsync(ClusterFixture fixture, SqlBooleanTruthClusterState state,
-        global::KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsClusterCallers root, ErrorCode code, CancellationToken token)
+        global::KeyLoad.IntegrationTests.Features.OrleansExecution.RequestCqrsClusterCallers root, ErrorCode code, CancellationToken token)
     {
         var before = await SqlBooleanTruthClusterImage.ReadAsync(root, state, token);
         foreach (var item in SqlBooleanTruthClusterCases.All.Where(item => item.Clause == SqlBooleanTruthClusterCases.BareClause

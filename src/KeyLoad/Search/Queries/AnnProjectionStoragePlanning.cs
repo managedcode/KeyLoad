@@ -6,7 +6,7 @@ using KeyLoad.Core.Features.Search;
 namespace KeyLoad.Server;
 
 /// <summary>Reads enrollment and publication only while borrowing the actual open ANN storage.</summary>
-internal sealed class AnnProjectionStoragePlanning(DatabaseEngine database, INativeAnnMaintenance native)
+internal sealed class AnnProjectionStoragePlanning(DatabaseEngine database, IAnnMaintenance execution)
 {
     internal Task<AnnProjectionJobState?> PrepareAsync(ProjectionConsumerRef consumer, long generation,
         Guid nodeId, AnnProjectionJobState? current, ReadExecutionBudget budget,
@@ -39,7 +39,7 @@ internal sealed class AnnProjectionStoragePlanning(DatabaseEngine database, INat
                 var ownInitial = AnnProjectionJobValidation.Initial(work);
                 return new(authority, ownInitial, ownInitial, null, null, null, work.ThroughSequence, null);
             }
-            var enrollment = await native.ReadEnrollmentBoundAsync(work.Principal, reserved, budget, binding, token).ConfigureAwait(true);
+            var enrollment = await execution.ReadEnrollmentBoundAsync(work.Principal, reserved, budget, binding, token).ConfigureAwait(true);
             if (enrollment is null)
             {
                 return null;
@@ -67,7 +67,7 @@ internal sealed class AnnProjectionStoragePlanning(DatabaseEngine database, INat
         {
             return original;
         }
-        var publication = await native.ReadPublishedBoundAsync(work.Principal, original.InitialRequest, budget, binding, token)
+        var publication = await execution.ReadPublishedBoundAsync(work.Principal, original.InitialRequest, budget, binding, token)
             .ConfigureAwait(true);
         if (publication.Source.ThroughSequence >= work.ThroughSequence)
         {

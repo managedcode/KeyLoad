@@ -15,7 +15,7 @@ internal sealed class RemoteTransferSignedExecution(GrainRequestCodec codec, Bac
     {
         var requestId = Guid.NewGuid();
         var principal = await CurrentPrincipalAsync(subject, token).ConfigureAwait(true);
-        var connection = NativeConnectionExecutionIdentity.Resolve(services);
+        var connection = ConnectionExecutionIdentity.Resolve(services);
         using var identity = new GrainRequestIdentityScope(services, principal, requestId, Guid.Empty, token, connectionId: connection);
         var signed = codec.CreateRead(requestId, principal.Id, kind, payload);
         var reply = await DrainAsync(connection, requestId, signed, token).ConfigureAwait(true);
@@ -23,7 +23,7 @@ internal sealed class RemoteTransferSignedExecution(GrainRequestCodec codec, Bac
         {
             throw Errors.Fail(error, reply.SafeDetail ?? RemoteTransferCoordinationProtocol.InvalidResult);
         }
-        var value = NativeSerialization.Deserialize<GrainValue>(reply.Payload.Span).Value;
+        var value = OrleansSerialization.Deserialize<GrainValue>(reply.Payload.Span).Value;
         return value is null ? null : value as T ?? throw Errors.Fail(ErrorCode.Corruption, RemoteTransferCoordinationProtocol.InvalidResult);
     }
 
@@ -31,9 +31,9 @@ internal sealed class RemoteTransferSignedExecution(GrainRequestCodec codec, Bac
     {
         var requestId = Guid.NewGuid();
         var principal = await CurrentPrincipalAsync(subject, token).ConfigureAwait(true);
-        var connection = NativeConnectionExecutionIdentity.Resolve(services);
+        var connection = ConnectionExecutionIdentity.Resolve(services);
         using var identity = new GrainRequestIdentityScope(services, principal, requestId, request.CommandId, token, connectionId: connection);
-        var signed = codec.CreateCommand(requestId, principal.Id, OperationKind.Batch, request.CommandId, NativeSerialization.Serialize(request));
+        var signed = codec.CreateCommand(requestId, principal.Id, OperationKind.Batch, request.CommandId, OrleansSerialization.Serialize(request));
         return await DrainAsync(connection, requestId, signed, token).ConfigureAwait(true);
     }
 

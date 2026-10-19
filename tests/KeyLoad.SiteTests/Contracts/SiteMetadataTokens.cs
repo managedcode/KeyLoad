@@ -121,7 +121,7 @@ internal static class SiteMetadataTokens
     internal const string ManifestRel = "manifest";
     internal const string IconRel = "icon";
     internal const string AppleTouchRel = "apple-touch-icon";
-    internal const string IndexTitle = "KeyLoad — the AI-native database for AI agents";
+    internal const string IndexTitle = "KeyLoad — the AI-execution database for AI agents";
     internal const string Scope = "scope";
     internal const string StartUrl = "start_url";
     internal const string Display = "display";

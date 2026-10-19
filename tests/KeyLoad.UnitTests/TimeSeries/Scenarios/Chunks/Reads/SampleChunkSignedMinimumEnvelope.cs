@@ -14,27 +14,27 @@ internal static class SampleChunkSignedMinimumEnvelope
 
     internal static string Create(GrainRequestCodec codec, PrincipalRecord reader, Guid requestId,
         ReadSampleChunkWindowRequest request)
-        => codec.CreateRead(requestId, reader.Id, GrainReadKind.SampleChunkWindow, NativeSerialization.Serialize(request));
+        => codec.CreateRead(requestId, reader.Id, GrainReadKind.SampleChunkWindow, OrleansSerialization.Serialize(request));
 
     internal static string ReplaceMinimum(GrainRequestCodec codec, string original, Guid requestId,
         CommitToken? minimum)
     {
         var verified = codec.VerifyRead(original, requestId);
-        var before = GrainNativePayload.Read<ReadSampleChunkWindowRequest>(verified.Payload);
+        var before = GrainPayload.Read<ReadSampleChunkWindowRequest>(verified.Payload);
         var replacement = before with
         {
             MinimumToken = minimum
         };
-        var payload = NativeSerialization.Serialize(replacement);
+        var payload = OrleansSerialization.Serialize(replacement);
         if (verified.Payload.Span.SequenceEqual(payload))
         {
-            throw new InvalidOperationException("The generated native payload omitted the changed minimum.");
+            throw new InvalidOperationException("The generated execution payload omitted the changed minimum.");
         }
         var envelope = verified.Envelope with
         {
             Payload = payload
         };
-        var changed = NativeSerialization.Serialize(envelope);
+        var changed = OrleansSerialization.Serialize(envelope);
         var encoded = Convert.ToBase64String(changed).TrimEnd(Padding)
             .Replace(StandardPlus, UrlMinus).Replace(StandardSlash, UrlUnderscore);
         return original[..(original.IndexOf(Separator, StringComparison.Ordinal) + NextCharacter)] + encoded
@@ -45,7 +45,7 @@ internal static class SampleChunkSignedMinimumEnvelope
         Guid requestId, ReadSampleChunkWindowRequest expected)
     {
         var verified = codec.VerifyRead(original, requestId);
-        var actual = GrainNativePayload.Read<ReadSampleChunkWindowRequest>(verified.Payload);
+        var actual = GrainPayload.Read<ReadSampleChunkWindowRequest>(verified.Payload);
         SampleChunkExplicitMinimumUnitReads.RequireBytes(expected, actual);
         return actual;
     }

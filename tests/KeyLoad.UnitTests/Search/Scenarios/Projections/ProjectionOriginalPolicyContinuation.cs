@@ -5,7 +5,7 @@ namespace KeyLoad.UnitTests.Features.Search;
 
 internal static class ProjectionOriginalPolicyContinuation
 {
-    private const string NativeDirectory = "projection-original-policy-text";
+    private const string RuntimeDirectoryCore = "projection-original-policy-text";
     private const string MissingLineage = "The original projection lineage is absent.";
     private const string AcceptedOriginal = "The original projection outcome crossed its current policy fence.";
 
@@ -64,9 +64,9 @@ internal static class ProjectionOriginalPolicyContinuation
 
     private static async Task HealthyReadAsync(EventProjectionFixture fixture)
     {
-        var projection = new NativeTextProjection(Path.Combine(fixture.Harness.DirectoryPath, NativeDirectory),
+        var projection = new RuntimeTextProjection(Path.Combine(fixture.Harness.DirectoryPath, RuntimeDirectoryCore),
             UnitExecutionOptions.DatabaseLimits(fixture.Database.Limits), fixture.Harness.Store.Identity.NodeId,
-            UnitNativeTextOptions.Execution());
+            UnitTextOptions.Execution());
         try
         {
             await ClassificationLineageWholeAssertions.HealthyAsync(fixture, projection);

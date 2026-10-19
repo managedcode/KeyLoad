@@ -11,7 +11,7 @@ internal static class DistributedTextStatisticsLeaf
     private const string CanonicalTextRequired = "The distributed statistics require the canonical text profile.";
     private const string ReceivingPrincipalChanged = "The distributed statistics receiving principal changed.";
 
-    internal static DistributedTextWitnessV1 Execute(DatabaseEngine database, string principalId,
+    internal static DistributedTextWitness Execute(DatabaseEngine database, string principalId,
         SearchRequest request, PhysicalShardRecord owner, string tenant,
         IOptions<QueryExecutionOptions> options, ReadExecutionBudget budget, global::KeyLoad.Core.Features.ResourceExecution.Execution.ReadExecutionBudgetReadGrant grant, PartitionQueryLifetimeMetadata? metadata = null)
     {
@@ -31,7 +31,7 @@ internal static class DistributedTextStatisticsLeaf
         }
         using var admission = database.AdmitQuery(budget.Cancellation);
         using var charged = budget.EnterReadGrant(grant);
-        Func<IKeyValueView, PrincipalRecord, ResourceDefinition, string, DistributedTextWitnessV1> read =
+        Func<IKeyValueView, PrincipalRecord, ResourceDefinition, string, DistributedTextWitness> read =
             (view, principal, resource, digest) => Capture(database, view, principal, resource, digest,
                 request, owner, tenant, execution, budget, grant, metadata);
         return metadata is null
@@ -40,7 +40,7 @@ internal static class DistributedTextStatisticsLeaf
                 grant, budget, metadata, read);
     }
 
-    private static DistributedTextWitnessV1 Capture(DatabaseEngine database, IKeyValueView view,
+    private static DistributedTextWitness Capture(DatabaseEngine database, IKeyValueView view,
         PrincipalRecord principal, ResourceDefinition resource, string digest, SearchRequest request,
         PhysicalShardRecord owner, string tenant, QueryExecutionOptions execution,
         ReadExecutionBudget budget, global::KeyLoad.Core.Features.ResourceExecution.Execution.ReadExecutionBudgetReadGrant grant,
@@ -65,14 +65,14 @@ internal static class DistributedTextStatisticsLeaf
         }
         var statistics = CaptureStatistics(database, view, principal, request, execution, budget, metadata?.Principal);
         var identity = database.Store.Identity;
-        var result = new DistributedTextWitnessV1(request.Partition, owner, identity.NodeId,
+        var result = new DistributedTextWitness(request.Partition, owner, identity.NodeId,
             identity.ReadGeneration, database.Store.Position, principal.PolicyEpoch, resource.SchemaVersion,
             digest, statistics, grant.ReadBytes, grant.ExaminedRecords, identity.Incarnation);
         budget.CheckResult(result);
         return result;
     }
 
-    private static DistributedTextStatisticsV1 CaptureStatistics(DatabaseEngine database, IKeyValueView view,
+    private static DistributedTextStatistics CaptureStatistics(DatabaseEngine database, IKeyValueView view,
         PrincipalRecord principal, SearchRequest request, QueryExecutionOptions execution, ReadExecutionBudget budget,
         PrincipalRecord? sourcePrincipal)
     {

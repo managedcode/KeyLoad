@@ -24,7 +24,7 @@ internal static class SqlInnerJoinRetainedIdentityPages
     private const string GreaterThan = ">";
     private const string AccessPath = "bounded-primary-key-inner-join";
     private const string Corrupt = "The retained relational join source is inconsistent.";
-    private const int Dialect = 2;
+    private const int Dialect = SqlOperationProtocol.DefaultQueryDialectVersion;
     private const int PageLimit = 10;
     private const int SingleCandidate = 1;
     private const int FalseThreshold = 100;

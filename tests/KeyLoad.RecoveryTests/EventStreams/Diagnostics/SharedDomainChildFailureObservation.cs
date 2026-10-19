@@ -16,7 +16,7 @@ internal static class SharedDomainChildFailureObservation
         Exception primary, CancellationToken token)
     {
         var path = Path.Combine(root, SharedDomainChildProgressProtocol.FileName);
-        SharedDomainChildProgressV1? witness = null;
+        SharedDomainChildProgress? witness = null;
         if (File.Exists(path))
         {
             var info = new FileInfo(path);
@@ -26,7 +26,7 @@ internal static class SharedDomainChildFailureObservation
                 throw new InvalidDataException(SharedDomainChildProgressProtocol.Invalid);
             }
             var bytes = await ReadBoundedAsync(path, token);
-            witness = NativeSerialization.Deserialize<SharedDomainChildProgressV1>(bytes);
+            witness = OrleansSerialization.Deserialize<SharedDomainChildProgress>(bytes);
             Validate(witness);
         }
         var text = JsonSerializer.Serialize(new
@@ -68,7 +68,7 @@ internal static class SharedDomainChildFailureObservation
         return bytes;
     }
 
-    private static void Validate(SharedDomainChildProgressV1 witness)
+    private static void Validate(SharedDomainChildProgress witness)
     {
         if (witness.Version != SharedDomainChildProgressProtocol.Version || !Enum.IsDefined(witness.Phase)
             || witness.SeedOrdinal < SharedDomainChildProgressProtocol.InitialOrdinal

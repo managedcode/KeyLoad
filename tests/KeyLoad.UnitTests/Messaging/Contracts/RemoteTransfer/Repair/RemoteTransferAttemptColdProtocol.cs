@@ -17,5 +17,5 @@ internal static class RemoteTransferAttemptColdProtocol
     internal const string FillerMessage = "attempt-cold-filler";
     internal const string Payload = "{\"attempt\":true}";
     internal const string Headers = "{}";
-    internal const string Missing = "The actual native attempt state is missing.";
+    internal const string Missing = "The actual execution attempt state is missing.";
 }

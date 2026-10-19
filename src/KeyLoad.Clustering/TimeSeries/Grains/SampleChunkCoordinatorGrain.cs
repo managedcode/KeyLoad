@@ -10,7 +10,7 @@ using Orleans.Serialization;
 
 namespace KeyLoad.Clustering;
 
-#pragma warning disable ORLEANSEXP005 // Centrally pinned native Orleans journaling required by ADR-124.
+#pragma warning disable ORLEANSEXP005 // Centrally pinned execution Orleans journaling required by ADR-124.
 [Immovable(ImmovableKind.Any)]
 [GrainType(SampleChunkJobProtocol.GrainAlias), PreferLocalPlacement]
 internal sealed class SampleChunkCoordinatorGrain(IDurableStateManager state,
@@ -90,15 +90,15 @@ internal sealed class SampleChunkCoordinatorGrain(IDurableStateManager state,
         await PersistAsync(token).ConfigureAwait(true);
         await ObserveSchedulingAsync(observation, GrainRequestPhase.SampleChunkAdmissionPersisted, token)
             .ConfigureAwait(true);
-        var nativeRequest = SampleChunkJobMetadata.Create(this.GetGrainId(), clock.GetUtcNow(), hint,
+        var runtimeRequest = SampleChunkJobMetadata.Create(this.GetGrainId(), clock.GetUtcNow(), hint,
             codec.Limits.MaxBatchBytes);
-        var job = await jobs.ScheduleJobAsync(nativeRequest, token).ConfigureAwait(true);
+        var job = await jobs.ScheduleJobAsync(runtimeRequest, token).ConfigureAwait(true);
         if (observation is not null)
         {
-            SampleChunkNativeJobObservation.Returned(services, hint.CommandId, job.Id,
-            nativeRequest.Metadata![SampleChunkJobProtocol.HintKey], codec.Limits.MaxBatchBytes);
+            SampleChunkJobObservation.Returned(services, hint.CommandId, job.Id,
+            runtimeRequest.Metadata![SampleChunkJobProtocol.HintKey], codec.Limits.MaxBatchBytes);
         }
-        await ObserveSchedulingAsync(observation, GrainRequestPhase.SampleChunkNativeJobReturned, token)
+        await ObserveSchedulingAsync(observation, GrainRequestPhase.SampleChunkJobReturned, token)
             .ConfigureAwait(true);
         if (admissions.TryGetValue(hint.CommandId, out var retained) && retained == original)
         {
@@ -146,7 +146,7 @@ internal sealed class SampleChunkCoordinatorGrain(IDurableStateManager state,
         }
         if (codec.PhaseObserver is not null)
         {
-            SampleChunkNativeJobObservation.Executing(services, hint.CommandId, context.Job.Id,
+            SampleChunkJobObservation.Executing(services, hint.CommandId, context.Job.Id,
             context.Job.Metadata![SampleChunkJobProtocol.HintKey], codec.Limits.MaxBatchBytes);
         }
         using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, runtime.SchedulingToken);

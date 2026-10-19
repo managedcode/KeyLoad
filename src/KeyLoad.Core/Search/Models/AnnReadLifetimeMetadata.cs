@@ -1,11 +1,13 @@
 using System.Collections.Immutable;
-using KeyLoad.Core.Features.ClusterRouting.Contracts;
+using KeyLoad.Core.Features.CommandOutcomes.Contracts;
+using KeyLoad.Core.Features.RuntimeJournaling.Contracts;
+using KeyLoad.Core.Features.StoragePartitions.Contracts;
 using KeyLoad.Core.Features.ResourceExecution;
 
 namespace KeyLoad.Core.Features.Search;
 
 internal sealed record AnnReadLifetimeMetadata(ResourceDefinition Definition,
-    ResourceLifetimeCoverageV1 Coverage, PrincipalRecord Principal, ImmutableArray<ResourceDefinition> Definitions)
+    ResourceLifetimeCoverage Coverage, PrincipalRecord Principal, ImmutableArray<ResourceDefinition> Definitions)
 {
     private const string Invalid = "The ANN source lifetime metadata is invalid.";
 
@@ -17,12 +19,12 @@ internal sealed record AnnReadLifetimeMetadata(ResourceDefinition Definition,
             throw Errors.Fail(ErrorCode.OwnershipLost, Invalid);
         }
         ResourceLifetimeCoverage.Require(Coverage, partition, Definitions, maximumBytes);
-        if (NativeSerialization.Measure(Definitions) > maximumBytes || NativeSerialization.Measure(Definition) > maximumBytes)
+        if (OrleansSerialization.Measure(Definitions) > maximumBytes || OrleansSerialization.Measure(Definition) > maximumBytes)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, Invalid);
         }
         var primary = Definitions.FirstOrDefault(value => value.Name == Definition.Name);
-        if (primary is null || !NativeSerialization.Serialize(primary).AsSpan().SequenceEqual(NativeSerialization.Serialize(Definition)))
+        if (primary is null || !OrleansSerialization.Serialize(primary).AsSpan().SequenceEqual(OrleansSerialization.Serialize(Definition)))
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, Invalid);
         }

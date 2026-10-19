@@ -36,7 +36,7 @@ internal static class QueueEnqueueProcessAssertions
         }
         await Assert.That(store.Read(view => view.GetRecord<QueueCounters>(KeySpace.Partition(QueueEnqueueCrashProtocol.CountersFamily,
             command.Partition, QueueEnqueueCrashProtocol.Queue))))
-            .IsEqualTo(new QueueCounters(QueueEnqueueCrashProtocol.Second, bodies.Sum(body => NativeSerialization.Serialize(body).LongLength), QueueEnqueueCrashProtocol.Initial, QueueEnqueueCrashProtocol.Initial, QueueEnqueueCrashProtocol.First));
+            .IsEqualTo(new QueueCounters(QueueEnqueueCrashProtocol.Second, bodies.Sum(body => OrleansSerialization.Serialize(body).LongLength), QueueEnqueueCrashProtocol.Initial, QueueEnqueueCrashProtocol.Initial, QueueEnqueueCrashProtocol.First));
         await ReferencesAsync(store, QueueEnqueueCrashProtocol.ReadyFamily, [Reference(QueueEnqueueCrashProtocol.ReadyFamily, QueueEnqueueCrashProtocol.FirstLong, QueueEnqueueCrashProtocol.Ready)]);
         await ReferencesAsync(store, QueueEnqueueCrashProtocol.ScheduledFamily, [Reference(QueueEnqueueCrashProtocol.ScheduledFamily, messages.Single(message => message.MessageId == QueueEnqueueCrashProtocol.Scheduled).NotBefore!.Value,
             QueueEnqueueCrashProtocol.Scheduled)]);
@@ -59,5 +59,5 @@ internal static class QueueEnqueueProcessAssertions
 
     internal static string Reference(string family, object sequence, string id)
         => Convert.ToHexString(KeySpace.Partition(family, QueueEnqueueCrashProtocol.Partition, QueueEnqueueCrashProtocol.Queue, sequence, id))
-            + QueueEnqueueCrashProtocol.ImageSeparator + Convert.ToHexString(NativeSerialization.Serialize(id));
+            + QueueEnqueueCrashProtocol.ImageSeparator + Convert.ToHexString(OrleansSerialization.Serialize(id));
 }

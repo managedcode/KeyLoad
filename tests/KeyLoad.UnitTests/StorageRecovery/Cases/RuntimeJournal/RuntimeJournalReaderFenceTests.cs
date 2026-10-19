@@ -10,7 +10,7 @@ internal sealed class RuntimeJournalReaderFenceTests
     [Test]
     [Arguments(StoreReaderContract.Unspecified)]
     [Arguments(UnsupportedReaderContract)]
-    public async Task AcNative002ZeroOrUnknownCapabilityRejectsWithoutFileMutation(int capability)
+    public async Task Ac002ZeroOrUnknownCapabilityRejectsWithoutFileMutation(int capability)
     {
         using var fixture = new RuntimeJournalReaderFixture();
         StoreIdentity originalIdentity;
@@ -46,7 +46,7 @@ internal sealed class RuntimeJournalReaderFenceTests
     }
 
     [Test]
-    public async Task AcNative002OmittedCurrentCapabilityRejectsWithoutMutationAndRecovers()
+    public async Task Ac002OmittedCurrentCapabilityRejectsWithoutMutationAndRecovers()
     {
         using var fixture = new RuntimeJournalReaderFixture();
         StoreIdentity originalIdentity;
@@ -94,7 +94,7 @@ internal sealed class RuntimeJournalReaderFenceTests
     }
 
     [Test]
-    public async Task AcNative002UnsupportedIdentityMagicRejectsWithoutChangingNativeFiles()
+    public async Task Ac002UnsupportedIdentityMagicRejectsWithoutChangingFiles()
     {
         using var fixture = new RuntimeJournalReaderFixture();
         StoreIdentity originalIdentity;

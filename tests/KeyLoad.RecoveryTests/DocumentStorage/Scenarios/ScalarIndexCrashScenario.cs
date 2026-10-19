@@ -39,7 +39,7 @@ internal static class ScalarIndexCrashScenario
         => new(store, new AuthorizationPolicy(), CrashExecutionOptions.DatabaseLimits(),
             CrashExecutionOptions.DueWork(), CrashExecutionOptions.EventSource(), CrashExecutionOptions.Messaging(),
             CrashExecutionOptions.GraphExecution(), CrashExecutionOptions.ChangeFeedExecution(),
-            CrashExecutionOptions.BlobExecution(), CrashExecutionOptions.NativeClaimsExecution(),
+            CrashExecutionOptions.RuntimeClaimsExecution(),
             CrashExecutionOptions.TimeSeriesExecution());
 
     private static void Prepare(DatabaseEngine database)

@@ -26,7 +26,7 @@ internal static class SubscriptionWindowBudgetAssertions
         var db = Open(store, limits);
         var image = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
-        var identity = NativeSerialization.Serialize(store.Identity);
+        var identity = OrleansSerialization.Serialize(store.Identity);
         for (var repeat = FirstRepeat; repeat < Repeats; repeat++)
         {
             token.ThrowIfCancellationRequested();
@@ -39,7 +39,7 @@ internal static class SubscriptionWindowBudgetAssertions
             await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, image, position, identity);
             var retained = OutcomeStoreOracle.ReadPartition(store, group.Source.Partition, Subject, request.RequestId)
                 ?? throw new InvalidOperationException(MissingOutcome);
-            await NativeReplayResultAssertions.Same<ReceiveSubscriptionResult>(retained, original);
+            await ReplayResultAssertions.Same<ReceiveSubscriptionResult>(retained, original);
         }
     }
 
@@ -62,6 +62,5 @@ internal static class SubscriptionWindowBudgetAssertions
     private static DatabaseEngine Open(ZoneTreeStore store, DatabaseLimits limits)
         => new(store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(limits),
             UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(),
-            UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(),
-            UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
+            UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
 }

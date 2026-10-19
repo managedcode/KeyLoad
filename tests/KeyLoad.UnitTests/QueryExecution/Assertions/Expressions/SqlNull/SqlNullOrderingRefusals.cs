@@ -32,8 +32,8 @@ internal static class SqlNullOrderingRefusals
         await ErrorAsync(() => engine.ExecuteAst(SqlNullOrderingProtocol.Root, changed), ErrorCode.CursorExpired);
         using var cancelled = new CancellationTokenSource();
         await cancelled.CancelAsync();
-        foreach (var request in new[] { SqlNullOrderingProtocol.Native(database.Partition, false),
-            SqlNullOrderingProtocol.Native(database.Partition, true) })
+        foreach (var request in new[] { SqlNullOrderingProtocol.Execution(database.Partition, false),
+            SqlNullOrderingProtocol.Execution(database.Partition, true) })
         {
             var error = Assert.ThrowsExactly<OperationCanceledException>(() => engine.Execute(SqlNullOrderingProtocol.Root, request,
                 cancellationToken: cancelled.Token));
@@ -50,9 +50,9 @@ internal static class SqlNullOrderingRefusals
         var identity = JsonDefaults.Serialize(database.Store.Identity);
         var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
         await ErrorAsync(() => engine.Execute(SqlNullOrderingProtocol.Reader,
-            SqlNullOrderingProtocol.Native(database.Partition, false)), ErrorCode.PermissionDenied);
+            SqlNullOrderingProtocol.Execution(database.Partition, false)), ErrorCode.PermissionDenied);
         await ErrorAsync(() => engine.Execute(SqlNullOrderingProtocol.Reader,
-            SqlNullOrderingProtocol.Native(database.Partition, true)), ErrorCode.PermissionDenied);
+            SqlNullOrderingProtocol.Execution(database.Partition, true)), ErrorCode.PermissionDenied);
         await ErrorAsync(() => engine.Execute(SqlNullOrderingProtocol.Reader,
             new(database.Partition, SqlAllPages.DuplicateSql, AllowFullScan: true)), ErrorCode.PermissionDenied);
         await ErrorAsync(() => engine.Execute(SqlNullOrderingProtocol.Reader,
@@ -76,7 +76,7 @@ internal static class SqlNullOrderingRefusals
         var image = SqlInnerJoinRetainedIdentityFlow.Image(database.Store);
         var cut = database.Store.Position;
         var identity = JsonDefaults.Serialize(database.Store.Identity);
-        var good = SqlNullOrderingProtocol.Native(database.Partition, false);
+        var good = SqlNullOrderingProtocol.Execution(database.Partition, false);
         foreach (var (direction, code) in new[]
         {
             (" USING ", ErrorCode.Validation), (" USING '>' ", ErrorCode.Validation),
@@ -88,7 +88,7 @@ internal static class SqlNullOrderingRefusals
             await ErrorAsync(() => engine.Execute(SqlNullOrderingProtocol.Root,
                 good with
                 {
-                    Sql = good.Sql.Replace(SqlNullOrderingProtocol.NativeAscending, direction, StringComparison.Ordinal)
+                    Sql = good.Sql.Replace(SqlNullOrderingProtocol.RuntimeAscending, direction, StringComparison.Ordinal)
                 }), code);
             await UnchangedAsync(database.Store, image, cut, identity);
             await SqlNullOrderingPages.HealthyAsync(database.Database, database.Store,

@@ -53,7 +53,7 @@ internal static partial class ScaleServerResourceProcess
             process.StartInfo.ArgumentList.Add(argument);
         }
 
-        var limit = Math.Min(budget.Remaining, maximumOutputBytes ?? budget.Settings.MaxNativeOutputBytes);
+        var limit = Math.Min(budget.Remaining, maximumOutputBytes ?? budget.Settings.MaxOutputBytes);
         if (limit < budget.Settings.MinimumCommandBytes)
         {
             throw new InvalidDataException(MessageText);
@@ -62,7 +62,7 @@ internal static partial class ScaleServerResourceProcess
         var errorLimit = Math.Min(budget.Settings.MaxFileBytes, Math.Max(RunAsyncFirstPositiveCount, limit / budget.Settings.StandardErrorOutputDivisor));
         var outputLimit = limit - errorLimit;
         process.Start();
-        var output = ReadBoundedAsync(process.StandardOutput.BaseStream, outputLimit, budget.Settings.NativeReadBufferBytes, cancellationToken);
+        var output = ReadBoundedAsync(process.StandardOutput.BaseStream, outputLimit, budget.Settings.RuntimeReadBufferBytes, cancellationToken);
         var error = DrainBoundedAsync(process.StandardError.BaseStream, errorLimit, cancellationToken);
         var exit = process.WaitForExitAsync(cancellationToken);
         var readers = Task.WhenAll(output, error);

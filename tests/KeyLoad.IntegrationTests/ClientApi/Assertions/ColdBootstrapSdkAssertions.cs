@@ -19,11 +19,11 @@ internal static class ColdBootstrapSdkAssertions
         await Assert.That(receipt.Mutations.Length).IsEqualTo(OneMutation);
         var expected = new MutationReceipt(PutKind, ColdBootstrapSdkFlow.Collection,
             ColdBootstrapSdkFlow.Document, ColdBootstrapSdkFlow.FirstRevision);
-        await Assert.That(NativeSerialization.Serialize(receipt.Mutations[MutationIndex])
-            .SequenceEqual(NativeSerialization.Serialize(expected))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(receipt.Mutations[MutationIndex])
+            .SequenceEqual(OrleansSerialization.Serialize(expected))).IsTrue();
     }
 
-    internal static async Task NativeReceiptAsync(CommitReceipt actual, CommandRequest command,
+    internal static async Task RuntimeReceiptAsync(CommitReceipt actual, CommandRequest command,
         long revision, long previousPosition)
     {
         await Assert.That(actual.Token.Position).IsGreaterThan(previousPosition);

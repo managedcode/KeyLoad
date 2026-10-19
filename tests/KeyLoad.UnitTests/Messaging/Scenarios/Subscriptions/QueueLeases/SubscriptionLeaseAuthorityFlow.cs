@@ -26,13 +26,13 @@ internal static class SubscriptionLeaseAuthorityFlow
         var original = fixture.Database.Apply(operation);
         var deliveries = original.Get<ReceiveSubscriptionResult>().Deliveries;
         await Assert.That(deliveries.Select(d => d.Event.Position)).IsEquivalentTo(new long[] { 1, 2, 3 }, CollectionOrdering.Matching);
-        await NativeReplayResultAssertions.Same<ReceiveSubscriptionResult>(fixture.Database.Apply(operation), original);
+        await ReplayResultAssertions.Same<ReceiveSubscriptionResult>(fixture.Database.Apply(operation), original);
         var command = new SubscriptionDeliveryCommand(Guid.NewGuid(), group, deliveries[1].Token, action, LeaseSeconds: 20);
         var attempt = Create(fixture.Database, OperationKind.SubscriptionDelivery, command, command.CommandId, time.AddSeconds(1));
         var key = SubscriptionCheckpointAuthorityFlow.WindowKey(group, 2);
         var saved = fixture.Store.Read(view => view.ReadOwnedValue(key))
             ?? throw new InvalidOperationException("The genuine leased subscription slot is absent.");
-        var row = NativeSerialization.Deserialize<GroupDelivery>(saved);
+        var row = OrleansSerialization.Deserialize<GroupDelivery>(saved);
         var originalBytes = QueueWholeFlowStorage.Bytes(fixture.Store);
         var originalPosition = fixture.Store.Position;
         fixture.Store.Commit((tx, _) =>
@@ -43,7 +43,7 @@ internal static class SubscriptionLeaseAuthorityFlow
         await SubscriptionLeaseAuthorityAssertions.RefusalAsync(fixture.Database, fixture.Store, operation, original, attempt);
         var bytes = QueueWholeFlowStorage.Bytes(fixture.Store);
         var position = fixture.Store.Position;
-        var identity = NativeSerialization.Serialize(fixture.Store.Identity);
+        var identity = OrleansSerialization.Serialize(fixture.Store.Identity);
         fixture.Store.Dispose();
         token.ThrowIfCancellationRequested();
         using var first = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution(),
@@ -58,7 +58,7 @@ internal static class SubscriptionLeaseAuthorityFlow
             return true;
         });
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(first, originalBytes, originalPosition + 2, identity);
-        await NativeReplayResultAssertions.Same<ReceiveSubscriptionResult>(db.Apply(operation), original);
+        await ReplayResultAssertions.Same<ReceiveSubscriptionResult>(db.Apply(operation), original);
         await CompleteAsync(db, first, fixture.Directory, group, action, row, key, attempt,
             command, operation, original, time, source, token);
     }
@@ -84,7 +84,7 @@ internal static class SubscriptionLeaseAuthorityFlow
             _ => throw new ArgumentOutOfRangeException(nameof(action))
         };
         await Assert.That(store.Read(view => view.ReadOwnedValue(key))!.AsSpan()
-            .SequenceEqual(NativeSerialization.Serialize(expected))).IsTrue();
+            .SequenceEqual(OrleansSerialization.Serialize(expected))).IsTrue();
         await Assert.That(store.Read(view => view.ReadOwnedValue(SubscriptionCheckpointAuthorityFlow.WindowKey(group, 99)))).IsNull();
         var receipts = new List<(Command<DatabaseCommand> Operation, Result<object> Result)> { (attempt, result) };
         var second = original.Get<ReceiveSubscriptionResult>().Deliveries[1];
@@ -100,11 +100,11 @@ internal static class SubscriptionLeaseAuthorityFlow
             await Assert.That(second).IsEqualTo(new SubscriptionDelivery(original.Get<ReceiveSubscriptionResult>().Deliveries[1].Event,
                 second.Token, 2L, time.AddSeconds(33), 2));
             await Assert.That(second.Token).IsNotEqualTo(command.Token);
-            await NativeReplayResultAssertions.Same<ReceiveSubscriptionResult>(db.Apply(reclaimed), reclaimedOutcome);
+            await ReplayResultAssertions.Same<ReceiveSubscriptionResult>(db.Apply(reclaimed), reclaimedOutcome);
         }
         else if (action == DeliveryAction.Renew)
         {
-            await NativeReplayResultAssertions.Same<ReceiveSubscriptionResult>(db.Apply(claim), original);
+            await ReplayResultAssertions.Same<ReceiveSubscriptionResult>(db.Apply(claim), original);
         }
         if (action != DeliveryAction.Ack)
         {
@@ -123,7 +123,7 @@ internal static class SubscriptionLeaseAuthorityFlow
     {
         var bytes = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
-        var identity = NativeSerialization.Serialize(store.Identity);
+        var identity = OrleansSerialization.Serialize(store.Identity);
         store.Dispose();
         token.ThrowIfCancellationRequested();
         using var second = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution(),

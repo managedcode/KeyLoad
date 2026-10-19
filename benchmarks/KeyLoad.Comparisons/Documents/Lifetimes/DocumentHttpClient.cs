@@ -9,11 +9,11 @@ internal sealed class DocumentHttpClient : IDisposable
     {
         get;
     }
-    internal DocumentHttpClient(HttpClient source, IOptions<NativeComparisonExecutionOptions> options)
+    internal DocumentHttpClient(HttpClient source, IOptions<ComparisonExecutionOptions> options)
     {
         handler = new()
         {
-            MaxConnectionsPerServer = NativeComparisonExecutionOptions.Require(options).Value.DocumentClientMaxConnections
+            MaxConnectionsPerServer = ComparisonExecutionOptions.Require(options).Value.DocumentClientMaxConnections
         };
         try
         {

@@ -2,9 +2,9 @@ namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 internal sealed class IsolatedResourceLogSubscriberScope<T> : IAsyncDisposable
 {
-    private const string PendingOperations = "Native subscriber operations remain active; enumerator disposal is deferred.";
-    private const string PendingDisposal = "Native subscriber disposal is still running; its lifetime remains retained.";
-    private static TimeSpan CleanupDeadline => NativeExecutionPolicyFixture.Harness().Value.SubscriberCleanupTimeout;
+    private const string PendingOperations = "Execution subscriber operations remain active; enumerator disposal is deferred.";
+    private const string PendingDisposal = "Execution subscriber disposal is still running; its lifetime remains retained.";
+    private static TimeSpan CleanupDeadline => ExecutionPolicyFixture.Harness().Value.SubscriberCleanupTimeout;
     private readonly List<Task> _originalOperations = [];
     private readonly CancellationTokenSource _lifetime;
     private int _disposeStarted;

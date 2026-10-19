@@ -1,6 +1,6 @@
 using KeyLoad.Client;
 using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.ClusterRouting;
+using KeyLoad.IntegrationTests.Features.OrleansExecution;
 using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Features.TimeSeries;
@@ -10,7 +10,7 @@ internal static class ChunkMultiblockClusterWrites
     internal static async Task CommitAsync(RequestCqrsClusterCallers administrator, ChunkMultiblockClusterState state,
         Mutation mutation, string kind, long revision, bool official, ChunkMultiblockClusterPhase phase, CancellationToken token)
     {
-        var command = new CommandRequest(Guid.NewGuid(), state.Scenario.Native.Partition, [mutation]);
+        var command = new CommandRequest(Guid.NewGuid(), state.Scenario.Execution.Partition, [mutation]);
         var failures = new List<Exception>();
         CommitReceipt? receipt = null;
         await ServerFailureObserver.ObserveAsync(async () =>

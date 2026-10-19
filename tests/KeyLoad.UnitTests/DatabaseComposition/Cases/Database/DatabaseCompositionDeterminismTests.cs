@@ -36,12 +36,12 @@ internal sealed class DatabaseCompositionDeterminismTests
                     new GraphToQueueMutation(Queue, Graph, Vertex(left, From), MessagePrefix)]);
             var work = left.CreateReadWork(TestContext.Current!.Execution.CancellationToken);
             var operation = left.Database.CreateCommand(OperationKind.Batch, commandId, "root", fixedEvaluation,
-                NativeSerialization.Serialize(request), work);
+                OrleansSerialization.Serialize(request), work);
             var limits = new DatabaseLimits { QueryDeadlineSeconds = OneSecondDeadline };
             var steady = new DivergentClock(DateTimeOffset.UnixEpoch, timestampStep: 0);
             var jumping = new DivergentClock(DateTimeOffset.UnixEpoch.AddYears(50), TimeSpan.TicksPerHour);
-            var leftEngine = new DatabaseEngine(left.Store, left.Database.Authorization, UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), steady);
-            var rightEngine = new DatabaseEngine(right.Store, right.Database.Authorization, UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), jumping);
+            var leftEngine = new DatabaseEngine(left.Store, left.Database.Authorization, UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), steady);
+            var rightEngine = new DatabaseEngine(right.Store, right.Database.Authorization, UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), jumping);
 
             var probe = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(limits), jumping);
             var elapsedFailure = Assert.ThrowsExactly<KeyLoadException>(probe.Check);
@@ -57,7 +57,7 @@ internal sealed class DatabaseCompositionDeterminismTests
             {
                 await Assert.That(effect.CompositionReferences.SequenceEqual([expectedFrom, expectedTo])).IsTrue();
             }
-            await Assert.That(NativeSerialization.Serialize(rightReceipt).SequenceEqual(NativeSerialization.Serialize(leftReceipt))).IsTrue();
+            await Assert.That(OrleansSerialization.Serialize(rightReceipt).SequenceEqual(OrleansSerialization.Serialize(leftReceipt))).IsTrue();
             await Assert.That(rightReceipt.Mutations.Select(Effect).SequenceEqual(leftReceipt.Mutations.Select(Effect))).IsTrue();
             await Assert.That(SameStored<EdgeRecord>(left, right, EdgeSpace, Graph, EdgePrefix + SourceId)).IsTrue();
             await Assert.That(SameStored<MessageMetadata>(left, right, MessageMetadataSpace, Queue,
@@ -77,8 +77,8 @@ internal sealed class DatabaseCompositionDeterminismTests
     {
         T Read(IAtomicStore store) => store.Read(view => view.GetRecord<T>(
             KeySpace.Partition(space, left.Partition, resource, id)))!;
-        return NativeSerialization.Serialize(Read(left.Store)).AsSpan()
-            .SequenceEqual(NativeSerialization.Serialize(Read(right.Store)));
+        return OrleansSerialization.Serialize(Read(left.Store)).AsSpan()
+            .SequenceEqual(OrleansSerialization.Serialize(Read(right.Store)));
     }
 
     private static TestDatabase Seed()

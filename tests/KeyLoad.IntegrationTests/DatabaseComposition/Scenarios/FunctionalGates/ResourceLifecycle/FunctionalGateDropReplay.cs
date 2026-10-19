@@ -1,5 +1,5 @@
 using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.ClusterReplication;
+using KeyLoad.IntegrationTests.Features.StorageReplication;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
 using KeyLoad.IntegrationTests.Features.RelationalStorage;
 
@@ -24,9 +24,9 @@ internal static class FunctionalGateDropReplay
                 await SqlClusterProtocol.EqualAsync(table.OriginalDrop, actual);
                 await FunctionalGateDropAssertions.FreshAsync(context, state, token);
             }
-            await NativeSubmissionColdAssertions.ReceiptAsync(table.FreshReceipt,
+            await SubmissionColdAssertions.ReceiptAsync(table.FreshReceipt,
                 await context.SdkAsync(context.Administrator.Sdk.CommitAsync(table.FreshCommand, token)));
-            await NativeSubmissionColdAssertions.ReceiptAsync(table.FreshReceipt,
+            await SubmissionColdAssertions.ReceiptAsync(table.FreshReceipt,
                 await context.McpAsync<CommitReceipt>(context.Administrator,
                     McpCallerTools.DocumentsCommit, table.FreshCommand, token));
         }
@@ -36,19 +36,19 @@ internal static class FunctionalGateDropReplay
     private static async Task OriginalAsync(FunctionalGateContext context, FunctionalGateDropState state,
         CancellationToken token)
     {
-        await NativeSubmissionColdAssertions.ReceiptAsync(state.Receipt,
+        await SubmissionColdAssertions.ReceiptAsync(state.Receipt,
             await context.SdkAsync(context.Administrator.Sdk.CommitAsync(state.Original, token)));
         await FunctionalGateDropAssertions.FreshAsync(context, state, token);
-        await NativeSubmissionColdAssertions.ReceiptAsync(state.Receipt,
+        await SubmissionColdAssertions.ReceiptAsync(state.Receipt,
             await context.McpAsync<CommitReceipt>(context.Administrator,
                 McpCallerTools.DocumentsCommit, state.Original, token));
         await FunctionalGateDropAssertions.FreshAsync(context, state, token);
         var sql = FunctionalGateRelationalCalls.Commit(state.Original);
-        await NativeSubmissionColdAssertions.ReceiptAsync(state.Receipt,
+        await SubmissionColdAssertions.ReceiptAsync(state.Receipt,
             await FunctionalGateRelationalCalls.SqlSdkAsync<CommitReceipt>(context,
                 context.Administrator, sql, token));
         await FunctionalGateDropAssertions.FreshAsync(context, state, token);
-        await NativeSubmissionColdAssertions.ReceiptAsync(state.Receipt,
+        await SubmissionColdAssertions.ReceiptAsync(state.Receipt,
             await FunctionalGateRelationalCalls.SqlMcpAsync<CommitReceipt>(context,
                 context.Administrator, sql, token));
         await FunctionalGateDropAssertions.FreshAsync(context, state, token);

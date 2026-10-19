@@ -2,7 +2,7 @@ using System.Text.Json;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
-/// <summary>Owned atomic no-overwrite evidence exports only safe provider, native and public membership facts.</summary>
+/// <summary>Owned atomic no-overwrite evidence exports only safe provider, execution and public membership facts.</summary>
 internal sealed class IsolatedKeyLoadFaultChecksEvidence(string cell, BenchmarkSessionFaultWorker worker)
 {
     public int SchemaVersion { get; } = 1;
@@ -21,7 +21,7 @@ internal sealed class IsolatedKeyLoadFaultChecksEvidence(string cell, BenchmarkS
     public string Stage { get; internal set; } = "setup";
     public IsolatedKeyLoadFaultChecksMembership[] Baseline { get; internal set; } = [];
     public List<IsolatedKeyLoadFaultChecksPhaseReceipt> Phases { get; } = [];
-    public List<IsolatedKeyLoadFaultChecksNativeReceipt> Native { get; internal set; } = [];
+    public List<IsolatedKeyLoadFaultChecksReceipt> Execution { get; internal set; } = [];
 
     internal async Task WriteAsync(string directory, string? failureCategory)
     {
@@ -34,9 +34,9 @@ internal sealed class IsolatedKeyLoadFaultChecksEvidence(string cell, BenchmarkS
         Directory.CreateDirectory(directory);
         var pending = Path.Combine(directory, ".fault-" + Guid.NewGuid().ToString("N") + ".pending");
         var bytes = JsonSerializer.SerializeToUtf8Bytes(this, JsonDefaults.Options);
-        IsolatedKeyLoadFaultChecksProtocol.Require(bytes.Length <= NativeExecutionPolicyFixture.Harness().Value.KeyLoadFaultMaximumEvidenceBytes);
+        IsolatedKeyLoadFaultChecksProtocol.Require(bytes.Length <= ExecutionPolicyFixture.Harness().Value.KeyLoadFaultMaximumEvidenceBytes);
         var owned = false;
-        using var deadline = new CancellationTokenSource(NativeExecutionPolicyFixture.Harness().Value.KeyLoadFaultCliTimeout, TimeProvider.System);
+        using var deadline = new CancellationTokenSource(ExecutionPolicyFixture.Harness().Value.KeyLoadFaultCliTimeout, TimeProvider.System);
         try
         {
             await using (var stream = new FileStream(pending, FileMode.CreateNew, FileAccess.Write, FileShare.None,

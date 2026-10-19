@@ -115,7 +115,7 @@ internal static class SqlModelViewClusterAuthorizationAssertions
         SqlModelViewClusterScenario scenario, McpPersistedIdentity identity, bool use,
         CancellationToken cancellationToken)
     {
-        var native = await McpCallerAssertions.SdkSuccessAsync(
+        var execution = await McpCallerAssertions.SdkSuccessAsync(
             await administrator.ReadStreamAsync(new(scenario.Stream), cancellationToken));
         var request = scenario.EventSql();
         var requests = new[]
@@ -143,11 +143,11 @@ internal static class SqlModelViewClusterAuthorizationAssertions
                     await reader.QueryAsync(query, cancellationToken));
                 var official = await McpCallerAssertions.SuccessAsync<QueryPage>(
                     await mcp.CallAsync(McpCallerTools.QueryExecute, query, cancellationToken));
-                await SqlModelViewClusterParityAssertions.AssertEventRowsAsync(native.Events, sdk);
-                await SqlModelViewClusterParityAssertions.AssertEventRowsAsync(native.Events, official.Value);
+                await SqlModelViewClusterParityAssertions.AssertEventRowsAsync(execution.Events, sdk);
+                await SqlModelViewClusterParityAssertions.AssertEventRowsAsync(execution.Events, official.Value);
                 await SqlClusterProtocol.EqualAsync(sdk, official.Value);
             }
-            await SqlClusterProtocol.EqualAsync(native, await McpCallerAssertions.SdkSuccessAsync(
+            await SqlClusterProtocol.EqualAsync(execution, await McpCallerAssertions.SdkSuccessAsync(
                 await administrator.ReadStreamAsync(new(scenario.Stream), cancellationToken)));
         }
     }

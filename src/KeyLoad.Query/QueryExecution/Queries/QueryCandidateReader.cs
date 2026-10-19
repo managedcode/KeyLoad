@@ -64,7 +64,7 @@ internal sealed class QueryCandidateReader(DatabaseEngine database, IKeyValueVie
                 new object?[] { request.Query.Collection, index.Name }.Concat(values).ToArray());
             var result = VisitRange(prefix, (_, value) =>
             {
-                Read(NativeSerialization.Deserialize<string>(value));
+                Read(OrleansSerialization.Deserialize<string>(value));
                 return true;
             });
             if (result.HasMore)
@@ -78,7 +78,7 @@ internal sealed class QueryCandidateReader(DatabaseEngine database, IKeyValueVie
 
     private void Candidate(ReadOnlySpan<byte> payload)
     {
-        var record = NativeSerialization.Deserialize<DocumentRecord>(payload);
+        var record = OrleansSerialization.Deserialize<DocumentRecord>(payload);
         if (!record.Deleted && database.Authorization.CanReadRow(principal, record.Access))
         {
             accept(record);

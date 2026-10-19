@@ -14,7 +14,7 @@ internal static class IsolatedCurrentJobCacheNodeProgram
         process.stdout.write(JSON.stringify({ result }));
 
         async function runPolicy([currentJobModule, transportModule, fixtureDirectory]) {
-          const [{ classifyCurrentJob }, { nativeArguments }] = await Promise.all([
+          const [{ classifyCurrentJob }, { runtimeArguments }] = await Promise.all([
             import(pathToFileURL(currentJobModule).href), import(pathToFileURL(transportModule).href)]);
           const cohort = JSON.parse(await readFile(path.join(fixtureDirectory,
             'IsolatedCurrentJobOriginalOpenSearchCohort.json'), 'utf8'));
@@ -27,11 +27,11 @@ internal static class IsolatedCurrentJobCacheNodeProgram
           const classify = job => classifyCurrentJob(job, cohort, job.name, job.id);
           const constructedRunning = { ...queued[0], status: 'in_progress', conclusion: null };
           const context = { transport: { allowBinary: false } };
-          const currentArgs = nativeArguments(`repos/managedcode/KeyLoad/actions/jobs/${queued[0].id}`,
+          const currentArgs = runtimeArguments(`repos/managedcode/KeyLoad/actions/jobs/${queued[0].id}`,
             context, queued[0].id);
-          const genericArgs = nativeArguments('repos/managedcode/KeyLoad/actions/runs/37320853130', context);
+          const genericArgs = runtimeArguments('repos/managedcode/KeyLoad/actions/runs/37320853130', context);
           let wrongRouteRejected = false;
-          try { nativeArguments('repos/managedcode/KeyLoad/actions/runs/37320853130', context, queued[0].id); }
+          try { runtimeArguments('repos/managedcode/KeyLoad/actions/runs/37320853130', context, queued[0].id); }
           catch { wrongRouteRejected = true; }
           const mutateAndReject = change => {
             const altered = { ...queued[0], ...change };
@@ -76,7 +76,7 @@ internal static class IsolatedCurrentJobCacheNodeProgram
               settled.then(() => ({ ready: false, childSettled: true }))]);
             if (!readyOutcome.ready && !existsSync(readyPath)) {
               if (readyOutcome.failure) throw readyOutcome.failure;
-              throw new Error('The native child exited before readiness.');
+              throw new Error('The execution child exited before readiness.');
             }
             ready = true;
             if (mode === 'cancel') controller.abort();
@@ -102,8 +102,8 @@ internal static class IsolatedCurrentJobCacheNodeProgram
               if (failure) reject(failure); else resolve();
             };
             const abort = () => complete(signal.reason instanceof Error ? signal.reason
-              : new Error('Native child readiness was canceled.'));
-            const timer = setTimeout(() => complete(new Error('Native child readiness exceeded its bound.')), 5000);
+              : new Error('Execution child readiness was canceled.'));
+            const timer = setTimeout(() => complete(new Error('Execution child readiness exceeded its bound.')), 5000);
             signal.addEventListener('abort', abort, { once: true });
             try {
               watcher = watch(path.dirname(file), (_event, name) => {

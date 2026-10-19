@@ -1,6 +1,6 @@
 namespace KeyLoad.Comparisons;
 
-/// <summary>Disjoint mutation lanes and stable read lanes shared by every native database.</summary>
+/// <summary>Disjoint mutation lanes and stable read lanes shared by every execution database.</summary>
 public sealed class DocumentComparisonSchedule(DocumentComparisonScenario scenario, DocumentComparisonCorpus corpus, int operations)
 {
     /// <summary>Gets records added during measurement.</summary>
@@ -70,7 +70,7 @@ public sealed class DocumentComparisonSchedule(DocumentComparisonScenario scenar
         }
         return Read(scenario == DocumentComparisonScenario.SequentialRead ? ordinal % Initial : Permute(ordinal, Initial));
     }
-    /// <summary>Enumerates the exact complete final state in native ordinal identifier order.</summary>
+    /// <summary>Enumerates the exact complete final state in execution ordinal identifier order.</summary>
     public IEnumerable<BenchmarkDocument> FinalDocuments(bool initialState = false)
     {
         if (initialState)

@@ -40,16 +40,16 @@ internal static class QueueExpiredReadyVersionExhaustionAssertions
             lane.Partition, lane.Queue, metadata.Id)))).IsEqualTo(body);
         var retained = body is not null;
         var leased = metadata.State == MessageState.Leased;
-        var bytes = retained ? NativeSerialization.Serialize(body).LongLength : 0;
+        var bytes = retained ? OrleansSerialization.Serialize(body).LongLength : 0;
         await Assert.That(store.Read(view => view.GetRecord<QueueCounters>(KeySpace.Partition(QueueClaimVersionExhaustionProtocol.CounterSpace,
             lane.Partition, lane.Queue)))).IsEqualTo(new QueueCounters(retained ? 1 : 0, bytes, leased ? 1 : 0, leased ? bytes : 0, nextReadySequence));
         var ready = metadata.State == MessageState.Ready
             ? new[] { Convert.ToHexString(KeySpace.Partition(QueueClaimVersionExhaustionProtocol.ReadySpace, lane.Partition, lane.Queue,
-                metadata.ReadySequence, metadata.Id)) + ":" + Convert.ToHexString(NativeSerialization.Serialize(metadata.Id)) }
+                metadata.ReadySequence, metadata.Id)) + ":" + Convert.ToHexString(OrleansSerialization.Serialize(metadata.Id)) }
             : [];
         var lease = leased
             ? new[] { Convert.ToHexString(KeySpace.Partition(QueueClaimVersionExhaustionProtocol.LeaseSpace, lane.Partition, lane.Queue,
-                metadata.LeaseUntil!.Value, metadata.Id)) + ":" + Convert.ToHexString(NativeSerialization.Serialize(metadata.Id)) }
+                metadata.LeaseUntil!.Value, metadata.Id)) + ":" + Convert.ToHexString(OrleansSerialization.Serialize(metadata.Id)) }
             : [];
         await Assert.That(References(store, lane, QueueClaimVersionExhaustionProtocol.ReadySpace)).IsEquivalentTo(ready, CollectionOrdering.Matching);
         await Assert.That(References(store, lane, QueueClaimVersionExhaustionProtocol.LeaseSpace)).IsEquivalentTo(lease, CollectionOrdering.Matching);

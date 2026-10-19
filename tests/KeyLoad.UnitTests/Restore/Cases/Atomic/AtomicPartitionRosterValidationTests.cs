@@ -1,6 +1,8 @@
 using KeyLoad.Core.Features.BackupRestore.Execution;
 using KeyLoad.Core.Features.BackupRestore.Serialization;
-using KeyLoad.Core.Features.ClusterRouting.Contracts;
+using KeyLoad.Core.Features.CommandOutcomes.Contracts;
+using KeyLoad.Core.Features.RuntimeJournaling.Contracts;
+using KeyLoad.Core.Features.StoragePartitions.Contracts;
 using KeyLoad.Storage;
 using Microsoft.Extensions.Options;
 
@@ -52,11 +54,11 @@ internal sealed class AtomicPartitionRosterValidationTests
         await Assert.That(fixture.Store.Read(view => view.ReadOwnedValue(malformedKey))).IsNull();
     }
 
-    private static AtomicPartitionCatalogEntryV1 Entry(long storePosition, long appliedIndex,
+    private static AtomicPartitionCatalogEntry Entry(long storePosition, long appliedIndex,
         int version = AtomicPartitionRosterProtocol.CurrentVersion, PartitionRef? partition = null)
         => new(version, partition ?? AtomicPartitionRosterFixture.Source, storePosition, appliedIndex);
 
-    private static async Task AssertInvalidEntryAsync(Func<long, AtomicPartitionCatalogEntryV1> createEntry)
+    private static async Task AssertInvalidEntryAsync(Func<long, AtomicPartitionCatalogEntry> createEntry)
     {
         using var fixture = new AtomicPartitionRosterFixture();
         fixture.ConfigureGraph();

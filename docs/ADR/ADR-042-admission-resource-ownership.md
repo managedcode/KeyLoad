@@ -73,7 +73,7 @@ flowchart LR
    negative argument, quota, principal, cancellation, stopped/disposed and
    concurrent-reader flows. No source-text behavior checks or test-only production
    hooks substitute for the real operation.
-3. Local unit and process-recovery tests use the canonical native TUnit entry and
+3. Local unit and process-recovery tests use the canonical TUnit entry and
    are development evidence. Delivered qualification requires exact-source Linux
    GitHub Build and Tests, recovery and replicated-cluster jobs, with that path using the real
    .NET and official MCP clients.

@@ -1,6 +1,8 @@
 using System.Diagnostics.CodeAnalysis;
 using KeyLoad.Core;
-using KeyLoad.Core.Features.ClusterRouting.Contracts;
+using KeyLoad.Core.Features.CommandOutcomes.Contracts;
+using KeyLoad.Core.Features.RuntimeJournaling.Contracts;
+using KeyLoad.Core.Features.StoragePartitions.Contracts;
 using KeyLoad.Core.Features.Search;
 using KeyLoad.Server;
 using KeyLoad.Storage;
@@ -13,7 +15,7 @@ namespace KeyLoad.UnitTests.Features.Search;
 internal sealed class Bm25OriginalPhaseRecoveryOwner
 {
     private const string DirectoryPrefix = "keyload-bm25-phase-recovery-";
-    private const string MissingOwner = "The original BM25 native owner is not open.";
+    private const string MissingOwner = "The original BM25 execution owner is not open.";
     private readonly StoreIdentity originalIdentity;
     private bool originalJoined;
     private ZoneTreeStore? coldStore;
@@ -77,7 +79,7 @@ internal sealed class Bm25OriginalPhaseRecoveryOwner
         {
             throw new InvalidOperationException("The original BM25 phase command is required.");
         }
-        var phase = NativeSerialization.Deserialize<Bm25CorpusPublicationPhaseCommand>(input.Input.Span);
+        var phase = OrleansSerialization.Deserialize<Bm25CorpusPublicationPhaseCommand>(input.Input.Span);
         if (phase.CommandId != operation.CommandId || phase.Current.Partition != Source.Partition)
         {
             throw new InvalidOperationException("The original BM25 phase partition is inconsistent.");
@@ -99,7 +101,7 @@ internal sealed class Bm25OriginalPhaseRecoveryOwner
 
     internal (long AppliedPosition, long StorePosition) ReadCut()
         => Store.Read(view => (view.ReadOwnedValue(KeySpace.AppliedBytes) is { } bytes
-            ? NativeSerialization.Deserialize<long>(bytes) : default(long), Store.Position));
+            ? OrleansSerialization.Deserialize<long>(bytes) : default(long), Store.Position));
 
     internal void Reopen(DatabaseLimits? configuredLimits = null)
     {
@@ -131,7 +133,7 @@ internal sealed class Bm25OriginalPhaseRecoveryOwner
             return Source.CreateConfiguredDatabase(store);
         }
         var create = TestDatabaseEngineFactory.Capture(UnitExecutionOptions.DatabaseLimits(configuredLimits),
-            UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), null, Source.Database.EvaluationClock);
+            UnitExecutionOptions.RuntimeClaimsExecution(), null, Source.Database.EvaluationClock);
         return create(store);
     }
 

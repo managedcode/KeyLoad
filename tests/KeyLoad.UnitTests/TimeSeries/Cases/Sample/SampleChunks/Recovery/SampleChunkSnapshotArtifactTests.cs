@@ -51,7 +51,7 @@ internal sealed class SampleChunkSnapshotArtifactTests
         => new(fixture.Read(), fixture.Owner.Database.ReadSamples(SampleChunkCanonicalFixture.Principal,
             fixture.Owner.Partition, SampleChunkCanonicalFixture.Set, SampleChunkCanonicalFixture.Series,
             SampleChunkCanonicalFixture.Start, SampleChunkCanonicalFixture.Until, SampleChunkCanonicalFixture.OutputLimit),
-            fixture.Raw(), fixture.Owner.Store.Position, Convert.ToHexString(NativeSerialization.Serialize(receipt)), null);
+            fixture.Raw(), fixture.Owner.Store.Position, Convert.ToHexString(OrleansSerialization.Serialize(receipt)), null);
 
     private static async Task RequireFileAsync(string path, SampleChunkCrashSnapshot expected,
         int maximumBytes, CancellationToken token)

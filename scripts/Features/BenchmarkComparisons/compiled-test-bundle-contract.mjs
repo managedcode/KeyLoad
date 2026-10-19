@@ -70,8 +70,8 @@ export function validateRuntimeDescriptor(value, context, inventory) {
       && assembly.pdbSha256 === files.get(assembly.pdbPath)?.sha256
       && runtimeBundle.sha256.test(assembly.sha256 ?? '') && runtimeBundle.sha256.test(assembly.pdbSha256 ?? ''));
   }
-  const native = selectRuntimeAspire(inventory, value.aspire?.version, value.architecture);
-  requireRuntime(value.aspire?.dcpPath === native.dcpPath && value.aspire?.dashboardPath === native.dashboardPath);
+  const execution = selectRuntimeAspire(inventory, value.aspire?.version, value.architecture);
+  requireRuntime(value.aspire?.dcpPath === execution.dcpPath && value.aspire?.dashboardPath === execution.dashboardPath);
   return value;
 }
 
@@ -82,11 +82,11 @@ export function selectRuntimeAspire(inventory, version, architecture) {
     && entry.path.slice(prefix.length).startsWith(version + '_')
     && entry.path.slice(prefix.length).split('/').length === 3 && entry.path.endsWith('/dcp/dcp'));
   requireRuntime(candidates.length === 1 && candidates[0].bytes > 0 && (candidates[0].mode & 0o111) !== 0,
-    'NativeAspireBundleMissingOrAmbiguous');
+    'AspireBundleMissingOrAmbiguous');
   const dcpPath = candidates[0].path;
   const dashboardPath = path.posix.dirname(path.posix.dirname(dcpPath)) + '/dashboard/Aspire.Dashboard';
   const dashboard = inventory.find(entry => entry.path === dashboardPath);
   requireRuntime(dashboard !== undefined && dashboard.bytes > 0 && (dashboard.mode & 0o111) !== 0,
-    'NativeAspireDashboardMissing');
+    'AspireDashboardMissing');
   return { version, dcpPath, dashboardPath };
 }

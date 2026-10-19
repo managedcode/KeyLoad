@@ -9,7 +9,7 @@ internal static class QueueLifecycleCrashProtocol
     internal const string Pending = "pending";
     internal const string Healthy = "healthy";
     internal const string Payload = "{\"knowledge\":\"complete lifecycle crash corpus\"}";
-    internal const string Headers = "{\"trace\":\"native atomic boundary\"}";
+    internal const string Headers = "{\"trace\":\"execution atomic boundary\"}";
     internal const int None = 0;
     internal const int One = 1;
     internal const int Two = 2;

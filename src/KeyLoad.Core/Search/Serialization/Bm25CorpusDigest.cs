@@ -4,10 +4,10 @@ namespace KeyLoad.Core.Features.Search;
 
 internal static class Bm25CorpusDigest
 {
-    private const string SourceDigestDomain = "keyload-bm25-corpus-source-v1";
+    private const string SourceDigestDomain = "keyload-bm25-corpus-source";
     private static readonly byte[] SourceDigestDomainBytes = System.Text.Encoding.UTF8.GetBytes(SourceDigestDomain);
 
-    internal static string Compute(Bm25CorpusCurrentV1 current, AtomicPartitionPlacementResolution placement,
+    internal static string Compute(Bm25CorpusCurrent current, AtomicPartitionPlacementResolution placement,
         ReadExecutionBudget work)
     {
         work.ChargeBytes(Measure(current, placement));
@@ -15,21 +15,21 @@ internal static class Bm25CorpusDigest
         return Compute(current, placement, work.MaximumResultBytes);
     }
 
-    internal static string Compute(Bm25CorpusCurrentV1 current, AtomicPartitionPlacementResolution placement,
+    internal static string Compute(Bm25CorpusCurrent current, AtomicPartitionPlacementResolution placement,
         long maximumBytes)
     {
         if (Measure(current, placement) > maximumBytes)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, Bm25CorpusProtocol.Capacity);
         }
-        var bytes = NativeSerialization.Serialize(current with
+        var bytes = OrleansSerialization.Serialize(current with
         {
             PayloadDigest = string.Empty
         });
         byte[]? placementBytes = null;
         try
         {
-            placementBytes = NativeSerialization.Serialize(placement);
+            placementBytes = OrleansSerialization.Serialize(placement);
             using var hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
             hash.AppendData(SourceDigestDomainBytes);
             hash.AppendData(bytes);
@@ -48,18 +48,18 @@ internal static class Bm25CorpusDigest
 
     internal static string Resource(ResourceDefinition resource, ReadExecutionBudget work)
     {
-        work.ChargeBytes(checked(NativeSerialization.Measure(resource) + SHA256.HashSizeInBytes));
+        work.ChargeBytes(checked(OrleansSerialization.Measure(resource) + SHA256.HashSizeInBytes));
         work.Check();
         return Resource(resource, work.MaximumResultBytes);
     }
 
     internal static string Resource(ResourceDefinition resource, long maximumBytes)
     {
-        if (checked(NativeSerialization.Measure(resource) + SHA256.HashSizeInBytes) > maximumBytes)
+        if (checked(OrleansSerialization.Measure(resource) + SHA256.HashSizeInBytes) > maximumBytes)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, Bm25CorpusProtocol.Capacity);
         }
-        var bytes = NativeSerialization.Serialize(resource);
+        var bytes = OrleansSerialization.Serialize(resource);
         try
         {
             return Convert.ToHexStringLower(SHA256.HashData(bytes));
@@ -67,11 +67,11 @@ internal static class Bm25CorpusDigest
         finally { CryptographicOperations.ZeroMemory(bytes); }
     }
 
-    private static long Measure(Bm25CorpusCurrentV1 current, AtomicPartitionPlacementResolution placement)
-        => checked(NativeSerialization.Measure(current with
+    private static long Measure(Bm25CorpusCurrent current, AtomicPartitionPlacementResolution placement)
+        => checked(OrleansSerialization.Measure(current with
         {
             PayloadDigest = string.Empty
         })
-            + NativeSerialization.Measure(placement) + SourceDigestDomainBytes.Length
+            + OrleansSerialization.Measure(placement) + SourceDigestDomainBytes.Length
             + SHA256.HashSizeInBytes);
 }

@@ -44,7 +44,7 @@ internal static class CompositionReplayFixture
     {
         var id = Guid.NewGuid();
         return db.Database.CreateCommand(OperationKind.Batch, id, principal, TimeProvider.System.GetUtcNow(),
-            NativeSerialization.Serialize(new CommandRequest(id, db.Partition, [new QueueToGraph(Graph, Queue, Prefix)])));
+            OrleansSerialization.Serialize(new CommandRequest(id, db.Partition, [new QueueToGraph(Graph, Queue, Prefix)])));
     }
 
     internal static void ConfigureReader(TestDatabase db, Capability? revoked = null)

@@ -6,7 +6,7 @@ namespace KeyLoad.UnitTests.Features.QueryExecution;
 internal sealed class PartitionQueryContractTests
 {
     [Test]
-    public async Task GeneratedPlanAndCompleteNativeResultRoundTripWithStableFields()
+    public async Task GeneratedPlanAndCompleteResultRoundTripWithStableFields()
     {
         using var database = PartitionQueryTestSupport.Create();
         var partitions = PartitionQueryTestSupport.Partitions(database)[..2];
@@ -15,10 +15,10 @@ internal sealed class PartitionQueryContractTests
         var limits = database.Database.Limits;
         var request = QueryValidation.Normalize(PartitionQueryTestSupport.Request(database, 2), limits, UnitExecutionOptions.QueryExecution().Value);
         var plan = PartitionQueryPlanFactory.Create(request, database.Store.Identity, [.. partitions], limits, UnitExecutionOptions.QueryExecution().Value);
-        var planRoundTrip = NativeSerialization.Deserialize<PartitionQueryPlanV1>(NativeSerialization.Serialize(plan));
+        var planRoundTrip = OrleansSerialization.Deserialize<PartitionQueryPlan>(OrleansSerialization.Serialize(plan));
         var result = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution()).ExecutePartitionQuery(PartitionQueryTestSupport.Principal,
             PartitionQueryTestSupport.Request(database, 2), [.. partitions]);
-        var resultRoundTrip = NativeSerialization.Deserialize<PartitionQueryResultV1>(NativeSerialization.Serialize(result));
+        var resultRoundTrip = OrleansSerialization.Deserialize<PartitionQueryResult>(OrleansSerialization.Serialize(result));
 
         await Assert.That(JsonDefaults.Serialize(planRoundTrip).AsSpan().SequenceEqual(JsonDefaults.Serialize(plan))).IsTrue();
         await Assert.That(JsonDefaults.Serialize(resultRoundTrip).AsSpan().SequenceEqual(JsonDefaults.Serialize(result))).IsTrue();
@@ -54,7 +54,7 @@ internal sealed class PartitionQueryContractTests
         await Assert.That(database.Store.Position).IsEqualTo(position);
         var healthy = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution()).ExecutePartitionQuery(
             PartitionQueryTestSupport.Principal, PartitionQueryTestSupport.Request(database, 1), [partitions[0]]);
-        await PartitionQueryWholeFlowAssertions.AssertNativeRowAsync(healthy, partitions[0], "valid-leaf", "healthy", creation);
+        await PartitionQueryWholeFlowAssertions.RuntimeAssertRowAsync(healthy, partitions[0], "valid-leaf", "healthy", creation);
         await Assert.That(database.Store.Position).IsEqualTo(position);
     }
 
@@ -83,7 +83,7 @@ internal sealed class PartitionQueryContractTests
         await Assert.That(database.Store.Position).IsEqualTo(position);
         var healthy = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution()).ExecutePartitionQuery(
             PartitionQueryTestSupport.Principal, PartitionQueryTestSupport.Request(database, 1), [database.Partition]);
-        await PartitionQueryWholeFlowAssertions.AssertNativeRowAsync(healthy, database.Partition, "valid-leaf", "healthy", creation);
+        await PartitionQueryWholeFlowAssertions.RuntimeAssertRowAsync(healthy, database.Partition, "valid-leaf", "healthy", creation);
         await Assert.That(database.Store.Position).IsEqualTo(position);
     }
 }

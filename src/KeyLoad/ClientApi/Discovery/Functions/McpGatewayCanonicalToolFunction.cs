@@ -37,8 +37,7 @@ internal sealed class McpGatewayCanonicalToolFunction : AIFunction
         }
 
         var result = await new McpToolDispatcher(context, state)
-            .InvokeCanonicalAsync(ToJsonArguments(arguments), cancellationToken)
-            .ConfigureAwait(false);
+            .InvokeCanonicalAsync(ToJsonArguments(arguments), cancellationToken);
         return result;
     }
 

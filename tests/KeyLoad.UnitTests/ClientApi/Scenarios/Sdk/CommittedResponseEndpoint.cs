@@ -1,16 +1,16 @@
 using System.Collections.Concurrent;
 using System.Text.Json;
-using KeyLoad.UnitTests.Features.ClusterRouting;
+using KeyLoad.UnitTests.Features.OrleansExecution;
 using Microsoft.AspNetCore.Http;
 
 namespace KeyLoad.UnitTests.Features.ClientApi;
 
-internal sealed class CommittedResponseEndpoint(ConnectionNativeScenario scenario, PrincipalRecord principal,
+internal sealed class CommittedResponseEndpoint(ConnectionScenario scenario, PrincipalRecord principal,
     bool callerCancellation)
 {
     private int count;
     internal ConcurrentQueue<CommandRequest> Requests { get; } = new();
-    internal ConcurrentQueue<byte[]> NativeReplies { get; } = new();
+    internal ConcurrentQueue<byte[]> Replies { get; } = new();
     internal TaskCompletionSource FirstChunk { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
     internal TaskCompletionSource Release { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
     internal TaskCompletionSource FirstJoined { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -20,7 +20,7 @@ internal sealed class CommittedResponseEndpoint(ConnectionNativeScenario scenari
     {
         get; private set;
     }
-    internal byte[]? OriginalNativeReply
+    internal byte[]? OriginalReply
     {
         get; private set;
     }
@@ -44,12 +44,12 @@ internal sealed class CommittedResponseEndpoint(ConnectionNativeScenario scenari
                     JsonDefaults.Options, context.RequestAborted);
                 return;
             }
-            NativeReplies.Enqueue(reply.Payload.ToArray());
-            var receipt = ConnectionNativeAssertions.Value<CommitReceipt>(reply);
+            Replies.Enqueue(reply.Payload.ToArray());
+            var receipt = ConnectionAssertions.Value<CommitReceipt>(reply);
             if (first)
             {
                 Original = receipt;
-                OriginalNativeReply = reply.Payload.ToArray();
+                OriginalReply = reply.Payload.ToArray();
                 await InterruptAsync(context, receipt);
             }
             else
@@ -62,12 +62,12 @@ internal sealed class CommittedResponseEndpoint(ConnectionNativeScenario scenari
         {
             Aborted.TrySetResult();
         }
-        catch (Exception error) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+        catch (Exception error) when (global::KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(error))
         {
             Failure.TrySetResult(error);
             throw;
         }
-        catch (Exception error) when (!global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+        catch (Exception error) when (!global::KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(error))
         {
             Failure.TrySetResult(error);
             throw;

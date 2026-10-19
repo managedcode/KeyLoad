@@ -25,24 +25,24 @@ internal static class DocumentPatchAtomicityAssertions
             ?? throw new InvalidOperationException("The retained document command is missing.");
         var before = DocumentPatchAtomicityState.Read(owner);
         var stored = OutcomeStoreOracle.ReadPartition(owner.Store, owner.Source.Partition, Root, operation.CommandId)
-            ?? throw new InvalidOperationException("The original scoped native outcome is missing.");
-        await BytesAsync(NativeSerialization.Serialize(result), NativeSerialization.Serialize(stored));
+            ?? throw new InvalidOperationException("The original scoped execution outcome is missing.");
+        await BytesAsync(OrleansSerialization.Serialize(result), OrleansSerialization.Serialize(stored));
         await Assert.That(Errors.Code(stored.Problem)).IsEqualTo(Errors.Code(result.Problem));
         await Assert.That(stored.Problem?.Detail).IsEqualTo(result.Problem?.Detail);
         if (Errors.Code(result.Problem) is null)
         {
-            await BytesAsync(NativeSerialization.Serialize(result.Get<CommitReceipt>()), NativeSerialization.Serialize(stored.Get<CommitReceipt>()));
+            await BytesAsync(OrleansSerialization.Serialize(result.Get<CommitReceipt>()), OrleansSerialization.Serialize(stored.Get<CommitReceipt>()));
         }
         else
         {
             await Assert.That(stored.Value).IsNull();
         }
-        var entryBytes = NativeSerialization.Serialize(original);
-        var resultBytes = NativeSerialization.Serialize(result);
-        await BytesAsync(resultBytes, NativeSerialization.Serialize(owner.Submit(operation)));
+        var entryBytes = OrleansSerialization.Serialize(original);
+        var resultBytes = OrleansSerialization.Serialize(result);
+        await BytesAsync(resultBytes, OrleansSerialization.Serialize(owner.Submit(operation)));
         var resolved = owner.Database.ResolveOutcome(operation);
-        await BytesAsync(resultBytes, NativeSerialization.Serialize(resolved));
-        await BytesAsync(entryBytes, NativeSerialization.Serialize(owner.Entry(operation.CommandId)));
+        await BytesAsync(resultBytes, OrleansSerialization.Serialize(resolved));
+        await BytesAsync(entryBytes, OrleansSerialization.Serialize(owner.Entry(operation.CommandId)));
         await before.RequireAsync(DocumentPatchAtomicityState.Read(owner));
     }
 

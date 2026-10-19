@@ -8,7 +8,7 @@ internal static class SearchCapturedExecution
     private const string MissingOwner = "The original search owner is missing.";
     private const long ReferenceArrayHeaderPointerSlots = 3;
 
-    internal static NativeSearchStart Start(DatabaseEngine database, ITextProjection? provider,
+    internal static SearchStart Start(DatabaseEngine database, ITextProjection? provider,
         IKeyValueView view, PrincipalRecord principal, ResourceDefinition resource, SearchRequest request,
         ReadExecutionBudget budget, QueryExecutionOptions execution, PreparedSimilarity? similarity,
         FilteredSearchEligibility eligibility)
@@ -20,16 +20,16 @@ internal static class SearchCapturedExecution
         }
         var ranker = request.Text is not null ? new TextRanker(request.Text, request.TextField!, budget,
             execution.TextBudgetCheckInterval, execution.MaximumDocumentWords, execution.MaximumWordCharacters) : null;
-        if (provider is ICapturedTextProjection native && ranker is not null
+        if (provider is ICapturedTextProjection execution && ranker is not null
             && (ranker.HasTerms || request.TextIndex is not null))
         {
-            return new(native.CaptureRead(view, principal, resource, request, budget), ranker, null);
+            return new(execution.CaptureRead(view, principal, resource, request, budget), ranker, null);
         }
         return new(null, null, Rank(database, provider, view, principal, resource, request, budget,
             similarity, eligibility, ranker, null));
     }
 
-    internal static RankedDocument[] Complete(DatabaseEngine database, NativeSearchStart original,
+    internal static RankedDocument[] Complete(DatabaseEngine database, SearchStart original,
         SearchRequest request, ReadExecutionBudget budget,
         PreparedSimilarity? similarity, FilteredSearchEligibility eligibility)
     {

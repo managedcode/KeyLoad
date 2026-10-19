@@ -1,4 +1,4 @@
-using KeyLoad.RecoveryTests.Features.ClusterRouting;
+using KeyLoad.RecoveryTests.Features.OrleansExecution;
 using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Features.Authorization;
@@ -24,12 +24,12 @@ internal sealed class AuthenticationExecutionTests
                     await AuthenticationExecutionChanges.WarmAsync(source, state, collector, token);
                     await AuthenticationExecutionCold.RunAsync(hosts, state, collector, token);
                 }
-                catch (Exception original) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(original))
+                catch (Exception original) when (global::KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(original))
                 {
                     hosts.RetainRoots();
                     throw;
                 }
-                catch (Exception original) when (!global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(original))
+                catch (Exception original) when (!global::KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(original))
                 {
                     hosts.RetainRoots();
                     throw;

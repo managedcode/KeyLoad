@@ -4,7 +4,7 @@ using Orleans.Journaling;
 
 namespace KeyLoad.Clustering;
 
-#pragma warning disable ORLEANSEXP005 // ADR-110: native journal-backed ANN durable state only.
+#pragma warning disable ORLEANSEXP005 // ADR-110: execution journal-backed ANN durable state only.
 internal sealed class AnnProjectionJobStateOwner(IDurableStateManager manager,
     IOptions<RuntimeJournalOptions> journal, int maximumBatchBytes)
 {
@@ -18,7 +18,7 @@ internal sealed class AnnProjectionJobStateOwner(IDurableStateManager manager,
     {
         RequireOpen();
         _ = Validate(next);
-        var size = NativeSerialization.Measure(next);
+        var size = OrleansSerialization.Measure(next);
         if (size > options.MaximumJournalBytes || size > maximumBatchBytes)
         {
             throw Errors.Fail(ErrorCode.ResourceExhausted, AnnProjectionJobProtocol.Exhausted);
@@ -63,7 +63,7 @@ internal sealed class AnnProjectionJobStateOwner(IDurableStateManager manager,
         {
             throw Errors.Fail(ErrorCode.Corruption, AnnProjectionJobProtocol.Invalid);
         }
-        var bytes = NativeSerialization.Measure(current);
+        var bytes = OrleansSerialization.Measure(current);
         if (bytes > options.MaximumJournalBytes || bytes > maximumBatchBytes)
         {
             throw Errors.Fail(ErrorCode.ResourceExhausted, AnnProjectionJobProtocol.Exhausted);

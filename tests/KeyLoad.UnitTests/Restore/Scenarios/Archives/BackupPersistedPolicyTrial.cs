@@ -31,7 +31,7 @@ internal static class BackupPersistedPolicyTrial
             ?? throw new InvalidOperationException("The original canonical backup cut is missing.");
         var backupCut = fixture.CreateBackup();
         await Assert.That(backupCut).IsEqualTo(source.Position);
-        var archive = await NativeBackupJournalRepairAssertions.ArchiveAsync(fixture.BackupDirectory, token);
+        var archive = await BackupJournalRepairAssertions.ArchiveAsync(fixture.BackupDirectory, token);
         var verified = KeyLoad.Storage.ZoneTree.ZoneTreeStore.VerifyBackup(fixture.BackupDirectory, UnitExecutionOptions.StorageExecution(), token);
         await Assert.That(verified.Position).IsEqualTo(source.Position);
         await BackupPersistedPolicyAssertions.SameAsync(sourceIdentity, verified.Identity);
@@ -57,7 +57,7 @@ internal static class BackupPersistedPolicyTrial
         await BackupPersistedPolicyAssertions.CurrentAsync(fixture, database, false, token);
         await RepairAndColdAsync(fixture, database, token);
         await BackupPersistedPolicyAssertions.UnchangedAsync(fixture.Source.Store, source);
-        await NativeBackupJournalRepairAssertions.SameArchiveAsync(archive, fixture.BackupDirectory, token);
+        await BackupJournalRepairAssertions.SameArchiveAsync(archive, fixture.BackupDirectory, token);
     }
 
     private static async Task RepairAndColdAsync(BackupIndexedDocumentDedupFixture fixture,
@@ -118,7 +118,7 @@ internal static class BackupPersistedPolicyTrial
         var currentApplied = database.Store.Read(view => view.ReadOwnedValue(KeySpace.AppliedBytes));
         await Assert.That(currentApplied).IsNotNull();
         await Assert.That(currentApplied!.AsSpan().SequenceEqual(originalApplied)).IsTrue();
-        await Assert.That(database.LastApplied).IsEqualTo(NativeSerialization.Deserialize<long>(originalApplied));
+        await Assert.That(database.LastApplied).IsEqualTo(OrleansSerialization.Deserialize<long>(originalApplied));
         await Assert.That(originalToken.Position).IsLessThanOrEqualTo(database.LastApplied);
         var reference = fixture.Source.ExpectedReference(new(fixture.Partition,
             BackupPersistedPolicySeed.Collection, BackupPersistedPolicySeed.DocumentId));
@@ -127,7 +127,7 @@ internal static class BackupPersistedPolicyTrial
         await Assert.That(refusedToken.Code).IsEqualTo(ErrorCode.TokenInvalidated);
         await Assert.That(refusedToken.Message).IsEqualTo(EarlierMinimumToken);
         var freshToken = new CommitToken(restoredIncarnation, fixture.Partition.AtomicPartitionId,
-            NativeSerialization.Deserialize<long>(originalApplied));
+            OrleansSerialization.Deserialize<long>(originalApplied));
         await BackupPersistedPolicyAssertions.SameAsync(new DocumentResult(reference, 1L,
             BackupPersistedPolicySeed.Json, false, []), database.GetDocument(BackupPersistedPolicySeed.Reader,
                 reference, freshToken, token));

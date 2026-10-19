@@ -63,7 +63,7 @@ internal sealed class SampleLatestTests
         var bounded = new DatabaseEngine(db.Store, db.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new()
         {
             MaxQueryReadBytes = SampleAggregateTestData.RawReadBudgetBytes
-        }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
+        }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
         var result = bounded.ReadLatestSample(SampleAggregateTestData.RootPrincipal,
             new(db.Partition, SampleAggregateTestData.Set, SampleAggregateTestData.Series));
         var after = db.Store.GetReadDiagnostics();

@@ -30,7 +30,7 @@ internal sealed class SqlInnerJoinDeclaredProjectionTests
     private const string MetadataRevisionAlias = "metadata_revision";
     private const string OrderJson = "{\"order_id\":\"order\",\"customer_id\":\"customer\",\"total\":7,\"source_revision\":999}";
     private const string CustomerJson = "{\"id\":\"customer\"}";
-    private const int Dialect = 2;
+    private const int Dialect = SqlOperationProtocol.DefaultQueryDialectVersion;
     private const int Limit = 100;
     private const int DeclaredRevision = 999;
 

@@ -9,7 +9,7 @@ internal static class SqlBooleanOperandClusterParameters
     private const string WireClause = "score AND $1";
 
     internal static async Task RequireAsync(
-        global::KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsClusterCallers caller,
+        global::KeyLoad.IntegrationTests.Features.OrleansExecution.RequestCqrsClusterCallers caller,
         PostgresClusterCaller wire, long revision, CancellationToken token)
     {
         foreach (var value in new bool?[] { true, false, null })

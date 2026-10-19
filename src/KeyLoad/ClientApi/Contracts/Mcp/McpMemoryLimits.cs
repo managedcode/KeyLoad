@@ -11,7 +11,7 @@ internal sealed record McpMemoryLimits
     private const long DefaultControlBytes = 134_217_728;
     private const long DefaultIngressBytes = 1_073_741_824;
 
-    /// <summary>Capacity for classified data operations and their native output ownership.</summary>
+    /// <summary>Capacity for classified data operations and their execution output ownership.</summary>
     public long DataBytes { get; init; } = DefaultDataBytes;
     /// <summary>Capacity reserved for classified control operations and protocol responses.</summary>
     public long ControlBytes { get; init; } = DefaultControlBytes;

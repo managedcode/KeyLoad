@@ -4,7 +4,7 @@ namespace KeyLoad.UnitTests.Features.QueryExecution;
 
 internal static class SqlBetweenSymmetricCases
 {
-    internal const string Profile = "SQL.BetweenSymmetric.v1";
+    internal const string Profile = "SQL.BetweenSymmetric";
     internal const string AsymmetricFault = "score BETWEEN 2 AND 1 /* original asymmetric */";
     internal const string AsymmetricHealthy = "score BETWEEN 1 AND 2 /* original asymmetric */";
     internal const string Prefix = "SELECT TOP (5) label AS label FROM null_ordering WHERE ";

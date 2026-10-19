@@ -12,7 +12,7 @@ internal sealed class QueueAccountingRefusalWholeFlowTests
     [Arguments(QueueAccountingOperation.Reclaim, QueueAccountingColumn.InFlightBytes)]
     [Arguments(QueueAccountingOperation.ReadyExpiry, QueueAccountingColumn.StoredBytes)]
     [Arguments(QueueAccountingOperation.ScheduledExpiry, QueueAccountingColumn.StoredBytes)]
-    public Task InsufficientNativeUsageRefusesAtomicallyAcrossColdThenOriginalOperationAndHealthyWorkSucceed(
+    public Task InsufficientUsageRefusesAtomicallyAcrossColdThenOriginalOperationAndHealthyWorkSucceed(
         QueueAccountingOperation operation, QueueAccountingColumn column)
         => QueueAccountingFaultTrial.RunAsync(operation, column, TestContext.Current!.Execution.CancellationToken);
 }

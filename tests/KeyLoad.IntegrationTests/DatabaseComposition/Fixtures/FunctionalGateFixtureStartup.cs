@@ -1,7 +1,7 @@
 using System.Globalization;
-using KeyLoad.AppHost.Features.ClusterReplication;
 using KeyLoad.AppHost.Features.TestInfrastructure;
-using KeyLoad.IntegrationTests.Features.ClusterReplication;
+using KeyLoad.AppHost.Features.TestInfrastructure;
+using KeyLoad.IntegrationTests.Features.StorageReplication;
 using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;

@@ -23,7 +23,7 @@ internal static class OnlineTextRequestEnvelopes
             PrincipalId = verified.UserId,
             CommandKind = verified.Value!.Kind,
             CommandId = verified.CommandId,
-            Payload = GrainNativePayload.Copy(NativeSerialization.Serialize(verified), scope.Limits.MaxBatchBytes),
+            Payload = GrainPayload.Copy(OrleansSerialization.Serialize(verified), scope.Limits.MaxBatchBytes),
             ExpiresAt = expiry
         };
     }
@@ -35,7 +35,7 @@ internal static class OnlineTextRequestEnvelopes
         RequireExpiry(now, lifetime, expiry);
         return GrainRequestEnvelopeConstruction.Read(requestId, scope.Incarnation,
             principal, GrainReadKind.OnlineTextMaintenance,
-            GrainNativePayload.Copy(NativeSerialization.Serialize(request), scope.Limits.MaxBatchBytes), expiry)
+            GrainPayload.Copy(OrleansSerialization.Serialize(request), scope.Limits.MaxBatchBytes), expiry)
             with
         {
             Purpose = OnlineTextRequestScope.Purpose
@@ -48,7 +48,7 @@ internal static class OnlineTextRequestEnvelopes
         RequireExpiry(now, lifetime, expiry);
         return GrainRequestEnvelopeConstruction.Read(actor, scope.Incarnation, principal,
             GrainReadKind.ProjectionBatch,
-            GrainNativePayload.Copy(NativeSerialization.Serialize(request), scope.Limits.MaxBatchBytes), expiry)
+            GrainPayload.Copy(OrleansSerialization.Serialize(request), scope.Limits.MaxBatchBytes), expiry)
             with
         {
             Purpose = OnlineTextRequestScope.Purpose
@@ -61,7 +61,7 @@ internal static class OnlineTextRequestEnvelopes
         RequireExpiry(now, lifetime, expiry);
         return GrainRequestEnvelopeConstruction.Command(actor, scope.Incarnation, principal,
             OperationKind.CommitProjectionBatch, request.CommandId,
-            GrainNativePayload.Copy(NativeSerialization.Serialize(request), scope.Limits.MaxBatchBytes), expiry)
+            GrainPayload.Copy(OrleansSerialization.Serialize(request), scope.Limits.MaxBatchBytes), expiry)
             with
         {
             Purpose = OnlineTextRequestScope.Purpose

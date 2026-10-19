@@ -13,31 +13,31 @@ internal static class SubscriptionFilterRefusals
             CommandId = Guid.NewGuid(),
             Definition = db.GetSubscription(SubscriptionFilterProtocol.Root, replacement.Subscription).Definition
         };
-        var before = SubscriptionFilterNativeAssertions.Image(store, replacement.Subscription.Source.Partition);
+        var before = SubscriptionFilterAssertions.Image(store, replacement.Subscription.Source.Partition);
         var unchanged = SubscriptionFilterColdTrial.Apply(db, OperationKind.ConfigureSubscription, same, same.CommandId, token).Get<SubscriptionInfo>();
         await Assert.That(unchanged.Generation).IsEqualTo(SubscriptionFilterProtocol.FirstGeneration);
-        await Assert.That(SubscriptionFilterNativeAssertions.Image(store, replacement.Subscription.Source.Partition).SequenceEqual(before)).IsTrue();
-        await SubscriptionFilterNativeAssertions.RefusedAsync(db, store, replacement with
+        await Assert.That(SubscriptionFilterAssertions.Image(store, replacement.Subscription.Source.Partition).SequenceEqual(before)).IsTrue();
+        await SubscriptionFilterAssertions.RefusedAsync(db, store, replacement with
         {
             CommandId = Guid.NewGuid(),
             ExpectedGeneration = SubscriptionFilterProtocol.NextGeneration
         }, ErrorCode.RevisionConflict, token);
-        await SubscriptionFilterNativeAssertions.RefusedAsync(db, store, replacement with
+        await SubscriptionFilterAssertions.RefusedAsync(db, store, replacement with
         {
             CommandId = Guid.NewGuid(),
             ExpectedGeneration = 0
         }, ErrorCode.Validation, token);
-        await SubscriptionFilterNativeAssertions.RefusedAsync(db, store, replacement with
+        await SubscriptionFilterAssertions.RefusedAsync(db, store, replacement with
         {
             CommandId = Guid.NewGuid(),
             Start = SubscriptionStart.FromNow
         }, ErrorCode.Validation, token);
-        await SubscriptionFilterNativeAssertions.RefusedAsync(db, store, replacement with
+        await SubscriptionFilterAssertions.RefusedAsync(db, store, replacement with
         {
             CommandId = Guid.NewGuid(),
             Cursor = SubscriptionFilterProtocol.InvalidCursor
         }, ErrorCode.Validation, token);
-        await SubscriptionFilterNativeAssertions.RefusedAsync(db, store, replacement with
+        await SubscriptionFilterAssertions.RefusedAsync(db, store, replacement with
         {
             CommandId = Guid.NewGuid(),
             Subscription = replacement.Subscription with
@@ -45,7 +45,7 @@ internal static class SubscriptionFilterRefusals
                 GroupId = SubscriptionFilterProtocol.MissingGroup
             }
         }, ErrorCode.NotFound, token);
-        await SubscriptionFilterNativeAssertions.RefusedAsync(db, store, replacement with
+        await SubscriptionFilterAssertions.RefusedAsync(db, store, replacement with
         {
             CommandId = Guid.NewGuid(),
             Definition = replacement.Definition with
@@ -53,7 +53,7 @@ internal static class SubscriptionFilterRefusals
                 EventTypes = [SubscriptionFilterProtocol.NewType, SubscriptionFilterProtocol.NewType]
             }
         }, ErrorCode.Validation, token);
-        await SubscriptionFilterNativeAssertions.RefusedAsync(db, store, replacement with
+        await SubscriptionFilterAssertions.RefusedAsync(db, store, replacement with
         {
             CommandId = Guid.NewGuid(),
             ExpectedGeneration = null

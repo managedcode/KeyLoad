@@ -4,10 +4,10 @@ namespace KeyLoad;
 
 /// <summary>Represents a safe, caller-visible KeyLoad failure with its domain code and HTTP status.</summary>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(KeyLoadException.NativeAlias)]
+[Orleans.Alias(KeyLoadException.RuntimeAlias)]
 public sealed class KeyLoadException : Exception
 {
-    internal const string NativeAlias = "keyload.error.v1";
+    internal const string RuntimeAlias = "keyload.error";
     private const string DefaultSafeDetail = "A KeyLoad operation failed.";
     /// <summary>Initializes a KeyLoad exception with the supplied domain code, safe detail, and HTTP status.</summary>
     /// <param name="code">Identifies the domain error.</param>

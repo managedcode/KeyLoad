@@ -18,7 +18,7 @@ internal static class McpServerComposition
         + "Use the returned exact schema with gateway_tool_invoke. Retry writes with the same command identity and payload. "
         + "Cancellation does not prove rollback. Paginate bounded database reads using their returned cursors.";
 
-    /// <summary>Registers fresh per-request native handlers and independent retained-memory ownership.</summary>
+    /// <summary>Registers fresh per-request execution handlers and independent retained-memory ownership.</summary>
     internal static void Register(WebApplicationBuilder builder)
     {
         builder.Logging.AddFilter(SdkLoggerPrefix, LogLevel.None);

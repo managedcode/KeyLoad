@@ -5,20 +5,20 @@ using ModelContextProtocol.Protocol;
 
 namespace KeyLoad.UnitTests.Features.ClientApi;
 
-/// <summary>Owns genuine canonical JSON and native response objects for explicit output-lifetime proofs.</summary>
+/// <summary>Owns genuine canonical JSON and execution response objects for explicit output-lifetime proofs.</summary>
 internal static class McpOutputTestData
 {
     internal const int MaximumBytes = 65_536;
     internal const int MaximumSummaryCharacters = 128;
     internal const int OverReplyDepth = 62;
-    internal const int NativeResultDepth = 63;
+    internal const int ResultDepth = 63;
     internal const int LongBusinessIdentifierBytes = 257;
     internal const string ResultField = "result";
     internal const string ErrorField = "error";
     internal const string DetailField = "detail";
     internal const string RequestIdField = "requestId";
     internal const string IdentifierField = "id";
-    internal const string NativeIdentifier = "native-output-request";
+    internal const string RuntimeIdentifier = "execution-output-request";
     internal const string Marker = "private-output-marker";
     internal const string SafeProtocolError = "The MCP request is invalid.";
     internal const string InvalidJson = "{\"private-output-marker\":]}";
@@ -32,8 +32,8 @@ internal static class McpOutputTestData
     internal static readonly Guid ExecutionId = Guid.Parse(ExecutionIdentifier);
 
     /// <summary>Creates a real polymorphic SDK response with already injected server-info metadata.</summary>
-    /// <param name="tool">The native result borrowing its reply owner's document.</param>
-    /// <returns>The exact response object supplied to the product validator and native serializer.</returns>
+    /// <param name="tool">The execution result borrowing its reply owner's document.</param>
+    /// <returns>The exact response object supplied to the product validator and execution serializer.</returns>
     internal static JsonRpcResponse Response(CallToolResult tool)
     {
         var result = JsonSerializer.SerializeToNode(tool, McpJsonUtilities.DefaultOptions)!;
@@ -41,6 +41,6 @@ internal static class McpOutputTestData
         {
             [MetaKeys.ServerInfo] = new JsonObject { [MetadataNameField] = MetadataName, [MetadataVersionField] = MetadataVersion }
         };
-        return new JsonRpcResponse { Id = new RequestId(NativeIdentifier), Result = result };
+        return new JsonRpcResponse { Id = new RequestId(RuntimeIdentifier), Result = result };
     }
 }

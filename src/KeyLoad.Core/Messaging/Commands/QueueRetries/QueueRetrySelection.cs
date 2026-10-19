@@ -39,9 +39,9 @@ public sealed partial class DatabaseEngine
         {
             throw Errors.Fail(ErrorCode.Corruption, QueueRetryProtocol.InvalidDecision);
         }
-        var seed = NativeSerialization.Serialize(new QueueRetrySeed(original.CommandId, lane, metadata.Id,
+        var seed = OrleansSerialization.Serialize(new QueueRetrySeed(original.CommandId, lane, metadata.Id,
             metadata.DeliveryGeneration, metadata.Attempts, metadata.StateVersion));
-        RequireNativeBudget(seed.Length);
+        RequireBudget(seed.Length);
         Span<byte> digest = stackalloc byte[QueueRetryProtocol.DigestBytes];
         _ = HMACSHA256.HashData(Store.Identity.SigningKey.Span, seed, digest);
         var draw = BinaryPrimitives.ReadUInt64BigEndian(digest);

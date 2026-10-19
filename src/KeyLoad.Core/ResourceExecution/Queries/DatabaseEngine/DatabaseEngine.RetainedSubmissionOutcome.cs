@@ -1,5 +1,7 @@
-using KeyLoad.Core.Features.ClusterRouting.Execution;
-using KeyLoad.Core.Features.ClusterRouting.Identity;
+using KeyLoad.Core.Features.CommandOutcomes.Execution;
+using KeyLoad.Core.Features.RuntimeJournaling.Execution;
+using KeyLoad.Core.Features.CommandOutcomes.Identity;
+using KeyLoad.Core.Features.RuntimeJournaling.Identity;
 using KeyLoad.Storage;
 using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
@@ -13,7 +15,7 @@ public sealed partial class DatabaseEngine
         => ReadRetainedSubmissionOutcomeCore(operation, null);
 
     /// <summary>Charges retained lookup to the same original admission work without changing canonical denial semantics.</summary>
-    /// <param name="operation">Unchanged original native identity and payload.</param>
+    /// <param name="operation">Unchanged original execution identity and payload.</param>
     /// <param name="work">Required original admission budget, cancellation and lifetime.</param>
     /// <returns>The actual retained result, or null only at the existing absent-outcome boundary.</returns>
     internal Result<object>? ReadRetainedSubmissionOutcome(Command<DatabaseCommand> operation, ReadExecutionBudget work)

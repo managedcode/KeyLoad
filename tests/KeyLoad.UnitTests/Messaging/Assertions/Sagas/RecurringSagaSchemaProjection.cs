@@ -58,13 +58,13 @@ internal static class RecurringSagaSchemaProjection
     internal static async Task ObserveAsync(SafeProjectorOperationDatabase owner, RecurringSagaSchemaState state,
         Func<Task> operation)
     {
-        var identity = NativeSerialization.Serialize(owner.Store.Identity);
+        var identity = OrleansSerialization.Serialize(owner.Store.Identity);
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(() => RecurringSagaSchemaCanonical.CurrentAsync(owner, state), failures);
         await ServerFailureObserver.ObserveAsync(() => SafeProjectorOperationImages.ObserveAsync(owner, operation), failures);
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            await Assert.That(NativeSerialization.Serialize(owner.Store.Identity).AsSpan().SequenceEqual(identity)).IsTrue();
+            await Assert.That(OrleansSerialization.Serialize(owner.Store.Identity).AsSpan().SequenceEqual(identity)).IsTrue();
         }, failures);
         await ServerFailureObserver.ObserveAsync(() => RecurringSagaSchemaCanonical.CurrentAsync(owner, state), failures);
         ServerFailureObserver.ThrowIfAny(failures);

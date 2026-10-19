@@ -30,7 +30,7 @@ internal static class EventReferenceSelectProtocol
         {
             [MinimumParameter] = JsonSerializer.SerializeToElement(7)
         },
-            AllowFullScan: true, QueryDialectVersion: 2);
+            AllowFullScan: true, QueryDialectVersion: SqlOperationProtocol.DefaultQueryDialectVersion);
 
     internal static string Payload(PartitionRef partition, string id, int score)
         => JsonSerializer.Serialize(new
@@ -44,5 +44,5 @@ internal static class EventReferenceSelectProtocol
         {
             [MinimumParameter] = JsonSerializer.SerializeToElement(7)
         },
-            AllowFullScan: true, QueryDialectVersion: 2);
+            AllowFullScan: true, QueryDialectVersion: SqlOperationProtocol.DefaultQueryDialectVersion);
 }

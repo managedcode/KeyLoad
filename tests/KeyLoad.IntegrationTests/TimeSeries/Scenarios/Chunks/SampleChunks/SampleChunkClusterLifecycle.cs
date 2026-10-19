@@ -12,7 +12,7 @@ internal static class SampleChunkClusterLifecycle
         var append = await scenario.CommitAsync(sdk, new AppendSamples(TimeSeriesClusterScenario.Set,
             TimeSeriesClusterScenario.Series, [scenario.First, scenario.Equal], TimeSeriesClusterScenario.PrivateTags), token)
             .ConfigureAwait(false);
-        var original = new CommandRequest(Guid.NewGuid(), scenario.Native.Partition,
+        var original = new CommandRequest(Guid.NewGuid(), scenario.Execution.Partition,
             [new SealSampleChunkWindow(TimeSeriesClusterScenario.Set, TimeSeriesClusterScenario.Series,
                 scenario.WindowId, SampleChunkClusterProtocol.AppendedRevision)]);
         var seal = await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(original, token).ConfigureAwait(false));
@@ -33,7 +33,7 @@ internal static class SampleChunkClusterLifecycle
     {
         await Assert.That(actual.Token.Position > previous.Token.Position).IsTrue();
         var expected = new CommitReceipt(original.CommandId, new CommitToken(actual.Token.Incarnation,
-            scenario.Native.Partition.AtomicPartitionId, actual.Token.Position),
+            scenario.Execution.Partition.AtomicPartitionId, actual.Token.Position),
             [new MutationReceipt(SampleChunkProtocol.SealKind, TimeSeriesClusterScenario.Set,
                 TimeSeriesClusterScenario.Series, SampleChunkClusterProtocol.SealedRevision)],
             DurabilityProfile.ProcessDurable, 3);

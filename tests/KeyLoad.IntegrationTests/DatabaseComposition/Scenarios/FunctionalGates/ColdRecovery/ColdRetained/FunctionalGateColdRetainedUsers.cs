@@ -17,7 +17,7 @@ internal static class FunctionalGateColdRetainedUsers
         var reference = original.Bind(new(state.Partition, FunctionalGateColdProtocol.Resource("docs", FirstModel),
             FunctionalGateColdProtocol.Id));
         var expected = new DocumentReadResult(new(reference, OriginalRevision,
-            FunctionalGateColdProtocol.DocumentJson(original.Bind(state.Anchor), model.Blob.Begin.Blob), false, []));
+            FunctionalGateColdProtocol.DocumentJson(original.Bind(state.Anchor), model.Blob.Path), false, []));
         await FunctionalGateColdRetainedCalls.RunAsync(fixture, original, state.Writer,
             context => WriterAsync(context, model.Command, expected, unchanged, token), token);
         foreach (var proof in state.Workloads)

@@ -7,5 +7,5 @@ namespace KeyLoad;
 /// <param name="OrderingKey">Groups messages that must retain their ordering.</param>
 /// <param name="Fingerprint">Identifies the canonical command fingerprint.</param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.MessageBody)]
+[Orleans.Alias(ContractAliases.MessageBody)]
 public sealed record MessageBody([property: Orleans.Id(0)] string Id, [property: Orleans.Id(1)] string PayloadJson, [property: Orleans.Id(2)] string HeadersJson, [property: Orleans.Id(3)] string? OrderingKey, [property: Orleans.Id(4)] string Fingerprint);

@@ -19,7 +19,7 @@ public bytes and replicated-cluster, recovery and restart guarantees.
 
 Bound work before copies, scans, decoding or retained output begin. Prefer a
 scoped borrowed visit or bounded page consumed within the existing read gate over
-materializing complete scans. Borrowed spans and native views end with their owning
+materializing complete scans. Borrowed spans and views end with their owning
 operation; retained values remain owned copies unless a narrower borrowing
 contract proves they cannot mutate or escape. Reuse transaction-scoped verified
 images, lengths and metadata instead of rereading persisted truth. Compile
@@ -28,7 +28,7 @@ selection state. A work limit rejects excess work; it never returns partial
 success.
 
 Keep independent resource quantities distinct. Logical examined keys/bytes,
-managed allocations, process memory, native residency, physical I/O, client load,
+managed allocations, process memory, residency, physical I/O, client load,
 server CPU/RAM, concurrency and backlog require their own observations and
 provenance. A logical counter is not an OS-I/O, allocation, RSS or durability
 claim. Telemetry is bounded and low-cardinality; it excludes principals, request
@@ -46,7 +46,7 @@ unchanged unless an owning feature contract explicitly freezes a public change.
 |---|---|---|
 | REQ-MP-001: review current operation/resource paths and close evidenced defects | AC-MP-001: complete located inventory, source review and independently verified defect closure | ResourceExecution and each affected feature; no source assertion substitutes for an operation |
 | REQ-MP-002: bounded consistent read/mutation work without redundant materialization | AC-MP-002..006: same read cut and ordering, bounded visits/candidates/results, exact outcomes and bytes, cancellation/error preservation, and real-store healthy follow-up | StorageRecovery, DocumentStorage, EventStreams, TimeSeries, QueryExecution, Search, GraphTraversal, Messaging and ChangeFeeds |
-| REQ-MP-003: bounded cluster lifetime and crash-safe retention | AC-MP-007/008: owned process/resource settlement and actual recovery/replicated-cluster effects preserve committed state | ClusterRouting and StorageRecovery |
+| REQ-MP-003: bounded cluster lifetime and crash-safe retention | AC-MP-007/008: owned process/resource settlement and actual recovery/replicated-cluster effects preserve committed state | OrleansExecution and StorageRecovery |
 | REQ-MP-004: bounded streaming caller/report transport | AC-MP-009/010: actual SDK/Kestrel and report-file flows preserve body/error/cancel semantics and settle all owned operations | ClientApi and BenchmarkComparisons |
 | REQ-MP-005: honest integrated qualification and resource measurement | AC-MP-011/012: exact-SHA comparable evidence, correctness and resource assertions, complete joined gates; local/source-only checks remain development evidence | ResourceExecution and the applicable Linux GitHub suites |
 | REQ-MP-006: remove avoidable JSON text byte copies and cached-receive request parses | AC-MP-006/009/011/012: strict text/byte and Unicode/error semantics, owned lifetimes, measured allocation boundaries and real replay flows | ResourceExecution, Abstractions and Messaging |
@@ -54,21 +54,21 @@ unchanged unless an owning feature contract explicitly freezes a public change.
 Feature implementations and exact operation limits remain in their canonical
 feature specifications. Shared read budgets, counters, admission and API
 composition have a single owner. Local unit and process-recovery runners
-use the same native TUnit entry; cluster acceptance uses the actual Docker
+use the same TUnit entry; cluster acceptance uses the actual Docker
 cluster and discovered endpoints with the .NET SDK and official MCP SDK clients.
 Tests use TUnit. Only exact-source Linux GitHub artifacts qualify delivered
 source, resource measurements or performance comparisons.
 
 ## Resource qualification
 
-### Mandatory native SIMD
+### Mandatory SIMD
 
 REQ-SIMD-005/006 and AC-SIMD-005/006 in Search make SIMD-enabled execution
 mandatory in the product and qualification path; there is no optional scalar
-product path or hardware-disabled profile. Core's Search validation owns the single shared native
+product path or hardware-disabled profile. Core's Search validation owns the single shared execution
 `KeyLoad.SimdRuntime.RequireHardwareSupport()` predicate; Server calls it before
 configuration or storage acquisition, and standalone similarity calls it before
-finite-vector work after its existing dimension validation. Native .NET chooses
+finite-vector work after its existing dimension validation. Execution .NET chooses
 the supported CPU implementation. A missing accelerated implementation produces
 an explicit PlatformNotSupportedException; no scalar alternate is admitted.
 Bounded vector tails and independent numeric oracles retain their actual purpose.
@@ -76,7 +76,7 @@ Bounded vector tails and independent numeric oracles retain their actual purpose
 Implementation integrates the kernel and existing metric operations, early Server
 admission and normal-only test selection, and the CodeQuality producer, validator
 and CI inventories, then builds, analyzes and formats once and executes the
-affected normal native50 whole operations. Readers fail closed on unsupported profiles; there is no legacy reader or data
+affected normal execution50 whole operations. Readers fail closed on unsupported profiles; there is no legacy reader or data
 migration. Reverting this implementation must retain mandatory SIMD admission.
 
 Verification retains original vector error/numeric/cancellation/healthy-page
@@ -97,7 +97,7 @@ unavailable, not zero. Neither source limits nor local runs establish a maximum
 performance claim.
 
 The required delivered-source gates remain the strict default-configuration build,
-native TUnit suites with SIMD enabled, process recovery, Aspire cluster SDK/MCP flows, formatter, governance,
+TUnit suites with SIMD enabled, process recovery, Aspire cluster SDK/MCP flows, formatter, governance,
 coverage and complexity artifacts, plus applicable fault, resource and endurance
 work. A process-kill test does not prove power-loss durability. No acceptance
 criterion is complete until its actual operation test and required qualification
@@ -107,7 +107,7 @@ evidence are joined.
 flowchart LR
     Caller[Authorized SDK or MCP operation] --> Admit[Bounded admission and cancellation]
     Admit --> Cut[Node-local committed read cut]
-    Cut --> Work[Budgeted native visits and bounded selection]
+    Cut --> Work[Budgeted visits and bounded selection]
     Work --> Result[Exact bounded caller-visible result]
     Work --> Observe[Privacy-safe scoped observations]
     Observe --> Qualify[Matched exact-source Linux evidence]

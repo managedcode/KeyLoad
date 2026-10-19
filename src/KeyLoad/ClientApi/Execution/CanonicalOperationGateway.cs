@@ -22,13 +22,13 @@ internal static class CanonicalOperationGateway
     private static async Task<DispatchedOperationReply> ExecuteCoreAsync(HttpContext context, GrainReadKind? readKind,
         OperationKind? commandKind, Guid commandId, ReadOnlyMemory<byte> payload, CancellationToken cancellationToken)
     {
-        var execution = await ExecuteNativeAsync(context, readKind, commandKind, commandId, payload,
-            cancellationToken).ConfigureAwait(false);
+        var execution = await RuntimeExecuteAsync(context, readKind, commandKind, commandId, payload,
+            cancellationToken);
         var requestId = execution.RequestId;
         var reply = execution.Reply;
         try
         {
-            var value = NativeSerialization.Deserialize<GrainValue>(reply.Payload.Span);
+            var value = OrleansSerialization.Deserialize<GrainValue>(reply.Payload.Span);
             cancellationToken.ThrowIfCancellationRequested();
             return new(requestId, McpBoundedJson.Serialize(PublicReadResponse.Create(readKind, commandKind, value.Value),
                 context.RequestServices.GetRequiredService<IOptions<McpExecutionOptions>>().Value.MaximumDataReplyBytes));
@@ -44,7 +44,7 @@ internal static class CanonicalOperationGateway
         }
     }
 
-    private static async Task<NativeDispatch> ExecuteNativeAsync(HttpContext context, GrainReadKind? readKind,
+    private static async Task<RuntimeDispatch> RuntimeExecuteAsync(HttpContext context, GrainReadKind? readKind,
         OperationKind? commandKind, Guid commandId, ReadOnlyMemory<byte> payload, CancellationToken cancellationToken)
     {
         var actual = CanonicalOperationRequestPreparation.Create(context, readKind, commandKind,
@@ -59,7 +59,7 @@ internal static class CanonicalOperationGateway
             using var connection = ServerConnectionFeature.Acquire(context, cancellationToken);
             using var requestContext = node.OpenRequestContext(actual.Principal, requestId,
                 commandId, connection.Token, connection.Id);
-            reply = await node.ExecuteAsync(requestId, actual.SignedRequest, actual.Command, connection.Token).ConfigureAwait(false);
+            reply = await node.ExecuteAsync(requestId, actual.SignedRequest, actual.Command, connection.Token);
             outcome = DatabasePhaseOutcome.Completed;
         }
         catch (Exception failure) when (failure is OperationCanceledException or KeyLoadException { Code: ErrorCode.Cancelled })
@@ -74,7 +74,7 @@ internal static class CanonicalOperationGateway
         return new(requestId, reply);
     }
 
-    private readonly record struct NativeDispatch(Guid RequestId, GrainOperationReply Reply);
+    private readonly record struct RuntimeDispatch(Guid RequestId, GrainOperationReply Reply);
 
     private static string Interrupted(OperationKind? commandKind) => commandKind switch
     {

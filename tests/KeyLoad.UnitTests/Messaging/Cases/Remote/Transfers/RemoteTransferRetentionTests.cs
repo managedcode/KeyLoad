@@ -56,7 +56,7 @@ internal sealed class RemoteTransferRetentionTests
     }
 
     [Test]
-    public async Task ByteCapIncludesNativeReceiptReservationAndDoesNotEvictAcceptedIntent()
+    public async Task ByteCapIncludesReceiptReservationAndDoesNotEvictAcceptedIntent()
     {
         using var measured = new RemoteTransferDatabase();
         var first = Create(measured, measured.SourceQueue, FirstId);

@@ -23,25 +23,25 @@ internal static class RequiredProcessingPolicyRefusal
     {
         var store = fixture.Harness.Store;
         var outcome = KeySpace.PartitionOutcome(fixture.Harness.Partition, operation.UserId!, operation.CommandId);
-        var locator = KeySpace.OutcomeLocatorV2(fixture.Harness.Partition, operation.UserId!, operation.CommandId);
+        var locator = KeySpace.OutcomeLocator(fixture.Harness.Partition, operation.UserId!, operation.CommandId);
         await Assert.That(store.Read(view => view.ReadOwnedValue(outcome))).IsNull();
         await Assert.That(store.Read(view => view.ReadOwnedValue(locator))).IsNull();
         var before = Image(store, outcome, locator);
         var position = store.Position;
         var expectedApplied = checked(fixture.Harness.Database.LastApplied + 1L);
-        var identity = NativeSerialization.Serialize(store.Identity);
-        var clock = store.Read(view => NativeSerialization.Deserialize<DateTimeOffset>(view.ReadOwnedValue(KeySpace.ClockBytes)!));
+        var identity = OrleansSerialization.Serialize(store.Identity);
+        var clock = store.Read(view => OrleansSerialization.Deserialize<DateTimeOffset>(view.ReadOwnedValue(KeySpace.ClockBytes)!));
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
             await RequiredProcessingPolicyAssertions.FailureAsync(fixture.Harness.Database.ApplyEmbedded(operation, token), code, detail), failures);
         await ServerFailureObserver.ObserveAsync(async () => await Assert.That(Image(store, outcome, locator).SequenceEqual(before)).IsTrue(), failures);
         await ServerFailureObserver.ObserveAsync(async () => await Assert.That(store.Position).IsEqualTo(position + 1L), failures);
         await ServerFailureObserver.ObserveAsync(async () => await Assert.That(store.Read(view => view.ReadOwnedValue(KeySpace.AppliedBytes))!
-            .AsSpan().SequenceEqual(NativeSerialization.Serialize(expectedApplied))).IsTrue(), failures);
-        await ServerFailureObserver.ObserveAsync(async () => await Assert.That(NativeSerialization.Serialize(store.Identity).AsSpan().SequenceEqual(identity)).IsTrue(), failures);
+            .AsSpan().SequenceEqual(OrleansSerialization.Serialize(expectedApplied))).IsTrue(), failures);
+        await ServerFailureObserver.ObserveAsync(async () => await Assert.That(OrleansSerialization.Serialize(store.Identity).AsSpan().SequenceEqual(identity)).IsTrue(), failures);
         await ServerFailureObserver.ObserveAsync(async () => await Assert.That(store.Read(view => view.ReadOwnedValue(locator))!
             .AsSpan().SequenceEqual(outcome)).IsTrue(), failures);
-        await ServerFailureObserver.ObserveAsync(async () => await Assert.That(store.Read(view => NativeSerialization.Deserialize<DateTimeOffset>(
+        await ServerFailureObserver.ObserveAsync(async () => await Assert.That(store.Read(view => OrleansSerialization.Deserialize<DateTimeOffset>(
             view.ReadOwnedValue(KeySpace.ClockBytes)!))).IsGreaterThanOrEqualTo(clock), failures);
         ServerFailureObserver.ThrowIfAny(failures);
         var bytes = RequiredProcessingPolicyAssertions.Outcome(store, fixture.Harness.Partition, operation.UserId!, operation.CommandId);

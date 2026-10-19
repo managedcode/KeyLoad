@@ -8,7 +8,7 @@ namespace KeyLoad.UnitTests.Features.EventStreams;
 internal sealed class StreamTraversalMcpSchemaTests
 {
     private const string Tool = "keyload_streams_read";
-    private const string Route = "/v1/streams/read";
+    private const string Route = "/streams/read";
     private const string Request = "request";
     private const string UnknownAuthority = "principalId";
     private const string CallerAuthority = "caller-cannot-grant-authority";
@@ -25,7 +25,7 @@ internal sealed class StreamTraversalMcpSchemaTests
     private static readonly string[] RequestProperties = ["stream", "afterRevision", "limit", "direction", "maxBytes", "cursor"];
 
     [Test]
-    public async Task CompleteOriginalCursorRequestDecodeRefusesCallerAuthorityThenNativePageRoundtripIsHealthy()
+    public async Task CompleteOriginalCursorRequestDecodeRefusesCallerAuthorityThenPageRoundtripIsHealthy()
     {
         using var fixture = new StreamReadResourceFixture(eventCount: StreamTraversalTestProtocol.Third, protectedFields: true);
         var first = fixture.Traverse(fixture.Traversal(StreamReadDirection.Backward, limit: StreamTraversalTestProtocol.First));
@@ -58,16 +58,16 @@ internal sealed class StreamTraversalMcpSchemaTests
         await Assert.That(decoded.ReadKind).IsEqualTo(GrainReadKind.Stream);
         await Assert.That(decoded.CommandKind).IsNull();
         await Assert.That(decoded.CommandId).IsEqualTo(Guid.Empty);
-        var nativeRequest = NativeSerialization.Deserialize<ReadStreamRequest>(decoded.Payload.Span);
-        await Assert.That(JsonDefaults.Serialize(nativeRequest).AsSpan().SequenceEqual(JsonDefaults.Serialize(healthyRequest))).IsTrue();
-        var result = fixture.Traverse(nativeRequest);
-        await StreamTraversalNativeAssertions.PageAsync(result, [StreamTraversalTestProtocol.Second, StreamTraversalTestProtocol.First],
+        var runtimeRequest = OrleansSerialization.Deserialize<ReadStreamRequest>(decoded.Payload.Span);
+        await Assert.That(JsonDefaults.Serialize(runtimeRequest).AsSpan().SequenceEqual(JsonDefaults.Serialize(healthyRequest))).IsTrue();
+        var result = fixture.Traverse(runtimeRequest);
+        await StreamTraversalAssertions.PageAsync(result, [StreamTraversalTestProtocol.Second, StreamTraversalTestProtocol.First],
             StreamTraversalTestProtocol.Third, false);
-        var encoded = NativeSerialization.Serialize(result);
-        var nativeResult = NativeSerialization.Deserialize<StreamPage>(encoded);
-        var publicResult = JsonSerializer.Deserialize<StreamPage>(JsonDefaults.Serialize(nativeResult), JsonDefaults.Options);
+        var encoded = OrleansSerialization.Serialize(result);
+        var runtimeResult = OrleansSerialization.Deserialize<StreamPage>(encoded);
+        var publicResult = JsonSerializer.Deserialize<StreamPage>(JsonDefaults.Serialize(runtimeResult), JsonDefaults.Options);
         await Assert.That(JsonDefaults.Serialize(publicResult).AsSpan().SequenceEqual(JsonDefaults.Serialize(result))).IsTrue();
-        await Assert.That(NativeSerialization.Measure(result)).IsEqualTo((long)encoded.Length);
+        await Assert.That(OrleansSerialization.Measure(result)).IsEqualTo((long)encoded.Length);
     }
 
     private static Dictionary<string, JsonElement> Arguments(byte[] bytes)

@@ -56,7 +56,7 @@ internal static class DueFreshAttemptAssertions
     {
         var actual = fixture.Store.Read(view => view.GetRecord<RecurringScheduleRecord>(
             RecurringSagaStorage.ScheduleKey(fixture.Queue, scheduleId))!);
-        await Assert.That(NativeSerialization.Serialize(actual).AsSpan().SequenceEqual(scheduleBytes)).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(actual).AsSpan().SequenceEqual(scheduleBytes)).IsTrue();
         await Assert.That(Counters(fixture)).IsEqualTo(expectedCounters);
         await Assert.That(fixture.Database.InspectMessage(RecurringSagaDatabase.RootPrincipal, fixture.Queue,
             OccurrenceId(scheduleId, 0))).IsNull();
@@ -114,7 +114,7 @@ internal static class DueFreshAttemptAssertions
         var actualBytes = fixture.Store.Read(view => view.ReadOwnedValue(KeySpace.Partition(OutboxSpace,
             fixture.Partition, sequence)));
         await Assert.That(actualBytes).IsNotNull();
-        await AssertOutboxFieldsAsync(NativeSerialization.Deserialize<OutboxEntry>(actualBytes), entry);
+        await AssertOutboxFieldsAsync(OrleansSerialization.Deserialize<OutboxEntry>(actualBytes), entry);
         if (storedSnapshot is not null)
         {
             await Assert.That(actualBytes.AsSpan().SequenceEqual(storedSnapshot)).IsTrue();
@@ -152,15 +152,15 @@ internal static class DueFreshAttemptAssertions
         var first = original.Get<CommitReceipt>();
         var again = replay.Get<CommitReceipt>();
         await Assert.That(again.Token).IsEqualTo(first.Token);
-        await Assert.That(NativeSerialization.Serialize(again).AsSpan()
-            .SequenceEqual(NativeSerialization.Serialize(first))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(again).AsSpan()
+            .SequenceEqual(OrleansSerialization.Serialize(first))).IsTrue();
     }
 
     internal static byte[] ScheduleBytes(RecurringSagaDatabase fixture, Guid scheduleId)
         => fixture.Store.Read(view =>
         {
             var record = view.GetRecord<RecurringScheduleRecord>(RecurringSagaStorage.ScheduleKey(fixture.Queue, scheduleId));
-            return NativeSerialization.Serialize(record
+            return OrleansSerialization.Serialize(record
                 ?? throw new InvalidOperationException(MissingScheduleRecord));
         });
 

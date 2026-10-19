@@ -61,7 +61,7 @@ public sealed partial class DatabaseEngine
 
         var tail = head?.TailRevision ?? HeadTailRevisionValidationBoundary;
         var sequenceKey = KeySpace.Partition(EventSequenceSpace, partition);
-        var sequence = tx.ReadOwnedValue(sequenceKey) is { } bytes ? NativeSerialization.Deserialize<long>(bytes) : AppendAbsentCount;
+        var sequence = tx.ReadOwnedValue(sequenceKey) is { } bytes ? OrleansSerialization.Deserialize<long>(bytes) : AppendAbsentCount;
         if (sequence < tail)
         {
             throw Errors.Fail(ErrorCode.Corruption, InvalidEventSequenceDetail);

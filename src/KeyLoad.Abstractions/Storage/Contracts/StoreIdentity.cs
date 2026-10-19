@@ -9,9 +9,9 @@ namespace KeyLoad.Storage;
 /// <param name="Durability">Acknowledgement guarantee supplied by the provider.</param>
 /// <param name="DispatchPaused">Whether restored dispatch remains paused.</param>
 /// <param name="ReadGeneration">Generation fencing restored or replaced read authority.</param>
-/// <param name="MinimumReaderContract">Required reader capability admitted by this native store.</param>
+/// <param name="MinimumReaderContract">Required reader capability admitted by this execution store.</param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.StoreIdentity)]
+[Orleans.Alias(ContractAliases.StoreIdentity)]
 public sealed record StoreIdentity([property: Orleans.Id(0)] int FormatVersion, [property: Orleans.Id(1)] int KeyCodecVersion, [property: Orleans.Id(2)] Guid NodeId, [property: Orleans.Id(3)] Guid Incarnation,
     [property: Orleans.Id(4)] ReadOnlyMemory<byte> SigningKey, [property: Orleans.Id(5)] DurabilityProfile Durability, [property: Orleans.Id(6)] bool DispatchPaused = false, [property: Orleans.Id(7)] long ReadGeneration = StoreIdentity.DefaultReadGeneration,
     [property: Orleans.Id(8), System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)] int MinimumReaderContract = StoreReaderContract.Unspecified)

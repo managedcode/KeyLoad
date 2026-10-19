@@ -3,11 +3,11 @@ using System.Runtime.ExceptionServices;
 namespace KeyLoad.Core.Features.GraphTraversal;
 
 internal sealed class GraphIncomingEdgesOrderComparer(ReadExecutionBudget budget)
-    : IComparer<GraphIncomingEdgeRowV1>
+    : IComparer<GraphIncomingEdgeRow>
 {
     private ExceptionDispatchInfo? budgetFailure;
 
-    public int Compare(GraphIncomingEdgeRowV1? left, GraphIncomingEdgeRowV1? right)
+    public int Compare(GraphIncomingEdgeRow? left, GraphIncomingEdgeRow? right)
     {
         const int EqualOrderIdentity = 0;
 

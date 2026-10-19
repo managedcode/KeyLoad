@@ -6,5 +6,5 @@ internal interface IDatabaseAuthenticationExecutionObserver
     void Started(string httpRequestId, Guid authenticateRequestId);
     void Terminal(string httpRequestId, Guid authenticateRequestId,
         global::KeyLoad.Diagnostics.Features.ResourceExecution.DatabasePhaseOutcome outcome);
-    void Ticket(string httpRequestId, string nativeSubject, DatabaseAuthenticationTicketSnapshot ticket);
+    void Ticket(string httpRequestId, string runtimeSubject, DatabaseAuthenticationTicketSnapshot ticket);
 }

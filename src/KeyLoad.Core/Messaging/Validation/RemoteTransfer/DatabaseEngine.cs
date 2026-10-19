@@ -20,7 +20,7 @@ public sealed partial class DatabaseEngine
                 || !RemoteTransferDependencyShape.Valid(stamp.Dependency) || !RemoteTransferDependencyShape.Valid(witness.CurrentDependency)
                 || !RemoteTransferDependencyShape.Digest(witness.OutcomeDigest)
                 || witness.ReadGeneration < RemoteTransferAttemptProtocol.NoUsage
-                || witness.TargetCut.Position < RemoteTransferAttemptProtocol.MinimumNativePosition
+                || witness.TargetCut.Position < RemoteTransferAttemptProtocol.RuntimeMinimumPosition
                 || witness.Purpose != RemoteTransferAttemptProtocol.FailurePurpose || !Enum.IsDefined(witness.FailureKind)
                 || stamp.Source != record.Source || stamp.Destination != record.Destination || stamp.TransferId != record.TransferId
                 || stamp.PrincipalId != record.PrincipalId || stamp.MessageFingerprint != record.Fingerprint

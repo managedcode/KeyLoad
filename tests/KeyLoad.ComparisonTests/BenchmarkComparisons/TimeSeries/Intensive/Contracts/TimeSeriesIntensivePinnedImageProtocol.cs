@@ -4,8 +4,8 @@ internal static class TimeSeriesIntensivePinnedImageProtocol
 {
     internal const string Image = "docker.io/timescale/timescaledb:2.30.2-pg18@sha256:e72689191e1c977892c53d6f2c344dbc4a9657a867dc8cc1899229f9d3672b2e";
     internal const string FamiliarImage = "timescale/timescaledb:2.30.2-pg18@sha256:e72689191e1c977892c53d6f2c344dbc4a9657a867dc8cc1899229f9d3672b2e";
-    internal const string NativeRepoDigest = "timescale/timescaledb@sha256:e72689191e1c977892c53d6f2c344dbc4a9657a867dc8cc1899229f9d3672b2e";
-    internal const string QualifiedRepoDigest = "docker.io/" + NativeRepoDigest;
+    internal const string RepoDigest = "timescale/timescaledb@sha256:e72689191e1c977892c53d6f2c344dbc4a9657a867dc8cc1899229f9d3672b2e";
+    internal const string QualifiedRepoDigest = "docker.io/" + RepoDigest;
     internal const string EvidenceEnvironment = "KEYLOAD_TIMESERIES_IMAGE_FACTS_DIRECTORY";
     internal const string ActionsEnvironment = "GITHUB_ACTIONS";
     internal const string ShaEnvironment = "GITHUB_SHA";
@@ -62,10 +62,10 @@ internal static class TimeSeriesIntensivePinnedImageProtocol
     internal const string Tab = "\t";
     internal const string Newline = "\n";
     internal const string GitHubMissing = "The actual own-main Linux GitHub image feasibility context is required.";
-    internal const string EvidenceInvalid = "The native image facts directory must be a fresh absolute owned path.";
-    internal const string NativeFailure = "A bounded native image feasibility command failed; inspect the retained command receipt.";
-    internal const string OutputFailure = "A native image feasibility stream exceeded its one-MiB bound.";
-    internal const string ImageInvalid = "The pinned native image configuration or observed bootstrap primitives differ.";
+    internal const string EvidenceInvalid = "The execution image facts directory must be a fresh absolute owned path.";
+    internal const string RuntimeFailure = "A bounded execution image feasibility command failed; inspect the retained command receipt.";
+    internal const string OutputFailure = "A execution image feasibility stream exceeded its one-MiB bound.";
+    internal const string ImageInvalid = "The pinned execution image configuration or observed bootstrap primitives differ.";
     internal const string CleanupFailure = "The unique owned image probe could not be independently removed.";
     internal const int SchemaVersion = 1;
     internal const int MaximumBytes = 1_048_576;
@@ -73,7 +73,7 @@ internal static class TimeSeriesIntensivePinnedImageProtocol
     internal const int PullSeconds = 600;
     internal const int OperationSeconds = 30;
     internal const int RegexSeconds = 1;
-    internal static IReadOnlyList<string> AcceptedRepoDigests { get; } = [NativeRepoDigest, QualifiedRepoDigest];
+    internal static IReadOnlyList<string> AcceptedRepoDigests { get; } = [RepoDigest, QualifiedRepoDigest];
     internal static IReadOnlyList<string> AcceptedImageNames { get; } = [Image, FamiliarImage];
     internal static IReadOnlyList<string> RequiredTools { get; } = ["postgres", "pg_basebackup", "pg_isready", "timeout"];
 }

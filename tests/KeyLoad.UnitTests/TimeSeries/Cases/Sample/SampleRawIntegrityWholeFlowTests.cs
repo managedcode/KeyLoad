@@ -9,8 +9,8 @@ internal sealed class SampleRawIntegrityWholeFlowTests
     [Arguments(SampleRawIntegrityFault.NonpositiveSequence)]
     [Arguments(SampleRawIntegrityFault.NonfiniteValue)]
     [Arguments(SampleRawIntegrityFault.MissingSample)]
-    [Arguments(SampleRawIntegrityFault.WrongNativeRoot)]
-    [Arguments(SampleRawIntegrityFault.MalformedNative)]
+    [Arguments(SampleRawIntegrityFault.RuntimeWrongRoot)]
+    [Arguments(SampleRawIntegrityFault.RuntimeMalformed)]
     public async Task AcSeries005008009010011016RawIntegrityRefusesAcrossColdThenExactRepairAndReplayRemainHealthy(
         SampleRawIntegrityFault fault)
     {

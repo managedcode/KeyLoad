@@ -44,8 +44,8 @@ internal static class SqlCallNoPartialWriteAssertions
     internal static async Task ReceiptAsync(CommitReceipt expected, CommitReceipt actual)
     {
         await SameAsync(expected, actual);
-        await Assert.That(NativeSerialization.Serialize(actual).AsSpan().SequenceEqual(
-            NativeSerialization.Serialize(expected))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(actual).AsSpan().SequenceEqual(
+            OrleansSerialization.Serialize(expected))).IsTrue();
     }
 
     internal static async Task SameAsync<TExpected, TActual>(TExpected expected, TActual actual)

@@ -2,10 +2,10 @@ using KeyLoad.Storage;
 
 namespace KeyLoad.Core.Features.Messaging;
 
-/// <summary>Owns one decoded body and its exact persisted native byte length.</summary>
+/// <summary>Owns one decoded body and its exact persisted execution byte length.</summary>
 
 [global::Orleans.GenerateSerializer]
-[global::Orleans.Alias(global::KeyLoad.Core.Features.InternalSerialization.CoreNativeAliases.StoredMessageBody)]
+[global::Orleans.Alias(global::KeyLoad.Core.Features.InternalSerialization.CoreAliases.StoredMessageBody)]
 internal readonly record struct StoredMessageBody(
     [property: global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.StoredMessageBodyFields.Body)] MessageBody Body,
     [property: global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.StoredMessageBodyFields.Bytes)] long Bytes)
@@ -22,7 +22,7 @@ internal readonly record struct StoredMessageBody(
         if (!view.ReadValue(key, borrowed =>
         {
             bytes = borrowed.Length;
-            body = NativeSerialization.Deserialize<MessageBody>(borrowed);
+            body = OrleansSerialization.Deserialize<MessageBody>(borrowed);
         }) || body is null)
         {
             return null;

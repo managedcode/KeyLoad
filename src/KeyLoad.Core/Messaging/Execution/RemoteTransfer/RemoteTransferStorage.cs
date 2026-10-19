@@ -59,7 +59,7 @@ internal static class RemoteTransferStorage
         return checked(SerializedBytes(record) + record.ReceiptReservationBytes - actualReceiptBytes);
     }
 
-    internal static long SerializedBytes<T>(T record) => NativeSerialization.Serialize(record).LongLength;
+    internal static long SerializedBytes<T>(T record) => OrleansSerialization.Serialize(record).LongLength;
 
     internal static RemoteTransferCapacity Add(RemoteTransferCapacity current, long bytes)
         => new(checked(current.StoredRecords + AdjacentElementOffset), checked(current.StoredBytes + bytes));

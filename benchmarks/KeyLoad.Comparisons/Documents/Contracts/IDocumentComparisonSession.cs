@@ -1,6 +1,6 @@
 namespace KeyLoad.Comparisons;
 
-/// <summary>A real native client's identity and unrestricted ordered actual-state readback.</summary>
+/// <summary>A real execution client's identity and unrestricted ordered actual-state readback.</summary>
 public interface IDocumentComparisonSession : IComparisonSession
 {
     /// <summary>Identity assigned once to the actual independently owned client, never to borrowed wrappers.</summary>

@@ -84,7 +84,7 @@ internal sealed class SiteBrowserSession : IAsyncDisposable
         var coverageNames = new List<string>(coverage.Count);
         foreach (var snapshot in coverage)
         {
-            var coverageName = SiteBrowserTokens.NativeCoveragePrefix + Guid.NewGuid().ToString("N") + SiteBrowserTokens.NativeCoverageSuffix;
+            var coverageName = SiteBrowserTokens.CoveragePrefix + Guid.NewGuid().ToString("N") + SiteBrowserTokens.CoverageSuffix;
             await File.WriteAllBytesAsync(Path.Combine(sessionDirectory, coverageName),
                 JsonSerializer.SerializeToUtf8Bytes(snapshot), cancellationToken);
             coverageNames.Add(coverageName);

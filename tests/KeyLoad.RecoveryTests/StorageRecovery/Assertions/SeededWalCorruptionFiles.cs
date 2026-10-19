@@ -49,12 +49,12 @@ internal static class SeededWalCorruptionFiles
     }
     internal static async Task RequireHistoryAsync(SeededWalCorruptionProcessOwner owner)
     {
-        string[] phases = [global::KeyLoad.RecoveryTests.NativeChecksumProfileProtocol.Seed,
-            global::KeyLoad.RecoveryTests.NativeChecksumProfileProtocol.CorruptionRefusal,
-            global::KeyLoad.RecoveryTests.NativeChecksumProfileProtocol.CorruptionRefusal,
-            global::KeyLoad.RecoveryTests.NativeChecksumProfileProtocol.FirstAppend,
-            global::KeyLoad.RecoveryTests.NativeChecksumProfileProtocol.SecondAppend,
-            global::KeyLoad.RecoveryTests.NativeChecksumProfileProtocol.Cold];
+        string[] phases = [global::KeyLoad.RecoveryTests.ChecksumProfileProtocol.Seed,
+            global::KeyLoad.RecoveryTests.ChecksumProfileProtocol.CorruptionRefusal,
+            global::KeyLoad.RecoveryTests.ChecksumProfileProtocol.CorruptionRefusal,
+            global::KeyLoad.RecoveryTests.ChecksumProfileProtocol.FirstAppend,
+            global::KeyLoad.RecoveryTests.ChecksumProfileProtocol.SecondAppend,
+            global::KeyLoad.RecoveryTests.ChecksumProfileProtocol.Cold];
         await Assert.That(owner.History.Count).IsEqualTo(phases.Length);
         for (var index = 0; index < phases.Length; index++)
         {
@@ -63,7 +63,7 @@ internal static class SeededWalCorruptionFiles
             await Assert.That(actual.SignalObserved).IsTrue();
             await Assert.That(actual.ExitCode).IsEqualTo(0);
             await Assert.That(actual.OriginalExitAndBothReadersJoined).IsTrue();
-            await Assert.That(actual.NativeProcessClosed).IsTrue();
+            await Assert.That(actual.ProcessClosed).IsTrue();
         }
         await Assert.That(owner.Active).IsNull();
     }

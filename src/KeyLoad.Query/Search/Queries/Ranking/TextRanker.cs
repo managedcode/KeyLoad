@@ -95,13 +95,13 @@ internal sealed class TextRanker
 
     public SearchScore[] Rank() => Rank(corpusCount, totalLength, frequency);
 
-    internal KeyLoad.Query.Features.QueryExecution.DistributedTextStatisticsV1 CaptureStatistics()
+    internal KeyLoad.Query.Features.QueryExecution.DistributedTextStatistics CaptureStatistics()
     {
         return KeyLoad.Query.Features.QueryExecution.DistributedTextStatisticsCapture.Copy(
             terms, corpusCount, totalLength, frequency, budget);
     }
 
-    internal SearchScore[] Rank(KeyLoad.Query.Features.QueryExecution.DistributedTextStatisticsV1 statistics)
+    internal SearchScore[] Rank(KeyLoad.Query.Features.QueryExecution.DistributedTextStatistics statistics)
     {
         KeyLoad.Query.Features.QueryExecution.DistributedTextStatisticsValidation.Require(statistics, terms, budget);
         return Rank(statistics.DocumentCount, statistics.TotalLength, statistics.DocumentFrequencies);

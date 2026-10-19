@@ -9,7 +9,7 @@ using Orleans.Serialization;
 
 namespace KeyLoad.Clustering;
 
-#pragma warning disable ORLEANSEXP005 // ADR-110: native journal-backed ANN durable coordinator only.
+#pragma warning disable ORLEANSEXP005 // ADR-110: execution journal-backed ANN durable coordinator only.
 [Immovable(ImmovableKind.Any)]
 [GrainType(AnnProjectionJobProtocol.GrainAlias), PreferLocalPlacement]
 internal sealed class AnnProjectionCoordinatorGrain(IDurableStateManager state, ILocalDurableJobManager jobs,
@@ -28,7 +28,7 @@ internal sealed class AnnProjectionCoordinatorGrain(IDurableStateManager state, 
             (binding) => ScheduleCoreAsync(consumer, generation, nodeId, binding), cancellationToken);
 
     private async Task ScheduleCoreAsync(ProjectionConsumerRef consumer, long generation, Guid nodeId,
-        NativeCapabilityWorkLifetime binding)
+        CapabilityWorkLifetime binding)
     {
         RequireKey(consumer, generation, nodeId);
         using var linked = CancellationTokenSource.CreateLinkedTokenSource(binding.Token, runtime.SchedulingToken);
@@ -81,7 +81,7 @@ internal sealed class AnnProjectionCoordinatorGrain(IDurableStateManager state, 
                 services, codec.OperationLimits,
                 (binding) => ExecuteOriginalAsync(context, binding), cancellationToken));
 
-    private async Task ExecuteOriginalAsync(IJobRunContext context, NativeCapabilityWorkLifetime binding)
+    private async Task ExecuteOriginalAsync(IJobRunContext context, CapabilityWorkLifetime binding)
     {
         owner.RequireOpen();
         var original = owner.Current
@@ -129,7 +129,7 @@ internal sealed class AnnProjectionCoordinatorGrain(IDurableStateManager state, 
         }, binding, token).ConfigureAwait(true);
     }
 
-    private async Task WriteAsync(AnnProjectionJobState value, NativeCapabilityWorkLifetime binding,
+    private async Task WriteAsync(AnnProjectionJobState value, CapabilityWorkLifetime binding,
         CancellationToken token)
     {
         try

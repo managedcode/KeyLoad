@@ -34,7 +34,7 @@ internal static class QueueDeadlinePoisonPrefixClaims
         }).ToImmutableArray();
         var operation = Operation(database, OperationKind.Receive, request.RequestId, request, subject, time);
         var result = database.Apply(operation);
-        await NativeReplayResultAssertions.Same<ReceiveResult>(result,
+        await ReplayResultAssertions.Same<ReceiveResult>(result,
             Result<object>.Succeed(new ReceiveResult(request.RequestId, expected, expectedToken)));
         foreach (var delivery in result.Get<ReceiveResult>().Deliveries)
         {
@@ -44,8 +44,8 @@ internal static class QueueDeadlinePoisonPrefixClaims
         }
         var bytes = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
-        var identity = NativeSerialization.Serialize(store.Identity);
-        await NativeReplayResultAssertions.Same<ReceiveResult>(database.Apply(operation), result);
+        var identity = OrleansSerialization.Serialize(store.Identity);
+        await ReplayResultAssertions.Same<ReceiveResult>(database.Apply(operation), result);
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, bytes, position, identity);
         return result.Get<ReceiveResult>();
     }
@@ -56,10 +56,10 @@ internal static class QueueDeadlinePoisonPrefixClaims
         token.ThrowIfCancellationRequested();
         var bytes = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
-        var identity = NativeSerialization.Serialize(store.Identity);
+        var identity = OrleansSerialization.Serialize(store.Identity);
         var request = new ReceiveRequest(original.RequestId, lane, MaxMessages: original.Deliveries.Length);
         var operation = Operation(database, OperationKind.Receive, request.RequestId, request, subject, time);
-        await NativeReplayResultAssertions.Same<ReceiveResult>(database.Apply(operation),
+        await ReplayResultAssertions.Same<ReceiveResult>(database.Apply(operation),
             Result<object>.Succeed(original));
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, bytes, position, identity);
     }

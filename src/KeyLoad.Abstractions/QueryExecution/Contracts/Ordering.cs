@@ -7,6 +7,6 @@ namespace KeyLoad.Query;
 /// <param name="Descending">Whether to order from greatest to least.</param>
 /// <param name="NullsFirst"></param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.Ordering)]
+[Orleans.Alias(ContractAliases.Ordering)]
 public sealed record Ordering([property: Orleans.Id(0)] string Path, [property: Orleans.Id(1)] bool Descending,
     [property: Orleans.Id(2), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] bool? NullsFirst = null);

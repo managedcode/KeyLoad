@@ -13,8 +13,8 @@ internal static class GraphTraversalIntegrityFaultRows
     private const string ForeignEdgeId = "foreign-edge";
     private const string NoncanonicalAttributes = "{ \"value\" : 1 }";
     private const long InvalidRevision = 0;
-    private const int WrongNativeType = 7;
-    private const byte MalformedNativeByte = byte.MaxValue;
+    private const int RuntimeWrongType = 7;
+    private const byte MalformedByte = byte.MaxValue;
 
     internal static GraphTraversalOwnedFault Install(ZoneTreeStore store, GraphTraversalIntegrityState state,
         GraphTraversalIntegrityFault fault)
@@ -35,7 +35,7 @@ internal static class GraphTraversalIntegrityFaultRows
             }
             else if (fault == GraphTraversalIntegrityFault.NullTarget)
             {
-                transaction.Put(key, NativeGraphFixtures.EncodeUnchecked(edge with
+                transaction.Put(key, GraphFixtures.EncodeUnchecked(edge with
                 {
                     To = null!
                 }));
@@ -59,9 +59,9 @@ internal static class GraphTraversalIntegrityFaultRows
     private static byte[] AdjacencyBytes(GraphTraversalIntegrityState state, GraphTraversalIntegrityFault fault)
         => fault switch
         {
-            GraphTraversalIntegrityFault.AdjacencyIdentity => NativeSerialization.Serialize(state.HealthyEdge.Id),
-            GraphTraversalIntegrityFault.MalformedAdjacency => [MalformedNativeByte],
-            GraphTraversalIntegrityFault.WrongAdjacencyType => NativeSerialization.Serialize(WrongNativeType),
+            GraphTraversalIntegrityFault.AdjacencyIdentity => OrleansSerialization.Serialize(state.HealthyEdge.Id),
+            GraphTraversalIntegrityFault.MalformedAdjacency => [MalformedByte],
+            GraphTraversalIntegrityFault.WrongAdjacencyType => OrleansSerialization.Serialize(RuntimeWrongType),
             _ => throw new ArgumentOutOfRangeException(nameof(fault))
         };
 

@@ -7,10 +7,10 @@ namespace KeyLoad;
 /// <param name="Resources">The resources consumed by the projection.</param>
 /// <param name="MutationKinds">The mutation kinds consumed by the projection.</param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.ProjectionConsumerDefinition)]
+[Orleans.Alias(ContractAliases.ProjectionConsumerDefinition)]
 public sealed record ProjectionConsumerDefinition([property: Orleans.Id(0)] long IndexGeneration, [property: Orleans.Id(1)] ImmutableArray<string> Resources, [property: Orleans.Id(2)] ImmutableArray<string> MutationKinds)
 {
-    /// <summary>Gets the explicit native committed-vector maintenance selector.</summary>
+    /// <summary>Gets the explicit execution committed-vector maintenance selector.</summary>
     [Orleans.Id(3), System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public AnnProjectionMaintenanceProfile? AnnMaintenance
     {

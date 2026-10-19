@@ -11,7 +11,7 @@ internal static class Q2CapabilityOperation
         var position = database.Store.Position;
         var before = QueueWholeFlowStorage.Bytes(database.Store);
         var expected = engine.Execute("root", new(database.Partition, SqlInnerJoinRejectionFixture.HealthySql,
-            AllowFullScan: true, QueryDialectVersion: 2));
+            AllowFullScan: true, QueryDialectVersion: SqlOperationProtocol.DefaultQueryDialectVersion));
         var actual = engine.ExecuteAst("root", request);
         await Assert.That(actual.AccessPath).IsEqualTo("bounded-primary-key-inner-join");
         await Assert.That(actual.Rows).HasSingleItem();
@@ -27,10 +27,10 @@ internal static class Q2CapabilityOperation
     {
         var position = database.Store.Position;
         var before = QueueWholeFlowStorage.Bytes(database.Store);
-        var native = database.Store.GetReadDiagnostics();
+        var execution = database.Store.GetReadDiagnostics();
         QueryPage? result = null;
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => result = engine.ExecuteAst("root", request));
-        await Assert.That(database.Store.GetReadDiagnostics()).IsEqualTo(native);
+        await Assert.That(database.Store.GetReadDiagnostics()).IsEqualTo(execution);
         await Assert.That(result).IsNull();
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.UnsupportedCapability);
         await Assert.That(failure.Message).IsEqualTo("The query AST version is unsupported.");

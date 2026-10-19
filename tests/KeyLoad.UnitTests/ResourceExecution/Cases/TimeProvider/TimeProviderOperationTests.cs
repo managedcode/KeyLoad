@@ -21,7 +21,7 @@ internal sealed class TimeProviderOperationTests
     [Test]
     [Arguments(false)]
     [Arguments(true)]
-    public async Task EmbeddedCommandsPersistBorrowedUtcAndReplayOriginalOutcome(bool native)
+    public async Task EmbeddedCommandsPersistBorrowedUtcAndReplayOriginalOutcome(bool execution)
     {
         var clock = new ControlledReadClock(Epoch);
         using var fixture = new TestDatabase(timeProvider: clock);
@@ -32,12 +32,12 @@ internal sealed class TimeProviderOperationTests
         var reference = new EntityRef(fixture.Partition, Collection, Entity);
         clock.Advance(TimeSpan.FromMinutes(1));
         var committedAt = clock.GetUtcNow();
-        var outcome = await SubmitAsync(coordinator, command, native);
+        var outcome = await SubmitAsync(coordinator, command, execution);
         var record = DocumentCrudFixture.ReadRecord(fixture, reference)!;
         await Assert.That(record.UpdatedAt).IsEqualTo(committedAt);
         await Assert.That(record.Json).IsEqualTo(Json);
         clock.Advance(TimeSpan.FromDays(1));
-        var replay = await SubmitAsync(coordinator, command, native);
+        var replay = await SubmitAsync(coordinator, command, execution);
         await Assert.That(replay.Get<CommitReceipt>().Token).IsEqualTo(outcome.Get<CommitReceipt>().Token);
         await Assert.That(DocumentCrudFixture.ReadRecord(fixture, reference)!.UpdatedAt).IsEqualTo(committedAt);
         await Assert.That(fixture.Database.GetDocument(Root, reference)!.Revision).IsEqualTo(1);
@@ -109,8 +109,8 @@ internal sealed class TimeProviderOperationTests
         await Assert.That(fixture.Database.GetDocument(Root, new(fixture.Partition, Collection, Entity))!.Json).IsEqualTo(Json);
     }
 
-    private static Task<Result<object>> SubmitAsync(EmbeddedCoordinator coordinator, CommandRequest command, bool native)
-        => native
-            ? coordinator.SubmitNativeAsync(OperationKind.Batch, command.CommandId, Root, NativeSerialization.Serialize(command))
+    private static Task<Result<object>> SubmitAsync(EmbeddedCoordinator coordinator, CommandRequest command, bool execution)
+        => execution
+            ? coordinator.RuntimeSubmitAsync(OperationKind.Batch, command.CommandId, Root, OrleansSerialization.Serialize(command))
             : coordinator.SubmitAsync(OperationKind.Batch, command.CommandId, Root, JsonSerializer.Serialize(command, JsonDefaults.Options));
 }

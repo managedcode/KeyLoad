@@ -7,11 +7,11 @@ public enum TextIndexMaintenancePhase
     Configure,
     /// <summary>Capture a complete bounded canonical seed or recovery authority.</summary>
     Capture,
-    /// <summary>Persist original native page work before changing postings.</summary>
+    /// <summary>Persist original execution page work before changing postings.</summary>
     Intent,
-    /// <summary>Apply the actual native index changes.</summary>
-    NativeIndex,
-    /// <summary>Join native handles and publish verified complete inventory.</summary>
+    /// <summary>Apply the actual execution index changes.</summary>
+    RuntimeIndex,
+    /// <summary>Join execution handles and publish verified complete inventory.</summary>
     Publish,
     /// <summary>Observe the original canonical checkpoint child receipt.</summary>
     Checkpoint,

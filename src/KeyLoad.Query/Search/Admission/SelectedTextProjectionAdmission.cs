@@ -5,7 +5,7 @@ namespace KeyLoad.Query.Features.Search;
 
 internal static class SelectedTextProjectionAdmission
 {
-    private const string Missing = "The selected native text generation is unavailable; explicitly restore it.";
+    private const string Missing = "The selected execution text generation is unavailable; explicitly restore it.";
 
     internal static ITextProjectionLease? Acquire(DatabaseEngine database, ITextProjection? provider,
         IKeyValueView view, PrincipalRecord principal, ResourceDefinition resource, SearchRequest request,

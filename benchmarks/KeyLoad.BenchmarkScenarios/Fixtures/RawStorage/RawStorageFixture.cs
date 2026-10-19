@@ -9,7 +9,7 @@ internal sealed class RawStorageFixture : IDisposable
     private const int MinimumMaximumWrites = 1;
     private const int SmallPayloadBytes = 32;
     private const int LargePayloadBytes = 1024;
-    private const string UnavailableMessage = "The raw storage fixture cannot continue after an incomplete native operation.";
+    private const string UnavailableMessage = "The raw storage fixture cannot continue after an incomplete execution operation.";
     private readonly int maximumWrites;
     private readonly byte[] readScratch;
     private RawStorageFixtureZoneTreeEngine? engine;
@@ -78,7 +78,7 @@ internal sealed class RawStorageFixture : IDisposable
         }
     }
 
-    /// <summary>Writes a native tombstone or delete and charges even a no-op attempt.</summary>
+    /// <summary>Writes a execution tombstone or delete and charges even a no-op attempt.</summary>
     public bool Delete(int index)
     {
         EnsureUsable(index);
@@ -94,7 +94,7 @@ internal sealed class RawStorageFixture : IDisposable
         }
     }
 
-    /// <summary>Closes actual native owners in dependency order; repeated calls retry only owners not yet released.</summary>
+    /// <summary>Closes actual execution owners in dependency order; repeated calls retry only owners not yet released.</summary>
     public void Dispose()
     {
         disposed = true;

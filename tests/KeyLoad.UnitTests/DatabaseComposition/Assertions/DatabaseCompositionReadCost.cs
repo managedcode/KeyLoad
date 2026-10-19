@@ -14,7 +14,7 @@ internal static class DatabaseCompositionReadCost
     private const long FirstReadySequence = 1L;
     private const int EndpointCatalogReads = 3;
     private const long MissingValueBytes = 0;
-    private const string EndpointLifetimeMissing = "The original endpoint has no native catalog lifetime.";
+    private const string EndpointLifetimeMissing = "The original endpoint has no execution catalog lifetime.";
     internal static long SingleUntyped(TestDatabase db, string queue, string message, EntityRef from, EntityRef to)
         => db.Store.Read(view =>
         {

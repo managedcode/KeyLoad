@@ -64,7 +64,7 @@ internal static class GenerationVisibilityPartialScanFlow
             }),
             UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(),
             UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(),
-            UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(),
+            UnitExecutionOptions.RuntimeClaimsExecution(),
             UnitExecutionOptions.TimeSeriesExecution(), db.Database.EvaluationClock);
 
     private static RowVisibilityScope Scope(DatabaseEngine database, PartitionRef partition)

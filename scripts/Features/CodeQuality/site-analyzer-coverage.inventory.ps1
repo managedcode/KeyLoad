@@ -1,11 +1,11 @@
 function Read-CoverageContract([string] $ContractPath, [string] $RepositoryRoot) {
     $tokens = $script:CoverageTokens
     $contract = Get-Content -LiteralPath $ContractPath -Raw | ConvertFrom-Json -AsHashtable
-    $nativeFormat = $contract[$tokens.JsonNativeFormat]
+    $runtimeFormat = $contract[$tokens.RuntimeJsonFormat]
     $artifacts = $contract[$tokens.JsonArtifactNames]
     if ($contract[$tokens.JsonSchemaVersion] -ne $tokens.SchemaVersion -or
         $contract[$tokens.JsonModule] -cne $tokens.ModuleName -or
-        $contract[$tokens.JsonCollectorVersion] -cne $tokens.NativeCollectorVersion -or
+        $contract[$tokens.JsonCollectorVersion] -cne $tokens.RuntimeCollectorVersion -or
         $contract[$tokens.JsonRequirements] -cnotcontains $tokens.RequirementCodeQuality -or
         $contract[$tokens.JsonRequirements] -cnotcontains $tokens.AcceptanceCodeQuality -or
         $contract[$tokens.JsonRequirements] -cnotcontains $tokens.RequirementBenchmark -or
@@ -15,15 +15,15 @@ function Read-CoverageContract([string] $ContractPath, [string] $RepositoryRoot)
         $contract[$tokens.JsonThresholds][$tokens.JsonModuleLinePercent] -ne $tokens.RequiredModuleLinePercent -or
         $contract[$tokens.JsonThresholds][$tokens.JsonModuleBranchPercent] -ne $tokens.RequiredModuleBranchPercent -or
         $contract[$tokens.JsonThresholds][$tokens.JsonCriticalLinePercent] -ne $tokens.RequiredPipelineLinePercent -or
-        $nativeFormat[$tokens.JsonPackageSelector] -cne $tokens.NativePackageSelector -or
-        $nativeFormat[$tokens.JsonLineSelector] -cne $tokens.NativeLineSelector -or
-        $nativeFormat[$tokens.JsonPackageName] -cne $tokens.ModuleName -or
-        $nativeFormat[$tokens.JsonNativeSourceRoots] -cne $tokens.NativeSourceRoots -or
-        $nativeFormat[$tokens.JsonNativeUnverifiedRoots] -cne $tokens.NativeUnverifiedRoots -or
-        $nativeFormat[$tokens.JsonNativeHitSemantics] -cne $tokens.NativeHitSemantics -or
+        $runtimeFormat[$tokens.JsonPackageSelector] -cne $tokens.PackageSelector -or
+        $runtimeFormat[$tokens.JsonLineSelector] -cne $tokens.LineSelector -or
+        $runtimeFormat[$tokens.JsonPackageName] -cne $tokens.ModuleName -or
+        $runtimeFormat[$tokens.JsonSourceRoots] -cne $tokens.RuntimeSourceRoots -or
+        $runtimeFormat[$tokens.JsonUnverifiedRoots] -cne $tokens.UnverifiedRoots -or
+        $runtimeFormat[$tokens.JsonHitSemantics] -cne $tokens.HitSemantics -or
         $artifacts[$tokens.JsonManifestArtifact] -cne $tokens.SourceManifestName -or
         $artifacts[$tokens.JsonReportArtifact] -cne $tokens.DerivedReportName -or
-        $artifacts[$tokens.JsonNativeCoverageArtifact] -cne $tokens.CoberturaName) {
+        $artifacts[$tokens.JsonCoverageArtifact] -cne $tokens.CoberturaName) {
         throw $tokens.ErrorInvalidContract
     }
 
@@ -54,9 +54,9 @@ function Assert-CoverageSourceFileInventory([string] $RepositoryRoot, [object] $
         if (($sourceFile.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) { throw $tokens.ErrorUnsafePath }
         if ($sourceFile.PSIsContainer -or $sourceFile.Extension -cne $tokens.CSharpExtension) { continue }
         $sourceRelative = ([IO.Path]::GetRelativePath($sourceRoot, $sourceFile.FullName)).Replace([string] $tokens.PathSeparator, $tokens.PathSlash).Replace([string] $tokens.PathBackslash, $tokens.PathSlash)
-        # Only the project's native SDK output roots are outside the authored source inventory.
-        if ($sourceRelative.StartsWith($tokens.NativeIntermediateOutputPrefix, [StringComparison]::Ordinal) -or
-            $sourceRelative.StartsWith($tokens.NativeBuildOutputPrefix, [StringComparison]::Ordinal)) { continue }
+        # Only the project's execution SDK output roots are outside the authored source inventory.
+        if ($sourceRelative.StartsWith($tokens.IntermediateOutputPrefix, [StringComparison]::Ordinal) -or
+            $sourceRelative.StartsWith($tokens.BuildOutputPrefix, [StringComparison]::Ordinal)) { continue }
         $path = ([IO.Path]::GetRelativePath($RepositoryRoot, $sourceFile.FullName)).Replace([string] $tokens.PathSeparator, $tokens.PathSlash).Replace([string] $tokens.PathBackslash, $tokens.PathSlash)
         if (-not $expected.Remove($path)) { throw $tokens.ErrorSourceInventory }
     }

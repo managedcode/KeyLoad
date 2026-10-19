@@ -6,7 +6,7 @@ namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
-    private static bool IsResourceFreeNativeOperation(OperationKind kind)
+    private static bool IsResourceFreeOperation(OperationKind kind)
         => kind is OperationKind.ConfigurePrincipal or OperationKind.ConfigureApiKey or OperationKind.SetDispatch
             or OperationKind.RuntimeJournal;
 

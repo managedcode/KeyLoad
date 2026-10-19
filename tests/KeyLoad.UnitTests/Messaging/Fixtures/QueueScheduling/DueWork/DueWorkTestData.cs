@@ -39,7 +39,7 @@ internal static class DueWorkTestData
             definition, 1, 1, 0, false);
         var key = KeySpace.Partition(DueWorkProtocol.ScheduleSpace, fixture.Partition,
             fixture.Queue.Queue, keyId.ToString(DueWorkFields.GuidFormat));
-        var value = NativeSerialization.Serialize(record);
+        var value = OrleansSerialization.Serialize(record);
         fixture.Store.Commit((transaction, _) =>
         {
             transaction.Put(key, value);

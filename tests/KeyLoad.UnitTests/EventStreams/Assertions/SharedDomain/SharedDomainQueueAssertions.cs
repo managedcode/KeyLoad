@@ -72,7 +72,7 @@ internal static class SharedDomainQueueAssertions
         }
         await Assert.That(body).IsNotNull();
         var input = new EnqueueMessage(lane.Queue, metadata.Id, scope.Payload, Headers);
-        await SharedDomainValueAssertions.EqualAsync(NativeSerialization.Deserialize<MessageBody>(body!),
+        await SharedDomainValueAssertions.EqualAsync(OrleansSerialization.Deserialize<MessageBody>(body!),
             new MessageBody(metadata.Id, scope.Payload, Headers, null, JsonData.Fingerprint(input)));
         var metadataKey = KeySpace.Partition(Metadata, lane.Partition, lane.Queue, metadata.Id);
         await SharedDomainValueAssertions.EqualAsync(database.Store.Read(view => view.GetRecord<MessageMetadata>(metadataKey)), metadata);

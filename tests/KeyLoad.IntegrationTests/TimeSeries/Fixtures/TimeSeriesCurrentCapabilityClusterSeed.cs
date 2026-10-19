@@ -1,5 +1,5 @@
 using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.ClusterRouting;
+using KeyLoad.IntegrationTests.Features.OrleansExecution;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
 using KeyLoad.IntegrationTests.Features.Search;
 
@@ -27,7 +27,7 @@ internal static class TimeSeriesCurrentCapabilityClusterSeed
         var principal = new PrincipalRecord("series-capability-" + Guid.NewGuid().ToString("N"),
             scenario.Partition.TenantId, [new(scenario.Partition.DatabaseId, TimeSeriesClusterScenario.Set,
                 Capability.SeriesRead | Capability.SeriesAppend)], [WriteGrant]);
-        var identity = await NativeTextClusterScenario.ConfigureIdentityAsync(fixture, principal, token);
+        var identity = await TextClusterScenario.ConfigureIdentityAsync(fixture, principal, token);
         await SqlClusterProtocol.EqualAsync(principal, identity.Principal);
         var readerCommand = Append(scenario, Third, 2, 5d);
         var readerReceipt = await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2,

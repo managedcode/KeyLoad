@@ -28,7 +28,7 @@ internal sealed class SqlInnerJoinExecutionTests
     private const string EmptyKeyLeft = "{\"order_id\":\"b\",\"customer_id\":\"\",\"total\":6}";
     private const string FirstRight = "{\"id\":\"c1\",\"name\":\"Ada\"}";
     private const string LastRight = "{\"id\":\"c2\",\"name\":\"Lin\"}";
-    private const int QueryDialectVersion = 2;
+    private const int QueryDialectVersion = SqlOperationProtocol.DefaultQueryDialectVersion;
     private const int ExpectedMatches = 2;
     private const int OverlongIdentifierLength = 257;
 

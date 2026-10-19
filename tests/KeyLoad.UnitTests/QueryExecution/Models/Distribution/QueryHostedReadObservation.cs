@@ -7,7 +7,7 @@ namespace KeyLoad.UnitTests.Features.QueryExecution;
 internal sealed class QueryHostedReadObservation(Guid connectionId, SiloAddress originSilo,
     GrainId expectedProducer, string principalId, int partitions)
 {
-    internal const string ChangedOwner = "The native query changed its original request, producer or physical owner.";
+    internal const string ChangedOwner = "The execution query changed its original request, producer or physical owner.";
     private readonly Lock gate = new();
     private readonly Dictionary<ZoneTreeStore, QueryHostedPhysicalRead> physicalReads = [];
     private readonly Dictionary<Guid, (GrainRequestProbeIdentity Identity, QueryHostedStorageOwner Owner)> children = [];
@@ -77,7 +77,7 @@ internal sealed class QueryHostedReadObservation(Guid connectionId, SiloAddress 
     {
         lock (gate)
         {
-            if (Coordinator is null || identity.ReadKind != GrainReadKind.DistributedSearchLeafV2
+            if (Coordinator is null || identity.ReadKind != GrainReadKind.DistributedSearchLeaf
                 || identity.PrincipalId != Identity.PrincipalId || identity.CommandKind is not null
                 || identity.CommandId != Guid.Empty || identity.RequestId == Identity.RequestId
                 || identity.OriginalExpiresAt == default || identity.OriginalExpiresAt > Identity.OriginalExpiresAt

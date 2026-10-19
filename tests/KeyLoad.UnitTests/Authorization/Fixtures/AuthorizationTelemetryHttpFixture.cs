@@ -40,9 +40,9 @@ internal sealed class AuthorizationTelemetryHttpFixture : IDisposable, IAsyncDis
         Spans = new(options);
         Logs = new(options);
         Metrics = new(options);
-        NativeSpans = new(options);
+        RuntimeSpans = new(options);
     }
-    internal AuthorizationNativeSpanObservation NativeSpans
+    internal AuthorizationSpanObservation RuntimeSpans
     {
         get;
     }
@@ -70,7 +70,7 @@ internal sealed class AuthorizationTelemetryHttpFixture : IDisposable, IAsyncDis
         builder.Logging.ClearProviders();
         builder.Logging.SetMinimumLevel(LogLevel.Information);
         builder.WebHost.ConfigureKestrel(server => server.Listen(IPAddress.Loopback, 0));
-        builder.Services.AddOpenTelemetry().WithTracing(tracing => tracing.AddProcessor(new AuthorizationUnsafeClientSpanProcessor(() => UnsafeState)).AddProcessor(NativeSpans));
+        builder.Services.AddOpenTelemetry().WithTracing(tracing => tracing.AddProcessor(new AuthorizationUnsafeClientSpanProcessor(() => UnsafeState)).AddProcessor(RuntimeSpans));
         builder.AddServiceDefaults();
         builder.Services.AddSingleton(Observations);
         builder.Services.AddOpenTelemetry()
@@ -83,7 +83,7 @@ internal sealed class AuthorizationTelemetryHttpFixture : IDisposable, IAsyncDis
                 exportIntervalMilliseconds: options.Value.ExportIntervalMilliseconds)));
         builder.Logging.AddOpenTelemetry(logs => logs.AddProcessor(new SimpleLogRecordExportProcessor(Logs)));
         app = builder.Build();
-        NativeSpans.Privacy = app.Services.GetRequiredService<IOptions<KeyLoad.Server.Features.Authorization.Configuration.HttpTelemetryPrivacyOptions>>().Value;
+        RuntimeSpans.Privacy = app.Services.GetRequiredService<IOptions<KeyLoad.Server.Features.Authorization.Configuration.HttpTelemetryPrivacyOptions>>().Value;
         app.UseMiddleware<AdminHttpMetricsMiddleware>();
         if (useServerErrorMiddleware)
         {

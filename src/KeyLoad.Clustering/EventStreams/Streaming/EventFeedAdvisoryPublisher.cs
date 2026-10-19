@@ -6,7 +6,7 @@ namespace KeyLoad.Clustering;
 
 internal sealed class EventFeedAdvisoryPublisher(IOptions<DatabaseLimits> databaseOptions)
 {
-    private const string InvalidContext = "The native event feed advisory context exceeds its bound.";
+    private const string InvalidContext = "The execution event feed advisory context exceeds its bound.";
 
     internal async Task PublishAsync(IAsyncObserver<EventFeedWakeupHint> actualProducer,
         EventFeedWakeupHint actualHint, CancellationToken originalCancellationToken)
@@ -21,20 +21,20 @@ internal sealed class EventFeedAdvisoryPublisher(IOptions<DatabaseLimits> databa
         try
         {
             RequestContext.Clear();
-            // The native enqueue Task is not cancellation-aware. Join its ORIGINAL settlement before restoration.
+            // The execution enqueue Task is not cancellation-aware. Join its ORIGINAL settlement before restoration.
             await actualProducer.OnNextAsync(actualHint, null).ConfigureAwait(true);
         }
-        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+        catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error))
         {
             nonfatal = error;
         }
-        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
+        catch (Exception error) when (!CqrsBoundaryErrors.IsNonFatal(error))
         {
             fatal = error;
         }
         finally
         {
-            settlement = await NativeCqrsStreamSettlement.SettleAsync<EventFeedWakeupHint>(null,
+            settlement = await CqrsStreamSettlement.SettleAsync<EventFeedWakeupHint>(null,
                 () => RestoreContext(original), nonfatal ?? fatal).ConfigureAwait(true);
         }
         if ((settlement ?? nonfatal ?? fatal) is { } terminal)

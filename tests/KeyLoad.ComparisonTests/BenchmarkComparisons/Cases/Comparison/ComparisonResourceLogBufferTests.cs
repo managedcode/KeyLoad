@@ -2,9 +2,9 @@ namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 internal sealed class ComparisonResourceLogBufferTests
 {
-    /// <summary>AC-ISO-006: independent resources retain bounded native lines and truncate oversized messages.</summary>
+    /// <summary>AC-ISO-006: independent resources retain bounded execution lines and truncate oversized messages.</summary>
     [Test]
-    public async Task NativeResourceLogsHaveIndependentLineByteAndMessageBounds()
+    public async Task ResourceLogsHaveIndependentLineByteAndMessageBounds()
     {
         var first = new ComparisonResourceLogBuffer(3, 20, 8);
         first.Add("one");

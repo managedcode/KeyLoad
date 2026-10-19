@@ -18,7 +18,7 @@ internal static class QueueLifecycleImage
         var page = view.Scan(KeySpace.Partition(family, lane.Partition, lane.Queue), QueueLifecycleTestProtocol.ImageRecords);
         if (page.HasMore)
         {
-            throw new InvalidOperationException("The native lifecycle fixture image exceeded its bound.");
+            throw new InvalidOperationException("The execution lifecycle fixture image exceeded its bound.");
         }
         return page.Records.Select(row => Convert.ToHexString(row.Key.Span) + ":" + Convert.ToHexString(row.Value.Span));
     }).ToArray());

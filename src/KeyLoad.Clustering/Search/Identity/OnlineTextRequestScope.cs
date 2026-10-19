@@ -2,9 +2,9 @@ namespace KeyLoad.Clustering;
 
 internal static class OnlineTextRequestScope
 {
-    internal const string Purpose = "keyload-online-text-capability-v1";
-    internal const string CapabilityRequestAlias = "keyload.orleans.search.online-text-capability-request.v1";
-    internal const string CapabilityResultAlias = "keyload.orleans.search.online-text-capability-result.v1";
+    internal const string Purpose = "keyload-online-text-capability";
+    internal const string CapabilityRequestAlias = "keyload.orleans.search.online-text-capability-request";
+    internal const string CapabilityResultAlias = "keyload.orleans.search.online-text-capability-result";
 
     internal static bool Validate(GrainRequestEnvelope request)
     {

@@ -17,7 +17,7 @@ internal static class PartitionQueryTestSupport
     internal static TestDatabase Create(DatabaseLimits? limits = null, SensitiveFieldPolicy[]? fields = null)
         => Create(out _, limits, fields);
 
-    internal static TestDatabase Create(out ResourceLifetimeV1 creation, DatabaseLimits? limits = null,
+    internal static TestDatabase Create(out ResourceLifetime creation, DatabaseLimits? limits = null,
         SensitiveFieldPolicy[]? fields = null)
     {
         var database = new TestDatabase(limits);
@@ -80,8 +80,7 @@ internal static class PartitionQueryTestSupport
     internal static QueryEngine ReadEngine(TestDatabase database, DatabaseLimits? limits)
     {
         var engine = limits is null ? database.Database : TestDatabaseEngineFactory.Capture(
-            UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.BlobExecution(),
-            UnitExecutionOptions.NativeClaimsExecution(), null, database.Database.EvaluationClock)(database.Store);
+            UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.RuntimeClaimsExecution(), null, database.Database.EvaluationClock)(database.Store);
         return new(engine, UnitExecutionOptions.QueryExecution());
     }
 

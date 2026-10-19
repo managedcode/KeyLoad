@@ -4,7 +4,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Query;
 
-/// <summary>Parses the closed Q1.Search.v1 statement into the existing graph-search request.</summary>
+/// <summary>Parses the closed Q1.Search statement into the existing graph-search request.</summary>
 internal static class SqlGraphSearchParser
 {
     internal static GraphSearchRequest Parse(SqlGraphSearchRequest request, IOptions<DatabaseLimits> limitsOptions, ReadExecutionBudget budget,

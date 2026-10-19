@@ -3,7 +3,7 @@ using System.Collections.Immutable;
 namespace KeyLoad.Client;
 
 /// <summary>Joined finite worker outcome with bounded identities and actual failures.</summary>
-/// <param name="Reason">Local SDK stop cause; no native success is fabricated.</param>
+/// <param name="Reason">Local SDK stop cause; no execution success is fabricated.</param>
 /// <param name="Received">Actual received count, including known unhandled locally rejected leases.</param>
 /// <param name="Acknowledged">Actual successful ACK count.</param>
 /// <param name="PeakActiveHandlers">Observed original simultaneous handler ownership.</param>

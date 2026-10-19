@@ -2,7 +2,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
 
-/// <summary>Optional benchmark cohort metadata forwarded from validated native host options.</summary>
+/// <summary>Optional benchmark cohort metadata forwarded from validated execution host options.</summary>
 [ConfigurationOptions]
 internal sealed record BenchmarkRelayOptions
 {

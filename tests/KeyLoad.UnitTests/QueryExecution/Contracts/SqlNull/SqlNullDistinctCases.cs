@@ -4,28 +4,28 @@ namespace KeyLoad.UnitTests.Features.QueryExecution;
 
 internal static class SqlNullDistinctCases
 {
-    internal const string NumericSeparatorProfile = "SQL.NumericDigitSeparators.v1";
+    internal const string NumericSeparatorProfile = "SQL.NumericDigitSeparators";
     internal const string NumericSeparatorClause = "score = 10e-1 /* retained NumericSeparatorClause */";
     internal const string NumericRadixSeparatorClause = "score = 1 /* retained NumericRadixSeparatorClause */";
     internal const string NumericOctalSeparatorClause = "score = 1 /* retained NumericOctalSeparatorClause */";
-    internal const string Profile = "TSQL.NullDistinct.v1";
-    internal const string NullSynonymProfile = "SQL.NullPredicateSynonyms.v1";
+    internal const string Profile = "TSQL.NullDistinct";
+    internal const string NullSynonymProfile = "SQL.NullPredicateSynonyms";
     internal const string NullClause = "score IS NULL /* retained NullClause */";
     internal const string NotNullClause = "score IS NOT NULL /* retained NotNullClause */";
-    internal const string PositiveProfile = "SQL.PositiveNumericLiteral.v1";
+    internal const string PositiveProfile = "SQL.PositiveNumericLiteral";
     internal const string PositiveClause = "score = +1";
-    internal const string LeadingProfile = "SQL.LeadingDecimalLiteral.v1";
+    internal const string LeadingProfile = "SQL.LeadingDecimalLiteral";
     internal const string LeadingClause = "score > .5";
-    internal const string HexProfile = "SQL.HexadecimalIntegerLiteral.v1";
+    internal const string HexProfile = "SQL.HexadecimalIntegerLiteral";
     internal const string HexClause = "score = 1 /* retained HexClause */";
-    internal const string UnicodeProfile = "SQL.UnicodeStringLiteral.v1";
+    internal const string UnicodeProfile = "SQL.UnicodeStringLiteral";
     internal const string UnicodeClause = "score = 1 AND label = N'low' /* retained UnicodeClause */";
     internal const string UnicodeCustomClause = "score = 1 AND label = N'low' /* retained UnicodeCustomClause */";
-    internal const string BinaryOctalProfile = "SQL.BinaryOctalIntegerLiteral.v1";
+    internal const string BinaryOctalProfile = "SQL.BinaryOctalIntegerLiteral";
     internal const string BinaryClause = "score = 1 /* retained BinaryClause */";
     internal const string OctalClause = "score = 1 /* retained OctalClause */";
-    internal const string EscapeProfile = "SQL.EscapeStringLiteral.v1";
-    internal const string DollarProfile = "SQL.DollarQuotedString.v1";
+    internal const string EscapeProfile = "SQL.EscapeStringLiteral";
+    internal const string DollarProfile = "SQL.DollarQuotedString";
     internal const string DollarClause = "score = 1 AND label = N'low' /* retained DollarClause */";
     internal const string EscapeClause = "score = 1 AND label = N'low' /* retained EscapeClause */";
     internal const string ContinuationClause = "score = 1 AND label = N'low' /* retained ContinuationClause */";
@@ -184,7 +184,7 @@ internal static class SqlNullDistinctCases
         new("score = 79228162514264337593543950335 /* retained literal 105 */", new Comparison(Score, "=", ValueOperand.Create(decimal.MaxValue)), []),
         new("score = 79228162514264337593543950335 /* retained literal 106 */", new Comparison(Score, "=", ValueOperand.Create(decimal.MaxValue)), []),
         .. SqlUnicodeIdentifierCases.All,
-        .. SqlNullDistinctNativeNullCases.All,
+        .. SqlNullDistinctNullCases.All,
     ];
     internal static Logical And(Predicate left, Predicate right) => new(left, "AND", right);
     internal static Logical Or(Predicate left, Predicate right) => new(left, "OR", right);

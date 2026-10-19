@@ -8,8 +8,8 @@ internal static class DistributedSearchReplyShapeValidation
     private const int FirstCandidate = 0;
     private const string InvalidReply = "The distributed search reply contains a foreign or incomplete phase payload.";
 
-    internal static void Require(DistributedSearchOwnedLeafV1 request,
-        DistributedSearchLeafResultV1 result, ReadExecutionBudget budget)
+    internal static void Require(DistributedSearchOwnedLeaf request,
+        DistributedSearchLeafResult result, ReadExecutionBudget budget)
     {
         if (result.Candidates is { } candidates)
         {
@@ -39,7 +39,7 @@ internal static class DistributedSearchReplyShapeValidation
         }
     }
 
-    private static void RequireWindow(DistributedSearchOwnedLeafV1 request,
+    private static void RequireWindow(DistributedSearchOwnedLeaf request,
         GlobalBranchWindow? window, bool expected, string name, GlobalBranchKind kind,
         ReadExecutionBudget budget)
     {

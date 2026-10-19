@@ -44,8 +44,8 @@ internal static class RemoteTransferAckedRetentionColdTrial
             [new AcceptQueueTransfer(fixture.DestinationQueue, pending.IntentToken)]);
         var failure = fixture.Apply(OperationKind.Batch, refused);
         await Assert.That(Errors.Code(failure.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
-        var originalBytes = RemoteTransferAttemptColdNative.Outcome(fixture, accept.CommandId, fixture.DestinationPartition);
-        var failureBytes = RemoteTransferAttemptColdNative.Outcome(fixture, refused.CommandId, fixture.DestinationPartition);
+        var originalBytes = RemoteTransferAttemptCold.Outcome(fixture, accept.CommandId, fixture.DestinationPartition);
+        var failureBytes = RemoteTransferAttemptCold.Outcome(fixture, refused.CommandId, fixture.DestinationPartition);
         fixture.Reopen();
         await RemoteTransferAckedRetentionColdAssertions.RequireAsync(fixture, transfer, second, original, pending,
             proof, message, capacity, accept, accepted, refused, failure, originalBytes, failureBytes);

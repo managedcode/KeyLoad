@@ -40,7 +40,7 @@ internal static class GrainBm25CorpusPublicationCommand
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
         }
-        var operation = GrainNativePayload.Read<Command<DatabaseCommand>>(request.Payload);
+        var operation = GrainPayload.Read<Command<DatabaseCommand>>(request.Payload);
         if (operation.Value!.Kind != OperationKind.Bm25CorpusPublicationPhase
             || operation.Value!.Kind != request.Envelope.CommandKind || operation.CommandId != request.Envelope.CommandId
             || operation.UserId != request.Envelope.PrincipalId)

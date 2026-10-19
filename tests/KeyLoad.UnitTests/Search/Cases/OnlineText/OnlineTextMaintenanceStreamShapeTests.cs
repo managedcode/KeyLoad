@@ -1,6 +1,6 @@
 using KeyLoad.Clustering;
 using ManagedCode.Communication.CQRS;
-using static KeyLoad.UnitTests.Features.Search.NativeOnlineTextProgressFrames;
+using static KeyLoad.UnitTests.Features.Search.OnlineTextProgressFrames;
 
 namespace KeyLoad.UnitTests.Features.Search;
 
@@ -68,7 +68,7 @@ internal sealed class OnlineTextMaintenanceStreamShapeTests
     }
 
     [Test]
-    public async Task CorruptNativeEnvelopeWrongRequestAndEveryAlienUnionPayloadPreserveEachOriginalPrefix()
+    public async Task CorruptEnvelopeWrongRequestAndEveryAlienUnionPayloadPreserveEachOriginalPrefix()
     {
         var id = Guid.NewGuid();
         var frames = (await CreateAsync(id, Grammar)).Where(frame => frame.Kind == CqrsStreamChunkKind.Progress).ToArray();

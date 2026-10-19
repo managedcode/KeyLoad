@@ -20,7 +20,7 @@ internal static class LocalInboxProcessingRecoveryImage
         var page = view.Scan([], InventoryBound);
         if (page.HasMore)
         {
-            throw new InvalidOperationException("The complete local processing fixture exceeded its bounded native inventory.");
+            throw new InvalidOperationException("The complete local processing fixture exceeded its bounded execution inventory.");
         }
         return page.Records.Select(row => Convert.ToHexString(row.Key.Span) + ":" + Convert.ToHexString(row.Value.Span)).ToArray();
     });
@@ -54,7 +54,7 @@ internal static class LocalInboxProcessingRecoveryImage
     }
 
     internal static async Task CutAsync(DatabaseEngine database, ZoneTreeStore store, Command<DatabaseCommand> original,
-        MessageInspection input, long seedPosition, long seedTail, bool committed, EntityRefLifetimeV1 lifetime)
+        MessageInspection input, long seedPosition, long seedTail, bool committed, EntityRefLifetime lifetime)
     {
         await Assert.That(store.Position).IsEqualTo(seedPosition + (committed ? 1L : 0L));
         var record = store.Read(view => view.GetRecord<InboxRecord>(InboxKey()));

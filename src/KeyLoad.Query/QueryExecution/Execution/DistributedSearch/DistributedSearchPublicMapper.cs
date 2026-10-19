@@ -9,12 +9,12 @@ internal static class DistributedSearchPublicMapper
     private const int VersionOne = 1;
     private const int NoMatches = 0;
     private const int SingleMatch = 1;
-    private const string AccessPath = "distributedCanonicalSearchV1";
+    private const string AccessPath = "distributedCanonicalSearch";
     private const string InvalidProjection = "The distributed search projection does not match its original global selection.";
 
-    internal static DistributedSearchPageV1 Map(ImmutableArray<GlobalBranchCandidate> selected,
-        ImmutableArray<DistributedSearchLeafResultV1> projected,
-        ImmutableArray<DistributedTextWitnessV1> witnesses, string epoch,
+    internal static DistributedSearchPage Map(ImmutableArray<GlobalBranchCandidate> selected,
+        ImmutableArray<DistributedSearchLeafResult> projected,
+        ImmutableArray<DistributedTextWitness> witnesses, string epoch,
         SearchRankFusion fusion, bool explain, ReadExecutionBudget budget)
     {
         budget.Check();
@@ -33,19 +33,19 @@ internal static class DistributedSearchPublicMapper
                 Explanation = explain ? fusion.Explain(candidate.Reference) : null
             });
         }
-        var leaves = ImmutableArray.CreateBuilder<PartitionQueryLeafWitnessV1>(witnesses.Length);
+        var leaves = ImmutableArray.CreateBuilder<PartitionQueryLeafWitness>(witnesses.Length);
         foreach (var witness in witnesses)
         {
             budget.Check();
             leaves.Add(new(witness.Partition, witness.CutPosition, witness.PolicyEpoch, witness.SchemaVersion, AccessPath));
         }
-        var page = new DistributedSearchPageV1(VersionOne, hits.MoveToImmutable(), leaves.MoveToImmutable(), epoch, true);
+        var page = new DistributedSearchPage(VersionOne, hits.MoveToImmutable(), leaves.MoveToImmutable(), epoch, true);
         budget.CheckResult(page);
         return page;
     }
 
     private static RankedDocument Find(GlobalBranchCandidate candidate,
-        ImmutableArray<DistributedSearchLeafResultV1> leaves, ReadExecutionBudget budget)
+        ImmutableArray<DistributedSearchLeafResult> leaves, ReadExecutionBudget budget)
     {
         RankedDocument? selected = null;
         var matches = NoMatches;

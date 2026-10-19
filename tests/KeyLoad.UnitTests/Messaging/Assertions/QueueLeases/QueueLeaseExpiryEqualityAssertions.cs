@@ -17,7 +17,7 @@ internal static class QueueLeaseExpiryEqualityAssertions
     {
         await Assert.That(QueueWholeFlowStorage.Bytes(store)).IsEquivalentTo(image, CollectionOrdering.Matching);
         await Assert.That(store.Position).IsEqualTo(position);
-        await Assert.That(NativeSerialization.Serialize(store.Identity)).IsEquivalentTo(identity, CollectionOrdering.Matching);
+        await Assert.That(OrleansSerialization.Serialize(store.Identity)).IsEquivalentTo(identity, CollectionOrdering.Matching);
     }
 
     internal static async Task DeliveryAsync(Delivery delivery, string id, string payload, string headers)

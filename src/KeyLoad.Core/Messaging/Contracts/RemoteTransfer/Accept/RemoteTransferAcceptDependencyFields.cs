@@ -12,5 +12,5 @@ internal static class RemoteTransferAcceptDependencyFields
     internal const uint TransferStoredBytes = 7;
     internal const uint MaxBatchBytes = 8;
     internal const uint MaxScanRecords = 9;
-    internal const string Alias = "keyload.core.queue-transfer.accept-dependency.v1";
+    internal const string Alias = "keyload.core.queue-transfer.accept-dependency";
 }

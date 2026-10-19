@@ -22,7 +22,7 @@ internal sealed class EqualityAccessPathTests
     [Arguments(false, true)]
     [Arguments(true, false)]
     [Arguments(true, true)]
-    public async Task AcAisql008ReversedLiteralAndParameterEqualityUsesTheSameNativePathAndOrderedRows(bool indexed, bool parameterized)
+    public async Task AcAisql008ReversedLiteralAndParameterEqualityUsesTheSamePathAndOrderedRows(bool indexed, bool parameterized)
     {
         using var db = EqualityAccessPathSupport.Create();
         var engine = new QueryEngine(db.Database, UnitExecutionOptions.QueryExecution());
@@ -42,7 +42,7 @@ internal sealed class EqualityAccessPathTests
     [Arguments(false, true)]
     [Arguments(true, false)]
     [Arguments(true, true)]
-    public async Task AcAisql008NativeEqualityCandidatesStillEvaluateContradictoryAndUnknownResiduals(bool indexed, bool nullResidual)
+    public async Task AcAisql008EqualityCandidatesStillEvaluateContradictoryAndUnknownResiduals(bool indexed, bool nullResidual)
     {
         using var db = EqualityAccessPathSupport.Create();
         var engine = new QueryEngine(db.Database, UnitExecutionOptions.QueryExecution());
@@ -91,7 +91,7 @@ internal sealed class EqualityAccessPathTests
     }
 
     [Test]
-    public async Task AcAisql008DisjunctiveEqualitiesCannotSelectOnlyOneNativePoint()
+    public async Task AcAisql008DisjunctiveEqualitiesCannotSelectOnlyOnePoint()
     {
         using var db = EqualityAccessPathSupport.Create();
         var engine = new QueryEngine(db.Database, UnitExecutionOptions.QueryExecution());

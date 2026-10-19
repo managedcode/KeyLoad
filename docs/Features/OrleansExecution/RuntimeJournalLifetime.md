@@ -1,0 +1,33 @@
+# runtime-journal construction and shutdown
+
+Decision: [ADR-136](../../ADR/ADR-136-orleans-partition-ownership.md). Related: [RuntimeJournal](RuntimeJournal.md), [RequestDrainLifecycle](RequestDrainLifecycle.md), [RuntimeConstructorCycle](RuntimeConstructorCycle.md). This contract changes only internal construction and lifetime; persisted identities, provider name, format and packages are unchanged.
+
+## Requirements and automated operation map
+
+- REQ/AC-EXECUTION-JOURNAL-LIFETIME-001: Generic Host and silo construction resolves the job manager and journal provider/client before any storage publication. Construction opens no files and never invokes storage borrowers. A real journal catalog call waits behind closed admission; its cancellation settles that same Task before disposal and has no storage effect. `RuntimeConstructorCycleTests` owns this production flow; descriptor inspection or a substitute service provider is insufficient.
+- REQ/AC-EXECUTION-JOURNAL-LIFETIME-002: admitted operations resolve the SAME registered `DatabaseEngine`, `ICommitCoordinator` and `GrainRequestCodec` only after `RuntimeJournalAdmission.WaitAsync`. The owner is published by the per-silo storage Grain Service, never by a delegate constructing a second store. Keep batch-size validation, the coordinator barrier, the current persisted principal, the signed CQRS stream, the original command identity and uncertain-outcome replay. `RuntimeJournalStorageTests` and the job scheduled-effect operations cover this boundary.
+- REQ/AC-EXECUTION-JOURNAL-LIFETIME-003: execution `LocalDurableJobManager` keeps its Active-stage scheduling admission and worker settlement, with no decorator or forwarding observer. A separate lifecycle participant returns the SAME memoized `RequestWorkOwner.DrainAsync` task at ApplicationServices stop, before runtime storage services stop and the lower storage close. `RequestDrainLifecycleTests` exercises the real `SiloLifecycleSubject`, admitted producers and real ZoneTree effects. A failed or cancelled stop never licenses storage close while `IsJoined` is false.
+- REQ/AC-EXECUTION-JOURNAL-LIFETIME-004: journal and real SDK/official MCP scheduled-job flows through the Aspire replicated cluster preserve outbox commit-before-schedule, at-least-once idempotent effects, stored receipts/replay, current persisted authority and recovery. Keep producer/iterator/task ownership, initiating plus cleanup failures and retained evidence when close is unknown.
+
+```mermaid
+flowchart TD
+  Constructors[Host silo jobs and provider constructors] --> Deferred[Capture storage borrowers only]
+  RuntimeInit[Storage GrainService Init] --> Published[Same storage owner publication]
+  Published --> Admission[Journal admission opens]
+  Deferred --> Operation[Journal operation]
+  Admission --> Operation
+  Operation --> Write[Grain call to ZoneTree owners on ReplicaCount silos]
+  JobsStop[jobs Active stop] --> RequestsStop[Application request drain]
+  RequestsStop --> Storage[Runtime storage services stop]
+  Storage --> Close[Silo-local storage close]
+```
+
+## Ownership
+
+OrleansExecution owns RuntimeJournalClient/StorageProvider, the server runtime registration and the dedicated request-drain participant. Grain-call default-deny transitions are unchanged. There is no second journal, clock, dispatcher, scheduler, retry loop or storage.
+
+Constructors validate pure immutable options without requiring open files. The database batch bound is validated at admitted use before the command. jobs startup is the provider behaviour; bootstrap that needs grain RPC runs only after Active. Shutdown stage values are the pinned Orleans constants, not a parallel lifecycle. Same-stage callbacks may run concurrently and failures may let later stages run; the storage close still checks the borrower-join state.
+
+The internal registration entry is `RuntimeJournalRegistration.Register(ISiloBuilder)`. It resolves no service or options during `UseOrleans` registration. Registered factories later request existing DI `IOptions`; DurableJobs configuration uses those validated settings and the injected `TimeProvider`. Deferred journal codec/database/coordinator closures point only to the registered storage borrow delegates and return the SAME owner-held objects without registering borrowed disposables in DI. `RequestDrainRegistration.Register` is independent of the jobs participant.
+
+Frontend, public API and schema are N/A. Process-kill evidence is not power-loss durability.

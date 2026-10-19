@@ -39,7 +39,7 @@ internal static class QueueScheduledAuthorityHistory
         {
             var saved = Outcome(store, state, operation.CommandId)!;
             await Assert.That(saved.Incarnation).IsEqualTo(store.Identity.Incarnation);
-            await Assert.That(NativeSerialization.Serialize(saved.Result).SequenceEqual(NativeSerialization.Serialize(result))).IsTrue();
+            await Assert.That(OrleansSerialization.Serialize(saved.Result).SequenceEqual(OrleansSerialization.Serialize(result))).IsTrue();
             var replay = owner.Apply(operation);
             if (operation.Value!.Kind == OperationKind.Receive)
             {
@@ -49,7 +49,7 @@ internal static class QueueScheduledAuthorityHistory
             }
             else
             {
-                await Assert.That(NativeSerialization.Serialize(replay).SequenceEqual(NativeSerialization.Serialize(result))).IsTrue();
+                await Assert.That(OrleansSerialization.Serialize(replay).SequenceEqual(OrleansSerialization.Serialize(result))).IsTrue();
             }
         }
         await QueuePendingAuthorityHistory.SameAsync(store, before);

@@ -1,5 +1,7 @@
 using KeyLoad.Core;
-using KeyLoad.Core.Features.ClusterRouting.Contracts;
+using KeyLoad.Core.Features.CommandOutcomes.Contracts;
+using KeyLoad.Core.Features.RuntimeJournaling.Contracts;
+using KeyLoad.Core.Features.StoragePartitions.Contracts;
 using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
 
@@ -18,7 +20,7 @@ internal static class QueueViewLeaseIsolationOperations
         var owner = state.Owner;
         var index = checked(owner.ReadCut().AppliedPosition + QueueViewLeaseIsolationProtocol.One);
         var operation = owner.Database.CreateCommand(kind, id, QueueViewLeaseIsolationProtocol.Root,
-            owner.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(request));
+            owner.Database.EvaluationClock.GetUtcNow(), OrleansSerialization.Serialize(request));
         operation = owner.Database.OwnCommand(operation);
         var predicted = expected(operation);
         var result = owner.Submit(operation);
@@ -28,11 +30,11 @@ internal static class QueueViewLeaseIsolationOperations
         var global = kind is OperationKind.ConfigureResource or OperationKind.ConfigurePrincipal;
         var key = global ? KeySpace.GlobalOutcome(QueueViewLeaseIsolationProtocol.Root, id)
             : KeySpace.PartitionOutcome(state.Partition, QueueViewLeaseIsolationProtocol.Root, id);
-        var locatorKey = KeySpace.OutcomeLocatorV2(state.Partition, QueueViewLeaseIsolationProtocol.Root, id);
+        var locatorKey = KeySpace.OutcomeLocator(state.Partition, QueueViewLeaseIsolationProtocol.Root, id);
         var outcome = owner.Store.Read(view => view.ReadOwnedValue(key))
             ?? throw new InvalidOperationException(QueueViewLeaseIsolationProtocol.Absent);
         var locator = owner.Store.Read(view => view.ReadOwnedValue(locatorKey));
-        var stored = NativeSerialization.Deserialize<StoredOutcome>(outcome);
+        var stored = OrleansSerialization.Deserialize<StoredOutcome>(outcome);
         await Assert.That(stored.Incarnation).IsEqualTo(owner.Store.Identity.Incarnation);
         await Assert.That(stored.PolicyEpoch).IsEqualTo(QueueViewLeaseIsolationProtocol.Initial);
         await Assert.That(stored.ScopeKind).IsEqualTo(global ? CommandOutcomeScopeKind.Global : CommandOutcomeScopeKind.Partition);

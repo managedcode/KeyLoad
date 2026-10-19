@@ -14,7 +14,7 @@ internal static class SqlModelEventRecordIntegrityFlow
             SqlEventReferenceJoinFixture.StreamSet, SqlEventReferenceJoinFixture.Stream, 1L, 5L);
         var original = database.Store.Read(view => view.ReadOwnedValue(key))
                        ?? throw new InvalidOperationException("The original retained event is absent.");
-        var record = NativeSerialization.Deserialize<EventRecord>(original);
+        var record = OrleansSerialization.Deserialize<EventRecord>(original);
         var damaged = new[]
         {
             record with { EventSequence = 0 },
@@ -23,7 +23,7 @@ internal static class SqlModelEventRecordIntegrityFlow
         };
         foreach (var fault in damaged)
         {
-            await FaultAsync(database, key, original, NativeSerialization.Serialize(fault));
+            await FaultAsync(database, key, original, OrleansSerialization.Serialize(fault));
         }
         await SqlEventReferenceJoinCold.RunAsync(database, seed.Command, seed.Receipt,
             repair.Command, repair.Receipt);
@@ -47,8 +47,8 @@ internal static class SqlModelEventRecordIntegrityFlow
             await Assert.That(JsonDefaults.Serialize(database.Store.Identity)).IsEquivalentTo(identity, CollectionOrdering.Matching);
             await QueriesAsync(database.Store, database.Database, database.Partition, expected, checked(position + 1));
         }
-        catch (Exception error) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-        catch (Exception error) when (!global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
+        catch (Exception error) when (global::KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
+        catch (Exception error) when (!global::KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         try
         {
             database.Store.Commit((transaction, _) => { transaction.Put(key, original); return true; });
@@ -56,8 +56,8 @@ internal static class SqlModelEventRecordIntegrityFlow
             await Assert.That(JsonDefaults.Serialize(database.Store.Identity)).IsEquivalentTo(identity, CollectionOrdering.Matching);
             await SqlEventReferenceJoinOperation.VerifyAsync(database, repaired: true);
         }
-        catch (Exception error) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-        catch (Exception error) when (!global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
+        catch (Exception error) when (global::KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
+        catch (Exception error) when (!global::KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
     }
 

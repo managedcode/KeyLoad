@@ -1,6 +1,6 @@
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
-/// <summary>Controlled native-output parser bytes only; no HTTP client, server or provider authentication is simulated.</summary>
+/// <summary>Controlled execution-output parser bytes only; no HTTP client, server or provider authentication is simulated.</summary>
 internal sealed class IsolatedGitHubHeaderTests
 {
     private const string Source = """
@@ -30,7 +30,7 @@ internal sealed class IsolatedGitHubHeaderTests
     [Arguments(4096)]
     public async Task AcIso007ControlledHeaderBoundaryPreservesBinaryBodyAcrossChunks(int blockSize)
     {
-        using var directory = new NativeArtifactTestDirectory();
+        using var directory = new ArtifactTestDirectory();
         var result = await SessionNodeProcess.RunAsync(
             ["--input-type=module", "-e", Source, SessionNodeProcess.Module("isolated-github-headers.mjs"),
                 directory.Root, blockSize.ToString(System.Globalization.CultureInfo.InvariantCulture)],

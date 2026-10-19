@@ -11,8 +11,8 @@ internal static class KurrentOwnedStreamAppend
         ArgumentNullException.ThrowIfNull(writer);
         ArgumentNullException.ThrowIfNull(ownership);
         ArgumentNullException.ThrowIfNull(eventData);
-        var nativeEventId = eventData.EventId.ToGuid();
-        ownership.Reserve(stream, nativeEventId);
+        var runtimeEventId = eventData.EventId.ToGuid();
+        ownership.Reserve(stream, runtimeEventId);
         IWriteResult result;
         try
         {
@@ -24,16 +24,16 @@ internal static class KurrentOwnedStreamAppend
         }
         catch (WrongExpectedVersionException)
         {
-            ownership.Reject(stream, nativeEventId);
+            ownership.Reject(stream, runtimeEventId);
             throw;
         }
         catch (Exception)
         {
-            ownership.MarkUnknown(stream, nativeEventId);
+            ownership.MarkUnknown(stream, runtimeEventId);
             throw;
         }
         // No conversion, copy validation or success result can precede this actual ACK transition.
-        ownership.Acknowledge(stream, nativeEventId);
+        ownership.Acknowledge(stream, runtimeEventId);
         return result;
     }
 }

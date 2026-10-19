@@ -3,10 +3,10 @@ using System.Text.Json.Serialization;
 
 namespace KeyLoad.Comparisons;
 
-/// <summary>Canonical native comparison value serialization, with no standalone report producer.</summary>
+/// <summary>Canonical execution comparison value serialization, with no standalone report producer.</summary>
 public static class ComparisonJson
 {
-    /// <summary>Shared strict value and topology converters for native correctness contracts.</summary>
+    /// <summary>Shared strict value and topology converters for execution correctness contracts.</summary>
     public static JsonSerializerOptions Options { get; } = CreateOptions();
 
     private static JsonSerializerOptions CreateOptions()

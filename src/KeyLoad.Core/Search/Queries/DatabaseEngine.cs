@@ -44,7 +44,7 @@ public sealed partial class DatabaseEngine
             var rejected = ImmutableArray.CreateBuilder<ErrorCode>();
             foreach (var row in page.Records)
             {
-                var current = NativeSerialization.Deserialize<ProjectionConsumerInfo>(row.Value.Span);
+                var current = OrleansSerialization.Deserialize<ProjectionConsumerInfo>(row.Value.Span);
                 if (!row.Key.Span.SequenceEqual(ConsumerKey(current.Consumer)))
                 {
                     throw Errors.Fail(ErrorCode.Corruption, InvalidMaintenanceAuthority);

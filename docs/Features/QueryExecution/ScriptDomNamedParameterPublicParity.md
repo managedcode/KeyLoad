@@ -1,6 +1,6 @@
 # Exact named parameters through public cluster SQL operations
 
-REQ-TSQL-002/003/005/006 and AC-TSQL-002/003/005/006 in [ScriptDOM](ScriptDom.md), under [ADR-130](../../ADR/ADR-130-microsoft-scriptdom-tsql.md), [ADR-125](../../ADR/ADR-125-connection-owned-execution.md) and [ADR-117](../../ADR/ADR-117-native-tunit-ci-entry.md), retain the existing bounded typed database operations. This is public wire-key parity alongside the separate Unit dictionary-comparer repair. A Dictionary comparer does not survive SDK/MCP JSON serialization; this flow makes no public comparer-regression claim.
+REQ-TSQL-002/003/005/006 and AC-TSQL-002/003/005/006 in [ScriptDOM](ScriptDom.md), under [ADR-130](../../ADR/ADR-130-microsoft-scriptdom-tsql.md), [ADR-125](../../ADR/ADR-125-connection-owned-execution.md) and [ADR-117](../../ADR/ADR-117-tunit-ci-entry.md), retain the existing bounded typed database operations. This is public wire-key parity alongside the separate Unit dictionary-comparer repair. A Dictionary comparer does not survive SDK/MCP JSON serialization; this flow makes no public comparer-regression claim.
 
 ## Requirements and whole-operation map
 
@@ -22,6 +22,6 @@ flowchart LR
   Join --> Keys
 ```
 
-The existing NativeAnnotationsAndPrivateLexicalBoundsRefuseThenCanonicalSqlAstAndTypedInsertReplaySurviveTwoColdOwners declaration is retained, with the same real Aspire cluster fixture, resources, discovered endpoints and server-owned connections. Existing global serialization is retained because the original whole operation kills/restarts the actual shared-key cluster cohort; no new scheduling restriction is introduced. The same two cold waves each repeat these wire-key checks without writes beyond original GUID replay. Public local cuts are opaque and only bounded positive witnesses; no equal cross-node cut proof is claimed.
+The existing AnnotationsAndPrivateLexicalBoundsRefuseThenCanonicalSqlAstAndTypedInsertReplaySurviveTwoColdOwners declaration is retained, with the same real Aspire cluster fixture, resources, discovered endpoints and server-owned connections. Existing global serialization is retained because the original whole operation kills/restarts the actual shared-key cluster cohort; no new scheduling restriction is introduced. The same two cold waves each repeat these wire-key checks without writes beyond original GUID replay. Public local cuts are opaque and only bounded positive witnesses; no equal cross-node cut proof is claimed.
 
 No product, parser, package, transport, provider, host, quota, timeout, public API, schema or persisted-format change is included.

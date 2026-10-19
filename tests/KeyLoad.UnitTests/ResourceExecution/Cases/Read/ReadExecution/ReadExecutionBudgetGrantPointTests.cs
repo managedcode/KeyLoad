@@ -7,7 +7,7 @@ internal sealed class ReadExecutionBudgetGrantPointTests
     private const string ExaminedExceededDiagnostic = "The read execution examined-record budget is exceeded.";
 
     [Test]
-    public async Task ExactPointGrantChargesSharedBytesBeforeNativeReader()
+    public async Task ExactPointGrantChargesSharedBytesBeforeReader()
     {
         using var database = ReadExecutionBudgetGrantSeed.CreateDatabase();
         var key = ReadExecutionBudgetGrantSeed.FirstKey;
@@ -30,7 +30,7 @@ internal sealed class ReadExecutionBudgetGrantPointTests
     }
 
     [Test]
-    public async Task MissingPointConsumesOneExaminedAttemptAndItsNativeKeyBytes()
+    public async Task MissingPointConsumesOneExaminedAttemptAndItsKeyBytes()
     {
         using var database = ReadExecutionBudgetGrantSeed.CreateDatabase();
         var key = ReadExecutionBudgetGrantSeed.MissingKey;
@@ -62,7 +62,7 @@ internal sealed class ReadExecutionBudgetGrantPointTests
     }
 
     [Test]
-    public async Task OneByteOverPointGrantRejectsBeforeNativeReaderAndAggregateDebit()
+    public async Task OneByteOverPointGrantRejectsBeforeReaderAndAggregateDebit()
     {
         using var database = ReadExecutionBudgetGrantSeed.CreateDatabase();
         var key = ReadExecutionBudgetGrantSeed.FirstKey;

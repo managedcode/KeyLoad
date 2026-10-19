@@ -16,7 +16,7 @@ internal static class QueueWorkerClusterByteReplay
             McpCallerTools.MessagesReceive, original.Receive, token))).Value, expected);
         await QueueWorkerClusterByteImages.RequireAsync(admin, sdk, mcp, seed, delivery, false, token);
         await QueueWorkerClusterAssertions.EqualAsync(await McpCallerAssertions.SdkSuccessAsync(
-            await sdk.CommitAsync(seed.Native.Producer, token)), seed.Native.Receipt);
+            await sdk.CommitAsync(seed.Execution.Producer, token)), seed.Execution.Receipt);
         await QueueWorkerClusterByteImages.RequireAsync(admin, sdk, mcp, seed, delivery, false, token);
     }
 }

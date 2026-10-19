@@ -17,7 +17,7 @@ internal static class TestDatabaseConcurrentCloseReopen
                 using var unexpected = ZoneTreeOwnerLock.Open(options, requireExisting: true);
             });
             await Assert.That(error).IsNotNull();
-            await Assert.That(OfflineNativeErrors.IsLockContention(error!)).IsTrue();
+            await Assert.That(OfflineErrors.IsLockContention(error!)).IsTrue();
         }
     }
 
@@ -53,7 +53,7 @@ internal static class TestDatabaseConcurrentCloseReopen
                     await TestDatabaseConcurrentCloseAssertions.CurrentAsync(owner, store, state);
                     var replay = owner.Apply(state.Original);
                     await TestDatabaseConcurrentCloseAssertions.ReceiptAsync(replay, state.ExpectedReceipt);
-                    await NativeReplayResultAssertions.Same<CommitReceipt>(replay, state.Result);
+                    await ReplayResultAssertions.Same<CommitReceipt>(replay, state.Result);
                     await TestDatabaseConcurrentCloseAssertions.CurrentAsync(owner, store, state);
                 }, failures);
                 lifetime.Close(store, failures);

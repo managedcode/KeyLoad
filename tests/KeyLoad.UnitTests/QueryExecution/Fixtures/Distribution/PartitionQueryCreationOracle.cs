@@ -6,10 +6,10 @@ internal static class PartitionQueryCreationOracle
 {
     private const string OriginalConfigurationRequired = "The original successful partition-query configuration outcome is required.";
 
-    internal static ResourceLifetimeV1 Configure(TestDatabase fixture, ConfigureResourceRequest request)
+    internal static ResourceLifetime Configure(TestDatabase fixture, ConfigureResourceRequest request)
     {
         var command = fixture.Database.CreateCommand(OperationKind.ConfigureResource, Guid.NewGuid(),
-            PartitionQueryTestSupport.Principal, fixture.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(request));
+            PartitionQueryTestSupport.Principal, fixture.Database.EvaluationClock.GetUtcNow(), OrleansSerialization.Serialize(request));
         _ = fixture.SubmitIssued(command).Get<ResourceDefinition>();
         var outcome = OutcomeStoreOracle.ReadStored(fixture.Store, command);
         if (outcome is null || outcome.Result.IsFailed || outcome.PreparedCommand.CommandId != command.CommandId
@@ -24,7 +24,7 @@ internal static class PartitionQueryCreationOracle
             request.Definition);
     }
 
-    internal static EntityRef Reference(ResourceLifetimeV1 creation, PartitionRef partition, string id)
+    internal static EntityRef Reference(ResourceLifetime creation, PartitionRef partition, string id)
     {
         if (creation.TenantId != partition.TenantId || creation.DatabaseId != partition.DatabaseId
             || creation.TransactionDomainId != partition.TransactionDomainId)

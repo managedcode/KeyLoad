@@ -14,8 +14,8 @@ internal sealed class GraphIncomingEdgesPageBuilder
     private readonly int limit;
     private readonly ReadExecutionBudget budget;
     private readonly long cutPosition;
-    private readonly ImmutableArray<GraphIncomingEdgeRowV1>.Builder rows =
-        ImmutableArray.CreateBuilder<GraphIncomingEdgeRowV1>();
+    private readonly ImmutableArray<GraphIncomingEdgeRow>.Builder rows =
+        ImmutableArray.CreateBuilder<GraphIncomingEdgeRow>();
     private long retainedBytes;
 
     internal GraphIncomingEdgesPageBuilder(DatabaseEngine database, PrincipalRecord principal,
@@ -43,7 +43,7 @@ internal sealed class GraphIncomingEdgesPageBuilder
             AttributesJson = database.Authorization.Project(principal, graph.FieldPolicies,
                 edge.AttributesJson, out _)
         };
-        var row = new GraphIncomingEdgeRowV1(projected, deliveredRevision);
+        var row = new GraphIncomingEdgeRow(projected, deliveredRevision);
         var rowBytes = budget.MeasureResult(row);
         var addition = checked(rowBytes + (rows.Count > EmptyRowCount ? CommaBytes : NoCommaBytes));
         var adjusted = checked(retainedBytes - ArrayBracketsBytes);
@@ -55,7 +55,7 @@ internal sealed class GraphIncomingEdgesPageBuilder
         rows.Add(row);
     }
 
-    internal GraphIncomingEdgesPageV1 Build()
+    internal GraphIncomingEdgesPage Build()
     {
         budget.Check();
         var comparer = new GraphIncomingEdgesOrderComparer(budget);
@@ -68,12 +68,12 @@ internal sealed class GraphIncomingEdgesPageBuilder
             comparer.RethrowOwnedBudgetFailure(exception);
             throw;
         }
-        var result = new GraphIncomingEdgesPageV1(Version, rows.ToImmutable(), cutPosition,
+        var result = new GraphIncomingEdgesPage(Version, rows.ToImmutable(), cutPosition,
             GraphCrossPartitionProtocol.EventualProjection);
         budget.CheckResult(result);
         return result;
     }
 
-    private GraphIncomingEdgesPageV1 EmptyPage()
+    private GraphIncomingEdgesPage EmptyPage()
         => new(Version, [], cutPosition, GraphCrossPartitionProtocol.EventualProjection);
 }

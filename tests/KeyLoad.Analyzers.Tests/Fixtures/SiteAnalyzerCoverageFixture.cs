@@ -36,7 +36,7 @@ internal static class SiteAnalyzerCoverageFixture
         SiteAnalyzerCoverageTokens.PairClose,
         SiteAnalyzerCoverageTokens.DuplicateBranchCaseVariantSuffix,
         StringComparison.Ordinal);
-    internal static string NativeBranchBooleanCases => SiteAnalyzerCoverageXmlBuilder.Build(nativeBranchBooleanCasing: true, includeFalseBranch: true);
+    internal static string BranchBooleanCases => SiteAnalyzerCoverageXmlBuilder.Build(branchBooleanCasing: true, includeFalseBranch: true);
     internal static string MalformedBranchBoolean => SiteAnalyzerCoverageXmlBuilder.Build().Replace(
         SiteAnalyzerCoverageTokens.LowercaseTrue,
         SiteAnalyzerCoverageTokens.InvalidBranchBoolean,

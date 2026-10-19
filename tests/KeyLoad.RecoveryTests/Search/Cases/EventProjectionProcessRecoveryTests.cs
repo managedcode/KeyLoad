@@ -35,7 +35,7 @@ internal sealed class EventProjectionProcessRecoveryTests
             await process.WaitForExitAsync(timeout.Token);
             await JoinPipesAsync(process, timeout.Token);
             await KilledProcessFileReadiness.WaitAsync(root, timeout.Token);
-            RecoveryFileInventory.AssertNativeHandlesReleased(root);
+            RecoveryFileInventory.AssertHandlesReleased(root);
             await EventProjectionProcessRecoveryAssertions.RecoverAndVerifyAsync(root, stage, timeout.Token);
         }
         catch (Exception failure)

@@ -1,6 +1,6 @@
 namespace KeyLoad.UnitTests.Features.Search;
 
-/// <summary>Operation clock observing actual work in the owning native store.</summary>
+/// <summary>Operation clock observing actual work in the owning execution store.</summary>
 internal sealed class AnnPublicObservedWorkClock : TimeProvider
 {
     private readonly DateTimeOffset epoch = TimeProvider.System.GetUtcNow();

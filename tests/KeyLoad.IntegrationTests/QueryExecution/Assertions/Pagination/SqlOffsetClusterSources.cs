@@ -1,5 +1,5 @@
 using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.ClusterRouting;
+using KeyLoad.IntegrationTests.Features.OrleansExecution;
 
 namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 
@@ -30,7 +30,7 @@ internal static class SqlOffsetClusterSources
         }
         var replay = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.CommitAsync(state.Seed, token));
         await SqlClusterProtocol.EqualAsync(state.Receipt, replay);
-        await Assert.That(NativeSerialization.Serialize(replay).AsSpan().SequenceEqual(NativeSerialization.Serialize(state.Receipt))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(replay).AsSpan().SequenceEqual(OrleansSerialization.Serialize(state.Receipt))).IsTrue();
         await Assert.That(replay.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
         await Assert.That(replay.PersistedCopies).IsEqualTo(3);
         var official = await SqlClusterProtocol.McpAsync<CommitReceipt>(callers.Mcp, SqlClusterProtocol.Call(state.Partition, McpCallerTools.DocumentsCommit, state.Seed) with
@@ -38,6 +38,6 @@ internal static class SqlOffsetClusterSources
             CommandId = state.Seed.CommandId
         }, token);
         await SqlClusterProtocol.EqualAsync(state.Receipt, official);
-        await Assert.That(NativeSerialization.Serialize(official).AsSpan().SequenceEqual(NativeSerialization.Serialize(state.Receipt))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(official).AsSpan().SequenceEqual(OrleansSerialization.Serialize(state.Receipt))).IsTrue();
     }
 }

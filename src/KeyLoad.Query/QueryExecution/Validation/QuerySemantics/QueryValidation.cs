@@ -8,8 +8,6 @@ namespace KeyLoad.Query;
 internal static class QueryValidation
 {
     private const string QueryRequestPartitionAndQueryAreRequiredDetail = "A query request, partition and query are required.";
-    private const int VersionOne = 1;
-    private const int VersionTwo = 2;
     private const string QueryASTVersionIsUnsupportedDetail = "The query AST version is unsupported.";
     private const int MinimumPositiveCount = 1;
     private const string QueryStructureExceedsItsBudgetDetail = "The query structure exceeds its budget.";
@@ -33,7 +31,7 @@ internal static class QueryValidation
         {
             throw Errors.Fail(ErrorCode.Validation, QueryRequestPartitionAndQueryAreRequiredDetail);
         }
-        if (request.AstVersion is not (VersionOne or VersionTwo))
+        if (request.AstVersion != SqlOperationProtocol.DefaultQueryDialectVersion)
         {
             throw Errors.Fail(ErrorCode.UnsupportedCapability, QueryASTVersionIsUnsupportedDetail);
         }
@@ -53,7 +51,7 @@ internal static class QueryValidation
 
         var projection = QuerySelectionNormalization.Projection(query.Projection, limits.MaxQueryDepth);
         var order = QuerySelectionNormalization.Order(query.Order, limits.MaxQueryDepth);
-        ValidateJoinVersion(request, query, projection);
+        ValidateJoinShape(request, query, projection);
         var join = NormalizeJoin(query.InnerJoin, limits);
         if (join is not null)
         {
@@ -92,11 +90,10 @@ internal static class QueryValidation
         return normalized;
     }
 
-    private static void ValidateJoinVersion(AstQueryRequest request, SelectQuery query, ImmutableArray<Selection> projection)
+    private static void ValidateJoinShape(AstQueryRequest request, SelectQuery query, ImmutableArray<Selection> projection)
     {
         var hasJoin = query.InnerJoin is not null;
-        if (request.AstVersion == VersionOne && hasJoin
-            || hasJoin && (query.Alias is null || query.ModelSource is not null
+        if (hasJoin && (query.Alias is null || query.ModelSource is not null
                 && !global::KeyLoad.Query.Features.QueryExecution.QueueEntityRefJoinBinding.IsSupportedSource(query)
                 && !global::KeyLoad.Query.Features.QueryExecution.EventEntityRefJoinBinding.IsSupportedSource(query)
                 || request.Cursor is not null || query.Explain

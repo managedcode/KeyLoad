@@ -17,8 +17,8 @@ internal static class TopicPurgeCrashScenario
     private const int InitialEventReadLimit = 1;
     private const long SourceGeneration = 1;
     private const string RetainedEntity = "retained";
-    private const string InvalidOutcome = "The seeded purge operation violated its native outcome contract.";
-    private const string TruncatedInventory = "The purge fixture inventory exceeded its native bound.";
+    private const string InvalidOutcome = "The seeded purge operation violated its execution outcome contract.";
+    private const string TruncatedInventory = "The purge fixture inventory exceeded its execution bound.";
     private const string RecordSeparator = ":";
     private const string DocumentSpace = "document";
     private const string MessageMetadataSpace = "message-meta";

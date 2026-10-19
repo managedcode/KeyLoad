@@ -65,7 +65,7 @@ internal static class SampleChunkProcessAssertions
     private static async Task OriginalOutcomeAsync(string root, SampleChunkCrashSnapshot snapshot)
     {
         await Assert.That(snapshot.OriginalInflightResult).IsNotNull();
-        var outcome = NativeSerialization.Deserialize<Result<object>>(Convert.FromHexString(snapshot.OriginalInflightResult!));
+        var outcome = OrleansSerialization.Deserialize<Result<object>>(Convert.FromHexString(snapshot.OriginalInflightResult!));
         var receipt = outcome.Get<CommitReceipt>();
         await Assert.That(receipt.CommandId).IsEqualTo(SampleChunkCrashContract.InflightId);
         var expectedToken = SampleChunkSnapshotFile.ReadExpectedToken(root, SampleChunkCrashContract.InflightId,

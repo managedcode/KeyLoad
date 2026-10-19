@@ -1,13 +1,13 @@
 namespace KeyLoad.Query.Features.QueryExecution;
 
-internal sealed class DistributedSearchPreparedLeaf(DistributedSearchOwnedLeafV1 actualRequest,
-    Func<CancellationToken, Task<DistributedSearchLeafResultV1>> run,
-    Func<DistributedSearchLeafResultV1, CancellationToken, Task> complete)
+internal sealed class DistributedSearchPreparedLeaf(DistributedSearchOwnedLeaf actualRequest,
+    Func<CancellationToken, Task<DistributedSearchLeafResult>> run,
+    Func<DistributedSearchLeafResult, CancellationToken, Task> complete)
 {
-    internal DistributedSearchOwnedLeafV1 ActualRequest { get; } = actualRequest;
+    internal DistributedSearchOwnedLeaf ActualRequest { get; } = actualRequest;
 
-    internal Task<DistributedSearchLeafResultV1> RunAsync(CancellationToken token) => run(token);
+    internal Task<DistributedSearchLeafResult> RunAsync(CancellationToken token) => run(token);
 
-    internal Task CompleteAsync(DistributedSearchLeafResultV1 result, CancellationToken token)
+    internal Task CompleteAsync(DistributedSearchLeafResult result, CancellationToken token)
         => complete(result, token);
 }

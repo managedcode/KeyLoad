@@ -33,14 +33,14 @@ internal static class AuthorizationCredentialColdAssertions
         (string[] Bytes, long Position) original, global::KeyLoad.Storage.StoreIdentity identity,
         long applied, ZoneTreeStore store, CancellationToken cancellationToken)
     {
-        await Assert.That(NativeSerialization.Serialize(store.Identity).AsSpan()
-            .SequenceEqual(NativeSerialization.Serialize(identity))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(store.Identity).AsSpan()
+            .SequenceEqual(OrleansSerialization.Serialize(identity))).IsTrue();
         await ImageAsync(store, original);
         var database = fixture.Database.CreateConfiguredDatabase(store);
         await Assert.That(database.LastApplied).IsEqualTo(applied);
         var replay = database.ApplyEmbedded(database.CreateCommand(OperationKind.ConfigureApiKey, repair.Id, AuthorizationCredentialHttpExportProtocol.RootPrincipal, default, JsonSerializer.Serialize(repair.Request, JsonDefaults.Options)), cancellationToken);
-        await Assert.That(NativeSerialization.Serialize(replay).AsSpan()
-            .SequenceEqual(NativeSerialization.Serialize(repair.Result))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(replay).AsSpan()
+            .SequenceEqual(OrleansSerialization.Serialize(repair.Result))).IsTrue();
         await ImageAsync(store, original);
         var principal = database.Authenticate(AuthorizationTelemetryTestProtocol.MemberKey,
             TimeProvider.System.GetUtcNow());

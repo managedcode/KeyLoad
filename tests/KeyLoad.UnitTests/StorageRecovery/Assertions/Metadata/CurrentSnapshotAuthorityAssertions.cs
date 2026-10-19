@@ -113,7 +113,7 @@ internal static class CurrentSnapshotAuthorityAssertions
         };
         expected.Add(Convert.ToHexString(KeyCodec.Encode(ZoneTreePersistenceFormat.SystemNamespace,
             restored ? ZoneTreePersistenceFormat.DispatchPausedKey : ZoneTreePersistenceFormat.LastAppliedKey)),
-            restored ? NativeSerialization.Serialize(true) : NativeSerialization.Serialize(OriginalAppliedPosition));
+            restored ? OrleansSerialization.Serialize(true) : OrleansSerialization.Serialize(OriginalAppliedPosition));
         if (healthy)
         {
             expected.Add(Convert.ToHexString(FollowupKey), FollowupValue);

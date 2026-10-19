@@ -34,7 +34,7 @@ internal static class QueueGraphReplayFlow
                 QueueGraphReplayState.ContinuationJson),
                 new GraphToQueueMutation(QueueGraphIdentityState.Queue, QueueGraphIdentityState.Graph,
                     source.From, QueueGraphReplayState.NextPrefix)]), new DateTimeOffset(reverse.Timestamp).AddSeconds(1));
-        var state = new QueueGraphReplayState(source, reverse, NativeSerialization.Serialize(receipt), next, continuation);
+        var state = new QueueGraphReplayState(source, reverse, OrleansSerialization.Serialize(receipt), next, continuation);
         await QueueGraphReplayAssertions.ReplaysAsync(state, db.Database, db.Store, continued: false);
         var reference = from ? source.First.Reference : source.Second.Reference;
         var foreign = new PartitionRef(db.Partition.TenantId, db.Partition.DatabaseId,
@@ -49,7 +49,7 @@ internal static class QueueGraphReplayFlow
         var record = from ? source.First : source.Second;
         db.Store.Commit((tx, _) =>
         {
-            tx.Put(source.EndpointKey, NativeSerialization.Serialize(record with
+            tx.Put(source.EndpointKey, OrleansSerialization.Serialize(record with
             {
                 Reference = mismatched
             }));

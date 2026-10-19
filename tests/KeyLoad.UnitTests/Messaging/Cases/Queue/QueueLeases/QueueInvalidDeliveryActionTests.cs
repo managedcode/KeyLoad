@@ -7,7 +7,7 @@ internal sealed class QueueInvalidDeliveryActionTests
     [Arguments(QueueRetryJitter.None, 99)]
     [Arguments(QueueRetryJitter.Full, -1)]
     [Arguments(QueueRetryJitter.Full, 99)]
-    public Task UnsupportedNativeActionPreservesCurrentLeaseThenProcessingCommitsExactlyOnce(
+    public Task UnsupportedActionPreservesCurrentLeaseThenProcessingCommitsExactlyOnce(
         QueueRetryJitter jitter, int action)
         => QueueInvalidDeliveryActionTrial.RunAsync(jitter, action, TestContext.Current!.Execution.CancellationToken);
 }

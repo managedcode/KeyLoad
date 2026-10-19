@@ -31,7 +31,7 @@ internal static class SubscriptionPausedDrainFlow
         var deliveries = original.Get<ReceiveSubscriptionResult>().Deliveries;
         var claimSaved = SubscriptionProcessingAtomicAssertions.OutcomeBytes(fixture.Store, group, claim.CommandId);
         await SubscriptionInboxConflictAssertions.InitialClaimsAsync(fixture.Database, group, deliveries, time);
-        await NativeReplayResultAssertions.Same<ReceiveSubscriptionResult>(fixture.Database.Apply(claim), original);
+        await ReplayResultAssertions.Same<ReceiveSubscriptionResult>(fixture.Database.Apply(claim), original);
         var pause = new SetSubscriptionPausedRequest(Guid.NewGuid(), group, 1, true);
         Add(fixture.Database, fixture.Store, group, Create(fixture.Database, OperationKind.SetSubscriptionPaused, pause, pause.CommandId,
             time.AddSeconds(2)), history).Get<SubscriptionInfo>();
@@ -43,7 +43,7 @@ internal static class SubscriptionPausedDrainFlow
         var renewed = Add(fixture.Database, fixture.Store, group,
             Create(fixture.Database, OperationKind.SubscriptionDelivery, renew, renew.CommandId, time.AddSeconds(4)), history);
         await SubscriptionPausedDrainAssertions.ReceiptAsync(renewed, renew, 1);
-        await NativeReplayResultAssertions.Same<ReceiveSubscriptionResult>(fixture.Database.Apply(claim), original);
+        await ReplayResultAssertions.Same<ReceiveSubscriptionResult>(fixture.Database.Apply(claim), original);
         await AckAsync(fixture.Database, fixture.Store, group, deliveries[2], history);
         await SubscriptionPausedDrainAssertions.StatusAsync(fixture.Database, group, 0, 3, true);
         await SubscriptionPausedDrainAssertions.OriginalClaimAsync(fixture.Database, fixture.Store, request, original, claimSaved, token);
@@ -56,7 +56,7 @@ internal static class SubscriptionPausedDrainFlow
     {
         var cut = QueueWholeFlowStorage.Bytes(fixture.Store);
         var position = fixture.Store.Position;
-        var identity = NativeSerialization.Serialize(fixture.Store.Identity);
+        var identity = OrleansSerialization.Serialize(fixture.Store.Identity);
         fixture.Store.Dispose();
         token.ThrowIfCancellationRequested();
         using var cold = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
@@ -88,7 +88,7 @@ internal static class SubscriptionPausedDrainFlow
     {
         var cut = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
-        var identity = NativeSerialization.Serialize(store.Identity);
+        var identity = OrleansSerialization.Serialize(store.Identity);
         store.Dispose();
         token.ThrowIfCancellationRequested();
         using var cold = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
@@ -124,7 +124,7 @@ internal static class SubscriptionPausedDrainFlow
             delivery.Token, 1L, time.AddSeconds(30), 1);
         await Assert.That(JsonSerializer.Serialize(delivery, JsonDefaults.Options))
             .IsEqualTo(JsonSerializer.Serialize(expected, JsonDefaults.Options));
-        await NativeReplayResultAssertions.Same<ReceiveSubscriptionResult>(db.Apply(operation), original);
+        await ReplayResultAssertions.Same<ReceiveSubscriptionResult>(db.Apply(operation), original);
         await AckAsync(db, store, group, delivery, history);
         await SubscriptionCheckpointAuthorityAssertions.SettledClaimAsync(db, store, request, original, token);
         await SubscriptionPausedDrainAssertions.StatusAsync(db, group, number, number, false);

@@ -8,8 +8,8 @@ internal static class SiteBrowserTokens
     public const string SessionsDirectory = SiteCoverageTokens.SessionsDirectory;
     public const string SourceManifestFile = SiteCoverageTokens.SourceManifestFile;
     public const string MetadataFile = SiteCoverageTokens.MetadataFile;
-    public const string NativeCoveragePrefix = "chrome-";
-    public const string NativeCoverageSuffix = SiteTokens.JsonSuffix;
+    public const string CoveragePrefix = "chrome-";
+    public const string CoverageSuffix = SiteTokens.JsonSuffix;
     public const string ChromeProfileDirectory = "chrome-profile";
     public const string DownloadDirectory = "downloads";
     public const string HtmlExtension = ".html";

@@ -2,10 +2,10 @@ using ManagedCode.Communication;
 
 namespace KeyLoad.Client;
 
-/// <summary>Reads the current authorized native chunk window through the existing signed SDK transport.</summary>
+/// <summary>Reads the current authorized execution chunk window through the existing signed SDK transport.</summary>
 public static class TimeSeriesChunkClientExtensions
 {
-    /// <summary>Reads a complete bounded window at the current native cut.</summary>
+    /// <summary>Reads a complete bounded window at the current execution cut.</summary>
     /// <param name="client">Actual signed database client.</param>
     /// <param name="request">Enrolled window, scalar tag predicate and strict output cap.</param>
     /// <param name="cancellationToken">Original caller cancellation.</param>

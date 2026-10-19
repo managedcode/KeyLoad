@@ -6,6 +6,6 @@ internal sealed class InitialPrincipalEpochTests
     [Arguments(0L)]
     [Arguments(-1L)]
     [Arguments(long.MinValue)]
-    public Task RefusedInitialEpochThenNativeKeyLifecycleAndScopedEffectsSurviveTwoColdOwners(long epoch)
+    public Task RefusedInitialEpochThenKeyLifecycleAndScopedEffectsSurviveTwoColdOwners(long epoch)
         => InitialPrincipalEpochFlow.RunAsync(epoch, TestContext.Current!.Execution.CancellationToken);
 }

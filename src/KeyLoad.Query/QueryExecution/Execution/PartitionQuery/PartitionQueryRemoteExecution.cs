@@ -5,16 +5,16 @@ using KeyLoad.Core.Features.ResourceExecution.Execution;
 
 namespace KeyLoad.Query.Features.QueryExecution;
 
-/// <summary>Uses the existing native plan and merge with authenticated, individually admitted owner leaves.</summary>
+/// <summary>Uses the existing execution plan and merge with authenticated, individually admitted owner leaves.</summary>
 internal static partial class PartitionQueryRemoteExecution
 {
     private const int FirstLeafIndex = 0;
     private const long NoReadBytes = 0;
     private const string DeadlineExceededDetail = "The read execution deadline is exceeded.";
     private const string InsufficientGrant = "The partition query grants exceed the original operation budget.";
-    internal static async Task<PartitionQueryPageV1> ExecuteAsync(QueryEngine engine,
-        PartitionQueryRequestV1 request,
-        Func<PartitionQueryLeafPlanV1, ReadExecutionBudgetReadGrant, ReadExecutionBudget, CancellationToken,
+    internal static async Task<PartitionQueryPage> ExecuteAsync(QueryEngine engine,
+        PartitionQueryRequest request,
+        Func<PartitionQueryLeafPlan, ReadExecutionBudgetReadGrant, ReadExecutionBudget, CancellationToken,
             Task<PartitionQueryPreparedLeaf>> prepare,
         Func<CancellationToken, Task> revalidate, TimeProvider clock, DateTimeOffset originalExpiry,
         CancellationToken cancellationToken, IResourceLifetimeWorkBinding? binding = null)
@@ -41,7 +41,7 @@ internal static partial class PartitionQueryRemoteExecution
             _ = PartitionQueryPlanValidation.Validate(plan, database.Limits, engine.Execution);
             var grants = Reserve(plan, budget);
             var preparedLeaves = await PrepareLeavesAsync(plan, grants, budget, prepare, execution.Token).ConfigureAwait(true);
-            var leaves = ImmutableArray.CreateBuilder<PartitionQueryLeafResultV1>(plan.Leaves.Length);
+            var leaves = ImmutableArray.CreateBuilder<PartitionQueryLeafResult>(plan.Leaves.Length);
             var owners = ImmutableArray.CreateBuilder<PhysicalShardRecord>(plan.Leaves.Length);
             var concurrency = Math.Min(engine.Execution.MaximumConcurrentPartitionLeaves, plan.Leaves.Length);
             for (var offset = FirstLeafIndex; offset < plan.Leaves.Length; offset += concurrency)
@@ -77,9 +77,9 @@ internal static partial class PartitionQueryRemoteExecution
         }
     }
 
-    private static async Task<PartitionQueryPreparedLeaf[]> PrepareLeavesAsync(PartitionQueryPlanV1 plan,
+    private static async Task<PartitionQueryPreparedLeaf[]> PrepareLeavesAsync(PartitionQueryPlan plan,
         ReadExecutionBudgetReadGrant[] grants, ReadExecutionBudget budget,
-        Func<PartitionQueryLeafPlanV1, ReadExecutionBudgetReadGrant, ReadExecutionBudget, CancellationToken,
+        Func<PartitionQueryLeafPlan, ReadExecutionBudgetReadGrant, ReadExecutionBudget, CancellationToken,
             Task<PartitionQueryPreparedLeaf>> prepare, CancellationToken token)
     {
         var preparedLeaves = new PartitionQueryPreparedLeaf[plan.Leaves.Length];
@@ -91,7 +91,7 @@ internal static partial class PartitionQueryRemoteExecution
         return preparedLeaves;
     }
 
-    private static void CompleteReadAccounting(ImmutableArray<PartitionQueryLeafResultV1>.Builder leaves,
+    private static void CompleteReadAccounting(ImmutableArray<PartitionQueryLeafResult>.Builder leaves,
         ReadExecutionBudgetReadGrant[] grants)
     {
         for (var index = FirstLeafIndex; index < leaves.Count; index++)
@@ -122,7 +122,7 @@ internal static partial class PartitionQueryRemoteExecution
         }
     }
 
-    private static ReadExecutionBudgetReadGrant[] Reserve(PartitionQueryPlanV1 plan, ReadExecutionBudget budget)
+    private static ReadExecutionBudgetReadGrant[] Reserve(PartitionQueryPlan plan, ReadExecutionBudget budget)
     {
         var availableBytes = budget.RemainingReadGrantBytes - budget.MaximumResultBytes;
         if (availableBytes < NoReadBytes)

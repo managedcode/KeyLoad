@@ -28,7 +28,7 @@ internal sealed class GraphCrossPartitionDeleteTests
         await Assert.That(intent.Revision).IsEqualTo(2L);
 
         GraphCrossPartitionTestSupport.Deliver(database, source, target, EdgeId, 2);
-        var owner = database.Store.Read(view => view.GetRecord<GraphEdgeOwnerVersionV1>(
+        var owner = database.Store.Read(view => view.GetRecord<GraphEdgeOwnerVersion>(
             GraphCrossPartitionKeys.OwnerVersion(source, GraphCrossPartitionTestSupport.Graph, EdgeId)));
         var canonical = database.Store.Read(view => view.GetRecord<EdgeRecord>(
             GraphCrossPartitionKeys.CanonicalEdge(source, GraphCrossPartitionTestSupport.Graph, EdgeId)));

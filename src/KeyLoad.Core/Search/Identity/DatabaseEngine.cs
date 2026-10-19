@@ -21,11 +21,11 @@ public sealed partial class DatabaseEngine
             {
                 throw Errors.Fail(ErrorCode.PermissionDenied, Bm25CorpusProtocol.Administrator);
             }
-            work.ChargeBytes(NativeSerialization.Measure(phase));
+            work.ChargeBytes(OrleansSerialization.Measure(phase));
             RequireBm25Subject(view, administrator, phase, evaluatedAt);
-            work.ChargeBytes(NativeSerialization.Measure(phase));
-            var payload = NativeSerialization.Serialize(phase);
-            RequireNativeBudget(payload.Length);
+            work.ChargeBytes(OrleansSerialization.Measure(phase));
+            var payload = OrleansSerialization.Serialize(phase);
+            RequireBudget(payload.Length);
             return CreatePreparedCommand(OperationKind.Bm25CorpusPublicationPhase, phase.CommandId,
                 administrator.Id, evaluatedAt, payload, DatabaseCommandFingerprint.Compute(phase.CommandId,
                     OperationKind.Bm25CorpusPublicationPhase, administrator.Id, Identity<Bm25CorpusPublicationPhaseCommand>(payload)), work, view);

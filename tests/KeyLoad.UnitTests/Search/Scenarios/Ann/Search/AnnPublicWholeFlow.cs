@@ -18,7 +18,7 @@ internal static class AnnPublicWholeFlow
     private const string EfSearch = "KeyLoad:PackedAnn:EfSearch";
 
     internal static async Task RunAsync(int threshold, int breadth,
-        Func<TestDatabase, NativeAnnMaintenanceTestRuntime, AnnMaintenanceRequest, Task> operation, TimeProvider? clock = null)
+        Func<TestDatabase, AnnMaintenanceTestRuntime, AnnMaintenanceRequest, Task> operation, TimeProvider? clock = null)
     {
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
@@ -26,19 +26,19 @@ internal static class AnnPublicWholeFlow
             using var database = AnnSeedTestSupport.Create(Count, timeProvider: clock);
             await ServerFailureObserver.ObserveAsync(async () =>
             {
-                var request = NativeAnnMaintenanceTestData.Pin(database);
+                var request = AnnMaintenanceTestData.Pin(database);
                 var settings = new Dictionary<string, string?>
                 {
                     [ExactThreshold] = threshold.ToString(System.Globalization.CultureInfo.InvariantCulture),
                     [SearchBreadth] = breadth.ToString(System.Globalization.CultureInfo.InvariantCulture),
                     [EfSearch] = breadth.ToString(System.Globalization.CultureInfo.InvariantCulture)
                 };
-                await using var runtime = new NativeAnnMaintenanceTestRuntime(database,
+                await using var runtime = new AnnMaintenanceTestRuntime(database,
                     configuration: new ConfigurationBuilder().AddInMemoryCollection(settings).Build());
                 await ServerFailureObserver.ObserveAsync(async () =>
                 {
                     var began = await runtime.PhaseAsync(database, request, AnnMaintenanceCapabilityKind.Begin);
-                    _ = await NativeAnnMaintenancePhaseAssertions.FinishAsync(database, runtime, request, began.Source!.ThroughSequence);
+                    _ = await AnnMaintenancePhaseAssertions.FinishAsync(database, runtime, request, began.Source!.ThroughSequence);
                     await operation(database, runtime, request);
                 }, failures);
             }, failures);
@@ -51,7 +51,7 @@ internal static class AnnPublicWholeFlow
             VectorField: AnnSeedTestSupport.Field, Vector: [1, 0, 0], Space: AnnSeedTestSupport.Space(), Limit: Count),
             pin.Consumer, pin.IndexGeneration);
 
-    internal static SearchEngine Engine(TestDatabase database, NativeAnnMaintenanceTestRuntime runtime,
+    internal static SearchEngine Engine(TestDatabase database, AnnMaintenanceTestRuntime runtime,
         bool enabled = true, int? bytes = null)
         => new(database.Database, Options.Create(new QueryExecutionOptions
         {
@@ -64,7 +64,7 @@ internal static class AnnPublicWholeFlow
         var rows = empty ? [] : new RankedDocument[]
         { Row(database, "seed-00002", 1d / 61d, redacted), Row(database, "seed-00001", 1d / 62d, redacted), Row(database, "seed-00000", 1d / 63d, redacted) };
         var expected = new AnnSearchPage(Version, [.. rows], cut, mode, mode != AnnPageMode.Approximate,
-            NativeAnnMaintenanceTestData.Generation, AnnPageMode.Approximate);
+            AnnMaintenanceTestData.Generation, AnnPageMode.Approximate);
         await Assert.That(JsonDefaults.Serialize(page).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
     }
 
@@ -74,7 +74,7 @@ internal static class AnnPublicWholeFlow
 
     internal static async Task UnchangedAsync(TestDatabase database, (string Key, string Value)[] image, long cut)
     {
-        await Assert.That(NativeAnnMaintenanceTestData.Snapshot(database)).IsEquivalentTo(image, CollectionOrdering.Matching);
+        await Assert.That(AnnMaintenanceTestData.Snapshot(database)).IsEquivalentTo(image, CollectionOrdering.Matching);
         await Assert.That(database.Store.Position).IsEqualTo(cut);
     }
 }

@@ -36,7 +36,7 @@ internal static class SubscriptionLeaseVersionExhaustionAssertions
     {
         var image = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
-        var identity = NativeSerialization.Serialize(store.Identity);
+        var identity = OrleansSerialization.Serialize(store.Identity);
         var actual = QueueWholeFlowStorage.Apply(db, OperationKind.ReceiveSubscription, request, request.RequestId, due);
         await Assert.That(actual).IsEqualTo(original);
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, image, position, identity);
@@ -45,7 +45,7 @@ internal static class SubscriptionLeaseVersionExhaustionAssertions
     private static string[] Domain(ZoneTreeStore store, ReceiveSubscriptionRequest request)
     {
         var outcome = Convert.ToHexString(KeySpace.PartitionOutcome(request.Subscription.Source.Partition, Subject, request.RequestId));
-        var locator = Convert.ToHexString(KeySpace.OutcomeLocatorV2(request.Subscription.Source.Partition, Subject, request.RequestId));
+        var locator = Convert.ToHexString(KeySpace.OutcomeLocator(request.Subscription.Source.Partition, Subject, request.RequestId));
         var clock = Convert.ToHexString(KeySpace.ClockBytes);
         return QueueWholeFlowStorage.Bytes(store).Where(row => !row.StartsWith(outcome + ":", StringComparison.Ordinal)
             && !row.StartsWith(locator + ":", StringComparison.Ordinal)
@@ -55,7 +55,7 @@ internal static class SubscriptionLeaseVersionExhaustionAssertions
     private static async Task RequireLocatorAsync(ZoneTreeStore store, ReceiveSubscriptionRequest request)
     {
         var partition = request.Subscription.Source.Partition;
-        var key = KeySpace.OutcomeLocatorV2(partition, Subject, request.RequestId);
+        var key = KeySpace.OutcomeLocator(partition, Subject, request.RequestId);
         var expected = KeySpace.PartitionOutcome(partition, Subject, request.RequestId);
         var actual = store.Read(view => view.ReadOwnedValue(key));
         await Assert.That(actual).IsNotNull();

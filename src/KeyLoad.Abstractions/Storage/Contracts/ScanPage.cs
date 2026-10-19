@@ -6,5 +6,5 @@ namespace KeyLoad.Storage;
 /// <param name="Records">Independent key/value copies in encoded key order.</param>
 /// <param name="HasMore">True when another live matching record was examined.</param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.ScanPage)]
+[Orleans.Alias(ContractAliases.ScanPage)]
 public sealed record ScanPage([property: Orleans.Id(0)] ImmutableArray<KeyValueRecord> Records, [property: Orleans.Id(1)] bool HasMore);

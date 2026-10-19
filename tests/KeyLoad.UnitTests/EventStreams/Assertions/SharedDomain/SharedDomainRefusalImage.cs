@@ -12,9 +12,9 @@ internal static class SharedDomainRefusalImage
     internal static string[] Capture(IAtomicStore store, PartitionRef partition, Guid id)
     {
         var ignored = new[] { KeySpace.PartitionOutcome(partition, Writer, id),
-            KeySpace.OutcomeLocatorV2(partition, Writer, id), KeySpace.Clock.ToArray() }
+            KeySpace.OutcomeLocator(partition, Writer, id), KeySpace.Clock.ToArray() }
             .Select(key => Convert.ToHexString(key) + Separator).ToArray();
-        return SharedDomainNativeImage.Capture(store).Where(row => !ignored.Any(prefix => row.StartsWith(prefix, StringComparison.Ordinal))).ToArray();
+        return SharedDomainImage.Capture(store).Where(row => !ignored.Any(prefix => row.StartsWith(prefix, StringComparison.Ordinal))).ToArray();
     }
 
     internal static async Task RequireAsync(DatabaseEngine database, SharedDomainState state, PartitionRef partition,

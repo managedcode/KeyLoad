@@ -1,6 +1,6 @@
 using System.Text.Json;
 using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.ClusterRouting;
+using KeyLoad.IntegrationTests.Features.OrleansExecution;
 using KeyLoad.Query;
 
 namespace KeyLoad.IntegrationTests.Features.QueryExecution;
@@ -10,7 +10,7 @@ internal static class QueryCapabilityVersionClusterPages
     internal static async Task RunAsync(RequestCqrsClusterCallers reader, QueryCapabilityVersionClusterState state, CancellationToken token)
     {
         await QueryCapabilityVersionClusterManifest.RunAsync(reader, state.Partition, token);
-        foreach (var version in new[] { 1, 2 })
+        foreach (var version in new[] { 1 })
         {
             var builder = QueryCapabilityVersionClusterRequests.Builder(state.Partition) with
             {

@@ -12,7 +12,7 @@ internal static class AnnMaintenanceEnrollmentAck
             return;
         }
         if (configured.InitialAnnMaintenance is { } reserved
-            && NativeSerialization.Serialize(reserved).AsSpan().SequenceEqual(NativeSerialization.Serialize(request)))
+            && OrleansSerialization.Serialize(reserved).AsSpan().SequenceEqual(OrleansSerialization.Serialize(request)))
         {
             throw Errors.Fail(ErrorCode.Corruption, GrainRoutingProtocol.InvalidRequest);
         }

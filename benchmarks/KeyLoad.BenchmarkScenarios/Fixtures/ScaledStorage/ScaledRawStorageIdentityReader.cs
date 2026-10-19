@@ -4,8 +4,8 @@ namespace KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
 
 internal static class ScaledRawStorageIdentityReader
 {
-    private const string MissingMessage = "A seeded scaled record is missing from the native engine.";
-    private const string MismatchMessage = "The native value differs from the complete deterministic value.";
+    private const string MissingMessage = "A seeded scaled record is missing from the execution engine.";
+    private const string MismatchMessage = "The execution value differs from the complete deterministic value.";
 
     internal static ulong Read(ScaledRawStorageCorpus corpus, ScaledRawStorageZoneTreeEngine engine,
         int index, ref long readCalls)

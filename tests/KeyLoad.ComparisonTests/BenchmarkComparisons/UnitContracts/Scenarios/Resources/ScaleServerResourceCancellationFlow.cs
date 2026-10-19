@@ -5,14 +5,14 @@ namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 internal static class ScaleServerResourceCancellationFlow
 {
     private const string NodeExecutable = "node";
-    private const string HealthyOutput = "scale-native-healthy-follow-up";
+    private const string HealthyOutput = "scale-execution-healthy-follow-up";
     private const string TemporaryDirectoryPrefix = "keyload-scale-probe-cancel-";
     private const string GuidFormat = "N";
-    private const string OwnedDirectoryChangedMessage = "The owned native probe directory changed before cleanup.";
+    private const string OwnedDirectoryChangedMessage = "The owned execution probe directory changed before cleanup.";
 
     internal static async Task RunAsync(CancellationToken testToken)
     {
-        var failures = new NativeSerializationBenchmarkFailures();
+        var failures = new SerializationBenchmarkFailures();
         var flow = new State(testToken);
         try
         {
@@ -44,23 +44,23 @@ internal static class ScaleServerResourceCancellationFlow
         CancellationToken testToken)
     {
         var originalProbe = ScaleServerResourceProcess.RunAsync(NodeExecutable,
-            ScaleServerResourceCancellationNativeFixture.StartArguments(flow.MarkerPath, budget.Settings.Cadence),
+            ScaleServerResourceCancellationFixture.StartArguments(flow.MarkerPath, budget.Settings.Cadence),
             budget, flow.Cancellation.Token);
         flow.Original = originalProbe;
-        var child = await ScaleServerResourceCancellationNativeFixture.WaitForStartedChildAsync(flow.MarkerPath,
+        var child = await ScaleServerResourceCancellationFixture.WaitForStartedChildAsync(flow.MarkerPath,
             budget, testToken);
         await flow.Cancellation.CancelAsync();
         flow.OriginalCancellation = await Assert.ThrowsAsync<OperationCanceledException>(() => originalProbe)
-            ?? throw new InvalidOperationException(ScaleServerResourceCancellationNativeFixture.CancellationMissingMessage);
+            ?? throw new InvalidOperationException(ScaleServerResourceCancellationFixture.CancellationMissingMessage);
         await Assert.That(flow.OriginalCancellation.CancellationToken).IsEqualTo(flow.Cancellation.Token);
         await Assert.That(originalProbe.IsCanceled).IsTrue();
-        await Assert.That(ScaleServerResourceCancellationNativeFixture.IsOriginalChildRunning(child)).IsFalse();
+        await Assert.That(ScaleServerResourceCancellationFixture.IsOriginalChildRunning(child)).IsFalse();
     }
 
     private static async Task ExecuteHealthyFollowUpAsync(State flow, CancellationToken testToken)
     {
         var healthyProbe = ScaleServerResourceProcess.RunAsync(NodeExecutable,
-            ScaleServerResourceCancellationNativeFixture.HealthyArguments(HealthyOutput),
+            ScaleServerResourceCancellationFixture.HealthyArguments(HealthyOutput),
             UnitAppHostResourceOptions.Budget(), flow.HealthyCancellation.Token);
         flow.Healthy = healthyProbe;
         var output = await healthyProbe.WaitAsync(testToken);
@@ -69,7 +69,7 @@ internal static class ScaleServerResourceCancellationFlow
     }
 
     private static Task CaptureSettlementAsync(Task<string?>? operation, CancellationTokenSource cancellation,
-        OperationCanceledException? expectedCancellation, NativeSerializationBenchmarkFailures failures)
+        OperationCanceledException? expectedCancellation, SerializationBenchmarkFailures failures)
         => IsolatedAggregateNodeGuardedInvocation.CaptureAsync(
             () => ScaleServerResourceCancellationSettlement.SettleAsync(operation, cancellation,
                 expectedCancellation, failures), failures.Add);
@@ -107,7 +107,7 @@ internal static class ScaleServerResourceCancellationFlow
         {
             get;
         }
-        internal string MarkerPath => Path.Combine(Directory, ScaleServerResourceCancellationNativeFixture.StartMarkerName);
+        internal string MarkerPath => Path.Combine(Directory, ScaleServerResourceCancellationFixture.StartMarkerName);
         internal CancellationTokenSource Cancellation
         {
             get;
@@ -136,13 +136,13 @@ internal static class ScaleServerResourceCancellationFlow
             HealthyCancellation = CancellationTokenSource.CreateLinkedTokenSource(testToken);
         }
 
-        public void Dispose(NativeSerializationBenchmarkFailures failures)
+        public void Dispose(SerializationBenchmarkFailures failures)
         {
             DisposeSource(Cancellation, failures);
             DisposeSource(HealthyCancellation, failures);
         }
 
-        private static void DisposeSource(CancellationTokenSource source, NativeSerializationBenchmarkFailures failures)
+        private static void DisposeSource(CancellationTokenSource source, SerializationBenchmarkFailures failures)
             => IsolatedAggregateNodeGuardedInvocation.Capture(source.Dispose, failures.Add);
 
     }

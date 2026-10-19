@@ -37,17 +37,17 @@ internal sealed class ZoneTreeCoordinatedPointCacheBindingTests
             await Assert.That(oldBindingRead).IsNotNull();
             await Assert.That(oldBindingRead!.SequenceEqual(Value)).IsTrue();
             await Assert.That(afterOldBindingRead.Enabled).IsFalse();
-            await Assert.That(afterOldBindingRead.NativeLookups).IsEqualTo(old.NativeLookups + 1);
+            await Assert.That(afterOldBindingRead.RuntimeLookups).IsEqualTo(old.RuntimeLookups + 1);
             await Assert.That(afterOldBindingRead.Hits).IsEqualTo(old.Hits);
             await Assert.That(result).IsEqualTo(ZoneTreePointCacheControlResult.Applied);
             await Assert.That(coldReplacement.Hits).IsEqualTo(0L);
-            await Assert.That(coldReplacement.NativeLookups).IsEqualTo(0L);
+            await Assert.That(coldReplacement.RuntimeLookups).IsEqualTo(0L);
             await Assert.That(coldReplacement.RetainedBytes).IsEqualTo(
                 fixture.CreateOptions().IndexChargeBytes);
             await Assert.That(old.Hits).IsEqualTo(1L);
             await Assert.That(first).IsNotNull();
             await Assert.That(first!.SequenceEqual(Value)).IsTrue();
-            await Assert.That(afterFill.NativeLookups).IsEqualTo(1L);
+            await Assert.That(afterFill.RuntimeLookups).IsEqualTo(1L);
             await Assert.That(afterFill.Admissions).IsEqualTo(1L);
             await Assert.That(second).IsNotNull();
             await Assert.That(second!.SequenceEqual(Value)).IsTrue();
@@ -79,7 +79,7 @@ internal sealed class ZoneTreeCoordinatedPointCacheBindingTests
             await Assert.That(unboundValue).IsNotNull();
             await Assert.That(unboundValue!.SequenceEqual(Value)).IsTrue();
             await Assert.That(afterUnboundRead.Enabled).IsFalse();
-            await Assert.That(afterUnboundRead.NativeLookups).IsEqualTo(beforeRenewal.NativeLookups + 1);
+            await Assert.That(afterUnboundRead.RuntimeLookups).IsEqualTo(beforeRenewal.RuntimeLookups + 1);
             await Assert.That(afterUnboundRead.Hits).IsEqualTo(beforeRenewal.Hits);
             await Assert.That(withdrewRenewal).IsTrue();
             await Assert.That(retiredOlderBinding).IsTrue();
@@ -88,7 +88,7 @@ internal sealed class ZoneTreeCoordinatedPointCacheBindingTests
     }
 
     [Test]
-    public async Task RetireDuringNativeObserverChargesAndLooksUpOnceWithoutPublishingFill()
+    public async Task RetireDuringObserverChargesAndLooksUpOnceWithoutPublishingFill()
     {
         using var fixture = new ZoneTreeCoordinatedPointCacheFileFixture();
         await fixture.RunAsync(async () =>
@@ -121,7 +121,7 @@ internal sealed class ZoneTreeCoordinatedPointCacheBindingTests
             await Assert.That(borrowedCopy!.SequenceEqual(Value)).IsTrue();
             await Assert.That(observerCalls).IsEqualTo(1);
             await Assert.That(observedBytes).IsEqualTo((long)Key.Length + Value.Length);
-            await Assert.That(afterObserver.NativeLookups).IsEqualTo(1L);
+            await Assert.That(afterObserver.RuntimeLookups).IsEqualTo(1L);
             await Assert.That(afterObserver.Admissions).IsEqualTo(0L);
             await Assert.That(afterObserver.InFlightEntries).IsEqualTo(0);
             await Assert.That(afterObserver.LiveEntries).IsEqualTo(0);

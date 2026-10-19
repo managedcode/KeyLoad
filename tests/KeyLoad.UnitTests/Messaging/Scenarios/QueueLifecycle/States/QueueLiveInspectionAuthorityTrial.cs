@@ -14,7 +14,7 @@ internal static class QueueLiveInspectionAuthorityTrial
         var positive = await QueueLiveInspectionAuthorityAssertions.SeedPositiveAsync(fixture.Database, fixture.Store, state);
         await QueueLiveInspectionAuthorityAssertions.LeasedAsync(fixture.Database, fixture.Store, state);
         var original = QueuePendingAuthorityHistory.Capture(fixture.Store);
-        var foreign = NativeSerialization.Serialize(NativeSerialization.Deserialize<MessageBody>(state.OriginalBytes)
+        var foreign = OrleansSerialization.Serialize(OrleansSerialization.Deserialize<MessageBody>(state.OriginalBytes)
             with
         {
             Id = QueueLeaseAuthorityProtocol.Foreign

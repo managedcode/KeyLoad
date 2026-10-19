@@ -9,7 +9,7 @@ internal static class IsolatedKurrentVolumeChecks
 {
     internal static async Task VerifyAsync(DistributedApplication app, int nodeCount, CancellationToken token)
     {
-        var harnessOptions = NativeExecutionPolicyFixture.Harness();
+        var harnessOptions = ExecutionPolicyFixture.Harness();
         using var deadlineTimeout = new CancellationTokenSource(harnessOptions.Value.KurrentVolumeTimeout, TimeProvider.System);
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(token, deadlineTimeout.Token);
         var options = new ComparisonOptions
@@ -21,7 +21,7 @@ internal static class IsolatedKurrentVolumeChecks
             Concurrency = 16,
             Topology = new BenchmarkSessionSelection(KurrentConstants.Name, nodeCount).Topology
         };
-        await IsolatedKurrentVolumeChecksNative.RequireCanonicalProfileAsync(options);
+        await RuntimeIsolatedKurrentVolumeChecks.RequireCanonicalProfileAsync(options);
         var endpoint = await IsolatedKurrentCleanupChecksGossip.ReadLeaderAsync(app, nodeCount, deadline.Token);
         var fixture = new IsolatedKurrentVolumeChecksFixture(endpoint, options, harnessOptions);
         ExceptionDispatchInfo? primary = null;

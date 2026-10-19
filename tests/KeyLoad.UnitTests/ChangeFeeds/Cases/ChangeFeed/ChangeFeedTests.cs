@@ -79,7 +79,7 @@ internal sealed class ChangeFeedTests
         db.Commit(new PutDocument("orders", "a", "{}"), new PutDocument("orders", "b", "{}"));
         var active = Consumer(db);
         Configure(db, active);
-        var rebuild = Consumer(db, "text-v2");
+        var rebuild = Consumer(db, "text");
         Configure(db, rebuild);
         Complete(db, active, db.Database.ReadProjectionBatch("root", new(active)));
         var id = Guid.NewGuid();
@@ -144,7 +144,7 @@ internal sealed class ChangeFeedTests
         var consumer = Consumer(db);
         Configure(db, consumer);
         var all = db.Database.ReadProjectionBatch("root", new(consumer));
-        var entrySize = ProjectionNativeByteFixture.StoredEntryBytes(db, all.Entries[0].Sequence);
+        var entrySize = ProjectionByteFixture.StoredEntryBytes(db, all.Entries[0].Sequence);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => db.Database.ReadProjectionBatch("root", new(consumer, MaxBytes: entrySize - 1))).Code)
             .IsEqualTo(ErrorCode.BudgetExceeded);
         var batch = db.Database.ReadProjectionBatch("root", new(consumer, MaxBytes: entrySize));

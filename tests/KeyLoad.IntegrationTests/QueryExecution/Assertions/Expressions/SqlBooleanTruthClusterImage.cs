@@ -2,7 +2,7 @@ namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 
 internal static class SqlBooleanTruthClusterImage
 {
-    internal static async Task<string> ReadAsync(global::KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsClusterCallers root, SqlBooleanTruthClusterState state, CancellationToken token)
+    internal static async Task<string> ReadAsync(global::KeyLoad.IntegrationTests.Features.OrleansExecution.RequestCqrsClusterCallers root, SqlBooleanTruthClusterState state, CancellationToken token)
     {
         var documents = new List<DocumentReadResult>();
         foreach (var row in SqlBooleanTruthClusterState.Rows)

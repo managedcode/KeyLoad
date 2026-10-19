@@ -32,7 +32,7 @@ internal static class ModelHeadAuthorityOperations
             var expected = new AggregateReplayPage(source, new(2L, 1L, 1L), null,
                 [new(source, 1L, 1L, new("created", "Created", ModelHeadAuthorityFixture.Payload("first"), ModelHeadAuthorityFixture.Headers), ModelHeadAuthorityFixture.Epoch),
                  new(source, 2L, 2L, new("paid", "Paid", ModelHeadAuthorityFixture.Payload("second"), ModelHeadAuthorityFixture.Headers), ModelHeadAuthorityFixture.Epoch)], store.Position);
-            await EqualAsync(database.ReadAggregateReplay("root", new(source, "model-head-v1", FromBeginning: true, MaximumEvents: 2), token), expected);
+            await EqualAsync(database.ReadAggregateReplay("root", new(source, "model-head", FromBeginning: true, MaximumEvents: 2), token), expected);
             await EqualAsync(database.InspectMessage("root", new(fixture.Harness.Partition, ModelHeadAuthorityFixture.Queue), "ready"),
                 new MessageInspection(new("ready", MessageState.Ready, 0, 1L, 1L, ModelHeadAuthorityFixture.Epoch, null),
                     ModelHeadAuthorityFixture.Payload("queue"), ModelHeadAuthorityFixture.Headers));

@@ -1,5 +1,5 @@
 import path from 'node:path';
-import { runBounded } from './native-process.mjs';
+import { runBounded } from './process.mjs';
 import { GH, requireGitHub } from './isolated-github-contract.mjs';
 import { writeCapture } from './isolated-github-files.mjs';
 import { streamToFile } from './isolated-github-stream.mjs';
@@ -14,8 +14,8 @@ export function validateZipInventory(output, requiredEntries) {
   return entries;
 }
 
-export async function inspectNativeZip(archive, requiredEntries, retainedInventory, context) {
-  const result = await runBounded('unzip', ['-Z1', archive], { cwd: context.native.workspace,
+export async function inspectZip(archive, requiredEntries, retainedInventory, context) {
+  const result = await runBounded('unzip', ['-Z1', archive], { cwd: context.execution.workspace,
     timeoutMs: GH.unzipTimeoutMs, maximumOutputBytes: GH.inventoryBytes });
   requireGitHub(result.success);
   const entries = validateZipInventory(result.stdout, requiredEntries);
@@ -23,5 +23,5 @@ export async function inspectNativeZip(archive, requiredEntries, retainedInvento
   return entries;
 }
 
-export const extractNativeEntry = (archive, entry, output, maximumBytes, context) => streamToFile('unzip',
-  ['-p', archive, entry], path.resolve(output), maximumBytes, GH.unzipTimeoutMs, context.native.workspace);
+export const extractEntry = (archive, entry, output, maximumBytes, context) => streamToFile('unzip',
+  ['-p', archive, entry], path.resolve(output), maximumBytes, GH.unzipTimeoutMs, context.execution.workspace);

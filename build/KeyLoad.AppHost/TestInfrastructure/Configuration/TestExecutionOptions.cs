@@ -10,7 +10,7 @@ internal sealed class TestExecutionOptions
     private const int OrdinaryMinutes = 30;
     private const int ClusterMinutes = 60;
     private const int IntensiveMinutes = 140;
-    private const int NativeVectorMinutes = 145;
+    private const int VectorMinutes = 145;
     private const int MaximumMinutes = 180;
     private const int ApplicationCleanupSeconds = 30;
     private const int ImageCleanupSeconds = 45;
@@ -31,9 +31,9 @@ internal sealed class TestExecutionOptions
     public TimeSpan OrdinaryTimeout { get; set; } = TimeSpan.FromMinutes(OrdinaryMinutes);
     public TimeSpan ClusterTimeout { get; set; } = TimeSpan.FromMinutes(ClusterMinutes);
     public TimeSpan IntensiveTimeout { get; set; } = TimeSpan.FromMinutes(IntensiveMinutes);
-    public TimeSpan NativeControlTimeout { get; set; } = TimeSpan.FromMinutes(ClusterMinutes);
-    public TimeSpan NativeScaledTimeout { get; set; } = TimeSpan.FromMinutes(IntensiveMinutes);
-    public TimeSpan NativeVectorTimeout { get; set; } = TimeSpan.FromMinutes(NativeVectorMinutes);
+    public TimeSpan ControlTimeout { get; set; } = TimeSpan.FromMinutes(ClusterMinutes);
+    public TimeSpan ScaledTimeout { get; set; } = TimeSpan.FromMinutes(IntensiveMinutes);
+    public TimeSpan VectorTimeout { get; set; } = TimeSpan.FromMinutes(VectorMinutes);
     public TimeSpan ApplicationCleanupTimeout { get; set; } = TimeSpan.FromSeconds(ApplicationCleanupSeconds);
     public TimeSpan ImageCleanupTimeout { get; set; } = TimeSpan.FromSeconds(ImageCleanupSeconds);
     public TimeSpan TerminationGrace { get; set; } = TimeSpan.FromSeconds(GraceSeconds);
@@ -50,7 +50,7 @@ internal sealed class TestExecutionOptions
     public int MaximumParallelTests { get; set; } = DefaultMaximumParallelTests;
 
     internal bool IsValid() => Bounded(OrdinaryTimeout) && Bounded(ClusterTimeout) && Bounded(IntensiveTimeout)
-        && Bounded(NativeControlTimeout) && Bounded(NativeScaledTimeout) && Bounded(NativeVectorTimeout)
+        && Bounded(ControlTimeout) && Bounded(ScaledTimeout) && Bounded(VectorTimeout)
         && Bounded(ApplicationCleanupTimeout) && Bounded(ImageCleanupTimeout) && Bounded(TerminationGrace)
         && Bounded(ProcessSettlementTimeout) && Bounded(ProcessExitPollInterval) && Bounded(DatabaseReadinessPollInterval)
         && Bounded(ProtectedMovementSetupRequestLifetime)

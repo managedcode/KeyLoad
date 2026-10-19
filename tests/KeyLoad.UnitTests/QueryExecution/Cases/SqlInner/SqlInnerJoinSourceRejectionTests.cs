@@ -21,7 +21,7 @@ internal sealed class SqlInnerJoinSourceRejectionTests
     [Arguments("missing-right", ErrorCode.NotFound)]
     [Arguments("cross-domain-right", ErrorCode.Conflict)]
     [Arguments("cross-domain-left", ErrorCode.Conflict)]
-    [Arguments("ast-one", ErrorCode.UnsupportedCapability)]
+    [Arguments("ast-other", ErrorCode.UnsupportedCapability)]
     [Arguments("ast-unknown", ErrorCode.UnsupportedCapability)]
     [Arguments("missing-left-alias", ErrorCode.UnsupportedCapability)]
     [Arguments("missing-projection-source", ErrorCode.UnsupportedCapability)]
@@ -29,13 +29,13 @@ internal sealed class SqlInnerJoinSourceRejectionTests
     [Arguments("same-collection", ErrorCode.UnsupportedCapability)]
     [Arguments("cursor", ErrorCode.UnsupportedCapability)]
     [Arguments("no-full-scan", ErrorCode.UnsupportedCapability)]
-    public async Task PersistedSourceAndAstContractRejectsWithoutNativeScanAndHealthySameEngineRead(string scenario, ErrorCode code)
+    public async Task PersistedSourceAndAstContractRejectsWithoutScanAndHealthySameEngineRead(string scenario, ErrorCode code)
     {
         using var database = new TestDatabase();
         SqlInnerJoinRejectionFixture.Seed(database);
         var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
         var before = JsonDefaults.Serialize(engine.Execute(SqlInnerJoinRejectionFixture.Root,
-            new(database.Partition, SqlInnerJoinRejectionFixture.HealthySql, AllowFullScan: true, QueryDialectVersion: 2)));
+            new(database.Partition, SqlInnerJoinRejectionFixture.HealthySql, AllowFullScan: true, QueryDialectVersion: SqlOperationProtocol.DefaultQueryDialectVersion)));
         var request = InvalidRequest(SqlInnerJoinRejectionFixture.Ast(database), scenario);
         var position = database.Store.Position;
         var diagnostics = database.Store.GetReadDiagnostics();
@@ -70,7 +70,7 @@ internal sealed class SqlInnerJoinSourceRejectionTests
             "missing-right" => request with { Query = query with { InnerJoin = join with { Collection = "absent" } } },
             "cross-domain-right" => request with { Query = query with { InnerJoin = join with { Collection = "foreign" } } },
             "cross-domain-left" => request with { Query = query with { Collection = "foreign" } },
-            "ast-one" => request with { AstVersion = 1 },
+            "ast-other" => request with { AstVersion = 2 },
             "ast-unknown" => request with { AstVersion = 3 },
             "missing-left-alias" => request with { Query = query with { Alias = null } },
             "missing-projection-source" => request with { Query = query with { Projection = [new("/order_id", "value")] } },

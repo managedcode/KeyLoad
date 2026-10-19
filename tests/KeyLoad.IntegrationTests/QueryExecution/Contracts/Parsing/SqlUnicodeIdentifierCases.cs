@@ -2,7 +2,7 @@ namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 
 internal static class SqlUnicodeIdentifierCases
 {
-    internal const string Profile = "SQL.UnicodeIdentifier.v1";
+    internal const string Profile = "SQL.UnicodeIdentifier";
     private const int UnitValue = 1;
     internal const string Clause = "U&\"sc\\006fre\" = 1";
     internal const string WideClause = "u&\"sc\\+00006fre\" = 1";

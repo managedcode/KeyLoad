@@ -64,7 +64,7 @@ internal static class CompositeSparseUniqueAssertions
             {
                 object?[] parts = [Collection, Index, "shared", row.Rank];
                 var key = KeySpace.Partition(space, db.Partition, space == "index" ? [.. parts, row.Id] : parts);
-                return new KeyValuePair<string, string>(Convert.ToHexString(key), Convert.ToHexString(NativeSerialization.Serialize(row.Id)));
+                return new KeyValuePair<string, string>(Convert.ToHexString(key), Convert.ToHexString(OrleansSerialization.Serialize(row.Id)));
             }).OrderBy(row => row.Key, StringComparer.Ordinal).ToArray();
             var actual = db.Store.Read(view => Rows(view, KeySpace.Partition(space, db.Partition, Collection, Index)));
             await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
@@ -79,7 +79,7 @@ internal static class CompositeSparseUniqueAssertions
         var page = view.Scan(prefix, MaximumRecords);
         if (page.HasMore)
         {
-            throw new InvalidOperationException("The complete sparse-index native domain exceeded its fixture bound.");
+            throw new InvalidOperationException("The complete sparse-index execution domain exceeded its fixture bound.");
         }
         return page.Records.Select(row => new KeyValuePair<string, string>(Convert.ToHexString(row.Key.Span),
             Convert.ToHexString(row.Value.Span))).ToArray();

@@ -1,5 +1,5 @@
 using System.Net;
-using KeyLoad.IntegrationTests.Features.ClusterRouting;
+using KeyLoad.IntegrationTests.Features.OrleansExecution;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
 using ModelContextProtocol;
 using ModelContextProtocol.Protocol;

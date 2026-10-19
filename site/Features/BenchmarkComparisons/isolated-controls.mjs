@@ -23,7 +23,7 @@ function options(select, entries, initial) {
 export function initializeIsolatedControls(elements) {
   options(elements.scenario, [...SESSION.caseIds, ...['create', 'delete', 'update', 'read', 'search'].map(lane => 'mixed/' + lane)]
     .map(value => [value, value]), 'sequential-read');
-  options(elements.nodes, SESSION.nodes.map(value => [value, value + ' native nodes']), 3);
+  options(elements.nodes, SESSION.nodes.map(value => [value, value + ' execution nodes']), 3);
   options(elements.target, [['all', 'All engines'], ...SESSION_TARGETS.map(value => [value.name, value.name])], 'all');
   options(elements.metric, Object.entries(metrics).filter(([, metric]) => !metric.queue).map(([value, metric]) => [value, metric.title]), 'throughput');
   options(elements.repetition, [['session', 'Original session result']], 'session');

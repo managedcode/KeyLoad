@@ -6,7 +6,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.UnitTests.Features.ClientApi;
 
-/// <summary>Builds the real package factory and production catalog owner for native graph cases.</summary>
+/// <summary>Builds the real package factory and production catalog owner for execution graph cases.</summary>
 internal sealed class McpGatewayCatalogTestHost : IAsyncDisposable
 {
     private readonly ServiceProvider _services;

@@ -59,7 +59,7 @@ internal static class AtomicTriadOutboxCommitted
             var sequence = FirstSequence + ordinal;
             var raw = store.Read(view => view.ReadOwnedValue(KeySpace.Partition("outbox", command.Partition, sequence)))!;
             bytes += raw.LongLength;
-            var entry = NativeSerialization.Deserialize<OutboxEntry>(raw);
+            var entry = OrleansSerialization.Deserialize<OutboxEntry>(raw);
             await Assert.That(entry.Sequence).IsEqualTo(sequence);
             await Assert.That(entry.Ordinal).IsEqualTo(ordinal);
             await Assert.That(entry.Commit).IsEqualTo(receipt.Token);

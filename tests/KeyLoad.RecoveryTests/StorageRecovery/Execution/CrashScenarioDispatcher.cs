@@ -33,8 +33,8 @@ internal static class CrashScenarioDispatcher
                 or SampleRollupCrashContract.DropFaultMode or SampleRollupCrashContract.RefreshRecoverMode
                 or SampleRollupCrashContract.DropRecoverMode or SampleRollupCrashContract.VerifyMode
                 => SampleRollupCrashScenario.RunAsync(directory, store, boundary, mode),
-            NativeAnnCrashContract.Prepare or NativeAnnCrashContract.Fault or NativeAnnCrashContract.Recover or NativeAnnCrashContract.Verify
-                => NativeAnnCrashScenario.RunAsync(directory, store, boundary, mode),
+            AnnCrashContract.Prepare or AnnCrashContract.Fault or AnnCrashContract.Recover or AnnCrashContract.Verify
+                => AnnCrashScenario.RunAsync(directory, store, boundary, mode),
             SampleRetentionCrashScenario.Mode => SampleRetentionCrashScenario.RunAsync(directory, store, boundary),
             EventProjectionCrashScenario.Mode => EventProjectionCrashScenario.RunAsync(directory, store, boundary),
             QueueDeadlineCrashProtocol.Mode => QueueDeadlineCrashScenario.RunAsync(directory, store, boundary),

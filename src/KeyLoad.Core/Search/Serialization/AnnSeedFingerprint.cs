@@ -7,7 +7,7 @@ namespace KeyLoad.Core.Features.Search;
 
 internal static class AnnSeedFingerprint
 {
-    private const string Domain = "keyload.ann.seed.corpus.v1";
+    private const string Domain = "keyload.ann.seed.corpus";
     private const string TextTooLong = "A bounded ANN seed text field exceeded its admitted scratch.";
     private const string DigestFailure = "The ANN seed digest could not be finalized.";
     private static readonly UTF8Encoding StrictUtf8 = new(false, true);

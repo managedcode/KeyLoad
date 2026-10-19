@@ -35,7 +35,7 @@ internal static class SampleChunkSubnormalClusterResults
     }
 
     internal static ReadSamplesRequest Raw(SampleChunkClusterScenario scenario, string series)
-        => new(scenario.Native.Partition, TimeSeriesClusterScenario.Set, series,
+        => new(scenario.Execution.Partition, TimeSeriesClusterScenario.Set, series,
             scenario.From, scenario.Until, SampleChunkClusterProtocol.OutputLimit);
 
     internal static async Task HealthyAsync(SampleChunkSubnormalClusterState original,

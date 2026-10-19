@@ -108,8 +108,8 @@ internal sealed class EventAppendWholeFlowFixture : IDisposable
         var position = Database.Store.Position;
         var before = KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(Database.Store);
         var retry = Submit(command);
-        await Assert.That(NativeSerialization.Serialize(retry))
-            .IsEquivalentTo(NativeSerialization.Serialize(original), CollectionOrdering.Matching);
+        await Assert.That(OrleansSerialization.Serialize(retry))
+            .IsEquivalentTo(OrleansSerialization.Serialize(original), CollectionOrdering.Matching);
         await Assert.That(Errors.Code(retry.Problem)).IsEqualTo(Errors.Code(original.Problem));
         await Assert.That(retry.Problem?.Detail).IsEqualTo(original.Problem?.Detail);
         await Assert.That(retry.Value).IsNull();

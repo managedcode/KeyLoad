@@ -7,7 +7,7 @@ namespace KeyLoad.Core;
 public sealed class AnalyticsAggregateSnapshot
 {
     internal AnalyticsAggregateSnapshot(AggregateAnalyticsRequest request, PrincipalRecord principal,
-        ResourceDefinition resource, ResourceLifetimeV1 lifetime, ImmutableArray<AnalyticsEventRecord> rows,
+        ResourceDefinition resource, ResourceLifetime lifetime, ImmutableArray<AnalyticsEventRecord> rows,
         Guid incarnation, long readGeneration, long generation, long position, ReadExecutionBudget work, IOptions<DatabaseLimits> options, TimeProvider clock)
     {
         ArgumentNullException.ThrowIfNull(options);
@@ -64,7 +64,7 @@ public sealed class AnalyticsAggregateSnapshot
     {
         get;
     }
-    internal ResourceLifetimeV1 Lifetime
+    internal ResourceLifetime Lifetime
     {
         get;
     }

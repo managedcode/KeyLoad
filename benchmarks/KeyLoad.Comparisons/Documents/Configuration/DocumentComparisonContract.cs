@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace KeyLoad.Comparisons;
 
-/// <summary>The embedded machine contract shared with the native job planner.</summary>
+/// <summary>The embedded machine contract shared with the execution job planner.</summary>
 public sealed record DocumentComparisonContract
 {
     private static readonly Lazy<DocumentComparisonContract> Contract = new(Read);
@@ -20,7 +20,7 @@ public sealed record DocumentComparisonContract
     {
         get; init;
     }
-    /// <summary>Gets admitted actual native member counts.</summary>
+    /// <summary>Gets admitted actual execution member counts.</summary>
     public required ImmutableArray<int> NodeCounts
     {
         get; init;
@@ -80,7 +80,7 @@ public sealed record DocumentComparisonContract
     {
         get; init;
     }
-    /// <summary>Gets the canonical native operation deadline.</summary>
+    /// <summary>Gets the canonical execution operation deadline.</summary>
     public required int TimeoutSeconds
     {
         get; init;

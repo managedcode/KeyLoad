@@ -2,10 +2,10 @@ namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 internal static class ScaleServerResourceCancellationSettlement
 {
-    private const string FailureIdentityMessage = "The original native cancellation failure changed while settling its task.";
+    private const string FailureIdentityMessage = "The original execution cancellation failure changed while settling its task.";
 
     internal static async Task SettleAsync(Task<string?>? original, CancellationTokenSource cancellation,
-        OperationCanceledException? expectedCancellation, NativeSerializationBenchmarkFailures failures)
+        OperationCanceledException? expectedCancellation, SerializationBenchmarkFailures failures)
     {
         if (original is null)
         {
@@ -19,7 +19,7 @@ internal static class ScaleServerResourceCancellationSettlement
     }
 
     private static async Task RequestCancellationAsync(Task original, CancellationTokenSource cancellation,
-        NativeSerializationBenchmarkFailures failures)
+        SerializationBenchmarkFailures failures)
     {
         if (original.IsCompleted || cancellation.IsCancellationRequested)
         {
@@ -56,7 +56,7 @@ internal static class ScaleServerResourceCancellationSettlement
     }
 
     private static async Task ObserveOriginalAsync(Task<string?> original, CancellationTokenSource cancellation,
-        OperationCanceledException? expectedCancellation, NativeSerializationBenchmarkFailures failures)
+        OperationCanceledException? expectedCancellation, SerializationBenchmarkFailures failures)
     {
         await ((Task)original).ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
         if (original.Exception is { } originalFailures)

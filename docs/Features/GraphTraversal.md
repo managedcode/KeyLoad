@@ -14,7 +14,7 @@ GraphTraversal owns graph edge records, adjacency maintenance, and authorized bo
 | Backend | `src/KeyLoad.Core/GraphAndSeries.cs`, mutation dispatch/authorization in `DatabaseEngine.cs` and `MutationAuthorization.cs` | `src/KeyLoad.Core/GraphTraversal/` |
 | Tests | `tests/KeyLoad.UnitTests/GraphAndSearchTests.cs`, `ReadExecutionTests.cs`, `HttpAdmissionTests.cs` | `tests/KeyLoad.UnitTests/GraphTraversal/` |
 | Durable specification | This file | `docs/Features/GraphTraversal.md` |
-| HTTP | `src/KeyLoad/ApiEndpoints.cs`: `POST /v1/graph/traverse`; edge mutations enter through shared `POST /v1/commands` | Shared HTTP transport belongs to `src/KeyLoad/ClientApi/`; graph semantics belong to `src/KeyLoad.Core/GraphTraversal/` |
+| HTTP | `src/KeyLoad/ApiEndpoints.cs`: `POST /graph/traverse`; edge mutations enter through shared `POST /commands` | Shared HTTP transport belongs to `src/KeyLoad/ClientApi/`; graph semantics belong to `src/KeyLoad.Core/GraphTraversal/` |
 | .NET SDK | `src/KeyLoad.Client/GraphTraversal/Transport/KeyLoadClient.cs`: `TraverseAsync`; `DatabaseComposition/Commands/KeyLoadClient.cs`: atomic graph mutations | Shared client transport belongs to ClientApi; typed graph traversal belongs to GraphTraversal |
 | Official MCP | The authenticated official C# SDK exposes `keyload_graph_incoming` and shortest-path tools through the shared ClientApi gateway/catalog | Real cluster schema oracles preserve exact properties/required fields and hints; nested `PartitionRef` includes computed `atomicPartitionId` as an optional property |
 | UI | No dedicated graph-management or traversal frontend is specified | N/A: graph traversal is a database/API query capability, not a separate frontend surface |
@@ -51,7 +51,7 @@ TUnit then cluster SDK/MCP and node resource artifacts own qualification.
 REQ-GRAPH-006 / AC-GRAPH-005: compare the current directed traversal with an
 independent test-owned graph model backed by genuine `TestDatabase`/ZoneTree
 fixtures. Compute minimum hop distances independently from the production
-reader, native keys and returned result; compare complete vertex/edge membership
+reader, keys and returned result; compare complete vertex/edge membership
 and ordinal public order for directed cycles, converging equal-depth paths,
 shorter direct paths, shuffled insertion and hidden intermediate vertices.
 For each requested depth, expand only visible permitted targets and prove that
@@ -85,7 +85,7 @@ Positive: an authorized edge write binds both visible document endpoints to the 
 
 ## Decisions and verification
 
-Related decisions: [ADR-001](../ADR/ADR-001-partition-identity-affinity.md), [ADR-004](../ADR/ADR-004-committed-read-views.md), [ADR-005](../ADR/ADR-005-canonical-keyspace-codec.md), [ADR-010](../ADR/ADR-010-query-budgets-security.md), [ADR-014](../ADR/ADR-014-principals-rbac-row-policy.md), and [ADR-136](../ADR/ADR-136-native-orleans-partition-ownership.md). Cross-partition edges follow [CrossPartitionEdges](GraphTraversal/CrossPartitionEdges.md) and [ADR-102](../ADR/ADR-102-cross-partition-graph-edges.md); they do not change the current same-partition write contract.
+Related decisions: [ADR-001](../ADR/ADR-001-partition-identity-affinity.md), [ADR-004](../ADR/ADR-004-committed-read-views.md), [ADR-005](../ADR/ADR-005-canonical-keyspace-codec.md), [ADR-010](../ADR/ADR-010-query-budgets-security.md), [ADR-014](../ADR/ADR-014-principals-rbac-row-policy.md), and [ADR-136](../ADR/ADR-136-orleans-partition-ownership.md). Cross-partition edges follow [CrossPartitionEdges](GraphTraversal/CrossPartitionEdges.md) and [ADR-102](../ADR/ADR-102-cross-partition-graph-edges.md); they do not change the current same-partition write contract.
 
 ```mermaid
 flowchart LR
@@ -99,19 +99,19 @@ flowchart LR
 
 ## Graph shortest path observed cancellation
 
-REQ-GRAPH-003/004, AC-GRAPH-003/004 retain original cancellation semantics. Replace exclusive polling/thread helpers with an owning operation TimeProvider which synchronously cancels the original token only after both charged bytes exceed the actual empty-adjacency probe and native same-store RangeExaminedBytes increases. Native storage/read-cut and budget are real. Require exact original-token cancellation, no partial result, full storage bytes/cut unchanged, then the identical busy-source request returns the complete literal no-path result and identical store/cut. No corpus/budget/timeout increase or permitted-success branch. Authored source requires original native normal/scalar and Linux reruns; preserve original failure receipt.
+REQ-GRAPH-003/004, AC-GRAPH-003/004 retain original cancellation semantics. Replace exclusive polling/thread helpers with an owning operation TimeProvider which synchronously cancels the original token only after both charged bytes exceed the actual empty-adjacency probe and same-store RangeExaminedBytes increases. storage/read-cut and budget are real. Require exact original-token cancellation, no partial result, full storage bytes/cut unchanged, then the identical busy-source request returns the complete literal no-path result and identical store/cut. No corpus/budget/timeout increase or permitted-success branch. Authored source requires original normal/scalar and Linux reruns; preserve original failure receipt.
 
 ## Incoming projection negative to cold healthy flow
 
-REQ/AC-GRAPH-002/004 and REQ/AC-AUTH-005/007 map to the unchanged HiddenSourceEndpointIsOmittedFromIncomingProjection and HiddenTargetEndpointIsNotFoundWithoutReturningProjectionRows. The latter original source has no owner: genuine healthy continuation repairs its owner as well as the hidden target, rather than trusting a caller role. Full literal edge, delivered revision, projection and call-current cut follow row/grant repair; grant refusal and revocation preserve the full bounded canonical image. Same-root native close/open preserves node/incarnation and original outcomes; original row-repair command replay returns each complete receipt without a second document revision. Original declarations, limits and initial assertions remain.
+REQ/AC-GRAPH-002/004 and REQ/AC-AUTH-005/007 map to the unchanged HiddenSourceEndpointIsOmittedFromIncomingProjection and HiddenTargetEndpointIsNotFoundWithoutReturningProjectionRows. The latter original source has no owner: genuine healthy continuation repairs its owner as well as the hidden target, rather than trusting a caller role. Full literal edge, delivered revision, projection and call-current cut follow row/grant repair; grant refusal and revocation preserve the full bounded canonical image. Same-root close/open preserves node/incarnation and original outcomes; original row-repair command replay returns each complete receipt without a second document revision. Original declarations, limits and initial assertions remain.
 
 ## Canonical outgoing identity before filtering
 
 REQ-GRAPH-ADJACENCY-001 maps to AC-GRAPH-ADJACENCY-001/002: every examined outgoing
 record must reference its canonical edge under the same graph/source partition,
-with the complete current source EntityRef, valid native identifiers, positive
+with the complete current source EntityRef, valid identifiers, positive
 revision and canonical bounded attributes. Missing/invalid rows return Corruption
-without a partial result or changed full native image/cut, including when a label
+without a partial result or changed full image/cut, including when a label
 filter would otherwise exclude them. Independent whole-operation tests seed a
 healthy first candidate and damage only the second candidate; repeat the original
 request after a joined cold open, repair only the owned row, replay the original
@@ -127,8 +127,8 @@ cross-partition traversal or alter reverse delivery contracts.
 
 ## Shortest path canonical edge integrity
 
-REQ-GRAPH-PATH-INTEGRITY-001 maps to AC-GRAPH-PATH-INTEGRITY-001: actual native seed with healthy first candidate and damaged second canonical edge, noncanonical attributes/nonpositive revision × filtered/unfiltered reads, Corruption without partial result or complete image/cut change. Repeated actual refusal across joined same-root cold, only original owned edge-row bytes restored, same request healthy with independently constructed full path/cut, seed receipt immutable replay, distinct healthy graph command and path, second cold complete image/cut/path/receipt stability. Original native baseline failures and repaired runtime are mandatory; source review alone does not close the criterion. Production owners: existing GraphShortestPathValidation, GraphShortestPathReader, GraphShortestPathResultProjector; additive Unit Cases/Assertions only using existing native fixture/input oracles. Linux/cluster/resource/performance gates remain open.
+REQ-GRAPH-PATH-INTEGRITY-001 maps to AC-GRAPH-PATH-INTEGRITY-001: actual seed with healthy first candidate and damaged second canonical edge, noncanonical attributes/nonpositive revision × filtered/unfiltered reads, Corruption without partial result or complete image/cut change. Repeated actual refusal across joined same-root cold, only original owned edge-row bytes restored, same request healthy with independently constructed full path/cut, seed receipt immutable replay, distinct healthy graph command and path, second cold complete image/cut/path/receipt stability. Original baseline failures and repaired runtime are mandatory; source review alone does not close the criterion. Production owners: existing GraphShortestPathValidation, GraphShortestPathReader, GraphShortestPathResultProjector; additive Unit Cases/Assertions only using existing fixture/input oracles. Linux/cluster/resource/performance gates remain open.
 
-## Selected path identity and native value refusals
+## Selected path identity and value refusals
 
-REQ-GRAPH-PATH-IDENTITY-001 maps to AC-GRAPH-PATH-IDENTITY-001: nine native selected-row contradictions (missing canonical edge, foreign edge identity, foreign source, adjacency value pointing to the genuine healthy edge under the damaged edge key, empty label, empty target identity, null target, malformed adjacency bytes and wrong native adjacency type) each run through the real shortest-path operation both with and without an excluding label filter. Every operation has an actual valid first adjacency candidate, the selected second damaged candidate, exact `Corruption`, no partial path and unchanged full bounded canonical image and read cut. Repeat the same refusal, join same-root cold reopen and repeat it again; restore only the captured original owned row; require the exact original healthy complete image at one repair commit later. Retry the unchanged request with complete independently constructed path fields, replay the original complete seed receipt without a second effect, execute a new genuine graph command and read its complete path, replay that command, then join a second cold reopen and require exact image/cut, original and fresh path results and both complete receipt replays. Reads and replays retain their original effect-free checks.
+REQ-GRAPH-PATH-IDENTITY-001 maps to AC-GRAPH-PATH-IDENTITY-001: nine selected-row contradictions (missing canonical edge, foreign edge identity, foreign source, adjacency value pointing to the genuine healthy edge under the damaged edge key, empty label, empty target identity, null target, malformed adjacency bytes and wrong adjacency type) each run through the real shortest-path operation both with and without an excluding label filter. Every operation has an actual valid first adjacency candidate, the selected second damaged candidate, exact `Corruption`, no partial path and unchanged full bounded canonical image and read cut. Repeat the same refusal, join same-root cold reopen and repeat it again; restore only the captured original owned row; require the exact original healthy complete image at one repair commit later. Retry the unchanged request with complete independently constructed path fields, replay the original complete seed receipt without a second effect, execute a new genuine graph command and read its complete path, replay that command, then join a second cold reopen and require exact image/cut, original and fresh path results and both complete receipt replays. Reads and replays retain their original effect-free checks.

@@ -2,7 +2,7 @@ using System.Text;
 
 namespace KeyLoad.Comparisons.Targets;
 
-/// <summary>Creates and observes the actual native scalar index used by ordered corpus readback.</summary>
+/// <summary>Creates and observes the actual execution scalar index used by ordered corpus readback.</summary>
 internal static class SurrealDbReadbackIndex
 {
     private const string NumberIndexSuffix = "_number";
@@ -17,7 +17,7 @@ internal static class SurrealDbReadbackIndex
 
     internal static string Name(string table) => table + NumberIndexSuffix;
 
-    internal static async Task<string> CreateAsync(HttpClient http, string table, NativeComparisonExecutionOptions policy, TimeProvider timeProvider, CancellationToken token)
+    internal static async Task<string> CreateAsync(HttpClient http, string table, ComparisonExecutionOptions policy, TimeProvider timeProvider, CancellationToken token)
     {
         await SurrealDbSqlTransport.ExecuteAsync(http,
             string.Format(System.Globalization.CultureInfo.InvariantCulture, Define, Name(table), table), policy, cancellationToken: token, timeProvider: timeProvider).ConfigureAwait(false);

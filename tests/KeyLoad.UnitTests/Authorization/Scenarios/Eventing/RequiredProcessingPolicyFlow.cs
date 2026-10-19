@@ -42,7 +42,7 @@ internal static class RequiredProcessingPolicyFlow
                         ErrorCode.Unauthenticated, RequiredProcessingPolicyFixture.Unavailable);
                     await Assert.That(fixture.Harness.Store.Read(view => view.ReadOwnedValue(KeySpace.PartitionOutcome(
                         fixture.Harness.Partition, revokedOperation.UserId!, revoked.CommandId)))).IsNull();
-                    await Assert.That(fixture.Harness.Store.Read(view => view.ReadOwnedValue(KeySpace.OutcomeLocatorV2(
+                    await Assert.That(fixture.Harness.Store.Read(view => view.ReadOwnedValue(KeySpace.OutcomeLocator(
                         fixture.Harness.Partition, revokedOperation.UserId!, revoked.CommandId)))).IsNull();
                 });
                 await fixture.PrincipalAsync(3L, false, token);

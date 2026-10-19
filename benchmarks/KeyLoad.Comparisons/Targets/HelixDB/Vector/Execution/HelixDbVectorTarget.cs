@@ -8,28 +8,28 @@ namespace KeyLoad.Comparisons.Targets;
 /// <param name="provider">Borrowed clock; defaults to the system provider.</param>
 /// <param name = "image">The immutable server image.</param>
 /// <param name = "runId">The unique isolated corpus scope.</param>
-public sealed class HelixDbVectorTarget(HttpClient http, string image, string runId, IOptions<NativeComparisonExecutionOptions> executionOptions, TimeProvider? provider = null) : IVectorComparisonTarget
+public sealed class HelixDbVectorTarget(HttpClient http, string image, string runId, IOptions<ComparisonExecutionOptions> executionOptions, TimeProvider? provider = null) : IVectorComparisonTarget
 {
     private readonly TimeProvider timeProvider = provider ?? TimeProvider.System;
     private const string V0PinnedServerImage = "v0.0.10; pinned server image";
     private const string OnePersistentLocalServerHELIXDATADIR = "one persistent local server; HELIX_DATA_DIR";
-    private const string XHelixAwaitDurableTrueNativeDiskFlush = "X-Helix-Await-Durable true; native disk flush; not fault-qualified";
-    private const string NativeCommittedReadsStrongSearchConsistency = "native committed reads; strong search consistency";
-    private const string POSTV2QueryJSONOperationTree = "POST /v2/query JSON operation tree";
+    private const string XHelixAwaitDurableTrueDiskFlush = "X-Helix-Await-Durable true; execution disk flush; not fault-qualified";
+    private const string CommittedReadsStrongSearchConsistency = "execution committed reads; strong search consistency";
+    private const string POSTV2QueryJSONOperationTree = "POST /query JSON operation tree";
     private const string IsolatedLocalServerNoAuthentication = "isolated local server; no authentication";
     private const int SingleResultCardinality = 1;
-    private const string SingleNativeLocalWriterNoReplicationConfigured = "single native local writer; no replication configured";
-    private const string PersistentNativeDirectory = "persistent native directory";
+    private const string RuntimeSingleLocalWriterNoReplicationConfigured = "single execution local writer; no replication configured";
+    private const string PersistentDirectory = "persistent execution directory";
     private const string StrongSearchConsistency = "strong search consistency";
-    private const string HelixDBExposesNativeANNNotNamedExactHNSW = "HelixDB exposes native ANN, not named exact/HNSW/IVFFlat tuning.";
-    private const string NoNativeEXPLAINEndpointExecutedAST = "No native EXPLAIN endpoint; executed AST=";
+    private const string HelixDBExposesANNNotNamedExactHNSW = "HelixDB exposes execution ANN, not named exact/HNSW/IVFFlat tuning.";
+    private const string NoEXPLAINEndpointExecutedAST = "No execution EXPLAIN endpoint; executed AST=";
     private const int CanonicalTopK = 10;
     private const string ObservedIndexLifecycle = "; observed index lifecycle=";
     private const int EmptyResultCount = 0;
-    private readonly IOptions<NativeComparisonExecutionOptions> execution = NativeComparisonExecutionOptions.Require(executionOptions);
-    private NativeComparisonExecutionOptions Policy => execution.Value;
+    private readonly IOptions<ComparisonExecutionOptions> execution = ComparisonExecutionOptions.Require(executionOptions);
+    private ComparisonExecutionOptions Policy => execution.Value;
     private const string RunIdentityFormat = "N";
-    private readonly string label = HelixDbNativeTokens.TokenKeyLoadVector + Guid.Parse(runId).ToString(RunIdentityFormat);
+    private readonly string label = HelixDbTokens.TokenKeyLoadVector + Guid.Parse(runId).ToString(RunIdentityFormat);
     private int corpusCount;
     private int dimensions;
     private bool ownsData;
@@ -37,23 +37,23 @@ public sealed class HelixDbVectorTarget(HttpClient http, string image, string ru
     private bool ownsIndex;
     private string? indexDefinition;
     /// <inheritdoc/>
-    public string Name => HelixDbNativeTokens.TokenHelixDB;
+    public string Name => HelixDbTokens.TokenHelixDB;
     /// <inheritdoc/>
     public TargetProfile Profile
     {
         get; private set;
-    } = new(HelixDbNativeTokens.TokenHelixDB, V0PinnedServerImage, OnePersistentLocalServerHELIXDATADIR, XHelixAwaitDurableTrueNativeDiskFlush, NativeCommittedReadsStrongSearchConsistency, POSTV2QueryJSONOperationTree, IsolatedLocalServerNoAuthentication, image)
+    } = new(HelixDbTokens.TokenHelixDB, V0PinnedServerImage, OnePersistentLocalServerHELIXDATADIR, XHelixAwaitDurableTrueDiskFlush, CommittedReadsStrongSearchConsistency, POSTV2QueryJSONOperationTree, IsolatedLocalServerNoAuthentication, image)
     {
-        Cluster = new(SingleResultCardinality, SingleResultCardinality, SingleNativeLocalWriterNoReplicationConfigured, [PersistentNativeDirectory, StrongSearchConsistency])
+        Cluster = new(SingleResultCardinality, SingleResultCardinality, RuntimeSingleLocalWriterNoReplicationConfigured, [PersistentDirectory, StrongSearchConsistency])
     };
 
     /// <inheritdoc/>
-    public bool Supports(VectorIndexKind indexKind, VectorQueryMode queryMode) => indexKind == VectorIndexKind.NativeAnn && Enum.IsDefined(queryMode);
+    public bool Supports(VectorIndexKind indexKind, VectorQueryMode queryMode) => indexKind == VectorIndexKind.RuntimeAnn && Enum.IsDefined(queryMode);
     /// <inheritdoc/>
     public async Task<int> IngestAsync(IAsyncEnumerable<VectorDocument> documents, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(documents);
-        using var health = await http.GetAsync(new Uri(HelixDbNativeTokens.TokenReadyz, UriKind.Relative), HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
+        using var health = await http.GetAsync(new Uri(HelixDbTokens.TokenReadyz, UriKind.Relative), HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
         health.EnsureSuccessStatusCode();
         ownsData = true;
         await HelixDbVectorSetup.CreateAsync(http, label, scalarIndexes, Policy, token: cancellationToken, timeProvider: timeProvider).ConfigureAwait(false);
@@ -67,7 +67,7 @@ public sealed class HelixDbVectorTarget(HttpClient http, string image, string ru
         ArgumentNullException.ThrowIfNull(profile);
         if (!Supports(profile.IndexKind, profile.QueryMode))
         {
-            throw new NotSupportedException(HelixDBExposesNativeANNNotNamedExactHNSW);
+            throw new NotSupportedException(HelixDBExposesANNNotNamedExactHNSW);
         }
 
         dimensions = profile.Dimensions;
@@ -99,7 +99,7 @@ public sealed class HelixDbVectorTarget(HttpClient http, string image, string ru
     {
         cancellationToken.ThrowIfCancellationRequested();
         // The public HelixDB API has no EXPLAIN operation: retain the actual executed AST and observed lifecycle receipt.
-        return Task.FromResult(NoNativeEXPLAINEndpointExecutedAST + HelixDbVectorAst.Search(label, query.Span, CanonicalTopK, mode).ToJsonString() + ObservedIndexLifecycle + (indexDefinition ?? throw new InvalidOperationException(HelixDbNativeTokens.TokenHelixDbIndexNotReady)));
+        return Task.FromResult(NoEXPLAINEndpointExecutedAST + HelixDbVectorAst.Search(label, query.Span, CanonicalTopK, mode).ToJsonString() + ObservedIndexLifecycle + (indexDefinition ?? throw new InvalidOperationException(HelixDbTokens.TokenHelixDbIndexNotReady)));
     }
 
     /// <inheritdoc/>
@@ -109,7 +109,7 @@ public sealed class HelixDbVectorTarget(HttpClient http, string image, string ru
         using var response = await HelixDbProtocol.QueryAsync(http, HelixDbProtocol.Batch(HelixDbVectorAst.Update(label, update), true), true, Policy, token: cancellationToken, timeProvider: timeProvider).ConfigureAwait(false);
         if (HelixDbProtocol.Rows(response).GetArrayLength() != SingleResultCardinality)
         {
-            throw new ComparisonFailureException(HelixDbNativeTokens.TokenHelixDbUpdateCardinalityMismatch);
+            throw new ComparisonFailureException(HelixDbTokens.TokenHelixDbUpdateCardinalityMismatch);
         }
     }
 
@@ -120,7 +120,7 @@ public sealed class HelixDbVectorTarget(HttpClient http, string image, string ru
         var rows = HelixDbProtocol.Rows(response);
         if (rows.GetArrayLength() > SingleResultCardinality)
         {
-            throw new ComparisonFailureException(HelixDbNativeTokens.TokenHelixDbInvalidRows);
+            throw new ComparisonFailureException(HelixDbTokens.TokenHelixDbInvalidRows);
         }
         return rows.GetArrayLength() == EmptyResultCount ? null : HelixDbVectorStorage.Read(rows[EmptyResultCount]);
     }
@@ -139,9 +139,9 @@ public sealed class HelixDbVectorTarget(HttpClient http, string image, string ru
             if (ownsData)
             {
                 await HelixDbVectorSetup.DropAsync(http, label, scalarIndexes.Keys, Policy, token: timeout.Token, timeProvider: timeProvider).ConfigureAwait(false);
-                using var response = await HelixDbProtocol.QueryAsync(http, HelixDbProtocol.Batch(HelixDbProtocol.Node(HelixDbNativeTokens.TokenDrop, new()
+                using var response = await HelixDbProtocol.QueryAsync(http, HelixDbProtocol.Batch(HelixDbProtocol.Node(HelixDbTokens.TokenDrop, new()
                 {
-                    [HelixDbNativeTokens.TokenInput] = HelixDbProtocol.Nodes(label)
+                    [HelixDbTokens.TokenInput] = HelixDbProtocol.Nodes(label)
                 }), true), true, Policy, token: timeout.Token, timeProvider: timeProvider).ConfigureAwait(false);
             }
         }
@@ -153,12 +153,12 @@ public sealed class HelixDbVectorTarget(HttpClient http, string image, string ru
 
     private VectorNeighbor ReadNeighbor(JsonElement row)
     {
-        var distance = row.GetProperty(HelixDbNativeTokens.MetaTokenDistance).GetDouble();
+        var distance = row.GetProperty(HelixDbTokens.MetaTokenDistance).GetDouble();
         if (!double.IsFinite(distance))
         {
-            throw new ComparisonFailureException(HelixDbNativeTokens.TokenHelixDbInvalidDistance);
+            throw new ComparisonFailureException(HelixDbTokens.TokenHelixDbInvalidDistance);
         }
 
-        return new(row.GetProperty(HelixDbNativeTokens.TokenId).GetString()!, distance);
+        return new(row.GetProperty(HelixDbTokens.TokenId).GetString()!, distance);
     }
 }

@@ -33,7 +33,7 @@ internal static class UserAnalyticsProcessScenario
         var failures = new List<Exception>();
         try
         {
-            using var generation = new AnalyticsStoreNativeGeneration(snapshot, directory);
+            using var generation = new AnalyticsStoreGeneration(snapshot, directory);
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 UserAnalyticsProcessState.Equal(P.Expected(updated: false), generation.Query(token));
@@ -46,11 +46,11 @@ internal static class UserAnalyticsProcessScenario
                 GC.KeepAlive(generation);
             }, failures);
         }
-        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+        catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error))
         {
             failures.Add(error);
         }
-        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
+        catch (Exception error) when (!CqrsBoundaryErrors.IsNonFatal(error))
         {
             failures.Add(error);
         }
@@ -82,11 +82,11 @@ internal static class UserAnalyticsProcessScenario
                 await AggregateAsync(host, ownedRuntime, work, cut, updated: true, token);
             }, failures);
         }
-        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+        catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error))
         {
             failures.Add(error);
         }
-        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
+        catch (Exception error) when (!CqrsBoundaryErrors.IsNonFatal(error))
         {
             failures.Add(error);
         }

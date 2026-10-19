@@ -3,7 +3,7 @@ using P = KeyLoad.IntegrationTests.Features.DatabaseComposition.FunctionalGateUs
 
 namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
 
-/// <summary>Independent arithmetic literals, never values read from the native analytics engine.</summary>
+/// <summary>Independent arithmetic literals, never values read from the execution analytics engine.</summary>
 internal static class FunctionalGateUserAnalyticsExpected
 {
     private const int InitialEvents = 3;

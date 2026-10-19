@@ -48,7 +48,7 @@ internal sealed class SiteStaticFileHost : IAsyncDisposable
             }
             catch (HttpListenerException)
             {
-                // Retry the bounded native port-binding race after discarding this listener.
+                // Retry the bounded execution port-binding race after discarding this listener.
                 DiscardUnstartedListener(untransferred);
                 untransferred = null;
             }

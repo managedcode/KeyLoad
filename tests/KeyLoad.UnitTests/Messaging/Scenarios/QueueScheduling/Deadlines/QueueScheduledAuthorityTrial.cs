@@ -21,7 +21,7 @@ internal static class QueueScheduledAuthorityTrial
         };
         var request = new ReceiveRequest(Guid.NewGuid(), flow.Lane, LeaseSeconds: QueueLifecycleTestProtocol.LeaseSeconds);
         var receive = fixture.Database.CreateCommand(OperationKind.Receive, request.RequestId,
-            QueueLifecycleTestProtocol.Administrator, flow.Time, NativeSerialization.Serialize(request));
+            QueueLifecycleTestProtocol.Administrator, flow.Time, OrleansSerialization.Serialize(request));
         var state = new QueueScheduledAuthorityState(flow, due, key, exact, receive);
         await QueueScheduledAuthorityImage.ScheduledAsync(fixture.Database, fixture.Store, state);
         var original = QueuePendingAuthorityHistory.Capture(fixture.Store);
@@ -69,7 +69,7 @@ internal static class QueueScheduledAuthorityTrial
         QueueScheduledAuthorityState state, QueuePendingAuthorityCut original, byte[] exact,
         DateTimeOffset due, byte[] key)
     {
-        var malformed = NativeSerialization.Serialize(NativeSerialization.Deserialize<MessageMetadata>(exact)
+        var malformed = OrleansSerialization.Serialize(OrleansSerialization.Deserialize<MessageMetadata>(exact)
             with
         {
             NotBefore = due.AddTicks(1)

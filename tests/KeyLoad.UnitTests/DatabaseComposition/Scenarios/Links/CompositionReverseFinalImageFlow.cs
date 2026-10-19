@@ -1,7 +1,7 @@
 using KeyLoad.Core;
 using KeyLoad.UnitTests.Features.Authorization;
 using ManagedCode.Communication.Commands;
-using A = KeyLoad.UnitTests.Features.DatabaseComposition.CompositionBoundReferenceNativeAssertions;
+using A = KeyLoad.UnitTests.Features.DatabaseComposition.CompositionBoundReferenceAssertions;
 using D = KeyLoad.UnitTests.Features.DatabaseComposition.CompositionReverseFinalImageData;
 
 namespace KeyLoad.UnitTests.Features.DatabaseComposition;
@@ -13,7 +13,7 @@ internal static class CompositionReverseFinalImageFlow
         owner.Source.Configure(D.Collection, ResourceKind.Collection);
         owner.Source.Configure(D.Graph, ResourceKind.Graph);
         owner.Source.Configure(D.Queue, ResourceKind.WorkQueue);
-        var bound = CompositionBoundReferenceNativeReads.Reference(owner, D.Collection, D.Id);
+        var bound = CompositionBoundReferenceReads.Reference(owner, D.Collection, D.Id);
         var seedRequest = new CommandRequest(Guid.NewGuid(), owner.Source.Partition,
             [new PutDocument(D.Collection, D.Id, D.Json, 0)]);
         var seed = Issue(owner, seedRequest, token, out _);
@@ -54,7 +54,7 @@ internal static class CompositionReverseFinalImageFlow
     {
         work = new(owner.Database.OperationLimitsOptions, owner.Database.EvaluationClock, token);
         return owner.Database.CreateCommand(OperationKind.Batch, request.CommandId, D.Root,
-            owner.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(request), work);
+            owner.Database.EvaluationClock.GetUtcNow(), OrleansSerialization.Serialize(request), work);
     }
 
     private static Task VerifyAsync(SafeProjectorOperationDatabase owner, CompositionReverseFinalImageState state)

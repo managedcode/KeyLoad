@@ -3,7 +3,7 @@ using KeyLoad.UnitTests.Features.ClientApi;
 
 namespace KeyLoad.UnitTests.Features.QueryExecution;
 
-/// <summary>Checks the native nullable Q2 source and join fields in the unit MCP catalog.</summary>
+/// <summary>Checks the execution nullable Q2 source and join fields in the unit MCP catalog.</summary>
 internal static class PartitionQueryMcpInnerJoinSchemaAssertions
 {
     private const string ObjectType = PartitionQueryMcpProtocol.ObjectType;

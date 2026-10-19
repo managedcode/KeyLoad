@@ -7,7 +7,7 @@ internal static class ImplementationTermCatalog
     internal const string DiagnosticId = "KLD0038";
     internal const string Title = "Implementation terminology requires explicit approval";
     internal const string Message = "Term '{0}' requires explicit owner approval in this implementation context";
-    internal const string Description = "Only the explicitly approved native runtime, domain and testing meanings are permitted. Renaming an unauthorized mechanism does not authorize it.";
+    internal const string Description = "Only the explicitly approved execution runtime, domain and testing meanings are permitted. Renaming an unauthorized mechanism does not authorize it.";
     internal const string NamespacePrefix = "KeyLoad.";
     internal const string RuleVocabularyType = "KeyLoad.Analyzers.Features.CodeQuality.ImplementationTermCatalog";
     internal const string RuleReaderType = "KeyLoad.Analyzers.Features.CodeQuality.ImplementationTermReader";
@@ -35,16 +35,16 @@ internal static class ImplementationTermCatalog
     internal const string DataRuntimeAssembly = "KeyLoad.Clustering";
     internal const string DataRuntimeNamespace = "KeyLoad.Clustering";
     internal const string DataServerAssembly = "KeyLoad";
-    internal const string NativeLoggingProcessorAssembly = "OpenTelemetry";
-    internal const string NativeLoggingProcessorType = "OpenTelemetry.SimpleLogRecordExportProcessor";
-    internal const string NativeActivityProcessorType = "OpenTelemetry.SimpleActivityExportProcessor";
-    internal const string DataRecordFamiliesType = "KeyLoad.Core.Features.ClusterRouting.Contracts.PartitionRecordFamilies";
+    internal const string LoggingProcessorAssembly = "OpenTelemetry";
+    internal const string LoggingProcessorType = "OpenTelemetry.SimpleLogRecordExportProcessor";
+    internal const string ActivityProcessorType = "OpenTelemetry.SimpleActivityExportProcessor";
+    internal const string DataRecordFamiliesType = "KeyLoad.Core.Features.StoragePartitions.Contracts.PartitionRecordFamilies";
     internal const string DataReadKindType = "KeyLoad.Clustering.GrainReadKind";
     internal const string DataRequestPhaseType = "KeyLoad.Clustering.GrainRequestPhase";
     internal const string DataToolDescriptionsType = "KeyLoad.Server.McpToolDescriptions";
     internal const string DataNamespace = "KeyLoad";
     internal const string DataFeatureNamespaceSuffix = ".Features.TimeSeries";
-    internal static readonly string[] NativeNamespaces =
+    internal static readonly string[] RuntimeNamespaces =
     [
         "System", "Microsoft", "Orleans", "ManagedCode", "Tenray.ZoneTree", "ZoneTree", "TUnit", "Aspire", "BenchmarkDotNet"
     ];
@@ -75,7 +75,7 @@ internal static class ImplementationTermCatalog
     ];
     internal static readonly string[] DataRequestPhases =
     [
-        "SampleChunkAdmissionPersisted", "SampleChunkNativeJobReturned", "SampleChunkAdmissionRefused"
+        "SampleChunkAdmissionPersisted", "SampleChunkJobReturned", "SampleChunkAdmissionRefused"
     ];
     internal static readonly string[] DataToolDescriptionFields =
     [
@@ -115,13 +115,13 @@ internal static class ImplementationTermCatalog
         "KeyLoad.UnitTests.Features.ClientApi.McpMutationTestData.SealChunkKind",
         "KeyLoad.UnitTests.Features.ClientApi.McpMutationTestData.MergeChunkKind",
         "KeyLoad.UnitTests.Features.ClientApi.McpMutationTestData.DropChunkKind",
-        "KeyLoad.UnitTests.Features.ClusterRouting.PartitionRecordInventoryTests.ExpectedFamilies",
+        "KeyLoad.UnitTests.Features.OrleansExecution.PartitionRecordInventoryTests.ExpectedFamilies",
         "KeyLoad.UnitTests.Features.BackupRestore.SeriesPortableBackupSeed.EventPrefix",
         "KeyLoad.UnitTests.Features.BackupRestore.SeriesPortableBackupAssertions.MaximumSampleRows",
         "KeyLoad.UnitTests.Features.Search.SearchTests.SampleId",
         "KeyLoad.UnitTests.Features.Search.SearchTests.LargeFiniteSampleValue"
     ];
-    internal static readonly string[] NativeModelContracts =
+    internal static readonly string[] ModelContracts =
     [
         "Orleans.Serialization.Codecs.IFieldCodec`1", "Orleans.Serialization.Cloning.IDeepCopier`1",
         "Orleans.Serialization.Serializers.IBaseCodec`1", "Orleans.Serialization.Activators.IActivator`1"
@@ -141,13 +141,13 @@ internal static class ImplementationTermCatalog
         "KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons.ScaleServerResourceSampler",
         "KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons.ScaleServerResourceEvidenceCollector",
         "KeyLoad.ComparisonTests.Features.BenchmarkComparisons.RawStorageReportData",
-        "KeyLoad.ComparisonTests.Features.BenchmarkComparisons.NativeSerializationReportData"
+        "KeyLoad.ComparisonTests.Features.BenchmarkComparisons.SerializationReportData"
     ];
     internal static readonly string[] MeasurementMembers =
     [
-        "KeyLoad.Comparisons.NativeComparisonExecutionOptions.ResourceSampleIntervalMilliseconds",
-        "KeyLoad.Comparisons.NativeComparisonOperationalPolicy.DefaultResourceSampleIntervalMilliseconds",
-        "KeyLoad.Comparisons.NativeComparisonOperationalPolicy.MaximumResourceSampleIntervalMilliseconds",
+        "KeyLoad.Comparisons.ComparisonExecutionOptions.ResourceSampleIntervalMilliseconds",
+        "KeyLoad.Comparisons.ComparisonOperationalPolicy.DefaultResourceSampleIntervalMilliseconds",
+        "KeyLoad.Comparisons.ComparisonOperationalPolicy.MaximumResourceSampleIntervalMilliseconds",
         "KeyLoad.Comparisons.VectorComparisonProfile.LatencySampleCount",
         "KeyLoad.Comparisons.VectorComparisonProfileValues.LatencySampleCount",
         "KeyLoad.Comparisons.VectorProfileJsonFields.LatencySampleCount",
@@ -163,12 +163,12 @@ internal static class ImplementationTermCatalog
         "KeyLoad.ComparisonTests.Features.BenchmarkComparisons.ScaleServerCancellationProbe.SamplingMissing",
         "KeyLoad.ComparisonTests.Features.BenchmarkComparisons.ScaleServerCancellationProbe.SampleCountField",
         "KeyLoad.ComparisonTests.Features.BenchmarkComparisons.ScaleServerCancellationProbe.AdditionalSampleCount",
-        "KeyLoad.ComparisonTests.Features.BenchmarkComparisons.ScaleServerResourceBoundsNativeFixture.OutputBoundMessage",
+        "KeyLoad.ComparisonTests.Features.BenchmarkComparisons.ScaleServerResourceBoundsFixture.OutputBoundMessage",
         "KeyLoad.ComparisonTests.Features.BenchmarkComparisons.ScaleServerResourceBoundsFlow.SampleByteGrant",
         "KeyLoad.ComparisonTests.Features.BenchmarkComparisons.ScaleServerResourceNodeProgram.Source",
         "KeyLoad.ComparisonTests.Features.BenchmarkComparisons.ScaleServerResourceEvidenceParserTests.AcScale016RejectsMisboundOrIncomparableServerEvidence(string)"
     ];
 
-    internal static bool NativeNamespace(string value) => Array.Exists(NativeNamespaces,
+    internal static bool RuntimeNamespace(string value) => Array.Exists(RuntimeNamespaces,
         prefix => value == prefix || value.StartsWith(prefix + ".", StringComparison.Ordinal));
 }

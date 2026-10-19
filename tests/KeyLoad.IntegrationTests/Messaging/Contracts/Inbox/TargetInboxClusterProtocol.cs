@@ -15,7 +15,7 @@ internal static class TargetInboxClusterProtocol
     internal const string Handler = "handler";
     internal const string SourcePartition = "source";
     internal const string TargetPartition = "target";
-    internal const string CommandPath = "/v1/inbox/commit";
+    internal const string CommandPath = "/inbox/commit";
     internal const string CommandHeader = "X-KeyLoad-Command-Id";
     internal const int NoFailures = 0;
     internal const string Tool = "keyload_inbox_commit";

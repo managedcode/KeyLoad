@@ -6,7 +6,7 @@ import { createRunContext } from './source-context.mjs';
 import { verifySourceCheckout } from './source-checkout.mjs';
 import { runtimeBundle, requireRuntime, selectRuntimeAspire, validateRuntimeDescriptor, validateRuntimeInventory } from './compiled-test-bundle-contract.mjs';
 import { collectRuntimeFiles, hashRuntimeFile, readRuntimeJson, requireRuntimeDestination } from './compiled-test-bundle-files.mjs';
-import { runBundleNative } from './compiled-test-bundle-native.mjs';
+import { runBundle } from './compiled-test-bundle-execution.mjs';
 
 async function requirePlainDirectory(directory) {
   for (let current = directory; current !== path.dirname(current); current = path.dirname(current)) {
@@ -19,10 +19,10 @@ async function requireArchive(directory, descriptor, inventory) {
   const archive = path.join(directory, runtimeBundle.archive);
   const record = await hashRuntimeFile(archive, runtimeBundle.maximumArchiveBytes);
   requireRuntime(record.sha256 === descriptor.archiveSha256 && record.bytes === descriptor.archiveBytes);
-  const names = (await runBundleNative('tar', ['--list', '--gzip', '--file', archive, '--quoting-style=literal'], directory))
+  const names = (await runBundle('tar', ['--list', '--gzip', '--file', archive, '--quoting-style=literal'], directory))
     .toString('utf8').trimEnd().split('\n');
   requireRuntime(names.length === inventory.length && names.every((name, index) => name === inventory[index].path));
-  const types = (await runBundleNative('tar', ['--list', '--verbose', '--gzip', '--file', archive, '--quoting-style=literal'], directory))
+  const types = (await runBundle('tar', ['--list', '--verbose', '--gzip', '--file', archive, '--quoting-style=literal'], directory))
     .toString('utf8').trimEnd().split('\n');
   requireRuntime(types.length === inventory.length && types.every(line => line.startsWith('-')));
 }
@@ -34,7 +34,7 @@ export async function packCompiledRuntime(environment = process.env) {
   const directory = path.join(context.workspace, 'artifacts/benchmark-runtime-bundle');
   await mkdir(directory, { mode: 0o700 });
   await requirePlainDirectory(directory);
-  const tracked = await runBundleNative('git', ['ls-files', '-z', '--', '*.csproj'], context.workspace, 1048576);
+  const tracked = await runBundle('git', ['ls-files', '-z', '--', '*.csproj'], context.workspace, 1048576);
   const projects = tracked.toString('utf8').split('\0').filter(Boolean);
   const configuration = await readRuntimeJson(path.join(context.workspace, 'global.json'), 65536);
   const aspireVersion = configuration['msbuild-sdks']?.['Aspire.AppHost.Sdk'];
@@ -46,7 +46,7 @@ export async function packCompiledRuntime(environment = process.env) {
   const list = path.join(directory, runtimeBundle.list);
   await writeFile(list, inventory.map(entry => entry.path).join('\0') + '\0', { flag: 'wx', mode: 0o600 });
   const archive = path.join(directory, runtimeBundle.archive);
-  await runBundleNative('tar', ['--create', '--gzip', '--file', archive, '--hard-dereference',
+  await runBundle('tar', ['--create', '--gzip', '--file', archive, '--hard-dereference',
     '--no-recursion', '--null', '--verbatim-files-from', '--files-from', list], context.workspace, 1048576);
   const fileRecord = await hashRuntimeFile(archive, runtimeBundle.maximumArchiveBytes);
   const inventoryRecord = await hashRuntimeFile(path.join(directory, runtimeBundle.inventory), runtimeBundle.maximumInventoryBytes);
@@ -56,7 +56,7 @@ export async function packCompiledRuntime(environment = process.env) {
     sourceRevision: context.sourceSha, runId: Number(context.runId), attempt: Number(context.runAttempt),
     repository: context.repository, ref: context.ref, platform: 'linux', architecture: process.arch,
     workspace: context.workspace,
-    sdkVersion: (await runBundleNative('dotnet', ['--version'], context.workspace, 1024)).toString('utf8').trim(),
+    sdkVersion: (await runBundle('dotnet', ['--version'], context.workspace, 1024)).toString('utf8').trim(),
     archive: runtimeBundle.archive, archiveSha256: fileRecord.sha256, archiveBytes: fileRecord.bytes,
     inventory: runtimeBundle.inventory, inventorySha256: inventoryRecord.sha256, fileCount: inventory.length,
     aspire: selectRuntimeAspire(inventory, aspireVersion, process.arch),
@@ -67,7 +67,7 @@ export async function packCompiledRuntime(environment = process.env) {
   };
   validateRuntimeDescriptor(descriptor, context, inventory);
   await requireArchive(directory, descriptor, inventory);
-  process.stdout.write('Compiled runtime: archive and native Aspire identities verified.\n');
+  process.stdout.write('Compiled runtime: archive and execution Aspire identities verified.\n');
   await writeFile(path.join(directory, runtimeBundle.descriptor), JSON.stringify(descriptor, null, 2) + '\n',
     { flag: 'wx', mode: 0o600 });
   return descriptor;
@@ -91,7 +91,7 @@ export async function importCompiledRuntime(directory, environment = process.env
   await requireArchive(directory, descriptor, inventory);
   process.stdout.write('Compiled runtime: source and archive verified; importing original files.\n');
   await requireRuntimeDestination(context.workspace, inventory);
-  await runBundleNative('tar', ['--extract', '--gzip', '--file', path.join(directory, runtimeBundle.archive),
+  await runBundle('tar', ['--extract', '--gzip', '--file', path.join(directory, runtimeBundle.archive),
     '--directory', context.workspace, '--no-same-owner', '--no-same-permissions', '--keep-old-files', '--no-overwrite-dir'], context.workspace, 1048576);
   for (const entry of inventory) {
     const actual = await hashRuntimeFile(path.join(context.workspace, entry.path));
@@ -100,7 +100,7 @@ export async function importCompiledRuntime(directory, environment = process.env
   }
   await verifySourceCheckout(context);
   await writeRuntimeImport(directory, descriptor, context, environment);
-  process.stdout.write(`Compiled runtime: ${inventory.length} original file hashes verified; native runner ready.\n`);
+  process.stdout.write(`Compiled runtime: ${inventory.length} original file hashes verified; execution runner ready.\n`);
   return descriptor;
 }
 

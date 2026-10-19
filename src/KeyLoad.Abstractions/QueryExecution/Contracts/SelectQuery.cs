@@ -15,7 +15,7 @@ namespace KeyLoad.Query;
 /// <param name="InnerJoin">Optional Q2 typed-row INNER JOIN.</param>
 /// <param name="Offset"></param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.SelectQuery)]
+[Orleans.Alias(ContractAliases.SelectQuery)]
 public sealed record SelectQuery([property: Orleans.Id(0)] string Collection, [property: Orleans.Id(1)] string? Alias, [property: Orleans.Id(2)] ImmutableArray<Selection> Projection, [property: Orleans.Id(3)] Predicate? Filter,
     [property: Orleans.Id(4)] ImmutableArray<Ordering> Order, [property: Orleans.Id(5)] int Limit, [property: Orleans.Id(6)] bool Explain = false,
     [property: Orleans.Id(7), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] ModelQuerySource? ModelSource = null,

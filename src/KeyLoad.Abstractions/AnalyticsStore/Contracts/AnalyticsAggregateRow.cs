@@ -2,7 +2,7 @@ using System.Collections.Immutable;
 
 namespace KeyLoad;
 
-/// <summary>One complete authorized native aggregate group.</summary>
+/// <summary>One complete authorized execution aggregate group.</summary>
 /// <param name="Dimensions">Group dimension values.</param>
 /// <param name="Metrics">Finite aggregate values indexed by selection name.</param>
 [Orleans.GenerateSerializer]

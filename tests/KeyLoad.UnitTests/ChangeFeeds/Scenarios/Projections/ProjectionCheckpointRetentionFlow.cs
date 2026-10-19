@@ -4,7 +4,7 @@ namespace KeyLoad.UnitTests.Features.ChangeFeeds;
 
 internal static class ProjectionCheckpointRetentionFlow
 {
-    private const string MissingResult = "The joined native cold retention operation requires its original continuation.";
+    private const string MissingResult = "The joined execution cold retention operation requires its original continuation.";
 
     internal static async Task RunAsync(bool ahead)
     {

@@ -11,7 +11,7 @@ internal static class GraphIncomingClusterScenario
     internal const string Graph = "incoming-links";
     internal const string Collection = "incoming-vertices";
     internal const string Tool = "keyload_graph_incoming";
-    internal const string Projection = "eventual-reverse.v1";
+    internal const string Projection = "eventual-reverse";
     internal const string Label = "incoming-edge";
     internal const string SecretPath = "/secret";
     internal const string SecretGrant = "graph.incoming.secret.read";
@@ -60,7 +60,7 @@ internal static class GraphIncomingClusterScenario
             localSource, firstSource, secondSource, reader, targetOnly, Graph);
     }
 
-    internal static ReadIncomingGraphEdgesRequestV1 Request(GraphIncomingClusterSeed seed, int limit = 10)
+    internal static ReadIncomingGraphEdgesRequest Request(GraphIncomingClusterSeed seed, int limit = 10)
         => new(RequestVersion, seed.Target, seed.Graph, limit);
 
     internal static UpsertEdge Edge(string id, EntityRef from, EntityRef to, string label = Label,

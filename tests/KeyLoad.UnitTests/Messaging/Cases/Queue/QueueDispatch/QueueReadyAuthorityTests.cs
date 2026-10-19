@@ -11,7 +11,7 @@ internal sealed class QueueReadyAuthorityTests
     [Arguments(QueueReadyAuthorityFault.NegativeLeaseVersion, true)]
     [Arguments(QueueReadyAuthorityFault.NonPositiveDeliveryGeneration, false)]
     [Arguments(QueueReadyAuthorityFault.NonPositiveDeliveryGeneration, true)]
-    public Task NativeReadyNumericAuthorityRefusesOriginalClaimOrExpiryThenExactRepairTwoColdOwnersAndHealthyAck(
+    public Task ReadyNumericAuthorityRefusesOriginalClaimOrExpiryThenExactRepairTwoColdOwnersAndHealthyAck(
         QueueReadyAuthorityFault fault, bool expired)
         => QueueReadyAuthorityTrial.CounterAsync(fault, expired, TestContext.Current!.Execution.CancellationToken);
 
@@ -32,7 +32,7 @@ internal sealed class QueueReadyAuthorityTests
     [Arguments(QueueReadyAuthorityFault.InFlightCountWithoutBytes, true)]
     [Arguments(QueueReadyAuthorityFault.InFlightBytesWithoutCount, false)]
     [Arguments(QueueReadyAuthorityFault.InFlightBytesWithoutCount, true)]
-    public Task NativeCounterAuthorityRefusesOriginalReceiveThenExactRepairTwoColdOwnersAndHealthyAck(
+    public Task CounterAuthorityRefusesOriginalReceiveThenExactRepairTwoColdOwnersAndHealthyAck(
         QueueReadyAuthorityFault fault, bool expired)
         => QueueReadyAuthorityTrial.CounterAsync(fault, expired, TestContext.Current!.Execution.CancellationToken);
 
@@ -45,7 +45,7 @@ internal sealed class QueueReadyAuthorityTests
     [Arguments(QueueReadyAuthorityFault.MetadataIdentity, true)]
     [Arguments(QueueReadyAuthorityFault.BodyIdentity, false)]
     [Arguments(QueueReadyAuthorityFault.BodyIdentity, true)]
-    public Task NativeReadyAuthorityFaultPreservesOriginalInputThenRepairsClaimOrExpiryAndHealthyProcessing(
+    public Task ReadyAuthorityFaultPreservesOriginalInputThenRepairsClaimOrExpiryAndHealthyProcessing(
         QueueReadyAuthorityFault fault, bool expired)
         => QueueReadyAuthorityTrial.RunAsync(fault, expired, TestContext.Current!.Execution.CancellationToken);
 }

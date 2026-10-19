@@ -65,7 +65,7 @@ internal sealed class McpSchemaMetadataTests
             JsonDefaults.Serialize(new MetadataProbe(McpCanonicalTestData.Entity, default)))).IsNotNull();
     }
 
-    /// <summary>Native string schemas correspond to canonical base64 bytes and runtime rejection of null or malformed bytes.</summary>
+    /// <summary>Execution string schemas correspond to canonical base64 bytes and runtime rejection of null or malformed bytes.</summary>
     [Test]
     public async Task AcMcp003ByteMemorySchemasDescribeActualStrictBase64Wire()
     {

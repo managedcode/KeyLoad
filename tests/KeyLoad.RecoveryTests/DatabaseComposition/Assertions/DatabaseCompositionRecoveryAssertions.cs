@@ -76,7 +76,7 @@ internal static class DatabaseCompositionRecoveryAssertions
             .Edges).HasSingleItem();
     }
 
-    private static async Task<EntityRefLifetimeV1> OriginalCollectionLifetimeAsync(DatabaseEngine database)
+    private static async Task<EntityRefLifetime> OriginalCollectionLifetimeAsync(DatabaseEngine database)
     {
         var partition = DatabaseCompositionCrashScenario.Partition;
         var commandId = DatabaseCompositionCrashScenario.CollectionCommandId;
@@ -91,7 +91,7 @@ internal static class DatabaseCompositionRecoveryAssertions
         await Assert.That(Errors.Code(stored.Result.Problem)).IsNull();
         await Assert.That(JsonDefaults.Serialize(stored.Result.Get<ResourceDefinition>()).AsSpan()
             .SequenceEqual(JsonDefaults.Serialize(definition))).IsTrue();
-        await Assert.That(JsonDefaults.Serialize(NativeSerialization.Deserialize<ConfigureResourceRequest>(original.Value.Input.Span))
+        await Assert.That(JsonDefaults.Serialize(OrleansSerialization.Deserialize<ConfigureResourceRequest>(original.Value.Input.Span))
             .AsSpan().SequenceEqual(JsonDefaults.Serialize(request))).IsTrue();
         var fingerprint = DatabaseCommandFingerprint.Compute(commandId, OperationKind.ConfigureResource,
             DatabaseCompositionCrashScenario.Principal, JsonSerializer.Serialize(request, JsonDefaults.Options));

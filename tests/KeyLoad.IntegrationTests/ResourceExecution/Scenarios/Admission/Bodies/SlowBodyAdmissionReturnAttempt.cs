@@ -1,7 +1,7 @@
 using System.Net.Http.Headers;
 using Aspire.Hosting.Testing;
 using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.ClusterRouting;
+using KeyLoad.IntegrationTests.Features.OrleansExecution;
 using KeyLoad.Server;
 using static KeyLoad.IntegrationTests.Features.ResourceExecution.EarlyAdmissionQualificationProtocol;
 
@@ -65,7 +65,7 @@ internal static class SlowBodyAdmissionReturnAttempt
         if (pending is not null)
         {
             await ServerFailureObserver.ObserveAsync(() => TerminalAsync(pending, mode, canceled.Token, cleanup.Token), failures);
-            // Force cancellation only after preserving the first native terminal observation.
+            // Force cancellation only after preserving the first execution terminal observation.
             await ServerFailureObserver.ObserveAsync(canceled.CancelAsync, failures);
             if (!pending.IsCompleted)
             {

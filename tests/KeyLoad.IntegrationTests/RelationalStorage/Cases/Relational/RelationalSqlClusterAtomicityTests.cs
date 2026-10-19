@@ -4,7 +4,7 @@ using KeyLoad.IntegrationTests.Features.QueryExecution;
 
 namespace KeyLoad.IntegrationTests.Features.RelationalStorage;
 
-/// <summary>AC-AISQL-003/004: native typed-row failures roll back every earlier mixed-model effect.</summary>
+/// <summary>AC-AISQL-003/004: execution typed-row failures roll back every earlier mixed-model effect.</summary>
 [ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = McpCallerProtocol.FixtureKey)]
 [NotInParallel]
 internal sealed class RelationalSqlClusterAtomicityTests(ClusterFixture fixture)

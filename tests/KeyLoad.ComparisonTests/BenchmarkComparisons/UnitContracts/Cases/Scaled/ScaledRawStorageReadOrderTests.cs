@@ -5,7 +5,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
-/// <summary>Verifies the complete deterministic scale-v1 shuffle independently of its implementation.</summary>
+/// <summary>Verifies the complete deterministic scale shuffle independently of its implementation.</summary>
 internal sealed class ScaledRawStorageReadOrderTests
 {
     private static readonly IOptions<ScaledStorageExecutionOptions> ExecutionOptions = UnitBenchmarkOptions.ScaledPreparation;

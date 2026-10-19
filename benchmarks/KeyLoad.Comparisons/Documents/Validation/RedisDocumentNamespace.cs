@@ -5,14 +5,14 @@ using StackExchange.Redis;
 
 namespace KeyLoad.Comparisons.Targets;
 
-/// <summary>Owns bounded document namespace readback and final native deletion.</summary>
+/// <summary>Owns bounded document namespace readback and final execution deletion.</summary>
 internal sealed class RedisDocumentNamespace(string prefix, int maximumIdentity, int capacity)
 {
     private const string DocumentBatchReadCommand = "MGET";
     internal async IAsyncEnumerable<FoundDocument> ReadAsync(ConnectionMultiplexer actual,
         [EnumeratorCancellation] CancellationToken token, CommandFlags flags = CommandFlags.DemandMaster)
     {
-        // Native SCAN may repeat keys. A bounded identity bitset deduplicates observations without retaining payloads.
+        // Execution SCAN may repeat keys. A bounded identity bitset deduplicates observations without retaining payloads.
         var present = new BitArray(maximumIdentity);
         var endpoint = actual.GetEndPoints(configuredOnly: true).Single();
         var server = actual.GetServer(endpoint);
@@ -25,7 +25,7 @@ internal sealed class RedisDocumentNamespace(string prefix, int maximumIdentity,
                 CultureInfo.InvariantCulture, out var ordinal) || ordinal < DocumentMeasurementValues.NoObservedItems || ordinal >= maximumIdentity
                 || id != ScaledComparisonCorpus.Id(ordinal))
             {
-                throw new ComparisonFailureException(DocumentProtocolText.DocumentReadbackUnexpectedNativeKey);
+                throw new ComparisonFailureException(DocumentProtocolText.DocumentReadbackUnexpectedKey);
             }
 
             present[ordinal] = true;
@@ -62,13 +62,13 @@ internal sealed class RedisDocumentNamespace(string prefix, int maximumIdentity,
         {
             token.ThrowIfCancellationRequested();
             var keys = identities.Select(id => (object)(prefix + id)).ToArray();
-            // Await the original bounded native MGET, including when cancellation arrives during execution.
+            // Await the original bounded execution MGET, including when cancellation arrives during execution.
             // IServer binds MGET to this exact observed endpoint; IDatabase routing could choose another discovered replica.
             var values = (RedisResult[])(await server.ExecuteAsync(database.Database, DocumentBatchReadCommand, keys, flags).ConfigureAwait(false))!;
             token.ThrowIfCancellationRequested();
             if (values.Length != identities.Count || values.Any(value => value.IsNull))
             {
-                throw new ComparisonFailureException(DocumentProtocolText.DocumentReadbackMissingNativeKey);
+                throw new ComparisonFailureException(DocumentProtocolText.DocumentReadbackMissingKey);
             }
 
             var result = identities.Select((id, index) => new FoundDocument(id, values[index].ToString())).ToArray();
@@ -110,7 +110,7 @@ internal sealed class RedisDocumentNamespace(string prefix, int maximumIdentity,
         await foreach (var _ in server.KeysAsync(pattern: prefix + DocumentProtocolText.EmptyText, pageSize: capacity)
             .WithCancellation(deadline.Token).ConfigureAwait(false))
         {
-            throw new ComparisonFailureException(DocumentProtocolText.DocumentNativeCleanupIncomplete);
+            throw new ComparisonFailureException(DocumentProtocolText.DocumentCleanupIncomplete);
         }
     }
 }

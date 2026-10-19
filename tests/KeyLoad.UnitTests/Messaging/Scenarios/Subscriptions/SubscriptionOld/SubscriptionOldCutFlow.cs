@@ -42,7 +42,7 @@ internal static class SubscriptionOldCutFlow
         await Assert.That(fixture.Store.Position > backupPosition).IsTrue();
         var original = QueueWholeFlowStorage.Bytes(fixture.Store);
         var position = fixture.Store.Position;
-        var identity = NativeReadCutStoreStateAssertions.SnapshotIdentity(fixture.Store);
+        var identity = ReadCutStoreStateAssertions.SnapshotIdentity(fixture.Store);
         var archive = Directory.GetFiles(root).ToDictionary(path => Path.GetFileName(path)!, File.ReadAllBytes,
             StringComparer.Ordinal);
         var failures = new List<Exception>();
@@ -89,7 +89,7 @@ internal static class SubscriptionOldCutFlow
             await SubscriptionOldCutHealthy.RunAsync(database, store, state);
             bytes = QueueWholeFlowStorage.Bytes(store);
             position = store.Position;
-            identity = NativeReadCutStoreStateAssertions.SnapshotIdentity(store);
+            identity = ReadCutStoreStateAssertions.SnapshotIdentity(store);
         }, failures);
         if (store is not null)
         {
@@ -97,7 +97,7 @@ internal static class SubscriptionOldCutFlow
             {
                 bytes = QueueWholeFlowStorage.Bytes(store);
                 position = store.Position;
-                identity = NativeReadCutStoreStateAssertions.SnapshotIdentity(store);
+                identity = ReadCutStoreStateAssertions.SnapshotIdentity(store);
             }, failures);
             ServerFailureObserver.Observe(store.Dispose, failures);
         }

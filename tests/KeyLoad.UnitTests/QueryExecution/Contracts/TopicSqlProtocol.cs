@@ -15,7 +15,7 @@ internal static class TopicSqlProtocol
     internal const string Star = "*";
     internal const string Payload = "{\"score\":1,\"secret\":\"TOPIC_PAYLOAD_CANARY\"}";
     internal const string NextPayload = "{\"score\":2,\"secret\":\"TOPIC_PAYLOAD_CANARY\"}";
-    internal const string Headers = "{\"privateHeader\":\"TOPIC_HEADER_CANARY\",\"trace\":\"native-trace\"}";
+    internal const string Headers = "{\"privateHeader\":\"TOPIC_HEADER_CANARY\",\"trace\":\"execution-trace\"}";
     internal const string Secret = "TOPIC_PAYLOAD_CANARY";
     internal const string HeaderSecret = "TOPIC_HEADER_CANARY";
     internal const string Sql = "SELECT * FROM TOPIC_EVENTS('topic-events') ORDER BY position";

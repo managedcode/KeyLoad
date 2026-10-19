@@ -8,7 +8,7 @@ public sealed partial class PostgresTarget
     /// <inheritdoc/>
     public Task InitializeDocumentsAsync(DocumentComparisonInitialization initialization, CancellationToken token)
     {
-        DocumentNativeInitialization.Validate(initialization);
+        DocumentInitialization.Validate(initialization);
         return InitializeAsync(initialization.Corpus, token);
     }
     /// <inheritdoc/>
@@ -26,14 +26,14 @@ public sealed partial class PostgresTarget
             }
         }
         // Captures a fresh WAL boundary after every measured session and the full primary oracle have joined.
-        // Existing native observation waits for BOTH named standbys to flush AND replay through this boundary.
+        // Existing execution observation waits for BOTH named standbys to flush AND replay through this boundary.
         var observed = await new PostgresTopology(lifecycleOptions, provider: timeProvider)
             .ObserveCopiesAsync(connection, topology, Profile, cancellationToken).ConfigureAwait(false);
         Profile = PostgresDocumentCopyProof.BindFinalState(observed, Profile, schedule);
     }
     /// <inheritdoc/>
     public Task<IDocumentComparisonSession> OpenDocumentSessionAsync(CancellationToken token)
-        => DocumentNativeSessionAcquisition<Npgsql.NpgsqlConnection>.OpenAsync(
+        => DocumentSessionAcquisition<Npgsql.NpgsqlConnection>.OpenAsync(
             cancellation => source.OpenConnectionAsync(cancellation).AsTask(), AdmitDocumentConnectionAsync,
             connection => new PostgresComparisonSession(connection, topK, graphDepth,
                 -DocumentMeasurementValues.SingleItemCount, lifecycleOptions, provider: timeProvider), token);

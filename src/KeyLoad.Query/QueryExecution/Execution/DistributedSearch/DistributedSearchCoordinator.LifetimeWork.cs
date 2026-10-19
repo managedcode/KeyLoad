@@ -7,8 +7,8 @@ namespace KeyLoad.Query.Features.QueryExecution;
 
 internal static partial class DistributedSearchCoordinator
 {
-    internal static Task<DistributedSearchPageV1> ExecuteBoundAsync(DatabaseEngine database,
-        DistributedSearchRequestV1 request, IOptions<QueryExecutionOptions> options,
+    internal static Task<DistributedSearchPage> ExecuteBoundAsync(DatabaseEngine database,
+        DistributedSearchRequest request, IOptions<QueryExecutionOptions> options,
         Func<DistributedSearchPhaseWork, ReadExecutionBudgetReadGrant, ReadExecutionBudget, CancellationToken,
             Task<DistributedSearchPreparedLeaf>> prepare,
         Func<CancellationToken, Task> sourceBarrier, TimeProvider clock, DateTimeOffset originalExpiry,

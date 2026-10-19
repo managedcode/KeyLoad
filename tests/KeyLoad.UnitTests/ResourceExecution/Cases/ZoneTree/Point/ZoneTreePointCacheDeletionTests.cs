@@ -9,7 +9,7 @@ internal sealed class ZoneTreePointCacheDeletionTests
     private static readonly byte[] ReplacementValue = [99, 100];
 
     [Test]
-    public async Task WarmDeleteMissesNativeTwiceThenDifferentReinsertIsColdAndWarmsCorrectly()
+    public async Task WarmDeleteMissesTwiceThenDifferentReinsertIsColdAndWarmsCorrectly()
     {
         using var fixture = new ZoneTreePointCacheFileFixture();
         var store = fixture.OpenStore();
@@ -33,22 +33,22 @@ internal sealed class ZoneTreePointCacheDeletionTests
         await Assert.That(absentSecond).IsNull();
         await Assert.That(replacementCold).IsEquivalentTo(ReplacementValue);
         await Assert.That(replacementWarm).IsEquivalentTo(ReplacementValue);
-        await Assert.That(afterWarm.NativeLookups).IsEqualTo(1L);
-        await Assert.That(afterWarm.NativeMisses).IsEqualTo(0L);
+        await Assert.That(afterWarm.RuntimeLookups).IsEqualTo(1L);
+        await Assert.That(afterWarm.RuntimeMisses).IsEqualTo(0L);
         await Assert.That(afterWarm.Admissions).IsEqualTo(1L);
         await Assert.That(afterAbsentReads.Hits).IsEqualTo(afterWarm.Hits);
-        await Assert.That(afterAbsentReads.NativeLookups - afterWarm.NativeLookups).IsEqualTo(2L);
-        await Assert.That(afterAbsentReads.NativeMisses - afterWarm.NativeMisses).IsEqualTo(2L);
+        await Assert.That(afterAbsentReads.RuntimeLookups - afterWarm.RuntimeLookups).IsEqualTo(2L);
+        await Assert.That(afterAbsentReads.RuntimeMisses - afterWarm.RuntimeMisses).IsEqualTo(2L);
         await Assert.That(afterAbsentReads.Admissions).IsEqualTo(afterWarm.Admissions);
         await Assert.That(afterAbsentReads.LiveEntries).IsEqualTo(0);
         await Assert.That(afterReplacementCold.Hits).IsEqualTo(afterAbsentReads.Hits);
-        await Assert.That(afterReplacementCold.NativeLookups - afterAbsentReads.NativeLookups).IsEqualTo(1L);
-        await Assert.That(afterReplacementCold.NativeMisses).IsEqualTo(afterAbsentReads.NativeMisses);
+        await Assert.That(afterReplacementCold.RuntimeLookups - afterAbsentReads.RuntimeLookups).IsEqualTo(1L);
+        await Assert.That(afterReplacementCold.RuntimeMisses).IsEqualTo(afterAbsentReads.RuntimeMisses);
         await Assert.That(afterReplacementCold.Admissions - afterAbsentReads.Admissions).IsEqualTo(1L);
         await Assert.That(afterReplacementCold.LiveEntries).IsEqualTo(1);
         await Assert.That(afterReplacementWarm.Hits - afterReplacementCold.Hits).IsEqualTo(1L);
-        await Assert.That(afterReplacementWarm.NativeLookups).IsEqualTo(afterReplacementCold.NativeLookups);
-        await Assert.That(afterReplacementWarm.NativeMisses).IsEqualTo(afterReplacementCold.NativeMisses);
+        await Assert.That(afterReplacementWarm.RuntimeLookups).IsEqualTo(afterReplacementCold.RuntimeLookups);
+        await Assert.That(afterReplacementWarm.RuntimeMisses).IsEqualTo(afterReplacementCold.RuntimeMisses);
         await Assert.That(afterReplacementWarm.Admissions).IsEqualTo(afterReplacementCold.Admissions);
     }
 

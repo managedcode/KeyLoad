@@ -1,5 +1,5 @@
 using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.ClusterRouting;
+using KeyLoad.IntegrationTests.Features.OrleansExecution;
 
 namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 
@@ -33,7 +33,7 @@ internal static class TopicSqlClusterPhase
         {
             await TopicSqlClusterAssertions.FullAsync(state, await TopicSqlClusterRoutes.QueryAsync(reader, route, state, false, token));
             await TopicSqlClusterAssertions.FullAsync(state, await TopicSqlClusterRoutes.QueryAsync(reader, route, state, true, token));
-            var source = await TopicSqlClusterRoutes.NativeAsync(reader, route, state, token);
+            var source = await TopicSqlClusterRoutes.RuntimeAsyncCore(reader, route, state, token);
             await Assert.That(source.Source).IsEqualTo(state.Source);
             await Assert.That(source.Head).IsEqualTo(state.Original.Head);
             await SqlClusterProtocol.EqualAsync(state.Original.Events, source.Events);
@@ -43,10 +43,10 @@ internal static class TopicSqlClusterPhase
         }, token);
         await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node3, fixture.AdminKey, async admin =>
         {
-            var native = await McpCallerAssertions.SdkSuccessAsync(await admin.Sdk.ReadEventSourceAsync(state.Read, token));
-            await Assert.That(native.Source).IsEqualTo(state.Source);
-            await Assert.That(native.Head).IsEqualTo(state.Original.Head);
-            await SqlClusterProtocol.EqualAsync(state.Original.Events, native.Events);
+            var execution = await McpCallerAssertions.SdkSuccessAsync(await admin.Sdk.ReadEventSourceAsync(state.Read, token));
+            await Assert.That(execution.Source).IsEqualTo(state.Source);
+            await Assert.That(execution.Head).IsEqualTo(state.Original.Head);
+            await SqlClusterProtocol.EqualAsync(state.Original.Events, execution.Events);
             var official = (await McpCallerAssertions.SuccessAsync<EventSourcePage>(await admin.Mcp.CallAsync(McpCallerTools.EventsRead, state.Read, token))).Value;
             await Assert.That(official.Head).IsEqualTo(state.Original.Head);
             await SqlClusterProtocol.EqualAsync(state.Original.Events, official.Events);

@@ -1,6 +1,6 @@
 namespace KeyLoad.Clustering;
 
-/// <summary>Issues the original bounded multi-lane receive child without changing its native payload.</summary>
+/// <summary>Issues the original bounded multi-lane receive child without changing its execution payload.</summary>
 internal static class MultiLaneReceiveRequestIssuance
 {
     internal static string CreateMultiLaneReceiveChild(GrainRequestCodec codec, Guid requestId, string principalId, Guid commandId,
@@ -19,7 +19,7 @@ internal static class MultiLaneReceiveRequestIssuance
             Incarnation = context.Scope.Incarnation,
             CommandKind = OperationKind.Receive,
             CommandId = commandId,
-            Payload = GrainNativePayload.Copy(payload, context.Scope.Limits.MaxBatchBytes),
+            Payload = GrainPayload.Copy(payload, context.Scope.Limits.MaxBatchBytes),
             ExpiresAt = expiry
         };
         _ = MultiLaneReceiveChildScope.Validate(envelope);

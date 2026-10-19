@@ -40,7 +40,7 @@ public sealed partial class DatabaseEngine
         var scan = view.VisitRange(GroupKey(SubscriptionGroupsSubscriptionWindowKeySpace, subscription, state.Generation),
             checked(maximum + SubscriptionGroupsAdjacentElementOffset), (key, value) =>
             {
-                var delivery = NativeSerialization.Deserialize<GroupDelivery>(value)
+                var delivery = OrleansSerialization.Deserialize<GroupDelivery>(value)
                     ?? throw Errors.Fail(ErrorCode.Corruption, SubscriptionGroupsSubscriptionDeliveryWindowIsInconsistentDetail);
                 ValidateSubscriptionDeliveryAuthority(delivery, delivery.Position);
                 if (delivery.Position <= state.Checkpoint || delivery.Position > state.IssuedPosition
@@ -62,7 +62,7 @@ public sealed partial class DatabaseEngine
         SubscriptionWindowAuthorityReadBudget budget)
     {
         GroupDelivery? delivery = null;
-        view.ReadValue(key, value => delivery = NativeSerialization.Deserialize<GroupDelivery>(value), budget.Observe);
+        view.ReadValue(key, value => delivery = OrleansSerialization.Deserialize<GroupDelivery>(value), budget.Observe);
         return delivery;
     }
 

@@ -34,7 +34,7 @@ internal static class McpMemoryProjectionComponents
         return checked(RoundCapacityScaleFactor * RoundCapacity(arrayCapacity) + MetadataPerTokenBytes * tokens + MetadataBaseBytes);
     }
 
-    /// <summary>Projects native writer growth, maximum size hint and old/new buffer overlap.</summary>
+    /// <summary>Projects execution writer growth, maximum size hint and old/new buffer overlap.</summary>
     /// <param name="bytes">The current writer contents.</param>
     /// <param name="hint">The conservative maximum size hint passed to the writer.</param>
     /// <returns>The conservative writer byte charge.</returns>
@@ -55,7 +55,7 @@ internal static class McpMemoryProjectionComponents
             RoundCapacity(checked(EscapedCharacterExpansion * bytes + WriterSlackBytes)));
     }
 
-    /// <summary>Projects native JSON values, containers, dictionaries, depth slots and decoded UTF-16 strings.</summary>
+    /// <summary>Projects execution JSON values, containers, dictionaries, depth slots and decoded UTF-16 strings.</summary>
     /// <param name="bytes">The UTF-8 source bytes represented by the structure.</param>
     /// <param name="tokens">The bounded token count.</param>
     /// <param name="properties">The bounded property count.</param>

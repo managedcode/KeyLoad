@@ -77,7 +77,7 @@ public sealed partial class DatabaseEngine
     }
 
     private static long InspectionRequestBytes<T>(string principalId, T request)
-        => checked(Encoding.UTF8.GetByteCount(principalId) + NativeSerialization.Serialize(request).LongLength);
+        => checked(Encoding.UTF8.GetByteCount(principalId) + OrleansSerialization.Serialize(request).LongLength);
 
     private QueueTransferInspection? InspectQueueTransfer(IKeyValueView view, string principalId,
         QueueLaneRef source, Guid transferId)

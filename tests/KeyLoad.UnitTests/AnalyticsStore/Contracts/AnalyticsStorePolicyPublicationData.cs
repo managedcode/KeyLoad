@@ -1,4 +1,4 @@
-using D = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreNativeTestData;
+using D = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreTestData;
 
 namespace KeyLoad.UnitTests.Features.AnalyticsStore;
 

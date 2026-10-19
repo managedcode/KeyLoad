@@ -1,9 +1,9 @@
-using KeyLoad.IntegrationTests.Features.ClusterReplication;
+using KeyLoad.IntegrationTests.Features.StorageReplication;
 using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
 
-/// <summary>Writes joined native resource logs and the original retained startup snapshot without consulting a stopped provider.</summary>
+/// <summary>Writes joined execution resource logs and the original retained startup snapshot without consulting a stopped provider.</summary>
 internal static class FunctionalGateResourceLogs
 {
     internal static async Task JoinAsync(ClusterFixtureDiagnostics? diagnostics, string[] nodeNames,
@@ -15,11 +15,11 @@ internal static class FunctionalGateResourceLogs
             {
                 await diagnostics.DisposeAsync().ConfigureAwait(false);
             }
-            catch (Exception failure) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+            catch (Exception failure) when (KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(failure))
             {
                 failures.Add(failure);
             }
-            catch (Exception failure) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+            catch (Exception failure) when (!KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(failure))
             {
                 failures.Add(failure);
             }
@@ -37,7 +37,7 @@ internal static class FunctionalGateResourceLogs
         {
             lines = lines.Select(line => line.Replace(secret, "[redacted]", StringComparison.Ordinal)).ToArray();
         }
-        var output = Path.Combine(root, "native-resource-logs");
+        var output = Path.Combine(root, "execution-resource-logs");
         Directory.CreateDirectory(output);
         _ = ClusterFailureReceipts.SaveImmutable(output, BoundedDiagnosticLog.Bound(lines));
         saveStartupEvidence(output);

@@ -5,7 +5,7 @@ public sealed partial class OpenSearchTarget
     /// <inheritdoc/>
     public Task InitializeDocumentsAsync(DocumentComparisonInitialization initialization, CancellationToken token)
     {
-        DocumentNativeInitialization.Validate(initialization);
+        DocumentInitialization.Validate(initialization);
         return InitializeAsync(initialization.Corpus, token);
     }
     /// <inheritdoc/>

@@ -31,27 +31,27 @@ internal static class SampleMetadataIntegrityScenario
         byte[] bytes;
         if (IsRetention(fault))
         {
-            var state = NativeSerialization.Deserialize<SampleRetentionState>(original);
+            var state = OrleansSerialization.Deserialize<SampleRetentionState>(original);
             bytes = fault switch
             {
-                SampleMetadataIntegrityFault.RetentionFloor => NativeSerialization.Serialize(state with { BeforeUtcTicks = -1 }),
-                SampleMetadataIntegrityFault.RetentionCount => NativeSerialization.Serialize(state with { PurgedCount = -1 }),
-                SampleMetadataIntegrityFault.RetentionVersion => NativeSerialization.Serialize(state with { FormatVersion = 2 }),
-                SampleMetadataIntegrityFault.RetentionRoot => NativeSerialization.Serialize("wrong-root"),
+                SampleMetadataIntegrityFault.RetentionFloor => OrleansSerialization.Serialize(state with { BeforeUtcTicks = -1 }),
+                SampleMetadataIntegrityFault.RetentionCount => OrleansSerialization.Serialize(state with { PurgedCount = -1 }),
+                SampleMetadataIntegrityFault.RetentionVersion => OrleansSerialization.Serialize(state with { FormatVersion = 2 }),
+                SampleMetadataIntegrityFault.RetentionRoot => OrleansSerialization.Serialize("wrong-root"),
                 SampleMetadataIntegrityFault.RetentionWire => [byte.MaxValue],
                 _ => throw new ArgumentOutOfRangeException(nameof(fault))
             };
         }
         else
         {
-            var state = NativeSerialization.Deserialize<SampleRollupState>(original);
+            var state = OrleansSerialization.Deserialize<SampleRollupState>(original);
             bytes = fault switch
             {
-                SampleMetadataIntegrityFault.BucketEndpoint => NativeSerialization.Serialize(state with { FromUtcTicks = Floor.UtcTicks + 1 }),
-                SampleMetadataIntegrityFault.BucketCount => NativeSerialization.Serialize(state with { Count = -1 }),
-                SampleMetadataIntegrityFault.BucketSequence => NativeSerialization.Serialize(state with { SourceSequence = -1 }),
-                SampleMetadataIntegrityFault.BucketFloor => NativeSerialization.Serialize(state with { RetentionBeforeUtcTicks = -1 }),
-                SampleMetadataIntegrityFault.BucketVersion => NativeSerialization.Serialize(state with { FormatVersion = 2 }),
+                SampleMetadataIntegrityFault.BucketEndpoint => OrleansSerialization.Serialize(state with { FromUtcTicks = Floor.UtcTicks + 1 }),
+                SampleMetadataIntegrityFault.BucketCount => OrleansSerialization.Serialize(state with { Count = -1 }),
+                SampleMetadataIntegrityFault.BucketSequence => OrleansSerialization.Serialize(state with { SourceSequence = -1 }),
+                SampleMetadataIntegrityFault.BucketFloor => OrleansSerialization.Serialize(state with { RetentionBeforeUtcTicks = -1 }),
+                SampleMetadataIntegrityFault.BucketVersion => OrleansSerialization.Serialize(state with { FormatVersion = 2 }),
                 _ => throw new ArgumentOutOfRangeException(nameof(fault))
             };
         }

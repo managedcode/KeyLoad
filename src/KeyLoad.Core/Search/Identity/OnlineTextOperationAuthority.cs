@@ -26,14 +26,14 @@ public sealed partial class DatabaseEngine
             {
                 throw Errors.Fail(ErrorCode.PermissionDenied, OnlineTextPublicationProtocol.AdministratorRequired);
             }
-            var pin = new NativeTextSeedPin(command.Request.Consumer, command.Request.ConsumerGeneration,
+            var pin = new TextSeedPin(command.Request.Consumer, command.Request.ConsumerGeneration,
                 command.Request.Collection, command.Request.Field, command.Request.NodeId, command.Request.Placement);
-            var current = NativeTextSeedCollector.CaptureMetadataView(this, raw, principalId, pin, budget);
+            var current = TextSeedCollector.CaptureMetadataView(this, raw, principalId, pin, budget);
             OnlineTextPublicationValidation.LocalSource(command, current, prepared.ValidatedSource);
             ValidateOnlineTextCheckpoint(raw, principal, command.Request, command.Result.Checkpoint, prepared.CheckpointIntent);
             budget.Check();
-            var payload = NativeSerialization.Serialize(command);
-            RequireNativeBudget(payload.Length);
+            var payload = OrleansSerialization.Serialize(command);
+            RequireBudget(payload.Length);
             return CreatePreparedCommand(OperationKind.OnlineTextPublicationPhase, command.Request.CommandId,
                 principalId, evaluatedAt, payload, DatabaseCommandFingerprint.Compute(command.Request.CommandId,
                     OperationKind.OnlineTextPublicationPhase, principalId, Identity<OnlineTextPublicationPhaseCommand>(payload)), budget, view);

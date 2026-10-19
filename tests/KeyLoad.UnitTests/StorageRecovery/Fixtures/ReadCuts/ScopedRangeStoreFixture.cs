@@ -49,12 +49,12 @@ internal sealed class ScopedRangeStoreFixture : IDisposable
             Store.Dispose();
             closeReturned = true;
         }
-        catch (Exception failure) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        catch (Exception failure) when (KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(failure))
         {
             originalCloseFailure = ExceptionDispatchInfo.Capture(failure);
             throw;
         }
-        catch (Exception failure) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        catch (Exception failure) when (!KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(failure))
         {
             originalCloseFailure = ExceptionDispatchInfo.Capture(failure);
             throw;

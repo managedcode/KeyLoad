@@ -2,9 +2,9 @@ namespace KeyLoad.Server;
 
 internal static class AuthorizationApi
 {
-    private const string ResourcesPath = "/v1/admin/resources";
-    private const string PrincipalsPath = "/v1/admin/principals";
-    private const string ApiKeysPath = "/v1/admin/api-keys";
+    private const string ResourcesPath = "/admin/resources";
+    private const string PrincipalsPath = "/admin/principals";
+    private const string ApiKeysPath = "/admin/api-keys";
 
     internal static void Map(WebApplication app)
     {

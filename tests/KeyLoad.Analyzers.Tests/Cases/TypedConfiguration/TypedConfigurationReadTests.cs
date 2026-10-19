@@ -1,6 +1,6 @@
 namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
 
-/// <summary>AC-CQ-035/037: native providers remain inside actual metadata-owned binding boundaries.</summary>
+/// <summary>AC-CQ-035/037: execution providers remain inside actual metadata-owned binding boundaries.</summary>
 internal sealed class TypedConfigurationReadTests
 {
     [Test]
@@ -24,7 +24,7 @@ internal sealed class TypedConfigurationReadTests
     }
 
     [Test]
-    public async Task ActualBindingMethodPermitsNativeProviderOperationsAsync()
+    public async Task ActualBindingMethodPermitsProviderOperationsAsync()
     {
         const string source = """
             using Microsoft.Extensions.Configuration;

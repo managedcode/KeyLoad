@@ -69,7 +69,7 @@ internal static class SiteIsolatedBrowserAssertions
     {
         "measured" => "Measured",
         "unsupported" => "Unsupported scenario",
-        "unsupportedTopology" => "Unsupported native topology",
+        "unsupportedTopology" => "Unsupported execution topology",
         "failed" => "Benchmark failed · no data",
         _ => throw new ArgumentOutOfRangeException(nameof(value)),
     };

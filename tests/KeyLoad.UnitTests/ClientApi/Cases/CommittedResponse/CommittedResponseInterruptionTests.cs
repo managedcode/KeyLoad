@@ -1,4 +1,4 @@
-using KeyLoad.UnitTests.Features.ClusterRouting;
+using KeyLoad.UnitTests.Features.OrleansExecution;
 
 namespace KeyLoad.UnitTests.Features.ClientApi;
 
@@ -8,5 +8,5 @@ internal sealed class CommittedResponseInterruptionTests
     [Arguments(false)]
     [Arguments(true)]
     public Task OriginalCommittedWriteSurvivesInterruptedBodyThenExactReplayConflictAndHealthyRevision(bool callerCancellation)
-        => ConnectionNativeScenario.RunAsync(scenario => CommittedResponseFlow.RunAsync(scenario, callerCancellation));
+        => ConnectionScenario.RunAsync(scenario => CommittedResponseFlow.RunAsync(scenario, callerCancellation));
 }

@@ -4,8 +4,8 @@ internal sealed class BenchmarkSessionDocumentVerification(BenchmarkSessionConte
 {
     internal async Task<DocumentReadbackEvidence> VerifyAsync(bool afterMixed, CancellationToken token)
     {
-        var native = (IDocumentComparisonTarget)context.Target;
-        await using var reader = await native.OpenDocumentSessionAsync(token).ConfigureAwait(false);
+        var execution = (IDocumentComparisonTarget)context.Target;
+        await using var reader = await execution.OpenDocumentSessionAsync(token).ConfigureAwait(false);
         var schedule = new DocumentComparisonSchedule(afterMixed ? DocumentComparisonScenario.MixedCrud : DocumentComparisonScenario.SequentialRead,
             context.Corpus, afterMixed ? checked(context.Options.Operations * BenchmarkSessionLimits.DocumentMixedLanes) : context.Options.Operations);
         var result = await DocumentComparisonOracle.VerifyAsync(reader.ReadDocumentsAsync(token), schedule.FinalDocuments(), token).ConfigureAwait(false);
@@ -13,7 +13,7 @@ internal sealed class BenchmarkSessionDocumentVerification(BenchmarkSessionConte
         {
             throw new ComparisonFailureException(BenchmarkSessionProtocol.SessionFinalCardinalityMismatch);
         }
-        await native.VerifyDocumentCopiesAsync(schedule, token).ConfigureAwait(false);
+        await execution.VerifyDocumentCopiesAsync(schedule, token).ConfigureAwait(false);
         return result;
     }
 }

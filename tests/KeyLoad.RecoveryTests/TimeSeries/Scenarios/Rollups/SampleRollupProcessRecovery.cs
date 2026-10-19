@@ -9,7 +9,7 @@ namespace KeyLoad.RecoveryTests.Features.TimeSeries;
 internal static class SampleRollupProcessRecovery
 {
     private const string DotnetHost = "dotnet";
-    private const string FailedChild = "The native rollup process child exited unsuccessfully.";
+    private const string FailedChild = "The execution rollup process child exited unsuccessfully.";
     private const int SuccessExit = 0;
 
     internal static async Task RunAsync(string root, bool drop, CancellationToken callerToken)
@@ -63,8 +63,8 @@ internal static class SampleRollupProcessRecovery
             }
         }
         await KilledProcessFileReadiness.WaitAsync(root, token);
-        RecoveryFileInventory.AssertNativeHandlesReleased(root);
-        child.CloseNativeProcessAfterJoin();
+        RecoveryFileInventory.AssertHandlesReleased(root);
+        child.CloseProcessAfterJoin();
     }
 
     private static ProcessStartInfo CreateStart(string root, string mode)

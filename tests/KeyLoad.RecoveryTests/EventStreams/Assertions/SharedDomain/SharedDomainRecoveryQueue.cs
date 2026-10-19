@@ -71,7 +71,7 @@ internal static class SharedDomainRecoveryQueue
             return NoRevision;
         }
         await Assert.That(body).IsNotNull();
-        await SharedDomainRecoveryValues.EqualAsync(NativeSerialization.Deserialize<MessageBody>(body!),
+        await SharedDomainRecoveryValues.EqualAsync(OrleansSerialization.Deserialize<MessageBody>(body!),
             new MessageBody(metadata.Id, scope.Payload, Headers, null, JsonData.Fingerprint(new EnqueueMessage(lane.Queue, metadata.Id, scope.Payload, Headers))));
         return body!.LongLength;
     }

@@ -11,7 +11,7 @@ internal static class SubscriptionOldCutCold
     internal static DatabaseEngine Open(ZoneTreeStore store, SubscriptionOldCutState state)
         => new(store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(),
             UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(),
-            UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(),
+            UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(),
             UnitExecutionOptions.TimeSeriesExecution(), state.Clock);
 
     internal static async Task RunAsync(string path, SubscriptionOldCutState state, string[] bytes,

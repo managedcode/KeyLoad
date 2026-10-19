@@ -84,7 +84,7 @@ internal sealed class GraphSearchReachabilityReader(
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, EdgeLimit);
         }
-        var edgeId = NativeSerialization.Deserialize<string>(value)
+        var edgeId = OrleansSerialization.Deserialize<string>(value)
             ?? throw Errors.Fail(ErrorCode.Corruption, MissingEdge);
         var edge = budget.ReadRecord<EdgeRecord>(view, KeySpace.Partition(EdgeSpace, partition, walk.Graph, edgeId))
             ?? throw Errors.Fail(ErrorCode.Corruption, MissingEdge);

@@ -8,20 +8,20 @@ namespace KeyLoad.Comparisons.Targets;
 /// <param name="connectionString">Connection settings for the single configured primary endpoint.</param>
 /// <param name="runId">Guid-formatted run identifier used to isolate benchmark keys.</param>
 /// <param name="image">Redis image reference recorded after initialization and replica verification.</param>
-/// <param name="lifecycleOptions">Centrally validated native lifecycle policy.</param>
-/// <param name="nativeExecutionOptions">Centrally validated native adapter execution policy.</param>
+/// <param name="lifecycleOptions">Centrally validated execution lifecycle policy.</param>
+/// <param name="runtimeExecutionOptions">Centrally validated execution adapter execution policy.</param>
 /// <param name="diagnosticOptions">Centrally validated privacy-preserving diagnostic bounds.</param>
 /// <param name="topology">The expected single-primary or direct-replica topology; replicated mode does not imply sharding or failover.</param>
 /// <param name="replicas">Optional direct replica endpoints checked for the replicated durability receipt.</param>
 /// <param name="provider">Borrowed clock; defaults to the system provider.</param>
 public sealed partial class RedisTarget(string connectionString, string runId, string image,
-    IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<NativeComparisonExecutionOptions> nativeExecutionOptions,
-    IOptions<NativeComparisonDiagnosticOptions> diagnosticOptions,
+    IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<ComparisonExecutionOptions> runtimeExecutionOptions,
+    IOptions<ComparisonDiagnosticOptions> diagnosticOptions,
     ComparisonTopology topology = ComparisonTopology.Standalone, string[]? replicas = null, TimeProvider? provider = null) : IDocumentComparisonTarget
 {
     private readonly TimeProvider timeProvider = provider ?? TimeProvider.System;
-    private readonly IOptions<NativeComparisonExecutionOptions> executionOptions = NativeComparisonExecutionOptions.Require(nativeExecutionOptions);
-    private readonly IOptions<NativeComparisonDiagnosticOptions> diagnostics = NativeComparisonDiagnosticOptions.Require(diagnosticOptions);
+    private readonly IOptions<ComparisonExecutionOptions> executionOptions = ComparisonExecutionOptions.Require(runtimeExecutionOptions);
+    private readonly IOptions<ComparisonDiagnosticOptions> diagnostics = ComparisonDiagnosticOptions.Require(diagnosticOptions);
     private const string FieldSeparator = ":";
 
     private const string RunIdentityFormat = "N";
@@ -29,12 +29,12 @@ public sealed partial class RedisTarget(string connectionString, string runId, s
     private const string Prefix = "keyload-benchmark:";
     private const string TargetName = "Redis";
     private const string InitialVersion = "unverified";
-    private const string InitialTopology = "unverified native topology";
+    private const string InitialTopology = "unverified execution topology";
     private const string InitialReadContract = "primary key reads";
     private const string TcpTransport = "RESP/TCP multiplexed";
     private const string TlsTransport = "RESP/TLS multiplexed";
     private const string Authorization = "Aspire password; no row/field policy";
-    private const string ReplicatedTopology = "single primary plus two native direct replicas; no cluster sharding or automatic failover claim";
+    private const string ReplicatedTopology = "single primary plus two execution direct replicas; no cluster sharding or automatic failover claim";
     private const string SingleTopology = "single primary, no replicas";
     private const string AofAcknowledgement = "AOF appendfsync=always; single-node ACK";
     private const string ReplicatedAcknowledgement = "AOF appendfsync=always; WAITAOF 1 local + 1 replica fsync on the same primary connection (receipt RPC included)";
@@ -57,7 +57,7 @@ public sealed partial class RedisTarget(string connectionString, string runId, s
     /// <returns><see langword="true"/> for point read or document write; otherwise <see langword="false"/>.</returns>
     public bool Supports(Scenario scenario) => scenario is Scenario.PointRead or Scenario.DocumentWrite or Scenario.DocumentUpdate or Scenario.DocumentDelete;
 
-    /// <summary>Connects to the configured primary, seeds run-specific keys, and verifies native topology and fsync receipts.</summary>
+    /// <summary>Connects to the configured primary, seeds run-specific keys, and verifies execution topology and fsync receipts.</summary>
     /// <param name="dataset">The deterministic document corpus used to seed and probe the target.</param>
     /// <param name="cancellationToken">A token that cancels connection and replica-verification operations.</param>
     /// <returns>A task that completes after the observed Redis profile has been recorded.</returns>
@@ -69,7 +69,7 @@ public sealed partial class RedisTarget(string connectionString, string runId, s
 
         ArgumentNullException.ThrowIfNull(dataset);
         var documentTiming = (dataset as DocumentComparisonCorpus)?.InitializationTiming;
-        documentTiming?.IndexNotApplicable(); // Redis document keys have no separate native index build.
+        documentTiming?.IndexNotApplicable(); // Redis document keys have no separate execution index build.
         corpusCount = dataset.Documents.Count;
         if ((dataset.Settings is ScaledComparisonProfile || dataset is DocumentComparisonCorpus))
         {
@@ -81,7 +81,7 @@ public sealed partial class RedisTarget(string connectionString, string runId, s
         var settings = RedisReplicaProof.CreateOptions(connectionSettings);
         if (settings.EndPoints.Count != SingleItemCount)
         {
-            throw new ComparisonFailureException(RedisNativeProtocol.PrimaryEndpointError);
+            throw new ComparisonFailureException(RedisProtocol.PrimaryEndpointError);
         }
 
         Profile = Profile with
@@ -89,7 +89,7 @@ public sealed partial class RedisTarget(string connectionString, string runId, s
             Transport = settings.Ssl ? TlsTransport : TcpTransport
         };
         connection = await ConnectionMultiplexer.ConnectAsync(settings).WaitAsync(cancellationToken);
-        var primaryEndpoint = RedisNativeProtocol.RequirePrimaryEndpoint(connection);
+        var primaryEndpoint = RedisProtocol.RequirePrimaryEndpoint(connection);
         var primaryIdentity = await RedisReplicaProof.ReadIdentityAsync(connection, primaryEndpoint, cancellationToken);
         var database = connection.GetDatabase();
         if ((dataset.Settings is ScaledComparisonProfile || dataset is DocumentComparisonCorpus))
@@ -135,7 +135,7 @@ public sealed partial class RedisTarget(string connectionString, string runId, s
         var settings = RedisReplicaProof.CreateOptions(connectionSettings);
         if (settings.EndPoints.Count != SingleItemCount)
         {
-            throw new ComparisonFailureException(RedisNativeProtocol.PrimaryEndpointError);
+            throw new ComparisonFailureException(RedisProtocol.PrimaryEndpointError);
         }
 
         var workerConnection = await ConnectionMultiplexer.ConnectAsync(settings).WaitAsync(cancellationToken);

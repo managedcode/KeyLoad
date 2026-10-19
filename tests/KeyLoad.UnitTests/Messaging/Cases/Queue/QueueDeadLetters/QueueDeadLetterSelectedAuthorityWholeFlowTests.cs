@@ -12,7 +12,7 @@ internal sealed class QueueDeadLetterSelectedAuthorityWholeFlowTests
     [Arguments(QueueDeadLetterSelectedOperation.Read, QueueDeadLetterSelectedFault.WitnessMetadataAlias)]
     [Arguments(QueueDeadLetterSelectedOperation.Read, QueueDeadLetterSelectedFault.MissingBody)]
     [Arguments(QueueDeadLetterSelectedOperation.Read, QueueDeadLetterSelectedFault.ForeignBody)]
-    public Task SelectedNativeDeadLetterAuthorityRefusesThenExactRepairOriginalContinuationAndHealthyInboxSurviveCold(
+    public Task SelectedDeadLetterAuthorityRefusesThenExactRepairOriginalContinuationAndHealthyInboxSurviveCold(
         QueueDeadLetterSelectedOperation kind, QueueDeadLetterSelectedFault fault)
         => QueueDeadLetterSelectedTrial.RunAsync(kind, fault, TestContext.Current!.Execution.CancellationToken);
 }

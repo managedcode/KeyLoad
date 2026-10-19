@@ -2,7 +2,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace KeyLoad.AppHost.Hosting;
 
-/// <summary>Owns the native KeyLoad process data root and session lifetime.</summary>
+/// <summary>Owns the execution KeyLoad process data root and session lifetime.</summary>
 [ConfigurationOptions]
 internal sealed class AppHostStartupOptions
 {

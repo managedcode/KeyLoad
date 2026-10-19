@@ -11,7 +11,7 @@ internal sealed class BenchmarkSessionQueryWorkload(BenchmarkSessionContext cont
         }
         if (context.Target is not IBenchmarkSessionQueries queries)
         {
-            return state.Report(BenchmarkSessionProtocol.Index, BenchmarkSessionProtocol.Failed, BenchmarkSessionProtocol.NativeAdapterSessionIndexLifecycleUnavailable, BenchmarkSessionLimits.NoObservedItems, [], BenchmarkSessionLimits.NoObservedItems);
+            return state.Report(BenchmarkSessionProtocol.Index, BenchmarkSessionProtocol.Failed, BenchmarkSessionProtocol.AdapterSessionIndexLifecycleUnavailable, BenchmarkSessionLimits.NoObservedItems, [], BenchmarkSessionLimits.NoObservedItems);
         }
         var timer = new BenchmarkSessionTimer(context.Clock);
         try
@@ -19,7 +19,7 @@ internal sealed class BenchmarkSessionQueryWorkload(BenchmarkSessionContext cont
             await queries.BuildSessionIndexesAsync(token).ConfigureAwait(false);
             return state.Report(BenchmarkSessionProtocol.Index, BenchmarkSessionProtocol.Measured, null, BenchmarkSessionLimits.NoObservedItems, [], timer.Elapsed.TotalSeconds);
         }
-        catch (BenchmarkSessionNativeCapabilityException error)
+        catch (BenchmarkSessionCapabilityException error)
         {
             return state.Unavailable(BenchmarkSessionProtocol.Index, error.Message);
         }
@@ -52,7 +52,7 @@ internal sealed class BenchmarkSessionQueryWorkload(BenchmarkSessionContext cont
         }
         if (context.Target is not IBenchmarkSessionQueries queries)
         {
-            return Task.FromResult(context.State.Report(BenchmarkSessionProtocol.Search, BenchmarkSessionProtocol.Failed, BenchmarkSessionProtocol.NativeAdapterSessionQueryLifecycleUnavailable, BenchmarkSessionLimits.NoObservedItems, [], BenchmarkSessionLimits.NoObservedItems));
+            return Task.FromResult(context.State.Report(BenchmarkSessionProtocol.Search, BenchmarkSessionProtocol.Failed, BenchmarkSessionProtocol.AdapterSessionQueryLifecycleUnavailable, BenchmarkSessionLimits.NoObservedItems, [], BenchmarkSessionLimits.NoObservedItems));
         }
         return RunLaneAsync(BenchmarkSessionProtocol.Search, BenchmarkSessionProtocol.Search, (_, ordinal, cancellation) => queries.QuerySessionAsync(ordinal,
             BenchmarkSessionLimits.StableMutationGroups * context.Options.Operations, context.Options.Records - BenchmarkSessionLimits.StableMutationGroups * context.Options.Operations, cancellation), false, token);
@@ -67,7 +67,7 @@ internal sealed class BenchmarkSessionQueryWorkload(BenchmarkSessionContext cont
             var lane = await context.Measurement.MeasureAsync(name, context.Options.Operations, context.Options.Concurrency,
                 operation, token, openDocumentSessions: documentSessions).ConfigureAwait(false);
             return lane.Measurement.Failures != BenchmarkSessionLimits.NoObservedItems || lane.Measurement.Attempts != context.Options.Operations
-                ? context.State.Failed(id, BenchmarkSessionProtocol.SessionNativeOperationAccountingIncomplete, timer, [lane])
+                ? context.State.Failed(id, BenchmarkSessionProtocol.SessionOperationAccountingIncomplete, timer, [lane])
                 : context.State.Report(id, BenchmarkSessionProtocol.Measured, null, BenchmarkSessionLimits.NoObservedItems, [lane], timer.Elapsed.TotalSeconds);
         }
         catch (Exception error) when (BenchmarkSessionFailure.IsNonfatal(error))

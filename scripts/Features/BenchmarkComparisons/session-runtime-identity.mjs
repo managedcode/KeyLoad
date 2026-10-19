@@ -5,8 +5,8 @@ import { SESSION, exactSession as exact, requireSession as require, sessionHash 
 import { readJson, hashRegularFile } from './isolated-github-files.mjs';
 import { downloadArtifact } from './isolated-github-api.mjs';
 import { validateDownloadedArchive } from './isolated-github-stream.mjs';
-import { inspectNativeZip, extractNativeEntry } from './isolated-github-zip.mjs';
-import { createDirectory } from './native-files.mjs';
+import { inspectZip, extractEntry } from './isolated-github-zip.mjs';
+import { createDirectory } from './files.mjs';
 import { projectArtifact } from './isolated-github-validation.mjs';
 
 export const RUNTIME_IDENTITY = Object.freeze({ artifact: 'comparison-compiled-runtime-identity',
@@ -32,12 +32,12 @@ export async function collectSessionRuntimeIdentity(input, artifact, context) {
   await downloadArtifact(artifact, archive, RUNTIME_IDENTITY.maximumBytes, context);
   const archiveRecord = await validateDownloadedArchive(archive, artifact, RUNTIME_IDENTITY.maximumBytes);
   const required = [runtimeBundle.descriptor, runtimeBundle.inventory];
-  const entries = await inspectNativeZip(archive, required, path.join(input, 'github', 'runtime-identity-inventory.txt'), context);
+  const entries = await inspectZip(archive, required, path.join(input, 'github', 'runtime-identity-inventory.txt'), context);
   require(entries.length === required.length && entries.every(entry => required.includes(entry)));
   const directory = await createDirectory(path.join(input, 'github', 'runtime'));
   const files = [];
   for (const name of required) {
-    const raw = await extractNativeEntry(archive, name, path.join(directory, name),
+    const raw = await extractEntry(archive, name, path.join(directory, name),
       name === runtimeBundle.descriptor ? RUNTIME_IDENTITY.descriptorBytes : runtimeBundle.maximumInventoryBytes, context);
     files.push({ path: 'github/runtime/' + name, bytes: raw.bytes, sha256: raw.sha256 });
   }

@@ -2,7 +2,7 @@
 
 Status: Accepted for implementation; runtime and delivery qualification pending. Date: 2026-10-02. Related: [ClientApi](../Features/ClientApi.md), REQ-CLIENT-004–007 / AC-CLIENT-004–007; [Authorization](../Features/Authorization.md), [BlobStorage](../Features/BlobStorage.md), [TestInfrastructure](../Features/TestInfrastructure.md).
 
-Current tool discovery uses the three native gateway meta tools and static agent
+Current tool discovery uses the three gateway meta tools and static agent
 resource/prompt guidance specified in [ADR-104](ADR-104-mcp-gateway-tool-discovery.md).
 Canonical typed operations, persisted authorization, official SDK transport and
 signed Orleans execution remain governed by this ADR.
@@ -18,7 +18,7 @@ qualification gates.
 
 Direction: protocol adapters belong to ClientApi, while business behavior and requirements stay in the owning DocumentStorage/EventStreams/Messaging/GraphTraversal/TimeSeries/Search/ChangeFeeds/BlobStorage slices. Identity comes from persisted server credentials; model/tool arguments cannot substitute trusted roles. Every operation runs in the caller's connection grain (ADR-036, ADR-125) and uses the same canonical authorization, bounds, outcomes and unknown-write retry semantics.
 
-Use the centrally pinned official SDK 2.2.0, native stateless Streamable HTTP
+Use the centrally pinned official SDK 2.2.0, stateless Streamable HTTP
 `/mcp`, the canonical typed operation inventory and shared Orleans execution.
 The agent-facing API is the three-tool discovery/schema/invocation flow under
 ADR-104, with fresh persisted authorization for each invocation. Acceptance is specified in [ClientApi](../Features/ClientApi.md).
@@ -26,7 +26,7 @@ ADR-104, with fresh persisted authorization for each invocation. Acceptance is s
 The Server centrally pins `ModelContextProtocol.AspNetCore` 2.2.0; the official integration
 caller uses `ModelContextProtocol.Core` 2.2.0. Source was reviewed at official tag
 [v2.2.0](https://github.com/modelcontextprotocol/csharp-sdk/releases/tag/v2.2.0),
-commit 6fa3825973949a9c4f0cd8af344e15a8db09dc35. Native public composition is
+commit 6fa3825973949a9c4f0cd8af344e15a8db09dc35. public composition is
 AddMcpServer/WithHttpTransport with HttpServerSessionMode.Stateless and MapMcp.
 Use WithListToolsHandler/WithCallToolHandler and no competing reflection-discovered
 ToolCollection. The shared host registers IHttpContextAccessor explicitly.
@@ -52,45 +52,45 @@ request.CommandId. MCP request IDs and Orleans actor IDs never replace them.
 
 | Stable tool name | Canonical request | Result | Existing lane route / capability |
 |---|---|---|---|
-| keyload_documents_get | GetDocumentRequest | DocumentResult or null | /v1/documents/get; Document |
-| keyload_streams_read | ReadStreamRequest | StreamPage | /v1/streams/read; Stream |
-| keyload_events_read | ReadEventSourceRequest | EventSourcePage | /v1/events/read; EventSource |
-| keyload_subscriptions_status | GetSubscriptionRequest | SubscriptionInfo | /v1/subscriptions/status; Subscription |
-| keyload_messages_inspect | InspectMessageRequest | MessageInspection or null | /v1/queues/inspect; Message |
-| keyload_graph_traverse | TraverseRequest | GraphTraversal | /v1/graph/traverse; Traverse |
-| keyload_graph_shortest_path | GraphShortestPathRequest | GraphShortestPathResult | /v1/graph/shortest-path; GraphShortestPath |
-| keyload_query_graph_path | SqlGraphPathRequest | GraphShortestPathResult | /v1/query/graph-path; SqlGraphPath |
-| keyload_series_read | ReadSamplesRequest | SampleRecord array | /v1/series/read; Samples |
-| keyload_query_execute | QueryRequest | QueryPage | /v1/query; Query |
-| keyload_query_ast | AstQueryRequest | QueryPage | /v1/query/ast; AstQuery |
-| keyload_query_capabilities | none | QueryCapabilityManifest | /v1/query/capabilities; QueryCapabilities |
-| keyload_changes_read | ReadChangeFeedRequest | ChangeFeedPage | /v1/changes/read; ChangeFeed |
-| keyload_query_live_start | StartLiveQueryRequest | LiveQuerySnapshot | /v1/query/live/start; LiveQueryStart |
-| keyload_query_live_read | ReadLiveQueryRequest | LiveQueryPage | /v1/query/live/read; LiveQueryRead |
-| keyload_outbox_status | GetOutboxStatusRequest | OutboxStatus | /v1/admin/outbox/status; OutboxStatus |
-| keyload_projections_read | ReadProjectionBatchRequest | ProjectionBatch | /v1/admin/projections/read; ProjectionBatch |
-| keyload_search_execute | SearchRequest | RankedDocument array | /v1/search; Search |
-| keyload_admin_backup | none | BackupReceipt | /v1/admin/backup; Backup |
-| keyload_admin_admission | none | NodeAdmissionStatus | /v1/admin/admission; Admission |
-| keyload_admin_status | none | NodeStatus | /v1/status; NodeStatus |
-| keyload_documents_commit | CommandRequest | CommitReceipt | /v1/commands; Batch |
-| keyload_messages_receive | ReceiveRequest | ReceiveResult | /v1/queues/receive; Receive |
-| keyload_messages_complete | DeliveryCommand | CommitReceipt | /v1/queues/delivery; Delivery |
-| keyload_messages_process | ProcessingRequest | CommitReceipt | /v1/queues/process; Processing |
-| keyload_resources_configure | ConfigureResourceRequest + outer commandId | ResourceDefinition | /v1/admin/resources; ConfigureResource |
-| keyload_principals_configure | ConfigurePrincipalRequest + outer commandId | PrincipalRecord | /v1/admin/principals; ConfigurePrincipal |
-| keyload_credentials_configure | ConfigureApiKeyRequest + outer commandId | boolean | /v1/admin/api-keys; ConfigureApiKey |
-| keyload_admin_dispatch | boolean request + outer commandId | boolean | /v1/admin/dispatch; SetDispatch |
-| keyload_subscriptions_configure | ConfigureSubscriptionRequest | SubscriptionInfo | /v1/subscriptions/configure; ConfigureSubscription |
-| keyload_subscriptions_seek | SeekSubscriptionRequest | SubscriptionInfo | /v1/subscriptions/seek; SeekSubscription |
-| keyload_subscriptions_receive | ReceiveSubscriptionRequest | ReceiveSubscriptionResult | /v1/subscriptions/receive; ReceiveSubscription |
-| keyload_subscriptions_complete | SubscriptionDeliveryCommand | CommitReceipt | /v1/subscriptions/delivery; SubscriptionDelivery |
-| keyload_subscriptions_process | SubscriptionProcessingRequest | SubscriptionProcessingResult | /v1/subscriptions/process; SubscriptionProcessing |
-| keyload_subscriptions_pause | SetSubscriptionPausedRequest | SubscriptionInfo | /v1/subscriptions/pause; SetSubscriptionPaused |
-| keyload_projections_configure | ConfigureProjectionConsumerRequest | ProjectionConsumerInfo | /v1/admin/projections/configure; ConfigureProjectionConsumer |
-| keyload_projections_commit | CommitProjectionBatchRequest | ProjectionBatchResult | /v1/admin/projections/commit; CommitProjectionBatch |
-| keyload_projections_release | ReleaseProjectionConsumerRequest | ProjectionConsumerInfo | /v1/admin/projections/release; ReleaseProjectionConsumer |
-| keyload_outbox_purge | PurgeOutboxRequest | OutboxHead | /v1/admin/outbox/purge; PurgeOutbox |
+| keyload_documents_get | GetDocumentRequest | DocumentResult or null | /documents/get; Document |
+| keyload_streams_read | ReadStreamRequest | StreamPage | /streams/read; Stream |
+| keyload_events_read | ReadEventSourceRequest | EventSourcePage | /events/read; EventSource |
+| keyload_subscriptions_status | GetSubscriptionRequest | SubscriptionInfo | /subscriptions/status; Subscription |
+| keyload_messages_inspect | InspectMessageRequest | MessageInspection or null | /queues/inspect; Message |
+| keyload_graph_traverse | TraverseRequest | GraphTraversal | /graph/traverse; Traverse |
+| keyload_graph_shortest_path | GraphShortestPathRequest | GraphShortestPathResult | /graph/shortest-path; GraphShortestPath |
+| keyload_query_graph_path | SqlGraphPathRequest | GraphShortestPathResult | /query/graph-path; SqlGraphPath |
+| keyload_series_read | ReadSamplesRequest | SampleRecord array | /series/read; Samples |
+| keyload_query_execute | QueryRequest | QueryPage | /query; Query |
+| keyload_query_ast | AstQueryRequest | QueryPage | /query/ast; AstQuery |
+| keyload_query_capabilities | none | QueryCapabilityManifest | /query/capabilities; QueryCapabilities |
+| keyload_changes_read | ReadChangeFeedRequest | ChangeFeedPage | /changes/read; ChangeFeed |
+| keyload_query_live_start | StartLiveQueryRequest | LiveQuerySnapshot | /query/live/start; LiveQueryStart |
+| keyload_query_live_read | ReadLiveQueryRequest | LiveQueryPage | /query/live/read; LiveQueryRead |
+| keyload_outbox_status | GetOutboxStatusRequest | OutboxStatus | /admin/outbox/status; OutboxStatus |
+| keyload_projections_read | ReadProjectionBatchRequest | ProjectionBatch | /admin/projections/read; ProjectionBatch |
+| keyload_search_execute | SearchRequest | RankedDocument array | /search; Search |
+| keyload_admin_backup | none | BackupReceipt | /admin/backup; Backup |
+| keyload_admin_admission | none | NodeAdmissionStatus | /admin/admission; Admission |
+| keyload_admin_status | none | NodeStatus | /status; NodeStatus |
+| keyload_documents_commit | CommandRequest | CommitReceipt | /commands; Batch |
+| keyload_messages_receive | ReceiveRequest | ReceiveResult | /queues/receive; Receive |
+| keyload_messages_complete | DeliveryCommand | CommitReceipt | /queues/delivery; Delivery |
+| keyload_messages_process | ProcessingRequest | CommitReceipt | /queues/process; Processing |
+| keyload_resources_configure | ConfigureResourceRequest + outer commandId | ResourceDefinition | /admin/resources; ConfigureResource |
+| keyload_principals_configure | ConfigurePrincipalRequest + outer commandId | PrincipalRecord | /admin/principals; ConfigurePrincipal |
+| keyload_credentials_configure | ConfigureApiKeyRequest + outer commandId | boolean | /admin/api-keys; ConfigureApiKey |
+| keyload_admin_dispatch | boolean request + outer commandId | boolean | /admin/dispatch; SetDispatch |
+| keyload_subscriptions_configure | ConfigureSubscriptionRequest | SubscriptionInfo | /subscriptions/configure; ConfigureSubscription |
+| keyload_subscriptions_seek | SeekSubscriptionRequest | SubscriptionInfo | /subscriptions/seek; SeekSubscription |
+| keyload_subscriptions_receive | ReceiveSubscriptionRequest | ReceiveSubscriptionResult | /subscriptions/receive; ReceiveSubscription |
+| keyload_subscriptions_complete | SubscriptionDeliveryCommand | CommitReceipt | /subscriptions/delivery; SubscriptionDelivery |
+| keyload_subscriptions_process | SubscriptionProcessingRequest | SubscriptionProcessingResult | /subscriptions/process; SubscriptionProcessing |
+| keyload_subscriptions_pause | SetSubscriptionPausedRequest | SubscriptionInfo | /subscriptions/pause; SetSubscriptionPaused |
+| keyload_projections_configure | ConfigureProjectionConsumerRequest | ProjectionConsumerInfo | /admin/projections/configure; ConfigureProjectionConsumer |
+| keyload_projections_commit | CommitProjectionBatchRequest | ProjectionBatchResult | /admin/projections/commit; CommitProjectionBatch |
+| keyload_projections_release | ReleaseProjectionConsumerRequest | ProjectionConsumerInfo | /admin/projections/release; ReleaseProjectionConsumer |
+| keyload_outbox_purge | PurgeOutboxRequest | OutboxHead | /admin/outbox/purge; PurgeOutbox |
 
 Authenticate is internal and absent. Batch retains all ten
 canonical mutation discriminators. Backup is a physical side effect, despite
@@ -102,7 +102,7 @@ Input schemas describe actual canonical JSON including nullable values, required
 constructor parameters, strict immutable arrays, base64 byte memory, enums and
 polymorphism. Decode with JsonDefaults.Options and enforce outer keys explicitly.
 Schemas do not themselves authorize or validate an operation. Custom converter
-schemas use the reviewed private schema-only options projection and native exporter
+schemas use the reviewed private schema-only options projection and exporter
 in the plan. Runtime decoding keeps canonical options; no enum handling is narrowed.
 
 Success StructuredContent is one bounded object `{result, requestId}`: `result`
@@ -115,7 +115,7 @@ bounded envelope limit above the existing 16 MiB canonical reply limit.
 
 ## Admission, cancellation and resources
 
-Before native SDK parsing, a separate bounded ingress lease reserves the framed
+Before SDK parsing, a separate bounded ingress lease reserves the framed
 body and parse working set. A strict UTF8/JSON resource preflight bounds
 depth/tokens/properties and rejects duplicate names in a private bounded wire
 buffer; it does not implement the MCP protocol. Incoming SDK filters then acquire
@@ -123,18 +123,18 @@ the existing HttpAdmissionGovernor using the actual catalog route and full frame
 byte count, binding the fresh principal before typed arguments allocation.
 Whitespace and RPC metadata count toward the existing body ceiling, including the
 64KiB default control-frame ceiling. A memory-only supplement covers retained
-native frame/output transformations; it adds no command/authority quotas.
+frame/output transformations; it adds no command/authority quotas.
 Only after canonical plus supplemental coverage replaces ingress may ingress
 release. It does not wait for database execution. Delivery/SubscriptionDelivery/
 SetDispatch preserve the control reserve and heavy reads preserve their working
 set. Control replies are bounded64KiB; data replies retain the existing16MiB
-canonical ceiling. Owned body/result documents and leases survive native
+canonical ceiling. Owned body/result documents and leases survive execution
 SerializeToNode/SSE writes until the middleware pipeline and actual session drain
 finish. Exact named component accounting is in the plan; source reservations are
 not a measured heap guarantee. Ingress exhaustion fails closed for all callers;
 the control-progress guarantee applies to execution data saturation.
 
-Stateless calls pass native handler cancellation and RequestAborted. Cancellation
+Stateless calls pass handler cancellation and RequestAborted. Cancellation
 notifications on another stateless HTTP request cannot target an earlier call.
 Disconnected accepted writes retain UnknownWriteOutcome/same-command retry
 semantics. SDK disposal awaits actual handlers. SDK full-JSON Trace and
@@ -143,8 +143,8 @@ not contain keys or private payloads. Error sanitization is reviewed before join
 
 Blob resources remain gated by ADR-038 acceptance and implementation. Their URIs
 must be opaque and authorization checked on each read, with bounded range/page
-limits. Native BlobResourceContents.FromBytes receives raw bytes; official clients
-use DecodedData, avoiding double base64. Native resources/read has no IsError;
+limits. BlobResourceContents.FromBytes receives raw bytes; official clients
+use DecodedData, avoiding double base64. resources/read has no IsError;
 unresolved URIs use safe protocol InvalidParams for the current revision. No
 unfinished blob tool or resource may be advertised. The current canonical
 inventory contains the operation names, including the ten BlobStorage operations
@@ -193,17 +193,17 @@ REQ-CLIENT-006, AC-MCP-001/003/005/007 and AC-ROC-006: the official client must 
 stateless HTTP; pinning the client revision disables its server/discover path and
 forces an initialize handshake which the current stateless protocol does not use.
 Keep the server's current protocol, official transport and per-request persisted
-bearer authentication unchanged. Use the pinned official SDK's native negotiation without protocol emulation.
+bearer authentication unchanged. Use the pinned official SDK's negotiation without protocol emulation.
 
-The official caller retains native default negotiation and per-request persisted
+The official caller retains default negotiation and per-request persisted
 authentication. ADR-104 owns discovery tests: exactly three meta tools, the
 65,536-byte cap, nonempty cursor and one-byte-short rejection, fresh mutable Tool
-isolation, and complete canonical operation/schema parity through native graph
+isolation, and complete canonical operation/schema parity through graph
 search and invocation. Every existing negative/authority scenario remains. A
 present empty header is one empty StringValues element; a no-values header is
 absent in this abstraction. No reflection discovery, duplicate catalog source or
 protocol workaround is permitted. The current discovery contract is exercised
-through its real native tools and cursor boundaries.
+through its real tools and cursor boundaries.
 
 This additive version-one adapter does not change database schema or existing HTTP
 JSON. Tool names and wrappers are versioned; later incompatible contracts require

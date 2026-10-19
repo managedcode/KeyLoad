@@ -5,15 +5,15 @@ namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 internal sealed class SessionQueryChecksTarget : SessionChecksTarget, IBenchmarkSessionQueries
 {
     internal int Queries;
-    internal bool NativeIndexUnavailable
+    internal bool RuntimeIndexUnavailable
     {
         get; init;
     }
     public Task BuildSessionIndexesAsync(CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        return NativeIndexUnavailable
-            ? Task.FromException(new BenchmarkSessionNativeCapabilityException("Contract-only native index absence."))
+        return RuntimeIndexUnavailable
+            ? Task.FromException(new BenchmarkSessionCapabilityException("Contract-only execution index absence."))
             : Task.CompletedTask;
     }
     public async Task QuerySessionAsync(int ordinal, int stableStart, int stableCount, CancellationToken cancellationToken)

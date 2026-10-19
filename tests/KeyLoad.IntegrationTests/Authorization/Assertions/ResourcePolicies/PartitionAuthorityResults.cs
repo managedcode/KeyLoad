@@ -12,22 +12,22 @@ internal static class PartitionAuthorityResults
     {
         var request = state.Scenario.Request();
         var direct = await McpCallerAssertions.SdkSuccessAsync(await sdk.PartitionQueryAsync(request, token));
-        var official = await McpCallerAssertions.SuccessAsync<PartitionQueryPageV1>(await session.CallAsync(
+        var official = await McpCallerAssertions.SuccessAsync<PartitionQueryPage>(await session.CallAsync(
             PartitionQueryClusterProtocol.ToolName, request, token));
         var call = SqlClusterProtocol.Call(state.Scenario.Partitions[PartitionAuthorityProtocol.FirstLeaf],
             PartitionQueryClusterProtocol.ToolName, request);
         await PageAsync(direct, state, epoch);
         await PageAsync(official.Value, state, epoch);
-        await PageAsync(await SqlClusterProtocol.SdkAsync<PartitionQueryPageV1>(sdk, call, token), state, epoch);
-        await PageAsync(await SqlClusterProtocol.McpAsync<PartitionQueryPageV1>(session, call, token), state, epoch);
+        await PageAsync(await SqlClusterProtocol.SdkAsync<PartitionQueryPage>(sdk, call, token), state, epoch);
+        await PageAsync(await SqlClusterProtocol.McpAsync<PartitionQueryPage>(session, call, token), state, epoch);
     }
 
-    private static async Task PageAsync(PartitionQueryPageV1 actual, PartitionAuthorityState state, long epoch)
+    private static async Task PageAsync(PartitionQueryPage actual, PartitionAuthorityState state, long epoch)
     {
         await PartitionQueryClusterAssertions.AssertOracleAsync(actual, state.Scenario, state.Scenario.Partitions);
         await Assert.That(actual.Version).IsEqualTo(PartitionQueryClusterProtocol.Version);
         await Assert.That(actual.Complete).IsTrue();
-        ImmutableArray<PartitionQueryRowV1> rows = [
+        ImmutableArray<PartitionQueryRow> rows = [
             new(Reference(state, PartitionAuthorityProtocol.FirstLeaf, PartitionAuthorityProtocol.FirstId), new(PartitionAuthorityProtocol.FirstId,
                 PartitionQueryClusterProtocol.RowRevision, PartitionAuthorityProtocol.FirstProjection, false, [])),
             new(Reference(state, PartitionAuthorityProtocol.SecondLeaf, PartitionAuthorityProtocol.SecondId), new(PartitionAuthorityProtocol.SecondId,

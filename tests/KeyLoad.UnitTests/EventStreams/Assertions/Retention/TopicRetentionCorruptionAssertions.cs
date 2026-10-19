@@ -34,10 +34,10 @@ internal static class TopicRetentionCorruptionAssertions
         var receipt = fixture.Submit(original).Get<CommitReceipt>();
         await Assert.That(receipt.CommandId).IsEqualTo(original.CommandId);
         await Assert.That(receipt.Token.Position).IsEqualTo(position + CommitAdvance);
-        await Assert.That(Convert.ToHexString(NativeSerialization.Serialize(receipt.Mutations.Single())))
-            .IsEqualTo(Convert.ToHexString(NativeSerialization.Serialize(new MutationReceipt(PurgeOperation, Topic, ThroughPosition, PurgedRecords))));
+        await Assert.That(Convert.ToHexString(OrleansSerialization.Serialize(receipt.Mutations.Single())))
+            .IsEqualTo(Convert.ToHexString(OrleansSerialization.Serialize(new MutationReceipt(PurgeOperation, Topic, ThroughPosition, PurgedRecords))));
         await Assert.That(TopicRetentionAssertions.ProtectedBytes(fixture)).IsEquivalentTo(protectedState, CollectionOrdering.Matching);
-        await TopicRetentionNativeState.VerifyAsync(fixture);
+        await TopicRetentionState.VerifyAsync(fixture);
         var all = QueueWholeFlowStorage.Bytes(fixture.Store);
         var committed = fixture.Store.Position;
         var replay = fixture.Submit(original).Get<CommitReceipt>();

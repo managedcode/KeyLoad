@@ -3,8 +3,8 @@ namespace KeyLoad.RecoveryTests;
 internal static class QueueOrderedRetryCrashProtocol
 {
     internal const string Mode = "queue-ordered-retry-crash";
-    internal const string OperationFile = "queue-ordered-retry-operation.native";
-    internal const string DeliveryFile = "queue-ordered-retry-delivery.native";
+    internal const string OperationFile = "queue-ordered-retry-operation.execution";
+    internal const string DeliveryFile = "queue-ordered-retry-delivery.execution";
     internal const string Queue = "ordered-retry";
     internal const string First = "ordered-a";
     internal const string Second = "ordered-b";
@@ -35,7 +35,7 @@ internal static class QueueOrderedRetryCrashProtocol
     internal const string PendingDeadLetterFamily = "queue-pending-dead-letter";
     internal const string DeadLetterOrderFamily = "queue-dead-letter-order";
     internal const string QueueOrderFamily = "queue-order";
-    internal const string SeedMismatch = "The native ordered retry seed differs from the full literal.";
+    internal const string SeedMismatch = "The execution ordered retry seed differs from the full literal.";
     internal static readonly PartitionRef Partition = new(Tenant, Database, Domain, PartitionKey);
     internal static readonly Guid CommandId = Guid.Parse(OriginalCommandId);
     internal static readonly string[] Families = [MessageBodyFamily, MessageMetadataFamily, QueueCountersFamily, ReadyFamily,

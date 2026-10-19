@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
-using D = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreNativeTestData;
-using N = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsBoundsNative;
-using O = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreNativeTestOperations;
+using D = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreTestData;
+using N = KeyLoad.UnitTests.Features.AnalyticsStore.RuntimeAnalyticsBounds;
+using O = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreTestOperations;
 using P = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsBoundsData;
 
 namespace KeyLoad.UnitTests.Features.AnalyticsStore;
@@ -42,7 +42,7 @@ internal static class AnalyticsBoundsPrivacyFlow
         await N.UnchangedAsync(db, async () =>
         {
             var snapshot = db.Database.CaptureAnalyticsAggregate(D.Reader, query, token);
-            await AnalyticsStoreNativeTestProjection.RunAsync(snapshot, expected, token);
+            await AnalyticsStoreTestProjection.RunAsync(snapshot, expected, token);
             db.Database.ValidateAnalyticsAggregatePublication(snapshot);
             await RawAsync(db, events, token);
         });
@@ -50,7 +50,7 @@ internal static class AnalyticsBoundsPrivacyFlow
         await PolicyAsync(db, 3, [D.ReadGrant]);
         await N.UnchangedAsync(db, async () =>
         {
-            await AnalyticsStoreNativeTestProjection.RunAsync(previous, expected, token);
+            await AnalyticsStoreTestProjection.RunAsync(previous, expected, token);
             var denied = await Assert.ThrowsExactlyAsync<KeyLoadException>(() =>
                 {
                     db.Database.ValidateAnalyticsAggregatePublication(previous);
@@ -63,7 +63,7 @@ internal static class AnalyticsBoundsPrivacyFlow
         await N.UnchangedAsync(db, async () =>
         {
             var healthy = db.Database.CaptureAnalyticsAggregate(D.Reader, query, token);
-            await AnalyticsStoreNativeTestProjection.RunAsync(healthy, expected, token);
+            await AnalyticsStoreTestProjection.RunAsync(healthy, expected, token);
             db.Database.ValidateAnalyticsAggregatePublication(healthy);
         });
     }

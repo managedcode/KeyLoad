@@ -20,7 +20,7 @@ internal static class SiteCoverageArtifactReader
             !result.Receipts.Any(receipt => receipt.Runtime == SiteCoverageTokens.BrowserRuntime) ||
             result.BrowserSessions.Count == SiteCoverageTokens.Zero)
         {
-            result.Errors.Add(SiteCoverageTokens.MissingNativeReceiptsFailure);
+            result.Errors.Add(SiteCoverageTokens.MissingReceiptsFailure);
         }
 
         return result;
@@ -41,7 +41,7 @@ internal static class SiteCoverageArtifactReader
                 continue;
             }
 
-            await ReadNativeFileAsync(file, repository, sources, null, SiteCoverageTokens.NodeRuntime, version,
+            await ReadFileAsync(file, repository, sources, null, SiteCoverageTokens.NodeRuntime, version,
                 result, cancellationToken).ConfigureAwait(false);
         }
     }
@@ -88,7 +88,7 @@ internal static class SiteCoverageArtifactReader
             foreach (var name in metadata.CoverageFiles.Order(StringComparer.Ordinal))
             {
                 var coveragePath = Path.Combine(directory, name);
-                await ReadNativeFileAsync(coveragePath, repository, sources, metadata.Origins,
+                await ReadFileAsync(coveragePath, repository, sources, metadata.Origins,
                     SiteCoverageTokens.BrowserRuntime, metadata.BrowserVersion, result, cancellationToken)
                     .ConfigureAwait(false);
                 receiptPaths.Add(SiteCoverageArtifactFiles.RelativePath(artifactRoot, coveragePath));
@@ -110,7 +110,7 @@ internal static class SiteCoverageArtifactReader
         }
     }
 
-    private static async Task ReadNativeFileAsync(string path, string repository,
+    private static async Task ReadFileAsync(string path, string repository,
         IReadOnlyDictionary<string, SiteCoverageSourceEntry> sources, IReadOnlySet<string>? origins,
         string runtime, string version, SiteCoverageCollection result, CancellationToken cancellationToken)
     {
@@ -122,7 +122,7 @@ internal static class SiteCoverageArtifactReader
             var artifactRoot = Environment.GetEnvironmentVariable(SiteCoverageTokens.CoverageRootEnvironment)!;
             var receiptIdentity = SiteCoverageArtifactFiles.RelativePath(artifactRoot, path);
             var receiptHash = SiteCoverageSourceManifestWriter.Hash(bytes);
-            var snapshots = SiteCoverageNativeRanges.ParseScripts(document.RootElement.GetProperty(SiteCoverageTokens.Result),
+            var snapshots = SiteCoverageRanges.ParseScripts(document.RootElement.GetProperty(SiteCoverageTokens.Result),
                 runtime, repository, sources, origins, receiptIdentity, receiptHash);
             foreach (var group in snapshots.GroupBy(snapshot => snapshot.SourcePath, StringComparer.Ordinal))
             {

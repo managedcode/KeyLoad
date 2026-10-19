@@ -10,11 +10,11 @@ namespace KeyLoad.UnitTests.Features.ResourceExecution;
 
 internal static class ResourceIncarnationAssertions
 {
-    internal static ResourceLifetimeV1 Lifetime(ZoneTreeStore store, PartitionRef partition, string name = ResourceIncarnationLiteral.Table)
-        => NativeSerialization.Deserialize<ResourceLifetimeV1>(Bytes(store, ResourceIncarnationLiteral.LifetimeKey(partition, name)));
+    internal static ResourceLifetime Lifetime(ZoneTreeStore store, PartitionRef partition, string name = ResourceIncarnationLiteral.Table)
+        => OrleansSerialization.Deserialize<ResourceLifetime>(Bytes(store, ResourceIncarnationLiteral.LifetimeKey(partition, name)));
 
     internal static byte[] Bytes(ZoneTreeStore store, byte[] key)
-        => store.Read(view => view.ReadOwnedValue(key) ?? throw new InvalidOperationException("The original native record is absent."));
+        => store.Read(view => view.ReadOwnedValue(key) ?? throw new InvalidOperationException("The original execution record is absent."));
 
     internal static async Task EqualAsync<T>(T expected, T actual)
         => await Assert.That(JsonDefaults.Serialize(actual)).IsEquivalentTo(JsonDefaults.Serialize(expected),
@@ -53,7 +53,7 @@ internal static class ResourceIncarnationAssertions
             await Assert.That(fingerprint).IsEqualTo(ResourceIncarnationLiteral.Fingerprint);
             await Assert.That(incarnation).IsEqualTo(ResourceIncarnationLiteral.Incarnation);
         }
-        var expected = new ResourceLifetimeV1(partition.TenantId, partition.DatabaseId, definition.Name,
+        var expected = new ResourceLifetime(partition.TenantId, partition.DatabaseId, definition.Name,
             definition.TransactionDomainId, definition.Kind, new(incarnation), fingerprint);
         await EqualAsync(expected, Lifetime(store, partition));
     }

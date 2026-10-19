@@ -8,11 +8,11 @@ namespace KeyLoad.Core.Features.ResourceExecution;
 /// <summary>Derives active creation identity from the original canonical operation without changing its fingerprint.</summary>
 internal static class ResourceLifetimeIdentity
 {
-    private const string IncarnationDomain = "keyload:resource-incarnation:v1";
+    private const string IncarnationDomain = "keyload:resource-incarnation";
     private const string InvalidIdentity = "The persisted resource lifetime identity is invalid.";
     private const int DigestCharacters = 64;
 
-    internal static ResourceLifetimeV1 Create(Command<DatabaseCommand> original, string tenantId,
+    internal static ResourceLifetime Create(Command<DatabaseCommand> original, string tenantId,
         string databaseId, ResourceDefinition definition)
     {
         RequireScope(tenantId, databaseId, definition);
@@ -29,7 +29,7 @@ internal static class ResourceLifetimeIdentity
             definition.Kind, new(incarnation), fingerprint);
     }
 
-    internal static void Validate(ResourceLifetimeV1 lifetime)
+    internal static void Validate(ResourceLifetime lifetime)
     {
         if (lifetime is null)
         {
@@ -39,7 +39,7 @@ internal static class ResourceLifetimeIdentity
             new(lifetime.ResourceName, lifetime.Kind, lifetime.TransactionDomainId));
     }
 
-    internal static void Validate(ResourceLifetimeV1 lifetime, string tenantId,
+    internal static void Validate(ResourceLifetime lifetime, string tenantId,
         string databaseId, ResourceDefinition definition)
     {
         RequireScope(tenantId, databaseId, definition);

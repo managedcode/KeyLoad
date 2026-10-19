@@ -15,7 +15,7 @@ internal static class SurrealDbVectorStorage
     private const string IdKey = "id";
     private const string EmbeddingKey = "embedding";
     private const string PayloadKey = "payload";
-    internal static async IAsyncEnumerable<VectorReadback> ReadbackAsync(HttpClient http, string table, NativeComparisonExecutionOptions policy, int corpusCount, TimeProvider timeProvider, [EnumeratorCancellation] CancellationToken cancellationToken)
+    internal static async IAsyncEnumerable<VectorReadback> ReadbackAsync(HttpClient http, string table, ComparisonExecutionOptions policy, int corpusCount, TimeProvider timeProvider, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         var seen = EmptyResultCount;
         var after = -SingleResultCardinality;
@@ -52,11 +52,11 @@ internal static class SurrealDbVectorStorage
 
         if (seen != corpusCount)
         {
-            throw new InvalidDataException(SurrealDbNativeTokens.TokenSurrealDbReadbackCountMismatch);
+            throw new InvalidDataException(SurrealDbTokens.TokenSurrealDbReadbackCountMismatch);
         }
     }
 
-    internal static async Task<VectorReadback?> ReadAsync(HttpClient http, string table, NativeComparisonExecutionOptions policy, string id, TimeProvider timeProvider, CancellationToken cancellationToken)
+    internal static async Task<VectorReadback?> ReadAsync(HttpClient http, string table, ComparisonExecutionOptions policy, string id, TimeProvider timeProvider, CancellationToken cancellationToken)
     {
         using var response = await SurrealDbSqlTransport.QueryAsync(http, SurrealDbVectorProtocol.ReadOneSql(table, id), policy, cancellationToken: cancellationToken, timeProvider: timeProvider).ConfigureAwait(false);
         var result = SurrealDbVectorProtocol.SingleResult(response.RootElement);

@@ -45,9 +45,9 @@ internal static class GraphMutationEffectClosureFlow
                     await Assert.That(owner.Database.Traverse(D.Root, owner.Source.Partition, D.Graph, to).Edges).IsEmpty();
                     await Assert.That(owner.Store.Read(view => view.GetRecord<EdgeRecord>(
                         GraphCrossPartitionKeys.CanonicalEdge(owner.Source.Partition, D.Graph, D.Edge)))).IsNull();
-                    await CompositionPrefixPrepareAssertions.EqualAsync(new GraphEdgeOwnerVersionV1(
+                    await CompositionPrefixPrepareAssertions.EqualAsync(new GraphEdgeOwnerVersion(
                         GraphCrossPartitionProtocol.CurrentVersion, DeletedRevision, true),
-                        owner.Store.Read(view => view.GetRecord<GraphEdgeOwnerVersionV1>(
+                        owner.Store.Read(view => view.GetRecord<GraphEdgeOwnerVersion>(
                             GraphCrossPartitionKeys.OwnerVersion(owner.Source.Partition, D.Graph, D.Edge))));
                 }
                 else

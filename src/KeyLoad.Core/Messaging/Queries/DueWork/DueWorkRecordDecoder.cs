@@ -36,7 +36,7 @@ internal static class DueWorkRecordDecoder
     private static DueWorkHint? ReadSchedule(DatabaseEngine database, ReadOnlySpan<byte> key,
         ReadOnlySpan<byte> value, DateTimeOffset wakeAt)
     {
-        var record = NativeSerialization.Deserialize<RecurringScheduleRecord>(value);
+        var record = OrleansSerialization.Deserialize<RecurringScheduleRecord>(value);
         ValidateSchedule(database, key, record);
         var dueAt = OccurrenceTime(record.Definition, record.NextOrdinal);
         ValidateOccurrenceExpiry(record.Definition, dueAt);
@@ -53,7 +53,7 @@ internal static class DueWorkRecordDecoder
     private static DueWorkHint? ReadSaga(DatabaseEngine database, ReadOnlySpan<byte> key,
         ReadOnlySpan<byte> value, DateTimeOffset wakeAt)
     {
-        var record = NativeSerialization.Deserialize<SagaRecord>(value);
+        var record = OrleansSerialization.Deserialize<SagaRecord>(value);
         ValidateSaga(database, key, record);
         return record.Phase == SagaPhase.Waiting && record.Deadline is { } dueAt && dueAt <= wakeAt
             ? new(DueWorkKind.Saga, record.Lane, record.SagaId, record.CreatorPrincipalId,

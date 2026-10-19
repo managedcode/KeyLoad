@@ -7,7 +7,7 @@ internal sealed class CommandIdempotencyProcessChild
 {
     private readonly int outputLimitCharacters;
     private readonly string? expectedSignal;
-    private bool? nativeOutputWitnessHold;
+    private bool? outputWitnessHold;
     private Process? process;
     private Task? processExit;
     private CommandIdempotencyProcessPipes? pipes;
@@ -27,9 +27,9 @@ internal sealed class CommandIdempotencyProcessChild
         this.expectedSignal = expectedSignal;
     }
 
-    internal void EnableNativeOutputWitness(bool hold) => nativeOutputWitnessHold = hold;
-    internal Task ReportNativeOutputWitnessAsync(List<Exception> failures)
-        => pipes is null ? Task.CompletedTask : pipes.ReportNativeOutputWitnessAsync(failures);
+    internal void EnableOutputWitness(bool hold) => outputWitnessHold = hold;
+    internal Task ReportOutputWitnessAsync(List<Exception> failures)
+        => pipes is null ? Task.CompletedTask : pipes.ReportOutputWitnessAsync(failures);
     internal int ExitCode => RequireProcess().ExitCode;
     internal static CommandIdempotencyProcessChild Create(int outputLimitCharacters, bool expectAcknowledgement)
         => Create(outputLimitCharacters, expectAcknowledgement ? CrashFixtureValues.Acknowledgement : null);
@@ -72,9 +72,9 @@ internal sealed class CommandIdempotencyProcessChild
         {
             pipes = CommandIdempotencyProcessPipes.Create(startedProcess, outputLimitCharacters,
                 expectedSignal);
-            if (nativeOutputWitnessHold is { } hold)
+            if (outputWitnessHold is { } hold)
             {
-                pipes.EnableNativeOutputWitness(hold);
+                pipes.EnableOutputWitness(hold);
             }
             pipes.StartReaders();
             startupFailure = CommandIdempotencyProcessFailureHandling.PreserveStartupFailure(
@@ -140,16 +140,16 @@ internal sealed class CommandIdempotencyProcessChild
     {
         var failures = new List<Exception>();
         var activeProcess = RequireProcess();
-        CommandIdempotencyProcessNativeExit.TryKill(activeProcess, failures);
-        await CommandIdempotencyProcessNativeExit.ObserveExitAsync(processExit, failures, cancellationToken);
+        CommandIdempotencyProcessExit.TryKill(activeProcess, failures);
+        await CommandIdempotencyProcessExit.ObserveExitAsync(processExit, failures, cancellationToken);
         await JoinReadersForCleanupAsync(failures, cancellationToken);
-        var processExited = CommandIdempotencyProcessNativeExit.HasExited(activeProcess, failures);
+        var processExited = CommandIdempotencyProcessExit.HasExited(activeProcess, failures);
         IsSettled = (processExit is null || processExit.IsCompleted) && processExited
             && (pipes is null || pipes.ReadersSettled);
         CommandIdempotencyProcessFailureHandling.ThrowFailures(failures);
     }
 
-    internal void CloseNativeProcessAfterJoin()
+    internal void CloseProcessAfterJoin()
     {
         if (IsDisposed)
         {
@@ -190,7 +190,7 @@ internal sealed class CommandIdempotencyProcessChild
         var failures = new List<Exception>();
         await JoinReadersForCleanupAsync(failures, cancellationToken);
         var activeProcess = RequireProcess();
-        var processExited = CommandIdempotencyProcessNativeExit.HasExited(activeProcess, failures);
+        var processExited = CommandIdempotencyProcessExit.HasExited(activeProcess, failures);
         IsSettled = (processExit is null || processExit.IsCompleted) && processExited
             && (pipes is null || pipes.ReadersSettled);
         CommandIdempotencyProcessFailureHandling.ThrowFailures(failures);

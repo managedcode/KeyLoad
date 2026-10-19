@@ -8,7 +8,7 @@ internal sealed class SqlTopicRetentionOperationTests
 {
     private const string RequestKey = "request";
     [Test]
-    public async Task AcEventRetention003SharedSqlAndMcpDecoderPurgeTheActualNativeStoreWithOneIdentity()
+    public async Task AcEventRetention003SharedSqlAndMcpDecoderPurgeTheActualStoreWithOneIdentity()
     {
         using var fixture = new TopicRetentionFixture();
         fixture.ReleasePins();
@@ -20,10 +20,10 @@ internal sealed class SqlTopicRetentionOperationTests
         var decoded = SqlOperationTestData.Compile(SqlOperationTestData.Call("keyload_documents_commit", arguments));
         await Assert.That(decoded.CommandKind).IsEqualTo(OperationKind.Batch);
         await Assert.That(decoded.CommandId).IsEqualTo(command.CommandId);
-        var payload = NativeSerialization.Deserialize<CommandRequest>(decoded.Payload.Span);
+        var payload = OrleansSerialization.Deserialize<CommandRequest>(decoded.Payload.Span);
         await Assert.That(payload.Mutations.Single()).IsEqualTo(new PurgeTopic("topic", 2, 1));
         var coordinator = new EmbeddedCoordinator(fixture.Database);
-        var receipt = (await coordinator.SubmitNativeAsync(OperationKind.Batch, decoded.CommandId, "root", decoded.Payload))
+        var receipt = (await coordinator.RuntimeSubmitAsync(OperationKind.Batch, decoded.CommandId, "root", decoded.Payload))
             .Get<CommitReceipt>();
         await Assert.That(receipt.Mutations.Single()).IsEqualTo(new MutationReceipt("purgeTopic", "topic", "2", 2));
         await TopicRetentionAssertions.RetainedTail(fixture);

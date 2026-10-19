@@ -8,5 +8,5 @@ namespace KeyLoad;
 /// <param name="AttributesJson">Contains the edge attributes as JSON.</param>
 /// <param name="Revision">Identifies the document, stream, or edge revision.</param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.EdgeRecord)]
+[Orleans.Alias(ContractAliases.EdgeRecord)]
 public sealed record EdgeRecord([property: Orleans.Id(0)] string Id, [property: Orleans.Id(1)] EntityRef From, [property: Orleans.Id(2)] EntityRef To, [property: Orleans.Id(3)] string Label, [property: Orleans.Id(4)] string AttributesJson, [property: Orleans.Id(5)] long Revision);

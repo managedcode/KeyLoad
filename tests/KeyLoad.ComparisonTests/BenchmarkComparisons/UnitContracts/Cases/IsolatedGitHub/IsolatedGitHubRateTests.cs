@@ -14,7 +14,7 @@ internal sealed class IsolatedGitHubRateTests
     [Arguments("duplicate-header")]
     [Arguments("wait-budget")]
     [Arguments("repeat-budget")]
-    public async Task AcIso007NativeHeaderParserBoundsOnlyPermittedProviderWaits(string input)
+    public async Task AcIso007HeaderParserBoundsOnlyPermittedProviderWaits(string input)
     {
         var result = await SessionNodeProcess.RunAsync(
             ["--input-type=module", "-e", IsolatedGitHubRateProgram.Source,
@@ -27,34 +27,34 @@ internal sealed class IsolatedGitHubRateTests
     }
 
     [Test]
-    [Arguments("native-recorded-cancel")]
-    [Arguments("native-recorded-502")]
-    [Arguments("native-recorded-success")]
-    [Arguments("native-exit-success")]
-    [Arguments("native-partial-body")]
-    [Arguments("native-recorded-partial")]
-    [Arguments("native-negative-body")]
-    [Arguments("native-oversized-body")]
-    [Arguments("native-unsafe-body")]
-    [Arguments("native-wrong-error")]
-    [Arguments("native-wrong-hash")]
-    [Arguments("native-auth")]
-    [Arguments("native-complete-invalid-json")]
-    [Arguments("native-timeout")]
-    [Arguments("native-overflow")]
-    [Arguments("native-spawn-failure")]
-    [Arguments("native-cancelled")]
-    [Arguments("native-signal")]
-    [Arguments("native-repeat-budget")]
-    [Arguments("native-wait-budget")]
-    public async Task AcIso007OriginalNativeStreamFailureRetriesOnlyWithinUnchangedMetadataAndWaitBudgets(string input)
+    [Arguments("execution-recorded-cancel")]
+    [Arguments("execution-recorded-502")]
+    [Arguments("execution-recorded-success")]
+    [Arguments("execution-exit-success")]
+    [Arguments("execution-partial-body")]
+    [Arguments("execution-recorded-partial")]
+    [Arguments("execution-negative-body")]
+    [Arguments("execution-oversized-body")]
+    [Arguments("execution-unsafe-body")]
+    [Arguments("execution-wrong-error")]
+    [Arguments("execution-wrong-hash")]
+    [Arguments("execution-auth")]
+    [Arguments("execution-complete-invalid-json")]
+    [Arguments("execution-timeout")]
+    [Arguments("execution-overflow")]
+    [Arguments("execution-spawn-failure")]
+    [Arguments("execution-cancelled")]
+    [Arguments("execution-signal")]
+    [Arguments("execution-repeat-budget")]
+    [Arguments("execution-wait-budget")]
+    public async Task AcIso007OriginalStreamFailureRetriesOnlyWithinUnchangedMetadataAndWaitBudgets(string input)
     {
         var result = await SessionNodeProcess.RunAsync(
             ["--input-type=module", "-e", IsolatedGitHubRateProgram.Source,
                 SessionNodeProcess.Module("isolated-github-rate.mjs"), input],
             TestContext.Current!.Execution.CancellationToken);
-        var accepted = input is "native-recorded-cancel" or "native-recorded-502" or "native-recorded-success"
-            or "native-partial-body" or "native-recorded-partial";
+        var accepted = input is "execution-recorded-cancel" or "execution-recorded-502" or "execution-recorded-success"
+            or "execution-partial-body" or "execution-recorded-partial";
         await Assert.That(result.ExitCode).IsEqualTo(accepted ? 0 : 1);
         await Assert.That(result.Output.Trim()).IsEqualTo(accepted ? "accepted" : "rejected");
         await Assert.That(result.Error).IsEmpty();

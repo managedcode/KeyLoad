@@ -15,7 +15,7 @@ internal static class QueueLifecycleCeilingInjection
     private const string PendingFamily = "queue-pending-dead-letter";
     private const string OrderFamily = "queue-order";
     private const long NoOrderPosition = 0;
-    private const string MissingFixture = "The original native lifecycle ceiling fixture row is missing.";
+    private const string MissingFixture = "The original execution lifecycle ceiling fixture row is missing.";
 
     internal static QueueLifecycleCeilingRows Inject(ZoneTreeStore store, QueueLaneRef lane, string id,
         QueueLifecycleCeilingFault fault)
@@ -26,18 +26,18 @@ internal static class QueueLifecycleCeilingInjection
         {
             var metadataKey = KeySpace.Partition(MetadataFamily, lane.Partition, lane.Queue, id);
             var metadataBytes = Require(view, metadataKey);
-            var metadata = NativeSerialization.Deserialize<MessageMetadata>(metadataBytes);
+            var metadata = OrleansSerialization.Deserialize<MessageMetadata>(metadataBytes);
             var counterKey = KeySpace.Partition(CounterFamily, lane.Partition, lane.Queue);
-            var counters = NativeSerialization.Deserialize<QueueCounters>(Require(view, counterKey));
+            var counters = OrleansSerialization.Deserialize<QueueCounters>(Require(view, counterKey));
             var changed = Metadata(metadata, fault);
             if (changed != metadata)
             {
-                Save(view, metadataKey, NativeSerialization.Serialize(changed), saved, changes);
+                Save(view, metadataKey, OrleansSerialization.Serialize(changed), saved, changes);
             }
             var changedCounters = Counters(counters, fault);
             if (changedCounters != counters)
             {
-                Save(view, counterKey, NativeSerialization.Serialize(changedCounters), saved, changes);
+                Save(view, counterKey, OrleansSerialization.Serialize(changedCounters), saved, changes);
             }
             if (changed.DeliveryGeneration != metadata.DeliveryGeneration)
             {
@@ -126,11 +126,11 @@ internal static class QueueLifecycleCeilingInjection
             : KeySpace.Partition(PendingFamily, lane.Partition, lane.Queue, metadata.Id);
         var bytes = Require(view, key);
         var replacement = metadata.State == MessageState.DeadLettered
-            ? NativeSerialization.Serialize(NativeSerialization.Deserialize<QueueDeadLetterReference>(bytes) with
+            ? OrleansSerialization.Serialize(OrleansSerialization.Deserialize<QueueDeadLetterReference>(bytes) with
             {
                 DeliveryGeneration = long.MaxValue
             })
-            : NativeSerialization.Serialize(NativeSerialization.Deserialize<QueuePendingDeadLetterReference>(bytes) with
+            : OrleansSerialization.Serialize(OrleansSerialization.Deserialize<QueuePendingDeadLetterReference>(bytes) with
             {
                 DeliveryGeneration = long.MaxValue
             });
@@ -141,7 +141,7 @@ internal static class QueueLifecycleCeilingInjection
                 ?? throw new InvalidOperationException(MissingFixture);
             var order = KeySpace.Partition(OrderFamily, lane.Partition, lane.Queue, body.OrderingKey,
                 metadata.ActiveOrderSequence, metadata.Id);
-            Save(view, order, NativeSerialization.Serialize(NativeSerialization.Deserialize<QueueOrderReference>(Require(view, order)) with
+            Save(view, order, OrleansSerialization.Serialize(OrleansSerialization.Deserialize<QueueOrderReference>(Require(view, order)) with
             {
                 DeliveryGeneration = long.MaxValue
             }), saved, changes);

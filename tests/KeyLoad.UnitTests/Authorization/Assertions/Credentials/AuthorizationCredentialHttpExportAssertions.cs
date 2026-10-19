@@ -28,12 +28,12 @@ internal static class AuthorizationCredentialHttpExportAssertions
         var stored = database.Store.Read(view => global::KeyLoad.Storage.StorageRecords.GetRecord<global::KeyLoad.ApiKeyRecord>(
             view, global::KeyLoad.Core.KeySpace.ApiKey(key.Id)))
             ?? throw new InvalidOperationException(AuthorizationCredentialHttpExportProtocol.MissingAcknowledgedCredential);
-        await Assert.That(global::KeyLoad.NativeSerialization.Serialize(stored).AsSpan()
-            .SequenceEqual(global::KeyLoad.NativeSerialization.Serialize(key))).IsTrue();
+        await Assert.That(global::KeyLoad.OrleansSerialization.Serialize(stored).AsSpan()
+            .SequenceEqual(global::KeyLoad.OrleansSerialization.Serialize(key))).IsTrue();
         var image = AuthorizationTelemetryPolicyRepair.Capture(database);
         var replay = database.Submit(global::KeyLoad.OperationKind.ConfigureApiKey, request, id: command);
-        await Assert.That(global::KeyLoad.NativeSerialization.Serialize(replay).AsSpan()
-            .SequenceEqual(global::KeyLoad.NativeSerialization.Serialize(result))).IsTrue();
+        await Assert.That(global::KeyLoad.OrleansSerialization.Serialize(replay).AsSpan()
+            .SequenceEqual(global::KeyLoad.OrleansSerialization.Serialize(result))).IsTrue();
         await AuthorizationTelemetryPolicyRepair.UnchangedAsync(database, image);
         return (command, request, result);
     }

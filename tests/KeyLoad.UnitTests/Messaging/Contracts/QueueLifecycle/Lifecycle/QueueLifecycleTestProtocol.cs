@@ -10,7 +10,7 @@ internal static class QueueLifecycleTestProtocol
     internal const string Pending = "b-active";
     internal const string Held = "c-held";
     internal const string Healthy = "d-healthy";
-    internal const string Payload = "{\"knowledge\":\"native same-root lifecycle\"}";
+    internal const string Payload = "{\"knowledge\":\"execution same-root lifecycle\"}";
     internal const string Headers = "{\"trace\":\"complete independent headers\"}";
     internal const string OrderingKey = "entity-1";
     internal const string ReadySpace = "ready";

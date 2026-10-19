@@ -1,9 +1,9 @@
 namespace KeyLoad.Comparisons;
 
-/// <summary>Owns one actual native client and delegates its existing operation implementation.</summary>
+/// <summary>Owns one actual execution client and delegates its existing operation implementation.</summary>
 internal sealed class DocumentOwnedSession(IComparisonSession session, Guid clientIdentity,
     Func<CancellationToken, IAsyncEnumerable<FoundDocument>> readback, Func<ValueTask> disposeClient,
-    bool singleOperationTiming = true, Func<Scenario, BenchmarkDocument, CancellationToken, Task<OperationResult>>? executeOperation = null, IDisposable? nativeClient = null) : IDocumentComparisonSession
+    bool singleOperationTiming = true, Func<Scenario, BenchmarkDocument, CancellationToken, Task<OperationResult>>? executeOperation = null, IDisposable? runtimeClient = null) : IDocumentComparisonSession
 {
     private Task? disposal;
     private readonly System.Threading.Lock gate = new();
@@ -23,9 +23,9 @@ internal sealed class DocumentOwnedSession(IComparisonSession session, Guid clie
     }
     private async Task DisposeOriginalAsync()
     {
-        var sessionFailure = await NativeComparisonFailure.ObserveAsync(DisposeSessionAsync()).ConfigureAwait(false);
-        var clientFailure = await NativeComparisonFailure.ObserveAsync(DisposeClientAsync()).ConfigureAwait(false);
-        var combined = NativeComparisonFailure.Combine(sessionFailure, clientFailure is null ? [] : [clientFailure]);
+        var sessionFailure = await RuntimeComparisonFailure.ObserveAsync(DisposeSessionAsync()).ConfigureAwait(false);
+        var clientFailure = await RuntimeComparisonFailure.ObserveAsync(DisposeClientAsync()).ConfigureAwait(false);
+        var combined = RuntimeComparisonFailure.Combine(sessionFailure, clientFailure is null ? [] : [clientFailure]);
         if (combined is not null)
         {
             System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(combined).Throw();
@@ -38,6 +38,6 @@ internal sealed class DocumentOwnedSession(IComparisonSession session, Guid clie
         {
             await disposeClient().ConfigureAwait(false);
         }
-        finally { nativeClient?.Dispose(); }
+        finally { runtimeClient?.Dispose(); }
     }
 }

@@ -8,7 +8,7 @@ internal static class CurrentJournalSignatureHealthy
     private const string Restore = "restore";
     private const long CapturedPosition = 2L;
 
-    internal static async Task RunAsync(NativeBackupCutFixture fixture, CurrentJournalSignatureAuthority authority,
+    internal static async Task RunAsync(BackupCutFixture fixture, CurrentJournalSignatureAuthority authority,
         string cliTarget, CancellationToken token)
     {
         var verified = ZoneTreeStore.VerifyBackup(fixture.Backup, UnitExecutionOptions.StorageExecution(), token);
@@ -21,9 +21,9 @@ internal static class CurrentJournalSignatureHealthy
         var cli = await CliBackupRestoreProcess.RunAsync(CliBackupRestoreProcess.CaptureExecutionOptions(),
             [Restore, fixture.Backup, cliTarget], token);
         await CliBackupRestoreAssertions.SuccessfulProcessAsync(cli);
-        var restored = NativeBackupJournalRepairAssertions.Read(cliTarget, token);
+        var restored = BackupJournalRepairAssertions.Read(cliTarget, token);
         await CliBackupJournalRepairAssertions.ReceiptAsync(cli, restored.Identity);
-        await NativeBackupJournalRepairAssertions.RestoredAsync(fixture, restored.Identity, restored);
+        await BackupJournalRepairAssertions.RestoredAsync(fixture, restored.Identity, restored);
         await CurrentJournalSignatureCold.RunAsync(fixture, cliTarget, restored.Identity, token);
     }
 }

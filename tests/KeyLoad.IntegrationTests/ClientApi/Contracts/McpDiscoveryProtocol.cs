@@ -60,7 +60,7 @@ internal static class McpDiscoveryProtocol
     internal const string Query = "query";
     internal const string QueryDialectVersion = "queryDialectVersion";
     internal const string Default = "default";
-    internal const int DefaultQueryDialectVersion = 1;
+    internal const int DefaultQueryDialectVersion = SqlOperationProtocol.DefaultQueryDialectVersion;
     internal const string Search = "search";
     internal const string Version = "version";
     internal const string Collection = "collection";

@@ -11,7 +11,7 @@ internal static class QueryHostedSearchRead
         QueryHostedSearchDataset data, Guid requestId, CancellationToken token)
     {
         var signed = node.Codec.CreateRead(requestId, data.Principal.Id, GrainReadKind.DistributedSearch,
-            NativeSerialization.Serialize(data.Request));
+            OrleansSerialization.Serialize(data.Request));
         var local = node.Services.GetRequiredService<ILocalSiloDetails>();
         using var identity = new GrainRequestIdentityScope(node.Services, data.Principal, requestId,
             Guid.Empty, token, placement: local.SiloAddress, connectionId: node.ConnectionId);
@@ -20,16 +20,16 @@ internal static class QueryHostedSearchRead
             execution => connection.ExecuteStreamAsync(signed, execution),
             node.Services.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>(),
             requestId, node.Clock, node.RoutingOptions,
-            new NativeCqrsStreamPurpose(() => node.Codec.VerifyRequest(signed, requestId)), token).ConfigureAwait(false);
+            new CqrsStreamPurpose(() => node.Codec.VerifyRequest(signed, requestId)), token).ConfigureAwait(false);
     }
 
-    internal static DistributedSearchPageV1 Page(GrainOperationReply reply)
+    internal static DistributedSearchPage Page(GrainOperationReply reply)
     {
         if (reply.Error is { } error)
         {
-            throw Errors.Fail(error, reply.SafeDetail ?? "The native search returned an error.");
+            throw Errors.Fail(error, reply.SafeDetail ?? "The execution search returned an error.");
         }
-        return NativeSerialization.Deserialize<GrainValue>(reply.Payload.Span).Value as DistributedSearchPageV1
-            ?? throw new InvalidOperationException("The native search returned no page.");
+        return OrleansSerialization.Deserialize<GrainValue>(reply.Payload.Span).Value as DistributedSearchPage
+            ?? throw new InvalidOperationException("The execution search returned no page.");
     }
 }

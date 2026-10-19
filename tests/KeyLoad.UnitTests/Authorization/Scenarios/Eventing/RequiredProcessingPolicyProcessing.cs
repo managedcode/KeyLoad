@@ -19,7 +19,7 @@ internal static class RequiredProcessingPolicyProcessing
             expectedToken), result);
         await Assert.That(fixture.Harness.Store.Position).IsEqualTo(position);
         await Assert.That(actual.Token).IsNotEmpty();
-        var evaluatedAt = fixture.Harness.Store.Read(view => NativeSerialization.Deserialize<DateTimeOffset>(view.ReadOwnedValue(KeySpace.ClockBytes)!));
+        var evaluatedAt = fixture.Harness.Store.Read(view => OrleansSerialization.Deserialize<DateTimeOffset>(view.ReadOwnedValue(KeySpace.ClockBytes)!));
         await Assert.That(actual.LeaseUntil).IsEqualTo(evaluatedAt.AddSeconds(fixture.Resource.QueuePolicy.MaxLeaseSeconds));
         await RequiredProcessingPolicyAssertions.EqualAsync(new DeliveryClaims(fixture.Lane, id, RequiredProcessingPolicyFixture.Worker,
             1L, 1L, fixture.Harness.Store.Identity.Incarnation), fixture.Harness.Database.Verify<DeliveryClaims>(actual.Token));

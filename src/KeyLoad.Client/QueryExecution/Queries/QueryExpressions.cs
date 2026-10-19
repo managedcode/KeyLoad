@@ -10,7 +10,7 @@ namespace KeyLoad.Client;
 
 internal sealed class QueryExpressions(IOptions<QueryTranslationOptions> options)
 {
-    private const string NativeImplicitOperator = "op_Implicit";
+    private const string ImplicitOperator = "op_Implicit";
     private readonly QueryTranslationOptions limits = options.Value;
     internal static KeyLoadException Unsupported() => Errors.Fail(ErrorCode.UnsupportedCapability, QueryPredicateTokens.UnsupportedExpressionMessage);
     private static string Name(MemberInfo member) => member.GetCustomAttribute<JsonPropertyNameAttribute>()?.Name
@@ -26,7 +26,7 @@ internal sealed class QueryExpressions(IOptions<QueryTranslationOptions> options
         {
             var from = convert.Operand.Type;
             var to = convert.Type;
-            if (convert.Method is not null && !NativeIntegerDecimalConversion(convert, from, to) || !(to == typeof(object) || Nullable.GetUnderlyingType(to) == from
+            if (convert.Method is not null && !IntegerDecimalConversion(convert, from, to) || !(to == typeof(object) || Nullable.GetUnderlyingType(to) == from
                                                                                                                            || Integer(from) && to == typeof(decimal)
                                                                                                                            || Integer(from) && Integer(to) && (Unsigned(from) == Unsigned(to) && Width(to) >= Width(from)
                                                                                                                                                                || Unsigned(from) && !Unsigned(to) && Width(to) > Width(from))))
@@ -38,9 +38,9 @@ internal sealed class QueryExpressions(IOptions<QueryTranslationOptions> options
         }
         return expression;
     }
-    private static bool NativeIntegerDecimalConversion(UnaryExpression conversion, Type from, Type to)
+    private static bool IntegerDecimalConversion(UnaryExpression conversion, Type from, Type to)
         => Integer(from) && to == typeof(decimal) && conversion.Method is { IsStatic: true } method
-           && method.DeclaringType == typeof(decimal) && method.Name == NativeImplicitOperator
+           && method.DeclaringType == typeof(decimal) && method.Name == ImplicitOperator
            && method.ReturnType == typeof(decimal)
            && method.GetParameters() is [{ ParameterType: var input }] && input == from;
 

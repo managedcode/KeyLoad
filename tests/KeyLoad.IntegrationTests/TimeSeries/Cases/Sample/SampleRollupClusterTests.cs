@@ -12,7 +12,7 @@ internal sealed class SampleRollupClusterTests(ClusterFixture fixture)
     private const string ReadSql = "CALL keyload_series_read_rollup(@arguments)";
     private const string Arguments = "arguments";
     [Test]
-    public async Task AcSeries024NativeSdkOfficialMcpSqlLateCorrectionAndOriginalReceiptParity()
+    public async Task AcSeries024SdkOfficialMcpSqlLateCorrectionAndOriginalReceiptParity()
     {
         using var deadline = McpCallerDeadline.Create();
         var scenario = await TimeSeriesClusterScenario.CreateAsync(fixture, deadline.Token);

@@ -18,7 +18,7 @@ internal static class SampleRollupCrashScenario
                 SampleChunkSnapshotFile.CaptureExpectedToken(directory, SampleRollupCrashContract.AcknowledgedId, database, SampleRollupCrashContract.Partition);
                 var receipt = SampleRollupCrashOperations.Commit(database, SampleRollupCrashContract.AcknowledgedId,
                     SampleRollupCrashContract.Refresh(InitialRevision)).Get<CommitReceipt>();
-                await File.WriteAllBytesAsync(Path.Combine(directory, SampleRollupCrashContract.AcknowledgedReceiptFile), NativeSerialization.Serialize(receipt));
+                await File.WriteAllBytesAsync(Path.Combine(directory, SampleRollupCrashContract.AcknowledgedReceiptFile), OrleansSerialization.Serialize(receipt));
                 await File.WriteAllBytesAsync(Path.Combine(directory, SampleRollupCrashContract.RawFile), SampleRollupCrashState.Raw(database));
                 await SampleRollupCrashState.WriteAsync(directory, SampleRollupCrashContract.PreparedFile, database);
                 await RecoveryProcessPause.WaitForKillAsync();
@@ -48,7 +48,7 @@ internal static class SampleRollupCrashScenario
         var request = new CommandRequest(SampleRollupCrashContract.InflightId, SampleRollupCrashContract.Partition,
             [SampleRollupCrashOperations.Inflight(drop)]);
         var operation = CrashDatabase.Operation(database, OperationKind.Batch, request, SampleRollupCrashContract.InflightId);
-        await File.WriteAllBytesAsync(Path.Combine(directory, SampleRollupCrashContract.OperationFile), NativeSerialization.Serialize(operation));
+        await File.WriteAllBytesAsync(Path.Combine(directory, SampleRollupCrashContract.OperationFile), OrleansSerialization.Serialize(operation));
         SampleChunkSnapshotFile.CaptureExpectedToken(directory, request.CommandId, database, request.Partition);
         boundary.Position = checked(database.Store.Position + SampleRollupCrashContract.PositionStep);
         boundary.Armed = true;
@@ -59,6 +59,5 @@ internal static class SampleRollupCrashScenario
     private static DatabaseEngine OpenExisting(ZoneTreeStore store)
         => new(store, new AuthorizationPolicy(), CrashExecutionOptions.DatabaseLimits(), CrashExecutionOptions.DueWork(),
             CrashExecutionOptions.EventSource(), CrashExecutionOptions.Messaging(), CrashExecutionOptions.GraphExecution(),
-            CrashExecutionOptions.ChangeFeedExecution(), CrashExecutionOptions.BlobExecution(),
-            CrashExecutionOptions.NativeClaimsExecution(), CrashExecutionOptions.TimeSeriesExecution());
+            CrashExecutionOptions.ChangeFeedExecution(), CrashExecutionOptions.RuntimeClaimsExecution(), CrashExecutionOptions.TimeSeriesExecution());
 }

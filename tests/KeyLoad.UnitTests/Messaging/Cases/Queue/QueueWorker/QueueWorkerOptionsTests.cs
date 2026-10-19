@@ -14,7 +14,7 @@ internal sealed class QueueWorkerOptionsTests
     [Arguments(QueueWorkerInvalidPolicy.EmptyPoll)]
     [Arguments(QueueWorkerInvalidPolicy.UncertaintyCount)]
     [Arguments(QueueWorkerInvalidPolicy.LeaseDuration)]
-    public async Task InvalidCallerPolicyRefusesBeforeNativeSendOrHandler(QueueWorkerInvalidPolicy field)
+    public async Task InvalidCallerPolicyRefusesBeforeSendOrHandler(QueueWorkerInvalidPolicy field)
     {
         using var http = new HttpClient();
         http.Dispose();
@@ -27,7 +27,7 @@ internal sealed class QueueWorkerOptionsTests
     }
 
     [Test]
-    public async Task PreCancelledValidInvocationJoinsWithoutNativeSendOrHandlerAndPreservesSharedClientOwnership()
+    public async Task PreCancelledValidInvocationJoinsWithoutSendOrHandlerAndPreservesSharedClientOwnership()
     {
         using var http = new HttpClient();
         var originalTimeout = http.Timeout;

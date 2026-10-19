@@ -1,6 +1,6 @@
 namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
 
-/// <summary>AC-CQ-037: const aliases are followed only when their native semantic storage is never reassigned.</summary>
+/// <summary>AC-CQ-037: const aliases are followed only when their execution semantic storage is never reassigned.</summary>
 internal sealed class TypedConfigurationFileBufferAliasTests
 {
     [Test]

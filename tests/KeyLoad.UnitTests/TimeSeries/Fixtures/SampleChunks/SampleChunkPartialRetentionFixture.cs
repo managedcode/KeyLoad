@@ -93,8 +93,8 @@ internal sealed class SampleChunkPartialRetentionFixture : IDisposable
             {
                 original.Dispose();
             }
-            catch (Exception failure) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
-            catch (Exception failure) when (!global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
+            catch (Exception failure) when (global::KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
+            catch (Exception failure) when (!global::KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
         }
         KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
     }

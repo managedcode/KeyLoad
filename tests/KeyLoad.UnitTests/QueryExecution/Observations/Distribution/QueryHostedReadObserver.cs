@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace KeyLoad.UnitTests.Features.QueryExecution;
 
-/// <summary>Holds actual native search after canonical range reads and joins its original producer.</summary>
+/// <summary>Holds actual execution search after canonical range reads and joins its original producer.</summary>
 internal sealed class QueryHostedReadObserver : IGrainRequestPhaseObserver
 {
     private readonly ConcurrentDictionary<Guid, QueryHostedReadObservation> reads = new();
@@ -70,7 +70,7 @@ internal sealed class QueryHostedReadObserver : IGrainRequestPhaseObserver
 
     private void ObserveChild(GrainRequestProbeIdentity identity, GrainRequestPhase phase, IGrainContext context)
     {
-        if (phase != GrainRequestPhase.AuthorizationReload || identity.ReadKind != GrainReadKind.DistributedSearchLeafV2)
+        if (phase != GrainRequestPhase.AuthorizationReload || identity.ReadKind != GrainReadKind.DistributedSearchLeaf)
         {
             return;
         }

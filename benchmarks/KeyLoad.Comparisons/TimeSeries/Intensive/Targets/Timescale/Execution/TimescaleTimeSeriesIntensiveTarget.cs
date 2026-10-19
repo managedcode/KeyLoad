@@ -11,7 +11,7 @@ internal sealed partial class TimescaleTimeSeriesIntensiveTarget : ITimeSeriesIn
     private const int MissingItemIndex = -1;
     private const int NoObservedItems = 0;
 
-    private readonly NativeComparisonExecutionOptions execution;
+    private readonly ComparisonExecutionOptions execution;
 
     private readonly TimescaleTimeSeriesIntensiveContext context;
     private readonly TimescaleTimeSeriesIntensiveSession session;
@@ -22,7 +22,7 @@ internal sealed partial class TimescaleTimeSeriesIntensiveTarget : ITimeSeriesIn
     private int seedOrdinal;
     private bool ownsSchema;
 
-    internal TimescaleTimeSeriesIntensiveTarget(string connectionString, string runId, IOptions<NativeComparisonExecutionOptions> executionOptions, TimeProvider? provider = null)
+    internal TimescaleTimeSeriesIntensiveTarget(string connectionString, string runId, IOptions<ComparisonExecutionOptions> executionOptions, TimeProvider? provider = null)
     {
         timeProvider = provider ?? TimeProvider.System;
         execution = executionOptions.Value;

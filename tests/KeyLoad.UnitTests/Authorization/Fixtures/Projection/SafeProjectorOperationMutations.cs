@@ -51,15 +51,14 @@ internal static class SafeProjectorOperationMutations
         await Assert.That(stored.PolicyEpoch).IsEqualTo(policyEpoch);
         await Assert.That(stored.Incarnation).IsEqualTo(command.ExpectedToken.Incarnation);
         await Assert.That(stored.Partition).IsEqualTo(owner.Source.Partition);
-        await Assert.That(stored.ScopeKind).IsEqualTo(KeyLoad.Core.Features.ClusterRouting.Contracts.CommandOutcomeScopeKind.Partition);
-        await Assert.That(stored.BlobAuthority is null).IsTrue();
+        await Assert.That(stored.ScopeKind).IsEqualTo(KeyLoad.Core.Features.CommandOutcomes.Contracts.CommandOutcomeScopeKind.Partition);
         await Assert.That(stored.CompositionAuthority is null).IsTrue();
         await Assert.That(stored.OnlineTextAuthority is null).IsTrue();
         await Assert.That(stored.RemoteTransferFailureAuthority is null).IsTrue();
         var encodedClock = owner.Store.Read(view => view.ReadOwnedValue(KeySpace.ClockBytes))
             ?? throw new InvalidOperationException(MissingClock);
-        await Assert.That(NativeSerialization.Deserialize<DateTimeOffset>(encodedClock)).IsEqualTo(new DateTimeOffset(command.Operation.Timestamp));
-        var locator = owner.Store.Read(view => view.ReadOwnedValue(KeySpace.OutcomeLocatorV2(
+        await Assert.That(OrleansSerialization.Deserialize<DateTimeOffset>(encodedClock)).IsEqualTo(new DateTimeOffset(command.Operation.Timestamp));
+        var locator = owner.Store.Read(view => view.ReadOwnedValue(KeySpace.OutcomeLocator(
             owner.Source.Partition, SafeProjectorOperationProtocol.Reader, command.Operation.CommandId)));
         await Assert.That(locator is not null && locator.AsSpan().SequenceEqual(key)).IsTrue();
     }
@@ -112,7 +111,7 @@ internal static class SafeProjectorOperationMutations
         var excluded = new[]
         {
             KeySpace.PartitionOutcome(owner.Source.Partition, SafeProjectorOperationProtocol.Reader, id),
-            KeySpace.OutcomeLocatorV2(owner.Source.Partition, SafeProjectorOperationProtocol.Reader, id),
+            KeySpace.OutcomeLocator(owner.Source.Partition, SafeProjectorOperationProtocol.Reader, id),
             KeySpace.ClockBytes,
             KeySpace.AppliedBytes
         }.Select(key => Convert.ToHexString(key) + Separator).ToArray();

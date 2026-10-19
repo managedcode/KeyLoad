@@ -1,6 +1,6 @@
-using D = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreNativeTestData;
-using O = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreNativeTestOperations;
-using P = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreNativeTestProjection;
+using D = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreTestData;
+using O = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreTestOperations;
+using P = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreTestProjection;
 using S = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStorePolicyPublicationData;
 
 namespace KeyLoad.UnitTests.Features.AnalyticsStore;

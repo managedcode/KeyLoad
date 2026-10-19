@@ -21,7 +21,7 @@ internal static class SiteAnalyzerCoverageXmlBuilder
         bool includeDuplicateClass = false,
         bool includeMethods = false,
         int branchSourceCount = int.MaxValue,
-        bool nativeBranchBooleanCasing = false,
+        bool branchBooleanCasing = false,
         bool includeFalseBranch = false,
         string? boundaryLineSource = null,
         int? boundaryLineNumber = null)
@@ -33,7 +33,7 @@ internal static class SiteAnalyzerCoverageXmlBuilder
         AppendPackageHeader(xml, sourceRoot, multipleSourceRoots);
         xml.Append(moduleName).Append(SiteAnalyzerCoverageTokens.CoveragePackageMiddle);
         AppendClasses(xml, executable, coveredLines, lineHits, branchCovered, branchTotal, linesPerSource,
-            includeBranch, branchSourceCount, includeDuplicateClass, includeMethods, nativeBranchBooleanCasing,
+            includeBranch, branchSourceCount, includeDuplicateClass, includeMethods, branchBooleanCasing,
             includeFalseBranch, boundaryLineSource, boundaryLineNumber);
         return xml.Append(SiteAnalyzerCoverageTokens.PackageClose).ToString();
     }
@@ -70,7 +70,7 @@ internal static class SiteAnalyzerCoverageXmlBuilder
         int branchSourceCount,
         bool includeDuplicateClass,
         bool includeMethods,
-        bool nativeBranchBooleanCasing,
+        bool branchBooleanCasing,
         bool includeFalseBranch,
         string? boundaryLineSource,
         int? boundaryLineNumber)
@@ -80,10 +80,10 @@ internal static class SiteAnalyzerCoverageXmlBuilder
             var sourceHasBranches = includeBranch && branchSourceCount > 0;
             var sourceBoundaryLine = source == boundaryLineSource ? boundaryLineNumber : null;
             var sourceLines = SiteAnalyzerCoverageLineBudget.GetLineCount(source, linesPerSource);
-            AppendClassCoverage(xml, source, SiteAnalyzerCoverageTokens.ClassNameValue, lineHits, branchCovered, branchTotal, sourceHasBranches, sourceLines, coveredLines[source], includeMethods, nativeBranchBooleanCasing, includeFalseBranch, sourceBoundaryLine);
+            AppendClassCoverage(xml, source, SiteAnalyzerCoverageTokens.ClassNameValue, lineHits, branchCovered, branchTotal, sourceHasBranches, sourceLines, coveredLines[source], includeMethods, branchBooleanCasing, includeFalseBranch, sourceBoundaryLine);
             if (includeDuplicateClass && source == SiteAnalyzerCoverageTokens.HashFileRelativePath)
             {
-                AppendClassCoverage(xml, source, SiteAnalyzerCoverageTokens.DuplicateClassNameValue, SiteAnalyzerCoverageTokens.CounterZero, branchCovered, branchTotal, false, sourceLines, coveredLines[source], includeMethods, nativeBranchBooleanCasing, includeFalseBranch, sourceBoundaryLine);
+                AppendClassCoverage(xml, source, SiteAnalyzerCoverageTokens.DuplicateClassNameValue, SiteAnalyzerCoverageTokens.CounterZero, branchCovered, branchTotal, false, sourceLines, coveredLines[source], includeMethods, branchBooleanCasing, includeFalseBranch, sourceBoundaryLine);
             }
 
             if (sourceHasBranches)
@@ -121,7 +121,7 @@ internal static class SiteAnalyzerCoverageXmlBuilder
         int linesPerSource,
         int? coveredLineCount,
         bool includeMethods,
-        bool nativeBranchBooleanCasing,
+        bool branchBooleanCasing,
         bool includeFalseBranch,
         int? boundaryLineNumber)
     {
@@ -146,7 +146,7 @@ internal static class SiteAnalyzerCoverageXmlBuilder
                 branchCovered,
                 branchTotal,
                 includeBranch && lineNumber == SiteAnalyzerCoverageTokens.FirstLineNumber,
-                nativeBranchBooleanCasing,
+                branchBooleanCasing,
                 includeFalseBranch);
         }
 
@@ -160,7 +160,7 @@ internal static class SiteAnalyzerCoverageXmlBuilder
         long branchCovered,
         long branchTotal,
         bool includeBranch,
-        bool nativeBranchBooleanCasing,
+        bool branchBooleanCasing,
         bool includeFalseBranch)
     {
         xml.Append(SiteAnalyzerCoverageTokens.LineOpen)
@@ -170,12 +170,12 @@ internal static class SiteAnalyzerCoverageXmlBuilder
         if (!includeBranch)
         {
             xml.Append(includeFalseBranch
-                ? nativeBranchBooleanCasing ? SiteAnalyzerCoverageTokens.BranchFalseNativeSuffix : SiteAnalyzerCoverageTokens.BranchFalseSuffix
+                ? branchBooleanCasing ? SiteAnalyzerCoverageTokens.RuntimeBranchFalseSuffix : SiteAnalyzerCoverageTokens.BranchFalseSuffix
                 : SiteAnalyzerCoverageTokens.LineClose);
             return;
         }
 
-        xml.Append(nativeBranchBooleanCasing ? SiteAnalyzerCoverageTokens.BranchTrueNative : SiteAnalyzerCoverageTokens.BranchTrue)
+        xml.Append(branchBooleanCasing ? SiteAnalyzerCoverageTokens.RuntimeBranchTrue : SiteAnalyzerCoverageTokens.BranchTrue)
             .Append(Percentage(branchCovered, branchTotal))
             .Append(SiteAnalyzerCoverageTokens.CoveragePairOpen)
             .Append(branchCovered.ToString(System.Globalization.CultureInfo.InvariantCulture))

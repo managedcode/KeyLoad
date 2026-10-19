@@ -65,7 +65,7 @@ internal sealed class SiteBrowserCoverageFixture : IDisposable
 
         var selected = matches[SiteCoverageTokens.Zero];
         var node = await FindMappedNodeAsync(coverageRoot, inputs.Repository, manifest, cancellationToken);
-        var root = Path.Combine(coverageRoot, SiteCoverageTokens.NativeEvidenceDirectory,
+        var root = Path.Combine(coverageRoot, SiteCoverageTokens.RuntimeEvidenceDirectory,
             SiteBrowserCoverageTokens.BrowserFixturePrefix + Guid.NewGuid().ToString(SiteCoverageTokens.CompactGuidFormat));
         var sessionId = Path.GetFileName(selected.Path);
         var browserFiles = selected.Metadata.CoverageFiles.ToDictionary(name => name,
@@ -121,7 +121,7 @@ internal sealed class SiteBrowserCoverageFixture : IDisposable
             return JsonSerializer.SerializeToUtf8Bytes(root);
         }
 
-        throw new InvalidDataException(SiteCoverageTokens.MissingNativeReceiptsFailure);
+        throw new InvalidDataException(SiteCoverageTokens.MissingReceiptsFailure);
     }
 
     public byte[] ModifiedBrowserBytes(Action<JsonObject> modify)
@@ -215,6 +215,6 @@ internal sealed class SiteBrowserCoverageFixture : IDisposable
             }
         }
 
-        throw new InvalidDataException(SiteCoverageTokens.MissingNativeReceiptsFailure);
+        throw new InvalidDataException(SiteCoverageTokens.MissingReceiptsFailure);
     }
 }

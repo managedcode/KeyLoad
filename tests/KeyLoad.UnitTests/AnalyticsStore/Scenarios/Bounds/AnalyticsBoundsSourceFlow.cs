@@ -1,6 +1,6 @@
-using D = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreNativeTestData;
-using N = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsBoundsNative;
-using O = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreNativeTestOperations;
+using D = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreTestData;
+using N = KeyLoad.UnitTests.Features.AnalyticsStore.RuntimeAnalyticsBounds;
+using O = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreTestOperations;
 using P = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsBoundsData;
 
 namespace KeyLoad.UnitTests.Features.AnalyticsStore;

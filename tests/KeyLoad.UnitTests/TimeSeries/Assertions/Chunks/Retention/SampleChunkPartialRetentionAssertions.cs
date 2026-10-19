@@ -60,11 +60,11 @@ internal static class SampleChunkPartialRetentionAssertions
     {
         var block = Bytes(fixture, SampleChunkKeys.Block(fixture.Partition, SampleChunkCanonicalFixture.Set,
             SampleChunkCanonicalFixture.Series, fixture.WindowId, generation, BlockOrdinal));
-        var envelope = NativeSerialization.Deserialize<SampleChunkManifestEnvelope>(Bytes(fixture,
+        var envelope = OrleansSerialization.Deserialize<SampleChunkManifestEnvelope>(Bytes(fixture,
             SampleChunkKeys.Manifest(fixture.Partition, SampleChunkCanonicalFixture.Set,
                 SampleChunkCanonicalFixture.Series, fixture.WindowId, generation)));
         await Assert.That(envelope.Digest.Span.SequenceEqual(SHA256.HashData(envelope.Encoded.Span))).IsTrue();
-        var manifest = NativeSerialization.Deserialize<SampleChunkManifest>(envelope.Encoded.Span);
+        var manifest = OrleansSerialization.Deserialize<SampleChunkManifest>(envelope.Encoded.Span);
         await Assert.That(manifest.RecordCount).IsEqualTo(expected.Length);
         await Assert.That(manifest.BlockDigests.Length).IsEqualTo(1);
         await Assert.That(manifest.BlockDigests[BlockOrdinal].Span.SequenceEqual(SHA256.HashData(block))).IsTrue();
@@ -102,7 +102,7 @@ internal static class SampleChunkPartialRetentionAssertions
         await Assert.That(page.Records.Length).IsEqualTo(expected.Length);
         for (var index = 0; index < expected.Length; index++)
         {
-            var record = NativeSerialization.Deserialize<SampleRecord>(page.Records[index].Value.Span);
+            var record = OrleansSerialization.Deserialize<SampleRecord>(page.Records[index].Value.Span);
             await Assert.That(Convert.ToHexString(JsonDefaults.Serialize(record)))
                 .IsEqualTo(Convert.ToHexString(JsonDefaults.Serialize(expected[index])));
             var key = KeySpace.Partition(RawSampleFamily, fixture.Partition, SampleChunkCanonicalFixture.Set,

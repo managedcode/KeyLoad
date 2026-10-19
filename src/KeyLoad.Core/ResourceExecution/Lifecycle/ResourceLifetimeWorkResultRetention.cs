@@ -10,7 +10,7 @@ internal sealed class ResourceLifetimeWorkResultRetention : IDisposable
     private const string Capacity = "The retained resource lifetimes exceed the operation result budget.";
     private const string Invalid = "The resource lifetime ledger input is invalid.";
     private readonly Lock gate = new();
-    private readonly HashSet<ResourceLifetimeV1> retained = [];
+    private readonly HashSet<ResourceLifetime> retained = [];
     private readonly DatabaseLimits limits;
     private long retainedBytes;
     private bool disposed;
@@ -46,10 +46,10 @@ internal sealed class ResourceLifetimeWorkResultRetention : IDisposable
         }
     }
 
-    internal void Reserve(ImmutableArray<ResourceLifetimeV1> lifetimes)
+    internal void Reserve(ImmutableArray<ResourceLifetime> lifetimes)
         => Reserve(lifetimes, limits.MaxBatchBytes);
 
-    internal void Reserve(ImmutableArray<ResourceLifetimeV1> lifetimes, int maximumBytes)
+    internal void Reserve(ImmutableArray<ResourceLifetime> lifetimes, int maximumBytes)
     {
         if (lifetimes.IsDefault || maximumBytes <= Empty)
         {
@@ -59,14 +59,14 @@ internal sealed class ResourceLifetimeWorkResultRetention : IDisposable
         {
             ObjectDisposedException.ThrowIf(disposed, this);
             var bound = Math.Min(maximumBytes, limits.MaxBatchBytes);
-            var pending = new HashSet<ResourceLifetimeV1>();
+            var pending = new HashSet<ResourceLifetime>();
             long additionalBytes = Empty;
             foreach (var lifetime in lifetimes)
             {
                 ResourceLifetimeIdentity.Validate(lifetime);
                 if (!retained.Contains(lifetime) && pending.Add(lifetime))
                 {
-                    additionalBytes += NativeSerialization.Measure(lifetime);
+                    additionalBytes += OrleansSerialization.Measure(lifetime);
                 }
                 if (additionalBytes > bound - retainedBytes
                     || pending.Count > limits.MaxScanRecords - retained.Count)

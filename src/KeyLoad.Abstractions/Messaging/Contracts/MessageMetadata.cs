@@ -17,7 +17,7 @@ namespace KeyLoad;
 /// <param name="EnqueueSequence">The immutable strict-order sequence at original enqueue, or zero for competing consumers.</param>
 /// <param name="ActiveOrderSequence">The current strict-order position, or zero when the message has no active order entry.</param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.MessageMetadata)]
+[Orleans.Alias(ContractAliases.MessageMetadata)]
 public sealed record MessageMetadata([property: Orleans.Id(0)] string Id, [property: Orleans.Id(1)] MessageState State, [property: Orleans.Id(2)] int Attempts, [property: Orleans.Id(3)] long StateVersion, [property: Orleans.Id(4)] long ReadySequence,
     [property: Orleans.Id(5)] DateTimeOffset? NotBefore, [property: Orleans.Id(6)] DateTimeOffset? ExpiresAt, [property: Orleans.Id(7)] string? LeaseOwner = null, [property: Orleans.Id(8)] long LeaseVersion = MessageMetadata.DefaultLeaseVersion,
     [property: Orleans.Id(9)] DateTimeOffset? LeaseUntil = null, [property: Orleans.Id(10)] long DeliveryGeneration = MessageMetadata.DefaultDeliveryGeneration, [property: Orleans.Id(11)] string? SafeFailureCode = null, [property: Orleans.Id(12)] long ParkedSequence = MessageMetadata.DefaultLeaseVersion,

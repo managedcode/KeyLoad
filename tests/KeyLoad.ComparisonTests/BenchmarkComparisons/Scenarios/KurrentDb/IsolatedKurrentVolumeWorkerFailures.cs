@@ -5,7 +5,7 @@ namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 /// <summary>Retains original worker and cancellation callback errors until every worker settles.</summary>
 internal sealed class IsolatedKurrentVolumeWorkerFailures
 {
-    private const string JoinedFailures = "Kurrent volume workers and native cancellation callbacks failed.";
+    private const string JoinedFailures = "Kurrent volume workers and execution cancellation callbacks failed.";
     private readonly Lock gate = new();
     private readonly HashSet<Exception> seen = new(ReferenceEqualityComparer.Instance);
     private readonly List<Exception> originals = [];

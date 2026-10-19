@@ -2,8 +2,8 @@ namespace KeyLoad;
 
 internal static class QueueDeadlineContract
 {
-    internal const string Alias = "keyload.mutation.advance-queue-deadline.v1";
-    internal const string KindAlias = "keyload.messaging.queue-deadline-kind.v1";
+    internal const string Alias = "keyload.mutation.advance-queue-deadline";
+    internal const string KindAlias = "keyload.messaging.queue-deadline-kind";
     internal const string Discriminator = "advanceQueueDeadline";
     internal const string KindJsonName = "deadlineKind";
     internal const int QueueField = 0;

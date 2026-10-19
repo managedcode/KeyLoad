@@ -21,14 +21,14 @@ internal static class ProjectionDigestImage
     {
         if (effect)
         {
-            var value = NativeSerialization.Deserialize<VectorProjectionEffect>(original);
-            return NativeSerialization.Serialize(value with
+            var value = OrleansSerialization.Deserialize<VectorProjectionEffect>(original);
+            return OrleansSerialization.Serialize(value with
             {
                 Fingerprint = (value.Fingerprint[0] == '0' ? "1" : "0") + value.Fingerprint[1..]
             });
         }
-        var vector = NativeSerialization.Deserialize<VectorRecord>(original);
-        return NativeSerialization.Serialize(vector with
+        var vector = OrleansSerialization.Deserialize<VectorRecord>(original);
+        return OrleansSerialization.Serialize(vector with
         {
             Values = [0f, 1f]
         });
@@ -47,7 +47,7 @@ internal static class ProjectionDigestImage
         var before = prefix + Convert.ToHexString(original);
         if (!string.Equals(image.Single(row => row.StartsWith(prefix, StringComparison.Ordinal)), before, StringComparison.Ordinal))
         {
-            throw new InvalidOperationException("The captured original digest row is not the exact native input.");
+            throw new InvalidOperationException("The captured original digest row is not the exact execution input.");
         }
         return image.Select(row => string.Equals(row, before, StringComparison.Ordinal)
             ? prefix + Convert.ToHexString(damaged) : row).ToArray();
@@ -66,11 +66,11 @@ internal static class ProjectionDigestImage
 
     internal static async Task ColdAsync(EventProjectionFixture fixture, string[] image, long cut)
     {
-        var identity = NativeSerialization.Serialize(fixture.Harness.Store.Identity);
+        var identity = OrleansSerialization.Serialize(fixture.Harness.Store.Identity);
         var failures = new List<Exception>();
         ServerFailureObserver.Observe(fixture.Harness.Reopen, failures);
         await ServerFailureObserver.ObserveAsync(async () =>
-            await Assert.That(NativeSerialization.Serialize(fixture.Harness.Store.Identity).AsSpan().SequenceEqual(identity)).IsTrue(), failures);
+            await Assert.That(OrleansSerialization.Serialize(fixture.Harness.Store.Identity).AsSpan().SequenceEqual(identity)).IsTrue(), failures);
         await ServerFailureObserver.ObserveAsync(() => ClassificationLineageWholeAssertions.UnchangedAsync(
             fixture, image, cut), failures);
         ServerFailureObserver.ThrowIfAny(failures);

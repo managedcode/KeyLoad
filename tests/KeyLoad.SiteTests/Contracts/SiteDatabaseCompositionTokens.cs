@@ -29,7 +29,7 @@ internal static class SiteDatabaseCompositionTokens
     internal const string LeaseBoundary = "does not lease or ACK";
     internal const string BlobsSameDatabase = "blobs remain part of the same database";
     internal const string FullSqlPending = "Full declarative SQL";
-    internal const string NativeClientPending = "native SQL-client protocol";
+    internal const string ClientPending = "execution SQL-client protocol";
     internal const string CrossPartitionPending = "cross-partition composition";
     internal const string CurrentApi = "current composition API";
     internal const string Preview = "development preview";
@@ -50,6 +50,6 @@ internal static class SiteDatabaseCompositionTokens
     // README and landing state the same current stage, atomic scope and readiness contracts.
     internal static readonly string[] StageContracts =
         [CanonicalCall, SdkCommit, OfficialMcp, CurrentApi, Preview, AtomicScope, AtomicRollback,
-            LeaseBoundary, BlobsSameDatabase, BlobBoundary, FullSqlPending, NativeClientPending,
+            LeaseBoundary, BlobsSameDatabase, BlobBoundary, FullSqlPending, ClientPending,
             CrossPartitionPending, PendingFeatures, PendingQualification];
 }

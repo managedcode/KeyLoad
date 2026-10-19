@@ -46,13 +46,13 @@ internal static class QueueGraphIdentityCold
                 await QueueGraphIdentityAssertions.ModelsAsync(state, engine, store, healthy: true);
                 var receipt = engine.Apply(state.Healthy).Get<CommitReceipt>();
                 var outcome = engine.ResolveOutcome(state.Healthy).Get<CommitReceipt>();
-                await Assert.That(NativeSerialization.Serialize(receipt).AsSpan()
+                await Assert.That(OrleansSerialization.Serialize(receipt).AsSpan()
                     .SequenceEqual(state.HealthyReceipt)).IsTrue();
-                await Assert.That(NativeSerialization.Serialize(outcome).AsSpan()
+                await Assert.That(OrleansSerialization.Serialize(outcome).AsSpan()
                     .SequenceEqual(state.HealthyReceipt)).IsTrue();
                 var seed = engine.Apply(state.Seed).Get<CommitReceipt>();
-                await Assert.That(NativeSerialization.Serialize(seed).AsSpan()
-                    .SequenceEqual(NativeSerialization.Serialize(state.SeedReceipt))).IsTrue();
+                await Assert.That(OrleansSerialization.Serialize(seed).AsSpan()
+                    .SequenceEqual(OrleansSerialization.Serialize(state.SeedReceipt))).IsTrue();
                 await Assert.That(QueueWholeFlowStorage.Bytes(store)).IsEquivalentTo(before,
                     global::TUnit.Assertions.Enums.CollectionOrdering.Matching);
                 await Assert.That(store.Position).IsEqualTo(position);

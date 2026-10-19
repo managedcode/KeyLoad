@@ -1,5 +1,5 @@
 using KeyLoad.UnitTests.Features.Authorization;
-using D = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreNativeTestData;
+using D = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreTestData;
 using O = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsCompositionOperations;
 using P = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsCompositionData;
 

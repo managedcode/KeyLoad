@@ -2,9 +2,9 @@ namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
 
 internal sealed class SiteIsolatedHttpTests
 {
-    /// <summary>AC-ISO-008: real fetch loads hash-bound compact bytes from the native confined static listener.</summary>
+    /// <summary>AC-ISO-008: real fetch loads hash-bound compact bytes from the execution confined static listener.</summary>
     [Test]
-    public async Task AC_ISO_008_NativeHttpAcceptsAuthenticProjection()
+    public async Task AC_ISO_008_HttpAcceptsAuthenticProjection()
     {
         var fixture = await SiteIsolatedFixture.ReadAsync();
         await using var host = SiteStaticFileHost.Start(fixture.Root);
@@ -13,7 +13,7 @@ internal sealed class SiteIsolatedHttpTests
         await Assert.That(response.GetProperty(SiteIsolatedFields.Result).GetInt32()).IsEqualTo(SiteIsolatedInventory.ControlWorkers());
     }
 
-    /// <summary>AC-ISO-008: controlled malformed files are parser data; native HTTP/fetch/crypto remain genuine.</summary>
+    /// <summary>AC-ISO-008: controlled malformed files are parser data; execution HTTP/fetch/crypto remain genuine.</summary>
     [Test]
     [Arguments("hash")]
     [Arguments("duplicate")]
@@ -22,7 +22,7 @@ internal sealed class SiteIsolatedHttpTests
     [Arguments("projectionSize")]
     [Arguments("missing")]
     [Arguments("abort")]
-    public async Task AC_ISO_008_NativeHttpRejectsCorruptionBoundsMissingAndCancellation(string corruption)
+    public async Task AC_ISO_008_HttpRejectsCorruptionBoundsMissingAndCancellation(string corruption)
     {
         var fixture = await SiteIsolatedFixture.ReadAsync();
         var token = TestContext.Current!.Execution.CancellationToken;

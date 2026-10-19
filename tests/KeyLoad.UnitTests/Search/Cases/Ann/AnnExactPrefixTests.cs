@@ -6,7 +6,7 @@ namespace KeyLoad.UnitTests.Features.Search;
 
 internal sealed class AnnExactPrefixTests
 {
-    private const string ConsumerName = "ann-exact-prefix-v1";
+    private const string ConsumerName = "ann-exact-prefix";
     private const string UpperDetail = "The projection upper sequence is outside the current consumer checkpoint and retained head.";
     private const string ThroughField = "throughSequence";
     private const long Step = 1;
@@ -18,7 +18,7 @@ internal sealed class AnnExactPrefixTests
     private static readonly ImmutableArray<float> LaterValues = [-0f, 7.125f, 3.5f];
 
     [Test]
-    public async Task ExactNativePrefixExcludesLaterWritesAndSignedCheckpointReplayRemainsHealthy()
+    public async Task ExactPrefixExcludesLaterWritesAndSignedCheckpointReplayRemainsHealthy()
     {
         using var db = AnnProjectionPinTestSupport.Create();
         var consumer = AnnProjectionPinTestSupport.Consumer(db, ConsumerName);
@@ -28,11 +28,11 @@ internal sealed class AnnExactPrefixTests
         var seed = AnnProjectionPinTestSupport.Capture(db);
         AnnProjectionPinTestSupport.PutVector(db, LaterValues);
         var request = new ReadProjectionBatchRequest(consumer, BatchLimit, BatchBytes, seed.Cut.OutboxTail);
-        var native = NativeSerialization.Deserialize<ReadProjectionBatchRequest>(NativeSerialization.Serialize(request));
+        var execution = OrleansSerialization.Deserialize<ReadProjectionBatchRequest>(OrleansSerialization.Serialize(request));
         var json = JsonSerializer.Deserialize<ReadProjectionBatchRequest>(JsonSerializer.Serialize(request, JsonDefaults.Options), JsonDefaults.Options)!;
         var before = Snapshot(db);
         var position = db.Store.Position;
-        var batch = db.Database.ReadProjectionBatch(AnnProjectionPinTestSupport.Principal, native);
+        var batch = db.Database.ReadProjectionBatch(AnnProjectionPinTestSupport.Principal, execution);
         var jsonBatch = db.Database.ReadProjectionBatch(AnnProjectionPinTestSupport.Principal, json);
         await AssertPrefixAsync(batch, seed.Cut.OutboxTail);
         await AssertPrefixAsync(jsonBatch, seed.Cut.OutboxTail);
@@ -46,7 +46,7 @@ internal sealed class AnnExactPrefixTests
         var committedPosition = db.Store.Position;
         var replay = AnnProjectionPinTestSupport.CommitEmpty(db, consumer, batch,
             AnnProjectionPinTestSupport.Principal, commandId, now).Get<ProjectionBatchResult>();
-        await Assert.That(NativeSerialization.Serialize(replay)).IsEquivalentTo(NativeSerialization.Serialize(applied), CollectionOrdering.Matching);
+        await Assert.That(OrleansSerialization.Serialize(replay)).IsEquivalentTo(OrleansSerialization.Serialize(applied), CollectionOrdering.Matching);
         await Assert.That(Snapshot(db)).IsEquivalentTo(committed, CollectionOrdering.Matching);
         await Assert.That(db.Store.Position).IsEqualTo(committedPosition);
         var empty = db.Database.ReadProjectionBatch(AnnProjectionPinTestSupport.Principal, request);

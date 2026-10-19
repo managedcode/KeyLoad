@@ -40,15 +40,15 @@ internal static class PostgresSessionReplies
                 {
                     try
                     {
-                        await WriteResultAsync(writer, reply.Payload, format, options, chunkBytes, describe, closed).ConfigureAwait(false);
+                        await WriteResultAsync(writer, reply.Payload, format, options, chunkBytes, describe, closed);
                     }
-                    catch (Exception failure) when (reply.PossibleWrite && global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+                    catch (Exception failure) when (reply.PossibleWrite && global::KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(failure))
                     {
                         throw Errors.Fail(ErrorCode.UnknownWriteOutcome, PostgresProtocol.InterruptedReply, failure);
                     }
-                }, failures).ConfigureAwait(false);
+                }, failures);
             }
-        }, failures).ConfigureAwait(false);
+        }, failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
@@ -80,11 +80,11 @@ internal static class PostgresSessionReplies
             closed.ThrowIfCancellationRequested();
             var count = Math.Min(chunkBytes, json.Length - offset);
             writer.Raw(json.AsSpan(offset, count));
-            await writer.FlushAsync(closed).ConfigureAwait(false);
+            await writer.FlushAsync(closed);
             offset += count;
         }
         writer.Text(PostgresWireWriter.CommandComplete, ResultTag + PostgresProtocol.CommandSeparator + OneColumn.ToString(CultureInfo.InvariantCulture));
-        await writer.FlushAsync(closed).ConfigureAwait(false);
+        await writer.FlushAsync(closed);
     }
 
     internal const byte ParameterDescription = (byte)'t';

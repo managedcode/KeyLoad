@@ -11,7 +11,7 @@ internal static class ZoneTreeBackupArchiveJournalOpen
         {
             return OfflineRegularFile.Open(path, FileAccess.Read, FileShare.Read, streamBufferBytes);
         }
-        catch (KeyLoadException original) when (OfflineNativeErrors.IsInvalidEntry(original))
+        catch (KeyLoadException original) when (OfflineErrors.IsInvalidEntry(original))
         {
             throw Errors.Fail(ErrorCode.Corruption, ZoneTreePersistenceFormat.BackupFileVerificationFailed, original);
         }

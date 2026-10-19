@@ -1,5 +1,7 @@
 using System.Collections.Immutable;
-using KeyLoad.Core.Features.ClusterRouting.Contracts;
+using KeyLoad.Core.Features.CommandOutcomes.Contracts;
+using KeyLoad.Core.Features.RuntimeJournaling.Contracts;
+using KeyLoad.Core.Features.StoragePartitions.Contracts;
 using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Core.Features.ResourceExecution.Execution;
 using KeyLoad.Storage;
@@ -17,25 +19,25 @@ public sealed partial class ReadExecutionBudget
 
     internal void RequireResourceLifetimeBinding(IResourceLifetimeWorkBinding binding) => LifetimeBindings.Require(binding);
 
-    internal void ObserveResourceLifetime(PartitionRef partition, ResourceDefinition definition, ResourceLifetimeV1 lifetime)
+    internal void ObserveResourceLifetime(PartitionRef partition, ResourceDefinition definition, ResourceLifetime lifetime)
         => LifetimeBindings.Observe(partition, definition, lifetime);
 
-    internal void ObserveAuthenticatedResourceLifetimes(ImmutableArray<ResourceLifetimeV1> lifetimes)
+    internal void ObserveAuthenticatedResourceLifetimes(ImmutableArray<ResourceLifetime> lifetimes)
         => LifetimeBindings.ObserveAuthenticated(lifetimes);
 
-    internal ResourceLifetimeCoverageV1 BindResourceLifetimes(DatabaseEngine database, IKeyValueView authorizedView,
+    internal ResourceLifetimeCoverage BindResourceLifetimes(DatabaseEngine database, IKeyValueView authorizedView,
         PartitionRef partition, ImmutableArray<ResourceDefinition> definitions)
         => LifetimeBindings.Capture(database, authorizedView, partition, definitions, requireBinding: true);
 
     // Lower direct APIs retain same-cut pairs without D4 ownership; hosted Bound entries attach first.
-    internal ResourceLifetimeCoverageV1 CaptureResourceLifetimes(DatabaseEngine database, IKeyValueView authorizedView,
+    internal ResourceLifetimeCoverage CaptureResourceLifetimes(DatabaseEngine database, IKeyValueView authorizedView,
         PartitionRef partition, ImmutableArray<ResourceDefinition> definitions)
         => LifetimeBindings.Capture(database, authorizedView, partition, definitions, requireBinding: false);
-    internal ResourceLifetimeCoverageV1 BindAuthenticatedResourceLifetimes(DatabaseEngine database,
-        IKeyValueView authorizedLocalView, ResourceLifetimeCoverageV1 coverage, ImmutableArray<ResourceDefinition> definitions)
+    internal ResourceLifetimeCoverage BindAuthenticatedResourceLifetimes(DatabaseEngine database,
+        IKeyValueView authorizedLocalView, ResourceLifetimeCoverage coverage, ImmutableArray<ResourceDefinition> definitions)
         => LifetimeBindings.CaptureAuthenticated(database, authorizedLocalView, coverage, definitions, requireBinding: true);
 
-    internal ResourceLifetimeCoverageV1 CaptureAuthenticatedResourceLifetimes(DatabaseEngine database,
-        IKeyValueView authorizedLocalView, ResourceLifetimeCoverageV1 coverage, ImmutableArray<ResourceDefinition> definitions)
+    internal ResourceLifetimeCoverage CaptureAuthenticatedResourceLifetimes(DatabaseEngine database,
+        IKeyValueView authorizedLocalView, ResourceLifetimeCoverage coverage, ImmutableArray<ResourceDefinition> definitions)
         => LifetimeBindings.CaptureAuthenticated(database, authorizedLocalView, coverage, definitions, requireBinding: false);
 }

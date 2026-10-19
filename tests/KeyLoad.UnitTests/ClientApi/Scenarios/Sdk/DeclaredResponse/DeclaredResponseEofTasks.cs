@@ -3,7 +3,7 @@ using KeyLoad.Server;
 
 namespace KeyLoad.UnitTests.Features.ClientApi;
 
-/// <summary>Retains actual native tasks; signals do not replace any producer.</summary>
+/// <summary>Retains actual execution tasks; signals do not replace any producer.</summary>
 internal sealed class DeclaredResponseEofTasks
 {
     private readonly ConcurrentQueue<Task> originals = new();

@@ -3,7 +3,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.UnitTests;
 
-/// <summary>Explicit canonical native MCP policy for real framing, admission and authentication tests.</summary>
+/// <summary>Explicit canonical execution MCP policy for real framing, admission and authentication tests.</summary>
 internal static class UnitMcpOptions
 {
     internal static IOptions<McpExecutionOptions> Execution(McpExecutionOptions? configured = null)

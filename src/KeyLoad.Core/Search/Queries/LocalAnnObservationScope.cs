@@ -6,7 +6,7 @@ namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
-    private const string LocalAnnObservationInvalid = "The native ANN observation scope is no longer current.";
+    private const string LocalAnnObservationInvalid = "The execution ANN observation scope is no longer current.";
 
     internal LocalAnnObservationFence CaptureLocalAnnObservation(string principalId, AnnMaintenanceRequest original,
         ReadExecutionBudget budget, AnnReadLifetimeMetadata? sourceMetadata = null)
@@ -75,14 +75,14 @@ public sealed partial class DatabaseEngine
     private static void RequireSameAnnObservation(AnnMaintenanceRequest retained,
         AnnMaintenanceRequest original, ReadExecutionBudget budget)
     {
-        var retainedSize = NativeSerialization.Measure(retained);
-        var originalSize = NativeSerialization.Measure(original);
+        var retainedSize = OrleansSerialization.Measure(retained);
+        var originalSize = OrleansSerialization.Measure(original);
         budget.ChargeBytes(checked(retainedSize + originalSize));
-        var retainedBytes = NativeSerialization.Serialize(retained);
+        var retainedBytes = OrleansSerialization.Serialize(retained);
         byte[]? originalBytes = null;
         try
         {
-            originalBytes = NativeSerialization.Serialize(original);
+            originalBytes = OrleansSerialization.Serialize(original);
             if (retainedBytes.Length != retainedSize || originalBytes.Length != originalSize
                 || !retainedBytes.AsSpan().SequenceEqual(originalBytes))
             {
@@ -100,9 +100,9 @@ public sealed partial class DatabaseEngine
     }
     private static string LocalAnnObservationDigest<T>(T value, ReadExecutionBudget budget)
     {
-        var measured = NativeSerialization.Measure(value);
+        var measured = OrleansSerialization.Measure(value);
         budget.ChargeBytes(measured);
-        var bytes = NativeSerialization.Serialize(value);
+        var bytes = OrleansSerialization.Serialize(value);
         try
         {
             if (bytes.Length != measured)

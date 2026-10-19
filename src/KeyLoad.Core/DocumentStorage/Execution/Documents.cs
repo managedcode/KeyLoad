@@ -25,7 +25,7 @@ public sealed partial class DatabaseEngine
         ArgumentNullException.ThrowIfNull(partition);
         ArgumentNullException.ThrowIfNull(collection);
         return view.ReadOwnedValue(KeySpace.Partition(DocumentEpochSpaceText, partition, collection)) is { } bytes
-            ? NativeSerialization.Deserialize<long>(bytes) : InitialDocumentEpoch;
+            ? OrleansSerialization.Deserialize<long>(bytes) : InitialDocumentEpoch;
     }
     private static void CheckRevision(long actual, long? expected)
     {
@@ -64,7 +64,7 @@ public sealed partial class DatabaseEngine
             if (index.Unique)
             {
                 var uniqueKey = UniqueKey(after.Reference.Partition, resource.Name, index, values);
-                if (tx.ReadOwnedValue(uniqueKey) is { } occupant && NativeSerialization.Deserialize<string>(occupant) != after.Reference.Id)
+                if (tx.ReadOwnedValue(uniqueKey) is { } occupant && OrleansSerialization.Deserialize<string>(occupant) != after.Reference.Id)
                 {
                     throw Errors.Fail(ErrorCode.Conflict, UpdateIndexesDetailText);
                 }
@@ -128,7 +128,7 @@ public sealed partial class DatabaseEngine
         Func<IKeyValueView, PrincipalRecord, ResourceDefinition, T> read)
         => WithQueryView(principalId, partition, collection, Capability.None, read);
 
-    /// <summary>Checks additional native query capabilities before reading private resource metadata in the same cut.</summary>
+    /// <summary>Checks additional execution query capabilities before reading private resource metadata in the same cut.</summary>
     internal T WithQueryView<T>(string principalId, PartitionRef partition, string collection,
         Capability additionalRequiredCapabilities, Func<IKeyValueView, PrincipalRecord, ResourceDefinition, T> read,
         ReadExecutionBudget? budget = null, Action<IKeyValueView>? beforeResourceAdmission = null)

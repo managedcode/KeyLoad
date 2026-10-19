@@ -5,5 +5,5 @@ namespace KeyLoad.Query;
 /// <param name="Operator">The logical operator.</param>
 /// <param name="Right">The second predicate.</param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.Logical)]
+[Orleans.Alias(ContractAliases.Logical)]
 public sealed record Logical([property: Orleans.Id(0)] Predicate Left, [property: Orleans.Id(1)] string Operator, [property: Orleans.Id(2)] Predicate Right) : Predicate;

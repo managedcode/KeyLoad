@@ -15,7 +15,7 @@ internal sealed record PartitionQueryClusterScenario(
     ImmutableArray<PartitionRef> Partitions,
     ImmutableArray<PartitionQueryClusterInputRow> Inputs,
     SelectQuery Query,
-    ImmutableDictionary<(string TenantId, string DatabaseId, string ResourceName), EntityRefLifetimeV1> ResourceLifetimes)
+    ImmutableDictionary<(string TenantId, string DatabaseId, string ResourceName), EntityRefLifetime> ResourceLifetimes)
 {
     private const string Tenant = "pquery-cluster-tenant";
     private const string Domain = "pquery-cluster-domain";
@@ -51,7 +51,7 @@ internal sealed record PartitionQueryClusterScenario(
         return new(partitions, inputs, CreateQuery(), lifetimes);
     }
 
-    internal PartitionQueryRequestV1 Request(ImmutableArray<PartitionRef>? partitions = null,
+    internal PartitionQueryRequest Request(ImmutableArray<PartitionRef>? partitions = null,
         SelectQuery? query = null)
         => new(PartitionQueryClusterProtocol.Version, partitions ?? Partitions, query ?? Query,
             Parameters: null, AllowFullScan: true, AstVersion: PartitionQueryClusterProtocol.AstVersion);
@@ -101,10 +101,10 @@ internal sealed record PartitionQueryClusterScenario(
             null, [new(PartitionQueryClusterProtocol.RankField, Descending: false)],
             PartitionQueryClusterProtocol.Limit);
 
-    private static async Task<ImmutableDictionary<(string TenantId, string DatabaseId, string ResourceName), EntityRefLifetimeV1>> ConfigureResourcesAsync(KeyLoadClient administrator,
+    private static async Task<ImmutableDictionary<(string TenantId, string DatabaseId, string ResourceName), EntityRefLifetime>> ConfigureResourcesAsync(KeyLoadClient administrator,
         ImmutableArray<PartitionRef> partitions, CancellationToken cancellationToken)
     {
-        var lifetimes = ImmutableDictionary.CreateBuilder<(string TenantId, string DatabaseId, string ResourceName), EntityRefLifetimeV1>();
+        var lifetimes = ImmutableDictionary.CreateBuilder<(string TenantId, string DatabaseId, string ResourceName), EntityRefLifetime>();
         foreach (var partition in partitions)
         {
             var definition = new ResourceDefinition(PartitionQueryClusterProtocol.Collection,
@@ -126,13 +126,13 @@ internal sealed record PartitionQueryClusterScenario(
         return lifetimes.ToImmutable();
     }
 
-    private static EntityRefLifetimeV1 ExpectedLifetime(Guid commandId, ConfigureResourceRequest request)
+    private static EntityRefLifetime ExpectedLifetime(Guid commandId, ConfigureResourceRequest request)
     {
         var principalId = PartitionStoreProtocol.AdministratorId;
         var fingerprint = DatabaseCommandFingerprint.Compute(commandId, OperationKind.ConfigureResource,
             principalId, JsonSerializer.Serialize(request, JsonDefaults.Options));
         var original = Command<DatabaseCommand>.Create(nameof(DatabaseCommand),
-            new DatabaseCommand(OperationKind.ConfigureResource, NativeSerialization.Serialize(request), fingerprint), commandId);
+            new DatabaseCommand(OperationKind.ConfigureResource, OrleansSerialization.Serialize(request), fingerprint), commandId);
         original.UserId = principalId;
         var lifetime = ResourceLifetimeIdentity.Create(original, request.TenantId, request.DatabaseId, request.Definition);
         return new(lifetime.Incarnation.Value);

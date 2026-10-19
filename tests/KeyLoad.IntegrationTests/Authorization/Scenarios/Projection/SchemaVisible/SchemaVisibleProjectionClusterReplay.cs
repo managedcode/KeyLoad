@@ -1,6 +1,6 @@
 using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.ClusterReplication;
-using KeyLoad.IntegrationTests.Features.ClusterRouting;
+using KeyLoad.IntegrationTests.Features.StorageReplication;
+using KeyLoad.IntegrationTests.Features.OrleansExecution;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
 using P = KeyLoad.IntegrationTests.Features.Authorization.SchemaVisibleProjectionClusterProtocol;
 using S = KeyLoad.IntegrationTests.Features.Authorization.SafeProjectorOperationClusterProtocol;
@@ -18,7 +18,7 @@ internal static class SchemaVisibleProjectionClusterReplay
         history.PublicPatch = command;
         history.PublicReceipt = receipt;
         await SafeProjectorOperationClusterReceipts.PatchAsync(receipt, history.State, command.CommandId, history.Revision);
-        await NativeSubmissionColdAssertions.ReceiptAsync(receipt,
+        await SubmissionColdAssertions.ReceiptAsync(receipt,
             new CommitReceipt(command.CommandId, receipt.Token,
                 [new(S.PatchKind, history.State.Collection, S.First, S.UpdatedRevision)],
                 DurabilityProfile.ProcessDurable, 3));
@@ -55,7 +55,7 @@ internal static class SchemaVisibleProjectionClusterReplay
         {
             var actual = await McpCallerAssertions.SdkSuccessAsync(await issuer.Sdk.CommitAsync(request, token));
             await SqlClusterProtocol.EqualAsync(expected, actual);
-            await NativeSubmissionColdAssertions.ReceiptAsync(actual, expected);
+            await SubmissionColdAssertions.ReceiptAsync(actual, expected);
         }, token);
         await SafeProjectorOperationClusterImages.ObserveAsync(root, history, async () =>
         {
@@ -65,7 +65,7 @@ internal static class SchemaVisibleProjectionClusterReplay
                 .Contains(PrivateReferencesProperty, StringComparison.OrdinalIgnoreCase)).IsFalse();
             var actual = (await McpCallerAssertions.SuccessAsync<CommitReceipt>(reply)).Value;
             await SqlClusterProtocol.EqualAsync(expected, actual);
-            await NativeSubmissionColdAssertions.ReceiptAsync(actual, expected);
+            await SubmissionColdAssertions.ReceiptAsync(actual, expected);
         }, token);
     }
 

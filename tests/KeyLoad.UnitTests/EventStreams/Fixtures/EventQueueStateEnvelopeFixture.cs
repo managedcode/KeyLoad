@@ -57,7 +57,7 @@ internal sealed class EventQueueStateEnvelopeFixture : IDisposable
     internal void Reopen()
     {
         RequireOriginalRoot();
-        var identity = KeyLoad.UnitTests.Features.StorageRecovery.Assertions.NativeReadCutStoreStateAssertions.SnapshotIdentity(Store);
+        var identity = KeyLoad.UnitTests.Features.StorageRecovery.Assertions.ReadCutStoreStateAssertions.SnapshotIdentity(Store);
         Store.Dispose();
         Store = new(new(Owner.Directory)
         {

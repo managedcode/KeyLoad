@@ -4,7 +4,7 @@ namespace KeyLoad.UnitTests.Features.ChangeFeeds;
 
 internal static class FeedDeleteClassificationFlow
 {
-    private const string MissingResult = "The joined native deletion cold flow must retain its complete continuation.";
+    private const string MissingResult = "The joined execution deletion cold flow must retain its complete continuation.";
 
     internal static async Task RunAsync()
     {
@@ -51,9 +51,9 @@ internal static class FeedDeleteClassificationFlow
             [new PutDocument(FeedVertexAuthorityFixture.Collection, FeedDeleteClassificationFixture.Id,
                 FeedDeleteClassificationFixture.RestoredJson, 3L, ExplicitReplacement: true)]);
         token.ThrowIfCancellationRequested();
-        var result = FeedNativeHealthyAdmission.Submit(owner,
+        var result = FeedHealthyAdmission.Submit(owner,
             owner.CreateCommand(OperationKind.Batch, command.CommandId, FeedVertexAuthorityFixture.Root,
-                state.Source.CommittedAt, NativeSerialization.Serialize(command)),
+                state.Source.CommittedAt, OrleansSerialization.Serialize(command)),
             explicitTime: true, token);
         var receipt = result.Get<CommitReceipt>();
         await FeedVertexAuthorityAssertions.ReceiptAsync(command, receipt,

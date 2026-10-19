@@ -8,13 +8,13 @@ namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 internal static class IsolatedKurrentCleanupChecks
 {
-    /// <summary>AC-ISO-005/006: actual bounded deletion preserves an independently owned native stream.</summary>
+    /// <summary>AC-ISO-005/006: actual bounded deletion preserves an independently owned execution stream.</summary>
     internal static async Task VerifyAsync(DistributedApplication app, int nodeCount, CancellationToken token)
     {
-        using var deadlineTimeout = new CancellationTokenSource(NativeExecutionPolicyFixture.Lifecycle().Value.KurrentCleanupHostTimeout, TimeProvider.System);
+        using var deadlineTimeout = new CancellationTokenSource(ExecutionPolicyFixture.Lifecycle().Value.KurrentCleanupHostTimeout, TimeProvider.System);
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(token, deadlineTimeout.Token);
         var endpoint = await IsolatedKurrentCleanupChecksGossip.ReadLeaderAsync(app, nodeCount, deadline.Token);
-        var owner = new NativeProbeOwner(endpoint);
+        var owner = new ProbeOwner(endpoint);
         ExceptionDispatchInfo? primary = null;
         try
         {
@@ -32,35 +32,35 @@ internal static class IsolatedKurrentCleanupChecks
         }
     }
 
-    private static async Task SeedAsync(NativeProbeOwner owner, CancellationToken token)
+    private static async Task SeedAsync(ProbeOwner owner, CancellationToken token)
     {
         owner.Writer = owner.CreateClient();
         await owner.Writer.AppendToStreamAsync(owner.Foreign, StreamState.NoStream, [owner.Expected], cancellationToken: token);
         owner.ForeignOwned = true;
-        for (var index = 0; index < IsolatedKurrentCleanupChecksNative.PrivateCount; index++)
+        for (var index = 0; index < RuntimeIsolatedKurrentCleanupChecks.PrivateCount; index++)
         {
-            var stream = IsolatedKurrentCleanupChecksNative.PrivatePrefix + Guid.NewGuid().ToString(KurrentConstants.GuidFormat);
+            var stream = RuntimeIsolatedKurrentCleanupChecks.PrivatePrefix + Guid.NewGuid().ToString(KurrentConstants.GuidFormat);
             await owner.Writer.AppendToStreamAsync(stream, StreamState.NoStream,
-                [IsolatedKurrentCleanupChecksNative.CreateEvent()], cancellationToken: token);
+                [RuntimeIsolatedKurrentCleanupChecks.CreateEvent()], cancellationToken: token);
             owner.PrivateStreams.Add(stream);
         }
     }
 
-    private static async Task DeleteAndVerifyAsync(NativeProbeOwner owner, CancellationToken token)
+    private static async Task DeleteAndVerifyAsync(ProbeOwner owner, CancellationToken token)
     {
         var writer = owner.Writer ?? throw new InvalidOperationException(KurrentConstants.NotInitialized);
         var streams = owner.PrivateStreams.ToArray();
         owner.PrivateDeletionStarted = true;
         owner.Clients.Remove(writer);
-        // Ownership transfers to the actual production cleanup, even when native deletion fails.
-        var diagnostic = await KurrentOwnedStreamCleanup.RunAsync(writer, streams, [writer], [], NativeExecutionPolicyFixture.Lifecycle(), NativeExecutionPolicyFixture.ReadDiagnostics(), TimeProvider.System, token);
-        await IsolatedKurrentCleanupChecksNative.RequireCompleteAsync(diagnostic, streams.Length);
+        // Ownership transfers to the actual production cleanup, even when execution deletion fails.
+        var diagnostic = await KurrentOwnedStreamCleanup.RunAsync(writer, streams, [writer], [], ExecutionPolicyFixture.Lifecycle(), ExecutionPolicyFixture.ReadDiagnostics(), TimeProvider.System, token);
+        await RuntimeIsolatedKurrentCleanupChecks.RequireCompleteAsync(diagnostic, streams.Length);
         var reader = owner.CreateClient();
-        await IsolatedKurrentCleanupChecksNative.RequireDeletedAsync(reader, streams, token);
+        await RuntimeIsolatedKurrentCleanupChecks.RequireDeletedAsync(reader, streams, token);
         await KurrentReplicaProbe.RequireOriginalEventAsync(reader, owner.Foreign, owner.Expected, token);
     }
 
-    private static async Task CleanupRemainingAsync(NativeProbeOwner owner, ExceptionDispatchInfo? primary)
+    private static async Task CleanupRemainingAsync(ProbeOwner owner, ExceptionDispatchInfo? primary)
     {
         // Unknown effects after an attempted deletion are never retried by the fixture.
         var streams = owner.PrivateDeletionStarted ? [] : owner.PrivateStreams.ToArray();
@@ -80,7 +80,7 @@ internal static class IsolatedKurrentCleanupChecks
             owner.Clients.Clear();
             try
             {
-                await KurrentOwnedStreamCleanup.RunAsync(null, streams, untransferred, [], NativeExecutionPolicyFixture.Lifecycle(), NativeExecutionPolicyFixture.ReadDiagnostics(), TimeProvider.System, CancellationToken.None);
+                await KurrentOwnedStreamCleanup.RunAsync(null, streams, untransferred, [], ExecutionPolicyFixture.Lifecycle(), ExecutionPolicyFixture.ReadDiagnostics(), TimeProvider.System, CancellationToken.None);
             }
             finally
             {
@@ -92,7 +92,7 @@ internal static class IsolatedKurrentCleanupChecks
         owner.Clients.Clear();
         try
         {
-            await KurrentOwnedStreamCleanup.RunAsync(writer, streams, clients, [], NativeExecutionPolicyFixture.Lifecycle(), NativeExecutionPolicyFixture.ReadDiagnostics(), TimeProvider.System, CancellationToken.None);
+            await KurrentOwnedStreamCleanup.RunAsync(writer, streams, clients, [], ExecutionPolicyFixture.Lifecycle(), ExecutionPolicyFixture.ReadDiagnostics(), TimeProvider.System, CancellationToken.None);
         }
         catch (Exception)
         {
@@ -101,7 +101,7 @@ internal static class IsolatedKurrentCleanupChecks
         }
     }
 
-    private sealed class NativeProbeOwner(Uri endpoint)
+    private sealed class ProbeOwner(Uri endpoint)
     {
         internal List<KurrentDBClient> Clients { get; } = [];
         internal List<string> PrivateStreams { get; } = [];
@@ -117,12 +117,12 @@ internal static class IsolatedKurrentCleanupChecks
         {
             get; set;
         }
-        internal string Foreign { get; } = IsolatedKurrentCleanupChecksNative.ForeignPrefix + Guid.NewGuid().ToString(KurrentConstants.GuidFormat);
-        internal KurrentEventData Expected { get; } = IsolatedKurrentCleanupChecksNative.CreateEvent();
+        internal string Foreign { get; } = RuntimeIsolatedKurrentCleanupChecks.ForeignPrefix + Guid.NewGuid().ToString(KurrentConstants.GuidFormat);
+        internal KurrentEventData Expected { get; } = RuntimeIsolatedKurrentCleanupChecks.CreateEvent();
 
         internal KurrentDBClient CreateClient()
         {
-            var client = IsolatedKurrentCleanupChecksNative.CreateClient(endpoint);
+            var client = RuntimeIsolatedKurrentCleanupChecks.CreateClient(endpoint);
             Clients.Add(client);
             return client;
         }

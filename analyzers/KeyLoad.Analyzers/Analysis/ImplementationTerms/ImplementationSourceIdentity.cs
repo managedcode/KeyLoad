@@ -16,7 +16,7 @@ internal static class ImplementationSourceIdentity
         if (attribute?.ArgumentList is not { Arguments.Count: 2 } arguments ||
             model.GetSymbolInfo(attribute, token).Symbol is not IMethodSymbol constructor ||
             constructor.ContainingType.ToDisplayString() != "System.Reflection.AssemblyMetadataAttribute" ||
-            !ImplementationTermSymbols.Native(constructor) ||
+            !ImplementationTermSymbols.Execution(constructor) ||
             model.GetConstantValue(arguments.Arguments[0].Expression, token).Value is not
                 "KeyLoad.FunctionalCompileIdentity.Source" ||
             model.GetConstantValue(arguments.Arguments[1].Expression, token).Value is not string identity)

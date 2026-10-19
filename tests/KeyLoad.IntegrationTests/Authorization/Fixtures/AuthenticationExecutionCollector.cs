@@ -48,8 +48,8 @@ internal sealed class AuthenticationExecutionCollector
             => owner.Add(new(index, httpRequestId, authenticateRequestId, AuthenticationExecutionEventKind.Started));
         public void Terminal(string httpRequestId, Guid authenticateRequestId, DatabasePhaseOutcome outcome)
             => owner.Add(new(index, httpRequestId, authenticateRequestId, AuthenticationExecutionEventKind.Terminal, outcome));
-        public void Ticket(string httpRequestId, string nativeSubject, DatabaseAuthenticationTicketSnapshot ticket)
+        public void Ticket(string httpRequestId, string runtimeSubject, DatabaseAuthenticationTicketSnapshot ticket)
             => owner.Add(new(index, httpRequestId, Guid.Empty, AuthenticationExecutionEventKind.Ticket,
-                Subject: nativeSubject, Ticket: ticket));
+                Subject: runtimeSubject, Ticket: ticket));
     }
 }

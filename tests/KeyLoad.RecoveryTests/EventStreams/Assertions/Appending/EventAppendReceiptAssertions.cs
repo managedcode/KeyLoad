@@ -24,8 +24,8 @@ internal static class EventAppendReceiptAssertions
         var expected = new[] { new MutationReceipt(PutKind, EventAppendCrashContract.Documents, EventAppendCrashContract.Producer, 1),
             new MutationReceipt(AppendKind, EventAppendCrashContract.Streams, EventAppendCrashContract.StreamId, 2),
             new MutationReceipt(EnqueueKind, EventAppendCrashContract.Queue, EventAppendCrashContract.Producer, 1) };
-        await Assert.That(receipt.Mutations.Select(value => Convert.ToHexString(NativeSerialization.Serialize(value))))
-            .IsEquivalentTo(expected.Select(value => Convert.ToHexString(NativeSerialization.Serialize(value))), CollectionOrdering.Matching);
+        await Assert.That(receipt.Mutations.Select(value => Convert.ToHexString(OrleansSerialization.Serialize(value))))
+            .IsEquivalentTo(expected.Select(value => Convert.ToHexString(OrleansSerialization.Serialize(value))), CollectionOrdering.Matching);
     }
 
     internal static async Task VerifyOutboxAsync(IAtomicStore store, CommitReceipt receipt, long seedTail, DateTimeOffset time)
@@ -40,8 +40,8 @@ internal static class EventAppendReceiptAssertions
             await Assert.That(entry.Ordinal).IsEqualTo(index);
             await Assert.That(entry.CommittedAt).IsEqualTo(time);
             await Assert.That(entry.Before).IsNull();
-            await Assert.That(Convert.ToHexString(NativeSerialization.Serialize(entry.Receipt)))
-                .IsEqualTo(Convert.ToHexString(NativeSerialization.Serialize(receipt.Mutations[index])));
+            await Assert.That(Convert.ToHexString(OrleansSerialization.Serialize(entry.Receipt)))
+                .IsEqualTo(Convert.ToHexString(OrleansSerialization.Serialize(receipt.Mutations[index])));
             var producer = receipt.CommandId == EventAppendCrashContract.CommandId ? EventAppendCrashContract.Producer : EventAppendCrashContract.Healthy;
             var request = EventAppendCrashContract.ProducerCommand(receipt.CommandId, producer, producer == EventAppendCrashContract.Producer ? 1 : 2);
             await Assert.That(JsonSerializer.Serialize(entry.Mutation, JsonDefaults.Options))
@@ -50,8 +50,8 @@ internal static class EventAppendReceiptAssertions
             {
                 var reference = await EventAppendCollectionAssertions.ReferenceAsync(store, producer);
                 var image = new DocumentRecord(reference, 1L, EventAppendCrashContract.DocumentJson, new(), time);
-                await Assert.That(Convert.ToHexString(NativeSerialization.Serialize(entry.After)))
-                    .IsEqualTo(Convert.ToHexString(NativeSerialization.Serialize(image)));
+                await Assert.That(Convert.ToHexString(OrleansSerialization.Serialize(entry.After)))
+                    .IsEqualTo(Convert.ToHexString(OrleansSerialization.Serialize(image)));
             }
             else
             {
@@ -81,11 +81,11 @@ internal static class EventAppendReceiptAssertions
         var expected = new[] { new MutationReceipt(PutKind, EventAppendCrashContract.Documents, EventAppendCrashContract.Healthy, 1),
             new MutationReceipt(AppendKind, EventAppendCrashContract.Streams, EventAppendCrashContract.StreamId, 3),
             new MutationReceipt(EnqueueKind, EventAppendCrashContract.Queue, EventAppendCrashContract.Healthy, 1) };
-        await Assert.That(receipt.Mutations.Select(value => Convert.ToHexString(NativeSerialization.Serialize(value))))
-            .IsEquivalentTo(expected.Select(value => Convert.ToHexString(NativeSerialization.Serialize(value))), CollectionOrdering.Matching);
+        await Assert.That(receipt.Mutations.Select(value => Convert.ToHexString(OrleansSerialization.Serialize(value))))
+            .IsEquivalentTo(expected.Select(value => Convert.ToHexString(OrleansSerialization.Serialize(value))), CollectionOrdering.Matching);
     }
 
     internal static async Task SameResultAsync(Result<object> expected, Result<object> actual)
-        => await Assert.That(NativeSerialization.Serialize(actual).AsSpan()
-            .SequenceEqual(NativeSerialization.Serialize(expected))).IsTrue();
+        => await Assert.That(OrleansSerialization.Serialize(actual).AsSpan()
+            .SequenceEqual(OrleansSerialization.Serialize(expected))).IsTrue();
 }

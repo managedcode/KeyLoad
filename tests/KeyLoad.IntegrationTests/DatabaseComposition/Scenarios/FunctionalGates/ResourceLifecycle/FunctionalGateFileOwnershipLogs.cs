@@ -1,12 +1,12 @@
 using System.Text;
 using Aspire.Hosting.ApplicationModel;
-using KeyLoad.IntegrationTests.Features.ClusterReplication;
+using KeyLoad.IntegrationTests.Features.StorageReplication;
 using Microsoft.Extensions.DependencyInjection;
 using P = KeyLoad.IntegrationTests.Features.DatabaseComposition.FunctionalGateFileOwnershipProtocol;
 
 namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
 
-/// <summary>Retains the original bounded native refusal prefix while separating batch traversal from stream ownership.</summary>
+/// <summary>Retains the original bounded execution refusal prefix while separating batch traversal from stream ownership.</summary>
 internal static class FunctionalGateFileOwnershipLogs
 {
     internal static async Task<string> ReadAsync(FunctionalGateFixture fixture, string name, CancellationToken token)

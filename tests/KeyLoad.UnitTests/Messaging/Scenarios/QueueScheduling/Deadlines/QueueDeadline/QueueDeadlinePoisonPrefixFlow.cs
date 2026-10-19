@@ -21,11 +21,11 @@ internal static class QueueDeadlinePoisonPrefixFlow
     {
         token.ThrowIfCancellationRequested();
         using var fixture = new TestDatabase();
-        fixture.Configure(QueueDeadlineNativeProtocol.Queue, ResourceKind.WorkQueue);
-        var lane = new QueueLaneRef(fixture.Partition, QueueDeadlineNativeProtocol.Queue);
+        fixture.Configure(RuntimeQueueDeadlineProtocol.Queue, ResourceKind.WorkQueue);
+        var lane = new QueueLaneRef(fixture.Partition, RuntimeQueueDeadlineProtocol.Queue);
         var start = QueueWholeFlowStorage.Clock(fixture.Store);
         var due = start.AddSeconds(DueSeconds);
-        QueueDeadlineNativeOperations.ConfigureWorker(fixture.Database, lane.Partition, start,
+        QueueDeadlineOperations.ConfigureWorker(fixture.Database, lane.Partition, start,
             Capability.QueueConsume | Capability.QueueInspect | Capability.QueueAck, QueueDeadlinePoisonPrefixProtocol.First);
         var seeded = await QueueDeadlinePoisonPrefixSeed.RunAsync(fixture.Database, fixture.Store, lane, start, due, token);
         var family = leased ? QueueDeadlineRecordDecoder.Leased : QueueDeadlineRecordDecoder.Scheduled;
@@ -41,7 +41,7 @@ internal static class QueueDeadlinePoisonPrefixFlow
         await QueueDeadlinePoisonPrefixAssertions.CursorAndCancellationAsync(fixture.Database, fixture.Store, due, token);
         var damaged = QueueWholeFlowStorage.Bytes(fixture.Store);
         var position = fixture.Store.Position;
-        var identity = NativeSerialization.Serialize(fixture.Store.Identity);
+        var identity = OrleansSerialization.Serialize(fixture.Store.Identity);
         var cursor = QueueDeadlineCursor.Match(fixture.Store.Identity, null);
         if (leased)
         {
@@ -137,15 +137,15 @@ internal static class QueueDeadlinePoisonPrefixFlow
             foreach (var hint in page.Jobs)
             {
                 var command = new CommandRequest(Guid.NewGuid(), lane.Partition, [hint.Mutation]);
-                var operation = database.PrepareQueueRetryOperation(database.OwnCommand(database.CreateCommand(OperationKind.Batch, command.CommandId, QueueDeadlineNativeProtocol.Worker, due, System.Text.Json.JsonSerializer.Serialize(command, JsonDefaults.Options))));
+                var operation = database.PrepareQueueRetryOperation(database.OwnCommand(database.CreateCommand(OperationKind.Batch, command.CommandId, RuntimeQueueDeadlineProtocol.Worker, due, System.Text.Json.JsonSerializer.Serialize(command, JsonDefaults.Options))));
                 var placement = database.ReadAtomicPartitionPlacement(QueueDeadlinePoisonPrefixProtocol.Root, lane.Partition);
                 var expected = new CommitReceipt(command.CommandId, new(placement.Incarnation,
                     lane.Partition.AtomicPartitionId, checked(store.Position + QueueDeadlinePoisonPrefixProtocol.First)), [new(QueueDeadlineProtocol.ReceiptKind, lane.Queue, hint.Mutation.MessageId, hint.Mutation.ExpectedStateVersion + QueueDeadlinePoisonPrefixProtocol.First)], DurabilityProfile.ProcessDurable, 1);
                 var result = database.Apply(operation);
                 await Assert.That(Errors.Code(result.Problem)).IsNull();
 
-                await Assert.That(NativeSerialization.Serialize(result.Get<CommitReceipt>()).SequenceEqual(
-                    NativeSerialization.Serialize(expected))).IsTrue();
+                await Assert.That(OrleansSerialization.Serialize(result.Get<CommitReceipt>()).SequenceEqual(
+                    OrleansSerialization.Serialize(expected))).IsTrue();
                 outcomes.Add((operation, result));
             }
             if (outcomes.Any(item => item.Result.Get<CommitReceipt>().Mutations.Any(mutation => mutation.Id == target))
@@ -162,12 +162,12 @@ internal static class QueueDeadlinePoisonPrefixFlow
     {
         var bytes = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
-        var identity = NativeSerialization.Serialize(store.Identity);
+        var identity = OrleansSerialization.Serialize(store.Identity);
         foreach (var item in outcomes)
         {
             token.ThrowIfCancellationRequested();
-            await NativeReplayResultAssertions.Same<CommitReceipt>(database.Apply(item.Operation), item.Result);
-            await NativeReplayResultAssertions.Same<CommitReceipt>(database.ResolveOutcome(item.Operation), item.Result);
+            await ReplayResultAssertions.Same<CommitReceipt>(database.Apply(item.Operation), item.Result);
+            await ReplayResultAssertions.Same<CommitReceipt>(database.ResolveOutcome(item.Operation), item.Result);
         }
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, bytes, position, identity);
     }

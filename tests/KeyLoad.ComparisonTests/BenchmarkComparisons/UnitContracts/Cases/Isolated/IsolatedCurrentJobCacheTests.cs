@@ -76,7 +76,7 @@ internal sealed class IsolatedCurrentJobCacheTests
     }
 
     [Test]
-    public async Task AcNgr001CancellationJoinsWaitAndTheOriginalNativeChild()
+    public async Task AcNgr001CancellationJoinsWaitAndTheOriginalChild()
     {
         var token = TestContext.Current!.Execution.CancellationToken;
         var wait = await IsolatedCurrentJobCacheNodeProbe.RunRefreshWaitCancellationAsync(token);
@@ -84,7 +84,7 @@ internal sealed class IsolatedCurrentJobCacheTests
         {
             await Assert.That(document.RootElement.GetProperty(Result).GetProperty(Rejected).GetBoolean()).IsTrue();
         }
-        using var directory = new NativeArtifactTestDirectory();
+        using var directory = new ArtifactTestDirectory();
         await VerifyChildStopsAsync(directory.Root, "cancel", 1024, token);
         await VerifyChildStopsAsync(directory.Root, "overflow", 32, token);
     }

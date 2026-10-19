@@ -22,7 +22,7 @@ internal static class AtomicTriadOutboxImage
             var page = view.Scan(KeySpace.Partition(family, partition), InventoryBound);
             if (page.HasMore)
             {
-                throw new InvalidOperationException("The complete mixed-model image exceeded its native bound.");
+                throw new InvalidOperationException("The complete mixed-model image exceeded its execution bound.");
             }
             rows.AddRange(page.Records.Select(row => Convert.ToHexString(row.Key.Span) + ":" + Convert.ToHexString(row.Value.Span)));
         }
@@ -36,8 +36,8 @@ internal static class AtomicTriadOutboxImage
             await Assert.That(actual is null && expected is null).IsTrue();
             return;
         }
-        await Assert.That(NativeSerialization.Serialize(actual))
-            .IsEquivalentTo(NativeSerialization.Serialize(expected), CollectionOrdering.Matching);
+        await Assert.That(OrleansSerialization.Serialize(actual))
+            .IsEquivalentTo(OrleansSerialization.Serialize(expected), CollectionOrdering.Matching);
     }
 
     internal static async Task AbsentAsync(DatabaseEngine engine, PartitionRef partition)

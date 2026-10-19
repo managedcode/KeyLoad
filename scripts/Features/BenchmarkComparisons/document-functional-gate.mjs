@@ -5,23 +5,23 @@ import { fileURLToPath } from 'node:url';
 import { GH, requireGitHub, canonicalJobUrl } from './isolated-github-contract.mjs';
 import { validateSuccessfulJob, validateArtifact, uniqueNamed, projectJob, projectArtifact } from './isolated-github-validation.mjs';
 import { downloadArtifact } from './isolated-github-api.mjs';
-import { inspectNativeZip, extractNativeEntry } from './isolated-github-zip.mjs';
+import { inspectZip, extractEntry } from './isolated-github-zip.mjs';
 import { validateDownloadedArchive } from './isolated-github-stream.mjs';
 import { hashRegularFile, readJson } from './isolated-github-files.mjs';
-import { createDirectory } from './native-files.mjs';
+import { createDirectory } from './files.mjs';
 import { validateFunctionalProcesses } from './functional-process-evidence.mjs';
-import { validateNativeProcess } from './session-process-identity.mjs';
-import { runBounded } from './native-process.mjs';
+import { validateProcess } from './session-process-identity.mjs';
+import { runBounded } from './process.mjs';
 import { exactKeys, AGGREGATE } from './aggregate-contracts.mjs';
 
 export const FUNCTIONAL = Object.freeze({
   job: 'KeyLoad functional CLUSTER million-record ingestion', artifact: 'keyload-functional-heavy-load',
-  steps: Object.freeze(['Test exclusive heavy-load admission', 'Test ingestion while SDK and MCP reads are active', 'Save original functional load results and native process receipts']),
+  steps: Object.freeze(['Test exclusive heavy-load admission', 'Test ingestion while SDK and MCP reads are active', 'Save original functional load results and execution process receipts']),
   archive: 'archives/keyload-functional-heavy-load.zip',
   className: 'KeyLoad.IntegrationTests.Features.DocumentStorage.HeavyDocumentLoadClusterTests',
   methodName: 'MillionAcknowledgedDocumentsRemainCorrectDuringSdkAndOfficialMcpReads',
-  files: Object.freeze(['github/functional/original.trx', 'github/functional/native-process-startup.json',
-    'github/functional/native-process-before-shutdown.json', 'github/functional/native-process-shutdown.json']),
+  files: Object.freeze(['github/functional/original.trx', 'github/functional/execution-process-startup.json',
+    'github/functional/execution-process-before-shutdown.json', 'github/functional/execution-process-shutdown.json']),
   maximumBytes: 33554432,
 });
 
@@ -58,7 +58,7 @@ export function validateDocumentFunctionalProof(proof, cohort) {
     && proof.test.className === FUNCTIONAL.className && proof.test.methodName === FUNCTIONAL.methodName
     && proof.test.instanceName === FUNCTIONAL.methodName && proof.test.count === 1
     && Array.isArray(proof.processes) && proof.processes.length === 3);
-  for (const [index, process] of proof.processes.entries()) validateNativeProcess(process, 'server', 'node' + (index + 1));
+  for (const [index, process] of proof.processes.entries()) validateProcess(process, 'server', 'node' + (index + 1));
   return proof;
 }
 
@@ -94,20 +94,20 @@ export async function collectDocumentFunctionalGate(output, capture, context, ru
   const archive = path.join(output, FUNCTIONAL.archive);
   await downloadArtifact(selected.artifact, archive, GH.workerZipBytes, context);
   await validateDownloadedArchive(archive, selected.artifact, GH.workerZipBytes);
-  const entries = originalEntries(await inspectNativeZip(archive, [], path.join(output, 'github/functional-inventory.txt'), context));
+  const entries = originalEntries(await inspectZip(archive, [], path.join(output, 'github/functional-inventory.txt'), context));
   await createDirectory(path.join(output, 'github/functional'));
   const files = [];
   for (const [index, entry] of entries.entries()) {
-    const raw = await extractNativeEntry(archive, entry, path.join(output, FUNCTIONAL.files[index]), FUNCTIONAL.maximumBytes, context);
+    const raw = await extractEntry(archive, entry, path.join(output, FUNCTIONAL.files[index]), FUNCTIONAL.maximumBytes, context);
     files.push({ path: FUNCTIONAL.files[index], entry, bytes: raw.bytes, sha256: raw.sha256 });
   }
   const raw = await hashRegularFile(archive, GH.workerZipBytes);
-  const test = await parseDocumentFunctionalTrx(path.join(output, FUNCTIONAL.files[0]), context.native.workspace);
+  const test = await parseDocumentFunctionalTrx(path.join(output, FUNCTIONAL.files[0]), context.execution.workspace);
   const processes = validateFunctionalProcesses(...await Promise.all(FUNCTIONAL.files.slice(1)
     .map(file => readJson(path.join(output, file), FUNCTIONAL.maximumBytes))), runtimeIdentity);
   const proof = { job: projectJob(selected.job, context.cohort, FUNCTIONAL.steps), artifact: projectArtifact(selected.artifact),
     archive: { path: FUNCTIONAL.archive, bytes: raw.bytes, sha256: raw.sha256 }, files, test, processes };
-  await verifyDocumentFunctionalGate(output, proof, capture, context.cohort, runtimeIdentity, context.native.workspace);
+  await verifyDocumentFunctionalGate(output, proof, capture, context.cohort, runtimeIdentity, context.execution.workspace);
   return proof;
 }
 
@@ -121,12 +121,12 @@ export async function verifyDocumentFunctionalGate(input, supplied, capture, coh
   requireGitHub(raw.bytes === proof.archive.bytes && raw.sha256 === proof.archive.sha256);
   const temporary = await mkdtemp(path.join(input, '.functional-original-'));
   try {
-    const context = { native: { workspace } };
-    const entries = originalEntries(await inspectNativeZip(archive, [], path.join(temporary, 'inventory.txt'), context));
+    const context = { execution: { workspace } };
+    const entries = originalEntries(await inspectZip(archive, [], path.join(temporary, 'inventory.txt'), context));
     for (const [index, file] of proof.files.entries()) {
       requireGitHub(file.entry === entries[index]);
       const actual = await hashRegularFile(path.join(filesRoot, file.path), FUNCTIONAL.maximumBytes);
-      const original = await extractNativeEntry(archive, file.entry, path.join(temporary, String(index)), FUNCTIONAL.maximumBytes, context);
+      const original = await extractEntry(archive, file.entry, path.join(temporary, String(index)), FUNCTIONAL.maximumBytes, context);
       requireGitHub(actual.bytes === file.bytes && actual.sha256 === file.sha256
         && original.bytes === actual.bytes && original.sha256 === actual.sha256);
     }

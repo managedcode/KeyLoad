@@ -3,7 +3,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.UnitTests;
 
-/// <summary>Validated native observation policy for actual filesystem operation tests.</summary>
+/// <summary>Validated execution observation policy for actual filesystem operation tests.</summary>
 internal static class UnitAdminObservationOptions
 {
     internal static IOptions<AdminObservationOptions> Execution(AdminObservationOptions? configured = null)

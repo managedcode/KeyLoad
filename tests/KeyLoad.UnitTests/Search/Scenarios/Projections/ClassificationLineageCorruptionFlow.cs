@@ -9,7 +9,7 @@ internal static class ClassificationLineageCorruptionFlow
     private const long SingleStorageCommit = 1;
     private const long FaultAndRepairCommits = 2;
     private const string CorruptLineage = "The stored vector projection lineage is corrupt.";
-    private const string NativeDirectory = "classification-corruption-native-text";
+    private const string RuntimeDirectoryCore = "classification-corruption-execution-text";
 
     internal static async Task RunAsync()
     {
@@ -41,7 +41,7 @@ internal static class ClassificationLineageCorruptionFlow
             ?? throw new InvalidOperationException("The original lineage is absent.");
         var vector = fixture.VectorBytes() ?? throw new InvalidOperationException("The original vector is absent.");
         var lineage = fixture.Lineage() ?? throw new InvalidOperationException("The original lineage cannot be read.");
-        var damaged = NativeSerialization.Serialize(lineage with
+        var damaged = OrleansSerialization.Serialize(lineage with
         {
             SourceEventRevision = InvalidEventRevision
         });
@@ -85,9 +85,9 @@ internal static class ClassificationLineageCorruptionFlow
 
     private static async Task HealthyAsync(EventProjectionFixture fixture)
     {
-        var projection = new NativeTextProjection(Path.Combine(fixture.Harness.DirectoryPath, NativeDirectory),
+        var projection = new RuntimeTextProjection(Path.Combine(fixture.Harness.DirectoryPath, RuntimeDirectoryCore),
             UnitExecutionOptions.DatabaseLimits(fixture.Database.Limits), fixture.Harness.Store.Identity.NodeId,
-            UnitNativeTextOptions.Execution());
+            UnitTextOptions.Execution());
         try
         {
             await ClassificationLineageWholeAssertions.HealthyAsync(fixture, projection);

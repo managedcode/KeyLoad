@@ -15,7 +15,7 @@ internal static class GraphVertexAuthorityFault
         var key = DocumentStorageKeys.RecordKey(selected);
         var original = store.Read(view => view.ReadOwnedValue(key))
             ?? throw new InvalidOperationException(OriginalRequired);
-        var record = NativeSerialization.Deserialize<DocumentRecord>(original)
+        var record = OrleansSerialization.Deserialize<DocumentRecord>(original)
             ?? throw new InvalidOperationException(OriginalRequired);
         store.Commit((transaction, _) =>
         {

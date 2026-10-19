@@ -26,11 +26,11 @@
         <RepositoryPath>$([System.String]::Copy($([System.IO.Path]::GetRelativePath('$(_KeyLoadCompileIdentityRoot)', '%(Compile.FullPath)'))).Replace('\','/'))</RepositoryPath>
         <PathTooLong Condition="$([System.String]::Copy($([System.IO.Path]::GetRelativePath('$(_KeyLoadCompileIdentityRoot)', '%(Compile.FullPath)'))).Length) &gt; 4096">true</PathTooLong>
         <!-- Match the original import metadata per item; a same-path counterfeit must not inherit an exclusion. -->
-        <NativeTUnitGenerated>false</NativeTUnitGenerated>
-        <NativeTUnitGenerated Condition="'$(_KeyLoadCompileIdentityTUnitGenerated)' == 'true' and '%(Compile.FullPath)' == '$(_KeyLoadCompileIdentityTUnitSource)' and '%(Compile.DefiningProjectFullPath)' == '$(_KeyLoadCompileIdentityTUnitProps)' and '%(Compile.DefiningProjectDirectory)' == '$(_KeyLoadCompileIdentityTUnitDirectory)' and '%(Compile.Link)' == 'TUnit.Core.GeneratedNamespace.cs' and '%(Compile.Visible)' == 'false'">true</NativeTUnitGenerated>
+        <TUnitGenerated>false</TUnitGenerated>
+        <TUnitGenerated Condition="'$(_KeyLoadCompileIdentityTUnitGenerated)' == 'true' and '%(Compile.FullPath)' == '$(_KeyLoadCompileIdentityTUnitSource)' and '%(Compile.DefiningProjectFullPath)' == '$(_KeyLoadCompileIdentityTUnitProps)' and '%(Compile.DefiningProjectDirectory)' == '$(_KeyLoadCompileIdentityTUnitDirectory)' and '%(Compile.Link)' == 'TUnit.Core.GeneratedNamespace.cs' and '%(Compile.Visible)' == 'false'">true</TUnitGenerated>
       </_KeyLoadCompileIdentityCandidate>
       <_KeyLoadCompileIdentityUserCandidate Include="@(_KeyLoadCompileIdentityCandidate)"
-          Condition="'%(RepositoryPath)' != '' and '%(NativeTUnitGenerated)' != 'true' and !$([System.String]::Copy('%(RepositoryPath)').Contains('/obj/')) and !$([System.String]::Copy('%(RepositoryPath)').Contains('/bin/'))">
+          Condition="'%(RepositoryPath)' != '' and '%(TUnitGenerated)' != 'true' and !$([System.String]::Copy('%(RepositoryPath)').Contains('/obj/')) and !$([System.String]::Copy('%(RepositoryPath)').Contains('/bin/'))">
         <Path>%(RepositoryPath)</Path>
       </_KeyLoadCompileIdentityUserCandidate>
       <_KeyLoadCompileIdentitySource Include="@(_KeyLoadCompileIdentityUserCandidate)"

@@ -51,7 +51,7 @@ internal sealed class TimeSeriesIntensiveDigestTests
         try
         {
             CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("ar-SA");
-            await Assert.That(TimeSeriesIntensiveWorkloadDigest.Compute(UnitBenchmarkOptions.Native())).IsEqualTo(expected);
+            await Assert.That(TimeSeriesIntensiveWorkloadDigest.Compute(UnitBenchmarkOptions.Execution())).IsEqualTo(expected);
         }
         finally
         {
@@ -59,7 +59,7 @@ internal sealed class TimeSeriesIntensiveDigestTests
         }
 
         await Assert.That(TimeSeriesIntensivePlans.CommandId("run-a", "warmup:0:0")).IsNotEqualTo(TimeSeriesIntensivePlans.CommandId("run-b", "warmup:0:0"));
-        await Assert.That(TimeSeriesIntensiveWorkloadDigest.Compute(UnitBenchmarkOptions.Native())).IsEqualTo(expected);
+        await Assert.That(TimeSeriesIntensiveWorkloadDigest.Compute(UnitBenchmarkOptions.Execution())).IsEqualTo(expected);
         await Assert.That(expected.Length).IsEqualTo(64);
     }
 
@@ -67,7 +67,7 @@ internal sealed class TimeSeriesIntensiveDigestTests
     public async Task AcCq034ConfiguredOperationTimeoutChangesOnlyItsIndependentWorkloadFrameAsync()
     {
         const long configuredTicks = 7 * TimeSpan.TicksPerSecond;
-        var execution = UnitBenchmarkOptions.Native();
+        var execution = UnitBenchmarkOptions.Execution();
         execution.Value.OperationTimeout = TimeSpan.FromTicks(configuredTicks);
         execution.Value.Validate();
         var expected = TimeSeriesIntensiveReferenceWorkload.Compute(configuredTicks);

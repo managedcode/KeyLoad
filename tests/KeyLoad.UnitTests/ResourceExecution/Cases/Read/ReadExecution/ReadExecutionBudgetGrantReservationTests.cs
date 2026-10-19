@@ -6,7 +6,7 @@ internal sealed class ReadExecutionBudgetGrantReservationTests
 {
     private const string ExaminedExceededDiagnostic = "The read execution examined-record budget is exceeded.";
     [Test]
-    public async Task ExactLeafGrantsShareOneAggregateNativeByteLedger()
+    public async Task ExactLeafGrantsShareOneAggregateByteLedger()
     {
         var maximumBytes = ReadExecutionBudgetGrantSeed.FirstKey.Length + ReadExecutionBudgetGrantSeed.FirstValue.Length
             + ReadExecutionBudgetGrantSeed.SecondKey.Length + ReadExecutionBudgetGrantSeed.SecondValue.Length;

@@ -2,7 +2,7 @@ using KeyLoad.Client;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
-/// <summary>Private retained ACKs and credentials are never serialized into native evidence.</summary>
+/// <summary>Private retained ACKs and credentials are never serialized into execution evidence.</summary>
 internal sealed record IsolatedKeyLoadFaultChecksSeed(PartitionRef Partition, CommandRequest SentinelCommand,
     CommitReceipt SentinelReceipt, DeliveryCommand Ack, CommitReceipt AckReceipt,
     IsolatedKeyLoadPublicChecksIdentity Reader, int RequiredCopies)

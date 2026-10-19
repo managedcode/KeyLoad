@@ -1,7 +1,7 @@
 using System.Globalization;
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
-using KeyLoad.AppHost.Features.ClusterReplication;
+using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.AppHost.Hosting;
 using KeyLoad.Server;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,7 +22,7 @@ internal static class FunctionalColdReopenProfileModel
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            KeyLoadResources.AddKeyLoad(builder);
+            AppHostProgram.AddKeyLoad(builder);
             var settings = AppHostOptionsRegistration.Get(builder).Control.Value;
             await Assert.That(settings.FunctionalColdReopen).IsEqualTo(cold);
             await Assert.That(settings.ProcessFaults).IsEqualTo(faults);

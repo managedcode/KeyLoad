@@ -5,7 +5,7 @@ namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
 internal sealed class SiteIsolatedGitHubReceiptTests
 {
     [Test]
-    public async Task AC_ISO_009_ActualMetadataRetainsIndependentSourcesAndAllNativeWorkers()
+    public async Task AC_ISO_009_ActualMetadataRetainsIndependentSourcesAndAllWorkers()
     {
         var token = TestContext.Current!.Execution.CancellationToken;
         var inputs = await SiteIsolatedGitHubInputs.ReadAsync(token);
@@ -71,7 +71,7 @@ internal sealed class SiteIsolatedGitHubReceiptTests
             .IsEqualTo(SiteIsolatedInventory.Workers());
     }
 
-    /// <summary>AC-BC-FAIL-003: failure cannot be relabelled successful and failed uploads or native runtime preparation checks remain rejected.</summary>
+    /// <summary>AC-BC-FAIL-003: failure cannot be relabelled successful and failed uploads or execution runtime preparation checks remain rejected.</summary>
     [Test]
     [Arguments("successConclusion")]
     [Arguments("successWorkload")]

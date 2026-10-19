@@ -17,19 +17,19 @@ internal static class SeededWalCorruptionFlow
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(callerToken, originalDeadline.Token);
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            await owner.PhaseAsync(NativeChecksumProfileProtocol.Seed, deadline.Token);
+            await owner.PhaseAsync(ChecksumProfileProtocol.Seed, deadline.Token);
             await trial.CaptureAsync(deadline.Token);
             await trial.DamageAsync(deadline.Token);
         }, failures);
         for (var attempt = 0; attempt < 2; attempt++)
         {
-            await ServerFailureObserver.ObserveAsync(() => owner.PhaseAsync(NativeChecksumProfileProtocol.CorruptionRefusal, deadline.Token), failures);
+            await ServerFailureObserver.ObserveAsync(() => owner.PhaseAsync(ChecksumProfileProtocol.CorruptionRefusal, deadline.Token), failures);
             await ServerFailureObserver.ObserveAsync(() => SeededWalCorruptionFiles.RequireFaultedAsync(trial, deadline.Token), failures);
-            ServerFailureObserver.Observe(() => RecoveryFileInventory.AssertNativeHandlesReleased(trial.Root), failures);
+            ServerFailureObserver.Observe(() => RecoveryFileInventory.AssertHandlesReleased(trial.Root), failures);
         }
         await RepairAsync(trial, failures);
-        foreach (var phase in new[] { NativeChecksumProfileProtocol.FirstAppend,
-            NativeChecksumProfileProtocol.SecondAppend, NativeChecksumProfileProtocol.Cold })
+        foreach (var phase in new[] { ChecksumProfileProtocol.FirstAppend,
+            ChecksumProfileProtocol.SecondAppend, ChecksumProfileProtocol.Cold })
         {
             await ServerFailureObserver.ObserveAsync(() => owner.PhaseAsync(phase, deadline.Token), failures);
             await ServerFailureObserver.ObserveAsync(() => SeededWalCorruptionFiles.RequireOriginalAuthorityAsync(trial, deadline.Token), failures);
@@ -72,6 +72,6 @@ internal static class SeededWalCorruptionFlow
         using var repair = new CancellationTokenSource(TimeSpan.FromSeconds(CommandIdempotencyProcessRecoveryTests.CleanupTimeoutSeconds), TimeProvider.System);
         await ServerFailureObserver.ObserveAsync(() => trial.RepairAsync(repair.Token), failures);
         await ServerFailureObserver.ObserveAsync(() => SeededWalCorruptionFiles.RequireRestoredAsync(trial, repair.Token), failures);
-        ServerFailureObserver.Observe(() => RecoveryFileInventory.AssertNativeHandlesReleased(trial.Root), failures);
+        ServerFailureObserver.Observe(() => RecoveryFileInventory.AssertHandlesReleased(trial.Root), failures);
     }
 }

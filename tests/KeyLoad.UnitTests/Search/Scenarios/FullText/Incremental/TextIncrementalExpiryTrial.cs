@@ -1,0 +1,94 @@
+using KeyLoad.Clustering;
+using KeyLoad.Core;
+using KeyLoad.UnitTests.Features.Messaging;
+using TUnit.Assertions.Enums;
+
+namespace KeyLoad.UnitTests.Features.Search;
+
+/// <summary>Owns only the original genuine page, actual signed expiry and immutable failed execution ACK.</summary>
+internal static class TextIncrementalExpiryTrial
+{
+    private const string ExpiredDetail = "The projection batch token expired.";
+    private const string IncompleteDetail = "The execution text projection does not match the authorized source cut.";
+
+    internal static async Task RunAsync(TestDatabase database, CancellationToken token)
+    {
+        database.Configure(TextBilingualAudit.Collection, ResourceKind.Collection);
+        _ = await TextMaintenanceSeed.CommitAsync(database, token);
+        var request = await TextMaintenanceRequestFixture.CreateAsync(database, token);
+        var original = await PrepareAsync(database, request, token);
+        var retained = await TextIncrementalExpirySnapshot.CaptureAsync(database, request, token);
+        var claims = database.Database.Verify<ProjectionBatchClaims>(original.Token);
+        await Assert.That(claims.Consumer).IsEqualTo(request.Consumer);
+        await Assert.That(claims.IndexGeneration).IsEqualTo(request.IndexGeneration);
+        await Assert.That(claims.Incarnation).IsEqualTo(database.Store.Identity.Incarnation);
+        await WaitForOriginalExpiryAsync(database.Database.EvaluationClock, claims.ExpiresAt, token);
+        await Assert.That(database.Database.EvaluationClock.GetUtcNow()).IsGreaterThanOrEqualTo(claims.ExpiresAt);
+        await retained.RequireAsync(database, token);
+        await TextIncrementalIntentOwner.RunAsync(database, async runtime =>
+        {
+            var begin = await runtime.PhaseAsync(database, request, TextMaintenanceCapabilityKind.Begin, token: token);
+            await Assert.That(OrleansSerialization.Serialize(begin.OriginalCheckpointIntent!).SequenceEqual(OrleansSerialization.Serialize(original))).IsTrue();
+            _ = await runtime.PhaseAsync(database, request, TextMaintenanceCapabilityKind.ApplyIntent, token: token);
+            await RejectCheckpointAsync(database, runtime, request, original, token);
+            await retained.RequireAsync(database, token);
+        });
+        await TextIncrementalExpiryHealthy.RunAsync(database, request, token);
+    }
+
+    private static async Task WaitForOriginalExpiryAsync(TimeProvider clock, DateTimeOffset originalExpiry,
+        CancellationToken cancellationToken)
+    {
+        while (clock.GetUtcNow() < originalExpiry)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var remaining = originalExpiry - clock.GetUtcNow();
+            if (remaining <= TimeSpan.Zero)
+            {
+                break;
+            }
+            var delay = TimeSpan.FromMilliseconds(Math.Ceiling(remaining.TotalMilliseconds));
+            await Task.Delay(delay, clock, cancellationToken);
+        }
+    }
+
+    private static async Task<CommitProjectionBatchRequest> PrepareAsync(TestDatabase database,
+        TextIndexMaintenanceRequest request, CancellationToken token)
+    {
+        CommitProjectionBatchRequest? original = null;
+        await TextIncrementalIntentOwner.RunAsync(database, async runtime =>
+        {
+            var begin = await runtime.PhaseAsync(database, request, TextMaintenanceCapabilityKind.Begin, token: token);
+            var page = database.Database.ReadProjectionBatch(TextMaintenanceTestValues.Principal,
+                new(request.Consumer, ThroughSequence: begin.ReplayUpperSequence));
+            original = new CommitProjectionBatchRequest(Guid.NewGuid(), request.Consumer, page.Token, []);
+            var prepared = await runtime.PhaseAsync(database, request, TextMaintenanceCapabilityKind.PreparePage, page, original, token: token);
+            await Assert.That(OrleansSerialization.Serialize(prepared.OriginalCheckpointIntent!).SequenceEqual(OrleansSerialization.Serialize(original))).IsTrue();
+        });
+        return original ?? throw new InvalidOperationException();
+    }
+
+    private static async Task RejectCheckpointAsync(TestDatabase database, TextMaintenanceTestRuntime runtime,
+        TextIndexMaintenanceRequest request, CommitProjectionBatchRequest original, CancellationToken token)
+    {
+        var before = JsonDefaults.Serialize(database.Database.GetOutboxStatus(TextMaintenanceTestValues.Principal, database.Partition));
+        var failure = database.Submit(OperationKind.CommitProjectionBatch, original, id: original.CommandId);
+        await Assert.That(Errors.Code(failure.Problem)).IsEqualTo(ErrorCode.TokenInvalidated);
+
+        await Assert.That(failure.Value).IsNull();
+        await Assert.That(failure.Problem?.Detail).IsEqualTo(ExpiredDetail);
+        await Assert.That(JsonDefaults.Serialize(database.Database.GetOutboxStatus(TextMaintenanceTestValues.Principal, database.Partition)).SequenceEqual(before)).IsTrue();
+        var image = QueueWholeFlowStorage.Bytes(database.Store);
+        var position = database.Store.Position;
+        var replay = database.Submit(OperationKind.CommitProjectionBatch, original, id: original.CommandId);
+        await Assert.That(OrleansSerialization.Serialize(replay).SequenceEqual(OrleansSerialization.Serialize(failure))).IsTrue();
+        TextMaintenanceCapabilityResult? partial = null;
+        var error = await Assert.ThrowsExactlyAsync<KeyLoadException>(async () => partial =
+            await runtime.PhaseAsync(database, request, TextMaintenanceCapabilityKind.Verify, token: token)) ?? throw new InvalidOperationException();
+        await Assert.That(error.Code).IsEqualTo(ErrorCode.HistoryUnavailable);
+        await Assert.That(error.Message).IsEqualTo(IncompleteDetail);
+        await Assert.That(partial).IsNull();
+        await Assert.That(database.Store.Position).IsEqualTo(position);
+        await Assert.That(QueueWholeFlowStorage.Bytes(database.Store)).IsEquivalentTo(image, CollectionOrdering.Matching);
+    }
+}

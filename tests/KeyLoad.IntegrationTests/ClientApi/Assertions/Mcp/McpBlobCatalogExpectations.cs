@@ -2,7 +2,7 @@ using System.Collections.Immutable;
 
 namespace KeyLoad.IntegrationTests.Features.ClientApi;
 
-/// <summary>Independent public BlobStorage schema and effect expectations for native discovery.</summary>
+/// <summary>Independent public BlobStorage schema and effect expectations for execution discovery.</summary>
 internal static class McpBlobCatalogExpectations
 {
     private const string BeginUpload = "keyload_blobs_begin_upload";

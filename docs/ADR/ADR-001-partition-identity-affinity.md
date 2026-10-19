@@ -16,13 +16,13 @@ This makes authorization, command routing, transaction scope, and idempotency ag
 
 ## Related requirements
 
-`REQ-DSTORE-004`/`AC-DSTORE-004`, `REQ-MSG-005`/`AC-MSG-005`, and `REQ-GRAPH-001`/`AC-GRAPH-001`; see [DocumentStorage](../Features/DocumentStorage.md), [Messaging](../Features/Messaging.md), and [GraphTraversal](../Features/GraphTraversal.md). Cluster routing requirements remain in [ClusterRouting](../Features/ClusterRouting.md); the cluster concept is described in [ADR-136](ADR-136-native-orleans-partition-ownership.md).
+`REQ-DSTORE-004`/`AC-DSTORE-004`, `REQ-MSG-005`/`AC-MSG-005`, and `REQ-GRAPH-001`/`AC-GRAPH-001`; see [DocumentStorage](../Features/DocumentStorage.md), [Messaging](../Features/Messaging.md), and [GraphTraversal](../Features/GraphTraversal.md). Cluster routing requirements remain in [OrleansExecution](../Features/OrleansExecution.md); the cluster concept is described in [ADR-136](ADR-136-orleans-partition-ownership.md).
 
 ## Implementation contract
 
 1. Freeze canonical identity fields, catalog binding validation, and token lineage before changing routing.
 2. Add real tests for cross-domain key reuse, valid shared resources, authorization, and stable command scope.
-3. Implement in `src/KeyLoad.Abstractions/ClusterRouting/` and `src/KeyLoad.Core/ClusterRouting/`; route via the connection grain and the logical partition grain. Preserve the silo-local ZoneTree owner's ownership of stores and locks.
+3. Implement in `src/KeyLoad.Abstractions/StoragePartitions/` and `src/KeyLoad.Core/StoragePartitions/`; route via the connection grain and the logical partition grain. Preserve the silo-local ZoneTree owner's ownership of stores and locks.
 4. Create resources under the canonical catalog binding and reject ambiguous or absent bindings.
 5. GitHub Actions must run TUnit, recovery, and the Aspire replicated cluster through .NET and MCP SDKs; compare stable outcomes across failover.
 

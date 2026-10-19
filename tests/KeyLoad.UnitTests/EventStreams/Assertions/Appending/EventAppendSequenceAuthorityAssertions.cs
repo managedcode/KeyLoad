@@ -45,7 +45,7 @@ internal static class EventAppendSequenceAuthorityAssertions
         var position = store.Position;
         var before = QueueWholeFlowStorage.Bytes(store);
         var actual = QueueWholeFlowStorage.Apply(database, OperationKind.Batch, command, command.CommandId, now);
-        await NativeReplayResultAssertions.Same<CommitReceipt>(actual, original);
+        await ReplayResultAssertions.Same<CommitReceipt>(actual, original);
         await Assert.That(store.Position).IsEqualTo(position);
         await Assert.That(QueueWholeFlowStorage.Bytes(store))
             .IsEquivalentTo(before, TUnit.Assertions.Enums.CollectionOrdering.Matching);

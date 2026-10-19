@@ -26,7 +26,7 @@ public interface IAtomicStore : IDisposable
     /// <param name="read">Action that must not retain the view or borrowed bytes.</param>
     /// <returns>The action's independently owned result.</returns>
     T Read<T>(Func<IKeyValueView, T> read);
-    /// <summary>Runs synchronous discard-only preparation under the native store gate.</summary>
+    /// <summary>Runs synchronous discard-only preparation under the execution store gate.</summary>
     /// <typeparam name="T">Independently owned result type.</typeparam>
     /// <param name="prepare">Callback receiving a scoped child transaction and actual next local position.</param>
     /// <returns>The owned result; no journal, tree, cache publication or durable position is changed.</returns>
@@ -43,7 +43,7 @@ public interface IAtomicStore : IDisposable
     void SetDispatchPaused(bool paused);
     /// <summary>Creates the provider's verified backup in the destination directory.</summary>
     /// <param name="directory">Destination directory owned by the backup caller.</param>
-    /// <param name="cancellationToken">Cancellation checked during native copying and verification.</param>
+    /// <param name="cancellationToken">Cancellation checked during execution copying and verification.</param>
     /// <returns>The captured local storage position.</returns>
     long CreateBackup(string directory, CancellationToken cancellationToken = default);
     /// <summary>Publishes a snapshot of a verified committed store cut.</summary>

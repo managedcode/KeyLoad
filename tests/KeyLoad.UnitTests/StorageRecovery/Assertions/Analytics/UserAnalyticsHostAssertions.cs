@@ -40,6 +40,6 @@ internal static class UserAnalyticsHostAssertions
     }
 
     internal static async Task SameAsync<T>(T expected, T actual)
-        => await Assert.That(Convert.ToHexString(NativeSerialization.Serialize(actual)))
-            .IsEqualTo(Convert.ToHexString(NativeSerialization.Serialize(expected)));
+        => await Assert.That(Convert.ToHexString(OrleansSerialization.Serialize(actual)))
+            .IsEqualTo(Convert.ToHexString(OrleansSerialization.Serialize(expected)));
 }

@@ -30,7 +30,7 @@ Related: `REQ-MSG-001..003/AC-MSG-001..003`, ADR-023/024/027/029/030.
 
 1. Freeze lease-token fields, dedup identity/horizon, supported atomic scope, and external-side-effect caveat.
 2. Test lost claim/ACK response, stale and expired worker, changed fingerprint, permission revocation, quota failure, process kill, and reopen with real store/process.
-3. Implement lease state and inbox effect transaction in `src/KeyLoad.Core/Messaging/`; keep worker transport in the ClientApi/Messaging boundary and Orleans routing in its existing ClusterRouting slice.
+3. Implement lease state and inbox effect transaction in `src/KeyLoad.Core/Messaging/`; keep worker transport in the ClientApi/Messaging boundary and Orleans routing in its existing OrleansExecution slice.
 4. Fence stale token generations. Rollback may restore only a verified cut matching retained inbox receipts and canonical effects; assign a new/fenced identity, keep delivery paused, and reconcile before redelivery. Never reactivate stale lease tokens or repeat a known canonical effect. The current wire and persisted-data formats remain fixed.
 5. Run GitHub TUnit, process recovery, and replicated-cluster SDK/MCP races; publish only exact-SHA evidence.
 
@@ -43,14 +43,14 @@ request/result, ordering, bounded admission, per-lane authorization/read-cut,
 atomicity, cancellation and uncertainty contract is in
 [Messaging](../Features/Messaging.md).
 
-Implement in order: freeze that contract; add native attributed Messaging types
+Implement in order: freeze that contract; add attributed Messaging types
 and centrally validated lane ceiling; compose existing claims through the connection grain
-and joined native Communication CQRS streams; bind one SDK/HTTP/MCP
+and joined Communication CQRS streams; bind one SDK/HTTP/MCP
 operation and its SQL CALL inventory; add real ZoneTree and public replicated-cluster whole flows;
-then run every required native gate and retain original results before status
+then run every required gate and retain original results before status
 changes. Existing identity and commit lifetimes are reused, no new
 scheduler, read-cut authority, persisted group receipt or cross-partition commit.
-Explicit request-to-request graph permission is limited to the existing native
+Explicit request-to-request graph permission is limited to the existing execution
 ExecuteStreamAsync transition; a multi-lane parent only emits ordinary Receive
 children and cannot recursively emit multi-lane children. Field aliases/IDs of
 existing persisted claims remain fixed. Rollback drains the new ingress while
@@ -59,7 +59,7 @@ preserving committed lease/receipt recovery.
 ```mermaid
 flowchart LR
   API[SDK / MCP / SQL CALL] --> Parent[Connection grain]
-  Parent --> Child[One native Receive call at a time]
+  Parent --> Child[One Receive call at a time]
   Child --> Owner[Silo-local ZoneTree owner]
   Owner --> Outcome[Independent committed / rejected / unknown outcome]
 ```

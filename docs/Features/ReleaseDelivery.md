@@ -53,7 +53,7 @@ permissions, version identity, deployment artifacts and current-producer handoff
 ```mermaid
 flowchart LR
     PR[PR or main source] --> CI[Build and Tests solution rules tests replicated cluster]
-    Main[Own main push or manual] --> Benchmarks[All native load comparisons]
+    Main[Own main push or manual] --> Benchmarks[All load comparisons]
     Benchmarks --> Aggregate[Complete authenticated JSON aggregate]
     WebSource[Trusted main source or manual] --> Website[Separate Website workflow]
     Aggregate --> Trigger[Dispatch Website only]
@@ -81,7 +81,7 @@ Build artifacts contain all actual packable projects, a self-contained Linux x64
 server distribution, persistent-container configuration for a replicated cluster
 (`KeyLoad:SiloCount` silos, `KeyLoad:ReplicaCount` copies; three is the default), and
 version-labelled images built from the existing owned Dockerfiles. Database credentials
-are runtime configuration and are never bundled into source/assets. Native Orleans
+are runtime configuration and are never bundled into source/assets. Orleans
 clustering and node-local ZoneTree ownership are retained; distribution packaging does
 not establish production readiness, endurance or power-loss durability.
 

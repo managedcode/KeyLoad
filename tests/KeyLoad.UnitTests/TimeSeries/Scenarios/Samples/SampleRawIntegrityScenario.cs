@@ -8,7 +8,7 @@ internal static class SampleRawIntegrityScenario
 {
     private const string SampleSpace = "sample";
     private const string OtherSeries = "wrong-series";
-    private const string WrongRoot = "wrong-native-root";
+    private const string WrongRoot = "wrong-execution-root";
     private const int DamagedIndex = 3;
     private const int NextSequence = 4;
     private const long InvalidSequence = 0;
@@ -37,26 +37,26 @@ internal static class SampleRawIntegrityScenario
         var expected = Record(DamagedIndex);
         var bytes = fault switch
         {
-            SampleRawIntegrityFault.Series => NativeSerialization.Serialize(expected with { SeriesId = OtherSeries }),
-            SampleRawIntegrityFault.Timestamp => NativeSerialization.Serialize(expected with
+            SampleRawIntegrityFault.Series => OrleansSerialization.Serialize(expected with { SeriesId = OtherSeries }),
+            SampleRawIntegrityFault.Timestamp => OrleansSerialization.Serialize(expected with
             {
                 Sample = expected.Sample with
                 {
                     Timestamp = expected.Sample.Timestamp.AddTicks(NextTimestampTick)
                 }
             }),
-            SampleRawIntegrityFault.Sequence => NativeSerialization.Serialize(expected with { Sequence = NextSequence }),
-            SampleRawIntegrityFault.NonpositiveSequence => NativeSerialization.Serialize(expected with { Sequence = InvalidSequence }),
-            SampleRawIntegrityFault.NonfiniteValue => NativeSerialization.Serialize(expected with
+            SampleRawIntegrityFault.Sequence => OrleansSerialization.Serialize(expected with { Sequence = NextSequence }),
+            SampleRawIntegrityFault.NonpositiveSequence => OrleansSerialization.Serialize(expected with { Sequence = InvalidSequence }),
+            SampleRawIntegrityFault.NonfiniteValue => OrleansSerialization.Serialize(expected with
             {
                 Sample = expected.Sample with
                 {
                     Value = double.NaN
                 }
             }),
-            SampleRawIntegrityFault.MissingSample => NativeGraphFixtures.EncodeUnchecked(expected with { Sample = null! }),
-            SampleRawIntegrityFault.WrongNativeRoot => NativeSerialization.Serialize(WrongRoot),
-            SampleRawIntegrityFault.MalformedNative => [byte.MaxValue],
+            SampleRawIntegrityFault.MissingSample => GraphFixtures.EncodeUnchecked(expected with { Sample = null! }),
+            SampleRawIntegrityFault.RuntimeWrongRoot => OrleansSerialization.Serialize(WrongRoot),
+            SampleRawIntegrityFault.RuntimeMalformed => [byte.MaxValue],
             _ => throw new ArgumentOutOfRangeException(nameof(fault))
         };
         Restore(fixture, bytes);

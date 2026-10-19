@@ -39,7 +39,7 @@ internal static class SubscriptionGroupProgressAuthorityFlow
         var key = Key(group);
         var saved = fixture.Store.Read(view => view.ReadOwnedValue(key))
             ?? throw new InvalidOperationException("The actual configured subscription group is missing.");
-        var state = NativeSerialization.Deserialize<GroupState>(saved);
+        var state = OrleansSerialization.Deserialize<GroupState>(saved);
         fixture.Store.Commit((tx, _) =>
         {
             tx.PutRecord(key, Inject(state, fault));
@@ -49,7 +49,7 @@ internal static class SubscriptionGroupProgressAuthorityFlow
         await SubscriptionGroupProgressAuthorityAssertions.RefuseAsync(fixture.Database, fixture.Store, fresh, request, emptyRequest, ack, token);
         var image = QueueWholeFlowStorage.Bytes(fixture.Store);
         var position = fixture.Store.Position;
-        var identity = NativeSerialization.Serialize(fixture.Store.Identity);
+        var identity = OrleansSerialization.Serialize(fixture.Store.Identity);
         fixture.Store.Dispose();
         using var first = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution(),
             UnitExecutionOptions.PointCacheExecution());
@@ -61,9 +61,9 @@ internal static class SubscriptionGroupProgressAuthorityFlow
             tx.Put(key, saved);
             return true;
         });
-        await NativeReplayResultAssertions.Same<ReceiveSubscriptionResult>(SubscriptionCheckpointAuthorityFlow.Apply(
+        await ReplayResultAssertions.Same<ReceiveSubscriptionResult>(SubscriptionCheckpointAuthorityFlow.Apply(
             db, OperationKind.ReceiveSubscription, request, request.RequestId, token), original);
-        await NativeReplayResultAssertions.Same<ReceiveSubscriptionResult>(SubscriptionCheckpointAuthorityFlow.Apply(
+        await ReplayResultAssertions.Same<ReceiveSubscriptionResult>(SubscriptionCheckpointAuthorityFlow.Apply(
             db, OperationKind.ReceiveSubscription, emptyRequest, emptyRequest.RequestId, token), emptyResult);
         await SubscriptionGroupProgressAuthorityContinuation.RunAsync(db, first, fixture.Directory,
             group, fresh, ack, claim, token);

@@ -3,7 +3,7 @@ using KeyLoad.IntegrationTests.Features.ClientApi;
 
 namespace KeyLoad.IntegrationTests.Features.DocumentStorage;
 
-/// <summary>Independent literal state with authenticated native placement and original commit cuts.</summary>
+/// <summary>Independent literal state with authenticated execution placement and original commit cuts.</summary>
 internal static class ScopedCommandIdentityClusterOracle
 {
     internal static DocumentResult Document(ScopedCommandIdentityClusterScenario scenario, bool first)

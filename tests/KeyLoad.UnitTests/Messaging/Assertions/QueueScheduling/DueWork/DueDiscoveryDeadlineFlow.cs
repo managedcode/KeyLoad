@@ -25,17 +25,17 @@ internal static class DueDiscoveryDeadlineFlow
         var request = new CommandRequest(commandId, fixture.Partition,
             [new ConfigureRecurringSchedule(definition, AbsentRevision)]);
         var receipt = fixture.Apply(OperationKind.Batch, request, id: commandId).Get<CommitReceipt>();
-        var receiptBytes = NativeSerialization.Serialize(receipt);
+        var receiptBytes = OrleansSerialization.Serialize(receipt);
         var image = Image(fixture);
-        var identity = NativeSerialization.Serialize(fixture.Store.Identity);
+        var identity = OrleansSerialization.Serialize(fixture.Store.Identity);
         var position = fixture.Store.Position;
-        var native = (ZoneTreeStore)fixture.Store;
-        var baseline = native.GetReadDiagnostics().RangeExaminedBytes;
-        clock.Arm(() => native.GetReadDiagnostics().RangeExaminedBytes > baseline,
+        var execution = (ZoneTreeStore)fixture.Store;
+        var baseline = execution.GetReadDiagnostics().RangeExaminedBytes;
+        clock.Arm(() => execution.GetReadDiagnostics().RangeExaminedBytes > baseline,
             fixture.Database.DueDiscoveryDeadline);
         var failure = Assert.ThrowsExactly<KeyLoadException>(() =>
             DueWorkDiscovery.ReadPage(fixture.Database, null, DueWorkTestData.WakeAt));
-        await Assert.That(clock.ExpiredAfterNativeProgress).IsTrue();
+        await Assert.That(clock.ExpiredAfterProgress).IsTrue();
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
         await Assert.That(failure.Message).IsEqualTo(DueWorkProtocol.DeadlineExceeded);
         clock.Disarm();
@@ -44,17 +44,17 @@ internal static class DueDiscoveryDeadlineFlow
         var expected = new DueWorkHint(DueWorkKind.Schedule, fixture.Queue, ScheduleId,
             RecurringSagaDatabase.RootPrincipal, InitialRevision, InitialGeneration, InitialOrdinal, definition.FirstDueAt);
         await Assert.That(page.Jobs.Length).IsEqualTo(SingleHint);
-        await Assert.That(NativeSerialization.Serialize(page.Jobs[InitialOrdinal])
-            .SequenceEqual(NativeSerialization.Serialize(expected))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(page.Jobs[InitialOrdinal])
+            .SequenceEqual(OrleansSerialization.Serialize(expected))).IsTrue();
         await Assert.That(page.Rejected.IsEmpty).IsTrue();
         await UnchangedAsync(fixture, image, identity, position);
         fixture.Reopen();
         var replay = fixture.Apply(OperationKind.Batch, request, id: commandId).Get<CommitReceipt>();
-        await Assert.That(NativeSerialization.Serialize(replay).SequenceEqual(receiptBytes)).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(replay).SequenceEqual(receiptBytes)).IsTrue();
         await UnchangedAsync(fixture, image, identity, position);
         var cold = DueWorkDiscovery.ReadPage(fixture.Database, null, DueWorkTestData.WakeAt);
-        await Assert.That(NativeSerialization.Serialize(cold.Jobs)
-            .SequenceEqual(NativeSerialization.Serialize(page.Jobs))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(cold.Jobs)
+            .SequenceEqual(OrleansSerialization.Serialize(page.Jobs))).IsTrue();
         await Assert.That(cold.Rejected.IsEmpty).IsTrue();
         await UnchangedAsync(fixture, image, identity, position);
     }
@@ -64,7 +64,7 @@ internal static class DueDiscoveryDeadlineFlow
     {
         await Assert.That(Image(fixture).SequenceEqual(image)).IsTrue();
         await Assert.That(fixture.Store.Position).IsEqualTo(position);
-        await Assert.That(NativeSerialization.Serialize(fixture.Store.Identity).SequenceEqual(identity)).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(fixture.Store.Identity).SequenceEqual(identity)).IsTrue();
     }
 
     private static string[] Image(RecurringSagaDatabase fixture) => fixture.Store.Read(view =>

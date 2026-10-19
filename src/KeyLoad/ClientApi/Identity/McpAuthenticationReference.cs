@@ -1,3 +1,3 @@
 namespace KeyLoad.Server;
 
-internal sealed record McpAuthenticationReference(Type NativeType, McpFrameShape Shape);
+internal sealed record McpAuthenticationReference(Type RuntimeType, McpFrameShape Shape);

@@ -71,7 +71,7 @@ internal sealed class SiteHeavyChildProcessFixture : IAsyncDisposable
         }
         _lifetime = CancellationTokenSource.CreateLinkedTokenSource(token);
         var start = CreateStart(github, overflow, missingExecutable);
-        _running = github ? SiteIsolatedGitHubNativeProcess.RunProbeAsync(start, _lifetime.Token, admission)
+        _running = github ? SiteIsolatedGitHubProcess.RunProbeAsync(start, _lifetime.Token, admission)
             : SiteIsolatedNodeProcess.RunProcessAsync(start, _lifetime.Token, admission);
         return _running;
     }
@@ -190,7 +190,7 @@ internal sealed class SiteHeavyChildProcessFixture : IAsyncDisposable
         }
         catch (Exception error) when (running.IsCompleted && error is OperationCanceledException or InvalidOperationException or Win32Exception or TimeoutException)
         {
-            // The test asserts the original failure; disposal separately verifies the actual native PID exited.
+            // The test asserts the original failure; disposal separately verifies the actual execution PID exited.
         }
     }
 }

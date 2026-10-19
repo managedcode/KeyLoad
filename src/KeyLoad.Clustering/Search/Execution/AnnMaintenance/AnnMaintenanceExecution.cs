@@ -11,9 +11,9 @@ internal static class AnnMaintenanceExecution
         Func<string, CancellationToken, Task<GrainOperationReply>> executeChild, Func<Guid, Task> abort,
         IServiceProvider services, GrainRequestCodec codec,
         IOptions<GrainRoutingOptions> routing, ILogger diagnostics,
-        ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer, NativeCqrsStreamPurpose purpose)
+        ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer, CqrsStreamPurpose purpose)
     {
-        var request = GrainNativePayload.ReadCommand<AnnMaintenanceRequest>(parent.Payload);
+        var request = GrainPayload.ReadCommand<AnnMaintenanceRequest>(parent.Payload);
         purpose.EnableAnnMaintenance(request.Mode);
         var children = new AnnMaintenanceChildCalls(parent, executeChild, abort, services, codec, diagnostics, purpose.WorkBinding);
         AnnMaintenanceResult result;

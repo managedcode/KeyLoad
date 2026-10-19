@@ -99,11 +99,11 @@ internal sealed class ChunkSelectedIntegrityFixture : IDisposable
             {
                 original.Dispose();
             }
-            catch (Exception error) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+            catch (Exception error) when (KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(error))
             {
                 failures.Add(error);
             }
-            catch (Exception error) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+            catch (Exception error) when (!KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(error))
             {
                 failures.Add(error);
             }

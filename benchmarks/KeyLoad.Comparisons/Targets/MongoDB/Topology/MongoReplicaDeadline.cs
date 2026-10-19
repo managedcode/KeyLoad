@@ -4,9 +4,9 @@ namespace KeyLoad.Comparisons.Targets;
 
 internal static class MongoReplicaDeadline
 {
-    internal static CancellationTokenSource CreateOperation(IOptions<NativeComparisonExecutionOptions> options, TimeProvider timeProvider, CancellationToken cancellationToken)
+    internal static CancellationTokenSource CreateOperation(IOptions<ComparisonExecutionOptions> options, TimeProvider timeProvider, CancellationToken cancellationToken)
     {
-        var execution = NativeComparisonExecutionOptions.Require(options).Value;
+        var execution = ComparisonExecutionOptions.Require(options).Value;
         var deadline = new ComparisonCancellationSource(timeProvider, cancellationToken);
         try
         {
@@ -20,6 +20,6 @@ internal static class MongoReplicaDeadline
         }
     }
 
-    internal static CancellationTokenSource CreateCleanup(IOptions<NativeComparisonExecutionOptions> options, TimeProvider timeProvider)
-        => new(NativeComparisonExecutionOptions.Require(options).Value.CleanupTimeout, timeProvider);
+    internal static CancellationTokenSource CreateCleanup(IOptions<ComparisonExecutionOptions> options, TimeProvider timeProvider)
+        => new(ComparisonExecutionOptions.Require(options).Value.CleanupTimeout, timeProvider);
 }

@@ -9,7 +9,7 @@ namespace KeyLoad.UnitTests.Features.Search;
 
 internal static class PackedAnnStressColdRestore
 {
-    private const string FileName = "managed-ann-stress-native.bin";
+    private const string FileName = "managed-ann-stress-execution.bin";
 
     internal static async Task VerifyAsync(TestDatabase database, PackedAnnIndex index, VectorRecord[] records,
         float[] query, DistanceMetric metric, CancellationToken token)
@@ -29,15 +29,15 @@ internal static class PackedAnnStressColdRestore
         database.Store.Dispose();
         using var reopened = new ZoneTreeStore(new(database.Directory), UnitExecutionOptions.StorageExecution(),
             UnitExecutionOptions.PointCacheExecution());
-        await Assert.That(NativeSerialization.Serialize(reopened.Identity)
-            .SequenceEqual(NativeSerialization.Serialize(identity))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(reopened.Identity)
+            .SequenceEqual(OrleansSerialization.Serialize(identity))).IsTrue();
         await PackedAnnStressOracle.UnchangedAsync(reopened, canonical, position);
         var owner = QueueWholeFlowStorage.Open(reopened);
         var restoredRecords = owner.WithVectors(PackedAnnTestData.Principal, database.Partition,
             PackedAnnTestData.Collection, PackedAnnTestData.Field(metric), (_, _, pairs) =>
                 pairs.Select(pair => pair.Vector).OrderBy(row => row.DocumentId, StringComparer.Ordinal).ToArray());
-        await Assert.That(NativeSerialization.Serialize(restoredRecords))
-            .IsEquivalentTo(NativeSerialization.Serialize(records), CollectionOrdering.Matching);
+        await Assert.That(OrleansSerialization.Serialize(restoredRecords))
+            .IsEquivalentTo(OrleansSerialization.Serialize(records), CollectionOrdering.Matching);
         using var input = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
         var budget = new AnnWorkBudget(new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(owner.Limits),
             cancellationToken: token), PackedAnnIndexTestSupport.GenerousWorkLimit);

@@ -12,7 +12,7 @@ internal static class ChunkWindowRecordCapacityAssertions
     private const long FreshGeneration = 1;
     private const long FreshRevision = 3;
     private const long FreshSequence = 258;
-    private const string Missing = "The native series chunk window is unavailable.";
+    private const string Missing = "The execution series chunk window is unavailable.";
     private const string MissingRepresentation = "The original complete two-block generation is absent.";
 
     internal static string[] Capture(ZoneTreeStore store, SampleChunkCanonicalFixture fixture)
@@ -115,7 +115,7 @@ internal static class ChunkWindowRecordCapacityAssertions
             var page = store.Read(view => view.Scan(SampleReadKeys.Prefix(fixture.Owner.Partition,
                 SampleChunkCanonicalFixture.Set, SampleChunkCanonicalFixture.Series), ReadLimit));
             await Assert.That(page.HasMore).IsFalse();
-            var records = page.Records.Select(row => NativeSerialization.Deserialize<SampleRecord>(row.Value.Span)).ToArray();
+            var records = page.Records.Select(row => OrleansSerialization.Deserialize<SampleRecord>(row.Value.Span)).ToArray();
             await Assert.That(JsonDefaults.Serialize(records).SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
             var keys = expected.Select(row => Convert.ToHexString(KeySpace.Partition("sample", fixture.Owner.Partition,
                 SampleChunkCanonicalFixture.Set, SampleChunkCanonicalFixture.Series, row.Sample.Timestamp, row.Sequence))).ToArray();

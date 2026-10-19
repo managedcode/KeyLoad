@@ -8,7 +8,7 @@ internal sealed record SampleChunkMaintenanceIdentity([property: Orleans.Id(0)] 
     [property: Orleans.Id(3)] Guid WindowId, [property: Orleans.Id(4)] long Generation,
     [property: Orleans.Id(5)] long Revision)
 {
-    internal const string SerializerAlias = "keyload.core.sample-chunk-maintenance-identity.v1";
+    internal const string SerializerAlias = "keyload.core.sample-chunk-maintenance-identity";
     private const int GuidBytes = 16;
 
     internal Guid CommandId()

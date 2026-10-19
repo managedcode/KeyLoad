@@ -95,7 +95,7 @@ internal static class CatalogIdentityAssertions
 
     internal static byte[] Outcome(ZoneTreeStore store, CommandRequest command, string principal)
         => store.Read(view => view.ReadOwnedValue(KeySpace.PartitionOutcome(command.Partition, principal, command.CommandId)))
-            ?? throw new InvalidOperationException("The complete acknowledged native outcome must exist.");
+            ?? throw new InvalidOperationException("The complete acknowledged execution outcome must exist.");
 
     internal static Task ReplayAsync(DatabaseEngine database, ZoneTreeStore store, CommandRequest command,
         CommitReceipt receipt, byte[] outcome, string principal, CancellationToken token)

@@ -24,7 +24,7 @@ internal static class SafeProjectorOperationOutbox
         foreach (var (row, literal) in page.Records.Zip(expected))
         {
             await Assert.That(row.Key.Span.SequenceEqual(KeySpace.Partition(Outbox, owner.Source.Partition, literal.Sequence))).IsTrue();
-            var actual = NativeSerialization.Deserialize<OutboxEntry>(row.Value.Span);
+            var actual = OrleansSerialization.Deserialize<OutboxEntry>(row.Value.Span);
             await SafeProjectorOperationSeed.EqualAsync(actual, literal);
             await Assert.That(actual.Receipt.CompositionReferences).IsEmpty();
         }

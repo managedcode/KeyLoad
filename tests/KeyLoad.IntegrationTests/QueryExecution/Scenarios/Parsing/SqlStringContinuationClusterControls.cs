@@ -9,11 +9,11 @@ internal static class SqlStringContinuationClusterControls
     private const string InvalidBytes = "label = E'\\xc3'\n'plain'";
 
     internal static async Task InvalidAsync(ClusterFixture fixture, SqlNullDistinctClusterState state,
-        global::KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsClusterCallers root,
+        global::KeyLoad.IntegrationTests.Features.OrleansExecution.RequestCqrsClusterCallers root,
         CancellationToken token)
     {
         var before = await SqlNullDistinctClusterImage.ReadAsync(root, state, token);
-        await global::KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsClusterCallers.RunOwnedAsync(
+        await global::KeyLoad.IntegrationTests.Features.OrleansExecution.RequestCqrsClusterCallers.RunOwnedAsync(
             fixture.App, global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerProtocol.Node2,
             state.Seed.Reader.Secret, async caller =>
         {
@@ -36,9 +36,9 @@ internal static class SqlStringContinuationClusterControls
     }
 
     private static async Task RefuseThenHealthyAsync(
-        global::KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsClusterCallers caller,
+        global::KeyLoad.IntegrationTests.Features.OrleansExecution.RequestCqrsClusterCallers caller,
         PostgresClusterCaller wire,
-        global::KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsClusterCallers root,
+        global::KeyLoad.IntegrationTests.Features.OrleansExecution.RequestCqrsClusterCallers root,
         SqlNullDistinctClusterState state, CancellationToken token)
     {
         var before = await SqlNullDistinctClusterImage.ReadAsync(root, state, token);

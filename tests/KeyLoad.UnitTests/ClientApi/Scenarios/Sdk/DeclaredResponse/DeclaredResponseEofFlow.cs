@@ -1,5 +1,5 @@
 using KeyLoad.Server;
-using KeyLoad.UnitTests.Features.ClusterRouting;
+using KeyLoad.UnitTests.Features.OrleansExecution;
 using static KeyLoad.UnitTests.Features.ClientApi.DeclaredResponseEofProtocol;
 
 namespace KeyLoad.UnitTests.Features.ClientApi;
@@ -10,7 +10,7 @@ internal static class DeclaredResponseEofFlow
     {
         var failures = new List<Exception>();
         var tasks = new DeclaredResponseEofTasks();
-        ConnectionNativeScenario? scenario = null;
+        ConnectionScenario? scenario = null;
         KeyLoadClientKestrelServer? server = null;
         DeclaredResponseEofEndpoint? endpoint = null;
         var transportUncertain = false;
@@ -35,7 +35,7 @@ internal static class DeclaredResponseEofFlow
 
         async Task RunOwnedAsync()
         {
-            scenario = new ConnectionNativeScenario();
+            scenario = new ConnectionScenario();
             await scenario.InitializeAsync(TestContext.Current!.Execution.CancellationToken);
             using var deadline = new CancellationTokenSource(scenario.Timing.CompletionTimeout, TimeProvider.System);
             using var linked = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token,

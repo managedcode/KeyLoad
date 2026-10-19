@@ -3,7 +3,7 @@ using KeyLoad.Server;
 
 namespace KeyLoad.UnitTests.Features.ClientApi;
 
-/// <summary>AC-MCP-003/004/005: bounded frame ownership preserves the exact wire bytes through native SDK replay.</summary>
+/// <summary>AC-MCP-003/004/005: bounded frame ownership preserves the exact wire bytes through execution SDK replay.</summary>
 internal sealed class McpFrameBodyTests
 {
     private const int MaximumBodyBytes = 64;

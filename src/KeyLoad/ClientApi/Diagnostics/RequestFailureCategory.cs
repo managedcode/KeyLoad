@@ -17,7 +17,7 @@ internal enum RequestFailureCategory
     InvalidOperation,
     /// <summary>An I/O exception reached the generic failure boundary.</summary>
     Io,
-    /// <summary>A native Orleans runtime exception reached the generic failure boundary.</summary>
+    /// <summary>A execution Orleans runtime exception reached the generic failure boundary.</summary>
     Orleans,
     /// <summary>A timeout exception reached the generic failure boundary.</summary>
     Timeout,

@@ -15,7 +15,7 @@ internal static class PartitionQueryPublicValidation
     private const string RequestBytesExceeded = "The partition query request exceeds its byte budget.";
 
     internal static (AstQueryRequest Request, ImmutableArray<PartitionRef> Partitions) Prepare(
-        PartitionQueryRequestV1? request, DatabaseLimits limits, QueryExecutionOptions execution)
+        PartitionQueryRequest? request, DatabaseLimits limits, QueryExecutionOptions execution)
     {
         ArgumentNullException.ThrowIfNull(limits);
         ValidateHeader(request);
@@ -34,7 +34,7 @@ internal static class PartitionQueryPublicValidation
         return (normalized, partitions);
     }
 
-    private static void ValidateHeader(PartitionQueryRequestV1? request)
+    private static void ValidateHeader(PartitionQueryRequest? request)
     {
         if (request is null || request.Query is null)
         {
@@ -44,7 +44,7 @@ internal static class PartitionQueryPublicValidation
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidRequest);
         }
-        if (request.AstVersion != RequestVersion)
+        if (request.AstVersion != SqlOperationProtocol.DefaultQueryDialectVersion)
         {
             throw Errors.Fail(ErrorCode.UnsupportedCapability, InvalidRequest);
         }
@@ -87,7 +87,7 @@ internal static class PartitionQueryPublicValidation
         }
     }
 
-    private static void ValidateRequestBytes(PartitionQueryRequestV1 request, DatabaseLimits limits)
+    private static void ValidateRequestBytes(PartitionQueryRequest request, DatabaseLimits limits)
     {
         var length = JsonDefaults.Serialize(request).Length;
         if (length > limits.MaxQueryBytes)

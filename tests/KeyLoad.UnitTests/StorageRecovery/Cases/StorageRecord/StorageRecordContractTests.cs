@@ -51,7 +51,7 @@ internal sealed class StorageRecordContractTests
         await Assert.That(after.OwnedPointLookups - before.OwnedPointLookups).IsEqualTo(0L);
         await Assert.That(after.BorrowedPointLookups - before.BorrowedPointLookups).IsEqualTo(1L);
         await Assert.That(after.PointExaminedBytes - before.PointExaminedBytes)
-            .IsEqualTo((long)key.Length + NativeSerialization.Measure(expected));
+            .IsEqualTo((long)key.Length + OrleansSerialization.Measure(expected));
     }
 
     [Test]

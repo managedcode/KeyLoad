@@ -11,7 +11,7 @@ runtime. User instructions control scope and authorization.
 
 Microsoft Orleans owns the cluster: membership, discovery, failure detection,
 distributed grain directory, placement, activation movement, scheduling, internal
-communication and scaling. Enable the native distributed grain directory and
+communication and scaling. Enable the distributed grain directory and
 activation repartitioner. Do not implement a second cluster runtime.
 
 The execution path is public API -> one server-owned Orleans grain per connected
@@ -32,9 +32,9 @@ delivered-source qualification, including deployed filesystem behavior, remains
 open. `SharedVolume` requires `ReplicaCount=1`; reject conflicting settings.
 
 With isolated storage, each silo-local Grain Service owns that node's ZoneTree
-files, native WAL, locks and ordered apply gate. Local code borrows storage through
+files, WAL, locks and ordered apply gate. Local code borrows storage through
 DI; activations never transfer file handles. Copies use typed Orleans Grain Service
-calls to target silos found through native Orleans membership. `KeyLoad:SiloCount`
+calls to target silos found through Orleans membership. `KeyLoad:SiloCount`
 and `KeyLoad:ReplicaCount` are independent positive startup settings; copies cannot
 exceed available silos. A distributed query calls the owners of the required logical
 partitions with bounded concurrency and merges their results; physical copies of
@@ -46,11 +46,11 @@ Background queue, ANN and time-series work uses Orleans `[StatelessWorker]`
 grains. Orleans automatically creates and retires their activations according to
 load. A shared helper creates the logical pool key; application code never creates
 per-activation worker IDs or manages its own pool. Each activation accepts events,
-holds a bounded buffer and flushes on a native grain timer with a typed interval
+holds a bounded buffer and flushes on a grain timer with a typed interval
 option. No leadership check gates this
 work. Durable delivery and idempotent effects are separate from an in-memory
 buffer. Grain Services own per-silo resources; workers own activation-local work.
-Choose native timers, reminders, Streams, Journaling and Durable Jobs by their
+Choose timers, reminders, Streams, Journaling and Durable Jobs by their
 actual lifetime and delivery guarantees, with bounded cancellation and shutdown.
 
 Every addressing identifier is created by one shared helper per identity kind.
@@ -59,44 +59,61 @@ ad-hoc concatenation. Do not change user entity casing implicitly.
 
 ## Data, authorization and integrations
 
-- ZoneTree is the canonical storage engine for every model. Use its native APIs,
-  bounded replay and ordered atomic commit/apply. Keep atomic partition identity
+- ZoneTree is the canonical storage engine for database records and file metadata.
+  File and blob payload bytes live in physical storage managed by
+  ManagedCode.Storage, outside ZoneTree. ZoneTree stores their metadata and
+  physical-storage references. Use ZoneTree APIs, bounded replay and
+  ordered atomic commit/apply for database state. Keep atomic partition identity
   separate from Orleans activation placement.
 - Use ZoneTree.FullTextSearch for full-text indexing and ZoneTree.Analytics for
   approved analytics integration. Derived indexes, caches and analytics never
   become a second authority for database records or permissions.
 - Access ZoneTree, ZoneTree.FullTextSearch and ZoneTree.Analytics through their
-  public synchronous native APIs. Their asynchronous API calls and dispatching
+  public synchronous APIs. Their asynchronous API calls and dispatching
   engine work through `Task.Run`, `Task.Factory.StartNew` or a thread-pool callback
   are compiler errors (`KLD0039`). Do not wrap synchronous engine operations to
   bypass this rule. Orleans, HTTP and other actual asynchronous transports remain
   asynchronous; the rule makes no claim about a dependency's internal scheduling.
-- Use native generated Orleans binary serialization with explicit stable
+- Use generated Orleans binary serialization with explicit stable
   `[GenerateSerializer]`, `[Id]` and `[Alias]` contracts internally. Preserve raw
   ZoneTree bytes, sortable keys, public JSON and exact user content. Introduce no
   runtime serializer fallback or persisted-data migration.
 - SQL syntax uses Microsoft.SqlServer.TransactSql.ScriptDom. Compile supported
   syntax into the same bounded authorized operations as SDK/MCP. Reject valid
   unsupported ASTs explicitly before effects. Parsing, execution semantics and
-  native SQL-client interoperability are separate qualification gates.
+  SQL-client interoperability are separate qualification gates.
 - ASP.NET Core Authentication and Authorization admit HTTP/SDK/MCP callers.
   Tickets carry the verified subject only. Every operation checks fresh persisted
   credentials and permissions. ManagedCode.Orleans.Identity propagates verified
   call-local context and restores it after asynchronous work.
-- Use ManagedCode.Communication native commands, results and CQRS response streams.
+- Use ManagedCode.Communication commands, results and CQRS response streams.
   Reuse its producer, transport, cancellation and settlement APIs. KeyLoad owns
   authorization, operation identity, payload validation and resource bounds.
 - Use the official MCP C# SDK and ManagedCode.MCPGateway for on-demand tool
   discovery. ManagedCode.MarkdownLd.Kb supplies approved graph-based tool search.
   Discovery respects fresh authorization and excludes secrets and user payloads.
   Supply bounded static MCP guidance through the same server.
+- Blob API contracts and server-side upload/download implementations use
+  ManagedCode.Storage. Reuse its storage interfaces and provider implementations,
+  including S3. Do not add a KeyLoad IStorage adapter, custom multipart engine,
+  transfer stream or parallel storage implementation when the library already
+  supplies that behavior. KeyLoad exposes the ManagedCode.Storage file-storage contract
+  (`IStorage`, or its VFS surface where applicable); this is a public KeyLoad
+  capability, not merely a client for an external bucket. ManagedCode.Storage
+  owns physical payload access through the selected provider; ZoneTree owns
+  metadata and physical-storage references, never the binary payload or its
+  parts. Remove superseded KeyLoad transport code instead of maintaining a
+  parallel Blob API or writing a separate S3 implementation. Preserve fresh
+  authorization and explicit publication, cleanup and recovery contracts across
+  the metadata and physical-storage boundary; a metadata commit alone does not
+  prove file persistence or replication.
 - Keep chunked blobs with partial reads, same-partition atomic operations,
   explicit cross-partition contracts, persisted command outcomes and honest
   acknowledgement/read-cut semantics.
 - RAM and Orleans caches are bounded and disposable. Tie cached results to the
   authorized read cut and policy epoch; invalidate after writes and policy
   changes. Restart, migration and failover cannot turn RAM into storage authority.
-- Use existing native Orleans, ASP.NET Core, ServiceDefaults and Aspire
+- Use existing Orleans, ASP.NET Core, ServiceDefaults and Aspire
   OpenTelemetry integrations. Exclude secrets, payloads and unbounded labels.
 
 ## Repository ownership and structure
@@ -119,9 +136,11 @@ stashing. Keep changes visible. Do not use Azure CLI.
   its actual owner; do not create empty folders or generic forwarding chains.
 - `Program.cs` shows real initialization, mode selection, host composition, run
   and joined shutdown. Keep reusable model behavior in its owning slice.
-- Keep namespaces, native contract IDs and live project/build/source references
+- Keep namespaces, contract IDs and live project/build/source references
   coherent when moving files. Remove replaced implementations and their exclusive
   helpers and tests together. Add no compatibility shim.
+
+Maintain one current implementation and contract per capability. Do not retain version-suffixed types, parallel older routes or version-selecting execution paths.
 
 ## MCAF-GOV-001: Current governance
 
@@ -133,7 +152,7 @@ valid and remove inactive implementations and their exclusive supporting files.
 ## MCAF-ARCH-001: Cohesive implementation
 
 Inspect current registrations and callers before adding or removing infrastructure.
-Reuse the selected Microsoft, Orleans, ZoneTree and ManagedCode native APIs. New
+Reuse the selected Microsoft, Orleans, ZoneTree and ManagedCode APIs. New
 library adoption requires explicit owner approval after a concrete review of
 version, original license, API fit, resource/cancellation contracts and integration.
 Research alone is not adoption approval. Apply the installed Orleans skill for
@@ -160,16 +179,16 @@ The compiler reports unauthorized implementation terminology in C# identifiers,
 text and comments as `KLD0038` errors. Restricted terms include fallback,
 migration/migrate, regression, mock, fixture, sample/simple and compatibility,
 including their grammatical forms and compound identifiers. Meanings approved by
-the current design stay explicit: native Orleans activation migration, real
+the current design stay explicit: Orleans activation migration, real
 TUnit fixtures owned under `tests/.../Fixtures/` and source-resolved test contracts,
-metadata and support reachable from real native TUnit cases or lifecycle interfaces;
+metadata and support reachable from real TUnit cases or lifecycle interfaces;
 real process-recovery fixtures reached from the compiled `KeyLoad.RecoveryTests` entry point;
-Aspire resource fixtures reached from the `KeyLoad.AppHost` entry point's resolved native
-`DistributedApplication.CreateBuilder` composition and its native builder-typed composition callbacks;
-BenchmarkDotNet fixtures rooted in its native benchmark, setup and cleanup attributes
+Aspire resource fixtures reached from the `KeyLoad.AppHost` entry point's resolved execution
+`DistributedApplication.CreateBuilder` composition and its builder-typed composition callbacks;
+BenchmarkDotNet fixtures rooted in its benchmark, setup and cleanup attributes
 and their source-resolved measurement support under `benchmarks/`;
 time-series sample data, original operation/resource measurement samples and their
-authentic report fields, and resolved native framework API names. These are term-specific semantic contexts,
+authentic report fields, and resolved framework API names. These are term-specific semantic contexts,
 not permission to add a fallback or mock inside an approved feature. The
 analyzer's exact vocabulary declarations describe this rule and grant no runtime
 implementation permission. No blanket file, test, generated-code or keyword
@@ -202,12 +221,12 @@ dotnet build KeyLoad.slnx --no-restore -warnaserror
 node scripts/Features/RepositoryGovernance/verify.mjs
 ```
 
-Use native TUnit/Microsoft.Testing.Platform entry after build, with Detailed output.
+Use TUnit/Microsoft.Testing.Platform entry after build, with Detailed output.
 C# fixtures own Aspire startup, readiness, discovered endpoints, real SDK and
 MCP clients, fault injection and joined cleanup. AppHost owns all container
 lifecycle and resource commands; tests never start independent containers or
 substitute graceful shutdown for an abrupt fault. Unit and process tests use
-only the infrastructure they actually require. `KeyLoad.AppHost` starts native
+only the infrastructure they actually require. `KeyLoad.AppHost` starts execution
 KeyLoad services through `AddProject` and required Azurite resources for development
 and functional tests. `KeyLoad.LoadTests.AppHost` is separate: it starts only the
 selected database infrastructure, waits for readiness and exposes endpoints;
@@ -215,7 +234,7 @@ client code owns load execution and measurements. Each AppHost removes its own
 session containers and volumes on joined teardown after success, failure or
 cancellation. Preserve unrelated Docker resources. Normal builds and test startup
 never publish or build a KeyLoad server image. Explicit release delivery packages
-containers with native .NET SDK `PublishContainer`; maintain no product Dockerfile.
+containers with execution .NET SDK `PublishContainer`; maintain no product Dockerfile.
 
 Complete solution build, unit tests, real process recovery, actual Aspire cluster
 SDK/MCP operations, coverage and fault/endurance checks remain distinct mandatory
@@ -227,12 +246,12 @@ qualification. Process-kill recovery does not prove power-loss durability.
 Preserve `.editorconfig`, Allman multiline executable blocks and numeric gates:
 64 code lines per method, 200 per type, 400 per file, nesting depth 3, and the
 configured coverage thresholds (80 line / 70 branch, 90 for critical modules).
-Keep generated-code/source identities, native reports and executable source
+Keep generated-code/source identities, reports and executable source
 inventories truthful; do not exclude product code to improve coverage.
 
 ## Performance and comparisons
 
-Use native .NET SIMD/intrinsics in normal supported execution. Validate required
+Use execution .NET SIMD/intrinsics in normal supported execution. Validate required
 hardware; scalar arithmetic is limited to tails and independent correctness
 oracles. Do not add a product SIMD-disable mode.
 
@@ -241,7 +260,7 @@ before selecting optimizations. Retain source/DLL/PDB/process, workload and
 capture identities, overhead and matched before/after evidence. A trace alone
 proves no performance improvement.
 
-Comparisons use native one-node and three-node topologies, 100,000 and 1,000,000
+Comparisons use one-node and three-node topologies, 100,000 and 1,000,000
 actual records, at least 100,000 measured operations per applicable cell, and the
 shared pure/mixed/ingestion/search scenario inventory (including 1/10/500 clients).
 Keep corpus, operation schedule, acknowledgement/durability, resources and result

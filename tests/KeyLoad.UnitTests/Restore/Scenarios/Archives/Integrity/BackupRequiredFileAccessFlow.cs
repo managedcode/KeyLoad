@@ -11,7 +11,7 @@ internal static class BackupRequiredFileAccessFlow
     private const string DestinationName = "required-file-access-repaired";
     private const string RestoreCommand = "restore";
     private const int PermissionDeniedErrno = 13;
-    private const string NativeFileAccessFailure = "Offline filesystem operation failed.";
+    private const string FileAccessFailure = "Offline filesystem operation failed.";
 
     internal static async Task RunAsync(bool existingEmpty, CancellationToken token)
     {
@@ -29,8 +29,8 @@ internal static class BackupRequiredFileAccessFlow
         global::Microsoft.Extensions.Options.IOptions<global::KeyLoad.AppHost.Features.TestInfrastructure.TestExecutionOptions> options,
         MetadataBackupFixture fixture, bool existingEmpty, CancellationToken token)
     {
-        var source = NativeBackupJournalRepairAssertions.Read(fixture.SourceDirectory, token);
-        var original = await NativeBackupJournalRepairAssertions.ArchiveAsync(fixture.BackupDirectory, token);
+        var source = BackupJournalRepairAssertions.Read(fixture.SourceDirectory, token);
+        var original = await BackupJournalRepairAssertions.ArchiveAsync(fixture.BackupDirectory, token);
         var destination = Path.Combine(fixture.BackupDirectory, DestinationName);
         if (existingEmpty)
         {
@@ -43,10 +43,10 @@ internal static class BackupRequiredFileAccessFlow
             await ServerFailureObserver.ObserveAsync(() => RefuseAsync(options, fixture, destination,
                 existingEmpty, region, original, source, token), failures);
             ServerFailureObserver.Observe(region.Repair, failures);
-            await ServerFailureObserver.ObserveAsync(() => NativeBackupJournalRepairAssertions.SameArchiveAsync(
+            await ServerFailureObserver.ObserveAsync(() => BackupJournalRepairAssertions.SameArchiveAsync(
                 original, fixture.BackupDirectory, CancellationToken.None), failures);
-            await ServerFailureObserver.ObserveAsync(() => NativeBackupJournalRepairAssertions.SameCutAsync(source,
-                NativeBackupJournalRepairAssertions.Read(fixture.SourceDirectory, CancellationToken.None)), failures);
+            await ServerFailureObserver.ObserveAsync(() => BackupJournalRepairAssertions.SameCutAsync(source,
+                BackupJournalRepairAssertions.Read(fixture.SourceDirectory, CancellationToken.None)), failures);
         }, failures);
         ServerFailureObserver.ThrowIfAny(failures);
         var result = await CliBackupRestoreProcess.RunAsync(options,
@@ -55,8 +55,8 @@ internal static class BackupRequiredFileAccessFlow
         await MetadataOuterChecksumRepairAssertions.RestoredAsync(fixture, destination, result, source.Position, token);
         await MetadataOuterChecksumRepairCold.RunAsync(destination, token);
         await MetadataOuterChecksumRepairAssertions.OriginalArchiveAsync(original, fixture.BackupDirectory, destination, token);
-        await NativeBackupJournalRepairAssertions.SameCutAsync(source,
-            NativeBackupJournalRepairAssertions.Read(fixture.SourceDirectory, token));
+        await BackupJournalRepairAssertions.SameCutAsync(source,
+            BackupJournalRepairAssertions.Read(fixture.SourceDirectory, token));
     }
 
     private static async Task RefuseAsync(
@@ -66,11 +66,11 @@ internal static class BackupRequiredFileAccessFlow
         (StoreIdentity Identity, long Position, string[] Rows) source, CancellationToken token)
     {
         region.DenyNewReaders();
-        var native = Assert.ThrowsExactly<IOException>(() => ZoneTreeStore.Restore(
+        var execution = Assert.ThrowsExactly<IOException>(() => ZoneTreeStore.Restore(
             fixture.BackupDirectory, destination, UnitExecutionOptions.StorageExecution()));
-        await Assert.That(native).IsNotNull();
-        await Assert.That(native!.Message).IsEqualTo(NativeFileAccessFailure);
-        await Assert.That(native.InnerException is Win32Exception { NativeErrorCode: PermissionDeniedErrno }).IsTrue();
+        await Assert.That(execution).IsNotNull();
+        await Assert.That(execution!.Message).IsEqualTo(FileAccessFailure);
+        await Assert.That(execution.InnerException is Win32Exception { NativeErrorCode: PermissionDeniedErrno }).IsTrue();
         await BackupRequiredFileAccessAssertions.NoPublicationAsync(fixture.BackupDirectory, destination, existingEmpty);
         await region.RequireOriginalAsync(original[JournalName], token);
         await BackupRequiredFileAccessAssertions.ImmutableInputsAsync(fixture, original, source, token);

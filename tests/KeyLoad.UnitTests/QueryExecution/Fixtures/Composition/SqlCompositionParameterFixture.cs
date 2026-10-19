@@ -8,8 +8,8 @@ namespace KeyLoad.UnitTests.Features.QueryExecution;
 
 internal sealed class SqlCompositionParameterFixture : IDisposable
 {
-    private const string Unknown = "The original composed SQL fixture native owner has not released.";
-    private readonly List<NativeStorageOwnerSettlement> attempts = [];
+    private const string Unknown = "The original composed SQL fixture execution owner has not released.";
+    private readonly List<StorageOwnerSettlement> attempts = [];
     private ZoneTreeStore? cold;
     private bool sourceJoined;
     private bool closeAttempted;
@@ -37,7 +37,7 @@ internal sealed class SqlCompositionParameterFixture : IDisposable
         {
             throw new InvalidOperationException(Unknown);
         }
-        var attempt = new NativeStorageOwnerSettlement();
+        var attempt = new StorageOwnerSettlement();
         attempts.Add(attempt);
         cold = ZoneTreeStore.OpenOwned(new(Source.Directory)
         {
@@ -98,11 +98,11 @@ internal sealed class SqlCompositionParameterFixture : IDisposable
         {
             CloseCold();
         }
-        catch (Exception failure) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        catch (Exception failure) when (KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(failure))
         {
             failures.Add(failure);
         }
-        catch (Exception failure) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        catch (Exception failure) when (!KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(failure))
         {
             failures.Add(failure);
         }
@@ -117,11 +117,11 @@ internal sealed class SqlCompositionParameterFixture : IDisposable
             {
                 Source.Dispose();
             }
-            catch (Exception failure) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+            catch (Exception failure) when (KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(failure))
             {
                 failures.Add(failure);
             }
-            catch (Exception failure) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+            catch (Exception failure) when (!KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(failure))
             {
                 failures.Add(failure);
             }

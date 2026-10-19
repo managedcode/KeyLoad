@@ -5,7 +5,7 @@ internal static class DistributedTextStatisticsValidation
     private const int Empty = 0;
     private const string Invalid = "The distributed text statistics are invalid or incomparable.";
 
-    internal static void Require(DistributedTextStatisticsV1 statistics, IReadOnlyList<string> terms,
+    internal static void Require(DistributedTextStatistics statistics, IReadOnlyList<string> terms,
         KeyLoad.Core.ReadExecutionBudget budget)
     {
         ArgumentNullException.ThrowIfNull(statistics);

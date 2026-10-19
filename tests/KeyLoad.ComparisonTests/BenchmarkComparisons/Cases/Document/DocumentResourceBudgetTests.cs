@@ -5,7 +5,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
-/// <summary>AC-METH-001/003: actual native resource bounds admit the canonical document inventory.</summary>
+/// <summary>AC-METH-001/003: actual execution resource bounds admit the canonical document inventory.</summary>
 internal sealed class DocumentResourceBudgetTests
 {
     private const string KeyLoadTarget = "KeyLoad";
@@ -24,12 +24,12 @@ internal sealed class DocumentResourceBudgetTests
     private const string Requests = "512";
     private const string AdmissionRequests = "IsolatedKeyLoadAdmission__RequestsPerScope";
     private const string AdmissionMode = "IsolatedKeyLoadAdmission__DocumentWorkload";
-    private const string NativeDirectory = "native";
+    private const string RuntimeDirectoryCore = "execution";
 
     [Test]
     [Arguments(1)]
     [Arguments(3)]
-    public async Task PostgreSqlDocumentClientsHaveNativeConnectionHeadroom(int nodes)
+    public async Task PostgreSqlDocumentClientsHaveConnectionHeadroom(int nodes)
     {
         await using var fixture = new IsolatedResourceTopologyFixture(PostgresTarget, nodes);
         IsolatedPostgresResources.Add(fixture.Context);
@@ -83,7 +83,7 @@ internal sealed class DocumentResourceBudgetTests
     [Arguments(nameof(BenchmarkDeploymentOptions.DocumentKeyLoadRequestsPerScope), "500")]
     [Arguments(nameof(BenchmarkDeploymentOptions.DocumentKeyLoadMaximumScanRecords), "1000000")]
     [Arguments(nameof(BenchmarkDeploymentOptions.DocumentKeyLoadMaximumQueryReadBytes), "67108864")]
-    public async Task InsufficientDocumentBoundsRejectBeforeNativeDirectories(string option, string value)
+    public async Task InsufficientDocumentBoundsRejectBeforeDirectories(string option, string value)
     {
         await using var fixture = new IsolatedResourceTopologyFixture(KeyLoadTarget, 3);
         fixture.Context.Builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
@@ -91,7 +91,7 @@ internal sealed class DocumentResourceBudgetTests
             [DeploymentPrefix + option] = value
         });
         await Assert.That(() => IsolatedKeyLoadResources.Add(fixture.Context)).Throws<OptionsValidationException>();
-        await Assert.That(Directory.Exists(Path.Combine(fixture.Context.Root, NativeDirectory))).IsFalse();
+        await Assert.That(Directory.Exists(Path.Combine(fixture.Context.Root, RuntimeDirectoryCore))).IsFalse();
         fixture.Context.Builder.Configuration[DeploymentPrefix + option] = option switch
         {
             nameof(BenchmarkDeploymentOptions.DocumentPostgresMaximumConnections) => ExpectedConnections,

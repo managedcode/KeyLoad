@@ -32,18 +32,18 @@ internal static class IsolatedKeyLoadPublicChecksMessaging
         IsolatedKeyLoadPublicChecksScenario scenario, long position, CancellationToken token)
     {
         var request = new ReadStreamRequest(scenario.Stream);
-        var native = await IsolatedKeyLoadPublicChecksAssertions.SuccessAsync(await sdk.ReadStreamAsync(request, token));
+        var execution = await IsolatedKeyLoadPublicChecksAssertions.SuccessAsync(await sdk.ReadStreamAsync(request, token));
         var sql = IsolatedKeyLoadPublicChecksProtocol.Call(scenario.Partition, IsolatedKeyLoadPublicChecksProtocol.StreamRead, request);
         var official = await mcp.SuccessAsync<StreamPage>(SqlOperationProtocol.ToolName, sql, token);
-        await Assert.That(native.Events).HasSingleItem();
-        await Assert.That(native.Events[0].Data.EventId).IsEqualTo(scenario.EventId);
-        await Assert.That(native.Events[0].Data.PayloadJson).IsEqualTo(scenario.InitialStoredJson);
-        await Assert.That(native.Events[0].Revision).IsEqualTo(1L);
-        await IsolatedKeyLoadPublicChecksAssertions.EqualAsync(native.Events, official.Events);
-        await IsolatedKeyLoadPublicChecksAssertions.EqualAsync(native.Head, official.Head);
-        await Assert.That(official.Stream).IsEqualTo(native.Stream);
-        await Assert.That(official.HasMore).IsEqualTo(native.HasMore);
-        await Assert.That(native.CutPosition).IsGreaterThanOrEqualTo(position);
+        await Assert.That(execution.Events).HasSingleItem();
+        await Assert.That(execution.Events[0].Data.EventId).IsEqualTo(scenario.EventId);
+        await Assert.That(execution.Events[0].Data.PayloadJson).IsEqualTo(scenario.InitialStoredJson);
+        await Assert.That(execution.Events[0].Revision).IsEqualTo(1L);
+        await IsolatedKeyLoadPublicChecksAssertions.EqualAsync(execution.Events, official.Events);
+        await IsolatedKeyLoadPublicChecksAssertions.EqualAsync(execution.Head, official.Head);
+        await Assert.That(official.Stream).IsEqualTo(execution.Stream);
+        await Assert.That(official.HasMore).IsEqualTo(execution.HasMore);
+        await Assert.That(execution.CutPosition).IsGreaterThanOrEqualTo(position);
         await Assert.That(official.CutPosition).IsGreaterThanOrEqualTo(position);
     }
 

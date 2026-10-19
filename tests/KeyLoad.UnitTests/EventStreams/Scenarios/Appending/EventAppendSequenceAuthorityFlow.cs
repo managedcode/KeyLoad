@@ -36,11 +36,11 @@ internal static class EventAppendSequenceAuthorityFlow
         var key = KeySpace.Partition(SequenceSpace, fixture.Database.Partition);
         var original = fixture.Database.Store.Read(view => view.ReadOwnedValue(key))
             ?? throw new InvalidOperationException("The original event sequence is absent.");
-        await Assert.That(NativeSerialization.Deserialize<long>(original)).IsEqualTo(1L);
+        await Assert.That(OrleansSerialization.Deserialize<long>(original)).IsEqualTo(1L);
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            fixture.Database.Store.Commit((tx, _) => { tx.Put(key, NativeSerialization.Serialize(sequence)); return true; });
+            fixture.Database.Store.Commit((tx, _) => { tx.Put(key, OrleansSerialization.Serialize(sequence)); return true; });
             var position = fixture.Database.Store.Position;
             var before = QueueWholeFlowStorage.Bytes(fixture.Database.Store);
             for (var attempt = 0; attempt < 2; attempt++)

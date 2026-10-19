@@ -13,5 +13,5 @@ internal static class AuthenticationExecutionProtocol
     internal const string MissingEvent = "The actual authentication observation is incomplete.";
     internal const string UnknownSuffix = "-not-persisted";
     internal const string MalformedScheme = "Basic ";
-    internal const string DocumentsRoute = "/v1/documents/get";
+    internal const string DocumentsRoute = "/documents/get";
 }

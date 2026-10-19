@@ -27,7 +27,7 @@ internal static class VisibleVectorReads
         var range = budget.VisitRange(view, KeySpace.Partition(VectorKeySpace, partition, collection, field),
             database.Limits.MaxScanRecords, (key, value) =>
             {
-                var vector = NativeSerialization.Deserialize<VectorRecord>(value);
+                var vector = OrleansSerialization.Deserialize<VectorRecord>(value);
                 var document = budget.ReadRecord<DocumentRecord>(view,
                     DocumentStorageKeys.RecordKey(partition, collection, vector.DocumentId));
                 if (document is { Deleted: false } && document.Revision == vector.DocumentRevision

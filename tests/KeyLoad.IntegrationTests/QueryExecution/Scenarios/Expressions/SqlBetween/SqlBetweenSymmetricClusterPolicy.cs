@@ -3,7 +3,7 @@ namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 internal static class SqlBetweenSymmetricClusterPolicy
 {
     internal static async Task RunAsync(ClusterFixture fixture, SqlBetweenSymmetricClusterState state,
-        global::KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsClusterCallers root, CancellationToken token)
+        global::KeyLoad.IntegrationTests.Features.OrleansExecution.RequestCqrsClusterCallers root, CancellationToken token)
     {
         var original = state.Seed.Reader.Principal;
         var denied = original with

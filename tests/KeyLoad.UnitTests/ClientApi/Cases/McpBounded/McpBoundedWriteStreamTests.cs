@@ -13,9 +13,9 @@ internal sealed class McpBoundedWriteStreamTests
     private const int MaximumBytes = 64;
     private const string PrivateMarker = "private-bounded-marker";
 
-    /// <summary>Native JSON writes copy only accepted bytes; the returned owner survives private-buffer clearing.</summary>
+    /// <summary>Execution JSON writes copy only accepted bytes; the returned owner survives private-buffer clearing.</summary>
     [Test]
-    public async Task AcMcp004NativeSerializerReturnsAnIndependentExactLengthOwner()
+    public async Task AcMcp004SerializerReturnsAnIndependentExactLengthOwner()
     {
         var expected = JsonDefaults.Serialize(PrivateMarker);
         using var stream = new McpBoundedWriteStream(MaximumBytes);
@@ -32,7 +32,7 @@ internal sealed class McpBoundedWriteStreamTests
         await Assert.That(owned.AsSpan().SequenceEqual(expected)).IsTrue();
     }
 
-    /// <summary>A failed native write cannot append any bytes and disposal clears the entire prior private buffer.</summary>
+    /// <summary>A failed execution write cannot append any bytes and disposal clears the entire prior private buffer.</summary>
     [Test]
     public async Task AcMcp004OverrunPreservesAcceptedPrefixThenClearsFullCapacity()
     {
@@ -52,7 +52,7 @@ internal sealed class McpBoundedWriteStreamTests
 
     /// <summary>Canonical converter exceptions also leave clearing to the same deterministic stream owner.</summary>
     [Test]
-    public async Task AcMcp004NativeConverterFailureDoesNotMaskItsErrorDuringCleanup()
+    public async Task AcMcp004ConverterFailureDoesNotMaskItsErrorDuringCleanup()
     {
         var prefix = Encoding.UTF8.GetBytes(PrivateMarker);
         using var stream = new McpBoundedWriteStream(MaximumBytes);

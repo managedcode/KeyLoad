@@ -86,7 +86,7 @@ internal sealed class StorageRecoveryProcessTests
     {
         using var store = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
         return store.Read(view => Enumerable.Range(0, 3)
-            .Select(i => NativeSerialization.Deserialize<int>(view.ReadOwnedValue(KeyCodec.Encode("item", (long)i))!)).ToArray());
+            .Select(i => OrleansSerialization.Deserialize<int>(view.ReadOwnedValue(KeyCodec.Encode("item", (long)i))!)).ToArray());
     }
 
     private static async Task RecordCrashTrialAsync(StreamWriter evidence, int batch, int trial,

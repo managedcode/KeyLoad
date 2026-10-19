@@ -6,7 +6,7 @@ namespace KeyLoad;
 /// <param name="Label">Names the graph relationship.</param>
 /// <param name="AttributesJson">Contains authorized relationship attributes.</param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.QueueGraphLink)]
+[Orleans.Alias(ContractAliases.QueueGraphLink)]
 public sealed record QueueGraphLink([property: Orleans.Id(0)] EntityRef From,
     [property: Orleans.Id(1)] EntityRef To, [property: Orleans.Id(2)] string Label,
     [property: Orleans.Id(3)] string AttributesJson = DatabaseCompositionDefaults.EmptyAttributes);

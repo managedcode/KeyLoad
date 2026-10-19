@@ -3,7 +3,7 @@ using KeyLoad.Server;
 
 namespace KeyLoad.UnitTests.Features.ClientApi;
 
-/// <summary>AC-MCP-003: actual native enum parser retains numeric, nullable and flags forms.</summary>
+/// <summary>AC-MCP-003: actual execution enum parser retains numeric, nullable and flags forms.</summary>
 internal sealed class McpSchemaEnumTests
 {
     private const string MetricKey = "metric";
@@ -61,9 +61,9 @@ internal sealed class McpSchemaEnumTests
         await Assert.That(roundTrip).IsEqualTo(probe);
     }
 
-    /// <summary>Output enums preserve native named forms, numeric values and nullable metadata.</summary>
+    /// <summary>Output enums preserve execution named forms, numeric values and nullable metadata.</summary>
     [Test]
-    public async Task AcMcp007OutputSchemasRetainNativeNamesNumericFormsAndNull()
+    public async Task AcMcp007OutputSchemasRetainNamesNumericFormsAndNull()
     {
         var output = McpSchemaFactory.CreateOutput(typeof(EnumProbe), false).GetProperty(McpSchemaInspector.Defs)
             .GetProperty(McpSchemaInspector.Result).GetProperty(McpSchemaInspector.Properties);

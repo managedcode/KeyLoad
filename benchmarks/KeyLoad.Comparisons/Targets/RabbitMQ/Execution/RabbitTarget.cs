@@ -9,7 +9,7 @@ namespace KeyLoad.Comparisons.Targets;
 /// <param name="connectionString">AMQP connection URI used to create the broker connection.</param>
 /// <param name="runId">Guid-formatted run identifier used to isolate the queue name.</param>
 /// <param name="image">Broker image reference recorded in the verified profile.</param>
-/// <param name="lifecycleOptions">Centrally validated native lifecycle policy.</param>
+/// <param name="lifecycleOptions">Centrally validated execution lifecycle policy.</param>
 /// <param name="topology">The expected one- or three-member quorum queue topology.</param>
 /// <param name="management">Optional management API client for broker membership verification; initialization requires it, and the target disposes it.</param>
 /// <param name="provider">Borrowed clock; defaults to the system provider.</param>
@@ -23,7 +23,7 @@ public sealed class RabbitTarget(string connectionString, string runId, string i
     private const string InitializeAsyncQuorumMemberOnlineVerificationManualACKOrderedChannelRPCBarrierText = "; quorum member online verification; manual ACK + ordered channel RPC barrier";
 
     private const string UnverifiedToken = "unverified";
-    private const string UnverifiedNativeTopologyToken = "unverified native topology";
+    private const string UnverifiedTopologyToken = "unverified execution topology";
     private const string PublisherConfirmAndConsumerAcknowledgementContract = "persistent messages + tracked publisher confirms; manual consumer ACK + channel RPC barrier";
     private const string BasicGetManualAcknowledgementsAtLeastOnceToken = "basic.get manual acknowledgements; at least once";
     private const string AMQPTCPOneChannelPerWorkerToken = "AMQP 0-9-1/TCP; one channel per worker";
@@ -37,7 +37,7 @@ public sealed class RabbitTarget(string connectionString, string runId, string i
     private readonly string queue = QueuePrefix + Guid.Parse(runId).ToString(RunIdentityFormat);
     private readonly string imageName = image;
     private readonly ComparisonTopology configuredTopology = topology;
-    private readonly Dictionary<string, object?> queueArguments = RabbitNativePolicy.QueueArguments(topology);
+    private readonly Dictionary<string, object?> queueArguments = RabbitPolicy.QueueArguments(topology);
     private readonly HttpClient? managementClient = management;
     private IConnection? connection;
 
@@ -45,7 +45,7 @@ public sealed class RabbitTarget(string connectionString, string runId, string i
     public TargetProfile Profile
     {
         get; private set;
-    } = new(nameof(RabbitMQ), UnverifiedToken, UnverifiedNativeTopologyToken,
+    } = new(nameof(RabbitMQ), UnverifiedToken, UnverifiedTopologyToken,
         PublisherConfirmAndConsumerAcknowledgementContract,
         BasicGetManualAcknowledgementsAtLeastOnceToken, AMQPTCPOneChannelPerWorkerToken, AspireUserNoFieldPolicyToken, null);
     /// <summary>Reports support only for the queue-cycle scenario.</summary>
@@ -84,7 +84,7 @@ public sealed class RabbitTarget(string connectionString, string runId, string i
         Profile = Profile with
         {
             Version = proof.Version,
-            Topology = RabbitNativePolicy.TopologyLabel(configuredTopology),
+            Topology = RabbitPolicy.TopologyLabel(configuredTopology),
             WriteAcknowledgement = $"{InitializeAsyncPersistentMessagesTrackedPublisherConfirmsQuorumText}{ComparisonTopologies.NodeCount(configuredTopology) / ClusterNodeCountMultiplier + AdjacentElementOffset}{InitializeAsyncOfText}{ComparisonTopologies.NodeCount(configuredTopology)}{InitializeAsyncQuorumMemberOnlineVerificationManualACKOrderedChannelRPCBarrierText}",
             Transport = endpoint.Scheme == TlsScheme ? AMQPTLSOneChannelPerWorkerToken : AMQPTCPOneChannelPerWorkerToken,
             Image = imageName,

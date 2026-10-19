@@ -8,7 +8,7 @@ public sealed partial class DatabaseEngine
 {
     internal Bm25CorpusPublicationPhaseCommand CaptureBm25CorpusMetadata(IKeyValueView raw,
         PrincipalRecord principal, ResourceDefinition resource, SearchRequest request,
-        DistributedTextStatisticsV1 statistics, string tokenizer, Guid commandId,
+        DistributedTextStatistics statistics, string tokenizer, Guid commandId,
         Guid? expectedGeneration, DateTimeOffset originalExpiry, ReadExecutionBudget work)
     {
         var view = work.CreateView(raw);
@@ -16,11 +16,11 @@ public sealed partial class DatabaseEngine
         var appliedBytes = view.ReadOwnedValue(KeySpace.AppliedBytes)
             ?? throw Errors.Fail(ErrorCode.Corruption, Bm25CorpusProtocol.Invalid);
         var identity = Store.Identity;
-        var current = new Bm25CorpusCurrentV1(Bm25CorpusProtocol.Format, request.Partition,
+        var current = new Bm25CorpusCurrent(Bm25CorpusProtocol.Format, request.Partition,
             request.Collection, request.TextField!, tokenizer, principal.Id, principal.PolicyEpoch,
             resource.SchemaVersion, Bm25CorpusDigest.Resource(resource, work), new(identity.NodeId, identity.Incarnation),
             ReadOutboxHead(view, request.Partition).Tail, Store.Position,
-            NativeSerialization.Deserialize<long>(appliedBytes), identity.ReadGeneration,
+            OrleansSerialization.Deserialize<long>(appliedBytes), identity.ReadGeneration,
             identity.Incarnation, statistics, commandId, string.Empty);
         current = current with
         {

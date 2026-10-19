@@ -9,7 +9,7 @@ REQ-GRAPH-CROSS-AUTH-002: Every examined adjacency counts before labels and visi
 AC-GRAPH-CROSS-AUTH-002: Require exact BudgetExceeded/no SDK value, official dispatched error/no protected partial page; immediately observe full current literal healthy result plus administrator complete related documents/graph/outbox. Repeat after epoch2 omission, epoch3 repair and both owned cold cycles. No global journal/position invariance claim; administrative policy writes have legitimate outcomes/clock effects.
 
 REQ-GRAPH-CROSS-AUTH-003: Original genuine administrator mixed-document/edge command full receipt remains immutable on exact replay; fresh edge revision2 is not rolled back by historical replay. Independently bind complete receipt mutations and durability.
-AC-GRAPH-CROSS-AUTH-003: Each SDK and official original receipt replay is immediately bracketed by full current model/outbox. Dispose native caller scopes before each actual all-three Kill/BeginRestart/Restart/readiness join, reopen fresh administrator/reader clients, and retain primary plus cleanup failures through existing RunOwned/Cold owners. Same principal epoch1→2 foreign document grant removal→3 original repair, no role elevation. A fresh legitimate b-local revision2 mutation follows first cold and retains original receipt separately.
+AC-GRAPH-CROSS-AUTH-003: Each SDK and official original receipt replay is immediately bracketed by full current model/outbox. Dispose caller scopes before each actual all-three Kill/BeginRestart/Restart/readiness join, reopen fresh administrator/reader clients, and retain primary plus cleanup failures through existing RunOwned/Cold owners. Same principal epoch1→2 foreign document grant removal→3 original repair, no role elevation. A fresh legitimate b-local revision2 mutation follows first cold and retains original receipt separately.
 
 ```mermaid
 flowchart TD
@@ -23,4 +23,4 @@ flowchart TD
  Replay --> Cold2[Second all3 cold and fresh callers]
 ```
 
-Owners: existing GraphVertex case only type-body addition; new GraphTraversal Models/Helpers/Assertions roles. Docs GraphTraversal/CrossAuthorityPublic.md. Frontend N/A. Original Test/name/noArgs/deadline/original flow retained. Native UID UNKNOWN until actual census. Compiler/current image/runtime/Linux/cluster/resources OPEN. No scalar/performance/power-loss claims.
+Owners: existing GraphVertex case only type-body addition; new GraphTraversal Models/Helpers/Assertions roles. Docs GraphTraversal/CrossAuthorityPublic.md. Frontend N/A. Original Test/name/noArgs/deadline/original flow retained. UID UNKNOWN until actual census. Compiler/current image/runtime/Linux/cluster/resources OPEN. No scalar/performance/power-loss claims.

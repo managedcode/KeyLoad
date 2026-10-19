@@ -81,7 +81,7 @@ internal sealed class TypedConfigurationDurationTests
     }
 
     [Test]
-    public async Task NativeExplicitTimeoutConstArgumentsAreStillOperationalPolicyAsync()
+    public async Task ExplicitTimeoutConstArgumentsAreStillOperationalPolicyAsync()
     {
         const string source = """
             internal static class Subject
@@ -101,7 +101,7 @@ internal sealed class TypedConfigurationDurationTests
     }
 
     [Test]
-    public async Task NativeFixedTemporalIdentitiesKeepTheirFrameworkMeaningAsync()
+    public async Task FixedTemporalIdentitiesKeepTheirFrameworkMeaningAsync()
     {
         const string source = """
             internal static class Subject

@@ -17,7 +17,7 @@ internal sealed class SqlInnerJoinLifecycleTests
     private const string NameField = "name";
     private const string LeftEntityId = "a";
     private const string RightEntityId = "c1";
-    private const int QueryDialectVersion = 2;
+    private const int QueryDialectVersion = SqlOperationProtocol.DefaultQueryDialectVersion;
     private const int InitialGeneration = 1;
     private const int FirstCommittedGeneration = InitialGeneration + 1;
     private const int FinalGeneration = 33;
@@ -130,8 +130,7 @@ internal sealed class SqlInnerJoinLifecycleTests
             UnitExecutionOptions.PointCacheExecution());
         var owner = new DatabaseEngine(reopened, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(),
             UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(),
-            UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(),
-            UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
+            UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
 
         var page = new QueryEngine(owner, UnitExecutionOptions.QueryExecution())
             .Execute("root", JoinRequest(database));

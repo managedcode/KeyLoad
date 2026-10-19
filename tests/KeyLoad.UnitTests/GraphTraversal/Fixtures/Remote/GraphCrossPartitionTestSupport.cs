@@ -43,19 +43,19 @@ internal static class GraphCrossPartitionTestSupport
         return database.Submit(OperationKind.Batch, request, id: commandId).Get<CommitReceipt>();
     }
 
-    internal static GraphCrossPartitionDeliveryIntentV1? Intent(TestDatabase database,
+    internal static GraphCrossPartitionDeliveryIntent? Intent(TestDatabase database,
         PartitionRef source, string edgeId, EntityRef target)
-        => database.Store.Read(view => view.GetRecord<GraphCrossPartitionDeliveryIntentV1>(
+        => database.Store.Read(view => view.GetRecord<GraphCrossPartitionDeliveryIntent>(
             GraphCrossPartitionKeys.Intent(source, Graph, edgeId, target)));
 
-    internal static GraphCrossPartitionReceiverStateV1? Receiver(TestDatabase database,
+    internal static GraphCrossPartitionReceiverState? Receiver(TestDatabase database,
         PartitionRef target, PartitionRef source, string edgeId, EntityRef destination)
-        => database.Store.Read(view => view.GetRecord<GraphCrossPartitionReceiverStateV1>(
+        => database.Store.Read(view => view.GetRecord<GraphCrossPartitionReceiverState>(
             GraphCrossPartitionKeys.Reverse(target, Graph, destination, source, edgeId)));
 
-    internal static GraphCrossPartitionCapacityV1? Capacity(TestDatabase database,
+    internal static GraphCrossPartitionCapacity? Capacity(TestDatabase database,
         PartitionRef partition, GraphCrossPartitionCapacityDirection direction)
-        => database.Store.Read(view => view.GetRecord<GraphCrossPartitionCapacityV1>(
+        => database.Store.Read(view => view.GetRecord<GraphCrossPartitionCapacity>(
             GraphCrossPartitionKeys.Capacity(partition, direction)));
 
     internal static void Deliver(TestDatabase database, PartitionRef source,
@@ -67,10 +67,10 @@ internal static class GraphCrossPartitionTestSupport
             new CompleteCrossPartitionReverseEdge(source, Graph, edgeId, destination, revision));
     }
 
-    internal static GraphIncomingEdgesPageV1 ReadIncoming(TestDatabase database,
+    internal static GraphIncomingEdgesPage ReadIncoming(TestDatabase database,
         EntityRef target, int limit = 10, string principal = Root)
         => database.Database.ReadIncomingGraphEdges(principal,
-            new ReadIncomingGraphEdgesRequestV1(1, target, Graph, limit));
+            new ReadIncomingGraphEdgesRequest(1, target, Graph, limit));
 
     internal static PrincipalRecord CreateRowRestrictedReader(TestDatabase database, string id)
     {

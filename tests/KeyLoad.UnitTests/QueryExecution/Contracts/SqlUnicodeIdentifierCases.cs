@@ -2,7 +2,7 @@ namespace KeyLoad.UnitTests.Features.QueryExecution;
 
 internal static class SqlUnicodeIdentifierCases
 {
-    internal const string Profile = "SQL.UnicodeIdentifier.v1";
+    internal const string Profile = "SQL.UnicodeIdentifier";
     private const int UnitValue = 1;
     internal const string Clause = "\"score\" = 1 /* retained escaped identifier */";
     internal const string WideClause = "\"score\" = 1 /* retained wide identifier */";

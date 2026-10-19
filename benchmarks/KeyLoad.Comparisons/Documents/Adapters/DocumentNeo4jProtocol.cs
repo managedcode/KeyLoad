@@ -8,7 +8,7 @@ internal static class DocumentNeo4jProtocol
     private const string DataProperty = "data";
     private const string ValuesProperty = "values";
     internal static JsonElement Rows(JsonDocument response) => response.RootElement.GetProperty(DataProperty).GetProperty(ValuesProperty);
-    internal static async Task<JsonDocument> QueryAsync(HttpClient operationClient, string statement, object? parameters, NativeComparisonExecutionOptions execution, CancellationToken cancellationToken)
+    internal static async Task<JsonDocument> QueryAsync(HttpClient operationClient, string statement, object? parameters, ComparisonExecutionOptions execution, CancellationToken cancellationToken)
     {
         const string DbNeo4jQueryV2Token = "db/neo4j/query/v2";
 

@@ -2,7 +2,7 @@ using ManagedCode.Communication.CQRS;
 
 namespace KeyLoad.Clustering;
 
-/// <summary>Validates completed native text phases of one original signed maintenance operation.</summary>
+/// <summary>Validates completed execution text phases of one original signed maintenance operation.</summary>
 internal sealed class TextMaintenanceStreamShape(Guid requestId)
 {
     private TextIndexMaintenancePhase? phase;
@@ -27,8 +27,8 @@ internal sealed class TextMaintenanceStreamShape(Guid requestId)
     {
         (null, TextIndexMaintenancePhase.Configure) => true,
         (TextIndexMaintenancePhase.Configure, TextIndexMaintenancePhase.Capture) => true,
-        (TextIndexMaintenancePhase.Capture or TextIndexMaintenancePhase.Checkpoint, TextIndexMaintenancePhase.NativeIndex) => true,
-        (TextIndexMaintenancePhase.NativeIndex, TextIndexMaintenancePhase.Publish) => true,
+        (TextIndexMaintenancePhase.Capture or TextIndexMaintenancePhase.Checkpoint, TextIndexMaintenancePhase.RuntimeIndex) => true,
+        (TextIndexMaintenancePhase.RuntimeIndex, TextIndexMaintenancePhase.Publish) => true,
         (TextIndexMaintenancePhase.Publish, TextIndexMaintenancePhase.Checkpoint) => true,
         (TextIndexMaintenancePhase.Capture or TextIndexMaintenancePhase.Checkpoint, TextIndexMaintenancePhase.Completed) => true,
         _ => false

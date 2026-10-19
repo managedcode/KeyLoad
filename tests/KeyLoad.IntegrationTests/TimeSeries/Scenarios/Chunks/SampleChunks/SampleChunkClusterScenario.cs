@@ -3,22 +3,22 @@ using KeyLoad.IntegrationTests.Features.ClientApi;
 
 namespace KeyLoad.IntegrationTests.Features.TimeSeries;
 
-internal sealed record SampleChunkClusterScenario(TimeSeriesClusterScenario Native, Guid WindowId,
+internal sealed record SampleChunkClusterScenario(TimeSeriesClusterScenario Execution, Guid WindowId,
     DateTimeOffset From, DateTimeOffset Until)
 {
     internal static async Task<SampleChunkClusterScenario> CreateAsync(ClusterFixture fixture,
         KeyLoadClient sdk, CancellationToken token)
     {
-        var native = await TimeSeriesClusterScenario.CreateAsync(fixture, token).ConfigureAwait(false);
+        var execution = await TimeSeriesClusterScenario.CreateAsync(fixture, token).ConfigureAwait(false);
         var from = TimeProvider.System.GetUtcNow();
-        var scenario = new SampleChunkClusterScenario(native, Guid.NewGuid(), from, from.AddHours(SampleChunkClusterProtocol.WindowHours));
+        var scenario = new SampleChunkClusterScenario(execution, Guid.NewGuid(), from, from.AddHours(SampleChunkClusterProtocol.WindowHours));
         await scenario.CommitAsync(sdk, new OpenSampleChunkWindow(TimeSeriesClusterScenario.Set,
             TimeSeriesClusterScenario.Series, scenario.WindowId, scenario.From, scenario.Until), token)
             .ConfigureAwait(false);
         return scenario;
     }
 
-    internal ReadSampleChunkWindowRequest Request => new(Native.Partition, TimeSeriesClusterScenario.Set,
+    internal ReadSampleChunkWindowRequest Request => new(Execution.Partition, TimeSeriesClusterScenario.Set,
         TimeSeriesClusterScenario.Series, WindowId, null, null, Limit: SampleChunkClusterProtocol.OutputLimit);
     internal SampleData First => new(SampleChunkClusterProtocol.FirstId, From, SampleChunkClusterProtocol.FirstValue);
     internal SampleData Equal => new(SampleChunkClusterProtocol.EqualId, From.ToOffset(TimeSpan.FromHours(SampleChunkClusterProtocol.AlternateOffsetHours)), SampleChunkClusterProtocol.SecondValue);
@@ -31,7 +31,7 @@ internal sealed record SampleChunkClusterScenario(TimeSeriesClusterScenario Nati
     internal async Task<CommitReceipt> CommitAsync(KeyLoadClient sdk, Mutation mutation,
         CancellationToken token)
         => await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(
-            new CommandRequest(Guid.NewGuid(), Native.Partition, [mutation]), token).ConfigureAwait(false));
+            new CommandRequest(Guid.NewGuid(), Execution.Partition, [mutation]), token).ConfigureAwait(false));
 
     internal async Task<SampleChunkWindowResult> WaitForActualMergeAsync(KeyLoadClient sdk,
         CancellationToken token)

@@ -11,8 +11,8 @@ internal static class AnnWaitExecution
     private const string Invalid = "The ANN wait requires a vector scope, generation and acknowledged minimum token.";
     private const string WrongToken = "The ANN wait token belongs to another incarnation, atomic partition or placement.";
     private const string Future = "The ANN wait token is beyond the current committed storage cut.";
-    private const string Corrupt = "The native ANN indexed or canonical applied prefix is invalid.";
-    private const string Missing = "The native ANN generation does not cover the required prefix; explicitly restore the generation.";
+    private const string Corrupt = "The execution ANN indexed or canonical applied prefix is invalid.";
+    private const string Missing = "The execution ANN generation does not cover the required prefix; explicitly restore the generation.";
 
     internal static Task<WaitForAnnIndexResult> ExecuteAsync(DatabaseEngine database, IAnnProjection? projection,
         string principalId, WaitForAnnIndexRequest request, IOptions<QueryExecutionOptions> configured,
@@ -73,7 +73,7 @@ internal static class AnnWaitExecution
             var authority = new BudgetedReadView(view, budget);
             database.ValidateCommitToken(authority, request.Partition, request.MinimumToken, ErrorCode.TokenInvalidated, WrongToken);
             var raw = authority.ReadOwnedValue(KeySpace.AppliedBytes) ?? throw Errors.Fail(ErrorCode.Corruption, Corrupt);
-            var applied = NativeSerialization.Deserialize<long>(raw);
+            var applied = OrleansSerialization.Deserialize<long>(raw);
             if (applied < InitialPosition)
             {
                 throw Errors.Fail(ErrorCode.Corruption, Corrupt);

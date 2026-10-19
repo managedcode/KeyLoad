@@ -1,5 +1,5 @@
 using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.ClusterRouting;
+using KeyLoad.IntegrationTests.Features.OrleansExecution;
 using KeyLoad.IntegrationTests.Features.Messaging;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
 namespace KeyLoad.IntegrationTests.Features.Authorization;
@@ -75,5 +75,5 @@ internal static class EventMessageSensitiveSafeR52Replay
     }
 
     internal static async Task SameAsync(object expected, object actual)
-        => await Assert.That(NativeSerialization.Serialize(actual).SequenceEqual(NativeSerialization.Serialize(expected))).IsTrue();
+        => await Assert.That(OrleansSerialization.Serialize(actual).SequenceEqual(OrleansSerialization.Serialize(expected))).IsTrue();
 }

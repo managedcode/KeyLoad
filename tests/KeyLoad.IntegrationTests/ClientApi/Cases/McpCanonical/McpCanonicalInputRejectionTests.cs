@@ -2,8 +2,8 @@ using KeyLoad.IntegrationTests.Features.DocumentStorage;
 
 namespace KeyLoad.IntegrationTests.Features.ClientApi;
 
-/// <summary>AC-MCP-003/007: native public calls reject invalid canonical requests before starting an operation grain.</summary>
-/// <param name="fixture">The initialized actual native Aspire Orleans application.</param>
+/// <summary>AC-MCP-003/007: execution public calls reject invalid canonical requests before starting an operation grain.</summary>
+/// <param name="fixture">The initialized actual execution Aspire Orleans application.</param>
 [ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = McpCallerProtocol.FixtureKey)]
 [NotInParallel]
 internal sealed class McpCanonicalInputRejectionTests(ClusterFixture fixture)

@@ -38,10 +38,10 @@ internal static class CompositePhysicalIndexObservation
             {
                 throw new InvalidOperationException(Truncated);
             }
-            after = range.Records.Select(row => NativeSerialization.Deserialize<string>(row.Value.Span)).ToArray();
+            after = range.Records.Select(row => OrleansSerialization.Deserialize<string>(row.Value.Span)).ToArray();
         }
         return new(partition.PartitionKey, space, index,
             page.Records.Select(row => Convert.ToHexString(row.Key.Span)).ToArray(),
-            page.Records.Select(row => NativeSerialization.Deserialize<string>(row.Value.Span)).ToArray(), after);
+            page.Records.Select(row => OrleansSerialization.Deserialize<string>(row.Value.Span)).ToArray(), after);
     }
 }

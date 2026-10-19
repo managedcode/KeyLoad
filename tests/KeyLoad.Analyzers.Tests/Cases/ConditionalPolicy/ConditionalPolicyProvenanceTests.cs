@@ -1,10 +1,10 @@
 namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
 
-/// <summary>AC-CQ-034/037: only conditional result values contribute to native deadline provenance.</summary>
+/// <summary>AC-CQ-034/037: only conditional result values contribute to execution deadline provenance.</summary>
 internal sealed class ConditionalPolicyProvenanceTests
 {
     [Test]
-    public async Task NativeDeadlineSinksFindConstantsInConditionalCoalesceAndSwitchResultsAsync()
+    public async Task DeadlineSinksFindConstantsInConditionalCoalesceAndSwitchResultsAsync()
     {
         const string source = """
             internal static class Subject
@@ -23,7 +23,7 @@ internal sealed class ConditionalPolicyProvenanceTests
     }
 
     [Test]
-    public async Task DynamicAndOptionsResultsAndNativeTimeSpanSentinelsRemainAllowedAsync()
+    public async Task DynamicAndOptionsResultsAndTimeSpanSentinelsRemainAllowedAsync()
     {
         const string source = """
             [KeyLoad.ConfigurationOptions]

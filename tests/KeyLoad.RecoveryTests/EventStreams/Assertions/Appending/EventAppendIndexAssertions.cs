@@ -26,7 +26,7 @@ internal static class EventAppendIndexAssertions
         await Assert.That(actual.HasMore).IsFalse();
         var expected = identities.Select(id => Convert.ToHexString(KeySpace.Partition(IndexSpace,
             EventAppendCrashContract.Partition, EventAppendCrashContract.Documents,
-            EventAppendCrashContract.DocumentIndex, true, id)) + Separator + Convert.ToHexString(NativeSerialization.Serialize(id)));
+            EventAppendCrashContract.DocumentIndex, true, id)) + Separator + Convert.ToHexString(OrleansSerialization.Serialize(id)));
         var rows = actual.Records.Select(row => Convert.ToHexString(row.Key.Span) + Separator + Convert.ToHexString(row.Value.Span));
         await Assert.That(rows.Order(StringComparer.Ordinal)).IsEquivalentTo(expected.Order(StringComparer.Ordinal), CollectionOrdering.Matching);
     }

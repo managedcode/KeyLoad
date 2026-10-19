@@ -8,7 +8,7 @@ internal static class DistributedTextWitnessValidation
     private const string CutChanged = "The distributed search statistics cut or authority changed.";
 
     internal static void Require(DatabaseEngine database, IKeyValueView view, PrincipalRecord principal,
-        ResourceDefinition resource, string digest, DistributedTextWitnessV1 witness,
+        ResourceDefinition resource, string digest, DistributedTextWitness witness,
         PartitionRef partition, global::KeyLoad.Core.Features.ResourceExecution.Execution.ReadExecutionBudgetReadGrant grant, ReadExecutionBudget budget)
     {
         ArgumentNullException.ThrowIfNull(database);

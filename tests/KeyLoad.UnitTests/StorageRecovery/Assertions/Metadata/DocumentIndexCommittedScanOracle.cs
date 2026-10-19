@@ -106,7 +106,7 @@ internal static class DocumentIndexCommittedScanOracle
         var documents = new List<DocumentIndexCommittedDocument>();
         var documentRange = view.VisitRange(DocumentStorageKeys.Prefix(partition, Collection), RangeLimit, (_, value) =>
         {
-            var record = NativeSerialization.Deserialize<DocumentRecord>(value);
+            var record = OrleansSerialization.Deserialize<DocumentRecord>(value);
             documents.Add(new(record.Reference.Id, record.Revision, record.Json, record.Deleted));
             return true;
         }, cancellationToken: token);
@@ -127,7 +127,7 @@ internal static class DocumentIndexCommittedScanOracle
         var prefix = KeySpace.Partition(nameof(index), partition, Collection, index, label);
         var result = view.VisitRange(prefix, RangeLimit, (_, value) =>
         {
-            ids.Add(NativeSerialization.Deserialize<string>(value));
+            ids.Add(OrleansSerialization.Deserialize<string>(value));
             return true;
         }, cancellationToken: token);
         EnsureCompleteRange(result, ids.Count);

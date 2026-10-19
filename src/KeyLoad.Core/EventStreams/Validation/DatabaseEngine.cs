@@ -22,7 +22,7 @@ public sealed partial class DatabaseEngine
                 throw Errors.Fail(ErrorCode.Corruption, EventSourceRetainedHistoryDetail);
             }
             JsonData.Identifier(id);
-            var group = NativeSerialization.Deserialize<GroupState>(value);
+            var group = OrleansSerialization.Deserialize<GroupState>(value);
             if (group.Generation < TopicPurgePositiveIdentity || group.OwnershipEpoch < TopicPurgePositiveIdentity
                 || group.Checkpoint < TopicPurgeInitialCheckpoint || group.IssuedPosition < group.Checkpoint || group.IssuedPosition > tail
                 || group.Definition is null || group.Definition.Policy is null)
@@ -60,7 +60,7 @@ public sealed partial class DatabaseEngine
     {
         try
         {
-            var identity = NativeSerialization.Deserialize<RetainedTopicEventIdentity>(value);
+            var identity = OrleansSerialization.Deserialize<RetainedTopicEventIdentity>(value);
             if (identity.Generation != source.Generation || identity.Position < TopicPurgePositiveIdentity
                 || identity.Position >= firstAvailablePosition || identity.ContentDigest is null
                 || identity.ContentDigest.Length != RetainedTopicDigestCharacters

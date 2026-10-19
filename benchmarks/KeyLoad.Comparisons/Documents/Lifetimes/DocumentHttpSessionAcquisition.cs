@@ -8,7 +8,7 @@ internal sealed class DocumentHttpSessionAcquisition : IAsyncDisposable
     private IComparisonSession? session;
     private Exception? primary;
     internal static async Task<IDocumentComparisonSession> OpenAsync(HttpClient source,
-        IOptions<NativeComparisonExecutionOptions> options, Func<HttpClient, CancellationToken, Task> admit,
+        IOptions<ComparisonExecutionOptions> options, Func<HttpClient, CancellationToken, Task> admit,
         Func<HttpClient, IComparisonSession> createSession, CancellationToken token,
         Func<HttpClient, IComparisonSession, Scenario, BenchmarkDocument, CancellationToken, Task<OperationResult>>? execute = null,
         Func<HttpClient, IComparisonSession, CancellationToken, IAsyncEnumerable<FoundDocument>>? readback = null)
@@ -21,7 +21,7 @@ internal sealed class DocumentHttpSessionAcquisition : IAsyncDisposable
         catch (Exception failure) { owner.primary = failure; throw; }
     }
     private async Task<IDocumentComparisonSession> AcquireAsync(HttpClient source,
-        IOptions<NativeComparisonExecutionOptions> options, Func<HttpClient, CancellationToken, Task> admit,
+        IOptions<ComparisonExecutionOptions> options, Func<HttpClient, CancellationToken, Task> admit,
         Func<HttpClient, IComparisonSession> createSession,
         Func<HttpClient, IComparisonSession, Scenario, BenchmarkDocument, CancellationToken, Task<OperationResult>>? execute,
         Func<HttpClient, IComparisonSession, CancellationToken, IAsyncEnumerable<FoundDocument>>? readback, CancellationToken token)
@@ -34,7 +34,7 @@ internal sealed class DocumentHttpSessionAcquisition : IAsyncDisposable
         var result = new DocumentOwnedSession(session, Guid.NewGuid(), readback is null ? session.ReadCorpusAsync :
             cancellation => readback(transferredClient, transferredSession, cancellation), () => ValueTask.CompletedTask,
             executeOperation: execute is null ? null : (operation, document, cancellation) =>
-                execute(transferredClient, transferredSession, operation, document, cancellation), nativeClient: connection);
+                execute(transferredClient, transferredSession, operation, document, cancellation), runtimeClient: connection);
         session = null;
         connection = null;
         return result;
@@ -42,17 +42,17 @@ internal sealed class DocumentHttpSessionAcquisition : IAsyncDisposable
     public async ValueTask DisposeAsync()
     {
         var cleanup = new List<Exception>();
-        if (session is not null && await NativeComparisonFailure.ObserveAsync(DisposeSessionAsync()).ConfigureAwait(false) is { } sessionFailure)
+        if (session is not null && await RuntimeComparisonFailure.ObserveAsync(DisposeSessionAsync()).ConfigureAwait(false) is { } sessionFailure)
         {
             cleanup.Add(sessionFailure);
         }
 
-        if (connection is not null && await NativeComparisonFailure.ObserveAsync(DisposeConnectionAsync()).ConfigureAwait(false) is { } clientFailure)
+        if (connection is not null && await RuntimeComparisonFailure.ObserveAsync(DisposeConnectionAsync()).ConfigureAwait(false) is { } clientFailure)
         {
             cleanup.Add(clientFailure);
         }
 
-        var combined = NativeComparisonFailure.Combine(primary, [.. cleanup]);
+        var combined = RuntimeComparisonFailure.Combine(primary, [.. cleanup]);
         if (cleanup.Count != DocumentMeasurementValues.NoObservedItems && combined is not null)
         {
             System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(combined).Throw();

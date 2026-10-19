@@ -91,10 +91,10 @@ internal static class SampleChunkNumericValidator
 
     private static void ValidateOffset(long utcTicks, short offsetMinutes)
     {
-        const int MinimumNativeUtcOffsetMinutes = -840;
-        const int MaximumNativeUtcOffsetMinutes = 840;
+        const int MinimumUtcOffsetMinutes = -840;
+        const int MaximumUtcOffsetMinutes = 840;
 
-        SampleChunkWire.Require(offsetMinutes is >= MinimumNativeUtcOffsetMinutes and <= MaximumNativeUtcOffsetMinutes);
+        SampleChunkWire.Require(offsetMinutes is >= MinimumUtcOffsetMinutes and <= MaximumUtcOffsetMinutes);
         var localTicks = utcTicks + (long)offsetMinutes * TimeSpan.TicksPerMinute;
         SampleChunkWire.Require(localTicks >= DateTimeOffset.MinValue.Ticks
             && localTicks <= DateTimeOffset.MaxValue.Ticks);

@@ -15,7 +15,7 @@ internal static class SubscriptionPendingCounterAuthorityAssertions
     {
         var image = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
-        var identity = NativeSerialization.Serialize(store.Identity);
+        var identity = OrleansSerialization.Serialize(store.Identity);
         for (var repeat = FirstRepeat; repeat < Repeats; repeat++)
         {
             token.ThrowIfCancellationRequested();
@@ -33,8 +33,8 @@ internal static class SubscriptionPendingCounterAuthorityAssertions
         var expected = new CommitReceipt(request.CommandId, token, [new(nameof(DeliveryAction.Nack), request.Subscription.Source.Resource,
                 NackedPosition.ToString(System.Globalization.CultureInfo.InvariantCulture), InitialLeaseVersion)], DurabilityProfile.ProcessDurable, 1);
         await Assert.That(Errors.Code(actual.Problem)).IsNull();
-        await Assert.That(NativeSerialization.Serialize(actual.Get<CommitReceipt>()).AsSpan()
-            .SequenceEqual(NativeSerialization.Serialize(expected))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(actual.Get<CommitReceipt>()).AsSpan()
+            .SequenceEqual(OrleansSerialization.Serialize(expected))).IsTrue();
     }
 
     private static void Failure(Action action)
@@ -42,7 +42,7 @@ internal static class SubscriptionPendingCounterAuthorityAssertions
         var error = Assert.ThrowsExactly<KeyLoadException>(action);
         if (error.Code != ErrorCode.Corruption || error.Message != CorruptionDetail)
         {
-            throw new InvalidOperationException("The native pending counter corruption was not refused exactly.", error);
+            throw new InvalidOperationException("The execution pending counter corruption was not refused exactly.", error);
         }
     }
 }

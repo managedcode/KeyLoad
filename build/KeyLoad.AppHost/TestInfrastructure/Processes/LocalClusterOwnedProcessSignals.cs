@@ -4,11 +4,11 @@ using System.Runtime.InteropServices;
 
 namespace KeyLoad.AppHost.Features.TestInfrastructure.Processes;
 
-/// <summary>Owns native signaling for one already-owned local CLUSTER child process.</summary>
+/// <summary>Owns execution signaling for one already-owned local CLUSTER child process.</summary>
 internal static partial class LocalClusterOwnedProcessSignals
 {
-    private const string NativeLibraryName = "libc";
-    private const string NativeSignalEntryPoint = "kill";
+    private const string LibraryName = "libc";
+    private const string SignalEntryPoint = "kill";
     private const int SignalTerminate = 15;
     private const int CompletionCount = 0;
 
@@ -39,6 +39,6 @@ internal static partial class LocalClusterOwnedProcessSignals
     }
 
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    [LibraryImport(NativeLibraryName, EntryPoint = NativeSignalEntryPoint, SetLastError = true)]
+    [LibraryImport(LibraryName, EntryPoint = SignalEntryPoint, SetLastError = true)]
     private static partial int SendSignal(int processId, int signal);
 }

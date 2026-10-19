@@ -37,7 +37,7 @@ internal static class SubscriptionGroupProgressAuthorityAssertions
     {
         var image = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
-        var identity = NativeSerialization.Serialize(store.Identity);
+        var identity = OrleansSerialization.Serialize(store.Identity);
         var nack = ack with
         {
             CommandId = Guid.NewGuid(),
@@ -96,7 +96,7 @@ internal static class SubscriptionGroupProgressAuthorityAssertions
         var expected = new CommitReceipt(request.CommandId, expectedToken, [new("Ack", request.Subscription.Source.Resource,
                 eventPosition.ToString(System.Globalization.CultureInfo.InvariantCulture), 1L)], DurabilityProfile.ProcessDurable, 1);
         await Assert.That(Errors.Code(actual.Problem)).IsNull();
-        await Assert.That(NativeSerialization.Serialize(actual.Get<CommitReceipt>()).AsSpan()
-            .SequenceEqual(NativeSerialization.Serialize(expected))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(actual.Get<CommitReceipt>()).AsSpan()
+            .SequenceEqual(OrleansSerialization.Serialize(expected))).IsTrue();
     }
 }

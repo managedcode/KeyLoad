@@ -33,7 +33,7 @@ internal static class MetadataOuterChecksumRepairAssertions
     internal static async Task RestoredAsync(MetadataBackupFixture fixture, string destination,
         CliBackupRestoreProcessResult result, long sourcePosition, CancellationToken token)
     {
-        var actual = NativeBackupJournalRepairAssertions.Read(destination, token);
+        var actual = BackupJournalRepairAssertions.Read(destination, token);
         await CliBackupJournalRepairAssertions.ReceiptAsync(result, actual.Identity);
         await Assert.That(actual.Identity.NodeId).IsNotEqualTo(fixture.OriginalIdentity.NodeId);
         await Assert.That(actual.Identity.Incarnation).IsNotEqualTo(fixture.OriginalIdentity.Incarnation);
@@ -44,10 +44,10 @@ internal static class MetadataOuterChecksumRepairAssertions
         string[] expected =
         [
             Convert.ToHexString(MetadataBackupFixture.StoredKeyBytes) + ":" +
-                Convert.ToHexString(NativeSerialization.Serialize(MetadataBackupFixture.ExpectedValue)),
+                Convert.ToHexString(OrleansSerialization.Serialize(MetadataBackupFixture.ExpectedValue)),
             Convert.ToHexString(KeyCodec.Encode(ZoneTreePersistenceFormat.SystemNamespace,
                 ZoneTreePersistenceFormat.DispatchPausedKey)) + ":" +
-                Convert.ToHexString(NativeSerialization.Serialize(true))
+                Convert.ToHexString(OrleansSerialization.Serialize(true))
         ];
         await Assert.That(actual.Rows).IsEquivalentTo(expected.Order(StringComparer.Ordinal), CollectionOrdering.Matching);
     }

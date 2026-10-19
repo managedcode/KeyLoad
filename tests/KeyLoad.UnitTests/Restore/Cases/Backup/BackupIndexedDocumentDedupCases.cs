@@ -129,7 +129,7 @@ internal sealed class BackupIndexedDocumentDedupCases
                 ResourceKind.Collection, fixture.Partition.TransactionDomainId), JsonDefaults.Options));
         var paused = ReadSystem(fixture.TargetStore, DispatchPausedKey);
         await Assert.That(paused).IsNotNull();
-        await Assert.That(NativeSerialization.Deserialize<bool>(paused!)).IsTrue();
+        await Assert.That(OrleansSerialization.Deserialize<bool>(paused!)).IsTrue();
     }
 
     private static byte[]? ReadSystem(ZoneTreeStore store, string key)
@@ -159,7 +159,7 @@ internal sealed class BackupIndexedDocumentDedupCases
         var position = fixture.TargetStore.Position;
         var replay = database.Apply(restored);
         await Assert.That(Errors.Code(replay.Problem)).IsNull();
-        await NativeReplayResultAssertions.Same<CommitReceipt>(replay, firstResult);
+        await ReplayResultAssertions.Same<CommitReceipt>(replay, firstResult);
         await Assert.That(fixture.TargetStore.Position).IsEqualTo(position);
         await BackupIndexedDocumentDedupAssertions.AssertOldOutcomePreserved(fixture.TargetStore,
             fixture.Partition, RestoredCommandId, firstBytes);

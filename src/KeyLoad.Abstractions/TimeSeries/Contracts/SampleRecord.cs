@@ -6,5 +6,5 @@ namespace KeyLoad;
 /// <param name="Sequence">Specifies the sequence value.</param>
 /// <param name="TagsJson">Contains the sample tags as JSON.</param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.SampleRecord)]
+[Orleans.Alias(ContractAliases.SampleRecord)]
 public sealed record SampleRecord([property: Orleans.Id(0)] string SeriesId, [property: Orleans.Id(1)] SampleData Sample, [property: Orleans.Id(2)] long Sequence, [property: Orleans.Id(3)] string TagsJson);

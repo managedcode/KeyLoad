@@ -3,8 +3,8 @@ namespace KeyLoad.Core;
 internal static class AggregateSnapshotPersistence
 {
     internal const int CurrentFormatVersion = 1;
-    internal const string SnapshotEnvelopeAlias = "keyload.core.v1.AggregateSnapshotEnvelope";
-    internal const string SnapshotSpace = "aggregate-snapshot-v1";
+    internal const string SnapshotEnvelopeAlias = "keyload.core.AggregateSnapshotEnvelope";
+    internal const string SnapshotSpace = "aggregate-snapshot";
     private const string UnknownFormatMessage = "The aggregate snapshot format is unsupported.";
     private const string InvalidSnapshotMessage = "The aggregate snapshot is corrupt.";
 
@@ -24,7 +24,7 @@ internal static class AggregateSnapshotPersistence
     }
 
     internal static byte[] Serialize(AggregateSnapshotState snapshot)
-        => NativeSerialization.Serialize(new AggregateSnapshotEnvelope(CurrentFormatVersion, snapshot));
+        => OrleansSerialization.Serialize(new AggregateSnapshotEnvelope(CurrentFormatVersion, snapshot));
 
     internal static AggregateSnapshotState Deserialize(ReadOnlySpan<byte> value, DatabaseLimits limits)
     {
@@ -32,7 +32,7 @@ internal static class AggregateSnapshotPersistence
         const int SourceRevisionValidationBoundary = 0;
         const int StateSchemaVersionValidationBoundary = 1;
 
-        var envelope = NativeSerialization.Deserialize<AggregateSnapshotEnvelope>(value);
+        var envelope = OrleansSerialization.Deserialize<AggregateSnapshotEnvelope>(value);
         if (envelope.FormatVersion != CurrentFormatVersion)
         {
             throw Errors.Fail(ErrorCode.FormatUnsupported, UnknownFormatMessage);

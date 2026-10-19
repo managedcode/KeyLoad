@@ -9,7 +9,7 @@ internal static class VectorProfileTokens
     internal const string ExactMethod = "exact";
     internal const string HnswMethod = "hnsw";
     internal const string IvfFlatMethod = "ivfflat";
-    internal const string NativeMethod = "native";
+    internal const string RuntimeMethod = "execution";
     internal const string PlainMode = "plain";
     internal const string FilteredMode = "filtered";
     internal const string MixedMode = "mixed";

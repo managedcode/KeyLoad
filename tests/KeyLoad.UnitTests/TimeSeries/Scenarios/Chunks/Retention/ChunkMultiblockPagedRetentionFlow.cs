@@ -24,10 +24,10 @@ internal static class ChunkMultiblockPagedRetentionFlow
         ChunkMultiblockPagedRetentionOperations.Seed(fixture);
         await ChunkMultiblockPagedRetentionRows.RequireAsync(fixture, expired: false, healthy: false);
         await ChunkMultiblockPagedRetentionRepresentation.RecordsAsync(fixture, healthy: false);
-        var native = ChunkMultiblockPagedRetentionRepresentation.Capture(fixture, ChunkMultiblockBoundaryData.InitialGeneration);
+        var execution = ChunkMultiblockPagedRetentionRepresentation.Capture(fixture, ChunkMultiblockBoundaryData.InitialGeneration);
         fixture.Clock.AdvanceTo(SampleChunkCanonicalFixture.Late.Timestamp);
-        await PageAsync(fixture, native, ChunkMultiblockPagedRetentionOperations.DeletePage, more: true);
-        await PageAsync(fixture, native, ChunkMultiblockPagedRetentionOperations.ExpiredCount, more: false);
+        await PageAsync(fixture, execution, ChunkMultiblockPagedRetentionOperations.DeletePage, more: true);
+        await PageAsync(fixture, execution, ChunkMultiblockPagedRetentionOperations.ExpiredCount, more: false);
         await ChunkMultiblockPagedRetentionRefusal.RunAsync(fixture);
         await ColdAsync(fixture, healthy: false);
         ChunkMultiblockPagedRetentionOperations.Healthy(fixture);
@@ -37,7 +37,7 @@ internal static class ChunkMultiblockPagedRetentionFlow
         await ColdAsync(fixture, healthy: true);
     }
 
-    private static async Task PageAsync(SampleChunkPartialRetentionFixture fixture, byte[][] native, long purged, bool more)
+    private static async Task PageAsync(SampleChunkPartialRetentionFixture fixture, byte[][] execution, long purged, bool more)
     {
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
@@ -50,7 +50,7 @@ internal static class ChunkMultiblockPagedRetentionFlow
             await ChunkMultiblockPagedRetentionRows.PageAsync(fixture, purged, more);
             await ChunkMultiblockPagedRetentionRows.RequireAsync(fixture, expired: true, healthy: false);
         }, failures);
-        await ServerFailureObserver.ObserveAsync(() => ChunkMultiblockPagedRetentionRepresentation.UnchangedAsync(fixture, native), failures);
+        await ServerFailureObserver.ObserveAsync(() => ChunkMultiblockPagedRetentionRepresentation.UnchangedAsync(fixture, execution), failures);
         await ServerFailureObserver.ObserveAsync(() => SampleChunkPartialRetentionAssertions.Replay(fixture), failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }

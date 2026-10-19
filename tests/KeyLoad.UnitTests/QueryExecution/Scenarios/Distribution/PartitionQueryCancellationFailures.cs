@@ -5,7 +5,7 @@ namespace KeyLoad.UnitTests.Features.QueryExecution;
 
 internal static class PartitionQueryCancellationFailures
 {
-    private const string FailureMessage = "The partition query and native cancellation observer did not settle cleanly.";
+    private const string FailureMessage = "The partition query and execution cancellation observer did not settle cleanly.";
 
     internal static void ThrowIfAny(Exception? primary, List<Exception> settlement)
     {

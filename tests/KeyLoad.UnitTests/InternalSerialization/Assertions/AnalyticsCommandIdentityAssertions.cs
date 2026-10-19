@@ -7,7 +7,7 @@ using KeyLoad.Storage;
 using KeyLoad.UnitTests.Features.Authorization;
 using ManagedCode.Communication.Commands;
 using D = KeyLoad.UnitTests.Features.InternalSerialization.AnalyticsCommandIdentityData;
-using O = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreNativeTestOperations;
+using O = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreTestOperations;
 
 namespace KeyLoad.UnitTests.Features.InternalSerialization;
 
@@ -24,7 +24,7 @@ internal static class AnalyticsCommandIdentityAssertions
 
     internal static async Task OrderAsync(Command<DatabaseCommand> operation, bool delete)
     {
-        var request = NativeSerialization.Deserialize<CommandRequest>(operation.Value!.Input.Span);
+        var request = OrleansSerialization.Deserialize<CommandRequest>(operation.Value!.Input.Span);
         using var document = JsonSerializer.SerializeToDocument(request, JsonDefaults.Options);
         await Assert.That(operation.Value.Fingerprint).IsEqualTo(JsonData.Fingerprint(new
         {
@@ -88,14 +88,14 @@ internal static class AnalyticsCommandIdentityAssertions
 
     internal static async Task UnchangedAsync(SafeProjectorOperationDatabase owner, Func<Task> action)
     {
-        var identity = NativeSerialization.Serialize(owner.Store.Identity);
+        var identity = OrleansSerialization.Serialize(owner.Store.Identity);
         var image = TeamRowPolicyAssertions.Image(owner.Store);
         var position = owner.Store.Position;
         var applied = owner.Database.LastApplied;
         var cut = owner.ReadCanonicalCut();
         var outbox = owner.Database.GetOutboxStatus(D.Root, owner.Source.Partition);
         await action();
-        await Assert.That(NativeSerialization.Serialize(owner.Store.Identity).SequenceEqual(identity)).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(owner.Store.Identity).SequenceEqual(identity)).IsTrue();
         await Assert.That(TeamRowPolicyAssertions.Image(owner.Store).SequenceEqual(image, StringComparer.Ordinal)).IsTrue();
         await Assert.That(owner.Store.Position).IsEqualTo(position);
         await Assert.That(owner.Database.LastApplied).IsEqualTo(applied);
@@ -108,19 +108,19 @@ internal static class AnalyticsCommandIdentityAssertions
         using var database = new TestDatabase();
         var id = Guid.NewGuid();
         var request = new CommandRequest(id, database.Partition, [new PutDocument(D.Collection, D.Document, D.Json, 0)]);
-        await NativeIdentityAsync(database.Database, OperationKind.Batch, id, request);
+        await RuntimeIdentityAsync(database.Database, OperationKind.Batch, id, request);
         var definition = new ResourceDefinition(D.Collection, ResourceKind.Collection, database.Partition.TransactionDomainId);
-        await NativeIdentityAsync(database.Database, OperationKind.ConfigureResource, Guid.NewGuid(),
+        await RuntimeIdentityAsync(database.Database, OperationKind.ConfigureResource, Guid.NewGuid(),
             new ConfigureResourceRequest(database.Partition.TenantId, database.Partition.DatabaseId, definition));
     }
 
-    private static async Task NativeIdentityAsync<T>(DatabaseEngine database, OperationKind kind, Guid id, T request)
+    private static async Task RuntimeIdentityAsync<T>(DatabaseEngine database, OperationKind kind, Guid id, T request)
     {
         var identity = JsonSerializer.Serialize(request, JsonDefaults.Options);
         var operation = database.CreateCommand(kind, id, D.Root, database.EvaluationClock.GetUtcNow(), identity);
         var work = new ReadExecutionBudget(database.OperationLimitsOptions, database.EvaluationClock,
             TestContext.Current!.Execution.CancellationToken);
-        var charged = database.CreateCommand(kind, id, D.Root, new DateTimeOffset(operation.Timestamp), NativeSerialization.Serialize(request), work);
+        var charged = database.CreateCommand(kind, id, D.Root, new DateTimeOffset(operation.Timestamp), OrleansSerialization.Serialize(request), work);
         await Assert.That(charged.Value!.Input.Span.SequenceEqual(operation.Value!.Input.Span)).IsTrue();
         await Assert.That(charged.Value.Fingerprint).IsEqualTo(operation.Value.Fingerprint);
         await Assert.That(DatabaseCommandFingerprint.Compute(operation)).IsEqualTo(JsonData.Fingerprint(new

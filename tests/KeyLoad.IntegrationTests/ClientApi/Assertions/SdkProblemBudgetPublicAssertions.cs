@@ -1,5 +1,5 @@
 using KeyLoad.Client;
-using KeyLoad.IntegrationTests.Features.ClusterRouting;
+using KeyLoad.IntegrationTests.Features.OrleansExecution;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
 using ManagedCode.Communication;
 

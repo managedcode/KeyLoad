@@ -11,16 +11,16 @@ public sealed partial class DatabaseEngine
     /// <param name="timeProvider">The operation clock used for its deadline.</param>
     /// <param name="cancellationToken">Cancels all scan and point-read work.</param>
     /// <returns>Visible incoming canonical edges at one local read cut.</returns>
-    public GraphIncomingEdgesPageV1 ReadIncomingGraphEdges(string principalId,
-        ReadIncomingGraphEdgesRequestV1 request, TimeProvider? timeProvider = null,
+    public GraphIncomingEdgesPage ReadIncomingGraphEdges(string principalId,
+        ReadIncomingGraphEdgesRequest request, TimeProvider? timeProvider = null,
         CancellationToken cancellationToken = default)
     {
         var budget = new ReadExecutionBudget(OperationLimitsOptions, timeProvider ?? Clock, cancellationToken);
         return ReadIncomingGraphEdgesRead(principalId, request, timeProvider ?? Clock, budget);
     }
 
-    private GraphIncomingEdgesPageV1 ReadIncomingGraphEdgesRead(string principalId,
-        ReadIncomingGraphEdgesRequestV1 request, TimeProvider clock, ReadExecutionBudget budget)
+    private GraphIncomingEdgesPage ReadIncomingGraphEdgesRead(string principalId,
+        ReadIncomingGraphEdgesRequest request, TimeProvider clock, ReadExecutionBudget budget)
     {
         budget.Check();
         GraphCrossPartitionValidation.ValidateIncoming(request, Limits, budget);

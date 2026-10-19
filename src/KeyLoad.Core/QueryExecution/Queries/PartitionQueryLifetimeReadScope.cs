@@ -30,10 +30,10 @@ public sealed partial class DatabaseEngine
             (raw, principal, resource, digest) =>
             {
                 budget.Check();
-                RequireNativeBudget(NativeSerialization.Measure(principal));
-                RequireNativeBudget(NativeSerialization.Measure(metadata.Principal));
-                if (!NativeSerialization.Serialize(principal).AsSpan()
-                    .SequenceEqual(NativeSerialization.Serialize(metadata.Principal)))
+                RequireBudget(OrleansSerialization.Measure(principal));
+                RequireBudget(OrleansSerialization.Measure(metadata.Principal));
+                if (!OrleansSerialization.Serialize(principal).AsSpan()
+                    .SequenceEqual(OrleansSerialization.Serialize(metadata.Principal)))
                 {
                     throw Errors.Fail(ErrorCode.PermissionDenied, PartitionQueryReceivingIdentityChanged);
                 }

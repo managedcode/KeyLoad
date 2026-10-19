@@ -3,11 +3,11 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
 
-/// <summary>AC-CQ-037: actual native binding and validation reach an executing snapshot consumer.</summary>
+/// <summary>AC-CQ-037: actual execution binding and validation reach an executing snapshot consumer.</summary>
 internal sealed class TypedOptionsExecutionFlowTests
 {
     [Test]
-    public async Task BoundOverridesReachNativeAdmissionAndTaskDeadlineAsync()
+    public async Task BoundOverridesReachAdmissionAndTaskDeadlineAsync()
     {
         var state = new TypedOptionsFlowState();
         using var provider = TypedOptionsFlowRegistration.CreateProvider(state, "3", "00:00:02");
@@ -22,7 +22,7 @@ internal sealed class TypedOptionsExecutionFlowTests
     }
 
     [Test]
-    public async Task CanonicalDefaultsReachTheSameNativeOperationAsync()
+    public async Task CanonicalDefaultsReachTheSameOperationAsync()
     {
         var defaults = new TypedOptionsFlowSettings();
         var state = new TypedOptionsFlowState();

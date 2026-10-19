@@ -20,12 +20,12 @@ internal static class QueueWholeFlowStorage
     });
 
     internal static DateTimeOffset Clock(ZoneTreeStore store) => store.Read(view =>
-        NativeSerialization.Deserialize<DateTimeOffset>(view.ReadOwnedValue(KeySpace.ClockBytes)!));
+        OrleansSerialization.Deserialize<DateTimeOffset>(view.ReadOwnedValue(KeySpace.ClockBytes)!));
 
     internal static DatabaseEngine Open(ZoneTreeStore store) => new(store, new AuthorizationPolicy(),
         UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(),
         UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(),
-        UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
+        UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
 
     internal static Result<object> Apply<T>(DatabaseEngine database, OperationKind kind, T payload,
         Guid id, DateTimeOffset time) => database.Apply(database.CreateCommand(kind, id, "root", time, JsonSerializer.Serialize(payload, JsonDefaults.Options)));

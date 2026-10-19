@@ -2,17 +2,17 @@
 
 ## Purpose, entry points and ownership
 
-- Owns `run-tests.mjs`, the bounded argument selector for the native TUnit entry.
+- Owns `run-tests.mjs`, the bounded argument selector for the TUnit entry.
 - C# test fixtures own Aspire startup, readiness, discovered endpoints and joined teardown.
-- `KeyLoad.AppHost` starts native KeyLoad project processes and required Azurite resources.
+- `KeyLoad.AppHost` starts KeyLoad project processes and required Azurite resources.
 - `KeyLoad.LoadTests.AppHost` owns selected comparison infrastructure. Client code executes workloads and measurements outside the resource graph.
 - Normal builds and test startup never publish a KeyLoad container. Explicit release delivery uses the .NET SDK `PublishContainer` target.
 - AppHost cleanup removes only resources created for its session, including after failures and cancellation.
-- Preserve original native test, process and coverage evidence; do not claim container identities for native processes.
+- Preserve original test, process and coverage evidence; do not claim container identities for processes.
 
 ## Boundaries and protected risks
 
-Follow the [root policy](../../../AGENTS.md) and the owning feature specification. Keep changes in their actual owner, preserve unrelated work, and remove replaced code together with exclusive callers and fixtures. Use native Orleans calls for distributed execution and silo-local ZoneTree owners for files. Preserve persisted authorization, operation correctness, resource bounds, cancellation and joined shutdown. Never turn a static check or focused test into a claim of complete runtime qualification.
+Follow the [root policy](../../../AGENTS.md) and the owning feature specification. Keep changes in their actual owner, preserve unrelated work, and remove replaced code together with exclusive callers and fixtures. Use Orleans calls for distributed execution and silo-local ZoneTree owners for files. Preserve persisted authorization, operation correctness, resource bounds, cancellation and joined shutdown. Never turn a static check or focused test into a claim of complete runtime qualification.
 
 ## Commands and verification
 
@@ -22,7 +22,7 @@ From the repository root:
 node scripts/Features/RepositoryGovernance/verify.mjs
 ```
 
-Use the root's complete solution, native TUnit, real process recovery and Aspire SDK/MCP gates as applicable. Local checks are development evidence; delivered-source qualification and public measurements require exact-source Linux GitHub artifacts. Do not weaken compiler, analyzer, source-identity, coverage or runtime assertions.
+Use the root's complete solution, TUnit, real process recovery and Aspire SDK/MCP gates as applicable. Local checks are development evidence; delivered-source qualification and public measurements require exact-source Linux GitHub artifacts. Do not weaken compiler, analyzer, source-identity, coverage or runtime assertions.
 
 ## Skills
 

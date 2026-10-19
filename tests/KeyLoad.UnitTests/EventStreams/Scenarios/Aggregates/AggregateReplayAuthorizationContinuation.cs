@@ -54,7 +54,7 @@ internal static class AggregateReplayAuthorizationContinuation
         };
         var outcome = fixture.Store.Read(view => view.ReadOwnedValue(OutcomeStoreOracle.PartitionKey(
             fixture.Partition, AggregateReplayFixture.WorkerId, id)));
-        await Assert.That(NativeSerialization.Deserialize<StoredOutcome>(outcome!).PolicyEpoch).IsEqualTo(RepairedPolicyEpoch);
+        await Assert.That(OrleansSerialization.Deserialize<StoredOutcome>(outcome!).PolicyEpoch).IsEqualTo(RepairedPolicyEpoch);
         var page = fixture.Read(maximumEvents: RetainedTailMaximum);
         await PageAsync(page, oldPage with
         {

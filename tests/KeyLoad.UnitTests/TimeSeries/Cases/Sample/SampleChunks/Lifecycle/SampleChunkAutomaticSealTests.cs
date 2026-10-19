@@ -9,7 +9,7 @@ internal sealed class SampleChunkAutomaticSealTests
     private const string Prefix = "automatic-";
 
     [Test]
-    public async Task AcChunk007009FullNativeBlockAutomaticallySealsThenCorrectionMergesWithoutRawRewrite()
+    public async Task AcChunk007009FullBlockAutomaticallySealsThenCorrectionMergesWithoutRawRewrite()
     {
         using var fixture = new SampleChunkCanonicalFixture();
         fixture.Open();

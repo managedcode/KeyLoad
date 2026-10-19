@@ -15,7 +15,7 @@ internal sealed class DatabaseAuthenticationHandler(IOptionsMonitor<Authenticati
         {
             return AuthenticateResult.NoResult();
         }
-        var reply = await DatabaseCredentialResolver.ReadAsync(Context, executionObserver).ConfigureAwait(false);
+        var reply = await DatabaseCredentialResolver.ReadAsync(Context, executionObserver);
         PrincipalRecord principal;
         if (Context.Items[McpHttpPipeline.StateItem] is McpRequestState state)
         {
@@ -24,7 +24,7 @@ internal sealed class DatabaseAuthenticationHandler(IOptionsMonitor<Authenticati
         }
         else
         {
-            principal = McpNativeAuthentication.ReadPrincipal(reply.Span,
+            principal = McpAuthentication.ReadPrincipal(reply.Span,
                 Context.RequestServices.GetRequiredService<IOptions<McpExecutionOptions>>(), Context.RequestAborted);
         }
         Context.Features.Set(new DatabaseAuthenticatedPrincipal(principal));

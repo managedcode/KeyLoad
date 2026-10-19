@@ -1,9 +1,9 @@
 using KeyLoad.Storage.ZoneTree.IO;
-using KeyLoad.UnitTests.Features.ClusterRouting;
+using KeyLoad.UnitTests.Features.OrleansExecution;
 
 namespace KeyLoad.UnitTests.Features.StorageRecovery;
 
-/// <summary>Current node-owner special-file rejection remains a real native filesystem flow.</summary>
+/// <summary>Current node-owner special-file rejection remains a real execution filesystem flow.</summary>
 internal sealed class PartitionRootAdmissionSpecialEntryTests
 {
     private const string OwnerLockName = "node.owner.lock";
@@ -18,7 +18,7 @@ internal sealed class PartitionRootAdmissionSpecialEntryTests
         }
         else
         {
-            TUnit.Core.Skip.Test("Native FIFO admission requires a Linux or macOS test host.");
+            TUnit.Core.Skip.Test("Execution FIFO admission requires a Linux or macOS test host.");
         }
     }
 
@@ -28,7 +28,7 @@ internal sealed class PartitionRootAdmissionSpecialEntryTests
         {
             fixture.CreateExistingRoot();
             var path = Path.Combine(fixture.Root, OwnerLockName);
-            RequestCqrsProbeNativeFifo.Create(path);
+            RequestCqrsProbeFifo.Create(path);
             File.SetUnixFileMode(path, UnixFileMode.UserRead | UnixFileMode.UserWrite);
             var entries = Directory.GetFileSystemEntries(fixture.Root);
             var mode = File.GetUnixFileMode(path);

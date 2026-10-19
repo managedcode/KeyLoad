@@ -5,7 +5,7 @@ namespace KeyLoad.UnitTests.Features.ResourceExecution;
 internal sealed class ReadExecutionBudgetGrantRangeTests
 {
     [Test]
-    public async Task ExactRangeGrantIncludesChargedNativeLookaheadAttempt()
+    public async Task ExactRangeGrantIncludesChargedLookaheadAttempt()
     {
         using var database = ReadExecutionBudgetGrantSeed.CreateDatabase();
         var maximumBytes = ReadExecutionBudgetGrantSeed.FirstKey.Length + ReadExecutionBudgetGrantSeed.FirstValue.Length
@@ -51,7 +51,7 @@ internal sealed class ReadExecutionBudgetGrantRangeTests
     }
 
     [Test]
-    public async Task ZeroGrantAllowsEmptyNativeRangeWithoutChargingBytes()
+    public async Task ZeroGrantAllowsEmptyRangeWithoutChargingBytes()
     {
         using var database = ReadExecutionBudgetGrantSeed.CreateDatabase();
         var result = database.Store.Read(view =>
@@ -67,7 +67,7 @@ internal sealed class ReadExecutionBudgetGrantRangeTests
     }
 
     [Test]
-    public async Task OneByteOverRangeGrantRejectsBeforeNativeVisitorAndAggregateDebit()
+    public async Task OneByteOverRangeGrantRejectsBeforeVisitorAndAggregateDebit()
     {
         using var database = ReadExecutionBudgetGrantSeed.CreateDatabase();
         var maximumBytes = ReadExecutionBudgetGrantSeed.FirstKey.Length + ReadExecutionBudgetGrantSeed.FirstValue.Length - 1;

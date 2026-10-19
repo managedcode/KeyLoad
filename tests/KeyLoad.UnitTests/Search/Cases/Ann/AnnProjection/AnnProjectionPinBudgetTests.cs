@@ -14,7 +14,7 @@ internal sealed class AnnProjectionPinBudgetTests
     private static readonly ImmutableArray<float> ThirdValues = [7f, 8f, 9f];
 
     [Test]
-    public async Task ConsumerAndNativeBatchRecordCountsEnforceInclusiveLimits()
+    public async Task ConsumerAndBatchRecordCountsEnforceInclusiveLimits()
     {
         using var database = AnnProjectionPinTestSupport.Create(new()
         {
@@ -58,24 +58,24 @@ internal sealed class AnnProjectionPinBudgetTests
     }
 
     [Test]
-    public async Task ProjectionBatchByteBoundaryUsesTheActualNativeOutboxRecordLength()
+    public async Task ProjectionBatchByteBoundaryUsesTheActualOutboxRecordLength()
     {
-        var nativeBytes = MeasureVectorEntryBytes();
+        var runtimeBytesCore = MeasureVectorEntryBytes();
         using var database = AnnProjectionPinTestSupport.Create(new()
         {
-            MaxProjectionBatchBytes = nativeBytes
+            MaxProjectionBatchBytes = runtimeBytesCore
         });
         var consumer = AnnProjectionPinTestSupport.Consumer(database, ByteBoundaryConsumer);
         var start = AnnProjectionPinTestSupport.Tail(database);
         AnnProjectionPinTestSupport.Configure(database, consumer, start);
         AnnProjectionPinTestSupport.PutVector(database, FirstValues);
         var stored = AnnProjectionPinTestSupport.StoredOutbox(database, start + 1);
-        await Assert.That(stored.Length).IsEqualTo(nativeBytes);
+        await Assert.That(stored.Length).IsEqualTo(runtimeBytesCore);
         var beforeHead = database.Database.GetOutboxStatus(AnnProjectionPinTestSupport.Principal, database.Partition).Head;
         var beforeConsumer = AnnProjectionPinTestSupport.StoredConsumer(database, consumer);
 
         var oneByteShort = Assert.ThrowsExactly<KeyLoadException>(() =>
-            AnnProjectionPinTestSupport.Read(database, consumer, limit: 1, maxBytes: nativeBytes - 1));
+            AnnProjectionPinTestSupport.Read(database, consumer, limit: 1, maxBytes: runtimeBytesCore - 1));
         await Assert.That(oneByteShort.Code).IsEqualTo(ErrorCode.BudgetExceeded);
         await Assert.That(database.Database.GetOutboxStatus(AnnProjectionPinTestSupport.Principal, database.Partition).Consumers
             .Single().Checkpoint).IsEqualTo(start);
@@ -86,7 +86,7 @@ internal sealed class AnnProjectionPinBudgetTests
         await Assert.That(AnnProjectionPinTestSupport.StoredOutbox(database, start + 1)
             .SequenceEqual(stored)).IsTrue();
 
-        var exact = AnnProjectionPinTestSupport.Read(database, consumer, limit: 1, maxBytes: nativeBytes);
+        var exact = AnnProjectionPinTestSupport.Read(database, consumer, limit: 1, maxBytes: runtimeBytesCore);
         await Assert.That(exact.Entries.Length).IsEqualTo(1);
         await Assert.That(exact.ThroughSequence).IsEqualTo(start + 1);
         await Assert.That(exact.Entries[0].Sequence).IsEqualTo(start + 1);

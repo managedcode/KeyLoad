@@ -1,6 +1,6 @@
 namespace KeyLoad.UnitTests.Features.StorageRecovery;
 
-/// <summary>Bounds complete native recovery-fixture image observation; a remaining row must refuse the proof.</summary>
+/// <summary>Bounds complete execution recovery-fixture image observation; a remaining row must refuse the proof.</summary>
 [ConfigurationOptions]
 internal sealed class RecoveryImageCaptureOptions
 {

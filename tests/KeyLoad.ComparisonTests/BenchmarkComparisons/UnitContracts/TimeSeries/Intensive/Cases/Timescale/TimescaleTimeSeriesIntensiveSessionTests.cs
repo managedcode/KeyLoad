@@ -10,7 +10,7 @@ internal sealed class TimescaleTimeSeriesIntensiveSessionTests
     public async Task AcTsi008PrivateDataSourceSettingsMatchTheFrozenPoolAndTimeoutPolicy()
     {
         var settings = TimescaleTimeSeriesIntensiveSession.CreateConnectionSettings(
-            "Host=127.0.0.1;Database=keyload;Username=benchmark", ValidSchema, UnitBenchmarkOptions.Native());
+            "Host=127.0.0.1;Database=keyload;Username=benchmark", ValidSchema, UnitBenchmarkOptions.Execution());
         await Assert.That(settings.Timeout).IsEqualTo(30);
         await Assert.That(settings.CommandTimeout).IsEqualTo(30);
         await Assert.That(settings.CancellationTimeout).IsEqualTo(2000);
@@ -32,14 +32,14 @@ internal sealed class TimescaleTimeSeriesIntensiveSessionTests
     {
         Assert.ThrowsExactly<ArgumentException>(() =>
             TimescaleTimeSeriesIntensiveSession.CreateConnectionSettings(
-                "Host=127.0.0.1;Database=keyload;Username=benchmark", "public", UnitBenchmarkOptions.Native()));
+                "Host=127.0.0.1;Database=keyload;Username=benchmark", "public", UnitBenchmarkOptions.Execution()));
         await Assert.That(ValidSchema.Length).IsEqualTo(44);
     }
 
     [Test]
-    public async Task AcCq034ConfiguredAdapterPolicyReachesNativeNpgsqlSettingsAsync()
+    public async Task AcCq034ConfiguredAdapterPolicyReachesNpgsqlSettingsAsync()
     {
-        var execution = UnitBenchmarkOptions.Native();
+        var execution = UnitBenchmarkOptions.Execution();
         execution.Value.TimescaleConnectionTimeout = TimeSpan.FromSeconds(7);
         execution.Value.TimescaleCommandTimeout = TimeSpan.FromSeconds(11);
         execution.Value.TimescaleCancellationTimeoutMilliseconds = 1250;

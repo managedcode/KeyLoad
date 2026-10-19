@@ -6,7 +6,7 @@ internal static class SqlBetweenSymmetricClusterPages
 {
     internal static async Task HealthyAsync(ClusterFixture fixture, SqlBetweenSymmetricClusterState state, CancellationToken token)
     {
-        await global::KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerProtocol.Node2, state.Seed.Reader.Secret, async caller =>
+        await global::KeyLoad.IntegrationTests.Features.OrleansExecution.RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerProtocol.Node2, state.Seed.Reader.Secret, async caller =>
         {
             var capabilities = await global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.QueryCapabilitiesAsync(token));
             await global::TUnit.Assertions.Assert.That(capabilities.ReadProfiles.Contains(SqlBetweenSymmetricClusterCases.Profile)).IsTrue();
@@ -33,7 +33,7 @@ internal static class SqlBetweenSymmetricClusterPages
         }, token);
     }
 
-    internal static async Task CaseAsync(global::KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsClusterCallers caller, PostgresClusterCaller wire,
+    internal static async Task CaseAsync(global::KeyLoad.IntegrationTests.Features.OrleansExecution.RequestCqrsClusterCallers caller, PostgresClusterCaller wire,
         SqlBetweenSymmetricClusterCase item, long revision, CancellationToken token)
     {
         var sql = SqlBetweenSymmetricClusterCases.Prefix + item.Clause + SqlBetweenSymmetricClusterCases.Tail;

@@ -5,7 +5,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
-/// <summary>Retains actual local execution or original workflow provenance for the same native fault workload.</summary>
+/// <summary>Retains actual local execution or original workflow provenance for the same execution fault workload.</summary>
 [ConfigurationBinding]
 internal static class IsolatedKeyLoadFaultChecksProvider
 {

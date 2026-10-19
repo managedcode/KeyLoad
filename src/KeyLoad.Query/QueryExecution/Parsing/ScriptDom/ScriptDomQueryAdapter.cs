@@ -25,7 +25,7 @@ internal static class ScriptDomQueryAdapter
         execution.Validate();
         cancellationToken.ThrowIfCancellationRequested();
         budget.Check();
-        if (request.QueryDialectVersion is not (NamedVersion or JoinVersion))
+        if (request.QueryDialectVersion != SqlOperationProtocol.DefaultQueryDialectVersion)
         {
             throw ScriptDomErrors.Unsupported();
         }
@@ -42,8 +42,6 @@ internal static class ScriptDomQueryAdapter
         return new(request.Partition, query, request.Parameters, request.AllowFullScan, request.Cursor,
             AstVersion: request.QueryDialectVersion);
     }
-    private const int NamedVersion = 1;
-    private const int JoinVersion = 2;
 
     private const int EmptyCount = 0;
 }

@@ -21,8 +21,6 @@ internal static class PublicReadResponse
         GrainReadKind.QueueTransferReceipt => new QueueTransferReceiptReadResult(Require<QueueTransferReceiptInspection>(value)),
         GrainReadKind.RecurringSchedule => new RecurringScheduleReadResult(Require<RecurringScheduleInspection>(value)),
         GrainReadKind.Saga => new SagaReadResult(Require<SagaInspection>(value)),
-        GrainReadKind.BlobMetadata => new BlobMetadataReadResult(Require<BlobMetadata>(value)),
-        GrainReadKind.BlobUploadInfo => new BlobUploadInfoReadResult(Require<BlobUploadInfo>(value)),
         _ => value
     };
 

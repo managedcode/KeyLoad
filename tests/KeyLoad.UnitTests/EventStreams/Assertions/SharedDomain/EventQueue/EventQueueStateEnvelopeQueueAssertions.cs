@@ -80,7 +80,7 @@ internal static class EventQueueStateEnvelopeQueueAssertions
         var input = EventQueueStateEnvelopeProducer.Message(fixture, metadata.Id == Scheduled);
         await Assert.That(body).IsNotNull();
         await Assert.That(body!.AsSpan().SequenceEqual(state.Bodies[Convert.ToHexString(key)])).IsTrue();
-        await EventQueueStateEnvelopeSourceAssertions.EqualAsync(NativeSerialization.Deserialize<MessageBody>(body),
+        await EventQueueStateEnvelopeSourceAssertions.EqualAsync(OrleansSerialization.Deserialize<MessageBody>(body),
             new MessageBody(metadata.Id, Payload, Headers, null, JsonData.Fingerprint(input)));
         return body.LongLength;
     }

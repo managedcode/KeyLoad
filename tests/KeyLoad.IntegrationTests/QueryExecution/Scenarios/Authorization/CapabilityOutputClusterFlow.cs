@@ -1,5 +1,5 @@
 using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.ClusterRouting;
+using KeyLoad.IntegrationTests.Features.OrleansExecution;
 using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Features.QueryExecution;
@@ -13,7 +13,7 @@ internal static class CapabilityOutputClusterFlow
         {
             await using var fixture = new ClusterFixture(new DatabaseLimits
             {
-                MaxBatchBytes = CapabilityOutputClusterProtocol.NativeBytes,
+                MaxBatchBytes = CapabilityOutputClusterProtocol.RuntimeBytes,
                 MaxQueryBytes = CapabilityOutputClusterProtocol.RequestBytes
             }, CapabilityOutputClusterProtocol.Options(mode));
             await ServerFailureObserver.ObserveAsync(async () =>

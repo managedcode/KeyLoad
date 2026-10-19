@@ -89,11 +89,11 @@ internal static class DeniedCommandRepairContinuation
                 await DocumentAsync(database, fixture.Partition, RepairedRevision, RepairedJson, expectedReference);
                 await ColdHealthyAsync(database, reopened, fixture.Partition, original.UserId!, expectedReference);
             }
-            catch (Exception error) when (!global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-            catch (Exception error) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
+            catch (Exception error) when (!global::KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
+            catch (Exception error) when (global::KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         }
-        catch (Exception error) when (!global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-        catch (Exception error) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
+        catch (Exception error) when (!global::KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
+        catch (Exception error) when (global::KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
     }
 
@@ -116,7 +116,7 @@ internal static class DeniedCommandRepairContinuation
         var command = new CommandRequest(id, partition,
             [new PutDocument(Collection, Document, json, revision - NextPosition)]);
         return database.CreateCommand(OperationKind.Batch, id, principal, database.EvaluationClock.GetUtcNow(),
-            NativeSerialization.Serialize(command));
+            OrleansSerialization.Serialize(command));
     }
 
     private static async Task OldDeniedAsync(DatabaseEngine database, ZoneTreeStore store,
@@ -145,7 +145,7 @@ internal static class DeniedCommandRepairContinuation
         var retry = database.OwnCommand(original);
         retry.Timestamp = database.EvaluationClock.GetUtcNow().UtcDateTime;
         var replay = database.Apply(retry);
-        await Assert.That(NativeSerialization.Serialize(replay).SequenceEqual(NativeSerialization.Serialize(expected))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(replay).SequenceEqual(OrleansSerialization.Serialize(expected))).IsTrue();
         await UnchangedAsync(store, position, bytes);
     }
 

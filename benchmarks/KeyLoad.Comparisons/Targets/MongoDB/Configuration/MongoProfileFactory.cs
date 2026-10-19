@@ -18,9 +18,9 @@ internal static class MongoProfileFactory
             !string.IsNullOrEmpty(url.Username) ? MongoSchema.AuthenticatedNoClientCertificate : MongoSchema.UnauthenticatedNoClientCertificate, image);
     }
     internal static MongoClientSettings CreateSettings(string connectionString, int concurrency,
-        IOptions<NativeComparisonExecutionOptions> executionOptions)
+        IOptions<ComparisonExecutionOptions> executionOptions)
     {
-        var execution = NativeComparisonExecutionOptions.Require(executionOptions).Value;
+        var execution = ComparisonExecutionOptions.Require(executionOptions).Value;
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(concurrency);
         ArgumentOutOfRangeException.ThrowIfGreaterThan(concurrency, int.MaxValue - execution.MongoPoolSessionMargin);
         var settings = MongoClientSettings.FromConnectionString(connectionString);

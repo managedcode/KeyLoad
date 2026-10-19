@@ -5,9 +5,9 @@ namespace KeyLoad.UnitTests.Features.BackupRestore;
 
 internal static class CurrentArchiveCancellationPublication
 {
-    private const string BackupSuffix = "-native-cancellation";
+    private const string BackupSuffix = "-execution-cancellation";
 
-    internal static async Task RunAsync(NativeBackupCutFixture fixture, CancellationToken token)
+    internal static async Task RunAsync(BackupCutFixture fixture, CancellationToken token)
     {
         var destination = fixture.Destination + BackupSuffix;
         var failures = new List<Exception>();
@@ -40,7 +40,7 @@ internal static class CurrentArchiveCancellationPublication
     private static async Task CompleteAsync(ZoneTreeStore store, string destination, CancellationToken token)
     {
         var image = EventingArtifactState.FullBytes(store);
-        var identity = NativeSerialization.Serialize(store.Identity);
+        var identity = OrleansSerialization.Serialize(store.Identity);
         var position = store.Position;
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(() => CaptureAndReadAsync(store, destination, position, image, token), failures);
@@ -50,7 +50,7 @@ internal static class CurrentArchiveCancellationPublication
         }, failures);
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            await Assert.That(NativeSerialization.Serialize(store.Identity).AsSpan().SequenceEqual(identity)).IsTrue();
+            await Assert.That(OrleansSerialization.Serialize(store.Identity).AsSpan().SequenceEqual(identity)).IsTrue();
         }, failures);
         await ServerFailureObserver.ObserveAsync(async () =>
         {
@@ -79,7 +79,7 @@ internal static class CurrentArchiveCancellationPublication
         ServerFailureObserver.ThrowIfAny(failures);
         var captured = store.CreateBackup(destination, token);
         await Assert.That(captured).IsEqualTo(position);
-        var archive = await NativeBackupJournalRepairAssertions.ArchiveAsync(destination, token);
+        var archive = await BackupJournalRepairAssertions.ArchiveAsync(destination, token);
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             await ReadCancelledAsync(destination);

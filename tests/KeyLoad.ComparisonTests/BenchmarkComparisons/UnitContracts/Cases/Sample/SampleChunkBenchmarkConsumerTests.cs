@@ -32,7 +32,7 @@ internal sealed class SampleChunkBenchmarkConsumerTests
             "sample-chunk-dry-" + Guid.NewGuid().ToString("N"));
         var captureDirectory = directory + "-host";
         Directory.CreateDirectory(captureDirectory);
-        var exit = await NativeSerializationBenchmarkProcess.RunProcessAsync(StartInfo(directory), captureDirectory,
+        var exit = await SerializationBenchmarkProcess.RunProcessAsync(StartInfo(directory), captureDirectory,
             TestContext.Current!.Execution.CancellationToken);
         await Assert.That(exit).IsEqualTo(0);
         var expected = cases.Select(item => item.Descriptor.WorkloadMethod.Name + "/"
@@ -73,14 +73,14 @@ internal sealed class SampleChunkBenchmarkConsumerTests
         {
             await using var stream = File.OpenRead(path);
             using var report = await JsonDocument.ParseAsync(stream);
-            foreach (var item in report.RootElement.GetProperty(NativeSerializationReportFields.Benchmarks).EnumerateArray())
+            foreach (var item in report.RootElement.GetProperty(SerializationReportFields.Benchmarks).EnumerateArray())
             {
-                await Assert.That(item.GetProperty(NativeSerializationReportFields.Type).GetString())
+                await Assert.That(item.GetProperty(SerializationReportFields.Type).GetString())
                     .IsEqualTo(nameof(SampleChunkSerializationBenchmarks));
-                await Assert.That(item.GetProperty(NativeSerializationReportFields.Statistics).ValueKind).IsEqualTo(JsonValueKind.Object);
-                await Assert.That(PositiveMeasurement(item.GetProperty(NativeSerializationReportFields.Measurements))).IsTrue();
-                var key = item.GetProperty(NativeSerializationReportFields.Method).GetString() + "/"
-                    + item.GetProperty(NativeSerializationReportFields.Parameters).GetString();
+                await Assert.That(item.GetProperty(SerializationReportFields.Statistics).ValueKind).IsEqualTo(JsonValueKind.Object);
+                await Assert.That(PositiveMeasurement(item.GetProperty(SerializationReportFields.Measurements))).IsTrue();
+                var key = item.GetProperty(SerializationReportFields.Method).GetString() + "/"
+                    + item.GetProperty(SerializationReportFields.Parameters).GetString();
                 await Assert.That(evidence.Add(key)).IsTrue();
             }
         }
@@ -88,8 +88,8 @@ internal sealed class SampleChunkBenchmarkConsumerTests
     }
 
     private static bool PositiveMeasurement(JsonElement measurements)
-        => measurements.EnumerateArray().Any(item => item.GetProperty(NativeSerializationReportFields.IterationMode).GetString() == "Workload"
-            && item.GetProperty(NativeSerializationReportFields.IterationStage).GetString() == "Result"
-            && item.GetProperty(NativeSerializationReportFields.Operations).GetInt64() > 0
-            && item.GetProperty(NativeSerializationReportFields.Nanoseconds).GetDouble() > 0);
+        => measurements.EnumerateArray().Any(item => item.GetProperty(SerializationReportFields.IterationMode).GetString() == "Workload"
+            && item.GetProperty(SerializationReportFields.IterationStage).GetString() == "Result"
+            && item.GetProperty(SerializationReportFields.Operations).GetInt64() > 0
+            && item.GetProperty(SerializationReportFields.Nanoseconds).GetDouble() > 0);
 }

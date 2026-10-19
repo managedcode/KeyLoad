@@ -1,6 +1,6 @@
 using KeyLoad.Core;
 using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.ClusterRouting;
+using KeyLoad.IntegrationTests.Features.OrleansExecution;
 
 namespace KeyLoad.IntegrationTests.Features.Messaging;
 
@@ -30,7 +30,7 @@ internal static class QueueLifecyclePublicSeed
         await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.ConfigureResourceAsync(Guid.NewGuid(),
             new(partition.TenantId, partition.DatabaseId, new(QueueLifecyclePublicProtocol.Collection, ResourceKind.Collection, partition.TransactionDomainId)), token));
         var id = "operator-" + suffix;
-        var key = id + ".keyload-native-lifecycle-credential";
+        var key = id + ".keyload-execution-lifecycle-credential";
         var principal = new PrincipalRecord(id, partition.TenantId,
             [new(partition.DatabaseId, queue.Name, Capability.QueuePublish | Capability.QueueConsume | Capability.QueueAck
                 | Capability.QueueInspect | Capability.DeadLettersRead | Capability.DeadLettersRedrive | Capability.QueueCancel | Capability.Query),
@@ -40,7 +40,7 @@ internal static class QueueLifecyclePublicSeed
         };
         await ConfigureAsync(root, principal, key, token);
         var deniedId = "denied-" + suffix;
-        var deniedKey = deniedId + ".keyload-native-lifecycle-credential";
+        var deniedKey = deniedId + ".keyload-execution-lifecycle-credential";
         await ConfigureAsync(root, principal with
         {
             Id = deniedId,

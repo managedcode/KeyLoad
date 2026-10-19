@@ -3,7 +3,7 @@ namespace KeyLoad.UnitTests.Features.AnalyticsStore;
 internal sealed class AnalyticsBoundCoreReadTests
 {
     [Test]
-    public Task ActualBoundRawAndNativeAggregateRetainOriginalWorkAndCurrentLifetime()
+    public Task ActualBoundRawAndAggregateRetainOriginalWorkAndCurrentLifetime()
         => AnalyticsBoundCoreFlow.HealthyAsync(TestContext.Current!.Execution.CancellationToken);
 
     [Test]

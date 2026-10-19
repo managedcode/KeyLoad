@@ -29,19 +29,19 @@ public sealed partial class DatabaseEngine
             var delay = ChooseQueueRetryDelay(original, input.Lane, input.Policy, input.Metadata);
             choices.Add(new(input.Lane, input.Metadata.Id, input.Metadata.StateVersion, input.Metadata.LeaseVersion,
                 input.Metadata.DeliveryGeneration, input.Metadata.Attempts, input.DueIndexKey,
-                SHA256.HashData(NativeSerialization.Serialize(input.Policy)), delay,
+                SHA256.HashData(OrleansSerialization.Serialize(input.Policy)), delay,
                 original.Timestamp.AddMilliseconds(delay)));
         }
         if (choices.Count == QueueRetryProtocol.Initial)
         {
             return original;
         }
-        var decisions = NativeSerialization.Serialize(new QueueRetryDecisions(QueueRetryProtocol.Version,
+        var decisions = OrleansSerialization.Serialize(new QueueRetryDecisions(QueueRetryProtocol.Version,
             original.Timestamp, choices.ToImmutableArray()));
-        RequireNativeBudget(decisions.Length);
+        RequireBudget(decisions.Length);
         var candidate = OwnCommand(original);
         candidate.Value = payload with { RetryDecisions = decisions };
-        RequireNativeBudget(NativeSerialization.Measure(candidate));
+        RequireBudget(OrleansSerialization.Measure(candidate));
         return candidate;
     }
 }

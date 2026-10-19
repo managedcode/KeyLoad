@@ -87,7 +87,7 @@ export function sessionSuiteFiles(aggregate, aggregateSha256) {
   for (const worker of aggregate.workers) {
     const prefix = `workers/${worker.id}/`;
     files.push({ path: prefix + 'session.json', sha256: worker.sessionSha256 });
-    for (const record of [...worker.session.cases, worker.session.nativeReport, worker.session.outerRuntime, worker.session.qualificationReport,
+    for (const record of [...worker.session.cases, worker.session.runtimeReport, worker.session.outerRuntime, worker.session.qualificationReport,
       ...(worker.session.resourceReport ? [worker.session.resourceReport] : [])])
       files.push({ path: prefix + record.path, sha256: record.sha256 });
     if (worker.stateSha256 !== null) files.push({ path: prefix + 'session-state.json', sha256: worker.stateSha256 });

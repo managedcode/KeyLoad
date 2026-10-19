@@ -25,11 +25,11 @@ internal static class Bm25PrivateAdmissionFlow
             using var database = new TestDatabase();
             await KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => ExecuteAsync(database), failures);
         }
-        catch (Exception error) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+        catch (Exception error) when (KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(error))
         {
             failures.Add(error);
         }
-        catch (Exception error) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error))
+        catch (Exception error) when (!KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(error))
         {
             failures.Add(error);
         }
@@ -46,7 +46,7 @@ internal static class Bm25PrivateAdmissionFlow
                 [new(database.Partition.DatabaseId, Collection, Capability.Query | Capability.DocumentsRead)], [])))
             .Get<PrincipalRecord>();
         var original = Capture(database, Guid.NewGuid(), null, token);
-        var phase = NativeSerialization.Deserialize<Bm25CorpusPublicationPhaseCommand>((original).Value!.Input.Span);
+        var phase = OrleansSerialization.Deserialize<Bm25CorpusPublicationPhaseCommand>((original).Value!.Input.Span);
         var expected = Bm25OriginalPhaseRecoveryState.BeforeLocalPublish(database.Database, database.Partition);
         var result = await SubmitAsync(database, original, token);
         await Bm25PrivateAdmissionAssertions.RequirePublicationAsync(database, phase, result, subject, 1, expected);
@@ -60,12 +60,12 @@ internal static class Bm25PrivateAdmissionFlow
         await Assert.That(conflict.Value).IsNull();
         await Assert.That(conflict.Problem?.Detail).IsEqualTo("The command ID was already used with different content.");
         await before.RequireAsync(CanonicalStoreCut.Read(database));
-        await NativeReplayResultAssertions.SameAsync(result, database.Database.ResolveSubmissionOutcome(original));
+        await ReplayResultAssertions.SameAsync(result, database.Database.ResolveSubmissionOutcome(original));
         var healthy = Capture(database, Guid.NewGuid(), original.CommandId, token);
         var healthyExpected = Bm25OriginalPhaseRecoveryState.BeforeLocalPublish(database.Database, database.Partition);
         var healthyResult = await SubmitAsync(database, healthy, token);
         await Bm25PrivateAdmissionAssertions.RequirePublicationAsync(database,
-            NativeSerialization.Deserialize<Bm25CorpusPublicationPhaseCommand>((healthy).Value!.Input.Span), healthyResult, subject, 2, healthyExpected);
+            OrleansSerialization.Deserialize<Bm25CorpusPublicationPhaseCommand>((healthy).Value!.Input.Span), healthyResult, subject, 2, healthyExpected);
         var document = database.Database.GetDocument(Root, new(database.Partition, Collection, Document));
         await Assert.That(document!.Json).IsEqualTo(ChangedJson);
     }
@@ -83,16 +83,16 @@ internal static class Bm25PrivateAdmissionFlow
         Bm25CorpusPublicationPhaseCommand phase, Result<object> result, CancellationToken token)
     {
         var before = CanonicalStoreCut.Read(database);
-        var retained = NativeSerialization.Serialize(database.ReadStoredOutcome(original.CommandId));
+        var retained = OrleansSerialization.Serialize(database.ReadStoredOutcome(original.CommandId));
         var refreshed = database.Database.CreateVerifiedBm25CorpusPublication(Root, phase, database.CreateReadWork(token));
         var replay = await SubmitAsync(database, refreshed, token);
-        await NativeReplayResultAssertions.SameAsync(result, replay);
-        await NativeReplayResultAssertions.SameAsync(result, database.Database.ResolveSubmissionOutcome(original));
+        await ReplayResultAssertions.SameAsync(result, replay);
+        await ReplayResultAssertions.SameAsync(result, database.Database.ResolveSubmissionOutcome(original));
         await before.RequireAsync(CanonicalStoreCut.Read(database));
-        await NativeReplayResultAssertions.BytesAsync(retained,
-            NativeSerialization.Serialize(database.ReadStoredOutcome(original.CommandId)));
-        await NativeReplayResultAssertions.BytesAsync(NativeSerialization.Serialize(phase),
-            NativeSerialization.Serialize(NativeSerialization.Deserialize<Bm25CorpusPublicationPhaseCommand>((database.ReadStoredOutcome(original.CommandId).PreparedCommand!).Value!.Input.Span)));
+        await ReplayResultAssertions.BytesAsync(retained,
+            OrleansSerialization.Serialize(database.ReadStoredOutcome(original.CommandId)));
+        await ReplayResultAssertions.BytesAsync(OrleansSerialization.Serialize(phase),
+            OrleansSerialization.Serialize(OrleansSerialization.Deserialize<Bm25CorpusPublicationPhaseCommand>((database.ReadStoredOutcome(original.CommandId).PreparedCommand!).Value!.Input.Span)));
     }
 
     private static async Task<Result<object>> SubmitAsync(TestDatabase database, Command<DatabaseCommand> operation,
@@ -110,7 +110,7 @@ internal static class Bm25PrivateAdmissionFlow
         await Assert.That(decoded.Envelope.ExpiresAt).IsEqualTo(expiry);
         await Assert.That(KeyLoad.Clustering.GrainBm25CorpusPublicationCommand.Resolve(decoded))
             .IsEqualTo(database.Partition.AtomicPartitionId);
-        var phase = NativeSerialization.Deserialize<Bm25CorpusPublicationPhaseCommand>((operation).Value!.Input.Span);
+        var phase = OrleansSerialization.Deserialize<Bm25CorpusPublicationPhaseCommand>((operation).Value!.Input.Span);
         await Assert.That(decoded.Envelope.ExpiresAt > phase.OriginalExpiry).IsTrue();
         var principal = database.Store.Read(view =>
             database.Database.Principal(view, Root, database.Database.EvaluationClock.GetUtcNow()));

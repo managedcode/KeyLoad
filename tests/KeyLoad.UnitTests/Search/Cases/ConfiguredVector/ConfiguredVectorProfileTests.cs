@@ -45,15 +45,15 @@ internal sealed class ConfiguredVectorProfileTests
             JsonDefaults.Serialize(expected.ToImmutableArray()))).IsTrue();
         for (var index = 0; index < expected.Length; index++)
         {
-            await Assert.That(NativeSerialization.Serialize(receipt.Mutations[index]).SequenceEqual(
-                NativeSerialization.Serialize(expected[index]))).IsTrue();
+            await Assert.That(OrleansSerialization.Serialize(receipt.Mutations[index]).SequenceEqual(
+                OrleansSerialization.Serialize(expected[index]))).IsTrue();
         }
         var token = TestContext.Current!.Execution.CancellationToken;
         await ConfiguredVectorProfileFlow.HealthyAsync(database.Database, database, token);
         var complete = QueueWholeFlowStorage.Bytes(database.Store);
         var position = database.Store.Position;
         var replay = database.Submit(OperationKind.Batch, healthy, id: healthy.CommandId).Get<CommitReceipt>();
-        await Assert.That(NativeSerialization.Serialize(replay).SequenceEqual(NativeSerialization.Serialize(receipt))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(replay).SequenceEqual(OrleansSerialization.Serialize(receipt))).IsTrue();
         await Assert.That(QueueWholeFlowStorage.Bytes(database.Store)).IsEquivalentTo(complete, CollectionOrdering.Matching);
         await Assert.That(database.Store.Position).IsEqualTo(position);
         database.Store.Dispose();
@@ -64,7 +64,7 @@ internal sealed class ConfiguredVectorProfileTests
         await Assert.That(QueueWholeFlowStorage.Bytes(reopened)).IsEquivalentTo(complete, CollectionOrdering.Matching);
         await Assert.That(reopened.Position).IsEqualTo(position);
         var restoredReceipt = owner.ApplyEmbedded(owner.CreateCommand(OperationKind.Batch, healthy.CommandId, Root, default, JsonSerializer.Serialize(healthy, JsonDefaults.Options)), cancellationToken: default).Get<CommitReceipt>();
-        await Assert.That(NativeSerialization.Serialize(restoredReceipt).SequenceEqual(NativeSerialization.Serialize(receipt))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(restoredReceipt).SequenceEqual(OrleansSerialization.Serialize(receipt))).IsTrue();
         await Assert.That(QueueWholeFlowStorage.Bytes(reopened)).IsEquivalentTo(complete, CollectionOrdering.Matching);
         await Assert.That(reopened.Position).IsEqualTo(position);
     }
@@ -85,7 +85,7 @@ internal sealed class ConfiguredVectorProfileTests
         await Assert.That(Errors.Code(rejected.Problem)).IsEqualTo(ErrorCode.UnsupportedCapability);
         await Assert.That(rejected.Problem?.Detail).IsEqualTo(UnsupportedDefinition);
         var restored = database.Store.Read(view => view.GetRecord<ResourceDefinition>(key))!;
-        await Assert.That(NativeSerialization.Serialize(restored).SequenceEqual(NativeSerialization.Serialize(original))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(restored).SequenceEqual(OrleansSerialization.Serialize(original))).IsTrue();
         var healthy = ConfiguredVectorProfileFlow.Command(database, projection: false, wrongModel: false);
         database.Submit(OperationKind.Batch, healthy, principal: Root, id: healthy.CommandId).Get<CommitReceipt>();
         await ConfiguredVectorProfileFlow.HealthyAsync(database.Database, database, TestContext.Current!.Execution.CancellationToken);

@@ -12,10 +12,10 @@ internal static class OpenSearchSessionQueryExecution
     private const string SessionHitsProperty = "hits";
     private const string SessionIdField = "id.session";
     private const string SessionKeywordType = "keyword";
-    private const string SessionMappingNotAcknowledged = "SessionNativeIndexMappingNotAcknowledged";
-    private const string SessionBackfillIncomplete = "SessionNativeIndexBackfillIncomplete";
-    private const string SessionShardFailure = "SessionNativeQueryShardFailure";
-    private const string SessionCardinalityMismatch = "SessionNativeQueryCardinalityMismatch";
+    private const string SessionMappingNotAcknowledged = "SessionIndexMappingNotAcknowledged";
+    private const string SessionBackfillIncomplete = "SessionIndexBackfillIncomplete";
+    private const string SessionShardFailure = "SessionQueryShardFailure";
+    private const string SessionCardinalityMismatch = "SessionQueryCardinalityMismatch";
     private const int SessionCorpusRows = 1_000_000;
     private const int SessionEmptyFailures = 0;
     private const int SessionCandidateLimit = 2;
@@ -25,7 +25,7 @@ internal static class OpenSearchSessionQueryExecution
 
     /// <inheritdoc/>
     internal static async Task BuildIndexesAsync(HttpClient client, string index, TimeProvider timeProvider,
-        IOptions<NativeComparisonExecutionOptions> executionOptions, CancellationToken cancellationToken)
+        IOptions<ComparisonExecutionOptions> executionOptions, CancellationToken cancellationToken)
     {
         using var deadline = new ComparisonCancellationSource(timeProvider, cancellationToken);
         deadline.CancelAfter(executionOptions.Value.IndexBuildTimeout);
@@ -53,7 +53,7 @@ internal static class OpenSearchSessionQueryExecution
                 throw new ComparisonFailureException(SessionMappingNotAcknowledged);
             }
         }
-        // Native in-place backfill indexes the retained documents; no new namespace, corpus reload or hidden retry.
+        // Execution in-place backfill indexes the retained documents; no new namespace, corpus reload or hidden retry.
         using var rebuilt = await OpenSearchHttp.SendJsonAsync(client, HttpMethod.Post,
             SessionPathPrefix + index + SessionBackfillSuffix,
             new

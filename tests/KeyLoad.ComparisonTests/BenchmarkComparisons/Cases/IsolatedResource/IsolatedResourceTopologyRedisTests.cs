@@ -7,19 +7,19 @@ internal sealed class IsolatedResourceTopologyRedisTests
 {
     private const string Target = "Redis";
     private const string Primary = "primary";
-    private const string NativePrimaryHost = "primary.dev.internal";
+    private const string RuntimePrimaryHost = "primary.dev.internal";
     private const string SecretEnvironment = "KEYLOAD_REDIS_PASSWORD";
     private const string PrimaryEnvironment = "KEYLOAD_REDIS_PRIMARY";
     private const string Bootstrap = "/bootstrap/isolated-redis.sh";
-    private const string ReplicaPrefix = "Benchmarks__Native__ReplicaConnections__";
-    private const string NativeScheme = "redis";
-    private const int NativePort = 6379;
+    private const string ReplicaPrefix = "Benchmarks__Execution__ReplicaConnections__";
+    private const string RuntimeScheme = "redis";
+    private const int RuntimePort = 6379;
 
-    /// <summary>AC-ISO-003/005 and AC-BC-FAIL-009: native authenticated TCP resources with explicit certificate opt-out.</summary>
+    /// <summary>AC-ISO-003/005 and AC-BC-FAIL-009: execution authenticated TCP resources with explicit certificate opt-out.</summary>
     [Test]
     [Arguments(1)]
     [Arguments(3)]
-    public async Task SelectedRedisHasExactAuthenticatedNativeGroupWithoutSecretArguments(int count)
+    public async Task SelectedRedisHasExactAuthenticatedGroupWithoutSecretArguments(int count)
     {
         await using var fixture = new IsolatedResourceTopologyFixture(Target, count);
         IsolatedRedisResources.Add(fixture.Context);
@@ -32,12 +32,12 @@ internal sealed class IsolatedResourceTopologyRedisTests
         var primary = nodes.Single(item => item.Name == Primary);
         await Assert.That(primary.PasswordParameter!.Secret).IsTrue();
         var runnerEnvironment = await IsolatedResourceTopologyFixture.EnvironmentAsync(runner);
-        await Assert.That(runnerEnvironment[IsolatedResourceTopologyFixture.NativePrefix + "ConnectionString"])
+        await Assert.That(runnerEnvironment[IsolatedResourceTopologyFixture.RuntimePrefix + "ConnectionString"])
             .IsEqualTo(primary.ConnectionStringExpression.ValueExpression);
         await Assert.That(runnerEnvironment.Count(item => item.Key.StartsWith(ReplicaPrefix, StringComparison.Ordinal)))
             .IsEqualTo(count - 1);
         await Assert.That(runnerEnvironment.Keys.Count(key => key.StartsWith(
-            IsolatedResourceTopologyFixture.NativePrefix + "Endpoints__", StringComparison.Ordinal))).IsEqualTo(count);
+            IsolatedResourceTopologyFixture.RuntimePrefix + "Endpoints__", StringComparison.Ordinal))).IsEqualTo(count);
         foreach (var node in nodes)
         {
             await VerifyNodeAsync(node, primary);
@@ -45,7 +45,7 @@ internal sealed class IsolatedResourceTopologyRedisTests
         for (var index = 0; index < count; index++)
         {
             var node = index == 0 ? primary : nodes.Single(item => item.Name == "replica" + index);
-            await Assert.That(runnerEnvironment[IsolatedResourceTopologyFixture.NativePrefix + "Endpoints__" + index])
+            await Assert.That(runnerEnvironment[IsolatedResourceTopologyFixture.RuntimePrefix + "Endpoints__" + index])
                 .IsEqualTo("{" + node.Name + ".bindings.tcp.url}");
         }
         for (var index = 0; index < count - 1; index++)
@@ -53,13 +53,13 @@ internal sealed class IsolatedResourceTopologyRedisTests
             var replica = nodes.Single(item => item.Name == "replica" + (index + 1));
             await Assert.That(runnerEnvironment[ReplicaPrefix + index]).IsEqualTo(replica.ConnectionStringExpression.ValueExpression);
         }
-        await Assert.That(runnerEnvironment[IsolatedResourceTopologyFixture.NativePrefix + "Image"])
+        await Assert.That(runnerEnvironment[IsolatedResourceTopologyFixture.RuntimePrefix + "Image"])
             .IsEqualTo("docker.io/library/redis:8.4.0@" + BenchmarkResources.RedisDigest);
     }
 
     private static async Task VerifyNodeAsync(RedisResource node, RedisResource primary)
     {
-        await VerifyNativeTransportAsync(node);
+        await VerifyTransportAsync(node);
         await IsolatedResourceTopologyFixture.VerifyPrivateDataAsync(node);
         await IsolatedResourceTopologyFixture.VerifyUserAsync(node);
         await Assert.That(node.PasswordParameter).IsSameReferenceAs(primary.PasswordParameter);
@@ -69,7 +69,7 @@ internal sealed class IsolatedResourceTopologyRedisTests
         var environment = await IsolatedResourceTopologyFixture.EnvironmentAsync(node);
         await Assert.That(environment[SecretEnvironment]).IsEqualTo("{" + primary.PasswordParameter!.Name + ".value}");
         await Assert.That(environment.ContainsKey(PrimaryEnvironment)).IsEqualTo(node != primary);
-        await Assert.That(environment.GetValueOrDefault(PrimaryEnvironment)).IsEqualTo(node == primary ? null : NativePrimaryHost);
+        await Assert.That(environment.GetValueOrDefault(PrimaryEnvironment)).IsEqualTo(node == primary ? null : RuntimePrimaryHost);
         var waits = node.Annotations.OfType<WaitAnnotation>().Select(wait => wait.Resource.Name);
         await Assert.That(waits).IsEquivalentTo(node == primary ? Array.Empty<string>() : new[] { Primary });
         var configuration = await IsolatedResourceTopologyFixture.ConfigurationAsync(node);
@@ -87,7 +87,7 @@ internal sealed class IsolatedResourceTopologyRedisTests
             .IsEqualTo(BenchmarkResources.RedisDigest[7..]);
     }
 
-    private static async Task VerifyNativeTransportAsync(RedisResource node)
+    private static async Task VerifyTransportAsync(RedisResource node)
     {
         // Inspect the actual pinned Aspire annotation; a missing explicit opt-out must fail this checks.
 #pragma warning disable ASPIRECERTIFICATES001
@@ -96,8 +96,8 @@ internal sealed class IsolatedResourceTopologyRedisTests
         await Assert.That(certificate.UseDeveloperCertificate).IsFalse();
 #pragma warning restore ASPIRECERTIFICATES001
         var endpoint = node.Annotations.OfType<EndpointAnnotation>().Single();
-        await Assert.That(endpoint.UriScheme).IsEqualTo(NativeScheme);
-        await Assert.That(endpoint.TargetPort).IsEqualTo(NativePort);
+        await Assert.That(endpoint.UriScheme).IsEqualTo(RuntimeScheme);
+        await Assert.That(endpoint.TargetPort).IsEqualTo(RuntimePort);
         await Assert.That(endpoint.TlsEnabled).IsFalse();
         await Assert.That(node.Annotations.OfType<HealthCheckAnnotation>().Any()).IsTrue();
     }

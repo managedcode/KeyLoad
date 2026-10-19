@@ -13,7 +13,7 @@ internal sealed class AnnPublicPinnedLeaseTests
     public Task ActualResidentPinnedReadRejectsCompetingPublicFrameThenReleasedLeaseReturnsLiteralHealthyPage()
         => AnnPublicWholeFlow.RunAsync(Threshold, Breadth, async (database, runtime, pin) =>
         {
-            var image = NativeAnnMaintenanceTestData.Snapshot(database);
+            var image = AnnMaintenanceTestData.Snapshot(database);
             var cut = database.Store.Position;
             var request = AnnPublicWholeFlow.Request(database, pin);
             IAnnProjectionLease? held = null;
@@ -36,7 +36,7 @@ internal sealed class AnnPublicPinnedLeaseTests
                     AnnSearchPage? partial = null;
                     var rejected = await Assert.ThrowsExactlyAsync<KeyLoadException>(async () => partial =
                         await engine.ApproximateSearchAsync(AnnProjectionPinTestSupport.Principal, request))
-                        ?? throw new InvalidOperationException("The competing native resident frame was not rejected.");
+                        ?? throw new InvalidOperationException("The competing execution resident frame was not rejected.");
                     await Assert.That(rejected.Code).IsEqualTo(ErrorCode.ResourceExhausted);
                     await Assert.That(partial).IsNull();
                     await AnnPublicWholeFlow.UnchangedAsync(database, image, cut);

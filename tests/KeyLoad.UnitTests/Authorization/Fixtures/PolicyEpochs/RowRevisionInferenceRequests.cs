@@ -20,7 +20,7 @@ internal static class RowRevisionInferenceRequests
 
     internal static Command<DatabaseCommand> Operation(global::KeyLoad.Core.DatabaseEngine database, CommandRequest command)
         => database.CreateCommand(OperationKind.Batch, command.CommandId, P.Reader,
-            database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(command));
+            database.EvaluationClock.GetUtcNow(), OrleansSerialization.Serialize(command));
 
     internal static string ReceiptKind(string kind) => kind switch
     {

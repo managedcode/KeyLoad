@@ -3,10 +3,10 @@
 ## Purpose, entry points and ownership
 
 - Owns the ZoneTree-backed storage adapter and checkpoint operations.
-- Main public entry point: `ZoneTreeStore.cs`; checkpoint behavior is owned by `StorageRecovery/Recovery/ZoneTreeCheckpointManager.cs` and the checkpoint codec/generation components.
+- Main public entry point: `ZoneTreeStore.cs`; checkpoint behavior is owned by `StorageEngine/Recovery/ZoneTreeCheckpointManager.cs` and the checkpoint codec/generation components. `StorageEngine` owns the complete ZoneTree store lifetime and persistence path; `PointCache` owns its bounded point-read cache; `Restore` owns archive creation and restoration.
 - Storage feature behavior belongs under `<SliceName>/` and its matching feature spec; keep provider-specific code behind storage abstractions.
-- Physical ownership is node-local: every silo has its own ZoneTree owner (`PartitionHost`/Grain Service) that owns its storage, journals, file locks and apply gate. Orleans grains route commands, and activation migration must not migrate storage ownership; files never move with activations. See [ADR-136](../../docs/ADR/ADR-136-native-orleans-partition-ownership.md).
-- Apply the installed Orleans skill when changing the boundary between silo-local storage and Orleans execution. Native storage recovery remains owned by this adapter.
+- Physical ownership is node-local: every silo has its own ZoneTree owner (`PartitionHost`/Grain Service) that owns its storage, journals, file locks and apply gate. Orleans grains route commands, and activation migration must not migrate storage ownership; files never move with activations. See [ADR-136](../../docs/ADR/ADR-136-orleans-partition-ownership.md).
+- Apply the installed Orleans skill when changing the boundary between silo-local storage and Orleans execution. storage recovery remains owned by this adapter.
 - Preserve atomicity, ordering, crash-recovery and disposal invariants. Do not add fake storage proofs, present local development evidence as delivered-source qualification, or use unlocked dependency versions.
 - Owner direction 2026-10-09 requires immediately reporting every confirmed upstream ZoneTree defect through a detailed public issue in https://github.com/ZoneTree/ZoneTree, with exact version/source, minimal real-operation reproduction, expected/actual behavior, original bounded evidence and KeyLoad impact. Reuse a matching issue and publish additional evidence instead of duplicating it; keep secrets and private caller data out. Record the issue URL in the owning feature/task and continue independent KeyLoad work while upstream maintainers decide whether and when to fix it. Public reporting is explicitly authorized, but it does not satisfy the affected acceptance gate or permit a workaround, replacement storage engine, unpublished package or compatibility fallback; ManagedCode dependencies retain their separate owning-repository repair/release requirements.
 - Owner correction 2026-10-13: batch all known confirmed defects in the same owned library/repository within the authorized task before releasing. Inspect the affected scope, collect and fix the defects together, add their focused regressions, self-review the complete change, and run the required checks against the combined batch. One defect may produce one release; several defects in that repository MUST share one release, not a version/release per fix.
@@ -14,7 +14,7 @@
 
 ## Storage access modes
 
-Follow [ADR-136](../../docs/ADR/ADR-136-native-orleans-partition-ownership.md).
+Follow [ADR-136](../../docs/ADR/ADR-136-orleans-partition-ownership.md).
 Isolated volumes have silo-local file owners reached through Orleans. A shared
 volume requires one open owner for each mutable physical partition, lazy opening
 and joined close before another silo reopens the same files; no data copies are
@@ -27,7 +27,7 @@ managed by Orleans and are not individually addressable.
 
 ## Boundaries and protected risks
 
-Follow the [root policy](../../AGENTS.md) and the owning feature specification. Keep changes in their actual owner, preserve unrelated work, and remove replaced code together with exclusive callers and fixtures. Use native Orleans calls for distributed execution and silo-local ZoneTree owners for files. Preserve persisted authorization, operation correctness, resource bounds, cancellation and joined shutdown. Never turn a static check or focused test into a claim of complete runtime qualification.
+Follow the [root policy](../../AGENTS.md) and the owning feature specification. Keep changes in their actual owner, preserve unrelated work, and remove replaced code together with exclusive callers and fixtures. Use Orleans calls for distributed execution and silo-local ZoneTree owners for files. Preserve persisted authorization, operation correctness, resource bounds, cancellation and joined shutdown. Never turn a static check or focused test into a claim of complete runtime qualification.
 
 ## Commands and verification
 
@@ -37,7 +37,7 @@ From the repository root:
 dotnet build KeyLoad.slnx --no-restore -warnaserror
 ```
 
-Use the root's complete solution, native TUnit, real process recovery and Aspire SDK/MCP gates as applicable. Local checks are development evidence; delivered-source qualification and public measurements require exact-source Linux GitHub artifacts. Do not weaken compiler, analyzer, source-identity, coverage or runtime assertions.
+Use the root's complete solution, TUnit, real process recovery and Aspire SDK/MCP gates as applicable. Local checks are development evidence; delivered-source qualification and public measurements require exact-source Linux GitHub artifacts. Do not weaken compiler, analyzer, source-identity, coverage or runtime assertions.
 
 ## Skills
 

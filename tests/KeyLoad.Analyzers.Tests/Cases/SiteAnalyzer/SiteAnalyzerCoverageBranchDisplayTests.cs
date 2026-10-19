@@ -2,7 +2,7 @@ using System.Text.Json;
 
 namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
 
-/// <summary>AC-BC-027 and AC-CQ-009: native display precision never replaces integer branch evidence.</summary>
+/// <summary>AC-BC-027 and AC-CQ-009: execution display precision never replaces integer branch evidence.</summary>
 [NotInParallel(SiteAnalyzerCoverageTokens.ProcessIsolationKey)]
 internal sealed class SiteAnalyzerCoverageBranchDisplayTests
 {
@@ -38,7 +38,7 @@ internal sealed class SiteAnalyzerCoverageBranchDisplayTests
         "16.67% (9223372036854775808/9223372036854775809)"];
 
     [Test]
-    public async Task ObservedNativeDisplaysKeepIntegerBranchCountsAsync()
+    public async Task ObservedDisplaysKeepIntegerBranchCountsAsync()
     {
         using var scope = new SiteAnalyzerCoverageTestScope();
         await scope.PrepareAsync();

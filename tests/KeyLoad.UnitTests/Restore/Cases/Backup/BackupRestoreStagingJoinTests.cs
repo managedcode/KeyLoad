@@ -13,20 +13,20 @@ internal sealed class BackupRestoreStagingJoinTests
     private const UnixFileMode PrivateDirectoryMode = UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute;
 
     [Test, Arguments(false), Arguments(true)]
-    public async Task AcSqlc011AbsentTargetPublishesNativeCutAndPreservesEveryBackupByte(bool trailingSeparator)
+    public async Task AcSqlc011AbsentTargetPublishesCutAndPreservesEveryBackupByte(bool trailingSeparator)
     {
-        using var fixture = new NativeBackupCutFixture();
+        using var fixture = new BackupCutFixture();
         await AssertStagedRestoreAsync(fixture, existingEmpty: false, trailingSeparator);
     }
 
     [Test, Arguments(false), Arguments(true)]
-    public async Task AcSqlc011ExistingEmptyTargetPublishesNativeCheckpointAndPreservesEveryBackupByte(bool trailingSeparator)
+    public async Task AcSqlc011ExistingEmptyTargetPublishesCheckpointAndPreservesEveryBackupByte(bool trailingSeparator)
     {
-        using var fixture = new NativeBackupCutFixture(checkpoint: true);
+        using var fixture = new BackupCutFixture(checkpoint: true);
         await AssertStagedRestoreAsync(fixture, existingEmpty: true, trailingSeparator);
     }
 
-    private static async Task AssertStagedRestoreAsync(NativeBackupCutFixture fixture, bool existingEmpty, bool trailingSeparator)
+    private static async Task AssertStagedRestoreAsync(BackupCutFixture fixture, bool existingEmpty, bool trailingSeparator)
     {
         if (existingEmpty)
         {
@@ -48,7 +48,7 @@ internal sealed class BackupRestoreStagingJoinTests
         await AssertBackupUnchangedAsync(fixture.Backup, original);
     }
 
-    private static async Task AssertRestoredDataAsync(NativeBackupCutFixture fixture, StoreIdentity identity)
+    private static async Task AssertRestoredDataAsync(BackupCutFixture fixture, StoreIdentity identity)
     {
         await Assert.That(identity.NodeId).IsNotEqualTo(fixture.Identity.NodeId);
         await Assert.That(identity.Incarnation).IsNotEqualTo(fixture.Identity.Incarnation);
@@ -56,10 +56,10 @@ internal sealed class BackupRestoreStagingJoinTests
         await Assert.That(identity.DispatchPaused).IsTrue();
         using var restored = new ZoneTreeStore(new(fixture.Destination), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         await Assert.That(restored.Position).IsEqualTo(fixture.Position + RestoreAuthorityCommits);
-        await Assert.That(restored.Read(view => NativeSerialization.Deserialize<string>(
+        await Assert.That(restored.Read(view => OrleansSerialization.Deserialize<string>(
                 view.ReadOwnedValue(MetadataBackupFixture.StoredKeyBytes)!)))
             .IsEqualTo(MetadataBackupFixture.ExpectedValue);
-        await Assert.That(restored.Read(view => NativeSerialization.Deserialize<bool>(view.ReadOwnedValue(
+        await Assert.That(restored.Read(view => OrleansSerialization.Deserialize<bool>(view.ReadOwnedValue(
             KeyCodec.Encode(ZoneTreePersistenceFormat.SystemNamespace, ZoneTreePersistenceFormat.DispatchPausedKey))!)))
             .IsTrue();
         await Assert.That(restored.Identity.NodeId).IsEqualTo(identity.NodeId);
@@ -68,7 +68,7 @@ internal sealed class BackupRestoreStagingJoinTests
         await Assert.That(restored.Identity.DispatchPaused).IsTrue();
     }
 
-    private static async Task AssertPublishedDirectoryAsync(NativeBackupCutFixture fixture)
+    private static async Task AssertPublishedDirectoryAsync(BackupCutFixture fixture)
     {
         await Assert.That(Directory.Exists(fixture.Destination)).IsTrue();
         var parent = Directory.GetParent(fixture.Destination) ?? throw new InvalidOperationException(MissingParent);

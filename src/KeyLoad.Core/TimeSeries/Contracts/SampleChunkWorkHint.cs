@@ -9,5 +9,5 @@ public sealed record SampleChunkWorkHint([property: Orleans.Id(0)] PartitionRef 
     [property: Orleans.Id(7)] bool Seal, [property: Orleans.Id(8)] Guid CommandId,
     [property: Orleans.Id(9)] long CreatorPolicyEpoch)
 {
-    internal const string SerializerAlias = "keyload.core.sample-chunk-work-hint.v1";
+    internal const string SerializerAlias = "keyload.core.sample-chunk-work-hint";
 }

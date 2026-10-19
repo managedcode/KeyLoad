@@ -22,7 +22,7 @@ internal sealed class ZoneTreePointCacheAuthorizationTests
     {
         using var fixture = new ZoneTreePointCacheFileFixture();
         var store = fixture.OpenStore(maxValueBytes: 4096);
-        var database = new DatabaseEngine(store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
+        var database = new DatabaseEngine(store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
         var root = new PrincipalRecord(RootId, RootTenant,
             [new ScopeGrant("*", "*", Capability.All)], ["*"])
         {
@@ -67,9 +67,9 @@ internal sealed class ZoneTreePointCacheAuthorizationTests
         await Assert.That(principalRevoked.Code).IsEqualTo(ErrorCode.Unauthenticated);
         await Assert.That(warmed.Admissions).IsGreaterThanOrEqualTo(2L);
         await Assert.That(afterExpiry.Hits - warmed.Hits).IsEqualTo(1L);
-        await Assert.That(afterRevocation.NativeLookups - beforeKeyRevocationAuth.NativeLookups).IsEqualTo(1L);
+        await Assert.That(afterRevocation.RuntimeLookups - beforeKeyRevocationAuth.RuntimeLookups).IsEqualTo(1L);
         await Assert.That(afterPrincipalRevocation.Hits - beforePrincipalRevocationAuth.Hits).IsEqualTo(1L);
-        await Assert.That(afterPrincipalRevocation.NativeLookups - beforePrincipalRevocationAuth.NativeLookups)
+        await Assert.That(afterPrincipalRevocation.RuntimeLookups - beforePrincipalRevocationAuth.RuntimeLookups)
             .IsEqualTo(1L);
     }
 

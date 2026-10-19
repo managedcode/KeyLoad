@@ -41,9 +41,9 @@ internal static class QueueAccountingFaultHealthy
 
     internal static async Task ReplayAsync(DatabaseEngine database, QueueAccountingFaultState state, QueueAccountingHealthyState healthy)
     {
-        await NativeReplayResultAssertions.Same<CommitReceipt>(QueueWholeFlowStorage.Apply(database, OperationKind.Batch,
+        await ReplayResultAssertions.Same<CommitReceipt>(QueueWholeFlowStorage.Apply(database, OperationKind.Batch,
             healthy.Producer, healthy.Producer.CommandId, new DateTimeOffset(state.Operation.Timestamp)), healthy.Produced);
-        await NativeReplayResultAssertions.Same<CommitReceipt>(QueueWholeFlowStorage.Apply(database, OperationKind.Delivery,
+        await ReplayResultAssertions.Same<CommitReceipt>(QueueWholeFlowStorage.Apply(database, OperationKind.Delivery,
             healthy.Ack, healthy.Ack.CommandId, new DateTimeOffset(state.Operation.Timestamp)), healthy.Acked);
         var stale = QueueWholeFlowStorage.Apply(database, OperationKind.Receive, healthy.Claim, healthy.Claim.RequestId, new DateTimeOffset(state.Operation.Timestamp));
         await Assert.That(Errors.Code(stale.Problem)).IsEqualTo(ErrorCode.StaleLease);
@@ -51,7 +51,7 @@ internal static class QueueAccountingFaultHealthy
         await Assert.That(stale.Value).IsNull();
         var retained = database.Store.Read(view => view.GetRecord<StoredOutcome>(KeySpace.PartitionOutcome(
             state.Lane.Partition, QueueAccountingFaultProtocol.Root, healthy.Claim.RequestId)))!;
-        await NativeReplayResultAssertions.Same<ReceiveResult>(retained.Result, healthy.Claimed);
+        await ReplayResultAssertions.Same<ReceiveResult>(retained.Result, healthy.Claimed);
         await AssertHealthyAsync(database, state, healthy);
     }
 

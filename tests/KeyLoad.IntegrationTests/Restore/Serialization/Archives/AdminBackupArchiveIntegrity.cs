@@ -8,7 +8,7 @@ internal static class AdminBackupArchiveIntegrity
 {
     private const string BackupManifestName = "backup.json";
     private const int EmptyManifestBytes = 0;
-    private const string InvalidManifestLength = "The fixture backup manifest exceeds its native file bound.";
+    private const string InvalidManifestLength = "The fixture backup manifest exceeds its execution file bound.";
     private const string ChangedManifestLength = "The fixture backup manifest changed while its digest was captured.";
 
     internal static async Task<byte[]> CaptureManifestDigestAsync(string directory,

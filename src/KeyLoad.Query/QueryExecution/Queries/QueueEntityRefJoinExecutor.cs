@@ -7,7 +7,7 @@ using KeyLoad.Storage;
 
 namespace KeyLoad.Query.Features.QueryExecution;
 
-/// <summary>Reads queue reference candidates and native typed documents through one authorized bounded view.</summary>
+/// <summary>Reads queue reference candidates and execution typed documents through one authorized bounded view.</summary>
 internal static class QueueEntityRefJoinExecutor
 {
     private const string CorruptReference = "The queue join selected a document with an inconsistent stored identity.";

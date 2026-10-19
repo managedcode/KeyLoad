@@ -3,10 +3,10 @@ namespace KeyLoad.UnitTests.Features.StorageRecovery;
 internal sealed class PartitionHostApplicationLifetimeTests
 {
     [Test]
-    public Task ConcurrentOpenBorrowAndDisposeRetainOneNativeOwnerAndBothCommittedRowsAcrossTwoReopens()
+    public Task ConcurrentOpenBorrowAndDisposeRetainOneOwnerAndBothCommittedRowsAcrossTwoReopens()
         => PartitionHostApplicationFlow.RunAsync(heldLock: false);
 
     [Test]
-    public Task HeldNativeNodeLockRejectsMemoizedOpeningThenNewOwnerRecoversTheSameRoot()
+    public Task HeldNodeLockRejectsMemoizedOpeningThenNewOwnerRecoversTheSameRoot()
         => PartitionHostApplicationFlow.RunAsync(heldLock: true);
 }

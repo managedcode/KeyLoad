@@ -15,7 +15,7 @@ internal static class SiteIsolatedGitHubFields
     public const string Workflow = "workflow.json";
     public const string Runs = "workflow_runs-pages.json";
     public const string Attempts = "attempts";
-    public const string NativeRun = "run-attempt.json";
+    public const string RuntimeRun = "run-attempt.json";
     public const string Jobs = "jobs-pages.json";
     public const string ArtifactPages = "artifacts-pages.json";
     public const string Selected = "selected";
@@ -35,10 +35,10 @@ internal static class SiteIsolatedGitHubFields
     public const string Status = "status";
     public const string TotalCount = "total_count";
     public const string WorkflowRuns = "workflow_runs";
-    public const string NativeAttempt = "run_attempt";
-    public const string NativeRunId = "run_id";
-    public const string NativeHeadSha = "head_sha";
-    public const string NativeConclusion = "conclusion";
+    public const string RuntimeAttempt = "run_attempt";
+    public const string RuntimeRunId = "run_id";
+    public const string HeadSha = "head_sha";
+    public const string RuntimeConclusion = "conclusion";
     public const string Failure = "failure";
     public const string Steps = "steps";
     public const string Job = "job";
@@ -72,14 +72,14 @@ internal static class SiteIsolatedGitHubFields
     public const string CandidateAccepted = "candidateAccepted";
     public const string InputsPreserved = "inputsPreserved";
     public const string FollowupAccepted = "followupAccepted";
-    public const string NativeFixtureKey = "KeyLoad.SiteTests.IsolatedGitHubNativeFixture";
+    public const string RuntimeFixtureKey = "KeyLoad.SiteTests.IsolatedGitHubFixture";
     public const string Repository = "repository";
     public const string WorkflowKey = "workflow";
     public const string Event = "event";
     public const string WorkflowRun = "workflow_run";
-    public const string NativeHeadRepository = "head_repository";
-    public const string NativeHtmlUrl = "html_url";
-    public const string NativeRunNumber = "run_number";
-    public const string NativeJobs = "jobs";
+    public const string HeadRepository = "head_repository";
+    public const string HtmlUrl = "html_url";
+    public const string RuntimeRunNumber = "run_number";
+    public const string RuntimeJobs = "jobs";
     public const string Cancelled = "cancelled";
 }

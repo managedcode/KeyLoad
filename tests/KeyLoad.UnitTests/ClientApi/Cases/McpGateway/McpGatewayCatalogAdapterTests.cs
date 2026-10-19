@@ -9,7 +9,7 @@ internal sealed class McpGatewayCatalogAdapterTests
     private const string DocumentGet = "keyload_documents_get";
 
     [Test]
-    public async Task NativeFunctionExposesExactCanonicalNameDescriptionAndSchemas()
+    public async Task FunctionExposesExactCanonicalNameDescriptionAndSchemas()
     {
         var operation = McpOperationCatalog.Entries.Single(item => item.Name == DocumentGet);
         var function = new McpGatewayCanonicalToolFunction(operation, new HttpContextAccessor());

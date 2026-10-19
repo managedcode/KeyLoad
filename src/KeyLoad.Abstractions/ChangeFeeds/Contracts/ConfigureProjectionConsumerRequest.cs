@@ -6,7 +6,7 @@ namespace KeyLoad;
 /// <param name="Definition">The consumer definition.</param>
 /// <param name="StartAfter">The optional outbox sequence after which consumption begins.</param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.ConfigureProjectionConsumerRequest)]
+[Orleans.Alias(ContractAliases.ConfigureProjectionConsumerRequest)]
 public sealed record ConfigureProjectionConsumerRequest([property: Orleans.Id(0)] Guid CommandId, [property: Orleans.Id(1)] ProjectionConsumerRef Consumer,
     [property: Orleans.Id(2)] ProjectionConsumerDefinition Definition, [property: Orleans.Id(3)] long? StartAfter = null)
 {

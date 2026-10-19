@@ -4,7 +4,7 @@ using Cartograph.Catalog;
 
 namespace KeyLoad.Storage.ZoneTree.Restore;
 
-/// <summary>Validates and streams a native archive into operation-owned staging.</summary>
+/// <summary>Validates and streams a execution archive into operation-owned staging.</summary>
 internal static class BackupArtifactExtraction
 {
     internal static BackupArtifactStaging StageArtifact(string artifactPath,

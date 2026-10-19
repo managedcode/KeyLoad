@@ -26,7 +26,7 @@ internal static class PostgresSchemaPublicFlow
         CancellationToken cancellationToken)
     {
         var runId = Guid.NewGuid().ToString("D");
-        var target = new PostgresTarget(connectionString, runId, "comparison-test-image", NativeExecutionPolicyFixture.Read(), NativeExecutionPolicyFixture.Lifecycle());
+        var target = new PostgresTarget(connectionString, runId, "comparison-test-image", ExecutionPolicyFixture.Read(), ExecutionPolicyFixture.Lifecycle());
         try
         {
             await target.InitializeAsync(dataset, cancellationToken);

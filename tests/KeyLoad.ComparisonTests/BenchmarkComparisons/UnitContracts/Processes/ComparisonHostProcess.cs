@@ -2,7 +2,7 @@ using System.Diagnostics;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
-/// <summary>Runs the native comparison host with isolated benchmark configuration.</summary>
+/// <summary>Runs the execution comparison host with isolated benchmark configuration.</summary>
 internal static class ComparisonHostProcess
 {
     private const string StartupFailureMessage = "The comparison host did not start.";

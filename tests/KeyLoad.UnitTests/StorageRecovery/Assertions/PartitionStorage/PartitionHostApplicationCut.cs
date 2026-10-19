@@ -12,7 +12,7 @@ internal sealed record PartitionHostApplicationCut(byte[] Identity, long Positio
             {
                 throw new InvalidOperationException(PartitionHostApplicationProtocol.IncompleteCut);
             }
-            return new(NativeSerialization.Serialize(store.Identity), store.Position,
+            return new(OrleansSerialization.Serialize(store.Identity), store.Position,
                 page.Records.Select(row => Encode(row.Key.Span, row.Value.Span)).ToArray());
         });
 

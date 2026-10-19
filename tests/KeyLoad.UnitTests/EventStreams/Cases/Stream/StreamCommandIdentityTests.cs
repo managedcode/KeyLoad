@@ -44,7 +44,7 @@ internal sealed class StreamCommandIdentityTests
         var replay = fixture.Apply(operation);
 
         await Assert.That(receipt.CommandId).IsEqualTo(commandId);
-        await NativeReplayResultAssertions.Same<CommitReceipt>(replay, committed);
+        await ReplayResultAssertions.Same<CommitReceipt>(replay, committed);
         await Assert.That(fixture.EventSourceHead.TailPosition).IsEqualTo(1L);
         await Assert.That(fixture.Read().Events.Select(record => record.Revision).SequenceEqual([1L])).IsTrue();
     }
@@ -65,7 +65,7 @@ internal sealed class StreamCommandIdentityTests
         {
             Mutations = [mutation]
         };
-        await Assert.ThrowsExactlyAsync<AssertionException>(() => NativeReplayResultAssertions.Same<CommitReceipt>(
+        await Assert.ThrowsExactlyAsync<AssertionException>(() => ReplayResultAssertions.Same<CommitReceipt>(
             Result<object>.Succeed(changed), committed));
     }
 

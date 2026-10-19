@@ -5,7 +5,7 @@ namespace KeyLoad.UnitTests.Features.QueryExecution;
 internal sealed class QueryReadCutObservationTests
 {
     [Test]
-    public Task ActualObservedAndUnobservedQueriesPreserveCompleteNativePageAndStore() =>
+    public Task ActualObservedAndUnobservedQueriesPreserveCompletePageAndStore() =>
         QueryReadCutObservationCapture.RunAsync(async db =>
         {
             db.Configure("orders", ResourceKind.Collection);
@@ -22,8 +22,8 @@ internal sealed class QueryReadCutObservationTests
             var before = QueryReadCutObservationCapture.Cut(db);
             var page = observed.Execute("reader", request, cancellationToken: TestContext.Current!.Execution.CancellationToken);
             var unchanged = normal.Execute("reader", request);
-            await Assert.That(NativeSerialization.Serialize(page).AsSpan()
-                .SequenceEqual(NativeSerialization.Serialize(unchanged))).IsTrue();
+            await Assert.That(OrleansSerialization.Serialize(page).AsSpan()
+                .SequenceEqual(OrleansSerialization.Serialize(unchanged))).IsTrue();
             await Assert.That(page.Rows.Single().EntityId).IsEqualTo("a");
             await Assert.That(capture.Values.Count).IsEqualTo(1);
             var value = capture.Values.Single();

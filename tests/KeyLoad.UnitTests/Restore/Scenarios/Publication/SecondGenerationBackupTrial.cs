@@ -16,38 +16,38 @@ internal static class SecondGenerationBackupTrial
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            using var fixture = new NativeBackupCutFixture(checkpoint: true);
+            using var fixture = new BackupCutFixture(checkpoint: true);
             await ServerFailureObserver.ObserveAsync(() => ExerciseAsync(fixture, token), failures);
         }, failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    private static async Task ExerciseAsync(NativeBackupCutFixture fixture, CancellationToken token)
+    private static async Task ExerciseAsync(BackupCutFixture fixture, CancellationToken token)
     {
-        var source = NativeBackupJournalRepairAssertions.Read(fixture.Source, token);
-        var original = await NativeBackupJournalRepairAssertions.ArchiveAsync(fixture.Backup, token);
+        var source = BackupJournalRepairAssertions.Read(fixture.Source, token);
+        var original = await BackupJournalRepairAssertions.ArchiveAsync(fixture.Backup, token);
         var restored = ZoneTreeStore.Restore(fixture.Backup, fixture.Destination, UnitExecutionOptions.StorageExecution(), cancellationToken: token);
-        await NativeBackupJournalRepairAssertions.RestoredAsync(fixture, restored,
-            NativeBackupJournalRepairAssertions.Read(fixture.Destination, token));
+        await BackupJournalRepairAssertions.RestoredAsync(fixture, restored,
+            BackupJournalRepairAssertions.Read(fixture.Destination, token));
         var parent = Path.GetDirectoryName(fixture.Destination)!;
         var archive = Path.Combine(parent, SecondArchiveName);
         var target = Path.Combine(parent, SecondTargetName);
         await CreateSecondAsync(fixture.Destination, archive, token);
-        var current = NativeBackupJournalRepairAssertions.Read(fixture.Destination, token);
+        var current = BackupJournalRepairAssertions.Read(fixture.Destination, token);
         await SecondGenerationBackupAssertions.LiteralAsync(current);
-        var captured = await NativeBackupJournalRepairAssertions.ArchiveAsync(archive, token);
+        var captured = await BackupJournalRepairAssertions.ArchiveAsync(archive, token);
         await SecondGenerationBackupAssertions.CheckpointAsync(original, captured, source.Identity, current.Identity);
         var verified = ZoneTreeStore.VerifyBackup(archive, UnitExecutionOptions.StorageExecution(), token);
         await BackupPersistedPolicyAssertions.SameAsync(current.Identity, verified.Identity);
         await Assert.That(verified.Position).IsEqualTo(current.Position);
         await SecondGenerationBackupAssertions.ConflictAsync(archive, fixture.Destination, current, captured, token);
         await RestoreAndColdAsync(archive, target, current, token);
-        await NativeBackupJournalRepairAssertions.SameCutAsync(current,
-            NativeBackupJournalRepairAssertions.Read(fixture.Destination, token));
-        await NativeBackupJournalRepairAssertions.SameCutAsync(source,
-            NativeBackupJournalRepairAssertions.Read(fixture.Source, token));
-        await NativeBackupJournalRepairAssertions.SameArchiveAsync(original, fixture.Backup, token);
-        await NativeBackupJournalRepairAssertions.SameArchiveAsync(captured, archive, token);
+        await BackupJournalRepairAssertions.SameCutAsync(current,
+            BackupJournalRepairAssertions.Read(fixture.Destination, token));
+        await BackupJournalRepairAssertions.SameCutAsync(source,
+            BackupJournalRepairAssertions.Read(fixture.Source, token));
+        await BackupJournalRepairAssertions.SameArchiveAsync(original, fixture.Backup, token);
+        await BackupJournalRepairAssertions.SameArchiveAsync(captured, archive, token);
     }
 
     private static async Task CreateSecondAsync(string current, string archive, CancellationToken token)
@@ -79,12 +79,12 @@ internal static class SecondGenerationBackupTrial
         var result = await CliBackupRestoreProcess.RunAsync(CliBackupRestoreProcess.CaptureExecutionOptions(),
             [RestoreCommand, archive, target], token);
         await CliBackupRestoreAssertions.SuccessfulProcessAsync(result);
-        var actual = NativeBackupJournalRepairAssertions.Read(target, token);
+        var actual = BackupJournalRepairAssertions.Read(target, token);
         await SecondGenerationBackupAssertions.RestoredAsync(current, actual);
         await CliBackupJournalRepairAssertions.ReceiptAsync(result, actual.Identity);
-        await NativeBackupJournalRepairAssertions.SameCutAsync(actual,
-            NativeBackupJournalRepairAssertions.Read(target, token));
-        await NativeBackupJournalRepairAssertions.SameCutAsync(actual,
-            NativeBackupJournalRepairAssertions.Read(target, token));
+        await BackupJournalRepairAssertions.SameCutAsync(actual,
+            BackupJournalRepairAssertions.Read(target, token));
+        await BackupJournalRepairAssertions.SameCutAsync(actual,
+            BackupJournalRepairAssertions.Read(target, token));
     }
 }

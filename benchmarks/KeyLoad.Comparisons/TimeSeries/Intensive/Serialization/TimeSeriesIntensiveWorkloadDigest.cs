@@ -4,10 +4,10 @@ namespace KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries.Intensive
 
 internal static class TimeSeriesIntensiveWorkloadDigest
 {
-    internal static string Compute(IOptions<NativeComparisonExecutionOptions> executionOptions)
+    internal static string Compute(IOptions<ComparisonExecutionOptions> executionOptions)
     {
         using var frame = new TimeSeriesIntensiveDigestWriter(TimeSeriesIntensiveFrameLabels.WorkloadDomain);
-        var execution = NativeComparisonExecutionOptions.Require(executionOptions).Value;
+        var execution = ComparisonExecutionOptions.Require(executionOptions).Value;
         Header(frame, execution.OperationTimeout);
         frame.String(TimeSeriesIntensiveFrameLabels.SeedInsertion);
         frame.Count(TimeSeriesIntensiveProfile.SampleCount);

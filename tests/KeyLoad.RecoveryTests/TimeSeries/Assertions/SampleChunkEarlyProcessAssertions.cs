@@ -27,7 +27,7 @@ internal static class SampleChunkEarlyProcessAssertions
         {
             await Assert.That(recovered.RawImage).IsEqualTo(prepared.RawImage);
         }
-        var result = NativeSerialization.Deserialize<Result<object>>(Convert.FromHexString(recovered.OriginalInflightResult!));
+        var result = OrleansSerialization.Deserialize<Result<object>>(Convert.FromHexString(recovered.OriginalInflightResult!));
         var receipt = result.Get<CommitReceipt>();
         await Assert.That(receipt.CommandId).IsEqualTo(SampleChunkCrashContract.InflightId);
         var expectedToken = SampleChunkSnapshotFile.ReadExpectedToken(root, SampleChunkCrashContract.InflightId,
@@ -51,7 +51,7 @@ internal static class SampleChunkEarlyProcessAssertions
 
     private static async Task PreparedAsync(SampleChunkEarlyCrashSnapshot actual, SampleChunkEarlyCut cut)
     {
-        var original = NativeSerialization.Deserialize<Result<object>>(Convert.FromHexString(actual.OriginalAcknowledgedResult));
+        var original = OrleansSerialization.Deserialize<Result<object>>(Convert.FromHexString(actual.OriginalAcknowledgedResult));
         var expected = new ResourceDefinition(SampleChunkCrashContract.Set, ResourceKind.TimeSeries,
             SampleChunkCrashContract.Partition.TransactionDomainId);
         await Assert.That(Convert.ToHexString(JsonDefaults.Serialize(original.Get<ResourceDefinition>())))

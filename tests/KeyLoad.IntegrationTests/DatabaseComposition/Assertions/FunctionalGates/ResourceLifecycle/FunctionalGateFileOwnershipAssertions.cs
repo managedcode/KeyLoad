@@ -1,14 +1,14 @@
 using System.Globalization;
 using System.Text.Json;
 using Aspire.Hosting.ApplicationModel;
-using KeyLoad.AppHost.Features.ClusterReplication;
+using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.AppHost.Features.StorageRecovery;
 using Microsoft.Extensions.DependencyInjection;
 using P = KeyLoad.IntegrationTests.Features.DatabaseComposition.FunctionalGateFileOwnershipProtocol;
 
 namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
 
-/// <summary>Compares native configured paths and exact process launches for the live-file refusal operation.</summary>
+/// <summary>Compares execution configured paths and exact process launches for the live-file refusal operation.</summary>
 internal static class FunctionalGateFileOwnershipAssertions
 {
     private const string DataEnvironment = "KeyLoad__DataDirectory";

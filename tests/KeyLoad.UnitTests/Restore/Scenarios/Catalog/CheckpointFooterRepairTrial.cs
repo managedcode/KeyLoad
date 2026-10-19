@@ -19,36 +19,36 @@ internal static class CheckpointFooterRepairTrial
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            using var fixture = new NativeBackupCutFixture(checkpoint: true);
+            using var fixture = new BackupCutFixture(checkpoint: true);
             await ServerFailureObserver.ObserveAsync(() => ExerciseAsync(options, fixture, token), failures);
         }, failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
     private static async Task ExerciseAsync(IOptions<TestExecutionOptions> options,
-        NativeBackupCutFixture fixture, CancellationToken token)
+        BackupCutFixture fixture, CancellationToken token)
     {
-        var archive = await NativeBackupJournalRepairAssertions.ArchiveAsync(fixture.Backup, token);
-        var source = NativeBackupJournalRepairAssertions.Read(fixture.Source, token);
+        var archive = await BackupJournalRepairAssertions.ArchiveAsync(fixture.Backup, token);
+        var source = BackupJournalRepairAssertions.Read(fixture.Source, token);
         await RefuseAndRepairAsync(options, fixture, archive, source, token);
-        await NativeBackupJournalRepairAssertions.SameArchiveAsync(archive, fixture.Backup, token);
+        await BackupJournalRepairAssertions.SameArchiveAsync(archive, fixture.Backup, token);
         var result = await CliBackupRestoreProcess.RunAsync(options,
             [RestoreCommand, fixture.Backup, fixture.Destination], token);
         await CliBackupRestoreAssertions.SuccessfulProcessAsync(result);
-        var restored = NativeBackupJournalRepairAssertions.Read(fixture.Destination, token);
+        var restored = BackupJournalRepairAssertions.Read(fixture.Destination, token);
         await CliBackupJournalRepairAssertions.ReceiptAsync(result, restored.Identity);
-        await NativeBackupJournalRepairAssertions.RestoredAsync(fixture, restored.Identity, restored);
-        await NativeBackupJournalRepairAssertions.SameCutAsync(restored,
-            NativeBackupJournalRepairAssertions.Read(fixture.Destination, token));
-        await NativeBackupJournalRepairAssertions.SameCutAsync(restored,
-            NativeBackupJournalRepairAssertions.Read(fixture.Destination, token));
-        await NativeBackupJournalRepairAssertions.SameCutAsync(source,
-            NativeBackupJournalRepairAssertions.Read(fixture.Source, token));
-        await NativeBackupJournalRepairAssertions.SameArchiveAsync(archive, fixture.Backup, token);
+        await BackupJournalRepairAssertions.RestoredAsync(fixture, restored.Identity, restored);
+        await BackupJournalRepairAssertions.SameCutAsync(restored,
+            BackupJournalRepairAssertions.Read(fixture.Destination, token));
+        await BackupJournalRepairAssertions.SameCutAsync(restored,
+            BackupJournalRepairAssertions.Read(fixture.Destination, token));
+        await BackupJournalRepairAssertions.SameCutAsync(source,
+            BackupJournalRepairAssertions.Read(fixture.Source, token));
+        await BackupJournalRepairAssertions.SameArchiveAsync(archive, fixture.Backup, token);
     }
 
     private static async Task RefuseAndRepairAsync(IOptions<TestExecutionOptions> options,
-        NativeBackupCutFixture fixture, Dictionary<string, byte[]> archive,
+        BackupCutFixture fixture, Dictionary<string, byte[]> archive,
         (KeyLoad.Storage.StoreIdentity Identity, long Position, string[] Rows) source, CancellationToken token)
     {
         var failures = new List<Exception>();
@@ -59,7 +59,7 @@ internal static class CheckpointFooterRepairTrial
             var damaged = CheckpointFooterRepairFault.Create(archive[MetadataTestContract.JournalFileName]);
             repairRequired = true;
             await fixture.RewriteJournalAsync(damaged);
-            var faulted = await NativeBackupJournalRepairAssertions.ArchiveAsync(fixture.Backup, token);
+            var faulted = await BackupJournalRepairAssertions.ArchiveAsync(fixture.Backup, token);
             await RefusedAsync(options, fixture, faulted, source, token);
             await RefusedAsync(options, fixture, faulted, source, token);
         }, failures);
@@ -75,7 +75,7 @@ internal static class CheckpointFooterRepairTrial
     }
 
     private static async Task RefusedAsync(IOptions<TestExecutionOptions> options,
-        NativeBackupCutFixture fixture, Dictionary<string, byte[]> faulted,
+        BackupCutFixture fixture, Dictionary<string, byte[]> faulted,
         (KeyLoad.Storage.StoreIdentity Identity, long Position, string[] Rows) source, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
@@ -93,8 +93,8 @@ internal static class CheckpointFooterRepairTrial
         await Assert.That(problem.RootElement.GetProperty(DetailKey).GetString())
             .IsEqualTo(ZoneTreePersistenceFormat.CheckpointVerificationFailed);
         await Assert.That(Directory.Exists(fixture.Destination) || File.Exists(fixture.Destination)).IsFalse();
-        await NativeBackupJournalRepairAssertions.SameArchiveAsync(faulted, fixture.Backup, token);
-        await NativeBackupJournalRepairAssertions.SameCutAsync(source,
-            NativeBackupJournalRepairAssertions.Read(fixture.Source, token));
+        await BackupJournalRepairAssertions.SameArchiveAsync(faulted, fixture.Backup, token);
+        await BackupJournalRepairAssertions.SameCutAsync(source,
+            BackupJournalRepairAssertions.Read(fixture.Source, token));
     }
 }

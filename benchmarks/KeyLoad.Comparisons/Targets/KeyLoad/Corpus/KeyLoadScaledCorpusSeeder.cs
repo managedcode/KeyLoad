@@ -7,14 +7,14 @@ namespace KeyLoad.Comparisons.Targets;
 internal static class KeyLoadScaledCorpusSeeder
 {
     internal static async Task SeedAsync(KeyLoadClient client, PartitionRef partition,
-        IReadOnlyList<BenchmarkDocument> documents, int expectedCopies, IOptions<NativeComparisonExecutionOptions> executionOptions,
+        IReadOnlyList<BenchmarkDocument> documents, int expectedCopies, IOptions<ComparisonExecutionOptions> executionOptions,
         CancellationToken cancellationToken)
     {
         const int NoObservedItems = 0;
         const string SeedDocumentsToken = "SeedDocuments";
         const string ScaledCorpusSeedReceiptMismatchDetail = "ScaledCorpusSeedReceiptMismatch";
 
-        var batchSize = NativeComparisonExecutionOptions.Require(executionOptions).Value.KeyLoadDocumentSeedBatchSize;
+        var batchSize = ComparisonExecutionOptions.Require(executionOptions).Value.KeyLoadDocumentSeedBatchSize;
         foreach (var batch in documents.Chunk(batchSize))
         {
             cancellationToken.ThrowIfCancellationRequested();

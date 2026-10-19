@@ -3,7 +3,7 @@ namespace KeyLoad.RecoveryTests.Features.DocumentStorage;
 internal static class CommandIdempotencyProcessCleanup
 {
     private const int NoCleanupFailures = 0;
-    private const string UnsettledChildMessage = "The unsettled command child retained its native trial root.";
+    private const string UnsettledChildMessage = "The unsettled command child retained its execution trial root.";
 
     internal static async Task CleanupActiveTrialAsync(string root, CommandIdempotencyProcessChild? active, Exception? primary)
     {

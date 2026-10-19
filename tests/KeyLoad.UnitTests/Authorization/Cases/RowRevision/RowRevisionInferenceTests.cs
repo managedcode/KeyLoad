@@ -8,6 +8,6 @@ internal sealed class RowRevisionInferenceTests
     [Arguments(P.Put)]
     [Arguments(P.Patch)]
     [Arguments(P.Delete)]
-    public async Task HiddenRowRevisionGuessesStayDeniedBeforeCasAndOwnedRepairReplaysAcrossTwoNativeColdCuts(string kind)
+    public async Task HiddenRowRevisionGuessesStayDeniedBeforeCasAndOwnedRepairReplaysAcrossTwoColdCuts(string kind)
         => await RowRevisionInferenceFlow.RunAsync(kind, TestContext.Current!.Execution.CancellationToken);
 }

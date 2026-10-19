@@ -29,18 +29,18 @@ internal sealed class PostgresAdmissionLifetime
                 context.Features.Set(lifetime);
                 lifetime.expiry = deadline.Token.Register(static value =>
                     ((ServerConnectionFeature)value!).RequestClose(), owner);
-                await ServerFailureObserver.ObserveAsync(() => next(context), failures).ConfigureAwait(false);
-                await ServerFailureObserver.ObserveAsync(() => lifetime.expiry.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+                await ServerFailureObserver.ObserveAsync(() => next(context), failures);
+                await ServerFailureObserver.ObserveAsync(() => lifetime.expiry.DisposeAsync().AsTask(), failures);
                 ServerFailureObserver.Observe(() => context.Features.Set<PostgresAdmissionLifetime>(null), failures);
-            }, failures).ConfigureAwait(false);
-        }, failures).ConfigureAwait(false);
+            }, failures);
+        }, failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
     internal async Task CompleteAsync()
     {
         Token.ThrowIfCancellationRequested();
-        await expiry.DisposeAsync().ConfigureAwait(false);
+        await expiry.DisposeAsync();
         Token.ThrowIfCancellationRequested();
         Completed = true;
     }

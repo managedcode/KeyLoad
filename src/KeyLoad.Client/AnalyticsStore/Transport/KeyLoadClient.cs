@@ -12,10 +12,10 @@ public sealed partial class KeyLoadClient
         CancellationToken cancellationToken = default)
         => Send<AnalyticsEventsPage>(AnalyticsStoreProtocol.ReadRoute, request, false, null, cancellationToken);
 
-    /// <summary>Queries complete native aggregates over the current authorized canonical event cut.</summary>
+    /// <summary>Queries complete execution aggregates over the current authorized canonical event cut.</summary>
     /// <param name="request">Store, atomic partition, range, declared dimensions and metric selections.</param>
     /// <param name="cancellationToken">Cancellation throughout the original HTTP operation.</param>
-    /// <returns>Complete bounded groups; incomplete native plans refuse the operation.</returns>
+    /// <returns>Complete bounded groups; incomplete execution plans refuse the operation.</returns>
     public Task<Result<AnalyticsAggregateResult>> AggregateAnalyticsAsync(AggregateAnalyticsRequest request,
         CancellationToken cancellationToken = default)
         => Send<AnalyticsAggregateResult>(AnalyticsStoreProtocol.AggregateRoute, request, false, null, cancellationToken);

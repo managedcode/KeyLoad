@@ -40,8 +40,8 @@ internal static class ResourcePairBindingBm25
         await Assert.That(source.ReadCanonicalCut()).IsEqualTo(cut);
         ResourcePairBindingFlow.Repair(source.Store, damaged);
         var original = Capture(state, Root, token);
-        var phase = NativeSerialization.Deserialize<Bm25CorpusPublicationPhaseCommand>(original.Value!.Input.Span);
-        await ResourceIncarnationAssertions.EqualAsync(new DistributedTextStatisticsV1([CorpusTerm], One, One, [One]), phase.Current.Statistics);
+        var phase = OrleansSerialization.Deserialize<Bm25CorpusPublicationPhaseCommand>(original.Value!.Input.Span);
+        await ResourceIncarnationAssertions.EqualAsync(new DistributedTextStatistics([CorpusTerm], One, One, [One]), phase.Current.Statistics);
         var expectedIndex = source.Store.Position + One;
         var canonical = source.Database.LastApplied;
         var result = source.SubmitIssuedEmbedded(original, token);
@@ -71,7 +71,7 @@ internal static class ResourcePairBindingBm25
                 Corpus, CorpusField, TextProjectionProtocol.TokenizerVersion, [CorpusTerm], new ReadExecutionBudget(database.OperationLimitsOptions, database.EvaluationClock, token)));
         if (expectedCurrent)
         {
-            await ResourceIncarnationAssertions.EqualAsync(new DistributedTextStatisticsV1([CorpusTerm], One, One, [One]), current!);
+            await ResourceIncarnationAssertions.EqualAsync(new DistributedTextStatistics([CorpusTerm], One, One, [One]), current!);
         }
         else
         {

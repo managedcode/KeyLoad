@@ -36,7 +36,7 @@ internal sealed class ProjectionProcessRecoveryTests
             var database = new DatabaseEngine(store, new AuthorizationPolicy(), RecoveryExecutionOptions.DatabaseLimits(new()
             {
                 MaxOutboxRecords = 1
-            }), RecoveryExecutionOptions.DueWork(), RecoveryExecutionOptions.EventSource(), RecoveryExecutionOptions.Messaging(), RecoveryExecutionOptions.GraphExecution(), RecoveryExecutionOptions.ChangeFeedExecution(), RecoveryExecutionOptions.BlobExecution(), RecoveryExecutionOptions.NativeClaimsExecution(), RecoveryExecutionOptions.TimeSeriesExecution());
+            }), RecoveryExecutionOptions.DueWork(), RecoveryExecutionOptions.EventSource(), RecoveryExecutionOptions.Messaging(), RecoveryExecutionOptions.GraphExecution(), RecoveryExecutionOptions.ChangeFeedExecution(), RecoveryExecutionOptions.RuntimeClaimsExecution(), RecoveryExecutionOptions.TimeSeriesExecution());
             await AssertRecoveredProcessCutAsync(database, stage);
             await RetryRecoveredCommandAsync(root, database, timeout.Token);
         }
@@ -95,7 +95,7 @@ internal sealed class ProjectionProcessRecoveryTests
     private static async Task AssertRetryReceiptAsync(DatabaseEngine database, Command<DatabaseCommand> original,
         ProjectionBatchResult recovered)
     {
-        var request = NativeSerialization.Deserialize<CommitProjectionBatchRequest>(original.Value!.Input.Span, NativeValidationProfile.PublicInputElements);
+        var request = OrleansSerialization.Deserialize<CommitProjectionBatchRequest>(original.Value!.Input.Span, ValidationProfile.PublicInputElements);
         var retryId = Guid.NewGuid();
         var retried = database.Apply(database.CreateCommand(OperationKind.CommitProjectionBatch, retryId, "root", TimeProvider.System.GetUtcNow(), JsonSerializer.Serialize(request with
         {

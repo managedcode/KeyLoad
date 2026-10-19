@@ -9,21 +9,21 @@ internal sealed class AnnProjectionJobDispatch(GrainRequestCodec codec, IService
     TimeProvider clock, Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> serializer,
     IOptions<GrainRoutingOptions> routing)
 {
-    private const string InvalidResult = "The native ANN maintenance result is invalid.";
+    private const string InvalidResult = "The execution ANN maintenance result is invalid.";
 
     internal async Task<AnnMaintenanceResult> ExecuteAsync(global::Orleans.IGrainFactory grains,
         PrincipalRecord principal, AnnMaintenanceRequest original, DateTimeOffset expiry, IResourceLifetimeWorkBinding binding,
         CancellationToken token)
     {
         var requestId = Guid.NewGuid();
-        var connectionId = NativeConnectionExecutionIdentity.Resolve(services);
+        var connectionId = ConnectionExecutionIdentity.Resolve(services);
         var failures = new List<Exception>();
         AnnMaintenanceResult? result = null;
         byte[]? payload = null;
         try
         {
-            if (binding is not INativeRequestWorkBinding native
-                || !ReferenceEquals(binding.ResultRetention, native.OriginalProducer.ResultRetention))
+            if (binding is not IRequestWorkBinding execution
+                || !ReferenceEquals(binding.ResultRetention, execution.OriginalProducer.ResultRetention))
             {
                 throw Errors.Fail(ErrorCode.OwnershipLost, AnnProjectionJobProtocol.Invalid);
             }
@@ -32,8 +32,8 @@ internal sealed class AnnProjectionJobDispatch(GrainRequestCodec codec, IService
             {
                 throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
             }
-            native.OriginalProducer.AdmitPublication();
-            payload = NativeSerialization.Serialize(original);
+            execution.OriginalProducer.AdmitPublication();
+            payload = OrleansSerialization.Serialize(original);
             var signed = codec.Issue(GrainRequestEnvelopeConstruction.Command(requestId, codec.Incarnation,
                 principal.Id, OperationKind.MaintainAnnIndex, original.CommandId, payload,
                 expiry < context.Now + context.Lifetime ? expiry : context.Now + context.Lifetime));
@@ -43,11 +43,11 @@ internal sealed class AnnProjectionJobDispatch(GrainRequestCodec codec, IService
             {
                 result = await ReadAsync(grains, signed, requestId, original, connectionId, token).ConfigureAwait(true);
             }
-            catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
-            catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
+            catch (Exception failure) when (CqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
+            catch (Exception failure) when (!CqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
         }
-        catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
-        catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
+        catch (Exception failure) when (CqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
+        catch (Exception failure) when (!CqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
         Capture(() =>
         {
             if (payload is not null)
@@ -63,15 +63,15 @@ internal sealed class AnnProjectionJobDispatch(GrainRequestCodec codec, IService
     {
         try
         { cleanup(); }
-        catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
-        catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
+        catch (Exception failure) when (CqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
+        catch (Exception failure) when (!CqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
     }
 
     private async Task<AnnMaintenanceResult> ReadAsync(global::Orleans.IGrainFactory grains, string signed,
         Guid requestId, AnnMaintenanceRequest original, Guid connectionId, CancellationToken token)
     {
         var actor = grains.GetGrain<IConnectionGrain>(connectionId);
-        var purpose = new NativeCqrsStreamPurpose(() => codec.Verify(signed));
+        var purpose = new CqrsStreamPurpose(() => codec.Verify(signed));
         var reply = await GrainRequestStreamConsumer.DrainWithPurposeAsync(
             streamToken => actor.ExecuteStreamAsync(signed, streamToken), serializer, requestId,
             clock, routing, purpose, token).ConfigureAwait(true);
@@ -84,7 +84,7 @@ internal sealed class AnnProjectionJobDispatch(GrainRequestCodec codec, IService
         {
             throw Errors.Fail(error, reply.SafeDetail ?? InvalidResult);
         }
-        var value = GrainNativePayload.Read<GrainValue>(reply.Payload).Value;
+        var value = GrainPayload.Read<GrainValue>(reply.Payload).Value;
         if (value is not AnnMaintenanceResult result || result.CommandId != original.CommandId
             || result.Consumer != original.Consumer || result.IndexGeneration != original.IndexGeneration
             || result.Phase != AnnMaintenancePhase.Completed)

@@ -30,7 +30,7 @@ internal static class QueueRedriveUnusedSequenceControl
             RetryJitter = QueueRetryJitter.Full
         });
         var lane = new QueueLaneRef(fixture.Partition, QueueOrderedRetryProtocol.Queue);
-        var recorder = new QueueLifecycleNativeRecorder(fixture.Database, lane, id => QueueOrderedRetryOperations.Literal(id));
+        var recorder = new QueueLifecycleRecorder(fixture.Database, lane, id => QueueOrderedRetryOperations.Literal(id));
         var state = new QueueOrderedRetryState(fixture.Partition, QueueWholeFlowStorage.Clock(fixture.Store), policy)
         {
             BeforeApply = recorder.Observe
@@ -66,11 +66,11 @@ internal static class QueueRedriveUnusedSequenceControl
     }
 
     private static async Task ColdAsync(TestDatabase fixture, QueueOrderedRetryState state,
-        QueueLifecycleNativeRecorder recorder, bool block, CancellationToken token)
+        QueueLifecycleRecorder recorder, bool block, CancellationToken token)
     {
         var image = QueueWholeFlowStorage.Bytes(fixture.Store);
         var position = fixture.Store.Position;
-        var identity = NativeSerialization.Serialize(fixture.Store.Identity);
+        var identity = OrleansSerialization.Serialize(fixture.Store.Identity);
         fixture.Store.Dispose();
         using var cold = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         var database = QueueWholeFlowStorage.Open(cold);

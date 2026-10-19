@@ -10,10 +10,10 @@ internal static class QueueFullDeadLetterSequenceControl
         using var fixture = new TestDatabase();
         QueueLifecycleProvisioning.Seed(fixture, byteSublimit: false);
         var lane = new QueueLaneRef(fixture.Partition, QueueLifecycleTestProtocol.Queue);
-        var recorder = new QueueLifecycleNativeRecorder(fixture.Database, lane, QueueLifecycleHealthy.Enqueue);
+        var recorder = new QueueLifecycleRecorder(fixture.Database, lane, QueueLifecycleHealthy.Enqueue);
         var state = new QueueLifecycleTestState(fixture.Partition, QueueWholeFlowStorage.Clock(fixture.Store))
         {
-            NativeSubmit = recorder.Apply
+            RuntimeSubmit = recorder.Apply
         };
         await QueueLifecycleInitialPhase.RunAsync(fixture.Database, fixture.Store, state, token);
         var counters = QueueLifecycleControlCold.Read(fixture.Database, lane);
@@ -28,11 +28,11 @@ internal static class QueueFullDeadLetterSequenceControl
     }
 
     private static async Task ColdAsync(TestDatabase fixture, QueueLifecycleTestState state,
-        QueueLifecycleNativeRecorder recorder, CancellationToken token)
+        QueueLifecycleRecorder recorder, CancellationToken token)
     {
         var image = QueueWholeFlowStorage.Bytes(fixture.Store);
         var position = fixture.Store.Position;
-        var identity = NativeSerialization.Serialize(fixture.Store.Identity);
+        var identity = OrleansSerialization.Serialize(fixture.Store.Identity);
         fixture.Store.Dispose();
         using var cold = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         var database = QueueWholeFlowStorage.Open(cold);

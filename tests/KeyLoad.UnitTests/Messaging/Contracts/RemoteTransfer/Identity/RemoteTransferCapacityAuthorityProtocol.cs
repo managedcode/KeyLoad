@@ -3,7 +3,7 @@ namespace KeyLoad.UnitTests.Features.Messaging;
 internal static class RemoteTransferCapacityAuthorityProtocol
 {
     internal const string Payload = "{\"capacityAuthority\":94}";
-    internal const string Headers = "{\"origin\":\"retained-native\"}";
+    internal const string Headers = "{\"origin\":\"retained-execution\"}";
     internal const string Original = "capacity-original";
     internal const string Second = "capacity-second";
     internal const string Pending = "capacity-pending";
@@ -12,8 +12,8 @@ internal static class RemoteTransferCapacityAuthorityProtocol
     internal const string Documents = "capacity-documents";
     internal const string FreshDocument = "capacity-protected-document";
     internal const string Corrupt = "Persisted queue transfer capacity is inconsistent.";
-    internal const string MissingNativeRow = "The genuine capacity-authority seed row is missing.";
-    internal const string NativeImageExceeded = "The complete transfer-capacity image exceeded its original fixture bound.";
+    internal const string RuntimeMissingRow = "The genuine capacity-authority seed row is missing.";
+    internal const string RuntimeImageExceeded = "The complete transfer-capacity image exceeded its original fixture bound.";
     internal const int First = 1;
     internal const int SecondValue = 2;
     internal const int Third = 3;

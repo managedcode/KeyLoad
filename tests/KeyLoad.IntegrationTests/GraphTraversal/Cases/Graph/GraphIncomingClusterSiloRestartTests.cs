@@ -9,7 +9,7 @@ internal sealed class GraphIncomingClusterSiloRestartTests(ClusterFixture fixtur
 {
     private const string SourceCollection = GraphPathClusterScenario.CollectionA;
     private const string EdgeId = "incoming-survives-silo-rejoin";
-    private const string Projection = "eventual-reverse.v1";
+    private const string Projection = "eventual-reverse";
     private const string GuidFormat = "N";
     private const int RequestVersion = 1;
 
@@ -42,7 +42,7 @@ internal sealed class GraphIncomingClusterSiloRestartTests(ClusterFixture fixtur
         await VerifyOfficialMcpAsync(seed, source, deadline.Token);
     }
 
-    private static ReadIncomingGraphEdgesRequestV1 Request(GraphPathClusterSeed seed)
+    private static ReadIncomingGraphEdgesRequest Request(GraphPathClusterSeed seed)
         => new(RequestVersion, seed.Target, GraphPathClusterScenario.Graph, 10);
 
     private static async Task SeedCrossEdgeAsync(KeyLoadClient admin, GraphPathClusterSeed seed,
@@ -77,7 +77,7 @@ internal sealed class GraphIncomingClusterSiloRestartTests(ClusterFixture fixtur
             .ConfigureAwait(false);
     }
 
-    private static async Task AssertDeliveredRowAsync(GraphIncomingEdgesPageV1 page,
+    private static async Task AssertDeliveredRowAsync(GraphIncomingEdgesPage page,
         EntityRef target, EntityRef source)
     {
         await Assert.That(page.CutPosition).IsGreaterThan(0L);
@@ -96,7 +96,7 @@ internal sealed class GraphIncomingClusterSiloRestartTests(ClusterFixture fixtur
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node3,
             seed.Reader.Secret, cancellationToken);
         var reply = await mcp.CallAsync(GraphIncomingClusterScenario.Tool, Request(seed), cancellationToken);
-        var result = await McpCallerAssertions.SuccessAsync<GraphIncomingEdgesPageV1>(reply);
+        var result = await McpCallerAssertions.SuccessAsync<GraphIncomingEdgesPage>(reply);
         await AssertDeliveredRowAsync(result.Value, seed.Target, source);
         await GraphIncomingClusterAssertions.AssertNoPrivatePayloadAsync(reply, seed.Reader.Secret);
     }

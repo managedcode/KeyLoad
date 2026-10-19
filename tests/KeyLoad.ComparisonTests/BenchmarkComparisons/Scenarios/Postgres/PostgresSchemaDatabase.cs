@@ -36,7 +36,7 @@ internal static class PostgresSchemaDatabase
 
     internal static async Task DropAsync(string connectionString)
     {
-        var policy = NativeExecutionPolicyFixture.Harness().Value;
+        var policy = ExecutionPolicyFixture.Harness().Value;
         using var cleanup = new CancellationTokenSource(policy.PostgresDatabaseCleanupTimeout, TimeProvider.System);
         var ownedPool = new NpgsqlConnection(new NpgsqlConnectionStringBuilder(connectionString) { Database = DatabaseName }.ConnectionString);
         NpgsqlConnection.ClearPool(ownedPool);

@@ -8,7 +8,7 @@ internal static class SampleChunkSnapshotFile
     internal static void CaptureExpectedToken(string root, Guid commandId, DatabaseEngine database, PartitionRef partition)
     {
         var expected = CrashDatabase.NextCommitToken(database, partition);
-        var bytes = NativeSerialization.Serialize(expected);
+        var bytes = OrleansSerialization.Serialize(expected);
         if (bytes.Length > database.Limits.MaxBatchBytes)
         {
             throw new InvalidOperationException(SampleChunkCrashContract.Invalid);
@@ -29,7 +29,7 @@ internal static class SampleChunkSnapshotFile
         {
             throw new InvalidOperationException(SampleChunkCrashContract.Invalid);
         }
-        return NativeSerialization.Deserialize<CommitToken>(bytes);
+        return OrleansSerialization.Deserialize<CommitToken>(bytes);
     }
 
     private static string ExpectedTokenPath(string root, Guid commandId)

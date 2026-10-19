@@ -11,7 +11,7 @@ Decision record: [ADR-033](../ADR/ADR-033-code-quality.md). Related decisions:
 [ADR-111](../ADR/ADR-111-magic-runtime-values.md) and
 [ADR-113](../ADR/ADR-113-centralized-runtime-options.md) (literals and options),
 [ADR-115](../ADR/ADR-115-time-provider.md) (clock access) and
-[ADR-117](../ADR/ADR-117-native-tunit-ci-entry.md) (native TUnit entry).
+[ADR-117](../ADR/ADR-117-tunit-ci-entry.md) (TUnit entry).
 
 ## Scope
 
@@ -40,7 +40,7 @@ flowchart LR
     Compiler --> Findings[Located diagnostics and SARIF]
     Findings --> Gates[Release build, formatter and governance]
     Tests[Real compilation TUnit analyzer cases] --> Rules
-    Functional[Functional TUnit suites] --> Coverage[Native coverage reports]
+    Functional[Functional TUnit suites] --> Coverage[coverage reports]
     Coverage --> Metrics[Coverage thresholds and CRAP]
     Gates --> CI[GitHub Actions artifacts]
     Metrics --> CI
@@ -57,19 +57,19 @@ unless stated otherwise. A criterion with no automated case names its evidence.
 | REQ-CQ-002: KeyLoad-owned Roslyn rules are editable and proven by real compilations | AC-CQ-002: compiler cases assert diagnostic ID, severity and exact span for the rules they exercise. AC-CQ-004: eighteen rules have unique enabled IDs and expected severities. Each rule selects its generated-code contract; KLD0038 and KLD0039 analyze generated code. | `DiagnosticContractTests` (`AllEighteenRulesHaveUniqueEnabledIdsAndExpectedSeveritiesAsync`) and the existing compiler case folders; focused compiler execution evidence for KLD0038/KLD0039 remains open. |
 | REQ-CQ-003: compiler SARIF is retained, including for failed builds | AC-CQ-003: each project writes `artifacts/code-quality/<project>/<configuration>/<framework>/diagnostics.sarif`; CI uploads `code-quality-<os>` even when the build fails, and an upload never turns a failed build green | Workflow review of `Directory.Build.targets` and the `Save build diagnostics` step (explicit review exception) |
 | REQ-CQ-004: quality gates are enforced and qualification is stated honestly | AC-CQ-005: no required gate is skipped, disabled or downgraded to pass. AC-CQ-006: documentation and status record source configuration, local checks and exact-source Linux evidence separately. AC-CQ-022: the complete solution passes the strict Release build and `dotnet format --verify-no-changes`; repairs preserve public signatures, persisted bytes, signed identities, cancellation and lifetime rules. AC-CQ-023: every source-bound method with cyclomatic complexity above 20 is reviewed and, where it helps, split along a real responsibility | Governance check `node scripts/Features/RepositoryGovernance/verify.mjs`; review of `docs/implementation/status.json`; Release build and formatter gates (AC-CQ-022) |
-| REQ-CQ-006: maintainability limits are executable | AC-CQ-008: KLD0030..KLD0033 accept the boundary and reject one past it (file 400, type 200, executable unit 64 including the 63/64/65 edge, nesting 3). AC-CQ-009: the analyzer module reaches the coverage thresholds below from the native analyzer suite | `FileCodeLineCountAnalyzerTests`, `AggregateTypeCodeLineCountAnalyzerTests`, `ExecutableUnitCodeLineCountAnalyzerTests`, `ExecutableUnitSpanAndTriviaAnalyzerTests`, `ControlFlowNestingAnalyzerTests`, `ControlFlowNestingExtendedConstructTests`, `NumericAnalyzerSelfInventoryTests`, `SiteAnalyzerCoverage*Tests` |
+| REQ-CQ-006: maintainability limits are executable | AC-CQ-008: KLD0030..KLD0033 accept the boundary and reject one past it (file 400, type 200, executable unit 64 including the 63/64/65 edge, nesting 3). AC-CQ-009: the analyzer module reaches the coverage thresholds below from the analyzer suite | `FileCodeLineCountAnalyzerTests`, `AggregateTypeCodeLineCountAnalyzerTests`, `ExecutableUnitCodeLineCountAnalyzerTests`, `ExecutableUnitSpanAndTriviaAnalyzerTests`, `ControlFlowNestingAnalyzerTests`, `ControlFlowNestingExtendedConstructTests`, `NumericAnalyzerSelfInventoryTests`, `SiteAnalyzerCoverage*Tests` |
 | REQ-CQ-008: a pull request replaces its own earlier run and no other run cancels another | AC-CQ-017: the Build and Tests concurrency group is the ref for pull requests (with cancel-in-progress) and the run ID otherwise | Workflow expression review (explicit review exception) |
-| REQ-CQ-009: functional coverage is source-bound, measured and used to find real gaps | AC-CQ-018..021 and AC-CQ-039..048 below | Native coverage tooling tests in `tests/KeyLoad.UnitTests/CodeQuality/` and CI coverage jobs |
-| REQ-CQ-010: no object or Monitor lock; typed synchronization only | AC-CQ-025: KLD0034 fires on object-typed locks, `Monitor` calls and synchronous locks inside grains. AC-CQ-026: short synchronous shared-service sections use `System.Threading.Lock`; asynchronous exclusion uses cancellable `SemaphoreSlim.WaitAsync` released in `finally`. AC-CQ-027: grain-owned state relies on Orleans turn scheduling, while node-local storage, journal and apply gates stay | `TypedSynchronizationTests`, `GrainSynchronizationTests`, `NativeSynchronizationDelegateTests`; existing functional lifecycle suites for AC-CQ-026/027 |
-| REQ-CQ-011: runtime-policy numbers and strings use named identities | AC-CQ-029: KLD0035 reports numeric literals (including zero and one) reaching timeouts, delays and deadlines. AC-CQ-030: KLD0036 reports string literals in native comparisons and format tokens. AC-CQ-031: fixtures cover aliases, overloads and generated code. AC-CQ-032: the repository has no unreported finding and every migration keeps exact values, formats and persisted bytes | `MagicRuntime*Tests`, `GeneralRuntime*Tests` |
+| REQ-CQ-009: functional coverage is source-bound, measured and used to find real gaps | AC-CQ-018..021 and AC-CQ-039..048 below | coverage tooling tests in `tests/KeyLoad.UnitTests/CodeQuality/` and CI coverage jobs |
+| REQ-CQ-010: no object or Monitor lock; typed synchronization only | AC-CQ-025: KLD0034 fires on object-typed locks, `Monitor` calls and synchronous locks inside grains. AC-CQ-026: short synchronous shared-service sections use `System.Threading.Lock`; asynchronous exclusion uses cancellable `SemaphoreSlim.WaitAsync` released in `finally`. AC-CQ-027: grain-owned state relies on Orleans turn scheduling, while node-local storage, journal and apply gates stay | `TypedSynchronizationTests`, `GrainSynchronizationTests`, `SynchronizationDelegateTests`; existing functional lifecycle suites for AC-CQ-026/027 |
+| REQ-CQ-011: runtime-policy numbers and strings use named identities | AC-CQ-029: KLD0035 reports numeric literals (including zero and one) reaching timeouts, delays and deadlines. AC-CQ-030: KLD0036 reports string literals in comparisons and format tokens. AC-CQ-031: fixtures cover aliases, overloads and generated code. AC-CQ-032: the repository has no unreported finding and every migration keeps exact values, formats and persisted bytes | `MagicRuntime*Tests`, `GeneralRuntime*Tests` |
 | REQ-CQ-012: no inline runtime string, numeric or character literals | AC-CQ-033: KLD0035/KLD0036 reject runtime literals outside named `const` declarations, enums and attribute metadata; there is no blanket 0/1/-1 exemption and no suppression baseline | `GeneralRuntimeNumericTests`, `GeneralRuntimeTextTests`, `PersistedPolicyLiteralTests` |
 | REQ-CQ-013: operational policy is typed, validated `IOptions<T>` | AC-CQ-034: deadlines, retries, capacities and limits are bound and validated centrally and injected as options. AC-CQ-035: raw `IConfiguration` or environment reads exist only in central binding and composition code. AC-CQ-037: KLD0037 rejects policy hidden behind `const`/`static readonly`, direct configuration reads and options clones that overwrite policy with literals. AC-CQ-038: the Release build reports none of these findings | `TypedConfiguration*Tests`, `TypedOptionsExecutionFlowTests`, `OptionsSnapshot*Tests`, `SerializedOptions*Tests`, `ConditionalPolicyProvenanceTests` |
 | REQ-CQ-014: tests execute real operations | AC-CQ-049: functional tests run a real operation and assert its outcome and resulting state; source-text, getter/setter and shape-only tests are removed. AC-CQ-050: active requirements cite no removed source-text tests | `GovernanceWorkingFileTests` (real governance CLI accept/reject flows); repository review (explicit review exception for AC-CQ-050) |
 | REQ-CQ-LINUX-RUNNER-001 / AC-CQ-LINUX-RUNNER-001: functional CI runs on explicit Linux runners | Build, analyzer, unit, recovery, Aspire-topology and coverage jobs declare `ubuntu-24.04`; a runner label alone proves neither a passing job nor a timing result | Workflow review (explicit review exception) |
-| REQ-CQ-NATIVE-EXCEPTION-001 / AC-CQ-NATIVE-EXCEPTION-001: exception types keep legitimate constructors | KLD0021 resolves `System.Exception` from the compilation and skips direct and indirect subclasses; a lookalike type and ordinary Orleans DTOs still report the located error | `OrleansContractConstructorTests` |
+| REQ-CQ-EXECUTION-EXCEPTION-001 / AC-CQ-EXECUTION-EXCEPTION-001: exception types keep legitimate constructors | KLD0021 resolves `System.Exception` from the compilation and skips direct and indirect subclasses; a lookalike type and ordinary Orleans DTOs still report the located error | `OrleansContractConstructorTests` |
 | REQ-CQ-MULTILINE-BLOCKS-001 | AC-CQ-MULTILINE-BLOCKS-001: executable control-flow, method and lambda braces span lines (Allman) and `IDE0055` is an error. AC-CQ-MULTILINE-BLOCKS-002: the expansion preserves behaviour, so existing whole-operation tests stay green. AC-CQ-MULTILINE-BLOCKS-003: newly compact blocks fail the formatter gate | `dotnet format KeyLoad.slnx --verify-no-changes --no-restore` and the Release build |
 | REQ-CQ-ROS-001..003 | AC-CQ-ROS-001..003 below | Tool manifest and MCP session (manual evidence for installation) |
-| REQ-CQ-SIMD-PROFILE-001 / AC-CQ-SIMD-PROFILE-001 | Coverage and qualification run the normal SIMD-enabled profile only; inherited intrinsics-disabling variables are refused and no scalar profile is admitted | Native coverage tooling tests |
+| REQ-CQ-SIMD-PROFILE-001 / AC-CQ-SIMD-PROFILE-001 | Coverage and qualification run the normal SIMD-enabled profile only; inherited intrinsics-disabling variables are refused and no scalar profile is admitted | coverage tooling tests |
 
 ## Build policy
 
@@ -116,7 +116,7 @@ unique and never reused.
 | KLD0035 | Runtime numeric literals, including zero and one, use named constants or typed options | Error |
 | KLD0036 | Runtime strings, characters, interpolation text and format tokens use named identities or `nameof` | Error |
 | KLD0037 | Operational policy comes from centrally bound, validated `IOptions<T>`, not from raw configuration reads or constants | Error |
-| KLD0038 | Implementation terminology requires explicit owner approval; only narrowly approved native runtime, domain and testing meanings are allowed | Error |
+| KLD0038 | Implementation terminology requires explicit owner approval; only narrowly approved runtime, domain and testing meanings are allowed | Error |
 | KLD0039 | ZoneTree, ZoneTree.FullTextSearch and ZoneTree.Analytics use public synchronous APIs without thread-pool dispatch | Error |
 
 Rule fixtures (all under `Cases/`): KLD0001 `LiteralMachineKey/`, KLD0013
@@ -125,7 +125,7 @@ KLD0020 `Program/ProgramCompositionRootTests`, KLD0021 and KLD0023 `Orleans/`,
 KLD0022 `SystemClock/`, KLD0024 `UntypedCatch/`, KLD0030..KLD0033 `FileCode/`,
 `AggregateType/`, `ExecutableUnit/` and `ControlFlow/`, KLD0034
 `TypedSynchronization/`, `Grain/GrainSynchronizationTests` and
-`NativeSynchronization/`, KLD0035/KLD0036 `MagicRuntime/` and `GeneralRuntime/`,
+`Synchronization/`, KLD0035/KLD0036 `MagicRuntime/` and `GeneralRuntime/`,
 KLD0037 `TypedConfiguration/`, `TypedOptions/`, `OptionsSnapshot/`,
 `SerializedOptions/` and `ConditionalPolicy/`.
 The existing diagnostic inventory includes KLD0038 and KLD0039. Focused compiler
@@ -176,13 +176,13 @@ Coverage exists to find untested behaviour, not to reach a number.
 - Only functional tests contribute (AC-CQ-018..021). Load, stress, performance and
   comparison runs never contribute. A complete ordinary suite stays mandatory and a
   coverage selection never qualifies it.
-- Coverage is collected through the native `Microsoft.Testing.Extensions.CodeCoverage`
+- Coverage is collected through the execution `Microsoft.Testing.Extensions.CodeCoverage`
   / `dotnet-coverage` tool (centrally pinned) while the suites run through the
   TestInfrastructure entry. Original reports, TRX files and tool logs are
   retained and uploaded even after a failure.
 - Missing, stale, empty or malformed coverage is unmeasured. It is never reported
   as zero, as a pass, or as a passing CRAP score. Branch coverage is merged only
-  when the native report identifies each branch outcome; otherwise per-run counts
+  when the report identifies each branch outcome; otherwise per-run counts
   are kept and the merged branch value is unmeasured.
 - CRAP combines source-mapped cyclomatic complexity with the measured functional
   coverage of the same source and build cohort.
@@ -195,9 +195,9 @@ Coverage exists to find untested behaviour, not to reach a number.
   reported as unmeasured. Process-kill tests do not support any power-loss
   durability claim.
 
-Native analyzer coverage (AC-CQ-009): CI prepares a source-bound manifest
+analyzer coverage (AC-CQ-009): CI prepares a source-bound manifest
 (`scripts/Features/CodeQuality/site-analyzer-coverage*`), runs the complete
-analyzer suite with the native collector, requires exactly one TRX with executed
+analyzer suite with the collector, requires exactly one TRX with executed
 and passed equal to total, and verifies the Cobertura integers against the
 captured source hashes and the thresholds above.
 
@@ -205,25 +205,25 @@ Product functional coverage:
 
 | Acceptance | Contract |
 |---|---|
-| AC-CQ-018 | Contributors are exact functional cases run through the TestInfrastructure entry with the native collector; original DLL/PDB hashes are bound before and after collection and a modified build image is never accepted |
-| AC-CQ-019 | Reports give per-module and per-file covered and executable lines, native branch counts where available, percentages and uncovered locations; normal/replica duplicates are never summed |
+| AC-CQ-018 | Contributors are exact functional cases run through the TestInfrastructure entry with the collector; original DLL/PDB hashes are bound before and after collection and a modified build image is never accepted |
+| AC-CQ-019 | Reports give per-module and per-file covered and executable lines, branch counts where available, percentages and uncovered locations; normal/replica duplicates are never summed |
 | AC-CQ-020 | A source-controlled inventory classifies every production project; load, stress, performance and comparison cases are excluded; server-process coverage is collected from each `KeyLoad` process of the Aspire-owned topology |
 | AC-CQ-021 | Module closure follows the review loop above |
 | AC-CQ-039 | A closed inventory (`functional-coverage.product-contributors.json`, `functional-coverage.unit-test-inventory.json`) identifies each admitted case by suite, class, method and instance, its REQ/AC and executed modules; omissions, extras, duplicates, changed source, failed or skipped cases are rejected |
 | AC-CQ-040 | Original binary coverage files are retained; merging uses an explicit verified report list with identical module identities and repeated-input invariance; denominators are not summed |
 | AC-CQ-041 | Server contribution comes from the real server processes of the Aspire-owned topology; fault and restart cases keep their own evidence and cannot assume a final flush |
-| AC-CQ-042 | Collector preparation is an Aspire-owned dependency using the pinned native tool and a test-only image built from the already compiled server closure; no global tool, second coverage framework or independent Docker deployment |
+| AC-CQ-042 | Collector preparation is an Aspire-owned dependency using the pinned tool and a test-only image built from the already compiled server closure; no global tool, second coverage framework or independent Docker deployment |
 | AC-CQ-043 | Each production module has a compiled identity: DLL/PDB hashes, module MVID, PDB debug identity and per-document source checksums |
 | AC-CQ-044 | Test images carry the same identity and a compile-input receipt emitted into the assembly by `FunctionalCompilationIdentity.targets`; a later filesystem snapshot cannot vouch for an older compilation |
-| AC-CQ-045 | Unit, recovery and Aspire-topology groups are separate inputs; native tool and process settlement is bounded and joined; a missing group is an open gate, never an invented report |
+| AC-CQ-045 | Unit, recovery and Aspire-topology groups are separate inputs; tool and process settlement is bounded and joined; a missing group is an open gate, never an invented report |
 | AC-CQ-046 | AppHost owns image materialization, source/tool validation, derived-image proof and cleanup around the real topology callers |
 | AC-CQ-047 | Each contributing fixture writes one create-only receipt after its application stops and all collectors settle |
 | AC-CQ-048 | Child-process witness acquisition and cleanup use the validated option bounds, signal only the owned child and publish no successful terminal receipt on timeout |
 
 Evidence scope: tests that exercise the tooling itself (for example
-`NativeCoverageMergeTests`, `ProductionSourceManifestOperationTests`,
-`NativeCoverageImageMaterializationTests`, `NativeCompilationIdentityPackageRootTests`,
-`NativePathMapCompilerTests` and `NativeProcessEvidenceWholeFlowTests` in
+`CoverageMergeTests`, `ProductionSourceManifestOperationTests`,
+`CoverageImageMaterializationTests`, `CompilationIdentityPackageRootTests`,
+`PathMapCompilerTests` and `ProcessEvidenceWholeFlowTests` in
 `tests/KeyLoad.UnitTests/CodeQuality/Cases/`) are tooling controls. They are
 required gates but never product coverage contributors.
 

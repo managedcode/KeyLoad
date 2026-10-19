@@ -14,7 +14,7 @@ internal static class KurrentTargetProfile
             throw new ComparisonFailureException(KurrentConstants.VersionMismatch);
         }
 
-        var settings = KurrentNativeSettings.CreateWriter(connectionString);
+        var settings = KurrentSettings.CreateWriter(connectionString);
         var connectivity = settings.ConnectivitySettings;
         var insecure = connectivity.Insecure;
         var transport = insecure ? KurrentConstants.Insecure : KurrentConstants.TlsVerified;

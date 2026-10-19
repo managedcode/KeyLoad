@@ -5,13 +5,13 @@ using System.Text.Json;
 
 namespace KeyLoad.Comparisons;
 
-/// <summary>Lazy canonical 1024-byte native document corpus; no retained record/payload table.</summary>
+/// <summary>Lazy canonical 1024-byte execution document corpus; no retained record/payload table.</summary>
 public sealed class DocumentComparisonCorpus : IComparisonCorpus
 {
     internal DocumentInitializationTiming InitializationTiming { get; } = new();
     private readonly int records;
     private readonly Lazy<string> digest;
-    /// <summary>Creates a bounded corpus whose settings retain actual native client admission.</summary>
+    /// <summary>Creates a bounded corpus whose settings retain actual execution client admission.</summary>
     public DocumentComparisonCorpus(int records, int clients)
     {
         if (records < DocumentMeasurementValues.NoObservedItems || records > DocumentComparisonContract.Current.Ingestion.Records || clients is < DocumentMeasurementValues.SingleItemCount or > DocumentMeasurementValues.MaximumClients)

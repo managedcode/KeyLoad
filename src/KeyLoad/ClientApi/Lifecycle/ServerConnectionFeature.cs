@@ -152,12 +152,12 @@ internal sealed class ServerConnectionFeature : IAsyncDisposable
         await Task.Yield();
         RequestClose();
         var failures = new List<Exception>();
-        await ServerFailureObserver.ObserveAsync(() => closeSignal.Task, failures).ConfigureAwait(false);
-        await drained.Task.ConfigureAwait(false);
+        await ServerFailureObserver.ObserveAsync(() => closeSignal.Task, failures);
+        await drained.Task;
         if (used)
         {
             await ServerFailureObserver.ObserveAsync(() => services.GetRequiredService<OrleansNode>()
-                .CloseConnectionAsync(Id, CancellationToken.None), failures).ConfigureAwait(false);
+                .CloseConnectionAsync(Id, CancellationToken.None), failures);
         }
         ServerFailureObserver.ThrowIfAny(failures);
     }
@@ -165,9 +165,9 @@ internal sealed class ServerConnectionFeature : IAsyncDisposable
     public async ValueTask DisposeAsync()
     {
         var failures = new List<Exception>();
-        await ServerFailureObserver.ObserveAsync(CloseAsync, failures).ConfigureAwait(false);
-        await ServerFailureObserver.ObserveAsync(() => transportClosed.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
-        await ServerFailureObserver.ObserveAsync(() => idle.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+        await ServerFailureObserver.ObserveAsync(CloseAsync, failures);
+        await ServerFailureObserver.ObserveAsync(() => transportClosed.DisposeAsync().AsTask(), failures);
+        await ServerFailureObserver.ObserveAsync(() => idle.DisposeAsync().AsTask(), failures);
         closed.Dispose();
         ServerFailureObserver.ThrowIfAny(failures);
     }

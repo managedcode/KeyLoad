@@ -12,30 +12,30 @@ internal sealed class ServerErrorMiddleware(RequestDelegate next, ILogger<Server
     {
         try
         {
-            await next(context).ConfigureAwait(false);
+            await next(context);
         }
         catch (KeyLoadException error) when (!context.Response.HasStarted)
         {
-            await WriteAsync(context, error.Code, error.Message).ConfigureAwait(false);
+            await WriteAsync(context, error.Code, error.Message);
         }
         catch (JsonException) when (!context.Response.HasStarted)
         {
-            await WriteAsync(context, ErrorCode.Validation, ServerProtocol.InvalidJson).ConfigureAwait(false);
+            await WriteAsync(context, ErrorCode.Validation, ServerProtocol.InvalidJson);
         }
         catch (BadHttpRequestException error) when (!context.Response.HasStarted)
         {
             var large = error.StatusCode == StatusCodes.Status413PayloadTooLarge;
             await WriteAsync(context, large ? ErrorCode.ResourceExhausted : ErrorCode.Validation,
-                large ? ServerProtocol.BodyExceeded : ServerProtocol.InvalidJson).ConfigureAwait(false);
+                large ? ServerProtocol.BodyExceeded : ServerProtocol.InvalidJson);
         }
         catch (OperationCanceledException) when (context.RequestAborted.IsCancellationRequested)
         {
             // The caller owns this cancellation; a committed command is resolved by its stable retry ID.
         }
-        catch (Exception error) when (!context.Response.HasStarted && NativeCqrsBoundaryErrors.IsNonFatal(error))
+        catch (Exception error) when (!context.Response.HasStarted && CqrsBoundaryErrors.IsNonFatal(error))
         {
             RequestFailureDiagnostic.LogFailure(logger, context, error, time);
-            await WriteAsync(context, ErrorCode.RecoveryRequired, UnexpectedFailure).ConfigureAwait(false);
+            await WriteAsync(context, ErrorCode.RecoveryRequired, UnexpectedFailure);
         }
     }
 
@@ -44,6 +44,6 @@ internal sealed class ServerErrorMiddleware(RequestDelegate next, ILogger<Server
         context.Response.StatusCode = Errors.Status(code);
         context.Response.ContentLength = null;
         await context.Response.WriteAsJsonAsync(Errors.Problem(code, safeDetail), JsonDefaults.Options,
-            context.RequestAborted).ConfigureAwait(false);
+            context.RequestAborted);
     }
 }

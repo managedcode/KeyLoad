@@ -1,22 +1,22 @@
 using System.Globalization;
 
 namespace KeyLoad.Comparisons.Targets;
-/// <summary>Observes native HNSW backfill completion and records its actual definition.</summary>
+/// <summary>Observes execution HNSW backfill completion and records its actual definition.</summary>
 internal static class SurrealDbVectorIndex
 {
-    private const string NativeINFOFORTABLEFormatTemplate = "INFO FOR TABLE {0};";
-    private static readonly System.Text.CompositeFormat NativeINFOFORTABLEFormat = System.Text.CompositeFormat.Parse(NativeINFOFORTABLEFormatTemplate);
-    private const string SurrealDbNativeIndexDefinitionMismatch = "SurrealDbNativeIndexDefinitionMismatch";
-    private const string NativeINFOFORINDEXONTABLEFormatTemplate = "INFO FOR INDEX {0} ON TABLE {1};";
-    private static readonly System.Text.CompositeFormat NativeINFOFORINDEXONTABLEFormat = System.Text.CompositeFormat.Parse(NativeINFOFORINDEXONTABLEFormatTemplate);
+    private const string INFOFORTABLEFormatTemplate = "INFO FOR TABLE {0};";
+    private static readonly System.Text.CompositeFormat INFOFORTABLEFormat = System.Text.CompositeFormat.Parse(INFOFORTABLEFormatTemplate);
+    private const string SurrealDbIndexDefinitionMismatch = "SurrealDbIndexDefinitionMismatch";
+    private const string INFOFORINDEXONTABLEFormatTemplate = "INFO FOR INDEX {0} ON TABLE {1};";
+    private static readonly System.Text.CompositeFormat INFOFORINDEXONTABLEFormat = System.Text.CompositeFormat.Parse(INFOFORINDEXONTABLEFormatTemplate);
     private const string DimensionSetting = "DIMENSION";
     private const string ConstructionSetting = "EFC";
     private const string NeighborsSetting = "M";
     private const int FirstSettingOrdinal = 0;
     private const int SettingValueOffset = 1;
-    private const string NativeHnsw = "HNSW";
-    private const string NativeCosine = "COSINE";
-    private const string NativeFloat32 = "F32";
+    private const string RuntimeHnsw = "HNSW";
+    private const string RuntimeCosine = "COSINE";
+    private const string Float32 = "F32";
     private const string IndexesField = "indexes";
     private const string ReadyState = "ready";
     private const string FailedState = "failed";
@@ -25,7 +25,7 @@ internal static class SurrealDbVectorIndex
     private const int Neighbors = 16;
     private const int ConstructionEf = 200;
     private const int SearchEf = 200;
-    internal static async Task<VectorIndexReceipt> BuildAsync(HttpClient http, string table, string index, VectorComparisonProfile profile, NativeComparisonExecutionOptions policy, TimeProvider timeProvider, CancellationToken cancellationToken)
+    internal static async Task<VectorIndexReceipt> BuildAsync(HttpClient http, string table, string index, VectorComparisonProfile profile, ComparisonExecutionOptions policy, TimeProvider timeProvider, CancellationToken cancellationToken)
     {
         using var indexDeadline = new ComparisonCancellationSource(timeProvider, cancellationToken);
         indexDeadline.CancelAfter(policy.IndexBuildTimeout);
@@ -35,24 +35,24 @@ internal static class SurrealDbVectorIndex
         await SurrealDbSqlTransport.ExecuteAsync(http, definition, policy, cancellationToken: cancellationToken, timeProvider: timeProvider).ConfigureAwait(false);
         await WaitAsync(http, table, index, policy, cancellationToken: cancellationToken, timeProvider: timeProvider).ConfigureAwait(false);
         timer.Stop();
-        using var nativeInfo = await SurrealDbSqlTransport.QueryAsync(http, string.Format(System.Globalization.CultureInfo.InvariantCulture, NativeINFOFORTABLEFormat, table), policy, cancellationToken: cancellationToken, timeProvider: timeProvider).ConfigureAwait(false);
-        var actualDefinition = SurrealDbVectorProtocol.ReadRequiredString(SurrealDbVectorProtocol.SingleResult(nativeInfo.RootElement).GetProperty(IndexesField), index);
-        if (!actualDefinition.Contains(NativeHnsw, StringComparison.OrdinalIgnoreCase) || !actualDefinition.Contains(NativeCosine, StringComparison.OrdinalIgnoreCase) || !actualDefinition.Contains(NativeFloat32, StringComparison.OrdinalIgnoreCase)
+        using var runtimeInfo = await SurrealDbSqlTransport.QueryAsync(http, string.Format(System.Globalization.CultureInfo.InvariantCulture, INFOFORTABLEFormat, table), policy, cancellationToken: cancellationToken, timeProvider: timeProvider).ConfigureAwait(false);
+        var actualDefinition = SurrealDbVectorProtocol.ReadRequiredString(SurrealDbVectorProtocol.SingleResult(runtimeInfo.RootElement).GetProperty(IndexesField), index);
+        if (!actualDefinition.Contains(RuntimeHnsw, StringComparison.OrdinalIgnoreCase) || !actualDefinition.Contains(RuntimeCosine, StringComparison.OrdinalIgnoreCase) || !actualDefinition.Contains(Float32, StringComparison.OrdinalIgnoreCase)
             || !HasNumericSetting(actualDefinition, DimensionSetting, profile.Dimensions)
             || !HasNumericSetting(actualDefinition, ConstructionSetting, ConstructionEf)
             || !HasNumericSetting(actualDefinition, NeighborsSetting, Neighbors))
         {
-            throw new ComparisonFailureException(SurrealDbNativeIndexDefinitionMismatch);
+            throw new ComparisonFailureException(SurrealDbIndexDefinitionMismatch);
         }
 
         var parameters = new Dictionary<string, string>(StringComparer.Ordinal)
         {
-            [SurrealDbNativeTokens.TokenAlgorithm] = SurrealDbNativeTokens.TokenHNSW,
-            [SurrealDbNativeTokens.TokenDimension] = profile.Dimensions.ToString(CultureInfo.InvariantCulture),
-            [SurrealDbNativeTokens.TokenDistance] = SurrealDbNativeTokens.TokenCOSINE,
-            [SurrealDbNativeTokens.TokenEfConstruction] = ConstructionEf.ToString(CultureInfo.InvariantCulture),
-            [SurrealDbNativeTokens.TokenM] = Neighbors.ToString(CultureInfo.InvariantCulture),
-            [SurrealDbNativeTokens.TokenEfSearch] = SearchEf.ToString(CultureInfo.InvariantCulture)
+            [SurrealDbTokens.TokenAlgorithm] = SurrealDbTokens.TokenHNSW,
+            [SurrealDbTokens.TokenDimension] = profile.Dimensions.ToString(CultureInfo.InvariantCulture),
+            [SurrealDbTokens.TokenDistance] = SurrealDbTokens.TokenCOSINE,
+            [SurrealDbTokens.TokenEfConstruction] = ConstructionEf.ToString(CultureInfo.InvariantCulture),
+            [SurrealDbTokens.TokenM] = Neighbors.ToString(CultureInfo.InvariantCulture),
+            [SurrealDbTokens.TokenEfSearch] = SearchEf.ToString(CultureInfo.InvariantCulture)
         };
         policy.RecordEvidence(parameters);
         return new(VectorIndexKind.Hnsw, actualDefinition, parameters, timer.Elapsed.TotalMilliseconds);
@@ -72,19 +72,19 @@ internal static class SurrealDbVectorIndex
         return false;
     }
 
-    private static async Task WaitAsync(HttpClient http, string table, string index, NativeComparisonExecutionOptions policy, TimeProvider timeProvider, CancellationToken cancellationToken)
+    private static async Task WaitAsync(HttpClient http, string table, string index, ComparisonExecutionOptions policy, TimeProvider timeProvider, CancellationToken cancellationToken)
     {
         var started = timeProvider.GetTimestamp();
         while (true)
         {
-            using var response = await SurrealDbSqlTransport.QueryAsync(http, string.Format(System.Globalization.CultureInfo.InvariantCulture, NativeINFOFORINDEXONTABLEFormat, index, table), policy, cancellationToken: cancellationToken, timeProvider: timeProvider).ConfigureAwait(false);
+            using var response = await SurrealDbSqlTransport.QueryAsync(http, string.Format(System.Globalization.CultureInfo.InvariantCulture, INFOFORINDEXONTABLEFormat, index, table), policy, cancellationToken: cancellationToken, timeProvider: timeProvider).ConfigureAwait(false);
             var info = SurrealDbVectorProtocol.SingleResult(response.RootElement);
-            if (!info.TryGetProperty(SurrealDbNativeTokens.TokenBuilding, out var building))
+            if (!info.TryGetProperty(SurrealDbTokens.TokenBuilding, out var building))
             {
-                throw new InvalidDataException(SurrealDbNativeTokens.TokenSurrealDbInvalidIndexStatus);
+                throw new InvalidDataException(SurrealDbTokens.TokenSurrealDbInvalidIndexStatus);
             }
 
-            var state = SurrealDbVectorProtocol.ReadRequiredString(building, SurrealDbNativeTokens.TokenStatus);
+            var state = SurrealDbVectorProtocol.ReadRequiredString(building, SurrealDbTokens.TokenStatus);
             if (state.Equals(ReadyState, StringComparison.OrdinalIgnoreCase))
             {
                 return;
@@ -92,7 +92,7 @@ internal static class SurrealDbVectorIndex
 
             if (state is FailedState or AbortedState or ErrorState || timeProvider.GetElapsedTime(started) >= policy.IndexBuildTimeout)
             {
-                throw new InvalidDataException(SurrealDbNativeTokens.TokenSurrealDbHnswBuildDidNotBecomeReady);
+                throw new InvalidDataException(SurrealDbTokens.TokenSurrealDbHnswBuildDidNotBecomeReady);
             }
 
             await Task.Delay(policy.IndexPollInterval, timeProvider, cancellationToken).ConfigureAwait(false);

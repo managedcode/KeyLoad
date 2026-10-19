@@ -20,7 +20,7 @@ internal sealed class DatabasePhaseSchemaTests
             DatabasePhaseKind.ProviderWriteGateWait,
             DatabasePhaseKind.ProviderWriteGateHold,
             DatabasePhaseKind.AtomicJournalWriteFlush,
-            DatabasePhaseKind.NativeTreeMutation
+            DatabasePhaseKind.TreeMutation
         ];
 
         int[] expectedIds = [0, 1, 2, 3, 4, 27, 28, 29, 30, 31];

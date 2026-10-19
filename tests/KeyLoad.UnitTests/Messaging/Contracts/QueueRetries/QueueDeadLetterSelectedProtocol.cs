@@ -27,7 +27,7 @@ internal static class QueueDeadLetterSelectedProtocol
     internal const string MissingReference = "The queue lifecycle reference does not match its metadata.";
     internal const string MissingMetadataDetail = "The queue lifecycle metadata is unavailable.";
     internal const string MissingBodyDetail = "The queue lifecycle body is unavailable.";
-    internal const string ReturnedRefusal = "The native operation returned instead of refusing damaged authority.";
+    internal const string ReturnedRefusal = "The execution operation returned instead of refusing damaged authority.";
     internal const string RedriveKind = "redriveQueueMessage";
     internal const string CancelKind = "cancelQueueMessage";
     internal const string PutKind = "putDocument";

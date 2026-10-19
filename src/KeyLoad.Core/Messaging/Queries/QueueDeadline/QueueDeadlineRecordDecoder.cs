@@ -65,9 +65,9 @@ internal static class QueueDeadlineRecordDecoder
     {
         if (space == Metadata)
         {
-            return NativeSerialization.Deserialize<MessageMetadata>(value);
+            return OrleansSerialization.Deserialize<MessageMetadata>(value);
         }
-        if (NativeSerialization.Deserialize<string>(value) != id)
+        if (OrleansSerialization.Deserialize<string>(value) != id)
         {
             throw Errors.Fail(ErrorCode.Corruption, DueWorkProtocol.InvalidRecord);
         }
@@ -86,7 +86,7 @@ internal static class QueueDeadlineRecordDecoder
             {
                 throw Errors.Fail(ErrorCode.ResourceExhausted, DueWorkProtocol.RangeBytesExceeded);
             }
-            metadata = NativeSerialization.Deserialize<MessageMetadata>(bytes);
+            metadata = OrleansSerialization.Deserialize<MessageMetadata>(bytes);
             return false;
         }, observer: page.ObserveBytes, cancellationToken: page.CancellationToken);
         if (found.HasMore)

@@ -9,7 +9,7 @@ internal static class TimeSeriesChunkQualificationScopeImage
     private const string SampleFamily = "sample";
     private const string SampleIdentityFamily = "sample-id";
     private const string SampleSequenceFamily = "sample-sequence";
-    private const string RetentionFamily = "sample-retention-v1";
+    private const string RetentionFamily = "sample-retention";
     private const string WindowFamily = "sample-chunk-window";
     private const string ManifestFamily = "sample-chunk-manifest";
     private const string BlockFamily = "sample-chunk-block";

@@ -1,10 +1,10 @@
 namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
 
-/// <summary>AC-CQ-034/037: exact native file buffers require configured execution policy.</summary>
+/// <summary>AC-CQ-034/037: exact execution file buffers require configured execution policy.</summary>
 internal sealed class TypedConfigurationFileBufferTests
 {
     [Test]
-    public async Task NativeFileBufferConstsAndReadonlyInitializersAreRejectedAsync()
+    public async Task FileBufferConstsAndReadonlyInitializersAreRejectedAsync()
     {
         const string source = """
             internal static class Subject
@@ -28,7 +28,7 @@ internal sealed class TypedConfigurationFileBufferTests
     }
 
     [Test]
-    public async Task ActualOptionsValuesReachNativeFileAndTextBuffersAsync()
+    public async Task ActualOptionsValuesReachFileAndTextBuffersAsync()
     {
         const string source = """
             [KeyLoad.ConfigurationOptions]
@@ -71,7 +71,7 @@ internal sealed class TypedConfigurationFileBufferTests
     }
 
     [Test]
-    public async Task SourceShadowTypesCannotForgeNativeFilePolicySymbolsAsync()
+    public async Task SourceShadowTypesCannotForgeFilePolicySymbolsAsync()
     {
         const string source = """
             namespace System.IO
@@ -98,7 +98,7 @@ internal sealed class TypedConfigurationFileBufferTests
     }
 
     [Test]
-    public async Task ProtocolMathAndApplicationBufferNamesRemainOutsideNativeSinksAsync()
+    public async Task ProtocolMathAndApplicationBufferNamesRemainOutsideSinksAsync()
     {
         const string source = """
             internal sealed class BufferOptions { internal int BufferSize { get; set; } }
@@ -139,7 +139,7 @@ internal sealed class TypedConfigurationFileBufferTests
     }
 
     [Test]
-    public async Task NativeBaseConstructorsRejectHiddenBuffersAndAcceptActualOptionsAsync()
+    public async Task BaseConstructorsRejectHiddenBuffersAndAcceptActualOptionsAsync()
     {
         const string source = """
             [KeyLoad.ConfigurationOptions]

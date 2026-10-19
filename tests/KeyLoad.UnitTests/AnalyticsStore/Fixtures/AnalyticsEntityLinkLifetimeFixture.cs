@@ -6,7 +6,7 @@ using KeyLoad.Server;
 using KeyLoad.Storage;
 using KeyLoad.UnitTests.Features.Authorization;
 using A = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsEntityLinkLifetimeAssertions;
-using D = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreNativeTestData;
+using D = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreTestData;
 
 namespace KeyLoad.UnitTests.Features.AnalyticsStore;
 
@@ -21,7 +21,7 @@ internal sealed class AnalyticsEntityLinkLifetimeFixture(SafeProjectorOperationD
     internal static Task RunAsync(Func<AnalyticsEntityLinkLifetimeFixture, Task> body, CancellationToken token)
         => SafeProjectorOperationDatabase.RunAsync(async owner =>
         {
-            await AnalyticsStoreNativeTestOperations.InitializeAsync(owner.Source, false);
+            await AnalyticsStoreTestOperations.InitializeAsync(owner.Source, false);
             owner.Source.Configure(Other, ResourceKind.Collection);
             owner.Source.Commit(new PutDocument(Other, D.AnchorId, D.AnchorJson, 0));
             var fixture = new AnalyticsEntityLinkLifetimeFixture(owner);
@@ -48,7 +48,7 @@ internal sealed class AnalyticsEntityLinkLifetimeFixture(SafeProjectorOperationD
         var partition = owner.Source.Partition;
         var definition = view.GetRecord<ResourceDefinition>(KeySpace.Resource(partition.TenantId, partition.DatabaseId, collection));
         var lifetime = ResourceLifetimeCatalog.Read(view, partition.TenantId, partition.DatabaseId, collection, definition)
-            ?? throw new InvalidOperationException("The native anchor resource lifetime is absent.");
+            ?? throw new InvalidOperationException("The execution anchor resource lifetime is absent.");
         return new EntityRef(partition, collection, D.AnchorId) { Lifetime = new(lifetime.Incarnation.Value) };
     });
 
@@ -57,7 +57,7 @@ internal sealed class AnalyticsEntityLinkLifetimeFixture(SafeProjectorOperationD
         var key = AnalyticsStoreKeys.Event(owner.Source.Partition, D.Store, D.First);
         var original = owner.Store.Read(view => view.ReadOwnedValue(key))
             ?? throw new InvalidOperationException("The committed analytics event is absent.");
-        var stored = NativeSerialization.Deserialize<AnalyticsStoredEvent>(original);
+        var stored = OrleansSerialization.Deserialize<AnalyticsStoredEvent>(original);
         var damaged = stored with
         {
             Event = stored.Event with
@@ -66,12 +66,12 @@ internal sealed class AnalyticsEntityLinkLifetimeFixture(SafeProjectorOperationD
             }
         };
         var image = TeamRowPolicyAssertions.Image(owner.Store);
-        var identity = NativeSerialization.Serialize(owner.Store.Identity);
+        var identity = OrleansSerialization.Serialize(owner.Store.Identity);
         var position = owner.Store.Position;
         var applied = owner.Database.LastApplied;
         var journal = owner.ReadCanonicalCut();
         var failures = new List<Exception>();
-        // Deliberate current-format row corruption, using the existing owned native-store fault/restore discipline.
+        // Deliberate current-format row corruption, using the existing owned execution-store fault/restore discipline.
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             owner.Store.Commit((transaction, _) => { transaction.PutRecord(key, damaged); return true; });
@@ -81,7 +81,7 @@ internal sealed class AnalyticsEntityLinkLifetimeFixture(SafeProjectorOperationD
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             await Assert.That(TeamRowPolicyAssertions.Image(owner.Store).SequenceEqual(image, StringComparer.Ordinal)).IsTrue();
-            await Assert.That(NativeSerialization.Serialize(owner.Store.Identity).SequenceEqual(identity)).IsTrue();
+            await Assert.That(OrleansSerialization.Serialize(owner.Store.Identity).SequenceEqual(identity)).IsTrue();
             await Assert.That(owner.Store.Position).IsEqualTo(position + 2);
             await Assert.That(owner.Database.LastApplied).IsEqualTo(applied);
             await Assert.That(owner.ReadCanonicalCut()).IsEqualTo((journal.AppliedPosition, journal.StorePosition + 2));

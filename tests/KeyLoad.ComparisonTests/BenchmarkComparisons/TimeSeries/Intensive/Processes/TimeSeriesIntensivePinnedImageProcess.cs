@@ -18,7 +18,7 @@ internal static class TimeSeriesIntensivePinnedImageProcess
         var started = TimeProvider.System.GetUtcNow();
         if (!process.Start())
         {
-            throw new InvalidOperationException(TimeSeriesIntensivePinnedImageProtocol.NativeFailure);
+            throw new InvalidOperationException(TimeSeriesIntensivePinnedImageProtocol.RuntimeFailure);
         }
 
         var stdout = output.ReadAsync(process.StandardOutput.BaseStream, deadline.Token);
@@ -78,7 +78,7 @@ internal static class TimeSeriesIntensivePinnedImageProcess
         {
             await TimeSeriesIntensivePinnedImageReaper.ReapAsync(process);
         }
-        catch (Exception cleanup) when (primary is not null || TimeSeriesIntensivePinnedImageFailure.IsNative(cleanup))
+        catch (Exception cleanup) when (primary is not null || TimeSeriesIntensivePinnedImageFailure.RuntimeIs(cleanup))
         {
             failures.Add(cleanup.GetType().FullName ?? nameof(Exception));
             primary ??= cleanup;
@@ -88,7 +88,7 @@ internal static class TimeSeriesIntensivePinnedImageProcess
         {
             await deadline.CancelAsync();
         }
-        catch (Exception cancellation) when (primary is not null || TimeSeriesIntensivePinnedImageFailure.IsNative(cancellation))
+        catch (Exception cancellation) when (primary is not null || TimeSeriesIntensivePinnedImageFailure.RuntimeIs(cancellation))
         {
             failures.Add(cancellation.GetType().FullName ?? nameof(Exception));
             primary ??= cancellation;
@@ -135,7 +135,7 @@ internal static class TimeSeriesIntensivePinnedImageProcess
         {
             await evidence.RetainCommandAsync(label, command);
         }
-        catch (Exception persistence) when (primary is not null || TimeSeriesIntensivePinnedImageFailure.IsNative(persistence))
+        catch (Exception persistence) when (primary is not null || TimeSeriesIntensivePinnedImageFailure.RuntimeIs(persistence))
         {
             primary ??= persistence;
         }

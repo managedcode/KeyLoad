@@ -20,7 +20,7 @@ internal sealed class ScaledRawStorageBenchmarkTests
     private const int LargePayloadBytes = 1024;
     private const int ExpectedBenchmarkCaseCount = 4;
     private const int MemoryDiagnoserCount = 1;
-    private const int NativeJobCount = 1;
+    private const int JobCount = 1;
     private const int HundredThousandRecords = 100_000;
     private const int OneMillionRecords = 1_000_000;
     private const int UnsupportedRecordCount = 200_000;
@@ -46,7 +46,7 @@ internal sealed class ScaledRawStorageBenchmarkTests
         await Assert.That(benchmarkType.GetCustomAttributes(typeof(MemoryDiagnoserAttribute), inherit: false).Length)
             .IsEqualTo(MemoryDiagnoserCount);
         await Assert.That(benchmarkType.GetCustomAttributes(typeof(SimpleJobAttribute), inherit: false).Length)
-            .IsEqualTo(NativeJobCount);
+            .IsEqualTo(JobCount);
 
         var cases = BenchmarkConverter.TypeToBenchmarks(benchmarkType, ManualConfig.CreateMinimumViable()).BenchmarksCases;
         var methodNames = cases.Select(item => item.Descriptor.WorkloadMethod.Name)
@@ -71,12 +71,12 @@ internal sealed class ScaledRawStorageBenchmarkTests
             {
                 benchmark.Setup();
                 var expectedChecksum = ExpectedChecksum(HundredThousandRecords);
-                var beforeSequential = benchmark.Capture().NativeReadCalls;
+                var beforeSequential = benchmark.Capture().RuntimeReadCalls;
                 await Assert.That(benchmark.SequentialRead()).IsEqualTo(expectedChecksum);
-                await Assert.That(benchmark.Capture().NativeReadCalls - beforeSequential).IsEqualTo((long)ReadsPerInvocation);
-                var beforeRandom = benchmark.Capture().NativeReadCalls;
+                await Assert.That(benchmark.Capture().RuntimeReadCalls - beforeSequential).IsEqualTo((long)ReadsPerInvocation);
+                var beforeRandom = benchmark.Capture().RuntimeReadCalls;
                 await Assert.That(benchmark.RandomRead()).IsEqualTo(expectedChecksum);
-                await Assert.That(benchmark.Capture().NativeReadCalls - beforeRandom).IsEqualTo((long)ReadsPerInvocation);
+                await Assert.That(benchmark.Capture().RuntimeReadCalls - beforeRandom).IsEqualTo((long)ReadsPerInvocation);
                 benchmark.Cleanup();
             });
     }
@@ -125,7 +125,7 @@ internal sealed class ScaledRawStorageBenchmarkTests
         var engines = ParameterValues(cases, nameof(ScaledStorageReadBenchmarks.Engine));
         var records = ParameterValues(cases, nameof(ScaledStorageReadBenchmarks.RecordCount));
         var payloads = ParameterValues(cases, nameof(ScaledStorageReadBenchmarks.PayloadBytes));
-        await Assert.That(engines.Length).IsEqualTo(NativeJobCount);
+        await Assert.That(engines.Length).IsEqualTo(JobCount);
         await Assert.That(engines[0])
             .IsEqualTo(Environment.GetEnvironmentVariable(EngineEnvironmentVariable) ?? ZoneTreeLabel);
         await Assert.That(records).IsEquivalentTo([ExpectedRecordCount().ToString(CultureInfo.InvariantCulture)],

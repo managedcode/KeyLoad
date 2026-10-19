@@ -16,7 +16,7 @@ internal sealed class QueueDeadlineCapacityWholeFlowTests
     [Arguments(QueueDeadlineKind.ExpireLease, true, false, QueueDeadlineCapacityFault.ReadySequence)]
     [Arguments(QueueDeadlineKind.ExpireLease, false, true, QueueDeadlineCapacityFault.StateVersion)]
     [Arguments(QueueDeadlineKind.ExpireLease, true, true, QueueDeadlineCapacityFault.StateVersion)]
-    public Task NativeDeadlineCeilingRetainsCompleteInputFailedIdentityAndColdThenExactRepairFreshDecisionAndHealthyAck(
+    public Task DeadlineCeilingRetainsCompleteInputFailedIdentityAndColdThenExactRepairFreshDecisionAndHealthyAck(
         QueueDeadlineKind kind, bool sweep, bool jitter, QueueDeadlineCapacityFault fault)
         => QueueDeadlineCapacityFlow.RunAsync(kind, sweep, jitter, fault, TestContext.Current!.Execution.CancellationToken);
 
@@ -25,7 +25,7 @@ internal sealed class QueueDeadlineCapacityWholeFlowTests
     [Arguments(true, QueueDeadlineCapacityFault.FullDeadLetterMaxPark)]
     [Arguments(false, QueueDeadlineCapacityFault.ExpiryBeforeDeadLetterMaxPark)]
     [Arguments(true, QueueDeadlineCapacityFault.ExpiryBeforeDeadLetterMaxPark)]
-    public Task NativeFullDeadLetterAndExpiryPriorityDoNotConsumeExhaustedParkSequenceThenColdAndHealthyWork(
+    public Task FullDeadLetterAndExpiryPriorityDoNotConsumeExhaustedParkSequenceThenColdAndHealthyWork(
         bool sweep, QueueDeadlineCapacityFault control)
         => QueueDeadlineCapacityFlow.PositiveAsync(sweep, control, TestContext.Current!.Execution.CancellationToken);
 }

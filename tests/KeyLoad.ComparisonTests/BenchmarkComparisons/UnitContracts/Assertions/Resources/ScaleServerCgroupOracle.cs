@@ -20,21 +20,21 @@ internal static class ScaleServerCgroupOracle
     {
         if (!HasActualRoot())
         {
-            throw new InvalidDataException("Native cgroup hierarchy root was not verified.");
+            throw new InvalidDataException("Execution cgroup hierarchy root was not verified.");
         }
 
         var row = ReadBounded(MembershipPath).Split('\n')
             .Single(line => line.StartsWith("0::", StringComparison.Ordinal));
         if (!row.StartsWith("0::/", StringComparison.Ordinal))
         {
-            throw new InvalidDataException("Native unified cgroup membership was malformed.");
+            throw new InvalidDataException("Execution unified cgroup membership was malformed.");
         }
 
         var directory = Path.GetFullPath(Path.Combine(CgroupRoot, row[3..].TrimStart('/')));
         var root = Path.GetFullPath(CgroupRoot);
         if (directory != root && !directory.StartsWith(root + Path.DirectorySeparatorChar, StringComparison.Ordinal))
         {
-            throw new InvalidDataException("Native cgroup membership escaped its verified root.");
+            throw new InvalidDataException("Execution cgroup membership escaped its verified root.");
         }
 
         var cpu = decimal.MaxValue;
@@ -55,7 +55,7 @@ internal static class ScaleServerCgroupOracle
         }
         if (directory != root || string.IsNullOrWhiteSpace(cpuSet))
         {
-            throw new InvalidDataException("Native cgroup ancestry was incomplete.");
+            throw new InvalidDataException("Execution cgroup ancestry was incomplete.");
         }
 
         return new(cpu == decimal.MaxValue ? Unlimited : cpu.ToString(CultureInfo.InvariantCulture), cpuSet,
@@ -74,7 +74,7 @@ internal static class ScaleServerCgroupOracle
         if (fields.Length != 2 || !long.TryParse(fields[1], NumberStyles.None, CultureInfo.InvariantCulture, out var period)
             || period <= 0)
         {
-            throw new InvalidDataException("Native cgroup CPU limit was malformed.");
+            throw new InvalidDataException("Execution cgroup CPU limit was malformed.");
         }
         if (fields[0] == Unlimited)
         {
@@ -82,7 +82,7 @@ internal static class ScaleServerCgroupOracle
         }
         if (!long.TryParse(fields[0], NumberStyles.None, CultureInfo.InvariantCulture, out var quota) || quota <= 0)
         {
-            throw new InvalidDataException("Native cgroup CPU quota was malformed.");
+            throw new InvalidDataException("Execution cgroup CPU quota was malformed.");
         }
         return (decimal)quota / period;
     }
@@ -97,7 +97,7 @@ internal static class ScaleServerCgroupOracle
         }
         if (!long.TryParse(text, NumberStyles.None, CultureInfo.InvariantCulture, out var limit) || limit <= 0)
         {
-            throw new InvalidDataException("Native cgroup memory limit was malformed.");
+            throw new InvalidDataException("Execution cgroup memory limit was malformed.");
         }
         return limit;
     }
@@ -202,7 +202,7 @@ internal static class ScaleServerCgroupOracle
         }
         if (total > FileLimit || stream.ReadByte() != -1)
         {
-            throw new InvalidDataException("Native cgroup evidence exceeded its bound.");
+            throw new InvalidDataException("Execution cgroup evidence exceeded its bound.");
         }
 
         return System.Text.Encoding.UTF8.GetString(bytes, 0, total);

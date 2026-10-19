@@ -9,7 +9,7 @@ namespace KeyLoad;
 /// <param name="Durability">Identifies the achieved durability boundary on the acknowledged copies.</param>
 /// <param name="PersistedCopies">The actual number of storage copies that acknowledged this command.</param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.CommitReceipt)]
+[Orleans.Alias(ContractAliases.CommitReceipt)]
 public sealed record CommitReceipt([property: Orleans.Id(0)] Guid CommandId, [property: Orleans.Id(1)] CommitToken Token, [property: Orleans.Id(2)] ImmutableArray<MutationReceipt> Mutations, [property: Orleans.Id(3)] DurabilityProfile Durability,
     [property: Orleans.Id(4)] int PersistedCopies)
 {

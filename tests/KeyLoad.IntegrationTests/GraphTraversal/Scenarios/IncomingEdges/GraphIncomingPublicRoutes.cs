@@ -3,7 +3,7 @@ using System.Text;
 using System.Text.Json;
 using KeyLoad.Client;
 using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.ClusterRouting;
+using KeyLoad.IntegrationTests.Features.OrleansExecution;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
 using ManagedCode.Communication;
 
@@ -18,12 +18,12 @@ internal static class GraphIncomingPublicRoutes
         var direct = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.IncomingEdgesAsync(request, token));
         await LiteralAsync(direct, seed, sourceHidden);
         var reply = await callers.Mcp.CallAsync(GraphIncomingClusterScenario.Tool, request, token);
-        await LiteralAsync((await McpCallerAssertions.SuccessAsync<GraphIncomingEdgesPageV1>(reply)).Value, seed, sourceHidden);
+        await LiteralAsync((await McpCallerAssertions.SuccessAsync<GraphIncomingEdgesPage>(reply)).Value, seed, sourceHidden);
         await GraphIncomingClusterAssertions.AssertNoPrivatePayloadAsync(reply, seed.Reader.Secret);
         var sql = SqlClusterProtocol.Call(seed.TargetPartition, GraphIncomingClusterScenario.Tool, request);
-        await LiteralAsync(await SqlClusterProtocol.SdkAsync<GraphIncomingEdgesPageV1>(callers.Sdk, sql, token), seed, sourceHidden);
+        await LiteralAsync(await SqlClusterProtocol.SdkAsync<GraphIncomingEdgesPage>(callers.Sdk, sql, token), seed, sourceHidden);
         reply = await callers.Mcp.CallAsync(SqlOperationProtocol.ToolName, sql, token);
-        await LiteralAsync((await McpCallerAssertions.SuccessAsync<GraphIncomingEdgesPageV1>(reply)).Value, seed, sourceHidden);
+        await LiteralAsync((await McpCallerAssertions.SuccessAsync<GraphIncomingEdgesPage>(reply)).Value, seed, sourceHidden);
         await GraphIncomingClusterAssertions.AssertNoPrivatePayloadAsync(reply, seed.Reader.Secret);
     }
 
@@ -75,7 +75,7 @@ internal static class GraphIncomingPublicRoutes
         await GraphIncomingClusterAssertions.AssertNoPrivatePayloadAsync(reply, credential);
     }
 
-    private static async Task LiteralAsync(GraphIncomingEdgesPageV1 page, GraphIncomingClusterSeed seed, bool hidden)
+    private static async Task LiteralAsync(GraphIncomingEdgesPage page, GraphIncomingClusterSeed seed, bool hidden)
     {
         if (hidden)
         {

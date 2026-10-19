@@ -14,9 +14,9 @@ internal static class RemoteTransferAckedRetentionColdAssertions
         await Assert.That(RemoteTransferStorage.IsCapacityFailure(failure)).IsTrue();
         await RemoteTransferCoordinationColdAssertions.EqualAsync(fixture.Apply(OperationKind.Batch, accept).Get<CommitReceipt>(), accepted);
         await RemoteTransferCoordinationColdAssertions.EqualAsync(fixture.Apply(OperationKind.Batch, refused), failure);
-        await Assert.That(RemoteTransferAttemptColdNative.Outcome(fixture, accept.CommandId,
+        await Assert.That(RemoteTransferAttemptCold.Outcome(fixture, accept.CommandId,
             fixture.DestinationPartition).AsSpan().SequenceEqual(originalBytes)).IsTrue();
-        await Assert.That(RemoteTransferAttemptColdNative.Outcome(fixture, refused.CommandId,
+        await Assert.That(RemoteTransferAttemptCold.Outcome(fixture, refused.CommandId,
             fixture.DestinationPartition).AsSpan().SequenceEqual(failureBytes)).IsTrue();
         await RemoteTransferCoordinationColdAssertions.EqualAsync(fixture.TargetCapacity(fixture.DestinationQueue), capacity);
         await RemoteTransferCoordinationColdAssertions.EqualAsync(fixture.Database.InspectQueueTransfer(RemoteTransferDatabase.RootPrincipal,

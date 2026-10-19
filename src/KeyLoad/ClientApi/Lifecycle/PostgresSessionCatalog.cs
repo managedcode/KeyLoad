@@ -3,8 +3,8 @@ namespace KeyLoad.Server;
 internal sealed class PostgresSessionCatalog(global::Microsoft.Extensions.Options.IOptions<PostgresSessionOptions> configured, PostgresRetainedAdmission admission) : IDisposable
 {
     private PostgresSessionOptions Options => configured.Value;
-    private const string Capacity = "The native SQL statement or portal grant is exhausted.";
-    private const string Missing = "The native SQL statement or portal is unavailable.";
+    private const string Capacity = "The execution SQL statement or portal grant is exhausted.";
+    private const string Missing = "The execution SQL statement or portal is unavailable.";
     private readonly Dictionary<string, PostgresPreparedStatement> statements = new(configured.Value.MaximumStatements, StringComparer.Ordinal);
     private readonly Dictionary<string, PostgresBoundPortal> portals = new(StringComparer.Ordinal);
     private int retained;

@@ -110,7 +110,7 @@ internal static class ProductionSourceManifestImageAssertions
         await Assert.That(receipt.GetProperty(CentralInputCountProperty).GetInt32()).IsEqualTo(CentralInputCount);
         await AssertHashAsync(compiled.GetProperty(DllHashProperty).GetString());
         await AssertHashAsync(compiled.GetProperty(PdbHashProperty).GetString());
-        await ProductionSourceManifestNativeIdentityAssertions.AssertAsync(compiled,
+        await ProductionSourceManifestIdentityAssertions.AssertAsync(compiled,
             Path.GetFileNameWithoutExtension(expectedProject));
     }
 

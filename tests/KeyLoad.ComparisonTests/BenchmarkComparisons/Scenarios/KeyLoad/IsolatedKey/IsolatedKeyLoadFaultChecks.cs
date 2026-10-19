@@ -6,7 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
-/// <summary>AC-ISO-003/004/005: untimed genuine process faults of each selected fixed native membership.</summary>
+/// <summary>AC-ISO-003/004/005: untimed genuine process faults of each selected fixed execution membership.</summary>
 internal static class IsolatedKeyLoadFaultChecks
 {
     internal static async Task VerifyAsync(DistributedApplication app, int nodeCount, string evidenceDirectory, CancellationToken token)
@@ -16,17 +16,17 @@ internal static class IsolatedKeyLoadFaultChecks
         ArgumentOutOfRangeException.ThrowIfGreaterThan(nodeCount, 3);
         ArgumentException.ThrowIfNullOrWhiteSpace(evidenceDirectory);
         var evidence = IsolatedKeyLoadFaultChecksProvider.Read(nodeCount);
-        IsolatedKeyLoadFaultChecksNative? native = null;
+        RuntimeIsolatedKeyLoadFaultChecks? execution = null;
         string? failure = null;
-        using var deadlineTimeout = new CancellationTokenSource(NativeExecutionPolicyFixture.Harness().Value.KeyLoadFaultChecksTimeout, TimeProvider.System);
+        using var deadlineTimeout = new CancellationTokenSource(ExecutionPolicyFixture.Harness().Value.KeyLoadFaultChecksTimeout, TimeProvider.System);
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(token, deadlineTimeout.Token);
         try
         {
             await IsolatedKeyLoadFaultChecksExecution.RunAsync(async () =>
             {
-                native = new(app, nodeCount);
-                evidence.Native = native.Receipts;
-                await RunAsync(app, nodeCount, native, evidence, deadline.Token);
+                execution = new(app, nodeCount);
+                evidence.Execution = execution.Receipts;
+                await RunAsync(app, nodeCount, execution, evidence, deadline.Token);
             });
         }
         catch (ComparisonFailureException)
@@ -35,8 +35,8 @@ internal static class IsolatedKeyLoadFaultChecks
         }
         finally
         {
-            var restored = native is null || await native.RestoreAllAsync();
-            failure ??= restored ? null : "nativeCleanup";
+            var restored = execution is null || await execution.RestoreAllAsync();
+            failure ??= restored ? null : "runtimeCleanup";
             try
             {
                 await IsolatedKeyLoadFaultChecksExecution.RunAsync(() => evidence.WriteAsync(evidenceDirectory, failure));
@@ -52,7 +52,7 @@ internal static class IsolatedKeyLoadFaultChecks
         }
     }
 
-    private static async Task RunAsync(DistributedApplication app, int nodes, IsolatedKeyLoadFaultChecksNative native,
+    private static async Task RunAsync(DistributedApplication app, int nodes, RuntimeIsolatedKeyLoadFaultChecks execution,
         IsolatedKeyLoadFaultChecksEvidence evidence, CancellationToken token)
     {
         var admin = await app.Services.GetRequiredService<DistributedApplicationModel>().Resources.OfType<ParameterResource>()
@@ -63,7 +63,7 @@ internal static class IsolatedKeyLoadFaultChecks
         var seed = await IsolatedKeyLoadFaultChecksSeed.CreateAsync(sdk, nodes, token);
         await IsolatedKeyLoadFaultChecksAuthority.VerifyAsync(app, 1, admin!, seed, token);
         evidence.Baseline = await IsolatedKeyLoadFaultChecksMembership.WaitAsync(app, nodes, admin!, token);
-        await IsolatedKeyLoadFaultChecksPhases.RunAsync(app, nodes, admin!, seed, native, evidence, token);
+        await IsolatedKeyLoadFaultChecksPhases.RunAsync(app, nodes, admin!, seed, execution, evidence, token);
         evidence.Stage = "complete";
     }
 }

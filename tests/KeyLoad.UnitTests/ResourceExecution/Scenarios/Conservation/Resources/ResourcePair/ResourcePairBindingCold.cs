@@ -19,14 +19,13 @@ internal static class ResourcePairBindingCold
             token.ThrowIfCancellationRequested();
             await ResourceIncarnationCold.OpenAsync(state.Source, identity, async store =>
             {
-                await Assert.That(NativeSerialization.Serialize(identity).AsSpan()
-                    .SequenceEqual(NativeSerialization.Serialize(store.Identity))).IsTrue();
+                await Assert.That(OrleansSerialization.Serialize(identity).AsSpan()
+                    .SequenceEqual(OrleansSerialization.Serialize(store.Identity))).IsTrue();
                 await ResourceIncarnationAssertions.UnchangedAsync(store, image, cut.StorePosition);
                 var database = state.Source.CreateConfiguredDatabase(store);
                 await Assert.That(database.LastApplied).IsEqualTo(cut.AppliedPosition);
                 await ReplayAsync(state, store, database);
                 await ResourcePairBindingAssertions.ModelsAsync(state, database);
-                await ResourcePairBindingBlob.HealthyAsync(state, database);
                 await ResourcePairBindingSql.HealthyAsync(state, database, token);
                 await ResourcePairBindingQuery.HealthyAsync(state, database);
                 await ResourcePairBindingBm25.HealthyAsync(state, database, token, expectedCurrent: wave == Zero);
@@ -42,7 +41,7 @@ internal static class ResourcePairBindingCold
                 await ResourcePairBindingAssertions.PairsAsync(state, store);
                 image = QueueWholeFlowStorage.Bytes(store);
                 cut = store.Read(view => (view.ReadOwnedValue(KeySpace.AppliedBytes) is { } bytes
-                    ? NativeSerialization.Deserialize<long>(bytes) : default(long), store.Position));
+                    ? OrleansSerialization.Deserialize<long>(bytes) : default(long), store.Position));
             });
         }
     }

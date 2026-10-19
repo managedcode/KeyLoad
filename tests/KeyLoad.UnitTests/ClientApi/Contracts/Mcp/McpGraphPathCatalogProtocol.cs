@@ -15,7 +15,7 @@ internal static class McpGraphPathCatalogProtocol
     internal const string AllowFullScan = "allowFullScan";
     internal const string Cursor = "cursor";
     internal const string QueryDialectVersion = "queryDialectVersion";
-    internal const int DefaultQueryDialectVersion = 1;
+    internal const int DefaultQueryDialectVersion = SqlOperationProtocol.DefaultQueryDialectVersion;
     internal const string Found = "found";
     internal const string Hops = "hops";
     internal const string Vertices = "vertices";
@@ -29,6 +29,6 @@ internal static class McpGraphPathCatalogProtocol
     internal const string TransactionDomainId = "transactionDomainId";
     internal const string PartitionKey = "partitionKey";
     internal const string AtomicPartitionId = "atomicPartitionId";
-    internal const string GraphRoute = "/v1/graph/shortest-path";
-    internal const string SqlRoute = "/v1/query/graph-path";
+    internal const string GraphRoute = "/graph/shortest-path";
+    internal const string SqlRoute = "/query/graph-path";
 }

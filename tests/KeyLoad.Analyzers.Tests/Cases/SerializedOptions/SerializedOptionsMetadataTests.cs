@@ -135,7 +135,7 @@ internal sealed class SerializedOptionsMetadataTests
     }
 
     [Test]
-    public async Task NativeFactoryValueCanBeExposedByAReadonlyGetterAsync()
+    public async Task FactoryValueCanBeExposedByAReadonlyGetterAsync()
     {
         const string source = """
             internal sealed class Selection
@@ -151,7 +151,7 @@ internal sealed class SerializedOptionsMetadataTests
     }
 
     [Test]
-    public async Task APropertyNamedValueCannotForgeTheNativeOptionsExportAsync()
+    public async Task APropertyNamedValueCannotForgeTheOptionsExportAsync()
     {
         const string source = """
             internal sealed class FakeOptions { internal Policy Value => null!; }

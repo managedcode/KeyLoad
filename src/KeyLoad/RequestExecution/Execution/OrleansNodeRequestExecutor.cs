@@ -1,0 +1,89 @@
+using KeyLoad.Clustering;
+using ManagedCode.Communication.CQRS;
+using Microsoft.Extensions.Options;
+using Orleans.Serialization;
+
+namespace KeyLoad.Server;
+
+/// <summary>Bounds one admitted execution request and its complete CQRS response stream.</summary>
+internal sealed class OrleansNodeRequestExecutor(IOptions<GrainRoutingOptions> routingOptions,
+    ILogger<OrleansNode> logger)
+{
+    internal static Task CloseAsync(IGrainFactory grains, IServiceProvider services,
+        Guid connectionId, CancellationToken cancellationToken)
+        => grains.GetGrain<IConnectionGrain>(connectionId).CloseAsync(
+            services.GetRequiredService<GrainRequestCodec>().CreateConnectionClose(connectionId), cancellationToken);
+
+    internal Task<GrainOperationReply> ExecuteAsync(IGrainFactory? factory, IServiceProvider? runtime,
+        bool databaseReady, bool requireDatabaseReady,
+        Guid requestId, string signedRequest, bool command, CancellationToken cancellationToken)
+        => ExecuteCoreAsync(factory, runtime, databaseReady, requireDatabaseReady,
+            requestId, signedRequest, command, null, cancellationToken);
+
+    internal Task<GrainOperationReply> ExecuteAsync(NodeRequestTarget target, bool requireDatabaseReady,
+        Guid requestId, string signedRequest, bool command, CancellationToken cancellationToken)
+        => ExecuteAsync(target.Factory, target.Runtime, target.DatabaseReady,
+            requireDatabaseReady, requestId, signedRequest, command, cancellationToken);
+
+    internal Task<GrainOperationReply> ExecuteWithProgressAsync(NodeRequestTarget target,
+        Guid requestId, string signedRequest, Func<GrainRequestProgress, CancellationToken, ValueTask> progress,
+        CancellationToken cancellationToken)
+        => ExecuteCoreAsync(target.Factory, target.Runtime, target.DatabaseReady, true,
+            requestId, signedRequest, false, progress, cancellationToken);
+
+    private async Task<GrainOperationReply> ExecuteCoreAsync(IGrainFactory? factory, IServiceProvider? runtime,
+        bool databaseReady, bool requireDatabaseReady,
+        Guid requestId, string signedRequest, bool command,
+        Func<GrainRequestProgress, CancellationToken, ValueTask>? progress, CancellationToken cancellationToken)
+    {
+        if (requireDatabaseReady && !databaseReady)
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, OrleansNodeProtocol.RoutingUnavailable);
+        }
+        var grains = factory ?? throw Errors.Fail(ErrorCode.OwnershipLost, OrleansNodeProtocol.RoutingUnavailable);
+        var services = runtime ?? throw Errors.Fail(ErrorCode.OwnershipLost, OrleansNodeProtocol.RoutingUnavailable);
+        var connectionId = ConnectionExecutionIdentity.Resolve(services);
+        var clock = services.GetRequiredService<TimeProvider>();
+        using var deadline = new CancellationTokenSource(routingOptions.Value.ExecutionLifetime, clock);
+        using var execution = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, deadline.Token);
+        var reply = await DrainAsync(grains, services, connectionId, requestId, signedRequest, command, clock,
+            progress, execution.Token, cancellationToken);
+        if (reply.Error is { } error)
+        {
+            throw Errors.Fail(error, reply.SafeDetail ?? OrleansNodeProtocol.ReplyRejected);
+        }
+        return reply;
+    }
+
+    private async Task<GrainOperationReply> DrainAsync(IGrainFactory grains, IServiceProvider services,
+        Guid connectionId, Guid requestId, string signedRequest, bool command, TimeProvider clock,
+        Func<GrainRequestProgress, CancellationToken, ValueTask>? progress,
+        CancellationToken executionToken, CancellationToken callerToken)
+    {
+        var stage = OrleansRpcFailureStage.Preparation;
+        OrleansRpcFailureOperation? originalOperation = null;
+        try
+        {
+            Func<CancellationToken, IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>> source =
+                token => grains.GetGrain<IConnectionGrain>(connectionId).ExecuteStreamAsync(signedRequest, token);
+            var serializer = services.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>();
+            var purpose = new CqrsStreamPurpose(() =>
+            {
+                var request = services.GetRequiredService<GrainRequestCodec>().VerifyRequest(signedRequest, requestId);
+                originalOperation = new(request.Envelope.CommandId, request.Envelope.ReadKind, request.Envelope.CommandKind);
+                return request;
+            });
+            stage = OrleansRpcFailureStage.Consumption;
+            var reply = progress is null
+                ? await GrainRequestStreamConsumer.DrainWithPurposeAsync(source, serializer, requestId, clock,
+                    routingOptions, purpose, executionToken)
+                : await GrainRequestStreamConsumer.DrainWithProgressAsync(source, serializer, requestId, clock,
+                    routingOptions, purpose, progress, executionToken);
+            return reply;
+        }
+        catch (Exception failure) when (CqrsBoundaryErrors.IsNonFatal(failure))
+        {
+            throw OrleansRpcFailure.Translate(failure, command, requestId, logger, stage, originalOperation, callerToken);
+        }
+    }
+}

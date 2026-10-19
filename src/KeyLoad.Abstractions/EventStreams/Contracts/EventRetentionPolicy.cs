@@ -2,7 +2,7 @@ namespace KeyLoad;
 
 /// <summary>Configures event retention bounds.</summary>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.EventRetentionPolicy)]
+[Orleans.Alias(ContractAliases.EventRetentionPolicy)]
 public sealed record EventRetentionPolicy
 {
     private const int DefaultMaxEvents = 100_000;

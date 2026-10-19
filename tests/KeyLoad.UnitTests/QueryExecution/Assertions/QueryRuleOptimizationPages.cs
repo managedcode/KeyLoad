@@ -36,7 +36,7 @@ internal static class QueryRuleOptimizationPages
     private static async Task QueryAsync(QueryEngine engine, AstQueryRequest ast, QueryRequest sql,
         string path, int shape, long cut, bool denied, CancellationToken token)
     {
-        for (var route = 0; route < QueryRuleOptimizationData.NativeRouteCount; route++)
+        for (var route = 0; route < QueryRuleOptimizationData.RuntimeRouteCount; route++)
         {
             var astPage = ast;
             var sqlPage = sql;

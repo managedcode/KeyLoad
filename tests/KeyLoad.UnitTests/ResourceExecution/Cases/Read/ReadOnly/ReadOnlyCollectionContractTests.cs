@@ -65,7 +65,7 @@ internal sealed class ReadOnlyCollectionContractTests
     }
 
     [Test]
-    public async Task AcRoc002NativeJournalReaderFenceIsRetainedInPublicIdentityJson()
+    public async Task AcRoc002JournalReaderFenceIsRetainedInPublicIdentityJson()
     {
         var identity = new StoreIdentity(1, 2,
             Guid.Parse("00000000-0000-0000-0000-000000000001"),

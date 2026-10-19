@@ -1,6 +1,6 @@
 # Bounded queue deadline prefix refusal
 
-REQ-MSG-DEADLINE-ADVANCE / AC-MSG-DEADLINE-ADVANCE require native QS/QL discovery to remain bounded and fair. An oversized readable native key refuses its selected prefix with the original Corruption/KeyExceedsBound failure. It cannot become an invented after-key or a retained oversized cursor.
+REQ-MSG-DEADLINE-ADVANCE / AC-MSG-DEADLINE-ADVANCE require QS/QL discovery to remain bounded and fair. An oversized readable key refuses its selected prefix with the original Corruption/KeyExceedsBound failure. It cannot become an invented after-key or a retained oversized cursor.
 
 QueueDeadlineCursor.DeferNext matches the current store incarnation/read generation and advances the family while preserving every valid fixed-upper and after-key bound. Discovery reports PrefixRejected and revisits the unchanged selected family on the next bounded sweep. Its other families may progress through the original separately authorized connection execution. The poison input is never deleted, acknowledged or advanced by this path. No persistent/public contract changes.
 
@@ -8,7 +8,7 @@ QueueDeadlinePoisonPrefixWholeFlowTests uses actual ZoneTree scheduled and lease
 
 ```mermaid
 flowchart LR
-    Prefix[Oversized native due prefix] --> Refuse[Bounded refusal without advancement]
+    Prefix[Oversized due prefix] --> Refuse[Bounded refusal without advancement]
     Refuse --> Other[Independent due family progresses]
     Other --> Repair[Remove exact fixture-owned poison]
     Repair --> Resume[Original work advances once]

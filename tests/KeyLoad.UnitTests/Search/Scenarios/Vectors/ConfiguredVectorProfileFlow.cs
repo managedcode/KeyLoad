@@ -75,7 +75,7 @@ internal static class ConfiguredVectorProfileFlow
         await Assert.That(ModelBytes(database, command)).IsEquivalentTo(model, CollectionOrdering.Matching);
         var complete = QueueWholeFlowStorage.Bytes(database.Store);
         var replay = database.Submit(OperationKind.Batch, command, id: command.CommandId);
-        await Assert.That(NativeSerialization.Serialize(replay).SequenceEqual(NativeSerialization.Serialize(rejected))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(replay).SequenceEqual(OrleansSerialization.Serialize(rejected))).IsTrue();
         await Assert.That(QueueWholeFlowStorage.Bytes(database.Store)).IsEquivalentTo(complete, CollectionOrdering.Matching);
         await Assert.That(database.Store.Position).IsEqualTo(position + CommitAdvance);
     }
@@ -91,7 +91,7 @@ internal static class ConfiguredVectorProfileFlow
         }
         var outcome = global ? OutcomeStoreOracle.GlobalKey(principal, commandId)
             : OutcomeStoreOracle.PartitionKey(database.Partition, principal, commandId);
-        var locator = global ? null : KeySpace.OutcomeLocatorV2(database.Partition, principal, commandId);
+        var locator = global ? null : KeySpace.OutcomeLocator(database.Partition, principal, commandId);
         return page.Records.Where(record => !record.Key.Span.SequenceEqual(outcome)
             && (locator is null || !record.Key.Span.SequenceEqual(locator))
             && !record.Key.Span.SequenceEqual(KeySpace.ClockBytes)).Select(record => Convert.ToHexString(record.Key.Span)
@@ -110,7 +110,7 @@ internal static class ConfiguredVectorProfileFlow
         var vector = owner.Store.Read(view => view.GetRecord<VectorRecord>(
             KeySpace.Partition(VectorKeySpace, partition, Collection, Field, Target)));
         var expectedVector = new VectorRecord(Target, Field, Space, [0, 1], UpdatedRevision);
-        await Assert.That(NativeSerialization.Serialize(vector!).SequenceEqual(NativeSerialization.Serialize(expectedVector))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(vector!).SequenceEqual(OrleansSerialization.Serialize(expectedVector))).IsTrue();
         var rival = rows.Single(row => row.Document.Reference.Id == Rival).Document;
         await Assert.That(JsonDefaults.Serialize(rival).SequenceEqual(JsonDefaults.Serialize(
             new DocumentResult(provenance.ExpectedReference(new(partition, Collection, Rival)), InitialRevision, OriginalJson, false, [])))).IsTrue();

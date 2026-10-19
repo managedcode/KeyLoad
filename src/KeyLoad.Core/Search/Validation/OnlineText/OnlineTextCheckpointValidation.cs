@@ -1,5 +1,8 @@
-using KeyLoad.Core.Features.ClusterRouting.Contracts;
-using KeyLoad.Core.Features.ClusterRouting.Execution;
+using KeyLoad.Core.Features.CommandOutcomes.Contracts;
+using KeyLoad.Core.Features.RuntimeJournaling.Contracts;
+using KeyLoad.Core.Features.StoragePartitions.Contracts;
+using KeyLoad.Core.Features.CommandOutcomes.Execution;
+using KeyLoad.Core.Features.RuntimeJournaling.Execution;
 using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.Core.Features.Search;
 using KeyLoad.Storage;
@@ -31,8 +34,8 @@ public sealed partial class DatabaseEngine
             {
                 throw Errors.Fail(ErrorCode.Corruption, OnlineTextPublicationProtocol.InvalidPublication);
             }
-            var payload = NativeSerialization.Serialize(intent);
-            RequireNativeBudget(payload.Length);
+            var payload = OrleansSerialization.Serialize(intent);
+            RequireBudget(payload.Length);
             var fingerprint = DatabaseCommandFingerprint.Compute(intent.CommandId, OperationKind.CommitProjectionBatch,
                 principal.Id, Identity<CommitProjectionBatchRequest>(payload));
             if (outcome.Fingerprint != fingerprint)
@@ -41,9 +44,9 @@ public sealed partial class DatabaseEngine
             }
         }
         var actual = outcome.Result.Get<ProjectionBatchResult>();
-        RequireNativeBudget(NativeSerialization.Measure(actual));
-        RequireNativeBudget(NativeSerialization.Measure(acknowledged));
-        if (!NativeSerialization.Serialize(actual).AsSpan().SequenceEqual(NativeSerialization.Serialize(acknowledged))
+        RequireBudget(OrleansSerialization.Measure(actual));
+        RequireBudget(OrleansSerialization.Measure(acknowledged));
+        if (!OrleansSerialization.Serialize(actual).AsSpan().SequenceEqual(OrleansSerialization.Serialize(acknowledged))
             || acknowledged.Checkpoint != RequireActiveProjectionConsumer(view, principal,
                 request.Consumer, request.ConsumerGeneration).Checkpoint)
         {

@@ -1,7 +1,7 @@
 
 namespace KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
 
-/// <summary>Central native database memory and WAL deployment policy for comparison cells.</summary>
+/// <summary>Central execution database memory and WAL deployment policy for comparison cells.</summary>
 [ConfigurationOptions]
 internal sealed record BenchmarkDeploymentOptions
 {

@@ -114,7 +114,7 @@ internal sealed class McpRequestAdmission : IDisposable
         return memory.Reserve(McpMemoryLane.Data, projection.ProgressNotification(bytes), cancellationToken);
     }
 
-    /// <summary>Releases ownership only after the native SDK transport has drained.</summary>
+    /// <summary>Releases ownership only after the execution SDK transport has drained.</summary>
     public void Dispose()
     {
         if (disposed)
@@ -128,6 +128,5 @@ internal sealed class McpRequestAdmission : IDisposable
     }
 
     private static bool IsControlRoute(string route) => route is McpToolRoutes.MessagesComplete
-        or McpToolRoutes.SubscriptionsComplete or McpToolRoutes.AdminDispatch
-        or BlobToolRoutes.AbortUpload or BlobToolRoutes.Reclaim;
+        or McpToolRoutes.SubscriptionsComplete or McpToolRoutes.AdminDispatch;
 }

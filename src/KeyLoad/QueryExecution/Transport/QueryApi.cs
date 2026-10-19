@@ -6,12 +6,12 @@ namespace KeyLoad.Server;
 
 internal static class QueryApi
 {
-    private const string QueryPath = "/v1/query";
-    private const string SearchPath = "/v1/query/search";
-    private const string AstPath = "/v1/query/ast";
-    private const string CapabilitiesPath = "/v1/query/capabilities";
-    private const string LiveStartPath = "/v1/query/live/start";
-    private const string LiveReadPath = "/v1/query/live/read";
+    private const string QueryPath = "/query";
+    private const string SearchPath = "/query/search";
+    private const string AstPath = "/query/ast";
+    private const string CapabilitiesPath = "/query/capabilities";
+    private const string LiveStartPath = "/query/live/start";
+    private const string LiveReadPath = "/query/live/read";
 
     internal static void Map(WebApplication app)
     {
@@ -20,13 +20,13 @@ internal static class QueryApi
         app.MapPost(McpToolRoutes.QueryGraphPath, (SqlGraphPathRequest request, HttpContext context) =>
             ApiGrainDispatch.ReadAsync(context, GrainReadKind.SqlGraphPath, request));
         app.MapPost(SqlOperationProtocol.Route, ExecuteSqlAsync);
-        app.MapPost(DistributedSearchProtocol.Route, (DistributedSearchRequestV1 request, HttpContext context) =>
+        app.MapPost(DistributedSearchProtocol.Route, (DistributedSearchRequest request, HttpContext context) =>
             ApiGrainDispatch.ReadAsync(context, GrainReadKind.DistributedSearch, request));
         app.MapPost(QueryPath, (QueryRequest request, HttpContext context) =>
             ApiGrainDispatch.ReadAsync(context, GrainReadKind.Query, request));
         app.MapPost(AstPath, (AstQueryRequest request, HttpContext context) =>
             ApiGrainDispatch.ReadAsync(context, GrainReadKind.AstQuery, request));
-        app.MapPost(McpToolRoutes.QueryPartitions, (PartitionQueryRequestV1 request, HttpContext context) =>
+        app.MapPost(McpToolRoutes.QueryPartitions, (PartitionQueryRequest request, HttpContext context) =>
             ApiGrainDispatch.ReadAsync(context, GrainReadKind.PartitionQuery, request));
         app.MapGet(CapabilitiesPath, (Func<HttpContext, Task<IResult>>)(context =>
             ApiGrainDispatch.ReadAsync(context, GrainReadKind.QueryCapabilities)));
@@ -42,7 +42,7 @@ internal static class QueryApi
         var operation = SqlOperationCompiler.Compile(request, limitsOptions, admission.Limits.MaxBodyBytes, queryOptions,
             context.RequestAborted);
         var reply = await CanonicalOperationGateway.ExecuteAsync(context, operation.ReadKind,
-            operation.CommandKind, operation.CommandId, operation.Payload, context.RequestAborted).ConfigureAwait(false);
+            operation.CommandKind, operation.CommandId, operation.Payload, context.RequestAborted);
         return new GrainJsonResult(reply.Payload);
     }
 }

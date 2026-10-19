@@ -8,7 +8,7 @@ using Microsoft.CodeAnalysis.Operations;
 
 namespace KeyLoad.Analyzers.Features.CodeQuality;
 
-/// <summary>Enforces native typed-options ownership for runtime configuration and operational policy.</summary>
+/// <summary>Enforces execution typed-options ownership for runtime configuration and operational policy.</summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class TypedConfigurationAnalyzer : DiagnosticAnalyzer
 {
@@ -58,9 +58,9 @@ public sealed class TypedConfigurationAnalyzer : DiagnosticAnalyzer
         LiteralDeclarationOwnership.IsOptionsDefault(context.Compilation, context.Operation.Syntax, context.ContainingSymbol) &&
         context.Operation switch
         {
-            IInvocationOperation invocation => MagicRuntimeOperations.IsNativeType(context.Compilation,
+            IInvocationOperation invocation => MagicRuntimeOperations.IsType(context.Compilation,
                 invocation.TargetMethod.ContainingType, MagicRuntimeMetadataNames.TimeSpan),
-            IObjectCreationOperation creation => MagicRuntimeOperations.IsNativeType(context.Compilation,
+            IObjectCreationOperation creation => MagicRuntimeOperations.IsType(context.Compilation,
                 creation.Type, MagicRuntimeMetadataNames.TimeSpan) || ConfigurationOwnership.IsOptionsType(context.Compilation, creation.Type),
             _ => false
         };
@@ -73,10 +73,10 @@ public sealed class TypedConfigurationAnalyzer : DiagnosticAnalyzer
         SymbolEqualityComparer.Default.Equals(initializer.InitializedFields[0], field) &&
         context.Operation switch
         {
-            IInvocationOperation invocation when MagicRuntimeOperations.IsNativeType(context.Compilation,
+            IInvocationOperation invocation when MagicRuntimeOperations.IsType(context.Compilation,
                 invocation.TargetMethod.ContainingType, MagicRuntimeMetadataNames.TimeSpan) =>
                 invocation.Arguments.All(argument => MagicRuntimeOperations.IsNumeric(argument.Value.Type) && argument.Value.ConstantValue.HasValue),
-            IObjectCreationOperation creation when MagicRuntimeOperations.IsNativeType(context.Compilation,
+            IObjectCreationOperation creation when MagicRuntimeOperations.IsType(context.Compilation,
                 creation.Type, MagicRuntimeMetadataNames.TimeSpan) =>
                 creation.Arguments.All(argument => MagicRuntimeOperations.IsNumeric(argument.Value.Type) && argument.Value.ConstantValue.HasValue),
             _ => false
@@ -101,7 +101,7 @@ public sealed class TypedConfigurationAnalyzer : DiagnosticAnalyzer
             OperationalPolicyBindings.IsCapacityMethod(context.Compilation, constructor, creation.Arguments) =>
             !OperationalPolicyBindings.IsCoalescedWakeSignal(context.Compilation, creation) &&
             !ConfiguredCountingSignal.IsConfigured(context.Compilation, creation, context.CancellationToken) &&
-            creation.Arguments.Any(argument => NativeTimerPolicy.IsDurationArgument(context.Compilation, constructor, argument) &&
+            creation.Arguments.Any(argument => TimerPolicy.IsDurationArgument(context.Compilation, constructor, argument) &&
                 HardcodedDurationPolicy.IsHardcoded(context.Compilation, argument.Value, context.CancellationToken)),
         IInvocationOperation invocation when OwnedDiagnosticsPolicy.IsMethod(context.Compilation, invocation.TargetMethod) =>
             invocation.Arguments.Any(argument => OwnedDiagnosticsPolicy.IsArgument(argument) &&
@@ -113,7 +113,7 @@ public sealed class TypedConfigurationAnalyzer : DiagnosticAnalyzer
         IInvocationOperation invocation when HardcodedDurationPolicy.IsDurationMethod(context.Compilation, invocation.TargetMethod) ||
             OperationalPolicyBindings.IsCapacityMethod(context.Compilation, invocation.TargetMethod, invocation.Arguments) =>
             !OperationalPolicyBindings.IsNonblockingWait(context.Compilation, invocation) &&
-            invocation.Arguments.Any(argument => NativeTimerPolicy.IsDurationArgument(context.Compilation, invocation.TargetMethod, argument) &&
+            invocation.Arguments.Any(argument => TimerPolicy.IsDurationArgument(context.Compilation, invocation.TargetMethod, argument) &&
                 HardcodedDurationPolicy.IsHardcoded(context.Compilation, argument.Value, context.CancellationToken)),
         ISimpleAssignmentOperation { Target: IPropertyReferenceOperation property } assignment when
             OperationalPolicyBindings.IsOperationalProperty(context.Compilation, property.Property) =>

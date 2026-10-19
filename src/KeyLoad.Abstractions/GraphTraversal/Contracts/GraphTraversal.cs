@@ -6,5 +6,5 @@ namespace KeyLoad;
 /// <param name="Vertices">The visited vertices.</param>
 /// <param name="Edges">The traversed edges.</param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.GraphTraversal)]
+[Orleans.Alias(ContractAliases.GraphTraversal)]
 public sealed record GraphTraversal([property: Orleans.Id(0)] ImmutableArray<EntityRef> Vertices, [property: Orleans.Id(1)] ImmutableArray<EdgeRecord> Edges);

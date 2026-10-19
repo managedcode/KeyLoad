@@ -10,8 +10,8 @@ namespace KeyLoad.UnitTests.Features.CodeQuality.Processes;
 
 internal static class ProductionSourceManifestProcess
 {
-    internal const string Failure = "The native source-manifest producer process failed.";
-    private const string DeadlineFailure = "The native source-manifest producer exceeded its operation deadline.";
+    internal const string Failure = "The execution source-manifest producer process failed.";
+    private const string DeadlineFailure = "The execution source-manifest producer exceeded its operation deadline.";
     private const int FirstCapturedStreamIndex = 0;
     private const int SecondCapturedStreamIndex = 1;
 
@@ -121,7 +121,7 @@ internal static class ProductionSourceManifestProcess
         await using var cleanup = await ProductionSourceManifestProcessSettlement.JoinAsync(process, true,
             original, options.ProcessSettlementTimeout, timeProvider, options.TerminationGrace, failures)
             .ConfigureAwait(false);
-        await cleanup.ConfirmNativeExitAsync(process, options.ProcessExitPollInterval).ConfigureAwait(false);
+        await cleanup.ConfirmExitAsync(process, options.ProcessExitPollInterval).ConfigureAwait(false);
         if (!original.IsCompletedSuccessfully || exit is null || output is null || error is null || failures.Count != 0)
         {
             return null;

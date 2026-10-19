@@ -101,7 +101,7 @@ internal sealed class RequestFailureDiagnosticMiddlewareTests
     }
 
     [Test]
-    public async Task NativeOrleansFailureUsesClosedCategoryAndOmitsClrTypeAndMessage()
+    public async Task OrleansFailureUsesClosedCategoryAndOmitsClrTypeAndMessage()
     {
         var context = CreateContext();
         var (status, body, output) = await InvokeFailureAsync(context, new OrleansException(ExceptionMessageCanary));

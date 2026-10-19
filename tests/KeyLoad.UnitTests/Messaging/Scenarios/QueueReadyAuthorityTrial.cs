@@ -28,7 +28,7 @@ internal static class QueueReadyAuthorityTrial
             : "The queue lifecycle accounting is invalid.";
         var damaged = QueueWholeFlowStorage.Bytes(fixture.Store);
         var position = fixture.Store.Position;
-        var identity = NativeSerialization.Serialize(fixture.Store.Identity);
+        var identity = OrleansSerialization.Serialize(fixture.Store.Identity);
         await CounterRefusalAsync(fixture.Database, fixture.Store, operation, lane, damaged, position, identity, detail);
         fixture.Store.Dispose();
         token.ThrowIfCancellationRequested();
@@ -43,7 +43,7 @@ internal static class QueueReadyAuthorityTrial
         var received = database.Apply(operation);
         var repairedImage = QueueWholeFlowStorage.Bytes(first);
         var repairedPosition = first.Position;
-        await global::KeyLoad.UnitTests.Features.ResourceExecution.NativeReplayResultAssertions.Same<ReceiveResult>(database.Apply(operation), received);
+        await global::KeyLoad.UnitTests.Features.ResourceExecution.ReplayResultAssertions.Same<ReceiveResult>(database.Apply(operation), received);
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(first, repairedImage, repairedPosition, identity);
         await QueueReadyAuthorityColdContinuation.RunAsync(database, first, fixture.Directory, lane, received.Get<ReceiveResult>(), expired,
             operation, producer, produced, identity, token);
@@ -64,7 +64,7 @@ internal static class QueueReadyAuthorityTrial
         var row = fixture.Store.Commit((tx, _) =>
         {
             var bytes = tx.ReadOwnedValue(key) ?? throw new InvalidOperationException("Original queue counters are absent.");
-            global::KeyLoad.Storage.StorageRecords.PutRecord(tx, key, CorruptCounter(NativeSerialization.Deserialize<QueueCounters>(bytes), fault));
+            global::KeyLoad.Storage.StorageRecords.PutRecord(tx, key, CorruptCounter(OrleansSerialization.Deserialize<QueueCounters>(bytes), fault));
             return bytes;
         });
         return (key, row);
@@ -117,12 +117,12 @@ internal static class QueueReadyAuthorityTrial
         var lane = new QueueLaneRef(fixture.Partition, "jobs");
         var id = Guid.NewGuid();
         var original = fixture.Database.CreateCommand(OperationKind.Receive, id, "worker", now.AddSeconds(2),
-            NativeSerialization.Serialize(new ReceiveRequest(id, lane)));
-        var input = NativeSerialization.Serialize(original);
+            OrleansSerialization.Serialize(new ReceiveRequest(id, lane)));
+        var input = OrleansSerialization.Serialize(original);
         var row = QueueReadyAuthorityFaultRow.Damage(fixture, lane, fault);
         var image = QueueWholeFlowStorage.Bytes(fixture.Store);
         var position = fixture.Store.Position;
-        var identity = NativeSerialization.Serialize(fixture.Store.Identity);
+        var identity = OrleansSerialization.Serialize(fixture.Store.Identity);
         var cut = fixture.ReadCanonicalCut();
         var failures = new List<Exception>();
         for (var repeat = 0; repeat < 2; repeat++)
@@ -132,14 +132,14 @@ internal static class QueueReadyAuthorityTrial
             failures.Add(failure);
             await QueueReadyAuthorityRefusalAssertions.RequireAsync(fixture, original, image, position, identity);
             await Assert.That(fixture.ReadCanonicalCut()).IsEqualTo(cut);
-            await Assert.That(NativeSerialization.Serialize(original).AsSpan().SequenceEqual(input)).IsTrue();
+            await Assert.That(OrleansSerialization.Serialize(original).AsSpan().SequenceEqual(input)).IsTrue();
         }
         await QueueReadyAuthorityRefusalAssertions.RequireOriginalFailuresAsync(failures,
             QueueReadyAuthorityRefusalAssertions.ExpectedError(fault));
         QueueReadyAuthorityFaultRow.Restore(fixture, row.Key, row.Original);
         await Assert.That(fixture.ReadCanonicalCut().AppliedPosition).IsEqualTo(cut.AppliedPosition);
         var receive = fixture.Database.Apply(original).Get<ReceiveResult>();
-        await Assert.That(NativeSerialization.Serialize(original).AsSpan().SequenceEqual(input)).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(original).AsSpan().SequenceEqual(input)).IsTrue();
         await QueueReadyAuthorityRefusalAssertions.RequireRepairedReplayAsync(fixture, original, receive);
         await QueueReadyAuthorityHealthy.CompleteOriginalAsync(fixture, lane, receive, expired, now.AddSeconds(2));
         await QueueReadyAuthorityHealthy.RunAsync(fixture, lane, now.AddSeconds(2), token);
@@ -151,7 +151,7 @@ internal static class QueueReadyAuthorityTrial
     {
         var image = QueueWholeFlowStorage.Bytes(fixture.Store);
         var position = fixture.Store.Position;
-        var identity = NativeSerialization.Serialize(fixture.Store.Identity);
+        var identity = OrleansSerialization.Serialize(fixture.Store.Identity);
         var cut = fixture.ReadCanonicalCut();
         fixture.JoinOwnedResources();
         for (var attempt = 0; attempt < 2; attempt++)
@@ -163,12 +163,12 @@ internal static class QueueReadyAuthorityTrial
             await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(cold, image, position, identity);
             var stored = OutcomeStoreOracle.Read(cold, original)
                 ?? throw new InvalidOperationException("The repaired original receive outcome is absent.");
-            await global::KeyLoad.UnitTests.Features.ResourceExecution.NativeReplayResultAssertions.Same<ReceiveResult>(
+            await global::KeyLoad.UnitTests.Features.ResourceExecution.ReplayResultAssertions.Same<ReceiveResult>(
                 stored, ManagedCode.Communication.Result<object>.Succeed(receive));
             var replay = owner.Apply(original);
             if (expired)
             {
-                await global::KeyLoad.UnitTests.Features.ResourceExecution.NativeReplayResultAssertions.Same<ReceiveResult>(replay, stored);
+                await global::KeyLoad.UnitTests.Features.ResourceExecution.ReplayResultAssertions.Same<ReceiveResult>(replay, stored);
             }
             else
             {

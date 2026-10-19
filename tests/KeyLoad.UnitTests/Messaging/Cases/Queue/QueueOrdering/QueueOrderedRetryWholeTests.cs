@@ -11,7 +11,7 @@ internal sealed class QueueOrderedRetryWholeTests
     [Test]
     [Arguments(MessageState.Scheduled)]
     [Arguments(MessageState.Leased)]
-    public Task AcMsg089ForeignEarlierStrictHeadBodyRefusesFollowerReceiveThenExactRepairNativeAckTwoColdAndHealthy(
+    public Task AcMsg089ForeignEarlierStrictHeadBodyRefusesFollowerReceiveThenExactRepairAckTwoColdAndHealthy(
         MessageState headState)
         => QueueStrictHeadBodyWholeFlow.RunAsync(headState, TestContext.Current!.Execution.CancellationToken);
 }

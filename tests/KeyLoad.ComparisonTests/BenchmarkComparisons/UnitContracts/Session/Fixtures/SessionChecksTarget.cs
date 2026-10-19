@@ -4,7 +4,7 @@ using KeyLoad.Comparisons;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
-// Small deterministic contract oracle only; this target never produces native performance evidence.
+// Small deterministic contract oracle only; this target never produces execution performance evidence.
 internal class SessionChecksTarget : IDocumentComparisonTarget
 {
     internal ConcurrentDictionary<string, BenchmarkDocument> Documents { get; } = new(StringComparer.Ordinal);

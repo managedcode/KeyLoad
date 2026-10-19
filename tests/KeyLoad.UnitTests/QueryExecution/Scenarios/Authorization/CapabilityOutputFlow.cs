@@ -12,7 +12,7 @@ internal static class CapabilityOutputFlow
         {
             using var database = new TestDatabase(new DatabaseLimits
             {
-                MaxBatchBytes = CapabilityOutputFixture.NativeBytes,
+                MaxBatchBytes = CapabilityOutputFixture.RuntimeBytes,
                 MaxQueryBytes = CapabilityOutputFixture.RequestBytes
             });
             await ServerFailureObserver.ObserveAsync(async () =>
@@ -34,7 +34,7 @@ internal static class CapabilityOutputFlow
     {
         var beforeCancellation = SqlInnerJoinRetainedIdentityFlow.Image(database.Store);
         var beforePosition = database.Store.Position;
-        var beforeIdentity = NativeSerialization.Serialize(database.Store.Identity);
+        var beforeIdentity = OrleansSerialization.Serialize(database.Store.Identity);
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
@@ -56,7 +56,7 @@ internal static class CapabilityOutputFlow
         CapabilityOutputFixture.Policy(database, false, 2);
         var image = SqlInnerJoinRetainedIdentityFlow.Image(database.Store);
         var position = database.Store.Position;
-        var deniedIdentity = NativeSerialization.Serialize(database.Store.Identity);
+        var deniedIdentity = OrleansSerialization.Serialize(database.Store.Identity);
         await ServerFailureObserver.ObserveAsync(() => CapabilityOutputOperations.RejectAsync(() => engine.Execute(
             CapabilityOutputFixture.Reader, CapabilityOutputFixture.Sql(database.Partition, true, 1)),
             ErrorCode.PermissionDenied), failures);

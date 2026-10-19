@@ -48,7 +48,7 @@ internal sealed class GraphIncomingEdgesTests
         using var database = GraphCrossPartitionTestSupport.CreateDatabase();
         var target = GraphCrossPartitionTestSupport.Vertex(
             GraphCrossPartitionTestSupport.Partition(MachineKeyTarget), "vertex");
-        var malformed = new ReadIncomingGraphEdgesRequestV1(2, target,
+        var malformed = new ReadIncomingGraphEdgesRequest(2, target,
             GraphCrossPartitionTestSupport.Graph, 1);
 
         var failure = Assert.ThrowsExactly<KeyLoadException>(() =>

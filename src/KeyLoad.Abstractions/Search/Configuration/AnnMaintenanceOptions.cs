@@ -4,7 +4,7 @@ namespace KeyLoad;
 [ConfigurationOptions]
 public sealed record AnnMaintenanceOptions
 {
-    /// <summary>Central native parent configuration section.</summary>
+    /// <summary>Central execution parent configuration section.</summary>
     public const string SectionName = "KeyLoad:AnnMaintenance";
     /// <summary>Safe invalid configuration detail.</summary>
     public const string ValidationMessage = "The ANN maintenance page bound is invalid.";
@@ -13,6 +13,6 @@ public sealed record AnnMaintenanceOptions
     private const int MinimumPages = 1;
     /// <summary>Maximum actual page/checkpoint operations before this request stops with BudgetExceeded.</summary>
     public int MaximumReplayPages { get; init; } = DefaultPages;
-    /// <summary>Validates the closed bounded native parent page count.</summary>
+    /// <summary>Validates the closed bounded execution parent page count.</summary>
     public bool IsValid() => MaximumReplayPages is >= MinimumPages and <= MaximumPages;
 }

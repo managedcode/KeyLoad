@@ -18,7 +18,7 @@ internal static class QueueReadyAuthorityRefusalAssertions
     {
         await Assert.That(fixture.Store.Position).IsEqualTo(position);
         await Assert.That(QueueWholeFlowStorage.Bytes(fixture.Store)).IsEquivalentTo(image, TUnit.Assertions.Enums.CollectionOrdering.Matching);
-        await Assert.That(NativeSerialization.Serialize(fixture.Store.Identity)).IsEquivalentTo(identity, TUnit.Assertions.Enums.CollectionOrdering.Matching);
+        await Assert.That(OrleansSerialization.Serialize(fixture.Store.Identity)).IsEquivalentTo(identity, TUnit.Assertions.Enums.CollectionOrdering.Matching);
         var result = fixture.Database.ResolveOutcome(original);
         await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.RecoveryRequired);
 
@@ -34,15 +34,15 @@ internal static class QueueReadyAuthorityRefusalAssertions
     internal static async Task RequireRepairedReplayAsync(TestDatabase fixture, Command<DatabaseCommand> original,
         ReceiveResult first)
     {
-        var resultBytes = NativeSerialization.Serialize(first);
+        var resultBytes = OrleansSerialization.Serialize(first);
         var image = QueueWholeFlowStorage.Bytes(fixture.Store);
-        var identity = NativeSerialization.Serialize(fixture.Store.Identity);
+        var identity = OrleansSerialization.Serialize(fixture.Store.Identity);
         var position = fixture.Store.Position;
         var cut = fixture.ReadCanonicalCut();
         var replay = fixture.Database.Apply(original).Get<ReceiveResult>();
-        await Assert.That(NativeSerialization.Serialize(replay)).IsEquivalentTo(resultBytes, TUnit.Assertions.Enums.CollectionOrdering.Matching);
+        await Assert.That(OrleansSerialization.Serialize(replay)).IsEquivalentTo(resultBytes, TUnit.Assertions.Enums.CollectionOrdering.Matching);
         await Assert.That(QueueWholeFlowStorage.Bytes(fixture.Store)).IsEquivalentTo(image, TUnit.Assertions.Enums.CollectionOrdering.Matching);
-        await Assert.That(NativeSerialization.Serialize(fixture.Store.Identity)).IsEquivalentTo(identity, TUnit.Assertions.Enums.CollectionOrdering.Matching);
+        await Assert.That(OrleansSerialization.Serialize(fixture.Store.Identity)).IsEquivalentTo(identity, TUnit.Assertions.Enums.CollectionOrdering.Matching);
         await Assert.That(fixture.Store.Position).IsEqualTo(position);
         await Assert.That(fixture.ReadCanonicalCut()).IsEqualTo(cut);
     }

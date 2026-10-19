@@ -18,13 +18,13 @@ internal sealed class KurrentCleanupStateTests
         var fatal = RuntimeOversizeFailure();
         var nested = new InvalidOperationException("outer", new AggregateException(
             new IOException("ordinary branch"), new ArgumentException("later branch", fatal)));
-        state.RecordFailure(nested, KurrentCleanupStage.NativeDispose, disposal: true);
+        state.RecordFailure(nested, KurrentCleanupStage.RuntimeDisposeCore, disposal: true);
         state.FinishDeletion(cancellationRequested: true, expired: false);
 
         var diagnostic = state.Snapshot();
         await Assert.That(diagnostic.Stage).IsEqualTo(KurrentCleanupStage.Delete);
         await Assert.That(diagnostic.Outcome).IsEqualTo(KurrentCleanupOutcome.Failed);
-        await Assert.That(diagnostic.Reason).IsEqualTo(KurrentCleanupFailureReason.NativeRpc);
+        await Assert.That(diagnostic.Reason).IsEqualTo(KurrentCleanupFailureReason.RuntimeRpc);
         await Assert.That(diagnostic.GrpcStatus).IsEqualTo(DeadlineStatus);
         await Assert.That(diagnostic.Counts).IsEqualTo(new KurrentCleanupCounts(2, 1, 0, 1, 0, 1));
         await Assert.That(diagnostic.LaterDisposalFailures).IsEqualTo(1);
@@ -40,12 +40,12 @@ internal sealed class KurrentCleanupStateTests
         var siblingFatal = RuntimeOversizeFailure();
         var laterFatal = RuntimeOversizeFailure();
         state.RecordFailure(new AggregateException(new InvalidOperationException("first branch", firstFatal),
-            new InvalidOperationException("second branch", siblingFatal)), KurrentCleanupStage.NativeDispose);
+            new InvalidOperationException("second branch", siblingFatal)), KurrentCleanupStage.RuntimeDisposeCore);
         state.RecordFailure(new InvalidOperationException("later fatal", laterFatal),
             KurrentCleanupStage.HttpDispose, disposal: true);
 
         var diagnostic = state.Snapshot();
-        await Assert.That(diagnostic.Stage).IsEqualTo(KurrentCleanupStage.NativeDispose);
+        await Assert.That(diagnostic.Stage).IsEqualTo(KurrentCleanupStage.RuntimeDisposeCore);
         await Assert.That(diagnostic.LaterDisposalFailures).IsEqualTo(1);
         await Assert.That(ThrownBy<OutOfMemoryException>(state)).IsSameReferenceAs(firstFatal);
     }
@@ -79,11 +79,11 @@ internal sealed class KurrentCleanupStateTests
         {
             nested = new InvalidOperationException("nested", nested);
         }
-        state.RecordFailure(nested, KurrentCleanupStage.NativeDispose, disposal: true);
+        state.RecordFailure(nested, KurrentCleanupStage.RuntimeDisposeCore, disposal: true);
 
         var diagnostic = state.Snapshot();
         await Assert.That(diagnostic.Stage).IsEqualTo(KurrentCleanupStage.Delete);
-        await Assert.That(diagnostic.Reason).IsEqualTo(KurrentCleanupFailureReason.NativeRpc);
+        await Assert.That(diagnostic.Reason).IsEqualTo(KurrentCleanupFailureReason.RuntimeRpc);
         await Assert.That(diagnostic.GrpcStatus).IsEqualTo(DeadlineStatus);
         await Assert.That(diagnostic.LaterDisposalFailures).IsEqualTo(1);
         await Assert.That(ThrownBy<OutOfMemoryException>(state)).IsSameReferenceAs(fatal);

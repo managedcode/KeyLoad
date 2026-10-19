@@ -1,12 +1,12 @@
 # Benchmark methodology
 
 KeyLoad is compared with other databases by running the same workload against each
-database's own native topology and reporting what was measured. This page explains
+database's own topology and reporting what was measured. This page explains
 the rules behind that comparison and how to read the published numbers. The
 execution contract (jobs, phases, schedules) is in
 [Methodology](../Features/BenchmarkComparisons/Methodology.md); requirements and
 acceptance criteria are in [BenchmarkComparisons](../Features/BenchmarkComparisons.md),
-[ADR-122](../ADR/ADR-122-native-benchmark-methodology.md) and
+[ADR-122](../ADR/ADR-122-benchmark-methodology.md) and
 [ADR-142](../ADR/ADR-142-shared-live-benchmark-sessions.md). The measured figures
 themselves are on the [benchmark website](https://www.keyload.cloud/#benchmarks).
 
@@ -16,13 +16,13 @@ themselves are on the [benchmark website](https://www.keyload.cloud/#benchmarks)
   payload bytes, operation order and count, concurrency, timing boundaries and
   correctness oracle. An adapter executes the shared scenario; it never swaps in an
   easier workload.
-- Each database runs its real native topology: one node and three nodes, with real
+- Each database runs its real topology: one node and three nodes, with real
   membership. Client counts and independent standalone databases are never relabelled
   as cluster nodes. Only free community features are used, with no enterprise images
   or paid cluster features.
 - Different databases and topologies never share a runner, process, container,
   volume or measurement session. Each runs in its own isolated Linux job.
-- A capability a database does not provide natively is an explicit unavailable
+- A capability a database does not provide ly is an explicit unavailable
   result, never a substitute or a zero.
 - Acknowledgement and durability are compared as the contract each database really
   gives. Unequal contracts are visible in the report and rule out a performance
@@ -36,11 +36,11 @@ themselves are on the [benchmark website](https://www.keyload.cloud/#benchmarks)
 
 Each job starts the database through Aspire, waits for readiness and membership, and
 then runs separate real TUnit tests with the real client of that database: the
-initial load, native index construction, sequential and random reads, search and
+initial load, index construction, sequential and random reads, search and
 queries, and a mixed concurrent test. Setup, readiness and the final correctness
 check (full content and replica verification) are outside operation latency.
 Acknowledgement defines when a write is complete; no extra read is added to a
-measured write. A native batch records its real size and duration and is never split
+measured write. A batch records its real size and duration and is never split
 into invented per-record samples.
 
 ## Workload families and oracles
@@ -71,22 +71,22 @@ them visible instead of hiding them.
   says so.
 - The load model is closed loop. It does not correct coordinated omission and does
   not qualify overload, endurance or power-loss behaviour.
-- Every report records the exact source revision, run and job, runtime and CPU, native DLL/PDB/process identities or external image
+- Every report records the exact source revision, run and job, runtime and CPU, DLL/PDB/process identities or external image
   digests, engine versions, topology, resource limits, read consistency, index
   settings and effective acknowledgement and durability.
 
-The primary development/functional AppHost runs native KeyLoad projects and
+The primary development/functional AppHost runs KeyLoad projects and
 Azurite. The separate LoadTests AppHost owns selected database infrastructure and
 exposes endpoints to the client-owned workload, then removes only its own
 resources. Ordinary execution never publishes KeyLoad server or client images.
-Native-process resource equivalence remains an open publication gate; observed
+process resource equivalence remains an open publication gate; observed
 workload figures alone are not comparable server-resource proof.
 
 ## Topology and guarantees
 
 KeyLoad's one-node arm keeps a single copy. Its three-node arm is a replicated
 cluster of three copies in which a write is acknowledged once all configured
-copies confirm durable local apply. Other databases run their own native
+copies confirm durable local apply. Other databases run their own execution
 configuration (for example synchronous commit, append-only fsync or quorum queues
 where the engine offers them), and the exact settings are part of each report. A node
 count alone does not establish equal guarantees.

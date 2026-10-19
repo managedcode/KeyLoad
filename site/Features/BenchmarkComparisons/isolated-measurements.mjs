@@ -12,15 +12,15 @@ function viewWorker(worker, report) {
   const profile = worker.session.targetProfile;
   const runtime = worker.session.runtime;
   const target = profile ?? { name: worker.target, version: notRecorded, image: notRecorded,
-    topology: topologyUnavailable(worker) ? 'Native topology unavailable' : 'Native profile not observed for this workload', cluster: { dataCopies: notRecorded, observations: [] },
+    topology: topologyUnavailable(worker) ? 'Execution topology unavailable' : 'Execution profile not observed for this workload', cluster: { dataCopies: notRecorded, observations: [] },
     writeAcknowledgement: notRecorded, readContract: notRecorded, transport: notRecorded, authorization: notRecorded };
   const unqualified = report.status === 'measured' && !qualified(worker);
   return { ...worker, rawSha256: worker.sessionSha256, disposition: report.status === 'notQualified' || unqualified ? 'failed'
-    : report.status === 'unavailable' ? topologyUnavailable(worker) ? 'unsupportedTopology' : 'unsupported' : report.status, reason: unqualified ? worker.qualification.status === 'failed' ? worker.session.reason : 'Native profile or session resource qualification incomplete.' : report.detail,
+    : report.status === 'unavailable' ? topologyUnavailable(worker) ? 'unsupportedTopology' : 'unsupported' : report.status, reason: unqualified ? worker.qualification.status === 'failed' ? worker.session.reason : 'Execution profile or session resource qualification incomplete.' : report.detail,
     report: { hostOs: runtime.operatingSystem, architecture: runtime.architecture, logicalProcessors: runtime.logicalProcessors,
       runtime: runtime.framework, storage: runtime.storage, client: worker.session.processes.client,
       serverProcesses: worker.session.processes.servers,
-      nativeServerImage: worker.target === 'KeyLoad' ? null : worker.session.images.server ?? notRecorded, targets: [target] } };
+      serverImage: worker.target === 'KeyLoad' ? null : worker.session.images.server ?? notRecorded, targets: [target] } };
 }
 export function selectedIsolatedRows(projection, scenario, nodeCount, repetition, metric, target) {
   const [caseId, laneId] = scenario.split('/');

@@ -3,7 +3,7 @@ using MongoDB.Driver;
 
 namespace KeyLoad.Comparisons.Targets;
 
-/// <summary>Verifies the original native MongoDB server version and strict single-node topology.</summary>
+/// <summary>Verifies the original execution MongoDB server version and strict single-node topology.</summary>
 internal static class MongoServerVerification
 {
     internal static async Task VerifySingleNodeAsync(MongoClient? primaryClient, CancellationToken cancellationToken)

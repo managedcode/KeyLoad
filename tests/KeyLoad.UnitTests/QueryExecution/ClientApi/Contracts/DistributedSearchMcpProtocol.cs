@@ -3,7 +3,7 @@ namespace KeyLoad.UnitTests.Features.QueryExecution;
 internal static class DistributedSearchMcpProtocol
 {
     internal const string Tool = "keyload_query_distributed_search";
-    internal const string Route = "/v1/query/distributed-search";
+    internal const string Route = "/query/distributed-search";
     internal const string Object = "object";
     internal const string Boolean = "boolean";
     internal const string Number = "number";
@@ -50,7 +50,7 @@ internal static class DistributedSearchMcpProtocol
     internal const string RedactedFields = "redactedFields";
     internal const string Id = "id";
     internal const string Branch = "branch";
-    internal const string Rank = "nativeRank";
+    internal const string Rank = "runtimeRank";
     internal const string Weight = "weight";
     internal const string Contribution = "contribution";
     internal const int VersionOne = 1;
@@ -62,6 +62,6 @@ internal static class DistributedSearchMcpProtocol
     internal const long SchemaVersion = 1;
     internal const double RankedScore = 0.25;
     internal const string LiteralEpoch = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
-    internal const string AccessPath = "distributedCanonicalSearchV1";
+    internal const string AccessPath = "distributedCanonicalSearch";
     internal const string LiteralDocument = "{\"title\":\"independent literal\"}";
 }

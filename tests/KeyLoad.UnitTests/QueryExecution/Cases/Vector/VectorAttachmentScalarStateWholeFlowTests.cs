@@ -19,7 +19,7 @@ internal sealed class VectorAttachmentScalarStateWholeFlowTests
     [Arguments(ScalarState.Filter)]
     [Arguments(ScalarState.Projection)]
     [Arguments(ScalarState.Explain)]
-    public async Task ScalarStateCannotBeDiscardedAndNativeHealthyAttachmentRetainsLiteralRanks(ScalarState state)
+    public async Task ScalarStateCannotBeDiscardedAndHealthyAttachmentRetainsLiteralRanks(ScalarState state)
     {
         using var db = new TestDatabase();
         AdapterVectorWholeFlow.Seed(db);

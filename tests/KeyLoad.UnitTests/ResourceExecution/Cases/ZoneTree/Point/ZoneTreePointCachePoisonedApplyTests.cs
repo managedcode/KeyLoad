@@ -62,7 +62,7 @@ internal sealed class ZoneTreePointCachePoisonedApplyTests
         AssertValue(reopened, [44]);
         var recovered = reopened.GetPointCacheDiagnostics();
         await Assert.That(cold.Hits).IsEqualTo(0L);
-        await Assert.That(recovered.NativeLookups).IsEqualTo(1L);
+        await Assert.That(recovered.RuntimeLookups).IsEqualTo(1L);
         await Assert.That(recovered.Admissions).IsEqualTo(1L);
     }
 
@@ -77,7 +77,7 @@ internal sealed class ZoneTreePointCachePoisonedApplyTests
         var actual = store.Read(view => view.ReadOwnedValue(KeyA));
         if (actual is null || !actual.AsSpan().SequenceEqual(expected))
         {
-            throw new InvalidOperationException("Recovered native bytes did not match the durable write.");
+            throw new InvalidOperationException("Recovered execution bytes did not match the durable write.");
         }
     }
 }

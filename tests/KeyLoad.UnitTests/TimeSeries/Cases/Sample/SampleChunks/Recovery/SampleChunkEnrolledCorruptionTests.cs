@@ -13,7 +13,7 @@ internal sealed class SampleChunkEnrolledCorruptionTests
     [Arguments(SampleChunkCorruptionCut.BlockDigest)]
     [Arguments(SampleChunkCorruptionCut.MissingCorrection)]
     [Arguments(SampleChunkCorruptionCut.CorrectionSequence)]
-    public async Task AcChunk010012EnrolledNativeCorruptionRefusesWholeReadThenExactRepairReceiptAndMergeAreHealthy(SampleChunkCorruptionCut cut)
+    public async Task AcChunk010012EnrolledCorruptionRefusesWholeReadThenExactRepairReceiptAndMergeAreHealthy(SampleChunkCorruptionCut cut)
     {
         using var fixture = new SampleChunkCanonicalFixture();
         fixture.Open();

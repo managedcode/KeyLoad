@@ -9,7 +9,7 @@ internal static class MetadataOuterChecksumRepairCold
 {
     private const string HealthyKey = "metadata-checksum-repaired-healthy";
     private const string HealthyValue = "{\"repaired\":true}";
-    private const string MissingValue = "The repaired metadata archive lost its complete native value.";
+    private const string MissingValue = "The repaired metadata archive lost its complete execution value.";
     private const int ColdOwners = 2;
     private const long HealthyCommitCount = 1;
 
@@ -29,7 +29,7 @@ internal static class MetadataOuterChecksumRepairCold
             await Assert.That(store.Position).IsEqualTo(before + HealthyCommitCount);
             await ValuesAsync(store);
             image = EventingArtifactState.FullBytes(store);
-            identity = NativeSerialization.Serialize(store.Identity);
+            identity = OrleansSerialization.Serialize(store.Identity);
             position = store.Position;
         }, token);
         for (var cold = 0; cold < ColdOwners; cold++)
@@ -38,7 +38,7 @@ internal static class MetadataOuterChecksumRepairCold
             {
                 await Assert.That(store.Position).IsEqualTo(position);
                 await Assert.That(EventingArtifactState.FullBytes(store)).IsEquivalentTo(image, CollectionOrdering.Matching);
-                await Assert.That(NativeSerialization.Serialize(store.Identity).AsSpan().SequenceEqual(identity)).IsTrue();
+                await Assert.That(OrleansSerialization.Serialize(store.Identity).AsSpan().SequenceEqual(identity)).IsTrue();
                 await ValuesAsync(store);
             }, token);
         }
@@ -50,8 +50,8 @@ internal static class MetadataOuterChecksumRepairCold
             ?? throw new InvalidOperationException(MissingValue);
         var healthy = store.Read(view => view.ReadOwnedValue(KeyCodec.Encode(HealthyKey)))
             ?? throw new InvalidOperationException(MissingValue);
-        await Assert.That(NativeSerialization.Deserialize<string>(original)).IsEqualTo(MetadataBackupFixture.ExpectedValue);
-        await Assert.That(NativeSerialization.Deserialize<string>(healthy)).IsEqualTo(HealthyValue);
+        await Assert.That(OrleansSerialization.Deserialize<string>(original)).IsEqualTo(MetadataBackupFixture.ExpectedValue);
+        await Assert.That(OrleansSerialization.Deserialize<string>(healthy)).IsEqualTo(HealthyValue);
         await Assert.That(store.Identity.DispatchPaused).IsTrue();
     }
 

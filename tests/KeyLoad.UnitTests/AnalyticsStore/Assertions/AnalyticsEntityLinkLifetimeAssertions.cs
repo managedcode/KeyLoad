@@ -4,8 +4,8 @@ using KeyLoad.Core.Features.DocumentStorage;
 using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.UnitTests.Features.Authorization;
 using ManagedCode.Communication.Commands;
-using D = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreNativeTestData;
-using O = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreNativeTestOperations;
+using D = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreTestData;
+using O = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreTestOperations;
 
 namespace KeyLoad.UnitTests.Features.AnalyticsStore;
 
@@ -34,9 +34,9 @@ internal static class AnalyticsEntityLinkLifetimeAssertions
         var raw = owner.Store.Read(view => view.ReadOwnedValue(AnalyticsStoreKeys.Event(owner.Source.Partition, D.Store, D.First)))
             ?? throw new InvalidOperationException("The committed analytics event is absent.");
         await EqualAsync(new AnalyticsStoredEvent(expected, false, new DateTimeOffset(operation.Timestamp)),
-            NativeSerialization.Deserialize<AnalyticsStoredEvent>(raw));
+            OrleansSerialization.Deserialize<AnalyticsStoredEvent>(raw));
         var generation = owner.Store.Read(view => view.ReadOwnedValue(AnalyticsStoreKeys.Generation(owner.Source.Partition, D.Store)))!;
-        await Assert.That(NativeSerialization.Deserialize<long>(generation)).IsEqualTo(revision);
+        await Assert.That(OrleansSerialization.Deserialize<long>(generation)).IsEqualTo(revision);
         await EqualAsync(new AnalyticsEventsPage([expected], false, null), owner.Database.ReadAnalyticsEvents(D.Root, D.Read(owner.Source), token));
         await EqualAsync(new DocumentResult(fixture.Bound, 1, D.AnchorJson, false, []),
             owner.Database.GetDocument(D.Root, fixture.Bound, cancellationToken: token));
@@ -75,13 +75,13 @@ internal static class AnalyticsEntityLinkLifetimeAssertions
     {
         var owner = fixture.Owner;
         var image = TeamRowPolicyAssertions.Image(owner.Store);
-        var identity = NativeSerialization.Serialize(owner.Store.Identity);
+        var identity = OrleansSerialization.Serialize(owner.Store.Identity);
         var position = owner.Store.Position;
         var applied = owner.Database.LastApplied;
         var journal = owner.ReadCanonicalCut();
         await read();
         await Assert.That(TeamRowPolicyAssertions.Image(owner.Store).SequenceEqual(image, StringComparer.Ordinal)).IsTrue();
-        await Assert.That(NativeSerialization.Serialize(owner.Store.Identity).SequenceEqual(identity)).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(owner.Store.Identity).SequenceEqual(identity)).IsTrue();
         await Assert.That(owner.Store.Position).IsEqualTo(position);
         await Assert.That(owner.Database.LastApplied).IsEqualTo(applied);
         await Assert.That(owner.ReadCanonicalCut()).IsEqualTo(journal);

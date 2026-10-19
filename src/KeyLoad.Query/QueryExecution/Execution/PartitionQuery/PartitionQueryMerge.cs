@@ -23,8 +23,8 @@ internal static class PartitionQueryMerge
     private const string DuplicateReferenceMessage = "Partition query leaves returned a duplicate entity reference.";
     private const string IncompleteMessage = "A partition query leaf did not complete.";
 
-    internal static PartitionQueryResultV1 Complete(PartitionQueryPlanV1 plan,
-        ImmutableArray<PartitionQueryLeafResultV1> leaves, StoreIdentity owner, DatabaseLimits limits,
+    internal static PartitionQueryResult Complete(PartitionQueryPlan plan,
+        ImmutableArray<PartitionQueryLeafResult> leaves, StoreIdentity owner, DatabaseLimits limits,
         ReadExecutionBudget budget, QueryExecutionOptions execution,
         ImmutableArray<PhysicalShardRecord> physicalOwners = default)
     {
@@ -49,7 +49,7 @@ internal static class PartitionQueryMerge
     }
 
     private static (int ExaminedRecords, long ReadBytes, long RetainedBytes) ValidateLeaves(
-        PartitionQueryPlanV1 plan, ImmutableArray<PartitionQueryLeafResultV1> leaves,
+        PartitionQueryPlan plan, ImmutableArray<PartitionQueryLeafResult> leaves,
         PartitionRef[] partitions, StoreIdentity owner, ReadExecutionBudget budget,
         ImmutableArray<PhysicalShardRecord> physicalOwners)
     {
@@ -89,7 +89,7 @@ internal static class PartitionQueryMerge
         return (examined, readBytes, retained);
     }
 
-    internal static void ValidateLeaf(PartitionQueryLeafPlanV1 plan, PartitionQueryLeafResultV1? result,
+    internal static void ValidateLeaf(PartitionQueryLeafPlan plan, PartitionQueryLeafResult? result,
         PartitionRef partition, StoreIdentity owner, ReadExecutionBudget budget,
         PhysicalShardRecord? physicalOwner = null)
     {
@@ -109,7 +109,7 @@ internal static class PartitionQueryMerge
         }
     }
 
-    private static void ValidateLeafShape(PartitionQueryLeafResultV1 result)
+    private static void ValidateLeafShape(PartitionQueryLeafResult result)
     {
         if (result.Version != Version || result.CutPosition < InitialSequence || result.PolicyEpoch < MinimumPositiveCount
             || result.SchemaVersion < VersionOne || result.ExaminedRecords < EmptyElementCount || result.ReadBytes < NoRetainedBytes
@@ -119,7 +119,7 @@ internal static class PartitionQueryMerge
         }
     }
 
-    private static void ValidateLeafBudgets(PartitionQueryLeafPlanV1 plan, PartitionQueryLeafResultV1 result)
+    private static void ValidateLeafBudgets(PartitionQueryLeafPlan plan, PartitionQueryLeafResult result)
     {
         if (result.Candidates.Length > plan.MaxCandidates || result.ExaminedRecords > plan.MaxExaminedRecords
             || result.ReadBytes > plan.MaxReadBytes || result.RetainedBytes > plan.MaxRetainedBytes)
@@ -128,10 +128,10 @@ internal static class PartitionQueryMerge
         }
     }
 
-    private static void ValidateCandidates(PartitionQueryLeafResultV1 result,
-        PartitionQueryLeafPlanV1 plan, PartitionRef partition, ReadExecutionBudget budget)
+    private static void ValidateCandidates(PartitionQueryLeafResult result,
+        PartitionQueryLeafPlan plan, PartitionRef partition, ReadExecutionBudget budget)
     {
-        PartitionQueryCandidateV1? previous = null;
+        PartitionQueryCandidate? previous = null;
         foreach (var candidate in result.Candidates)
         {
             budget.Check();
@@ -153,13 +153,13 @@ internal static class PartitionQueryMerge
         }
     }
 
-    private static ImmutableArray<PartitionQueryCandidateV1> MergeRuns(
-        ImmutableArray<PartitionQueryLeafResultV1> leaves,
+    private static ImmutableArray<PartitionQueryCandidate> MergeRuns(
+        ImmutableArray<PartitionQueryLeafResult> leaves,
         IReadOnlyList<Ordering> order, int maximumRows, ReadExecutionBudget budget)
     {
-        var comparer = Comparer<PartitionQueryCandidateV1>.Create((left, right) =>
+        var comparer = Comparer<PartitionQueryCandidate>.Create((left, right) =>
             PartitionQueryOrder.Compare(left, right, order));
-        var queue = new PriorityQueue<MergeCursor, PartitionQueryCandidateV1>(comparer);
+        var queue = new PriorityQueue<MergeCursor, PartitionQueryCandidate>(comparer);
         var seen = new HashSet<EntityRef>();
         var candidateCount = EmptyElementCount;
         foreach (var leaf in leaves)
@@ -182,7 +182,7 @@ internal static class PartitionQueryMerge
                 queue.Enqueue(new(index, EmptyElementCount), leaves[index].Candidates[FirstElementIndex]);
             }
         }
-        var output = ImmutableArray.CreateBuilder<PartitionQueryCandidateV1>(Math.Min(maximumRows, candidateCount));
+        var output = ImmutableArray.CreateBuilder<PartitionQueryCandidate>(Math.Min(maximumRows, candidateCount));
         while (output.Count < maximumRows && queue.TryDequeue(out var cursor, out _))
         {
             budget.Check();
@@ -196,7 +196,7 @@ internal static class PartitionQueryMerge
         return output.MoveToImmutable();
     }
 
-    private static long RetainedBytes(ImmutableArray<PartitionQueryLeafResultV1> leaves, int resultRows,
+    private static long RetainedBytes(ImmutableArray<PartitionQueryLeafResult> leaves, int resultRows,
         ReadExecutionBudget budget)
     {
         long candidates = InitialSequence;

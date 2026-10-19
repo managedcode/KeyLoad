@@ -59,10 +59,10 @@ internal sealed class ZoneTreeCoordinatedPointCacheRetirementTests
         await Assert.That(evidence.Renewal).IsEqualTo(new CacheReadPermitAcceptance(2, 1, false));
         await Assert.That(evidence.ApplyResult).IsEqualTo(ZoneTreePointCacheControlResult.Applied);
         await Assert.That(evidence.Cold.Hits).IsEqualTo(0L);
-        await Assert.That(evidence.Cold.NativeLookups).IsEqualTo(0L);
+        await Assert.That(evidence.Cold.RuntimeLookups).IsEqualTo(0L);
         await Assert.That(evidence.Refill).IsNotNull();
         await Assert.That(evidence.Refill!.SequenceEqual(Value)).IsTrue();
-        await Assert.That(evidence.AfterRefill.NativeLookups).IsEqualTo(1L);
+        await Assert.That(evidence.AfterRefill.RuntimeLookups).IsEqualTo(1L);
         await Assert.That(evidence.FirstWarm).IsNotNull();
         await Assert.That(evidence.FirstWarm!.SequenceEqual(Value)).IsTrue();
     }

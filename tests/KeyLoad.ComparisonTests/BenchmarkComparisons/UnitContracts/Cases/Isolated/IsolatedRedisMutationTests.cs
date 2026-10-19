@@ -9,10 +9,10 @@ internal sealed class IsolatedRedisMutationTests
     private const string FirstReplica = "replica-one";
     private const string SecondReplica = "replica-two";
     private const string Version = "8.4.0";
-    private const string State = "native replicas";
+    private const string State = "execution replicas";
 
     [Test]
-    public void AcIso005NativeRedisCreateUpdateDeleteMustAffectOneExistingOrAbsentKey()
+    public void AcIso005RedisCreateUpdateDeleteMustAffectOneExistingOrAbsentKey()
     {
         RedisMutationContract.RequireSet(true, Scenario.DocumentWrite);
         RedisMutationContract.RequireSet(true, Scenario.DocumentUpdate);

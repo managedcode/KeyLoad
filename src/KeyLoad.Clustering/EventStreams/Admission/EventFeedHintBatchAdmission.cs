@@ -4,12 +4,12 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Clustering;
 
-internal sealed class EventFeedHintBatchAdmission(Serializer<MemoryMessageBody> nativeSerializer,
+internal sealed class EventFeedHintBatchAdmission(Serializer<MemoryMessageBody> runtimeSerializer,
     IOptions<DatabaseLimits> databaseOptions, IOptions<GrainRoutingOptions> routingOptions)
 {
     private const int Version = 1;
     private const long FirstRevision = 1;
-    private const string Invalid = "The native event feed advisory batch is invalid.";
+    private const string Invalid = "The execution event feed advisory batch is invalid.";
 
     internal EventFeedWakeupHint Require<T>(IEnumerable<T> originalEvents,
         Dictionary<string, object>? originalContext)
@@ -29,8 +29,8 @@ internal sealed class EventFeedHintBatchAdmission(Serializer<MemoryMessageBody> 
         var limits = databaseOptions.Value;
         limits.Validate();
         var maximumBytes = checked((int)Math.Min(limits.MaxBatchBytes, limits.MaxQueryReadBytes));
-        using var counter = new GrainNativeCountingWriter(maximumBytes, routingOptions, CancellationToken.None);
-        nativeSerializer.Serialize(new MemoryMessageBody(new object[] { hint }, null), counter);
+        using var counter = new GrainCountingWriter(maximumBytes, routingOptions, CancellationToken.None);
+        runtimeSerializer.Serialize(new MemoryMessageBody(new object[] { hint }, null), counter);
         return hint;
     }
 }

@@ -4,7 +4,7 @@ using KeyLoad.IntegrationTests.Features.QueryExecution;
 namespace KeyLoad.IntegrationTests.Features.ClientApi;
 
 /// <summary>AC-MCP-002: concurrent real official callers retain independently persisted tenant authority.</summary>
-/// <param name="fixture">The initialized actual native Aspire Orleans application.</param>
+/// <param name="fixture">The initialized actual execution Aspire Orleans application.</param>
 [ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = McpCallerProtocol.FixtureKey)]
 [NotInParallel]
 internal sealed class McpConcurrentIdentityTests(ClusterFixture fixture)
@@ -15,7 +15,7 @@ internal sealed class McpConcurrentIdentityTests(ClusterFixture fixture)
     private const int SecondDenial = 3;
     private const int OperationCount = 4;
 
-    /// <summary>Actual concurrent HTTP operations never exchange principals between two native SDK clients.</summary>
+    /// <summary>Actual concurrent HTTP operations never exchange principals between two execution SDK clients.</summary>
     [Test]
     public async Task AcMcp002DistinctOfficialClientsKeepTheirOwnTenantsDuringConcurrentCalls()
     {

@@ -8,7 +8,7 @@ namespace KeyLoad.RecoveryTests.Features.Messaging;
 
 internal static class LocalInboxProcessingRecoveryModels
 {
-    internal static async Task<EntityRefLifetimeV1> LifetimeAsync(Command<DatabaseCommand> original)
+    internal static async Task<EntityRefLifetime> LifetimeAsync(Command<DatabaseCommand> original)
     {
         var partition = LocalInboxProcessingCrashContract.Partition;
         var definition = new ResourceDefinition(LocalInboxProcessingCrashContract.Documents, ResourceKind.Collection, partition.TransactionDomainId);
@@ -17,14 +17,14 @@ internal static class LocalInboxProcessingRecoveryModels
         await Assert.That(original.UserId).IsEqualTo(CrashFixtureValues.Principal);
         await Assert.That(original.Value!.Kind).IsEqualTo(OperationKind.ConfigureResource);
         await LocalInboxProcessingRecoveryImage.ExactAsync(
-            NativeSerialization.Deserialize<ConfigureResourceRequest>(original.Value.Input.Span), request);
+            OrleansSerialization.Deserialize<ConfigureResourceRequest>(original.Value.Input.Span), request);
         await Assert.That(original.Value.Fingerprint).IsEqualTo(DatabaseCommandFingerprint.Compute(original.CommandId,
             OperationKind.ConfigureResource, CrashFixtureValues.Principal, JsonSerializer.Serialize(request, JsonDefaults.Options)));
         var lifetime = ResourceLifetimeIdentity.Create(original, partition.TenantId, partition.DatabaseId, definition);
         return new(lifetime.Incarnation.Value);
     }
 
-    internal static async Task RequireAsync(DatabaseEngine database, DateTimeOffset time, bool committed, EntityRefLifetimeV1 lifetime)
+    internal static async Task RequireAsync(DatabaseEngine database, DateTimeOffset time, bool committed, EntityRefLifetime lifetime)
     {
         if (committed)
         {

@@ -47,8 +47,8 @@ internal static class SeriesPortableBackupAssertions
             await Assert.That(ReferenceEquals(actual[row].SeriesId, actual[0].SeriesId)).IsFalse();
             await Assert.That(ReferenceEquals(actual[row].TagsJson, actual[0].TagsJson)).IsFalse();
         }
-        var expectedBytes = NativeSerialization.Serialize(expected);
-        var actualBytes = NativeSerialization.Serialize(actual);
+        var expectedBytes = OrleansSerialization.Serialize(expected);
+        var actualBytes = OrleansSerialization.Serialize(actual);
         await Assert.That(actualBytes.AsSpan().SequenceEqual(expectedBytes)).IsTrue()
             .Because(DescribeRows(expected, actual, expectedBytes, actualBytes));
     }

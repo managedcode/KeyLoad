@@ -33,7 +33,7 @@ export function selectSessionSiteProducer(capture, workflow, mode = 'validate') 
     job, SESSION.aggregateArtifact, SESSION_SITE.suiteBytes);
   const provider = validateArtifact(uniqueNamed(capture.artifacts, SESSION_SITE.provider), capture.run,
     job, SESSION_SITE.provider, SESSION_SITE.providerBytes);
-  return { cohort, job, suite, provider, functional:selectDocumentFunctionalGate(capture,cohort), native: selectSessionEvidence(capture, cohort) };
+  return { cohort, job, suite, provider, functional:selectDocumentFunctionalGate(capture,cohort), execution: selectSessionEvidence(capture, cohort) };
 }
 
 // Called after complete aggregate validation; failed originals remain reviewable in validate mode only.
@@ -42,7 +42,7 @@ export function requirePublishableSessionMeasurements(aggregate) {
   for (const worker of aggregate.workers) {
     requireSession(worker.job.conclusion === 'success' && ['success','unavailable'].includes(worker.session.outcome)
       && ['passed','notApplicable'].includes(worker.qualification.status)
-      && worker.native.length === SESSION.caseIds.length && worker.native.every(test => test.outcome === 'Passed')
+      && worker.execution.length === SESSION.caseIds.length && worker.execution.every(test => test.outcome === 'Passed')
       && worker.reports.length === SESSION.caseIds.length
       && worker.reports.every((report,index) => report.caseId === SESSION.caseIds[index]
         && ['measured','unavailable'].includes(report.status)));

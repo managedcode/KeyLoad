@@ -15,7 +15,7 @@ change.
 | REQ-SERIES-PUBLIC-RETENTION-005: rejected staging does not consume sample identity or sequence | AC-SERIES-PUBLIC-RETENTION-005: after the first joined cold restart, a genuine MCP-first fresh command commits exactly the same formerly staged fresh ID/value/timestamp. Its complete appendSamples receipt reports revision3. The only visible rows are floor/sequence2/value5 and fresh/sequence3/value7, with aggregate Count2/Sum12/Min5/Max7/Mean6 and all literal dense windows. Mapping: Trial, Expected and Current. |
 | REQ-SERIES-PUBLIC-RETENTION-006: original successful receipts replay without resurrection | AC-SERIES-PUBLIC-RETENTION-006: replay the complete original seed, expiry, both dedup receipts and eventual fresh receipt through each client after their relevant phase. Require complete original receipt equality and full unchanged current DTOs/outbox after every replay. Mapping: Replay and Current. |
 | REQ-SERIES-PUBLIC-RETENTION-007: persisted authority and outcomes survive both joined cold boundaries | AC-SERIES-PUBLIC-RETENTION-007: dispose and join all original SDK/MCP caller owners before each actual all-three-node Aspire restart. Reconnect using the same persisted SeriesRead principal and secret, assert the full literal current results, re-exercise original refused commands, and replay every successful receipt. The first cold retains sequence2/floor state; the second retains the genuine fresh sequence3 state. Mapping: Trial, Refusals and Replay. |
-| REQ-SERIES-PUBLIC-RETENTION-008: resource and qualification contracts remain honest | AC-SERIES-PUBLIC-RETENTION-008: one genuine NoArgs TUnit case uses the unchanged shared two-minute deadline, original cluster topology and owned caller cleanup. No fake provider, new clock/limit, scalar product mode, compatibility fallback or generated test UID. Compilation, native TUnit execution and exact-source Linux cluster evidence are required independently before acceptance. Mapping: SeriesRetentionAtomicPublicTests and Trial. |
+| REQ-SERIES-PUBLIC-RETENTION-008: resource and qualification contracts remain honest | AC-SERIES-PUBLIC-RETENTION-008: one genuine NoArgs TUnit case uses the unchanged shared two-minute deadline, original cluster topology and owned caller cleanup. No fake provider, new clock/limit, scalar product mode, compatibility fallback or generated test UID. Compilation, TUnit execution and exact-source Linux cluster evidence are required independently before acceptance. Mapping: SeriesRetentionAtomicPublicTests and Trial. |
 
 The public DTO oracles are independent literals: tags are {"visible":17}; T is
 the existing fixed UTC scenario start; raw ranges include T through T+3ticks;
@@ -52,7 +52,7 @@ Canonical implementation map:
 - Helpers/SeriesRetentionAtomicPublicReplay.cs: complete successful receipt replay.
 - Helpers/SeriesRetentionAtomicPublicTrial.cs: genuine operations, caller ownership and both cold boundaries.
 
-Backend/public contracts/client implementation: N/A, existing native APIs are
+Backend/public contracts/client implementation: N/A, existing APIs are
 unchanged. Frontend and benchmarks: N/A, this is correctness acceptance rather
 than a UI or performance change. Qualification: implementation authored;
 compiler, runtime and exact-source Linux cluster results remain pending. Process

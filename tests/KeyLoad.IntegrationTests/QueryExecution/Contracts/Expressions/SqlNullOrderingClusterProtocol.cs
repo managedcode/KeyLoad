@@ -5,7 +5,7 @@ internal static class SqlNullOrderingClusterProtocol
 {
     internal const string Collection = "null_ordering";
     internal const string Label = "label";
-    internal const string Profile = "Q1.NullOrdering.v1";
+    internal const string Profile = "Q1.NullOrdering";
     internal const string ScorePath = "/score";
     internal const string LabelPath = "/label";
     internal const string AscFirst = "SELECT label AS label FROM null_ordering ORDER BY score ASC NULLS FIRST LIMIT 5";
@@ -28,7 +28,7 @@ internal static class SqlNullOrderingClusterProtocol
     internal static AstQueryRequest Ast(bool descending, bool first)
         => new(PostgresClusterState.Partition, new(Collection, null, [new(LabelPath, Label)], null,
             [new(ScorePath, descending, first)], RowCount), AllowFullScan: true);
-    internal const string UsingProfile = "SQL.OrderUsing.v1";
+    internal const string UsingProfile = "SQL.OrderUsing";
     internal const string DirectionName = "direction";
     internal const string DirectionOperand = "@direction";
     internal const string DirectionValue = ">";

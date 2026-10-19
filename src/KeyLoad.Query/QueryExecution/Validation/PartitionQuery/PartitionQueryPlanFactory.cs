@@ -16,7 +16,7 @@ internal static class PartitionQueryPlanFactory
     private const string GrantBudgetMessage = "The partition query grants exceed the configured budget.";
     private const string UnsupportedWindowMessage = "Partition query windows are not supported.";
 
-    internal static PartitionQueryPlanV1 Create(AstQueryRequest request, StoreIdentity owner,
+    internal static PartitionQueryPlan Create(AstQueryRequest request, StoreIdentity owner,
         ImmutableArray<PartitionRef> partitions, DatabaseLimits limits, QueryExecutionOptions execution, int? maximumResultBytes = null)
     {
         ArgumentNullException.ThrowIfNull(request);
@@ -44,7 +44,7 @@ internal static class PartitionQueryPlanFactory
         var examined = Divide(limits.MaxScanRecords, sorted.Length);
         var readBytes = Divide(limits.MaxQueryReadBytes, sorted.Length);
         var retained = Divide(remainingRetained, sorted.Length);
-        var leaves = ImmutableArray.CreateBuilder<PartitionQueryLeafPlanV1>(sorted.Length);
+        var leaves = ImmutableArray.CreateBuilder<PartitionQueryLeafPlan>(sorted.Length);
         for (var index = FirstElementIndex; index < sorted.Length; index++)
         {
             var leafRequest = request with

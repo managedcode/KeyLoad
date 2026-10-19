@@ -8,5 +8,5 @@ namespace KeyLoad.Query;
 [JsonDerivedType(typeof(ValueOperand), QueryAstDiscriminatorNames.Value)]
 [JsonDerivedType(typeof(ParameterOperand), QueryAstDiscriminatorNames.Parameter)]
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.Operand)]
+[Orleans.Alias(ContractAliases.Operand)]
 public abstract record Operand;

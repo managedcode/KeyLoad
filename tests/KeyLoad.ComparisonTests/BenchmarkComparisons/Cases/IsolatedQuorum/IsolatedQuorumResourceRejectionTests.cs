@@ -3,7 +3,7 @@ using T = KeyLoad.ComparisonTests.Features.BenchmarkComparisons.IsolatedQuorumRe
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
-/// <summary>AC-ISO-001/003: invalid cell labels fail before allocating native resources, credentials or files.</summary>
+/// <summary>AC-ISO-001/003: invalid cell labels fail before allocating execution resources, credentials or files.</summary>
 internal sealed class IsolatedQuorumResourceRejectionTests
 {
     [Test]
@@ -13,7 +13,7 @@ internal sealed class IsolatedQuorumResourceRejectionTests
     [Arguments(T.Rabbit, "zero")]
     [Arguments(T.Rabbit, "four")]
     [Arguments(T.Rabbit, "target")]
-    public async Task AcIso001SelectionMismatchDoesNotAllocateNativeResources(string helper, string corruption)
+    public async Task AcIso001SelectionMismatchDoesNotAllocateResources(string helper, string corruption)
     {
         using var model = new IsolatedQuorumResourceModel();
         var selection = new BenchmarkSessionSelection(helper, 1);

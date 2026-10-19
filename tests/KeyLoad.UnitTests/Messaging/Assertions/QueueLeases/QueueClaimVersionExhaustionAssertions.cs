@@ -20,7 +20,7 @@ internal static class QueueClaimVersionExhaustionAssertions
     {
         await Assert.That(database.InspectMessage(QueueClaimVersionExhaustionProtocol.Root, state.Lane, state.Body.Id))
             .IsEqualTo(new MessageInspection(state.DamagedMetadata, state.Body.PayloadJson, state.Body.HeadersJson));
-        var bytes = NativeSerialization.Serialize(state.Body).LongLength;
+        var bytes = OrleansSerialization.Serialize(state.Body).LongLength;
         await Assert.That(store.Read(view => view.GetRecord<MessageBody>(KeySpace.Partition(QueueClaimVersionExhaustionProtocol.BodySpace,
             state.Lane.Partition, state.Lane.Queue, state.Body.Id)))).IsEqualTo(state.Body);
         await Assert.That(store.Read(view => view.GetRecord<QueueCounters>(KeySpace.Partition(QueueClaimVersionExhaustionProtocol.CounterSpace,
@@ -36,7 +36,7 @@ internal static class QueueClaimVersionExhaustionAssertions
     {
         var key = KeySpace.PartitionOutcome(state.Lane.Partition, QueueClaimVersionExhaustionProtocol.Root, state.Operation.CommandId);
         var retained = store.Read(view => view.ReadOwnedValue(key))!;
-        var stored = NativeSerialization.Deserialize<StoredOutcome>(retained);
+        var stored = OrleansSerialization.Deserialize<StoredOutcome>(retained);
         await EqualAsync(stored.Result, original);
         var bytes = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
@@ -48,7 +48,7 @@ internal static class QueueClaimVersionExhaustionAssertions
     }
 
     internal static async Task EqualAsync<T>(T actual, T expected)
-        => await Assert.That(NativeSerialization.Serialize(actual).AsSpan().SequenceEqual(NativeSerialization.Serialize(expected))).IsTrue();
+        => await Assert.That(OrleansSerialization.Serialize(actual).AsSpan().SequenceEqual(OrleansSerialization.Serialize(expected))).IsTrue();
 
     internal static async Task DomainAsync(ZoneTreeStore store, QueueLaneRef lane, string[] expected)
         => await Assert.That(Domain(store, lane)).IsEquivalentTo(expected, CollectionOrdering.Matching);

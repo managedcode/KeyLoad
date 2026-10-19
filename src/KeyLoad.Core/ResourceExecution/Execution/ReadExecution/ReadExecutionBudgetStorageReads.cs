@@ -2,12 +2,12 @@ using KeyLoad.Storage;
 
 namespace KeyLoad.Core.Features.ResourceExecution.Execution;
 
-/// <summary>Executes gate-scoped reads through the same original budget and native observers.</summary>
+/// <summary>Executes gate-scoped reads through the same original budget and execution observers.</summary>
 internal static class ReadExecutionBudgetStorageReads
 {
     private static StorageReadObserver? Observer(ReadExecutionBudget budget, IKeyValueView view)
         => view is ResourceEffectPreparationTransaction prepared && ReferenceEquals(prepared.Work, budget)
-            ? null : budget.ChargeNativeReadRecord;
+            ? null : budget.ChargeReadRecord;
 
     internal static byte[]? Read(ReadExecutionBudget budget, IKeyValueView view, byte[] key)
     {
@@ -24,7 +24,7 @@ internal static class ReadExecutionBudgetStorageReads
         ArgumentNullException.ThrowIfNull(view);
         budget.Check();
         T? record = null;
-        view.ReadValue(key, value => record = NativeSerialization.Deserialize<T>(value), Observer(budget, view));
+        view.ReadValue(key, value => record = OrleansSerialization.Deserialize<T>(value), Observer(budget, view));
         budget.Check();
         return record;
     }

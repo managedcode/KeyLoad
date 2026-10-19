@@ -13,8 +13,8 @@ internal static class SerializedOptionsSnapshotContract
     {
         var type = constructor.ContainingType;
         return type.IsRecord &&
-            HasNativeAttribute(compilation, type, OrleansMetadataNames.GenerateSerializerAttribute) &&
-            HasNativeAttribute(compilation, type, ConfigurationMetadataNames.OrleansAlias) &&
+            RuntimeHasAttribute(compilation, type, OrleansMetadataNames.GenerateSerializerAttribute) &&
+            RuntimeHasAttribute(compilation, type, ConfigurationMetadataNames.OrleansAlias) &&
             type.DeclaringSyntaxReferences.All(reference =>
                 reference.GetSyntax(cancellationToken) is RecordDeclarationSyntax { ParameterList: { } parameters } record &&
                 parameters.Parameters.All(parameter => IsSerializedParameter(compilation, type, parameter)) &&
@@ -23,7 +23,7 @@ internal static class SerializedOptionsSnapshotContract
 
     private static bool IsSerializedParameter(Compilation compilation, INamedTypeSymbol type, ParameterSyntax parameter) =>
         type.GetMembers(parameter.Identifier.ValueText).OfType<IPropertySymbol>()
-            .Any(property => HasNativeAttribute(compilation, property, OrleansMetadataNames.IdAttribute));
+            .Any(property => RuntimeHasAttribute(compilation, property, OrleansMetadataNames.IdAttribute));
 
     private static bool IsDataMember(Compilation compilation, MemberDeclarationSyntax member,
         CancellationToken cancellationToken) => member switch
@@ -34,14 +34,14 @@ internal static class SerializedOptionsSnapshotContract
                     accessor.Body is null && accessor.ExpressionBody is null &&
                     accessor.Kind() is SyntaxKind.GetAccessorDeclaration or SyntaxKind.InitAccessorDeclaration) &&
                 compilation.GetSemanticModel(member.SyntaxTree).GetDeclaredSymbol(property, cancellationToken) is { } symbol &&
-                HasNativeAttribute(compilation, symbol, OrleansMetadataNames.IdAttribute),
+                RuntimeHasAttribute(compilation, symbol, OrleansMetadataNames.IdAttribute),
             _ => false
         };
 
-    private static bool HasNativeAttribute(Compilation compilation, ISymbol symbol, string metadataName)
+    private static bool RuntimeHasAttribute(Compilation compilation, ISymbol symbol, string metadataName)
     {
         var attribute = compilation.GetTypeByMetadataName(metadataName);
-        return attribute?.ContainingAssembly.Name == ConfigurationMetadataNames.NativeOrleansAssembly &&
+        return attribute?.ContainingAssembly.Name == ConfigurationMetadataNames.OrleansAssembly &&
             symbol.GetAttributes().Any(data => SymbolEqualityComparer.Default.Equals(data.AttributeClass, attribute));
     }
 }

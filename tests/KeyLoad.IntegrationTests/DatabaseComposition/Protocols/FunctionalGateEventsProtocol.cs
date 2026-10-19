@@ -6,7 +6,7 @@ namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
 internal static class FunctionalGateEventsProtocol
 {
     internal const int ResourceCount = 3;
-    internal const string Reducer = "functional-gate-events-v1";
+    internal const string Reducer = "functional-gate-events";
     internal const string EventIdColumn = "event_id";
     internal const string IterationField = "iteration";
     internal const string TargetIdColumn = "target_id";
@@ -51,5 +51,5 @@ internal static class FunctionalGateEventsProtocol
             {
                 [IterationField] = JsonSerializer.SerializeToElement(iteration)
             },
-            AllowFullScan: true, QueryDialectVersion: 2);
+            AllowFullScan: true, QueryDialectVersion: SqlOperationProtocol.DefaultQueryDialectVersion);
 }

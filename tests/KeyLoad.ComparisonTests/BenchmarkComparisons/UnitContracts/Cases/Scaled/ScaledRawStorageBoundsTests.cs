@@ -11,7 +11,7 @@ internal sealed class ScaledRawStorageBoundsTests
     private const int FirstRecordIndex = 0;
     private const int InvalidRecordIndex = -1;
     private const int BeyondReservedMissIndex = MiniRecordCount + 1;
-    private const long OneNativeRead = 1L;
+    private const long OneRead = 1L;
     private const int InitialVerificationPasses = 1;
     private const int RepeatedVerificationPasses = 2;
     private const long GibibyteBytes = 1024L * 1024 * 1024;
@@ -54,11 +54,11 @@ internal sealed class ScaledRawStorageBoundsTests
 
         var beforeMiss = fixture.Capture();
         await Assert.That(fixture.TryRead(MiniRecordCount, out _)).IsFalse();
-        await AssertCounterDeltaAsync(beforeMiss, fixture.Capture(), OneNativeRead);
+        await AssertCounterDeltaAsync(beforeMiss, fixture.Capture(), OneRead);
 
         var beforeRead = fixture.Capture();
         await Assert.That(fixture.Read(FirstRecordIndex)).IsEqualTo((ulong)FirstRecordIndex);
-        await AssertCounterDeltaAsync(beforeRead, fixture.Capture(), OneNativeRead);
+        await AssertCounterDeltaAsync(beforeRead, fixture.Capture(), OneRead);
         await AssertCompleteMiniOracleAsync(fixture, initial.FullValueDigest);
     }
 
@@ -69,7 +69,7 @@ internal sealed class ScaledRawStorageBoundsTests
         var before = fixture.Capture();
         await Assert.That(invalidRead).Throws<ArgumentOutOfRangeException>();
         var after = fixture.Capture();
-        await Assert.That(after.NativeReadCalls).IsEqualTo(before.NativeReadCalls);
+        await Assert.That(after.RuntimeReadCalls).IsEqualTo(before.RuntimeReadCalls);
         await Assert.That(after.SeedAttempts).IsEqualTo(before.SeedAttempts);
         await Assert.That(after.SuccessfulSeedWrites).IsEqualTo(before.SuccessfulSeedWrites);
     }
@@ -82,7 +82,7 @@ internal sealed class ScaledRawStorageBoundsTests
         await Assert.That(snapshot.SuccessfulSeedWrites).IsEqualTo(MiniRecordCount);
         await Assert.That(snapshot.VerifiedRecords).IsEqualTo(MiniRecordCount);
         await Assert.That(snapshot.VerificationPasses).IsEqualTo(InitialVerificationPasses);
-        await Assert.That(snapshot.NativeReadCalls).IsEqualTo(MiniRecordCount + 1L);
+        await Assert.That(snapshot.RuntimeReadCalls).IsEqualTo(MiniRecordCount + 1L);
     }
 
     private static async Task AssertCompleteMiniOracleAsync(
@@ -94,7 +94,7 @@ internal sealed class ScaledRawStorageBoundsTests
         var afterVerify = fixture.Capture();
         await Assert.That(afterVerify.VerifiedRecords).IsEqualTo(MiniRecordCount);
         await Assert.That(afterVerify.VerificationPasses).IsEqualTo(RepeatedVerificationPasses);
-        await Assert.That(afterVerify.NativeReadCalls - beforeVerify.NativeReadCalls)
+        await Assert.That(afterVerify.RuntimeReadCalls - beforeVerify.RuntimeReadCalls)
             .IsEqualTo(MiniRecordCount + 1L);
         await Assert.That(afterVerify.FullValueDigest).IsEqualTo(initialDigest);
     }
@@ -124,7 +124,7 @@ internal sealed class ScaledRawStorageBoundsTests
         await Assert.That(snapshot.SuccessfulSeedWrites).IsEqualTo(QualificationRecordCount);
         await Assert.That(snapshot.VerifiedRecords).IsEqualTo(QualificationRecordCount);
         await Assert.That(snapshot.VerificationPasses).IsEqualTo(InitialVerificationPasses);
-        await Assert.That(snapshot.NativeReadCalls).IsEqualTo(QualificationRecordCount + 1L);
+        await Assert.That(snapshot.RuntimeReadCalls).IsEqualTo(QualificationRecordCount + 1L);
     }
 
     private static async Task AssertCounterDeltaAsync(
@@ -132,7 +132,7 @@ internal sealed class ScaledRawStorageBoundsTests
         ScaledRawStorageSnapshot after,
         long expectedReadDelta)
     {
-        await Assert.That(after.NativeReadCalls - before.NativeReadCalls).IsEqualTo(expectedReadDelta);
+        await Assert.That(after.RuntimeReadCalls - before.RuntimeReadCalls).IsEqualTo(expectedReadDelta);
         await Assert.That(after.SeedAttempts).IsEqualTo(before.SeedAttempts);
         await Assert.That(after.SuccessfulSeedWrites).IsEqualTo(before.SuccessfulSeedWrites);
     }

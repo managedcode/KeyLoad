@@ -9,14 +9,14 @@ internal static class RestoreUnsafeDestinationFlow
 {
     private const string LinkName = "restore-link";
     private const string TargetName = "empty-link-target";
-    private const string InvalidTarget = "The native backup destination is not a regular directory path.";
+    private const string InvalidTarget = "The execution backup destination is not a regular directory path.";
 
     internal static async Task RunAsync(bool ancestorLink, CancellationToken token)
     {
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            using var fixture = new NativeBackupCutFixture(checkpoint: true);
+            using var fixture = new BackupCutFixture(checkpoint: true);
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 token.ThrowIfCancellationRequested();
@@ -44,7 +44,7 @@ internal static class RestoreUnsafeDestinationFlow
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    private static async Task RefuseAsync(NativeBackupCutFixture fixture, string destination)
+    private static async Task RefuseAsync(BackupCutFixture fixture, string destination)
     {
         KeyLoadException? original = null;
         try
@@ -59,7 +59,7 @@ internal static class RestoreUnsafeDestinationFlow
         await Assert.That(Directory.EnumerateDirectories(root, ".keyload-restore-*").Any()).IsFalse();
     }
 
-    private static async Task<string[]> SourceAsync(NativeBackupCutFixture fixture, CancellationToken token)
+    private static async Task<string[]> SourceAsync(BackupCutFixture fixture, CancellationToken token)
     {
         string[]? source = null;
         var failures = new List<Exception>();

@@ -15,18 +15,18 @@ public sealed partial class KeyLoadTarget
     /// <inheritdoc/>
     public Task InitializeDocumentsAsync(DocumentComparisonInitialization initialization, CancellationToken token)
     {
-        DocumentNativeInitialization.Validate(initialization);
+        DocumentInitialization.Validate(initialization);
         ownsDocumentNamespace = true;
         return InitializeAsync(initialization.Corpus, token);
     }
     /// <inheritdoc/>
     public Task<IDocumentComparisonSession> OpenDocumentSessionAsync(CancellationToken token)
-        => DocumentHttpSessionAcquisition.OpenAsync(http, nativeExecutionOptions,
+        => DocumentHttpSessionAcquisition.OpenAsync(http, runtimeExecutionOptions,
             async (owned, cancellation) => { _ = KeyLoadClientResults.Success(await new KeyLoadClient(owned, credential, clientOptions).StatusAsync(cancellation).ConfigureAwait(false)); },
             owned => new KeyLoadComparisonSession(new KeyLoadClient(owned, credential, clientOptions), partition, space, topK, graphDepth, graphVertices,
-                graphEdges, DocumentMeasurementValues.NativeActualEnumeration, expectedNodeCount, lifecycleOptions, nativeExecutionOptions, translationOptions, provider: timeProvider), token,
+                graphEdges, DocumentMeasurementValues.ActualEnumeration, expectedNodeCount, lifecycleOptions, runtimeExecutionOptions, translationOptions, provider: timeProvider), token,
             (owned, session, operation, document, cancellation) => ((KeyLoadComparisonSession)session).ExecuteDocumentOperationAsync(operation, document, cancellation));
     private Task CleanupDocumentNamespaceAsync() => ownsDocumentNamespace
-        ? DocumentKeyLoadCleanup.RunAsync(client, partition, nativeExecutionOptions, translationOptions, timeProvider)
+        ? DocumentKeyLoadCleanup.RunAsync(client, partition, runtimeExecutionOptions, translationOptions, timeProvider)
         : Task.CompletedTask;
 }

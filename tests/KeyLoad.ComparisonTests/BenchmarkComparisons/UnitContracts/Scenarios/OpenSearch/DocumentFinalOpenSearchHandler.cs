@@ -7,7 +7,7 @@ using KeyLoad.Comparisons.Targets;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
-/// <summary>Controlled original HTTP responses exercise final native wire proof; these are not benchmark measurements.</summary>
+/// <summary>Controlled original HTTP responses exercise final execution wire proof; these are not benchmark measurements.</summary>
 internal sealed class DocumentFinalOpenSearchHandler(DocumentComparisonSchedule schedule, string corruption) : HttpMessageHandler
 {
     internal const string Index = "controlled-documents";

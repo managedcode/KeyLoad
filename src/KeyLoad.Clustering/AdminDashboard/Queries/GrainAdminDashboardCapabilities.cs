@@ -17,7 +17,7 @@ internal static class GrainAdminDashboardCapabilities
         var payload = request.Payload;
         if (kind == GrainReadKind.AdminDashboard)
         {
-            GrainNativePayload.RequireNoDto(payload);
+            GrainPayload.RequireNoDto(payload);
             var result = await administration.ReadDashboardAsync(cancellationToken).ConfigureAwait(true);
             ConnectionReadExecution.ValidateFreshRequest(codec, request, request.Envelope.RequestId, cancellationToken);
             GrainRequestAuthority.RequireAdministrator(GrainRequestAuthority.ReloadForRequest(database,
@@ -27,9 +27,9 @@ internal static class GrainAdminDashboardCapabilities
         return kind switch
         {
             GrainReadKind.AdminResources => new AdminCatalogReader(database).Read(principal.Id,
-                GrainNativePayload.Read<AdminResourcesRequest>(payload), cancellationToken),
+                GrainPayload.Read<AdminResourcesRequest>(payload), cancellationToken),
             GrainReadKind.AdminQueue => new AdminQueueReader(database).Read(principal.Id,
-                GrainNativePayload.Read<AdminQueueRequest>(payload), cancellationToken),
+                GrainPayload.Read<AdminQueueRequest>(payload), cancellationToken),
             _ => throw Errors.Fail(ErrorCode.UnsupportedCapability, GrainRoutingProtocol.InvalidRequest)
         };
     }

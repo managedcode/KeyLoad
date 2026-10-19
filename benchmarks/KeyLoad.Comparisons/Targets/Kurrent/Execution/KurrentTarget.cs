@@ -10,7 +10,7 @@ public sealed class KurrentTarget : IComparisonTarget
 {
     private readonly TimeProvider timeProvider;
     private readonly IOptions<ComparisonLifecycleOptions> lifecycleOptions;
-    private readonly IOptions<NativeComparisonDiagnosticOptions> diagnosticOptions;
+    private readonly IOptions<ComparisonDiagnosticOptions> diagnosticOptions;
     private readonly KurrentSetupDiagnostics setupDiagnostics;
     private readonly string connectionString;
     private readonly HttpClient[] nodeHttpClients;
@@ -29,25 +29,25 @@ public sealed class KurrentTarget : IComparisonTarget
         get; private set;
     }
 
-    /// <summary>Creates a KurrentDB stream target that verifies the requested native topology before measurement.</summary>
+    /// <summary>Creates a KurrentDB stream target that verifies the requested execution topology before measurement.</summary>
     /// <param name="connectionString">Connection settings used to create the writer and verify the cluster.</param>
     /// <param name="nodeClients">HTTP clients for the configured KurrentDB nodes; the target disposes these clients.</param>
     /// <param name="runId">Guid-formatted run identifier used to isolate benchmark stream names.</param>
     /// <param name="image">Pinned server image reference recorded in the target profile.</param>
-    /// <param name="lifecycleOptions">The validated native lifecycle policy.</param>
-    /// <param name="diagnosticOptions">The centrally validated native diagnostic bounds.</param>
+    /// <param name="lifecycleOptions">The validated execution lifecycle policy.</param>
+    /// <param name="diagnosticOptions">The centrally validated execution diagnostic bounds.</param>
     /// <param name="provider">Borrowed clock; defaults to the system provider.</param>
-    /// <param name="topology">The one, two or three native members that cluster verification must establish.</param>
+    /// <param name="topology">The one, two or three execution members that cluster verification must establish.</param>
     public KurrentTarget(string connectionString, HttpClient[] nodeClients, string runId, string image,
         ComparisonTopology topology, IOptions<ComparisonLifecycleOptions> lifecycleOptions,
-        IOptions<NativeComparisonDiagnosticOptions> diagnosticOptions, TimeProvider? provider = null)
+        IOptions<ComparisonDiagnosticOptions> diagnosticOptions, TimeProvider? provider = null)
     {
         timeProvider = provider ?? TimeProvider.System;
         ArgumentNullException.ThrowIfNull(image);
         ArgumentNullException.ThrowIfNull(lifecycleOptions);
         lifecycleOptions.Value.Validate();
         this.lifecycleOptions = lifecycleOptions;
-        this.diagnosticOptions = NativeComparisonDiagnosticOptions.Require(diagnosticOptions);
+        this.diagnosticOptions = ComparisonDiagnosticOptions.Require(diagnosticOptions);
         setupDiagnostics = new(diagnosticOptions);
         this.connectionString = connectionString;
         nodeHttpClients = nodeClients;
@@ -87,10 +87,10 @@ public sealed class KurrentTarget : IComparisonTarget
                 topology: topology, timeout: timeout, cancellationToken: cancellationToken, options: lifecycleOptions, timeProvider: timeProvider);
             nodeClients = proof.NodeClients;
             ownedClients.AddRange(nodeClients);
-            // Native SDK construction eagerly discovers and caches a preferred live member.
-            // Construct the writer after all native views agree on their actual leader.
+            // Execution SDK construction eagerly discovers and caches a preferred live member.
+            // Construct the writer after all execution views agree on their actual leader.
             setupStage = KurrentSetupStage.WriterConstruction;
-            writer = new KurrentDBClient(KurrentNativeSettings.CreateWriter(connectionString));
+            writer = new KurrentDBClient(KurrentSettings.CreateWriter(connectionString));
             ownedClients.Add(writer);
             setupStage = KurrentSetupStage.NoStreamSemantics;
             await VerifyNoStreamConflictAsync(cancellationToken);

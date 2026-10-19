@@ -9,7 +9,7 @@ internal static class QueueLifecycleAccountingAssertions
     internal static long BodyBytes(string id)
     {
         var literal = QueueLifecycleHealthy.Enqueue(id);
-        return NativeSerialization.Serialize(new MessageBody(id, literal.PayloadJson, literal.HeadersJson,
+        return OrleansSerialization.Serialize(new MessageBody(id, literal.PayloadJson, literal.HeadersJson,
             literal.OrderingKey, JsonData.Fingerprint(literal))).LongLength;
     }
 

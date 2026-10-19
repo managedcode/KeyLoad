@@ -12,7 +12,7 @@ internal static class GraphSearchLineageFault
             GraphSearchLineageProtocol.Collection, GraphSearchLineageProtocol.Alpha);
         var original = state.Store.Read(view => view.ReadOwnedValue(key))
             ?? throw new InvalidOperationException(GraphSearchLineageProtocol.Missing);
-        var damaged = NativeSerialization.Serialize(GraphSearchLineageProtocol.WrongRow);
+        var damaged = OrleansSerialization.Serialize(GraphSearchLineageProtocol.WrongRow);
         string[]? restored = null;
         var position = 0L;
         byte[] identity = [];
@@ -31,7 +31,7 @@ internal static class GraphSearchLineageFault
             var originalRow = Convert.ToHexString(key) + ":" + Convert.ToHexString(original);
             restored = image.Select(row => row == damagedRow ? originalRow : row).ToArray();
             position = state.Store.Position + 1L;
-            identity = NativeSerialization.Serialize(state.Store.Identity);
+            identity = OrleansSerialization.Serialize(state.Store.Identity);
             await Assert.That(image.Count(row => row == damagedRow)).IsEqualTo(1);
         }, failures);
         ServerFailureObserver.Observe(() => Write(state, key, original), failures);

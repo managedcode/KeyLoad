@@ -13,7 +13,7 @@ internal static class CurrentJournalSignatureRefusal
     private const string Restore = "restore";
     private const string Staging = ".keyload-restore-*";
 
-    internal static async Task RunAsync(NativeBackupCutFixture fixture, CurrentJournalSignatureAuthority authority,
+    internal static async Task RunAsync(BackupCutFixture fixture, CurrentJournalSignatureAuthority authority,
         string cliTarget, CancellationToken token)
     {
         var verified = Assert.ThrowsExactly<KeyLoadException>(() => ZoneTreeStore.VerifyBackup(fixture.Backup,

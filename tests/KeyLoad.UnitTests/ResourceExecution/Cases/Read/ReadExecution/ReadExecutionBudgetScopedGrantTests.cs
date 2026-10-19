@@ -5,7 +5,7 @@ namespace KeyLoad.UnitTests.Features.ResourceExecution;
 internal sealed class ReadExecutionBudgetScopedGrantTests
 {
     [Test]
-    public async Task NativeMetadataAndRawProducerReadsShareExactScopeWhileOrdinaryViewsKeepTheirContract()
+    public async Task MetadataAndRawProducerReadsShareExactScopeWhileOrdinaryViewsKeepTheirContract()
     {
         var firstBytes = ReadExecutionBudgetGrantSeed.FirstKey.Length + ReadExecutionBudgetGrantSeed.FirstValue.Length;
         var secondBytes = ReadExecutionBudgetGrantSeed.SecondKey.Length + ReadExecutionBudgetGrantSeed.SecondValue.Length;
@@ -19,7 +19,7 @@ internal sealed class ReadExecutionBudgetScopedGrantTests
             using (work.EnterReadGrant(grant))
             {
                 metadata = work.CreateView(view).ReadValue(ReadExecutionBudgetGrantSeed.FirstKey, static _ => { });
-                producer = view.ReadValue(ReadExecutionBudgetGrantSeed.SecondKey, static _ => { }, work.ChargeNativeReadRecord);
+                producer = view.ReadValue(ReadExecutionBudgetGrantSeed.SecondKey, static _ => { }, work.ChargeReadRecord);
             }
             work.CompleteReadGrant(grant);
             var ordinary = work.CreateView(view).ReadValue(ReadExecutionBudgetGrantSeed.FirstKey, static _ => { });
@@ -34,7 +34,7 @@ internal sealed class ReadExecutionBudgetScopedGrantTests
     }
 
     [Test]
-    public async Task FailedNativeReaderRetainsAllowanceAndFreshIndependentReaderContinues()
+    public async Task FailedReaderRetainsAllowanceAndFreshIndependentReaderContinues()
     {
         var bytes = ReadExecutionBudgetGrantSeed.FirstKey.Length + ReadExecutionBudgetGrantSeed.FirstValue.Length;
         using var database = ReadExecutionBudgetGrantSeed.CreateDatabase(new()
@@ -74,7 +74,7 @@ internal sealed class ReadExecutionBudgetScopedGrantTests
     }
 
     [Test]
-    public async Task NativeDeadlineCapCannotRenewOriginalLifetimeAndExpiredCapDoesNotAffectFreshRead()
+    public async Task DeadlineCapCannotRenewOriginalLifetimeAndExpiredCapDoesNotAffectFreshRead()
     {
         using var database = ReadExecutionBudgetGrantSeed.CreateDatabase();
         var work = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits));

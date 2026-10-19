@@ -9,8 +9,8 @@ internal static class PostgresDocumentCopyProof
     private const string Failure = "PostgresFinalDocumentCopyReceiptMissing";
     private const string WalReceiptPrefix = "Named standbys flushed and replayed seeded corpus through WAL ";
     private const string InitialCorpusLabel = "seeded corpus", FinalCorpusLabel = "final document state";
-    private const string FinalStateObservation = "Final document state records={0}; sha256={1}; fresh native WAL flush/replay observation after full primary readback";
-    private const string MembershipPrefix = "Native standby identities=";
+    private const string FinalStateObservation = "Final document state records={0}; sha256={1}; fresh execution WAL flush/replay observation after full primary readback";
+    private const string MembershipPrefix = "Execution standby identities=";
     private static readonly CompositeFormat FinalStateObservationFormat = CompositeFormat.Parse(FinalStateObservation);
     internal static TargetProfile BindFinalState(TargetProfile observed, TargetProfile initial, DocumentComparisonSchedule schedule)
     {

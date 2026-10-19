@@ -1,12 +1,12 @@
 using KeyLoad.Client;
-using KeyLoad.UnitTests.Features.ClusterRouting;
+using KeyLoad.UnitTests.Features.OrleansExecution;
 using static KeyLoad.UnitTests.Features.ClientApi.DeclaredResponseEofProtocol;
 
 namespace KeyLoad.UnitTests.Features.ClientApi;
 
 internal static class DeclaredResponseEofStages
 {
-    internal static async Task RunAsync(ConnectionNativeScenario scenario, PrincipalRecord principal,
+    internal static async Task RunAsync(ConnectionScenario scenario, PrincipalRecord principal,
         KeyLoadClientKestrelServer server, DeclaredResponseEofEndpoint endpoint, DeclaredResponseEofTasks tasks,
         AtomicPartitionPlacementResolution placement, CancellationToken token)
     {
@@ -33,7 +33,7 @@ internal static class DeclaredResponseEofStages
         await endpoint.RequireCountsAsync();
     }
 
-    private static async Task ReadAsync(ConnectionNativeScenario scenario, PrincipalRecord principal,
+    private static async Task ReadAsync(ConnectionScenario scenario, PrincipalRecord principal,
         KeyLoadClient client, DeclaredResponseEofEndpoint endpoint, DeclaredResponseEofTasks tasks,
         DeclaredResponseEofCut cut, CancellationToken token)
     {

@@ -8,7 +8,7 @@ internal sealed class ZoneTreePointCacheCapacityTests
     private static readonly TimeSpan WaitLimit = TimeSpan.FromSeconds(10);
 
     [Test]
-    public async Task OversizedKeyValueAndUnavailableIndexReturnNativeBytesWithoutRetention()
+    public async Task OversizedKeyValueAndUnavailableIndexReturnBytesWithoutRetention()
     {
         using var fixture = new ZoneTreePointCacheFileFixture();
         var store = fixture.OpenStore(maxValueBytes: 1, maxKeyBytes: 8);
@@ -29,7 +29,7 @@ internal sealed class ZoneTreePointCacheCapacityTests
             var second = unavailable.Read(view => view.ReadOwnedValue(key));
             var noIndex = unavailable.GetPointCacheDiagnostics();
             await Assert.That(second).IsEquivalentTo(value);
-            await Assert.That(noIndex.NativeLookups).IsEqualTo(1L);
+            await Assert.That(noIndex.RuntimeLookups).IsEqualTo(1L);
             await Assert.That(noIndex.Admissions).IsEqualTo(0L);
             await Assert.That(noIndex.ReadBypasses).IsGreaterThan(0L);
             await Assert.That(limitedPool.Budget.GetSnapshot().RetainedBytes).IsEqualTo(0L);
@@ -41,7 +41,7 @@ internal sealed class ZoneTreePointCacheCapacityTests
 
         await Assert.That(first).IsEquivalentTo(value);
         await Assert.That(longKeyValue).IsEquivalentTo(new byte[] { 9 });
-        await Assert.That(afterOversized.NativeLookups).IsEqualTo(2L);
+        await Assert.That(afterOversized.RuntimeLookups).IsEqualTo(2L);
         await Assert.That(afterOversized.AdmissionBypasses).IsEqualTo(2L);
         await Assert.That(afterOversized.ReadBypasses).IsEqualTo(1L);
         await Assert.That(afterOversized.RetainedBytes).IsGreaterThan(0L);
@@ -130,9 +130,9 @@ internal sealed class ZoneTreePointCacheCapacityTests
         {
             await entered.Task.WaitAsync(WaitLimit, TimeProvider.System);
             var before = store.GetPointCacheDiagnostics();
-            var nativeValue = store.Read(view => view.ReadOwnedValue(keys[17]));
+            var runtimeValue = store.Read(view => view.ReadOwnedValue(keys[17]));
             var pressured = store.GetPointCacheDiagnostics();
-            await Assert.That(nativeValue).IsEquivalentTo(new byte[] { 17 });
+            await Assert.That(runtimeValue).IsEquivalentTo(new byte[] { 17 });
             await Assert.That(pressured.EvictionAttempts - before.EvictionAttempts).IsEqualTo(16L);
             await Assert.That(pressured.AdmissionBypasses - before.AdmissionBypasses).IsEqualTo(1L);
         }

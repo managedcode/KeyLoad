@@ -17,7 +17,7 @@ internal static class TransactionalReadViewCommands
                 DocumentIndexCommittedScanOracle.DeletedJson, 0L),
             new PutDocument(DocumentIndexCommittedScanOracle.Collection, DocumentIndexCommittedScanOracle.StableId,
                 DocumentIndexCommittedScanOracle.StableJson, 0L));
-        state.Identity = NativeReadCutStoreStateAssertions.SnapshotIdentity(state.Store);
+        state.Identity = ReadCutStoreStateAssertions.SnapshotIdentity(state.Store);
         state.OldPosition = state.Store.Position;
         state.OldImage = QueueImage(state.Store);
         await DocumentIndexCommittedScanOracle.AssertOldCutAsync(

@@ -29,12 +29,12 @@ internal static class EventQueueStateEnvelopeSourceAssertions
             KeySpace.Partition(FeedFamily, fixture.Partition, InitialRevision)
         })
         {
-            await EqualAsync(NativeSerialization.Deserialize<EventRecord>(Required(fixture, key)), record);
+            await EqualAsync(OrleansSerialization.Deserialize<EventRecord>(Required(fixture, key)), record);
         }
         await EqualAsync(fixture.Store.Read(view => view.GetRecord<EventIdentity>(KeySpace.Partition(
             IdentityFamily, fixture.Partition, Streams, Item, InitialGeneration, Item))),
             new EventIdentity(Item, InitialGeneration, InitialRevision));
-        await Assert.That(NativeSerialization.Deserialize<long>(Required(fixture,
+        await Assert.That(OrleansSerialization.Deserialize<long>(Required(fixture,
             KeySpace.Partition(SequenceFamily, fixture.Partition)))).IsEqualTo(TopicEventSequence);
         var expectedPage = new StreamPage(fixture.Stream, new(InitialRevision, InitialRevision, InitialGeneration),
             [record], fixture.Store.Position, false, null, fixture.Store.Position);
@@ -85,13 +85,13 @@ internal static class EventQueueStateEnvelopeSourceAssertions
     {
         var key = KeySpace.Partition(TopicEventFamily, fixture.Partition, Topic, InitialGeneration, InitialRevision);
         var body = Required(fixture, key);
-        await EqualAsync(NativeSerialization.Deserialize<SourceEventRecord>(body),
+        await EqualAsync(OrleansSerialization.Deserialize<SourceEventRecord>(body),
             new SourceEventRecord(fixture.TopicSource, InitialRevision, TopicEventSequence,
                 new(Item, EventType, Payload, Headers), fixture.At));
         await EqualAsync(fixture.Store.Read(view => view.GetRecord<TopicHead>(
             KeySpace.Partition(TopicHeadFamily, fixture.Partition, Topic))),
             new TopicHead(InitialRevision, InitialRevision, InitialGeneration, body.LongLength));
-        await Assert.That(NativeSerialization.Deserialize<long>(Required(fixture, KeySpace.Partition(
+        await Assert.That(OrleansSerialization.Deserialize<long>(Required(fixture, KeySpace.Partition(
             TopicIdentityFamily, fixture.Partition, Topic, InitialGeneration, Item)))).IsEqualTo(InitialRevision);
         foreach (var family in new[] { TopicEventFamily, TopicHeadFamily, TopicIdentityFamily })
         {

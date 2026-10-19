@@ -2,7 +2,7 @@ using KeyLoad.Server;
 
 namespace KeyLoad.UnitTests.Features.StorageRecovery;
 
-/// <summary>Retains actual native fault-test owners until their original disposal succeeds.</summary>
+/// <summary>Retains actual execution fault-test owners until their original disposal succeeds.</summary>
 internal sealed class StorageFailureOwnerLifetime
 {
     private readonly HashSet<IDisposable> owners = [];

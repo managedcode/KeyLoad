@@ -4,13 +4,13 @@ internal static class QueueClaimAckCrashProtocol
 {
     internal const string ClaimMode = "queue-claim-commit-crash";
     internal const string AckMode = "queue-ack-commit-crash";
-    internal const string OperationFile = "queue-claim-ack-operation.native";
-    internal const string BaselineFile = "queue-claim-ack-baseline.native";
-    internal const string TargetFile = "queue-claim-ack-target.native";
-    internal const string PhysicalTargetFile = "queue-claim-ack-physical-target.native";
+    internal const string OperationFile = "queue-claim-ack-operation.execution";
+    internal const string BaselineFile = "queue-claim-ack-baseline.execution";
+    internal const string TargetFile = "queue-claim-ack-target.execution";
+    internal const string PhysicalTargetFile = "queue-claim-ack-physical-target.execution";
     internal const int AdjacentPosition = 1;
     internal const int PlacementVersion = 1;
-    internal const string DeliveryFile = "queue-claim-ack-delivery.native";
+    internal const string DeliveryFile = "queue-claim-ack-delivery.execution";
     internal const string Queue = "claim-ack";
     internal const string Message = "original";
     internal const string Healthy = "healthy";

@@ -1,6 +1,6 @@
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
-using KeyLoad.AppHost.Features.ClusterReplication;
+using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.AppHost.Features.StorageRecovery;
 using KeyLoad.AppHost.Hosting;
 using KeyLoad.Server;
@@ -26,7 +26,7 @@ internal static class FunctionalFileOwnershipProfileModel
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            KeyLoadResources.AddKeyLoad(builder);
+            AppHostProgram.AddKeyLoad(builder);
             await Assert.That(AppHostOptionsRegistration.Get(builder).Control.Value.ExclusiveOwnerContention).IsTrue();
             app = builder.Build();
             var model = app.Services.GetRequiredService<DistributedApplicationModel>();

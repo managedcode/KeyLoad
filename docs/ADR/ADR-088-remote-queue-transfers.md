@@ -19,7 +19,7 @@ OutputPending; external side effects remain outside database guarantees.
 Implementation contract: [RemoteTransfers](../Features/Messaging/RemoteTransfers.md),
 REQ/AC-XFER-001–005.
 The linked contract contains ordered stages, exact ownership, baseline, tests,
-native serialization, retained payload, resource/retention limits and rollout/
+serialization, retained payload, resource/retention limits and rollout/
 rollback. ADR-002/003/024/026/028/029/030/036/082/125/136 remain mandatory.
 
 ```mermaid

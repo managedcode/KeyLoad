@@ -23,7 +23,7 @@ internal sealed class BenchmarkSessionMixedWorkload(BenchmarkSessionContext cont
             lanes = await MeasureStreamsAsync(token).ConfigureAwait(false);
             if (lanes.Any(lane => lane.Measurement.Failures != BenchmarkSessionLimits.NoObservedItems || lane.Measurement.Attempts != context.Options.Operations))
             {
-                return state.Failed(BenchmarkSessionProtocol.Mixed, BenchmarkSessionProtocol.MixedNativeAcknowledgementsIncomplete, timer, lanes);
+                return state.Failed(BenchmarkSessionProtocol.Mixed, BenchmarkSessionProtocol.MixedAcknowledgementsIncomplete, timer, lanes);
             }
             if (lanes.Max(lane => lane.FirstStartedMs) >= lanes.Min(lane => lane.LastCompletedMs))
             {
@@ -33,7 +33,7 @@ internal sealed class BenchmarkSessionMixedWorkload(BenchmarkSessionContext cont
             var proof = await context.Verification.VerifyAsync(true, token).ConfigureAwait(false);
             return context.Target is IBenchmarkSessionQueries
                 ? state.Report(BenchmarkSessionProtocol.Mixed, BenchmarkSessionProtocol.Measured, null, proof.Records, lanes, lanes.Max(lane => lane.Measurement.ElapsedSeconds))
-                : state.Report(BenchmarkSessionProtocol.Mixed, BenchmarkSessionProtocol.Failed, BenchmarkSessionProtocol.NativeAdapterSessionQueryLifecycleUnavailable, proof.Records, lanes, lanes.Max(lane => lane.Measurement.ElapsedSeconds));
+                : state.Report(BenchmarkSessionProtocol.Mixed, BenchmarkSessionProtocol.Failed, BenchmarkSessionProtocol.AdapterSessionQueryLifecycleUnavailable, proof.Records, lanes, lanes.Max(lane => lane.Measurement.ElapsedSeconds));
         }
         catch (Exception error) when (BenchmarkSessionFailure.IsNonfatal(error))
         {

@@ -15,8 +15,8 @@ internal static class TopicRetentionCorruptionFixture
     {
         var command = new CommandRequest(Guid.NewGuid(), fixture.Owner.Partition, [new PublishTopic("topic", [new("event4", "Created", "{\"n\":4}")])]);
         var receipt = fixture.Submit(command).Get<CommitReceipt>();
-        await Assert.That(Convert.ToHexString(NativeSerialization.Serialize(receipt.Mutations.Single())))
-            .IsEqualTo(Convert.ToHexString(NativeSerialization.Serialize(new MutationReceipt("publishTopic", "topic", "event4", 4))));
+        await Assert.That(Convert.ToHexString(OrleansSerialization.Serialize(receipt.Mutations.Single())))
+            .IsEqualTo(Convert.ToHexString(OrleansSerialization.Serialize(new MutationReceipt("publishTopic", "topic", "event4", 4))));
         var page = fixture.Database.ReadEventSource("root", new(fixture.Source, AfterPosition: 3));
         await Assert.That(page.Events.Single().Data).IsEqualTo(new EventData("event4", "Created", "{\"n\":4}"));
         await Assert.That(page.Events.Single().EventSequence).IsEqualTo(4L);

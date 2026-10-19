@@ -8,9 +8,9 @@ public static class AnalyticsStoreProtocol
     /// <summary>Stable batch delete mutation discriminator.</summary>
     public const string DeleteKind = "deleteAnalyticsEvents";
     /// <summary>HTTP route for authorized raw event pages.</summary>
-    public const string ReadRoute = "/v1/analytics/read";
-    /// <summary>HTTP route for complete native aggregates.</summary>
-    public const string AggregateRoute = "/v1/analytics/aggregate";
+    public const string ReadRoute = "/analytics/read";
+    /// <summary>HTTP route for complete execution aggregates.</summary>
+    public const string AggregateRoute = "/analytics/aggregate";
     /// <summary>Official MCP and T-SQL EXEC raw-read identity.</summary>
     public const string ReadTool = "keyload_analytics_read";
     /// <summary>Official MCP and T-SQL EXEC aggregate identity.</summary>

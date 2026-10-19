@@ -24,8 +24,8 @@ internal sealed class TopicRetentionClusterTests(ClusterFixture fixture)
             new(Guid.NewGuid(), scenario.Subscription, 1, SubscriptionStart.FromNow), token));
         var command = scenario.Purge();
         var purged = await McpCallerAssertions.SuccessAsync<CommitReceipt>(await session.CallAsync(McpCallerTools.DocumentsCommit, command, token));
-        await Assert.That(NativeSerialization.Serialize(purged.Value.Mutations.Single()).SequenceEqual(
-            NativeSerialization.Serialize(new MutationReceipt("purgeTopic", "topic", "2", 2)))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(purged.Value.Mutations.Single()).SequenceEqual(
+            OrleansSerialization.Serialize(new MutationReceipt("purgeTopic", "topic", "2", 2)))).IsTrue();
         var replay = await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(command, token));
         await Assert.That(JsonDefaults.Serialize(replay).AsSpan().SequenceEqual(JsonDefaults.Serialize(purged.Value))).IsTrue();
         var original = await McpCallerAssertions.SuccessAsync<CommitReceipt>(await session.CallAsync(
@@ -50,8 +50,8 @@ internal sealed class TopicRetentionClusterTests(ClusterFixture fixture)
         var healthyCommand = healthySql.Parameters![TopicRetentionClusterScenario.ArgumentsKey]
             .GetProperty(TopicRetentionClusterScenario.RequestKey).Deserialize<CommandRequest>(JsonDefaults.Options)!;
         await Assert.That(healthyReceipt.CommandId).IsEqualTo(healthyCommand.CommandId);
-        await Assert.That(NativeSerialization.Serialize(healthyReceipt.Mutations.Single()).SequenceEqual(
-            NativeSerialization.Serialize(new MutationReceipt("publishTopic", "topic", "event4", 4)))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(healthyReceipt.Mutations.Single()).SequenceEqual(
+            OrleansSerialization.Serialize(new MutationReceipt("publishTopic", "topic", "event4", 4)))).IsTrue();
         var sqlReplay = await SqlClusterProtocol.McpAsync<CommitReceipt>(session, healthySql, token);
         await Assert.That(JsonDefaults.Serialize(sqlReplay).AsSpan().SequenceEqual(JsonDefaults.Serialize(healthyReceipt))).IsTrue();
         var healthy = await McpCallerAssertions.SuccessAsync<EventSourcePage>(await session.CallAsync(McpCallerTools.EventsRead,

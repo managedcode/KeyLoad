@@ -2,7 +2,7 @@ using ManagedCode.Communication;
 
 namespace KeyLoad.Client;
 
-/// <summary>Invokes administrator-only maintenance through the same authenticated native request stream.</summary>
+/// <summary>Invokes administrator-only maintenance through the same authenticated execution request stream.</summary>
 public static class TextIndexMaintenanceClient
 {
     /// <summary>Builds, restores or releases one exact node-owned disposable generation.</summary>

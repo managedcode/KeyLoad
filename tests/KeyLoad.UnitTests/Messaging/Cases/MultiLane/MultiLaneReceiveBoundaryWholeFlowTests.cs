@@ -3,7 +3,7 @@ using TUnit.Assertions.Enums;
 
 namespace KeyLoad.UnitTests.Features.Messaging;
 
-/// <summary>Real post-commit parent expiry and post-submit native byte-bound uncertainty.</summary>
+/// <summary>Real post-commit parent expiry and post-submit execution byte-bound uncertainty.</summary>
 [NotInParallel]
 internal sealed class MultiLaneReceiveBoundaryWholeFlowTests
 {
@@ -13,17 +13,17 @@ internal sealed class MultiLaneReceiveBoundaryWholeFlowTests
         var clock = new MultiLaneReceiveExpiryClock();
         await using var fixture = new RequestCqrsHostedRuntimeFixture(clock);
         await fixture.InitializeAsync();
-        var lanes = MultiLaneReceiveNativeFlow.Seed(fixture, 2);
+        var lanes = MultiLaneReceiveFlow.Seed(fixture, 2);
         var request = new MultiLaneReceiveRequest(Guid.NewGuid(),
             [new(Guid.NewGuid(), lanes[0]), new(Guid.NewGuid(), lanes[1])]);
-        var untouched = NativeSerialization.Serialize(fixture.Database.Database.InspectMessage("root", lanes[1], "message")!);
+        var untouched = OrleansSerialization.Serialize(fixture.Database.Database.InspectMessage("root", lanes[1], "message")!);
         var cut = fixture.Database.Store.Position;
         clock.Arm(() => fixture.Database.Store.Position, cut);
-        var reply = await MultiLaneReceiveNativeFlow.ReceiveAsync(fixture, request);
+        var reply = await MultiLaneReceiveFlow.ReceiveAsync(fixture, request);
         await Assert.That(reply.Error).IsNull().Because(MultiLaneReceiveFailureObservation.Summary(fixture));
-        var result = MultiLaneReceiveNativeFlow.Value(reply);
+        var result = MultiLaneReceiveFlow.Value(reply);
         await Assert.That(result.Outcomes.Length).IsEqualTo(2);
-        await MultiLaneReceiveNativeFlow.CommittedAsync(result.Outcomes[0], request.Requests[0]);
+        await MultiLaneReceiveFlow.CommittedAsync(result.Outcomes[0], request.Requests[0]);
         await Assert.That(result.StopError).IsEqualTo(ErrorCode.TokenInvalidated);
         await Assert.That(result.SafeDetail).IsEqualTo(GrainRoutingProtocol.InvalidRequest);
         await Assert.That(result.Outcomes[1].Status).IsEqualTo(QueueLaneReceiveStatus.NotAttempted);
@@ -36,19 +36,19 @@ internal sealed class MultiLaneReceiveBoundaryWholeFlowTests
         await Assert.That(fixture.Database.Store.Position).IsEqualTo(cut + 1);
         await Assert.That(OutcomeStoreOracle.ReadPartition(fixture.Database.Store, fixture.Database.Partition,
             "root", request.Requests[1].RequestId)).IsNull();
-        await Assert.That(NativeSerialization.Serialize(fixture.Database.Database.InspectMessage("root", lanes[1], "message")!)
+        await Assert.That(OrleansSerialization.Serialize(fixture.Database.Database.InspectMessage("root", lanes[1], "message")!)
             .SequenceEqual(untouched)).IsTrue();
         var persistedOutcome = OutcomeStoreOracle.ReadPartition(fixture.Database.Store, fixture.Database.Partition,
             "root", request.Requests[0].RequestId)
             ?? throw new InvalidOperationException("The committed first-lane outcome is absent.");
         var persisted = persistedOutcome.Get<ReceiveResult>();
-        await Assert.That(NativeSerialization.Serialize(persisted).SequenceEqual(NativeSerialization.Serialize(result.Outcomes[0].Result!))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(persisted).SequenceEqual(OrleansSerialization.Serialize(result.Outcomes[0].Result!))).IsTrue();
         var state = QueueWholeFlowStorage.Bytes(fixture.Database.Store);
         var position = fixture.Database.Store.Position;
         var retry = new MultiLaneReceiveRequest(Guid.NewGuid(), [request.Requests[0]]);
-        var recovered = await MultiLaneReceiveNativeFlow.ReceiveAsync(fixture, retry);
+        var recovered = await MultiLaneReceiveFlow.ReceiveAsync(fixture, retry);
         await Assert.That(recovered.Error).IsNull().Because(MultiLaneReceiveFailureObservation.Summary(fixture));
-        var expired = MultiLaneReceiveNativeFlow.Value(recovered);
+        var expired = MultiLaneReceiveFlow.Value(recovered);
         await Assert.That(expired.RequestId).IsEqualTo(retry.RequestId);
         await Assert.That(expired.Outcomes.Length).IsEqualTo(1);
         await Assert.That(expired.StopError).IsNull();
@@ -62,8 +62,8 @@ internal sealed class MultiLaneReceiveBoundaryWholeFlowTests
         var retained = OutcomeStoreOracle.ReadPartition(fixture.Database.Store, fixture.Database.Partition,
             "root", request.Requests[0].RequestId)
             ?? throw new InvalidOperationException("The original first-lane outcome is absent after replay.");
-        await Assert.That(NativeSerialization.Serialize(retained.Get<ReceiveResult>())
-            .SequenceEqual(NativeSerialization.Serialize(persisted))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(retained.Get<ReceiveResult>())
+            .SequenceEqual(OrleansSerialization.Serialize(persisted))).IsTrue();
         await Assert.That(fixture.Database.Store.Position).IsEqualTo(position);
         await Assert.That(QueueWholeFlowStorage.Bytes(fixture.Database.Store)).IsEquivalentTo(state, CollectionOrdering.Matching);
         await HealthyAsync(fixture);
@@ -89,13 +89,13 @@ internal sealed class MultiLaneReceiveBoundaryWholeFlowTests
         var payload = "{\"value\":\"" + new string('a', 2048) + "\"}";
         fixture.Database.Commit(new EnqueueMessage(lanes[0].Queue, "large", payload, "{\"kind\":\"large\"}"),
             new EnqueueMessage(lanes[1].Queue, "untouched", "{\"value\":2}"));
-        var before = NativeSerialization.Serialize(fixture.Database.Database.InspectMessage("root", lanes[1], "untouched")!);
+        var before = OrleansSerialization.Serialize(fixture.Database.Database.InspectMessage("root", lanes[1], "untouched")!);
         var request = new MultiLaneReceiveRequest(Guid.NewGuid(),
             [new(Guid.NewGuid(), lanes[0]), new(Guid.NewGuid(), lanes[1])]);
         var cut = fixture.Database.Store.Position;
-        var reply = await MultiLaneReceiveNativeFlow.ReceiveAsync(fixture, request);
+        var reply = await MultiLaneReceiveFlow.ReceiveAsync(fixture, request);
         await Assert.That(reply.Error).IsNull().Because(MultiLaneReceiveFailureObservation.Summary(fixture));
-        var result = MultiLaneReceiveNativeFlow.Value(reply);
+        var result = MultiLaneReceiveFlow.Value(reply);
         await Assert.That(result.Outcomes.Length).IsEqualTo(2);
         await Assert.That(result.Outcomes[0].Status).IsEqualTo(QueueLaneReceiveStatus.Unknown);
         await Assert.That(result.Outcomes[0].Error).IsEqualTo(ErrorCode.UnknownWriteOutcome);
@@ -115,14 +115,14 @@ internal sealed class MultiLaneReceiveBoundaryWholeFlowTests
         await Assert.That(delivery.HeadersJson).IsEqualTo("{\"kind\":\"large\"}");
         await Assert.That(delivery.Attempt).IsEqualTo(1);
         await Assert.That(delivery.LeaseVersion).IsEqualTo(1L);
-        await Assert.That(NativeSerialization.Serialize(new GrainValue(original)).Length).IsGreaterThan(replyCeiling);
+        await Assert.That(OrleansSerialization.Serialize(new GrainValue(original)).Length).IsGreaterThan(replyCeiling);
         await Assert.That(OutcomeStoreOracle.ReadPartition(fixture.Database.Store, fixture.Database.Partition,
             "root", request.Requests[1].RequestId)).IsNull();
-        await Assert.That(NativeSerialization.Serialize(fixture.Database.Database.InspectMessage("root", lanes[1], "untouched")!)
+        await Assert.That(OrleansSerialization.Serialize(fixture.Database.Database.InspectMessage("root", lanes[1], "untouched")!)
             .SequenceEqual(before)).IsTrue();
         var state = QueueWholeFlowStorage.Bytes(fixture.Database.Store);
         var position = fixture.Database.Store.Position;
-        var retry = await MultiLaneReceiveNativeFlow.ReceiveAsync(fixture, request);
+        var retry = await MultiLaneReceiveFlow.ReceiveAsync(fixture, request);
         await Assert.That(retry.Payload.Span.SequenceEqual(reply.Payload.Span)).IsTrue();
         await Assert.That(fixture.Database.Store.Position).IsEqualTo(position);
         await Assert.That(QueueWholeFlowStorage.Bytes(fixture.Database.Store)).IsEquivalentTo(state, CollectionOrdering.Matching);
@@ -131,13 +131,13 @@ internal sealed class MultiLaneReceiveBoundaryWholeFlowTests
 
     private static async Task HealthyAsync(RequestCqrsHostedRuntimeFixture fixture)
     {
-        var lane = MultiLaneReceiveNativeFlow.Seed(fixture, 1)[0];
+        var lane = MultiLaneReceiveFlow.Seed(fixture, 1)[0];
         var request = new MultiLaneReceiveRequest(Guid.NewGuid(), [new(Guid.NewGuid(), lane)]);
-        var reply = await MultiLaneReceiveNativeFlow.ReceiveAsync(fixture, request);
+        var reply = await MultiLaneReceiveFlow.ReceiveAsync(fixture, request);
         await Assert.That(reply.Error).IsNull().Because(MultiLaneReceiveFailureObservation.Summary(fixture));
-        var result = MultiLaneReceiveNativeFlow.Value(reply);
+        var result = MultiLaneReceiveFlow.Value(reply);
         await Assert.That(result.StopError).IsNull();
         await Assert.That(result.Outcomes.Length).IsEqualTo(1);
-        await MultiLaneReceiveNativeFlow.CommittedAsync(result.Outcomes[0], request.Requests[0]);
+        await MultiLaneReceiveFlow.CommittedAsync(result.Outcomes[0], request.Requests[0]);
     }
 }

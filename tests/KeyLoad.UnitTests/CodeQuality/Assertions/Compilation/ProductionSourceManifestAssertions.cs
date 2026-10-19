@@ -118,7 +118,7 @@ internal static class ProductionSourceManifestAssertions
             await Assert.That(compiledIdentity.GetProperty(CompileReceiptProperty).GetProperty(CentralInputCountProperty).GetInt32()).IsEqualTo(CentralInputCount);
             await AssertHashAsync(compiledIdentity.GetProperty(DllHashProperty).GetString());
             await AssertHashAsync(compiledIdentity.GetProperty(PdbHashProperty).GetString());
-            await ProductionSourceManifestNativeIdentityAssertions.AssertAsync(compiledIdentity, module);
+            await ProductionSourceManifestIdentityAssertions.AssertAsync(compiledIdentity, module);
         }
     }
 

@@ -15,8 +15,8 @@ internal static class AggregateReplayClusterTokens
     internal const string ShippedEventId = "order-shipped";
     internal const string DispatchedEventId = "order-dispatched";
     internal const string DeliveredEventId = "order-delivered";
-    internal const string Reducer = "orders.reducer.v1";
-    internal const string UnknownReducer = "orders.reducer.v2";
+    internal const string Reducer = "orders.reducer";
+    internal const string UnknownReducer = "orders.reducer";
     internal const string EventType = "OrderChanged";
     internal const string CountProperty = "count";
     internal const string IncrementProperty = "increment";

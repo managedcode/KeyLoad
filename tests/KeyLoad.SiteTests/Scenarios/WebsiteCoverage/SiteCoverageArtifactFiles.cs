@@ -8,7 +8,7 @@ internal static class SiteCoverageArtifactFiles
     {
         if (!Directory.Exists(directory))
         {
-            result.Errors.Add(SiteCoverageTokens.MissingNativeReceiptsFailure);
+            result.Errors.Add(SiteCoverageTokens.MissingReceiptsFailure);
             return [];
         }
 
@@ -25,12 +25,12 @@ internal static class SiteCoverageArtifactFiles
         CancellationToken cancellationToken)
     {
         var info = new FileInfo(path);
-        if (!info.Exists || info.Length < SiteCoverageTokens.Zero || info.Length > SiteCoverageTokens.MaximumNativeFileBytes ||
-            ++result.FilesRead > SiteCoverageTokens.MaximumNativeFiles ||
-            result.BytesRead + info.Length > SiteCoverageTokens.MaximumNativeBytes ||
+        if (!info.Exists || info.Length < SiteCoverageTokens.Zero || info.Length > SiteCoverageTokens.RuntimeMaximumFileBytes ||
+            ++result.FilesRead > SiteCoverageTokens.RuntimeMaximumFiles ||
+            result.BytesRead + info.Length > SiteCoverageTokens.RuntimeMaximumBytes ||
             !HasNoLinkedAncestors(RequiredCoverageRoot(), path))
         {
-            throw SiteCoverageNativeJson.Invalid(SiteCoverageTokens.InvalidCoverageFailure);
+            throw SiteCoverageJson.Invalid(SiteCoverageTokens.InvalidCoverageFailure);
         }
 
         await using var input = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read,
@@ -45,10 +45,10 @@ internal static class SiteCoverageArtifactFiles
                 break;
             }
 
-            if (output.Length + read > SiteCoverageTokens.MaximumNativeFileBytes ||
-                result.BytesRead + output.Length + read > SiteCoverageTokens.MaximumNativeBytes)
+            if (output.Length + read > SiteCoverageTokens.RuntimeMaximumFileBytes ||
+                result.BytesRead + output.Length + read > SiteCoverageTokens.RuntimeMaximumBytes)
             {
-                throw SiteCoverageNativeJson.Invalid(SiteCoverageTokens.InvalidCoverageFailure);
+                throw SiteCoverageJson.Invalid(SiteCoverageTokens.InvalidCoverageFailure);
             }
 
             await output.WriteAsync(buffer.AsMemory(SiteTokens.Zero, read), cancellationToken).ConfigureAwait(false);
@@ -87,7 +87,7 @@ internal static class SiteCoverageArtifactFiles
     {
         if (!Directory.Exists(directory))
         {
-            result.Errors.Add(SiteCoverageTokens.MissingNativeReceiptsFailure);
+            result.Errors.Add(SiteCoverageTokens.MissingReceiptsFailure);
             return [];
         }
 
@@ -126,7 +126,7 @@ internal static class SiteCoverageArtifactFiles
     public static int ReadInt32(JsonElement value, string property)
     {
         var item = value.GetProperty(property);
-        return item.TryGetInt32(out var number) ? number : throw SiteCoverageNativeJson.Invalid(SiteCoverageTokens.JsonFailure);
+        return item.TryGetInt32(out var number) ? number : throw SiteCoverageJson.Invalid(SiteCoverageTokens.JsonFailure);
     }
 
     public static string RelativePath(string root, string path)
@@ -135,7 +135,7 @@ internal static class SiteCoverageArtifactFiles
         var fullPath = Path.GetFullPath(path);
         if (!fullPath.StartsWith(fullRoot, PathComparison))
         {
-            throw SiteCoverageNativeJson.Invalid(SiteCoverageTokens.CoveragePathFailure);
+            throw SiteCoverageJson.Invalid(SiteCoverageTokens.CoveragePathFailure);
         }
 
         return Path.GetRelativePath(root, path).Replace(Path.DirectorySeparatorChar, SiteCoverageTokens.Slash[SiteCoverageTokens.Zero]);
@@ -145,7 +145,7 @@ internal static class SiteCoverageArtifactFiles
     {
         var root = Environment.GetEnvironmentVariable(SiteCoverageTokens.CoverageRootEnvironment);
         return root is not null && Path.IsPathFullyQualified(root)
-            ? Path.GetFullPath(root) : throw SiteCoverageNativeJson.Invalid(SiteCoverageTokens.InvalidRootFailure);
+            ? Path.GetFullPath(root) : throw SiteCoverageJson.Invalid(SiteCoverageTokens.InvalidRootFailure);
     }
 
     public static bool HasNoLinkedAncestors(string root, string path)

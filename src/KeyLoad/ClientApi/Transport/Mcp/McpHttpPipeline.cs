@@ -4,12 +4,12 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
 
-/// <summary>Bounds actual HTTP framing and resolves persisted authority before native stateless SDK processing.</summary>
+/// <summary>Bounds actual HTTP framing and resolves persisted authority before execution stateless SDK processing.</summary>
 internal static class McpHttpPipeline
 {
     internal const string StateItem = "keyload-mcp-state";
 
-    /// <summary>Owns the private replay and all leases until the native endpoint has finished draining.</summary>
+    /// <summary>Owns the private replay and all leases until the execution endpoint has finished draining.</summary>
     internal static async Task RunAsync(HttpContext context, RequestDelegate next)
     {
         var governor = context.RequestServices.GetRequiredService<HttpAdmissionGovernor>();
@@ -22,14 +22,14 @@ internal static class McpHttpPipeline
         try
         {
             context.Items[StateItem] = state;
-            _ = await DatabaseAuthenticationComposition.AuthenticateAsync(context).ConfigureAwait(false);
+            _ = await DatabaseAuthenticationComposition.AuthenticateAsync(context);
             var headers = McpTransportGuard.ReadHeaders(context.Request.Headers, executionOptions);
             context.Items[ServerProtocol.PrincipalItem] = state.Principal;
             if (HttpMethods.IsPost(context.Request.Method))
             {
                 SetBodyLimit(context, governor.Limits.MaxBodyBytes);
                 pendingBody = await McpFrameBody.ReadAsync(originalBody, context.Request.ContentLength,
-                    governor.Limits.MaxBodyBytes, executionOptions, context.RequestAborted).ConfigureAwait(false);
+                    governor.Limits.MaxBodyBytes, executionOptions, context.RequestAborted);
                 McpTransportGuard.Inspect(pendingBody.Bytes, headers);
                 context.Request.Body = pendingBody.OpenReader();
                 state.Attach(pendingBody);
@@ -39,7 +39,7 @@ internal static class McpHttpPipeline
             {
                 state.Admit(default, context.RequestAborted);
             }
-            await next(context).ConfigureAwait(false);
+            await next(context);
         }
         catch (KeyLoadException error) when (McpTransportDiagnostics.HasStage(error))
         {

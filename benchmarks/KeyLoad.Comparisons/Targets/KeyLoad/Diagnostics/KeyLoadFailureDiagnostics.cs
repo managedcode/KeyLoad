@@ -51,7 +51,7 @@ internal static class KeyLoadFailureDiagnostics
     internal static bool IsRecoverableOutputFailure(Exception error)
         => error is IOException or InvalidOperationException or ArgumentException or NotSupportedException;
 
-    internal static async Task ObserveAsync(global::KeyLoad.Client.KeyLoadClient client, global::KeyLoad.PartitionRef partition, ComparisonCase failed, IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<NativeComparisonDiagnosticOptions> diagnosticOptions, TimeProvider timeProvider, CancellationToken cancellationToken)
+    internal static async Task ObserveAsync(global::KeyLoad.Client.KeyLoadClient client, global::KeyLoad.PartitionRef partition, ComparisonCase failed, IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<ComparisonDiagnosticOptions> diagnosticOptions, TimeProvider timeProvider, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(client);
         ArgumentNullException.ThrowIfNull(partition);
@@ -87,7 +87,7 @@ internal static class KeyLoadFailureDiagnostics
 
 public sealed partial class KeyLoadTarget : IComparisonFailureDiagnostics
 {
-    private readonly IOptions<NativeComparisonDiagnosticOptions> diagnostics = NativeComparisonDiagnosticOptions.Require(diagnosticOptions);
+    private readonly IOptions<ComparisonDiagnosticOptions> diagnostics = ComparisonDiagnosticOptions.Require(diagnosticOptions);
     /// <inheritdoc />
     Task IComparisonFailureDiagnostics.ObserveFailureAsync(ComparisonCase failed, CancellationToken cancellationToken)
         => KeyLoadFailureDiagnostics.ObserveAsync(client: client, partition: partition, failed: failed, cancellationToken: cancellationToken,

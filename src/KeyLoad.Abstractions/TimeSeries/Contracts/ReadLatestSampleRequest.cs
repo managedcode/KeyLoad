@@ -6,6 +6,6 @@ namespace KeyLoad;
 /// <param name="SeriesId">Series identity.</param>
 /// <param name="AtOrBefore">Inclusive timestamp cut, or null for the latest committed sample.</param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.ReadLatestSampleRequest)]
+[Orleans.Alias(ContractAliases.ReadLatestSampleRequest)]
 public sealed record ReadLatestSampleRequest([property: Orleans.Id(0)] PartitionRef Partition, [property: Orleans.Id(1)] string Set, [property: Orleans.Id(2)] string SeriesId,
     [property: Orleans.Id(3)] DateTimeOffset? AtOrBefore = null);

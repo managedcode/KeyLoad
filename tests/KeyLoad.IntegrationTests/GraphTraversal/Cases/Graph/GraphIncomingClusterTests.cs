@@ -28,7 +28,7 @@ internal sealed class GraphIncomingClusterTests(ClusterFixture fixture)
         var sdkPage = await McpCallerAssertions.SdkSuccessAsync(await reader.IncomingEdgesAsync(request,
             deadline.Token));
         var mcpReply = await mcp.CallAsync(GraphIncomingClusterScenario.Tool, request, deadline.Token);
-        var mcpPage = await McpCallerAssertions.SuccessAsync<GraphIncomingEdgesPageV1>(mcpReply);
+        var mcpPage = await McpCallerAssertions.SuccessAsync<GraphIncomingEdgesPage>(mcpReply);
 
         await GraphIncomingClusterAssertions.AssertThreeRowsAsync(sdkPage, seed);
         await GraphIncomingClusterAssertions.AssertEquivalentAsync(sdkPage, mcpPage.Value);
@@ -57,7 +57,7 @@ internal sealed class GraphIncomingClusterTests(ClusterFixture fixture)
             var sdkPage = await McpCallerAssertions.SdkSuccessAsync(await sourceRestricted.IncomingEdgesAsync(
                 request, deadline.Token));
             var hiddenReply = await sourceMcp.CallAsync(GraphIncomingClusterScenario.Tool, request, deadline.Token);
-            var hiddenPage = await McpCallerAssertions.SuccessAsync<GraphIncomingEdgesPageV1>(hiddenReply);
+            var hiddenPage = await McpCallerAssertions.SuccessAsync<GraphIncomingEdgesPage>(hiddenReply);
             await GraphIncomingClusterAssertions.AssertSourceHiddenAsync(sdkPage, seed);
             await GraphIncomingClusterAssertions.AssertEquivalentAsync(sdkPage, hiddenPage.Value);
             await GraphIncomingClusterAssertions.AssertNoPrivatePayloadAsync(hiddenReply, seed.TargetOnlyReader.Secret);
@@ -145,7 +145,7 @@ internal sealed class GraphIncomingClusterTests(ClusterFixture fixture)
     }
 
     private static async Task AssertBudgetFailureAsync(KeyLoadClient reader, McpOfficialClient mcp,
-        ReadIncomingGraphEdgesRequestV1 request, CancellationToken cancellationToken)
+        ReadIncomingGraphEdgesRequest request, CancellationToken cancellationToken)
     {
         var limited = request with
         {
@@ -169,7 +169,7 @@ internal sealed class GraphIncomingClusterTests(ClusterFixture fixture)
         await Assert.That(page.Rows.Any(row => row.Edge.From == seed.LocalSource)).IsTrue();
     }
 
-    private static async Task AssertSecondSourceAndLocalRemainAsync(GraphIncomingEdgesPageV1 page,
+    private static async Task AssertSecondSourceAndLocalRemainAsync(GraphIncomingEdgesPage page,
         GraphIncomingClusterSeed seed)
     {
         await GraphIncomingClusterAssertions.AssertExpectedRowAsync(page, seed.SecondSource,
@@ -179,7 +179,7 @@ internal sealed class GraphIncomingClusterTests(ClusterFixture fixture)
     }
 
     private static async Task AssertTargetGraphDeniedAsync(ClusterFixture fixture, KeyLoadClient admin,
-        GraphIncomingClusterSeed seed, ReadIncomingGraphEdgesRequestV1 request, CancellationToken cancellationToken)
+        GraphIncomingClusterSeed seed, ReadIncomingGraphEdgesRequest request, CancellationToken cancellationToken)
     {
         var identity = await GraphIncomingClusterScenario.CreateDocumentOnlyReaderAsync(admin, seed,
             cancellationToken);

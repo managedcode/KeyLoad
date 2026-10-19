@@ -44,7 +44,7 @@ internal static class SubscriptionPausedDrainAssertions
     {
         var bytes = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
-        var identity = NativeSerialization.Serialize(store.Identity);
+        var identity = OrleansSerialization.Serialize(store.Identity);
         foreach (var entry in history)
         {
             var replay = db.Apply(entry.Operation);
@@ -56,11 +56,11 @@ internal static class SubscriptionPausedDrainAssertions
             }
             else if (entry.Result.Value is SubscriptionInfo)
             {
-                await NativeReplayResultAssertions.Same<SubscriptionInfo>(replay, entry.Result);
+                await ReplayResultAssertions.Same<SubscriptionInfo>(replay, entry.Result);
             }
             else
             {
-                await NativeReplayResultAssertions.Same<CommitReceipt>(replay, entry.Result);
+                await ReplayResultAssertions.Same<CommitReceipt>(replay, entry.Result);
             }
             var saved = SubscriptionProcessingAtomicAssertions.OutcomeBytes(store, group, entry.Operation.CommandId);
             await Assert.That(saved.AsSpan().SequenceEqual(entry.Saved)).IsTrue();

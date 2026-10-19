@@ -13,7 +13,7 @@ internal static class Bm25PortableFamilyBackupSeed
     internal const string SecondSubject = "bm25-portable-second";
     internal const string Root = "root";
 
-    internal static async Task<(Bm25CorpusCurrentV1[] Heads, byte[][] Bytes)> CreateAsync(EventingArtifactFixture fixture,
+    internal static async Task<(Bm25CorpusCurrent[] Heads, byte[][] Bytes)> CreateAsync(EventingArtifactFixture fixture,
         CancellationToken token)
     {
         var source = fixture.Source;
@@ -50,7 +50,7 @@ internal static class Bm25PortableFamilyBackupSeed
         return ([first.Head, second.Head], [first.Bytes, second.Bytes]);
     }
 
-    internal static async Task<(Bm25CorpusCurrentV1 Head, byte[] Bytes)> PublishAsync(TestDatabase source,
+    internal static async Task<(Bm25CorpusCurrent Head, byte[] Bytes)> PublishAsync(TestDatabase source,
         string subject, CancellationToken token, Guid? expectedGeneration = null)
     {
         var operation = Bm25CorpusCapture.Create(source.Database, Root, subject,
@@ -64,7 +64,7 @@ internal static class Bm25PortableFamilyBackupSeed
         var bytes = source.Store.Read(view => view.ReadOwnedValue(KeySpace.Partition(
             Bm25CorpusProtocol.CurrentFamily, source.Partition, Collection, Field,
             TextProjectionProtocol.TokenizerVersion, subject)))!;
-        var current = NativeSerialization.Deserialize<Bm25CorpusCurrentV1>(bytes);
+        var current = OrleansSerialization.Deserialize<Bm25CorpusCurrent>(bytes);
         await Assert.That(current.Partition).IsEqualTo(source.Partition);
         await Assert.That(current.PrincipalId).IsEqualTo(subject);
         await Assert.That(current.PolicyEpoch).IsEqualTo(1L);

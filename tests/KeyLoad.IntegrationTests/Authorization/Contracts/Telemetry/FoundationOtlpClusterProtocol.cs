@@ -35,7 +35,7 @@ internal static class FoundationOtlpClusterProtocol
     internal const string ParentOperation = "Foundation telemetry caller";
     internal const string Failure = "The original Orleans telemetry receiver contract failed.";
     internal const string Header = "X-KeyLoad-Private";
-    internal const string HeaderCanary = "cluster-native-private-header";
+    internal const string HeaderCanary = "cluster-execution-private-header";
     internal const string ApiKeyHeader = "X-API-Key";
     internal const string ExchangePath = "/api/telemetry/validateToken";
     internal const string SpanPath = "/api/telemetry/spans";

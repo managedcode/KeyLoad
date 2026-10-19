@@ -34,7 +34,7 @@ internal static class EventProjectionRecoveryQueryOracle
     internal static async Task AssertChangedPayloadConflictsAsync(ZoneTreeStore store, DatabaseEngine database,
         Command<DatabaseCommand> operation, CommitReceipt receipt)
     {
-        var command = NativeSerialization.Deserialize<CommandRequest>(operation.Value!.Input.Span, NativeValidationProfile.PublicInputElements);
+        var command = OrleansSerialization.Deserialize<CommandRequest>(operation.Value!.Input.Span, ValidationProfile.PublicInputElements);
         var projection = (ApplyVectorProjection)command.Mutations.Single();
         var changed = projection with
         {
@@ -64,11 +64,11 @@ internal static class EventProjectionRecoveryQueryOracle
         [new PatchDocument(EventProjectionCrashScenario.Collection, EventProjectionCrashScenario.SourceId,
             [new(EventProjectionCrashScenario.InputField, PatchKind.Set, InputReplacementJson)],
             EventProjectionCrashScenario.DocumentRevision)]);
-        var operation = NativeSerialization.Deserialize<Command<DatabaseCommand>>(await File.ReadAllBytesAsync(
+        var operation = OrleansSerialization.Deserialize<Command<DatabaseCommand>>(await File.ReadAllBytesAsync(
             Path.Combine(root, EventProjectionCrashScenario.OperationFile), cancellationToken));
         var projection = EventProjectionRecoveryStoreOracle.ReadProjection(operation);
         var before = EventProjectionRecoveryStoreOracle.CaptureCommittedBytes(store, operation, projection);
-        var baselineHead = NativeSerialization.Deserialize<OutboxHead>(await File.ReadAllBytesAsync(
+        var baselineHead = OrleansSerialization.Deserialize<OutboxHead>(await File.ReadAllBytesAsync(
             Path.Combine(root, EventProjectionCrashScenario.OutboxHeadFile), cancellationToken));
         var projectionOutbox = store.Read(view => view.ReadOwnedValue(
             EventProjectionCrashScenario.OutboxEntryKey(baselineHead.Tail + 1)))
@@ -101,7 +101,7 @@ internal static class EventProjectionRecoveryQueryOracle
 
     private static async Task AssertVectorBytesAsync(byte[] actual, float[] values)
     {
-        var expected = NativeSerialization.Serialize(new VectorRecord(EventProjectionCrashScenario.TargetId,
+        var expected = OrleansSerialization.Serialize(new VectorRecord(EventProjectionCrashScenario.TargetId,
             EventProjectionCrashScenario.VectorField, EventProjectionCrashScenario.Space, [.. values],
             EventProjectionCrashScenario.DocumentRevision));
         await Assert.That(actual.AsSpan().SequenceEqual(expected)).IsTrue();

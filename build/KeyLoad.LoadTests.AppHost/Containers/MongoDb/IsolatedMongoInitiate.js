@@ -1,7 +1,7 @@
-// Runs once as a same-image native mongosh client, outside every timed operation.
+// Runs once as a same-image execution mongosh client, outside every timed operation.
 const MongoDiagnosticStage = Object.freeze({ authentication: 'Authentication', ping: 'Ping', initiate: 'Initiate', replica: 'ReplicaStatus', unknown: 'Unknown' });
 const MongoDiagnosticPredicate = Object.freeze({
-    none: 'None', awaiting: 'AwaitingResponse', exception: 'NativeException', command: 'CommandOk', set: 'ReplicaSet', shape: 'MembersShape',
+    none: 'None', awaiting: 'AwaitingResponse', exception: 'RuntimeException', command: 'CommandOk', set: 'ReplicaSet', shape: 'MembersShape',
     count: 'MemberCount', health: 'MemberHealth', primary: 'PrimaryCount', secondary: 'SecondaryCount', voting: 'VotingCount',
     writable: 'WritableVotingCount', majority: 'WriteMajorityCount', unknown: 'UnknownStage'
 });
@@ -18,7 +18,7 @@ const MongoDiagnosticCodeNames = new Map([
     [109, 'ConfigurationInProgress'], [10107, 'NotWritablePrimary'], [11600, 'InterruptedAtShutdown'], [11601, 'Interrupted'],
     [11602, 'InterruptedDueToReplStateChange'], [13435, 'NotPrimaryNoSecondaryOk']
 ]);
-const MongoDiagnosticPrefix = 'MongoNativeBootstrapDiagnostic ';
+const MongoDiagnosticPrefix = 'MongoBootstrapDiagnostic ';
 
 function mongoDiagnosticNumber(value) {
     return typeof value === MongoDiagnosticKind.number && Number.isSafeInteger(value) && value >= 0 && value <= MongoDiagnosticLimits.integer ? value : null;
@@ -88,13 +88,13 @@ function projectMongoDiagnostic(stage, host, status, error, expectedHosts, expec
     };
 }
 
-// Native bootstrap composition.
+// Execution bootstrap composition.
 const MongoBootstrap = Object.freeze({
     readinessPath: '/bootstrap/isolated-mongo-readiness.js', zero: 0, one: 1, primaryPriority: 2,
     commandMs: 2000, pollMs: 500, scheme: 'mongodb://', database: 'admin',
     direct: '/admin?directConnection=true&serverSelectionTimeoutMS=2000&connectTimeoutMS=2000&socketTimeoutMS=2000',
-    authenticationFailed: 'MongoNativeAuthenticationFailed', timeout: 'MongoNativeBootstrapTimeout',
-    initiationFailed: 'MongoNativeReplicaInitiationFailed'
+    authenticationFailed: 'MongoAuthenticationFailed', timeout: 'MongoBootstrapTimeout',
+    initiationFailed: 'MongoReplicaInitiationFailed'
 });
 const hosts = process.env.KEYLOAD_MONGO_MEMBERS.split(',');
 const set = process.env.KEYLOAD_MONGO_REPLICA_SET;
@@ -190,9 +190,9 @@ async function bootstrap() {
 bootstrap().then(
     () => quit(0),
     error => {
-        // Native failures are retained as a fixed classification without credential-bearing details.
+        // Execution failures are retained as a fixed classification without credential-bearing details.
         if (lastDiagnostic === null || lastDiagnostic.predicate === MongoDiagnosticPredicate.none || lastDiagnostic.predicate === MongoDiagnosticPredicate.awaiting) rememberException(error);
-        print('MongoNativeBootstrapFailed');
+        print('MongoBootstrapFailed');
         printDiagnostic();
         quit(1);
     }

@@ -91,7 +91,7 @@ internal sealed class DocumentIndexCommittedScanScenario : IAsyncDisposable
     {
         if (!scanEntered.Wait(OperationDeadline, cancellation.Token))
         {
-            throw new TimeoutException("The native document/index scan did not reach its owned barrier.");
+            throw new TimeoutException("The execution document/index scan did not reach its owned barrier.");
         }
         writerTask = Task.Run(() =>
         {
@@ -136,7 +136,7 @@ internal sealed class DocumentIndexCommittedScanScenario : IAsyncDisposable
         reopened = new(new(database.Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         reopenedStoreOpen = true;
         var engine = DocumentIndexCommittedScanOperations.CreateEngine(reopened);
-        await NativeReadCutStoreStateAssertions.AssertIdentityAndPositionAsync(reopened, expectedIdentity, committedPosition);
+        await ReadCutStoreStateAssertions.AssertIdentityAndPositionAsync(reopened, expectedIdentity, committedPosition);
         await DocumentIndexCommittedScanOracle.AssertCommittedCutAsync(
             DocumentIndexCommittedScanOracle.ReadCut(reopened, database.Partition), committedPosition);
 

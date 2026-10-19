@@ -8,7 +8,7 @@ internal sealed class ComparisonProgressFile
 {
     private const string PendingSuffix = ".pending";
     private const string LinkedPath = "The progress path contains a symbolic link.";
-    private static TimeSpan WriteDeadline => NativeExecutionPolicyFixture.Harness().Value.ProgressWriteTimeout;
+    private static TimeSpan WriteDeadline => ExecutionPolicyFixture.Harness().Value.ProgressWriteTimeout;
     private readonly Channel<string> latest = Channel.CreateBounded<string>(new BoundedChannelOptions(1)
     {
         SingleReader = true,
@@ -64,7 +64,7 @@ internal sealed class ComparisonProgressFile
             RequireUnlinkedAncestors(directory);
             RequireUnlinkedFile(path);
             await using (var stream = new FileStream(pending, FileMode.CreateNew, FileAccess.Write,
-                FileShare.None, NativeExecutionPolicyFixture.Harness().Value.ProgressFileBufferBytes, FileOptions.Asynchronous))
+                FileShare.None, ExecutionPolicyFixture.Harness().Value.ProgressFileBufferBytes, FileOptions.Asynchronous))
             {
                 ownsPending = true;
                 await stream.WriteAsync(Encoding.UTF8.GetBytes(line + Environment.NewLine), deadline.Token);

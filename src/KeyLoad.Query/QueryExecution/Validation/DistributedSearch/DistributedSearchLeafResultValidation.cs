@@ -8,7 +8,7 @@ internal static class DistributedSearchLeafResultValidation
     private const int NoRecords = 0;
     private const string InvalidResult = "The distributed search receiving result is inconsistent with its original phase.";
 
-    internal static void Require(DistributedSearchOwnedLeafV1 request, DistributedSearchLeafResultV1 result,
+    internal static void Require(DistributedSearchOwnedLeaf request, DistributedSearchLeafResult result,
         ReadExecutionBudget budget)
     {
         ArgumentNullException.ThrowIfNull(request);
@@ -33,7 +33,7 @@ internal static class DistributedSearchLeafResultValidation
         budget.CheckResult(result);
     }
 
-    private static bool ValidSlots(DistributedSearchOwnedLeafV1 request, DistributedSearchLeafResultV1 result)
+    private static bool ValidSlots(DistributedSearchOwnedLeaf request, DistributedSearchLeafResult result)
         => request.Phase switch
         {
             DistributedSearchPhase.Statistics => result.Candidates is null && result.Projection is null

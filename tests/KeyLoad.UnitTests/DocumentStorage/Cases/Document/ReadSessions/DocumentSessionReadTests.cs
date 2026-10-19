@@ -25,9 +25,9 @@ internal sealed class DocumentSessionReadTests
         var receipt = Apply(db, FirstJson, Invalid);
         var reference = new EntityRef(db.Partition, Collection, DocumentId);
         var request = new GetDocumentRequest(reference, receipt.Token);
-        var native = NativeSerialization.Deserialize<GetDocumentRequest>(NativeSerialization.Serialize(request));
+        var execution = OrleansSerialization.Deserialize<GetDocumentRequest>(OrleansSerialization.Serialize(request));
         var json = JsonSerializer.Deserialize<GetDocumentRequest>(JsonSerializer.Serialize(request, JsonDefaults.Options), JsonDefaults.Options)!;
-        await LiteralAsync(db.Database.GetDocument(Root, native.Reference, native.MinimumToken), reference, FirstJson, First);
+        await LiteralAsync(db.Database.GetDocument(Root, execution.Reference, execution.MinimumToken), reference, FirstJson, First);
         await LiteralAsync(db.Database.GetDocument(Root, json.Reference, json.MinimumToken), reference, FirstJson, First);
         var before = Snapshot(db);
         var position = db.Store.Position;
@@ -44,7 +44,7 @@ internal sealed class DocumentSessionReadTests
             GetDocumentRequest[] wireRequests =
             [
                 direct,
-                NativeSerialization.Deserialize<GetDocumentRequest>(NativeSerialization.Serialize(direct)),
+                OrleansSerialization.Deserialize<GetDocumentRequest>(OrleansSerialization.Serialize(direct)),
                 JsonSerializer.Deserialize<GetDocumentRequest>(JsonSerializer.Serialize(direct, JsonDefaults.Options), JsonDefaults.Options)!
             ];
             foreach (var rejectedRequest in wireRequests)
@@ -63,7 +63,7 @@ internal sealed class DocumentSessionReadTests
     }
 
     [Test]
-    public async Task CancelledMinimumReadReturnsNoResultAndFreshNativeReadSucceeds()
+    public async Task CancelledMinimumReadReturnsNoResultAndFreshReadSucceeds()
     {
         using var db = new TestDatabase();
         db.Configure(Collection, ResourceKind.Collection);
@@ -116,14 +116,14 @@ internal sealed class DocumentSessionReadTests
     }
 
     [Test]
-    public async Task MissingAppliedAuthorityFailsClosedAndRestoredNativeReadContinues()
+    public async Task MissingAppliedAuthorityFailsClosedAndRestoredReadContinues()
     {
         using var db = new TestDatabase();
         db.Configure(Collection, ResourceKind.Collection);
         var receipt = Apply(db, FirstJson, Invalid);
         var reference = new EntityRef(db.Partition, Collection, DocumentId);
         var original = db.Store.Read(view => view.ReadOwnedValue(KeySpace.AppliedBytes))
-            ?? throw new InvalidOperationException("The native applied seed is missing.");
+            ?? throw new InvalidOperationException("The execution applied seed is missing.");
         db.Store.Commit((transaction, _) => { transaction.Delete(KeySpace.AppliedBytes); return true; });
         var before = Snapshot(db);
         var position = db.Store.Position;
@@ -146,8 +146,8 @@ internal sealed class DocumentSessionReadTests
         var receipt = Apply(db, FirstJson, Invalid);
         var reference = new EntityRef(db.Partition, Collection, DocumentId);
         var original = db.Store.Read(view => view.ReadOwnedValue(KeySpace.AppliedBytes))
-            ?? throw new InvalidOperationException("The native applied seed is missing.");
-        var corrupt = truncated ? original[..^1] : NativeSerialization.Serialize(-First);
+            ?? throw new InvalidOperationException("The execution applied seed is missing.");
+        var corrupt = truncated ? original[..^1] : OrleansSerialization.Serialize(-First);
         db.Store.Commit((transaction, _) => { transaction.Put(KeySpace.AppliedBytes, corrupt); return true; });
         var before = Snapshot(db);
         var position = db.Store.Position;
@@ -176,7 +176,7 @@ internal sealed class DocumentSessionReadTests
         var page = view.Scan([], SnapshotBound);
         if (page.HasMore)
         {
-            throw new InvalidOperationException("The complete session-read fixture exceeds its native snapshot bound.");
+            throw new InvalidOperationException("The complete session-read fixture exceeds its execution snapshot bound.");
         }
         return page.Records.Select(record => (Convert.ToHexString(record.Key.Span),
             Convert.ToHexString(record.Value.Span))).ToArray();

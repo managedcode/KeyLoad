@@ -18,28 +18,28 @@ internal static class ConfigurationReadOperations
     {
         IInvocationOperation invocation => IsOptionsActivator(compilation, invocation) ||
             invocation.TargetMethod.Name == ConfigurationMetadataNames.Create &&
-            MagicRuntimeOperations.IsNativeType(compilation, invocation.TargetMethod.ContainingType, ConfigurationMetadataNames.StaticOptions) &&
+            MagicRuntimeOperations.IsType(compilation, invocation.TargetMethod.ContainingType, ConfigurationMetadataNames.StaticOptions) &&
             invocation.TargetMethod.TypeArguments.Any(type => ConfigurationOwnership.IsOptionsType(compilation, type)),
         IObjectCreationOperation { Type: INamedTypeSymbol type } =>
-            (MagicRuntimeOperations.IsNativeType(compilation, type, ConfigurationMetadataNames.OptionsFactory) ||
-             MagicRuntimeOperations.IsNativeType(compilation, type, ConfigurationMetadataNames.OptionsManager)) &&
+            (MagicRuntimeOperations.IsType(compilation, type, ConfigurationMetadataNames.OptionsFactory) ||
+             MagicRuntimeOperations.IsType(compilation, type, ConfigurationMetadataNames.OptionsManager)) &&
             type.TypeArguments.Any(argument => ConfigurationOwnership.IsOptionsType(compilation, argument)),
         _ => false
     };
 
     private static bool IsRawMethod(Compilation compilation, IMethodSymbol method) =>
         ConfigurationOwnership.IsConfiguration(compilation, method.ContainingType) ||
-        MagicRuntimeOperations.IsNativeType(compilation, method.ContainingType, ConfigurationMetadataNames.ConfigurationBinder) ||
-        MagicRuntimeOperations.IsNativeType(compilation, method.ContainingType, ConfigurationMetadataNames.ConfigurationExtensions) ||
-        MagicRuntimeOperations.IsNativeMetadataType(compilation, method.ContainingType, ConfigurationMetadataNames.ConfigurationRootExtensions) ||
-        MagicRuntimeOperations.IsNativeMetadataType(compilation, method.ContainingType, ConfigurationMetadataNames.Environment) &&
+        MagicRuntimeOperations.IsType(compilation, method.ContainingType, ConfigurationMetadataNames.ConfigurationBinder) ||
+        MagicRuntimeOperations.IsType(compilation, method.ContainingType, ConfigurationMetadataNames.ConfigurationExtensions) ||
+        MagicRuntimeOperations.IsMetadataType(compilation, method.ContainingType, ConfigurationMetadataNames.ConfigurationRootExtensions) ||
+        MagicRuntimeOperations.IsMetadataType(compilation, method.ContainingType, ConfigurationMetadataNames.Environment) &&
             method.Name is ConfigurationMetadataNames.GetEnvironmentVariable or
                 ConfigurationMetadataNames.GetEnvironmentVariables or ConfigurationMetadataNames.GetCommandLineArgs or
                 ConfigurationMetadataNames.ExpandEnvironmentVariables;
 
     private static bool IsOptionsActivator(Compilation compilation, IInvocationOperation invocation) =>
         invocation.TargetMethod.Name == ConfigurationMetadataNames.CreateInstance &&
-        MagicRuntimeOperations.IsNativeMetadataType(compilation, invocation.TargetMethod.ContainingType, ConfigurationMetadataNames.Activator) &&
+        MagicRuntimeOperations.IsMetadataType(compilation, invocation.TargetMethod.ContainingType, ConfigurationMetadataNames.Activator) &&
         (invocation.TargetMethod.TypeArguments.Any(type => ConfigurationOwnership.IsOptionsType(compilation, type)) ||
          invocation.Arguments.Any(argument => KnownOptionsType(compilation, argument.Value)));
 

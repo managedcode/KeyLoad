@@ -33,7 +33,7 @@ internal sealed class ReadExecutionBudgetGrantCancellationTests
     }
 
     [Test]
-    public async Task GrantRangeUsesRootDeadlineDuringNativeTraversal()
+    public async Task GrantRangeUsesRootDeadlineDuringTraversal()
     {
         using var database = ReadExecutionBudgetGrantSeed.CreateDatabase();
         var clock = new AdvancingClock();

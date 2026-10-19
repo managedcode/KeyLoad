@@ -22,5 +22,5 @@ internal static class RemoteTransferRepairClaimsFields
     internal const uint OwnerCut = 17;
     internal const uint ReadGeneration = 18;
     internal const uint ReceiptDigest = 19;
-    internal const string Alias = "keyload.core.queue-transfer.repair-claims.v1";
+    internal const string Alias = "keyload.core.queue-transfer.repair-claims";
 }

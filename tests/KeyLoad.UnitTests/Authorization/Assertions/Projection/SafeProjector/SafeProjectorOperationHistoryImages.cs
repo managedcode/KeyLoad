@@ -17,7 +17,7 @@ internal static class SafeProjectorOperationHistoryImages
         return owner.Store.Read(view =>
         {
             var outcome = view.ReadOwnedValue(key) ?? throw new InvalidOperationException(Missing);
-            var locator = view.ReadOwnedValue(KeySpace.OutcomeLocatorV2(
+            var locator = view.ReadOwnedValue(KeySpace.OutcomeLocator(
                 owner.Source.Partition, operation.UserId!, operation.CommandId));
             var validLocator = global ? locator is null : locator is not null && locator.AsSpan().SequenceEqual(key);
             if (!validLocator)

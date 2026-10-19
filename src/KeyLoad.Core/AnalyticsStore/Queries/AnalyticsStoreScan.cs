@@ -15,7 +15,7 @@ internal static class AnalyticsStoreScan
             (key, value) =>
             {
                 work.Check();
-                var stored = NativeSerialization.Deserialize<AnalyticsStoredEvent>(value);
+                var stored = OrleansSerialization.Deserialize<AnalyticsStoredEvent>(value);
                 var row = stored.Event;
                 if (row is null || row.Revision <= AbsentRevision || !key.SequenceEqual(AnalyticsStoreKeys.Event(partition, store, row.Id)))
                 {

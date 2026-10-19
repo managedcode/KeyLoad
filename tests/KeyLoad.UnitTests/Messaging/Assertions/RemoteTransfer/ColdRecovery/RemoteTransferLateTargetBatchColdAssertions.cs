@@ -1,5 +1,7 @@
 using KeyLoad.Core;
-using KeyLoad.Core.Features.ClusterRouting.Contracts;
+using KeyLoad.Core.Features.CommandOutcomes.Contracts;
+using KeyLoad.Core.Features.RuntimeJournaling.Contracts;
+using KeyLoad.Core.Features.StoragePartitions.Contracts;
 using KeyLoad.Core.Features.Messaging;
 
 namespace KeyLoad.UnitTests.Features.Messaging;
@@ -32,7 +34,7 @@ internal static class RemoteTransferLateTargetBatchColdAssertions
     {
         await FailureAsync(fixture, state);
         await Assert.That(RemoteTransferLateTargetBatchColdTrial.CounterBytes(fixture).AsSpan().SequenceEqual(counterBytes)).IsTrue();
-        var counters = NativeSerialization.Deserialize<QueueCounters>(counterBytes);
+        var counters = OrleansSerialization.Deserialize<QueueCounters>(counterBytes);
         await Assert.That(counters.StoredMessages).IsEqualTo(ThirdSequence);
         await Assert.That(counters.NextReadySequence).IsEqualTo(ThirdSequence);
         await Assert.That(counters.InFlightMessages).IsEqualTo(NoUsage);
@@ -59,7 +61,7 @@ internal static class RemoteTransferLateTargetBatchColdAssertions
     private static async Task FailureAsync(RemoteTransferDatabase fixture, RemoteTransferLateTargetBatchState state)
     {
         await RemoteTransferCoordinationColdAssertions.EqualAsync(fixture.Apply(OperationKind.Batch, state.FailedRequest), state.Failure);
-        await Assert.That(RemoteTransferAttemptColdNative.Outcome(fixture, state.FailedRequest.CommandId,
+        await Assert.That(RemoteTransferAttemptCold.Outcome(fixture, state.FailedRequest.CommandId,
             fixture.DestinationPartition).AsSpan().SequenceEqual(state.FailureBytes)).IsTrue();
     }
 

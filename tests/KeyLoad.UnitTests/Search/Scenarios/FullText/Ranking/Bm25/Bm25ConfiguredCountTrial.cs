@@ -1,5 +1,7 @@
-using KeyLoad.Core.Features.ClusterRouting.Execution;
-using KeyLoad.Core.Features.ClusterRouting.Identity;
+using KeyLoad.Core.Features.CommandOutcomes.Execution;
+using KeyLoad.Core.Features.RuntimeJournaling.Execution;
+using KeyLoad.Core.Features.CommandOutcomes.Identity;
+using KeyLoad.Core.Features.RuntimeJournaling.Identity;
 using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Core.Features.Search;
 using KeyLoad.Query.Features.Search;
@@ -25,7 +27,7 @@ internal static class Bm25ConfiguredCountTrial
         var firstExpected = Bm25OriginalPhaseRecoveryState.BeforeLocalPublish(owner.Database, owner.Source.Partition);
         var firstResult = flow.Publish(first);
         await RequireStoredAsync(flow, first, firstResult, firstExpected);
-        var originalEntry = NativeSerialization.Serialize(owner.PhaseEntry(first));
+        var originalEntry = OrleansSerialization.Serialize(owner.PhaseEntry(first));
         var next = CaptureSecond(flow);
         var replacement = flow.Capture(first.CommandId);
         var healthy = flow.Capture(replacement.CommandId);
@@ -112,15 +114,15 @@ internal static class Bm25ConfiguredCountTrial
         await Assert.That(result.Problem?.Detail).IsEqualTo(Bm25CorpusProtocol.Capacity);
 
         await Assert.That(result.Value).IsNull();
-        await NativeReplayResultAssertions.BytesAsync(NativeSerialization.Serialize(familyBefore),
-            NativeSerialization.Serialize(Family(flow)));
+        await ReplayResultAssertions.BytesAsync(OrleansSerialization.Serialize(familyBefore),
+            OrleansSerialization.Serialize(Family(flow)));
         var after = Bm25OriginalPhaseRecoveryState.Read(flow.Owner);
         await Assert.That(after.NodeId).IsEqualTo(before.NodeId);
         await Assert.That(after.Incarnation).IsEqualTo(before.Incarnation);
         await Assert.That(after.Position).IsEqualTo(checked(before.Position + 1L));
         await Assert.That(after.Applied).IsEqualTo(before.Applied);
         await Assert.That(flow.Owner.PhaseEntry(operation).CanonicalSequence).IsEqualTo(0L);
-        await NativeReplayResultAssertions.SameAsync(result, flow.Owner.Database.ResolveSubmissionOutcome(operation));
+        await ReplayResultAssertions.SameAsync(result, flow.Owner.Database.ResolveSubmissionOutcome(operation));
         await Assert.That(Outcome(flow, operation).Length).IsGreaterThan(0);
     }
 
@@ -128,7 +130,7 @@ internal static class Bm25ConfiguredCountTrial
         Command<DatabaseCommand> operation, Result<object> result, (CommitToken Token, long Applied) expected)
     {
         await Assert.That(Errors.Code(result.Problem)).IsNull();
-        var phase = NativeSerialization.Deserialize<Bm25CorpusPublicationPhaseCommand>((operation).Value!.Input.Span);
+        var phase = OrleansSerialization.Deserialize<Bm25CorpusPublicationPhaseCommand>((operation).Value!.Input.Span);
         await Assert.That(phase.Current.Statistics.DocumentCount).IsEqualTo(1);
         await Assert.That(phase.Current.Statistics.TotalLength).IsEqualTo(1L);
         var receipt = result.Get<CommitReceipt>();
@@ -139,15 +141,15 @@ internal static class Bm25ConfiguredCountTrial
         await Assert.That(flow.Owner.Store.Position).IsEqualTo(expected.Token.Position);
         var expectedReceipt = new CommitReceipt(operation.CommandId, expected.Token, [],
             flow.Owner.Database.Durability, flow.Owner.Database.AcknowledgedPersistedCopies);
-        await NativeReplayResultAssertions.BytesAsync(NativeSerialization.Serialize(expectedReceipt), NativeSerialization.Serialize(receipt));
+        await ReplayResultAssertions.BytesAsync(OrleansSerialization.Serialize(expectedReceipt), OrleansSerialization.Serialize(receipt));
         await Assert.That(receipt.Token.Incarnation).IsEqualTo(flow.Owner.Store.Identity.Incarnation);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(flow.Owner.Source.Partition.AtomicPartitionId);
         await Assert.That(receipt.Durability).IsEqualTo(flow.Owner.Database.Durability);
         var work = flow.Owner.Source.CreateReadWork(Bm25OriginalPhaseRecoveryFlow.Token);
         var actual = flow.Owner.Store.Read(view => work.CreateView(view).ReadOwnedValue(Bm25CorpusKeys.Current(phase.Current)))
             ?? throw new InvalidOperationException("The actual published corpus head is missing.");
-        await NativeReplayResultAssertions.BytesAsync(NativeSerialization.Serialize(phase.Current), actual);
-        await NativeReplayResultAssertions.SameAsync(result, flow.Owner.Database.ResolveSubmissionOutcome(operation));
+        await ReplayResultAssertions.BytesAsync(OrleansSerialization.Serialize(phase.Current), actual);
+        await ReplayResultAssertions.SameAsync(result, flow.Owner.Database.ResolveSubmissionOutcome(operation));
     }
 
     private static async Task RequireReplayAsync(Bm25OriginalPhaseRecoveryFlow flow,
@@ -155,14 +157,14 @@ internal static class Bm25ConfiguredCountTrial
     {
         var before = Bm25OriginalPhaseRecoveryState.Read(flow.Owner);
         var raw = Outcome(flow, original);
-        var entry = NativeSerialization.Serialize(flow.Owner.PhaseEntry(original));
+        var entry = OrleansSerialization.Serialize(flow.Owner.PhaseEntry(original));
         var issuance = Assert.ThrowsExactly<KeyLoadException>(() => flow.Reissue(original));
         await Assert.That(issuance.Code).IsEqualTo(ErrorCode.BudgetExceeded);
         await Assert.That(issuance.Message).IsEqualTo(ResourceEffectAdmissionProtocol.Capacity);
         await before.RequireAsync(Bm25OriginalPhaseRecoveryState.Read(flow.Owner));
-        await NativeReplayResultAssertions.SameAsync(expected, flow.Publish(original));
+        await ReplayResultAssertions.SameAsync(expected, flow.Publish(original));
         await before.RequireAsync(Bm25OriginalPhaseRecoveryState.Read(flow.Owner));
-        await NativeReplayResultAssertions.BytesAsync(raw, Outcome(flow, original));
+        await ReplayResultAssertions.BytesAsync(raw, Outcome(flow, original));
         await Bm25OriginalPhaseRecoveryState.RequireRetainedAsync(flow.Owner, original, entry);
     }
 }

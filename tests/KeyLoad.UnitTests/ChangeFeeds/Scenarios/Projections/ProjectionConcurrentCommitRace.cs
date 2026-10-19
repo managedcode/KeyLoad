@@ -31,5 +31,5 @@ internal static class ProjectionConcurrentCommitRace
             secondResult ?? throw new InvalidOperationException(MissingResult));
     }
 
-    private const string MissingResult = "The joined native projection competitors require both original outcomes.";
+    private const string MissingResult = "The joined execution projection competitors require both original outcomes.";
 }

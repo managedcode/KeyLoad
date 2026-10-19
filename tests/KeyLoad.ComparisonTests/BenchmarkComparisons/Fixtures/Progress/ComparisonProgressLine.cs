@@ -50,7 +50,7 @@ internal static partial class ComparisonProgressLine
         return Path.Combine(isolated.FullName, Failures, directory.Name, FileName);
     }
 
-    internal static bool TryFromNativeLog(string line, out string marker)
+    internal static bool TryFromLog(string line, out string marker)
     {
         marker = string.Empty;
         if (IsValid(line))
@@ -59,7 +59,7 @@ internal static partial class ComparisonProgressLine
             return true;
         }
         if (line.Length <= TimestampCharacters + 1 || line.Length > MaximumCharacters + TimestampCharacters + 1
-            || line[TimestampCharacters] != ' ' || !NativeTimestamp().IsMatch(line[..TimestampCharacters])
+            || line[TimestampCharacters] != ' ' || !RuntimeTimestamp().IsMatch(line[..TimestampCharacters])
             || !DateTimeOffset.TryParseExact(line.AsSpan(0, TimestampCharacters), TimestampFormat,
                 CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal, out _))
         {
@@ -84,5 +84,5 @@ internal static partial class ComparisonProgressLine
     private static partial Regex CellName();
 
     [GeneratedRegex("\\A[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]{7}Z\\z", RegexOptions.CultureInvariant, 100)]
-    private static partial Regex NativeTimestamp();
+    private static partial Regex RuntimeTimestamp();
 }

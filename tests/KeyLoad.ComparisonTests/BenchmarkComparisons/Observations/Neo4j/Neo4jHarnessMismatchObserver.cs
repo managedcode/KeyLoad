@@ -11,7 +11,7 @@ internal sealed class Neo4jHarnessMismatchObserver(
     IComparisonCorpus dataset,
     CancellationToken runToken) : IAsyncDisposable
 {
-    private static TimeSpan MutationTimeout => NativeExecutionPolicyFixture.Harness().Value.Neo4jMutationTimeout;
+    private static TimeSpan MutationTimeout => ExecutionPolicyFixture.Harness().Value.Neo4jMutationTimeout;
     private const string RestoreFailureMessage = "Neo4jHarnessSeedRestoreMismatch";
     private const string HttpStatusPrefix = ":HTTP";
     private readonly HttpClient client = Neo4jHarnessQueryClient.CreateClient(endpoint, password);

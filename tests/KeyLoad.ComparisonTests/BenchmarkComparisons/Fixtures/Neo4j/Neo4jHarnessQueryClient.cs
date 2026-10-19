@@ -7,7 +7,7 @@ namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 internal sealed class Neo4jHarnessQueryClient : IDisposable
 {
-    private static TimeSpan RequestTimeout => NativeExecutionPolicyFixture.Harness().Value.Neo4jRequestTimeout;
+    private static TimeSpan RequestTimeout => ExecutionPolicyFixture.Harness().Value.Neo4jRequestTimeout;
     private const string DatabaseQueryPath = "db/neo4j/query/v2";
     private readonly HttpClient client;
 

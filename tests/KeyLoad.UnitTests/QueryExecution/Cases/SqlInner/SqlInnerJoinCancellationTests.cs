@@ -11,7 +11,7 @@ internal sealed class SqlInnerJoinCancellationTests
     private const string QueryText = "SELECT TOP (10) l.order_id AS order_id, r.name AS name "
         + "FROM orders AS l INNER JOIN customers AS r ON l.customer_id = r.id "
         + "ORDER BY l.order_id ASC";
-    private const int Dialect = 2;
+    private const int Dialect = SqlOperationProtocol.DefaultQueryDialectVersion;
     private const int SeedRows = 512;
     private const int WriteBatchSize = 256;
     private const int PaddingLength = 8_192;
@@ -33,7 +33,7 @@ internal sealed class SqlInnerJoinCancellationTests
     ];
 
     [Test]
-    public async Task AcJoinCancellationAfterNativeRangeProgressSettlesTheOriginalReadAndKeepsTheStoreHealthy()
+    public async Task AcJoinCancellationAfterRangeProgressSettlesTheOriginalReadAndKeepsTheStoreHealthy()
     {
         using var database = new TestDatabase();
         Configure(database);
@@ -42,14 +42,14 @@ internal sealed class SqlInnerJoinCancellationTests
         var request = new QueryRequest(database.Partition, QueryText, AllowFullScan: true, QueryDialectVersion: Dialect);
         var position = database.Store.Position;
         var before = global::KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(database.Store);
-        var identity = Convert.ToHexString(NativeSerialization.Serialize(database.Store.Identity));
+        var identity = Convert.ToHexString(OrleansSerialization.Serialize(database.Store.Identity));
         var baseline = database.Store.GetReadDiagnostics();
         using var cancellation = new CancellationTokenSource();
-        var clock = new CancelAfterNativeRangeProgressTimeProvider(database, baseline, cancellation);
+        var clock = new CancelAfterRangeProgressTimeProvider(database, baseline, cancellation);
         var query = Task.Run(() => engine.Execute("root", request, clock, cancellation.Token));
         var failure = await Assert.ThrowsAsync<OperationCanceledException>(() => query);
 
-        await Assert.That(clock.CancellationRequestedAfterNativeProgress).IsTrue();
+        await Assert.That(clock.CancellationRequestedAfterProgress).IsTrue();
         await Assert.That(clock.ObservedRangeBytes).IsGreaterThan(baseline.RangeExaminedBytes);
         var cancellationFailure = failure ?? throw new InvalidOperationException();
         await Assert.That(cancellationFailure.CancellationToken).IsEqualTo(cancellation.Token);
@@ -69,7 +69,7 @@ internal sealed class SqlInnerJoinCancellationTests
     }
 
     [Test]
-    public async Task AcJoinDeadlineAfterNativeRangeProgressSettlesTheReadAndKeepsTheStoreHealthy()
+    public async Task AcJoinDeadlineAfterRangeProgressSettlesTheReadAndKeepsTheStoreHealthy()
     {
         using var database = new TestDatabase();
         Configure(database);
@@ -78,12 +78,12 @@ internal sealed class SqlInnerJoinCancellationTests
         var request = new QueryRequest(database.Partition, QueryText, AllowFullScan: true, QueryDialectVersion: Dialect);
         var position = database.Store.Position;
         var baseline = database.Store.GetReadDiagnostics();
-        var clock = new ExpireAfterNativeRangeProgressTimeProvider(database, baseline,
+        var clock = new ExpireAfterRangeProgressTimeProvider(database, baseline,
             database.Database.Limits.QueryDeadlineSeconds);
 
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute("root", request, clock));
 
-        await Assert.That(clock.ExpiredAfterNativeProgress).IsTrue();
+        await Assert.That(clock.ExpiredAfterProgress).IsTrue();
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
         await Assert.That(failure.Message).IsEqualTo(DeadlineDiagnostic);
         await Assert.That(database.Store.Position).IsEqualTo(position);
@@ -117,14 +117,14 @@ internal sealed class SqlInnerJoinCancellationTests
         }
     }
 
-    private sealed class CancelAfterNativeRangeProgressTimeProvider(TestDatabase database,
+    private sealed class CancelAfterRangeProgressTimeProvider(TestDatabase database,
         ZoneTreeReadSnapshot baseline, CancellationTokenSource cancellation) : TimeProvider
     {
         private long timestamp;
         private long observedRangeBytes;
         private int cancellationRequested;
 
-        internal bool CancellationRequestedAfterNativeProgress => Volatile.Read(ref cancellationRequested) != 0;
+        internal bool CancellationRequestedAfterProgress => Volatile.Read(ref cancellationRequested) != 0;
         internal long ObservedRangeBytes => Interlocked.Read(ref observedRangeBytes);
         public override long TimestampFrequency => TimeSpan.TicksPerSecond;
 
@@ -141,12 +141,12 @@ internal sealed class SqlInnerJoinCancellationTests
         }
     }
 
-    private sealed class ExpireAfterNativeRangeProgressTimeProvider(TestDatabase database,
+    private sealed class ExpireAfterRangeProgressTimeProvider(TestDatabase database,
         ZoneTreeReadSnapshot baseline, int deadlineSeconds) : TimeProvider
     {
         private long timestamp;
 
-        internal bool ExpiredAfterNativeProgress
+        internal bool ExpiredAfterProgress
         {
             get; private set;
         }
@@ -156,7 +156,7 @@ internal sealed class SqlInnerJoinCancellationTests
         {
             if (database.Store.GetReadDiagnostics().RangeExaminedBytes > baseline.RangeExaminedBytes)
             {
-                ExpiredAfterNativeProgress = true;
+                ExpiredAfterProgress = true;
                 return checked((long)(deadlineSeconds + 1) * TimestampFrequency);
             }
             return Interlocked.Increment(ref timestamp);

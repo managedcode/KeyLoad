@@ -153,27 +153,4 @@ internal sealed class ResourcePolicyUpdateRejectionTests
         await Assert.That(JsonData.Fingerprint(fixture.Resource())).IsEqualTo(JsonData.Fingerprint(previous));
     }
 
-    [Test]
-    public async Task AcRpol002BlobQuotaIsOutsideThePolicyOnlyReplacementSet()
-    {
-        var previous = new ResourceDefinition("blob-policy", ResourceKind.BlobStore,
-            ResourcePolicyUpdateFixture.DomainId)
-        {
-            BlobPolicy = new()
-        };
-        var previousPolicy = previous.BlobPolicy!;
-        var replacement = previous with
-        {
-            BlobPolicy = previousPolicy with
-            {
-                MaxBlobBytes = previousPolicy.MaxBlobBytes + 1
-            },
-            SchemaVersion = previous.SchemaVersion + 1
-        };
-
-        var failure = Assert.ThrowsExactly<KeyLoadException>(() =>
-            ResourcePolicyUpdates.Validate(previous, replacement, previous.SchemaVersion));
-
-        await Assert.That(failure!.Code).IsEqualTo(ErrorCode.UnsupportedCapability);
-    }
 }

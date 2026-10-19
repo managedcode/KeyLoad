@@ -61,7 +61,7 @@ internal sealed class RevokedOutcomeAdmissionFixture : IDisposable
         OriginalToken = ExpectedCanonicalCommit.Next(Database, Harness.Partition);
         OriginalResult = Database.Apply(Operation(Original));
         OriginalOutcome = ReadOutcome(Original.CommandId);
-        OriginalLocator = Store.Read(view => view.ReadOwnedValue(KeySpace.OutcomeLocatorV2(Harness.Partition, Worker, Original.CommandId)))
+        OriginalLocator = Store.Read(view => view.ReadOwnedValue(KeySpace.OutcomeLocator(Harness.Partition, Worker, Original.CommandId)))
             ?? throw new InvalidOperationException("The original outcome locator is absent.");
     }
     internal void Policy(long epoch, bool denied, bool revoked)
@@ -75,7 +75,7 @@ internal sealed class RevokedOutcomeAdmissionFixture : IDisposable
         Harness.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(principal)).Get<PrincipalRecord>();
     }
     internal Command<DatabaseCommand> Operation(CommandRequest command)
-        => Database.CreateCommand(OperationKind.Batch, command.CommandId, Worker, Epoch, NativeSerialization.Serialize(command));
+        => Database.CreateCommand(OperationKind.Batch, command.CommandId, Worker, Epoch, OrleansSerialization.Serialize(command));
     internal CommandRequest Next() => new(Guid.NewGuid(), Harness.Partition,
         [new PutDocument(Documents, "c", "{\"value\":3}", 0),
          new AppendEvents(Events, "stream", [new("healthy", "Created", "{\"event\":2}")], ExpectedStreamRevision.Exact(1)),

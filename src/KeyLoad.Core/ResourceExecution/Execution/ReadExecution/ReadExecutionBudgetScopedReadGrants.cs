@@ -70,7 +70,7 @@ internal sealed class ReadExecutionBudgetScopedReadGrants(ReadExecutionBudget bu
         scopedReadGrant = null;
     }
 
-    internal void ChargeNativeReadRecord(long count)
+    internal void ChargeReadRecord(long count)
     {
         if (scopedReadGrant is { } grant)
         {
@@ -78,7 +78,7 @@ internal sealed class ReadExecutionBudgetScopedReadGrants(ReadExecutionBudget bu
         }
         else
         {
-            budget.ChargeUnscopedNativeRecord(count);
+            budget.ChargeUnscopedRecord(count);
         }
     }
 
@@ -96,19 +96,19 @@ internal sealed class ReadExecutionBudgetScopedReadGrants(ReadExecutionBudget bu
     }
 
     /// <summary>Reserves one non-borrowable raw-byte ceiling for a sequential query leaf.</summary>
-    /// <param name="maximumBytes">Maximum accepted native bytes reserved for that leaf.</param>
-    /// <param name="maximumRecords">Maximum native point attempts and range records reserved for that leaf.</param>
+    /// <param name="maximumBytes">Maximum accepted execution bytes reserved for that leaf.</param>
+    /// <param name="maximumRecords">Maximum execution point attempts and range records reserved for that leaf.</param>
     /// <returns>A reader sharing this operation's aggregate bytes, deadline and cancellation.</returns>
     internal ReadExecutionBudgetReadGrant CreateReadGrant(long maximumBytes, int maximumRecords)
     {
         budget.Check();
         ArgumentOutOfRangeException.ThrowIfNegative(maximumBytes);
         ArgumentOutOfRangeException.ThrowIfNegative(maximumRecords);
-        if (maximumBytes > budget.MaximumNativeReadBytes - budget.ReadBytes - reservedReadGrantBytes)
+        if (maximumBytes > budget.RuntimeMaximumReadBytes - budget.ReadBytes - reservedReadGrantBytes)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, ReadExecutionBudget.ReadBytesExceeded);
         }
-        if (maximumRecords > budget.MaximumNativeScanRecords - examinedGrantRecords - reservedGrantRecords)
+        if (maximumRecords > budget.MaximumScanRecords - examinedGrantRecords - reservedGrantRecords)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, ExaminedRecordsExceeded);
         }
@@ -127,12 +127,12 @@ internal sealed class ReadExecutionBudgetScopedReadGrants(ReadExecutionBudget bu
             throw new ArgumentException(GrantOwnerMismatch, nameof(grant));
         }
         if (count > grant.RemainingBytes || count > reservedReadGrantBytes
-            || count > budget.MaximumNativeReadBytes - budget.ReadBytes)
+            || count > budget.RuntimeMaximumReadBytes - budget.ReadBytes)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, ReadExecutionBudget.ReadBytesExceeded);
         }
         if (grant.RemainingRecords == EmptyElementCount || reservedGrantRecords == EmptyElementCount
-            || examinedGrantRecords >= budget.MaximumNativeScanRecords)
+            || examinedGrantRecords >= budget.MaximumScanRecords)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, ExaminedRecordsExceeded);
         }
@@ -159,12 +159,12 @@ internal sealed class ReadExecutionBudgetScopedReadGrants(ReadExecutionBudget bu
             throw new ArgumentException(GrantOwnerMismatch, nameof(grant));
         }
         if (count > grant.RemainingBytes || count > reservedReadGrantBytes
-            || count > budget.MaximumNativeReadBytes - budget.ReadBytes)
+            || count > budget.RuntimeMaximumReadBytes - budget.ReadBytes)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, ReadExecutionBudget.ReadBytesExceeded);
         }
         if (records > grant.RemainingRecords || records > reservedGrantRecords
-            || records > budget.MaximumNativeScanRecords - examinedGrantRecords)
+            || records > budget.MaximumScanRecords - examinedGrantRecords)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, ExaminedRecordsExceeded);
         }

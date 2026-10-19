@@ -12,7 +12,7 @@ internal sealed class IsolatedNeo4jMutationTests
     private const string Duplicate = "[[1],[1]]";
 
     [Test]
-    public void AcIso005NativeNeo4jMutationCountMustBeExactlyOne()
+    public void AcIso005Neo4jMutationCountMustBeExactlyOne()
     {
         using var one = JsonDocument.Parse(One);
         using var zero = JsonDocument.Parse(Zero);

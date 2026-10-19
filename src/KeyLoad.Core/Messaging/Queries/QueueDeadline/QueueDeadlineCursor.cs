@@ -11,7 +11,7 @@ public sealed record QueueDeadlineCursor([property: Orleans.Id(0)] Guid Incarnat
     [property: Orleans.Id(4)] DuePrefixCursor Leased,
     [property: Orleans.Id(5)] DuePrefixCursor Metadata)
 {
-    internal const string SerializerAlias = "keyload.core.queue-deadline-cursor.v1";
+    internal const string SerializerAlias = "keyload.core.queue-deadline-cursor";
 
     internal const int ScheduledIndex = 0;
     internal const int LeasedIndex = 1;

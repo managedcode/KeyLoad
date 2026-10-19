@@ -9,7 +9,7 @@ internal sealed class QueueWorkerPollBoundaryTests
     private const long BeyondCeilingTick = 1L;
 
     [Test]
-    public async Task ExactEmptyPollCeilingAdmitsPreCancelledInvocationAndNextTickRefusesBeforeNativeIo()
+    public async Task ExactEmptyPollCeilingAdmitsPreCancelledInvocationAndNextTickRefusesBeforeIo()
     {
         using var http = new HttpClient();
         http.Dispose();

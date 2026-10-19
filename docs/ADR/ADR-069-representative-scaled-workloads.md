@@ -16,8 +16,8 @@ workloads using actual returned records and independent caller-visible oracles.
 Preserve equal corpus, query/filter, schedule, accuracy, acknowledgement,
 topology, durability and effective-resource contracts across comparable engines.
 The canonical eleven-target inventory remains in the feature specification. Each
-comparison database runs its real native server and loader in isolated Linux
-GitHub runner/job cells; record native membership and mark unsupported native
+comparison database runs its real server and loader in isolated Linux
+GitHub runner/job cells; record membership and mark unsupported execution
 capabilities/topologies explicitly unavailable. Local experiments, tiny controls,
 source settings and parser fixtures never become database measurements or website
 figures.
@@ -36,7 +36,7 @@ sum oracle `((1,000,000 / N) * N * (N - 1) / 2)`; checksum-only or attribute-onl
 proof is insufficient.
 
 Use .NET 10, one launch, eight warmups and ten actual iterations; retain 8..10
-actual result samples as the native benchmark permits, and reject a measured row
+actual result samples as the benchmark permits, and reject a measured row
 below 100 ms. The read-order,
 seed, payload bytes, key identity, full-value checks and settings are owned in
 detail by ScaledWorkloads.md. Charge the oracle and validation work inside the
@@ -44,12 +44,12 @@ measurement; do not relabel this as lookup-only. The raw-read lane is an interna
 ZoneTree diagnostic and never substitutes for a database-comparison cell or a
 public metric.
 
-The real native fixture verifies exactly N successful terminal seed writes,
+The real fixture verifies exactly N successful terminal seed writes,
 reads all N distinct complete values before timing and afterward, and preserves
-native record/residency observations. The reserved miss is not a seed. Each
+record/residency observations. The reserved miss is not a seed. Each
 successful read verifies actual identity. Preparation has the existing bounded
 20-minute deadline with cancellation checks at least every 256 operations; the
-whole native child has the current 12 GiB peak ceiling and 2 GiB total/cgroup
+whole child has the current 12 GiB peak ceiling and 2 GiB total/cgroup
 headroom requirement. Owners remain charged until original operations, readers,
 and close settle. Preserve primary and independent cleanup failures. Unobserved
 vendor constructor/close faults are explicit evidence gaps, not test-double proof.
@@ -60,7 +60,7 @@ REQ-SCALE-007 requires the subsequent genuine authorized .NET SDK and official
 MCP operations through Aspire cluster for supported ordered/range, index and bounded
 complex-query workloads, exact result/count/digest checks, error/cancel/recovery
 flows, and at least 100,000 measured operations at both required scales. The raw
-ZoneTree lane does not close this product gate. Native image, actual dataset,
+ZoneTree lane does not close this product gate. image, actual dataset,
 membership, server resource, correctness and acknowledgement evidence must all
 come from the original run and remain source/run/attempt/job/artifact bound. Retain
 original raw JSON, CSV and stdout plus the exact settings, machine and hardware
@@ -78,28 +78,28 @@ Automated acceptance remains mapped to the owning specification:
 | Requirement | Required evidence |
 |---|---|
 | REQ-SCALE-001 / AC-SCALE-001 | Compact deterministic corpus, exact key/value format, independent goldens, order and uniqueness |
-| REQ-SCALE-002 / AC-SCALE-002 | Real native seed/readback, complete distinct-value validation, owned scratch and successful cleanup |
-| REQ-SCALE-003 / AC-SCALE-003 | Actual residency, process and preparation bounds; cancellation, cleanup and source-bound native observations |
-| REQ-SCALE-004 / AC-SCALE-004 | Every measured call performs and validates one million native reads at exact 100K/1M scales |
+| REQ-SCALE-002 / AC-SCALE-002 | Real seed/readback, complete distinct-value validation, owned scratch and successful cleanup |
+| REQ-SCALE-003 / AC-SCALE-003 | Actual residency, process and preparation bounds; cancellation, cleanup and source-bound observations |
+| REQ-SCALE-004 / AC-SCALE-004 | Every measured call performs and validates one million reads at exact 100K/1M scales |
 | REQ-SCALE-005 / AC-SCALE-005 | Complete eight-cell ZoneTree profile, separate counts/operations/iterations, minimum duration and original reports |
 | REQ-SCALE-006 / AC-SCALE-006 | Local raw originals stay development-only; full comparison evidence comes from authenticated isolated Linux GitHub cells |
-| REQ-SCALE-007 / AC-SCALE-007 | Real cluster SDK/MCP product workload cohort with equal native correctness and resource contracts; currently open until proven |
+| REQ-SCALE-007 / AC-SCALE-007 | Real cluster SDK/MCP product workload cohort with equal correctness and resource contracts; currently open until proven |
 | REQ-SCALE-008 / AC-SCALE-008 | Full current-source build, normal/scalar/recovery/cluster, coverage, fault and required quality gates; no skipped or synthetic success |
 
 Source review, a valid report parser, local BDN, or a completed child exit does not
-qualify native data, process settlement, performance, coverage or durability.
+qualify data, process settlement, performance, coverage or durability.
 The status and each open qualification boundary remain in the feature spec;
 no universal winner or production-readiness
 claim follows from this diagnostic lane.
 
 ```mermaid
 flowchart LR
-    Corpus[Bounded deterministic corpus] --> Native[Actual ZoneTree or isolated native database]
-    Native --> Verify[Full data and native resource validation]
+    Corpus[Bounded deterministic corpus] --> Execution[Actual ZoneTree or isolated database]
+    Execution --> Verify[Full data and resource validation]
     Verify --> Read[1M actual reads per raw-lane invocation]
     Read --> Oracle[Identity and arithmetic oracle]
     Oracle --> Local[Development-only raw evidence]
-    Native --> Compare[Separate authenticated Linux comparison cell]
+    Execution --> Compare[Separate authenticated Linux comparison cell]
     Compare --> Website[Current complete aggregate, if ready]
 ```
 
@@ -107,7 +107,7 @@ flowchart LR
 
 The raw lane can guide storage optimization while remaining separate from product
 performance claims. Full product comparison continues to require comparable
-native execution and public caller evidence. Rollback removes only the diagnostic
+execution and public caller evidence. Rollback removes only the diagnostic
 profile and its implementation after preserving source and original evidence; it
 does not alter ZoneTree authority, WAL, Orleans request/partition ownership,
 production cluster topology, public APIs or stored data. It cannot remove correctness,

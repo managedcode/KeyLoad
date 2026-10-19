@@ -3,10 +3,10 @@ namespace KeyLoad.RecoveryTests;
 internal static class QueueEnqueueCrashProtocol
 {
     internal const string Mode = "queue-enqueue-commit-crash";
-    internal const string OperationFile = "queue-enqueue-operation.native";
-    internal const string BaselineFile = "queue-enqueue-baseline.native";
-    internal const string TargetFile = "queue-enqueue-target.native";
-    internal const string PhysicalTargetFile = "queue-enqueue-physical-target.native";
+    internal const string OperationFile = "queue-enqueue-operation.execution";
+    internal const string BaselineFile = "queue-enqueue-baseline.execution";
+    internal const string TargetFile = "queue-enqueue-target.execution";
+    internal const string PhysicalTargetFile = "queue-enqueue-physical-target.execution";
     internal const string Queue = "enqueue";
     internal const string Collection = "producer";
     internal const string Ready = "ready";
@@ -28,7 +28,7 @@ internal static class QueueEnqueueCrashProtocol
     internal const string BaselineExceeded = "The original enqueue baseline exceeded its admitted bound.";
     internal const string TerminalDomainExceeded = "The terminal enqueue domain exceeded its admitted bound.";
     internal const string UnexpectedMutation = "Unexpected enqueue producer mutation.";
-    // Independent public contract oracle reviewed against native private DuplicateMessageId.
+    // Independent public contract oracle reviewed against execution private DuplicateMessageId.
     internal const string ExpectedDuplicateMessageDetail = "A message ID is already present in this lane.";
     internal const string Tenant = "tenant";
     internal const string Database = "database";

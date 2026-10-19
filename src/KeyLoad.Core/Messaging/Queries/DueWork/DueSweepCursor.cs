@@ -10,7 +10,7 @@ public sealed record DueSweepCursor([property: Orleans.Id(0)] Guid Incarnation,
     [property: Orleans.Id(3)] DuePrefixCursor Schedules,
     [property: Orleans.Id(4)] DuePrefixCursor Sagas)
 {
-    internal const string SerializerAlias = "keyload.core.due-sweep-cursor.v1";
+    internal const string SerializerAlias = "keyload.core.due-sweep-cursor";
 
     internal static DueSweepCursor Empty(Guid incarnation, long readGeneration)
         => new(incarnation, readGeneration, DueWorkKind.Schedule, DuePrefixCursor.Empty, DuePrefixCursor.Empty);

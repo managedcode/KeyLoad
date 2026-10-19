@@ -4,7 +4,7 @@ namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 
 internal static class SqlBetweenSymmetricClusterCases
 {
-    internal const string Profile = "SQL.BetweenSymmetric.v1";
+    internal const string Profile = "SQL.BetweenSymmetric";
     internal const string AsymmetricFault = "score BETWEEN ASYMMETRIC 2 AND 1";
     internal const string AsymmetricHealthy = "score BETWEEN ASYMMETRIC 1 AND 2";
     internal const string Prefix = "SELECT label AS label FROM null_ordering WHERE ";

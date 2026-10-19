@@ -1,6 +1,6 @@
 $script:FcCoverageImages = [ordered]@{
     TestManifestName = 'functional-coverage.test-image-manifest.json'
-    InvalidBinding = 'Functional coverage has no current native product and test-image binding.'
+    InvalidBinding = 'Functional coverage has no current execution product and test-image binding.'
 }
 
 function Get-FcCompilationProducerBinding([string] $Root) {

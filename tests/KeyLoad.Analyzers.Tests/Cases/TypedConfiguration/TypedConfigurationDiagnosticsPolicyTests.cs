@@ -28,7 +28,7 @@ internal sealed class TypedConfigurationDiagnosticsPolicyTests
     }
 
     [Test]
-    public async Task TheSameNativeOptionsSnapshotReachesBothPrimitiveProjectionOwnersAsync()
+    public async Task TheSameOptionsSnapshotReachesBothPrimitiveProjectionOwnersAsync()
     {
         const string source = """
             using KeyLoad.Diagnostics.Features.ResourceExecution;
@@ -55,7 +55,7 @@ internal sealed class TypedConfigurationDiagnosticsPolicyTests
     [Test]
     [Arguments(AnalyzerFixture.ServerAssembly)]
     [Arguments("KeyLoad.Diagnostics")]
-    public async Task ApplicationSourceNamesCannotBecomeNativeOwnedPolicyApisAsync(string assemblyName)
+    public async Task ApplicationSourceNamesCannotBecomeOwnedPolicyApisAsync(string assemblyName)
     {
         const string source = """
             namespace KeyLoad.Diagnostics.Features.ResourceExecution

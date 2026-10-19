@@ -8,8 +8,8 @@ internal sealed class SqlAdmissionTests
 {
     private const string Root = "root";
     private const string Tenant = "tenant";
-    private const string QueryRoute = "/v1/query";
-    private const string DeliveryRoute = "/v1/queues/delivery";
+    private const string QueryRoute = "/query";
+    private const string DeliveryRoute = "/queues/delivery";
     private const int BodyBytes = 128;
     private static readonly PrincipalRecord Principal = new(Root, Tenant, [], []);
 

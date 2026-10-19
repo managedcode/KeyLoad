@@ -8,7 +8,7 @@ public sealed partial class DatabaseEngine
     internal RemoteTransferCoordinationHint? ReadTransferCoordinationHint(IKeyValueView view,
         ReadOnlySpan<byte> key, ReadOnlySpan<byte> value, string subject)
     {
-        var record = NativeSerialization.Deserialize<RemoteTransferIntentRecord>(value);
+        var record = OrleansSerialization.Deserialize<RemoteTransferIntentRecord>(value);
         if (record is null || record.Source is null || record.Source.Partition is null || record.TransferId == Guid.Empty
             || !key.SequenceEqual(RemoteTransferStorage.IntentKey(record.Source, record.TransferId)))
         {

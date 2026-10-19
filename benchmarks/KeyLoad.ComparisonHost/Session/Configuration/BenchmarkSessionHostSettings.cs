@@ -4,9 +4,9 @@ using Microsoft.Extensions.Configuration;
 
 namespace KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
 
-/// <summary>Validates the selected native session and retains original workflow provenance when present.</summary>
+/// <summary>Validates the selected execution session and retains original workflow provenance when present.</summary>
 [KeyLoad.ConfigurationBinding]
-internal sealed record BenchmarkSessionHostSettings(string SessionId, IsolatedHostSettings Native)
+internal sealed record BenchmarkSessionHostSettings(string SessionId, IsolatedHostSettings Execution)
 {
     internal const string Profile = BenchmarkSessionContract.Profile;
     private const int MissingJobId = 0;
@@ -47,7 +47,7 @@ internal sealed record BenchmarkSessionHostSettings(string SessionId, IsolatedHo
             .SingleOrDefault(item => item.Target == target && item.NodeCounts.Contains(nodes))?.Reason;
         var image = target == IsolatedHostConstants.KeyLoad || unsupported is not null ? null
             : IsolatedHostSettings.Required(configuration, IsolatedHostConstants.Image);
-        var execution = NativeComparisonExecutionRegistration.ReadHost(configuration);
+        var execution = ComparisonExecutionRegistration.ReadHost(configuration);
         if (job is <= MissingJobId || !Path.IsPathFullyQualified(output)
             || target != IsolatedHostConstants.KeyLoad && unsupported is null && !ComparisonExecutionIdentityImageReference.IsValid(image!, execution))
         {
@@ -60,6 +60,6 @@ internal sealed record BenchmarkSessionHostSettings(string SessionId, IsolatedHo
             new(selection, identity, worker, Path.GetFullPath(output),
                 IsolatedHostSettings.Required(configuration, ComparisonHostConstants.Storage),
                 Guid.NewGuid().ToString(ComparisonHostConstants.GuidFormat), unsupported,
-                unsupported is null ? IsolatedHostNativeSettings.Read(configuration, selection, image) : null, execution));
+                unsupported is null ? RuntimeIsolatedHostSettings.Read(configuration, selection, image) : null, execution));
     }
 }

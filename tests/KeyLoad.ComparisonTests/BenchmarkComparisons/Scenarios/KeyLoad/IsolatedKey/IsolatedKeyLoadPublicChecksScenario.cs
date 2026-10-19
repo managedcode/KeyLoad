@@ -24,7 +24,7 @@ internal sealed record IsolatedKeyLoadPublicChecksScenario(PartitionRef Partitio
     internal StreamRef Stream => new(Partition, StreamSet, "public-stream");
     internal QueueLaneRef Lane => new(Partition, Queue);
     internal InspectMessageRequest Inspect => new(Lane, MessageId);
-    internal BlobRef Blob => new(Partition, BlobStore, "public-object");
+    internal string FileResource => BlobStore;
 
     internal CommandRequest Command(params Mutation[] mutations) => new(Guid.NewGuid(), Partition, [.. mutations]);
 

@@ -5,7 +5,7 @@ using KeyLoad.Server;
 
 namespace KeyLoad.UnitTests.Features.ClientApi;
 
-/// <summary>AC-MCP-003/004/007: native bounded serialization preserves the exact canonical wire contract.</summary>
+/// <summary>AC-MCP-003/004/007: execution bounded serialization preserves the exact canonical wire contract.</summary>
 internal sealed class McpBoundedJsonTests
 {
     private const int SpareBytes = 256;
@@ -69,9 +69,9 @@ internal sealed class McpBoundedJsonTests
         await Assert.That(Encoding.UTF8.GetString(actual)).IsEqualTo(NullJson);
     }
 
-    /// <summary>A payload crossing native serializer buffer boundaries succeeds without changing its bytes.</summary>
+    /// <summary>A payload crossing execution serializer buffer boundaries succeeds without changing its bytes.</summary>
     [Test]
-    public async Task AcMcp004LargeCanonicalDtoCrossesNativeBuffersWithinItsExactBound()
+    public async Task AcMcp004LargeCanonicalDtoCrossesBuffersWithinItsExactBound()
     {
         var command = Command(new string('x', LargeValueCharacters));
         var expected = JsonDefaults.Serialize(command);
@@ -104,7 +104,7 @@ internal sealed class McpBoundedJsonTests
 
     /// <summary>The actual strict immutable-array failure is preserved instead of being relabeled as admission.</summary>
     [Test]
-    public void AcMcp007DefaultImmutableArrayRetainsItsNativeCanonicalFailure()
+    public void AcMcp007DefaultImmutableArrayRetainsItsCanonicalFailure()
     {
         var command = new CommandRequest(McpCanonicalTestData.StableId, McpCanonicalTestData.Partition, default);
         Assert.ThrowsExactly<JsonException>(() => McpBoundedJson.Serialize(command, SmallByteLimit));

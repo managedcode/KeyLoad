@@ -6,15 +6,15 @@ namespace KeyLoad.Comparisons.Targets;
 /// <param name="client">HTTP client configured for the OpenSearch endpoint and Aspire credentials; the target disposes it.</param>
 /// <param name="runId">Guid-formatted run identifier used to isolate the index name.</param>
 /// <param name="image">Pinned OpenSearch image reference checked during initialization and recorded in the profile.</param>
-/// <param name="topology">The expected one, two or three native nodes verified against the created index.</param>
-/// <param name="lifecycleOptions">Centrally validated native lifecycle policy.</param>
-/// <param name="nativeExecutionOptions">Centrally validated native adapter execution policy.</param>
+/// <param name="topology">The expected one, two or three execution nodes verified against the created index.</param>
+/// <param name="lifecycleOptions">Centrally validated execution lifecycle policy.</param>
+/// <param name="runtimeExecutionOptions">Centrally validated execution adapter execution policy.</param>
 /// <param name="provider">Borrowed clock; defaults to the system provider.</param>
 public sealed partial class OpenSearchTarget(HttpClient client, string runId, string image, ComparisonTopology topology,
-    IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<NativeComparisonExecutionOptions> nativeExecutionOptions, TimeProvider? provider = null) : IDocumentComparisonTarget
+    IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<ComparisonExecutionOptions> runtimeExecutionOptions, TimeProvider? provider = null) : IDocumentComparisonTarget
 {
     private readonly TimeProvider timeProvider = provider ?? TimeProvider.System;
-    private readonly IOptions<NativeComparisonExecutionOptions> executionOptions = NativeComparisonExecutionOptions.Require(nativeExecutionOptions);
+    private readonly IOptions<ComparisonExecutionOptions> executionOptions = ComparisonExecutionOptions.Require(runtimeExecutionOptions);
 
     private readonly string index = OpenSearchNames.IndexNamePrefix + Guid.Parse(runId).ToString(OpenSearchNames.GuidFormat);
     private readonly int expectedCopies = ComparisonTopologies.NodeCount(topology);
@@ -72,7 +72,7 @@ public sealed partial class OpenSearchTarget(HttpClient client, string runId, st
         }
 
         OpenSearchClusterObservation beforeSeed;
-        // Explicit native index creation/readiness is distinct; insertion-time index maintenance remains in load.
+        // Explicit execution index creation/readiness is distinct; insertion-time index maintenance remains in load.
         using (documentTiming?.MeasureIndex())
         {
             await OpenSearchIndex.CreateAsync(client, index, dataset.Settings.Dimensions, expectedCopies - AdjacentElementOffset, cancellationToken);

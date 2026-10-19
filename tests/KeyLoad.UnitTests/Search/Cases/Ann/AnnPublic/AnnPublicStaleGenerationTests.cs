@@ -11,23 +11,23 @@ internal sealed class AnnPublicStaleGenerationTests
     private const string UpdatedId = "seed-00000";
 
     [Test]
-    public Task CanonicalVectorChangeRejectsStalePageThenExplicitNativeRestoreReturnsCompleteLiteralPage()
+    public Task CanonicalVectorChangeRejectsStalePageThenExplicitRestoreReturnsCompleteLiteralPage()
         => AnnPublicWholeFlow.RunAsync(FullCorpus, FullCorpus, async (database, runtime, pin) =>
         {
             AnnSeedTestSupport.CommitVector(database, UpdatedId, [2f, 0f, 0f]);
-            var image = NativeAnnMaintenanceTestData.Snapshot(database);
+            var image = AnnMaintenanceTestData.Snapshot(database);
             var cut = database.Store.Position;
-            var files = NativeAnnFixtureFileSnapshot.Capture(database.Directory);
+            var files = AnnFixtureFileSnapshot.Capture(database.Directory);
             var request = AnnPublicWholeFlow.Request(database, pin);
             var engine = AnnPublicWholeFlow.Engine(database, runtime);
             AnnSearchPage? partial = null;
             var error = await Assert.ThrowsExactlyAsync<KeyLoadException>(async () =>
                 partial = await engine.ApproximateSearchAsync(AnnProjectionPinTestSupport.Principal, request))
-                ?? throw new InvalidOperationException("The stale native ANN generation did not fail.");
+                ?? throw new InvalidOperationException("The stale execution ANN generation did not fail.");
             await Assert.That(error.Code).IsEqualTo(ErrorCode.HistoryUnavailable);
             await Assert.That(partial).IsNull();
             await AnnPublicWholeFlow.UnchangedAsync(database, image, cut);
-            await Assert.That(NativeAnnFixtureFileSnapshot.Capture(database.Directory))
+            await Assert.That(AnnFixtureFileSnapshot.Capture(database.Directory))
                 .IsEquivalentTo(files, TUnit.Assertions.Enums.CollectionOrdering.Matching);
             await runtime.Owner.AbortAsync(runtime.SessionId);
             var restore = pin with
@@ -35,13 +35,13 @@ internal sealed class AnnPublicStaleGenerationTests
                 CommandId = Guid.NewGuid(),
                 Mode = AnnMaintenanceMode.Restore
             };
-            var began = await NativeAnnMaintenancePhaseAssertions.UnchangedPhaseAsync(database, runtime, restore,
+            var began = await AnnMaintenancePhaseAssertions.UnchangedPhaseAsync(database, runtime, restore,
                 AnnMaintenanceCapabilityKind.Begin);
-            _ = await NativeAnnMaintenancePhaseAssertions.UnchangedPhaseAsync(database, runtime, restore,
+            _ = await AnnMaintenancePhaseAssertions.UnchangedPhaseAsync(database, runtime, restore,
                 AnnMaintenanceCapabilityKind.Load);
-            _ = await NativeAnnMaintenancePhaseAssertions.FinishAsync(database, runtime, restore,
+            _ = await AnnMaintenancePhaseAssertions.FinishAsync(database, runtime, restore,
                 began.Source!.ThroughSequence);
-            image = NativeAnnMaintenanceTestData.Snapshot(database);
+            image = AnnMaintenanceTestData.Snapshot(database);
             cut = database.Store.Position;
             var page = await engine.ApproximateSearchAsync(AnnProjectionPinTestSupport.Principal, request);
             var expected = new AnnSearchPage(Version,

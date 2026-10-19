@@ -4,7 +4,7 @@ namespace KeyLoad.UnitTests.Features.BackupRestore;
 
 internal static class RestoreDestinationCancellationPrecedenceAssertions
 {
-    internal static async Task PreservedAsync(NativeBackupCutFixture fixture,
+    internal static async Task PreservedAsync(BackupCutFixture fixture,
         (KeyLoad.Storage.StoreIdentity Identity, long Position, string[] Rows) source,
         Dictionary<string, byte[]> archive, string parent, string[] entries, bool nonempty,
         CancellationToken token)
@@ -23,8 +23,8 @@ internal static class RestoreDestinationCancellationPrecedenceAssertions
         }
         await Assert.That(Directory.EnumerateFileSystemEntries(parent).Order(StringComparer.Ordinal).ToArray())
             .IsEquivalentTo(entries, CollectionOrdering.Matching);
-        await NativeBackupJournalRepairAssertions.SameCutAsync(source,
-            NativeBackupJournalRepairAssertions.Read(fixture.Source, token));
-        await NativeBackupJournalRepairAssertions.SameArchiveAsync(archive, fixture.Backup, token);
+        await BackupJournalRepairAssertions.SameCutAsync(source,
+            BackupJournalRepairAssertions.Read(fixture.Source, token));
+        await BackupJournalRepairAssertions.SameArchiveAsync(archive, fixture.Backup, token);
     }
 }

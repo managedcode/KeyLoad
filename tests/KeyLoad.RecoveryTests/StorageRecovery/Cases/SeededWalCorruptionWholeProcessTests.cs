@@ -6,7 +6,7 @@ internal sealed class SeededWalCorruptionWholeProcessTests
     [Arguments(1701)]
     [Arguments(1702)]
     [Arguments(1703)]
-    public async Task SavedSeedCorruptsOnlyCompleteActualNativeFrameThenTypedFailStopExactRepairHealthyTriadReplayAndCold(int seed)
+    public async Task SavedSeedCorruptsOnlyCompleteActualFrameThenTypedFailStopExactRepairHealthyTriadReplayAndCold(int seed)
     {
         var token = TestContext.Current!.Execution.CancellationToken;
         using var admission = await StorageTrialLease.AcquireAsync(token);

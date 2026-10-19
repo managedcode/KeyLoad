@@ -3,7 +3,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
 
-/// <summary>Binds scaled-fixture policy from the actual native generated runner's environment.</summary>
+/// <summary>Binds scaled-fixture policy from the actual execution generated runner's environment.</summary>
 [ConfigurationBinding]
 internal static class ScaledStorageExecutionRegistration
 {

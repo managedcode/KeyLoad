@@ -66,7 +66,7 @@ internal sealed class McpBoundedWriteStreamAsyncTests
         await Assert.That(stream.ToOwnedArray().Length).IsEqualTo(0);
     }
 
-    /// <summary>Framework async disposal clears the same native buffer and guards later asynchronous writes.</summary>
+    /// <summary>Framework async disposal clears the same execution buffer and guards later asynchronous writes.</summary>
     [Test]
     public async Task AcMcp004AsyncDisposalClearsFullPrivateCapacity()
     {

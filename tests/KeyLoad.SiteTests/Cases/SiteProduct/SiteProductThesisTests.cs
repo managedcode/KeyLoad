@@ -5,7 +5,7 @@ namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
 internal sealed class SiteProductThesisTests
 {
     [Test]
-    public async Task AC_COMP_009_ReadmeStatesEveryAiNativeThesisAsItsOwnSection()
+    public async Task AC_COMP_009_ReadmeStatesEveryAiThesisAsItsOwnSection()
     {
         var readme = await SiteProductCopy.ReadSourceAsync(SiteDatabaseCompositionTokens.ReadmePath);
         await Assert.That(SiteProductCopy.Missing(readme, SiteProductThesisTokens.ReadmeTheses)).IsEmpty();

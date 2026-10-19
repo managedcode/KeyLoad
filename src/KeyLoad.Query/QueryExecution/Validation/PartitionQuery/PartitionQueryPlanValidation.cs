@@ -17,7 +17,7 @@ internal static class PartitionQueryPlanValidation
     private const string InvalidPlanMessage = "The partition query plan is invalid.";
     private const string PlanBudgetMessage = "The partition query plan exceeds its resource budget.";
 
-    internal static PartitionRef[] Validate(PartitionQueryPlanV1 plan, DatabaseLimits limits, QueryExecutionOptions execution)
+    internal static PartitionRef[] Validate(PartitionQueryPlan plan, DatabaseLimits limits, QueryExecutionOptions execution)
     {
         ArgumentNullException.ThrowIfNull(plan);
         ArgumentNullException.ThrowIfNull(limits);
@@ -72,7 +72,7 @@ internal static class PartitionQueryPlanValidation
         return partitions;
     }
 
-    private static void ValidateBounds(PartitionQueryPlanV1 plan, DatabaseLimits limits, int maximumLeafCount)
+    private static void ValidateBounds(PartitionQueryPlan plan, DatabaseLimits limits, int maximumLeafCount)
     {
         if (plan.Version != VersionOne || plan.NodeId == Guid.Empty || plan.Incarnation == Guid.Empty
             || plan.ReadGeneration < InitialSequence || plan.Leaves.IsDefaultOrEmpty
@@ -89,8 +89,8 @@ internal static class PartitionQueryPlanValidation
         }
     }
 
-    private static AstQueryRequest NormalizeShape(PartitionQueryLeafPlanV1 leaf,
-        PartitionQueryPlanV1 plan, PartitionRef[] partitions, int index)
+    private static AstQueryRequest NormalizeShape(PartitionQueryLeafPlan leaf,
+        PartitionQueryPlan plan, PartitionRef[] partitions, int index)
     {
         if (leaf is null || leaf.Version != VersionOne || leaf.Partition is null || leaf.Request is null
             || leaf.Request.Partition is null || leaf.Request.Query is null

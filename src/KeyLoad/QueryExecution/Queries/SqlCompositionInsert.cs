@@ -13,14 +13,14 @@ internal static class SqlCompositionInsert
         {
             throw ScriptDomOperationErrors.Invalid();
         }
-        if (request.QueryDialectVersion is not (DefaultVersion or JoinedVersion))
+        if (request.QueryDialectVersion != SqlOperationProtocol.DefaultQueryDialectVersion)
         {
             throw ScriptDomOperationErrors.Unsupported();
         }
         var (target, query) = ScriptDomInsertShape.Read(statement);
         var parameters = new ScriptDomCompositionParameters(request.Parameters, positionalParameterCount, checkBudget, token);
         var (id, mutation) = target.Equals(ScriptDomInsertShape.GraphEdges, StringComparison.OrdinalIgnoreCase)
-            ? ScriptDomQueueToGraphInsert.Read(query, parameters, request.QueryDialectVersion)
+            ? ScriptDomQueueToGraphInsert.Read(query, parameters)
             : target.Equals(ScriptDomInsertShape.QueueMessages, StringComparison.OrdinalIgnoreCase)
                 ? ScriptDomGraphToQueueInsert.Read(query, parameters, request.QueryDialectVersion)
                 : throw ScriptDomOperationErrors.Unsupported();
@@ -33,6 +33,4 @@ internal static class SqlCompositionInsert
         token.ThrowIfCancellationRequested();
         return new(id, request.Partition, [mutation]);
     }
-    private const int DefaultVersion = 1;
-    internal const int JoinedVersion = 2;
 }

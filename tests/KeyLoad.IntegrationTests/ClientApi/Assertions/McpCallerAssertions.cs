@@ -8,7 +8,7 @@ using ModelContextProtocol.Protocol;
 
 namespace KeyLoad.IntegrationTests.Features.ClientApi;
 
-/// <summary>Verifies observable native SDK envelopes without replacing server behavior or exposing private failures.</summary>
+/// <summary>Verifies observable execution SDK envelopes without replacing server behavior or exposing private failures.</summary>
 internal static class McpCallerAssertions
 {
     private const int FailureReasonUtf8ByteLimit = 128;
@@ -57,7 +57,7 @@ internal static class McpCallerAssertions
         {
             ReadResponseUnavailable => "ReadTransport",
             ServerResponseUnavailable => "ServerTransport",
-            GrainRoutingProtocol.InvalidRequest => "NativeEnvelope",
+            GrainRoutingProtocol.InvalidRequest => "RuntimeEnvelope",
             _ => "ServerOrUnknown"
         };
         return "The canonical SDK outcome reported " + ClosedErrorCode(problem?.ErrorCode)
@@ -90,7 +90,7 @@ internal static class McpCallerAssertions
         return Encoding.UTF8.GetByteCount(reason) < FailureReasonUtf8ByteLimit ? reason : UnclassifiedMcpError;
     }
 
-    /// <summary>Requires the exact success wrapper, a nonempty execution GUID and a bounded native text summary.</summary>
+    /// <summary>Requires the exact success wrapper, a nonempty execution GUID and a bounded execution text summary.</summary>
     /// <typeparam name="T">The public canonical result type.</typeparam>
     /// <param name="reply">The actual official SDK response.</param>
     /// <returns>The canonical value and the operation's actual execution identifier.</returns>
@@ -106,7 +106,7 @@ internal static class McpCallerAssertions
     }
 
     /// <summary>Requires a safe domain failure and its correct before-dispatch or after-dispatch identity.</summary>
-    /// <param name="reply">The native error result.</param>
+    /// <param name="reply">The execution error result.</param>
     /// <param name="expected">The required domain error.</param>
     /// <param name="dispatched">Whether a real operation grain must have started.</param>
     /// <returns>The actual operation GUID, or null before dispatch.</returns>
@@ -143,7 +143,7 @@ internal static class McpCallerAssertions
     }
 
     /// <summary>Checks private credential and payload omission using boolean assertions which never print those values.</summary>
-    /// <param name="reply">The actual returned native reply.</param>
+    /// <param name="reply">The actual returned execution reply.</param>
     /// <param name="credential">The private test credential that must not be returned.</param>
     /// <param name="privateValue">The private payload marker that must not be returned.</param>
     /// <returns>The completed omission assertions.</returns>

@@ -162,7 +162,7 @@ internal static class IsolatedAggregateNodeTestCleanup
         }
         if (primary is not null || failures.Length > 0)
         {
-            throw new AggregateException("Native Node lifetime test and cleanup failed.",
+            throw new AggregateException("Execution Node lifetime test and cleanup failed.",
                 primary is null ? failures : [primary, .. failures]);
         }
     }

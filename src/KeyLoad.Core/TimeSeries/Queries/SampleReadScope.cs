@@ -3,7 +3,7 @@ using KeyLoad.Storage;
 namespace KeyLoad.Core.Features.TimeSeries;
 
 [global::Orleans.GenerateSerializer]
-[global::Orleans.Alias(global::KeyLoad.Core.Features.InternalSerialization.CoreNativeAliases.SampleReadScope)]
+[global::Orleans.Alias(global::KeyLoad.Core.Features.InternalSerialization.CoreAliases.SampleReadScope)]
 internal sealed record SampleReadScope(
     [property: global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.SampleReadScopeFields.Principal)] PrincipalRecord Principal,
     [property: global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.SampleReadScopeFields.Resource)] ResourceDefinition Resource,

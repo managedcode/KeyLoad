@@ -19,12 +19,12 @@ internal sealed class SearchRankFusion(int constant, int limit, ReadExecutionBud
         {
             GlobalBranchSinglePartitionAdapter.ValidateAt(branch, rank, budget);
             var reference = branch[rank].Reference;
-            var nativeRank = rank + AdjacentElementOffset;
+            var runtimeRank = rank + AdjacentElementOffset;
             var contribution = weight / ((double)constant + rank + AdjacentElementOffset);
             scores[reference] = scores.GetValueOrDefault(reference) + contribution;
             if (weight > EmptyElementCount)
             {
-                explanations?.Record(reference, new(kind, nativeRank, weight, contribution));
+                explanations?.Record(reference, new(kind, runtimeRank, weight, contribution));
             }
         }
     }

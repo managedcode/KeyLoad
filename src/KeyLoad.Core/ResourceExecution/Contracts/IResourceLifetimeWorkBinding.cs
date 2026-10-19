@@ -1,5 +1,7 @@
 using System.Collections.Immutable;
-using KeyLoad.Core.Features.ClusterRouting.Contracts;
+using KeyLoad.Core.Features.CommandOutcomes.Contracts;
+using KeyLoad.Core.Features.RuntimeJournaling.Contracts;
+using KeyLoad.Core.Features.StoragePartitions.Contracts;
 
 namespace KeyLoad.Core.Features.ResourceExecution;
 
@@ -11,7 +13,7 @@ internal interface IResourceLifetimeWorkBinding
         get;
     }
 
-    void Bind(ResourceLifetimeCoverageV1 coverage);
+    void Bind(ResourceLifetimeCoverage coverage);
 
-    void Bind(ImmutableArray<ResourceLifetimeV1> actualLifetimes);
+    void Bind(ImmutableArray<ResourceLifetime> actualLifetimes);
 }

@@ -91,7 +91,7 @@ public sealed partial class DatabaseEngine
         SampleRecord record;
         try
         {
-            record = NativeSerialization.Deserialize<SampleRecord>(value);
+            record = OrleansSerialization.Deserialize<SampleRecord>(value);
         }
         catch (KeyLoadException error) when (error.Code == ErrorCode.Corruption)
         {

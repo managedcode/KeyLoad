@@ -1,6 +1,6 @@
 using KeyLoad.Clustering;
 using KeyLoad.Server;
-using KeyLoad.UnitTests.Features.ClusterRouting;
+using KeyLoad.UnitTests.Features.OrleansExecution;
 using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.DependencyInjection;
 using Orleans.Serialization;
@@ -9,13 +9,13 @@ namespace KeyLoad.UnitTests.Features.Authorization;
 
 internal static class StartedReadPolicyConsumer
 {
-    internal static async Task<StartedReadPolicyObservation> RunAsync(ConnectionNativeScenario scenario,
+    internal static async Task<StartedReadPolicyObservation> RunAsync(ConnectionScenario scenario,
         PrincipalRecord principal, Guid requestId, TaskCompletionSource started,
         CancellationToken selected, CancellationToken parent)
     {
         var fixture = scenario.Fixture;
         var signed = fixture.Codec.CreateRead(requestId, principal.Id, GrainReadKind.Document,
-            NativeSerialization.Serialize(new GetDocumentRequest(scenario.Reference(StartedReadPolicyProtocol.Document))));
+            OrleansSerialization.Serialize(new GetDocumentRequest(scenario.Reference(StartedReadPolicyProtocol.Document))));
         var frames = new List<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>();
         OperationCanceledException? cancellation = null;
         var failures = new List<Exception>();
@@ -25,11 +25,11 @@ internal static class StartedReadPolicyConsumer
                 requestId, Guid.Empty, selected, connectionId: fixture.ConnectionId);
             await ServerFailureObserver.ObserveAsync(async () =>
             {
-                var bounded = NativeCqrsStreamLifetime.RunWithPurpose(
+                var bounded = CqrsStreamLifetime.RunWithPurpose(
                     token => scenario.Connection.ExecuteStreamAsync(signed, token).WithBatchSize(GrainRequestStreamProtocol.BatchSize),
                     fixture.Cluster.ServiceProvider.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>(),
                     requestId, fixture.Clock, static () => { }, fixture.RoutingOptions, null,
-                    new NativeCqrsStreamPurpose(), selected);
+                    new CqrsStreamPurpose(), selected);
                 await using var enumerator = bounded.GetAsyncEnumerator(selected);
                 await ServerFailureObserver.ObserveAsync(async () =>
                 {

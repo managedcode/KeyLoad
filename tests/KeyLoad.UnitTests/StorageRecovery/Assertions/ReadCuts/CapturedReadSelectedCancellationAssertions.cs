@@ -1,6 +1,6 @@
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
-using static KeyLoad.UnitTests.Features.StorageRecovery.NativeCapturedReadScopeScenario;
+using static KeyLoad.UnitTests.Features.StorageRecovery.CapturedReadScopeScenario;
 
 namespace KeyLoad.UnitTests.Features.StorageRecovery;
 
@@ -47,8 +47,8 @@ internal static class CapturedReadSelectedCancellationAssertions
         var failure = Assert.ThrowsExactly<OperationCanceledException>(() => Visit(frozen, reverse,
             (key, value) =>
             {
-                var expectedKey = NativeReadCutFixture.Key(reverse ? Second : First);
-                var expectedValue = NativeReadCutFixture.Value(reverse ? OldSecond : OldFirst);
+                var expectedKey = ReadCutFixture.Key(reverse ? Second : First);
+                var expectedValue = ReadCutFixture.Value(reverse ? OldSecond : OldFirst);
                 if (!key.SequenceEqual(expectedKey) || !value.SequenceEqual(expectedValue))
                 {
                     throw new InvalidDataException(UnexpectedOriginalRow);
@@ -65,9 +65,9 @@ internal static class CapturedReadSelectedCancellationAssertions
     private static StorageScanResult Visit(ZoneTreeCapturedReadView frozen, bool reverse,
         StorageRecordVisitor visitor, StorageReadObserver observer, CancellationToken token)
         => reverse
-            ? frozen.VisitReverseRange(NativeReadCutFixture.Key(Group), MaximumRecords, visitor,
+            ? frozen.VisitReverseRange(ReadCutFixture.Key(Group), MaximumRecords, visitor,
                 observer: observer, cancellationToken: token)
-            : frozen.VisitRange(NativeReadCutFixture.Key(Group), MaximumRecords, visitor,
+            : frozen.VisitRange(ReadCutFixture.Key(Group), MaximumRecords, visitor,
                 observer: observer, cancellationToken: token);
 
     private static async Task RequireAsync(OperationCanceledException failure, int delivered, int observed,

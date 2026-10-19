@@ -9,5 +9,5 @@ namespace KeyLoad;
 /// <param name="Redacted">Indicates whether the document was redacted.</param>
 /// <param name="RedactedFields">Lists fields removed from the result.</param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.DocumentResult)]
+[Orleans.Alias(ContractAliases.DocumentResult)]
 public sealed record DocumentResult([property: Orleans.Id(0)] EntityRef Reference, [property: Orleans.Id(1)] long Revision, [property: Orleans.Id(2)] string Json, [property: Orleans.Id(3)] bool Redacted, [property: Orleans.Id(4)] ImmutableArray<string> RedactedFields);

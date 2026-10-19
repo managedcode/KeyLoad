@@ -4,7 +4,7 @@ Status: Accepted; implementation and qualification pending.
 Date: 2026-10-05. Scope: prerequisite for distributed query fan-out only.
 
 The cancellation-observation amendment implements
-AC-DQUERY-PREREQ-005 with an already-armed, owned native observation thread and
+AC-DQUERY-PREREQ-005 with an already-armed, owned observation thread and
 the unchanged synchronous real ZoneTree query. Exact case/helper ownership,
 15-second observation/join bounds, original token/budget, no-result and healthy
 follow-up requirements are frozen in DistributedQueryExecution before code.
@@ -16,14 +16,14 @@ rollback may revert this test synchronization but cannot weaken its assertions.
 Distributed query execution requires query fan-out across logical partitions.
 A cross-partition query is a fan-out over ordinary Orleans partition grains: each
 leaf reads its own silo-local ZoneTree owner and a calling grain gathers and merges
-the bounded results ([ADR-136](ADR-136-native-orleans-partition-ownership.md)).
+the bounded results ([ADR-136](ADR-136-orleans-partition-ownership.md)).
 `QueryRequest` today addresses one `PartitionRef`; `QueryEngine.Execute` performs
 one local authorized query. Calling several partitions on the same local
 `DatabaseEngine` a distributed query would be false evidence.
 
 The safe first code stage is therefore an internal prerequisite: exercise the
 real Q1 leaf operator on multiple atomic partitions in one `TestDatabase`, then
-merge only its bounded owned results. It prepares generated native structures
+merge only its bounded owned results. It prepares generated structures
 and verifies correct order/cut/policy bookkeeping without publishing a route or
 calling another grain. The existing signed request identity, persisted
 authorization, `QueryEngine` admission/compiler and `DatabaseEngine.WithQueryView`
@@ -32,9 +32,9 @@ remain authoritative.
 ## Decision
 
 Add five internal Orleans-generated value types under the QueryExecution
-feature: `PartitionQueryPlanV1`, `PartitionQueryLeafPlanV1`,
-`PartitionQueryCandidateV1`, `PartitionQueryLeafResultV1`, and
-`PartitionQueryResultV1`, with aliases and IDs frozen in
+feature: `PartitionQueryPlan`, `PartitionQueryLeafPlan`,
+`PartitionQueryCandidate`, `PartitionQueryLeafResult`, and
+`PartitionQueryResult`, with aliases and IDs frozen in
 `DistributedQueryExecution.md`. The plan is valid only for 1–8 unique atomic
 partitions all executed by the same actual store owner identity. It carries no
 trusted principal or caller-selected node. A leaf plan carries
@@ -62,7 +62,7 @@ Allocate deterministic fixed per-leaf record, raw-byte and retained-byte
 shares before starting any leaf. Sum of grants stays within current configured
 limits after one parse/admission charge. Every leaf enforces its share while
 scanning and before retaining candidates. The merger reserves bounded
-retention before accepting native results and returns no more than current
+retention before accepting results and returns no more than current
 `MaxResults`. There is no work stealing. A root token and the existing single
 operation deadline cover parse, all leaves and merge. Current local leaf calls
 are synchronous, so this ADR does not claim remote capacity/backpressure or
@@ -74,7 +74,7 @@ slow-owner settlement.
 2. Query adds only feature-local internal contracts, models, validation,
    coordinator and leaf execution helpers. It reuses `QueryValidation`,
    `QueryEngine` admission, SQL compiler, `PreparedQuery` sort encoding,
-   `QueryCandidateReader`, and `DatabaseEngine.WithQueryView`. The internal native read-grant seam frozen in the linked feature
+   `QueryCandidateReader`, and `DatabaseEngine.WithQueryView`. The internal read-grant seam frozen in the linked feature
    enforces every raw scan/lookup before decoding or copying.
 3. UnitTests seed real ZoneTree records in at least two distinct
    `PartitionRef`s using `TestDatabase`. Expected order and result projection
@@ -84,7 +84,7 @@ slow-owner settlement.
    invalid plan shape, cancellation after observed actual read bytes and a
    healthy follow-up. Assert positions and policy witnesses per leaf; never
    assert a synthetic scalar global cut.
-4. The full solution build, format, governance and Aspire suites run after the stage. Passing local unit tests only qualify this prerequisite implementation. Distributed query execution remains pending all actual leaf-on-other-silo, native Orleans, SDK/official MCP, fault, bounded fan-out and Linux delivered-source acceptance.
+4. The full solution build, format, governance and Aspire suites run after the stage. Passing local unit tests only qualify this prerequisite implementation. Distributed query execution remains pending all actual leaf-on-other-silo, Orleans, SDK/official MCP, fault, bounded fan-out and Linux delivered-source acceptance.
 
 ## Rollback and exclusions
 
@@ -120,18 +120,18 @@ sequenceDiagram
 The explicit ResourceExecution dependency is now frozen in the linked
 feature: internal CreateReadGrant(maximumBytes, maximumRecords) returns
 ReadExecutionBudgetReadGrant;
-accepted native bytes convert fixed reserved capacity before decode/copy.
-Core adds only KeyLoad.Query friend visibility and actual native regressions.
-The native grant cases are split by responsibility into
+accepted bytes convert fixed reserved capacity before decode/copy.
+Core adds only KeyLoad.Query friend visibility and actual regressions.
+The grant cases are split by responsibility into
 ReadExecutionBudgetGrantPointTests, ReadExecutionBudgetGrantRangeTests,
 ReadExecutionBudgetGrantReservationTests and
 ReadExecutionBudgetGrantCancellationTests, sharing only the actual ZoneTree
-seed helper ReadExecutionBudgetGrantSeed. The original assertions and native
+seed helper ReadExecutionBudgetGrantSeed. The original assertions and execution
 read callbacks remain intact; the split satisfies the mandatory type-size limit.
 This ADR does not authorize fresh per-leaf deadlines, post-hoc accounting,
 changing public Q1 tie ordering or enlarging any configured limit.
 
-Both raw-byte and examined-attempt reservations convert before native read
+Both raw-byte and examined-attempt reservations convert before read
 callbacks; point misses and charged range lookahead count one each. The
 feature freezes the exact conservative retention constants/formula and the
 leaf-array transfer peak, with alias-aware candidate payload ownership. These

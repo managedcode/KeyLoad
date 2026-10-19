@@ -14,11 +14,11 @@ internal static class McpToolDescriptions
     private const string QueueTransferReceipt = "Read the committed signed destination receipt for a transfer; this does not assert source completion. Null when absent.";
     private const string ScheduleInspect = "Read one recurring schedule with current payload and header projection; null when absent.";
     private const string SagaInspect = "Read projected current saga state and deadline; null when absent.";
-    private const string QuerySearch = "Execute the bounded Q1.Search.v1 SQL graph-search profile under the same current policy and read cut as graph search.";
+    private const string QuerySearch = "Execute the bounded Q1.Search SQL graph-search profile under the same current policy and read cut as graph search.";
     private const string GraphTraverse = "Traverse a graph with explicit depth, vertex and edge limits under the current principal.";
     private const string GraphShortestPath = "Find one shortest directed path between authorized graph entities in one current read cut, with explicit depth, vertex and examined-edge limits.";
     private const string GraphIncomingEdges = "Read a bounded eventual reverse-adjacency page for one authorized graph target; rows are verified against current canonical source edges and endpoint visibility.";
-    private const string QueryGraphPath = "Execute the bounded Q1.GraphPath.v1 SQL profile for one shortest directed graph path under the same current policy and read cut as the typed graph operation.";
+    private const string QueryGraphPath = "Execute the bounded Q1.GraphPath SQL profile for one shortest directed graph path under the same current policy and read cut as the typed graph operation.";
     private const string SeriesRead = "Read a bounded time-series page in the supplied UTC time range.";
     private const string SeriesLatest = "Read the latest authorized sample at or before an optional inclusive UTC timestamp; sample is null when absent.";
     private const string SeriesAggregate = "Read complete raw count, sum, minimum, maximum and sum/count average in [from, untilExclusive); null end includes the maximum timestamp. Exceeding maxSamples rejects the whole result.";
@@ -28,14 +28,14 @@ internal static class McpToolDescriptions
     private const string SeriesSampleChunkWindow = "Read one authorized sample-chunk window with an optional tag filter under one committed cut; result includes generation, revision, source sequence and retention floor. Exceeding the record limit rejects the whole result.";
     private const string QueryExecute = "Execute an authorized read-only query with bounded work; continue with its returned cursor.";
     private const string QueryAst = "Execute the canonical typed query AST. Put polymorphic kind before other object fields and preserve its returned cursor.";
-    private const string QueryPartitions = "Read one complete bounded query over up to eight authorized atomic partitions. Native Orleans request workers execute the authorized leaves at the addressed storage owner. Results carry full entity references and separate leaf cuts; this operation has no cursor or global snapshot.";
+    private const string QueryPartitions = "Read one complete bounded query over up to eight authorized atomic partitions. Execution Orleans request workers execute the authorized leaves at the addressed storage owner. Results carry full entity references and separate leaf cuts; this operation has no cursor or global snapshot.";
     private const string QueryCapabilities = "Discover supported query versions, predicates, read profiles and bounded execution limits.";
     private const string ChangesRead = "Read a bounded document change-feed page and preserve the returned signed cursor.";
     private const string QueryLiveStart = "Start a bounded live query snapshot and retain its cursor for subsequent reads.";
     private const string QueryLiveRead = "Read the next bounded live query page using the original query and returned cursor.";
     private const string OutboxStatus = "Read administrator-authorized outbox usage and projection-consumer progress.";
     private const string ProjectionsRead = "Read a bounded administrator-authorized projection batch and retain its acknowledgement token.";
-    private const string WaitForIndex = "Publish the authorized native lexical generation at an acknowledged minimum applied cut with bounded cancellation and deadline.";
+    private const string WaitForIndex = "Publish the authorized execution lexical generation at an acknowledged minimum applied cut with bounded cancellation and deadline.";
     private const string SearchExecute = "Search authorized documents with lexical, vector or hybrid ranking and explicit result limits.";
     private const string SearchGraph = "Search with versioned graph scope and shortest-hop retrieval in one authorized read cut; optional bounded context is expanded only from selected hits.";
     private const string AdminBackup = "Create an administrator-authorized physical node backup. Retrying can create another archive; this operation has filesystem side effects.";
@@ -122,7 +122,7 @@ internal static class McpToolDescriptions
         McpToolNames.OutboxPurge => OutboxPurge,
         AdminDashboardProtocol.SnapshotTool or AdminDashboardProtocol.ResourcesTool or AdminDashboardProtocol.QueueTool
             => AdminDashboardMcpCatalog.Description(name),
-        _ => BlobMcpDescriptions.For(name)
+        _ => throw new ArgumentOutOfRangeException(nameof(name))
     };
 
     private static string? ModelDescription(string name)

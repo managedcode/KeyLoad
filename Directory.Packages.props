@@ -2,7 +2,7 @@
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
-    <KeyLoadNativeCoverageToolVersion>18.12.0</KeyLoadNativeCoverageToolVersion>
+    <KeyLoadCoverageToolVersion>18.12.0</KeyLoadCoverageToolVersion>
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="Cartograph" Version="0.1.0-alpha" />
@@ -15,6 +15,7 @@
     <PackageVersion Include="ManagedCode.Communication.Orleans" Version="10.3.10" />
     <PackageVersion Include="ManagedCode.TimeSeries" Version="10.1.2" />
     <PackageVersion Include="ManagedCode.Storage.FileSystem" Version="10.1.4" />
+    <PackageVersion Include="ManagedCode.Storage.Server" Version="10.1.4" />
     <PackageVersion Include="ManagedCode.Orleans.Graph" Version="10.4.6" />
     <PackageVersion Include="ManagedCode.Orleans.Identity.Core" Version="10.4.2" />
     <PackageVersion Include="ManagedCode.MCPGateway" Version="0.4.24" />
@@ -58,7 +59,7 @@
     <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.20.0" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.20.0" />
     <PackageVersion Include="TUnit" Version="1.75.0" />
-    <!-- One native Microsoft engine: MTP collects test processes; the same-version CLI collects owned CLUSTER containers. -->
+    <!-- One Microsoft engine: MTP collects test processes; the same-version CLI collects owned CLUSTER containers. -->
     <PackageVersion Include="Microsoft.Testing.Extensions.CodeCoverage" Version="18.12.0" />
     <PackageVersion Include="BenchmarkDotNet" Version="0.15.8" />
     <PackageVersion Include="Npgsql" Version="10.0.3" />

@@ -36,7 +36,7 @@ internal static class IsolatedDocumentResourceTokens
     internal const string OpenSearchData = "/usr/share/opensearch/data";
     internal const string KurrentData = "/var/lib/kurrentdb";
     internal const string MongoData = "/data/db";
-    internal const string NativePassword = "Password";
+    internal const string RuntimePassword = "Password";
     internal const string Shell = "mongosh";
     internal const string Quiet = "--quiet";
     internal const string NoDatabase = "--nodb";

@@ -3,7 +3,7 @@ using Dom = Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace KeyLoad.Server;
 
-/// <summary>Accepts one permanent unqualified table name before native DROP admission.</summary>
+/// <summary>Accepts one permanent unqualified table name before execution DROP admission.</summary>
 internal static class ScriptDomDropTableSyntax
 {
     private const int SingleName = 1;

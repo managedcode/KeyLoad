@@ -3,20 +3,20 @@ using SessionFields = KeyLoad.ComparisonTests.Features.BenchmarkComparisons.Benc
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
-/// <summary>Runs real shared-session admission with exclusively owned native configuration evidence.</summary>
+/// <summary>Runs real shared-session admission with exclusively owned execution configuration evidence.</summary>
 internal sealed class BenchmarkSessionStartupFixture : IDisposable
 {
     internal const string Failure = "IsolatedComparisonHostFailed";
     internal const string Canary = "private-isolated-host-canary";
-    internal const string Image = "Benchmarks__Native__Image";
-    internal const string EndpointPrefix = "Benchmarks__Native__Endpoints__";
-    internal const string Endpoints = "Benchmarks__Native__Endpoints";
-    internal const string Connection = "Benchmarks__Native__ConnectionString";
+    internal const string Image = "Benchmarks__Execution__Image";
+    internal const string EndpointPrefix = "Benchmarks__Execution__Endpoints__";
+    internal const string Endpoints = "Benchmarks__Execution__Endpoints";
+    internal const string Connection = "Benchmarks__Execution__ConnectionString";
     internal const string AdminKey = "Benchmarks__AdminKey";
-    internal const string User = "Benchmarks__Native__User";
-    internal const string Password = "Benchmarks__Native__Password";
-    private const string NativePrefix = "Benchmarks__Native__";
-    private readonly NativeArtifactTestDirectory directory = new();
+    internal const string User = "Benchmarks__Execution__User";
+    internal const string Password = "Benchmarks__Execution__Password";
+    private const string RuntimePrefix = "Benchmarks__Execution__";
+    private readonly ArtifactTestDirectory directory = new();
 
     internal Dictionary<string, string> Settings(string target = "KeyLoad", int nodes = 3)
     {
@@ -24,7 +24,7 @@ internal sealed class BenchmarkSessionStartupFixture : IDisposable
         settings[SessionHostStartupSupport.Target] = target;
         settings[SessionHostStartupSupport.Nodes] = nodes.ToString(CultureInfo.InvariantCulture);
         settings[SessionFields.OutputEnvironment] = directory.Root;
-        foreach (var key in settings.Keys.Where(key => key.StartsWith(NativePrefix, StringComparison.Ordinal)
+        foreach (var key in settings.Keys.Where(key => key.StartsWith(RuntimePrefix, StringComparison.Ordinal)
             && key != Image).ToArray())
         {
             settings.Remove(key);
@@ -40,7 +40,7 @@ internal sealed class BenchmarkSessionStartupFixture : IDisposable
     {
         var text = result.Stdout + result.Stderr;
         await Assert.That(result.ExitCode).IsNotEqualTo(0);
-        await Assert.That(text).Contains(SessionHostStartupSupport.NativeNames[0]);
+        await Assert.That(text).Contains(SessionHostStartupSupport.RuntimeNames[0]);
         if (expectedDetail is not null)
         {
             await Assert.That(text).Contains(expectedDetail);

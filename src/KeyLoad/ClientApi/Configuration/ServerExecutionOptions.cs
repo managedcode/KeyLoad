@@ -28,7 +28,7 @@ internal sealed class ServerExecutionOptions
     /// <summary>Gets or sets the JSON parser nesting depth within the unchanged public protocol ceiling.</summary>
     public int MaximumJsonDepth { get; set; } = MaximumSupportedJsonDepth;
 
-    /// <summary>Gets or sets whether a dedicated native HTTP/2 listener is explicitly enabled.</summary>
+    /// <summary>Gets or sets whether a dedicated execution HTTP/2 listener is explicitly enabled.</summary>
     public bool EnableHttp2
     {
         get; set;

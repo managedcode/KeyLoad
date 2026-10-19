@@ -51,11 +51,11 @@ internal sealed class QueueAdmissionCancellationWholeFlowTests
         await Assert.That(QueueWholeFlowStorage.Bytes(fixture.Store)).IsEquivalentTo(after, CollectionOrdering.Matching);
         if (kind == OperationKind.Receive)
         {
-            await NativeReplayResultAssertions.Same<ReceiveResult>(retry, healthy);
+            await ReplayResultAssertions.Same<ReceiveResult>(retry, healthy);
         }
         else
         {
-            await NativeReplayResultAssertions.Same<CommitReceipt>(retry, healthy);
+            await ReplayResultAssertions.Same<CommitReceipt>(retry, healthy);
         }
     }
 

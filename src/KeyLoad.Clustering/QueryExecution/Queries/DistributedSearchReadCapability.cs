@@ -9,7 +9,7 @@ namespace KeyLoad.Clustering;
 
 internal static class DistributedSearchReadCapability
 {
-    internal static Task<DistributedSearchPageV1> ExecuteAsync(DatabaseEngine database,
+    internal static Task<DistributedSearchPage> ExecuteAsync(DatabaseEngine database,
         IServiceProvider services, PrincipalRecord principal,
         DecodedGrainRequest request, Guid requestId, GrainRequestCodec codec, IGrainContext context,
         TimeProvider clock, IResourceLifetimeWorkBinding binding, CancellationToken token)
@@ -23,7 +23,7 @@ internal static class DistributedSearchReadCapability
             observed = new DistributedSearchStatisticsObservation(codec, request, requestId, context).ObserveAsync;
         }
         return DistributedSearchCoordinator.ExecuteBoundAsync(database,
-            GrainNativePayload.Read<DistributedSearchRequestV1>(request.Payload), options, execution.PrepareAsync,
+            GrainPayload.Read<DistributedSearchRequest>(request.Payload), options, execution.PrepareAsync,
             services.GetRequiredService<Func<ICommitCoordinator>>()().ReadBarrierAsync,
             clock, request.Envelope.ExpiresAt, observed, binding, token);
     }

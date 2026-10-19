@@ -1,7 +1,7 @@
 namespace KeyLoad;
 
 /// <summary>Bounds modeled retained cache bytes and live entries shared by one node.</summary>
-/// <remarks>These admission ceilings do not bound process RSS, native storage or query working memory.</remarks>
+/// <remarks>These admission ceilings do not bound process RSS, execution storage or query working memory.</remarks>
 [ConfigurationOptions]
 public sealed record CacheMemoryLimits
 {

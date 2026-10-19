@@ -1,6 +1,6 @@
 namespace KeyLoad.AppHost.Features.ClientApi;
 
-/// <summary>Publishes an allocated native HTTP/2 listener for each server process.</summary>
+/// <summary>Publishes an allocated execution HTTP/2 listener for each server process.</summary>
 internal static class ClusterConnectionEndpointResources
 {
     private const string Http2Endpoint = "http2";

@@ -3,7 +3,7 @@ namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 internal static class SqlUnicodeIdentifierClusterParameters
 {
     internal static async Task RequireAsync(
-        global::KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsClusterCallers caller,
+        global::KeyLoad.IntegrationTests.Features.OrleansExecution.RequestCqrsClusterCallers caller,
         PostgresClusterCaller wire, long revision, CancellationToken token)
     {
         var parameters = new Dictionary<string, global::System.Text.Json.JsonElement>
@@ -41,7 +41,7 @@ internal static class SqlUnicodeIdentifierClusterParameters
     }
 
     private static async Task WindowsAsync(
-        global::KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsClusterCallers caller,
+        global::KeyLoad.IntegrationTests.Features.OrleansExecution.RequestCqrsClusterCallers caller,
         PostgresClusterCaller wire, long revision, CancellationToken token)
     {
         var item = SqlNullDistinctClusterCases.All.Single(value => value.Clause == SqlUnicodeIdentifierCases.Clause);

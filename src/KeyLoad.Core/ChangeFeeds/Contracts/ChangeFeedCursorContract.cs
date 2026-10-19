@@ -2,7 +2,7 @@ namespace KeyLoad.Core;
 
 internal static class ChangeFeedCursorContract
 {
-    internal const string Alias = "keyload.core.v1.ChangeFeedClaims";
+    internal const string Alias = "keyload.core.ChangeFeedClaims";
     internal const int PurposeField = 0;
     internal const int IncarnationField = 1;
     internal const int PartitionField = 2;

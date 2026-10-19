@@ -3,7 +3,7 @@ using System.Text.RegularExpressions;
 
 namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
 
-/// <summary>Independent native arithmetic for a single original case or concurrent lane, without repetition pooling.</summary>
+/// <summary>Independent execution arithmetic for a single original case or concurrent lane, without repetition pooling.</summary>
 internal static class SiteIsolatedOracle
 {
     private const string Images = "images";

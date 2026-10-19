@@ -18,7 +18,7 @@ internal static class ScriptDomSelectRefusals
             await SqlNullOrderingRefusals.UnchangedAsync(database.Store, image, position, identity);
         }
         await ScriptDomSelectCancellation.RequireAsync(database, engine);
-        await ScriptDomNativeParsingCancellation.RequireAsync(database, engine);
+        await ScriptDomParsingCancellation.RequireAsync(database, engine);
     }
     internal static async Task DeniedAsync(TestDatabase database)
     {

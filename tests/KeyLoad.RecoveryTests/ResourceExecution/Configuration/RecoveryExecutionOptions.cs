@@ -7,19 +7,19 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.RecoveryTests;
 
-/// <summary>Explicit validated native options composition for genuine test-owned engine and replica fixtures.</summary>
+/// <summary>Explicit validated execution options composition for genuine test-owned engine and replica fixtures.</summary>
 internal static class RecoveryExecutionOptions
 {
-    internal static IOptions<NativeProcessReadinessOptions> NativeProcessReadiness()
+    internal static IOptions<ProcessReadinessOptions> ProcessReadiness()
     {
-        var settings = new NativeProcessReadinessOptions();
+        var settings = new ProcessReadinessOptions();
         settings.Validate();
         return Options.Create(settings);
     }
 
-    internal static IOptions<NativeTextExecutionOptions> NativeText()
+    internal static IOptions<TextExecutionOptions> RuntimeText()
     {
-        var settings = new NativeTextExecutionOptions();
+        var settings = new TextExecutionOptions();
         settings.Validate();
         return Options.Create(settings);
     }
@@ -45,16 +45,9 @@ internal static class RecoveryExecutionOptions
         return Options.Create(settings);
     }
 
-    internal static IOptions<BlobExecutionOptions> BlobExecution()
+    internal static IOptions<ClaimsExecutionOptions> RuntimeClaimsExecution(ClaimsExecutionOptions? configured = null)
     {
-        var settings = new BlobExecutionOptions();
-        settings.Validate();
-        return Options.Create(settings);
-    }
-
-    internal static IOptions<NativeClaimsExecutionOptions> NativeClaimsExecution(NativeClaimsExecutionOptions? configured = null)
-    {
-        var value = configured ?? new NativeClaimsExecutionOptions();
+        var value = configured ?? new ClaimsExecutionOptions();
         value.Validate();
         return Options.Create(value);
     }

@@ -9,7 +9,7 @@ namespace KeyLoad.IntegrationTests.Features.TimeSeries;
 internal sealed class SampleChunkLifecycleClusterTests(ClusterFixture fixture)
 {
     [Test]
-    public async Task AcChunk007009011NativeBackgroundMergePreservesLiteralRowsReceiptsAndCurrentPolicy()
+    public async Task AcChunk007009011BackgroundMergePreservesLiteralRowsReceiptsAndCurrentPolicy()
     {
         var failures = new List<Exception>();
         McpCallerDeadline? deadline = null;

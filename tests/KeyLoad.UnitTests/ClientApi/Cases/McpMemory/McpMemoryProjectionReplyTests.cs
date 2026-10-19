@@ -7,11 +7,11 @@ internal sealed class McpMemoryProjectionReplyTests
 {
     private const int ReplyBytes = 128;
     private const long HeldBytes = 4096;
-    private const int NativeEnvelopeBytes = 64 * 1024;
-    private const int NativeEnvelopeItems = 1_024;
+    private const int RuntimeEnvelopeBytes = 64 * 1024;
+    private const int EnvelopeItems = 1_024;
     private static readonly McpFrameShape ReplyShape = new(12, 3);
 
-    /// <summary>Reply bytes and native wrapper shape increase the retained output peak without releasing held bytes.</summary>
+    /// <summary>Reply bytes and execution wrapper shape increase the retained output peak without releasing held bytes.</summary>
     [Test]
     public async Task AfterReplyAddsMonotonicWrapperAndSseHeadroom()
     {
@@ -20,10 +20,10 @@ internal sealed class McpMemoryProjectionReplyTests
         var largerReply = new KeyLoad.Server.McpMemoryProjection(UnitMcpOptions.Execution()).AfterReply(HeldBytes, ReplyBytes * 2, ReplyShape);
         var largerShape = new KeyLoad.Server.McpMemoryProjection(UnitMcpOptions.Execution()).AfterReply(HeldBytes, ReplyBytes,
             new McpFrameShape(ReplyShape.TokenCount * 2, ReplyShape.PropertyCount * 2));
-        var wrapperCapacity = ReplyBytes + NativeEnvelopeBytes;
-        var encodedUpper = 6L * wrapperCapacity + NativeEnvelopeBytes;
-        var wrapperTokens = ReplyShape.TokenCount + NativeEnvelopeItems;
-        var wrapperProperties = ReplyShape.PropertyCount + NativeEnvelopeItems;
+        var wrapperCapacity = ReplyBytes + RuntimeEnvelopeBytes;
+        var encodedUpper = 6L * wrapperCapacity + RuntimeEnvelopeBytes;
+        var wrapperTokens = ReplyShape.TokenCount + EnvelopeItems;
+        var wrapperProperties = ReplyShape.PropertyCount + EnvelopeItems;
         var expectedReply = HeldBytes + 2L * wrapperCapacity + encodedUpper +
                             McpMemoryProjectionComponents.Metadata(encodedUpper, wrapperTokens) +
                             McpMemoryProjectionComponents.Structure(encodedUpper, wrapperTokens, wrapperProperties) +

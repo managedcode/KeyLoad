@@ -8,5 +8,5 @@ namespace KeyLoad;
 /// <param name="Patches">Lists field changes to apply.</param>
 /// <param name="ExpectedRevision">Sets the optional revision precondition.</param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.PatchDocument)]
+[Orleans.Alias(ContractAliases.PatchDocument)]
 public sealed record PatchDocument([property: Orleans.Id(0)] string Collection, [property: Orleans.Id(1)] string Id, [property: Orleans.Id(2)] ImmutableArray<FieldPatch> Patches, [property: Orleans.Id(3)] long ExpectedRevision) : Mutation(Collection);

@@ -1,6 +1,6 @@
 using KeyLoad.Clustering;
 using KeyLoad.Server;
-using KeyLoad.UnitTests.Features.ClusterRouting;
+using KeyLoad.UnitTests.Features.OrleansExecution;
 using KeyLoad.UnitTests.Features.Messaging;
 using P = KeyLoad.UnitTests.Features.Authorization.StartedReadPolicyProtocol;
 
@@ -9,7 +9,7 @@ namespace KeyLoad.UnitTests.Features.Authorization;
 internal static class StartedReadPolicyFlow
 {
     internal static Task RunAsync(string variant)
-        => ConnectionNativeScenario.RunAsync(async scenario =>
+        => ConnectionScenario.RunAsync(async scenario =>
         {
             await scenario.InitializeAsync(TestContext.Current!.Execution.CancellationToken);
             using var timeout = new CancellationTokenSource(scenario.Timing.CompletionTimeout, TimeProvider.System);
@@ -27,7 +27,7 @@ internal static class StartedReadPolicyFlow
             await scenario.CloseAsync(token);
         });
 
-    private static async Task HeldAsync(ConnectionNativeScenario scenario, PrincipalRecord writer,
+    private static async Task HeldAsync(ConnectionScenario scenario, PrincipalRecord writer,
         PrincipalRecord reader, CommandRequest command, GrainOperationReply receipt, byte[] outcome,
         string variant, CancellationToken token)
     {
@@ -57,7 +57,7 @@ internal static class StartedReadPolicyFlow
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    private static async Task ContinueAsync(ConnectionNativeScenario scenario, PrincipalRecord writer,
+    private static async Task ContinueAsync(ConnectionScenario scenario, PrincipalRecord writer,
         PrincipalRecord reader, CommandRequest command, GrainOperationReply receipt, byte[] outcome,
         string variant, Guid requestId, ConnectionOperationGate gate, Task<StartedReadPolicyObservation> original,
         CancellationTokenSource selected, CancellationToken token)
@@ -87,7 +87,7 @@ internal static class StartedReadPolicyFlow
         await StartedReadPolicyAssertions.FramesAsync(await original.WaitAsync(token), requestId, variant);
         await scenario.Observation.Read(requestId).Disposed.Task.WaitAsync(token);
         await StartedReadPolicyAssertions.ConservedAsync(scenario, image, position, outcome, writer.Id, command);
-        await ConnectionNativeAssertions.SameOwnerAsync(scenario, requestId, siblingId, token);
+        await ConnectionAssertions.SameOwnerAsync(scenario, requestId, siblingId, token);
         await Assert.That(scenario.Observation.Read(requestId).Identity.PrincipalId).IsEqualTo(reader.Id);
         await Assert.That(scenario.Observation.Read(siblingId).Identity.PrincipalId).IsEqualTo(writer.Id);
         if (variant != P.Cancelled)
@@ -102,13 +102,13 @@ internal static class StartedReadPolicyFlow
         var replay = await scenario.CommandAsync(writer, Guid.NewGuid(), command, token);
         await Assert.That(replay.Error).IsNull();
         await Assert.That(replay.Payload.Span.SequenceEqual(receipt.Payload.Span)).IsTrue();
-        await ConnectionNativeAssertions.SameOwnerAsync(scenario, requestId, healthyId, token);
+        await ConnectionAssertions.SameOwnerAsync(scenario, requestId, healthyId, token);
         var current = scenario.Fixture.Database.Store.Read(view => view.ReadOwnedValue(
             OutcomeStoreOracle.PartitionKey(command.Partition, writer.Id, command.CommandId)))!;
         await Assert.That(current.AsSpan().SequenceEqual(outcome)).IsTrue();
     }
 
-    private static async Task PersistPrincipalAsync(ConnectionNativeScenario scenario, PrincipalRecord principal)
+    private static async Task PersistPrincipalAsync(ConnectionScenario scenario, PrincipalRecord principal)
     {
         var acknowledged = scenario.Fixture.Database.Submit(OperationKind.ConfigurePrincipal,
             new ConfigurePrincipalRequest(principal)).Get<PrincipalRecord>();

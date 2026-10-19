@@ -33,7 +33,7 @@ internal static class QueueDeadlineCoordination
             throw Errors.Fail(ErrorCode.Unauthenticated, GrainRoutingProtocol.MissingPrincipal);
         }
         var commandId = Guid.NewGuid();
-        var body = NativeSerialization.Serialize(new CommandRequest(commandId, hint.Lane.Partition, [hint.Mutation]));
+        var body = OrleansSerialization.Serialize(new CommandRequest(commandId, hint.Lane.Partition, [hint.Mutation]));
         var reply = await dispatch(principal, commandId, body, lifetime.Token).ConfigureAwait(true);
         return new(reply.Error);
     }

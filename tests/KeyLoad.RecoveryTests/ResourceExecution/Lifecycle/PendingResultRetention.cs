@@ -10,7 +10,7 @@ internal sealed class PendingResultRetention(IOptions<DatabaseLimits> options) :
     private const string MissingRetention = "The pending result ledger has already been transferred or was not acquired.";
     private ResourceLifetimeWorkResultRetention? pending = new(options);
 
-    internal ResourceLifetimeWorkResultRetention TransferTo(NativeRequestWorkLease lease)
+    internal ResourceLifetimeWorkResultRetention TransferTo(RequestWorkLease lease)
     {
         var retention = pending ?? throw new InvalidOperationException(MissingRetention);
         lease.AttachResultRetention(retention);

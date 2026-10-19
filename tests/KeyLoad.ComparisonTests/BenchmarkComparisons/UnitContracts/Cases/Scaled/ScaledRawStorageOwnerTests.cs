@@ -10,7 +10,7 @@ internal sealed class ScaledRawStorageOwnerTests
     private const int MiniValueBytes = 32;
     private const int FirstRecordIndex = 0;
     private const ulong FirstRecordId = 0UL;
-    private const long OneNativeRead = 1L;
+    private const long OneRead = 1L;
 
     [Test]
     public async Task AcScale003CompetingFixtureIsRejectedUntilTheOwnedFixtureCloses()
@@ -44,7 +44,7 @@ internal sealed class ScaledRawStorageOwnerTests
     {
         await Assert.That(snapshot.SeedAttempts).IsEqualTo(MiniRecordCount);
         await Assert.That(snapshot.SuccessfulSeedWrites).IsEqualTo(MiniRecordCount);
-        await Assert.That(snapshot.NativeReadCalls).IsEqualTo(MiniRecordCount + 1L);
+        await Assert.That(snapshot.RuntimeReadCalls).IsEqualTo(MiniRecordCount + 1L);
     }
 
     private static async Task AssertCompetingFixtureRejectedAsync()
@@ -85,7 +85,7 @@ internal sealed class ScaledRawStorageOwnerTests
     {
         await Assert.That(after.SeedAttempts).IsEqualTo(before.SeedAttempts);
         await Assert.That(after.SuccessfulSeedWrites).IsEqualTo(before.SuccessfulSeedWrites);
-        await Assert.That(after.NativeReadCalls).IsEqualTo(before.NativeReadCalls);
+        await Assert.That(after.RuntimeReadCalls).IsEqualTo(before.RuntimeReadCalls);
     }
 
     private static async Task AssertOneRealReadAsync(
@@ -96,7 +96,7 @@ internal sealed class ScaledRawStorageOwnerTests
         var afterRead = fixture.Capture();
         await Assert.That(afterRead.SeedAttempts).IsEqualTo(beforeRead.SeedAttempts);
         await Assert.That(afterRead.SuccessfulSeedWrites).IsEqualTo(beforeRead.SuccessfulSeedWrites);
-        await Assert.That(afterRead.NativeReadCalls - beforeRead.NativeReadCalls).IsEqualTo(OneNativeRead);
+        await Assert.That(afterRead.RuntimeReadCalls - beforeRead.RuntimeReadCalls).IsEqualTo(OneRead);
     }
 
     private static async Task AssertReplacementReadAsync(ScaledRawStorageFixture replacement)
@@ -104,10 +104,10 @@ internal sealed class ScaledRawStorageOwnerTests
         var beforeRead = replacement.Capture();
         await Assert.That(beforeRead.SeedAttempts).IsEqualTo(MiniRecordCount);
         await Assert.That(beforeRead.SuccessfulSeedWrites).IsEqualTo(MiniRecordCount);
-        await Assert.That(beforeRead.NativeReadCalls).IsEqualTo(MiniRecordCount + 1L);
+        await Assert.That(beforeRead.RuntimeReadCalls).IsEqualTo(MiniRecordCount + 1L);
         await Assert.That(replacement.Read(FirstRecordIndex)).IsEqualTo(FirstRecordId);
         var afterRead = replacement.Capture();
-        await Assert.That(afterRead.NativeReadCalls - beforeRead.NativeReadCalls).IsEqualTo(OneNativeRead);
+        await Assert.That(afterRead.RuntimeReadCalls - beforeRead.RuntimeReadCalls).IsEqualTo(OneRead);
     }
 
     private static void CloseAfterBody(bool bodyCompleted, Exception? bodyFailure,

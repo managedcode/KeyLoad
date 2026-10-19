@@ -1,5 +1,5 @@
-name: Native benchmark session setup
-description: Authenticate this job and import the exact compiled native server, client and Aspire runtime.
+name: Execution benchmark session setup
+description: Authenticate this job and import the exact compiled execution server, client and Aspire runtime.
 inputs:
   runtime-artifact-id:
     description: Same-run immutable compiled runner bundle

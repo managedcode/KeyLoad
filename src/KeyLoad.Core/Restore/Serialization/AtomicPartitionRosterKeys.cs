@@ -5,7 +5,7 @@ namespace KeyLoad.Core.Features.BackupRestore.Serialization;
 internal static class AtomicPartitionRosterKeys
 {
     internal static byte[] Prefix() => KeyCodec.Encode(AtomicPartitionRosterProtocol.KeySpace,
-        AtomicPartitionRosterProtocol.KeyVersion, AtomicPartitionRosterProtocol.PartitionKeyKind);
+        AtomicPartitionRosterProtocol.PartitionKeyKind);
 
     internal static byte[] Partition(PartitionRef partition)
     {

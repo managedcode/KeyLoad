@@ -18,7 +18,7 @@ internal sealed class McpCommandConflictDiagnosticWholeFlowTests
     private const long Second = 2;
 
     [Test]
-    public async Task NativeReplayConflictKeepsOwnedProblemAndStateThenHealthyCommand()
+    public async Task ReplayConflictKeepsOwnedProblemAndStateThenHealthyCommand()
     {
         using var database = new TestDatabase();
         database.Configure(Collection, ResourceKind.Collection);
@@ -30,7 +30,7 @@ internal sealed class McpCommandConflictDiagnosticWholeFlowTests
         var before = QueueWholeFlowStorage.Bytes(database.Store);
         var position = database.Store.Position;
         var replay = database.Submit(OperationKind.Batch, command, id: command.CommandId);
-        await Assert.That(NativeSerialization.Serialize(replay).AsSpan().SequenceEqual(NativeSerialization.Serialize(original))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(replay).AsSpan().SequenceEqual(OrleansSerialization.Serialize(original))).IsTrue();
         var changed = command with
         {
             Mutations = [new PutDocument(Collection, Document, ChangedJson, ExpectedRevision: First)]
@@ -52,8 +52,8 @@ internal sealed class McpCommandConflictDiagnosticWholeFlowTests
         await Assert.That(healthy.Token.AtomicPartitionId).IsEqualTo(database.Partition.AtomicPartitionId);
         await Assert.That(healthy.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
         await Assert.That(healthy.Mutations).HasSingleItem();
-        await Assert.That(NativeSerialization.Serialize(healthy.Mutations[0]).AsSpan().SequenceEqual(
-            NativeSerialization.Serialize(new MutationReceipt(MutationKind, Collection, Document, Second)))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(healthy.Mutations[0]).AsSpan().SequenceEqual(
+            OrleansSerialization.Serialize(new MutationReceipt(MutationKind, Collection, Document, Second)))).IsTrue();
         var reference = new EntityRef(database.Partition, Collection, Document);
         var actual = database.Database.GetDocument(Root, reference);
         await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(

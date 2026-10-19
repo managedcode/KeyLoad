@@ -54,7 +54,7 @@ internal static class SqlLeftFilteredJoinFixture
             {
                 [MinimumParameter] = System.Text.Json.JsonSerializer.SerializeToElement(7)
             },
-            AllowFullScan: true, QueryDialectVersion: 2);
+            AllowFullScan: true, QueryDialectVersion: SqlOperationProtocol.DefaultQueryDialectVersion);
 
     internal static AstQueryRequest Ast(PartitionRef partition)
         => new(partition, new SelectQuery(Left, "l",
@@ -66,5 +66,5 @@ internal static class SqlLeftFilteredJoinFixture
             {
                 [MinimumParameter] = System.Text.Json.JsonSerializer.SerializeToElement(7)
             },
-            AllowFullScan: true, AstVersion: 2);
+            AllowFullScan: true, AstVersion: SqlOperationProtocol.DefaultQueryDialectVersion);
 }

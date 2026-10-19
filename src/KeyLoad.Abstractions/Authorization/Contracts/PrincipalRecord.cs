@@ -8,7 +8,7 @@ namespace KeyLoad;
 /// <param name="Grants">Lists scoped capabilities.</param>
 /// <param name="FieldGrants">Lists field-level grants.</param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.PrincipalRecord)]
+[Orleans.Alias(ContractAliases.PrincipalRecord)]
 public sealed record PrincipalRecord([property: Orleans.Id(0)] string Id, [property: Orleans.Id(1)] string TenantId, [property: Orleans.Id(2)] ImmutableArray<ScopeGrant> Grants, [property: Orleans.Id(3)] ImmutableArray<string> FieldGrants)
 {
     private const int InitialPolicyEpoch = 1;

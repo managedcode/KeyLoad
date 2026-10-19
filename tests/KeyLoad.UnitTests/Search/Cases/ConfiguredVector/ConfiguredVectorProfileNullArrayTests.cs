@@ -39,11 +39,11 @@ internal sealed class ConfiguredVectorProfileNullArrayTests
         var resourceKey = KeySpace.Resource(database.Partition.TenantId, database.Partition.DatabaseId, definition.Name);
         await Assert.That(database.Store.Read(view => view.GetRecord<ResourceDefinition>(resourceKey))).IsNull();
         var stored = database.Store.Read(view => view.GetRecord<StoredOutcome>(OutcomeStoreOracle.UnknownKey("root", id)))!;
-        await Assert.That(NativeSerialization.Serialize(stored.Result).SequenceEqual(NativeSerialization.Serialize(rejected))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(stored.Result).SequenceEqual(OrleansSerialization.Serialize(rejected))).IsTrue();
         var complete = QueueWholeFlowStorage.Bytes(database.Store);
         var rejectedPosition = database.Store.Position;
         var rejectedReplay = database.Submit(OperationKind.ConfigureResource, document.RootElement, id: id);
-        await Assert.That(NativeSerialization.Serialize(rejectedReplay).SequenceEqual(NativeSerialization.Serialize(rejected))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(rejectedReplay).SequenceEqual(OrleansSerialization.Serialize(rejected))).IsTrue();
         await Assert.That(QueueWholeFlowStorage.Bytes(database.Store)).IsEquivalentTo(complete, CollectionOrdering.Matching);
         await Assert.That(database.Store.Position).IsEqualTo(rejectedPosition);
         var arguments = new Dictionary<string, JsonElement>
@@ -60,14 +60,14 @@ internal sealed class ConfiguredVectorProfileNullArrayTests
         await Assert.That(database.Store.Position).IsEqualTo(rejectedPosition);
         var healthyId = Guid.NewGuid();
         var accepted = database.Submit(OperationKind.ConfigureResource, healthy, id: healthyId);
-        await Assert.That(NativeSerialization.Serialize(accepted.Get<ResourceDefinition>()).SequenceEqual(
-            NativeSerialization.Serialize(definition))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(accepted.Get<ResourceDefinition>()).SequenceEqual(
+            OrleansSerialization.Serialize(definition))).IsTrue();
         var committed = QueueWholeFlowStorage.Bytes(database.Store);
         var committedPosition = database.Store.Position;
-        await Assert.That(NativeSerialization.Serialize(database.Store.Read(view => view.GetRecord<ResourceDefinition>(resourceKey))!)
-            .SequenceEqual(NativeSerialization.Serialize(definition))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(database.Store.Read(view => view.GetRecord<ResourceDefinition>(resourceKey))!)
+            .SequenceEqual(OrleansSerialization.Serialize(definition))).IsTrue();
         var replay = database.Submit(OperationKind.ConfigureResource, healthy, id: healthyId);
-        await Assert.That(NativeSerialization.Serialize(replay).SequenceEqual(NativeSerialization.Serialize(accepted))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(replay).SequenceEqual(OrleansSerialization.Serialize(accepted))).IsTrue();
         await Assert.That(QueueWholeFlowStorage.Bytes(database.Store)).IsEquivalentTo(committed, CollectionOrdering.Matching);
         await Assert.That(database.Store.Position).IsEqualTo(committedPosition);
     }

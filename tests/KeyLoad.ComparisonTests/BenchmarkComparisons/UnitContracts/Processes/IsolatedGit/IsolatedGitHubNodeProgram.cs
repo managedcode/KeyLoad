@@ -31,7 +31,7 @@ internal static class IsolatedGitHubNodeProgram
         const jobs = [{ total_count: 1, jobs: [job] }];
         const artifacts = [{ total_count: 1, artifacts: [artifact] }];
         if (corruption === 'valid-legacy-url') job.html_url = 'https://github.com/managedcode/KeyLoad/runs/123/jobs/1001';
-        if (corruption === 'valid-native-no-attempt') delete job.run_attempt;
+        if (corruption === 'valid-execution-no-attempt') delete job.run_attempt;
         if (corruption === 'source') run.head_sha = 'c'.repeat(40);
         if (corruption === 'run') run.id++;
         if (corruption === 'attempt') run.run_attempt++;

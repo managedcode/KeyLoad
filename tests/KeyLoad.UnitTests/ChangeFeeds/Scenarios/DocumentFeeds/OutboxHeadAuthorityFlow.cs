@@ -5,7 +5,7 @@ namespace KeyLoad.UnitTests.Features.ChangeFeeds;
 
 internal static class OutboxHeadAuthorityFlow
 {
-    private const string MissingResult = "The completed native cold flow must retain its original result.";
+    private const string MissingResult = "The completed execution cold flow must retain its original result.";
 
     internal static async Task RunAsync(int fault)
     {

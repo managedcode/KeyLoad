@@ -6,19 +6,19 @@ internal static class HelixDbDocumentAst
 {
     private const int SingleResultCardinality = 1;
     private const int EmptyResultCount = 0;
-    internal static JsonObject Lookup(string label, string id) => HelixDbProtocol.Nodes(label, HelixDbProtocol.Compare(HelixDbNativeTokens.TokenEq, HelixDbNativeTokens.TokenId, HelixDbNativeTokens.TokenString, id));
-    internal static JsonObject Read(string label, string id) => HelixDbProtocol.Project(Lookup(label, id), HelixDbNativeTokens.TokenId, HelixDbNativeTokens.TokenPayload);
-    internal static JsonObject Add(string label, BenchmarkDocument document) => HelixDbProtocol.Node(HelixDbNativeTokens.TokenAddN, new() { [HelixDbNativeTokens.TokenLabel] = label, [HelixDbNativeTokens.TokenProperties] = new JsonArray { new JsonArray(HelixDbNativeTokens.TokenId, HelixDbProtocol.Value(HelixDbNativeTokens.TokenString, document.Id)), new JsonArray(HelixDbNativeTokens.TokenNumber, HelixDbProtocol.Value(HelixDbNativeTokens.TokenI64, document.Number)), new JsonArray(HelixDbNativeTokens.TokenPayload, HelixDbProtocol.Value(HelixDbNativeTokens.TokenString, document.Json)) } });
-    internal static JsonObject Update(string label, BenchmarkDocument document) => HelixDbProtocol.Node(HelixDbNativeTokens.TokenSetProperty, new() { [HelixDbNativeTokens.TokenInput] = Lookup(label, document.Id), [HelixDbNativeTokens.TokenName] = HelixDbNativeTokens.TokenPayload, [HelixDbNativeTokens.TokenValue] = HelixDbProtocol.Value(HelixDbNativeTokens.TokenString, document.Json) });
-    internal static JsonObject Page(string label, int after, int capacity) => HelixDbProtocol.Project(HelixDbProtocol.Limit(HelixDbProtocol.Ordered(HelixDbProtocol.Nodes(label, HelixDbProtocol.Compare(HelixDbNativeTokens.TokenGt, HelixDbNativeTokens.TokenNumber, HelixDbNativeTokens.TokenI64, after)), HelixDbNativeTokens.TokenNumber), capacity), HelixDbNativeTokens.TokenId, HelixDbNativeTokens.TokenNumber, HelixDbNativeTokens.TokenPayload);
-    internal static JsonObject Index(string label, string property, bool range, bool unique = true) => HelixDbProtocol.Node(HelixDbNativeTokens.TokenCreateIndex, new() { [HelixDbNativeTokens.TokenIfNotExists] = false, [HelixDbNativeTokens.TokenSpec] = HelixDbProtocol.Node(range ? HelixDbNativeTokens.TokenNodeRange : HelixDbNativeTokens.TokenNodeEquality, range ? new() { [HelixDbNativeTokens.TokenLabel] = label, [HelixDbNativeTokens.TokenProperty] = property, [HelixDbNativeTokens.TokenDirection] = HelixDbNativeTokens.TokenAsc } : new() { [HelixDbNativeTokens.TokenLabel] = label, [HelixDbNativeTokens.TokenProperty] = property, [HelixDbNativeTokens.TokenUnique] = unique }) });
+    internal static JsonObject Lookup(string label, string id) => HelixDbProtocol.Nodes(label, HelixDbProtocol.Compare(HelixDbTokens.TokenEq, HelixDbTokens.TokenId, HelixDbTokens.TokenString, id));
+    internal static JsonObject Read(string label, string id) => HelixDbProtocol.Project(Lookup(label, id), HelixDbTokens.TokenId, HelixDbTokens.TokenPayload);
+    internal static JsonObject Add(string label, BenchmarkDocument document) => HelixDbProtocol.Node(HelixDbTokens.TokenAddN, new() { [HelixDbTokens.TokenLabel] = label, [HelixDbTokens.TokenProperties] = new JsonArray { new JsonArray(HelixDbTokens.TokenId, HelixDbProtocol.Value(HelixDbTokens.TokenString, document.Id)), new JsonArray(HelixDbTokens.TokenNumber, HelixDbProtocol.Value(HelixDbTokens.TokenI64, document.Number)), new JsonArray(HelixDbTokens.TokenPayload, HelixDbProtocol.Value(HelixDbTokens.TokenString, document.Json)) } });
+    internal static JsonObject Update(string label, BenchmarkDocument document) => HelixDbProtocol.Node(HelixDbTokens.TokenSetProperty, new() { [HelixDbTokens.TokenInput] = Lookup(label, document.Id), [HelixDbTokens.TokenName] = HelixDbTokens.TokenPayload, [HelixDbTokens.TokenValue] = HelixDbProtocol.Value(HelixDbTokens.TokenString, document.Json) });
+    internal static JsonObject Page(string label, int after, int capacity) => HelixDbProtocol.Project(HelixDbProtocol.Limit(HelixDbProtocol.Ordered(HelixDbProtocol.Nodes(label, HelixDbProtocol.Compare(HelixDbTokens.TokenGt, HelixDbTokens.TokenNumber, HelixDbTokens.TokenI64, after)), HelixDbTokens.TokenNumber), capacity), HelixDbTokens.TokenId, HelixDbTokens.TokenNumber, HelixDbTokens.TokenPayload);
+    internal static JsonObject Index(string label, string property, bool range, bool unique = true) => HelixDbProtocol.Node(HelixDbTokens.TokenCreateIndex, new() { [HelixDbTokens.TokenIfNotExists] = false, [HelixDbTokens.TokenSpec] = HelixDbProtocol.Node(range ? HelixDbTokens.TokenNodeRange : HelixDbTokens.TokenNodeEquality, range ? new() { [HelixDbTokens.TokenLabel] = label, [HelixDbTokens.TokenProperty] = property, [HelixDbTokens.TokenDirection] = HelixDbTokens.TokenAsc } : new() { [HelixDbTokens.TokenLabel] = label, [HelixDbTokens.TokenProperty] = property, [HelixDbTokens.TokenUnique] = unique }) });
     internal static JsonObject DropIndex(string label, string property, bool range, bool unique = true)
     {
-        var fields = Index(label, property, range, unique)[HelixDbNativeTokens.TokenCreateIndex]!.AsObject();
-        return HelixDbProtocol.Node(HelixDbNativeTokens.TokenDropIndex,
+        var fields = Index(label, property, range, unique)[HelixDbTokens.TokenCreateIndex]!.AsObject();
+        return HelixDbProtocol.Node(HelixDbTokens.TokenDropIndex,
             new()
             {
-                [HelixDbNativeTokens.TokenSpec] = fields[HelixDbNativeTokens.TokenSpec]!.DeepClone()
+                [HelixDbTokens.TokenSpec] = fields[HelixDbTokens.TokenSpec]!.DeepClone()
             });
     }
 
@@ -27,33 +27,33 @@ internal static class HelixDbDocumentAst
         var branches = new JsonArray();
         for (var hops = SingleResultCardinality; hops <= depth; hops++)
         {
-            JsonNode traversal = JsonValue.Create(HelixDbNativeTokens.TokenContext)!;
+            JsonNode traversal = JsonValue.Create(HelixDbTokens.TokenContext)!;
             for (var hop = EmptyResultCount; hop < hops; hop++)
             {
-                traversal = HelixDbProtocol.Node(HelixDbNativeTokens.TokenOut, new()
+                traversal = HelixDbProtocol.Node(HelixDbTokens.TokenOut, new()
                 {
-                    [HelixDbNativeTokens.TokenInput] = traversal,
-                    [HelixDbNativeTokens.TokenLabel] = label + HelixDbNativeTokens.TokenLinks
+                    [HelixDbTokens.TokenInput] = traversal,
+                    [HelixDbTokens.TokenLabel] = label + HelixDbTokens.TokenLinks
                 });
             }
 
-            branches.Add(new JsonObject { [HelixDbNativeTokens.TokenRoot] = traversal });
+            branches.Add(new JsonObject { [HelixDbTokens.TokenRoot] = traversal });
         }
 
-        var union = HelixDbProtocol.Node(HelixDbNativeTokens.TokenUnion, new()
+        var union = HelixDbProtocol.Node(HelixDbTokens.TokenUnion, new()
         {
-            [HelixDbNativeTokens.TokenInput] = Lookup(label, id),
-            [HelixDbNativeTokens.TokenTraversals] = branches
+            [HelixDbTokens.TokenInput] = Lookup(label, id),
+            [HelixDbTokens.TokenTraversals] = branches
         });
-        var distinct = HelixDbProtocol.Node(HelixDbNativeTokens.TokenDedup, new()
+        var distinct = HelixDbProtocol.Node(HelixDbTokens.TokenDedup, new()
         {
-            [HelixDbNativeTokens.TokenInput] = union
+            [HelixDbTokens.TokenInput] = union
         });
-        var filtered = HelixDbProtocol.Node(HelixDbNativeTokens.TokenWhere, new()
+        var filtered = HelixDbProtocol.Node(HelixDbTokens.TokenWhere, new()
         {
-            [HelixDbNativeTokens.TokenInput] = distinct,
-            [HelixDbNativeTokens.TokenPredicate] = HelixDbProtocol.Compare(HelixDbNativeTokens.TokenNeq, HelixDbNativeTokens.TokenId, HelixDbNativeTokens.TokenString, id)
+            [HelixDbTokens.TokenInput] = distinct,
+            [HelixDbTokens.TokenPredicate] = HelixDbProtocol.Compare(HelixDbTokens.TokenNeq, HelixDbTokens.TokenId, HelixDbTokens.TokenString, id)
         });
-        return HelixDbProtocol.Project(HelixDbProtocol.Ordered(filtered, HelixDbNativeTokens.TokenId), HelixDbNativeTokens.TokenId);
+        return HelixDbProtocol.Project(HelixDbProtocol.Ordered(filtered, HelixDbTokens.TokenId), HelixDbTokens.TokenId);
     }
 }

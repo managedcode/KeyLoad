@@ -20,7 +20,7 @@ internal sealed class GraphCrossPartitionFingerprintTests
     public async Task SeparatelyStoredCanonicalEdgeKeepsTheOriginalDeliveryFingerprint()
     {
         var edge = Edge();
-        var persistedEdge = NativeSerialization.Deserialize<EdgeRecord>(NativeSerialization.Serialize(edge));
+        var persistedEdge = OrleansSerialization.Deserialize<EdgeRecord>(OrleansSerialization.Serialize(edge));
         await Assert.That(Fingerprint(edge, persistedEdge)).IsEqualTo(Fingerprint(edge, edge));
     }
 

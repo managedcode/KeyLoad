@@ -12,6 +12,6 @@ internal sealed class SubscriptionFilterProcessRecoveryTests
     [Arguments(CommitStage.MutationApplied, 1)]
     [Arguments(CommitStage.MutationApplied, 2)]
     [Arguments(CommitStage.ApplyCompleted, 0)]
-    public Task FilterGenerationAndOldWindowRecoverAsOneNativeTransaction(CommitStage stage, int index)
+    public Task FilterGenerationAndOldWindowRecoverAsOneTransaction(CommitStage stage, int index)
         => SubscriptionFilterProcessTrial.RunAsync(stage, index, TestContext.Current!.Execution.CancellationToken);
 }

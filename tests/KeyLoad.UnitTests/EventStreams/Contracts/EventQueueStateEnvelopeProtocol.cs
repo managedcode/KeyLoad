@@ -27,7 +27,7 @@ internal static class EventQueueStateEnvelopeProtocol
     internal const string SecretPath = "/secret";
     internal const string Classification = "envelope-protected";
     internal const string IdentifierFormat = "N";
-    internal const string MissingRow = "The original native event/queue envelope is missing.";
+    internal const string MissingRow = "The original execution event/queue envelope is missing.";
     internal const string ImageLimit = "The feature-owned envelope image exceeds its fixed bound.";
     internal const int ScanBound = 256;
     internal const int SingleResult = 1;

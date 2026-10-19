@@ -5,19 +5,19 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 
 namespace KeyLoad.Comparisons.Targets;
-/// <summary>Owns bounded ingestion and native ordered vector/value readback.</summary>
+/// <summary>Owns bounded ingestion and execution ordered vector/value readback.</summary>
 internal static class HelixDbVectorStorage
 {
     private const int EmptyResultCount = 0;
     private const int SingleResultCardinality = 1;
-    internal static async Task<int> IngestAsync(HttpClient http, string label, IAsyncEnumerable<VectorDocument> documents, NativeComparisonExecutionOptions policy, TimeProvider timeProvider, CancellationToken token)
+    internal static async Task<int> IngestAsync(HttpClient http, string label, IAsyncEnumerable<VectorDocument> documents, ComparisonExecutionOptions policy, TimeProvider timeProvider, CancellationToken token)
     {
         var entries = new JsonArray();
         var names = new JsonArray();
         var count = EmptyResultCount;
         await foreach (var document in documents.WithCancellation(token).ConfigureAwait(false))
         {
-            var name = HelixDbNativeTokens.TokenD + count.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            var name = HelixDbTokens.TokenD + count.ToString(System.Globalization.CultureInfo.InvariantCulture);
             entries.Add(HelixDbProtocol.Entry(HelixDbVectorAst.Add(label, document), name));
             names.Add(name);
             count++;
@@ -37,7 +37,7 @@ internal static class HelixDbVectorStorage
         return count;
     }
 
-    internal static async IAsyncEnumerable<VectorReadback> ReadbackAsync(HttpClient http, string label, int count, NativeComparisonExecutionOptions policy, TimeProvider timeProvider, [EnumeratorCancellation] CancellationToken token)
+    internal static async IAsyncEnumerable<VectorReadback> ReadbackAsync(HttpClient http, string label, int count, ComparisonExecutionOptions policy, TimeProvider timeProvider, [EnumeratorCancellation] CancellationToken token)
     {
         var after = -SingleResultCardinality;
         var seen = EmptyResultCount;
@@ -55,7 +55,7 @@ internal static class HelixDbVectorStorage
                 var result = Read(row);
                 if (result.Number <= after || seen >= count)
                 {
-                    throw new ComparisonFailureException(HelixDbNativeTokens.TokenHelixDbReadbackOrderingInvalid);
+                    throw new ComparisonFailureException(HelixDbTokens.TokenHelixDbReadbackOrderingInvalid);
                 }
 
                 after = result.Number;
@@ -66,18 +66,18 @@ internal static class HelixDbVectorStorage
 
         if (seen != count)
         {
-            throw new ComparisonFailureException(HelixDbNativeTokens.TokenHelixDbReadbackCountMismatch);
+            throw new ComparisonFailureException(HelixDbTokens.TokenHelixDbReadbackCountMismatch);
         }
     }
 
     internal static VectorReadback Read(JsonElement row)
     {
-        var vector = row.GetProperty(HelixDbNativeTokens.TokenEmbedding).EnumerateArray().Select(component => component.GetSingle()).ToArray();
+        var vector = row.GetProperty(HelixDbTokens.TokenEmbedding).EnumerateArray().Select(component => component.GetSingle()).ToArray();
         if (vector.Length == EmptyResultCount || vector.Any(value => !float.IsFinite(value)))
         {
-            throw new ComparisonFailureException(HelixDbNativeTokens.TokenHelixDbInvalidStoredVector);
+            throw new ComparisonFailureException(HelixDbTokens.TokenHelixDbInvalidStoredVector);
         }
 
-        return new(row.GetProperty(HelixDbNativeTokens.TokenNumber).GetInt32(), row.GetProperty(HelixDbNativeTokens.TokenId).GetString()!, vector.Length, VectorComparisonCorpus.HashVector(vector), Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(row.GetProperty(HelixDbNativeTokens.TokenPayload).GetString()!))));
+        return new(row.GetProperty(HelixDbTokens.TokenNumber).GetInt32(), row.GetProperty(HelixDbTokens.TokenId).GetString()!, vector.Length, VectorComparisonCorpus.HashVector(vector), Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(row.GetProperty(HelixDbTokens.TokenPayload).GetString()!))));
     }
 }

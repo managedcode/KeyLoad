@@ -5,9 +5,9 @@ namespace KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries.Intensive
 
 internal sealed class TimescaleTimeSeriesIntensiveOperation : IAsyncDisposable
 {
-    private const int OwnedNativeResourceSlots = 5;
+    private const int OwnedResourceSlots = 5;
 
-    private readonly IAsyncDisposable?[] resources = new IAsyncDisposable?[OwnedNativeResourceSlots];
+    private readonly IAsyncDisposable?[] resources = new IAsyncDisposable?[OwnedResourceSlots];
     private ExceptionDispatchInfo? primary;
     private ExceptionDispatchInfo? cleanup;
     private int resourceCount;

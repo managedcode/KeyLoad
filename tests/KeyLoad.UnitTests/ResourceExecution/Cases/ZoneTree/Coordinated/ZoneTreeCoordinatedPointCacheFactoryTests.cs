@@ -42,8 +42,8 @@ internal sealed class ZoneTreeCoordinatedPointCacheFactoryTests
             await Assert.That(cold.Hits).IsEqualTo(0L);
             await Assert.That(cold.Misses).IsEqualTo(0L);
             await Assert.That(cold.ReadBypasses).IsEqualTo(0L);
-            await Assert.That(cold.NativeLookups).IsEqualTo(0L);
-            await Assert.That(cold.NativeMisses).IsEqualTo(0L);
+            await Assert.That(cold.RuntimeLookups).IsEqualTo(0L);
+            await Assert.That(cold.RuntimeMisses).IsEqualTo(0L);
             await Assert.That(cold.AdmissionBypasses).IsEqualTo(0L);
             await Assert.That(cold.Admissions).IsEqualTo(0L);
             await Assert.That(cold.Evictions).IsEqualTo(0L);

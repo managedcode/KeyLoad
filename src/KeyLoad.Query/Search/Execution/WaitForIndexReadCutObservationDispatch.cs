@@ -12,7 +12,7 @@ internal static class WaitForIndexReadCutObservationDispatch
         budget.Check();
         var identity = database.Store.Identity;
         var position = database.Store.Position;
-        var digest = Convert.ToHexStringLower(SHA256.HashData(NativeSerialization.Serialize(request)));
+        var digest = Convert.ToHexStringLower(SHA256.HashData(OrleansSerialization.Serialize(request)));
         budget.Check();
         return new(identity.NodeId, identity.Incarnation, identity.ReadGeneration, position,
             result.AppliedToken, principal.Id, principal.PolicyEpoch, resource.SchemaVersion,

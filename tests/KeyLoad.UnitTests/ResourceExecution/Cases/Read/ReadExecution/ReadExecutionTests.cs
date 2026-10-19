@@ -32,7 +32,7 @@ internal sealed class ReadExecutionTests
         var bounded = new DatabaseEngine(database.Store, database.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new()
         {
             MaxBatchBytes = MaximumBatchBytes
-        }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
+        }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => new SearchEngine(bounded, UnitExecutionOptions.QueryExecution())
             .Search(RootIdentity, new(database.Partition, Orders, FieldTextPath, "alpha"), TestContext.Current!.Execution.CancellationToken)).Code)
             .IsEqualTo(ErrorCode.BudgetExceeded);

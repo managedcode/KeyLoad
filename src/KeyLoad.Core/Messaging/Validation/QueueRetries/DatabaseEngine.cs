@@ -36,7 +36,7 @@ public sealed partial class DatabaseEngine
         {
             throw Errors.Fail(ErrorCode.Corruption, QueueRetryProtocol.MissingDecision);
         }
-        var choices = NativeSerialization.Deserialize<QueueRetryDecisions>(payload.RetryDecisions.Span);
+        var choices = OrleansSerialization.Deserialize<QueueRetryDecisions>(payload.RetryDecisions.Span);
         if (choices.Version != QueueRetryProtocol.Version || choices.EvaluatedAt != operation.Timestamp || choices.Items.IsDefaultOrEmpty)
         {
             throw Errors.Fail(ErrorCode.Corruption, QueueRetryProtocol.InvalidDecision);
@@ -50,7 +50,7 @@ public sealed partial class DatabaseEngine
         if (choice.Lane != input.Lane || choice.MessageId != metadata.Id || choice.ExpectedStateVersion != metadata.StateVersion
             || choice.ExpectedLeaseVersion != metadata.LeaseVersion || choice.DeliveryGeneration != metadata.DeliveryGeneration
             || choice.Attempts != metadata.Attempts || !choice.DueIndexKey.Span.SequenceEqual(input.DueIndexKey.Span)
-            || !CryptographicOperations.FixedTimeEquals(choice.PolicyDigest.Span, SHA256.HashData(NativeSerialization.Serialize(input.Policy))))
+            || !CryptographicOperations.FixedTimeEquals(choice.PolicyDigest.Span, SHA256.HashData(OrleansSerialization.Serialize(input.Policy))))
         {
             throw Errors.Fail(ErrorCode.Conflict, QueueRetryProtocol.StaleDecision);
         }

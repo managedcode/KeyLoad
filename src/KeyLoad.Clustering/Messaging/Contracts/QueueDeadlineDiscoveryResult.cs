@@ -8,5 +8,5 @@ namespace KeyLoad.Clustering;
 public sealed record QueueDeadlineDiscoveryResult([property: Id(0)] QueueDeadlinePage? Page,
     [property: Id(1)] QueueDeadlineCursor Cursor, [property: Id(2)] ErrorCode? PrefixError)
 {
-    internal const string SerializerAlias = "keyload.orleans.queue-deadline-discovery-result.v1";
+    internal const string SerializerAlias = "keyload.orleans.queue-deadline-discovery-result";
 }

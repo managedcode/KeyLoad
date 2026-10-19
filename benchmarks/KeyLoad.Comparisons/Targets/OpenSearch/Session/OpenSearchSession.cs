@@ -4,9 +4,9 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons.Targets;
 
-internal sealed class OpenSearchSession(HttpClient client, string index, int topK, int expectedCopies, int corpusCount, IOptions<NativeComparisonExecutionOptions> executionOptions) : IComparisonSession
+internal sealed class OpenSearchSession(HttpClient client, string index, int topK, int expectedCopies, int corpusCount, IOptions<ComparisonExecutionOptions> executionOptions) : IComparisonSession
 {
-    private readonly NativeComparisonExecutionOptions execution = NativeComparisonExecutionOptions.Require(executionOptions).Value;
+    private readonly ComparisonExecutionOptions execution = ComparisonExecutionOptions.Require(executionOptions).Value;
 
     private const string OpenSearchCorpusSortValueInvalidDetail = "OpenSearchCorpusSortValueInvalid";
 

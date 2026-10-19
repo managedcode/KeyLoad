@@ -16,7 +16,7 @@ internal static class ProjectionClassificationRepairFlow
     private const string EventId = "projection-event";
     private const string ReducerId = "projection-reducer";
     private const string ReducerVersion = "v1";
-    private const string NativeDirectory = "classification-repair-native-text";
+    private const string RuntimeDirectoryCore = "classification-repair-execution-text";
     private const string MissingResource = "The original classification resource is missing.";
     private const string AcceptedFailedCommand = "The immutable denied projection command was accepted.";
     private const string MissingLineage = "The repaired projection lineage is missing.";
@@ -106,7 +106,7 @@ internal static class ProjectionClassificationRepairFlow
             ReducerVersion, ReducerGeneration, [EventProjectionFixture.SourceClass]);
         await Assert.That(JsonDefaults.Serialize(fixture.Lineage()).AsSpan()
             .SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
-        var vector = NativeSerialization.Deserialize<VectorRecord>(fixture.VectorBytes()
+        var vector = OrleansSerialization.Deserialize<VectorRecord>(fixture.VectorBytes()
             ?? throw new InvalidOperationException(MissingVector));
         var expectedVector = new VectorRecord(EventProjectionFixture.TargetId, EventProjectionFixture.VectorField,
             EventProjectionFixture.Space, [1, 0], OriginalRevision);
@@ -116,9 +116,9 @@ internal static class ProjectionClassificationRepairFlow
 
     private static async Task HealthyReadAsync(EventProjectionFixture fixture)
     {
-        var projection = new NativeTextProjection(Path.Combine(fixture.Harness.DirectoryPath, NativeDirectory),
+        var projection = new RuntimeTextProjection(Path.Combine(fixture.Harness.DirectoryPath, RuntimeDirectoryCore),
             UnitExecutionOptions.DatabaseLimits(fixture.Database.Limits), fixture.Harness.Store.Identity.NodeId,
-            UnitNativeTextOptions.Execution());
+            UnitTextOptions.Execution());
         try
         {
             await ClassificationLineageWholeAssertions.HealthyAsync(fixture, projection);

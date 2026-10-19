@@ -5,28 +5,28 @@ Status: Accepted; current source implementation and delivered-source qualificati
 ## Decision
 
 Each current benchmark session has a separate Linux GitHub runner, one selected
-native database topology and a native workload client outside its infrastructure
+database topology and a workload client outside its infrastructure
 resource graph. [ADR-142](ADR-142-shared-live-benchmark-sessions.md) owns the
 current 22 sessions: eleven databases at one and three nodes. The initial million
 is measured and applicable lanes retain at least 100,000 operations. Remaining
 model-family, physical 100,000-corpus, vector and intensive TimeSeries requirements
 remain separate open gates; they are not invented additional publication jobs.
 
-The 11 targets are KeyLoad, PostgreSQL with pgvector, Qdrant, RabbitMQ, Redis, Neo4j, MongoDB, OpenSearch, KurrentDB, SurrealDB and HelixDB. The current publication topologies have one or three nodes. A cell proves its own native membership, copies, acknowledgement/durability behavior, resource envelope and workload result. If a target cannot provide the required native topology, its slot records an explicit unsupported disposition; independent standalone processes are never presented as a cluster.
+The 11 targets are KeyLoad, PostgreSQL with pgvector, Qdrant, RabbitMQ, Redis, Neo4j, MongoDB, OpenSearch, KurrentDB, SurrealDB and HelixDB. The current publication topologies have one or three nodes. A cell proves its own membership, copies, acknowledgement/durability behavior, resource envelope and workload result. If a target cannot provide the required topology, its slot records an explicit unsupported disposition; independent standalone processes are never presented as a cluster.
 
 ```mermaid
 flowchart LR
     Plan[Current source-derived plan] --> Cells[22 live database and topology sessions]
-    Cells --> Native[Actual target topology and workload]
-    Native --> Outcome[Measured, unsupported, or terminal failed row]
+    Cells --> Execution[Actual target topology and workload]
+    Execution --> Outcome[Measured, unsupported, or terminal failed row]
     Outcome --> Proof[Authenticated source, run, job, and artifact proof]
     Proof --> Aggregate[Complete current aggregate]
     Aggregate --> Website[Independent Website qualification]
 ```
 
-Each worker retains its original result and native observations, bound to the exact source revision, run, attempt, job, target, profile and options. The aggregate validates the canonical plan, every required slot, artifact bytes and provider identity. It never synthesizes a metric, infers a zero, combines independent throughput or percentiles, or treats parser fixtures as measurements. A measured row must pass its caller-visible correctness, fairness, native topology, resource and provenance checks. A terminal workload failure retains the failed job and a fixed safe reason with `report: null`; explicit unsupported topology is a different disposition. Missing, skipped, canceled without a valid terminal result, duplicate, corrupt, expired, mixed-source or unauthenticated inputs fail the relevant completeness gate.
+Each worker retains its original result and observations, bound to the exact source revision, run, attempt, job, target, profile and options. The aggregate validates the canonical plan, every required slot, artifact bytes and provider identity. It never synthesizes a metric, infers a zero, combines independent throughput or percentiles, or treats parser fixtures as measurements. A measured row must pass its caller-visible correctness, fairness, topology, resource and provenance checks. A terminal workload failure retains the failed job and a fixed safe reason with `report: null`; explicit unsupported topology is a different disposition. Missing, skipped, canceled without a valid terminal result, duplicate, corrupt, expired, mixed-source or unauthenticated inputs fail the relevant completeness gate.
 
-For KeyLoad comparison cells, benchmark-only `KeyLoad:ReplicaCount` selection (1, 2 or 3) is trusted startup configuration, never a client option. Each selection uses fresh silos and separate storage directories. One copy has no copy fault tolerance; two copies need both and have no single-copy-loss availability; three copies preserve the product default of acknowledgement from every configured copy and ordered apply. One- and two-copy timing does not qualify those configurations for production. The normal AppHost and production server default to three copies. Native .NET SDK and official MCP SDK flows, persisted authorization, stable command outcomes, restart/required-copy-loss checks and unchanged replicated-cluster recovery proofs remain required; timing cells do not replace recovery or correctness gates.
+For KeyLoad comparison cells, benchmark-only `KeyLoad:ReplicaCount` selection (1, 2 or 3) is trusted startup configuration, never a client option. Each selection uses fresh silos and separate storage directories. One copy has no copy fault tolerance; two copies need both and have no single-copy-loss availability; three copies preserve the product default of acknowledgement from every configured copy and ordered apply. One- and two-copy timing does not qualify those configurations for production. The normal AppHost and production server default to three copies. Execution .NET SDK and official MCP SDK flows, persisted authorization, stable command outcomes, restart/required-copy-loss checks and unchanged replicated-cluster recovery proofs remain required; timing cells do not replace recovery or correctness gates.
 
 ## Acceptance and evidence ownership
 
@@ -35,11 +35,11 @@ The feature specification is the canonical source for the plan, profiles, per-ce
 | Requirement | Acceptance |
 |---|---|
 | REQ-BC-050: Linux-only complete qualification | AC-ISO-001: every required current cell and gate executes on Linux against the exact delivered source. |
-| REQ-BC-051: one isolated worker per target/topology/workload identity | AC-ISO-002: source-derived inventory and native resource ownership match the complete plan. |
-| REQ-BC-052: actual native topology and honest unsupported states | AC-ISO-003: observed native membership, copies and acknowledgements match each supported cell. |
+| REQ-BC-051: one isolated worker per target/topology/workload identity | AC-ISO-002: source-derived inventory and resource ownership match the complete plan. |
+| REQ-BC-052: actual topology and honest unsupported states | AC-ISO-003: observed membership, copies and acknowledgements match each supported cell. |
 | REQ-BC-053: safe benchmark-only KeyLoad replica-count selection | AC-ISO-004: invalid/changed configuration rejects; SDK/MCP restart, required-copy-loss and replicated-cluster contracts remain intact. |
 | REQ-BC-054: shared workload correctness and failure retention | AC-ISO-005: deterministic inputs, measured initial load without warmup, full result oracles, attempt/failure accounting and settled operations are retained. |
-| REQ-BC-055: exact worker envelope and provenance | AC-ISO-006: each original versioned worker report matches its exact target, scenario, run and native observations. |
+| REQ-BC-055: exact worker envelope and provenance | AC-ISO-006: each original versioned worker report matches its exact target, scenario, run and observations. |
 | REQ-BC-056: complete authenticated aggregation | AC-ISO-007: all source-planned slots and original artifacts are strictly validated before aggregation. |
 | REQ-BC-057: site metrics derive from validated current evidence | AC-ISO-008: the derived projection preserves source values and passes the specified site/browser/coverage gates. |
 | REQ-BC-058: only fresh eligible evidence may publish metrics | AC-ISO-009: selected evidence and source remain unchanged through final freshness checks and actual provider publication. |
@@ -48,32 +48,32 @@ The current cohort contract is REQ/AC-BC-CURRENT-001..004; the independent conte
 
 The following supplemental predicates remain active. The concise contracts here preserve details not fully restated in the current feature tables; BenchmarkComparisons and the named tests remain the canonical automated-evidence owners.
 
-### Native workload and ownership
+### workload and ownership
 
-- **AC-KC-001..003 / AC-KO-001..005 (KurrentDB):** Native 1/3-member fixtures use the checked complete capacity `4096 + 5 * (256 + 10000) + 2 = 55378` and unique stream identities. Seed and readback use at most 16 original workers and one original operation per item. Every tracked deletion identity must come from an actual successful native NoStream append ACK; reserve before each append, transition to deletable only after that same operation succeeds, and never retry an uncertain append or deletion. Unknown, rejected, pending and foreign identities are never deleted. Cleanup submits the exact ACK-owned set once, at concurrency at most 16, under one 120-second delete allowance and 180-second total cleanup allowance. Success requires tracked=submitted=acknowledged=55378, faulted=pending=0, no cancellation/deadline/disposal failure, then actual readback of every tombstone and byte/ID preservation of an independently owned foreign event. Fixture setup/readback remains within its existing 900-second bound. Each topology retains all five 10,000-operation native StreamAppend repetitions and the original workload evidence. Any failed or uncertain effect stays failed even if cleanup of known ACKs succeeds. The existing cleanup timeout branch does not yet prove unconditional original-task settlement, native quorum-loss/cancellation recovery, or parent kill/reap; those fault claims remain pending until the owned process boundary is actually qualified.
-- **AC-MR-001..005 (MongoDB):** Native 1/3-member admission validates every peer’s exact `(id=index, name=host)` member bijection and self identity, health=1, intended first member as writable PRIMARY, all others SECONDARY, consistent primary/member/vote/priority tuples, votes=1, priorities=2/1/1, and no arbiter, hidden, delayed or non-voting shortcut. Actual voting and writable counts must equal N and each satisfy its majority. Native status/config/hello fields must agree on membership and version/term relationships. BSON integral observations retain exact native signed-Long identity; only the specified config-version fields permit validated Int32 fallback, while election term must be native Long. No lossy number/JSON/coercion path is admitted. Readiness requires two complete fresh, identical valid rounds separated by 500 ms, resetting on invalid/exception, inside one 120-second bootstrap budget. Existing direct connect/selection/socket/command bounds are 2 seconds and every stage/poll consumes remaining budget. The one-node case proves actual authenticated writable hello/ping without fabricated replica metadata. The real three-node election uses the ordinary 20-second native step-down fixture (force is permitted only in this untimed election fixture), observes the actual lower-priority writable primary and its term, then the intended primary’s automatic return and two-round admission; the whole parent stays within 300 seconds and its child readiness within 120 seconds. Original child stdout, stderr and exit are joined. Domain tests for Long extrema/values above 2^53 do not qualify native election. Uncooperative-child cancellation/kill/reap/healthy-follow-up remains pending until proven through the actual owned process.
+- **AC-KC-001..003 / AC-KO-001..005 (KurrentDB):** 1/3-member fixtures use the checked complete capacity `4096 + 5 * (256 + 10000) + 2 = 55378` and unique stream identities. Seed and readback use at most 16 original workers and one original operation per item. Every tracked deletion identity must come from an actual successful NoStream append ACK; reserve before each append, transition to deletable only after that same operation succeeds, and never retry an uncertain append or deletion. Unknown, rejected, pending and foreign identities are never deleted. Cleanup submits the exact ACK-owned set once, at concurrency at most 16, under one 120-second delete allowance and 180-second total cleanup allowance. Success requires tracked=submitted=acknowledged=55378, faulted=pending=0, no cancellation/deadline/disposal failure, then actual readback of every tombstone and byte/ID preservation of an independently owned foreign event. Fixture setup/readback remains within its existing 900-second bound. Each topology retains all five 10,000-operation StreamAppend repetitions and the original workload evidence. Any failed or uncertain effect stays failed even if cleanup of known ACKs succeeds. The existing cleanup timeout branch does not yet prove unconditional original-task settlement, quorum-loss/cancellation recovery, or parent kill/reap; those fault claims remain pending until the owned process boundary is actually qualified.
+- **AC-MR-001..005 (MongoDB):** 1/3-member admission validates every peer’s exact `(id=index, name=host)` member bijection and self identity, health=1, intended first member as writable PRIMARY, all others SECONDARY, consistent primary/member/vote/priority tuples, votes=1, priorities=2/1/1, and no arbiter, hidden, delayed or non-voting shortcut. Actual voting and writable counts must equal N and each satisfy its majority. status/config/hello fields must agree on membership and version/term relationships. BSON integral observations retain exact signed-Long identity; only the specified config-version fields permit validated Int32 fallback, while election term must be Long. No lossy number/JSON/coercion path is admitted. Readiness requires two complete fresh, identical valid rounds separated by 500 ms, resetting on invalid/exception, inside one 120-second bootstrap budget. Existing direct connect/selection/socket/command bounds are 2 seconds and every stage/poll consumes remaining budget. The one-node case proves actual authenticated writable hello/ping without fabricated replica metadata. The real three-node election uses the ordinary 20-second step-down fixture (force is permitted only in this untimed election fixture), observes the actual lower-priority writable primary and its term, then the intended primary’s automatic return and two-round admission; the whole parent stays within 300 seconds and its child readiness within 120 seconds. Original child stdout, stderr and exit are joined. Domain tests for Long extrema/values above 2^53 do not qualify election. Uncooperative-child cancellation/kill/reap/healthy-follow-up remains pending until proven through the actual owned process.
 - **AC-ISO-006L (replay diagnostics):** Preserve the fixed 13 protected configuration/sender/pool records and the existing UTF-8 line/byte budgets. Exact validated UTC-prefix and seven-space grammar is required for protected configuration/capacity records; malformed, truncated, secret-bearing or trailing data remains ordinary bounded tail or is rejected as specified. Keep only closed counters and safe categories: never record identity, payload, nonce, MAC, secret, address or exception text. Evict ordinary oldest entries before protected observations; never exceed the configured caps.
 
 ### Original operations, process ownership, and evidence
 
-The primary AppHost owns native KeyLoad server project processes and Azurite.
+The primary AppHost owns KeyLoad server project processes and Azurite.
 The separate LoadTests AppHost owns selected infrastructure, discovered endpoints,
-readiness and run-owned cleanup. External DBs retain pinned native images and
-anonymous session volumes; native SDK product publication is explicit release
+readiness and run-owned cleanup. External DBs retain pinned images and
+anonymous session volumes; SDK product publication is explicit release
 work only. Actual DLL/PDB/source/process identities replace product image inputs.
 REQ-BC-PROCESS-IDENTITY-001 retains exact PID and captured start identity, original
 cancellation/error objects and bounded joined stdout/stderr/process-tree cleanup.
 AppHost's identity-checked deliberate Kill and awaited exit prove an abrupt fault;
 graceful Stop does not. Local reports have no invented GitHub provenance. Original
-GitHub qualification and matched native-process resources remain independent gates.
+GitHub qualification and matched process resources remain independent gates.
 
-- **AC-HT-001..003 (native HTTP timer):** The original referenced lifetime timer remains owned until the original promise and post-abort callback settle, and is cleared in `finally`. Preserve the existing 30-second HTTP/readiness bounds and original outcome; do not use a detached race, retry, global keepalive or abandon original work after timeout.
+- **AC-HT-001..003 (HTTP timer):** The original referenced lifetime timer remains owned until the original promise and post-abort callback settle, and is cleared in `finally`. Preserve the existing 30-second HTTP/readiness bounds and original outcome; do not use a detached race, retry, global keepalive or abandon original work after timeout.
 - **AC-KF-001..003 (failure aggregation):** Preserve actual original error objects and fatal-runtime precedence through nested/aggregate failures. Deduplicate by reference; the first actual fatal captured by exception dispatch information outranks an ordinary primary, without cloning or synthesizing exceptions. Keep original failure stage/status, counters, locks, cancellation and lifecycle settlement.
-- **AC-PQ-001..002 / AC-MP-012:** Every AppHost-owned TUnit invocation has its own named results directory so one invocation cannot overwrite another's original report. Retain every unmodified report and associated original logs, then match each to the exact source, case, summary, run, job and artifact identity. Coverage merging checks the real report set and source association; no rewritten report, synthetic count or log-count substitute is accepted. Keep workflow invocation, filters, ordering, permissions, native boundaries and publication gates intact.
+- **AC-PQ-001..002 / AC-MP-012:** Every AppHost-owned TUnit invocation has its own named results directory so one invocation cannot overwrite another's original report. Retain every unmodified report and associated original logs, then match each to the exact source, case, summary, run, job and artifact identity. Coverage merging checks the real report set and source association; no rewritten report, synthetic count or log-count substitute is accepted. Keep workflow invocation, filters, ordering, permissions, boundaries and publication gates intact.
 
-These criteria do not assert that a pending cancellation, fault or native qualification has passed. Original immutable run artifacts retain their historical source and outcomes and are not active-plan fallback evidence.
+These criteria do not assert that a pending cancellation, fault or qualification has passed. Original immutable run artifacts retain their historical source and outcomes and are not active-plan fallback evidence.
 
-Local Aspire builds and test runs are permitted development evidence only. They must use the owner-required AppHost entry point, with AppHost owning resources, readiness, execution and shutdown. Delivered-source qualification is Linux GitHub Actions at one exact source SHA with original reports and artifacts. The applicable build, format, TUnit, scalar, process-recovery, cluster SDK/MCP, native comparison, source-closure, coverage, browser, archive, freshness and provider gates remain distinct and mandatory. A source review, resource model, partial cohort, old receipt or development run cannot substitute for its runtime gate.
+Local Aspire builds and test runs are permitted development evidence only. They must use the owner-required AppHost entry point, with AppHost owning resources, readiness, execution and shutdown. Delivered-source qualification is Linux GitHub Actions at one exact source SHA with original reports and artifacts. The applicable build, format, TUnit, scalar, process-recovery, cluster SDK/MCP, comparison, source-closure, coverage, browser, archive, freshness and provider gates remain distinct and mandatory. A source review, resource model, partial cohort, old receipt or development run cannot substitute for its runtime gate.
 
 ## Rollout and rollback
 
@@ -82,30 +82,30 @@ This decision changes benchmark execution and evidence accounting, not database 
 The ADR remains Accepted until the required implementation and exact-source Linux evidence are complete. The canonical feature documents and status records remain the authority for which gates have actually passed.
 
 
-## Native external database annotations
+## external database annotations
 
 REQ/AC-BC-IMAGE-MODEL-001 retains actual pinned Aspire ContainerImageAnnotation
 semantics for external databases. Image/registry/digest, readonly bootstrap,
 anonymous writable session volume, client endpoint bindings and readiness remain
 verified by their real model owners. Unsupported topologies allocate no database
-or workload resource. A model pass does not qualify native startup, membership,
+or workload resource. A model pass does not qualify startup, membership,
 workload results or publication.
 
 ## Measurement scheduling and ingestion contract, 2026-10-09
 
 Related requirements: REQ/AC-SCALE-024..028 (measurement scheduling, ingestion and mixed load) in
 [ScalingQualification](../Features/BenchmarkComparisons/ScalingQualification.md#functional-scheduling-and-ingestion).
-[NativeTUnitEntry](../Features/TestInfrastructure/NativeTUnitEntry.md)
+[TUnitEntry](../Features/TestInfrastructure/TUnitEntry.md)
 REQ/AC-TUNIT-ENTRY-013/014 govern serial benchmark execution and exclusive heavy
-functional selection while preserving original outcomes and joined resource cleanup; [ADR-117](ADR-117-native-tunit-ci-entry.md)
-retains direct native TUnit invocation and fixture-owned Aspire lifetimes.
+functional selection while preserving original outcomes and joined resource cleanup; [ADR-117](ADR-117-tunit-ci-entry.md)
+retains direct TUnit invocation and fixture-owned Aspire lifetimes.
 
 Independent functional tests use the ordinary 20-slot default, with a measured
-increase up to 50. Measurements execute one native test/scenario at a time inside
+increase up to 50. Measurements execute one test/scenario at a time inside
 each benchmark job. The measurement case may itself execute the declared number
-of workload clients concurrently: client concurrency never represents native
+of workload clients concurrently: client concurrency never represents execution
 TUnit scheduling. Independent benchmark jobs may execute concurrently only on
-separate Linux runners with their own native topology, clients, containers,
+separate Linux runners with their own topology, clients, containers,
 volumes and joined cleanup. No arbitrary cross-job serialization is introduced.
 Heavy functional mixed-ingestion cases execute exclusively on owned replicated-cluster resources,
 separately from ordinary cases and other heavy cases in the runner; they qualify
@@ -124,16 +124,16 @@ One canonical shared scenario inventory covers all comparison databases under RE
 datasets, seed/payload, operation schedules/counts, client concurrency, measured
 boundaries and correctness oracles with equivalent effective resources and
 acknowledgement/durability. Planner/aggregate joins reject missing, substituted or
-incomparable cells; unsupported native capabilities remain explicitly unavailable.
+incomparable cells; unsupported capabilities remain explicitly unavailable.
 The new ingestion inventory is shared across targets rather than a KeyLoad-only
 performance workload. It remains unimplemented/unqualified in this checkpoint.
 
-Implementation order: the native selector and existing typed execution options first; then the feature-local ingestion contracts, execution and reporting with real ComparisonTests flows; then bounded mixed-load cases through the existing ClusterFixture and SDK/MCP owners, with exclusive heavy selection, coverage exclusion and isolated Linux acceptance. No new resource harness, public API, dependency or database format is introduced.
+Implementation order: the selector and existing typed execution options first; then the feature-local ingestion contracts, execution and reporting with real ComparisonTests flows; then bounded mixed-load cases through the existing ClusterFixture and SDK/MCP owners, with exclusive heavy selection, coverage exclusion and isolated Linux acceptance. No new resource harness, public API, dependency or database format is introduced.
 
 Rollout changes scheduling only in this checkpoint. New load cases are **not
 implemented or qualified**; they enter dispatch only after their selector,
 report, inventory, correctness and provenance contracts are implemented and
-verified together. Preserve existing c16 profiles, 100K/1M inventory, native
+verified together. Preserve existing c16 profiles, 100K/1M inventory, execution
 matrix identities and original immutable reports. Rollback of this scoped work
 may remove its scheduling/doc change or unqualified future routes; it never
 rewrites historical results or presents overlapping measurements as qualified.

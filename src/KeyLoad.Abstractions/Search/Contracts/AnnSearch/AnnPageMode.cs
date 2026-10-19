@@ -5,8 +5,8 @@ namespace KeyLoad;
 [Orleans.Alias(AnnSearchContractAliases.Mode)]
 public enum AnnPageMode
 {
-    /// <summary>The eligible native set was completely ranked by actual exact work.</summary>
+    /// <summary>The eligible execution set was completely ranked by actual exact work.</summary>
     Exact = 0,
-    /// <summary>The native graph supplied bounded approximate candidates.</summary>
+    /// <summary>The execution graph supplied bounded approximate candidates.</summary>
     Approximate = 1
 }

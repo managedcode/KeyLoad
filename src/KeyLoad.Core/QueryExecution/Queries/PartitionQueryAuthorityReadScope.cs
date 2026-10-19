@@ -31,7 +31,7 @@ public sealed partial class DatabaseEngine
         string? digest = null;
         grant.ReadValue(view, KeySpace.Resource(partition.TenantId, partition.DatabaseId, collection), bytes =>
         {
-            resource = NativeSerialization.Deserialize<ResourceDefinition>(bytes);
+            resource = OrleansSerialization.Deserialize<ResourceDefinition>(bytes);
             digest = Convert.ToHexStringLower(SHA256.HashData(bytes));
         });
         var charged = grant.CreateView(view);
@@ -57,7 +57,7 @@ public sealed partial class DatabaseEngine
         ReadExecutionBudgetReadGrant grant) where T : class
     {
         T? record = null;
-        grant.ReadValue(view, key, bytes => record = NativeSerialization.Deserialize<T>(bytes));
+        grant.ReadValue(view, key, bytes => record = OrleansSerialization.Deserialize<T>(bytes));
         return record;
     }
 }

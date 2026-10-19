@@ -71,7 +71,7 @@ internal sealed class AnnProjectionWorkerGrain(BackgroundStorageClient storage,
         }
     }
 
-    private async Task<byte[]?> CycleCoreAsync(byte[]? after, NativeCapabilityWorkLifetime binding)
+    private async Task<byte[]?> CycleCoreAsync(byte[]? after, CapabilityWorkLifetime binding)
     {
         var token = binding.Token;
         try

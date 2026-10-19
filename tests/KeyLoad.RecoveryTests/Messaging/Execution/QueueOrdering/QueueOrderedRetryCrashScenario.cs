@@ -11,8 +11,8 @@ internal static class QueueOrderedRetryCrashScenario
             new(QueueOrderedRetryCrashProtocol.Partition, QueueOrderedRetryCrashProtocol.Queue), delivery.Token, DeliveryAction.Nack);
         var operation = database.PrepareQueueRetryOperation(database.OwnCommand(
             CrashDatabase.Operation(database, OperationKind.Delivery, command, command.CommandId)));
-        await File.WriteAllBytesAsync(Path.Combine(directory, QueueOrderedRetryCrashProtocol.OperationFile), NativeSerialization.Serialize(operation));
-        await File.WriteAllBytesAsync(Path.Combine(directory, QueueOrderedRetryCrashProtocol.DeliveryFile), NativeSerialization.Serialize(delivery));
+        await File.WriteAllBytesAsync(Path.Combine(directory, QueueOrderedRetryCrashProtocol.OperationFile), OrleansSerialization.Serialize(operation));
+        await File.WriteAllBytesAsync(Path.Combine(directory, QueueOrderedRetryCrashProtocol.DeliveryFile), OrleansSerialization.Serialize(delivery));
         boundary.Position = store.Position + QueueOrderedRetryCrashProtocol.One;
         boundary.Armed = true;
         _ = database.Apply(operation).Get<CommitReceipt>();

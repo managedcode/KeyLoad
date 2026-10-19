@@ -16,7 +16,7 @@ internal static class QueueDeadlineCapacityCold
         await ReplayAsync(database, store, state, token);
         var image = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
-        var identity = NativeSerialization.Serialize(store.Identity);
+        var identity = OrleansSerialization.Serialize(store.Identity);
         store.Dispose();
         token.ThrowIfCancellationRequested();
         using var cold = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
@@ -33,14 +33,14 @@ internal static class QueueDeadlineCapacityCold
     {
         var image = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
-        var identity = NativeSerialization.Serialize(store.Identity);
+        var identity = OrleansSerialization.Serialize(store.Identity);
         foreach (var (operation, result) in state.Outcomes)
         {
             token.ThrowIfCancellationRequested();
             var stored = OutcomeStoreOracle.Read(store, operation)
                 ?? throw new InvalidOperationException("The deadline command outcome is absent before replay.");
-            await Assert.That(NativeSerialization.Serialize(stored))
-                .IsEquivalentTo(NativeSerialization.Serialize(result), TUnit.Assertions.Enums.CollectionOrdering.Matching);
+            await Assert.That(OrleansSerialization.Serialize(stored))
+                .IsEquivalentTo(OrleansSerialization.Serialize(result), TUnit.Assertions.Enums.CollectionOrdering.Matching);
             if (result.Value is CommitReceipt receipt)
             {
                 await QueueDeadlineCapacityOperations.ReceiptAsync(database.Apply(operation), receipt);
@@ -52,9 +52,9 @@ internal static class QueueDeadlineCapacityCold
             {
                 if (received.Deliveries.IsEmpty)
                 {
-                    await NativeReplayResultAssertions.Same<ReceiveResult>(database.Apply(operation), result);
+                    await ReplayResultAssertions.Same<ReceiveResult>(database.Apply(operation), result);
                     await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, image, position, identity);
-                    await NativeReplayResultAssertions.Same<ReceiveResult>(database.ResolveOutcome(operation), result);
+                    await ReplayResultAssertions.Same<ReceiveResult>(database.ResolveOutcome(operation), result);
                 }
                 else
                 {
@@ -65,8 +65,8 @@ internal static class QueueDeadlineCapacityCold
                 await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, image, position, identity);
                 var retained = OutcomeStoreOracle.Read(store, operation)
                     ?? throw new InvalidOperationException("The deadline receive outcome is absent after replay.");
-                await Assert.That(NativeSerialization.Serialize(retained))
-                    .IsEquivalentTo(NativeSerialization.Serialize(result), TUnit.Assertions.Enums.CollectionOrdering.Matching);
+                await Assert.That(OrleansSerialization.Serialize(retained))
+                    .IsEquivalentTo(OrleansSerialization.Serialize(result), TUnit.Assertions.Enums.CollectionOrdering.Matching);
             }
             if (Errors.Code(result.Problem) is not null)
             {

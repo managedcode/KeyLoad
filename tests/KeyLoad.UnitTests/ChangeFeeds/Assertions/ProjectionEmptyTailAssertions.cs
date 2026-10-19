@@ -35,7 +35,7 @@ internal static class ProjectionEmptyTailAssertions
         var position = store.Position;
         var applied = owner.LastApplied;
         var key = OutcomeStoreOracle.PartitionKey(partition, Root, rejected.CommandId);
-        var locatorKey = KeySpace.OutcomeLocatorV2(partition, Root, rejected.CommandId);
+        var locatorKey = KeySpace.OutcomeLocator(partition, Root, rejected.CommandId);
         await Assert.That(store.Read(view => view.ReadOwnedValue(key))).IsNull();
         await Assert.That(store.Read(view => view.ReadOwnedValue(locatorKey))).IsNull();
         var result = owner.ApplyEmbedded(rejected, token);
@@ -54,7 +54,7 @@ internal static class ProjectionEmptyTailAssertions
         await Assert.That(retained.Where(row => !metadata.Any(value => row.StartsWith(value, StringComparison.Ordinal))))
             .IsEquivalentTo(image.Where(row => !metadata.Any(value => row.StartsWith(value, StringComparison.Ordinal))),
                 global::TUnit.Assertions.Enums.CollectionOrdering.Matching);
-        var stored = store.Read(view => NativeSerialization.Deserialize<StoredOutcome>(view.ReadOwnedValue(key)!));
+        var stored = store.Read(view => OrleansSerialization.Deserialize<StoredOutcome>(view.ReadOwnedValue(key)!));
         await Assert.That(stored.CanonicalSequence).IsEqualTo(owner.LastApplied);
         await Assert.That(stored.PreparedCommand.CommandId).IsEqualTo(rejected.CommandId);
         await Assert.That(stored.PreparedCommand.Value!.Input.Span.SequenceEqual(rejected.Value!.Input.Span)).IsTrue();

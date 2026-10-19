@@ -5,7 +5,7 @@ namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 internal sealed class IsolatedKeyLoadAdmissionTests
 {
-    private const string ReadPath = "/v1/documents/get";
+    private const string ReadPath = "/documents/get";
     private const string PrincipalId = "principal";
     private const string TenantId = "tenant";
     private const int ChangedBodyBytes = 131_072;
@@ -13,7 +13,7 @@ internal sealed class IsolatedKeyLoadAdmissionTests
     [Test]
     public async Task IntensiveAdmissionAcceptsSixteenVerifiedClientsAndRejectsCapacityOverflow()
     {
-        var options = IsolatedKeyLoadAdmissionOptions.CreateHttpOptions(NativeExecutionPolicyFixture.Admission());
+        var options = IsolatedKeyLoadAdmissionOptions.CreateHttpOptions(ExecutionPolicyFixture.Admission());
         var limits = options.Value;
         var governor = new HttpAdmissionGovernor(options);
         var leases = new List<HttpAdmissionLease>();
@@ -43,21 +43,21 @@ internal sealed class IsolatedKeyLoadAdmissionTests
         await Assert.That(limits.HeavyReadReservedBytes).IsEqualTo(new HttpAdmissionLimits().HeavyReadReservedBytes);
     }
 
-    /// <summary>AC-ISO-003/005: missing, default and changed native SDK limits fail the declared profile.</summary>
+    /// <summary>AC-ISO-003/005: missing, default and changed execution SDK limits fail the declared profile.</summary>
     [Test]
     public async Task ActualMemberAdmissionMustMatchEveryDeclaredLimit()
     {
-        var options = IsolatedKeyLoadAdmissionOptions.CreateHttpOptions(NativeExecutionPolicyFixture.Admission());
+        var options = IsolatedKeyLoadAdmissionOptions.CreateHttpOptions(ExecutionPolicyFixture.Admission());
         var limits = options.Value;
         var status = new HttpAdmissionGovernor(options).Status();
         IsolatedKeyLoadAdmissionProfile.Verify(status, options);
         await Assert.That(Assert.ThrowsExactly<ComparisonFailureException>(
             () => IsolatedKeyLoadAdmissionProfile.Verify(null, options))).IsNotNull();
         await Assert.That(Assert.ThrowsExactly<ComparisonFailureException>(
-            () => IsolatedKeyLoadAdmissionProfile.Verify(new HttpAdmissionGovernor(NativeExecutionPolicyFixture.Http()).Status(), options))).IsNotNull();
+            () => IsolatedKeyLoadAdmissionProfile.Verify(new HttpAdmissionGovernor(ExecutionPolicyFixture.Http()).Status(), options))).IsNotNull();
         await Assert.That(Assert.ThrowsExactly<ComparisonFailureException>(
             () => IsolatedKeyLoadAdmissionProfile.Verify(
-                new HttpAdmissionGovernor(NativeExecutionPolicyFixture.Http(limits with
+                new HttpAdmissionGovernor(ExecutionPolicyFixture.Http(limits with
                 {
                     MaxBodyBytes = ChangedBodyBytes
                 })).Status(), options))).IsNotNull();
@@ -66,7 +66,7 @@ internal sealed class IsolatedKeyLoadAdmissionTests
     [Test]
     public async Task ConfiguredSlotsReachActualAdmissionAndReleaseOnDisposal()
     {
-        var options = IsolatedKeyLoadAdmissionOptions.CreateHttpOptions(NativeExecutionPolicyFixture.Admission(
+        var options = IsolatedKeyLoadAdmissionOptions.CreateHttpOptions(ExecutionPolicyFixture.Admission(
             new IsolatedKeyLoadAdmissionOptions { RequestsPerScope = 2 }));
         var governor = new HttpAdmissionGovernor(options);
         using (var first = governor.Begin(ReadPath, 0))

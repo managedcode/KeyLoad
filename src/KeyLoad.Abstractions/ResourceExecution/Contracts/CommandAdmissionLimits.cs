@@ -3,7 +3,7 @@ namespace KeyLoad;
 /// <summary>Configures node-local admission limits without changing canonical apply decisions.</summary>
 [ConfigurationOptions]
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.CommandAdmissionLimits)]
+[Orleans.Alias(ContractAliases.CommandAdmissionLimits)]
 public sealed record CommandAdmissionLimits
 {
     /// <summary>The section bound by the server composition root.</summary>

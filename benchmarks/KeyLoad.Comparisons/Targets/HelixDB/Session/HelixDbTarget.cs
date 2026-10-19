@@ -7,13 +7,13 @@ public sealed partial class HelixDbTarget : IBenchmarkSessionQueries
     private const int SessionCandidateLimit = 2;
     private const int SessionExpectedRows = 1;
     private const int SessionFirstRow = 0;
-    private const string SessionCardinalityMismatch = "SessionNativeQueryCardinalityMismatch";
+    private const string SessionCardinalityMismatch = "SessionQueryCardinalityMismatch";
 
     private bool ownsSessionNumberEqualityIndex;
     /// <inheritdoc/>
     public async Task BuildSessionIndexesAsync(CancellationToken cancellationToken)
     {
-        await HelixDbIndexLifecycle.ExecuteAsync(http, HelixDbDocumentAst.Index(label, HelixDbNativeTokens.TokenNumber, range: false),
+        await HelixDbIndexLifecycle.ExecuteAsync(http, HelixDbDocumentAst.Index(label, HelixDbTokens.TokenNumber, range: false),
             Policy, timeProvider, cancellationToken).ConfigureAwait(false);
         ownsSessionNumberEqualityIndex = true;
     }
@@ -22,13 +22,13 @@ public sealed partial class HelixDbTarget : IBenchmarkSessionQueries
     public async Task QuerySessionAsync(int ordinal, int stableStart, int stableCount, CancellationToken cancellationToken)
     {
         var expected = BenchmarkSessionQueryContract.Expected(ordinal, stableStart, stableCount);
-        var filter = HelixDbProtocol.Node(HelixDbNativeTokens.TokenWhere, new JsonObject
+        var filter = HelixDbProtocol.Node(HelixDbTokens.TokenWhere, new JsonObject
         {
-            [HelixDbNativeTokens.TokenInput] = HelixDbDocumentAst.Lookup(label, expected.Id),
-            [HelixDbNativeTokens.TokenPredicate] = HelixDbProtocol.Compare(HelixDbNativeTokens.TokenEq,
-                HelixDbNativeTokens.TokenNumber, HelixDbNativeTokens.TokenI64, expected.Number)
+            [HelixDbTokens.TokenInput] = HelixDbDocumentAst.Lookup(label, expected.Id),
+            [HelixDbTokens.TokenPredicate] = HelixDbProtocol.Compare(HelixDbTokens.TokenEq,
+                HelixDbTokens.TokenNumber, HelixDbTokens.TokenI64, expected.Number)
         });
-        var query = HelixDbProtocol.Project(HelixDbProtocol.Limit(filter, SessionCandidateLimit), HelixDbNativeTokens.TokenId, HelixDbNativeTokens.TokenPayload);
+        var query = HelixDbProtocol.Project(HelixDbProtocol.Limit(filter, SessionCandidateLimit), HelixDbTokens.TokenId, HelixDbTokens.TokenPayload);
         using var response = await HelixDbProtocol.QueryAsync(http, HelixDbProtocol.Batch(query, false), false, Policy,
             timeProvider, cancellationToken).ConfigureAwait(false);
         var rows = HelixDbProtocol.Rows(response);
@@ -36,7 +36,7 @@ public sealed partial class HelixDbTarget : IBenchmarkSessionQueries
         {
             throw new ComparisonFailureException(SessionCardinalityMismatch);
         }
-        BenchmarkSessionQueryContract.Require(new(rows[SessionFirstRow].GetProperty(HelixDbNativeTokens.TokenId).GetString()!,
-            rows[SessionFirstRow].GetProperty(HelixDbNativeTokens.TokenPayload).GetString()!), expected);
+        BenchmarkSessionQueryContract.Require(new(rows[SessionFirstRow].GetProperty(HelixDbTokens.TokenId).GetString()!,
+            rows[SessionFirstRow].GetProperty(HelixDbTokens.TokenPayload).GetString()!), expected);
     }
 }

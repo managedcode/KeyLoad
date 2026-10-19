@@ -5,7 +5,7 @@ internal sealed class SiteBrowserBehaviorTests
 {
     /// <summary>AC-BC-025/ISO-009: the current comparison page preserves responsive navigation and the live scene lifecycle.</summary>
     [Test]
-    public async Task CurrentPageRetainsResponsiveSceneLifecycleAndNativeCoverage()
+    public async Task CurrentPageRetainsResponsiveSceneLifecycleAndCoverage()
     {
         var fixture = await SiteIsolatedFixture.ReadAsync();
         var token = TestContext.Current!.Execution.CancellationToken;
@@ -16,6 +16,6 @@ internal sealed class SiteBrowserBehaviorTests
         await SiteBrowserVisualAssertions.AssertResponsive(browser.Chrome, token);
         await SiteBrowserVisualAssertions.AssertSceneLifecycle(browser.Chrome, browser.BaseUrl, token);
         await browser.CompleteAsync(token);
-        await SiteBrowserCoverageAssertions.AssertNativeConversionAsync(browser.BaseUrl, fixture.Inputs.Site, token);
+        await SiteBrowserCoverageAssertions.AssertConversionAsync(browser.BaseUrl, fixture.Inputs.Site, token);
     }
 }

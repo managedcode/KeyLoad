@@ -8,15 +8,15 @@ namespace KeyLoad.Comparisons.Targets;
 /// <param name="connectionString">MongoDB connection string for the selected topology.</param>
 /// <param name="runId">Stable run identifier used to isolate the benchmark database.</param>
 /// <param name="image">Server image recorded in comparison provenance.</param>
-/// <param name="topology">Requested one, two or three native members.</param>
-/// <param name="lifecycleOptions">Centrally validated native lifecycle policy.</param>
-/// <param name="nativeExecutionOptions">Centrally validated native adapter execution policy.</param>
+/// <param name="topology">Requested one, two or three execution members.</param>
+/// <param name="lifecycleOptions">Centrally validated execution lifecycle policy.</param>
+/// <param name="runtimeExecutionOptions">Centrally validated execution adapter execution policy.</param>
 /// <param name="provider">Borrowed clock; defaults to the system provider.</param>
 public sealed partial class MongoTarget(string connectionString, string runId, string image, ComparisonTopology topology,
-    IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<NativeComparisonExecutionOptions> nativeExecutionOptions, TimeProvider? provider = null) : IDocumentComparisonTarget
+    IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<ComparisonExecutionOptions> runtimeExecutionOptions, TimeProvider? provider = null) : IDocumentComparisonTarget
 {
     private readonly TimeProvider timeProvider = provider ?? TimeProvider.System;
-    private readonly IOptions<NativeComparisonExecutionOptions> executionOptions = NativeComparisonExecutionOptions.Require(nativeExecutionOptions);
+    private readonly IOptions<ComparisonExecutionOptions> executionOptions = ComparisonExecutionOptions.Require(runtimeExecutionOptions);
 
     private readonly string databaseName = MongoSchema.DatabasePrefix + Guid.Parse(runId).ToString(MongoSchema.InvariantFormat);
     private readonly List<IMongoClient> ownedClients = [];
@@ -156,7 +156,7 @@ public sealed partial class MongoTarget(string connectionString, string runId, s
         => MongoSchema.DatabasePrefix + databaseName + MongoSchema.DatabaseSeparator + document.Id;
 
     internal static MongoClientSettings CreateSettings(string connectionString, int concurrency,
-        IOptions<NativeComparisonExecutionOptions> executionOptions)
+        IOptions<ComparisonExecutionOptions> executionOptions)
         => MongoProfileFactory.CreateSettings(connectionString, concurrency, executionOptions);
 
     private async Task CreateIndexesAsync(CancellationToken cancellationToken)

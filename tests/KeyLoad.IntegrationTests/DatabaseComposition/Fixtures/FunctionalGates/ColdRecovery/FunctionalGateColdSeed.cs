@@ -26,9 +26,9 @@ internal static class FunctionalGateColdSeed
             };
             var definition = await FunctionalGateRelationalCalls.SqlSdkAsync<ResourceDefinition>(context, context.Administrator, create, token);
             await SqlClusterProtocol.EqualAsync(expected, definition);
-            var blob = await FunctionalGateColdBlobUpload.RunAsync(context, index, token);
+            var blob = await FunctionalGateFiles.UploadAsync(context, FunctionalGateColdProtocol.Resource("blobs", index), FunctionalGateColdProtocol.Id, token);
             var beforeWrite = TimeProvider.System.GetUtcNow();
-            var command = FunctionalGateColdMutations.Command(context, index, blob.Begin.Blob);
+            var command = FunctionalGateColdMutations.Command(context, index, blob.Path);
             var receipt = await context.SdkAsync(context.Writer.Sdk.CommitAsync(command, token));
             await FunctionalGateColdMutations.ReceiptAsync(context, index, command, receipt);
             var reference = context.Bind(new(context.Partition, FunctionalGateColdProtocol.Resource("docs", index), FunctionalGateColdProtocol.Id));

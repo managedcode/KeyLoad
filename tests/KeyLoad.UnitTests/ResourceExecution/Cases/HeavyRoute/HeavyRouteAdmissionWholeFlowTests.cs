@@ -3,10 +3,10 @@ namespace KeyLoad.UnitTests.Features.ResourceExecution;
 internal sealed class HeavyRouteAdmissionWholeFlowTests
 {
     [Test]
-    [Arguments("/v1/search/graph")]
+    [Arguments("/search/graph")]
     [Arguments(AnnSearchProtocol.Route)]
-    [Arguments("/v1/graph/shortest-path")]
-    [Arguments("/v1/graph/incoming")]
-    public Task NativeHeavyReservationRefusalReleaseFreshPersistedGrantRepairReadReplayAndTwoCold(string route)
+    [Arguments("/graph/shortest-path")]
+    [Arguments("/graph/incoming")]
+    public Task HeavyReservationRefusalReleaseFreshPersistedGrantRepairReadReplayAndTwoCold(string route)
         => HeavyRouteAdmissionFlow.RunAsync(route, TestContext.Current!.Execution.CancellationToken);
 }

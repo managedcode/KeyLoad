@@ -1,7 +1,7 @@
 namespace KeyLoad;
 
 /// <summary>Returns the durable target receipt without asserting source acknowledgement.</summary>
-/// <param name="Receipt">The original native effects receipt.</param>
+/// <param name="Receipt">The original execution effects receipt.</param>
 /// <param name="AlreadyProcessed">Whether an existing inbox identity supplied the receipt.</param>
 /// <param name="OriginalEffectsToken">The original durable target effects cut.</param>
 [global::Orleans.GenerateSerializer]

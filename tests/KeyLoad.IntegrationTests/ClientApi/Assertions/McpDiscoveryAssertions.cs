@@ -4,7 +4,7 @@ using ModelContextProtocol.Protocol;
 
 namespace KeyLoad.IntegrationTests.Features.ClientApi;
 
-/// <summary>Checks actual discovered native schemas against public acceptance without calling internal catalog code.</summary>
+/// <summary>Checks actual discovered execution schemas against public acceptance without calling internal catalog code.</summary>
 internal static class McpDiscoveryAssertions
 {
     /// <summary>Requires exactly the public frozen set, with no omitted, duplicate or internal capability.</summary>
@@ -18,7 +18,7 @@ internal static class McpDiscoveryAssertions
     }
 
     /// <summary>Requires the actual tool's canonical required fields, wrapper schema and explicit effect hints.</summary>
-    /// <param name="tool">The real native tool decoded from a real Orleans response.</param>
+    /// <param name="tool">The real execution tool decoded from a real Orleans response.</param>
     /// <returns>The completed observable contract assertions.</returns>
     internal static async Task VerifyAsync(Tool tool)
     {

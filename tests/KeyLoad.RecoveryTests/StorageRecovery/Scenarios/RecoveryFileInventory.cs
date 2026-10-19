@@ -50,7 +50,7 @@ internal static class RecoveryFileInventory
         }
     }
 
-    internal static void AssertNativeHandlesReleased(string directory)
+    internal static void AssertHandlesReleased(string directory)
     {
         foreach (var file in OwnedFiles(directory))
         {

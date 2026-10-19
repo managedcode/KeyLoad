@@ -10,22 +10,22 @@ internal static class SqlOperationCompiler
     internal static McpDecodedOperation Compile(SqlOperationRequest request, IOptions<DatabaseLimits> limitsOptions,
         int maximumPayloadBytes, IOptions<QueryExecutionOptions> queryOptions, CancellationToken cancellationToken = default)
         => RequireOperation(CompileCore(request, limitsOptions, maximumPayloadBytes, queryOptions, null, false, cancellationToken));
-    internal static McpDecodedOperation CompileNativeSession(SqlOperationRequest request, IOptions<DatabaseLimits> limitsOptions,
+    internal static McpDecodedOperation CompileSession(SqlOperationRequest request, IOptions<DatabaseLimits> limitsOptions,
         int maximumPayloadBytes, IOptions<QueryExecutionOptions> queryOptions, int positionalParameterCount,
         CancellationToken cancellationToken = default)
         => RequireOperation(CompileCore(request, limitsOptions, maximumPayloadBytes, queryOptions, positionalParameterCount, false, cancellationToken));
-    internal static SqlNativeSessionCompilation CompileNativeSessionPlan(SqlOperationRequest request,
+    internal static SqlSessionCompilation CompileSessionPlan(SqlOperationRequest request,
         IOptions<DatabaseLimits> limitsOptions, int maximumPayloadBytes, IOptions<QueryExecutionOptions> queryOptions,
         int positionalParameterCount, CancellationToken cancellationToken)
         => CompileCore(request, limitsOptions, maximumPayloadBytes, queryOptions, positionalParameterCount, true, cancellationToken);
-    private static McpDecodedOperation RequireOperation(SqlNativeSessionCompilation compilation)
+    private static McpDecodedOperation RequireOperation(SqlSessionCompilation compilation)
         => compilation.Operation ?? throw ScriptDomOperationErrors.Unsupported();
-    private static SqlNativeSessionCompilation CompileCore(SqlOperationRequest request, IOptions<DatabaseLimits> limitsOptions,
-        int maximumPayloadBytes, IOptions<QueryExecutionOptions> queryOptions, int? positionalParameterCount, bool nativeIdentityControl, CancellationToken token)
+    private static SqlSessionCompilation CompileCore(SqlOperationRequest request, IOptions<DatabaseLimits> limitsOptions,
+        int maximumPayloadBytes, IOptions<QueryExecutionOptions> queryOptions, int? positionalParameterCount, bool identityControl, CancellationToken token)
     {
         SqlOperationBounds.Validate(request, limitsOptions, maximumPayloadBytes, queryOptions, token);
         SqlOriginalMutationIdentity.ValidateDeclared(request.CommandId);
-        if (positionalParameterCount is < MinimumNativeParameterCount || positionalParameterCount > queryOptions.Value.MaximumParameters)
+        if (positionalParameterCount is < MinimumParameterCount || positionalParameterCount > queryOptions.Value.MaximumParameters)
         {
             throw ScriptDomOperationErrors.Invalid();
         }
@@ -33,13 +33,13 @@ internal static class SqlOperationCompiler
         var statement = global::KeyLoad.Features.QueryExecution.ScriptDomSyntax.Parse(request.Sql, limitsOptions, budget.Check, token);
         if (positionalParameterCount is { } count)
         {
-            global::KeyLoad.Features.QueryExecution.ScriptDomSyntax.ValidateNativeSessionSlots(statement, count, budget.Check, token);
+            global::KeyLoad.Features.QueryExecution.ScriptDomSyntax.ValidateSessionSlots(statement, count, budget.Check, token);
         }
-        if (nativeIdentityControl && statement is global::Microsoft.SqlServer.TransactSql.ScriptDom.SetCommandStatement control)
+        if (identityControl && statement is global::Microsoft.SqlServer.TransactSql.ScriptDom.SetCommandStatement control)
         {
             if (request.CommandId.HasValue || request.AllowFullScan || request.Cursor is not null
-                || request.Parameters is { Count: > MinimumNativeParameterCount }
-                || positionalParameterCount != MinimumNativeParameterCount)
+                || request.Parameters is { Count: > MinimumParameterCount }
+                || positionalParameterCount != MinimumParameterCount)
             {
                 throw ScriptDomOperationErrors.Invalid();
             }
@@ -108,6 +108,6 @@ internal static class SqlOperationCompiler
         token.ThrowIfCancellationRequested();
         return operation;
     }
-    private const int MinimumNativeParameterCount = 0;
+    private const int MinimumParameterCount = 0;
 }
 

@@ -9,5 +9,5 @@ namespace KeyLoad;
 /// <param name="CutPosition">The committed position at which the snapshot was taken.</param>
 /// <remarks>The snapshot is complete within its configured row and byte bounds.</remarks>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.LiveQuerySnapshot)]
+[Orleans.Alias(ContractAliases.LiveQuerySnapshot)]
 public sealed record LiveQuerySnapshot([property: Orleans.Id(0)] ImmutableArray<QueryRow> Rows, [property: Orleans.Id(1)] string Cursor, [property: Orleans.Id(2)] long ThroughSequence, [property: Orleans.Id(3)] long CutPosition);

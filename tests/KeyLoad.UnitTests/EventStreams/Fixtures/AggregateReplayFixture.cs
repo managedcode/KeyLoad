@@ -20,7 +20,7 @@ internal sealed class AggregateReplayFixture : IDisposable
     internal const string PayloadUseGrant = "aggregate.payload.use";
     internal const string HeaderReadGrant = "aggregate.header.read";
     internal const string HeaderUseGrant = "aggregate.header.use";
-    internal const string Reducer = "orders.reducer.v1";
+    internal const string Reducer = "orders.reducer";
     internal const string StateJson = "{ \"count\" : 2, \"nested\" : [true, null] }";
     private const string SystemTenant = "system";
     private const string Wildcard = "*";
@@ -160,7 +160,7 @@ internal sealed class AggregateReplayFixture : IDisposable
     internal void StoreEnvelope(AggregateSnapshotEnvelope envelope)
         => Store.Commit((transaction, _) =>
         {
-            transaction.Put(SnapshotKey(), NativeSerialization.Serialize(envelope));
+            transaction.Put(SnapshotKey(), OrleansSerialization.Serialize(envelope));
             return true;
         });
 
@@ -206,7 +206,7 @@ internal sealed class AggregateReplayFixture : IDisposable
     private void Open(DatabaseLimits? limits, TimeProvider? timeProvider)
     {
         store = new(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
-        database = new(store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), timeProvider);
+        database = new(store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), timeProvider);
     }
 
     private void Submit<T>(OperationKind kind, T payload)

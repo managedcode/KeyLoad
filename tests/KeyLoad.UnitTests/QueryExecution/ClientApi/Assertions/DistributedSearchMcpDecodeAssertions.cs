@@ -39,22 +39,22 @@ internal static class DistributedSearchMcpDecodeAssertions
     }
 
     private static async Task DeniedAsync(McpOperationDescriptor descriptor,
-        Dictionary<string, JsonElement> arguments, DistributedSearchRequestV1 expected)
+        Dictionary<string, JsonElement> arguments, DistributedSearchRequest expected)
     {
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => descriptor.Decode(arguments)).Code)
             .IsEqualTo(ErrorCode.Validation);
         await HealthyAsync(descriptor.Decode(Arguments(JsonDefaults.Serialize(expected))), expected);
     }
 
-    private static async Task HealthyAsync(McpDecodedOperation decoded, DistributedSearchRequestV1 expected)
+    private static async Task HealthyAsync(McpDecodedOperation decoded, DistributedSearchRequest expected)
     {
         await Assert.That(decoded.ReadKind).IsEqualTo(GrainReadKind.DistributedSearch);
         await Assert.That(decoded.CommandKind).IsNull();
         await Assert.That(decoded.CommandId).IsEqualTo(Guid.Empty);
-        var actual = NativeSerialization.Deserialize<DistributedSearchRequestV1>(decoded.Payload.Span);
+        var actual = OrleansSerialization.Deserialize<DistributedSearchRequest>(decoded.Payload.Span);
         await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
-        var json = JsonSerializer.Deserialize<DistributedSearchRequestV1>(JsonDefaults.Serialize(actual), JsonDefaults.Options);
-        var roundtrip = NativeSerialization.Deserialize<DistributedSearchRequestV1>(NativeSerialization.Serialize(json));
+        var json = JsonSerializer.Deserialize<DistributedSearchRequest>(JsonDefaults.Serialize(actual), JsonDefaults.Options);
+        var roundtrip = OrleansSerialization.Deserialize<DistributedSearchRequest>(OrleansSerialization.Serialize(json));
         await Assert.That(JsonDefaults.Serialize(roundtrip).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
     }
 

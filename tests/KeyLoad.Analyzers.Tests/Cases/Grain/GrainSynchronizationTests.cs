@@ -4,14 +4,14 @@ namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
 internal sealed class GrainSynchronizationTests
 {
     [Test]
-    [Arguments("NativeGrain")]
+    [Arguments("RuntimeGrain")]
     [Arguments("Intermediate")]
     [Arguments("Orleans.Grain<SubjectState>")]
-    public async Task NativeLocksInDirectAndInheritedGrainsAreRejectedAsync(string baseType)
+    public async Task LocksInDirectAndInheritedGrainsAreRejectedAsync(string baseType)
     {
         var source = $$"""
-            using NativeGrain = Orleans.Grain;
-            internal abstract class Intermediate : NativeGrain { }
+            using RuntimeGrain = Orleans.Grain;
+            internal abstract class Intermediate : RuntimeGrain { }
             internal sealed class SubjectState { }
             internal sealed class Subject : {{baseType}}
             {
@@ -32,7 +32,7 @@ internal sealed class GrainSynchronizationTests
     [Arguments("gate.Enter()")]
     [Arguments("gate.EnterScope()")]
     [Arguments("gate.TryEnter()")]
-    public async Task ExplicitNativeLockAcquisitionInGrainsIsRejectedAsync(string invocation)
+    public async Task ExplicitLockAcquisitionInGrainsIsRejectedAsync(string invocation)
     {
         var source = $$"""
             internal sealed class Subject : Orleans.Grain
@@ -70,7 +70,7 @@ internal sealed class GrainSynchronizationTests
     }
 
     [Test]
-    public async Task ApplicationMonitorTypeDoesNotBindToNativeMonitorAsync()
+    public async Task ApplicationMonitorTypeDoesNotBindToMonitorAsync()
     {
         const string source = """
             namespace Application;

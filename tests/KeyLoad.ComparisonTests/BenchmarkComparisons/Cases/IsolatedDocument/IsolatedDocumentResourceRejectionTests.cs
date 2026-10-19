@@ -10,7 +10,7 @@ internal sealed class IsolatedDocumentResourceRejectionTests
     private const string OpenSearch = "OpenSearch";
     private const string Kurrent = "KurrentDB";
 
-    /// <summary>AC-ISO-002/006: reject incompatible selection before any native node, secret or directory allocation.</summary>
+    /// <summary>AC-ISO-002/006: reject incompatible selection before any execution node, secret or directory allocation.</summary>
     [Test]
     [Arguments(Postgres)]
     [Arguments(Mongo)]
@@ -28,7 +28,7 @@ internal sealed class IsolatedDocumentResourceRejectionTests
         await Assert.That(Directory.Exists(foreign.Context.Root)).IsFalse();
     }
 
-    /// <summary>AC-ISO-003/006: independent cells never share a native data volume.</summary>
+    /// <summary>AC-ISO-003/006: independent cells never share a execution data volume.</summary>
     [Test]
     [Arguments(OpenSearch, "/usr/share/opensearch/data")]
     [Arguments(Kurrent, "/var/lib/kurrentdb")]

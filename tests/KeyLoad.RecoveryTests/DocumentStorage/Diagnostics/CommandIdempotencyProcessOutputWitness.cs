@@ -7,7 +7,7 @@ internal static class CommandIdempotencyProcessOutputWitness
     private const int StandardOutput = 0;
     private const int StandardError = 1;
     private const int NoCrossing = 0;
-    private const string Prefix = "KEYLOAD_NATIVE_CHILD_OUTPUT";
+    private const string Prefix = "KEYLOAD__CHILD_OUTPUT";
     private const string ModeField = " mode=";
     private const string PipeField = " pipe=";
     private const string LimitField = " limit=";

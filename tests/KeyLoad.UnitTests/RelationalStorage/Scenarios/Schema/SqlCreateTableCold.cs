@@ -8,8 +8,8 @@ internal static class SqlCreateTableCold
     private const long WarmRevision = 1;
     private const string Eight = "8";
     private const string Nine = "9";
-    private const string EightSelected = "{\"title\":\"native\",\"amount\":8,\"active\":true}";
-    private const string NineSelected = "{\"title\":\"native\",\"amount\":9,\"active\":true}";
+    private const string EightSelected = "{\"title\":\"execution\",\"amount\":8,\"active\":true}";
+    private const string NineSelected = "{\"title\":\"execution\",\"amount\":9,\"active\":true}";
     internal static async Task RunAsync(TestDatabase fixture, SqlCreateTableState state)
     {
         var identity = fixture.Store.Identity;

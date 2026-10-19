@@ -5,7 +5,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.IntegrationTests;
 
-/// <summary>Composes validated native server policy for a stopped Orleans node.</summary>
+/// <summary>Composes validated execution server policy for a stopped Orleans node.</summary>
 internal static class IntegrationServerRuntimeOptions
 {
     internal static ServerRuntimeOptions Runtime(NodeOptions node)

@@ -13,14 +13,14 @@ internal static class ApiGrainDispatch
                 or GrainReadKind.Traverse or GrainReadKind.GraphShortestPath or GrainReadKind.GraphIncomingEdges
                 or GrainReadKind.SqlGraphPath
                 or GrainReadKind.PartitionQuery
-                ? NativeSerialization.Serialize(payload, NativeValidationProfile.PublicInputElements)
-                : NativeSerialization.Serialize(payload));
+                ? OrleansSerialization.Serialize(payload, ValidationProfile.PublicInputElements)
+                : OrleansSerialization.Serialize(payload));
 
     internal static Task<IResult> ReadAsync(HttpContext context, GrainReadKind kind) =>
-        ExecuteAsync(context, kind, null, Guid.Empty, NativeSerialization.Serialize(ReadAsyncValueEmptyCount));
+        ExecuteAsync(context, kind, null, Guid.Empty, OrleansSerialization.Serialize(ReadAsyncValueEmptyCount));
 
     internal static Task<IResult> SubmitAsync<T>(HttpContext context, OperationKind kind, Guid commandId, T payload) =>
-        ExecuteAsync(context, null, kind, commandId, NativeSerialization.Serialize(payload, NativeValidationProfile.PublicInputElements));
+        ExecuteAsync(context, null, kind, commandId, OrleansSerialization.Serialize(payload, ValidationProfile.PublicInputElements));
 
     internal static Guid CommandId(HttpContext context) =>
         Guid.TryParse(context.Request.Headers[ServerProtocol.CommandHeader], out var id) && id != Guid.Empty ? id
@@ -34,8 +34,8 @@ internal static class ApiGrainDispatch
             throw Errors.Fail(ErrorCode.Validation, GrainRoutingProtocol.InvalidRequest);
         }
         await CanonicalOperationGateway.ExecuteAsync(context, null, kind, commandId,
-            NativeSerialization.Serialize(payload, NativeValidationProfile.PublicInputElements),
-            context.RequestAborted).ConfigureAwait(false);
+            OrleansSerialization.Serialize(payload, ValidationProfile.PublicInputElements),
+            context.RequestAborted);
         return global::ManagedCode.Communication.Result.Succeed();
     }
 
@@ -43,7 +43,7 @@ internal static class ApiGrainDispatch
         OperationKind? commandKind, Guid commandId, ReadOnlyMemory<byte> payload)
     {
         var reply = await CanonicalOperationGateway.ExecuteAsync(context, readKind, commandKind, commandId,
-            payload, context.RequestAborted).ConfigureAwait(false);
+            payload, context.RequestAborted);
         return new GrainJsonResult(reply.Payload);
     }
 }

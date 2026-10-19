@@ -67,7 +67,7 @@ function Get-FcFileCoverage([object[]] $Lines, [object[]] $Branches, [object[]] 
         [ordered]@{
             path = $_.path
             lines = [ordered]@{ covered = $_.linesCovered; valid = $_.linesValid; percent = Get-FcPercent $_.linesCovered $_.linesValid }
-            nativeBranches = $branchSummary
+            runtimeBranches = $branchSummary
         }
     })
 }
@@ -160,18 +160,18 @@ function Read-FcCobertura([string] $Root, [string] $Path, [object[]] $Sources) {
         }
     }
     if ($lineRecords.Count -eq 0) { throw $t.ErrorIncomplete }
-    $nativeLinesValid = Convert-FcCount $document.DocumentElement.GetAttribute('lines-valid')
-    $nativeLinesCovered = Convert-FcCount $document.DocumentElement.GetAttribute('lines-covered')
-    $nativeBranchesValid = Convert-FcCount $document.DocumentElement.GetAttribute('branches-valid')
-    $nativeBranchesCovered = Convert-FcCount $document.DocumentElement.GetAttribute('branches-covered')
+    $runtimeLinesValid = Convert-FcCount $document.DocumentElement.GetAttribute('lines-valid')
+    $runtimeLinesCovered = Convert-FcCount $document.DocumentElement.GetAttribute('lines-covered')
+    $runtimeBranchesValid = Convert-FcCount $document.DocumentElement.GetAttribute('branches-valid')
+    $runtimeBranchesCovered = Convert-FcCount $document.DocumentElement.GetAttribute('branches-covered')
     $lineRecordCovered = @($lineRecords.Values | Where-Object { $_.hits -gt 0 }).Count
     $branchRecordCovered = 0L; $branchRecordTotal = 0L
     foreach ($branch in $branchRecords) {
         $branchRecordCovered = Add-FcCount $branchRecordCovered ([long] $branch.covered)
         $branchRecordTotal = Add-FcCount $branchRecordTotal ([long] $branch.total)
     }
-    if ($nativeLinesValid -ne $lineRecords.Count -or $nativeLinesCovered -ne $lineRecordCovered -or
-        $nativeBranchesValid -ne $branchRecordTotal -or $nativeBranchesCovered -ne $branchRecordCovered) { throw $t.ErrorInvalidCount }
+    if ($runtimeLinesValid -ne $lineRecords.Count -or $runtimeLinesCovered -ne $lineRecordCovered -or
+        $runtimeBranchesValid -ne $branchRecordTotal -or $runtimeBranchesCovered -ne $branchRecordCovered) { throw $t.ErrorInvalidCount }
     $missing = @($Sources | Where-Object { -not $sourcesWithLineRecords.Contains([string] $_.path) } | ForEach-Object { [string] $_.path })
     [ordered]@{
         lines = @($lineRecords.Values)
@@ -179,8 +179,8 @@ function Read-FcCobertura([string] $Root, [string] $Path, [object[]] $Sources) {
         branches = @($branchRecords)
         sourceCount = $seenSources.Count
         sourcesWithoutLines = $missing
-        nativeLines = [ordered]@{ covered = $nativeLinesCovered; valid = $nativeLinesValid; percent = Get-FcPercent $nativeLinesCovered $nativeLinesValid }
-        nativeBranches = [ordered]@{ covered = $nativeBranchesCovered; valid = $nativeBranchesValid; percent = Get-FcPercent $nativeBranchesCovered $nativeBranchesValid }
+        runtimeLines = [ordered]@{ covered = $runtimeLinesCovered; valid = $runtimeLinesValid; percent = Get-FcPercent $runtimeLinesCovered $runtimeLinesValid }
+        runtimeBranches = [ordered]@{ covered = $runtimeBranchesCovered; valid = $runtimeBranchesValid; percent = Get-FcPercent $runtimeBranchesCovered $runtimeBranchesValid }
     }
 }
 
@@ -264,9 +264,9 @@ function New-FcReport([object[]] $Runs, [string] $Filter, [object[]] $Sources, [
             testDefinitions = $_.trx.definitionsCount
             testResults = $_.trx.resultsCount
             testCases = $_.trx.cases
-            nativeReportSha256 = $_.reportHash
+            reportSha256 = $_.reportHash
             trxSha256 = $_.trxHash
-            lines = $_.coverage.nativeLines
+            lines = $_.coverage.runtimeLines
             distinctSourceLineLocations = [ordered]@{
                 covered = $distinctCovered
                 valid = $distinctValid
@@ -274,7 +274,7 @@ function New-FcReport([object[]] $Runs, [string] $Filter, [object[]] $Sources, [
             }
             files = $fileCoverage
             sourceFilesWithoutLines = $_.coverage.sourcesWithoutLines
-            nativeBranchPairs = $_.coverage.branches
+            runtimeBranchPairs = $_.coverage.branches
         }
     })
     $manifestInfo = [ordered]@{ path = [IO.Path]::GetFileName($ManifestPath); sha256 = Get-FcHash $ManifestPath }
@@ -282,7 +282,7 @@ function New-FcReport([object[]] $Runs, [string] $Filter, [object[]] $Sources, [
         schemaVersion = $script:FunctionalCoverage.SchemaVersion
         module = 'KeyLoad.Query'
         requirements = @('REQ-CQ-009','AC-CQ-018','AC-CQ-019','AC-CQ-039')
-        scope = "Filter $Filter through native unit normal; KeyLoad.Query production module only"
+        scope = "Filter $Filter through execution unit normal; KeyLoad.Query production module only"
         filter = $Filter
         lineHitUnion = $script:FunctionalCoverage.HitUnion
         mergedBranches = 'unmeasured; no branch-outcome identity union is available'
@@ -304,12 +304,12 @@ function Convert-FcReportToMarkdown([object] $Report) {
     $builder = [Text.StringBuilder]::new()
     [void] $builder.AppendLine('# KeyLoad.Query functional coverage')
     [void] $builder.AppendLine('')
-    [void] $builder.AppendLine('Private exact `PartitionQuery` case profile through native `unit` normal with hardware intrinsics enabled. This report records raw counts and uncovered locations; it applies no threshold and does not qualify complete product or CLUSTER coverage.')
+    [void] $builder.AppendLine('Private exact `PartitionQuery` case profile through execution `unit` normal with hardware intrinsics enabled. This report records raw counts and uncovered locations; it applies no threshold and does not qualify complete product or CLUSTER coverage.')
     [void] $builder.AppendLine('')
-    [void] $builder.AppendLine('| Run | TRX cases | Native lines covered | Native lines valid | Native line percent | Native branch pairs |')
+    [void] $builder.AppendLine('| Run | TRX cases | Execution lines covered | Execution lines valid | Execution line percent | Execution branch pairs |')
     [void] $builder.AppendLine('|---|---:|---:|---:|---:|---:|')
     foreach ($run in $Report.runs) {
-        [void] $builder.AppendLine("| $($run.suite) | $($run.testResults) | $($run.lines.covered) | $($run.lines.valid) | $($run.lines.percent)% | $($run.nativeBranchPairs.Count) pairs |")
+        [void] $builder.AppendLine("| $($run.suite) | $($run.testResults) | $($run.lines.covered) | $($run.lines.valid) | $($run.lines.percent)% | $($run.runtimeBranchPairs.Count) pairs |")
     }
     [void] $builder.AppendLine('')
     [void] $builder.AppendLine("Merged distinct source-line hit union: $($Report.unionLineCounts.covered)/$($Report.unionLineCounts.valid) ($($Report.unionLineCounts.percent)%). Merged branches: unmeasured.")
@@ -323,14 +323,14 @@ function Convert-FcReportToMarkdown([object] $Report) {
     }
     foreach ($run in $Report.runs) {
         [void] $builder.AppendLine('')
-        [void] $builder.AppendLine("## $($run.suite) native per-source counts")
-        [void] $builder.AppendLine('| Source | Native lines covered | Native lines valid | Native line percent | Native branches covered | Native branches valid | Native branch percent |')
+        [void] $builder.AppendLine("## $($run.suite) execution per-source counts")
+        [void] $builder.AppendLine('| Source | Execution lines covered | Execution lines valid | Execution line percent | Execution branches covered | Execution branches valid | Execution branch percent |')
         [void] $builder.AppendLine('|---|---:|---:|---:|---:|---:|---:|')
         foreach ($file in $run.files) {
             $linePercent = if ($null -eq $file.lines.percent) { 'unmeasured' } else { "$($file.lines.percent)%" }
-            $branchCovered = if ($null -eq $file.nativeBranches) { 'unmeasured' } else { [string] $file.nativeBranches.covered }
-            $branchValid = if ($null -eq $file.nativeBranches) { 'unmeasured' } else { [string] $file.nativeBranches.valid }
-            $branchPercent = if ($null -eq $file.nativeBranches -or $null -eq $file.nativeBranches.percent) { 'unmeasured' } else { "$($file.nativeBranches.percent)%" }
+            $branchCovered = if ($null -eq $file.runtimeBranches) { 'unmeasured' } else { [string] $file.runtimeBranches.covered }
+            $branchValid = if ($null -eq $file.runtimeBranches) { 'unmeasured' } else { [string] $file.runtimeBranches.valid }
+            $branchPercent = if ($null -eq $file.runtimeBranches -or $null -eq $file.runtimeBranches.percent) { 'unmeasured' } else { "$($file.runtimeBranches.percent)%" }
             [void] $builder.AppendLine("| ``$($file.path)`` | $($file.lines.covered) | $($file.lines.valid) | $linePercent | $branchCovered | $branchValid | $branchPercent |")
         }
     }

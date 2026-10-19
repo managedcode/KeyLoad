@@ -15,7 +15,7 @@ internal static class TopicPurgeModelAssertions
         var records = Enumerable.Range((int)first, 4 - (int)first).Select(i =>
             new SourceEventRecord(TopicPurgeCrashContract.Source, i, i, TopicPurgeCrashContract.Event(i), new DateTimeOffset(publication.Timestamp))).ToArray();
         var head = store.Read(view => view.GetRecord<TopicHead>(KeySpace.Partition("topic-head", TopicPurgeCrashContract.Partition, TopicPurgeCrashContract.Topic)));
-        await Assert.That(head).IsEqualTo(new TopicHead(3, first, 1, records.Sum(record => NativeSerialization.Serialize(record).LongLength)));
+        await Assert.That(head).IsEqualTo(new TopicHead(3, first, 1, records.Sum(record => OrleansSerialization.Serialize(record).LongLength)));
         var page = database.ReadEventSource("root", new(TopicPurgeCrashContract.Source, AfterPosition: first - 1));
         await Assert.That(page.Events).IsEquivalentTo(records, CollectionOrdering.Matching);
         await Assert.That(page.HasMore).IsFalse();

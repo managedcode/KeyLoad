@@ -7,11 +7,11 @@ The independent graph branch sorts shortest hops then full EntityRef and feeds o
 ## Versioned public contract
 
 The graph executor adds an explicit `GraphSearchRequest` and `GraphSearchResult`; it does not
-change the exact array reply of existing Search. HTTP `/v1/search/graph`, SDK
+change the exact array reply of existing Search. HTTP `/search/graph`, SDK
 `GraphSearchAsync` and official MCP `keyload_search_graph` invoke the same isolated
 Orleans request/read grain and one canonical authorized storage read cut.
 
-The generated v1 records, with sequential native IDs starting at0, are:
+The generated v1 records, with sequential IDs starting at0, are:
 
 - `GraphWalkSpec(Graph, Seeds, MaxDepth=3, MaxVertices=1000, MaxEdges=5000,
   Labels=null)`: immutable qualified EntityRef seeds and optional immutable
@@ -46,7 +46,7 @@ with no truncated success or exact/completeness claim.
 
 | Requirement | Acceptance and mapped automated tests |
 |---|---|
-| REQ-GSEARCH-001: independent AST roles within one read cut | AC-GSEARCH-001: GraphScope, Retriever and Expansion are independently callable and composable; count native read-gate entry and prove exactly one per request. `GraphSearchOperatorTests` |
+| REQ-GSEARCH-001: independent AST roles within one read cut | AC-GSEARCH-001: GraphScope, Retriever and Expansion are independently callable and composable; count read-gate entry and prove exactly one per request. `GraphSearchOperatorTests` |
 | REQ-GSEARCH-002: current persisted path authorization | AC-GSEARCH-002: hidden/deleted/revoked intermediate vertices stop traversal; each seed retains existing explicit start authorization. Endpoint collection/AllowedIds filters do not prune valid other-collection intermediate vertices. Requested labels require graph label field-use authorization. `GraphSearchAuthorizationTests` |
 | REQ-GSEARCH-003: deterministic deduplicated shortest-hop ranking | AC-GSEARCH-003: graph score1/(1+shortestHops), multi-seed BFS, cycles/convergent paths contribute once per full EntityRef; weightedRrfV1 text/vector/graph matches independent exhaustive small-corpus oracle, including missing/zero-weight branches and ordinal ties. `GraphSearchOracleTests` |
 | REQ-GSEARCH-004: explicit bounded expansion output | AC-GSEARCH-004: only selected final hits seed expansion; context uses its own current collection/row/field policy, deduplicated shortest hops, explicit SelectedHits completeness and shared combined reply bounds. `GraphSearchExpansionTests` |
@@ -83,10 +83,10 @@ There are no new dependencies or stored-format migrations in the graph executor.
 
 This is a bounded Q1.Search.v1 profile of the shared SQL language, not full SQL
 conformance or a SQL client connection protocol. The dedicated typed
-`SqlGraphSearchRequest(Version, QueryRequest Query)` uses native IDs0/1 and alias
-`keyload.contract.sql-graph-search-request.v1`. Version must be1, Cursor must be
-null and AllowFullScan must be explicitly true. The native read kind,
-HTTP `/v1/query/search`, SDK `SearchSqlAsync` and official MCP
+`SqlGraphSearchRequest(Version, QueryRequest Query)` uses IDs0/1 and alias
+`keyload.contract.sql-graph-search-request`. Version must be1, Cursor must be
+null and AllowFullScan must be explicitly true. The read kind,
+HTTP `/query/search`, SDK `SearchSqlAsync` and official MCP
 `keyload_query_search`; all return the existing GraphSearchResult. Current
 application capability3 admits it. Existing scalar QueryPage is unchanged.
 
@@ -125,7 +125,7 @@ request before building arrays. Parser output is exactly GraphSearchRequest;
 the final graph-executor validation remains authoritative. Execute solely through
 SearchEngine.GraphSearchAsync with the original principal and cancellation.
 There is no second traversal implementation, extra store read or SQL-specific
-authorization path. Manifest ReadProfiles adds `graph-search-v1`, while its Q1
+authorization path. Manifest ReadProfiles adds `graph-search`, while its Q1
 baseline and honest scalar conformance inventory remain unchanged.
 
 AC-GSEARCH-006 maps SQL SEARCH syntax and real-store direct/SQL equivalence to new

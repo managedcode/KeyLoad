@@ -53,7 +53,7 @@ internal static class ModelQueueQueryRows
     {
         try
         {
-            return NativeSerialization.Deserialize<MessageMetadata>(bytes);
+            return OrleansSerialization.Deserialize<MessageMetadata>(bytes);
         }
         catch (Exception exception) when (exception is JsonException or ArgumentException
                                            or InvalidOperationException)

@@ -1,5 +1,4 @@
 using KeyLoad.Core.Features.Authorization;
-using KeyLoad.Core.Features.BlobStorage;
 using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Storage;
 using ManagedCode.Communication;
@@ -35,8 +34,6 @@ public sealed partial class DatabaseEngine
         {
             _ = ResourceLifetimeCatalog.Create(transaction, operation, request.TenantId, request.DatabaseId, request.Definition);
         }
-        BlobStorageOperations.ConfigureResource(transaction, request, previous is null, Store.Identity.Incarnation,
-            BlobExecution.InitialCatalogProofRecords);
         transaction.PutRecord(key, request.Definition);
         return Result(request.Definition);
     }
@@ -50,7 +47,6 @@ public sealed partial class DatabaseEngine
         var definition = request.Definition;
         Features.RelationalStorage.RelationalRowValidation.ValidateSchema(definition);
         Features.AnalyticsStore.AnalyticsStoreValidation.ValidateSchema(definition);
-        BlobStorageOperations.ValidatePolicy(definition);
         Features.Search.VectorFieldProfiles.Validate(definition);
         if (!Enum.IsDefined(definition.Kind) || !Enum.IsDefined(definition.Authority)
             || definition.Indexes.Any(index => index is null || index.Fields.Any(string.IsNullOrEmpty))

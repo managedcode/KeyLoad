@@ -4,6 +4,6 @@ namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 internal sealed class SqlParserAdmissionClusterWholeFlowTests
 {
     [Test]
-    public Task NativeAnnotationsAndPrivateLexicalBoundsRefuseThenCanonicalSqlAstAndTypedInsertReplaySurviveTwoColdOwners()
+    public Task AnnotationsAndPrivateLexicalBoundsRefuseThenCanonicalSqlAstAndTypedInsertReplaySurviveTwoColdOwners()
         => SqlParserAdmissionClusterFlow.RunAsync();
 }

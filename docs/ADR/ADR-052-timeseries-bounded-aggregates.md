@@ -19,14 +19,14 @@ ordering, event deduplication, persisted authorization or replication. The initi
 10.0.0 implementation used published source23632b9f8d49d5a7feb337caa6cbeb5b22d7575a.
 Temporal rounding defects were subsequently repaired in the owning repository;
 published10.0.2 source2c9118b6fbd45a5170682d345d66cba4ad6e8f2d passed1104/1104
-native tests and90% coverage in each module. The lead independently verified the
+tests and90% coverage in each module. The lead independently verified the
 release/tag, actual package contents, NuGet signatures and duplicate-publication
 fence in the delivery receipt (report removed from repository).
 The following summer allocation patch is published10.0.3 at source
 de44e91ecf38779b61fe79a51153ce7b7b4db0ea. Its owning Release run37077860613
 passes1107/1107 tests, Core687/725 and Orleans205/212 covered lines. The lead
 independently verifies the annotated tag, actual GitHub assets and both signed
-NuGet payloads before the new central pin. Four native repeated normal/scalar
+NuGet payloads before the new central pin. Four repeated normal/scalar
 profiles complete16 cases each, with20 result iterations per case; the
 10.0.3 receipt (report removed from repository) keeps
 source, package and measurement proof separate. The private static generic-state
@@ -34,14 +34,14 @@ callbacks preserve the public accumulator contract and add no consumer
 workaround. The KeyLoad10.0.3 consumer change requires a new exact-SHA GitHub
 unit/recovery/cluster qualification.
 
-Three native DoubleTimeSeriesSummer instances use Strategy.Sum/Min/Max,
+Three DoubleTimeSeriesSummer instances use Strategy.Sum/Min/Max,
 TimeSpan.MaxValue and maximum bucket count1. Pass each real sample timestamp and
 value in the canonical UTC/sequence order. Every representable UTC date tick is
-less than half TimeSpan.MaxValue, so native RoundUtc puts all values into one
+less than half TimeSpan.MaxValue, so RoundUtc puts all values into one
 bucket. This avoids unordered multi-bucket summation, retains actual dates and
-uses native raw DataCount. Raw average is Sum/DataCount; the library's documented
+uses raw DataCount. Raw average is Sum/DataCount; the library's documented
 bucket Average operation is a different contract and is not used here. Empty
-windows need no native accumulator, and live accumulators do not retain samples.
+windows need no accumulator, and live accumulators do not retain samples.
 
 ## Public contract
 
@@ -85,20 +85,20 @@ HttpAdmissionGovernor and its new TimeSeriesHttpAdmissionTests keep the existing
 Add IKeyValueView.VisitReverseRange with the identical prefix, exclusive lower
 afterKey, exclusive upper untilKey, observer, cancellation and borrowed visitor
 parameters as VisitRange. Only order changes to descending encoded keys.
-Parameterize the existing private range merge and its native cursors. Preserve
+Parameterize the existing private range merge and its cursors. Preserve
 forward defaults, staged replacement/insert/tombstone precedence and counters.
 
 The baseline uses pinned ZoneTree's CreateReverseIterator(NoRefresh); seek to
 the lesser of caller upper bound and binary prefix successor. Empty/all-FF
-prefix has no successor and uses native reverse start. Filter exclusive bounds
-explicitly and stop below the lower/prefix boundary. Staged data uses the native
+prefix has no successor and uses reverse start. Filter exclusive bounds
+explicitly and stop below the lower/prefix boundary. Staged data uses the execution
 SortedSet.GetViewBetween(...).Reverse enumerator, not a buffered LINQ reverse.
 Do not buffer/copy the full baseline, transaction changes or series history.
-If seek throws, dispose the acquired native iterator before rethrowing.
+If seek throws, dispose the acquired iterator before rethrowing.
 
 Charge matching examined key/value bytes before callback or live lookahead.
 Visitor=false stops before further cursor advance. Every failure releases the
-native cursors and original storage gate. Latest stops after its first live
+cursors and original storage gate. Latest stops after its first live
 committed sample; its real-store logical baseline-entry delta is one, independent
 of history size. Counters are logical work, not physical disk/RSS measurements.
 
@@ -107,12 +107,12 @@ flowchart LR
     Client[Typed SDK or official MCP client] --> Request[Connection grain]
     Request --> Read[Authorized consistent read]
     Read --> Gate[Node local store gate and one budgeted view]
-    Gate --> Latest[Native descending first live sample]
+    Gate --> Latest[descending first live sample]
     Gate --> Raw[Ascending bounded raw samples]
-    Raw --> Native[Published ManagedCode native statistics]
-    Native --> Windows[Dense capped UTC windows]
+    Raw --> Execution[Published ManagedCode statistics]
+    Execution --> Windows[Dense capped UTC windows]
     Latest --> Result[Exact bounded typed JSON output]
-    Native --> Result
+    Execution --> Result
     Windows --> Result
 ```
 
@@ -121,7 +121,7 @@ flowchart LR
 Each criterion maps to test-owned independent raw oracles and real provider/
 SDK/MCP/fault operations in the TimeSeries feature. Preserve all existing
 forward/inclusive/security/replication tests. No doubles, weakened assertions,
-global suppression, new retries or increased bounds. Native seek-error disposal
+global suppression, new retries or increased bounds. seek-error disposal
 requires source/lifetime review because no real provider failure-injection API
 is available; it is not claimed as an executed environmental fault branch.
 
@@ -134,5 +134,5 @@ statistics must not be relabeled measured server aggregation.
 This ADR remains Accepted until all implementation, tests, docs and verification
 exist. Numeric coverage, full comparison, endurance, power-loss, maximum speed,
 activation migration, retention/rollups, SQL and compressed chunks remain open
-gates/work. SMID waits for owner mapping; native Orleans Streams remains an
+gates/work. SMID waits for owner mapping; Orleans Streams remains an
 independent first-priority architecture workstream under the root policy.

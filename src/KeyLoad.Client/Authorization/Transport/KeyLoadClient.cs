@@ -16,7 +16,7 @@ public sealed partial class KeyLoadClient
     /// <param name="commandId">Stable command identifier for the write.</param>
     /// <param name="key">API key metadata and policy.</param>
     /// <param name="cancellationToken">Token that cancels the HTTP operation.</param>
-    /// <returns>No-data acknowledgement after the original native credential write succeeds.</returns>
+    /// <returns>No-data acknowledgement after the original execution credential write succeeds.</returns>
     public Task<Result> ConfigureApiKeyAsync(Guid commandId, ApiKeyRecord key, CancellationToken cancellationToken = default)
         => transport.SendStatus(ClientApiRoutes.ApiKeysConfigure, new ConfigureApiKeyRequest(key), commandId, cancellationToken);
 }

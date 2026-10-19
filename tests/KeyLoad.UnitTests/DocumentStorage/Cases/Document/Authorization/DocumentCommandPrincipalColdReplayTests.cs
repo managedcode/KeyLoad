@@ -3,6 +3,6 @@ namespace KeyLoad.UnitTests.Features.DocumentStorage;
 internal sealed class DocumentCommandPrincipalColdReplayTests
 {
     [Test]
-    public Task TwoPersistedPrincipalsKeepIndependentNativeReceiptsThroughConflictsAndTwoColdReopens()
+    public Task TwoPersistedPrincipalsKeepIndependentReceiptsThroughConflictsAndTwoColdReopens()
         => DocumentPatchAtomicityOwner.RunAsync(DocumentCommandPrincipalColdReplayTrial.RunAsync);
 }

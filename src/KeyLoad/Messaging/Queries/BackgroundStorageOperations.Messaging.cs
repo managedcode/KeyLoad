@@ -70,7 +70,7 @@ internal sealed partial class BackgroundStorageOperations
             DatabaseEngine.ValidatePartition(hint.Lane.Partition);
             if (hint.Kind == DueWorkKind.Saga)
             {
-                var eligible = NativeSagaTimeoutEligibility.Read(Database, hint, clock.GetUtcNow());
+                var eligible = SagaTimeoutEligibility.Read(Database, hint, clock.GetUtcNow());
                 return eligible.IsEligible ? eligible.Creator : null;
             }
             return Database.Store.Read(view =>

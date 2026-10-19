@@ -2,7 +2,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
 
-/// <summary>Creates native options around strict immutable host inputs without changing their parsing contracts.</summary>
+/// <summary>Creates execution options around strict immutable host inputs without changing their parsing contracts.</summary>
 [KeyLoad.ConfigurationBinding]
 internal static class ComparisonHostOptionsRegistration
 {

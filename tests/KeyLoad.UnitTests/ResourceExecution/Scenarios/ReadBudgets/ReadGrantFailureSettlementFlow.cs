@@ -6,12 +6,12 @@ namespace KeyLoad.UnitTests.Features.ResourceExecution;
 
 internal static class ReadGrantFailureSettlementFlow
 {
-    private const int NativeRecords = 2;
+    private const int RuntimeRecords = 2;
     private const int OneRecord = 1;
     private const int ExtraByte = 1;
     private const long NoAvailableBytes = 0L;
     private const string GrantParameter = "grant";
-    private const string ConsumerFailure = "The original native read consumer failed.";
+    private const string ConsumerFailure = "The original execution read consumer failed.";
 
     internal static async Task RunAsync()
     {
@@ -22,7 +22,7 @@ internal static class ReadGrantFailureSettlementFlow
             using var fixture = ReadExecutionBudgetGrantSeed.CreateDatabase(new()
             {
                 MaxQueryReadBytes = maximum,
-                MaxScanRecords = NativeRecords
+                MaxScanRecords = RuntimeRecords
             });
             ZoneTreeStore? cold = null;
             await ServerFailureObserver.ObserveAsync(async () =>
@@ -45,8 +45,8 @@ internal static class ReadGrantFailureSettlementFlow
             }, failures);
             ServerFailureObserver.Observe(() => cold?.Dispose(), failures);
         }
-        catch (Exception failure) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
-        catch (Exception failure) when (!global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
+        catch (Exception failure) when (global::KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
+        catch (Exception failure) when (!global::KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
@@ -54,7 +54,7 @@ internal static class ReadGrantFailureSettlementFlow
         TestDatabase fixture, CancellationTokenSource cancellation)
     {
         var budget = fixture.CreateReadWork(cancellation.Token);
-        var grant = budget.CreateReadGrant(FirstBytes + SecondBytes, NativeRecords);
+        var grant = budget.CreateReadGrant(FirstBytes + SecondBytes, RuntimeRecords);
         var originalFailure = new IOException(ConsumerFailure);
         ArgumentException? active = null;
         KeyLoadException? refused = null;
@@ -112,9 +112,9 @@ internal static class ReadGrantFailureSettlementFlow
             var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(new()
             {
                 MaxQueryReadBytes = maximum,
-                MaxScanRecords = NativeRecords
+                MaxScanRecords = RuntimeRecords
             }));
-            var grant = budget.CreateReadGrant(maximum, NativeRecords);
+            var grant = budget.CreateReadGrant(maximum, RuntimeRecords);
             byte[]? first = null;
             byte[]? second = null;
             using (budget.EnterReadGrant(grant))
@@ -131,7 +131,7 @@ internal static class ReadGrantFailureSettlementFlow
         await Assert.That(actual.first!.SequenceEqual(ReadExecutionBudgetGrantSeed.FirstValue)).IsTrue();
         await Assert.That(actual.second!.SequenceEqual(ReadExecutionBudgetGrantSeed.SecondValue)).IsTrue();
         await Assert.That(actual.ReadBytes).IsEqualTo((long)maximum);
-        await Assert.That(actual.ExaminedRecords).IsEqualTo(NativeRecords);
+        await Assert.That(actual.ExaminedRecords).IsEqualTo(RuntimeRecords);
         await Assert.That(actual.Code).IsEqualTo(ErrorCode.BudgetExceeded);
     }
 

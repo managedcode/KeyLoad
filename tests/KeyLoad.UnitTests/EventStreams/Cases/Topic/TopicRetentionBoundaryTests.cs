@@ -50,7 +50,7 @@ internal sealed class TopicRetentionBoundaryTests
     }
 
     [Test]
-    public async Task AcEventRetention002NativePinBytesAreChargedBeforeRetentionDecision()
+    public async Task AcEventRetention002PinBytesAreChargedBeforeRetentionDecision()
     {
         using var fixture = new TopicRetentionFixture();
         fixture.ReleasePins();

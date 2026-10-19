@@ -13,5 +13,5 @@ public sealed record DueWorkPage([property: Orleans.Id(0)] ImmutableArray<DueWor
     [property: Orleans.Id(6)] long ExaminedBytes,
     [property: Orleans.Id(7)] long AdmittedValueBytes)
 {
-    internal const string SerializerAlias = "keyload.core.due-work-page.v1";
+    internal const string SerializerAlias = "keyload.core.due-work-page";
 }

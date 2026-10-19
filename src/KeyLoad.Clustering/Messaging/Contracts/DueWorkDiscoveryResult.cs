@@ -8,5 +8,5 @@ namespace KeyLoad.Clustering;
 public sealed record DueWorkDiscoveryResult([property: Id(0)] DueWorkPage? Page,
     [property: Id(1)] DueSweepCursor Cursor, [property: Id(2)] ErrorCode? PrefixError)
 {
-    internal const string SerializerAlias = "keyload.orleans.due-work-discovery-result.v1";
+    internal const string SerializerAlias = "keyload.orleans.due-work-discovery-result";
 }

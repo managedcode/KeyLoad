@@ -2,7 +2,7 @@ using System.Collections.Immutable;
 
 namespace KeyLoad;
 
-/// <summary>Queries complete bounded native aggregates from one authorized canonical event cut.</summary>
+/// <summary>Queries complete bounded execution aggregates from one authorized canonical event cut.</summary>
 /// <param name="Partition">Canonical atomic partition.</param>
 /// <param name="Store">Independent analytics store.</param>
 /// <param name="FromInclusive">Inclusive UTC event-time boundary.</param>

@@ -6,13 +6,12 @@ namespace KeyLoad.Query;
 /// <summary>A bounded Q1/Q2 parser. Unsupported syntax is rejected, never passed through to storage.</summary>
 public sealed class SqlParser
 {
-    private const int DefaultDialectVersion = 1;
-    private const int JoinDialectVersion = 2;
+    private const int DefaultDialectVersion = SqlOperationProtocol.DefaultQueryDialectVersion;
     private readonly Microsoft.SqlServer.TransactSql.ScriptDom.TSqlStatement statement;
     private readonly global::KeyLoad.Query.Features.QueryExecution.ScriptDomLoweringContext context;
     private readonly int dialectVersion;
 
-    /// <summary>Creates the native T-SQL adapter with centrally validated query limits.</summary>
+    /// <summary>Creates the execution T-SQL adapter with centrally validated query limits.</summary>
     /// <param name="sql">Original bounded T-SQL text.</param>
     /// <param name="limitsOptions">Original database operation limits.</param>
     /// <param name="executionOptions">Original query execution limits.</param>
@@ -29,7 +28,7 @@ public sealed class SqlParser
         limits.Validate();
         var execution = executionOptions.Value;
         execution.Validate();
-        if (dialectVersion is not (DefaultDialectVersion or JoinDialectVersion))
+        if (dialectVersion != DefaultDialectVersion)
         {
             throw global::KeyLoad.Features.QueryExecution.ScriptDomErrors.Unsupported();
         }
@@ -39,7 +38,7 @@ public sealed class SqlParser
         context = new(limitsOptions, executionOptions, originalBudget, limits.MaxQueryTokens);
     }
 
-    /// <summary>Lowers supported native T-SQL into the existing immutable authorized query plan.</summary>
+    /// <summary>Lowers supported execution T-SQL into the existing immutable authorized query plan.</summary>
     /// <returns>The canonical typed SELECT plan.</returns>
     public SelectQuery Parse()
         => global::KeyLoad.Query.Features.QueryExecution.ScriptDomSelectLowering.Read(statement, dialectVersion, context);

@@ -1,6 +1,7 @@
-using KeyLoad.Core.Features.BlobStorage;
-using KeyLoad.Core.Features.ClusterRouting.Execution;
-using KeyLoad.Core.Features.ClusterRouting.Identity;
+using KeyLoad.Core.Features.CommandOutcomes.Execution;
+using KeyLoad.Core.Features.RuntimeJournaling.Execution;
+using KeyLoad.Core.Features.CommandOutcomes.Identity;
+using KeyLoad.Core.Features.RuntimeJournaling.Identity;
 using KeyLoad.Storage;
 using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
@@ -32,7 +33,7 @@ public sealed partial class DatabaseEngine
     });
 
     /// <summary>Returns only the actual validated stored outcome; observation failures retain their cause.</summary>
-    /// <param name="operation">Original native operation with its stable command identity.</param>
+    /// <param name="operation">Original execution operation with its stable command identity.</param>
     /// <returns>The canonical stored result after all current authority and identity checks.</returns>
     internal Result<object> ResolveSubmissionOutcome(Command<DatabaseCommand> operation)
     {
@@ -72,11 +73,6 @@ public sealed partial class DatabaseEngine
         if (previous.PolicyEpoch != principal.PolicyEpoch)
         {
             throw Errors.Fail(ErrorCode.PermissionDenied, ChangedOutcomePrincipalPolicyMessage);
-        }
-
-        if (BlobStorageOperations.Handles(operation.Value!.Kind))
-        {
-            new BlobStorageOperations(this).ValidateOutcomeAuthority(view, operation, previous.Result, previous.BlobAuthority);
         }
 
         ValidateBm25CachedOutcome(view, principal, operation, previous);

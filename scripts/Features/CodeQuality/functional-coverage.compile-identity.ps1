@@ -11,7 +11,7 @@ $script:FcCompileIdentity = [ordered]@{
     MaximumSourceRecords = 5000
     MaximumValueCharacters = 8192
     MaximumReceiptCharacters = 33554432
-    InvalidReceipt = 'The native project compilation receipt is missing, duplicated, malformed or unsupported.'
+    InvalidReceipt = 'The execution project compilation receipt is missing, duplicated, malformed or unsupported.'
 }
 
 function Read-FcAssemblyMetadataStrings([object] $Reader) {
@@ -93,7 +93,7 @@ function Assert-FcCompileReceiptEntries([object[]] $Actual, [object[]] $Expected
     }
 }
 
-function Read-FcNativeCompileReceipt([string] $DllPath, [object[]] $ExpectedSources, [object[]] $ExpectedCentralInputs,
+function Read-FcCompileReceipt([string] $DllPath, [object[]] $ExpectedSources, [object[]] $ExpectedCentralInputs,
     [object] $ExpectedProducer) {
     $stream = [IO.File]::OpenRead($DllPath)
     $pe = $null
@@ -134,7 +134,7 @@ function Read-FcNativeCompileReceipt([string] $DllPath, [object[]] $ExpectedSour
             centralInputCount = $ExpectedCentralInputs.Count
             centralInputs = $ExpectedCentralInputs
             producer = $producerRows[0]
-            binding = 'same-assembly native metadata; DLL MVID and portable-PDB CodeView identity verified'
+            binding = 'same-assembly execution metadata; DLL MVID and portable-PDB CodeView identity verified'
         }
     }
     finally {
@@ -145,5 +145,5 @@ function Read-FcNativeCompileReceipt([string] $DllPath, [object[]] $ExpectedSour
 
 function Read-FcUnitCompileReceipt([string] $DllPath, [object[]] $ExpectedSources, [object[]] $ExpectedCentralInputs,
     [object] $ExpectedProducer) {
-    Read-FcNativeCompileReceipt $DllPath $ExpectedSources $ExpectedCentralInputs $ExpectedProducer
+    Read-FcCompileReceipt $DllPath $ExpectedSources $ExpectedCentralInputs $ExpectedProducer
 }

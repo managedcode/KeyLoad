@@ -9,7 +9,7 @@ internal static class TargetInboxProcessRecovery
     internal static async Task VerifyAsync(string root, CommitStage stage, CancellationToken token)
     {
         var operation = JsonDefaults.Deserialize<Command<DatabaseCommand>>(await File.ReadAllBytesAsync(Path.Combine(root, TargetInboxCrashProtocol.OperationFile), token));
-        var request = NativeSerialization.Deserialize<CommitInboxRequest>(operation.Value!.Input.Span, NativeValidationProfile.PublicInputElements);
+        var request = OrleansSerialization.Deserialize<CommitInboxRequest>(operation.Value!.Input.Span, ValidationProfile.PublicInputElements);
         var delivery = JsonDefaults.Deserialize<Delivery>(await File.ReadAllBytesAsync(Path.Combine(root, TargetInboxCrashProtocol.DeliveryFile), token));
         CommitInboxResult? original = null;
         var failures = new List<Exception>();

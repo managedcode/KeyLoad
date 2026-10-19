@@ -24,7 +24,7 @@ internal static class ProjectionCheckpointRetentionFixture
         await ProjectionConsumerIdentityAssertions.SourcesAsync(database.Database, source);
         var probe = Purge(database.Database, source.Partition, 2L, 2);
         await Assert.That(probe.CommandId).IsNotEqualTo(pinned.CommandId);
-        var state = NativeSerialization.Deserialize<ProjectionConsumerInfo>(source.Original)
+        var state = OrleansSerialization.Deserialize<ProjectionConsumerInfo>(source.Original)
             ?? throw new InvalidOperationException(ProjectionConsumerIdentityFixture.MissingRow);
         database.Store.Commit((transaction, _) => { global::KeyLoad.Storage.StorageRecords.PutRecord(transaction, source.Key, state with { Checkpoint = ahead ? 3L : -1L }); return true; });
         var result = new ProjectionCheckpointRetentionState(source, pinned, refused, probe,

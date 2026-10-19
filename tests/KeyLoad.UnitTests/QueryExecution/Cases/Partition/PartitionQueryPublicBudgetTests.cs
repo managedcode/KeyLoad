@@ -26,9 +26,9 @@ internal sealed class PartitionQueryPublicBudgetTests
 
         var measured = MeasurePublicPage();
         var mapBytes = MappingBytes(measured.Rows.Length, measured.Leaves.Length);
-        var projected = new PartitionQueryPageV1(1,
-            [.. measured.Rows.Select(candidate => new PartitionQueryRowV1(candidate.Reference, candidate.Row))],
-            [.. measured.Leaves.Select(leaf => new PartitionQueryLeafWitnessV1(leaf.Partition,
+        var projected = new PartitionQueryPage(1,
+            [.. measured.Rows.Select(candidate => new PartitionQueryRow(candidate.Reference, candidate.Row))],
+            [.. measured.Leaves.Select(leaf => new PartitionQueryLeafWitness(leaf.Partition,
                 leaf.CutPosition, leaf.PolicyEpoch, leaf.SchemaVersion, leaf.AccessPath))], true);
         var exactBytes = checked((int)Math.Max(measured.RetainedBytes + mapBytes,
             JsonDefaults.Serialize(projected).Length));
@@ -49,7 +49,7 @@ internal sealed class PartitionQueryPublicBudgetTests
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
     }
 
-    private static PartitionQueryResultV1 MeasurePublicPage()
+    private static PartitionQueryResult MeasurePublicPage()
     {
         using var fixture = new PartitionQueryPublicTestSupport();
         SeedOne(fixture);
@@ -69,8 +69,8 @@ internal sealed class PartitionQueryPublicBudgetTests
     private static void SeedOne(PartitionQueryPublicTestSupport fixture)
         => fixture.AddRows(fixture.First, new PartitionQueryPublicSeed("budget-row", 1, "one"));
 
-    private static PartitionQueryPageV1 Run(PartitionQueryPublicTestSupport fixture,
-        PartitionQueryRequestV1 request)
+    private static PartitionQueryPage Run(PartitionQueryPublicTestSupport fixture,
+        PartitionQueryRequest request)
         => new QueryEngine(fixture.Database, UnitExecutionOptions.QueryExecution()).QueryPartitions("root", request,
             fixture.ExpectedOwner);
 }

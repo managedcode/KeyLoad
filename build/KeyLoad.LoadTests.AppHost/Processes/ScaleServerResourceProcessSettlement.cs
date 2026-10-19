@@ -4,7 +4,7 @@ using System.Runtime.ExceptionServices;
 
 namespace KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
 
-/// <summary>Stops the owned native probe and settles every original process and pipe task.</summary>
+/// <summary>Stops the owned execution probe and settles every original process and pipe task.</summary>
 internal static class ScaleServerResourceProcessSettlement
 {
     internal static async Task SettleAsync(Process process, Task output, Task error, Task exit, Task readers,

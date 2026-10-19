@@ -1,11 +1,11 @@
 namespace KeyLoad.Server;
 
-/// <summary>Publishes one operation identity safely across the native response-header start boundary.</summary>
+/// <summary>Publishes one operation identity safely across the execution response-header start boundary.</summary>
 internal static class OperationResponseHeaders
 {
     private const string InvalidPublication = "The operation response identity cannot be published in this request state.";
 
-    /// <summary>Captures one request-local identity holder before native handlers can start the response.</summary>
+    /// <summary>Captures one request-local identity holder before execution handlers can start the response.</summary>
     /// <param name="context">The new public HTTP request.</param>
     internal static void Register(HttpContext context)
     {

@@ -48,8 +48,8 @@ internal static class SharedDomainColdFlow
     private static async Task<SharedDomainCut> ExecuteAsync(DatabaseEngine database, ZoneTreeStore store, SharedDomainState state,
         SharedDomainCut cut, bool continueHealthy, CancellationToken token)
     {
-        await NativeReadCutStoreStateAssertions.AssertIdentityAndPositionAsync(store, cut.Identity, cut.Position);
-        await SharedDomainNativeImage.SameAsync(store, cut.Rows, cut.Position);
+        await ReadCutStoreStateAssertions.AssertIdentityAndPositionAsync(store, cut.Identity, cut.Position);
+        await SharedDomainImage.SameAsync(store, cut.Rows, cut.Position);
         await SharedDomainModelAssertions.AllAsync(database, state, token);
         await SharedDomainHistoryOperations.AllAsync(database, store, state, token);
         if (continueHealthy)
@@ -58,13 +58,13 @@ internal static class SharedDomainColdFlow
             await SharedDomainModelAssertions.AllAsync(database, state, token);
             cut = Capture(store);
         }
-        await NativeReadCutStoreStateAssertions.AssertIdentityAndPositionAsync(store, cut.Identity, cut.Position);
-        await SharedDomainNativeImage.SameAsync(store, cut.Rows, cut.Position);
+        await ReadCutStoreStateAssertions.AssertIdentityAndPositionAsync(store, cut.Identity, cut.Position);
+        await SharedDomainImage.SameAsync(store, cut.Rows, cut.Position);
         return cut;
     }
 
     private static SharedDomainCut Capture(ZoneTreeStore store)
-        => new(NativeReadCutStoreStateAssertions.SnapshotIdentity(store), store.Position, SharedDomainNativeImage.Capture(store));
+        => new(ReadCutStoreStateAssertions.SnapshotIdentity(store), store.Position, SharedDomainImage.Capture(store));
 
     private static void RequireOriginalRoot(string root)
     {

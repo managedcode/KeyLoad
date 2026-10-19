@@ -77,10 +77,10 @@ public sealed partial class DatabaseEngine
         var proof = new AnnProjectionSettlementClaims(AnnProjectionSettlementClaims.SettlementPurpose,
             Store.Identity.Incarnation, fresh.Id, fresh.PolicyEpoch, authority.ConfigureCommandId,
             original.Consumer, original.IndexGeneration, original.CommandId,
-            System.Security.Cryptography.SHA256.HashData(NativeSerialization.Serialize(exact)),
-            System.Security.Cryptography.SHA256.HashData(NativeSerialization.Serialize(result)),
+            System.Security.Cryptography.SHA256.HashData(OrleansSerialization.Serialize(exact)),
+            System.Security.Cryptography.SHA256.HashData(OrleansSerialization.Serialize(result)),
             checkpoint, original.NodeId, original.Placement, batch.ExpiresAt, childCommandId);
-        if (CoreNativeClaims.MeasureCharacters(proof) > ClaimsExecution.MaximumTokenCharacters)
+        if (CoreClaims.MeasureCharacters(proof) > ClaimsExecution.MaximumTokenCharacters)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, InvalidAnnSettlement);
         }
@@ -88,7 +88,7 @@ public sealed partial class DatabaseEngine
         {
             InitialAnnMaintenanceSettlement = Sign(proof)
         };
-        if (NativeSerialization.Measure(intent) > Limits.MaxBatchBytes)
+        if (OrleansSerialization.Measure(intent) > Limits.MaxBatchBytes)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, InvalidAnnSettlement);
         }
@@ -132,9 +132,9 @@ public sealed partial class DatabaseEngine
             || proof.InitialRequestSha256.Length != System.Security.Cryptography.SHA256.HashSizeInBytes
             || proof.OriginalResultSha256.Length != System.Security.Cryptography.SHA256.HashSizeInBytes
             || !System.Security.Cryptography.CryptographicOperations.FixedTimeEquals(proof.InitialRequestSha256,
-                System.Security.Cryptography.SHA256.HashData(NativeSerialization.Serialize(original)))
-            || !NativeSerialization.Serialize(proof.PhysicalPlacement).AsSpan()
-                .SequenceEqual(NativeSerialization.Serialize(original.Placement))
+                System.Security.Cryptography.SHA256.HashData(OrleansSerialization.Serialize(original)))
+            || !OrleansSerialization.Serialize(proof.PhysicalPlacement).AsSpan()
+                .SequenceEqual(OrleansSerialization.Serialize(original.Placement))
             || completed && !state.InitialAnnMaintenanceSettled)
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, InvalidAnnSettlement);

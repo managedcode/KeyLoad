@@ -42,14 +42,14 @@ internal sealed class Bm25OriginalPhaseRecoveryFlow(Bm25OriginalPhaseRecoveryOwn
 
     internal Command<DatabaseCommand> Reissue(Command<DatabaseCommand> original)
         => owner.Database.CreateVerifiedBm25CorpusPublication(Publisher,
-            NativeSerialization.Deserialize<Bm25CorpusPublicationPhaseCommand>((original).Value!.Input.Span), Work());
+            OrleansSerialization.Deserialize<Bm25CorpusPublicationPhaseCommand>((original).Value!.Input.Span), Work());
 
     internal Result<object> Publish(Command<DatabaseCommand> operation) => owner.Submit(operation);
 
     internal PrincipalRecord Configure(PrincipalRecord principal)
     {
         var operation = owner.Database.CreateCommand(OperationKind.ConfigurePrincipal, Guid.NewGuid(), Root,
-            owner.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(new ConfigurePrincipalRequest(principal)));
+            owner.Database.EvaluationClock.GetUtcNow(), OrleansSerialization.Serialize(new ConfigurePrincipalRequest(principal)));
         return owner.Submit(operation).Get<PrincipalRecord>();
     }
 
@@ -96,7 +96,7 @@ internal sealed class Bm25OriginalPhaseRecoveryFlow(Bm25OriginalPhaseRecoveryOwn
     internal async Task RequireHealthyAsync(Command<DatabaseCommand> operation, Result<object> result)
     {
         await Assert.That(Errors.Code(result.Problem)).IsNull();
-        var phase = NativeSerialization.Deserialize<Bm25CorpusPublicationPhaseCommand>((operation).Value!.Input.Span);
+        var phase = OrleansSerialization.Deserialize<Bm25CorpusPublicationPhaseCommand>((operation).Value!.Input.Span);
         await Assert.That(result.Get<CommitReceipt>().CommandId).IsEqualTo(operation.CommandId);
         await Assert.That(phase.Current.PolicyEpoch).IsEqualTo(Reader.PolicyEpoch);
         await Assert.That(phase.Current.Statistics.DocumentCount).IsEqualTo(1);

@@ -28,9 +28,9 @@ internal static class RowRevisionInferenceAssertions
         var result = database.ApplyEmbedded(operation, token);
         await ResultAsync(result, code, detail);
         var outcomeKey = KeySpace.PartitionOutcome(command.Partition, P.Reader, command.CommandId);
-        var locatorKey = KeySpace.OutcomeLocatorV2(command.Partition, P.Reader, command.CommandId);
+        var locatorKey = KeySpace.OutcomeLocator(command.Partition, P.Reader, command.CommandId);
         var bytes = store.Read(view => view.ReadOwnedValue(outcomeKey))!;
-        var stored = NativeSerialization.Deserialize<StoredOutcome>(bytes);
+        var stored = OrleansSerialization.Deserialize<StoredOutcome>(bytes);
         await Assert.That(stored.PolicyEpoch).IsEqualTo(P.PolicyEpoch);
         await Assert.That(stored.Incarnation).IsEqualTo(store.Identity.Incarnation);
         await Assert.That(JsonDefaults.Serialize(stored.Result).AsSpan().SequenceEqual(JsonDefaults.Serialize(result))).IsTrue();
@@ -38,11 +38,11 @@ internal static class RowRevisionInferenceAssertions
         string[] allowed = [Convert.ToHexString(outcomeKey), Convert.ToHexString(locatorKey), Convert.ToHexString(KeySpace.ClockBytes), Convert.ToHexString(KeySpace.AppliedBytes)];
         await Assert.That(Filter(before, allowed).SequenceEqual(Filter(TeamRowPolicyAssertions.Image(store), allowed))).IsTrue();
         await Assert.That(store.Read(view => view.ReadOwnedValue(KeySpace.AppliedBytes))!
-            .AsSpan().SequenceEqual(NativeSerialization.Serialize(expectedApplied))).IsTrue();
+            .AsSpan().SequenceEqual(OrleansSerialization.Serialize(expectedApplied))).IsTrue();
         await Assert.That(JsonDefaults.Serialize(database.GetOutboxStatus(P.Root, command.Partition)).AsSpan().SequenceEqual(outbox)).IsTrue();
         var afterClock = store.Read(view => view.ReadOwnedValue(KeySpace.ClockBytes))!;
-        await Assert.That(NativeSerialization.Deserialize<DateTimeOffset>(afterClock))
-            .IsGreaterThanOrEqualTo(NativeSerialization.Deserialize<DateTimeOffset>(beforeClock));
+        await Assert.That(OrleansSerialization.Deserialize<DateTimeOffset>(afterClock))
+            .IsGreaterThanOrEqualTo(OrleansSerialization.Deserialize<DateTimeOffset>(beforeClock));
         await ReplayAsync(database, store, operation, result, bytes, command.Partition, token);
         return (operation, result, bytes);
     }

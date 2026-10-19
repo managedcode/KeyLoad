@@ -3,7 +3,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.IntegrationTests.Features.DocumentStorage;
 
-/// <summary>AC-METH-005: broad, disabled or covered native selections fail before acquiring a private Orleans fixture.</summary>
+/// <summary>AC-METH-005: broad, disabled or covered execution selections fail before acquiring a private Orleans fixture.</summary>
 internal sealed class HeavyDocumentLoadAdmissionTests
 {
     private const string BroadFilter = "/*/*/*/*";
@@ -34,7 +34,7 @@ internal sealed class HeavyDocumentLoadAdmissionTests
     [Arguments("missing-parallelism")]
     [Arguments("duplicate-parallelism")]
     [Arguments("coverage-switch")]
-    public void NativeSelectionRejectsBeforeOwnershipThenHealthyExclusiveCallContinues(string invalid)
+    public void SelectionRejectsBeforeOwnershipThenHealthyExclusiveCallContinues(string invalid)
     {
         using var configuration = new ConfigurationManager();
         configuration[HeavyDocumentLoadExecutionOptions.EnabledSetting] = bool.TrueString;

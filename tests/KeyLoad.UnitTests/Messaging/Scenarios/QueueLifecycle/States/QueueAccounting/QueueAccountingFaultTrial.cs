@@ -31,7 +31,7 @@ internal static class QueueAccountingFaultTrial
         using var cold = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         var restored = QueueWholeFlowStorage.Open(cold);
         await ReplayAsync(restored, state, result);
-        await NativeReplayResultAssertions.Same<CommitReceipt>(QueueWholeFlowStorage.Apply(restored, OperationKind.Batch,
+        await ReplayResultAssertions.Same<CommitReceipt>(QueueWholeFlowStorage.Apply(restored, OperationKind.Batch,
             state.Producer, state.Producer.CommandId, new DateTimeOffset(state.Operation.Timestamp)), state.Produced);
         await QueueAccountingFaultHealthy.ReplayAsync(restored, state, healthy);
         await Assert.That(QueueWholeFlowStorage.Bytes(cold)).IsEquivalentTo(complete, TUnit.Assertions.Enums.CollectionOrdering.Matching);
@@ -50,6 +50,6 @@ internal static class QueueAccountingFaultTrial
 
     private static Task ReplayAsync(DatabaseEngine database, QueueAccountingFaultState state, Result<object> result)
         => state.Operation.Value!.Kind == OperationKind.Receive
-            ? NativeReplayResultAssertions.Same<ReceiveResult>(database.Apply(state.Operation), result)
-            : NativeReplayResultAssertions.Same<CommitReceipt>(database.Apply(state.Operation), result);
+            ? ReplayResultAssertions.Same<ReceiveResult>(database.Apply(state.Operation), result)
+            : ReplayResultAssertions.Same<CommitReceipt>(database.Apply(state.Operation), result);
 }

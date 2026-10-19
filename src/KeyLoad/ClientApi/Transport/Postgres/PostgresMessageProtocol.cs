@@ -17,9 +17,9 @@ internal static class PostgresMessageProtocol
     internal const int PasswordChallenge = 3;
     internal const int AuthenticationOk = 0;
     internal const string ServerVersion = "server_version";
-    internal const string ServerVersionValue = "18.0 (KeyLoad native-sql-v1)";
+    internal const string ServerVersionValue = "18.0 (KeyLoad execution-sql)";
     internal const string Profile = "keyload_protocol_profile";
-    internal const string ProfileValue = "native-sql-v1-jsonb-result";
+    internal const string ProfileValue = "execution-sql-jsonb-result";
     internal const string Encoding = "server_encoding";
     internal const string StandardStrings = "standard_conforming_strings";
     internal const string StandardStringsOn = "on";

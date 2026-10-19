@@ -26,7 +26,7 @@ internal sealed record ScaledRawStorageSnapshot
     {
         get; init;
     }
-    internal required long NativeReadCalls
+    internal required long RuntimeReadCalls
     {
         get; init;
     }
@@ -54,7 +54,7 @@ internal sealed record ScaledRawStorageSnapshot
     {
         get; init;
     }
-    internal required long? NativeResidentRecords
+    internal required long? RuntimeResidentRecords
     {
         get; init;
     }

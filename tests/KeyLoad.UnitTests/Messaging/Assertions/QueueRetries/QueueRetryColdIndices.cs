@@ -91,13 +91,13 @@ internal static class QueueRetryColdIndices
             QueueRetryColdProtocol.FirstSequence, QueueRetryColdProtocol.Retry);
         var value = new KeyLoad.Core.Features.Messaging.QueueDeadLetterReference(QueueRetryColdProtocol.Retry,
             QueueRetryColdProtocol.FirstSequence, QueueRetryColdProtocol.FirstSequence, QueueRetryColdProtocol.ExhaustedCode);
-        return Convert.ToHexString(key) + ":" + Convert.ToHexString(NativeSerialization.Serialize(value));
+        return Convert.ToHexString(key) + ":" + Convert.ToHexString(OrleansSerialization.Serialize(value));
     }
 
     private static string Row(QueueLaneRef lane, string family, string id, DateTimeOffset? time = null)
     {
         var key = time is { } instant ? KeySpace.Partition(family, lane.Partition, lane.Queue, instant, id)
             : KeySpace.Partition(family, lane.Partition, lane.Queue, id);
-        return Convert.ToHexString(key) + ":" + Convert.ToHexString(NativeSerialization.Serialize(id));
+        return Convert.ToHexString(key) + ":" + Convert.ToHexString(OrleansSerialization.Serialize(id));
     }
 }

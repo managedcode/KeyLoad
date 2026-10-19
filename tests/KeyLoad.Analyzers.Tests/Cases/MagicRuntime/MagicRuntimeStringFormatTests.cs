@@ -1,6 +1,6 @@
 namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
 
-/// <summary>AC-CQ-030 and AC-CQ-031: native formatting policy distinguishes literal formats from data.</summary>
+/// <summary>AC-CQ-030 and AC-CQ-031: execution formatting policy distinguishes literal formats from data.</summary>
 internal sealed class MagicRuntimeStringFormatTests
 {
     [Test]
@@ -13,7 +13,7 @@ internal sealed class MagicRuntimeStringFormatTests
     [Arguments("duration.ToString(format: [|\"c\"|], formatProvider: CultureInfo.InvariantCulture)")]
     [Arguments("date.ToString([|\"O\"|], CultureInfo.InvariantCulture)")]
     [Arguments("time.ToString([|\"O\"|], CultureInfo.InvariantCulture)")]
-    public async Task NativeToStringFormatArgumentsRequireNamedTokensAsync(string expression)
+    public async Task ToStringFormatArgumentsRequireNamedTokensAsync(string expression)
     {
         var source = $$"""
             using System;
@@ -40,7 +40,7 @@ internal sealed class MagicRuntimeStringFormatTests
     [Arguments("duration.TryFormat(buffer, out _, format: [|\"c\"|], formatProvider: CultureInfo.InvariantCulture)")]
     [Arguments("date.TryFormat(buffer, out _, format: [|\"O\"|], provider: CultureInfo.InvariantCulture)")]
     [Arguments("time.TryFormat(buffer, out _, format: [|\"O\"|], provider: CultureInfo.InvariantCulture)")]
-    public async Task NativeTryFormatConversionAndNamedParametersRetainFullStringSpanAsync(string expression)
+    public async Task TryFormatConversionAndNamedParametersRetainFullStringSpanAsync(string expression)
     {
         var source = $$"""
             using System;
@@ -58,7 +58,7 @@ internal sealed class MagicRuntimeStringFormatTests
     }
 
     [Test]
-    public async Task ConstFormatsPreserveNativeStringAndSpanFormattingAsync()
+    public async Task ConstFormatsPreserveStringAndSpanFormattingAsync()
     {
         const string source = """
             using System;
@@ -110,7 +110,7 @@ internal sealed class MagicRuntimeStringFormatTests
     [Arguments("long")]
     [Arguments("ulong")]
     [Arguments("float")]
-    public async Task NativeNumericPrimitiveFormattingRequiresNamedTokensAsync(string numericType)
+    public async Task NumericPrimitiveFormattingRequiresNamedTokensAsync(string numericType)
     {
         var source = $$"""
             using System.Globalization;

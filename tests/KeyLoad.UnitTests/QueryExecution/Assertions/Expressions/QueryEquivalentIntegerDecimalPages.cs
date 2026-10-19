@@ -13,7 +13,7 @@ internal static class QueryEquivalentIntegerDecimalPages
     {
         var image = TeamRowPolicyAssertions.Image(store);
         var cut = store.Position;
-        var identity = NativeSerialization.Serialize(store.Identity);
+        var identity = OrleansSerialization.Serialize(store.Identity);
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
@@ -56,7 +56,7 @@ internal static class QueryEquivalentIntegerDecimalPages
                 cancellationToken: token),
              () => engine.ExecuteAst(Subject, ast, cancellationToken: token),
              () => engine.ExecuteAst(Subject, csharp, cancellationToken: token),
-             () => engine.ExecuteAst(Subject, Q2CapabilityFixtures.NativeRoundTrip(csharp), cancellationToken: token)];
+             () => engine.ExecuteAst(Subject, Q2CapabilityFixtures.RuntimeRoundTrip(csharp), cancellationToken: token)];
         foreach (var call in calls)
         {
             if (denied is { } error)

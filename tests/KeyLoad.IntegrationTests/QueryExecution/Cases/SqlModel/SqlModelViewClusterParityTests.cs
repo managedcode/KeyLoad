@@ -11,7 +11,7 @@ namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 internal sealed class SqlModelViewClusterParityTests(ClusterFixture fixture)
 {
     [Test]
-    public async Task AcSqlView005SqlAndAstSdkAndOfficialMcpMatchNativeRowsWithoutQueueEffects()
+    public async Task AcSqlView005SqlAndAstSdkAndOfficialMcpMatchRowsWithoutQueueEffects()
     {
         using var deadline = McpCallerDeadline.Create();
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
@@ -35,7 +35,7 @@ internal sealed class SqlModelViewClusterParityTests(ClusterFixture fixture)
     private static async Task AssertEventParityAsync(KeyLoadClient sdk, McpOfficialClient mcp,
         SqlModelViewClusterScenario scenario, CancellationToken cancellationToken)
     {
-        var native = await McpCallerAssertions.SdkSuccessAsync(await sdk.ReadStreamAsync(
+        var execution = await McpCallerAssertions.SdkSuccessAsync(await sdk.ReadStreamAsync(
             new(scenario.Stream), cancellationToken));
         var sql = await McpCallerAssertions.SdkSuccessAsync(await sdk.QueryAsync(
             scenario.EventSql(), cancellationToken));
@@ -46,7 +46,7 @@ internal sealed class SqlModelViewClusterParityTests(ClusterFixture fixture)
         var mcpAst = await McpCallerAssertions.SuccessAsync<QueryPage>(await mcp.CallAsync(
             McpCallerTools.QueryAst, scenario.EventAst(), cancellationToken));
 
-        await SqlModelViewClusterParityAssertions.AssertEventRowsAsync(native.Events, sql);
+        await SqlModelViewClusterParityAssertions.AssertEventRowsAsync(execution.Events, sql);
         await SqlModelViewClusterParityAssertions.AssertEquivalentRowsAsync(sql, ast,
             mcpSql.Value, mcpAst.Value, "model-scan:events");
     }

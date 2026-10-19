@@ -7,7 +7,7 @@ namespace KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
 /// <summary>Reads the actual lifetime peak resident bytes for this diagnostic process.</summary>
 internal static partial class ScaledRawStorageProcessMemory
 {
-    private const string NativeLibraryName = "/usr/lib/libSystem.B.dylib";
+    private const string LibraryName = "/usr/lib/libSystem.B.dylib";
     private const string GetResourceUsageEntryPoint = "getrusage";
     private const int CurrentProcessUsage = 0;
     private const int ResourceUsageSizeBytes = 144;
@@ -52,7 +52,7 @@ internal static partial class ScaledRawStorageProcessMemory
         return usage.MaximumResidentSetSizeBytes;
     }
 
-    [LibraryImport(NativeLibraryName, EntryPoint = GetResourceUsageEntryPoint, SetLastError = true)]
+    [LibraryImport(LibraryName, EntryPoint = GetResourceUsageEntryPoint, SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
     private static partial int GetResourceUsage(int who, out ResourceUsage usage);
 

@@ -4,6 +4,6 @@ namespace KeyLoad.UnitTests.Features.QueryExecution;
 internal sealed class RemotePartitionParallelCancellationTests
 {
     [Test]
-    public Task IndependentNativeProducersReadActualOwnersBeforeCancellationAndJoinBeforeLiteralHealthyMerge()
+    public Task IndependentProducersReadActualOwnersBeforeCancellationAndJoinBeforeLiteralHealthyMerge()
         => QueryHostedParallelCancellation.RunAsync();
 }

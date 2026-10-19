@@ -15,8 +15,8 @@ internal sealed class ImplementationTermPermissions(SemanticModel model,
     internal bool Allows(string term, string text, SyntaxNode node, CancellationToken cancellationToken)
     {
         var symbol = ImplementationTermSymbols.Resolve(model, node, cancellationToken);
-        if (ImplementationTermSymbols.Native(symbol) || IsVocabulary(symbol) ||
-            term == ImplementationTermCatalog.DemonstrationWord && ImplementationTermSymbols.NativeLoggingProcessor(symbol))
+        if (ImplementationTermSymbols.Execution(symbol) || IsVocabulary(symbol) ||
+            term == ImplementationTermCatalog.DemonstrationWord && ImplementationTermSymbols.LoggingProcessor(symbol))
         {
             return true;
         }
@@ -32,7 +32,7 @@ internal sealed class ImplementationTermPermissions(SemanticModel model,
         }
         return term switch
         {
-            ImplementationTermCatalog.MovementWord => NativeMovement(text),
+            ImplementationTermCatalog.MovementWord => Movement(text),
             ImplementationTermCatalog.DataWord => ImplementationTermSymbols.TimeSeries(symbol, model.Compilation) ||
                 ImplementationTermSymbols.TimeSeries(ownerSymbol, model.Compilation) ||
                 ImplementationTermSymbols.Measurement(symbol) || ImplementationTermSymbols.Measurement(ownerSymbol) ||
@@ -59,7 +59,7 @@ internal sealed class ImplementationTermPermissions(SemanticModel model,
         symbol?.ContainingType?.ToDisplayString() == ImplementationTermCatalog.RuleReaderType &&
         symbol is IMethodSymbol { Name: nameof(ImplementationTermReader.Read) or "Classify" or "Compound" };
 
-    private static bool NativeMovement(string text) =>
+    private static bool Movement(string text) =>
         text.Contains(ImplementationTermCatalog.OrleansWord, StringComparison.Ordinal) &&
         text.Contains(ImplementationTermCatalog.ActivationWord, StringComparison.OrdinalIgnoreCase);
 

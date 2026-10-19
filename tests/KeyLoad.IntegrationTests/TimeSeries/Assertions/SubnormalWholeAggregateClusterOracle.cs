@@ -23,7 +23,7 @@ internal static class SubnormalWholeAggregateClusterOracle
         McpOfficialClient mcp, string series, SampleAggregate expected, Func<Task> current,
         CancellationToken token)
     {
-        var request = new AggregateSamplesRequest(scenario.Native.Partition, TimeSeriesClusterScenario.Set,
+        var request = new AggregateSamplesRequest(scenario.Execution.Partition, TimeSeriesClusterScenario.Set,
             series, scenario.From, scenario.Until, SampleChunkClusterProtocol.OutputLimit);
         await EqualAsync(expected, await McpCallerAssertions.SdkSuccessAsync(
             await sdk.AggregateSamplesAsync(request, token).ConfigureAwait(false)));

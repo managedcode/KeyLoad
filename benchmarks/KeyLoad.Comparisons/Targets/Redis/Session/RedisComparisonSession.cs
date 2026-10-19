@@ -5,7 +5,7 @@ using StackExchange.Redis;
 namespace KeyLoad.Comparisons.Targets;
 
 internal sealed class RedisComparisonSession(ConnectionMultiplexer connection, string prefix, ComparisonTopology topology, int corpusCount,
-    IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<NativeComparisonExecutionOptions> nativeExecutionOptions, bool joinOriginalOperations = false)
+    IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<ComparisonExecutionOptions> runtimeExecutionOptions, bool joinOriginalOperations = false)
     : IComparisonSession
 {
     private const string ClientCommand = "CLIENT";
@@ -16,7 +16,7 @@ internal sealed class RedisComparisonSession(ConnectionMultiplexer connection, s
     private const string WaitAofFailed = "RedisWaitAofFailed";
     private const int RequiredLocalFsync = 1;
     private const int RequiredReplicaFsync = 1;
-    private readonly NativeComparisonExecutionOptions execution = NativeComparisonExecutionOptions.Require(nativeExecutionOptions).Value;
+    private readonly ComparisonExecutionOptions execution = ComparisonExecutionOptions.Require(runtimeExecutionOptions).Value;
     private readonly IDatabase database = connection.GetDatabase();
 
     public async IAsyncEnumerable<FoundDocument> ReadCorpusAsync([EnumeratorCancellation] CancellationToken cancellationToken)
@@ -54,7 +54,7 @@ internal sealed class RedisComparisonSession(ConnectionMultiplexer connection, s
             {
                 keys[index] = prefix + ScaledComparisonCorpus.Id(offset + index);
             }
-            var values = await JoinNativeAsync(database.StringGetAsync(keys, CommandFlags.DemandMaster), cancellationToken);
+            var values = await RuntimeJoinAsync(database.StringGetAsync(keys, CommandFlags.DemandMaster), cancellationToken);
             for (var index = FirstElementIndex; index < values.Length; index++)
             {
                 cancellationToken.ThrowIfCancellationRequested();
@@ -69,7 +69,7 @@ internal sealed class RedisComparisonSession(ConnectionMultiplexer connection, s
 
     public async Task<FoundDocument?> ReadAsync(BenchmarkDocument document, CancellationToken cancellationToken)
     {
-        var json = await JoinNativeAsync(database.StringGetAsync(prefix + document.Id, CommandFlags.DemandMaster), cancellationToken);
+        var json = await RuntimeJoinAsync(database.StringGetAsync(prefix + document.Id, CommandFlags.DemandMaster), cancellationToken);
         return json.IsNull ? null : new(document.Id, json.ToString());
     }
 
@@ -100,13 +100,13 @@ internal sealed class RedisComparisonSession(ConnectionMultiplexer connection, s
     {
         if (scenario == Scenario.DocumentDelete)
         {
-            RedisMutationContract.RequireDelete(await JoinNativeAsync(database.KeyDeleteAsync(prefix + document.Id,
+            RedisMutationContract.RequireDelete(await RuntimeJoinAsync(database.KeyDeleteAsync(prefix + document.Id,
                 CommandFlags.DemandMaster), token));
         }
         else
         {
             var when = scenario == Scenario.DocumentWrite ? When.NotExists : When.Exists;
-            RedisMutationContract.RequireSet(await JoinNativeAsync(database.StringSetAsync(prefix + document.Id, document.Json,
+            RedisMutationContract.RequireSet(await RuntimeJoinAsync(database.StringSetAsync(prefix + document.Id, document.Json,
                 when: when, flags: CommandFlags.DemandMaster), token), scenario);
         }
     }
@@ -123,7 +123,7 @@ internal sealed class RedisComparisonSession(ConnectionMultiplexer connection, s
         }
         var timeoutMilliseconds = checked((int)Math.Ceiling(lifecycleOptions.Value.RedisReceiptTimeout.TotalMilliseconds));
         var arguments = new object[] { RequiredLocalFsync, RequiredReplicaFsync, timeoutMilliseconds };
-        var reply = (RedisResult[])(await JoinNativeAsync(database.ExecuteAsync(WaitAofCommand, arguments, CommandFlags.DemandMaster), token))!;
+        var reply = (RedisResult[])(await RuntimeJoinAsync(database.ExecuteAsync(WaitAofCommand, arguments, CommandFlags.DemandMaster), token))!;
         if (reply.Length != FsyncReceiptFieldCount || (long)reply[FirstElementIndex] < RequiredLocalFsync || (long)reply[SingleItemCount] < RequiredReplicaFsync)
         {
             throw new ComparisonFailureException(WaitAofFailed);
@@ -135,9 +135,9 @@ internal sealed class RedisComparisonSession(ConnectionMultiplexer connection, s
     }
 
     private async Task<long> ReadClientIdAsync(CancellationToken token)
-        => (long)await JoinNativeAsync(database.ExecuteAsync(ClientCommand, new object[] { ClientIdSubcommand }, CommandFlags.DemandMaster), token);
+        => (long)await RuntimeJoinAsync(database.ExecuteAsync(ClientCommand, new object[] { ClientIdSubcommand }, CommandFlags.DemandMaster), token);
 
-    private async Task<T> JoinNativeAsync<T>(Task<T> original, CancellationToken token)
+    private async Task<T> RuntimeJoinAsync<T>(Task<T> original, CancellationToken token)
     {
         if (!joinOriginalOperations)
         {

@@ -11,9 +11,9 @@ internal static class Bm25OriginalExpiryTrial
         var unadmitted = flow.Capture(null);
         var success = flow.Publish(admitted);
         await flow.RequireHealthyAsync(admitted, success);
-        var admittedEntry = NativeSerialization.Serialize(owner.Entry(admitted.CommandId));
-        var firstPhase = NativeSerialization.Deserialize<Bm25CorpusPublicationPhaseCommand>((admitted).Value!.Input.Span);
-        var secondPhase = NativeSerialization.Deserialize<Bm25CorpusPublicationPhaseCommand>((unadmitted).Value!.Input.Span);
+        var admittedEntry = OrleansSerialization.Serialize(owner.Entry(admitted.CommandId));
+        var firstPhase = OrleansSerialization.Deserialize<Bm25CorpusPublicationPhaseCommand>((admitted).Value!.Input.Span);
+        var secondPhase = OrleansSerialization.Deserialize<Bm25CorpusPublicationPhaseCommand>((unadmitted).Value!.Input.Span);
         var clock = owner.Database.EvaluationClock;
         var expiry = firstPhase.OriginalExpiry > secondPhase.OriginalExpiry
             ? firstPhase.OriginalExpiry : secondPhase.OriginalExpiry;
@@ -37,7 +37,7 @@ internal static class Bm25OriginalExpiryTrial
         var beforeFailure = Bm25OriginalPhaseRecoveryState.Read(owner);
         var failed = flow.Publish(expired);
         await Bm25OriginalExpiryAssertions.FailureAsync(flow, expired, failed, beforeFailure, family);
-        var failedEntry = NativeSerialization.Serialize(owner.Entry(expired.CommandId));
+        var failedEntry = OrleansSerialization.Serialize(owner.Entry(expired.CommandId));
         await Bm25OriginalExpiryAssertions.ReplayAsync(flow, unadmitted, failed, failedEntry, expiry);
         var beforeCold = Bm25OriginalPhaseRecoveryState.Read(owner);
         owner.Reopen();

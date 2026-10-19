@@ -45,7 +45,7 @@ internal sealed class ZoneTreeExistingStoreValidationTests
     {
         using var files = new ZoneTreeExistingStoreFixture();
         var original = await File.ReadAllBytesAsync(files.IdentityPath);
-        var envelope = NativeSerialization.Deserialize<ZoneTreeIdentityEnvelope>(original.AsSpan(sizeof(ulong)));
+        var envelope = OrleansSerialization.Deserialize<ZoneTreeIdentityEnvelope>(original.AsSpan(sizeof(ulong)));
         envelope.Checksum[0] ^= ChecksumCorruptionMask;
         var corrupted = ZoneTreeMetadataBinary.Write(envelope, ZoneTreeMetadataBinary.IdentityMagic);
         await File.WriteAllBytesAsync(files.IdentityPath, corrupted);

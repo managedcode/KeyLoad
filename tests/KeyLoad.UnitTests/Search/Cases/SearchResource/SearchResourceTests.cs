@@ -80,7 +80,7 @@ internal sealed class SearchResourceTests
     private static long StoredJsonBytes(TestDatabase database, string collection)
         => database.Store.Read(view => view.Scan(DocumentStorageKeys.Prefix(database.Partition, collection),
             CorpusDocuments + 1).Records.Sum(record => (long)Encoding.UTF8.GetByteCount(
-                NativeSerialization.Deserialize<DocumentRecord>(record.Value.Span).Json)));
+                OrleansSerialization.Deserialize<DocumentRecord>(record.Value.Span).Json)));
 
     private static Mutation[] Rows(string collection, string extra) => Enumerable.Range(0, CorpusDocuments)
         .Select(index => (Mutation)new PutDocument(collection, $"row-{index:D2}",
@@ -99,7 +99,7 @@ internal sealed class SearchResourceTests
     {
         var updatedAt = db.Store.Read(view => view.Scan(DocumentStorageKeys.Prefix(db.Partition, collection),
             CorpusDocuments + 1).Records
-            .Select(record => NativeSerialization.Deserialize<DocumentRecord>(record.Value.Span).UpdatedAt).ToArray());
+            .Select(record => OrleansSerialization.Deserialize<DocumentRecord>(record.Value.Span).UpdatedAt).ToArray());
         await Assert.That(updatedAt.Length).IsEqualTo(CorpusDocuments + 1);
         await Assert.That(updatedAt.All(time => time == evaluatedAt)).IsTrue();
     }
@@ -116,11 +116,11 @@ internal sealed class SearchResourceTests
         var exact = new SearchEngine(new DatabaseEngine(db.Store, db.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new()
         {
             MaxBatchBytes = exactBytes
-        }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution()), UnitExecutionOptions.QueryExecution());
+        }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution()), UnitExecutionOptions.QueryExecution());
         var shortBudget = new SearchEngine(new DatabaseEngine(db.Store, db.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new()
         {
             MaxBatchBytes = exactBytes - 1
-        }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution()), UnitExecutionOptions.QueryExecution());
+        }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution()), UnitExecutionOptions.QueryExecution());
         var position = db.Store.Position;
 
         var accepted = await exact.SearchAsync("root", request, TestContext.Current!.Execution.CancellationToken);

@@ -34,7 +34,7 @@ internal static class RetainedAppendIdentityOperations
     {
         var image = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
-        var identity = NativeReadCutStoreStateAssertions.SnapshotIdentity(store);
+        var identity = ReadCutStoreStateAssertions.SnapshotIdentity(store);
         var failures = new List<Exception>();
         foreach (var original in fixture.Successes)
         {
@@ -43,7 +43,7 @@ internal static class RetainedAppendIdentityOperations
                 var key = KeySpace.PartitionOutcome(fixture.Stream.Partition, "root", original.Key.CommandId);
                 var raw = store.Read(view => view.ReadOwnedValue(key))
                     ?? throw new InvalidOperationException("The original complete outcome is missing.");
-                await NativeReplayResultAssertions.Same<CommitReceipt>(QueueWholeFlowStorage.Apply(database,
+                await ReplayResultAssertions.Same<CommitReceipt>(QueueWholeFlowStorage.Apply(database,
                     OperationKind.Batch, original.Key, original.Key.CommandId, RetainedAppendIdentityFixture.Epoch), original.Value);
                 await Assert.That(store.Read(view => view.ReadOwnedValue(key))!.AsSpan().SequenceEqual(raw)).IsTrue();
                 foreach (var effect in original.Value.Get<CommitReceipt>().Mutations)

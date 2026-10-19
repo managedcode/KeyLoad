@@ -1,6 +1,6 @@
 namespace KeyLoad.IntegrationTests.Features.Authorization;
 
-/// <summary>Frozen bounded policy for the native dashboard Orleans observation.</summary>
+/// <summary>Frozen bounded policy for the execution dashboard Orleans observation.</summary>
 [ConfigurationOptions]
 internal sealed class FoundationOtlpClusterExecutionOptions
 {

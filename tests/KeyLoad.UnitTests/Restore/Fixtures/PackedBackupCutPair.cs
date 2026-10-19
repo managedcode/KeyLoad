@@ -7,9 +7,9 @@ namespace KeyLoad.UnitTests.Features.BackupRestore;
 internal static class PackedBackupCutPair
 {
     internal const string SecondKey = "packed-cut/second";
-    internal const string SecondValue = "second-acknowledged-native-cut";
-    private const string FirstBackup = "first-native-backup";
-    private const string SecondBackup = "second-native-backup";
+    internal const string SecondValue = "second-acknowledged-execution-cut";
+    private const string FirstBackup = "first-execution-backup";
+    private const string SecondBackup = "second-execution-backup";
 
     internal static async Task<(string First, string Second)> CaptureAsync(CliBackupRestoreFixture fixture)
     {

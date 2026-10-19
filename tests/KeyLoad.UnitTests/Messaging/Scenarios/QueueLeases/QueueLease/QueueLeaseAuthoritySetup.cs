@@ -68,13 +68,13 @@ internal static class QueueLeaseAuthoritySetup
     {
         if (fault == QueueLeaseAuthorityFault.ForeignBodyIdentity)
         {
-            var body = NativeSerialization.Deserialize<MessageBody>(state.OriginalBytes);
-            return NativeSerialization.Serialize(body with
+            var body = OrleansSerialization.Deserialize<MessageBody>(state.OriginalBytes);
+            return OrleansSerialization.Serialize(body with
             {
                 Id = QueueLeaseAuthorityProtocol.Foreign
             });
         }
-        var metadata = NativeSerialization.Deserialize<MessageMetadata>(state.OriginalBytes);
+        var metadata = OrleansSerialization.Deserialize<MessageMetadata>(state.OriginalBytes);
         var damaged = fault switch
         {
             QueueLeaseAuthorityFault.ForeignMetadataIdentity => metadata with
@@ -115,7 +115,7 @@ internal static class QueueLeaseAuthoritySetup
             },
             _ => throw new ArgumentOutOfRangeException(nameof(fault))
         };
-        return NativeSerialization.Serialize(damaged);
+        return OrleansSerialization.Serialize(damaged);
     }
 
     internal static Command<DatabaseCommand> Create<T>(DatabaseEngine database, OperationKind kind, T value, Guid id, DateTimeOffset time)

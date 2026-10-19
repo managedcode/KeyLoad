@@ -18,7 +18,7 @@ internal sealed class EventFeedPubSubStorageTests
     private const string WrongStateName = "foreign-state";
 
     [Test]
-    public async Task ActualNativePubSubCasQuotaCancellationAndDisposeRefuseThenHealthyStateRemainsComplete()
+    public async Task ActualPubSubCasQuotaCancellationAndDisposeRefuseThenHealthyStateRemainsComplete()
     {
         var registrations = new ServiceCollection();
         var fixtureLimits = new DatabaseLimits { MaxResults = SingleSlot };
@@ -64,7 +64,7 @@ internal sealed class EventFeedPubSubStorageTests
     }
 
     [Test]
-    public async Task ActualNativePubSubEncodedByteRefusalPreservesOriginalStateThenHealthyReplacementAndRestart()
+    public async Task ActualPubSubEncodedByteRefusalPreservesOriginalStateThenHealthyReplacementAndRestart()
     {
         const string Original = "original-hint-state";
         const string Healthy = "healthy-complete-hint-state";
@@ -129,9 +129,9 @@ internal sealed class EventFeedPubSubStorageTests
     }
 
     private static List<string> RequireEncodedState(GrainState<List<string>> state)
-        => state.State ?? throw new InvalidOperationException("The original native pubsub operation returned no state.");
+        => state.State ?? throw new InvalidOperationException("The original execution pubsub operation returned no state.");
 
-    private static GrainId Id(string key) => NativeEventFeedPubSubFreshStateFixture.IdFor(key);
+    private static GrainId Id(string key) => EventFeedPubSubFreshStateFixture.IdFor(key);
 
     private static async Task RequireState(EventFeedPubSubStorage storage, GrainId id,
         EventFeedWakeupHint expected, string? tag)
@@ -153,7 +153,7 @@ internal sealed class EventFeedPubSubStorageTests
         {
             return;
         }
-        throw new InvalidOperationException("The native pubsub operation did not preserve its closed refusal.");
+        throw new InvalidOperationException("The execution pubsub operation did not preserve its closed refusal.");
     }
 
     private static async Task RequireConflict(Func<Task> operation)
@@ -166,7 +166,7 @@ internal sealed class EventFeedPubSubStorageTests
         {
             return;
         }
-        throw new InvalidOperationException("The native pubsub operation accepted a stale state revision.");
+        throw new InvalidOperationException("The execution pubsub operation accepted a stale state revision.");
     }
 
     private static async Task RequireCancelled(Func<Task> operation)
@@ -179,7 +179,7 @@ internal sealed class EventFeedPubSubStorageTests
         {
             return;
         }
-        throw new InvalidOperationException("The native pubsub operation ignored original cancellation.");
+        throw new InvalidOperationException("The execution pubsub operation ignored original cancellation.");
     }
 
     private static async Task RequireDisposed(Func<Task> operation)
@@ -192,6 +192,6 @@ internal sealed class EventFeedPubSubStorageTests
         {
             return;
         }
-        throw new InvalidOperationException("The native pubsub operation entered after disposal.");
+        throw new InvalidOperationException("The execution pubsub operation entered after disposal.");
     }
 }

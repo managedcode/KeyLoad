@@ -7,12 +7,12 @@ namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons.TimeSeries.Inten
 internal sealed class TimeSeriesIntensiveFailureMappingTests
 {
     [Test]
-    public async Task AcTsi004NativeCodesAndStatusesRemainActualExceptionValues()
+    public async Task AcTsi004CodesAndStatusesRemainActualExceptionValues()
     {
         var keyLoad = new KeyLoadException(ErrorCode.UnknownWriteOutcome, "safe fixture detail", 503);
         await Assert.That(TimeSeriesIntensiveFailure.From(keyLoad)).IsEqualTo(
             new TimeSeriesIntensiveFailure(TimeSeriesIntensiveFailureOrigin.KeyLoad, ErrorCode.UnknownWriteOutcome, 503, null));
-        var postgres = new PostgresException("native fixture detail", "ERROR", "ERROR", "23505");
+        var postgres = new PostgresException("execution fixture detail", "ERROR", "ERROR", "23505");
         await Assert.That(TimeSeriesIntensiveFailure.From(postgres)).IsEqualTo(
             new TimeSeriesIntensiveFailure(TimeSeriesIntensiveFailureOrigin.PostgreSQL, null, null, 0x3233353035));
         await Assert.That(TimeSeriesIntensiveFailure.Outcome(postgres)).IsEqualTo(TimeSeriesIntensiveOutcome.TargetFailure);
@@ -22,7 +22,7 @@ internal sealed class TimeSeriesIntensiveFailureMappingTests
     }
 
     [Test]
-    public async Task AcTsi004UnknownAndValidationFailuresCannotAcquireInventedNativeCodes()
+    public async Task AcTsi004UnknownAndValidationFailuresCannotAcquireInventedCodes()
     {
         var unknown = TimeSeriesIntensiveFailure.From(new InvalidOperationException("unknown fixture detail"));
         await Assert.That(unknown).IsEqualTo(new TimeSeriesIntensiveFailure(TimeSeriesIntensiveFailureOrigin.Unexpected, null, null, null));

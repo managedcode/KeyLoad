@@ -32,7 +32,7 @@ internal sealed class ResourceEffectPreparationTransaction : ResourceEffectObser
     }
 
     void IResourceLifetimeReadBindingView.BindResourceLifetime(PartitionRef partition,
-        ResourceDefinition definition, ResourceLifetimeV1 lifetime)
+        ResourceDefinition definition, ResourceLifetime lifetime)
         => Work.ObserveResourceLifetime(partition, definition, lifetime);
 
 }

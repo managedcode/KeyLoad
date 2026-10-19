@@ -27,7 +27,7 @@ internal sealed record RetainedSubmissionBudgetImage(Dictionary<string, string> 
     internal static async Task ResultAsync(Result<object> expected, Result<object>? actual)
     {
         await Assert.That(actual).IsNotNull();
-        await NativeReplayResultAssertions.Same<CommitReceipt>(actual!, expected);
+        await ReplayResultAssertions.Same<CommitReceipt>(actual!, expected);
     }
 
     private static Dictionary<string, string> RowsOf(TestDatabase fixture) => fixture.Store.Read(view =>

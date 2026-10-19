@@ -11,7 +11,7 @@ internal static class GraphIncomingClusterAssertions
     private const string LocalEdgeId = "local-edge";
     private const string MissingRow = "The expected graph incoming row was absent.";
 
-    internal static async Task AssertThreeRowsAsync(GraphIncomingEdgesPageV1 page,
+    internal static async Task AssertThreeRowsAsync(GraphIncomingEdgesPage page,
         GraphIncomingClusterSeed seed)
     {
         await Assert.That(page.Version).IsEqualTo(1);
@@ -29,8 +29,8 @@ internal static class GraphIncomingClusterAssertions
             GraphIncomingClusterScenario.PublicMarker + "-local");
     }
 
-    internal static async Task AssertEquivalentAsync(GraphIncomingEdgesPageV1 expected,
-        GraphIncomingEdgesPageV1 actual)
+    internal static async Task AssertEquivalentAsync(GraphIncomingEdgesPage expected,
+        GraphIncomingEdgesPage actual)
     {
         await Assert.That(actual.Version).IsEqualTo(expected.Version);
         await Assert.That(actual.CutPosition).IsGreaterThan(0L);
@@ -42,7 +42,7 @@ internal static class GraphIncomingClusterAssertions
         }
     }
 
-    internal static async Task AssertSourceHiddenAsync(GraphIncomingEdgesPageV1 page,
+    internal static async Task AssertSourceHiddenAsync(GraphIncomingEdgesPage page,
         GraphIncomingClusterSeed seed)
     {
         await Assert.That(page.Projection).IsEqualTo(Projection);
@@ -51,7 +51,7 @@ internal static class GraphIncomingClusterAssertions
             GraphIncomingClusterScenario.PublicMarker + "-local");
     }
 
-    internal static async Task AssertFailureAsync(Result<GraphIncomingEdgesPageV1> result,
+    internal static async Task AssertFailureAsync(Result<GraphIncomingEdgesPage> result,
         ErrorCode expected)
     {
         await Assert.That(result.IsFailed).IsTrue();
@@ -65,7 +65,7 @@ internal static class GraphIncomingClusterAssertions
         => await McpCallerAssertions.DoesNotDiscloseAsync(result, credential,
             GraphIncomingClusterScenario.PrivateMarker);
 
-    internal static async Task AssertExpectedRowAsync(GraphIncomingEdgesPageV1 page, EntityRef source,
+    internal static async Task AssertExpectedRowAsync(GraphIncomingEdgesPage page, EntityRef source,
         EntityRef target, string edgeId, long revision, long deliveredRevision, string publicMarker)
     {
         var row = page.Rows.SingleOrDefault(candidate => candidate.Edge.From == source
@@ -74,7 +74,7 @@ internal static class GraphIncomingClusterAssertions
         await AssertRowAsync(row!, source, target, edgeId, revision, deliveredRevision, publicMarker);
     }
 
-    private static async Task AssertRowAsync(GraphIncomingEdgeRowV1 row, EntityRef source, EntityRef target,
+    private static async Task AssertRowAsync(GraphIncomingEdgeRow row, EntityRef source, EntityRef target,
         string edgeId, long edgeRevision, long deliveredRevision, string publicMarker)
     {
         await Assert.That(row.Edge.Id).IsEqualTo(edgeId);
@@ -86,8 +86,8 @@ internal static class GraphIncomingClusterAssertions
         await Assert.That(row.Edge.AttributesJson).IsEqualTo("{\"public\":\"" + publicMarker + "\"}");
     }
 
-    private static async Task AssertEdgeAsync(GraphIncomingEdgeRowV1 actual,
-        GraphIncomingEdgeRowV1 expected)
+    private static async Task AssertEdgeAsync(GraphIncomingEdgeRow actual,
+        GraphIncomingEdgeRow expected)
     {
         await Assert.That(actual.Edge.Id).IsEqualTo(expected.Edge.Id);
         await Assert.That(actual.Edge.From).IsEqualTo(expected.Edge.From);

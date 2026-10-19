@@ -51,7 +51,7 @@ public sealed partial class DatabaseEngine
             });
             if (tx.ReadOwnedValue(idKey) is { } existing)
             {
-                if (NativeSerialization.Deserialize<string>(existing) != fingerprint)
+                if (OrleansSerialization.Deserialize<string>(existing) != fingerprint)
                 {
                     throw Errors.Fail(ErrorCode.Conflict, ConflictingSampleContentDetail);
                 }

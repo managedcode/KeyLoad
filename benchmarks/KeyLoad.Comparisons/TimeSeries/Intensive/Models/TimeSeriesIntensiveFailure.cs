@@ -21,13 +21,13 @@ internal readonly record struct TimeSeriesIntensiveFailure(TimeSeriesIntensiveFa
     {
         TimeSeriesIntensiveObservedFailureException { InnerException: { } original } => From(original),
         TimeSeriesIntensiveTargetCompletionException { InnerException: { } original } => From(original),
-        KeyLoadTimeSeriesIntensiveProblemException native => new(TimeSeriesIntensiveFailureOrigin.KeyLoad, native.Code, native.HttpStatus, null),
+        KeyLoadTimeSeriesIntensiveProblemException execution => new(TimeSeriesIntensiveFailureOrigin.KeyLoad, execution.Code, execution.HttpStatus, null),
         KeyLoadTimeSeriesIntensiveReplyException => new(TimeSeriesIntensiveFailureOrigin.Oracle, null, null, null),
-        KeyLoadException native => new(TimeSeriesIntensiveFailureOrigin.KeyLoad, native.Code, native.StatusCode, null),
-        PostgresException native => new(TimeSeriesIntensiveFailureOrigin.PostgreSQL, null, null, PackSqlState(native.SqlState)),
+        KeyLoadException execution => new(TimeSeriesIntensiveFailureOrigin.KeyLoad, execution.Code, execution.StatusCode, null),
+        PostgresException execution => new(TimeSeriesIntensiveFailureOrigin.PostgreSQL, null, null, PackSqlState(execution.SqlState)),
         NpgsqlException => new(TimeSeriesIntensiveFailureOrigin.PostgreSQL, null, null, null),
-        HttpRequestException native => new(TimeSeriesIntensiveFailureOrigin.HttpTransport, null, (int?)native.StatusCode, null),
-        OperationCanceledException { InnerException: PostgresException native } => From(native),
+        HttpRequestException execution => new(TimeSeriesIntensiveFailureOrigin.HttpTransport, null, (int?)execution.StatusCode, null),
+        OperationCanceledException { InnerException: PostgresException execution } => From(execution),
         ComparisonFailureException => new(TimeSeriesIntensiveFailureOrigin.Oracle, null, null, null),
         OperationCanceledException or TimeoutException => new(TimeSeriesIntensiveFailureOrigin.Client, null, null, null),
         _ => new(TimeSeriesIntensiveFailureOrigin.Unexpected, null, null, null)

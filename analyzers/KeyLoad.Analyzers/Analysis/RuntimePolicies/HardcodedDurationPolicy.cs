@@ -12,26 +12,26 @@ internal static class HardcodedDurationPolicy
     internal static bool IsDurationMethod(Compilation compilation, IMethodSymbol method)
     {
         var type = method.ContainingType;
-        if (NativeTimerPolicy.IsDurationMethod(compilation, method))
+        if (TimerPolicy.IsDurationMethod(compilation, method))
         {
             return true;
         }
-        if (MagicRuntimeOperations.IsNativeType(compilation, type, MagicRuntimeMetadataNames.TimeSpan))
+        if (MagicRuntimeOperations.IsType(compilation, type, MagicRuntimeMetadataNames.TimeSpan))
         {
             return method.MethodKind == MethodKind.Constructor ||
                 method.IsStatic && method.Name.StartsWith(MagicRuntimeMetadataNames.FromPrefix, StringComparison.Ordinal);
         }
 
-        if (MagicRuntimeOperations.IsNativeType(compilation, type, MagicRuntimeMetadataNames.CancellationSource))
+        if (MagicRuntimeOperations.IsType(compilation, type, MagicRuntimeMetadataNames.CancellationSource))
         {
             return method.MethodKind == MethodKind.Constructor || method.Name == MagicRuntimeMetadataNames.CancelAfter;
         }
 
         return method.Name is MagicRuntimeMetadataNames.Delay or MagicRuntimeMetadataNames.Wait or
                 MagicRuntimeMetadataNames.WaitAsync &&
-            (MagicRuntimeOperations.IsNativeType(compilation, type, MagicRuntimeMetadataNames.Task) ||
-             MagicRuntimeOperations.IsNativeType(compilation, type, MagicRuntimeMetadataNames.GenericTask) ||
-             MagicRuntimeOperations.IsNativeType(compilation, type, MagicRuntimeMetadataNames.Semaphore));
+            (MagicRuntimeOperations.IsType(compilation, type, MagicRuntimeMetadataNames.Task) ||
+             MagicRuntimeOperations.IsType(compilation, type, MagicRuntimeMetadataNames.GenericTask) ||
+             MagicRuntimeOperations.IsType(compilation, type, MagicRuntimeMetadataNames.Semaphore));
     }
 
     internal static bool IsHardcoded(Compilation compilation, IOperation operation, CancellationToken cancellationToken) =>
@@ -81,10 +81,10 @@ internal static class HardcodedDurationPolicy
         operation is ILocalReferenceOperation local && SymbolEqualityComparer.Default.Equals(local.Local, symbol) ||
         operation.ChildOperations.Any(child => ReferencesSymbol(child, symbol));
 
-    internal static bool IsFixedNativeIdentity(Compilation compilation, IOperation operation) =>
+    internal static bool IsFixedIdentity(Compilation compilation, IOperation operation) =>
         operation is IFieldReferenceOperation field &&
-        (MagicRuntimeOperations.IsNativeType(compilation, field.Field.ContainingType, MagicRuntimeMetadataNames.TimeSpan) &&
+        (MagicRuntimeOperations.IsType(compilation, field.Field.ContainingType, MagicRuntimeMetadataNames.TimeSpan) &&
             field.Field.Name is ConfigurationMetadataNames.Zero or ConfigurationMetadataNames.MinValue or ConfigurationMetadataNames.MaxValue ||
-         MagicRuntimeOperations.IsNativeType(compilation, field.Field.ContainingType, ConfigurationMetadataNames.Timeout) &&
+         MagicRuntimeOperations.IsType(compilation, field.Field.ContainingType, ConfigurationMetadataNames.Timeout) &&
             field.Field.Name is ConfigurationMetadataNames.Infinite or ConfigurationMetadataNames.InfiniteTimeSpan);
 }

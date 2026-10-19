@@ -6,7 +6,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Query.Features.QueryExecution;
 
-internal sealed class DistributedSearchOperation(DatabaseEngine database, DistributedSearchRequestV1 request,
+internal sealed class DistributedSearchOperation(DatabaseEngine database, DistributedSearchRequest request,
     ImmutableArray<PartitionRef> partitions, IOptions<QueryExecutionOptions> options,
     ReadExecutionBudget budget, ReadExecutionBudgetReadGrant[] grants,
     Func<DistributedSearchPhaseWork, ReadExecutionBudgetReadGrant, ReadExecutionBudget, CancellationToken,
@@ -15,9 +15,9 @@ internal sealed class DistributedSearchOperation(DatabaseEngine database, Distri
     Func<CancellationToken, Task>? statisticsCaptured)
 {
     private const int FirstLeaf = 0;
-    private const string ScoreProfile = "distributed-canonical-v1";
+    private const string ScoreProfile = "distributed-canonical";
 
-    internal async Task<DistributedSearchPageV1> RunAsync()
+    internal async Task<DistributedSearchPage> RunAsync()
     {
         var initial = DistributedSearchWorkFactory.Create(DistributedSearchPhase.Statistics, partitions,
             request.Search, default, null, null, default, default, budget);
@@ -53,15 +53,15 @@ internal sealed class DistributedSearchOperation(DatabaseEngine database, Distri
             fusion, request.Search.Explain, budget);
     }
 
-    private Task<ImmutableArray<DistributedSearchLeafResultV1>> RunAsync(DistributedSearchPhase phase,
+    private Task<ImmutableArray<DistributedSearchLeafResult>> RunAsync(DistributedSearchPhase phase,
         ImmutableArray<DistributedSearchPhaseWork> work)
         => DistributedSearchPhaseBatch.RunAsync(work, grants, DistributedSearchGrants.Index(phase,
             FirstLeaf, partitions.Length), options, budget, prepare, execution);
 
-    private ImmutableArray<DistributedTextWitnessV1> Witnesses(ImmutableArray<DistributedSearchLeafResultV1> results)
+    private ImmutableArray<DistributedTextWitness> Witnesses(ImmutableArray<DistributedSearchLeafResult> results)
     {
         budget.ChargeBytes(PartitionQueryRetention.CandidateArrayBytes(results.Length));
-        var witnesses = ImmutableArray.CreateBuilder<DistributedTextWitnessV1>(results.Length);
+        var witnesses = ImmutableArray.CreateBuilder<DistributedTextWitness>(results.Length);
         foreach (var result in results)
         {
             budget.Check();
@@ -70,10 +70,10 @@ internal sealed class DistributedSearchOperation(DatabaseEngine database, Distri
         return witnesses.MoveToImmutable();
     }
 
-    private DistributedTextStatisticsV1 Statistics(ImmutableArray<DistributedTextWitnessV1> witnesses)
+    private DistributedTextStatistics Statistics(ImmutableArray<DistributedTextWitness> witnesses)
     {
         budget.ChargeBytes(PartitionQueryRetention.CandidateArrayBytes(witnesses.Length));
-        var summaries = ImmutableArray.CreateBuilder<DistributedTextStatisticsV1>(witnesses.Length);
+        var summaries = ImmutableArray.CreateBuilder<DistributedTextStatistics>(witnesses.Length);
         foreach (var witness in witnesses)
         {
             budget.Check();
@@ -82,7 +82,7 @@ internal sealed class DistributedSearchOperation(DatabaseEngine database, Distri
         return DistributedTextStatisticsMerge.Combine(summaries.MoveToImmutable(), options, budget);
     }
 
-    private ImmutableArray<GlobalBranchWindow> Branches(ImmutableArray<DistributedSearchLeafResultV1> results, bool text)
+    private ImmutableArray<GlobalBranchWindow> Branches(ImmutableArray<DistributedSearchLeafResult> results, bool text)
     {
         if (text ? request.Search.Text is null : request.Search.Vector is null)
         {

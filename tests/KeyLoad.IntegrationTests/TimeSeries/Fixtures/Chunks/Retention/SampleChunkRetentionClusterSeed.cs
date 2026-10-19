@@ -8,12 +8,12 @@ internal static class SampleChunkRetentionClusterSeed
     internal static async Task<SampleChunkRetentionClusterOriginal> RunAsync(ClusterFixture fixture, KeyLoadClient sdk,
         McpOfficialClient mcp, CancellationToken token)
     {
-        var native = await TimeSeriesClusterScenario.CreateAsync(fixture, token).ConfigureAwait(false);
-        var scenario = new SampleChunkClusterScenario(native, Guid.NewGuid(), TimeSeriesClusterScenario.Start,
+        var execution = await TimeSeriesClusterScenario.CreateAsync(fixture, token).ConfigureAwait(false);
+        var scenario = new SampleChunkClusterScenario(execution, Guid.NewGuid(), TimeSeriesClusterScenario.Start,
             TimeSeriesClusterScenario.Start.AddHours(SampleChunkClusterProtocol.WindowHours));
         await scenario.CommitAsync(sdk, new OpenSampleChunkWindow(TimeSeriesClusterScenario.Set,
             TimeSeriesClusterScenario.Series, scenario.WindowId, scenario.From, scenario.Until), token).ConfigureAwait(false);
-        var original = new CommandRequest(Guid.NewGuid(), native.Partition,
+        var original = new CommandRequest(Guid.NewGuid(), execution.Partition,
         [new AppendSamples(TimeSeriesClusterScenario.Set, TimeSeriesClusterScenario.Series,
             [scenario.First, scenario.Equal, Late(scenario)], TimeSeriesClusterScenario.PrivateTags)]);
         var receipt = await SampleChunkRetentionClusterWriteOracle.CommitAsync(sdk, mcp, original,
@@ -37,5 +37,5 @@ internal static class SampleChunkRetentionClusterSeed
     internal static MutationReceipt Mutation(string kind, long revision)
         => new(kind, TimeSeriesClusterScenario.Set, TimeSeriesClusterScenario.Series, revision);
     internal static CommandRequest Request(SampleChunkClusterScenario scenario, Mutation mutation)
-        => new(Guid.NewGuid(), scenario.Native.Partition, [mutation]);
+        => new(Guid.NewGuid(), scenario.Execution.Partition, [mutation]);
 }

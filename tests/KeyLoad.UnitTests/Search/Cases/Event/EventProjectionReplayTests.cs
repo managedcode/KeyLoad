@@ -32,7 +32,7 @@ internal sealed class EventProjectionReplayTests
     }
 
     [Test]
-    public async Task AcLineage003NativeReopenPreservesEffectLineageAndStableReceipt()
+    public async Task AcLineage003ReopenPreservesEffectLineageAndStableReceipt()
     {
         using var fixture = new EventProjectionFixture();
         var request = fixture.Request();
@@ -46,8 +46,8 @@ internal sealed class EventProjectionReplayTests
         var search = await fixture.SearchAsync();
 
         await Assert.That(lineage).IsNotNull();
-        await Assert.That(NativeSerialization.Serialize(retry).AsSpan()
-            .SequenceEqual(NativeSerialization.Serialize(receipt))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(retry).AsSpan()
+            .SequenceEqual(OrleansSerialization.Serialize(receipt))).IsTrue();
         await Assert.That(fixture.VectorBytes()!.SequenceEqual(persistedVector)).IsTrue();
         await Assert.That(search.Select(result => result.Document.Reference.Id).ToArray())
             .IsEquivalentTo(new[] { EventProjectionFixture.TargetId }, CollectionOrdering.Matching);

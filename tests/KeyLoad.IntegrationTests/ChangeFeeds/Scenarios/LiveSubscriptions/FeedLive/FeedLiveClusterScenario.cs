@@ -1,6 +1,6 @@
 using KeyLoad.Client;
 using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.ClusterRouting;
+using KeyLoad.IntegrationTests.Features.OrleansExecution;
 using KeyLoad.IntegrationTests.Features.Search;
 using KeyLoad.Query;
 
@@ -35,7 +35,7 @@ internal sealed record FeedLiveClusterScenario(PartitionRef Partition, McpPersis
             RestrictRows = true,
             OwnerId = FeedLiveClusterProtocol.Owner
         };
-        var identity = await NativeTextClusterScenario.ConfigureIdentityAsync(fixture, principal, token);
+        var identity = await TextClusterScenario.ConfigureIdentityAsync(fixture, principal, token);
         var original = new CommandRequest(Guid.NewGuid(), partition,
         [new PutDocument(FeedLiveClusterProtocol.Collection, FeedLiveClusterProtocol.First,
             FeedLiveClusterProtocol.FirstJson, Access: new(FeedLiveClusterProtocol.Owner)),

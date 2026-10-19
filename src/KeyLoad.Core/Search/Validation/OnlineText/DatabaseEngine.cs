@@ -26,13 +26,13 @@ public sealed partial class DatabaseEngine
         Authorization.RequireFieldUse(principal, resource, request.Field);
         ValidateOnlineTextCheckpoint(view, principal, request, command.Result.Checkpoint, null);
         var head = ReadOutboxHead(view, request.Consumer.Partition);
-        RequireNativeTextProjectionHistory(head, consumer.Checkpoint);
+        RequireTextProjectionHistory(head, consumer.Checkpoint);
         var appliedBytes = view.ReadOwnedValue(KeySpace.AppliedBytes)
             ?? throw Errors.Fail(ErrorCode.Corruption, OnlineTextPublicationProtocol.InvalidPublication);
         var placement = ReadAtomicPartitionPlacement(view, principal.Id, request.Consumer.Partition);
-        var resourceSha = Convert.ToHexStringLower(SHA256.HashData(NativeSerialization.Serialize(resource)));
+        var resourceSha = Convert.ToHexStringLower(SHA256.HashData(OrleansSerialization.Serialize(resource)));
         if (command.DataEpoch != Store.Identity.FormatVersion || source.Incarnation != Store.Identity.Incarnation
-            || source.AppliedPosition != NativeSerialization.Deserialize<long>(appliedBytes)
+            || source.AppliedPosition != OrleansSerialization.Deserialize<long>(appliedBytes)
             || source.ThroughSequence != head.Tail || consumer.Checkpoint != source.ThroughSequence
             || source.PolicyEpoch != principal.PolicyEpoch || source.SchemaVersion != resource.SchemaVersion
             || source.ResourceSha256 != resourceSha

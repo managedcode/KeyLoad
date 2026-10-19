@@ -9,7 +9,7 @@ namespace KeyLoad;
 /// <param name="StateJson">The original valid JSON worker state.</param>
 /// <param name="Checksum">SHA256 of the frozen snapshot identity.</param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.AggregateSnapshotState)]
+[Orleans.Alias(ContractAliases.AggregateSnapshotState)]
 public sealed record AggregateSnapshotState([property: Orleans.Id(0)] StreamRef Stream,
     [property: Orleans.Id(1)] long SnapshotVersion, [property: Orleans.Id(2)] long SourceRevision,
     [property: Orleans.Id(3)] string ReducerVersion, [property: Orleans.Id(4)] int StateSchemaVersion,

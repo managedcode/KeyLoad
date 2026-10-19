@@ -73,9 +73,9 @@ new KeyLoad.Server.McpMemoryProjection(UnitMcpOptions.Execution()).Authenticatio
 new KeyLoad.Server.McpMemoryProjection(UnitMcpOptions.Execution()).Authentication(SmallFrameBytes, 0, new McpFrameShape(0, 0, -1)));
     }
 
-    /// <summary>Authentication framing honors the frozen native limits instead of projecting impossible shapes.</summary>
+    /// <summary>Authentication framing honors the frozen execution limits instead of projecting impossible shapes.</summary>
     [Test]
-    public async Task AuthenticationRejectsShapesBeyondNativeFramingCeilings()
+    public async Task AuthenticationRejectsShapesBeyondFramingCeilings()
     {
         Assert.ThrowsExactly<ArgumentOutOfRangeException>(() =>
 new KeyLoad.Server.McpMemoryProjection(UnitMcpOptions.Execution()).Authentication(SmallFrameBytes, 0, new McpFrameShape(131_073, 0)));

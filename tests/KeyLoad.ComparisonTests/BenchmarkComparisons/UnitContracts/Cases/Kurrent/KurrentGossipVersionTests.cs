@@ -3,7 +3,7 @@ using KeyLoad.Comparisons.Targets;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
-/// <summary>AC-ISO-003/005/006: pure member inputs preserve exact pinned build identity; native HTTP proof remains a separate GitHub gate.</summary>
+/// <summary>AC-ISO-003/005/006: pure member inputs preserve exact pinned build identity; execution HTTP proof remains a separate GitHub gate.</summary>
 internal sealed class KurrentGossipVersionTests
 {
     private const string PinnedImageVersion = "26.1.2", PinnedGossipVersion = "26.1.2.3778";
@@ -20,10 +20,10 @@ internal sealed class KurrentGossipVersionTests
     [Test]
     [Arguments(1)]
     [Arguments(3)]
-    public async Task ExactNativeBuildIsAcceptedAndRetainedSeparatelyFromImageProfile(int count)
+    public async Task ExactBuildIsAcceptedAndRetainedSeparatelyFromImageProfile(int count)
     {
         var topology = ComparisonTopologies.FromNodeCount(count);
-        var views = NativeDocumentTopologyKurrentTests.Views(count, PinnedGossipVersion);
+        var views = DocumentTopologyKurrentTests.Views(count, PinnedGossipVersion);
         await Assert.That(KurrentConstants.ExpectedServerVersion).IsEqualTo(PinnedImageVersion);
         await Assert.That(KurrentConstants.ExpectedGossipVersion).IsEqualTo(PinnedGossipVersion);
         await Assert.That(KurrentClusterMembers.IsReady(views, topology)).IsTrue();
@@ -40,11 +40,11 @@ internal sealed class KurrentGossipVersionTests
     [Test]
     [Arguments(1)]
     [Arguments(3)]
-    public async Task ImageTagsNeighboringBuildsAndNormalizedVariantsFailExactNativeIdentity(int count)
+    public async Task ImageTagsNeighboringBuildsAndNormalizedVariantsFailExactIdentity(int count)
     {
         foreach (var version in RejectedVersions)
         {
-            var views = NativeDocumentTopologyKurrentTests.Views(count, version);
+            var views = DocumentTopologyKurrentTests.Views(count, version);
             await Assert.That(KurrentClusterMembers.IsReady(views, ComparisonTopologies.FromNodeCount(count))).IsFalse();
         }
     }
@@ -53,7 +53,7 @@ internal sealed class KurrentGossipVersionTests
     [Arguments(3)]
     public async Task AForeignBuildOnOneOtherwiseMatchingMemberRejectsTheWholeGroup(int count)
     {
-        var views = NativeDocumentTopologyKurrentTests.Views(count, PinnedGossipVersion);
+        var views = DocumentTopologyKurrentTests.Views(count, PinnedGossipVersion);
         ReplaceMember(views, 1, views[0].Members[1] with
         {
             Version = RejectedVersions[1]
@@ -66,7 +66,7 @@ internal sealed class KurrentGossipVersionTests
     [Arguments(3)]
     public async Task ExactBuildDoesNotOverrideUnhealthyMembersOrEndpointAndRoleRequirements(int count)
     {
-        var baseline = NativeDocumentTopologyKurrentTests.Views(count, PinnedGossipVersion);
+        var baseline = DocumentTopologyKurrentTests.Views(count, PinnedGossipVersion);
         var member = baseline[0].Members[0];
         foreach (var invalid in new[]
         {
@@ -76,7 +76,7 @@ internal sealed class KurrentGossipVersionTests
             member with { State = KurrentConstants.FollowerState },
         })
         {
-            var views = NativeDocumentTopologyKurrentTests.Views(count, PinnedGossipVersion);
+            var views = DocumentTopologyKurrentTests.Views(count, PinnedGossipVersion);
             ReplaceMember(views, 0, invalid);
             await Assert.That(KurrentClusterMembers.IsReady(views, ComparisonTopologies.FromNodeCount(count))).IsFalse();
         }
@@ -87,7 +87,7 @@ internal sealed class KurrentGossipVersionTests
     [Arguments("26.1.2.3779")]
     [Arguments("26.1.3")]
     [Arguments("26.1.2-rc1")]
-    public async Task NativeBuildVersionCannotReplaceTheStrictImageTag(string imageVersion)
+    public async Task BuildVersionCannotReplaceTheStrictImageTag(string imageVersion)
     {
         using var client = new HttpClient();
         var failure = await Assert.ThrowsExactlyAsync<ComparisonFailureException>(() => CreateProfileAsync(client, imageVersion));

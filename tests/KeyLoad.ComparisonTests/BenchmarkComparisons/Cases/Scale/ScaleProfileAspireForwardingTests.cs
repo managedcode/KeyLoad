@@ -15,7 +15,7 @@ internal sealed class ScaleProfileAspireForwardingTests
     private const string TargetEnvironment = "Benchmarks__Target";
     private const string SuiteResource = "tests-comparison";
     private const string TestRootPrefix = "keyload-scale-forwarding-";
-    private const string Filter = "/*/*/IsolatedNativeComparisonTests/*";
+    private const string Filter = "/*/*/IsolatedComparisonTests/*";
 
     [Test]
     public async Task AcScale014AspireRunnerReceivesWorkerProfileAndClearsHarnessSelector()

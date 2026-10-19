@@ -53,7 +53,7 @@ internal static class SqlCompositionParameterFlow
             token.ThrowIfCancellationRequested();
             var image = QueueWholeFlowStorage.Bytes(fixture.Store);
             var position = fixture.Store.Position;
-            var identity = NativeReadCutStoreStateAssertions.SnapshotIdentity(fixture.Store);
+            var identity = ReadCutStoreStateAssertions.SnapshotIdentity(fixture.Store);
             fixture.Reopen();
             await SqlCompositionParameterAssertions.ConserveAsync(fixture, image, position, identity);
             await SqlCompositionParameterRefusals.RunAsync(fixture, forward, false, token);
@@ -71,14 +71,14 @@ internal static class SqlCompositionParameterFlow
         await Assert.That(compiled.CommandKind).IsEqualTo(OperationKind.Batch);
         await Assert.That(compiled.ReadKind).IsNull();
         await Assert.That(compiled.CommandId).IsEqualTo(command.CommandId);
-        var decoded = NativeSerialization.Deserialize<CommandRequest>(compiled.Payload.Span);
+        var decoded = OrleansSerialization.Deserialize<CommandRequest>(compiled.Payload.Span);
         await SqlCompositionParameterAssertions.EqualAsync(decoded, command);
         var operation = fixture.Database.CreateCommand(OperationKind.Batch, command.CommandId, C.Root,
             fixture.Seed.SeedAt.AddSeconds(reverse ? SqlCompositionParameterData.ReverseOperationOffsetSeconds
-                : SqlCompositionParameterData.ForwardOperationOffsetSeconds), NativeSerialization.Serialize(decoded));
+                : SqlCompositionParameterData.ForwardOperationOffsetSeconds), OrleansSerialization.Serialize(decoded));
         var expected = new CommitReceipt(command.CommandId, new(fixture.Store.Identity.Incarnation, command.Partition.AtomicPartitionId, fixture.Store.Position + 1L), [SqlCompositionParameterData.Receipt(fixture, reverse)], DurabilityProfile.ProcessDurable, 1);
         var actual = fixture.Database.Apply(operation).Get<CommitReceipt>();
-        await SqlCompositionParameterAssertions.NativeReceiptAsync(actual, expected);
+        await SqlCompositionParameterAssertions.RuntimeReceiptAsync(actual, expected);
         fixture.Originals.Add(new(command, operation, expected, SqlCompositionParameterData.Effect(fixture, reverse)));
         await SqlCompositionParameterAssertions.ModelsAsync(fixture);
         await SqlCompositionParameterAssertions.OutboxAsync(fixture);
@@ -93,12 +93,12 @@ internal static class SqlCompositionParameterFlow
         {
             var image = QueueWholeFlowStorage.Bytes(fixture.Store);
             var position = fixture.Store.Position;
-            var identity = NativeReadCutStoreStateAssertions.SnapshotIdentity(fixture.Store);
+            var identity = ReadCutStoreStateAssertions.SnapshotIdentity(fixture.Store);
             var failures = new List<Exception>();
             await ServerFailureObserver.ObserveAsync(async () =>
             {
-                await SqlCompositionParameterAssertions.NativeReceiptAsync(fixture.Database.Apply(operation).Get<CommitReceipt>(), expected);
-                await SqlCompositionParameterAssertions.NativeReceiptAsync(fixture.Database.ResolveOutcome(operation).Get<CommitReceipt>(), expected);
+                await SqlCompositionParameterAssertions.RuntimeReceiptAsync(fixture.Database.Apply(operation).Get<CommitReceipt>(), expected);
+                await SqlCompositionParameterAssertions.RuntimeReceiptAsync(fixture.Database.ResolveOutcome(operation).Get<CommitReceipt>(), expected);
                 await SqlCompositionParameterAssertions.ModelsAsync(fixture);
                 await SqlCompositionParameterAssertions.OutboxAsync(fixture);
             }, failures);

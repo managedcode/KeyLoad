@@ -25,7 +25,7 @@ internal static class SubscriptionParkedRecoveryFlow
         var deliveries = firstResult.Get<ReceiveSubscriptionResult>().Deliveries;
         await Assert.That(deliveries.Select(d => d.Event.Position)).IsEquivalentTo(
             new long[] { 1, 2, 3 }, CollectionOrdering.Matching);
-        await NativeReplayResultAssertions.Same<ReceiveSubscriptionResult>(fixture.Database.Apply(firstOperation), firstResult);
+        await ReplayResultAssertions.Same<ReceiveSubscriptionResult>(fixture.Database.Apply(firstOperation), firstResult);
         var claims = new List<(Command<DatabaseCommand> Operation, Result<object> Result, byte[] Saved)>
         { (firstOperation, firstResult, SubscriptionProcessingAtomicAssertions.OutcomeBytes(fixture.Store, group, first.RequestId)) };
         var receipts = new List<(Command<DatabaseCommand> Operation, Result<object> Result, byte[] Saved)>();
@@ -36,7 +36,7 @@ internal static class SubscriptionParkedRecoveryFlow
         var retry = new ReceiveSubscriptionRequest(Guid.NewGuid(), group, MaxEvents: 3, LeaseSeconds: 1);
         var retryOperation = Create(fixture.Database, OperationKind.ReceiveSubscription, retry, retry.RequestId, time.AddSeconds(2));
         var retryResult = fixture.Database.Apply(retryOperation);
-        await NativeReplayResultAssertions.Same<ReceiveSubscriptionResult>(fixture.Database.Apply(retryOperation), retryResult);
+        await ReplayResultAssertions.Same<ReceiveSubscriptionResult>(fixture.Database.Apply(retryOperation), retryResult);
         claims.Add((retryOperation, retryResult, SubscriptionProcessingAtomicAssertions.OutcomeBytes(fixture.Store, group, retry.RequestId)));
         var reclaimed = await Assert.That(retryResult.Get<ReceiveSubscriptionResult>().Deliveries).HasSingleItem();
         await Assert.That(reclaimed).IsEqualTo(new SubscriptionDelivery(deliveries[0].Event,
@@ -52,7 +52,7 @@ internal static class SubscriptionParkedRecoveryFlow
         await SubscriptionParkedRecoveryAssertions.ReplayAsync(fixture.Database, fixture.Store, group, parkOperation, parked, history);
         var bytes = QueueWholeFlowStorage.Bytes(fixture.Store);
         var position = fixture.Store.Position;
-        var identity = NativeSerialization.Serialize(fixture.Store.Identity);
+        var identity = OrleansSerialization.Serialize(fixture.Store.Identity);
         fixture.Store.Dispose();
         token.ThrowIfCancellationRequested();
         using var cold = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution(),
@@ -110,7 +110,7 @@ internal static class SubscriptionParkedRecoveryFlow
                 oldDeliveries[index].Event, deliveries[index].Token, 1L, time.AddSeconds(9), 1));
             await Assert.That(deliveries[index].Token).IsNotEqualTo(oldDeliveries[index].Token);
         }
-        await NativeReplayResultAssertions.Same<ReceiveSubscriptionResult>(db.Apply(operation), original);
+        await ReplayResultAssertions.Same<ReceiveSubscriptionResult>(db.Apply(operation), original);
         await AckAsync(db, store, group, deliveries[2], time.AddMilliseconds(8500), receipts);
         await SubscriptionParkedRecoveryAssertions.StatusAsync(db, group, policy, 2, 0, 3, 3, false, null);
         await AckAsync(db, store, group, deliveries[0], time.AddMilliseconds(8500), receipts);
@@ -129,7 +129,7 @@ internal static class SubscriptionParkedRecoveryFlow
     {
         var bytes = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
-        var identity = NativeSerialization.Serialize(store.Identity);
+        var identity = OrleansSerialization.Serialize(store.Identity);
         store.Dispose();
         token.ThrowIfCancellationRequested();
         using var cold = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution(),
@@ -168,7 +168,7 @@ internal static class SubscriptionParkedRecoveryFlow
         await Assert.That(delivery.Event.Data).IsEqualTo(new EventData("event4", "Created", "{\"n\":4}"));
         await Assert.That(delivery.Attempt).IsEqualTo(1);
         await Assert.That(delivery.LeaseVersion).IsEqualTo(1L);
-        await NativeReplayResultAssertions.Same<ReceiveSubscriptionResult>(db.Apply(operation), original);
+        await ReplayResultAssertions.Same<ReceiveSubscriptionResult>(db.Apply(operation), original);
         var receipts = new List<(Command<DatabaseCommand> Operation, Result<object> Result, byte[] Saved)>();
         await AckAsync(db, store, group, delivery, time.AddMilliseconds(500), receipts);
         await SubscriptionParkedRecoveryAssertions.StatusAsync(db, group, policy, 2, 4, 4, 4, false, null);

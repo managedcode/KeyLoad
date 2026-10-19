@@ -13,7 +13,7 @@ internal sealed class AspireTestEntryArtifactModelTests
     private const string SuiteEnvironment = "KeyLoadTests__Suite";
 
     [Test]
-    public async Task ExplicitArtifactPathsAndCollectorsRemainSeparateNativeArguments()
+    public async Task ExplicitArtifactPathsAndCollectorsRemainSeparateArguments()
     {
         var builder = CreateBuilder(
             "--KeyLoadTests:Suite=unit",
@@ -21,7 +21,7 @@ internal sealed class AspireTestEntryArtifactModelTests
             "--KeyLoadTests:ReportTrx=true",
             "--KeyLoadTests:CoverageSettings=config/coverage settings.runsettings",
             "--KeyLoadTests:CoverageOutput=artifacts/coverage results");
-        KeyLoadResources.AddKeyLoad(builder);
+        AppHostProgram.AddKeyLoad(builder);
         var app = builder.Build();
         try
         {
@@ -48,7 +48,7 @@ internal sealed class AspireTestEntryArtifactModelTests
     public async Task ComparisonTargetPassesOnlyToItsSingleChildRunner()
     {
         var builder = CreateBuilder("--KeyLoadTests:Suite=comparison", "--Benchmarks:Target=ZoneTree");
-        KeyLoadResources.AddKeyLoad(builder);
+        AppHostProgram.AddKeyLoad(builder);
         var app = builder.Build();
         try
         {
@@ -94,7 +94,7 @@ internal sealed class AspireTestEntryArtifactModelTests
     private static async Task AssertRejectedBeforeResourcesAsync(params string[] args)
     {
         var builder = CreateBuilder(args);
-        await Assert.That(() => KeyLoadResources.AddKeyLoad(builder)).Throws<InvalidOperationException>();
+        await Assert.That(() => AppHostProgram.AddKeyLoad(builder)).Throws<InvalidOperationException>();
         await Assert.That(builder.Resources.Select(resource => resource.Name)).IsEmpty();
     }
 

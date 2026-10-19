@@ -8,7 +8,7 @@ internal sealed class PartitionQueryCancellationTests
     private const int SeedCount = 5_000;
 
     [Test]
-    public async Task ObservedNativeReadProgressCancelsTheOriginalBudgetAndLeavesNoPartialResult()
+    public async Task ObservedReadProgressCancelsTheOriginalBudgetAndLeavesNoPartialResult()
     {
         using var database = PartitionQueryTestSupport.Create();
         SeedRows(database);

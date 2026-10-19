@@ -10,17 +10,17 @@ internal static partial class DistributedSearchOwnedLeafExecution
     private const string OwnerChanged = "The distributed search receiving owner changed.";
     private const string InvalidPhase = "The distributed search receiving phase is invalid.";
 
-    internal static DistributedSearchLeafResultV1 ExecuteV2(DatabaseEngine database, string principalId,
-        DistributedSearchOwnedLeafV2 request, PhysicalShardRecord actualOwner,
+    internal static DistributedSearchLeafResult Execute(DatabaseEngine database, string principalId,
+        DistributedSearchOwnedLeaf request, PhysicalShardRecord actualOwner,
         IOptions<QueryExecutionOptions> options, TimeProvider clock, DateTimeOffset originalExpiry,
         CancellationToken token, IResourceLifetimeWorkBinding? binding = null)
     {
-        if (request is null || request.Original is null || request.Definition is null || request.Coverage is null
+        if (request is null || request.Definition is null || request.Coverage is null
             || request.Principal is null || request.Principal.Id != principalId)
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, InvalidPhase);
         }
-        var original = request.Original;
+        var original = request;
         var budget = new ReadExecutionBudget(database.OperationLimitsOptions, clock, token);
         if (binding is not null)
         {
@@ -40,13 +40,13 @@ internal static partial class DistributedSearchOwnedLeafExecution
         return result;
     }
 
-    private static DistributedSearchLeafResultV1 ExecutePhase(DatabaseEngine database, string principalId,
-        DistributedSearchOwnedLeafV1 request, IOptions<QueryExecutionOptions> options,
+    private static DistributedSearchLeafResult ExecutePhase(DatabaseEngine database, string principalId,
+        DistributedSearchOwnedLeaf request, IOptions<QueryExecutionOptions> options,
         ReadExecutionBudget budget, ReadExecutionBudgetReadGrant grant, PartitionQueryLifetimeMetadata? metadata = null)
     {
         var witness = request.Witness;
-        DistributedSearchCandidateLeafV1? candidates = null;
-        DistributedSearchProjectionLeafV1? projection = null;
+        DistributedSearchCandidateLeaf? candidates = null;
+        DistributedSearchProjectionLeaf? projection = null;
         switch (request.Phase)
         {
             case DistributedSearchPhase.Statistics:

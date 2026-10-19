@@ -3,7 +3,7 @@ namespace KeyLoad.IntegrationTests.Features.GraphTraversal;
 internal static class GraphIncomingMcpProtocol
 {
     internal const string Tool = "keyload_graph_incoming";
-    internal const string Route = "/v1/graph/incoming";
+    internal const string Route = "/graph/incoming";
     internal const string Version = "version";
     internal const string Target = "target";
     internal const string Graph = "graph";
@@ -40,7 +40,7 @@ internal static class GraphIncomingMcpProtocol
     internal const string Reference = "$ref";
     internal const string Definitions = "$defs";
     internal const string Ref = "$ref";
-    internal const string RequestAlias = "keyload.contract.graph-incoming-edges-request.v1";
-    internal const string RowAlias = "keyload.contract.graph-incoming-edge-row.v1";
-    internal const string PageAlias = "keyload.contract.graph-incoming-edges-page.v1";
+    internal const string RequestAlias = "keyload.contract.graph-incoming-edges-request";
+    internal const string RowAlias = "keyload.contract.graph-incoming-edge-row";
+    internal const string PageAlias = "keyload.contract.graph-incoming-edges-page";
 }

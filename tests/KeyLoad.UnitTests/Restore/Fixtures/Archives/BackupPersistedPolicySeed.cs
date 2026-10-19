@@ -37,7 +37,7 @@ internal static class BackupPersistedPolicySeed
 
     internal static Command<DatabaseCommand> Create<T>(DatabaseEngine database, OperationKind kind, T request, Guid id)
         => database.CreateCommand(kind, id, Root, database.EvaluationClock.GetUtcNow(),
-            NativeSerialization.Serialize(request));
+            OrleansSerialization.Serialize(request));
 
     internal static Result<object> Send<T>(DatabaseEngine database, OperationKind kind, T request, CancellationToken token)
         => database.ApplyEmbedded(Create(database, kind, request, Guid.NewGuid()), token);

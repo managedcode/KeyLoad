@@ -15,10 +15,6 @@ internal static class IsolatedKeyLoadPublicChecksProtocol
     internal const string Inspect = "keyload_messages_inspect";
     internal const string Receive = "keyload_messages_receive";
     internal const string Complete = "keyload_messages_complete";
-    internal const string BlobPart = "keyload_blobs_write_part";
-    internal const string BlobComplete = "keyload_blobs_complete_upload";
-    internal const string BlobMetadata = "keyload_blobs_metadata";
-    internal const string BlobRange = "keyload_blobs_read_range";
     internal const string Request = "request";
     private const string Argument = "args";
     private const string NodePrefix = "node";

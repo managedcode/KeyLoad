@@ -17,7 +17,7 @@ internal static class SqlTypedInsertParameterParity
         };
         var request = new SqlOperationRequest(fixture.Partition, WireSql, values,
             CommandId: state.Created.Command.CommandId);
-        var wire = SqlOperationCompiler.CompileNativeSession(request, limits, limits.Value.MaxBatchBytes,
+        var wire = SqlOperationCompiler.CompileSession(request, limits, limits.Value.MaxBatchBytes,
             UnitExecutionOptions.QueryExecution(), SlotCount, token);
         await SqlTypedInsertAssertions.SameAsync(state.Created.Command.Payload, wire.Payload);
         await SqlTypedInsertAssertions.SameAsync(state.Created.Result,
@@ -27,12 +27,12 @@ internal static class SqlTypedInsertParameterParity
             SqlTypedInsertAssertions.OutcomeBytes(fixture.Store, fixture.Partition, wire.CommandId));
         await RefuseAsync(() => SqlOperationCompiler.Compile(request, limits, limits.Value.MaxBatchBytes,
             UnitExecutionOptions.QueryExecution(), token), ErrorCode.UnsupportedCapability);
-        await RefuseAsync(() => SqlOperationCompiler.CompileNativeSession(request with
+        await RefuseAsync(() => SqlOperationCompiler.CompileSession(request with
         {
             Sql = InvalidSlot
         },
             limits, limits.Value.MaxBatchBytes, UnitExecutionOptions.QueryExecution(), SlotCount, token), ErrorCode.Validation);
-        await RefuseAsync(() => SqlOperationCompiler.CompileNativeSession(request with
+        await RefuseAsync(() => SqlOperationCompiler.CompileSession(request with
         {
             Sql = SqlTypedInsertLiteral.Sql
         },
@@ -53,7 +53,7 @@ internal static class SqlTypedInsertParameterParity
     }
     private const int SlotCount = 1;
     private const string CanonicalSlot = "p1";
-    private const string MissingFailure = "The original native INSERT parameter refusal is missing.";
+    private const string MissingFailure = "The original execution INSERT parameter refusal is missing.";
     private const string WireSql = "INSERT INTO [sql-values] (id,title,amount,active,price,at) VALUES (N'one',N'alpha',7,$01,12.5,N'2026-10-14T00:00:00Z'),(N'two',N'beta',NULL,NULL,NULL,NULL)";
     private const string InvalidSlot = "INSERT INTO [sql-values] (id,title,active) VALUES (N'four',N'delta',$0)";
 }

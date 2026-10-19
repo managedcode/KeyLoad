@@ -3,6 +3,6 @@ namespace KeyLoad.UnitTests.Features.ResourceExecution;
 internal sealed class RetainedSubmissionBudgetTests
 {
     [Test]
-    public Task NativeRetainedOutcomeChargesOriginalWorkAndPreservesCurrentAuthority()
+    public Task RetainedOutcomeChargesOriginalWorkAndPreservesCurrentAuthority()
         => RetainedSubmissionBudgetFlow.RunAsync();
 }

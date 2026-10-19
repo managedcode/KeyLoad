@@ -23,16 +23,16 @@ internal static class QueueLifecycleRecoveryAssertions
         var receipt = database.Apply(operation).Get<CommitReceipt>();
         if (outcome is { } retained)
         {
-            await MessagingRecoveryReceiptAssertions.AssertSameNativeValueAsync(retained.Get<CommitReceipt>(), receipt);
+            await MessagingRecoveryReceiptAssertions.AssertSameValueAsync(retained.Get<CommitReceipt>(), receipt);
         }
         await QueueLifecycleRecoveryImage.AssertAsync(database, store, true);
-        await MessagingRecoveryReceiptAssertions.AssertSameNativeValueAsync(receipt, database.Apply(operation).Get<CommitReceipt>());
-        await MessagingRecoveryReceiptAssertions.AssertSameNativeValueAsync(receipt, database.ResolveOutcome(operation).Get<CommitReceipt>());
+        await MessagingRecoveryReceiptAssertions.AssertSameValueAsync(receipt, database.Apply(operation).Get<CommitReceipt>());
+        await MessagingRecoveryReceiptAssertions.AssertSameValueAsync(receipt, database.ResolveOutcome(operation).Get<CommitReceipt>());
         await QueueLifecycleRecoveryContinuation.RunAsync(root, database, store, operation, receipt, token);
     }
 
     internal static DatabaseEngine Open(ZoneTreeStore store) => new(store, new AuthorizationPolicy(),
         RecoveryExecutionOptions.DatabaseLimits(), RecoveryExecutionOptions.DueWork(), RecoveryExecutionOptions.EventSource(),
         RecoveryExecutionOptions.Messaging(), RecoveryExecutionOptions.GraphExecution(), RecoveryExecutionOptions.ChangeFeedExecution(),
-        RecoveryExecutionOptions.BlobExecution(), RecoveryExecutionOptions.NativeClaimsExecution(), RecoveryExecutionOptions.TimeSeriesExecution());
+        RecoveryExecutionOptions.RuntimeClaimsExecution(), RecoveryExecutionOptions.TimeSeriesExecution());
 }

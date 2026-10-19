@@ -21,7 +21,7 @@ internal static class QueueDeadLetterAdmissionRows
             }
             else
             {
-                var counters = NativeSerialization.Deserialize<QueueCounters>(original);
+                var counters = OrleansSerialization.Deserialize<QueueCounters>(original);
                 var damaged = fault switch
                 {
                     QueueDeadLetterAdmissionFault.NegativeStoredMessages => counters with { StoredMessages = -1 },

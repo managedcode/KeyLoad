@@ -13,7 +13,7 @@ public sealed partial class DatabaseEngine
             || !RemoteTransferDependencyShape.Valid(witness.OriginalAuthority.Dependency)
             || !RemoteTransferDependencyShape.Valid(witness.CurrentDependency)
             || witness.ReadGeneration < RemoteTransferAttemptProtocol.NoUsage
-            || witness.TargetCut.Position < RemoteTransferAttemptProtocol.MinimumNativePosition
+            || witness.TargetCut.Position < RemoteTransferAttemptProtocol.RuntimeMinimumPosition
             || !RemoteTransferAttemptOriginalIdentity.Matches(hint, witness.OriginalAuthority)
             || witness.TargetCut.Incarnation != witness.OriginalAuthority.TargetIncarnation
             || witness.TargetCut.AtomicPartitionId != hint.Destination.Partition.AtomicPartitionId

@@ -1,6 +1,6 @@
 using System.Diagnostics;
 using System.Text;
-using KeyLoad.IntegrationTests.Features.ClusterReplication.Processes;
+using KeyLoad.IntegrationTests.Features.StorageReplication.Processes;
 using KeyLoad.RecoveryTests;
 using KeyLoad.RecoveryTests.Features.Messaging;
 using KeyLoad.Server;
@@ -52,7 +52,7 @@ internal sealed class QueueWorkerClusterChild : IAsyncDisposable
             }
             child.started = true;
             child.InitializeReaders();
-            var frame = Convert.ToBase64String(NativeSerialization.Serialize(input));
+            var frame = Convert.ToBase64String(OrleansSerialization.Serialize(input));
             await child.process.StandardInput.WriteAsync(frame.AsMemory(), token);
             child.process.StandardInput.Close();
             return child;
@@ -111,7 +111,7 @@ internal sealed class QueueWorkerClusterChild : IAsyncDisposable
                 {
                     throw new InvalidOperationException(QueueWorkerClusterProtocol.Missing);
                 }
-                claimed.TrySetResult(NativeSerialization.Deserialize<ExternalQueueWorkerCrashClaim>(Convert.FromBase64String(
+                claimed.TrySetResult(OrleansSerialization.Deserialize<ExternalQueueWorkerCrashClaim>(Convert.FromBase64String(
                     line[ExternalQueueWorkerCrashProtocol.Marker.Length..])));
                 published = true;
             }

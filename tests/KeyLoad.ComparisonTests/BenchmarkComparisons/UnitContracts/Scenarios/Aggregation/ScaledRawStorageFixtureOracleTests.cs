@@ -6,7 +6,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
-/// <summary>Independent value-digest and native-residency assertions for real scaled fixture cases.</summary>
+/// <summary>Independent value-digest and execution-residency assertions for real scaled fixture cases.</summary>
 internal static class ScaledRawStorageFixtureOracleTests
 {
     private static readonly IOptions<ScaledStorageExecutionOptions> ExecutionOptions = UnitBenchmarkOptions.ScaledPreparation;
@@ -36,12 +36,12 @@ internal static class ScaledRawStorageFixtureOracleTests
         await Assert.That(fixture.ReadNextRandom()).IsEqualTo((ulong)FirstPermutationValue(recordCount));
     }
 
-    internal static async Task AssertNativeResidenceAsync(
+    internal static async Task AssertResidenceAsync(
         ScaledRawStorageSnapshot snapshot, int expectedRecords)
     {
         await Assert.That(snapshot.ProcessPeakBytes >= MinimumPositiveProcessPeakBytes).IsTrue();
-        await Assert.That(snapshot.NativeResidentRecords).IsNotNull();
-        await Assert.That(Convert.ToInt64(snapshot.NativeResidentRecords, CultureInfo.InvariantCulture))
+        await Assert.That(snapshot.RuntimeResidentRecords).IsNotNull();
+        await Assert.That(Convert.ToInt64(snapshot.RuntimeResidentRecords, CultureInfo.InvariantCulture))
             .IsEqualTo(expectedRecords);
     }
 

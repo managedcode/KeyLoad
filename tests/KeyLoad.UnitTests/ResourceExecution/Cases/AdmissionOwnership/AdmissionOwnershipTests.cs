@@ -6,7 +6,7 @@ internal sealed class AdmissionOwnershipTests
 {
     private const string PrincipalId = "principal";
     private const string TenantId = "tenant";
-    private const string RequestPath = "/v1/commands";
+    private const string RequestPath = "/commands";
 
     [Test]
     public async Task InvalidCommandReservationArgumentsLeaveEveryCounterUnchanged()

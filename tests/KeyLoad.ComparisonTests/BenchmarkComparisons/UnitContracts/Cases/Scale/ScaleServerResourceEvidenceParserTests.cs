@@ -12,7 +12,7 @@ internal sealed class ScaleServerResourceEvidenceParserTests
     [Arguments("complete-matched-cohort")]
     [Arguments("retained-incomplete")]
     [Arguments("configured-policy")]
-    public async Task AcScale016AcceptsBoundedNativeEvidenceAndExplicitUnavailableRows(string scenario)
+    public async Task AcScale016AcceptsBoundedEvidenceAndExplicitUnavailableRows(string scenario)
         => await AssertScenarioAsync(scenario);
 
     [Test]

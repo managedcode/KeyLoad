@@ -12,7 +12,7 @@ internal static class SubscriptionReceiveSlotAuthorityAssertions
     {
         var bytes = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
-        var identity = NativeSerialization.Serialize(store.Identity);
+        var identity = OrleansSerialization.Serialize(store.Identity);
         for (var repeat = 0; repeat < 2; repeat++)
         {
             var failure = Assert.ThrowsExactly<KeyLoadException>(() => SubscriptionReceiveSlotAuthorityFlow.Apply(
@@ -30,12 +30,12 @@ internal static class SubscriptionReceiveSlotAuthorityAssertions
     {
         var bytes = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
-        var identity = NativeSerialization.Serialize(store.Identity);
+        var identity = OrleansSerialization.Serialize(store.Identity);
         var result = SubscriptionReceiveSlotAuthorityFlow.Apply(db, OperationKind.ReceiveSubscription,
             request, request.RequestId, token);
-        await NativeReplayResultAssertions.Same<ReceiveSubscriptionResult>(result, original);
-        await Assert.That(NativeSerialization.Serialize(result).AsSpan()
-            .SequenceEqual(NativeSerialization.Serialize(original))).IsTrue();
+        await ReplayResultAssertions.Same<ReceiveSubscriptionResult>(result, original);
+        await Assert.That(OrleansSerialization.Serialize(result).AsSpan()
+            .SequenceEqual(OrleansSerialization.Serialize(original))).IsTrue();
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, bytes, position, identity);
     }
 
@@ -73,7 +73,7 @@ internal static class SubscriptionReceiveSlotAuthorityAssertions
         await Assert.That(delivery.Event.Data).IsEqualTo(new EventData("event4", "Created", "{\"n\":4}"));
         await Assert.That(delivery.Attempt).IsEqualTo(1);
         await Assert.That(delivery.LeaseVersion).IsEqualTo(1L);
-        await NativeReplayResultAssertions.Same<ReceiveSubscriptionResult>(
+        await ReplayResultAssertions.Same<ReceiveSubscriptionResult>(
             ApplyHealthy(db, OperationKind.ReceiveSubscription, request, request.RequestId, evaluatedAt, token), result);
         var ack = new SubscriptionDeliveryCommand(Guid.NewGuid(), group, delivery.Token, DeliveryAction.Ack);
         var receipt = ApplyHealthy(db, OperationKind.SubscriptionDelivery, ack, ack.CommandId, evaluatedAt, token);

@@ -26,8 +26,8 @@ internal static class QueueDeadLetterSelectedImage
             await MessageAsync(database, store, state.Lane, expected, terminal ? null : body);
         }
         var retained = state.Target == QueueDeadLetterSelectedProtocol.Original ? state.SecondBody : state.FirstBody;
-        var retainedBytes = NativeSerialization.Serialize(retained).LongLength;
-        var allBytes = NativeSerialization.Serialize(state.FirstBody).LongLength + NativeSerialization.Serialize(state.SecondBody).LongLength;
+        var retainedBytes = OrleansSerialization.Serialize(retained).LongLength;
+        var allBytes = OrleansSerialization.Serialize(state.FirstBody).LongLength + OrleansSerialization.Serialize(state.SecondBody).LongLength;
         var readySequence = healthy ? HealthySequence(state) : settled && state.Kind == QueueDeadLetterSelectedOperation.Redrive
             ? QueueDeadLetterSelectedProtocol.Three : QueueDeadLetterSelectedProtocol.Two;
         var expectedCounters = new QueueCounters(settled ? QueueDeadLetterSelectedProtocol.One : QueueDeadLetterSelectedProtocol.Two,
@@ -110,7 +110,7 @@ internal static class QueueDeadLetterSelectedImage
     }
 
     private static string Row<T>(byte[] key, T value) => Convert.ToHexString(key) + QueueDeadLetterSelectedProtocol.Separator
-        + Convert.ToHexString(NativeSerialization.Serialize(value));
+        + Convert.ToHexString(OrleansSerialization.Serialize(value));
     private static async Task PageAsync(ZoneTreeStore store, QueueLaneRef lane, string space, string[] expected)
     {
         var page = store.Read(view => view.Scan(QueueDeadLetterSelectedSetup.Key(lane, space), QueueDeadLetterSelectedProtocol.Four));

@@ -3,7 +3,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.IntegrationTests.Features.DocumentStorage;
 
-/// <summary>Checks the actual native caller before any owned Aspire resource acquisition.</summary>
+/// <summary>Checks the actual execution caller before any owned Aspire resource acquisition.</summary>
 [ConfigurationBinding]
 internal static class HeavyDocumentLoadAdmission
 {

@@ -16,7 +16,7 @@ public sealed partial class DatabaseEngine
             || claims.CurrentPolicyEpoch < RemoteTransferAttemptProtocol.MinimumPolicyEpoch
             || claims.OriginalPolicyEpoch >= claims.CurrentPolicyEpoch
             || claims.ReadGeneration != claims.OwnerCut.Position
-            || claims.OwnerCut.Position < RemoteTransferAttemptProtocol.MinimumNativePosition
+            || claims.OwnerCut.Position < RemoteTransferAttemptProtocol.RuntimeMinimumPosition
             || claims.OwnerCut.Incarnation != hint.SourceCut.Incarnation
             || claims.OwnerCut.AtomicPartitionId != (claims.Stage == QueueTransferRepairStage.Accept
                 ? hint.Destination.Partition.AtomicPartitionId : hint.Source.Partition.AtomicPartitionId)

@@ -3,7 +3,7 @@ using ModelContextProtocol.Protocol;
 
 namespace KeyLoad.UnitTests.Features.ClientApi;
 
-/// <summary>AC-MCP-002/003/004: concrete headers are bounded and cannot trigger reflective native mismatch errors.</summary>
+/// <summary>AC-MCP-002/003/004: concrete headers are bounded and cannot trigger reflective execution mismatch errors.</summary>
 internal sealed class McpTransportGuardTests
 {
     private const int MaximumMethodCharacters = 64;
@@ -22,7 +22,7 @@ internal sealed class McpTransportGuardTests
         await Assert.That(headers[McpTransportGuardTestData.RevisionHeader].ToString()).IsEqualTo(McpTransportGuardTestData.Revision);
     }
 
-    /// <summary>Absent optional routing headers remain absent for native mandatory-header validation.</summary>
+    /// <summary>Absent optional routing headers remain absent for execution mandatory-header validation.</summary>
     [Test]
     public async Task MissingRoutingHeadersRemainNullable()
     {
@@ -41,7 +41,7 @@ internal sealed class McpTransportGuardTests
         await Assert.That(result.Name).IsEqualTo(McpTransportGuardTestData.TabbedName);
     }
 
-    /// <summary>Native header dictionaries preserve case-insensitive protocol-header lookup.</summary>
+    /// <summary>Execution header dictionaries preserve case-insensitive protocol-header lookup.</summary>
     [Test]
     public async Task ProtocolHeaderNamesAreCaseInsensitive()
     {

@@ -34,7 +34,7 @@ internal static class RestoreCommittedDispatchAssertions
     {
         var bytes = store.Read(view => view.ReadOwnedValue(KeyCodec.Encode(SystemSpace, DispatchKey)))
             ?? throw new InvalidOperationException(MissingAuthority);
-        await Assert.That(NativeSerialization.Deserialize<bool>(bytes)).IsEqualTo(expected);
-        await Assert.That(bytes.AsSpan().SequenceEqual(NativeSerialization.Serialize(expected))).IsTrue();
+        await Assert.That(OrleansSerialization.Deserialize<bool>(bytes)).IsEqualTo(expected);
+        await Assert.That(bytes.AsSpan().SequenceEqual(OrleansSerialization.Serialize(expected))).IsTrue();
     }
 }

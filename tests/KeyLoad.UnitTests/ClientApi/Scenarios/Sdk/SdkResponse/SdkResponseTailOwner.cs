@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace KeyLoad.UnitTests.Features.ClientApi;
 
-/// <summary>Retains original real HTTP producers; the native database and transport are borrowed.</summary>
+/// <summary>Retains original real HTTP producers; the execution database and transport are borrowed.</summary>
 internal sealed class SdkResponseTailOwner(TestDatabase database)
 {
     private readonly TaskCompletionSource withholding = new(TaskCreationOptions.RunContinuationsAsynchronously);

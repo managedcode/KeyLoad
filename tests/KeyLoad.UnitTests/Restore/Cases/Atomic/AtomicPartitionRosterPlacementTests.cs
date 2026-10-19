@@ -34,7 +34,7 @@ internal sealed class AtomicPartitionRosterPlacementTests
                 AtomicPartitionRosterFixture.Graph, EdgeId, destinationVertex, FirstRevision));
         await Assert.That(Errors.Code(delivered.Problem)).IsNull();
         await Assert.That(fixture.ReadEntry(AtomicPartitionRosterFixture.Destination)).IsEqualTo(targetEntry);
-        var receiver = fixture.Store.Read(view => view.GetRecord<GraphCrossPartitionReceiverStateV1>(
+        var receiver = fixture.Store.Read(view => view.GetRecord<GraphCrossPartitionReceiverState>(
             GraphCrossPartitionKeys.Reverse(AtomicPartitionRosterFixture.Destination,
                 AtomicPartitionRosterFixture.Graph, destinationVertex, AtomicPartitionRosterFixture.Source, EdgeId)));
         await Assert.That(receiver).IsNotNull();

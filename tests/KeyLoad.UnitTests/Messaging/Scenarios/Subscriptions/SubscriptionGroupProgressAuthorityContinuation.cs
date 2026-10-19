@@ -15,7 +15,7 @@ internal static class SubscriptionGroupProgressAuthorityContinuation
             fresh, fresh.RequestId, token);
         await Assert.That(empty.Get<ReceiveSubscriptionResult>().Deliveries).IsEmpty();
         await SubscriptionCheckpointAuthorityAssertions.StatusAsync(db, group, 0, 3, 3);
-        await NativeReplayResultAssertions.Same<ReceiveSubscriptionResult>(SubscriptionCheckpointAuthorityFlow.Apply(
+        await ReplayResultAssertions.Same<ReceiveSubscriptionResult>(SubscriptionCheckpointAuthorityFlow.Apply(
             db, OperationKind.ReceiveSubscription, fresh, fresh.RequestId, token), empty);
         var expectedThird = SubscriptionGroupProgressAuthorityAssertions.NextToken(db, store, group);
         var thirdResult = SubscriptionCheckpointAuthorityFlow.Apply(db, OperationKind.SubscriptionDelivery,
@@ -35,7 +35,7 @@ internal static class SubscriptionGroupProgressAuthorityContinuation
         await SubscriptionCheckpointAuthorityAssertions.NoWindowAsync(store, group);
         var image = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
-        var identity = NativeSerialization.Serialize(store.Identity);
+        var identity = OrleansSerialization.Serialize(store.Identity);
         store.Dispose();
         using var cold = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution(),
             UnitExecutionOptions.PointCacheExecution());
@@ -60,7 +60,7 @@ internal static class SubscriptionGroupProgressAuthorityContinuation
         await Assert.That(delivery.Event.Data).IsEqualTo(new EventData("event4", "Created", "{\"n\":4}"));
         await Assert.That(delivery.Attempt).IsEqualTo(1);
         await Assert.That(delivery.LeaseVersion).IsEqualTo(1L);
-        await NativeReplayResultAssertions.Same<ReceiveSubscriptionResult>(SubscriptionCheckpointAuthorityFlow.Apply(
+        await ReplayResultAssertions.Same<ReceiveSubscriptionResult>(SubscriptionCheckpointAuthorityFlow.Apply(
             db, OperationKind.ReceiveSubscription, request, request.RequestId, token), result);
         var ack = new SubscriptionDeliveryCommand(Guid.NewGuid(), group, delivery.Token, DeliveryAction.Ack);
         var expectedAck = SubscriptionGroupProgressAuthorityAssertions.NextToken(db, store, group);

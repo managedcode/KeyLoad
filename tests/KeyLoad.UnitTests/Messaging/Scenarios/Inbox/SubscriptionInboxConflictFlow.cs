@@ -25,14 +25,14 @@ internal static class SubscriptionInboxConflictFlow
         var producer = Create(fixture.Database, OperationKind.Batch, publish, publish.CommandId, producedAt);
         var producerResult = fixture.Database.Apply(producer);
         producerResult.Get<CommitReceipt>();
-        await NativeReplayResultAssertions.Same<CommitReceipt>(fixture.Database.Apply(producer), producerResult);
+        await ReplayResultAssertions.Same<CommitReceipt>(fixture.Database.Apply(producer), producerResult);
         var source = SubscriptionCheckpointAuthorityAssertions.SourceImage(fixture.Store, group.Source.Partition);
         var time = producedAt.AddSeconds(1);
         var receive = new ReceiveSubscriptionRequest(Guid.NewGuid(), group, MaxEvents: 3);
         var claim = Create(fixture.Database, OperationKind.ReceiveSubscription, receive, receive.RequestId, time);
         var originalClaim = fixture.Database.Apply(claim);
         var deliveries = originalClaim.Get<ReceiveSubscriptionResult>().Deliveries;
-        await NativeReplayResultAssertions.Same<ReceiveSubscriptionResult>(fixture.Database.Apply(claim), originalClaim);
+        await ReplayResultAssertions.Same<ReceiveSubscriptionResult>(fixture.Database.Apply(claim), originalClaim);
         await SubscriptionInboxConflictAssertions.InitialClaimsAsync(fixture.Database, group, deliveries, producedAt);
         var request = new SubscriptionProcessingRequest(Guid.NewGuid(), group, deliveries[0].Token, "worker", 1,
             [new PutDocument("orders", "first", "{\"n\":1}", 0), new PutDocument("orders", "second", "{\"n\":2}", 0)]);
@@ -51,7 +51,7 @@ internal static class SubscriptionInboxConflictFlow
         var currentResult = fixture.Database.Apply(currentOperation);
         var currentDeliveries = currentResult.Get<ReceiveSubscriptionResult>().Deliveries;
         await SubscriptionInboxConflictAssertions.ClaimsAsync(currentDeliveries, deliveries, time.AddSeconds(33));
-        await NativeReplayResultAssertions.Same<ReceiveSubscriptionResult>(fixture.Database.Apply(currentOperation), currentResult);
+        await ReplayResultAssertions.Same<ReceiveSubscriptionResult>(fixture.Database.Apply(currentOperation), currentResult);
         claims.Add((currentOperation, currentResult, SubscriptionProcessingAtomicAssertions.OutcomeBytes(fixture.Store, group, current.RequestId)));
         var conflict = request with
         {
@@ -71,7 +71,7 @@ internal static class SubscriptionInboxConflictFlow
     {
         var cut = QueueWholeFlowStorage.Bytes(fixture.Store);
         var position = fixture.Store.Position;
-        var identity = NativeSerialization.Serialize(fixture.Store.Identity);
+        var identity = OrleansSerialization.Serialize(fixture.Store.Identity);
         fixture.Store.Dispose();
         token.ThrowIfCancellationRequested();
         using var cold = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
@@ -84,7 +84,7 @@ internal static class SubscriptionInboxConflictFlow
         }
         await SubscriptionInboxConflictAssertions.FencedOriginalProcessingAsync(db, cold, group, history[0]);
         await SubscriptionParkedRecoveryAssertions.OldReceiveAsync(db, cold, group, claims[0].Operation, claims[0].Result, claims[0].Saved);
-        await NativeReplayResultAssertions.Same<ReceiveSubscriptionResult>(db.Apply(claims[1].Operation), claims[1].Result);
+        await ReplayResultAssertions.Same<ReceiveSubscriptionResult>(db.Apply(claims[1].Operation), claims[1].Result);
         var deliveries = claims[1].Result.Get<ReceiveSubscriptionResult>().Deliveries;
         var repair = original with
         {
@@ -110,7 +110,7 @@ internal static class SubscriptionInboxConflictFlow
             }, 2, index == 2 ? 1 : 3, 3, 3, false, null);
         }
         await SubscriptionParkedRecoveryAssertions.NoWindowAsync(cold, group);
-        var current = NativeSerialization.Deserialize<ReceiveSubscriptionRequest>(claims[1].Operation.Value!.Input.Span, NativeValidationProfile.PublicInputElements)
+        var current = OrleansSerialization.Deserialize<ReceiveSubscriptionRequest>(claims[1].Operation.Value!.Input.Span, ValidationProfile.PublicInputElements)
             ?? throw new InvalidOperationException("The original current Receive request is absent.");
         await SubscriptionCheckpointAuthorityAssertions.SettledClaimAsync(db, cold, current, claims[1].Result, token);
         await SecondColdAsync(cold, fixture.Directory, group, claims, history, inbox, source, current, token);
@@ -123,7 +123,7 @@ internal static class SubscriptionInboxConflictFlow
     {
         var cut = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
-        var identity = NativeSerialization.Serialize(store.Identity);
+        var identity = OrleansSerialization.Serialize(store.Identity);
         store.Dispose();
         token.ThrowIfCancellationRequested();
         using var cold = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
@@ -161,7 +161,7 @@ internal static class SubscriptionInboxConflictFlow
             new("event4", "Created", "{\"n\":4}"), time), delivery.Token, 1L, time.AddSeconds(30), 1);
         await Assert.That(JsonSerializer.Serialize(delivery, JsonDefaults.Options))
             .IsEqualTo(JsonSerializer.Serialize(expected, JsonDefaults.Options));
-        await NativeReplayResultAssertions.Same<ReceiveSubscriptionResult>(db.Apply(operation), original);
+        await ReplayResultAssertions.Same<ReceiveSubscriptionResult>(db.Apply(operation), original);
         var ack = new SubscriptionDeliveryCommand(Guid.NewGuid(), group, delivery.Token, DeliveryAction.Ack);
         var ackOperation = Create(db, OperationKind.SubscriptionDelivery, ack, ack.CommandId, time.AddSeconds(1));
         var receipt = db.Apply(ackOperation);

@@ -102,7 +102,7 @@ internal static class FunctionalGateExecution
             2 => FunctionalGateComposition.ExerciseAsync(context, iteration, token),
             3 => FunctionalGateEvents.ExerciseAsync(context, iteration, resourceIndex, token),
             4 => QueueAsync(context, iteration, resourceIndex, queue, token),
-            5 => FunctionalGateBlobs.ExerciseAsync(context, iteration, resourceIndex, token),
+            5 => FunctionalGateFiles.ExerciseAsync(context, iteration, resourceIndex, token),
             6 => FunctionalGateGraphs.ExerciseAsync(context, iteration, token),
             7 => FunctionalGateSearch.ExerciseAsync(context, iteration, token),
             8 => FunctionalGateAnalytics.ExerciseAsync(context, iteration, token),

@@ -104,7 +104,7 @@ internal static class ModelEventQueryRows
     {
         try
         {
-            return NativeSerialization.Deserialize<EventRecord>(bytes);
+            return OrleansSerialization.Deserialize<EventRecord>(bytes);
         }
         catch (Exception exception) when (exception is JsonException or ArgumentException
                                            or InvalidOperationException)

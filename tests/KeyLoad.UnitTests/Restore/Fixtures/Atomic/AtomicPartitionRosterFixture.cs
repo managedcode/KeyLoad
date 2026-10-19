@@ -3,7 +3,9 @@ using KeyLoad.Core;
 using KeyLoad.Core.Features.Authorization;
 using KeyLoad.Core.Features.BackupRestore.Execution;
 using KeyLoad.Core.Features.BackupRestore.Serialization;
-using KeyLoad.Core.Features.ClusterRouting.Contracts;
+using KeyLoad.Core.Features.CommandOutcomes.Contracts;
+using KeyLoad.Core.Features.RuntimeJournaling.Contracts;
+using KeyLoad.Core.Features.StoragePartitions.Contracts;
 using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.RecoveryTests.Features.StorageRecovery;
 using KeyLoad.Storage;
@@ -54,12 +56,12 @@ internal sealed class AtomicPartitionRosterFixture : IDisposable
         }
         catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is null)
         {
-            TestDatabaseNativeDisposal.Rollback(error, Store, acquiring, DeleteDirectory);
+            TestDatabaseDisposal.Rollback(error, Store, acquiring, DeleteDirectory);
             throw;
         }
         catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is not null)
         {
-            TestDatabaseNativeDisposal.Rollback(error, Store, acquiring, DeleteDirectory);
+            TestDatabaseDisposal.Rollback(error, Store, acquiring, DeleteDirectory);
             throw;
         }
     }
@@ -84,8 +86,8 @@ internal sealed class AtomicPartitionRosterFixture : IDisposable
             : Database.ApplyStorageOperation(operation, sequence, CancellationToken.None).Result;
     }
 
-    internal AtomicPartitionCatalogEntryV1? ReadEntry(PartitionRef partition)
-        => Store.Read(view => view.GetRecord<AtomicPartitionCatalogEntryV1>(AtomicPartitionRosterKeys.Partition(partition)));
+    internal AtomicPartitionCatalogEntry? ReadEntry(PartitionRef partition)
+        => Store.Read(view => view.GetRecord<AtomicPartitionCatalogEntry>(AtomicPartitionRosterKeys.Partition(partition)));
 
     internal byte[]? ReadEntryBytes(PartitionRef partition)
         => Store.Read(view => view.ReadOwnedValue(AtomicPartitionRosterKeys.Partition(partition)));
@@ -108,7 +110,7 @@ internal sealed class AtomicPartitionRosterFixture : IDisposable
         Database = CreateDatabase(Store);
     }
 
-    internal ResourceLifetimeV1 ConfigureGraph()
+    internal ResourceLifetime ConfigureGraph()
     {
         var collection = new ResourceDefinition(Collection, ResourceKind.Collection, Source.TransactionDomainId);
         var graph = new ResourceDefinition(Graph, ResourceKind.Graph, Source.TransactionDomainId);
@@ -117,7 +119,7 @@ internal sealed class AtomicPartitionRosterFixture : IDisposable
         return lifetime;
     }
 
-    private ResourceLifetimeV1 RequireConfigured(ResourceDefinition definition)
+    private ResourceLifetime RequireConfigured(ResourceDefinition definition)
     {
         var request = new ConfigureResourceRequest(Source.TenantId, Source.DatabaseId, definition);
         var original = Database.CreateCommand(OperationKind.ConfigureResource, Guid.NewGuid(), RootPrincipalId,
@@ -151,10 +153,9 @@ internal sealed class AtomicPartitionRosterFixture : IDisposable
     private DatabaseEngine CreateDatabase(ZoneTreeStore store)
         => new(store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.DueWork(),
             UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(),
-            UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(),
-            UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), timeProvider);
+            UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), timeProvider);
 
-    internal void WriteLocalDocument(PartitionRef partition, string id, string json, ResourceLifetimeV1 lifetime)
+    internal void WriteLocalDocument(PartitionRef partition, string id, string json, ResourceLifetime lifetime)
     {
         var reference = new EntityRef(partition, Collection, id) { Lifetime = new(lifetime.Incarnation.Value) };
         var record = new DocumentRecord(reference, 1, json, new RowAccess(), Database.EvaluationClock.GetUtcNow());
@@ -162,7 +163,7 @@ internal sealed class AtomicPartitionRosterFixture : IDisposable
         {
             var roster = new AtomicPartitionRosterTransaction(transaction, Options.Create(limits), position, NoAppliedIndex);
             roster.Put(KeySpace.Partition(PartitionRecordFamilies.Document, partition, Collection, id),
-                NativeSerialization.Serialize(record));
+                OrleansSerialization.Serialize(record));
             roster.PersistCandidates();
             roster.ValidateCommit();
             return true;

@@ -9,7 +9,7 @@ internal static class TruncatedBackupArchiveCold
 {
     private const string HealthyKey = "archive-repaired-healthy";
     private const string HealthyValue = "{\"restored\":true}";
-    private const string MissingHealthy = "The repaired original archive lost its healthy native commit.";
+    private const string MissingHealthy = "The repaired original archive lost its healthy execution commit.";
     private const int ColdOwners = 2;
     private const string LargeKey = "archive-original-bounded-pieces";
     private const int LargeCharacters = 8192;
@@ -32,7 +32,7 @@ internal static class TruncatedBackupArchiveCold
     {
         var bytes = store.Read(view => view.ReadOwnedValue(KeyCodec.Encode(LargeKey)))
             ?? throw new InvalidOperationException(MissingLarge);
-        await Assert.That(NativeSerialization.Deserialize<string>(bytes))
+        await Assert.That(OrleansSerialization.Deserialize<string>(bytes))
             .IsEqualTo(new string(LargeCharacter, LargeCharacters));
     }
 
@@ -71,7 +71,7 @@ internal static class TruncatedBackupArchiveCold
     {
         var bytes = store.Read(view => view.ReadOwnedValue(KeyCodec.Encode(HealthyKey)))
             ?? throw new InvalidOperationException(MissingHealthy);
-        await Assert.That(NativeSerialization.Deserialize<string>(bytes)).IsEqualTo(HealthyValue);
+        await Assert.That(OrleansSerialization.Deserialize<string>(bytes)).IsEqualTo(HealthyValue);
         await Assert.That(store.Identity.DispatchPaused).IsTrue();
         await LargeAsync(store);
     }

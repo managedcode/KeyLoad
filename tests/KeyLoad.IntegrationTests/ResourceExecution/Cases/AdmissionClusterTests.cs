@@ -25,7 +25,7 @@ internal sealed class AdmissionClusterTests
                 var id = Guid.NewGuid();
                 var payload = new DeliveryCommand(id, new(new("tenant", "database", "orders", PartitionKey), "jobs"),
                     new string('t', 2_000), DeliveryAction.Ack);
-                using var request = new HttpRequestMessage(HttpMethod.Post, "/v1/queues/delivery")
+                using var request = new HttpRequestMessage(HttpMethod.Post, "/queues/delivery")
                 {
                     Content = new ByteArrayContent(JsonDefaults.Serialize(payload))
                 };
@@ -39,7 +39,7 @@ internal sealed class AdmissionClusterTests
                 await Assert.That(rejected.StatusCode).IsEqualTo(System.Net.HttpStatusCode.TooManyRequests);
                 var problem = await rejected.Content.ReadFromJsonAsync<ManagedCode.Communication.Problem>(JsonDefaults.Options, timeout.Token);
                 await Assert.That(problem!.ErrorCode).IsEqualTo(nameof(ErrorCode.ResourceExhausted));
-                using var control = new HttpRequestMessage(HttpMethod.Post, "/v1/admin/dispatch?paused=false");
+                using var control = new HttpRequestMessage(HttpMethod.Post, "/admin/dispatch?paused=false");
                 control.Headers.Authorization = new AuthenticationHeaderValue("Bearer", fixture.AdminKey);
                 control.Headers.Add(CommandIdHeader, id.ToString());
                 using var completed = await http.SendAsync(control, timeout.Token);
@@ -77,7 +77,7 @@ internal sealed class AdmissionClusterTests
                 await Assert.That(read.Problem!.ErrorCode).IsEqualTo(nameof(ErrorCode.NotFound));
                 // An admission rejection did not claim the ID: a different control payload can now commit under it.
                 using var http = fixture.App.CreateHttpClient(node, "http");
-                using var control = new HttpRequestMessage(HttpMethod.Post, "/v1/admin/dispatch?paused=false");
+                using var control = new HttpRequestMessage(HttpMethod.Post, "/admin/dispatch?paused=false");
                 control.Headers.Authorization = new AuthenticationHeaderValue("Bearer", fixture.AdminKey);
                 control.Headers.Add(CommandIdHeader, commandId.ToString());
                 using var response = await http.SendAsync(control, timeout.Token);

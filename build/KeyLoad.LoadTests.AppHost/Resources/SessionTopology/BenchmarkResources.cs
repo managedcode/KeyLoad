@@ -1,4 +1,4 @@
-/// <summary>Immutable native server image identities shared by session topology registrations.</summary>
+/// <summary>Immutable execution server image identities shared by session topology registrations.</summary>
 internal static class BenchmarkResources
 {
     // Multi-architecture manifest digests pin the actual content, including the PostgreSQL patch under pg18.

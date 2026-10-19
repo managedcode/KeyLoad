@@ -7,8 +7,8 @@ namespace KeyLoad.UnitTests.Features.AdminDashboard;
 
 internal sealed class AdminHttpMetricsMiddlewareTests
 {
-    private const string RouteTemplate = "/v1/documents/{documentId}/revisions";
-    private const string RoutePath = "/v1/documents/secret-document-42/revisions";
+    private const string RouteTemplate = "/documents/{documentId}/revisions";
+    private const string RoutePath = "/documents/secret-document-42/revisions";
     private const string RawQuery = "?token=private-credential&page=2";
     private const string EndpointName = "documents-revisions";
     private const string UnknownMethod = "BREW";
@@ -16,9 +16,9 @@ internal sealed class AdminHttpMetricsMiddlewareTests
     private const string QueryMarker = "?";
     private const string PathSecret = "secret-document-42";
     private const string QuerySecret = "private-credential";
-    private const string DashboardPath = "/v1/admin/dashboard";
-    private const string AdmissionPath = "/v1/admin/admission";
-    private const string StatusPath = "/v1/status";
+    private const string DashboardPath = "/admin/dashboard";
+    private const string AdmissionPath = "/admin/admission";
+    private const string StatusPath = "/status";
     private const string StaticPath = "/admin/app.js";
     private const string McpPath = "/mcp";
     private const int NotFound = StatusCodes.Status404NotFound;

@@ -8,7 +8,7 @@ internal static class QueueWorkerClusterByteContinuation
     internal static async Task RunAsync(ClusterFixture fixture, KeyLoadClient admin, KeyLoadClient sdk,
         McpOfficialClient mcp, QueueWorkerClusterByteSeed seed, Delivery first, CancellationToken token)
     {
-        var result = await sdk.RunQueueAckWorkerAsync(seed.Native.Lane, Guid.NewGuid(),
+        var result = await sdk.RunQueueAckWorkerAsync(seed.Execution.Lane, Guid.NewGuid(),
             (context, handlerToken) => QueueWorkerClusterByteImages.DeliveryAsync(seed, context.Delivery, handlerToken),
             QueueWorkerClusterProtocol.Options(QueueWorkerClusterProtocol.RemainingReadyDeliveries), TimeProvider.System, token);
         await Assert.That(result.Reason).IsEqualTo(QueueWorkerStopReason.DeliveryBudget);
@@ -19,7 +19,7 @@ internal static class QueueWorkerClusterByteContinuation
         await ReplayedAsync(admin, sdk, mcp, seed, first, result, token);
         await QueueProducerClusterCold.RestartAsync(fixture, token);
         await ReplayedAsync(admin, sdk, mcp, seed, first, result, token);
-        await QueueWorkerClusterHealthy.RunAsync(sdk, mcp, seed.Native, token);
+        await QueueWorkerClusterHealthy.RunAsync(sdk, mcp, seed.Execution, token);
         await QueueWorkerClusterByteImages.RequireAsync(admin, sdk, mcp, seed, first, true, token);
     }
 
@@ -32,8 +32,8 @@ internal static class QueueWorkerClusterByteContinuation
             var receipt = await QueueWorkerClusterCompletion.SuccessAsync(ack);
             var mutation = await Assert.That(receipt.Mutations).HasSingleItem();
             await Assert.That(mutation.Id).IsNotEqualTo(QueueWorkerClusterProtocol.First);
-            await QueueWorkerClusterAssertions.ReceiptAsync(receipt, ack.Command!.CommandId, seed.Native,
-                [new(nameof(DeliveryAction.Ack), seed.Native.Lane.Queue, mutation.Id, QueueWorkerClusterProtocol.AckStateVersion)]);
+            await QueueWorkerClusterAssertions.ReceiptAsync(receipt, ack.Command!.CommandId, seed.Execution,
+                [new(nameof(DeliveryAction.Ack), seed.Execution.Lane.Queue, mutation.Id, QueueWorkerClusterProtocol.AckStateVersion)]);
             await QueueWorkerClusterAssertions.EqualAsync(await QueueWorkerClusterCompletion.SuccessAsync(await sdk.ReconcileQueueWorkerOperationAsync(ack, token)),
                 receipt);
             await QueueWorkerClusterByteImages.RequireAsync(admin, sdk, mcp, seed, first, true, token);

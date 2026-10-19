@@ -21,7 +21,7 @@ public static class JsonData
     private const string InvalidDocumentDetail = "A document must be an object.";
     private const string ConcretePatchDetail = "Patch paths must address concrete fields.";
     private const string MissingPatchParentDetail = "A patch parent is missing or is not an object.";
-    private const string UnsupportedArrayPatchDetail = "Array patch operations are not supported in protocol v1.";
+    private const string UnsupportedArrayPatchDetail = "Array patch operations are not supported in the current protocol.";
     private const string InvalidIdentifierDetail = "An identifier is missing, too long or contains control characters.";
     private const string WildcardPathSegment = "*";
     private const string NullJsonValue = "null";

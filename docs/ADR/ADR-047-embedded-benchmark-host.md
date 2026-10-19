@@ -69,5 +69,5 @@ persisted-data change follows from this compiler-package alignment.
 Deliver the source/library/host/test/reference changes coherently; persisted data is
 unchanged. Rollback removes that complete source unit while preserving strict policy,
 without a duplicate fixture API or diagnostic bypass. Shared
-contracts/configuration/docs have a single owner; independent query/storage/native
+contracts/configuration/docs have a single owner; independent query/storage/execution
 work cannot be overwritten. Accepted remains until every mapped gate succeeds.

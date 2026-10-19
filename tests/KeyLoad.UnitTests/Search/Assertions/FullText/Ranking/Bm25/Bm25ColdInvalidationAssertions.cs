@@ -9,7 +9,7 @@ namespace KeyLoad.UnitTests.Features.Search;
 
 internal static class Bm25ColdInvalidationAssertions
 {
-    internal static byte[] HeadBytes(Bm25OriginalPhaseRecoveryOwner owner, Bm25CorpusCurrentV1 head)
+    internal static byte[] HeadBytes(Bm25OriginalPhaseRecoveryOwner owner, Bm25CorpusCurrent head)
     {
         var work = owner.Source.CreateReadWork(Bm25OriginalPhaseRecoveryFlow.Token);
         return owner.Store.Read(view =>
@@ -17,9 +17,9 @@ internal static class Bm25ColdInvalidationAssertions
             byte[]? raw = null;
             if (!view.ReadValue(Bm25CorpusKeys.Current(head), bytes => raw = bytes.ToArray(), work.ChargeBytes))
             {
-                throw new InvalidOperationException("The original native BM25 head is missing.");
+                throw new InvalidOperationException("The original execution BM25 head is missing.");
             }
-            return raw ?? throw new InvalidOperationException("The original native BM25 head was not read.");
+            return raw ?? throw new InvalidOperationException("The original execution BM25 head was not read.");
         });
     }
 
@@ -29,9 +29,9 @@ internal static class Bm25ColdInvalidationAssertions
         var before = Bm25OriginalPhaseRecoveryState.Read(flow.Owner);
         foreach (var original in originals)
         {
-            await NativeReplayResultAssertions.BytesAsync(original.Entry,
-                NativeSerialization.Serialize(flow.Owner.Entry(original.Operation.CommandId)));
-            await NativeReplayResultAssertions.SameAsync(original.Result, flow.Owner.Submit(original.Operation));
+            await ReplayResultAssertions.BytesAsync(original.Entry,
+                OrleansSerialization.Serialize(flow.Owner.Entry(original.Operation.CommandId)));
+            await ReplayResultAssertions.SameAsync(original.Result, flow.Owner.Submit(original.Operation));
         }
         await before.RequireAsync(Bm25OriginalPhaseRecoveryState.Read(flow.Owner));
     }
@@ -49,10 +49,10 @@ internal static class Bm25ColdInvalidationAssertions
     {
         var before = Bm25OriginalPhaseRecoveryState.Read(flow.Owner);
         var replay = flow.Publish(flow.Reissue(original));
-        await NativeReplayResultAssertions.SameAsync(expected, replay);
-        await NativeReplayResultAssertions.SameAsync(expected, flow.Owner.Database.ResolveOutcome(original));
-        await NativeReplayResultAssertions.BytesAsync(NativeSerialization.Serialize(expected.Get<CommitReceipt>()),
-            NativeSerialization.Serialize(replay.Get<CommitReceipt>()));
+        await ReplayResultAssertions.SameAsync(expected, replay);
+        await ReplayResultAssertions.SameAsync(expected, flow.Owner.Database.ResolveOutcome(original));
+        await ReplayResultAssertions.BytesAsync(OrleansSerialization.Serialize(expected.Get<CommitReceipt>()),
+            OrleansSerialization.Serialize(replay.Get<CommitReceipt>()));
         await before.RequireAsync(Bm25OriginalPhaseRecoveryState.Read(flow.Owner));
         await Bm25OriginalPhaseRecoveryState.RequireRetainedAsync(flow.Owner, original, entry);
     }

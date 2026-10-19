@@ -1,6 +1,6 @@
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
-/// <summary>AC-ISO-002/006: strict selection, native configuration and trusted identity precede allocation.</summary>
+/// <summary>AC-ISO-002/006: strict selection, execution configuration and trusted identity precede allocation.</summary>
 internal sealed class BenchmarkSessionConfigurationTests
 {
     [Test]
@@ -23,7 +23,7 @@ internal sealed class BenchmarkSessionConfigurationTests
     [Arguments("KEYLOAD_COMPARISON_JOB_ID")]
     [Arguments("GITHUB_RUN_ID")]
     [Arguments("Benchmarks__Output")]
-    public async Task MissingRequiredIdentityRejectsBeforeNativeAllocation(string key)
+    public async Task MissingRequiredIdentityRejectsBeforeAllocation(string key)
     {
         using var fixture = new BenchmarkSessionStartupFixture();
         var settings = fixture.Settings();
@@ -42,7 +42,7 @@ internal sealed class BenchmarkSessionConfigurationTests
     [Arguments("MongoDB")]
     [Arguments("OpenSearch")]
     [Arguments("KurrentDB")]
-    public async Task EachRealTargetRequiresItsOwnNativeSettings(string target)
+    public async Task EachRealTargetRequiresItsOwnSettings(string target)
     {
         using var fixture = new BenchmarkSessionStartupFixture();
         await fixture.AssertFailureAsync(await BenchmarkSessionStartupFixture.RunAsync(fixture.Settings(target, 1)));
@@ -54,7 +54,7 @@ internal sealed class BenchmarkSessionConfigurationTests
     [Arguments("duplicate")]
     [Arguments("credentials")]
     [Arguments("scalar")]
-    public async Task KeyLoadEndpointsMustProveExactDistinctNativeCount(string defect)
+    public async Task KeyLoadEndpointsMustProveExactDistinctCount(string defect)
     {
         using var fixture = new BenchmarkSessionStartupFixture();
         var settings = fixture.Settings("KeyLoad", 3);

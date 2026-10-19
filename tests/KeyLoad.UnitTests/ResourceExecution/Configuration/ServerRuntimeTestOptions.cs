@@ -5,7 +5,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.UnitTests;
 
-/// <summary>Explicit standalone native options composition for physical server fixtures.</summary>
+/// <summary>Explicit standalone execution options composition for physical server fixtures.</summary>
 internal static class ServerRuntimeTestOptions
 {
     internal static ServerRuntimeOptions Runtime(NodeOptions node)

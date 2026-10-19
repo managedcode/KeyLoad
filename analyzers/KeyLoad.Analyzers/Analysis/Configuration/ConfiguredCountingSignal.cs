@@ -11,7 +11,7 @@ namespace KeyLoad.Analyzers.Features.CodeQuality;
 internal static class ConfiguredCountingSignal
 {
     internal static bool IsConfigured(Compilation compilation, IObjectCreationOperation creation, CancellationToken cancellationToken) =>
-        MagicRuntimeOperations.IsNativeType(compilation, creation.Type, MagicRuntimeMetadataNames.Semaphore) &&
+        MagicRuntimeOperations.IsType(compilation, creation.Type, MagicRuntimeMetadataNames.Semaphore) &&
         creation.Arguments is [var initial, var maximum] &&
         initial.Value.ConstantValue is { HasValue: true, Value: int count } && count == OperationalPolicyMetadataNames.EmptySignalCount &&
         IsCapacity(compilation, maximum.Value, new HashSet<ISymbol>(SymbolEqualityComparer.Default), cancellationToken);
@@ -40,13 +40,13 @@ internal static class ConfiguredCountingSignal
     private static bool IsSaturated(Compilation compilation, IInvocationOperation invocation, HashSet<ISymbol> visited,
         CancellationToken cancellationToken) =>
         invocation.TargetMethod.Name == OperationalPolicyMetadataNames.Minimum &&
-        MagicRuntimeOperations.IsNativeType(compilation, invocation.TargetMethod.ContainingType, OperationalPolicyMetadataNames.Math) &&
-        invocation.Arguments is [var ceiling, var configured] && IsNativeIntegerCeiling(ceiling.Value) &&
+        MagicRuntimeOperations.IsType(compilation, invocation.TargetMethod.ContainingType, OperationalPolicyMetadataNames.Math) &&
+        invocation.Arguments is [var ceiling, var configured] && IsIntegerCeiling(ceiling.Value) &&
         IsCapacity(compilation, configured.Value, visited, cancellationToken);
 
-    private static bool IsNativeIntegerCeiling(IOperation operation) => operation switch
+    private static bool IsIntegerCeiling(IOperation operation) => operation switch
     {
-        IConversionOperation conversion => IsNativeIntegerCeiling(conversion.Operand),
+        IConversionOperation conversion => IsIntegerCeiling(conversion.Operand),
         IFieldReferenceOperation field => field.Field.ContainingType.SpecialType == SpecialType.System_Int32 &&
             field.Field.Name == nameof(int.MaxValue),
         _ => false

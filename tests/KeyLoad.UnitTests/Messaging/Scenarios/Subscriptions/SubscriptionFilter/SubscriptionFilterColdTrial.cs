@@ -32,15 +32,15 @@ internal static class SubscriptionFilterColdTrial
                 EventTypes = [SubscriptionFilterProtocol.NewType]
             },
             ExpectedGeneration: SubscriptionFilterProtocol.FirstGeneration);
-        await SubscriptionFilterNativeAssertions.RefusedAsync(fixture.Database, fixture.Store, replacement, ErrorCode.Conflict, token);
+        await SubscriptionFilterAssertions.RefusedAsync(fixture.Database, fixture.Store, replacement, ErrorCode.Conflict, token);
         var pause = new SetSubscriptionPausedRequest(Guid.NewGuid(), group, SubscriptionFilterProtocol.FirstGeneration, true);
         Apply(fixture.Database, OperationKind.SetSubscriptionPaused, pause, pause.CommandId, token).Get<SubscriptionInfo>();
-        var cut = SubscriptionFilterNativeAssertions.Image(fixture.Store, fixture.Partition);
+        var cut = SubscriptionFilterAssertions.Image(fixture.Store, fixture.Partition);
         fixture.Store.Dispose();
         using var first = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         var db = QueueWholeFlowStorage.Open(first);
-        await Assert.That(SubscriptionFilterNativeAssertions.Image(first, fixture.Partition)).IsEquivalentTo(cut, CollectionOrdering.Matching);
-        await SubscriptionFilterNativeAssertions.StatusAsync(db, group, SubscriptionFilterProtocol.FirstGeneration, SubscriptionFilterProtocol.GapCheckpoint, true);
+        await Assert.That(SubscriptionFilterAssertions.Image(first, fixture.Partition)).IsEquivalentTo(cut, CollectionOrdering.Matching);
+        await SubscriptionFilterAssertions.StatusAsync(db, group, SubscriptionFilterProtocol.FirstGeneration, SubscriptionFilterProtocol.GapCheckpoint, true);
         await SubscriptionFilterRefusals.RunAsync(db, first, replacement, token);
         await SubscriptionFilterWindowFaults.RunAsync(db, first, replacement, token);
         replacement = replacement with
@@ -50,15 +50,15 @@ internal static class SubscriptionFilterColdTrial
         var original = Apply(db, OperationKind.ConfigureSubscription, replacement, replacement.CommandId, token);
         var updated = original.Get<SubscriptionInfo>();
         await Assert.That(updated.IssuedPosition).IsEqualTo(SubscriptionFilterProtocol.GapCheckpoint);
-        await SubscriptionFilterNativeAssertions.StatusAsync(db, group, SubscriptionFilterProtocol.NextGeneration, SubscriptionFilterProtocol.GapCheckpoint, true);
+        await SubscriptionFilterAssertions.StatusAsync(db, group, SubscriptionFilterProtocol.NextGeneration, SubscriptionFilterProtocol.GapCheckpoint, true);
         await SubscriptionFilterContinuation.RunAsync(db, group, independent, received, token);
-        var image = SubscriptionFilterNativeAssertions.Image(first, fixture.Partition);
+        var image = SubscriptionFilterAssertions.Image(first, fixture.Partition);
         first.Dispose();
         using var second = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         var cold = QueueWholeFlowStorage.Open(second);
-        await NativeReplayResultAssertions.Same<SubscriptionInfo>(Apply(cold, OperationKind.ConfigureSubscription, replacement, replacement.CommandId, token), original);
-        await Assert.That(SubscriptionFilterNativeAssertions.Image(second, fixture.Partition)).IsEquivalentTo(image, CollectionOrdering.Matching);
-        await SubscriptionFilterNativeAssertions.StatusAsync(cold, group, SubscriptionFilterProtocol.NextGeneration, SubscriptionFilterProtocol.WindowSize, false);
+        await ReplayResultAssertions.Same<SubscriptionInfo>(Apply(cold, OperationKind.ConfigureSubscription, replacement, replacement.CommandId, token), original);
+        await Assert.That(SubscriptionFilterAssertions.Image(second, fixture.Partition)).IsEquivalentTo(image, CollectionOrdering.Matching);
+        await SubscriptionFilterAssertions.StatusAsync(cold, group, SubscriptionFilterProtocol.NextGeneration, SubscriptionFilterProtocol.WindowSize, false);
         await SubscriptionFilterContinuation.HealthyAsync(cold, group, token);
         await SubscriptionFilterTailFlow.RunAsync(cold, group.Source, token);
     }

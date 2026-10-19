@@ -28,7 +28,7 @@ internal static class ScriptDomMoneyModePages
         var budget = new global::KeyLoad.Core.ReadExecutionBudget(database.Database.OperationLimitsOptions);
         var statement = global::KeyLoad.Features.QueryExecution.ScriptDomSyntax.Parse(wire.Sql,
             database.Database.OperationLimitsOptions, budget.Check, CancellationToken.None);
-        global::KeyLoad.Features.QueryExecution.ScriptDomSyntax.ValidateNativeSessionSlots(statement,
+        global::KeyLoad.Features.QueryExecution.ScriptDomSyntax.ValidateSessionSlots(statement,
             SingleSlot, budget.Check, CancellationToken.None);
         var ast = global::KeyLoad.Query.Features.QueryExecution.ScriptDomQueryAdapter.Lower(statement, wire,
             database.Database.OperationLimitsOptions, UnitExecutionOptions.QueryExecution(), budget, SingleSlot, CancellationToken.None);
@@ -49,7 +49,7 @@ internal static class ScriptDomMoneyModePages
         var budget = new global::KeyLoad.Core.ReadExecutionBudget(database.Database.OperationLimitsOptions);
         var statement = global::KeyLoad.Features.QueryExecution.ScriptDomSyntax.Parse(
             Prefix + slot + Suffix, database.Database.OperationLimitsOptions, budget.Check, CancellationToken.None);
-        global::KeyLoad.Features.QueryExecution.ScriptDomSyntax.ValidateNativeSessionSlots(statement,
+        global::KeyLoad.Features.QueryExecution.ScriptDomSyntax.ValidateSessionSlots(statement,
             SingleSlot, budget.Check, CancellationToken.None);
     }
     private const string Prefix = "SELECT TOP (1) title FROM offsetleft WHERE order_id = ";

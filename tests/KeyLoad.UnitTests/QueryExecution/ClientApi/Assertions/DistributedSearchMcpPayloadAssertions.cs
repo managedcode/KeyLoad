@@ -10,10 +10,10 @@ internal static class DistributedSearchMcpPayloadAssertions
     private const string SourcePartition = "independent-source";
     private const string DestinationPartition = "independent-destination";
     private const string Secret = "/secret";
-    private const int NativeRank = 1;
+    private const int RuntimeRank = 1;
     private const double Weight = 1;
 
-    internal static DistributedSearchRequestV1 Request()
+    internal static DistributedSearchRequest Request()
     {
         var source = new PartitionRef(McpCanonicalTestData.Tenant, McpCanonicalTestData.Database,
             McpCanonicalTestData.Domain, SourcePartition);
@@ -29,35 +29,35 @@ internal static class DistributedSearchMcpPayloadAssertions
         var request = Request();
         var expected = Page(request);
         var original = JsonDefaults.Serialize(expected);
-        var publicDecoded = JsonSerializer.Deserialize<DistributedSearchPageV1>(original, JsonDefaults.Options)!;
+        var publicDecoded = JsonSerializer.Deserialize<DistributedSearchPage>(original, JsonDefaults.Options)!;
         await EqualAsync(expected, publicDecoded);
-        var native = NativeSerialization.Serialize(publicDecoded);
-        var nativeDecoded = NativeSerialization.Deserialize<DistributedSearchPageV1>(native)!;
-        await EqualAsync(expected, nativeDecoded);
-        await Assert.That(JsonDefaults.Serialize(nativeDecoded).AsSpan().SequenceEqual(original)).IsTrue();
+        var execution = OrleansSerialization.Serialize(publicDecoded);
+        var runtimeDecoded = OrleansSerialization.Deserialize<DistributedSearchPage>(execution)!;
+        await EqualAsync(expected, runtimeDecoded);
+        await Assert.That(JsonDefaults.Serialize(runtimeDecoded).AsSpan().SequenceEqual(original)).IsTrue();
         var malformed = JsonNode.Parse(original)!.AsObject();
         malformed[McpCanonicalTestData.UnknownKey] = JsonValue.Create(McpCanonicalTestData.Principal);
         var malformedBytes = JsonSerializer.SerializeToUtf8Bytes(malformed);
-        Assert.ThrowsExactly<JsonException>(() => JsonSerializer.Deserialize<DistributedSearchPageV1>(malformedBytes, JsonDefaults.Options));
-        await EqualAsync(expected, JsonSerializer.Deserialize<DistributedSearchPageV1>(original, JsonDefaults.Options)!);
+        Assert.ThrowsExactly<JsonException>(() => JsonSerializer.Deserialize<DistributedSearchPage>(malformedBytes, JsonDefaults.Options));
+        await EqualAsync(expected, JsonSerializer.Deserialize<DistributedSearchPage>(original, JsonDefaults.Options)!);
         await Assert.That(request.Search.Limit).IsEqualTo(DistributedSearchMcpProtocol.DefaultLimit);
     }
 
-    private static DistributedSearchPageV1 Page(DistributedSearchRequestV1 request)
+    private static DistributedSearchPage Page(DistributedSearchRequest request)
         => new(DistributedSearchMcpProtocol.VersionOne,
-            [new(new(new(request.Partitions[NativeIndex], McpCanonicalTestData.Resource, McpCanonicalTestData.Entity),
+            [new(new(new(request.Partitions[RuntimeIndex], McpCanonicalTestData.Resource, McpCanonicalTestData.Entity),
                 DistributedSearchMcpProtocol.Revision, DistributedSearchMcpProtocol.LiteralDocument, true, [Secret]),
                 DistributedSearchMcpProtocol.RankedScore, new(DistributedSearchMcpProtocol.FusionConstant,
-                    [new(SearchBranchKind.Text, NativeRank, Weight, DistributedSearchMcpProtocol.RankedScore)]))],
-            [new(request.Partitions[NativeIndex], DistributedSearchMcpProtocol.Cut, DistributedSearchMcpProtocol.PolicyEpoch,
+                    [new(SearchBranchKind.Text, RuntimeRank, Weight, DistributedSearchMcpProtocol.RankedScore)]))],
+            [new(request.Partitions[RuntimeIndex], DistributedSearchMcpProtocol.Cut, DistributedSearchMcpProtocol.PolicyEpoch,
                 DistributedSearchMcpProtocol.SchemaVersion, DistributedSearchMcpProtocol.AccessPath),
              new(request.Partitions[DestinationIndex], DistributedSearchMcpProtocol.Cut, DistributedSearchMcpProtocol.PolicyEpoch,
                 DistributedSearchMcpProtocol.SchemaVersion, DistributedSearchMcpProtocol.AccessPath)],
             DistributedSearchMcpProtocol.LiteralEpoch, true);
 
-    private const int NativeIndex = 0;
+    private const int RuntimeIndex = 0;
     private const int DestinationIndex = 1;
 
-    private static async Task EqualAsync(DistributedSearchPageV1 expected, DistributedSearchPageV1 actual)
+    private static async Task EqualAsync(DistributedSearchPage expected, DistributedSearchPage actual)
         => await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
 }

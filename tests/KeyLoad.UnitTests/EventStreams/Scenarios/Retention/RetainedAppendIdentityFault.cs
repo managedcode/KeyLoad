@@ -19,7 +19,7 @@ internal sealed class RetainedAppendIdentityFault(RetainedAppendIdentityFixture 
         }
         original = store.Read(view => view.ReadOwnedValue(eventKey))
             ?? throw new InvalidOperationException("The literal original event is missing.");
-        var record = NativeSerialization.Deserialize<EventRecord>(original);
+        var record = OrleansSerialization.Deserialize<EventRecord>(original);
         var identity = new EventIdentity(kind == "foreign-locator" ? RetainedAppendIdentityFixture.Foreign
             : RetainedAppendIdentityFixture.Target, 1, 1);
         var damaged = SelectRecord(record);

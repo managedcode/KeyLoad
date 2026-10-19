@@ -47,16 +47,16 @@ internal static class QueueLeaseAuthorityHealthy
     internal static async Task ReplayAsync(DatabaseEngine database, ZoneTreeStore store,
         QueueLeaseAuthorityState state, QueueLeaseAuthorityHealthyState healthy)
     {
-        await NativeReplayResultAssertions.Same<CommitReceipt>(QueueWholeFlowStorage.Apply(database, OperationKind.Batch,
+        await ReplayResultAssertions.Same<CommitReceipt>(QueueWholeFlowStorage.Apply(database, OperationKind.Batch,
             healthy.Producer, healthy.Producer.CommandId, new DateTimeOffset(state.Original.Timestamp)), healthy.Produced);
-        await NativeReplayResultAssertions.Same<CommitReceipt>(database.Apply(healthy.Ack), healthy.Acked);
+        await ReplayResultAssertions.Same<CommitReceipt>(database.Apply(healthy.Ack), healthy.Acked);
         var stale = database.Apply(healthy.Claim);
         await Assert.That(Errors.Code(stale.Problem)).IsEqualTo(ErrorCode.StaleLease);
 
         await Assert.That(stale.Value).IsNull();
         var retained = store.Read(view => view.GetRecord<StoredOutcome>(KeySpace.PartitionOutcome(
             state.Lane.Partition, QueueLeaseAuthorityProtocol.Root, healthy.Claim.CommandId)))!;
-        await NativeReplayResultAssertions.Same<ReceiveResult>(retained.Result, healthy.Claimed);
+        await ReplayResultAssertions.Same<ReceiveResult>(retained.Result, healthy.Claimed);
         await RequireAsync(database, store, state, healthy);
     }
 

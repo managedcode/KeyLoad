@@ -1,6 +1,6 @@
 using System.Text.Json;
 using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.ClusterRouting;
+using KeyLoad.IntegrationTests.Features.OrleansExecution;
 using static KeyLoad.IntegrationTests.Features.QueryExecution.QueryEquivalentIntegerClusterDecimalProtocol;
 
 namespace KeyLoad.IntegrationTests.Features.QueryExecution;
@@ -10,8 +10,8 @@ internal static class QueryEquivalentIntegerClusterCalls
     private const int SqlRoute = 0;
     private const int JsonRoute = 1;
     private const int BuilderRoute = 2;
-    private const string NativeDenied = "The principal cannot perform this operation in this scope.";
-    private const string McpDenied = NativeDenied;
+    private const string RuntimeDenied = "The principal cannot perform this operation in this scope.";
+    private const string McpDenied = RuntimeDenied;
     internal static async Task MatrixAsync(RequestCqrsClusterCallers root, RequestCqrsClusterCallers reader,
         QueryEquivalentIntegerClusterState state, bool denied, CancellationToken token)
     {
@@ -41,7 +41,7 @@ internal static class QueryEquivalentIntegerClusterCalls
                 {
                     await Assert.That(sdk.IsFailed).IsTrue();
                     await Assert.That(sdk.Value).IsNull();
-                    await SqlClusterProtocol.EqualAsync(Errors.Problem(ErrorCode.PermissionDenied, NativeDenied), sdk.Problem);
+                    await SqlClusterProtocol.EqualAsync(Errors.Problem(ErrorCode.PermissionDenied, RuntimeDenied), sdk.Problem);
                 }
                 else
                 {

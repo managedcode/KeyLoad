@@ -10,7 +10,7 @@ internal sealed record Bm25OriginalPhaseRecoveryState(Guid NodeId, Guid Incarnat
         => database.Store.Read(view =>
         {
             var applied = view.ReadOwnedValue(KeySpace.AppliedBytes) is { } bytes
-                ? NativeSerialization.Deserialize<long>(bytes) : 0L;
+                ? OrleansSerialization.Deserialize<long>(bytes) : 0L;
             return (new CommitToken(database.Store.Identity.Incarnation, partition.AtomicPartitionId,
                 checked(database.Store.Position + 1L)), applied);
         });
@@ -29,9 +29,9 @@ internal sealed record Bm25OriginalPhaseRecoveryState(Guid NodeId, Guid Incarnat
                 }, observer: work.ChargeBytes, cancellationToken: Bm25OriginalPhaseRecoveryFlow.Token);
             if (scan.HasMore)
             {
-                throw new InvalidOperationException("The complete original canonical image exceeded the native record bound.");
+                throw new InvalidOperationException("The complete original canonical image exceeded the execution record bound.");
             }
-            return (Position: owner.Store.Position, Rows: NativeSerialization.Serialize(rows.ToArray()));
+            return (Position: owner.Store.Position, Rows: OrleansSerialization.Serialize(rows.ToArray()));
         });
         return new(owner.Store.Identity.NodeId, owner.Store.Identity.Incarnation, image.Position,
             owner.Database.LastApplied, image.Rows);
@@ -43,7 +43,7 @@ internal sealed record Bm25OriginalPhaseRecoveryState(Guid NodeId, Guid Incarnat
         await Assert.That(actual.Incarnation).IsEqualTo(Incarnation);
         await Assert.That(actual.Position).IsEqualTo(Position);
         await Assert.That(actual.Applied).IsEqualTo(Applied);
-        await NativeReplayResultAssertions.BytesAsync(Rows, actual.Rows);
+        await ReplayResultAssertions.BytesAsync(Rows, actual.Rows);
     }
 
     internal static async Task RequireRetainedAsync(Bm25OriginalPhaseRecoveryOwner owner,
@@ -53,8 +53,8 @@ internal sealed record Bm25OriginalPhaseRecoveryState(Guid NodeId, Guid Incarnat
         await Assert.That(actual.PreparedCommand).IsNotNull();
         await Assert.That(actual.PreparedCommand!.Value!.Kind).IsEqualTo(OperationKind.Bm25CorpusPublicationPhase);
         await Assert.That(actual.PreparedCommand.CommandId).IsEqualTo(original.CommandId);
-        await NativeReplayResultAssertions.BytesAsync(original.Value!.Input.ToArray(),
+        await ReplayResultAssertions.BytesAsync(original.Value!.Input.ToArray(),
             actual.PreparedCommand.Value!.Input.ToArray());
-        await NativeReplayResultAssertions.BytesAsync(originalEntry, NativeSerialization.Serialize(actual));
+        await ReplayResultAssertions.BytesAsync(originalEntry, OrleansSerialization.Serialize(actual));
     }
 }

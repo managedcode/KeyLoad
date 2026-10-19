@@ -31,7 +31,7 @@ public sealed partial class DatabaseEngine
         return EncodeResourceEffectAdmission(captured);
     }
 
-    private ResourceEffectAdmissionV1 CaptureResourceEffectAdmission(IKeyValueView raw,
+    private ResourceEffectAdmission CaptureResourceEffectAdmission(IKeyValueView raw,
         Command<DatabaseCommand> operation, string fingerprint, bool preserveBudgetFailure = false,
         long? preparationPosition = null, ReadExecutionBudget? preparationWork = null)
     {
@@ -55,7 +55,7 @@ public sealed partial class DatabaseEngine
                 ObserveCompositionPrefix(preparation, principal, operation, preparationPosition!.Value,
                     preserveBudgetFailure);
             }
-            var admission = new ResourceEffectAdmissionV1(ResourceEffectAdmissionProtocol.Version,
+            var admission = new ResourceEffectAdmission(ResourceEffectAdmissionProtocol.Version,
                 fingerprint, scope.Capture(), null, null);
             scope.Activate(admission);
             return admission;
@@ -63,15 +63,15 @@ public sealed partial class DatabaseEngine
         catch (KeyLoadException error) when (!preserveBudgetFailure || error.Code != ErrorCode.BudgetExceeded)
         {
             return new(ResourceEffectAdmissionProtocol.Version, fingerprint,
-                ImmutableArray<ResourceLifetimeV1>.Empty,
+                ImmutableArray<ResourceLifetime>.Empty,
                 error.Code, error.Message);
         }
     }
 
-    private byte[] EncodeResourceEffectAdmission(ResourceEffectAdmissionV1 admission)
+    private byte[] EncodeResourceEffectAdmission(ResourceEffectAdmission admission)
     {
-        var bytes = NativeSerialization.Serialize(admission);
-        RequireNativeBudget(bytes.Length);
+        var bytes = OrleansSerialization.Serialize(admission);
+        RequireBudget(bytes.Length);
         return bytes;
     }
 }

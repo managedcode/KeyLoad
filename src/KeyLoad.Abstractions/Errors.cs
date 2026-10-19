@@ -8,8 +8,8 @@ public static class Errors
     private const string ProblemTypePrefix = "urn:keyload:error:";
     private const string InvalidDomainProblem = "The database command problem is invalid.";
 
-    /// <summary>Reads the exact domain error from a native problem, or returns null for success.</summary>
-    /// <param name="problem">The native problem associated with the database result.</param>
+    /// <summary>Reads the exact domain error from a execution problem, or returns null for success.</summary>
+    /// <param name="problem">The execution problem associated with the database result.</param>
     /// <returns>The validated domain code, or null when no problem exists.</returns>
     public static ErrorCode? Code(Problem? problem)
     {

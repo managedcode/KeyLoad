@@ -38,8 +38,8 @@ internal sealed class CheckpointTests
             using var reopened = new ZoneTreeStore(new(root), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
             await Assert.That(reopened.Position).IsEqualTo(101);
             await Assert.That(reopened.Identity.FormatVersion).IsEqualTo(ZoneTreePersistenceFormat.CurrentDataEpoch);
-            await Assert.That(reopened.Read(view => NativeSerialization.Deserialize<string>(view.ReadOwnedValue(KeyCodec.Encode("value"))!))).EndsWith("99");
-            await Assert.That(reopened.Read(view => NativeSerialization.Deserialize<int>(view.ReadOwnedValue(KeyCodec.Encode("next"))!))).IsEqualTo(101);
+            await Assert.That(reopened.Read(view => OrleansSerialization.Deserialize<string>(view.ReadOwnedValue(KeyCodec.Encode("value"))!))).EndsWith("99");
+            await Assert.That(reopened.Read(view => OrleansSerialization.Deserialize<int>(view.ReadOwnedValue(KeyCodec.Encode("next"))!))).IsEqualTo(101);
         }
         finally
         {
@@ -80,7 +80,7 @@ internal sealed class CheckpointTests
                 await Assert.That(target.Identity.NodeId).IsEqualTo(identity.NodeId);
                 await Assert.That(target.Identity.ReadGeneration).IsEqualTo(identity.ReadGeneration + 1);
                 await Assert.That(target.Read(view => view.ReadOwnedValue(KeyCodec.Encode("obsolete")))).IsNull();
-                await Assert.That(target.Read(view => NativeSerialization.Deserialize<string>(view.ReadOwnedValue(KeyCodec.Encode("new"))!))).IsEqualTo("value");
+                await Assert.That(target.Read(view => OrleansSerialization.Deserialize<string>(view.ReadOwnedValue(KeyCodec.Encode("new"))!))).IsEqualTo("value");
                 target.Commit((tx, _) => { tx.PutRecord(KeyCodec.Encode("system", "last-applied"), 8L); return true; });
                 await CurrentSnapshotFenceAssertions.RejectAsync(target, Path.Combine(root, "target"), snapshot, 7,
                     ErrorCode.OwnershipLost, installed: true);
@@ -111,7 +111,7 @@ internal sealed class CheckpointTests
             await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => store.InstallSnapshot(snapshot, 0)).Code).IsEqualTo(ErrorCode.Corruption);
             await File.WriteAllBytesAsync(snapshot, bytes[..^80]);
             await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => store.InstallSnapshot(snapshot, 0)).Code).IsEqualTo(ErrorCode.Corruption);
-            await Assert.That(store.Read(view => NativeSerialization.Deserialize<string>(view.ReadOwnedValue(KeyCodec.Encode("key"))!))).IsEqualTo("safe");
+            await Assert.That(store.Read(view => OrleansSerialization.Deserialize<string>(view.ReadOwnedValue(KeyCodec.Encode("key"))!))).IsEqualTo("safe");
             await Assert.That(store.Position).IsEqualTo(1);
         }
         finally

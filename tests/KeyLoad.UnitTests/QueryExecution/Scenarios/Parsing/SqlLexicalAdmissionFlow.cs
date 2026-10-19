@@ -16,7 +16,7 @@ internal static class SqlLexicalAdmissionFlow
         var ast = SqlJoinSourceBindingFixture.Ast(partition, SqlLexicalAdmissionFixture.Kind);
         foreach (var fault in SqlLexicalAdmissionFixture.Faults(healthy))
         {
-            var native = store.GetReadDiagnostics();
+            var execution = store.GetReadDiagnostics();
             global::KeyLoad.QueryPage? page = null;
             var error = Assert.ThrowsExactly<global::KeyLoad.KeyLoadException>(() =>
                 page = engine.Execute(SqlJoinSourceBindingFixture.Root, healthy with
@@ -26,7 +26,7 @@ internal static class SqlLexicalAdmissionFlow
             await Assert.That(page).IsNull();
             await Assert.That(error.Code).IsEqualTo(fault.Code);
             await Assert.That(error.Message).IsEqualTo(fault.Code == global::KeyLoad.ErrorCode.Validation ? Invalid : Unsupported);
-            await Assert.That(store.GetReadDiagnostics()).IsEqualTo(native);
+            await Assert.That(store.GetReadDiagnostics()).IsEqualTo(execution);
             await SqlJoinSourceBindingFlow.UnchangedAsync(store, before, position, identity);
             await SqlJoinSourceBindingAssertions.PageAsync(engine.Execute(SqlJoinSourceBindingFixture.Root, healthy), SqlLexicalAdmissionFixture.Kind, position);
             await SqlJoinSourceBindingAssertions.PageAsync(engine.ExecuteAst(SqlJoinSourceBindingFixture.Root, ast), SqlLexicalAdmissionFixture.Kind, position);

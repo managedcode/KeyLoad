@@ -14,7 +14,7 @@ internal static class SqlImplicitAliasClusterPages
         ("\"FROM\"", "FROM", "{\"FROM\":null}")
     ];
 
-    internal static async Task HealthyAsync(global::KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsClusterCallers caller,
+    internal static async Task HealthyAsync(global::KeyLoad.IntegrationTests.Features.OrleansExecution.RequestCqrsClusterCallers caller,
         PostgresClusterCaller wire, CancellationToken token)
     {
         foreach (var (label, name, json) in Cases)

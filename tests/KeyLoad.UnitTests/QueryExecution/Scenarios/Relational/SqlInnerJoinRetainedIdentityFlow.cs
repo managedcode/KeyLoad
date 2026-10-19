@@ -34,7 +34,7 @@ internal static class SqlInnerJoinRetainedIdentityFlow
                 database.Partition, collection, id);
             var bytes = database.Store.Read(view => view.ReadOwnedValue(key))
                         ?? throw new InvalidOperationException("The original retained join row is absent.");
-            var row = NativeSerialization.Deserialize<DocumentRecord>(bytes);
+            var row = OrleansSerialization.Deserialize<DocumentRecord>(bytes);
             var foreignPartition = new PartitionRef(database.Partition.TenantId, database.Partition.DatabaseId,
                 database.Partition.TransactionDomainId, Foreign);
             var identities = new EntityRef[]
@@ -45,7 +45,7 @@ internal static class SqlInnerJoinRetainedIdentityFlow
             };
             foreach (var identity in identities)
             {
-                faults.Add(new(key, bytes, NativeSerialization.Serialize(row with
+                faults.Add(new(key, bytes, OrleansSerialization.Serialize(row with
                 {
                     Reference = identity
                 }), left));

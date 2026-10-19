@@ -20,10 +20,10 @@ internal sealed class DatabasePhaseBankTests
     {
         var bank = DatabasePhaseTestComposition.Create(false);
         var started = bank.Begin();
-        bank.End(DatabasePhaseKind.NativeTreeMutation, DatabasePhaseOutcome.Completed, started);
+        bank.End(DatabasePhaseKind.TreeMutation, DatabasePhaseOutcome.Completed, started);
         bank.End((DatabasePhaseKind)InvalidPhase, (DatabasePhaseOutcome)OutcomeCount, DisabledTimestamp);
         bank.RecordBusy((DatabasePhaseKind)PhaseCount);
-        bank.RecordBusy(DatabasePhaseKind.NativeTreeMutation);
+        bank.RecordBusy(DatabasePhaseKind.TreeMutation);
         var snapshot = bank.Capture();
 
         await Assert.That(bank.IsEnabled).IsFalse();
@@ -118,7 +118,7 @@ internal sealed class DatabasePhaseBankTests
     public async Task PreviouslyReturnedSnapshotStaysDetachedAfterLaterUpdatesAndDegradation()
     {
         var bank = DatabasePhaseTestComposition.Create(true);
-        var phase = DatabasePhaseKind.NativeTreeMutation;
+        var phase = DatabasePhaseKind.TreeMutation;
         var firstStart = bank.Begin();
         bank.End(phase, DatabasePhaseOutcome.Completed, firstStart);
         bank.RecordBusy(phase);

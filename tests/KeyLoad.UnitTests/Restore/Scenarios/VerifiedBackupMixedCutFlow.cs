@@ -4,7 +4,7 @@ namespace KeyLoad.UnitTests.Features.BackupRestore;
 
 internal static class VerifiedBackupMixedCutFlow
 {
-    private const string Target = "mixed-cut-native-target";
+    private const string Target = "mixed-cut-execution-target";
 
     internal static async Task RunAsync(bool earlierJournal, CancellationToken token)
     {

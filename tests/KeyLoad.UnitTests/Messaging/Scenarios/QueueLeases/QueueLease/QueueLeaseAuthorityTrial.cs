@@ -22,18 +22,18 @@ internal static class QueueLeaseAuthorityTrial
         var database = QueueWholeFlowStorage.Open(reopened);
         await QueueLeaseAuthorityRefusals.RequireAsync(database, reopened, state, fault, damaged);
         reopened.Commit((tx, _) => { tx.Put(state.FaultKey, state.OriginalBytes); return true; });
-        await NativeReplayResultAssertions.Same<ReceiveResult>(database.Apply(state.Claim), state.Claimed);
+        await ReplayResultAssertions.Same<ReceiveResult>(database.Apply(state.Claim), state.Claimed);
         var original = database.Apply(state.Original);
         await QueueLeaseAuthorityPostimage.RequireAsync(database, reopened, state, original);
-        await NativeReplayResultAssertions.Same<CommitReceipt>(database.Apply(state.Original), original);
+        await ReplayResultAssertions.Same<CommitReceipt>(database.Apply(state.Original), original);
         await OriginalClaimAsync(database, reopened, state);
         var healthy = await QueueLeaseAuthorityHealthy.RunAsync(database, reopened, state);
         var completed = QueueWholeFlowStorage.Bytes(reopened);
         reopened.Dispose();
         using var cold = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         var restored = QueueWholeFlowStorage.Open(cold);
-        await NativeReplayResultAssertions.Same<CommitReceipt>(restored.Apply(state.Original), original);
-        await NativeReplayResultAssertions.Same<CommitReceipt>(QueueWholeFlowStorage.Apply(restored, OperationKind.Batch,
+        await ReplayResultAssertions.Same<CommitReceipt>(restored.Apply(state.Original), original);
+        await ReplayResultAssertions.Same<CommitReceipt>(QueueWholeFlowStorage.Apply(restored, OperationKind.Batch,
             state.Producer, state.Producer.CommandId, new DateTimeOffset(state.Original.Timestamp)), state.Produced);
         await OriginalClaimAsync(restored, cold, state);
         await QueueLeaseAuthorityHealthy.ReplayAsync(restored, cold, state, healthy);
@@ -46,7 +46,7 @@ internal static class QueueLeaseAuthorityTrial
         var replay = database.Apply(state.Claim);
         if (state.Kind == QueueLeaseAuthorityOperation.Renew)
         {
-            await NativeReplayResultAssertions.Same<ReceiveResult>(replay, state.Claimed);
+            await ReplayResultAssertions.Same<ReceiveResult>(replay, state.Claimed);
         }
         else
         {
@@ -56,6 +56,6 @@ internal static class QueueLeaseAuthorityTrial
         }
         var retained = store.Read(view => view.GetRecord<StoredOutcome>(KeySpace.PartitionOutcome(
             state.Lane.Partition, QueueLeaseAuthorityProtocol.Root, state.Claim.CommandId)))!;
-        await NativeReplayResultAssertions.Same<ReceiveResult>(retained.Result, state.Claimed);
+        await ReplayResultAssertions.Same<ReceiveResult>(retained.Result, state.Claimed);
     }
 }

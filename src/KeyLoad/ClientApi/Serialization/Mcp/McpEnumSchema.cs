@@ -3,7 +3,7 @@ using System.Text.Json.Schema;
 
 namespace KeyLoad.Server;
 
-/// <summary>Projects existing native string-enum metadata without narrowing canonical numeric or flags handling.</summary>
+/// <summary>Projects existing execution string-enum metadata without narrowing canonical numeric or flags handling.</summary>
 internal static class McpEnumSchema
 {
     private static readonly string[] Annotations =
@@ -13,13 +13,13 @@ internal static class McpEnumSchema
     {
         var underlying = Nullable.GetUnderlyingType(context.TypeInfo.Type);
         var type = underlying ?? context.TypeInfo.Type;
-        if (!type.IsEnum || schema is not JsonObject native)
+        if (!type.IsEnum || schema is not JsonObject execution)
         {
             return schema;
         }
         var outer = new JsonObject();
-        MoveAnnotations(native, outer);
-        var strings = input ? InputStrings(native) : native;
+        MoveAnnotations(execution, outer);
+        var strings = input ? InputStrings(execution) : execution;
         var branches = new JsonArray(strings, Integer(Enum.GetUnderlyingType(type)));
         if (underlying is not null)
         {
@@ -29,10 +29,10 @@ internal static class McpEnumSchema
         return outer;
     }
 
-    private static JsonObject InputStrings(JsonObject native)
+    private static JsonObject InputStrings(JsonObject execution)
     {
         var strings = new JsonObject { [McpSchemaKeywords.Type] = McpSchemaKeywords.String };
-        if (native[McpSchemaKeywords.Enum] is JsonArray names)
+        if (execution[McpSchemaKeywords.Enum] is JsonArray names)
         {
             strings[McpSchemaKeywords.Examples] = new JsonArray(names.Where(name => name is not null)
                 .Select(name => name!.DeepClone()).ToArray());
@@ -40,15 +40,15 @@ internal static class McpEnumSchema
         return strings;
     }
 
-    private static void MoveAnnotations(JsonObject native, JsonObject outer)
+    private static void MoveAnnotations(JsonObject execution, JsonObject outer)
     {
         foreach (var key in Annotations)
         {
-            if (!native.TryGetPropertyValue(key, out var value))
+            if (!execution.TryGetPropertyValue(key, out var value))
             {
                 continue;
             }
-            native.Remove(key);
+            execution.Remove(key);
             outer[key] = value;
         }
     }

@@ -6,71 +6,71 @@ using ModelContextProtocol.Protocol;
 
 namespace KeyLoad.UnitTests.Features.ClientApi;
 
-/// <summary>AC-MCP-003/005/007: a fresh native result retains injected metadata and exact message identity.</summary>
+/// <summary>AC-MCP-003/005/007: a fresh execution result retains injected metadata and exact message identity.</summary>
 internal sealed class McpResponseReplacementTests
 {
-    /// <summary>Replacement moves the original metadata node without copying old business payload or changing native identity.</summary>
+    /// <summary>Replacement moves the original metadata node without copying old business payload or changing execution identity.</summary>
     /// <param name="failure">Whether to replace with the genuine safe failure rather than success tool result.</param>
     [Test]
     [Arguments(false)]
     [Arguments(true)]
-    public async Task ReplacementPreservesNativeMetadataAndIdentity(bool failure)
+    public async Task ReplacementPreservesMetadataAndIdentity(bool failure)
     {
-        var metadata = McpNativeBoundaryTestData.Metadata();
+        var metadata = McpBoundaryTestData.Metadata();
         var originalMetadata = JsonSerializer.SerializeToUtf8Bytes(metadata, McpJsonUtilities.DefaultOptions);
         var oldResult = new JsonObject
         {
-            [McpNativeBoundaryTestData.OldPayloadField] = McpNativeBoundaryTestData.OldPayload,
-            [McpNativeBoundaryTestData.MetaField] = metadata
+            [McpBoundaryTestData.OldPayloadField] = McpBoundaryTestData.OldPayload,
+            [McpBoundaryTestData.MetaField] = metadata
         };
         var context = new JsonRpcMessageContext();
-        var identifier = new RequestId(McpOutputTestData.NativeIdentifier);
+        var identifier = new RequestId(McpOutputTestData.RuntimeIdentifier);
         var response = new JsonRpcResponse { Id = identifier, Context = context, Result = oldResult };
-        using var owner = McpNativeBoundaryTestData.Reply(failure);
+        using var owner = McpBoundaryTestData.Reply(failure);
         var tool = owner.ToolResult();
         var expected = JsonSerializer.SerializeToNode(tool, McpJsonUtilities.DefaultOptions)
-            ?? throw new InvalidOperationException(McpNativeBoundaryTestData.MissingNode);
+            ?? throw new InvalidOperationException(McpBoundaryTestData.MissingNode);
         McpResponseReplacement.Apply(response, tool);
         var replaced = response.Result as JsonObject
-            ?? throw new InvalidOperationException(McpNativeBoundaryTestData.MissingNode);
+            ?? throw new InvalidOperationException(McpBoundaryTestData.MissingNode);
         await Assert.That(replaced).IsNotSameReferenceAs(oldResult);
-        await Assert.That(replaced[McpNativeBoundaryTestData.MetaField]).IsSameReferenceAs(metadata);
+        await Assert.That(replaced[McpBoundaryTestData.MetaField]).IsSameReferenceAs(metadata);
         await Assert.That(metadata.Parent).IsSameReferenceAs(replaced);
-        await Assert.That(oldResult[McpNativeBoundaryTestData.MetaField]).IsNull();
+        await Assert.That(oldResult[McpBoundaryTestData.MetaField]).IsNull();
         await Assert.That(response.Context).IsSameReferenceAs(context);
         await Assert.That(response.Id).IsEqualTo(identifier);
         await Assert.That(JsonSerializer.SerializeToUtf8Bytes(metadata, McpJsonUtilities.DefaultOptions)
             .AsSpan().SequenceEqual(originalMetadata)).IsTrue();
-        await Assert.That(JsonNode.DeepEquals(replaced[McpNativeBoundaryTestData.ContentField],
-            expected[McpNativeBoundaryTestData.ContentField])).IsTrue();
-        await Assert.That(JsonNode.DeepEquals(replaced[McpNativeBoundaryTestData.StructuredContentField],
-            expected[McpNativeBoundaryTestData.StructuredContentField])).IsTrue();
-        await Assert.That(replaced[McpNativeBoundaryTestData.IsErrorField]?.GetValue<bool>()).IsEqualTo(failure);
+        await Assert.That(JsonNode.DeepEquals(replaced[McpBoundaryTestData.ContentField],
+            expected[McpBoundaryTestData.ContentField])).IsTrue();
+        await Assert.That(JsonNode.DeepEquals(replaced[McpBoundaryTestData.StructuredContentField],
+            expected[McpBoundaryTestData.StructuredContentField])).IsTrue();
+        await Assert.That(replaced[McpBoundaryTestData.IsErrorField]?.GetValue<bool>()).IsEqualTo(failure);
         await Assert.That(JsonSerializer.Serialize<JsonRpcMessage>(response, McpJsonUtilities.DefaultOptions))
-            .DoesNotContain(McpNativeBoundaryTestData.OldPayload);
+            .DoesNotContain(McpBoundaryTestData.OldPayload);
     }
 
-    /// <summary>Missing metadata or a null discarded result produces only the actual native serialization of the fresh tool result.</summary>
+    /// <summary>Missing metadata or a null discarded result produces only the actual execution serialization of the fresh tool result.</summary>
     /// <param name="nullResult">Whether the discarded response has no result node.</param>
     [Test]
     [Arguments(false)]
     [Arguments(true)]
-    public async Task ReplacementWithoutMetadataMatchesNativeToolResult(bool nullResult)
+    public async Task ReplacementWithoutMetadataMatchesToolResult(bool nullResult)
     {
         var oldResult = nullResult ? null : new JsonObject
         {
-            [McpNativeBoundaryTestData.OldPayloadField] = McpNativeBoundaryTestData.OldPayload
+            [McpBoundaryTestData.OldPayloadField] = McpBoundaryTestData.OldPayload
         };
-        var response = new JsonRpcResponse { Id = new RequestId(McpOutputTestData.NativeIdentifier), Result = oldResult };
-        using var owner = McpNativeBoundaryTestData.Reply(failure: true);
+        var response = new JsonRpcResponse { Id = new RequestId(McpOutputTestData.RuntimeIdentifier), Result = oldResult };
+        using var owner = McpBoundaryTestData.Reply(failure: true);
         var tool = owner.ToolResult();
         var expected = JsonSerializer.SerializeToNode(tool, McpJsonUtilities.DefaultOptions)
-            ?? throw new InvalidOperationException(McpNativeBoundaryTestData.MissingNode);
+            ?? throw new InvalidOperationException(McpBoundaryTestData.MissingNode);
         McpResponseReplacement.Apply(response, tool);
         await Assert.That(JsonNode.DeepEquals(response.Result, expected)).IsTrue();
-        await Assert.That(response.Result?[McpNativeBoundaryTestData.MetaField]).IsNull();
+        await Assert.That(response.Result?[McpBoundaryTestData.MetaField]).IsNull();
         await Assert.That(response.Context).IsNull();
         await Assert.That(JsonSerializer.Serialize<JsonRpcMessage>(response, McpJsonUtilities.DefaultOptions))
-            .DoesNotContain(McpNativeBoundaryTestData.OldPayload);
+            .DoesNotContain(McpBoundaryTestData.OldPayload);
     }
 }

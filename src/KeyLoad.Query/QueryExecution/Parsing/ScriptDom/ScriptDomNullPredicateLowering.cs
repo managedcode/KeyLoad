@@ -26,7 +26,7 @@ internal static class ScriptDomNullPredicateLowering
         }
 
         // ScriptDOM folds DISTINCT FROM NULL into BooleanIsNullExpression. Inspect
-        // only the original native operator span, never operand text or trivia text.
+        // only the original execution operator span, never operand text or trivia text.
         for (var index = operandEnd + NextTokenOffset; index <= test.LastTokenIndex; index++)
         {
             context.Check(depth);

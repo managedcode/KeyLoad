@@ -93,7 +93,7 @@ internal sealed class ScriptDomCompositionParameters(Dictionary<string, global::
         }
         if (positionalCount is { } count)
         {
-            if (expression is Dom.MoneyLiteral money && ScriptDomSyntax.TryGetNativeSessionSlot(money, count, out var slot))
+            if (expression is Dom.MoneyLiteral money && ScriptDomSyntax.TryGetSessionSlot(money, count, out var slot))
             {
                 return slot;
             }

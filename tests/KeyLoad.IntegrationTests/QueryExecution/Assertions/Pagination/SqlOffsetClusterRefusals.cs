@@ -1,5 +1,5 @@
 using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.ClusterRouting;
+using KeyLoad.IntegrationTests.Features.OrleansExecution;
 
 namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 
@@ -8,8 +8,8 @@ internal static class SqlOffsetClusterRefusals
     internal static async Task InvalidAsync(RequestCqrsClusterCallers callers, SqlOffsetClusterState state, CancellationToken token)
     {
         var original = SqlOffsetClusterProtocol.JoinRequest(state.Partition);
-        await Assert.That(original.Sql.EndsWith(NativeWindow, StringComparison.Ordinal)).IsTrue();
-        var ordered = original.Sql[..^NativeWindow.Length];
+        await Assert.That(original.Sql.EndsWith(RuntimeWindow, StringComparison.Ordinal)).IsTrue();
+        var ordered = original.Sql[..^RuntimeWindow.Length];
         foreach (var (sql, code) in new[]
         {
             (ordered + "OFFSET -1 ROWS FETCH NEXT 1 ROWS ONLY", ErrorCode.Validation),
@@ -71,6 +71,6 @@ internal static class SqlOffsetClusterRefusals
                 ErrorCode.PermissionDenied, dispatched: true);
         }
     }
-    private const string NativeWindow = "OFFSET 1 ROWS FETCH NEXT 1 ROWS ONLY";
+    private const string RuntimeWindow = "OFFSET 1 ROWS FETCH NEXT 1 ROWS ONLY";
 
 }

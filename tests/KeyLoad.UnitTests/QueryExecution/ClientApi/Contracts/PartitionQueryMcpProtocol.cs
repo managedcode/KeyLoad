@@ -3,11 +3,11 @@ namespace KeyLoad.UnitTests.Features.QueryExecution;
 internal static class PartitionQueryMcpProtocol
 {
     internal const string Tool = "keyload_query_partitions";
-    internal const string Route = "/v1/query/partitions";
-    internal const string RequestAlias = "keyload.contract.partition-query-request.v1";
-    internal const string RowAlias = "keyload.contract.partition-query-row.v1";
-    internal const string WitnessAlias = "keyload.contract.partition-query-leaf-witness.v1";
-    internal const string PageAlias = "keyload.contract.partition-query-page.v1";
+    internal const string Route = "/query/partitions";
+    internal const string RequestAlias = "keyload.contract.partition-query-request";
+    internal const string RowAlias = "keyload.contract.partition-query-row";
+    internal const string WitnessAlias = "keyload.contract.partition-query-leaf-witness";
+    internal const string PageAlias = "keyload.contract.partition-query-page";
     internal const string Version = "version";
     internal const string Partitions = "partitions";
     internal const string Query = "query";

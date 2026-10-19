@@ -1,6 +1,6 @@
 using KeyLoad.Server;
 using KeyLoad.Storage;
-using static KeyLoad.UnitTests.Features.StorageRecovery.NativeCapturedReadScopeScenario;
+using static KeyLoad.UnitTests.Features.StorageRecovery.CapturedReadScopeScenario;
 
 namespace KeyLoad.UnitTests.Features.StorageRecovery;
 
@@ -10,13 +10,13 @@ internal static class LiveRangeSelectedCancellationFlow
 
     internal static async Task RunAsync()
     {
-        NativeReadCutFixture? fixture = null;
+        ReadCutFixture? fixture = null;
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             fixture = new();
             Seed(fixture.Store);
-            var identity = Assertions.NativeReadCutStoreStateAssertions.SnapshotIdentity(fixture.Store);
+            var identity = Assertions.ReadCutStoreStateAssertions.SnapshotIdentity(fixture.Store);
             var position = fixture.Store.Position;
             foreach (var staged in new[] { false, true })
             {
@@ -38,7 +38,7 @@ internal static class LiveRangeSelectedCancellationFlow
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    private static async Task RequireDirectionAsync(NativeReadCutFixture fixture, StoreIdentity identity,
+    private static async Task RequireDirectionAsync(ReadCutFixture fixture, StoreIdentity identity,
         long position, bool staged, bool reverse)
     {
         foreach (var phase in Enum.GetValues<LiveRangeCancellationPhase>())

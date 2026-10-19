@@ -38,7 +38,7 @@ internal static class SubscriptionParkedRecoveryAssertions
         var saved = SubscriptionProcessingAtomicAssertions.OutcomeBytes(store, group, operation.CommandId);
         var cut = QueueWholeFlowStorage.Bytes(store);
         position = store.Position;
-        var identity = NativeSerialization.Serialize(store.Identity);
+        var identity = OrleansSerialization.Serialize(store.Identity);
         var replay = db.Apply(operation);
         await Assert.That(JsonSerializer.Serialize(replay, JsonDefaults.Options))
             .IsEqualTo(JsonSerializer.Serialize(failure, JsonDefaults.Options));
@@ -53,7 +53,7 @@ internal static class SubscriptionParkedRecoveryAssertions
     {
         var cut = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
-        var identity = NativeSerialization.Serialize(store.Identity);
+        var identity = OrleansSerialization.Serialize(store.Identity);
         var replay = db.Apply(operation);
         if (Errors.Code(original.Problem) is not null)
         {
@@ -64,15 +64,15 @@ internal static class SubscriptionParkedRecoveryAssertions
         }
         else if (original.Value is CommitReceipt)
         {
-            await NativeReplayResultAssertions.Same<CommitReceipt>(replay, original);
+            await ReplayResultAssertions.Same<CommitReceipt>(replay, original);
         }
         else if (original.Value is SubscriptionInfo)
         {
-            await NativeReplayResultAssertions.Same<SubscriptionInfo>(replay, original);
+            await ReplayResultAssertions.Same<SubscriptionInfo>(replay, original);
         }
         else
         {
-            await NativeReplayResultAssertions.Same<ReceiveSubscriptionResult>(replay, original);
+            await ReplayResultAssertions.Same<ReceiveSubscriptionResult>(replay, original);
         }
         await Assert.That(SubscriptionProcessingAtomicAssertions.OutcomeBytes(store, group, operation.CommandId)
             .AsSpan().SequenceEqual(saved)).IsTrue();
@@ -111,7 +111,7 @@ internal static class SubscriptionParkedRecoveryAssertions
     {
         var cut = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
-        var identity = NativeSerialization.Serialize(store.Identity);
+        var identity = OrleansSerialization.Serialize(store.Identity);
         var result = db.Apply(operation);
         await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.TokenInvalidated);
         await Assert.That(result.Problem?.Detail).IsEqualTo("The cached receive belongs to an earlier subscription generation.");
@@ -119,8 +119,8 @@ internal static class SubscriptionParkedRecoveryAssertions
         await Assert.That(result.Value).IsNull();
         var retained = SubscriptionProcessingAtomicAssertions.OutcomeBytes(store, group, operation.CommandId);
         await Assert.That(retained.AsSpan().SequenceEqual(saved)).IsTrue();
-        await NativeReplayResultAssertions.Same<ReceiveSubscriptionResult>(
-            NativeSerialization.Deserialize<StoredOutcome>(retained).Result, original);
+        await ReplayResultAssertions.Same<ReceiveSubscriptionResult>(
+            OrleansSerialization.Deserialize<StoredOutcome>(retained).Result, original);
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, cut, position, identity);
     }
 }

@@ -99,7 +99,7 @@ internal static class ScaleServerMountReader
         }
 
         var endpoint = await ScaleServerResourceProcess.RunAsync(Docker,
-            [ArgumentsText, IsLocalDockerAsyncArgumentsText, FormatArgument, ContextFormat], budget, token, budget.Settings.MaxNativeOutputBytes);
+            [ArgumentsText, IsLocalDockerAsyncArgumentsText, FormatArgument, ContextFormat], budget, token, budget.Settings.MaxOutputBytes);
         return endpoint?.Trim().StartsWith(UnixPrefix, StringComparison.Ordinal) == true;
     }
 
@@ -122,7 +122,7 @@ internal static class ScaleServerMountReader
 
         var json = await ScaleServerResourceProcess.RunAsync(Findmnt,
             [ArgumentsText, ReadActualMountAsyncArgumentsText, TargetArgument, canonicalSource, OutputArgument, FindmntOutput], budget, token,
-            budget.Settings.MaxNativeOutputBytes);
+            budget.Settings.MaxOutputBytes);
         if (json is null)
         {
             return null;

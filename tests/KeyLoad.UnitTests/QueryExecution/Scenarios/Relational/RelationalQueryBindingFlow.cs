@@ -45,7 +45,7 @@ internal static class RelationalQueryBindingFlow
         await cancelled.CancelAsync();
         var image = SqlInnerJoinRetainedIdentityFlow.Image(fixture.Store);
         var position = fixture.Store.Position;
-        var identity = NativeSerialization.Serialize(fixture.Store.Identity);
+        var identity = OrleansSerialization.Serialize(fixture.Store.Identity);
         var error = Assert.ThrowsExactly<OperationCanceledException>(() => engine.Execute(Reader,
             new(fixture.Partition, Projection, AllowFullScan: true), cancellationToken: cancelled.Token));
         await Assert.That(error.CancellationToken).IsEqualTo(cancelled.Token);

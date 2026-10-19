@@ -10,7 +10,7 @@ internal static class ChunkMultiblockClusterPages
     private const long AbsentCut = 0;
 
     internal static ReadSampleChunkWindowRequest Request(ChunkMultiblockClusterState state)
-        => new(state.Scenario.Native.Partition, TimeSeriesClusterScenario.Set, TimeSeriesClusterScenario.Series,
+        => new(state.Scenario.Execution.Partition, TimeSeriesClusterScenario.Set, TimeSeriesClusterScenario.Series,
             state.Scenario.WindowId, null, null, Limit);
 
     internal static async Task RequireAsync(ChunkMultiblockClusterState state, KeyLoadClient sdk,
@@ -24,7 +24,7 @@ internal static class ChunkMultiblockClusterPages
         await WindowAsync(state, await SqlClusterProtocol.SdkAsync<SampleChunkWindowResult>(sdk, call, token));
         await WindowAsync(state, await SqlClusterProtocol.McpAsync<SampleChunkWindowResult>(mcp, call, token));
         await SampleChunkRetentionClusterReadOracle.RawAsync(sdk, mcp,
-            new(state.Scenario.Native.Partition, TimeSeriesClusterScenario.Set, TimeSeriesClusterScenario.Series,
+            new(state.Scenario.Execution.Partition, TimeSeriesClusterScenario.Set, TimeSeriesClusterScenario.Series,
                 state.Scenario.From, state.Scenario.Until, Limit),
             [.. ChunkMultiblockClusterExpected.Visible(state.Expired, state.Healthy, state.Opened)], token);
     }

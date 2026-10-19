@@ -18,7 +18,7 @@ Scope: recognizable shared icons for the public landing and operational console,
 | Criterion | Pass condition; negative/edge behavior | Verification |
 | --- | --- | --- |
 | AC-SEO-001 | Canonical console `logo.svg` and site `favicon.svg` remain unchanged and byte-identical. Six derived binary files are identical across surfaces and emitted output: ICO with bounded 16/32/48 frames; square PNG32/96/180/192/512. Both heads reference SVG, ICO, PNG32/96 and touch180. Landing manifest references local192/512 with scope/start URL `./` and display `browser`. Missing, conflicting or incorrectly sized assets fail. | `SiteMetadataTests` validates actual source/build bytes, formats, dimensions and head references. |
-| AC-SEO-002 | Real built initial HTML has exactly one nonempty title/description, www HTTPS canonical, index/large-preview robots and canonical theme color. Complete OG website/title/description/site_name/url/locale/image/type/1200×630/alt and Twitter large-card/title/description/image/alt agree. Image URL is `https://www.keyload.cloud/og-image.png`. No localhost, conflicting fields, credentials or unsupported readiness/performance claims. Existing H1/navigation/body hooks remain. | `SiteMetadataTests` parses the actual builder head; native browser/manual review retains readable output. |
+| AC-SEO-002 | Real built initial HTML has exactly one nonempty title/description, www HTTPS canonical, index/large-preview robots and canonical theme color. Complete OG website/title/description/site_name/url/locale/image/type/1200×630/alt and Twitter large-card/title/description/image/alt agree. Image URL is `https://www.keyload.cloud/og-image.png`. No localhost, conflicting fields, credentials or unsupported readiness/performance claims. Existing H1/navigation/body hooks remain. | `SiteMetadataTests` parses the actual builder head; browser/manual review retains readable output. |
 | AC-SEO-003 | Valid schema.org JSON-LD describes WebSite and SoftwareSourceCode with stable IDs, actual name/URL/GitHub/C#/Elastic License 2.0 with the canonical root license URL. Invented offers, ratings, reviews and search actions are absent. Generated robots/sitemap use the same canonical, allow icon/card fetches, and exclude admin. | Real-output HTML/JSON-LD/robots/sitemap assertions in `SiteMetadataTests`. |
 | AC-SEO-004 | Editable `assets/og-image.svg` and real PNG1200×630 under300KiB use the existing K/palette and readable product message. No measurements or screenshot artifacts. Root `og-image.png` is the exact source PNG. Every manifest/head asset exists. | Signature/IHDR/size/exact-byte assertions; subjective full-size and reduced composition is a manual ADR040/053 exception. |
 | AC-SEO-005 | Builder checks every added source as a regular confined asset before output. Missing/symlink icon or card is rejected without partial output. Existing immutable report/vendor hashes, output confinement and JS/CSS budgets remain mandatory. | `SiteMetadataRejectionTests` mutates isolated source copies and invokes the real builder with authentic reports; existing SiteBuildTests remain. |
@@ -60,11 +60,11 @@ flowchart LR
 Acceptance explicitly covers missing/symlink files, invalid dimensions, metadata conflicts, long-text preview readability and unauthorized/unknown routes. Qualification remains GitHub-only. Local development builds and visual inspection are manual/design evidence and do not prove provider cache refresh, indexing, full tests, coverage or publication.
 
 The canonical ICO contains three PNG-backed frames. Its file header type is1;
-entry byte2 is color count0 and byte3 is reserved0. The native generated entries
+entry byte2 is color count0 and byte3 is reserved0. The generated entries
 have planes0/bits32 and8-bit RGBA PNG payloads. AC-SEO-001 checks these actual
 fields, frame boundaries, dimensions and exact bytes across all three surfaces.
 The [Microsoft directory structure](https://devblogs.microsoft.com/oldnewthing/20101018-00/?p=12513),
 [PNG icon format](https://devblogs.microsoft.com/oldnewthing/20101022-00/?p=12473)
-and [Pillow native ICO writer](https://github.com/python-pillow/Pillow/blob/main/src/PIL/IcoImagePlugin.py)
+and [Pillow ICO writer](https://github.com/python-pillow/Pillow/blob/main/src/PIL/IcoImagePlugin.py)
 support the format distinction. REQ-BC-FAIL-016 (ADR-080) defines the assertion; canonical icon assets remain
 byte-identical.

@@ -1,6 +1,6 @@
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
-/// <summary>Named structural fields of the original session envelope and its explicit native startup inputs.</summary>
+/// <summary>Named structural fields of the original session envelope and its explicit execution startup inputs.</summary>
 internal static class BenchmarkSessionEvidenceKeys
 {
     internal const string SchemaVersion = "schemaVersion";
@@ -16,7 +16,7 @@ internal static class BenchmarkSessionEvidenceKeys
     internal const string Workflow = "workflow";
     internal const string Cases = "cases";
     internal const string OuterRuntime = "outerRuntime";
-    internal const string NativeReport = "nativeReport";
+    internal const string RuntimeReport = "runtimeReport";
     internal const string QualificationReport = "qualificationReport";
     internal const string ResourceReport = "resourceReport";
     internal const string Outcome = "outcome";
@@ -28,8 +28,8 @@ internal static class BenchmarkSessionEvidenceKeys
     internal const string VerifiedRecords = "verifiedRecords";
     internal const string Lanes = "lanes";
     internal const string Detail = "detail";
-    internal const string NativeTestName = "testName";
-    internal const string NativeResultElement = "UnitTestResult";
+    internal const string RuntimeTestName = "testName";
+    internal const string ResultElement = "UnitTestResult";
     internal const string SessionEnvironment = "Benchmarks__SessionId";
     internal const string ProfileEnvironment = "Benchmarks__EvidenceProfile";
     internal const string SourceEnvironment = "Benchmarks__SourceRevision";
@@ -43,8 +43,8 @@ internal static class BenchmarkSessionEvidenceKeys
     internal const string WorkflowEnvironment = "GITHUB_WORKFLOW";
     internal const string ShaEnvironment = "GITHUB_SHA";
     internal const string JobEnvironment = "KEYLOAD_COMPARISON_JOB_ID";
-    internal const string FirstEndpointEnvironment = "Benchmarks__Native__Endpoints__0";
+    internal const string FirstEndpointEnvironment = "Benchmarks__Execution__Endpoints__0";
     internal const string OperationsEnvironment = "Benchmarks__Operations";
     internal const string WarmupEnvironment = "Benchmarks__Warmup";
-    internal const string ApiKeyEnvironment = "Benchmarks__Native__ApiKey";
+    internal const string ApiKeyEnvironment = "Benchmarks__Execution__ApiKey";
 }

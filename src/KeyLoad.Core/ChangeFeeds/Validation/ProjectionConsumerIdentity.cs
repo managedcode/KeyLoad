@@ -40,7 +40,7 @@ public sealed partial class DatabaseEngine
 
     private static ProjectionConsumerInfo RequireProjectionConsumerRecord(KeyValueRecord record, PartitionRef partition)
     {
-        var state = NativeSerialization.Deserialize<ProjectionConsumerInfo>(record.Value.Span)
+        var state = OrleansSerialization.Deserialize<ProjectionConsumerInfo>(record.Value.Span)
             ?? throw Errors.Fail(ErrorCode.Corruption, InvalidConsumerIdentity);
         if (state.Consumer is null || state.Consumer.Partition != partition || !record.Key.Span.SequenceEqual(ConsumerKey(state.Consumer)))
         {

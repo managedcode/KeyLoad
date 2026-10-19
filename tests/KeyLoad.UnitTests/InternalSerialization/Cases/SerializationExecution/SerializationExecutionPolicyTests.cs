@@ -6,7 +6,7 @@ using KeyLoad.Features.ResourceExecution;
 
 namespace KeyLoad.UnitTests.Features.InternalSerialization;
 
-/// <summary>AC-IS-003/007: native serializers preserve canonical bytes across buffer boundaries.</summary>
+/// <summary>AC-IS-003/007: execution serializers preserve canonical bytes across buffer boundaries.</summary>
 internal sealed class SerializationExecutionPolicyTests
 {
     [Test]
@@ -26,9 +26,9 @@ internal sealed class SerializationExecutionPolicyTests
         var following = PooledJsonText.Deserialize<Dictionary<string, string>>("{\"other\":\"following\"}");
         await Assert.That(following[FollowingKey]).IsEqualTo("following");
         await Assert.That(JsonDefaults.Serialize(decoded).SequenceEqual(json)).IsTrue();
-        await Assert.That(NativeSerialization.Serialize(decoded[TextKey]).SequenceEqual(
-            NativeSerialization.Serialize(payload))).IsTrue();
-        var id = new Guid(NativeFingerprintFixtures.Id);
+        await Assert.That(OrleansSerialization.Serialize(decoded[TextKey]).SequenceEqual(
+            OrleansSerialization.Serialize(payload))).IsTrue();
+        var id = new Guid(FingerprintFixtures.Id);
         const string Principal = "root界\\\"😀";
         var authored = payload + "\uD800";
         var fingerprint = JsonData.Fingerprint(new
@@ -48,11 +48,11 @@ internal sealed class SerializationExecutionPolicyTests
     [Arguments(4096)]
     public async Task DomSegmentsPreserveWholeStringEscapingAndSurrogateProgressAsync(int boundaryCharacters)
     {
-        var owner = new NativeDomStringSizes();
+        var owner = new DomStringSizes();
         var boundary = new string('x', boundaryCharacters - 1);
         foreach (var text in new[]
         {
-            string.Empty, NativeDomFixtures.EscapedText, boundary + "🙂" + NativeDomFixtures.EscapedText
+            string.Empty, DomFixtures.EscapedText, boundary + "🙂" + DomFixtures.EscapedText
         })
         {
             var expected = (long)JsonEncodedText.Encode(text).EncodedUtf8Bytes.Length;
@@ -65,22 +65,22 @@ internal sealed class SerializationExecutionPolicyTests
     [Arguments(4095)]
     [Arguments(4097)]
     [Arguments(4096)]
-    public async Task DomSegmentsRejectMalformedUtf16WithNativeFailureAsync(int boundaryCharacters)
+    public async Task DomSegmentsRejectMalformedUtf16WithFailureAsync(int boundaryCharacters)
     {
-        var owner = new NativeDomStringSizes();
+        var owner = new DomStringSizes();
         var boundary = new string('x', boundaryCharacters - 1);
         foreach (var text in new[] { "\uD800", "\uDC00", boundary + "\uD800\uD800\uDC00\uDC00" + boundary })
         {
-            var native = Assert.ThrowsExactly<ArgumentException>(() => JsonEncodedText.Encode(text));
+            var execution = Assert.ThrowsExactly<ArgumentException>(() => JsonEncodedText.Encode(text));
             var actual = Assert.ThrowsExactly<ArgumentException>(() => owner.Escaped(text));
             var repeated = Assert.ThrowsExactly<ArgumentException>(() => owner.Escaped(text));
-            await Assert.That(actual.Message).IsEqualTo(native.Message);
-            await Assert.That(actual.ParamName).IsEqualTo(native.ParamName);
+            await Assert.That(actual.Message).IsEqualTo(execution.Message);
+            await Assert.That(actual.ParamName).IsEqualTo(execution.ParamName);
             await Assert.That(actual.InnerException is EncoderFallbackException).IsTrue();
-            await Assert.That(native.InnerException is EncoderFallbackException).IsTrue();
-            await Assert.That(repeated.Message).IsEqualTo(native.Message);
+            await Assert.That(execution.InnerException is EncoderFallbackException).IsTrue();
+            await Assert.That(repeated.Message).IsEqualTo(execution.Message);
         }
-        var following = boundary + "🙂" + NativeDomFixtures.EscapedText;
+        var following = boundary + "🙂" + DomFixtures.EscapedText;
         var expected = (long)JsonEncodedText.Encode(following).EncodedUtf8Bytes.Length;
         await Assert.That(owner.Escaped(following)).IsEqualTo(expected);
         await Assert.That(owner.Escaped(following)).IsEqualTo(expected);

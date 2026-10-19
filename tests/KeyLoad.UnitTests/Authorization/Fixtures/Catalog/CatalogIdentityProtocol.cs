@@ -9,8 +9,8 @@ internal static class CatalogIdentityProtocol
     internal const string Collection = "identity-records";
     internal const string Row = "record";
     internal const string Key = "identity-key";
-    internal const string Secret = "identity-key.native-owned-matrix-credential";
-    internal const string WrongSecret = "identity-key.native-owned-wrong-credential";
+    internal const string Secret = "identity-key.execution-owned-matrix-credential";
+    internal const string WrongSecret = "identity-key.execution-owned-wrong-credential";
     internal const string Original = "{\"public\":\"open\",\"secret\":\"CANARY\"}";
     internal const string Current = "{\"public\":\"closed\",\"secret\":\"CANARY\"}";
     internal const string Hidden = "{\"public\":\"open\"}";

@@ -27,7 +27,7 @@ internal static class RecurringSagaStorage
     internal static RecurringSagaCapacity RequireCapacity(IKeyValueView view, QueueLaneRef lane)
         => Require(view.GetRecord<RecurringSagaCapacity>(CapacityKey(lane)));
 
-    internal static long SerializedBytes<T>(T value) => NativeSerialization.Serialize(value).LongLength;
+    internal static long SerializedBytes<T>(T value) => OrleansSerialization.Serialize(value).LongLength;
 
     internal static RecurringSagaCapacity Add(RecurringSagaCapacity current, long bytes, DatabaseLimits limits)
     {

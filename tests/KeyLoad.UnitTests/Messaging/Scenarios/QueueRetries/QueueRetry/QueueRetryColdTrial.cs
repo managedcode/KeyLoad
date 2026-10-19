@@ -72,11 +72,11 @@ internal static class QueueRetryColdTrial
 
     private static async Task ReplayAsync(DatabaseEngine database, QueueRetryColdState state, DateTimeOffset time)
     {
-        await NativeReplayResultAssertions.Same<CommitReceipt>(QueueWholeFlowStorage.Apply(database, OperationKind.Batch,
+        await ReplayResultAssertions.Same<CommitReceipt>(QueueWholeFlowStorage.Apply(database, OperationKind.Batch,
             state.Enqueue, state.Enqueue.CommandId, time), state.Enqueued);
         if (state.Healthy is { } healthy)
         {
-            await NativeReplayResultAssertions.Same<CommitReceipt>(QueueWholeFlowStorage.Apply(database, OperationKind.Batch,
+            await ReplayResultAssertions.Same<CommitReceipt>(QueueWholeFlowStorage.Apply(database, OperationKind.Batch,
                 healthy.Command, healthy.Command.CommandId, time), healthy.Result);
         }
         if (state.Rejected is { } rejected)
@@ -85,13 +85,13 @@ internal static class QueueRetryColdTrial
                 rejected.Command.CommandId, time);
             await Assert.That(Errors.Code(actual.Problem)).IsEqualTo(Errors.Code(rejected.Result.Problem));
             await Assert.That(actual.Problem?.Detail).IsEqualTo(rejected.Result.Problem?.Detail);
-            await Assert.That(NativeSerialization.Serialize(actual).AsSpan()
-                .SequenceEqual(NativeSerialization.Serialize(rejected.Result))).IsTrue();
+            await Assert.That(OrleansSerialization.Serialize(actual).AsSpan()
+                .SequenceEqual(OrleansSerialization.Serialize(rejected.Result))).IsTrue();
             await Assert.That(actual.Value).IsNull();
         }
         foreach (var original in state.Completed)
         {
-            await NativeReplayResultAssertions.Same<CommitReceipt>(QueueWholeFlowStorage.Apply(database, OperationKind.Delivery,
+            await ReplayResultAssertions.Same<CommitReceipt>(QueueWholeFlowStorage.Apply(database, OperationKind.Delivery,
                 original.Command, original.Command.CommandId, time), original.Result);
         }
     }

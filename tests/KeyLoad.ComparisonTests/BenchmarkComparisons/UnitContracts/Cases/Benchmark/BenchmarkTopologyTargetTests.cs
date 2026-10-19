@@ -18,7 +18,7 @@ internal sealed class BenchmarkTopologyTargetTests
     public async Task AcIso004DefaultTargetRetainsItsRequiredClusterContract()
     {
         using var http = new HttpClient();
-        await using var target = new KeyLoadTarget(http, ApiKey, RunId, UnitBenchmarkOptions.Lifecycle(), UnitBenchmarkOptions.Native(), UnitBenchmarkOptions.Diagnostics(), UnitBenchmarkOptions.KeyLoadAdmission(), UnitClientOptions.Execution(), UnitClientOptions.Translation());
+        await using var target = new KeyLoadTarget(http, ApiKey, RunId, UnitBenchmarkOptions.Lifecycle(), UnitBenchmarkOptions.Execution(), UnitBenchmarkOptions.Diagnostics(), UnitBenchmarkOptions.KeyLoadAdmission(), UnitClientOptions.Execution(), UnitClientOptions.Translation());
         await Assert.That(target.Profile.Topology).IsEqualTo(ClusterTopology);
         await Assert.That(target.Profile.ReadContract).Contains(DatabaseReadCut);
         await Assert.That(target.Profile.Cluster).IsNull();
@@ -30,7 +30,7 @@ internal sealed class BenchmarkTopologyTargetTests
         string silos, string copies)
     {
         using var http = new HttpClient();
-        await using var target = new KeyLoadTarget(http, ApiKey, RunId, UnitBenchmarkOptions.Lifecycle(), UnitBenchmarkOptions.Native(), UnitBenchmarkOptions.Diagnostics(), UnitBenchmarkOptions.KeyLoadAdmission(), UnitClientOptions.Execution(), UnitClientOptions.Translation(), expectedNodes: nodes);
+        await using var target = new KeyLoadTarget(http, ApiKey, RunId, UnitBenchmarkOptions.Lifecycle(), UnitBenchmarkOptions.Execution(), UnitBenchmarkOptions.Diagnostics(), UnitBenchmarkOptions.KeyLoadAdmission(), UnitClientOptions.Execution(), UnitClientOptions.Translation(), expectedNodes: nodes);
         await Assert.That(target.Profile.Topology).Contains(silos);
         await Assert.That(target.Profile.Topology).Contains(copies);
         await Assert.That(target.Profile.ReadContract).Contains(DatabaseReadCut);
@@ -48,7 +48,7 @@ internal sealed class BenchmarkTopologyTargetTests
         using var http = new HttpClient();
         var error = await Assert.ThrowsExactlyAsync<ArgumentOutOfRangeException>(async () =>
         {
-            await using var target = new KeyLoadTarget(http, ApiKey, RunId, UnitBenchmarkOptions.Lifecycle(), UnitBenchmarkOptions.Native(), UnitBenchmarkOptions.Diagnostics(), UnitBenchmarkOptions.KeyLoadAdmission(), UnitClientOptions.Execution(), UnitClientOptions.Translation(), expectedNodes: nodes);
+            await using var target = new KeyLoadTarget(http, ApiKey, RunId, UnitBenchmarkOptions.Lifecycle(), UnitBenchmarkOptions.Execution(), UnitBenchmarkOptions.Diagnostics(), UnitBenchmarkOptions.KeyLoadAdmission(), UnitClientOptions.Execution(), UnitClientOptions.Translation(), expectedNodes: nodes);
         });
         await Assert.That(error!.ParamName).IsEqualTo(ExpectedNodesParameter);
     }

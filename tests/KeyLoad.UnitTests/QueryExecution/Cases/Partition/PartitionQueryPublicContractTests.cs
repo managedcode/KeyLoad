@@ -13,8 +13,8 @@ internal sealed class PartitionQueryPublicContractTests
         fixture.AddRows(fixture.Second, new PartitionQueryPublicSeed("same", 1, "second"));
         var request = PartitionQueryPublicTestSupport.Request([fixture.Second, fixture.First], 2);
         var result = Run(fixture, request);
-        var bytes = NativeSerialization.Serialize(result);
-        var roundTrip = NativeSerialization.Deserialize<PartitionQueryPageV1>(bytes);
+        var bytes = OrleansSerialization.Serialize(result);
+        var roundTrip = OrleansSerialization.Deserialize<PartitionQueryPage>(bytes);
 
         await Assert.That(roundTrip.Version).IsEqualTo(1);
         await Assert.That(roundTrip.Complete).IsTrue();
@@ -24,7 +24,7 @@ internal sealed class PartitionQueryPublicContractTests
         await Assert.That(roundTrip.Leaves.Select(leaf => leaf.Partition).SequenceEqual([fixture.First, fixture.Second])).IsTrue();
         await Assert.That(roundTrip.Leaves.All(leaf => leaf.CutPosition > 0 && leaf.PolicyEpoch > 0
             && leaf.SchemaVersion > 0 && leaf.AccessPath.Length > 0)).IsTrue();
-        await Assert.That(NativeSerialization.Serialize(roundTrip).SequenceEqual(bytes)).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(roundTrip).SequenceEqual(bytes)).IsTrue();
     }
 
     [Test]
@@ -79,8 +79,8 @@ internal sealed class PartitionQueryPublicContractTests
         await Assert.That(fixture.Position).IsEqualTo(position);
     }
 
-    private static PartitionQueryPageV1 Run(PartitionQueryPublicTestSupport fixture,
-        PartitionQueryRequestV1 request, string principalId = "root")
+    private static PartitionQueryPage Run(PartitionQueryPublicTestSupport fixture,
+        PartitionQueryRequest request, string principalId = "root")
         => new QueryEngine(fixture.Database, UnitExecutionOptions.QueryExecution()).QueryPartitions(principalId, request,
             fixture.ExpectedOwner);
 }

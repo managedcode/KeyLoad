@@ -25,7 +25,7 @@ internal static class BackupCreateSourceAccessAssertions
                 Convert.ToHexString(row.Key.Span) + ":" + Convert.ToHexString(row.Value.Span)).ToArray());
         });
         await Assert.That(current.HasMore).IsFalse();
-        await NativeBackupJournalRepairAssertions.SameCutAsync(original,
+        await BackupJournalRepairAssertions.SameCutAsync(original,
             (current.Identity, current.Position, current.Rows));
     }
 
@@ -42,11 +42,11 @@ internal static class BackupCreateSourceAccessAssertions
         await Assert.That(Directory.EnumerateFileSystemEntries(candidate).Any()).IsFalse();
     }
 
-    internal static async Task RestoredAsync(NativeBackupCutFixture fixture, CliBackupRestoreProcessResult result,
+    internal static async Task RestoredAsync(BackupCutFixture fixture, CliBackupRestoreProcessResult result,
         CancellationToken token)
     {
-        var current = NativeBackupJournalRepairAssertions.Read(fixture.Destination, token);
+        var current = BackupJournalRepairAssertions.Read(fixture.Destination, token);
         await CliBackupJournalRepairAssertions.ReceiptAsync(result, current.Identity);
-        await NativeBackupJournalRepairAssertions.RestoredAsync(fixture, current.Identity, current);
+        await BackupJournalRepairAssertions.RestoredAsync(fixture, current.Identity, current);
     }
 }

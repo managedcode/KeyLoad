@@ -7,7 +7,7 @@ namespace KeyLoad;
 /// <param name="StreamId">The stream identifier when the source is a stream.</param>
 /// <param name="Generation">The source generation used to detect replacement.</param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.EventSourceRef)]
+[Orleans.Alias(ContractAliases.EventSourceRef)]
 public sealed record EventSourceRef([property: Orleans.Id(0)] PartitionRef Partition, [property: Orleans.Id(1)] string Resource, [property: Orleans.Id(2)] EventSourceKind Kind, [property: Orleans.Id(3)] string? StreamId = null, [property: Orleans.Id(4)] long Generation = EventSourceRef.DefaultGeneration)
 {
     private const int DefaultGeneration = 1;

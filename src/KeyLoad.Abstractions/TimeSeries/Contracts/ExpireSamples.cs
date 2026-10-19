@@ -6,7 +6,7 @@ namespace KeyLoad;
 /// <param name="Before">Samples strictly before this trusted cutoff become unavailable.</param>
 /// <param name="MaximumDeletes">Maximum expired records removed in this atomic command.</param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.ExpireSamples)]
+[Orleans.Alias(ContractAliases.ExpireSamples)]
 public sealed record ExpireSamples([property: Orleans.Id(0)] string SeriesSet,
     [property: Orleans.Id(1)] string SeriesId, [property: Orleans.Id(2)] DateTimeOffset Before,
     [property: Orleans.Id(3)] int MaximumDeletes = SampleRetentionDefaults.DefaultDeletes) : Mutation(SeriesSet);

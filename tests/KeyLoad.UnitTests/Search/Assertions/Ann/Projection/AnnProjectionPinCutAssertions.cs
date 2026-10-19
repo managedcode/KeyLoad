@@ -48,8 +48,8 @@ internal static class AnnProjectionPinCutAssertions
         await Assert.That(applied.Checkpoint).IsEqualTo(seedTail);
         await Assert.That(applied.Receipt.Mutations.Length).IsZero();
         await Assert.That(applied.AlreadyProcessed).IsFalse();
-        await Assert.That(NativeSerialization.Serialize(replayed)
-            .SequenceEqual(NativeSerialization.Serialize(applied))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(replayed)
+            .SequenceEqual(OrleansSerialization.Serialize(applied))).IsTrue();
         await Assert.That(replayed.Receipt.Token).IsEqualTo(applied.Receipt.Token);
         await Assert.That(database.Store.Position).IsEqualTo(afterApplyPosition);
     }

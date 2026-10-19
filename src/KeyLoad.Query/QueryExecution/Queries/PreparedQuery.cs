@@ -120,7 +120,7 @@ internal sealed class PreparedQuery
         return page;
     }
 
-    internal ImmutableArray<PartitionQueryCandidateV1> DrainCandidates(int limit, ReadExecutionBudget budget,
+    internal ImmutableArray<PartitionQueryCandidate> DrainCandidates(int limit, ReadExecutionBudget budget,
         Action<long> reserveArray, Action releaseHeap)
     {
         if (!ordinalFullReferenceOrder)
@@ -130,7 +130,7 @@ internal sealed class PreparedQuery
 
         var count = Math.Min(limit, rowCount);
         reserveArray(PartitionQueryRetention.CandidateArrayBytes(count));
-        var candidates = ImmutableArray.CreateBuilder<PartitionQueryCandidateV1>(count);
+        var candidates = ImmutableArray.CreateBuilder<PartitionQueryCandidate>(count);
         candidates.Count = count;
         for (var index = count - AdjacentElementOffset; index >= EmptyElementCount; index--)
         {
@@ -153,7 +153,7 @@ internal sealed class PreparedQuery
         reserveCandidate!(retainedBytes);
         var keys = ImmutableArray.CreateRange(pendingKeys.Select(static key =>
             ImmutableCollectionsMarshal.AsImmutableArray(key)));
-        var candidate = new PartitionQueryCandidateV1(VersionOne, row.Document.Reference, projected, keys);
+        var candidate = new PartitionQueryCandidate(VersionOne, row.Document.Reference, projected, keys);
         var retained = row with
         {
             SourceDocument = null,

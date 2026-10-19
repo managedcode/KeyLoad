@@ -28,7 +28,7 @@ internal static class QueueDeadlinePoisonPrefixAssertions
         await Assert.That(cursor.Scheduled.UpperKey!.Value.AsSpan().SequenceEqual(expected)).IsTrue();
         var original = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
-        var identity = NativeSerialization.Serialize(store.Identity);
+        var identity = OrleansSerialization.Serialize(store.Identity);
         using var cancelled = new CancellationTokenSource();
         await cancelled.CancelAsync();
         await Assert.ThrowsAsync<OperationCanceledException>(() => Task.FromResult(
@@ -53,7 +53,7 @@ internal static class QueueDeadlinePoisonPrefixAssertions
             KeySpace.Partition(QueueDeadlinePoisonPrefixProtocol.Body, lane.Partition, lane.Queue, scheduled.MessageId)))).IsEqualTo(scheduledBody);
         await Assert.That(database.Store.Read(view => view.GetRecord<MessageBody>(
             KeySpace.Partition(QueueDeadlinePoisonPrefixProtocol.Body, lane.Partition, lane.Queue, originalLease.MessageId)))).IsEqualTo(leasedBody);
-        var bodyBytes = NativeSerialization.Serialize(scheduledBody).Length + NativeSerialization.Serialize(leasedBody).Length;
+        var bodyBytes = OrleansSerialization.Serialize(scheduledBody).Length + OrleansSerialization.Serialize(leasedBody).Length;
         await Assert.That(database.Store.Read(view => view.GetRecord<QueueCounters>(
             KeySpace.Partition(QueueDeadlinePoisonPrefixProtocol.Counters, lane.Partition, lane.Queue))))
             .IsEqualTo(new QueueCounters(QueueDeadlinePoisonPrefixProtocol.Second, bodyBytes, QueueDeadlinePoisonPrefixProtocol.Initial, QueueDeadlinePoisonPrefixProtocol.Initial, QueueDeadlinePoisonPrefixProtocol.FinalReadySequence));

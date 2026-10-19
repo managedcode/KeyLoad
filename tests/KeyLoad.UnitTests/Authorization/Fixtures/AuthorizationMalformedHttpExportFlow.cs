@@ -17,7 +17,7 @@ internal static class AuthorizationMalformedHttpExportFlow
         using var deadline = fixture.Deadline();
         using (var caller = new AuthorizationTelemetryCallerActivities(AuthorizationUnsafeSpanState.None))
         {
-            await AuthorizationTelemetryNativeAssertions.CallerAsync(caller);
+            await RuntimeAuthorizationTelemetryAssertions.CallerAsync(caller);
             using var invalid = await SendAsync(fixture, payload, malformed: true, deadline.Token);
             await AuthorizationMalformedHttpExportAssertions.ProblemAsync(invalid, deadline.Token);
         }
@@ -26,7 +26,7 @@ internal static class AuthorizationMalformedHttpExportFlow
         var repaired = AuthorizationTelemetryPolicyRepair.Capture(fixture.Database);
         using (var caller = new AuthorizationTelemetryCallerActivities(AuthorizationUnsafeSpanState.None))
         {
-            await AuthorizationTelemetryNativeAssertions.CallerAsync(caller);
+            await RuntimeAuthorizationTelemetryAssertions.CallerAsync(caller);
             using var healthy = await SendAsync(fixture, payload with
             {
                 AfterName = null

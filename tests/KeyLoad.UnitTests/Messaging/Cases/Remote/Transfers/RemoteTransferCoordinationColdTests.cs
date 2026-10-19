@@ -5,8 +5,8 @@ namespace KeyLoad.UnitTests.Features.Messaging;
 
 internal sealed class RemoteTransferCoordinationColdTests
 {
-    private const string MessageId = "coordinator-native-original";
-    private const string Payload = "{\"native\":true}";
+    private const string MessageId = "coordinator-execution-original";
+    private const string Payload = "{\"execution\":true}";
     private const long NoRecords = 0;
     private const long OneRecord = 1;
     private const int InitialAttempts = 0;
@@ -15,7 +15,7 @@ internal sealed class RemoteTransferCoordinationColdTests
     private const string EmptyHeaders = "{}";
 
     [Test]
-    public async Task NativePendingDiscoveryDoesNotMutateAndColdCanonicalAcceptCompleteRetainOriginalReceipts()
+    public async Task PendingDiscoveryDoesNotMutateAndColdCanonicalAcceptCompleteRetainOriginalReceipts()
     {
         var clock = new RemoteTransferDiscoveryClock();
         using var fixture = new RemoteTransferDatabase(timeProvider: clock);

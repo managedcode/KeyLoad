@@ -8,7 +8,7 @@ internal static class McpSchemaProjection
 {
     private const int RequiredFamilyMatches = 1;
 
-    /// <summary>Copies canonical options while replacing only the two opaque strict format converter families with native metadata.</summary>
+    /// <summary>Copies canonical options while replacing only the two opaque strict format converter families with execution metadata.</summary>
     /// <returns>A read-only options copy used exclusively by the JSON Schema exporter.</returns>
     internal static JsonSerializerOptions Create()
     {

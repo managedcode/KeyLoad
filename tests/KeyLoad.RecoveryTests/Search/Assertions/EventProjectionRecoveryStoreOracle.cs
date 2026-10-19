@@ -26,7 +26,7 @@ internal static class EventProjectionRecoveryStoreOracle
     {
         var bytes = await File.ReadAllBytesAsync(Path.Combine(root, EventProjectionCrashScenario.OutboxHeadFile),
             cancellationToken);
-        return (NativeSerialization.Deserialize<OutboxHead>(bytes), bytes);
+        return (OrleansSerialization.Deserialize<OutboxHead>(bytes), bytes);
     }
 
     internal static async Task AssertCutAsync(ProjectionCrashCut cut, bool committed,
@@ -40,7 +40,7 @@ internal static class EventProjectionRecoveryStoreOracle
         await Assert.That(cut.OutboxEntry is not null).IsEqualTo(committed);
         var currentHeadBytes = cut.OutboxHead
             ?? throw new InvalidOperationException("The outbox head was missing after store reopen.");
-        var currentHead = NativeSerialization.Deserialize<OutboxHead>(currentHeadBytes);
+        var currentHead = OrleansSerialization.Deserialize<OutboxHead>(currentHeadBytes);
         await Assert.That(currentHead.Tail).IsEqualTo(committed ? beforeHead.Tail + 1 : beforeHead.Tail);
         await Assert.That(currentHead.FirstAvailable).IsEqualTo(beforeHead.FirstAvailable);
         await Assert.That(currentHead.StoredRecords).IsEqualTo(beforeHead.StoredRecords + (committed ? 1 : 0));
@@ -103,7 +103,7 @@ internal static class EventProjectionRecoveryStoreOracle
         await Assert.That(outbox.Entry?.Mutation is ApplyVectorProjection).IsTrue();
         var vectorBytes = outbox.Vector
             ?? throw new InvalidOperationException("The committed projection vector was missing.");
-        var vector = NativeSerialization.Deserialize<VectorRecord>(vectorBytes);
+        var vector = OrleansSerialization.Deserialize<VectorRecord>(vectorBytes);
         await Assert.That(vector.DocumentId).IsEqualTo(EventProjectionCrashScenario.TargetId);
         await Assert.That(vector.Values.AsSpan().SequenceEqual(new[] { 1f, 0f })).IsTrue();
         await Assert.That(vector.DocumentRevision).IsEqualTo(EventProjectionCrashScenario.DocumentRevision);
@@ -128,7 +128,7 @@ internal static class EventProjectionRecoveryStoreOracle
     }
 
     internal static ApplyVectorProjection ReadProjection(Command<DatabaseCommand> operation)
-        => NativeSerialization.Deserialize<CommandRequest>(operation.Value!.Input.Span, NativeValidationProfile.PublicInputElements)
+        => OrleansSerialization.Deserialize<CommandRequest>(operation.Value!.Input.Span, ValidationProfile.PublicInputElements)
             .Mutations.Single() as ApplyVectorProjection
             ?? throw new InvalidOperationException("The persisted projection operation has an unexpected mutation.");
 

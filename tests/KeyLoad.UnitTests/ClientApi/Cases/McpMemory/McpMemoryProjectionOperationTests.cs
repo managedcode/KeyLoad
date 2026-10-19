@@ -45,14 +45,14 @@ internal sealed class McpMemoryProjectionOperationTests
         await Assert.That(largerPrincipal > baseline).IsTrue();
     }
 
-    /// <summary>Pre-operation math includes the native validation stream separately from canonical reply ownership.</summary>
+    /// <summary>Pre-operation math includes the execution validation stream separately from canonical reply ownership.</summary>
     [Test]
-    public async Task BeforeOperationAddsCanonicalAndNativeReplyCapacitySeparately()
+    public async Task BeforeOperationAddsCanonicalAndReplyCapacitySeparately()
     {
         var input = CreateInput();
         var shape = input.Shape;
         var expansionHint = 6L * input.WireBytes + InputExpansionAllowanceBytes;
-        var nativeValidationCapacity = MaximumReplyBytes + InputExpansionAllowanceBytes;
+        var validationCapacity = MaximumReplyBytes + InputExpansionAllowanceBytes;
         var expected = new KeyLoad.Server.McpMemoryProjection(UnitMcpOptions.Execution()).Authentication(input.Capacity, input.AuthenticationBytes, input.AuthenticationShape) +
                        2 * McpMemoryProjectionComponents.Metadata(input.WireBytes, shape.TokenCount) +
                        2 * McpMemoryProjectionComponents.Structure(input.WireBytes, shape.TokenCount, shape.PropertyCount) +
@@ -60,13 +60,13 @@ internal sealed class McpMemoryProjectionOperationTests
                        McpMemoryProjectionComponents.Writer(input.MaximumPayloadBytes, expansionHint) +
                        McpMemoryProjectionComponents.Escaping(input.MaximumPayloadBytes) +
                        McpMemoryProjectionComponents.Structure(input.MaximumPayloadBytes, shape.TokenCount, shape.PropertyCount) +
-                       2L * input.MaximumPayloadBytes + MaximumReplyBytes + nativeValidationCapacity;
+                       2L * input.MaximumPayloadBytes + MaximumReplyBytes + validationCapacity;
 
         await Assert.That(new KeyLoad.Server.McpMemoryProjection(UnitMcpOptions.Execution()).BeforeOperation(input, MaximumReplyBytes, protocolReply: false))
             .IsEqualTo(expected);
     }
 
-    /// <summary>Protocol-mode precharge includes the full bounded native control reply peak.</summary>
+    /// <summary>Protocol-mode precharge includes the full bounded execution control reply peak.</summary>
     [Test]
     public async Task ProtocolReplyPrechargesMoreThanTheCanonicalOperationReply()
     {

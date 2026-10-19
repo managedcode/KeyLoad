@@ -33,5 +33,5 @@ internal static class AdminReadAuthority
     }
 
     internal static long Position(IKeyValueView view) => view.ReadOwnedValue(KeySpace.Applied.ToArray()) is { } value
-        ? NativeSerialization.Deserialize<long>(value) : InitialAdminReadPosition;
+        ? OrleansSerialization.Deserialize<long>(value) : InitialAdminReadPosition;
 }

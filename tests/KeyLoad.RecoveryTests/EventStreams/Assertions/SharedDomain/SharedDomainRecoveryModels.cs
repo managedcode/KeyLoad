@@ -38,7 +38,7 @@ internal static class SharedDomainRecoveryModels
     }
 
     private static async Task DocumentAsync(DatabaseEngine database, SharedDomainScope scope, string collection, string id,
-        bool present, ResourceLifetimeV1 lifetime, CancellationToken token)
+        bool present, ResourceLifetime lifetime, CancellationToken token)
     {
         var reference = new EntityRef(scope.Partition, collection, id)
         {

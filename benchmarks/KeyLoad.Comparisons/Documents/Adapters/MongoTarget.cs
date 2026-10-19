@@ -9,7 +9,7 @@ public sealed partial class MongoTarget
     public Task InitializeDocumentsAsync(DocumentComparisonInitialization initialization, CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(initialization);
-        return DocumentNativeInitialization.InitializeAsync(this, initialization, token);
+        return DocumentInitialization.InitializeAsync(this, initialization, token);
     }
     /// <inheritdoc/>
     public Task<IDocumentComparisonSession> OpenDocumentSessionAsync(CancellationToken token)

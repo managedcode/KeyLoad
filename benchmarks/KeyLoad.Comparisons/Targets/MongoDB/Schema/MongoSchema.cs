@@ -75,7 +75,7 @@ internal static class MongoSchema
     public const string InvariantFormat = "N";
     public const string HealthyState = "healthy";
     public const string SingleState = "single";
-    public const string SingleObservation = "native hello writable primary; standalone or one-member replica status observed";
+    public const string SingleObservation = "execution hello writable primary; standalone or one-member replica status observed";
     public const string GuidFormat = "N";
     public const string EventIdFormat = "D";
     public const string ConcernSeparator = ", journal=";
@@ -86,10 +86,10 @@ internal static class MongoSchema
     public const string ObservationReadConcern = "clientReadConcern=";
     public const string ObservationReadPreference = "clientReadPreference=";
     public const string ObservationSet = "replicaSet=";
-    public const string ObservationMajority = "native voting and writable voting members equal requested count; native write/election majority=";
+    public const string ObservationMajority = "execution voting and writable voting members equal requested count; execution write/election majority=";
     public const string ObservationIdentities = "memberIdentities=";
     public const string MemberIdentitySeparator = "@";
-    public const string ObservationSeededCopies = "direct secondary native corpus count and exact seeded body verified after copy probe";
+    public const string ObservationSeededCopies = "direct secondary execution corpus count and exact seeded body verified after copy probe";
     public const string ProbeJsonPrefix = "{\"probe\":\"";
     public const string ProbeJsonSuffix = "\"}";
     public const string CredentialConfigured = "connection-string credentials configured";

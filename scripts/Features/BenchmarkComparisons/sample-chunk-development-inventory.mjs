@@ -81,7 +81,7 @@ export async function captureReleaseInventory() {
   const { names, excludedGeneratedDirectories } = await enumerateReleaseFiles();
   if (!names.includes('KeyLoad.Benchmarks.dll') || !names.includes('KeyLoad.BenchmarkScenarios.dll')
       || !names.includes('KeyLoad.Core.dll') || !names.some((name) => /^Orleans\..+\.dll$/i.test(path.basename(name)))) {
-    throw new Error('The Release output is missing the benchmark, scenario, Core, or native Orleans assembly.');
+    throw new Error('The Release output is missing the benchmark, scenario, Core, or execution Orleans assembly.');
   }
   return { ...snapshot('release-binaries', null, await measureFiles(names, benchmarkDirectory)),
     scope: 'runtime-output-files-including-locale-and-rid-assets', excludedGeneratedDirectories,

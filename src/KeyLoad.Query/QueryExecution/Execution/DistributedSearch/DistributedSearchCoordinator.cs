@@ -9,8 +9,8 @@ internal static partial class DistributedSearchCoordinator
 {
     private const string DeadlineExceeded = "The read execution deadline is exceeded.";
 
-    internal static async Task<DistributedSearchPageV1> ExecuteAsync(DatabaseEngine database,
-        DistributedSearchRequestV1 request, IOptions<QueryExecutionOptions> options,
+    internal static async Task<DistributedSearchPage> ExecuteAsync(DatabaseEngine database,
+        DistributedSearchRequest request, IOptions<QueryExecutionOptions> options,
         Func<DistributedSearchPhaseWork, ReadExecutionBudgetReadGrant, ReadExecutionBudget, CancellationToken,
             Task<DistributedSearchPreparedLeaf>> prepare,
         Func<CancellationToken, Task> sourceBarrier, TimeProvider clock, DateTimeOffset originalExpiry,

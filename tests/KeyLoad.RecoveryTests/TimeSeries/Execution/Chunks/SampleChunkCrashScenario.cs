@@ -34,7 +34,7 @@ internal static class SampleChunkCrashScenario
         {
             SampleChunkCrashOperations.Seed(database, mode == SampleChunkCrashContract.PrepareMerge);
             await File.WriteAllBytesAsync(Path.Combine(root, SampleChunkCrashContract.OriginalReceiptFile),
-                NativeSerialization.Serialize(SampleChunkCrashOperations.OriginalAcknowledged(database)))
+                OrleansSerialization.Serialize(SampleChunkCrashOperations.OriginalAcknowledged(database)))
                 .ConfigureAwait(false);
             await SampleChunkCrashState.WriteAsync(root, SampleChunkCrashContract.PreparedFile, database).ConfigureAwait(false);
             await RecoveryProcessPause.WaitForKillAsync();
@@ -61,7 +61,7 @@ internal static class SampleChunkCrashScenario
             [SampleChunkCrashOperations.Intended(merge)]);
         var operation = CrashDatabase.Operation(database, OperationKind.Batch, request, request.CommandId);
         await File.WriteAllBytesAsync(Path.Combine(root, SampleChunkCrashContract.OriginalOperationFile),
-            NativeSerialization.Serialize(operation)).ConfigureAwait(false);
+            OrleansSerialization.Serialize(operation)).ConfigureAwait(false);
         SampleChunkSnapshotFile.CaptureExpectedToken(root, request.CommandId, database, request.Partition);
         boundary.Position = checked(database.Store.Position + SampleChunkCrashContract.PositionStep);
         boundary.Armed = true;
@@ -72,6 +72,5 @@ internal static class SampleChunkCrashScenario
     internal static DatabaseEngine OpenExisting(ZoneTreeStore store)
         => new(store, new AuthorizationPolicy(), CrashExecutionOptions.DatabaseLimits(), CrashExecutionOptions.DueWork(),
             CrashExecutionOptions.EventSource(), CrashExecutionOptions.Messaging(), CrashExecutionOptions.GraphExecution(),
-            CrashExecutionOptions.ChangeFeedExecution(), CrashExecutionOptions.BlobExecution(),
-            CrashExecutionOptions.NativeClaimsExecution(), CrashExecutionOptions.TimeSeriesExecution());
+            CrashExecutionOptions.ChangeFeedExecution(), CrashExecutionOptions.RuntimeClaimsExecution(), CrashExecutionOptions.TimeSeriesExecution());
 }

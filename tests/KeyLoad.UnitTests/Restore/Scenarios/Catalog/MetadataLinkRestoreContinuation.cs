@@ -96,6 +96,6 @@ internal static class MetadataLinkRestoreContinuation
     }
 
     private static async Task RequireLiteralAsync(ZoneTreeStore store)
-        => await Assert.That(store.Read(view => NativeSerialization.Deserialize<string>(
+        => await Assert.That(store.Read(view => OrleansSerialization.Deserialize<string>(
             view.ReadOwnedValue(MetadataBackupFixture.StoredKeyBytes)!))).IsEqualTo(MetadataBackupFixture.ExpectedValue);
 }

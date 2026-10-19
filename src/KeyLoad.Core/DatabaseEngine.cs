@@ -21,15 +21,14 @@ public sealed partial class DatabaseEngine
     /// <param name="messagingOptions">Centrally validated topic, catch-up and retry work limits.</param>
     /// <param name="graphOptions">Centrally validated shared graph traversal limits.</param>
     /// <param name="changeFeedOptions">Centrally validated change cursor and projection policy.</param>
-    /// <param name="blobOptions">Centrally validated blob restore and catalog proof policy.</param>
-    /// <param name="claimsOptions">Centrally validated native signed-claim decoding limits.</param>
+    /// <param name="claimsOptions">Centrally validated execution signed-claim decoding limits.</param>
     /// <param name="timeSeriesOptions">Centrally validated time-series append admission.</param>
     /// <param name="timeProvider">Optional business clock; hosting runtime time is unaffected.</param>
     public DatabaseEngine(IAtomicStore store, IAuthorizationPolicy authorization, IOptions<DatabaseLimits> limits,
         IOptions<DueWorkExecutionOptions> dueWorkOptions, IOptions<EventSourceExecutionOptions> eventSourceOptions,
         IOptions<MessagingExecutionOptions> messagingOptions, IOptions<GraphExecutionOptions> graphOptions,
-        IOptions<ChangeFeedExecutionOptions> changeFeedOptions, IOptions<BlobExecutionOptions> blobOptions,
-        IOptions<NativeClaimsExecutionOptions> claimsOptions,
+        IOptions<ChangeFeedExecutionOptions> changeFeedOptions,
+        IOptions<ClaimsExecutionOptions> claimsOptions,
         IOptions<TimeSeriesExecutionOptions> timeSeriesOptions,
         TimeProvider? timeProvider = null)
     {
@@ -47,9 +46,6 @@ public sealed partial class DatabaseEngine
         ArgumentNullException.ThrowIfNull(changeFeedOptions);
         changeFeedExecution = changeFeedOptions.Value;
         changeFeedExecution.Validate();
-        ArgumentNullException.ThrowIfNull(blobOptions);
-        BlobExecution = blobOptions.Value;
-        BlobExecution.Validate();
         ArgumentNullException.ThrowIfNull(claimsOptions);
         ClaimsExecution = claimsOptions.Value;
         ClaimsExecution.Validate();
@@ -76,11 +72,7 @@ public sealed partial class DatabaseEngine
     }
 
     private readonly ChangeFeedExecutionOptions changeFeedExecution;
-    internal BlobExecutionOptions BlobExecution
-    {
-        get;
-    }
-    internal NativeClaimsExecutionOptions ClaimsExecution
+    internal ClaimsExecutionOptions ClaimsExecution
     {
         get;
     }
@@ -139,7 +131,7 @@ public sealed partial class DatabaseEngine
         ? NoPersistedCopies : CommitReceipt.LocalCopyCount;
 
     /// <summary>Gets the canonical store's last applied replicated position.</summary>
-    public long LastApplied => Store.Read(view => view.ReadOwnedValue(KeySpace.AppliedBytes) is { } bytes ? NativeSerialization.Deserialize<long>(bytes) : DatabaseEngineNoRetainedBytes);
+    public long LastApplied => Store.Read(view => view.ReadOwnedValue(KeySpace.AppliedBytes) is { } bytes ? OrleansSerialization.Deserialize<long>(bytes) : DatabaseEngineNoRetainedBytes);
 
     /// <summary>Reads a configured resource and checks its transaction domain and optional kind.</summary>
     /// <param name="view">Current gated storage view.</param>
@@ -154,7 +146,7 @@ public sealed partial class DatabaseEngine
         return BindResourceDefinition(view, partition, name, kind);
     }
 
-    /// <summary>Creates a commit token from the local storage identity in the command's existing native view.</summary>
+    /// <summary>Creates a commit token from the local storage identity in the command's existing execution view.</summary>
     /// <param name="view">The command's already-owned transaction or committed read view.</param>
     /// <param name="partition">Complete atomic partition identity.</param>
     /// <param name="position">Applied commit position.</param>

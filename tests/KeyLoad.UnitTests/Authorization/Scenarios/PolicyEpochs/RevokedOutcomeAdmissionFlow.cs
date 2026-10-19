@@ -84,7 +84,7 @@ internal static class RevokedOutcomeAdmissionFlow
     {
         var image = QueueWholeFlowStorage.Bytes(fixture.Store);
         var position = fixture.Store.Position;
-        var identity = NativeReadCutStoreStateAssertions.SnapshotIdentity(fixture.Store);
+        var identity = ReadCutStoreStateAssertions.SnapshotIdentity(fixture.Store);
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(action, failures);
         await ServerFailureObserver.ObserveAsync(() => RevokedOutcomeAdmissionValues.ConservedAsync(fixture, image, identity, position), failures);

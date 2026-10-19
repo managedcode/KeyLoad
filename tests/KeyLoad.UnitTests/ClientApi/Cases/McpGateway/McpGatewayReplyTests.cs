@@ -5,10 +5,10 @@ using ModelContextProtocol.Protocol;
 
 namespace KeyLoad.UnitTests.Features.ClientApi;
 
-/// <summary>AC-MCPGW-004/005: metadata replies are bounded and native invoke results remain identical.</summary>
+/// <summary>AC-MCPGW-004/005: metadata replies are bounded and execution invoke results remain identical.</summary>
 internal sealed class McpGatewayReplyTests
 {
-    private const string Marker = "native-call-result";
+    private const string Marker = "execution-call-result";
     private const string ToolName = "keyload_documents_get";
     private const string RequestIdKey = "requestId";
     private const string ResultKey = "result";
@@ -31,7 +31,7 @@ internal sealed class McpGatewayReplyTests
     }
 
     [Test]
-    public async Task NativeFunctionResultIdentityAndErrorBitAreNotNormalized()
+    public async Task FunctionResultIdentityAndErrorBitAreNotNormalized()
     {
         using var document = JsonDocument.Parse("{\"secret\":\"" + Marker + "\"}");
         var expected = new CallToolResult { IsError = true, StructuredContent = document.RootElement.Clone() };
@@ -40,17 +40,17 @@ internal sealed class McpGatewayReplyTests
             McpResult = expected,
             Outcome = global::ManagedCode.MCPGateway.McpGatewayInvocationOutcome.ToolError
         };
-        var actual = McpGatewayNativeResult.GetOriginal(gatewayResult);
+        var actual = McpGatewayResult.GetOriginal(gatewayResult);
         await Assert.That(ReferenceEquals(actual, expected)).IsTrue();
         await Assert.That(actual!.IsError).IsTrue();
-        await Assert.That(McpGatewayNativeResult.GetOriginal(gatewayResult with
+        await Assert.That(McpGatewayResult.GetOriginal(gatewayResult with
         {
             IsSuccess = false
         })).IsNull();
     }
 
     [Test]
-    public async Task NativeMetadataResultWriterStopsAtInclusiveByteLimit()
+    public async Task MetadataResultWriterStopsAtInclusiveByteLimit()
     {
         var projection = new McpGatewaySearchProjection([]);
         var exact = McpGatewayMetaResultWriter.Serialize(projection, 256);
@@ -65,7 +65,7 @@ internal sealed class McpGatewayReplyTests
     public async Task SearchProjectionReturnsCompleteCanonicalToolAndFiniteScore()
     {
         var source = SearchMatch(ToolName, 0.75);
-        var projection = McpGatewayMetaProjector.Search(new McpGatewaySearchResult([source], [], "native"), 1);
+        var projection = McpGatewayMetaProjector.Search(new McpGatewaySearchResult([source], [], "execution"), 1);
         var projected = projection.Matches.Single();
         var canonical = McpOperationCatalog.TryGetTool(ToolName, out var descriptor) ? descriptor!.CreateTool() : null;
         await Assert.That(projected.Tool.Name).IsEqualTo(canonical!.Name);
@@ -76,11 +76,11 @@ internal sealed class McpGatewayReplyTests
     }
 
     [Test]
-    public async Task RouteProjectionRejectsNonfiniteNativeScores()
+    public async Task RouteProjectionRejectsNonfiniteScores()
     {
         var source = SearchMatch(ToolName, double.NaN);
-        var native = new McpGatewayToolRouteResult([new("documents", 1, [source])], [], [], "native");
-        var failure = Assert.ThrowsExactly<KeyLoadException>(() => McpGatewayMetaProjector.Route(native, 1, 1));
+        var execution = new McpGatewayToolRouteResult([new("documents", 1, [source])], [], [], "execution");
+        var failure = Assert.ThrowsExactly<KeyLoadException>(() => McpGatewayMetaProjector.Route(execution, 1, 1));
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.RecoveryRequired);
     }
 
@@ -90,9 +90,9 @@ internal sealed class McpGatewayReplyTests
         const string secondName = "keyload_documents_commit";
         var first = SearchMatch(ToolName, 0.8);
         var second = SearchMatch(secondName, 0.7);
-        var native = new McpGatewayToolRouteResult(
-            [new("documents", 0.9, [first, second]), new("duplicate", 0.6, [first])], [], [], "native");
-        var projection = McpGatewayMetaProjector.Route(native, 2, 2);
+        var execution = new McpGatewayToolRouteResult(
+            [new("documents", 0.9, [first, second]), new("duplicate", 0.6, [first])], [], [], "execution");
+        var projection = McpGatewayMetaProjector.Route(execution, 2, 2);
         await Assert.That(projection.Categories.Length).IsEqualTo(1);
         await Assert.That(projection.Categories[0].Tools.Select(item => item.Tool.Name)
             .SequenceEqual([ToolName, secondName])).IsTrue();

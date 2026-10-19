@@ -7,18 +7,18 @@ namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 internal static class IsolatedKeyLoadFaultChecksPhases
 {
     internal static async Task RunAsync(DistributedApplication app, int nodes, string admin,
-        IsolatedKeyLoadFaultChecksSeed seed, IsolatedKeyLoadFaultChecksNative native,
+        IsolatedKeyLoadFaultChecksSeed seed, RuntimeIsolatedKeyLoadFaultChecks execution,
         IsolatedKeyLoadFaultChecksEvidence evidence, CancellationToken token)
     {
         var targets = Enumerable.Range(1, nodes).ToArray();
         for (var phase = 0; phase < targets.Length; phase++)
         {
-            await PhaseAsync(app, nodes, admin, seed, native, evidence, phase + 1, targets[phase], token);
+            await PhaseAsync(app, nodes, admin, seed, execution, evidence, phase + 1, targets[phase], token);
         }
     }
 
     private static async Task PhaseAsync(DistributedApplication app, int nodes, string admin,
-        IsolatedKeyLoadFaultChecksSeed seed, IsolatedKeyLoadFaultChecksNative native,
+        IsolatedKeyLoadFaultChecksSeed seed, RuntimeIsolatedKeyLoadFaultChecks execution,
         IsolatedKeyLoadFaultChecksEvidence evidence, int phase, int killed, CancellationToken token)
     {
         var before = await IsolatedKeyLoadFaultChecksMembership.WaitAsync(app, nodes, admin, token);
@@ -28,13 +28,13 @@ internal static class IsolatedKeyLoadFaultChecksPhases
         var receipt = new IsolatedKeyLoadFaultChecksPhaseReceipt(phase, killed, command.CommandId,
             "requiredCopiesUnavailable");
         evidence.Phases.Add(receipt);
-        evidence.Stage = "nativeKill";
-        var stop = await native.KillAsync(killed, token);
+        evidence.Stage = "runtimeKill";
+        var stop = await execution.KillAsync(killed, token);
         var live = nodes == 1 ? 1 : killed == 1 ? 2 : 1;
         evidence.Stage = "copyAcknowledgementAssertions";
         await WhileStoppedAsync(app, nodes, live, admin, seed, command, receipt, token);
-        evidence.Stage = "nativeRestart";
-        await native.RestartAsync(stop, token);
+        evidence.Stage = "runtimeRestart";
+        await execution.RestartAsync(stop, token);
         evidence.Stage = "publicRecovery";
         await IsolatedKeyLoadFaultChecksMembership.WaitAsync(app, nodes, admin, token);
         using var recoveredHttp = IsolatedKeyLoadPublicChecksProtocol.CreateHttp(app, live);

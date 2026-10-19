@@ -11,7 +11,7 @@ internal static class DistributedTextStatisticsMerge
     private const string Invalid = "The distributed statistics collection is invalid.";
     private const string Exhausted = "The distributed statistics exceed their original query grant.";
 
-    internal static DistributedTextStatisticsV1 Combine(ImmutableArray<DistributedTextStatisticsV1> leaves,
+    internal static DistributedTextStatistics Combine(ImmutableArray<DistributedTextStatistics> leaves,
         IOptions<QueryExecutionOptions> options, ReadExecutionBudget budget)
     {
         ArgumentNullException.ThrowIfNull(options);
@@ -33,7 +33,7 @@ internal static class DistributedTextStatisticsMerge
         foreach (var leaf in leaves)
         {
             DistributedTextStatisticsValidation.Require(leaf, first.Terms, budget);
-            admission.Accept(NativeSerialization.Measure(leaf));
+            admission.Accept(OrleansSerialization.Measure(leaf));
         }
         var frequencies = ImmutableArray.CreateBuilder<int>(first.Terms.Length);
         for (var index = Empty; index < first.Terms.Length; index++)
@@ -61,8 +61,8 @@ internal static class DistributedTextStatisticsMerge
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, Exhausted);
         }
-        var result = new DistributedTextStatisticsV1(first.Terms, documents, length, frequencies.MoveToImmutable());
-        admission.Accept(NativeSerialization.Measure(result));
+        var result = new DistributedTextStatistics(first.Terms, documents, length, frequencies.MoveToImmutable());
+        admission.Accept(OrleansSerialization.Measure(result));
         DistributedTextStatisticsValidation.Require(result, first.Terms, budget);
         return result;
     }

@@ -3,15 +3,15 @@ import { GH } from './isolated-github-contract.mjs';
 import { SESSION, requireSession, sessionRows, validateSessionCohort } from './session-contract.mjs';
 
 export function createSessionContext(environment, platform) {
-  const native = createRunContext(environment, platform);
+  const execution = createRunContext(environment, platform);
   requireSession(environment.GITHUB_ACTIONS === 'true' && environment.RUNNER_OS === 'Linux'
-    && environment.GITHUB_REPOSITORY_ID === '477801965' && environment.GITHUB_WORKFLOW === SESSION.workflow && native.repository === SESSION.repository
-    && native.ref === SESSION.ref && typeof environment.GH_TOKEN === 'string' && environment.GH_TOKEN.length > 0
+    && environment.GITHUB_REPOSITORY_ID === '477801965' && environment.GITHUB_WORKFLOW === SESSION.workflow && execution.repository === SESSION.repository
+    && execution.ref === SESSION.ref && typeof environment.GH_TOKEN === 'string' && environment.GH_TOKEN.length > 0
     && environment.GITHUB_WORKFLOW_REF === `${SESSION.repository}/${GH.workflowPath}@${SESSION.ref}`);
-  const cohort = validateSessionCohort({ sourceRevision: native.sourceSha, runId: Number(native.runId),
-    attempt: Number(native.runAttempt), repository: native.repository, ref: native.ref,
+  const cohort = validateSessionCohort({ sourceRevision: execution.sourceSha, runId: Number(execution.runId),
+    attempt: Number(execution.runAttempt), repository: execution.repository, ref: execution.ref,
     workflow: SESSION.workflow, profile: SESSION.profile });
-  return { native, cohort };
+  return { execution, cohort };
 }
 export function selectSession(environment) {
   const selected = sessionRows().filter(row => row.id === environment.KEYLOAD_BENCHMARK_SESSION_ID);

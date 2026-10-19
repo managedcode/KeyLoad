@@ -8,7 +8,7 @@ namespace KeyLoad;
 /// <param name="FromCollection">Declares the typed source-endpoint collection for an explicit inner join; null preserves ordinary endpoint resolution.</param>
 /// <param name="ToCollection">Declares the distinct typed target-endpoint collection; both declarations are required for an inner join.</param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.QueueToGraph)]
+[Orleans.Alias(ContractAliases.QueueToGraph)]
 public sealed record QueueToGraph([property: Orleans.Id(0)] string Graph,
     [property: Orleans.Id(1)] string Queue, [property: Orleans.Id(2)] string EdgeIdPrefix,
     [property: Orleans.Id(3)] int MaxMessages = DatabaseCompositionDefaults.MaximumItems,

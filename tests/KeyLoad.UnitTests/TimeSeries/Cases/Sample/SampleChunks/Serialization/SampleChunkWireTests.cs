@@ -28,14 +28,14 @@ internal sealed class SampleChunkWireTests
     }
 
     [Test]
-    public async Task AcChunk004NativeEnvelopeTruncationTrailingBytesAndUnknownVersionFailClosed()
+    public async Task AcChunk004EnvelopeTruncationTrailingBytesAndUnknownVersionFailClosed()
     {
         var encoded = SampleChunkWireCodecAssertions.Encoded(SampleChunkTestData.FixedRecords());
         var truncated = encoded[..^1];
         var trailing = encoded.Append((byte)0).ToArray();
-        using var serializer = new NativeSerializerFixture();
+        using var serializer = new SerializerFixture();
         var payload = SampleChunkTestData.Payload(encoded);
-        var unknownVersion = serializer.Encode(payload, NativePayloadVersion.Current + 1);
+        var unknownVersion = serializer.Encode(payload, PayloadVersion.Current + 1);
         var truncatedFailure = SampleChunkWireCodecAssertions.DecodeFailure(truncated);
         var trailingFailure = SampleChunkWireCodecAssertions.DecodeFailure(trailing);
         var versionFailure = SampleChunkWireCodecAssertions.DecodeFailure(unknownVersion);

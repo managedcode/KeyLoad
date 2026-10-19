@@ -8,7 +8,7 @@ internal static class JournalOriginalFailureAssertions
         ZoneTreeExistingStoreFixture files)
     {
         await JournalOriginalFailureCut.RowsAsync(store, files, healthy: false);
-        var identity = NativeSerialization.Serialize(store.Identity);
+        var identity = OrleansSerialization.Serialize(store.Identity);
         var identityFile = await File.ReadAllBytesAsync(files.IdentityPath);
         var position = store.Position;
         var originalJournal = runtime.Journal;
@@ -22,7 +22,7 @@ internal static class JournalOriginalFailureAssertions
         await Assert.That(failure.InnerException is ObjectDisposedException).IsTrue();
         await Assert.That(runtime.Poisoned).IsTrue();
         await Assert.That(store.Position).IsEqualTo(position);
-        await Assert.That(NativeSerialization.Serialize(store.Identity).AsSpan().SequenceEqual(identity)).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(store.Identity).AsSpan().SequenceEqual(identity)).IsTrue();
         await Assert.That((await File.ReadAllBytesAsync(files.IdentityPath)).AsSpan().SequenceEqual(identityFile)).IsTrue();
         await Assert.That((await File.ReadAllBytesAsync(files.JournalPath)).AsSpan().SequenceEqual(journal)).IsTrue();
         await RequirePoisonedAsync(store);

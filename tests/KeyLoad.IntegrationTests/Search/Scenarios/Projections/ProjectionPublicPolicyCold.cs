@@ -1,6 +1,6 @@
 using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.ClusterReplication;
-using KeyLoad.IntegrationTests.Features.ClusterRouting;
+using KeyLoad.IntegrationTests.Features.StorageReplication;
+using KeyLoad.IntegrationTests.Features.OrleansExecution;
 using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Features.Search;
@@ -83,8 +83,8 @@ internal static class ProjectionPublicPolicyCold
                             scenario.VectorSearch(), reader.Secret, ProjectionPublicPolicyProtocol.Healthy(), token);
                         return true;
                     }, token);
-                var nativeStatus = await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.StatusAsync(token));
-                return (nativeStatus, image.CutPosition);
+                var runtimeStatus = await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.StatusAsync(token));
+                return (runtimeStatus, image.CutPosition);
             }, token);
     }
 

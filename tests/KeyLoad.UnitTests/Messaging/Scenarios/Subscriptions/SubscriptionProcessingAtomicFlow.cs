@@ -28,7 +28,7 @@ internal static class SubscriptionProcessingAtomicFlow
         var deliveries = originalClaim.Get<ReceiveSubscriptionResult>().Deliveries;
         await Assert.That(deliveries.Select(d => d.Event.Position)).IsEquivalentTo(
             new long[] { 1, 2, 3 }, CollectionOrdering.Matching);
-        await NativeReplayResultAssertions.Same<ReceiveSubscriptionResult>(fixture.Database.Apply(claim), originalClaim);
+        await ReplayResultAssertions.Same<ReceiveSubscriptionResult>(fixture.Database.Apply(claim), originalClaim);
         var request = new SubscriptionProcessingRequest(Guid.NewGuid(), group, deliveries[0].Token, "worker", 1,
             [new PutDocument("orders", "first", "{\"n\":1}", 0),
              new PutDocument("orders", "second", "{\"n\":2}", 9)]);
@@ -46,7 +46,7 @@ internal static class SubscriptionProcessingAtomicFlow
         await SubscriptionProcessingAtomicAssertions.FailureReplayAsync(fixture.Database, fixture.Store,
             group, failed, failure, failureBytes);
         var cut = QueueWholeFlowStorage.Bytes(fixture.Store);
-        var identity = NativeSerialization.Serialize(fixture.Store.Identity);
+        var identity = OrleansSerialization.Serialize(fixture.Store.Identity);
         position = fixture.Store.Position;
         fixture.Store.Dispose();
         token.ThrowIfCancellationRequested();
@@ -55,7 +55,7 @@ internal static class SubscriptionProcessingAtomicFlow
         var db = QueueWholeFlowStorage.Open(first);
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(first, cut, position, identity);
         await SubscriptionProcessingAtomicAssertions.FailureReplayAsync(db, first, group, failed, failure, failureBytes);
-        await NativeReplayResultAssertions.Same<ReceiveSubscriptionResult>(db.Apply(claim), originalClaim);
+        await ReplayResultAssertions.Same<ReceiveSubscriptionResult>(db.Apply(claim), originalClaim);
         await SubscriptionCheckpointAuthorityAssertions.SourceAsync(db, first, group.Source, source);
         await ContinueAsync(db, first, fixture.Directory, group, request, failed, failure,
             failureBytes, claim, originalClaim, time, source, token);
@@ -109,7 +109,7 @@ internal static class SubscriptionProcessingAtomicFlow
         }
         await SubscriptionCheckpointAuthorityAssertions.StatusAsync(db, group, 3, 3, 3);
         await SubscriptionCheckpointAuthorityAssertions.NoWindowAsync(store, group);
-        var receive = NativeSerialization.Deserialize<ReceiveSubscriptionRequest>(claim.Value!.Input.Span, NativeValidationProfile.PublicInputElements)
+        var receive = OrleansSerialization.Deserialize<ReceiveSubscriptionRequest>(claim.Value!.Input.Span, ValidationProfile.PublicInputElements)
             ?? throw new InvalidOperationException("The original Receive request is absent.");
         await SubscriptionCheckpointAuthorityAssertions.SettledClaimAsync(db, store, receive, originalClaim, token);
         await SecondColdAsync(db, store, directory, group, failed, failure, failureBytes, receipts, ackReceipts, receive, originalClaim, source, token);
@@ -124,7 +124,7 @@ internal static class SubscriptionProcessingAtomicFlow
         await SubscriptionCheckpointAuthorityAssertions.SourceAsync(db, store, group.Source, source);
         var cut = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
-        var identity = NativeSerialization.Serialize(store.Identity);
+        var identity = OrleansSerialization.Serialize(store.Identity);
         store.Dispose();
         token.ThrowIfCancellationRequested();
         using var second = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution(),

@@ -5,8 +5,8 @@ namespace KeyLoad.Client;
 /// <summary>Reads durable queue-transfer protocol state through the shared SDK transport.</summary>
 public static class QueueTransferClient
 {
-    private const string InspectPath = "/v1/queues/transfers/inspect";
-    private const string ReceiptPath = "/v1/queues/transfers/receipt";
+    private const string InspectPath = "/queues/transfers/inspect";
+    private const string ReceiptPath = "/queues/transfers/receipt";
 
     /// <summary>Reads the authorized source intent and completion state.</summary>
     /// <param name="client">The authenticated KeyLoad client.</param>

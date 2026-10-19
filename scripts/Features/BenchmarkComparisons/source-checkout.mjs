@@ -1,6 +1,6 @@
 import { assertCleanSourceRevision } from './source-context.mjs';
-import { message, processLimit } from './native-process-contracts.mjs';
-import { runBounded } from './native-process.mjs';
+import { message, processLimit } from './process-contracts.mjs';
+import { runBounded } from './process.mjs';
 
 export async function verifySourceCheckout(context) {
   const options = { cwd: context.workspace, timeoutMs: processLimit.inspectTimeoutMs };

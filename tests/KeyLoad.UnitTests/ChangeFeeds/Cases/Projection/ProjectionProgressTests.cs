@@ -124,7 +124,7 @@ internal sealed class ProjectionProgressTests
         {
             data = new string('x', 2_000)
         }));
-        var bytes = ProjectionNativeByteFixture.Calibrate(small, large);
+        var bytes = ProjectionByteFixture.Calibrate(small, large);
         await Assert.That(bytes.Large).IsGreaterThan(bytes.Small);
         using var db = new TestDatabase(new()
         {
@@ -159,7 +159,7 @@ internal sealed class ProjectionProgressTests
         {
             data = new string('x', 2_000)
         }));
-        var bytes = ProjectionNativeByteFixture.Calibrate(small, large);
+        var bytes = ProjectionByteFixture.Calibrate(small, large);
         using var db = new TestDatabase(new()
         {
             MaxOutboxBytes = bytes.Input,
@@ -190,7 +190,7 @@ internal sealed class ProjectionProgressTests
         db.Store.Compact();
         db.Store.Dispose();
         using var reopened = new ZoneTreeStore(new(db.Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
-        var engine = new DatabaseEngine(reopened, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
+        var engine = new DatabaseEngine(reopened, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
         await Assert.That(engine.GetOutboxStatus("root", db.Partition).Consumers.Single().LastProgressReservationCut).IsEqualTo(1);
         Result<object> Submit(ProjectionBatch batch, Mutation[] effects)
         {

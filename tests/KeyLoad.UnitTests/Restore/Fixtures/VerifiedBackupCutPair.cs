@@ -53,7 +53,7 @@ internal static class VerifiedBackupCutPair
         await Assert.That(verification.Identity.FormatVersion).IsEqualTo(fixture.Source.Store.Identity.FormatVersion);
         await Assert.That(verification.Identity.SigningKey.Span.SequenceEqual(fixture.Source.Store.Identity.SigningKey.Span)).IsTrue();
         var rows = EventingArtifactState.Bytes(fixture.Source.Store, fixture.Source.Partition);
-        var archive = await NativeRestoreCancellationFlow.ArchiveAsync(path, token);
+        var archive = await RestoreCancellationFlow.ArchiveAsync(path, token);
         return new(path, capture, rows, archive);
     }
 }

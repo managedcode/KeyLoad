@@ -7,5 +7,5 @@ namespace KeyLoad;
 /// <param name="Data">Contains the event data.</param>
 /// <param name="RecordedAt">Records the persistence time.</param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.EventRecord)]
+[Orleans.Alias(ContractAliases.EventRecord)]
 public sealed record EventRecord([property: Orleans.Id(0)] StreamRef Stream, [property: Orleans.Id(1)] long Revision, [property: Orleans.Id(2)] long EventSequence, [property: Orleans.Id(3)] EventData Data, [property: Orleans.Id(4)] DateTimeOffset RecordedAt);

@@ -22,7 +22,7 @@ namespace KeyLoad.Query;
 /// <param name="SupportedAstVersions">The exact supported AST versions.</param>
 /// <param name="SupportedQueryDialectVersions">The exact supported query-language versions.</param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.QueryCapabilityManifest)]
+[Orleans.Alias(ContractAliases.QueryCapabilityManifest)]
 public sealed record QueryCapabilityManifest([property: Orleans.Id(0)] int ProtocolVersion, [property: Orleans.Id(1)] int AstVersion, [property: Orleans.Id(2)] string SqlDialect, [property: Orleans.Id(3)] string Scope,
     [property: Orleans.Id(4)] string NumericPolicy, [property: Orleans.Id(5)] string MissingPolicy, [property: Orleans.Id(6)] ImmutableArray<string> Adapters, [property: Orleans.Id(7)] ImmutableArray<string> Predicates, [property: Orleans.Id(8)] int MaxRows, [property: Orleans.Id(9)] int MaxCandidates,
     [property: Orleans.Id(10)] int MaxBytes, [property: Orleans.Id(11)] int MaxDepth, [property: Orleans.Id(12)] bool FullScanRequiresOptIn, [property: Orleans.Id(13)] bool ReadOnly, [property: Orleans.Id(14)] long MaxCandidateBytes, [property: Orleans.Id(15)] ImmutableArray<string> ReadProfiles,

@@ -11,7 +11,7 @@ internal sealed class CentralAppHostOptionsTests
     private const string MaxSampleMetadataBytesSetting = ScaleServerResourceOptions.SectionName + ":" + nameof(ScaleServerResourceOptions.MaxSampleMetadataBytes);
     private const string MaxHardwareBytesSetting = ScaleServerResourceOptions.SectionName + ":" + nameof(ScaleServerResourceOptions.MaxHardwareBytes);
     private const string CadenceSetting = ScaleServerResourceOptions.SectionName + ":" + nameof(ScaleServerResourceOptions.Cadence);
-    private const string NativeReadBufferBytesSetting = ScaleServerResourceOptions.SectionName + ":" + nameof(ScaleServerResourceOptions.NativeReadBufferBytes);
+    private const string ReadBufferBytesSetting = ScaleServerResourceOptions.SectionName + ":" + nameof(ScaleServerResourceOptions.RuntimeReadBufferBytes);
     private const string RequestsPerScopeSetting = IsolatedKeyLoadAdmissionOptions.SectionName + ":" + nameof(IsolatedKeyLoadAdmissionOptions.RequestsPerScope);
 
     [Test]
@@ -36,7 +36,7 @@ internal sealed class CentralAppHostOptionsTests
     public async Task InvalidPolicyRejectsBeforeAnyAspireResourcesExist()
     {
         var builder = DistributedApplication.CreateBuilder(new DistributedApplicationOptions { DisableDashboard = true, Args = [] });
-        builder.Configuration[NativeReadBufferBytesSetting] = "0";
+        builder.Configuration[ReadBufferBytesSetting] = "0";
         var failure = Assert.ThrowsExactly<OptionsValidationException>(() => LoadTestsOptionsRegistration.Get(builder));
         await Assert.That(failure.OptionsType).IsEqualTo(typeof(ScaleServerResourceOptions));
         await Assert.That(builder.Resources.Count).IsEqualTo(0);
@@ -50,13 +50,13 @@ internal sealed class CentralAppHostOptionsTests
         var runtime = LoadTestsOptionsRegistration.Get(builder);
         var governor = new HttpAdmissionGovernor(IsolatedKeyLoadAdmissionOptions.CreateHttpOptions(runtime.IsolatedAdmission));
         builder.Configuration[RequestsPerScopeSetting] = "3";
-        using (var first = governor.Begin("/v1/documents/get", 0))
-        using (var second = governor.Begin("/v1/documents/get", 0))
+        using (var first = governor.Begin("/documents/get", 0))
+        using (var second = governor.Begin("/documents/get", 0))
         {
             first.Bind(new("principal", "tenant", [], []));
             second.Bind(new("principal", "tenant", [], []));
             await Assert.That(Assert.ThrowsExactly<KeyLoadException>(
-                () => governor.Begin("/v1/documents/get", 0)).Code).IsEqualTo(ErrorCode.ResourceExhausted);
+                () => governor.Begin("/documents/get", 0)).Code).IsEqualTo(ErrorCode.ResourceExhausted);
             await Assert.That(governor.Status().VerifiedScopes.Commands).IsEqualTo(2);
         }
         await Assert.That(governor.Status().Node.Commands).IsEqualTo(0);

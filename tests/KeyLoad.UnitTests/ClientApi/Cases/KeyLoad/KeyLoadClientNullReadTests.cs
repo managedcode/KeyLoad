@@ -8,7 +8,7 @@ namespace KeyLoad.UnitTests.Features.ClientApi;
 internal sealed class KeyLoadClientNullReadTests
 {
     private const string ApiKey = "null-read-test-key";
-    private const string StatusPath = "/v1/status";
+    private const string StatusPath = "/status";
     private const string JsonContentType = "application/json";
     private const string UnavailableDetail = "The read response is unavailable.";
     private const string Node = "healthy-node";
@@ -23,16 +23,16 @@ internal sealed class KeyLoadClientNullReadTests
     private const string UploadAbsence = "{\"upload\":null}";
     private static readonly string[] ExpectedNullablePaths =
     [
-        "/v1/documents/get", "/v1/documents/get", "/v1/queues/inspect",
-        "/v1/queues/transfers/inspect", "/v1/queues/transfers/receipt",
-        "/v1/queues/schedules/inspect", "/v1/queues/sagas/inspect",
-        "/v1/blobs/metadata", "/v1/blobs/uploads/info"
+        "/documents/get", "/documents/get", "/queues/inspect",
+        "/queues/transfers/inspect", "/queues/transfers/receipt",
+        "/queues/schedules/inspect", "/queues/sagas/inspect",
+        "/blobs/metadata", "/blobs/uploads/info"
     ];
 
     [Test]
     [Arguments("null")]
     [Arguments("{")]
-    public async Task AllNativeAbsentReadsRemainSuccessfulBeforeUnavailableStatusAndFullHealthyContinuation(string unavailable)
+    public async Task AllAbsentReadsRemainSuccessfulBeforeUnavailableStatusAndFullHealthyContinuation(string unavailable)
     {
         var observation = new KeyLoadClientKestrelObservation();
         try
@@ -96,7 +96,6 @@ internal sealed class KeyLoadClientNullReadTests
         var minimum = new CommitToken(Guid.NewGuid(), "literal-atomic-partition", 1);
         var lane = new QueueLaneRef(partition, "queue");
         var other = new QueueLaneRef(partition, "other-queue");
-        var blob = new BlobRef(partition, "blobs", "absent");
         var id = Guid.NewGuid();
         await AbsentAsync(client.GetAsync(reference, cancellationToken), static value => value.Document, observation);
         await AbsentAsync(client.GetAsync(reference, minimum, cancellationToken), static value => value.Document, observation);
@@ -105,8 +104,6 @@ internal sealed class KeyLoadClientNullReadTests
         await AbsentAsync(client.InspectQueueTransferReceiptAsync(new(other, lane, id), cancellationToken), static value => value.Receipt, observation);
         await AbsentAsync(client.InspectRecurringScheduleAsync(new(lane, id), cancellationToken), static value => value.Schedule, observation);
         await AbsentAsync(client.InspectSagaAsync(new(lane, id), cancellationToken), static value => value.Saga, observation);
-        await AbsentAsync(client.GetBlobMetadataAsync(new(blob), cancellationToken), static value => value.Metadata, observation);
-        await AbsentAsync(client.GetBlobUploadInfoAsync(new(blob, id), cancellationToken), static value => value.Upload, observation);
     }
 
     private static async Task AbsentAsync<T>(Task<Result<T>> pending, Func<T, object?> data, KeyLoadClientKestrelObservation observation)

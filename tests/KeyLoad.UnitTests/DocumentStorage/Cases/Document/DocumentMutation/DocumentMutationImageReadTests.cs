@@ -84,12 +84,12 @@ internal sealed class DocumentMutationImageReadTests
         var expected = new CommitReceipt(id, new(db.Store.Identity.Incarnation, db.Partition.AtomicPartitionId,
             db.Store.Position), [new(kind, Collection, DocumentId, revision)], db.Store.Identity.Durability, (db.Store.Identity.Durability == DurabilityProfile.Buffered ? 0 : 1));
 
-        await Assert.That(NativeSerialization.Serialize(receipt).SequenceEqual(
-            NativeSerialization.Serialize(expected))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(receipt).SequenceEqual(
+            OrleansSerialization.Serialize(expected))).IsTrue();
         await RequireDocumentImage(db, revision, json);
         var replay = db.Submit(OperationKind.Batch, command, id: id).Get<CommitReceipt>();
-        await Assert.That(NativeSerialization.Serialize(replay).SequenceEqual(
-            NativeSerialization.Serialize(expected))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(replay).SequenceEqual(
+            OrleansSerialization.Serialize(expected))).IsTrue();
         await RequireDocumentImage(db, revision, json);
         return delta;
     }

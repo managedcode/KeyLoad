@@ -6,12 +6,12 @@ namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 internal sealed class KurrentCleanupDiagnosticTests
 {
-    private readonly KurrentCleanupDiagnostics diagnostics = new(NativeExecutionPolicyFixture.ReadDiagnostics());
+    private readonly KurrentCleanupDiagnostics diagnostics = new(ExecutionPolicyFixture.ReadDiagnostics());
 
     private const string Secret = "credential-marker";
-    private const int NativeDeadlineStatus = 4;
+    private const int RuntimeDeadlineStatus = 4;
 
-    /// <summary>AC-ISO-005/006: acknowledged native cleanup is complete only with balanced final counters.</summary>
+    /// <summary>AC-ISO-005/006: acknowledged execution cleanup is complete only with balanced final counters.</summary>
     [Test]
     public async Task CompleteCountsRequireEveryStreamAcknowledgedAndNoPendingOperation()
     {
@@ -54,7 +54,7 @@ internal sealed class KurrentCleanupDiagnosticTests
     }
 
     [Test]
-    public async Task ClosedProjectionRetainsActualNumericStatusAndNeverNativeText()
+    public async Task ClosedProjectionRetainsActualNumericStatusAndNeverText()
     {
         var error = new AggregateException(new RpcException(new Status(StatusCode.DeadlineExceeded, Secret)));
         var classified = diagnostics.Classify(error);
@@ -62,9 +62,9 @@ internal sealed class KurrentCleanupDiagnosticTests
         var text = diagnostics.Project(diagnostic);
         using var document = JsonDocument.Parse(text);
         await Assert.That(text.Contains(Secret, StringComparison.Ordinal)).IsFalse();
-        await Assert.That(text.Length <= NativeExecutionPolicyFixture.ReadDiagnostics().Value.KurrentCleanupMaximumCharacters).IsTrue();
-        await Assert.That(document.RootElement.GetProperty(nameof(KurrentCleanupDiagnostic.GrpcStatus)).GetInt32()).IsEqualTo(NativeDeadlineStatus);
-        await Assert.That(classified.Reason).IsEqualTo(KurrentCleanupFailureReason.NativeRpc);
+        await Assert.That(text.Length <= ExecutionPolicyFixture.ReadDiagnostics().Value.KurrentCleanupMaximumCharacters).IsTrue();
+        await Assert.That(document.RootElement.GetProperty(nameof(KurrentCleanupDiagnostic.GrpcStatus)).GetInt32()).IsEqualTo(RuntimeDeadlineStatus);
+        await Assert.That(classified.Reason).IsEqualTo(KurrentCleanupFailureReason.RuntimeRpc);
     }
 
     [Test]
@@ -100,20 +100,20 @@ internal sealed class KurrentCleanupDiagnosticTests
     }
 
     [Test]
-    public async Task FirstNativeFailureStopsAdmissionAndSurvivesLaterDisposalFailure()
+    public async Task FirstFailureStopsAdmissionAndSurvivesLaterDisposalFailure()
     {
-        var state = new KurrentCleanupState(3, NativeExecutionPolicyFixture.Lifecycle(), NativeExecutionPolicyFixture.ReadDiagnostics());
+        var state = new KurrentCleanupState(3, ExecutionPolicyFixture.Lifecycle(), ExecutionPolicyFixture.ReadDiagnostics());
         var first = new RpcException(new Status(StatusCode.DeadlineExceeded, Secret));
         await Assert.That(state.TrySubmit(CancellationToken.None, out var index)).IsTrue();
         await Assert.That(index).IsEqualTo(0);
         state.CompleteDelete(first);
         await Assert.That(state.TrySubmit(CancellationToken.None, out _)).IsFalse();
-        state.RecordFailure(new IOException(Secret), KurrentCleanupStage.NativeDispose, disposal: true);
+        state.RecordFailure(new IOException(Secret), KurrentCleanupStage.RuntimeDisposeCore, disposal: true);
         state.FinishDeletion(cancellationRequested: true, expired: false);
         var diagnostic = state.Snapshot();
         await Assert.That(diagnostic.Counts).IsEqualTo(new KurrentCleanupCounts(3, 1, 0, 1, 0, 1));
         await Assert.That(diagnostic.Stage).IsEqualTo(KurrentCleanupStage.Delete);
-        await Assert.That(diagnostic.GrpcStatus).IsEqualTo(NativeDeadlineStatus);
+        await Assert.That(diagnostic.GrpcStatus).IsEqualTo(RuntimeDeadlineStatus);
         await Assert.That(diagnostic.LaterDisposalFailures).IsEqualTo(1);
         Exception? thrown = null;
         try

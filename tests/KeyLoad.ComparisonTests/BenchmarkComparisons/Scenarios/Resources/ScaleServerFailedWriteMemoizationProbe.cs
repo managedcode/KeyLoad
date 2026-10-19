@@ -9,7 +9,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
-/// <summary>Verifies original failed-write task and exception memoization against the actual native resource collector.</summary>
+/// <summary>Verifies original failed-write task and exception memoization against the actual execution resource collector.</summary>
 internal static class ScaleServerFailedWriteMemoizationProbe
 {
     private const string ProbeDirectory = "failed-write-probe";
@@ -67,7 +67,7 @@ internal static class ScaleServerFailedWriteMemoizationProbe
     private static async Task<Exception> VerifyFailedWriteAsync(DistributedApplication app, ContainerResource[] containers,
         CancellationTokenSource caller, ScaleServerResourceEvidenceCollector collector, Task observation, string output)
     {
-        var primary = await CancelNativeResourceWaitAsync(app, containers[0].Name, caller);
+        var primary = await CancelResourceWaitAsync(app, containers[0].Name, caller);
         var settlement = await CaptureSettlementFailureAsync(primary, caller, collector, observation);
         var completion = collector.CompleteAsync(observation);
         var firstFailure = await CaptureWriteFailureAsync(completion);
@@ -94,7 +94,7 @@ internal static class ScaleServerFailedWriteMemoizationProbe
         ScaleServerProbeFailureOrder.Throw(failures);
     }
 
-    private static async Task<OperationCanceledException> CancelNativeResourceWaitAsync(
+    private static async Task<OperationCanceledException> CancelResourceWaitAsync(
         DistributedApplication app, string resourceName, CancellationTokenSource caller)
     {
         var original = AspireResourceCompletion.WaitForExitAsync(app, resourceName, caller.Token);
@@ -121,7 +121,7 @@ internal static class ScaleServerFailedWriteMemoizationProbe
         {
             return failure;
         }
-        throw new InvalidOperationException("Cancellation and native sidecar writer failures were not retained together.");
+        throw new InvalidOperationException("Cancellation and execution sidecar writer failures were not retained together.");
     }
 
     private static async Task<Exception> CaptureWriteFailureAsync(Task completion)
@@ -138,6 +138,6 @@ internal static class ScaleServerFailedWriteMemoizationProbe
         {
             return failure;
         }
-        throw new InvalidOperationException("The native resource-evidence writer accepted a directory as its sidecar.");
+        throw new InvalidOperationException("The execution resource-evidence writer accepted a directory as its sidecar.");
     }
 }

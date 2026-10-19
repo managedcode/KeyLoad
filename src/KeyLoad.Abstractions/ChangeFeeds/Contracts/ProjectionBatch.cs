@@ -9,6 +9,6 @@ namespace KeyLoad;
 /// <param name="Token">The token used to acknowledge the batch.</param>
 /// <param name="HasMore">Whether another entry is available.</param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.ProjectionBatch)]
+[Orleans.Alias(ContractAliases.ProjectionBatch)]
 public sealed record ProjectionBatch([property: Orleans.Id(0)] ProjectionConsumerInfo Consumer, [property: Orleans.Id(1)] ImmutableArray<OutboxEntry> Entries, [property: Orleans.Id(2)] long ThroughSequence,
     [property: Orleans.Id(3)] string Token, [property: Orleans.Id(4)] bool HasMore);

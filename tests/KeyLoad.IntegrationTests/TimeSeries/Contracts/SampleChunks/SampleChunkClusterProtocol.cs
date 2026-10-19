@@ -2,7 +2,7 @@ namespace KeyLoad.IntegrationTests.Features.TimeSeries;
 
 internal static class SampleChunkClusterProtocol
 {
-    internal const string FixtureKey = "sample-chunk-native-cold";
+    internal const string FixtureKey = "sample-chunk-execution-cold";
     internal const string ColdScenario = "sample-chunk-generation-cold";
     internal const int WindowHours = 1;
     internal const int AlternateOffsetHours = -5;

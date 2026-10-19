@@ -23,7 +23,7 @@ internal static class AuthorizationTelemetryAssertions
     }
     internal static async Task ExportsAsync(AuthorizationTelemetryHttpFixture fixture, AuthorizationUnsafeSpanState state, string? suppressedTrace, bool malformedJson = false, bool authenticationFailure = false)
     {
-        var nativeSpans = fixture.NativeSpans.Bank.Snapshot();
+        var runtimeSpans = fixture.RuntimeSpans.Bank.Snapshot();
         var spans = fixture.Spans.Bank.Snapshot();
         var logs = fixture.Logs.Bank.Snapshot();
         var metrics = fixture.Metrics.Bank.Snapshot();
@@ -51,10 +51,10 @@ internal static class AuthorizationTelemetryAssertions
             ? AuthorizationTelemetryTestProtocol.HealthyCount : AuthorizationTelemetryTestProtocol.RequestCount).Because(JsonSerializer.Serialize(new
             {
                 exported = serialized,
-                nativeSpans
+                runtimeSpans
             }, JsonDefaults.Options));
-        await AuthorizationTelemetryNativeAssertions.SuppressionAsync(nativeSpans, suppressed, state, suppressedTrace);
-        await AuthorizationTelemetryNativeAssertions.IdentityAsync(spans, nativeSpans);
+        await RuntimeAuthorizationTelemetryAssertions.SuppressionAsync(runtimeSpans, suppressed, state, suppressedTrace);
+        await RuntimeAuthorizationTelemetryAssertions.IdentityAsync(spans, runtimeSpans);
         await SpansAsync(servers, clients, suppressedTrace);
         await LogsAsync(logs, servers, clients, suppressedTrace, malformedJson || authenticationFailure);
         await MetricsAsync(metrics);

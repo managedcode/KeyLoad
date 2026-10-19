@@ -4,13 +4,13 @@ using T = KeyLoad.ComparisonTests.Features.BenchmarkComparisons.IsolatedQuorumRe
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
-/// <summary>AC-ISO-001/003: native Rabbit peers use common secret auth, exact disc discovery and owned data.</summary>
+/// <summary>AC-ISO-001/003: execution Rabbit peers use common secret auth, exact disc discovery and owned data.</summary>
 internal sealed class IsolatedQuorumResourceRabbitTests
 {
     [Test]
     [Arguments(1)]
     [Arguments(3)]
-    public async Task AcIso003RabbitModelBindsActualMembersAndSharedNativeCredentials(int count)
+    public async Task AcIso003RabbitModelBindsActualMembersAndSharedCredentials(int count)
     {
         using var model = new IsolatedQuorumResourceModel();
         model.Add(T.Rabbit, count);

@@ -6,5 +6,5 @@ namespace KeyLoad;
 /// <param name="ExpectedGeneration">The subscription generation expected by the caller.</param>
 /// <param name="Paused">Whether to pause delivery.</param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.SetSubscriptionPausedRequest)]
+[Orleans.Alias(ContractAliases.SetSubscriptionPausedRequest)]
 public sealed record SetSubscriptionPausedRequest([property: Orleans.Id(0)] Guid CommandId, [property: Orleans.Id(1)] SubscriptionRef Subscription, [property: Orleans.Id(2)] long ExpectedGeneration, [property: Orleans.Id(3)] bool Paused);

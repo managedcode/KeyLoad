@@ -9,7 +9,7 @@ internal static class RemoteTransferRepairColdHealthy
         byte[] acceptBytes, CommandRequest deniedComplete, byte[] completeBytes, CommandRequest acceptedCommand,
         CommitReceipt accepted, CommandRequest completedCommand, CommitReceipt completed, int ceiling, RemoteTransferRepairColdFailure? refused)
     {
-        await RemoteTransferAttemptColdNative.AckAsync(fixture, RemoteTransferRepairColdProtocol.Message);
+        await RemoteTransferAttemptCold.AckAsync(fixture, RemoteTransferRepairColdProtocol.Message);
         await ProveAsync(fixture, transfer, original, proof, deniedAccept, acceptBytes, deniedComplete,
             completeBytes, acceptedCommand, accepted, completedCommand, completed, ceiling, refused);
         fixture.Reopen();
@@ -25,14 +25,14 @@ internal static class RemoteTransferRepairColdHealthy
         byte[] acceptBytes, CommandRequest deniedComplete, byte[] completeBytes, CommandRequest acceptedCommand,
         CommitReceipt accepted, CommandRequest completedCommand, CommitReceipt completed, int ceiling, RemoteTransferRepairColdFailure? refused)
     {
-        await Assert.That(RemoteTransferRepairColdNative.Outcome(fixture, deniedAccept.CommandId, fixture.DestinationPartition).AsSpan().SequenceEqual(acceptBytes)).IsTrue();
-        await Assert.That(RemoteTransferRepairColdNative.Outcome(fixture, deniedComplete.CommandId, fixture.SourcePartition).AsSpan().SequenceEqual(completeBytes)).IsTrue();
-        await Assert.That(Errors.Code(RemoteTransferRepairColdNative.Apply(fixture, deniedAccept).Problem)).IsEqualTo(ErrorCode.PermissionDenied);
-        await Assert.That(Errors.Code(RemoteTransferRepairColdNative.Apply(fixture, deniedComplete).Problem)).IsEqualTo(ErrorCode.PermissionDenied);
-        await Assert.That(Errors.Code(RemoteTransferRepairColdNative.Apply(fixture, acceptedCommand).Problem)).IsEqualTo(ErrorCode.PermissionDenied);
-        await Assert.That(RemoteTransferRepairColdNative.Outcome(fixture, deniedAccept.CommandId, fixture.DestinationPartition).AsSpan().SequenceEqual(acceptBytes)).IsTrue();
-        await Assert.That(RemoteTransferRepairColdNative.Outcome(fixture, deniedComplete.CommandId, fixture.SourcePartition).AsSpan().SequenceEqual(completeBytes)).IsTrue();
-        await RemoteTransferCoordinationColdAssertions.EqualAsync(RemoteTransferRepairColdNative.Apply(fixture, completedCommand).Get<CommitReceipt>(), completed);
+        await Assert.That(RemoteTransferRepairCold.Outcome(fixture, deniedAccept.CommandId, fixture.DestinationPartition).AsSpan().SequenceEqual(acceptBytes)).IsTrue();
+        await Assert.That(RemoteTransferRepairCold.Outcome(fixture, deniedComplete.CommandId, fixture.SourcePartition).AsSpan().SequenceEqual(completeBytes)).IsTrue();
+        await Assert.That(Errors.Code(RemoteTransferRepairCold.Apply(fixture, deniedAccept).Problem)).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(Errors.Code(RemoteTransferRepairCold.Apply(fixture, deniedComplete).Problem)).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(Errors.Code(RemoteTransferRepairCold.Apply(fixture, acceptedCommand).Problem)).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(RemoteTransferRepairCold.Outcome(fixture, deniedAccept.CommandId, fixture.DestinationPartition).AsSpan().SequenceEqual(acceptBytes)).IsTrue();
+        await Assert.That(RemoteTransferRepairCold.Outcome(fixture, deniedComplete.CommandId, fixture.SourcePartition).AsSpan().SequenceEqual(completeBytes)).IsTrue();
+        await RemoteTransferCoordinationColdAssertions.EqualAsync(RemoteTransferRepairCold.Apply(fixture, completedCommand).Get<CommitReceipt>(), completed);
         await RemoteTransferCoordinationColdAssertions.EqualAsync(fixture.Database.InspectQueueTransfer(RemoteTransferRepairColdProtocol.Subject,
             fixture.SourceQueue, transfer.TransferId), original with
             {
@@ -48,8 +48,8 @@ internal static class RemoteTransferRepairColdHealthy
         await Assert.That(fixture.TargetCapacity(fixture.DestinationQueue).StoredRecords).IsEqualTo(RemoteTransferRepairColdProtocol.InitialRecords);
         var expectedRecords = ceiling == RemoteTransferRepairColdProtocol.FullCeiling
             ? RemoteTransferRepairColdProtocol.FullRepairRecords : RemoteTransferRepairColdProtocol.LimitedRepairRecords;
-        await RemoteTransferAttemptColdNative.AccountingAsync(fixture, transfer.TransferId, expectedRecords);
-        var state = RemoteTransferRepairColdNative.State(fixture, transfer.TransferId);
+        await RemoteTransferAttemptCold.AccountingAsync(fixture, transfer.TransferId, expectedRecords);
+        var state = RemoteTransferRepairCold.State(fixture, transfer.TransferId);
         await Assert.That(state.Ceiling).IsEqualTo(ceiling);
         await Assert.That(state.AcceptPolicyGeneration).IsEqualTo(RemoteTransferRepairColdProtocol.RepairedGeneration);
         await Assert.That(state.CompleteGeneration).IsEqualTo(ceiling == RemoteTransferRepairColdProtocol.FullCeiling
@@ -57,11 +57,11 @@ internal static class RemoteTransferRepairColdHealthy
         await Assert.That((long)state.History.Length).IsEqualTo(expectedRecords - RemoteTransferRepairColdProtocol.InitialRecords);
         if (refused is not null)
         {
-            await RemoteTransferCoordinationColdAssertions.EqualAsync(RemoteTransferRepairColdNative.Apply(fixture, refused.Command), refused.Result);
-            await Assert.That(RemoteTransferRepairColdNative.Outcome(fixture, refused.Command.CommandId,
+            await RemoteTransferCoordinationColdAssertions.EqualAsync(RemoteTransferRepairCold.Apply(fixture, refused.Command), refused.Result);
+            await Assert.That(RemoteTransferRepairCold.Outcome(fixture, refused.Command.CommandId,
                 fixture.SourcePartition).AsSpan().SequenceEqual(refused.Bytes)).IsTrue();
         }
-        var stored = NativeSerialization.Deserialize<StoredOutcome>(RemoteTransferRepairColdNative.Outcome(fixture,
+        var stored = OrleansSerialization.Deserialize<StoredOutcome>(RemoteTransferRepairCold.Outcome(fixture,
             acceptedCommand.CommandId, fixture.DestinationPartition));
         await RemoteTransferCoordinationColdAssertions.EqualAsync(stored.Result.Get<CommitReceipt>(), accepted);
     }

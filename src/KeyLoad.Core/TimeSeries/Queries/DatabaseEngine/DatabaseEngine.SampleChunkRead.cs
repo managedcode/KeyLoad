@@ -3,7 +3,7 @@ namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
-    /// <summary>Reads the complete authorized enrolled chunk window at the original native owner cut.</summary>
+    /// <summary>Reads the complete authorized enrolled chunk window at the original execution owner cut.</summary>
     public SampleChunkWindowResult ReadSampleChunkWindow(string principalId, ReadSampleChunkWindowRequest request,
         CancellationToken cancellationToken = default)
     {

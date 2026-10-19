@@ -136,7 +136,7 @@ internal sealed class SampleChunkStoreFixture : IDisposable
         var scan = budget.VisitRange(view, SampleReadKeys.Prefix(partition, Set, Series), MaximumSeriesRecords,
             (_, value) =>
             {
-                records.Add(NativeSerialization.Deserialize<SampleRecord>(value));
+                records.Add(OrleansSerialization.Deserialize<SampleRecord>(value));
                 return true;
             });
         if (scan.HasMore)

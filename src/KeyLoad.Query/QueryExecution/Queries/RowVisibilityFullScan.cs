@@ -68,7 +68,7 @@ internal static class RowVisibilityFullScan
         return scan((_, bytes) =>
             {
                 budget.Check();
-                var document = NativeSerialization.Deserialize<DocumentRecord>(bytes);
+                var document = OrleansSerialization.Deserialize<DocumentRecord>(bytes);
                 if (!document.Deleted && (lease is null || lease.Contains(document.Reference.Id))
                     && database.Authorization.CanReadRow(principal, document.Access))
                 {

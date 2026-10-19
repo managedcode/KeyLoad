@@ -28,7 +28,7 @@ internal static class DocumentMeasurementValues
     internal const int MicrosecondsPerMillisecond = 1000;
     internal const int MixedCrudCycleLength = 4;
     internal const int NamespacesPerRepetition = 2;
-    internal const int NativeActualEnumeration = -1;
+    internal const int ActualEnumeration = -1;
     internal const int NoObservedItems = 0;
     internal const int OperationTimeoutSeconds = 30;
     internal const int OrdinaryClients = 16;

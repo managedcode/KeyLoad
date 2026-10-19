@@ -6,7 +6,7 @@ namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons.TimeSeries.Inten
 internal sealed class TimeSeriesIntensivePinnedImageTests
 {
     [Test]
-    public async Task AcTsi003PinnedNativeImageHasObservedPg18BootstrapPrimitives()
+    public async Task AcTsi003PinnedImageHasObservedPg18BootstrapPrimitives()
     {
         var facts = await TimeSeriesIntensivePinnedImageQualification.RunAsync(
             TestContext.Current!.Execution.CancellationToken);

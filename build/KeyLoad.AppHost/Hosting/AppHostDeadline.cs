@@ -1,6 +1,6 @@
 namespace KeyLoad.AppHost.Hosting;
 
-/// <summary>Owns a native provider deadline and the incoming cancellation registration.</summary>
+/// <summary>Owns a execution provider deadline and the incoming cancellation registration.</summary>
 internal sealed class AppHostDeadline : CancellationTokenSource
 {
     private readonly CancellationTokenRegistration incoming;

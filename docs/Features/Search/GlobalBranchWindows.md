@@ -33,7 +33,7 @@ WindowComplete,Approximate,Truncated,Exhaustive,ExaminedCandidateCount).
 String identifiers are nonblank and bounded by JsonData.Identifier; candidate
 revision is positive; arrays are initialized; duplicate/unknown source IDs reject.
 The merger receives DatabaseLimits and the shared ReadExecutionBudget, charges
-every examined record and exact native bytes before retaining it, and retains no
+every examined record and exact bytes before retaining it, and retains no
 more than MaxScanRecords/MaxBatchBytes. No unbounded window list is accepted.
 Strict mode rejects Approximate or Truncated input; explicit incomplete mode
 retains those flags. Exhaustive also requires every source Exhaustive and no
@@ -55,10 +55,10 @@ Validation rejects malformed requests, identifiers, uninitialized arrays,
 nonpositive/oversized limits and duplicate/unknown logical source windows.
 Corruption rejects malformed/conflicting candidates or incomparable scope.
 BudgetExceeded rejects record/byte/window/deadline exhaustion; cancellation keeps
-its native cancellation exception. Strict missing/incomplete windows give
+its cancellation exception. Strict missing/incomplete windows give
 OwnershipLost; strict approximate/truncated windows give UnsupportedCapability.
 Expected and received window lists each obey MaxScanRecords and their exact
-native metadata is included in the one shared MaxBatchBytes accounting. Every
+metadata is included in the one shared MaxBatchBytes accounting. Every
 examined candidate across all windows counts against the same MaxScanRecords.
 
 The merger and order live in the Query Search slice (Contracts/Models/Queries/Validation) with a narrow join into SearchRankFusion; rankers, physical topology, persisted statistics, public SearchRequest, policy projections and existing expected results are unchanged.

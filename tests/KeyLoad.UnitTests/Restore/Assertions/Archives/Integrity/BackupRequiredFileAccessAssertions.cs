@@ -48,8 +48,8 @@ internal static class BackupRequiredFileAccessAssertions
         Dictionary<string, byte[]> original, (StoreIdentity Identity, long Position, string[] Rows) source,
         CancellationToken token)
     {
-        await NativeBackupJournalRepairAssertions.SameCutAsync(source,
-            NativeBackupJournalRepairAssertions.Read(fixture.SourceDirectory, token));
+        await BackupJournalRepairAssertions.SameCutAsync(source,
+            BackupJournalRepairAssertions.Read(fixture.SourceDirectory, token));
         var files = Directory.EnumerateFiles(fixture.BackupDirectory).Select(path =>
             Path.GetFileName(path) ?? throw new InvalidOperationException(MissingName)).ToArray();
         await Assert.That(files).IsEquivalentTo(original.Keys, CollectionOrdering.Matching);

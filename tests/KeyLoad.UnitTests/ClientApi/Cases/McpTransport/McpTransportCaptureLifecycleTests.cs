@@ -5,16 +5,16 @@ using ModelContextProtocol.Protocol;
 
 namespace KeyLoad.UnitTests.Features.ClientApi;
 
-/// <summary>AC-CLIENT-008: native captures remain enabled across real provider/listener disposal and recreation.</summary>
+/// <summary>AC-CLIENT-008: execution captures remain enabled across real provider/listener disposal and recreation.</summary>
 [NotInParallel(LoggingEventSourceIsolation.Key)]
 internal sealed class McpTransportCaptureLifecycleTests
 {
     private const int CaptureLifetimes = 2;
     private const string MethodCanary = "private-lifecycle-method-canary";
 
-    /// <summary>Two independently owned native capture lifetimes preserve closed categories and privacy.</summary>
+    /// <summary>Two independently owned execution capture lifetimes preserve closed categories and privacy.</summary>
     [Test]
-    public async Task NativeProviderCaptureCanBeDisposedAndReenabled()
+    public async Task ProviderCaptureCanBeDisposedAndReenabled()
     {
         for (var lifetime = 0; lifetime < CaptureLifetimes; lifetime++)
         {

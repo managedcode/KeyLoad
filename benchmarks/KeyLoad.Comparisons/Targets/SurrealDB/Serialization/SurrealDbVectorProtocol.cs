@@ -3,7 +3,7 @@ using System.Text;
 using System.Text.Json;
 
 namespace KeyLoad.Comparisons.Targets;
-/// <summary>Owns SurrealDB HTTP framing and its native response-envelope validation.</summary>
+/// <summary>Owns SurrealDB HTTP framing and its execution response-envelope validation.</summary>
 internal static class SurrealDbVectorProtocol
 {
     private const int SingleResultCardinality = 1;
@@ -13,23 +13,23 @@ internal static class SurrealDbVectorProtocol
     private const string SETNumber = " SET number = ";
     private const string Embedding = ", embedding = ";
     private const string Payload = ", payload = ";
-    private const char NativeCharacter59 = ';';
-    private const string NativeSELECTNumberIdEmbeddingPayloadFROMWHERENumberFormatTemplate = "SELECT number, id, embedding, payload FROM {0} WITH INDEX {3} WHERE number > {1} ORDER BY number LIMIT {2};";
-    private static readonly System.Text.CompositeFormat NativeSELECTNumberIdEmbeddingPayloadFROMWHERENumberFormat = System.Text.CompositeFormat.Parse(NativeSELECTNumberIdEmbeddingPayloadFROMWHERENumberFormatTemplate);
-    private const string NativeSELECTNumberIdEmbeddingPayloadFROMFormatTemplate = "SELECT number, id, embedding, payload FROM {0}:{1};";
-    private static readonly System.Text.CompositeFormat NativeSELECTNumberIdEmbeddingPayloadFROMFormat = System.Text.CompositeFormat.Parse(NativeSELECTNumberIdEmbeddingPayloadFROMFormatTemplate);
-    private const string NativeUPDATESETEmbeddingFormatTemplate = "UPDATE {0}:{1} SET embedding = {2} RETURN AFTER;";
-    private static readonly System.Text.CompositeFormat NativeUPDATESETEmbeddingFormat = System.Text.CompositeFormat.Parse(NativeUPDATESETEmbeddingFormatTemplate);
-    private const string NativeEmptyTextFormatTemplate = "{0}, {1}";
-    private static readonly System.Text.CompositeFormat NativeEmptyTextFormat = System.Text.CompositeFormat.Parse(NativeEmptyTextFormatTemplate);
-    private const string NativeCOSINEFormatTemplate = "{0}, COSINE";
-    private static readonly System.Text.CompositeFormat NativeCOSINEFormat = System.Text.CompositeFormat.Parse(NativeCOSINEFormatTemplate);
-    private const string NativeSELECTIdVectorDistanceKnnASDistanceFROMFormatTemplate = "SELECT id, vector::distance::knn() AS distance FROM {0} WHERE embedding <|{1}|> {2}{3} ORDER BY distance, id LIMIT {4};";
-    private static readonly System.Text.CompositeFormat NativeSELECTIdVectorDistanceKnnASDistanceFROMFormat = System.Text.CompositeFormat.Parse(NativeSELECTIdVectorDistanceKnnASDistanceFROMFormatTemplate);
+    private const char Character59 = ';';
+    private const string SELECTNumberIdEmbeddingPayloadFROMWHERENumberFormatTemplate = "SELECT number, id, embedding, payload FROM {0} WITH INDEX {3} WHERE number > {1} ORDER BY number LIMIT {2};";
+    private static readonly System.Text.CompositeFormat SELECTNumberIdEmbeddingPayloadFROMWHERENumberFormat = System.Text.CompositeFormat.Parse(SELECTNumberIdEmbeddingPayloadFROMWHERENumberFormatTemplate);
+    private const string SELECTNumberIdEmbeddingPayloadFROMFormatTemplate = "SELECT number, id, embedding, payload FROM {0}:{1};";
+    private static readonly System.Text.CompositeFormat SELECTNumberIdEmbeddingPayloadFROMFormat = System.Text.CompositeFormat.Parse(SELECTNumberIdEmbeddingPayloadFROMFormatTemplate);
+    private const string UPDATESETEmbeddingFormatTemplate = "UPDATE {0}:{1} SET embedding = {2} RETURN AFTER;";
+    private static readonly System.Text.CompositeFormat UPDATESETEmbeddingFormat = System.Text.CompositeFormat.Parse(UPDATESETEmbeddingFormatTemplate);
+    private const string EmptyTextFormatTemplate = "{0}, {1}";
+    private static readonly System.Text.CompositeFormat EmptyTextFormat = System.Text.CompositeFormat.Parse(EmptyTextFormatTemplate);
+    private const string COSINEFormatTemplate = "{0}, COSINE";
+    private static readonly System.Text.CompositeFormat COSINEFormat = System.Text.CompositeFormat.Parse(COSINEFormatTemplate);
+    private const string SELECTIdVectorDistanceKnnASDistanceFROMFormatTemplate = "SELECT id, vector::distance::knn() AS distance FROM {0} WHERE embedding <|{1}|> {2}{3} ORDER BY distance, id LIMIT {4};";
+    private static readonly System.Text.CompositeFormat SELECTIdVectorDistanceKnnASDistanceFROMFormat = System.Text.CompositeFormat.Parse(SELECTIdVectorDistanceKnnASDistanceFROMFormatTemplate);
     private const string EXPLAIN = "EXPLAIN FORMAT JSON ";
     private const int CanonicalTopK = 10;
-    private const string NativeDEFINEINDEXONTABLEFIELDSEmbeddingHNSWDIMENSIONFormatTemplate = "DEFINE INDEX {0} ON TABLE {1} FIELDS embedding HNSW DIMENSION {2} TYPE F32 DIST COSINE EFC {3} M {4} CONCURRENTLY;";
-    private static readonly System.Text.CompositeFormat NativeDEFINEINDEXONTABLEFIELDSEmbeddingHNSWDIMENSIONFormat = System.Text.CompositeFormat.Parse(NativeDEFINEINDEXONTABLEFIELDSEmbeddingHNSWDIMENSIONFormatTemplate);
+    private const string DEFINEINDEXONTABLEFIELDSEmbeddingHNSWDIMENSIONFormatTemplate = "DEFINE INDEX {0} ON TABLE {1} FIELDS embedding HNSW DIMENSION {2} TYPE F32 DIST COSINE EFC {3} M {4} CONCURRENTLY;";
+    private static readonly System.Text.CompositeFormat DEFINEINDEXONTABLEFIELDSEmbeddingHNSWDIMENSIONFormat = System.Text.CompositeFormat.Parse(DEFINEINDEXONTABLEFIELDSEmbeddingHNSWDIMENSIONFormatTemplate);
     private const string ANDNumber = " AND number % 100 = 0";
     private const string ANDNumber2 = " AND number % 10 != 9";
     private const int VectorArrayDelimiterWidth = 2;
@@ -37,8 +37,8 @@ internal static class SurrealDbVectorProtocol
     private const char VectorComponentSeparator = ',';
     private const char VectorArrayEnd = ']';
     private const char VectorRecordPrefix = 'v';
-    private const char NativeCharacter48 = '0';
-    private const char NativeCharacter57 = '9';
+    private const char Character48 = '0';
+    private const char Character57 = '9';
     private const string VectorValueFormat = "R";
     private const string InvalidResponse = "SurrealDbInvalidResponse";
     private const string ResultKey = "result";
@@ -99,7 +99,7 @@ internal static class SurrealDbVectorProtocol
         var sql = CreateBatchBuilder(batch.Count, recordBuilderCapacity);
         foreach (var document in batch)
         {
-            sql.Append(CREATEONLY).Append(table).Append(RecordSeparator).Append(RecordKey(document.Id)).Append(SETNumber).Append(document.Number.ToString(CultureInfo.InvariantCulture)).Append(Embedding).Append(FormatVector(document.Embedding.Span, vectorComponentBuilderCapacity)).Append(Payload).Append(JsonSerializer.Serialize(document.Payload)).Append(NativeCharacter59);
+            sql.Append(CREATEONLY).Append(table).Append(RecordSeparator).Append(RecordKey(document.Id)).Append(SETNumber).Append(document.Number.ToString(CultureInfo.InvariantCulture)).Append(Embedding).Append(FormatVector(document.Embedding.Span, vectorComponentBuilderCapacity)).Append(Payload).Append(JsonSerializer.Serialize(document.Payload)).Append(Character59);
         }
 
         return sql.ToString();
@@ -110,17 +110,17 @@ internal static class SurrealDbVectorProtocol
     internal static StringBuilder CreateVectorBuilder(int componentCount, int vectorComponentBuilderCapacity)
         => new(componentCount * vectorComponentBuilderCapacity + VectorArrayDelimiterWidth);
 
-    internal static string ReadbackSql(string table, int after, int limit) => string.Format(System.Globalization.CultureInfo.InvariantCulture, NativeSELECTNumberIdEmbeddingPayloadFROMWHERENumberFormat, table, after, limit, SurrealDbReadbackIndex.Name(table));
-    internal static string ReadOneSql(string table, string id) => string.Format(System.Globalization.CultureInfo.InvariantCulture, NativeSELECTNumberIdEmbeddingPayloadFROMFormat, table, RecordKey(id));
-    internal static string UpdateSql(string table, string id, ReadOnlySpan<float> vector, int vectorComponentBuilderCapacity) => string.Format(System.Globalization.CultureInfo.InvariantCulture, NativeUPDATESETEmbeddingFormat, table, RecordKey(id), FormatVector(vector, vectorComponentBuilderCapacity));
+    internal static string ReadbackSql(string table, int after, int limit) => string.Format(System.Globalization.CultureInfo.InvariantCulture, SELECTNumberIdEmbeddingPayloadFROMWHERENumberFormat, table, after, limit, SurrealDbReadbackIndex.Name(table));
+    internal static string ReadOneSql(string table, string id) => string.Format(System.Globalization.CultureInfo.InvariantCulture, SELECTNumberIdEmbeddingPayloadFROMFormat, table, RecordKey(id));
+    internal static string UpdateSql(string table, string id, ReadOnlySpan<float> vector, int vectorComponentBuilderCapacity) => string.Format(System.Globalization.CultureInfo.InvariantCulture, UPDATESETEmbeddingFormat, table, RecordKey(id), FormatVector(vector, vectorComponentBuilderCapacity));
     internal static string SearchSql(string table, ReadOnlySpan<float> vector, int topK, VectorQueryMode mode, VectorIndexKind index, int ef, int vectorComponentBuilderCapacity)
     {
-        var operatorParameters = index == VectorIndexKind.Hnsw ? string.Format(System.Globalization.CultureInfo.InvariantCulture, NativeEmptyTextFormat, topK, ef) : string.Format(System.Globalization.CultureInfo.InvariantCulture, NativeCOSINEFormat, topK);
-        return string.Format(System.Globalization.CultureInfo.InvariantCulture, NativeSELECTIdVectorDistanceKnnASDistanceFROMFormat, table, operatorParameters, FormatVector(vector, vectorComponentBuilderCapacity), FilterClause(mode), topK);
+        var operatorParameters = index == VectorIndexKind.Hnsw ? string.Format(System.Globalization.CultureInfo.InvariantCulture, EmptyTextFormat, topK, ef) : string.Format(System.Globalization.CultureInfo.InvariantCulture, COSINEFormat, topK);
+        return string.Format(System.Globalization.CultureInfo.InvariantCulture, SELECTIdVectorDistanceKnnASDistanceFROMFormat, table, operatorParameters, FormatVector(vector, vectorComponentBuilderCapacity), FilterClause(mode), topK);
     }
 
     internal static string ExplainSql(string table, ReadOnlySpan<float> vector, VectorQueryMode mode, VectorIndexKind index, int ef, int vectorComponentBuilderCapacity) => EXPLAIN + SearchSql(table, vector, CanonicalTopK, mode, index, ef, vectorComponentBuilderCapacity);
-    internal static string HnswIndex(string index, string table, int dimensions, int efConstruction, int neighbors) => string.Format(System.Globalization.CultureInfo.InvariantCulture, NativeDEFINEINDEXONTABLEFIELDSEmbeddingHNSWDIMENSIONFormat, index, table, dimensions, efConstruction, neighbors);
+    internal static string HnswIndex(string index, string table, int dimensions, int efConstruction, int neighbors) => string.Format(System.Globalization.CultureInfo.InvariantCulture, DEFINEINDEXONTABLEFIELDSEmbeddingHNSWDIMENSIONFormat, index, table, dimensions, efConstruction, neighbors);
     private static string FilterClause(VectorQueryMode mode) => mode switch
     {
         VectorQueryMode.Plain => string.Empty,
@@ -135,7 +135,7 @@ internal static class SurrealDbVectorProtocol
         {
             if (!float.IsFinite(vector[index]))
             {
-                throw new InvalidDataException(SurrealDbNativeTokens.TokenSurrealDbInvalidVector);
+                throw new InvalidDataException(SurrealDbTokens.TokenSurrealDbInvalidVector);
             }
 
             if (index != EmptyResultCount)
@@ -149,5 +149,5 @@ internal static class SurrealDbVectorProtocol
         return result.Append(VectorArrayEnd).ToString();
     }
 
-    private static string RecordKey(string id) => id.Length == CanonicalTopK && id[EmptyResultCount] == VectorRecordPrefix && id.AsSpan(SingleResultCardinality).IndexOfAnyExceptInRange(NativeCharacter48, NativeCharacter57) < EmptyResultCount ? SurrealDbNativeTokens.TokenV + id[SingleResultCardinality..] : throw new InvalidDataException(SurrealDbNativeTokens.TokenSurrealDbInvalidRecordId);
+    private static string RecordKey(string id) => id.Length == CanonicalTopK && id[EmptyResultCount] == VectorRecordPrefix && id.AsSpan(SingleResultCardinality).IndexOfAnyExceptInRange(Character48, Character57) < EmptyResultCount ? SurrealDbTokens.TokenV + id[SingleResultCardinality..] : throw new InvalidDataException(SurrealDbTokens.TokenSurrealDbInvalidRecordId);
 }

@@ -1,6 +1,6 @@
 using KeyLoad.Client;
 using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.ClusterReplication;
+using KeyLoad.IntegrationTests.Features.StorageReplication;
 
 namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 
@@ -23,7 +23,7 @@ internal sealed class PartitionQueryPublicClusterTests(ClusterFixture fixture)
             .ConfigureAwait(false);
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node2,
             fixture.AdminKey, deadline.Token).ConfigureAwait(false);
-        var receipt = await McpCallerAssertions.SuccessAsync<PartitionQueryPageV1>(await mcp.CallAsync(
+        var receipt = await McpCallerAssertions.SuccessAsync<PartitionQueryPage>(await mcp.CallAsync(
             PartitionQueryClusterProtocol.ToolName, request, deadline.Token).ConfigureAwait(false)).ConfigureAwait(false);
         await PartitionQueryClusterAssertions.AssertOracleAsync(receipt.Value, scenario, scenario.Partitions)
             .ConfigureAwait(false);

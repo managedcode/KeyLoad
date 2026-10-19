@@ -7,6 +7,6 @@ internal sealed class GraphSearchLineageWholeFlowTests
     [Arguments(false, true)]
     [Arguments(true, false)]
     [Arguments(true, true)]
-    public Task AllGraphExpressionAuthorityPrecedesEarlierNativeLookupThenUseOnlyRepairCompleteResultsReplayAndTwoCold(bool expansion, bool emptyLabels)
+    public Task AllGraphExpressionAuthorityPrecedesEarlierLookupThenUseOnlyRepairCompleteResultsReplayAndTwoCold(bool expansion, bool emptyLabels)
         => GraphSearchLineageFlow.RunAsync(expansion, emptyLabels);
 }

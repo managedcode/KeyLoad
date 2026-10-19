@@ -1,7 +1,7 @@
 using System.Text;
 using KeyLoad.Clustering;
 using KeyLoad.Server;
-using KeyLoad.UnitTests.Features.ClusterRouting;
+using KeyLoad.UnitTests.Features.OrleansExecution;
 using KeyLoad.UnitTests.Features.Messaging;
 using ManagedCode.Communication;
 using ManagedCode.Communication.CQRS;
@@ -13,13 +13,13 @@ namespace KeyLoad.UnitTests.Features.Authorization;
 
 internal static class StartedReadPolicyAssertions
 {
-    internal static async Task ReceiptAsync(ConnectionNativeScenario scenario, CommandRequest command,
+    internal static async Task ReceiptAsync(ConnectionScenario scenario, CommandRequest command,
         GrainOperationReply reply, CommitToken expectedToken)
     {
         await Assert.That(reply.Error).IsNull();
-        var receipt = ConnectionNativeAssertions.Value<CommitReceipt>(reply);
+        var receipt = ConnectionAssertions.Value<CommitReceipt>(reply);
         var entry = scenario.Fixture.Database.ReadStoredOutcome(command.CommandId);
-        CommitReceipt expected = new(command.CommandId, expectedToken, [new(P.Put, ConnectionNativeProtocol.Collection, P.Document, P.Revision)], DurabilityProfile.ProcessDurable,
+        CommitReceipt expected = new(command.CommandId, expectedToken, [new(P.Put, ConnectionProtocol.Collection, P.Document, P.Revision)], DurabilityProfile.ProcessDurable,
             scenario.Fixture.Source.Services.GetRequiredService<IOptions<NodeOptions>>().Value.ReplicaCount);
         await EqualAsync(expected, receipt);
         await Assert.That(entry.CanonicalSequence).IsEqualTo(expectedToken.Position);
@@ -27,11 +27,11 @@ internal static class StartedReadPolicyAssertions
         await Assert.That(receipt.Mutations.All(item => item.CompositionReferences.IsEmpty)).IsTrue();
     }
 
-    internal static async Task DocumentAsync(ConnectionNativeScenario scenario, GrainOperationReply reply)
+    internal static async Task DocumentAsync(ConnectionScenario scenario, GrainOperationReply reply)
     {
         await Assert.That(reply.Error).IsNull();
-        DocumentResult expected = new(scenario.Reference(P.Document), P.Revision, ConnectionNativeProtocol.FirstJson, false, []);
-        await EqualAsync(expected, ConnectionNativeAssertions.Value<DocumentResult>(reply));
+        DocumentResult expected = new(scenario.Reference(P.Document), P.Revision, ConnectionProtocol.FirstJson, false, []);
+        await EqualAsync(expected, ConnectionAssertions.Value<DocumentResult>(reply));
         await EqualAsync(expected, scenario.Stored(P.Document)!);
     }
 
@@ -69,7 +69,7 @@ internal static class StartedReadPolicyAssertions
         await Assert.That(failed.EventId).IsNull();
     }
 
-    internal static async Task ConservedAsync(ConnectionNativeScenario scenario, string[] image, long position,
+    internal static async Task ConservedAsync(ConnectionScenario scenario, string[] image, long position,
         byte[] originalOutcome, string writer, CommandRequest command)
     {
         var store = scenario.Fixture.Database.Store;

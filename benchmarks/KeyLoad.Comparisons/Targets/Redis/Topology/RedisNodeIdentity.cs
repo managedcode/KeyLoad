@@ -7,11 +7,11 @@ internal sealed record RedisNodeIdentity(string RunId, string Version)
 {
     private const int SingleItemCount = 1;
 
-    public const string InvalidError = "RedisNativeIdentityInvalid";
-    public const string DuplicateError = "RedisNativeIdentityNotUnique";
-    public const string VersionError = "RedisNativeVersionMismatch";
-    public const string ChangedError = "RedisNativeIdentityChanged";
-    public const string ObservationPrefix = "native node identity: ";
+    public const string InvalidError = "RedisIdentityInvalid";
+    public const string DuplicateError = "RedisIdentityNotUnique";
+    public const string VersionError = "RedisVersionMismatch";
+    public const string ChangedError = "RedisIdentityChanged";
+    public const string ObservationPrefix = "execution node identity: ";
     public const string VersionSeparator = " version=";
     private const string RunIdSeparator = " run_id=";
     private const string PrimaryRoleObservation = "primary";
@@ -26,9 +26,9 @@ internal sealed record RedisNodeIdentity(string RunId, string Version)
 
     public static async Task<RedisNodeIdentity> ReadAsync(IServer server, CommandFlags flags, CancellationToken token)
     {
-        var info = await RedisNativeProtocol.ReadInfoAsync(server, RedisNativeProtocol.ServerSection, flags, token);
-        var runId = info.GetValueOrDefault(RedisNativeProtocol.RunIdField);
-        var version = info.GetValueOrDefault(RedisNativeProtocol.VersionField);
+        var info = await RedisProtocol.ReadInfoAsync(server, RedisProtocol.ServerSection, flags, token);
+        var runId = info.GetValueOrDefault(RedisProtocol.RunIdField);
+        var version = info.GetValueOrDefault(RedisProtocol.VersionField);
         if (string.IsNullOrWhiteSpace(runId) || string.IsNullOrWhiteSpace(version))
         {
             throw new ComparisonFailureException(InvalidError);

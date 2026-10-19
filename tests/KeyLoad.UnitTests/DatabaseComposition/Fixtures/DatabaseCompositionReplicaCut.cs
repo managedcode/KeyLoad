@@ -6,13 +6,13 @@ using KeyLoad.UnitTests.Features.Authorization;
 
 namespace KeyLoad.UnitTests.Features.DatabaseComposition;
 
-/// <summary>Installs the original native source image into a distinct, same-group physical store.</summary>
+/// <summary>Installs the original execution source image into a distinct, same-group physical store.</summary>
 internal sealed class DatabaseCompositionReplicaCut : IDisposable
 {
     private const string TargetSuffix = "-composition-replica-cut";
     private const string SnapshotName = "composition-replica-cut.snapshot";
     private const string RootPrincipal = "root";
-    private const string ReplicaCutMismatch = "The native replica image differs from its original identity and source cut.";
+    private const string ReplicaCutMismatch = "The execution replica image differs from its original identity and source cut.";
     private const int NoCleanupFailures = 0;
     private const bool DeleteOwnedTreeRecursively = true;
     private readonly TestDatabase source;
@@ -112,7 +112,7 @@ internal sealed class DatabaseCompositionReplicaCut : IDisposable
         var request = new CommandRequest(Guid.NewGuid(), source.Partition, [.. mutations]);
         var work = new ReadExecutionBudget(Database.OperationLimitsOptions, Database.EvaluationClock, token);
         var original = Database.CreateCommand(OperationKind.Batch, request.CommandId, RootPrincipal,
-            Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(request), work);
+            Database.EvaluationClock.GetUtcNow(), OrleansSerialization.Serialize(request), work);
         return Database.Apply(original).Get<CommitReceipt>();
     }
 

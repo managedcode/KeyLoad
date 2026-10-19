@@ -24,7 +24,7 @@ internal static class QueueClaimAckCrashScenario
             var delivery = CrashDatabase.Submit(database, OperationKind.Receive, request, request.RequestId)
                 .Get<ReceiveResult>().Deliveries.Single();
             await File.WriteAllBytesAsync(Path.Combine(directory, QueueClaimAckCrashProtocol.DeliveryFile),
-                NativeSerialization.Serialize(delivery));
+                OrleansSerialization.Serialize(delivery));
             var command = new DeliveryCommand(QueueClaimAckCrashProtocol.OperationId, request.Lane, delivery.Token, DeliveryAction.Ack);
             operation = database.OwnCommand(CrashDatabase.Operation(database, OperationKind.Delivery, command, command.CommandId));
         }
@@ -33,15 +33,15 @@ internal static class QueueClaimAckCrashScenario
             operation = database.OwnCommand(CrashDatabase.Operation(database, OperationKind.Receive, request, request.RequestId));
         }
         await File.WriteAllBytesAsync(Path.Combine(directory, QueueClaimAckCrashProtocol.OperationFile),
-            NativeSerialization.Serialize(operation));
+            OrleansSerialization.Serialize(operation));
         var target = CrashDatabase.NextCommitToken(database, QueueClaimAckCrashProtocol.Partition);
         var physicalTarget = checked(store.Position + QueueClaimAckCrashProtocol.AdjacentPosition);
         await File.WriteAllBytesAsync(Path.Combine(directory, QueueClaimAckCrashProtocol.BaselineFile),
-            NativeSerialization.Serialize(CaptureBaseline(store)));
+            OrleansSerialization.Serialize(CaptureBaseline(store)));
         await File.WriteAllBytesAsync(Path.Combine(directory, QueueClaimAckCrashProtocol.TargetFile),
-            NativeSerialization.Serialize(target));
+            OrleansSerialization.Serialize(target));
         await File.WriteAllBytesAsync(Path.Combine(directory, QueueClaimAckCrashProtocol.PhysicalTargetFile),
-            NativeSerialization.Serialize(physicalTarget));
+            OrleansSerialization.Serialize(physicalTarget));
         boundary.Position = physicalTarget;
         boundary.Armed = true;
         _ = database.Apply(operation);

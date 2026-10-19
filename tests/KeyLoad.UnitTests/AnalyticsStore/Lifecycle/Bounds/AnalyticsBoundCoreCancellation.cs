@@ -1,4 +1,4 @@
-using D = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreNativeTestData;
+using D = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreTestData;
 
 namespace KeyLoad.UnitTests.Features.AnalyticsStore;
 
@@ -12,7 +12,7 @@ internal static class AnalyticsBoundCoreCancellation
         {
             using var caller = CancellationTokenSource.CreateLinkedTokenSource(original);
             await AnalyticsBoundCoreOwner.LeaseAsync(fixture, owner, async (lease, ledger, work) =>
-                await AnalyticsBoundsNative.UnchangedAsync(fixture, async () =>
+                await RuntimeAnalyticsBounds.UnchangedAsync(fixture, async () =>
                 {
                     await caller.CancelAsync();
                     var error = Assert.ThrowsExactly<OperationCanceledException>(() =>
@@ -28,7 +28,7 @@ internal static class AnalyticsBoundCoreCancellation
         => AnalyticsBoundCoreOwner.RunAsync(async (fixture, owner, original) =>
         {
             await AnalyticsBoundCoreOwner.LeaseAsync(fixture, owner, async (lease, ledger, work) =>
-                await AnalyticsBoundsNative.UnchangedAsync(fixture, async () =>
+                await RuntimeAnalyticsBounds.UnchangedAsync(fixture, async () =>
                 {
                     work.ConstrainLifetime(fixture.Database.EvaluationClock.GetUtcNow() + ShortOriginalExpiry);
                     await Task.Delay(BoundedObservation, fixture.Database.EvaluationClock, original);

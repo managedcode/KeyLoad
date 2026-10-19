@@ -84,7 +84,7 @@ internal static class GlobalBranchWindowMerger
             {
                 budget.Check();
                 GlobalBranchValidation.ValidateCandidateEncodingBounds(candidate);
-                bytes.Accept(NativeSerialization.Measure(candidate));
+                bytes.Accept(OrleansSerialization.Measure(candidate));
                 GlobalBranchValidation.ValidateCandidate(candidate);
                 if (previous is not null && GlobalBranchOrder.CompareCandidates(previous, candidate) > EqualOrder)
                 {

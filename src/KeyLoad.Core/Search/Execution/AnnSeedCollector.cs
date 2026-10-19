@@ -115,7 +115,7 @@ internal static class AnnSeedCollector
         {
             throw Errors.Fail(ErrorCode.Corruption, InvalidAppliedPosition);
         }
-        var applied = appliedBytes is null ? CaptureCutAbsentCount : NativeSerialization.Deserialize<long>(appliedBytes);
+        var applied = appliedBytes is null ? CaptureCutAbsentCount : OrleansSerialization.Deserialize<long>(appliedBytes);
         if (applied < AppliedValidationBoundary)
         {
             throw Errors.Fail(ErrorCode.Corruption, InvalidAppliedPosition);

@@ -2,7 +2,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
 
-/// <summary>Uses the native options factory and canonical node postconfiguration before native silo registration.</summary>
+/// <summary>Uses the execution options factory and canonical node postconfiguration before execution silo registration.</summary>
 [ConfigurationBinding]
 internal static class ServerNodeOptionsComposition
 {

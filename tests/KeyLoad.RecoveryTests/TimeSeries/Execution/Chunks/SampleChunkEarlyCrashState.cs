@@ -35,7 +35,7 @@ internal static class SampleChunkEarlyCrashState
         {
             throw new InvalidOperationException(SampleChunkCrashContract.Invalid);
         }
-        var operation = NativeSerialization.Deserialize<Command<DatabaseCommand>>(
+        var operation = OrleansSerialization.Deserialize<Command<DatabaseCommand>>(
             await File.ReadAllBytesAsync(path).ConfigureAwait(false));
         var before = SampleChunkCrashState.Complete(database);
         var position = database.Store.Position;
@@ -45,7 +45,7 @@ internal static class SampleChunkEarlyCrashState
         {
             throw new InvalidOperationException(SampleChunkCrashContract.Invalid);
         }
-        var original = Convert.ToHexString(NativeSerialization.Serialize(SampleChunkEarlyCrashOperations.Configure(database)));
+        var original = Convert.ToHexString(OrleansSerialization.Serialize(SampleChunkEarlyCrashOperations.Configure(database)));
         var receiptPath = Path.Combine(root, SampleChunkCrashContract.OriginalReceiptFile);
         if (new FileInfo(receiptPath).Length > database.Limits.MaxBatchBytes)
         {
@@ -56,6 +56,6 @@ internal static class SampleChunkEarlyCrashState
         {
             throw new InvalidOperationException(SampleChunkCrashContract.Invalid);
         }
-        return Convert.ToHexString(NativeSerialization.Serialize(result));
+        return Convert.ToHexString(OrleansSerialization.Serialize(result));
     }
 }

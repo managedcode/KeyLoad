@@ -11,7 +11,7 @@ internal static class SeededWalCorruptionFrame
     private const int SequenceOffset = 12;
     private const int ChecksumOffset = 20;
     private const int ChecksumBytes = 32;
-    private const string Invalid = "The original seeded native WAL is not a complete current checksummed frame history.";
+    private const string Invalid = "The original seeded execution WAL is not a complete current checksummed frame history.";
     internal static long Validate(byte[] journal)
     {
         var offset = 0;

@@ -25,7 +25,7 @@ internal static class SqlParserAdmissionUnicode
     internal static Task RunAsync(SqlParserAdmissionFixture fixture, DatabaseEngine database, ZoneTreeStore store, CancellationToken token)
         => GraphLabelUseOperations.ObserveAsync(store, async () =>
         {
-            await NativeOffsetsAsync();
+            await OffsetsAsync();
             var exact = Prefix + Plain + Open;
             exact += new string(Padding, ByteBound - Encoding.UTF8.GetByteCount(exact + Close)) + Close;
             await Assert.That(Encoding.UTF8.GetByteCount(exact)).IsEqualTo(ByteBound);
@@ -38,7 +38,7 @@ internal static class SqlParserAdmissionUnicode
             await PagesAsync(fixture, database, store, exact, token);
         });
 
-    private static async Task NativeOffsetsAsync()
+    private static async Task OffsetsAsync()
     {
         var parser = new Dom.TSql180Parser(initialQuotedIdentifiers: true, Dom.SqlEngineType.Standalone);
         using var input = new StringReader(Prefix + Plain);

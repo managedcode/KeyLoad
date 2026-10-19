@@ -1,4 +1,4 @@
-using KeyLoad.AppHost.Features.ClusterReplication;
+using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.AppHost.Features.StorageRecovery;
 using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.AppHost.Hosting;
@@ -25,7 +25,7 @@ internal static class FunctionalFileOwnershipProfileRefusals
             values.AddRange(changes);
             var builder = P.Create(root, Silos, true, true, [.. values]);
             var original = builder.Resources.Count;
-            _ = Assert.ThrowsExactly<InvalidOperationException>(() => KeyLoadResources.AddKeyLoad(builder));
+            _ = Assert.ThrowsExactly<InvalidOperationException>(() => AppHostProgram.AddKeyLoad(builder));
             await Assert.That(builder.Resources.Count).IsEqualTo(original);
             await Assert.That(Directory.Exists(root) || File.Exists(root)).IsFalse();
         }

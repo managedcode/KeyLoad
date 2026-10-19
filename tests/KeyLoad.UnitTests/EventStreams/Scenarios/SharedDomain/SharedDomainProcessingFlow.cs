@@ -11,7 +11,7 @@ internal static class SharedDomainProcessingFlow
     {
         var scope = state.Scopes[FirstIndex];
         var other = state.Scopes.Skip(SecondIndex).ToDictionary(candidate => candidate.Partition,
-            candidate => SharedDomainNativeImage.Capture(database.Store, candidate.Partition));
+            candidate => SharedDomainImage.Capture(database.Store, candidate.Partition));
         var lane = new QueueLaneRef(scope.Partition, scope.Queue!);
         var request = new ReceiveRequest(Guid.NewGuid(), lane);
         var operation = SharedDomainOperations.Operation(database, OperationKind.Receive, request.RequestId, request);
@@ -29,10 +29,10 @@ internal static class SharedDomainProcessingFlow
         await Assert.That(received.Get<ReceiveResult>().RequestId).IsEqualTo(request.RequestId);
         await Assert.That(received.Get<ReceiveResult>().Token).IsEqualTo(new CommitToken(database.Store.Identity.Incarnation,
             scope.Partition.AtomicPartitionId, expectedPosition));
-        var before = SharedDomainNativeImage.Capture(database.Store);
+        var before = SharedDomainImage.Capture(database.Store);
         var position = database.Store.Position;
-        await NativeReplayResultAssertions.Same<ReceiveResult>(SharedDomainOperations.Apply(database, operation, token), received);
-        await SharedDomainNativeImage.SameAsync(database.Store, before, position);
+        await ReplayResultAssertions.Same<ReceiveResult>(SharedDomainOperations.Apply(database, operation, token), received);
+        await SharedDomainImage.SameAsync(database.Store, before, position);
         await SharedDomainHistoryOperations.SaveAsync(database.Store, state, scope.Partition, operation, received);
         var processing = SharedDomainCorpus.Processing(scope, delivery.Token, Guid.NewGuid());
         await SharedDomainRefusals.ConsumerAsync(database, state, processing, token);
@@ -41,11 +41,11 @@ internal static class SharedDomainProcessingFlow
         var completed = SharedDomainOperations.Apply(database, processingOperation, token);
         await SharedDomainValueAssertions.ProcessingAsync(completed, processing, database.Store.Identity, processingPosition);
         state.Processed = true;
-        state.Recorded.Add(scope.Partition.AtomicPartitionId + IdentitySeparator + Processed, SharedDomainNativeImage.Clock(database.Store));
+        state.Recorded.Add(scope.Partition.AtomicPartitionId + IdentitySeparator + Processed, SharedDomainImage.Clock(database.Store));
         await SharedDomainHistoryOperations.SaveAsync(database.Store, state, scope.Partition, processingOperation, completed);
         foreach (var pair in other)
         {
-            await SharedDomainNativeImage.ScopeAsync(database.Store, pair.Key, pair.Value);
+            await SharedDomainImage.ScopeAsync(database.Store, pair.Key, pair.Value);
         }
         await SharedDomainModelAssertions.AllAsync(database, state, token);
         await SharedDomainInboxAssertions.RequireAsync(database.Store, processing, completed.Get<CommitReceipt>());

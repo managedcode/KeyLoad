@@ -33,7 +33,7 @@ internal static class ResourcePairBindingBatch
 
     internal static Command<DatabaseCommand> Issue(DatabaseEngine database, CommandRequest request)
         => database.CreateCommand(OperationKind.Batch, request.CommandId, Root,
-            database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(request));
+            database.EvaluationClock.GetUtcNow(), OrleansSerialization.Serialize(request));
 
     private static async Task HealthyAsync(ResourcePairBindingState state, string id, CancellationToken token)
     {
@@ -70,7 +70,7 @@ internal static class ResourcePairBindingBatch
             QueueJson, Headers), InitialRevision);
         var request = new CommandRequest(Guid.NewGuid(), source.Partition, [schedule]);
         var operation = source.Database.CreateCommand(OperationKind.Batch, request.CommandId, SchedulerAdmin,
-            source.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(request));
+            source.Database.EvaluationClock.GetUtcNow(), OrleansSerialization.Serialize(request));
         var before = QueueWholeFlowStorage.Bytes(source.Store);
         var actual = source.SubmitIssuedEmbedded(operation, token);
         var original = source.ReadStoredOutcome(operation).PreparedCommand;

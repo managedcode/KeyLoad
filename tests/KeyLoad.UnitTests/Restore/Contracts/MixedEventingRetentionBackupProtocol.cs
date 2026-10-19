@@ -6,7 +6,7 @@ internal static class MixedEventingRetentionBackupProtocol
     internal const string Group = "mixed-purge-pin";
     internal const string EventType = "MixedRetention";
     internal const string Payload = "{\"retained\":\"original mixed cut\"}";
-    internal const string Headers = "{\"lineage\":\"native backup\"}";
+    internal const string Headers = "{\"lineage\":\"execution backup\"}";
     internal const string First = "mixed-one";
     internal const string Second = "mixed-two";
     internal const string Third = "mixed-three";

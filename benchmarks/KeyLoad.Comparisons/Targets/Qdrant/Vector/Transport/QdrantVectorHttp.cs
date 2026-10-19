@@ -7,7 +7,7 @@ namespace KeyLoad.Comparisons.Targets;
 
 internal static class QdrantVectorHttp
 {
-    internal static async Task<JsonDocument> SendAsync(HttpClient client, HttpMethod method, string path, object? body, IOptions<NativeComparisonExecutionOptions> executionOptions, TimeProvider timeProvider, CancellationToken token)
+    internal static async Task<JsonDocument> SendAsync(HttpClient client, HttpMethod method, string path, object? body, IOptions<ComparisonExecutionOptions> executionOptions, TimeProvider timeProvider, CancellationToken token)
     {
         using var deadline = new ComparisonCancellationSource(timeProvider, token);
         deadline.CancelAfter(executionOptions.Value.OperationTimeout);

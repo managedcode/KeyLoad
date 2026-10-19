@@ -1,5 +1,7 @@
 using KeyLoad.Core;
-using KeyLoad.Core.Features.ClusterRouting.Contracts;
+using KeyLoad.Core.Features.CommandOutcomes.Contracts;
+using KeyLoad.Core.Features.RuntimeJournaling.Contracts;
+using KeyLoad.Core.Features.StoragePartitions.Contracts;
 using KeyLoad.Storage;
 using KeyLoad.UnitTests.Features.ResourceExecution;
 
@@ -140,7 +142,7 @@ internal sealed class AtomicPartitionRosterRegistrationTests
 
         fixture.Reopen();
         var replay = fixture.Submit(OperationKind.Batch, request, commandId);
-        await NativeReplayResultAssertions.SameAsync(rejected, replay);
+        await ReplayResultAssertions.SameAsync(rejected, replay);
         await Assert.That(fixture.ReadEntry(AtomicPartitionRosterFixture.Source)).IsEqualTo(entry);
     }
 

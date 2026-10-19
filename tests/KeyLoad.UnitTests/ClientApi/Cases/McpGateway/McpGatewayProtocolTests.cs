@@ -67,7 +67,7 @@ internal sealed class McpGatewayProtocolTests
     {
         var cursor = Assert.ThrowsExactly<KeyLoadException>(() => McpGatewayToolPagination.Create("x", MaximumListBytes));
         await Assert.That(cursor.Code).IsEqualTo(ErrorCode.Validation);
-        var exact = NativeListBytes();
+        var exact = ListBytes();
         var tooSmall = Assert.ThrowsExactly<KeyLoadException>(() => McpGatewayToolPagination.Create(null, exact - 1));
         await Assert.That(tooSmall.Code).IsEqualTo(ErrorCode.ResourceExhausted);
     }
@@ -122,7 +122,7 @@ internal sealed class McpGatewayProtocolTests
         await Assert.That(duplicate.Code).IsEqualTo(ErrorCode.Validation);
     }
 
-    private static int NativeListBytes()
+    private static int ListBytes()
     {
         var page = McpGatewayToolPagination.Create(null, MaximumListBytes);
         return JsonSerializer.SerializeToUtf8Bytes(page, McpJsonUtilities.DefaultOptions).Length;

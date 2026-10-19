@@ -45,7 +45,7 @@ internal static class InitialPrincipalEpochFlow
         var image = InitialPrincipalEpochAssertions.Image(store, outcome);
         var expectedApplied = checked(fixture.Harness.Database.LastApplied + 1L);
         var position = store.Position;
-        var identity = NativeSerialization.Serialize(store.Identity);
+        var identity = OrleansSerialization.Serialize(store.Identity);
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
@@ -56,11 +56,11 @@ internal static class InitialPrincipalEpochFlow
         {
             await Assert.That(InitialPrincipalEpochAssertions.Image(store, outcome).SequenceEqual(image)).IsTrue();
             await Assert.That(store.Read(view => view.ReadOwnedValue(KeySpace.AppliedBytes))!
-                .AsSpan().SequenceEqual(NativeSerialization.Serialize(expectedApplied))).IsTrue();
+                .AsSpan().SequenceEqual(OrleansSerialization.Serialize(expectedApplied))).IsTrue();
         }, failures);
         await ServerFailureObserver.ObserveAsync(async () => await Assert.That(store.Position).IsEqualTo(position + 1L), failures);
         await ServerFailureObserver.ObserveAsync(async () =>
-            await Assert.That(NativeSerialization.Serialize(store.Identity).AsSpan().SequenceEqual(identity)).IsTrue(), failures);
+            await Assert.That(OrleansSerialization.Serialize(store.Identity).AsSpan().SequenceEqual(identity)).IsTrue(), failures);
         await ServerFailureObserver.ObserveAsync(async () =>
             await Assert.That(store.Read(view => view.ReadOwnedValue(outcome))).IsNotNull(), failures);
         await ServerFailureObserver.ObserveAsync(async () =>

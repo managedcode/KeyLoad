@@ -4,7 +4,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.UnitTests.Features.TimeSeries;
 
-/// <summary>AC-CQ-034/AC-CHUNK-001..004: native slice policy preserves the frozen chunk contract.</summary>
+/// <summary>AC-CQ-034/AC-CHUNK-001..004: execution slice policy preserves the frozen chunk contract.</summary>
 internal sealed class SampleChunkExecutionPolicyTests
 {
     [Test]
@@ -12,7 +12,7 @@ internal sealed class SampleChunkExecutionPolicyTests
     [Arguments(3, 2)]
     [Arguments(1024, 1024)]
     [Arguments(65_536, 16_383)]
-    public async Task ConfiguredSlicesPreserveNativeEnvelopeChecksumAndEveryDecodedFieldAsync(
+    public async Task ConfiguredSlicesPreserveEnvelopeChecksumAndEveryDecodedFieldAsync(
         int hashChunkBytes, int textCancellationCheckIntervalCodeUnits)
     {
         var options = UnitExecutionOptions.TimeSeriesExecution(new TimeSeriesExecutionOptions

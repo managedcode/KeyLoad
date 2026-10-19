@@ -29,6 +29,6 @@ internal static class KeyLoadClientNullWriteReadAssertions
             throw new InvalidOperationException(healthy.Problem.Detail);
         }
         await Assert.That(healthy.Value.Document).IsNotNull();
-        await Assert.That(NativeSerialization.Serialize(healthy.Value.Document).SequenceEqual(NativeSerialization.Serialize(document))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(healthy.Value.Document).SequenceEqual(OrleansSerialization.Serialize(document))).IsTrue();
     }
 }

@@ -5,7 +5,7 @@ namespace KeyLoad.Client;
 /// <summary>Executes versioned graph search through the shared authenticated SDK transport.</summary>
 public static class GraphSearchClient
 {
-    private const string GraphSearchPath = "/v1/search/graph";
+    private const string GraphSearchPath = "/search/graph";
 
     /// <summary>Searches one read cut with graph scope, retrieval and separate bounded context.</summary>
     /// <param name="client">The authenticated KeyLoad client.</param>

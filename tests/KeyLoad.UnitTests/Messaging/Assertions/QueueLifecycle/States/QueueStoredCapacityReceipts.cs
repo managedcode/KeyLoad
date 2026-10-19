@@ -19,19 +19,19 @@ internal static class QueueStoredCapacityReceipts
     }
 
     internal static async Task ReceiptAsync(Result<object> actual, Guid id, CommitToken token, ImmutableArray<MutationReceipt> mutations)
-        => await NativeReplayResultAssertions.Same<CommitReceipt>(actual, Result<object>.Succeed(new CommitReceipt(id, token, mutations, DurabilityProfile.ProcessDurable, 1)));
+        => await ReplayResultAssertions.Same<CommitReceipt>(actual, Result<object>.Succeed(new CommitReceipt(id, token, mutations, DurabilityProfile.ProcessDurable, 1)));
 
     internal static async Task<Delivery> ClaimAsync(DatabaseEngine owner, Result<object> actual,
         QueueStoredCapacityState state, PartitionRef partition, CommitToken token)
     {
         var delivery = await Assert.That(actual.Get<ReceiveResult>().Deliveries).HasSingleItem();
         var lane = new QueueLaneRef(partition, QueueEnqueueColdProtocol.Queue);
-        var request = NativeSerialization.Deserialize<ReceiveRequest>(state.Receive.Value!.Input.Span,
-            NativeValidationProfile.PublicInputElements);
+        var request = OrleansSerialization.Deserialize<ReceiveRequest>(state.Receive.Value!.Input.Span,
+            ValidationProfile.PublicInputElements);
         var expected = new Delivery(QueueEnqueueColdProtocol.Ready, QueueEnqueueColdProtocol.ReadyJson,
             QueueEnqueueColdProtocol.Headers, delivery.Token, QueueEnqueueAuthorityProtocol.First,
             new DateTimeOffset(state.Receive.Timestamp).AddSeconds(request.LeaseSeconds), QueueEnqueueAuthorityProtocol.First, QueueEnqueueAuthorityProtocol.First);
-        await NativeReplayResultAssertions.Same<ReceiveResult>(actual, Result<object>.Succeed(new ReceiveResult(state.Receive.CommandId, [expected], token)));
+        await ReplayResultAssertions.Same<ReceiveResult>(actual, Result<object>.Succeed(new ReceiveResult(state.Receive.CommandId, [expected], token)));
         await Assert.That(delivery.Token).IsNotEqualTo(string.Empty);
         await Assert.That(owner.Verify<DeliveryClaims>(delivery.Token)).IsEqualTo(
             new DeliveryClaims(lane, QueueEnqueueColdProtocol.Ready, QueueEnqueueColdProtocol.Root, QueueEnqueueAuthorityProtocol.First, QueueEnqueueAuthorityProtocol.First, token.Incarnation));
@@ -43,7 +43,7 @@ internal static class QueueStoredCapacityReceipts
     {
         var key = KeySpace.PartitionOutcome(partition, QueueEnqueueColdProtocol.Root, operation.CommandId);
         var retained = store.Read(view => view.ReadOwnedValue(key))!;
-        await QueueClaimVersionExhaustionAssertions.EqualAsync(NativeSerialization.Deserialize<StoredOutcome>(retained).Result, original);
+        await QueueClaimVersionExhaustionAssertions.EqualAsync(OrleansSerialization.Deserialize<StoredOutcome>(retained).Result, original);
         var image = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
         await QueueClaimVersionExhaustionAssertions.EqualAsync(owner.Apply(operation), original);

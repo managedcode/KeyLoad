@@ -109,10 +109,10 @@ public sealed partial class DatabaseEngine
         }
     }
 
-    private static GraphEdgeOwnerVersionV1? CurrentOwnerVersion(IKeyValueView view, PartitionRef partition,
+    private static GraphEdgeOwnerVersion? CurrentOwnerVersion(IKeyValueView view, PartitionRef partition,
         string graph, string edgeId, EdgeRecord? edge)
     {
-        var owner = GraphCrossPartitionRecords.Read<GraphEdgeOwnerVersionV1>(view,
+        var owner = GraphCrossPartitionRecords.Read<GraphEdgeOwnerVersion>(view,
             GraphCrossPartitionKeys.OwnerVersion(partition, graph, edgeId));
         if (owner is null)
         {
@@ -143,6 +143,6 @@ public sealed partial class DatabaseEngine
     private static void PersistOwnerVersion(IAtomicTransaction tx, PartitionRef partition,
         string graph, string edgeId, long revision, bool deleted)
         => tx.PutRecord(GraphCrossPartitionKeys.OwnerVersion(partition, graph, edgeId),
-            new GraphEdgeOwnerVersionV1(GraphCrossPartitionProtocol.CurrentVersion, revision, deleted));
+            new GraphEdgeOwnerVersion(GraphCrossPartitionProtocol.CurrentVersion, revision, deleted));
 
 }

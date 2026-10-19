@@ -11,7 +11,7 @@ internal sealed class ScaledRawStorageFixture : IDisposable
     private ScaledRawStorageFixtureCore? _core;
     private bool _closing;
     private bool _disposed;
-    private const string InactiveMessage = "The scaled native fixture is not initialized.";
+    private const string InactiveMessage = "The scaled execution fixture is not initialized.";
     private const string DeadlineMessage = "The scaled fixture preparation deadline expired.";
 
     internal ScaledRawStorageFixture(int recordCount, int payloadBytes, IOptions<ScaledStorageExecutionOptions> executionOptions,

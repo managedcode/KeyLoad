@@ -18,7 +18,7 @@ internal static class FunctionalGateCreationLifetime
         => context.ReferenceBindings.ExpectCreation(context.Partition, definition.Name,
             Create(context, commandId, definition, table));
 
-    internal static EntityRefLifetimeV1 Create(FunctionalGateContext context, Guid commandId,
+    internal static EntityRefLifetime Create(FunctionalGateContext context, Guid commandId,
         ResourceDefinition definition, bool table)
     {
         if (commandId == Guid.Empty)

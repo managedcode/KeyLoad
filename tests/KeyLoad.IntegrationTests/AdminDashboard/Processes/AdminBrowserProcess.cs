@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using System.Globalization;
 using System.Text.Json;
-using KeyLoad.IntegrationTests.Features.ClusterReplication.Processes;
+using KeyLoad.IntegrationTests.Features.StorageReplication.Processes;
 using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Features.AdminDashboard;

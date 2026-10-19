@@ -10,13 +10,13 @@ public sealed partial class RedisTarget
     /// <inheritdoc/>
     public Task InitializeDocumentsAsync(DocumentComparisonInitialization initialization, CancellationToken token)
     {
-        DocumentNativeInitialization.Validate(initialization);
+        DocumentInitialization.Validate(initialization);
         documentNamespace = new(prefix, initialization.MaximumIdentityExclusive, executionOptions.Value.ReadbackBatchCapacity);
         return InitializeAsync(initialization.Corpus, token);
     }
     /// <inheritdoc/>
     public Task<IDocumentComparisonSession> OpenDocumentSessionAsync(CancellationToken token)
-        => DocumentNativeSessionAcquisition<ConnectionMultiplexer>.OpenAsync(
+        => DocumentSessionAcquisition<ConnectionMultiplexer>.OpenAsync(
             _ => ConnectionMultiplexer.ConnectAsync(RedisReplicaProof.CreateOptions(connectionSettings)), AdmitDocumentConnectionAsync,
             actual => new RedisComparisonSession(actual, prefix, configuredTopology,
                 -DocumentMeasurementValues.SingleItemCount, lifecycleOptions, executionOptions, joinOriginalOperations: true),

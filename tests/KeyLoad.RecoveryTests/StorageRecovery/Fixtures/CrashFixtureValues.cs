@@ -23,7 +23,7 @@ internal static class CrashFixtureValues
     internal const string Orders = "orders";
     internal const string Partition = "partition";
     internal const string Projection = "projection";
-    internal const string ProjectionConsumer = "projection-v1";
+    internal const string ProjectionConsumer = "projection";
     internal const string ProjectionCommandId = "a64f0bcf-93ca-4c6e-a1ca-6f97e1ddbb66";
     internal const string SubscriptionCommandId = "cd8b971e-e8ee-4c83-bace-1c30954d097b";
     internal const string Topic = "topic";

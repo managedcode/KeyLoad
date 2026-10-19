@@ -41,7 +41,7 @@ internal static class QueryHostedParallelCancellation
             await Assert.That(secondCall.IsCompleted).IsFalse();
             await firstCaller.CancelAsync().ConfigureAwait(false);
             var error = await Assert.ThrowsExactlyAsync<OperationCanceledException>(async () => await firstCall)
-                ?? throw new InvalidOperationException("The original native caller cancellation is unavailable.");
+                ?? throw new InvalidOperationException("The original execution caller cancellation is unavailable.");
             await Assert.That(error.CancellationToken == firstCaller.Token).IsTrue();
             await first.Disposed.Task.WaitAsync(completion.Token).ConfigureAwait(false);
             await Assert.That(secondCall.IsCompleted).IsFalse();

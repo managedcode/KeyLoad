@@ -5,7 +5,7 @@ namespace KeyLoad.UnitTests.Features.Search;
 
 internal static class ClassificationLineageWholeFlow
 {
-    private const string NativeDirectory = "classification-lineage-native-text";
+    private const string RuntimeDirectoryCore = "classification-lineage-execution-text";
 
     internal static async Task RunAsync()
     {
@@ -56,11 +56,11 @@ internal static class ClassificationLineageWholeFlow
         await ClassificationLineageWholeAssertions.RetainedAsync(fixture, vector, lineage);
     }
 
-    private static async Task WithProviderAsync(EventProjectionFixture fixture, Func<NativeTextProjection, Task> action)
+    private static async Task WithProviderAsync(EventProjectionFixture fixture, Func<RuntimeTextProjection, Task> action)
     {
-        var projection = new NativeTextProjection(Path.Combine(fixture.Harness.DirectoryPath, NativeDirectory),
+        var projection = new RuntimeTextProjection(Path.Combine(fixture.Harness.DirectoryPath, RuntimeDirectoryCore),
             UnitExecutionOptions.DatabaseLimits(fixture.Database.Limits), fixture.Harness.Store.Identity.NodeId,
-            UnitNativeTextOptions.Execution());
+            UnitTextOptions.Execution());
         try
         {
             await action(projection);

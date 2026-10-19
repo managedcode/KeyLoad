@@ -4,7 +4,7 @@ internal static class FunctionalGateColdMutations
 {
     private const string AppendSamplesKind = "appendSamples";
 
-    internal static CommandRequest Command(FunctionalGateContext context, int index, BlobRef blob)
+    internal static CommandRequest Command(FunctionalGateContext context, int index, string blob)
     {
         var reference = context.Bind(new(context.Partition, FunctionalGateColdProtocol.Resource("docs", index), FunctionalGateColdProtocol.Id));
         var mutations = new List<Mutation>();

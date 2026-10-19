@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
-/// <summary>AC-ISO-003/004/005: untimed genuine SDK/MCP qualification of the selected fixed native membership.</summary>
+/// <summary>AC-ISO-003/004/005: untimed genuine SDK/MCP qualification of the selected fixed execution membership.</summary>
 internal static class IsolatedKeyLoadPublicChecks
 {
     private const string AdminParameter = "admin-key";
@@ -15,7 +15,7 @@ internal static class IsolatedKeyLoadPublicChecks
         ArgumentNullException.ThrowIfNull(app);
         ArgumentOutOfRangeException.ThrowIfLessThan(nodeCount, 1);
         ArgumentOutOfRangeException.ThrowIfGreaterThan(nodeCount, 3);
-        using var deadlineTimeout = new CancellationTokenSource(NativeExecutionPolicyFixture.Harness().Value.KeyLoadPublicChecksTimeout, TimeProvider.System);
+        using var deadlineTimeout = new CancellationTokenSource(ExecutionPolicyFixture.Harness().Value.KeyLoadPublicChecksTimeout, TimeProvider.System);
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(token, deadlineTimeout.Token);
         var key = await app.Services.GetRequiredService<DistributedApplicationModel>().Resources
             .OfType<ParameterResource>().Single(item => item.Name == AdminParameter).GetValueAsync(deadline.Token)
@@ -28,7 +28,7 @@ internal static class IsolatedKeyLoadPublicChecks
         await IsolatedKeyLoadPublicChecksDocuments.VerifyAsync(sdk, mcp, scenario, deadline.Token);
         await IsolatedKeyLoadPublicChecksAuthorization.VerifyAsync(app, sdk, scenario, nodeCount, deadline.Token);
         await IsolatedKeyLoadPublicChecksMessaging.VerifyAsync(sdk, mcp, scenario, deadline.Token);
-        await IsolatedKeyLoadPublicChecksBlobs.VerifyAsync(sdk, mcp, scenario, deadline.Token);
+        await IsolatedKeyLoadPublicChecksBlobs.VerifyAsync(http, key, scenario, deadline.Token);
         await VerifyMembershipAsync(app, key, nodeCount, deadline.Token);
     }
 

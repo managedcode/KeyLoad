@@ -51,7 +51,7 @@ internal static class QueueEnqueueSequenceWholeFlow
         fixture.Store.Dispose();
         using var cold = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution, UnitExecutionOptions.PointCacheExecution());
         var owner = fixture.CreateConfiguredDatabase(cold);
-        await NativeReadCutStoreStateAssertions.AssertIdentityAndPositionAsync(cold, identity, position);
+        await ReadCutStoreStateAssertions.AssertIdentityAndPositionAsync(cold, identity, position);
         await QueueStoredCapacityAssertions.ImageAsync(cold, position, image);
         await QueueStoredCapacityReceipts.FailureAsync(owner, cold, fixture.Partition, operation, result);
         await QueueEnqueueSequenceAssertions.ResultAsync(owner, cold, lane, command,
@@ -62,7 +62,7 @@ internal static class QueueEnqueueSequenceWholeFlow
         cold.Dispose();
         using var second = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution, UnitExecutionOptions.PointCacheExecution());
         var restored = fixture.CreateConfiguredDatabase(second);
-        await NativeReadCutStoreStateAssertions.AssertIdentityAndPositionAsync(second, identity, finalPosition);
+        await ReadCutStoreStateAssertions.AssertIdentityAndPositionAsync(second, identity, finalPosition);
         await QueueStoredCapacityAssertions.ImageAsync(second, finalPosition, final);
         await QueueStoredCapacityReceipts.FailureAsync(restored, second, fixture.Partition, operation, result);
         await QueueStoredCapacityReceipts.FailureAsync(restored, second, fixture.Partition, healthy.Operation, healthy.Result);
@@ -97,7 +97,7 @@ internal static class QueueEnqueueSequenceWholeFlow
                 EnqueueSequence = strict ? QueueEnqueueAuthorityProtocol.First : QueueEnqueueAuthorityProtocol.Initial,
                 ActiveOrderSequence = strict ? QueueEnqueueAuthorityProtocol.First : QueueEnqueueAuthorityProtocol.Initial
             });
-        var bytes = NativeSerialization.Serialize(new MessageBody(message.MessageId, message.PayloadJson,
+        var bytes = OrleansSerialization.Serialize(new MessageBody(message.MessageId, message.PayloadJson,
             message.HeadersJson, message.OrderingKey, JsonData.Fingerprint(message))).LongLength;
         await Assert.That(store.Read(view => view.GetRecord<QueueCounters>(key))).IsEqualTo(new QueueCounters(
             scheduledSuccess ? QueueEnqueueAuthorityProtocol.Second : QueueEnqueueAuthorityProtocol.First, before.StoredBytes + bytes, QueueEnqueueAuthorityProtocol.Initial, QueueEnqueueAuthorityProtocol.Initial, QueueEnqueueAuthorityProtocol.First)

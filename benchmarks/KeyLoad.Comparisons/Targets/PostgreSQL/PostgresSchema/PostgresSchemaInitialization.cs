@@ -16,9 +16,9 @@ internal static class PostgresSchemaInitialization
     internal static async Task InitializeAsync(NpgsqlConnection connection, IComparisonCorpus dataset, PostgresSchemaIdentity identity, Guid ownerGuid, ComparisonTopology topology, TargetProfile initialProfile, Action<TargetProfile> updateProfile, Action markCommitAttempted, IOptions<ComparisonLifecycleOptions> lifecycleOptions, TimeProvider timeProvider, CancellationToken cancellationToken)
     {
         var documentTiming = (dataset as DocumentComparisonCorpus)?.InitializationTiming;
-        var nativeTopology = new PostgresTopology(lifecycleOptions, provider: timeProvider);
-        await nativeTopology.ConfigureReplicationAsync(connection, topology, cancellationToken);
-        // Empty native schema/index creation is separate from COPY, whose intrinsic index maintenance stays in load.
+        var runtimeTopology = new PostgresTopology(lifecycleOptions, provider: timeProvider);
+        await runtimeTopology.ConfigureReplicationAsync(connection, topology, cancellationToken);
+        // Empty execution schema/index creation is separate from COPY, whose intrinsic index maintenance stays in load.
         using (documentTiming?.MeasureIndex())
         {
             await PostgresSchemaLifecycle.CreateAsync(connection, identity, ownerGuid, dataset.Settings.Dimensions,
@@ -36,13 +36,13 @@ internal static class PostgresSchemaInitialization
             await PostgresStreamOperations.SeedAsync(connection, control, cancellationToken);
             await CopyEdgesAsync(connection, dataset, cancellationToken);
         }
-        // Native planner/index statistics readiness follows the actual corpus load.
+        // Execution planner/index statistics readiness follows the actual corpus load.
         using (documentTiming?.MeasureIndex())
         {
             await AnalyzeAsync(connection, cancellationToken);
         }
 
-        updateProfile(await nativeTopology.ObserveCopiesAsync(connection, topology, profile, cancellationToken));
+        updateProfile(await runtimeTopology.ObserveCopiesAsync(connection, topology, profile, cancellationToken));
     }
 
     private static async Task<TargetProfile> VerifySettingsAsync(NpgsqlConnection connection, TargetProfile profile,

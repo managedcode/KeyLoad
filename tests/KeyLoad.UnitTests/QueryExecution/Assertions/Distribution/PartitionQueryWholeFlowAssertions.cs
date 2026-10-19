@@ -4,8 +4,8 @@ namespace KeyLoad.UnitTests.Features.QueryExecution;
 
 internal static class PartitionQueryWholeFlowAssertions
 {
-    internal static async Task AssertPublicRowAsync(PartitionQueryPageV1 page, PartitionRef partition,
-        string id, string label, ResourceLifetimeV1 creation)
+    internal static async Task AssertPublicRowAsync(PartitionQueryPage page, PartitionRef partition,
+        string id, string label, ResourceLifetime creation)
     {
         await Assert.That(page.Version).IsEqualTo(1);
         await Assert.That(page.Complete).IsTrue();
@@ -20,8 +20,8 @@ internal static class PartitionQueryWholeFlowAssertions
         await Assert.That(page.Leaves[0].PolicyEpoch).IsGreaterThan(0);
     }
 
-    internal static async Task AssertNativeRowAsync(PartitionQueryResultV1 result, PartitionRef partition,
-        string id, string label, ResourceLifetimeV1 creation)
+    internal static async Task RuntimeAssertRowAsync(PartitionQueryResult result, PartitionRef partition,
+        string id, string label, ResourceLifetime creation)
     {
         await Assert.That(result.Complete).IsTrue();
         await Assert.That(result.Rows.Length).IsEqualTo(1);

@@ -13,7 +13,7 @@ internal static class SubscriptionProcessingAtomicAssertions
     internal static string[] DomainImage(ZoneTreeStore store, SubscriptionRef group, Guid id)
     {
         var own = new[] { KeySpace.PartitionOutcome(group.Source.Partition, "root", id),
-            KeySpace.OutcomeLocatorV2(group.Source.Partition, "root", id), KeySpace.ClockBytes }
+            KeySpace.OutcomeLocator(group.Source.Partition, "root", id), KeySpace.ClockBytes }
             .Select(key => Convert.ToHexString(key) + ":").ToArray();
         return QueueWholeFlowStorage.Bytes(store).Where(row =>
             !own.Any(key => row.StartsWith(key, StringComparison.Ordinal))).ToArray();
@@ -31,7 +31,7 @@ internal static class SubscriptionProcessingAtomicAssertions
         await Assert.That(db.GetDocument("root", new(group.Source.Partition, "orders", "first"))).IsNull();
         await Assert.That(db.GetDocument("root", new(group.Source.Partition, "orders", "second"))).IsNull();
         await SubscriptionCheckpointAuthorityAssertions.StatusAsync(db, group, 0, 3, 3);
-        await FailureAsync(NativeSerialization.Deserialize<StoredOutcome>(OutcomeBytes(store, group, operation.CommandId)).Result);
+        await FailureAsync(OrleansSerialization.Deserialize<StoredOutcome>(OutcomeBytes(store, group, operation.CommandId)).Result);
     }
 
     internal static async Task OwnOutcomeOnlyAsync(ZoneTreeStore store, SubscriptionRef group,
@@ -41,7 +41,7 @@ internal static class SubscriptionProcessingAtomicAssertions
         await Assert.That(store.Position).IsEqualTo(position);
         await Assert.That(QueueWholeFlowStorage.Clock(store)).IsEqualTo(new DateTimeOffset(operation.Timestamp));
         var key = KeySpace.PartitionOutcome(group.Source.Partition, "root", operation.CommandId);
-        var locator = store.Read(view => view.ReadOwnedValue(KeySpace.OutcomeLocatorV2(
+        var locator = store.Read(view => view.ReadOwnedValue(KeySpace.OutcomeLocator(
             group.Source.Partition, "root", operation.CommandId)));
         await Assert.That(locator is not null && locator.AsSpan().SequenceEqual(key)).IsTrue();
     }
@@ -51,7 +51,7 @@ internal static class SubscriptionProcessingAtomicAssertions
     {
         var cut = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
-        var identity = NativeSerialization.Serialize(store.Identity);
+        var identity = OrleansSerialization.Serialize(store.Identity);
         await FailureAsync(original);
         for (var repeat = 0; repeat < 2; repeat++)
         {
@@ -103,10 +103,10 @@ internal static class SubscriptionProcessingAtomicAssertions
     {
         var cut = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
-        var identity = NativeSerialization.Serialize(store.Identity);
-        await NativeReplayResultAssertions.Same<SubscriptionProcessingResult>(db.Apply(operation), original);
-        await NativeReplayResultAssertions.Same<SubscriptionProcessingResult>(
-            NativeSerialization.Deserialize<StoredOutcome>(OutcomeBytes(store, group, operation.CommandId)).Result, original);
+        var identity = OrleansSerialization.Serialize(store.Identity);
+        await ReplayResultAssertions.Same<SubscriptionProcessingResult>(db.Apply(operation), original);
+        await ReplayResultAssertions.Same<SubscriptionProcessingResult>(
+            OrleansSerialization.Deserialize<StoredOutcome>(OutcomeBytes(store, group, operation.CommandId)).Result, original);
         await Assert.That(OutcomeBytes(store, group, operation.CommandId).AsSpan().SequenceEqual(saved)).IsTrue();
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, cut, position, identity);
     }

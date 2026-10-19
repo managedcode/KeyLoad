@@ -3,7 +3,7 @@
 The benchmark pipeline runs each database topology as one live session: the same
 database serves every TUnit workload test of its job. The architectural decision is
 [ADR-142](../../ADR/ADR-142-shared-live-benchmark-sessions.md). The pipeline has no
-per-cell planners, report schemas or readers beyond this session shape. Reusable native
+per-cell planners, report schemas or readers beyond this session shape. Reusable execution
 adapters, genuine operations, bounded provider transport and immutable result files
 are kept, and there is no runtime fallback to another producer. Linux qualification of
 the session path is a separate acceptance gate.
@@ -20,9 +20,9 @@ count do not create jobs.
 The 11 databases give **22 measurement jobs**. One shared preparation, one aggregation
 and a separate Website dispatch give **25 jobs in the comparison flow**. One existing
 functional replicated-cluster heavy-load gate is also kept until it moves to Build and
-Tests; it is a correctness gate, so the measurement jobs stay exactly 22. Real native
+Tests; it is a correctness gate, so the measurement jobs stay exactly 22. Real execution
 topologies, separate Linux runners between databases/topologies and their resource
-contracts are kept. An unavailable native topology gets an explicit unavailable result.
+contracts are kept. An unavailable topology gets an explicit unavailable result.
 
 One live database runs for the whole job. Aspire starts it, and genuine C# clients run
 the different TUnit tests through one shared session fixture. The mixed tests contain
@@ -49,12 +49,12 @@ flowchart LR
 
 The session fixture starts the database topology once through Aspire and gives every
 workload test of the job access to the same database. It does not load the million
-silently in setup: the first native TUnit test performs and measures the load. The
+silently in setup: the first TUnit test performs and measures the load. The
 following tests have explicit prerequisites and a defined order of access to the state.
 One workload test runs at a time on a runner; the parallel clients inside a mixed test
 are part of the measured load.
 
-Separate tests give separate native outcomes and measurement reports: initial load,
+Separate tests give separate outcomes and measurement reports: initial load,
 index construction, sequential/random reads, search/range/complex queries, updates,
 mixed create/delete/read/search and final-state verification. The supported operation
 inventory is the same for all adapters; an unavailable capability is marked
@@ -63,9 +63,9 @@ fixtures.
 
 ## Shared execution plan
 
-1. Start the selected native topology and wait for its readiness.
+1. Start the selected topology and wait for its readiness.
 2. Load the base 1,000,000 records and verify the actual data. Measure the load time
-   and throughput. Measure the construction of the required native indexes separately.
+   and throughput. Measure the construction of the required indexes separately.
 3. Run separate TUnit operation tests on the loaded database. In the mixed test, a
    shared start launches parallel bounded client streams: add 100,000 new records,
    delete 100,000 selected base records, update 100,000 other records, and run reads
@@ -80,9 +80,9 @@ fixtures.
    search/query and the whole mixed scenario, then finish the job.
 
 A group of 100,000 operations defines the amount of work of a stream. The number of
-simultaneous native requests is bounded by the shared client-concurrency contract; all
+simultaneous requests is bounded by the shared client-concurrency contract; all
 100,000 requests are not materialized as an unbounded set of simultaneous tasks.
-Native batching has the same explicit contract for the compared adapters.
+batching has the same explicit contract for the compared adapters.
 
 The shared deterministic plan splits keys into groups, for example: 100,000 base
 records for delete, another 100,000 for update and 800,000 stable base records. Create
@@ -94,7 +94,7 @@ The corpus/seed, payload, key groups, queries, counts, concurrency and initial
 conditions are the same for all databases. An impossible exact wall-clock completion
 order between streams is not fixed: they genuinely run at the same time. Reads with a
 deterministic oracle use the stable group; checks of mutated keys and of the search
-index respect the declared native consistency/read-cut contracts and verify the final
+index respect the declared consistency/read-cut contracts and verify the final
 state after ACK. Wrong results are not masked by endless polling or hidden retries.
 
 For each operation type the report contains the actual attempted/completed/error
@@ -115,33 +115,33 @@ matrix, restarts or separate benchmark scenario.
 
 ## Shared preparation and measurement
 
-- The exact-source native test runner, both AppHosts, server and workload client
+- The exact-source test runner, both AppHosts, server and workload client
   are built once. The immutable runtime bundle retains source, DLL/PDB, package
   assets and Aspire tool identities; workers validate and import it without a
-  repeated solution restore/build. KeyLoad is a native project process; external
+  repeated solution restore/build. KeyLoad is a project process; external
   databases use pinned images. Ordinary build/start/load never publishes a
   KeyLoad or workload-client container.
-- Contract tests, the actual matrix-to-C# selection and native startup verification
+- Contract tests, the actual matrix-to-C# selection and startup verification
   run before the fan-out. Inside a package readiness belongs to Aspire; setup is not
   part of operation latency.
 - Ingestion at 1/10/500 clients, the minimum measured operation counts, recall,
   replicated acknowledgement, resource bounds and all required workload families are
   kept. The number of jobs is not the number of measured scenarios.
-- Unavailable native capabilities/topologies have explicit unavailable results with a
-  verified reason. A native failure makes the scenario result failed/null; missing or
+- Unavailable capabilities/topologies have explicit unavailable results with a
+  verified reason. A failure makes the scenario result failed/null; missing or
   corrupt evidence cannot be replaced by unavailable.
 
-The primary `KeyLoad.AppHost` serves development and functional tests with native
+The primary `KeyLoad.AppHost` serves development and functional tests with execution
 server project processes and Azurite. `KeyLoad.LoadTests.AppHost` owns only the
 selected load infrastructure. It awaits readiness, exposes discovered endpoints to
 `KeyLoad.ComparisonHost`, and joins cleanup after the client-owned workload. The
 client remains outside the resource graph. Only run-owned Docker resources are
-removed; native image user defaults and anonymous session volumes own external DB
+removed; image user defaults and anonymous session volumes own external DB
 files. SDK `PublishContainer` is explicit release/publication work.
 
-Local execution retains actual native binary/source/process identities with no
+Local execution retains actual binary/source/process identities with no
 invented GitHub provenance. It cannot authorize public figures. Matched resource
-qualification for native KeyLoad processes and external advertised-endpoint
+qualification for KeyLoad processes and external advertised-endpoint
 reachability remain open until actual execution proves them; measured workload
 reports do not close these independent gates.
 
@@ -173,11 +173,11 @@ follow the real results.
 
 | Requirement | Completion gate |
 | --- | --- |
-| REQ-BSESSION-001: two jobs per database, one native topology per job. | AC-BSESSION-001: the canonical planner forms 22 workers; all 11 database groups have only native 1/3-node rows. |
-| REQ-BSESSION-002: several TUnit tests share one infrastructure. | AC-BSESSION-002: the original native discovery/TRX shows separate load/read/search/mixed cases; resource identities stay the same between cases; Aspire starts the topology once. |
+| REQ-BSESSION-001: two jobs per database, one topology per job. | AC-BSESSION-001: the canonical planner forms 22 workers; all 11 database groups have only 1/3-node rows. |
+| REQ-BSESSION-002: several TUnit tests share one infrastructure. | AC-BSESSION-002: the original discovery/TRX shows separate load/read/search/mixed cases; resource identities stay the same between cases; Aspire starts the topology once. |
 | REQ-BSESSION-003: the initial million is measured. | AC-BSESSION-003: the report contains actual attempted/ACKed/verified record counts, elapsed/throughput and the original load case outcome; setup does not hide inserts. |
 | REQ-BSESSION-004: separate operation tests and a genuine mixed workload. | AC-BSESSION-004: at least 100k measured operations per applicable case; mixed create/delete of 100k each genuinely overlap in time; a deterministic final oracle verifies the records and results. |
 | REQ-BSESSION-005: one build, an immutable exact-source bundle. | AC-BSESSION-005: workers verify source/DLL/PDB/process identities and run the compiled tests without rebuilding; Docker lifecycle belongs to Aspire. |
-| REQ-BSESSION-006: no warmup and no per-case data reset. | AC-BSESSION-006: actual operation accounting starts from the first call; the same dataset and topology are kept between native cases. |
-| REQ-BSESSION-007: complete genuine results and honest publication. | AC-BSESSION-007: the aggregator accounts for the whole planned case inventory, validates source/run/attempt and original artifacts, rejects corrupt/missing/mixed data, preserves failed/null and native unavailable; Website derives metrics only from validated successful measurements. |
-| REQ-BSESSION-008: completed verification. | AC-BSESSION-008: exact-source Linux build/format/governance, focused native regressions and genuine 1-node/3-node SDK/MCP benchmark sessions with retained reports; no local/source-only result closes the Linux gate. |
+| REQ-BSESSION-006: no warmup and no per-case data reset. | AC-BSESSION-006: actual operation accounting starts from the first call; the same dataset and topology are kept between cases. |
+| REQ-BSESSION-007: complete genuine results and honest publication. | AC-BSESSION-007: the aggregator accounts for the whole planned case inventory, validates source/run/attempt and original artifacts, rejects corrupt/missing/mixed data, preserves failed/null and unavailable; Website derives metrics only from validated successful measurements. |
+| REQ-BSESSION-008: completed verification. | AC-BSESSION-008: exact-source Linux build/format/governance, focused regressions and genuine 1-node/3-node SDK/MCP benchmark sessions with retained reports; no local/source-only result closes the Linux gate. |

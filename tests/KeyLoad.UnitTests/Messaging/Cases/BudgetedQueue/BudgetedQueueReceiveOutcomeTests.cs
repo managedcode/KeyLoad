@@ -5,7 +5,7 @@ internal sealed class BudgetedQueueReceiveOutcomeTests
     [Test]
     [Arguments(false)]
     [Arguments(true)]
-    public async Task NativeQueueReceiveOutcomeUsesOriginalBudgetAndFreshResourcePolicyCas(bool header)
+    public async Task QueueReceiveOutcomeUsesOriginalBudgetAndFreshResourcePolicyCas(bool header)
         => await BudgetedQueueReceiveOutcomeFlow.RunAsync(header,
             TestContext.Current!.Execution.CancellationToken);
 }

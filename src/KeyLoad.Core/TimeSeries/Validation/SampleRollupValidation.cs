@@ -14,7 +14,7 @@ internal static class SampleRollupValidation
 
     internal static void State(SampleRollupState state, DateTimeOffset from, DateTimeOffset until)
     {
-        if (state.FormatVersion != SampleRollupNative.Version)
+        if (state.FormatVersion != RuntimeSampleRollup.Version)
         {
             throw Errors.Fail(ErrorCode.FormatUnsupported, SampleRollupProtocol.Unsupported);
         }

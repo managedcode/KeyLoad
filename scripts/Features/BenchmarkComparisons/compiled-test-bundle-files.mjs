@@ -21,7 +21,7 @@ export async function hashRuntimeFile(target, maximum = runtimeBundle.maximumFil
   return { bytes, sha256: hash.digest('hex'), mode: after.mode & 0o777 };
 }
 
-async function omitNativeAspireBundleLink(root, target, aspireVersion) {
+async function omitAspireBundleLink(root, target, aspireVersion) {
   const relative = path.relative(root, target).split(path.sep).join('/');
   const matched = /^artifacts\/benchmark-runtime\/packages\/aspire\.cli\.(linux-(?:x64|arm64))\/(\d+\.\d+\.\d+)\/tools\/net10\.0\/\1\/bundle$/u.exec(relative);
   requireRuntime(matched !== null && matched[2] === aspireVersion, 'UnexpectedRuntimeSymbolicLink');
@@ -29,9 +29,9 @@ async function omitNativeAspireBundleLink(root, target, aspireVersion) {
   const version = path.basename(destination);
   requireRuntime(destination === path.join(path.dirname(target), 'versions', version)
     && version.startsWith(aspireVersion + '_') && await realpath(target) === destination,
-    'UnexpectedNativeAspireBundleLink');
+    'UnexpectedAspireBundleLink');
   const metadata = await lstat(destination);
-  requireRuntime(metadata.isDirectory() && !metadata.isSymbolicLink(), 'UnexpectedNativeAspireBundleLink');
+  requireRuntime(metadata.isDirectory() && !metadata.isSymbolicLink(), 'UnexpectedAspireBundleLink');
 }
 
 async function walkRuntimeDirectory(root, directory, entries, counter, aspireVersion) {
@@ -40,7 +40,7 @@ async function walkRuntimeDirectory(root, directory, entries, counter, aspireVer
   for (const entry of await readdir(directory, { withFileTypes: true })) {
     const target = path.join(directory, entry.name);
     if (entry.isSymbolicLink()) {
-      await omitNativeAspireBundleLink(root, target, aspireVersion);
+      await omitAspireBundleLink(root, target, aspireVersion);
       continue;
     }
     if (entry.isDirectory()) await walkRuntimeDirectory(root, target, entries, counter, aspireVersion);

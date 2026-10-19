@@ -11,8 +11,8 @@ internal static class AuthorizationTelemetryTestProtocol
     internal const int CatalogCount = 1;
     internal const int IndexCount = 0;
     internal const long SchemaVersion = 1;
-    internal const string Route = "/v1/telemetry/catalog/{subject}";
-    internal const string Target = "/v1/telemetry/catalog/path-canary?token=query-canary";
+    internal const string Route = "/telemetry/catalog/{subject}";
+    internal const string Target = "/telemetry/catalog/path-canary?token=query-canary";
     internal const string Administrator = "root";
     internal const string AdministratorKey = "root.unit-test-credential-32-characters";
     internal const string Member = "telemetry-member";
@@ -24,8 +24,8 @@ internal static class AuthorizationTelemetryTestProtocol
     internal const string ScopeCanary = "scope-canary";
     internal const string TagCanary = "tag-canary";
     internal const string BaggageCanary = "baggage-canary";
-    internal const string FailureTemplate = "Native catalog denied {Payload}";
-    internal const string HealthyTemplate = "Native catalog returned {Payload}";
+    internal const string FailureTemplate = "Execution catalog denied {Payload}";
+    internal const string HealthyTemplate = "Execution catalog returned {Payload}";
     internal const string LoggerCategory = "KeyLoad.Authorization.TelemetryOperations";
     internal const string CanaryTag = "tenant";
     internal const string BaggageKey = "private";
@@ -36,8 +36,8 @@ internal static class AuthorizationTelemetryTestProtocol
     internal const string ScopeDenial = "Cluster administration is required.";
     internal const int DeniedEventId = 601;
     internal const int HealthyEventId = 602;
-    internal const string FlushFailure = "Native telemetry exporters did not flush before the bounded deadline.";
-    internal const string CaptureFailure = "Native telemetry capture exceeded its validated capacity.";
+    internal const string FlushFailure = "Execution telemetry exporters did not flush before the bounded deadline.";
+    internal const string CaptureFailure = "Execution telemetry capture exceeded its validated capacity.";
     internal static readonly string[] Canaries = ["path-canary", "query-canary", MemberKey,
         AdministratorKey, BodyCanary, HeaderCanary, ExceptionCanary, TraceStateCanary, ScopeCanary, TagCanary, BaggageCanary];
 }

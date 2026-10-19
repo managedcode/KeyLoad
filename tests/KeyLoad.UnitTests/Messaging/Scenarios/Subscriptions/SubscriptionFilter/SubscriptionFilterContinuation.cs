@@ -21,8 +21,8 @@ internal static class SubscriptionFilterContinuation
         await Assert.That(result.Deliveries.Select(x => x.Event.Position)).IsEquivalentTo(new long[] { 2 }, CollectionOrdering.Matching);
         ack = new(Guid.NewGuid(), group, result.Deliveries.Single().Token, DeliveryAction.Ack);
         SubscriptionFilterColdTrial.Apply(db, OperationKind.SubscriptionDelivery, ack, ack.CommandId, token).Get<CommitReceipt>();
-        await SubscriptionFilterNativeAssertions.StatusAsync(db, group, SubscriptionFilterProtocol.NextGeneration, SubscriptionFilterProtocol.WindowSize, false);
-        await SubscriptionFilterNativeAssertions.StatusAsync(db, independent, SubscriptionFilterProtocol.FirstGeneration, 0, false);
+        await SubscriptionFilterAssertions.StatusAsync(db, group, SubscriptionFilterProtocol.NextGeneration, SubscriptionFilterProtocol.WindowSize, false);
+        await SubscriptionFilterAssertions.StatusAsync(db, independent, SubscriptionFilterProtocol.FirstGeneration, 0, false);
         await Assert.That(db.ReadEventSource(SubscriptionFilterProtocol.Root, new(group.Source), token).Events.Length).IsEqualTo(SubscriptionFilterProtocol.WindowSize);
     }
 

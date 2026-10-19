@@ -1,6 +1,6 @@
 namespace KeyLoad.Comparisons;
 
-/// <summary>A lazily generated deterministic vector document for native ingestion.</summary>
+/// <summary>A lazily generated deterministic vector document for execution ingestion.</summary>
 /// <param name="Number">The deterministic corpus number.</param>
 /// <param name="Id">The canonical ordinal record ID.</param>
 /// <param name="Embedding">The owned float32 vector.</param>

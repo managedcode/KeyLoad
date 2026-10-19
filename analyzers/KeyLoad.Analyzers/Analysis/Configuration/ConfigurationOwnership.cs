@@ -29,11 +29,11 @@ internal static class ConfigurationOwnership
              type.AllInterfaces.Any(candidate => SymbolEqualityComparer.Default.Equals(candidate, contract)));
 
     internal static bool IsOptionsWrapper(Compilation compilation, ITypeSymbol? type) =>
-        MagicRuntimeOperations.IsNativeType(compilation, type, ConfigurationMetadataNames.Options);
+        MagicRuntimeOperations.IsType(compilation, type, ConfigurationMetadataNames.Options);
 
     internal static bool IsImmutableTemporalData(Compilation compilation, IFieldSymbol field) =>
         field.IsStatic && field.IsReadOnly &&
-        MagicRuntimeOperations.IsNativeType(compilation, field.Type, MagicRuntimeMetadataNames.TimeSpan) &&
+        MagicRuntimeOperations.IsType(compilation, field.Type, MagicRuntimeMetadataNames.TimeSpan) &&
         HasMarker(compilation, field, ConfigurationMetadataNames.ImmutableTemporalData);
 
     internal static bool IsSerializedOptionsSnapshot(Compilation compilation, IPropertySymbol property) =>

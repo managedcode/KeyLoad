@@ -14,7 +14,7 @@ $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot 'functional-coverage.test-identity.ps1')
 . (Join-Path $PSScriptRoot 'functional-coverage.production-snapshot.ps1')
 . (Join-Path $PSScriptRoot 'functional-coverage.production-evidence.ps1')
-. (Join-Path $PSScriptRoot 'functional-coverage.native-merge.contributors.ps1')
+. (Join-Path $PSScriptRoot 'functional-coverage.execution-merge.contributors.ps1')
 . (Join-Path $PSScriptRoot 'functional-coverage.product-contributors.ps1')
 
 $script:Psm = [ordered]@{
@@ -32,8 +32,8 @@ $script:Psm = [ordered]@{
     BindingMissingPathsLabel = '; firstMissingSourcePaths='
     BindingMissingPathsSeparator = ','
     MaximumBindingDiagnosticPaths = 8
-    InvalidReceipt = 'The production source manifest or a referenced native image receipt is invalid.'
-    Drift = 'A source, native image, compile input or producer changed during identity capture.'
+    InvalidReceipt = 'The production source manifest or a referenced execution image receipt is invalid.'
+    Drift = 'A source, execution image, compile input or producer changed during identity capture.'
     TestProjects = @('KeyLoad.UnitTests','KeyLoad.RecoveryTests','KeyLoad.IntegrationTests')
     CentralNames = @('global.json','Directory.Build.props','Directory.Build.targets',
         'Directory.Packages.props','KeyLoad.slnx')
@@ -45,7 +45,7 @@ $script:Psm = [ordered]@{
     SettingsPath = 'scripts/Features/CodeQuality/functional-coverage.production.settings.xml'
     SettingsEvidenceName = 'functional-coverage.production.settings.xml'
     ProducerPath = 'build/CodeQuality/FunctionalCompilationIdentity.targets'
-    IdentityQualification = 'static native identity inspection only; no test, coverage or build qualification'
+    IdentityQualification = 'static execution identity inspection only; no test, coverage or build qualification'
 }
 
 function Resolve-PsmRoot([string] $Path) {
@@ -166,7 +166,7 @@ function Get-PsmProjectIdentity([string] $Root, [string] $ProjectName, [bool] $I
     }
     $producerPath = Resolve-FcPath $Root $script:Psm.ProducerPath
     $producer = [ordered]@{ path = $script:Psm.ProducerPath; sha256 = Get-FcHash $producerPath }
-    $receipt = Read-FcNativeCompileReceipt (Resolve-FcPath $Root $dll) $sources $central $producer
+    $receipt = Read-FcCompileReceipt (Resolve-FcPath $Root $dll) $sources $central $producer
     $identity['compileReceipt'] = $receipt
     [ordered]@{ sources = $sources; compiledIdentity = $identity }
 }

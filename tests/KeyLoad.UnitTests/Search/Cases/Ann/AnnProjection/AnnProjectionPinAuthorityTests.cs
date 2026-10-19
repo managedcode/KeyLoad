@@ -2,7 +2,7 @@ namespace KeyLoad.UnitTests.Features.Search;
 
 internal sealed class AnnProjectionPinAuthorityTests
 {
-    private const string ConsumerName = "ann-pin-authority-v1";
+    private const string ConsumerName = "ann-pin-authority";
     private const string AdminId = "ann-pin-admin";
     private const string OrdinaryId = "ann-pin-user";
 

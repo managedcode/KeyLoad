@@ -5,7 +5,7 @@ namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 internal sealed class VectorResponseContractTests
 {
     [Test]
-    public async Task ExactResponsesRequireEveryIndependentNeighborAndCorrectNativeOrdering()
+    public async Task ExactResponsesRequireEveryIndependentNeighborAndCorrectOrdering()
     {
         var corpus = Corpus("vector-100k-exact-filtered-c16");
         var expected = corpus.ExactNeighbors(corpus.CreateQueries()[0]);
@@ -17,7 +17,7 @@ internal sealed class VectorResponseContractTests
     }
 
     [Test]
-    public async Task NativeUnknownDuplicateIneligibleAndNonFiniteNeighborsAreRejected()
+    public async Task UnknownDuplicateIneligibleAndNonFiniteNeighborsAreRejected()
     {
         var corpus = Corpus("vector-100k-hnsw-filtered-c16");
         var expected = corpus.ExactNeighbors(corpus.CreateQueries()[0]);
@@ -53,5 +53,5 @@ internal sealed class VectorResponseContractTests
             .Throws<InvalidDataException>();
     }
 
-    private static VectorComparisonCorpus Corpus(string id) => new(VectorComparisonProfile.Parse(id), UnitBenchmarkOptions.Native());
+    private static VectorComparisonCorpus Corpus(string id) => new(VectorComparisonProfile.Parse(id), UnitBenchmarkOptions.Execution());
 }

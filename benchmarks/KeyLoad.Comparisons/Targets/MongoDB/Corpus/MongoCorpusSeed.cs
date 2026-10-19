@@ -8,10 +8,10 @@ internal static class MongoCorpusSeed
 {
     public static async Task SeedAsync(IComparisonCorpus dataset, IMongoCollection<BsonDocument> documents,
         IMongoCollection<BsonDocument> edges, IMongoCollection<BsonDocument> events,
-        Func<BenchmarkDocument, string> streamName, IOptions<NativeComparisonExecutionOptions> executionOptions,
+        Func<BenchmarkDocument, string> streamName, IOptions<ComparisonExecutionOptions> executionOptions,
         CancellationToken cancellationToken)
     {
-        var batchSize = NativeComparisonExecutionOptions.Require(executionOptions).Value.MongoSeedBatchSize;
+        var batchSize = ComparisonExecutionOptions.Require(executionOptions).Value.MongoSeedBatchSize;
         await InsertBatchesAsync(dataset.Documents.Select(MongoSchema.Document), documents, batchSize, cancellationToken);
         if (dataset is BenchmarkDataset)
         {

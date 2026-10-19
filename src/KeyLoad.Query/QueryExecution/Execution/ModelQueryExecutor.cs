@@ -22,7 +22,7 @@ internal sealed class ModelQueryExecutor(DatabaseEngine database, QueryEngine qu
         var source = query.ModelSource!;
         if (source.Kind == ModelQuerySourceKind.Events && query.InnerJoin is not null)
         {
-            budget.ConstrainNativeWork(database.Limits.MaxQueryReadBytes, database.Limits.MaxScanRecords);
+            budget.ConstrainWork(database.Limits.MaxQueryReadBytes, database.Limits.MaxScanRecords);
         }
         return database.WithModelQueryView(principalId, request.Partition, query.Collection, source, budget,
             (view, principal, resource) => ExecuteModelView(view, principal, resource, request, budget));

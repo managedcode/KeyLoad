@@ -16,7 +16,7 @@ internal static class RequiredProcessingPolicyCold
         var image = CanonicalStoreImage.Bytes(db.Store);
         var position = db.Store.Position;
         var identity = db.Store.Identity;
-        var bytes = NativeSerialization.Serialize(identity);
+        var bytes = OrleansSerialization.Serialize(identity);
         db.JoinOwnedResources();
         var failures = new List<Exception>();
         for (var cycle = 0; cycle < 2; cycle++)

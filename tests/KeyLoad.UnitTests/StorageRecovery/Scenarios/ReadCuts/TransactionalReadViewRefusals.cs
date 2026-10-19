@@ -15,7 +15,7 @@ internal static class TransactionalReadViewRefusals
             var callbacks = 0;
             var concurrent = Assert.ThrowsExactly<KeyLoadException>(() => lease.VisitPrefix([], (_, _) => { callbacks++; return true; }));
             await Assert.That(concurrent.Code).IsEqualTo(ErrorCode.ResourceExhausted);
-            await Assert.That(concurrent.Message).IsEqualTo("A native read-cut lease permits only one active traversal.");
+            await Assert.That(concurrent.Message).IsEqualTo("A execution read-cut lease permits only one active traversal.");
             await Assert.That(callbacks).IsEqualTo(0);
         }, failures);
         await ServerFailureObserver.ObserveAsync(() => SecondCaptureAsync(state), failures);
@@ -30,7 +30,7 @@ internal static class TransactionalReadViewRefusals
         {
             var error = Assert.ThrowsExactly<KeyLoadException>(() => unexpected = state.Capture());
             await Assert.That(error.Code).IsEqualTo(ErrorCode.ResourceExhausted);
-            await Assert.That(error.Message).IsEqualTo("The runtime already owns a native read-cut lease.");
+            await Assert.That(error.Message).IsEqualTo("The runtime already owns a execution read-cut lease.");
         }, failures);
         if (unexpected is not null)
         {
@@ -43,7 +43,7 @@ internal static class TransactionalReadViewRefusals
         var callbacks = 0;
         var error = Assert.ThrowsExactly<KeyLoadException>(() => lease.VisitPrefix([], (_, _) => { callbacks++; return true; }));
         await Assert.That(error.Code).IsEqualTo(ErrorCode.OwnershipLost);
-        await Assert.That(error.Message).IsEqualTo("The native read-cut lease is closed.");
+        await Assert.That(error.Message).IsEqualTo("The execution read-cut lease is closed.");
         await Assert.That(callbacks).IsEqualTo(0);
     }
     internal static async Task CancellationAsync(TransactionalReadViewState state)

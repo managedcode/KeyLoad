@@ -7,7 +7,7 @@ internal static class CurrentArchiveCancellationRefusal
 {
     private const string VerificationSuffix = "-cancelled-verification";
 
-    internal static async Task RunAsync(NativeBackupCutFixture fixture, bool existingEmpty, CancellationToken token)
+    internal static async Task RunAsync(BackupCutFixture fixture, bool existingEmpty, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
         if (existingEmpty)
@@ -23,7 +23,7 @@ internal static class CurrentArchiveCancellationRefusal
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 await cancelled.CancelAsync();
-                await NativeStagesAsync(fixture, cancelled.Token);
+                await StagesAsync(fixture, cancelled.Token);
                 for (var attempt = 0; attempt < 2; attempt++)
                 {
                     var failure = Assert.ThrowsExactly<OperationCanceledException>(() => ZoneTreeBackupRestoreRestore.Restore(
@@ -46,7 +46,7 @@ internal static class CurrentArchiveCancellationRefusal
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    private static async Task NativeStagesAsync(NativeBackupCutFixture fixture, CancellationToken cancelled)
+    private static async Task StagesAsync(BackupCutFixture fixture, CancellationToken cancelled)
     {
         var stage = fixture.Destination + VerificationSuffix;
         Directory.CreateDirectory(stage);

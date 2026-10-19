@@ -22,7 +22,7 @@ internal sealed class CurrentStoragePreservationTests
             {
                 transaction.Put(fixture.FirstKey, fixture.FirstValue);
                 transaction.Put(fixture.SecondKey, fixture.SecondValue);
-                transaction.Put(KeyCodec.Encode("system", "last-applied"), NativeSerialization.Serialize(position));
+                transaction.Put(KeyCodec.Encode("system", "last-applied"), OrleansSerialization.Serialize(position));
                 return position;
             });
             store.SetDispatchPaused(true);

@@ -34,13 +34,13 @@ internal static class RevokedOutcomeAdmissionValues
     internal static async Task OriginalAsync(RevokedOutcomeAdmissionFixture fixture)
     {
         await Assert.That(fixture.ReadOutcome(fixture.Original.CommandId).AsSpan().SequenceEqual(fixture.OriginalOutcome)).IsTrue();
-        var locator = fixture.Store.Read(view => view.ReadOwnedValue(KeySpace.OutcomeLocatorV2(
+        var locator = fixture.Store.Read(view => view.ReadOwnedValue(KeySpace.OutcomeLocator(
             fixture.Harness.Partition, RevokedOutcomeAdmissionFixture.Worker, fixture.Original.CommandId)));
         await Assert.That(locator is not null && locator.AsSpan().SequenceEqual(fixture.OriginalLocator)).IsTrue();
         await Assert.That(fixture.OriginalLocator.AsSpan().SequenceEqual(KeySpace.PartitionOutcome(
             fixture.Harness.Partition, RevokedOutcomeAdmissionFixture.Worker, fixture.Original.CommandId))).IsTrue();
-        var stored = NativeSerialization.Deserialize<StoredOutcome>(fixture.OriginalOutcome);
-        await NativeReplayResultAssertions.Same<CommitReceipt>(stored.Result, fixture.OriginalResult);
+        var stored = OrleansSerialization.Deserialize<StoredOutcome>(fixture.OriginalOutcome);
+        await ReplayResultAssertions.Same<CommitReceipt>(stored.Result, fixture.OriginalResult);
         await Assert.That(stored.PolicyEpoch).IsEqualTo(1L);
         await Assert.That(stored.Incarnation).IsEqualTo(fixture.Store.Identity.Incarnation);
     }
@@ -51,7 +51,7 @@ internal static class RevokedOutcomeAdmissionValues
         await ServerFailureObserver.ObserveAsync(async () =>
             await Assert.That(KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(fixture.Store))
                 .IsEquivalentTo(image, CollectionOrdering.Matching), failures);
-        await ServerFailureObserver.ObserveAsync(() => NativeReadCutStoreStateAssertions.AssertIdentityAndPositionAsync(
+        await ServerFailureObserver.ObserveAsync(() => ReadCutStoreStateAssertions.AssertIdentityAndPositionAsync(
             fixture.Store, identity, position), failures);
         await ServerFailureObserver.ObserveAsync(() => OriginalAsync(fixture), failures);
         ServerFailureObserver.ThrowIfAny(failures);
@@ -69,7 +69,7 @@ internal static class RevokedOutcomeAdmissionValues
     internal static async Task FreshReplayAsync(RevokedOutcomeAdmissionFixture fixture)
     {
         var command = fixture.Fresh ?? throw new InvalidOperationException("The fresh producer is missing.");
-        await NativeReplayResultAssertions.Same<CommitReceipt>(fixture.Database.Apply(fixture.Operation(command)), fixture.FreshResult ?? throw new InvalidOperationException("The fresh producer outcome is missing."));
+        await ReplayResultAssertions.Same<CommitReceipt>(fixture.Database.Apply(fixture.Operation(command)), fixture.FreshResult ?? throw new InvalidOperationException("The fresh producer outcome is missing."));
         await Assert.That(fixture.ReadOutcome(command.CommandId).AsSpan().SequenceEqual(fixture.FreshOutcome)).IsTrue();
         await OriginalAsync(fixture);
     }

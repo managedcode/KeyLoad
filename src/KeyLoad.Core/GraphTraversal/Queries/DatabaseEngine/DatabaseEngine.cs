@@ -25,8 +25,8 @@ public sealed partial class DatabaseEngine
         return ShortestPath(principalId, request, budget);
     }
 
-    internal GraphIncomingEdgesPageV1 ReadIncomingGraphEdgesBound(string principalId,
-        ReadIncomingGraphEdgesRequestV1 request, ReadExecutionBudget budget, IResourceLifetimeWorkBinding binding)
+    internal GraphIncomingEdgesPage ReadIncomingGraphEdgesBound(string principalId,
+        ReadIncomingGraphEdgesRequest request, ReadExecutionBudget budget, IResourceLifetimeWorkBinding binding)
     {
         ArgumentNullException.ThrowIfNull(request);
         ArgumentNullException.ThrowIfNull(budget);

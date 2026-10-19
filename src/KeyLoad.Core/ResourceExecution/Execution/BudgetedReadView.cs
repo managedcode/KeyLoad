@@ -12,10 +12,10 @@ internal sealed class BudgetedReadView : IKeyValueView, IResourceLifetimeReadBin
     private readonly ReadExecutionBudgetReadGrant? grant;
 
     void IResourceLifetimeReadBindingView.BindResourceLifetime(PartitionRef partition,
-        ResourceDefinition definition, ResourceLifetimeV1 lifetime)
+        ResourceDefinition definition, ResourceLifetime lifetime)
         => budget.ObserveResourceLifetime(partition, definition, lifetime);
 
-    void IResourceEffectObservation.ObserveLifetime(ResourceLifetimeV1 lifetime)
+    void IResourceEffectObservation.ObserveLifetime(ResourceLifetime lifetime)
     {
         if (view is IResourceEffectObservation observation)
         {
@@ -23,7 +23,7 @@ internal sealed class BudgetedReadView : IKeyValueView, IResourceLifetimeReadBin
         }
     }
 
-    void IResourceEffectObservation.ObserveResource(PartitionRef partition, ResourceLifetimeV1 lifetime)
+    void IResourceEffectObservation.ObserveResource(PartitionRef partition, ResourceLifetime lifetime)
     {
         if (view is IResourceEffectObservation observation)
         {
@@ -34,7 +34,7 @@ internal sealed class BudgetedReadView : IKeyValueView, IResourceLifetimeReadBin
     /// <summary>Creates a view whose lifetime is bounded by the wrapped storage action.</summary>
     /// <param name="view">The underlying view, valid only in its current storage action.</param>
     /// <param name="budget">The shared operation budget.</param>
-    /// <param name="grant">Optional existing native leaf reservation charging actual examined records.</param>
+    /// <param name="grant">Optional existing execution leaf reservation charging actual examined records.</param>
     public BudgetedReadView(IKeyValueView view, ReadExecutionBudget budget, ReadExecutionBudgetReadGrant? grant = null)
     {
         ArgumentNullException.ThrowIfNull(view);
@@ -129,7 +129,7 @@ internal sealed class BudgetedReadView : IKeyValueView, IResourceLifetimeReadBin
     {
         if (grant is null)
         {
-            budget.ChargeNativeReadRecord(bytes);
+            budget.ChargeReadRecord(bytes);
         }
         else
         {

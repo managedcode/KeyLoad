@@ -31,30 +31,30 @@ internal sealed class KurrentStreamOwnership
         }
     }
 
-    internal void Reserve(string stream, Guid nativeEventId)
+    internal void Reserve(string stream, Guid runtimeEventId)
     {
         ArgumentException.ThrowIfNullOrEmpty(stream);
-        if (nativeEventId == Guid.Empty)
+        if (runtimeEventId == Guid.Empty)
         {
-            throw new ArgumentException(KurrentConstants.OwnershipInvalidDescriptor, nameof(nativeEventId));
+            throw new ArgumentException(KurrentConstants.OwnershipInvalidDescriptor, nameof(runtimeEventId));
         }
         lock (gate)
         {
-            if (entries.Count >= Capacity || !entries.TryAdd(stream, new(nativeEventId, KurrentStreamOwnershipState.Reserved)))
+            if (entries.Count >= Capacity || !entries.TryAdd(stream, new(runtimeEventId, KurrentStreamOwnershipState.Reserved)))
             {
                 throw new ComparisonFailureException(KurrentConstants.OwnershipReservationRejected);
             }
         }
     }
 
-    internal void Acknowledge(string stream, Guid nativeEventId)
-        => Complete(stream, nativeEventId, KurrentStreamOwnershipState.Acknowledged);
+    internal void Acknowledge(string stream, Guid runtimeEventId)
+        => Complete(stream, runtimeEventId, KurrentStreamOwnershipState.Acknowledged);
 
-    internal void Reject(string stream, Guid nativeEventId)
-        => Complete(stream, nativeEventId, KurrentStreamOwnershipState.Rejected);
+    internal void Reject(string stream, Guid runtimeEventId)
+        => Complete(stream, runtimeEventId, KurrentStreamOwnershipState.Rejected);
 
-    internal void MarkUnknown(string stream, Guid nativeEventId)
-        => Complete(stream, nativeEventId, KurrentStreamOwnershipState.Unknown);
+    internal void MarkUnknown(string stream, Guid runtimeEventId)
+        => Complete(stream, runtimeEventId, KurrentStreamOwnershipState.Unknown);
 
     internal string[] SnapshotAcknowledged()
     {
@@ -65,11 +65,11 @@ internal sealed class KurrentStreamOwnership
         }
     }
 
-    private void Complete(string stream, Guid nativeEventId, KurrentStreamOwnershipState state)
+    private void Complete(string stream, Guid runtimeEventId, KurrentStreamOwnershipState state)
     {
         lock (gate)
         {
-            if (!entries.TryGetValue(stream, out var entry) || entry.NativeEventId != nativeEventId ||
+            if (!entries.TryGetValue(stream, out var entry) || entry.RuntimeEventId != runtimeEventId ||
                 entry.State != KurrentStreamOwnershipState.Reserved)
             {
                 throw new ComparisonFailureException(KurrentConstants.OwnershipTransitionRejected);

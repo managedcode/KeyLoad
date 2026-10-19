@@ -11,11 +11,11 @@ internal static class QueueEnqueueProcessRecovery
     {
         using var store = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
         var owner = QueueLifecycleRecoveryAssertions.Open(store);
-        var operation = NativeSerialization.Deserialize<Command<DatabaseCommand>>(await File.ReadAllBytesAsync(Path.Combine(root, QueueEnqueueCrashProtocol.OperationFile), token));
-        var target = NativeSerialization.Deserialize<CommitToken>(await File.ReadAllBytesAsync(Path.Combine(root, QueueEnqueueCrashProtocol.TargetFile), token));
-        var physicalTarget = NativeSerialization.Deserialize<long>(await File.ReadAllBytesAsync(Path.Combine(root, QueueEnqueueCrashProtocol.PhysicalTargetFile), token));
-        var baseline = NativeSerialization.Deserialize<string[]>(await File.ReadAllBytesAsync(Path.Combine(root, QueueEnqueueCrashProtocol.BaselineFile), token));
-        var command = NativeSerialization.Deserialize<CommandRequest>(operation.Value!.Input.Span, NativeValidationProfile.PublicInputElements);
+        var operation = OrleansSerialization.Deserialize<Command<DatabaseCommand>>(await File.ReadAllBytesAsync(Path.Combine(root, QueueEnqueueCrashProtocol.OperationFile), token));
+        var target = OrleansSerialization.Deserialize<CommitToken>(await File.ReadAllBytesAsync(Path.Combine(root, QueueEnqueueCrashProtocol.TargetFile), token));
+        var physicalTarget = OrleansSerialization.Deserialize<long>(await File.ReadAllBytesAsync(Path.Combine(root, QueueEnqueueCrashProtocol.PhysicalTargetFile), token));
+        var baseline = OrleansSerialization.Deserialize<string[]>(await File.ReadAllBytesAsync(Path.Combine(root, QueueEnqueueCrashProtocol.BaselineFile), token));
+        var command = OrleansSerialization.Deserialize<CommandRequest>(operation.Value!.Input.Span, ValidationProfile.PublicInputElements);
         var due = command.Mutations.OfType<EnqueueMessage>().Single(message => message.MessageId == QueueEnqueueCrashProtocol.Scheduled).NotBefore;
         await QueueEnqueueProcessValueAssertions.EqualAsync(command, new CommandRequest(QueueEnqueueCrashProtocol.OperationId,
             QueueEnqueueCrashProtocol.Partition,

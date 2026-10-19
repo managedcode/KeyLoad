@@ -5,9 +5,9 @@ namespace KeyLoad.Server;
 /// <summary>Composes version-one typed feature routes through distinct Orleans request actors.</summary>
 internal static class ApiEndpoints
 {
-    private const string AdmissionPath = "/v1/admin/admission";
-    private const string BackupPath = "/v1/admin/backup";
-    private const string StatusPath = "/v1/status";
+    private const string AdmissionPath = "/admin/admission";
+    private const string BackupPath = "/admin/backup";
+    private const string StatusPath = "/status";
 
     /// <summary>Maps all existing public operations to their owning feature adapters.</summary>
     /// <param name="app">Application whose trusted identity middleware has been configured.</param>
@@ -17,7 +17,6 @@ internal static class ApiEndpoints
         ArgumentNullException.ThrowIfNull(app);
         DocumentApi.Map(app);
         RelationalStorageApi.Map(app);
-        BlobApi.Map(app);
         EventStreamApi.Map(app);
         MessagingApi.Map(app);
         QueueDispatchApi.Map(app);

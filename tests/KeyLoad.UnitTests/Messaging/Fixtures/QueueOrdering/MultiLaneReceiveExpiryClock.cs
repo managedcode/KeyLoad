@@ -12,9 +12,9 @@ internal sealed class MultiLaneReceiveExpiryClock : TimeProvider
     }
     private bool advanced;
 
-    internal void Arm(Func<long> nativePosition, long committedCut)
+    internal void Arm(Func<long> runtimePosition, long committedCut)
     {
-        position = nativePosition;
+        position = runtimePosition;
         armed = committedCut;
     }
 

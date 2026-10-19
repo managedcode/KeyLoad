@@ -1,5 +1,8 @@
-using KeyLoad.Core.Features.ClusterRouting.Contracts;
-using KeyLoad.Core.Features.ClusterRouting.Execution;
+using KeyLoad.Core.Features.CommandOutcomes.Contracts;
+using KeyLoad.Core.Features.RuntimeJournaling.Contracts;
+using KeyLoad.Core.Features.StoragePartitions.Contracts;
+using KeyLoad.Core.Features.CommandOutcomes.Execution;
+using KeyLoad.Core.Features.RuntimeJournaling.Execution;
 using KeyLoad.Core.Features.Search;
 using KeyLoad.Storage;
 
@@ -16,7 +19,7 @@ public sealed partial class DatabaseEngine
         {
             return null;
         }
-        budget.ChargeBytes(NativeSerialization.Measure(current));
+        budget.ChargeBytes(OrleansSerialization.Measure(current));
         if (current.FormatVersion != OnlineTextPublicationProtocol.CurrentFormat
             || current.PrincipalId != principal.Id || current.Consumer != request.Consumer
             || current.ConsumerGeneration != request.ConsumerGeneration
@@ -37,10 +40,10 @@ public sealed partial class DatabaseEngine
         {
             throw Errors.Fail(ErrorCode.Corruption, OnlineTextPublicationProtocol.MissingAuthority);
         }
-        budget.ChargeBytes(NativeSerialization.Measure(current.Authority));
-        budget.ChargeBytes(NativeSerialization.Measure(stored.OnlineTextAuthority));
-        if (!NativeSerialization.Serialize(current.Authority).AsSpan()
-            .SequenceEqual(NativeSerialization.Serialize(stored.OnlineTextAuthority))
+        budget.ChargeBytes(OrleansSerialization.Measure(current.Authority));
+        budget.ChargeBytes(OrleansSerialization.Measure(stored.OnlineTextAuthority));
+        if (!OrleansSerialization.Serialize(current.Authority).AsSpan()
+            .SequenceEqual(OrleansSerialization.Serialize(stored.OnlineTextAuthority))
             || current.PublishedCut != stored.Result.Get<OnlineTextIndexMaintenanceResult>().PublishedCut)
         {
             throw Errors.Fail(ErrorCode.Corruption, OnlineTextPublicationProtocol.MissingAuthority);

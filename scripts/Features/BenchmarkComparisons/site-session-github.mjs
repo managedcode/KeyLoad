@@ -1,9 +1,9 @@
 import path from 'node:path';
 import { readdir } from 'node:fs/promises';
-import { createDirectory } from './native-files.mjs';
+import { createDirectory } from './files.mjs';
 import { captureApi, downloadArtifact } from './isolated-github-api.mjs';
 import { initializeTransport } from './isolated-github-transport.mjs';
-import { inspectNativeZip, extractNativeEntry } from './isolated-github-zip.mjs';
+import { inspectZip, extractEntry } from './isolated-github-zip.mjs';
 import { validateDownloadedArchive } from './isolated-github-stream.mjs';
 import { readJson, writeJson, hashRegularFile } from './isolated-github-files.mjs';
 import { GH } from './isolated-github-contract.mjs';
@@ -39,7 +39,7 @@ async function snapshotFiles(input) {
       const name = relative + '/' + entry.name;
       requireSession(sessionPath(name) && !entry.isSymbolicLink() && files.length < 10000);
       if (entry.isDirectory()) await visit(name, depth + 1);
-      else files.push({ path: name, ...await hashRegularFile(path.join(input, name), SESSION.nativeBytes, true) });
+      else files.push({ path: name, ...await hashRegularFile(path.join(input, name), SESSION.runtimeBytesCore, true) });
     }
   }
   await visit('metadata', 0);
@@ -95,11 +95,11 @@ export async function captureSessionSite({ environment = process.env, args, down
     const fresh = { schemaVersion: SESSION.schema, state: 'selection_verified', source: { ...context.source, measured: selected.cohort.sourceRevision },
       cohort: selected.cohort, aggregateJobId: selected.job.id, suiteArtifactId: selected.suite.id,
       providerArtifactId: selected.provider.id,
-      preparation: {jobId:selected.native.preparation.id,runtimeArtifactId:selected.native.runtimeArtifact.id,
-        runtimeDigest:selected.native.runtimeArtifact.digest,compiledArtifactId:selected.native.compiledArtifact.id,
-        compiledDigest:selected.native.compiledArtifact.digest,functionalArtifactId:selected.functional.artifact.id,
+      preparation: {jobId:selected.execution.preparation.id,runtimeArtifactId:selected.execution.runtimeArtifact.id,
+        runtimeDigest:selected.execution.runtimeArtifact.digest,compiledArtifactId:selected.execution.compiledArtifact.id,
+        compiledDigest:selected.execution.compiledArtifact.digest,functionalArtifactId:selected.functional.artifact.id,
         functionalDigest:selected.functional.artifact.digest},
-      workers: selected.native.workers.map(({row,job,artifact}) => ({id:row.id,jobId:job.id,artifactId:artifact.id,digest:artifact.digest})),
+      workers: selected.execution.workers.map(({row,job,artifact}) => ({id:row.id,jobId:job.id,artifactId:artifact.id,digest:artifact.digest})),
       metadataFiles: await snapshotFiles(input) };
     await writeJson(path.join(input, 'metadata-proof.json'), fresh);
     return fresh;
@@ -110,18 +110,18 @@ export async function captureSessionSite({ environment = process.env, args, down
   const functionalSelection = selected.functional;
   const functionalArchive = await downloadOriginal(functionalSelection.artifact, input,
     'keyload-functional-heavy-load.zip', GH.workerZipBytes, context);
-  const runtimeArchive = await downloadOriginal(selected.native.runtimeArtifact, input,
+  const runtimeArchive = await downloadOriginal(selected.execution.runtimeArtifact, input,
     'comparison-compiled-runtime-identity.zip', 134_217_728, context);
-  await inspectNativeZip(path.join(input, suite.path), ['aggregate.json'], path.join(metadata, 'suite-inventory.txt'), context);
-  const aggregateRaw = await extractNativeEntry(path.join(input, suite.path), 'aggregate.json',
+  await inspectZip(path.join(input, suite.path), ['aggregate.json'], path.join(metadata, 'suite-inventory.txt'), context);
+  const aggregateRaw = await extractEntry(path.join(input, suite.path), 'aggregate.json',
     path.join(metadata, 'aggregate-original.json'), SESSION.aggregateBytes, context);
   const aggregate = validateSessionAggregate(await readJson(path.join(metadata, 'aggregate-original.json'), SESSION.aggregateBytes));
   if (context.mode === 'publish') requirePublishableSessionMeasurements(aggregate);
   requireSession(JSON.stringify(aggregate.cohort) === JSON.stringify(selected.cohort));
   const workerArchives = [];
-  const workers = selected.native.workers.map(({ row, job, artifact }) => ({ id: row.id, target: row.target, nodeCount: row.nodeCount,
+  const workers = selected.execution.workers.map(({ row, job, artifact }) => ({ id: row.id, target: row.target, nodeCount: row.nodeCount,
     job: projectJob(job, selected.cohort, SESSION.workerSteps), artifact: projectArtifact(artifact) }));
-  for (const [index, worker] of selected.native.workers.entries()) {
+  for (const [index, worker] of selected.execution.workers.entries()) {
     const original = await downloadOriginal(worker.artifact, input, worker.row.artifactName + '.zip', SESSION.archiveBytes, context);
     workerArchives.push({ id: worker.row.id, ...original });
     const measured = aggregate.workers[index];
@@ -136,10 +136,10 @@ export async function captureSessionSite({ environment = process.env, args, down
       url: `https://github.com/${SESSION.repository}/actions/runs/${selected.run.id}` }, cohort: selected.cohort,
     aggregateJob: projectJob(selected.job, selected.cohort, SESSION_SITE.aggregateSteps),
     artifacts: { suite: projectArtifact(selected.suite), provider: projectArtifact(selected.provider) }, workers,
-    preparation: { job: projectJob(selected.native.preparation, selected.cohort, SESSION.prepareSteps),
-      compiledArtifact: projectArtifact(selected.native.compiledArtifact) },
+    preparation: { job: projectJob(selected.execution.preparation, selected.cohort, SESSION.prepareSteps),
+      compiledArtifact: projectArtifact(selected.execution.compiledArtifact) },
     functional: { artifact: projectArtifact(functionalSelection.artifact), archive: functionalArchive },
-    runtimeIdentity: { artifact: projectArtifact(selected.native.runtimeArtifact), archive: runtimeArchive },
+    runtimeIdentity: { artifact: projectArtifact(selected.execution.runtimeArtifact), archive: runtimeArchive },
     suiteFiles: sessionSuiteFiles(aggregate, aggregateRaw.sha256), workerArchives,
     archives: null, inputFiles: null, metadataFiles: await snapshotFiles(input) });
   await writeJson(path.join(input, 'metadata-proof.json'), receipt);

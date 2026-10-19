@@ -28,14 +28,14 @@ internal static class SubscriptionWindowBudgetWholeFlow
         await SubscriptionWindowBudgetAssertions.RefuseAsync(fixture.Store, group, request, original, fault, token);
         var image = QueueWholeFlowStorage.Bytes(fixture.Store);
         var position = fixture.Store.Position;
-        var identity = NativeSerialization.Serialize(fixture.Store.Identity);
+        var identity = OrleansSerialization.Serialize(fixture.Store.Identity);
         fixture.Store.Dispose();
         using var first = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution(),
             UnitExecutionOptions.PointCacheExecution());
         var db = QueueWholeFlowStorage.Open(first);
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(first, image, position, identity);
         await SubscriptionWindowBudgetAssertions.RefuseAsync(first, group, request, original, fault, token);
-        await NativeReplayResultAssertions.Same<ReceiveSubscriptionResult>(SubscriptionCheckpointAuthorityFlow.Apply(
+        await ReplayResultAssertions.Same<ReceiveSubscriptionResult>(SubscriptionCheckpointAuthorityFlow.Apply(
             db, OperationKind.ReceiveSubscription, request, request.RequestId, token), original);
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(first, image, position, identity);
         var fresh = new ReceiveSubscriptionRequest(Guid.NewGuid(), group);

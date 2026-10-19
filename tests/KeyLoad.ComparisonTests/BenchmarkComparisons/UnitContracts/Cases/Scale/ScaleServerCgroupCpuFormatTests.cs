@@ -4,9 +4,9 @@ namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 internal sealed class ScaleServerCgroupCpuFormatTests
 {
-    private const string NativeLimited = "100000 100000\n";
+    private const string Limited = "100000 100000\n";
     private const string OuterWhitespaceLimited = " \t100000 100000\r\n ";
-    private const string NativeUnlimited = "max 100000\n";
+    private const string RuntimeUnlimited = "max 100000\n";
     private const string RootUnlimited = " \tmax\n";
     private const string LargerLimit = "200000 100000\n";
     private const string ZeroQuota = "0 100000\n";
@@ -20,9 +20,9 @@ internal sealed class ScaleServerCgroupCpuFormatTests
     private const decimal OneCore = 1;
 
     [Test]
-    [Arguments(NativeLimited)]
+    [Arguments(Limited)]
     [Arguments(OuterWhitespaceLimited)]
-    public async Task AcScale016NativeCpuFileWhitespacePreservesPositiveLimitAndAncestorMinimum(string text)
+    public async Task AcScale016CpuFileWhitespacePreservesPositiveLimitAndAncestorMinimum(string text)
     {
         decimal? cpu = null;
         await Assert.That(ScaleServerCgroupEnvelopeReader.TryAccumulateCpuLimit(text, isRoot: false, ref cpu)).IsTrue();
@@ -32,12 +32,12 @@ internal sealed class ScaleServerCgroupCpuFormatTests
     }
 
     [Test]
-    public async Task AcScale016NativeUnlimitedAndRootWhitespacePreserveFiniteAncestor()
+    public async Task AcScale016UnlimitedAndRootWhitespacePreserveFiniteAncestor()
     {
         decimal? cpu = null;
-        await Assert.That(ScaleServerCgroupEnvelopeReader.TryAccumulateCpuLimit(NativeUnlimited, isRoot: false, ref cpu)).IsTrue();
+        await Assert.That(ScaleServerCgroupEnvelopeReader.TryAccumulateCpuLimit(RuntimeUnlimited, isRoot: false, ref cpu)).IsTrue();
         await Assert.That(cpu).IsNull();
-        await Assert.That(ScaleServerCgroupEnvelopeReader.TryAccumulateCpuLimit(NativeLimited, isRoot: false, ref cpu)).IsTrue();
+        await Assert.That(ScaleServerCgroupEnvelopeReader.TryAccumulateCpuLimit(Limited, isRoot: false, ref cpu)).IsTrue();
         await Assert.That(ScaleServerCgroupEnvelopeReader.TryAccumulateCpuLimit(RootUnlimited, isRoot: true, ref cpu)).IsTrue();
         await Assert.That(cpu).IsEqualTo(OneCore);
         await Assert.That(ScaleServerCgroupEnvelopeReader.TryAccumulateCpuLimit(RootUnlimited, isRoot: false, ref cpu)).IsFalse();
@@ -58,7 +58,7 @@ internal sealed class ScaleServerCgroupCpuFormatTests
         decimal? cpu = OneCore;
         await Assert.That(ScaleServerCgroupEnvelopeReader.TryAccumulateCpuLimit(text, isRoot: false, ref cpu)).IsFalse();
         await Assert.That(cpu).IsEqualTo(OneCore);
-        await Assert.That(ScaleServerCgroupEnvelopeReader.TryAccumulateCpuLimit(NativeLimited, isRoot: false, ref cpu)).IsTrue();
+        await Assert.That(ScaleServerCgroupEnvelopeReader.TryAccumulateCpuLimit(Limited, isRoot: false, ref cpu)).IsTrue();
         await Assert.That(cpu).IsEqualTo(OneCore);
     }
 }

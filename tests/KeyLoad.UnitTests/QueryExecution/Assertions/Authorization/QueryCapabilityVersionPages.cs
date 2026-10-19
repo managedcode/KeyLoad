@@ -14,7 +14,7 @@ internal static class QueryCapabilityVersionPages
         {
             var engine = new QueryEngine(database, UnitExecutionOptions.QueryExecution());
             await RequiredProcessingPolicyAssertions.EqualAsync(QueryCapabilityVersionExpected.Manifest(QueryCapabilityVersionRequests.Limits()), engine.Capabilities);
-            foreach (var version in new[] { 1, 2 })
+            foreach (var version in new[] { 1 })
             {
                 var authored = QueryCapabilityVersionRequests.Ast(fixture.Harness.Partition, version);
                 var builder = QueryCapabilityVersionRequests.Builder(fixture.Harness.Partition) with
@@ -23,10 +23,10 @@ internal static class QueryCapabilityVersionPages
                 };
                 await RequiredProcessingPolicyAssertions.EqualAsync(authored, builder);
                 var json = JsonSerializer.Deserialize<AstQueryRequest>(JsonSerializer.Serialize(builder, JsonDefaults.Options), JsonDefaults.Options)!;
-                var native = NativeSerialization.Deserialize<AstQueryRequest>(NativeSerialization.Serialize(builder));
+                var execution = OrleansSerialization.Deserialize<AstQueryRequest>(OrleansSerialization.Serialize(builder));
                 await RequiredProcessingPolicyAssertions.EqualAsync(authored, json);
-                await RequiredProcessingPolicyAssertions.EqualAsync(authored, native);
-                foreach (var request in new[] { builder, json, native })
+                await RequiredProcessingPolicyAssertions.EqualAsync(authored, execution);
+                foreach (var request in new[] { builder, json, execution })
                 {
                     await AstPagesAsync(engine, request, store.Position, token);
                 }

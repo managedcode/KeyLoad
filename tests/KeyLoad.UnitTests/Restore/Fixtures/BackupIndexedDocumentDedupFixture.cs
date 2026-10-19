@@ -111,7 +111,7 @@ internal sealed class BackupIndexedDocumentDedupFixture : IDisposable
         var clock = Source.Store.Read(view => view.ReadOwnedValue(KeyCodec.Encode(SystemNamespace, ClockKey)));
         var metadata = Source.Store.Read(view => view.GetRecord<ResourceDefinition>(KeySpace.Resource(
             Partition.TenantId, Partition.DatabaseId, AuthorityResource)));
-        if (applied is null || NativeSerialization.Deserialize<long>(applied) != expectedApplied
+        if (applied is null || OrleansSerialization.Deserialize<long>(applied) != expectedApplied
             || clock is null || JsonSerializer.Serialize(metadata, JsonDefaults.Options) != JsonSerializer.Serialize(
                 new ResourceDefinition(AuthorityResource, ResourceKind.Collection, Partition.TransactionDomainId), JsonDefaults.Options))
         {
@@ -142,8 +142,7 @@ internal sealed class BackupIndexedDocumentDedupFixture : IDisposable
     internal static DatabaseEngine CreateDatabase(ZoneTreeStore store)
         => new(store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(),
             UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(),
-            UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(),
-            UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), TimeProvider.System);
+            UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), TimeProvider.System);
 
     internal static byte[] ReadOutcomeBytes(IAtomicStore store, PartitionRef partition, string principal, Guid commandId)
         => store.Read(view => view.ReadOwnedValue(OutcomeStoreOracle.PartitionKey(partition, principal, commandId)))

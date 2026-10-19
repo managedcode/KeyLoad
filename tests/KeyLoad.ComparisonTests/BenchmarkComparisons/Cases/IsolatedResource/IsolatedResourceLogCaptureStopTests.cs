@@ -4,10 +4,10 @@ using Microsoft.Extensions.Logging;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
-/// <summary>AC-ISO-006: native log capture has one joinable stop and retains output after stopping.</summary>
+/// <summary>AC-ISO-006: execution log capture has one joinable stop and retains output after stopping.</summary>
 internal sealed class IsolatedResourceLogCaptureStopTests
 {
-    private const string ResourceName = "native-node";
+    private const string ResourceName = "execution-node";
     private const string ComparisonResourceName = "comparisons";
     private const string ContainerImage = "mcr.microsoft.com/dotnet/runtime:10.0";
     private const string LogMarker = "isolated-stop-log-retained";
@@ -20,12 +20,12 @@ internal sealed class IsolatedResourceLogCaptureStopTests
     private const int LogMarkerEventId = 1;
     private static readonly TimeSpan Deadline = TimeSpan.FromSeconds(30);
     private static readonly TimeSpan MarkerPollInterval = TimeSpan.FromMilliseconds(10);
-    private static readonly Action<ILogger, string, Exception?> LogNativeMarker =
+    private static readonly Action<ILogger, string, Exception?> RuntimeLogMarker =
         LoggerMessage.Define<string>(LogLevel.Information,
-            new EventId(LogMarkerEventId, nameof(LogNativeMarker)), LogMarkerTemplate);
+            new EventId(LogMarkerEventId, nameof(RuntimeLogMarker)), LogMarkerTemplate);
 
     [Test]
-    public async Task StopAsyncSharesCompletionAndWritersRetainNativeLogsAfterStop()
+    public async Task StopAsyncSharesCompletionAndWritersRetainLogsAfterStop()
     {
         var outputRoot = Directory.CreateTempSubdirectory(OutputDirectoryPrefix);
         IsolatedResourceLogCaptureStopFixture? fixture = null;
@@ -55,13 +55,13 @@ internal sealed class IsolatedResourceLogCaptureStopTests
     private static async Task VerifyCaptureAsync(IsolatedResourceLogCaptureStopFixture fixture, string outputRoot)
     {
         using var timeout = new CancellationTokenSource(Deadline, TimeProvider.System);
-        await PublishNativeLogsAsync(fixture, timeout.Token);
+        await PublishLogsAsync(fixture, timeout.Token);
         await JoinSharedStopAsync(fixture.Capture, timeout.Token);
         await VerifyWritersAsync(fixture.Capture, outputRoot, timeout.Token);
         await DisposeCaptureTwiceAsync(fixture.Capture, timeout.Token);
     }
 
-    private static async Task PublishNativeLogsAsync(IsolatedResourceLogCaptureStopFixture fixture, CancellationToken token)
+    private static async Task PublishLogsAsync(IsolatedResourceLogCaptureStopFixture fixture, CancellationToken token)
     {
         var loggerService = fixture.Application.Services.GetRequiredService<ResourceLoggerService>();
         var notifications = fixture.Application.Services.GetRequiredService<ResourceNotificationService>();
@@ -74,8 +74,8 @@ internal sealed class IsolatedResourceLogCaptureStopTests
             {
                 await ActivateAndObserveAsync(notifications, fixture.Resource, subscriber, token);
                 await ActivateAndObserveAsync(notifications, fixture.ComparisonResource, subscriber, token);
-                LogNativeMarker(loggerService.GetLogger(fixture.Resource), LogMarker, null);
-                LogNativeMarker(loggerService.GetLogger(fixture.ComparisonResource), LogMarker, null);
+                RuntimeLogMarker(loggerService.GetLogger(fixture.Resource), LogMarker, null);
+                RuntimeLogMarker(loggerService.GetLogger(fixture.ComparisonResource), LogMarker, null);
                 await WaitForCapturedLinesAsync(fixture.Capture, token);
             }, failures);
         }

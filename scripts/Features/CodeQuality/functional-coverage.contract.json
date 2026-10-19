@@ -22,26 +22,26 @@
     "src/KeyLoad.Query/ChangeFeeds/Validation/LiveQueryResultByteAdmission.cs",
     "src/KeyLoad.Query/QueryExecution/Configuration/QueryExecutionOptions.cs",
     "src/KeyLoad.Query/QueryExecution/Contracts/DistributedSearch/DistributedSearchBranchNames.cs",
-    "src/KeyLoad.Query/QueryExecution/Contracts/DistributedSearch/DistributedSearchCandidateLeafV1.cs",
-    "src/KeyLoad.Query/QueryExecution/Contracts/DistributedSearch/DistributedSearchEpochInputV1.cs",
-    "src/KeyLoad.Query/QueryExecution/Contracts/DistributedSearch/DistributedSearchLeafResultV1.cs",
-    "src/KeyLoad.Query/QueryExecution/Contracts/DistributedSearch/DistributedSearchOwnedLeafV1.cs",
-    "src/KeyLoad.Query/QueryExecution/Contracts/DistributedSearch/DistributedSearchOwnedLeafV2.cs",
+    "src/KeyLoad.Query/QueryExecution/Contracts/DistributedSearch/DistributedSearchCandidateLeaf.cs",
+    "src/KeyLoad.Query/QueryExecution/Contracts/DistributedSearch/DistributedSearchEpochInput.cs",
+    "src/KeyLoad.Query/QueryExecution/Contracts/DistributedSearch/DistributedSearchLeafResult.cs",
+    "src/KeyLoad.Query/QueryExecution/Contracts/DistributedSearch/DistributedSearchOwnedLeaf.cs",
+    "src/KeyLoad.Query/QueryExecution/Contracts/DistributedSearch/DistributedSearchOwnedLeaf.cs",
     "src/KeyLoad.Query/QueryExecution/Contracts/DistributedSearch/DistributedSearchPhase.cs",
     "src/KeyLoad.Query/QueryExecution/Contracts/DistributedSearch/DistributedSearchPhaseErrors.cs",
     "src/KeyLoad.Query/QueryExecution/Contracts/DistributedSearch/DistributedSearchPhaseWork.cs",
-    "src/KeyLoad.Query/QueryExecution/Contracts/DistributedSearch/DistributedSearchProjectionLeafV1.cs",
-    "src/KeyLoad.Query/QueryExecution/Contracts/DistributedTextWitnessV1.cs",
+    "src/KeyLoad.Query/QueryExecution/Contracts/DistributedSearch/DistributedSearchProjectionLeaf.cs",
+    "src/KeyLoad.Query/QueryExecution/Contracts/DistributedTextWitness.cs",
     "src/KeyLoad.Query/QueryExecution/Contracts/IQueryReadCutObserver.cs",
-    "src/KeyLoad.Query/QueryExecution/Contracts/PartitionQuery/PartitionQueryCandidateV1.cs",
-    "src/KeyLoad.Query/QueryExecution/Contracts/PartitionQuery/PartitionQueryLeafPlanV1.cs",
-    "src/KeyLoad.Query/QueryExecution/Contracts/PartitionQuery/PartitionQueryLeafResultV1.cs",
+    "src/KeyLoad.Query/QueryExecution/Contracts/PartitionQuery/PartitionQueryCandidate.cs",
+    "src/KeyLoad.Query/QueryExecution/Contracts/PartitionQuery/PartitionQueryLeafPlan.cs",
+    "src/KeyLoad.Query/QueryExecution/Contracts/PartitionQuery/PartitionQueryLeafResult.cs",
     "src/KeyLoad.Query/QueryExecution/Contracts/PartitionQuery/PartitionQueryOwnedLeaf.cs",
     "src/KeyLoad.Query/QueryExecution/Contracts/PartitionQuery/PartitionQueryOwnedLeafRequest.cs",
-    "src/KeyLoad.Query/QueryExecution/Contracts/PartitionQuery/PartitionQueryOwnedLeafRequestV2.cs",
-    "src/KeyLoad.Query/QueryExecution/Contracts/PartitionQuery/PartitionQueryPlanV1.cs",
+    "src/KeyLoad.Query/QueryExecution/Contracts/PartitionQuery/PartitionQueryOwnedLeafRequest.cs",
+    "src/KeyLoad.Query/QueryExecution/Contracts/PartitionQuery/PartitionQueryPlan.cs",
     "src/KeyLoad.Query/QueryExecution/Contracts/PartitionQuery/PartitionQueryPreparedLeaf.cs",
-    "src/KeyLoad.Query/QueryExecution/Contracts/PartitionQuery/PartitionQueryResultV1.cs",
+    "src/KeyLoad.Query/QueryExecution/Contracts/PartitionQuery/PartitionQueryResult.cs",
     "src/KeyLoad.Query/QueryExecution/Contracts/PartitionQuery/PartitionQuerySerializationAliases.cs",
     "src/KeyLoad.Query/QueryExecution/Contracts/QueryCapabilityCatalog.cs",
     "src/KeyLoad.Query/QueryExecution/Contracts/QueryCursorClaims.cs",
@@ -204,7 +204,7 @@
     "src/KeyLoad.Query/Search/Contracts/PackedAnnStorageNode.cs",
     "src/KeyLoad.Query/Search/Contracts/TextProjectionProtocol.cs",
     "src/KeyLoad.Query/Search/Contracts/TextProjectionScope.cs",
-    "src/KeyLoad.Query/Search/Diagnostics/NativeTextPostingObservation.cs",
+    "src/KeyLoad.Query/Search/Diagnostics/TextPostingObservation.cs",
     "src/KeyLoad.Query/Search/Execution/Bm25CorpusCapture.cs",
     "src/KeyLoad.Query/Search/Execution/ExactSearchExecution.cs",
     "src/KeyLoad.Query/Search/Execution/PackedAnn/PackedAnnBuildScratch.cs",
@@ -225,7 +225,7 @@
     "src/KeyLoad.Query/Search/Execution/WaitForIndexReadCutObservationDispatch.cs",
     "src/KeyLoad.Query/Search/Lifecycle/TextProjectionLifecycle.cs",
     "src/KeyLoad.Query/Search/Models/FilteredVectorPlan.cs",
-    "src/KeyLoad.Query/Search/Models/NativeSearchStart.cs",
+    "src/KeyLoad.Query/Search/Models/SearchStart.cs",
     "src/KeyLoad.Query/Search/Models/PackedAnnApproximateResult.cs",
     "src/KeyLoad.Query/Search/Models/WaitForIndexReadCutObservation.cs",
     "src/KeyLoad.Query/Search/Queries/Ann/AnnPublicSearchExecutor.cs",
@@ -243,7 +243,7 @@
     "src/KeyLoad.Query/Search/Queries/GlobalBranch/GlobalBranchWindowMerger.cs",
     "src/KeyLoad.Query/Search/Queries/Graphs/GraphSearchExecutor.cs",
     "src/KeyLoad.Query/Search/Queries/Graphs/GraphSearchExpansion.cs",
-    "src/KeyLoad.Query/Search/Queries/NativeTextIndexPublication.cs",
+    "src/KeyLoad.Query/Search/Queries/TextIndexPublication.cs",
     "src/KeyLoad.Query/Search/Queries/PackedAnn/PackedAnnApproximateSearch.cs",
     "src/KeyLoad.Query/Search/Queries/PackedAnn/PackedAnnCandidateHeaps.cs",
     "src/KeyLoad.Query/Search/Queries/PackedAnn/PackedAnnExactSearch.cs",
@@ -295,7 +295,7 @@
       "tests/KeyLoad.UnitTests/QueryExecution/Cases/Partition/PartitionQueryPublicContractTests.cs",
       "tests/KeyLoad.UnitTests/QueryExecution/Cases/Partition/PartitionQueryPublicMergeTests.cs",
       "tests/KeyLoad.UnitTests/QueryExecution/ClientApi/Assertions/PartitionQueryMcpCatalogAssertions.cs",
-      "tests/KeyLoad.UnitTests/QueryExecution/ClientApi/Assertions/PartitionQueryMcpNativeAssertions.cs",
+      "tests/KeyLoad.UnitTests/QueryExecution/ClientApi/Assertions/PartitionQueryMcpAssertions.cs",
       "tests/KeyLoad.UnitTests/QueryExecution/ClientApi/Cases/PartitionQueryMcpContractTests.cs",
       "tests/KeyLoad.UnitTests/QueryExecution/ClientApi/Contracts/PartitionQueryMcpProtocol.cs",
       "tests/KeyLoad.UnitTests/QueryExecution/ClientApi/Fixtures/Distribution/PartitionQueryMcpTestData.cs",
@@ -338,8 +338,8 @@
       },
       {
         "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryCancellationTests",
-        "methodName": "ObservedNativeReadProgressCancelsTheOriginalBudgetAndLeavesNoPartialResult",
-        "instanceName": "ObservedNativeReadProgressCancelsTheOriginalBudgetAndLeavesNoPartialResult",
+        "methodName": "ObservedReadProgressCancelsTheOriginalBudgetAndLeavesNoPartialResult",
+        "instanceName": "ObservedReadProgressCancelsTheOriginalBudgetAndLeavesNoPartialResult",
         "acceptance": [
           "AC-PQUERY-004"
         ],
@@ -349,12 +349,12 @@
         "executedModules": [
           "KeyLoad.Query"
         ],
-        "operationOutcomeAndState": "cancels after observed actual native bytes with original caller token; no page is returned and a subsequent one-row query succeeds"
+        "operationOutcomeAndState": "cancels after observed actual execution bytes with original caller token; no page is returned and a subsequent one-row query succeeds"
       },
       {
         "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryContractTests",
-        "methodName": "GeneratedPlanAndCompleteNativeResultRoundTripWithStableFields",
-        "instanceName": "GeneratedPlanAndCompleteNativeResultRoundTripWithStableFields",
+        "methodName": "GeneratedPlanAndCompleteResultRoundTripWithStableFields",
+        "instanceName": "GeneratedPlanAndCompleteResultRoundTripWithStableFields",
         "acceptance": [
           "AC-PQUERY-001"
         ],
@@ -364,7 +364,7 @@
         "executedModules": [
           "KeyLoad.Query"
         ],
-        "operationOutcomeAndState": "native plan and result round trip are checked alongside a real ZoneTree query, duplicate textual IDs/full partition identity, and exact rows"
+        "operationOutcomeAndState": "execution plan and result round trip are checked alongside a real ZoneTree query, duplicate textual IDs/full partition identity, and exact rows"
       },
       {
         "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryContractTests",
@@ -398,8 +398,8 @@
       },
       {
         "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryGrantTests",
-        "methodName": "ActualNativeReadBytesAndExaminedRecordsAdmitExactlyAndRejectOneLess",
-        "instanceName": "ActualNativeReadBytesAndExaminedRecordsAdmitExactlyAndRejectOneLess",
+        "methodName": "ActualReadBytesAndExaminedRecordsAdmitExactlyAndRejectOneLess",
+        "instanceName": "ActualReadBytesAndExaminedRecordsAdmitExactlyAndRejectOneLess",
         "acceptance": [
           "AC-PQUERY-004"
         ],
@@ -413,8 +413,8 @@
       },
       {
         "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryGrantTests",
-        "methodName": "MaxBatchAdmitsTheCompleteNativeMergeAtItsExactBoundAndNoRowsBelowIt",
-        "instanceName": "MaxBatchAdmitsTheCompleteNativeMergeAtItsExactBoundAndNoRowsBelowIt",
+        "methodName": "MaxBatchAdmitsTheCompleteMergeAtItsExactBoundAndNoRowsBelowIt",
+        "instanceName": "MaxBatchAdmitsTheCompleteMergeAtItsExactBoundAndNoRowsBelowIt",
         "acceptance": [
           "AC-PQUERY-004"
         ],
@@ -428,8 +428,8 @@
       },
       {
         "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryGrantTests",
-        "methodName": "OneNativeGrantChargesIndexRangeAndDocumentPointReadsTogether",
-        "instanceName": "OneNativeGrantChargesIndexRangeAndDocumentPointReadsTogether",
+        "methodName": "OneGrantChargesIndexRangeAndDocumentPointReadsTogether",
+        "instanceName": "OneGrantChargesIndexRangeAndDocumentPointReadsTogether",
         "acceptance": [
           "AC-PQUERY-004"
         ],
@@ -439,7 +439,7 @@
         "executedModules": [
           "KeyLoad.Query"
         ],
-        "operationOutcomeAndState": "native index range plus point read share the leaf allowance; exact bound passes and one-under examined cap rejects"
+        "operationOutcomeAndState": "execution index range plus point read share the leaf allowance; exact bound passes and one-under examined cap rejects"
       },
       {
         "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryMergeTests",
@@ -561,7 +561,7 @@
         "executedModules": [
           "KeyLoad.Query"
         ],
-        "operationOutcomeAndState": "real query page round-trips through native codec; full references, per-leaf cuts/policy/schema/path and exact bytes are checked"
+        "operationOutcomeAndState": "real query page round-trips through execution codec; full references, per-leaf cuts/policy/schema/path and exact bytes are checked"
       },
       {
         "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryPublicContractTests",
@@ -625,8 +625,8 @@
       },
       {
         "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryMcpContractTests",
-        "methodName": "PublicAndNativeRequestBodiesRoundTripTheSameTypedValues",
-        "instanceName": "PublicAndNativeRequestBodiesRoundTripTheSameTypedValues",
+        "methodName": "PublicAndRequestBodiesRoundTripTheSameTypedValues",
+        "instanceName": "PublicAndRequestBodiesRoundTripTheSameTypedValues",
         "acceptance": [
           "AC-PQUERY-001"
         ],
@@ -636,12 +636,12 @@
         "executedModules": [
           "KeyLoad.Query"
         ],
-        "operationOutcomeAndState": "native and public request codecs preserve typed values; each decoded request executes and equal pages are checked"
+        "operationOutcomeAndState": "execution and public request codecs preserve typed values; each decoded request executes and equal pages are checked"
       },
       {
         "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryMcpContractTests",
-        "methodName": "PublicAndNativePageBodiesRoundTripRowsAndLeafWitnesses",
-        "instanceName": "PublicAndNativePageBodiesRoundTripRowsAndLeafWitnesses",
+        "methodName": "PublicAndPageBodiesRoundTripRowsAndLeafWitnesses",
+        "instanceName": "PublicAndPageBodiesRoundTripRowsAndLeafWitnesses",
         "acceptance": [
           "AC-PQUERY-005"
         ],
@@ -681,7 +681,7 @@
         "executedModules": [
           "KeyLoad.Query"
         ],
-        "operationOutcomeAndState": "public QueryEngine returns typed Validation and zero native read calls with unchanged position"
+        "operationOutcomeAndState": "public QueryEngine returns typed Validation and zero execution read calls with unchanged position"
       },
       {
         "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryMcpContractTests",
@@ -696,7 +696,7 @@
         "executedModules": [
           "KeyLoad.Query"
         ],
-        "operationOutcomeAndState": "public QueryEngine returns typed UnsupportedCapability and zero native read calls with unchanged position"
+        "operationOutcomeAndState": "public QueryEngine returns typed UnsupportedCapability and zero execution read calls with unchanged position"
       }
     ]
   },
@@ -707,7 +707,7 @@
   ],
   "reportMerge": {
     "lineHitUnion": "logical-or by source path and line number",
-    "branchMerge": "unmeasured; retain each native report branch pair separately"
+    "branchMerge": "unmeasured; retain each execution report branch pair separately"
   },
   "thresholds": null,
   "qualification": "private exact Query functional profile only; does not close AC-CQ-009 or product/CLUSTER coverage",

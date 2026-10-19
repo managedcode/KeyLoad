@@ -38,11 +38,11 @@ internal sealed class TestDatabaseOriginalResourceCommands
         {
             if (payload.Kind == OperationKind.DropTable)
             {
-                var drop = NativeSerialization.Deserialize<DropTableRequest>(payload.Input.Span);
+                var drop = OrleansSerialization.Deserialize<DropTableRequest>(payload.Input.Span);
                 Record((drop.TenantId, drop.DatabaseId, drop.ResourceName), outcome.CanonicalSequence, null);
                 return;
             }
-            var request = NativeSerialization.Deserialize<ConfigureResourceRequest>(payload.Input.Span);
+            var request = OrleansSerialization.Deserialize<ConfigureResourceRequest>(payload.Input.Span);
             Record((request.TenantId, request.DatabaseId, request.Definition.Name), outcome.CanonicalSequence,
                 new(database.OwnCommand(command), request));
         }
@@ -72,7 +72,7 @@ internal sealed class TestDatabaseOriginalResourceCommands
         operations.TryAdd(sequence, creation);
     }
 
-    internal ResourceLifetimeV1 Lifetime(string tenant, string database, string resource)
+    internal ResourceLifetime Lifetime(string tenant, string database, string resource)
     {
         lock (gate)
         {

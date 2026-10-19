@@ -2,7 +2,7 @@
 set -eu
 umask 077
 
-: "${KEYLOAD_REDIS_PASSWORD:?Missing native Redis credential}"
+: "${KEYLOAD_REDIS_PASSWORD:?Missing execution Redis credential}"
 case "$KEYLOAD_REDIS_PASSWORD" in
     *[!0-9a-f]*) exit 1 ;;
 esac

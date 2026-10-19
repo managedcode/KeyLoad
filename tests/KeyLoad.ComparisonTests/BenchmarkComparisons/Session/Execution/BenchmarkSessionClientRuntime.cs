@@ -1,7 +1,7 @@
 using System.Text.Json;
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
-using KeyLoad.AppHost.Features.ClusterReplication;
+using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.Comparisons;
 using KeyLoad.Diagnostics.Features.ResourceExecution;
@@ -11,11 +11,11 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
-/// <summary>Starts only selected database infrastructure, then runs the native workload client outside Aspire's resource graph.</summary>
+/// <summary>Starts only selected database infrastructure, then runs the execution workload client outside Aspire's resource graph.</summary>
 internal static class BenchmarkSessionClientRuntime
 {
     private const string KeyLoad = "KeyLoad";
-    private const string ServerProcesses = "Benchmarks__Native__Processes";
+    private const string ServerProcesses = "Benchmarks__Execution__Processes";
     private static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web);
 
     internal static async Task<int> RunAsync(DistributedApplication application, BenchmarkSessionSelection selection,
@@ -40,7 +40,7 @@ internal static class BenchmarkSessionClientRuntime
         if (selection.Target == KeyLoad)
         {
             var model = application.Services.GetRequiredService<DistributedApplicationModel>();
-            var processes = new List<NativeProcessEvidence>();
+            var processes = new List<ProcessEvidence>();
             foreach (var resource in model.Resources.OfType<ProjectResource>())
             {
                 processes.Add(await ProjectProcessEvidence.ReadAsync(application.ResourceNotifications,
@@ -48,12 +48,12 @@ internal static class BenchmarkSessionClientRuntime
             }
             if (processes.Count != selection.NodeCount)
             {
-                throw new InvalidDataException("The selected database does not expose the required native server processes.");
+                throw new InvalidDataException("The selected database does not expose the required execution server processes.");
             }
             environment.Add(ServerProcesses, JsonSerializer.Serialize(processes, Json));
         }
         var policy = application.Services.GetRequiredService<IOptions<TestExecutionOptions>>();
-        return await IsolatedNativeClientExecution.RunAsync(application, settings.Resources,
+        return await IsolatedClientExecution.RunAsync(application, settings.Resources,
             lifetime => BenchmarkSessionClientProcess.RunAsync(environment, evidence, policy, lifetime), token);
     }
 }

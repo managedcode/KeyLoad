@@ -18,7 +18,7 @@ internal sealed class CanonicalVectorPublicMetricTests
     [Arguments(DistanceMetric.DotProduct)]
     [Arguments(DistanceMetric.Cosine)]
     [Arguments(DistanceMetric.Euclidean)]
-    public async Task NativeExactTopKMatchesLiteralMetricOrderAndCanceledReadPreservesEveryDocument(
+    public async Task ExactTopKMatchesLiteralMetricOrderAndCanceledReadPreservesEveryDocument(
         DistanceMetric metric)
     {
         using var database = new TestDatabase();

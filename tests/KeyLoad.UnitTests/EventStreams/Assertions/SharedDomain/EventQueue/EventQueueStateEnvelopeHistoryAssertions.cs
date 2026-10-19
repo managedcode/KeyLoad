@@ -19,14 +19,14 @@ internal static class EventQueueStateEnvelopeHistoryAssertions
 
     internal static (StoreIdentity Identity, long Position, string[] Image) Capture(EventQueueStateEnvelopeFixture fixture)
     {
-        return (NativeReadCutStoreStateAssertions.SnapshotIdentity(fixture.Store), fixture.Store.Position,
+        return (ReadCutStoreStateAssertions.SnapshotIdentity(fixture.Store), fixture.Store.Position,
             QueueWholeFlowStorage.Bytes(fixture.Store));
     }
 
     internal static async Task SameAsync(EventQueueStateEnvelopeFixture fixture,
         (StoreIdentity Identity, long Position, string[] Image) expected)
     {
-        await NativeReadCutStoreStateAssertions.AssertIdentityAndPositionAsync(fixture.Store, expected.Identity, expected.Position);
+        await ReadCutStoreStateAssertions.AssertIdentityAndPositionAsync(fixture.Store, expected.Identity, expected.Position);
         await Assert.That(QueueWholeFlowStorage.Bytes(fixture.Store)).IsEquivalentTo(expected.Image, CollectionOrdering.Matching);
     }
 
@@ -50,7 +50,7 @@ internal static class EventQueueStateEnvelopeHistoryAssertions
     {
         await Assert.That(Required(fixture, KeySpace.PartitionOutcome(fixture.Partition, Root, entry.Operation.CommandId))
             .AsSpan().SequenceEqual(entry.OutcomeBytes)).IsTrue();
-        await Assert.That(Required(fixture, KeySpace.OutcomeLocatorV2(fixture.Partition, Root, entry.Operation.CommandId))
+        await Assert.That(Required(fixture, KeySpace.OutcomeLocator(fixture.Partition, Root, entry.Operation.CommandId))
             .AsSpan().SequenceEqual(entry.LocatorBytes)).IsTrue();
     }
 
@@ -66,19 +66,19 @@ internal static class EventQueueStateEnvelopeHistoryAssertions
         }
         if (expected.Result.Value is ReceiveResult)
         {
-            await NativeReplayResultAssertions.Same<ReceiveResult>(actual, expected.Result);
+            await ReplayResultAssertions.Same<ReceiveResult>(actual, expected.Result);
         }
         else if (expected.Result.Value is ReceiveSubscriptionResult)
         {
-            await NativeReplayResultAssertions.Same<ReceiveSubscriptionResult>(actual, expected.Result);
+            await ReplayResultAssertions.Same<ReceiveSubscriptionResult>(actual, expected.Result);
         }
         else if (expected.Result.Value is SubscriptionInfo)
         {
-            await NativeReplayResultAssertions.Same<SubscriptionInfo>(actual, expected.Result);
+            await ReplayResultAssertions.Same<SubscriptionInfo>(actual, expected.Result);
         }
         else
         {
-            await NativeReplayResultAssertions.Same<CommitReceipt>(actual, expected.Result);
+            await ReplayResultAssertions.Same<CommitReceipt>(actual, expected.Result);
         }
     }
 
@@ -88,7 +88,7 @@ internal static class EventQueueStateEnvelopeHistoryAssertions
         var receipt = state.ProcessingReceipt ?? throw new InvalidOperationException(MissingProcessing);
         var key = KeySpace.Partition(InboxFamily, fixture.Partition, Queue, Item, Handler, InitialGeneration);
         await Assert.That(Required(fixture, key).AsSpan().SequenceEqual(state.InboxBytes)).IsTrue();
-        var actual = NativeSerialization.Deserialize<InboxRecord>(Required(fixture, key));
+        var actual = OrleansSerialization.Deserialize<InboxRecord>(Required(fixture, key));
         var fingerprint = JsonData.Fingerprint(new
         {
             request.Lane,
@@ -99,7 +99,7 @@ internal static class EventQueueStateEnvelopeHistoryAssertions
             Id = Root
         });
         await Assert.That(actual.Fingerprint).IsEqualTo(fingerprint);
-        await NativeReplayResultAssertions.Same<CommitReceipt>(Result<object>.Succeed(actual.Receipt), Result<object>.Succeed(receipt));
+        await ReplayResultAssertions.Same<CommitReceipt>(Result<object>.Succeed(actual.Receipt), Result<object>.Succeed(receipt));
         await EventQueueStateEnvelopeSourceAssertions.EqualAsync(fixture.Database.GetDocument(Root,
             new(fixture.Partition, Documents, Processed)),
             new DocumentResult(new(fixture.Partition, Documents, Processed), InitialRevision, Payload, false, []));

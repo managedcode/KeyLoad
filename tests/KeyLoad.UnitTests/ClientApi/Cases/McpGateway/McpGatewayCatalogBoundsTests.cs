@@ -19,7 +19,7 @@ internal sealed class McpGatewayCatalogBoundsTests
     }
 
     [Test]
-    public async Task NativeSearchRejectsOverLimitBeforeInitialization()
+    public async Task SearchRejectsOverLimitBeforeInitialization()
     {
         await using var host = McpGatewayCatalogTestHost.Create();
         var failure = await Assert.ThrowsExactlyAsync<KeyLoadException>(() =>
@@ -29,7 +29,7 @@ internal sealed class McpGatewayCatalogBoundsTests
     }
 
     [Test]
-    public async Task NativeRouteRejectsInvalidBoundsAndUtf8QueryBeforeInitialization()
+    public async Task RouteRejectsInvalidBoundsAndUtf8QueryBeforeInitialization()
     {
         await using var host = McpGatewayCatalogTestHost.Create();
         var categoryFailure = await Assert.ThrowsExactlyAsync<KeyLoadException>(() =>

@@ -20,7 +20,7 @@ internal sealed class ScaledRawStorageReadOrder
     private int sequentialCursor;
     private int randomCursor;
 
-    /// <summary>Builds the scale-v1 SplitMix64 Fisher-Yates order within the supplied cancellation scope.</summary>
+    /// <summary>Builds the scale SplitMix64 Fisher-Yates order within the supplied cancellation scope.</summary>
     public ScaledRawStorageReadOrder(int recordCount, IOptions<ScaledStorageExecutionOptions> executionOptions, CancellationToken cancellationToken = default)
     {
         if (recordCount is < MinimumRecordCount or > MaximumRecordCount)

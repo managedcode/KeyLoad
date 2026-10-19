@@ -11,7 +11,7 @@ internal static class SqlInnerJoinCancellationWholeState
     internal static async Task UnchangedAsync(TestDatabase database, string[] before, long position, string identity)
     {
         await Assert.That(database.Store.Position).IsEqualTo(position);
-        await Assert.That(Convert.ToHexString(NativeSerialization.Serialize(database.Store.Identity))).IsEqualTo(identity);
+        await Assert.That(Convert.ToHexString(OrleansSerialization.Serialize(database.Store.Identity))).IsEqualTo(identity);
         await Assert.That(global::KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(database.Store))
             .IsEquivalentTo(before, TUnit.Assertions.Enums.CollectionOrdering.Matching);
     }

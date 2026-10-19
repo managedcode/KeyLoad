@@ -15,7 +15,7 @@ internal static class SourceEventReader
     /// <param name="view">The storage view valid for the current read or transaction action.</param>
     /// <param name="source">Expected source identity.</param>
     /// <param name="position">Expected one-based source position.</param>
-    /// <param name="observer">Optional native operation accounting before raw bytes are decoded.</param>
+    /// <param name="observer">Optional execution operation accounting before raw bytes are decoded.</param>
     /// <returns>The owned decoded event record.</returns>
     /// <exception cref="KeyLoadException">The record is unavailable or its persisted identity is corrupt.</exception>
     public static SourceEventRecord Read(IKeyValueView view, EventSourceRef source, long position,
@@ -57,7 +57,7 @@ internal static class SourceEventReader
 
     private static SourceEventRecord DecodeTopic(ReadOnlySpan<byte> bytes, EventSourceRef source, long position)
     {
-        var record = NativeSerialization.Deserialize<SourceEventRecord>(bytes);
+        var record = OrleansSerialization.Deserialize<SourceEventRecord>(bytes);
         if (record.Source != source || record.Position != position)
         {
             throw Errors.Fail(ErrorCode.Corruption, EventRecordCorruptMessage);
@@ -67,7 +67,7 @@ internal static class SourceEventReader
 
     private static SourceEventRecord DecodeStream(ReadOnlySpan<byte> bytes, EventSourceRef source, long position)
     {
-        var record = NativeSerialization.Deserialize<EventRecord>(bytes);
+        var record = OrleansSerialization.Deserialize<EventRecord>(bytes);
         var expectedStream = new StreamRef(source.Partition, source.Resource, source.StreamId!, source.Generation);
         if (record.Stream != expectedStream || record.Revision != position)
         {

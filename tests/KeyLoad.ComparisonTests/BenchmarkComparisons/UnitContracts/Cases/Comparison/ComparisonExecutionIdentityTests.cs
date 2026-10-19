@@ -1,7 +1,7 @@
 using SessionFields = KeyLoad.ComparisonTests.Features.BenchmarkComparisons.BenchmarkSessionEvidenceKeys;
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
-/// <summary>Verifies original workflow provenance failures through the real native client process.</summary>
+/// <summary>Verifies original workflow provenance failures through the real execution client process.</summary>
 internal sealed class ComparisonExecutionIdentityTests
 {
     private const string SingleProfile = "smoke-single";
@@ -85,7 +85,7 @@ internal sealed class ComparisonExecutionIdentityTests
     }
 
     [Test]
-    public async Task AcImage005IdentityIsValidatedBeforeNativeClientEndpoints()
+    public async Task AcImage005IdentityIsValidatedBeforeClientEndpoints()
     {
         var settings = ComparisonExecutionIdentitySupport.ValidSettings();
         settings.Remove(ComparisonExecutionIdentitySupport.RunId);

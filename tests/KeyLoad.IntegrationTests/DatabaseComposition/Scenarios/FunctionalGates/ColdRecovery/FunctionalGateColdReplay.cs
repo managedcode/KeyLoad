@@ -21,7 +21,7 @@ internal static class FunctionalGateColdReplay
                 await FunctionalGateRelationalCalls.SqlSdkAsync<CommitReceipt>(context, context.Writer, model.TableInsert, token));
             await SqlClusterProtocol.EqualAsync(model.TableReceipt,
                 await FunctionalGateRelationalCalls.SqlMcpAsync<CommitReceipt>(context, context.Writer, model.TableInsert, token));
-            await FunctionalGateColdBlobUpload.ReplayAsync(context, model.Blob, token);
+            await FunctionalGateFiles.VerifyAsync(context.Reader, model.Blob, token);
             await FunctionalGateColdReadAssertions.VerifyAsync(context, model, token);
         }
     }

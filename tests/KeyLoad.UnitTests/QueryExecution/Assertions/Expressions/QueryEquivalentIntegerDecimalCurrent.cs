@@ -31,7 +31,7 @@ internal static class QueryEquivalentIntegerDecimalCurrent
     {
         var image = SqlInnerJoinRetainedIdentityFlow.Image(store);
         var cut = store.Position;
-        var identity = NativeSerialization.Serialize(store.Identity);
+        var identity = OrleansSerialization.Serialize(store.Identity);
         var failures = new List<Exception>();
         await KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
         {

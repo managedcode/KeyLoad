@@ -7,8 +7,8 @@ namespace KeyLoad.Core.Features.ResourceExecution;
 internal sealed class ResourceEffectBindingScope(IOptions<DatabaseLimits> options)
 {
     private readonly DatabaseLimits limits = options.Value;
-    private readonly HashSet<ResourceLifetimeV1> observed = [];
-    private ResourceEffectAdmissionV1? admitted;
+    private readonly HashSet<ResourceLifetime> observed = [];
+    private ResourceEffectAdmission? admitted;
     private long retainedBytes;
     private long readBytes;
     private long examined;
@@ -24,7 +24,7 @@ internal sealed class ResourceEffectBindingScope(IOptions<DatabaseLimits> option
         examined++;
     }
 
-    internal void Observe(PartitionRef partition, ResourceLifetimeV1 lifetime)
+    internal void Observe(PartitionRef partition, ResourceLifetime lifetime)
     {
         if (partition.TenantId != lifetime.TenantId || partition.DatabaseId != lifetime.DatabaseId
             || partition.TransactionDomainId != lifetime.TransactionDomainId)
@@ -34,7 +34,7 @@ internal sealed class ResourceEffectBindingScope(IOptions<DatabaseLimits> option
         ObserveLifetime(lifetime);
     }
 
-    internal void ObserveLifetime(ResourceLifetimeV1 lifetime)
+    internal void ObserveLifetime(ResourceLifetime lifetime)
     {
         if (admitted is not null && !admitted.Bindings.Contains(lifetime))
         {
@@ -44,7 +44,7 @@ internal sealed class ResourceEffectBindingScope(IOptions<DatabaseLimits> option
         {
             return;
         }
-        var bytes = NativeSerialization.Measure(lifetime);
+        var bytes = OrleansSerialization.Measure(lifetime);
         if (bytes <= ResourceEffectAdmissionProtocol.Zero || bytes > limits.MaxBatchBytes - retainedBytes)
         {
             throw Errors.Fail(ErrorCode.ResourceExhausted, ResourceEffectAdmissionProtocol.Capacity);
@@ -53,7 +53,7 @@ internal sealed class ResourceEffectBindingScope(IOptions<DatabaseLimits> option
         retainedBytes += bytes;
     }
 
-    internal ImmutableArray<ResourceLifetimeV1> Capture()
+    internal ImmutableArray<ResourceLifetime> Capture()
         => observed.OrderBy(value => value.TenantId, StringComparer.Ordinal)
             .ThenBy(value => value.DatabaseId, StringComparer.Ordinal)
             .ThenBy(value => value.ResourceName, StringComparer.Ordinal)
@@ -61,8 +61,8 @@ internal sealed class ResourceEffectBindingScope(IOptions<DatabaseLimits> option
 
     // Composition source selection runs at its original business point after the clock gate.
     // Every originally admitted lifetime is nevertheless checked in the current cut before that gate.
-    internal void ActivateOriginalBindings(IKeyValueView view, ResourceEffectAdmissionV1 value,
-        Action<ResourceLifetimeV1> authorizeUnobservedCollection)
+    internal void ActivateOriginalBindings(IKeyValueView view, ResourceEffectAdmission value,
+        Action<ResourceLifetime> authorizeUnobservedCollection)
     {
         ArgumentNullException.ThrowIfNull(authorizeUnobservedCollection);
         if (!observed.IsSubsetOf(value.Bindings))
@@ -94,16 +94,16 @@ internal sealed class ResourceEffectBindingScope(IOptions<DatabaseLimits> option
 
     internal void RequireComplete()
     {
-        if (admitted is not null && !NativeSerialization.Serialize(Capture()).AsSpan()
-            .SequenceEqual(NativeSerialization.Serialize(admitted.Bindings)))
+        if (admitted is not null && !OrleansSerialization.Serialize(Capture()).AsSpan()
+            .SequenceEqual(OrleansSerialization.Serialize(admitted.Bindings)))
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, ResourceEffectAdmissionProtocol.Changed);
         }
     }
 
-    internal void Activate(ResourceEffectAdmissionV1 value)
+    internal void Activate(ResourceEffectAdmission value)
     {
-        if (!NativeSerialization.Serialize(Capture()).AsSpan().SequenceEqual(NativeSerialization.Serialize(value.Bindings)))
+        if (!OrleansSerialization.Serialize(Capture()).AsSpan().SequenceEqual(OrleansSerialization.Serialize(value.Bindings)))
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, ResourceEffectAdmissionProtocol.Changed);
         }

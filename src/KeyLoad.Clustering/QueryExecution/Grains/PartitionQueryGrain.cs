@@ -46,10 +46,10 @@ internal sealed class PartitionQueryGrain(GrainRequestCodec codec, SiloDatabaseC
             }
             var partition = request.Envelope.ReadKind switch
             {
-                GrainReadKind.PartitionQueryLeafV2 => GrainNativePayload.Read<PartitionQueryOwnedLeafRequestV2>(
-                    request.Payload).Original?.Plan?.Partition,
-                GrainReadKind.DistributedSearchLeafV2 => GrainNativePayload.Read<DistributedSearchOwnedLeafV2>(
-                    request.Payload).Original?.Search?.Partition,
+                GrainReadKind.PartitionQueryLeaf => GrainPayload.Read<PartitionQueryOwnedLeafRequest>(
+                    request.Payload).Plan?.Partition,
+                GrainReadKind.DistributedSearchLeaf => GrainPayload.Read<DistributedSearchOwnedLeaf>(
+                    request.Payload).Search?.Partition,
                 _ => null
             };
             if (partition is null || PartitionQueryGrainIdentity.For(partition) != this.GetPrimaryKeyString())
@@ -58,7 +58,7 @@ internal sealed class PartitionQueryGrain(GrainRequestCodec codec, SiloDatabaseC
             }
             return await storage.On(owner).ExecuteAsync(signedRequest, cancellationToken).ConfigureAwait(true);
         }
-        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+        catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error))
         {
             return GrainReplyFactory.Failure(error, false, diagnostics, codec.ExecutionOptions, requestId,
                 GrainFailureStage.CapabilityExecution, cancellationToken);

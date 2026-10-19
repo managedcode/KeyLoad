@@ -5,12 +5,12 @@ namespace KeyLoad.Analyzers.Features.CodeQuality;
 
 internal static class MagicRuntimeOperations
 {
-    internal static bool IsNativeType(Compilation compilation, ITypeSymbol? type, string metadataName) =>
+    internal static bool IsType(Compilation compilation, ITypeSymbol? type, string metadataName) =>
         type is not null && SymbolEqualityComparer.Default.Equals(type.OriginalDefinition,
             compilation.GetTypeByMetadataName(metadataName));
 
-    internal static bool IsNativeMetadataType(Compilation compilation, ITypeSymbol? type, string metadataName) =>
-        IsNativeType(compilation, type, metadataName) &&
+    internal static bool IsMetadataType(Compilation compilation, ITypeSymbol? type, string metadataName) =>
+        IsType(compilation, type, metadataName) &&
         type!.Locations.All(static location => location.IsInMetadata);
 
     internal static bool IsNumeric(ITypeSymbol? type) => type?.SpecialType is

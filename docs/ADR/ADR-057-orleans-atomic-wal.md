@@ -1,10 +1,10 @@
-# ADR-057: Native Orleans binary atomic WAL
+# ADR-057: Orleans binary atomic WAL
 
 Status: Accepted. The current persisted format and current-source qualification are governed by [StorageRecovery CurrentFormat](../Features/StorageRecovery/CurrentFormat.md). Related REQ-STORAGE-015..019, AC-WAL-001..005.
 
 ## Decision
 
-commands.wal mutation payload uses private generated Orleans DTOs with permanent field IDs and type aliases and a cached typed serializer. Fields0/1 carry key/nullable value; mandatory field2 is Put1 or Delete2, with default0 invalid. This prevents a missing field from implying deletion. Validate exact kind/value pairing before apply. A closed native IFieldCodec<ReadOnlyMemory<byte>> registration to ReadOnlyMemoryOfByteCodec avoids generic per-byte serialization for nullable values. A direct Microsoft.Orleans.Serialization reference uses the centrally pinned version. Native ZoneTree Memory<byte> ByteArraySerializer and Sync WAL remain. No duplicate custom serializer, permissive JSON fallback or application-owned serialization loop. Serialized output is bounded by the existing configured MaxFrameBytes; exact binary length is checked before writing.
+commands.wal mutation payload uses private generated Orleans DTOs with permanent field IDs and type aliases and a cached typed serializer. Fields0/1 carry key/nullable value; mandatory field2 is Put1 or Delete2, with default0 invalid. This prevents a missing field from implying deletion. Validate exact kind/value pairing before apply. A closed IFieldCodec<ReadOnlyMemory<byte>> registration to ReadOnlyMemoryOfByteCodec avoids generic per-byte serialization for nullable values. A direct Microsoft.Orleans.Serialization reference uses the centrally pinned version. ZoneTree Memory<byte> ByteArraySerializer and Sync WAL remain. No duplicate custom serializer, permissive JSON fallback or application-owned serialization loop. Serialized output is bounded by the existing configured MaxFrameBytes; exact binary length is checked before writing.
 
 Use only the current WAL, identity and checkpoint contracts recorded in CurrentFormat. Generated Orleans DTOs, permanent field IDs/type aliases, explicit operation kinds, complete payload validation, sanitized corruption errors, durable flush ordering, poisoned unknown outcomes and node-local ZoneTree byte storage remain mandatory. Unsupported identity/checkpoint/WAL values and corrupt complete frames fail closed before state publication. Current torn-tail handling follows the current reader contract; this ADR defines no alternate-format path.
 
@@ -13,7 +13,7 @@ flowchart LR
     Stage[Ordered owned mutations] --> Orleans[Generated binary codec and bounded output]
     Orleans --> Journal[Versioned checksummed commands WAL]
     Journal --> Flush[Flush to disk before apply]
-    Flush --> Tree[Native ZoneTree bytes and Sync WAL]
+    Flush --> Tree[ZoneTree bytes and Sync WAL]
     Journal --> Verify[Verify checksum sequence complete decode and keys]
     Verify --> Replay[Replay whole valid frame]
 ```
@@ -67,6 +67,6 @@ short-header suffix remains an incomplete-tail case and is truncated only by
 ordinary recovery. The regression is not qualified until actual
 normal/scalar and applicable recovery evidence exists.
 
-## Native codec refinement
+## codec refinement
 
-The centrally pinned Orleans NullableCodec's generic codec resolution uses ReadOnlyMemoryCodec<byte> with per-byte tagged fields. Accept the framework's closed native IFieldCodec<ReadOnlyMemory<byte>> → ReadOnlyMemoryOfByteCodec registration, with no custom wire codec. Nullable nonnull values then use native length-prefixed raw bytes. The original size/4096-byte assertions remain unchanged. The current generated Orleans codec uses the accepted closed native memory codec; no custom JSON or alternate-format decoder is supported. The active identity/WAL/checkpoint values and exact bytes remain those frozen in CurrentFormat.
+The centrally pinned Orleans NullableCodec's generic codec resolution uses ReadOnlyMemoryCodec<byte> with per-byte tagged fields. Accept the framework's closed IFieldCodec<ReadOnlyMemory<byte>> → ReadOnlyMemoryOfByteCodec registration, with no custom wire codec. Nullable nonnull values then use length-prefixed raw bytes. The original size/4096-byte assertions remain unchanged. The current generated Orleans codec uses the accepted closed memory codec; no custom JSON or alternate-format decoder is supported. The active identity/WAL/checkpoint values and exact bytes remain those frozen in CurrentFormat.

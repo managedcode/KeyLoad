@@ -1,6 +1,6 @@
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
-using KeyLoad.UnitTests.Features.ClusterRouting;
+using KeyLoad.UnitTests.Features.OrleansExecution;
 
 namespace KeyLoad.UnitTests.Features.TimeSeries;
 
@@ -23,7 +23,7 @@ internal static class SampleChunkSignedMinimumAssertions
     {
         if (actual.CutPosition <= NoCut)
         {
-            throw new InvalidOperationException("The native signed chunk read has no owner cut.");
+            throw new InvalidOperationException("The execution signed chunk read has no owner cut.");
         }
         var expected = new SampleChunkWindowResult(request.WindowId, SampleChunkCanonicalFixture.Start,
             SampleChunkCanonicalFixture.Until, SampleChunkCanonicalFixture.FirstGeneration,
@@ -32,7 +32,7 @@ internal static class SampleChunkSignedMinimumAssertions
         SampleChunkExplicitMinimumUnitReads.RequireBytes(expected, actual);
     }
 
-    internal static async Task HealthyAsync(ConnectionNativeScenario scenario, SampleChunkSignedMinimumState state,
+    internal static async Task HealthyAsync(ConnectionScenario scenario, SampleChunkSignedMinimumState state,
         CancellationToken token)
     {
         var id = Guid.NewGuid();
@@ -41,10 +41,10 @@ internal static class SampleChunkSignedMinimumAssertions
         var reply = await scenario.InvokeAsync(state.Reader, id, Guid.Empty, signed, token);
         await Assert.That(reply.Error).IsNull();
         await Assert.That(reply.SafeDetail).IsNull();
-        Page(state.Request, ConnectionNativeAssertions.Value<SampleChunkWindowResult>(reply));
+        Page(state.Request, ConnectionAssertions.Value<SampleChunkWindowResult>(reply));
     }
 
-    internal static async Task RefusedAsync(ConnectionNativeScenario scenario, SampleChunkSignedMinimumState state,
+    internal static async Task RefusedAsync(ConnectionScenario scenario, SampleChunkSignedMinimumState state,
         Guid id, string signed, bool mac, CancellationToken token)
     {
         if (mac)

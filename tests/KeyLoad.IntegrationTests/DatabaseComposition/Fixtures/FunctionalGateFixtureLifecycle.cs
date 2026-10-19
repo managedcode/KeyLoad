@@ -1,6 +1,6 @@
 using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.Diagnostics.Features.ResourceExecution;
-using KeyLoad.IntegrationTests.Features.ClusterReplication;
+using KeyLoad.IntegrationTests.Features.StorageReplication;
 using KeyLoad.Server;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -19,7 +19,7 @@ internal sealed partial class FunctionalGateFixture
 
     private async Task DisposeCoreAsync()
     {
-        // Publish the one original cleanup task before a native cancellation callback can reenter.
+        // Publish the one original cleanup task before a execution cancellation callback can reenter.
         await Task.Yield();
         var failures = new List<Exception>();
         var stopped = App is null;
@@ -65,13 +65,13 @@ internal sealed partial class FunctionalGateFixture
         {
             return true;
         }
-        NativeProcessEvidence[] observed = [];
+        ProcessEvidence[] observed = [];
         var stopped = false;
         if (processEvidenceDirectory is { } evidenceOutput)
         {
             await ServerFailureObserver.ObserveAsync(async () =>
                 observed = await ClusterFixtureApplicationStartup.CaptureAsync(application, NodeNames, evidenceOutput,
-                    "native-process-before-shutdown.json", token).ConfigureAwait(false), failures).ConfigureAwait(false);
+                    "execution-process-before-shutdown.json", token).ConfigureAwait(false), failures).ConfigureAwait(false);
         }
         await ServerFailureObserver.ObserveAsync(async () =>
         {

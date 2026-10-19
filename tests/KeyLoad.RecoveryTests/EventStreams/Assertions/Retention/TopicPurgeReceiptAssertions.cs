@@ -36,13 +36,13 @@ internal static class TopicPurgeReceiptAssertions
         await Assert.That(stored.Partition).IsEqualTo(TopicPurgeCrashContract.Partition);
         var canonical = "{\"id\":" + JsonSerializer.Serialize(operation.CommandId, JsonDefaults.Options) + ",\"kind\":" +
             JsonSerializer.Serialize(OperationKind.Batch, JsonDefaults.Options) + ",\"payloadJson\":" +
-            JsonSerializer.Serialize(JsonSerializer.Serialize(NativeSerialization.Deserialize<CommandRequest>(operation.Value!.Input.Span),
+            JsonSerializer.Serialize(JsonSerializer.Serialize(OrleansSerialization.Deserialize<CommandRequest>(operation.Value!.Input.Span),
                 JsonDefaults.Options), JsonDefaults.Options) + ",\"principalId\":\"root\"}";
         await Assert.That(stored.Fingerprint).IsEqualTo(Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(canonical))));
         await EventAppendReceiptAssertions.SameResultAsync(outcome, stored.Result);
-        await Assert.That(store.Read(view => NativeSerialization.Deserialize<DateTimeOffset>(view.ReadOwnedValue(KeySpace.Clock.ToArray())!))).IsEqualTo(new DateTimeOffset(operation.Timestamp));
+        await Assert.That(store.Read(view => OrleansSerialization.Deserialize<DateTimeOffset>(view.ReadOwnedValue(KeySpace.Clock.ToArray())!))).IsEqualTo(new DateTimeOffset(operation.Timestamp));
         await Assert.That(stored.CanonicalSequence).IsGreaterThan(0L);
-        await Assert.That(store.Read(view => NativeSerialization.Deserialize<long>(view.ReadOwnedValue(KeySpace.AppliedBytes)
+        await Assert.That(store.Read(view => OrleansSerialization.Deserialize<long>(view.ReadOwnedValue(KeySpace.AppliedBytes)
             ?? throw new InvalidOperationException("The canonical applied position is missing.")))).IsEqualTo(stored.CanonicalSequence);
     }
     internal static async Task StableReplayAsync(DatabaseEngine database, Command<DatabaseCommand> operation, Result<object> expected)

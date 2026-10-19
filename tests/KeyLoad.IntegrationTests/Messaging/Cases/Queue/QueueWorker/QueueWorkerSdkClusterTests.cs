@@ -14,7 +14,7 @@ internal sealed class QueueWorkerSdkClusterTests
     public Task ActualSingleRenewalBudgetStopsAndJoinsHeldHandlerWithoutAckThenColdFreshWorker()
         => QueueWorkerClusterTrial.RenewalBudgetAsync();
     [Test]
-    public Task ActualNativeProjectedUtf8ExcessRetainsLeaseWithoutHandlerOrAckThenColdCorrectBudgetWorker()
+    public Task ActualProjectedUtf8ExcessRetainsLeaseWithoutHandlerOrAckThenColdCorrectBudgetWorker()
         => QueueWorkerClusterTrial.ByteRefusalAsync();
     [Test]
     public Task ActualCallerHandlerFailureJoinsWithoutAckThenColdFreshWorker()

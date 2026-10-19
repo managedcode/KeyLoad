@@ -2,7 +2,7 @@ namespace KeyLoad.RecoveryTests.Features.TimeSeries;
 
 internal sealed class SampleChunkEarlyProcessRecoveryTests
 {
-    private const string RootPrefix = "keyload-native-chunk-early-recovery-";
+    private const string RootPrefix = "keyload-execution-chunk-early-recovery-";
     [Test]
     [Arguments(SampleChunkEarlyCut.Open)]
     [Arguments(SampleChunkEarlyCut.Append)]

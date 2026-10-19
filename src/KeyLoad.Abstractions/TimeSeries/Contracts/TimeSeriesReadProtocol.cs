@@ -4,13 +4,13 @@ namespace KeyLoad;
 public static class TimeSeriesReadProtocol
 {
     /// <summary>HTTP route for the projected latest sample.</summary>
-    public const string LatestRoute = "/v1/series/latest";
+    public const string LatestRoute = "/series/latest";
     /// <summary>HTTP route for complete raw half-open statistics.</summary>
-    public const string AggregateRoute = "/v1/series/aggregate";
+    public const string AggregateRoute = "/series/aggregate";
     /// <summary>HTTP route for dense bounded UTC windows.</summary>
-    public const string WindowsRoute = "/v1/series/windows";
+    public const string WindowsRoute = "/series/windows";
     /// <summary>HTTP route for persisted time-series retention progress.</summary>
-    public const string RetentionRoute = "/v1/series/retention";
+    public const string RetentionRoute = "/series/retention";
     /// <summary>Official MCP tool identity for the latest sample.</summary>
     public const string LatestTool = "keyload_series_latest";
     /// <summary>Official MCP tool identity for complete raw statistics.</summary>

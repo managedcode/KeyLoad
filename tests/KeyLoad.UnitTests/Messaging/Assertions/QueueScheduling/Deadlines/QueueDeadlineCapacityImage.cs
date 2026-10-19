@@ -27,7 +27,7 @@ internal static class QueueDeadlineCapacityImage
             {
                 var body = new MessageBody(metadata.Id, QueueDeadlineCapacityProtocol.Json, new string(QueueDeadlineCapacityProtocol.Json.AsSpan()), input.OrderingKey, JsonData.Fingerprint(input));
                 Add(expected[Body], KeySpace.Partition(Body, lane.Partition, lane.Queue, metadata.Id), body);
-                var bytes = NativeSerialization.Serialize(body).LongLength;
+                var bytes = OrleansSerialization.Serialize(body).LongLength;
                 storedBytes += bytes;
                 leasedBytes += metadata.State == MessageState.Leased ? bytes : NoUsage;
                 parkedBytes += metadata.State == MessageState.DeadLettered ? bytes : NoUsage;
@@ -80,5 +80,5 @@ internal static class QueueDeadlineCapacityImage
     }
 
     private static void Add<T>(List<string> rows, byte[] key, T value)
-        => rows.Add(Convert.ToHexString(key) + ByteSeparator + Convert.ToHexString(NativeSerialization.Serialize(value)));
+        => rows.Add(Convert.ToHexString(key) + ByteSeparator + Convert.ToHexString(OrleansSerialization.Serialize(value)));
 }

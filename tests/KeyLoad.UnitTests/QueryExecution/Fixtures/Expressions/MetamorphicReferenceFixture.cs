@@ -30,7 +30,7 @@ internal sealed class MetamorphicReferenceFixture(int seed) : IDisposable
         Receipt = Harness.Submit(OperationKind.Batch, Seed, id: Seed.CommandId).Get<CommitReceipt>();
         var expected = new CommitReceipt(Seed.CommandId, new(Harness.Store.Identity.Incarnation, Harness.Partition.AtomicPartitionId, before + 1L), [.. Rows.Select(row => new MutationReceipt("putDocument", MetamorphicReferenceData.Collection, row.Id, 1L))], DurabilityProfile.ProcessDurable, 1);
         await MetamorphicReferenceAssertions.EqualAsync(Receipt, expected);
-        await NativeReceiptAsync(Receipt);
+        await RuntimeReceiptAsync(Receipt);
         await Assert.That(Harness.Store.Position).IsEqualTo(before + 1L);
         Outcome = Harness.Store.Read(view => view.ReadOwnedValue(KeySpace.PartitionOutcome(Harness.Partition, "root", Seed.CommandId)))
             ?? throw new InvalidOperationException("The original generated-corpus outcome must exist.");
@@ -51,7 +51,7 @@ internal sealed class MetamorphicReferenceFixture(int seed) : IDisposable
         await MetamorphicReferenceAssertions.EqualAsync(Harness.Store.Read(view =>
             view.GetRecord<PrincipalRecord>(KeySpace.Principal(MetamorphicReferenceData.Reader))), expected);
     }
-    internal static async Task NativeReceiptAsync(CommitReceipt receipt)
+    internal static async Task RuntimeReceiptAsync(CommitReceipt receipt)
     {
         foreach (var mutation in receipt.Mutations)
         {

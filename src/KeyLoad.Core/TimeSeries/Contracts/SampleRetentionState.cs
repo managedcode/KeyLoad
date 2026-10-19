@@ -1,7 +1,7 @@
 namespace KeyLoad.Core.Features.TimeSeries;
 
 [global::Orleans.GenerateSerializer]
-[global::Orleans.Alias(SampleRetentionNativeAliases.State)]
+[global::Orleans.Alias(SampleRetentionAliases.State)]
 internal sealed record SampleRetentionState(
     [property: global::Orleans.Id(SampleRetentionStateFields.FormatVersion)] int FormatVersion,
     [property: global::Orleans.Id(SampleRetentionStateFields.BeforeUtcTicks)] long BeforeUtcTicks,

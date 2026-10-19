@@ -2,7 +2,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad;
 
-/// <summary>Immutable process-start policy for the bounded native phase counter bank.</summary>
+/// <summary>Immutable process-start policy for the bounded execution phase counter bank.</summary>
 [ConfigurationOptions]
 public sealed record DatabasePhaseExecutionOptions
 {

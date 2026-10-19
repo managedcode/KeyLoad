@@ -13,7 +13,7 @@ internal static class SubscriptionOldCutRefusal
     {
         var bytes = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
-        var identity = NativeReadCutStoreStateAssertions.SnapshotIdentity(store);
+        var identity = ReadCutStoreStateAssertions.SnapshotIdentity(store);
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {

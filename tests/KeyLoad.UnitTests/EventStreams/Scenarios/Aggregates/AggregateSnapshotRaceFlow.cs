@@ -31,7 +31,7 @@ internal static class AggregateSnapshotRaceFlow
             {
                 fixture.ColdImage = QueueWholeFlowStorage.Bytes(fixture.Store);
                 fixture.ColdPosition = fixture.Store.Position;
-                fixture.ColdIdentity = NativeReadCutStoreStateAssertions.SnapshotIdentity(fixture.Store);
+                fixture.ColdIdentity = ReadCutStoreStateAssertions.SnapshotIdentity(fixture.Store);
             }, failures);
             ServerFailureObserver.Observe(fixture.Store.Dispose, failures);
             await ServerFailureObserver.ObserveAsync(() => AggregateSnapshotRaceCold.RunAsync(fixture, token), failures);
@@ -76,7 +76,7 @@ internal static class AggregateSnapshotRaceFlow
     {
         var image = QueueWholeFlowStorage.Bytes(fixture.Store);
         var position = fixture.Store.Position;
-        var identity = NativeReadCutStoreStateAssertions.SnapshotIdentity(fixture.Store);
+        var identity = ReadCutStoreStateAssertions.SnapshotIdentity(fixture.Store);
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(action, failures);
         await ServerFailureObserver.ObserveAsync(() => AggregateSnapshotRaceValues.ConservedAsync(fixture, image, identity, position), failures);

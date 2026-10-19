@@ -8,14 +8,14 @@ internal static class SampleRawReadDecoder
     internal static SampleRecord Read(ReadOnlySpan<byte> key, ReadOnlySpan<byte> value,
         PartitionRef partition, string set, string series)
     {
-        var record = NativeSerialization.Deserialize<SampleRecord>(value);
+        var record = OrleansSerialization.Deserialize<SampleRecord>(value);
         if (record is null || record.Sample is null || record.SeriesId != series
             || record.Sequence < FirstSequence || !double.IsFinite(record.Sample.Value))
         {
             throw Errors.Fail(ErrorCode.Corruption, CorruptSample);
         }
 
-        var canonical = KeySpace.Partition(KeyLoad.Core.Features.ClusterRouting.Contracts.PartitionRecordFamilies.Sample,
+        var canonical = KeySpace.Partition(KeyLoad.Core.Features.StoragePartitions.Contracts.PartitionRecordFamilies.Sample,
             partition, set, series, record.Sample.Timestamp, record.Sequence);
         if (!key.SequenceEqual(canonical))
         {

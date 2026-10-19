@@ -1,5 +1,5 @@
 using KeyLoad.Core;
-using D = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreNativeTestData;
+using D = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreTestData;
 
 namespace KeyLoad.UnitTests.Features.AnalyticsStore;
 
@@ -17,20 +17,20 @@ internal static class AnalyticsBoundReadBudgetFlow
         => AnalyticsBoundCoreOwner.RunAsync(async (fixture, owner, original) =>
         {
             await AnalyticsBoundCoreOwner.LeaseAsync(fixture, owner, async (lease, ledger, work) =>
-                await AnalyticsBoundsNative.UnchangedAsync(fixture, async () =>
+                await RuntimeAnalyticsBounds.UnchangedAsync(fixture, async () =>
                 {
-                    // Activate native accounting before real work, rather than inventing observed bytes or records.
-                    work.ConstrainNativeWork(work.MaximumNativeReadBytes, work.MaximumNativeScanRecords);
+                    // Activate execution accounting before real work, rather than inventing observed bytes or records.
+                    work.ConstrainWork(work.RuntimeMaximumReadBytes, work.MaximumScanRecords);
                     var first = fixture.Database.ReadAnalyticsEventsBound(D.Root, D.Read(fixture), work, lease);
                     await Assert.That(first.Events.Length).IsEqualTo(ExpectedRows);
                     var bytes = work.ReadBytes;
-                    var records = work.ConstrainedNativeRecords;
+                    var records = work.ConstrainedRecords;
                     var retained = ledger.RetainedEncodedBytes;
                     var dependencies = lease.Dependencies;
                     await Assert.That(bytes).IsGreaterThan(NoReadBytes);
                     await Assert.That(records).IsGreaterThan(NoReadRecords);
-                    work.ConstrainNativeWork(exhaustBytes ? bytes : work.MaximumNativeReadBytes,
-                        exhaustBytes ? work.MaximumNativeScanRecords : records);
+                    work.ConstrainWork(exhaustBytes ? bytes : work.RuntimeMaximumReadBytes,
+                        exhaustBytes ? work.MaximumScanRecords : records);
                     AnalyticsEventsPage? page = null;
                     AnalyticsAggregateSnapshot? snapshot = null;
                     var error = Assert.ThrowsExactly<KeyLoadException>(() =>
@@ -48,7 +48,7 @@ internal static class AnalyticsBoundReadBudgetFlow
                     await Assert.That(page).IsNull();
                     await Assert.That(snapshot).IsNull();
                     await Assert.That(work.ReadBytes).IsEqualTo(bytes);
-                    await Assert.That(work.ConstrainedNativeRecords).IsEqualTo(records);
+                    await Assert.That(work.ConstrainedRecords).IsEqualTo(records);
                     await Assert.That(ledger.RetainedEncodedBytes).IsEqualTo(retained);
                     await Assert.That(lease.Dependencies.SetEquals(dependencies)).IsTrue();
                 }), original);

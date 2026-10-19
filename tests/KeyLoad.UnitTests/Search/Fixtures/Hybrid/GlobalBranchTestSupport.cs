@@ -7,8 +7,8 @@ namespace KeyLoad.UnitTests.Features.Search;
 internal static class GlobalBranchTestSupport
 {
     internal const string Branch = "vector-main";
-    internal const string Profile = "profile-v1";
-    internal const string Corpus = "tenant-corpus-v1";
+    internal const string Profile = "profile";
+    internal const string Corpus = "tenant-corpus";
     internal const string Statistics = "stats-17";
     internal const string Collection = "documents";
     internal const int Limit = 10;
@@ -46,19 +46,19 @@ internal static class GlobalBranchTestSupport
             .ThenBy(candidate => candidate.Reference.Collection, StringComparer.Ordinal)
             .ThenBy(candidate => candidate.Reference.Id, StringComparer.Ordinal).ToArray();
 
-    internal static long NativeInputBytes(GlobalBranchMergeRequest request,
+    internal static long InputBytes(GlobalBranchMergeRequest request,
         ImmutableArray<GlobalBranchWindow> windows)
     {
-        var bytes = NativeSerialization.Measure(request);
+        var bytes = OrleansSerialization.Measure(request);
         foreach (var window in windows)
         {
-            bytes = checked(bytes + NativeSerialization.Measure(window with
+            bytes = checked(bytes + OrleansSerialization.Measure(window with
             {
                 Candidates = []
             }));
             foreach (var candidate in window.Candidates)
             {
-                bytes = checked(bytes + NativeSerialization.Measure(candidate));
+                bytes = checked(bytes + OrleansSerialization.Measure(candidate));
             }
         }
         return bytes;

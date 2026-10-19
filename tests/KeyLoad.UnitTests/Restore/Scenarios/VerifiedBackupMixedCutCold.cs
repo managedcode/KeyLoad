@@ -20,7 +20,7 @@ internal static class VerifiedBackupMixedCutCold
         var identity = JsonSerializer.Serialize(store.Identity, JsonDefaults.Options);
         var before = EventingArtifactState.FullBytes(store);
         var key = KeyCodec.Encode(HealthyNamespace, HealthyKey);
-        var value = NativeSerialization.Serialize(HealthyValue);
+        var value = OrleansSerialization.Serialize(HealthyValue);
         store.Commit((transaction, _) => { transaction.PutRecord(key, HealthyValue); return true; });
         var expected = before.Append(Convert.ToHexString(key) + ":" + Convert.ToHexString(value))
             .Order(StringComparer.Ordinal).ToArray();

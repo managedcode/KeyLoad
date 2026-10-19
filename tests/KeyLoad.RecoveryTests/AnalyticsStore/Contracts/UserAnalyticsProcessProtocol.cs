@@ -8,7 +8,7 @@ internal static class UserAnalyticsProcessProtocol
     internal const string Recover = "user-analytics-derived-recover";
     internal const string PhysicalDirectory = "physical";
     internal const string EvidenceFile = "analytics-original.bin";
-    internal const string EvidenceAlias = "keyload.crashhost.analytics-derived-original.v1";
+    internal const string EvidenceAlias = "keyload.crashhost.analytics-derived-original";
     internal const string Tenant = "analytics-process";
     internal const string Database = "database";
     internal const string Domain = "events";

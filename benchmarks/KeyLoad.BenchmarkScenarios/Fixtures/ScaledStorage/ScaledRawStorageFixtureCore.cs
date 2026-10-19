@@ -26,7 +26,7 @@ internal sealed class ScaledRawStorageFixtureCore
     private long _successfulSeedWrites;
     private long _verifiedRecords;
     private long _verificationPasses;
-    private long _nativeReadCalls;
+    private long _ReadCalls;
     private long _seedElapsedTicks;
     private long _verificationElapsedTicks;
     private string _fullValueDigest = string.Empty;
@@ -97,7 +97,7 @@ internal sealed class ScaledRawStorageFixtureCore
             throw new ArgumentOutOfRangeException(nameof(index));
         }
 
-        _nativeReadCalls++;
+        _ReadCalls++;
         return _engine!.TryRead(index, out value);
     }
 
@@ -124,12 +124,12 @@ internal sealed class ScaledRawStorageFixtureCore
     internal ScaledRawStorageSnapshot Capture()
     {
         EnsureOpen();
-        var native = _engine!.Capture();
+        var execution = _engine!.Capture();
         using var process = Process.GetCurrentProcess();
         var peak = ScaledRawStorageProcessMemory.ReadPeakBytes(process);
         var available = GC.GetGCMemoryInfo().TotalAvailableMemoryBytes;
         ScaledRawStorageMemoryGuard.ValidateObserved(peak, available, _processMemoryCeilingBytes, settings.RequiredHeadroomBytes);
-        return ScaledRawStorageSnapshotFactory.Create(this, native, peak, process.WorkingSet64, available);
+        return ScaledRawStorageSnapshotFactory.Create(this, execution, peak, process.WorkingSet64, available);
     }
 
     internal void Close(bool performPostOracle)
@@ -164,7 +164,7 @@ internal sealed class ScaledRawStorageFixtureCore
         RawStorageFixtureFailures.Throw(primary, failures);
     }
 
-    internal long NativeReadCalls => _nativeReadCalls;
+    internal long RuntimeReadCalls => _ReadCalls;
     internal long ProcessMemoryCeilingBytes => _processMemoryCeilingBytes;
     internal long SeedAttempts => _seedAttempts;
     internal long SuccessfulSeedWrites => _successfulSeedWrites;
@@ -181,7 +181,7 @@ internal sealed class ScaledRawStorageFixtureCore
     private ulong ReadOne(int index)
     {
         EnsureOpen();
-        return ScaledRawStorageIdentityReader.Read(_corpus, _engine!, index, ref _nativeReadCalls);
+        return ScaledRawStorageIdentityReader.Read(_corpus, _engine!, index, ref _ReadCalls);
     }
 
     private void EnsureOpen()
@@ -191,7 +191,7 @@ internal sealed class ScaledRawStorageFixtureCore
     {
         const long NoPreparationDeadline = 0L;
         var result = ScaledRawStorageVerification.Run(_corpus, _engine!, _expectedScratch,
-            RecordCount, ref _nativeReadCalls, enforceBudget ? _deadlineStart : NoPreparationDeadline,
+            RecordCount, ref _ReadCalls, enforceBudget ? _deadlineStart : NoPreparationDeadline,
             enforceBudget, executionOptions, TimeProvider, enforceBudget ? _token : CancellationToken.None);
         _ = _engine!.Capture();
         if (enforceBudget)

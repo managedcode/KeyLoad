@@ -5,9 +5,9 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons.Targets;
 
-internal sealed class KurrentCleanupDiagnostics(IOptions<NativeComparisonDiagnosticOptions> options)
+internal sealed class KurrentCleanupDiagnostics(IOptions<ComparisonDiagnosticOptions> options)
 {
-    private readonly NativeComparisonDiagnosticOptions settings = NativeComparisonDiagnosticOptions.Require(options).Value;
+    private readonly ComparisonDiagnosticOptions settings = ComparisonDiagnosticOptions.Require(options).Value;
     private const int NoObservedItems = 0;
 
     private const int MaximumGrpcStatus = 16;
@@ -45,7 +45,7 @@ internal sealed class KurrentCleanupDiagnostics(IOptions<NativeComparisonDiagnos
         {
             if (error is RpcException rpc)
             {
-                return (KurrentCleanupFailureReason.NativeRpc, NativeStatus(rpc));
+                return (KurrentCleanupFailureReason.RuntimeRpc, RuntimeStatus(rpc));
             }
             if (error is OperationCanceledException)
             {
@@ -54,7 +54,7 @@ internal sealed class KurrentCleanupDiagnostics(IOptions<NativeComparisonDiagnos
             if (error is AccessDeniedException or NotAuthenticatedException or NotLeaderException
                 or WrongExpectedVersionException or StreamDeletedException or StreamNotFoundException)
             {
-                return (KurrentCleanupFailureReason.NativeFailure, error.InnerException is RpcException nativeRpc ? NativeStatus(nativeRpc) : null);
+                return (KurrentCleanupFailureReason.RuntimeFailure, error.InnerException is RpcException runtimeRpc ? RuntimeStatus(runtimeRpc) : null);
             }
             if (error.InnerException is not { } inner)
             {
@@ -65,7 +65,7 @@ internal sealed class KurrentCleanupDiagnostics(IOptions<NativeComparisonDiagnos
         return (KurrentCleanupFailureReason.Unknown, null);
     }
 
-    private static int? NativeStatus(RpcException error)
+    private static int? RuntimeStatus(RpcException error)
     {
         const int NoObservedItems = 0;
 

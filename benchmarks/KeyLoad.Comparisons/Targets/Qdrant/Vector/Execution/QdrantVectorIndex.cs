@@ -5,7 +5,7 @@ namespace KeyLoad.Comparisons.Targets;
 
 internal static class QdrantVectorIndex
 {
-    internal static async Task<VectorIndexReceipt> BuildAsync(HttpClient client, HttpClient[] nodes, string collection, VectorComparisonProfile profile, IOptions<NativeComparisonExecutionOptions> executionOptions, TimeProvider timeProvider, CancellationToken token)
+    internal static async Task<VectorIndexReceipt> BuildAsync(HttpClient client, HttpClient[] nodes, string collection, VectorComparisonProfile profile, IOptions<ComparisonExecutionOptions> executionOptions, TimeProvider timeProvider, CancellationToken token)
     {
         using var deadline = new ComparisonCancellationSource(timeProvider, token);
         deadline.CancelAfter(executionOptions.Value.IndexBuildTimeout);
@@ -56,7 +56,7 @@ internal static class QdrantVectorIndex
             profile.IndexKind == VectorIndexKind.Exact ? QdrantVectorProtocol.EmptyCount : watch.Elapsed.TotalMilliseconds);
     }
 
-    private static async Task<string> AwaitReadyAsync(HttpClient[] nodes, string path, VectorComparisonProfile profile, IOptions<NativeComparisonExecutionOptions> executionOptions, TimeProvider timeProvider, CancellationToken token)
+    private static async Task<string> AwaitReadyAsync(HttpClient[] nodes, string path, VectorComparisonProfile profile, IOptions<ComparisonExecutionOptions> executionOptions, TimeProvider timeProvider, CancellationToken token)
     {
         using var deadline = new ComparisonCancellationSource(timeProvider, token);
         deadline.CancelAfter(executionOptions.Value.IndexBuildTimeout);

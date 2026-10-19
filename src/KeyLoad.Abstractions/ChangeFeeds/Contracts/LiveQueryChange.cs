@@ -8,6 +8,6 @@ namespace KeyLoad;
 /// <param name="Revision">The changed entity revision.</param>
 /// <param name="Row">The resulting query row when the kind is <see cref="LiveQueryChangeKind.Upsert"/>.</param>
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.LiveQueryChange)]
+[Orleans.Alias(ContractAliases.LiveQueryChange)]
 public sealed record LiveQueryChange([property: Orleans.Id(0)] long Sequence, [property: Orleans.Id(1)] CommitToken Commit, [property: Orleans.Id(2)] LiveQueryChangeKind Kind, [property: Orleans.Id(3)] EntityRef Reference,
     [property: Orleans.Id(4)] long Revision, [property: Orleans.Id(5)] QueryRow? Row);

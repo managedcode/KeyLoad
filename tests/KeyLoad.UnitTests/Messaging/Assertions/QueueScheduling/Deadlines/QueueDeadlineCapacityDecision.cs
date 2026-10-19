@@ -38,7 +38,7 @@ internal static class QueueDeadlineCapacityDecision
         if (state.Jitter)
         {
             var wrapper = operation.Value!;
-            var choice = NativeSerialization.Deserialize<QueueRetryDecisions>(wrapper.RetryDecisions.Span).Items.Single();
+            var choice = OrleansSerialization.Deserialize<QueueRetryDecisions>(wrapper.RetryDecisions.Span).Items.Single();
             await Assert.That(choice.Lane).IsEqualTo(state.Lane);
             await Assert.That(choice.MessageId).IsEqualTo(original.Id);
             await Assert.That(choice.ExpectedStateVersion).IsEqualTo(original.StateVersion);

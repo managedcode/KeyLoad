@@ -8,10 +8,10 @@ public static class KeySpace
     private const string CatalogSpace = "catalog";
     private const string PrincipalSpace = "principal";
     private const string ApiKeySpace = "api-key";
-    private const string ScopedOutcomeSpace = "outcome-v2";
+    private const string ScopedOutcomeSpace = "outcome";
     private const string GlobalOutcomeScope = "global";
     private const string UnknownOutcomeScope = "unknown";
-    private const string ScopedOutcomeLocatorSpace = "outcome-locator-v2";
+    private const string ScopedOutcomeLocatorSpace = "outcome-locator";
     private const string SystemSpace = "system";
     private const string AppliedName = "last-applied";
     private const string ClockName = "clock";
@@ -66,6 +66,6 @@ public static class KeySpace
     internal static byte[] UnknownOutcome(string principal, Guid id)
         => KeyCodec.Encode(ScopedOutcomeSpace, UnknownOutcomeScope, principal, id);
 
-    internal static byte[] OutcomeLocatorV2(PartitionRef partition, string principal, Guid id)
+    internal static byte[] OutcomeLocator(PartitionRef partition, string principal, Guid id)
         => Partition(ScopedOutcomeLocatorSpace, partition, principal, id);
 }

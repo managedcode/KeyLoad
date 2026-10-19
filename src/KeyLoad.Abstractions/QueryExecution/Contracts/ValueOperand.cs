@@ -7,7 +7,7 @@ namespace KeyLoad.Query;
 /// <param name="Value">The serialized value.</param>
 [method: JsonConstructor]
 [Orleans.GenerateSerializer]
-[Orleans.Alias(NativeContractAliases.ValueOperand)]
+[Orleans.Alias(ContractAliases.ValueOperand)]
 public sealed record ValueOperand([property: Orleans.Id(0)] JsonElement Value) : Operand
 {
     /// <summary>Serializes an object as the operand's JSON value.</summary>

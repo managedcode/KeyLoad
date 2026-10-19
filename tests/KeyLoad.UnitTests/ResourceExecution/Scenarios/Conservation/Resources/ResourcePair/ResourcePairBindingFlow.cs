@@ -19,7 +19,6 @@ internal static class ResourcePairBindingFlow
         token.ThrowIfCancellationRequested();
         Configure(state);
         await ResourcePairBindingBatch.RunAsync(state, token);
-        await ResourcePairBindingBlob.RunAsync(state, token);
         await ResourcePairBindingSql.RunAsync(state, token);
         await ResourcePairBindingQuery.RunAsync(state, token);
         await ResourcePairBindingBm25.RunAsync(state, token);
@@ -35,7 +34,6 @@ internal static class ResourcePairBindingFlow
             new(Documents, ResourceKind.Collection, source.Partition.TransactionDomainId),
             new(Events, ResourceKind.StreamSet, source.Partition.TransactionDomainId),
             new(Queue, ResourceKind.WorkQueue, source.Partition.TransactionDomainId) { QueuePolicy = new() },
-            new(Blobs, ResourceKind.BlobStore, source.Partition.TransactionDomainId),
             new(Table, ResourceKind.Collection, source.Partition.TransactionDomainId)
             {
                 Authority = DocumentAuthority.Document,
@@ -89,10 +87,10 @@ internal static class ResourcePairBindingFlow
 
     private static byte[] Conflict(byte[] original)
     {
-        var lifetime = NativeSerialization.Deserialize<ResourceLifetimeV1>(original);
+        var lifetime = OrleansSerialization.Deserialize<ResourceLifetime>(original);
         var value = lifetime.Incarnation.Value.ToCharArray();
         value[Zero] = value[Zero] == HexZero ? HexOne : HexZero;
-        return NativeSerialization.Serialize(lifetime with
+        return OrleansSerialization.Serialize(lifetime with
         {
             Incarnation = lifetime.Incarnation with { Value = new string(value) }
         });

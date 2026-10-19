@@ -1,6 +1,5 @@
 using System.Collections.Immutable;
 using KeyLoad.Clustering;
-using KeyLoad.UnitTests.Features.BlobStorage;
 
 namespace KeyLoad.UnitTests.Features.ClientApi;
 
@@ -8,33 +7,33 @@ namespace KeyLoad.UnitTests.Features.ClientApi;
 internal static class McpCatalogExpectations
 {
     internal const string DocumentsGet = "keyload_documents_get";
-    private const string DocumentsGetRoute = "/v1/documents/get";
+    private const string DocumentsGetRoute = "/documents/get";
     internal const string StreamsRead = "keyload_streams_read";
-    private const string StreamsReadRoute = "/v1/streams/read";
+    private const string StreamsReadRoute = "/streams/read";
     internal const string StreamsReplay = "keyload_streams_replay";
-    private const string StreamsReplayRoute = "/v1/streams/replay";
+    private const string StreamsReplayRoute = "/streams/replay";
     internal const string EventsRead = "keyload_events_read";
-    private const string EventsReadRoute = "/v1/events/read";
+    private const string EventsReadRoute = "/events/read";
     internal const string SubscriptionsStatus = "keyload_subscriptions_status";
-    private const string SubscriptionsStatusRoute = "/v1/subscriptions/status";
+    private const string SubscriptionsStatusRoute = "/subscriptions/status";
     internal const string MessagesInspect = "keyload_messages_inspect";
-    private const string MessagesInspectRoute = "/v1/queues/inspect";
+    private const string MessagesInspectRoute = "/queues/inspect";
     internal const string QueueTransferInspect = "keyload_queue_transfer_inspect";
-    private const string QueueTransferInspectRoute = "/v1/queues/transfers/inspect";
+    private const string QueueTransferInspectRoute = "/queues/transfers/inspect";
     internal const string QueueTransferReceipt = "keyload_queue_transfer_receipt";
-    private const string QueueTransferReceiptRoute = "/v1/queues/transfers/receipt";
+    private const string QueueTransferReceiptRoute = "/queues/transfers/receipt";
     internal const string ScheduleInspect = "keyload_schedule_inspect";
-    private const string ScheduleInspectRoute = "/v1/queues/schedules/inspect";
+    private const string ScheduleInspectRoute = "/queues/schedules/inspect";
     internal const string SagaInspect = "keyload_saga_inspect";
-    private const string SagaInspectRoute = "/v1/queues/sagas/inspect";
+    private const string SagaInspectRoute = "/queues/sagas/inspect";
     internal const string GraphTraverse = "keyload_graph_traverse";
-    private const string GraphTraverseRoute = "/v1/graph/traverse";
+    private const string GraphTraverseRoute = "/graph/traverse";
     internal const string GraphShortestPath = "keyload_graph_shortest_path";
     internal const string GraphIncomingEdges = "keyload_graph_incoming";
-    private const string GraphShortestPathRoute = "/v1/graph/shortest-path";
-    private const string GraphIncomingEdgesRoute = "/v1/graph/incoming";
+    private const string GraphShortestPathRoute = "/graph/shortest-path";
+    private const string GraphIncomingEdgesRoute = "/graph/incoming";
     internal const string QueryGraphPath = "keyload_query_graph_path";
-    private const string QueryGraphPathRoute = "/v1/query/graph-path";
+    private const string QueryGraphPathRoute = "/query/graph-path";
     internal const string SeriesRead = "keyload_series_read";
     internal const string SeriesLatest = "keyload_series_latest";
     internal const string SeriesAggregate = "keyload_series_aggregate";
@@ -42,75 +41,75 @@ internal static class McpCatalogExpectations
     internal const string SeriesRollup = "keyload_series_read_rollup";
     internal const string SeriesRetention = "keyload_series_retention";
     internal const string QueryExecute = "keyload_query_execute";
-    private const string QueryExecuteRoute = "/v1/query";
+    private const string QueryExecuteRoute = "/query";
     internal const string QuerySearch = "keyload_query_search";
-    private const string QuerySearchRoute = "/v1/query/search";
+    private const string QuerySearchRoute = "/query/search";
     internal const string QueryAst = "keyload_query_ast";
     internal const string QueryDistributedSearch = "keyload_query_distributed_search";
-    private const string QueryDistributedSearchRoute = "/v1/query/distributed-search";
+    private const string QueryDistributedSearchRoute = "/query/distributed-search";
     internal const string QueryPartitions = KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryMcpProtocol.Tool;
     private const string QueryPartitionsRoute = KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryMcpProtocol.Route;
-    private const string QueryAstRoute = "/v1/query/ast";
+    private const string QueryAstRoute = "/query/ast";
     internal const string QueryCapabilities = "keyload_query_capabilities";
-    private const string QueryCapabilitiesRoute = "/v1/query/capabilities";
+    private const string QueryCapabilitiesRoute = "/query/capabilities";
     internal const string ChangesRead = "keyload_changes_read";
-    private const string ChangesReadRoute = "/v1/changes/read";
+    private const string ChangesReadRoute = "/changes/read";
     internal const string QueryLiveStart = "keyload_query_live_start";
-    private const string QueryLiveStartRoute = "/v1/query/live/start";
+    private const string QueryLiveStartRoute = "/query/live/start";
     internal const string QueryLiveRead = "keyload_query_live_read";
-    private const string QueryLiveReadRoute = "/v1/query/live/read";
+    private const string QueryLiveReadRoute = "/query/live/read";
     internal const string OutboxStatus = "keyload_outbox_status";
-    private const string OutboxStatusRoute = "/v1/admin/outbox/status";
+    private const string OutboxStatusRoute = "/admin/outbox/status";
     internal const string ProjectionsRead = "keyload_projections_read";
-    private const string ProjectionsReadRoute = "/v1/admin/projections/read";
+    private const string ProjectionsReadRoute = "/admin/projections/read";
     internal const string SearchExecute = "keyload_search_execute";
-    private const string SearchExecuteRoute = "/v1/search";
+    private const string SearchExecuteRoute = "/search";
     internal const string SearchGraph = "keyload_search_graph";
-    private const string SearchGraphRoute = "/v1/search/graph";
+    private const string SearchGraphRoute = "/search/graph";
     internal const string AdminBackup = "keyload_admin_backup";
-    private const string AdminBackupRoute = "/v1/admin/backup";
+    private const string AdminBackupRoute = "/admin/backup";
     internal const string AdminAdmission = "keyload_admin_admission";
-    private const string AdminAdmissionRoute = "/v1/admin/admission";
+    private const string AdminAdmissionRoute = "/admin/admission";
     internal const string AdminStatus = "keyload_admin_status";
-    private const string AdminStatusRoute = "/v1/status";
+    private const string AdminStatusRoute = "/status";
     internal const string DocumentsCommit = "keyload_documents_commit";
-    private const string DocumentsCommitRoute = "/v1/commands";
+    private const string DocumentsCommitRoute = "/commands";
     internal const string MessagesReceive = "keyload_messages_receive";
-    private const string MessagesReceiveRoute = "/v1/queues/receive";
+    private const string MessagesReceiveRoute = "/queues/receive";
     internal const string MessagesComplete = "keyload_messages_complete";
-    private const string MessagesCompleteRoute = "/v1/queues/delivery";
+    private const string MessagesCompleteRoute = "/queues/delivery";
     internal const string InboxCommit = "keyload_inbox_commit";
-    private const string InboxCommitRoute = "/v1/inbox/commit";
+    private const string InboxCommitRoute = "/inbox/commit";
     internal const string MessagesProcess = "keyload_messages_process";
-    private const string MessagesProcessRoute = "/v1/queues/process";
+    private const string MessagesProcessRoute = "/queues/process";
     internal const string ResourcesConfigure = "keyload_resources_configure";
-    private const string ResourcesConfigureRoute = "/v1/admin/resources";
+    private const string ResourcesConfigureRoute = "/admin/resources";
     internal const string PrincipalsConfigure = "keyload_principals_configure";
-    private const string PrincipalsConfigureRoute = "/v1/admin/principals";
+    private const string PrincipalsConfigureRoute = "/admin/principals";
     internal const string CredentialsConfigure = "keyload_credentials_configure";
-    private const string CredentialsConfigureRoute = "/v1/admin/api-keys";
+    private const string CredentialsConfigureRoute = "/admin/api-keys";
     internal const string AdminDispatch = "keyload_admin_dispatch";
-    private const string AdminDispatchRoute = "/v1/admin/dispatch";
+    private const string AdminDispatchRoute = "/admin/dispatch";
     internal const string SubscriptionsConfigure = "keyload_subscriptions_configure";
-    private const string SubscriptionsConfigureRoute = "/v1/subscriptions/configure";
+    private const string SubscriptionsConfigureRoute = "/subscriptions/configure";
     internal const string SubscriptionsSeek = "keyload_subscriptions_seek";
-    private const string SubscriptionsSeekRoute = "/v1/subscriptions/seek";
+    private const string SubscriptionsSeekRoute = "/subscriptions/seek";
     internal const string SubscriptionsReceive = "keyload_subscriptions_receive";
-    private const string SubscriptionsReceiveRoute = "/v1/subscriptions/receive";
+    private const string SubscriptionsReceiveRoute = "/subscriptions/receive";
     internal const string SubscriptionsComplete = "keyload_subscriptions_complete";
-    private const string SubscriptionsCompleteRoute = "/v1/subscriptions/delivery";
+    private const string SubscriptionsCompleteRoute = "/subscriptions/delivery";
     internal const string SubscriptionsProcess = "keyload_subscriptions_process";
-    private const string SubscriptionsProcessRoute = "/v1/subscriptions/process";
+    private const string SubscriptionsProcessRoute = "/subscriptions/process";
     internal const string SubscriptionsPause = "keyload_subscriptions_pause";
-    private const string SubscriptionsPauseRoute = "/v1/subscriptions/pause";
+    private const string SubscriptionsPauseRoute = "/subscriptions/pause";
     internal const string ProjectionsConfigure = "keyload_projections_configure";
-    private const string ProjectionsConfigureRoute = "/v1/admin/projections/configure";
+    private const string ProjectionsConfigureRoute = "/admin/projections/configure";
     internal const string ProjectionsCommit = "keyload_projections_commit";
-    private const string ProjectionsCommitRoute = "/v1/admin/projections/commit";
+    private const string ProjectionsCommitRoute = "/admin/projections/commit";
     internal const string ProjectionsRelease = "keyload_projections_release";
-    private const string ProjectionsReleaseRoute = "/v1/admin/projections/release";
+    private const string ProjectionsReleaseRoute = "/admin/projections/release";
     internal const string OutboxPurge = "keyload_outbox_purge";
-    private const string OutboxPurgeRoute = "/v1/admin/outbox/purge";
+    private const string OutboxPurgeRoute = "/admin/outbox/purge";
 
     internal const int Count = 81;
     internal static ImmutableArray<(string Name, string Route, GrainReadKind? ReadKind, OperationKind? CommandKind)> Entries
@@ -118,9 +117,9 @@ internal static class McpCatalogExpectations
         get;
     } =
     [
-        ("keyload_analytics_read", "/v1/analytics/read", GrainReadKind.AnalyticsEvents, null),
-        ("keyload_analytics_aggregate", "/v1/analytics/aggregate", GrainReadKind.AnalyticsAggregate, null),
-        ("keyload_tables_drop", "/v1/admin/tables/drop", null, OperationKind.DropTable),
+        ("keyload_analytics_read", "/analytics/read", GrainReadKind.AnalyticsEvents, null),
+        ("keyload_analytics_aggregate", "/analytics/aggregate", GrainReadKind.AnalyticsAggregate, null),
+        ("keyload_tables_drop", "/admin/tables/drop", null, OperationKind.DropTable),
         .. KeyLoad.UnitTests.Features.Search.SearchMcpCatalogEntries.All,
         (DocumentsGet, DocumentsGetRoute, GrainReadKind.Document, null),
         (StreamsRead, StreamsReadRoute, GrainReadKind.Stream, null),
@@ -157,7 +156,7 @@ internal static class McpCatalogExpectations
         (AdminAdmission, AdminAdmissionRoute, GrainReadKind.Admission, null),
         (AdminStatus, AdminStatusRoute, GrainReadKind.NodeStatus, null),
         (DocumentsCommit, DocumentsCommitRoute, null, OperationKind.Batch),
-        ("keyload_messages_receive_across_lanes", "/v1/queues/receive-across-lanes", null, OperationKind.ReceiveAcrossLanes),
+        ("keyload_messages_receive_across_lanes", "/queues/receive-across-lanes", null, OperationKind.ReceiveAcrossLanes),
         (MessagesReceive, MessagesReceiveRoute, null, OperationKind.Receive),
         (MessagesComplete, MessagesCompleteRoute, null, OperationKind.Delivery),
         (InboxCommit, InboxCommitRoute, null, OperationKind.CommitInbox),
@@ -177,7 +176,6 @@ internal static class McpCatalogExpectations
         (ProjectionsCommit, ProjectionsCommitRoute, null, OperationKind.CommitProjectionBatch),
         (ProjectionsRelease, ProjectionsReleaseRoute, null, OperationKind.ReleaseProjectionConsumer),
         (OutboxPurge, OutboxPurgeRoute, null, OperationKind.PurgeOutbox),
-        .. BlobAgentCases.All().Select(item => (item.Name, item.Route, item.ReadKind, item.CommandKind)),
         .. McpAdminDashboardCatalogEntries.All,
         (SqlOperationProtocol.ToolName, SqlOperationProtocol.Route, null, null)
     ];

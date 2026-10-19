@@ -44,9 +44,9 @@ internal sealed class QueryResultByteLimitTests
     [Test]
     [Arguments(false)]
     [Arguments(true)]
-    public async Task NullOrLargerResultCeilingStillRejectsAboveNativeBatchLimitAndHealthyReadWorks(bool larger)
+    public async Task NullOrLargerResultCeilingStillRejectsAboveBatchLimitAndHealthyReadWorks(bool larger)
     {
-        using var database = new TestDatabase(new DatabaseLimits { MaxBatchBytes = QueryResultByteLimitFixture.NativeCap });
+        using var database = new TestDatabase(new DatabaseLimits { MaxBatchBytes = QueryResultByteLimitFixture.RuntimeCap });
         QueryResultByteLimitFixture.Seed(database, 5_000);
         var sources = QueryResultByteLimitFixture.Sources(database);
         var position = database.Store.Position;
@@ -74,13 +74,13 @@ internal sealed class QueryResultByteLimitTests
     [Test]
     [Arguments(0)]
     [Arguments(-1)]
-    public async Task InvalidResultCeilingDeniesOwnerAdmissionBeforeNativeReadAndHealthyOwnerStillWorks(int maximum)
+    public async Task InvalidResultCeilingDeniesOwnerAdmissionBeforeReadAndHealthyOwnerStillWorks(int maximum)
     {
         using var database = new TestDatabase();
         QueryResultByteLimitFixture.Seed(database, 32);
         var sources = QueryResultByteLimitFixture.Sources(database);
         var position = database.Store.Position;
-        var native = database.Store.GetReadDiagnostics();
+        var execution = database.Store.GetReadDiagnostics();
         InvalidOperationException? failure = null;
         try
         {
@@ -96,7 +96,7 @@ internal sealed class QueryResultByteLimitTests
         }
         await Assert.That(failure).IsNotNull();
         await Assert.That(failure!.Message).IsEqualTo(QueryExecutionOptions.ValidationMessage);
-        await Assert.That(database.Store.GetReadDiagnostics().RangeExaminedBytes).IsEqualTo(native.RangeExaminedBytes);
+        await Assert.That(database.Store.GetReadDiagnostics().RangeExaminedBytes).IsEqualTo(execution.RangeExaminedBytes);
         var healthy = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
         await VerifyHealthyAsync(database, healthy, false, false, sources, position);
     }

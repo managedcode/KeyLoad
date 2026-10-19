@@ -1,10 +1,10 @@
 using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.Testing;
-using KeyLoad.IntegrationTests.Features.ClusterReplication;
+using KeyLoad.IntegrationTests.Features.StorageReplication;
 
 namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
 
-/// <summary>Validates the exact native project silo model selected by the functional fixture.</summary>
+/// <summary>Validates the exact execution project silo model selected by the functional fixture.</summary>
 internal static class FunctionalGateProjectModel
 {
     internal static string[] ReadResourceNames(IDistributedApplicationTestingBuilder ownedBuilder, string[] nodeNames)
@@ -14,7 +14,7 @@ internal static class FunctionalGateProjectModel
             .Select(resource => resource.Name).ToArray();
         if (!names.Order(StringComparer.Ordinal).SequenceEqual(nodeNames.Order(StringComparer.Ordinal), StringComparer.Ordinal))
         {
-            throw new InvalidOperationException("The functional Aspire model must expose exactly its requested native silos.");
+            throw new InvalidOperationException("The functional Aspire model must expose exactly its requested execution silos.");
         }
         return names;
     }

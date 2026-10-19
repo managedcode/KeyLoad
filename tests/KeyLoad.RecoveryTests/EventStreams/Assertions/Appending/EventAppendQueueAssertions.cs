@@ -34,7 +34,7 @@ internal static class EventAppendQueueAssertions
         {
             expected.Add(EventAppendCrashContract.Healthy);
         }
-        var actual = ready.Records.Select(record => NativeSerialization.Deserialize<string>(record.Value.Span));
+        var actual = ready.Records.Select(record => OrleansSerialization.Deserialize<string>(record.Value.Span));
         await Assert.That(actual).IsEquivalentTo(expected, CollectionOrdering.Matching);
         var bodyBytes = expected.Sum(id => store.Read(view => view.ReadOwnedValue(KeySpace.Partition(
             BodySpace, EventAppendCrashContract.Partition, EventAppendCrashContract.Queue, id)))!.Length);

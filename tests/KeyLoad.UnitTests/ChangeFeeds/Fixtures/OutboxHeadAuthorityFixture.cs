@@ -17,7 +17,7 @@ internal static class OutboxHeadAuthorityFixture
     internal const string QuotaDetail = "The committed outbox quota is exhausted; advance consumers and reclaim retained entries.";
 
     internal static Command<DatabaseCommand> Operation<T>(DatabaseEngine owner, OperationKind kind, Guid id, T request)
-        => owner.CreateCommand(kind, id, Root, owner.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(request));
+        => owner.CreateCommand(kind, id, Root, owner.EvaluationClock.GetUtcNow(), OrleansSerialization.Serialize(request));
 
     internal static Command<DatabaseCommand> Write(DatabaseEngine owner, PartitionRef partition, string id)
     {

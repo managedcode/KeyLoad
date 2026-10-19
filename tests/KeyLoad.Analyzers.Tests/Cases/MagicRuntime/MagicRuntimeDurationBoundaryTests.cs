@@ -4,7 +4,7 @@ namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
 internal sealed class MagicRuntimeDurationBoundaryTests
 {
     [Test]
-    public async Task NativeFactoryDefaultArgumentsAreNotReportedAsSourceLiteralsAsync()
+    public async Task FactoryDefaultArgumentsAreNotReportedAsSourceLiteralsAsync()
     {
         const string source = """
             using System;
@@ -18,7 +18,7 @@ internal sealed class MagicRuntimeDurationBoundaryTests
     }
 
     [Test]
-    public async Task NonTimeoutNativeParametersAndUnrelatedNamesRequireNumericIdentitiesAsync()
+    public async Task NonTimeoutParametersAndUnrelatedNamesRequireNumericIdentitiesAsync()
     {
         const string source = """
             using System.Threading;
@@ -41,7 +41,7 @@ internal sealed class MagicRuntimeDurationBoundaryTests
     }
 
     [Test]
-    public async Task NativeDateTimeComponentsRequireGeneralNumericIdentitiesAsync()
+    public async Task DateTimeComponentsRequireGeneralNumericIdentitiesAsync()
     {
         const string source = """
             using System;

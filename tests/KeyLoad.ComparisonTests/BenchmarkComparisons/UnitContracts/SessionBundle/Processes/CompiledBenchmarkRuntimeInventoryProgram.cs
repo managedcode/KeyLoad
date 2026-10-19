@@ -18,8 +18,8 @@ internal static class CompiledBenchmarkRuntimeInventoryProgram
         try {
           await mkdir(path.join(version, 'dcp'), { recursive: true });
           await mkdir(path.join(version, 'dashboard'));
-          await writeFile(path.join(version, 'dcp/dcp'), 'native-control', { mode: 493, flag: 'wx' });
-          await writeFile(path.join(version, 'dashboard/Aspire.Dashboard'), 'native-control', { mode: 493, flag: 'wx' });
+          await writeFile(path.join(version, 'dcp/dcp'), 'execution-control', { mode: 493, flag: 'wx' });
+          await writeFile(path.join(version, 'dashboard/Aspire.Dashboard'), 'execution-control', { mode: 493, flag: 'wx' });
           let target = 'versions/13.6.1_controlled';
           if (variant === 'foreign-target') {
             await mkdir(path.join(root, 'foreign'));

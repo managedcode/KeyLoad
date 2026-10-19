@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
 using KeyLoad.Core;
-using D = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreNativeTestData;
-using O = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreNativeTestOperations;
+using D = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreTestData;
+using O = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreTestOperations;
 using P = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsBoundsData;
 
 namespace KeyLoad.UnitTests.Features.AnalyticsStore;
@@ -11,7 +11,7 @@ internal static class AnalyticsBoundsOwner
     internal static DatabaseEngine ReadEngine(TestDatabase fixture, DatabaseLimits limits)
     {
         var factory = TestDatabaseEngineFactory.Capture(UnitExecutionOptions.DatabaseLimits(limits),
-            UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), null, fixture.Database.EvaluationClock);
+            UnitExecutionOptions.RuntimeClaimsExecution(), null, fixture.Database.EvaluationClock);
         return factory(fixture.Store);
     }
 
@@ -36,7 +36,7 @@ internal static class AnalyticsBoundsOwner
         var id = Guid.NewGuid();
         var revisions = events.ToImmutableDictionary(row => row.Id, _ => expectedRevision, StringComparer.Ordinal);
         var operation = db.Database.CreateCommand(OperationKind.Batch, id, D.Root,
-            db.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(new CommandRequest(id, db.Partition,
+            db.Database.EvaluationClock.GetUtcNow(), OrleansSerialization.Serialize(new CommandRequest(id, db.Partition,
                 [new UpsertAnalyticsEvents(store, [.. events], revisions)])), work);
         var expected = new CommitReceipt(id, new(db.Store.Identity.Incarnation, db.Partition.AtomicPartitionId,
             checked(db.Database.LastApplied + 1)), [new(P.UpsertKind, store, events.OrderBy(row => row.Id, StringComparer.Ordinal).Last().Id, generation)], DurabilityProfile.ProcessDurable, 1);

@@ -1,8 +1,8 @@
 using System.Text.Json;
 using KeyLoad.Client;
 using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.ClusterReplication;
-using KeyLoad.IntegrationTests.Features.ClusterRouting;
+using KeyLoad.IntegrationTests.Features.StorageReplication;
+using KeyLoad.IntegrationTests.Features.OrleansExecution;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
 using KeyLoad.Server;
 using P = KeyLoad.IntegrationTests.Features.Search.GraphSearchPathPolicyClusterProtocol;
@@ -34,10 +34,10 @@ internal static class GraphSearchPathPolicyClusterCalls
 
     internal static async Task ReplayAsync(RequestCqrsClusterCallers root, GraphSearchPathPolicyClusterState state, CancellationToken token)
     {
-        await ObserveAsync(root, state, () => NativeSubmissionColdAssertions.ReplayAsync(root, state.Seed, state.SeedReceipt, token), token);
+        await ObserveAsync(root, state, () => SubmissionColdAssertions.ReplayAsync(root, state.Seed, state.SeedReceipt, token), token);
         if (state.Continuation is { } command && state.ContinuationReceipt is { } receipt)
         {
-            await ObserveAsync(root, state, () => NativeSubmissionColdAssertions.ReplayAsync(root, command, receipt, token), token);
+            await ObserveAsync(root, state, () => SubmissionColdAssertions.ReplayAsync(root, command, receipt, token), token);
         }
     }
 

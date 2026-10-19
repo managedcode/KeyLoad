@@ -29,7 +29,7 @@ internal static class QueueScheduledAuthorityImage
         var literal = new EnqueueMessage(flow.Lane.Queue, QueueLifecycleTestProtocol.Pending,
             QueueLifecycleTestProtocol.Payload, QueueLifecycleTestProtocol.Headers, NotBefore: state.Due);
         var body = new MessageBody(literal.MessageId, literal.PayloadJson, literal.HeadersJson, literal.OrderingKey, JsonData.Fingerprint(literal));
-        var bytes = NativeSerialization.Serialize(body).LongLength;
+        var bytes = OrleansSerialization.Serialize(body).LongLength;
         var counters = new QueueCounters(terminal ? 0 : 1, terminal ? 0 : bytes,
             leased ? 1 : 0, leased ? bytes : 0, healthy ? 2 : metadata.ReadySequence);
         List<string> expected = [];
@@ -95,5 +95,5 @@ internal static class QueueScheduledAuthorityImage
 
     private static string Row<T>(QueueScheduledAuthorityState state, string space, T value, params object[] rest)
         => Convert.ToHexString(KeySpace.Partition(space, state.Flow.Partition,
-            new object[] { state.Flow.Lane.Queue }.Concat(rest).ToArray())) + ":" + Convert.ToHexString(NativeSerialization.Serialize(value));
+            new object[] { state.Flow.Lane.Queue }.Concat(rest).ToArray())) + ":" + Convert.ToHexString(OrleansSerialization.Serialize(value));
 }

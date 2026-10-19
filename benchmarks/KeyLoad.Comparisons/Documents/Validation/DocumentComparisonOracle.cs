@@ -5,7 +5,7 @@ using System.Text.Json;
 
 namespace KeyLoad.Comparisons;
 
-/// <summary>Independent complete native ordered readback oracle, excluding verification from measured timings.</summary>
+/// <summary>Independent complete execution ordered readback oracle, excluding verification from measured timings.</summary>
 public static class DocumentComparisonOracle
 {
     /// <summary>Checks every actual record against the full independently generated final state.</summary>
@@ -30,7 +30,7 @@ public static class DocumentComparisonOracle
             {
                 throw new ComparisonFailureException(DocumentProtocolText.DocumentReadbackIdentityOrContentMismatch);
             }
-            // Native JSON objects may reorder whitespace/properties; compare exact complete semantic body before canonical digesting.
+            // Execution JSON objects may reorder whitespace/properties; compare exact complete semantic body before canonical digesting.
             Append(expectedHash, value.Id);
             Append(expectedHash, CanonicalBody(value.Json));
             Append(actualHash, row.Id);

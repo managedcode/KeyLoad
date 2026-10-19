@@ -5,7 +5,7 @@ namespace KeyLoad.Core.Features.DocumentStorage;
 /// <param name="After">The constructed final image, including a deletion tombstone.</param>
 
 [global::Orleans.GenerateSerializer]
-[global::Orleans.Alias(global::KeyLoad.Core.Features.InternalSerialization.CoreNativeAliases.DocumentMutationResult)]
+[global::Orleans.Alias(global::KeyLoad.Core.Features.InternalSerialization.CoreAliases.DocumentMutationResult)]
 internal readonly record struct DocumentMutationResult(
     [property: global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.DocumentMutationResultFields.Receipt)] MutationReceipt Receipt,
     [property: global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.DocumentMutationResultFields.After)] DocumentRecord After);

@@ -3,13 +3,13 @@ using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Features.ClientApi;
 
-/// <summary>Passively records bounded HTTP completion facts during native initialization only.</summary>
+/// <summary>Passively records bounded HTTP completion facts during execution initialization only.</summary>
 internal sealed class McpInitializeHttpObservation(HttpMessageHandler inner) : DelegatingHandler(inner)
 {
     private const int MaximumObservations = 8;
     private const int SchemaVersion = 1;
     private const int NoResponse = 0;
-    private const string Kind = "NativeMcpInitializeHttp";
+    private const string Kind = "McpInitializeHttp";
     private const string NoneCategory = "None";
     private const string CanceledCategory = "Canceled";
     private const string HttpCategory = "HttpRequest";
@@ -25,7 +25,7 @@ internal sealed class McpInitializeHttpObservation(HttpMessageHandler inner) : D
     private bool enabled = true;
     private bool saturated;
 
-    /// <summary>Stops recording before later native caller operations.</summary>
+    /// <summary>Stops recording before later execution caller operations.</summary>
     internal void Stop()
     {
         lock (gate)
@@ -34,12 +34,12 @@ internal sealed class McpInitializeHttpObservation(HttpMessageHandler inner) : D
         }
     }
 
-    /// <summary>Preserves the initiating native exception and bounded diagnostic write failures.</summary>
-    internal void WriteAndThrow(Exception original, string node, NativeMcpInitializeLogObservation nativeObservation)
+    /// <summary>Preserves the initiating execution exception and bounded diagnostic write failures.</summary>
+    internal void WriteAndThrow(Exception original, string node, McpInitializeLogObservation runtimeObservation)
     {
         var failures = new List<Exception> { original };
-        nativeObservation.Stop();
-        nativeObservation.Write(failures);
+        runtimeObservation.Stop();
+        runtimeObservation.Write(failures);
         lock (gate)
         {
             ServerFailureObserver.Observe(() => Console.Error.WriteLine(JsonSerializer.Serialize(new
@@ -54,7 +54,7 @@ internal sealed class McpInitializeHttpObservation(HttpMessageHandler inner) : D
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    /// <summary>Passes the same request, cancellation token and unconsumed response through the native handler.</summary>
+    /// <summary>Passes the same request, cancellation token and unconsumed response through the execution handler.</summary>
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
         var recording = Recording();

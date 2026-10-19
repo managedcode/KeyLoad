@@ -30,7 +30,7 @@ internal sealed class KeyLoadQueryFactoryTests
     private sealed record FactoryProjection(string Id, long Revision, string Name, int Priority);
 
     [Test]
-    public async Task AcQueryFactory001TypedBuilderExecutesAgainstNativeZoneTreeRows()
+    public async Task AcQueryFactory001TypedBuilderExecutesAgainstZoneTreeRows()
     {
         using var database = new TestDatabase();
         var readCut = Seed(database);
@@ -44,7 +44,7 @@ internal sealed class KeyLoadQueryFactoryTests
     }
 
     [Test]
-    public async Task AcQueryFactory002NullArgumentsPreserveNativeStoreAndHealthyQuery()
+    public async Task AcQueryFactory002NullArgumentsPreserveStoreAndHealthyQuery()
     {
         using var database = new TestDatabase();
         var readCut = Seed(database);

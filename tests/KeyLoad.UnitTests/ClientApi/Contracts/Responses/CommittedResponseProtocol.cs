@@ -14,7 +14,7 @@ internal static class CommittedResponseProtocol
     internal const string HealthyJson = "{\"value\":2}";
     internal const string ConflictDetail = "The command ID was already used with different content.";
     internal const string UnknownDetail = "The write response is unavailable. Retry the same command ID.";
-    internal const string UnexpectedRequest = "The original bounded network/native operation differs.";
+    internal const string UnexpectedRequest = "The original bounded network/execution operation differs.";
     internal const string MutationKind = "putDocument";
     internal const int InitialIndex = 0;
     internal const int ReplayIndex = 1;

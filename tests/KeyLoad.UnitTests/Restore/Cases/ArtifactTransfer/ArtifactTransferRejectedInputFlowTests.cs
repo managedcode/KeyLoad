@@ -8,7 +8,7 @@ internal sealed class ArtifactTransferRejectedInputFlowTests
     private const string PieceBytesParameterName = "pieceBytes";
 
     [Test]
-    public async Task AcBackup001RejectedArtifactInputsPreserveNativeStateThenHealthyRestoreSucceeds()
+    public async Task AcBackup001RejectedArtifactInputsPreserveStateThenHealthyRestoreSucceeds()
     {
         var token = TestContext.Current!.Execution.CancellationToken;
         var root = await CliBackupRestoreFixture.RunAsync(async fixture =>

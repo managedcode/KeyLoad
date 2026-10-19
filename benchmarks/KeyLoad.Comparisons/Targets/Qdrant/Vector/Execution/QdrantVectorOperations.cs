@@ -5,7 +5,7 @@ using Microsoft.Extensions.Options;
 namespace KeyLoad.Comparisons.Targets;
 
 internal sealed class QdrantVectorOperations(HttpClient client, HttpClient[] nodes, string collection,
-    string image, ComparisonTopology topology, IOptions<NativeComparisonExecutionOptions> executionOptions,
+    string image, ComparisonTopology topology, IOptions<ComparisonExecutionOptions> executionOptions,
     IOptions<ComparisonLifecycleOptions> lifecycleOptions, TimeProvider? provider = null) : IAsyncDisposable
 {
     private readonly TimeProvider timeProvider = provider ?? TimeProvider.System;
@@ -19,8 +19,8 @@ internal sealed class QdrantVectorOperations(HttpClient client, HttpClient[] nod
     } = new(QdrantVectorProtocol.TargetName, QdrantVectorProtocol.Unverified, QdrantVectorProtocol.Unverified, QdrantVectorProtocol.Unverified,
         QdrantVectorProtocol.InitialReadContract, QdrantVectorProtocol.Transport, QdrantVectorProtocol.Authentication, image);
     private string Path => QdrantVectorProtocol.CollectionPrefix + collection;
-    private string ReadSuffix => QdrantNativePolicy.QuerySuffix(topology);
-    private string WriteSuffix => QdrantVectorProtocol.WaitForApply + QdrantNativePolicy.SeedSuffix(topology);
+    private string ReadSuffix => QdrantPolicy.QuerySuffix(topology);
+    private string WriteSuffix => QdrantVectorProtocol.WaitForApply + QdrantPolicy.SeedSuffix(topology);
 
     internal async Task<int> IngestAsync(IAsyncEnumerable<VectorDocument> documents, CancellationToken token)
     {
@@ -54,8 +54,8 @@ internal sealed class QdrantVectorOperations(HttpClient client, HttpClient[] nod
         {
             Version = proof.Version,
             Cluster = proof.Evidence,
-            Topology = QdrantNativePolicy.TopologyLabel(topology),
-            WriteAcknowledgement = QdrantNativePolicy.WriteContract(topology)
+            Topology = QdrantPolicy.TopologyLabel(topology),
+            WriteAcknowledgement = QdrantPolicy.WriteContract(topology)
         };
         return loaded;
     }
@@ -150,10 +150,10 @@ internal sealed class QdrantVectorOperations(HttpClient client, HttpClient[] nod
 
     internal async Task<string> ExplainAsync(VectorQueryMode mode, CancellationToken token)
     {
-        using var native = await QdrantVectorHttp.SendAsync(client, HttpMethod.Get, Path, null, executionOptions, token: token, timeProvider: timeProvider);
+        using var execution = await QdrantVectorHttp.SendAsync(client, HttpMethod.Get, Path, null, executionOptions, token: token, timeProvider: timeProvider);
         return JsonSerializer.Serialize(new
         {
-            collection = native.RootElement.GetProperty(QdrantVectorProtocol.Result),
+            collection = execution.RootElement.GetProperty(QdrantVectorProtocol.Result),
             query = QdrantVectorQueries.Evidence(kind, mode),
             observation = QdrantVectorProtocol.PlanObservation
         });

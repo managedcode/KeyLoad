@@ -5,7 +5,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons.Targets;
 
-/// <summary>Compares exact vector search against a run-specific Qdrant collection and verifies its configured native peers.</summary>
+/// <summary>Compares exact vector search against a run-specific Qdrant collection and verifies its configured execution peers.</summary>
 public sealed class QdrantTarget : IComparisonTarget, IVectorComparisonTarget
 {
     private const string RunIdentityFormat = "N";
@@ -28,7 +28,7 @@ public sealed class QdrantTarget : IComparisonTarget, IVectorComparisonTarget
     private bool collectionCreationAttempted;
     private int topK;
     private QdrantVectorOperations? vectorOperations;
-    private readonly IOptions<NativeComparisonExecutionOptions> executionOptions;
+    private readonly IOptions<ComparisonExecutionOptions> executionOptions;
     private readonly IOptions<ComparisonLifecycleOptions> lifecycleOptions;
 
     private QdrantVectorOperations Vectors => vectorOperations ??= new(client, nodeClients, collection, image, topology,
@@ -47,9 +47,9 @@ public sealed class QdrantTarget : IComparisonTarget, IVectorComparisonTarget
         var receipt = await Vectors.BuildIndexAsync(profile, token);
         Profile = Profile with
         {
-            ReadContract = QdrantVectorProtocol.NativeReadPrefix + profile.IndexKind
+            ReadContract = QdrantVectorProtocol.ReadPrefix + profile.IndexKind
             + QdrantVectorProtocol.CosineReadDescription + profile.QueryMode + QdrantVectorProtocol.PredicateReadDescription
-            + QdrantNativePolicy.ReadContract(topology)
+            + QdrantPolicy.ReadContract(topology)
         };
         return receipt;
     }
@@ -65,25 +65,25 @@ public sealed class QdrantTarget : IComparisonTarget, IVectorComparisonTarget
     /// <param name="http">The collection and query client; the target disposes it.</param>
     /// <param name="runId">Guid-formatted run identifier used to isolate the collection.</param>
     /// <param name="image">Qdrant image reference recorded after replica verification.</param>
-    /// <param name="executionOptions">Centrally registered native execution limits.</param>
-    /// <param name="lifecycleOptions">Centrally registered native lifecycle policy.</param>
-    /// <param name="topology">The one- or three-node native topology to configure and verify.</param>
+    /// <param name="executionOptions">Centrally registered execution execution limits.</param>
+    /// <param name="lifecycleOptions">Centrally registered execution lifecycle policy.</param>
+    /// <param name="topology">The one- or three-node execution topology to configure and verify.</param>
     /// <param name="nodeClients">Optional clients for each Qdrant node used by replica verification; the target disposes distinct clients.</param>
     /// <param name="provider">Borrowed clock; defaults to the system provider.</param>
     public QdrantTarget(HttpClient http, string runId, string image,
-        IOptions<NativeComparisonExecutionOptions> executionOptions, IOptions<ComparisonLifecycleOptions> lifecycleOptions,
+        IOptions<ComparisonExecutionOptions> executionOptions, IOptions<ComparisonLifecycleOptions> lifecycleOptions,
         ComparisonTopology topology = ComparisonTopology.Standalone, HttpClient[]? nodeClients = null, TimeProvider? provider = null)
     {
         timeProvider = provider ?? TimeProvider.System;
         ArgumentNullException.ThrowIfNull(lifecycleOptions);
         lifecycleOptions.Value.Validate();
-        this.executionOptions = NativeComparisonExecutionOptions.Require(executionOptions);
+        this.executionOptions = ComparisonExecutionOptions.Require(executionOptions);
         this.lifecycleOptions = lifecycleOptions;
         client = http;
         this.image = image;
         this.topology = topology;
-        seedSuffix = QdrantNativePolicy.SeedSuffix(topology);
-        querySuffix = QdrantNativePolicy.QuerySuffix(topology);
+        seedSuffix = QdrantPolicy.SeedSuffix(topology);
+        querySuffix = QdrantPolicy.QuerySuffix(topology);
         collection = CollectionPrefix + Guid.Parse(runId).ToString(RunIdentityFormat);
         this.nodeClients = nodeClients ?? [http];
         ownedClients = this.nodeClients.Prepend(http).Distinct<HttpClient>(ReferenceEqualityComparer.Instance).ToArray();
@@ -94,7 +94,7 @@ public sealed class QdrantTarget : IComparisonTarget, IVectorComparisonTarget
         }
     }
 
-    /// <summary>Gets the server version, native topology, write acknowledgement, exact-read, transport, and replica evidence.</summary>
+    /// <summary>Gets the server version, execution topology, write acknowledgement, exact-read, transport, and replica evidence.</summary>
     public TargetProfile Profile
     {
         get; private set;
@@ -121,7 +121,7 @@ public sealed class QdrantTarget : IComparisonTarget, IVectorComparisonTarget
         QdrantReplicaProof.ValidateClients(nodeClients, topology);
         collectionCreationAttempted = true;
         using (var create = await client.PutAsJsonAsync(QdrantVectorProtocol.CollectionPrefix + collection,
-            QdrantNativePolicy.CreateCollection(dataset.Options.Dimensions, topology), cancellationToken))
+            QdrantPolicy.CreateCollection(dataset.Options.Dimensions, topology), cancellationToken))
         {
             create.EnsureSuccessStatusCode();
         }
@@ -133,9 +133,9 @@ public sealed class QdrantTarget : IComparisonTarget, IVectorComparisonTarget
         Profile = Profile with
         {
             Version = proof.Version,
-            Topology = QdrantNativePolicy.TopologyLabel(topology),
-            WriteAcknowledgement = QdrantNativePolicy.WriteContract(topology),
-            ReadContract = QdrantNativePolicy.ReadContract(topology),
+            Topology = QdrantPolicy.TopologyLabel(topology),
+            WriteAcknowledgement = QdrantPolicy.WriteContract(topology),
+            ReadContract = QdrantPolicy.ReadContract(topology),
             Image = image,
             Cluster = proof.Evidence
         };

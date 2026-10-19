@@ -41,11 +41,11 @@ internal sealed record McpPersistedIdentity(PrincipalRecord Principal, ApiKeyRec
         return await CreateAsync(administrator, partition, resourceName, capabilities, cancellationToken);
     }
 
-    /// <summary>Reuses native persisted identity creation with an already owned real administrator SDK.</summary>
+    /// <summary>Reuses execution persisted identity creation with an already owned real administrator SDK.</summary>
     /// <param name="administrator">The real public SDK authenticated as the persisted administrator.</param>
     /// <param name="partition">The actual identity tenant and scoped database.</param>
     /// <param name="resourceName">The resource receiving the initial persisted grant.</param>
-    /// <param name="capabilities">The initial native capability set.</param>
+    /// <param name="capabilities">The initial execution capability set.</param>
     /// <param name="cancellationToken">The original bounded caller lifetime.</param>
     /// <returns>The genuinely persisted identity and its private generated credential.</returns>
     internal static async Task<McpPersistedIdentity> CreateAsync(KeyLoadClient administrator, PartitionRef partition,

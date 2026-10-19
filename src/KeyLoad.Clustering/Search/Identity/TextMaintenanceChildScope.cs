@@ -2,7 +2,7 @@ namespace KeyLoad.Clustering;
 
 internal static class TextMaintenanceChildScope
 {
-    internal const string Purpose = "keyload-text-maintenance-child-v1";
+    internal const string Purpose = "keyload-text-maintenance-child";
 
     internal static bool IsSelected(GrainRequestEnvelope request)
         => request.Purpose == Purpose && (request.ReadKind is (GrainReadKind.TextMaintenance

@@ -2,6 +2,7 @@ using System.Security.Cryptography;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Authorization;
 using KeyLoad.Server;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 
 namespace KeyLoad.UnitTests.Features.StorageRecovery;
@@ -13,10 +14,10 @@ internal sealed class PartitionStoragePublicationBorrowFixture : IAsyncDisposabl
     private const string AdministratorPrefix = "root.";
     private const int SecretBytes = 32;
     private const int NoFailures = 0;
-    private const string UnknownOwner = "The original native publication owner has not joined; retain its root.";
+    private const string UnknownOwner = "The original execution publication owner has not joined; retain its root.";
     private readonly NodeOptions options;
     private PartitionHostApplicationOwner? owner;
-    private RequestCqrsHostedRuntimeFixture? native;
+    private RequestCqrsHostedRuntimeFixture? execution;
     private Task? closing;
     private bool retained;
 
@@ -46,15 +47,15 @@ internal sealed class PartitionStoragePublicationBorrowFixture : IAsyncDisposabl
         {
             await CloseOwnerAsync().ConfigureAwait(false);
         }
-        if (native is null)
+        if (execution is null)
         {
-            native = new();
-            await native.InitializeAsync(TestContext.Current!.Execution.CancellationToken).ConfigureAwait(false);
+            execution = new();
+            await execution.InitializeAsync(TestContext.Current!.Execution.CancellationToken).ConfigureAwait(false);
         }
         var runtime = ServerRuntimeTestOptions.Runtime(options);
         owner = new(runtime, new AuthorizationPolicy(), new CommandAdmissionGovernor(runtime.CommandAdmission),
-            TimeProvider.System, NullLogger<PartitionHost>.Instance, native.Grains);
-        await owner.OpenAsync().ConfigureAwait(false);
+            TimeProvider.System, NullLogger<PartitionHost>.Instance, execution.Grains);
+        await owner.OpenAsync(execution.Services.GetRequiredService<PartitionHostApplicationOwner>().Session.OwnerContext.Context).ConfigureAwait(false);
     }
 
     private async Task CloseOwnerAsync()
@@ -81,11 +82,11 @@ internal sealed class PartitionStoragePublicationBorrowFixture : IAsyncDisposabl
             {
                 await owner.DisposeAsync().ConfigureAwait(false);
             }
-            catch (Exception failure) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+            catch (Exception failure) when (KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(failure))
             {
                 failures.Add(failure);
             }
-            catch (Exception failure) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+            catch (Exception failure) when (!KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(failure))
             {
                 failures.Add(failure);
             }
@@ -94,7 +95,7 @@ internal sealed class PartitionStoragePublicationBorrowFixture : IAsyncDisposabl
                 failures.Add(new InvalidOperationException(UnknownOwner));
             }
         }
-        await CloseNativeAsync(failures).ConfigureAwait(false);
+        await RuntimeCloseAsync(failures).ConfigureAwait(false);
         if (failures.Count == NoFailures && !retained && Directory.Exists(DirectoryPath))
         {
             ServerFailureObserver.Observe(() => Directory.Delete(DirectoryPath, true), failures);
@@ -104,20 +105,20 @@ internal sealed class PartitionStoragePublicationBorrowFixture : IAsyncDisposabl
 
     private static string Secret() => Convert.ToBase64String(RandomNumberGenerator.GetBytes(SecretBytes));
 
-    private async Task CloseNativeAsync(List<Exception> failures)
+    private async Task RuntimeCloseAsync(List<Exception> failures)
     {
         try
         {
-            if (native is not null)
+            if (execution is not null)
             {
-                await native.DisposeAsync().ConfigureAwait(false);
+                await execution.DisposeAsync().ConfigureAwait(false);
             }
         }
-        catch (Exception failure) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        catch (Exception failure) when (KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(failure))
         {
             failures.Add(failure);
         }
-        catch (Exception failure) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        catch (Exception failure) when (!KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(failure))
         {
             failures.Add(failure);
         }
