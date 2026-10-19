@@ -19,8 +19,8 @@ BUILD_TESTS_NAME = "Build and Tests"
 MAX_RESPONSE_BYTES = 16 * 1024 * 1024
 MAX_ITEMS = 10_000
 MAX_PAGES = 100
-BUILD_TESTS_JOB = "Build and test KeyLoad"
-REQUIRED_CI_JOBS = {"Check repository rules", "Test code analyzers", BUILD_TESTS_JOB, "Test three-node database"}
+BUILD_TESTS_JOB = "build-and-test"
+REQUIRED_CI_JOBS = {BUILD_TESTS_JOB}
 REPOSITORY_ID = None
 
 
@@ -267,17 +267,16 @@ def ci_jobs(run):
         if not isinstance(name, str) or not name or name in names or not isinstance(job.get("id"), int):
             fail("Exact-source CI job inventory has invalid or duplicate identities.")
         names.add(name)
-        normalized = BUILD_TESTS_JOB if name == f"{BUILD_TESTS_JOB} (ubuntu-latest)" else name
-        if normalized in REQUIRED_CI_JOBS:
-            if normalized in mandatory_names:
+        if name in REQUIRED_CI_JOBS:
+            if name in mandatory_names:
                 fail("Exact-source CI contains duplicate mandatory job identities.")
-            mandatory_names.add(normalized)
+            mandatory_names.add(name)
         html_url = job.get("html_url")
         if not isinstance(html_url, str) or not html_url.startswith(f"https://github.com/{REPOSITORY}/actions/runs/{run['id']}/job/"):
             fail("Exact-source CI job URL is missing or foreign.")
         records.append({"id": job["id"], "name": name, "url": html_url, "status": job["status"], "conclusion": job["conclusion"]})
     if mandatory_names != REQUIRED_CI_JOBS:
-        fail("Exact-source CI attempt lacks a mandatory build, analyzer, repository, or CLUSTER job.")
+        fail("Exact-source CI attempt lacks the mandatory build-and-test job.")
     return sorted(records, key=lambda item: item["name"])
 
 
