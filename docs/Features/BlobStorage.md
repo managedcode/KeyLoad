@@ -64,10 +64,12 @@ independent local directories do not implement shared file storage.
 
 The old engine, raw-part contracts, HTTP/SDK/MCP routes, raw-part restore processing
 and exclusive serializers are removed. The rejected consumer IStorage adapter is
-also removed. module composition, metadata integration and its public
+also removed. Module composition, metadata integration and its public
 acceptance tests remain in progress; no new working KeyLoad file route is claimed.
-The owning Storage repository contains focused chunk-server repairs that
-must be published and verified before consumption.
+The combined chunk-server repair is published as ManagedCode.Storage 10.1.5. Its
+Linux release, all-package public-feed verification and consumer package source
+commits are verified. KeyLoad centrally references the published Server and
+FileSystem packages; this does not establish module integration or acceptance.
 
 The HTTP surface inherits ManagedCode.Storage.Server operations. Physical
 provider paths are private metadata and are not returned as public download

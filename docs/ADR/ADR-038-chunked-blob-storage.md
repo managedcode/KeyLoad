@@ -76,8 +76,9 @@ verification. Earlier raw-part tests do not qualify the replacement.
 
 The custom KeyLoad BlobStorage engine and its raw-part DTOs, HTTP/SDK/MCP
 transport, restore processing and exclusive serializers are removed. The rejected
-consumer IStorage adapter is removed as well. module composition with
+consumer IStorage adapter is removed as well. Module composition with
 KeyLoad metadata/authorization integration remains open and must be verified
-before exposing file access. server repairs are prepared in the owning
-Storage repository; no local package or temporary project reference substitutes
-for its published delivery.
+before exposing file access. The combined Storage repair is delivered in published
+10.1.5 packages, with its Linux release and public-feed source identities verified.
+KeyLoad uses those published packages; module composition and metadata
+authorization remain open.

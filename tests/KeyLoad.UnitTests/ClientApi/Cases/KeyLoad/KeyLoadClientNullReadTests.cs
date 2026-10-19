@@ -19,14 +19,11 @@ internal sealed class KeyLoadClientNullReadTests
     private const string ReceiptAbsence = "{\"receipt\":null}";
     private const string ScheduleAbsence = "{\"schedule\":null}";
     private const string SagaAbsence = "{\"saga\":null}";
-    private const string MetadataAbsence = "{\"metadata\":null}";
-    private const string UploadAbsence = "{\"upload\":null}";
     private static readonly string[] ExpectedNullablePaths =
     [
         "/documents/get", "/documents/get", "/queues/inspect",
         "/queues/transfers/inspect", "/queues/transfers/receipt",
-        "/queues/schedules/inspect", "/queues/sagas/inspect",
-        "/blobs/metadata", "/blobs/uploads/info"
+        "/queues/schedules/inspect", "/queues/sagas/inspect"
     ];
 
     [Test]
@@ -127,8 +124,6 @@ internal sealed class KeyLoadClientNullReadTests
         5 => ReceiptAbsence,
         6 => ScheduleAbsence,
         7 => SagaAbsence,
-        8 => MetadataAbsence,
-        9 => UploadAbsence,
         _ => throw new InvalidOperationException()
     };
 }

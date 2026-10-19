@@ -23,7 +23,6 @@ internal sealed class ResourcePairBindingState(TestDatabase source, ResourcePair
     internal const string Documents = "pair-documents";
     internal const string Events = "pair-events";
     internal const string Queue = "pair-jobs";
-    internal const string Blobs = "pair-blobs";
     internal const string Table = "pair-typed";
     internal const string Root = "root";
     internal const string SchedulerAdmin = "pair-scheduler-admin";
@@ -45,8 +44,6 @@ internal sealed class ResourcePairBindingState(TestDatabase source, ResourcePair
     internal const string SubmissionFailuresKey = "KeyLoad.ResourcePair.OriginalSubmissionFailures";
     internal const string Invalid = "The genuine resource pair whole-operation state is incomplete.";
     internal const string RowSeparator = ":";
-    internal const string BlobId = "pair-object";
-    internal const string ChainDomain = "blob-chain";
     internal const string SqlInsert = "INSERT INTO [pair-typed] (id,amount) VALUES ('typed-one',17)";
     internal const string SqlAccessPath = "bounded-full-scan";
     internal const string SqlSelect = "SELECT id,amount FROM [pair-typed]";
@@ -60,7 +57,6 @@ internal sealed class ResourcePairBindingState(TestDatabase source, ResourcePair
     internal const int Zero = 0;
     internal const int One = 1;
     internal const int TwoColdWaves = 2;
-    internal const int BlobBytes = 4;
     internal const int PersistedCopies = 1;
     internal const long InitialRevision = 0L;
     internal const long FirstRevision = 1L;
@@ -68,11 +64,6 @@ internal sealed class ResourcePairBindingState(TestDatabase source, ResourcePair
     internal const long NextPolicyEpoch = 2L;
     internal const char HexZero = '0';
     internal const char HexOne = '1';
-    private const byte FirstPayloadByte = 0x31;
-    private const byte SecondPayloadByte = 0x32;
-    private const byte ThirdPayloadByte = 0x33;
-    private const byte LastPayloadByte = 0x34;
-    internal static readonly byte[] Payload = [FirstPayloadByte, SecondPayloadByte, ThirdPayloadByte, LastPayloadByte];
     internal static readonly string[] Models = [Documents, Events, Queue];
     internal TestDatabase Source { get; } = source;
     internal ResourcePairBindingFault Fault { get; } = fault;
