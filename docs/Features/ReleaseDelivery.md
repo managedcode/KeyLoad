@@ -27,72 +27,28 @@ flowchart LR
     License --> Commercial[Separate authorization for hosted database services]
 ```
 
-Delivery uses four workflows (Build and Tests, Benchmarks, Website and Release)
-and a real dated database release. ADR-112 owns the separate Website boundary. The immutable
-version/tag is `v<major>.<minor>.<yyMMdd>.<daily-build>`; major/minor come from central
-source configuration, UTC defines the date, and the positive daily sequence is
-frozen to the authenticated release run. Example: `v0.1.261003.1` for the current
-0.1 base. NuGet supports four numeric components; CLR assembly/file components
-have smaller bounds, so use stable `M.m.0.0` / `M.m.0.N` and full informational
-version ([NuGet](https://learn.microsoft.com/en-us/nuget/concepts/package-versioning),
-[CLR metadata](https://learn.microsoft.com/en-us/dotnet/api/system.reflection.assemblyversionattribute)).
-NuGet packages retain the current source's development stage as `M.m.yyMMdd.N-dev`;
-tag, image and informational versions retain the requested four numeric components.
-This keeps the alpha-only Cartograph dependency visible and respects
-[NU5104](https://learn.microsoft.com/en-us/nuget/reference/errors-and-warnings/nu5104)
-without suppressing diagnostics or claiming stable packages.
+Delivery uses four independent workflows: Build and Tests, Benchmarks, Website
+and Release. Release is manual and only builds downloadable applications and
+Docker image archives through the .NET SDK.
 
-The owner subsequently deferred packaging because the product is unfinished.
-Release remains manual and prepared for a later explicit release/readiness request;
-current workflow implementation and CI checks do not authorize dispatch or publication.
+- REQ-REL-001 / AC-REL-001: `dotnet publish --self-contained true` builds the server
+  and CLI for `linux-x64`, `linux-arm64`, `win-x64`, `win-arm64`, `osx-x64` and
+  `osx-arm64`. Each runtime has one downloadable archive containing both applications,
+  their .NET runtime, configuration files and license notices.
+- REQ-REL-002 / AC-REL-002: SDK `PublishContainer` builds the server and benchmark
+  Linux x64 images into downloadable Docker archives. Images use the source SHA
+  as their tag and retain the centrally configured base image and non-root user.
+- REQ-REL-003 / AC-REL-003: Release uses read-only repository permissions. Source
+  package and assembly versions remain centrally configured. The workflow does
+  not create tags, GitHub Releases, registry publications or NuGet packages.
 
-Requirements/acceptance are REQ/AC-PIPE-001..004 and REQ/AC-REL-001..003.
-[ADR-064](../ADR/ADR-064-workflow-release-delivery.md) is required for release
-permissions, version identity, deployment artifacts and current-producer handoff.
+Canonical implementation: [release.yml](../../.github/workflows/release.yml),
+[Directory.Build.props](../../Directory.Build.props) and
+[Directory.Build.targets](../../Directory.Build.targets).
+[ADR-064](../ADR/ADR-064-workflow-release-delivery.md) records the workflow boundary.
+Build and Tests executes the solution build and tests. Benchmarks owns database
+measurements; Website owns site qualification and Pages publication.
 
-```mermaid
-flowchart LR
-    PR[PR or main source] --> CI[Build and Tests solution rules tests replicated cluster]
-    Main[Own main push or manual] --> Benchmarks[All load comparisons]
-    Benchmarks --> Aggregate[Complete authenticated JSON aggregate]
-    WebSource[Trusted main source or manual] --> Website[Separate Website workflow]
-    Aggregate --> Trigger[Dispatch Website only]
-    Trigger --> Website
-    Website --> Qualify[Applicable site tests browser coverage]
-    Qualify --> Deploy[Publish with ready metrics or without figures]
-    Manual[Manual own-main Release] --> Version[UTC dated reservation]
-    Version --> Build[Full build packages database images]
-    CI --> SourceGate[Successful exact-source Build and Tests proof]
-    Build --> Publish[Versioned GHCR assets tag GitHub Release]
-    SourceGate --> Publish
-```
-
-Canonical ownership:
-- shared infrastructure: `.github/workflows/build-and-tests.yml`, `benchmarks.yml`, `website.yml`, `release.yml`,
-  root Dockerfile, the existing comparison Dockerfile and `Directory.Build.props`;
-- tooling: `scripts/Features/ReleaseDelivery/` version/asset helpers and distribution;
-- focused contracts/tests: `tests/KeyLoad.UnitTests/ReleaseDelivery/`;
-- source/provenance handoff: existing BenchmarkComparisons production adapters and
-  their TUnit suites, preserving their existing canonical slice;
-- frontend/public API/storage/schema: N/A; this task changes delivery and consumes
-  existing measurements without changing database or webpage behavior.
-
-Build artifacts contain all actual packable projects, a self-contained Linux x64
-server distribution, persistent-container configuration for a replicated cluster
-(`KeyLoad:SiloCount` silos, `KeyLoad:ReplicaCount` copies; three is the default), and
-version-labelled images built from the existing owned Dockerfiles. Database credentials
-are runtime configuration and are never bundled into source/assets. Orleans
-clustering and node-local ZoneTree ownership are retained; distribution packaging does
-not establish production readiness, endurance or power-loss durability.
-
-Reservation is source/run/date bound and retained before expensive work. Its daily
-sequence is at least the actual daily release-run ordinal and exceeds already
-published dated tag counters. A retry validates and reuses its reservation; it
-cannot silently change version/source or steal another run's tag/assets. Publication
-checks successful latest exact-source CI and all owned hashes, then creates/reuses only
-its own immutable tag/release/image identities. Failed source tests, conflicts,
-missing credentials or incomplete artifacts fail without force or overwrite.
-
-No NuGet feed publication or version-bump commit is included. The requested NuGet
-files are real GitHub Release assets. Site publication authenticates the current
-benchmark run/attempt/SHA, independently preserves the required genuine archive, and retains every existing test/browser/coverage/freshness gate.
+A successful publish builds deployment files. Runtime behavior on each target
+platform, deployed cluster operation, endurance and power-loss durability require
+separate execution evidence. No cross-platform runtime qualification is claimed.
