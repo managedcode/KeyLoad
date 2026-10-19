@@ -1,0 +1,106 @@
+@inject AdminConsoleSession Session
+
+@if (View == "catalog")
+{
+    <FluentCard>
+        <h2>Resources by category</h2>
+        <p>Counts describe this bounded page.</p>
+        <div id="catalog-chips" class="actions">
+            @foreach (var kind in Session.Data.Catalog.Select(item => item.Kind).Distinct())
+            {
+                <FluentButton OnClick="@(() => filter = filter == kind ? null : kind)">@kind (@Session.Data.Catalog.Count(item => item.Kind == kind))</FluentButton>
+            }
+        </div>
+        <div id="catalog-table" class="table-scroll">
+            <FluentDataGrid Items="@(Session.Data.Catalog.Where(item => filter is null || item.Kind == filter).AsQueryable())" TGridItem="AdminResourceInfo">
+                <PropertyColumn Property="@(item => item.Name)" Title="Name" />
+                <PropertyColumn Property="@(item => item.Kind)" Title="Kind" />
+                <PropertyColumn Property="@(item => item.TransactionDomainId)" Title="Transaction domain" />
+                <PropertyColumn Property="@(item => item.SchemaVersion)" Title="Schema" />
+                <PropertyColumn Property="@(item => item.IndexCount)" Title="Indexes" />
+                <PropertyColumn Property="@(item => item.Paused)" Title="Paused" />
+            </FluentDataGrid>
+        </div>
+        <FluentButton Id="catalog-first" OnClick="@(() => Session.LoadResourcesAsync(View))">First page</FluentButton>
+        <FluentButton Id="catalog-next" Disabled="@(Session.Data.ResourceAfter is null)" OnClick="@(() => Session.LoadResourcesAsync(View, true))">Next page</FluentButton>
+    </FluentCard>
+}
+else
+{
+    <div class="browse">
+        <FluentCard>
+            <h2>Resources</h2>
+            <div id="resource-list" class="resource-list">
+                @foreach (var item in Session.Data.Resources)
+                {
+                    <FluentButton OnClick="@(() => SelectAsync(item))" aria-pressed="@(Session.Data.Selected == item)">@item.Name <small>@item.Kind · @item.TransactionDomainId</small></FluentButton>
+                }
+                @if (Session.Data.Resources.IsEmpty) { <p class="empty">No matching resources on this page.</p> }
+            </div>
+            <FluentButton Id="resources-first" OnClick="@(() => Session.LoadResourcesAsync(View))">First</FluentButton>
+            <FluentButton Id="resources-next" Disabled="@(Session.Data.ResourceAfter is null)" OnClick="@(() => Session.LoadResourcesAsync(View, true))">Next</FluentButton>
+        </FluentCard>
+        <FluentCard>
+            <h2 id="data-title">@(Session.Data.Selected?.Name ?? "Select a resource")</h2>
+            <p id="data-description">@Session.Data.Description</p>
+            <div id="data-table" class="table-scroll">
+                @if (Session.Data.Selected?.Kind == ResourceKind.Collection)
+                {
+                    <FluentDataGrid Items="Session.Data.Rows.AsQueryable()" TGridItem="QueryRow">
+                        <PropertyColumn Property="@(item => item.EntityId)" Title="Entity" />
+                        <PropertyColumn Property="@(item => item.Revision)" Title="Revision" />
+                        <TemplateColumn Title="Document" Context="row"><span class="preview">@row.Json</span></TemplateColumn>
+                        <TemplateColumn Title="Details" Context="row"><FluentButton OnClick="@(() => details = row.Json)">View JSON</FluentButton></TemplateColumn>
+                    </FluentDataGrid>
+                }
+                else if (Session.Data.Selected?.Kind == ResourceKind.WorkQueue)
+                {
+                    <FluentDataGrid Items="Session.Data.Messages.AsQueryable()" TGridItem="AdminQueueItem">
+                        <PropertyColumn Property="@(item => item.Id)" Title="Message" />
+                        <PropertyColumn Property="@(item => item.State)" Title="State" />
+                        <PropertyColumn Property="@(item => item.Attempts)" Title="Attempts" />
+                        <PropertyColumn Property="@(item => item.StateVersion)" Title="Version" />
+                        <PropertyColumn Property="@(item => item.NotBefore)" Title="Not before" />
+                        <PropertyColumn Property="@(item => item.LeaseUntil)" Title="Lease until" />
+                        <PropertyColumn Property="@(item => item.ExpiresAt)" Title="Expires" />
+                    </FluentDataGrid>
+                }
+                else if (Session.Data.Selected?.Kind == ResourceKind.BlobStore)
+                {
+                    <FluentDataGrid Items="Session.Data.Files.AsQueryable()" TGridItem="ManagedCode.Storage.Core.Models.BlobMetadata">
+                        <PropertyColumn Property="@(item => item.FullName)" Title="Name" />
+                        <PropertyColumn Property="@(item => item.Length)" Title="Bytes" />
+                        <PropertyColumn Property="@(item => item.MimeType)" Title="Content type" />
+                        <PropertyColumn Property="@(item => item.LastModified)" Title="Modified" />
+                    </FluentDataGrid>
+                }
+            </div>
+            <p id="data-empty" hidden="@(Session.Data.Rows.Length + Session.Data.Messages.Length + Session.Data.Files.Length > 0)">No records on this page. Select a resource to inspect its records.</p>
+            <p>Read cut: @Session.Data.Cut</p>
+            <FluentButton Id="data-first" Disabled="@(Session.Data.Selected is null)" OnClick="@(() => PageAsync(false))">First page</FluentButton>
+            <FluentButton Id="data-next" Disabled="@(Session.Data.After is null)" OnClick="@(() => PageAsync(true))">Next page</FluentButton>
+        </FluentCard>
+    </div>
+}
+@if (details is not null)
+{
+    <section id="details-dialog" role="dialog" aria-modal="true" aria-label="Document details" class="inspector" @onkeydown="CloseOnEscape">
+        <h2>Document details</h2><FluentButton Id="close-details" OnClick="@(() => details = null)" AutoFocus="true">Close</FluentButton>
+        <pre tabindex="0">@details</pre>
+    </section>
+}
+
+@code {
+    [Parameter, EditorRequired] public string View { get; set; } = string.Empty;
+    private string? details;
+    private ResourceKind? filter;
+    private string? priorView;
+    protected override void OnParametersSet()
+    {
+        if (priorView != View || !Session.Connected || Session.Data.Selected is null) { details = null; filter = null; }
+        priorView = View;
+    }
+    private Task SelectAsync(AdminResourceInfo item) { details = null; return Session.LoadDataAsync(item); }
+    private Task PageAsync(bool next) => Session.Data.Selected is { } item ? Session.LoadDataAsync(item, next) : Task.CompletedTask;
+    private void CloseOnEscape(KeyboardEventArgs args) { if (args.Key == "Escape") { details = null; } }
+}

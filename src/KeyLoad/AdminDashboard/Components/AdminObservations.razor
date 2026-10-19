@@ -1,0 +1,117 @@
+@if (View is "overview" or "performance")
+{
+    <div class="metrics" id="perf-stats">
+        @foreach (var metric in Metrics)
+        {
+            <FluentCard Class="stat"><h2>@metric.Label</h2><strong>@metric.Value</strong><p>@metric.Note</p></FluentCard>
+        }
+    </div>
+    <FluentCard>
+        <h2>Request activity</h2><p>Completed public API requests per second on this node. History is limited to 120 observations.</p>
+        <div id="activity-chart">
+            @if (Rates.Count > 0)
+            {
+                <svg viewBox="0 0 600 160" role="img" aria-label="Measured requests per second"><g class="series"><path d="@RatePath" fill="none" stroke="currentColor" stroke-width="2" /></g></svg>
+            }
+            else { <p>Two live observations unlock the chart.</p> }
+        </div>
+    </FluentCard>
+    <FluentCard>
+        <h2>Admission capacity</h2><p>Current occupancy, not throughput.</p>
+        <div id="perf-admission" class="metrics">
+            @foreach (var pair in Admission)
+            {
+                <div class="meter-track"><label>@pair.Label: @pair.Value / @pair.Limit</label><progress value="@pair.Value" max="@pair.Limit"></progress></div>
+            }
+        </div>
+    </FluentCard>
+}
+@if (View == "errors")
+{
+    <FluentCard>
+        <h2>Failed requests</h2><p>Newest first · route templates only · resets with the server process</p>
+        <div class="actions">
+            @foreach (var choice in ErrorFilters)
+            {
+                <FluentButton OnClick="@(() => errorFilter = choice)">@choice</FluentButton>
+            }
+        </div>
+        <div id="error-table" class="table-scroll">
+            <FluentDataGrid Items="FilteredErrors.AsQueryable()" TGridItem="AdminHttpFailure">
+                <PropertyColumn Property="@(item => item.At)" Title="Time" />
+                <PropertyColumn Property="@(item => item.Method)" Title="Method" />
+                <PropertyColumn Property="@(item => item.Route)" Title="Route template" />
+                <PropertyColumn Property="@(item => item.StatusCode)" Title="Status" />
+                <PropertyColumn Property="@(item => item.Aborted)" Title="Aborted" />
+                <PropertyColumn Property="@(item => item.ElapsedMilliseconds)" Title="Duration (ms)" />
+            </FluentDataGrid>
+        </div>
+        @if (!FilteredErrors.Any()) { <p>No failed requests observed for this filter.</p> }
+    </FluentCard>
+}
+@if (View is "cluster" or "overview")
+{
+    <FluentCard>
+        <h2>Orleans silos</h2><p>Active membership as reported by this node. Membership does not imply peer health.</p>
+        <div id="topology" class="metrics">
+            @foreach (var silo in Snapshot.ActiveSilos)
+            {
+                <div class="node @(silo == Snapshot.SiloName ? "self" : null)"><strong>@silo</strong><p>@(silo == Snapshot.SiloName ? "Executing node" : "Not observed from this node")</p></div>
+            }
+        </div>
+        <dl id="process-facts" class="facts">
+            <dt>Node identity</dt><dd>@Snapshot.Node.NodeId</dd><dt>Incarnation</dt><dd>@Snapshot.Node.Incarnation</dd>
+            <dt>Process</dt><dd>@Snapshot.Node.ProcessId</dd><dt>HTTP instance</dt><dd>@Snapshot.Http.ProcessInstance</dd>
+            <dt>Started</dt><dd>@Snapshot.Http.StartedAt</dd><dt>Configured silos / copies</dt><dd>@Snapshot.Node.SiloCount / @Snapshot.Node.ReplicaCount</dd>
+            <dt>Routing ready</dt><dd>@Snapshot.Node.RoutingReady</dd><dt>Durability</dt><dd>@Snapshot.Node.Durability</dd>
+            <dt>Applied position</dt><dd>@Snapshot.Node.Position</dd><dt>Read generation</dt><dd>@Snapshot.Node.ReadGeneration</dd>
+        </dl>
+    </FluentCard>
+}
+@if (View is "storage" or "overview")
+{
+    <FluentCard>
+        <h2>Physical storage on this node</h2><p>File lengths on the executing node, not unique logical database size.</p>
+        <p id="disk-state">@(Snapshot.Storage.Complete ? "Complete" : "Incomplete") · @Snapshot.Storage.Notice</p>
+        <dl class="facts"><dt>Canonical bytes</dt><dd>@Snapshot.Storage.CanonicalBytes</dd><dt>Backup bytes</dt><dd>@Snapshot.Storage.BackupBytes</dd><dt>Total bytes</dt><dd>@Snapshot.Storage.TotalBytes</dd><dt>Observed files</dt><dd>@Snapshot.Storage.ObservedFiles</dd></dl>
+        <div id="disk-table" class="table-scroll">
+            <FluentDataGrid Items="Snapshot.Storage.Files.OrderByDescending(item => item.Bytes).AsQueryable()" TGridItem="AdminFileInfo">
+                <PropertyColumn Property="@(item => item.Path)" Title="Relative path" />
+                <PropertyColumn Property="@(item => item.Category)" Title="Category" />
+                <PropertyColumn Property="@(item => item.Bytes)" Title="Bytes" />
+            </FluentDataGrid>
+        </div>
+    </FluentCard>
+}
+
+@code {
+    [Parameter, EditorRequired] public AdminNodeSnapshot Snapshot { get; set; } = default!;
+    /// <summary>Gets or sets the bounded measured request rates.</summary>
+    [Parameter, EditorRequired] public IReadOnlyList<double> Rates { get; set; } = [];
+    /// <summary>Gets or sets the last measured mean request duration.</summary>
+    [Parameter] public double? Latency { get; set; }
+    /// <summary>Gets or sets the last measured failed-request share.</summary>
+    [Parameter] public double? ErrorPercent { get; set; }
+    [Parameter, EditorRequired] public string View { get; set; } = string.Empty;
+    private static readonly string[] ErrorFilters = ["All", "4xx", "5xx", "Aborted"];
+    private string errorFilter = "All";
+    private IEnumerable<AdminHttpFailure> FilteredErrors => Snapshot.Http.RecentFailures.Where(item => errorFilter switch
+    {
+        "4xx" => item.StatusCode is >= 400 and < 500, "5xx" => item.StatusCode >= 500, "Aborted" => item.Aborted, _ => true
+    });
+    private (string Label, string Value, string Note)[] Metrics => [
+        ("Throughput", Number((Rates.Count == 0 ? null : (double?)Rates[^1])), "Completed requests / s"),
+        ("Average latency", Number(Latency), "Mean HTTP duration, ms"),
+        ("Error rate", Number(ErrorPercent), "Failed share, %"),
+        ("Canonical database", Snapshot.Storage.CanonicalBytes?.ToString(CultureInfo.InvariantCulture) ?? "Unavailable", "Physical bytes on this node"),
+        ("Lifetime requests", Snapshot.Http.CompletedRequests.ToString(CultureInfo.InvariantCulture), "Since server process start"),
+        ("Started", Snapshot.Http.StartedAt.ToString("u", CultureInfo.InvariantCulture), "Server process")];
+    private (string Label, long Value, long Limit)[] Admission => [
+        ("Commands", Snapshot.Admission.Usage.Commands, Snapshot.Admission.Limits.MaxCommands),
+        ("Retained bytes", Snapshot.Admission.Usage.RetainedBytes, Snapshot.Admission.Limits.MaxRetainedBytes),
+        ("Control commands", Snapshot.Admission.Usage.ControlCommands, Snapshot.Admission.Limits.ReservedControlCommands),
+        ("Control bytes", Snapshot.Admission.Usage.ControlRetainedBytes, Snapshot.Admission.Limits.ReservedControlBytes)];
+    private static string Number(double? value) => value?.ToString("N1", CultureInfo.InvariantCulture) ?? "Awaiting observations";
+    private string RatePath => string.Join(" ", Rates.Select((value, index) => FormattableString.Invariant(
+        $"{(index == 0 ? "M" : "L")}{index * 600.0 / Math.Max(1, Rates.Count - 1):F2},{150 - value * 140 / Math.Max(1, Rates.Max()):F2}")));
+}

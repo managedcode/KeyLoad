@@ -8,13 +8,15 @@
   </ItemGroup>
   <ItemGroup>
     <InternalsVisibleTo Include="KeyLoad.UnitTests" />
-    <InternalsVisibleTo Include="KeyLoad.ComparisonTests" />
+    <InternalsVisibleTo Include="KeyLoad.ComparisonHost" />
     <InternalsVisibleTo Include="KeyLoad.RecoveryTests" />
     <InternalsVisibleTo Include="KeyLoad.IntegrationTests" />
     <ProjectReference Include="../KeyLoad.Clustering/KeyLoad.Clustering.csproj" />
     <ProjectReference Include="../KeyLoad.Storage.ZoneTree/KeyLoad.Storage.ZoneTree.csproj" />
     <ProjectReference Include="../KeyLoad.Query/KeyLoad.Query.csproj" />
+    <ProjectReference Include="../KeyLoad.Client/KeyLoad.Client.csproj" />
     <PackageReference Include="ManagedCode.Orleans.RapidMembership" />
+    <PackageReference Include="Microsoft.FluentUI.AspNetCore.Components" />
     <PackageReference Include="Microsoft.Extensions.Http.Resilience" />
     <PackageReference Include="Microsoft.Extensions.ServiceDiscovery" />
     <PackageReference Include="OpenTelemetry.Extensions.Hosting" />

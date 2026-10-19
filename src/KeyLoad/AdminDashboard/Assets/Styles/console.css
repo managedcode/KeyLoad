@@ -1,0 +1,50 @@
+* { box-sizing: border-box; }
+body { margin: 0; color: #242424; background: #f5f5f5; font: 14px/1.5 system-ui, sans-serif; }
+.console-header { display: flex; align-items: center; gap: 20px; padding: 16px 24px; background: white; border-bottom: 1px solid #ddd; }
+.kl-brand { display: flex; align-items: center; gap: 10px; font-size: 22px; font-weight: 650; color: inherit; text-decoration: none; }
+.kl-brand small { font-size: 13px; font-weight: 400; }
+.actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.console-header .actions { margin-left: auto; }
+.console-layout { display: grid; grid-template-columns: 220px minmax(0, 1fr); min-height: calc(100vh - 130px); }
+nav { padding: 20px 12px; background: white; border-right: 1px solid #ddd; }
+nav h2 { font-size: 12px; text-transform: uppercase; margin: 20px 10px 8px; color: #616161; }
+nav button { display: block; width: 100%; margin: 3px 0; text-align: left; }
+main { min-width: 0; padding: 28px; }
+h1 { margin: 0 0 8px; font-size: 28px; } h2 { font-size: 18px; margin-top: 0; }
+#status-message { min-height: 24px; margin-bottom: 20px; }
+.fluent-card { display: block; margin-bottom: 20px; padding: 24px; min-width: 0; width: 100%; }
+.connect-card { max-width: 640px; margin: 40px auto; }
+#connect-form { display: grid; gap: 12px; max-width: 450px; }
+.scope { display: flex; flex-wrap: wrap; align-items: end; gap: 12px; }
+.scope label { display: grid; gap: 5px; flex: 1; min-width: 120px; }
+.metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 16px; }
+.stat strong { font-size: 24px; font-weight: 600; }
+.stat p, .node p { color: #616161; }
+.browse { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 20px; }
+.resource-list { display: grid; gap: 8px; padding-bottom: 20px; }
+.resource-list button { white-space: normal; overflow-wrap: anywhere; }
+.resource-list small { display: block; }
+.table-scroll { max-width: 100%; overflow: auto; margin: 16px 0; }
+.preview { display: block; max-width: 350px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.facts { display: grid; grid-template-columns: minmax(120px, 1fr) minmax(0, 2fr); gap: 8px; }
+dd { margin: 0; overflow-wrap: anywhere; }
+.node { padding: 16px; background: #f5f5f5; border-radius: 6px; overflow-wrap: anywhere; }
+.node.self { border: 2px solid #0f6cbd; }
+#activity-chart svg { width: 100%; max-height: 220px; color: #0f6cbd; }
+progress { display: block; width: 100%; }
+footer { display: flex; flex-wrap: wrap; gap: 16px; padding: 12px 24px; background: white; border-top: 1px solid #ddd; }
+#captured-at { overflow-wrap: anywhere; }
+#menu-toggle { display: none; }
+.inspector { position: fixed; inset: 0 0 0 auto; width: min(650px, 100%); z-index: 100; padding: 32px; background: white; box-shadow: 0 0 0 100vmax #0007; overflow: auto; }
+pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media (max-width: 900px) { .browse { grid-template-columns: 1fr; } main { padding: 16px; } .fluent-card { padding: 16px; } }
+@media (max-width: 700px) {
+  .console-header { padding: 12px; flex-wrap: wrap; gap: 12px; }
+  .console-layout { grid-template-columns: minmax(0, 1fr); }
+  #menu-toggle { display: inline-flex; margin-left: auto; }
+  .console-header .actions { width: 100%; margin: 0; }
+  nav { display: none; } nav.open { display: block; }
+  .scope { display: grid; } .metrics { grid-template-columns: minmax(0, 1fr); }
+  footer { padding: 12px; font-size: 12px; }
+}
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }

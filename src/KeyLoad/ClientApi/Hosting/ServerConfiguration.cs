@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using KeyLoad.Client;
 using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Authorization;
@@ -7,6 +8,7 @@ using KeyLoad.Server.Features.OrleansHosting;
 using KeyLoad.Storage.ZoneTree;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Options;
+using Microsoft.FluentUI.AspNetCore.Components;
 
 namespace KeyLoad.Server;
 
@@ -69,6 +71,14 @@ internal static class ServerConfiguration
             builder.Services.AddSingleton<ILifecycleParticipant<ISiloLifecycle>>(lifecycleParticipantFactory);
         }
         DatabaseAuthenticationComposition.Register(builder.Services);
+        builder.Services.AddRazorComponents().AddInteractiveServerComponents();
+        builder.Services.AddFluentUIComponents();
+        builder.Services.AddKeyLoadClientExecutionOptions(builder.Configuration);
+        builder.Services.AddOptions<AdminConsoleOptions>()
+            .Bind(builder.Configuration.GetSection(AdminConsoleOptions.SectionName))
+            .Validate(options => options.IsValid(), AdminConsoleOptions.Invalid).ValidateOnStart();
+        builder.Services.AddScoped<AdminConsoleConnection>();
+        builder.Services.AddScoped<AdminConsoleSession>();
         FileStorageComposition.Register(builder);
         McpServerComposition.Register(builder);
         configureServices?.Invoke(builder.Services, node.Value);
@@ -102,7 +112,9 @@ internal static class ServerConfiguration
         app.UseMiddleware<AdminHttpMetricsMiddleware>();
         app.Use(next => new ServerErrorMiddleware(next,
             app.Services.GetRequiredService<ILogger<ServerErrorMiddleware>>(), app.Services.GetRequiredService<TimeProvider>()).InvokeAsync);
+        AdminStaticAssets.UseHeaders(app);
         app.UseRouting();
+        app.UseAntiforgery();
         app.MapWhen(context => !DatabaseAuthenticationComposition.IsProtected(context.Request),
             branch =>
             {
@@ -118,6 +130,8 @@ internal static class ServerConfiguration
         DatabaseReadinessEndpoints.Map(app);
         OrleansHealthEndpoints.Map(app);
         AdminStaticAssets.Map(app);
+        app.MapStaticAssets().AllowAnonymous();
+        app.MapRazorComponents<AdminApp>().AddInteractiveServerRenderMode().AllowAnonymous();
         app.MapKeyLoadApi();
         app.MapControllers();
         app.MapMcp(McpFramingProtocol.Path);

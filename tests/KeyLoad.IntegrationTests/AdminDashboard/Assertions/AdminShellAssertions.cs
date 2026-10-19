@@ -14,8 +14,8 @@ internal static class AdminShellAssertions
     private const string NoSniff = "nosniff";
     private const string NoReferrer = "no-referrer";
     private const string HtmlType = "text/html";
-    private const string ContentPolicy = "default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self'; "
-        + "img-src 'self' data:; base-uri 'none'; frame-ancestors 'none'; form-action 'self'; object-src 'none'";
+    private const string ContentPolicy = "default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self'; "
+        + "img-src 'self' data:; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; object-src 'none'";
 
     internal static async Task VerifyAsync(ClusterFixture fixture, CancellationToken cancellationToken)
     {

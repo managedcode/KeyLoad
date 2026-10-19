@@ -1,0 +1,159 @@
+@page "/admin/"
+@attribute [Microsoft.AspNetCore.Authorization.AllowAnonymous]
+@implements IAsyncDisposable
+@inject AdminConsoleSession Session
+@inject IJSRuntime JS
+
+<div class="console" data-interactive="@interactive.ToString().ToLowerInvariant()">
+    <header class="console-header">
+        <a class="kl-brand" href="/admin/"><img src="/admin/logo.svg" width="32" height="32" alt="" />KeyLoad <small>Console</small></a>
+        <FluentButton Id="menu-toggle" OnClick="@(() => menuOpen = !menuOpen)" aria-expanded="@menuOpen.ToString().ToLowerInvariant()" aria-controls="console-nav">Navigation</FluentButton>
+        <div class="actions">
+            <FluentButton Id="refresh" OnClick="Session.RefreshAsync" Disabled="@(!Session.Connected || Session.Busy)">Refresh</FluentButton>
+            <FluentButton Id="disconnect" OnClick="DisconnectAsync" Disabled="@(!Session.Connected)">Disconnect</FluentButton>
+        </div>
+    </header>
+    <div class="console-layout">
+        <nav id="console-nav" class="@(menuOpen ? "open" : null)" aria-label="Console navigation">
+            @foreach (var group in Navigation.GroupBy(item => item.Group))
+            {
+                <h2>@group.Key</h2>
+                @foreach (var item in group)
+                {
+                    <FluentButton data-view="@item.Key" aria-current="@(view == item.Key ? "page" : null)"
+                                  Appearance="@(view == item.Key ? ButtonAppearance.Primary : ButtonAppearance.Subtle)"
+                                  OnClick="@(() => NavigateAsync(item.Key))">@item.Label</FluentButton>
+                }
+            }
+        </nav>
+        <main>
+            <h1 id="view-title">@Navigation.First(item => item.Key == view).Label</h1>
+            <p id="status-message" role="status" aria-live="polite">@Session.Status</p>
+            @if (!Session.Connected)
+            {
+                <FluentCard Class="connect-card">
+                    <h2>Connect to your cluster</h2>
+                    <p>Use a persisted administrator API key. It stays in this server circuit and is cleared on disconnect.</p>
+                    <form id="connect-form" @onsubmit="ConnectAsync" @onsubmit:preventDefault>
+                        <label for="api-key">Administrator API key</label>
+                        <FluentTextInput Id="api-key" TextInputType="TextInputType.Password" @bind-Value="credential" AutoComplete="off" Required="true" />
+                        <FluentButton Id="connect-button" Type="ButtonType.Submit" Appearance="ButtonAppearance.Primary" Disabled="@(!interactive)">Connect</FluentButton>
+                    </form>
+                </FluentCard>
+            }
+            else
+            {
+                @if (view is "catalog" or "collections" or "queues" or "files")
+                {
+                    <FluentCard>
+                        <form id="scope-form" class="scope" @onsubmit="LoadScopeAsync" @onsubmit:preventDefault>
+                            <label>Tenant<FluentTextInput Id="tenant-id" @bind-Value="Session.Tenant" Required="true" /></label>
+                            <label>Database<FluentTextInput Id="database-id" @bind-Value="Session.Database" Required="true" /></label>
+                            <label>Partition key<FluentTextInput Id="partition-key" @bind-Value="Session.PartitionKey" Required="true" /></label>
+                            <FluentButton Type="ButtonType.Submit" Appearance="ButtonAppearance.Primary">Load resources</FluentButton>
+                        </form>
+                    </FluentCard>
+                    <AdminDataView View="view" />
+                }
+                else
+                {
+                    <AdminObservations Snapshot="Session.Snapshot!" Rates="Session.Measurements.Rates" Latency="Session.Measurements.Latency" ErrorPercent="Session.Measurements.ErrorPercent" View="view" />
+                }
+            }
+        </main>
+    </div>
+    <footer>
+        <strong id="connection-state">@(Session.Connected ? "Connected" : "Disconnected")</strong>
+        <span id="session-node">@(Session.Snapshot?.SiloName ?? "Not connected")</span>
+        <span id="captured-at">@(Session.Snapshot?.CapturedAt.ToString("O", CultureInfo.InvariantCulture) ?? "No observation yet")</span>
+        <span>Read only</span>
+    </footer>
+</div>
+<FluentProviders />
+
+@code {
+    private static readonly (string Key, string Label, string Group)[] Navigation = [
+        ("overview", "Overview", "Monitoring"), ("performance", "Performance", "Monitoring"), ("errors", "Errors & logs", "Monitoring"),
+        ("catalog", "Catalog", "Data"), ("collections", "Collections", "Data"), ("queues", "Queues", "Data"), ("files", "Blob storage", "Data"),
+        ("cluster", "Nodes", "Infrastructure"), ("storage", "Disk usage", "Infrastructure")];
+    private string credential = string.Empty;
+    private string view = "overview";
+    private bool menuOpen;
+    private bool interactive;
+    private bool visible = true;
+    private readonly CancellationTokenSource lifetime = new();
+    private Task? polling;
+    private IJSObjectReference? module;
+    private DotNetObjectReference<AdminConsole>? reference;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) { return; }
+        module = await JS.InvokeAsync<IJSObjectReference>("import", "/admin/visibility.js");
+        reference = DotNetObjectReference.Create(this);
+        visible = await module.InvokeAsync<bool>("observe", reference);
+        interactive = true;
+        polling = PollAsync();
+        StateHasChanged();
+    }
+
+    private async Task ConnectAsync()
+    {
+        var key = credential;
+        credential = string.Empty;
+        if (!string.IsNullOrWhiteSpace(key)) { await Session.ConnectAsync(key); }
+    }
+
+    private async Task DisconnectAsync()
+    {
+        credential = string.Empty;
+        await Session.DisconnectAsync();
+    }
+
+    private async Task NavigateAsync(string next)
+    {
+        menuOpen = false;
+        view = next;
+        if (next is "catalog" or "collections" or "queues" or "files") { await LoadScopeAsync(); }
+    }
+
+    private Task LoadScopeAsync() => Session.LoadResourcesAsync(view);
+
+    [JSInvokable]
+    public async Task VisibilityChanged(bool value)
+    {
+        visible = value;
+        if (visible) { await Session.RefreshAsync(); }
+        StateHasChanged();
+    }
+
+    private async Task PollAsync()
+    {
+        using var timer = new PeriodicTimer(Session.PollInterval);
+        try
+        {
+            while (await timer.WaitForNextTickAsync(lifetime.Token))
+            {
+                await InvokeAsync(async () =>
+                {
+                    if (visible) { await Session.RefreshAsync(); StateHasChanged(); }
+                });
+            }
+        }
+        catch (OperationCanceledException) when (lifetime.IsCancellationRequested) { }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await lifetime.CancelAsync();
+        if (polling is not null) { await polling; }
+        try
+        {
+            if (module is not null) { await module.InvokeVoidAsync("stop"); await module.DisposeAsync(); }
+        }
+        catch (JSDisconnectedException) { }
+        reference?.Dispose();
+        lifetime.Dispose();
+        await Session.DisconnectAsync();
+    }
+}

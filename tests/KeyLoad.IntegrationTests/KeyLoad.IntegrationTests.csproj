@@ -18,5 +18,6 @@
     <PackageReference Include="ModelContextProtocol.Core" />
     <PackageReference Include="Npgsql" />
     <PackageReference Include="TUnit" />
+    <PackageReference Include="Microsoft.Playwright" />
   </ItemGroup>
 </Project>

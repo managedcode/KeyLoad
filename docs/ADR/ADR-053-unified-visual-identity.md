@@ -25,24 +25,9 @@ The two surfaces shared no logo, palette, typography or components, so KeyLoad r
   - No Material Design and no decorative colour blobs.
   - The logo is a graphite squircle with white replica blocks and chevron, plus one iridescent replica.
   - Data colours: violet, peach-ink, periwinkle, orchid, graphite, amber, grey, red (`--kl-c1..c8`). There is no green data colour; the deep green `--kl-good` is reserved for semantic success status.
-- **Surfaces.**
-  - Design: a complete re-layout, not a restyle. Both surfaces share editorial paper, oversized black display type, mono uppercase eyebrows, graphite instrument panels and the iridescent marker.
-  - The console is a "control room":
-    - a floating Liquid Glass command bar (the `<aside>`) with three segmented navigation clusters; at ≤1320 px it collapses to icons, with a label on the active view only;
-    - an editorial masthead with the view title and live controls;
-    - a pulse strip of four KPI numerals with sparklines;
-    - graphite instrument panels for request activity, throughput, console events and ZoneTree owners;
-    - a persistent bottom status bar, a split connect screen and a right-hand inspector sheet for JSON details.
-  - The site reads like a spec sheet. See the Site bullet below.
-- **CSP and fonts.** System fonts only, no external fonts or CDNs. The console CSP is unchanged. Dynamic geometry uses CSSOM only.
-- **Console information architecture.**
-  - **Monitoring:**
-    - Overview: KPI tiles with sparklines, a stacked request-activity chart, a storage donut, a node card, admission and recent errors.
-    - Performance: throughput, latency and error-rate charts, lifetime totals and admission meters.
-    - Errors & logs: the server failure log with status filters, plus session events.
-  - **Data:** Catalog with kind chips, Collections, Queues and Blob storage.
-  - **Infrastructure:** Nodes (owner figure and details) and Disk usage (category bar and largest files).
-  - Every original `data-view` and pinned browser hook is preserved.
+- **Console framework.** The administration UI uses Microsoft Fluent UI Blazor 5.0.1 with interactive server rendering. Fluent cards, inputs, buttons and data grids own the controls; the circuit owns navigation, authorized reads, bounded measurement history and cancellation. The shared logo and brand asset remain canonical for the public site.
+- **CSP and fonts.** System fonts only and same-origin framework assets. Fluent's dynamic component geometry requires inline styles; script execution remains restricted to same-origin assets. The small visibility bridge reports tab visibility without owning application state.
+- **Console information architecture.** Monitoring contains Overview, Performance and the filtered server failure log. Data contains the catalog, collections, queues and blob storage. Infrastructure contains actual Orleans membership and bounded physical file observations. Responsive navigation and independently scrollable Fluent data grids keep the page within the viewport.
 - **Real data only.** Charts plot at most 120 comparable session samples and reset on process change, failure or reconnect. The error log is a new bounded server observation: `AdminHttpSnapshot.RecentFailures`, at most 50 newest-first entries holding the route template, normalised method, status, aborted flag and duration. It never holds a raw path, query, payload or credential.
   - The node figure shows the executing node's own observation. Other nodes are labelled as not observed from the executing node.
 - **Site.** The landing is a new product page, not a restyle. Its numbered chapters (`01 — …`) run in this order:
@@ -61,7 +46,7 @@ The two surfaces shared no logo, palette, typography or components, so KeyLoad r
 
 ```mermaid
 flowchart LR
-    Brand[brand.css and logo.svg canonical in console Assets] --> Console[admin console embedded whitelist]
+    Brand[brand.css and logo.svg canonical in console Assets] --> Console[Blazor Server and Fluent UI console]
     Brand -->|byte identical mirror| Site[site brand.css and favicon.svg]
     Drift[SiteTests AC_VI_001 parity] --> Site
     Drift --> Brand
@@ -126,13 +111,13 @@ never bypassed. This additive contract remains Accepted until required gates pas
 
 1. **Brand:** tokens and logo, mirrored to the site, land before the UI packets.
 2. **Metrics:** ring buffer and middleware in `src/KeyLoad/AdminDashboard/AdminHttp*.cs`, with unit tests `AdminHttpMetricsTests` and `AdminHttpMetricsMiddlewareTests` written first; the DTO is frozen in Abstractions.
-3. **Console:** `Assets/*` and the `AdminStaticAssets` whitelist, plus the node observation fields and observer, with the `AdminDashboardClusterTests` assertions.
+3. **Console:** `Components/`, circuit-owned `Execution/`, the SDK asset manifest and the `AdminStaticAssets` whitelist, plus the node observation fields and observer, with the `AdminDashboardClusterTests` assertions.
 4. **Site:** site HTML/CSS/poster, colour constants in `measurements.mjs` and `scene-geometry.mjs`, `BUILD.assets` and SiteTests parity.
 5. **Docs:** feature docs, this ADR, the Architecture map and exact-SHA CI evidence.
 
 Dependencies:
 - Contract additions are additive init properties with defaults. The SDK and the official MCP output pick them up from the DTO type.
-- No schema, storage, routing or package change.
+- No schema, storage or routing change. The console uses the owner-approved Fluent UI package and native Playwright browser tests.
 
 Rollout, rollback and verification:
 - **Rollout:** a single release. The console and the site deploy independently.
@@ -140,7 +125,7 @@ Rollout, rollback and verification:
 - **Verification:**
   - build-and-tests.yml unit tests: metrics ring and middleware.
   - Replicated cluster: failure-log route template and node observation through the real SDK and official MCP.
-  - Real Chrome console flow: existing hooks plus new views.
+  - Playwright console flow: native locators, Fluent inputs and grids, all views, authorization failure, reconnect, disconnect and responsive screenshots.
   - website.yml SiteTests: unchanged hooks, budgets and the parity test.
   - Subjective beauty is judged from desktop/mobile screenshots of a real replicated cluster (manual exception). It never replaces a functional gate.
 

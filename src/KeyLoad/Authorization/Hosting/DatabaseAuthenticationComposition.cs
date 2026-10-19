@@ -20,8 +20,20 @@ internal static class DatabaseAuthenticationComposition
 
     internal static bool IsProtected(HttpRequest request)
         => !AdminStaticAssets.IsPublicRequest(request)
+            && !IsPublicFrameworkRequest(request)
             && !request.Path.StartsWithSegments(ServerProtocol.HealthPrefix, StringComparison.OrdinalIgnoreCase)
             && !request.Path.StartsWithSegments(ServerProtocol.InternalPrefix, StringComparison.OrdinalIgnoreCase);
+
+    private const string CircuitPath = "/_blazor";
+    private const string FrameworkPath = "/_framework";
+    private const string FluentAssetPath = "/_content/Microsoft.FluentUI.AspNetCore.Components";
+
+    private static bool IsPublicFrameworkRequest(HttpRequest request) =>
+        request.HttpContext.GetEndpoint()?.Metadata.GetMetadata<IAllowAnonymous>() is not null
+        && (request.Path.StartsWithSegments(CircuitPath, StringComparison.Ordinal)
+            || (HttpMethods.IsGet(request.Method) || HttpMethods.IsHead(request.Method))
+                && (request.Path.StartsWithSegments(FrameworkPath, StringComparison.Ordinal)
+                    || request.Path.StartsWithSegments(FluentAssetPath, StringComparison.Ordinal)));
 
     internal static async Task<PrincipalRecord> AuthenticateAsync(HttpContext context)
     {

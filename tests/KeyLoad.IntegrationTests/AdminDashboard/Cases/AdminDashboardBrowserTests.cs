@@ -1,6 +1,6 @@
 using Aspire.Hosting.Testing;
 using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.Server;
+using Microsoft.Playwright;
 
 namespace KeyLoad.IntegrationTests.Features.AdminDashboard;
 
@@ -8,56 +8,104 @@ namespace KeyLoad.IntegrationTests.Features.AdminDashboard;
 [NotInParallel]
 internal sealed class AdminDashboardBrowserTests(ClusterFixture fixture)
 {
-    private const string AdminPath = "/admin";
-    private const string Ready = "document.readyState==='complete'&&!!document.getElementById('connect-form')";
-    private const string SelectCollections = "document.querySelector('button[data-view=collections]').click();true";
-    private const string ResourcesLoaded = "document.querySelector('#resource-list')?.textContent.includes('dashboard-documents')===true";
-    private const string SelectResource = "(()=>{const button=[...document.querySelectorAll('#resource-list button')].find(item=>item.textContent.includes('dashboard-documents'));button.click();return true;})()";
-    private const string RowsLoaded = "document.querySelector('#data-title')?.textContent==='dashboard-documents'"
-        + "&&document.querySelectorAll('#data-table tbody tr').length===1"
-        + "&&document.querySelector('#data-table')?.textContent.includes('document-1')===true";
-    private const string InjectionAbsent = "window.dashboardInjection!==true";
-    private const string FocusVisible = "(()=>{const refresh=document.getElementById('refresh');refresh.focus();return document.activeElement===refresh;})()";
+    private const string AdminPath = "/admin/";
+    private const string InvalidCredential = "root.invalid-untrusted-credential-long-enough";
+    private const string EmptyTenantPrefix = "dashboard-empty-";
+    private const string EmptyDatabase = "empty-database";
+    private const string GuidFormat = "N";
+    private const string Interactive = ".console[data-interactive=true]";
+    private const string DataTable = "#data-table";
+    private const string Status = "#status-message";
+    private const string Tenant = "#tenant-id";
+    private const string Database = "#database-id";
+    private const string ScopeSubmit = "#scope-form button[type=submit]";
+    private const string InjectionAbsent = "window.dashboardInjection !== true";
+    private const string CleanStorage = "localStorage.length === 0 && sessionStorage.length === 0";
+    private const string Collections = "collections";
+    private const string Catalog = "catalog";
+    private const string Queues = "queues";
+    private const string DocumentText = "<script>";
 
     [Test]
-    public async Task AcAd006RealChromeBrowsesSeededClusterDataAndDisconnectClearsSession()
+    public async Task AcAd006PlaywrightBrowsesServerRenderedFluentConsoleAndClearsSession()
     {
-        using var deadlineTimeout = new CancellationTokenSource(AdminBrowserProtocol.Deadline, TimeProvider.System);
-        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current!.Execution.CancellationToken, deadlineTimeout.Token);
+        using var timeout = new CancellationTokenSource(AdminBrowserProtocol.Deadline, TimeProvider.System);
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current!.Execution.CancellationToken, timeout.Token);
         var scenario = await AdminDashboardScenario.CreateAsync(fixture, deadline.Token);
         using var http = fixture.App.CreateHttpClient(McpCallerProtocol.Node1, McpCallerProtocol.HttpEndpoint);
-        var url = new Uri(http.BaseAddress!, AdminPath).AbsoluteUri;
-        var failures = new List<Exception>();
-        await ServerFailureObserver.ObserveAsync(async () =>
+        await using var browser = await AdminBrowserFixture.StartAsync(deadline.Token);
+        var page = browser.Page;
+        var errors = new List<string>();
+        page.PageError += (_, error) => errors.Add(error);
+        await page.GotoAsync(new Uri(http.BaseAddress!, AdminPath).AbsoluteUri);
+        await page.Locator(Interactive).WaitForAsync();
+        await ConnectAsync(page, fixture.AdminKey);
+        await SelectAsync(page, Collections);
+        await page.Locator(Tenant).FillAsync(scenario.Partition.TenantId);
+        await page.Locator(Database).FillAsync(scenario.Partition.DatabaseId);
+        await page.Locator("#partition-key").FillAsync(scenario.Partition.PartitionKey);
+        await page.Locator(ScopeSubmit).ClickAsync();
+        await page.GetByRole(AriaRole.Button, new() { Name = AdminDashboardScenario.Collection }).ClickAsync();
+        await Assertions.Expect(page.Locator(DataTable)).ToContainTextAsync(AdminDashboardScenario.DocumentId);
+        await page.GetByRole(AriaRole.Button, new() { Name = "View JSON" }).ClickAsync();
+        await Assertions.Expect(page.Locator("#details-dialog pre")).ToContainTextAsync(DocumentText);
+        await page.Locator("#close-details").ClickAsync();
+        await Assert.That(await page.EvaluateAsync<bool>(InjectionAbsent)).IsTrue();
+        await VerifyEmptyScopeAsync(page, scenario);
+        await VerifyViewsAsync(page);
+        await AdminPlaywrightAssertions.ViewportsAsync(page);
+        await page.Locator("#disconnect").ClickAsync();
+        await Assertions.Expect(page.Locator("#connection-state")).ToHaveTextAsync("Disconnected");
+        await Assert.That(await page.EvaluateAsync<bool>(CleanStorage)).IsTrue();
+        await Assertions.Expect(page.Locator("body")).Not.ToContainTextAsync(AdminDashboardScenario.DocumentId);
+        await Assertions.Expect(page.Locator("body")).Not.ToContainTextAsync(fixture.AdminKey);
+        await page.Locator("#api-key").FillAsync(InvalidCredential);
+        await page.Locator("#connect-button").ClickAsync();
+        await Assertions.Expect(page.Locator(Status)).ToContainTextAsync("Administrator authorization failed");
+        await ConnectAsync(page, fixture.AdminKey);
+        await page.Locator("#disconnect").ClickAsync();
+        await Assert.That(errors.Count).IsEqualTo(0);
+    }
+
+    private static async Task ConnectAsync(IPage page, string key)
+    {
+        await page.Locator("#api-key").FillAsync(key);
+        await page.Locator("#connect-button").ClickAsync();
+        await Assertions.Expect(page.Locator("#connection-state")).ToHaveTextAsync("Connected");
+    }
+
+    private static Task SelectAsync(IPage page, string view) => page.Locator("[data-view=" + view + "]").ClickAsync();
+
+    private static async Task VerifyEmptyScopeAsync(IPage page, AdminDashboardScenario scenario)
+    {
+        await page.Locator(Tenant).FillAsync(EmptyTenantPrefix + Guid.NewGuid().ToString(GuidFormat));
+        await page.Locator(Database).FillAsync(EmptyDatabase);
+        await page.Locator(ScopeSubmit).ClickAsync();
+        await Assertions.Expect(page.Locator("#resource-list")).ToContainTextAsync("No matching resources on this page.");
+        await Assertions.Expect(page.Locator(DataTable)).Not.ToContainTextAsync(AdminDashboardScenario.DocumentId);
+        await page.Locator(Tenant).FillAsync(scenario.Partition.TenantId);
+        await page.Locator(Database).FillAsync(scenario.Partition.DatabaseId);
+        await page.Locator(ScopeSubmit).ClickAsync();
+        await Assertions.Expect(page.Locator("#resource-list")).ToContainTextAsync(AdminDashboardScenario.Collection);
+    }
+
+    private static async Task VerifyViewsAsync(IPage page)
+    {
+        await SelectAsync(page, Queues);
+        await page.GetByRole(AriaRole.Button, new() { Name = AdminDashboardScenario.Queue }).ClickAsync();
+        await Assertions.Expect(page.Locator(DataTable)).ToContainTextAsync(AdminDashboardScenario.MessageId);
+        await SelectAsync(page, Catalog);
+        await Assertions.Expect(page.Locator("#catalog-table")).ToContainTextAsync(AdminDashboardScenario.Collection);
+        foreach (var view in new[] { "files", "cluster", "storage", "performance", "errors", "overview" })
         {
-            await using var browser = await AdminBrowserProcess.StartAsync(deadline.Token);
-            await ServerFailureObserver.ObserveAsync(async () =>
-            {
-                await AdminBrowserLifecycleAssertions.BeginNetworkAsync(browser.Cdp, deadline.Token);
-                await browser.Cdp.CommandAsync(AdminBrowserProtocol.PageNavigate, new
-                {
-                    url
-                }, deadline.Token);
-                await browser.Cdp.WaitAsync(Ready, deadline.Token);
-                await AdminBrowserAssertions.ConnectAsync(browser.Cdp, fixture, scenario, deadline.Token);
-                await AdminBrowserLifecycleAssertions.VerifyRefreshAndMotionAsync(browser.Cdp, deadline.Token);
-                await AdminBrowserLifecycleAssertions.VerifyBackgroundSuspensionAsync(browser.Cdp, deadline.Token);
-                await browser.Cdp.EvaluateAsync(SelectCollections, deadline.Token);
-                await browser.Cdp.WaitAsync(ResourcesLoaded, deadline.Token);
-                await browser.Cdp.EvaluateAsync(SelectResource, deadline.Token);
-                await browser.Cdp.WaitAsync(RowsLoaded, deadline.Token);
-                await Assert.That((await browser.Cdp.EvaluateAsync(InjectionAbsent, deadline.Token)).GetBoolean()).IsTrue();
-                await Assert.That((await browser.Cdp.EvaluateAsync(FocusVisible, deadline.Token)).GetBoolean()).IsTrue();
-                await AdminBrowserScopeAssertions.VerifyEmptyScopeAndReconnectAsync(browser.Cdp, fixture, scenario, deadline.Token);
-                await AdminBrowserAssertions.DetailsAndNavigationAsync(browser.Cdp, deadline.Token);
-                await AdminBrowserViewAssertions.VerifyViewsAsync(browser.Cdp, deadline.Token);
-                await AdminBrowserAssertions.CheckViewportAsync(browser.Cdp, AdminBrowserProtocol.DesktopWidth, "desktop", deadline.Token);
-                await AdminBrowserAssertions.CheckViewportAsync(browser.Cdp, AdminBrowserProtocol.MobileWidth, "mobile", deadline.Token);
-                await AdminBrowserAssertions.DisconnectAsync(browser.Cdp, fixture, deadline.Token);
-                await AdminBrowserAssertions.RejectThenReconnectAsync(browser.Cdp, fixture, scenario, deadline.Token);
-            }, failures);
-            browser.PreserveEvidence = failures.Count != 0;
-        }, failures);
-        ServerFailureObserver.ThrowIfAny(failures);
+            await SelectAsync(page, view);
+            await Assertions.Expect(page.Locator("[data-view=" + view + "]")).ToHaveAttributeAsync("aria-current", "page");
+        }
+        await Assertions.Expect(page.Locator("#topology .node")).ToHaveCountAsync(3);
+        await Assertions.Expect(page.Locator("#topology .self")).ToHaveCountAsync(1);
+        await page.Locator("#refresh").FocusAsync();
+        await Assertions.Expect(page.Locator("#refresh")).ToBeFocusedAsync();
+        await page.EmulateMediaAsync(new() { ReducedMotion = ReducedMotion.Reduce });
+        await Assert.That(await page.Locator("#refresh").EvaluateAsync<bool>("element => getComputedStyle(element).transitionDuration === '0s'")).IsTrue();
     }
 }
