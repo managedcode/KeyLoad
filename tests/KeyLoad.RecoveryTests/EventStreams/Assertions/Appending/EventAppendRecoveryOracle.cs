@@ -20,6 +20,8 @@ internal static class EventAppendRecoveryOracle
             EventAppendCrashContract.SeedPositionFile, cancellationToken);
         var seedTail = await CommandIdempotencyCrashData.ReadEvidenceAsync<long>(root,
             EventAppendCrashContract.SeedTailFile, cancellationToken);
+        var target = await CommandIdempotencyCrashData.ReadEvidenceAsync<CommitToken>(root,
+            EventAppendCrashContract.TargetFile, cancellationToken);
         using var store = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution(),
             RecoveryExecutionOptions.PointCacheExecution());
         var database = Open(store);
@@ -33,15 +35,15 @@ internal static class EventAppendRecoveryOracle
         await EventAppendStateAssertions.VerifyAsync(database, new DateTimeOffset(original.Timestamp), seedTail, committed, healthy: false);
         if (recovered is not null)
         {
-            await EventAppendReceiptAssertions.VerifyAsync(store, recovered.Value.Get<CommitReceipt>(), seedPosition + PositionStep);
+            await EventAppendReceiptAssertions.VerifyAsync(store, recovered.Value.Get<CommitReceipt>(), target);
         }
         await EventAppendReceiptAssertions.AssertOutboxPresenceAsync(store, seedTail, committed);
         var applied = database.Apply(original);
-        await EventAppendReceiptAssertions.VerifyAsync(store, applied.Get<CommitReceipt>(), seedPosition + PositionStep);
+        await EventAppendReceiptAssertions.VerifyAsync(store, applied.Get<CommitReceipt>(), target);
         await EventAppendStateAssertions.VerifyAsync(database, new DateTimeOffset(original.Timestamp), seedTail, committed: true, healthy: false);
         if (recovered is not null)
         {
-            await EventAppendReceiptAssertions.SameResultAsync(recovered, applied);
+            await EventAppendReceiptAssertions.SameResultAsync(recovered.Value, applied);
         }
         await EventAppendReceiptAssertions.VerifyOutboxAsync(store, applied.Get<CommitReceipt>(), seedTail, new DateTimeOffset(original.Timestamp));
         var stablePosition = store.Position;
@@ -62,10 +64,17 @@ internal static class EventAppendRecoveryOracle
         await EventAppendStateAssertions.SameBytesAsync(stable, store);
         await EventAppendReceiptAssertions.SameResultAsync(applied, database.Apply(original));
         await EventAppendDedupAssertions.VerifyAsync(database, new DateTimeOffset(original.Timestamp), seedTail);
+        await HealthyAsync(database, original, seedTail);
+    }
+
+    private static async Task HealthyAsync(DatabaseEngine database, Command<DatabaseCommand> original, long seedTail)
+    {
+        var store = database.Store;
         var healthy = EventAppendCrashContract.ProducerCommand(EventAppendCrashContract.HealthyCommandId,
             EventAppendCrashContract.Healthy, 2);
+        var healthyTarget = CrashDatabase.NextCommitToken(database, EventAppendCrashContract.Partition);
         var result = database.Apply(database.CreateCommand(original.Value!.Kind, healthy.CommandId, original.UserId!, new DateTimeOffset(original.Timestamp), JsonSerializer.Serialize(healthy, JsonDefaults.Options)));
-        await EventAppendReceiptAssertions.VerifyHealthyAsync(store, result.Get<CommitReceipt>());
+        await EventAppendReceiptAssertions.VerifyHealthyAsync(store, result.Get<CommitReceipt>(), healthyTarget);
         await EventAppendReceiptAssertions.VerifyOutboxAsync(store, result.Get<CommitReceipt>(), seedTail + 3, new DateTimeOffset(original.Timestamp));
         await EventAppendStateAssertions.VerifyAsync(database, new DateTimeOffset(original.Timestamp), seedTail, committed: true, healthy: true);
     }

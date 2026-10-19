@@ -1,6 +1,7 @@
 using System.Text.Json;
 using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.Features.InternalSerialization;
+using KeyLoad.Storage;
 using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.Core;
@@ -26,8 +27,16 @@ public sealed partial class DatabaseEngine
         return CreateCommandCore(kind, id, principalId, evaluatedAt, payload, work);
     }
 
+    private Command<DatabaseCommand> CreateCommand(IKeyValueView admissionView, OperationKind kind, Guid id,
+        string principalId, DateTimeOffset evaluatedAt, ReadOnlyMemory<byte> payload)
+    {
+        ArgumentNullException.ThrowIfNull(admissionView);
+        return CreateCommandCore(kind, id, principalId, evaluatedAt, payload, null, admissionView);
+    }
+
     private Command<DatabaseCommand> CreateCommandCore(OperationKind kind, Guid id, string principalId,
-        DateTimeOffset evaluatedAt, ReadOnlyMemory<byte> payload, ReadExecutionBudget? work)
+        DateTimeOffset evaluatedAt, ReadOnlyMemory<byte> payload, ReadExecutionBudget? work,
+        IKeyValueView? admissionView = null)
     {
         RequireNativeBudget(payload.Length);
         payload = payload.ToArray();
@@ -65,7 +74,7 @@ public sealed partial class DatabaseEngine
             _ => throw Errors.Fail(ErrorCode.UnsupportedCapability, UnsupportedDatabaseCommand)
         };
         return CreatePreparedCommand(kind, id, principalId, evaluatedAt, payload,
-            DatabaseCommandFingerprint.Compute(id, kind, principalId, identity), work);
+            DatabaseCommandFingerprint.Compute(id, kind, principalId, identity), work, admissionView);
     }
 
     private string BatchIdentity(ReadOnlyMemory<byte> payload, ReadExecutionBudget? work)

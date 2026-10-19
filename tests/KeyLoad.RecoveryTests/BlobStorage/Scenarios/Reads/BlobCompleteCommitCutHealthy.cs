@@ -55,6 +55,7 @@ internal static class BlobCompleteCommitCutHealthy
         var operation = owner.CreateCommand(kind, id, BlobCommitCutProtocol.Principal,
             owner.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(command));
         var position = owner.Store.Position;
+        var expectedToken = CrashDatabase.NextCommitToken(owner, BlobCommitCutProtocol.Partition);
         var result = owner.Apply(operation);
         if (Errors.Code(result.Problem) is { } error)
         {
@@ -62,12 +63,12 @@ internal static class BlobCompleteCommitCutHealthy
         }
         var receipt = kind == OperationKind.CompleteBlobUpload
             ? result.Get<BlobCommitResult<BlobMetadata>>().Receipt : result.Get<BlobCommitResult<BlobUploadInfo>>().Receipt;
-        await BlobCompleteCommitCutOracle.ExactAsync(receipt, new CommitReceipt(id, new CommitToken(owner.Store.Identity.Incarnation, BlobCommitCutProtocol.Partition.AtomicPartitionId,
-                position + 1), [], DurabilityProfile.ProcessDurable, 1));
+        await BlobCompleteCommitCutOracle.ExactAsync(receipt, new CommitReceipt(id, expectedToken, [], DurabilityProfile.ProcessDurable, 1));
         await Assert.That(receipt.CommandId).IsEqualTo(id);
         await Assert.That(receipt.Token.Incarnation).IsEqualTo(owner.Store.Identity.Incarnation);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(BlobCommitCutProtocol.Partition.AtomicPartitionId);
-        await Assert.That(receipt.Token.Position).IsEqualTo(position + 1);
+        await Assert.That(receipt.Token.Position).IsEqualTo(expectedToken.Position);
+        await Assert.That(owner.Store.Position).IsEqualTo(checked(position + 1L));
         await Assert.That(receipt.Durability).IsEqualTo(owner.Store.Identity.Durability);
         await Assert.That(receipt.Mutations).IsEmpty();
         return (operation, result);

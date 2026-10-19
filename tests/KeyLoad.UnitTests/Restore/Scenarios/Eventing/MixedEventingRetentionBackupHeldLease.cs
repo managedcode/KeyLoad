@@ -31,10 +31,11 @@ internal static class MixedEventingRetentionBackupHeldLease
         var physical = EventingArtifactState.FullBytes(store);
         var position = store.Position;
         var clock = fixture.Database.EvaluationClock;
-        var now = clock.GetUtcNow();
-        if (now < deadline)
+        var remaining = deadline - clock.GetUtcNow();
+        while (remaining > TimeSpan.Zero)
         {
-            await Task.Delay(deadline - now, clock, token);
+            await Task.Delay(TimeSpan.FromMilliseconds(Math.Ceiling(remaining.TotalMilliseconds)), clock, token);
+            remaining = deadline - clock.GetUtcNow();
         }
         token.ThrowIfCancellationRequested();
         await Assert.That(clock.GetUtcNow() >= deadline).IsTrue();

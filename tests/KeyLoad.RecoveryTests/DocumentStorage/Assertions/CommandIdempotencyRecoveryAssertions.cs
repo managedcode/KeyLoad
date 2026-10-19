@@ -26,7 +26,7 @@ internal static class CommandIdempotencyRecoveryAssertions
         CommandIdempotencyCrashAssertions.AssertCanonicalEffects(database, store, expected, seedTail + 4, seedTail);
         CommandIdempotencyCrashAssertions.RequireDocument(database.GetDocument(CrashFixtureValues.Principal,
             new(CommandIdempotencyCrashContract.Partition, CommandIdempotencyCrashContract.Collection, CommandIdempotencyCrashContract.FollowUpDocumentId), cancellationToken: cancellationToken),
-            new(CommandIdempotencyCrashContract.Partition, CommandIdempotencyCrashContract.Collection, CommandIdempotencyCrashContract.FollowUpDocumentId),
+            CommandIdempotencyCrashData.ExpectedDocumentReference(database, CommandIdempotencyCrashContract.FollowUpDocumentId),
             1, CommandIdempotencyCrashContract.FollowUpJson);
         AssertHealthyFollowUp(database, store, seedTail + 4);
     }

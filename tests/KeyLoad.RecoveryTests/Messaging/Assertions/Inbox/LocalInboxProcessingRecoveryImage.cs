@@ -54,7 +54,7 @@ internal static class LocalInboxProcessingRecoveryImage
     }
 
     internal static async Task CutAsync(DatabaseEngine database, ZoneTreeStore store, Command<DatabaseCommand> original,
-        MessageInspection input, long seedPosition, long seedTail, bool committed)
+        MessageInspection input, long seedPosition, long seedTail, bool committed, EntityRefLifetimeV1 lifetime)
     {
         await Assert.That(store.Position).IsEqualTo(seedPosition + (committed ? 1L : 0L));
         var record = store.Read(view => view.GetRecord<InboxRecord>(InboxKey()));
@@ -74,7 +74,7 @@ internal static class LocalInboxProcessingRecoveryImage
         } : input;
         await ExactAsync(database.InspectMessage(CrashFixtureValues.Principal,
             LocalInboxProcessingCrashContract.InputLane, LocalInboxProcessingCrashContract.Message), expectedInput);
-        await LocalInboxProcessingRecoveryModels.RequireAsync(database, new DateTimeOffset(original.Timestamp), committed);
+        await LocalInboxProcessingRecoveryModels.RequireAsync(database, new DateTimeOffset(original.Timestamp), committed, lifetime);
         var head = database.GetOutboxStatus(CrashFixtureValues.Principal, LocalInboxProcessingCrashContract.Partition).Head;
         await Assert.That(head.Tail).IsEqualTo(seedTail + (committed ? LocalInboxProcessingCrashContract.MutationCount : 0));
         for (var ordinal = 0; ordinal < LocalInboxProcessingCrashContract.MutationCount; ordinal++)

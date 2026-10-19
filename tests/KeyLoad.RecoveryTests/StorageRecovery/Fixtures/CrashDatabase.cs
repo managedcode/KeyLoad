@@ -1,6 +1,7 @@
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Authorization;
+using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
@@ -29,4 +30,17 @@ internal static class CrashDatabase
 
     internal static Result<object> Submit<T>(DatabaseEngine database, OperationKind kind, T payload, Guid id)
         => database.Apply(Operation(database, kind, payload, id));
+
+    internal static CommitToken NextCommitToken(DatabaseEngine database, PartitionRef partition)
+        => database.Store.Read<CommitToken>(view =>
+        {
+            var placement = database.ReadAtomicPartitionPlacement(view, CrashFixtureValues.Principal, partition);
+            var applied = view.ReadOwnedValue(KeySpace.AppliedBytes) is { } bytes
+                ? NativeSerialization.Deserialize<long>(bytes) : 0L;
+            return new(placement.Incarnation, partition.AtomicPartitionId, checked(applied + 1L));
+        });
+
+    internal static long AppliedPosition(IAtomicStore store)
+        => store.Read(view => view.ReadOwnedValue(KeySpace.AppliedBytes) is { } bytes
+            ? NativeSerialization.Deserialize<long>(bytes) : 0L);
 }

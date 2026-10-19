@@ -15,6 +15,7 @@ internal static class SampleRollupCrashScenario
         {
             case SampleRollupCrashContract.PrepareMode:
                 SampleRollupCrashOperations.Seed(database);
+                SampleChunkSnapshotFile.CaptureExpectedToken(directory, SampleRollupCrashContract.AcknowledgedId, database, SampleRollupCrashContract.Partition);
                 var receipt = SampleRollupCrashOperations.Commit(database, SampleRollupCrashContract.AcknowledgedId,
                     SampleRollupCrashContract.Refresh(InitialRevision)).Get<CommitReceipt>();
                 await File.WriteAllBytesAsync(Path.Combine(directory, SampleRollupCrashContract.AcknowledgedReceiptFile), NativeSerialization.Serialize(receipt));
@@ -48,6 +49,7 @@ internal static class SampleRollupCrashScenario
             [SampleRollupCrashOperations.Inflight(drop)]);
         var operation = CrashDatabase.Operation(database, OperationKind.Batch, request, SampleRollupCrashContract.InflightId);
         await File.WriteAllBytesAsync(Path.Combine(directory, SampleRollupCrashContract.OperationFile), NativeSerialization.Serialize(operation));
+        SampleChunkSnapshotFile.CaptureExpectedToken(directory, request.CommandId, database, request.Partition);
         boundary.Position = checked(database.Store.Position + SampleRollupCrashContract.PositionStep);
         boundary.Armed = true;
         database.ApplyEmbedded(operation, cancellationToken: default).Get<CommitReceipt>();

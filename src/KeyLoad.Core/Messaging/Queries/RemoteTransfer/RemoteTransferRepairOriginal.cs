@@ -23,7 +23,7 @@ public sealed partial class DatabaseEngine
             ? new AcceptQueueTransfer(intent.Destination, request.IntentToken)
             : new CompleteQueueTransfer(intent.Source, intent.TransferId, request.ReceiptToken!);
         var command = new CommandRequest(request.AcceptCommandId, partition, [mutation]);
-        var original = CreateCommand(OperationKind.Batch, command.CommandId, principal.Id,
+        var original = CreateCommand(view, OperationKind.Batch, command.CommandId, principal.Id,
             Clock.GetUtcNow(), NativeSerialization.Serialize(command));
         _ = AuthorizeOperation(view, principal, original);
         if (stage == QueueTransferRepairStage.Complete)

@@ -1,3 +1,7 @@
+using System.Text.Json;
+using KeyLoad.Core;
+using KeyLoad.Core.Features.InternalSerialization;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Server.Features.Search;
 
 namespace KeyLoad.RecoveryTests.Features.Search;
@@ -32,8 +36,9 @@ internal static class NativeTextIncrementalProcessAssertions
             NativeTextIncrementalCrashProtocol.OriginalFile, token);
         var recovered = await ReadAsync(root, NativeTextIncrementalCrashProtocol.RecoveredFile, token);
         var healthy = await ReadAsync(root, NativeTextIncrementalCrashProtocol.HealthyFile, token);
-        await LiteralAsync(recovered, healthy: false);
-        await LiteralAsync(healthy, healthy: true);
+        var lifetime = await ReadLifetimeAsync(root, token);
+        await LiteralAsync(recovered, lifetime, healthy: false);
+        await LiteralAsync(healthy, lifetime, healthy: true);
         await NativeTextIncrementalCheckpointAssertions.RequireAsync(root, original.Request, recovered, token);
         await Assert.That(NativeSerialization.Serialize(recovered.OriginalReceipt).SequenceEqual(NativeSerialization.Serialize(original.Receipt))).IsTrue();
         await Assert.That(original.Receipt.CommandId).IsEqualTo(original.Mutation.CommandId);
@@ -61,7 +66,7 @@ internal static class NativeTextIncrementalProcessAssertions
             return;
         }
         var verified = await ReadAsync(root, NativeTextIncrementalCrashProtocol.VerifiedFile, token);
-        await LiteralAsync(verified, healthy: true);
+        await LiteralAsync(verified, lifetime, healthy: true);
         await NativeTextIncrementalCheckpointAssertions.RequireAsync(root, healthyOriginal.Request, verified, token);
         await Assert.That(NativeSerialization.Serialize(verified.Checkpoint).SequenceEqual(
             NativeSerialization.Serialize(healthy.Checkpoint))).IsTrue();
@@ -76,11 +81,37 @@ internal static class NativeTextIncrementalProcessAssertions
         await Assert.That(JsonDefaults.Serialize(verified.Postings).SequenceEqual(JsonDefaults.Serialize(healthy.Postings))).IsTrue();
     }
 
-    private static async Task LiteralAsync(NativeTextIncrementalCrashResult actual, bool healthy)
+    internal static async Task<EntityRefLifetimeV1> ReadLifetimeAsync(string root, CancellationToken token)
+    {
+        var creation = await NativeTextIncrementalEvidenceFiles.ReadAsync<StoredOutcome>(root,
+            NativeTextIncrementalCrashProtocol.CreationFile, token);
+        var original = creation.PreparedCommand;
+        var partition = NativeTextIncrementalCrashProtocol.Partition;
+        var definition = new ResourceDefinition(NativeTextIncrementalCrashProtocol.Collection,
+            ResourceKind.Collection, partition.TransactionDomainId);
+        var expected = new ConfigureResourceRequest(partition.TenantId, partition.DatabaseId, definition);
+        await Assert.That(creation.Result.IsSuccess).IsTrue();
+        await Assert.That(original.CommandId).IsNotEqualTo(Guid.Empty);
+        await Assert.That(original.UserId).IsEqualTo(CrashFixtureValues.Principal);
+        await Assert.That(original.Value!.Kind).IsEqualTo(OperationKind.ConfigureResource);
+        await Assert.That(JsonDefaults.Serialize(NativeSerialization.Deserialize<ConfigureResourceRequest>(original.Value.Input.Span))
+            .SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
+        var fingerprint = DatabaseCommandFingerprint.Compute(original.CommandId, OperationKind.ConfigureResource,
+            CrashFixtureValues.Principal, JsonSerializer.Serialize(expected, JsonDefaults.Options));
+        await Assert.That(original.Value.Fingerprint).IsEqualTo(fingerprint);
+        await Assert.That(creation.Fingerprint).IsEqualTo(fingerprint);
+        var lifetime = ResourceLifetimeIdentity.Create(original, partition.TenantId, partition.DatabaseId, definition);
+        return new(lifetime.Incarnation.Value);
+    }
+
+    private static async Task LiteralAsync(NativeTextIncrementalCrashResult actual, EntityRefLifetimeV1 lifetime, bool healthy)
     {
         var revision = healthy ? NativeTextIncrementalCrashProtocol.HealthyRevision : NativeTextIncrementalCrashProtocol.ChangedRevision;
         var expected = new DocumentResult(new(NativeTextIncrementalCrashProtocol.Partition,
-            NativeTextIncrementalCrashProtocol.Collection, NativeTextIncrementalCrashProtocol.Ukrainian), revision,
+            NativeTextIncrementalCrashProtocol.Collection, NativeTextIncrementalCrashProtocol.Ukrainian)
+        {
+            Lifetime = lifetime
+        }, revision,
             healthy ? NativeTextIncrementalCrashProtocol.HealthyJson : NativeTextIncrementalCrashProtocol.ChangedJson, false, []);
         await Assert.That(JsonDefaults.Serialize(actual.Ukrainian).SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
         await Assert.That(actual.English).IsNull();
@@ -98,7 +129,10 @@ internal static class NativeTextIncrementalProcessAssertions
         await Assert.That(active.CanonicalSha256.Length).IsEqualTo(DigestBytes);
         await Assert.That(deleted.Id).IsEqualTo(EnglishRecord);
         await Assert.That(deleted.Reference).IsEqualTo(new EntityRef(NativeTextIncrementalCrashProtocol.Partition,
-            NativeTextIncrementalCrashProtocol.Collection, NativeTextIncrementalCrashProtocol.English));
+            NativeTextIncrementalCrashProtocol.Collection, NativeTextIncrementalCrashProtocol.English)
+        {
+            Lifetime = lifetime
+        });
         await Assert.That(deleted.Revision).IsEqualTo(NativeTextIncrementalCrashProtocol.ChangedRevision);
         await Assert.That(deleted.Deleted).IsTrue();
         await Assert.That(deleted.CanonicalSha256.Length).IsEqualTo(DigestBytes);

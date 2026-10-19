@@ -31,7 +31,7 @@ internal static class SampleChunkProcessAssertions
                 : SampleChunkCrashContract.SealedGeneration);
             await Assert.That(recovered.RawImage).IsEqualTo(prepared.RawImage);
             await Assert.That(recovered.OriginalAcknowledgedReceipt).IsEqualTo(prepared.OriginalAcknowledgedReceipt);
-            await OriginalOutcomeAsync(recovered);
+            await OriginalOutcomeAsync(root, recovered);
             var healthy = await ReadAsync(root, SampleChunkCrashContract.HealthyFile, token);
             await LiteralAsync(healthy, true, SampleChunkCrashContract.MergedRevision, SampleChunkCrashContract.MergedGeneration);
             await Assert.That(healthy.OriginalAcknowledgedReceipt).IsEqualTo(prepared.OriginalAcknowledgedReceipt);
@@ -62,13 +62,15 @@ internal static class SampleChunkProcessAssertions
             .IsEqualTo(Convert.ToHexString(JsonDefaults.Serialize(rows)));
     }
 
-    private static async Task OriginalOutcomeAsync(SampleChunkCrashSnapshot snapshot)
+    private static async Task OriginalOutcomeAsync(string root, SampleChunkCrashSnapshot snapshot)
     {
         await Assert.That(snapshot.OriginalInflightResult).IsNotNull();
         var outcome = NativeSerialization.Deserialize<Result<object>>(Convert.FromHexString(snapshot.OriginalInflightResult!));
         var receipt = outcome.Get<CommitReceipt>();
         await Assert.That(receipt.CommandId).IsEqualTo(SampleChunkCrashContract.InflightId);
-        await Assert.That(receipt.Token.Position).IsEqualTo(snapshot.Position);
+        var expectedToken = SampleChunkSnapshotFile.ReadExpectedToken(root, SampleChunkCrashContract.InflightId,
+            RecoveryExecutionOptions.DatabaseLimits().Value.MaxBatchBytes);
+        await Assert.That(receipt.Token).IsEqualTo(expectedToken);
     }
 
     private static async Task<SampleChunkCrashSnapshot> ReadAsync(string root, string name, CancellationToken token)

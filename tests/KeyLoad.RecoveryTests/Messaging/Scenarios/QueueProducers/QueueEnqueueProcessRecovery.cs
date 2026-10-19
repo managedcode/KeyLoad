@@ -13,6 +13,7 @@ internal static class QueueEnqueueProcessRecovery
         var owner = QueueLifecycleRecoveryAssertions.Open(store);
         var operation = NativeSerialization.Deserialize<Command<DatabaseCommand>>(await File.ReadAllBytesAsync(Path.Combine(root, QueueEnqueueCrashProtocol.OperationFile), token));
         var target = NativeSerialization.Deserialize<CommitToken>(await File.ReadAllBytesAsync(Path.Combine(root, QueueEnqueueCrashProtocol.TargetFile), token));
+        var physicalTarget = NativeSerialization.Deserialize<long>(await File.ReadAllBytesAsync(Path.Combine(root, QueueEnqueueCrashProtocol.PhysicalTargetFile), token));
         var baseline = NativeSerialization.Deserialize<string[]>(await File.ReadAllBytesAsync(Path.Combine(root, QueueEnqueueCrashProtocol.BaselineFile), token));
         var command = NativeSerialization.Deserialize<CommandRequest>(operation.Value!.Input.Span, NativeValidationProfile.PublicInputElements);
         var due = command.Mutations.OfType<EnqueueMessage>().Single(message => message.MessageId == QueueEnqueueCrashProtocol.Scheduled).NotBefore;
@@ -31,14 +32,14 @@ internal static class QueueEnqueueProcessRecovery
         await Assert.That(target.Incarnation).IsEqualTo(placement.Incarnation);
         await Assert.That(target.AtomicPartitionId).IsEqualTo(command.Partition.AtomicPartitionId);
         var outcome = OutcomeStoreOracle.ReadPartition(store, command.Partition, CrashFixtureValues.Principal, operation.CommandId);
-        await Assert.That(store.Position).IsEqualTo(outcome is null ? target.Position - QueueEnqueueCrashProtocol.First : target.Position);
+        await Assert.That(store.Position).IsEqualTo(outcome is null ? physicalTarget - QueueEnqueueCrashProtocol.First : physicalTarget);
         if (outcome is null)
         {
             await Assert.That(QueueClaimAckRecoveryAssertions.Capture(store)).IsEquivalentTo(baseline, CollectionOrdering.Matching);
         }
         else
         {
-            await QueueEnqueueProcessAssertions.ReceiptAsync(outcome, command, target);
+            await QueueEnqueueProcessAssertions.ReceiptAsync(outcome.Value, command, target);
             await QueueEnqueueProcessAssertions.InitialAsync(owner, store, command);
         }
         if (stage >= CommitStage.JournalFlushed)
@@ -46,7 +47,7 @@ internal static class QueueEnqueueProcessRecovery
             await Assert.That(outcome).IsNotNull();
         }
         var result = owner.Apply(operation);
-        await Assert.That(store.Position).IsEqualTo(target.Position);
+        await Assert.That(store.Position).IsEqualTo(physicalTarget);
         await QueueEnqueueProcessAssertions.ReceiptAsync(result, command, target);
         await QueueEnqueueProcessAssertions.InitialAsync(owner, store, command);
         if (outcome is { } retained)

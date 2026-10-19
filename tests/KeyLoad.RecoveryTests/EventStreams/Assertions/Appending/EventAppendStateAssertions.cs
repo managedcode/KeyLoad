@@ -17,6 +17,7 @@ internal static class EventAppendStateAssertions
     {
         await EventAppendQueueAssertions.VerifyAsync(database.Store, committed, healthy);
         await EventAppendIndexAssertions.VerifyAsync(database.Store, committed, healthy);
+        var cut = CrashDatabase.AppliedPosition(database.Store);
         var page = database.ReadStream(EventAppendCrashContract.Principal, EventAppendCrashContract.Stream);
         var ids = new List<string> { EventAppendCrashContract.SeedId };
         if (committed)
@@ -29,7 +30,7 @@ internal static class EventAppendStateAssertions
         }
         await Assert.That(page.Stream).IsEqualTo(EventAppendCrashContract.Stream);
         await Assert.That(page.Head).IsEqualTo(new StreamHead(ids.Count, 1, 1));
-        await Assert.That(page.CutPosition).IsEqualTo(database.Store.Position);
+        await Assert.That(page.CutPosition).IsEqualTo(cut);
         await Assert.That(page.HasMore).IsFalse();
         var expected = ids.Select((id, index) => new EventRecord(EventAppendCrashContract.Stream,
             index + 1L, index + 1L, EventAppendCrashContract.Event(id), time));
@@ -55,7 +56,8 @@ internal static class EventAppendStateAssertions
             await Assert.That(message).IsNull();
             return;
         }
-        await Assert.That(document!.Reference).IsEqualTo(reference);
+        var expectedReference = await EventAppendCollectionAssertions.ReferenceAsync(database.Store, id);
+        await Assert.That(document!.Reference).IsEqualTo(expectedReference);
         await Assert.That(document.Revision).IsEqualTo(1L);
         await Assert.That(document.Json).IsEqualTo(EventAppendCrashContract.DocumentJson);
         await Assert.That(document.Redacted).IsFalse();

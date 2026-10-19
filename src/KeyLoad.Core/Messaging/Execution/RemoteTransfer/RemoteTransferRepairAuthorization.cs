@@ -40,4 +40,19 @@ public sealed partial class DatabaseEngine
             throw Errors.Fail(ErrorCode.RecoveryRequired, RemoteTransferRepairProtocol.Invalid);
         }
     }
+
+    private void ObserveRemoteTransferRepairDestination(IKeyValueView view, PrincipalRecord principal,
+        AdvanceQueueTransferRepair request)
+    {
+        var record = view.GetRecord<RemoteTransferIntentRecord>(RemoteTransferStorage.IntentKey(request.SourceQueue, request.TransferId))
+            ?? throw Errors.Fail(ErrorCode.NotFound, RemoteTransferRepairProtocol.Unavailable);
+        ValidateIntentRecord(view, record, request.SourceQueue, request.TransferId);
+        if (record.PrincipalId != principal.Id)
+        {
+            throw Errors.Fail(ErrorCode.RevisionConflict, RemoteTransferRepairProtocol.Stale);
+        }
+        RequireTransferCapabilities(principal, record.Destination, Capability.QueueInspect);
+        var resource = BindAuthorizedReadResource(view, record.Destination.Partition, record.Destination.Queue, ResourceKind.WorkQueue);
+        RequireTransferInspector(principal, record.Destination, resource);
+    }
 }

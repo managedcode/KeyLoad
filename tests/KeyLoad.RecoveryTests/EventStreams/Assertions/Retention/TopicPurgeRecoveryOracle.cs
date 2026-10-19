@@ -35,7 +35,7 @@ internal static class TopicPurgeRecoveryOracle
             await TopicPurgeReceiptAssertions.VerifyAsync(store, operation, outcome, seedPosition + 1, pinned);
             if (recovered is not null)
             {
-                await EventAppendReceiptAssertions.SameResultAsync(recovered, outcome);
+                await EventAppendReceiptAssertions.SameResultAsync(recovered.Value, outcome);
             }
             await TopicPurgeModelAssertions.VerifyAsync(database, await ReadAsync<Command<DatabaseCommand>>(root,
                 TopicPurgeCrashContract.PublishOperationFile, cancellationToken), pinned ? 2 : 3, pinned, cursor);
@@ -54,7 +54,7 @@ internal static class TopicPurgeRecoveryOracle
         await TopicPurgeContinuation.FinalAsync(finalDatabase, pinned);
         var settled = EventAppendStateAssertions.Bytes(finalStore);
         var position = finalStore.Position;
-        await TopicPurgeReceiptAssertions.StableReplayAsync(finalDatabase, operation, OutcomeStoreOracle.Read(finalStore, operation)!);
+        await TopicPurgeReceiptAssertions.StableReplayAsync(finalDatabase, operation, OutcomeStoreOracle.Read(finalStore, operation)!.Value);
         await Assert.That(finalStore.Position).IsEqualTo(position);
         await EventAppendStateAssertions.SameBytesAsync(settled, finalStore);
     }

@@ -24,7 +24,7 @@ internal static class QueueClaimAckRecoveryContinuation
             var command = new DeliveryCommand(Guid.NewGuid(), QueueClaimAckCrashProtocol.Lane, delivery!.Token, DeliveryAction.Ack);
             var completion = restored.OwnCommand(CrashDatabase.Operation(restored, OperationKind.Delivery, command, command.CommandId));
             token.ThrowIfCancellationRequested();
-            var target = QueueClaimAckRecovery.NextToken(restored, cold);
+            var target = QueueClaimAckRecovery.NextToken(restored);
             var receipt = restored.Apply(completion);
             await QueueClaimAckRecovery.ReceiptAsync(receipt.Get<CommitReceipt>(), command.CommandId,
                 QueueClaimAckCrashProtocol.Message, target);
@@ -41,7 +41,7 @@ internal static class QueueClaimAckRecoveryContinuation
         var enqueue = database.OwnCommand(CrashDatabase.Operation(database, OperationKind.Batch,
             new CommandRequest(id, QueueClaimAckCrashProtocol.Partition, [new EnqueueMessage(QueueClaimAckCrashProtocol.Queue,
                 QueueClaimAckCrashProtocol.Healthy, QueueClaimAckCrashProtocol.Payload, QueueClaimAckCrashProtocol.Headers)]), id));
-        var enqueueTarget = QueueClaimAckRecovery.NextToken(database, store);
+        var enqueueTarget = QueueClaimAckRecovery.NextToken(database);
         var created = database.Apply(enqueue);
         await EnqueueReceiptAsync(created.Get<CommitReceipt>(), enqueue.CommandId, enqueueTarget);
         await QueueClaimAckRecoveryAssertions.ImageAsync(database, QueueClaimAckCrashProtocol.Healthy, MessageState.Ready, null, 2);
@@ -49,7 +49,7 @@ internal static class QueueClaimAckRecoveryContinuation
         var request = new ReceiveRequest(Guid.NewGuid(), QueueClaimAckCrashProtocol.Lane, MaxMessages: 1,
             LeaseSeconds: QueueClaimAckCrashProtocol.LeaseSeconds);
         var claim = database.OwnCommand(CrashDatabase.Operation(database, OperationKind.Receive, request, request.RequestId));
-        var claimTarget = QueueClaimAckRecovery.NextToken(database, store);
+        var claimTarget = QueueClaimAckRecovery.NextToken(database);
         var received = database.Apply(claim);
         await QueueClaimAckRecoveryAssertions.DeliveryAsync(database, received.Get<ReceiveResult>(), request.RequestId,
             new DateTimeOffset(claim.Timestamp), QueueClaimAckCrashProtocol.Healthy, claimTarget);
@@ -83,7 +83,7 @@ internal static class QueueClaimAckRecoveryContinuation
         var ack = new DeliveryCommand(Guid.NewGuid(), QueueClaimAckCrashProtocol.Lane, delivery.Token, DeliveryAction.Ack);
         var completion = restored.OwnCommand(CrashDatabase.Operation(restored, OperationKind.Delivery, ack, ack.CommandId));
         token.ThrowIfCancellationRequested();
-        var target = QueueClaimAckRecovery.NextToken(restored, cold);
+        var target = QueueClaimAckRecovery.NextToken(restored);
         var completed = restored.Apply(completion);
         await QueueClaimAckRecovery.ReceiptAsync(completed.Get<CommitReceipt>(), ack.CommandId,
             QueueClaimAckCrashProtocol.Healthy, target);

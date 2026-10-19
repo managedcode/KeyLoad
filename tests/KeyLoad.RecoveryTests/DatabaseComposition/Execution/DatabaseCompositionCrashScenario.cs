@@ -8,6 +8,7 @@ namespace KeyLoad.RecoveryTests;
 internal static class DatabaseCompositionCrashScenario
 {
     private const string SeedEntitiesCommandIdText = "0f2d5acb-d6af-41e0-8f34-567748432f9f";
+    private const string CollectionCommandIdText = "f5e8bdf6-70b0-4412-9272-350aa90d8d1c";
     private const string SourceQueueCommandIdText = "6e316398-ac45-4e70-b489-383561931f04";
     private const string TargetQueueCommandIdText = "7c1e560d-2106-4910-ae25-73444a6f4189";
 
@@ -33,6 +34,7 @@ internal static class DatabaseCompositionCrashScenario
     private const string AtomicPartition = "partition";
     internal static PartitionRef Partition { get; } = new(FixtureTenant, FixtureDatabase, FixtureDomain, AtomicPartition);
     internal static Guid CommandId { get; } = Guid.Parse(CompositionCommandIdText);
+    internal static Guid CollectionCommandId { get; } = Guid.Parse(CollectionCommandIdText);
 
     internal static async Task RunAsync(string directory, ZoneTreeStore store, CanonicalCrashBoundary boundary)
     {
@@ -56,13 +58,12 @@ internal static class DatabaseCompositionCrashScenario
 
     private static void Seed(DatabaseEngine database)
     {
-        const string CollectionCommandIdText = "f5e8bdf6-70b0-4412-9272-350aa90d8d1c";
         const string GraphCommandIdText = "4c26a9a5-a087-45a9-9456-9f6d4ca7a559";
         const string EmptyDocumentJson = "{}";
 
         foreach (var (name, kind, id) in new[]
         {
-            (Collection, ResourceKind.Collection, Guid.Parse(CollectionCommandIdText)),
+            (Collection, ResourceKind.Collection, CollectionCommandId),
             (Graph, ResourceKind.Graph, Guid.Parse(GraphCommandIdText)),
             (SourceQueue, ResourceKind.WorkQueue, Guid.Parse(SourceQueueCommandIdText)),
             (TargetQueue, ResourceKind.WorkQueue, Guid.Parse(TargetQueueCommandIdText))

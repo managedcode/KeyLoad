@@ -29,7 +29,7 @@ public sealed partial class DatabaseEngine
                 return ReadValidatedSubmissionOutcome(view, normalized, verifiedSelection: selection);
             }
             catch (KeyLoadException refusal) when (CqrsRuntimeFailures.FindFatal(refusal) is null
-                && refusal.Code is ErrorCode.PermissionDenied or ErrorCode.TokenInvalidated
+                && refusal.Code is ErrorCode.PermissionDenied or ErrorCode.Unauthenticated or ErrorCode.TokenInvalidated
                     or ErrorCode.StaleLease or ErrorCode.LeaseExpired or ErrorCode.Conflict)
             {
                 return ManagedCode.Communication.Result<object>.Fail(Errors.Problem(refusal.Code, refusal.Message));

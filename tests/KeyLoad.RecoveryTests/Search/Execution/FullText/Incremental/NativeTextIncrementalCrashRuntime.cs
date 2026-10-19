@@ -13,7 +13,6 @@ namespace KeyLoad.RecoveryTests.Features.Search;
 /// <summary>Owns real canonical storage and native text files across abrupt process recovery.</summary>
 internal sealed class NativeTextIncrementalCrashRuntime : IAsyncDisposable
 {
-    private const string CanonicalDirectory = "canonical";
     private readonly ServiceProvider services;
     private readonly NativeTextIncrementalMaintenanceService owner;
     private Guid session = Guid.NewGuid();
@@ -29,7 +28,7 @@ internal sealed class NativeTextIncrementalCrashRuntime : IAsyncDisposable
     {
         EvidenceRoot = root;
         PhysicalRoot = root;
-        Store = new(new(Path.Combine(root, CanonicalDirectory))
+        Store = new(new(Path.Combine(root, PartitionStoreProtocol.CanonicalDirectory))
         {
             Incarnation = incarnation
         }, CrashExecutionOptions.StorageExecution(), CrashExecutionOptions.PointCacheExecution());

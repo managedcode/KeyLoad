@@ -6,6 +6,8 @@ internal static class LocalInboxProcessingCrashContract
     internal const string OperationFile = "local-processing-operation.bin";
     internal const string InputFile = "local-processing-input.bin";
     internal const string PositionFile = "local-processing-seed-position.bin";
+    internal const string TargetFile = "local-processing-canonical-target.bin";
+    internal const string CollectionFile = "local-processing-collection-command.bin";
     internal const string TailFile = "local-processing-seed-tail.bin";
     internal const string Input = "local-input";
     internal const string Output = "local-output";

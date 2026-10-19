@@ -72,6 +72,7 @@ internal sealed class NativeCompilationIdentityPackageRootFixture : IAsyncDispos
         {
             await CopyRepositoryFileAsync(relativePath, cancellationToken);
         }
+        Directory.CreateDirectory(Path.GetDirectoryName(ProjectPath)!);
         await File.WriteAllTextAsync(Path.Combine(Root, SourceRelativePath.Replace('/', Path.DirectorySeparatorChar)), OwnedSource,
             Encoding.UTF8, cancellationToken);
         await File.WriteAllTextAsync(ProjectPath, ProjectTemplate, Encoding.UTF8, cancellationToken);

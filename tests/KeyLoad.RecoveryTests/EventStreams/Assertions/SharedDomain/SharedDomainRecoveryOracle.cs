@@ -42,7 +42,7 @@ internal static class SharedDomainRecoveryOracle
             SharedDomainRecoverySeed.AppliedPosition(input) + FirstRevision);
         if (recovered is not null)
         {
-            await SharedDomainRecoveryValues.ResultAsync(applied, recovered);
+            await SharedDomainRecoveryValues.ResultAsync(applied, recovered.Value);
         }
         history.Add(SharedDomainRecoverySeed.Capture(store, input.Original, applied, original.Partition));
         await SharedDomainRecoveryImage.SeedOtherScopesAsync(store, input, committed: true);

@@ -20,6 +20,8 @@ internal static class EventProjectionProcessRecoveryAssertions
         var beforePositionBytes = await File.ReadAllBytesAsync(Path.Combine(root,
             EventProjectionCrashScenario.PositionFile), cancellationToken);
         var beforePosition = NativeSerialization.Deserialize<long>(beforePositionBytes);
+        var expectedToken = NativeSerialization.Deserialize<CommitToken>(await File.ReadAllBytesAsync(
+            Path.Combine(root, EventProjectionCrashScenario.TargetTokenFile), cancellationToken));
         var cut = EventProjectionRecoveryStoreOracle.CaptureCut(store, operation, projection, beforeHead.Tail);
         var committed = cut.Vector is not null;
         await EventProjectionRecoveryStoreOracle.AssertCutAsync(cut, committed, beforeHead, before.Bytes,
@@ -38,7 +40,7 @@ internal static class EventProjectionProcessRecoveryAssertions
             await Assert.That(firstReceipt.Token).IsEqualTo(recoveredReceipt.Token);
         }
         await EventProjectionRecoveryStoreOracle.AssertReceiptAndOutboxAsync(store, database, operation,
-            firstReceipt, beforeHead.Tail);
+            firstReceipt, expectedToken, beforeHead.Tail);
         await EventProjectionRecoveryStoreOracle.AssertRetryStableAsync(root, store, database, operation,
             firstReceipt, cancellationToken);
         await EventProjectionRecoveryQueryOracle.AssertChangedPayloadConflictsAsync(store, database,

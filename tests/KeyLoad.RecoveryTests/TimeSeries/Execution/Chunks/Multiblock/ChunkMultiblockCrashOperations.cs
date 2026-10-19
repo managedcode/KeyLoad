@@ -4,9 +4,10 @@ namespace KeyLoad.RecoveryTests;
 
 internal static class ChunkMultiblockCrashOperations
 {
-    internal static void Seed(DatabaseEngine database, bool merge)
+    internal static void Seed(string root, DatabaseEngine database, bool merge)
     {
         SampleChunkCrashOperations.Seed(database, merge);
+        SampleChunkSnapshotFile.CaptureExpectedToken(root, ChunkMultiblockCrashData.AdditionalId, database, SampleChunkCrashContract.Partition);
         Additional(database, merge).Get<CommitReceipt>();
     }
 

@@ -85,8 +85,13 @@ internal static class NativeTextOnlineCrashProof
     private static async Task LiteralAsync(NativeTextOnlineCrashRuntime runtime, OnlineTextIndexMaintenanceRequest request)
     {
         var query = new SearchRequest(request.Consumer.Partition, request.Collection, request.Field, ChangedText);
+        var lifetime = await NativeTextIncrementalProcessAssertions.ReadLifetimeAsync(
+            runtime.Canonical.EvidenceRoot, CancellationToken.None);
         RankedDocument[] expected = [new(new(new(request.Consumer.Partition, request.Collection,
-            NativeTextIncrementalCrashProtocol.Ukrainian), NativeTextIncrementalCrashProtocol.ChangedRevision,
+            NativeTextIncrementalCrashProtocol.Ukrainian)
+        {
+            Lifetime = lifetime
+        }, NativeTextIncrementalCrashProtocol.ChangedRevision,
             NativeTextIncrementalCrashProtocol.ChangedJson, false, []), LiteralExpectedSingleHitScore)];
         NativeTextOnlineCrashFlow.RequireEqual(expected,
             await runtime.Search.SearchAsync(CrashFixtureValues.Principal, query, CancellationToken.None));

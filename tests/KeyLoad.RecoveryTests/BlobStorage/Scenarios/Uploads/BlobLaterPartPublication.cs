@@ -15,7 +15,7 @@ internal static class BlobLaterPartPublication
         var info = new BlobUploadInfo(blob, upload, 65_553, 0, 0, 0,
             new DateTimeOffset(begun.Operation.Timestamp).AddSeconds(3_600), BlobUploadStatus.Active, initial);
         await BlobPriorPublicationImage.ExactAsync(begun.Result.Get<BlobCommitResult<BlobUploadInfo>>().Value, info);
-        await BlobPriorPublicationImage.ReceiptAsync(owner, begun.Result.Get<BlobCommitResult<BlobUploadInfo>>().Receipt, begin.CommandId, blob);
+        await BlobPriorPublicationImage.ReceiptAsync(owner, begun.Result.Get<BlobCommitResult<BlobUploadInfo>>().Receipt, begun, blob);
         var commands = new List<BlobPriorPublicationCommand> { begun };
         var hash = initial;
         for (var ordinal = 0; ordinal < 2; ordinal++)
@@ -31,7 +31,7 @@ internal static class BlobLaterPartPublication
                     StoredBytes = ordinal == 0 ? 65_536 : 65_553,
                     IntegrityHash = hash
                 });
-            await BlobPriorPublicationImage.ReceiptAsync(owner, written.Result.Get<BlobCommitResult<BlobUploadInfo>>().Receipt, part.CommandId, blob);
+            await BlobPriorPublicationImage.ReceiptAsync(owner, written.Result.Get<BlobCommitResult<BlobUploadInfo>>().Receipt, written, blob);
             commands.Add(written);
         }
         var request = new CompleteBlobUploadRequest(Guid.NewGuid(), blob, upload, hash);
@@ -39,7 +39,7 @@ internal static class BlobLaterPartPublication
         commands.Add(completed);
         var metadata = new BlobMetadata(blob, 1, upload, 65_553, 2, hash, new RowAccess(), new DateTimeOffset(completed.Operation.Timestamp));
         await BlobPriorPublicationImage.ExactAsync(completed.Result.Get<BlobCommitResult<BlobMetadata>>().Value, metadata);
-        await BlobPriorPublicationImage.ReceiptAsync(owner, completed.Result.Get<BlobCommitResult<BlobMetadata>>().Receipt, request.CommandId, blob);
+        await BlobPriorPublicationImage.ReceiptAsync(owner, completed.Result.Get<BlobCommitResult<BlobMetadata>>().Receipt, completed, blob);
         var incarnation = owner.Store.Identity.Incarnation;
         var state = new BlobState(1, incarnation, incarnation, begin.CommandId, "root", blob, upload, new RowAccess(),
             65_553, 0, info.ExpiresAt, 2, 65_553, hash, BlobUploadStatus.Complete, 0, 0);

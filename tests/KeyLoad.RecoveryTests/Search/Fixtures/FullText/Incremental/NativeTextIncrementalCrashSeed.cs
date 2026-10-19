@@ -1,3 +1,6 @@
+using KeyLoad.Core;
+using KeyLoad.Storage;
+
 namespace KeyLoad.RecoveryTests.Features.Search;
 
 internal static class NativeTextIncrementalCrashSeed
@@ -10,10 +13,20 @@ internal static class NativeTextIncrementalCrashSeed
         NativeTextIncrementalCrashRuntime runtime, CancellationToken token)
     {
         var partition = NativeTextIncrementalCrashProtocol.Partition;
+        var creationId = Guid.NewGuid();
         _ = await runtime.CommitAsync<ResourceDefinition>(OperationKind.ConfigureResource,
             new ConfigureResourceRequest(partition.TenantId, partition.DatabaseId,
                 new(NativeTextIncrementalCrashProtocol.Collection, ResourceKind.Collection, partition.TransactionDomainId)),
-            Guid.NewGuid(), token);
+            creationId, token);
+        var creation = runtime.Store.Read(view => view.GetRecord<StoredOutcome>(
+            OutcomeStoreOracle.GlobalKey(CrashFixtureValues.Principal, creationId)))
+            ?? throw new InvalidOperationException(NativeTextIncrementalCrashProtocol.Invalid);
+        if (!creation.Result.IsSuccess || creation.PreparedCommand.CommandId != creationId)
+        {
+            throw new InvalidOperationException(NativeTextIncrementalCrashProtocol.Invalid);
+        }
+        await NativeTextIncrementalEvidenceFiles.WriteAsync(runtime.EvidenceRoot,
+            NativeTextIncrementalCrashProtocol.CreationFile, creation, token);
         var seed = new CommandRequest(Guid.NewGuid(), partition,
             [new PutDocument(NativeTextIncrementalCrashProtocol.Collection, NativeTextIncrementalCrashProtocol.Ukrainian,
                 NativeTextIncrementalCrashProtocol.InitialUkrainianJson),

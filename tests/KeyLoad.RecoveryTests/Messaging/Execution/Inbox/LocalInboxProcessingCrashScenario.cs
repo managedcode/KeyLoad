@@ -1,6 +1,7 @@
 using KeyLoad.Core;
 using KeyLoad.RecoveryTests.Features.DocumentStorage;
 using KeyLoad.Storage.ZoneTree;
+using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.RecoveryTests.Features.Messaging;
 
@@ -12,7 +13,8 @@ internal static class LocalInboxProcessingCrashScenario
     internal static async Task RunAsync(string directory, ZoneTreeStore store, CanonicalCrashBoundary boundary)
     {
         var database = CrashDatabase.Create(store);
-        Configure(database);
+        var collection = Configure(database);
+        await CommandIdempotencyCrashData.SaveEvidenceAsync(directory, LocalInboxProcessingCrashContract.CollectionFile, collection);
         var producer = new CommandRequest(Guid.NewGuid(), LocalInboxProcessingCrashContract.Partition,
             [new EnqueueMessage(LocalInboxProcessingCrashContract.Input, LocalInboxProcessingCrashContract.Message,
                 LocalInboxProcessingCrashContract.Payload)]);
@@ -34,6 +36,8 @@ internal static class LocalInboxProcessingCrashScenario
             database.InspectMessage(CrashFixtureValues.Principal, LocalInboxProcessingCrashContract.InputLane,
                 LocalInboxProcessingCrashContract.Message)!);
         await CommandIdempotencyCrashData.SaveEvidenceAsync(directory, LocalInboxProcessingCrashContract.PositionFile, store.Position);
+        await CommandIdempotencyCrashData.SaveEvidenceAsync(directory, LocalInboxProcessingCrashContract.TargetFile,
+            CrashDatabase.NextCommitToken(database, LocalInboxProcessingCrashContract.Partition));
         await CommandIdempotencyCrashData.SaveEvidenceAsync(directory, LocalInboxProcessingCrashContract.TailFile,
             database.GetOutboxStatus(CrashFixtureValues.Principal, LocalInboxProcessingCrashContract.Partition).Head.Tail);
         boundary.Position = store.Position + LocalInboxProcessingCrashContract.Generation;
@@ -42,8 +46,9 @@ internal static class LocalInboxProcessingCrashScenario
         await RecoveryProcessPause.WaitForKillAsync();
     }
 
-    private static void Configure(DatabaseEngine database)
+    private static Command<DatabaseCommand> Configure(DatabaseEngine database)
     {
+        var operations = new List<Command<DatabaseCommand>>();
         foreach (var resource in new[]
         {
             new ResourceDefinition(LocalInboxProcessingCrashContract.Input, ResourceKind.WorkQueue, LocalInboxProcessingCrashContract.Partition.TransactionDomainId),
@@ -52,9 +57,12 @@ internal static class LocalInboxProcessingCrashScenario
             new ResourceDefinition(LocalInboxProcessingCrashContract.Events, ResourceKind.StreamSet, LocalInboxProcessingCrashContract.Partition.TransactionDomainId)
         })
         {
-            CrashDatabase.Submit(database, OperationKind.ConfigureResource, new ConfigureResourceRequest(
-                LocalInboxProcessingCrashContract.Partition.TenantId, LocalInboxProcessingCrashContract.Partition.DatabaseId, resource),
-                Guid.NewGuid()).Get<ResourceDefinition>();
+            var operation = CrashDatabase.Operation(database, OperationKind.ConfigureResource, new ConfigureResourceRequest(
+                LocalInboxProcessingCrashContract.Partition.TenantId, LocalInboxProcessingCrashContract.Partition.DatabaseId, resource), Guid.NewGuid());
+            database.Apply(operation).Get<ResourceDefinition>();
+            operations.Add(operation);
         }
+        return operations.Single(operation => NativeSerialization.Deserialize<ConfigureResourceRequest>(operation.Value!.Input.Span)
+            .Definition.Name == LocalInboxProcessingCrashContract.Documents);
     }
 }

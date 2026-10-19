@@ -4,7 +4,7 @@
   "concept": "Orleans owns all clustering and activation scaling. The API reaches one grain per connected client, logical database/partition grains, storage owners and bounded result aggregation. Shared volumes require one open owner per physical partition without copies; isolated volumes use typed Orleans calls between owners. Shared-volume ownership and distributed partition-query execution are not yet qualified.",
   "qualification": {
     "build": "Not recorded here. Run dotnet build KeyLoad.slnx -warnaserror.",
-    "unitTests": "open",
+    "unitTests": "open: native text-maintenance execution is blocked in the ZoneTree 2.0.1 synchronous maintainer wait on the Orleans scheduler; upstream issue https://github.com/ZoneTree/ZoneTree/issues/190. Focused passes do not qualify the complete suite.",
     "processRecoveryTests": "open",
     "aspireClusterSdkMcpTests": "open",
     "coverage": "open: original Linux analyzer measurements exist; current source mapping and required numeric gates are not qualified. Functional coverage remains open.",

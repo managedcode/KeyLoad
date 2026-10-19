@@ -12,10 +12,10 @@ internal static class BlobPriorPublicationLifetime
         Command<DatabaseCommand> delete, Command<DatabaseCommand> reclaim)
     {
         var tombstone = await DeleteAsync(owner, seed, delete);
-        var reclaimed = new BlobPriorPublicationCommand(reclaim, owner.Apply(reclaim));
+        var reclaimed = BlobPriorPublicationCommands.Send(owner, reclaim, seed.Blob.Partition);
         var result = reclaimed.Result.Get<BlobCommitResult<BlobReclaimResult>>();
         await BlobPriorPublicationImage.ExactAsync(result.Value, new BlobReclaimResult(seed.Upload, 1, 0, 4, true));
-        await BlobPriorPublicationImage.ReceiptAsync(owner, result.Receipt, reclaim.CommandId, seed.Blob);
+        await BlobPriorPublicationImage.ReceiptAsync(owner, result.Receipt, reclaimed, seed.Blob);
         await BlobPriorPublicationAssertions.QuotasAsync(owner, seed, 0, 0);
         foreach (var family in new[] { "blob-state-v1", "blob-part-v1", "blob-partmeta-v1" })
         {
@@ -29,7 +29,7 @@ internal static class BlobPriorPublicationLifetime
 
     private static async Task<BlobMetadata> DeleteAsync(DatabaseEngine owner, BlobPriorPublicationState seed, Command<DatabaseCommand> delete)
     {
-        var deleted = new BlobPriorPublicationCommand(delete, owner.Apply(delete));
+        var deleted = BlobPriorPublicationCommands.Send(owner, delete, seed.Blob.Partition);
         var tombstone = seed.Metadata with
         {
             Revision = 2,
@@ -41,7 +41,7 @@ internal static class BlobPriorPublicationLifetime
             Deleted = true
         };
         await BlobPriorPublicationImage.ExactAsync(deleted.Result.Get<BlobCommitResult<BlobMetadata>>().Value, tombstone);
-        await BlobPriorPublicationImage.ReceiptAsync(owner, deleted.Result.Get<BlobCommitResult<BlobMetadata>>().Receipt, delete.CommandId, seed.Blob);
+        await BlobPriorPublicationImage.ReceiptAsync(owner, deleted.Result.Get<BlobCommitResult<BlobMetadata>>().Receipt, deleted, seed.Blob);
         await BlobPriorPublicationImage.ExactAsync(new BlobStorageOperations(owner).Metadata("root", new(seed.Blob)), tombstone);
         await BlobPriorPublicationImage.ExactAsync(owner.Store.Read(view => view.GetRecord<BlobState>(
             BlobPriorPublicationOracle.Key("blob-state-v1", seed))), seed.State with

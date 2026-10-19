@@ -28,7 +28,7 @@ public sealed partial class DatabaseEngine
             RequireNativeBudget(payload.Length);
             return CreatePreparedCommand(OperationKind.Bm25CorpusPublicationPhase, phase.CommandId,
                 administrator.Id, evaluatedAt, payload, DatabaseCommandFingerprint.Compute(phase.CommandId,
-                    OperationKind.Bm25CorpusPublicationPhase, administrator.Id, Identity<Bm25CorpusPublicationPhaseCommand>(payload)), work);
+                    OperationKind.Bm25CorpusPublicationPhase, administrator.Id, Identity<Bm25CorpusPublicationPhaseCommand>(payload)), work, view);
         });
     }
 

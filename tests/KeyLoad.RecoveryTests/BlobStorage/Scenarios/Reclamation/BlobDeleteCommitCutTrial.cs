@@ -92,11 +92,11 @@ internal static class BlobDeleteCommitCutTrial
         var result = owner.Apply(original);
         await Assert.That(Errors.Code(result.Problem)).IsNull();
         var receipt = result.Get<BlobCommitResult<BlobMetadata>>().Receipt;
-        await BlobDeleteCommitCutOracle.ExactAsync(receipt, new CommitReceipt(original.CommandId, new CommitToken(proof.Incarnation, BlobCommitCutProtocol.Partition.AtomicPartitionId, proof.Position + 1), [], DurabilityProfile.ProcessDurable, 1));
+        await BlobDeleteCommitCutOracle.ExactAsync(receipt, new CommitReceipt(original.CommandId, proof.TargetToken, [], DurabilityProfile.ProcessDurable, 1));
         await Assert.That(receipt.CommandId).IsEqualTo(original.CommandId);
         await Assert.That(receipt.Token.Incarnation).IsEqualTo(proof.Incarnation);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(BlobCommitCutProtocol.Partition.AtomicPartitionId);
-        await Assert.That(receipt.Token.Position).IsEqualTo(proof.Position + 1);
+        await Assert.That(receipt.Token.Position).IsEqualTo(proof.TargetToken.Position);
         await Assert.That(receipt.Durability).IsEqualTo(store.Identity.Durability);
         await Assert.That(receipt.Mutations).IsEmpty();
         await BlobDeleteCommitCutOracle.ExactAsync(result.Get<BlobCommitResult<BlobMetadata>>().Value,

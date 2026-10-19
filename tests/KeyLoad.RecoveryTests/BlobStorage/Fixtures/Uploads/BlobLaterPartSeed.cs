@@ -35,7 +35,7 @@ internal static class BlobLaterPartSeed
         };
         await BlobPriorPublicationImage.ExactAsync(deletion.Result.Get<BlobCommitResult<BlobMetadata>>().Value, tombstone);
         await BlobPriorPublicationImage.ReceiptAsync(owner, deletion.Result.Get<BlobCommitResult<BlobMetadata>>().Receipt,
-            request.CommandId, publication.Blob);
+            deletion, publication.Blob);
         var result = new BlobRetiredPartState(publication, deletion, tombstone);
         await BlobLaterPartAssertions.RetiredAsync(owner, result);
         return result;

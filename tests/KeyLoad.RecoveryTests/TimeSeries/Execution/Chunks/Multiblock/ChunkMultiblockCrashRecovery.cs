@@ -8,8 +8,10 @@ internal static class ChunkMultiblockCrashRecovery
         var inflight = await SampleChunkCrashRecovery.ReplayOriginalForMultiblockAsync(root, database).ConfigureAwait(false);
         await ChunkMultiblockCrashState.WriteAsync(root, SampleChunkCrashContract.RecoveredFile, database, merge, inflight).ConfigureAwait(false);
         await RequireAcknowledgedAsync(root, database).ConfigureAwait(false);
+        SampleChunkSnapshotFile.CaptureExpectedToken(root, ChunkMultiblockCrashData.FreshCommandId, database, SampleChunkCrashContract.Partition);
         var appended = ChunkMultiblockCrashOperations.Fresh(database);
         appended.Get<CommitReceipt>();
+        SampleChunkSnapshotFile.CaptureExpectedToken(root, ChunkMultiblockCrashData.HealthyMergeId, database, SampleChunkCrashContract.Partition);
         var merged = ChunkMultiblockCrashOperations.HealthyMerge(database, merge);
         merged.Get<CommitReceipt>();
         await ChunkMultiblockCrashState.WriteAsync(root, SampleChunkCrashContract.HealthyFile, database, merge, inflight,

@@ -17,8 +17,8 @@ internal static class ChunkMultiblockProcessAssertions
         if (!merge)
         {
             await ChunkMultiblockProcessRaw.RequireAsync(prepared, prepared: true, healthy: false);
-            await ReceiptAsync(prepared.OriginalAdditionalResult, prepared, ChunkMultiblockCrashData.AdditionalId,
-                prepared.Position, "appendSamples", ChunkMultiblockCrashProtocol.PreparedAutomaticSealSequence);
+            await ReceiptAsync(root, prepared.OriginalAdditionalResult, prepared, ChunkMultiblockCrashData.AdditionalId,
+                "appendSamples", ChunkMultiblockCrashProtocol.PreparedAutomaticSealSequence);
         }
         if (ChunkMultiblockCrashProtocol.IsPrepare(mode))
         {
@@ -38,8 +38,8 @@ internal static class ChunkMultiblockProcessAssertions
         await Assert.That(recovered.OriginalAcknowledgedReceipt).IsEqualTo(prepared.OriginalAcknowledgedReceipt);
         await Assert.That(recovered.OriginalAdditionalResult).IsEqualTo(prepared.OriginalAdditionalResult);
         await Assert.That(recovered.OriginalInflightResult).IsNotNull();
-        await ReceiptAsync(recovered.OriginalInflightResult!, prepared, SampleChunkCrashContract.InflightId,
-            recovered.Position, merge ? "mergeSampleChunkWindow" : "appendSamples",
+        await ReceiptAsync(root, recovered.OriginalInflightResult!, prepared, SampleChunkCrashContract.InflightId,
+            merge ? "mergeSampleChunkWindow" : "appendSamples",
             merge ? ChunkMultiblockCrashProtocol.RecoveredMergeRevision : ChunkMultiblockCrashProtocol.PreparedSequence);
         var healthy = await ReadAsync(root, SampleChunkCrashContract.HealthyFile, token);
         await ChunkMultiblockProcessRows.RequireAsync(healthy, merge, prepared: false, healthy: true);
@@ -51,7 +51,7 @@ internal static class ChunkMultiblockProcessAssertions
         {
             await ChunkMultiblockProcessRaw.RequireAsync(healthy, prepared: false, healthy: true);
         }
-        await HealthyReceiptsAsync(healthy, prepared, recovered.Position, merge);
+        await HealthyReceiptsAsync(root, healthy, prepared, merge);
         if (!ChunkMultiblockCrashProtocol.IsVerify(mode))
         {
             return;
@@ -64,28 +64,30 @@ internal static class ChunkMultiblockProcessAssertions
         {
             await ChunkMultiblockProcessRaw.RequireAsync(cold, prepared: false, healthy: true);
         }
-        await HealthyReceiptsAsync(cold, prepared, recovered.Position, merge);
+        await HealthyReceiptsAsync(root, cold, prepared, merge);
     }
 
-    private static async Task HealthyReceiptsAsync(ChunkMultiblockCrashSnapshot state,
-        ChunkMultiblockCrashSnapshot prepared, long recoveredPosition, bool merge)
+    private static async Task HealthyReceiptsAsync(string root, ChunkMultiblockCrashSnapshot state,
+        ChunkMultiblockCrashSnapshot prepared, bool merge)
     {
-        await ReceiptAsync(state.OriginalInflightResult!, prepared, SampleChunkCrashContract.InflightId,
-            recoveredPosition, merge ? "mergeSampleChunkWindow" : "appendSamples",
+        await ReceiptAsync(root, state.OriginalInflightResult!, prepared, SampleChunkCrashContract.InflightId,
+            merge ? "mergeSampleChunkWindow" : "appendSamples",
             merge ? ChunkMultiblockCrashProtocol.RecoveredMergeRevision : ChunkMultiblockCrashProtocol.PreparedSequence);
-        await ReceiptAsync(state.HealthyAppendResult!, prepared, ChunkMultiblockCrashData.FreshCommandId,
-            checked(recoveredPosition + SampleChunkCrashContract.PositionStep), "appendSamples", ChunkMultiblockCrashProtocol.SampleLimit);
-        await ReceiptAsync(state.HealthyMergeResult!, prepared, ChunkMultiblockCrashData.HealthyMergeId,
-            checked(recoveredPosition + ChunkMultiblockCrashProtocol.HealthyCommits), "mergeSampleChunkWindow",
+        await ReceiptAsync(root, state.HealthyAppendResult!, prepared, ChunkMultiblockCrashData.FreshCommandId,
+            "appendSamples", ChunkMultiblockCrashProtocol.SampleLimit);
+        await ReceiptAsync(root, state.HealthyMergeResult!, prepared, ChunkMultiblockCrashData.HealthyMergeId,
+            "mergeSampleChunkWindow",
             merge ? ChunkMultiblockCrashProtocol.HealthyMergeRevision : ChunkMultiblockCrashProtocol.HealthySealRevision);
         await Assert.That(state.StorageIncarnation).IsEqualTo(prepared.StorageIncarnation);
         await Assert.That(state.StorageDurability).IsEqualTo(prepared.StorageDurability);
     }
 
-    private static async Task ReceiptAsync(string bytes, ChunkMultiblockCrashSnapshot authority,
-        Guid command, long position, string kind, long revision)
+    private static async Task ReceiptAsync(string root, string bytes, ChunkMultiblockCrashSnapshot authority,
+        Guid command, string kind, long revision)
     {
-        var expected = new CommitReceipt(command, new(authority.StorageIncarnation, SampleChunkCrashContract.Partition.AtomicPartitionId, position), [new(kind, SampleChunkCrashContract.Set, SampleChunkCrashContract.Series, revision)], authority.StorageDurability, (authority.StorageDurability == DurabilityProfile.Buffered ? 0 : 1));
+        var expectedToken = SampleChunkSnapshotFile.ReadExpectedToken(root, command,
+            RecoveryExecutionOptions.DatabaseLimits().Value.MaxBatchBytes);
+        var expected = new CommitReceipt(command, expectedToken, [new(kind, SampleChunkCrashContract.Set, SampleChunkCrashContract.Series, revision)], authority.StorageDurability, (authority.StorageDurability == DurabilityProfile.Buffered ? 0 : 1));
         var actual = NativeSerialization.Deserialize<Result<object>>(Convert.FromHexString(bytes)).Get<CommitReceipt>();
         await Assert.That(JsonSerializer.Serialize(actual, JsonDefaults.Options))
             .IsEqualTo(JsonSerializer.Serialize(expected, JsonDefaults.Options));

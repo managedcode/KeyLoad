@@ -8,6 +8,8 @@ internal static class BlobCompleteCommitCutSeedAssertions
 {
     internal static async Task AssertAsync(DatabaseEngine owner, BlobCommitCutSeedProof proof)
     {
+        await Assert.That(proof.ExpectedTokens.Length).IsEqualTo(proof.Operations.Length);
+        await Assert.That(proof.Results.Length).IsEqualTo(proof.Operations.Length);
         for (var index = 0; index < proof.Operations.Length; index++)
         {
             var operation = NativeSerialization.Deserialize<Command<DatabaseCommand>>(proof.Operations[index]);
@@ -24,12 +26,11 @@ internal static class BlobCompleteCommitCutSeedAssertions
                 continue;
             }
             var receipt = await ValueAsync(proof, operation, result);
-            await BlobCompleteCommitCutOracle.ExactAsync(receipt, new CommitReceipt(operation.CommandId, new CommitToken(proof.Incarnation, BlobCommitCutProtocol.Partition.AtomicPartitionId,
-                    proof.Position - proof.Operations.Length + index + 1), [], DurabilityProfile.ProcessDurable, 1));
+            await BlobCompleteCommitCutOracle.ExactAsync(receipt, new CommitReceipt(operation.CommandId, proof.ExpectedTokens[index], [], DurabilityProfile.ProcessDurable, 1));
             await Assert.That(receipt.CommandId).IsEqualTo(operation.CommandId);
             await Assert.That(receipt.Token.Incarnation).IsEqualTo(proof.Incarnation);
             await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(BlobCommitCutProtocol.Partition.AtomicPartitionId);
-            await Assert.That(receipt.Token.Position).IsEqualTo(proof.Position - proof.Operations.Length + index + 1);
+            await Assert.That(receipt.Token.Position).IsEqualTo(proof.ExpectedTokens[index].Position);
             await Assert.That(receipt.Durability).IsEqualTo(owner.Store.Identity.Durability);
             await Assert.That(receipt.Mutations).IsEmpty();
         }

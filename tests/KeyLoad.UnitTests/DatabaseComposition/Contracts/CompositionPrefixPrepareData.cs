@@ -28,7 +28,7 @@ internal static class CompositionPrefixPrepareData
     internal const string Upsert = "upsertEdge";
     internal const string Cancel = "cancelQueueMessage";
     internal const string InvalidLink = "The queue graph link is invalid.";
-    internal const string ClockBehind = "The leader clock is behind the committed clock.";
+    internal const string ClockBehind = "The operation time is behind the committed storage time.";
     internal const string Retiring = "The resource lifetime is retiring.";
     internal const string Marker = "clock-rollback-marker";
     internal const string MarkerJson = "{\"id\":\"clock-rollback-marker\"}";

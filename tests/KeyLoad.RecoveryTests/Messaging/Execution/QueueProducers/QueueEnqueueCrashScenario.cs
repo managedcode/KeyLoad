@@ -23,14 +23,13 @@ internal static class QueueEnqueueCrashScenario
                 new EnqueueMessage(QueueEnqueueCrashProtocol.Queue, QueueEnqueueCrashProtocol.Scheduled, QueueEnqueueCrashProtocol.Payload,
                     QueueEnqueueCrashProtocol.Headers, NotBefore: due)]);
         var operation = database.OwnCommand(CrashDatabase.Operation(database, OperationKind.Batch, command, command.CommandId));
-        var placement = database.ReadAtomicPartitionPlacement(CrashFixtureValues.Principal,
-            QueueEnqueueCrashProtocol.Partition);
-        var target = new CommitToken(placement.Incarnation, QueueEnqueueCrashProtocol.Partition.AtomicPartitionId,
-            checked(store.Position + QueueEnqueueCrashProtocol.AdjacentPosition));
+        var target = CrashDatabase.NextCommitToken(database, QueueEnqueueCrashProtocol.Partition);
+        var physicalTarget = checked(store.Position + QueueEnqueueCrashProtocol.AdjacentPosition);
         await File.WriteAllBytesAsync(Path.Combine(directory, QueueEnqueueCrashProtocol.OperationFile), NativeSerialization.Serialize(operation));
         await File.WriteAllBytesAsync(Path.Combine(directory, QueueEnqueueCrashProtocol.TargetFile), NativeSerialization.Serialize(target));
+        await File.WriteAllBytesAsync(Path.Combine(directory, QueueEnqueueCrashProtocol.PhysicalTargetFile), NativeSerialization.Serialize(physicalTarget));
         await File.WriteAllBytesAsync(Path.Combine(directory, QueueEnqueueCrashProtocol.BaselineFile), NativeSerialization.Serialize(Capture(store)));
-        boundary.Position = target.Position;
+        boundary.Position = physicalTarget;
         boundary.Armed = true;
         _ = database.Apply(operation);
         await RecoveryProcessPause.WaitForKillAsync();

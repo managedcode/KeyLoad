@@ -66,7 +66,7 @@ internal sealed class CompositionPrefixPrepareOwner
     {
         Token.ThrowIfCancellationRequested();
         return originalJoined ? Database.Apply(original)
-            : Source.SubmitIssued(original);
+            : Source.SubmitAtOriginalTime(Database, original);
     }
 
     internal (long AppliedPosition, long StorePosition) Cut()

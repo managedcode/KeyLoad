@@ -1,5 +1,6 @@
 using KeyLoad.Core;
 using KeyLoad.Core.Features.BlobStorage;
+using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.RecoveryTests.Features.BlobStorage;
 
@@ -8,7 +9,15 @@ internal static class BlobPriorPublicationCommands
     internal static BlobPriorPublicationCommand Send<T>(DatabaseEngine owner, OperationKind kind, Guid id, T payload)
     {
         var operation = CrashDatabase.Operation(owner, kind, payload, id);
-        return new(operation, owner.Apply(operation));
+        return Send(owner, operation, QueueLifecycleCrashProtocol.Partition);
+    }
+
+    internal static BlobPriorPublicationCommand Send(DatabaseEngine owner, Command<DatabaseCommand> operation,
+        PartitionRef partition)
+    {
+        var expectedToken = CrashDatabase.NextCommitToken(owner, partition);
+        var position = owner.Store.Position;
+        return new(operation, owner.Apply(operation), expectedToken, position);
     }
 
     internal static async Task<BlobPriorPublicationState> SeedAsync(string root)
@@ -38,7 +47,7 @@ internal static class BlobPriorPublicationCommands
         var info = new BlobUploadInfo(blob, upload, 4, revision, 0, 0,
             new DateTimeOffset(begun.Operation.Timestamp).AddSeconds(3_600), BlobUploadStatus.Active, initial);
         await BlobPriorPublicationImage.ExactAsync(begun.Result.Get<BlobCommitResult<BlobUploadInfo>>().Value, info);
-        await BlobPriorPublicationImage.ReceiptAsync(owner, begun.Result.Get<BlobCommitResult<BlobUploadInfo>>().Receipt, begin.CommandId, blob);
+        await BlobPriorPublicationImage.ReceiptAsync(owner, begun.Result.Get<BlobCommitResult<BlobUploadInfo>>().Receipt, begun, blob);
         var part = new WriteBlobPartRequest(Guid.NewGuid(), blob, upload, 0, bytes, BlobPriorPublicationOracle.Hash(bytes));
         var written = Send(owner, OperationKind.WriteBlobPart, part.CommandId, part);
         var hash = BlobPriorPublicationOracle.Complete(initial, bytes);
@@ -49,12 +58,12 @@ internal static class BlobPriorPublicationCommands
                 StoredBytes = 4,
                 IntegrityHash = hash
             });
-        await BlobPriorPublicationImage.ReceiptAsync(owner, written.Result.Get<BlobCommitResult<BlobUploadInfo>>().Receipt, part.CommandId, blob);
+        await BlobPriorPublicationImage.ReceiptAsync(owner, written.Result.Get<BlobCommitResult<BlobUploadInfo>>().Receipt, written, blob);
         var complete = new CompleteBlobUploadRequest(Guid.NewGuid(), blob, upload, hash);
         var completed = Send(owner, OperationKind.CompleteBlobUpload, complete.CommandId, complete);
         var metadata = new BlobMetadata(blob, revision + 1, upload, 4, 1, hash, new RowAccess(), new DateTimeOffset(completed.Operation.Timestamp));
         await BlobPriorPublicationImage.ExactAsync(completed.Result.Get<BlobCommitResult<BlobMetadata>>().Value, metadata);
-        await BlobPriorPublicationImage.ReceiptAsync(owner, completed.Result.Get<BlobCommitResult<BlobMetadata>>().Receipt, complete.CommandId, blob);
+        await BlobPriorPublicationImage.ReceiptAsync(owner, completed.Result.Get<BlobCommitResult<BlobMetadata>>().Receipt, completed, blob);
         var incarnation = owner.Store.Identity.Incarnation;
         var state = new BlobState(1, incarnation, incarnation, begin.CommandId, "root", blob, upload, new RowAccess(),
             4, revision, info.ExpiresAt, 1, 4, hash, BlobUploadStatus.Complete, 0, 0);

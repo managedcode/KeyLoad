@@ -1,3 +1,4 @@
+using KeyLoad.Storage;
 using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.Core;
@@ -44,17 +45,34 @@ public sealed partial class DatabaseEngine
     }
 
     private Command<DatabaseCommand> CreatePreparedCommand(OperationKind kind, Guid id, string principalId,
-        DateTimeOffset evaluatedAt, ReadOnlyMemory<byte> input, string fingerprint, ReadExecutionBudget? work)
+        DateTimeOffset evaluatedAt, ReadOnlyMemory<byte> input, string fingerprint, ReadExecutionBudget? work,
+        IKeyValueView? admissionView = null)
     {
         var operation = Command<DatabaseCommand>.Create(DatabaseCommandType,
             new DatabaseCommand(kind, input, fingerprint), id);
         operation.UserId = principalId;
         operation.Timestamp = evaluatedAt.UtcDateTime;
+        byte[] admission;
+        if (admissionView is not null)
+        {
+            if (RequiresCompositionEffectCapture(operation))
+            {
+                throw Errors.Fail(ErrorCode.UnsupportedCapability, UnsupportedDatabaseCommand);
+            }
+            work?.Check();
+            admission = EncodeResourceEffectAdmission(CaptureResourceEffectAdmission(admissionView, operation, fingerprint,
+                preserveBudgetFailure: work is not null));
+            work?.Check();
+        }
+        else
+        {
+            admission = work is null
+                ? CaptureResourceEffectAdmission(operation)
+                : CaptureResourceEffectAdmission(operation, work);
+        }
         operation.Value = operation.Value! with
         {
-            ResourceAdmission = work is null
-                ? CaptureResourceEffectAdmission(operation)
-                : CaptureResourceEffectAdmission(operation, work)
+            ResourceAdmission = admission
         };
         return OwnCommand(operation);
     }

@@ -30,7 +30,9 @@ internal static class SampleChunkEarlyProcessAssertions
         var result = NativeSerialization.Deserialize<Result<object>>(Convert.FromHexString(recovered.OriginalInflightResult!));
         var receipt = result.Get<CommitReceipt>();
         await Assert.That(receipt.CommandId).IsEqualTo(SampleChunkCrashContract.InflightId);
-        await Assert.That(receipt.Token.Position).IsEqualTo(recovered.Position);
+        var expectedToken = SampleChunkSnapshotFile.ReadExpectedToken(root, SampleChunkCrashContract.InflightId,
+            RecoveryExecutionOptions.DatabaseLimits().Value.MaxBatchBytes);
+        await Assert.That(receipt.Token).IsEqualTo(expectedToken);
         await LiteralAsync(healthy, SampleChunkCrashContract.MergedRevision, SampleChunkCrashContract.MergedGeneration,
             SampleChunkEarlyCrashProtocol.CorrectedSequence);
         await Assert.That(healthy.Position > recovered.Position).IsTrue();

@@ -27,19 +27,20 @@ internal static class BlobCommitCutSeed
         var database = CrashDatabase.Create(store);
         var operations = new List<byte[]>();
         var results = new List<byte[]>();
+        var expectedTokens = new List<CommitToken>();
         Submit(database, OperationKind.ConfigurePrincipal, Guid.Parse(DeniedPrincipalCommandIdText),
             new ConfigurePrincipalRequest(new(BlobCommitCutProtocol.DeniedPrincipal,
-                BlobCommitCutProtocol.Partition.TenantId, [], [])), operations, results);
+                BlobCommitCutProtocol.Partition.TenantId, [], [])), operations, results, expectedTokens);
         Submit(database, OperationKind.ConfigureResource, Guid.Parse(ConfigureIdText),
             new ConfigureResourceRequest(BlobCommitCutProtocol.Partition.TenantId, BlobCommitCutProtocol.Partition.DatabaseId,
-                new(BlobCommitCutProtocol.Resource, ResourceKind.BlobStore, BlobCommitCutProtocol.Partition.TransactionDomainId)), operations, results);
-        var originalHash = Upload(database, BlobCommitCutProtocol.OriginalUpload, BlobCommitCutPayload.OriginalBytes(), OriginalRevision, operations, results);
+                new(BlobCommitCutProtocol.Resource, ResourceKind.BlobStore, BlobCommitCutProtocol.Partition.TransactionDomainId)), operations, results, expectedTokens);
+        var originalHash = Upload(database, BlobCommitCutProtocol.OriginalUpload, BlobCommitCutPayload.OriginalBytes(), OriginalRevision, operations, results, expectedTokens);
         var id = Guid.Parse(OriginalCompleteIdText);
         Submit(database, OperationKind.CompleteBlobUpload, id,
-            new CompleteBlobUploadRequest(id, BlobCommitCutProtocol.Blob, BlobCommitCutProtocol.OriginalUpload, originalHash), operations, results);
+            new CompleteBlobUploadRequest(id, BlobCommitCutProtocol.Blob, BlobCommitCutProtocol.OriginalUpload, originalHash), operations, results, expectedTokens);
         if (complete)
         {
-            _ = Upload(database, BlobCommitCutProtocol.NewUpload, BlobCommitCutPayload.MultipartBytes(), PublishedRevision, operations, results);
+            _ = Upload(database, BlobCommitCutProtocol.NewUpload, BlobCommitCutPayload.MultipartBytes(), PublishedRevision, operations, results, expectedTokens);
         }
         var identity = store.Identity;
         var state = new
@@ -52,6 +53,8 @@ internal static class BlobCommitCutSeed
             DeniedPrincipalBytes = store.Read(view => view.ReadOwnedValue(KeySpace.Principal(BlobCommitCutProtocol.DeniedPrincipal))),
             Operations = operations.ToArray(),
             Results = results.ToArray(),
+            ExpectedTokens = expectedTokens.ToArray(),
+            TargetToken = CrashDatabase.NextCommitToken(database, BlobCommitCutProtocol.Partition),
             RawImage = Image(store)
         };
         var bytes = JsonDefaults.Serialize(state);
@@ -64,12 +67,12 @@ internal static class BlobCommitCutSeed
     }
 
     private static string Upload(DatabaseEngine database, Guid upload, byte[] bytes, long revision,
-        List<byte[]> operations, List<byte[]> results)
+        List<byte[]> operations, List<byte[]> results, List<CommitToken> expectedTokens)
     {
         var begin = upload == BlobCommitCutProtocol.OriginalUpload
             ? Guid.Parse(OriginalBeginIdText) : Guid.Parse(NewBeginIdText);
         Submit(database, OperationKind.BeginBlobUpload, begin,
-            new BeginBlobUploadRequest(begin, BlobCommitCutProtocol.Blob, upload, bytes.Length, revision), operations, results);
+            new BeginBlobUploadRequest(begin, BlobCommitCutProtocol.Blob, upload, bytes.Length, revision), operations, results, expectedTokens);
         var integrity = BlobIntegrity.InitialHash(database.Store.Identity.Incarnation, BlobCommitCutProtocol.Blob, upload, bytes.Length);
         for (var offset = FirstPartOffset; offset < bytes.Length; offset += BlobCommitCutProtocol.PartLength)
         {
@@ -79,17 +82,18 @@ internal static class BlobCommitCutSeed
             var id = upload == BlobCommitCutProtocol.OriginalUpload ? Guid.Parse(OriginalPartIdText)
                 : ordinal == FirstPartOrdinal ? Guid.Parse(NewFirstPartIdText) : Guid.Parse(NewSecondPartIdText);
             Submit(database, OperationKind.WriteBlobPart, id,
-                new WriteBlobPartRequest(id, BlobCommitCutProtocol.Blob, upload, ordinal, part, digest), operations, results);
+                new WriteBlobPartRequest(id, BlobCommitCutProtocol.Blob, upload, ordinal, part, digest), operations, results, expectedTokens);
             integrity = BlobIntegrity.NextHash(integrity, ordinal, part.Length, digest);
         }
         return integrity;
     }
 
     private static void Submit<T>(DatabaseEngine database, OperationKind kind, Guid id, T request,
-        List<byte[]> operations, List<byte[]> results)
+        List<byte[]> operations, List<byte[]> results, List<CommitToken> expectedTokens)
     {
         var operation = database.CreateCommand(kind, id, BlobCommitCutProtocol.Principal,
             database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(request));
+        var expectedToken = CrashDatabase.NextCommitToken(database, BlobCommitCutProtocol.Partition);
         var result = database.Apply(operation);
         if (Errors.Code(result.Problem) is not null)
         {
@@ -97,6 +101,7 @@ internal static class BlobCommitCutSeed
         }
         operations.Add(NativeSerialization.Serialize(operation));
         results.Add(NativeSerialization.Serialize(result));
+        expectedTokens.Add(expectedToken);
     }
 
     private static string Image(ZoneTreeStore store) => store.Read(view =>

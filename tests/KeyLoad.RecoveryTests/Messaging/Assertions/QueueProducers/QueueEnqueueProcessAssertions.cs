@@ -9,13 +9,8 @@ namespace KeyLoad.RecoveryTests.Features.Messaging;
 
 internal static class QueueEnqueueProcessAssertions
 {
-    internal static CommitToken Next(DatabaseEngine owner, ZoneTreeStore store)
-    {
-        var placement = owner.ReadAtomicPartitionPlacement(CrashFixtureValues.Principal,
-            QueueEnqueueCrashProtocol.Partition);
-        return new(placement.Incarnation, QueueEnqueueCrashProtocol.Partition.AtomicPartitionId,
-            checked(store.Position + QueueEnqueueCrashProtocol.First));
-    }
+    internal static CommitToken Next(DatabaseEngine owner)
+        => CrashDatabase.NextCommitToken(owner, QueueEnqueueCrashProtocol.Partition);
 
     internal static async Task ReceiptAsync(Result<object> result, CommandRequest command, CommitToken expected)
         => await QueueEnqueueProcessValueAssertions.EqualAsync(result.Get<CommitReceipt>(), new CommitReceipt(command.CommandId, expected, command.Mutations.Select(mutation => mutation switch

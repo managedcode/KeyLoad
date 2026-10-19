@@ -5,6 +5,7 @@ internal static class EventAppendCrashContract
     internal const string Mode = "event-append-seeded-crash";
     internal const string OperationFile = "event-append-input.bin";
     internal const string SeedPositionFile = "event-append-seed-position.bin";
+    internal const string TargetFile = "event-append-target-token.bin";
     internal const string SeedTailFile = "event-append-seed-tail.bin";
     internal const string Documents = "append-documents";
     internal const string DocumentIndex = "producer";

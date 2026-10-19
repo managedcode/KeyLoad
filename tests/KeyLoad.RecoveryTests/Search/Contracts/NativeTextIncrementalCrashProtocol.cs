@@ -12,6 +12,7 @@ internal static class NativeTextIncrementalCrashProtocol
     internal const string Verify = "native-text-incremental-verify";
     internal const string RequestFile = "text-incremental-request.bin";
     internal const string OriginalFile = "text-incremental-original.bin";
+    internal const string CreationFile = "text-incremental-creation.bin";
     internal const string RecoveredFile = "text-incremental-recovered.bin";
     internal const string HealthyFile = "text-incremental-healthy.bin";
     internal const string VerifiedFile = "text-incremental-verified.bin";

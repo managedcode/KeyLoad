@@ -16,6 +16,9 @@ internal static class LocalInboxProcessingProcessRecovery
         var original = await CommandIdempotencyCrashData.ReadEvidenceAsync<Command<DatabaseCommand>>(root, LocalInboxProcessingCrashContract.OperationFile, token);
         var input = await CommandIdempotencyCrashData.ReadEvidenceAsync<MessageInspection>(root, LocalInboxProcessingCrashContract.InputFile, token);
         var position = await CommandIdempotencyCrashData.ReadEvidenceAsync<long>(root, LocalInboxProcessingCrashContract.PositionFile, token);
+        var target = await CommandIdempotencyCrashData.ReadEvidenceAsync<CommitToken>(root, LocalInboxProcessingCrashContract.TargetFile, token);
+        var collection = await CommandIdempotencyCrashData.ReadEvidenceAsync<Command<DatabaseCommand>>(root, LocalInboxProcessingCrashContract.CollectionFile, token);
+        var lifetime = await LocalInboxProcessingRecoveryModels.LifetimeAsync(collection);
         var tail = await CommandIdempotencyCrashData.ReadEvidenceAsync<long>(root, LocalInboxProcessingCrashContract.TailFile, token);
         LocalInboxProcessingRecoveryState? state = null;
         string[] image = [];
@@ -35,17 +38,17 @@ internal static class LocalInboxProcessingProcessRecovery
                 {
                     await Assert.That(outcome).IsNotNull();
                 }
-                await LocalInboxProcessingRecoveryImage.CutAsync(database, store, original, input, position, tail, outcome is not null);
+                await LocalInboxProcessingRecoveryImage.CutAsync(database, store, original, input, position, tail, outcome is not null, lifetime);
                 var reconciled = database.Apply(original);
-                await LocalInboxProcessingRecoveryReceipt.RequireAsync(store, original, reconciled.Get<CommitReceipt>(), position + 1L, tail);
+                await LocalInboxProcessingRecoveryReceipt.RequireAsync(store, original, reconciled.Get<CommitReceipt>(), target, tail, lifetime);
                 originalRows = LocalInboxProcessingRecoveryOriginalRows.Capture(store, original, tail);
-                await LocalInboxProcessingRecoveryImage.CutAsync(database, store, original, input, position, tail, committed: true);
+                await LocalInboxProcessingRecoveryImage.CutAsync(database, store, original, input, position, tail, committed: true, lifetime);
                 if (outcome is not null)
                 {
-                    await LocalInboxProcessingRecoveryImage.ReplayAsync(database, store, original, outcome);
+                    await LocalInboxProcessingRecoveryImage.ReplayAsync(database, store, original, outcome.Value);
                     await LocalInboxProcessingRecoveryOriginalRows.SameAsync(store, originalRows);
                 }
-                state = await LocalInboxProcessingRecoveryContinuation.RunAsync(database, store, original, reconciled, originalRows);
+                state = await LocalInboxProcessingRecoveryContinuation.RunAsync(database, store, original, reconciled, originalRows, lifetime);
                 await LocalInboxProcessingRecoveryOriginalRows.SameAsync(store, originalRows);
                 image = LocalInboxProcessingRecoveryImage.All(store);
                 finalPosition = store.Position;
@@ -55,6 +58,13 @@ internal static class LocalInboxProcessingProcessRecovery
         ServerFailureObserver.ThrowIfAny(failures);
         ArgumentNullException.ThrowIfNull(state);
         ArgumentNullException.ThrowIfNull(identity);
+        await VerifyColdAsync(root, state, image, finalPosition, identity, originalRows, lifetime, failures);
+    }
+
+    private static async Task VerifyColdAsync(string root, LocalInboxProcessingRecoveryState state,
+        string[] image, long finalPosition, StoreIdentity identity, (byte[] Key, byte[] Value)[] originalRows,
+        EntityRefLifetimeV1 lifetime, List<Exception> failures)
+    {
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             RequireOriginalRoot(root);
@@ -70,21 +80,21 @@ internal static class LocalInboxProcessingProcessRecovery
                 await Assert.That(LocalInboxProcessingRecoveryImage.All(store)).IsEquivalentTo(image, CollectionOrdering.Matching);
                 await LocalInboxProcessingRecoveryOriginalRows.SameAsync(store, originalRows);
                 var database = TargetInboxRecoveryDatabase.Open(store);
-                await VerifyContinuationAsync(database, store, state, originalRows);
+                await VerifyContinuationAsync(database, store, state, originalRows, lifetime);
             }, failures);
         }, failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
     private static async Task VerifyContinuationAsync(KeyLoad.Core.DatabaseEngine database, ZoneTreeStore store,
-        LocalInboxProcessingRecoveryState state, (byte[] Key, byte[] Value)[] originalRows)
+        LocalInboxProcessingRecoveryState state, (byte[] Key, byte[] Value)[] originalRows, EntityRefLifetimeV1 lifetime)
     {
         foreach (var item in state.History)
         {
             await LocalInboxProcessingRecoveryImage.ReplayAsync(database, store, item.Operation, item.Result);
             await LocalInboxProcessingRecoveryOriginalRows.SameAsync(store, originalRows);
         }
-        await LocalInboxProcessingRecoveryHealthy.ModelsAsync(database);
+        await LocalInboxProcessingRecoveryHealthy.ModelsAsync(database, lifetime);
         await LocalInboxProcessingRecoveryReceiveFence.RequireAsync(database, store, state);
         await LocalInboxProcessingRecoveryOriginalRows.SameAsync(store, originalRows);
     }

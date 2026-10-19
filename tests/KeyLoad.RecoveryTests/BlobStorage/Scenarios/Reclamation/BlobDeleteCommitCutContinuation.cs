@@ -14,13 +14,14 @@ internal static class BlobDeleteCommitCutContinuation
         var operation = owner.CreateCommand(OperationKind.ReclaimBlob, request.CommandId, BlobCommitCutProtocol.Principal,
             owner.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(request));
         var cut = owner.Store.Position;
+        var expectedToken = CrashDatabase.NextCommitToken(owner, BlobCommitCutProtocol.Partition);
         var result = owner.Apply(operation);
         await Assert.That(Errors.Code(result.Problem)).IsNull();
         var value = result.Get<BlobCommitResult<BlobReclaimResult>>();
         await BlobDeleteCommitCutOracle.ExactAsync(value.Value, new BlobReclaimResult(BlobCommitCutProtocol.OriginalUpload, 1, 0, 4, true));
-        await BlobDeleteCommitCutOracle.ExactAsync(value.Receipt, new CommitReceipt(request.CommandId, new CommitToken(proof.Incarnation, BlobCommitCutProtocol.Partition.AtomicPartitionId, cut + 1), [], DurabilityProfile.ProcessDurable, 1));
+        await BlobDeleteCommitCutOracle.ExactAsync(value.Receipt, new CommitReceipt(request.CommandId, expectedToken, [], DurabilityProfile.ProcessDurable, 1));
         await Assert.That(value.Receipt.CommandId).IsEqualTo(request.CommandId);
-        await Assert.That(value.Receipt.Token.Position).IsEqualTo(cut + 1);
+        await Assert.That(value.Receipt.Token.Position).IsEqualTo(expectedToken.Position);
         await Assert.That(owner.Store.Position).IsEqualTo(cut + 1);
         await BlobDeleteCommitCutAssertions.PublishedAsync(owner, proof, selected, deleted: true, reclaimed: true);
         await ReplayAsync(owner, operation, result);

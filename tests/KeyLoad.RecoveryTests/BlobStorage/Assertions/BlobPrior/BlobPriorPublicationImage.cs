@@ -36,10 +36,11 @@ internal static class BlobPriorPublicationImage
         await SameAsync(store, image, position, identity);
     }
 
-    internal static async Task ReceiptAsync(DatabaseEngine owner, CommitReceipt receipt, Guid command, BlobRef blob)
+    internal static async Task ReceiptAsync(DatabaseEngine owner, CommitReceipt receipt, BlobPriorPublicationCommand command, BlobRef blob)
     {
-        await Assert.That(receipt.CommandId).IsEqualTo(command);
-        await Assert.That(receipt.Token.Position).IsEqualTo(owner.Store.Position);
+        await Assert.That(receipt.CommandId).IsEqualTo(command.Operation.CommandId);
+        await ExactAsync(receipt.Token, command.ExpectedToken);
+        await Assert.That(owner.Store.Position).IsEqualTo(checked(command.PreviousPosition + 1L));
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(blob.Partition.AtomicPartitionId);
         await Assert.That(receipt.Durability).IsEqualTo(owner.Store.Identity.Durability);
         await Assert.That(receipt.Mutations).IsEmpty();

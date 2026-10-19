@@ -24,7 +24,8 @@ internal static class SampleRollupCrashReplay
             File.ReadAllBytes(Path.Combine(directory, SampleRollupCrashContract.OperationFile)));
         var first = database.ApplyEmbedded(operation, cancellationToken: default).Get<CommitReceipt>();
         var kind = drop ? SampleRollupProtocol.DropKind : SampleRollupProtocol.RefreshKind;
-        if (first.CommandId != SampleRollupCrashContract.InflightId || first.Token.Position != position
+        var expectedToken = SampleChunkSnapshotFile.ReadExpectedToken(directory, SampleRollupCrashContract.InflightId, database.Limits.MaxBatchBytes);
+        if (first.CommandId != SampleRollupCrashContract.InflightId || first.Token != expectedToken
             || first.Token.AtomicPartitionId != SampleRollupCrashContract.Partition.AtomicPartitionId
             || first.Durability != DurabilityProfile.ProcessDurable || first.Mutations.Length != OneMutation
             || !NativeSerialization.Serialize(first.Mutations[FirstMutation]).SequenceEqual(

@@ -38,7 +38,7 @@ internal static class ChunkMultiblockCrashScenario
         var database = ChunkMultiblockCrashProtocol.IsPrepare(mode) ? CrashDatabase.Create(store) : SampleChunkCrashScenario.OpenExisting(store);
         if (ChunkMultiblockCrashProtocol.IsPrepare(mode))
         {
-            ChunkMultiblockCrashOperations.Seed(database, merge);
+            ChunkMultiblockCrashOperations.Seed(root, database, merge);
             await File.WriteAllBytesAsync(Path.Combine(root, SampleChunkCrashContract.OriginalReceiptFile),
                 NativeSerialization.Serialize(SampleChunkCrashOperations.OriginalAcknowledged(database))).ConfigureAwait(false);
             await ChunkMultiblockCrashState.WriteAsync(root, SampleChunkCrashContract.PreparedFile, database, merge).ConfigureAwait(false);
@@ -64,6 +64,7 @@ internal static class ChunkMultiblockCrashScenario
             [ChunkMultiblockCrashOperations.Intended(merge)]);
         var original = CrashDatabase.Operation(database, OperationKind.Batch, request, request.CommandId);
         await File.WriteAllBytesAsync(Path.Combine(root, SampleChunkCrashContract.OriginalOperationFile), NativeSerialization.Serialize(original)).ConfigureAwait(false);
+        SampleChunkSnapshotFile.CaptureExpectedToken(root, request.CommandId, database, request.Partition);
         boundary.Position = checked(database.Store.Position + SampleChunkCrashContract.PositionStep);
         boundary.Armed = true;
         database.ApplyEmbedded(original, cancellationToken: default).Get<CommitReceipt>();

@@ -20,7 +20,8 @@ public sealed partial class DatabaseEngine
         return Store.Read(raw =>
         {
             budget.ConstrainLifetime(prepared.OriginalExpiry);
-            var principal = Principal(budget.CreateView(raw), principalId, evaluatedAt);
+            var view = budget.CreateView(raw);
+            var principal = Principal(view, principalId, evaluatedAt);
             if (!principal.ClusterAdministrator)
             {
                 throw Errors.Fail(ErrorCode.PermissionDenied, OnlineTextPublicationProtocol.AdministratorRequired);
@@ -35,7 +36,7 @@ public sealed partial class DatabaseEngine
             RequireNativeBudget(payload.Length);
             return CreatePreparedCommand(OperationKind.OnlineTextPublicationPhase, command.Request.CommandId,
                 principalId, evaluatedAt, payload, DatabaseCommandFingerprint.Compute(command.Request.CommandId,
-                    OperationKind.OnlineTextPublicationPhase, principalId, Identity<OnlineTextPublicationPhaseCommand>(payload)), budget);
+                    OperationKind.OnlineTextPublicationPhase, principalId, Identity<OnlineTextPublicationPhaseCommand>(payload)), budget, view);
         });
     }
 }

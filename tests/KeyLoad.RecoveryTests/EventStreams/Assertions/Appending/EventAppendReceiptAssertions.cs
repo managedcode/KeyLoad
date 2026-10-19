@@ -13,13 +13,13 @@ internal static class EventAppendReceiptAssertions
     private const string EnqueueKind = "enqueue";
     private const string OutboxSpace = "outbox";
 
-    internal static async Task VerifyAsync(IAtomicStore store, CommitReceipt receipt, long expectedPosition)
+    internal static async Task VerifyAsync(IAtomicStore store, CommitReceipt receipt, CommitToken expectedToken)
     {
         await Assert.That(receipt.CommandId).IsEqualTo(EventAppendCrashContract.CommandId);
         await Assert.That(receipt.Durability).IsEqualTo(store.Identity.Durability);
         await Assert.That(receipt.Token.Incarnation).IsEqualTo(store.Identity.Incarnation);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(EventAppendCrashContract.Partition.AtomicPartitionId);
-        await Assert.That(receipt.Token.Position).IsEqualTo(expectedPosition);
+        await Assert.That(receipt.Token).IsEqualTo(expectedToken);
 
         var expected = new[] { new MutationReceipt(PutKind, EventAppendCrashContract.Documents, EventAppendCrashContract.Producer, 1),
             new MutationReceipt(AppendKind, EventAppendCrashContract.Streams, EventAppendCrashContract.StreamId, 2),
@@ -48,8 +48,8 @@ internal static class EventAppendReceiptAssertions
                 .IsEqualTo(JsonSerializer.Serialize(request.Mutations[index], JsonDefaults.Options));
             if (index == 0)
             {
-                var image = new DocumentRecord(new(EventAppendCrashContract.Partition,
-                    EventAppendCrashContract.Documents, producer), 1L, EventAppendCrashContract.DocumentJson, new(), time);
+                var reference = await EventAppendCollectionAssertions.ReferenceAsync(store, producer);
+                var image = new DocumentRecord(reference, 1L, EventAppendCrashContract.DocumentJson, new(), time);
                 await Assert.That(Convert.ToHexString(NativeSerialization.Serialize(entry.After)))
                     .IsEqualTo(Convert.ToHexString(NativeSerialization.Serialize(image)));
             }
@@ -70,12 +70,12 @@ internal static class EventAppendReceiptAssertions
         }
     }
 
-    internal static async Task VerifyHealthyAsync(IAtomicStore store, CommitReceipt receipt)
+    internal static async Task VerifyHealthyAsync(IAtomicStore store, CommitReceipt receipt, CommitToken expectedToken)
     {
         await Assert.That(receipt.CommandId).IsEqualTo(EventAppendCrashContract.HealthyCommandId);
         await Assert.That(receipt.Token.Incarnation).IsEqualTo(store.Identity.Incarnation);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(EventAppendCrashContract.Partition.AtomicPartitionId);
-        await Assert.That(receipt.Token.Position).IsEqualTo(store.Position);
+        await Assert.That(receipt.Token).IsEqualTo(expectedToken);
 
         await Assert.That(receipt.Durability).IsEqualTo(store.Identity.Durability);
         var expected = new[] { new MutationReceipt(PutKind, EventAppendCrashContract.Documents, EventAppendCrashContract.Healthy, 1),

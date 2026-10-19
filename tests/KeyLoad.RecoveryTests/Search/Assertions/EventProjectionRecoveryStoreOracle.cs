@@ -82,7 +82,7 @@ internal static class EventProjectionRecoveryStoreOracle
     }
 
     internal static async Task AssertReceiptAndOutboxAsync(ZoneTreeStore store, DatabaseEngine database,
-        Command<DatabaseCommand> operation, CommitReceipt receipt, long beforeTail)
+        Command<DatabaseCommand> operation, CommitReceipt receipt, CommitToken expectedToken, long beforeTail)
     {
         await Assert.That(receipt.CommandId).IsEqualTo(operation.CommandId);
         await Assert.That(receipt.Mutations.Length).IsEqualTo(1);
@@ -90,7 +90,7 @@ internal static class EventProjectionRecoveryStoreOracle
         await Assert.That(receipt.Mutations[0].Resource).IsEqualTo(EventProjectionCrashScenario.Collection);
         await Assert.That(receipt.Mutations[0].Id).IsEqualTo(EventProjectionCrashScenario.TargetId);
         await Assert.That(receipt.Mutations[0].Revision).IsEqualTo(EventProjectionCrashScenario.DocumentRevision);
-        await Assert.That(receipt.Token.Position).IsEqualTo(store.Position);
+        await Assert.That(receipt.Token).IsEqualTo(expectedToken);
         var durable = OutcomeStoreOracle.Read(database.Store, operation)?.Get<CommitReceipt>();
         await Assert.That(durable is not null && JsonDefaults.Serialize(durable).AsSpan()
             .SequenceEqual(JsonDefaults.Serialize(receipt))).IsTrue();
@@ -98,7 +98,7 @@ internal static class EventProjectionRecoveryStoreOracle
         await Assert.That(outbox.Head?.Tail).IsEqualTo(beforeTail + 1);
         await Assert.That(outbox.Entry?.Sequence).IsEqualTo(beforeTail + 1);
         await Assert.That(outbox.Entry?.Ordinal).IsEqualTo(0);
-        await Assert.That(outbox.Entry?.Commit).IsEqualTo(receipt.Token);
+        await Assert.That(outbox.Entry?.Commit).IsEqualTo(expectedToken);
         await Assert.That(outbox.Entry?.Receipt.Kind).IsEqualTo(EventProjectionCrashScenario.MutationKind);
         await Assert.That(outbox.Entry?.Mutation is ApplyVectorProjection).IsTrue();
         var vectorBytes = outbox.Vector

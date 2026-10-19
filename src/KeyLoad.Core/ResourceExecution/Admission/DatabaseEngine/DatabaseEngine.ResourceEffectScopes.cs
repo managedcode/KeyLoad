@@ -18,6 +18,13 @@ public sealed partial class DatabaseEngine
         switch (operation.Value!.Kind)
         {
             case OperationKind.Batch:
+                foreach (var mutation in Payload<CommandRequest>(operation).Mutations)
+                {
+                    if (mutation is AdvanceQueueTransferRepair repair)
+                    {
+                        ObserveRemoteTransferRepairDestination(view, principal, repair);
+                    }
+                }
                 return;
             case OperationKind.Receive:
             case OperationKind.Processing:

@@ -34,15 +34,15 @@ internal static class QueueClaimAckCrashScenario
         }
         await File.WriteAllBytesAsync(Path.Combine(directory, QueueClaimAckCrashProtocol.OperationFile),
             NativeSerialization.Serialize(operation));
-        var placement = database.ReadAtomicPartitionPlacement(CrashFixtureValues.Principal,
-            QueueClaimAckCrashProtocol.Partition);
-        var target = new CommitToken(placement.Incarnation, QueueClaimAckCrashProtocol.Partition.AtomicPartitionId,
-            checked(store.Position + QueueClaimAckCrashProtocol.AdjacentPosition));
+        var target = CrashDatabase.NextCommitToken(database, QueueClaimAckCrashProtocol.Partition);
+        var physicalTarget = checked(store.Position + QueueClaimAckCrashProtocol.AdjacentPosition);
         await File.WriteAllBytesAsync(Path.Combine(directory, QueueClaimAckCrashProtocol.BaselineFile),
             NativeSerialization.Serialize(CaptureBaseline(store)));
         await File.WriteAllBytesAsync(Path.Combine(directory, QueueClaimAckCrashProtocol.TargetFile),
             NativeSerialization.Serialize(target));
-        boundary.Position = target.Position;
+        await File.WriteAllBytesAsync(Path.Combine(directory, QueueClaimAckCrashProtocol.PhysicalTargetFile),
+            NativeSerialization.Serialize(physicalTarget));
+        boundary.Position = physicalTarget;
         boundary.Armed = true;
         _ = database.Apply(operation);
         await RecoveryProcessPause.WaitForKillAsync();

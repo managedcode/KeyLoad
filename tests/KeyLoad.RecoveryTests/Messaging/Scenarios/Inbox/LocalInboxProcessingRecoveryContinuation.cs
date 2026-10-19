@@ -13,7 +13,7 @@ internal static class LocalInboxProcessingRecoveryContinuation
     private const string StaleDetail = "The delivery lease is stale.";
 
     internal static async Task<LocalInboxProcessingRecoveryState> RunAsync(DatabaseEngine database, ZoneTreeStore store,
-        Command<DatabaseCommand> original, Result<object> result, (byte[] Key, byte[] Value)[] originalRows)
+        Command<DatabaseCommand> original, Result<object> result, (byte[] Key, byte[] Value)[] originalRows, EntityRefLifetimeV1 lifetime)
     {
         var history = new List<(Command<DatabaseCommand>, Result<object>)> { (original, result) };
         var request = NativeSerialization.Deserialize<ProcessingRequest>(original.Value!.Input.Span, NativeValidationProfile.PublicInputElements);
@@ -41,7 +41,7 @@ internal static class LocalInboxProcessingRecoveryContinuation
         });
         history.Add((stale, await RefuseAsync(database, store, stale, ErrorCode.StaleLease, StaleDetail, originalRows)));
         await LocalInboxProcessingRecoveryOriginalRows.SameAsync(store, originalRows);
-        var (receiveOperation, received) = await LocalInboxProcessingHealthyContinuation.RunAsync(database, store, original, history, originalRows);
+        var (receiveOperation, received) = await LocalInboxProcessingHealthyContinuation.RunAsync(database, store, original, history, originalRows, lifetime);
         await LocalInboxProcessingRecoveryOriginalRows.SameAsync(store, originalRows);
         foreach (var entry in history)
         {

@@ -10,6 +10,7 @@ internal static class EventAppendCrashScenario
     private const string CollectionCommand = "4d10a82c-bc9a-49d3-b8db-4d0150e325ea";
     private const string StreamCommand = "8184f9f0-2bbf-4b16-9860-f0d509826a53";
     private const string QueueCommand = "81c785fd-22ec-4676-87fa-01f93b9b1f9a";
+    internal static Guid CollectionCommandId { get; } = Guid.Parse(CollectionCommand);
 
     internal static async Task RunAsync(string directory, ZoneTreeStore store, CanonicalCrashBoundary boundary)
     {
@@ -26,6 +27,8 @@ internal static class EventAppendCrashScenario
         database.Apply(database.CreateCommand(OperationKind.Batch, seed.CommandId, CrashFixtureValues.Principal, new DateTimeOffset(operation.Timestamp), NativeSerialization.Serialize(seed))).Get<CommitReceipt>();
         await CommandIdempotencyCrashData.SaveEvidenceAsync(directory, EventAppendCrashContract.OperationFile, operation);
         await CommandIdempotencyCrashData.SaveEvidenceAsync(directory, EventAppendCrashContract.SeedPositionFile, store.Position);
+        await CommandIdempotencyCrashData.SaveEvidenceAsync(directory, EventAppendCrashContract.TargetFile,
+            CrashDatabase.NextCommitToken(database, EventAppendCrashContract.Partition));
         await CommandIdempotencyCrashData.SaveEvidenceAsync(directory, EventAppendCrashContract.SeedTailFile,
             database.GetOutboxStatus(EventAppendCrashContract.Principal, EventAppendCrashContract.Partition).Head.Tail);
         boundary.Position = store.Position + PositionStep;

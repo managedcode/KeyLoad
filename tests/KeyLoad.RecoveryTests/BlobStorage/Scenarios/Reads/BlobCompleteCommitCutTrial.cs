@@ -92,12 +92,11 @@ internal static class BlobCompleteCommitCutTrial
         await BlobCompleteCommitCutOracle.ExactAsync(completed.Value, BlobCompleteCommitCutOracle.Metadata(proof,
             original, BlobCommitCutProtocol.NewUpload, BlobCompleteCommitCutOracle.MultipartPayload(), 2));
         var receipt = completed.Receipt;
-        await BlobCompleteCommitCutOracle.ExactAsync(receipt, new CommitReceipt(original.CommandId, new CommitToken(proof.Incarnation, BlobCommitCutProtocol.Partition.AtomicPartitionId,
-                proof.Position + CommitDelta), [], DurabilityProfile.ProcessDurable, 1));
+        await BlobCompleteCommitCutOracle.ExactAsync(receipt, new CommitReceipt(original.CommandId, proof.TargetToken, [], DurabilityProfile.ProcessDurable, 1));
         await Assert.That(receipt.CommandId).IsEqualTo(original.CommandId);
         await Assert.That(receipt.Token.Incarnation).IsEqualTo(proof.Incarnation);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(BlobCommitCutProtocol.Partition.AtomicPartitionId);
-        await Assert.That(receipt.Token.Position).IsEqualTo(proof.Position + CommitDelta);
+        await Assert.That(receipt.Token.Position).IsEqualTo(proof.TargetToken.Position);
         await Assert.That(receipt.Durability).IsEqualTo(store.Identity.Durability);
         await Assert.That(receipt.Mutations).IsEmpty();
         await Assert.That(store.Position).IsEqualTo(proof.Position + CommitDelta);

@@ -47,6 +47,7 @@ internal static class SampleChunkEarlyCrashScenario
         var operation = CrashDatabase.Operation(database, OperationKind.Batch, request, request.CommandId);
         await File.WriteAllBytesAsync(Path.Combine(root, SampleChunkCrashContract.OriginalOperationFile),
             NativeSerialization.Serialize(operation)).ConfigureAwait(false);
+        SampleChunkSnapshotFile.CaptureExpectedToken(root, request.CommandId, database, request.Partition);
         boundary.Position = checked(database.Store.Position + SampleChunkCrashContract.PositionStep);
         boundary.Armed = true;
         database.ApplyEmbedded(operation, cancellationToken: default).Get<CommitReceipt>();

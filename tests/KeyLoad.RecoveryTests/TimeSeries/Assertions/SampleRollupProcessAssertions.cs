@@ -80,7 +80,9 @@ internal static class SampleRollupProcessAssertions
         var receipt = NativeSerialization.Deserialize<CommitReceipt>(originalReceipt);
         await Assert.That(receipt.CommandId).IsEqualTo(SampleRollupCrashContract.AcknowledgedId);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(SampleRollupCrashContract.Partition.AtomicPartitionId);
-        await Assert.That(receipt.Token.Position).IsEqualTo(prepared.Position);
+        var expectedToken = SampleChunkSnapshotFile.ReadExpectedToken(root, SampleRollupCrashContract.AcknowledgedId,
+            RecoveryExecutionOptions.DatabaseLimits().Value.MaxBatchBytes);
+        await Assert.That(receipt.Token).IsEqualTo(expectedToken);
         await Assert.That(receipt.Token.Incarnation).IsNotEqualTo(Guid.Empty);
 
         await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
