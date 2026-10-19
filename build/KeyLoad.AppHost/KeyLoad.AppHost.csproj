@@ -3,6 +3,7 @@
   <PropertyGroup>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <IsAspireHost>true</IsAspireHost>
+    <UserSecretsId>KeyLoad.AppHost</UserSecretsId>
     <AspireUseCliBundle>true</AspireUseCliBundle>
     <OutputType>Exe</OutputType>
     <IsPackable>false</IsPackable>

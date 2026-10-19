@@ -1,6 +1,5 @@
 using System.Text;
 using Aspire.Hosting.ApplicationModel;
-using KeyLoad.IntegrationTests.Features.StorageReplication;
 using Microsoft.Extensions.DependencyInjection;
 using P = KeyLoad.IntegrationTests.Features.DatabaseComposition.FunctionalGateFileOwnershipProtocol;
 
@@ -11,7 +10,7 @@ internal static class FunctionalGateFileOwnershipLogs
 {
     internal static async Task<string> ReadAsync(FunctionalGateFixture fixture, string name, CancellationToken token)
     {
-        var profile = ClusterFixtureProfile.ReadProfile(fixture.Root);
+        var profile = fixture.Identity;
         string[] secrets = [profile.AdminKey, profile.SigningKey];
         var output = new StringBuilder();
         var logs = fixture.App.Services.GetRequiredService<ResourceLoggerService>();

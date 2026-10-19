@@ -12,14 +12,14 @@ internal sealed class ModelSqlClusterColdOwnership
     private const string Changed = "An original owned SQL cold restart receipt changed.";
 
     private ModelSqlClusterColdOwnership(ClusterFixture fixture)
-        => incarnation = ClusterFixtureProfile.ReadProfile(fixture.Root).Incarnation;
+        => incarnation = fixture.Identity.Incarnation;
 
     internal static ModelSqlClusterColdOwnership Require(ClusterFixture fixture)
         => Owners.GetValue(fixture, static owner => new(owner));
 
     internal string Claim(ClusterFixture fixture)
     {
-        if (ClusterFixtureProfile.ReadProfile(fixture.Root).Incarnation != incarnation)
+        if (fixture.Identity.Incarnation != incarnation)
         {
             throw new InvalidOperationException(Changed);
         }

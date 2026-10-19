@@ -1,6 +1,7 @@
 using Aspire.Hosting;
 using KeyLoad.AppHost.Hosting;
 using KeyLoad.Server;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.UnitTests.Features.TestInfrastructure.Helpers;
 
@@ -44,7 +45,17 @@ internal static class LoggerModelControlRejectionFlow
     private static async Task AssertAdmissionRejectedAsync(IDistributedApplicationBuilder builder, string name,
         string expectedRejectionMessage)
     {
-        var failure = Assert.ThrowsExactly<InvalidOperationException>(() => AppHostProgram.AddKeyLoad(builder));
+        Exception failure;
+        if (expectedRejectionMessage == AppHostStartupOptions.ValidationMessage)
+        {
+            var validation = Assert.ThrowsExactly<OptionsValidationException>(() => AppHostProgram.AddKeyLoad(builder));
+            await Assert.That(validation.OptionsType).IsEqualTo(typeof(AppHostStartupOptions)).Because(name);
+            failure = validation;
+        }
+        else
+        {
+            failure = Assert.ThrowsExactly<InvalidOperationException>(() => AppHostProgram.AddKeyLoad(builder));
+        }
         await Assert.That(failure.Message).IsEqualTo(expectedRejectionMessage).Because(name);
     }
 

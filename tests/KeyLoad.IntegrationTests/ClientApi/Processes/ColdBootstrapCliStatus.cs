@@ -32,8 +32,7 @@ internal static class ColdBootstrapCliStatus
         start.ArgumentList.Add(Path.Combine(ClusterFixtureDiagnostics.FindRepositoryRoot().FullName, CliAssembly));
         start.ArgumentList.Add(StatusCommand);
         start.ArgumentList.Add(fixture.App.GetEndpoint(McpCallerProtocol.Node1, McpCallerProtocol.HttpEndpoint).AbsoluteUri);
-        start.ArgumentList.Add(Path.Combine(fixture.Root, ClusterFixtureProtocol.ProfileFileName));
-        start.Environment.Remove(CredentialEnvironment);
+        start.Environment[CredentialEnvironment] = fixture.AdminKey;
         using var process = new Process { StartInfo = start };
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>

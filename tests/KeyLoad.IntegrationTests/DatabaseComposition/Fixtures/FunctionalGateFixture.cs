@@ -1,6 +1,7 @@
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
 using KeyLoad.AppHost.Features.TestInfrastructure;
+using KeyLoad.AppHost.Hosting;
 using KeyLoad.IntegrationTests.Features.StorageReplication;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -26,12 +27,14 @@ internal sealed partial class FunctionalGateFixture : IAsyncDisposable
     }
     internal DistributedApplication App { get; private set; } = null!;
     internal string AdminKey { get; private set; } = string.Empty;
+    internal ClusterIdentity Identity => App.Services.GetRequiredService<ClusterIdentity>();
+
     internal string[] NodeNames
     {
         get;
     }
     internal int ReplicaCount { get; }
-    internal string Root { get; } = Path.Combine(Path.GetTempPath(), "keyload-functional-" + Guid.NewGuid().ToString("N"));
+    internal string Root { get; } = ClusterDataDirectory.Resolve(Path.Combine(Path.GetTempPath(), "keyload-functional-" + Guid.NewGuid().ToString("N")));
     internal bool PreserveEvidence
     {
         get; set;
@@ -93,7 +96,7 @@ internal sealed partial class FunctionalGateFixture : IAsyncDisposable
     internal void OwnApplication(DistributedApplication app)
     {
         App = app;
-        var profile = ClusterFixtureProfile.ReadProfile(Root);
+        var profile = Identity;
         AdminKey = profile.AdminKey;
         diagnosticSecrets = [profile.SigningKey, profile.AdminKey];
         saveStartupEvidence = App.Services.GetRequiredService<ClusterFixtureStartupEvidence>().Save;

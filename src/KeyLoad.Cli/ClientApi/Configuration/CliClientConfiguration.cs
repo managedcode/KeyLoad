@@ -1,5 +1,4 @@
 using System.Globalization;
-using System.Text.Json;
 using KeyLoad.Client;
 using Microsoft.Extensions.Options;
 
@@ -9,21 +8,17 @@ namespace KeyLoad.Cli.Features.ClientApi;
 [ConfigurationBinding]
 internal static class CliClientConfiguration
 {
-    private const string AdminKeyPropertyName = "AdminKey";
     private const string KeyEnvironmentVariableName = "KEYLOAD_API_KEY";
     private const string StatusTimeoutEnvironmentVariableName = "KEYLOAD_CLI_STATUS_TIMEOUT";
     private const string ProblemBodyEnvironmentVariableName = "KEYLOAD_CLIENT__MAXPROBLEMBODYBYTES";
     private const string ConnectionValidationMessage = "The CLI endpoint and credential must be present.";
     private const int EndpointArgument = 1;
-    private const int ProfileArgument = 2;
-    private const int ArgumentsWithProfile = 3;
 
     internal static CliClientRuntimeOptions Read(string[] args)
     {
         var connection = Create<CliConnectionOptions>(options =>
         {
             options.ApiKey = Environment.GetEnvironmentVariable(KeyEnvironmentVariableName)
-                ?? (args.Length == ArgumentsWithProfile ? ProfileKey(args[ProfileArgument]) : null)
                 ?? throw Errors.Fail(ErrorCode.Unauthenticated,
                     CliClientApi.GetMessage(CliClientApi.MissingCredentialMessageKey));
             options.Endpoint = new Uri(args[EndpointArgument]);
@@ -71,9 +66,4 @@ internal static class CliClientConfiguration
             [new ConfigureNamedOptions<T>(Options.DefaultName, configure)], [],
             [new ValidateOptions<T>(Options.DefaultName, validate, message)]));
 
-    private static string ProfileKey(string path)
-    {
-        using var profile = JsonDocument.Parse(File.ReadAllBytes(path));
-        return profile.RootElement.GetProperty(AdminKeyPropertyName).GetString()!;
-    }
 }

@@ -5,5 +5,4 @@ namespace KeyLoad.AppHost.Hosting;
 
 internal sealed record AppHostRuntimeOptions(IOptions<TestExecutionOptions> TestExecution, IOptions<AppHostStartupOptions> Startup,
     IOptions<AppHostControlOptions> Control, IOptions<ClusterDeploymentOptions> Cluster,
-    IOptions<CommandAdmissionLimits> CommandAdmission, IOptions<HttpAdmissionLimits> HttpAdmission,
-    IOptions<ClusterProfileExecutionOptions> Profile);
+    IOptions<CommandAdmissionLimits> CommandAdmission, IOptions<HttpAdmissionLimits> HttpAdmission);

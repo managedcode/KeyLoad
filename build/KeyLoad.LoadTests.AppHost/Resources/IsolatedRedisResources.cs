@@ -74,7 +74,7 @@ internal static class IsolatedRedisResources
 
         var name = NodeNames[index];
         var directory = context.DataDirectory(name);
-        ClusterProfileStore.PrepareDirectory(directory);
+        Directory.CreateDirectory(directory);
         var node = UseTcp(context.Builder.AddRedis(name, password: password))
             .WithImageTag(Version).WithImageSHA256(BenchmarkResources.RedisDigest[ElementIndex..])
             .WithContainerNetworkAlias(name).WithDataBindMount(directory)

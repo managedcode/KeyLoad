@@ -1,3 +1,4 @@
+using System.Text;
 using KeyLoad.Client;
 
 namespace KeyLoad.IntegrationTests.Features.ClientApi;
@@ -31,23 +32,26 @@ internal static class ColdBootstrapSdkAssertions
             new(actual.Token.Incarnation, command.Partition.AtomicPartitionId, actual.Token.Position),
             [new(PutKind, ColdBootstrapSdkFlow.Collection, ColdBootstrapSdkFlow.Document, revision)],
             DurabilityProfile.ProcessDurable, 3);
-        await Assert.That(JsonDefaults.Serialize(actual).SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
+        await Assert.That(Encoding.UTF8.GetString(JsonDefaults.Serialize(actual)))
+            .IsEqualTo(Encoding.UTF8.GetString(JsonDefaults.Serialize(expected)));
     }
 
     internal static async Task DocumentAtMinimumAsync(KeyLoadClient sdk, EntityRef reference,
         CommitToken minimum, long revision, string json, CancellationToken token)
     {
-        var actual = await PublicReadAssertions.DocumentAsync(await sdk.GetAsync(reference, minimum, token));
+        var actual = await PublicReadAssertions.DocumentAsync(await sdk.GetAsync(reference with { Lifetime = null }, minimum, token));
         var expected = new DocumentResult(reference, revision, json, false, []);
-        await Assert.That(JsonDefaults.Serialize(actual).SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
+        await Assert.That(Encoding.UTF8.GetString(JsonDefaults.Serialize(actual)))
+            .IsEqualTo(Encoding.UTF8.GetString(JsonDefaults.Serialize(expected)));
     }
 
     internal static async Task DocumentAsync(KeyLoadClient sdk, EntityRef reference, long revision,
         string json, CancellationToken token)
     {
-        var actual = await PublicReadAssertions.DocumentAsync(await sdk.GetAsync(reference, token));
+        var actual = await PublicReadAssertions.DocumentAsync(await sdk.GetAsync(reference with { Lifetime = null }, token));
         await Assert.That(actual is not null).IsTrue();
         var expected = new DocumentResult(reference, revision, json, false, []);
-        await Assert.That(JsonDefaults.Serialize(actual).SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
+        await Assert.That(Encoding.UTF8.GetString(JsonDefaults.Serialize(actual)))
+            .IsEqualTo(Encoding.UTF8.GetString(JsonDefaults.Serialize(expected)));
     }
 }

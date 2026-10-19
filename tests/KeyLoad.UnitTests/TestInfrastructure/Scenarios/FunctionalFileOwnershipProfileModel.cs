@@ -62,7 +62,7 @@ internal static class FunctionalFileOwnershipProfileModel
         foreach (var resource in resources)
         {
             var contender = contenders.Contains(resource.Name, StringComparer.Ordinal);
-            var directory = Path.GetFullPath(Path.Combine(root, contender ? owner.Name : resource.Name));
+            var directory = ClusterDataDirectory.Resolve(Path.Combine(root, contender ? owner.Name : resource.Name));
             await Assert.That(Directory.Exists(directory)).IsTrue();
             await Assert.That(names.Add(resource.Name)).IsTrue();
             await Assert.That(resource.GetProjectMetadata().ProjectPath).IsEqualTo(owner.GetProjectMetadata().ProjectPath);

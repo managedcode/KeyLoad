@@ -27,9 +27,6 @@ internal static class AppHostProgram
     private const string SiloEndpoint = "silo";
     private const string TcpScheme = "tcp";
     private const string ReadyPath = "/health/ready";
-    private const string SigningParameter = "signing-key";
-    private const string AdminParameter = "admin-key";
-    private const string IncarnationParameter = "incarnation";
     private const string GuidFormat = "D";
     private const string ClusterGuidFormat = "N";
     private const string ClusterPrefix = "keyload-";
@@ -74,14 +71,14 @@ internal static class AppHostProgram
             throw new InvalidOperationException(InvalidMode);
         }
         var configuration = global::AppHostConfiguration.Read(builder);
-        var profile = global::ClusterProfileStore.Open(configuration.DataRoot, runtime.Profile);
-        AddCluster(builder, profile, configuration.DataRoot, configuration.Ephemeral,
+        var databaseIdentity = AppHostOptionsRegistration.CreateIdentity(builder, configuration.Ephemeral);
+        AddCluster(builder, databaseIdentity, configuration.DataRoot, configuration.Ephemeral,
             functionalNodeCount: control.FunctionalNodeCount);
     }
 
     /// <summary>Adds execution project silos with the configured isolated or shared physical storage path.</summary>
     internal static IResourceBuilder<ProjectResource>[] AddCluster(IDistributedApplicationBuilder builder,
-        LocalProfile profile, string dataRoot, bool ephemeral, int? benchmarkNodeCount = null, int? functionalNodeCount = null)
+        ClusterIdentity databaseIdentity, string dataRoot, bool ephemeral, int? benchmarkNodeCount = null, int? functionalNodeCount = null)
     {
         ArgumentNullException.ThrowIfNull(builder);
         ArgumentException.ThrowIfNullOrWhiteSpace(dataRoot);
@@ -99,18 +96,19 @@ internal static class AppHostProgram
         {
             throw new InvalidOperationException(ClusterDeploymentOptions.ValidationMessage);
         }
-        ClusterProfileStore.Validate(profile);
-        var root = Path.GetFullPath(dataRoot);
-        ClusterProfileStore.PrepareDirectory(root);
-        var identity = AddIdentityParameters(builder, profile);
+        databaseIdentity.Validate();
+        builder.Services.AddSingleton(databaseIdentity);
+        var root = ClusterDataDirectory.Resolve(dataRoot);
+        Directory.CreateDirectory(root);
+        var identity = AddIdentityParameters(builder, databaseIdentity);
         var nodes = new IResourceBuilder<ProjectResource>[nodeNames.Length];
         for (var index = FirstNodeIndex; index < nodes.Length; index++)
         {
-            nodes[index] = AddNode(builder, profile, root, ephemeral, nodeNames.Length,
+            nodes[index] = AddNode(builder, databaseIdentity, root, ephemeral, nodeNames.Length,
                 replicas, identity, nodeNames[index], index);
         }
         var contenders = ExclusiveOwnerContentionResources.Add(options.Control.Value.ExclusiveOwnerContention,
-            nodes[FirstNodeIndex], resourceName => AddNode(builder, profile, root, true,
+            nodes[FirstNodeIndex], resourceName => AddNode(builder, databaseIdentity, root, true,
                 nodeNames.Length, replicas, identity, ExclusiveOwnerContentionResources.OwnerName, FirstNodeIndex,
                 resourceName));
         var membershipSecret = builder.AddParameter(MembershipParameter,
@@ -129,7 +127,7 @@ internal static class AppHostProgram
     private const string SharedFilesDirectory = "files";
 
     private static IResourceBuilder<ProjectResource> AddNode(IDistributedApplicationBuilder builder,
-        LocalProfile profile, string root, bool ephemeral, int siloCount, int replicaCount,
+        ClusterIdentity databaseIdentity, string root, bool ephemeral, int siloCount, int replicaCount,
         (IResourceBuilder<ParameterResource> Signing, IResourceBuilder<ParameterResource> Admin,
             IResourceBuilder<ParameterResource> Incarnation) identity,
         string ownerName, int index, string? resourceName = null)
@@ -137,12 +135,12 @@ internal static class AppHostProgram
         resourceName ??= ownerName;
         var options = AppHostOptionsRegistration.Get(builder).Cluster.Value;
         var directory = Path.Combine(root, options.StorageMode == StorageAccessMode.SharedVolume ? SharedDirectory : ownerName);
-        ClusterProfileStore.PrepareDirectory(directory);
+        Directory.CreateDirectory(directory);
         var port = ephemeral ? (int?)null : options.FirstPublicPort + index;
         var resource = builder.AddProject<Projects.KeyLoad>(resourceName, launchProfileName: null)
             .WithHttpEndpoint(port: port, name: HttpEndpoint, isProxied: false)
             .WithEndpoint(name: SiloEndpoint, scheme: TcpScheme, isExternal: false, isProxied: false);
-        resource.WithEnvironment(ClusterEnvironment, ClusterPrefix + profile.Incarnation.ToString(ClusterGuidFormat))
+        resource.WithEnvironment(ClusterEnvironment, ClusterPrefix + databaseIdentity.Incarnation.ToString(ClusterGuidFormat))
             .WithEnvironment(PublicEnvironment, resource.GetEndpoint(HttpEndpoint))
             .WithEnvironment(ServerUrlsEnvironment, resource.GetEndpoint(HttpEndpoint))
             .WithEnvironment(SiloNameEnvironment, resourceName)
@@ -166,11 +164,11 @@ internal static class AppHostProgram
 
     private static (IResourceBuilder<ParameterResource> Signing, IResourceBuilder<ParameterResource> Admin,
         IResourceBuilder<ParameterResource> Incarnation)
-        AddIdentityParameters(IDistributedApplicationBuilder builder, LocalProfile profile)
+        AddIdentityParameters(IDistributedApplicationBuilder builder, ClusterIdentity databaseIdentity)
     {
-        var signing = builder.AddParameter(SigningParameter, profile.SigningKey, secret: true);
-        var admin = builder.AddParameter(AdminParameter, profile.AdminKey, secret: true);
-        var incarnation = builder.AddParameter(IncarnationParameter, profile.Incarnation.ToString(GuidFormat), secret: true);
+        var signing = builder.AddParameter(ClusterIdentity.SigningParameter, databaseIdentity.SigningKey, secret: true);
+        var admin = builder.AddParameter(ClusterIdentity.AdminParameter, databaseIdentity.AdminKey, secret: true);
+        var incarnation = builder.AddParameter(ClusterIdentity.IncarnationParameter, databaseIdentity.Incarnation.ToString(GuidFormat), secret: true);
         return (signing, admin, incarnation);
     }
 }

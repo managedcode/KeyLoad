@@ -9,7 +9,7 @@ internal static class FunctionalGateColdReopen
     {
         var execution = fixture.ColdRuntime
             ?? throw new InvalidOperationException("The original functional runtime is unavailable.");
-        var profile = ClusterFixtureProfile.ReadProfile(fixture.Root);
+        var profile = fixture.Identity;
         var scenario = ProcessRuntimeOwnedReceipt.Scenario(profile.Incarnation, 1);
         var stopped = await Task.WhenAll(fixture.NodeNames.Select(node => ObserveAsync(
             () => execution.KillAsync(node, scenario, token)))).ConfigureAwait(false);
@@ -26,7 +26,7 @@ internal static class FunctionalGateColdReopen
         var settled = await Task.WhenAll(fixture.NodeNames.Select(node => ObserveAsync(
             () => execution.RestartAsync(node, token)))).ConfigureAwait(false);
         ServerFailureObserver.ThrowIfAny([.. begun.SelectMany(item => item), .. settled.SelectMany(item => item)]);
-        await Assert.That(ClusterFixtureProfile.ReadProfile(fixture.Root).Incarnation).IsEqualTo(profile.Incarnation);
+        await Assert.That(fixture.Identity.Incarnation).IsEqualTo(profile.Incarnation);
     }
 
     private static async Task<Exception[]> ObserveAsync(Func<Task> operation)

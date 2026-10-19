@@ -28,7 +28,7 @@ internal static class IsolatedHelixDbResources
         }
 
         var directory = context.DataDirectory(Name);
-        ClusterProfileStore.PrepareDirectory(directory);
+        Directory.CreateDirectory(directory);
         var node = context.Builder.AddContainer(Name, Image, ImageTag)
             .WithImageSHA256(BenchmarkResources.HelixDbDigest[ElementIndex..])
             .WithContainerNetworkAlias(Name)

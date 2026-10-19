@@ -1,6 +1,5 @@
 using KeyLoad.Client;
 using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.StorageReplication;
 using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Features.QueryExecution;
@@ -17,7 +16,7 @@ internal static class CapabilityOutputClusterAssertions
         await Assert.That(actual.Token.Position).IsGreaterThan(0L);
         await Assert.That(actual.PersistedCopies).IsEqualTo(3);
         await Assert.That(actual.Token.Incarnation)
-            .IsEqualTo(ClusterFixtureProfile.ReadProfile(fixture.Root).Incarnation);
+            .IsEqualTo(fixture.Identity.Incarnation);
     }
 
     internal static async Task<string> ImageAsync(KeyLoadClient root, CapabilityOutputClusterState state, CancellationToken token)

@@ -85,8 +85,7 @@ internal sealed class ClusterPublishedPortPolicyTests
 
     private static string NewRoot() => Path.Combine(Path.GetTempPath(), "keyload-published-ports-" + Guid.NewGuid().ToString("N"));
 
-    private static LocalProfile CreateProfile() => new(ClusterProfileStore.CurrentVersion,
-        Guid.NewGuid(), Secret(), "root." + Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(32)));
+    private static ClusterIdentity CreateProfile() => new(Guid.NewGuid(), Secret(), "root." + Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(32)));
 
     private static string Secret() => Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
 }

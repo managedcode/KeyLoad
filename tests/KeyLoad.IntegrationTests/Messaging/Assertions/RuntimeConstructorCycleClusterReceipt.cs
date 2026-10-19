@@ -1,6 +1,5 @@
 using KeyLoad.Client;
 using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.StorageReplication;
 
 namespace KeyLoad.IntegrationTests.Features.Messaging;
 
@@ -18,7 +17,7 @@ internal static class RuntimeConstructorCycleClusterReceipt
             DurabilityProfile.ProcessDurable, 3);
         await SameAsync(receipt, expected);
         await Assert.That(receipt.Token.Incarnation).IsEqualTo(
-            ClusterFixtureProfile.ReadProfile(fixture.Root).Incarnation);
+            fixture.Identity.Incarnation);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(command.Partition.AtomicPartitionId);
         await Assert.That(receipt.PersistedCopies).IsEqualTo(3);
         await Assert.That(receipt.Token.Position).IsGreaterThan(0L);

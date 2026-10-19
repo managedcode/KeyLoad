@@ -1,4 +1,5 @@
 using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
 using KeyLoad.AppHost.Features.TestInfrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,9 +23,8 @@ internal static class AppHostOptionsRegistration
         var cluster = Bind<ClusterDeploymentOptions>(builder.Configuration, value => value.IsValid(), ClusterDeploymentOptions.ValidationMessage);
         var command = Bind<CommandAdmissionLimits>(builder.Configuration.GetSection(CommandAdmissionLimits.SectionName), value => Validate(value.Validate), CommandAdmissionLimits.ValidationMessage);
         var http = Bind<HttpAdmissionLimits>(builder.Configuration.GetSection(HttpAdmissionLimits.SectionName), value => Validate(value.Validate), HttpAdmissionLimits.ValidationMessage);
-        var profile = BindProfileExecution(builder.Configuration);
         var control = AppHostControlOptionsRegistration.Bind(builder.Configuration);
-        var runtime = new AppHostRuntimeOptions(execution, startup, control, cluster, command, http, profile);
+        var runtime = new AppHostRuntimeOptions(execution, startup, control, cluster, command, http);
         Register(builder.Services, runtime);
         return runtime;
     }
@@ -34,15 +34,19 @@ internal static class AppHostOptionsRegistration
         services.AddSingleton(runtime.Cluster);
         services.AddSingleton(runtime.CommandAdmission);
         services.AddSingleton(runtime.HttpAdmission);
-        services.AddSingleton(runtime.Profile);
         services.AddSingleton(runtime.Control);
         services.AddSingleton(runtime.TestExecution);
         services.AddSingleton(runtime.Startup);
     }
 
-    internal static IOptions<ClusterProfileExecutionOptions> BindProfileExecution(IConfiguration configuration) =>
-        Bind<ClusterProfileExecutionOptions>(configuration.GetSection(ClusterProfileExecutionOptions.SectionName),
-            value => value.IsValid(), ClusterProfileExecutionOptions.ValidationMessage);
+    internal static ClusterIdentity CreateIdentity(IDistributedApplicationBuilder builder, bool ephemeral)
+        => ephemeral ? new(Guid.NewGuid(), Convert.ToBase64String(RandomNumberGenerator.GetBytes(ClusterIdentity.SecretBytes)),
+            ClusterIdentity.AdminPrefix + Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(ClusterIdentity.SecretBytes)))
+            : BindIdentity(builder.Configuration).Value;
+
+    internal static IOptions<ClusterIdentity> BindIdentity(IConfiguration configuration) =>
+        Bind<ClusterIdentity>(configuration.GetSection(ClusterIdentity.SectionName),
+            identity => identity.IsValid(), ClusterIdentity.InvalidIdentity);
 
     internal static IOptions<TestExecutionOptions> BindTestExecution(IConfiguration configuration) =>
         Bind<TestExecutionOptions>(configuration.GetSection(TestExecutionOptions.SectionName),

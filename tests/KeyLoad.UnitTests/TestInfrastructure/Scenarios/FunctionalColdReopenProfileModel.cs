@@ -27,10 +27,8 @@ internal static class FunctionalColdReopenProfileModel
             await Assert.That(settings.FunctionalColdReopen).IsEqualTo(cold);
             await Assert.That(settings.ProcessFaults).IsEqualTo(faults);
             await Assert.That(settings.FunctionalNodeCount).IsEqualTo(nodes == 0 ? (int?)null : nodes);
-            var profileOptions = AppHostOptionsRegistration.Get(builder).Profile;
-            var profile = ClusterProfileStore.DeserializeCurrent(ClusterProfileStore.ReadBoundedBytes(
-                Path.Combine(root, ClusterProfileStore.ProfileName), profileOptions), profileOptions);
             app = builder.Build();
+            var profile = app.Services.GetRequiredService<ClusterIdentity>();
             await VerifyResourcesAsync(app, builder.ExecutionContext, root, nodes == 0 ? 3 : nodes, faults, profile.Incarnation);
         }, failures);
         if (app is not null)
@@ -56,7 +54,7 @@ internal static class FunctionalColdReopenProfileModel
             Enumerable.Range(1, nodes).Select(index => NodePrefix + index.ToString(CultureInfo.InvariantCulture)).ToArray());
         await Assert.That(model.Resources.OfType<ContainerResource>().Select(resource => resource.Name))
             .IsEmpty();
-        await Assert.That(File.Exists(Path.Combine(root, ClusterProfileStore.ProfileName))).IsTrue();
+        await Assert.That(Directory.GetFiles(root)).IsEmpty();
         foreach (var resource in resources)
         {
             var environment = new Dictionary<string, object>(StringComparer.Ordinal);
@@ -65,7 +63,7 @@ internal static class FunctionalColdReopenProfileModel
             {
                 await callback.Callback(context);
             }
-            var directory = Path.GetFullPath(Path.Combine(root, resource.Name));
+            var directory = ClusterDataDirectory.Resolve(Path.Combine(root, resource.Name));
             await Assert.That(environment[DataEnvironment]).IsEqualTo(directory);
             await Assert.That(environment[ClusterEnvironment]).IsEqualTo("keyload-" + incarnation.ToString("N"));
             await Assert.That(Directory.Exists(directory)).IsTrue();

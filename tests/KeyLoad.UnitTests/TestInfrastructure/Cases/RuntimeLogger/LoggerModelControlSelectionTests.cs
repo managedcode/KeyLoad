@@ -1,6 +1,5 @@
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
-using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.AppHost.Hosting;
 using KeyLoad.Server;
 using KeyLoad.UnitTests.Features.TestInfrastructure.Helpers;
@@ -16,8 +15,6 @@ internal sealed class LoggerModelControlSelectionTests
     private const string FalseValue = "false";
     private const string ComparisonTargetValue = "KeyLoad";
     private const string NestedControlSetting = LoggerModelControlSetting + ":Nested";
-    private const string ContainerNamePrefix = "keyload-";
-    private const string ImageDigestMarker = "@sha256:";
     private const string SolutionFileName = "KeyLoad.slnx";
     private const string SourceDirectoryName = "build";
     private const string AppHostProjectName = "KeyLoad.AppHost";
@@ -27,7 +24,6 @@ internal sealed class LoggerModelControlSelectionTests
     private const string ArgumentSeparator = "=";
     private const string LoggerModelControlSetting = "KeyLoadTests:LoggerModelControl";
     private const string InvalidSelectionMessage = "The C1 logger model control selection is invalid.";
-    private const string InvalidLocalImageMessage = "Local CLUSTER image mode configuration is invalid.";
     private const string EphemeralSetting = "KeyLoad:Ephemeral";
     private const string DataRootSetting = "KeyLoad:DataRoot";
     private const string FirstPublicPortSetting = "KeyLoad:FirstPublicPort";
@@ -39,19 +35,9 @@ internal sealed class LoggerModelControlSelectionTests
     private const string ImageRepository = "ghcr.io/managedcode/keyload";
     private const string ImageTag = "current";
     private const string ImageDigest = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
-    private const string DataMountTarget = "/data";
     private const int IdentityParameterCount = 4;
-    private const string SuiteSetting = "KeyLoadTests:Suite";
-    private const string UnitSuite = "unit";
-    private const string ClusterSuite = "cluster";
-    private const string FilterSetting = "KeyLoadTests:Filter";
-    private const string RuntimeFilter = "/*/*/ActualCase/*";
     private const string BenchmarkEnabledSetting = "Benchmarks:Enabled";
     private const string ComparisonTargetSetting = "Benchmarks:Target";
-    private const string ProtocolEnabledSetting = "KeyLoadTests:ProtocolCohort:Enabled";
-    private const string ProtocolVoterPrefix = "KeyLoadTests:ProtocolCohort:Voters:";
-    private const string LocalImageEnabledSetting = "KeyLoadTests:LocalClusterImage:Enabled";
-    private const string GithubActionsSetting = "GITHUB_ACTIONS";
     private const string NodeOne = "node1";
     private const string NodeTwo = "node2";
     private const string NodeThree = "node3";
@@ -65,14 +51,14 @@ internal sealed class LoggerModelControlSelectionTests
         var failures = new List<Exception>();
         DistributedApplication? app = null;
         ServerFailureObserver.Observe(() => AppHostProgram.AddKeyLoad(builder), failures);
-        LocalProfile? profile = null;
+        ClusterIdentity? profile = null;
         if (failures.Count == 0)
         {
-            ServerFailureObserver.Observe(() => profile = ReadCreatedProfile(root, builder), failures);
-        }
-        if (failures.Count == 0)
-        {
-            ServerFailureObserver.Observe(() => app = builder.Build(), failures);
+            ServerFailureObserver.Observe(() =>
+            {
+                app = builder.Build();
+                profile = app.Services.GetRequiredService<ClusterIdentity>();
+            }, failures);
         }
         if (failures.Count == 0 && app is { } built && profile is { } created)
         {
@@ -104,39 +90,26 @@ internal sealed class LoggerModelControlSelectionTests
     private static async Task VerifyModelAsync(DistributedApplication app, string root, Guid incarnation)
     {
         var model = app.Services.GetRequiredService<DistributedApplicationModel>();
-        var nodes = model.Resources.OfType<ContainerResource>().ToArray();
+        var nodes = model.Resources.OfType<ProjectResource>().ToArray();
         await Assert.That(nodes.Select(node => node.Name).ToArray()).IsEquivalentTo(NodeNames, CollectionOrdering.Matching);
-        await Assert.That(model.Resources.OfType<ExecutableResource>()).IsEmpty();
+        await Assert.That(model.Resources.OfType<ContainerResource>()).IsEmpty();
         await Assert.That(model.Resources.OfType<ParameterResource>().Count()).IsEqualTo(IdentityParameterCount);
-        await Assert.That(File.Exists(Path.Combine(root, ClusterProfileStore.ProfileName))).IsTrue();
+        await Assert.That(Directory.GetFiles(root)).IsEmpty();
+        var parameter = model.Resources.OfType<ParameterResource>().Single(value => value.Name == "incarnation");
+        await Assert.That(await parameter.GetValueAsync(TestContext.Current!.Execution.CancellationToken)).IsEqualTo(incarnation.ToString("D"));
         foreach (var node in nodes)
         {
-            await VerifyNodeAsync(node, root, incarnation).ConfigureAwait(false);
+            await VerifyNodeAsync(node, root).ConfigureAwait(false);
         }
     }
 
-    private static async Task VerifyNodeAsync(ContainerResource node, string root, Guid incarnation)
+    private static async Task VerifyNodeAsync(ProjectResource node, string root)
     {
-        var expectedContainerName = ContainerNamePrefix + incarnation.ToString(GuidFormat) + "-" + node.Name;
-        await Assert.That(node.Annotations.OfType<ContainerNameAnnotation>().Single().Name).IsEqualTo(expectedContainerName);
-        var mount = node.Annotations.OfType<ContainerMountAnnotation>().Single();
-        await Assert.That(mount.Source).IsEqualTo(Path.Combine(root, node.Name));
-        await Assert.That(mount.Target).IsEqualTo(DataMountTarget);
-        await Assert.That(mount.Type).IsEqualTo(ContainerMountType.BindMount);
-        await Assert.That(mount.IsReadOnly).IsFalse();
-        await Assert.That(Directory.Exists(mount.Source)).IsTrue();
-        await VerifyImageAsync(node);
-        await LoggerModelEndpointAssertions.VerifyAsync(node);
-    }
-
-    private static async Task VerifyImageAsync(ContainerResource node)
-    {
-        var image = node.Annotations.OfType<ContainerImageAnnotation>().Single();
-        await Assert.That(image.Image).IsEqualTo(ImageRepository);
-        await Assert.That(image.Tag).IsNull();
-        await Assert.That(image.SHA256).IsEqualTo(ImageDigest);
-        await Assert.That(node.TryGetContainerImageName(out var actual)).IsTrue();
-        await Assert.That(actual).IsEqualTo(ImageRepository + ImageDigestMarker + ImageDigest);
+        await Assert.That(node.GetProjectMetadata().ProjectPath).EndsWith("KeyLoad.csproj");
+        await Assert.That(Directory.Exists(Path.Combine(root, node.Name))).IsTrue();
+        var endpoint = node.Annotations.OfType<EndpointAnnotation>().Single(value => value.Name == "http");
+        await Assert.That(endpoint.Port).IsNull();
+        await Assert.That(endpoint.IsProxied).IsFalse();
     }
 
     private static (string Name, string[] Arguments, bool IncludeImage, string ExpectedMessage)[] RejectedSelections()
@@ -146,17 +119,10 @@ internal sealed class LoggerModelControlSelectionTests
             (nameof(FalseValue), [Argument(LoggerModelControlSetting, FalseValue)], true, InvalidSelectionMessage),
             (nameof(LoggerModelControlSetting), [Argument(LoggerModelControlSetting, string.Empty)], true, InvalidSelectionMessage),
             (nameof(NestedControlSetting), [Argument(NestedControlSetting, TrueValue)], true, InvalidSelectionMessage),
-            (nameof(UnitSuite), [Argument(SuiteSetting, UnitSuite)], true, InvalidSelectionMessage),
             (nameof(BenchmarkEnabledSetting), [Argument(BenchmarkEnabledSetting, TrueValue)], true, InvalidSelectionMessage),
             (nameof(ComparisonTargetSetting), [Argument(ComparisonTargetSetting, ComparisonTargetValue)], true, InvalidSelectionMessage),
-            (nameof(ProtocolEnabledSetting), [Argument(ProtocolEnabledSetting, TrueValue),
-                Argument(ProtocolVoterPrefix + NodeOne, ImageReference), Argument(ProtocolVoterPrefix + NodeTwo, ImageReference),
-                Argument(ProtocolVoterPrefix + NodeThree, ImageReference)], true, InvalidSelectionMessage),
-            (nameof(LocalImageEnabledSetting), [Argument(SuiteSetting, ClusterSuite), Argument(FilterSetting, RuntimeFilter),
-                Argument(LocalImageEnabledSetting, TrueValue), Argument(ImageSetting, string.Empty),
-                Argument(GithubActionsSetting, TrueValue)], false, InvalidLocalImageMessage),
             (nameof(EphemeralSetting), [Argument(EphemeralSetting, FalseValue)], true, InvalidSelectionMessage),
-            (nameof(DataRootSetting), [Argument(DataRootSetting, string.Empty)], true, InvalidSelectionMessage)
+            (nameof(DataRootSetting), [Argument(DataRootSetting, string.Empty)], true, AppHostStartupOptions.ValidationMessage)
         ];
     }
 
@@ -180,13 +146,6 @@ internal sealed class LoggerModelControlSelectionTests
             ProjectDirectory = Path.Combine(RepositoryRoot(), SourceDirectoryName, AppHostProjectName),
             Args = [.. arguments]
         });
-    }
-
-    private static LocalProfile ReadCreatedProfile(string root, IDistributedApplicationBuilder builder)
-    {
-        var options = AppHostOptionsRegistration.Get(builder).Profile;
-        var path = Path.Combine(root, ClusterProfileStore.ProfileName);
-        return ClusterProfileStore.DeserializeCurrent(ClusterProfileStore.ReadBoundedBytes(path, options), options);
     }
 
     private static string Argument(string setting, string value) => ArgumentPrefix + setting + ArgumentSeparator + value;

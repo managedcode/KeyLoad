@@ -33,7 +33,7 @@ internal sealed partial class ClusterFixture
         builder.Eventing.Subscribe<BeforeStartEvent>((_, _) =>
         {
             App = base.App;
-            AdminKey = ClusterFixtureProfile.ReadProfile(Root).AdminKey;
+            AdminKey = Identity.AdminKey;
             processRuntime = new(App, resourceNames, ClusterFixtureDiagnostics.FindRepositoryRoot().FullName);
             diagnostics = new(App);
             diagnostics.Start(App.Services.GetRequiredService<ResourceLoggerService>());

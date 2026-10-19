@@ -3,7 +3,6 @@ using KeyLoad.AppHost.Hosting;
 internal sealed record AppHostConfiguration(string DataRoot, bool Ephemeral)
 {
     private const string DefaultDataRoot = "../../data/cluster";
-    internal const string AdminParameter = "admin-key";
 
     internal static AppHostConfiguration Read(IDistributedApplicationBuilder builder)
     {

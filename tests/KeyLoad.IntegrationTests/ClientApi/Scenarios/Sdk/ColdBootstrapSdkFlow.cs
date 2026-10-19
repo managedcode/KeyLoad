@@ -1,4 +1,9 @@
+using System.Text.Json;
 using KeyLoad.Client;
+using KeyLoad.Core.Features.InternalSerialization;
+using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.Server;
+using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.IntegrationTests.Features.ClientApi;
 
@@ -29,8 +34,11 @@ internal static class ColdBootstrapSdkFlow
         var admin = new KeyLoadClient(adminHttp, fixture.AdminKey, IntegrationClientOptions.Execution());
         var status = await McpCallerAssertions.SdkSuccessAsync(await admin.StatusAsync(joined.Token));
         await ColdBootstrapCliStatus.VerifyAsync(fixture, status, joined.Token).ConfigureAwait(false);
-        var configured = await McpCallerAssertions.SdkSuccessAsync(await admin.ConfigureResourceAsync(Guid.NewGuid(),
-            new(partition.TenantId, partition.DatabaseId, new(Collection, ResourceKind.Collection, partition.TransactionDomainId)), joined.Token));
+        var resourceCommandId = Guid.NewGuid();
+        var resourceRequest = new ConfigureResourceRequest(partition.TenantId, partition.DatabaseId,
+            new(Collection, ResourceKind.Collection, partition.TransactionDomainId));
+        var configured = await McpCallerAssertions.SdkSuccessAsync(await admin.ConfigureResourceAsync(resourceCommandId,
+            resourceRequest, joined.Token));
         await Assert.That(configured.Name).IsEqualTo(Collection);
         var identity = await McpPersistedIdentity.CreateAsync(fixture, partition, Collection,
             Capability.DocumentsRead | Capability.DocumentsWrite, joined.Token).ConfigureAwait(false);
@@ -41,7 +49,10 @@ internal static class ColdBootstrapSdkFlow
         var command = new CommandRequest(id, partition, [new PutDocument(Collection, Document, OriginalJson, ExpectedRevision: AbsentRevision)]);
         var receipt = await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(command, joined.Token));
         await ColdBootstrapSdkAssertions.ReceiptAsync(receipt, command).ConfigureAwait(false);
-        var reference = new EntityRef(partition, Collection, Document);
+        var reference = new EntityRef(partition, Collection, Document)
+        {
+            Lifetime = ExpectedLifetime(resourceCommandId, resourceRequest)
+        };
         await ColdBootstrapSdkAssertions.RuntimeReceiptAsync(receipt, command, FirstRevision, InitialPosition);
         await ColdBootstrapSdkAssertions.DocumentAtMinimumAsync(sdk, reference, receipt.Token, FirstRevision,
             OriginalJson, joined.Token);
@@ -61,6 +72,18 @@ internal static class ColdBootstrapSdkFlow
         var after = await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(command, joined.Token));
         await Assert.That(OrleansSerialization.Serialize(after).SequenceEqual(OrleansSerialization.Serialize(receipt))).IsTrue();
         await HealthyContinuationAsync(sdk, reference, command, changed, receipt, joined.Token);
+    }
+
+    private static EntityRefLifetime ExpectedLifetime(Guid commandId, ConfigureResourceRequest request)
+    {
+        var principalId = PartitionStoreProtocol.AdministratorId;
+        var fingerprint = DatabaseCommandFingerprint.Compute(commandId, OperationKind.ConfigureResource,
+            principalId, JsonSerializer.Serialize(request, JsonDefaults.Options));
+        var original = Command<DatabaseCommand>.Create(nameof(DatabaseCommand),
+            new DatabaseCommand(OperationKind.ConfigureResource, OrleansSerialization.Serialize(request), fingerprint), commandId);
+        original.UserId = principalId;
+        var lifetime = ResourceLifetimeIdentity.Create(original, request.TenantId, request.DatabaseId, request.Definition);
+        return new(lifetime.Incarnation.Value);
     }
 
     private static async Task HealthyContinuationAsync(KeyLoadClient sdk, EntityRef reference,

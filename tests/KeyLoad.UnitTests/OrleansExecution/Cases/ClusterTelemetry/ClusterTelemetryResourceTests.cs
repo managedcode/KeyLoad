@@ -1,7 +1,7 @@
 using System.Security.Cryptography;
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
-using KeyLoad.AppHost.Features.TestInfrastructure;
+using KeyLoad.AppHost.Hosting;
 using KeyLoad.Server;
 
 namespace KeyLoad.UnitTests.Features.OrleansExecution;
@@ -51,7 +51,7 @@ internal sealed class ClusterTelemetryResourceTests
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            var profile = new LocalProfile(ClusterProfileStore.CurrentVersion, Guid.NewGuid(),
+            var profile = new ClusterIdentity(Guid.NewGuid(),
                 Secret(), RootCredentialPrefix + Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(SecretBytes)));
             var nodes = KeyLoad.AppHost.Hosting.AppHostProgram.AddCluster(builder, profile, root, ephemeral: true);
             await Assert.That(nodes.Select(node => node.Resource.Name).Order(StringComparer.Ordinal).ToArray())
@@ -100,7 +100,7 @@ internal sealed class ClusterTelemetryResourceTests
             await Assert.That(environment.ContainsKey(ServiceName)).IsFalse();
             await Assert.That(environment.ContainsKey(ResourceAttributes)).IsFalse();
         }
-        await Assert.That(environment[DataDirectory]).IsEqualTo(Path.GetFullPath(Path.Combine(root, node.Resource.Name)));
+        await Assert.That(environment[DataDirectory]).IsEqualTo(ClusterDataDirectory.Resolve(Path.Combine(root, node.Resource.Name)));
         await Assert.That(node.Resource.Annotations.OfType<EndpointAnnotation>()
             .Single(endpoint => endpoint.Name == HttpEndpoint).IsProxied).IsFalse();
         await Assert.That(node.Resource.GetProjectMetadata().ProjectPath).EndsWith("KeyLoad.csproj");

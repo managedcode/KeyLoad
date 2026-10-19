@@ -43,7 +43,7 @@ internal static class IsolatedNeo4jResources
         }
         var deployment = LoadTestsOptionsRegistration.Get(context.Builder).Deployment.Value;
         var directory = context.DataDirectory(Name);
-        ClusterProfileStore.PrepareDirectory(directory);
+        Directory.CreateDirectory(directory);
         var password = context.Builder.AddParameter(PasswordParameter,
             Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(SecretBytes)), secret: true);
         var node = context.Builder.AddContainer(Name, Image, Version)

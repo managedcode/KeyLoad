@@ -1,5 +1,6 @@
 using Aspire.Hosting;
 using KeyLoad.AppHost.Features.TestInfrastructure;
+using KeyLoad.AppHost.Hosting;
 using KeyLoad.Client;
 using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.Messaging;
@@ -77,13 +78,15 @@ internal sealed partial class ClusterFixture : AspireFixture<Projects.KeyLoad_Ap
     public string Root
     {
         get; private set;
-    } = Path.Combine(Path.GetTempPath(),
-        ClusterFixtureProtocol.RootDirectoryPrefix + Guid.NewGuid().ToString(ClusterFixtureProtocol.GuidFormat));
+    } = ClusterDataDirectory.Resolve(Path.Combine(Path.GetTempPath(),
+        ClusterFixtureProtocol.RootDirectoryPrefix + Guid.NewGuid().ToString(ClusterFixtureProtocol.GuidFormat)));
 
     /// <summary>Gets the actual started Aspire application and its allocated endpoint model.</summary>
     public new DistributedApplication App { get; private set; } = null!;
-    /// <summary>Gets the administrator credential loaded from the private local profile.</summary>
+    /// <summary>Gets the administrator credential from the Aspire application identity.</summary>
     public string AdminKey { get; private set; } = "";
+
+    internal ClusterIdentity Identity => App.Services.GetRequiredService<ClusterIdentity>();
 
     internal ClusterFixtureColdStartObservation? ColdStartObservation
     {

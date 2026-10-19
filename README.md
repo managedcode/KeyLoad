@@ -207,6 +207,16 @@ dotnet build KeyLoad.slnx --no-restore -warnaserror
 
 **2. Start KeyLoad through Aspire**
 
+Before starting a persistent development cluster, configure its identity once:
+
+```bash
+dotnet user-secrets set --project build/KeyLoad.AppHost Parameters:incarnation "$(uuidgen)"
+dotnet user-secrets set --project build/KeyLoad.AppHost Parameters:signing-key "$(openssl rand -base64 32)"
+dotnet user-secrets set --project build/KeyLoad.AppHost Parameters:admin-key "root.$(openssl rand -hex 32)"
+```
+
+For existing database storage, configure its original identity and signing key instead of generating new values. Keep these secrets between restarts. Ephemeral test clusters generate a private identity for each run and keep it in the Aspire application; they write no credential profile beside database files.
+
 ```bash
 aspire start --apphost build/KeyLoad.AppHost/KeyLoad.AppHost.csproj --no-build --non-interactive
 ```
@@ -246,7 +256,7 @@ of five. A missing required copy blocks successful writes; available owners can
 still serve earlier committed data after Orleans membership settles.
 
 Both values are read at startup; there is no live resizing or data movement.
-Node data and private development credentials remain in `data/cluster/`.
+Node data remains in `data/cluster/`; development credentials live in AppHost user secrets.
 HTTP ports start at `5101`; keep the data directory between restarts.
 Stop owned resources with `aspire stop --non-interactive`.
 
@@ -262,14 +272,14 @@ shared filesystem locking and flush behavior still need deployment qualification
 
 **4. Look around**
 
+Export the `Parameters:admin-key` value from AppHost user secrets as `KEYLOAD_API_KEY` before running the CLI or the examples below.
+
 - Open the [admin console](http://localhost:5101/admin).
 - Or check the cluster from the CLI:
 
 ```bash
-dotnet run --project src/KeyLoad.Cli --no-build -- status http://localhost:5101 data/cluster/local-profile.json
+dotnet run --project src/KeyLoad.Cli --no-build -- status http://localhost:5101
 ```
-
-Your local admin API key is the `AdminKey` value in `data/cluster/local-profile.json`. Export it as `KEYLOAD_API_KEY` for the examples below.
 
 ## Use it
 

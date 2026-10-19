@@ -38,7 +38,7 @@ internal static class IsolatedSurrealDbResources
         }
 
         var directory = context.DataDirectory(Name);
-        ClusterProfileStore.PrepareDirectory(directory);
+        Directory.CreateDirectory(directory);
         var password = context.Builder.AddParameter(NameText,
             Convert.ToHexStringLower(System.Security.Cryptography.RandomNumberGenerator.GetBytes(CountValue)), secret: true);
         var node = context.Builder.AddContainer(Name, Image, ImageTag)

@@ -2,7 +2,6 @@ using System.Text;
 using KeyLoad.Client;
 using KeyLoad.Core;
 using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.StorageReplication;
 
 namespace KeyLoad.IntegrationTests.Features.Messaging;
 
@@ -27,7 +26,7 @@ internal static class QueueWorkerClusterByteSetup
         var producer = new CommandRequest(Guid.NewGuid(), partition,
             [.. QueueWorkerClusterProtocol.Messages.Select(id => new EnqueueMessage(lane.Queue, id,
                 QueueWorkerClusterByteProtocol.Payload, QueueWorkerClusterProtocol.Headers))]);
-        var profile = ClusterFixtureProfile.ReadProfile(fixture.Root);
+        var profile = fixture.Identity;
         var sdk = new KeyLoadClient(http, identity.Secret, IntegrationClientOptions.Execution());
         var receipt = await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(producer, token));
         var execution = new QueueWorkerClusterSeed(lane, identity, producer, receipt, Convert.FromBase64String(profile.SigningKey));

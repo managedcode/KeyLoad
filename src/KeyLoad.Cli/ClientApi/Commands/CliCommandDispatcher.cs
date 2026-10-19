@@ -20,7 +20,7 @@ internal static class CliCommandDispatcher
     {
         command = args[CommandArgumentIndex] switch
         {
-            StatusCommand when args.Length is OneOperandArguments or TwoOperandArguments => CliCommand.Status,
+            StatusCommand when args.Length == OneOperandArguments => CliCommand.Status,
             BackupCommand when args.Length == TwoOperandArguments => CliCommand.Backup,
             CompactCommand when args.Length == OneOperandArguments => CliCommand.Compact,
             RestoreCommand when args.Length == TwoOperandArguments => CliCommand.Restore,

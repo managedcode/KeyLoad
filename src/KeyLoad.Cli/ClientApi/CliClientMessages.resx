@@ -5,7 +5,7 @@
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
   <data name="Help" xml:space="preserve"><value>KeyLoad CLI
-  status &lt;node-url&gt; [local-profile.json]
+  status &lt;node-url&gt;
   backup &lt;offline-database-directory&gt; &lt;empty-backup-directory&gt;
   compact &lt;offline-database-directory&gt;
   restore &lt;backup-directory&gt; &lt;empty-database-directory&gt;
@@ -16,6 +16,6 @@
   unpack-backup &lt;artifact-file&gt; &lt;empty-backup-directory&gt;
 
 Backup and restore require an offline database. Restore creates a new incarnation with dispatch paused.</value></data>
-  <data name="MissingCredential" xml:space="preserve"><value>Set KEYLOAD_API_KEY or supply a local profile path.</value></data>
+  <data name="MissingCredential" xml:space="preserve"><value>Set KEYLOAD_API_KEY.</value></data>
   <data name="NodeUnavailable" xml:space="preserve"><value>The node is unavailable.</value></data>
 </root>
