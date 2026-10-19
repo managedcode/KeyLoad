@@ -211,7 +211,8 @@ dotnet build KeyLoad.slnx --no-restore -warnaserror
 aspire start --apphost build/KeyLoad.AppHost/KeyLoad.AppHost.csproj --no-build --non-interactive
 ```
 
-Aspire starts native `KeyLoad.Server` .NET project processes and Azurite for
+The server executable project is [`KeyLoad`](src/KeyLoad/KeyLoad.csproj).
+Aspire starts native `KeyLoad` .NET project processes and Azurite for
 Orleans membership. Ordinary build, development and tests do not publish or run
 KeyLoad Docker images. Native SDK `PublishContainer` belongs to explicit releases.
 The separate `build/KeyLoad.LoadTests.AppHost` owns selected comparison database
@@ -363,7 +364,7 @@ Feature code uses `Features/<SliceName>/<Responsibility>/` across the solution.
 
 | Path | What's inside |
 |---|---|
-| [`src/KeyLoad.Server`](src/KeyLoad.Server) | The database server: HTTP API, MCP server and admin console |
+| [`src/KeyLoad`](src/KeyLoad) | The database server: HTTP API, MCP server and admin console |
 | [`src/KeyLoad.Client`](src/KeyLoad.Client) | The .NET SDK |
 | [`src/KeyLoad.Cli`](src/KeyLoad.Cli) | Command-line tool for operators and workers |
 | [`build/KeyLoad.AppHost`](build/KeyLoad.AppHost) | Native KeyLoad development and functional-test host, with Azurite membership |

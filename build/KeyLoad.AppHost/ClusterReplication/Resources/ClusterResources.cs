@@ -90,7 +90,7 @@ internal static class ClusterResources
         var directory = Path.Combine(root, options.StorageMode == StorageAccessMode.SharedVolume ? SharedDirectory : ownerName);
         ClusterProfileStore.PrepareDirectory(directory);
         var port = ephemeral ? (int?)null : options.FirstPublicPort + index;
-        var resource = builder.AddProject<Projects.KeyLoad_Server>(resourceName, launchProfileName: null)
+        var resource = builder.AddProject<Projects.KeyLoad>(resourceName, launchProfileName: null)
             .WithHttpEndpoint(port: port, name: HttpEndpoint, isProxied: false)
             .WithEndpoint(name: SiloEndpoint, scheme: TcpScheme, isExternal: false, isProxied: false);
         resource.WithEnvironment(ClusterEnvironment, ClusterPrefix + profile.Incarnation.ToString(ClusterGuidFormat))

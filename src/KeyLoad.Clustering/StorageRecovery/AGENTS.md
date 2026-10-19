@@ -3,7 +3,7 @@
 ## Purpose, entry points and ownership
 
 - Owns only the shared physical-storage publication contract for ADR-136.
-- The implementation is the same silo-local `PartitionHostApplicationOwner` in KeyLoad.Server; this contract never creates a store or another owner.
+- The implementation is the same silo-local `PartitionHostApplicationOwner` in KeyLoad; this contract never creates a store or another owner.
 - Isolated storage opens during native Grain Service initialization. Shared storage opens only for the actual ordinary database activation through `ILocalDatabaseRuntime`; other silos forward through Orleans without opening the files.
 - Shared activation failure and deactivation join the exact acquired physical session before its handles close. Scoped services borrow that session; they never resolve an unrelated current host or carry a handle across RPC.
 - Other native services observe `Opening` or await `WaitForOpenAsync` without initiating acquisition.

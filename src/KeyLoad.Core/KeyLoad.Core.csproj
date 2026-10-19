@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
     <InternalsVisibleTo Include="KeyLoad.Clustering" />
-    <InternalsVisibleTo Include="KeyLoad.Server" />
+    <InternalsVisibleTo Include="KeyLoad" />
     <InternalsVisibleTo Include="KeyLoad.Query" />
     <ProjectReference Include="../KeyLoad.Abstractions/KeyLoad.Abstractions.csproj" />
     <PackageReference Include="ManagedCode.TimeSeries" />

@@ -68,8 +68,8 @@ function Assert-ProcessIdentity([object] $Process, [object] $Server, [string] $C
     }
     $binary = $Process.Binary
     if ($binary.AssemblySha256 -cne $Server.dllSha256 -or $binary.PdbSha256 -cne $Server.pdbSha256 -or
-        [IO.Path]::GetFileName([string] $binary.AssemblyPath) -cne 'KeyLoad.Server.dll' -or
-        [IO.Path]::GetFileName([string] $binary.PdbPath) -cne 'KeyLoad.Server.pdb' -or
+        [IO.Path]::GetFileName([string] $binary.AssemblyPath) -cne 'KeyLoad.dll' -or
+        [IO.Path]::GetFileName([string] $binary.PdbPath) -cne 'KeyLoad.pdb' -or
         $binary.ExecutableSha256 -cnotmatch '\A[0-9a-f]{64}\z' -or
         $binary.SourceCompositionSha256 -cne $Composition -or $binary.SourceCount -ne $Server.compileReceipt.sourceCount) {
         throw 'The native server files differ from the original compiled source manifest.'
@@ -143,7 +143,7 @@ function Get-FcNativeProcessLifecycleEvidence([string] $Repository, [string] $Re
         throw 'The native lifecycle evidence must belong to this checkout.'
     }
     $manifest = Read-OriginalJson $SourceManifestPath 16777216
-    $servers = @($manifest.compiledProducts | Where-Object module -CEQ 'KeyLoad.Server')
+    $servers = @($manifest.compiledProducts | Where-Object module -CEQ 'KeyLoad')
     if ($servers.Count -ne 1 -or $manifest.repository -cne 'managedcode/KeyLoad' -or
         $servers[0].compiledIdentity.inspectedSourceRoot -cne $root) {
         throw 'Exactly one original native server compilation identity is required.'

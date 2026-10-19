@@ -18,7 +18,7 @@
     <ProjectReference Include="../../src/KeyLoad.Client/KeyLoad.Client.csproj" />
     <ProjectReference Include="../../src/KeyLoad.Diagnostics/KeyLoad.Diagnostics.csproj" />
     <ProjectReference Include="../../src/KeyLoad.Clustering/KeyLoad.Clustering.csproj" />
-    <ProjectReference Include="../../src/KeyLoad.Server/KeyLoad.Server.csproj" />
+    <ProjectReference Include="../../src/KeyLoad/KeyLoad.csproj" />
     <ProjectReference Include="../../src/KeyLoad.Query/KeyLoad.Query.csproj" />
     <ProjectReference Include="../../src/KeyLoad.Core/KeyLoad.Core.csproj" />
     <ProjectReference Include="../KeyLoad.RecoveryTests/KeyLoad.RecoveryTests.csproj" />

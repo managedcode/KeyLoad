@@ -27,7 +27,7 @@ for a database you need to retain. Regenerating cluster identities or mounting o
 volume into multiple nodes is unsafe. Follow qualified backup/recovery procedures
 for data transfer; a volume copy alone is not a consistency-qualified backup.
 
-The `server/KeyLoad.Server` and `cli/KeyLoad.Cli` executables include their .NET
+The `server/KeyLoad` and `cli/KeyLoad.Cli` executables include their .NET
 runtime. The server needs the same Orleans cluster, replica count and credential
 settings as the Compose file. The CLI exposes its actual commands through `cli/KeyLoad.Cli`.
 The standard CI qualifies the real Docker/Aspire cluster through SDK/MCP;

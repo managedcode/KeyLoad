@@ -38,7 +38,7 @@ flowchart LR
 - Public DTO/protocol: `src/KeyLoad.Abstractions/AdminDashboard/`.
 - Gated catalog/queue behavior: `src/KeyLoad.Core/AdminDashboard/`.
 - Grain composition: the caller's connection grain, the existing read enum and the silo-local node administration service; no new durable grain state or grain-owned filesystem.
-- API, observations, exact static hosting and frontend: `src/KeyLoad.Server/AdminDashboard/`, with frontend `Assets/` fully colocated executable artifacts. Existing shared server configuration is composition only.
+- API, observations, exact static hosting and frontend: `src/KeyLoad/AdminDashboard/`, with frontend `Assets/` fully colocated executable artifacts. Existing shared server configuration is composition only.
 - .NET SDK: `src/KeyLoad.Client/AdminDashboard/`; official MCP/agent declarations consume these same typed capabilities.
 - Tests: `tests/KeyLoad.UnitTests/AdminDashboard/`, `tests/KeyLoad.IntegrationTests/AdminDashboard/`.
 - Infrastructure: the existing unit, recovery and Aspire cluster gates; public `site/` and Pages publication N/A because operational administration is hosted by the database server, not the public benchmark site.

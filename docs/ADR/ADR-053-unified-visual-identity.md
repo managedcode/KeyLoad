@@ -16,7 +16,7 @@ The two surfaces shared no logo, palette, typography or components, so KeyLoad r
 
 ## Decision
 
-- **One brand source.** `src/KeyLoad.Server/AdminDashboard/Assets/Styles/brand.css` holds the tokens and the shared primitives (`kl-brand`, `kl-btn`, `kl-card`, `kl-glass`, `kl-badge`, `kl-chip`, reduced motion). It is mirrored byte-for-byte to `site/Features/BenchmarkComparisons/brand.css`, and `logo.svg` to `site/favicon.svg`. The SiteTests drift test `AC_VI_001` fails on any difference.
+- **One brand source.** `src/KeyLoad/AdminDashboard/Assets/Styles/brand.css` holds the tokens and the shared primitives (`kl-brand`, `kl-btn`, `kl-card`, `kl-glass`, `kl-badge`, `kl-chip`, reduced motion). It is mirrored byte-for-byte to `site/Features/BenchmarkComparisons/brand.css`, and `logo.svg` to `site/favicon.svg`. The SiteTests drift test `AC_VI_001` fails on any difference.
 - **Style direction (owner, 2026-10-02).** Earlier candidates were rejected: a light-blue look, pastel/rainbow glass and a plain grey version. The adopted style is serious Apple-style Liquid Glass in the sibling brands' colours:
   - Managed Code: warm off-white, black ink and system typography.
   - Prostir: graphite instrument panels (`.kl-graphite`).
@@ -125,7 +125,7 @@ never bypassed. This additive contract remains Accepted until required gates pas
 ## Implementation contract
 
 1. **Brand:** tokens and logo, mirrored to the site, land before the UI packets.
-2. **Metrics:** ring buffer and middleware in `src/KeyLoad.Server/AdminDashboard/AdminHttp*.cs`, with unit tests `AdminHttpMetricsTests` and `AdminHttpMetricsMiddlewareTests` written first; the DTO is frozen in Abstractions.
+2. **Metrics:** ring buffer and middleware in `src/KeyLoad/AdminDashboard/AdminHttp*.cs`, with unit tests `AdminHttpMetricsTests` and `AdminHttpMetricsMiddlewareTests` written first; the DTO is frozen in Abstractions.
 3. **Console:** `Assets/*` and the `AdminStaticAssets` whitelist, plus the node observation fields and observer, with the `AdminDashboardClusterTests` assertions.
 4. **Site:** site HTML/CSS/poster, colour constants in `measurements.mjs` and `scene-geometry.mjs`, `BUILD.assets` and SiteTests parity.
 5. **Docs:** feature docs, this ADR, the Architecture map and exact-SHA CI evidence.

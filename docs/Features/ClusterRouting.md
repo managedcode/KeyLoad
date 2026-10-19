@@ -91,7 +91,7 @@ REQ-ROUTE-WORKER-001 is the only accepted pattern for queue, ANN and time-series
 ## Slice map
 
 - `src/KeyLoad.Clustering/ClusterRouting/`: `Grains/ConnectionGrain.cs`, `Grains/CommandPartitionGrain.cs`, commands, queries, native CQRS streaming, identity context and configuration options.
-- `src/KeyLoad.Server/ClusterRouting/`: host composition, lifecycle participants (request drain), Grain Services, telemetry and diagnostics.
+- `src/KeyLoad/ClusterRouting/`: host composition, lifecycle participants (request drain), Grain Services, telemetry and diagnostics.
 - Tests: `tests/KeyLoad.UnitTests/ClusterRouting/` (native TestCluster and real ZoneTree) and `tests/KeyLoad.IntegrationTests/ClusterRouting/` (Aspire-owned cluster through the real .NET SDK and official MCP client).
 - Frontend: N/A, routing has no UI.
 

@@ -9,7 +9,7 @@ internal sealed class TemporaryGitCheckout : IAsyncDisposable
     private const string AcceptedProperty = "accepted";
     private const string MessageProperty = "message";
     private const string HeadProperty = "head";
-    private const string SourceDirectory = "src/KeyLoad.Server";
+    private const string SourceDirectory = "src/KeyLoad";
     private const string TrackedFileName = "TrackedSource.cs";
     private const string UntrackedFileName = "UntrackedProbe.cs";
     private const string IgnoredFileName = "GeneratedCache.tmp";
@@ -23,7 +23,7 @@ internal sealed class TemporaryGitCheckout : IAsyncDisposable
         const { runBounded } = await import(pathToFileURL(process.argv[1]).href);
         const gitignore = process.argv[2];
         const root = process.argv[3];
-        const source = path.join(root, 'src/KeyLoad.Server');
+        const source = path.join(root, 'src/KeyLoad');
         await mkdir(source, { recursive: true });
         await copyFile(gitignore, path.join(root, '.gitignore'));
         const trackedSource = 'namespace TemporaryCheckout;\ninternal sealed class TrackedSource { }\n';
@@ -39,7 +39,7 @@ internal sealed class TemporaryGitCheckout : IAsyncDisposable
         await git(['init', '--quiet']);
         await git(['config', 'user.name', 'KeyLoad source checkout test']);
         await git(['config', 'user.email', 'source-checkout-test@example.invalid']);
-        await git(['add', '--', '.gitignore', 'src/KeyLoad.Server/TrackedSource.cs']);
+        await git(['add', '--', '.gitignore', 'src/KeyLoad/TrackedSource.cs']);
         await git(['commit', '--quiet', '-m', 'committed source fixture']);
         const head = await git(['rev-parse', 'HEAD']);
         process.stdout.write(JSON.stringify({ head }));

@@ -34,7 +34,7 @@ internal static class ImplementationTermCatalog
     internal const string DataCoreAssembly = "KeyLoad.Core";
     internal const string DataRuntimeAssembly = "KeyLoad.Clustering";
     internal const string DataRuntimeNamespace = "KeyLoad.Clustering";
-    internal const string DataServerAssembly = "KeyLoad.Server";
+    internal const string DataServerAssembly = "KeyLoad";
     internal const string NativeLoggingProcessorAssembly = "OpenTelemetry";
     internal const string NativeLoggingProcessorType = "OpenTelemetry.SimpleLogRecordExportProcessor";
     internal const string NativeActivityProcessorType = "OpenTelemetry.SimpleActivityExportProcessor";

@@ -349,7 +349,7 @@ range overwrite/tombstone/prefetch/lookahead/bounds, pre- and mid-cancellation,
 provider budget failure and healthy subsequent reads. GitHub executes them; no
 measurement claim follows from authored counters or local static validation.
 
-Actors: the data caller, the trusted control caller, the operator and the CI observer. Actual entry points: [CommandAdmissionGovernor](../../src/KeyLoad.Core/ResourceExecution/Commands/CommandAdmission/CommandAdmissionGovernor.cs), [HTTP admission](../../src/KeyLoad.Server/ClientApi/Transport/ApiEndpoints.cs), [ServiceDefaults telemetry](../../src/KeyLoad.ServiceDefaults), Aspire composition; shared resource contracts in [CommandAdmissionLimits](../../src/KeyLoad.Abstractions/ResourceExecution/Contracts/CommandAdmissionLimits.cs) and [HttpAdmissionLimits](../../src/KeyLoad.Abstractions/ResourceExecution/Contracts/HttpAdmissionLimits.cs). Public UI is N/A; benchmark views belong to BenchmarkComparisons.
+Actors: the data caller, the trusted control caller, the operator and the CI observer. Actual entry points: [CommandAdmissionGovernor](../../src/KeyLoad.Core/ResourceExecution/Commands/CommandAdmission/CommandAdmissionGovernor.cs), [HTTP admission](../../src/KeyLoad/ClientApi/Transport/ApiEndpoints.cs), [ServiceDefaults telemetry](../../src/KeyLoad.ServiceDefaults), Aspire composition; shared resource contracts in [CommandAdmissionLimits](../../src/KeyLoad.Abstractions/ResourceExecution/Contracts/CommandAdmissionLimits.cs) and [HttpAdmissionLimits](../../src/KeyLoad.Abstractions/ResourceExecution/Contracts/HttpAdmissionLimits.cs). Public UI is N/A; benchmark views belong to BenchmarkComparisons.
 
 | Requirement | Acceptance / flows | Test mapping |
 |---|---|---|

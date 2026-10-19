@@ -13,7 +13,7 @@ export const runtimeBundle = Object.freeze({
     ['outer-tests', 'tests/KeyLoad.ComparisonTests/bin/Release/net10.0/KeyLoad.ComparisonTests'],
     ['apphost', 'build/KeyLoad.AppHost/bin/Release/net10.0/KeyLoad.AppHost'],
     ['load-apphost', 'build/KeyLoad.LoadTests.AppHost/bin/Release/net10.0/KeyLoad.LoadTests.AppHost'],
-    ['server', 'src/KeyLoad.Server/bin/Release/net10.0/KeyLoad.Server'],
+    ['server', 'src/KeyLoad/bin/Release/net10.0/KeyLoad'],
     ['comparison-client', 'benchmarks/KeyLoad.ComparisonHost/bin/Release/net10.0/KeyLoad.ComparisonHost'],
     ['comparisons', 'benchmarks/KeyLoad.Comparisons/bin/Release/net10.0/KeyLoad.Comparisons'],
   ]),

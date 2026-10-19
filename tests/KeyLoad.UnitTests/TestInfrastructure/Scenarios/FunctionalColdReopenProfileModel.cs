@@ -69,7 +69,7 @@ internal static class FunctionalColdReopenProfileModel
             await Assert.That(environment[DataEnvironment]).IsEqualTo(directory);
             await Assert.That(environment[ClusterEnvironment]).IsEqualTo("keyload-" + incarnation.ToString("N"));
             await Assert.That(Directory.Exists(directory)).IsTrue();
-            await Assert.That(resource.GetProjectMetadata().ProjectPath).EndsWith("KeyLoad.Server.csproj");
+            await Assert.That(resource.GetProjectMetadata().ProjectPath).EndsWith("KeyLoad.csproj");
             var commands = resource.Annotations.OfType<ResourceCommandAnnotation>()
                 .Where(command => command.Name == ProcessFaultCommandProtocol.CommandName).ToArray();
             await Assert.That(commands.Length).IsEqualTo(faults ? 1 : 0);

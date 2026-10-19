@@ -1291,7 +1291,7 @@ The public SDK depends only on versioned contracts in `KeyLoad.Abstractions`; th
 ```text
 KeyLoad.Client ──────────────────────── KeyLoad.Abstractions
                                              ▲
-KeyLoad.Server ── Query ── Core ───────────────┤
+KeyLoad ── Query ── Core ───────────────┤
                     │       │                 │
             Search adapters  Storage.ZoneTree
                     │       │

@@ -15,7 +15,7 @@ BackupRestore creates an offline backup of canonical storage and restores it int
 | Storage backup/restore | `src/KeyLoad.Storage.ZoneTree/ZoneTreeStore.cs` delegates to `Restore/Recovery/ZoneTree/Archives/ZoneTreeBackupRestore.cs` and its file/restore helpers | Private behavior is owned by `src/KeyLoad.Storage.ZoneTree/Restore/`; the public facade remains the shared entry point |
 | Archive and transfer | `src/KeyLoad.Storage.ZoneTree/Restore/Execution/BackupArtifact.cs`, `ArtifactTransfer.cs` and focused helpers | Same canonical slice |
 | CLI | `src/KeyLoad.Cli/Restore/Commands/CliBackupRestore.cs` behind the aggregate Program runner | Slice-local offline operations; exact dispatch/text/disposal parity under AC-CQ-010 and ADR-033 |
-| HTTP backup entry | `src/KeyLoad.Server/ClientApi/Transport/ApiEndpoints.cs` | Shared server boundary; no public restore route is defined |
+| HTTP backup entry | `src/KeyLoad/ClientApi/Transport/ApiEndpoints.cs` | Shared server boundary; no public restore route is defined |
 | Tests | `tests/KeyLoad.UnitTests/Restore/Cases/Artifact/ArtifactTests.cs`; `tests/KeyLoad.RecoveryTests/StorageRecovery/Cases/StoragePublicationRecoveryTests.cs` | Feature-owned tests and real process infrastructure stay in their owning existing test projects |
 | Documentation | This spec; detailed storage design in `../design/product-specification.md` | One canonical feature acceptance source |
 | UI and public blob API | None | N/A: operators use CLI/admin boundaries; archive chunking is not a user-facing blob contract |

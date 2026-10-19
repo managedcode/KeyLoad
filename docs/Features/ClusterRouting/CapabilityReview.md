@@ -104,9 +104,9 @@ flowchart LR
 
 ## Source joins
 
-- [OrleansSiloConfiguration](../../../src/KeyLoad.Server/ClusterRouting/Hosting/SiloHosting/OrleansSiloConfiguration.cs) owns borrowed DI, the message bound, services, serializer registration, the native directory/repartitioner, activity propagation and the event-feed stream provider.
-- [PartitionStorageGrainService](../../../src/KeyLoad.Server/StorageRecovery/GrainServices/PartitionStorageGrainService.cs) opens the silo's storage owner in native Init.
-- [NativeRequestWorkOwner](../../../src/KeyLoad.Clustering/ClusterRouting/Streaming/RequestWork/NativeRequestWorkOwner.cs) and [OrleansNode](../../../src/KeyLoad.Server/ClusterRouting/Hosting/SiloHosting/OrleansNode.cs) own bounded admission, cancellation and drain before physical cleanup.
+- [OrleansSiloConfiguration](../../../src/KeyLoad/ClusterRouting/Hosting/SiloHosting/OrleansSiloConfiguration.cs) owns borrowed DI, the message bound, services, serializer registration, the native directory/repartitioner, activity propagation and the event-feed stream provider.
+- [PartitionStorageGrainService](../../../src/KeyLoad/StorageRecovery/GrainServices/PartitionStorageGrainService.cs) opens the silo's storage owner in native Init.
+- [NativeRequestWorkOwner](../../../src/KeyLoad.Clustering/ClusterRouting/Streaming/RequestWork/NativeRequestWorkOwner.cs) and [OrleansNode](../../../src/KeyLoad/ClusterRouting/Hosting/SiloHosting/OrleansNode.cs) own bounded admission, cancellation and drain before physical cleanup.
 - [EventStreams](../EventStreams.md), [Messaging](../Messaging.md), [ChangeFeeds](../ChangeFeeds.md) and [ResourceExecution](../ResourceExecution.md) keep canonical data, effect, cursor and cache contracts.
 
 Each candidate needs its own committed-operation tests through the Aspire-owned

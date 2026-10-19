@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
-    <InternalsVisibleTo Include="KeyLoad.Server" />
+    <InternalsVisibleTo Include="KeyLoad" />
     <InternalsVisibleTo Include="KeyLoad.UnitTests" />
     <InternalsVisibleTo Include="KeyLoad.RecoveryTests" />
     <InternalsVisibleTo Include="KeyLoad.IntegrationTests" />

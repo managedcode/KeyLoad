@@ -729,7 +729,7 @@
       ],
       "executedModules": [
         "KeyLoad.Client",
-        "KeyLoad.Server",
+        "KeyLoad",
         "KeyLoad.Query",
         "KeyLoad.Core",
         "KeyLoad.Clustering",
@@ -753,7 +753,7 @@
         "KeyLoad.Client",
         "KeyLoad.Core",
         "KeyLoad.Clustering",
-        "KeyLoad.Server",
+        "KeyLoad",
         "KeyLoad.Storage.ZoneTree"
       ],
       "operationOutcomeAndState": "The actual SDK and official MCP clients commit mirrored create, replace, patch and delete operations; each terminal receipt and independently read document revision/content (including deletion) matches the expected lifecycle."
@@ -774,7 +774,7 @@
         "KeyLoad.Client",
         "KeyLoad.Core",
         "KeyLoad.Clustering",
-        "KeyLoad.Server",
+        "KeyLoad",
         "KeyLoad.Storage.ZoneTree"
       ],
       "operationOutcomeAndState": "The actual official MCP and SDK clients run the inverse mirrored mutation order; each terminal receipt and independently read document revision/content matches, then the final document is absent."
@@ -795,7 +795,7 @@
         "KeyLoad.Client",
         "KeyLoad.Core",
         "KeyLoad.Clustering",
-        "KeyLoad.Server",
+        "KeyLoad",
         "KeyLoad.Storage.ZoneTree"
       ],
       "operationOutcomeAndState": "SDK and official MCP establish revisions one and two, reject a stale explicit replacement as RevisionConflict without changing persisted revision-two content, then successfully read that same state."
@@ -819,7 +819,7 @@
         "KeyLoad.Core",
         "KeyLoad.Clustering",
         "KeyLoad.Query",
-        "KeyLoad.Server",
+        "KeyLoad",
         "KeyLoad.Storage.ZoneTree"
       ],
       "operationOutcomeAndState": "configures the typed right schema and commits a two-pair seed through the SDK; compares direct and unified SQL pages from SDK and official MCP for access path, cut, exact row JSON, pair identities and source revisions"
@@ -844,7 +844,7 @@
         "KeyLoad.Core",
         "KeyLoad.Clustering",
         "KeyLoad.Query",
-        "KeyLoad.Server",
+        "KeyLoad",
         "KeyLoad.Storage.ZoneTree"
       ],
       "operationOutcomeAndState": "uses persisted right-resource and join-field-use policies; asserts SDK and official MCP denials and non-disclosure, unchanged source rows, then equal healthy direct/unified pages through both clients"
@@ -869,7 +869,7 @@
         "KeyLoad.Core",
         "KeyLoad.Clustering",
         "KeyLoad.Query",
-        "KeyLoad.Server",
+        "KeyLoad",
         "KeyLoad.Storage.ZoneTree"
       ],
       "operationOutcomeAndState": "cancels the original token on SDK and official MCP direct/unified join calls, checks their cancellation outcomes, then checks each healthy caller route returns the joined page at or beyond the seed cut"
@@ -894,7 +894,7 @@
         "KeyLoad.Core",
         "KeyLoad.Clustering",
         "KeyLoad.Query",
-        "KeyLoad.Server",
+        "KeyLoad",
         "KeyLoad.Storage.ZoneTree"
       ],
       "operationOutcomeAndState": "interleaves atomic pair-generation commits with SDK and official MCP direct/unified reads; each page must represent the complete previous or next pair generation and final pages agree across all four routes"
@@ -919,7 +919,7 @@
         "KeyLoad.Core",
         "KeyLoad.Clustering",
         "KeyLoad.Query",
-        "KeyLoad.Server",
+        "KeyLoad",
         "KeyLoad.Storage.ZoneTree"
       ],
       "operationOutcomeAndState": "applies a real CLUSTER scan-work limit, checks SDK and official MCP return BudgetExceeded, verifies seeded source documents remain unchanged, then confirms both callers complete an exact healthy joined result"
@@ -944,7 +944,7 @@
         "KeyLoad.Core",
         "KeyLoad.Clustering",
         "KeyLoad.Query",
-        "KeyLoad.Server",
+        "KeyLoad",
         "KeyLoad.Storage.ZoneTree"
       ],
       "operationOutcomeAndState": "applies a real CLUSTER raw read-byte limit, checks SDK and official MCP return BudgetExceeded, verifies seeded source documents remain unchanged, then confirms both callers complete an exact healthy joined result"
@@ -969,7 +969,7 @@
         "KeyLoad.Core",
         "KeyLoad.Clustering",
         "KeyLoad.Query",
-        "KeyLoad.Server",
+        "KeyLoad",
         "KeyLoad.Storage.ZoneTree"
       ],
       "operationOutcomeAndState": "applies a real CLUSTER serialized joined-page byte limit, checks SDK and official MCP return BudgetExceeded, verifies seeded source documents remain unchanged, then confirms both callers complete an exact healthy joined result"

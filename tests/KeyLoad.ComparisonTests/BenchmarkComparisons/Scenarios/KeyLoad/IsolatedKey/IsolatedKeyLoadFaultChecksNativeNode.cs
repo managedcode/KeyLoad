@@ -20,7 +20,7 @@ internal sealed record IsolatedKeyLoadFaultChecksNativeNode(ProjectResource Mode
     internal static IsolatedKeyLoadFaultChecksNativeNode Read(ProjectResource resource, int index)
     {
         IsolatedKeyLoadFaultChecksProtocol.Require(resource.Name == IsolatedKeyLoadFaultChecksProtocol.Resource(index)
-            && Path.GetFileName(resource.GetProjectMetadata().ProjectPath) == "KeyLoad.Server.csproj");
+            && Path.GetFileName(resource.GetProjectMetadata().ProjectPath) == "KeyLoad.csproj");
         return new(resource);
     }
 

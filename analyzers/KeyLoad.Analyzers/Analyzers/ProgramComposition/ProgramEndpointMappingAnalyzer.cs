@@ -9,7 +9,7 @@ using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace KeyLoad.Analyzers.Features.CodeQuality;
 
-/// <summary>Reports direct endpoint mappings in KeyLoad.Server Program.cs.</summary>
+/// <summary>Reports direct endpoint mappings in KeyLoad Program.cs.</summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class ProgramEndpointMappingAnalyzer : DiagnosticAnalyzer
 {
@@ -25,7 +25,7 @@ public sealed class ProgramEndpointMappingAnalyzer : DiagnosticAnalyzer
         isEnabledByDefault: true,
         description: CodeQualityDiagnosticText.EndpointMappingDescription);
 
-    private const string ServerAssemblyName = "KeyLoad.Server";
+    private const string ServerAssemblyName = "KeyLoad";
     private const string AggregateMethodName = "MapKeyLoadApi";
 
     /// <inheritdoc/>

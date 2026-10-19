@@ -99,7 +99,7 @@ internal sealed class ClusterTelemetryResourceTests
         await Assert.That(environment[DataDirectory]).IsEqualTo(Path.GetFullPath(Path.Combine(root, node.Resource.Name)));
         await Assert.That(node.Resource.Annotations.OfType<EndpointAnnotation>()
             .Single(endpoint => endpoint.Name == HttpEndpoint).IsProxied).IsFalse();
-        await Assert.That(node.Resource.GetProjectMetadata().ProjectPath).EndsWith("KeyLoad.Server.csproj");
+        await Assert.That(node.Resource.GetProjectMetadata().ProjectPath).EndsWith("KeyLoad.csproj");
         var storage = builder.Resources.OfType<AzureStorageResource>().ToArray();
         await Assert.That(storage.Select(resource => resource.Name)).IsEquivalentTo(new[] { "orleans-storage" });
         await Assert.That(builder.Resources.OfType<ContainerResource>()).IsEmpty();

@@ -1,4 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <RootNamespace>KeyLoad.Server</RootNamespace>
+  </PropertyGroup>
   <ItemGroup>
     <EmbeddedResource Include="AdminDashboard/Assets/**/*" LogicalName="KeyLoad.AdminDashboard.%(Filename)%(Extension)" />
     <Content Include="ResourceExecution/Analytics/Assets/ZoneTree.Analytics.LICENSE.txt" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />

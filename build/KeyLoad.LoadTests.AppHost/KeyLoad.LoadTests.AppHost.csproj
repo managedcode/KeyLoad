@@ -9,7 +9,7 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../KeyLoad.AppHost/KeyLoad.AppHost.csproj" IsAspireProjectResource="false" />
-    <ProjectReference Include="../../src/KeyLoad.Server/KeyLoad.Server.csproj" IsAspireProjectResource="false" />
+    <ProjectReference Include="../../src/KeyLoad/KeyLoad.csproj" IsAspireProjectResource="false" />
     <ProjectReference Include="../../benchmarks/KeyLoad.Comparisons/KeyLoad.Comparisons.csproj" IsAspireProjectResource="false" />
     <PackageReference Include="Aspire.Hosting.AppHost" />
     <PackageReference Include="Aspire.Hosting.PostgreSQL" />

@@ -10,7 +10,7 @@
   <ItemGroup>
     <ProjectReference Include="../../src/KeyLoad.Abstractions/KeyLoad.Abstractions.csproj" IsAspireProjectResource="false" />
     <ProjectReference Include="../../src/KeyLoad.Clustering/KeyLoad.Clustering.csproj" IsAspireProjectResource="false" />
-    <ProjectReference Include="../../src/KeyLoad.Server/KeyLoad.Server.csproj" />
+    <ProjectReference Include="../../src/KeyLoad/KeyLoad.csproj" />
     <ProjectReference Include="../../src/KeyLoad.Storage.ZoneTree/KeyLoad.Storage.ZoneTree.csproj" IsAspireProjectResource="false" />
     <PackageReference Include="Aspire.Hosting.AppHost" />
     <PackageReference Include="Aspire.Hosting.Azure.Storage" />

@@ -2,7 +2,7 @@
 
 ## Purpose, entry points and ownership
 
-- Owns the primary native KeyLoad development and functional-test Aspire host: AddProject<KeyLoad.Server> services plus required Azurite Orleans membership storage only.
+- Owns the primary native KeyLoad development and functional-test Aspire host: AddProject<KeyLoad> services plus required Azurite Orleans membership storage only.
 - Entry point: `Program.cs`. Selected comparison database infrastructure belongs to `../KeyLoad.LoadTests.AppHost`; its workload runs in the separate native client process, outside the resource graph.
 - Keep host wiring and genuinely shared infrastructure composition here. Feature-specific deployment behavior belongs under `<SliceName>/` and the matching `docs/Features/<SliceName>.md`.
 - Aspire owns resource orchestration, not database storage state. Each silo's ZoneTree owner (node-local `PartitionHost`) owns its storage, journals, file locks and the apply gate; Microsoft Orleans does all clustering and Orleans grains route commands (ADR-136).

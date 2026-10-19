@@ -8,14 +8,14 @@ namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
 internal static class AnalyzerFixture
 {
     internal const string ClusteringAssembly = "KeyLoad.Clustering";
-    internal const string ServerAssembly = "KeyLoad.Server";
+    internal const string ServerAssembly = "KeyLoad";
     internal const string CoreAssembly = "KeyLoad.Core";
     internal const string CoreTestAssembly = "KeyLoad.Core.Tests";
     internal const string UnitTestAssembly = "KeyLoad.UnitTests";
     internal const string ExternalAssembly = "External.Contracts";
-    internal const string ProgramPath = "/repo/src/KeyLoad.Server/Program.cs";
-    internal const string ServerEndpointsPath = "/repo/src/KeyLoad.Server/ApiEndpoints.cs";
-    internal const string ServerHostingPath = "/repo/src/KeyLoad.Server/Hosting.cs";
+    internal const string ProgramPath = "/repo/src/KeyLoad/Program.cs";
+    internal const string ServerEndpointsPath = "/repo/src/KeyLoad/ApiEndpoints.cs";
+    internal const string ServerHostingPath = "/repo/src/KeyLoad/Hosting.cs";
     internal const string ContractPath = "/repo/src/KeyLoad.Clustering/Sample/Contracts/Dto.cs";
     internal const string ClusteringModelsPath = "/repo/src/KeyLoad.Clustering/Sample/Models.cs";
     internal const string GeneratedPath = "/repo/src/KeyLoad.Clustering/Sample/Generated.g.cs";

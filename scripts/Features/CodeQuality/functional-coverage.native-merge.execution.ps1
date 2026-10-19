@@ -175,8 +175,8 @@ function Assert-FcNativeClusterServerCoverage([object] $Plan, [string] $Output) 
     $index = [Array]::IndexOf([object[]] $Plan.inputs, $cluster[0])
     $path = Join-Path $Output ('input-' + $index.ToString('D4') + '.cobertura')
     $report = Read-FcNativeMergeCoverage $path $Plan.descriptor.bounds.maximumReportBytes $Plan.manifest
-    if (-not $report.packages.ContainsKey('KeyLoad.Server') -or
-        $report.packages['KeyLoad.Server'].linesValid -le 0 -or $report.packages['KeyLoad.Server'].linesCovered -le 0) {
-        throw 'The original native cluster MTP report contains no executed source-bound KeyLoad.Server code.'
+    if (-not $report.packages.ContainsKey('KeyLoad') -or
+        $report.packages['KeyLoad'].linesValid -le 0 -or $report.packages['KeyLoad'].linesCovered -le 0) {
+        throw 'The original native cluster MTP report contains no executed source-bound KeyLoad code.'
     }
 }

@@ -27,7 +27,7 @@ Scope: recognizable shared icons for the public landing and operational console,
 
 ## Implementation and delivery contract
 
-- Exports: six icon files under `src/KeyLoad.Server/AdminDashboard/Assets/Icons/`
+- Exports: six icon files under `src/KeyLoad/AdminDashboard/Assets/Icons/`
   and exact site-root mirrors; `site/Features/BenchmarkComparisons/assets/og-image.svg/png`
   and `site.webmanifest`.
 - Production: only `site/Features/BenchmarkComparisons/index.html` head and

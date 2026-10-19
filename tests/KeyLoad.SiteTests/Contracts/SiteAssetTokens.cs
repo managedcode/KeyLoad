@@ -36,8 +36,8 @@ internal static class SiteAssetTokens
     public const string ObserversModule = "scene-observers.mjs";
     public const string Stylesheet = "styles.css";
     public const string BrandStylesheet = "brand.css";
-    public const string ConsoleBrandStylesheetPath = "src/KeyLoad.Server/AdminDashboard/Assets/Styles/brand.css";
-    public const string ConsoleLogoPath = "src/KeyLoad.Server/AdminDashboard/Assets/Icons/logo.svg";
+    public const string ConsoleBrandStylesheetPath = "src/KeyLoad/AdminDashboard/Assets/Styles/brand.css";
+    public const string ConsoleLogoPath = "src/KeyLoad/AdminDashboard/Assets/Icons/logo.svg";
     public const string TokenStylesheet = "tokens.css";
     public const string SceneStylesheet = "scene.css";
     public const string PosterAsset = "assets/agent-context.png";

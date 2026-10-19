@@ -17,7 +17,7 @@ internal static class CodeQualityDiagnosticText
 
     public const string EndpointMappingTitle = "Endpoint mappings belong to host endpoint extensions";
     public const string EndpointMappingMessage = "Program.cs must call only '{0}'; move direct endpoint mapping '{1}' into the host endpoint extension";
-    public const string EndpointMappingDescription = "KeyLoad.Server Program.cs is a composition root. Concrete Map* endpoint registrations belong to the MapKeyLoadApi host endpoint extension.";
+    public const string EndpointMappingDescription = "KeyLoad Program.cs is a composition root. Concrete Map* endpoint registrations belong to the MapKeyLoadApi host endpoint extension.";
 
     public const string GrainVersionTitle = "Grain interfaces require explicit versions";
     public const string GrainVersionMessage = "Grain interface '{0}' must declare a positive Orleans VersionAttribute";

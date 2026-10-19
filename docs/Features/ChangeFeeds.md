@@ -13,7 +13,7 @@ ChangeFeeds exposes committed document mutations to authorized readers and bound
 | Contracts | `src/KeyLoad.Abstractions/ChangeFeeds/Contracts/ChangeFeeds.cs` | `src/KeyLoad.Abstractions/ChangeFeeds/` |
 | Outbox and public feed | `src/KeyLoad.Core/ChangeFeeds/Execution/ProjectionOutbox.cs`, `ChangeFeeds.cs` | `src/KeyLoad.Core/ChangeFeeds/` |
 | Scalar live query | `src/KeyLoad.Query/ChangeFeeds/Queries/LiveQueryExecutor.cs`; public facade `LiveQueries.cs` | Slice-local private owner borrowing the existing database/query engine; same single read cut |
-| HTTP/.NET SDK | `src/KeyLoad.Server/ClientApi/Transport/ApiEndpoints.cs`, `src/KeyLoad.Client/ChangeFeeds/Transport/ChangeFeedClientExtensions.cs` | Shared entry points; behavior remains in this slice |
+| HTTP/.NET SDK | `src/KeyLoad/ClientApi/Transport/ApiEndpoints.cs`, `src/KeyLoad.Client/ChangeFeeds/Transport/ChangeFeedClientExtensions.cs` | Shared entry points; behavior remains in this slice |
 | Tests | `tests/KeyLoad.UnitTests/ChangeFeeds/` feed/projection suites, `LiveQueryTests.cs`; `tests/KeyLoad.RecoveryTests/EventStreams/Cases/ProjectionRecoveryTests.cs`; `tests/KeyLoad.IntegrationTests/ClusterReplication/Cases/Cluster/ClusterTests.cs`; new `Features/ChangeFeeds/Cases/FeedLiveClusterTests.cs` | Unit feed/projection source is slice-local; remaining layout debt targets matching `Features/ChangeFeeds/` folders |
 | Durable design | `../design/change-feeds.md` | Detailed design reference; this file owns feature acceptance |
 | Frontend | None | N/A: polling and query results are database/client contracts, with no independent UI |

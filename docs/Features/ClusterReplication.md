@@ -72,7 +72,7 @@ does not prove equal data or a distributed snapshot.
 
 - `src/KeyLoad.Clustering/ClusterReplication/Grains/DatabaseCommitGrain.cs` owns ordered native copy calls.
 - `src/KeyLoad.Clustering/ClusterReplication/GrainServices/` owns native addressing of silo-local storage services.
-- `src/KeyLoad.Server/StorageRecovery/GrainServices/PartitionStorageGrainService.cs` owns each silo's storage lifetime.
+- `src/KeyLoad/StorageRecovery/GrainServices/PartitionStorageGrainService.cs` owns each silo's storage lifetime.
 - `build/KeyLoad.AppHost/ClusterReplication/` owns topology and fault commands.
 - Integration tests use actual SDK and official MCP clients. Process tests use actual owned child processes. Neither source presence nor a focused unit pass establishes distributed recovery.
 

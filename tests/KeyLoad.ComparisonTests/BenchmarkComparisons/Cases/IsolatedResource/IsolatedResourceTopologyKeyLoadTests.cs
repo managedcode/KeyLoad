@@ -58,7 +58,7 @@ internal sealed class IsolatedResourceTopologyKeyLoadTests
         var directory = Path.GetFullPath(Path.Combine(fixture.Context.Root, "native", "keyload", node.Name));
         await Assert.That(environment[DataDirectorySetting]).IsEqualTo(directory);
         await Assert.That(Directory.Exists(directory)).IsTrue();
-        await Assert.That(node.GetProjectMetadata().ProjectPath).EndsWith("KeyLoad.Server.csproj");
+        await Assert.That(node.GetProjectMetadata().ProjectPath).EndsWith("KeyLoad.csproj");
         await Assert.That(environment[SiloNameSetting]).IsEqualTo(node.Name);
         await Assert.That(environment[SiloCountSetting]).IsEqualTo(count.ToString(System.Globalization.CultureInfo.InvariantCulture));
         await Assert.That(environment[CopyCountSetting]).IsEqualTo(count.ToString(System.Globalization.CultureInfo.InvariantCulture));

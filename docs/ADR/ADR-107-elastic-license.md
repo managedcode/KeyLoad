@@ -44,7 +44,7 @@ are N/A because this decision changes only licensing and its distribution metada
 On 2026-10-06, the complete ELv2 body matches the retrieved authoritative text
 byte-for-byte. README, actual source JSON-LD, file-based NuGet/publish metadata,
 unchanged third-party vendor bytes and repository governance checks pass.
-A real local no-build KeyLoad.Client package and KeyLoad.Server publish output
+A real local no-build KeyLoad.Client package and KeyLoad publish output
 both contain the exact current LICENSE. These probes use existing compiled
 binaries and prove license packaging, not new runtime qualification.
 

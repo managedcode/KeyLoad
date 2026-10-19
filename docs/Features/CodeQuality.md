@@ -207,7 +207,7 @@ Product functional coverage:
 |---|---|
 | AC-CQ-018 | Contributors are exact functional cases run through the TestInfrastructure entry with the native collector; original DLL/PDB hashes are bound before and after collection and a modified build image is never accepted |
 | AC-CQ-019 | Reports give per-module and per-file covered and executable lines, native branch counts where available, percentages and uncovered locations; normal/replica duplicates are never summed |
-| AC-CQ-020 | A source-controlled inventory classifies every production project; load, stress, performance and comparison cases are excluded; server-process coverage is collected from each `KeyLoad.Server` process of the Aspire-owned topology |
+| AC-CQ-020 | A source-controlled inventory classifies every production project; load, stress, performance and comparison cases are excluded; server-process coverage is collected from each `KeyLoad` process of the Aspire-owned topology |
 | AC-CQ-021 | Module closure follows the review loop above |
 | AC-CQ-039 | A closed inventory (`functional-coverage.product-contributors.json`, `functional-coverage.unit-test-inventory.json`) identifies each admitted case by suite, class, method and instance, its REQ/AC and executed modules; omissions, extras, duplicates, changed source, failed or skipped cases are rejected |
 | AC-CQ-040 | Original binary coverage files are retained; merging uses an explicit verified report list with identical module identities and repeated-input invariance; denominators are not summed |

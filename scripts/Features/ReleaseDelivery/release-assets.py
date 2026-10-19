@@ -181,8 +181,8 @@ def verify_database_distribution(path, reservation):
     if path.name != expected:
         fail("Database distribution filename does not match the reserved release version.")
     record, names = checked_tar(path, MAX_DATABASE_BYTES)
-    required = {"server/KeyLoad.Server", "server/KeyLoad.Server.dll", "server/KeyLoad.Server.runtimeconfig.json",
-                "server/KeyLoad.Server.deps.json", "cli/KeyLoad.Cli", "cli/KeyLoad.Cli.dll", "compose.yml",
+    required = {"server/KeyLoad", "server/KeyLoad.dll", "server/KeyLoad.runtimeconfig.json",
+                "server/KeyLoad.deps.json", "cli/KeyLoad.Cli", "cli/KeyLoad.Cli.dll", "compose.yml",
                 "initialize.sh", "README.md", ".env.example", "release-version.json"}
     if not required.issubset(names) or "server" not in names or "cli" not in names:
         fail("Database distribution lacks the server, CLI, or CLUSTER deployment payload.")

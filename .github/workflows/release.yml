@@ -113,7 +113,7 @@ jobs:
         run: |
           args=(-p:Version="$RELEASE_VERSION" -p:PackageVersion="$RELEASE_PACKAGE_VERSION" -p:AssemblyVersion="$RELEASE_ASSEMBLY_VERSION" -p:FileVersion="$RELEASE_FILE_VERSION")
           dotnet pack KeyLoad.slnx --no-build --no-restore --configuration Release "${args[@]}" --output artifacts/assets
-          dotnet publish src/KeyLoad.Server/KeyLoad.Server.csproj --configuration Release --runtime linux-x64 --self-contained true "${args[@]}" --output artifacts/distribution/server
+          dotnet publish src/KeyLoad/KeyLoad.csproj --configuration Release --runtime linux-x64 --self-contained true "${args[@]}" --output artifacts/distribution/server
           dotnet publish src/KeyLoad.Cli/KeyLoad.Cli.csproj --configuration Release --runtime linux-x64 --self-contained true "${args[@]}" --output artifacts/distribution/cli
           cp scripts/Features/ReleaseDelivery/distribution/{compose.yml,initialize.sh,README.md,.env.example} artifacts/distribution/
           cp artifacts/reservation/release-version.json artifacts/distribution/
@@ -125,7 +125,7 @@ jobs:
         run: |
           docker version
           for role in server benchmarks; do
-            project=src/KeyLoad.Server/KeyLoad.Server.csproj
+            project=src/KeyLoad/KeyLoad.csproj
             if [[ "$role" == benchmarks ]]; then project=benchmarks/KeyLoad.ComparisonHost/KeyLoad.ComparisonHost.csproj; fi
             reference="ghcr.io/managedcode/keyload-$role:$RELEASE_VERSION"
             archive="keyload-$role-$RELEASE_VERSION-linux-amd64.docker.tar.gz"

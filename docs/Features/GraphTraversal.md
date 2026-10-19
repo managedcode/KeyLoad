@@ -14,7 +14,7 @@ GraphTraversal owns graph edge records, adjacency maintenance, and authorized bo
 | Backend | `src/KeyLoad.Core/GraphAndSeries.cs`, mutation dispatch/authorization in `DatabaseEngine.cs` and `MutationAuthorization.cs` | `src/KeyLoad.Core/GraphTraversal/` |
 | Tests | `tests/KeyLoad.UnitTests/GraphAndSearchTests.cs`, `ReadExecutionTests.cs`, `HttpAdmissionTests.cs` | `tests/KeyLoad.UnitTests/GraphTraversal/` |
 | Durable specification | This file | `docs/Features/GraphTraversal.md` |
-| HTTP | `src/KeyLoad.Server/ApiEndpoints.cs`: `POST /v1/graph/traverse`; edge mutations enter through shared `POST /v1/commands` | Shared HTTP transport belongs to `src/KeyLoad.Server/ClientApi/`; graph semantics belong to `src/KeyLoad.Core/GraphTraversal/` |
+| HTTP | `src/KeyLoad/ApiEndpoints.cs`: `POST /v1/graph/traverse`; edge mutations enter through shared `POST /v1/commands` | Shared HTTP transport belongs to `src/KeyLoad/ClientApi/`; graph semantics belong to `src/KeyLoad.Core/GraphTraversal/` |
 | .NET SDK | `src/KeyLoad.Client/GraphTraversal/Transport/KeyLoadClient.cs`: `TraverseAsync`; `DatabaseComposition/Commands/KeyLoadClient.cs`: atomic graph mutations | Shared client transport belongs to ClientApi; typed graph traversal belongs to GraphTraversal |
 | Official MCP | The authenticated official C# SDK exposes `keyload_graph_incoming` and shortest-path tools through the shared ClientApi gateway/catalog | Real cluster schema oracles preserve exact properties/required fields and hints; nested `PartitionRef` includes computed `atomicPartitionId` as an optional property |
 | UI | No dedicated graph-management or traversal frontend is specified | N/A: graph traversal is a database/API query capability, not a separate frontend surface |

@@ -208,7 +208,7 @@ NuGet publication follow root policy.
 | src/KeyLoad.Storage.ZoneTree | ZoneTreeStore.cs, StorageRecovery/Execution/ZoneTreeStoreRuntime.cs, StorageRecovery/Recovery/ZoneTreeCheckpointManager.cs | StorageRecovery and Restore; files, WAL, checkpoints and local archives stay with the silo-local ZoneTree owner. |
 | src/KeyLoad.Query | QueryExecution/Queries/QueryEngine.cs, QueryExecution/Execution/SqlParser.cs, Search/Queries/QueryExecution/SearchEngine.cs, ChangeFeeds/Queries/LiveQueryExecutor.cs | QueryExecution, Search, ChangeFeeds; one authorized typed AST and bounded read cut. |
 | src/KeyLoad.Clustering | ClusterRouting/Grains/ConnectionGrain.cs, ClusterRouting/Grains/CommandPartitionGrain.cs, ClusterRouting/Queries/Connections/ConnectionReadExecution.cs, `<SliceName>/GrainServices/` | ClusterRouting; connection and partition grains route through Orleans to the silo-local ZoneTree owners. |
-| src/KeyLoad.Server | Program.cs, NodeOptions.cs, ClientApi/, ClusterRouting/Hosting/SiloHosting/OrleansNode.cs | Composition root, Orleans host and public API; caller identity never supplies trusted roles. |
+| src/KeyLoad | Program.cs, NodeOptions.cs, ClientApi/, ClusterRouting/Hosting/SiloHosting/OrleansNode.cs | Composition root, Orleans host and public API; caller identity never supplies trusted roles. |
 | src/KeyLoad.Client | ClientApi/Transport/KeyLoadClient.cs, QueryExecution/Queries/KeyLoadQuery.cs | ClientApi transport; business operations mirror the same canonical slices as core, contracts, API and tests. |
 | src/KeyLoad.Cli | Program.cs, ClientApi/Transport/CliClientApi.cs, Restore/Commands/CliBackupRestore.cs | Administrative entry point with typed ClientApi and backup/restore owners. |
 | build/KeyLoad.AppHost | Program.cs, BenchmarkComparisons/Resources/SessionTopology/BenchmarkResources.cs | ClusterReplication, ClusterRouting, TestInfrastructure, BenchmarkComparisons and CodeQuality; Aspire owns cluster resources, readiness, test dependencies and shutdown. |
@@ -635,7 +635,7 @@ classDiagram
 
 The [AdminDashboard](Features/AdminDashboard.md) slice under
 [ADR-051](ADR/ADR-051-admin-dashboard.md) hosts the read-only console in
-`src/KeyLoad.Server/AdminDashboard/Assets/`, with shared Abstractions DTOs, Core
+`src/KeyLoad/AdminDashboard/Assets/`, with shared Abstractions DTOs, Core
 catalog/queue readers and a matching Client SDK. It uses the connection grain
 with call-local authorized reads; physical observations are reported per node.
 The public `site/` is its own surface. Both share one visual identity under

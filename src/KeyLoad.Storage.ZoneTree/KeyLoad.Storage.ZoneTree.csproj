@@ -5,7 +5,7 @@
   <ItemGroup>
     <ProjectReference Include="../KeyLoad.Abstractions/KeyLoad.Abstractions.csproj" />
     <ProjectReference Include="../KeyLoad.Diagnostics/KeyLoad.Diagnostics.csproj" />
-    <InternalsVisibleTo Include="KeyLoad.Server" />
+    <InternalsVisibleTo Include="KeyLoad" />
     <InternalsVisibleTo Include="KeyLoad.UnitTests" />
     <InternalsVisibleTo Include="KeyLoad.IntegrationTests" />
     <InternalsVisibleTo Include="KeyLoad.ComparisonTests" />

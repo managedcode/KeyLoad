@@ -266,7 +266,7 @@ function Read-FcNativeClusterLifecycles([string] $Root, [object] $Value, [object
     if ($Value.clusterLifecycles.Count -eq 0 -or $Value.clusterLifecycles.Count -gt $Value.bounds.maximumFiles) {
         throw $script:FcNativeMergeInput.InvalidDescriptor
     }
-    $servers = @($Manifest.value.compiledProducts | Where-Object module -CEQ 'KeyLoad.Server')
+    $servers = @($Manifest.value.compiledProducts | Where-Object module -CEQ 'KeyLoad')
     if ($servers.Count -ne 1) { throw $script:FcNativeMergeInput.InvalidSource }
     $directories = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
     $originals = [Collections.Generic.List[object]]::new()

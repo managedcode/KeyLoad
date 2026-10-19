@@ -11,7 +11,7 @@ internal static class IsolatedNativeReportAssertions
     private const string KeyLoad = "KeyLoad";
     private const string Mongo = "MongoDB";
     private const string Membership = "orleans-storage";
-    private const string ServerProject = "KeyLoad.Server.csproj";
+    private const string ServerProject = "KeyLoad.csproj";
     private const string ExternalImageDigest = "@sha256:";
 
     internal static async Task VerifyModelAsync(IResourceCollection resources, BenchmarkSessionSelection selection,
