@@ -67,4 +67,7 @@ public sealed record ResourceDefinition([property: Orleans.Id(0)] string Name, [
     {
         get; init;
     }
+    /// <summary>Gets file metadata and physical-object reservation limits.</summary>
+    [Orleans.Id(16)]
+    public FileStoragePolicy FilePolicy { get; init; } = new();
 }

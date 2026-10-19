@@ -21,6 +21,7 @@ public sealed partial class DatabaseEngine
                     }
                 }
                 return;
+            case OperationKind.FileMetadata:
             case OperationKind.Receive:
             case OperationKind.Processing:
             case OperationKind.CommitInbox:

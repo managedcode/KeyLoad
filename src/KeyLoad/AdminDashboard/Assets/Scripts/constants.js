@@ -54,7 +54,9 @@ export const Api = Object.freeze({
     resources: '/admin/dashboard/resources',
     queue: '/admin/dashboard/queue',
     query: '/query/ast',
-    blobs: '/blobs/list',
+    files: '/api/storage',
+    fileNext: 'X-KeyLoad-Next-File',
+    fileList: '/list',
     get: 'GET',
     post: 'POST',
     contentType: 'Content-Type',
@@ -250,7 +252,7 @@ export const Id = Object.freeze({
 export const Headers = Object.freeze({
     documents: ['Document ID', 'Revision', 'JSON preview', 'Details'],
     queues: ['Message ID', 'State', 'Attempts', 'Version', 'Not before', 'Lease until', 'Expires at'],
-    blobs: ['Object ID', 'Published length', 'Revision', 'Parts', 'Updated'],
+    blobs: ['File', 'Length', 'Content type', 'Updated'],
     physical: ['Relative file path', 'Category', 'Physical length'],
     errors: ['Time', 'Status', 'Method', 'Route', 'Duration'],
     catalog: ['Name', 'Category', 'Transaction domain', 'Schema', 'Indexes', 'State', 'Browse']

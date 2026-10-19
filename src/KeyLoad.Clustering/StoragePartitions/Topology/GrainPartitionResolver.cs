@@ -8,6 +8,7 @@ internal static class GrainPartitionResolver
     {
         OperationKind.OnlineTextPublicationPhase => GrainOnlineTextPublicationCommand.Resolve(request),
         OperationKind.Bm25CorpusPublicationPhase => GrainBm25CorpusPublicationCommand.Resolve(request),
+        OperationKind.FileMetadata => Route<global::KeyLoad.Core.Features.BlobStorage.FileMetadataMutation>(request, value => (value.CommandId, value.Address.Partition)),
         OperationKind.Batch => Route<CommandRequest>(request, value => (value.CommandId, value.Partition)),
         OperationKind.Receive => Route<ReceiveRequest>(request, value => (value.RequestId, value.Lane.Partition)),
         OperationKind.Delivery => Route<DeliveryCommand>(request, value => (value.CommandId, value.Lane.Partition)),

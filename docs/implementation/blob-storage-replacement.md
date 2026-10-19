@@ -32,7 +32,7 @@ references; it does not store file payloads or binary upload parts.
 
 ## Verification status
 
-Module integration and end-to-end file acceptance remain pending. Existing
+Module integration is implemented in source; end-to-end acceptance is under verification. Existing
 raw-part BlobStorage evidence does not qualify the replacement.
 
 ## Progress
@@ -51,8 +51,12 @@ raw-part BlobStorage evidence does not qualify the replacement.
   10.1.5 public nupkg source commits were independently verified; KeyLoad central
   references are updated once to those published versions. Consumer restore and the complete Debug solution build with warnings as errors
   pass (0 warnings / 0 errors). Focused consumer checks are recorded below.
-- KeyLoad module composition, metadata integration and acceptance tests
-  are incomplete. Removal is not a file-API readiness claim.
+- Native controller/provider composition, metadata-only publication and fresh
+  scope/row authorization are implemented. Server Debug build passes with zero
+  warnings/errors. Nine file tests pass for metadata publication, quota/row authorization, native
+  MVC route discovery and physical identity isolation. Actual Aspire HTTP
+  acceptance is blocked by the independently reproduced text receipt startup
+  failure recorded below.
 
 ## Current KeyLoad checks
 
@@ -71,6 +75,40 @@ Focused TUnit checks on the final assembly:
   in the initial healthy mixed-model step, before resource-pair fault injection.
   Assertions are retained; this is an open gate, not a passing whole-operation claim.
 
-These checks do not establish file API acceptance. Module composition,
-metadata/authorization integration, physical recovery and distributed file
-qualification remain incomplete. No real new KeyLoad file route is claimed.
+The new routes are composed in source. These focused checks do not establish
+complete file API acceptance: physical recovery, cancellation/endurance, payload
+backup consistency and deployed shared-provider cluster qualification remain open.
+
+## Connected metadata and authorization checkpoint
+
+The native Storage server/controller and filesystem provider are composed in the
+server. Metadata-only reservation, staging, revision publication, row authorization,
+quota accounting, listing, retirement and protected cleanup use the existing
+signed connection-grain path. All twelve MVC actions have capability metadata;
+no raw metadata mutation is admitted through the generic public gateway.
+The admin file browser uses the new native metadata route and encrypted cursor.
+
+Current local evidence:
+
+- `dotnet restore KeyLoad.slnx`: pass.
+- Scoped `dotnet format` and complete solution `--verify-no-changes`: pass.
+- Complete Debug `dotnet build KeyLoad.slnx --no-restore -warnaserror -m:1`:
+  pass, zero warnings/errors.
+- All nine BlobStorage unit cases: pass. Seven use real ZoneTree metadata operations; the other two verify MVC route discovery and physical
+  namespace/session isolation. Scope includes fresh row-policy changes,
+  revocation, quotas, concurrent publication and protected cleanup.
+- PartitionRecordInventoryTests: 1 pass; 69 current partition families.
+- ContractFamilyTests: 13 pass.
+- FileStartupDiagnosticTests: 1 pass; original startup causes survive a long
+  shutdown stack within the existing diagnostic limits and secret redaction.
+- Repository governance and changed dashboard JavaScript syntax: pass.
+
+The actual Aspire HTTP scenario is present and runs the native AppHost with
+Azurite. It fails before any file operation: the node cannot open the fresh text
+projection receipt. The same failure is independently reproduced by existing
+`TextOnlineWholeOperationTests.OrderedPublicationPreservesFullOriginalReceiptAndSameViewBilingualReads`:
+`TextEnvelopeCodec.Decode` -> `TextRootFiles.VerifyReceipt` reports
+`The execution text projection is corrupt.` No assertion or startup protection
+is weakened. HTTP upload/download, ranges and revocation are therefore unqualified
+until this startup blocker is resolved. This checkpoint does not close physical
+restore, cancellation/endurance, shared-provider multi-silo or Linux delivery gates.

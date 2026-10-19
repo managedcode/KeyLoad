@@ -6,6 +6,7 @@ public sealed partial class DatabaseEngine
     {
         OperationKind.Bm25CorpusPublicationPhase => typeof(global::KeyLoad.Core.Features.Search.Bm25CorpusPublicationPhaseCommand),
         OperationKind.OnlineTextPublicationPhase => typeof(global::KeyLoad.Core.Features.Search.OnlineTextPublicationPhaseCommand),
+        OperationKind.FileMetadata => typeof(global::KeyLoad.Core.Features.BlobStorage.FileMetadataMutation),
         OperationKind.Batch => typeof(CommandRequest),
         OperationKind.Receive => typeof(ReceiveRequest),
         OperationKind.Delivery => typeof(DeliveryCommand),

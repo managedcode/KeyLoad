@@ -71,6 +71,7 @@ internal static class ServerConfiguration
             builder.Services.AddSingleton<ILifecycleParticipant<ISiloLifecycle>>(lifecycleParticipantFactory);
         }
         DatabaseAuthenticationComposition.Register(builder.Services);
+        FileStorageComposition.Register(builder);
         McpServerComposition.Register(builder);
         configureServices?.Invoke(builder.Services, node.Value);
     }
@@ -120,6 +121,7 @@ internal static class ServerConfiguration
         OrleansHealthEndpoints.Map(app);
         AdminStaticAssets.Map(app);
         app.MapKeyLoadApi();
+        app.MapControllers();
         app.MapMcp(McpFramingProtocol.Path);
     }
 

@@ -62,14 +62,43 @@ ZoneTree metadata without reimplementing the library storage/transport layer.
 Every participating silo must see the same configured physical object namespace;
 independent local directories do not implement shared file storage.
 
-The old engine, raw-part contracts, HTTP/SDK/MCP routes, raw-part restore processing
-and exclusive serializers are removed. The rejected consumer IStorage adapter is
-also removed. Module composition, metadata integration and its public
-acceptance tests remain in progress; no new working KeyLoad file route is claimed.
-The combined chunk-server repair is published as ManagedCode.Storage 10.1.5. Its
-Linux release, all-package public-feed verification and consumer package source
-commits are verified. KeyLoad centrally references the published Server and
-FileSystem packages; this does not establish module integration or acceptance.
+The server composes the published ManagedCode.Storage.Server and FileSystem
+10.1.5 packages. `FileStorageController` inherits the native server controller
+and delegates form, stream and chunk transfers to the library. The selected
+filesystem provider is scoped to the complete partition, resource and incarnation.
+The physical key is a server-created immutable identifier; public metadata keeps
+the original logical name and excludes provider paths.
+
+`FileStoragePolicy` bounds file bytes, allocated bytes, files, active reservations
+and physical objects. Private metadata commands reserve capacity, stage one object,
+publish with a revision condition, abort joined writes, retire visibility and
+reclaim retired objects. A failed or ambiguous publication retains its physical
+reference. Read responses use the library's verified file-backed snapshot and
+ASP.NET Core range handling, with another metadata/authorization check before
+returning the response.
+
+The authenticated MVC resource filter checks persisted scope before provider
+creation and model binding. Every metadata operation reloads credentials, grants,
+row policy and resource lifetime through the existing connection-grain path.
+Metadata/list/delete/cleanup use those same checks. Paging cursors are encrypted
+and bound to the principal, policy epoch and physical resource namespace.
+
+Routes start at `/api/storage/{tenant}/{database}/{domain}/{partition}/{resource}`.
+Native transfer suffixes are `upload`, `upload/stream`, `download/{path}`,
+`stream/{path}`, `download-bytes/{path}`, `upload-chunks/upload`,
+`upload-chunks/complete` and `upload-chunks/{uploadId}` (DELETE).
+KeyLoad metadata suffixes are `metadata/{path}`, `list`, `files/{path}` (DELETE)
+and `cleanup` (POST). Lists and cleanup return bounded pages; the next encrypted
+cursor is in `X-KeyLoad-Next-File`. Stream uploads may declare length through
+`X-File-Length` when Content-Length is unavailable.
+
+Single-silo storage defaults to `DataDirectory/files`. Multi-silo file access
+requires an explicit shared `KeyLoad:FileStorage:RootDirectory` and
+`SharedDirectory=true`. The native development AppHost configures one common
+file directory. Chunk sessions remain on their accepting HTTP node and are
+fenced by persisted transfer ownership; they are not durable cluster sessions.
+Complete replacement acceptance, physical restore and deployed shared-filesystem
+qualification remain open.
 
 The HTTP surface inherits ManagedCode.Storage.Server operations. Physical
 provider paths are private metadata and are not returned as public download

@@ -1,5 +1,3 @@
-using KeyLoad.Core.Features.CommandOutcomes.Contracts;
-using KeyLoad.Core.Features.RuntimeJournaling.Contracts;
 using KeyLoad.Core.Features.StoragePartitions.Contracts;
 
 namespace KeyLoad.UnitTests.Features.OrleansExecution;
@@ -8,17 +6,16 @@ internal sealed class PartitionRecordInventoryTests
 {
     private const string Suffix = "inventory-probe";
     private const string Value = "raw-value";
-    internal const int ExpectedFamilyCount = 71;
+    internal const int ExpectedFamilyCount = 69;
     private static readonly PartitionRef Partition = new(PartitionRecordFixture.TenantId,
         PartitionRecordFixture.DatabaseId, PartitionRecordFixture.DomainId, PartitionRecordFixture.PartitionKey);
     internal static readonly string[] ExpectedFamilies =
     [
-        "adjacency", "aggregate-snapshot", "analytics-event", "analytics-generation", "blob-head", "blob-part", "blob-partmeta",
-        "blob-state", "bm25-corpus-current", "dead-letter", "document", "document-epoch", "edge", "event", "event-feed",
-        "event-id", "event-sequence", "graph-cross-partition-capacity", "graph-cross-partition-intent",
+        "adjacency", "aggregate-snapshot", "analytics-event", "analytics-generation", "bm25-corpus-current", "dead-letter", "document", "document-epoch", "edge", "event", "event-feed",
+        "event-id", "event-sequence", "file-head", "file-quota", "file-upload", "graph-cross-partition-capacity", "graph-cross-partition-intent",
         "graph-cross-reverse-adjacency", "graph-edge-owner-version",
         "inbox", "index", "lease", "message-body", "message-meta",
-        "online-text-current", "outbox", "outbox-head", "outcome-locator", "outcome-locator", "outcome",
+        "online-text-current", "outbox", "outbox-head", "outcome", "outcome-locator",
         "processing-inbox", "processing-inbox-capacity", "projection-consumer", "projection-receipt", "queue-counters",
         "queue-dead-letter-order", "queue-order", "queue-pending-dead-letter",
         "queue-transfer-intent", "queue-transfer-source-capacity", "queue-transfer-target-capacity",

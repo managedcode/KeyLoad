@@ -114,5 +114,7 @@ public enum GrainReadKind
     /// <summary>Reads bounded canonical user analytics events under current persisted authority.</summary>
     AnalyticsEvents = 94,
     /// <summary>Aggregates a bounded authorized user analytics source cut through the execution derived engine.</summary>
-    AnalyticsAggregate = 95
+    AnalyticsAggregate = 95,
+    /// <summary>Reads authorized file metadata without physical payload bytes.</summary>
+    FileMetadata = 97
 }

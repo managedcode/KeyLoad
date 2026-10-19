@@ -42,6 +42,7 @@ public sealed partial class DatabaseEngine
         payload = payload.ToArray();
         var identity = kind switch
         {
+            OperationKind.FileMetadata => Identity<global::KeyLoad.Core.Features.BlobStorage.FileMetadataMutation>(payload),
             OperationKind.Batch => BatchIdentity(payload, work),
             OperationKind.Receive => Identity<ReceiveRequest>(payload),
             OperationKind.Delivery => Identity<DeliveryCommand>(payload),

@@ -19,6 +19,8 @@ public sealed partial class DatabaseEngine
         {
             OperationKind.Bm25CorpusPublicationPhase => ExecuteBm25CorpusPublication(transaction, principal, operation, position),
             OperationKind.OnlineTextPublicationPhase => ExecuteOnlineTextPublication(transaction, principal, operation),
+            OperationKind.FileMetadata => ExecuteFileMetadata(transaction, principal,
+                Payload<global::KeyLoad.Core.Features.BlobStorage.FileMetadataMutation>(operation), operation.Timestamp),
             OperationKind.Batch => ExecuteBatch(transaction, principal, operation, position, placement),
             OperationKind.Receive => Result(Receive(transaction, principal, Payload<ReceiveRequest>(operation), operation.Timestamp, position, operation)),
             OperationKind.Delivery => Result(CompleteDelivery(transaction, principal, Payload<DeliveryCommand>(operation), operation.Timestamp, position, operation)),

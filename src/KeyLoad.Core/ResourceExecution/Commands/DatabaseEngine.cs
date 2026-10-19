@@ -98,6 +98,10 @@ public sealed partial class DatabaseEngine
     private static void ValidateResourcePolicies(ResourceDefinition definition)
     {
         ValidateInboxPolicy(definition);
+        if (definition.FilePolicy is null || !definition.FilePolicy.IsValid())
+        {
+            throw Errors.Fail(ErrorCode.Validation, global::KeyLoad.Core.Features.BlobStorage.FileStorageProtocol.Invalid);
+        }
         var q = definition.QueuePolicy;
         if (definition.EventRetention.MaxEvents < ResourceConfigurationMinimumPositiveCount || definition.EventRetention.MaxBytes < ResourceConfigurationMinimumPositiveCount)
         {

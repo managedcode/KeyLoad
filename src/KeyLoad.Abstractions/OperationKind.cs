@@ -62,4 +62,6 @@ public enum OperationKind
     CreateTable = 51,
     /// <summary>Execution all-owner table retirement and logical removal through the authenticated request grain.</summary>
     DropTable = 53,
+    /// <summary>Changes metadata only through the authenticated file server.</summary>
+    FileMetadata = 56,
 }

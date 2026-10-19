@@ -69,7 +69,7 @@ export const Text = Object.freeze({
     stored: 'stored',
     inFlight: 'in flight',
     queueHint: 'Persisted metadata only. Inspection never receives or acknowledges messages.',
-    blobHint: 'Published object metadata · logical lengths.',
+    blobHint: 'Published file metadata · logical lengths.',
     documentHint: 'Authorized document rows · 25 per page.',
     schema: 'schema ',
     schemaShort: 'v',

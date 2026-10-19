@@ -156,7 +156,15 @@ function fetchData(kind, cursor) {
         astVersion: Config.astVersion
     });
     if (kind === Kind.queue) return call(Api.queue, { lane: { partition: scopePartition, queue: resource.name }, afterId: cursor, limit: Config.pageSize });
-    if (kind === Kind.blob) return call(Api.blobs, { partition: scopePartition, resource: resource.name, limit: Config.pageSize, afterId: cursor });
+    if (kind === Kind.blob) {
+        const path = [Api.files, ...[scopePartition.tenantId, scopePartition.databaseId,
+            scopePartition.transactionDomainId, scopePartition.partitionKey, resource.name].map(encodeURIComponent)].join('/');
+        const query = cursor === null ? Text.empty : `?after=${encodeURIComponent(cursor)}`;
+        return call(path + Api.fileList + query, null, (result, response) => ({
+            items: result.value,
+            next: response.headers.get(Api.fileNext)
+        }));
+    }
     return null;
 }
 
@@ -183,9 +191,9 @@ function queue(page) {
 }
 
 function blobs(page) {
-    dataAfter = page.nextAfterId;
+    dataAfter = page.next;
     write(Id.dataDescription, Text.blobHint);
-    table(Headers.blobs, page.items.map(row => [row.blob.id, bytes(row.length), row.revision, row.partCount, date(row.updatedAt)]), [Css.mono, Css.num, Css.num, Css.num]);
+    table(Headers.blobs, page.items.map(row => [row.fullName, bytes(row.length), row.mimeType, date(row.lastModified)]), [Css.mono, Css.num]);
     write(Id.dataEmpty, Text.noRows);
     write(Id.pageDescription, Text.page);
 }

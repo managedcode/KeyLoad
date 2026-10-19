@@ -17,7 +17,23 @@ internal static class CanonicalOperationGateway
     /// <returns>The exact canonical reply and actual execution identity.</returns>
     internal static Task<DispatchedOperationReply> ExecuteAsync(HttpContext context, GrainReadKind? readKind,
         OperationKind? commandKind, Guid commandId, ReadOnlyMemory<byte> payload, CancellationToken cancellationToken)
-        => ExecuteCoreAsync(context, readKind, commandKind, commandId, payload, cancellationToken);
+        => readKind == GrainReadKind.FileMetadata || commandKind == OperationKind.FileMetadata
+            ? throw Errors.Fail(ErrorCode.UnsupportedCapability, global::KeyLoad.Core.Features.BlobStorage.FileStorageProtocol.BoundaryOnly)
+            : ExecuteCoreAsync(context, readKind, commandKind, commandId, payload, cancellationToken);
+
+    internal static async Task<object?> ExecuteFileMetadataAsync(HttpContext context,
+        global::KeyLoad.Core.Features.BlobStorage.FileMetadataQuery? query,
+        global::KeyLoad.Core.Features.BlobStorage.FileMetadataMutation? mutation, CancellationToken token)
+    {
+        if ((query is null) == (mutation is null))
+        {
+            throw Errors.Fail(ErrorCode.Validation, global::KeyLoad.Core.Features.BlobStorage.FileStorageProtocol.Invalid);
+        }
+        var actual = await RuntimeExecuteAsync(context, query is null ? null : GrainReadKind.FileMetadata,
+            mutation is null ? null : OperationKind.FileMetadata, mutation?.CommandId ?? Guid.Empty,
+            query is null ? OrleansSerialization.Serialize(mutation!) : OrleansSerialization.Serialize(query), token);
+        return OrleansSerialization.Deserialize<GrainValue>(actual.Reply.Payload.Span).Value;
+    }
 
     private static async Task<DispatchedOperationReply> ExecuteCoreAsync(HttpContext context, GrainReadKind? readKind,
         OperationKind? commandKind, Guid commandId, ReadOnlyMemory<byte> payload, CancellationToken cancellationToken)

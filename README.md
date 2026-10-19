@@ -126,7 +126,7 @@ Complete Linux cluster, recovery, fault and coverage qualification remains open;
 | **Queues & topics** | Scheduling, leases, ACK, retries, dead letters and peek | Enqueue/publish |
 | **Events** | Append, replay and durable subscriptions | Append with expected revision |
 | **Time series** | Ranges, aggregates, windows and retention | Append samples |
-| **Files & blobs** | ManagedCode.Storage owns physical bytes; ZoneTree owns metadata | integration and qualification open |
+| **Files & blobs** | ManagedCode.Storage transfers with ZoneTree metadata, quotas and authorization | local acceptance in progress; recovery/cluster qualification open |
 | **Change feeds** | Resumable feeds and projections | Record document changes |
 
 Atomic batches share one partition. T-SQL `SELECT` reads supported documents, typed rows and model views; `EXEC` reaches the shared operation catalog. MCP discovers those operations on demand. [SQL syntax](docs/Features/QueryExecution.md) · [API and tool catalog](docs/Features/ClientApi.md).

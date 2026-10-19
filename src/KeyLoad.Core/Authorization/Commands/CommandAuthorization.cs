@@ -1,4 +1,3 @@
-using KeyLoad.Core.Features.CommandOutcomes.Identity;
 using KeyLoad.Core.Features.RuntimeJournaling.Identity;
 using KeyLoad.Storage;
 using ManagedCode.Communication.Commands;
@@ -37,6 +36,9 @@ public sealed partial class DatabaseEngine
         {
             case OperationKind.Bm25CorpusPublicationPhase:
                 AuthorizeBm25CorpusPublication(view, principal, operation);
+                return null;
+            case OperationKind.FileMetadata:
+                AuthorizeFileMetadata(view, principal, Payload<global::KeyLoad.Core.Features.BlobStorage.FileMetadataMutation>(operation));
                 return null;
             case OperationKind.Batch:
                 return AuthorizeBatch(view, principal, Payload<CommandRequest>(operation));

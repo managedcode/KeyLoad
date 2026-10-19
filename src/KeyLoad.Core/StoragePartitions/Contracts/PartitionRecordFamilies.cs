@@ -11,6 +11,9 @@ internal static class PartitionRecordFamilies
     internal const string AnalyticsGeneration = "analytics-generation";
     internal const string Bm25CorpusCurrent = global::KeyLoad.Core.Features.Search.Bm25CorpusProtocol.CurrentFamily;
     internal const string DeadLetter = "dead-letter";
+    internal const string FileHead = global::KeyLoad.Core.Features.BlobStorage.FileStorageProtocol.HeadFamily;
+    internal const string FileUpload = global::KeyLoad.Core.Features.BlobStorage.FileStorageProtocol.UploadFamily;
+    internal const string FileQuota = global::KeyLoad.Core.Features.BlobStorage.FileStorageProtocol.QuotaFamily;
     internal const string Document = "document";
     internal const string DocumentEpoch = "document-epoch";
     internal const string Edge = "edge";
@@ -32,7 +35,6 @@ internal static class PartitionRecordFamilies
     internal const string OutboxHead = "outbox-head";
     internal const string OutcomeLocator = "outcome-locator";
     internal const string Outcome = "outcome";
-    internal const string OutcomeLocator = "outcome-locator";
     internal const string ProcessingInbox = global::KeyLoad.Core.Features.Messaging.TargetInboxProtocol.RecordSpace;
     internal const string ProcessingInboxCapacity = global::KeyLoad.Core.Features.Messaging.TargetInboxProtocol.CapacitySpace;
     internal const string ProjectionConsumer = "projection-consumer";
@@ -91,6 +93,9 @@ internal static class PartitionRecordFamilies
         EventFeed,
         EventIdentity,
         EventSequence,
+        FileHead,
+        FileQuota,
+        FileUpload,
         GraphCrossPartitionCapacity,
         GraphCrossPartitionIntent,
         GraphCrossReverseAdjacency,
@@ -103,9 +108,8 @@ internal static class PartitionRecordFamilies
         OnlineTextCurrent,
         Outbox,
         OutboxHead,
-        OutcomeLocator,
-        OutcomeLocator,
         Outcome,
+        OutcomeLocator,
         ProcessingInbox,
         ProcessingInboxCapacity,
         ProjectionConsumer,

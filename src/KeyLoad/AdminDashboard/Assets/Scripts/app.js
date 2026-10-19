@@ -102,7 +102,7 @@ async function send(path, body, signal) {
     });
 }
 
-async function request(path, body = null) {
+async function request(path, body = null, select = result => result) {
     if (!credential || inFlight) return null;
     inFlight = true;
     const started = epoch;
@@ -119,7 +119,7 @@ async function request(path, body = null) {
         }
         if (!response.ok) throw new Error(Text.httpError + response.status + Text.closeParen);
         const result = await response.json();
-        return started === epoch ? result : null;
+        return started === epoch ? select(result, response) : null;
     } catch (error) {
         if (started !== epoch || error.name === Api.abort) return null;
         observationFailed();

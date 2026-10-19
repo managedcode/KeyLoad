@@ -74,11 +74,24 @@ verification. Earlier raw-part tests do not qualify the replacement.
 
 ## Current source state
 
-The custom KeyLoad BlobStorage engine and its raw-part DTOs, HTTP/SDK/MCP
-transport, restore processing and exclusive serializers are removed. The rejected
-consumer IStorage adapter is removed as well. Module composition with
-KeyLoad metadata/authorization integration remains open and must be verified
-before exposing file access. The combined Storage repair is delivered in published
-10.1.5 packages, with its Linux release and public-feed source identities verified.
-KeyLoad uses those published packages; module composition and metadata
-authorization remain open.
+The custom raw-part engine, public binary protocol, exclusive serializers and
+consumer IStorage adapter are removed. The published 10.1.5 native server and
+filesystem provider are composed directly. KeyLoad adds metadata-only reservation,
+staging, revision publication, tombstoning and protected reclamation through its
+existing authorized Orleans command/read path. The HTTP resource filter admits
+scope before provider creation; metadata operations enforce fresh persisted
+capability, row policy and resource lifetime checks.
+
+Immutable physical names belong to the complete resource incarnation. Public
+metadata exposes logical names only. Verified snapshots precede ASP.NET Core
+range responses, and encrypted cursors bind paging to principal and policy epoch.
+Multi-silo access requires an explicit shared physical root; AppHost supplies one
+for native development. Native chunk sessions have HTTP-node affinity enforced
+by the metadata lease, without claiming durable or distributed chunk sessions.
+
+The combined Storage repair is delivered in published 10.1.5 packages, with its
+Linux release and public-feed source identities verified. Local source checks
+and replacement acceptance evidence are tracked in the
+[implementation checklist](../implementation/blob-storage-replacement.md).
+Physical recovery, full shared-provider cluster execution and delivered-source
+qualification remain separate open gates.

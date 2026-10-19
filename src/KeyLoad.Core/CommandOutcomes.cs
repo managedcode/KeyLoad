@@ -73,6 +73,7 @@ public sealed partial class DatabaseEngine
             throw Errors.Fail(ErrorCode.PermissionDenied, ChangedOutcomePrincipalPolicyMessage);
         }
 
+        ValidateFileCachedOutcome(view, principal, operation);
         ValidateBm25CachedOutcome(view, principal, operation, previous);
         ValidateOnlineTextCachedOutcome(view, principal, operation, previous);
         ValidateCompositionOutcome(view, principal, operation, previous);

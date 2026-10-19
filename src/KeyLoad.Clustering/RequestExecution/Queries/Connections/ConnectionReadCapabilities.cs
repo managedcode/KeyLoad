@@ -1,7 +1,6 @@
 using KeyLoad.Core;
-using KeyLoad.Core.Features.CommandOutcomes.Identity;
-using KeyLoad.Core.Features.RuntimeJournaling.Identity;
 using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.Core.Features.RuntimeJournaling.Identity;
 using KeyLoad.Query;
 using KeyLoad.Query.Features.Search;
 using KeyLoad.Storage;
@@ -44,6 +43,12 @@ internal sealed class ConnectionReadCapabilities(DatabaseEngine localDatabase, I
         }
 
         var principal = await ReloadPrincipalAsync(request, requestId, null, cancellationToken).ConfigureAwait(true);
+        if (kind == GrainReadKind.FileMetadata)
+        {
+            return localDatabase.ReadFileMetadataBound(principal.Id,
+                GrainPayload.Read<global::KeyLoad.Core.Features.BlobStorage.FileMetadataQuery>(request.Payload),
+                binding, cancellationToken);
+        }
         if (UserAnalyticsReadExecution.Handles(kind))
         {
             return await UserAnalyticsReadExecution.ExecuteAsync(localDatabase, services, principal, kind, request,

@@ -1,7 +1,7 @@
 using System.Globalization;
 using System.Net;
-using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.AppHost.Features.StorageRecovery;
+using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.Clustering;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -118,6 +118,10 @@ internal static class AppHostProgram
         return nodes;
     }
 
+    private const string FileRootEnvironment = "KeyLoad__FileStorage__RootDirectory";
+    private const string SharedFilesEnvironment = "KeyLoad__FileStorage__SharedDirectory";
+    private const string SharedFilesDirectory = "files";
+
     private static IResourceBuilder<ProjectResource> AddNode(IDistributedApplicationBuilder builder,
         LocalProfile profile, string root, bool ephemeral, int siloCount, int replicaCount,
         (IResourceBuilder<ParameterResource> Signing, IResourceBuilder<ParameterResource> Admin,
@@ -142,6 +146,8 @@ internal static class AppHostProgram
             .WithEnvironment(SiloAddressEnvironment, LoopbackAddress)
             .WithEnvironment(SiloPortEnvironment, resource.GetEndpoint(SiloEndpoint).Property(EndpointProperty.TargetPort))
             .WithEnvironment(DataEnvironment, directory)
+            .WithEnvironment(FileRootEnvironment, Path.Combine(root, SharedFilesDirectory))
+            .WithEnvironment(SharedFilesEnvironment, bool.TrueString)
             .WithEnvironment(IncarnationEnvironment, identity.Incarnation)
             .WithEnvironment(SigningEnvironment, identity.Signing)
             .WithEnvironment(AdminEnvironment, identity.Admin)

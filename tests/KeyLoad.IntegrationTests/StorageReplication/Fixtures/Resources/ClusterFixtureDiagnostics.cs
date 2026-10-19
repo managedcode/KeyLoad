@@ -34,6 +34,9 @@ internal sealed class ClusterFixtureDiagnostics : IAsyncDisposable
     private const string GrainFailureMarker = "Orleans request rejected:";
     private const string RpcFailureMarker = "Orleans request stream failed";
     private const string RpcOriginalCauseMarker = "Orleans original stream cause";
+    private const string StartupFailureMarker = "Unhandled exception.";
+    private const string HostStartupFailureMarker = "Hosting failed to start";
+    private const string DatabaseStartupFailureMarker = "KeyLoad.KeyLoadException:";
     private const string MaintenanceFailureMarker = "Node-owned replica maintenance failed";
     private const int FailureLinesPerNode = 3;
     private const int MaximumCapturedLineBytes = 1_024;
@@ -215,7 +218,10 @@ internal sealed class ClusterFixtureDiagnostics : IAsyncDisposable
             || content.Contains(GrainFailureMarker, StringComparison.Ordinal)
             || content.Contains(RpcFailureMarker, StringComparison.Ordinal)
             || content.Contains(RpcOriginalCauseMarker, StringComparison.Ordinal)
-            || content.Contains(MaintenanceFailureMarker, StringComparison.Ordinal))
+            || content.Contains(MaintenanceFailureMarker, StringComparison.Ordinal)
+            || content.Contains(StartupFailureMarker, StringComparison.Ordinal)
+            || content.Contains(HostStartupFailureMarker, StringComparison.Ordinal)
+            || content.Contains(DatabaseStartupFailureMarker, StringComparison.Ordinal))
         {
             AppendLogLine(failures, content, FailureLinesPerNode);
         }
