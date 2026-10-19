@@ -56,7 +56,7 @@ The following supplemental predicates remain active. The concise contracts here 
 
 ### Original operations, process ownership, and evidence
 
-The primary AppHost owns KeyLoad server project processes and Azurite.
+The primary AppHost owns KeyLoad server project processes with in-memory RapidMembership.
 The separate LoadTests AppHost owns selected infrastructure, discovered endpoints,
 readiness and run-owned cleanup. External DBs retain pinned images and
 anonymous session volumes; SDK product publication is explicit release

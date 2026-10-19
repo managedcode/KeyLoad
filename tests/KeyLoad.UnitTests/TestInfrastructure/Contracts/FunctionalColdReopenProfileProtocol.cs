@@ -1,7 +1,6 @@
 using System.Globalization;
 using Aspire.Hosting;
 using KeyLoad.AppHost.Features.TestInfrastructure;
-using KeyLoad.AppHost.Features.TestInfrastructure;
 using Microsoft.Extensions.Configuration;
 
 namespace KeyLoad.UnitTests.Features.TestInfrastructure;

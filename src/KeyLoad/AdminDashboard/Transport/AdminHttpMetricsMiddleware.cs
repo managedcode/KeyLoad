@@ -9,8 +9,7 @@ internal sealed class AdminHttpMetricsMiddleware(RequestDelegate next, TimeProvi
     [
         "/commands", "/documents", "/streams", "/events", "/subscriptions", "/queues", "/inbox",
         "/graph", "/search", "/series", "/query", "/admin/resources", "/admin/principals", "/admin/api-keys",
-        "/admin/outbox", "/admin/projections", "/admin/dispatch", "/admin/backup", "/admin/tables", "/auth", "/blobs", "/files",
-        "/changes", "/projections", "/backups", "/analytics", "/models", "/vectors", "/outbox"
+        "/admin/outbox", "/admin/projections", "/admin/dispatch", "/admin/backup", "/admin/tables", "/changes", "/analytics"
     ];
     private const string McpPrefix = "/mcp";
     private const string AdmissionPath = "/admin/admission";

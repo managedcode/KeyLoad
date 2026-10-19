@@ -13,7 +13,6 @@
     <ProjectReference Include="../../src/KeyLoad/KeyLoad.csproj" />
     <ProjectReference Include="../../src/KeyLoad.Storage.ZoneTree/KeyLoad.Storage.ZoneTree.csproj" IsAspireProjectResource="false" />
     <PackageReference Include="Aspire.Hosting.AppHost" />
-    <PackageReference Include="Aspire.Hosting.Azure.Storage" />
     <InternalsVisibleTo Include="KeyLoad.LoadTests.AppHost" />
     <InternalsVisibleTo Include="KeyLoad.ComparisonHost" />
     <InternalsVisibleTo Include="KeyLoad.UnitTests" />

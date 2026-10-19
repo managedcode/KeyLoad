@@ -70,14 +70,14 @@ internal sealed class SqlInnerJoinExecutionTests
     }
 
     [Test]
-    public async Task Q1AndUnknownDialectOrAstVersionsRejectBeforeReadingAndHealthyQ2StillRuns()
+    public async Task NoncurrentDialectOrAstFormatsRejectBeforeReadingAndCurrentJoinStillRuns()
     {
         using var database = new TestDatabase();
         Configure(database);
         database.Commit(new PutDocument(LeftCollection, "a", FirstLeft), new PutDocument(RightCollection, "c1", FirstRight));
         var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
-        var q1 = Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute("root",
-            new(database.Partition, JoinSql, AllowFullScan: true)));
+        var noncurrentDialect = Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute("root",
+            new(database.Partition, JoinSql, AllowFullScan: true, QueryDialectVersion: 2)));
         var beforeUnsupported = database.Store.Position;
         var badDialect = Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute("root",
             new(database.Partition, JoinSql, AllowFullScan: true, QueryDialectVersion: 3)));
@@ -97,7 +97,7 @@ internal sealed class SqlInnerJoinExecutionTests
             }));
         var badAst = Assert.ThrowsExactly<KeyLoadException>(() => engine.ExecuteAst("root", ast));
 
-        await Assert.That(q1.Code).IsEqualTo(ErrorCode.UnsupportedCapability);
+        await Assert.That(noncurrentDialect.Code).IsEqualTo(ErrorCode.UnsupportedCapability);
         await Assert.That(badDialect.Code).IsEqualTo(ErrorCode.UnsupportedCapability);
         await Assert.That(explain.Code).IsEqualTo(ErrorCode.UnsupportedCapability);
         await Assert.That(badAst.Code).IsEqualTo(ErrorCode.UnsupportedCapability);
@@ -122,7 +122,7 @@ internal sealed class SqlInnerJoinExecutionTests
         await Assert.That(q1.Rows.Select(row => row.EntityId)).IsEquivalentTo(["a"], CollectionOrdering.Matching);
         var beforeUnsupportedJoin = database.Store.Position;
         var unsupported = Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute("root",
-            new(database.Partition, JoinSql, AllowFullScan: true)));
+            new(database.Partition, JoinSql, AllowFullScan: true, QueryDialectVersion: 2)));
         await Assert.That(unsupported.Code).IsEqualTo(ErrorCode.UnsupportedCapability);
         await Assert.That(database.Store.Position).IsEqualTo(beforeUnsupportedJoin);
 

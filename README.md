@@ -212,11 +212,23 @@ aspire start --apphost build/KeyLoad.AppHost/KeyLoad.AppHost.csproj --no-build -
 ```
 
 The server executable project is [`KeyLoad`](src/KeyLoad/KeyLoad.csproj).
-Aspire starts execution `KeyLoad` .NET project processes and Azurite for
-Orleans membership. Ordinary build, development and tests do not publish or run
+Aspire starts execution `KeyLoad` .NET project processes with in-memory
+[RapidMembership](https://github.com/managedcode/Orleans.RapidMembership) 10.4.0
+for Orleans membership. Ordinary build, development and tests do not publish or run
 KeyLoad Docker images. SDK `PublishContainer` belongs to explicit releases.
 The separate `build/KeyLoad.LoadTests.AppHost` owns selected comparison database
 infrastructure; its workload client runs outside the Aspire resource graph.
+
+Membership discovers localhost and reachable local IPv4 interfaces automatically.
+Aspire supplies one independent `KeyLoad:RapidMembership:SharedSecret` (at least
+32 UTF-8 bytes) to every silo and allocates each private TCP
+`KeyLoad:RapidMembership:ListenPort`. Outside Aspire, configure the same secret
+on all silos and allow UDP 11113 plus the selected membership TCP ports between
+them. Optional `KeyLoad:RapidMembership:DiscoveryNetworks` entries accept IPv4
+CIDR networks or address ranges. No seed IPs or membership files are required.
+RAPID membership and its table remain in RAM; quorum loss refuses membership
+changes, and a complete cluster restart discovers a new membership. Database
+files and their durability contracts remain independently owned by storage.
 
 **3. Choose the number of silos and copies**
 
@@ -367,7 +379,7 @@ Feature code uses `Features/<SliceName>/<Responsibility>/` across the solution.
 | [`src/KeyLoad`](src/KeyLoad) | The database server: HTTP API, MCP server and admin console |
 | [`src/KeyLoad.Client`](src/KeyLoad.Client) | The .NET SDK |
 | [`src/KeyLoad.Cli`](src/KeyLoad.Cli) | Command-line tool for operators and workers |
-| [`build/KeyLoad.AppHost`](build/KeyLoad.AppHost) | KeyLoad development and functional-test host, with Azurite membership |
+| [`build/KeyLoad.AppHost`](build/KeyLoad.AppHost) | KeyLoad development and functional-test host, with in-memory RapidMembership |
 | [`build/KeyLoad.LoadTests.AppHost`](build/KeyLoad.LoadTests.AppHost) | Selected load-test database infrastructure and owned cleanup |
 | [`src/KeyLoad.Abstractions`](src/KeyLoad.Abstractions) | Shared public contracts |
 | `src/KeyLoad.Core`, `Query`, `Clustering`, `Storage.ZoneTree`, `Diagnostics` | Database engine, SQL, Orleans grains, replica calls, storage and phase telemetry |

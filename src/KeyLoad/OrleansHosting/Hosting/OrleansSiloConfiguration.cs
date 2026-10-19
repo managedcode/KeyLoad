@@ -8,28 +8,27 @@ namespace KeyLoad.Server;
 
 internal static class OrleansSiloConfiguration
 {
-    internal static void Register(WebApplicationBuilder builder, IOptions<NodeOptions> nodeOptions, IPAddress address,
-        LocalhostClusteringOptions? localhostClustering = null)
+    internal static void Register(WebApplicationBuilder builder, IOptions<NodeOptions> nodeOptions, IPAddress address)
     {
         var options = nodeOptions.Value;
         options.Validate();
-        OrleansApplicationServices.RegisterSiloOwners(builder, localhostClustering);
+        OrleansApplicationServices.RegisterSiloOwners(builder);
         global::KeyLoad.Server.Features.ResourceExecution.DropTableRegistration.Register(builder.Services);
         OrleansPartitionServiceRegistration.Register(builder.Services);
         OrleansRequestServiceRegistration.Register(builder.Services);
-        builder.UseOrleans(silo => Configure(silo, options, address, localhostClustering));
+        builder.UseOrleans(silo => Configure(silo, options, address));
         OrleansHostedServiceRegistration.Guard(builder.Services);
     }
 
     private static void Configure(ISiloBuilder silo, NodeOptions options,
-        IPAddress address, LocalhostClusteringOptions? localhostClustering)
+        IPAddress address)
     {
         silo.Configure<ClusterOptions>(cluster =>
         {
             cluster.ClusterId = options.ClusterId;
             cluster.ServiceId = OrleansNodeProtocol.ServiceId;
         });
-        OrleansClustering.Configure(silo, options, address, localhostClustering);
+        OrleansClustering.Configure(silo, options, address);
         ConfigureMessaging(silo.Services);
         PartitionStorageRegistration.Register(silo);
         silo.Services.AddSingleton<OrleansNodeLifecycle>();

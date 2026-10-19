@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Net;
+using System.Security.Cryptography;
 using KeyLoad.AppHost.Features.StorageRecovery;
 using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.Clustering;
@@ -12,8 +13,11 @@ internal static class AppHostProgram
 {
     private const int Completed = 0;
     private const string InvalidMode = "Comparison workloads belong to KeyLoad.LoadTests.AppHost; execution tests use their TUnit entry point.";
-    private const string StorageName = "orleans-storage";
-    private const string TablesName = "orleans-membership";
+    private const string MembershipEndpoint = "membership";
+    private const string MembershipParameter = "membership-secret";
+    private const string MembershipSecretEnvironment = "KeyLoad__RapidMembership__SharedSecret";
+    private const string MembershipPortEnvironment = "KeyLoad__RapidMembership__ListenPort";
+    private const int MembershipSecretBytes = 32;
     private const string SiloCountEnvironment = "KeyLoad__SiloCount";
     private const string ReplicaCountEnvironment = "KeyLoad__ReplicaCount";
     private const string StorageModeEnvironment = "KeyLoad__StorageMode";
@@ -109,11 +113,13 @@ internal static class AppHostProgram
             nodes[FirstNodeIndex], resourceName => AddNode(builder, profile, root, true,
                 nodeNames.Length, replicas, identity, ExclusiveOwnerContentionResources.OwnerName, FirstNodeIndex,
                 resourceName));
-        var tables = builder.AddAzureStorage(StorageName)
-            .RunAsEmulator(emulator => emulator.WithLifetime(ContainerLifetime.Session)).AddTables(TablesName);
+        var membershipSecret = builder.AddParameter(MembershipParameter,
+            Convert.ToBase64String(RandomNumberGenerator.GetBytes(MembershipSecretBytes)), secret: true);
         foreach (var node in nodes.Concat(contenders))
         {
-            node.WithReference(tables, connectionName: OrleansHostingOptions.ConnectionName).WaitFor(tables);
+            node.WithEndpoint(name: MembershipEndpoint, scheme: TcpScheme, isExternal: false, isProxied: false)
+                .WithEnvironment(MembershipSecretEnvironment, membershipSecret)
+                .WithEnvironment(MembershipPortEnvironment, node.GetEndpoint(MembershipEndpoint).Property(EndpointProperty.TargetPort));
         }
         return nodes;
     }

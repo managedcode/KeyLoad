@@ -25,9 +25,9 @@ internal static class IdentityCapabilityOmission
             throw new InvalidDataException(InvalidIdentityPayload);
         }
 
-        var context = SerializerProviders.Get(typeof(StoreIdentity));
+        var context = OrleansSerialization.Serializer;
         ByteSpan? capability = null;
-        using (var session = context.Sessions.GetSession())
+        using (var session = context.SessionPool.GetSession())
         {
             capability = FindCapabilityField(generated, session);
             ValidateCapabilitySpan(generated, capability);
@@ -43,8 +43,8 @@ internal static class IdentityCapabilityOmission
 
     internal static void VerifyCapabilityOmitted(ReadOnlySpan<byte> payload)
     {
-        var context = SerializerProviders.Get(typeof(StoreIdentity));
-        using (var session = context.Sessions.GetSession())
+        var context = OrleansSerialization.Serializer;
+        using (var session = context.SessionPool.GetSession())
         {
             if (FindCapabilityField(payload, session) is not null)
             {
@@ -62,7 +62,7 @@ internal static class IdentityCapabilityOmission
         var reader = Reader.Create(bytes, session);
         ReadCurrentIdentityHeader(ref reader);
 
-        var id = WireIdentities.FirstFieldId;
+        var id = FirstEnvelopeFieldId;
         var enteredMembers = false;
         ByteSpan? found = null;
         while (true)
@@ -117,18 +117,28 @@ internal static class IdentityCapabilityOmission
         return found;
     }
 
+    private const uint FirstEnvelopeFieldId = 0;
+    private const uint EnvelopeVersionFieldDelta = 0;
+    private const uint EnvelopeValueFieldDelta = 1;
+
     private static void ReadCurrentIdentityHeader<TInput>(ref Reader<TInput> reader)
     {
-        PayloadHeader.Validate(reader.ReadFieldHeader());
+        var header = reader.ReadFieldHeader();
+        if (header.WireType != WireType.TagDelimited || header.IsReference
+            || header.FieldIdDelta != FirstEnvelopeFieldId
+            || header.FieldType is not null && header.FieldType != typeof(RuntimePayload))
+        {
+            throw new InvalidDataException(InvalidIdentityPayload);
+        }
         var version = reader.ReadFieldHeader();
-        if (!version.HasFieldId || version.FieldIdDelta != WireIdentities.VersionFieldDelta
+        if (!version.HasFieldId || version.FieldIdDelta != EnvelopeVersionFieldDelta
             || UInt32Codec.ReadValue(ref reader, version) != PayloadVersion.Current)
         {
             throw new InvalidDataException(InvalidIdentityPayload);
         }
 
         var value = reader.ReadFieldHeader();
-        if (!value.HasFieldId || value.FieldIdDelta != WireIdentities.ValueFieldDelta
+        if (!value.HasFieldId || value.FieldIdDelta != EnvelopeValueFieldDelta
             || value.FieldType != typeof(StoreIdentity) || value.WireType != WireType.TagDelimited || value.IsReference)
         {
             throw new InvalidDataException(InvalidIdentityPayload);

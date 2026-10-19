@@ -1,4 +1,3 @@
-using System.Net;
 using KeyLoad.RecoveryTests.Features.StorageRecovery;
 using KeyLoad.Server;
 using Orleans.TestingHost;
@@ -24,14 +23,13 @@ internal static class PartitionStorageProducerDisposeFlow
             var profile = new RequestCqrsHostedProfile(TimeProvider.System, UnitRoutingOptions.Routing(),
                 null, null, false, false, null);
             var arguments = profile.Arguments(directory, port);
-            var localhost = new LocalhostClusteringOptions(new IPEndPoint(IPAddress.Loopback, port));
-            var active = await PartitionStorageProducerDisposeTrial.RunAsync(arguments, localhost, profile, token)
+            var active = await PartitionStorageProducerDisposeTrial.RunAsync(arguments, profile, token)
                 .ConfigureAwait(false);
-            var original = await PartitionStorageFlow.RunOwnerAsync(arguments, localhost, profile,
+            var original = await PartitionStorageFlow.RunOwnerAsync(arguments, profile,
                 active.Identity, null, token).ConfigureAwait(false);
             for (var cold = P.FirstCold; cold < P.ColdCount; cold++)
             {
-                _ = await PartitionStorageFlow.RunOwnerAsync(arguments, localhost, profile,
+                _ = await PartitionStorageFlow.RunOwnerAsync(arguments, profile,
                     active.Identity, original, token).ConfigureAwait(false);
             }
         }, failures).ConfigureAwait(false);

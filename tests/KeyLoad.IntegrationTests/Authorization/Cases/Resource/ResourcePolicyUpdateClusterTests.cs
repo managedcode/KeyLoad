@@ -64,7 +64,7 @@ internal sealed class ResourcePolicyUpdateClusterTests(ClusterFixture fixture)
         await VerifyInitialAccessAsync(fixture, readerMcp, scenario, token);
         var cursors = await CaptureCursorsAsync(admin, administratorMcp, scenario, token);
         var versionTwo = await UpdateThroughMcpAsync(administratorMcp, scenario,
-            ResourcePolicyUpdateClusterProtocol.ReadGrant, ResourcePolicyUpdateClusterProtocol.UseGrant,
+            ResourcePolicyUpdateClusterProtocol.McpReadGrant, ResourcePolicyUpdateClusterProtocol.McpUseGrant,
             ResourcePolicyUpdateClusterProtocol.InitialSchemaVersion, token);
         await VerifyPolicyAckAsync(fixture, admin, administratorMcp, readerMcp, scenario, versionTwo,
             cursors, token);
@@ -72,7 +72,7 @@ internal sealed class ResourcePolicyUpdateClusterTests(ClusterFixture fixture)
         scenario = scenario with
         {
             Reader = await ResourcePolicyUpdateClusterScenario.ReplaceReaderGrantsAsync(admin, scenario.Reader,
-            [ResourcePolicyUpdateClusterProtocol.ReadGrant, ResourcePolicyUpdateClusterProtocol.UseGrant], token)
+            [ResourcePolicyUpdateClusterProtocol.McpReadGrant, ResourcePolicyUpdateClusterProtocol.McpUseGrant], token)
         };
         await ResourcePolicyUpdateClusterAssertions.AssertPolicyAllowedAsync(fixture, scenario,
             scenario.Reader, readerMcp, token);
@@ -80,7 +80,7 @@ internal sealed class ResourcePolicyUpdateClusterTests(ClusterFixture fixture)
         scenario = scenario with
         {
             Reader = await ResourcePolicyUpdateClusterScenario.ReplaceReaderGrantsAsync(admin, scenario.Reader,
-            [ResourcePolicyUpdateClusterProtocol.ReadGrant, ResourcePolicyUpdateClusterProtocol.UseGrant], token)
+            [ResourcePolicyUpdateClusterProtocol.CurrentReadGrant, ResourcePolicyUpdateClusterProtocol.CurrentUseGrant], token)
         };
         await ResourcePolicyUpdateClusterAssertions.AssertPolicyAllowedAsync(fixture, scenario,
             scenario.Reader, readerMcp, token);
@@ -110,7 +110,7 @@ internal sealed class ResourcePolicyUpdateClusterTests(ClusterFixture fixture)
         ResourceDefinition updated, ResourcePolicyUpdateCursors cursors, CancellationToken cancellationToken)
     {
         await ResourcePolicyUpdateClusterAssertions.AssertPolicyDefinitionAsync(scenario.InitialDefinition,
-            ResourcePolicyUpdateClusterProtocol.ReadGrant, ResourcePolicyUpdateClusterProtocol.UseGrant,
+            ResourcePolicyUpdateClusterProtocol.McpReadGrant, ResourcePolicyUpdateClusterProtocol.McpUseGrant,
             ResourcePolicyUpdateClusterProtocol.AfterMcpUpdateSchemaVersion, updated);
         await ResourcePolicyUpdateClusterAssertions.AssertSchemaVersionAsync(admin, scenario,
             ResourcePolicyUpdateClusterProtocol.AfterMcpUpdateSchemaVersion, cancellationToken);

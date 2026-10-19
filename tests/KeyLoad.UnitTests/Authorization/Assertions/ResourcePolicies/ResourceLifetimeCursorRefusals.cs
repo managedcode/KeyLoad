@@ -6,21 +6,20 @@ namespace KeyLoad.UnitTests.Features.Authorization;
 
 internal static class ResourceLifetimeCursorRefusals
 {
+    private const int UnsupportedFormat = 0;
+
     internal static async Task RunAsync(SafeProjectorOperationDatabase owner, QueryEngine engine, string sql,
         AstQueryRequest liveQuery, QueryCursorClaims scalar, LiveCursorClaims live, ResourceLifetime foreign)
     {
-        var scalarOld = new ResourceLifetimeScalarCursorNegative(ResourceLifetimeCursorNegativeProtocol.ScalarPurpose,
-            scalar.Incarnation, scalar.NodeId, scalar.ReadGeneration, scalar.PrincipalId, scalar.PolicyEpoch,
-            scalar.SchemaVersion, scalar.QueryHash, scalar.CutPosition, scalar.SourceEpoch, scalar.Offset, scalar.ExpiresAt);
-        var liveOld = new ResourceLifetimeLiveCursorNegative(ResourceLifetimeCursorNegativeProtocol.LivePurpose,
-            live.QueryHash, live.ChangeCursor);
-        foreach (var cursor in new[] { owner.Database.Sign(scalarOld), owner.Database.Sign(scalar with { Lifetime = foreign }) })
+        var invalidScalar = scalar with { Version = UnsupportedFormat };
+        var invalidLive = live with { Version = UnsupportedFormat };
+        foreach (var cursor in new[] { owner.Database.Sign(invalidScalar), owner.Database.Sign(scalar with { Lifetime = foreign }) })
         {
             await RefuseAsync(owner, () => engine.Execute(SafeProjectorOperationProtocol.Reader,
                 new(owner.Source.Partition, sql, AllowFullScan: true, Cursor: cursor),
                 cancellationToken: owner.CallerToken), ErrorCode.CursorExpired);
         }
-        foreach (var cursor in new[] { owner.Database.Sign(liveOld), owner.Database.Sign(live with { Lifetime = foreign }) })
+        foreach (var cursor in new[] { owner.Database.Sign(invalidLive), owner.Database.Sign(live with { Lifetime = foreign }) })
         {
             await RefuseAsync(owner, () => engine.ReadLiveQuery(SafeProjectorOperationProtocol.Reader,
                 new(liveQuery, cursor), cancellationToken: owner.CallerToken), ErrorCode.TokenInvalidated);

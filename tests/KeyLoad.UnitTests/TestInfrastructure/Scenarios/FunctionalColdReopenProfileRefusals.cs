@@ -1,6 +1,6 @@
 using KeyLoad.AppHost.Features.TestInfrastructure;
-using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.AppHost.Hosting;
+using Microsoft.Extensions.Options;
 using P = KeyLoad.UnitTests.Features.TestInfrastructure.FunctionalColdReopenProfileProtocol;
 
 namespace KeyLoad.UnitTests.Features.TestInfrastructure;
@@ -14,7 +14,14 @@ internal static class FunctionalColdReopenProfileRefusals
             var root = P.NewRoot();
             var builder = P.Create(root, 3, true, true, changes);
             var original = builder.Resources.Count;
-            _ = Assert.ThrowsExactly<InvalidOperationException>(() => AppHostProgram.AddKeyLoad(builder));
+            if (changes.Any(change => change.Key == P.DataRoot))
+            {
+                _ = Assert.ThrowsExactly<OptionsValidationException>(() => AppHostProgram.AddKeyLoad(builder));
+            }
+            else
+            {
+                _ = Assert.ThrowsExactly<InvalidOperationException>(() => AppHostProgram.AddKeyLoad(builder));
+            }
             await Assert.That(builder.Resources.Count).IsEqualTo(original);
             await Assert.That(Directory.Exists(root) || File.Exists(root)).IsFalse();
         }

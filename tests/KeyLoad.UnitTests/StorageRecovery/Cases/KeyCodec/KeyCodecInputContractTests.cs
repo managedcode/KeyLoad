@@ -46,7 +46,7 @@ internal sealed class KeyCodecInputContractTests
     public async Task UnsupportedAndInvalidClrValuesUseFrozenTypedErrors()
     {
         await KeyCodecExceptionAssertions.AssertAsync(() => KeyCodec.Encode(new DateTime(2024, 1, 1)),
-            ErrorCode.UnsupportedCapability, "This type is not supported by key codec v1.");
+            ErrorCode.UnsupportedCapability, "This type is not supported by key codec.");
         await KeyCodecExceptionAssertions.AssertAsync(() => KeyCodec.Encode(double.PositiveInfinity),
             ErrorCode.Validation, "Indexed numbers must be finite.");
         await KeyCodecExceptionAssertions.AssertAsync(() => KeyCodec.Encode("invalid-\uD800"),

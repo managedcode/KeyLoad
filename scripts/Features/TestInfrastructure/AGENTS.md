@@ -4,7 +4,7 @@
 
 - Owns `run-tests.mjs`, the bounded argument selector for the TUnit entry.
 - C# test fixtures own Aspire startup, readiness, discovered endpoints and joined teardown.
-- `KeyLoad.AppHost` starts KeyLoad project processes and required Azurite resources.
+- `KeyLoad.AppHost` starts KeyLoad project processes with the published in-memory RapidMembership provider.
 - `KeyLoad.LoadTests.AppHost` owns selected comparison infrastructure. Client code executes workloads and measurements outside the resource graph.
 - Normal builds and test startup never publish a KeyLoad container. Explicit release delivery uses the .NET SDK `PublishContainer` target.
 - AppHost cleanup removes only resources created for its session, including after failures and cancellation.

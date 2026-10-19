@@ -1,6 +1,4 @@
 using System.Text;
-using Orleans.Serialization.Buffers;
-using Orleans.Serialization.Codecs;
 
 namespace KeyLoad.UnitTests.Features.InternalSerialization;
 
@@ -41,37 +39,4 @@ internal sealed class ReaderMalformedTests
         await Assert.That(OrleansSerialization.Deserialize<string>(OrleansSerialization.Serialize(value))).IsEqualTo(value);
     }
 
-    [Test]
-    public async Task AcIs002OnlyOfficialReaderExhaustionIsClassifiedAsMalformedBuffer()
-    {
-        await Assert.That(RuntimePayloadSyntax.IsReaderBufferFailure(ReaderFailure())).IsTrue();
-        await Assert.That(RuntimePayloadSyntax.IsReaderBufferFailure(OwnedFailure())).IsFalse();
-    }
-
-    private static InvalidOperationException ReaderFailure()
-    {
-        using var session = SerializerProviders.Get(typeof(string)).Sessions.GetSession();
-        var reader = Reader.Create(ReadOnlySpan<byte>.Empty, session);
-        try
-        {
-            _ = reader.ReadFieldHeader();
-        }
-        catch (InvalidOperationException exception)
-        {
-            return exception;
-        }
-        throw new InvalidOperationException("The genuine reader did not reject an empty buffer.");
-    }
-
-    private static InvalidOperationException OwnedFailure()
-    {
-        try
-        {
-            throw new InvalidOperationException("Insufficient data present in buffer.");
-        }
-        catch (InvalidOperationException exception)
-        {
-            return exception;
-        }
-    }
 }

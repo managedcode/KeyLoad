@@ -48,22 +48,22 @@ internal sealed class RedisReplicaDiagnosticTests
         switch (predicate)
         {
             case "InfoRole":
-                info[RedisProtocol.RoleField] = RedisProtocol.MasterRole;
+                info[KeyLoad.Comparisons.Targets.RedisProtocol.RoleField] = KeyLoad.Comparisons.Targets.RedisProtocol.MasterRole;
                 break;
             case "InfoLink":
-                info[RedisProtocol.LinkField] = "down";
+                info[KeyLoad.Comparisons.Targets.RedisProtocol.LinkField] = "down";
                 break;
             case "InfoHost":
-                info.Remove(RedisProtocol.MasterHostField);
+                info.Remove(KeyLoad.Comparisons.Targets.RedisProtocol.MasterHostField);
                 break;
             case "InfoPort":
-                info[RedisProtocol.MasterPortField] = "invalid";
+                info[KeyLoad.Comparisons.Targets.RedisProtocol.MasterPortField] = "invalid";
                 break;
             case "RoleCardinality":
-                role = [RedisResult.Create((RedisValue)RedisProtocol.ReplicaRole)];
+                role = [RedisResult.Create((RedisValue)KeyLoad.Comparisons.Targets.RedisProtocol.ReplicaRole)];
                 break;
             case "RoleName":
-                role[0] = RedisResult.Create((RedisValue)RedisProtocol.MasterRole);
+                role[0] = RedisResult.Create((RedisValue)KeyLoad.Comparisons.Targets.RedisProtocol.MasterRole);
                 break;
             case "HostAgreement":
                 role[1] = RedisResult.Create((RedisValue)ReplicaHost);
@@ -103,9 +103,9 @@ internal sealed class RedisReplicaDiagnosticTests
     public async Task UnknownTextAndUnrelatedInfoAreNeverExported(string unsafeValue)
     {
         var info = Info();
-        info[RedisProtocol.MasterHostField] = unsafeValue;
-        info[RedisProtocol.RoleField] = unsafeValue;
-        info[RedisProtocol.LinkField] = unsafeValue;
+        info[KeyLoad.Comparisons.Targets.RedisProtocol.MasterHostField] = unsafeValue;
+        info[KeyLoad.Comparisons.Targets.RedisProtocol.RoleField] = unsafeValue;
+        info[KeyLoad.Comparisons.Targets.RedisProtocol.LinkField] = unsafeValue;
         info[UnrelatedField] = Secret;
         var role = Role();
         role[0] = RedisResult.Create((RedisValue)unsafeValue);
@@ -123,8 +123,8 @@ internal sealed class RedisReplicaDiagnosticTests
     public async Task OversizedAndInvalidPortsRemainBoundedNullObservations()
     {
         var info = Info();
-        info[RedisProtocol.MasterHostField] = new string('x', 8192);
-        info[RedisProtocol.MasterPortField] = "65536";
+        info[KeyLoad.Comparisons.Targets.RedisProtocol.MasterHostField] = new string('x', 8192);
+        info[KeyLoad.Comparisons.Targets.RedisProtocol.MasterPortField] = "65536";
         var role = Role();
         role[1] = RedisResult.Create((RedisValue)new string('x', 8192));
         role[2] = RedisResult.Create((RedisValue)65536);
@@ -140,7 +140,7 @@ internal sealed class RedisReplicaDiagnosticTests
     public async Task SuccessfulPredicateAndCaseInsensitiveAgreementAreDiagnosticOnly()
     {
         var info = Info();
-        info[RedisProtocol.MasterHostField] = RuntimeHost.ToUpperInvariant();
+        info[KeyLoad.Comparisons.Targets.RedisProtocol.MasterHostField] = RuntimeHost.ToUpperInvariant();
         using var projection = JsonDocument.Parse(diagnostics.Project(
             new DnsEndPoint(ReplicaHost, Port), new DnsEndPoint(RuntimeHost, Port), info, Role()));
         await Assert.That(projection.RootElement.GetProperty(PredicateField).GetString()).IsEqualTo("None");
@@ -172,15 +172,15 @@ internal sealed class RedisReplicaDiagnosticTests
 
     private static Dictionary<string, string> Info() => new(StringComparer.Ordinal)
     {
-        [RedisProtocol.RoleField] = RedisProtocol.ReplicaRole,
-        [RedisProtocol.LinkField] = RedisProtocol.LinkUp,
-        [RedisProtocol.MasterHostField] = RuntimeHost,
-        [RedisProtocol.MasterPortField] = "6379",
+        [KeyLoad.Comparisons.Targets.RedisProtocol.RoleField] = KeyLoad.Comparisons.Targets.RedisProtocol.ReplicaRole,
+        [KeyLoad.Comparisons.Targets.RedisProtocol.LinkField] = KeyLoad.Comparisons.Targets.RedisProtocol.LinkUp,
+        [KeyLoad.Comparisons.Targets.RedisProtocol.MasterHostField] = RuntimeHost,
+        [KeyLoad.Comparisons.Targets.RedisProtocol.MasterPortField] = "6379",
     };
 
     private static RedisResult[] Role() =>
     [
-        RedisResult.Create((RedisValue)RedisProtocol.ReplicaRole), RedisResult.Create((RedisValue)RuntimeHost),
+        RedisResult.Create((RedisValue)KeyLoad.Comparisons.Targets.RedisProtocol.ReplicaRole), RedisResult.Create((RedisValue)RuntimeHost),
         RedisResult.Create((RedisValue)Port), RedisResult.Create((RedisValue)"connected"), RedisResult.Create((RedisValue)1),
     ];
 }

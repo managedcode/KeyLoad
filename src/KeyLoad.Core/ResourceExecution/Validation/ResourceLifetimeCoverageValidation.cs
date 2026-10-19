@@ -1,12 +1,10 @@
 using System.Collections.Immutable;
-using KeyLoad.Core.Features.CommandOutcomes.Contracts;
-using KeyLoad.Core.Features.RuntimeJournaling.Contracts;
 using KeyLoad.Core.Features.StoragePartitions.Contracts;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core.Features.ResourceExecution;
 
-internal static class ResourceLifetimeCoverage
+internal static class ResourceLifetimeCoverageValidation
 {
     private const int FirstResourceIndex = 0;
 

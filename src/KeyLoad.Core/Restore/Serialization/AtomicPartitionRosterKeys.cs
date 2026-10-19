@@ -10,7 +10,7 @@ internal static class AtomicPartitionRosterKeys
     internal static byte[] Partition(PartitionRef partition)
     {
         ArgumentNullException.ThrowIfNull(partition);
-        return KeyCodec.Encode(AtomicPartitionRosterProtocol.KeySpace, AtomicPartitionRosterProtocol.KeyVersion,
+        return KeyCodec.Encode(AtomicPartitionRosterProtocol.KeySpace,
             AtomicPartitionRosterProtocol.PartitionKeyKind, partition.TenantId, partition.DatabaseId,
             partition.TransactionDomainId, partition.PartitionKey);
     }

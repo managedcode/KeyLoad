@@ -111,7 +111,7 @@ internal static class McpCatalogExpectations
     internal const string OutboxPurge = "keyload_outbox_purge";
     private const string OutboxPurgeRoute = "/admin/outbox/purge";
 
-    internal const int Count = 81;
+    internal const int Count = 71;
     internal static ImmutableArray<(string Name, string Route, GrainReadKind? ReadKind, OperationKind? CommandKind)> Entries
     {
         get;

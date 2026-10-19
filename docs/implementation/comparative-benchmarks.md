@@ -75,8 +75,8 @@ them visible instead of hiding them.
   digests, engine versions, topology, resource limits, read consistency, index
   settings and effective acknowledgement and durability.
 
-The primary development/functional AppHost runs KeyLoad projects and
-Azurite. The separate LoadTests AppHost owns selected database infrastructure and
+The primary development/functional AppHost runs KeyLoad projects with
+in-memory RapidMembership. The separate LoadTests AppHost owns selected database infrastructure and
 exposes endpoints to the client-owned workload, then removes only its own
 resources. Ordinary execution never publishes KeyLoad server or client images.
 process resource equivalence remains an open publication gate; observed

@@ -1,7 +1,7 @@
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
-using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.AppHost.Features.StorageRecovery;
+using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.AppHost.Hosting;
 using KeyLoad.Server;
 using Microsoft.Extensions.DependencyInjection;
@@ -36,7 +36,7 @@ internal static class FunctionalFileOwnershipProfileModel
                     || names.Contains(value.Name, StringComparer.Ordinal)).ToArray();
             await Assert.That(resources.Length).IsEqualTo(OwnersAndContenders);
             await Assert.That(model.Resources.OfType<ContainerResource>().Select(resource => resource.Name))
-                .IsEquivalentTo(new[] { "orleans-storage" });
+                .IsEmpty();
             await VerifyResourcesAsync(builder, resources, root, names);
         }, failures);
         if (app is not null)
@@ -102,7 +102,9 @@ internal static class FunctionalFileOwnershipProfileModel
         await Assert.That(command.Arguments.Select(argument => argument.Name)).IsEquivalentTo(new[]
         {
             ProcessFaultCommandProtocol.ExpectedProcessIdArgument, ProcessFaultCommandProtocol.ExpectedAspireStartArgument,
-            ProcessFaultCommandProtocol.ExpectedProcessStartArgument
+            ProcessFaultCommandProtocol.ExpectedProcessStartArgument,
+                ProcessFaultCommandProtocol.ExpectedLaunchProcessIdArgument,
+                ProcessFaultCommandProtocol.ExpectedLaunchProcessStartArgument
         });
         await Assert.That(command.Arguments.All(argument => argument.Required
             && argument.MaxLength == ProcessFaultCommandProtocol.MaximumIdentityCharacters)).IsTrue();

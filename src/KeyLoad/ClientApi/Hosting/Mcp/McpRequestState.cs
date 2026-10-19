@@ -47,10 +47,11 @@ internal sealed class McpRequestState : IDisposable
     internal void Authenticate(ReadOnlyMemory<byte> reply, CancellationToken cancellationToken)
     {
         admission.CoverAuthenticationScan(capacity, reply.Length, cancellationToken);
-        authenticationShape = McpAuthentication.Inspect(payload: reply.Span, cancellationToken: cancellationToken, options: options);
+        var principal = McpAuthentication.ReadPrincipal(payload: reply.Span, cancellationToken: cancellationToken, options: options);
+        authenticationShape = McpAuthentication.Inspect(principal, options, cancellationToken);
         admission.CoverAuthentication(capacity, reply.Length, authenticationShape, cancellationToken);
         authentication = reply;
-        Principal = McpAuthentication.ReadAdmittedPrincipal(payload: reply.Span, cancellationToken: cancellationToken, options: options);
+        Principal = principal;
     }
 
     internal McpMemoryLease ReserveProgress(int bytes, CancellationToken cancellationToken)

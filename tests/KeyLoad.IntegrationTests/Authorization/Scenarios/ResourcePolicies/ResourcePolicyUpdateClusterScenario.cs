@@ -18,8 +18,8 @@ internal sealed record ResourcePolicyUpdateClusterScenario(PartitionRef Partitio
     {
         var partition = new PartitionRef(TenantPrefix + Guid.NewGuid().ToString("N"), DatabaseId,
             DomainId, Guid.NewGuid().ToString("N"));
-        var definition = Definition(partition, ResourcePolicyUpdateClusterProtocol.ReadGrant,
-            ResourcePolicyUpdateClusterProtocol.UseGrant);
+        var definition = Definition(partition, ResourcePolicyUpdateClusterProtocol.InitialReadGrant,
+            ResourcePolicyUpdateClusterProtocol.InitialUseGrant);
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
         var admin = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         var persistedDefinition = await McpCallerAssertions.SdkSuccessAsync(await admin.ConfigureResourceAsync(Guid.NewGuid(),
@@ -29,7 +29,7 @@ internal sealed record ResourcePolicyUpdateClusterScenario(PartitionRef Partitio
             ResourcePolicyUpdateClusterProtocol.Collection,
             Capability.DocumentsRead | Capability.Query | Capability.ChangesRead, cancellationToken);
         var reader = await ReplaceReaderGrantsAsync(admin, identity,
-            [ResourcePolicyUpdateClusterProtocol.ReadGrant, ResourcePolicyUpdateClusterProtocol.UseGrant], cancellationToken);
+            [ResourcePolicyUpdateClusterProtocol.InitialReadGrant, ResourcePolicyUpdateClusterProtocol.InitialUseGrant], cancellationToken);
         var reference = new EntityRef(partition, ResourcePolicyUpdateClusterProtocol.Collection,
             ResourcePolicyUpdateClusterProtocol.DocumentId);
         var document = await PublicReadAssertions.DocumentAsync(await admin.GetAsync(reference, cancellationToken));
@@ -120,14 +120,14 @@ internal sealed record ResourcePolicyUpdateClusterScenario(PartitionRef Partitio
         KeyLoadClient administrator, ResourcePolicyUpdateClusterScenario scenario, ResourceDefinition versionTwo,
         CancellationToken cancellationToken)
     {
-        var versionThreeRequest = scenario.Request(ResourcePolicyUpdateClusterProtocol.ReadGrant,
-            ResourcePolicyUpdateClusterProtocol.UseGrant, versionTwo.SchemaVersion);
+        var versionThreeRequest = scenario.Request(ResourcePolicyUpdateClusterProtocol.SdkReadGrant,
+            ResourcePolicyUpdateClusterProtocol.SdkUseGrant, versionTwo.SchemaVersion);
         var originalCommandId = Guid.NewGuid();
         var first = await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigureResourceAsync(
             originalCommandId, versionThreeRequest, cancellationToken));
         await ResourcePolicyUpdateClusterAssertions.AssertSameDefinitionAsync(versionThreeRequest.Definition, first);
-        var versionFourRequest = scenario.Request(ResourcePolicyUpdateClusterProtocol.ReadGrant,
-            ResourcePolicyUpdateClusterProtocol.UseGrant, first.SchemaVersion);
+        var versionFourRequest = scenario.Request(ResourcePolicyUpdateClusterProtocol.CurrentReadGrant,
+            ResourcePolicyUpdateClusterProtocol.CurrentUseGrant, first.SchemaVersion);
         var current = await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigureResourceAsync(
             Guid.NewGuid(), versionFourRequest, cancellationToken));
         await ResourcePolicyUpdateClusterAssertions.AssertSameDefinitionAsync(versionFourRequest.Definition, current);

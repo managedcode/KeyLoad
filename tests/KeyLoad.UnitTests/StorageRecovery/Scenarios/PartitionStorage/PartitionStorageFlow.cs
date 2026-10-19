@@ -1,4 +1,3 @@
-using System.Net;
 using KeyLoad.RecoveryTests.Features.StorageRecovery;
 using KeyLoad.Server;
 using KeyLoad.Storage;
@@ -30,17 +29,16 @@ internal static class PartitionStorageFlow
             var profile = new RequestCqrsHostedProfile(TimeProvider.System, UnitRoutingOptions.Routing(),
                 null, null, false, false, null);
             var arguments = profile.Arguments(directory, port);
-            var localhost = new LocalhostClusteringOptions(new IPEndPoint(IPAddress.Loopback, port));
-            var partial = await PartitionStoragePartialTrial.RunAsync(arguments, localhost, profile, token)
+            var partial = await PartitionStoragePartialTrial.RunAsync(arguments, profile, token)
                 .ConfigureAwait(false);
             var released = new List<Exception>();
             PartitionStorageApplicationDisposeAssertions.RequireReleased(directory, released);
             ServerFailureObserver.ThrowIfAny(released);
-            var original = await RunOwnerAsync(arguments, localhost, profile, partial.Identity!, null, token)
+            var original = await RunOwnerAsync(arguments, profile, partial.Identity!, null, token)
                 .ConfigureAwait(false);
             for (var cold = FirstCold; cold < ColdCount; cold++)
             {
-                _ = await RunOwnerAsync(arguments, localhost, profile, partial.Identity!, original, token)
+                _ = await RunOwnerAsync(arguments, profile, partial.Identity!, original, token)
                     .ConfigureAwait(false);
             }
         }, failures).ConfigureAwait(false);
@@ -56,7 +54,7 @@ internal static class PartitionStorageFlow
     }
 
     internal static async Task<PartitionStorageCommit> RunOwnerAsync(string[] arguments,
-        LocalhostClusteringOptions localhost, RequestCqrsHostedProfile profile, StoreIdentity identity,
+        RequestCqrsHostedProfile profile, StoreIdentity identity,
         PartitionStorageCommit? original, CancellationToken token)
     {
         var failures = new List<Exception>();
@@ -70,7 +68,7 @@ internal static class PartitionStorageFlow
         {
             using var deadline = new CancellationTokenSource(profile.Timing.StartupTimeout, TimeProvider.System);
             using var startup = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token, token);
-            application = await ServerConfiguration.BuildAsync(arguments, localhostClustering: localhost,
+            application = await ServerConfiguration.BuildAsync(arguments,
                 configureServices: profile.Register, startupCancellation: startup.Token).ConfigureAwait(false);
             owner = application.Services.GetRequiredService<PartitionHostApplicationOwner>();
             node = application.Services.GetRequiredService<OrleansNode>();

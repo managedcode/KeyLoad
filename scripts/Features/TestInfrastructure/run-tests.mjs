@@ -63,7 +63,7 @@ export function runtimeSelection(input, inherited = process.env) {
       try {
         const selected = environment[key] || fallback;
         if (!path.isAbsolute(selected)) throw new Error('Relative directory.');
-        const physical = realpathSync.execution(selected);
+        const physical = realpathSync.native(selected);
         if (!statSync(physical).isDirectory()) throw new Error('Not a directory.');
         accessSync(physical, constants.R_OK | constants.W_OK | constants.X_OK);
         environment[key] = physical;

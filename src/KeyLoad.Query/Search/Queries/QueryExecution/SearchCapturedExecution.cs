@@ -20,10 +20,10 @@ internal static class SearchCapturedExecution
         }
         var ranker = request.Text is not null ? new TextRanker(request.Text, request.TextField!, budget,
             execution.TextBudgetCheckInterval, execution.MaximumDocumentWords, execution.MaximumWordCharacters) : null;
-        if (provider is ICapturedTextProjection execution && ranker is not null
+        if (provider is ICapturedTextProjection capturedProjection && ranker is not null
             && (ranker.HasTerms || request.TextIndex is not null))
         {
-            return new(execution.CaptureRead(view, principal, resource, request, budget), ranker, null);
+            return new(capturedProjection.CaptureRead(view, principal, resource, request, budget), ranker, null);
         }
         return new(null, null, Rank(database, provider, view, principal, resource, request, budget,
             similarity, eligibility, ranker, null));

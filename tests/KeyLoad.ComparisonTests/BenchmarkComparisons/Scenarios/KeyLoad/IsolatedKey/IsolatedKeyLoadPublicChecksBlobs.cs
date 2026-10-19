@@ -21,10 +21,11 @@ internal static class IsolatedKeyLoadPublicChecksBlobs
     {
         var partition = scenario.Partition;
         var scope = string.Join('/', Prefix, Uri.EscapeDataString(partition.TenantId), Uri.EscapeDataString(partition.DatabaseId),
-            Uri.EscapeDataString(partition.TransactionDomainId), Uri.EscapeDataString(partition.PartitionKey), scenario.FileResource);
+            Uri.EscapeDataString(partition.TransactionDomainId), Uri.EscapeDataString(partition.PartitionKey), IsolatedKeyLoadPublicChecksScenario.FileResource);
         var bytes = Enumerable.Range(0, ContentLength).Select(index => (byte)(index % ByteCycle)).ToArray();
         using var form = new MultipartFormDataContent();
-        form.Add(new ByteArrayContent(bytes), FormField, FileName);
+        using var content = new ByteArrayContent(bytes);
+        form.Add(content, FormField, FileName);
         using var upload = new HttpRequestMessage(HttpMethod.Post, string.Join('/', scope, "upload")) { Content = form };
         upload.Headers.Authorization = new AuthenticationHeaderValue(Scheme, credential);
         using var published = await http.SendAsync(upload, HttpCompletionOption.ResponseHeadersRead, token);

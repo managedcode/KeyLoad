@@ -2,11 +2,10 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Security.Cryptography;
 using System.Text;
-using KeyLoad.Client;
-using ManagedCode.Communication;
-using StorageMetadata = ManagedCode.Storage.Core.Models.BlobMetadata;
 using KeyLoad.IntegrationTests.Features.OrleansExecution;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
+using ManagedCode.Communication;
+using StorageMetadata = ManagedCode.Storage.Core.Models.BlobMetadata;
 
 namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
 
@@ -37,7 +36,8 @@ internal static class FunctionalGateFiles
     {
         var file = await UploadAsync(context, $"gate_blobs_{resourceIndex}", $"iteration_{iteration}", token);
         await VerifyAsync(context.Reader, file, token);
-        using var deniedRequest = UploadRequest(file.Path, file.Bytes);
+        using var deniedContent = new ByteArrayContent(file.Bytes);
+        using var deniedRequest = UploadRequest(file.Path, deniedContent);
         using var denied = await context.Reader.SendStorageAsync(deniedRequest, token);
         await Assert.That(denied.StatusCode).IsEqualTo(HttpStatusCode.Forbidden);
         await VerifyAsync(context.Reader, file, token);
@@ -51,7 +51,8 @@ internal static class FunctionalGateFiles
             Uri.EscapeDataString(scope.TransactionDomainId), Uri.EscapeDataString(scope.PartitionKey), Uri.EscapeDataString(resource));
         var bytes = Enumerable.Range(0, PayloadLength).Select(index => (byte)(index % ByteCycle)).ToArray();
         SHA256.HashData(Encoding.UTF8.GetBytes(path + name)).CopyTo(bytes, 0);
-        using var request = UploadRequest(string.Join('/', path, name), bytes);
+        using var content = new ByteArrayContent(bytes);
+        using var request = UploadRequest(string.Join('/', path, name), content);
         using var response = await context.Writer.SendStorageAsync(request, token);
         await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
         var uploaded = await response.Content.ReadFromJsonAsync<Result<StorageMetadata>>(JsonDefaults.Options, token);
@@ -73,11 +74,13 @@ internal static class FunctionalGateFiles
         await Assert.That(actual.AsSpan().SequenceEqual(file.Bytes)).IsTrue();
     }
 
-    private static HttpRequestMessage UploadRequest(string path, byte[] bytes)
+    private static HttpRequestMessage UploadRequest(string path, HttpContent body)
     {
         var separator = path.LastIndexOf('/');
-        var content = new MultipartFormDataContent();
-        content.Add(new ByteArrayContent(bytes), FormField, path[(separator + 1)..]);
+        var content = new MultipartFormDataContent
+        {
+            { body, FormField, path[(separator + 1)..] }
+        };
         return new(HttpMethod.Post, string.Concat(path.AsSpan(0, separator), "/upload")) { Content = content };
     }
 }

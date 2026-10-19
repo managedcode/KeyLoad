@@ -1,7 +1,5 @@
 using System.Text.Json;
 using KeyLoad.Core;
-using KeyLoad.Core.Features.CommandOutcomes.Contracts;
-using KeyLoad.Core.Features.RuntimeJournaling.Contracts;
 using KeyLoad.Core.Features.StoragePartitions.Contracts;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
@@ -14,8 +12,7 @@ internal static class MixedEventingRetentionBackupOracle
 {
     internal static string[] Rows(IAtomicStore store, PartitionRef partition, bool includeOutcomes = true)
         => store.Read(view => PartitionRecordFamilies.All.Where(family => includeOutcomes ||
-            family is not PartitionRecordFamilies.Outcome and not PartitionRecordFamilies.OutcomeLocator
-                and not PartitionRecordFamilies.OutcomeLocator).SelectMany(family =>
+            family is not PartitionRecordFamilies.Outcome and not PartitionRecordFamilies.OutcomeLocator).SelectMany(family =>
         {
             var page = view.Scan(KeySpace.Partition(family, partition), QueueLifecycleTestProtocol.ImageRecords);
             if (page.HasMore)

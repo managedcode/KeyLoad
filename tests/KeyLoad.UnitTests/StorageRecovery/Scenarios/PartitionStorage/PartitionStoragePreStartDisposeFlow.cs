@@ -1,4 +1,3 @@
-using System.Net;
 using KeyLoad.RecoveryTests.Features.StorageRecovery;
 using KeyLoad.Server;
 using KeyLoad.Storage;
@@ -33,14 +32,13 @@ internal static class PartitionStoragePreStartDisposeFlow
             var profile = new RequestCqrsHostedProfile(TimeProvider.System, UnitRoutingOptions.Routing(),
                 null, null, false, false, null);
             var arguments = profile.Arguments(directory, port);
-            var localhost = new LocalhostClusteringOptions(new IPEndPoint(IPAddress.Loopback, port));
-            await PartitionStoragePreStartDisposeTrial.RunAsync(arguments, localhost, profile, root, directory, token)
+            await PartitionStoragePreStartDisposeTrial.RunAsync(arguments, profile, root, directory, token)
                 .ConfigureAwait(false);
-            var original = await RunOwnerAsync(arguments, localhost, profile, directory, null, token)
+            var original = await RunOwnerAsync(arguments, profile, directory, null, token)
                 .ConfigureAwait(false);
             for (var cold = FirstCold; cold < ColdCount; cold++)
             {
-                _ = await RunOwnerAsync(arguments, localhost, profile, directory, original, token)
+                _ = await RunOwnerAsync(arguments, profile, directory, original, token)
                     .ConfigureAwait(false);
             }
         }, failures).ConfigureAwait(false);
@@ -56,7 +54,7 @@ internal static class PartitionStoragePreStartDisposeFlow
     }
 
     private static async Task<(StoreIdentity Identity, PartitionStorageCommit Receipt)> RunOwnerAsync(
-        string[] arguments, LocalhostClusteringOptions localhost, RequestCqrsHostedProfile profile,
+        string[] arguments, RequestCqrsHostedProfile profile,
         string directory, (StoreIdentity Identity, PartitionStorageCommit Receipt)? previous,
         CancellationToken token)
     {
@@ -71,7 +69,7 @@ internal static class PartitionStoragePreStartDisposeFlow
         {
             using var deadline = new CancellationTokenSource(profile.Timing.StartupTimeout, TimeProvider.System);
             using var startup = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token, token);
-            application = await ServerConfiguration.BuildAsync(arguments, localhostClustering: localhost,
+            application = await ServerConfiguration.BuildAsync(arguments,
                 configureServices: profile.Register, startupCancellation: startup.Token).ConfigureAwait(false);
             owner = application.Services.GetRequiredService<PartitionHostApplicationOwner>();
             node = application.Services.GetRequiredService<OrleansNode>();

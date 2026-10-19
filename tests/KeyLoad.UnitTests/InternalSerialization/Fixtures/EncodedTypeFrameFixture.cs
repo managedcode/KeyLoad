@@ -31,7 +31,7 @@ internal static class EncodedTypeFrameFixture
 
     internal static byte[] Encode<T>()
     {
-        using var session = SerializerProviders.Get(typeof(T)).Sessions.GetSession();
+        using var session = OrleansSerialization.Serializer.SessionPool.GetSession();
         var writer = Writer.CreatePooled(session);
         try
         {
@@ -47,7 +47,7 @@ internal static class EncodedTypeFrameFixture
 
     internal static (Type? Type, long Remaining) Decode<T>(byte[] bytes)
     {
-        using var session = SerializerProviders.Get(typeof(T)).Sessions.GetSession();
+        using var session = OrleansSerialization.Serializer.SessionPool.GetSession();
         var reader = Reader.Create(bytes.AsSpan(), session);
         var actual = session.TypeCodec.TryRead(ref reader);
         return (actual, reader.Remaining);

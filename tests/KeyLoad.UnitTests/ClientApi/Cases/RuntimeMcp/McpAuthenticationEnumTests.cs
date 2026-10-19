@@ -26,15 +26,15 @@ internal sealed class McpAuthenticationEnumTests
 
     private static (Type? ActualType, Capability Value, long Remaining) InspectOfficialCapability()
     {
-        var context = SerializerProviders.Get(typeof(GrainValue));
+        var context = OrleansSerialization.Serializer;
         var output = new ArrayBufferWriter<byte>();
-        using (var session = context.Sessions.GetSession())
+        using (var session = context.SessionPool.GetSession())
         {
             var writer = Writer.Create(output, session);
             session.CodecProvider.GetCodec<Capability>().WriteField(ref writer, ScalarField, typeof(Capability), Capability.All);
             writer.Commit();
         }
-        using var readSession = context.Sessions.GetSession();
+        using var readSession = context.SessionPool.GetSession();
         var reader = Reader.Create(output.WrittenSpan, readSession);
         var field = reader.ReadFieldHeader();
         var value = readSession.CodecProvider.GetCodec<Capability>().ReadValue(ref reader, field);

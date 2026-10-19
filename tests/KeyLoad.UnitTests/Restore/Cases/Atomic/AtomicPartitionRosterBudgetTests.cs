@@ -1,8 +1,6 @@
 using KeyLoad.Core;
 using KeyLoad.Core.Features.BackupRestore.Execution;
 using KeyLoad.Core.Features.BackupRestore.Serialization;
-using KeyLoad.Core.Features.CommandOutcomes.Contracts;
-using KeyLoad.Core.Features.RuntimeJournaling.Contracts;
 using KeyLoad.Core.Features.StoragePartitions.Contracts;
 using Microsoft.Extensions.Options;
 
@@ -15,7 +13,7 @@ internal sealed class AtomicPartitionRosterBudgetTests
     private const byte FirstStagedValue = 1;
     private const byte SecondStagedValue = 2;
     private const int OneCandidate = 1;
-    private const int OriginalEncodedRosterCandidateByteBudget = 88;
+    private const int EncodedRosterCandidateByteBudget = 83;
     private const string SeedJson = "{}";
     private const string RootPrincipalId = "root";
     private const string ExistingDocumentId = "existing-document";
@@ -77,7 +75,7 @@ internal sealed class AtomicPartitionRosterBudgetTests
         var second = AtomicPartitionRosterFixture.Destination;
         var maximumSingleKeyBytes = Math.Max(AtomicPartitionRosterKeys.Partition(first).Length,
             AtomicPartitionRosterKeys.Partition(second).Length);
-        await Assert.That(maximumSingleKeyBytes).IsEqualTo(OriginalEncodedRosterCandidateByteBudget);
+        await Assert.That(maximumSingleKeyBytes).IsEqualTo(EncodedRosterCandidateByteBudget);
         var boundedLimits = new DatabaseLimits { MaxBatchBytes = maximumSingleKeyBytes };
         boundedLimits.Validate();
         var boundedLimitOptions = Options.Create(boundedLimits);

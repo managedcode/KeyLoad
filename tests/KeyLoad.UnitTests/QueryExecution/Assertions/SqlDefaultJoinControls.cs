@@ -34,7 +34,8 @@ internal static class SqlDefaultJoinControls
         }
         var scalar = SqlOffsetProtocol.ScalarRequest(database.Partition) with
         {
-            Sql = plain.Sql
+            Sql = plain.Sql,
+            QueryDialectVersion = 2
         };
         await ErrorAsync(() => engine.Execute(SqlOffsetProtocol.Root, scalar), ErrorCode.UnsupportedCapability);
         await SqlOffsetRefusals.UnchangedAsync(database.Store, image, position, identity);

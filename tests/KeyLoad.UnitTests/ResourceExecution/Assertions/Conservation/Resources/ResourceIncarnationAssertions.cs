@@ -47,7 +47,7 @@ internal static class ResourceIncarnationAssertions
         });
         await Assert.That(original.Value.Fingerprint).IsEqualTo(fingerprint);
         var incarnation = Convert.ToHexStringLower(SHA256.HashData(KeyCodec.Encode(
-            "keyload:resource-incarnation:v1", partition.TenantId, partition.DatabaseId, definition.Name, fingerprint)));
+            "keyload:resource-incarnation", partition.TenantId, partition.DatabaseId, definition.Name, fingerprint)));
         if (!sql)
         {
             await Assert.That(fingerprint).IsEqualTo(ResourceIncarnationLiteral.Fingerprint);

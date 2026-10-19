@@ -15,14 +15,14 @@ internal static class McpAuthenticationMalformedFixture
     internal static byte[] Valid(PrincipalRecord principal) => Write(principal, null);
 
     internal static byte[] DefaultArray(PrincipalRecord principal)
-        => SerializerProviders.Get(typeof(GrainValue)).Serializer.SerializeToArray(new RuntimePayload
+        => OrleansSerialization.Serializer.SerializeToArray(new RuntimePayload
         {
             Version = PayloadVersion.Current,
             Value = new GrainValue(principal with { FieldGrants = default })
         });
 
     internal static byte[] DefaultTeams(PrincipalRecord principal)
-        => SerializerProviders.Get(typeof(GrainValue)).Serializer.SerializeToArray(new RuntimePayload
+        => OrleansSerialization.Serializer.SerializeToArray(new RuntimePayload
         {
             Version = PayloadVersion.Current,
             Value = new GrainValue(principal with { Teams = default })
@@ -30,7 +30,7 @@ internal static class McpAuthenticationMalformedFixture
 
     private static byte[] Write(PrincipalRecord principal, McpAuthenticationArrayFault? fault)
     {
-        using var session = SerializerProviders.Get(typeof(GrainValue)).Sessions.GetSession();
+        using var session = OrleansSerialization.Serializer.SessionPool.GetSession();
         var writer = Writer.CreatePooled(session);
         try
         {

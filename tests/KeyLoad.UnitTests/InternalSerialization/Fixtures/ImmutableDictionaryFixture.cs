@@ -11,7 +11,7 @@ internal static class ImmutableDictionaryFixture
     internal static byte[] Encode(ImmutableDictionaryFault fault)
     {
         var type = typeof(ImmutableDictionary<string, string>);
-        using var session = SerializerProviders.Get(type).Sessions.GetSession();
+        using var session = OrleansSerialization.Serializer.SessionPool.GetSession();
         var writer = Writer.CreatePooled(session);
         try
         {

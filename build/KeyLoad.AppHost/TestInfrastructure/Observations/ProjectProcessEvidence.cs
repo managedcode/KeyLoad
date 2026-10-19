@@ -2,7 +2,6 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Reflection.PortableExecutable;
 using System.Security.Cryptography;
-using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.Diagnostics.Features.ResourceExecution;
 using Microsoft.Extensions.Options;
 

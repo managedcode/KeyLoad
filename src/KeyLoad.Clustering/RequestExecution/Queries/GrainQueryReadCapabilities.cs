@@ -1,6 +1,5 @@
 using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Query;
-using KeyLoad.Query.Features.QueryExecution;
 
 namespace KeyLoad.Clustering;
 

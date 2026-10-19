@@ -6,7 +6,7 @@ namespace KeyLoad.UnitTests.Features.StorageRecovery;
 
 internal static class PartitionStoragePreStartDisposeTrial
 {
-    internal static async Task RunAsync(string[] arguments, LocalhostClusteringOptions localhost,
+    internal static async Task RunAsync(string[] arguments,
         RequestCqrsHostedProfile profile, string root, string directory, CancellationToken token)
     {
         var failures = new List<Exception>();
@@ -17,7 +17,7 @@ internal static class PartitionStoragePreStartDisposeTrial
         Task? originalStartupWait = null;
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            application = await ServerConfiguration.BuildAsync(arguments, localhostClustering: localhost,
+            application = await ServerConfiguration.BuildAsync(arguments,
                 configureServices: profile.Register, startupCancellation: token).ConfigureAwait(false);
             captured = new(application.Services.GetRequiredService<PartitionHostApplicationOwner>(),
                 application.Services.GetRequiredService<OrleansNode>(),

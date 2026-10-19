@@ -1,7 +1,6 @@
 using System.Security.Cryptography;
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
-using Aspire.Hosting.Azure;
 using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.Server;
 
@@ -17,6 +16,11 @@ internal sealed class ClusterTelemetryResourceTests
     private const string ServiceName = "OTEL_SERVICE_NAME";
     private const string ResourceAttributes = "OTEL_RESOURCE_ATTRIBUTES";
     private const string DataDirectory = "KeyLoad__DataDirectory";
+    private const string MembershipSecret = "KeyLoad__RapidMembership__SharedSecret";
+    private const string MembershipPort = "KeyLoad__RapidMembership__ListenPort";
+    private const string RemovedMembershipConnection = "ConnectionStrings__OrleansMembership";
+    private const string SigningKey = "KeyLoad__SigningKey";
+    private const string AdminKey = "KeyLoad__AdminKey";
     private const string HttpEndpoint = "http";
     private const int SecretBytes = 32;
     private const string Endpoint = "OTEL_EXPORTER_OTLP_ENDPOINT";
@@ -100,17 +104,20 @@ internal sealed class ClusterTelemetryResourceTests
         await Assert.That(node.Resource.Annotations.OfType<EndpointAnnotation>()
             .Single(endpoint => endpoint.Name == HttpEndpoint).IsProxied).IsFalse();
         await Assert.That(node.Resource.GetProjectMetadata().ProjectPath).EndsWith("KeyLoad.csproj");
-        var storage = builder.Resources.OfType<AzureStorageResource>().ToArray();
-        await Assert.That(storage.Select(resource => resource.Name)).IsEquivalentTo(new[] { "orleans-storage" });
         await Assert.That(builder.Resources.OfType<ContainerResource>()).IsEmpty();
-        var emulator = storage.Single();
-        await Assert.That(emulator.Annotations.OfType<EmulatorResourceAnnotation>()).HasSingleItem();
-        var image = emulator.Annotations.OfType<ContainerImageAnnotation>().Single();
-        await Assert.That(image.Registry).IsEqualTo("mcr.microsoft.com");
-        await Assert.That(image.Image).IsEqualTo("azure-storage/azurite");
-        await Assert.That(string.IsNullOrWhiteSpace(image.Tag)).IsFalse();
-        await Assert.That(emulator.Annotations.OfType<ContainerLifetimeAnnotation>().Single().Lifetime)
-            .IsEqualTo(ContainerLifetime.Session);
+        var membership = node.Resource.Annotations.OfType<EndpointAnnotation>()
+            .Single(endpoint => endpoint.Name == "membership");
+        await Assert.That(membership.UriScheme).IsEqualTo("tcp");
+        await Assert.That(membership.IsExternal).IsFalse();
+        await Assert.That(membership.IsProxied).IsFalse();
+        var secret = builder.Resources.OfType<ParameterResource>()
+            .Single(parameter => parameter.Name == "membership-secret");
+        await Assert.That(secret.Secret).IsTrue();
+        await Assert.That(ReferenceEquals(environment[MembershipSecret], secret)).IsTrue();
+        await Assert.That(environment.ContainsKey(MembershipPort)).IsTrue();
+        await Assert.That(environment.ContainsKey(RemovedMembershipConnection)).IsFalse();
+        await Assert.That(ReferenceEquals(environment[SigningKey], secret)).IsFalse();
+        await Assert.That(ReferenceEquals(environment[AdminKey], secret)).IsFalse();
         await Assert.That(Directory.Exists(Path.Combine(root, node.Resource.Name))).IsTrue();
     }
 

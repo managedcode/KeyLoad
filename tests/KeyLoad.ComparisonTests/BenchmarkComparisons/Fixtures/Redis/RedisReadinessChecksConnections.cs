@@ -15,7 +15,7 @@ internal sealed class RedisReadinessChecksConnections : IAsyncDisposable
     internal ConnectionMultiplexer Primary => connections[0];
     internal ConnectionMultiplexer[] Replicas => connections.Skip(1).ToArray();
     internal EndPoint[] ReplicaEndpoints => connections.Skip(1)
-        .Select(connection => RedisProtocol.ConfiguredEndpoint(connection, MissingConnection)).ToArray();
+        .Select(connection => KeyLoad.Comparisons.Targets.RedisProtocol.ConfiguredEndpoint(connection, MissingConnection)).ToArray();
 
     internal async Task ConnectAsync(DistributedApplication app, IEnumerable<RedisResource> resources, CancellationToken token)
     {

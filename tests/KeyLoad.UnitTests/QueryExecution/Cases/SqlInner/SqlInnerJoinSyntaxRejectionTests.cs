@@ -54,9 +54,9 @@ internal sealed class SqlInnerJoinSyntaxRejectionTests
         await SqlInnerJoinRejectionFixture.VerifyHealthyAsync(database, engine, before, position);
     }
     [Test]
-    [Arguments(1)]
+    [Arguments(2)]
     [Arguments(3)]
-    public async Task UnselectedOrUnknownSqlDialectRejectsBeforeScanAndHealthyQ2Follows(int dialect)
+    public async Task NoncurrentSqlDialectRejectsBeforeScanAndCurrentJoinFollows(int dialect)
     {
         using var database = new TestDatabase();
         SqlInnerJoinRejectionFixture.Seed(database);

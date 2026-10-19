@@ -15,7 +15,7 @@ public sealed partial class DatabaseEngine
     {
         ArgumentNullException.ThrowIfNull(metadata);
         budget.Check();
-        ResourceLifetimeCoverage.Require(metadata.Coverage, partition, [metadata.Definition], Limits.MaxBatchBytes);
+        ResourceLifetimeCoverageValidation.Require(metadata.Coverage, partition, [metadata.Definition], Limits.MaxBatchBytes);
         if (metadata.Principal is null || metadata.Principal.Id != principalId
             || metadata.Definition.Name != collection || metadata.Definition.Kind != ResourceKind.Collection)
         {

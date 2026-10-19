@@ -132,7 +132,7 @@ matrix, restarts or separate benchmark scenario.
   corrupt evidence cannot be replaced by unavailable.
 
 The primary `KeyLoad.AppHost` serves development and functional tests with execution
-server project processes and Azurite. `KeyLoad.LoadTests.AppHost` owns only the
+server project processes with in-memory RapidMembership. `KeyLoad.LoadTests.AppHost` owns only the
 selected load infrastructure. It awaits readiness, exposes discovered endpoints to
 `KeyLoad.ComparisonHost`, and joins cleanup after the client-owned workload. The
 client remains outside the resource graph. Only run-owned Docker resources are

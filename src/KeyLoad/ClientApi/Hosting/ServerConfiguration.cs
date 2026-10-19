@@ -14,7 +14,6 @@ namespace KeyLoad.Server;
 internal static class ServerConfiguration
 {
     internal static async Task<WebApplication> BuildAsync(string[] args,
-        LocalhostClusteringOptions? localhostClustering = null,
         IDatabaseAuthenticationExecutionObserver? authenticationExecutionObserver = null,
         Func<IServiceProvider, ILifecycleParticipant<ISiloLifecycle>>? lifecycleParticipantFactory = null,
         IGrainRequestPhaseObserver? phaseObserver = null, IGrainRequestPurposeObserver? purposeObserver = null,
@@ -22,7 +21,7 @@ internal static class ServerConfiguration
         CancellationToken startupCancellation = default)
     {
         var builder = WebApplication.CreateBuilder(args);
-        await ConfigureBuilderAsync(builder, localhostClustering, authenticationExecutionObserver,
+        await ConfigureBuilderAsync(builder, authenticationExecutionObserver,
             lifecycleParticipantFactory, phaseObserver, purposeObserver, configureServices, startupCancellation);
         var app = builder.Build();
         try
@@ -40,7 +39,6 @@ internal static class ServerConfiguration
     }
 
     internal static async Task ConfigureBuilderAsync(WebApplicationBuilder builder,
-        LocalhostClusteringOptions? localhostClustering = null,
         IDatabaseAuthenticationExecutionObserver? authenticationExecutionObserver = null,
         Func<IServiceProvider, ILifecycleParticipant<ISiloLifecycle>>? lifecycleParticipantFactory = null,
         IGrainRequestPhaseObserver? phaseObserver = null, IGrainRequestPurposeObserver? purposeObserver = null,
@@ -55,10 +53,10 @@ internal static class ServerConfiguration
         builder.Services.AddSingleton<IOptions<NodeOptions>>(node);
         ServerConnectionTransportComposition.Configure(builder);
         ConfigureTransportOptions(builder);
-        Register(builder.Services, localhostClustering);
+        Register(builder.Services);
         PostgresComposition.Register(builder.Services, builder.Configuration);
         RegisterObservers(builder.Services, authenticationExecutionObserver, phaseObserver, purposeObserver);
-        OrleansSiloConfiguration.Register(builder, node, address, localhostClustering);
+        OrleansSiloConfiguration.Register(builder, node, address);
         builder.Services.AddHostedService(provider => provider.GetRequiredService<OrleansNodeLifecycle>());
         builder.Services.AddOptions<HostOptions>().Configure<IOptions<ServerExecutionOptions>>((host, execution) =>
         {
@@ -181,12 +179,8 @@ internal static class ServerConfiguration
         }
     }
 
-    private static void Register(IServiceCollection services, LocalhostClusteringOptions? localhostClustering)
+    private static void Register(IServiceCollection services)
     {
-        if (localhostClustering is not null)
-        {
-            services.AddSingleton(localhostClustering);
-        }
         services.AddSingleton(TimeProvider.System);
         services.AddSingleton<ServerConnectionRegistry>();
         services.AddSingleton<AdminHttpMetrics>();

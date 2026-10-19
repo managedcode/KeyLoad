@@ -31,7 +31,7 @@ complete database/model comparison requirement.
 One preparation job builds the solution and compiled runtime bundle. Workers
 import and hash-check same-source/run/attempt DLLs/PDBs, NuGet assets and required
 Aspire tools without their own restore/build. The primary KeyLoad AppHost contains
-server project processes and Azurite for development and functional tests.
+server project processes with in-memory RapidMembership for development and functional tests.
 The separate LoadTests AppHost contains selected database infrastructure only;
 the workload client owns requests and measurements outside its resource
 graph. KeyLoad and its workload client are never containers in ordinary execution.

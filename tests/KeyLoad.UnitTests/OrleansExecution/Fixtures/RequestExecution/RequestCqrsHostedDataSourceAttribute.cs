@@ -4,15 +4,15 @@ namespace KeyLoad.UnitTests.Features.OrleansExecution;
 internal sealed class RequestCqrsHostedDataSourceAttribute(bool textMaintenance = false,
     bool annMaintenance = false) : DataSourceGeneratorAttribute<RequestCqrsHostedRuntimeFixture>
 {
-    public bool RuntimeTextMaintenance { get; } = textMaintenance;
-    public bool RuntimeAnnMaintenance { get; } = annMaintenance;
+    public bool TextMaintenance { get; } = textMaintenance;
+    public bool AnnMaintenance { get; } = annMaintenance;
 
     protected override IEnumerable<Func<RequestCqrsHostedRuntimeFixture>> GenerateDataSources(DataGeneratorMetadata metadata)
     {
-        if (RuntimeTextMaintenance || RuntimeAnnMaintenance)
+        if (TextMaintenance || AnnMaintenance)
         {
-            yield return () => new RequestCqrsHostedRuntimeFixture(textMaintenance: RuntimeTextMaintenance,
-                annMaintenance: RuntimeAnnMaintenance);
+            yield return () => new RequestCqrsHostedRuntimeFixture(textMaintenance: TextMaintenance,
+                annMaintenance: AnnMaintenance);
             yield break;
         }
         yield return () => SharedDataSources.GetOrCreate<RequestCqrsHostedRuntimeFixture>(

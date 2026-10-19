@@ -31,7 +31,7 @@ internal sealed class IsolatedResourceTopologyKeyLoadTests
         var runner = fixture.Context.Client;
         var nodes = fixture.Projects;
         await Assert.That(nodes.Length).IsEqualTo(count);
-        await Assert.That(resources.Select(resource => resource.Name)).IsEquivalentTo(new[] { "orleans-storage" });
+        await Assert.That(resources).IsEmpty();
         await Assert.That(nodes.Select(item => item.Name).ToArray())
             .IsEquivalentTo(Enumerable.Range(1, count).Select(index => "node" + index).ToArray());
         await IsolatedResourceTopologyFixture.VerifyWaitsAsync(runner, nodes);

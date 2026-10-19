@@ -1,6 +1,4 @@
 using System.Collections.Immutable;
-using KeyLoad.Core.Features.CommandOutcomes.Contracts;
-using KeyLoad.Core.Features.RuntimeJournaling.Contracts;
 using KeyLoad.Core.Features.StoragePartitions.Contracts;
 using KeyLoad.Storage;
 
@@ -97,7 +95,7 @@ internal sealed class ReadExecutionBudgetLifetimeBindings(ReadExecutionBudget wo
             values.Add(lifetime);
         }
         var coverage = new ResourceLifetimeCoverage(partition, values.MoveToImmutable());
-        ResourceLifetimeCoverage.Require(coverage, partition, definitions, database.Limits.MaxBatchBytes);
+        ResourceLifetimeCoverageValidation.Require(coverage, partition, definitions, database.Limits.MaxBatchBytes);
         binding?.Bind(coverage);
         work.Check();
         return coverage;
@@ -115,7 +113,7 @@ internal sealed class ReadExecutionBudgetLifetimeBindings(ReadExecutionBudget wo
         {
             throw Errors.Fail(ErrorCode.Corruption, ResourceLifetimeValidationMessages.MissingAuthority);
         }
-        ResourceLifetimeCoverage.Require(coverage, coverage.Partition, definitions, database.Limits.MaxBatchBytes);
+        ResourceLifetimeCoverageValidation.Require(coverage, coverage.Partition, definitions, database.Limits.MaxBatchBytes);
         var bindingView = new AuthenticatedResourceLifetimeReadView(authorizedLocalView, this);
         for (var index = FirstDefinitionIndex; index < definitions.Length; index++)
         {

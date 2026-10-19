@@ -1,6 +1,6 @@
 using System.Text.Json;
-using KeyLoad.IntegrationTests.Features.StorageReplication;
 using KeyLoad.IntegrationTests.Features.RelationalStorage;
+using KeyLoad.IntegrationTests.Features.StorageReplication;
 
 namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
 

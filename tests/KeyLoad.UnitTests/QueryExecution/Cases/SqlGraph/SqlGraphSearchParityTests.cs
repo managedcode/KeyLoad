@@ -156,8 +156,8 @@ internal sealed class SqlGraphSearchParityTests
 
         await Assert.That(manifest.SqlDialect).IsEqualTo("TSQL.ScriptDOM180");
         await Assert.That(manifest.AstVersion).IsEqualTo(1);
-        await Assert.That(manifest.SupportedAstVersions).IsEquivalentTo([2]);
-        await Assert.That(manifest.SupportedQueryDialectVersions).IsEquivalentTo([2]);
+        await Assert.That(manifest.SupportedAstVersions).IsEquivalentTo([1]);
+        await Assert.That(manifest.SupportedQueryDialectVersions).IsEquivalentTo([1]);
         await Assert.That(manifest.ReadProfiles).Contains("graph-search");
         await Assert.That(manifest.ReadProfiles).Contains("Q2.InnerJoin");
     }

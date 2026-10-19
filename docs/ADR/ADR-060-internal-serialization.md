@@ -1,85 +1,52 @@
 # ADR-060: generated internal serialization
 
-Status: Accepted. Date:2026-10-03.
+Status: Accepted. Current owner direction: 2026-10-19.
 
-REQ/AC-DSTORE-008 (exact caller-owned document text, 2026-10-05): validation is separated from PutDocument text rewriting. The same canonical writer validates into a discard sink and the record retains the original validated string. Public JsonData.Validate output, canonical fingerprint digests, record aliases/field IDs, and data epochs remain unchanged. No automatic existing-record rewrite; patch/redaction retain their derived-text contracts. Real-store exact-text, replacement/replay and invalid-atomicity regressions, unchanged canonical golden tests, and actual Aspire replicated-cluster SDK/official MCP Unicode/restart cases are required before qualification. This is a repair of the frozen contract, not a new data format.
+## Decision
 
-## Decision and contracts
+The official Orleans 10.4.0 generated serializer owns binary encoding, decoding,
+type metadata, object references, collections and field evolution. KeyLoad has no
+custom field codec, binary grammar, assembly-name selector, per-assembly service
+provider cache, wire walker or replacement JSON DOM serialization model.
 
-Implement REQ-IS-001..009 / AC-IS-001..009 using centrally pinned Orleans generated codecs, stable aliases and explicit immutable field IDs across all owned internal concrete DTOs. Use pooled sessions and raw ReadOnlyMemory<byte> codecs; reject incomplete/trailing/malformed input and validate required semantic fields before effects. Do not use Orleans' optional JSON codec or a runtime JSON fallback. JSON DOM adapters represent structural ordered fields and original numeric lexemes; DOM materialization is a concrete boundary, not a persisted JSON subtree.
+The shared serialization entry uses one standard `AddSerializer` registration
+and native pooled sessions. `JsonElement` alone uses the official
+`Microsoft.Orleans.Serialization.SystemTextJson` 10.4.0 codec; other attributed
+contracts use generated binary codecs. This is an explicit type registration,
+not a general-purpose JSON serializer selection rule.
 
-```mermaid
-flowchart TD
-    Frame[Explicit version and bounded frame] --> Integrity[Length checksum and authority checks]
-    Integrity --> Execution[Generated Orleans typed decode]
-    Execution --> Validate[Complete input and semantic validation]
-    Validate --> Apply[Existing ordered atomic apply]
-    Unknown[Unsupported or unknown version] --> Reject[Reject before mutation]
-```
+Active DTOs keep their explicit `[GenerateSerializer]`, `[Alias]` and `[Id]`
+contracts. The generated `RuntimePayload` application record retains its current
+version and value fields. Application envelope versions, required values, exact
+command root types, complete input consumption and domain/resource checks remain
+KeyLoad responsibilities. Orleans owns the binary representation and supported
+field evolution. No custom preflight parser interprets that representation.
 
-Concrete contracts retained: public HTTP/MCP JSON; exact caller-owned JSON document strings; canonical operation/idempotency golden digests; sortable KeyCodec1; ZoneTree ByteArraySerializer/WAL; fixed checksummed framing; raw blob chunks; HMAC/SHA; Cartograph archives. binary output must not be assumed canonical for unordered maps. Signed claims are versioned before changing signed bytes.
+## Boundaries
 
-## Current format identity and rollback
+Public HTTP/MCP JSON, exact caller-owned document text, canonical identity hashes,
+sortable keys, raw ZoneTree values and WAL framing, blob payloads, checksums,
+cryptography and archive formats retain their owning contracts. Binary map output
+is not a canonical identity. Unsupported application/storage versions fail before
+effects. No previous-format reader or automatic data conversion is introduced.
 
-Compaction preserves opaque JSON values. Current stores and metadata must use the required format identity and fail closed on unsupported identities before opening or mutating trees or truncating journals. Never promote or reinterpret an unsupported identity. Current backup and restore verify the complete source state before destination publication; unknown keys or failed verification prevent publication and preserve source. Rollback is a source checkpoint and never changes stored data or republishes a different format.
+MCP authentication uses the decoded generated `PrincipalRecord`. Existing byte
+limits, ingress reservations, structural projection limits, cancellation and
+fresh persisted authorization remain enforced. It does not decode Orleans fields
+or construct an alternative principal from wire references.
 
-## Security, tests and evidence
+## Acceptance
 
-header projection/skipping may not allocate decoded opaque payloads; control/data pools and all external capacity contracts stay exact. Existing state ownership, synchronous barriers, unknown outcomes, cancellation and caller-visible sanitized diagnostics remain.
+Causal server-envelope and fresh text-root receipt round trips, active DTO and
+collection tests, malformed/trailing input, unsupported application versions,
+command identity/accounting, signed claims and actual storage recovery remain
+required. Genuine Aspire SDK/MCP operations and abrupt silo restart must run
+through the published RapidMembership provider.
 
-codec/type-family/DOM tests, exact record byte accounting, actual current metadata corruption and unsupported-version fixtures, claims/tamper/version tests, existing canonical hashes, real-process recovery and genuine replicated-cluster SDK/MCP form the acceptance chain. Required commands are enabled solution restore/build and formatter/static governance, then canonical GitHub normal/scalar/recovery/analyzer/cluster jobs. No local runtime tests, no removed assertions or invented load tests. Performance, full memory amplification, power-loss, endurance and production proof are separately unqualified. Publication is not attempted again without explicit approval after the previous automatic-review rejection.
-
-## Owner performance extension, 2026-10-03
-
-REQ-IS-010/AC-IS-010 and REQ-IS-PERF-001..004 / AC-IS-PERF-001..004 add baseline diagnostics
-for all shared serialization consumers: contracts; authentic public generated BDN fixtures and TUnit cases; original result
-validation/provenance; workflow integration; exact-source CI and Linux measurement; and only evidence-selected bounded optimization.
-The diagnostics live in BenchmarkScenarios Features/BenchmarkComparisons/Execution*Serialization*, mirrored by UnitTests, with new serialization-* helpers in scripts. Existing ADR047
-public/unsealed generated-child contract and central package pins remain. A
-scoped UnitTests friend declaration permits direct corpus/manifest regressions;
-generated consumers still use public fixture methods and concrete return types.
-
-No database format/API/routing/authority change. JSON is benchmark-only historical
-typed UTF8 baseline and does not replace runtime or claim equal fault
-contracts. Default workflow retains full matrix/aggregate/site proof; diagnostic
-mode is explicitly separate and cannot refresh published website metrics.
-Rollback removes additive diagnostics, without user data changes. Real generated
-Dry execution and genuine24-case measured JSON/CSV plus executor/source/environment
-receipts are required; local build or exit0 cannot qualify measurements.
-
-## Approved immutable analytics maps, 2026-10-16
-
-AnalyticsStore's public `ImmutableDictionary<string, string/double/long>` values
-use the current centrally pinned Orleans 10.4.0 `ImmutableDictionaryCodec<TKey,TValue>`
-(package-declared source `d114d7522a53b8cce4c6b97d44293e5c7273d766`).
-KeyLoad admits only that exact built-in outer type and its generated surrogate:
-field0 is one nonnull freshly encoded `Dictionary<TKey,TValue>` Values, field1 is
-an optional default-null or already supported well-known string value comparer.
-The same strict comparer rule applies to the surrogate Values dictionary key
-comparer; ordinary standalone Dictionary admission remains unchanged.
-The existing dictionary walker still validates count, complete key/value pairs,
-types, references, UTF-8 and depth before generated allocation. Unknown members,
-base scopes, missing/duplicate/null Values, custom comparers and other unverified
-system surrogates remain refused. Postdecode required-member, graph, cycle and
-work validation is unchanged. binary map output remains noncanonical.
-
-This repairs KeyLoad-owned admission of an already selected generated codec.
-The existing Orleans wire encoding, envelope, persisted field IDs/aliases,
-public immutable DTOs, built-in codec, format identity, authority, capacity and
-public JSON contract remain unchanged. The supported type inventory is
-additive: older KeyLoad admission rejects immutable-map frames and the new
-AnalyticsStore DTO aliases. This is not mixed-reader compatibility.
-
-Before adoption or writes of the newly admitted types, deploy one homogeneous
-current Orleans 10.4.0 exact-source, DLL and pinned-codec reader cohort and qualify its existing
-current-format cold, process-recovery and public replicated-cluster paths. Older readers must
-fail closed; no reader fallback, automatic migration or compatibility rewriting
-is allowed. The package DLL/XML, declared source commit and writer APIs require their own
-source-bound compiler and runtime qualification; source matching alone is not PASS. No wire provider or version bump is introduced by this admission
-repair. The original byte, count, lifetime and persisted-authority budgets remain
-mandatory. Focused qualification includes malformed/oversized map
-frames, JSON batch normalization and ordered Analytics apply, complete raw
-rows and all five actual aggregates through GrainValue and public JSON,
-original receipt replay, cancellation/read/result limits and two joined cold
-reopens of the same canonical journals on every copy. Source preparation alone does
-not qualify compilation, recovery, public cluster or Linux execution.
+The deleted custom wire/DOM implementation and tests exclusive to its private
+parser are retired together. Native codec behavior is verified through real
+values and whole operations. Compiler/analyzer, formatting, governance, coverage,
+process recovery and exact-source Linux qualification remain separate gates.
+Local builds or focused passes do not establish complete product qualification,
+power-loss durability, endurance or performance. Measurements retain their own
+source/machine identities and never become database comparison figures.

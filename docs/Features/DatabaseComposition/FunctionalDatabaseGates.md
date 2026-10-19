@@ -39,8 +39,8 @@ flowchart LR
 
 The same real .NET SDK and official MCP C# SDK scenario must run first against
 one actual KeyLoad instance and then against three actual cluster nodes. Aspire
-AppHost owns each topology, Azure Table Storage membership through local
-Azurite, image preparation, readiness, discovered endpoints and joined shutdown.
+AppHost owns each topology, private RapidMembership endpoints and a shared
+secret, readiness, discovered endpoints and joined shutdown.
 The one-instance development gate has its actual single-replica acknowledgement
 contract; it is not evidence of cluster durability.
 

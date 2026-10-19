@@ -81,7 +81,7 @@ evidence contracts.
 ## host execution and source evidence
 
 The primary `build/KeyLoad.AppHost` owns development and functional-test KeyLoad
-server projects plus Azurite for Orleans membership. The separate
+server projects with in-memory RapidMembership for Orleans membership. The separate
 `build/KeyLoad.LoadTests.AppHost` owns the selected database infrastructure,
 readiness, discovered endpoints and cleanup. `KeyLoad.ComparisonHost` runs the
 client-owned workload outside that resource graph. Ordinary build/start/test/load

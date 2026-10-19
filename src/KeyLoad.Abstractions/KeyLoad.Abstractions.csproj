@@ -6,6 +6,7 @@
     <PackageReference Include="Microsoft.Extensions.Options" />
     <PackageReference Include="Microsoft.SqlServer.TransactSql.ScriptDom" />
     <PackageReference Include="Microsoft.Orleans.Serialization" />
+    <PackageReference Include="Microsoft.Orleans.Serialization.SystemTextJson" />
     <PackageReference Include="Microsoft.Orleans.CodeGenerator" PrivateAssets="all" />
   </ItemGroup>
   <ItemGroup>

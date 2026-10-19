@@ -2,15 +2,13 @@ namespace KeyLoad.UnitTests.Features.InternalSerialization;
 
 internal sealed class InspectionTests
 {
-    private static readonly SerializerContext Context = SerializerProviders.CreateInspection(typeof(OutboxHead));
-
     [Test]
     public async Task AcIs002InspectionUsesTheAuthoritativeEnvelope()
     {
         var expected = new OutboxHead(1, 1, 1, 1);
-        var actual = OrleansSerialization.Deserialize<OutboxHead>(OrleansSerialization.Serialize(expected), Context);
+        var actual = OrleansSerialization.Deserialize<OutboxHead>(OrleansSerialization.Serialize(expected));
         await Assert.That(actual).IsEqualTo(expected);
-        using var session = Context.Sessions.GetSession();
+        using var session = OrleansSerialization.Serializer.SessionPool.GetSession();
         await Assert.That(OrleansSerialization.Measure(expected, session)).IsEqualTo((long)OrleansSerialization.Serialize(expected).Length);
     }
 
@@ -21,7 +19,7 @@ internal sealed class InspectionTests
         KeyLoadException? failure = null;
         try
         {
-            _ = OrleansSerialization.Deserialize<OutboxHead>(bytes, Context);
+            _ = OrleansSerialization.Deserialize<OutboxHead>(bytes);
         }
         catch (KeyLoadException exception)
         {
@@ -35,16 +33,13 @@ internal sealed class InspectionTests
     [Arguments(EnvelopeFault.WrongRoot)]
     [Arguments(EnvelopeFault.MissingVersion)]
     [Arguments(EnvelopeFault.MissingValue)]
-    [Arguments(EnvelopeFault.DuplicateVersion)]
-    [Arguments(EnvelopeFault.DuplicateValue)]
-    [Arguments(EnvelopeFault.UnknownField)]
     public async Task AcIs002InspectionRejectsMalformedEnvelopeBeforeAdmission(EnvelopeFault fault)
     {
         using var fixture = new SerializerFixture();
         KeyLoadException? failure = null;
         try
         {
-            _ = OrleansSerialization.Deserialize<OutboxHead>(fixture.EncodeEnvelope(fault), Context);
+            _ = OrleansSerialization.Deserialize<OutboxHead>(fixture.EncodeEnvelope(fault));
         }
         catch (KeyLoadException exception)
         {

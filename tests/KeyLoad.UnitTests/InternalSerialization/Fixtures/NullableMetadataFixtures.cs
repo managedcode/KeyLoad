@@ -22,6 +22,6 @@ internal static class NullableMetadataFixtures
         => present ? new([Text], [null, ImmutableArray.Create(Text)]) : new(null, null);
 
     internal static byte[] EncodeUnchecked<T>(T value)
-        => SerializerProviders.Get(typeof(T)).Serializer.SerializeToArray(
+        => OrleansSerialization.Serializer.SerializeToArray(
             new RuntimePayload { Version = PayloadVersion.Current, Value = value });
 }

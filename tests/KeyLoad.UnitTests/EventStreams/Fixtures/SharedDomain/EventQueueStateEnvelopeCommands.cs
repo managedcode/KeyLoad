@@ -2,8 +2,6 @@ using System.Collections.Immutable;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.CommandOutcomes.Contracts;
-using KeyLoad.Core.Features.RuntimeJournaling.Contracts;
-using KeyLoad.Core.Features.StoragePartitions.Contracts;
 using KeyLoad.UnitTests.Features.ResourceExecution;
 using ManagedCode.Communication;
 using static KeyLoad.UnitTests.Features.EventStreams.EventQueueStateEnvelopeProtocol;

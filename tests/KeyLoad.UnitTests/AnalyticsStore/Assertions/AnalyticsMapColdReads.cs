@@ -32,7 +32,7 @@ internal static class AnalyticsMapColdReads
             foreach (var fault in Enum.GetValues<ImmutableDictionaryFault>())
             {
                 var malformed = ImmutableDictionaryFixture.Encode(fault);
-                await WireCollectionTests.Reject(() => OrleansSerialization.Deserialize<object>(malformed));
+                await SerializedPayloadAssertions.CorruptAsync(() => OrleansSerialization.Deserialize<object>(malformed));
                 await VerifyAsync(owner, events, token);
             }
             AnalyticsEventsPage? published = null;

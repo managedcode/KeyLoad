@@ -14,6 +14,7 @@
     <ProjectReference Include="../KeyLoad.Clustering/KeyLoad.Clustering.csproj" />
     <ProjectReference Include="../KeyLoad.Storage.ZoneTree/KeyLoad.Storage.ZoneTree.csproj" />
     <ProjectReference Include="../KeyLoad.Query/KeyLoad.Query.csproj" />
+    <PackageReference Include="ManagedCode.Orleans.RapidMembership" />
     <PackageReference Include="Microsoft.Extensions.Http.Resilience" />
     <PackageReference Include="Microsoft.Extensions.ServiceDiscovery" />
     <PackageReference Include="OpenTelemetry.Extensions.Hosting" />

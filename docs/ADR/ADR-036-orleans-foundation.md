@@ -8,7 +8,7 @@ Orleans is KeyLoad's runtime and its whole cluster. One server process hosts one
 
 Silo configuration uses only Orleans calls:
 
-- clustering provider: Azure Table storage through the Aspire-provided connection string, or localhost clustering for local development;
+- clustering provider: the published `ManagedCode.Orleans.RapidMembership` 10.4.0 provider for local and multi-host deployments; in-memory membership, automatic discovery and independent shared-secret authentication;
 - `AddDistributedGrainDirectory()` and `AddActivationRepartitioner()` — the owner-authorized experimental opt-ins `ORLEANSEXP003` and `ORLEANSEXP001` are suppressed only around these two calls;
 - `AddGrainService<...>()` for the silo-local ZoneTree owner and other per-silo services;
 - Durable Jobs and Journaling under ADR-110 (`ORLEANSEXP005` confined to that provider, its registration and tests);

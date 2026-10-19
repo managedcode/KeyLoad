@@ -1,18 +1,29 @@
+using System.Text;
+
 namespace KeyLoad.Clustering;
 
-/// <summary>Explicit execution Azure Table membership connection selection at host composition.</summary>
+/// <summary>Host-selected in-memory Orleans membership discovery and authentication.</summary>
 [ConfigurationOptions]
 public sealed class OrleansHostingOptions
 {
-    /// <summary>Execution Aspire connection name shared by every silo in one Orleans deployment.</summary>
-    public const string ConnectionName = "OrleansMembership";
-    /// <summary>Closed startup refusal for missing execution clustering configuration.</summary>
-    public const string ValidationMessage = "A execution Orleans Azure Table membership connection is required.";
+    private const int MinimumSharedSecretBytes = 32;
+    private const int AutomaticListenPort = 0;
+    private const int MaximumListenPort = 65535;
+    /// <summary>Configuration shared by silos in one authenticated discovery group.</summary>
+    public const string SectionName = "KeyLoad:RapidMembership";
+    /// <summary>Startup refusal for invalid membership configuration.</summary>
+    public const string ValidationMessage = "Rapid membership requires a shared secret of at least 32 UTF-8 bytes and a valid TCP port.";
 
-    /// <summary>Gets or sets the host-selected membership connection, separate from canonical database storage.</summary>
-    public string ConnectionString { get; set; } = string.Empty;
+    /// <summary>Gets or sets the independent membership authentication secret.</summary>
+    public string SharedSecret { get; set; } = string.Empty;
+    /// <summary>Gets or sets the private TCP listener port; zero selects an available port.</summary>
+    public int ListenPort { get; set; }
+    /// <summary>Gets or sets optional IPv4 CIDR networks or address ranges to discover.</summary>
+    public IReadOnlyList<string> DiscoveryNetworks { get; set; } = [];
 
-    /// <summary>Checks that host composition selected an explicit execution connection.</summary>
-    /// <returns>Whether the connection selection is nonempty.</returns>
-    public bool IsValid() => !string.IsNullOrWhiteSpace(ConnectionString);
+    /// <summary>Checks required authentication and listener configuration.</summary>
+    /// <returns>Whether the configuration can be used by the membership provider.</returns>
+    public bool IsValid() => !string.IsNullOrWhiteSpace(SharedSecret)
+        && Encoding.UTF8.GetByteCount(SharedSecret) >= MinimumSharedSecretBytes
+        && ListenPort is >= AutomaticListenPort and <= MaximumListenPort && DiscoveryNetworks is not null;
 }

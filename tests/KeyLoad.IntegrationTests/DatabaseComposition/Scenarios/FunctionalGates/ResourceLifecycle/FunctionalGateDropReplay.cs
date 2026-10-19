@@ -1,7 +1,7 @@
 using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.StorageReplication;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
 using KeyLoad.IntegrationTests.Features.RelationalStorage;
+using KeyLoad.IntegrationTests.Features.StorageReplication;
 
 namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
 

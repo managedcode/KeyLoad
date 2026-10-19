@@ -20,6 +20,8 @@ internal sealed class RequestCqrsHostedProfile(TimeProvider clock, IOptions<Grai
     IDatabaseAuthenticationExecutionObserver? authenticationExecutionObserver = null,
     Action<IServiceCollection, NodeOptions>? configureServices = null)
 {
+    private readonly string membershipSecret = clusterNode?.MembershipSecret
+        ?? Convert.ToBase64String(RandomNumberGenerator.GetBytes(SigningKeyBytes));
     internal const string Root = "root";
     private const string Credential = "root.unit-test-credential-32-characters";
     private const string SettingPrefix = "--KeyLoad:";
@@ -56,6 +58,7 @@ internal sealed class RequestCqrsHostedProfile(TimeProvider clock, IOptions<Grai
     {
         var identity = ClusterNode?.SiloName ?? SiloPrefix + Guid.NewGuid().ToString(GuidFormat);
         return [PublicUrls, WarningLogLevel,
+            "--" + OrleansHostingOptions.SectionName + ":" + nameof(OrleansHostingOptions.SharedSecret) + Assignment + membershipSecret,
             Setting(nameof(NodeOptions.DataDirectory), directory),
             Setting(nameof(NodeOptions.SiloName), identity),
             Setting(nameof(NodeOptions.ClusterId), ClusterNode?.ClusterId ?? identity),

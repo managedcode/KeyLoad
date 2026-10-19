@@ -1,4 +1,3 @@
-using System.Net;
 using KeyLoad.Clustering;
 using KeyLoad.RecoveryTests.Features.StorageRecovery;
 using KeyLoad.Server;
@@ -126,8 +125,7 @@ internal sealed class RequestCqrsHostedRuntimeFixture : IAsyncInitializer, IAsyn
         reservedSiloPort ??= profile.ClusterNode?.SiloPort ?? ports.AllocateConsecutivePortPairs(OnePort).Item1;
         var siloPort = reservedSiloPort.Value;
         arguments ??= profile.Arguments(directory, siloPort);
-        var primary = profile.ClusterNode?.PrimaryEndpoint ?? new IPEndPoint(IPAddress.Loopback, siloPort);
-        application = await ServerConfiguration.BuildAsync(arguments, localhostClustering: new(primary),
+        application = await ServerConfiguration.BuildAsync(arguments,
             authenticationExecutionObserver: profile.AuthenticationExecutionObserver,
             lifecycleParticipantFactory: profile.LifecycleParticipantFactory,
             phaseObserver: profile.Observer, purposeObserver: profile.PurposeObserver,

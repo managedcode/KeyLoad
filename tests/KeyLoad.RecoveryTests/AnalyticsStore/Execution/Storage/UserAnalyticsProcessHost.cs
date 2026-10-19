@@ -23,7 +23,7 @@ internal static class UserAnalyticsProcessHost
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             application = await ServerConfiguration.BuildAsync(UserAnalyticsProcessOptions.Arguments(root, endpoint.Port),
-                localhostClustering: new(endpoint), startupCancellation: token).ConfigureAwait(false);
+                startupCancellation: token).ConfigureAwait(false);
             reservation.Stop();
             await application.StartAsync(token).ConfigureAwait(false);
             var host = application.Services.GetRequiredService<PartitionHostApplicationOwner>().Borrow();

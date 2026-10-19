@@ -470,8 +470,8 @@ flowchart LR
 ```mermaid
 classDiagram
     OrleansSerialization --> RuntimePayload : versioned generated root
-    OrleansSerialization --> SerializerProviders : cached official providers
-    RuntimePayload --> RuntimeJsonValue : structural DOM surrogate
+    OrleansSerialization --> OrleansSerializer : official generated codecs
+    OrleansSerializer --> OfficialJsonCodec : JsonElement only
     ZoneTreeIdentityFile --> ZoneTreeMetadataBinary : explicit format fence
     GrainRequestEnvelope --> GrainValue : attributed boundary
 ```

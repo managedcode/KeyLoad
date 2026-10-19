@@ -1,7 +1,6 @@
 using System.Diagnostics;
 using System.Reflection;
 using System.Text.Json;
-using KeyLoad.AppHost.Features.TestInfrastructure;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.AppHost.Features.TestInfrastructure;

@@ -1,6 +1,5 @@
 using System.Runtime.CompilerServices;
 using KeyLoad.AppHost.Features.TestInfrastructure;
-using KeyLoad.AppHost.Features.TestInfrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;

@@ -7,7 +7,7 @@ using Orleans.TestingHost;
 
 namespace KeyLoad.RecoveryTests.Features.OrleansExecution;
 
-/// <summary>Runs two complete production hosts using Orleans' execution localhost membership provider.</summary>
+/// <summary>Runs two complete production hosts using the published RapidMembership provider.</summary>
 internal sealed class RequestCqrsHostedCluster : IAsyncDisposable
 {
     private const int SiloCount = 2;
@@ -32,6 +32,7 @@ internal sealed class RequestCqrsHostedCluster : IAsyncDisposable
         var identity = "cqrs-cluster-" + Guid.NewGuid().ToString("N");
         var incarnation = Guid.NewGuid();
         var signingKey = Convert.ToBase64String(RandomNumberGenerator.GetBytes(SigningKeyBytes));
+        var membershipSecret = Convert.ToBase64String(RandomNumberGenerator.GetBytes(SigningKeyBytes));
         var (primaryPort, _) = ports.AllocateConsecutivePortPairs(SiloCount);
         foreach (var index in Enumerable.Range(0, SiloCount))
         {
@@ -41,7 +42,7 @@ internal sealed class RequestCqrsHostedCluster : IAsyncDisposable
                 authenticationExecutionObserver: authenticationObservers?.Invoke(index),
                 configureServices: configureServices is null ? null : (services, node) => configureServices(index, services, node),
                 clusterNode: new(identity, identity + "-silo-" + index.ToString(CultureInfo.InvariantCulture),
-                    incarnation, signingKey, primaryPort + index, primaryPort, SiloCount, ReplicaCount)));
+                    incarnation, signingKey, membershipSecret, primaryPort + index, SiloCount, ReplicaCount)));
         }
         Nodes = ownedNodes.ToArray();
     }

@@ -8,7 +8,6 @@
     <ProjectReference Include="../KeyLoad.Query/KeyLoad.Query.csproj" />
     <ProjectReference Include="../KeyLoad.Diagnostics/KeyLoad.Diagnostics.csproj" />
     <PackageReference Include="Microsoft.Orleans.Server" />
-    <PackageReference Include="Microsoft.Orleans.Clustering.AzureStorage" />
     <PackageReference Include="Microsoft.Orleans.Streaming" />
     <PackageReference Include="Microsoft.Orleans.Journaling" />
     <PackageReference Include="Microsoft.Orleans.DurableJobs" />

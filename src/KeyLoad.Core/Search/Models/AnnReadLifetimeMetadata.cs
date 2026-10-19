@@ -1,8 +1,6 @@
 using System.Collections.Immutable;
-using KeyLoad.Core.Features.CommandOutcomes.Contracts;
-using KeyLoad.Core.Features.RuntimeJournaling.Contracts;
-using KeyLoad.Core.Features.StoragePartitions.Contracts;
 using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.Core.Features.StoragePartitions.Contracts;
 
 namespace KeyLoad.Core.Features.Search;
 
@@ -18,7 +16,7 @@ internal sealed record AnnReadLifetimeMetadata(ResourceDefinition Definition,
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, Invalid);
         }
-        ResourceLifetimeCoverage.Require(Coverage, partition, Definitions, maximumBytes);
+        ResourceLifetimeCoverageValidation.Require(Coverage, partition, Definitions, maximumBytes);
         if (OrleansSerialization.Measure(Definitions) > maximumBytes || OrleansSerialization.Measure(Definition) > maximumBytes)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, Invalid);

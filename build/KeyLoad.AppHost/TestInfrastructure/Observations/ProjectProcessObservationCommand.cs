@@ -1,7 +1,6 @@
 using System.Diagnostics;
 using System.Runtime.ExceptionServices;
 using System.Text;
-using KeyLoad.AppHost.Features.TestInfrastructure;
 using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.Options;
 

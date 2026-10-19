@@ -553,8 +553,8 @@
     {
       "suite": "unit",
       "className": "KeyLoad.UnitTests.Features.QueryExecution.SqlInnerJoinExecutionTests",
-      "methodName": "Q1AndUnknownDialectOrAstVersionsRejectBeforeReadingAndHealthyQ2StillRuns",
-      "instanceName": "Q1AndUnknownDialectOrAstVersionsRejectBeforeReadingAndHealthyQ2StillRuns",
+      "methodName": "NoncurrentDialectOrAstFormatsRejectBeforeReadingAndCurrentJoinStillRuns",
+      "instanceName": "NoncurrentDialectOrAstFormatsRejectBeforeReadingAndCurrentJoinStillRuns",
       "requirements": [
         "REQ-REL-004",
         "REQ-QUERY-007"

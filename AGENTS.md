@@ -227,8 +227,9 @@ MCP clients, fault injection and joined cleanup. AppHost owns all container
 lifecycle and resource commands; tests never start independent containers or
 substitute graceful shutdown for an abrupt fault. Unit and process tests use
 only the infrastructure they actually require. `KeyLoad.AppHost` starts execution
-KeyLoad services through `AddProject` and required Azurite resources for development
-and functional tests. `KeyLoad.LoadTests.AppHost` is separate: it starts only the
+KeyLoad services through `AddProject` with the published RapidMembership Orleans
+provider for development and functional tests; membership is in memory with
+auto discovery and an independent shared secret, without external storage. `KeyLoad.LoadTests.AppHost` is separate: it starts only the
 selected database infrastructure, waits for readiness and exposes endpoints;
 client code owns load execution and measurements. Each AppHost removes its own
 session containers and volumes on joined teardown after success, failure or

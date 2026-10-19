@@ -45,15 +45,15 @@ internal sealed class ComparisonDiagnosticProjectionTests
         var replica = new DnsEndPoint("replica1", 6379);
         Dictionary<string, string> info = new(StringComparer.Ordinal)
         {
-            [RedisProtocol.RoleField] = RedisProtocol.ReplicaRole,
-            [RedisProtocol.LinkField] = RedisProtocol.LinkUp,
-            [RedisProtocol.MasterHostField] = "primary.dev.internal",
-            [RedisProtocol.MasterPortField] = "6379",
+            [KeyLoad.Comparisons.Targets.RedisProtocol.RoleField] = KeyLoad.Comparisons.Targets.RedisProtocol.ReplicaRole,
+            [KeyLoad.Comparisons.Targets.RedisProtocol.LinkField] = KeyLoad.Comparisons.Targets.RedisProtocol.LinkUp,
+            [KeyLoad.Comparisons.Targets.RedisProtocol.MasterHostField] = "primary.dev.internal",
+            [KeyLoad.Comparisons.Targets.RedisProtocol.MasterPortField] = "6379",
             [Canary] = Canary
         };
         RedisResult[] role =
         [
-            RedisResult.Create((RedisValue)RedisProtocol.ReplicaRole), RedisResult.Create((RedisValue)"primary.dev.internal"),
+            RedisResult.Create((RedisValue)KeyLoad.Comparisons.Targets.RedisProtocol.ReplicaRole), RedisResult.Create((RedisValue)"primary.dev.internal"),
             RedisResult.Create((RedisValue)6379), RedisResult.Create((RedisValue)"connected"), RedisResult.Create((RedisValue)1)
         ];
         var complete = new RedisReplicaDiagnostics(UnitBenchmarkOptions.Diagnostics()).Project(replica, primary, info, role);

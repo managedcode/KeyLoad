@@ -10,7 +10,6 @@ internal static class IsolatedReportAssertions
     private const string Bootstrap = "bootstrap";
     private const string KeyLoad = "KeyLoad";
     private const string Mongo = "MongoDB";
-    private const string Membership = "orleans-storage";
     private const string ServerProject = "KeyLoad.csproj";
     private const string ExternalImageDigest = "@sha256:";
 
@@ -24,7 +23,7 @@ internal static class IsolatedReportAssertions
         if (selection.Target == KeyLoad)
         {
             await Assert.That(projects.Length).IsEqualTo(selection.NodeCount);
-            await Assert.That(containers.Select(container => container.Name).ToArray()).IsEquivalentTo(new[] { Membership });
+            await Assert.That(containers).IsEmpty();
             foreach (var project in projects)
             {
                 await Assert.That(Path.GetFileName(project.GetProjectMetadata().ProjectPath)).IsEqualTo(ServerProject);

@@ -1,6 +1,6 @@
 using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.OrleansExecution;
 using KeyLoad.IntegrationTests.Features.Messaging;
+using KeyLoad.IntegrationTests.Features.OrleansExecution;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
 
 namespace KeyLoad.IntegrationTests.Features.Search;

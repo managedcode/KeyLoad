@@ -8,8 +8,8 @@ The ordinary development and functional-test host is `../KeyLoad.AppHost`.
 Do not introduce another AppHost, resource runner or forwarding project.
 
 External databases use the selected pinned images and their entry points.
-KeyLoad uses execution `AddProject<KeyLoad>` processes and required Azurite
-membership storage. Ordinary build, startup, functional tests and load execution
+KeyLoad uses execution `AddProject<KeyLoad>` processes with the published
+in-memory RapidMembership Orleans provider. Ordinary build, startup, functional tests and load execution
 never publish or start a KeyLoad server or workload image. Execution .NET SDK
 `PublishContainer` belongs only to explicit release/publication.
 

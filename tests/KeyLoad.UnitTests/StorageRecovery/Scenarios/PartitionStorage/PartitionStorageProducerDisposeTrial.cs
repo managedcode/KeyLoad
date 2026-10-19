@@ -8,7 +8,7 @@ namespace KeyLoad.UnitTests.Features.StorageRecovery;
 internal static class PartitionStorageProducerDisposeTrial
 {
     internal static async Task<PartitionStorageProducerDisposeState> RunAsync(
-        string[] arguments, LocalhostClusteringOptions localhost,
+        string[] arguments,
         RequestCqrsHostedProfile profile, CancellationToken token)
     {
         var failures = new List<Exception>();
@@ -18,7 +18,7 @@ internal static class PartitionStorageProducerDisposeTrial
         {
             using var deadline = new CancellationTokenSource(profile.Timing.StartupTimeout, TimeProvider.System);
             using var startup = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token, token);
-            app = await ServerConfiguration.BuildAsync(arguments, localhostClustering: localhost,
+            app = await ServerConfiguration.BuildAsync(arguments,
                 configureServices: profile.Register, startupCancellation: startup.Token).ConfigureAwait(false);
             var node = app.Services.GetRequiredService<OrleansNode>();
             await PartitionStorageStartupWaitAssertions.StartAsync(app, node, startup.Token).ConfigureAwait(false);

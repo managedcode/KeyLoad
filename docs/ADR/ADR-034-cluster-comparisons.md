@@ -69,8 +69,8 @@ readback fails AC-KLEVENT-001–003 / AC-PERF-004.
 
 ## infrastructure, source and publication contracts
 
-The primary KeyLoad AppHost runs server project processes plus Azurite for
-Orleans membership. A separate LoadTests AppHost owns selected comparison database
+The primary KeyLoad AppHost runs server project processes with in-memory
+RapidMembership for Orleans membership. A separate LoadTests AppHost owns selected comparison database
 infrastructure, readiness, discovered endpoints and joined cleanup. The workload
 client runs as a process outside that graph. External databases use pinned
 images, image entry points/users and anonymous session volumes. Remove

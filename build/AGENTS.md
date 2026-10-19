@@ -3,7 +3,7 @@
 ## Purpose, entry points and ownership
 
 - Own build infrastructure. The two Aspire entry points are KeyLoad.AppHost/KeyLoad.AppHost.csproj and KeyLoad.LoadTests.AppHost/KeyLoad.LoadTests.AppHost.csproj; CodeQuality/FunctionalCompilationIdentity.targets captures actual compiled source identities.
-- The primary host contains KeyLoad server projects and required Azurite membership. The load-test host owns only the selected database infrastructure and exposes actual endpoints to a separately owned workload client.
+- The primary host contains KeyLoad server projects with the published in-memory RapidMembership provider. The load-test host owns only the selected database infrastructure and exposes actual endpoints to a separately owned workload client.
 - Ordinary build/start/test/load execution never builds or runs KeyLoad server or workload Docker images. Execution .NET SDK PublishContainer is explicit release/publication only. Preserve session-owned cleanup without touching unrelated Docker resources.
 - Own Aspire composition and MSBuild identity capture, not runtime database implementations.
 - Keep existing namespaces, diagnostics, persistence identities and behavior stable. Follow root AGENTS.md and project-local policies.

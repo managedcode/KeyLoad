@@ -1,8 +1,6 @@
 using KeyLoad.Core;
-using KeyLoad.Core.Features.CommandOutcomes.Contracts;
-using KeyLoad.Core.Features.RuntimeJournaling.Contracts;
-using KeyLoad.Core.Features.StoragePartitions.Contracts;
 using KeyLoad.Core.Features.Messaging;
+using KeyLoad.Core.Features.StoragePartitions.Contracts;
 using KeyLoad.Storage.ZoneTree;
 using TUnit.Assertions.Enums;
 namespace KeyLoad.UnitTests.Features.Messaging;
@@ -12,8 +10,7 @@ internal static class TargetInboxAssertions
     private const int ExpectedEventCount = 1;
     internal static string[] Image(ZoneTreeStore store, params PartitionRef[] partitions)
         => store.Read(view => partitions.SelectMany(partition => PartitionRecordFamilies.All
-            .Where(family => family != PartitionRecordFamilies.Outcome && family != PartitionRecordFamilies.OutcomeLocator
-                && family != PartitionRecordFamilies.OutcomeLocator)
+            .Where(family => family != PartitionRecordFamilies.Outcome && family != PartitionRecordFamilies.OutcomeLocator)
             .SelectMany(family =>
             {
                 var page = view.Scan(KeySpace.Partition(family, partition), TargetInboxUnitProtocol.MaximumFixtureRows);

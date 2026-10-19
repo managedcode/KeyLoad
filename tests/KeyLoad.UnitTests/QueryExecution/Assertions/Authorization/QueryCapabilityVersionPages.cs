@@ -45,7 +45,10 @@ internal static class QueryCapabilityVersionPages
             await GraphLabelUseOperations.ReplayAsync(database, store, fixture.Seed, fixture.Receipt, fixture.Outcome);
             foreach (var input in fixture.Seed.Mutations.Cast<PutDocument>())
             {
-                var reference = new EntityRef(fixture.Harness.Partition, input.Collection, input.Id);
+                var reference = new EntityRef(fixture.Harness.Partition, input.Collection, input.Id)
+                {
+                    Lifetime = new(fixture.Creation.Incarnation.Value)
+                };
                 await RequiredProcessingPolicyAssertions.EqualAsync(new DocumentResult(reference, 1L, input.Json, false, []),
                     database.GetDocument("root", reference, cancellationToken: token) ?? throw new InvalidOperationException("The original query example row is absent."));
             }

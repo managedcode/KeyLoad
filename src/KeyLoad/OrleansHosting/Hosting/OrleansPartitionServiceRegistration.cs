@@ -52,6 +52,7 @@ internal static class OrleansPartitionServiceRegistration
             ActivatorUtilities.CreateInstance<NodeAdministration>(provider, Host(provider)));
         services.AddScoped<IBackgroundStorageOperations, BackgroundStorageOperations>();
         services.AddSerializer(serialization => serialization
+            .AddJsonSerializer(type => type == typeof(System.Text.Json.JsonElement))
             .AddAssembly(typeof(GrainRequestProgress).Assembly)
             .AddAssembly(typeof(CqrsStreamChunkSurrogateConverter<GrainRequestProgress, GrainOperationReply>).Assembly)
             .AddAssembly(typeof(ClaimsPrincipalSurrogateConverter).Assembly));

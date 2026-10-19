@@ -1,4 +1,3 @@
-using System.Net;
 using KeyLoad.RecoveryTests.Features.StorageRecovery;
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
@@ -39,8 +38,7 @@ internal static class PeriodicMaintenanceFlow
                 var profile = new RequestCqrsHostedProfile(TimeProvider.System, UnitRoutingOptions.Routing(),
                     null, null, false, false, null, configureServices: Configure);
                 var arguments = profile.Arguments(root, port);
-                var localhost = new LocalhostClusteringOptions(new IPEndPoint(IPAddress.Loopback, port));
-                app = await ServerConfiguration.BuildAsync(arguments, localhostClustering: localhost,
+                app = await ServerConfiguration.BuildAsync(arguments,
                     configureServices: profile.Register, startupCancellation: testToken);
                 await app.StartAsync(testToken);
                 owner = app.Services.GetRequiredService<PartitionHostApplicationOwner>();
@@ -59,7 +57,7 @@ internal static class PeriodicMaintenanceFlow
                 settled = true;
                 for (var cold = FirstCold; cold < ColdCount; cold++)
                 {
-                    _ = await PartitionStorageFlow.RunOwnerAsync(arguments, localhost, profile,
+                    _ = await PartitionStorageFlow.RunOwnerAsync(arguments, profile,
                         identity, original, testToken);
                 }
             }, failures);

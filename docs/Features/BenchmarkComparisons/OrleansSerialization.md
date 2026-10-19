@@ -40,17 +40,11 @@ cluster guards. Unsupported formats, cancellation, byte budgets and trust bounda
 remain exactly the contract. Removing the additive fixtures rolls back this
 diagnostic without touching user data.
 
-## Allocation and variance contract
+## Native serialization measurements
 
-REQ/AC-IS-PERF005..007 (ADR060, NSP006) define the exact terminal-allocation/admission
-and prospective quantitative/variance contract. The runtime fast-returns existing
-closed nongeneric terminal types after one unchanged Normalize call; the complete
-fallback and persisted/corpus bytes are unchanged. Test matrix: new
-WireSupportedScalarTests/Fixtures prove the frozen allowed terminals and
-generic-owner/open closures; ScalarAllocationTests prove a measured 0B auxiliary delta
-and nullable Normalize equality; ScalarDepthTests prove the 264/265 boundaries. All
-roundtrip/fault/resource tests are retained. AC-IS-PERF007 uses a manual
-evidence exception: actual authenticated before/after originals, corpus/cohort checks,
-exact interval/ratio/launch arithmetic and independent review. Per-operation
-allocations do not establish total RAM usage or global maximum speed, and latency
-qualification stays open until that evidence exists.
+The runtime uses the official generated Orleans serializer and native sessions.
+There is no custom terminal type-admission fast path or wire walker to measure.
+Diagnostics must retain exact source, package, workload, allocation and timing
+identities. Retired private-parser allocation controls are not native codec
+performance evidence. Existing corpus, execution ownership and independent
+end-to-end comparison requirements remain mandatory.

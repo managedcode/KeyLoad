@@ -43,8 +43,8 @@ internal sealed class ImmutableDictionaryTests
     {
         var bytes = ImmutableDictionaryFixture.Encode(fault);
         var originalBytes = bytes.ToArray();
-        await WireCollectionTests.Reject(() => OrleansSerialization.Validate(bytes));
-        await WireCollectionTests.Reject(() => OrleansSerialization.Deserialize<ImmutableDictionary<string, string>>(bytes));
+        await SerializedPayloadAssertions.CorruptAsync(() => OrleansSerialization.Validate(bytes));
+        await SerializedPayloadAssertions.CorruptAsync(() => OrleansSerialization.Deserialize<ImmutableDictionary<string, string>>(bytes));
         await Assert.That(bytes.SequenceEqual(originalBytes)).IsTrue();
         var healthy = ImmutableDictionary<string, string>.Empty.Add(MapKey, MapValue);
         var actual = OrleansSerialization.Deserialize<ImmutableDictionary<string, string>>(OrleansSerialization.Serialize(healthy));

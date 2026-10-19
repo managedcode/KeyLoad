@@ -46,8 +46,8 @@ internal sealed class AspireFailureProcessTests
         var execution = AspireResourceCompletion.RunToExitAsync(application, runnerName, deadline.Token);
         try
         {
-            var execution = await failure.WaitAsync(deadline.Token);
-            if (execution.Snapshot.ExitCode is { } exit && !AspireTerminalResource.HasFailedState(execution.Snapshot))
+            var observation = await failure.WaitAsync(deadline.Token);
+            if (observation.Snapshot.ExitCode is { } exit && !AspireTerminalResource.HasFailedState(observation.Snapshot))
             {
                 await Assert.That(exit).IsNotEqualTo(0);
                 await Assert.That(await execution.WaitAsync(AspireFailureAssertions.EventDeadline, TimeProvider.System, deadline.Token)).IsEqualTo(exit);

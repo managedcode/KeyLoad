@@ -9,7 +9,7 @@ internal static class PartitionStoragePartialTrial
     private const int NoFailures = 0;
 
     internal static async Task<PartitionStoragePartialStart> RunAsync(string[] arguments,
-        LocalhostClusteringOptions localhost, RequestCqrsHostedProfile profile, CancellationToken token)
+        RequestCqrsHostedProfile profile, CancellationToken token)
     {
         var failures = new List<Exception>();
         WebApplication? application = null;
@@ -22,7 +22,7 @@ internal static class PartitionStoragePartialTrial
         {
             using var deadline = new CancellationTokenSource(profile.Timing.StartupTimeout, TimeProvider.System);
             using var startup = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token, token);
-            application = await ServerConfiguration.BuildAsync(arguments, localhostClustering: localhost,
+            application = await ServerConfiguration.BuildAsync(arguments,
                 lifecycleParticipantFactory: provider => observation = new(
                     provider.GetRequiredService<PartitionHostApplicationOwner>()),
                 configureServices: profile.Register, startupCancellation: startup.Token).ConfigureAwait(false);

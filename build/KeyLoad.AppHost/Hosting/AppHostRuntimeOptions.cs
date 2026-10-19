@@ -1,5 +1,4 @@
 using KeyLoad.AppHost.Features.TestInfrastructure;
-using KeyLoad.AppHost.Features.TestInfrastructure;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.AppHost.Hosting;

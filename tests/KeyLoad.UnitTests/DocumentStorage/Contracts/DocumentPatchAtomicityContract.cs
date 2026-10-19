@@ -19,5 +19,5 @@ internal static class DocumentPatchAtomicityContract
     internal const string MissingPath = "/details/missing/value";
     internal const string ArrayPath = "/items/0";
     internal const string MissingDetail = "A patch parent is missing or is not an object.";
-    internal const string ArrayDetail = "Array patch operations are not supported in protocol v1.";
+    internal const string ArrayDetail = "Array patch operations are not supported in the current protocol.";
 }

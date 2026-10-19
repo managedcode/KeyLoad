@@ -1,4 +1,3 @@
-using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.AppHost.Hosting;
 using Microsoft.Extensions.Configuration;
 

@@ -4,7 +4,6 @@ using System.Text;
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
 using KeyLoad.AppHost.Features.TestInfrastructure;
-using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.Diagnostics.Features.ResourceExecution;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;

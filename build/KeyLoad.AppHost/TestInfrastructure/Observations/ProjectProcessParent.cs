@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using System.Globalization;
-using KeyLoad.AppHost.Features.TestInfrastructure;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.AppHost.Features.TestInfrastructure;

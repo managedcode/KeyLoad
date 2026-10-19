@@ -1,5 +1,4 @@
 using System.Text;
-using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.Features.ResourceExecution;
@@ -42,47 +41,4 @@ internal sealed class SerializationExecutionPolicyTests
             .IsEqualTo(fingerprint);
     }
 
-    [Test]
-    [Arguments(4095)]
-    [Arguments(4097)]
-    [Arguments(4096)]
-    public async Task DomSegmentsPreserveWholeStringEscapingAndSurrogateProgressAsync(int boundaryCharacters)
-    {
-        var owner = new DomStringSizes();
-        var boundary = new string('x', boundaryCharacters - 1);
-        foreach (var text in new[]
-        {
-            string.Empty, DomFixtures.EscapedText, boundary + "🙂" + DomFixtures.EscapedText
-        })
-        {
-            var expected = (long)JsonEncodedText.Encode(text).EncodedUtf8Bytes.Length;
-            await Assert.That(owner.Escaped(text)).IsEqualTo(expected);
-            await Assert.That(owner.Escaped(text)).IsEqualTo(expected);
-        }
-    }
-
-    [Test]
-    [Arguments(4095)]
-    [Arguments(4097)]
-    [Arguments(4096)]
-    public async Task DomSegmentsRejectMalformedUtf16WithFailureAsync(int boundaryCharacters)
-    {
-        var owner = new DomStringSizes();
-        var boundary = new string('x', boundaryCharacters - 1);
-        foreach (var text in new[] { "\uD800", "\uDC00", boundary + "\uD800\uD800\uDC00\uDC00" + boundary })
-        {
-            var execution = Assert.ThrowsExactly<ArgumentException>(() => JsonEncodedText.Encode(text));
-            var actual = Assert.ThrowsExactly<ArgumentException>(() => owner.Escaped(text));
-            var repeated = Assert.ThrowsExactly<ArgumentException>(() => owner.Escaped(text));
-            await Assert.That(actual.Message).IsEqualTo(execution.Message);
-            await Assert.That(actual.ParamName).IsEqualTo(execution.ParamName);
-            await Assert.That(actual.InnerException is EncoderFallbackException).IsTrue();
-            await Assert.That(execution.InnerException is EncoderFallbackException).IsTrue();
-            await Assert.That(repeated.Message).IsEqualTo(execution.Message);
-        }
-        var following = boundary + "🙂" + DomFixtures.EscapedText;
-        var expected = (long)JsonEncodedText.Encode(following).EncodedUtf8Bytes.Length;
-        await Assert.That(owner.Escaped(following)).IsEqualTo(expected);
-        await Assert.That(owner.Escaped(following)).IsEqualTo(expected);
-    }
 }

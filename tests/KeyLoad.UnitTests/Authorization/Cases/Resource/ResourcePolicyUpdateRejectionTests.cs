@@ -1,5 +1,4 @@
 using KeyLoad.Core;
-using KeyLoad.Core.Features.Authorization;
 using KeyLoad.Storage;
 
 namespace KeyLoad.UnitTests.Features.Authorization;

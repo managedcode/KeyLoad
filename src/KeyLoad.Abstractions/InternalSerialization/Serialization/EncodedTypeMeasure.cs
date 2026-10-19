@@ -11,8 +11,7 @@ public static class EncodedTypeMeasure
     /// <returns>Encoded-type bytes only, excluding field, reference, ordinal and payload framing.</returns>
     public static long Measure<T>()
     {
-        var context = SerializerProviders.Get(typeof(T));
-        using var session = context.Sessions.GetSession();
+        using var session = OrleansSerialization.Serializer.SessionPool.GetSession();
         using var buffer = new RuntimeCountingWriter();
         var writer = Writer.Create(buffer, session);
         try

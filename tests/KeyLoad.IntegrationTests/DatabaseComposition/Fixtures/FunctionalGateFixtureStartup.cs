@@ -1,6 +1,5 @@
 using System.Globalization;
 using KeyLoad.AppHost.Features.TestInfrastructure;
-using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.IntegrationTests.Features.StorageReplication;
 using KeyLoad.Server;
 

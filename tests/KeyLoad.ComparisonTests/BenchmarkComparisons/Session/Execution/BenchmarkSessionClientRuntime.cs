@@ -2,7 +2,6 @@ using System.Text.Json;
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
 using KeyLoad.AppHost.Features.TestInfrastructure;
-using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.Comparisons;
 using KeyLoad.Diagnostics.Features.ResourceExecution;
 using KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;

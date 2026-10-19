@@ -1,7 +1,6 @@
 using System.Text.Json;
 using Aspire.Hosting;
 using KeyLoad.AppHost.Features.TestInfrastructure;
-using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.Diagnostics.Features.ResourceExecution;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;

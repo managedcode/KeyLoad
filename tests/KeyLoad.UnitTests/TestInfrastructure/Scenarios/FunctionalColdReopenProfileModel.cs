@@ -55,7 +55,7 @@ internal static class FunctionalColdReopenProfileModel
         await Assert.That(resources.Select(resource => resource.Name).ToArray()).IsEquivalentTo(
             Enumerable.Range(1, nodes).Select(index => NodePrefix + index.ToString(CultureInfo.InvariantCulture)).ToArray());
         await Assert.That(model.Resources.OfType<ContainerResource>().Select(resource => resource.Name))
-            .IsEquivalentTo(new[] { "orleans-storage" });
+            .IsEmpty();
         await Assert.That(File.Exists(Path.Combine(root, ClusterProfileStore.ProfileName))).IsTrue();
         foreach (var resource in resources)
         {
@@ -79,7 +79,9 @@ internal static class FunctionalColdReopenProfileModel
                 await Assert.That(arguments.Select(argument => argument.Name)).IsEquivalentTo(new[]
                 {
                     ProcessFaultCommandProtocol.ExpectedProcessIdArgument, ProcessFaultCommandProtocol.ExpectedAspireStartArgument,
-                    ProcessFaultCommandProtocol.ExpectedProcessStartArgument
+                    ProcessFaultCommandProtocol.ExpectedProcessStartArgument,
+                    ProcessFaultCommandProtocol.ExpectedLaunchProcessIdArgument,
+                    ProcessFaultCommandProtocol.ExpectedLaunchProcessStartArgument
                 });
                 await Assert.That(arguments.All(argument => argument.Required
                     && argument.MaxLength == ProcessFaultCommandProtocol.MaximumIdentityCharacters)).IsTrue();

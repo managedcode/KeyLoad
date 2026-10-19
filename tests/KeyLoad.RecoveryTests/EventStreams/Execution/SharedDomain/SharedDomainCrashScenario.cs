@@ -11,7 +11,7 @@ internal static class SharedDomainCrashScenario
 {
     internal static async Task RunAsync(string directory, ZoneTreeStore store, CanonicalCrashBoundary boundary)
     {
-        var progress = new SharedDomainChildProgress(directory, store);
+        var progress = new SharedDomainChildProgressRecorder(directory, store);
         progress.Record(SharedDomainChildProgressPhase.DatabaseBootstrap);
         var database = CrashDatabase.Create(store);
         progress.Record(SharedDomainChildProgressPhase.ResourceConfiguration);
@@ -55,7 +55,7 @@ internal static class SharedDomainCrashScenario
         await RecoveryProcessPause.WaitForKillAsync();
     }
 
-    private static async Task SaveAsync(string directory, ZoneTreeStore store, SharedDomainChildProgress progress,
+    private static async Task SaveAsync(string directory, ZoneTreeStore store, SharedDomainChildProgressRecorder progress,
         Command<DatabaseCommand> original,
         Command<DatabaseCommand>[] operations, Result<object>[] results, Command<DatabaseCommand>[] creations)
     {

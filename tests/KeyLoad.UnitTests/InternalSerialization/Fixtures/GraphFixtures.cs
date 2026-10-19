@@ -33,6 +33,6 @@ internal static class GraphFixtures
     }
 
     internal static byte[] EncodeUnchecked<T>(T value)
-        => SerializerProviders.Get(typeof(T)).Serializer.SerializeToArray(
+        => OrleansSerialization.Serializer.SerializeToArray(
             new RuntimePayload { Version = PayloadVersion.Current, Value = value });
 }

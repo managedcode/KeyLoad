@@ -1,4 +1,6 @@
 using System.Globalization;
+using System.Security.Cryptography;
+using KeyLoad.Clustering;
 using KeyLoad.Server;
 
 namespace KeyLoad.RecoveryTests.Features.AnalyticsStore;
@@ -18,6 +20,8 @@ internal static class UserAnalyticsProcessOptions
     private const string IncarnationText = "b48b95ce-971b-4de0-bbca-4823deec6db3";
 
     internal static string[] Arguments(string root, int siloPort) => [PublicUrls, WarningLogLevel, DiagnosticOutput,
+        "--" + OrleansHostingOptions.SectionName + ":" + nameof(OrleansHostingOptions.SharedSecret) + Assignment
+            + Convert.ToBase64String(RandomNumberGenerator.GetBytes(TestSecretBytes)),
         Setting(nameof(NodeOptions.DataDirectory), Path.Combine(root, UserAnalyticsProcessProtocol.PhysicalDirectory)),
         Setting(nameof(NodeOptions.SiloName), Identity), Setting(nameof(NodeOptions.ClusterId), Identity),
         Setting(nameof(NodeOptions.SiloPort), siloPort.ToString(CultureInfo.InvariantCulture)),

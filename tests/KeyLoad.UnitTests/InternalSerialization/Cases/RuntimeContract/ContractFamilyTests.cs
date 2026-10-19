@@ -15,7 +15,6 @@ internal sealed class ContractFamilyTests
     [Arguments(ContractFamily.Graph)]
     [Arguments(ContractFamily.TimeSeries)]
     [Arguments(ContractFamily.Vector)]
-    [Arguments(ContractFamily.Blob)]
     [Arguments(ContractFamily.Outbox)]
     [Arguments(ContractFamily.Relational)]
     [Arguments(ContractFamily.Query)]

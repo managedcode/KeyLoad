@@ -2,7 +2,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
 
-// Counts the existing public PrincipalRecord projection without creating JSON, strings or DTOs.
+// Counts the public projection of the principal decoded by the generated Orleans codec.
 internal sealed class McpAuthenticationProjection(bool enforceMcpBounds, IOptions<McpExecutionOptions> options)
 {
     private const int GetScalarPropertyCountEmptyCount = 0;
@@ -21,6 +21,41 @@ internal sealed class McpAuthenticationProjection(bool enforceMcpBounds, IOption
     private const int PrincipalMinimumTokens = ContainerTokens + PrincipalProperties + PrincipalScalarValues + PrincipalArrayValues * ContainerTokens;
     private const int GrantMinimumTokens = ContainerTokens + GrantProperties * (ScalarTokens + ScalarTokens);
     internal static McpFrameShape Scalar => new(ScalarTokens, GetScalarPropertyCountEmptyCount);
+
+    internal McpFrameShape Principal(PrincipalRecord principal, CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        var shape = Object(PrincipalProperties);
+        for (var index = GetScalarPropertyCountEmptyCount; index < PrincipalScalarValues; index++)
+        {
+            shape = Add(shape, Scalar);
+        }
+        shape = Add(shape, Values(principal.Grants, cancellationToken));
+        shape = Add(shape, Values(principal.FieldGrants, cancellationToken));
+        shape = Add(shape, Values(principal.Projects, cancellationToken));
+        return Add(shape, Values(principal.Teams, cancellationToken));
+    }
+
+    private McpFrameShape Values<T>(IReadOnlyList<T> values, CancellationToken cancellationToken)
+    {
+        RequireCount<T>(checked((uint)values.Count));
+        var shape = Array;
+        foreach (var value in values)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var child = Scalar;
+            if (value is ScopeGrant)
+            {
+                child = Object(GrantProperties);
+                for (var index = GetScalarPropertyCountEmptyCount; index < GrantProperties; index++)
+                {
+                    child = Add(child, Scalar);
+                }
+            }
+            shape = Add(shape, child);
+        }
+        return shape;
+    }
 
     internal McpFrameShape Object(int properties) => Check(new(ContainerTokens + properties, properties, ObjectDepthSingleItemCount));
     internal static McpFrameShape Array => new(ContainerTokens, GetArrayPropertyCountEmptyCount, GetArrayDepthSingleItemCount);
@@ -52,6 +87,3 @@ internal sealed class McpAuthenticationProjection(bool enforceMcpBounds, IOption
         }
     }
 }
-
-// Execution references retain only bounded projection metadata. They never retain user string bytes
-// or pretend to be executable PrincipalRecord/ScopeGrant instances.
