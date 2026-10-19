@@ -11,7 +11,6 @@ internal static class SampleChunkEarlyCrashScenario
         var mode = args[SampleChunkEarlyCrashProtocol.ModeArgument];
         var root = args[SampleChunkEarlyCrashProtocol.RootArgument];
         var cut = SampleChunkEarlyCrashProtocol.Cut(mode);
-        _ = SerializationExecutionRegistration.Process.Value;
         var boundary = new CanonicalCrashBoundary(Enum.Parse<CommitStage>(args[SampleChunkEarlyCrashProtocol.StageArgument]),
             int.Parse(args[SampleChunkEarlyCrashProtocol.MutationArgument], CultureInfo.InvariantCulture), false);
         using var store = new ZoneTreeStore(new(root)

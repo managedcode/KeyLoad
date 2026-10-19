@@ -2,7 +2,6 @@ using KeyLoad;
 using KeyLoad.AppHost.Hosting;
 
 const int Completed = 0;
-_ = SerializationExecutionRegistration.Process.Value;
 var builder = DistributedApplication.CreateBuilder(args);
 var runtime = AppHostOptionsRegistration.Get(builder);
 KeyLoadResources.AddKeyLoad(builder);

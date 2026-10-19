@@ -19,7 +19,6 @@ internal static class SampleChunkCrashScenario
         {
             return false;
         }
-        _ = SerializationExecutionRegistration.Process.Value;
         var mode = args[ModeArgument];
         var root = args[DirectoryArgument];
         var boundary = new CanonicalCrashBoundary(Enum.Parse<CommitStage>(args[StageArgument]),

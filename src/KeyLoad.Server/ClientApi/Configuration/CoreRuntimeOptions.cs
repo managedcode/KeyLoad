@@ -6,7 +6,6 @@ namespace KeyLoad.Server;
 
 /// <summary>Shares validated database, due-work, event and query policies with execution owners.</summary>
 internal sealed record CoreRuntimeOptions(
-    IOptions<SerializationExecutionOptions> Serialization,
     IOptions<DatabaseLimits> DatabaseLimits,
     IOptions<DueWorkExecutionOptions> DueWork,
     IOptions<EventSourceExecutionOptions> EventSource,
@@ -28,7 +27,6 @@ internal sealed record CoreRuntimeOptions(
 {
     internal void ValidateBeforePhysicalOwnership()
     {
-        _ = Serialization.Value;
         _ = DatabaseLimits.Value;
         _ = DueWork.Value;
         _ = EventSource.Value;

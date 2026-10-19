@@ -14,7 +14,6 @@ internal static class CliStorageConfiguration
     private const string BackupEnvironmentPrefix = "KEYLOAD_BACKUP__";
     internal static CliStorageRuntimeOptions Read()
     {
-        _ = SerializationExecutionRegistration.Process.Value;
         return new(
         Bind(EnvironmentPrefix, static () => new ZoneTreeStorageExecutionOptions(),
             options => options.IsValid(), ZoneTreeStorageExecutionOptions.ValidationMessage),

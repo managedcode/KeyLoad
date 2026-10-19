@@ -13,7 +13,6 @@ internal static class ChunkMultiblockCrashScenario
         {
             return false;
         }
-        _ = SerializationExecutionRegistration.Process.Value;
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {

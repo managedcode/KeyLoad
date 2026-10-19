@@ -11,7 +11,6 @@ internal static class EmbeddedBenchmarkRuntimeRegistration
 {
     internal static EmbeddedBenchmarkRuntimeOptions Read()
     {
-        _ = SerializationExecutionRegistration.Process.Value;
         var configuration = new ConfigurationBuilder().AddEnvironmentVariables().Build();
         using var configurationLifetime = configuration as IDisposable;
         return new(

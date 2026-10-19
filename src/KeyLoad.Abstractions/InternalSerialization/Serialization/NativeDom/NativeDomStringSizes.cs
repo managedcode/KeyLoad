@@ -1,5 +1,4 @@
 using System.Text.Json;
-using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Features.InternalSerialization;
 
@@ -8,18 +7,8 @@ internal sealed class NativeDomStringSizes
     private const long EmptyEncodedBytes = 0;
     private const int FirstCharacterOffset = 0;
     private const int LastCharacterOffset = 1;
+    private const int ChunkCharacters = 4096;
     private readonly Dictionary<string, long> escaped = new(ReferenceEqualityComparer.Instance);
-    private readonly int chunkCharacters;
-
-    internal NativeDomStringSizes() : this(SerializationExecutionRegistration.Process) { }
-
-    internal NativeDomStringSizes(IOptions<SerializationExecutionOptions> executionOptions)
-    {
-        ArgumentNullException.ThrowIfNull(executionOptions);
-        var configured = executionOptions.Value;
-        configured.Validate();
-        chunkCharacters = configured.DomChunkCharacters;
-    }
 
     internal long Escaped(string text)
     {
@@ -31,7 +20,7 @@ internal sealed class NativeDomStringSizes
         return bytes;
     }
 
-    private long CountEscaped(string text)
+    private static long CountEscaped(string text)
     {
         if (text.Length > NativeSerializationLimits.MaximumDomBytes)
         {
@@ -41,7 +30,7 @@ internal sealed class NativeDomStringSizes
         var offset = FirstCharacterOffset;
         while (offset < text.Length)
         {
-            var count = Math.Min(chunkCharacters, text.Length - offset);
+            var count = Math.Min(ChunkCharacters, text.Length - offset);
             if (offset + count < text.Length && char.IsHighSurrogate(text[offset + count - LastCharacterOffset]))
             {
                 count--;

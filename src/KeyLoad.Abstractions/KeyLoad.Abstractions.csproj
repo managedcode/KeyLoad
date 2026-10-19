@@ -4,8 +4,6 @@
     <PackageReference Include="ManagedCode.Communication" />
     <PackageReference Include="ManagedCode.Communication.Orleans" />
     <PackageReference Include="Microsoft.Extensions.Options" />
-    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" />
     <PackageReference Include="Microsoft.SqlServer.TransactSql.ScriptDom" />
     <PackageReference Include="Microsoft.Orleans.Serialization" />
     <PackageReference Include="Microsoft.Orleans.CodeGenerator" PrivateAssets="all" />
@@ -13,7 +11,7 @@
   <ItemGroup>
     <InternalsVisibleTo Include="KeyLoad.Storage.ZoneTree" />
     <InternalsVisibleTo Include="KeyLoad.Query" />
-    <InternalsVisibleTo Include="KeyLoad.Server" />
+    <InternalsVisibleTo Include="KeyLoad" />
     <InternalsVisibleTo Include="KeyLoad.Client" />
     <InternalsVisibleTo Include="KeyLoad.UnitTests" />
     <InternalsVisibleTo Include="KeyLoad.IntegrationTests" />

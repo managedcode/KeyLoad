@@ -1,12 +1,12 @@
 using System.Globalization;
 using System.Text.Json;
-using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Core.Features.ResourceExecution;
 
 /// <summary>Writes the existing canonical JSON ordering and numeric representation incrementally.</summary>
 internal static class CanonicalJsonWriter
 {
+    private const int FlushPendingBytes = 65_536;
     private const int FirstOrdinal = 1;
     private const int AdjacentElementOffset = 1;
 
@@ -19,32 +19,20 @@ internal static class CanonicalJsonWriter
     /// <param name="element">Parsed JSON value within its document lifetime.</param>
     /// <param name="decimalNumbers">Normalize decimals for validation; preserve raw spelling for fingerprints.</param>
     internal static void Write(Utf8JsonWriter writer, JsonElement element, bool decimalNumbers = true)
-        => Write(writer, element, SerializationExecutionRegistration.Process, decimalNumbers);
-
-    /// <summary>Writes canonical bytes using one validated native process policy snapshot.</summary>
-    /// <param name="writer">Caller-owned UTF-8 writer and destination.</param>
-    /// <param name="element">Parsed JSON value within its document lifetime.</param>
-    /// <param name="executionOptions">The actual native serializer execution wrapper.</param>
-    /// <param name="decimalNumbers">Whether decimal normalization is required.</param>
-    internal static void Write(Utf8JsonWriter writer, JsonElement element,
-        IOptions<SerializationExecutionOptions> executionOptions, bool decimalNumbers = true)
     {
         ArgumentNullException.ThrowIfNull(writer);
-        ArgumentNullException.ThrowIfNull(executionOptions);
-        var configured = executionOptions.Value;
-        configured.Validate();
-        WriteValue(writer, element, decimalNumbers, configured.CanonicalJsonFlushPendingBytes);
+        WriteValue(writer, element, decimalNumbers);
     }
 
-    private static void WriteValue(Utf8JsonWriter writer, JsonElement element, bool decimalNumbers, int flushPendingBytes)
+    private static void WriteValue(Utf8JsonWriter writer, JsonElement element, bool decimalNumbers)
     {
         switch (element.ValueKind)
         {
             case JsonValueKind.Object:
-                WriteObject(writer, element, decimalNumbers, flushPendingBytes);
+                WriteObject(writer, element, decimalNumbers);
                 break;
             case JsonValueKind.Array:
-                WriteArray(writer, element, decimalNumbers, flushPendingBytes);
+                WriteArray(writer, element, decimalNumbers);
                 break;
             case JsonValueKind.Number:
                 WriteNumber(writer, element, decimalNumbers);
@@ -53,13 +41,13 @@ internal static class CanonicalJsonWriter
                 element.WriteTo(writer);
                 break;
         }
-        if (writer.BytesPending >= flushPendingBytes)
+        if (writer.BytesPending >= FlushPendingBytes)
         {
             writer.Flush();
         }
     }
 
-    private static void WriteObject(Utf8JsonWriter writer, JsonElement element, bool decimalNumbers, int flushPendingBytes)
+    private static void WriteObject(Utf8JsonWriter writer, JsonElement element, bool decimalNumbers)
     {
         var properties = element.EnumerateObject()
             .Select(property => new NamedProperty(property.Name, property.Value)).ToArray();
@@ -75,17 +63,17 @@ internal static class CanonicalJsonWriter
         foreach (var property in properties)
         {
             writer.WritePropertyName(property.Name);
-            WriteValue(writer, property.Value, decimalNumbers, flushPendingBytes);
+            WriteValue(writer, property.Value, decimalNumbers);
         }
         writer.WriteEndObject();
     }
 
-    private static void WriteArray(Utf8JsonWriter writer, JsonElement element, bool decimalNumbers, int flushPendingBytes)
+    private static void WriteArray(Utf8JsonWriter writer, JsonElement element, bool decimalNumbers)
     {
         writer.WriteStartArray();
         foreach (var item in element.EnumerateArray())
         {
-            WriteValue(writer, item, decimalNumbers, flushPendingBytes);
+            WriteValue(writer, item, decimalNumbers);
         }
         writer.WriteEndArray();
     }

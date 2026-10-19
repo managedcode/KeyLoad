@@ -8,7 +8,6 @@ const int FailedOperationExitCode = 1;
 
 try
 {
-    _ = SerializationExecutionRegistration.Process.Value;
     if (args.Length == NoArguments)
     {
         CliClientApi.Help();

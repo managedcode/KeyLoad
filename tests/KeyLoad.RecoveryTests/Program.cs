@@ -1,5 +1,4 @@
 using System.Globalization;
-using KeyLoad;
 using KeyLoad.RecoveryTests;
 using KeyLoad.RecoveryTests.Features.AnalyticsStore;
 using KeyLoad.RecoveryTests.Features.BlobStorage;
@@ -32,7 +31,6 @@ if (await SampleChunkCrashScenario.TryRunAsync(args))
     return Environment.ExitCode;
 }
 
-_ = SerializationExecutionRegistration.Process.Value;
 if (await BlobCommitCutScenario.TryRunAsync(args)
     || await UserAnalyticsProcessScenario.TryRunAsync(args)
     || await NativeChecksumProfileScenario.TryRunAsync(args)

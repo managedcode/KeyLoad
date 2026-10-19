@@ -5,7 +5,6 @@ using Microsoft.Extensions.Options;
 const string PhysicalOwnerUnjoined = "The original physical owner has not joined; retain its application and root.";
 
 global::KeyLoad.SimdRuntime.RequireHardwareSupport();
-_ = SerializationExecutionRegistration.Process.Value;
 var app = await ServerConfiguration.BuildAsync(args).ConfigureAwait(false);
 var failures = new List<Exception>();
 OrleansNode? silo = null;

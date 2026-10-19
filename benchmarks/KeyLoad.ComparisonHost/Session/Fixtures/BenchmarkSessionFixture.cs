@@ -57,7 +57,6 @@ internal sealed class BenchmarkSessionFixture : IAsyncInitializer, IAsyncDisposa
 
     private void InitializeCore()
     {
-        _ = SerializationExecutionRegistration.Process.Value;
         var input = new ConfigurationManager();
         configuration = input;
         input.AddJsonFile(Path.Combine(AppContext.BaseDirectory, NativeComparisonExecutionRegistration.ConfigurationPath), optional: false);

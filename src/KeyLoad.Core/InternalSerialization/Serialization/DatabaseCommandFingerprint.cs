@@ -2,13 +2,13 @@ using System.Security.Cryptography;
 using System.Text.Json;
 using KeyLoad.Core.Features.ResourceExecution;
 using ManagedCode.Communication.Commands;
-using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Core.Features.InternalSerialization;
 
 // The original public input is fingerprinted without reparsing or changing user content.
 internal static class DatabaseCommandFingerprint
 {
+    private const int ChunkCharacters = 4096;
     private const string IdProperty = "id";
     private const string KindProperty = "kind";
     private const string PayloadProperty = "payloadJson";
@@ -18,13 +18,12 @@ internal static class DatabaseCommandFingerprint
 
     internal static string Compute(Guid id, OperationKind kind, string principalId, string payloadJson)
     {
-        var chunkCharacters = ReadChunkCharacters(SerializationExecutionRegistration.Process);
         using var hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
         using var output = new CanonicalHashStream(hash);
         using (var writer = new Utf8JsonWriter(output))
         {
             Begin(writer, id, kind);
-            WriteText(writer, payloadJson.AsSpan(), chunkCharacters);
+            WriteText(writer, payloadJson.AsSpan());
             End(writer, principalId);
         }
         return Convert.ToHexStringLower(hash.GetHashAndReset());
@@ -45,21 +44,13 @@ internal static class DatabaseCommandFingerprint
         writer.WriteEndObject();
     }
 
-    private static int ReadChunkCharacters(IOptions<SerializationExecutionOptions> executionOptions)
+    private static void WriteText(Utf8JsonWriter writer, ReadOnlySpan<char> text)
     {
-        ArgumentNullException.ThrowIfNull(executionOptions);
-        var configured = executionOptions.Value;
-        configured.Validate();
-        return configured.FingerprintChunkCharacters;
-    }
-
-    private static void WriteText(Utf8JsonWriter writer, ReadOnlySpan<char> text, int chunkCharacters)
-    {
-        while (text.Length > chunkCharacters)
+        while (text.Length > ChunkCharacters)
         {
-            writer.WriteStringValueSegment(text[..chunkCharacters], false);
+            writer.WriteStringValueSegment(text[..ChunkCharacters], false);
             writer.Flush();
-            text = text[chunkCharacters..];
+            text = text[ChunkCharacters..];
         }
         writer.WriteStringValueSegment(text, true);
     }

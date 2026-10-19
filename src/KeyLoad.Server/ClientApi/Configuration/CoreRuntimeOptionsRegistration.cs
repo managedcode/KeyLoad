@@ -9,7 +9,6 @@ internal static class CoreRuntimeOptionsRegistration
 {
     internal static void AddCoreRuntimeOptions(IServiceCollection services, IConfiguration configuration)
     {
-        services.AddSingleton(SerializationExecutionRegistration.Process);
         services.AddOptions<DatabaseLimits>().Bind(configuration.GetSection(DatabaseLimits.SectionName))
             .Validate(options => options.IsValid(), DatabaseLimits.ValidationMessage).ValidateOnStart();
         services.AddOptions<DueWorkExecutionOptions>().Bind(configuration.GetSection(DueWorkExecutionOptions.SectionName))

@@ -257,23 +257,14 @@ uses the validated snapshot with the original minimum-capacity formula and
 checked arithmetic; corpus identity, complete retained-record verification and
 native durability choices stay unchanged.
 
-Process-wide static JSON/native serializer owners share one lazily bound native
-SerializationExecutionOptions wrapper at the marked process-composition boundary.
-The sole source for this group is the native environment provider with prefix
-KEYLOAD_SERIALIZATION__; startup preflights and borrows that same wrapper, while
-standalone first use validates the same real OptionsFactory/OptionsManager path.
-No raw source read escapes to execution, no Options.Create fallback or per-call
-production pool is introduced. Defaults live in the canonical options type:
-JsonTextMaximumRetainedArrayBytes 1..262144/default262144,
-JsonTextMaximumArraysPerBucket 1..2/default2, FingerprintChunkCharacters
-2..4096/default4096 and DomChunkCharacters 2..4096/default4096. Independent native
-factory composition may construct a standalone owner for configured regressions;
-it does not mutate the process wrapper. Preserve cryptographic buffer zeroing,
-single production pool lifetime, surrogate-atomic positive progress, exact
+Static JSON and native serializer helpers own fixed internal buffer constants.
+They do not read environment variables or bind process-global options. The JSON
+text pool retains arrays up to 262144 bytes with two arrays per bucket;
+fingerprint and DOM string segments use 4096 characters. Preserve cryptographic
+buffer zeroing, one production pool, surrogate-atomic positive progress, exact
 fingerprints/native envelopes and frozen JsonDefaults.Options web/case/depth
-semantics. SerializationExecutionPolicyTests maps these real configured owners
-and invalid binding checks to AC-CQ-034/035; source/configuration does not qualify
-allocation, memory or performance claims.
+semantics. SerializationExecutionPolicyTests checks exact bytes and Unicode
+boundaries; source inspection does not qualify allocation or performance claims.
 
 Storage stream buffering is distinct from transfer/chunk buffering. The native
 storage options group owns StreamBufferBytes 1..4096, default 4096, for metadata,
@@ -370,15 +361,11 @@ does not change the20-second native child deadline, assertions, plan workload,
 source-freeze validation, process-tree cleanup or production scheduling. The
 observed timeout's cause remains unqualified until actual stage evidence exists.
 
-This options stage defines the remaining serialization reservations.
-`SerializationExecutionOptions` owns the
-canonical JSON pending-byte flush cadence (default65536, positive and no larger
-than the existing default) and bounded digest UTF-8 stack scratch (default256,
-positive and no larger than256). Existing static entry points borrow the same
-preflighted process-native wrapper; configured regression entry points capture a
-validated native wrapper before hashing or writing. JSON spelling/order, digest
-framing and exact hashes remain unchanged at every valid setting. Stack scratch
-above its configured threshold follows the existing bounded native pool route.
+Canonical JSON writing owns a fixed 65536-byte pending-output flush threshold.
+The time-series intensive digest writer owns a fixed 256-byte UTF-8 stack buffer;
+larger fields use the existing native pool. JSON spelling/order, digest framing
+and exact hashes remain unchanged. Independent golden bytes, Unicode boundaries
+and native flush checks cover these internal execution choices.
 
 `AnnSeedOptions` owns the allocated hash scratch (default4096). Its lower bound
 must hold the largest already-valid identifier's strict UTF-8 encoding and at

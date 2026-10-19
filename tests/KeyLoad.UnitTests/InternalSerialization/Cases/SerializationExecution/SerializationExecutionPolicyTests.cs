@@ -1,38 +1,29 @@
-using System.Globalization;
 using System.Text;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.Features.ResourceExecution;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Options;
 
 namespace KeyLoad.UnitTests.Features.InternalSerialization;
 
-/// <summary>AC-CQ-034/035: genuine native owners preserve canonical bytes under bound execution policy.</summary>
+/// <summary>AC-IS-003/007: native serializers preserve canonical bytes across buffer boundaries.</summary>
 internal sealed class SerializationExecutionPolicyTests
 {
     [Test]
-    [Arguments(1, 1, 2)]
-    [Arguments(4096, 1, 3)]
-    [Arguments(262_144, 2, 4096)]
-    public async Task ConfiguredPoolAndFingerprintPreserveCanonicalBytesAndOriginalShapeAsync(
-        int retainedArrayBytes, int arraysPerBucket, int chunkCharacters)
+    [Arguments(4095)]
+    [Arguments(4097)]
+    [Arguments(4096)]
+    public async Task PoolAndFingerprintPreserveCanonicalBytesAndOriginalShapeAsync(int boundaryCharacters)
     {
         const string TextKey = "text";
         const string EmptyKey = "empty";
         const string FollowingKey = "other";
 
-        var options = Bind(
-            (nameof(SerializationExecutionOptions.JsonTextMaximumRetainedArrayBytes), retainedArrayBytes),
-            (nameof(SerializationExecutionOptions.JsonTextMaximumArraysPerBucket), arraysPerBucket),
-            (nameof(SerializationExecutionOptions.FingerprintChunkCharacters), chunkCharacters));
-        var owner = new PooledJsonText.Owner(options);
-        var payload = new string('x', chunkCharacters - 1) + "😀界λ\"\\\n<&" + new string('y', 8192);
+        var payload = new string('x', boundaryCharacters - 1) + "😀界λ\"\\\n<&" + new string('y', 8192);
         var expected = new Dictionary<string, string> { [TextKey] = payload, [EmptyKey] = string.Empty };
         var json = JsonDefaults.Serialize(expected);
-        var decoded = owner.Deserialize<Dictionary<string, string>>(Encoding.UTF8.GetString(json));
-        var following = owner.Deserialize<Dictionary<string, string>>("{\"other\":\"following\"}");
+        var decoded = PooledJsonText.Deserialize<Dictionary<string, string>>(Encoding.UTF8.GetString(json));
+        var following = PooledJsonText.Deserialize<Dictionary<string, string>>("{\"other\":\"following\"}");
         await Assert.That(following[FollowingKey]).IsEqualTo("following");
         await Assert.That(JsonDefaults.Serialize(decoded).SequenceEqual(json)).IsTrue();
         await Assert.That(NativeSerialization.Serialize(decoded[TextKey]).SequenceEqual(
@@ -52,14 +43,13 @@ internal sealed class SerializationExecutionPolicyTests
     }
 
     [Test]
-    [Arguments(2)]
-    [Arguments(3)]
+    [Arguments(4095)]
+    [Arguments(4097)]
     [Arguments(4096)]
-    public async Task ConfiguredDomSegmentsPreserveWholeStringEscapingAndSurrogateProgressAsync(int chunkCharacters)
+    public async Task DomSegmentsPreserveWholeStringEscapingAndSurrogateProgressAsync(int boundaryCharacters)
     {
-        var options = Bind((nameof(SerializationExecutionOptions.DomChunkCharacters), chunkCharacters));
-        var owner = new NativeDomStringSizes(options);
-        var boundary = new string('x', chunkCharacters - 1);
+        var owner = new NativeDomStringSizes();
+        var boundary = new string('x', boundaryCharacters - 1);
         foreach (var text in new[]
         {
             string.Empty, NativeDomFixtures.EscapedText, boundary + "🙂" + NativeDomFixtures.EscapedText
@@ -72,14 +62,13 @@ internal sealed class SerializationExecutionPolicyTests
     }
 
     [Test]
-    [Arguments(2)]
-    [Arguments(3)]
+    [Arguments(4095)]
+    [Arguments(4097)]
     [Arguments(4096)]
-    public async Task ConfiguredDomSegmentsRejectMalformedUtf16WithNativeFailureAsync(int chunkCharacters)
+    public async Task DomSegmentsRejectMalformedUtf16WithNativeFailureAsync(int boundaryCharacters)
     {
-        var options = Bind((nameof(SerializationExecutionOptions.DomChunkCharacters), chunkCharacters));
-        var owner = new NativeDomStringSizes(options);
-        var boundary = new string('x', chunkCharacters - 1);
+        var owner = new NativeDomStringSizes();
+        var boundary = new string('x', boundaryCharacters - 1);
         foreach (var text in new[] { "\uD800", "\uDC00", boundary + "\uD800\uD800\uDC00\uDC00" + boundary })
         {
             var native = Assert.ThrowsExactly<ArgumentException>(() => JsonEncodedText.Encode(text));
@@ -95,52 +84,5 @@ internal sealed class SerializationExecutionPolicyTests
         var expected = (long)JsonEncodedText.Encode(following).EncodedUtf8Bytes.Length;
         await Assert.That(owner.Escaped(following)).IsEqualTo(expected);
         await Assert.That(owner.Escaped(following)).IsEqualTo(expected);
-    }
-
-    [Test]
-    [Arguments(nameof(SerializationExecutionOptions.JsonTextMaximumRetainedArrayBytes), 0)]
-    [Arguments(nameof(SerializationExecutionOptions.JsonTextMaximumRetainedArrayBytes), -1)]
-    [Arguments(nameof(SerializationExecutionOptions.JsonTextMaximumRetainedArrayBytes), 262_145)]
-    [Arguments(nameof(SerializationExecutionOptions.JsonTextMaximumArraysPerBucket), 0)]
-    [Arguments(nameof(SerializationExecutionOptions.JsonTextMaximumArraysPerBucket), -1)]
-    [Arguments(nameof(SerializationExecutionOptions.JsonTextMaximumArraysPerBucket), 3)]
-    [Arguments(nameof(SerializationExecutionOptions.FingerprintChunkCharacters), 0)]
-    [Arguments(nameof(SerializationExecutionOptions.FingerprintChunkCharacters), -1)]
-    [Arguments(nameof(SerializationExecutionOptions.FingerprintChunkCharacters), 1)]
-    [Arguments(nameof(SerializationExecutionOptions.FingerprintChunkCharacters), 4097)]
-    [Arguments(nameof(SerializationExecutionOptions.DomChunkCharacters), 0)]
-    [Arguments(nameof(SerializationExecutionOptions.DomChunkCharacters), -1)]
-    [Arguments(nameof(SerializationExecutionOptions.DomChunkCharacters), 1)]
-    [Arguments(nameof(SerializationExecutionOptions.DomChunkCharacters), 4097)]
-    public async Task InvalidNativeBindingRejectsBeforeOwnerCreationAsync(string property, int value)
-    {
-        var failure = Assert.ThrowsExactly<OptionsValidationException>(() => Bind((property, value)));
-        await Assert.That(failure.OptionsName).IsEqualTo(Options.DefaultName);
-        await Assert.That(failure.OptionsType).IsEqualTo(typeof(SerializationExecutionOptions));
-        await Assert.That(failure.Failures.ToArray()).IsEquivalentTo([SerializationExecutionOptions.ValidationMessage]);
-    }
-
-    [Test]
-    public async Task CanonicalNativeDefaultsAndProcessWrapperRemainDistinctCompositionContractsAsync()
-    {
-        var configured = Bind();
-        await Assert.That(configured.Value.JsonTextMaximumRetainedArrayBytes).IsEqualTo(262_144);
-        await Assert.That(configured.Value.JsonTextMaximumArraysPerBucket).IsEqualTo(2);
-        await Assert.That(configured.Value.FingerprintChunkCharacters).IsEqualTo(4096);
-        await Assert.That(configured.Value.DomChunkCharacters).IsEqualTo(4096);
-        await Assert.That(configured.Value.CanonicalJsonFlushPendingBytes).IsEqualTo(65_536);
-        await Assert.That(configured.Value.DigestUtf8StackBytes).IsEqualTo(256);
-        var process = SerializationExecutionRegistration.Process;
-        await Assert.That(SerializationExecutionRegistration.Process).IsSameReferenceAs(process);
-        await Assert.That(SerializationExecutionRegistration.Process.Value).IsSameReferenceAs(process.Value);
-    }
-
-    private static IOptions<SerializationExecutionOptions> Bind(params (string Property, int Value)[] values)
-    {
-        var input = values.Select(value => new KeyValuePair<string, string?>(
-            value.Property, value.Value.ToString(CultureInfo.InvariantCulture)));
-        var configuration = new ConfigurationBuilder().AddInMemoryCollection(input).Build();
-        using var lifetime = configuration as IDisposable;
-        return SerializationExecutionRegistration.Bind(configuration);
     }
 }
