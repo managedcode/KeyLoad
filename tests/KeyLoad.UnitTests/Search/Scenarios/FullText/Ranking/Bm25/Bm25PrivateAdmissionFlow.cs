@@ -47,8 +47,9 @@ internal static class Bm25PrivateAdmissionFlow
             .Get<PrincipalRecord>();
         var original = Capture(database, Guid.NewGuid(), null, token);
         var phase = NativeSerialization.Deserialize<Bm25CorpusPublicationPhaseCommand>((original).Value!.Input.Span);
+        var expected = Bm25OriginalPhaseRecoveryState.BeforeLocalPublish(database.Database, database.Partition);
         var result = await SubmitAsync(database, original, token);
-        await Bm25PrivateAdmissionAssertions.RequirePublicationAsync(database, phase, result, subject, 1);
+        await Bm25PrivateAdmissionAssertions.RequirePublicationAsync(database, phase, result, subject, 1, expected);
         await RequireReplayAsync(database, original, phase, result, token);
         database.Commit(new PutDocument(Collection, Document, ChangedJson, 1, ExplicitReplacement: true));
         var changed = Capture(database, original.CommandId, original.CommandId, token);
@@ -61,9 +62,10 @@ internal static class Bm25PrivateAdmissionFlow
         await before.RequireAsync(CanonicalStoreCut.Read(database));
         await NativeReplayResultAssertions.SameAsync(result, database.Database.ResolveSubmissionOutcome(original));
         var healthy = Capture(database, Guid.NewGuid(), original.CommandId, token);
+        var healthyExpected = Bm25OriginalPhaseRecoveryState.BeforeLocalPublish(database.Database, database.Partition);
         var healthyResult = await SubmitAsync(database, healthy, token);
         await Bm25PrivateAdmissionAssertions.RequirePublicationAsync(database,
-            NativeSerialization.Deserialize<Bm25CorpusPublicationPhaseCommand>((healthy).Value!.Input.Span), healthyResult, subject, 2);
+            NativeSerialization.Deserialize<Bm25CorpusPublicationPhaseCommand>((healthy).Value!.Input.Span), healthyResult, subject, 2, healthyExpected);
         var document = database.Database.GetDocument(Root, new(database.Partition, Collection, Document));
         await Assert.That(document!.Json).IsEqualTo(ChangedJson);
     }

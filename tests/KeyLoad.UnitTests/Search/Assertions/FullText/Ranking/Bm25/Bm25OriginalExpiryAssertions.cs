@@ -41,9 +41,9 @@ internal static class Bm25OriginalExpiryAssertions
         var after = Bm25OriginalPhaseRecoveryState.Read(flow.Owner);
         await Assert.That(after.NodeId).IsEqualTo(before.NodeId);
         await Assert.That(after.Incarnation).IsEqualTo(before.Incarnation);
-        await Assert.That(after.Position).IsGreaterThan(before.Position);
-        await Assert.That(after.Applied).IsEqualTo(before.Applied + 1);
-        await Assert.That(flow.Owner.Entry(operation.CommandId).CanonicalSequence).IsEqualTo(after.Applied);
+        await Assert.That(after.Position).IsEqualTo(checked(before.Position + 1L));
+        await Assert.That(after.Applied).IsEqualTo(before.Applied);
+        await Assert.That(flow.Owner.Entry(operation.CommandId).CanonicalSequence).IsEqualTo(0L);
         await PhaseAsync(operation, flow.Owner.Entry(operation.CommandId).PreparedCommand!);
         await NativeReplayResultAssertions.SameAsync(result,
             flow.Owner.Database.ResolveSubmissionOutcome(operation));

@@ -12,10 +12,10 @@ internal static class IsolatedCurrentJobNodeProgram
           attempt: 1, repository: 'managedcode/KeyLoad', ref: 'refs/heads/main', workflow: 'Benchmarks' };
         const name = 'RabbitMQ / 2 nodes / Document delete';
         job.name = name;
-        if (corruption === 'running' || corruption === 'legacy-running' || corruption === 'missing-attempt-running') {
+        if (corruption === 'running' || corruption === 'noncanonical-running' || corruption === 'missing-attempt-running') {
           job.status = 'in_progress';
         }
-        if (corruption === 'legacy-url' || corruption === 'legacy-running') {
+        if (corruption === 'noncanonical-url' || corruption === 'noncanonical-running') {
           job.html_url = 'https://github.com/managedcode/KeyLoad/runs/37120639751/jobs/111196796054';
         }
         if (corruption === 'missing-attempt' || corruption === 'missing-attempt-running') delete job.run_attempt;

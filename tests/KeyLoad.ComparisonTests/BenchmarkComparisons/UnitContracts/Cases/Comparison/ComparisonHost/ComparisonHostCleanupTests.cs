@@ -100,7 +100,11 @@ internal sealed class ComparisonHostCleanupTests
     {
         using var directory = new NativeArtifactTestDirectory();
         var missing = Path.Combine(directory.Root, "missing-operation-input.json");
-        var operation = File.ReadAllBytesAsync(missing);
+        async Task ReadMissingAsync()
+        {
+            _ = await File.ReadAllBytesAsync(missing);
+        }
+        var operation = ReadMissingAsync();
         var original = await NativeComparisonFailure.ObserveAsync(operation);
         var report = Path.Combine(directory.Root, "original-failed-report.json");
         await File.WriteAllTextAsync(report, "original");

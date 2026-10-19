@@ -63,8 +63,10 @@ internal static class NativeTextBm25CapturedClosureTrial
                 execution.MaximumDocumentWords, execution.MaximumWordCharacters);
             result = SearchCapturedExecution.Complete(owner.Database, new(captured, ranker, null), request,
                 work, null, FilteredSearchEligibility.Create(null, work));
-            RankedDocument[] expected = [new(NativeTextBm25ExpectedRows.Document(owner.Source.Partition,
-                "first", 1L, "{\"text\":\"needle\"}", false, []), 1d / 61d, null)];
+            var document = NativeTextBm25ExpectedRows.Document(owner.Source.Partition,
+                "first", 1L, "{\"text\":\"needle\"}", false, []);
+            document = document with { Reference = owner.Source.ExpectedReference(document.Reference) };
+            RankedDocument[] expected = [new(document, 1d / 61d, null)];
             await NativeTextBm25ExpectedRows.RequireOwnershipAsync(expected, result);
             await NativeTextBm25ExpectedRows.RequireWholeValuesAsync(expected, result);
         }, failures);

@@ -16,7 +16,7 @@ internal sealed class ComparisonParallelismSelectionTests
     private const string ArgumentsProperty = "args";
     private const string EnvironmentProperty = "environment";
     private const string RejectedProperty = "rejected";
-    private const string RetiredProperty = "retired";
+    private const string InvalidProperty = "invalid";
     private const string MessageProperty = "message";
     private const string ParallelismArgument = "--maximum-parallel-tests";
     private const string ConcurrencyEnvironment = "Benchmarks__Concurrency";
@@ -25,10 +25,10 @@ internal sealed class ComparisonParallelismSelectionTests
     private const string RevisionEnvironment = "GITHUB_SHA";
     private const string OriginalRevision = "original-revision";
     private const int RejectedSelections = 8;
-    private const int RetiredSelections = 30;
+    private const int InvalidSelections = 3;
 
     [Test]
-    public async Task AcTunitEntry013NodeComparisonRejectsOverlapAndRetiredSelectorsThenPreservesHealthySelection()
+    public async Task AcTunitEntry013NodeComparisonRejectsOverlapAndInvalidArgumentsThenPreservesHealthySelection()
     {
         var module = Path.Combine(SessionNodeProcess.RepositoryRoot(), ScriptsDirectory,
             FeaturesDirectory, SelectionSlice, SelectionModule);
@@ -60,7 +60,7 @@ internal sealed class ComparisonParallelismSelectionTests
         {
             await Assert.That(rejection.GetProperty(MessageProperty).GetString()).IsEqualTo(NodeIsolationMessage);
         }
-        await Assert.That(document.RootElement.GetProperty(RetiredProperty).GetArrayLength()).IsEqualTo(RetiredSelections);
+        await Assert.That(document.RootElement.GetProperty(InvalidProperty).GetArrayLength()).IsEqualTo(InvalidSelections);
     }
 
 }

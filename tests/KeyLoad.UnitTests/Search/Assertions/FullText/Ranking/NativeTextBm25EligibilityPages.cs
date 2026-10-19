@@ -17,6 +17,8 @@ internal static class NativeTextBm25EligibilityPages
             redacted, redacted ? ["/text"] : []);
         var second = NativeTextBm25ExpectedRows.Document(flow.Owner.Source.Partition, "second", 1L,
             redacted ? "{}" : "{\"text\":\"needle needle\"}", redacted, redacted ? ["/text"] : []);
+        first = first with { Reference = flow.Owner.Source.ExpectedReference(first.Reference) };
+        second = second with { Reference = flow.Owner.Source.ExpectedReference(second.Reference) };
         RankedDocument[] expected = mutated
             ? [new(first, 1d / 61d, null), new(second, 1d / 62d, null)]
             : [new(second, 1d / 61d, null), new(first, 1d / 62d, null)];

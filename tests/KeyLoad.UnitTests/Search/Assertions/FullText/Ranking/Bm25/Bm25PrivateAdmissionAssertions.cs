@@ -8,14 +8,21 @@ namespace KeyLoad.UnitTests.Features.Search;
 internal static class Bm25PrivateAdmissionAssertions
 {
     internal static async Task RequirePublicationAsync(TestDatabase database,
-        Bm25CorpusPublicationPhaseCommand phase, Result<object> result, PrincipalRecord subject, long totalLength)
+        Bm25CorpusPublicationPhaseCommand phase, Result<object> result, PrincipalRecord subject, long totalLength,
+        (CommitToken Token, long Applied) expected)
     {
         await Assert.That(Errors.Code(result.Problem)).IsNull();
         var receipt = result.Get<CommitReceipt>();
         await Assert.That(receipt.CommandId).IsEqualTo(phase.CommandId);
         await Assert.That(receipt.Token.Incarnation).IsEqualTo(database.Store.Identity.Incarnation);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(database.Partition.AtomicPartitionId);
-        await Assert.That(receipt.Token.Position).IsEqualTo(database.ReadStoredOutcome(phase.CommandId).CanonicalSequence);
+        await Assert.That(receipt.Token).IsEqualTo(expected.Token);
+        await Assert.That(database.ReadStoredOutcome(phase.CommandId).CanonicalSequence).IsEqualTo(0L);
+        await Assert.That(database.Database.LastApplied).IsEqualTo(expected.Applied);
+        await Assert.That(database.Store.Position).IsEqualTo(expected.Token.Position);
+        var expectedReceipt = new CommitReceipt(phase.CommandId, expected.Token, [],
+            database.Database.Durability, database.Database.AcknowledgedPersistedCopies);
+        await NativeReplayResultAssertions.BytesAsync(NativeSerialization.Serialize(expectedReceipt), NativeSerialization.Serialize(receipt));
         await Assert.That(receipt.Durability).IsEqualTo(database.Database.Durability);
         await Assert.That(receipt.Mutations).IsEmpty();
         await Assert.That(phase.Current.Generation).IsEqualTo(phase.CommandId);

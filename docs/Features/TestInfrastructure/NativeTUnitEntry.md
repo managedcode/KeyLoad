@@ -2,7 +2,8 @@
 
 ## Entry and ownership
 
-Build the solution in Release with warnings as errors, then start TUnit through
+Build development and functional tests in the SDK's default Debug configuration
+with warnings as errors, then start TUnit through
 Microsoft.Testing.Platform. The native argument selector at
 `scripts/Features/TestInfrastructure/run-tests.mjs` selects the project, filters,
 results and diagnostics; it does not implement database operations.
@@ -15,7 +16,7 @@ identity and original native reports bind a run to the tested implementation.
 
 ```mermaid
 flowchart LR
-    Build[Release build with warnings as errors] --> Native[Native TUnit process]
+    Build[Debug build with warnings as errors] --> Native[Native TUnit process]
     Native --> Fixture[C# test fixture]
     Fixture --> Aspire[Aspire-owned resources and readiness]
     Aspire --> Calls[Real SDK and official MCP operations]

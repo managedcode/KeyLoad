@@ -32,10 +32,12 @@ internal static class PartitionQueryMcpSchemaAssertions
         await VerifyObjectAsync(query,
             [PartitionQueryMcpProtocol.Collection, PartitionQueryMcpProtocol.Alias, PartitionQueryMcpProtocol.Projection,
                 PartitionQueryMcpProtocol.Filter, PartitionQueryMcpProtocol.Order, PartitionQueryMcpProtocol.Limit,
-                PartitionQueryMcpProtocol.Explain, PartitionQueryMcpProtocol.ModelSource, PartitionQueryMcpProtocol.InnerJoin],
+                PartitionQueryMcpProtocol.Explain, PartitionQueryMcpProtocol.ModelSource, PartitionQueryMcpProtocol.InnerJoin,
+                PartitionQueryMcpProtocol.Offset],
             [PartitionQueryMcpProtocol.Collection, PartitionQueryMcpProtocol.Alias, PartitionQueryMcpProtocol.Projection,
                 PartitionQueryMcpProtocol.Filter, PartitionQueryMcpProtocol.Order, PartitionQueryMcpProtocol.Limit]);
         var queryFields = query.GetProperty(McpDiscoveryProtocol.Properties);
+        await VerifyPrimitiveAsync(input, queryFields.GetProperty(PartitionQueryMcpProtocol.Offset), McpDiscoveryProtocol.Integer);
         await PartitionQueryMcpInnerJoinSchemaAssertions.VerifyProjectionAsync(input,
             queryFields.GetProperty(PartitionQueryMcpProtocol.Projection));
         await PartitionQueryMcpInnerJoinSchemaAssertions.VerifyInnerJoinAsync(input,
@@ -77,10 +79,20 @@ internal static class PartitionQueryMcpSchemaAssertions
     private static async Task VerifyEntityAsync(JsonElement root, JsonElement schema)
     {
         schema = Resolve(root, schema);
-        await VerifyObjectAsync(schema, EntityFields, EntityFields);
+        await VerifyObjectAsync(schema, [.. EntityFields, PartitionQueryMcpProtocol.Lifetime], EntityFields);
         await VerifyPartitionAsync(root, schema.GetProperty(McpDiscoveryProtocol.Properties).GetProperty(McpDiscoveryProtocol.Partition));
         await VerifyPrimitiveAsync(root, schema.GetProperty(McpDiscoveryProtocol.Properties).GetProperty(PartitionQueryMcpProtocol.Collection), McpDiscoveryProtocol.String);
         await VerifyPrimitiveAsync(root, schema.GetProperty(McpDiscoveryProtocol.Properties).GetProperty(PartitionQueryMcpProtocol.Id), McpDiscoveryProtocol.String);
+        await VerifyLifetimeAsync(root, schema.GetProperty(McpDiscoveryProtocol.Properties).GetProperty(PartitionQueryMcpProtocol.Lifetime));
+    }
+
+    private static async Task VerifyLifetimeAsync(JsonElement root, JsonElement schema)
+    {
+        schema = Resolve(root, schema);
+        await VerifyExactTypeSetAsync(root, schema, McpDiscoveryProtocol.Object, McpDiscoveryProtocol.Null);
+        await VerifyObjectShapeAsync(schema, [PartitionQueryMcpProtocol.Incarnation], [PartitionQueryMcpProtocol.Incarnation]);
+        await VerifyPrimitiveAsync(root, schema.GetProperty(McpDiscoveryProtocol.Properties)
+            .GetProperty(PartitionQueryMcpProtocol.Incarnation), McpDiscoveryProtocol.String);
     }
 
     private static async Task VerifyPartitionAsync(JsonElement root, JsonElement schema)

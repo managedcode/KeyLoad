@@ -8,13 +8,13 @@ internal sealed class NativeWorkloadTestReportRetentionTests
     {
         using var directory = new NativeArtifactTestDirectory();
         var output = Path.Combine(directory.Root, "output");
-        var reports = Path.Combine(output, "TestResults");
+        var reports = Path.Combine(output, "NativeTestResults");
         var evidence = Path.Combine(directory.Root, "isolated", "workers", "actual-cell");
         Directory.CreateDirectory(reports);
         var original = Path.Combine(reports, "original.trx");
         await File.WriteAllTextAsync(original, "original-report-byte-canary");
         NativeWorkloadTestReports.Retain(output, evidence);
-        var retained = Path.Combine(directory.Root, "isolated", "failures", "actual-cell", "TestResults", "original.trx");
+        var retained = Path.Combine(directory.Root, "isolated", "failures", "actual-cell", "NativeTestResults", "original.trx");
         await Assert.That(await File.ReadAllBytesAsync(retained)).IsEquivalentTo(await File.ReadAllBytesAsync(original));
         await Assert.That(Directory.Exists(evidence)).IsFalse();
         await Assert.That(() => NativeWorkloadTestReports.Retain(output, evidence)).Throws<IOException>();

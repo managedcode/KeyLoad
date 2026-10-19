@@ -18,33 +18,23 @@ internal static class ComparisonParallelismNodeProgram
           catch (failure) { rejected.push({ value, message: failure.message }); continue; }
           throw new Error('Concurrent or invalid comparison selection was accepted.');
         }
-        const retired = [];
-        function rejectRetired(arguments_, environment, message) {
-          try { nativeSelection(arguments_, environment); }
+        const invalid = [];
+        function rejectInvalid(argument, message) {
+          try { nativeSelection([...selection, argument], inherited); }
           catch (failure) {
             if (failure.message !== message) throw failure;
-            retired.push(message);
+            invalid.push(message);
             return;
           }
-          throw new Error('Retired benchmark selection was accepted.');
+          throw new Error('Invalid native test selection was accepted.');
         }
-        for (const key of ['ScaleProfile', 'VectorProfile', 'OpenLoopRate', 'OpenLoopCancellationProof']) {
-          for (const option of ['--KeyLoadTests:'+key, '--KeyLoadTests:'+key+'=', '--keyloadtests:'+key.toLowerCase()+'=old']) {
-            rejectRetired([...selection, option], inherited, 'Retired benchmark selection is not supported.');
-          }
-          for (const [name, value] of [['KeyLoadTests__'+key, ''], ['Benchmarks__'+key, null],
-            ['keyloadtests:'+key.toLowerCase(), undefined], ['BENCHMARKS__'+key.toLowerCase(), '']]) {
-            rejectRetired(selection, { ...inherited, [name]: value }, 'Retired benchmark selection is not supported.');
-          }
-        }
-        for (const clients of ['10', '500']) {
-          rejectRetired([...selection, '--Benchmarks:Concurrency='+clients], inherited,
-            'Benchmark workloads use their native session entry.');
-        }
+        rejectInvalid('--KeyLoadTests:Suite=comparison', 'Invalid or duplicate native test selection.');
+        rejectInvalid('--KeyLoadTests:Unknown=true', 'Unsupported native test argument.');
+        rejectInvalid('--KeyLoadTests:Filter=', 'Invalid or duplicate native test selection.');
         if (JSON.stringify(selection) !== originalSelection || JSON.stringify(inherited) !== originalInherited) {
           throw new Error('Native selection changed the caller inputs.');
         }
         const healthy = nativeSelection(selection, inherited);
-        process.stdout.write(JSON.stringify({ selected, explicit, rejected, retired, healthy }));
+        process.stdout.write(JSON.stringify({ selected, explicit, rejected, invalid, healthy }));
         """;
 }

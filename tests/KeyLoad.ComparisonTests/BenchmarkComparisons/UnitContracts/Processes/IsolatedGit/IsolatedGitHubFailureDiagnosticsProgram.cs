@@ -21,7 +21,7 @@ internal static class IsolatedGitHubFailureDiagnosticsProgram
         const previousToken = process.env.GH_TOKEN;
         if (excluded) process.env.GH_TOKEN = canary;
         const listeners = ['SIGTERM', 'SIGINT'].map(signal => process.listenerCount(signal));
-        const child = `const { writeFileSync } = require('node:fs');
+        const child = String.raw`const { writeFileSync } = require('node:fs');
           const [marker, mode, limit] = process.argv.slice(1); writeFileSync(marker, String(process.pid));
           const done = () => process.stdout.write(Buffer.from([0,255,128,10,1,2,3,4]), () => { process.exitCode = mode === 'healthy' ? 0 : 1; });
           const token = Buffer.from('private-native-stderr-canary');

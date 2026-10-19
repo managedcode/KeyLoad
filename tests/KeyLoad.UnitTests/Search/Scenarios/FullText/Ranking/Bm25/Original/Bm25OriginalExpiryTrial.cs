@@ -18,10 +18,14 @@ internal static class Bm25OriginalExpiryTrial
         var expiry = firstPhase.OriginalExpiry > secondPhase.OriginalExpiry
             ? firstPhase.OriginalExpiry : secondPhase.OriginalExpiry;
         var beforeWait = Bm25OriginalPhaseRecoveryState.Read(owner);
-        var remaining = expiry - clock.GetUtcNow();
-        if (remaining > TimeSpan.Zero)
+        while (clock.GetUtcNow() < expiry)
         {
-            await Task.Delay(remaining + TimeSpan.FromTicks(1), clock, Bm25OriginalPhaseRecoveryFlow.Token);
+            var remaining = expiry - clock.GetUtcNow();
+            if (remaining > TimeSpan.Zero)
+            {
+                await Task.Delay(TimeSpan.FromMilliseconds(Math.Ceiling(remaining.TotalMilliseconds)),
+                    clock, Bm25OriginalPhaseRecoveryFlow.Token);
+            }
         }
         await Assert.That(clock.GetUtcNow() >= expiry).IsTrue();
         await beforeWait.RequireAsync(Bm25OriginalPhaseRecoveryState.Read(owner));

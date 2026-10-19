@@ -24,14 +24,24 @@ internal sealed record BenchmarkSessionHostSettings(string SessionId, IsolatedHo
             throw new InvalidOperationException(Profile);
         }
         var target = IsolatedHostSettings.Required(configuration, BenchmarkSessionSelection.TargetSetting);
-        var nodes = int.Parse(IsolatedHostSettings.Required(configuration, BenchmarkSessionSelection.NodeCountSetting),
-            NumberStyles.None, CultureInfo.InvariantCulture);
+        if (!int.TryParse(IsolatedHostSettings.Required(configuration, BenchmarkSessionSelection.NodeCountSetting),
+            NumberStyles.None, CultureInfo.InvariantCulture, out var nodes))
+        {
+            throw new InvalidOperationException(Profile);
+        }
         var selection = BenchmarkSessionContract.ResourceSelection(target, nodes);
         var revision = configuration[ComparisonHostConstants.SourceRevision];
         var identity = ComparisonExecutionIdentity.ReadSession(configuration, revision, selection.Topology);
-        var job = identity.Provenance is null ? (long?)null
-            : long.Parse(IsolatedHostSettings.Required(configuration, IsolatedHostConstants.JobId),
-                NumberStyles.None, CultureInfo.InvariantCulture);
+        long? job = null;
+        if (identity.Provenance is not null)
+        {
+            if (!long.TryParse(IsolatedHostSettings.Required(configuration, IsolatedHostConstants.JobId),
+                NumberStyles.None, CultureInfo.InvariantCulture, out var parsedJob))
+            {
+                throw new InvalidOperationException(Profile);
+            }
+            job = parsedJob;
+        }
         var output = IsolatedHostSettings.Required(configuration, ComparisonHostConstants.Output);
         var unsupported = BenchmarkSessionContract.UnsupportedTopologies
             .SingleOrDefault(item => item.Target == target && item.NodeCounts.Contains(nodes))?.Reason;

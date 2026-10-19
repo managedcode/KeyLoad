@@ -1,3 +1,4 @@
+using KeyLoad.Core;
 using KeyLoad.UnitTests.Features.ResourceExecution;
 using ManagedCode.Communication.Commands;
 namespace KeyLoad.UnitTests.Features.Search;
@@ -5,6 +6,15 @@ namespace KeyLoad.UnitTests.Features.Search;
 internal sealed record Bm25OriginalPhaseRecoveryState(Guid NodeId, Guid Incarnation, long Position,
     long Applied, byte[] Rows)
 {
+    internal static (CommitToken Token, long Applied) BeforeLocalPublish(DatabaseEngine database, PartitionRef partition)
+        => database.Store.Read(view =>
+        {
+            var applied = view.ReadOwnedValue(KeySpace.AppliedBytes) is { } bytes
+                ? NativeSerialization.Deserialize<long>(bytes) : 0L;
+            return (new CommitToken(database.Store.Identity.Incarnation, partition.AtomicPartitionId,
+                checked(database.Store.Position + 1L)), applied);
+        });
+
     internal static Bm25OriginalPhaseRecoveryState Read(Bm25OriginalPhaseRecoveryOwner owner)
     {
         var work = owner.Source.CreateReadWork(Bm25OriginalPhaseRecoveryFlow.Token);
@@ -39,7 +49,7 @@ internal sealed record Bm25OriginalPhaseRecoveryState(Guid NodeId, Guid Incarnat
     internal static async Task RequireRetainedAsync(Bm25OriginalPhaseRecoveryOwner owner,
         Command<DatabaseCommand> original, byte[] originalEntry)
     {
-        var actual = owner.Entry(original.CommandId);
+        var actual = owner.PhaseEntry(original);
         await Assert.That(actual.PreparedCommand).IsNotNull();
         await Assert.That(actual.PreparedCommand!.Value!.Kind).IsEqualTo(OperationKind.Bm25CorpusPublicationPhase);
         await Assert.That(actual.PreparedCommand.CommandId).IsEqualTo(original.CommandId);

@@ -1,5 +1,6 @@
 using KeyLoad.Core.Features.ClusterRouting.Execution;
 using KeyLoad.Core.Features.ClusterRouting.Identity;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Core.Features.Search;
 using KeyLoad.Query.Features.Search;
 using KeyLoad.UnitTests.Features.ResourceExecution;
@@ -21,9 +22,10 @@ internal static class Bm25ConfiguredCountTrial
         });
         await Assert.That(second.PolicyEpoch).IsEqualTo(flow.Reader.PolicyEpoch);
         var first = flow.Capture(null);
+        var firstExpected = Bm25OriginalPhaseRecoveryState.BeforeLocalPublish(owner.Database, owner.Source.Partition);
         var firstResult = flow.Publish(first);
-        await RequireStoredAsync(flow, first, firstResult);
-        var originalEntry = NativeSerialization.Serialize(owner.Entry(first.CommandId));
+        await RequireStoredAsync(flow, first, firstResult, firstExpected);
+        var originalEntry = NativeSerialization.Serialize(owner.PhaseEntry(first));
         var next = CaptureSecond(flow);
         var replacement = flow.Capture(first.CommandId);
         var healthy = flow.Capture(replacement.CommandId);
@@ -36,6 +38,7 @@ internal static class Bm25ConfiguredCountTrial
         owner.Reopen(limits);
         await before.RequireAsync(Bm25OriginalPhaseRecoveryState.Read(owner));
         await Assert.That(owner.Database.Limits).IsEqualTo(limits);
+        var nextExpected = Bm25OriginalPhaseRecoveryState.BeforeLocalPublish(owner.Database, owner.Source.Partition);
         var result = flow.Publish(next);
         if (maximumHeads == 1)
         {
@@ -43,14 +46,16 @@ internal static class Bm25ConfiguredCountTrial
         }
         else
         {
-            await RequireStoredAsync(flow, next, result);
+            await RequireStoredAsync(flow, next, result, nextExpected);
         }
         await Assert.That(Family(flow).Length).IsEqualTo(maximumHeads);
         await Bm25OriginalPhaseRecoveryState.RequireRetainedAsync(owner, first, originalEntry);
         await RequireReplayAsync(flow, next, result);
-        await RequireStoredAsync(flow, replacement, flow.Publish(replacement));
+        var replacementExpected = Bm25OriginalPhaseRecoveryState.BeforeLocalPublish(owner.Database, owner.Source.Partition);
+        await RequireStoredAsync(flow, replacement, flow.Publish(replacement), replacementExpected);
+        var healthyExpected = Bm25OriginalPhaseRecoveryState.BeforeLocalPublish(owner.Database, owner.Source.Partition);
         var healthyResult = flow.Publish(healthy);
-        await RequireStoredAsync(flow, healthy, healthyResult);
+        await RequireStoredAsync(flow, healthy, healthyResult, healthyExpected);
         await Assert.That(Family(flow).Length).IsEqualTo(maximumHeads);
         var final = Bm25OriginalPhaseRecoveryState.Read(owner);
         owner.Reopen(limits);
@@ -112,14 +117,15 @@ internal static class Bm25ConfiguredCountTrial
         var after = Bm25OriginalPhaseRecoveryState.Read(flow.Owner);
         await Assert.That(after.NodeId).IsEqualTo(before.NodeId);
         await Assert.That(after.Incarnation).IsEqualTo(before.Incarnation);
-        await Assert.That(after.Position).IsGreaterThan(before.Position);
-        await Assert.That(after.Applied).IsEqualTo(before.Applied + 1);
+        await Assert.That(after.Position).IsEqualTo(checked(before.Position + 1L));
+        await Assert.That(after.Applied).IsEqualTo(before.Applied);
+        await Assert.That(flow.Owner.PhaseEntry(operation).CanonicalSequence).IsEqualTo(0L);
         await NativeReplayResultAssertions.SameAsync(result, flow.Owner.Database.ResolveSubmissionOutcome(operation));
         await Assert.That(Outcome(flow, operation).Length).IsGreaterThan(0);
     }
 
     private static async Task RequireStoredAsync(Bm25OriginalPhaseRecoveryFlow flow,
-        Command<DatabaseCommand> operation, Result<object> result)
+        Command<DatabaseCommand> operation, Result<object> result, (CommitToken Token, long Applied) expected)
     {
         await Assert.That(Errors.Code(result.Problem)).IsNull();
         var phase = NativeSerialization.Deserialize<Bm25CorpusPublicationPhaseCommand>((operation).Value!.Input.Span);
@@ -127,7 +133,13 @@ internal static class Bm25ConfiguredCountTrial
         await Assert.That(phase.Current.Statistics.TotalLength).IsEqualTo(1L);
         var receipt = result.Get<CommitReceipt>();
         await Assert.That(receipt.CommandId).IsEqualTo(operation.CommandId);
-        await Assert.That(receipt.Token.Position).IsEqualTo(flow.Owner.Entry(operation.CommandId).CanonicalSequence);
+        await Assert.That(receipt.Token).IsEqualTo(expected.Token);
+        await Assert.That(flow.Owner.PhaseEntry(operation).CanonicalSequence).IsEqualTo(0L);
+        await Assert.That(flow.Owner.Database.LastApplied).IsEqualTo(expected.Applied);
+        await Assert.That(flow.Owner.Store.Position).IsEqualTo(expected.Token.Position);
+        var expectedReceipt = new CommitReceipt(operation.CommandId, expected.Token, [],
+            flow.Owner.Database.Durability, flow.Owner.Database.AcknowledgedPersistedCopies);
+        await NativeReplayResultAssertions.BytesAsync(NativeSerialization.Serialize(expectedReceipt), NativeSerialization.Serialize(receipt));
         await Assert.That(receipt.Token.Incarnation).IsEqualTo(flow.Owner.Store.Identity.Incarnation);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(flow.Owner.Source.Partition.AtomicPartitionId);
         await Assert.That(receipt.Durability).IsEqualTo(flow.Owner.Database.Durability);
@@ -143,8 +155,12 @@ internal static class Bm25ConfiguredCountTrial
     {
         var before = Bm25OriginalPhaseRecoveryState.Read(flow.Owner);
         var raw = Outcome(flow, original);
-        var entry = NativeSerialization.Serialize(flow.Owner.Entry(original.CommandId));
-        await NativeReplayResultAssertions.SameAsync(expected, flow.Publish(flow.Reissue(original)));
+        var entry = NativeSerialization.Serialize(flow.Owner.PhaseEntry(original));
+        var issuance = Assert.ThrowsExactly<KeyLoadException>(() => flow.Reissue(original));
+        await Assert.That(issuance.Code).IsEqualTo(ErrorCode.BudgetExceeded);
+        await Assert.That(issuance.Message).IsEqualTo(ResourceEffectAdmissionProtocol.Capacity);
+        await before.RequireAsync(Bm25OriginalPhaseRecoveryState.Read(flow.Owner));
+        await NativeReplayResultAssertions.SameAsync(expected, flow.Publish(original));
         await before.RequireAsync(Bm25OriginalPhaseRecoveryState.Read(flow.Owner));
         await NativeReplayResultAssertions.BytesAsync(raw, Outcome(flow, original));
         await Bm25OriginalPhaseRecoveryState.RequireRetainedAsync(flow.Owner, original, entry);

@@ -1,5 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using KeyLoad.Core;
+using KeyLoad.Core.Features.ClusterRouting.Contracts;
+using KeyLoad.Core.Features.Search;
 using KeyLoad.Server;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
@@ -68,6 +70,32 @@ internal sealed class Bm25OriginalPhaseRecoveryOwner
     internal StoredOutcome Entry(Guid commandId) => originalJoined
         ? OutcomeStoreOracle.ReadStored(Database, commandId, CancellationToken.None)
         : Source.ReadStoredOutcome(commandId);
+
+    internal StoredOutcome PhaseEntry(Command<DatabaseCommand> operation)
+    {
+        if (operation.Value is not { Kind: OperationKind.Bm25CorpusPublicationPhase } input)
+        {
+            throw new InvalidOperationException("The original BM25 phase command is required.");
+        }
+        var phase = NativeSerialization.Deserialize<Bm25CorpusPublicationPhaseCommand>(input.Input.Span);
+        if (phase.CommandId != operation.CommandId || phase.Current.Partition != Source.Partition)
+        {
+            throw new InvalidOperationException("The original BM25 phase partition is inconsistent.");
+        }
+        var key = OutcomeStoreOracle.PartitionKey(phase.Current.Partition, operation.UserId!, operation.CommandId);
+        var inspection = Source.CreateReadWork(Bm25OriginalPhaseRecoveryFlow.Token);
+        var stored = Store.Read(raw => inspection.CreateView(raw).GetRecord<StoredOutcome>(key));
+        if (stored is null || stored.ScopeKind != CommandOutcomeScopeKind.Partition
+            || stored.Partition != phase.Current.Partition || stored.PreparedCommand is not { } prepared
+            || prepared.CommandId != operation.CommandId || prepared.UserId != operation.UserId
+            || prepared.Value is not { } actual || actual.Kind != input.Kind
+            || actual.Fingerprint != input.Fingerprint || stored.Fingerprint != input.Fingerprint
+            || !actual.Input.Span.SequenceEqual(input.Input.Span))
+        {
+            throw new InvalidOperationException("The exact original BM25 partition outcome is missing or inconsistent.");
+        }
+        return stored;
+    }
 
     internal (long AppliedPosition, long StorePosition) ReadCut()
         => Store.Read(view => (view.ReadOwnedValue(KeySpace.AppliedBytes) is { } bytes

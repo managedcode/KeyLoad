@@ -24,13 +24,20 @@ internal static class Bm25ConfiguredQuotaBytes
         return checked((long)Bm25CorpusKeys.Current(current).Length + NativeSerialization.Serialize(current).Length);
     }
 
-    internal static async Task RequireStoredAsync(TestDatabase database, Command<DatabaseCommand> operation, Result<object> result)
+    internal static async Task RequireStoredAsync(TestDatabase database, Command<DatabaseCommand> operation, Result<object> result,
+        (CommitToken Token, long Applied) expected)
     {
         await Assert.That(Errors.Code(result.Problem)).IsNull();
         var phase = Bm25ConfiguredQuotaFlow.Phase(operation);
         var receipt = result.Get<CommitReceipt>();
         await Assert.That(receipt.CommandId).IsEqualTo(operation.CommandId);
-        await Assert.That(receipt.Token.Position).IsEqualTo(database.ReadStoredOutcome(operation.CommandId).CanonicalSequence);
+        await Assert.That(receipt.Token).IsEqualTo(expected.Token);
+        await Assert.That(database.ReadStoredOutcome(operation.CommandId).CanonicalSequence).IsEqualTo(0L);
+        await Assert.That(database.Database.LastApplied).IsEqualTo(expected.Applied);
+        await Assert.That(database.Store.Position).IsEqualTo(expected.Token.Position);
+        var expectedReceipt = new CommitReceipt(operation.CommandId, expected.Token, [],
+            database.Database.Durability, database.Database.AcknowledgedPersistedCopies);
+        await NativeReplayResultAssertions.BytesAsync(NativeSerialization.Serialize(expectedReceipt), NativeSerialization.Serialize(receipt));
         await Assert.That(receipt.Token.Incarnation).IsEqualTo(database.Store.Identity.Incarnation);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(database.Partition.AtomicPartitionId);
         await Assert.That(receipt.Durability).IsEqualTo(database.Database.Durability);

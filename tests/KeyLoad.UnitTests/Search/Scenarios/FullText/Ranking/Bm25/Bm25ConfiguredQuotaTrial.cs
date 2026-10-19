@@ -14,7 +14,8 @@ internal static class Bm25ConfiguredQuotaTrial
             var originals = Enumerable.Range(0, Bm25ConfiguredQuotaFlow.HeadCount).Select(index => flow.Capture(index)).ToArray();
             foreach (var original in originals)
             {
-                await Bm25ConfiguredQuotaBytes.RequireStoredAsync(flow.Database, original, flow.Publish(original));
+                var expected = Bm25OriginalPhaseRecoveryState.BeforeLocalPublish(flow.Database.Database, flow.Database.Partition);
+                await Bm25ConfiguredQuotaBytes.RequireStoredAsync(flow.Database, original, flow.Publish(original), expected);
             }
             capacity = Bm25ConfiguredQuotaBytes.Retained(flow.Database);
             await Assert.That(capacity).IsEqualTo(originals.Sum(Bm25ConfiguredQuotaBytes.Candidate));
@@ -30,7 +31,8 @@ internal static class Bm25ConfiguredQuotaTrial
         await Assert.That(originals.Sum(Bm25ConfiguredQuotaBytes.Candidate)).IsEqualTo(capacity);
         for (var index = 0; index < originals.Length - 1; index++)
         {
-            await Bm25ConfiguredQuotaBytes.RequireStoredAsync(flow.Database, originals[index], flow.Publish(originals[index]));
+            var expected = Bm25OriginalPhaseRecoveryState.BeforeLocalPublish(flow.Database.Database, flow.Database.Partition);
+            await Bm25ConfiguredQuotaBytes.RequireStoredAsync(flow.Database, originals[index], flow.Publish(originals[index]), expected);
         }
         if (oneByteUnder)
         {
@@ -47,7 +49,8 @@ internal static class Bm25ConfiguredQuotaTrial
         }
         var final = flow.Capture(originals.Length - 1);
         await Assert.That(Bm25ConfiguredQuotaBytes.Retained(flow.Database) + Bm25ConfiguredQuotaBytes.Candidate(final)).IsEqualTo(capacity);
-        await Bm25ConfiguredQuotaBytes.RequireStoredAsync(flow.Database, final, flow.Publish(final));
+        var finalExpected = Bm25OriginalPhaseRecoveryState.BeforeLocalPublish(flow.Database.Database, flow.Database.Partition);
+        await Bm25ConfiguredQuotaBytes.RequireStoredAsync(flow.Database, final, flow.Publish(final), finalExpected);
         await Assert.That(Bm25ConfiguredQuotaBytes.Retained(flow.Database)).IsEqualTo(capacity);
         await RequireReplacementAsync(flow, originals[0], capacity, true);
     }
@@ -56,11 +59,13 @@ internal static class Bm25ConfiguredQuotaTrial
     {
         var beforeBytes = Bm25ConfiguredQuotaBytes.Retained(flow.Database);
         var reducing = flow.Capture(0, original.CommandId, "needle");
-        await Bm25ConfiguredQuotaBytes.RequireStoredAsync(flow.Database, reducing, flow.Publish(reducing));
+        var reducingExpected = Bm25OriginalPhaseRecoveryState.BeforeLocalPublish(flow.Database.Database, flow.Database.Partition);
+        await Bm25ConfiguredQuotaBytes.RequireStoredAsync(flow.Database, reducing, flow.Publish(reducing), reducingExpected);
         await Assert.That(Bm25ConfiguredQuotaBytes.Retained(flow.Database) < beforeBytes).IsTrue();
         var healthy = flow.Capture(0, reducing.CommandId);
+        var healthyExpected = Bm25OriginalPhaseRecoveryState.BeforeLocalPublish(flow.Database.Database, flow.Database.Partition);
         var result = flow.Publish(healthy);
-        await Bm25ConfiguredQuotaBytes.RequireStoredAsync(flow.Database, healthy, result);
+        await Bm25ConfiguredQuotaBytes.RequireStoredAsync(flow.Database, healthy, result, healthyExpected);
         if (wasFull)
         {
             await Assert.That(Bm25ConfiguredQuotaBytes.Retained(flow.Database)).IsEqualTo(capacity);

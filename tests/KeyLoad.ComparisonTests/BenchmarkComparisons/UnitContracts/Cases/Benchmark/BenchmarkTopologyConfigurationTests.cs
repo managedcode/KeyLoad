@@ -1,6 +1,7 @@
 using KeyLoad.Clustering;
 using KeyLoad.Server;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
@@ -41,7 +42,7 @@ internal sealed class BenchmarkTopologyConfigurationTests
         var options = BenchmarkTopologyConfigurationFixture.Node(silos, copies);
         var configured = new ReplicaCopyOptions { SiloCount = silos, ReplicaCount = copies };
         Assert.ThrowsExactly<InvalidOperationException>(options.Validate);
-        Assert.ThrowsExactly<InvalidOperationException>(configured.Validate);
+        Assert.ThrowsExactly<OptionsValidationException>(configured.Validate);
     }
 
     [Test]

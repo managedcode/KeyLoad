@@ -28,6 +28,7 @@ internal static class PartitionQueryMcpProtocol
     internal const string Filter = "filter";
     internal const string Order = "order";
     internal const string Limit = "limit";
+    internal const string Offset = "offset";
     internal const string Explain = "explain";
     internal const string ModelSource = "modelSource";
     internal const string InnerJoin = "innerJoin";
@@ -42,6 +43,8 @@ internal static class PartitionQueryMcpProtocol
     internal const string AtomicPartitionId = "atomicPartitionId";
     internal const string Collection = "collection";
     internal const string Id = "id";
+    internal const string Lifetime = "lifetime";
+    internal const string Incarnation = "incarnation";
     internal const string Type = "type";
     internal const string Properties = "properties";
     internal const string Required = "required";

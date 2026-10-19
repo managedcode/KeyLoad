@@ -40,7 +40,7 @@ internal sealed class ComparisonHostStartupTests
                 break;
             case "invalid-nodes":
                 settings[SessionHostStartupSupport.Nodes] = "2";
-                detail = nameof(ArgumentOutOfRangeException);
+                detail = "InvalidOperationException: InvalidSessionSelection";
                 break;
             case "missing-session":
                 settings.Remove(SessionFields.SessionEnvironment);

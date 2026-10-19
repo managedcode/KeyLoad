@@ -9,7 +9,7 @@ namespace KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
 [ConfigurationBinding]
 internal static class NativeComparisonExecutionRegistration
 {
-    internal const string ConfigurationPath = "BenchmarkComparisons/Configuration/native-execution.json";
+    internal const string ConfigurationPath = "Configuration/native-execution.json";
 
     internal static IOptions<NativeComparisonDiagnosticOptions> ReadDiagnostics(IConfiguration configuration)
     {
