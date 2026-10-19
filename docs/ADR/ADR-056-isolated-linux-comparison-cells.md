@@ -128,7 +128,7 @@ incomparable cells; unsupported capabilities remain explicitly unavailable.
 The new ingestion inventory is shared across targets rather than a KeyLoad-only
 performance workload. It remains unimplemented/unqualified in this checkpoint.
 
-Implementation order: the selector and existing typed execution options first; then the feature-local ingestion contracts, execution and reporting with real ComparisonTests flows; then bounded mixed-load cases through the existing ClusterFixture and SDK/MCP owners, with exclusive heavy selection, coverage exclusion and isolated Linux acceptance. No new resource harness, public API, dependency or database format is introduced.
+Implementation order: the selector and existing typed execution options first; then the feature-local ingestion contracts, execution and reporting with real ComparisonHost flows; then bounded mixed-load cases through the existing ClusterFixture and SDK/MCP owners, with exclusive heavy selection, coverage exclusion and isolated Linux acceptance. No new resource harness, public API, dependency or database format is introduced.
 
 Rollout changes scheduling only in this checkpoint. New load cases are **not
 implemented or qualified**; they enter dispatch only after their selector,

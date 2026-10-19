@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
 const defaultMaximumParallelTests = 50;
 const maximumParallelTests = 50;
-const comparisonParallelTests = 1;
+const exclusiveParallelTests = 1;
 const simdOptions = ['DOTNET_EnableHWIntrinsic', 'COMPlus_EnableHWIntrinsic',
   'DOTNET_EnableSIMD', 'COMPlus_EnableSIMD'];
 const heavyLoadEnabledOption = 'HeavyLoad:Enabled';
@@ -16,7 +16,7 @@ const ordinaryUnitFilter = '/KeyLoad.UnitTests/*/*/*';
 const projects = new Map([
   ['analyzers', 'KeyLoad.Analyzers.Tests'], ['unit', 'KeyLoad.UnitTests'],
   ['recovery', 'KeyLoad.RecoveryTests'],
-  ['cluster', 'KeyLoad.IntegrationTests'], ['comparison', 'KeyLoad.ComparisonTests'], ['site', 'KeyLoad.SiteTests']
+  ['cluster', 'KeyLoad.IntegrationTests'], ['site', 'KeyLoad.SiteTests']
 ]);
 const mapped = new Map([
   ['Filter', '--treenode-filter'], ['ResultsDirectory', '--results-directory'],
@@ -48,10 +48,10 @@ export function runtimeSelection(input, inherited = process.env) {
     throw new Error('Heavy CLUSTER load requires its exact exclusive functional selection.');
   }
   const parallel = Number(values.get('Execution:MaximumParallelTests')
-    ?? (suite === 'comparison' || heavyLoad ? comparisonParallelTests : defaultMaximumParallelTests));
+    ?? (heavyLoad ? exclusiveParallelTests : defaultMaximumParallelTests));
   if (!Number.isInteger(parallel) || parallel < 1 || parallel > maximumParallelTests) throw new Error('Invalid execution parallelism.');
-  if ((suite === 'comparison' || heavyLoad) && parallel !== comparisonParallelTests) {
-    throw new Error('Comparison measurements and heavy load require exactly one execution test at a time.');
+  if (heavyLoad && parallel !== exclusiveParallelTests) {
+    throw new Error('Heavy load requires exactly one execution test at a time.');
   }
   if (suite === 'cluster' && !values.has('Filter')) values.set('Filter', ordinaryClusterFilter);
   if (suite === 'unit' && !values.has('Filter')) values.set('Filter', ordinaryUnitFilter);
@@ -76,8 +76,7 @@ export function runtimeSelection(input, inherited = process.env) {
   const args = ['test', '--project', `tests/${project}`, '--no-build', '--no-restore',
     '--output', 'Detailed', '--github-reporter-style', 'full', '--maximum-parallel-tests', String(parallel),
     '--results-directory', path.resolve(root, values.get('ResultsDirectory') ?? `TestResults/${suite}`)];
-  args.push('--timeout', `${values.get('TimeoutMinutes') ?? (['cluster', 'comparison'].includes(suite) ? 60 : 30)}m`);
-  if (suite === 'comparison') args.push('--minimum-expected-tests', '1');
+  args.push('--timeout', `${values.get('TimeoutMinutes') ?? (suite === 'cluster' ? 60 : 30)}m`);
   for (const [key, value] of values) {
     if (['Suite', 'ResultsDirectory', 'Execution:MaximumParallelTests'].includes(key)) continue;
     if (key === 'ReportTrx') {

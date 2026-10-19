@@ -6,6 +6,8 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="TUnit" />
+    <PackageReference Include="Aspire.Hosting.Testing" />
+    <ProjectReference Include="../../build/KeyLoad.LoadTests.AppHost/KeyLoad.LoadTests.AppHost.csproj" />
     <ProjectReference Include="../KeyLoad.Comparisons/KeyLoad.Comparisons.csproj" />
     <ProjectReference Include="../../build/KeyLoad.AppHost/KeyLoad.AppHost.csproj" IsAspireProjectResource="false" />
     <Content Include="Configuration/execution.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />

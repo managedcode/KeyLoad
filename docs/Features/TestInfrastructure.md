@@ -21,7 +21,7 @@ flowchart LR
 
 Slice map: tests mirror their product slice; shared fixture/lifecycle infrastructure remains at test project roots. Shared CI/.gitignore/.dockerignore are integration-owned infrastructure. Production data/API/GUI: N/A, this framework migration adds no domain behavior. Blobs and MCP coverage must not be reported complete from framework migration alone.
 
-Traceability: AC-TEST-001 maps to all invoking test projects, AC-TEST-002 to IntegrationTests and ComparisonTests, AC-TEST-003 to source/ignore checks. Delivered-source qualification comes from Linux GitHub runs; local runs and development builds are development evidence. Coverage and complexity policy cannot be claimed satisfied without measured configured gates.
+Traceability: AC-TEST-001 maps to all invoking test projects, AC-TEST-002 to IntegrationTests and ComparisonHost, AC-TEST-003 to source/ignore checks. Delivered-source qualification comes from Linux GitHub runs; local runs and development builds are development evidence. Coverage and complexity policy cannot be claimed satisfied without measured configured gates.
 
 Test report retention (REQ/AC-TEST-001/002/005, AC-MP-012): CI retains the actual root TestResults reports from TUnit alongside each existing scoped report glob. Comparison test reports use a separate comparison-test-results artifact so the measured comparison-suite archive keeps its existing contract; no test, timeout, gate, permission, measured-report schema or ignore rule changes. Retention cannot convert failing or unexecuted tests to success.
 
@@ -33,13 +33,13 @@ Real process-recovery scenarios live directly in `KeyLoad.RecoveryTests`, under 
 
 | Requirement | Acceptance | Tests / evidence |
 |---|---|---|
-| REQ-TEST-009: closed suite selection maps to TUnit execution | AC-TEST-009: each closed suite selects the correct TUnit project, arguments, results directory and optional original TRX/Cobertura settings; unknown or explicit-empty suites, invalid bounded paths, incomplete coverage settings and mixed benchmark modes reject before resources; only comparison may pass its existing benchmark target | AspireTestEntryModelTests using the actual Aspire builder; original run reports |
+| REQ-TEST-009: closed suite selection maps to TUnit execution | AC-TEST-009: each closed suite selects the correct TUnit project, arguments, results directory and optional original TRX/Cobertura settings; unknown or explicit-empty suites, invalid bounded paths, incomplete coverage settings and mixed benchmark modes reject before resources; benchmark modes are excluded from test-suite selection | Current TUnit selector and original suite reports |
 | REQ-TEST-010: test entry preserves outcomes and bounded lifetime | AC-TEST-010: nonzero/failed-start/missing-exit/cancel/timeout cannot count as success; stop/disposal always run; every existing CI suite and artifact remains | source lifetime review and actual Linux CI runner exit/status evidence |
 | REQ-TEST-011: the replicated cluster is owned once and startup failure releases resources | AC-TEST-011: the test fixture's Aspire application owns the configured Docker silo nodes (`KeyLoad:SiloCount`, with `KeyLoad:ReplicaCount` copies; 3 is only the default) and discovered SDK/MCP endpoints, with no idle duplicate nodes; every partial start is disposed before deleting only its owned directory | real Aspire model tests, ClusterFixture source lifetime review, actual Docker cluster/recovery artifacts |
 
 Partial-start cleanup: every Build, image check, Start, profile or readiness failure disposes everything the fixture acquired, preserving the original failure alongside cleanup failures, and deletes only the fixture's owned data directory. Arguments are individual process arguments, never shell text; paths and filters are bounded to 4096 characters without NUL characters, and optional filters are development selection, never a complete qualification claim. Required CI suites set `KeyLoadTests:ReportTrx=true`; an omitted report setting cannot qualify original TRX retention.
 
-Canonical source: AppHost TestInfrastructure; actual model regressions: ComparisonTests BenchmarkComparisons/UnitContracts; functional infrastructure tests remain in UnitTests TestInfrastructure. Shared IntegrationTests fixture and CI composition are integration-owned. No public database or persisted format change. Local runs are development evidence; delivered-source Linux gates remain.
+Canonical source: `scripts/Features/TestInfrastructure/run-tests.mjs` selects the closed TUnit suite. IntegrationTests owns the real Aspire AppHost lifecycle through `TUnit.Aspire` and retains process readiness, abrupt-fault and joined-cleanup evidence.
 
 ### Logger model-control selection
 
@@ -117,7 +117,7 @@ AC-TEST-010 requires original per-suite MTP/TRX evidence from every required CI 
 | REQ-TEST-013: completion and planned fault contracts remain intact | AC-TEST-013: expected WaitForCompletion exit is allowed; nonzero/missing completion exit fails; healthy/running and transient health snapshots continue waiting; no dependencies remains valid; guards are canceled and joined before intentional comparison node kill/restart assertions |
 | REQ-TEST-014: original outcome, ownership and cleanup remain intact | AC-TEST-014: runner exit codes, startup exceptions and cancellation remain failures where applicable; AppHost stopping cancels waits; every notification task is canceled/joined, existing diagnostics and stop/disposal remain; unrelated database cells are unaffected |
 
-The lifecycle helpers live in AppHost Features/TestInfrastructure with notification regressions in ComparisonTests Features/TestInfrastructure; TestSuiteApplication and IsolatedCase integrate them. Public database, stored data, dependencies and topology are N/A: this is private test orchestration. service tests establish notification handling, not real Docker failure qualification; delivered Linux tests and failure artifact review remain required.
+Aspire lifecycle helpers live in `build/KeyLoad.AppHost/TestInfrastructure`. Distributed product tests use the shared TUnit Aspire fixtures in IntegrationTests. Real resource failure and joined-cleanup evidence remain separate from source/model inspection.
 
 ## Central TUnit admission
 
@@ -128,8 +128,6 @@ Aspire model tests map default/configured forwarding, boundary and malformed con
 ### Current normal-only suite composition
 
 SIMD is mandatory in every product and test run. TestSuiteProtocol and ProjectForSuite admit only analyzers/unit/recovery/cluster/comparison/site; any other suite name is unknown and refuses before resource creation. TestSuiteResources has no runner-disabled-intrinsics branch: 50 slots for ordinary tests and exclusive scheduling for heavy tests, explicit supported parallelism, comparison isolation of one test at a time, all project/argument/TRX/coverage/path selection and genuine Aspire preparation, readiness, clients and shutdown are retained. There is no ignored alias, scalar alternate or limits/configuration fallback.
-
-audit proves TestSuiteApplication, TestSuiteSettingsReader and typed execution policy have no scalar-specific behavior, so their cancellation, output/process joins and failure ledgers remain byte-exact. Existing AspireTestEntryModelTests same declarations verify the complete six-suite model, exact argument/project/results shape and absent injected disable environment. FilterIsOneArgumentAndIsBoundedBeforeResourcesAreAdded now refuses old unit-scalar before its original genuine healthy model; full negative and healthy controls/disposal remain. Its independent default ordinary literal is50, while the explicit rejected comparison20 configuration remains independently20. This source-owned model remains in ComparisonTests and executes only through authorized GitHub Benchmarks under its local policy; no local benchmark workload is started. Existing FunctionalTestParallelismTests/TUnitSelectionTests normal controls and final all-source compiler/format/census remain mandatory.
 
 ### Single normal (SIMD) profile for functional coverage
 
@@ -145,7 +143,7 @@ Whole regression: existing ImagesProduceClosedManifestAndRejectTamperingWithoutR
 
 ## Build and Tests boundary
 
-REQ-TEST-PIPELINE-001: Build and Tests runs solution builds, repository checks and KeyLoad functional analyzer/unit/scalar/recovery/cluster tests only. Benchmark tests are compiled in the separate KeyLoad.ComparisonTests project and executed only by Benchmarks, including progress, entry and counter regressions.
+REQ-TEST-PIPELINE-001: Build and Tests runs solution builds, repository checks and KeyLoad functional analyzer/unit/scalar/recovery/cluster tests only. Benchmark sessions execute only from `benchmarks/KeyLoad.ComparisonHost` in the separate Benchmarks workflow. There is no benchmark test suite under `tests/`.
 
 AC-TEST-PIPELINE-001: the unit assembly discovers no BenchmarkComparisons cases; the comparison assembly retains their test inventory and assertions; Build and Tests invokes no comparison suite or benchmark load-generator preparation. Benchmarks executes the transferred contracts in normal and scalar modes and retains original TRX reports. Static workflow/project inventory review is the explicit infrastructure-placement evidence exception; actual Aspire/TUnit discovery and original reports verify the runtime boundary.
 
@@ -373,3 +371,7 @@ CreateWaitingSaga intent: sampled now constructs dueAt, persisted CompareExchang
 REQ-TEST-010 / AC-TEST-010 and REQ-MSG-007 / AC-MSG-007: each actual TestCluster builder carries one private fixture-owner token in its Properties; actual ISiloBuilder.Configuration resolves only that owning fixture. A separately owned fixture cannot replace or clear another builder's owner. Register before build/start, unregister only the same owner during its original joined cleanup; startup failures retain original failure and database cleanup failures. No new product hook, alternate coordinator, timeout or provider. Existing shared PerTestSession and owned boundary fixtures keep their actual Orleans/ZoneTree lifetimes.
 
 The parent expiry whole-flow advances the actual owning clock two minutes after the first committed claim. Its unchanged default30second lease has then expired. Canonical receive replay reauthorizes that lease (CommandOutcomes.ValidateCachedQueueReceive -> Messaging.Lease) and must return exact Rejected/LeaseExpired with null result; serializing that null as a recovered receipt was the test error. Assert complete outer/lane identity, typed failure, no stop error, unchanged original persisted ReceiveResult bytes, every store byte and position, followed by fresh healthy receive. Never extend lease or parent deadline, reset clock, disable strict validation or invent a result. Existing valid receipt replay cases remain intact.
+
+## TUnit Aspire lifecycle
+
+Real distributed tests use `TUnit.Aspire` 1.75.0 and `AspireFixture<Projects.KeyLoad_AppHost>`. TUnit owns shared keyed class data-source initialization and disposal; the fixture configures the AppHost and preserves bounded process-fault, readiness and joined-shutdown evidence. Tests obtain actual endpoints from the started application. Analyzer, unit, process-recovery and static-site tests remain TUnit suites with only the infrastructure their operations require. The Benchmarks workflow owns comparison measurements separately.

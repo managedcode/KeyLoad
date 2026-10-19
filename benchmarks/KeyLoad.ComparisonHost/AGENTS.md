@@ -2,7 +2,7 @@
 
 ## Purpose, entry points and ownership
 
-- Owns the TUnit comparison executable and helpers in root responsibility folders.
+- Owns the separate benchmark executable: `Orchestration/` starts the selected Aspire topology and `Session/` runs measured workloads. No comparison test project lives under `tests/`.
 - Read root AGENTS.md, docs/Architecture.md, BenchmarkComparisons feature, ADR-033/034/043 and comparison-host acceptance/plan before implementation.
 - The selected load-test AppHost owns only database infrastructure. This client process runs outside the resource graph and owns workload, measurements, original reports, and joined client lifetime. Never replace the required KeyLoad topology.
 - Capture actual source/DLL/PDB/process identities. Local execution has no fabricated GitHub IDs and remains unqualified for public figures. Publication independently requires original authenticated GitHub source/run/attempt/job artifacts and matched resources. Ordinary execution has no KeyLoad server or client Docker image prerequisite.

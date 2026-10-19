@@ -31,18 +31,15 @@ flowchart LR
     Execution --> Report[Unchanged original measurement JSON]
 ```
 
-Slice map: Comparisons owns the observer/phase accounting; ComparisonTests owns execution
-log capture and the durable latest snapshot; scripts/BenchmarkComparisons owns the real
-process/output relay; benchmarks.yml is the workload join and runs the focused execution
-logger/parser/file regressions. Benchmark contract cases live in
-`tests/KeyLoad.ComparisonTests/BenchmarkComparisons/UnitContracts`; Build and Tests
-unit/scalar execution never runs them. Database API, SDK/MCP, stored state, GUI and
-website metrics: N/A.
+Slice map: Comparisons owns observer and phase accounting; ComparisonHost owns live
+log capture and the latest durable snapshot. Scripts relay bounded process output;
+`benchmarks.yml` joins the measured workload and retains original artifacts.
+Benchmark orchestration belongs to `benchmarks/KeyLoad.ComparisonHost/Orchestration`.
+Build and Tests runs product TUnit suites independently.
 
-Verification: Release solution build, Aspire-owned focused unit/comparison regressions,
-formatter/governance, then delivered-source CI and Benchmarks. Real
-Docker/replicated-cluster/recovery and mandatory endurance/scale gates need their own
-genuine runs. The profile of 4096 documents and 50000 attempts is a control workload,
-not 100k/1m dataset qualification. Original-job times are not request latency
+Verification requires formatter/governance, a complete solution build, and original
+delivered-source Linux benchmark artifacts. Real cluster recovery, endurance and scale
+remain separate gates. A 4096-document, 50000-attempt control workload does not qualify
+100000- or 1000000-record measurements. Original-job times are not request latency
 metrics. A source checkpoint is not a passing build, runtime, replication or
 performance qualification.

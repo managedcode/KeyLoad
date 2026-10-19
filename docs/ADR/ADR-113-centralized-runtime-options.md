@@ -272,7 +272,7 @@ optional buffer parameter. Preserve smaller caller buffers and unbuffered
 requests; reject invalid configured ceilings before taking file ownership. Real
 unflushed-file observations verify that lower configuration reaches the IO sink.
 
-Executable ComparisonTests lifecycle helpers consume the same central
+Executable ComparisonHost lifecycle helpers consume the same central
 binding contract through `ExecutionPolicyFixture.Harness()` and a typed
 `KeyLoad:ComparisonHarness` section. Ownership is feature-local
 Configuration/ComparisonHarnessOptions, the fixture composition entry,

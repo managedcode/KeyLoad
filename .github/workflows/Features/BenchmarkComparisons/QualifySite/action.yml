@@ -21,9 +21,11 @@ runs:
           fi
         done
         mkdir -p "$base"
-        printf 'EVIDENCE_DIR=%s\nKEYLOAD_SITE_REPOSITORY=%s\n' "$base" "$GITHUB_WORKSPACE/website" >> "$GITHUB_ENV"
-        printf 'KEYLOAD_SITE_COVERAGE=%s/js-coverage\n' "$base" >> "$GITHUB_ENV"
-        printf 'KEYLOAD_SITE_ISOLATED_CAPTURE=%s/isolated-capture\nKEYLOAD_SITE_ISOLATED_ARCHIVE_RECEIPT=%s/isolated-capture/archive-receipt.json\nKEYLOAD_SITE_ISOLATED_AGGREGATE=%s/isolated-capture/input/aggregate\n' "$base" "$base" "$base" >> "$GITHUB_ENV"
+        {
+          printf 'EVIDENCE_DIR=%s\nKEYLOAD_SITE_REPOSITORY=%s\n' "$base" "$GITHUB_WORKSPACE/website"
+          printf 'KEYLOAD_SITE_COVERAGE=%s/js-coverage\n' "$base"
+          printf 'KEYLOAD_SITE_ISOLATED_CAPTURE=%s/isolated-capture\nKEYLOAD_SITE_ISOLATED_ARCHIVE_RECEIPT=%s/isolated-capture/archive-receipt.json\nKEYLOAD_SITE_ISOLATED_AGGREGATE=%s/isolated-capture/input/aggregate\n' "$base" "$base" "$base"
+        } >> "$GITHUB_ENV"
     - name: Download verified benchmark data
       id: source
       env:
@@ -108,7 +110,7 @@ runs:
         "$chrome" --version > "$EVIDENCE_DIR/browser-version.txt"
         printf 'KEYLOAD_SITE_BROWSER=%s\n' "$chrome" >> "$GITHUB_ENV"
         mkdir -p "$KEYLOAD_SITE_COVERAGE/node"
-        cd website
+        cd website || exit
         git ls-files -z | xargs -0 sha256sum > "$EVIDENCE_DIR/source.sha256"
     - name: Set up .NET
       uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
@@ -123,9 +125,6 @@ runs:
         pwsh --version > "$EVIDENCE_DIR/powershell-version.txt"
         dotnet restore KeyLoad.slnx
         dotnet build build/KeyLoad.AppHost/KeyLoad.AppHost.csproj --no-restore -warnaserror
-        dotnet build tests/KeyLoad.ComparisonTests/KeyLoad.ComparisonTests.csproj --no-restore -warnaserror
-        node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/SiteQualificationStartupTests/*' --KeyLoadTests:ReportTrx=true "--KeyLoadTests:ResultsDirectory=$EVIDENCE_DIR/startup-tests"
-        node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/SessionCohortContractTests/*' --KeyLoadTests:ReportTrx=true "--KeyLoadTests:ResultsDirectory=$EVIDENCE_DIR/selection-tests"
         dotnet build tests/KeyLoad.Analyzers.Tests/KeyLoad.Analyzers.Tests.csproj --no-restore -warnaserror
         mkdir -p "$EVIDENCE_DIR/analyzer-coverage"
         cp scripts/Features/CodeQuality/site-analyzer-coverage.settings.xml "$EVIDENCE_DIR/analyzer-coverage/coverage.config.xml"
@@ -166,7 +165,7 @@ runs:
     - name: Check every required test passed
       shell: pwsh
       run: |
-        $receipts = foreach ($suite in @('startup-tests', 'selection-tests', 'analyzer-tests', 'site-tests')) {
+        $receipts = foreach ($suite in @('analyzer-tests', 'site-tests')) {
           $files = @(Get-ChildItem -LiteralPath "$env:EVIDENCE_DIR/$suite" -Filter '*.trx' -File)
           if ($files.Count -ne 1) { throw "Expected exactly one $suite TRX receipt" }
           [xml]$document = Get-Content -LiteralPath $files[0].FullName -Raw

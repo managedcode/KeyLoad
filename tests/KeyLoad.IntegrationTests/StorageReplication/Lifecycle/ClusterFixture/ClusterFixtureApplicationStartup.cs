@@ -12,10 +12,9 @@ internal static class ClusterFixtureApplicationStartup
     internal static ClusterFixtureColdStartObservation ObserveColdStart(string root)
         => new(root, Directory.Exists(root), File.Exists(root));
 
-    internal static async Task<string> StartAsync(DistributedApplication application, IReadOnlyCollection<string> names,
+    internal static async Task<string> ObserveStartedAsync(DistributedApplication application, IReadOnlyCollection<string> names,
         CancellationToken token)
     {
-        await application.StartAsync(token).ConfigureAwait(false);
         await AspireStartupReadiness.WaitForHealthyAsync(application, names, token).ConfigureAwait(false);
         var output = new ClusterFailureReceipts().RequireRunOutput(TestContext.ResultsDirectory);
         Directory.CreateDirectory(output);

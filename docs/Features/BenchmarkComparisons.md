@@ -39,7 +39,7 @@ Result files are immutable evidence of their own source. This decision establish
 no performance, durability or production-readiness claim. UI is N/A:
 internal diagnostics do not produce the public comparison website.
 
-[gate repair](BenchmarkComparisons/GateRepair.md) / [ADR-068](../ADR/ADR-068-benchmark-gate-repair.md)
+[ADR-068](../ADR/ADR-068-benchmark-gate-repair.md)
 define the same-ID current-job refresh, the exact canonical fixture metadata and the
 Kurrent leader-routing contracts that keep the full isolated scope intact.
 
@@ -71,11 +71,11 @@ evidence contracts.
 - Harness/adapters: `benchmarks/KeyLoad.Comparisons/`.
 - Embedded scenario library: `benchmarks/KeyLoad.BenchmarkScenarios/`; `KeyLoad.Benchmarks` retains only its typed executable runner under [ADR-047](../ADR/ADR-047-embedded-benchmark-host.md).
 - Aspire engine resources: `build/KeyLoad.LoadTests.AppHost/`.
-- Tests: `tests/KeyLoad.ComparisonTests/BenchmarkComparisons/`, including the sole benchmark-contract owner `UnitContracts/`; only helpers with actual functional consumers remain shared.
+- Session orchestration: `benchmarks/KeyLoad.ComparisonHost/Orchestration/`; measured workload cases: `benchmarks/KeyLoad.ComparisonHost/Session/`. No separate comparison test project exists.
 - Evidence/chart tooling: `scripts/Features/BenchmarkComparisons/`.
 - Site: `site/Features/BenchmarkComparisons/`.
 - Docs: this spec, ADR-034, `implementation/comparative-benchmarks.md` and the README presentation.
-- Time-series profile: Aspire resource in `build/KeyLoad.LoadTests.AppHost/`; profile/targets under `benchmarks/KeyLoad.Comparisons/TimeSeries/`; isolated composition in `benchmarks/KeyLoad.ComparisonHost/`; real tests under `tests/KeyLoad.ComparisonTests/BenchmarkComparisons/TimeSeries/`; [ADR-050](../ADR/ADR-050-timeseries-timescale-comparison.md).
+- Time-series profile: Aspire resource in `build/KeyLoad.LoadTests.AppHost/`; profile/targets under `benchmarks/KeyLoad.Comparisons/TimeSeries/`; isolated composition in `benchmarks/KeyLoad.ComparisonHost/`; [ADR-050](../ADR/ADR-050-timeseries-timescale-comparison.md).
 - Product persisted schema/public API changes: N/A; engines use isolated per-run benchmark databases/collections/streams.
 
 ## host execution and source evidence
@@ -158,7 +158,7 @@ ownership and PostgreSQL public event readback.
 
 | Acceptance | Owning scope | Caller-visible verification |
 |---|---|---|
-| AC-PERF-004 | Harness PostgresComparisonSession; ComparisonTests PostgresStreamPublicRegression and the existing PostgresSchemaPublicFlow join | Existing real Aspire PostgreSQL target: seeded, absent, append, conflicting duplicate/no corruption, cancelled and healthy following event reads; no new SQL or doubles. |
+| AC-PERF-004 | Harness PostgresComparisonSession; ComparisonHost live PostgreSQL checks and schema-lifetime joins | Existing real Aspire PostgreSQL target: seeded, absent, append, conflicting duplicate/no corruption, cancelled and healthy following event reads; no new SQL or doubles. |
 | AC-PERF-002/003 | ComparisonHost settings/constants/owner and host-only validation; UnitTests real-child startup/bindings/cleanup cases | Exactly three distinct HTTP(S) node origins with index 0 matching primary; safe early invalid config; actual Basic-auth management client; all existing precedence/cleanup/secret checks retained. |
 | AC-PERF-002/003 | AppHost BenchmarkComparisons/BenchmarkCallerBindings and the existing composition call | Actual node endpoints and broker management/user/password references; three-copy and queue-member proofs remain mandatory. |
 | AC-PERF-001/009 | Full relevant main baseline | Original GitHub results retain byte hashes, counts and failing cases; source-only builds cannot qualify tests. |
@@ -338,7 +338,7 @@ results, authentic jobs/images and a separate complete family projection are req
 before new TimeSeries metrics publish.
 
 Canonical technical ownership is BenchmarkComparisons/TimeSeries/Intensive in
-Comparisons, mirrored by ComparisonTests files and AppHost/host helpers. Product
+Comparisons, mirrored by ComparisonHost files and AppHost/host helpers. Product
 API/data migration is N/A: existing authorized SDK/MCP operations remain.
 Library-only memory aggregation is N/A in this node matrix; its semantic
 regressions remain.
@@ -378,10 +378,7 @@ required 100k/1m database datasets, replication/durability evidence, public webs
 comparisons or an acceleration claim. Canonical rewrite cost, correction recovery,
 storage, representative database scale and Linux gates remain open.
 
-`tests/KeyLoad.ComparisonTests/BenchmarkComparisons/UnitContracts/Cases/Sample/SampleChunkBenchmarkConsumerTests.cs`
-verifies all 36 matched cases through the real external generated consumer and performs
-its mutation rejection oracle; its Dry execution proves interoperability rather than
-performance. `scripts/Features/BenchmarkComparisons/sample-chunk-development*.mjs` binds
+The generated consumer executes the real benchmark fixtures. `scripts/Features/BenchmarkComparisons/sample-chunk-development*.mjs` binds
 the actual child execution, all 36 original BDN cases and 9 corpus manifests to
 unchanged source and Release dependency inventories, retaining the original settings
 and rejecting public or database-scale qualification. The owning
@@ -390,8 +387,7 @@ from validated Git paths: it omits only absent paths reported by ENOENT, rejects
 symlink parents and unsafe or non-regular present files, and retains exact
 per-file/total bounds, hashes and unchanged before/after source and Release
 inventories. A path disappearing during hashing still fails; no allowlist for removed paths
-or ignored non-ENOENT failure is permitted. The consumer regression runs through the
-unified Aspire entry; neither source review nor a build establishes consumer execution
+or ignored non-ENOENT failure is permitted. The consumer runs through the separate benchmark entry; neither source review nor a build establishes consumer execution
 or comparative performance qualification.
 
 ## Failed-cell publication contract
@@ -1001,3 +997,11 @@ flowchart LR
     SiteBrand --> Pages[Pages build BUILD.assets]
     Parity[SiteBrandParityTests] --> SiteBrand
 ```
+
+### Session workload evidence
+
+The separate benchmark host validates the seven original workload results, case hashes,
+source/run cohort and original TUnit receipt before retaining its session manifest.
+Deleted comparison-test suites do not contribute qualification steps. Product fault,
+durability, endurance and matched-process resource qualification remain separate gates;
+workload evidence does not close them.

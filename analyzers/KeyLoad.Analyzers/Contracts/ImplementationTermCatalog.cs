@@ -90,11 +90,7 @@ internal static class ImplementationTermCatalog
         "KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons.SampleChunkBenchmarkCorpus",
         "KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons.SampleChunkBenchmarkManifest",
         "KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons.SampleChunkBenchmarkState",
-        "KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons.SampleChunkSerializationBenchmarks",
-        "KeyLoad.ComparisonTests.Features.BenchmarkComparisons.SampleChunkBenchmarkConsumerTests",
-        "KeyLoad.ComparisonTests.Features.BenchmarkComparisons.SampleChunkBenchmarkRejectionOracle",
-        "KeyLoad.ComparisonTests.Features.BenchmarkComparisons.SampleChunkBenchmarkRejectionMutations",
-        "KeyLoad.ComparisonTests.Features.BenchmarkComparisons.SampleChunkBenchmarkRejectionProgram"
+        "KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons.SampleChunkSerializationBenchmarks"
     ];
     internal static readonly string[] DataControlMembers =
     [
@@ -140,8 +136,6 @@ internal static class ImplementationTermCatalog
         "KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons.ScaleServerResourceSampleBudget",
         "KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons.ScaleServerResourceSampler",
         "KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons.ScaleServerResourceEvidenceCollector",
-        "KeyLoad.ComparisonTests.Features.BenchmarkComparisons.RawStorageReportData",
-        "KeyLoad.ComparisonTests.Features.BenchmarkComparisons.SerializationReportData"
     ];
     internal static readonly string[] MeasurementMembers =
     [
@@ -159,14 +153,6 @@ internal static class ImplementationTermCatalog
         "KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons.ScaleServerResourceBounds.SamplingMissing",
         "KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons.ScaleServerResourceProcess.ReadBoundedAsync(System.IO.Stream, int, int, System.Threading.CancellationToken)",
         "KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons.ScaleServerResourceProcess.DrainBoundedAsync(System.IO.Stream, int, System.Threading.CancellationToken)",
-        "KeyLoad.ComparisonTests.Features.BenchmarkComparisons.Neo4jHarnessConstants.SamplesCsvFile",
-        "KeyLoad.ComparisonTests.Features.BenchmarkComparisons.ScaleServerCancellationProbe.SamplingMissing",
-        "KeyLoad.ComparisonTests.Features.BenchmarkComparisons.ScaleServerCancellationProbe.SampleCountField",
-        "KeyLoad.ComparisonTests.Features.BenchmarkComparisons.ScaleServerCancellationProbe.AdditionalSampleCount",
-        "KeyLoad.ComparisonTests.Features.BenchmarkComparisons.ScaleServerResourceBoundsFixture.OutputBoundMessage",
-        "KeyLoad.ComparisonTests.Features.BenchmarkComparisons.ScaleServerResourceBoundsFlow.SampleByteGrant",
-        "KeyLoad.ComparisonTests.Features.BenchmarkComparisons.ScaleServerResourceNodeProgram.Source",
-        "KeyLoad.ComparisonTests.Features.BenchmarkComparisons.ScaleServerResourceEvidenceParserTests.AcScale016RejectsMisboundOrIncomparableServerEvidence(string)"
     ];
 
     internal static bool RuntimeNamespace(string value) => Array.Exists(RuntimeNamespaces,

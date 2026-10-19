@@ -215,7 +215,7 @@ NuGet publication follow root policy.
 | tests/KeyLoad.UnitTests | TestDatabase.cs and `<SliceName>/` folders | Matching product slices; contract and engine regressions. |
 | tests/KeyLoad.RecoveryTests | Program.cs, StorageRecovery/Cases/, feature-owned Processes/ and Execution/ | TUnit recovery tests and their real child-process scenarios in the same test assembly. |
 | tests/KeyLoad.IntegrationTests | ClusterFixture.cs, StorageReplication/Cases/Cluster/ClusterTests.cs, ResourceExecution/Cases/AdmissionClusterTests.cs | Aspire-owned cluster fixtures; business cases mirror their owning slices through the real .NET SDK and official MCP client. |
-| tests/KeyLoad.ComparisonTests | BenchmarkComparisons/ | BenchmarkComparisons; real engine/container correctness and measurements. |
+| benchmarks/KeyLoad.ComparisonHost | Session/, Orchestration/ | Selected live benchmark topology, measured workloads and original result artifacts. |
 | benchmarks/KeyLoad.Benchmarks | Program.cs | BenchmarkComparisons; embedded microbenchmark development, no public claim without CI evidence. |
 | benchmarks/KeyLoad.BenchmarkScenarios | Benchmarks/EmbeddedBenchmarks.cs | BenchmarkComparisons; [ADR-047](ADR/ADR-047-embedded-benchmark-host.md) public fixture library for the external generated consumer. |
 | benchmarks/KeyLoad.Comparisons | Session/, Targets/ | BenchmarkComparisons; public library with shared workload/oracle and official engine clients. |
@@ -731,20 +731,17 @@ and acknowledgement guarantees separately.
 
 ```mermaid
 flowchart LR
-    AppHost[comparisons Aspire resource] --> ComparisonHost[TUnit C# client workload]
-    ComparisonHost --> ComparisonLibrary[Public harness library]
-    ComparisonTests[Real TUnit and engine tests] --> ComparisonLibrary
+    ComparisonHost[Separate benchmark session owner] --> AppHost[Selected Aspire database infrastructure]
+    ComparisonHost --> ComparisonLibrary[Public workload and target library]
 ```
 
 ```mermaid
 classDiagram
-    class ComparisonTests
-    class Neo4jHarnessRegression
+    class ComparisonHost
     class BenchmarkSession
     class Neo4jTarget
     class Neo4jQueryResponse
-    ComparisonTests --> Neo4jHarnessRegression : existing Aspire endpoint
-    Neo4jHarnessRegression --> BenchmarkSession : real load and failed prerequisites
+    ComparisonHost --> BenchmarkSession : measured workload against actual endpoint
     BenchmarkSession --> Neo4jTarget : target contract
     Neo4jTarget --> Neo4jQueryResponse : parsed acknowledgement
 ```

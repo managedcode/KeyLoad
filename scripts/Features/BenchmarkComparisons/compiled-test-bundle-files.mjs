@@ -62,7 +62,7 @@ export async function collectRuntimeFiles(root, projects, aspireVersion) {
   const directories = new Set([runtimeBundle.packages]);
   for (const project of projects) {
     requireRuntime(/^(?:src|tests|benchmarks|build|analyzers)\/[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+\.csproj$/u.test(project));
-    if (project.startsWith('tests/') && project !== 'tests/KeyLoad.ComparisonTests/KeyLoad.ComparisonTests.csproj') continue;
+    if (project.startsWith('tests/')) continue;
     directories.add(path.posix.dirname(project) + '/bin/Release');
     directories.add(path.posix.dirname(project) + '/obj');
   }

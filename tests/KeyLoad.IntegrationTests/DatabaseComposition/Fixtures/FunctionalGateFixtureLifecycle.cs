@@ -1,4 +1,5 @@
 using KeyLoad.AppHost.Features.TestInfrastructure;
+using KeyLoad.Clustering;
 using KeyLoad.Diagnostics.Features.ResourceExecution;
 using KeyLoad.IntegrationTests.Features.StorageReplication;
 using KeyLoad.Server;
@@ -33,9 +34,20 @@ internal sealed partial class FunctionalGateFixture
         }
         await FunctionalGateResourceLogs.JoinAsync(diagnostics, NodeNames, diagnosticSecrets,
             Root, saveStartupEvidence!, failures).ConfigureAwait(false);
-        if (contendersReleased && builder is { } ownedBuilder)
+        if (contendersReleased)
         {
-            await ServerFailureObserver.ObserveAsync(() => ownedBuilder.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+            try
+            {
+                await aspire.DisposeAsync().ConfigureAwait(false);
+            }
+            catch (Exception failure) when (CqrsBoundaryErrors.IsNonFatal(failure))
+            {
+                failures.Add(failure);
+            }
+            catch (Exception failure) when (!CqrsBoundaryErrors.IsNonFatal(failure))
+            {
+                failures.Add(failure);
+            }
         }
         if (stopped && started && failures.Count == 0)
         {

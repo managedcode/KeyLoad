@@ -5,7 +5,7 @@ Related: REQ-BC-023 / AC-GH-001..007, REQ-BC-001/002/009; ADR-032, ADR-033, ADR-
 
 ## Decision
 
-Use the existing Aspire-owned ComparisonTests lifecycle for Neo4j regressions. Tests and the benchmark target must use a real pinned Neo4j Community server and the real KeyLoad cluster target where applicable. Neo4j Community is a single-node topology; 2-node and 3-node Neo4j slots remain explicit unsupported-topology dispositions. Do not represent a standalone server as a cluster or fabricate missing capabilities.
+Use the separate ComparisonHost session owner and the selected Aspire database infrastructure. The benchmark target uses a real pinned Neo4j Community server and the real KeyLoad cluster target where applicable. Neo4j Community is a single-node topology; 2-node and 3-node Neo4j slots remain explicit unsupported-topology dispositions. Do not represent a standalone server as a cluster or fabricate missing capabilities.
 
 Grant cleanup authority only after a valid CREATE acknowledgement confirms ownership of the label/constraint. On failure or uncertain acknowledgement, do not delete an unowned resource. Dispose each owned client and attempt every confirmed-owned cleanup while retaining primary and cleanup failures. An uncertain acknowledgement may leave an orphan; it is not proof of ownership or recovery safety.
 
@@ -13,18 +13,26 @@ Neo4j's HTTP Query API can return HTTP 202 for a query failure. Parse the docume
 
 ```mermaid
 flowchart LR
-    Aspire[Existing Aspire Neo4j resource] --> Target[Real target and regression]
+    Aspire[Existing Aspire Neo4j resource] --> Target[Real Neo4j target]
     Target --> Query[CREATE acknowledgement]
     Query -->|valid ownership| Cleanup[Delete only owned label and constraint]
-    Query -->|failure or uncertainty| Preserve[Preserve unowned fixture]
+    Query -->|failure or uncertainty| Preserve[Preserve unowned data]
     Cleanup --> Oracle[Independent readback]
     Preserve --> Oracle
 ```
 
 ## Acceptance and implementation contract
 
-AC-GH-001..007 require replacement of fake HTTP/target cases with genuine lifecycle tests; successful ownership acknowledgement; preservation of foreign constraints on duplicate/setup failures; validation of real response shapes; complete measured writes/data readback; bounded mismatch/restoration flows; and exact-source qualification. Existing pure oracle cases remain useful when they do not stand in for behavior.
+AC-GH-001..007 require genuine engine operations, acknowledged cleanup ownership,
+preservation of foreign constraints after setup failures, valid response shapes,
+measured writes with original readback and bounded cleanup. These remain observable
+acceptance requirements; source inspection does not establish a pass.
 
-The private protocol helper validates the already parsed JsonElement; it does not change the public target API, request body, operation order or report schema. The existing ComparisonTests hook, friend visibility, AppHost lifecycle and shared joins are unchanged. Tests remain under tests/KeyLoad.ComparisonTests/BenchmarkComparisons/; target code remains in the Neo4j BenchmarkComparisons slice. No fake server, second host, proxy or product injector is introduced.
+The current target belongs to `benchmarks/KeyLoad.Comparisons`; the separate
+`benchmarks/KeyLoad.ComparisonHost` owns selected live infrastructure, measured
+workloads and original result artifacts. There is no comparison test project or
+parallel protocol-test harness. Original workload evidence does not qualify
+independent process faults, recovery or production readiness.
 
-Run the full enabled source checks before exact-source Linux TUnit and comparison qualification. A successful model test is not startup, query, cleanup or performance evidence. Keep the ADR Accepted until every mapped gate has authentic evidence. Historical source/run receipts remain immutable and do not qualify the current source.
+Run source checks and retain exact-source Linux engine and benchmark artifacts.
+Historical receipts do not qualify changed source.

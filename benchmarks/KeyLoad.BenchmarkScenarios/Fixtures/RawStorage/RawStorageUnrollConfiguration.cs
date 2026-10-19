@@ -3,7 +3,8 @@ using BenchmarkDotNet.Jobs;
 
 namespace KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
 
-internal sealed class RawStorageUnrollConfiguration : ManualConfig
+/// <summary>Provides the reflection-created BenchmarkDotNet loop policy for raw storage.</summary>
+public sealed class RawStorageUnrollConfiguration : ManualConfig
 {
     private const int CtorFactorSingleItemCount = 1;
 

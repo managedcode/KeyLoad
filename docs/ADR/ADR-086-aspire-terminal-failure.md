@@ -37,7 +37,7 @@ database jobs continue their own workloads after another database fails.
 ## Implementation and verification
 
 1. Requirements and this ADR precede the lifecycle helpers.
-2. New AppHost Features/TestInfrastructure lifecycle helpers and new ComparisonTests Features/TestInfrastructure tests use genuine Aspire notifications: terminal/missing-exit, live dependency failure, successful/failed bootstrap, no dependencies, cancellation and task settlement. failures settle within five seconds of event publication.
+2. AppHost lifecycle helpers retain original terminal state, exit code, cancellation and joined completion. Real distributed test fixtures use TUnit.Aspire; comparison orchestration belongs to the separate benchmark host.
 3. Build/format/governance and focused TUnit tests run through the canonical Aspire entry, then exact-source Linux CI reports are retained. Full unit/scalar/recovery/cluster and benchmark qualification remain required; unrelated failures are reported honestly. Source/service tests do not prove a Docker crash was exercised. A real failure artifact supplies environmental-path evidence.
 
 Acceptance mapping is in TestInfrastructure. No production contract, package, stored-data format or topology changes. Rollback reverts only these lifecycle joins and helpers; the canonical Aspire entry and existing outcomes remain required. Frontend N/A: developer and CI lifecycle only.

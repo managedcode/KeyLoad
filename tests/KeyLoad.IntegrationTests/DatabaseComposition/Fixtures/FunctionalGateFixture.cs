@@ -1,6 +1,5 @@
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
-using Aspire.Hosting.Testing;
 using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.IntegrationTests.Features.StorageReplication;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,7 +13,7 @@ internal sealed partial class FunctionalGateFixture : IAsyncDisposable
     private const int ThreeSilos = 3;
     private readonly Lock disposalGate = new();
     private readonly bool coldReopen;
-    private IDistributedApplicationTestingBuilder? builder;
+    private readonly FunctionalGateApplicationFixture aspire;
     private Task? disposal;
     private ClusterFixtureDiagnostics? diagnostics;
     private string[] diagnosticSecrets = [];
@@ -41,6 +40,7 @@ internal sealed partial class FunctionalGateFixture : IAsyncDisposable
     private FunctionalGateFixture(int nodes, int replicas, bool coldReopen, bool exclusiveOwnerContention)
     {
         this.coldReopen = coldReopen;
+        aspire = new(this);
         fileContenders = new(exclusiveOwnerContention);
         NodeNames = Enumerable.Range(SingleSilo, nodes).Select(ClusterFixtureProtocol.NodeName).ToArray();
         ReplicaCount = replicas;
@@ -64,35 +64,41 @@ internal sealed partial class FunctionalGateFixture : IAsyncDisposable
         token.ThrowIfCancellationRequested();
         var owner = new FunctionalGateFixture(nodes, replicas, coldReopen, exclusiveOwnerContention);
         return await FunctionalGateFixtureStartup.InitializeAsync(owner,
-            () => owner.InitializeAsync(nodes, token)).ConfigureAwait(false);
+            () => owner.InitializeOwnedAsync(token)).ConfigureAwait(false);
     }
 
-    private async Task InitializeAsync(int nodes, CancellationToken token)
+    private async Task InitializeOwnedAsync(CancellationToken token)
     {
-        var arguments = FunctionalGateFixtureStartup.Arguments(Root, nodes, ReplicaCount, coldReopen,
-            fileContenders.Enabled);
-        using var startupBound = new CancellationTokenSource(TimeSpan.FromMinutes(2), TimeProvider.System);
-        using var startup = CancellationTokenSource.CreateLinkedTokenSource(token, startupBound.Token);
-        builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.KeyLoad_AppHost>(arguments.ToArray(), startup.Token)
-            .ConfigureAwait(false);
-        ClusterFixtureComposition.ConfigureLogging(builder);
-        var resources = FunctionalGateProjectModel.ReadResourceNames(builder, NodeNames);
-        App = await builder.BuildAsync(startup.Token).ConfigureAwait(false);
+        ExecutionToken = token;
+        await aspire.InitializeAsync().ConfigureAwait(false);
+    }
+
+    internal CancellationToken ExecutionToken { get; private set; }
+
+    internal string[] CreateAspireArguments()
+        => FunctionalGateFixtureStartup.Arguments(Root, NodeNames.Length, ReplicaCount, coldReopen,
+            fileContenders.Enabled).ToArray();
+
+    internal async Task ObserveReadyAsync(CancellationToken cancellationToken)
+    {
+        await AspireStartupReadiness.WaitForHealthyAsync(App, NodeNames, cancellationToken).ConfigureAwait(false);
+        processEvidenceDirectory = new ClusterFailureReceipts().RequireRunOutput(TestContext.ResultsDirectory);
+        Directory.CreateDirectory(processEvidenceDirectory);
+        _ = await ClusterFixtureApplicationStartup.CaptureAsync(App, NodeNames, processEvidenceDirectory,
+            "execution-process-startup.json", cancellationToken).ConfigureAwait(false);
+        started = true;
+        PhysicalFiles = await FunctionalGatePhysicalFileAssertions.CaptureLiveAsync(this, cancellationToken).ConfigureAwait(false);
+    }
+
+    internal void OwnApplication(DistributedApplication app)
+    {
+        App = app;
         var profile = ClusterFixtureProfile.ReadProfile(Root);
         AdminKey = profile.AdminKey;
         diagnosticSecrets = [profile.SigningKey, profile.AdminKey];
         saveStartupEvidence = App.Services.GetRequiredService<ClusterFixtureStartupEvidence>().Save;
         diagnostics = new(App);
         diagnostics.Start(App.Services.GetRequiredService<ResourceLoggerService>());
-        var repository = ClusterFixtureDiagnostics.FindRepositoryRoot().FullName;
-        ColdRuntime = new(App, resources, repository);
-        await App.StartAsync(startup.Token).ConfigureAwait(false);
-        await AspireStartupReadiness.WaitForHealthyAsync(App, NodeNames, startup.Token).ConfigureAwait(false);
-        processEvidenceDirectory = new ClusterFailureReceipts().RequireRunOutput(TestContext.ResultsDirectory);
-        Directory.CreateDirectory(processEvidenceDirectory);
-        _ = await ClusterFixtureApplicationStartup.CaptureAsync(App, NodeNames, processEvidenceDirectory,
-            "execution-process-startup.json", startup.Token).ConfigureAwait(false);
-        started = true;
-        PhysicalFiles = await FunctionalGatePhysicalFileAssertions.CaptureLiveAsync(this, startup.Token).ConfigureAwait(false);
+        ColdRuntime = new(App, NodeNames, ClusterFixtureDiagnostics.FindRepositoryRoot().FullName);
     }
 }

@@ -19,24 +19,13 @@ internal static class ClusterFixtureComposition
             ClusterFixtureProtocol.ReplicaCountArgument + storage.ReplicaCount.ToString(System.Globalization.CultureInfo.InvariantCulture),
             KeyLoad.AppHost.Features.TestInfrastructure.ProcessFaultCommandProtocol.EnabledArgument];
 
-    internal static async Task<IDistributedApplicationTestingBuilder> CreateBuilderAsync(
-        string[] arguments, KeyLoad.IntegrationTests.Features.Authorization.FoundationOtlpClusterSelection? telemetry,
-        CancellationToken token)
+    internal static KeyLoadClient CreateClient(HttpClient transport, string key)
     {
-        var builder = telemetry is null
-            ? await DistributedApplicationTestingBuilder.CreateAsync<Projects.KeyLoad_AppHost>(arguments, token)
-            : await DistributedApplicationTestingBuilder.CreateAsync<Projects.KeyLoad_AppHost>(
-                KeyLoad.IntegrationTests.Features.Authorization.FoundationOtlpClusterConfiguration.Options(telemetry.Value), arguments, token);
-        return builder;
-    }
-
-    internal static KeyLoadClient CreateClient(DistributedApplication application, string node, string key)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(node);
+        ArgumentNullException.ThrowIfNull(transport);
         HttpClient? pending = null;
         try
         {
-            pending = application.CreateHttpClient(node, ClusterFixtureProtocol.HttpEndpointName);
+            pending = transport;
             pending.Timeout = ClusterFixtureProtocol.ClientTimeout;
             var client = new KeyLoadClient(pending, key, IntegrationClientOptions.Execution());
             pending = null;

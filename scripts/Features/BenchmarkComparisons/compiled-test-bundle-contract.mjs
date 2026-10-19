@@ -10,7 +10,6 @@ export const runtimeBundle = Object.freeze({
   maximumArchiveBytes: 6442450944, maximumOutputBytes: 67108864,
   timeoutMs: 1800000, sha256: /^[a-f0-9]{64}$/,
   assemblies: Object.freeze([
-    ['outer-tests', 'tests/KeyLoad.ComparisonTests/bin/Release/net10.0/KeyLoad.ComparisonTests'],
     ['apphost', 'build/KeyLoad.AppHost/bin/Release/net10.0/KeyLoad.AppHost'],
     ['load-apphost', 'build/KeyLoad.LoadTests.AppHost/bin/Release/net10.0/KeyLoad.LoadTests.AppHost'],
     ['server', 'src/KeyLoad/bin/Release/net10.0/KeyLoad'],

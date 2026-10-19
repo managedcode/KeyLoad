@@ -155,25 +155,14 @@ redirected pipe has not reached EOF. Successfully completed pipe tasks are remov
 from observation so EOF cannot cause a busy loop; a successful exit still requires both
 original readers to finish. The first operation failure and every distinct cleanup
 failure are preserved, along with the existing byte grants, cancellation, TERM/KILL
-bounds and provenance rules. ComparisonTests owns real Linux stdout/stderr overflow
-controls that use the validated cleanup threshold as a test cancellation bound, assert
-the exact bound failures and finish with a healthy follow-up after each original
-operation settles. A private bounded readiness marker identifies the actual child PID
-and start time before an owned gate permits `exec yes`, and the same child is
-independently asserted to have exited after the bound failure. On every
-assertion/error path the original operations are joined, any remaining same-identity
-child is stopped and the owned marker/gate directory is removed, retaining original and
-cleanup failures together.
+bounds and provenance rules. The owning benchmark host retains the original bounded stdout/stderr readers,
+termination and joined cleanup. Source inspection does not establish that overflow,
+cancellation or healthy follow-up has passed; those behaviors require original
+Linux execution evidence.
 
-The cancellation case is a complete real probe flow. It observes a bounded
-operation-owned readiness marker and the actual child PID before cancelling the
-original token, awaits the original probe and its redirected readers, asserts a
-cancellation with the original token (`TaskCanceledException` is a valid derived
-`OperationCanceledException`) and independently verifies that the child has exited. A
-healthy follow-up through the same production process contract then verifies its
-output and settled state. The case uses the existing validated execution options and
-owned fixture cleanup, without mocks, source-text checks, new production APIs, raised
-limits or detached cleanup.
+Cancellation qualification must observe the original process identity and readers,
+retain the original cancellation and verify actual process exit and a healthy following
+operation. The benchmark workload receipt does not establish this separate gate.
 
 ## Original teardown settlement (REQ/AC-SCALE-017)
 

@@ -17,7 +17,7 @@
     <PackageReference Include="Aspire.Hosting.RabbitMQ" />
     <PackageReference Include="Aspire.Hosting.Redis" />
     <InternalsVisibleTo Include="KeyLoad.UnitTests" />
-    <InternalsVisibleTo Include="KeyLoad.ComparisonTests" />
+    <InternalsVisibleTo Include="KeyLoad.ComparisonHost" />
     <InternalsVisibleTo Include="KeyLoad.IntegrationTests" />
   </ItemGroup>
 </Project>

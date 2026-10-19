@@ -16,7 +16,6 @@
     <InternalsVisibleTo Include="KeyLoad.LoadTests.AppHost" />
     <InternalsVisibleTo Include="KeyLoad.ComparisonHost" />
     <InternalsVisibleTo Include="KeyLoad.UnitTests" />
-    <InternalsVisibleTo Include="KeyLoad.ComparisonTests" />
     <InternalsVisibleTo Include="KeyLoad.IntegrationTests" />
   </ItemGroup>
 </Project>

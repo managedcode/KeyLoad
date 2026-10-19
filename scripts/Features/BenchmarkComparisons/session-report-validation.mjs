@@ -215,7 +215,7 @@ export function validateSessionQualification(value, session, execution) {
     && value.schemaVersion === 1 && value.sessionId === session.sessionId && value.target === session.target
     && value.nodeCount === session.nodeCount && Number.isInteger(value.runtimeExitCode)
     && value.runtimeExitCode >= -2_147_483_648 && value.runtimeExitCode <= 2_147_483_647 && ['passed', 'failed', 'notExecuted', 'notApplicable'].includes(value.status)
-    && Array.isArray(value.steps) && value.steps.length <= 3
+    && Array.isArray(value.steps) && value.steps.length <= 2
     && (value.status === 'passed' ? value.reason === null : sessionText(value.reason)));
   require(value.runtimeExitCode === 0 ? value.status !== 'notExecuted' && execution.every(item => item.outcome === 'Passed')
     : value.status === 'notExecuted' && session.outcome === 'failure' && session.reason === 'SessionTestFailure');
@@ -223,14 +223,12 @@ export function validateSessionQualification(value, session, execution) {
   else if (value.status === 'notExecuted') require(value.runtimeExitCode !== 0
     && value.steps.length === (session.target === 'KeyLoad' ? 1 : 0) && value.reason === 'ClientFailed');
   else {
-    const actual = value.steps.slice(0, 2);
-    require(value.steps.length === (session.target === 'KeyLoad' ? 3 : 2) && actual.every((step,index) => exact(step, ['id', 'status', 'failureType'])
-      && step.id === ['server-resource-cancellation', 'execution-correctness'][index]
+    const actual = value.steps.slice(0, 1);
+    require(value.steps.length === (session.target === 'KeyLoad' ? 2 : 1) && actual.every(step => exact(step, ['id', 'status', 'failureType'])
+      && step.id === 'execution-correctness'
       && ['passed', 'failed', 'notApplicable'].includes(step.status)
       && (step.status === 'failed' ? sessionText(step.failureType) : step.failureType === null)));
-    const applicable = [session.target !== 'KeyLoad' && session.nodeCount === 1,
-      ['KeyLoad', 'KurrentDB', 'PostgreSQL + pgvector', 'Redis', 'OpenSearch', 'MongoDB', 'Neo4j'].includes(session.target)];
-    require(actual.every((step,index) => applicable[index] ? step.status !== 'notApplicable' : step.status === 'notApplicable'));
+    require(actual.every(step => step.status !== 'notApplicable'));
     require(value.status === (actual.some(step => step.status === 'failed') ? 'failed' : 'passed'));
   }
   if (session.target === 'KeyLoad') {

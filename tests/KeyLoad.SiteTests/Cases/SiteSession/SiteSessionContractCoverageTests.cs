@@ -9,7 +9,7 @@ internal sealed class SiteSessionContractCoverageTests
     private const string Accepted = "accepted";
     private const string Rejections = "rejections";
     private const string ExpectedRejections = "expectedRejections";
-    private const string Fixture = "tests/KeyLoad.ComparisonTests/BenchmarkComparisons/UnitContracts/SessionCohort/Fixtures/session-contract-probe.mjs";
+    private const string Fixture = "tests/KeyLoad.SiteTests/Fixtures/session-contract-probe.mjs";
 
     [Test]
     [Arguments("plan")]

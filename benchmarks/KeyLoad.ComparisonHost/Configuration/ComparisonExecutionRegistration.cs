@@ -46,13 +46,17 @@ internal static class ComparisonExecutionRegistration
 
     internal static IOptions<ComparisonHostExecutionOptions> ReadHost(IConfiguration configuration)
     {
-        var options = new OptionsManager<ComparisonHostExecutionOptions>(
-            new OptionsFactory<ComparisonHostExecutionOptions>([new ConfigureFromConfigurationOptions<ComparisonHostExecutionOptions>(
-                configuration.GetSection(ComparisonHostExecutionOptions.SectionName))], [],
-                [new ValidateOptions<ComparisonHostExecutionOptions>(Options.DefaultName,
-                    value => value.IsValid(), ComparisonHostExecutionOptions.InvalidSettings)]));
-        _ = options.Value;
-        return options;
+        return ComparisonHostOptionsRegistration.Bind(() =>
+        {
+            var value = new ComparisonHostExecutionOptions();
+            configuration.GetSection(ComparisonHostExecutionOptions.SectionName).Bind(value);
+            if (!value.IsValid())
+            {
+                throw new OptionsValidationException(Options.DefaultName, typeof(ComparisonHostExecutionOptions),
+                    [ComparisonHostExecutionOptions.InvalidSettings]);
+            }
+            return value;
+        });
     }
 
     internal static IOptions<IsolatedKeyLoadAdmissionOptions> ReadIsolatedAdmission(IConfiguration configuration)

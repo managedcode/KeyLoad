@@ -46,8 +46,14 @@ Whole regression: ImagesProduceClosedManifestAndRejectTamperingWithoutReplacingE
 
 ## Normal-only suite composition
 
-TestSuiteProtocol and ProjectForSuite admit only analyzers/unit/recovery/cluster/comparison/site; any other suite name (including a former scalar suite) is unknown and refuses before resource creation. TestSuiteResources has no disabled-intrinsics runner branch. 50 ordinary / exclusive heavy 1 parallelism, comparison isolation 1, all project/argument/TRX/coverage/path selection and genuine Aspire preparation/readiness/clients/shutdown are unchanged. TestSuiteApplication, TestSuiteSettingsReader and the typed execution policy have no profile-specific behavior, so their cancellation, output/process joins and failure ledgers are byte-exact.
+`scripts/Features/TestInfrastructure/run-tests.mjs` admits only
+analyzers/unit/recovery/cluster/site. Other suite names are rejected. Ordinary TUnit
+execution uses 50 parallel tests; the explicit heavy-load selection uses one.
+The selector preserves bounded original arguments, TRX and coverage settings.
 
-AspireTestEntryModelTests verify the complete six-suite model, the exact argument/project/results shape and the absence of an injected disable environment. FilterIsOneArgumentAndIsBoundedBeforeResourcesAreAdded refuses an unknown suite before its genuine healthy model; full negative and healthy controls/disposal remain. The default ordinary parallelism is 50, while the explicit rejected comparison configuration stays 20. This model lives in ComparisonTests and executes only through authorized GitHub Benchmarks. FunctionalTestParallelismTests/TUnitSelectionTests normal controls and the final all-source compiler/format/census remain mandatory.
+Real distributed fixtures use `TUnit.Aspire` and the current AppHost. TUnit owns
+initialization and disposal; the owning fixtures retain actual process readiness,
+abrupt-fault and joined-cleanup evidence. Benchmark sessions execute separately from
+`benchmarks/KeyLoad.ComparisonHost` in the Benchmarks workflow.
 
 No product, public or persisted ID or storage-format change, clock, deadline or resource increase. Current execution, coverage and Linux qualification stay OPEN until actual source/DLL/PDB/discovery/reports/cleanup bind; source-path/count arithmetic is not a UID or PASS.

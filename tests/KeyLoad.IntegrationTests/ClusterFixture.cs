@@ -1,5 +1,4 @@
 using Aspire.Hosting;
-using Aspire.Hosting.ApplicationModel;
 using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.Client;
 using KeyLoad.Clustering;
@@ -9,15 +8,15 @@ using KeyLoad.Query;
 using KeyLoad.Server;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using TUnit.Aspire;
 using TUnit.Core.Interfaces;
 using static KeyLoad.IntegrationTests.Features.StorageReplication.ClusterFixtureResourceCleanup;
 
 namespace KeyLoad.IntegrationTests;
 
 /// <summary>Owns the real Aspire Orleans application shared by public SDK integration scenarios.</summary>
-internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable, IKeyedDataSource
+internal sealed partial class ClusterFixture : AspireFixture<Projects.KeyLoad_AppHost>, IKeyedDataSource
 {
-    private static readonly TimeSpan StartupTimeout = TimeSpan.FromMinutes(2);
     private readonly RemoteTransferCoordinatorFixtureSelection? transferCoordinator;
     private readonly long? commandBytes;
     private readonly Features.Authorization.FoundationOtlpClusterSelection? telemetry;
@@ -82,7 +81,7 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable, IKey
         ClusterFixtureProtocol.RootDirectoryPrefix + Guid.NewGuid().ToString(ClusterFixtureProtocol.GuidFormat));
 
     /// <summary>Gets the actual started Aspire application and its allocated endpoint model.</summary>
-    public DistributedApplication App { get; private set; } = null!;
+    public new DistributedApplication App { get; private set; } = null!;
     /// <summary>Gets the administrator credential loaded from the private local profile.</summary>
     public string AdminKey { get; private set; } = "";
 
@@ -93,27 +92,12 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable, IKey
 
     /// <summary>Starts all three genuine Aspire resources and waits for their health concurrently.</summary>
     /// <returns>A task that completes when each of the three resources is healthy.</returns>
-    public async Task InitializeAsync()
+    public override async Task InitializeAsync()
     {
         try
         {
-            using var timeout = new CancellationTokenSource(StartupTimeout, TimeProvider.System);
-            var arguments = ClusterFixtureComposition.PrepareArguments(Root, PublicQueryStorageSelection.Read(Key));
             ColdStartObservation = ClusterFixtureApplicationStartup.ObserveColdStart(Root);
-            var builder = await ClusterFixtureComposition.CreateBuilderAsync(arguments, telemetry, timeout.Token);
-            ClusterFixtureComposition.ConfigureTestOverrides(builder, commandBytes, httpAdmission, databaseLimits, queryExecution);
-            queueDeadline?.Configure(builder);
-            runtimeSql.Configure(builder, Root);
-            RemoteTransferCoordinatorFixtureConfiguration.Configure(builder, transferCoordinator);
-            resourceNames = ClusterFixtureComposition.GetResourceNames(builder);
-            var repository = ClusterFixtureDiagnostics.FindRepositoryRoot();
-            ClusterFixtureComposition.ConfigureLogging(builder);
-            App = await builder.BuildAsync(timeout.Token);
-            AdminKey = ClusterFixtureProfile.ReadProfile(Root).AdminKey;
-            processRuntime = new(App, resourceNames, repository.FullName);
-            diagnostics = new(App);
-            diagnostics.Start(App.Services.GetRequiredService<ResourceLoggerService>());
-            processEvidenceDirectory = await ClusterFixtureApplicationStartup.StartAsync(App, resourceNames, timeout.Token).ConfigureAwait(false);
+            await base.InitializeAsync().ConfigureAwait(false);
         }
         catch (Exception startupFailure)
         {
@@ -127,7 +111,7 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable, IKey
     /// <param name="key">An optional database credential; null selects the fixture administrator.</param>
     /// <returns>A client backed by Aspire's actual allocated HTTP endpoint.</returns>
     public KeyLoadClient Client(string node, string? key = null)
-        => ClusterFixtureComposition.CreateClient(RequireApp(), node, key ?? AdminKey);
+        => ClusterFixtureComposition.CreateClient(CreateHttpClient(node, ClusterFixtureProtocol.HttpEndpointName), key ?? AdminKey);
 
     /// <summary>Writes bounded Orleans state, readiness and recent node-log diagnostics.</summary>
     /// <returns>A task that completes after the diagnostic artifact is written.</returns>
@@ -150,7 +134,7 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable, IKey
 
     /// <summary>Saves diagnostics, drains observers and disposes the actual Aspire application.</summary>
     /// <returns>A task that completes after the owned test resources are disposed.</returns>
-    public async ValueTask DisposeAsync()
+    public override async ValueTask DisposeAsync()
     {
         using var cleanup = new CancellationTokenSource(App is null ? TimeSpan.FromSeconds(30)
             : App.Services.GetRequiredService<IOptions<TestExecutionOptions>>().Value.ApplicationCleanupTimeout,
@@ -179,10 +163,7 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable, IKey
             }
             diagnostics = null;
         }
-        if (ownedApp is not null)
-        {
-            await ServerFailureObserver.ObserveAsync(() => ownedApp.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
-        }
+        await ServerFailureObserver.ObserveAsync(() => base.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
         _ = await Features.QueryExecution.PostgresClusterFixtureOwnership.ReleaseRootAsync(!stopped, failures,
             () => ClusterFixtureFailureRootRetention.For(this).ReleaseAsync(
                 () => DeleteOwnedRootAsync(Root, failures))).ConfigureAwait(false);
@@ -202,6 +183,4 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable, IKey
     internal ProcessRuntimeControl RequireProcessRuntime() => processRuntime
         ?? throw new InvalidOperationException(ClusterFixtureRuntimeInvocation.RuntimeControllerUnavailable);
 
-    private DistributedApplication RequireApp() => App
-        ?? throw new InvalidOperationException(ClusterFixtureRuntimeInvocation.RuntimeControllerUnavailable);
 }

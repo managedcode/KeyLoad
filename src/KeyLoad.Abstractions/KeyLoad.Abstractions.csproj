@@ -1,6 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
-    <InternalsVisibleTo Include="KeyLoad.ComparisonTests" />
     <PackageReference Include="ManagedCode.Communication" />
     <PackageReference Include="ManagedCode.Communication.Orleans" />
     <PackageReference Include="Microsoft.Extensions.Options" />

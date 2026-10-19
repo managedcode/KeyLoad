@@ -23,4 +23,8 @@ jobs:
         shell: pwsh
         run: tests/KeyLoad.IntegrationTests/bin/Debug/net10.0/playwright.ps1 install --with-deps chromium
       - name: Test
-        run: dotnet test --solution KeyLoad.slnx --no-build --output Detailed
+        run: |
+          dotnet test --project tests/KeyLoad.Analyzers.Tests/KeyLoad.Analyzers.Tests.csproj --no-build --output Detailed
+          dotnet test --project tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj --no-build --output Detailed
+          dotnet test --project tests/KeyLoad.RecoveryTests/KeyLoad.RecoveryTests.csproj --no-build --output Detailed
+          dotnet test --project tests/KeyLoad.IntegrationTests/KeyLoad.IntegrationTests.csproj --no-build --output Detailed --treenode-filter '/*/*/*/*[Category!=HeavyLoad]'
