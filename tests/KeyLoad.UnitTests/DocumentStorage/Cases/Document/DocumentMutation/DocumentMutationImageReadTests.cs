@@ -12,11 +12,10 @@ internal sealed class DocumentMutationImageReadTests
     private const long MetadataByteTolerance = 2_048;
     private const long MutationAndOutcomeBorrowedPoints = 6;
     private const long PlacementWitnessBorrowedPoints = 3;
-    private const long ExistingRosterOriginBorrowedPoints = 1;
+    private const long ReplacementLifetimeBindingBorrowedPoints = 1;
+    private const long ResourceLifetimeBorrowedPoints = 3;
     private const long NewPutBorrowedPoints = MutationAndOutcomeBorrowedPoints
-        + PlacementWitnessBorrowedPoints;
-    private const long ExistingMutationBorrowedPoints = NewPutBorrowedPoints
-        + ExistingRosterOriginBorrowedPoints;
+        + PlacementWitnessBorrowedPoints + ResourceLifetimeBorrowedPoints;
 
     [Test]
     public async Task AcDstore005NewPutHasOneDocumentMissAndNoPayloadSizedPointRead()
@@ -37,9 +36,11 @@ internal sealed class DocumentMutationImageReadTests
             var small = await MeasureExisting(SmallJson, action);
             var large = await MeasureExisting(LargeJson(), action);
             var payloadDelta = LargeValueLength - 1;
+            var expectedPoints = NewPutBorrowedPoints
+                + (action == ImageAction.Replace ? ReplacementLifetimeBindingBorrowedPoints : 0);
 
-            await Assert.That(small.Points).IsEqualTo(ExistingMutationBorrowedPoints);
-            await Assert.That(large.Points).IsEqualTo(ExistingMutationBorrowedPoints);
+            await Assert.That(small.Points).IsEqualTo(expectedPoints);
+            await Assert.That(large.Points).IsEqualTo(expectedPoints);
             await Assert.That(Math.Abs((large.Bytes - small.Bytes) - payloadDelta))
                 .IsLessThanOrEqualTo(MetadataByteTolerance);
         }
@@ -78,11 +79,12 @@ internal sealed class DocumentMutationImageReadTests
     {
         var id = Guid.NewGuid();
         var command = new CommandRequest(id, db.Partition, [mutation]);
+        var nextPosition = checked(db.Database.LastApplied + 1);
         var before = db.Store.GetReadDiagnostics();
         var receipt = db.Submit(OperationKind.Batch, command, id: id).Get<CommitReceipt>();
         var delta = Delta(db, before);
         var expected = new CommitReceipt(id, new(db.Store.Identity.Incarnation, db.Partition.AtomicPartitionId,
-            db.Store.Position), [new(kind, Collection, DocumentId, revision)], db.Store.Identity.Durability, (db.Store.Identity.Durability == DurabilityProfile.Buffered ? 0 : 1));
+            nextPosition), [new(kind, Collection, DocumentId, revision)], db.Store.Identity.Durability, (db.Store.Identity.Durability == DurabilityProfile.Buffered ? 0 : 1));
 
         await Assert.That(OrleansSerialization.Serialize(receipt).SequenceEqual(
             OrleansSerialization.Serialize(expected))).IsTrue();
@@ -96,7 +98,7 @@ internal sealed class DocumentMutationImageReadTests
 
     private static async Task RequireDocumentImage(TestDatabase db, long revision, string? json)
     {
-        var reference = new EntityRef(db.Partition, Collection, DocumentId);
+        var reference = db.ExpectedReference(new(db.Partition, Collection, DocumentId));
         DocumentResult? expected = json is null ? null : new(reference, revision, json, false, []);
         var actual = db.Database.GetDocument("root", reference);
         await Assert.That(JsonSerializer.Serialize(actual, JsonDefaults.Options))

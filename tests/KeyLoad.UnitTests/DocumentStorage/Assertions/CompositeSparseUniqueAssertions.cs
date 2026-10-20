@@ -33,7 +33,7 @@ internal static class CompositeSparseUniqueAssertions
         }
         await Assert.That(document).IsNotNull();
         var value = document!;
-        await Assert.That(value.Reference).IsEqualTo(new EntityRef(db.Partition, Collection, id));
+        await Assert.That(value.Reference).IsEqualTo(db.ExpectedReference(new(db.Partition, Collection, id)));
         await Assert.That(value.Json).IsEqualTo(json);
         await Assert.That(value.Revision).IsEqualTo(revision);
         await Assert.That(value.Redacted).IsFalse();

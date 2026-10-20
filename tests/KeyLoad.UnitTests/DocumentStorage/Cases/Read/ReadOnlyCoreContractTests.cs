@@ -1,6 +1,5 @@
 using System.Collections.Immutable;
 using System.Text.Json;
-using KeyLoad.Storage;
 
 namespace KeyLoad.UnitTests.Features.DocumentStorage;
 
@@ -28,7 +27,7 @@ internal sealed class ReadOnlyCoreContractTests
     }
 
     [Test]
-    public async Task AcRoc005NullCommandMutationsBecomePersistedValidationAndFollowingCommandSucceeds()
+    public async Task AcRoc005NullCommandMutationsRejectAtAdmissionAndFollowingCommandSucceeds()
     {
         using var database = new TestDatabase();
         database.Configure(DocumentCollection, ResourceKind.Collection);
@@ -39,10 +38,15 @@ internal sealed class ReadOnlyCoreContractTests
             partition = database.Partition,
             mutations = (object?)null
         }, JsonDefaults.Options);
-        var rejected = database.Database.Apply(database.Database.CreateCommand(OperationKind.Batch, id, RootPrincipal, TimeProvider.System.GetUtcNow(), payload));
-
-        await Assert.That(Errors.Code(rejected.Problem)).IsEqualTo(ErrorCode.Validation);
-        await Assert.That(Errors.Code(database.Store.Read(view => view.GetRecord<StoredOutcome>(KeySpace.UnknownOutcome(RootPrincipal, id)))!.Result.Problem)).IsEqualTo(ErrorCode.Validation);
+        var before = global::KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(database.Store);
+        var position = database.Store.Position;
+        var rejected = Assert.ThrowsExactly<KeyLoadException>(() =>
+            database.Database.CreateCommand(OperationKind.Batch, id, RootPrincipal, TimeProvider.System.GetUtcNow(), payload));
+        await Assert.That(rejected.Code).IsEqualTo(ErrorCode.Validation);
+        await Assert.That(rejected.Message).IsEqualTo("The operation contains invalid protocol JSON.");
+        await Assert.That(global::KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(database.Store))
+            .IsEquivalentTo(before, global::TUnit.Assertions.Enums.CollectionOrdering.Matching);
+        await Assert.That(database.Store.Position).IsEqualTo(position);
         database.Commit(new PutDocument(DocumentCollection, HealthyDocumentId, EmptyDocumentJson));
         await Assert.That(database.Database.GetDocument(RootPrincipal,
             new(database.Partition, DocumentCollection, HealthyDocumentId))).IsNotNull();

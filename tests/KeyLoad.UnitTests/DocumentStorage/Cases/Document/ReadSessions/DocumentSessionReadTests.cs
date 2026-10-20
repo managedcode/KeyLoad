@@ -26,8 +26,8 @@ internal sealed class DocumentSessionReadTests
         var request = new GetDocumentRequest(reference, receipt.Token);
         var execution = OrleansSerialization.Deserialize<GetDocumentRequest>(OrleansSerialization.Serialize(request));
         var json = JsonSerializer.Deserialize<GetDocumentRequest>(JsonSerializer.Serialize(request, JsonDefaults.Options), JsonDefaults.Options)!;
-        await LiteralAsync(db.Database.GetDocument(Root, execution.Reference, execution.MinimumToken), reference, FirstJson, First);
-        await LiteralAsync(db.Database.GetDocument(Root, json.Reference, json.MinimumToken), reference, FirstJson, First);
+        await LiteralAsync(db, db.Database.GetDocument(Root, execution.Reference, execution.MinimumToken), reference, FirstJson, First);
+        await LiteralAsync(db, db.Database.GetDocument(Root, json.Reference, json.MinimumToken), reference, FirstJson, First);
         var before = Snapshot(db);
         var position = db.Store.Position;
         CommitToken[] rejected =
@@ -53,12 +53,12 @@ internal sealed class DocumentSessionReadTests
                 await Assert.That(error.Code).IsEqualTo(ErrorCode.TokenInvalidated);
                 await Assert.That(Snapshot(db)).IsEquivalentTo(before, CollectionOrdering.Matching);
                 await Assert.That(db.Store.Position).IsEqualTo(position);
-                await LiteralAsync(db.Database.GetDocument(Root, reference, receipt.Token), reference, FirstJson, First);
+                await LiteralAsync(db, db.Database.GetDocument(Root, reference, receipt.Token), reference, FirstJson, First);
             }
         }
         var next = Apply(db, SecondJson, First);
-        await LiteralAsync(db.Database.GetDocument(Root, reference, receipt.Token), reference, SecondJson, Second);
-        await LiteralAsync(db.Database.GetDocument(Root, reference, next.Token), reference, SecondJson, Second);
+        await LiteralAsync(db, db.Database.GetDocument(Root, reference, receipt.Token), reference, SecondJson, Second);
+        await LiteralAsync(db, db.Database.GetDocument(Root, reference, next.Token), reference, SecondJson, Second);
     }
 
     [Test]
@@ -77,7 +77,7 @@ internal sealed class DocumentSessionReadTests
         await Assert.That(error.CancellationToken).IsEqualTo(cancelled.Token);
         await Assert.That(Snapshot(db)).IsEquivalentTo(before, CollectionOrdering.Matching);
         await Assert.That(db.Store.Position).IsEqualTo(position);
-        await LiteralAsync(db.Database.GetDocument(Root, reference, receipt.Token), reference, FirstJson, First);
+        await LiteralAsync(db, db.Database.GetDocument(Root, reference, receipt.Token), reference, FirstJson, First);
     }
 
     [Test]
@@ -90,7 +90,7 @@ internal sealed class DocumentSessionReadTests
         var principal = new PrincipalRecord(Reader, db.Partition.TenantId,
             [new(db.Partition.DatabaseId, Collection, Capability.DocumentsRead)], []);
         db.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(principal)).Get<PrincipalRecord>();
-        await LiteralAsync(db.Database.GetDocument(Reader, reference, receipt.Token), reference, FirstJson, First);
+        await LiteralAsync(db, db.Database.GetDocument(Reader, reference, receipt.Token), reference, FirstJson, First);
         var revoked = principal with
         {
             Grants = [],
@@ -111,7 +111,7 @@ internal sealed class DocumentSessionReadTests
         {
             PolicyEpoch = revoked.PolicyEpoch + First
         })).Get<PrincipalRecord>();
-        await LiteralAsync(db.Database.GetDocument(Reader, reference, receipt.Token), reference, FirstJson, First);
+        await LiteralAsync(db, db.Database.GetDocument(Reader, reference, receipt.Token), reference, FirstJson, First);
     }
 
     [Test]
@@ -132,7 +132,7 @@ internal sealed class DocumentSessionReadTests
         await Assert.That(Snapshot(db)).IsEquivalentTo(before, CollectionOrdering.Matching);
         await Assert.That(db.Store.Position).IsEqualTo(position);
         db.Store.Commit((transaction, _) => { transaction.Put(KeySpace.AppliedBytes, original); return true; });
-        await LiteralAsync(db.Database.GetDocument(Root, reference, receipt.Token), reference, FirstJson, First);
+        await LiteralAsync(db, db.Database.GetDocument(Root, reference, receipt.Token), reference, FirstJson, First);
     }
 
     [Test]
@@ -157,10 +157,10 @@ internal sealed class DocumentSessionReadTests
         await Assert.That(Snapshot(db)).IsEquivalentTo(before, CollectionOrdering.Matching);
         await Assert.That(db.Store.Position).IsEqualTo(position);
         db.Store.Commit((transaction, _) => { transaction.Put(KeySpace.AppliedBytes, original); return true; });
-        await LiteralAsync(db.Database.GetDocument(Root, reference, receipt.Token), reference, FirstJson, First);
+        await LiteralAsync(db, db.Database.GetDocument(Root, reference, receipt.Token), reference, FirstJson, First);
         var next = Apply(db, SecondJson, First);
-        await LiteralAsync(db.Database.GetDocument(Root, reference, receipt.Token), reference, SecondJson, Second);
-        await LiteralAsync(db.Database.GetDocument(Root, reference, next.Token), reference, SecondJson, Second);
+        await LiteralAsync(db, db.Database.GetDocument(Root, reference, receipt.Token), reference, SecondJson, Second);
+        await LiteralAsync(db, db.Database.GetDocument(Root, reference, next.Token), reference, SecondJson, Second);
     }
 
     private static CommitReceipt Apply(TestDatabase db, string json, long revision)
@@ -181,10 +181,10 @@ internal sealed class DocumentSessionReadTests
             Convert.ToHexString(record.Value.Span))).ToArray();
     });
 
-    private static async Task LiteralAsync(DocumentResult? actual, EntityRef reference, string json, long revision)
+    private static async Task LiteralAsync(TestDatabase db, DocumentResult? actual, EntityRef reference, string json, long revision)
     {
         await Assert.That(actual).IsNotNull();
-        await Assert.That(actual!.Reference).IsEqualTo(reference);
+        await Assert.That(actual!.Reference).IsEqualTo(db.ExpectedReference(reference));
         await Assert.That(actual.Json).IsEqualTo(json);
         await Assert.That(actual.Revision).IsEqualTo(revision);
         await Assert.That(actual.Redacted).IsFalse();

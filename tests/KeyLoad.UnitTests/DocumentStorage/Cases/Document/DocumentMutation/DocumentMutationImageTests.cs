@@ -28,7 +28,7 @@ internal sealed class DocumentMutationImageTests
         var id = Guid.NewGuid();
         var receipt = db.Submit(OperationKind.Batch, new CommandRequest(id, db.Partition, [.. mutations]), id: id, time: now)
             .Get<CommitReceipt>();
-        var reference = new EntityRef(db.Partition, Collection, DocumentId);
+        var reference = db.ExpectedReference(new(db.Partition, Collection, DocumentId));
         DocumentRecord[] images =
         [
             new(reference, 1, FirstJson, new RowAccess(), now),

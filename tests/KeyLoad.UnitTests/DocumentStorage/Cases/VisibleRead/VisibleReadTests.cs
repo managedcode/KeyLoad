@@ -1,4 +1,5 @@
 using KeyLoad.Core.Features.DocumentStorage;
+using KeyLoad.Core.Features.ResourceExecution;
 
 namespace KeyLoad.UnitTests.Features.DocumentStorage;
 
@@ -18,6 +19,13 @@ internal sealed class VisibleReadTests
         db.Commit(new PutDocument(Collection, "a", "{}"), new PutDocument(Collection, "b", "{}"));
         var acceptedBytes = db.Store.Read(view => view.Scan(DocumentStorageKeys.Prefix(db.Partition, Collection), 1)
             .Records.Sum(record => (long)record.Key.Length + record.Value.Length));
+        acceptedBytes += db.Store.Read(view =>
+        {
+            var definition = KeySpace.Resource(db.Partition.TenantId, db.Partition.DatabaseId, Collection);
+            var lifetime = ResourceLifetimeCatalog.Key(db.Partition.TenantId, db.Partition.DatabaseId, Collection);
+            return definition.Length + view.ReadOwnedValue(definition)!.Length
+                + 2L * (lifetime.Length + view.ReadOwnedValue(lifetime)!.Length);
+        });
         var limited = new DatabaseEngine(db.Store, db.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new()
         {
             MaxQueryReadBytes = acceptedBytes
@@ -34,6 +42,7 @@ internal sealed class VisibleReadTests
             }));
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
         await Assert.That(visited).IsEquivalentTo(new[] { "a" });
+        await Assert.That(budget.ReadBytes).IsEqualTo(acceptedBytes);
         await Assert.That(db.Store.Position).IsEqualTo(position);
         await Assert.That(db.Database.WithDocuments(RootPrincipal, db.Partition, Collection,
             (_, _, documents) => documents.Length)).IsEqualTo(2);
