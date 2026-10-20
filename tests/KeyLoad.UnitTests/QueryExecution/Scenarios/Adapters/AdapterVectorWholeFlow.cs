@@ -69,7 +69,7 @@ internal static class AdapterVectorWholeFlow
             for (var index = 0; index < result.Hits.Length; index++)
             {
                 var hit = result.Hits[index];
-                await Assert.That(hit.Document.Reference).IsEqualTo(new EntityRef(database.Partition, Collection, index == 0 ? "a" : "b"));
+                await Assert.That(hit.Document.Reference).IsEqualTo(database.ExpectedReference(new(database.Partition, Collection, index == 0 ? "a" : "b")));
                 await Assert.That(hit.Document.Revision).IsEqualTo(1L);
                 await Assert.That(hit.Document.Json).IsEqualTo(index == 0 ? FirstJson : SecondJson);
                 await Assert.That(hit.Document.Redacted).IsFalse();

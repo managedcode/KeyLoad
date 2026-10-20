@@ -1,11 +1,10 @@
-using KeyLoad.Query;
 
 namespace KeyLoad.UnitTests.Features.QueryExecution;
 
 internal sealed class EqualityAccessPathBudgetTests
 {
-    private const int ReadBudgetBytes = 256;
-    private const int PayloadLength = 512;
+    private const int ReadBudgetBytes = 8_192;
+    private const int PayloadLength = 16_384;
     private const int OneCandidate = 1;
     private const string PayloadPrefix = "{\"status\":\"open\",\"payload\":\"";
     private const string PayloadSuffix = "\"}";
@@ -18,15 +17,13 @@ internal sealed class EqualityAccessPathBudgetTests
     [Arguments(true, true)]
     public async Task AcAisql008ReversedLookupChargesTheSameRawDocumentAndIndexReadBudget(bool indexed, bool parameterized)
     {
-        using var db = new TestDatabase(new()
-        {
-            MaxQueryReadBytes = ReadBudgetBytes
-        });
+        using var db = new TestDatabase();
         db.Configure(EqualityAccessPathSupport.Collection, ResourceKind.Collection,
             indexes: [new(EqualityAccessPathSupport.StatusIndex, [EqualityAccessPathSupport.StatusPath])]);
         db.Commit(new PutDocument(EqualityAccessPathSupport.Collection, EqualityAccessPathSupport.PrimaryId,
             PayloadPrefix + new string(PayloadCharacter, PayloadLength) + PayloadSuffix));
-        var engine = new QueryEngine(db.Database, UnitExecutionOptions.QueryExecution());
+        var engine = QueryBudgetReadOwner.Create(db, db.Database.Limits with { MaxQueryReadBytes = ReadBudgetBytes });
+        await Assert.That(engine.Execute("root", new(db.Partition, "SELECT * FROM orders WHERE id = 'absent'")).Rows).IsEmpty();
         foreach (var reversed in new[] { false, true })
         {
             var request = EqualityAccessPathSupport.Request(db, indexed, parameterized, reversed);
@@ -39,11 +36,8 @@ internal sealed class EqualityAccessPathBudgetTests
     [Arguments(true)]
     public async Task AcAisql008ReversedIndexCandidatesPreserveTheSharedLimitAndPointFollowup(bool parameterized)
     {
-        using var db = EqualityAccessPathSupport.Create(new()
-        {
-            MaxScanRecords = OneCandidate
-        });
-        var engine = new QueryEngine(db.Database, UnitExecutionOptions.QueryExecution());
+        using var db = EqualityAccessPathSupport.Create();
+        var engine = QueryBudgetReadOwner.Create(db, db.Database.Limits with { MaxScanRecords = OneCandidate });
         foreach (var reversed in new[] { false, true })
         {
             var request = EqualityAccessPathSupport.Request(db, indexed: true, parameterized, reversed);

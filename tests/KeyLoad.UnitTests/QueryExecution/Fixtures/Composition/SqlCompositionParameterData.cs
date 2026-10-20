@@ -51,13 +51,16 @@ internal static class SqlCompositionParameterData
 
     internal static Mutation Effect(SqlCompositionParameterFixture fixture, bool reverse)
         => reverse ? new EnqueueMessage(DerivedQueue, ReversePrefix + C.Prefix + C.Message,
-            JsonSerializer.Serialize(new QueueGraphLink(fixture.Seed.From, fixture.Seed.To, C.Label, C.AttributesJson), JsonDefaults.Options))
-            : new UpsertEdge(C.Graph, C.Prefix + C.Message, fixture.Seed.From, fixture.Seed.To, C.Label, C.AttributesJson, 0L);
+            JsonSerializer.Serialize(new QueueGraphLink(fixture.Source.ExpectedReference(fixture.Seed.From),
+                fixture.Source.ExpectedReference(fixture.Seed.To), C.Label, C.AttributesJson), JsonDefaults.Options))
+            : new UpsertEdge(C.Graph, C.Prefix + C.Message, fixture.Source.ExpectedReference(fixture.Seed.From),
+                fixture.Source.ExpectedReference(fixture.Seed.To), C.Label, C.AttributesJson, 0L);
     internal static MutationReceipt Receipt(SqlCompositionParameterFixture fixture, bool reverse)
         => new(reverse ? "enqueue" : "upsertEdge", reverse ? DerivedQueue : C.Graph,
             (reverse ? ReversePrefix : string.Empty) + C.Prefix + C.Message, 1L)
         {
-            CompositionReferences = [fixture.Seed.From, fixture.Seed.To]
+            CompositionReferences = [fixture.Source.ExpectedReference(fixture.Seed.From),
+                fixture.Source.ExpectedReference(fixture.Seed.To)]
         };
 
     private static void Add(Dictionary<string, JsonElement> target, params (string Name, object Value)[] values)

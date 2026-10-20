@@ -14,19 +14,29 @@ internal sealed class QueryLifetimeFlow(QueryFixture fixture, bool sourceNarrowe
     private long sourceEpoch = QueryLifetimeProtocol.SourceEpoch;
     private long targetEpoch = QueryLifetimeProtocol.TargetEpoch;
 
-    internal void Seed(bool restrictedRows)
+    internal async Task SeedAsync(bool restrictedRows)
     {
         fixture.Seed();
         Principal(fixture.Source, sourceEpoch, sourceNarrower, restrictedRows && sourceNarrower);
         Principal(fixture.Destination, targetEpoch, !sourceNarrower, restrictedRows && !sourceNarrower);
+        await QueryLifetimeAssertions.UnchangedAsync(this, async () =>
+        {
+            await QueryLifetimeAssertions.RefusedAsync(() => _ = Query(), ErrorCode.PermissionDenied,
+                QueryLifetimeProtocol.ReceivingIdentityChanged);
+            await QueryLifetimeAssertions.RefusedAsync(() => _ = Statistics(), ErrorCode.PermissionDenied,
+                QueryLifetimeProtocol.ReceivingIdentityChanged);
+        });
+        sourceEpoch = targetEpoch = checked(Math.Max(sourceEpoch, targetEpoch) + QueryLifetimeProtocol.NextEpoch);
+        Principal(fixture.Source, sourceEpoch, narrow: true, restrictedRows);
+        Principal(fixture.Destination, targetEpoch, narrow: true, restrictedRows);
     }
 
     internal void RepairRows()
     {
         sourceEpoch += QueryLifetimeProtocol.NextEpoch;
         targetEpoch += QueryLifetimeProtocol.NextEpoch;
-        Principal(fixture.Source, sourceEpoch, sourceNarrower, restrictedRows: false);
-        Principal(fixture.Destination, targetEpoch, !sourceNarrower, restrictedRows: false);
+        Principal(fixture.Source, sourceEpoch, narrow: true, restrictedRows: false);
+        Principal(fixture.Destination, targetEpoch, narrow: true, restrictedRows: false);
     }
 
     internal void HideNarrowSchema() => SetSchema(hidden: true);

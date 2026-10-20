@@ -120,7 +120,7 @@ internal static class LivePolicyEpochContinuation
     private static async Task RemovedAsync(TestDatabase db, ZoneTreeStore store, LiveQueryPage page, CommitReceipt receipt)
     {
         var expected = new LiveQueryChange(RemovedRevision, receipt.Token, LiveQueryChangeKind.Remove,
-            new(db.Partition, Collection, Id), RemovedRevision, null);
+            db.ExpectedReference(new(db.Partition, Collection, Id)), RemovedRevision, null);
         await SameAsync(new[] { expected }, page.Changes);
         await Assert.That(page.ThroughSequence).IsEqualTo(RemovedRevision);
         await Assert.That(page.HasMore).IsFalse();

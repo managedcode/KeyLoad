@@ -7,12 +7,9 @@ internal sealed class SqlModelViewBudgetTests
     [Test]
     public async Task AcSqlView005FullScanCandidateOverflowRejectsTheWholeEventOrQueueRequest()
     {
-        using var database = SqlModelViewTestSupport.Create(new()
-        {
-            MaxScanRecords = 1
-        });
+        using var database = SqlModelViewTestSupport.Create();
         SqlModelViewTestSupport.Seed(database);
-        var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
+        var engine = QueryBudgetReadOwner.Create(database, database.Database.Limits with { MaxScanRecords = 1 });
         var exactLimit = engine.Execute("root",
             SqlModelViewTestSupport.Request(database, "SELECT * FROM QUEUE_MESSAGES('jobs')"));
         await Assert.That(exactLimit.Rows).HasSingleItem();

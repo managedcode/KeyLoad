@@ -74,7 +74,7 @@ internal static class LiveQueryRetentionContinuation
     private static async Task UpsertAsync(TestDatabase db, ZoneTreeStore store, LiveQueryPage page, CommitReceipt receipt)
     {
         var expected = new LiveQueryChange(UpsertSequence, receipt.Token, LiveQueryChangeKind.Upsert,
-            new(db.Partition, Collection, Id), UpsertRevision, new(Id, UpsertRevision, Body, false, []));
+            db.ExpectedReference(new(db.Partition, Collection, Id)), UpsertRevision, new(Id, UpsertRevision, Body, false, []));
         await SameAsync(new[] { expected }, page.Changes);
         await Assert.That(page.ThroughSequence).IsEqualTo(UpsertSequence);
         await Assert.That(page.HasMore).IsFalse();
@@ -92,7 +92,7 @@ internal static class LiveQueryRetentionContinuation
         var position = store.Position;
         var page = engine.ReadLiveQuery(Root, new(query, cursor));
         var expected = new LiveQueryChange(DeleteSequence, receipt.Token, LiveQueryChangeKind.Remove,
-            new(db.Partition, Collection, Id), DeleteRevision, null);
+            db.ExpectedReference(new(db.Partition, Collection, Id)), DeleteRevision, null);
         await SameAsync(new[] { expected }, page.Changes);
         await Assert.That(page.ThroughSequence).IsEqualTo(DeleteSequence);
         await Assert.That(page.HasMore).IsFalse();

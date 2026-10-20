@@ -106,5 +106,6 @@ internal static class BinderFieldLineagePages
     }
 
     internal static async Task EqualAsync<T>(T expected, T actual)
-        => await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
+        => await Assert.That(System.Text.Encoding.UTF8.GetString(JsonDefaults.Serialize(actual)))
+            .IsEqualTo(System.Text.Encoding.UTF8.GetString(JsonDefaults.Serialize(expected)));
 }

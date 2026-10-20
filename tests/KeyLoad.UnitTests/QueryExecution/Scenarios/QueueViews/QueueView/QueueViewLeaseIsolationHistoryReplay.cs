@@ -10,10 +10,9 @@ internal static class QueueViewLeaseIsolationHistoryReplay
         {
             await OriginalAsync(state, retained);
             var operation = QueueViewLeaseIsolationOperations.Original(retained);
-            await QueueViewLeaseIsolationReads.ObserveAsync(state, async () =>
-                await QueueViewLeaseIsolationResults.SameAsync(
-                    state.Owner.Database.ApplyStorageOperation(operation, retained.Entry.CanonicalSequence,
-                        state.Token).Result, retained.Result));
+            await CurrentAsync(state, retained, () =>
+                state.Owner.Database.ApplyStorageOperation(operation, retained.Entry.CanonicalSequence,
+                    state.Token).Result);
             await CurrentAsync(state, retained, () => state.Owner.Submit(operation));
             await CurrentAsync(state, retained, () => state.Owner.Database.ResolveOutcome(operation));
             await OriginalAsync(state, retained);

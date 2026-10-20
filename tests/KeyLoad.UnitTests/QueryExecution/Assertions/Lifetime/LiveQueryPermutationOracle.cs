@@ -49,7 +49,7 @@ internal sealed class LiveQueryPermutationOracle(TestDatabase db, QueryEngine en
         var filtered = round is LiveQueryTestSchedule.NonmatchingUpdateRound or LiveQueryTestSchedule.NonmatchingInsertRound;
         var kind = removed ? LiveQueryChangeKind.Remove : LiveQueryChangeKind.Upsert;
         LiveQueryChange[] changes = filtered ? [] : [new(trial + RevisionAdvance, receipt.Token, kind,
-            new(db.Partition, Collection, id), revision, row)];
+            db.ExpectedReference(new(db.Partition, Collection, id)), revision, row)];
         await PageAsync(page, changes, trial + RevisionAdvance);
         await PageAsync(replay, changes, trial + RevisionAdvance);
         var empty = engine.ReadLiveQuery(Root, new(query, page.Cursor, Limit: PageLimit));

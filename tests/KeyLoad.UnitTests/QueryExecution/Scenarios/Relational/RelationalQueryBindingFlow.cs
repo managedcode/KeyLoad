@@ -23,9 +23,10 @@ internal static class RelationalQueryBindingFlow
         var engine = new QueryEngine(fixture.Database, UnitExecutionOptions.QueryExecution());
         await RelationalQueryBindingAssertions.InvalidAsync(engine, fixture.Store, fixture.Partition, token);
         var seed = Seed(fixture);
-        var expectedToken = fixture.Store.Read(view => fixture.Database.Token(view, fixture.Partition, fixture.Database.LastApplied));
+        var applied = fixture.ReadStoredOutcome(seed.Command.CommandId).CanonicalSequence;
+        var expectedToken = fixture.Store.Read(view => fixture.Database.Token(view, fixture.Partition, applied));
         await BinderFieldLineagePages.EqualAsync(new CommitReceipt(seed.Command.CommandId, expectedToken, [new("putDocument", Collection, Id, Revision)], DurabilityProfile.ProcessDurable, 1), seed.Receipt);
-        await RelationalQueryBindingAssertions.RecordAsync(fixture.Database, fixture.Partition, token);
+        await RelationalQueryBindingAssertions.RecordAsync(fixture, fixture.Database, fixture.Partition, token);
         await RelationalQueryBindingAssertions.InvalidAsync(engine, fixture.Store, fixture.Partition, token);
         await RelationalQueryBindingAssertions.HealthyAsync(engine, fixture.Store, fixture.Partition, token);
         await PolicyAsync(fixture, engine, token);
@@ -38,7 +39,7 @@ internal static class RelationalQueryBindingFlow
         Policy(fixture, DeniedEpoch, false);
         await RelationalQueryBindingAssertions.DeniedAsync(engine, fixture.Store, fixture.Partition, token);
         Policy(fixture, RepairedEpoch, true);
-        await RelationalQueryBindingAssertions.RecordAsync(fixture.Database, fixture.Partition, token);
+        await RelationalQueryBindingAssertions.RecordAsync(fixture, fixture.Database, fixture.Partition, token);
         await RelationalQueryBindingAssertions.InvalidAsync(engine, fixture.Store, fixture.Partition, token);
         await RelationalQueryBindingAssertions.HealthyAsync(engine, fixture.Store, fixture.Partition, token);
         using var cancelled = CancellationTokenSource.CreateLinkedTokenSource(token);

@@ -15,17 +15,14 @@ internal static class TopicSqlScanBudgetFlow
 
     internal static async Task RunAsync()
     {
-        using var database = TopicSqlSeed.Create(new()
-        {
-            MaxScanRecords = ScanRecords
-        });
+        using var database = TopicSqlSeed.Create();
         var command = TopicSqlSeed.Command(database);
         var receipt = TopicSqlSeed.Publish(database, command);
         var append = new CommandRequest(Guid.NewGuid(), database.Partition,
             [new PublishTopic(TopicSqlProtocol.Topic,
                 [.. Enumerable.Range(FirstAdditionalPosition, AdditionalRecords).Select(Event)])]);
         var appended = TopicSqlSeed.Publish(database, append);
-        var engine = TopicSqlSeed.Engine(database);
+        var engine = QueryBudgetReadOwner.Create(database, database.Database.Limits with { MaxScanRecords = ScanRecords });
         var bytes = QueueWholeFlowStorage.Bytes(database.Store);
         var position = database.Store.Position;
         var rejected = Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute(TopicSqlProtocol.Root,

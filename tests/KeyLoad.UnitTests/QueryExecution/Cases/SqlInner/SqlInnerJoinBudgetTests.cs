@@ -74,8 +74,16 @@ internal sealed class SqlInnerJoinBudgetTests
             new PutDocument(Right, "z", "{\"id\":\"z\",\"name\":\"Lin\"}"));
         var measured = SqlInnerJoinReadMeasurement.Measure(database, Left, Right,
             FirstCustomer, MissingCustomer, LastCustomer);
-        var exactReadBytes = checked(measured.LeftScanBytes + measured.RightProbeBytes);
-        var exact = Engine(database, database.Database.Limits with
+        var measuredEngine = QueryBudgetReadOwner.Create(database, database.Database.Limits);
+        var beforeRead = database.Store.GetReadDiagnostics();
+        var original = measuredEngine.Execute("root",
+            new(database.Partition, Sql, AllowFullScan: true, QueryDialectVersion: Dialect));
+        var afterRead = database.Store.GetReadDiagnostics();
+        var exactReadBytes = checked(afterRead.PointExaminedBytes - beforeRead.PointExaminedBytes
+            + afterRead.RangeExaminedBytes - beforeRead.RangeExaminedBytes);
+        await Assert.That(exactReadBytes).IsGreaterThanOrEqualTo(measured.LeftScanBytes + measured.RightProbeBytes);
+        await Assert.That(original.Rows.Length).IsEqualTo(2);
+        var exact = QueryBudgetReadOwner.Create(database, database.Database.Limits with
         {
             MaxQueryReadBytes = exactReadBytes
         });
@@ -88,9 +96,13 @@ internal sealed class SqlInnerJoinBudgetTests
         await Assert.That(measured.FoundRightProbes).IsEqualTo(ExpectedFoundRightProbes);
         await Assert.That(measured.HasMore).IsFalse();
         await Assert.That(accepted.Rows.Length).IsEqualTo(2);
-        var probeBytesOmitted = Engine(database, database.Database.Limits with
+        var oneByteLess = QueryBudgetReadOwner.Create(database, database.Database.Limits with { MaxQueryReadBytes = exactReadBytes - 1 });
+        var boundary = Assert.ThrowsExactly<KeyLoadException>(() => oneByteLess.Execute("root",
+            new(database.Partition, Sql, AllowFullScan: true, QueryDialectVersion: Dialect)));
+        await Assert.That(boundary.Code).IsEqualTo(ErrorCode.BudgetExceeded);
+        var probeBytesOmitted = QueryBudgetReadOwner.Create(database, database.Database.Limits with
         {
-            MaxQueryReadBytes = measured.LeftScanBytes
+            MaxQueryReadBytes = exactReadBytes - measured.RightProbeBytes
         });
         var rejectedProbeBytes = Assert.ThrowsExactly<KeyLoadException>(() => probeBytesOmitted.Execute("root",
             new(database.Partition, Sql, AllowFullScan: true, QueryDialectVersion: Dialect)));
@@ -98,7 +110,7 @@ internal sealed class SqlInnerJoinBudgetTests
         await Assert.That(database.Store.Position).IsEqualTo(position);
         await Assert.That(exact.Execute("root", new(database.Partition, Sql, AllowFullScan: true,
             QueryDialectVersion: Dialect)).Rows.Length).IsEqualTo(2);
-        var oneByteShort = Engine(database, database.Database.Limits with
+        var oneByteShort = QueryBudgetReadOwner.Create(database, database.Database.Limits with
         {
             MaxQueryReadBytes = exactReadBytes - 1
         });
@@ -120,9 +132,9 @@ internal sealed class SqlInnerJoinBudgetTests
             new PutDocument(Right, "a", "{\"id\":\"a\",\"name\":\"Ada\"}"),
             new PutDocument(Right, "z", "{\"id\":\"z\",\"name\":\"Lin\"}"));
         var request = new QueryRequest(database.Partition, TwoRowSql, AllowFullScan: true, QueryDialectVersion: Dialect);
-        var measured = Engine(database, database.Database.Limits).Execute("root", request);
+        var measured = QueryBudgetReadOwner.Create(database, database.Database.Limits).Execute("root", request);
         var exactPageBytes = JsonDefaults.Serialize(measured).Length;
-        var exact = Engine(database, database.Database.Limits with
+        var exact = QueryBudgetReadOwner.Create(database, database.Database.Limits with
         {
             MaxBatchBytes = exactPageBytes
         });
@@ -133,7 +145,7 @@ internal sealed class SqlInnerJoinBudgetTests
         await Assert.That(accepted.Rows.All(row => row.Sources?.Length == 2)).IsTrue();
         await Assert.That(JsonDefaults.Serialize(accepted).Length).IsEqualTo(exactPageBytes);
         var position = database.Store.Position;
-        var oneByteShort = Engine(database, database.Database.Limits with
+        var oneByteShort = QueryBudgetReadOwner.Create(database, database.Database.Limits with
         {
             MaxBatchBytes = exactPageBytes - 1
         });
@@ -157,7 +169,7 @@ internal sealed class SqlInnerJoinBudgetTests
         {
             MaxResults = 2
         };
-        var engine = Engine(database, limits);
+        var engine = QueryBudgetReadOwner.Create(database, limits);
 
         var accepted = engine.Execute("root", new(database.Partition, TwoRowSql, AllowFullScan: true, QueryDialectVersion: Dialect));
 
@@ -184,19 +196,10 @@ internal sealed class SqlInnerJoinBudgetTests
             AllowFullScan: true, AstVersion: Dialect);
 
     private static QueryEngine Engine(TestDatabase database, int maximumWork)
-        => Engine(database, database.Database.Limits with
+        => QueryBudgetReadOwner.Create(database, database.Database.Limits with
         {
             MaxScanRecords = maximumWork
         });
-
-    private static QueryEngine Engine(TestDatabase database, DatabaseLimits limits)
-    {
-        var owner = new DatabaseEngine(database.Store, database.Database.Authorization,
-            UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(),
-            UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(),
-            UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
-        return new(owner, UnitExecutionOptions.QueryExecution());
-    }
 
     private static void Configure(TestDatabase database)
     {

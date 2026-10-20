@@ -22,7 +22,7 @@ internal static class ScriptDomSelectJoinPages
     private const string Left = "l";
     private const string Right = "r";
     private const string AccessPath = "bounded-primary-key-inner-join";
-    private const int JoinVersion = 2;
+    private const int JoinVersion = SqlOperationProtocol.DefaultQueryDialectVersion;
     private const int Limit = 1;
     private const int Offset = 1;
     private const long Revision = 1;

@@ -30,7 +30,7 @@ internal static class RelationalQueryBindingCold
                     var engine = new QueryEngine(owner, UnitExecutionOptions.QueryExecution());
                     var checks = new List<Exception>();
                     await ServerFailureObserver.ObserveAsync(() => CapabilityOutputOperations.ConserveAsync(store, image, cut, identityBytes), checks);
-                    await ServerFailureObserver.ObserveAsync(() => RelationalQueryBindingAssertions.RecordAsync(owner, fixture.Partition, token), checks);
+                    await ServerFailureObserver.ObserveAsync(() => RelationalQueryBindingAssertions.RecordAsync(fixture, owner, fixture.Partition, token), checks);
                     await ServerFailureObserver.ObserveAsync(() => RelationalQueryBindingAssertions.InvalidAsync(engine, store, fixture.Partition, token), checks);
                     await ServerFailureObserver.ObserveAsync(() => RelationalQueryBindingAssertions.HealthyAsync(engine, store, fixture.Partition, token), checks);
                     await ServerFailureObserver.ObserveAsync(() => BinderFieldLineageAuthority.ReplayAsync(owner, store, seed, receipt, token), checks);

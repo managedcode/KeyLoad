@@ -73,7 +73,7 @@ internal sealed class SqlOperationCompilerTests
         var supported = SqlOperationTestData.Call(McpCatalogExpectations.QueryCapabilities);
         var request = supported with
         {
-            QueryDialectVersion = SqlOperationProtocol.DefaultQueryDialectVersion
+            QueryDialectVersion = SqlOperationProtocol.DefaultQueryDialectVersion + 1
         };
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => SqlOperationTestData.Compile(request));
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.UnsupportedCapability);

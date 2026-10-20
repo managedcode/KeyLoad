@@ -34,9 +34,9 @@ internal sealed class SqlGraphPathOperationFlowTests
         await Assert.That(healthy.Hops).IsEqualTo((int?)SqlGraphPathTestSupport.PathDepth);
         var expectedVertices = new[]
         {
-            new EntityRef(database.Partition, SqlGraphPathTestSupport.Orders, SqlGraphPathTestSupport.StartId),
-            new EntityRef(database.Partition, SqlGraphPathTestSupport.Projects, SqlGraphPathTestSupport.MiddleId),
-            new EntityRef(database.Partition, SqlGraphPathTestSupport.Orders, SqlGraphPathTestSupport.TargetId)
+            database.ExpectedReference(new(database.Partition, SqlGraphPathTestSupport.Orders, SqlGraphPathTestSupport.StartId)),
+            database.ExpectedReference(new(database.Partition, SqlGraphPathTestSupport.Projects, SqlGraphPathTestSupport.MiddleId)),
+            database.ExpectedReference(new(database.Partition, SqlGraphPathTestSupport.Orders, SqlGraphPathTestSupport.TargetId))
         };
         var expectedEdges = new[] { SqlGraphPathTestSupport.FirstEdge, SqlGraphPathTestSupport.SecondEdge };
         await Assert.That(healthy.Vertices.SequenceEqual(expectedVertices)).IsTrue();

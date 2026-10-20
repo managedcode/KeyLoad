@@ -25,7 +25,7 @@ internal static class QueryRuleOptimizationCurrent
         {
             foreach (var row in QueryRuleOptimizationData.Rows)
             {
-                var reference = new EntityRef(fixture.Harness.Partition, collection, row.Id);
+                var reference = fixture.Harness.ExpectedReference(new(fixture.Harness.Partition, collection, row.Id));
                 await RequiredProcessingPolicyAssertions.EqualAsync(new DocumentResult(reference, row.Revision, row.Json, false, []),
                     owner.GetDocument("root", reference) ?? throw new InvalidOperationException("The original optimizer row is absent."));
             }

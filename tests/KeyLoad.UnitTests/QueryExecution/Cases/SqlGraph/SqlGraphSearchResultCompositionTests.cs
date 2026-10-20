@@ -78,7 +78,7 @@ internal sealed class SqlGraphSearchResultCompositionTests
     {
         var ids = single ? new[] { "a-hit" } : new[] { "a-hit", "b-hit" };
         await Assert.That(result.Hits.Select(hit => hit.Document.Reference)).IsEquivalentTo(ids.Select(id =>
-            new EntityRef(database.Partition, "graph-search-documents", id)), CollectionOrdering.Matching);
+            database.ExpectedReference(new(database.Partition, "graph-search-documents", id))), CollectionOrdering.Matching);
         await Assert.That(result.Hits.Select(hit => hit.Document.Json)).IsEquivalentTo(
             ids.Select(_ => json), CollectionOrdering.Matching);
         await Assert.That(result.Hits.All(hit => hit.Document.Revision == 2 && !hit.Document.Redacted

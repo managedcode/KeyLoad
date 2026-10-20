@@ -35,7 +35,7 @@ internal static class EventingRequiredClaimState
         {
             await RequiredProcessingPolicyAssertions.EqualAsync(new MessageInspection(new("first", MessageState.Acked,
                 1, 3L, 1L, null, null, null, 1L, null, 1L), null, null), database.InspectMessage("root", fixture.Lane, "first"));
-            await RequiredProcessingPolicyAssertions.EqualAsync(new DocumentResult(fixture.Reference("first"), 1L,
+            await RequiredProcessingPolicyAssertions.EqualAsync(new DocumentResult(fixture.Harness.ExpectedReference(fixture.Reference("first")), 1L,
                 RequiredProcessingPolicyFixture.EffectJson("first"), false, []), database.GetDocument("root", fixture.Reference("first"), cancellationToken: token));
             await OutboxAsync(database, fixture.Harness.Partition, 2L);
         });

@@ -22,5 +22,6 @@ internal static class QueryLifetimeProtocol
     internal const string SchemaGrant = "schema.secret";
     internal const string SchemaDenied = "The requested field binding is unavailable.";
     internal const string UseDenied = "The query requires a protected field-use grant.";
+    internal const string ReceivingIdentityChanged = "The partition query receiving identity changed.";
     internal const string MissingFailure = "The original V2 read failure is missing.";
 }

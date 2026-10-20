@@ -57,8 +57,8 @@ internal static class SqlCallNoPartialWriteContinuation
                 await SqlCallNoPartialWriteAssertions.SameAsync(original, decoded);
                 var issued = db.Database.EvaluationClock.GetUtcNow();
                 var receipt = db.Submit(OperationKind.Batch, decoded, id: id, time: issued).Get<CommitReceipt>();
-                await SqlCallNoPartialWriteAssertions.OriginalAsync(db.Database, db.Partition, receipt, id);
-                await ReplayAsync(db.Database, db.Store, request, receipt, issued);
+                await SqlCallNoPartialWriteAssertions.OriginalAsync(db, db.Database, db.Partition, receipt, id);
+                await ReplayAsync(db, db.Database, db.Store, request, receipt, issued);
                 await ColdAsync(db, request, receipt, issued);
             }, failures);
         }, failures);
@@ -93,7 +93,7 @@ internal static class SqlCallNoPartialWriteContinuation
         await Assert.That(db.Database.GetDocument(SqlBetweenTestData.Root, new(db.Partition, SqlBetweenTestData.Collection, SecondId))).IsNull();
     }
 
-    private static async Task ReplayAsync(DatabaseEngine database, ZoneTreeStore store, SqlOperationRequest request,
+    private static async Task ReplayAsync(TestDatabase db, DatabaseEngine database, ZoneTreeStore store, SqlOperationRequest request,
         CommitReceipt receipt, DateTimeOffset issued)
     {
         var image = QueueWholeFlowStorage.Bytes(store);
@@ -111,7 +111,7 @@ internal static class SqlCallNoPartialWriteContinuation
         await Assert.That(Errors.Code(conflict.Problem)).IsEqualTo(ErrorCode.Conflict);
         await Assert.That(conflict.Value).IsNull();
         await SqlCallNoPartialWriteAssertions.UnchangedAsync(store, image, cut);
-        await SqlCallNoPartialWriteAssertions.OriginalAsync(database, original.Partition, receipt, original.CommandId);
+        await SqlCallNoPartialWriteAssertions.OriginalAsync(db, database, original.Partition, receipt, original.CommandId);
     }
 
     private static async Task ColdAsync(TestDatabase db, SqlOperationRequest request, CommitReceipt receipt, DateTimeOffset issued)
@@ -131,13 +131,13 @@ internal static class SqlCallNoPartialWriteContinuation
                 await Assert.That(cold.Identity.ReadGeneration).IsGreaterThanOrEqualTo(identity.ReadGeneration);
                 await SqlCallNoPartialWriteAssertions.UnchangedAsync(cold, image, cut);
                 var database = db.CreateConfiguredDatabase(cold);
-                await ReplayAsync(database, cold, request, receipt, issued);
+                await ReplayAsync(db, database, cold, request, receipt, issued);
                 var id = Guid.NewGuid();
                 var fresh = new CommandRequest(id, db.Partition, [new PutDocument(SqlBetweenTestData.Collection, HealthyId, HealthyBody, AbsentRevision)]);
                 var time = database.EvaluationClock.GetUtcNow();
                 var healthy = QueueWholeFlowStorage.Apply(database, OperationKind.Batch,
                     Decode(SqlOperationTestData.Compile(Request(fresh))), id, time).Get<CommitReceipt>();
-                await SqlCallNoPartialWriteAssertions.HealthyAsync(database, db.Partition, healthy, id);
+                await SqlCallNoPartialWriteAssertions.HealthyAsync(db, database, db.Partition, healthy, id);
                 var after = QueueWholeFlowStorage.Bytes(cold);
                 var afterCut = cold.Position;
                 await SqlCallNoPartialWriteAssertions.ReceiptAsync(healthy, QueueWholeFlowStorage.Apply(database,

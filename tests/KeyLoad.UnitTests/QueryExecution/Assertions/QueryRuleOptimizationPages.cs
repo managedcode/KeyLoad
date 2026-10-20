@@ -42,7 +42,8 @@ internal static class QueryRuleOptimizationPages
             QueryPage Execute() => route == QueryRuleOptimizationData.AstRoute
                 ? engine.ExecuteAst(QueryRuleOptimizationData.Reader, astPage, cancellationToken: token)
                 : engine.Execute(QueryRuleOptimizationData.Reader, sqlPage, cancellationToken: token);
-            if (denied)
+            if (denied && shape is not QueryRuleOptimizationData.RevisionOneShape
+                and not QueryRuleOptimizationData.RawShadowShape)
             {
                 await FailureAsync(Execute, ErrorCode.PermissionDenied, FieldUseDenied);
                 if (route == QueryRuleOptimizationData.AstRoute)

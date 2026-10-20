@@ -36,7 +36,7 @@ internal static class SchemaVisibleProjectionFlow
         await SchemaVisibleProjectionAssertions.WaveAsync(engine, fixture.Store, fixture.Partition, false, false, true, token);
         await SafeProjectorOperationReplay.AllAsync(owner, [seed], P.MixedEpoch);
         await SchemaVisibleProjectionRoot.ConfigureAsync(fixture, mixed);
-        await SchemaVisibleProjectionRoot.WaveAsync(fixture.Database, engine, fixture.Store, fixture.Partition, token);
+        await SchemaVisibleProjectionRoot.WaveAsync(fixture, fixture.Database, engine, fixture.Store, fixture.Partition, token);
         await SchemaVisibleProjectionCold.RunAsync(owner, seed, token);
     }
 

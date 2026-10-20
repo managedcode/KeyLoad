@@ -1,3 +1,4 @@
+using KeyLoad.Query;
 using KeyLoad.UnitTests.Features.Messaging;
 
 namespace KeyLoad.UnitTests.Features.QueryExecution;
@@ -14,7 +15,7 @@ internal sealed class TopicSqlRecoveryTests
             TopicSqlProtocol.Topic, (long)TopicSqlProtocol.FirstPosition, (long)TopicSqlProtocol.SecondPosition);
         var original = database.Store.Read(view => view.ReadOwnedValue(key))!;
         database.Store.Commit((transaction, _) => { transaction.Delete(key); return true; });
-        await RefuseAsync(database, ErrorCode.HistoryUnavailable);
+        await RefuseAsync(database, TopicSqlSeed.Engine(database), ErrorCode.HistoryUnavailable);
         database.Store.Commit((transaction, _) => { transaction.Put(key, original); return true; });
         var record = OrleansSerialization.Deserialize<SourceEventRecord>(original);
         var changed = OrleansSerialization.Serialize(record with
@@ -22,7 +23,7 @@ internal sealed class TopicSqlRecoveryTests
             Position = TopicSqlProtocol.FirstPosition
         });
         database.Store.Commit((transaction, _) => { transaction.Put(key, changed); return true; });
-        await RefuseAsync(database, ErrorCode.Corruption);
+        await RefuseAsync(database, TopicSqlSeed.Engine(database), ErrorCode.Corruption);
         database.Store.Commit((transaction, _) => { transaction.Put(key, original); return true; });
         await TopicSqlAssertions.RecordsAsync(TopicSqlSeed.Read(database),
             TopicSqlSeed.Engine(database).Execute(TopicSqlProtocol.Root, TopicSqlSeed.Request(database)));
@@ -33,13 +34,13 @@ internal sealed class TopicSqlRecoveryTests
     [Test]
     public async Task ActualTopicCompleteHistoryScanOverflowAndOriginalCancellationRejectThenPurgeMakesReadHealthy()
     {
-        using var database = TopicSqlSeed.Create(new()
+        using var database = TopicSqlSeed.Create();
+        TopicSqlSeed.Publish(database, TopicSqlSeed.Command(database));
+        var engine = QueryBudgetReadOwner.Create(database, database.Database.Limits with
         {
             MaxScanRecords = TopicSqlProtocol.FirstPosition
         });
-        TopicSqlSeed.Publish(database, TopicSqlSeed.Command(database));
-        await RefuseAsync(database, ErrorCode.BudgetExceeded);
-        var engine = TopicSqlSeed.Engine(database);
+        await RefuseAsync(database, engine, ErrorCode.BudgetExceeded);
         var bytes = QueueWholeFlowStorage.Bytes(database.Store);
         var position = database.Store.Position;
         using var cancelled = new CancellationTokenSource();
@@ -51,11 +52,11 @@ internal sealed class TopicSqlRecoveryTests
         await TopicSqlAssertions.UnchangedAsync(database, bytes, position);
     }
 
-    private static async Task RefuseAsync(TestDatabase database, ErrorCode code)
+    private static async Task RefuseAsync(TestDatabase database, QueryEngine engine, ErrorCode code)
     {
         var bytes = QueueWholeFlowStorage.Bytes(database.Store);
         var position = database.Store.Position;
-        var error = Assert.ThrowsExactly<KeyLoadException>(() => TopicSqlSeed.Engine(database).Execute(
+        var error = Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute(
             TopicSqlProtocol.Root, TopicSqlSeed.Request(database, TopicSqlProtocol.LimitedSql)));
         await Assert.That(error.Code).IsEqualTo(code);
         await TopicSqlAssertions.UnchangedAsync(database, bytes, position);

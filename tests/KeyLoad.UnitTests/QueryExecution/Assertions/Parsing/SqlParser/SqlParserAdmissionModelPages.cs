@@ -15,7 +15,7 @@ internal static class SqlParserAdmissionModelPages
         await RequiredProcessingPolicyAssertions.EqualAsync(new StreamPage(source, new(2L, 1L, 1L),
             [new(source, 1L, 1L, new("created", "Created", "{\"value\":1}", "{}"), SqlParserAdmissionFixture.Epoch),
              new(source, 2L, 2L, new("updated", "Updated", "{\"value\":2}", "{}"), SqlParserAdmissionFixture.Epoch)],
-            store.Position, false, null, store.Position), database.ReadStream("root", new(source), token));
+            database.LastApplied, false, null, database.LastApplied), database.ReadStream("root", new(source), token));
         var engine = new QueryEngine(database, UnitExecutionOptions.QueryExecution());
         var sql = "SELECT TOP (10) payload.value AS value FROM EVENTS('parser-events','source',+1) ORDER BY revision";
         var ast = new AstQueryRequest(partition, new(SqlParserAdmissionModels.Events, null, [new("/payload/value", "value")], null,
@@ -24,7 +24,7 @@ internal static class SqlParserAdmissionModelPages
             null, store.Position, "model-scan:events");
         await RequiredProcessingPolicyAssertions.EqualAsync(expected, engine.Execute(SqlOffsetProtocol.Reader, new(partition, sql, AllowFullScan: true), cancellationToken: token));
         await RequiredProcessingPolicyAssertions.EqualAsync(expected, engine.ExecuteAst(SqlOffsetProtocol.Reader, ast, cancellationToken: token));
-        var reference = new EntityRef(partition, SqlParserAdmissionModels.Table, "typed-row");
+        var reference = fixture.Harness.ExpectedReference(new(partition, SqlParserAdmissionModels.Table, "typed-row"));
         await RequiredProcessingPolicyAssertions.EqualAsync(new DocumentResult(reference, 1L, SqlParserAdmissionModels.TypedJson, false, []),
             database.GetDocument("root", reference, cancellationToken: token) ?? throw new InvalidOperationException("The literal inserted row is absent."));
         var typed = new QueryPage([new("typed-row", 1L, """{"amount":-1}""", false, [])], null, store.Position, "bounded-full-scan");

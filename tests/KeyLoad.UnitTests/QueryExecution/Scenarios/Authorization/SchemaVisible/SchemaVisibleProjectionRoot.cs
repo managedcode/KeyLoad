@@ -38,7 +38,7 @@ internal static class SchemaVisibleProjectionRoot
             new ConfigurePrincipalRequest(principal)).Get<PrincipalRecord>());
     }
 
-    internal static async Task WaveAsync(DatabaseEngine database, QueryEngine engine, ZoneTreeStore store, PartitionRef partition, CancellationToken token)
+    internal static async Task WaveAsync(TestDatabase fixture, DatabaseEngine database, QueryEngine engine, ZoneTreeStore store, PartitionRef partition, CancellationToken token)
     {
         var star = SchemaVisibleProjectionRequests.Star(partition);
         var system = star with
@@ -52,7 +52,7 @@ internal static class SchemaVisibleProjectionRoot
         };
         await SchemaVisibleProjectionAssertions.ObserveAsync(store, async () =>
         {
-            await BinderFieldLineagePages.EqualAsync<DocumentResult?>(new(new(partition, Collection, DocumentId),
+            await BinderFieldLineagePages.EqualAsync<DocumentResult?>(new(fixture.ExpectedReference(new(partition, Collection, DocumentId)),
                 OriginalRevision, EmptyJson, true, []), database.GetDocument(P.Reader, new(partition, Collection, DocumentId), cancellationToken: token));
             var expected = new QueryPage([new(DocumentId, OriginalRevision, P.IdJson, false, [])], null, store.Position, Point);
             await BinderFieldLineagePages.EqualAsync(expected, engine.Execute(P.Reader, new(partition, SqlSystem, AllowFullScan: true), cancellationToken: token));

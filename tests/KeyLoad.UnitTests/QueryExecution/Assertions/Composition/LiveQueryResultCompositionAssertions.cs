@@ -50,7 +50,7 @@ internal static class LiveQueryResultCompositionAssertions
             var change = page.Changes[index];
             await Assert.That(change.Sequence).IsEqualTo(sequence + index);
             await Assert.That(change.Commit).IsEqualTo(commits[index]);
-            await Assert.That(change.Reference).IsEqualTo(new EntityRef(db.Partition, "orders", ids[index]));
+            await Assert.That(change.Reference).IsEqualTo(db.ExpectedReference(new(db.Partition, "orders", ids[index])));
             await Assert.That(change.Kind).IsEqualTo(LiveQueryChangeKind.Upsert);
             await Assert.That(change.Revision).IsEqualTo(2L);
             await Assert.That(change.Row!.EntityId).IsEqualTo(ids[index]);

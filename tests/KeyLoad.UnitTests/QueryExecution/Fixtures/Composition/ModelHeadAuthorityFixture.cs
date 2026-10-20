@@ -19,6 +19,8 @@ internal sealed class ModelHeadAuthorityFixture : IDisposable
     internal StreamRef Source => new(Harness.Partition, Events, Stream, 1L);
     internal static string Payload(string visible) => "{\"visible\":\"" + visible + "\",\"secret\":\"" + Secret + "\"}";
     internal static string Headers => "{\"trace\":\"source\",\"privateHeader\":\"" + Secret + "\"}";
+    internal static string StoredPayload(string visible) => "{\"secret\":\"" + Secret + "\",\"visible\":\"" + visible + "\"}";
+    internal static string StoredHeaders => "{\"privateHeader\":\"" + Secret + "\",\"trace\":\"source\"}";
     internal async Task InitializeAsync()
     {
         foreach (var (name, kind) in new[] { (Events, ResourceKind.StreamSet), (Queue, ResourceKind.WorkQueue) })
@@ -36,8 +38,9 @@ internal sealed class ModelHeadAuthorityFixture : IDisposable
                 new("paid", "Paid", Payload("second"), Headers)], ExpectedStreamRevision.NoStream),
              new EnqueueMessage(Queue, "ready", Payload("queue"), Headers, Epoch)]);
         var before = Harness.Store.Position;
+        var expectedToken = Harness.NextCommitToken();
         Receipt = Harness.Submit(OperationKind.Batch, Seed, id: Seed.CommandId).Get<CommitReceipt>();
-        await ModelHeadAuthorityOperations.EqualAsync(Receipt, new CommitReceipt(Seed.CommandId, new(Harness.Store.Identity.Incarnation, Harness.Partition.AtomicPartitionId, before + 1L), [new("appendEvents", Events, Stream, 2L), new("enqueue", Queue, "ready", 1L)], DurabilityProfile.ProcessDurable, 1));
+        await ModelHeadAuthorityOperations.EqualAsync(Receipt, new CommitReceipt(Seed.CommandId, expectedToken, [new("appendEvents", Events, Stream, 2L), new("enqueue", Queue, "ready", 1L)], DurabilityProfile.ProcessDurable, 1));
         foreach (var effect in Receipt.Mutations)
         {
             await Assert.That(effect.CompositionReferences).IsEmpty();

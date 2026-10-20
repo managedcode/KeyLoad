@@ -14,7 +14,7 @@ internal static class ModelHeadAuthorityResults
             schemaVersion = 1,
             revision,
             eventSequence = revision,
-            recordedAt = ModelHeadAuthorityFixture.Epoch,
+            recordedAt = JsonSerializer.SerializeToElement(ModelHeadAuthorityFixture.Epoch, JsonDefaults.Options).GetString(),
             payload = new
             {
                 visible
@@ -30,7 +30,7 @@ internal static class ModelHeadAuthorityResults
         state = "Ready",
         attempts = 0,
         stateVersion = 1L,
-        notBefore = ModelHeadAuthorityFixture.Epoch,
+        notBefore = JsonSerializer.SerializeToElement(ModelHeadAuthorityFixture.Epoch, JsonDefaults.Options).GetString(),
         expiresAt = (DateTimeOffset?)null,
         payload = new
         {

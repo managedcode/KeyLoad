@@ -33,7 +33,7 @@ internal static class SqlParserAdmissionReads
             }
             foreach (var input in fixture.Seed.Mutations.Cast<PutDocument>())
             {
-                var reference = new EntityRef(fixture.Harness.Partition, input.Collection, input.Id);
+                var reference = fixture.Harness.ExpectedReference(new(fixture.Harness.Partition, input.Collection, input.Id));
                 await RequiredProcessingPolicyAssertions.EqualAsync(new DocumentResult(reference, 1L, input.Json, false, []),
                     database.GetDocument("root", reference, cancellationToken: token)
                         ?? throw new InvalidOperationException("The original literal parser source must exist."));

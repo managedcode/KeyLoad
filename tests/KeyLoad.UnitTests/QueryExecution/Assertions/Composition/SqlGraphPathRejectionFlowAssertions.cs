@@ -39,9 +39,9 @@ internal static class SqlGraphPathRejectionFlowAssertions
     private static async Task AssertIndependentPathAsync(TestDatabase database, GraphShortestPathResult actual,
         GraphShortestPathResult direct, long committedPosition)
     {
-        var from = new EntityRef(database.Partition, SqlGraphPathTestSupport.Orders, SqlGraphPathTestSupport.StartId);
-        var middle = new EntityRef(database.Partition, SqlGraphPathTestSupport.Projects, SqlGraphPathTestSupport.MiddleId);
-        var to = new EntityRef(database.Partition, SqlGraphPathTestSupport.Orders, SqlGraphPathTestSupport.TargetId);
+        var from = database.ExpectedReference(new(database.Partition, SqlGraphPathTestSupport.Orders, SqlGraphPathTestSupport.StartId));
+        var middle = database.ExpectedReference(new(database.Partition, SqlGraphPathTestSupport.Projects, SqlGraphPathTestSupport.MiddleId));
+        var to = database.ExpectedReference(new(database.Partition, SqlGraphPathTestSupport.Orders, SqlGraphPathTestSupport.TargetId));
         var expectedVertices = new[] { from, middle, to };
         var expectedEdges = new[]
         {

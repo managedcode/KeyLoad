@@ -76,7 +76,7 @@ internal static class SqlCompositionParameterFlow
         var operation = fixture.Database.CreateCommand(OperationKind.Batch, command.CommandId, C.Root,
             fixture.Seed.SeedAt.AddSeconds(reverse ? SqlCompositionParameterData.ReverseOperationOffsetSeconds
                 : SqlCompositionParameterData.ForwardOperationOffsetSeconds), OrleansSerialization.Serialize(decoded));
-        var expected = new CommitReceipt(command.CommandId, new(fixture.Store.Identity.Incarnation, command.Partition.AtomicPartitionId, fixture.Store.Position + 1L), [SqlCompositionParameterData.Receipt(fixture, reverse)], DurabilityProfile.ProcessDurable, 1);
+        var expected = new CommitReceipt(command.CommandId, ExpectedCanonicalCommit.Next(fixture.Database, command.Partition), [SqlCompositionParameterData.Receipt(fixture, reverse)], DurabilityProfile.ProcessDurable, 1);
         var actual = fixture.Database.Apply(operation).Get<CommitReceipt>();
         await SqlCompositionParameterAssertions.RuntimeReceiptAsync(actual, expected);
         fixture.Originals.Add(new(command, operation, expected, SqlCompositionParameterData.Effect(fixture, reverse)));

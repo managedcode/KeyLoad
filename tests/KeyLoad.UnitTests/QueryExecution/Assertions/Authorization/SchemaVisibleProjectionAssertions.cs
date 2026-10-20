@@ -29,7 +29,7 @@ internal static class SchemaVisibleProjectionAssertions
                 foreach (var request in SchemaVisibleProjectionRequests.Restricted(partition)
                     .Concat(SchemaVisibleProjectionJoins.Requests(partition)))
                 {
-                    await ObserveAsync(store, () => RefusalAsync(() => engine.Execute(P.Reader, request.Sql, cancellationToken: token)));
+                    await ObserveAsync(store, () => RefusalAsync(() => engine.Execute(P.Reader, request.Sql, cancellationToken: token), request.Sql.Sql));
                     await ObserveAsync(store, () => RefusalAsync(() => engine.ExecuteAst(P.Reader, request.Ast, cancellationToken: token)));
                 }
                 var star = SchemaVisibleProjectionRequests.Star(partition);
@@ -62,13 +62,13 @@ internal static class SchemaVisibleProjectionAssertions
         }
     }
 
-    internal static async Task RefusalAsync(Func<QueryPage> operation)
+    internal static async Task RefusalAsync(Func<QueryPage> operation, string context = "Typed query")
     {
         QueryPage? actual = null;
         var error = Assert.ThrowsExactly<KeyLoadException>(() => actual = operation());
         await Assert.That(actual is null).IsTrue();
         await Assert.That(error.Code).IsEqualTo(ErrorCode.Validation);
-        await Assert.That(error.Message).IsEqualTo(P.Detail);
+        await Assert.That(error.Message).IsEqualTo(P.Detail).Because(context);
         await Assert.That(error.StatusCode).IsEqualTo(Errors.Status(ErrorCode.Validation));
         await Assert.That(error.InnerException is null).IsTrue();
         await Assert.That(error.Message.Contains(Canary, StringComparison.Ordinal)).IsFalse();

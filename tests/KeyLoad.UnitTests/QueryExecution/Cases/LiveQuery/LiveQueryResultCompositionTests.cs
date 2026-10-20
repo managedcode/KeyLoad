@@ -45,7 +45,7 @@ internal sealed class LiveQueryResultCompositionTests
         await LiveQueryResultCompositionAssertions.LiteralAsync(second, [], start.ThroughSequence + 2, true, position);
         await LiveQueryResultCompositionAssertions.UnchangedAsync(db, image, position, identity);
         var change = new LiveQueryChange(start.ThroughSequence + 3, receipt.Token,
-            LiveQueryChangeKind.Upsert, new EntityRef(db.Partition, "orders", "a"), 1L,
+            LiveQueryChangeKind.Upsert, db.ExpectedReference(new(db.Partition, "orders", "a")), 1L,
             new QueryRow("a", 1L, "{\"id\":\"a\"}", RedactedFields: []));
         var healthy = engine.ReadLiveQuery("root", request with
         {

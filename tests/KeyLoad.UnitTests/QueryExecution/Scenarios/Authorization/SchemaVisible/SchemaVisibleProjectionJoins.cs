@@ -13,7 +13,7 @@ internal static class SchemaVisibleProjectionJoins
     private const string UnknownPath = "/absent";
     private const string Equal = "=";
     private const string SupportedPredicate = "e.payload.score >= @minimum";
-    private const string SupportedReplacement = "e.payload.public = @minimum";
+    private const string SupportedReplacement = "e.payload.[public] = @minimum";
     private const string UnknownReplacement = "e.absent = @minimum";
 
     internal static void Configure(TestDatabase fixture)

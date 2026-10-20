@@ -29,8 +29,8 @@ internal static class NestedSensitiveCurrentPolicyAssertions
     {
         var image = TeamRowPolicyAssertions.Image(store);
         var cut = store.Position;
-        var reference = new EntityRef(db.Partition, NestedSensitiveCurrentPolicyContinuation.Collection,
-            NestedSensitiveCurrentPolicyContinuation.DocumentId);
+        var reference = db.ExpectedReference(new(db.Partition, NestedSensitiveCurrentPolicyContinuation.Collection,
+            NestedSensitiveCurrentPolicyContinuation.DocumentId));
         var document = database.GetDocument(NestedSensitiveCurrentPolicyContinuation.Reader, reference, cancellationToken: token);
         var expectedDocument = new DocumentResult(reference, revision, json, false, []);
         await Assert.That(JsonDefaults.Serialize(document).AsSpan().SequenceEqual(JsonDefaults.Serialize(expectedDocument))).IsTrue();
@@ -52,8 +52,8 @@ internal static class NestedSensitiveCurrentPolicyAssertions
     {
         var image = TeamRowPolicyAssertions.Image(store);
         var cut = store.Position;
-        var reference = new EntityRef(db.Partition, NestedSensitiveCurrentPolicyContinuation.Collection,
-            NestedSensitiveCurrentPolicyContinuation.DocumentId);
+        var reference = db.ExpectedReference(new(db.Partition, NestedSensitiveCurrentPolicyContinuation.Collection,
+            NestedSensitiveCurrentPolicyContinuation.DocumentId));
         await ErrorAsync(Assert.ThrowsExactly<KeyLoadException>(() => database.GetDocument(
             NestedSensitiveCurrentPolicyContinuation.Reader, reference, cancellationToken: token)), ErrorCode.Unauthenticated);
         foreach (var sql in new[] { PredicateSql, SortSql })

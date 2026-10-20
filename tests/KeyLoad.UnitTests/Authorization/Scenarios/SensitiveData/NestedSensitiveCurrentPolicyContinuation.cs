@@ -41,7 +41,7 @@ internal static class NestedSensitiveCurrentPolicyContinuation
         var receipt = db.Submit(OperationKind.Batch, command, id: id).Get<CommitReceipt>();
         MutationReceipt[] expected = [new("putDocument", Collection, DocumentId, CurrentRevision)];
         await Assert.That(receipt.CommandId).IsEqualTo(id);
-        await Assert.That(receipt.Token.Position).IsEqualTo(db.Store.Position);
+        await Assert.That(receipt.Token.Position).IsEqualTo(db.Database.LastApplied);
         await Assert.That(JsonDefaults.Serialize(receipt.Mutations).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
         await ReplayAsync(db.Database, db.Store, command, receipt, token);
         await NestedSensitiveCurrentPolicyAssertions.HealthyAsync(db, db.Database, queries, db.Store,

@@ -21,13 +21,13 @@ internal static class QueryAdapterCollectionFixture
         await Assert.That(first).IsEqualTo(First);
         await Assert.That(second).IsEqualTo(Second);
         var originals = new List<(Command<DatabaseCommand> Operation, byte[] Result)>();
-        var before = fixture.Store.Position;
+        var expectedToken = fixture.NextCommitToken();
         var identity = fixture.Store.Identity;
         var command = new CommandRequest(SeedId, fixture.Partition,
             [new PutDocument(Collection, "a", first), new PutDocument(Collection, "b", second)]);
         var actual = QueryAdapterNullParityReplay.Apply(fixture.Database, OperationKind.Batch,
             SeedId, command, originals).Get<CommitReceipt>();
-        var expected = new CommitReceipt(SeedId, new(identity.Incarnation, fixture.Partition.AtomicPartitionId, before + 1), [new("putDocument", Collection, "a", 1), new("putDocument", Collection, "b", 1)], identity.Durability, (identity.Durability == DurabilityProfile.Buffered ? 0 : 1));
+        var expected = new CommitReceipt(SeedId, expectedToken, [new("putDocument", Collection, "a", 1), new("putDocument", Collection, "b", 1)], identity.Durability, (identity.Durability == DurabilityProfile.Buffered ? 0 : 1));
         await Assert.That(JsonDefaults.Serialize(actual)).IsEquivalentTo(JsonDefaults.Serialize(expected), CollectionOrdering.Matching);
         return originals;
     }

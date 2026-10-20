@@ -11,7 +11,7 @@ internal sealed class QueryLifetimeTests
         => await QueryFixtureAssertions.RunAsync(async fixture =>
         {
             var flow = new QueryLifetimeFlow(fixture, sourceNarrower);
-            flow.Seed(restrictedRows: true);
+            await flow.SeedAsync(restrictedRows: true);
             await QueryLifetimeAssertions.UnchangedAsync(flow, async () =>
             {
                 await Assert.That(flow.Query().Candidates.Length).IsEqualTo(QueryLifetimeProtocol.NoRows);
@@ -32,7 +32,7 @@ internal sealed class QueryLifetimeTests
         => await QueryFixtureAssertions.RunAsync(async fixture =>
         {
             var flow = new QueryLifetimeFlow(fixture, sourceNarrower);
-            flow.Seed(restrictedRows: false);
+            await flow.SeedAsync(restrictedRows: false);
             await QueryLifetimeAssertions.UnchangedAsync(flow, () => QueryLifetimeAssertions.HealthyAsync(flow));
             await QueryLifetimeAssertions.UnchangedAsync(flow, async () =>
             {
@@ -78,7 +78,7 @@ internal sealed class QueryLifetimeTests
         => await QueryFixtureAssertions.RunAsync(async fixture =>
         {
             var flow = new QueryLifetimeFlow(fixture, sourceNarrower: true);
-            flow.Seed(restrictedRows: false);
+            await flow.SeedAsync(restrictedRows: false);
             var original = flow.Capture();
             var other = flow.CreateOtherLifetime();
             var wrong = original with

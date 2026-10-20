@@ -39,13 +39,17 @@ internal static class SqlCompositionParameterAssertions
         await EqualAsync(fixture.Database.InspectMessage(C.Root, new(fixture.Source.Partition, C.Queue), C.Message), seed.Source);
         var forward = fixture.Originals.Count > 0;
         var reverse = fixture.Originals.Count > 1;
-        var edge = new EdgeRecord(C.Prefix + C.Message, seed.From, seed.To, C.Label, C.AttributesJson, 1L);
+        var from = fixture.Source.ExpectedReference(seed.From);
+        var to = fixture.Source.ExpectedReference(seed.To);
+        var edge = new EdgeRecord(C.Prefix + C.Message, from, to, C.Label, C.AttributesJson, 1L);
         await EqualAsync(fixture.Store.Read(view => view.GetRecord<EdgeRecord>(
             KeySpace.Partition("edge", fixture.Source.Partition, C.Graph, edge.Id))), forward ? edge : null);
         await EqualAsync(fixture.Database.Traverse(C.Root, fixture.Source.Partition, C.Graph, seed.From),
-            new KeyLoad.GraphTraversal(forward ? [seed.From, seed.To] : [seed.From], forward ? [edge] : []));
+            new KeyLoad.GraphTraversal(forward ? [from, to] : [from], forward ? [edge] : []));
+        var payload = KeyLoad.UnitTests.Features.DatabaseComposition.QueueGraphIdentityAssertions.Payload(
+            new(from, to, C.Label, C.AttributesJson));
         var derived = new MessageInspection(new(SqlCompositionParameterData.ReversePrefix + edge.Id,
-            MessageState.Ready, 0, 1L, 1L, null, null), seed.Source.PayloadJson, "{}");
+            MessageState.Ready, 0, 1L, 1L, null, null), payload, "{}");
         await EqualAsync(fixture.Database.InspectMessage(C.Root,
             new(fixture.Source.Partition, SqlCompositionParameterData.DerivedQueue), derived.Metadata.Id),
             reverse ? derived : null);
@@ -92,5 +96,6 @@ internal static class SqlCompositionParameterAssertions
     }
 
     internal static async Task EqualAsync<T>(T actual, T expected)
-        => await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
+        => await Assert.That(System.Text.Encoding.UTF8.GetString(JsonDefaults.Serialize(actual)))
+            .IsEqualTo(System.Text.Encoding.UTF8.GetString(JsonDefaults.Serialize(expected)));
 }

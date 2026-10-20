@@ -22,7 +22,7 @@ internal static class QueryEquivalentIntegerDecimalCurrent
     }
     internal static async Task ReceiptAsync(TestDatabase fixture, CommandRequest seed, CommitReceipt receipt)
     {
-        var expected = new CommitReceipt(seed.CommandId, new(fixture.Store.Identity.Incarnation, fixture.Partition.AtomicPartitionId, fixture.Store.Position), [.. Records.Select(row => new MutationReceipt(PutKind, Collection, row.Id, Revision))], DurabilityProfile.ProcessDurable, 1);
+        var expected = new CommitReceipt(seed.CommandId, new(fixture.Store.Identity.Incarnation, fixture.Partition.AtomicPartitionId, fixture.ReadStoredOutcome(seed.CommandId).CanonicalSequence), [.. Records.Select(row => new MutationReceipt(PutKind, Collection, row.Id, Revision))], DurabilityProfile.ProcessDurable, 1);
         await QueryEquivalentIntegerDecimalPages.EqualAsync(expected, receipt);
     }
     internal static async Task ReplayAsync(DatabaseEngine owner, ZoneTreeStore store,

@@ -27,7 +27,7 @@ internal static class SchemaVisibleProjectionCold
                     await Assert.That(owner.Database.LastApplied).IsEqualTo(applied);
                 }, checks);
                 await ServerFailureObserver.ObserveAsync(() => SafeProjectorOperationImages.ObserveAsync(owner,
-                    () => SchemaVisibleProjectionRoot.WaveAsync(owner.Database,
+                    () => SchemaVisibleProjectionRoot.WaveAsync(owner.Source, owner.Database,
                         new(owner.Database, UnitExecutionOptions.QueryExecution()), owner.Store, owner.Source.Partition, token)), checks);
                 await ServerFailureObserver.ObserveAsync(() => SafeProjectorOperationReplay.AllAsync(owner, [seed], MixedEpoch), checks);
                 await ServerFailureObserver.ObserveAsync(async () =>

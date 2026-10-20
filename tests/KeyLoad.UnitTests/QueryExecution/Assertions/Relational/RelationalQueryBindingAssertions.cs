@@ -106,8 +106,8 @@ internal static class RelationalQueryBindingAssertions
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    internal static Task RecordAsync(DatabaseEngine owner, PartitionRef partition, CancellationToken token)
-        => BinderFieldLineagePages.EqualAsync(new DocumentResult(new(partition, Collection, Id), Revision, Body, false, []),
+    internal static Task RecordAsync(TestDatabase fixture, DatabaseEngine owner, PartitionRef partition, CancellationToken token)
+        => BinderFieldLineagePages.EqualAsync(new DocumentResult(fixture.ExpectedReference(new(partition, Collection, Id)), Revision, Body, false, []),
             owner.GetDocument(Root, new(partition, Collection, Id), cancellationToken: token));
 
     private static async Task UnknownProjectionAsync(QueryEngine engine, PartitionRef partition, long cut, CancellationToken token)

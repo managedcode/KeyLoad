@@ -26,7 +26,7 @@ internal static class SqlBetweenAuthorityResults
         await Assert.That(page.Cursor).IsNull();
         await Assert.That(page.AccessPath).IsEqualTo(Scan);
         await Assert.That(page.CutPosition).IsEqualTo(cut);
-        var reference = new EntityRef(db.Partition, SqlBetweenTestData.Collection, SqlBetweenTestData.RowMiddle);
+        var reference = db.ExpectedReference(new(db.Partition, SqlBetweenTestData.Collection, SqlBetweenTestData.RowMiddle));
         var point = database.GetDocument(SqlBetweenAuthorityContinuation.Reader, reference);
         DocumentResult expectedPoint = new(reference, Revision, raw ? RawJson : RedactedJson,
             !raw, raw ? [] : [LowerPath, UpperPath]);
