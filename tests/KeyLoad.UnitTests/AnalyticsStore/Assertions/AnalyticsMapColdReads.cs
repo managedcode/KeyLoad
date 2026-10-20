@@ -29,10 +29,14 @@ internal static class AnalyticsMapColdReads
     {
         await UnchangedAsync(owner, async () =>
         {
-            foreach (var fault in Enum.GetValues<ImmutableDictionaryFault>())
+            using var serializer = new SerializerFixture();
+            var page = owner.Database.ReadAnalyticsEvents(D.Root, D.Read(owner.Source), token);
+            var payload = OrleansSerialization.Serialize(new GrainValue(page));
+            byte[][] malformed = [[], [0xff], serializer.EncodeNullRoot(), serializer.Encode(null),
+                OrleansSerialization.Serialize(page), [.. payload, 0x01]];
+            foreach (var bytes in malformed)
             {
-                var malformed = ImmutableDictionaryFixture.Encode(fault);
-                await SerializedPayloadAssertions.CorruptAsync(() => OrleansSerialization.Deserialize<object>(malformed));
+                await SerializedPayloadAssertions.CorruptAsync(() => OrleansSerialization.Deserialize<GrainValue>(bytes));
                 await VerifyAsync(owner, events, token);
             }
             AnalyticsEventsPage? published = null;
