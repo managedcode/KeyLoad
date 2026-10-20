@@ -29,12 +29,12 @@ internal static class ArchiveEntryFlow
         fixture.Source.Configure(P.Collection, ResourceKind.Collection, indexes: [new(P.Index, [P.LabelPath], Unique: true)]);
         var command = new CommandRequest(Guid.NewGuid(), fixture.Source.Partition, [new PutDocument(P.Collection, P.Document, P.Before)]);
         var operation = Operation(fixture.Source.Database, command);
-        var before = fixture.Source.Store.Position;
+        var before = fixture.Source.Database.LastApplied;
         var placement = fixture.Source.Database.ReadAtomicPartitionPlacement(P.Root, fixture.Source.Partition);
         var receipt = fixture.Source.Database.Apply(operation).Get<CommitReceipt>();
         await ArchiveEntryAssertions.ReceiptAsync(receipt, command, placement,
             before + P.PositionStep, P.InitialRevision, fixture.Source.Store.Identity.Durability);
-        await ArchiveEntryAssertions.ContentAsync(fixture.Source.Database, fixture.Source.Partition, healthy: false, token);
+        await ArchiveEntryAssertions.ContentAsync(fixture.Source.Database, fixture.Source, healthy: false, token);
         var sourceIdentity = fixture.Source.Store.Identity;
         var cut = fixture.Source.Store.Position;
         var rows = QueueWholeFlowStorage.Bytes(fixture.Source.Store);

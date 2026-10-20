@@ -1,3 +1,4 @@
+using System.Text.Json;
 using KeyLoad.Query;
 using KeyLoad.Storage.ZoneTree;
 using KeyLoad.UnitTests.Features.Messaging;
@@ -32,7 +33,8 @@ internal static class ArchiveEntryAssertions
         AtomicPartitionPlacementResolution placement, long position, long revision, DurabilityProfile durability)
     {
         var expected = new CommitReceipt(command.CommandId, new(placement.Incarnation, command.Partition.AtomicPartitionId, position), [new(P.Put, P.Collection, P.Document, revision)], durability, (durability == DurabilityProfile.Buffered ? 0 : 1));
-        await Assert.That(JsonDefaults.Serialize(actual).SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
+        await Assert.That(JsonSerializer.Serialize(actual, JsonDefaults.Options))
+            .IsEqualTo(JsonSerializer.Serialize(expected, JsonDefaults.Options));
         await Assert.That(actual.Mutations.All(mutation => mutation.CompositionReferences.IsEmpty)).IsTrue();
     }
 
@@ -42,13 +44,15 @@ internal static class ArchiveEntryAssertions
         await Assert.That(QueueWholeFlowStorage.Bytes(store).SequenceEqual(rows, StringComparer.Ordinal)).IsTrue();
     }
 
-    internal static async Task ContentAsync(DatabaseEngine database, PartitionRef partition, bool healthy, CancellationToken token)
+    internal static async Task ContentAsync(DatabaseEngine database, TestDatabase source, bool healthy, CancellationToken token)
     {
-        var reference = new EntityRef(partition, P.Collection, P.Document);
+        var partition = source.Partition;
+        var reference = source.ExpectedReference(new(partition, P.Collection, P.Document));
         var document = database.GetDocument(P.Root, reference, cancellationToken: token);
         var expected = new DocumentResult(reference, healthy ? P.HealthyRevision : P.InitialRevision,
             healthy ? P.After : P.Before, false, []);
-        await Assert.That(JsonDefaults.Serialize(document).SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
+        await Assert.That(JsonSerializer.Serialize(document, JsonDefaults.Options))
+            .IsEqualTo(JsonSerializer.Serialize(expected, JsonDefaults.Options));
         var query = new QueryEngine(database, UnitExecutionOptions.QueryExecution());
         foreach (var sql in new[] { P.BeforeSql, P.AfterSql })
         {

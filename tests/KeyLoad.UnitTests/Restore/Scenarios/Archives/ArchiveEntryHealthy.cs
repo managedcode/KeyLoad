@@ -20,7 +20,7 @@ internal static class ArchiveEntryHealthy
         var store = fixture.Open(fixture.Target, identity);
         var database = BackupIndexedDocumentDedupFixture.CreateDatabase(store);
         await Assert.That(store.Position).IsEqualTo(cut + P.PositionStep);
-        await ArchiveEntryAssertions.ContentAsync(database, fixture.Source.Partition, healthy: false, token);
+        await ArchiveEntryAssertions.ContentAsync(database, fixture.Source, healthy: false, token);
         var before = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
         var refused = database.Apply(original);
@@ -32,10 +32,11 @@ internal static class ArchiveEntryHealthy
             [new PutDocument(P.Collection, P.Document, P.After, P.InitialRevision)]);
         var healthy = ArchiveEntryFlow.Operation(database, command);
         var placement = database.ReadAtomicPartitionPlacement(P.Root, fixture.Source.Partition);
+        var nextPosition = checked(database.LastApplied + P.PositionStep);
         var receipt = database.Apply(healthy).Get<CommitReceipt>();
         await ArchiveEntryAssertions.ReceiptAsync(receipt, command, placement,
-            position + P.PositionStep, P.HealthyRevision, store.Identity.Durability);
-        await ArchiveEntryAssertions.ContentAsync(database, fixture.Source.Partition, healthy: true, token);
+            nextPosition, P.HealthyRevision, store.Identity.Durability);
+        await ArchiveEntryAssertions.ContentAsync(database, fixture.Source, healthy: true, token);
         await ColdAsync(fixture, identity, original, originalOutcome, healthy, receipt, token);
         await ArchiveEntryAssertions.ArchiveAsync(fixture.Backup, archive, token);
     }
@@ -59,7 +60,7 @@ internal static class ArchiveEntryHealthy
             {
                 var database = BackupIndexedDocumentDedupFixture.CreateDatabase(store);
                 await ArchiveEntryAssertions.ImageAsync(store, rows, position);
-                await ArchiveEntryAssertions.ContentAsync(database, fixture.Source.Partition, healthy: true, token);
+                await ArchiveEntryAssertions.ContentAsync(database, fixture.Source, healthy: true, token);
                 await Assert.That(Errors.Code(database.Apply(original).Problem)).IsEqualTo(ErrorCode.TokenInvalidated);
                 var replay = database.Apply(healthy).Get<CommitReceipt>();
                 await Assert.That(JsonDefaults.Serialize(replay).SequenceEqual(JsonDefaults.Serialize(receipt))).IsTrue();
