@@ -16,7 +16,8 @@ internal sealed class CachePolicyEpochState(CachePolicyEpochOwner owner)
     {
         get;
     } = new("cache-policy-tenant", "cache-policy-database", "cache-policy-domain", P.PartitionKey);
-    internal EntityRef Reference => new(Partition, P.Collection, P.Document);
+    private readonly TestDatabaseOriginalResourceCommands originalResources = new();
+    internal EntityRef Reference => originalResources.Reference(new(Partition, P.Collection, P.Document));
     internal ResourceDefinition Resource
     {
         get;
@@ -60,7 +61,14 @@ internal sealed class CachePolicyEpochState(CachePolicyEpochOwner owner)
 
     internal Result<object> Submit<T>(OperationKind kind, T payload, CancellationToken token,
         Guid? id = null, string principal = P.Root)
-        => Database.ApplyEmbedded(Database.CreateCommand(kind, id ?? Guid.NewGuid(), principal, default, System.Text.Json.JsonSerializer.Serialize(payload, JsonDefaults.Options)), token);
+    {
+        var operation = Database.CreateCommand(kind, id ?? Guid.NewGuid(), principal, default,
+            System.Text.Json.JsonSerializer.Serialize(payload, JsonDefaults.Options));
+        var before = TestDatabaseOriginalResourceCommands.Begin(Database, operation);
+        var result = Database.ApplyEmbedded(operation, token);
+        originalResources.Observe(Database, operation, result, before);
+        return result;
+    }
 
     internal byte[] Outcome(CommandRequest command)
         => Store.Read(view => view.ReadOwnedValue(KeySpace.PartitionOutcome(Partition, P.Root, command.CommandId)))

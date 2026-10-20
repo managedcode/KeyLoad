@@ -10,27 +10,28 @@ internal static class DropCancellation
         var id = Guid.NewGuid();
         var hold = profile.Observer.Hold(id, GrainRequestPhase.BeforeSubmit);
         using var caller = CancellationTokenSource.CreateLinkedTokenSource(token);
-        var call = DropPublicSubmission.Start(profile, DropRuntimeProtocol.Request, id, caller.Token);
         var before = await DropRuntimeAssertions.CaptureAsync(profile, token).ConfigureAwait(false);
+        var call = DropPublicSubmission.Start(profile, DropRuntimeProtocol.Request, id, caller.Token);
         try
         {
             await DropOperationFlow.WaitAsync(hold, call, token).ConfigureAwait(false);
             await Assert.That(call.Original.IsCompleted).IsFalse();
             await caller.CancelAsync().ConfigureAwait(false);
             await JoinCancelledAsync(profile, call).ConfigureAwait(false);
-            await hold.Disposed.Task.WaitAsync(token).ConfigureAwait(false);
-            await Assert.That(hold.SelectedCancellation.IsCancellationRequested).IsTrue();
+            await Assert.That(caller.IsCancellationRequested).IsTrue();
+            await DropRuntimeAssertions.SameImageAsync(profile, before, token).ConfigureAwait(false);
+            foreach (var node in profile.Hosts.Nodes)
+            {
+                var key = OutcomeStoreOracle.GlobalKey(PartitionStoreProtocol.AdministratorId, id);
+                await Assert.That(node.Database.Store.Read(view => view.ReadOwnedValue(key))).IsNull();
+            }
         }
         finally
         {
             hold.Released.TrySetResult();
         }
-        await DropRuntimeAssertions.SameImageAsync(profile, before, token).ConfigureAwait(false);
-        foreach (var node in profile.Hosts.Nodes)
-        {
-            var key = OutcomeStoreOracle.GlobalKey(PartitionStoreProtocol.AdministratorId, id);
-            await Assert.That(node.Database.Store.Read(view => view.ReadOwnedValue(key))).IsNull();
-        }
+        await hold.Settled.Task.WaitAsync(token).ConfigureAwait(false);
+        await hold.Disposed.Task.WaitAsync(token).ConfigureAwait(false);
         var retry = DropPublicSubmission.Start(profile, DropRuntimeProtocol.Request, id, token);
         var result = DropRuntimeAssertions.Value<DropTableResult>(await retry.Original.ConfigureAwait(false));
         await DropRuntimeAssertions.DroppedAsync(profile, id, DropRuntimeProtocol.Request, result, token).ConfigureAwait(false);

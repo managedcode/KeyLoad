@@ -22,7 +22,7 @@ internal static class AtomicPartitionScopeLifecycleTrial
         var state = new AtomicPartitionScopeLifecycleState(fixture.Partition, fixture.Store.Identity with
         {
             SigningKey = fixture.Store.Identity.SigningKey.ToArray()
-        });
+        }, fixture.ExpectedReference);
         await Assert.That(state.Left.AtomicPartitionId).IsNotEqualTo(state.Right.AtomicPartitionId);
         await Assert.That(state.Left.AtomicPartitionId).IsNotEqualTo(state.Foreign.AtomicPartitionId);
         await Assert.That(state.Left.AtomicPartitionId).IsEqualTo("bef935b7fc791a12ebf7fac2b28fd245f4c496e6b616ae02b8ac8c8a6c5cbba6");

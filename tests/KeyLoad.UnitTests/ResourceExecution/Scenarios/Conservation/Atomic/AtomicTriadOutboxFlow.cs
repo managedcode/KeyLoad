@@ -46,7 +46,7 @@ internal static class AtomicTriadOutboxFlow
             };
             var healthy = AtomicTriadOutboxFixture.Operation(engine, command);
             var result = engine.ApplyEmbedded(healthy, token);
-            await AtomicTriadOutboxCommitted.RequireAsync(engine, store, command, result.Get<CommitReceipt>());
+            await AtomicTriadOutboxCommitted.RequireAsync(source, engine, store, command, result.Get<CommitReceipt>());
             await AtomicTriadOutboxImage.ReplayAsync(engine, store, healthy, result, token);
             return new(command, healthy, result, purged, QueueWholeFlowStorage.Bytes(store), store.Position);
         });
@@ -55,7 +55,7 @@ internal static class AtomicTriadOutboxFlow
             await Assert.That(store.Position).IsEqualTo(continued.Position);
             await Assert.That(QueueWholeFlowStorage.Bytes(store))
                 .IsEquivalentTo(continued.Image, CollectionOrdering.Matching);
-            await AtomicTriadOutboxCommitted.RequireAsync(engine, store, continued.Command, continued.Result.Get<CommitReceipt>());
+            await AtomicTriadOutboxCommitted.RequireAsync(source, engine, store, continued.Command, continued.Result.Get<CommitReceipt>());
             await AtomicTriadOutboxImage.ReplayAsync(engine, store, state.Seed, state.SeedResult, token);
             await AtomicTriadOutboxImage.ReplayAsync(engine, store, state.Failed, state.Refusal, token);
             await AtomicTriadOutboxImage.ReplayAsync(engine, store, state.Purge, continued.Purged, token);

@@ -33,13 +33,13 @@ internal sealed class RelationalLinkageTests
 
         var graph = database.Database.Traverse(RelationalTestData.Root, database.Partition, Graph, first,
             cancellationToken: TestContext.Current!.Execution.CancellationToken);
-        await Assert.That(graph.Vertices).IsEquivalentTo(new[] { first, second }, CollectionOrdering.Matching);
+        await Assert.That(graph.Vertices).IsEquivalentTo(new[] { database.ExpectedReference(first), database.ExpectedReference(second) }, CollectionOrdering.Matching);
         await Assert.That(graph.Edges).HasSingleItem();
         var ranked = await new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution()).SearchAsync(RelationalTestData.Root,
             new(database.Partition, RelationalTestData.Table, VectorField: VectorField, Vector: [1, 0], Space: space),
             TestContext.Current!.Execution.CancellationToken);
         await Assert.That(ranked).HasSingleItem();
-        await Assert.That(ranked[0].Document.Reference).IsEqualTo(first);
+        await Assert.That(ranked[0].Document.Reference).IsEqualTo(database.ExpectedReference(first));
     }
 
     [Test]

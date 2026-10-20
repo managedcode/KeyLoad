@@ -18,7 +18,7 @@ internal static class ResourceIncarnationLiteral
     internal const string ColdCloseKnownKey = "ResourceIncarnation.CloseKnown";
     internal const string RawCreate = "{\"tenantId\":\"tenant\",\"databaseId\":\"database\",\"definition\":{\"name\":\"identity-records\",\"kind\":\"Collection\",\"transactionDomainId\":\"orders\"}}";
     internal const string Fingerprint = "6582b583af7321db4006d04a19849fc57216bfa68bd44dd6ddb48b2ad4430d50";
-    internal const string Incarnation = "09e90a899c76be2d8e63f79c0dcfc00fa9c822869140477362cd1e0fa86bc915";
+    internal const string Incarnation = "100598f0ee06583ef4fe35190f52c113315f2d85c9215e02fcb7e975cb05e437";
     private const string Sql = "CREATE TABLE [identity-records] (id NVARCHAR(MAX) NOT NULL PRIMARY KEY, value BIGINT NOT NULL, secret NVARCHAR(MAX) NOT NULL)";
     internal static readonly Guid OriginalId = new("01234567-89ab-cdef-0123-456789abcdef");
 

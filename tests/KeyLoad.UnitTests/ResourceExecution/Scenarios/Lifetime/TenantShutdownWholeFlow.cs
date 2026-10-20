@@ -17,12 +17,13 @@ internal static class TenantShutdownWholeFlow
         await using var selected = owner.Acquire(original.CommandId, RequestWorkKind.CommandCapability);
         using var admission = TenantAdmissionOperations.Reserve(fixture, governor, original, token);
         var cancelled = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-        using var registration = selected.Cancellation.Register(() => cancelled.TrySetResult());
+        using var execution = CancellationTokenSource.CreateLinkedTokenSource(owner.ShutdownToken, selected.Cancellation);
+        using var registration = execution.Token.Register(() => cancelled.TrySetResult());
         var drain = owner.DrainAsync();
         await cancelled.Task.WaitAsync(new RuntimeTestOptions().CompletionTimeout, token);
         await Assert.That(drain.IsCompleted).IsFalse();
         Assert.ThrowsExactly<OperationCanceledException>(() =>
-            fixture.SubmitIssuedEmbedded(original, selected.Cancellation));
+            fixture.SubmitIssuedEmbedded(original, execution.Token));
         var refused = Assert.ThrowsExactly<KeyLoadException>(() =>
             owner.Acquire(Guid.NewGuid(), RequestWorkKind.CommandCapability));
         await Assert.That(refused.Code).IsEqualTo(ErrorCode.OwnershipLost);
@@ -39,9 +40,9 @@ internal static class TenantShutdownWholeFlow
         var expectedToken = new CommitToken(fixture.Store.Identity.Incarnation,
             fixture.Partition.AtomicPartitionId, fixture.Database.LastApplied);
         await TenantAdmissionAssertions.ReceiptAsync(result, committed, "a1", expectedToken);
-        await TenantAdmissionAssertions.RecordAsync(fixture.Database, committed, fixture.Partition, "a1");
+        await TenantAdmissionAssertions.RecordAsync(fixture, fixture.Database, committed, fixture.Partition, "a1");
         var results = new List<Result<object>> { result };
-        await TenantAdmissionCold.ReplayAsync(fixture.Database, fixture.Store, fixture.SubmitIssued,
+        await TenantAdmissionCold.ReplayAsync(fixture, fixture.Database, fixture.Store, fixture.SubmitIssued,
             [committed], results, fixture.Partition, token);
         fixture.JoinOwnedResources();
         await TenantAdmissionCold.RunAsync(fixture, [committed], results, token);

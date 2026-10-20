@@ -23,8 +23,8 @@ internal static class ResourceIncarnationCold
                 var database = fixture.CreateConfiguredDatabase(store);
                 await ResourceIncarnationAssertions.PreserveAsync(store, fixture.Partition, state);
                 await ResourceIncarnationAssertions.ReplayAsync(database, store, state);
-                await ResourceIncarnationAssertions.RowAsync(database, fixture.Partition, wave + 2);
-                await ResourceIncarnationAssertions.WriteAsync(database, fixture.Partition, wave + 3);
+                await ResourceIncarnationAssertions.RowAsync(database, fixture.Partition, state.Lifetime, wave + 2);
+                await ResourceIncarnationAssertions.WriteAsync(database, fixture.Partition, state.Lifetime, wave + 3);
                 await ResourceIncarnationAssertions.PreserveAsync(store, fixture.Partition, state);
                 image = QueueWholeFlowStorage.Bytes(store);
                 position = store.Position;

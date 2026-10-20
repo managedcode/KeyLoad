@@ -39,7 +39,7 @@ internal static class TenantAdmissionWholeFlow
         {
             await ApplyAsync(fixture, operations[^1], ids[^1], results, applied, token);
         }
-        await TenantAdmissionCold.ReplayAsync(fixture.Database, fixture.Store,
+        await TenantAdmissionCold.ReplayAsync(fixture, fixture.Database, fixture.Store,
             fixture.SubmitIssued, applied.ToArray(), results, fixture.Partition, token);
         await Assert.That(governor.Snapshot()).IsEqualTo(new CommandAdmissionSnapshot(0, 0, 0, 0, 0, 0));
         fixture.JoinOwnedResources();
@@ -56,7 +56,7 @@ internal static class TenantAdmissionWholeFlow
         var expectedToken = new CommitToken(fixture.Store.Identity.Incarnation, partition.AtomicPartitionId,
             fixture.Database.LastApplied);
         await TenantAdmissionAssertions.ReceiptAsync(result, committed, id, expectedToken);
-        await TenantAdmissionAssertions.RecordAsync(fixture.Database, committed, partition, id);
+        await TenantAdmissionAssertions.RecordAsync(fixture, fixture.Database, committed, partition, id);
         results.Add(result);
         applied.Add(committed);
     }

@@ -57,7 +57,7 @@ internal static class AtomicTriadStagedWarm
     {
         state.Healthy = AtomicTriadStagedRecipe.Command(state.Partition, false);
         var operation = state.Operation(state.Healthy);
-        var position = state.Store.Position + AtomicTriadStagedProtocol.InitialRevision;
+        var position = state.Owner.LastApplied + AtomicTriadStagedProtocol.InitialRevision;
         var committed = state.Owner.ApplyEmbedded(operation, TestContext.Current!.Execution.CancellationToken);
         state.HealthyCommitted = Errors.Code(committed.Problem) is null;
         state.Receipt = new(state.Healthy.CommandId, new(state.Store.Identity.Incarnation, state.Partition.AtomicPartitionId,

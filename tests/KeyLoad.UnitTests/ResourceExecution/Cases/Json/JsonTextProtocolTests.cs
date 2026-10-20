@@ -66,7 +66,8 @@ internal sealed class JsonTextProtocolTests
         var stored = Result<object>.Fail(Errors.Problem(ErrorCode.PermissionDenied, StoredErrorDetail));
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => stored.Get<ResourceDefinition>());
         var wrongType = Assert.ThrowsExactly<KeyLoadException>(() => Result<object>.Succeed(MalformedJson).Get<ResourceDefinition>());
-        var absent = Assert.ThrowsExactly<KeyLoadException>(() => Result<object>.Succeed(null!).Get<string>());
+        Assert.ThrowsExactly<ArgumentNullException>(() => Result<object>.Succeed((object)null!));
+        var absent = Assert.ThrowsExactly<KeyLoadException>(() => default(Result<object>).Get<string>());
 
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(failure.Message).IsEqualTo(StoredErrorDetail);

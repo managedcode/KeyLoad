@@ -56,7 +56,7 @@ internal static class AtomicPartitionScopeLifecycleModels
             await Assert.That(message).IsNull();
             return;
         }
-        await EqualAsync(document, new DocumentResult(reference, 1, json, false, []));
+        await EqualAsync(document, new DocumentResult(state.Reference(reference), 1, json, false, []));
         await Assert.That(page.Head).IsEqualTo(new StreamHead(1, 1, 1));
         var record = page.Events.Single();
         await Assert.That(record.RecordedAt).IsGreaterThan(DateTimeOffset.MinValue);

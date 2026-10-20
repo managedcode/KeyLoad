@@ -16,7 +16,7 @@ internal static class DropRuntimeProtocol
     internal const int ColdReopens = 2;
     internal const int FirstCold = 0;
     internal const long NextCommit = 1;
-    internal const int TinyScanRecords = 4;
+    internal const int TinyScanRecords = 32;
     internal const string Tenant = "system";
     internal const string Database = "execution-drop";
     internal const string Domain = "execution-drop-domain";

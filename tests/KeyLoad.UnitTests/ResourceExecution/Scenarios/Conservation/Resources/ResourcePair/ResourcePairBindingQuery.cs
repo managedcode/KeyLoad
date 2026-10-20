@@ -66,8 +66,8 @@ internal static class ResourcePairBindingQuery
         var actual = additional
             ? database.WithQueryView(QueryUser, state.Source.Partition, Documents, Capability.VectorSearch, Read)
             : database.WithQueryView(QueryUser, state.Source.Partition, Documents, Read);
-        await ResourceIncarnationAssertions.EqualAsync(new DocumentResult(new(state.Source.Partition, Documents,
-            state.Mixed[Zero].Id), FirstRevision, DocumentJson, false, []), actual);
+        await ResourceIncarnationAssertions.EqualAsync(new DocumentResult(state.Source.ExpectedReference(new(state.Source.Partition, Documents,
+            state.Mixed[Zero].Id)), FirstRevision, DocumentJson, false, []), actual);
         await Assert.That(entered).IsTrue();
     }
 

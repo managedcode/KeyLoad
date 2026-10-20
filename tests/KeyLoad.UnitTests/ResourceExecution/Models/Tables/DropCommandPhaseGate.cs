@@ -11,10 +11,10 @@ internal sealed class DropCommandPhaseGate(Guid commandId, GrainRequestPhase pha
     internal Exception? Failure => failure;
     internal TaskCompletionSource<GrainRequestProbeIdentity> Arrived { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
     internal TaskCompletionSource Released { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+    internal TaskCompletionSource Settled { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
     internal TaskCompletionSource Disposed { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
-    internal CancellationToken SelectedCancellation { get; private set; }
 
-    internal bool Select(GrainRequestProbeIdentity identity, CancellationToken token)
+    internal bool Select(GrainRequestProbeIdentity identity)
     {
         lock (gate)
         {
@@ -27,7 +27,6 @@ internal sealed class DropCommandPhaseGate(Guid commandId, GrainRequestPhase pha
                 return false;
             }
             selected = identity;
-            SelectedCancellation = token;
             Arrived.TrySetResult(identity);
             return true;
         }

@@ -13,7 +13,7 @@ internal static class TenantAdmissionCold
         using var store = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution,
             UnitExecutionOptions.PointCacheExecution());
         var database = fixture.CreateConfiguredDatabase(store);
-        await ReplayAsync(database, store, database.Apply,
+        await ReplayAsync(fixture, database, store, database.Apply,
             operations, results, fixture.Partition, token);
         var id = Guid.NewGuid();
         var request = new CommandRequest(id, fixture.Partition,
@@ -22,10 +22,10 @@ internal static class TenantAdmissionCold
             TenantAdmissionOperations.PrincipalA, database.EvaluationClock.GetUtcNow(),
             global::KeyLoad.OrleansSerialization.Serialize(request));
         database.Apply(fresh).Get<CommitReceipt>();
-        await TenantAdmissionAssertions.RecordAsync(database, fresh, fixture.Partition, "cold-healthy");
+        await TenantAdmissionAssertions.RecordAsync(fixture, database, fresh, fixture.Partition, "cold-healthy");
     }
 
-    internal static async Task ReplayAsync(DatabaseEngine database, ZoneTreeStore store,
+    internal static async Task ReplayAsync(TestDatabase fixture, DatabaseEngine database, ZoneTreeStore store,
         Func<Command<DatabaseCommand>, Result<object>> replay, Command<DatabaseCommand>[] operations,
         List<Result<object>> results, PartitionRef firstPartition, CancellationToken token)
     {
@@ -41,7 +41,7 @@ internal static class TenantAdmissionCold
                 {
                     TenantId = TenantAdmissionOperations.OtherTenant
                 };
-            await TenantAdmissionAssertions.RecordAsync(database, operations[index], partition, ids[index]);
+            await TenantAdmissionAssertions.RecordAsync(fixture, database, operations[index], partition, ids[index]);
         }
 
         await Assert.That(TenantAdmissionAssertions.State(store).SequenceEqual(state)).IsTrue();

@@ -13,6 +13,6 @@ internal sealed class DropFailureTests
         => DropOperationFlow.RunAsync(DropReplyFailure.ExecuteAsync);
 
     [Test]
-    public Task CancelledDropBeforeSubmitCannotPublishLateAndOriginalCommandRetriesAcrossTwoColdReopens()
+    public Task CancelledCallerBeforeSubmitRetriesOriginalDropAfterReleaseAcrossTwoColdReopens()
         => DropOperationFlow.RunAsync(DropCancellation.ExecuteAsync);
 }

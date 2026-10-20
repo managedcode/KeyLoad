@@ -2,6 +2,7 @@ using KeyLoad.Diagnostics.Features.ResourceExecution;
 
 namespace KeyLoad.UnitTests.Features.ResourceExecution;
 
+[NotInParallel]
 internal sealed class DatabasePhaseAllocationTests
 {
     private const int StartupBytesMaximum = 128 * 1024;

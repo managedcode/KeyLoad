@@ -76,7 +76,7 @@ internal static class ResourcePairBindingBm25
         {
             await Assert.That(current).IsNull();
         }
-        await ResourceIncarnationAssertions.EqualAsync(new DocumentResult(new(state.Source.Partition, Corpus, CorpusDocument),
+        await ResourceIncarnationAssertions.EqualAsync(new DocumentResult(state.Source.ExpectedReference(new(state.Source.Partition, Corpus, CorpusDocument)),
             FirstRevision, CorpusJson, false, []), database.GetDocument(Root, new(state.Source.Partition, Corpus, CorpusDocument))!);
     }
 }

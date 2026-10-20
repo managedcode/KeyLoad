@@ -12,7 +12,7 @@ internal static class CachePolicyEpochProvision
             [new(state.Partition.DatabaseId, P.Collection, Capability.DocumentsRead)], []);
         await PrincipalAsync(state, state.Reader, token);
         state.Seed = new(Guid.NewGuid(), state.Partition, [new PutDocument(P.Collection, P.Document, P.Original, 0)]);
-        var before = state.Store.Position;
+        var before = state.Database.LastApplied;
         state.SeedReceipt = state.Submit(OperationKind.Batch, state.Seed, token, state.Seed.CommandId).Get<CommitReceipt>();
         await CachePolicyEpochAssertions.ReceiptAsync(state, state.Seed, state.SeedReceipt, before, "putDocument", P.FirstRevision);
         state.SeedOutcome = state.Outcome(state.Seed);
@@ -46,7 +46,7 @@ internal static class CachePolicyEpochProvision
     {
         state.Healthy = new(Guid.NewGuid(), state.Partition,
             [new PatchDocument(P.Collection, P.Document, [new("/public", PatchKind.Set, "\"changed\"")], P.FirstRevision)]);
-        var before = state.Store.Position;
+        var before = state.Database.LastApplied;
         state.HealthyReceipt = state.Submit(OperationKind.Batch, state.Healthy, token, state.Healthy.CommandId).Get<CommitReceipt>();
         await CachePolicyEpochAssertions.ReceiptAsync(state, state.Healthy, state.HealthyReceipt,
             before, "patchDocument", P.UpdatedRevision);

@@ -8,10 +8,20 @@ internal sealed class TransactionAuthorizationTests
         using var db = new TestDatabase();
         var definition = new ResourceDefinition("invalid", ResourceKind.Collection, db.Partition.TransactionDomainId);
         foreach (var invalid in new[] { definition with { Indexes = [null!] }, definition with { FieldPolicies = [null!] },
-            definition with { HeaderPolicies = [null!] }, definition with { FieldPolicies = [new(null!, definition.Name)] },
-            definition with { HeaderPolicies = [new(null!, definition.Name)] }, definition with { Indexes = [new("field", [null!])] }, definition with { Kind = (ResourceKind)99 } })
+            definition with { HeaderPolicies = [null!] }, definition with { Indexes = [new("field", [null!])] }, definition with { Kind = (ResourceKind)99 } })
         {
             await Assert.That(Errors.Code(db.Submit(OperationKind.ConfigureResource, new ConfigureResourceRequest("tenant", "database", invalid)).Problem)).IsEqualTo(ErrorCode.Validation);
+        }
+
+        foreach (var member in new[] { "fieldPolicies", "headerPolicies" })
+        {
+            var payload = "{\"tenantId\":\"tenant\",\"databaseId\":\"database\",\"definition\":{\"name\":\"invalid\",\"kind\":\"collection\",\"transactionDomainId\":\"orders\",\""
+                + member + "\":[{\"path\":null,\"classification\":\"invalid\"}]}}";
+            var before = db.ReadCanonicalCut();
+            var failure = Assert.ThrowsExactly<KeyLoadException>(() => db.Database.CreateCommand(
+                OperationKind.ConfigureResource, Guid.NewGuid(), "root", default, payload));
+            await Assert.That(failure.Code).IsEqualTo(ErrorCode.Validation);
+            await Assert.That(db.ReadCanonicalCut()).IsEqualTo(before);
         }
 
         foreach (var grants in new ScopeGrant[][] { [null!], [new("database", "orders", (Capability)(1L << 50))] })

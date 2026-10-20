@@ -22,7 +22,9 @@ internal static class TestDatabaseConcurrentCloseSeeding
         await Assert.That(original.Value!.Kind).IsEqualTo(OperationKind.Batch);
         await Assert.That(original.UserId!).IsEqualTo(TestDatabaseConcurrentCloseProtocol.Principal);
         var state = new TestDatabaseConcurrentCloseSeed(fixture.Partition, original, result, expected,
-            fixture.Store.Identity, fixture.Store.Position, TenantAdmissionAssertions.State(fixture.Store));
+            fixture.Store.Identity, fixture.Store.Position, TenantAdmissionAssertions.State(fixture.Store),
+            fixture.ExpectedReference(new(fixture.Partition, TestDatabaseConcurrentCloseProtocol.Collection,
+                TestDatabaseConcurrentCloseProtocol.Document)));
         await TestDatabaseConcurrentCloseAssertions.CurrentAsync(fixture.Database, fixture.Store, state);
         var replay = fixture.SubmitIssued(original);
         await TestDatabaseConcurrentCloseAssertions.ReceiptAsync(replay, expected);

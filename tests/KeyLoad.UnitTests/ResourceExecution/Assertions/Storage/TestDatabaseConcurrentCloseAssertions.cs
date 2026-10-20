@@ -18,8 +18,7 @@ internal static class TestDatabaseConcurrentCloseAssertions
 
     internal static async Task CurrentAsync(DatabaseEngine owner, ZoneTreeStore store, TestDatabaseConcurrentCloseSeed state)
     {
-        var reference = new EntityRef(state.Partition, TestDatabaseConcurrentCloseProtocol.Collection,
-            TestDatabaseConcurrentCloseProtocol.Document);
+        var reference = state.Reference;
         var expected = new DocumentResult(reference, TestDatabaseConcurrentCloseProtocol.Revision,
             TestDatabaseConcurrentCloseProtocol.Body, false, []);
         var actual = owner.GetDocument(TestDatabaseConcurrentCloseProtocol.Principal, reference);

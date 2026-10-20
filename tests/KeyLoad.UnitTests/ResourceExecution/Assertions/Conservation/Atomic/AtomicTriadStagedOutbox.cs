@@ -17,7 +17,7 @@ internal static class AtomicTriadStagedOutbox
 
     internal static async Task CompleteAsync(AtomicTriadStagedFixture state)
     {
-        var first = new DocumentRecord(new(state.Partition, AtomicTriadStagedProtocol.Collection, AtomicTriadStagedProtocol.Entity),
+        var first = new DocumentRecord(state.Harness.ExpectedReference(new(state.Partition, AtomicTriadStagedProtocol.Collection, AtomicTriadStagedProtocol.Entity)),
             1L, AtomicTriadStagedProtocol.FirstJson, new(), state.CommittedAt);
         var second = first with
         {

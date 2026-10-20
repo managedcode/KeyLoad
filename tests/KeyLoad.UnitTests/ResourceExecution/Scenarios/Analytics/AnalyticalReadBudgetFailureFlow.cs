@@ -33,7 +33,16 @@ internal static class AnalyticalReadBudgetFailureFlow
         var image = TenantAdmissionAssertions.State(store);
         var position = store.Position;
         var identity = System.Text.Json.JsonSerializer.Serialize(store.Identity, JsonDefaults.Options);
-        var maximum = SearchReadBudgetCost.TextMetadata(store, fixture.Partition, EmptyCollection);
+        var metadata = SearchReadBudgetCost.TextMetadata(store, fixture.Partition, EmptyCollection);
+        var healthy = new SearchRequest(fixture.Partition, EmptyCollection, Field, Term);
+        var measured = new SearchEngine(SearchReadBudgetOwner.Create(fixture, store,
+            fixture.Database.Limits.MaxQueryReadBytes), UnitExecutionOptions.QueryExecution());
+        var beforeRead = store.GetReadDiagnostics();
+        await Assert.That(await measured.SearchAsync(Principal, healthy)).IsEmpty();
+        var afterRead = store.GetReadDiagnostics();
+        var maximum = checked(afterRead.PointExaminedBytes - beforeRead.PointExaminedBytes
+            + afterRead.RangeExaminedBytes - beforeRead.RangeExaminedBytes);
+        await Assert.That(maximum).IsGreaterThanOrEqualTo(metadata);
         var owner = SearchReadBudgetOwner.Create(fixture, store, maximum);
         var search = new SearchEngine(owner, UnitExecutionOptions.QueryExecution());
         var rejected = Assert.ThrowsExactly<KeyLoadException>(() => search.Search(Principal,
@@ -41,7 +50,6 @@ internal static class AnalyticalReadBudgetFailureFlow
         await Assert.That(rejected.Code).IsEqualTo(ErrorCode.BudgetExceeded);
         await Assert.That(rejected.Message).IsEqualTo(ReadBytesExceeded);
         await Assert.That(owner.QueryReadsInFlight).IsEqualTo(NoQueries);
-        var healthy = new SearchRequest(fixture.Partition, EmptyCollection, Field, Term);
         await Assert.That(await search.SearchAsync(Principal, healthy)).IsEmpty();
         await Assert.That(owner.QueryReadsInFlight).IsEqualTo(NoQueries);
         await SearchReadBudgetAssertions.CancelledAsync(search, healthy);

@@ -7,14 +7,14 @@ internal static class AtomicTriadOutboxCommitted
     private const long FirstSequence = 2L;
     private const long FinalSequence = 4L;
 
-    internal static async Task RequireAsync(DatabaseEngine engine, ZoneTreeStore store, CommandRequest command,
+    internal static async Task RequireAsync(TestDatabase source, DatabaseEngine engine, ZoneTreeStore store, CommandRequest command,
         CommitReceipt receipt)
     {
         var partition = command.Partition;
         await Assert.That(receipt.CommandId).IsEqualTo(command.CommandId);
         await Assert.That(receipt.Token.Incarnation).IsEqualTo(store.Identity.Incarnation);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(partition.AtomicPartitionId);
-        await Assert.That(receipt.Token.Position).IsEqualTo(store.Position);
+        await Assert.That(receipt.Token.Position).IsEqualTo(engine.LastApplied);
 
         await Assert.That(receipt.Durability).IsEqualTo(engine.Durability);
         var expectedReceipts = AtomicTriadOutboxFixture.Receipts(command);
@@ -27,8 +27,8 @@ internal static class AtomicTriadOutboxCommitted
             new(partition, AtomicTriadOutboxFixture.Collection, AtomicTriadOutboxFixture.Entity))!;
         await Assert.That(document.Json).IsEqualTo(AtomicTriadOutboxFixture.Payload);
         await Assert.That(document.Revision).IsEqualTo(AtomicTriadOutboxFixture.InitialRevision);
-        await Assert.That(document.Reference).IsEqualTo(new EntityRef(partition,
-            AtomicTriadOutboxFixture.Collection, AtomicTriadOutboxFixture.Entity));
+        await Assert.That(document.Reference).IsEqualTo(source.ExpectedReference(new(partition,
+            AtomicTriadOutboxFixture.Collection, AtomicTriadOutboxFixture.Entity)));
         await Assert.That(document.Redacted).IsFalse();
         await Assert.That(document.RedactedFields).IsEmpty();
         var streamRef = new StreamRef(partition, AtomicTriadOutboxFixture.Streams, AtomicTriadOutboxFixture.Entity);
@@ -46,10 +46,10 @@ internal static class AtomicTriadOutboxCommitted
             new MessageMetadata(AtomicTriadOutboxFixture.Entity, MessageState.Ready, 0, 1L, 1L, null, null));
         await Assert.That(message.PayloadJson).IsEqualTo(AtomicTriadOutboxFixture.Payload);
         await Assert.That(message.HeadersJson).IsEqualTo(AtomicTriadOutboxFixture.Headers);
-        await OutboxAsync(engine, store, command, receipt, item.RecordedAt);
+        await OutboxAsync(source, engine, store, command, receipt, item.RecordedAt);
     }
 
-    private static async Task OutboxAsync(DatabaseEngine engine, ZoneTreeStore store,
+    private static async Task OutboxAsync(TestDatabase source, DatabaseEngine engine, ZoneTreeStore store,
         CommandRequest command, CommitReceipt receipt, DateTimeOffset recordedAt)
     {
         long bytes = 0;
@@ -65,7 +65,7 @@ internal static class AtomicTriadOutboxCommitted
             await Assert.That(entry.CommittedAt).IsEqualTo(recordedAt);
             await Assert.That(entry.Before).IsNull();
             var after = command.Mutations[ordinal] is PutDocument
-                ? new DocumentRecord(new(command.Partition, AtomicTriadOutboxFixture.Collection, AtomicTriadOutboxFixture.Entity),
+                ? new DocumentRecord(source.ExpectedReference(new(command.Partition, AtomicTriadOutboxFixture.Collection, AtomicTriadOutboxFixture.Entity)),
                     AtomicTriadOutboxFixture.InitialRevision, AtomicTriadOutboxFixture.Payload, new(), recordedAt) : null;
             await AtomicTriadOutboxImage.ExactAsync(entry.After, after);
             await Assert.That(JsonDefaults.Serialize<Mutation>(entry.Mutation).AsSpan()

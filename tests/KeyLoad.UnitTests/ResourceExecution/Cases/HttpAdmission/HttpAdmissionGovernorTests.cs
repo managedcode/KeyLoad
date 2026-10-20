@@ -40,12 +40,12 @@ internal sealed class HttpAdmissionGovernorTests
         {
             MaxReservedBytes = 25_000
         }));
-        var query = Begin(governor, "/V1/QUERY/AST/");
+        var query = Begin(governor, "/QUERY/AST/");
         await Assert.That(governor.Status().Node.RetainedBytes).IsEqualTo(20_480);
         var paths = new[] { "/search", "/graph/traverse", "/changes/read",
             "/search/graph", AnnSearchProtocol.Route, "/graph/shortest-path", "/graph/incoming",
             SampleChunkProtocol.ReadRoute, SampleRollupProtocol.ReadRoute,
-            "/V1/SERIES/CHUNKS/WINDOW/", "/V1/SERIES/ROLLUPS/READ/" };
+            "/SERIES/CHUNKS/WINDOW/", "/SERIES/ROLLUPS/READ/" };
         foreach (var path in paths)
         {
             await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => Begin(governor, path)).Code).IsEqualTo(ErrorCode.ResourceExhausted);
@@ -109,7 +109,7 @@ internal sealed class HttpAdmissionGovernorTests
         }));
         using var data = Begin(governor, "/queues/process");
         Bind(data, Principal());
-        using var control = Begin(governor, "/V1/QUEUES/DELIVERY/", 256);
+        using var control = Begin(governor, "/QUEUES/DELIVERY/", 256);
         Bind(control, Principal());
         await Assert.That(control.MaxBodyBytes).IsEqualTo(256);
         await Assert.That(governor.Status().Node.ControlCommands).IsEqualTo(1);

@@ -41,7 +41,7 @@ internal static class ResourcePairBindingAssertions
     {
         foreach (var value in state.Mixed)
         {
-            await ResourceIncarnationAssertions.EqualAsync(new DocumentResult(new(state.Source.Partition, Documents, value.Id), FirstRevision, DocumentJson, false, []),
+            await ResourceIncarnationAssertions.EqualAsync(new DocumentResult(state.Source.ExpectedReference(new(state.Source.Partition, Documents, value.Id)), FirstRevision, DocumentJson, false, []),
                 database.GetDocument(Root, new(state.Source.Partition, Documents, value.Id))!);
             var stream = new StreamRef(state.Source.Partition, Events, value.Id);
             var page = database.ReadStream(Root, stream);
@@ -56,7 +56,7 @@ internal static class ResourcePairBindingAssertions
         }
         foreach (var row in state.Rows)
         {
-            await ResourceIncarnationAssertions.EqualAsync(new DocumentResult(new(state.Source.Partition, Table, row.Id), FirstRevision, row.Json, false, []),
+            await ResourceIncarnationAssertions.EqualAsync(new DocumentResult(state.Source.ExpectedReference(new(state.Source.Partition, Table, row.Id)), FirstRevision, row.Json, false, []),
                 database.GetDocument(Root, new(state.Source.Partition, Table, row.Id))!);
         }
     }

@@ -15,15 +15,19 @@ internal sealed class ResourceProtocolFailureTests
     [Arguments(NullDefinition)]
     [Arguments(NullQueuePolicy)]
     [Arguments(NullEventRetention)]
-    public async Task AcRoc003NullResourceProtocolPersistsValidationWithoutPartialCatalogEffects(string payload)
+    public async Task AcRoc003NullResourceProtocolIsRejectedBeforeCatalogEffects(string payload)
     {
         using var database = new TestDatabase();
-        var operation = database.Database.CreateCommand(OperationKind.ConfigureResource, Guid.NewGuid(), RootPrincipal, TimeProvider.System.GetUtcNow(), payload);
-
-        var failure = database.Database.Apply(operation);
-
-        await Assert.That(Errors.Code(failure.Problem)).IsEqualTo(ErrorCode.Validation);
-        await Assert.That(OutcomeStoreOracle.Read(database.Store, operation)).IsEqualTo(failure);
+        var image = QueueWholeFlowStorage.Bytes(database.Store);
+        var cut = database.ReadCanonicalCut();
+        for (var attempt = 0; attempt < 2; attempt++)
+        {
+            var failure = Assert.ThrowsExactly<KeyLoadException>(() => database.Database.CreateCommand(
+                OperationKind.ConfigureResource, Guid.NewGuid(), RootPrincipal, TimeProvider.System.GetUtcNow(), payload));
+            await Assert.That(failure.Code).IsEqualTo(ErrorCode.Validation);
+        }
+        await Assert.That(database.ReadCanonicalCut()).IsEqualTo(cut);
+        await Assert.That(QueueWholeFlowStorage.Bytes(database.Store).SequenceEqual(image)).IsTrue();
         var absent = database.Store.Read(view => view.GetRecord<ResourceDefinition>(
             KeySpace.Resource(database.Partition.TenantId, database.Partition.DatabaseId, CollectionName)));
         await Assert.That(absent).IsNull();
@@ -34,7 +38,8 @@ internal sealed class ResourceProtocolFailureTests
     public async Task AcRoc003InvalidResourceFailureReplayRetainsItsOriginalOutcomeAndFingerprint()
     {
         using var database = new TestDatabase();
-        var operation = database.Database.CreateCommand(OperationKind.ConfigureResource, Guid.NewGuid(), RootPrincipal, TimeProvider.System.GetUtcNow(), NullDefinition);
+        var operation = database.Database.CreateCommand(OperationKind.ConfigureResource, Guid.NewGuid(), RootPrincipal, TimeProvider.System.GetUtcNow(),
+            "{\"tenantId\":\"tenant\",\"databaseId\":\"database\",\"definition\":{\"name\":\"\",\"kind\":\"collection\",\"transactionDomainId\":\"orders\"}}");
         var applied = database.Database.LastApplied;
         var original = database.Database.Apply(operation);
         var image = QueueWholeFlowStorage.Bytes(database.Store);

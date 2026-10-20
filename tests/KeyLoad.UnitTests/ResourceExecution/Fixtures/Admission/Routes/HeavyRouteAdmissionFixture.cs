@@ -14,7 +14,7 @@ internal sealed class HeavyRouteAdmissionFixture : IDisposable
     internal CommandRequest Seed { get; private set; } = null!;
     internal CommitReceipt Receipt { get; private set; } = null!;
     internal byte[] Outcome { get; private set; } = null!;
-    internal EntityRef Vertex(string id) => new(Harness.Partition, Collection, id);
+    internal EntityRef Vertex(string id) => Harness.ExpectedReference(new(Harness.Partition, Collection, id));
     internal EdgeRecord Edge => new("ab", Vertex("a"), Vertex("b"), "route", "{}", 1L);
     internal GraphShortestPathRequest Path => new(1, Harness.Partition, Graph, Vertex("a"), Vertex("b"), 1, 2, 1, ["route"]);
     internal async Task InitializeAsync()
@@ -25,8 +25,9 @@ internal sealed class HeavyRouteAdmissionFixture : IDisposable
             [new PutDocument(Collection, "a", "{}"), new PutDocument(Collection, "b", "{}"),
              new UpsertEdge(Graph, Edge.Id, Edge.From, Edge.To, Edge.Label, Edge.AttributesJson)]);
         var cut = Harness.Store.Position;
+        var expectedToken = Harness.NextCommitToken();
         Receipt = Harness.Submit(OperationKind.Batch, Seed, id: Seed.CommandId).Get<CommitReceipt>();
-        var expected = new CommitReceipt(Seed.CommandId, new(Harness.Store.Identity.Incarnation, Harness.Partition.AtomicPartitionId, cut + 1L), [new("putDocument", Collection, "a", 1L), new("putDocument", Collection, "b", 1L), new("upsertEdge", Graph, "ab", 1L)], DurabilityProfile.ProcessDurable, 1);
+        var expected = new CommitReceipt(Seed.CommandId, expectedToken, [new("putDocument", Collection, "a", 1L), new("putDocument", Collection, "b", 1L), new("upsertEdge", Graph, "ab", 1L)], DurabilityProfile.ProcessDurable, 1);
         await HeavyRouteAdmissionReads.EqualAsync(Receipt, expected);
         await RuntimeReceiptAsync(Receipt);
         await Assert.That(Harness.Store.Position).IsEqualTo(cut + 1L);

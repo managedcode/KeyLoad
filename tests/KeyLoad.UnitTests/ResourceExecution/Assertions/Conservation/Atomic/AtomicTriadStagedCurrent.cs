@@ -30,7 +30,7 @@ internal static class AtomicTriadStagedCurrent
     {
         await EqualAsync(state.Owner.GetDocument(AtomicTriadStagedProtocol.Root,
             new(state.Partition, AtomicTriadStagedProtocol.Collection, AtomicTriadStagedProtocol.Entity)),
-            new DocumentResult(new(state.Partition, AtomicTriadStagedProtocol.Collection, AtomicTriadStagedProtocol.Entity),
+            new DocumentResult(state.Harness.ExpectedReference(new(state.Partition, AtomicTriadStagedProtocol.Collection, AtomicTriadStagedProtocol.Entity)),
                 2L, AtomicTriadStagedProtocol.SecondJson, false, []));
         var stream = new StreamRef(state.Partition, AtomicTriadStagedProtocol.Streams, AtomicTriadStagedProtocol.Entity);
         var page = state.Owner.ReadStream(AtomicTriadStagedProtocol.Root, stream);

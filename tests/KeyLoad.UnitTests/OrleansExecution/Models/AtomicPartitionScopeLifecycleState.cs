@@ -3,7 +3,7 @@ using ManagedCode.Communication;
 
 namespace KeyLoad.UnitTests.Features.OrleansExecution;
 
-internal sealed class AtomicPartitionScopeLifecycleState(PartitionRef left, StoreIdentity originalIdentity)
+internal sealed class AtomicPartitionScopeLifecycleState(PartitionRef left, StoreIdentity originalIdentity, Func<EntityRef, EntityRef> expectedReference)
 {
     internal PartitionRef Left
     {
@@ -27,6 +27,7 @@ internal sealed class AtomicPartitionScopeLifecycleState(PartitionRef left, Stor
     {
         get;
     } = originalIdentity;
+    internal EntityRef Reference(EntityRef literal) => expectedReference(literal);
     internal Guid Incarnation => OriginalIdentity.Incarnation;
     internal Dictionary<string, DateTimeOffset> EventTimes
     {

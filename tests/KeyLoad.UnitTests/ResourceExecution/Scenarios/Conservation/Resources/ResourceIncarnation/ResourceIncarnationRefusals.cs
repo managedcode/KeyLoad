@@ -14,7 +14,7 @@ internal static class ResourceIncarnationRefusals
         await Assert.That(Errors.Code(failure.Problem)).IsEqualTo(ErrorCode.RevisionConflict);
         state.Outcomes.Add((stale, failure));
         await ResourceIncarnationAssertions.PreserveAsync(fixture.Store, fixture.Partition, state);
-        await ResourceIncarnationAssertions.RowAsync(fixture.Database, fixture.Partition, 2);
+        await ResourceIncarnationAssertions.RowAsync(fixture.Database, fixture.Partition, state.Lifetime, 2);
         var collision = fixture.Database.CreateCommand(state.Original.Value!.Kind, state.Original.CommandId,
             state.Original.UserId!, fixture.Database.EvaluationClock.GetUtcNow(),
             ResourceIncarnationLiteral.CreationJson(state.Original).Replace(
@@ -69,11 +69,11 @@ internal static class ResourceIncarnationRefusals
 
     private static async Task CorruptAsync(TestDatabase fixture, ResourceIncarnationState state, byte[]? corrupted)
     {
+        var operation = ResourceIncarnationLiteral.Configure(fixture.Database, fixture.Partition, state.Definition);
         var key = ResourceIncarnationLiteral.LifetimeKey(fixture.Partition);
         fixture.Store.Commit((tx, _) => { if (corrupted is null) { tx.Delete(key); } else { tx.Put(key, corrupted); } return true; });
         var image = QueueWholeFlowStorage.Bytes(fixture.Store);
         var position = fixture.Store.Position;
-        var operation = ResourceIncarnationLiteral.Configure(fixture.Database, fixture.Partition, state.Definition);
         var error = Assert.ThrowsExactly<KeyLoadException>(() => fixture.Database.Apply(operation));
         await Assert.That(error!.Code).IsEqualTo(ErrorCode.Corruption);
         await ResourceIncarnationAssertions.UnchangedAsync(fixture.Store, image, position);
@@ -82,6 +82,6 @@ internal static class ResourceIncarnationRefusals
         await ResourceIncarnationAssertions.EqualAsync(state.Definition, result.Get<ResourceDefinition>());
         state.Outcomes.Add((operation, result));
         await ResourceIncarnationAssertions.PreserveAsync(fixture.Store, fixture.Partition, state);
-        await ResourceIncarnationAssertions.RowAsync(fixture.Database, fixture.Partition, 2);
+        await ResourceIncarnationAssertions.RowAsync(fixture.Database, fixture.Partition, state.Lifetime, 2);
     }
 }

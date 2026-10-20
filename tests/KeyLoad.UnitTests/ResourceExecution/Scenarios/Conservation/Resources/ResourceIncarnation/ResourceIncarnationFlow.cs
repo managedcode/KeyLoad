@@ -16,8 +16,8 @@ internal static class ResourceIncarnationFlow
         await ResourceIncarnationAssertions.IdentityAsync(fixture.Store, fixture.Partition, original, definition, sql);
         await AgreementAsync(fixture, original, definition, token);
         await PrincipalCreationAsync(fixture, original, definition, token);
-        await ResourceIncarnationAssertions.WriteAsync(fixture.Database, fixture.Partition, 1);
         var lifetime = ResourceIncarnationAssertions.Lifetime(fixture.Store, fixture.Partition);
+        await ResourceIncarnationAssertions.WriteAsync(fixture.Database, fixture.Partition, lifetime, 1);
         var bytes = ResourceIncarnationAssertions.Bytes(fixture.Store, ResourceIncarnationLiteral.LifetimeKey(fixture.Partition));
         var creationOutcome = ResourceIncarnationAssertions.Bytes(fixture.Store, KeySpace.GlobalOutcome(original.UserId!, original.CommandId));
         var replacement = definition with
@@ -31,7 +31,7 @@ internal static class ResourceIncarnationFlow
         var state = new ResourceIncarnationState(original, created, replacement, lifetime, bytes, creationOutcome, updated, outcome,
             [(original, created), (updated, outcome)]);
         await ResourceIncarnationAssertions.PreserveAsync(fixture.Store, fixture.Partition, state);
-        await ResourceIncarnationAssertions.WriteAsync(fixture.Database, fixture.Partition, 2);
+        await ResourceIncarnationAssertions.WriteAsync(fixture.Database, fixture.Partition, lifetime, 2);
         await ResourceIncarnationRefusals.RunAsync(fixture, state, token);
         await ResourceIncarnationAssertions.ReplayAsync(fixture.Database, fixture.Store, state);
         await Assert.That(original.Value.Fingerprint).IsEqualTo(fingerprint);
@@ -58,7 +58,7 @@ internal static class ResourceIncarnationFlow
             var right = ResourceIncarnationAssertions.Lifetime(second.Store, second.Partition);
             await Assert.That(right.CreationFingerprint).IsNotEqualTo(left.CreationFingerprint);
             await Assert.That(right.Incarnation.Value).IsNotEqualTo(left.Incarnation.Value);
-            await ResourceIncarnationAssertions.WriteAsync(second.Database, second.Partition, 1);
+            await ResourceIncarnationAssertions.WriteAsync(second.Database, second.Partition, right, 1);
         });
 
     private static async Task AgreementAsync(TestDatabase originalOwner, Command<DatabaseCommand> original,
@@ -73,6 +73,7 @@ internal static class ResourceIncarnationFlow
             await Assert.That(ResourceIncarnationAssertions.Bytes(replica.Store, ResourceIncarnationLiteral.LifetimeKey(replica.Partition)))
                 .IsEquivalentTo(ResourceIncarnationAssertions.Bytes(originalOwner.Store, ResourceIncarnationLiteral.LifetimeKey(originalOwner.Partition)),
                     global::TUnit.Assertions.Enums.CollectionOrdering.Matching);
-            await ResourceIncarnationAssertions.WriteAsync(replica.Database, replica.Partition, 1);
+            await ResourceIncarnationAssertions.WriteAsync(replica.Database, replica.Partition,
+                ResourceIncarnationAssertions.Lifetime(originalOwner.Store, originalOwner.Partition), 1);
         });
 }

@@ -67,7 +67,7 @@ internal static class ResourceIncarnationAssertions
             KeySpace.Resource(partition.TenantId, partition.DatabaseId, ResourceIncarnationLiteral.Table)))!);
     }
 
-    internal static async Task<CommitReceipt> WriteAsync(DatabaseEngine database, PartitionRef partition, long revision)
+    internal static async Task<CommitReceipt> WriteAsync(DatabaseEngine database, PartitionRef partition, ResourceLifetime lifetime, long revision)
     {
         var command = new CommandRequest(Guid.NewGuid(), partition,
             [new PutDocument(ResourceIncarnationLiteral.Table, ResourceIncarnationLiteral.RowId,
@@ -79,13 +79,13 @@ internal static class ResourceIncarnationAssertions
             [new("putDocument", ResourceIncarnationLiteral.Table, ResourceIncarnationLiteral.RowId, revision)], receipt.Mutations);
         await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
         await Assert.That(receipt.PersistedCopies).IsEqualTo(1);
-        await RowAsync(database, partition, revision);
+        await RowAsync(database, partition, lifetime, revision);
         return receipt;
     }
 
-    internal static async Task RowAsync(DatabaseEngine database, PartitionRef partition, long revision)
+    internal static async Task RowAsync(DatabaseEngine database, PartitionRef partition, ResourceLifetime lifetime, long revision)
     {
-        var reference = new EntityRef(partition, ResourceIncarnationLiteral.Table, ResourceIncarnationLiteral.RowId);
+        var reference = new EntityRef(partition, ResourceIncarnationLiteral.Table, ResourceIncarnationLiteral.RowId) { Lifetime = new(lifetime.Incarnation.Value) };
         await EqualAsync(new DocumentResult(reference, revision, ResourceIncarnationLiteral.Row(revision), false, []),
             database.GetDocument("root", reference)!);
     }

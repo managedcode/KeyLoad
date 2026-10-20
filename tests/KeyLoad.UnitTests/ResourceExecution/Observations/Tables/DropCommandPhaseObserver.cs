@@ -43,14 +43,21 @@ internal sealed class DropCommandPhaseObserver : IGrainRequestPhaseObserver, Run
     private async ValueTask ObserveGateAsync(GrainRequestProbeIdentity identity, GrainRequestPhase phase,
         CancellationToken cancellationToken)
     {
-        if (!holds.TryGetValue(identity.CommandId, out var hold) || hold.Phase != phase || !hold.Select(identity, cancellationToken))
+        if (!holds.TryGetValue(identity.CommandId, out var hold) || hold.Phase != phase || !hold.Select(identity))
         {
             return;
         }
-        await hold.Released.Task.WaitAsync(cancellationToken).ConfigureAwait(true);
-        if (hold.Failure is { } failure)
+        try
         {
-            ExceptionDispatchInfo.Capture(failure).Throw();
+            await hold.Released.Task.WaitAsync(cancellationToken).ConfigureAwait(true);
+            if (hold.Failure is { } failure)
+            {
+                ExceptionDispatchInfo.Capture(failure).Throw();
+            }
+        }
+        finally
+        {
+            hold.Settled.TrySetResult();
         }
     }
 
@@ -68,6 +75,7 @@ internal sealed class DropCommandPhaseObserver : IGrainRequestPhaseObserver, Run
         {
             if (hold.Arrived.Task.IsCompletedSuccessfully)
             {
+                await hold.Settled.Task.WaitAsync(token).ConfigureAwait(false);
                 await hold.Disposed.Task.WaitAsync(token).ConfigureAwait(false);
             }
         }

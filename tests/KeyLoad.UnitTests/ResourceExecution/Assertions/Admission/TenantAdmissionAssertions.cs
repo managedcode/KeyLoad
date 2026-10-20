@@ -21,13 +21,13 @@ internal static class TenantAdmissionAssertions
             Convert.ToHexString(record.Value.Span)).ToArray();
     });
 
-    internal static async Task RecordAsync(DatabaseEngine database, Command<DatabaseCommand> operation,
+    internal static async Task RecordAsync(TestDatabase fixture, DatabaseEngine database, Command<DatabaseCommand> operation,
         PartitionRef partition, string id)
     {
         var record = database.GetDocument(operation.UserId!,
             new(partition, TenantAdmissionOperations.Collection, id));
         ArgumentNullException.ThrowIfNull(record);
-        var reference = new EntityRef(partition, TenantAdmissionOperations.Collection, id);
+        var reference = fixture.ExpectedReference(new(partition, TenantAdmissionOperations.Collection, id));
         await Assert.That(record.Reference).IsEqualTo(reference);
         await Assert.That(record.Revision).IsEqualTo(1L);
         await Assert.That(record.Json).IsEqualTo(TenantAdmissionOperations.Body);

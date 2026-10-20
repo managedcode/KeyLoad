@@ -22,11 +22,11 @@ internal static class SqlTypedInsertAssertions
     {
         var image = QueueWholeFlowStorage.Bytes(store);
         var cut = store.Position;
-        await DocumentAsync(database, fixture.Partition, SqlTypedInsertLiteral.One, SqlTypedInsertLiteral.OneJson);
-        await DocumentAsync(database, fixture.Partition, SqlTypedInsertLiteral.Two, SqlTypedInsertLiteral.TwoJson);
+        await DocumentAsync(fixture, database, fixture.Partition, SqlTypedInsertLiteral.One, SqlTypedInsertLiteral.OneJson);
+        await DocumentAsync(fixture, database, fixture.Partition, SqlTypedInsertLiteral.Two, SqlTypedInsertLiteral.TwoJson);
         if (repaired)
         {
-            await DocumentAsync(database, fixture.Partition, SqlTypedInsertLiteral.Three, SqlTypedInsertLiteral.ThreeJson);
+            await DocumentAsync(fixture, database, fixture.Partition, SqlTypedInsertLiteral.Three, SqlTypedInsertLiteral.ThreeJson);
         }
         else
         {
@@ -40,12 +40,12 @@ internal static class SqlTypedInsertAssertions
         }
         if (coldRows >= FirstCold)
         {
-            await DocumentAsync(database, fixture.Partition, SqlTypedInsertCold.FirstId, SqlTypedInsertCold.FirstJson);
+            await DocumentAsync(fixture, database, fixture.Partition, SqlTypedInsertCold.FirstId, SqlTypedInsertCold.FirstJson);
             expected.Add(new(SqlTypedInsertCold.FirstId, InitialRevision, ColdOne, false, []));
         }
         if (coldRows >= SecondCold)
         {
-            await DocumentAsync(database, fixture.Partition, SqlTypedInsertCold.SecondId, SqlTypedInsertCold.SecondJson);
+            await DocumentAsync(fixture, database, fixture.Partition, SqlTypedInsertCold.SecondId, SqlTypedInsertCold.SecondJson);
             expected.Add(new(SqlTypedInsertCold.SecondId, InitialRevision, ColdTwo, false, []));
         }
         var engine = new QueryEngine(database, UnitExecutionOptions.QueryExecution());
@@ -57,8 +57,8 @@ internal static class SqlTypedInsertAssertions
         await PageAsync(ast, expected, cut);
         await UnchangedAsync(store, image, cut);
     }
-    private static async Task DocumentAsync(DatabaseEngine database, PartitionRef partition, string id, string json)
-        => await SameAsync(new DocumentResult(new(partition, SqlTypedInsertLiteral.Table, id), InitialRevision, json, false, []),
+    private static async Task DocumentAsync(TestDatabase fixture, DatabaseEngine database, PartitionRef partition, string id, string json)
+        => await SameAsync(new DocumentResult(fixture.ExpectedReference(new(partition, SqlTypedInsertLiteral.Table, id)), InitialRevision, json, false, []),
             database.GetDocument(SqlTypedInsertLiteral.Root, new(partition, SqlTypedInsertLiteral.Table, id)));
     private static async Task PageAsync(QueryPage page, List<QueryRow> expected, long cut)
     {
