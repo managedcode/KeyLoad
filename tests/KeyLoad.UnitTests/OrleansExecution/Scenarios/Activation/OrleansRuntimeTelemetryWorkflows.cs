@@ -6,10 +6,11 @@ namespace KeyLoad.UnitTests.Features.OrleansExecution;
 
 internal static class OrleansRuntimeTelemetryWorkflows
 {
+    private const int CompleteOperationCaptureRecords = 1_000;
     internal static async Task RunAsync(RequestCqrsHostedRuntimeFixture fixture)
     {
         var callerActivity = Activity.Current;
-        await using var telemetry = await OrleansRuntimeTelemetryFixture.StartAsync();
+        await using var telemetry = await OrleansRuntimeTelemetryFixture.StartAsync(new() { MaximumRecords = CompleteOperationCaptureRecords });
         fixture.Database.Configure(OrleansRuntimeTelemetryTokens.Collection, ResourceKind.Collection);
         var first = PersistPrincipal(fixture, "first");
         var second = PersistPrincipal(fixture, "second");
@@ -40,7 +41,9 @@ internal static class OrleansRuntimeTelemetryWorkflows
 
         var traces = telemetry.Activities.Snapshot();
         var metrics = telemetry.Metrics.Snapshot();
-        await Assert.That(telemetry.Activities.WasTruncated).IsFalse();
+        await Assert.That(telemetry.Activities.WasTruncated).IsFalse()
+            .Because(string.Join("; ", traces.GroupBy(static activity => activity.DisplayName)
+                .Select(static group => group.Key + "=" + group.Count())));
         await Assert.That(telemetry.Metrics.WasTruncated).IsFalse().Because(telemetry.Metrics.DiagnosticSummary);
         await OrleansRuntimeTelemetryAssertions.AssertTracePrivacyAsync(traces, first, second, third, parentage,
             telemetry.Options, sentinelObservations);

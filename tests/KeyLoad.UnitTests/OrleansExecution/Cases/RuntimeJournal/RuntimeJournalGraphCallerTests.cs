@@ -16,12 +16,12 @@ internal sealed class RuntimeJournalGraphCallerTests(RuntimeRuntimeJournalFixtur
         var cancellationToken = TestContext.Current!.Execution.CancellationToken;
         cancellationToken.ThrowIfCancellationRequested();
         var grainId = $"execution/{JournalPrefix}/{Guid.NewGuid():N}";
-        var grain = fixture.Cluster.Client.GetGrain<IRuntimeJournalReplayGrain>(grainId);
+        var grain = fixture.Grains.GetGrain<IRuntimeJournalReplayGrain>(grainId);
         var original = new byte[] { InitialFirstByte, InitialSecondByte };
         await grain.SetAsync(original);
         await AssertStoredAsync(grain, original);
 
-        var probe = fixture.Cluster.Client.GetGrain<IRuntimeJournalGraphCallerProbeGrain>(Guid.NewGuid());
+        var probe = fixture.Grains.GetGrain<IRuntimeJournalGraphCallerProbeGrain>(Guid.NewGuid());
         var observation = await probe.ExerciseAsync(cancellationToken);
         await AssertCallerAndDenialOutcomes(observation);
         await AssertStoredAsync(grain, original);
@@ -32,14 +32,14 @@ internal sealed class RuntimeJournalGraphCallerTests(RuntimeRuntimeJournalFixtur
         await grain.DeactivateAsync();
         await RuntimeJournalGraphCallerSupport.WaitForActivationChangeAsync(grain, priorActivation,
             fixture.TimingOptions.Value);
-        var reopened = fixture.Cluster.Client.GetGrain<IRuntimeJournalReplayGrain>(grainId);
+        var reopened = fixture.Grains.GetGrain<IRuntimeJournalReplayGrain>(grainId);
         await AssertStoredAsync(reopened, followUp);
         var beforeDeleteActivation = await reopened.GetActivationTokenAsync();
         await reopened.DeleteAsync();
         await reopened.DeactivateAsync();
         await RuntimeJournalGraphCallerSupport.WaitForActivationChangeAsync(reopened,
             beforeDeleteActivation, fixture.TimingOptions.Value);
-        await Assert.That(await fixture.Cluster.Client.GetGrain<IRuntimeJournalReplayGrain>(grainId).ReadAsync())
+        await Assert.That(await fixture.Grains.GetGrain<IRuntimeJournalReplayGrain>(grainId).ReadAsync())
             .IsNull();
     }
 

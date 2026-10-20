@@ -55,6 +55,8 @@ internal static class OrleansTelemetryTagSanitizer
     private static string NormalizeMethod(string method)
         => method switch
         {
+            OrleansTelemetryPolicy.RequestMethodValue => OrleansTelemetryPolicy.RequestMethodValue,
+            OrleansTelemetryPolicy.CapabilityMethodValue => OrleansTelemetryPolicy.CapabilityMethodValue,
             OrleansTelemetryPolicy.RequestStreamStartMethod => OrleansTelemetryPolicy.RequestMethodValue,
             OrleansTelemetryPolicy.RequestStreamMethodName => OrleansTelemetryPolicy.RequestMethodValue,
             OrleansTelemetryPolicy.CapabilityMethodName => OrleansTelemetryPolicy.CapabilityMethodValue,

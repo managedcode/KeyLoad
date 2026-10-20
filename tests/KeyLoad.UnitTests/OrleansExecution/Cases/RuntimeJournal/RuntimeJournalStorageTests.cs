@@ -50,14 +50,14 @@ internal sealed class RuntimeJournalStorageTests(RuntimeRuntimeJournalFixture fi
     public async Task OrleansBinaryReplaysOneEntryAcrossReadPageBoundaries()
     {
         var grainId = NewName("binary-replay");
-        var grain = fixture.Cluster.Client.GetGrain<IRuntimeJournalReplayGrain>(grainId);
+        var grain = fixture.Grains.GetGrain<IRuntimeJournalReplayGrain>(grainId);
         var expected = Enumerable.Range(FirstPatternIndex, BinaryReplayPayloadBytes)
             .Select(index => (byte)(index % byte.MaxValue)).ToArray();
         await grain.SetAsync(expected);
         var originalActivation = await grain.GetActivationTokenAsync();
         await grain.DeactivateAsync();
         await WaitForActivationChangeAsync(grain, originalActivation);
-        var recovered = fixture.Cluster.Client.GetGrain<IRuntimeJournalReplayGrain>(grainId);
+        var recovered = fixture.Grains.GetGrain<IRuntimeJournalReplayGrain>(grainId);
         var actual = await recovered.ReadAsync();
         await Assert.That(actual).IsNotNull();
         await Assert.That(actual!.SequenceEqual(expected)).IsTrue();

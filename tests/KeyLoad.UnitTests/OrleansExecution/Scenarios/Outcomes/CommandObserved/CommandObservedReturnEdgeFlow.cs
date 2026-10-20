@@ -93,17 +93,15 @@ internal static class CommandObservedReturnEdgeFlow
             var before = await CommandObservedReturnEdgeSnapshot.CaptureAsync(scenario, operation.Token);
             var request = scenario.Receive();
             var requestId = Guid.NewGuid();
-            var phase = business ? GrainRequestPhase.OriginalBusinessReplyReturned : GrainRequestPhase.OriginalClaimReturned;
+            var phase = business ? GrainRequestPhase.SubmitReturned : GrainRequestPhase.BeforeSubmit;
             var gate = scenario.Observation.Hold(requestId, phase, fail: true);
             original = CommandObservedPolicyCalls.ReceiveAsync(scenario, requestId, request, operation.Token);
             await gate.Arrived.Task.WaitAsync(operation.Token);
-            var refused = await Assert.ThrowsExactlyAsync<KeyLoadException>(async () =>
-            {
-                _ = await original;
-            });
+            var refused = await original;
             observed = true;
-            await Assert.That((refused ?? throw new InvalidOperationException(nameof(refused))).Code).IsEqualTo(ErrorCode.UnknownWriteOutcome);
-            await Assert.That(refused.Message).IsEqualTo(business
+            await Assert.That(refused.Error).IsEqualTo(ErrorCode.UnknownWriteOutcome);
+            await Assert.That(refused.Payload.IsEmpty).IsTrue();
+            await Assert.That(refused.SafeDetail).IsEqualTo(business
                 ? CommandObservedReturnEdgeProtocol.Unknown : CommandObservedReturnEdgeProtocol.ClaimUnavailable);
             await scenario.Observation.Read(requestId).Disposed.Task.WaitAsync(operation.Token);
             await operation.CancelAsync();

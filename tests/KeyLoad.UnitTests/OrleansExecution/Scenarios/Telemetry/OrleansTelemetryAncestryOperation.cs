@@ -5,7 +5,7 @@ namespace KeyLoad.UnitTests.Features.OrleansExecution;
 internal static class OrleansTelemetryAncestryOperation
 {
     internal static async Task RunAsync(RequestCqrsHostedRuntimeFixture fixture, PrincipalRecord principal,
-        string documentId, List<string> documents)
+        Guid creation, string documentId, List<string> documents)
     {
         var commandId = Guid.NewGuid();
         var requestId = Guid.NewGuid();
@@ -24,7 +24,7 @@ internal static class OrleansTelemetryAncestryOperation
                 documentId, OrleansTelemetryAncestryProtocol.FirstRevision)], fixture.Database.Store.Identity.Durability, (fixture.Database.Store.Identity.Durability == DurabilityProfile.Buffered ? 0 : 1));
         await EqualAsync(expected, receipt);
         documents.Add(documentId);
-        await CurrentAsync(fixture, principal, documents, commandId, expected);
+        await CurrentAsync(fixture, principal, creation, documents, commandId, expected);
         var cut = fixture.Database.Store.Position;
         var journal = fixture.Database.ReadCanonicalCut();
         var replay = await RequestCqrsCommandStream.InvokeAsync(fixture, principal,
@@ -33,17 +33,17 @@ internal static class OrleansTelemetryAncestryOperation
         var replayReceipt = OrleansSerialization.Deserialize<GrainValue>(replay.Payload.Span).Value as CommitReceipt
             ?? throw new InvalidOperationException(OrleansTelemetryAncestryProtocol.MissingReceipt);
         await EqualAsync(expected, replayReceipt);
-        await CurrentAsync(fixture, principal, documents, commandId, expected);
+        await CurrentAsync(fixture, principal, creation, documents, commandId, expected);
         await Assert.That(fixture.Database.Store.Position).IsEqualTo(cut);
         await Assert.That(fixture.Database.ReadCanonicalCut()).IsEqualTo(journal);
     }
 
     private static async Task CurrentAsync(RequestCqrsHostedRuntimeFixture fixture, PrincipalRecord principal,
-        List<string> documents, Guid commandId, CommitReceipt expected)
+        Guid creation, List<string> documents, Guid commandId, CommitReceipt expected)
     {
         foreach (var id in documents)
         {
-            var reference = new EntityRef(fixture.Database.Partition, OrleansTelemetryAncestryProtocol.Collection, id);
+            var reference = fixture.Database.Reference(creation, OrleansTelemetryAncestryProtocol.Collection, id);
             var actual = fixture.Database.Database.GetDocument(OrleansTelemetryAncestryProtocol.Root, reference);
             await EqualAsync(new DocumentResult(reference, OrleansTelemetryAncestryProtocol.FirstRevision,
                 OrleansTelemetryAncestryProtocol.Json, false, []), actual);

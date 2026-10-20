@@ -42,7 +42,8 @@ internal static class OrleansTelemetryAncestryFlow
     {
         await Assert.That(telemetry.Options.MaximumParentLinks)
             .IsEqualTo(OrleansTelemetryAncestryProtocol.MaximumParentLinks);
-        fixture.Database.Configure(OrleansTelemetryAncestryProtocol.Collection, ResourceKind.Collection);
+        var creation = Guid.NewGuid();
+        fixture.Database.Configure(OrleansTelemetryAncestryProtocol.Collection, ResourceKind.Collection, id: creation);
         var principal = new PrincipalRecord(OrleansTelemetryAncestryProtocol.Principal,
             fixture.Database.Partition.TenantId,
             [new ScopeGrant(fixture.Database.Partition.DatabaseId, OrleansTelemetryAncestryProtocol.Collection,
@@ -52,22 +53,22 @@ internal static class OrleansTelemetryAncestryFlow
         await Assert.That(JsonDefaults.Serialize(persisted).AsSpan()
             .SequenceEqual(JsonDefaults.Serialize(principal))).IsTrue();
         List<string> documents = [];
-        await PhaseAsync(fixture, telemetry, persisted, documents, OrleansTelemetryAncestryProtocol.DeepDocument,
+        await PhaseAsync(fixture, telemetry, persisted, creation, documents, OrleansTelemetryAncestryProtocol.DeepDocument,
             OrleansTelemetryAncestryProtocol.MaximumParentLinks, expectedRecorded: false);
-        await PhaseAsync(fixture, telemetry, persisted, documents, OrleansTelemetryAncestryProtocol.BoundaryDocument,
+        await PhaseAsync(fixture, telemetry, persisted, creation, documents, OrleansTelemetryAncestryProtocol.BoundaryDocument,
             OrleansTelemetryAncestryProtocol.MaximumParentLinks - OrleansTelemetryAncestryProtocol.OneLink,
             expectedRecorded: true);
-        await PhaseAsync(fixture, telemetry, persisted, documents, OrleansTelemetryAncestryProtocol.HealthyDocument,
+        await PhaseAsync(fixture, telemetry, persisted, creation, documents, OrleansTelemetryAncestryProtocol.HealthyDocument,
             OrleansTelemetryAncestryProtocol.NoLocalParents, expectedRecorded: true);
     }
 
     private static async Task PhaseAsync(RequestCqrsHostedRuntimeFixture fixture,
-        OrleansRuntimeTelemetryFixture telemetry, PrincipalRecord principal, List<string> documents,
+        OrleansRuntimeTelemetryFixture telemetry, PrincipalRecord principal, Guid creation, List<string> documents,
         string documentId, int localParents, bool expectedRecorded)
     {
         var original = Activity.Current;
         var failures = new List<Exception>();
-        await ServerFailureObserver.ObserveAsync(() => RunOwnedPhaseAsync(fixture, telemetry, principal,
+        await ServerFailureObserver.ObserveAsync(() => RunOwnedPhaseAsync(fixture, telemetry, principal, creation,
             documents, documentId, localParents, expectedRecorded, failures), failures);
         await ServerFailureObserver.ObserveAsync(() => OrleansRuntimeTelemetryAssertions
             .AssertActivityRestoredAsync(original), failures);
@@ -75,7 +76,7 @@ internal static class OrleansTelemetryAncestryFlow
     }
 
     private static async Task RunOwnedPhaseAsync(RequestCqrsHostedRuntimeFixture fixture,
-        OrleansRuntimeTelemetryFixture telemetry, PrincipalRecord principal, List<string> documents,
+        OrleansRuntimeTelemetryFixture telemetry, PrincipalRecord principal, Guid creation, List<string> documents,
         string documentId, int localParents, bool expectedRecorded, List<Exception> failures)
     {
         using var chain = new OrleansTelemetryAncestryChain();
@@ -84,7 +85,7 @@ internal static class OrleansTelemetryAncestryFlow
         {
             var parent = chain.Start(telemetry, localParents);
             observation = new(parent);
-            return OrleansTelemetryAncestryOperation.RunAsync(fixture, principal, documentId, documents);
+            return OrleansTelemetryAncestryOperation.RunAsync(fixture, principal, creation, documentId, documents);
         }, failures);
         if (observation is not null)
         {

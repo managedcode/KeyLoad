@@ -11,7 +11,10 @@ internal static class RequestCqrsTextMaintenanceFlow
     internal static async Task RunAsync(RequestCqrsHostedRuntimeFixture fixture, TextIndexMaintenanceMode mode,
         RequestCqrsTextFault? fault)
     {
-        var token = TestContext.Current!.Execution.CancellationToken;
+        using var deadline = new CancellationTokenSource(fixture.Timing.CompletionTimeout, TimeProvider.System);
+        using var operation = CancellationTokenSource.CreateLinkedTokenSource(
+            TestContext.Current!.Execution.CancellationToken, deadline.Token);
+        var token = operation.Token;
         var lifetime = await RequestCqrsTextResource.ConfigureAsync(fixture.Database, token);
         var request = (await RequestCqrsHostedMaintenanceData.RequestAsync(fixture.Database, token));
         var payload = OrleansSerialization.Serialize(false);
@@ -62,8 +65,10 @@ internal static class RequestCqrsTextMaintenanceFlow
             }
         }
         catch (KeyLoadException error) { failure = error; }
-        await producer.ProducerSettled.Task;
-        await producer.ActivationSettled.Task;
+        await Assert.That(producer.Started.Task.IsCompletedSuccessfully).IsTrue()
+            .Because(failure?.Message ?? "The controlled CQRS producer must start before validation.");
+        await producer.ProducerSettled.Task.WaitAsync(token);
+        await producer.ActivationSettled.Task.WaitAsync(token);
         await Assert.That(producer.ProducerSettlementCount).IsEqualTo(1);
         await Assert.That(producer.ActivationSettlementCount).IsEqualTo(1);
         return new(kinds.ToArray(), phases.ToArray(), final, failure);

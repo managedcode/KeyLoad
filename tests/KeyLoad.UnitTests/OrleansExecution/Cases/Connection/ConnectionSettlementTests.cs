@@ -9,13 +9,14 @@ internal sealed class ConnectionSettlementTests
     public Task AcCrs055ExecutionDeadlineJoinsSelectedOperationAndFollowingWriteSucceeds()
     {
         var timing = new RuntimeTestOptions();
-        var routing = new GrainRoutingOptions { ExecutionLifetime = timing.HeldJobDelay };
+        var routing = new GrainRoutingOptions();
         return ConnectionScenario.RunAsync(async scenario =>
         {
+            await scenario.InitializeAsync(TestContext.Current!.Execution.CancellationToken);
             using var timeout = new CancellationTokenSource(timing.CompletionTimeout, TimeProvider.System);
             var token = timeout.Token;
-            await scenario.InitializeAsync(token);
             var principal = scenario.Principal();
+            routing.ExecutionLifetime = timing.HeldJobDelay;
             var requestId = Guid.NewGuid();
             var held = scenario.Observation.Hold(requestId);
             var command = scenario.Command("deadline-original");

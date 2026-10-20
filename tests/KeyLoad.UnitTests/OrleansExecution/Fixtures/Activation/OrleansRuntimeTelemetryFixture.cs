@@ -44,11 +44,11 @@ internal sealed class OrleansRuntimeTelemetryFixture : IAsyncDisposable
         get;
     }
 
-    internal static async Task<OrleansRuntimeTelemetryFixture> StartAsync()
+    internal static async Task<OrleansRuntimeTelemetryFixture> StartAsync(OrleansTelemetryCaptureOptions? configured = null)
     {
         var activities = new OrleansActivityCaptureExporter();
         var metrics = new OrleansMetricCaptureExporter();
-        var captureDefaults = new OrleansTelemetryCaptureOptions();
+        var captureDefaults = configured ?? new OrleansTelemetryCaptureOptions();
         var builder = Host.CreateApplicationBuilder();
         builder.AddServiceDefaults();
         builder.Services.AddOptions<OrleansTelemetryCaptureOptions>()
