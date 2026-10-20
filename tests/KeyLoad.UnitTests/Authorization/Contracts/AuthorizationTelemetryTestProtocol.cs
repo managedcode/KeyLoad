@@ -11,8 +11,8 @@ internal static class AuthorizationTelemetryTestProtocol
     internal const int CatalogCount = 1;
     internal const int IndexCount = 0;
     internal const long SchemaVersion = 1;
-    internal const string Route = "/telemetry/catalog/{subject}";
-    internal const string Target = "/telemetry/catalog/path-canary?token=query-canary";
+    internal const string Route = "/admin/resources/{subject}";
+    internal const string Target = "/admin/resources/path-canary?token=query-canary";
     internal const string Administrator = "root";
     internal const string AdministratorKey = "root.unit-test-credential-32-characters";
     internal const string Member = "telemetry-member";
