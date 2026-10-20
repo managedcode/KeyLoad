@@ -24,13 +24,14 @@ internal static class CompositionReverseFinalImageFlow
         var original = Issue(owner, request, token, out var work);
         var receipt = new CommitReceipt(original.CommandId, owner.NextToken(), [new("deleteDocument", D.Collection, D.Id, 2)], DurabilityProfile.ProcessDurable, 1);
         var position = owner.Store.Position;
-        await CompositionReverseFinalImageAssertions.RefusalAsync(owner.Submit(original));
+        await A.ReceiptAsync(receipt, owner.Submit(original).Get<CommitReceipt>());
         await Assert.That(owner.Store.Position).IsEqualTo(position + 1);
         await Assert.That(owner.ReadCanonicalCut().AppliedPosition).IsEqualTo(receipt.Token.Position);
         await Assert.That(owner.Database.LastApplied).IsEqualTo(receipt.Token.Position);
         var state = new CompositionReverseFinalImageState(bound, request, original, receipt, seed, seedReceipt);
         await A.UnchangedAsync(owner, async () =>
         {
+            await CompositionReverseFinalImageAssertions.RefusalAsync(owner.Database.ResolveOutcome(original));
             var denied = await Assert.ThrowsExactlyAsync<KeyLoadException>(() =>
             {
                 _ = owner.Database.ResolveSubmissionOutcome(original, work);

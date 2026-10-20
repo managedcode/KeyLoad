@@ -90,11 +90,12 @@ internal static class QueueGraphIdentityFlow
                 new EnqueueMessage(QueueGraphIdentityState.Queue, QueueGraphIdentityState.Message,
                     payload, HeadersJson: QueueGraphIdentityState.HeadersJson)]);
         var operation = await CompileAsync(db.Database, seed, at);
+        var nextPosition = checked(db.Database.LastApplied + 1);
         var receipt = db.Database.Apply(operation).Get<CommitReceipt>();
         var expectedReceipt = new CommitReceipt(operation.CommandId, new(db.Store.Identity.Incarnation, db.Partition.AtomicPartitionId,
-                db.Store.Position), [new("putDocument", QueueGraphIdentityState.Collection, first.Id, 1),
+                nextPosition), [new("putDocument", QueueGraphIdentityState.Collection, first.Id, 1),
                 new("putDocument", QueueGraphIdentityState.Collection, second.Id, 1),
-                new("enqueue", QueueGraphIdentityState.Queue, QueueGraphIdentityState.Message, 1)], receipt.Durability, (receipt.Durability == DurabilityProfile.Buffered ? 0 : 1));
+                new("enqueue", QueueGraphIdentityState.Queue, QueueGraphIdentityState.Message, 1)], db.Store.Identity.Durability, (db.Store.Identity.Durability == DurabilityProfile.Buffered ? 0 : 1));
         await Assert.That(JsonDefaults.Serialize(receipt).AsSpan().SequenceEqual(JsonDefaults.Serialize(expectedReceipt))).IsTrue();
         var failedRequest = new CommandRequest(Guid.NewGuid(), db.Partition,
             [new PutDocument(QueueGraphIdentityState.Collection, QueueGraphIdentityState.Marker,

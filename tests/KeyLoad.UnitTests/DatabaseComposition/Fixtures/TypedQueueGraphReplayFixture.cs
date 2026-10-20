@@ -39,8 +39,9 @@ internal static class TypedQueueGraphReplayFixture
              new PutDocument(ToCollection, Second, SecondJson),
              new EnqueueMessage(QueueGraphIdentityState.Queue, QueueGraphIdentityState.Message,
                  payload, HeadersJson: QueueGraphIdentityState.HeadersJson)]), at);
+        var nextPosition = checked(db.Database.LastApplied + 1);
         var receipt = db.Database.Apply(seed).Get<CommitReceipt>();
-        await SeedReceiptAsync(db, seed, receipt);
+        await SeedReceiptAsync(db, seed, receipt, nextPosition);
         var failed = await QueueGraphIdentityFlow.CompileAsync(db.Database, new(Guid.NewGuid(), db.Partition,
             [new PutDocument(QueueGraphIdentityState.Collection, QueueGraphIdentityState.Marker,
                 QueueGraphIdentityState.MarkerJson),
@@ -78,12 +79,12 @@ internal static class TypedQueueGraphReplayFixture
         }
     }
 
-    private static async Task SeedReceiptAsync(TestDatabase db, Command<DatabaseCommand> operation, CommitReceipt actual)
+    private static async Task SeedReceiptAsync(TestDatabase db, Command<DatabaseCommand> operation, CommitReceipt actual, long nextPosition)
     {
         var expected = new CommitReceipt(operation.CommandId, new(db.Store.Identity.Incarnation, db.Partition.AtomicPartitionId,
-                db.Store.Position), [new("putDocument", FromCollection, First, FirstRevision),
+                nextPosition), [new("putDocument", FromCollection, First, FirstRevision),
              new("putDocument", ToCollection, Second, FirstRevision),
-             new("enqueue", QueueGraphIdentityState.Queue, QueueGraphIdentityState.Message, FirstRevision)], actual.Durability, (actual.Durability == DurabilityProfile.Buffered ? 0 : 1));
+             new("enqueue", QueueGraphIdentityState.Queue, QueueGraphIdentityState.Message, FirstRevision)], db.Store.Identity.Durability, (db.Store.Identity.Durability == DurabilityProfile.Buffered ? 0 : 1));
         await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
     }
 }

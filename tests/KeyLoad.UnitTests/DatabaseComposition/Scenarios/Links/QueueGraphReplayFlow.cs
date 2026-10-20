@@ -25,8 +25,9 @@ internal static class QueueGraphReplayFlow
             [new GraphToQueueMutation(QueueGraphIdentityState.Queue, QueueGraphIdentityState.Graph,
                 source.From, QueueGraphReplayState.ReversePrefix)]);
         var reverse = await QueueGraphIdentityFlow.CompileAsync(db.Database, reverseCommand, new DateTimeOffset(source.Healthy.Timestamp).AddSeconds(1));
+        var nextPosition = checked(db.Database.LastApplied + 1);
         var receipt = db.Database.Apply(reverse).Get<CommitReceipt>();
-        await QueueGraphReplayAssertions.ReverseReceiptAsync(source, db.Store, reverse.CommandId, receipt);
+        await QueueGraphReplayAssertions.ReverseReceiptAsync(source, db.Store, reverse.CommandId, receipt, nextPosition);
         var continuation = DatabaseCompositionExpectedReferences.Capture(db,
             new(db.Partition, QueueGraphIdentityState.Collection, QueueGraphReplayState.Continuation));
         var next = await QueueGraphIdentityFlow.CompileAsync(db.Database, new(Guid.NewGuid(), db.Partition,

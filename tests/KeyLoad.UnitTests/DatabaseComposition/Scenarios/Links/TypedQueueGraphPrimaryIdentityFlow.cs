@@ -57,8 +57,9 @@ internal static class TypedQueueGraphPrimaryIdentityFlow
                     [new GraphToQueueMutation(QueueGraphIdentityState.Queue, QueueGraphIdentityState.Graph,
                         source.From, QueueGraphReplayState.ReversePrefix)]),
                     new DateTimeOffset(source.Healthy.Timestamp).AddSeconds(NextOffsetSeconds));
+                var nextPosition = checked(engine.LastApplied + 1);
                 var receipt = engine.Apply(reverse).Get<CommitReceipt>();
-                await QueueGraphReplayAssertions.ReverseReceiptAsync(source, store, reverse.CommandId, receipt);
+                await QueueGraphReplayAssertions.ReverseReceiptAsync(source, store, reverse.CommandId, receipt, nextPosition);
                 var continuation = store.Read(view => DatabaseCompositionExpectedReferences.Capture(view,
                     new(source.Fixture.Partition, QueueGraphIdentityState.Collection, QueueGraphReplayState.Continuation)));
                 var next = await QueueGraphIdentityFlow.CompileAsync(engine, new(Guid.NewGuid(), source.Fixture.Partition,
