@@ -29,7 +29,7 @@ internal static class SubscriptionOldCutAssertions
         }
         await SameAsync(database.GetDocument("root", new(state.Group.Source.Partition,
             SubscriptionOldCutState.Collection, "input2")), new DocumentResult(
-                new(state.Group.Source.Partition, SubscriptionOldCutState.Collection, "input2"),
+                new(state.Group.Source.Partition, SubscriptionOldCutState.Collection, "input2") { Lifetime = state.DocumentLifetime },
                 1, SubscriptionOldCutState.EffectJson, false, []));
     }
     internal static async Task ConservedAsync(ZoneTreeStore store, string[] bytes, long position, StoreIdentity identity)

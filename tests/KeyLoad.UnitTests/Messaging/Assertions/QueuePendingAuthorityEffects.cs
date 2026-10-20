@@ -10,7 +10,10 @@ internal static class QueuePendingAuthorityEffects
     {
         foreach (var processed in state.Processed)
         {
-            var reference = new EntityRef(state.Flow.Partition, QueueLifecycleTestProtocol.Collection, processed.Id);
+            var reference = new EntityRef(state.Flow.Partition, QueueLifecycleTestProtocol.Collection, processed.Id)
+            {
+                Lifetime = state.DocumentLifetime
+            };
             var document = owner.GetDocument(QueueLifecycleTestProtocol.Administrator, reference)!;
             await Assert.That(document.Reference).IsEqualTo(reference);
             await Assert.That(document.Revision).IsEqualTo(1);

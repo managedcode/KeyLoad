@@ -13,7 +13,7 @@ internal static class SubscriptionPendingCounterAuthorityContinuation
         token.ThrowIfCancellationRequested();
         await SubscriptionCheckpointAuthorityAssertions.SourceAsync(db, store, group.Source,
             SubscriptionCheckpointAuthorityAssertions.SourceImage(store, group.Source.Partition));
-        var expected = SubscriptionGroupProgressAuthorityAssertions.NextToken(db, store, group);
+        var expected = SubscriptionGroupProgressAuthorityAssertions.NextToken(db, group);
         var result = QueueWholeFlowStorage.Apply(db, OperationKind.ReceiveSubscription, request, request.RequestId, due);
         await SubscriptionContinuationAssertions.ClaimAsync(db, store, group, request, result,
             original.Deliveries[FirstDelivery].Event, ReclaimedAttempt, ReclaimedVersion, due,
@@ -50,7 +50,7 @@ internal static class SubscriptionPendingCounterAuthorityContinuation
     {
         token.ThrowIfCancellationRequested();
         var ack = new SubscriptionDeliveryCommand(Guid.NewGuid(), group, current.Token, DeliveryAction.Ack);
-        var expected = SubscriptionGroupProgressAuthorityAssertions.NextToken(db, store, group);
+        var expected = SubscriptionGroupProgressAuthorityAssertions.NextToken(db, group);
         var completed = QueueWholeFlowStorage.Apply(db, OperationKind.SubscriptionDelivery, ack, ack.CommandId, time);
         await SubscriptionContinuationAssertions.ReceiptAsync(completed, ack.CommandId, expected,
             new(nameof(DeliveryAction.Ack), group.Source.Resource,
@@ -66,7 +66,7 @@ internal static class SubscriptionPendingCounterAuthorityContinuation
         token.ThrowIfCancellationRequested();
         var publish = new CommandRequest(Guid.NewGuid(), group.Source.Partition,
             [new PublishTopic(Topic, [new(HealthyId, EventType, HealthyPayload)])]);
-        var expected = SubscriptionGroupProgressAuthorityAssertions.NextToken(db, store, group);
+        var expected = SubscriptionGroupProgressAuthorityAssertions.NextToken(db, group);
         var published = QueueWholeFlowStorage.Apply(db, OperationKind.Batch, publish, publish.CommandId, time);
         await SubscriptionContinuationAssertions.ReceiptAsync(published, publish.CommandId, expected,
             new(PublishMutation, Topic, HealthyId, HealthyPosition));
@@ -74,7 +74,7 @@ internal static class SubscriptionPendingCounterAuthorityContinuation
         retained.Add(entry);
         await SubscriptionContinuationAssertions.ReplayAsync(db, store, entry, time, token);
         var request = new ReceiveSubscriptionRequest(Guid.NewGuid(), group, MaxEvents: SingleEventCount);
-        expected = SubscriptionGroupProgressAuthorityAssertions.NextToken(db, store, group);
+        expected = SubscriptionGroupProgressAuthorityAssertions.NextToken(db, group);
         var claimed = QueueWholeFlowStorage.Apply(db, OperationKind.ReceiveSubscription, request, request.RequestId, time);
         await SubscriptionContinuationAssertions.ClaimAsync(db, store, group, request, claimed,
             new(group.Source, HealthyPosition, HealthyPosition, new(HealthyId, EventType, HealthyPayload), time),

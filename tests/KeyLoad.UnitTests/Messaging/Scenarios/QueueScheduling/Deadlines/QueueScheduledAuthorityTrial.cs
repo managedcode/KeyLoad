@@ -21,7 +21,8 @@ internal static class QueueScheduledAuthorityTrial
         var request = new ReceiveRequest(Guid.NewGuid(), flow.Lane, LeaseSeconds: QueueLifecycleTestProtocol.LeaseSeconds);
         var receive = fixture.Database.CreateCommand(OperationKind.Receive, request.RequestId,
             QueueLifecycleTestProtocol.Administrator, flow.Time, OrleansSerialization.Serialize(request));
-        var state = new QueueScheduledAuthorityState(flow, due, key, exact, receive);
+        var state = new QueueScheduledAuthorityState(flow, due, key, exact, receive, fixture.ExpectedReference(
+            new(flow.Partition, QueueLifecycleTestProtocol.Collection, QueueLifecycleTestProtocol.Pending)).Lifetime!);
         await QueueScheduledAuthorityImage.ScheduledAsync(fixture.Database, fixture.Store, state);
         var original = QueuePendingAuthorityHistory.Capture(fixture.Store);
         var damaged = await DamageAndRefuseAsync(fixture, state, original, exact, due, key);

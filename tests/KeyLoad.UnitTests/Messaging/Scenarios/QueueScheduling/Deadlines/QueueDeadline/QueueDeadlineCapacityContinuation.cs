@@ -12,7 +12,7 @@ internal static class QueueDeadlineCapacityContinuation
         var positive = state.Fault is QueueDeadlineCapacityFault.FullDeadLetterMaxPark or QueueDeadlineCapacityFault.ExpiryBeforeDeadLetterMaxPark;
         var operation = positive ? state.Attempt : QueueDeadlineCapacityOperations.Due(database, state.Lane,
             state.Original, state.Due, state.Kind, state.Sweep);
-        var commit = QueueDeadlinePoisonPrefixClaims.NextToken(database, store, state.Lane);
+        var commit = QueueDeadlinePoisonPrefixClaims.NextToken(database, state.Lane);
         var expected = await QueueDeadlineCapacityDecision.ExpectedAsync(state, operation);
         var sequence = expected.State == MessageState.Ready ? state.Counters.NextReadySequence + ReadySequenceStep : state.Counters.NextReadySequence;
         expected = expected with
@@ -44,7 +44,7 @@ internal static class QueueDeadlineCapacityContinuation
         if (expected.State == MessageState.Scheduled)
         {
             time = expected.NotBefore!.Value;
-            expected = await PromoteAsync(database, store, state, expected, sequence);
+            expected = await PromoteAsync(database, state, expected, sequence);
             sequence = expected.ReadySequence;
             await QueueDeadlineCapacityImage.RequireAsync(database, state.Lane, [(state.Input, expected)], sequence,
             QueueDeadlineCapacityOperations.ParkedSequence(state, expected));
@@ -53,12 +53,12 @@ internal static class QueueDeadlineCapacityContinuation
             claimed?.Deliveries.FirstOrDefault(), time, token);
     }
 
-    private static async Task<MessageMetadata> PromoteAsync(DatabaseEngine database, ZoneTreeStore store,
+    private static async Task<MessageMetadata> PromoteAsync(DatabaseEngine database,
         QueueDeadlineCapacityState state, MessageMetadata metadata, long sequence)
     {
         var operation = QueueDeadlineCapacityOperations.Due(database, state.Lane, metadata, metadata.NotBefore!.Value,
             QueueDeadlineKind.PromoteScheduled, false);
-        var commit = QueueDeadlinePoisonPrefixClaims.NextToken(database, store, state.Lane);
+        var commit = QueueDeadlinePoisonPrefixClaims.NextToken(database, state.Lane);
         var expected = metadata with
         {
             State = MessageState.Ready,

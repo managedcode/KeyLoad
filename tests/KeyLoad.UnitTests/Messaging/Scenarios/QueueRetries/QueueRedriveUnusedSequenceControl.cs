@@ -31,10 +31,11 @@ internal static class QueueRedriveUnusedSequenceControl
         });
         var lane = new QueueLaneRef(fixture.Partition, QueueOrderedRetryProtocol.Queue);
         var recorder = new QueueLifecycleRecorder(fixture.Database, lane, id => QueueOrderedRetryOperations.Literal(id));
-        var state = new QueueOrderedRetryState(fixture.Partition, QueueWholeFlowStorage.Clock(fixture.Store), policy)
+        var state = new QueueOrderedRetryState(fixture.Partition, QueueWholeFlowStorage.Clock(fixture.Store), policy, QueueOrderedRetryRestoreAuthority.Administrator)
         {
             BeforeApply = recorder.Observe
         };
+        await QueueOrderedRetryRestoreAuthority.ProvisionAsync(fixture.Database, state);
         await QueueOrderedRetryInitial.RunAsync(fixture.Database, state, token);
         var counters = QueueLifecycleControlCold.Read(fixture.Database, lane);
         QueueLifecycleControlCold.Write(fixture.Database, lane, block

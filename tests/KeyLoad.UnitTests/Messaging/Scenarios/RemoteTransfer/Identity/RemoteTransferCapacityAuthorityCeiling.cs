@@ -30,6 +30,7 @@ internal static class RemoteTransferCapacityAuthorityCeiling
         });
         var before = Domain(fixture, request.CommandId);
         var position = fixture.Store.Position;
+        var canonical = fixture.Database.LastApplied;
         var time = TimeProvider.System.GetUtcNow();
         var failed = fixture.Apply(OperationKind.Batch, request, time: time);
         await Assert.That(Errors.Code(failed.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
@@ -37,6 +38,7 @@ internal static class RemoteTransferCapacityAuthorityCeiling
 
         await Assert.That(failed.Value).IsNull();
         await Assert.That(fixture.Store.Position).IsEqualTo(position + First);
+        await Assert.That(fixture.Database.LastApplied).IsEqualTo(canonical + First);
         await Assert.That(Domain(fixture, request.CommandId)).IsEquivalentTo(before, TUnit.Assertions.Enums.CollectionOrdering.Matching);
         await RequireLocatorAsync(fixture, request.CommandId);
         await Assert.That(QueueWholeFlowStorage.Clock(RemoteTransferCapacityAuthorityStorage.Execution(fixture))).IsEqualTo(time);
@@ -82,8 +84,10 @@ internal static class RemoteTransferCapacityAuthorityCeiling
         var outcome = Convert.ToHexString(KeySpace.PartitionOutcome(fixture.SourcePartition, RemoteTransferDatabase.RootPrincipal, id)) + ":";
         var locator = Convert.ToHexString(KeySpace.OutcomeLocator(fixture.SourcePartition, RemoteTransferDatabase.RootPrincipal, id)) + ":";
         var clock = Convert.ToHexString(KeySpace.ClockBytes) + ":";
+        var applied = Convert.ToHexString(KeySpace.AppliedBytes) + ":";
         return RemoteTransferCapacityAuthorityStorage.Capture(fixture).Where(row => !row.StartsWith(outcome, StringComparison.Ordinal)
-            && !row.StartsWith(locator, StringComparison.Ordinal) && !row.StartsWith(clock, StringComparison.Ordinal)).ToArray();
+            && !row.StartsWith(locator, StringComparison.Ordinal) && !row.StartsWith(clock, StringComparison.Ordinal)
+            && !row.StartsWith(applied, StringComparison.Ordinal)).ToArray();
     }
 
     private static async Task RequireLocatorAsync(RemoteTransferDatabase fixture, Guid id)

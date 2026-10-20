@@ -139,7 +139,7 @@ internal static class QueueDeadlinePoisonPrefixFlow
                 var operation = database.PrepareQueueRetryOperation(database.OwnCommand(database.CreateCommand(OperationKind.Batch, command.CommandId, RuntimeQueueDeadlineProtocol.Worker, due, System.Text.Json.JsonSerializer.Serialize(command, JsonDefaults.Options))));
                 var placement = database.ReadAtomicPartitionPlacement(QueueDeadlinePoisonPrefixProtocol.Root, lane.Partition);
                 var expected = new CommitReceipt(command.CommandId, new(placement.Incarnation,
-                    lane.Partition.AtomicPartitionId, checked(store.Position + QueueDeadlinePoisonPrefixProtocol.First)), [new(QueueDeadlineProtocol.ReceiptKind, lane.Queue, hint.Mutation.MessageId, hint.Mutation.ExpectedStateVersion + QueueDeadlinePoisonPrefixProtocol.First)], DurabilityProfile.ProcessDurable, 1);
+                    lane.Partition.AtomicPartitionId, checked(database.LastApplied + QueueDeadlinePoisonPrefixProtocol.First)), [new(QueueDeadlineProtocol.ReceiptKind, lane.Queue, hint.Mutation.MessageId, hint.Mutation.ExpectedStateVersion + QueueDeadlinePoisonPrefixProtocol.First)], DurabilityProfile.ProcessDurable, 1);
                 var result = database.Apply(operation);
                 await Assert.That(Errors.Code(result.Problem)).IsNull();
 

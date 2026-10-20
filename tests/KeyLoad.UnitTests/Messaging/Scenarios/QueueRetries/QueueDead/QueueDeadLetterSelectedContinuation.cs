@@ -62,15 +62,18 @@ internal static class QueueDeadLetterSelectedContinuation
         await Assert.That(receipt.Mutations).IsEquivalentTo([
             new MutationReceipt(QueueDeadLetterSelectedProtocol.PutKind, QueueDeadLetterSelectedProtocol.Collection, id, QueueDeadLetterSelectedProtocol.One),
             new MutationReceipt(nameof(DeliveryAction.Ack), state.Lane.Queue, id, terminalVersion)], CollectionOrdering.Matching);
-        await EffectsAsync(database, store, processing, id, receipt);
+        await EffectsAsync(database, store, processing, id, receipt, state.DocumentLifetime);
     }
 
     internal static async Task EffectsAsync(DatabaseEngine database, ZoneTreeStore store,
-        ProcessingRequest processing, string id, CommitReceipt receipt)
+        ProcessingRequest processing, string id, CommitReceipt receipt, EntityRefLifetime documentLifetime)
     {
         var document = database.GetDocument(QueueDeadLetterSelectedProtocol.Administrator,
             new(processing.Lane.Partition, QueueDeadLetterSelectedProtocol.Collection, id))!;
-        await Assert.That(document.Reference).IsEqualTo(new EntityRef(processing.Lane.Partition, QueueDeadLetterSelectedProtocol.Collection, id));
+        await Assert.That(document.Reference).IsEqualTo(new EntityRef(processing.Lane.Partition, QueueDeadLetterSelectedProtocol.Collection, id)
+        {
+            Lifetime = documentLifetime
+        });
         await Assert.That(document.Json).IsEqualTo(QueueDeadLetterSelectedProtocol.Payload);
         await Assert.That(document.Revision).IsEqualTo(QueueDeadLetterSelectedProtocol.One);
         await Assert.That(document.Redacted).IsFalse();
@@ -92,13 +95,13 @@ internal static class QueueDeadLetterSelectedContinuation
     }
 
     internal static async Task ColdEffectsAsync(DatabaseEngine database, ZoneTreeStore store,
-        IEnumerable<QueueDeadLetterSelectedSaved> history)
+        IEnumerable<QueueDeadLetterSelectedSaved> history, EntityRefLifetime documentLifetime)
     {
         foreach (var saved in history.Where(saved => saved.Operation.Value!.Kind == OperationKind.Processing))
         {
             var processing = OrleansSerialization.Deserialize<ProcessingRequest>(saved.Operation.Value!.Input.Span, ValidationProfile.PublicInputElements)!;
             var id = ((PutDocument)processing.Effects[QueueDeadLetterSelectedProtocol.Zero]).Id;
-            await EffectsAsync(database, store, processing, id, saved.Result.Get<CommitReceipt>());
+            await EffectsAsync(database, store, processing, id, saved.Result.Get<CommitReceipt>(), documentLifetime);
         }
     }
 }

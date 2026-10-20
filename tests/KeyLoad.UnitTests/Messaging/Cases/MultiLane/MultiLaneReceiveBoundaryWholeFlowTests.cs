@@ -11,14 +11,14 @@ internal sealed class MultiLaneReceiveBoundaryWholeFlowTests
     public async Task OriginalParentExpiryRetainsCommittedLaneAndUndispatchedSuffixWithHealthyFollowup()
     {
         var clock = new MultiLaneReceiveExpiryClock();
-        await using var fixture = new RequestCqrsHostedRuntimeFixture(clock);
+        await using var fixture = new RequestCqrsHostedRuntimeFixture(clock, observer: clock);
         await fixture.InitializeAsync();
         var lanes = MultiLaneReceiveFlow.Seed(fixture, 2);
         var request = new MultiLaneReceiveRequest(Guid.NewGuid(),
             [new(Guid.NewGuid(), lanes[0]), new(Guid.NewGuid(), lanes[1])]);
         var untouched = OrleansSerialization.Serialize(fixture.Database.Database.InspectMessage("root", lanes[1], "message")!);
         var cut = fixture.Database.Store.Position;
-        clock.Arm(() => fixture.Database.Store.Position, cut);
+        clock.Arm(() => fixture.Database.Store.Position, cut, request.Requests[0].RequestId);
         var reply = await MultiLaneReceiveFlow.ReceiveAsync(fixture, request);
         await Assert.That(reply.Error).IsNull().Because(MultiLaneReceiveFailureObservation.Summary(fixture));
         var result = MultiLaneReceiveFlow.Value(reply);

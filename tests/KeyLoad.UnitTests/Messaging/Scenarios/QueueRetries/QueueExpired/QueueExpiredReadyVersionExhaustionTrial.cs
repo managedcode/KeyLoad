@@ -10,7 +10,7 @@ internal static class QueueExpiredReadyVersionExhaustionTrial
         using var fixture = new TestDatabase();
         var state = await SeedAsync(fixture, field);
         var domain = QueueClaimVersionExhaustionAssertions.Domain(fixture.Store, state.Lane);
-        var expected = await QueueExpiredReadyVersionExhaustionAssertions.NextTokenAsync(fixture.Database, fixture.Store, state.Lane);
+        var expected = await QueueExpiredReadyVersionExhaustionAssertions.NextTokenAsync(fixture.Database, state.Lane);
         var before = fixture.Store.Position;
         var result = fixture.Database.Apply(state.Operation);
         if (field == QueueClaimVersionExhaustion.StateVersion)
@@ -47,7 +47,7 @@ internal static class QueueExpiredReadyVersionExhaustionTrial
         var message = new EnqueueMessage(lane.Queue, QueueClaimVersionExhaustionProtocol.Message,
             QueueClaimVersionExhaustionProtocol.Payload, QueueClaimVersionExhaustionProtocol.Headers, ExpiresAt: time.AddSeconds(1));
         var producer = new CommandRequest(Guid.NewGuid(), lane.Partition, [message]);
-        var expected = await QueueExpiredReadyVersionExhaustionAssertions.NextTokenAsync(fixture.Database, fixture.Store, lane);
+        var expected = await QueueExpiredReadyVersionExhaustionAssertions.NextTokenAsync(fixture.Database, lane);
         var produced = QueueWholeFlowStorage.Apply(fixture.Database, OperationKind.Batch, producer, producer.CommandId, time);
         await QueueExpiredReadyVersionExhaustionAssertions.ReceiptAsync(produced, producer.CommandId, expected,
             QueueEnqueueColdProtocol.EnqueueKind, lane, message.MessageId, 1);

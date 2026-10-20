@@ -28,9 +28,9 @@ internal static class QueueEnqueueColdAssertions
         await Assert.That(receipt.Mutations).IsEquivalentTo(expected, CollectionOrdering.Matching);
     }
 
-    internal static async Task RequireProducerAsync(DatabaseEngine database, PartitionRef partition)
+    internal static async Task RequireProducerAsync(DatabaseEngine database, TestDatabase source)
     {
-        var reference = new EntityRef(partition, QueueEnqueueColdProtocol.Collection, QueueEnqueueColdProtocol.Document);
+        var reference = source.ExpectedReference(new(source.Partition, QueueEnqueueColdProtocol.Collection, QueueEnqueueColdProtocol.Document));
         var actual = database.GetDocument(QueueEnqueueColdProtocol.Root, reference);
         await Assert.That(actual).IsNotNull();
         await Assert.That(actual!.Reference).IsEqualTo(reference);

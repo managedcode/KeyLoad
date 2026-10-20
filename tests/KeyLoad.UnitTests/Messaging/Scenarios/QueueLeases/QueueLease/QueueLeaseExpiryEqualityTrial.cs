@@ -8,15 +8,17 @@ internal static class QueueLeaseExpiryEqualityTrial
 {
     internal static async Task RunAsync()
     {
-        using var fixture = new TestDatabase();
+        var clock = new ControlledReadClock(new(2040, 1, 1, 0, 0, 0, TimeSpan.Zero));
+        using var fixture = new TestDatabase(timeProvider: clock);
         fixture.Configure("jobs", ResourceKind.WorkQueue);
         var state = await SeedExpiredAsync(fixture);
+        clock.MoveUtc(state.Boundary);
         var identity = OrleansSerialization.Serialize(fixture.Store.Identity);
         var firstBytes = QueueWholeFlowStorage.Bytes(fixture.Store);
         var firstPosition = fixture.Store.Position;
         fixture.Store.Dispose();
         using var first = Open(fixture.Directory);
-        var database = QueueWholeFlowStorage.Open(first);
+        var database = QueueWholeFlowStorage.Open(first, clock);
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(first, firstBytes, firstPosition, identity);
         await ReplayExpiryAsync(database, first, state, firstBytes, firstPosition, identity);
         var (ack, acked) = await ReclaimAsync(database, first, state);
@@ -24,7 +26,7 @@ internal static class QueueLeaseExpiryEqualityTrial
         var secondPosition = first.Position;
         first.Dispose();
         using var second = Open(fixture.Directory);
-        var restored = QueueWholeFlowStorage.Open(second);
+        var restored = QueueWholeFlowStorage.Open(second, clock);
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(second, secondBytes, secondPosition, identity);
         await ReplayResultAssertions.Same<CommitReceipt>(Apply(restored, ack, state.Boundary), acked);
         await ReplayResultAssertions.Same<CommitReceipt>(Batch(restored, state.Producer, state.Boundary), state.Produced);
@@ -34,7 +36,7 @@ internal static class QueueLeaseExpiryEqualityTrial
         var finalPosition = second.Position;
         second.Dispose();
         using var final = Open(fixture.Directory);
-        var completed = QueueWholeFlowStorage.Open(final);
+        var completed = QueueWholeFlowStorage.Open(final, clock);
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(final, finalBytes, finalPosition, identity);
         await ReplayResultAssertions.Same<CommitReceipt>(Apply(completed, healthyAck, state.Boundary), healthyReceipt);
         await ReplayResultAssertions.Same<CommitReceipt>(Batch(completed, producer, state.Boundary), produced);

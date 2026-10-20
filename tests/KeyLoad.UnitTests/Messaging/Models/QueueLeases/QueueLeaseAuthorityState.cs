@@ -6,4 +6,4 @@ internal sealed record QueueLeaseAuthorityState(QueueLaneRef Lane, DateTimeOffse
     EnqueueMessage Message, CommandRequest Producer, Result<object> Produced,
     Command<DatabaseCommand> Claim, Result<object> Claimed, Delivery Delivery,
     Command<DatabaseCommand> Original, QueueLeaseAuthorityOperation Kind, MessageMetadata Metadata,
-    QueueCounters Counters, long BodyBytes, byte[] FaultKey, byte[] OriginalBytes);
+    QueueCounters Counters, long BodyBytes, byte[] FaultKey, byte[] OriginalBytes, EntityRef DocumentReference);

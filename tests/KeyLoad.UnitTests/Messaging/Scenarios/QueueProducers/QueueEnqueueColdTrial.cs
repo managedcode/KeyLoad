@@ -23,7 +23,7 @@ internal static class QueueEnqueueColdTrial
         var original = Apply(fixture.Database, command, QueueEnqueueColdProtocol.Root, token);
         var receipt = original.Get<CommitReceipt>();
         await QueueEnqueueColdAssertions.RequireReceiptAsync(receipt, command, fixture.Store.Identity.Incarnation);
-        await QueueEnqueueColdAssertions.RequireProducerAsync(fixture.Database, fixture.Partition);
+        await QueueEnqueueColdAssertions.RequireProducerAsync(fixture.Database, fixture);
         await QueueEnqueueColdAssertions.RequireInitialAsync(fixture.Database, fixture.Partition, scheduledAt);
         var image = QueueEnqueueColdAssertions.LaneBytes(fixture.Store, fixture.Partition);
         fixture.Store.Dispose();
@@ -55,7 +55,7 @@ internal static class QueueEnqueueColdTrial
         await ReplayResultAssertions.Same<CommitReceipt>(Apply(restored, healthy, QueueEnqueueColdProtocol.Publisher, token), healthyResult);
         await Assert.That(QueueEnqueueColdAssertions.LaneBytes(cold, fixture.Partition)).IsEquivalentTo(healthyImage, CollectionOrdering.Matching);
         await QueueEnqueueColdAssertions.RequireHealthyAsync(restored, fixture.Partition, scheduledAt);
-        await QueueEnqueueColdAssertions.RequireProducerAsync(restored, fixture.Partition);
+        await QueueEnqueueColdAssertions.RequireProducerAsync(restored, fixture);
     }
 
     private static async Task RefusalsAsync(DatabaseEngine database, PartitionRef partition,

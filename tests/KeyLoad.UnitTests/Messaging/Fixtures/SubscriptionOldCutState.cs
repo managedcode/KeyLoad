@@ -6,6 +6,7 @@ namespace KeyLoad.UnitTests.Features.Messaging;
 
 internal sealed class SubscriptionOldCutState(PartitionRef partition)
 {
+    internal EntityRefLifetime DocumentLifetime { get; set; } = null!;
     internal const string Topic = "old-cut-topic";
     internal const string Collection = "old-cut-effects";
     internal const string Worker = "old-cut-worker";

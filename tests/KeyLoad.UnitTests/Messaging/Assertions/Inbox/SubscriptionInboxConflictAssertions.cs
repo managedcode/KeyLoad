@@ -48,14 +48,14 @@ internal static class SubscriptionInboxConflictAssertions
 
     internal static async Task RefusalAsync(DatabaseEngine db, ZoneTreeStore store, SubscriptionRef group,
         Command<DatabaseCommand> operation, byte[] inbox, string[] source,
-        List<(Command<DatabaseCommand> Operation, Result<object> Result, byte[] Saved)> history)
+        List<(Command<DatabaseCommand> Operation, Result<object> Result, byte[] Saved)> history, TestDatabase originalOwner)
     {
         var before = SubscriptionProcessingAtomicAssertions.DomainImage(store, group, operation.CommandId);
         var position = store.Position;
         var failure = db.Apply(operation);
         await FailureAsync(failure);
         await SubscriptionProcessingAtomicAssertions.OwnOutcomeOnlyAsync(store, group, operation, before, position + 1);
-        await PreservedAsync(db, store, group, inbox, source);
+        await PreservedAsync(db, store, group, inbox, source, originalOwner);
         await SubscriptionParkedRecoveryAssertions.StatusAsync(db, group, new()
         {
             MaxWindow = 3
@@ -67,7 +67,7 @@ internal static class SubscriptionInboxConflictAssertions
     }
 
     internal static async Task RepairedAsync(DatabaseEngine db, ZoneTreeStore store, SubscriptionRef group,
-        SubscriptionProcessingRequest request, Result<object> result, Result<object> original, byte[] inbox, string[] source)
+        SubscriptionProcessingRequest request, Result<object> result, Result<object> original, byte[] inbox, string[] source, TestDatabase originalOwner)
     {
         await Assert.That(Errors.Code(result.Problem)).IsNull();
         var processing = result.Get<SubscriptionProcessingResult>();
@@ -80,20 +80,20 @@ internal static class SubscriptionInboxConflictAssertions
         {
             MaxWindow = 3
         }, 2, 1, 3, 3, false, null);
-        await PreservedAsync(db, store, group, inbox, source);
+        await PreservedAsync(db, store, group, inbox, source, originalOwner);
     }
 
     internal static async Task PreservedAsync(DatabaseEngine db, ZoneTreeStore store,
-        SubscriptionRef group, byte[] inbox, string[] source)
+        SubscriptionRef group, byte[] inbox, string[] source, TestDatabase originalOwner)
     {
-        await PreservedDocumentsAndInboxAsync(db, store, group, inbox);
+        await PreservedDocumentsAndInboxAsync(db, store, group, inbox, originalOwner);
         await SubscriptionCheckpointAuthorityAssertions.SourceAsync(db, store, group.Source, source);
     }
 
     internal static async Task PreservedDocumentsAndInboxAsync(DatabaseEngine db, ZoneTreeStore store,
-        SubscriptionRef group, byte[] inbox)
+        SubscriptionRef group, byte[] inbox, TestDatabase originalOwner)
     {
-        await SubscriptionProcessingAtomicAssertions.DocumentsAsync(db, group);
+        await SubscriptionProcessingAtomicAssertions.DocumentsAsync(db, group, originalOwner);
         await Assert.That(InboxBytes(store, group).AsSpan().SequenceEqual(inbox)).IsTrue();
     }
 

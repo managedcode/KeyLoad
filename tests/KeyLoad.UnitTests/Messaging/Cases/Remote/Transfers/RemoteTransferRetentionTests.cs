@@ -11,7 +11,7 @@ internal sealed class RemoteTransferRetentionTests
     private const string FirstId = "transfer-one";
     private const string SecondId = "transfer-two";
     private const string SourceMessageId = "disposable-source-message";
-    private const int MaxRetainedRecords = 1;
+    private const int MaxRetainedRecords = 16;
 
     [Test]
     public async Task PerLaneRecordCapsRejectExcessSourceAndDestinationStateAtomically()
@@ -25,6 +25,15 @@ internal sealed class RemoteTransferRetentionTests
         var second = Create(fixture, otherSource, SecondId);
         fixture.Commit(fixture.SourcePartition, first);
         fixture.Commit(otherSource.Partition, second);
+        for (var index = 1; index < MaxRetainedRecords; index++)
+        {
+            var retained = Create(fixture, fixture.SourceQueue, "retained-" + index);
+            fixture.Commit(fixture.SourcePartition, retained);
+            var intent = fixture.Database.InspectQueueTransfer(RemoteTransferDatabase.RootPrincipal,
+                fixture.SourceQueue, retained.TransferId)!;
+            fixture.Commit(fixture.DestinationPartition,
+                new AcceptQueueTransfer(fixture.DestinationQueue, intent.IntentToken));
+        }
 
         var accepted = fixture.Database.InspectQueueTransfer(RemoteTransferDatabase.RootPrincipal,
             fixture.SourceQueue, first.TransferId)!;
@@ -134,12 +143,15 @@ internal sealed class RemoteTransferRetentionTests
         fixture.Commit(fixture.DestinationPartition,
             new AcceptQueueTransfer(fixture.DestinationQueue, firstIntent.IntentToken));
         var retainedBytes = fixture.TargetCapacity(fixture.DestinationQueue).StoredBytes;
-        var commandBytes = Encoding.UTF8.GetByteCount(JsonSerializer.Serialize(
-            new CommandRequest(Guid.NewGuid(), fixture.DestinationPartition,
-                [new AcceptQueueTransfer(fixture.DestinationQueue, secondIntent.IntentToken)]), JsonDefaults.Options));
+        var next = new CommandRequest(Guid.NewGuid(), fixture.DestinationPartition,
+            [new AcceptQueueTransfer(fixture.DestinationQueue, secondIntent.IntentToken)]);
+        var admitted = fixture.Database.CreateCommand(OperationKind.Batch, next.CommandId,
+            RemoteTransferDatabase.RootPrincipal, TimeProvider.System.GetUtcNow(), JsonSerializer.Serialize(next, JsonDefaults.Options));
+        var commandBytes = admitted.Value!.Input.Length + admitted.Value.RetryDecisions.Length
+            + admitted.Value.ResourceAdmission.Length;
         await Assert.That((long)Encoding.UTF8.GetByteCount(secondIntent.IntentToken)).IsLessThan(retainedBytes);
         var nextReceiptBytes = RemoteTransferDatabase.MeasureTargetReceiptGrowth(FirstId, SecondId, Payload);
-        var byteLimit = checked((int)Math.Max(retainedBytes, commandBytes));
+        var byteLimit = checked((int)Math.Max(retainedBytes, Math.Max(commandBytes, OrleansSerialization.Serialize(admitted).Length)));
         await Assert.That(commandBytes).IsLessThanOrEqualTo(byteLimit);
         await Assert.That(retainedBytes + nextReceiptBytes).IsGreaterThan((long)byteLimit);
 

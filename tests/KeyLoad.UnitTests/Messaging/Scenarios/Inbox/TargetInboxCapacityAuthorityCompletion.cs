@@ -32,7 +32,7 @@ internal static class TargetInboxCapacityAuthorityCompletion
         var output = new QueueLaneRef(state.Original.Target.Partition, TargetInboxUnitProtocol.Output);
         var receive = new ReceiveRequest(Guid.NewGuid(), output, MaxMessages: OutputCount);
         var time = database.EvaluationClock.GetUtcNow();
-        var expectedToken = NextToken(database, store, output);
+        var expectedToken = NextToken(database, output);
         var received = QueueWholeFlowStorage.Apply(database, OperationKind.Receive, receive,
             receive.RequestId, time).Get<ReceiveResult>();
         var expected = new ReceiveResult(receive.RequestId, MessageIds.Select(id =>
@@ -48,17 +48,17 @@ internal static class TargetInboxCapacityAuthorityCompletion
             token.ThrowIfCancellationRequested();
             await ExactAsync(database.Verify<DeliveryClaims>(delivery.Token), new DeliveryClaims(output,
                 delivery.Id, TargetInboxUnitProtocol.Root, InitialLeaseVersion, OriginalGeneration, expectedToken.Incarnation));
-            await AckAsync(database, store, output, delivery);
+            await AckAsync(database, output, delivery);
         }
         await TerminalAsync(store, output);
         await TargetInboxAssertions.CapacityAsync(store, state.Original, TargetInboxCapacityAuthorityFixture.Capacity);
         await TargetInboxCapacityAuthorityAssertions.HistoryAsync(database, store, state, token);
     }
 
-    private static async Task AckAsync(DatabaseEngine database, ZoneTreeStore store, QueueLaneRef output, Delivery delivery)
+    private static async Task AckAsync(DatabaseEngine database, QueueLaneRef output, Delivery delivery)
     {
         var ack = new DeliveryCommand(Guid.NewGuid(), output, delivery.Token, DeliveryAction.Ack);
-        var expected = new CommitReceipt(ack.CommandId, NextToken(database, store, output), [new(AckKind, output.Queue, delivery.Id, FinalVersion)], DurabilityProfile.ProcessDurable, 1);
+        var expected = new CommitReceipt(ack.CommandId, NextToken(database, output), [new(AckKind, output.Queue, delivery.Id, FinalVersion)], DurabilityProfile.ProcessDurable, 1);
         var result = QueueWholeFlowStorage.Apply(database, OperationKind.Delivery, ack,
             ack.CommandId, database.EvaluationClock.GetUtcNow());
         await ExactAsync(result.Get<CommitReceipt>(), expected);
@@ -83,11 +83,11 @@ internal static class TargetInboxCapacityAuthorityCompletion
         }
     }
 
-    private static CommitToken NextToken(DatabaseEngine database, ZoneTreeStore store, QueueLaneRef output)
+    private static CommitToken NextToken(DatabaseEngine database, QueueLaneRef output)
     {
         var placement = database.ReadAtomicPartitionPlacement(TargetInboxUnitProtocol.Root, output.Partition);
         return new(placement.Incarnation, output.Partition.AtomicPartitionId,
-            checked(store.Position + NextCommitPosition));
+            checked(database.LastApplied + NextCommitPosition));
     }
 
     private static async Task ExactAsync<T>(T actual, T expected)

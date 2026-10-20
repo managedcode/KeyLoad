@@ -8,10 +8,10 @@ namespace KeyLoad.UnitTests.Features.Messaging;
 
 internal static class QueueDeadlinePoisonPrefixClaims
 {
-    internal static CommitToken NextToken(DatabaseEngine database, ZoneTreeStore store, QueueLaneRef lane)
+    internal static CommitToken NextToken(DatabaseEngine database, QueueLaneRef lane)
     {
         var placement = database.ReadAtomicPartitionPlacement(QueueDeadlinePoisonPrefixProtocol.Root, lane.Partition);
-        return new(placement.Incarnation, lane.Partition.AtomicPartitionId, checked(store.Position + QueueDeadlinePoisonPrefixProtocol.First));
+        return new(placement.Incarnation, lane.Partition.AtomicPartitionId, checked(database.LastApplied + QueueDeadlinePoisonPrefixProtocol.First));
     }
 
     internal static Command<DatabaseCommand> Operation<T>(DatabaseEngine database, OperationKind kind, Guid id,
@@ -23,7 +23,7 @@ internal static class QueueDeadlinePoisonPrefixClaims
     {
         token.ThrowIfCancellationRequested();
         var request = new ReceiveRequest(Guid.NewGuid(), lane, MaxMessages: ready.Length);
-        var expectedToken = NextToken(database, store, lane);
+        var expectedToken = NextToken(database, lane);
         var expected = ready.OrderBy(value => value.ReadySequence).Select(metadata =>
         {
             var claims = new DeliveryClaims(lane, metadata.Id, subject, metadata.LeaseVersion + QueueDeadlinePoisonPrefixProtocol.First,

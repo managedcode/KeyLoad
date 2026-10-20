@@ -54,8 +54,7 @@ internal static class QueueLeaseAuthorityPostimage
         var request = OrleansSerialization.Deserialize<ProcessingRequest>(state.Original.Value!.Input.Span);
         var document = database.GetDocument(QueueLeaseAuthorityProtocol.Root,
             new(state.Lane.Partition, QueueLeaseAuthorityProtocol.Collection, QueueLeaseAuthorityProtocol.Document))!;
-        await Assert.That(document.Reference).IsEqualTo(new EntityRef(state.Lane.Partition,
-            QueueLeaseAuthorityProtocol.Collection, QueueLeaseAuthorityProtocol.Document));
+        await Assert.That(document.Reference).IsEqualTo(state.DocumentReference);
         await Assert.That(document.Json).IsEqualTo(QueueLeaseAuthorityProtocol.Payload);
         await Assert.That(document.Revision).IsEqualTo(QueueLeaseAuthorityProtocol.One);
         await Assert.That(document.Redacted).IsFalse();

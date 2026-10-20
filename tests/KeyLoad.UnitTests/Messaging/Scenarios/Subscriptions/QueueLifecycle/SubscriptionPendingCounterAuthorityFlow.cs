@@ -31,7 +31,7 @@ internal static class SubscriptionPendingCounterAuthorityFlow
         await Assert.That(empty.Get<ReceiveSubscriptionResult>().Deliveries).IsEmpty();
         var nack = new SubscriptionDeliveryCommand(Guid.NewGuid(), group,
             received.Deliveries[FirstDelivery].Token, DeliveryAction.Nack);
-        var expected = SubscriptionGroupProgressAuthorityAssertions.NextToken(fixture.Database, fixture.Store, group);
+        var expected = SubscriptionGroupProgressAuthorityAssertions.NextToken(fixture.Database, group);
         var nacked = SubscriptionCheckpointAuthorityFlow.Apply(fixture.Database,
             OperationKind.SubscriptionDelivery, nack, nack.CommandId, token);
         await SubscriptionPendingCounterAuthorityAssertions.NackAsync(nacked, nack, expected);

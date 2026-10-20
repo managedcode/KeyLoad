@@ -50,7 +50,9 @@ internal static class QueueDeadlineCapacityRefusal
         var locator = Convert.ToHexString(KeySpace.OutcomeLocator(lane.Partition, operation.UserId!,
             operation.CommandId)) + QueueDeadlineCapacityProtocol.ByteSeparator;
         var clock = Convert.ToHexString(KeySpace.ClockBytes) + QueueDeadlineCapacityProtocol.ByteSeparator;
+        var applied = Convert.ToHexString(KeySpace.AppliedBytes) + QueueDeadlineCapacityProtocol.ByteSeparator;
         return QueueWholeFlowStorage.Bytes(store).Where(row => !row.StartsWith(outcome, StringComparison.Ordinal)
-            && !row.StartsWith(clock, StringComparison.Ordinal) && !row.StartsWith(locator, StringComparison.Ordinal)).ToArray();
+            && !row.StartsWith(clock, StringComparison.Ordinal)
+            && !row.StartsWith(applied, StringComparison.Ordinal) && !row.StartsWith(locator, StringComparison.Ordinal)).ToArray();
     }
 }

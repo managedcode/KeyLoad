@@ -1,3 +1,4 @@
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Storage;
 
 namespace KeyLoad.UnitTests.Features.Messaging;
@@ -163,6 +164,7 @@ internal sealed class SourceReadBudgetTests
         {
             KeySpace.Principal(ReaderId),
             KeySpace.Resource(database.Partition.TenantId, database.Partition.DatabaseId, TopicName),
+            ResourceLifetimeCatalog.Key(database.Partition.TenantId, database.Partition.DatabaseId, TopicName),
             KeySpace.Partition(TopicHeadSpace, database.Partition, TopicName),
             KeySpace.Partition(TopicEventSpace, database.Partition, TopicName, 1L, 1L)
         };

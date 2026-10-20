@@ -15,12 +15,14 @@ internal static class SubscriptionLeaseVersionExhaustionAssertions
     {
         var image = Domain(store, request);
         var position = store.Position;
+        var canonical = db.LastApplied;
         var result = QueueWholeFlowStorage.Apply(db, OperationKind.ReceiveSubscription, request, request.RequestId, due);
         await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
         await Assert.That(result.Problem?.Detail).IsEqualTo(detail);
 
         await Assert.That(result.Value).IsNull();
         await Assert.That(store.Position).IsEqualTo(position + NextPosition);
+        await Assert.That(db.LastApplied).IsEqualTo(canonical + NextPosition);
         await RequireLocatorAsync(store, request);
         await Assert.That(Domain(store, request)).IsEquivalentTo(image, CollectionOrdering.Matching);
         await Assert.That(QueueWholeFlowStorage.Clock(store)).IsEqualTo(due);
@@ -46,9 +48,11 @@ internal static class SubscriptionLeaseVersionExhaustionAssertions
         var outcome = Convert.ToHexString(KeySpace.PartitionOutcome(request.Subscription.Source.Partition, Subject, request.RequestId));
         var locator = Convert.ToHexString(KeySpace.OutcomeLocator(request.Subscription.Source.Partition, Subject, request.RequestId));
         var clock = Convert.ToHexString(KeySpace.ClockBytes);
+        var applied = Convert.ToHexString(KeySpace.AppliedBytes);
         return QueueWholeFlowStorage.Bytes(store).Where(row => !row.StartsWith(outcome + ":", StringComparison.Ordinal)
             && !row.StartsWith(locator + ":", StringComparison.Ordinal)
-            && !row.StartsWith(clock + ":", StringComparison.Ordinal)).ToArray();
+            && !row.StartsWith(clock + ":", StringComparison.Ordinal)
+            && !row.StartsWith(applied + ":", StringComparison.Ordinal)).ToArray();
     }
 
     private static async Task RequireLocatorAsync(ZoneTreeStore store, ReceiveSubscriptionRequest request)

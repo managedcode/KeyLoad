@@ -37,7 +37,7 @@ internal static class SubscriptionInboxConflictFlow
             [new PutDocument("orders", "first", "{\"n\":1}", 0), new PutDocument("orders", "second", "{\"n\":2}", 0)]);
         var operation = Create(fixture.Database, OperationKind.SubscriptionProcessing, request, request.CommandId, time.AddSeconds(1));
         var result = fixture.Database.Apply(operation);
-        await SubscriptionProcessingAtomicAssertions.SuccessAsync(fixture.Database, group, request, result);
+        await SubscriptionProcessingAtomicAssertions.SuccessAsync(fixture.Database, group, request, result, fixture);
         var history = new List<(Command<DatabaseCommand> Operation, Result<object> Result, byte[] Saved)>
         { (operation, result, SubscriptionProcessingAtomicAssertions.OutcomeBytes(fixture.Store, group, operation.CommandId)) };
         var claims = new List<(Command<DatabaseCommand> Operation, Result<object> Result, byte[] Saved)>
@@ -59,7 +59,7 @@ internal static class SubscriptionInboxConflictFlow
             Effects = [new PutDocument("orders", "first", "{\"n\":99}", 1), new PutDocument("orders", "second", "{\"n\":2}", 0)]
         };
         var failed = Create(fixture.Database, OperationKind.SubscriptionProcessing, conflict, conflict.CommandId, time.AddSeconds(4));
-        await SubscriptionInboxConflictAssertions.RefusalAsync(fixture.Database, fixture.Store, group, failed, inbox, source, history);
+        await SubscriptionInboxConflictAssertions.RefusalAsync(fixture.Database, fixture.Store, group, failed, inbox, source, history, fixture);
         await ColdAsync(fixture, group, request, claims, history, inbox, source, token);
     }
 
@@ -76,7 +76,7 @@ internal static class SubscriptionInboxConflictFlow
         using var cold = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         var db = QueueWholeFlowStorage.Open(cold);
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(cold, cut, position, identity);
-        await SubscriptionInboxConflictAssertions.PreservedAsync(db, cold, group, inbox, source);
+        await SubscriptionInboxConflictAssertions.PreservedAsync(db, cold, group, inbox, source, fixture);
         foreach (var entry in history.Skip(1))
         {
             await SubscriptionInboxConflictAssertions.ReplayAsync(db, cold, group, entry);
@@ -93,7 +93,7 @@ internal static class SubscriptionInboxConflictFlow
         var repairedOperation = Create(db, OperationKind.SubscriptionProcessing, repair, repair.CommandId,
             QueueWholeFlowStorage.Clock(cold).AddSeconds(1));
         var repaired = db.Apply(repairedOperation);
-        await SubscriptionInboxConflictAssertions.RepairedAsync(db, cold, group, repair, repaired, history[0].Result, inbox, source);
+        await SubscriptionInboxConflictAssertions.RepairedAsync(db, cold, group, repair, repaired, history[0].Result, inbox, source, fixture);
         history.Add((repairedOperation, repaired, SubscriptionProcessingAtomicAssertions.OutcomeBytes(cold, group, repairedOperation.CommandId)));
         await SubscriptionInboxConflictAssertions.ReplayAsync(db, cold, group, history[3]);
         foreach (var index in new[] { 2, 1 })
@@ -112,13 +112,13 @@ internal static class SubscriptionInboxConflictFlow
         var current = OrleansSerialization.Deserialize<ReceiveSubscriptionRequest>(claims[1].Operation.Value!.Input.Span, ValidationProfile.PublicInputElements)
             ?? throw new InvalidOperationException("The original current Receive request is absent.");
         await SubscriptionCheckpointAuthorityAssertions.SettledClaimAsync(db, cold, current, claims[1].Result, token);
-        await SecondColdAsync(cold, fixture.Directory, group, claims, history, inbox, source, current, token);
+        await SecondColdAsync(cold, fixture.Directory, group, claims, history, inbox, source, current, fixture, token);
     }
 
     private static async Task SecondColdAsync(ZoneTreeStore store, string directory, SubscriptionRef group,
         List<(Command<DatabaseCommand> Operation, Result<object> Result, byte[] Saved)> claims,
         List<(Command<DatabaseCommand> Operation, Result<object> Result, byte[] Saved)> history,
-        byte[] inbox, string[] source, ReceiveSubscriptionRequest current, CancellationToken token)
+        byte[] inbox, string[] source, ReceiveSubscriptionRequest current, TestDatabase originalOwner, CancellationToken token)
     {
         var cut = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
@@ -128,7 +128,7 @@ internal static class SubscriptionInboxConflictFlow
         using var cold = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         var db = QueueWholeFlowStorage.Open(cold);
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(cold, cut, position, identity);
-        await SubscriptionInboxConflictAssertions.PreservedAsync(db, cold, group, inbox, source);
+        await SubscriptionInboxConflictAssertions.PreservedAsync(db, cold, group, inbox, source, originalOwner);
         foreach (var entry in history.Skip(1))
         {
             await SubscriptionInboxConflictAssertions.ReplayAsync(db, cold, group, entry);
@@ -142,7 +142,7 @@ internal static class SubscriptionInboxConflictFlow
         }, 2, 3, 3, 3, false, null);
         await SubscriptionParkedRecoveryAssertions.NoWindowAsync(cold, group);
         await HealthyAsync(db, cold, group, token);
-        await SubscriptionInboxConflictAssertions.PreservedDocumentsAndInboxAsync(db, cold, group, inbox);
+        await SubscriptionInboxConflictAssertions.PreservedDocumentsAndInboxAsync(db, cold, group, inbox, originalOwner);
     }
 
     private static async Task HealthyAsync(DatabaseEngine db, ZoneTreeStore store, SubscriptionRef group, CancellationToken token)

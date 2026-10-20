@@ -15,7 +15,7 @@ internal static class RemoteTransferCapacityAuthorityValues
     {
         var placement = fixture.Database.ReadAtomicPartitionPlacement(RemoteTransferDatabase.RootPrincipal, request.Partition);
         var token = new CommitToken(placement.Incarnation, request.Partition.AtomicPartitionId,
-            checked(fixture.Store.Position + First));
+            checked(fixture.Database.LastApplied + First));
         var expected = new CommitReceipt(request.CommandId, token, [.. request.Mutations.Select(mutation => ExpectedMutation(fixture, mutation, token, originalAcceptPosition))], DurabilityProfile.ProcessDurable, 1);
         var result = fixture.Apply(OperationKind.Batch, request);
         await ReplayResultAssertions.Same<CommitReceipt>(result, Result<object>.Succeed(expected));

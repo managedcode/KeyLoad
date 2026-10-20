@@ -51,7 +51,8 @@ internal static class QueueOrderedRetryRestoreAuthority
         await RefusedAsync(database, state, operation, image, ErrorCode.PermissionDenied);
         foreach (var prior in original.Outcomes.Where(item => item.Operation.Value!.Kind == OperationKind.Batch && Errors.Code(item.Result.Problem) is null))
         {
-            await OriginalAuthorityRefusedAsync(database, state, prior.Operation, image);
+            var expected = prior.Operation.UserId == state.Principal ? ErrorCode.PermissionDenied : ErrorCode.TokenInvalidated;
+            await OriginalAuthorityRefusedAsync(database, state, prior.Operation, image, expected);
             var current = database.CreateCommand(prior.Operation.Value!.Kind, prior.Operation.CommandId,
                 prior.Operation.UserId!, new DateTimeOffset(prior.Operation.Timestamp), prior.Operation.Value.Input);
             await RefusedAsync(database, state, current, image, ErrorCode.TokenInvalidated);
@@ -88,6 +89,7 @@ internal static class QueueOrderedRetryRestoreAuthority
     {
         var request = new ConfigurePrincipalRequest(principal);
         var operation = database.OwnCommand(database.CreateCommand(OperationKind.ConfigurePrincipal, Guid.NewGuid(), QueueOrderedRetryProtocol.Root, state.Time, JsonSerializer.Serialize(request, JsonDefaults.Options)));
+        state.BeforeApply?.Invoke(database, operation);
         var result = database.Apply(operation);
         await Assert.That(OrleansSerialization.Serialize(result.Get<PrincipalRecord>())).IsEquivalentTo(
             OrleansSerialization.Serialize(principal), CollectionOrdering.Matching);
@@ -121,13 +123,17 @@ internal static class QueueOrderedRetryRestoreAuthority
     }
 
     private static async Task OriginalAuthorityRefusedAsync(DatabaseEngine database, QueueOrderedRetryState state,
-        Command<DatabaseCommand> operation, string[] image)
+        Command<DatabaseCommand> operation, string[] image, ErrorCode expected)
     {
         var before = database.Store.Position;
         var apply = database.Apply(operation);
         var resolve = database.ResolveOutcome(operation);
         await Assert.That(Errors.Code(apply.Problem)).IsEqualTo(ErrorCode.TokenInvalidated);
-        await Assert.That(Errors.Code(resolve.Problem)).IsEqualTo(ErrorCode.TokenInvalidated);
+        await Assert.That(Errors.Code(resolve.Problem)).IsEqualTo(expected);
+        if (expected == ErrorCode.PermissionDenied)
+        {
+            await Assert.That(resolve.Problem?.Detail).IsEqualTo(CommandOutcomes.ChangedOutcomePrincipalPolicyMessage);
+        }
         await Assert.That(apply.Value).IsNull();
         await Assert.That(resolve.Value).IsNull();
         await Assert.That(database.Store.Position).IsEqualTo(before);

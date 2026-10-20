@@ -54,6 +54,6 @@ internal static class QueueDeadLetterSelectedRetainedInbox
         var saved = state.History.Single(saved => saved.Operation.Value!.Kind == OperationKind.Processing);
         var processing = OrleansSerialization.Deserialize<ProcessingRequest>(saved.Operation.Value!.Input.Span, ValidationProfile.PublicInputElements)!;
         await QueueDeadLetterSelectedContinuation.EffectsAsync(database, store, processing,
-            QueueDeadLetterSelectedProtocol.HistoryMessage, saved.Result.Get<CommitReceipt>());
+            QueueDeadLetterSelectedProtocol.HistoryMessage, saved.Result.Get<CommitReceipt>(), state.DocumentLifetime);
     }
 }

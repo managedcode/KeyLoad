@@ -28,7 +28,7 @@ internal static class QueueDeadlineCapacitySeed
         var command = new CommandRequest(Guid.NewGuid(), lane.Partition, [input]);
         var operation = QueueDeadlinePoisonPrefixClaims.Operation(fixture.Database, OperationKind.Batch,
             command.CommandId, command, Root, start);
-        var expected = new CommitReceipt(command.CommandId, QueueDeadlinePoisonPrefixClaims.NextToken(fixture.Database, fixture.Store, lane), [new(EnqueueReceipt, Queue, Message, InitialStateVersion)], DurabilityProfile.ProcessDurable, 1);
+        var expected = new CommitReceipt(command.CommandId, QueueDeadlinePoisonPrefixClaims.NextToken(fixture.Database, lane), [new(EnqueueReceipt, Queue, Message, InitialStateVersion)], DurabilityProfile.ProcessDurable, 1);
         var result = fixture.Database.Apply(operation);
         await QueueDeadlineCapacityOperations.ReceiptAsync(result, expected);
         List<(Command<DatabaseCommand> Operation, Result<object> Result)> outcomes = [(operation, result)];

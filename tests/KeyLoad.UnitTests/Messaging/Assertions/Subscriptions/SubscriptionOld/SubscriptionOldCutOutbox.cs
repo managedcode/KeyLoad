@@ -10,17 +10,17 @@ internal static class SubscriptionOldCutOutbox
             new(1, 0, state.Producer.Token, epoch, new PublishTopic(SubscriptionOldCutState.Topic,
                 [new("event1", "Created", "{\"n\":1}"), new("event2", "Created", "{\"n\":2}"), new("event3", "Created", "{\"n\":3}")]),
                 new("publishTopic", SubscriptionOldCutState.Topic, "event3", 3)),
-            Document(2, "input2", state.OriginalProcessing.Receipt.Token, partition, epoch),
+            Document(2, "input2", state.OriginalProcessing.Receipt.Token, partition, epoch, state.DocumentLifetime),
             new(3, 0, state.FreshProducer.Token, epoch.AddSeconds(31), new PublishTopic(SubscriptionOldCutState.Topic,
                 [new("event4", "Created", "{\"n\":4}")]), new("publishTopic", SubscriptionOldCutState.Topic, "event4", 4)),
-            Document(4, "input4", state.FreshProcessing.Token, partition, epoch.AddSeconds(31))];
+            Document(4, "input4", state.FreshProcessing.Token, partition, epoch.AddSeconds(31), state.DocumentLifetime)];
         await EntriesAsync(database, partition, expected);
     }
     private static OutboxEntry Document(long sequence, string id, CommitToken commit, PartitionRef partition,
-        DateTimeOffset time) => new(sequence, 0, commit, time,
+        DateTimeOffset time, EntityRefLifetime lifetime) => new(sequence, 0, commit, time,
             new PutDocument(SubscriptionOldCutState.Collection, id, SubscriptionOldCutState.EffectJson, 0),
             new("putDocument", SubscriptionOldCutState.Collection, id, 1), After: new(
-                new(partition, SubscriptionOldCutState.Collection, id), 1, SubscriptionOldCutState.EffectJson, new(), time));
+                new(partition, SubscriptionOldCutState.Collection, id) { Lifetime = lifetime }, 1, SubscriptionOldCutState.EffectJson, new(), time));
 
     internal static async Task EntriesAsync(DatabaseEngine database, PartitionRef partition,
         IReadOnlyList<OutboxEntry> expected)

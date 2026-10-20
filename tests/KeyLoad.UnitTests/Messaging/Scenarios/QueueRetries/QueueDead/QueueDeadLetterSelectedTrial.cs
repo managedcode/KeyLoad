@@ -44,7 +44,7 @@ internal static class QueueDeadLetterSelectedTrial
         await Assert.That(QueueWholeFlowStorage.Bytes(cold)).IsEquivalentTo(completed, CollectionOrdering.Matching);
         await QueueDeadLetterSelectedHistory.ReplayAsync(restored, cold, state, history);
         await QueueDeadLetterSelectedImage.RequireAsync(restored, cold, state, settled: true, healthy: true);
-        await QueueDeadLetterSelectedContinuation.ColdEffectsAsync(restored, cold, continuation);
+        await QueueDeadLetterSelectedContinuation.ColdEffectsAsync(restored, cold, continuation, state.DocumentLifetime);
         await QueueDeadLetterSelectedRetainedInbox.RequireAsync(restored, cold, state);
         await Assert.That(QueueWholeFlowStorage.Bytes(cold)).IsEquivalentTo(completed, CollectionOrdering.Matching);
     }

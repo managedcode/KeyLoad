@@ -48,7 +48,8 @@ internal static class SagaTimeoutRestartWork
             while (true)
             {
                 var current = fixture.Database.Database.InspectSaga(SagaTimeoutTestData.SagaPrincipalId, saga.Lane, saga.Id, cancellationToken);
-                if (current is { Phase: SagaPhase.TimedOut, Revision: TimeoutRevision })
+                if (TimeProvider.System.GetUtcNow() >= job.DueTime
+                    && current is { Phase: SagaPhase.TimedOut, Revision: TimeoutRevision })
                 {
                     return;
                 }

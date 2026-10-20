@@ -45,7 +45,7 @@ internal static class QueueDeadLetterAdmissionWholeFlow
         await QueueDeadLetterAdmissionAssertions.Image(second, finalPosition, finalImage);
         await QueueDeadLetterSelectedImage.RequireAsync(secondOwner, second, state, settled: true, healthy: true);
         await QueueDeadLetterSelectedHistory.ReplayAsync(secondOwner, second, state, history);
-        await QueueDeadLetterSelectedContinuation.ColdEffectsAsync(secondOwner, second, continuation);
+        await QueueDeadLetterSelectedContinuation.ColdEffectsAsync(secondOwner, second, continuation, state.DocumentLifetime);
         await QueueDeadLetterSelectedRetainedInbox.RequireAsync(secondOwner, second, state);
         await QueueDeadLetterAdmissionAssertions.Image(second, finalPosition, finalImage);
     }

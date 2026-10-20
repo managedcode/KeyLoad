@@ -15,6 +15,7 @@ internal sealed class CompetingInboxState(PartitionRef partition, DateTimeOffset
     internal bool Equivalent { get; } = equivalent;
     internal Command<DatabaseCommand>[] Competitors { get; set; } = [];
     internal Result<object>[] Results { get; set; } = [];
+    internal EntityRef DocumentReference { get; set; } = null!;
     internal int Winner
     {
         get; set;

@@ -13,11 +13,11 @@ internal static class QueueExpiredReadyVersionExhaustionAssertions
         StateVersion = 2
     };
 
-    internal static async Task<CommitToken> NextTokenAsync(DatabaseEngine database, ZoneTreeStore store, QueueLaneRef lane)
+    internal static async Task<CommitToken> NextTokenAsync(DatabaseEngine database, QueueLaneRef lane)
     {
         var placement = database.ReadAtomicPartitionPlacement(QueueClaimVersionExhaustionProtocol.Root, lane.Partition);
         await Assert.That(placement.Partition).IsEqualTo(lane.Partition);
-        return new(placement.Incarnation, lane.Partition.AtomicPartitionId, checked(store.Position + 1));
+        return new(placement.Incarnation, lane.Partition.AtomicPartitionId, checked(database.LastApplied + 1));
     }
 
     internal static async Task EmptyAsync(Result<object> result, Guid id, CommitToken expected)

@@ -82,11 +82,11 @@ internal static class SubscriptionGroupProgressAuthorityAssertions
         }
     }
 
-    internal static CommitToken NextToken(DatabaseEngine db, ZoneTreeStore store, SubscriptionRef group)
+    internal static CommitToken NextToken(DatabaseEngine db, SubscriptionRef group)
     {
         var placement = db.ReadAtomicPartitionPlacement("root", group.Source.Partition);
         return new(placement.Incarnation, group.Source.Partition.AtomicPartitionId,
-            checked(store.Position + 1));
+            checked(db.LastApplied + 1));
     }
 
     internal static async Task ReceiptAsync(Result<object> actual, SubscriptionDeliveryCommand request,

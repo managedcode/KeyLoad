@@ -26,7 +26,7 @@ internal static class SubscriptionLeaseVersionExhaustionFlow
         var claim = SubscriptionTestActions.Receive(fixture, group);
         var nack = new SubscriptionDeliveryCommand(Guid.NewGuid(), group,
             claim.Deliveries[FirstDelivery].Token, DeliveryAction.Nack);
-        var expectedNack = SubscriptionGroupProgressAuthorityAssertions.NextToken(fixture.Database, fixture.Store, group);
+        var expectedNack = SubscriptionGroupProgressAuthorityAssertions.NextToken(fixture.Database, group);
         var nacked = SubscriptionCheckpointAuthorityFlow.Apply(fixture.Database,
             OperationKind.SubscriptionDelivery, nack, nack.CommandId, token);
         await SubscriptionPendingCounterAuthorityAssertions.NackAsync(nacked, nack, expectedNack);

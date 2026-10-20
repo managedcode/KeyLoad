@@ -54,7 +54,7 @@ internal static class SubscriptionOldCutReset
         SubscriptionOldCutState state, ReceiveSubscriptionResult claim)
     {
         var request = state.Processing(claim.Deliveries[1].Token);
-        var position = store.Position;
+        var position = database.LastApplied;
         var completed = state.Apply(database, OperationKind.SubscriptionProcessing, request, request.CommandId,
             SubscriptionOldCutState.Worker).Get<SubscriptionProcessingResult>();
         await Assert.That(completed.AlreadyProcessed).IsTrue();

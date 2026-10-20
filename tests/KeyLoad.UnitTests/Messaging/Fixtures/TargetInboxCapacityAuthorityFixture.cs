@@ -38,7 +38,7 @@ internal static class TargetInboxCapacityAuthorityFixture
         };
         return new(seed.Request, second, healthy, Read(source.Store, TargetInboxStorage.CapacityKey(seed.Target)),
             Read(source.Store, TargetInboxStorage.Key(seed.Request)), Read(source.Store, TargetInboxStorage.Key(second)),
-            original, secondResult, ack, ackResult);
+            original, secondResult, ack, ackResult, source.ExpectedReference(new(healthy.Target.Partition, TargetInboxUnitProtocol.Collection, Healthy)));
     }
 
     internal static void Change(ZoneTreeStore store, TargetInboxCapacityAuthorityState state, int fault, bool repair)

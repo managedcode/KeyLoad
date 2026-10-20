@@ -18,10 +18,12 @@ internal static class QueueLifecycleCeilingFailureAssertions
         var store = (ZoneTreeStore)database.Store;
         var domain = Domain(store, rows, principal);
         var position = store.Position;
+        var canonicalPosition = database.LastApplied;
         var identity = OrleansSerialization.Serialize(store.Identity);
         var result = Apply(database, rows, principal, time);
         await RefusalAsync(result);
         await Assert.That(store.Position).IsEqualTo(position + FailureCommit);
+        await Assert.That(database.LastApplied).IsEqualTo(canonicalPosition + FailureCommit);
         await Assert.That(OrleansSerialization.Serialize(store.Identity).AsSpan().SequenceEqual(identity)).IsTrue();
         await Assert.That(Domain(store, rows, principal)).IsEquivalentTo(domain, CollectionOrdering.Matching);
         await Assert.That(QueueWholeFlowStorage.Clock(store)).IsEqualTo(time);
@@ -68,9 +70,11 @@ internal static class QueueLifecycleCeilingFailureAssertions
     {
         var outcome = Convert.ToHexString(KeySpace.PartitionOutcome(rows.Lane.Partition, principal, rows.Request.CommandId));
         var clock = Convert.ToHexString(KeySpace.ClockBytes);
+        var applied = Convert.ToHexString(KeySpace.AppliedBytes);
         var locator = Convert.ToHexString(KeySpace.OutcomeLocator(rows.Lane.Partition, principal, rows.Request.CommandId));
         return QueueWholeFlowStorage.Bytes(store).Where(row => !row.StartsWith(outcome + Separator, StringComparison.Ordinal)
             && !row.StartsWith(clock + Separator, StringComparison.Ordinal)
+            && !row.StartsWith(applied + Separator, StringComparison.Ordinal)
             && !row.StartsWith(locator + Separator, StringComparison.Ordinal)).ToArray();
     }
 }

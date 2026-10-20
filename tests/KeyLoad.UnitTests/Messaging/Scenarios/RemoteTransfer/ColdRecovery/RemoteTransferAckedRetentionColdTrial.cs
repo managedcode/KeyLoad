@@ -5,7 +5,7 @@ internal static class RemoteTransferAckedRetentionColdTrial
     internal const string Message = "acked-retention-original";
     internal const string RefusedMessage = "acked-retention-refused";
     internal const string Payload = "{\"retained\":true}";
-    internal const int Ceiling = 1;
+    internal const int Ceiling = 16;
 
     internal static async Task RunAsync()
     {
@@ -22,6 +22,7 @@ internal static class RemoteTransferAckedRetentionColdTrial
             new(fixture.DestinationQueue.Queue, RefusedMessage, Payload));
         fixture.Commit(fixture.SourcePartition, transfer);
         fixture.Commit(other.Partition, second);
+        RetainFillers(fixture);
         var original = fixture.Database.InspectQueueTransfer(RemoteTransferDatabase.RootPrincipal, fixture.SourceQueue, transfer.TransferId)!;
         var pending = fixture.Database.InspectQueueTransfer(RemoteTransferDatabase.RootPrincipal, other, second.TransferId)!;
         var accept = new CommandRequest(Guid.NewGuid(), fixture.DestinationPartition,
@@ -62,5 +63,21 @@ internal static class RemoteTransferAckedRetentionColdTrial
             }, pending,
             proof, message, capacity, accept, accepted, refused, failure, originalBytes, failureBytes);
         await RemoteTransferCoordinationColdAssertions.EqualAsync(fixture.Apply(OperationKind.Batch, complete).Get<CommitReceipt>(), completed);
+    }
+    private static void RetainFillers(RemoteTransferDatabase fixture)
+    {
+        for (var index = 1; index < Ceiling; index++)
+        {
+            var transfer = new CreateQueueTransfer(fixture.SourceQueue, Guid.NewGuid(), fixture.DestinationQueue,
+                new(fixture.DestinationQueue.Queue, "retained-" + index, Payload));
+            fixture.Commit(fixture.SourcePartition, transfer);
+            var intent = fixture.Database.InspectQueueTransfer(RemoteTransferDatabase.RootPrincipal,
+                fixture.SourceQueue, transfer.TransferId)!;
+            fixture.Commit(fixture.DestinationPartition, new AcceptQueueTransfer(fixture.DestinationQueue, intent.IntentToken));
+            var received = fixture.Apply(OperationKind.Receive, new ReceiveRequest(Guid.NewGuid(), fixture.DestinationQueue))
+                .Get<ReceiveResult>().Deliveries.Single();
+            var ack = new DeliveryCommand(Guid.NewGuid(), fixture.DestinationQueue, received.Token, DeliveryAction.Ack);
+            fixture.Apply(OperationKind.Delivery, ack, id: ack.CommandId).Get<CommitReceipt>();
+        }
     }
 }

@@ -28,7 +28,7 @@ internal static class QueueExpiredReadyVersionExhaustionContinuation
             var request = new ReceiveRequest(Guid.NewGuid(), state.Lane, MaxMessages: 1,
                 LeaseSeconds: QueueClaimVersionExhaustionProtocol.LeaseSeconds);
             var operation = database.OwnCommand(QueueLeaseAuthoritySetup.Create(database, OperationKind.Receive, request, request.RequestId, state.Time));
-            var expected = await QueueExpiredReadyVersionExhaustionAssertions.NextTokenAsync(database, store, state.Lane);
+            var expected = await QueueExpiredReadyVersionExhaustionAssertions.NextTokenAsync(database, state.Lane);
             var expired = database.Apply(operation);
             await QueueExpiredReadyVersionExhaustionAssertions.EmptyAsync(expired, request.RequestId, expected);
             successes.Add((operation, expired));
@@ -60,7 +60,7 @@ internal static class QueueExpiredReadyVersionExhaustionContinuation
         var body = new MessageBody(id, payload, headers, null, JsonData.Fingerprint(message));
         var command = new CommandRequest(Guid.NewGuid(), state.Lane.Partition, [message]);
         var producer = database.OwnCommand(QueueLeaseAuthoritySetup.Create(database, OperationKind.Batch, command, command.CommandId, state.Time));
-        var expectedProducer = await QueueExpiredReadyVersionExhaustionAssertions.NextTokenAsync(database, store, state.Lane);
+        var expectedProducer = await QueueExpiredReadyVersionExhaustionAssertions.NextTokenAsync(database, state.Lane);
         var produced = database.Apply(producer);
         await QueueExpiredReadyVersionExhaustionAssertions.ReceiptAsync(produced, command.CommandId, expectedProducer,
             QueueEnqueueColdProtocol.EnqueueKind, state.Lane, id, 1);
@@ -70,7 +70,7 @@ internal static class QueueExpiredReadyVersionExhaustionContinuation
         var request = new ReceiveRequest(Guid.NewGuid(), state.Lane, MaxMessages: 1,
             LeaseSeconds: QueueClaimVersionExhaustionProtocol.LeaseSeconds);
         var claim = database.OwnCommand(QueueLeaseAuthoritySetup.Create(database, OperationKind.Receive, request, request.RequestId, state.Time));
-        var expectedClaim = await QueueExpiredReadyVersionExhaustionAssertions.NextTokenAsync(database, store, state.Lane);
+        var expectedClaim = await QueueExpiredReadyVersionExhaustionAssertions.NextTokenAsync(database, state.Lane);
         var claimed = database.Apply(claim);
         var delivery = await Assert.That(claimed.Get<ReceiveResult>().Deliveries).HasSingleItem();
         await QueueClaimVersionExhaustionAssertions.EqualAsync(delivery, new Delivery(id, payload, headers, delivery.Token,
@@ -86,7 +86,7 @@ internal static class QueueExpiredReadyVersionExhaustionContinuation
         await QueueClaimVersionExhaustionAssertions.EqualAsync(database.Apply(claim), claimed);
         var ack = new DeliveryCommand(Guid.NewGuid(), state.Lane, delivery.Token, DeliveryAction.Ack);
         var completion = database.OwnCommand(QueueLeaseAuthoritySetup.Create(database, OperationKind.Delivery, ack, ack.CommandId, state.Time));
-        var expectedAck = await QueueExpiredReadyVersionExhaustionAssertions.NextTokenAsync(database, store, state.Lane);
+        var expectedAck = await QueueExpiredReadyVersionExhaustionAssertions.NextTokenAsync(database, state.Lane);
         var receipt = database.Apply(completion);
         await QueueExpiredReadyVersionExhaustionAssertions.ReceiptAsync(receipt, ack.CommandId, expectedAck,
             nameof(DeliveryAction.Ack), state.Lane, id, 3);

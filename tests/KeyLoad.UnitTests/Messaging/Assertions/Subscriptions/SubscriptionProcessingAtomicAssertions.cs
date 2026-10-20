@@ -12,7 +12,7 @@ internal static class SubscriptionProcessingAtomicAssertions
     internal static string[] DomainImage(ZoneTreeStore store, SubscriptionRef group, Guid id)
     {
         var own = new[] { KeySpace.PartitionOutcome(group.Source.Partition, "root", id),
-            KeySpace.OutcomeLocator(group.Source.Partition, "root", id), KeySpace.ClockBytes }
+            KeySpace.OutcomeLocator(group.Source.Partition, "root", id), KeySpace.ClockBytes, KeySpace.AppliedBytes }
             .Select(key => Convert.ToHexString(key) + ":").ToArray();
         return QueueWholeFlowStorage.Bytes(store).Where(row =>
             !own.Any(key => row.StartsWith(key, StringComparison.Ordinal))).ToArray();
@@ -72,7 +72,7 @@ internal static class SubscriptionProcessingAtomicAssertions
     }
 
     internal static async Task SuccessAsync(DatabaseEngine db, SubscriptionRef group,
-        SubscriptionProcessingRequest request, Result<object> result)
+        SubscriptionProcessingRequest request, Result<object> result, TestDatabase originalOwner)
     {
         await Assert.That(Errors.Code(result.Problem)).IsNull();
         var processing = result.Get<SubscriptionProcessingResult>();
@@ -82,15 +82,15 @@ internal static class SubscriptionProcessingAtomicAssertions
         await Assert.That(processing.Receipt.Mutations).IsEquivalentTo(new MutationReceipt[]
         { new("putDocument", "orders", "first", 1), new("putDocument", "orders", "second", 1),
           new("Ack", "topic", "1", 1) }, CollectionOrdering.Matching);
-        await DocumentsAsync(db, group);
+        await DocumentsAsync(db, group, originalOwner);
         await SubscriptionCheckpointAuthorityAssertions.StatusAsync(db, group, 1, 3, 3);
     }
 
-    internal static async Task DocumentsAsync(DatabaseEngine db, SubscriptionRef group)
+    internal static async Task DocumentsAsync(DatabaseEngine db, SubscriptionRef group, TestDatabase originalOwner)
     {
         foreach (var item in new[] { (Id: "first", Json: "{\"n\":1}"), (Id: "second", Json: "{\"n\":2}") })
         {
-            var reference = new EntityRef(group.Source.Partition, "orders", item.Id);
+            var reference = originalOwner.ExpectedReference(new(group.Source.Partition, "orders", item.Id));
             var expected = new DocumentResult(reference, 1, item.Json, false, []);
             await Assert.That(JsonSerializer.Serialize(db.GetDocument("root", reference), JsonDefaults.Options))
                 .IsEqualTo(JsonSerializer.Serialize(expected, JsonDefaults.Options));

@@ -31,9 +31,11 @@ internal static class QueueDeadlineCapacityFlow
         var state = await QueueDeadlineCapacitySeed.RunAsync(fixture, kind, sweep, jitter, fault, token);
         var identity = OrleansSerialization.Serialize(fixture.Store.Identity);
         var beforePosition = fixture.Store.Position;
+        var beforeCanonical = fixture.Database.LastApplied;
         var domain = QueueDeadlineCapacityRefusal.Domain(fixture.Store, state.Lane, state.Attempt);
         var result = fixture.Database.Apply(state.Attempt);
         await Assert.That(fixture.Store.Position).IsEqualTo(beforePosition + CommitPositionStep);
+        await Assert.That(fixture.Database.LastApplied).IsEqualTo(beforeCanonical + CommitPositionStep);
         await Assert.That(OrleansSerialization.Serialize(fixture.Store.Identity)).IsEquivalentTo(identity,
             TUnit.Assertions.Enums.CollectionOrdering.Matching);
         await Assert.That(QueueDeadlineCapacityRefusal.Domain(fixture.Store, state.Lane, state.Attempt)).IsEquivalentTo(domain,

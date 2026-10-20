@@ -20,7 +20,7 @@ internal static class SubscriptionWindowBudgetWholeFlow
             MaxWindow = Window
         });
         var request = new ReceiveSubscriptionRequest(Guid.NewGuid(), group, MaxEvents: Window);
-        var expected = SubscriptionGroupProgressAuthorityAssertions.NextToken(fixture.Database, fixture.Store, group);
+        var expected = SubscriptionGroupProgressAuthorityAssertions.NextToken(fixture.Database, group);
         var original = SubscriptionCheckpointAuthorityFlow.Apply(fixture.Database,
             OperationKind.ReceiveSubscription, request, request.RequestId, token);
         var claim = original.Get<ReceiveSubscriptionResult>();

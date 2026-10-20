@@ -12,7 +12,7 @@ internal static class CompetingInboxOutbox
         for (var index = 0; index < effects.Length; index++)
         {
             expected.Add(new(index + 2, index, state.Receipt.Token, state.Time, effects[index], state.Receipt.Mutations[index],
-                After: index == 0 ? new DocumentRecord(new(state.Partition, CompetingInboxState.Documents, "effect"),
+                After: index == 0 ? new DocumentRecord(state.DocumentReference,
                     1, state.Json(state.Winner), new(), state.Time) : null));
         }
         await SubscriptionOldCutOutbox.EntriesAsync(database, state.Partition, expected);

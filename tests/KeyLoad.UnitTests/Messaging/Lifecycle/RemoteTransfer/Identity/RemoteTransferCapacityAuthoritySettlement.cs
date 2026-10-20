@@ -31,7 +31,7 @@ internal static class RemoteTransferCapacityAuthoritySettlement
         var ack = new DeliveryCommand(Guid.NewGuid(), fixture.DestinationQueue, delivery.Token, DeliveryAction.Ack);
         var placement = fixture.Database.ReadAtomicPartitionPlacement(RemoteTransferDatabase.RootPrincipal, fixture.DestinationPartition);
         var token = new CommitToken(placement.Incarnation, fixture.DestinationPartition.AtomicPartitionId,
-            checked(fixture.Store.Position + First));
+            checked(fixture.Database.LastApplied + First));
         var acked = fixture.Apply(OperationKind.Delivery, ack, id: ack.CommandId);
         await ReplayResultAssertions.Same<CommitReceipt>(acked, Result<object>.Succeed(new CommitReceipt(ack.CommandId, token, [new(nameof(DeliveryAction.Ack), fixture.DestinationQueue.Queue, transfer.Mutation.Message.MessageId, Third)], DurabilityProfile.ProcessDurable, 1)));
         var result = new RemoteTransferCapacityAuthorityCompleted(transfer, accepted.Request, accepted.Result, accepted.Proof,
@@ -47,7 +47,7 @@ internal static class RemoteTransferCapacityAuthoritySettlement
         var time = TimeProvider.System.GetUtcNow();
         var placement = fixture.Database.ReadAtomicPartitionPlacement(RemoteTransferDatabase.RootPrincipal, fixture.DestinationPartition);
         var token = new CommitToken(placement.Incarnation, fixture.DestinationPartition.AtomicPartitionId,
-            checked(fixture.Store.Position + First));
+            checked(fixture.Database.LastApplied + First));
         var claims = new DeliveryClaims(fixture.DestinationQueue, transfer.Mutation.Message.MessageId,
             RemoteTransferDatabase.RootPrincipal, First, First, fixture.Store.Identity.Incarnation);
         var expected = new ReceiveResult(request.RequestId,

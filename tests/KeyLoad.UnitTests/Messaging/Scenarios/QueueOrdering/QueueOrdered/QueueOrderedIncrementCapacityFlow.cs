@@ -25,10 +25,11 @@ internal static class QueueOrderedIncrementCapacityFlow
         });
         var lane = new QueueLaneRef(fixture.Partition, QueueOrderedRetryProtocol.Queue);
         var recorder = new QueueLifecycleRecorder(fixture.Database, lane, id => QueueOrderedRetryOperations.Literal(id));
-        var state = new QueueOrderedRetryState(fixture.Partition, QueueWholeFlowStorage.Clock(fixture.Store), QueueParkedHeadPolicy.Continue)
+        var state = new QueueOrderedRetryState(fixture.Partition, QueueWholeFlowStorage.Clock(fixture.Store), QueueParkedHeadPolicy.Continue, QueueOrderedRetryRestoreAuthority.Administrator)
         {
             BeforeApply = recorder.Observe
         };
+        await QueueOrderedRetryRestoreAuthority.ProvisionAsync(fixture.Database, state);
         await QueueOrderedRetryInitial.RunAsync(fixture.Database, state, token);
         recorder.Capture(state.Outcomes);
         await recorder.AssertAsync(token);

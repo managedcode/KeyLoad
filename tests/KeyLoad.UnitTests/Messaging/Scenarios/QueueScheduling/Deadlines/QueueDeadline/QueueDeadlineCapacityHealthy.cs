@@ -12,12 +12,12 @@ internal static class QueueDeadlineCapacityHealthy
         token.ThrowIfCancellationRequested();
         if (original.State == MessageState.Ready)
         {
-            active = await ReceiveAsync(database, store, state, original, time, token);
+            active = await ReceiveAsync(database, state, original, time, token);
             original = QueueDeadlineCapacityClaims.Leased(original, time);
         }
         if (active is not null)
         {
-            original = await AckAsync(database, store, state, original, active, time, token);
+            original = await AckAsync(database, state, original, active, time, token);
         }
         await QueueDeadlineCapacityImage.RequireAsync(database, state.Lane, [(state.Input, original)], sequence,
             QueueDeadlineCapacityOperations.ParkedSequence(state, original));
@@ -25,7 +25,7 @@ internal static class QueueDeadlineCapacityHealthy
         var request = new CommandRequest(Guid.NewGuid(), state.Lane.Partition, [input]);
         var operation = QueueDeadlinePoisonPrefixClaims.Operation(database, OperationKind.Batch, request.CommandId,
             request, Root, time);
-        var expected = new CommitReceipt(request.CommandId, QueueDeadlinePoisonPrefixClaims.NextToken(database, store, state.Lane), [new(EnqueueReceipt, Queue, HealthyMessage, InitialStateVersion)], DurabilityProfile.ProcessDurable, 1);
+        var expected = new CommitReceipt(request.CommandId, QueueDeadlinePoisonPrefixClaims.NextToken(database, state.Lane), [new(EnqueueReceipt, Queue, HealthyMessage, InitialStateVersion)], DurabilityProfile.ProcessDurable, 1);
         var result = database.Apply(operation);
         await QueueDeadlineCapacityOperations.ReceiptAsync(result, expected);
         state.Outcomes.Add((operation, result));
@@ -33,24 +33,24 @@ internal static class QueueDeadlineCapacityHealthy
         sequence += ReadySequenceStep;
         await QueueDeadlineCapacityImage.RequireAsync(database, state.Lane, [(state.Input, original), (input, healthy)], sequence,
             QueueDeadlineCapacityOperations.ParkedSequence(state, original));
-        var claim = await ReceiveAsync(database, store, state, healthy, time, token);
+        var claim = await ReceiveAsync(database, state, healthy, time, token);
         healthy = QueueDeadlineCapacityClaims.Leased(healthy, time);
         await QueueDeadlineCapacityImage.RequireAsync(database, state.Lane, [(state.Input, original), (input, healthy)], sequence,
             QueueDeadlineCapacityOperations.ParkedSequence(state, original));
-        healthy = await AckAsync(database, store, state, healthy, claim, time, token);
+        healthy = await AckAsync(database, state, healthy, claim, time, token);
         await QueueDeadlineCapacityImage.RequireAsync(database, state.Lane, [(state.Input, original), (input, healthy)], sequence,
             QueueDeadlineCapacityOperations.ParkedSequence(state, original));
         await QueueDeadlineCapacityCold.RunAsync(database, store, directory, state,
             [(state.Input, original), (input, healthy)], sequence, token);
     }
 
-    private static async Task<Delivery> ReceiveAsync(DatabaseEngine database, ZoneTreeStore store,
+    private static async Task<Delivery> ReceiveAsync(DatabaseEngine database,
         QueueDeadlineCapacityState state, MessageMetadata metadata, DateTimeOffset time, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
         var request = new ReceiveRequest(Guid.NewGuid(), state.Lane);
         var expected = QueueDeadlineCapacityClaims.Expected(database, state.Lane, metadata, request.RequestId,
-            QueueDeadlinePoisonPrefixClaims.NextToken(database, store, state.Lane), time);
+            QueueDeadlinePoisonPrefixClaims.NextToken(database, state.Lane), time);
         var operation = QueueDeadlinePoisonPrefixClaims.Operation(database, OperationKind.Receive, request.RequestId, request, Root, time);
         var result = database.Apply(operation);
         await QueueDeadlineCapacityClaims.RequireAsync(database, result.Get<ReceiveResult>(), expected, state.Lane);
@@ -58,12 +58,12 @@ internal static class QueueDeadlineCapacityHealthy
         return result.Get<ReceiveResult>().Deliveries.Single();
     }
 
-    private static async Task<MessageMetadata> AckAsync(DatabaseEngine database, ZoneTreeStore store,
+    private static async Task<MessageMetadata> AckAsync(DatabaseEngine database,
         QueueDeadlineCapacityState state, MessageMetadata metadata, Delivery claim, DateTimeOffset time, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
         var request = new DeliveryCommand(Guid.NewGuid(), state.Lane, claim.Token, DeliveryAction.Ack);
-        var expected = new CommitReceipt(request.CommandId, QueueDeadlinePoisonPrefixClaims.NextToken(database, store, state.Lane), [new(AckReceipt, Queue, metadata.Id, metadata.StateVersion + StateVersionStep)], DurabilityProfile.ProcessDurable, 1);
+        var expected = new CommitReceipt(request.CommandId, QueueDeadlinePoisonPrefixClaims.NextToken(database, state.Lane), [new(AckReceipt, Queue, metadata.Id, metadata.StateVersion + StateVersionStep)], DurabilityProfile.ProcessDurable, 1);
         var operation = QueueDeadlinePoisonPrefixClaims.Operation(database, OperationKind.Delivery, request.CommandId, request, Root, time);
         var result = database.Apply(operation);
         await QueueDeadlineCapacityOperations.ReceiptAsync(result, expected);

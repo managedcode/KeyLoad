@@ -25,7 +25,7 @@ internal static class SubscriptionGroupProgressAuthorityFlow
             MaxWindow = Window
         });
         var request = new ReceiveSubscriptionRequest(Guid.NewGuid(), group, MaxEvents: Window);
-        var expectedClaim = SubscriptionGroupProgressAuthorityAssertions.NextToken(fixture.Database, fixture.Store, group);
+        var expectedClaim = SubscriptionGroupProgressAuthorityAssertions.NextToken(fixture.Database, group);
         var original = SubscriptionCheckpointAuthorityFlow.Apply(fixture.Database,
             OperationKind.ReceiveSubscription, request, request.RequestId, token);
         var claim = original.Get<ReceiveSubscriptionResult>();

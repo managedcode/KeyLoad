@@ -57,7 +57,8 @@ internal static class QueueDeadLetterSelectedSetup
         var repairs = keys.Select(key => new QueueDeadLetterSelectedRepair(key,
             fixture.Store.Read(view => view.ReadOwnedValue(key))!)).ToArray();
         var state = new QueueDeadLetterSelectedState(lane, time, kind, fault, target, original, history.ToArray(),
-            repairs, Body(QueueDeadLetterSelectedProtocol.Original), Body(QueueDeadLetterSelectedProtocol.Foreign));
+            repairs, Body(QueueDeadLetterSelectedProtocol.Original), Body(QueueDeadLetterSelectedProtocol.Foreign),
+            fixture.ExpectedReference(new(lane.Partition, QueueDeadLetterSelectedProtocol.Collection, target)).Lifetime!);
         await QueueDeadLetterSelectedImage.RequireAsync(fixture.Database, fixture.Store, state);
         await QueueDeadLetterSelectedRetainedInbox.RequireAsync(fixture.Database, fixture.Store, state);
         return state;

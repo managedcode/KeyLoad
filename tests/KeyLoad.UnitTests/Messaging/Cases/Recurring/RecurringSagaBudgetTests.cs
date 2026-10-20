@@ -4,7 +4,7 @@ namespace KeyLoad.UnitTests.Features.Messaging;
 
 internal sealed class RecurringSagaBudgetTests
 {
-    private const int OneRetainedRecord = 1;
+    private const int RetainedRecordLimit = 16;
     private const int RetainedByteLimit = 4_096;
     private const int LargeJsonContentLength = 2_000;
     private const string EmptyJson = "{}";
@@ -14,7 +14,7 @@ internal sealed class RecurringSagaBudgetTests
     {
         using var fixture = new RecurringSagaDatabase(new()
         {
-            MaxScanRecords = OneRetainedRecord
+            MaxScanRecords = RetainedRecordLimit
         });
         var scheduleId = Guid.NewGuid();
         var definition = Definition(fixture, scheduleId, EmptyJson);
@@ -24,8 +24,13 @@ internal sealed class RecurringSagaBudgetTests
             {
                 PayloadJson = "{\"v\":2}"
             }, 1));
+        for (var index = 1; index < RetainedRecordLimit; index++)
+        {
+            _ = fixture.Commit(fixture.Partition,
+                new ConfigureRecurringSchedule(Definition(fixture, Guid.NewGuid(), EmptyJson), 0));
+        }
         var before = Capacity(fixture);
-        await Assert.That(before.Records).IsEqualTo(OneRetainedRecord);
+        await Assert.That(before.Records).IsEqualTo(RetainedRecordLimit);
 
         var sagaId = Guid.NewGuid();
         var result = fixture.Apply(OperationKind.Batch, new CommandRequest(Guid.NewGuid(), fixture.Partition,
@@ -35,7 +40,7 @@ internal sealed class RecurringSagaBudgetTests
             fixture.Queue, scheduleId)!.Revision).IsEqualTo(2);
         await Assert.That(fixture.Database.InspectSaga(RecurringSagaDatabase.RootPrincipal,
             fixture.Queue, sagaId)).IsNull();
-        await Assert.That(Capacity(fixture).Records).IsEqualTo(OneRetainedRecord);
+        await Assert.That(Capacity(fixture).Records).IsEqualTo(RetainedRecordLimit);
     }
 
     [Test]

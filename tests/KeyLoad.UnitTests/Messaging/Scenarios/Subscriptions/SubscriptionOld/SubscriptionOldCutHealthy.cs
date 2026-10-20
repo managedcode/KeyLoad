@@ -19,7 +19,7 @@ internal static class SubscriptionOldCutHealthy
         await Assert.That(delivery.LeaseVersion).IsEqualTo(1L);
         await Assert.That(delivery.LeaseUntil).IsEqualTo(SubscriptionOldCutState.Epoch.AddSeconds(61));
         var processing = state.Processing(delivery.Token, "input4");
-        var position = store.Position;
+        var position = database.LastApplied;
         var completed = state.Apply(database, OperationKind.SubscriptionProcessing, processing,
             processing.CommandId, SubscriptionOldCutState.Worker).Get<SubscriptionProcessingResult>();
         state.FreshProcessing = completed.Receipt;
@@ -38,7 +38,7 @@ internal static class SubscriptionOldCutHealthy
         await SubscriptionOldCutOutbox.RequireAsync(database, state);
         await SubscriptionOldCutAssertions.SameAsync(database.GetDocument("root", new(state.Group.Source.Partition,
             SubscriptionOldCutState.Collection, "input4")), new DocumentResult(
-                new(state.Group.Source.Partition, SubscriptionOldCutState.Collection, "input4"),
+                new(state.Group.Source.Partition, SubscriptionOldCutState.Collection, "input4") { Lifetime = state.DocumentLifetime },
                 1, SubscriptionOldCutState.EffectJson, false, []));
     }
 }

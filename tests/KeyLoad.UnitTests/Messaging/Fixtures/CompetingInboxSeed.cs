@@ -11,6 +11,7 @@ internal static class CompetingInboxSeed
         fixture.Configure(CompetingInboxState.Output, ResourceKind.WorkQueue);
         fixture.Configure(CompetingInboxState.Documents, ResourceKind.Collection);
         fixture.Configure(CompetingInboxState.Streams, ResourceKind.StreamSet);
+        state.DocumentReference = fixture.ExpectedReference(new(state.Partition, CompetingInboxState.Documents, "effect"));
         state.Producer = fixture.Commit(new EnqueueMessage(CompetingInboxState.Queue, "input", "{\"n\":1}"));
         var id = Guid.NewGuid();
         var claim = state.Operation(fixture.Database, OperationKind.Receive, new ReceiveRequest(id, state.Lane), id);

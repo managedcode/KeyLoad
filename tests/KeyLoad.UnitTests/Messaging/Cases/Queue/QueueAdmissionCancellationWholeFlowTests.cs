@@ -73,7 +73,7 @@ internal sealed class QueueAdmissionCancellationWholeFlowTests
             healthy.Get<CommitReceipt>();
             await Assert.That(fixture.Database.InspectMessage("root", lane, "input")!.Metadata.State).IsEqualTo(MessageState.Acked);
             var document = fixture.Database.GetDocument("root", new(fixture.Partition, "orders", "processed"))!;
-            await Assert.That(document.Reference).IsEqualTo(new EntityRef(fixture.Partition, "orders", "processed"));
+            await Assert.That(document.Reference).IsEqualTo(fixture.ExpectedReference(new(fixture.Partition, "orders", "processed")));
             await Assert.That(document.Json).IsEqualTo("{\"done\":true}");
             await Assert.That(document.Revision).IsEqualTo(1L);
             await Assert.That(document.Redacted).IsFalse();

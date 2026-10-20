@@ -32,7 +32,7 @@ internal static class QueueDeadlinePoisonPrefixHealthy
             token.ThrowIfCancellationRequested();
             var metadata = rows.Single(value => value.Id == delivery.Id);
             var ack = new DeliveryCommand(Guid.NewGuid(), lane, delivery.Token, DeliveryAction.Ack);
-            var expected = new CommitReceipt(ack.CommandId, QueueDeadlinePoisonPrefixClaims.NextToken(database, store, lane), [new(QueueDeadlinePoisonPrefixProtocol.AckReceipt, lane.Queue, metadata.Id, metadata.StateVersion + QueueDeadlinePoisonPrefixProtocol.First)], DurabilityProfile.ProcessDurable, 1);
+            var expected = new CommitReceipt(ack.CommandId, QueueDeadlinePoisonPrefixClaims.NextToken(database, lane), [new(QueueDeadlinePoisonPrefixProtocol.AckReceipt, lane.Queue, metadata.Id, metadata.StateVersion + QueueDeadlinePoisonPrefixProtocol.First)], DurabilityProfile.ProcessDurable, 1);
             var operation = QueueDeadlinePoisonPrefixClaims.Operation(database, OperationKind.Delivery, ack.CommandId,
                 ack, RuntimeQueueDeadlineProtocol.Worker, due);
             var result = database.Apply(operation);

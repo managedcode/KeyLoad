@@ -39,7 +39,8 @@ internal static class QueueLeaseAuthoritySetup
         var bytes = fixture.Store.Read(view => view.ReadOwnedValue(key))!;
         return new(lane, start, message, producer, produced, claim, claimed, delivery,
             Original(fixture.Database, lane, kind, delivery.Token, start.AddSeconds(QueueLeaseAuthorityProtocol.One)),
-            kind, metadata, counters, bodyBytes, key, bytes);
+            kind, metadata, counters, bodyBytes, key, bytes, fixture.ExpectedReference(new(lane.Partition,
+                QueueLeaseAuthorityProtocol.Collection, QueueLeaseAuthorityProtocol.Document)));
     }
 
     internal static QueueCounters Counters(ZoneTreeStore store, QueueLaneRef lane) => store.Read(view =>

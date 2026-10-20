@@ -12,8 +12,8 @@ internal static class TargetInboxCapacityAuthorityContinuationFlow
     internal static async Task<TargetInboxCapacityAuthorityContinuation> RunAsync(DatabaseEngine database,
         ZoneTreeStore store, TargetInboxCapacityAuthorityState state, CommitInboxRequest duplicate, CancellationToken token)
     {
+        var healthyPosition = checked(database.LastApplied + 1);
         var healthy = TargetInboxSetup.Apply(database, state.Healthy, token);
-        var healthyPosition = store.Position;
         await TargetInboxCapacityAuthorityHealthy.RequireAsync(database, store, state, healthy.Get<CommitInboxResult>(), healthyPosition);
         await TargetInboxCapacityAuthorityAssertions.ReplayAsync(database, store, state.Healthy, healthy, token);
         var before = TargetInboxAssertions.Image(store, state.Original.Source.Partition, state.Original.Target.Partition);

@@ -39,7 +39,8 @@ internal static class RemoteTransferCapacityAuthorityCold
         await Assert.That(stale.Value).IsNull();
 
         var retained = OutcomeStoreOracle.ReadPartition(RemoteTransferCapacityAuthorityStorage.Execution(fixture), fixture.DestinationPartition,
-            RemoteTransferDatabase.RootPrincipal, item.Receive.RequestId)!;
+            RemoteTransferDatabase.RootPrincipal, item.Receive.RequestId)
+            ?? throw new InvalidOperationException("The original receive outcome is absent.");
         await ReplayResultAssertions.Same<ReceiveResult>(retained, item.Received);
         await RemoteTransferCapacityAuthorityStorage.ImageAsync(fixture, image, position);
     }

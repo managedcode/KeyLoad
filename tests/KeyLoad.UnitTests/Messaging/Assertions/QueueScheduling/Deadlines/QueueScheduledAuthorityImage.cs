@@ -63,7 +63,10 @@ internal static class QueueScheduledAuthorityImage
         foreach (var (request, receipt) in state.Processed)
         {
             var effect = (PutDocument)request.Effects.Single();
-            var reference = new EntityRef(state.Flow.Partition, effect.Collection, effect.Id);
+            var reference = new EntityRef(state.Flow.Partition, effect.Collection, effect.Id)
+            {
+                Lifetime = state.DocumentLifetime
+            };
             var document = owner.GetDocument(QueueLifecycleTestProtocol.Administrator, reference)!;
             await Assert.That(document.Reference).IsEqualTo(reference);
             await Assert.That(document.Revision).IsEqualTo(1);

@@ -16,7 +16,7 @@ internal static class SubscriptionGroupProgressAuthorityContinuation
         await SubscriptionCheckpointAuthorityAssertions.StatusAsync(db, group, 0, 3, 3);
         await ReplayResultAssertions.Same<ReceiveSubscriptionResult>(SubscriptionCheckpointAuthorityFlow.Apply(
             db, OperationKind.ReceiveSubscription, fresh, fresh.RequestId, token), empty);
-        var expectedThird = SubscriptionGroupProgressAuthorityAssertions.NextToken(db, store, group);
+        var expectedThird = SubscriptionGroupProgressAuthorityAssertions.NextToken(db, group);
         var thirdResult = SubscriptionCheckpointAuthorityFlow.Apply(db, OperationKind.SubscriptionDelivery,
             third, third.CommandId, token);
         await SubscriptionGroupProgressAuthorityAssertions.ReceiptAsync(thirdResult, third, expectedThird, 3);
@@ -24,7 +24,7 @@ internal static class SubscriptionGroupProgressAuthorityContinuation
         foreach (var delivery in original.Deliveries.Take(2))
         {
             var ack = new SubscriptionDeliveryCommand(Guid.NewGuid(), group, delivery.Token, DeliveryAction.Ack);
-            var expectedAck = SubscriptionGroupProgressAuthorityAssertions.NextToken(db, store, group);
+            var expectedAck = SubscriptionGroupProgressAuthorityAssertions.NextToken(db, group);
             var result = SubscriptionCheckpointAuthorityFlow.Apply(db, OperationKind.SubscriptionDelivery,
                 ack, ack.CommandId, token);
             await SubscriptionGroupProgressAuthorityAssertions.ReceiptAsync(result, ack, expectedAck, delivery.Event.Position);
@@ -62,7 +62,7 @@ internal static class SubscriptionGroupProgressAuthorityContinuation
         await ReplayResultAssertions.Same<ReceiveSubscriptionResult>(SubscriptionCheckpointAuthorityFlow.Apply(
             db, OperationKind.ReceiveSubscription, request, request.RequestId, token), result);
         var ack = new SubscriptionDeliveryCommand(Guid.NewGuid(), group, delivery.Token, DeliveryAction.Ack);
-        var expectedAck = SubscriptionGroupProgressAuthorityAssertions.NextToken(db, store, group);
+        var expectedAck = SubscriptionGroupProgressAuthorityAssertions.NextToken(db, group);
         var receipt = SubscriptionCheckpointAuthorityFlow.Apply(db, OperationKind.SubscriptionDelivery, ack, ack.CommandId, token);
         await SubscriptionGroupProgressAuthorityAssertions.ReceiptAsync(receipt, ack, expectedAck, 4);
         await SubscriptionCheckpointAuthorityAssertions.StatusAsync(db, group, 4, 4, 4);

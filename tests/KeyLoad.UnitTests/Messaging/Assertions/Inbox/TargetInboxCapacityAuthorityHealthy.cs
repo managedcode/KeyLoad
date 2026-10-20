@@ -37,7 +37,7 @@ internal static class TargetInboxCapacityAuthorityHealthy
         var document = database.GetDocument(TargetInboxUnitProtocol.Root,
             new(request.Target.Partition, TargetInboxUnitProtocol.Collection, TargetInboxCapacityAuthorityFixture.Healthy));
         await Assert.That(JsonDefaults.Serialize(document)).IsEquivalentTo(JsonDefaults.Serialize(new DocumentResult(
-            new(request.Target.Partition, TargetInboxUnitProtocol.Collection, TargetInboxCapacityAuthorityFixture.Healthy),
+            state.HealthyReference,
             1L, TargetInboxUnitProtocol.Payload, false, [])), CollectionOrdering.Matching);
         await EventAsync(database, store, state, receipt);
         var message = database.InspectMessage(TargetInboxUnitProtocol.Root,

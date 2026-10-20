@@ -50,7 +50,9 @@ internal static class SubscriptionCheckpointAuthorityFlow
         var db = QueueWholeFlowStorage.Open(firstCold);
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(firstCold, cut, position, identity);
         await SubscriptionCheckpointAuthorityAssertions.CorruptionAsync(db, firstCold, second, token);
-        await SubscriptionCheckpointAuthorityAssertions.StatusAsync(db, group, 1, 3, 3);
+        var statusFailure = Assert.ThrowsExactly<KeyLoadException>(() => db.GetSubscription("root", group));
+        await Assert.That(statusFailure.Code).IsEqualTo(ErrorCode.Corruption);
+        await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(firstCold, cut, position, identity);
         await SubscriptionCheckpointAuthorityAssertions.SourceAsync(db, firstCold, group.Source, source);
         await ContinueAsync(db, firstCold, fixture.Directory, group, second, first, firstResult,
             third, thirdResult, request, original, saved, key, identity, source, token);

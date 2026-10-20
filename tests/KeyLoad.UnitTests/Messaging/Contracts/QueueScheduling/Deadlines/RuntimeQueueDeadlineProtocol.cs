@@ -15,7 +15,7 @@ internal static class RuntimeQueueDeadlineProtocol
     internal const long First = 1;
     internal const long Second = 2;
     internal const long Third = 3;
-    internal const int MinimumPageRecords = 2;
+    internal const int MinimumPageRecords = 3;
     internal const int MaximumDiscoveryPages = 12;
     internal const int RetryCapMilliseconds = 1000;
     internal const string LeaseSpace = "lease";

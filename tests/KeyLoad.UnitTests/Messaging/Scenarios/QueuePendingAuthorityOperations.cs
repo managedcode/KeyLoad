@@ -25,7 +25,8 @@ internal static class QueuePendingAuthorityOperations
         var command = new CommandRequest(Guid.NewGuid(), flow.Partition,
             [new ParkPendingQueueMessage(flow.Lane.Queue, QueueLifecycleTestProtocol.Pending, 3, 1)]);
         var operation = fixture.Database.CreateCommand(OperationKind.Batch, command.CommandId, QueueLifecycleTestProtocol.Administrator, flow.Time, JsonSerializer.Serialize(command, JsonDefaults.Options));
-        var state = new QueuePendingAuthorityState(flow, operation, key, marker);
+        var state = new QueuePendingAuthorityState(flow, operation, key, marker, fixture.ExpectedReference(
+            new(flow.Partition, QueueLifecycleTestProtocol.Collection, QueuePendingAuthorityProtocol.History)).Lifetime!);
         await ProcessAsync(fixture.Database, fixture.Store, state, QueuePendingAuthorityProtocol.History, 1, 1, 3);
         flow.Batch(fixture.Database, new CancelQueueMessage(flow.Lane.Queue, QueueLifecycleTestProtocol.Parked, 3, 1))
             .Get<CommitReceipt>();
@@ -60,7 +61,7 @@ internal static class QueuePendingAuthorityOperations
         await Assert.That(receipt.CommandId).IsEqualTo(state.Park.CommandId);
         await Assert.That(receipt.Token.Incarnation).IsEqualTo(store.Identity.Incarnation);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(state.Flow.Partition.AtomicPartitionId);
-        await Assert.That(receipt.Token.Position).IsEqualTo(store.Position);
+        await Assert.That(receipt.Token.Position).IsEqualTo(owner.LastApplied);
         await Assert.That(receipt.Durability).IsEqualTo(store.Identity.Durability);
         await Assert.That(receipt.Mutations).IsEquivalentTo([new MutationReceipt(QueuePendingAuthorityProtocol.ParkKind,
             state.Flow.Lane.Queue, QueueLifecycleTestProtocol.Pending, 4)], CollectionOrdering.Matching);
@@ -89,7 +90,7 @@ internal static class QueuePendingAuthorityOperations
         var result = state.Flow.Execute(owner, OperationKind.Processing, processing, processing.CommandId);
         var receipt = result.Get<CommitReceipt>();
         await Assert.That(receipt.CommandId).IsEqualTo(processing.CommandId);
-        await Assert.That(receipt.Token.Position).IsEqualTo(store.Position);
+        await Assert.That(receipt.Token.Position).IsEqualTo(owner.LastApplied);
         await Assert.That(receipt.Mutations).IsEquivalentTo([
             new MutationReceipt(QueuePendingAuthorityProtocol.PutKind, QueueLifecycleTestProtocol.Collection, id, 1),
             new MutationReceipt(nameof(DeliveryAction.Ack), state.Flow.Lane.Queue, id, terminalVersion)], CollectionOrdering.Matching);

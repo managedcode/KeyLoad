@@ -17,7 +17,7 @@ internal static class QueueScheduledAuthorityOperations
         var receipt = state.Flow.Execute(owner, OperationKind.Processing, request, request.CommandId).Get<CommitReceipt>();
         await Assert.That(store.Position).IsEqualTo(before + 1);
         await Assert.That(receipt.CommandId).IsEqualTo(request.CommandId);
-        await Assert.That(receipt.Token.Position).IsEqualTo(store.Position);
+        await Assert.That(receipt.Token.Position).IsEqualTo(owner.LastApplied);
         await Assert.That(receipt.Token.Incarnation).IsEqualTo(store.Identity.Incarnation);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(state.Flow.Partition.AtomicPartitionId);
         await Assert.That(receipt.Durability).IsEqualTo(store.Identity.Durability);

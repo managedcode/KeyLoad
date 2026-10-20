@@ -38,9 +38,11 @@ internal static class SubscriptionProcessingAtomicFlow
         }
         var before = SubscriptionProcessingAtomicAssertions.DomainImage(fixture.Store, group, failed.CommandId);
         var position = fixture.Store.Position;
+        var canonicalPosition = fixture.Database.LastApplied;
         var failure = fixture.Database.Apply(failed);
         await SubscriptionProcessingAtomicAssertions.RollbackAsync(fixture.Database, fixture.Store,
             group, failed, failure, before, position + 1);
+        await Assert.That(fixture.Database.LastApplied).IsEqualTo(canonicalPosition + 1);
         var failureBytes = SubscriptionProcessingAtomicAssertions.OutcomeBytes(fixture.Store, group, failed.CommandId);
         await SubscriptionProcessingAtomicAssertions.FailureReplayAsync(fixture.Database, fixture.Store,
             group, failed, failure, failureBytes);
@@ -57,13 +59,13 @@ internal static class SubscriptionProcessingAtomicFlow
         await ReplayResultAssertions.Same<ReceiveSubscriptionResult>(db.Apply(claim), originalClaim);
         await SubscriptionCheckpointAuthorityAssertions.SourceAsync(db, first, group.Source, source);
         await ContinueAsync(db, first, fixture.Directory, group, request, failed, failure,
-            failureBytes, claim, originalClaim, time, source, token);
+            failureBytes, claim, originalClaim, time, source, fixture, token);
     }
 
     private static async Task ContinueAsync(DatabaseEngine db, ZoneTreeStore store, string directory,
         SubscriptionRef group, SubscriptionProcessingRequest request, Command<DatabaseCommand> failed, Result<object> failure,
         byte[] failureBytes, Command<DatabaseCommand> claim, Result<object> originalClaim, DateTimeOffset time,
-        string[] source, CancellationToken token)
+        string[] source, TestDatabase originalOwner, CancellationToken token)
     {
         var repaired = request with
         {
@@ -73,7 +75,7 @@ internal static class SubscriptionProcessingAtomicFlow
         };
         var operation = Create(db, OperationKind.SubscriptionProcessing, repaired, repaired.CommandId, time.AddSeconds(2));
         var result = db.Apply(operation);
-        await SubscriptionProcessingAtomicAssertions.SuccessAsync(db, group, repaired, result);
+        await SubscriptionProcessingAtomicAssertions.SuccessAsync(db, group, repaired, result, originalOwner);
         var saved = SubscriptionProcessingAtomicAssertions.OutcomeBytes(store, group, operation.CommandId);
         await SubscriptionProcessingAtomicAssertions.SuccessReplayAsync(db, store, group, operation, result, saved);
         await SubscriptionProcessingAtomicAssertions.FailureReplayAsync(db, store, group, failed, failure, failureBytes);
@@ -84,14 +86,16 @@ internal static class SubscriptionProcessingAtomicFlow
         var onceOperation = Create(db, OperationKind.SubscriptionProcessing, once, once.CommandId, time.AddSeconds(3));
         var beforeOnce = SubscriptionProcessingAtomicAssertions.DomainImage(store, group, onceOperation.CommandId);
         var oncePosition = store.Position;
+        var onceCanonical = db.LastApplied;
         var onceResult = db.Apply(onceOperation);
         await SubscriptionProcessingAtomicAssertions.OwnOutcomeOnlyAsync(store, group, onceOperation, beforeOnce, oncePosition + 1);
+        await Assert.That(db.LastApplied).IsEqualTo(onceCanonical + 1);
         var projected = onceResult.Get<SubscriptionProcessingResult>();
         await Assert.That(projected.AlreadyProcessed).IsTrue();
         await Assert.That(projected.OriginalEffectsToken).IsEqualTo(result.Get<SubscriptionProcessingResult>().OriginalEffectsToken);
         await Assert.That(JsonSerializer.Serialize(projected.Receipt, JsonDefaults.Options))
             .IsEqualTo(JsonSerializer.Serialize(result.Get<SubscriptionProcessingResult>().Receipt, JsonDefaults.Options));
-        await SubscriptionProcessingAtomicAssertions.DocumentsAsync(db, group);
+        await SubscriptionProcessingAtomicAssertions.DocumentsAsync(db, group, originalOwner);
         var receipts = new List<(Command<DatabaseCommand> Operation, Result<object> Result, byte[] Saved)>
         { (operation, result, saved), (onceOperation, onceResult,
             SubscriptionProcessingAtomicAssertions.OutcomeBytes(store, group, onceOperation.CommandId)) };
@@ -111,14 +115,14 @@ internal static class SubscriptionProcessingAtomicFlow
         var receive = OrleansSerialization.Deserialize<ReceiveSubscriptionRequest>(claim.Value!.Input.Span, ValidationProfile.PublicInputElements)
             ?? throw new InvalidOperationException("The original Receive request is absent.");
         await SubscriptionCheckpointAuthorityAssertions.SettledClaimAsync(db, store, receive, originalClaim, token);
-        await SecondColdAsync(db, store, directory, group, failed, failure, failureBytes, receipts, ackReceipts, receive, originalClaim, source, token);
+        await SecondColdAsync(db, store, directory, group, failed, failure, failureBytes, receipts, ackReceipts, receive, originalClaim, source, originalOwner, token);
     }
 
     private static async Task SecondColdAsync(DatabaseEngine db, ZoneTreeStore store, string directory,
         SubscriptionRef group, Command<DatabaseCommand> failed, Result<object> failure, byte[] failureBytes,
         List<(Command<DatabaseCommand> Operation, Result<object> Result, byte[] Saved)> receipts,
         List<(SubscriptionDeliveryCommand Command, Result<object> Result)> ackReceipts,
-        ReceiveSubscriptionRequest receive, Result<object> originalClaim, string[] source, CancellationToken token)
+        ReceiveSubscriptionRequest receive, Result<object> originalClaim, string[] source, TestDatabase originalOwner, CancellationToken token)
     {
         await SubscriptionCheckpointAuthorityAssertions.SourceAsync(db, store, group.Source, source);
         var cut = QueueWholeFlowStorage.Bytes(store);
@@ -141,7 +145,7 @@ internal static class SubscriptionProcessingAtomicFlow
             await SubscriptionCheckpointAuthorityAssertions.ReplayAsync(cold, second, ack.Command, ack.Result, token);
         }
         await SubscriptionCheckpointAuthorityAssertions.SettledClaimAsync(cold, second, receive, originalClaim, token);
-        await SubscriptionProcessingAtomicAssertions.DocumentsAsync(cold, group);
+        await SubscriptionProcessingAtomicAssertions.DocumentsAsync(cold, group, originalOwner);
         await SubscriptionCheckpointAuthorityAssertions.StatusAsync(cold, group, 3, 3, 3);
         await SubscriptionCheckpointAuthorityAssertions.NoWindowAsync(second, group);
         await SubscriptionCheckpointAuthorityAssertions.SourceAsync(cold, second, group.Source, source);

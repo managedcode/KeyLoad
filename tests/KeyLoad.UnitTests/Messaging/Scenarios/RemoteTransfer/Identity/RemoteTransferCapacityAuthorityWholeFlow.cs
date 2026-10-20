@@ -1,3 +1,5 @@
+using System.Text.Json;
+using KeyLoad.Core.Features.ResourceExecution;
 using ManagedCode.Communication;
 using static KeyLoad.UnitTests.Features.Messaging.RemoteTransferCapacityAuthorityProtocol;
 
@@ -9,8 +11,12 @@ internal static class RemoteTransferCapacityAuthorityWholeFlow
     {
         token.ThrowIfCancellationRequested();
         using var fixture = new RemoteTransferDatabase();
-        _ = fixture.Apply(OperationKind.ConfigureResource, new ConfigureResourceRequest(RemoteTransferDatabase.TenantId,
-            RemoteTransferDatabase.DatabaseId, new(Documents, ResourceKind.Collection, RemoteTransferDatabase.Domain))).Get<ResourceDefinition>();
+        var resource = new ConfigureResourceRequest(RemoteTransferDatabase.TenantId,
+            RemoteTransferDatabase.DatabaseId, new(Documents, ResourceKind.Collection, RemoteTransferDatabase.Domain));
+        var creation = fixture.Database.CreateCommand(OperationKind.ConfigureResource, Guid.NewGuid(),
+            RemoteTransferDatabase.RootPrincipal, TimeProvider.System.GetUtcNow(), JsonSerializer.Serialize(resource, JsonDefaults.Options));
+        _ = fixture.Database.Apply(creation).Get<ResourceDefinition>();
+        var lifetime = ResourceLifetimeIdentity.Create(creation, resource.TenantId, resource.DatabaseId, resource.Definition);
         List<RemoteTransferCapacityAuthorityCompleted> completed = [];
         foreach (var name in new[] { Original, Second })
         {
@@ -43,12 +49,12 @@ internal static class RemoteTransferCapacityAuthorityWholeFlow
         await RemoteTransferCapacityAuthorityStorage.ImageAsync(fixture, original, position + SecondValue);
         var reconciled = await RemoteTransferCapacityAuthorityValues.SubmitAsync(fixture, applicationReplay,
             source ? null : completed.First().Proof.TargetCommit.Position);
-        await ContinueAsync(fixture, source, completed, pending, fresh, (applicationReplay, reconciled), token);
+        await ContinueAsync(fixture, source, completed, pending, fresh, (applicationReplay, reconciled), new(lifetime.Incarnation.Value), token);
     }
 
     private static async Task ContinueAsync(RemoteTransferDatabase fixture, bool source,
         List<RemoteTransferCapacityAuthorityCompleted> completed, RemoteTransferCapacityAuthorityTransfer pending,
-        CommandRequest fresh, (CommandRequest Request, Result<object> Result) reconciliation, CancellationToken token)
+        CommandRequest fresh, (CommandRequest Request, Result<object> Result) reconciliation, EntityRefLifetime lifetime, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
         if (source)
@@ -64,7 +70,7 @@ internal static class RemoteTransferCapacityAuthorityWholeFlow
         var document = fixture.Database.GetDocument(RemoteTransferDatabase.RootPrincipal,
             new(source ? fixture.SourcePartition : fixture.DestinationPartition, Documents, FreshDocument), cancellationToken: token);
         await RemoteTransferCapacityAuthorityValues.EqualAsync(document,
-            new DocumentResult(new(source ? fixture.SourcePartition : fixture.DestinationPartition, Documents, FreshDocument), First, Payload, false, []));
+            new DocumentResult(new(source ? fixture.SourcePartition : fixture.DestinationPartition, Documents, FreshDocument) { Lifetime = lifetime }, First, Payload, false, []));
         var healthy = await RemoteTransferCapacityAuthoritySeed.CreateAsync(fixture, Healthy);
         completed.Add(await RemoteTransferCapacityAuthoritySettlement.FinishAsync(fixture, healthy, completed.Count + First));
         await RemoteTransferCapacityAuthorityValues.ReplayAsync(fixture, reconciliation.Request, reconciliation.Result);

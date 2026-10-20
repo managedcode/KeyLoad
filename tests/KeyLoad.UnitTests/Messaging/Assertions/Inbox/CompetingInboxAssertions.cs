@@ -38,7 +38,7 @@ internal static class CompetingInboxAssertions
         var json = state.Json(state.Winner);
         await SubscriptionOldCutAssertions.SameAsync(database.GetDocument("root", new(state.Partition,
             CompetingInboxState.Documents, "effect")), new DocumentResult(
-                new(state.Partition, CompetingInboxState.Documents, "effect"), 1, json, false, []));
+                state.DocumentReference, 1, json, false, []));
         var stream = database.ReadStream("root", new ReadStreamRequest(new(state.Partition, CompetingInboxState.Streams, "effect")));
         await Assert.That(stream.Stream).IsEqualTo(new StreamRef(state.Partition, CompetingInboxState.Streams, "effect"));
         await Assert.That(stream.Head).IsEqualTo(new StreamHead(1, 1, 1));
