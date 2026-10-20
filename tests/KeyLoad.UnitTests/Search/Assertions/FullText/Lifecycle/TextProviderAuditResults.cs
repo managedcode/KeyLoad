@@ -29,7 +29,7 @@ internal static class TextProviderAuditResults
         var original = TextProviderAuditImages.Capture(owner);
         var actual = await owner.Search.SearchAsync(Root,
             new(owner.Source.Partition, Collection, Field, term, Limit: QueryLimit), token);
-        RankedDocument[] expected = id is null ? [] : [new(new(new(owner.Source.Partition, Collection, id),
+        RankedDocument[] expected = id is null ? [] : [new(new(owner.Reference(new(owner.Source.Partition, Collection, id)),
             revision, json, false, []), SingleBranchScore)];
         await Assert.That(JsonSerializer.Serialize(actual, JsonDefaults.Options))
             .IsEqualTo(JsonSerializer.Serialize(expected, JsonDefaults.Options));

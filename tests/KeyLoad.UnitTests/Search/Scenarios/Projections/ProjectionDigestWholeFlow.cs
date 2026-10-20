@@ -24,7 +24,7 @@ internal static class ProjectionDigestWholeFlow
         await ReplayAsync(fixture, malformed.Command, malformed.Result);
         var request = fixture.Request();
         var command = new CommandRequest(Guid.NewGuid(), fixture.Partition, [request]);
-        var beforeCommit = fixture.Harness.Store.Position;
+        var beforeCommit = fixture.Database.LastApplied;
         var result = fixture.Harness.Submit(OperationKind.Batch, command, EventProjectionFixture.WorkerId, command.CommandId);
         var receipt = result.Get<CommitReceipt>();
         await ProjectionDigestAssertions.ReceiptAsync(fixture, command, receipt, beforeCommit);
@@ -40,7 +40,7 @@ internal static class ProjectionDigestWholeFlow
         Result<object>? continued = null;
         if (!effect)
         {
-            var beforeRepair = fixture.Harness.Store.Position;
+            var beforeRepair = fixture.Database.LastApplied;
             var actual = fixture.Harness.Submit(OperationKind.Batch, continuation, EventProjectionFixture.WorkerId, continuation.CommandId);
             continued = actual;
             await ProjectionDigestAssertions.ReceiptAsync(fixture, continuation, actual.Get<CommitReceipt>(), beforeRepair);

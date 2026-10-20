@@ -14,8 +14,12 @@ internal static class TextProtectedRebuildColdSeed
 
     internal static TextProtectedRebuildColdOwner.Retained[] Initialize(TextProtectedRebuildColdOwner owner)
     {
-        owner.Source.Configure(Collection, ResourceKind.Collection,
-            fields: [new(Field, "secret", "protected.read", Use, "protected.write")]);
+        _ = owner.Send(OperationKind.ConfigureResource, new ConfigureResourceRequest(
+            owner.Source.Partition.TenantId, owner.Source.Partition.DatabaseId,
+            new(Collection, ResourceKind.Collection, owner.Source.Partition.TransactionDomainId)
+            {
+                FieldPolicies = [new(Field, "secret", "protected.read", Use, "protected.write")]
+            })).Result.Get<ResourceDefinition>();
         Policy(owner, 1L, allowed: true);
         return [Batch(owner, new PutDocument(Collection, Alpha, OriginalJson, Access: new(Reader)),
             new PutDocument(Collection, Beta, EnglishJson, Access: new(Reader)))];

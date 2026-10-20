@@ -12,13 +12,11 @@ internal static class TextBm25EligibilityPages
     {
         var before = Bm25OriginalPhaseRecoveryState.Read(flow.Owner);
         var result = await ReadAsync(flow, expectedHead);
-        var first = TextBm25ExpectedRows.Document(flow.Owner.Source.Partition, "first", mutated ? 2L : 1L,
+        var first = TextBm25ExpectedRows.Document(flow.Owner.Source, "first", mutated ? 2L : 1L,
             redacted ? "{}" : mutated ? "{\"text\":\"needle needle needle\"}" : "{\"text\":\"needle\"}",
             redacted, redacted ? ["/text"] : []);
-        var second = TextBm25ExpectedRows.Document(flow.Owner.Source.Partition, "second", 1L,
+        var second = TextBm25ExpectedRows.Document(flow.Owner.Source, "second", 1L,
             redacted ? "{}" : "{\"text\":\"needle needle\"}", redacted, redacted ? ["/text"] : []);
-        first = first with { Reference = flow.Owner.Source.ExpectedReference(first.Reference) };
-        second = second with { Reference = flow.Owner.Source.ExpectedReference(second.Reference) };
         RankedDocument[] expected = mutated
             ? [new(first, 1d / 61d, null), new(second, 1d / 62d, null)]
             : [new(second, 1d / 61d, null), new(first, 1d / 62d, null)];

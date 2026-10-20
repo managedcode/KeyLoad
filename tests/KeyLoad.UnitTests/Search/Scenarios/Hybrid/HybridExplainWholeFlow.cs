@@ -40,7 +40,7 @@ internal static class HybridExplainWholeFlow
         };
     }
 
-    internal static async Task LiteralAsync(GraphSearchResult result, PartitionRef partition, bool restricted)
+    internal static async Task LiteralAsync(GraphSearchResult result, TestDatabase database, bool restricted)
     {
         var ids = restricted ? new[] { B, C } : new[] { A, B, C, D };
         await Assert.That(result.Hits.Select(hit => hit.Document.Reference.Id).ToArray())
@@ -56,8 +56,8 @@ internal static class HybridExplainWholeFlow
             {
                 score += part.Contribution;
             }
-            var expected = new RankedDocument(new(new(partition, ThreeWayHybridTestSupport.Documents,
-                ids[index]), Revision, "{}", true, [TextField, VectorField]), score, new(Fusion, [.. parts]));
+            var expected = new RankedDocument(new(database.ExpectedReference(new(database.Partition, ThreeWayHybridTestSupport.Documents,
+                ids[index])), Revision, "{}", true, [TextField, VectorField]), score, new(Fusion, [.. parts]));
             await Assert.That(JsonDefaults.Serialize(result.Hits[index]).AsSpan()
                 .SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
 

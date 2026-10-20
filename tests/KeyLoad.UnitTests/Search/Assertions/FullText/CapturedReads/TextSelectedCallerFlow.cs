@@ -38,8 +38,8 @@ internal static class TextSelectedCallerFlow
         {
             TextIndex = selection
         };
-        RankedDocument[] expected = [new(new(new(database.Partition, TextBilingualAudit.Collection,
-            TextBilingualAudit.EnglishId), Revision, TextBilingualAudit.EnglishJson, false, []), Score)];
+        RankedDocument[] expected = [new(new(database.ExpectedReference(new(database.Partition, TextBilingualAudit.Collection,
+            TextBilingualAudit.EnglishId)), Revision, TextBilingualAudit.EnglishJson, false, []), Score)];
         await Assert.That(JsonDefaults.Serialize(await search.SearchAsync(Reader, request, token)).SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
         await PersistAsync(database, revoked: true, RevokedPolicy, token);
         var image = QueueWholeFlowStorage.Bytes(database.Store);

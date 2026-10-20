@@ -65,7 +65,7 @@ internal sealed class TextWaitObservedWorkTests
         await Assert.That(OrleansSerialization.Serialize(healthy.AppliedToken).SequenceEqual(OrleansSerialization.Serialize(receipt.Token))).IsTrue();
         await Assert.That(healthy.SchemaVersion).IsEqualTo(InitialSchemaVersion);
         await Assert.That(healthy.PolicyEpoch).IsEqualTo(InitialPolicyEpoch);
-        await TextBilingualAudit.VerifyAsync(search, database.Partition, TestContext.Current!.Execution.CancellationToken);
+        await TextBilingualAudit.VerifyAsync(search, database, TestContext.Current!.Execution.CancellationToken);
         await Assert.That(database.Store.Position).IsEqualTo(cut);
         await Assert.That(QueueWholeFlowStorage.Bytes(database.Store)).IsEquivalentTo(image, CollectionOrdering.Matching);
     }

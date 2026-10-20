@@ -18,10 +18,10 @@ internal static class TextCapturedPublicFlow
         await runtime.DisposeAsync();
         await Assert.That(Directory.Exists(files.Path)).IsFalse();
         await using var cold = new TextOnlineTestRuntime(fixture);
-        await TextCapturedPublicContinuation.HealthyAsync(cold, fixture.Partition, token);
+        await TextCapturedPublicContinuation.HealthyAsync(cold, fixture, token);
         var coldReceipt = await TextOnlineWholeFlow.RunAsync(fixture, cold, request, token);
         await Assert.That(OrleansSerialization.Serialize(coldReceipt).SequenceEqual(OrleansSerialization.Serialize(receipt))).IsTrue();
-        await TextCapturedPublicContinuation.HealthyAsync(cold, fixture.Partition, token);
+        await TextCapturedPublicContinuation.HealthyAsync(cold, fixture, token);
     }
 
     private static async Task RunRetainedAsync(bool cancelOriginal, TestDatabase fixture,
@@ -45,7 +45,7 @@ internal static class TextCapturedPublicFlow
                 original = StartOriginal(runtime, fixture, entered, release, originalCancellation.Token, token);
                 await AwaitOriginalPostingAsync(entered, original, token);
                 firstRelease.TrySetResult();
-                await TextCapturedPublicContinuation.OriginalAsync(await first, fixture.Partition);
+                await TextCapturedPublicContinuation.OriginalAsync(await first, fixture);
                 files.RequireOriginal(fixture, runtime, token);
                 var successor = await TextCapturedPublicContinuation.SwapAsync(fixture, runtime, request, token);
                 files.RequireOriginal(fixture, runtime, token);
@@ -66,7 +66,7 @@ internal static class TextCapturedPublicFlow
                 }
                 else
                 {
-                    await TextCapturedPublicContinuation.OriginalAsync(await original, fixture.Partition);
+                    await TextCapturedPublicContinuation.OriginalAsync(await original, fixture);
                 }
                 await files.RequireRetirementAsync(retirement, successorFiles, fixture, runtime, successorRequest, token);
                 await TextCapturedPublicContinuation.HealthyReplayAsync(fixture, runtime, request, receipt, successor, token);

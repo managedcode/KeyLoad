@@ -48,7 +48,7 @@ internal static class FilteredPolicyColdContinuation
         ]);
         var request = Request(database.Partition);
         var repaired = await CaptureAsync(database.Store);
-        await HealthyAsync(database.Database, reader, request, cancellationToken);
+        await HealthyAsync(database, database.Database, reader, request, cancellationToken);
         await UnchangedAsync(database.Store, repaired);
         var identity = database.Store.Identity;
         database.JoinOwnedResources();
@@ -74,11 +74,11 @@ internal static class FilteredPolicyColdContinuation
                 }, cancellationToken)))!;
         await Assert.That(denied.Code).IsEqualTo(ErrorCode.Unauthenticated);
         await UnchangedAsync(store, expected);
-        await HealthyAsync(engine, reader, request, cancellationToken);
+        await HealthyAsync(database, engine, reader, request, cancellationToken);
         await UnchangedAsync(store, expected);
     }
 
-    private static async Task HealthyAsync(DatabaseEngine database, string reader,
+    private static async Task HealthyAsync(TestDatabase provenance, DatabaseEngine database, string reader,
         SearchRequest request, CancellationToken cancellationToken)
     {
         var engine = new SearchEngine(database, UnitExecutionOptions.QueryExecution());
@@ -91,8 +91,8 @@ internal static class FilteredPolicyColdContinuation
         var rows = await engine.SearchAsync(reader, request, cancellationToken);
         await Assert.That(rows).HasSingleItem();
         var row = rows[0];
-        await Assert.That(row.Document.Reference).IsEqualTo(new EntityRef(request.Partition,
-            FilteredSearchTestSupport.Collection, EligibleId));
+        await Assert.That(row.Document.Reference).IsEqualTo(provenance.ExpectedReference(new(request.Partition,
+            FilteredSearchTestSupport.Collection, EligibleId)));
         await Assert.That(row.Document.Revision).IsEqualTo((long)FilteredSearchTestSupport.Revision);
         await Assert.That(row.Document.Json).IsEqualTo(ExpectedJson);
         await Assert.That(row.Document.Redacted).IsFalse();

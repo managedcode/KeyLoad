@@ -23,9 +23,9 @@ internal sealed record TextOnlineSeedFixture(TextSeedPin Pin, DocumentRecord[] E
         await Assert.That(receipt.Mutations.Length).IsEqualTo(command.Mutations.Length);
         var request = await TextMaintenanceRequestFixture.CreateAsync(database, cancellationToken);
         DocumentRecord[] expected = [
-            new(new(database.Partition, request.Collection, TextBilingualAudit.EnglishId), 1,
+            new(database.ExpectedReference(new(database.Partition, request.Collection, TextBilingualAudit.EnglishId)), 1,
                 TextBilingualAudit.EnglishJson, access, now),
-            new(new(database.Partition, request.Collection, TextBilingualAudit.UkrainianId), 1,
+            new(database.ExpectedReference(new(database.Partition, request.Collection, TextBilingualAudit.UkrainianId)), 1,
                 TextBilingualAudit.UkrainianJson, access, now)];
         return new(new(request.Consumer, request.IndexGeneration, request.Collection,
             request.Field, request.NodeId, request.Placement), expected);

@@ -86,7 +86,7 @@ internal sealed class TextProjectionRemovalTests
         await Assert.That(rows.Length).IsEqualTo(ids.Length);
         for (var index = 0; index < ids.Length; index++)
         {
-            await Assert.That(rows[index].Document.Reference).IsEqualTo(new EntityRef(db.Partition, Collection, ids[index]));
+            await Assert.That(rows[index].Document.Reference).IsEqualTo(db.ExpectedReference(new(db.Partition, Collection, ids[index])));
             await Assert.That(rows[index].Document.Json).IsEqualTo(json);
             await Assert.That(rows[index].Document.Revision).IsEqualTo(revision);
             await Assert.That(rows[index].Document.Redacted).IsFalse();

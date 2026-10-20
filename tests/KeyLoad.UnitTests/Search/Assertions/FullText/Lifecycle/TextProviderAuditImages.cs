@@ -75,8 +75,8 @@ internal static class TextProviderAuditImages
         await Assert.That(manifest.TokenizerVersion).IsEqualTo(TextProjectionProtocol.TokenizerVersion);
         await Assert.That(manifest.HashVersion).IsEqualTo(TextProjectionProtocol.HashVersion);
         await Assert.That(manifest.Scope).IsEqualTo(scope);
-        TextRecord[] records = [new(RuntimeFirstRecordId, new(owner.Source.Partition, Collection, Control), InitialRevision),
-            new(SecondRecordId, new(owner.Source.Partition, Collection, Ukrainian), ChangedRevision)];
+        TextRecord[] records = [new(RuntimeFirstRecordId, owner.Reference(new(owner.Source.Partition, Collection, Control)), InitialRevision),
+            new(SecondRecordId, owner.Reference(new(owner.Source.Partition, Collection, Ukrainian)), ChangedRevision)];
         await Assert.That(JsonSerializer.Serialize(manifest.Records, JsonDefaults.Options))
             .IsEqualTo(JsonSerializer.Serialize(records, JsonDefaults.Options));
         await Assert.That(manifest.Files.Length).IsGreaterThan(RuntimeEmptyInventory);

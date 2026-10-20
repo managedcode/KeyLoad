@@ -48,14 +48,14 @@ internal static class GraphSearchLineageRecipe
                 GraphSearchLineageProtocol.Vertices, GraphSearchLineageProtocol.Edges, labels) : null);
     }
 
-    internal static GraphSearchResult Expected(PartitionRef partition, bool expansion, bool emptyLabels)
+    internal static GraphSearchResult Expected(TestDatabase database, bool expansion, bool emptyLabels)
     {
         var firstBranches = expansion ? 1d : 2d;
         var secondBranches = expansion || emptyLabels ? 1d : 2d;
         return new(
-            [new(new(Vertex(partition, GraphSearchLineageProtocol.Alpha), 1L, GraphSearchLineageProtocol.AlphaJson, false, []), firstBranches / 61d),
-             new(new(Vertex(partition, GraphSearchLineageProtocol.Beta), 1L, GraphSearchLineageProtocol.BetaJson, false, []), secondBranches / 62d)],
-            expansion ? new(emptyLabels ? [] : [new(new(Vertex(partition, GraphSearchLineageProtocol.Context), 1L,
+            [new(new(database.ExpectedReference(Vertex(database.Partition, GraphSearchLineageProtocol.Alpha)), 1L, GraphSearchLineageProtocol.AlphaJson, false, []), firstBranches / 61d),
+             new(new(database.ExpectedReference(Vertex(database.Partition, GraphSearchLineageProtocol.Beta)), 1L, GraphSearchLineageProtocol.BetaJson, false, []), secondBranches / 62d)],
+            expansion ? new(emptyLabels ? [] : [new(new(database.ExpectedReference(Vertex(database.Partition, GraphSearchLineageProtocol.Context)), 1L,
                 GraphSearchLineageProtocol.ContextJson, false, []), 1)], GraphExpansionCompleteness.SelectedHits) : null);
     }
 }

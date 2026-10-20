@@ -10,9 +10,9 @@ internal static class SearchReadBudgetAssertions
         await Assert.That(store.Position).IsEqualTo(position);
         await Assert.That(System.Text.Json.JsonSerializer.Serialize(store.Identity, JsonDefaults.Options)).IsEqualTo(identity);
     }
-    internal static async Task HitAsync(SearchEngine search, SearchRequest request, string json, CancellationToken token)
+    internal static async Task HitAsync(TestDatabase provenance, SearchEngine search, SearchRequest request, string json, CancellationToken token)
     {
-        var expected = new RankedDocument(new(new(request.Partition, request.Collection, "a"),
+        var expected = new RankedDocument(new(provenance.ExpectedReference(new(request.Partition, request.Collection, "a")),
             InitialRevision, json, false, []), FirstScore);
         var actual = await search.SearchAsync(Principal, request, token);
         await Assert.That(actual).HasSingleItem();

@@ -1,5 +1,9 @@
 using KeyLoad.Core.Features.DocumentStorage;
+using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.Core.Features.Search;
 using KeyLoad.Storage;
+using KeyLoad.UnitTests.Features.ResourceExecution;
+using Microsoft.Extensions.Options;
 using TUnit.Assertions.Enums;
 
 namespace KeyLoad.UnitTests.Features.Search;
@@ -47,14 +51,14 @@ internal sealed class AnnSeedReadBudgetTests
     [Test]
     public async Task ScanLookaheadFailureNeverReturnsPartialSeed()
     {
-        using var database = AnnSeedTestSupport.Create(3, new()
-        {
-            MaxScanRecords = 2
-        });
+        using var database = AnnSeedTestSupport.Create(3);
+        var owner = SearchReadBudgetOwner.Create(database, database.Store, database.Database.Limits with { MaxScanRecords = 2 });
         var position = database.Store.Position;
         var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits));
         var expectedBytes = MeasureSourceBytes(database, maxScanRecords: 2);
-        var failure = AnnSeedTestSupport.CaptureFailure(database, AnnSeedTestSupport.Principal, budget: budget);
+        var failure = Assert.ThrowsExactly<KeyLoadException>(() => AnnSeedCollector.Capture(owner,
+            AnnSeedTestSupport.Principal, database.Partition, AnnSeedTestSupport.Collection, AnnSeedTestSupport.Field,
+            AnnSeedTestSupport.Space(), Options.Create(new AnnSeedOptions()), budget));
 
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
         await Assert.That(budget.ReadBytes).IsEqualTo(expectedBytes);
@@ -102,6 +106,8 @@ internal sealed class AnnSeedReadBudgetTests
             var counter = new AnnSeedReadByteCounter();
             CountRead(view, KeySpace.Principal(AnnSeedTestSupport.Principal), counter);
             CountRead(view, KeySpace.Resource(database.Partition.TenantId, database.Partition.DatabaseId,
+                AnnSeedTestSupport.Collection), counter);
+            CountRead(view, ResourceLifetimeCatalog.Key(database.Partition.TenantId, database.Partition.DatabaseId,
                 AnnSeedTestSupport.Collection), counter);
             CountRead(view, KeySpace.Partition("outbox-head", database.Partition), counter);
             CountRead(view, KeySpace.Applied.ToArray(), counter);

@@ -31,7 +31,7 @@ internal sealed class CanonicalVectorAtomicRevisionTests
         await Assert.That(before.Select(row => row.Document.Reference.Id)).IsEquivalentTo(
             new[] { Target, Rival }, CollectionOrdering.Matching);
         var original = database.Database.GetDocument(Root, new(database.Partition, Collection, Target))!;
-        await Assert.That(original.Reference).IsEqualTo(new EntityRef(database.Partition, Collection, Target));
+        await Assert.That(original.Reference).IsEqualTo(database.ExpectedReference(new(database.Partition, Collection, Target)));
         await Assert.That(original.Json).IsEqualTo(OriginalJson);
         await Assert.That(original.Revision).IsEqualTo(1L);
         var position = database.Store.Position;
@@ -51,7 +51,7 @@ internal sealed class CanonicalVectorAtomicRevisionTests
         await Assert.That(healthy.Select(row => row.Document.Reference.Id)).IsEquivalentTo(
             new[] { Rival, Target }, CollectionOrdering.Matching);
         var updated = healthy.Single(row => row.Document.Reference.Id == Target).Document;
-        await Assert.That(updated.Reference).IsEqualTo(new EntityRef(database.Partition, Collection, Target));
+        await Assert.That(updated.Reference).IsEqualTo(database.ExpectedReference(new(database.Partition, Collection, Target)));
         await Assert.That(updated.Json).IsEqualTo(UpdatedJson);
         await Assert.That(updated.Revision).IsEqualTo(2L);
         await Assert.That(await search.SearchAsync(Root, request with

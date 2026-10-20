@@ -56,7 +56,7 @@ internal static class TextSelectedShutdownAssertions
         {
             await ServerFailureObserver.ObserveAsync(async () =>
             {
-                original = search.SearchAsync(Root, request, token);
+                original = Task.Run(() => search.SearchAsync(Root, request, token), CancellationToken.None);
                 await entered.Task.WaitAsync(token);
                 shutdown = runtime.Owner.DisposeAsync().AsTask();
                 await Assert.That(shutdown.IsCompleted).IsFalse();
@@ -91,8 +91,8 @@ internal static class TextSelectedShutdownAssertions
 
     private static async Task LiteralAsync(TestDatabase database, RankedDocument[] actual)
     {
-        var expected = new RankedDocument(new(new(database.Partition, TextBilingualAudit.Collection,
-            TextBilingualAudit.EnglishId), Revision, TextBilingualAudit.EnglishJson, false, []), Score);
+        var expected = new RankedDocument(new(database.ExpectedReference(new(database.Partition, TextBilingualAudit.Collection,
+            TextBilingualAudit.EnglishId)), Revision, TextBilingualAudit.EnglishJson, false, []), Score);
         await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(new[] { expected }))).IsTrue();
     }
 }

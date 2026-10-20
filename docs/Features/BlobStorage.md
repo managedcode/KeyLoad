@@ -42,13 +42,13 @@ sequenceDiagram
 
 | Requirement | Observable acceptance |
 |---|---|
-| REQ-BLOB-001: storage contract | Real Storage server/client upload, metadata, listing, streaming and deletion use the same file resource. |
-| REQ-BLOB-002: physical content separation | Original payload bytes are present in the configured provider and absent from ZoneTree records, persisted command envelopes and replica journals. |
-| REQ-BLOB-003: fresh authorization | Cross-tenant/resource requests, revoked credentials and denied rows cannot publish or read physical content. Chunk session identities are isolated by verified caller and resource. |
-| REQ-BLOB-004: explicit publication | Failed provider writes do not publish; revision conflicts and unknown outcomes preserve recoverable physical content and do not delete a published version. |
-| REQ-BLOB-005: bounded work | Reservations, concurrent uploads, stream buffers, metadata pages, physical reads and joined cleanup remain bounded under rejection and cancellation. |
-| REQ-BLOB-006: exact physical reads | First/last/interior/cross-boundary/empty ranges match the original bytes; missing or damaged provider content fails closed. |
-| REQ-BLOB-007: explicit recovery | Reopen, file retirement, physical reclamation and metadata-plus-object restore preserve published references; metadata replication alone never claims payload copies. |
+| REQ-BLOB-001: storage contract | AC-BLOB-001: Real Storage server/client upload, metadata, listing, streaming and deletion use the same file resource. |
+| REQ-BLOB-002: physical content separation | AC-BLOB-002: Original payload bytes are present in the configured provider and absent from ZoneTree records, persisted command envelopes and replica journals. |
+| REQ-BLOB-003: fresh authorization | AC-BLOB-003: Cross-tenant/resource requests, revoked credentials and denied rows cannot publish or read physical content. Chunk session identities are isolated by verified caller and resource. |
+| REQ-BLOB-004: explicit publication | AC-BLOB-004: Failed provider writes do not publish; revision conflicts and unknown outcomes preserve recoverable physical content and do not delete a published version. |
+| REQ-BLOB-005: bounded work | AC-BLOB-005: Reservations, concurrent uploads, stream buffers, metadata pages, physical reads and joined cleanup remain bounded under rejection and cancellation. |
+| REQ-BLOB-006: exact physical reads | AC-BLOB-006: First/last/interior/cross-boundary/empty ranges match the original bytes; missing or damaged provider content fails closed. |
+| REQ-BLOB-007: explicit recovery | AC-BLOB-007: Reopen, file retirement, physical reclamation and metadata-plus-object restore preserve published references; metadata replication alone never claims payload copies. |
 
 Every acceptance gate remains open until the replacement's actual tests and
 original delivered-source artifacts establish it. Existing raw-part evidence

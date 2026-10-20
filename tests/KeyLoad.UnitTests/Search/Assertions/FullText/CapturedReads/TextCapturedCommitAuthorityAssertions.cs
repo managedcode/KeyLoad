@@ -6,26 +6,26 @@ namespace KeyLoad.UnitTests.Features.Search;
 
 internal static class TextCapturedCommitAuthorityAssertions
 {
-    internal static async Task OldAsync(PartitionRef partition, RankedDocument[] actual)
+    internal static async Task OldAsync(TestDatabase fixture, RankedDocument[] actual)
     {
         RankedDocument[] expected =
         [
-            new(TextBm25ExpectedRows.Document(partition, P.Second, P.InitialRevision,
+            new(TextBm25ExpectedRows.Document(fixture, P.Second, P.InitialRevision,
                 P.SecondJson, false, []), 1d / 61d, null),
-            new(TextBm25ExpectedRows.Document(partition, P.First, P.InitialRevision,
+            new(TextBm25ExpectedRows.Document(fixture, P.First, P.InitialRevision,
                 P.FirstJson, false, []), 1d / 62d, null)
         ];
         await TextBm25ExpectedRows.RequireOwnershipAsync(expected, actual);
         await TextBm25ExpectedRows.RequireWholeValuesAsync(expected, actual);
     }
 
-    internal static async Task FreshAsync(PartitionRef partition, RankedDocument[] actual)
+    internal static async Task FreshAsync(TestDatabase fixture, RankedDocument[] actual)
     {
         RankedDocument[] expected =
         [
-            new(TextBm25ExpectedRows.Document(partition, P.First, P.UpdatedRevision,
+            new(TextBm25ExpectedRows.Document(fixture, P.First, P.UpdatedRevision,
                 P.UpdatedFirstJson, false, []), 1d / 61d, null),
-            new(TextBm25ExpectedRows.Document(partition, P.Third, P.InitialRevision,
+            new(TextBm25ExpectedRows.Document(fixture, P.Third, P.InitialRevision,
                 P.SecondJson, false, []), 1d / 62d, null)
         ];
         await TextBm25ExpectedRows.RequireOwnershipAsync(expected, actual);

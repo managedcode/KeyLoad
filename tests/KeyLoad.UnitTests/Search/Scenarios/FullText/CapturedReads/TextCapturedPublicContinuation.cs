@@ -24,24 +24,24 @@ internal static class TextCapturedPublicContinuation
         }, token);
     }
 
-    internal static async Task OriginalAsync(RankedDocument[] actual, PartitionRef partition)
+    internal static async Task OriginalAsync(RankedDocument[] actual, TestDatabase fixture)
     {
-        RankedDocument[] expected = [new(new(new(partition, TextBilingualAudit.Collection,
-            TextBilingualAudit.UkrainianId), 1, TextBilingualAudit.UkrainianJson, false, []), 1d / 61d)];
+        RankedDocument[] expected = [new(new(fixture.ExpectedReference(new(fixture.Partition, TextBilingualAudit.Collection,
+            TextBilingualAudit.UkrainianId)), 1, TextBilingualAudit.UkrainianJson, false, []), 1d / 61d)];
         await Assert.That(JsonDefaults.Serialize(actual).SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
     }
 
-    internal static async Task HealthyAsync(TextOnlineTestRuntime runtime, PartitionRef partition, CancellationToken token)
+    internal static async Task HealthyAsync(TextOnlineTestRuntime runtime, TestDatabase fixture, CancellationToken token)
     {
-        RankedDocument[] expected = [new(new(new(partition, TextBilingualAudit.Collection,
-            TextBilingualAudit.UkrainianId), 2, """{"text":"оновлено changed"}""", false, []), 1d / 61d)];
+        RankedDocument[] expected = [new(new(fixture.ExpectedReference(new(fixture.Partition, TextBilingualAudit.Collection,
+            TextBilingualAudit.UkrainianId)), 2, """{"text":"оновлено changed"}""", false, []), 1d / 61d)];
         var actual = await runtime.Search.SearchAsync(TextMaintenanceTestValues.Principal,
-            TextBilingualAudit.Request(partition, "CHANGED"), token);
+            TextBilingualAudit.Request(fixture.Partition, "CHANGED"), token);
         await Assert.That(JsonDefaults.Serialize(actual).SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
         await Assert.That(await runtime.Search.SearchAsync(TextMaintenanceTestValues.Principal,
-            TextBilingualAudit.Request(partition, "ПРИВІТ"), token)).IsEmpty();
+            TextBilingualAudit.Request(fixture.Partition, "ПРИВІТ"), token)).IsEmpty();
         await Assert.That(await runtime.Search.SearchAsync(TextMaintenanceTestValues.Principal,
-            TextBilingualAudit.Request(partition, "hello"), token)).IsEmpty();
+            TextBilingualAudit.Request(fixture.Partition, "hello"), token)).IsEmpty();
     }
 
     internal static async Task HealthyReplayAsync(TestDatabase fixture, TextOnlineTestRuntime runtime,
@@ -50,16 +50,16 @@ internal static class TextCapturedPublicContinuation
     {
         await Assert.That(successor.CommandId).IsNotEqualTo(request.CommandId);
         await Assert.That(successor.TrackedRecords).IsEqualTo(TrackedBilingualRecords);
-        await HealthyAsync(runtime, fixture.Partition, token);
+        await HealthyAsync(runtime, fixture, token);
         var replay = await TextOnlineWholeFlow.RunAsync(fixture, runtime, request, token);
         await Assert.That(OrleansSerialization.Serialize(replay).SequenceEqual(OrleansSerialization.Serialize(original))).IsTrue();
-        await HealthyAsync(runtime, fixture.Partition, token);
+        await HealthyAsync(runtime, fixture, token);
         var successorReplay = await TextOnlineWholeFlow.RunAsync(fixture, runtime,
             request with
             {
                 CommandId = successor.CommandId
             }, token);
         await Assert.That(OrleansSerialization.Serialize(successorReplay).SequenceEqual(OrleansSerialization.Serialize(successor))).IsTrue();
-        await HealthyAsync(runtime, fixture.Partition, token);
+        await HealthyAsync(runtime, fixture, token);
     }
 }

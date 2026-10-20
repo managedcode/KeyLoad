@@ -54,5 +54,5 @@ internal sealed class AnnPublicStaleGenerationTests
         });
 
     private static RankedDocument Row(TestDatabase database, string id, double score)
-        => new(new(new(database.Partition, AnnSeedTestSupport.Collection, id), Revision, Json, false, []), score);
+        => new(new(database.ExpectedReference(new(database.Partition, AnnSeedTestSupport.Collection, id)), Revision, Json, false, []), score);
 }

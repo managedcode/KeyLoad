@@ -6,8 +6,8 @@ internal static class AnnLifetimeAssertions
 {
     internal static async Task PageAsync(AnnSearchPage page, TestDatabase target, long cut, bool administrator = false)
     {
-        RankedDocument Row(int index, double score) => new(new(new(target.Partition, AnnSeedTestSupport.Collection,
-            AnnSeedTestSupport.Id(index)), AnnLifetimeProtocol.Revision,
+        RankedDocument Row(int index, double score) => new(new(target.ExpectedReference(new(target.Partition, AnnSeedTestSupport.Collection,
+            AnnSeedTestSupport.Id(index))), AnnLifetimeProtocol.Revision,
             administrator ? AnnLifetimeProtocol.AdminProjected : AnnLifetimeProtocol.Projected, true,
             [AnnSeedTestSupport.Field, AnnLifetimeProtocol.TargetSecret]), score);
         RankedDocument[] rows = administrator
@@ -17,7 +17,8 @@ internal static class AnnLifetimeAssertions
                 Row(AnnLifetimeProtocol.BothOwner, AnnLifetimeProtocol.ThirdScore)];
         var expected = new AnnSearchPage(AnnPublicWholeFlow.Version, [.. rows], cut, AnnPageMode.Exact, true,
             AnnMaintenanceTestData.Generation, AnnPageMode.Approximate);
-        await Assert.That(JsonDefaults.Serialize(page).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
+        await Assert.That(System.Text.Encoding.UTF8.GetString(JsonDefaults.Serialize(page)))
+            .IsEqualTo(System.Text.Encoding.UTF8.GetString(JsonDefaults.Serialize(expected)));
     }
 
     internal static async Task RejectedAsync(Func<Task<AnnSearchPage>> read, ErrorCode code)

@@ -58,12 +58,13 @@ internal sealed class AnnProjectionPinAuthorityTests
         await Assert.That(Errors.Code(configure.Problem)).IsEqualTo(expected);
         await Assert.That(AnnProjectionPinTestSupport.ReadFailure(database, consumer, principal)).IsEqualTo(expected);
 
-        var commit = AnnProjectionPinTestSupport.CommitEmpty(database, consumer, batch,
-            principal, Guid.NewGuid(), TimeProvider.System.GetUtcNow());
-        await Assert.That(Errors.Code(commit.Problem)).IsEqualTo(expected);
+        var commit = Assert.ThrowsExactly<KeyLoadException>(() => AnnProjectionPinTestSupport.CommitEmpty(
+            database, consumer, batch, principal, Guid.NewGuid(), TimeProvider.System.GetUtcNow()));
+        await Assert.That(commit.Code).IsEqualTo(expected);
 
-        var release = AnnProjectionPinTestSupport.Release(database, consumer, principal);
-        await Assert.That(Errors.Code(release.Problem)).IsEqualTo(expected);
+        var release = Assert.ThrowsExactly<KeyLoadException>(() =>
+            AnnProjectionPinTestSupport.Release(database, consumer, principal));
+        await Assert.That(release.Code).IsEqualTo(expected);
 
         var purge = AnnProjectionPinTestSupport.Purge(database,
             database.Database.GetOutboxStatus(AnnProjectionPinTestSupport.Principal, database.Partition).Head.Tail, principal);

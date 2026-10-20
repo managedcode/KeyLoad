@@ -51,8 +51,10 @@ internal sealed class TextProjectionOwnershipTests
             ?? throw new InvalidOperationException("The execution generation has no manager root.");
         var manifestPath = Path.Combine(generation, TextProtocol.ManifestFile);
         var pendingPath = Path.Combine(generation, TextProtocol.PendingManifestFile);
-        var malformed = await File.ReadAllBytesAsync(manifestPath, cancellationToken);
-        malformed[^1] ^= 0x01;
+        var envelope = OrleansSerialization.Deserialize<TextEnvelope>(
+            await File.ReadAllBytesAsync(manifestPath, cancellationToken));
+        envelope.Payload[0] ^= 1;
+        var malformed = OrleansSerialization.Serialize(envelope);
         File.Delete(manifestPath);
         await File.WriteAllBytesAsync(pendingPath, malformed, cancellationToken);
         var snapshot = await TextOwnershipSnapshot.CaptureAsync(root, cancellationToken);

@@ -19,10 +19,10 @@ internal sealed class TextOnlineWholeOperationTests
         var original = await TextOnlineWholeFlow.RunAsync(fixture, runtime, request, token);
         await Assert.That(original.CommandId).IsEqualTo(request.CommandId);
         await Assert.That(original.TrackedRecords).IsEqualTo(seed.Expected.Length);
-        await TextBilingualAudit.VerifyAsync(runtime.Search, fixture.Partition, token);
+        await TextBilingualAudit.VerifyAsync(runtime.Search, fixture, token);
         var replay = await TextOnlineWholeFlow.RunAsync(fixture, runtime, request, token);
         await Assert.That(OrleansSerialization.Serialize(replay).SequenceEqual(OrleansSerialization.Serialize(original))).IsTrue();
-        await TextBilingualAudit.VerifyAsync(runtime.Search, fixture.Partition, token);
+        await TextBilingualAudit.VerifyAsync(runtime.Search, fixture, token);
     }
 
     [Test]
@@ -40,7 +40,7 @@ internal sealed class TextOnlineWholeOperationTests
             OnlineTextCapabilityKind.ResolveOriginal, runtime.FreshExpiry(fixture), cancelled.Token));
         var healthy = await TextOnlineWholeFlow.RunAsync(fixture, runtime, request, token);
         await Assert.That(healthy.CommandId).IsEqualTo(request.CommandId);
-        await TextBilingualAudit.VerifyAsync(runtime.Search, fixture.Partition, token);
+        await TextBilingualAudit.VerifyAsync(runtime.Search, fixture, token);
     }
     [Test]
     public async Task GenuineCompetingCapturedMaintenanceRefusesAtSharedLeaseCeilingThenJoinedAbortAllowsFullHealthyPublication()
@@ -87,7 +87,7 @@ internal sealed class TextOnlineWholeOperationTests
         KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
         var result = await TextOnlineWholeFlow.RunAsync(fixture, runtime, request, token);
         await Assert.That(result.CommandId).IsEqualTo(request.CommandId);
-        await TextBilingualAudit.VerifyAsync(runtime.Search, fixture.Partition, token);
+        await TextBilingualAudit.VerifyAsync(runtime.Search, fixture, token);
         var replay = await TextOnlineWholeFlow.RunAsync(fixture, runtime, request, token);
         await Assert.That(OrleansSerialization.Serialize(result).SequenceEqual(OrleansSerialization.Serialize(replay))).IsTrue();
     }
@@ -102,7 +102,7 @@ internal sealed class TextOnlineWholeOperationTests
         var first = new OnlineTextIndexMaintenanceRequest(Guid.NewGuid(), seed.Pin.Consumer,
             seed.Pin.Collection, seed.Pin.Field, seed.Pin.Generation, seed.Pin.NodeId, seed.Pin.Placement);
         var original = await TextOnlineWholeFlow.RunAsync(fixture, runtime, first, token);
-        await TextBilingualAudit.VerifyAsync(runtime.Search, fixture.Partition, token);
+        await TextBilingualAudit.VerifyAsync(runtime.Search, fixture, token);
         var deleted = fixture.Commit(new DeleteDocument(TextBilingualAudit.Collection, TextBilingualAudit.UkrainianId));
         await Assert.That(deleted.Mutations).HasSingleItem();
         var successor = first with
@@ -111,10 +111,10 @@ internal sealed class TextOnlineWholeOperationTests
         };
         var published = await TextOnlineWholeFlow.RunAsync(fixture, runtime, successor, token);
         await Assert.That(published.TrackedRecords).IsEqualTo(TrackedBilingualRecords);
-        await TextBilingualAudit.VerifyDeletedAsync(runtime.Search, fixture.Partition, token);
+        await TextBilingualAudit.VerifyDeletedAsync(runtime.Search, fixture, token);
         var replay = await TextOnlineWholeFlow.RunAsync(fixture, runtime, first, token);
         await Assert.That(OrleansSerialization.Serialize(replay).SequenceEqual(OrleansSerialization.Serialize(original))).IsTrue();
-        await TextBilingualAudit.VerifyDeletedAsync(runtime.Search, fixture.Partition, token);
+        await TextBilingualAudit.VerifyDeletedAsync(runtime.Search, fixture, token);
     }
 
     [Test]
@@ -141,8 +141,8 @@ internal sealed class TextOnlineWholeOperationTests
         });
         await Assert.That(result.PublishedCut.ThroughSequence).IsGreaterThan(result.BaseCut.ThroughSequence);
         await Assert.That(result.TrackedRecords).IsEqualTo(TrackedBilingualRecords);
-        RankedDocument[] expected = [new(new(new(fixture.Partition, TextBilingualAudit.Collection,
-            TextBilingualAudit.UkrainianId), 2, """{"text":"оновлено changed"}""", false, []), 1d / 61d)];
+        RankedDocument[] expected = [new(new(fixture.ExpectedReference(new(fixture.Partition, TextBilingualAudit.Collection,
+            TextBilingualAudit.UkrainianId)), 2, """{"text":"оновлено changed"}""", false, []), 1d / 61d)];
         var actual = await runtime.Search.SearchAsync(TextMaintenanceTestValues.Principal,
             TextBilingualAudit.Request(fixture.Partition, "CHANGED"), token);
         await Assert.That(JsonDefaults.Serialize(actual).SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
@@ -181,15 +181,15 @@ internal sealed class TextOnlineWholeOperationTests
             }, token);
             held.VerifyCandidates(["привіт"], [seed.Expected[1].Reference], budget);
             await Assert.That(Directory.Exists(path)).IsTrue();
-            await TextBilingualAudit.VerifyDeletedAsync(runtime.Search, fixture.Partition, token);
+            await TextBilingualAudit.VerifyDeletedAsync(runtime.Search, fixture, token);
         }
         await runtime.DisposeAsync();
         await Assert.That(Directory.Exists(path)).IsFalse();
         await using var recovered = new TextOnlineTestRuntime(fixture);
-        await TextBilingualAudit.VerifyDeletedAsync(recovered.Search, fixture.Partition, token);
+        await TextBilingualAudit.VerifyDeletedAsync(recovered.Search, fixture, token);
         var replay = await TextOnlineWholeFlow.RunAsync(fixture, recovered, request, token);
         await Assert.That(OrleansSerialization.Serialize(replay).SequenceEqual(OrleansSerialization.Serialize(first))).IsTrue();
-        await TextBilingualAudit.VerifyDeletedAsync(recovered.Search, fixture.Partition, token);
+        await TextBilingualAudit.VerifyDeletedAsync(recovered.Search, fixture, token);
     }
 
     [Test]

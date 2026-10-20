@@ -66,10 +66,12 @@ internal static class ConfiguredVectorProfileFlow
     {
         var model = ModelBytes(database, command);
         var position = database.Store.Position;
+        var applied = database.Database.LastApplied;
         var rejected = database.Submit(OperationKind.Batch, command, id: command.CommandId);
         await Assert.That(Errors.Code(rejected.Problem)).IsEqualTo(ErrorCode.Validation);
         await Assert.That(rejected.Problem?.Detail).IsEqualTo(Mismatch);
 
+        await Assert.That(database.Database.LastApplied).IsEqualTo(applied + CommitAdvance);
         await Assert.That(database.Store.Position).IsEqualTo(position + CommitAdvance);
         await Assert.That(ModelBytes(database, command)).IsEquivalentTo(model, CollectionOrdering.Matching);
         var complete = QueueWholeFlowStorage.Bytes(database.Store);
@@ -93,7 +95,8 @@ internal static class ConfiguredVectorProfileFlow
         var locator = global ? null : KeySpace.OutcomeLocator(database.Partition, principal, commandId);
         return page.Records.Where(record => !record.Key.Span.SequenceEqual(outcome)
             && (locator is null || !record.Key.Span.SequenceEqual(locator))
-            && !record.Key.Span.SequenceEqual(KeySpace.ClockBytes)).Select(record => Convert.ToHexString(record.Key.Span)
+            && !record.Key.Span.SequenceEqual(KeySpace.ClockBytes)
+            && !record.Key.Span.SequenceEqual(KeySpace.AppliedBytes)).Select(record => Convert.ToHexString(record.Key.Span)
                 + ":" + Convert.ToHexString(record.Value.Span)).ToArray();
     });
     internal static async Task HealthyAsync(DatabaseEngine owner, TestDatabase provenance, CancellationToken token)

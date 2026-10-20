@@ -58,14 +58,14 @@ internal static class TextOnlineReplacementRollbackFlow
         {
             await ServerFailureObserver.ObserveAsync(async () =>
             {
-                await TextBilingualAudit.VerifyAsync(cold.Search, fixture.Partition, token);
+                await TextBilingualAudit.VerifyAsync(cold.Search, fixture, token);
                 var oldReplay = await TextOnlineWholeFlow.RunAsync(fixture, cold, receipts.Initial, token);
                 await Assert.That(OrleansSerialization.Serialize(oldReplay).SequenceEqual(
                     OrleansSerialization.Serialize(receipts.Original))).IsTrue();
                 var freshReplay = await TextOnlineWholeFlow.RunAsync(fixture, cold, receipts.Fresh, token);
                 await Assert.That(OrleansSerialization.Serialize(freshReplay).SequenceEqual(
                     OrleansSerialization.Serialize(receipts.Published))).IsTrue();
-                await TextBilingualAudit.VerifyAsync(cold.Search, fixture.Partition, token);
+                await TextBilingualAudit.VerifyAsync(cold.Search, fixture, token);
             }, failures);
         }
         finally { await cold.DisposeAsync(); }
@@ -85,7 +85,7 @@ internal static class TextOnlineReplacementRollbackFlow
             CommandId = Guid.NewGuid()
         }, token);
         await Assert.That(ReadCurrent(fixture, initial, token).SequenceEqual(current)).IsTrue();
-        await TextBilingualAudit.VerifyAsync(runtime.Search, fixture.Partition, token);
+        await TextBilingualAudit.VerifyAsync(runtime.Search, fixture, token);
         var oldReplay = await TextOnlineWholeFlow.RunAsync(fixture, runtime, initial, token);
         await Assert.That(OrleansSerialization.Serialize(oldReplay).SequenceEqual(OrleansSerialization.Serialize(original))).IsTrue();
         var fresh = initial with
@@ -93,7 +93,7 @@ internal static class TextOnlineReplacementRollbackFlow
             CommandId = Guid.NewGuid()
         };
         var published = await TextOnlineWholeFlow.RunAsync(fixture, runtime, fresh, token);
-        await TextBilingualAudit.VerifyAsync(runtime.Search, fixture.Partition, token);
+        await TextBilingualAudit.VerifyAsync(runtime.Search, fixture, token);
         return (initial, original, fresh, published);
     }
 

@@ -1,4 +1,3 @@
-using KeyLoad.Query;
 using KeyLoad.Query.Features.Search;
 
 namespace KeyLoad.UnitTests.Features.Search;
@@ -38,7 +37,7 @@ internal sealed class PackedAnnNeighborCountTests
         await PackedAnnAdjacencyAssertions.AssertSameAsync(measuredGraph,
             PackedAnnAdjacencyAssertions.Snapshot(replay, PackedAnnIndexTestSupport.Budget(database)));
         await AssertOneUnderBuildLimitAsync(space, records, options, measuredBudget.WorkUnits, database);
-        await AssertCandidatesMatchPublicExactAsync(space, records, options, metric, database);
+        await PackedAnnNeighborCandidateAssertions.VerifyAsync(measured, measuredGraph, space, records, options, metric, database);
     }
 
     private static PackedAnnOptions Options() => new()
@@ -161,25 +160,6 @@ internal sealed class PackedAnnNeighborCountTests
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => PackedAnnBuilder.Build(space, records,
             UnitExecutionOptions.PackedAnn(options), PackedAnnIndexTestSupport.Budget(database, work - 1)));
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
-    }
-
-    private static async Task AssertCandidatesMatchPublicExactAsync(VectorSpace space, VectorRecord[] records,
-        PackedAnnOptions options, DistanceMetric metric, TestDatabase database)
-    {
-        var index = PackedAnnIndex.Build(space, records, UnitExecutionOptions.PackedAnn(options), PackedAnnIndexTestSupport.Budget(database));
-        var query = PackedAnnTestData.Vector(1_001, Dimension, Seed);
-        var actual = index.Search(query, records.Length, null, PackedAnnIndexTestSupport.Budget(database));
-        var exact = records.Select((record, ordinal) => new AnnCandidate(ordinal, record.DocumentId,
-                record.DocumentRevision, SearchEngine.Similarity(query, record.Values.ToArray(), metric)))
-            .OrderByDescending(candidate => candidate.Score)
-            .ThenBy(candidate => candidate.DocumentId, StringComparer.Ordinal).ToArray();
-        await Assert.That(actual.Candidates.Length).IsEqualTo(exact.Length);
-        for (var indexOrdinal = 0; indexOrdinal < exact.Length; indexOrdinal++)
-        {
-            await Assert.That(actual.Candidates[indexOrdinal].DocumentId).IsEqualTo(exact[indexOrdinal].DocumentId);
-            await Assert.That(actual.Candidates[indexOrdinal].SourceOrdinal).IsEqualTo(exact[indexOrdinal].SourceOrdinal);
-            await Assert.That(actual.Candidates[indexOrdinal].Score).IsEqualTo(exact[indexOrdinal].Score);
-        }
     }
 
     private static (int Source, int Layer) Find(PackedAnnState state, int[][][] adjacency,

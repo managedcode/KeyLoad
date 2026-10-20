@@ -56,7 +56,7 @@ internal sealed class TextAsyncAdmissionTests
 
         await lifetime.RunWithCleanupAsync(async () =>
         {
-            active = search.SearchAsync("root", Request(database), cancellation.Token);
+            active = Task.Run(() => search.SearchAsync("root", Request(database), cancellation.Token), CancellationToken.None);
             await postingObserved.Task.WaitAsync(CoordinationTimeout, TimeProvider.System);
             await Assert.That(database.Database.QueryReadsInFlight).IsEqualTo(1);
             await AssertSaturatedSearchRejectedWithoutReadsAsync(database, search);

@@ -36,16 +36,16 @@ internal static class TextCapturedBudgetFlow
             ServerFailureObserver.ThrowIfAny(failures);
         }
         await TextCapturedPublicFlow.CancelledCallerThenJoinedAsync(runtime, fixture, token);
-        await TextBilingualAudit.VerifyAsync(runtime.Search, fixture.Partition, token);
+        await TextBilingualAudit.VerifyAsync(runtime.Search, fixture, token);
         var replay = await TextOnlineWholeFlow.RunAsync(fixture, runtime, request, token);
         await Assert.That(OrleansSerialization.Serialize(replay).SequenceEqual(OrleansSerialization.Serialize(original))).IsTrue();
-        await TextBilingualAudit.VerifyAsync(runtime.Search, fixture.Partition, token);
+        await TextBilingualAudit.VerifyAsync(runtime.Search, fixture, token);
         await runtime.DisposeAsync();
         await using var cold = new TextOnlineTestRuntime(fixture);
-        await TextBilingualAudit.VerifyAsync(cold.Search, fixture.Partition, token);
+        await TextBilingualAudit.VerifyAsync(cold.Search, fixture, token);
         var coldReplay = await TextOnlineWholeFlow.RunAsync(fixture, cold, request, token);
         await Assert.That(OrleansSerialization.Serialize(coldReplay).SequenceEqual(OrleansSerialization.Serialize(original))).IsTrue();
-        await TextBilingualAudit.VerifyAsync(cold.Search, fixture.Partition, token);
+        await TextBilingualAudit.VerifyAsync(cold.Search, fixture, token);
     }
 
     private static IEnumerable<Exception> Flatten(Exception error)

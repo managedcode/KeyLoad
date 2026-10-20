@@ -69,6 +69,6 @@ internal sealed class AnnWaitGenerationTests
     }
 
     private static RankedDocument Row(TestDatabase database, int record, int denominator)
-        => new(new(new(database.Partition, AnnSeedTestSupport.Collection, AnnSeedTestSupport.Id(record)),
+        => new(new(database.ExpectedReference(new(database.Partition, AnnSeedTestSupport.Collection, AnnSeedTestSupport.Id(record))),
             Revision, Json, false, []), 1d / denominator);
 }

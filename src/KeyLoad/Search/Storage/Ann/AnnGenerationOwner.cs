@@ -121,7 +121,8 @@ internal sealed class AnnGenerationOwner : IAsyncDisposable
 
     internal AnnIndexLease Acquire(AnnMaintenanceRequest request, AnnSeed current)
     {
-        lock (gate)
+        AnnOwnerAdmission.EnterPublicRead(gate);
+        try
         {
             ObjectDisposedException.ThrowIf(closed, this);
             var key = new AnnOwnedKey(request.Consumer, request.IndexGeneration);
@@ -149,6 +150,7 @@ internal sealed class AnnGenerationOwner : IAsyncDisposable
             }
             return readLifetime.Acquire(slot);
         }
+        finally { gate.Exit(); }
     }
 
     internal void Release(AnnGenerationSlot slot)

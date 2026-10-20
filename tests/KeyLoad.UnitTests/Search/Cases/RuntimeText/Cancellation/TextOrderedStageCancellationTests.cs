@@ -34,7 +34,7 @@ internal sealed class TextOrderedStageCancellationTests
                 using var projection = TextBilingualAudit.Open(database);
                 var search = new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), projection);
                 await ServerFailureObserver.ObserveAsync(
-                    () => TextBilingualAudit.VerifyAsync(search, database.Partition, token), failures);
+                    () => TextBilingualAudit.VerifyAsync(search, database, token), failures);
             }, failures);
         }
         finally

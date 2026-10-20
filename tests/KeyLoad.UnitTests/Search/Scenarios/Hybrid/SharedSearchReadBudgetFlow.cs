@@ -37,22 +37,37 @@ internal static class SharedSearchReadBudgetFlow
         var lineageBytes = SearchReadBudgetCost.Point(store,
             KeySpace.Partition(LineageSpace, fixture.Partition, Collection, VectorField, Id));
         var metadataBytes = SearchReadBudgetCost.TextMetadata(store, fixture.Partition, Collection);
-        var maximum = checked(TwoDocumentReads * documentBytes + vectorBytes + lineageBytes + metadataBytes);
-        var owner = SearchReadBudgetOwner.Create(fixture, store, maximum);
-        var search = new SearchEngine(owner, UnitExecutionOptions.QueryExecution());
         var text = new SearchRequest(fixture.Partition, Collection, TextField, "alpha");
         var vector = new SearchRequest(fixture.Partition, Collection, VectorField: VectorField, Vector: [1, 0], Space: Space);
-        await SearchReadBudgetAssertions.HitAsync(search, text, Json, token);
-        await SearchReadBudgetAssertions.HitAsync(search, vector, Json, token);
+        var original = new SearchEngine(SearchReadBudgetOwner.Create(fixture, store, fixture.Database.Limits),
+            UnitExecutionOptions.QueryExecution());
+        var textBytes = await MeasureAsync(fixture, original, store, text, token);
+        var vectorReadBytes = await MeasureAsync(fixture, original, store, vector, token);
+        await Assert.That(textBytes).IsGreaterThanOrEqualTo(TwoDocumentReads * documentBytes + metadataBytes);
+        await Assert.That(vectorReadBytes).IsGreaterThanOrEqualTo(documentBytes + vectorBytes + lineageBytes);
+        var maximum = Math.Max(textBytes, vectorReadBytes);
+        var owner = SearchReadBudgetOwner.Create(fixture, store, maximum);
+        var search = new SearchEngine(owner, UnitExecutionOptions.QueryExecution());
+        await SearchReadBudgetAssertions.HitAsync(fixture, search, text, Json, token);
+        await SearchReadBudgetAssertions.HitAsync(fixture, search, vector, Json, token);
         await SearchReadBudgetAssertions.RefusedAsync(search,
             new(fixture.Partition, Collection, TextField, "alpha", VectorField, [1, 0], Space), token);
         await Assert.That(owner.QueryReadsInFlight).IsEqualTo(NoQueries);
         await SearchReadBudgetAssertions.CancelledAsync(search, text);
         await Assert.That(owner.QueryReadsInFlight).IsEqualTo(NoQueries);
-        await SearchReadBudgetAssertions.HitAsync(search, text, Json, token);
-        await SearchReadBudgetAssertions.HitAsync(search, vector, Json, token);
+        await SearchReadBudgetAssertions.HitAsync(fixture, search, text, Json, token);
+        await SearchReadBudgetAssertions.HitAsync(fixture, search, vector, Json, token);
         await Assert.That(owner.QueryReadsInFlight).IsEqualTo(NoQueries);
         await SearchReadBudgetAssertions.UnchangedAsync(store, image, position, identity);
+    }
+    private static async Task<long> MeasureAsync(TestDatabase fixture, SearchEngine search, ZoneTreeStore store,
+        SearchRequest request, CancellationToken token)
+    {
+        var before = store.GetReadDiagnostics();
+        await SearchReadBudgetAssertions.HitAsync(fixture, search, request, Json, token);
+        var after = store.GetReadDiagnostics();
+        return checked(after.PointExaminedBytes - before.PointExaminedBytes
+            + after.RangeExaminedBytes - before.RangeExaminedBytes);
     }
     private const int TwoDocumentReads = 2;
     private const int NoQueries = 0;

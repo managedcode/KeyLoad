@@ -99,7 +99,7 @@ internal static class ProjectionClassificationRepairFlow
     private static async Task CompleteCanonicalAsync(EventProjectionFixture fixture)
     {
         var expected = new VectorProjectionLineage(fixture.Stream, OriginalRevision, EventId,
-            new(fixture.Partition, EventProjectionFixture.Collection, EventProjectionFixture.SourceId),
+            fixture.Harness.ExpectedReference(new(fixture.Partition, EventProjectionFixture.Collection, EventProjectionFixture.SourceId)),
             OriginalRevision, EventProjectionFixture.InputField, RepairedSchema, OriginalWorkerEpoch,
             [EventProjectionFixture.SourceClass], fixture.TargetCollection, EventProjectionFixture.TargetId,
             EventProjectionFixture.VectorField, EventProjectionFixture.Space, RepairedSchema, ReducerId,

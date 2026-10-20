@@ -22,11 +22,11 @@ internal sealed class GraphSearchReachabilitySortBudgetTests
 
         var baselineClock = new GraphSearchReachabilitySortClock();
         var baseline = ReadReachability(database, walk, baselineClock, CancellationToken.None);
-        await AssertOrdered(baseline, seeds);
+        await AssertOrdered(database, baseline, seeds);
 
         await AssertCancellation(database, walk, baselineClock.TimestampCalls - 2);
         await AssertDeadline(database, walk, baselineClock.TimestampCalls - 1);
-        await AssertOrdered(ReadReachability(database, walk, TimeProvider.System, CancellationToken.None), seeds);
+        await AssertOrdered(database, ReadReachability(database, walk, TimeProvider.System, CancellationToken.None), seeds);
     }
 
     private static async Task AssertCancellation(TestDatabase database, GraphWalkSpec walk, long cancelAt)
@@ -68,9 +68,9 @@ internal sealed class GraphSearchReachabilitySortBudgetTests
             new PutDocument(GraphSearchTestSupport.Projects, SecondId, "{}"),
             new PutDocument(GraphSearchTestSupport.Projects, ThirdId, "{}"));
 
-    private static async Task AssertOrdered(GraphSearchReachability[] actual, EntityRef[] seeds)
+    private static async Task AssertOrdered(TestDatabase database, GraphSearchReachability[] actual, EntityRef[] seeds)
     {
-        var expected = seeds.OrderBy(seed => seed.Id, StringComparer.Ordinal).ToArray();
+        var expected = seeds.OrderBy(seed => seed.Id, StringComparer.Ordinal).Select(database.ExpectedReference).ToArray();
         await Assert.That(actual.Select(entry => entry.Reference).SequenceEqual(expected)).IsTrue();
         await Assert.That(actual.Select(entry => entry.ShortestHops).SequenceEqual([0, 0, 0])).IsTrue();
     }

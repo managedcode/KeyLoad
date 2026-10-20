@@ -3,10 +3,8 @@ namespace KeyLoad.Server.Features.Search;
 internal static class TextIncrementalOwnerShutdown
 {
     internal static async Task RunAsync(TextIncrementalSessions sessions, TextSelectedReadAdmission selectedAdmission,
-        Task originalWorker, Lock selectedGate, Dictionary<string, TextSelectedIndexSlot> selectedSlots)
+        Task originalWorker, Task originalReaders, Lock selectedGate, Dictionary<string, TextSelectedIndexSlot> selectedSlots)
     {
-        sessions.CloseAdmission();
-        var originalReaders = selectedAdmission.CloseAndJoinReaders();
         var failures = new List<Exception>();
         try
         {

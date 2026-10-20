@@ -11,8 +11,8 @@ internal static class TextProtectedRebuildColdAssertions
         var cut = owner.Store.Position;
         var rows = await owner.Search.SearchAsync(TextProtectedRebuildColdSeed.Reader,
             Request(owner, term), token);
-        var expected = new RankedDocument(new(new(owner.Source.Partition,
-            TextProtectedRebuildColdSeed.Collection, id), revision, publicJson, true,
+        var expected = new RankedDocument(new(owner.Reference(new(owner.Source.Partition,
+            TextProtectedRebuildColdSeed.Collection, id)), revision, publicJson, true,
             [TextProtectedRebuildColdSeed.Field]), 1d / 61d);
         await Assert.That(JsonDefaults.Serialize(rows).SequenceEqual(JsonDefaults.Serialize(new[] { expected }))).IsTrue();
         await UnchangedAsync(owner, before, cut);

@@ -38,7 +38,7 @@ internal static class TextWaitObservationAssertions
     internal static async Task RequirePagesAsync(TestDatabase database, SearchEngine plain, string principal,
         CancellationToken token)
     {
-        await TextBilingualAudit.VerifyAsync(plain, database.Partition, token);
+        await TextBilingualAudit.VerifyAsync(plain, database, token);
         var request = TextBilingualAudit.Request(database.Partition, TextBilingualAudit.EnglishQuery);
         var original = await plain.SearchAsync("root", request, token);
         var actual = await plain.SearchAsync(principal, request, token);

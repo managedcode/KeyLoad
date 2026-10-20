@@ -56,8 +56,8 @@ internal static class TextSelectedCancellationAssertions
         await Assert.That(database.Store.Position).IsEqualTo(position);
         await Assert.That(QueueWholeFlowStorage.Bytes(database.Store)).IsEquivalentTo(image, CollectionOrdering.Matching);
         var healthy = await search.SearchAsync(Root, request, token);
-        var expected = new RankedDocument(new(new(database.Partition, TextBilingualAudit.Collection,
-            TextBilingualAudit.EnglishId), Revision, TextBilingualAudit.EnglishJson, false, []), Score);
+        var expected = new RankedDocument(new(database.ExpectedReference(new(database.Partition, TextBilingualAudit.Collection,
+            TextBilingualAudit.EnglishId)), Revision, TextBilingualAudit.EnglishJson, false, []), Score);
         await Assert.That(JsonDefaults.Serialize(healthy).AsSpan().SequenceEqual(JsonDefaults.Serialize(new[] { expected }))).IsTrue();
         await Assert.That(database.Store.Position).IsEqualTo(position);
         await Assert.That(QueueWholeFlowStorage.Bytes(database.Store)).IsEquivalentTo(image, CollectionOrdering.Matching);

@@ -158,10 +158,12 @@ internal sealed class TextIncrementalMaintenanceService : ITextMaintenance, ISel
 
     private async Task DisposeCoreAsync()
     {
+        sessions.CloseAdmission();
+        var originalReaders = selectedAdmission.CloseAndJoinReaders();
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(shutdown.CancelAsync, failures);
         await ServerFailureObserver.ObserveAsync(() => TextIncrementalOwnerShutdown.RunAsync(
-            sessions, selectedAdmission, worker.DisposeAsync().AsTask(), selectedGate, selectedSlots), failures);
+            sessions, selectedAdmission, worker.DisposeAsync().AsTask(), originalReaders, selectedGate, selectedSlots), failures);
         ServerFailureObserver.ThrowIfAny(failures);
         shutdown.Dispose();
     }

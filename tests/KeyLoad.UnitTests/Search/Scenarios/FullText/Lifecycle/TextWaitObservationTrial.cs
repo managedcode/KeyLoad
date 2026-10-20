@@ -67,11 +67,13 @@ internal static class TextWaitObservationTrial
                 image = QueueWholeFlowStorage.Bytes(database.Store);
                 position = database.Store.Position;
             }
+            var expected = new CommitToken(database.Store.Identity.Incarnation, database.Partition.AtomicPartitionId,
+                database.Database.LastApplied);
             var result = await search.WaitForIndexAsync(principal, request, token);
             await Assert.That(result.SchemaVersion).IsEqualTo(1L);
             await Assert.That(result.PolicyEpoch).IsEqualTo(future is null ? 2L : 1L);
             await Assert.That(OrleansSerialization.Serialize(result.AppliedToken).SequenceEqual(
-                OrleansSerialization.Serialize(receipt.Token))).IsTrue();
+                OrleansSerialization.Serialize(expected))).IsTrue();
             await TextWaitObservationAssertions.RequireAsync(database, observer, request, result,
                 principal, image, position);
             var plain = new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), projection);

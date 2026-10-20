@@ -32,22 +32,22 @@ internal static class TextBilingualAudit
             UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(),
             UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(),
             UnitExecutionOptions.TimeSeriesExecution());
-    internal static async Task VerifyAsync(SearchEngine search, PartitionRef partition, CancellationToken token)
+    internal static async Task VerifyAsync(SearchEngine search, TestDatabase database, CancellationToken token)
     {
-        await LiteralAsync(search, partition, UkrainianQuery, UkrainianId, UkrainianJson, token);
-        await LiteralAsync(search, partition, EnglishQuery, EnglishId, EnglishJson, token);
+        await LiteralAsync(search, database, UkrainianQuery, UkrainianId, UkrainianJson, token);
+        await LiteralAsync(search, database, EnglishQuery, EnglishId, EnglishJson, token);
     }
-    internal static async Task VerifyDeletedAsync(SearchEngine search, PartitionRef partition, CancellationToken token)
+    internal static async Task VerifyDeletedAsync(SearchEngine search, TestDatabase database, CancellationToken token)
     {
-        await Assert.That(await search.SearchAsync(Root, Request(partition, UkrainianQuery), token)).IsEmpty();
-        await LiteralAsync(search, partition, EnglishQuery, EnglishId, EnglishJson, token);
+        await Assert.That(await search.SearchAsync(Root, Request(database.Partition, UkrainianQuery), token)).IsEmpty();
+        await LiteralAsync(search, database, EnglishQuery, EnglishId, EnglishJson, token);
     }
-    private static async Task LiteralAsync(SearchEngine search, PartitionRef partition, string query, string id,
+    private static async Task LiteralAsync(SearchEngine search, TestDatabase database, string query, string id,
         string json, CancellationToken token)
     {
-        var result = await search.SearchAsync(Root, Request(partition, query), token);
+        var result = await search.SearchAsync(Root, Request(database.Partition, query), token);
         var row = await Assert.That(result).HasSingleItem();
-        var expected = new DocumentResult(new(partition, Collection, id), Revision, json, false, []);
+        var expected = new DocumentResult(database.ExpectedReference(new(database.Partition, Collection, id)), Revision, json, false, []);
         await Assert.That(JsonDefaults.Serialize(row.Document).SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
         await Assert.That(row.Score).IsEqualTo(SingleBranchScore);
     }

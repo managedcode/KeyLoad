@@ -14,6 +14,8 @@ internal sealed class EventProjectionHarness : IDisposable
     private const string RootCredential = "root.projection-test-credential-32-characters";
     private const string PartitionKey = "customer-1";
     private readonly bool bootstrapped;
+    private readonly TestDatabaseOriginalResourceCommands originalResources = new();
+    internal EntityRef ExpectedReference(EntityRef literal) => originalResources.Reference(literal);
 
     internal string DirectoryPath
     {
@@ -38,7 +40,10 @@ internal sealed class EventProjectionHarness : IDisposable
     {
         var requestId = id ?? Guid.NewGuid();
         var operation = Database.CreateCommand(kind, requestId, principal, TimeProvider.System.GetUtcNow(), JsonSerializer.Serialize(payload, JsonDefaults.Options));
-        return Database.Apply(operation);
+        var before = TestDatabaseOriginalResourceCommands.Begin(Database, operation);
+        var result = Database.Apply(operation);
+        originalResources.Observe(Database, operation, result, before);
+        return result;
     }
 
     internal ResourceDefinition Configure(string name, ResourceKind kind, SensitiveFieldPolicy[]? fields = null)

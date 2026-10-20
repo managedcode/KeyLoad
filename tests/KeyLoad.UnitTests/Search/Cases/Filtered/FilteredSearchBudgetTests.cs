@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using KeyLoad.Query;
+using KeyLoad.UnitTests.Features.ResourceExecution;
 using TUnit.Assertions.Enums;
 
 namespace KeyLoad.UnitTests.Features.Search;
@@ -11,12 +12,10 @@ internal sealed class FilteredSearchBudgetTests
     [Test]
     public async Task AllowlistShapeAndCountFailBeforeStorageReads()
     {
-        using var database = FilteredSearchTestSupport.Create(new()
-        {
-            MaxScanRecords = 1
-        });
+        using var database = FilteredSearchTestSupport.Create();
         FilteredSearchTestSupport.AddCorpus(database);
-        var engine = new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution());
+        var owner = SearchReadBudgetOwner.Create(database, database.Store, database.Database.Limits with { MaxScanRecords = 1 });
+        var engine = new SearchEngine(owner, UnitExecutionOptions.QueryExecution());
         var position = database.Store.Position;
         var malformed = (await Assert.ThrowsExactlyAsync<KeyLoadException>(() =>
             engine.SearchAsync("absent-principal", VectorRequest(default), Token())))!;

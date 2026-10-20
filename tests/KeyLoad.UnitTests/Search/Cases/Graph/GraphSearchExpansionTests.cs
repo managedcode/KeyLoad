@@ -29,9 +29,9 @@ internal sealed class GraphSearchExpansionTests
         await Assert.That(result.Expansion!.Completeness).IsEqualTo(GraphExpansionCompleteness.SelectedHits);
         await Assert.That(result.Expansion.Documents.Select(item => item.Document.Reference).ToArray())
             .IsEquivalentTo([
-                GraphSearchTestSupport.Vertex(database, GraphSearchTestSupport.Projects, GraphSearchTestSupport.Middle),
-                GraphSearchTestSupport.Vertex(database, GraphSearchTestSupport.Projects, GraphSearchTestSupport.Root),
-                GraphSearchTestSupport.Vertex(database, GraphSearchTestSupport.Documents, GraphSearchTestSupport.SecondHit)
+                database.ExpectedReference(GraphSearchTestSupport.Vertex(database, GraphSearchTestSupport.Projects, GraphSearchTestSupport.Middle)),
+                database.ExpectedReference(GraphSearchTestSupport.Vertex(database, GraphSearchTestSupport.Projects, GraphSearchTestSupport.Root)),
+                database.ExpectedReference(GraphSearchTestSupport.Vertex(database, GraphSearchTestSupport.Documents, GraphSearchTestSupport.SecondHit))
             ], TUnit.Assertions.Enums.CollectionOrdering.Matching);
         await Assert.That(result.Expansion.Documents.Select(item => item.ShortestHops).ToArray())
             .IsEquivalentTo([1, 1, 2], TUnit.Assertions.Enums.CollectionOrdering.Matching);

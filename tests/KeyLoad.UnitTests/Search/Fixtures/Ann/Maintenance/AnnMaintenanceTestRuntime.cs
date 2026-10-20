@@ -13,6 +13,7 @@ internal sealed class AnnMaintenanceTestRuntime : IAsyncDisposable
     {
         get;
     }
+    internal CommitToken? VerifiedCanonicalCut { get; private set; }
     internal Guid SessionId { get; } = Guid.NewGuid();
     internal AnnMaintenanceTestRuntime(TestDatabase database, TimeProvider? phaseClock = null, IConfiguration? configuration = null)
         : this(database.Database, database.Directory, phaseClock, configuration)
@@ -39,13 +40,22 @@ internal sealed class AnnMaintenanceTestRuntime : IAsyncDisposable
             throw;
         }
     }
-    internal Task<AnnMaintenanceCapabilityResult> PhaseAsync(TestDatabase database, AnnMaintenanceRequest request,
+    internal async Task<AnnMaintenanceCapabilityResult> PhaseAsync(TestDatabase database, AnnMaintenanceRequest request,
         AnnMaintenanceCapabilityKind phase, ProjectionBatch? page = null, CommitProjectionBatchRequest? intent = null,
         CancellationToken? token = null)
     {
         var principal = database.Store.Read(view => database.Database.Principal(view,
             AnnProjectionPinTestSupport.Principal, database.Database.EvaluationClock.GetUtcNow()));
-        return Owner.ExecuteAsync(principal, new(request, SessionId, phase, page, intent), token ?? TestContext.Current!.Execution.CancellationToken);
+        CommitToken? expected = phase == AnnMaintenanceCapabilityKind.Verify
+            ? new(database.Store.Identity.Incarnation, request.Consumer.Partition.AtomicPartitionId, database.Database.LastApplied)
+            : null;
+        var result = await Owner.ExecuteAsync(principal, new(request, SessionId, phase, page, intent),
+            token ?? TestContext.Current!.Execution.CancellationToken);
+        if (expected is not null)
+        {
+            VerifiedCanonicalCut = expected;
+        }
+        return result;
     }
     public async ValueTask DisposeAsync()
     {

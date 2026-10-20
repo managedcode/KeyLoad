@@ -75,7 +75,7 @@ internal static class ProjectionDigestAssertions
         => await ProjectionDigestImage.ObserveAsync(fixture, async () =>
         {
             RankedDocument[] expected = visible
-                ? [new(new(new(fixture.Partition, fixture.TargetCollection, EventProjectionFixture.TargetId),
+                ? [new(new(fixture.Harness.ExpectedReference(new(fixture.Partition, fixture.TargetCollection, EventProjectionFixture.TargetId)),
                     1L, "{}", true, [EventProjectionFixture.InputField, EventProjectionFixture.VectorField]), Rank)] : [];
             await EqualAsync(await fixture.SearchAsync(), expected);
             var beforeTime = fixture.Database.EvaluationClock.GetUtcNow();

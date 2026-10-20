@@ -50,7 +50,7 @@ internal sealed class TextWaitForIndexTests
         await Assert.That(OrleansSerialization.Serialize(result.AppliedToken).SequenceEqual(OrleansSerialization.Serialize(receipt.Token))).IsTrue();
         await Assert.That(result.SchemaVersion).IsEqualTo(InitialSchemaVersion);
         await Assert.That(result.PolicyEpoch).IsEqualTo(InitialPolicyEpoch);
-        await TextBilingualAudit.VerifyAsync(search, database.Partition, token);
+        await TextBilingualAudit.VerifyAsync(search, database, token);
         await Assert.That(database.Store.Position).IsEqualTo(position);
         await Assert.That(QueueWholeFlowStorage.Bytes(database.Store)).IsEquivalentTo(image, CollectionOrdering.Matching);
     }

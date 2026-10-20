@@ -79,8 +79,10 @@ internal static class AnnWaitWholeFlow
         WaitForAnnIndexRequest request, CancellationToken token)
     {
         var result = await AnnPublicWholeFlow.Engine(database, runtime).WaitForAnnIndexAsync(Root, request, token);
-        await Assert.That(OrleansSerialization.Serialize(result.IndexedToken)
-            .SequenceEqual(OrleansSerialization.Serialize(request.MinimumToken))).IsTrue();
+        var expected = runtime.VerifiedCanonicalCut
+            ?? throw new InvalidOperationException("The original ANN verification cut is required.");
+        await Assert.That(result.IndexedToken).IsEqualTo(expected);
+        await Assert.That(expected.Position).IsGreaterThanOrEqualTo(request.MinimumToken.Position);
         await Assert.That(result.IndexGeneration).IsEqualTo(request.IndexGeneration);
         await Assert.That(result.SchemaVersion).IsEqualTo(FirstPosition);
         await Assert.That(result.PolicyEpoch).IsEqualTo(FirstPosition);

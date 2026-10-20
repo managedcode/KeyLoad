@@ -58,5 +58,6 @@ internal sealed class AnnLineageLifecycleTests
         await Assert.That(failure.Message).IsEqualTo(AnnProtocol.MissingDependencyHistory);
         await Assert.That(AnnMaintenanceTestData.Snapshot(database)).IsEquivalentTo(before, CollectionOrdering.Matching);
         await Assert.That(database.Store.Position).IsEqualTo(position);
+        await runtime.Owner.AbortAsync(runtime.SessionId);
     }
 }

@@ -65,7 +65,7 @@ internal sealed class TextIncrementalExpirySnapshot
 
     private static async Task DocumentAsync(TestDatabase database, string id, string json, CancellationToken cancellationToken)
     {
-        var reference = new EntityRef(database.Partition, TextBilingualAudit.Collection, id);
+        var reference = database.ExpectedReference(new(database.Partition, TextBilingualAudit.Collection, id));
         var actual = database.Database.GetDocument(TextMaintenanceTestValues.Principal, reference,
             cancellationToken: cancellationToken);
         var expected = new DocumentResult(reference, OriginalRevision, json, false, []);

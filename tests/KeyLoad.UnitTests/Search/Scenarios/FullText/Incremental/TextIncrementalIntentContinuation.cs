@@ -58,8 +58,8 @@ internal static class TextIncrementalIntentContinuation
                 var search = new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), projection);
                 var image = QueueWholeFlowStorage.Bytes(database.Store);
                 var position = database.Store.Position;
-                await PageAsync(search, request, UkrainianQuery, TextBilingualAudit.UkrainianId, TextBilingualAudit.UkrainianJson, token);
-                await PageAsync(search, request, TextBilingualAudit.EnglishQuery, TextBilingualAudit.EnglishId, TextBilingualAudit.EnglishJson, token);
+                await PageAsync(database, search, request, UkrainianQuery, TextBilingualAudit.UkrainianId, TextBilingualAudit.UkrainianJson, token);
+                await PageAsync(database, search, request, TextBilingualAudit.EnglishQuery, TextBilingualAudit.EnglishId, TextBilingualAudit.EnglishJson, token);
                 await Assert.That(database.Store.Position).IsEqualTo(position);
                 await Assert.That(QueueWholeFlowStorage.Bytes(database.Store)).IsEquivalentTo(image, CollectionOrdering.Matching);
             }, failures);
@@ -74,7 +74,7 @@ internal static class TextIncrementalIntentContinuation
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    private static async Task PageAsync(SearchEngine search, TextIndexMaintenanceRequest request,
+    private static async Task PageAsync(TestDatabase database, SearchEngine search, TextIndexMaintenanceRequest request,
         string text, string id, string json, CancellationToken token)
     {
         var query = TextBilingualAudit.Request(request.Consumer.Partition, text)
@@ -83,7 +83,7 @@ internal static class TextIncrementalIntentContinuation
             TextIndex = new(request.Consumer, request.IndexGeneration)
         };
         var actual = await search.SearchAsync(Root, query, token);
-        RankedDocument[] expected = [new(new(new(request.Consumer.Partition, request.Collection, id), OriginalRevision, json, false, []), Score)];
+        RankedDocument[] expected = [new(new(database.ExpectedReference(new(request.Consumer.Partition, request.Collection, id)), OriginalRevision, json, false, []), Score)];
         await Assert.That(JsonDefaults.Serialize(actual).SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
     }
 }

@@ -24,7 +24,7 @@ internal sealed class AnnWaitAuthorityTests
             {
                 WrongIncarnationCase => receipt.Token with { Incarnation = Guid.NewGuid() },
                 WrongAtomicCase => receipt.Token with { AtomicPartitionId = WrongAtomic },
-                FutureCase => receipt.Token with { Position = receipt.Token.Position + NextPosition },
+                FutureCase => receipt.Token with { Position = database.Database.LastApplied + NextPosition },
                 ZeroCase => receipt.Token with { Position = ZeroPosition },
                 _ => throw new ArgumentOutOfRangeException(nameof(defect))
             };

@@ -35,7 +35,7 @@ internal static class TextAuthorityContinuation
         var receipt = database.Submit(OperationKind.Batch, command, id: command.CommandId).Get<CommitReceipt>();
         await Assert.That(receipt.CommandId).IsEqualTo(command.CommandId);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(database.Partition.AtomicPartitionId);
-        await Assert.That(receipt.Token.Position).IsEqualTo(database.Store.Position);
+        await Assert.That(receipt.Token.Position).IsEqualTo(database.Database.LastApplied);
         var expected = new MutationReceipt(PutKind, request.Collection, HealthyId, Revision);
         var mutation = await Assert.That(receipt.Mutations).HasSingleItem();
         await Assert.That(OrleansSerialization.Serialize(mutation).SequenceEqual(
@@ -45,7 +45,7 @@ internal static class TextAuthorityContinuation
         var replay = database.Submit(OperationKind.Batch, command, id: command.CommandId).Get<CommitReceipt>();
         await Assert.That(OrleansSerialization.Serialize(replay).SequenceEqual(OrleansSerialization.Serialize(receipt))).IsTrue();
         await UnchangedAsync(database.Store, bytes, cut);
-        await LiteralAsync(search, request, token);
+        await LiteralAsync(database, search, request, token);
         await UnchangedAsync(database.Store, bytes, cut);
         await ColdAsync(database, projection, request, command, receipt, bytes, cut, token);
     }
@@ -74,7 +74,7 @@ internal static class TextAuthorityContinuation
                 await Assert.That(OrleansSerialization.Serialize(replay).SequenceEqual(OrleansSerialization.Serialize(receipt))).IsTrue();
                 await UnchangedAsync(reopened, bytes, cut);
                 projection = OpenProjection(database);
-                await LiteralAsync(new(owner, UnitExecutionOptions.QueryExecution(), projection), request, token);
+                await LiteralAsync(database, new(owner, UnitExecutionOptions.QueryExecution(), projection), request, token);
                 await UnchangedAsync(reopened, bytes, cut);
             }, failures);
         }
@@ -105,13 +105,13 @@ internal static class TextAuthorityContinuation
         await Assert.That(QueueWholeFlowStorage.Bytes(store)).IsEquivalentTo(bytes, CollectionOrdering.Matching);
     }
 
-    private static async Task LiteralAsync(SearchEngine search, SearchRequest request, CancellationToken token)
+    private static async Task LiteralAsync(TestDatabase database, SearchEngine search, SearchRequest request, CancellationToken token)
     {
         var rows = await search.SearchAsync(Reader, request with
         {
             Text = HealthyTerm
         }, token);
-        var expected = new RankedDocument(new(new(request.Partition, request.Collection, HealthyId),
+        var expected = new RankedDocument(new(database.ExpectedReference(new(request.Partition, request.Collection, HealthyId)),
             Revision, PublicJson, true, [Field]), Score);
         await Assert.That(JsonDefaults.Serialize(rows).SequenceEqual(JsonDefaults.Serialize(new[] { expected }))).IsTrue();
         await Assert.That(await search.SearchAsync(Reader, request with

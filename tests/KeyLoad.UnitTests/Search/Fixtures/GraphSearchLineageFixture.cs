@@ -50,7 +50,7 @@ internal sealed class GraphSearchLineageFixture(bool expansion, bool emptyLabels
             fields: [new(GraphSearchLineageProtocol.LabelPath, GraphSearchLineageProtocol.Classification,
                 GraphSearchLineageProtocol.LabelRead, GraphSearchLineageProtocol.LabelUse)]);
         Seed = GraphSearchLineageRecipe.Seed(Partition);
-        var position = Store.Position + 1L;
+        var position = Owner.LastApplied + 1L;
         Receipt = Owner.ApplyEmbedded(Operation(), TestContext.Current!.Execution.CancellationToken).Get<CommitReceipt>();
         await GraphSearchLineageValues.ReceiptAsync(Receipt, new(Seed.CommandId, new(Store.Identity.Incarnation, Partition.AtomicPartitionId, position), GraphSearchLineageRecipe.Receipts, DurabilityProfile.ProcessDurable, 1));
         Outcome = Store.Read(view => view.ReadOwnedValue(KeySpace.PartitionOutcome(Partition, GraphSearchLineageProtocol.Root, Seed.CommandId)))

@@ -58,13 +58,13 @@ internal static class TextCapturedPolicyFlow
             {
                 CommandId = Guid.NewGuid()
             }, token);
-            await TextCapturedPublicContinuation.HealthyAsync(runtime, fixture.Partition, token);
+            await TextCapturedPublicContinuation.HealthyAsync(runtime, fixture, token);
         }, failures);
         await SettleOriginalAsync(original, cancellation, release, observed, failures);
         ServerFailureObserver.ThrowIfAny(failures);
         await runtime.DisposeAsync();
         await using var cold = new TextOnlineTestRuntime(fixture);
-        await TextCapturedPublicContinuation.HealthyAsync(cold, fixture.Partition, token);
+        await TextCapturedPublicContinuation.HealthyAsync(cold, fixture, token);
         await Assert.That(StoredBytes(fixture, request).SequenceEqual(originalBytes)).IsTrue();
     }
 

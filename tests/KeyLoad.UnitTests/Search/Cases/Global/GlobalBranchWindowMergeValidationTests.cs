@@ -27,7 +27,7 @@ internal sealed class GlobalBranchWindowMergeValidationTests
         var first = GlobalBranchTestSupport.Window("a", [candidate]);
         var mismatchedScopes = new[]
         {
-            GlobalBranchTestSupport.Scope(profile: "profile"),
+            GlobalBranchTestSupport.Scope(profile: "another-profile"),
             GlobalBranchTestSupport.Scope(corpus: "another-corpus"),
             GlobalBranchTestSupport.Scope(statistics: "stats-18")
         };

@@ -53,8 +53,8 @@ internal static class AnnCaptureShutdownAssertions
 
     private static async Task AssertOriginalCaptureClosedAsync(Task capture)
     {
-        var closed = await Assert.ThrowsExactlyAsync<ObjectDisposedException>(() => capture);
-        await Assert.That(closed).IsNotNull();
+        var closed = await Assert.ThrowsExactlyAsync<OperationCanceledException>(() => capture);
+        await Assert.That(closed!.CancellationToken.IsCancellationRequested).IsTrue();
     }
 
     internal static async Task HealthyAsync(TestDatabase database, AnnMaintenanceRequest request)

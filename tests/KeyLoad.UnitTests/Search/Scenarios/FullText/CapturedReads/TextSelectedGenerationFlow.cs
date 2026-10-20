@@ -35,9 +35,9 @@ internal static class TextSelectedGenerationFlow
     {
         var search = new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), projection);
         var selection = new TextIndexSelection(maintenance.Consumer, maintenance.IndexGeneration);
-        await LiteralAsync(search, database.Partition, selection, "ПРИВІТ", TextBilingualAudit.UkrainianId,
+        await LiteralAsync(search, database, selection, "ПРИВІТ", TextBilingualAudit.UkrainianId,
             TextBilingualAudit.UkrainianJson, OriginalRevision, token);
-        await LiteralAsync(search, database.Partition, selection, "hello", TextBilingualAudit.EnglishId,
+        await LiteralAsync(search, database, selection, "hello", TextBilingualAudit.EnglishId,
             TextBilingualAudit.EnglishJson, OriginalRevision, token);
         await TextSelectedCallerFlow.VerifyAsync(database, search, selection, token);
         var id = Guid.NewGuid();
@@ -55,7 +55,7 @@ internal static class TextSelectedGenerationFlow
             Mode = TextIndexMaintenanceMode.Restore
         };
         _ = await TextMaintenancePhaseFlow.FinishAsync(database, runtime, restore, token);
-        await LiteralAsync(search, database.Partition, selection, ChangedQuery, TextBilingualAudit.UkrainianId,
+        await LiteralAsync(search, database, selection, ChangedQuery, TextBilingualAudit.UkrainianId,
             ChangedJson, ChangedRevision, token);
         await Assert.That(await search.SearchAsync(Root,
             TextBilingualAudit.Request(database.Partition, "hello") with
@@ -84,15 +84,15 @@ internal static class TextSelectedGenerationFlow
         await Assert.That(QueueWholeFlowStorage.Bytes(database.Store)).IsEquivalentTo(before, CollectionOrdering.Matching);
     }
 
-    private static async Task LiteralAsync(SearchEngine search, PartitionRef partition, TextIndexSelection selection,
+    private static async Task LiteralAsync(SearchEngine search, TestDatabase database, TextIndexSelection selection,
         string query, string id, string json, long revision, CancellationToken token)
     {
-        var actual = await search.SearchAsync(Root, TextBilingualAudit.Request(partition, query)
+        var actual = await search.SearchAsync(Root, TextBilingualAudit.Request(database.Partition, query)
             with
         {
             TextIndex = selection
         }, token);
-        var expected = new RankedDocument(new(new(partition, TextBilingualAudit.Collection, id), revision, json, false, []), Score);
+        var expected = new RankedDocument(new(database.ExpectedReference(new(database.Partition, TextBilingualAudit.Collection, id)), revision, json, false, []), Score);
         await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(new[] { expected }))).IsTrue();
     }
 }

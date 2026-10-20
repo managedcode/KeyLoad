@@ -13,10 +13,9 @@ internal sealed class ConfiguredVectorProfileNullArrayTests
     private const string Profiles = "vectorProfiles";
     private const string InvalidPayload = "The operation contains invalid protocol JSON.";
     private const string InvalidArguments = "The tool arguments do not match the canonical operation contract.";
-    private const int CommitAdvance = 1;
 
     [Test]
-    public async Task NullProfileArrayKeepsFailedOutcomeAndMcpRejectsBeforeHealthyResourceConfiguration()
+    public async Task NullProfileArrayRejectsBeforePersistenceAndMcpThenSameIdConfiguresHealthyResource()
     {
         using var database = new TestDatabase();
         var definition = new ResourceDefinition(ConfiguredVectorProfileFlow.Collection, ResourceKind.Collection,
@@ -29,22 +28,22 @@ internal sealed class ConfiguredVectorProfileNullArrayTests
         malformed[Definition]![Profiles] = null;
         using var document = JsonDocument.Parse(malformed.ToJsonString());
         var id = Guid.NewGuid();
-        var position = database.Store.Position;
-        var rejected = database.Submit(OperationKind.ConfigureResource, document.RootElement, id: id);
-        await Assert.That(Errors.Code(rejected.Problem)).IsEqualTo(ErrorCode.Validation);
-        await Assert.That(rejected.Problem?.Detail).IsEqualTo(InvalidPayload);
-
-        await Assert.That(database.Store.Position).IsEqualTo(position + CommitAdvance);
-        var resourceKey = KeySpace.Resource(database.Partition.TenantId, database.Partition.DatabaseId, definition.Name);
-        await Assert.That(database.Store.Read(view => view.GetRecord<ResourceDefinition>(resourceKey))).IsNull();
-        var stored = database.Store.Read(view => view.GetRecord<StoredOutcome>(OutcomeStoreOracle.UnknownKey("root", id)))!;
-        await Assert.That(OrleansSerialization.Serialize(stored.Result).SequenceEqual(OrleansSerialization.Serialize(rejected))).IsTrue();
         var complete = QueueWholeFlowStorage.Bytes(database.Store);
         var rejectedPosition = database.Store.Position;
-        var rejectedReplay = database.Submit(OperationKind.ConfigureResource, document.RootElement, id: id);
-        await Assert.That(OrleansSerialization.Serialize(rejectedReplay).SequenceEqual(OrleansSerialization.Serialize(rejected))).IsTrue();
+        var applied = database.Database.LastApplied;
+        for (var attempt = 0; attempt < 2; attempt++)
+        {
+            var rejected = Assert.ThrowsExactly<KeyLoadException>(() =>
+                database.Submit(OperationKind.ConfigureResource, document.RootElement, id: id));
+            await Assert.That(rejected.Code).IsEqualTo(ErrorCode.Validation);
+            await Assert.That(rejected.Message).IsEqualTo(InvalidPayload);
+        }
         await Assert.That(QueueWholeFlowStorage.Bytes(database.Store)).IsEquivalentTo(complete, CollectionOrdering.Matching);
         await Assert.That(database.Store.Position).IsEqualTo(rejectedPosition);
+        await Assert.That(database.Database.LastApplied).IsEqualTo(applied);
+        var resourceKey = KeySpace.Resource(database.Partition.TenantId, database.Partition.DatabaseId, definition.Name);
+        await Assert.That(database.Store.Read(view => view.GetRecord<ResourceDefinition>(resourceKey))).IsNull();
+        await Assert.That(database.Store.Read(view => view.ReadOwnedValue(OutcomeStoreOracle.UnknownKey("root", id)))).IsNull();
         var arguments = new Dictionary<string, JsonElement>
         {
             [McpCatalogProtocol.Request] = document.RootElement.Clone(),
@@ -57,7 +56,7 @@ internal sealed class ConfiguredVectorProfileNullArrayTests
         await Assert.That(officialBoundary.Message).IsEqualTo(InvalidArguments);
         await Assert.That(QueueWholeFlowStorage.Bytes(database.Store)).IsEquivalentTo(complete, CollectionOrdering.Matching);
         await Assert.That(database.Store.Position).IsEqualTo(rejectedPosition);
-        var healthyId = Guid.NewGuid();
+        var healthyId = id;
         var accepted = database.Submit(OperationKind.ConfigureResource, healthy, id: healthyId);
         await Assert.That(OrleansSerialization.Serialize(accepted.Get<ResourceDefinition>()).SequenceEqual(
             OrleansSerialization.Serialize(definition))).IsTrue();

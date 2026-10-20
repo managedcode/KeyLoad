@@ -38,7 +38,7 @@ internal static class SearchWaitAuthorityState
         var actual = await search.WaitForIndexAsync(Root, original, cancellationToken);
         var expected = new WaitForIndexResult(original.MinimumToken, OriginalSchemaVersion, OriginalPolicyEpoch);
         await Assert.That(JsonDefaults.Serialize(actual).SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
-        await TextBilingualAudit.VerifyAsync(search, database.Partition, cancellationToken);
+        await TextBilingualAudit.VerifyAsync(search, database, cancellationToken);
         await Assert.That(database.Store.Position).IsEqualTo(position);
         await Assert.That(QueueWholeFlowStorage.Bytes(database.Store)).IsEquivalentTo(image, CollectionOrdering.Matching);
     }

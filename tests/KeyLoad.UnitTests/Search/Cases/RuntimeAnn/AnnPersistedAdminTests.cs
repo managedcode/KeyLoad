@@ -33,6 +33,7 @@ internal sealed class AnnPersistedAdminTests
                 await Assert.That(denial.Code).IsEqualTo(ErrorCode.PermissionDenied);
                 await Assert.That(AnnMaintenanceTestData.Snapshot(database)).IsEquivalentTo(before, CollectionOrdering.Matching);
                 await Assert.That(database.Store.Position).IsEqualTo(position);
+                await actual.Owner.AbortAsync(actual.SessionId);
                 var began = await AnnMaintenancePhaseAssertions.UnchangedPhaseAsync(database, actual, request, AnnMaintenanceCapabilityKind.Begin);
                 var healthy = await AnnMaintenancePhaseAssertions.FinishAsync(database, actual, request, began.Source!.ThroughSequence);
                 await Assert.That(healthy.Count).IsEqualTo(Count);

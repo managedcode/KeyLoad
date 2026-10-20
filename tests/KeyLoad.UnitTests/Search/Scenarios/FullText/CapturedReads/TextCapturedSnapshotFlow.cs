@@ -51,19 +51,19 @@ internal static class TextCapturedSnapshotFlow
             var error = await Assert.ThrowsAsync<KeyLoadException>(async () => { _ = await original; });
             observed = true;
             await Assert.That((error ?? throw new InvalidOperationException()).Code).IsEqualTo(ErrorCode.TokenInvalidated);
-            await TextBilingualAudit.VerifyAsync(runtime.Search, fixture.Partition, token);
+            await TextBilingualAudit.VerifyAsync(runtime.Search, fixture, token);
             var replay = await TextOnlineWholeFlow.RunAsync(fixture, runtime, request, token);
             await Assert.That(OrleansSerialization.Serialize(replay).SequenceEqual(OrleansSerialization.Serialize(receipt))).IsTrue();
-            await TextBilingualAudit.VerifyAsync(runtime.Search, fixture.Partition, token);
+            await TextBilingualAudit.VerifyAsync(runtime.Search, fixture, token);
         }, failures);
         await SettleOriginalAsync(original, cancellation, release, observed, failures, root, ownedRoot);
         ServerFailureObserver.ThrowIfAny(failures);
         await runtime.DisposeAsync();
         await using var cold = new TextOnlineTestRuntime(fixture);
-        await TextBilingualAudit.VerifyAsync(cold.Search, fixture.Partition, token);
+        await TextBilingualAudit.VerifyAsync(cold.Search, fixture, token);
         var coldReplay = await TextOnlineWholeFlow.RunAsync(fixture, cold, request, token);
         await Assert.That(OrleansSerialization.Serialize(coldReplay).SequenceEqual(OrleansSerialization.Serialize(receipt))).IsTrue();
-        await TextBilingualAudit.VerifyAsync(cold.Search, fixture.Partition, token);
+        await TextBilingualAudit.VerifyAsync(cold.Search, fixture, token);
     }
 
     private static async Task SettleOriginalAsync(Task<RankedDocument[]> original, CancellationTokenSource cancellation,

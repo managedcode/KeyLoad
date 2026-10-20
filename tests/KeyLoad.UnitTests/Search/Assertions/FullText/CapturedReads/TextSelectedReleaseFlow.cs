@@ -41,8 +41,8 @@ internal static class TextSelectedReleaseFlow
         await Assert.That(partial).IsNull();
         await Assert.That(database.Store.Position).IsEqualTo(cut);
         await Assert.That(QueueWholeFlowStorage.Bytes(database.Store)).IsEquivalentTo(image, CollectionOrdering.Matching);
-        RankedDocument[] expected = [new(new(new(database.Partition, TextBilingualAudit.Collection,
-            TextBilingualAudit.UkrainianId), Revision, ChangedJson, false, []), Score)];
+        RankedDocument[] expected = [new(new(database.ExpectedReference(new(database.Partition, TextBilingualAudit.Collection,
+            TextBilingualAudit.UkrainianId)), Revision, ChangedJson, false, []), Score)];
         await Assert.That(JsonDefaults.Serialize(await search.SearchAsync(Root, request, token)).SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
         await Assert.That(database.Store.Position).IsEqualTo(cut);
         await Assert.That(QueueWholeFlowStorage.Bytes(database.Store)).IsEquivalentTo(image, CollectionOrdering.Matching);

@@ -42,10 +42,14 @@ internal sealed class ConfiguredVectorProfileSchemaTests
         var request = new ConfigureResourceRequest(database.Partition.TenantId, database.Partition.DatabaseId, definition);
         var id = Guid.NewGuid();
         var state = ConfiguredVectorProfileFlow.StateBytes(database, id, global: true);
+        var applied = database.Database.LastApplied;
+        var beforePosition = database.Store.Position;
         var original = database.Submit(OperationKind.ConfigureResource, request, id: id);
         await Assert.That(Errors.Code(original.Problem)).IsEqualTo(expected);
 
         await Assert.That(original.Problem?.Detail).IsEqualTo(ExpectedDetail(failure));
+        await Assert.That(database.Database.LastApplied).IsEqualTo(applied + 1);
+        await Assert.That(database.Store.Position).IsEqualTo(beforePosition + 1);
         await Assert.That(ConfiguredVectorProfileFlow.StateBytes(database, id, global: true)).IsEquivalentTo(state, CollectionOrdering.Matching);
         var key = KeySpace.Resource(database.Partition.TenantId, database.Partition.DatabaseId, Collection);
         await Assert.That(database.Store.Read(view => view.GetRecord<ResourceDefinition>(key))).IsNull();

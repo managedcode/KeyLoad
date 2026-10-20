@@ -1,4 +1,6 @@
 using KeyLoad.Clustering;
+using KeyLoad.Query;
+using KeyLoad.Server;
 using TUnit.Assertions.Enums;
 
 namespace KeyLoad.UnitTests.Features.Search;
@@ -23,30 +25,11 @@ internal sealed class AnnPublicMaintenanceReservationTests
             var files = AnnFixtureFileSnapshot.Capture(database.Directory);
             var before = database.Store.GetReadDiagnostics().RangeExaminedBytes;
             var token = TestContext.Current!.Execution.CancellationToken;
-            KeyLoadException? rejected = null;
-            AnnSearchPage? partial = null;
-            clock.Arm(() => runtime.Owner.ObserveWork(runtime.SessionId)?.Stage == AnnMaintenanceCapabilityKind.Verify
-                && database.Store.GetReadDiagnostics().RangeExaminedBytes > before,
-                () =>
-                {
-                    try
-                    {
-                        partial = engine.ApproximateSearchAsync(AnnProjectionPinTestSupport.Principal, request, token)
-                        .WaitAsync(token).GetAwaiter().GetResult();
-                    }
-                    catch (KeyLoadException error) { rejected = error; }
-                });
-            try
-            {
-                _ = await runtime.PhaseAsync(database, pin, AnnMaintenanceCapabilityKind.Verify, token: token);
-            }
-            finally { clock.Disarm(); }
+            var failure = await RejectWhileVerifyingAsync(database, runtime, pin, engine, request, clock, before, token);
             await Assert.That(clock.Triggered).IsTrue();
             await Assert.That(database.Store.GetReadDiagnostics().RangeExaminedBytes).IsGreaterThan(before);
-            var failure = rejected ?? throw new InvalidOperationException(Missing);
             await Assert.That(failure.Code).IsEqualTo(ErrorCode.ResourceExhausted);
             await Assert.That(failure.Message).IsEqualTo(Bound);
-            await Assert.That(partial).IsNull();
             await AnnPublicWholeFlow.UnchangedAsync(database, image, cut);
             await Assert.That(AnnFixtureFileSnapshot.Capture(database.Directory)).IsEquivalentTo(files, CollectionOrdering.Matching);
             await AnnPublicWholeFlow.PageAsync(await engine.ApproximateSearchAsync(AnnProjectionPinTestSupport.Principal,
@@ -54,4 +37,43 @@ internal sealed class AnnPublicMaintenanceReservationTests
             await AnnPublicWholeFlow.UnchangedAsync(database, image, cut);
         }, clock);
     }
+
+    private static async Task<KeyLoadException> RejectWhileVerifyingAsync(TestDatabase database,
+        AnnMaintenanceTestRuntime runtime, AnnMaintenanceRequest pin, SearchEngine engine,
+        ApproximateSearchRequest request, AnnPublicObservedWorkClock clock, long before, CancellationToken token)
+    {
+        var entered = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        using var release = new ManualResetEventSlim();
+        clock.Arm(() => runtime.Owner.ObserveWork(runtime.SessionId)?.Stage == AnnMaintenanceCapabilityKind.Verify
+            && database.Store.GetReadDiagnostics().RangeExaminedBytes > before,
+            () => { entered.TrySetResult(); release.Wait(token); });
+        var failures = new List<Exception>();
+        Task<AnnMaintenanceCapabilityResult>? original = null;
+        KeyLoadException? rejected = null;
+        AnnSearchPage? partial = null;
+        try
+        {
+            await ServerFailureObserver.ObserveAsync(async () =>
+            {
+                original = Task.Run(() => runtime.PhaseAsync(database, pin, AnnMaintenanceCapabilityKind.Verify,
+                    token: token), CancellationToken.None);
+                await entered.Task.WaitAsync(token);
+                rejected = await Assert.ThrowsExactlyAsync<KeyLoadException>(async () => partial =
+                    await engine.ApproximateSearchAsync(AnnProjectionPinTestSupport.Principal, request, token));
+                await Assert.That(partial).IsNull();
+            }, failures);
+        }
+        finally
+        {
+            release.Set();
+            clock.Disarm();
+            if (original is not null)
+            {
+                await ServerFailureObserver.ObserveAsync(async () => _ = await original, failures);
+            }
+        }
+        ServerFailureObserver.ThrowIfAny(failures);
+        return rejected ?? throw new InvalidOperationException(Missing);
+    }
+
 }

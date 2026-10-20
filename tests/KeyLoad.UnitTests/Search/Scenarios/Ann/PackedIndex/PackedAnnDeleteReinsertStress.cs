@@ -43,7 +43,7 @@ internal static class PackedAnnDeleteReinsertStress
         var id = PackedAnnTestData.DocumentId(ChangedOrdinal);
         var revision = records.Single(row => row.DocumentId == id).DocumentRevision;
         var deleted = database.Commit(new DeleteDocument(PackedAnnTestData.Collection, id, revision));
-        await Assert.That(deleted.Token.Position).IsEqualTo(database.Store.Position);
+        await Assert.That(deleted.Token.Position).IsEqualTo(database.Database.LastApplied);
         var remaining = PackedAnnTestData.Load(database, metric);
         await Assert.That(remaining.Length).IsEqualTo(RecordCount - RevisionStep);
         await Assert.That(remaining.Select(row => row.DocumentId)).DoesNotContain(id);
@@ -55,7 +55,7 @@ internal static class PackedAnnDeleteReinsertStress
         var restored = database.Commit(new PutDocument(PackedAnnTestData.Collection, id, DocumentJson, revision + RevisionStep),
             new PutVector(PackedAnnTestData.Collection, id, PackedAnnTestData.Field(metric),
                 ImmutableArray.CreateRange(vector), space, restoredRevision));
-        await Assert.That(restored.Token.Position).IsEqualTo(database.Store.Position);
+        await Assert.That(restored.Token.Position).IsEqualTo(database.Database.LastApplied);
         var recreated = PackedAnnTestData.Load(database, metric).Single(row => row.DocumentId == id);
         await Assert.That(recreated.DocumentRevision).IsEqualTo(restoredRevision);
         await Assert.That(recreated.Values.SequenceEqual(vector)).IsTrue();

@@ -39,7 +39,7 @@ internal static class TextProviderManifestRecovery
         var results = await search.SearchAsync(Principal,
             new(database.Partition, Collection, TextPath, Query), cancellationToken);
         var row = await Assert.That(results).HasSingleItem();
-        var expected = new DocumentResult(new(database.Partition, Collection, DocumentId), Revision, Json, false, []);
+        var expected = new DocumentResult(database.ExpectedReference(new(database.Partition, Collection, DocumentId)), Revision, Json, false, []);
         await Assert.That(JsonDefaults.Serialize(row.Document).SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
         await Assert.That(row.Score).IsEqualTo(SingleBranchScore);
         await Assert.That(row.Explanation).IsNull();

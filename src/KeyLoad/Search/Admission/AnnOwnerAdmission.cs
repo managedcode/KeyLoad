@@ -15,20 +15,32 @@ internal static class AnnOwnerAdmission
     internal static AnnReadReservation ReserveRead(AnnGenerationOwner owner, Lock gate, ref bool closed,
         List<AnnGenerationSlot> slots, AnnExecutionOptions options, AnnReadReservations publicReads, AnnMaintenanceMemory MaintenanceMemory, long desiredBytes)
     {
-        lock (gate)
+        EnterPublicRead(gate);
+        try
         {
             ObjectDisposedException.ThrowIf(closed, owner);
             return AnnPublicReadAdmission.Reserve(slots, options, publicReads, desiredBytes, MaintenanceMemory.Bytes);
         }
+        finally { gate.Exit(); }
     }
 
     internal static AnnManifest DescribePublished(AnnGenerationOwner owner, Lock gate, ref bool closed,
         List<AnnGenerationSlot> slots, AnnOwnedKey key)
     {
-        lock (gate)
+        EnterPublicRead(gate);
+        try
         {
             ObjectDisposedException.ThrowIf(closed, owner);
             return AnnPublicReadAdmission.Describe(slots, key);
+        }
+        finally { gate.Exit(); }
+    }
+
+    internal static void EnterPublicRead(Lock gate)
+    {
+        if (!gate.TryEnter())
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, AnnProtocol.Bound);
         }
     }
 

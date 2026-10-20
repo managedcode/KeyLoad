@@ -22,7 +22,7 @@ internal static class GraphSearchLineageValues
         {
             var result = await new SearchEngine(state.Owner, UnitExecutionOptions.QueryExecution()).GraphSearchAsync(
                 GraphSearchLineageProtocol.Reader, state.Request, TestContext.Current!.Execution.CancellationToken);
-            await EqualAsync(result, GraphSearchLineageRecipe.Expected(state.Partition, state.Expansion, state.EmptyLabels));
+            await EqualAsync(result, GraphSearchLineageRecipe.Expected(state.Harness, state.Expansion, state.EmptyLabels));
         });
     internal static async Task RefusedAsync(GraphSearchLineageFixture state, ErrorCode code, string? detail)
         => await GraphLabelUseOperations.ObserveAsync(state.Store, async () =>
@@ -48,6 +48,6 @@ internal static class GraphSearchLineageValues
                 GraphSearchLineageProtocol.Root, state.Seed.CommandId)))).IsEquivalentTo(state.Outcome, TUnit.Assertions.Enums.CollectionOrdering.Matching);
             var result = await new SearchEngine(state.Owner, UnitExecutionOptions.QueryExecution()).GraphSearchAsync(
                 GraphSearchLineageProtocol.Reader, state.Request, TestContext.Current!.Execution.CancellationToken);
-            await EqualAsync(result, GraphSearchLineageRecipe.Expected(state.Partition, state.Expansion, state.EmptyLabels));
+            await EqualAsync(result, GraphSearchLineageRecipe.Expected(state.Harness, state.Expansion, state.EmptyLabels));
         });
 }

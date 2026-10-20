@@ -64,8 +64,9 @@ internal sealed class TextProjectionRestartTests
         var original = await File.ReadAllBytesAsync(manifest, cancellationToken);
         var canonical = QueueWholeFlowStorage.Bytes(database.Store);
         var position = database.Store.Position;
-        var damaged = original.ToArray();
-        damaged[^1] ^= 1;
+        var envelope = OrleansSerialization.Deserialize<TextEnvelope>(original);
+        envelope.Payload[0] ^= 1;
+        var damaged = OrleansSerialization.Serialize(envelope);
         await File.WriteAllBytesAsync(manifest, damaged, cancellationToken);
         var damagedReceipt = await File.ReadAllBytesAsync(manifest, cancellationToken);
 

@@ -90,8 +90,8 @@ internal static class ClassificationLineageWholeAssertions
         await Assert.That(record.SourceStream).IsEqualTo(fixture.Stream);
         await Assert.That(record.SourceEventRevision).IsEqualTo(DocumentRevision);
         await Assert.That(record.SourceEventId).IsEqualTo(SourceEventId);
-        await Assert.That(record.SourceDocument).IsEqualTo(new EntityRef(fixture.Partition,
-            EventProjectionFixture.Collection, EventProjectionFixture.SourceId));
+        await Assert.That(record.SourceDocument).IsEqualTo(fixture.Harness.ExpectedReference(new(fixture.Partition,
+            EventProjectionFixture.Collection, EventProjectionFixture.SourceId)));
         await Assert.That(record.SourceDocumentRevision).IsEqualTo(DocumentRevision);
         await Assert.That(record.InputField).IsEqualTo(EventProjectionFixture.InputField);
         await Assert.That(record.SourceSchemaVersion).IsEqualTo(InitialSchemaVersion);
@@ -117,8 +117,8 @@ internal static class ClassificationLineageWholeAssertions
     {
         await Assert.That(actual.Length).IsEqualTo(ResultCount);
         var row = actual.Single();
-        await Assert.That(row.Document.Reference).IsEqualTo(new EntityRef(fixture.Partition,
-            fixture.TargetCollection, EventProjectionFixture.TargetId));
+        await Assert.That(row.Document.Reference).IsEqualTo(fixture.Harness.ExpectedReference(new(fixture.Partition,
+            fixture.TargetCollection, EventProjectionFixture.TargetId)));
         await Assert.That(row.Document.Revision).IsEqualTo(DocumentRevision);
         await Assert.That(row.Document.Json).IsEqualTo(EmptyJson);
         await Assert.That(row.Document.Redacted).IsTrue();

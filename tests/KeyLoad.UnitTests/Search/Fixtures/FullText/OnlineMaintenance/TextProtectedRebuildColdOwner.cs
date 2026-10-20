@@ -9,6 +9,8 @@ namespace KeyLoad.UnitTests.Features.Search;
 
 internal sealed class TextProtectedRebuildColdOwner : IDisposable
 {
+    private readonly TestDatabaseOriginalResourceCommands originalResources = new();
+    internal EntityRef Reference(EntityRef literal) => originalResources.Reference(literal);
     internal TestDatabase Source { get; } = new();
     internal ZoneTreeStore Store
     {
@@ -55,7 +57,10 @@ internal sealed class TextProtectedRebuildColdOwner : IDisposable
     {
         var operation = Database.CreateCommand(kind, id ?? Guid.NewGuid(), "root",
             Database.EvaluationClock.GetUtcNow(), OrleansSerialization.Serialize(request));
-        return new(operation, Database.ApplyEmbedded(operation, cancellationToken: default));
+        var before = TestDatabaseOriginalResourceCommands.Begin(Database, operation);
+        var result = Database.ApplyEmbedded(operation, cancellationToken: default);
+        originalResources.Observe(Database, operation, result, before);
+        return new(operation, result);
     }
 
     internal void Reopen(bool removeProjection)

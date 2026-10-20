@@ -41,7 +41,7 @@ internal sealed class HybridExplainPrivacyWholeFlowTests
         var actual = await engine.SearchAsync(Reader, request, TestContext.Current!.Execution.CancellationToken);
         RankedDocument[] expected =
         [
-            new(new(new(db.Partition, FilteredSearchTestSupport.Collection, Owned),
+            new(new(db.ExpectedReference(new(db.Partition, FilteredSearchTestSupport.Collection, Owned)),
                 FilteredSearchTestSupport.Revision, Json, false, []), Branches / (double)Denominator,
                 new(FilteredSearchTestSupport.FusionConstant,
                 [new(SearchBranchKind.Text, FirstRank, Weight, Weight / (double)Denominator),

@@ -77,9 +77,9 @@ internal static class TextMissingSettledAuthorityFlow
                 runtime.Owner, runtime.Owner);
             var search = new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), projection);
             var selection = new TextIndexSelection(request.Consumer, request.IndexGeneration);
-            await LiteralAsync(search, database.Partition, selection, UkrainianQuery,
+            await LiteralAsync(search, database, selection, UkrainianQuery,
                 TextBilingualAudit.UkrainianId, TextBilingualAudit.UkrainianJson, token);
-            await LiteralAsync(search, database.Partition, selection, TextBilingualAudit.EnglishQuery,
+            await LiteralAsync(search, database, selection, TextBilingualAudit.EnglishQuery,
                 TextBilingualAudit.EnglishId, TextBilingualAudit.EnglishJson, token);
         }, failures);
         ServerFailureObserver.ThrowIfAny(failures);
@@ -87,16 +87,16 @@ internal static class TextMissingSettledAuthorityFlow
         await Assert.That(QueueWholeFlowStorage.Bytes(database.Store)).IsEquivalentTo(image, CollectionOrdering.Matching);
     }
 
-    private static async Task LiteralAsync(SearchEngine search, PartitionRef partition,
+    private static async Task LiteralAsync(SearchEngine search, TestDatabase database,
         TextIndexSelection selection, string query, string id, string json, CancellationToken token)
     {
         var rows = await search.SearchAsync(Principal,
-            TextBilingualAudit.Request(partition, query) with
+            TextBilingualAudit.Request(database.Partition, query) with
             {
                 TextIndex = selection
             }, token);
         var row = await Assert.That(rows).HasSingleItem();
-        var expected = new DocumentResult(new(partition, TextBilingualAudit.Collection, id), Revision, json, false, []);
+        var expected = new DocumentResult(database.ExpectedReference(new(database.Partition, TextBilingualAudit.Collection, id)), Revision, json, false, []);
         await Assert.That(JsonDefaults.Serialize(row.Document).SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
         await Assert.That(row.Score).IsEqualTo(Score);
     }

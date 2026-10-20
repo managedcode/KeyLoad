@@ -100,9 +100,13 @@ internal sealed class ConfiguredVectorProfileTests
                 Capability.DocumentsRead | Capability.Query)], []))).Get<PrincipalRecord>();
         var command = ConfiguredVectorProfileFlow.Command(database, projection: false, wrongModel: true);
         var model = ConfiguredVectorProfileFlow.ModelBytes(database, command, Reader);
+        var applied = database.Database.LastApplied;
+        var position = database.Store.Position;
         var error = database.Submit(OperationKind.Batch, command, principal: Reader, id: command.CommandId);
         await Assert.That(Errors.Code(error.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(error.Problem?.Detail).IsEqualTo(Denied);
+        await Assert.That(database.Database.LastApplied).IsEqualTo(applied + 1);
+        await Assert.That(database.Store.Position).IsEqualTo(position + 1);
 
         await Assert.That(ConfiguredVectorProfileFlow.ModelBytes(database, command, Reader)).IsEquivalentTo(model, CollectionOrdering.Matching);
         var healthy = ConfiguredVectorProfileFlow.Command(database, projection: false, wrongModel: false);

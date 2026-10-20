@@ -7,12 +7,13 @@ namespace KeyLoad.UnitTests.Features.Search;
 internal static class TextBm25ExpectedRows
 {
     private const string Collection = "orders";
-    internal static DocumentResult Document(PartitionRef partition, string id, long revision,
+    internal static DocumentResult Document(TestDatabase provenance, string id, long revision,
         string json, bool redacted, ImmutableArray<string> fields)
     {
+        var partition = provenance.Partition;
         var owned = new PartitionRef(Copy(partition.TenantId), Copy(partition.DatabaseId),
             Copy(partition.TransactionDomainId), Copy(partition.PartitionKey));
-        return new(new(owned, Copy(Collection), Copy(id)), revision, Copy(json), redacted, fields);
+        return new(provenance.ExpectedReference(new(owned, Copy(Collection), Copy(id))), revision, Copy(json), redacted, fields);
     }
 
     private static string Copy(string literal) => new(literal.AsSpan());

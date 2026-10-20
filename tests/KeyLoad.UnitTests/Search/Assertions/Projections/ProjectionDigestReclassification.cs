@@ -27,11 +27,11 @@ internal static class ProjectionDigestReclassification
             }).Get<ResourceDefinition>();
         await ProjectionDigestAssertions.EqualAsync(changed, replacement);
         var command = new CommandRequest(Guid.NewGuid(), fixture.Partition, [request]);
-        var before = fixture.Harness.Store.Position;
+        var before = fixture.Database.LastApplied;
         var result = fixture.Harness.Submit(OperationKind.Batch, command, EventProjectionFixture.WorkerId, command.CommandId);
         await ProjectionDigestAssertions.ReceiptAsync(fixture, command, result.Get<CommitReceipt>(), before);
         var expected = new VectorProjectionLineage(fixture.Stream, 1L, "projection-event",
-            new(fixture.Partition, EventProjectionFixture.Collection, EventProjectionFixture.SourceId), 1L,
+            fixture.Harness.ExpectedReference(new(fixture.Partition, EventProjectionFixture.Collection, EventProjectionFixture.SourceId)), 1L,
             EventProjectionFixture.InputField, 3L, 1L, [Classification], fixture.TargetCollection,
             EventProjectionFixture.TargetId, EventProjectionFixture.VectorField, EventProjectionFixture.Space,
             3L, "projection-reducer", "v1", 1L, [Classification]);

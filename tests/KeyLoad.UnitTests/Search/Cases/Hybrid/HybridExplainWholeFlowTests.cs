@@ -21,7 +21,7 @@ internal sealed class HybridExplainWholeFlowTests
         var position = db.Store.Position;
         var token = TestContext.Current!.Execution.CancellationToken;
         var actual = await engine.GraphSearchAsync(ThreeWayHybridTestSupport.Reader, request, token);
-        await HybridExplainWholeFlow.LiteralAsync(actual, db.Partition, restricted);
+        await HybridExplainWholeFlow.LiteralAsync(actual, db, restricted);
         var plain = await engine.GraphSearchAsync(ThreeWayHybridTestSupport.Reader,
             request with
             {
@@ -70,7 +70,7 @@ internal sealed class HybridExplainWholeFlowTests
         await Assert.That(HybridExplainWholeFlow.Snapshot(db)).IsEquivalentTo(before, CollectionOrdering.Matching);
         await Assert.That(db.Store.Position).IsEqualTo(position);
         await HybridExplainWholeFlow.LiteralAsync(await engine.GraphSearchAsync(ThreeWayHybridTestSupport.Reader,
-            request, TestContext.Current!.Execution.CancellationToken), db.Partition, false);
+            request, TestContext.Current!.Execution.CancellationToken), db, false);
         await Assert.That(HybridExplainWholeFlow.Snapshot(db)).IsEquivalentTo(before, CollectionOrdering.Matching);
         await Assert.That(db.Store.Position).IsEqualTo(position);
     }
@@ -98,7 +98,7 @@ internal sealed class HybridExplainWholeFlowTests
         await Assert.That(db.Store.Position).IsEqualTo(position);
         await HybridExplainWholeFlow.LiteralAsync(await new SearchEngine(db.Database,
             UnitExecutionOptions.QueryExecution()).GraphSearchAsync(ThreeWayHybridTestSupport.Reader, request, token),
-            db.Partition, false);
+            db, false);
         await Assert.That(HybridExplainWholeFlow.Snapshot(db)).IsEquivalentTo(before, CollectionOrdering.Matching);
         await Assert.That(db.Store.Position).IsEqualTo(position);
     }

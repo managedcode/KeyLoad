@@ -17,7 +17,7 @@ internal static class TextIncrementalLiteralOracle
         var before = database.Store.Position;
         var ukrainian = database.Database.GetDocument(TextMaintenanceTestValues.Principal,
             new EntityRef(database.Partition, request.Collection, TextBilingualAudit.UkrainianId), cancellationToken: cancellationToken);
-        var expected = new DocumentResult(new(database.Partition, request.Collection, TextBilingualAudit.UkrainianId),
+        var expected = new DocumentResult(database.ExpectedReference(new(database.Partition, request.Collection, TextBilingualAudit.UkrainianId)),
             ChangedRevision, changedJson, false, []);
         await Assert.That(JsonDefaults.Serialize(ukrainian).SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
         await Assert.That(database.Database.GetDocument(TextMaintenanceTestValues.Principal,

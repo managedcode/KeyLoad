@@ -28,7 +28,7 @@ internal sealed class AnnWaitPinnedLeaseTests
                             return runtime.Owner.Acquire(view, new(request.Partition, request.Collection, request.VectorField,
                                 request.Space, request.Consumer, request.IndexGeneration), budget);
                         });
-                    await Assert.That(held.IndexedAppliedPosition).IsEqualTo(receipt.Token.Position);
+                    await Assert.That(held.IndexedAppliedPosition).IsEqualTo(runtime.VerifiedCanonicalCut!.Position);
                     WaitForAnnIndexResult? partial = null;
                     var error = await Assert.ThrowsExactlyAsync<KeyLoadException>(async () => partial =
                         await AnnPublicWholeFlow.Engine(database, runtime).WaitForAnnIndexAsync(AnnWaitWholeFlow.Root,

@@ -4,14 +4,12 @@ namespace KeyLoad.UnitTests.Features.ResourceExecution;
 internal static class SearchReadBudgetOwner
 {
     internal static DatabaseEngine Create(TestDatabase fixture, ZoneTreeStore store, long maximumBytes)
-        => new(store, fixture.Database.Authorization,
-            UnitExecutionOptions.DatabaseLimits(new()
-            {
-                MaxQueryReadBytes = maximumBytes,
-                MaxConcurrentQueries = fixture.Database.Limits.MaxConcurrentQueries
-            }),
-            UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(),
-            UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(),
-            UnitExecutionOptions.RuntimeClaimsExecution(),
-            UnitExecutionOptions.TimeSeriesExecution());
+        => Create(fixture, store, fixture.Database.Limits with { MaxQueryReadBytes = maximumBytes });
+
+    internal static DatabaseEngine Create(TestDatabase fixture, ZoneTreeStore store, DatabaseLimits limits)
+    {
+        var create = TestDatabaseEngineFactory.Capture(UnitExecutionOptions.DatabaseLimits(limits),
+            UnitExecutionOptions.RuntimeClaimsExecution(), null, fixture.Database.EvaluationClock);
+        return create(store);
+    }
 }

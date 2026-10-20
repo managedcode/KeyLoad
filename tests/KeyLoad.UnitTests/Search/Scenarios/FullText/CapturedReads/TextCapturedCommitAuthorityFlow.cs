@@ -55,9 +55,9 @@ internal static class TextCapturedCommitAuthorityFlow
         await A.CutsAsync(fixture, identity, cut);
         // No current Resource/Get/WithQueryView/Search read may rewarm the cache before Complete.
         var old = original.Complete();
-        await A.OldAsync(fixture.Partition, old);
+        await A.OldAsync(fixture, old);
         var fresh = await original.Search.SearchAsync(P.Subject, P.Request(fixture.Partition), token);
-        await A.FreshAsync(fixture.Partition, fresh);
+        await A.FreshAsync(fixture, fresh);
         await A.JournalAsync(fixture, command, committed);
         var beforeReplay = fixture.Store.Position;
         var replay = fixture.Submit(OperationKind.Batch, command, id: command.CommandId).Get<CommitReceipt>();
@@ -65,7 +65,7 @@ internal static class TextCapturedCommitAuthorityFlow
         await Assert.That(fixture.Store.Position).IsEqualTo(beforeReplay);
         await A.CutsAsync(fixture, identity, cut);
         await A.JournalAsync(fixture, command, replay);
-        await A.FreshAsync(fixture.Partition,
+        await A.FreshAsync(fixture,
             await original.Search.SearchAsync(P.Subject, P.Request(fixture.Partition), token));
     }
 

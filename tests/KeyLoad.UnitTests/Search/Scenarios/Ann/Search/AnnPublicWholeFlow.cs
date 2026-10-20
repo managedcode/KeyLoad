@@ -65,11 +65,12 @@ internal static class AnnPublicWholeFlow
         { Row(database, "seed-00002", 1d / 61d, redacted), Row(database, "seed-00001", 1d / 62d, redacted), Row(database, "seed-00000", 1d / 63d, redacted) };
         var expected = new AnnSearchPage(Version, [.. rows], cut, mode, mode != AnnPageMode.Approximate,
             AnnMaintenanceTestData.Generation, AnnPageMode.Approximate);
-        await Assert.That(JsonDefaults.Serialize(page).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
+        await Assert.That(System.Text.Encoding.UTF8.GetString(JsonDefaults.Serialize(page)))
+            .IsEqualTo(System.Text.Encoding.UTF8.GetString(JsonDefaults.Serialize(expected)));
     }
 
     private static RankedDocument Row(TestDatabase database, string id, double score, bool redacted)
-        => new(new(new(database.Partition, AnnSeedTestSupport.Collection, id), Revision, Json, redacted,
+        => new(new(database.ExpectedReference(new(database.Partition, AnnSeedTestSupport.Collection, id)), Revision, Json, redacted,
             redacted ? [AnnSeedTestSupport.Field] : []), score);
 
     internal static async Task UnchangedAsync(TestDatabase database, (string Key, string Value)[] image, long cut)

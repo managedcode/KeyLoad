@@ -24,8 +24,8 @@ internal sealed class EventProjectionInputTests
         await Assert.That(lineage.SourceStream).IsEqualTo(fixture.Stream);
         await Assert.That(lineage.SourceEventRevision).IsEqualTo(1L);
         await Assert.That(lineage.SourceEventId).IsEqualTo("projection-event");
-        await Assert.That(lineage.SourceDocument).IsEqualTo(new EntityRef(fixture.Partition,
-            EventProjectionFixture.Collection, EventProjectionFixture.SourceId));
+        await Assert.That(lineage.SourceDocument).IsEqualTo(fixture.Harness.ExpectedReference(new(fixture.Partition,
+            EventProjectionFixture.Collection, EventProjectionFixture.SourceId)));
         await Assert.That(lineage.SourceDocumentRevision).IsEqualTo(1L);
         await Assert.That(lineage.InputField).IsEqualTo(EventProjectionFixture.InputField);
         await Assert.That(lineage.ReducerGeneration).IsEqualTo(1L);
