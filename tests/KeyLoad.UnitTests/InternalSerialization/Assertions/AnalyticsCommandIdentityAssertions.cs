@@ -25,6 +25,9 @@ internal static class AnalyticsCommandIdentityAssertions
     {
         var request = OrleansSerialization.Deserialize<CommandRequest>(operation.Value!.Input.Span);
         using var document = JsonSerializer.SerializeToDocument(request, JsonDefaults.Options);
+        var work = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits());
+        await Assert.That(AnalyticsIdentity.Canonicalize(request, work, new DatabaseLimits().MaxBatchBytes))
+            .IsEqualTo(D.CanonicalIdentity(request.CommandId, request.Partition, delete));
         await Assert.That(operation.Value.Fingerprint).IsEqualTo(JsonData.Fingerprint(new
         {
             Id = operation.CommandId,
@@ -120,7 +123,9 @@ internal static class AnalyticsCommandIdentityAssertions
         var work = new ReadExecutionBudget(database.OperationLimitsOptions, database.EvaluationClock,
             TestContext.Current!.Execution.CancellationToken);
         var charged = database.CreateCommand(kind, id, D.Root, new DateTimeOffset(operation.Timestamp), OrleansSerialization.Serialize(request), work);
-        await Assert.That(charged.Value!.Input.Span.SequenceEqual(operation.Value!.Input.Span)).IsTrue();
+        await Assert.That(JsonSerializer.Serialize(OrleansSerialization.Deserialize<T>(charged.Value!.Input.Span,
+            ValidationProfile.PublicInputElements), JsonDefaults.Options)).IsEqualTo(JsonSerializer.Serialize(
+                OrleansSerialization.Deserialize<T>(operation.Value!.Input.Span, ValidationProfile.PublicInputElements), JsonDefaults.Options));
         await Assert.That(charged.Value.Fingerprint).IsEqualTo(operation.Value.Fingerprint);
         await Assert.That(DatabaseCommandFingerprint.Compute(operation)).IsEqualTo(JsonData.Fingerprint(new
         {

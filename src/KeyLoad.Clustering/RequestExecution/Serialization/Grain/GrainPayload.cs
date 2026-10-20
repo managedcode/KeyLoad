@@ -19,7 +19,7 @@ internal static class GrainPayload
     {
         try
         {
-            OrleansSerialization.Validate(payload);
+            OrleansSerialization.Validate(payload, typeof(object), ValidationProfile.PublicInputElements);
         }
         catch (KeyLoadException error) when (error.Code == ErrorCode.Corruption)
         {

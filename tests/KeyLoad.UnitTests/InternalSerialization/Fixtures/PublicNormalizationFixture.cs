@@ -52,6 +52,10 @@ internal static class PublicNormalizationFixture
     internal static StoredOutcome Stored(TestDatabase database, Command<DatabaseCommand> operation)
         => OutcomeStoreOracle.ReadStored(database.Store, operation)!;
 
+    internal static byte[] StoredBytes(TestDatabase database, Command<DatabaseCommand> operation)
+        => database.Store.Read(view => view.ReadOwnedValue(OutcomeStoreOracle.Key(operation)))
+            ?? throw new InvalidOperationException("The original public-input outcome is missing.");
+
     internal static string PublicJson(Command<DatabaseCommand> operation)
     {
         object input = operation.Value!.Kind == OperationKind.Batch

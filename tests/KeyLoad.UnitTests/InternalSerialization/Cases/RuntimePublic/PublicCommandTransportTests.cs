@@ -29,6 +29,7 @@ internal sealed class PublicCommandTransportTests
         await Assert.That(result.Error).IsEqualTo(ErrorCode.Validation);
         await Assert.That(result.SafeDetail).IsEqualTo(PublicNormalizationFixture.Detail(shape));
         var stored = PublicNormalizationFixture.Stored(database, operation);
+        var originalOutcome = PublicNormalizationFixture.StoredBytes(database, operation);
         await Assert.That(Errors.Code(stored.Result.Problem)).IsEqualTo(result.Error);
         await Assert.That(stored.Result.Problem?.Detail).IsEqualTo(result.SafeDetail);
         var retry = codec.Verify(codec.CreateCommand(Guid.NewGuid(), operation.UserId!,
@@ -36,7 +37,7 @@ internal sealed class PublicCommandTransportTests
         await Assert.That(retry.Envelope.RequestId).IsNotEqualTo(request.Envelope.RequestId);
         var repeated = await SignedGrainRequestTestContext.ExecuteAsync(executor, retry, actorKey, CancellationToken.None);
         await Assert.That(repeated).IsEqualTo(result);
-        await Assert.That(PublicNormalizationFixture.Stored(database, operation)).IsEqualTo(stored);
+        await Assert.That(PublicNormalizationFixture.StoredBytes(database, operation).SequenceEqual(originalOutcome)).IsTrue();
     }
 
     private static McpDecodedOperation Decode(TestDatabase database, Command<DatabaseCommand> operation)

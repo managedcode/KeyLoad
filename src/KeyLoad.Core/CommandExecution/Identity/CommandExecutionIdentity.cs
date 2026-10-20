@@ -1,4 +1,5 @@
 using KeyLoad.Storage;
+using KeyLoad.Features.InternalSerialization;
 using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.Core;
@@ -41,7 +42,7 @@ public static class CommandExecutionIdentity
         }
 
         RequireBudget(checked((long)input.Input.Length + input.RetryDecisions.Length + input.ResourceAdmission.Length), limits.MaxBatchBytes);
-        OrleansSerialization.Validate(input.Input.Span, CommandExecutionExecutionDatabaseCommandInputTypes.OperationPayloadType(input.Kind) ?? throw Errors.Fail(ErrorCode.UnsupportedCapability, CommandExecutionValidation.UnsupportedDatabaseCommand));
+        _ = OrleansSerialization.Deserialize(input.Input.Span, CommandExecutionExecutionDatabaseCommandInputTypes.OperationPayloadType(input.Kind) ?? throw Errors.Fail(ErrorCode.UnsupportedCapability, CommandExecutionValidation.UnsupportedDatabaseCommand), ValidationProfile.PublicInputElements);
     }
 
     internal static Command<DatabaseCommand> CreatePreparedCommand(this DatabaseEngine engine, OperationKind kind, Guid id, string principalId, DateTimeOffset evaluatedAt, ReadOnlyMemory<byte> input, string fingerprint, ReadExecutionBudget? work, IKeyValueView? admissionView = null)

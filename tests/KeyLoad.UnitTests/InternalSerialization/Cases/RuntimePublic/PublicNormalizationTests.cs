@@ -23,11 +23,12 @@ internal sealed class PublicNormalizationTests
         await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.Validation);
         await Assert.That(result.Problem?.Detail).IsEqualTo(PublicNormalizationFixture.Detail(shape));
         var stored = PublicNormalizationFixture.Stored(database, operation);
+        var originalOutcome = PublicNormalizationFixture.StoredBytes(database, operation);
         await Assert.That(stored.Fingerprint).IsEqualTo(PublicNormalizationFixture.Fingerprint(operation));
         await Assert.That(stored.Result).IsEqualTo(result);
         await Assert.That(database.Database.Apply(operation)).IsEqualTo(result);
         await Assert.That(database.Database.ResolveOutcome(verified)).IsEqualTo(result);
-        await Assert.That(PublicNormalizationFixture.Stored(database, operation)).IsEqualTo(stored);
+        await Assert.That(PublicNormalizationFixture.StoredBytes(database, operation).SequenceEqual(originalOutcome)).IsTrue();
         await Assert.That(OutcomeStoreOracle.Read(database.Store, operation)).IsEqualTo(result);
     }
 
@@ -78,16 +79,17 @@ internal sealed class PublicNormalizationTests
         var result = database.Database.Apply(normalized);
         await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.ClockUncertain);
         var stored = PublicNormalizationFixture.Stored(database, operation);
+        var originalOutcome = PublicNormalizationFixture.StoredBytes(database, operation);
         await Assert.That(stored.Result).IsEqualTo(result);
         var retry = database.Database.OwnCommand(operation);
         retry.Timestamp = database.Database.EvaluationClock.GetUtcNow().UtcDateTime;
         await Assert.That(database.Database.Apply(retry)).IsEqualTo(result);
         await Assert.That(database.Database.ResolveOutcome(normalized)).IsEqualTo(result);
-        await Assert.That(PublicNormalizationFixture.Stored(database, operation)).IsEqualTo(stored);
+        await Assert.That(PublicNormalizationFixture.StoredBytes(database, operation).SequenceEqual(originalOutcome)).IsTrue();
         var changed = database.Database.CreateCommand(retry.Value!.Kind, retry.CommandId, retry.UserId!,
             new DateTimeOffset(retry.Timestamp), PublicNormalizationFixture.PublicJson(retry) + "\n");
         await Assert.That(Errors.Code(database.Database.Apply(changed).Problem)).IsEqualTo(ErrorCode.Conflict);
-        await Assert.That(PublicNormalizationFixture.Stored(database, operation)).IsEqualTo(stored);
+        await Assert.That(PublicNormalizationFixture.StoredBytes(database, operation).SequenceEqual(originalOutcome)).IsTrue();
     }
 
     [Test]

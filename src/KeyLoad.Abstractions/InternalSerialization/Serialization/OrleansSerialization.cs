@@ -105,9 +105,12 @@ public static class OrleansSerialization
     public static void Validate(ReadOnlySpan<byte> value) => Validate(value, typeof(object));
 
     internal static void Validate(ReadOnlySpan<byte> value, Type expectedRootType)
+        => Validate(value, expectedRootType, ValidationProfile.Strict);
+
+    internal static void Validate(ReadOnlySpan<byte> value, Type expectedRootType, ValidationProfile profile)
     {
         using var session = Serializer.SessionPool.GetSession();
-        _ = DeserializeOwned(value, session, expectedRootType, false, ValidationProfile.Strict);
+        _ = DeserializeOwned(value, session, expectedRootType, false, profile);
     }
 
     /// <summary>Measures the generated encoding through a counting destination.</summary>

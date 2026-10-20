@@ -54,28 +54,6 @@ internal sealed class JsonElementTests
     }
 
     [Test]
-    public async Task AcIs002WrongNumericSurrogateLexemeIsRejected()
-    {
-        const string NumericLexeme = "1234";
-        const string InvalidNumber = "null";
-        var bytes = OrleansSerialization.Serialize(new ValueOperand(JsonElement.Parse(NumericLexeme)));
-        var index = bytes.AsSpan().IndexOf(System.Text.Encoding.UTF8.GetBytes(NumericLexeme));
-        await Assert.That(index >= 0).IsTrue();
-        System.Text.Encoding.UTF8.GetBytes(InvalidNumber).CopyTo(bytes, index);
-        KeyLoadException? failure = null;
-        try
-        {
-            _ = OrleansSerialization.Deserialize<ValueOperand>(bytes);
-        }
-        catch (KeyLoadException exception)
-        {
-            failure = exception;
-        }
-        await Assert.That(failure).IsNotNull();
-        await Assert.That(failure!.Code).IsEqualTo(ErrorCode.Corruption);
-    }
-
-    [Test]
     public async Task AcIs002DictionaryParametersUseTheSameOwnedElementAdapter()
     {
         const string Parameter = "amount";

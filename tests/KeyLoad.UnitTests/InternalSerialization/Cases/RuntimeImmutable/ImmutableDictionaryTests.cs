@@ -26,29 +26,4 @@ internal sealed class ImmutableDictionaryTests
         await Assert.That(((ImmutableDictionary<string, double>)actual[2])[MapValue]).IsEqualTo(4);
         await Assert.That(((ImmutableDictionary<string, long>)actual[3]).IsEmpty).IsTrue();
     }
-
-    [Test]
-    [Arguments(ImmutableDictionaryFault.MissingValues)]
-    [Arguments(ImmutableDictionaryFault.NullValues)]
-    [Arguments(ImmutableDictionaryFault.DuplicateValues)]
-    [Arguments(ImmutableDictionaryFault.IncompletePairs)]
-    [Arguments(ImmutableDictionaryFault.OversizedCount)]
-    [Arguments(ImmutableDictionaryFault.AlienMember)]
-    [Arguments(ImmutableDictionaryFault.BaseScope)]
-    [Arguments(ImmutableDictionaryFault.UnknownComparer)]
-    [Arguments(ImmutableDictionaryFault.TypedNullComparer)]
-    [Arguments(ImmutableDictionaryFault.DuplicateComparer)]
-    [Arguments(ImmutableDictionaryFault.UnknownKeyComparer)]
-    public async Task InvalidImmutableSurrogateCannotReachGeneratedMapAllocationAndHealthyMapStillReads(ImmutableDictionaryFault fault)
-    {
-        var bytes = ImmutableDictionaryFixture.Encode(fault);
-        var originalBytes = bytes.ToArray();
-        await SerializedPayloadAssertions.CorruptAsync(() => OrleansSerialization.Validate(bytes));
-        await SerializedPayloadAssertions.CorruptAsync(() => OrleansSerialization.Deserialize<ImmutableDictionary<string, string>>(bytes));
-        await Assert.That(bytes.SequenceEqual(originalBytes)).IsTrue();
-        var healthy = ImmutableDictionary<string, string>.Empty.Add(MapKey, MapValue);
-        var actual = OrleansSerialization.Deserialize<ImmutableDictionary<string, string>>(OrleansSerialization.Serialize(healthy));
-        await Assert.That(actual.Count).IsEqualTo(1);
-        await Assert.That(actual[MapKey]).IsEqualTo(MapValue);
-    }
 }

@@ -1,7 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Orleans.Serialization;
 using Orleans.Serialization.Codecs;
-using Orleans.Serialization.Session;
 
 namespace KeyLoad.UnitTests.Features.InternalSerialization;
 
@@ -23,7 +22,13 @@ internal sealed class SerializerFixture : IDisposable
     internal byte[] Encode(object? value, uint version = PayloadVersion.Current)
         => serializer.SerializeToArray(new RuntimePayload { Version = version, Value = value });
 
-    internal byte[] EncodeEnvelope(EnvelopeFault fault) => EnvelopeFixture.Encode(services.GetRequiredService<SerializerSessionPool>(), fault);
+    internal byte[] EncodeEnvelope(EnvelopeFault fault) => fault switch
+    {
+        EnvelopeFault.WrongRoot => Encode(new QueueCounters(1, 1, 1, 1, 1)),
+        EnvelopeFault.MissingVersion => Encode(new OutboxHead(1, 1, 1, 1), 0),
+        EnvelopeFault.MissingValue => Encode(null),
+        _ => throw new ArgumentOutOfRangeException(nameof(fault))
+    };
 
     internal byte[] EncodeNullRoot() => serializer.SerializeToArray(null!);
 

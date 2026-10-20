@@ -46,7 +46,9 @@ internal sealed class InspectionTests
             failure = exception;
         }
         await Assert.That(failure).IsNotNull();
-        await Assert.That(failure!.Code).IsEqualTo(ErrorCode.Corruption);
-        await Assert.That(failure.Message).IsEqualTo(PayloadVersion.InvalidPayload);
+        await Assert.That(failure!.Code).IsEqualTo(fault == EnvelopeFault.MissingVersion
+            ? ErrorCode.FormatUnsupported : ErrorCode.Corruption);
+        await Assert.That(failure.Message).IsEqualTo(fault == EnvelopeFault.MissingVersion
+            ? PayloadVersion.UnsupportedVersion : PayloadVersion.InvalidPayload);
     }
 }

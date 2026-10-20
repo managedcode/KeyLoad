@@ -12,6 +12,7 @@ internal static class AnalyticsCommandIdentityData
     internal const string Json = "{\"z\":1,\"a\":2}";
     internal const string First = "a";
     internal const string Last = "z";
+    private const string CanonicalTimestamp = "2024-01-01T00:01:00+00:00";
     internal static readonly DateTimeOffset From = new(2024, 1, 1, 0, 0, 0, TimeSpan.Zero);
 
     internal static AnalyticsEventData Event(string id, bool reverse, bool changed = false)
@@ -89,6 +90,6 @@ internal static class AnalyticsCommandIdentityData
         Links = Array.Empty<EntityRef>(),
         Metrics = new SortedDictionary<string, double>(StringComparer.Ordinal) { [First] = 2d, [Last] = 4d },
         RowAccess = (RowAccess?)null,
-        Timestamp = From.AddMinutes(1)
+        Timestamp = CanonicalTimestamp
     };
 }

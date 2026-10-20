@@ -23,10 +23,11 @@ internal static class PublicNormalizationChecks
         await Assert.That(Errors.Code(result.Problem)).IsEqualTo(code);
         await Assert.That(result.Problem?.Detail).IsEqualTo(detail);
         var stored = PublicNormalizationFixture.Stored(database, operation);
+        var originalOutcome = PublicNormalizationFixture.StoredBytes(database, operation);
         await Assert.That(stored.Result).IsEqualTo(result);
         await Assert.That(stored.Fingerprint).IsEqualTo(PublicNormalizationFixture.Fingerprint(operation));
         await Assert.That(database.Database.Apply(operation)).IsEqualTo(result);
         await Assert.That(database.Database.ResolveOutcome(normalized)).IsEqualTo(result);
-        await Assert.That(PublicNormalizationFixture.Stored(database, operation)).IsEqualTo(stored);
+        await Assert.That(PublicNormalizationFixture.StoredBytes(database, operation).SequenceEqual(originalOutcome)).IsTrue();
     }
 }

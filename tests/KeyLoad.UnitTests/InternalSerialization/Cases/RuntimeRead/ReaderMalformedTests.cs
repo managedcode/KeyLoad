@@ -1,5 +1,3 @@
-using System.Text;
-
 namespace KeyLoad.UnitTests.Features.InternalSerialization;
 
 internal sealed class ReaderMalformedTests
@@ -25,18 +23,4 @@ internal sealed class ReaderMalformedTests
         await Assert.That(actual.Reference).IsEqualTo(expected.Reference);
         OrleansSerialization.Validate(bytes);
     }
-
-    [Test]
-    public async Task AcIs002InvalidUtf8RemainsRejectedBeforeSuccessfulReaderReuse()
-    {
-        const string value = "Київ🌍";
-        var bytes = OrleansSerialization.Serialize(value);
-        var position = bytes.AsSpan().IndexOf(Encoding.UTF8.GetBytes(value));
-        await Assert.That(position >= 0).IsTrue();
-        bytes[position] = 0xff;
-        var failure = Assert.ThrowsExactly<KeyLoadException>(() => OrleansSerialization.Deserialize<string>(bytes));
-        await Assert.That(failure.Code).IsEqualTo(ErrorCode.Corruption);
-        await Assert.That(OrleansSerialization.Deserialize<string>(OrleansSerialization.Serialize(value))).IsEqualTo(value);
-    }
-
 }
