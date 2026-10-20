@@ -12,9 +12,12 @@ internal sealed class ConnectionFailureTests
     {
         return ConnectionScenario.RunAsync(async scenario =>
         {
-            using var timeout = new CancellationTokenSource(scenario.Timing.CompletionTimeout, TimeProvider.System);
-            var token = timeout.Token;
+            using var timeout = new CancellationTokenSource(scenario.Timing.StartupTimeout, TimeProvider.System);
+            using var caller = CancellationTokenSource.CreateLinkedTokenSource(
+                TestContext.Current!.Execution.CancellationToken, timeout.Token);
+            var token = caller.Token;
             await scenario.InitializeAsync(token);
+            timeout.CancelAfter(scenario.Timing.CompletionTimeout);
             var principal = scenario.Principal();
             using var diagnostics = new EventSourceLogCapture();
             var beforeFailure = scenario.Fixture.Database.ReadCanonicalCut();
@@ -60,9 +63,12 @@ internal sealed class ConnectionFailureTests
         var routing = new GrainRoutingOptions { MaximumConnectionOperations = 1 };
         return ConnectionScenario.RunAsync(async scenario =>
         {
-            using var timeout = new CancellationTokenSource(scenario.Timing.CompletionTimeout, TimeProvider.System);
-            var token = timeout.Token;
+            using var timeout = new CancellationTokenSource(scenario.Timing.StartupTimeout, TimeProvider.System);
+            using var caller = CancellationTokenSource.CreateLinkedTokenSource(
+                TestContext.Current!.Execution.CancellationToken, timeout.Token);
+            var token = caller.Token;
             await scenario.InitializeAsync(token);
+            timeout.CancelAfter(scenario.Timing.CompletionTimeout);
             var principal = scenario.Principal();
             var heldId = Guid.NewGuid();
             var held = scenario.Observation.Hold(heldId);
@@ -94,9 +100,12 @@ internal sealed class ConnectionFailureTests
     {
         return ConnectionScenario.RunAsync(async scenario =>
         {
-            using var timeout = new CancellationTokenSource(scenario.Timing.CompletionTimeout, TimeProvider.System);
-            var token = timeout.Token;
+            using var timeout = new CancellationTokenSource(scenario.Timing.StartupTimeout, TimeProvider.System);
+            using var caller = CancellationTokenSource.CreateLinkedTokenSource(
+                TestContext.Current!.Execution.CancellationToken, timeout.Token);
+            var token = caller.Token;
             await scenario.InitializeAsync(token);
+            timeout.CancelAfter(scenario.Timing.CompletionTimeout);
             var principal = scenario.Principal();
             var requestId = Guid.NewGuid();
             var held = scenario.Observation.Hold(requestId);
@@ -123,8 +132,11 @@ internal sealed class ConnectionFailureTests
     {
         return ConnectionScenario.RunAsync(async scenario =>
         {
-            using var timeout = new CancellationTokenSource(scenario.Timing.CompletionTimeout, TimeProvider.System);
-            await scenario.InitializeAsync(timeout.Token);
+            using var timeout = new CancellationTokenSource(scenario.Timing.StartupTimeout, TimeProvider.System);
+            using var caller = CancellationTokenSource.CreateLinkedTokenSource(
+                TestContext.Current!.Execution.CancellationToken, timeout.Token);
+            await scenario.InitializeAsync(caller.Token);
+            timeout.CancelAfter(scenario.Timing.CompletionTimeout);
             var serializer = scenario.Fixture.Cluster.ServiceProvider
                 .GetRequiredService<global::Orleans.Serialization.Serializer<Exception>>();
             KeyLoadException[] originals =
