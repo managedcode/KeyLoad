@@ -21,8 +21,9 @@ internal static class GraphLabelUseFixture
             [new PutDocument(Collection, "a", "{}"), new PutDocument(Collection, "b", "{}"), new PutDocument(Collection, "c", "{}"),
                 .. Edges(db.Partition).Select(edge => new UpsertEdge(Graph, edge.Id, edge.From, edge.To, edge.Label, edge.AttributesJson))]);
         var before = db.Store.Position;
+        var nextCanonical = checked(db.Database.LastApplied + 1L);
         var receipt = db.Submit(OperationKind.Batch, command, id: command.CommandId).Get<CommitReceipt>();
-        var expected = new CommitReceipt(command.CommandId, new(db.Store.Identity.Incarnation, db.Partition.AtomicPartitionId, before + 1L), [new("putDocument", Collection, "a", 1L), new("putDocument", Collection, "b", 1L),
+        var expected = new CommitReceipt(command.CommandId, new(db.Store.Identity.Incarnation, db.Partition.AtomicPartitionId, nextCanonical), [new("putDocument", Collection, "a", 1L), new("putDocument", Collection, "b", 1L),
                 new("putDocument", Collection, "c", 1L), new("upsertEdge", Graph, "ab", 1L),
                 new("upsertEdge", Graph, "bc", 1L)], DurabilityProfile.ProcessDurable, 1);
         await GraphLabelUseOperations.EqualAsync(expected, receipt);
@@ -47,12 +48,21 @@ internal static class GraphLabelUseFixture
         await GraphLabelUseOperations.EqualAsync(expected,
             db.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(expected)).Get<PrincipalRecord>());
     }
-    internal static global::KeyLoad.GraphTraversal Expected(PartitionRef partition, string[]? labels)
-        => labels is null || labels.Length == 0
+    internal static global::KeyLoad.GraphTraversal Expected(TestDatabase source, string[]? labels)
+    {
+        var partition = source.Partition;
+        global::KeyLoad.GraphTraversal expected = labels is null || labels.Length == 0
             ? new([Vertex(partition, "a"), Vertex(partition, "b"), Vertex(partition, "c")], [.. Edges(partition)])
             : labels.Contains("route", StringComparer.Ordinal)
                 ? new([Vertex(partition, "a"), Vertex(partition, "b")], [Edges(partition)[0]])
                 : new([Vertex(partition, "a")], []);
+        return new([.. expected.Vertices.Select(source.ExpectedReference)],
+            [.. expected.Edges.Select(edge => edge with
+            {
+                From = source.ExpectedReference(edge.From),
+                To = source.ExpectedReference(edge.To)
+            })]);
+    }
     internal static global::KeyLoad.GraphTraversal Traverse(DatabaseEngine db, PartitionRef partition, string[]? labels,
         CancellationToken token, string start = "a")
         => db.Traverse(Reader, partition, Graph, Vertex(partition, start), 2, 3, 2, labels, token);

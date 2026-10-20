@@ -24,10 +24,10 @@ internal static class GraphTraversalIntegrityFixture
     {
         database.Configure(Nodes, ResourceKind.Collection);
         database.Configure(Graph, ResourceKind.Graph);
-        var source = new EntityRef(database.Partition, Nodes, Source);
-        var healthy = new EdgeRecord(HealthyEdgeId, source, new(database.Partition, Nodes, HealthyTarget),
+        var source = database.ExpectedReference(new(database.Partition, Nodes, Source));
+        var healthy = new EdgeRecord(HealthyEdgeId, source, database.ExpectedReference(new(database.Partition, Nodes, HealthyTarget)),
             Label, Attributes, InitialRevision);
-        var damaged = new EdgeRecord(DamagedEdgeId, source, new(database.Partition, Nodes, DamagedTarget),
+        var damaged = new EdgeRecord(DamagedEdgeId, source, database.ExpectedReference(new(database.Partition, Nodes, DamagedTarget)),
             Label, Attributes, InitialRevision);
         var command = GraphStorageReferenceFixture.Command(database.Partition,
             new PutDocument(Nodes, Source, Attributes), new PutDocument(Nodes, HealthyTarget, Attributes),
@@ -38,7 +38,7 @@ internal static class GraphTraversalIntegrityFixture
     internal static GraphTraversalIntegrityContinuation Continue(DatabaseEngine owner, GraphTraversalIntegrityState state)
     {
         var edge = new EdgeRecord(ContinuedEdgeId, state.HealthyEdge.From,
-            new(state.HealthyEdge.From.Partition, Nodes, ContinuedTarget), Label, Attributes, InitialRevision);
+            state.HealthyEdge.From with { Id = ContinuedTarget }, Label, Attributes, InitialRevision);
         var command = GraphStorageReferenceFixture.Command(edge.From.Partition,
             new PutDocument(Nodes, ContinuedTarget, Attributes), Mutation(edge));
         return new(command, GraphStorageReferenceFixture.Submit(owner, command).Get<CommitReceipt>(), edge);

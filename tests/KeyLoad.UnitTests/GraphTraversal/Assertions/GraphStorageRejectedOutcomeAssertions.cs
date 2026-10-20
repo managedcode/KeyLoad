@@ -38,7 +38,7 @@ internal static class GraphStorageRejectedOutcomeAssertions
         await Assert.That(CaptureState(database, vertex, stream, message)).IsEquivalentTo(expected, CollectionOrdering.Matching);
         await Assert.That(database.Database.ReadStream(GraphStorageReferenceFixture.Root,
             new StreamRef(database.Partition, GraphStorageReferenceFixture.Events, stream)).CutPosition)
-            .IsEqualTo(database.Store.Position);
+            .IsEqualTo(database.Database.LastApplied);
     }
 
     private static byte[] CaptureStream(TestDatabase database, string stream)

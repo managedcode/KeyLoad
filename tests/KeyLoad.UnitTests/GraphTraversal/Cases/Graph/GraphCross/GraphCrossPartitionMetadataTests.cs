@@ -53,12 +53,9 @@ internal sealed class GraphCrossPartitionMetadataTests
     {
         var type = typeof(GraphCrossPartitionCapacityDirection);
         await AssertAliasAsync(type, "keyload.contract.graph-cross-partition-capacity-direction");
-        var fields = type.GetFields(BindingFlags.Public | BindingFlags.Static)
-            .Where(field => field.GetCustomAttribute<global::Orleans.IdAttribute>() is not null)
-            .OrderBy(field => field.GetCustomAttribute<global::Orleans.IdAttribute>()!.Id).ToArray();
+        var fields = type.GetFields(BindingFlags.Public | BindingFlags.Static);
         await Assert.That(fields.Select(field => field.Name).SequenceEqual(["PendingIntents", "ReceiverStates"])).IsTrue();
-        await Assert.That(fields.Select(field => field.GetCustomAttribute<global::Orleans.IdAttribute>()!.Id)
-            .SequenceEqual([0U, 1U])).IsTrue();
+        await Assert.That(fields.All(field => field.GetCustomAttribute<global::Orleans.IdAttribute>() is null)).IsTrue();
         var values = Enum.GetValues(type).Cast<GraphCrossPartitionCapacityDirection>()
             .Select(value => (int)value).Order().ToArray();
         await Assert.That(values.SequenceEqual([0, 1])).IsTrue();

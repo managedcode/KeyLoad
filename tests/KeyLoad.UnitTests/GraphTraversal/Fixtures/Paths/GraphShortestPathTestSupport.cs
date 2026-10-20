@@ -28,7 +28,7 @@ internal static class GraphShortestPathTestSupport
     }
 
     internal static EntityRef Vertex(TestDatabase database, string collection, string id)
-        => new(database.Partition, collection, id);
+        => database.ExpectedReference(new(database.Partition, collection, id));
 
     internal static void PersistVertices(TestDatabase database,
         IEnumerable<GraphShortestPathReferenceVertex> vertices, string? owner = null)

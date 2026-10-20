@@ -79,6 +79,6 @@ internal static class GraphSearchIntegrityAssertions
     }
 
     private static async Task EqualAsync<T>(T expected, T actual)
-        => await Assert.That(JsonElement.DeepEquals(JsonSerializer.SerializeToElement(expected, JsonDefaults.Options),
-            JsonSerializer.SerializeToElement(actual, JsonDefaults.Options))).IsTrue();
+        => await Assert.That(JsonSerializer.Serialize(actual, JsonDefaults.Options))
+            .IsEqualTo(JsonSerializer.Serialize(expected, JsonDefaults.Options));
 }

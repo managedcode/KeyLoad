@@ -28,9 +28,9 @@ internal static class GraphTraversalRowCold
                 await Assert.That(cold.Identity.ReadGeneration).IsGreaterThanOrEqualTo(identity.ReadGeneration);
                 await Assert.That(cold.Position).IsEqualTo(cut);
                 await Assert.That(CanonicalStoreImage.Bytes(cold).SequenceEqual(image, StringComparer.Ordinal)).IsTrue();
-                await GraphTraversalRowAssertions.ReadAsync(engine, cold, db.Partition, true, token);
+                await GraphTraversalRowAssertions.ReadAsync(engine, cold, db, true, token);
                 await GraphTraversalRowContinuation.ReplayAsync(engine, cold, command, receipt, outcome, token);
-                await GraphTraversalRowAssertions.ReadAsync(engine, cold, db.Partition, true, token);
+                await GraphTraversalRowAssertions.ReadAsync(engine, cold, db, true, token);
             }
             catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is null)
             {

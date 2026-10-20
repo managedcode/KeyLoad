@@ -45,12 +45,12 @@ internal sealed class GraphTraversalDeadlineTests
         var token = TestContext.Current!.Execution.CancellationToken;
         var healthy = database.Database.Traverse(Root, database.Partition, Links, Vertex(A), maxDepth: CycleDepth,
             cancellationToken: token);
-        await AssertHealthyAsync(healthy, database.Partition);
+        await AssertHealthyAsync(healthy, database);
         var before = CaptureState(database);
         await Assert.That(before.HasMore).IsFalse();
         await Assert.That(before.Records.Length).IsGreaterThan(0);
         var position = database.Store.Position;
-        await Assert.That(position).IsEqualTo(commit.Token.Position);
+        await Assert.That(database.Database.LastApplied).IsEqualTo(commit.Token.Position);
         var reads = database.Store.GetReadDiagnostics();
         var rangeThreshold = reads.RangeBaselineEntries + reads.RangeStagedEntries + examinedEdges;
         clock.ArmAfterWork(() =>
@@ -71,7 +71,7 @@ internal sealed class GraphTraversalDeadlineTests
         await AssertBytesEqualAsync(before, CaptureState(database));
         var after = database.Database.Traverse(Root, database.Partition, Links, Vertex(A), maxDepth: CycleDepth,
             cancellationToken: token);
-        await AssertHealthyAsync(after, database.Partition);
+        await AssertHealthyAsync(after, database);
         await AssertBytesEqualAsync(healthy, after);
         await Assert.That(database.Store.Position).IsEqualTo(position);
         await AssertBytesEqualAsync(before, CaptureState(database));
@@ -80,15 +80,16 @@ internal sealed class GraphTraversalDeadlineTests
     private static ScanPage CaptureState(TestDatabase database)
         => database.Store.Read(view => view.Scan([], SnapshotRecordCapacity));
 
-    private static async Task AssertHealthyAsync(global::KeyLoad.GraphTraversal page, PartitionRef partition)
+    private static async Task AssertHealthyAsync(global::KeyLoad.GraphTraversal page, TestDatabase database)
     {
+        var partition = database.Partition;
         await Assert.That(page.Vertices).IsEquivalentTo(new[]
-        { new EntityRef(partition, Orders, A), new(partition, Orders, B), new(partition, Orders, C) }, CollectionOrdering.Matching);
+        { new EntityRef(partition, Orders, A), new(partition, Orders, B), new(partition, Orders, C) }.Select(database.ExpectedReference), CollectionOrdering.Matching);
         await Assert.That(page.Edges.Select(edge => edge.Id)).IsEquivalentTo(new[] { AB, BC, CA }, CollectionOrdering.Matching);
         await Assert.That(page.Edges.Select(edge => edge.From)).IsEquivalentTo(new[]
-        { new EntityRef(partition, Orders, A), new(partition, Orders, B), new(partition, Orders, C) }, CollectionOrdering.Matching);
+        { new EntityRef(partition, Orders, A), new(partition, Orders, B), new(partition, Orders, C) }.Select(database.ExpectedReference), CollectionOrdering.Matching);
         await Assert.That(page.Edges.Select(edge => edge.To)).IsEquivalentTo(new[]
-        { new EntityRef(partition, Orders, B), new(partition, Orders, C), new(partition, Orders, A) }, CollectionOrdering.Matching);
+        { new EntityRef(partition, Orders, B), new(partition, Orders, C), new(partition, Orders, A) }.Select(database.ExpectedReference), CollectionOrdering.Matching);
         await Assert.That(page.Edges.All(edge => edge.Label == Label)).IsTrue();
         await Assert.That(page.Edges.All(edge => edge.Revision == InitialRevision)).IsTrue();
     }

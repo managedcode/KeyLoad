@@ -14,15 +14,15 @@ internal static class GraphLabelUseFlow
             {
                 var seed = await GraphLabelUseFixture.SeedAsync(db);
                 await GraphLabelUseFixture.PersistAsync(db, false, 1L);
-                await GraphLabelUseOperations.ReadAsync(db.Database, db.Store, db.Partition, false, token);
+                await GraphLabelUseOperations.ReadAsync(db.Database, db.Store, db, false, token);
                 await GraphLabelUseFault.RunAsync(db, token);
                 await GraphLabelUseFixture.PersistAsync(db, true, 2L);
-                await GraphLabelUseOperations.ReadAsync(db.Database, db.Store, db.Partition, true, token);
+                await GraphLabelUseOperations.ReadAsync(db.Database, db.Store, db, true, token);
                 await CancelledAsync(db);
                 await GraphLabelUseFixture.PersistAsync(db, false, 3L);
-                await GraphLabelUseOperations.ReadAsync(db.Database, db.Store, db.Partition, false, token);
+                await GraphLabelUseOperations.ReadAsync(db.Database, db.Store, db, false, token);
                 await GraphLabelUseFixture.PersistAsync(db, true, 4L);
-                await GraphLabelUseOperations.ReadAsync(db.Database, db.Store, db.Partition, true, token);
+                await GraphLabelUseOperations.ReadAsync(db.Database, db.Store, db, true, token);
                 await GraphLabelUseOperations.ReplayAsync(db.Database, db.Store, seed.Command, seed.Receipt, seed.Outcome);
                 await GraphLabelUseCold.RunAsync(db, seed.Command, seed.Receipt, seed.Outcome, token);
             }, failures);

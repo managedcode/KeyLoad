@@ -17,8 +17,8 @@ internal sealed class GraphIncomingPrivacyTests
         using var database = GraphCrossPartitionTestSupport.CreateDatabase();
         var sourcePartition = GraphCrossPartitionTestSupport.Partition(MachineKeyPrivateSource);
         var targetPartition = GraphCrossPartitionTestSupport.Partition(MachineKeyReaderTarget);
-        var source = GraphCrossPartitionTestSupport.Vertex(sourcePartition, "source");
-        var target = GraphCrossPartitionTestSupport.Vertex(targetPartition, "target");
+        var source = database.ExpectedReference(GraphCrossPartitionTestSupport.Vertex(sourcePartition, "source"));
+        var target = database.ExpectedReference(GraphCrossPartitionTestSupport.Vertex(targetPartition, "target"));
         GraphCrossPartitionTestSupport.Commit(database, sourcePartition,
             new PutDocument(source.Collection, source.Id, GraphCrossPartitionTestSupport.EmptyJson,
                 Access: new RowAccess(Writer)));
@@ -42,8 +42,8 @@ internal sealed class GraphIncomingPrivacyTests
         using var database = GraphCrossPartitionTestSupport.CreateDatabase();
         var sourcePartition = GraphCrossPartitionTestSupport.Partition(MachineKeyVisibleSource);
         var targetPartition = GraphCrossPartitionTestSupport.Partition(MachineKeyHiddenTarget);
-        var source = GraphCrossPartitionTestSupport.Vertex(sourcePartition, "source");
-        var target = GraphCrossPartitionTestSupport.Vertex(targetPartition, "target");
+        var source = database.ExpectedReference(GraphCrossPartitionTestSupport.Vertex(sourcePartition, "source"));
+        var target = database.ExpectedReference(GraphCrossPartitionTestSupport.Vertex(targetPartition, "target"));
         GraphCrossPartitionTestSupport.SeedVertices(database, source);
         GraphCrossPartitionTestSupport.Commit(database, targetPartition,
             new PutDocument(target.Collection, target.Id, GraphCrossPartitionTestSupport.EmptyJson,

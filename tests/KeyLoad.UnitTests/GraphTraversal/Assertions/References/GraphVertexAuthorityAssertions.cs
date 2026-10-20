@@ -43,7 +43,7 @@ internal static class GraphVertexAuthorityAssertions
             GraphVertexAuthorityFlow.Witness, 1L), new(UpsertKind, GraphTraversalIntegrityFixture.Graph,
             state.DamagedEdge.Id, 2L)];
         await Assert.That(receipt.Mutations.SequenceEqual(expected)).IsTrue();
-        var reference = new EntityRef(command.Partition, GraphTraversalIntegrityFixture.Nodes, GraphVertexAuthorityFlow.Witness);
+        var reference = state.HealthyEdge.From with { Id = GraphVertexAuthorityFlow.Witness };
         await Assert.That(JsonSerializer.Serialize(owner.GetDocument(GraphTraversalIntegrityFixture.Root, reference), JsonDefaults.Options))
             .IsEqualTo(JsonSerializer.Serialize(new DocumentResult(reference, 1L, GraphVertexAuthorityFlow.Payload, false, []), JsonDefaults.Options));
     }

@@ -27,7 +27,7 @@ internal sealed class GraphStorageAtomicEffectsTests
         {
             [Edge] = new(Edge, NewVertex, target.Id, GraphStorageReferenceFixture.Label, "{}", 1)
         };
-        await GraphStorageReferenceAssertions.VerifyAsync(database.Database, database.Partition, reference, [NewVertex]);
+        await GraphStorageReferenceAssertions.VerifyAsync(database.Database, database, reference, [NewVertex]);
         var position = database.Store.Position;
         var retried = GraphStorageReferenceFixture.Submit(database.Database, command).Get<CommitReceipt>();
         await Assert.That(retried.Token).IsEqualTo(committed.Token);
@@ -61,11 +61,11 @@ internal sealed class GraphStorageAtomicEffectsTests
             new(database.Partition, GraphStorageReferenceFixture.Queue), Message)!.PayloadJson).IsEqualTo("{}");
         await Assert.That(database.Database.InspectMessage(GraphStorageReferenceFixture.Root,
             new(database.Partition, GraphStorageReferenceFixture.Queue), Message)!.Metadata.State).IsEqualTo(MessageState.Ready);
-        await GraphStorageReferenceAssertions.VerifyAsync(database.Database, database.Partition, reference, [NewVertex]);
+        await GraphStorageReferenceAssertions.VerifyAsync(database.Database, database, reference, [NewVertex]);
         GraphStorageReferenceFixture.Submit(database.Database, GraphStorageReferenceFixture.Command(database.Partition,
             new DeleteEdge(GraphStorageReferenceFixture.Graph, Edge, 1))).Get<CommitReceipt>();
         reference.Clear();
-        await GraphStorageReferenceAssertions.VerifyAsync(database.Database, database.Partition, reference, [NewVertex]);
+        await GraphStorageReferenceAssertions.VerifyAsync(database.Database, database, reference, [NewVertex]);
     }
 
     [Test]
@@ -86,12 +86,12 @@ internal sealed class GraphStorageAtomicEffectsTests
         await Assert.That(database.Database.GetDocument(GraphStorageReferenceFixture.Root,
             new(database.Partition, GraphStorageReferenceFixture.Nodes, RejectedVertex))).IsNull();
         var reference = new Dictionary<string, GraphStorageExpectedEdge>(StringComparer.Ordinal);
-        await GraphStorageReferenceAssertions.VerifyAsync(database.Database, database.Partition, reference);
+        await GraphStorageReferenceAssertions.VerifyAsync(database.Database, database, reference);
         var target = GraphStorageReferenceFixture.Vertex(database.Partition, GraphStorageReferenceFixture.VertexId(1));
         GraphStorageReferenceFixture.Submit(database.Database, GraphStorageReferenceFixture.Command(database.Partition,
             new UpsertEdge(GraphStorageReferenceFixture.Graph, Edge, source, target, GraphStorageReferenceFixture.Label, "{}", 0)))
             .Get<CommitReceipt>();
         reference[Edge] = new(Edge, source.Id, target.Id, GraphStorageReferenceFixture.Label, "{}", 1);
-        await GraphStorageReferenceAssertions.VerifyAsync(database.Database, database.Partition, reference);
+        await GraphStorageReferenceAssertions.VerifyAsync(database.Database, database, reference);
     }
 }

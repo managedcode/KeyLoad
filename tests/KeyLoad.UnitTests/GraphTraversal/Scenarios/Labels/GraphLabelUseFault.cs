@@ -32,7 +32,7 @@ internal static class GraphLabelUseFault
         await ServerFailureObserver.ObserveAsync(() => GraphLabelUseOperations.ConserveAsync(db.Store,
             image, position + 2L, identity), failures);
         ServerFailureObserver.ThrowIfAny(failures);
-        await GraphLabelUseOperations.ReadAsync(db.Database, db.Store, db.Partition, false, token);
+        await GraphLabelUseOperations.ReadAsync(db.Database, db.Store, db, false, token);
     }
     private static void Write(TestDatabase db, byte[] key, byte[] value)
         => db.Store.Commit((transaction, _) =>

@@ -15,23 +15,30 @@ internal sealed class GraphTraversalResourceTests
     [Test]
     public async Task AcMp005_ConvergingLargeTargetUsesOneVisibilityLookup()
     {
-        using var db = new TestDatabase(new()
-        {
-            MaxQueryReadBytes = OneLargeVertexReadBudget
-        });
+        using var db = new TestDatabase();
         Configure(db);
         var start = Vertex(db, "a");
         var left = Vertex(db, "b");
         var right = Vertex(db, "c");
         var target = Vertex(db, "d");
         db.Commit(new PutDocument(Collection, start.Id, "{}"), new PutDocument(Collection, left.Id, "{}"),
-            new PutDocument(Collection, right.Id, "{}"), new PutDocument(Collection, target.Id, LargeDocument()),
+            new PutDocument(Collection, right.Id, "{}"), new PutDocument(Collection, target.Id, "{}"),
             new UpsertEdge(Graph, "ab", start, left, Walk), new UpsertEdge(Graph, "ac", start, right, Walk),
             new UpsertEdge(Graph, "bd", left, target, Walk), new UpsertEdge(Graph, "cd", right, target, Walk));
 
+        var before = db.Store.GetReadDiagnostics();
+        _ = db.Database.Traverse(Root, db.Partition, Graph, start,
+            cancellationToken: TestContext.Current!.Execution.CancellationToken);
+        var smallBytes = db.Store.GetReadDiagnostics().PointExaminedBytes - before.PointExaminedBytes;
+        var largeJson = LargeDocument();
+        db.Commit(new PutDocument(Collection, target.Id, largeJson, ExpectedRevision: 1, ExplicitReplacement: true));
+        before = db.Store.GetReadDiagnostics();
         var traversal = db.Database.Traverse(Root, db.Partition, Graph, start,
             cancellationToken: TestContext.Current!.Execution.CancellationToken);
 
+        var largeBytes = db.Store.GetReadDiagnostics().PointExaminedBytes - before.PointExaminedBytes;
+        var payloadDelta = System.Text.Encoding.UTF8.GetByteCount(largeJson) - 2;
+        await Assert.That(Math.Abs((largeBytes - smallBytes) - payloadDelta)).IsLessThanOrEqualTo(64);
         await Assert.That(traversal.Vertices.Select(vertex => vertex.Id))
             .IsEquivalentTo(new[] { "a", "b", "c", "d" });
         await Assert.That(traversal.Edges.Select(edge => edge.Id))

@@ -19,6 +19,8 @@ internal sealed class GraphCrossPartitionCurrentTargetGuardTests
             GraphCrossPartitionTestSupport.Partition(MachineKeyCurrentTarget), "current-to");
         var from = GraphCrossPartitionTestSupport.Vertex(source, "current-from");
         GraphCrossPartitionTestSupport.SeedVertices(database, from, target);
+        from = database.ExpectedReference(from);
+        target = database.ExpectedReference(target);
         GraphCrossPartitionTestSupport.Commit(database, source,
             new UpsertEdge(GraphCrossPartitionTestSupport.Graph, EdgeId, from, target, Label));
         var edge = new EdgeRecord(EdgeId, from, target, Label,

@@ -25,7 +25,7 @@ internal static class GraphLabelUseCold
                 await ServerFailureObserver.ObserveAsync(async () =>
                 {
                     var owner = fixture.CreateConfiguredDatabase(store);
-                    await GraphLabelUseOperations.ReadAsync(owner, store, fixture.Partition, true, token);
+                    await GraphLabelUseOperations.ReadAsync(owner, store, fixture, true, token);
                     await GraphLabelUseOperations.ReplayAsync(owner, store, seed, receipt, outcome);
                 }, failures);
                 await ServerFailureObserver.ObserveAsync(() => GraphLabelUseOperations.ConserveAsync(store,

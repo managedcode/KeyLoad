@@ -41,7 +41,7 @@ internal static class GraphIncomingVertexAuthorityAssertions
         MutationReceipt[] expected = [new("putDocument", GraphTraversalIntegrityFixture.Nodes, "incoming-witness", 1L),
             new("upsertEdge", GraphTraversalIntegrityFixture.Graph, edge.Id, 1L)];
         await Assert.That(receipt.Mutations.SequenceEqual(expected)).IsTrue();
-        var reference = new EntityRef(command.Partition, GraphTraversalIntegrityFixture.Nodes, "incoming-witness");
+        var reference = edge.From with { Id = "incoming-witness" };
         await Assert.That(JsonSerializer.Serialize(owner.GetDocument(GraphTraversalIntegrityFixture.Root, reference), JsonDefaults.Options))
             .IsEqualTo(JsonSerializer.Serialize(new DocumentResult(reference, 1L, "{}", false, []), JsonDefaults.Options));
     }

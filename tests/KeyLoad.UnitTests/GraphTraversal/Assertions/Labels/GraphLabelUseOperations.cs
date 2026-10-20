@@ -5,14 +5,15 @@ namespace KeyLoad.UnitTests.Features.GraphTraversal;
 
 internal static class GraphLabelUseOperations
 {
-    internal static async Task ReadAsync(DatabaseEngine database, ZoneTreeStore store, PartitionRef partition,
+    internal static async Task ReadAsync(DatabaseEngine database, ZoneTreeStore store, TestDatabase source,
         bool allow, CancellationToken token)
     {
+        var partition = source.Partition;
         await ObserveAsync(store, async () =>
         {
             foreach (var labels in new string[]?[] { null, [] })
             {
-                await EqualAsync(GraphLabelUseFixture.Expected(partition, labels),
+                await EqualAsync(GraphLabelUseFixture.Expected(source, labels),
                     GraphLabelUseFixture.Traverse(database, partition, labels, token));
             }
         });
@@ -22,7 +23,7 @@ internal static class GraphLabelUseOperations
             {
                 if (allow)
                 {
-                    await EqualAsync(GraphLabelUseFixture.Expected(partition, labels),
+                    await EqualAsync(GraphLabelUseFixture.Expected(source, labels),
                         GraphLabelUseFixture.Traverse(database, partition, labels, token));
                 }
                 else

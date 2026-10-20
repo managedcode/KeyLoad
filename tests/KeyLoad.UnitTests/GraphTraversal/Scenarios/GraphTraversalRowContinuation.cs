@@ -22,20 +22,20 @@ internal static class GraphTraversalRowContinuation
 
     internal static async Task RunAsync(TestDatabase db, CancellationToken token)
     {
-        await GraphTraversalRowAssertions.ReadAsync(db.Database, db.Store, db.Partition, false, token);
+        await GraphTraversalRowAssertions.ReadAsync(db.Database, db.Store, db, false, token);
         var command = new CommandRequest(Guid.NewGuid(), db.Partition,
             [new PutDocument(Collection, Intermediate, EmptyJson, OriginalRevision, Access: new(Reader))]);
         var receipt = db.Submit(OperationKind.Batch, command, id: command.CommandId).Get<CommitReceipt>();
         await Assert.That(receipt.CommandId).IsEqualTo(command.CommandId);
         await Assert.That(receipt.Token.Incarnation).IsEqualTo(db.Store.Identity.Incarnation);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(db.Partition.AtomicPartitionId);
-        await Assert.That(receipt.Token.Position).IsEqualTo(db.Store.Position);
+        await Assert.That(receipt.Token.Position).IsEqualTo(db.Database.LastApplied);
 
         await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
         MutationReceipt[] mutations = [new("putDocument", Collection, Intermediate, UpdatedRevision)];
         await Assert.That(JsonDefaults.Serialize(receipt.Mutations).AsSpan().SequenceEqual(JsonDefaults.Serialize(mutations))).IsTrue();
         var outcome = Outcome(db.Store, command);
-        await GraphTraversalRowAssertions.ReadAsync(db.Database, db.Store, db.Partition, true, token);
+        await GraphTraversalRowAssertions.ReadAsync(db.Database, db.Store, db, true, token);
         var principal = new PrincipalRecord(Reader, Tenant,
             [new(DatabaseScope, Collection, Capability.DocumentsRead), new(DatabaseScope, Graph, Capability.GraphRead)], [])
         {
@@ -56,7 +56,7 @@ internal static class GraphTraversalRowContinuation
         });
         await GraphTraversalRowAssertions.RefusedAsync(db.Database, db.Store, db.Partition, ErrorCode.Unauthenticated, token);
         await ConfigureAsync(db, principal);
-        await GraphTraversalRowAssertions.ReadAsync(db.Database, db.Store, db.Partition, true, token);
+        await GraphTraversalRowAssertions.ReadAsync(db.Database, db.Store, db, true, token);
         await ReplayAsync(db.Database, db.Store, command, receipt, outcome, token);
         await GraphTraversalRowCold.RunAsync(db, command, receipt, outcome, token);
     }

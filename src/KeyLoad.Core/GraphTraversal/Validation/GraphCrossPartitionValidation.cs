@@ -165,10 +165,10 @@ internal static class GraphCrossPartitionValidation
         {
             throw Errors.Fail(ErrorCode.Corruption, InvalidStoredRecord);
         }
-        EntityReferenceLifetime.RequireBound(edge.From);
-        EntityReferenceLifetime.RequireBound(edge.To);
         try
         {
+            EntityReferenceLifetime.RequireBound(edge.From);
+            EntityReferenceLifetime.RequireBound(edge.To);
             EngineResourceAccess.ValidatePartition(edge.From.Partition);
             EngineResourceAccess.ValidatePartition(edge.To.Partition);
             JsonData.Identifier(edge.Id);

@@ -36,7 +36,7 @@ internal sealed class GraphSearchIntegrityFlow : IDisposable
         var token = TestContext.Current!.Execution.CancellationToken;
         var state = GraphTraversalIntegrityFixture.Seed(database);
         var identity = database.Store.Identity;
-        var receipt = GraphSearchIntegrityRecipe.SeedReceipt(state, identity.Incarnation, database.Store.Position);
+        var receipt = GraphSearchIntegrityRecipe.SeedReceipt(state, identity.Incarnation, database.Database.LastApplied);
         await GraphSearchIntegrityAssertions.ReceiptAsync(receipt, state.SeedReceipt);
         var outcome = GraphSearchIntegrityAssertions.Outcome(database.Store, state.SeedCommand);
         await GraphSearchIntegrityAssertions.ReadAsync(database.Database, database.Store, state, null, selected, filtered, token);
@@ -62,7 +62,7 @@ internal sealed class GraphSearchIntegrityFlow : IDisposable
             await GraphTraversalIntegrityAssertions.Image(store, healthyImage, dirtyCut + RepairCommit);
             await GraphSearchIntegrityAssertions.ReadAsync(owner, store, state, null, selected, filtered, token);
             await GraphSearchIntegrityAssertions.ReplayAsync(owner, store, state.SeedCommand, receipt, outcome);
-            var position = store.Position + RepairCommit;
+            var position = checked(owner.LastApplied + RepairCommit);
             continuation = GraphTraversalIntegrityFixture.Continue(owner, state);
             await GraphSearchIntegrityAssertions.ReceiptAsync(
                 GraphSearchIntegrityRecipe.ContinuedReceipt(continuation, identity.Incarnation, position), continuation.Receipt);

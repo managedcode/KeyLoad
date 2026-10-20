@@ -19,7 +19,7 @@ internal sealed class GraphIncomingSortCancellationTests
             new DatabaseLimits { MaxResults = IncomingCount });
         var partition = GraphCrossPartitionTestSupport.Partition(TargetPartitionKey);
         var target = GraphCrossPartitionTestSupport.Vertex(partition, TargetId);
-        var sources = CreateSources(partition);
+        var sources = CreateSources(partition).Select(database.ExpectedReference).ToArray();
         SeedEdges(database, partition, sources, target);
         var fullPage = ReadPage(database, target);
         await AssertOrderedSourcesAsync(fullPage, sources);

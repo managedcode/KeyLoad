@@ -55,9 +55,9 @@ internal static class GraphIncomingVertexAuthorityFlow
     {
         database.Configure(GraphTraversalIntegrityFixture.Nodes, ResourceKind.Collection);
         database.Configure(GraphTraversalIntegrityFixture.Graph, ResourceKind.Graph);
-        var healthySource = new EntityRef(database.Partition, GraphTraversalIntegrityFixture.Nodes, "incoming-healthy-source");
-        var selectedSource = new EntityRef(database.Partition, GraphTraversalIntegrityFixture.Nodes, "incoming-selected-source");
-        var target = new EntityRef(database.Partition, GraphTraversalIntegrityFixture.Nodes, "incoming-common-target");
+        var healthySource = database.ExpectedReference(new(database.Partition, GraphTraversalIntegrityFixture.Nodes, "incoming-healthy-source"));
+        var selectedSource = database.ExpectedReference(new(database.Partition, GraphTraversalIntegrityFixture.Nodes, "incoming-selected-source"));
+        var target = database.ExpectedReference(new(database.Partition, GraphTraversalIntegrityFixture.Nodes, "incoming-common-target"));
         var healthy = new EdgeRecord("a-incoming-healthy", healthySource, target, "walk", "{}", 1L);
         var selected = new EdgeRecord("z-incoming-selected", selectedSource, target, "walk", "{}", 1L);
         var command = GraphStorageReferenceFixture.Command(database.Partition,

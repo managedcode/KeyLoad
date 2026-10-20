@@ -8,6 +8,8 @@ namespace KeyLoad.UnitTests.Features.GraphTraversal;
 
 internal static class GraphIncomingMcpCatalogAssertions
 {
+    private const string Lifetime = "lifetime";
+    private const string Incarnation = "incarnation";
     private const string MissingTool = "The public graph incoming tool is missing.";
 
     internal static async Task VerifyAsync()
@@ -87,8 +89,11 @@ internal static class GraphIncomingMcpCatalogAssertions
         schema = Resolve(root, schema);
         var fields = ImmutableArray.Create(GraphIncomingMcpProtocol.Partition, GraphIncomingMcpProtocol.Collection,
             GraphIncomingMcpProtocol.Id);
-        await VerifyObjectAsync(schema, fields);
+        await VerifyObjectAsync(schema, fields.Add(Lifetime), fields);
         var properties = schema.GetProperty(McpSchemaInspector.Properties);
+        var lifetime = Resolve(root, properties.GetProperty(Lifetime));
+        await VerifyObjectAsync(lifetime, [Incarnation]);
+        await VerifyPrimitiveAsync(root, lifetime.GetProperty(McpSchemaInspector.Properties).GetProperty(Incarnation), McpSchemaInspector.String);
         await VerifyPrimitiveAsync(root, properties.GetProperty(GraphIncomingMcpProtocol.Collection), McpSchemaInspector.String);
         await VerifyPrimitiveAsync(root, properties.GetProperty(GraphIncomingMcpProtocol.Id), McpSchemaInspector.String);
         await VerifyPartitionAsync(root, properties.GetProperty(GraphIncomingMcpProtocol.Partition));
@@ -112,7 +117,7 @@ internal static class GraphIncomingMcpCatalogAssertions
     private static async Task VerifyObjectAsync(JsonElement schema, ImmutableArray<string> fields,
         ImmutableArray<string> requiredFields)
     {
-        await Assert.That(schema.GetProperty(McpSchemaInspector.Type).GetString()).IsEqualTo(GraphIncomingMcpProtocol.Object);
+        await Assert.That(McpSchemaInspector.HasType(schema, GraphIncomingMcpProtocol.Object)).IsTrue();
         await Assert.That(schema.GetProperty(GraphIncomingMcpProtocol.AdditionalProperties).GetBoolean()).IsFalse();
         var actual = schema.GetProperty(McpSchemaInspector.Properties).EnumerateObject()
             .Select(property => property.Name).ToImmutableHashSet(StringComparer.Ordinal);

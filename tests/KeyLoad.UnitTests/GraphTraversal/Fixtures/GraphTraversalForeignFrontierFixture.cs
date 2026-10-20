@@ -17,8 +17,8 @@ internal static class GraphTraversalForeignFrontierFixture
 
     internal static GraphTraversalForeignFrontierState Seed(TestDatabase database)
     {
-        var source = GraphCrossPartitionTestSupport.Vertex(GraphCrossPartitionTestSupport.Partition(SourcePartition), SourceId);
-        var foreign = GraphCrossPartitionTestSupport.Vertex(GraphCrossPartitionTestSupport.Partition(ForeignPartition), CollidingId);
+        var source = database.ExpectedReference(GraphCrossPartitionTestSupport.Vertex(GraphCrossPartitionTestSupport.Partition(SourcePartition), SourceId));
+        var foreign = database.ExpectedReference(GraphCrossPartitionTestSupport.Vertex(GraphCrossPartitionTestSupport.Partition(ForeignPartition), CollidingId));
         var collision = GraphCrossPartitionTestSupport.Vertex(source.Partition, CollidingId);
         var tail = GraphCrossPartitionTestSupport.Vertex(source.Partition, LocalTailId);
         var edge = new EdgeRecord(SourceEdgeId, source, foreign, Label, Attributes, InitialRevision);
@@ -38,7 +38,7 @@ internal static class GraphTraversalForeignFrontierFixture
 
     internal static GraphTraversalIntegrityContinuation Continue(DatabaseEngine owner, GraphTraversalForeignFrontierState state)
     {
-        var target = GraphCrossPartitionTestSupport.Vertex(state.Source.Partition, ContinuedId);
+        var target = state.Source with { Id = ContinuedId };
         var edge = new EdgeRecord(ContinuedEdgeId, state.Source, target, Label, Attributes, InitialRevision);
         var command = GraphStorageReferenceFixture.Command(state.Source.Partition,
             new PutDocument(target.Collection, target.Id, Attributes), Mutation(edge));

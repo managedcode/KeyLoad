@@ -182,7 +182,7 @@ internal sealed class GraphTraversalReferenceOracleTests
         => new(vertex.Collection, vertex.Id, EmptyDocument, Access: new(owner));
 
     private static EntityRef Vertex(TestDatabase database, GraphTraversalReferenceVertex vertex)
-        => new(database.Partition, vertex.Collection, vertex.Id);
+        => database.ExpectedReference(new(database.Partition, vertex.Collection, vertex.Id));
 
     private static EntityRef[] ExpandVertices(TestDatabase database, GraphTraversalReferenceResult result)
         => result.Vertices.Select(vertex => Vertex(database, vertex)).ToArray();

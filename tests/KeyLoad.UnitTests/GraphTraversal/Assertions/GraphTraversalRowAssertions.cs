@@ -14,12 +14,13 @@ internal static class GraphTraversalRowAssertions
     private const string EmptyJson = "{}";
     private const long EdgeRevision = 1;
 
-    internal static async Task ReadAsync(DatabaseEngine engine, ZoneTreeStore store, PartitionRef partition,
+    internal static async Task ReadAsync(DatabaseEngine engine, ZoneTreeStore store, TestDatabase source,
         bool visible, CancellationToken token)
     {
+        var partition = source.Partition;
         var image = CanonicalStoreImage.Bytes(store);
         var cut = store.Position;
-        EntityRef Ref(string id) => new(partition, Collection, id);
+        EntityRef Ref(string id) => source.ExpectedReference(new(partition, Collection, id));
         var actual = engine.Traverse(Reader, partition, Graph, Ref(A), cancellationToken: token);
         EntityRef[] vertices = visible ? [Ref(A), Ref(B), Ref(C)] : [Ref(A)];
         EdgeRecord[] edges = visible ? [new("ab", Ref(A), Ref(B), Label, EmptyJson, EdgeRevision),

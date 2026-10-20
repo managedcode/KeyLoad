@@ -34,7 +34,7 @@ internal sealed class GraphStorageMutationReferenceTests
             {
                 reference[id] = new(id, from, to, label, json, previousRevision + 1);
             }
-            await GraphStorageReferenceAssertions.VerifyAsync(database.Database, database.Partition, reference);
+            await GraphStorageReferenceAssertions.VerifyAsync(database.Database, database, reference);
             var position = database.Store.Position;
             var retry = GraphStorageReferenceFixture.Submit(database.Database, command).Get<CommitReceipt>();
             await Assert.That(retry.Token).IsEqualTo(receipt.Token);
@@ -47,13 +47,13 @@ internal sealed class GraphStorageMutationReferenceTests
             await Assert.That(database.Database.GetDocument(GraphStorageReferenceFixture.Root,
                 new(database.Partition, GraphStorageReferenceFixture.Nodes, "forbidden"))).IsNull();
             await Assert.That(database.Store.Position).IsEqualTo(position);
-            await GraphStorageReferenceAssertions.VerifyAsync(database.Database, database.Partition, reference);
+            await GraphStorageReferenceAssertions.VerifyAsync(database.Database, database, reference);
         }
         database.Store.Dispose();
         using var reopened = new ZoneTreeStore(new(database.Directory), UnitExecutionOptions.StorageExecution(),
             UnitExecutionOptions.PointCacheExecution());
         var owner = GraphStorageReferenceFixture.ReopenedOwner(reopened);
-        await GraphStorageReferenceAssertions.VerifyAsync(owner, database.Partition, reference);
+        await GraphStorageReferenceAssertions.VerifyAsync(owner, database, reference);
         var healthy = GraphStorageReferenceFixture.Command(database.Partition,
             new UpsertEdge(GraphStorageReferenceFixture.Graph, GraphStorageReferenceFixture.HealthyEdge,
                 GraphStorageReferenceFixture.Vertex(database.Partition, GraphStorageReferenceFixture.VertexId(0)),
@@ -62,6 +62,6 @@ internal sealed class GraphStorageMutationReferenceTests
         GraphStorageReferenceFixture.Submit(owner, healthy).Get<CommitReceipt>();
         reference[GraphStorageReferenceFixture.HealthyEdge] = new(GraphStorageReferenceFixture.HealthyEdge, GraphStorageReferenceFixture.VertexId(0),
             GraphStorageReferenceFixture.VertexId(1), GraphStorageReferenceFixture.Label, "{}", 1);
-        await GraphStorageReferenceAssertions.VerifyAsync(owner, database.Partition, reference);
+        await GraphStorageReferenceAssertions.VerifyAsync(owner, database, reference);
     }
 }

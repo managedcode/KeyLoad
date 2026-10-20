@@ -2,9 +2,10 @@ namespace KeyLoad.UnitTests.Features.GraphTraversal;
 
 internal static class GraphStorageReferenceAssertions
 {
-    internal static async Task VerifyAsync(DatabaseEngine owner, PartitionRef partition,
+    internal static async Task VerifyAsync(DatabaseEngine owner, TestDatabase database,
         IReadOnlyDictionary<string, GraphStorageExpectedEdge> expected, IEnumerable<string>? additionalVertices = null)
     {
+        var partition = database.Partition;
         var canonical = owner.Store.Read(view =>
         {
             var records = new List<EdgeRecord>();
@@ -16,7 +17,7 @@ internal static class GraphStorageReferenceAssertions
             }
             return records;
         });
-        await CompareAsync(canonical, expected.Values, partition);
+        await CompareAsync(canonical, expected.Values, database);
         await VerifyAdjacencyCountAsync(owner, partition, "out", expected.Count);
         await VerifyAdjacencyCountAsync(owner, partition, "in", expected.Count);
         var vertices = Enumerable.Range(0, GraphStorageReferenceFixture.VertexCount)
@@ -26,10 +27,10 @@ internal static class GraphStorageReferenceAssertions
             var vertex = GraphStorageReferenceFixture.Vertex(partition, id);
             var outgoing = owner.Traverse(GraphStorageReferenceFixture.Root, partition,
                 GraphStorageReferenceFixture.Graph, vertex, maxDepth: 1);
-            await CompareAsync(outgoing.Edges, expected.Values.Where(edge => edge.From == id), partition);
+            await CompareAsync(outgoing.Edges, expected.Values.Where(edge => edge.From == id), database);
             var incoming = owner.ReadIncomingGraphEdges(GraphStorageReferenceFixture.Root,
                 new ReadIncomingGraphEdgesRequest(1, vertex, GraphStorageReferenceFixture.Graph, 100));
-            await CompareAsync(incoming.Rows.Select(row => row.Edge), expected.Values.Where(edge => edge.To == id), partition);
+            await CompareAsync(incoming.Rows.Select(row => row.Edge), expected.Values.Where(edge => edge.To == id), database);
             await Assert.That(incoming.Rows.All(row => row.DeliveredRevision == 0)).IsTrue();
         }
     }
@@ -51,8 +52,9 @@ internal static class GraphStorageReferenceAssertions
     }
 
     private static async Task CompareAsync(IEnumerable<EdgeRecord> actual, IEnumerable<GraphStorageExpectedEdge> expected,
-        PartitionRef partition)
+        TestDatabase database)
     {
+        var partition = database.Partition;
         var edges = actual.OrderBy(edge => edge.Id, StringComparer.Ordinal).ToArray();
         var reference = expected.OrderBy(edge => edge.Id, StringComparer.Ordinal).ToArray();
         await Assert.That(edges.Length).IsEqualTo(reference.Length);
@@ -61,8 +63,8 @@ internal static class GraphStorageReferenceAssertions
             var edge = edges[index];
             var literal = reference[index];
             await Assert.That(edge.Id).IsEqualTo(literal.Id);
-            await Assert.That(edge.From).IsEqualTo(GraphStorageReferenceFixture.Vertex(partition, literal.From));
-            await Assert.That(edge.To).IsEqualTo(GraphStorageReferenceFixture.Vertex(partition, literal.To));
+            await Assert.That(edge.From).IsEqualTo(database.ExpectedReference(GraphStorageReferenceFixture.Vertex(partition, literal.From)));
+            await Assert.That(edge.To).IsEqualTo(database.ExpectedReference(GraphStorageReferenceFixture.Vertex(partition, literal.To)));
             await Assert.That(edge.Label).IsEqualTo(literal.Label);
             await Assert.That(edge.AttributesJson).IsEqualTo(literal.Json);
             await Assert.That(edge.Revision).IsEqualTo(literal.Revision);

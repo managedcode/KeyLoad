@@ -24,8 +24,8 @@ internal static class GraphShortestPathCorruptionFlow
 
     internal static EdgeRecord Seed(TestDatabase database)
     {
-        var from = new EntityRef(database.Partition, Nodes, Source);
-        var to = new EntityRef(database.Partition, Nodes, Target);
+        var from = database.ExpectedReference(new(database.Partition, Nodes, Source));
+        var to = database.ExpectedReference(new(database.Partition, Nodes, Target));
         database.Commit(new PutDocument(Nodes, Source, GraphShortestPathTestSupport.EmptyJson),
             new PutDocument(Nodes, Target, GraphShortestPathTestSupport.EmptyJson),
             new UpsertEdge(GraphShortestPathTestSupport.Graph, EdgeId, from, to,
