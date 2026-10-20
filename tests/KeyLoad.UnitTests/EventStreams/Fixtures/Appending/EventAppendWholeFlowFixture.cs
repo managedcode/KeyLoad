@@ -90,7 +90,7 @@ internal sealed class EventAppendWholeFlowFixture : IDisposable
             await Assert.That(message).IsNull();
             return;
         }
-        await Assert.That(document!.Reference).IsEqualTo(new EntityRef(Database.Partition, Documents, identity));
+        await Assert.That(document!.Reference).IsEqualTo(Database.ExpectedReference(new(Database.Partition, Documents, identity)));
         await Assert.That(document.Redacted).IsFalse();
         await Assert.That(document.RedactedFields).IsEmpty();
         await Assert.That(document.Revision).IsEqualTo(1L);

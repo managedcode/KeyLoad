@@ -6,6 +6,7 @@ namespace KeyLoad.UnitTests.Features.EventStreams;
 internal sealed class SharedDomainState
 {
     internal ImmutableArray<SharedDomainScope> Scopes { get; } = SharedDomainCorpus.Create(SharedDomainProtocol.Tenant, SharedDomainProtocol.Database);
+    internal Dictionary<(PartitionRef Partition, string Collection), EntityRefLifetime> DocumentLifetimes { get; } = [];
     internal List<SharedDomainHistory> History { get; } = [];
     internal Dictionary<string, DateTimeOffset> Recorded { get; } = [];
     internal Dictionary<string, CommitReceipt> Producers { get; } = [];

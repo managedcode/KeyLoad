@@ -73,7 +73,7 @@ internal static class StreamRecordKeyAuthorityFlow
         var healthyResult = fixture.Submit(healthy);
         await StreamRecordKeyAuthorityAssertions.ReceiptAsync(fixture, healthy, healthyResult, 4L);
         await StreamRecordKeyAuthorityAssertions.PageAsync(fixture.Database.Database, fixture.Stream, fixture.Now,
-            StreamReadDirection.Forward, null, fixture.Database.Store.Position, [1L, 2L, 3L, 4L], 4L, token);
+            StreamReadDirection.Forward, null, fixture.Database.Database.LastApplied, [1L, 2L, 3L, 4L], 4L, token);
         await EventAppendSequenceAuthorityAssertions.ReplayAsync(fixture.Database.Database, fixture.Database.Store, healthy, healthyResult, fixture.Now);
         await StreamRecordKeyAuthorityCold.RunAsync(fixture, seed, seedResult, healthy, healthyResult, forward, backward, token);
     }

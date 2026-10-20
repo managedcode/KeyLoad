@@ -42,7 +42,10 @@ internal sealed class TopicRetentionBoundaryTests
         {
             MaxScanRecords = 1
         });
-        await TopicRetentionAssertions.Reject(fixture, fixture.Purge(), ErrorCode.ResourceExhausted);
+        var command = fixture.Purge();
+        await TopicRetentionAssertions.Reject(fixture, command, ErrorCode.BudgetExceeded);
+        await Assert.That(fixture.Submit(command).Problem?.Detail)
+            .IsEqualTo("The resource effect admission exceeds the original operation budget.");
         fixture.SetLimits(new());
         fixture.Submit(fixture.Purge()).Get<CommitReceipt>();
         await TopicRetentionIdentityFlow.VerifyAsync(fixture);

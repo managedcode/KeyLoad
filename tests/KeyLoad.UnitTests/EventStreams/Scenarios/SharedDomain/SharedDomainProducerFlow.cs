@@ -13,7 +13,7 @@ internal static class SharedDomainProducerFlow
             var other = state.Scopes.Where(candidate => candidate != scope).ToDictionary(candidate => candidate.Partition,
                 candidate => SharedDomainImage.Capture(database.Store, candidate.Partition));
             var command = SharedDomainCorpus.Producer(scope, id, healthy ? Healthy : Item);
-            var position = database.Store.Position + FirstRevision;
+            var position = checked(database.LastApplied + FirstRevision);
             var operation = SharedDomainOperations.Operation(database, OperationKind.Batch, command.CommandId, command);
             var result = SharedDomainOperations.Apply(database, operation, token);
             await SharedDomainValueAssertions.ReceiptAsync(result, command, database.Store.Identity, position);

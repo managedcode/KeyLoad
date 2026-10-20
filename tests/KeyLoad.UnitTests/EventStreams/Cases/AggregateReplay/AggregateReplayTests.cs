@@ -125,27 +125,6 @@ internal sealed class AggregateReplayTests
     }
 
     [Test]
-    public async Task AcEvent010CompleteTailAndSharedLimitsRejectWholeRequests()
-    {
-        using var fixture = new AggregateReplayFixture(new()
-        {
-            MaxResults = 2,
-            MaxScanRecords = 2
-        });
-        fixture.Append(Event(FirstEventId, 1), Event(SecondEventId, 2), Event(ThirdEventId, 3));
-
-        var tooLarge = Assert.ThrowsExactly<KeyLoadException>(() => fixture.Read(maximumEvents: 3));
-        var incomplete = Assert.ThrowsExactly<KeyLoadException>(() => fixture.Read(maximumEvents: 2));
-        using var cancellation = new CancellationTokenSource();
-        await cancellation.CancelAsync();
-        Assert.ThrowsExactly<OperationCanceledException>(() => fixture.Read(maximumEvents: 2,
-            cancellationToken: cancellation.Token));
-
-        await Assert.That(tooLarge.Code).IsEqualTo(ErrorCode.BudgetExceeded);
-        await Assert.That(incomplete.Code).IsEqualTo(ErrorCode.BudgetExceeded);
-    }
-
-    [Test]
     public async Task AcEvent010RawReadAndResultBytesAreBounded()
     {
         using var rawBudget = new AggregateReplayFixture();

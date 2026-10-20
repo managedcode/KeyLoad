@@ -12,7 +12,7 @@ internal static class EventAppendSequenceAuthorityAssertions
     {
         var receipt = result.Get<CommitReceipt>();
         await Assert.That(receipt.CommandId).IsEqualTo(command.CommandId);
-        await Assert.That(receipt.Token.Position).IsEqualTo(fixture.Database.Store.Position);
+        await Assert.That(receipt.Token.Position).IsEqualTo(fixture.Database.Database.LastApplied);
         var expected = new MutationReceipt[]
         {
             new("putDocument", EventAppendWholeFlowFixture.Documents, ((PutDocument)command.Mutations[0]).Id, 1L),
@@ -32,7 +32,7 @@ internal static class EventAppendSequenceAuthorityAssertions
         };
         var expected = new StreamPage(stream, new(3L, 1L, 1L),
             [.. expectedData.Select((data, index) => new EventRecord(stream, index + 1L, index + 1L, data, now))],
-            database.Store.Position, false, null, database.Store.Position);
+            database.LastApplied, false, null, database.LastApplied);
         var actual = database.ReadStream(EventAppendWholeFlowFixture.Root, stream, cancellationToken: token);
         await Assert.That(System.Text.Json.JsonSerializer.Serialize(actual, JsonDefaults.Options))
             .IsEqualTo(System.Text.Json.JsonSerializer.Serialize(expected, JsonDefaults.Options));

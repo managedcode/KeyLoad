@@ -28,6 +28,11 @@ internal static class SharedDomainOperations
             {
                 _ = fixture.Submit(OperationKind.ConfigureResource, new ConfigureResourceRequest(Tenant, Database, resource))
                     .Get<ResourceDefinition>();
+                if (resource.Kind == ResourceKind.Collection)
+                {
+                    state.DocumentLifetimes.Add((scope.Partition, resource.Name),
+                        fixture.ExpectedReference(new(scope.Partition, resource.Name, Item)).Lifetime!);
+                }
             }
         }
         ConfigurePrincipal(fixture.Database, state, denied: false, CancellationToken.None);

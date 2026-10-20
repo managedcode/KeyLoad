@@ -11,7 +11,7 @@ internal static class StreamRecordKeyAuthorityAssertions
     {
         var receipt = result.Get<CommitReceipt>();
         await Assert.That(receipt.CommandId).IsEqualTo(command.CommandId);
-        await Assert.That(receipt.Token.Position).IsEqualTo(fixture.Database.Store.Position);
+        await Assert.That(receipt.Token.Position).IsEqualTo(fixture.Database.Database.LastApplied);
         await Assert.That(receipt.Mutations).IsEquivalentTo(
             new MutationReceipt[] { new("appendEvents", EventAppendWholeFlowFixture.Streams,
                 EventAppendWholeFlowFixture.StreamId, tail) }, TUnit.Assertions.Enums.CollectionOrdering.Matching);
@@ -45,8 +45,8 @@ internal static class StreamRecordKeyAuthorityAssertions
     internal static async Task PagesAsync(DatabaseEngine database, StreamRef stream, DateTimeOffset now,
         StreamPage forward, StreamPage backward, CancellationToken token)
     {
-        await PageAsync(database, stream, now, StreamReadDirection.Forward, null, database.Store.Position, [1L, 2L, 3L], 3L, token);
-        await PageAsync(database, stream, now, StreamReadDirection.Backward, null, database.Store.Position, [3L, 2L, 1L], 3L, token);
+        await PageAsync(database, stream, now, StreamReadDirection.Forward, null, database.LastApplied, [1L, 2L, 3L], 3L, token);
+        await PageAsync(database, stream, now, StreamReadDirection.Backward, null, database.LastApplied, [3L, 2L, 1L], 3L, token);
         await PageAsync(database, stream, now, StreamReadDirection.Forward, forward.Cursor, forward.SnapshotCutPosition, [2L, 3L], 3L, token);
         await PageAsync(database, stream, now, StreamReadDirection.Backward, backward.Cursor, backward.SnapshotCutPosition, [2L, 1L], 3L, token);
     }
@@ -54,8 +54,8 @@ internal static class StreamRecordKeyAuthorityAssertions
     internal static async Task PagesFourAsync(DatabaseEngine database, StreamRef stream, DateTimeOffset now,
         StreamPage forward, StreamPage backward, CancellationToken token)
     {
-        await PageAsync(database, stream, now, StreamReadDirection.Forward, null, database.Store.Position, [1L, 2L, 3L, 4L], 4L, token);
-        await PageAsync(database, stream, now, StreamReadDirection.Backward, null, database.Store.Position, [4L, 3L, 2L, 1L], 4L, token);
+        await PageAsync(database, stream, now, StreamReadDirection.Forward, null, database.LastApplied, [1L, 2L, 3L, 4L], 4L, token);
+        await PageAsync(database, stream, now, StreamReadDirection.Backward, null, database.LastApplied, [4L, 3L, 2L, 1L], 4L, token);
         await PageAsync(database, stream, now, StreamReadDirection.Forward, forward.Cursor, forward.SnapshotCutPosition, [2L, 3L], 3L, token);
         await PageAsync(database, stream, now, StreamReadDirection.Backward, backward.Cursor, backward.SnapshotCutPosition, [2L, 1L], 3L, token);
     }
@@ -67,7 +67,7 @@ internal static class StreamRecordKeyAuthorityAssertions
             StreamRecordKeyAuthorityFlow.Third, StreamRecordKeyAuthorityFlow.Fourth };
         var records = revisions.Select(revision => new EventRecord(stream, revision, revision,
             EventAppendWholeFlowFixture.Data(ids[checked((int)revision - 1)]), now));
-        var expected = new StreamPage(stream, new(tail, 1L, 1L), [.. records], database.Store.Position, false, null, snapshotCut);
+        var expected = new StreamPage(stream, new(tail, 1L, 1L), [.. records], database.LastApplied, false, null, snapshotCut);
         var position = database.Store.Position;
         var before = QueueWholeFlowStorage.Bytes((KeyLoad.Storage.ZoneTree.ZoneTreeStore)database.Store);
         var actual = Read(database, stream, direction, 100, cursor, token);

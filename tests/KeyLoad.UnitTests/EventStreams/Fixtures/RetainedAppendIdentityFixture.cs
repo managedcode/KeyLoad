@@ -42,7 +42,7 @@ internal sealed class RetainedAppendIdentityFixture : IDisposable
     internal async Task<Result<object>> CommitAsync(DatabaseEngine database, ZoneTreeStore store,
         CommandRequest command, MutationReceipt[] effects)
     {
-        var position = store.Position + 1;
+        var position = checked(database.LastApplied + 1);
         var result = KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Apply(database, OperationKind.Batch,
             command, command.CommandId, Epoch);
         var receipt = result.Get<CommitReceipt>();
@@ -52,7 +52,7 @@ internal sealed class RetainedAppendIdentityFixture : IDisposable
         for (var index = 0; index < command.Mutations.Length; index++)
         {
             var mutation = command.Mutations[index];
-            var after = mutation is PutDocument put ? new DocumentRecord(new(Harness.Partition, Documents, put.Id),
+            var after = mutation is PutDocument put ? new DocumentRecord(Harness.ExpectedReference(new(Harness.Partition, Documents, put.Id)),
                 1, "{\"producer\":true}", new(), Epoch) : null;
             ExpectedOutbox.Add(new(ExpectedOutbox.Count + 1L, index, receipt.Token, Epoch, mutation, effects[index], After: after));
         }

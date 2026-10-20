@@ -30,7 +30,7 @@ internal static class TopicRetentionCorruptionAssertions
     internal static async Task PurgeRepairedAsync(TopicRetentionFixture fixture, CommandRequest original)
     {
         var protectedState = TopicRetentionAssertions.ProtectedBytes(fixture);
-        var position = fixture.Store.Position;
+        var position = fixture.Database.LastApplied;
         var receipt = fixture.Submit(original).Get<CommitReceipt>();
         await Assert.That(receipt.CommandId).IsEqualTo(original.CommandId);
         await Assert.That(receipt.Token.Position).IsEqualTo(position + CommitAdvance);

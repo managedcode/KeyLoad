@@ -15,7 +15,7 @@ internal static class RetainedAppendIdentityModel
             records = [.. records, new(stream, 3, 4, RetainedAppendIdentityFixture.Data("following"), RetainedAppendIdentityFixture.Epoch)];
         }
         await RetainedAppendIdentityAssertions.SameAsync(database.ReadStream("root", new ReadStreamRequest(stream)),
-            new StreamPage(stream, new(records.Length, 1, 1), [.. records], store.Position, false, null, store.Position));
+            new StreamPage(stream, new(records.Length, 1, 1), [.. records], database.LastApplied, false, null, database.LastApplied));
         var foreign = stream with
         {
             StreamId = RetainedAppendIdentityFixture.Foreign
@@ -23,12 +23,12 @@ internal static class RetainedAppendIdentityModel
         await RetainedAppendIdentityAssertions.SameAsync(database.ReadStream("root", new ReadStreamRequest(foreign)),
             new StreamPage(foreign, new(1, 1, 1), [new(foreign, 1, 2,
                 RetainedAppendIdentityFixture.Data(RetainedAppendIdentityFixture.Candidate), RetainedAppendIdentityFixture.Epoch)],
-                store.Position, false, null, store.Position));
+                database.LastApplied, false, null, database.LastApplied));
         foreach (var id in healthy ? new[] { "repaired", "healthy" } : new[] { "repaired" })
         {
             await RetainedAppendIdentityAssertions.SameAsync(database.GetDocument("root", new(stream.Partition,
-                RetainedAppendIdentityFixture.Documents, id)), new DocumentResult(new(stream.Partition,
-                    RetainedAppendIdentityFixture.Documents, id), 1, "{\"producer\":true}", false, []));
+                RetainedAppendIdentityFixture.Documents, id)), new DocumentResult(fixture.Harness.ExpectedReference(new(stream.Partition,
+                    RetainedAppendIdentityFixture.Documents, id)), 1, "{\"producer\":true}", false, []));
             var sequence = id == "repaired" ? 1L : 2L;
             await RetainedAppendIdentityAssertions.SameAsync(database.InspectMessage("root",
                 new(stream.Partition, RetainedAppendIdentityFixture.Queue), id), new MessageInspection(

@@ -16,10 +16,10 @@ internal static class SharedDomainModelAssertions
             var healthy = state.Healthy.Contains(scope.Partition.AtomicPartitionId);
             if (scope.Documents is { } documents)
             {
-                await DocumentAsync(database, scope, documents, Item, true, token);
-                await DocumentAsync(database, scope, documents, Processed, processed, token);
-                await DocumentAsync(database, scope, documents, Healthy, healthy, token);
-                await DocumentAsync(database, scope, documents, Refused, false, token);
+                await DocumentAsync(database, state, scope, documents, Item, true, token);
+                await DocumentAsync(database, state, scope, documents, Processed, processed, token);
+                await DocumentAsync(database, state, scope, documents, Healthy, healthy, token);
+                await DocumentAsync(database, state, scope, documents, Refused, false, token);
             }
             if (scope.Streams is { } streams)
             {
@@ -44,10 +44,13 @@ internal static class SharedDomainModelAssertions
         }
     }
 
-    private static async Task DocumentAsync(DatabaseEngine database, SharedDomainScope scope, string collection,
+    private static async Task DocumentAsync(DatabaseEngine database, SharedDomainState state, SharedDomainScope scope, string collection,
         string id, bool present, CancellationToken token)
     {
-        var reference = new EntityRef(scope.Partition, collection, id);
+        var reference = new EntityRef(scope.Partition, collection, id)
+        {
+            Lifetime = state.DocumentLifetimes[(scope.Partition, collection)]
+        };
         var actual = database.GetDocument(Root, reference, cancellationToken: token);
         await SharedDomainValueAssertions.EqualAsync(actual, present ? new DocumentResult(reference, FirstRevision, scope.Payload, false, []) : null);
     }
@@ -62,8 +65,8 @@ internal static class SharedDomainModelAssertions
         await Assert.That(actual.Events.Length).IsEqualTo(checked((int)tail));
         await Assert.That(actual.HasMore).IsFalse();
         await Assert.That(actual.Cursor).IsNull();
-        await Assert.That(actual.CutPosition).IsEqualTo(database.Store.Position);
-        await Assert.That(actual.SnapshotCutPosition).IsEqualTo(database.Store.Position);
+        await Assert.That(actual.CutPosition).IsEqualTo(database.LastApplied);
+        await Assert.That(actual.SnapshotCutPosition).IsEqualTo(database.LastApplied);
         List<EventRecord> expected = [];
         if (tail > NoRevision)
         {

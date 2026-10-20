@@ -16,8 +16,11 @@ internal sealed class TopicRetentionBatchBudgetTests
         });
         var command = new CommandRequest(Guid.NewGuid(), fixture.Owner.Partition,
             [new PurgeTopic("topic", 1), new PurgeTopic("topic", 2)]);
-        await TopicRetentionAssertions.Reject(fixture, command, ErrorCode.ResourceExhausted);
-        await Assert.That(fixture.Submit(command).Problem?.Detail).IsEqualTo("The topic purge scan budget is exhausted.");
+        await TopicRetentionAssertions.Reject(fixture, command,
+            scanLimit == 4 ? ErrorCode.BudgetExceeded : ErrorCode.ResourceExhausted);
+        await Assert.That(fixture.Submit(command).Problem?.Detail).IsEqualTo(scanLimit == 4
+            ? "The resource effect admission exceeds the original operation budget."
+            : "The topic purge scan budget is exhausted.");
         fixture.SetLimits(new());
         fixture.Submit(fixture.Purge()).Get<CommitReceipt>();
         await TopicRetentionIdentityFlow.VerifyAsync(fixture);

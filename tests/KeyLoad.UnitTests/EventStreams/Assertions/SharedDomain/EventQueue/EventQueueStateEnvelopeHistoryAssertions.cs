@@ -101,6 +101,6 @@ internal static class EventQueueStateEnvelopeHistoryAssertions
         await ReplayResultAssertions.Same<CommitReceipt>(Result<object>.Succeed(actual.Receipt), Result<object>.Succeed(receipt));
         await EventQueueStateEnvelopeSourceAssertions.EqualAsync(fixture.Database.GetDocument(Root,
             new(fixture.Partition, Documents, Processed)),
-            new DocumentResult(new(fixture.Partition, Documents, Processed), InitialRevision, Payload, false, []));
+            new DocumentResult(fixture.Owner.ExpectedReference(new(fixture.Partition, Documents, Processed)), InitialRevision, Payload, false, []));
     }
 }
