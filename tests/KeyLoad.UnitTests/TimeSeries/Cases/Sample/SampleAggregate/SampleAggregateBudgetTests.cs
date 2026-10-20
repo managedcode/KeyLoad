@@ -34,38 +34,43 @@ internal sealed class SampleAggregateBudgetTests
     [Test]
     public async Task AcSeries011InvalidOrOverServerSampleAndWindowCapsReturnBudgetExceeded()
     {
-        using var db = new TestDatabase(new DatabaseLimits
+        using var db = new TestDatabase();
+        SampleAggregateTestData.Configure(db);
+        var limits = db.Database.Limits with
         {
             MaxScanRecords = SampleAggregateTestData.OneResult,
             MaxResults = SampleAggregateTestData.OneResult
-        });
-        SampleAggregateTestData.Configure(db);
+        };
+        var create = TestDatabaseEngineFactory.Capture(UnitExecutionOptions.DatabaseLimits(limits),
+            UnitExecutionOptions.RuntimeClaimsExecution(), null, db.Database.EvaluationClock);
+        var bounded = create(db.Store);
         var aggregate = new AggregateSamplesRequest(db.Partition, SampleAggregateTestData.Set,
             SampleAggregateTestData.EmptySeries, SampleAggregateTestData.Start,
             SampleAggregateTestData.Start.Add(SampleAggregateTestData.Minute));
         var windows = new AggregateSampleWindowsRequest(db.Partition, SampleAggregateTestData.Set,
             SampleAggregateTestData.EmptySeries, SampleAggregateTestData.Start,
-            SampleAggregateTestData.Start.Add(SampleAggregateTestData.Minute), SampleAggregateTestData.Minute);
+            SampleAggregateTestData.Start.Add(SampleAggregateTestData.Minute), SampleAggregateTestData.Minute,
+            MaxSamples: SampleAggregateTestData.OneResult, MaxWindows: SampleAggregateTestData.OneResult);
 
-        var zeroSamples = SampleAggregateTestData.Failure(() => db.Database.AggregateSamples(
+        var zeroSamples = SampleAggregateTestData.Failure(() => bounded.AggregateSamples(
             SampleAggregateTestData.RootPrincipal, aggregate with
             {
                 MaxSamples = SampleAggregateTestData.ZeroScanRecords
             }),
             ErrorCode.BudgetExceeded);
-        var overSamples = SampleAggregateTestData.Failure(() => db.Database.AggregateSamples(
+        var overSamples = SampleAggregateTestData.Failure(() => bounded.AggregateSamples(
             SampleAggregateTestData.RootPrincipal, aggregate with
             {
                 MaxSamples = SampleAggregateTestData.OneResult + 1
             }),
             ErrorCode.BudgetExceeded);
-        var zeroWindows = SampleAggregateTestData.Failure(() => db.Database.AggregateSampleWindows(
+        var zeroWindows = SampleAggregateTestData.Failure(() => bounded.AggregateSampleWindows(
             SampleAggregateTestData.RootPrincipal, windows with
             {
                 MaxWindows = SampleAggregateTestData.ZeroResults
             }),
             ErrorCode.BudgetExceeded);
-        var overWindows = SampleAggregateTestData.Failure(() => db.Database.AggregateSampleWindows(
+        var overWindows = SampleAggregateTestData.Failure(() => bounded.AggregateSampleWindows(
             SampleAggregateTestData.RootPrincipal, windows with
             {
                 MaxWindows = SampleAggregateTestData.OneResult + 1

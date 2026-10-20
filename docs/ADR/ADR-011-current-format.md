@@ -8,7 +8,7 @@ REQ/AC-BLOB-001–007, REQ/AC-DSTORE-009 and REQ/AC-BACKUP-004.
 
 ## Decision
 
-Use one current reader and writer: identity epoch7, WAL4, checkpoint5,
+Use one current reader and writer: the current identity, WAL and unversioned checkpoint contracts,
 KeyCodec v1 and the frozen generated Orleans aliases and field IDs. Unknown or
 corrupt mandatory records fail closed before publication, without rewrite,
 alternate-key lookup or loss of the original bytes. One homogeneous current

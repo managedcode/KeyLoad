@@ -26,7 +26,7 @@ internal static class ZoneTreeCheckpointWriter
         }
 
         var budget = new ZoneTreeCheckpointBudget(options, TimeProvider.System, CancellationToken.None);
-        var metadata = new ZoneTreeCheckpointMetadata(ZoneTreePersistenceFormat.CheckpointVersion, KeyCodec.Version,
+        var metadata = new ZoneTreeCheckpointMetadata(KeyCodec.Version,
             snapshot.Incarnation, snapshot.Position, snapshot.AppliedPosition);
         using var digest = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
         WriteFrame(output, options, ZoneTreePersistenceFormat.CheckpointMagic, metadata.Position,
@@ -56,7 +56,7 @@ internal static class ZoneTreeCheckpointWriter
         IZoneTree<Memory<byte>, Memory<byte>> tree)
     {
         var budget = new ZoneTreeCheckpointBudget(options, TimeProvider.System, CancellationToken.None);
-        var metadata = new ZoneTreeCheckpointMetadata(ZoneTreePersistenceFormat.CheckpointVersion, KeyCodec.Version,
+        var metadata = new ZoneTreeCheckpointMetadata(KeyCodec.Version,
             identity.Incarnation, position, appliedPosition);
         using var output = new FileStream(
             path,

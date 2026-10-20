@@ -82,9 +82,10 @@ internal static class SampleChunkEnrollmentBoundaryFlow
         Result<object>? original = null;
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            original = fixture.Owner.Database.ApplyEmbedded(operation, cancellationToken: default);
-            originals.Add((operation, original));
-            await Assert.That(SampleRollupWholeFlow.Outcome(original)).IsEqualTo(
+            var actual = fixture.Owner.Database.ApplyEmbedded(operation, cancellationToken: default);
+            original = actual;
+            originals.Add((operation, actual));
+            await Assert.That(SampleRollupWholeFlow.Outcome(actual)).IsEqualTo(
                 SampleRollupWholeFlow.Outcome(Result<object>.Fail(Errors.Problem(ErrorCode.Conflict, ConflictDetail))));
 
         }, failures);
@@ -93,10 +94,10 @@ internal static class SampleChunkEnrollmentBoundaryFlow
         await ServerFailureObserver.ObserveAsync(async () => await Assert.That(fixture.Owner.Store.Read(view =>
             view.ReadOwnedValue(SampleChunkKeys.Window(fixture.Owner.Partition, mutation.SeriesSet,
                 mutation.SeriesId, mutation.WindowId)))).IsNull(), failures);
-        if (original is not null)
+        if (original is { } retained)
         {
             await ServerFailureObserver.ObserveAsync(() => SampleChunkCorrectionBoundColdAssertions.ReplayAsync(
-                fixture.Owner.Database, fixture.Owner.Store, operation, original), failures);
+                fixture.Owner.Database, fixture.Owner.Store, operation, retained), failures);
         }
         ServerFailureObserver.ThrowIfAny(failures);
     }

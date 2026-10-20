@@ -62,11 +62,13 @@ internal static class SampleRawIntegrityAssertions
     }
 
     internal static async Task ExpiryReceiptAsync(SampleRawIntegrityFixture fixture, CommitReceipt receipt,
-        Command<DatabaseCommand> operation)
+        Command<DatabaseCommand> operation, long expectedApplied)
     {
         await Assert.That(receipt.CommandId).IsEqualTo(operation.CommandId);
         await Assert.That(receipt.Token.Incarnation).IsEqualTo(fixture.Store.Identity.Incarnation);
-        await Assert.That(receipt.Token.Position).IsEqualTo(fixture.Store.Position);
+        await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(fixture.Partition.AtomicPartitionId);
+        await Assert.That(receipt.Token.Position).IsEqualTo(expectedApplied);
+        await Assert.That(fixture.Owner.LastApplied).IsEqualTo(expectedApplied);
         await Assert.That(receipt.Mutations.Length).IsEqualTo(OneMutation);
         var expected = new MutationReceipt(ExpiryKind, SampleAggregateTestData.Set, SampleAggregateTestData.Series, 3);
         await Assert.That(OrleansSerialization.Serialize(receipt.Mutations[0]).SequenceEqual(

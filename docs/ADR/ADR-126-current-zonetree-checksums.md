@@ -26,7 +26,7 @@ Its repository metadata binds source5d24bf5f46772facbe4e40e355b2ed1aa6e66c9b.
 The provider now computes the low32 bits of XXH3-64 over its explicit
 little-endian WAL header and exact key/value bytes. Use the published provider
 unchanged. KeyLoad owns no substitute checksum implementation or alternate
-reader. Its own current identity epoch7, atomic WAL4, checkpoint5, generated
+reader. Its own current identity, atomic WAL and unversioned checkpoint contracts, generated
 aliases/field IDs, raw-byte serializers, Sync WAL, uncompressed provider,
 node-local locks/apply ownership, canonical outcomes and required-copy ACK barriers remain
 the existing contract. New qualification creates current stores and reopens those

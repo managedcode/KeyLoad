@@ -39,13 +39,13 @@ internal static class SampleChunkPendingBoundFlow
                 fixture.WindowId, SampleChunkPendingBoundProtocol.Corrected),
             MergeKind, SampleChunkPendingBoundProtocol.Merged, originals);
         var merge = originals[^1].Result.Get<CommitReceipt>();
-        await Assert.That(merge.Token.Position).IsEqualTo(fixture.Owner.Store.Position);
+        await Assert.That(merge.Token.Position).IsEqualTo(fixture.Owner.Database.LastApplied);
         await trial.RequireAsync(firstMerged: true, secondCorrected: false);
         await SampleChunkCorrectionBoundReceipts.CommitAsync(fixture, SampleChunkPendingBoundTrial.Overflow,
             AppendKind, SampleChunkPendingBoundProtocol.FourthSequence, originals);
         var healthy = originals[^1].Result.Get<CommitReceipt>();
         await Assert.That(healthy.Token.Position > merge.Token.Position).IsTrue();
-        await Assert.That(healthy.Token.Position).IsEqualTo(fixture.Owner.Store.Position);
+        await Assert.That(healthy.Token.Position).IsEqualTo(fixture.Owner.Database.LastApplied);
         await trial.RequireAsync(firstMerged: true, secondCorrected: true);
         await SampleChunkPendingBoundCold.RunAsync(fixture, trial, originals);
     }

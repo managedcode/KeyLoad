@@ -25,8 +25,9 @@ internal sealed class SampleRawIntegrityWholeFlowTests
         await SampleRawIntegrityAssertions.UnchangedAsync(fixture.Store, corruptCut);
         await SampleRawIntegrityAssertions.RefuseAsync(fixture, expiry);
         SampleRawIntegrityScenario.Restore(fixture, original);
+        var expectedApplied = fixture.Owner.LastApplied + 1;
         var expired = fixture.Apply(expiry);
-        await SampleRawIntegrityAssertions.ExpiryReceiptAsync(fixture, expired, expiry);
+        await SampleRawIntegrityAssertions.ExpiryReceiptAsync(fixture, expired, expiry, expectedApplied);
         await SampleRawIntegrityAssertions.ReplayAsync(fixture, expiry, expired);
         await SampleRawIntegrityAssertions.ReplayAsync(fixture, fixture.SeedOperation, fixture.SeedReceipt);
 

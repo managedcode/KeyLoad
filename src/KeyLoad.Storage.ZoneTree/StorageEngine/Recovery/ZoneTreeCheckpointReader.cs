@@ -89,7 +89,8 @@ internal static class ZoneTreeCheckpointReader
         }
 
         var metadata = OrleansSerialization.Deserialize<ZoneTreeCheckpointMetadata>(frame.Payload);
-        if (metadata.Version != ZoneTreePersistenceFormat.CheckpointVersion || metadata.CodecVersion != KeyCodec.Version)
+        if (metadata.CodecVersion != KeyCodec.Version
+            || !frame.Payload.AsSpan().SequenceEqual(OrleansSerialization.Serialize(metadata)))
         {
             throw Errors.Fail(ErrorCode.FormatUnsupported, ZoneTreePersistenceFormat.SnapshotFormatUnsupported);
         }

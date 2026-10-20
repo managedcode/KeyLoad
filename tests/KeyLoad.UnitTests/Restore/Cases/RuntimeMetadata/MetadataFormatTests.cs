@@ -76,7 +76,7 @@ internal sealed class MetadataFormatTests
     [Arguments(CheckpointDefect.WrongType)]
     [Arguments(CheckpointDefect.NullRoot)]
     [Arguments(CheckpointDefect.EmptyIncarnation)]
-    [Arguments(CheckpointDefect.UnsupportedVersion)]
+    [Arguments(CheckpointDefect.UnknownField)]
     [Arguments(CheckpointDefect.UnsupportedCodec)]
     [Arguments(CheckpointDefect.Trailing)]
     [Arguments(CheckpointDefect.Truncated)]
@@ -90,11 +90,15 @@ internal sealed class MetadataFormatTests
         var metadata = OrleansSerialization.Deserialize<ZoneTreeCheckpointMetadata>(
             original.AsSpan(WalFileFixture.HeaderBytes, length));
         var payload = CheckpointPayload(metadata, defect);
+        if (defect == CheckpointDefect.UnknownField)
+        {
+            await Assert.That(OrleansSerialization.Deserialize<ZoneTreeCheckpointMetadata>(payload)).IsEqualTo(metadata);
+        }
         var frame = WalFileFixture.CreateFrame(payload, metadata.Position, ZoneTreePersistenceFormat.CheckpointMagic);
         await File.WriteAllBytesAsync(fixture.RestoredDirectory,
             [.. frame, .. original[(WalFileFixture.HeaderBytes + length)..]]);
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => store.InstallSnapshot(fixture.RestoredDirectory, 0));
-        await Assert.That(failure.Code).IsEqualTo(defect is CheckpointDefect.UnsupportedVersion or CheckpointDefect.UnsupportedCodec
+        await Assert.That(failure.Code).IsEqualTo(defect is CheckpointDefect.UnknownField or CheckpointDefect.UnsupportedCodec
             ? ErrorCode.FormatUnsupported : ErrorCode.Corruption);
         await Assert.That(store.Position).IsEqualTo(metadata.Position);
         await Assert.That(store.Read(view => view.GetRecord<string>(MetadataBackupFixture.StoredKeyBytes)))
@@ -109,7 +113,7 @@ internal sealed class MetadataFormatTests
             ZoneTreeMetadataBinary.IdentityMagic, MetadataTestContract.IdentityFormatUnsupportedDetail);
         return defect switch
         {
-            IdentityDefect.WrongType => RuntimeFile(new ZoneTreeCheckpointMetadata(ZoneTreePersistenceFormat.CheckpointVersion, KeyCodec.Version, identity.Incarnation, 0, 0), ZoneTreeMetadataBinary.IdentityMagic),
+            IdentityDefect.WrongType => RuntimeFile(new ZoneTreeCheckpointMetadata(KeyCodec.Version, identity.Incarnation, 0, 0), ZoneTreeMetadataBinary.IdentityMagic),
             IdentityDefect.NullRoot => RuntimeFile<ZoneTreeIdentityEnvelope>(null!, ZoneTreeMetadataBinary.IdentityMagic),
             IdentityDefect.NullPayload => RuntimeFile(envelope with { Payload = null! }, ZoneTreeMetadataBinary.IdentityMagic),
             IdentityDefect.NullChecksum => RuntimeFile(envelope with { Checksum = null! }, ZoneTreeMetadataBinary.IdentityMagic),
@@ -146,7 +150,7 @@ internal sealed class MetadataFormatTests
             CheckpointDefect.WrongType => RawPayload(new ZoneTreeIdentityEnvelope([], [])),
             CheckpointDefect.NullRoot => RawPayload<ZoneTreeCheckpointMetadata>(null!),
             CheckpointDefect.EmptyIncarnation => RawPayload(metadata with { Incarnation = Guid.Empty }),
-            CheckpointDefect.UnsupportedVersion => RawPayload(metadata with { Version = ZoneTreePersistenceFormat.CheckpointVersion + MetadataTestContract.OneByte }),
+            CheckpointDefect.UnknownField => MetadataCheckpointExtraField.Encode(metadata),
             CheckpointDefect.UnsupportedCodec => RawPayload(metadata with { CodecVersion = KeyCodec.Version + MetadataTestContract.OneByte }),
             CheckpointDefect.Trailing => [.. RawPayload(metadata), TrailingByte],
             CheckpointDefect.Truncated => RawPayload(metadata)[..^MetadataTestContract.OneByte],
@@ -202,6 +206,6 @@ internal sealed class MetadataFormatTests
     }
     internal enum CheckpointDefect
     {
-        WrongType, NullRoot, EmptyIncarnation, UnsupportedVersion, UnsupportedCodec, Trailing, Truncated
+        WrongType, NullRoot, EmptyIncarnation, UnknownField, UnsupportedCodec, Trailing, Truncated
     }
 }

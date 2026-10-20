@@ -18,6 +18,7 @@ internal static class TransactionalReadViewCommands
                 DocumentIndexCommittedScanOracle.StableJson, 0L));
         state.Identity = ReadCutStoreStateAssertions.SnapshotIdentity(state.Store);
         state.OldPosition = state.Store.Position;
+        state.OldAppliedPosition = state.Database.LastApplied;
         state.OldImage = QueueImage(state.Store);
         await DocumentIndexCommittedScanOracle.AssertOldCutAsync(
             DocumentIndexCommittedScanOracle.ReadCut(state.Store, fixture.Partition), state.OldPosition);
@@ -28,7 +29,7 @@ internal static class TransactionalReadViewCommands
              new DeleteDocument(DocumentIndexCommittedScanOracle.Collection, DocumentIndexCommittedScanOracle.DeleteId, 1L),
              new PutDocument(DocumentIndexCommittedScanOracle.Collection, DocumentIndexCommittedScanOracle.InsertId,
                 DocumentIndexCommittedScanOracle.InsertedJson, 0L)]));
-        state.WriterReceipt = new(id, new(state.Identity.Incarnation, fixture.Partition.AtomicPartitionId, state.OldPosition + 1L), [new("putDocument", DocumentIndexCommittedScanOracle.Collection, DocumentIndexCommittedScanOracle.ReplaceId, 2L),
+        state.WriterReceipt = new(id, new(state.Identity.Incarnation, fixture.Partition.AtomicPartitionId, state.OldAppliedPosition + 1L), [new("putDocument", DocumentIndexCommittedScanOracle.Collection, DocumentIndexCommittedScanOracle.ReplaceId, 2L),
              new("deleteDocument", DocumentIndexCommittedScanOracle.Collection, DocumentIndexCommittedScanOracle.DeleteId, 2L),
              new("putDocument", DocumentIndexCommittedScanOracle.Collection, DocumentIndexCommittedScanOracle.InsertId, 1L)], DurabilityProfile.ProcessDurable, 1);
     }

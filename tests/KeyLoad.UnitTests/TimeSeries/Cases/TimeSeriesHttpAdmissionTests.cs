@@ -4,7 +4,7 @@ internal sealed class TimeSeriesHttpAdmissionTests
 {
     private const string LatestRoute = "/series/latest";
     private const string AggregateRoute = "/series/aggregate";
-    private const string WindowsRoute = "/V1/SERIES/WINDOWS/";
+    private const string WindowsRoute = "/SERIES/WINDOWS/";
     private const string ExistingQueryRoute = "/query";
     private const int HeavyReadBytes = 16_384;
     private const int ReservedReadBytes = 20_480;

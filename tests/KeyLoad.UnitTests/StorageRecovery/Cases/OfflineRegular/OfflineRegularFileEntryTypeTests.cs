@@ -5,7 +5,7 @@ namespace KeyLoad.UnitTests.Features.StorageRecovery;
 
 internal sealed class OfflineRegularFileEntryTypeTests
 {
-    private const string RootPrefix = "keyload-offline-file-type-";
+    private const string RootPrefix = "ft-";
 
     [Test]
     public async Task AcEpoch012RejectsDirectorySymlinkSocketAndDeviceWithoutChangingTargets()

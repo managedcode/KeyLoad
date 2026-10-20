@@ -10,7 +10,6 @@ internal static class SampleChunkSignedMinimumFlow
 
     internal static async Task RunAsync(ConnectionScenario scenario, CancellationToken token)
     {
-        await scenario.InitializeAsync(token);
         var owner = scenario.Fixture.Database;
         var state = await SampleChunkSignedMinimumSeed.RunAsync(owner);
         await SampleChunkSignedMinimumAssertions.ObserveAsync(owner.Store,
@@ -42,6 +41,7 @@ internal static class SampleChunkSignedMinimumFlow
         })).Get<PrincipalRecord>();
         await SampleChunkSignedMinimumAssertions.ObserveAsync(owner.Store,
             () => SampleChunkSignedMinimumAssertions.HealthyAsync(scenario, state, token));
+        await SampleChunkSignedMinimumSeed.ReplayAsync(owner, state);
         await SampleChunkSignedMinimumCold.ReplayAsync(owner.Database, owner.Store, state, token);
         var cold = SampleRawIntegrityAssertions.Capture(owner.Store);
         var coldSource = new ConnectionColdSource(scenario.Fixture.Source);

@@ -65,7 +65,7 @@ internal sealed class SampleChunkMixedAtomicTests
     private static async Task DocumentAsync(SampleChunkCanonicalFixture fixture, Guid commandId,
         CommitReceipt receipt, DateTimeOffset before, DateTimeOffset after)
     {
-        var reference = new EntityRef(fixture.Owner.Partition, Collection, DocumentId);
+        var reference = fixture.Owner.ExpectedReference(new(fixture.Owner.Partition, Collection, DocumentId));
         await Assert.That(receipt.CommandId).IsEqualTo(commandId);
         var applied = fixture.Owner.Store.Read(view => OrleansSerialization.Deserialize<long>(
             view.ReadOwnedValue(KeySpace.AppliedBytes) ?? throw new InvalidOperationException(MissingAppliedPosition)));

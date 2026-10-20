@@ -30,6 +30,10 @@ internal sealed class TransactionalReadViewState : IDisposable
     {
         get; set;
     }
+    internal long OldAppliedPosition
+    {
+        get; set;
+    }
     internal long FinalPosition
     {
         get; set;

@@ -1,3 +1,4 @@
+using KeyLoad.Clustering;
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
 using KeyLoad.UnitTests.Features.OrleansExecution;
@@ -51,10 +52,17 @@ internal static class SampleChunkSignedMinimumAssertions
         {
             var failure = Assert.ThrowsExactly<KeyLoadException>(() => scenario.Fixture.Codec.VerifyRead(signed, id));
             SampleChunkExplicitMinimumUnitReads.RequireBytes(Errors.Problem(ErrorCode.TokenInvalidated, InvalidMac), failure.ToProblem());
+            GrainOperationReply? partial = null;
+            var rejected = await Assert.ThrowsExactlyAsync<KeyLoadException>(async () => partial =
+                await scenario.InvokeAsync(state.Reader, id, Guid.Empty, signed, token))
+                ?? throw new InvalidOperationException("The invalid MAC did not refuse before routing.");
+            SampleChunkExplicitMinimumUnitReads.RequireBytes(Errors.Problem(ErrorCode.TokenInvalidated, InvalidMac), rejected.ToProblem());
+            await Assert.That(partial).IsNull();
+            return;
         }
         var reply = await scenario.InvokeAsync(state.Reader, id, Guid.Empty, signed, token);
-        await Assert.That(reply.Error).IsEqualTo(mac ? ErrorCode.TokenInvalidated : ErrorCode.PermissionDenied);
-        await Assert.That(reply.SafeDetail).IsEqualTo(mac ? InvalidMac : ScopeDenied);
+        await Assert.That(reply.Error).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(reply.SafeDetail).IsEqualTo(ScopeDenied);
         await Assert.That(reply.Payload.IsEmpty).IsTrue();
     }
 }

@@ -4,7 +4,7 @@ namespace KeyLoad.UnitTests.Features.TimeSeries;
 
 internal sealed class SampleChunkGoldenTests
 {
-    private const string RuntimeEnvelope = "IAADMQGthjxnRWtleWxvYWQuY29yZS52MS5TYW1wbGVDaHVua1BheWxvYWToAAUBBUETgIDWvd/+388IQQUAAEEDAUEVgICAgICAgICAAUEbGGNodW5rLXNlcmllc0EPDGdvbGRlbkELAQR7fQBBQffOlzG+MwYd4aAjddKx0PQUlCfz2y/Y6nNkxVahI3Yv4OA=";
+    private const string RuntimeEnvelope = "IAADMQEmwX/aP2tleWxvYWQuY29yZS5TYW1wbGVDaHVua1BheWxvYWToAAUBBUETgIDWvd/+388IQQUAAEEDAUEVgICAgICAgICAAUEbGGNodW5rLXNlcmllc0EPDGdvbGRlbkELAQR7fQBBQb1ScZJbh+wrT8rOoPPFZwYGTt4efxLF+WkeJ2N1Ln0W4OA=";
 
     [Test]
     public async Task AcChunk004FrozenColumnsAndChecksumMatchIndependentOneRowFixture()
@@ -21,7 +21,10 @@ internal sealed class SampleChunkGoldenTests
         await Hex(payload.Series, "186368756e6b2d736572696573");
         await Hex(payload.EventIds, "0c676f6c64656e");
         await Hex(payload.Tags, "01047b7d00");
-        await Hex(payload.Checksum, "f7ce9731be33061de1a02375d2b1d0f4149427f3db2fd8ea7364c556a123762f");
+        await Hex(payload.Checksum, "bd5271925b87ec2b4fcacea0f3c56706064ede1e7f12c5f9691e2763752e7d16");
+        var independent = OrleansSerialization.Serialize(ExpectedPayload());
+        await Assert.That(Convert.ToBase64String(encoded)).IsEqualTo(Convert.ToBase64String(independent));
+        await Assert.That(Convert.ToBase64String(independent)).IsEqualTo(RuntimeEnvelope);
         await Assert.That(Convert.ToBase64String(encoded)).IsEqualTo(RuntimeEnvelope);
         var frozen = Convert.FromBase64String(RuntimeEnvelope);
         await SampleChunkTestData.AssertRecordsExact(source,
@@ -30,4 +33,14 @@ internal sealed class SampleChunkGoldenTests
 
     private static async Task Hex(ReadOnlyMemory<byte> actual, string expected)
         => await Assert.That(Convert.ToHexStringLower(actual.Span)).IsEqualTo(expected);
+
+    private static SampleChunkPayload ExpectedPayload() => new(1, 1,
+        Convert.FromHexString("8080d6bddffedfcf08"),
+        Convert.FromHexString("0000"),
+        Convert.FromHexString("01"),
+        Convert.FromHexString("80808080808080808001"),
+        Convert.FromHexString("186368756e6b2d736572696573"),
+        Convert.FromHexString("0c676f6c64656e"),
+        Convert.FromHexString("01047b7d00"),
+        Convert.FromHexString("bd5271925b87ec2b4fcacea0f3c56706064ede1e7f12c5f9691e2763752e7d16"));
 }

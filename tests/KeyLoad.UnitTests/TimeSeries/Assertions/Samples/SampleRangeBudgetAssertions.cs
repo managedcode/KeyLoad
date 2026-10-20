@@ -85,11 +85,12 @@ internal static class SampleRangeBudgetAssertions
     }
 
     internal static async Task AppendReceiptAsync(SampleRawIntegrityFixture fixture, Command<DatabaseCommand> operation,
-        CommitReceipt receipt, long previousPosition)
+        CommitReceipt receipt, long previousPosition, long previousApplied)
     {
         var nextPosition = checked(previousPosition + 1);
         await Assert.That(fixture.Store.Position).IsEqualTo(nextPosition);
-        var expected = new CommitReceipt(operation.CommandId, new(fixture.Store.Identity.Incarnation, fixture.Partition.AtomicPartitionId, nextPosition), [new(AppendKind, SampleAggregateTestData.Set, SampleAggregateTestData.Series, AppendedMaximumSequence)], DurabilityProfile.ProcessDurable, 1);
+        var expected = new CommitReceipt(operation.CommandId, new(fixture.Store.Identity.Incarnation, fixture.Partition.AtomicPartitionId, checked(previousApplied + 1)), [new(AppendKind, SampleAggregateTestData.Set, SampleAggregateTestData.Series, AppendedMaximumSequence)], DurabilityProfile.ProcessDurable, 1);
+        await Assert.That(fixture.Owner.LastApplied).IsEqualTo(previousApplied + 1);
         await Assert.That(OrleansSerialization.Serialize(receipt).SequenceEqual(
             OrleansSerialization.Serialize(expected))).IsTrue();
     }

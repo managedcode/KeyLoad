@@ -25,8 +25,7 @@ internal sealed class CheckpointBatchTests
         try
         {
             using var stream = new FileStream(path, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None);
-            var metadata = new ZoneTreeCheckpointMetadata(ZoneTreePersistenceFormat.CheckpointVersion,
-                KeyCodec.Version, Guid.NewGuid(), Position, 0);
+            var metadata = new ZoneTreeCheckpointMetadata(KeyCodec.Version, Guid.NewGuid(), Position, 0);
             ZoneTreeCheckpointFrame.Write(stream, options, ZoneTreePersistenceFormat.CheckpointMagic,
                 Position, OrleansSerialization.Serialize(metadata), null);
             StorageMutation first = new(KeyCodec.Encode(KeyA), new byte[] { 1 });

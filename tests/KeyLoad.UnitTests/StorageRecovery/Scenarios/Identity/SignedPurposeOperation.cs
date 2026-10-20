@@ -1,3 +1,4 @@
+using KeyLoad.Clustering;
 using KeyLoad.UnitTests.Features.OrleansExecution;
 
 namespace KeyLoad.UnitTests.Features.StorageRecovery;
@@ -6,18 +7,22 @@ internal static class SignedPurposeOperation
 {
     private const string DocumentId = "genuine-purpose-repair";
     private const string Json = "{\"purpose\":\"current\",\"text\":\"Україна\"}";
+    private const string InvalidScopeDetail = "The internal request has an invalid scope, key, expiry or operation.";
 
     internal static async Task RunAsync(ConnectionScenario scenario,
         SignedPurposeObservation observation, CancellationToken token)
     {
-        await scenario.InitializeAsync(token);
         var principal = scenario.Principal();
         var command = scenario.Command(DocumentId, Json);
         var before = SignedPurposeCut.Read(scenario.Fixture.Database);
         observation.Arm(command.CommandId);
-        var refused = await scenario.CommandAsync(principal, Guid.NewGuid(), command, token);
-        await Assert.That(refused.Error).IsEqualTo(ErrorCode.TokenInvalidated);
-        await Assert.That(refused.Payload.IsEmpty).IsTrue();
+        GrainOperationReply? partial = null;
+        var refused = await Assert.ThrowsExactlyAsync<KeyLoadException>(async () => partial =
+            await scenario.CommandAsync(principal, Guid.NewGuid(), command, token))
+            ?? throw new InvalidOperationException("The original signed purpose did not refuse before routing.");
+        await Assert.That(refused.Code).IsEqualTo(ErrorCode.TokenInvalidated);
+        await Assert.That(refused.Message).IsEqualTo(InvalidScopeDetail);
+        await Assert.That(partial).IsNull();
         await SignedPurposeCut.RequireAsync(before, scenario.Fixture.Database);
         await Assert.That(scenario.Stored(DocumentId)).IsNull();
         observation.Disarm();

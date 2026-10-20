@@ -1,6 +1,8 @@
 using System.Text.Json;
 using KeyLoad.Core.Features.Authorization;
+using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
+using KeyLoad.UnitTests.Features.StorageRecovery.Assertions;
 
 namespace KeyLoad.UnitTests.Features.StorageRecovery;
 
@@ -22,5 +24,19 @@ internal static class DocumentIndexCommittedScanOperations
             DocumentIndexCommittedScanOracle.HealthyJson, InitialDocumentRevision)]);
         var operation = engine.CreateCommand(OperationKind.Batch, commandId, RootPrincipal, engine.EvaluationClock.GetUtcNow(), JsonSerializer.Serialize(command, JsonDefaults.Options));
         return engine.Apply(operation).Get<CommitReceipt>();
+    }
+
+    internal static async Task CompleteReopenedAsync(ZoneTreeStore store, PartitionRef partition,
+        StoreIdentity identity, long physicalPosition, long appliedPosition)
+    {
+        var engine = CreateEngine(store);
+        await Assert.That(engine.LastApplied).IsEqualTo(appliedPosition);
+        await ReadCutStoreStateAssertions.AssertIdentityAndPositionAsync(store, identity, physicalPosition);
+        await DocumentIndexCommittedScanOracle.AssertCommittedCutAsync(
+            DocumentIndexCommittedScanOracle.ReadCut(store, partition), physicalPosition);
+        var healthy = ApplyHealthyCommand(engine, partition);
+        await Assert.That(healthy.Token.Position).IsEqualTo(appliedPosition + 1);
+        await DocumentIndexCommittedScanOracle.AssertHealthyCutAsync(
+            DocumentIndexCommittedScanOracle.ReadCut(store, partition), physicalPosition + 1);
     }
 }

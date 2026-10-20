@@ -10,6 +10,7 @@ internal static class SampleChunkSignedMinimumCold
 {
     private const int FirstWave = 0;
     private const int ColdWaves = 2;
+    private const int LocalPersistedCopies = 1;
 
     internal static async Task RunAsync(ConnectionColdSource owner, SampleChunkSignedMinimumState state,
         SampleRawIntegrityCut expected, CancellationToken token)
@@ -55,7 +56,7 @@ internal static class SampleChunkSignedMinimumCold
             {
                 var operation = database.CreateCommand(OperationKind.Batch, original.Request.CommandId, SampleChunkCanonicalFixture.Principal, default, JsonSerializer.Serialize(original.Request, JsonDefaults.Options));
                 var replay = database.ApplyEmbedded(operation, cancellationToken: token).Get<CommitReceipt>();
-                SampleChunkExplicitMinimumUnitReads.RequireBytes(original.Receipt, replay);
+                SampleChunkExplicitMinimumUnitReads.RequireBytes(original.Receipt with { PersistedCopies = LocalPersistedCopies }, replay);
                 return Task.CompletedTask;
             });
         }

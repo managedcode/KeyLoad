@@ -52,28 +52,6 @@ internal sealed class SampleRetentionLifecycleTests
     }
 
     [Test]
-    public async Task AcSeries016RawDeleteScanBudgetRejectsBeforeChangingFloorOrSamples()
-    {
-        using var db = new TestDatabase(new DatabaseLimits { MaxQueryReadBytes = 128 });
-        SampleAggregateTestData.Configure(db);
-        var timestamp = SampleAggregateTestData.Start;
-        var largeTags = "{\"payload\":\"" + new string('x', 512) + "\"}";
-        SampleAggregateTestData.Append(db, [SampleAggregateTestData.Data(1, timestamp, 1)], largeTags);
-
-        var failure = Assert.ThrowsExactly<KeyLoadException>(() => db.Commit(new ExpireSamples(
-            SampleAggregateTestData.Set, SampleAggregateTestData.Series, timestamp.AddTicks(1), 1)));
-        var key = SampleRetentionStateReader.Key(db.Partition, SampleAggregateTestData.Set, SampleAggregateTestData.Series);
-        var statusBytes = db.Store.Read(view => view.ReadOwnedValue(key));
-        var samples = db.Store.Read(view => view.VisitRange(
-            SampleReadKeys.Prefix(db.Partition, SampleAggregateTestData.Set, SampleAggregateTestData.Series),
-            2, static (_, _) => true));
-
-        await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
-        await Assert.That(statusBytes).IsNull();
-        await Assert.That(samples.Records).IsEqualTo(1);
-    }
-
-    [Test]
     public async Task AcSeries016ExpiryRejectsCorruptRecordsAndMismatchedSampleKeysWithoutDeleting()
     {
         using var db = new TestDatabase();

@@ -1,5 +1,4 @@
 using KeyLoad.Storage.ZoneTree;
-using KeyLoad.UnitTests.Features.StorageRecovery.Assertions;
 
 namespace KeyLoad.UnitTests.Features.StorageRecovery;
 
@@ -17,6 +16,7 @@ internal sealed class DocumentIndexCommittedScanScenario : IAsyncDisposable
     private Task<CommitReceipt>? writerTask;
     private ZoneTreeStore? reopened;
     private long oldPosition;
+    private long oldAppliedPosition;
     private bool originalStoreOpen = true;
     private bool reopenedStoreOpen;
     private bool disposed;
@@ -83,6 +83,7 @@ internal sealed class DocumentIndexCommittedScanScenario : IAsyncDisposable
             new PutDocument(DocumentIndexCommittedScanOracle.Collection, DocumentIndexCommittedScanOracle.StableId,
                 DocumentIndexCommittedScanOracle.StableJson, DocumentIndexCommittedScanOperations.InitialDocumentRevision));
         oldPosition = database.Store.Position;
+        oldAppliedPosition = database.Database.LastApplied;
         scanTask = Task.Run(() => database.Store.Read(view => DocumentIndexCommittedScanOracle.ReadAndHold(
             view, database.Store, database.Partition, scanEntered, releaseScan, cancellation.Token)));
     }
@@ -119,9 +120,9 @@ internal sealed class DocumentIndexCommittedScanScenario : IAsyncDisposable
         var oldCut = await scanTask!;
         await DocumentIndexCommittedScanOracle.AssertOldCutAsync(oldCut, oldPosition);
         var receipt = await writerTask!;
-        await DocumentIndexCommittedScanReceiptAssertions.AssertWriterReceiptAsync(receipt, oldPosition + 1);
+        await DocumentIndexCommittedScanReceiptAssertions.AssertWriterReceiptAsync(receipt, oldAppliedPosition + 1);
         await DocumentIndexCommittedScanOracle.AssertCommittedCutAsync(
-            DocumentIndexCommittedScanOracle.ReadCut(database.Store, database.Partition), receipt.Token.Position);
+            DocumentIndexCommittedScanOracle.ReadCut(database.Store, database.Partition), oldPosition + 1);
     }
 
     private async Task ReopenAndVerifyHealthyCommandAsync()
@@ -130,20 +131,13 @@ internal sealed class DocumentIndexCommittedScanScenario : IAsyncDisposable
         {
             SigningKey = database.Store.Identity.SigningKey.ToArray()
         };
-        var committedPosition = (await writerTask!).Token.Position;
+        var committedPosition = oldPosition + 1;
         database.Store.Dispose();
         originalStoreOpen = false;
         reopened = new(new(database.Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         reopenedStoreOpen = true;
-        var engine = DocumentIndexCommittedScanOperations.CreateEngine(reopened);
-        await ReadCutStoreStateAssertions.AssertIdentityAndPositionAsync(reopened, expectedIdentity, committedPosition);
-        await DocumentIndexCommittedScanOracle.AssertCommittedCutAsync(
-            DocumentIndexCommittedScanOracle.ReadCut(reopened, database.Partition), committedPosition);
-
-        var healthy = DocumentIndexCommittedScanOperations.ApplyHealthyCommand(engine, database.Partition);
-        await Assert.That(healthy.Token.Position).IsEqualTo(committedPosition + 1);
-        await DocumentIndexCommittedScanOracle.AssertHealthyCutAsync(
-            DocumentIndexCommittedScanOracle.ReadCut(reopened, database.Partition), healthy.Token.Position);
+        await DocumentIndexCommittedScanOperations.CompleteReopenedAsync(reopened, database.Partition,
+            expectedIdentity, committedPosition, oldAppliedPosition + 1);
     }
 
     private async Task DisposeReopenedStoreAsync(Task settlement)

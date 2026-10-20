@@ -12,8 +12,10 @@ does not authorize adding such a path.
 
 Deliver one strict current format. Remove obsolete old-format execution,
 tests, preparation resources, settings, routes and active documentation together.
-Keep current identity epoch7/WAL4/checkpoint5 bytes and Orleans serialization
-unchanged. Preserve node-local ownership, current backup/restore, corrupt-format
+Checkpoint metadata has one current schema without a format-version field.
+Its writer emits that schema and its reader requires its exact canonical encoding;
+there is no alternate reader or conversion. Preserve current identity and WAL bytes,
+Orleans aliases and the remaining stable field IDs. Preserve node-local ownership, current backup/restore, corrupt-format
 rejection, signed-purpose fencing, process recovery and genuine Aspire cluster SDK/MCP.
 Current stores are created with reader capability1 and magic `0x364449444C4B`;
 reject an absent/zero/unknown capability and remove unmarked-store conversion.

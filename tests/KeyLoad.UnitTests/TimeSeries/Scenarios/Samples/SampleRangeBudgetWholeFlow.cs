@@ -17,8 +17,9 @@ internal static class SampleRangeBudgetWholeFlow
         var append = fixture.Operation(new AppendSamples(SampleAggregateTestData.Set, SampleAggregateTestData.Series,
             [SampleRawIntegrityScenario.Sample(5)], SampleAggregateTestData.EmptyTags));
         var previousPosition = fixture.Store.Position;
+        var previousApplied = fixture.Owner.LastApplied;
         var receipt = fixture.Apply(append);
-        await SampleRangeBudgetAssertions.AppendReceiptAsync(fixture, append, receipt, previousPosition);
+        await SampleRangeBudgetAssertions.AppendReceiptAsync(fixture, append, receipt, previousPosition, previousApplied);
         await SampleRangeBudgetAssertions.HealthyRowsAsync(fixture, appended: true);
         await SampleRangeBudgetAssertions.RefuseAsync(fixture, fault);
         var healthyCut = SampleRawIntegrityAssertions.Capture(fixture.Store);

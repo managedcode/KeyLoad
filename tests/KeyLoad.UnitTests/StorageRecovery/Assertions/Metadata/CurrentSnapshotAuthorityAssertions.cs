@@ -12,8 +12,7 @@ internal static class CurrentSnapshotAuthorityAssertions
     private const long NextGeneration = 1;
     private const long RestoreIncrement = 1;
     private const long HealthyIncrement = 1;
-    private const int InitialRows = 3;
-    private const int HealthyRows = 4;
+    private const int MaximumRows = 5;
     private static readonly byte[] FollowupKey = [0x02, 0x44, 0x10];
     private static readonly byte[] FollowupValue = [0x83, 0x00, 0x45];
 
@@ -112,15 +111,19 @@ internal static class CurrentSnapshotAuthorityAssertions
             [Convert.ToHexString(fixture.SecondKey)] = fixture.SecondValue
         };
         expected.Add(Convert.ToHexString(KeyCodec.Encode(ZoneTreePersistenceFormat.SystemNamespace,
-            restored ? ZoneTreePersistenceFormat.DispatchPausedKey : ZoneTreePersistenceFormat.LastAppliedKey)),
-            restored ? OrleansSerialization.Serialize(true) : OrleansSerialization.Serialize(OriginalAppliedPosition));
+            ZoneTreePersistenceFormat.LastAppliedKey)), OrleansSerialization.Serialize(OriginalAppliedPosition));
+        if (restored)
+        {
+            expected.Add(Convert.ToHexString(KeyCodec.Encode(ZoneTreePersistenceFormat.SystemNamespace,
+                ZoneTreePersistenceFormat.DispatchPausedKey)), OrleansSerialization.Serialize(true));
+        }
         if (healthy)
         {
             expected.Add(Convert.ToHexString(FollowupKey), FollowupValue);
         }
-        var page = store.Read(view => view.Scan([], HealthyRows + 1));
+        var page = store.Read(view => view.Scan([], MaximumRows + 1));
         await Assert.That(page.HasMore).IsFalse();
-        await Assert.That(page.Records.Length).IsEqualTo(healthy ? HealthyRows : InitialRows);
+        await Assert.That(page.Records.Length).IsEqualTo(expected.Count);
         var actual = page.Records.ToDictionary(row => Convert.ToHexString(row.Key.Span), row => row.Value.ToArray());
         await Assert.That(actual.Keys.Order(StringComparer.Ordinal))
             .IsEquivalentTo(expected.Keys.Order(StringComparer.Ordinal), CollectionOrdering.Matching);

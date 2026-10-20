@@ -8,6 +8,7 @@ internal static class SampleChunkSignedMinimumSeed
     private const long NextPosition = 1;
     private const int AppendIndex = 1;
     private const string AppendKind = "appendSamples";
+    private const int PersistedCopies = 2;
 
     internal static async Task<SampleChunkSignedMinimumState> RunAsync(ConnectionServerDatabase owner)
     {
@@ -29,7 +30,7 @@ internal static class SampleChunkSignedMinimumSeed
             var command = new CommandRequest(Guid.NewGuid(), owner.Partition, [mutation]);
             var position = checked(owner.ReadCanonicalCut().AppliedPosition + NextPosition);
             var expected = new CommitReceipt(command.CommandId, new(owner.Store.Identity.Incarnation, owner.Partition.AtomicPartitionId, position), [new MutationReceipt(kinds[commands.Count], SampleChunkCanonicalFixture.Set,
-                    SampleChunkCanonicalFixture.Series, revisions[commands.Count])], DurabilityProfile.ProcessDurable, 1);
+                    SampleChunkCanonicalFixture.Series, revisions[commands.Count])], DurabilityProfile.ProcessDurable, PersistedCopies);
             var actual = owner.Submit(OperationKind.Batch, command, id: command.CommandId).Get<CommitReceipt>();
             await SampleChunkExplicitMinimumUnitReads.EqualAsync(expected, actual);
             commands.Add((command, expected));
@@ -43,6 +44,19 @@ internal static class SampleChunkSignedMinimumSeed
             MinimumToken = commands.Last().Receipt.Token
         };
         return new(request, reader, commands.ToArray());
+    }
+
+    internal static async Task ReplayAsync(ConnectionServerDatabase owner, SampleChunkSignedMinimumState state)
+    {
+        foreach (var original in state.Commands)
+        {
+            await SampleChunkSignedMinimumAssertions.ObserveAsync(owner.Store, async () =>
+            {
+                var replay = owner.Submit(OperationKind.Batch, original.Request,
+                    id: original.Request.CommandId).Get<CommitReceipt>();
+                await SampleChunkExplicitMinimumUnitReads.EqualAsync(original.Receipt, replay);
+            });
+        }
     }
 
     internal static CommitToken Earlier(SampleChunkSignedMinimumState state)
