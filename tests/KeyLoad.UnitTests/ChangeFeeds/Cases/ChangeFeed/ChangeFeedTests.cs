@@ -79,7 +79,7 @@ internal sealed class ChangeFeedTests
         db.Commit(new PutDocument("orders", "a", "{}"), new PutDocument("orders", "b", "{}"));
         var active = Consumer(db);
         Configure(db, active);
-        var rebuild = Consumer(db, "text");
+        var rebuild = Consumer(db, "rebuild");
         Configure(db, rebuild);
         Complete(db, active, db.Database.ReadProjectionBatch("root", new(active)));
         var id = Guid.NewGuid();
