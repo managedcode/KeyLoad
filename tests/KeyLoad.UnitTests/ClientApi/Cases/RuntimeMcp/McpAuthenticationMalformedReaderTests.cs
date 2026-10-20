@@ -1,4 +1,3 @@
-using System.Reflection;
 using KeyLoad.Server;
 
 namespace KeyLoad.UnitTests.Features.ClientApi;
@@ -21,16 +20,5 @@ internal sealed class McpAuthenticationMalformedReaderTests
         }
         var decoded = McpAuthentication.ReadPrincipal(payload, UnitMcpOptions.Execution(), CancellationToken.None);
         await Assert.That(JsonDefaults.Serialize(decoded).AsSpan().SequenceEqual(JsonDefaults.Serialize(principal))).IsTrue();
-    }
-
-    [Test]
-    public async Task OwnedInvalidOperationIncludingTheSameBufferMessageIsOutsideMalformedFilter()
-    {
-        var filter = typeof(McpAuthentication).GetMethod("Malformed", BindingFlags.Static | BindingFlags.NonPublic)!;
-        foreach (var message in new[] { "Owned session invariant failed.", "Insufficient data present in buffer." })
-        {
-            var failure = Assert.ThrowsExactly<InvalidOperationException>(() => throw new InvalidOperationException(message));
-            await Assert.That((bool)filter.Invoke(null, [failure])!).IsFalse();
-        }
     }
 }

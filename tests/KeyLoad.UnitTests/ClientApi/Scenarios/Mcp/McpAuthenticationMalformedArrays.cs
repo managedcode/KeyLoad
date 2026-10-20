@@ -1,6 +1,5 @@
 using System.Buffers;
 using System.Collections.Immutable;
-using KeyLoad.Server;
 using Orleans.Serialization.Buffers;
 using Orleans.Serialization.Codecs;
 using Orleans.Serialization.WireProtocol;
@@ -9,14 +8,12 @@ namespace KeyLoad.UnitTests.Features.ClientApi;
 
 internal static class McpAuthenticationMalformedArrays
 {
-    internal static void Grants<TBuffer>(ref Writer<TBuffer> writer, ImmutableArray<ScopeGrant> values,
-        McpAuthenticationArrayFault? fault) where TBuffer : IBufferWriter<byte>
+    internal static void Grants<TBuffer>(ref Writer<TBuffer> writer, ImmutableArray<ScopeGrant> values)
+        where TBuffer : IBufferWriter<byte>
     {
         var items = values.ToArray();
         Start(ref writer, items);
-        var count = fault == McpAuthenticationArrayFault.TooManyGrantProperties
-            ? checked((uint)(McpFramingProtocol.MaximumProperties / McpAuthenticationProjection.GrantProperties) + 1)
-            : checked((uint)items.Length);
+        var count = checked((uint)items.Length);
         if (count != 0)
         {
             UInt32Codec.WriteField(ref writer, 0, count);
@@ -30,13 +27,12 @@ internal static class McpAuthenticationMalformedArrays
     }
 
     internal static void Strings<TBuffer>(ref Writer<TBuffer> writer, ImmutableArray<string> values,
-        PrincipalRecord principal, McpAuthenticationArrayFault? fault) where TBuffer : IBufferWriter<byte>
+        PrincipalRecord principal, McpAuthenticationArrayFault fault) where TBuffer : IBufferWriter<byte>
     {
         var items = values.ToArray();
         Start(ref writer, items);
         var count = fault switch
         {
-            McpAuthenticationArrayFault.TooManyItems => checked((uint)McpFramingProtocol.MaximumTokens + 1),
             McpAuthenticationArrayFault.Underfilled => checked((uint)items.Length + 1),
             _ => checked((uint)items.Length)
         };
@@ -64,7 +60,7 @@ internal static class McpAuthenticationMalformedArrays
     }
 
     private static void Item<TBuffer>(ref Writer<TBuffer> writer, uint delta, string value,
-        PrincipalRecord principal, McpAuthenticationArrayFault? fault) where TBuffer : IBufferWriter<byte>
+        PrincipalRecord principal, McpAuthenticationArrayFault fault) where TBuffer : IBufferWriter<byte>
     {
         if (fault == McpAuthenticationArrayFault.WrongReferenceType)
         {

@@ -21,7 +21,7 @@ internal static class QueueDispatchMcpCatalogAssertions
     private static readonly string[] ResultFields =
         ["name", "kind", "transactionDomainId", "indexes", "fieldPolicies", "headerPolicies",
          "queuePolicy", "eventRetention", "authority", "schemaVersion", "paused",
-         "relationalSchema", "vectorProfiles", "inboxPolicy", "analyticsSchema"];
+         "relationalSchema", "vectorProfiles", "inboxPolicy", "analyticsSchema", "filePolicy"];
 
     internal static async Task RequireAsync()
     {

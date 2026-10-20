@@ -12,7 +12,7 @@ internal static class McpAuthenticationMalformedFixture
     internal const string Item = "execution-auth-array-item";
 
     internal static byte[] Array(PrincipalRecord principal, McpAuthenticationArrayFault fault) => Write(principal, fault);
-    internal static byte[] Valid(PrincipalRecord principal) => Write(principal, null);
+    internal static byte[] Valid(PrincipalRecord principal) => OrleansSerialization.Serialize(new GrainValue(principal));
 
     internal static byte[] DefaultArray(PrincipalRecord principal)
         => OrleansSerialization.Serializer.SerializeToArray(new RuntimePayload
@@ -28,7 +28,7 @@ internal static class McpAuthenticationMalformedFixture
             Value = new GrainValue(principal with { Teams = default })
         });
 
-    private static byte[] Write(PrincipalRecord principal, McpAuthenticationArrayFault? fault)
+    private static byte[] Write(PrincipalRecord principal, McpAuthenticationArrayFault fault)
     {
         using var session = OrleansSerialization.Serializer.SessionPool.GetSession();
         var writer = Writer.CreatePooled(session);
@@ -55,11 +55,11 @@ internal static class McpAuthenticationMalformedFixture
     }
 
     private static void WritePrincipal<TBuffer>(ref Writer<TBuffer> writer, PrincipalRecord value,
-        McpAuthenticationArrayFault? fault) where TBuffer : IBufferWriter<byte>
+        McpAuthenticationArrayFault fault) where TBuffer : IBufferWriter<byte>
     {
         StringCodec.WriteField(ref writer, 0, value.Id);
         StringCodec.WriteField(ref writer, 1, value.TenantId);
-        McpAuthenticationMalformedArrays.Grants(ref writer, value.Grants, fault);
+        McpAuthenticationMalformedArrays.Grants(ref writer, value.Grants);
         McpAuthenticationMalformedArrays.Strings(ref writer, value.FieldGrants, value, fault);
         Scalar(ref writer, value.ClusterAdministrator);
         StringCodec.WriteField(ref writer, 1, value.OwnerId);

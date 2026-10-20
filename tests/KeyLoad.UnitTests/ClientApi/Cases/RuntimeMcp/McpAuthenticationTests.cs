@@ -11,6 +11,7 @@ internal sealed class McpAuthenticationTests
 {
     internal const string PrincipalId = "root";
     internal const string SharedValue = "execution-auth-shared-value";
+    private const string UnicodePrincipal = "principal-ї-漢-🧭-e\u0301";
     private const int RequestCapacity = 16_384;
     private const string LegacyPrincipalJson = "{\"id\":\"root\"}";
     private static readonly uint[] PrincipalIds = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
@@ -27,6 +28,7 @@ internal sealed class McpAuthenticationTests
         ImmutableArray<string> repeated = [SharedValue, SharedValue];
         var principal = stored with
         {
+            Id = UnicodePrincipal,
             Grants = [shared, shared],
             FieldGrants = repeated,
             Projects = repeated,
