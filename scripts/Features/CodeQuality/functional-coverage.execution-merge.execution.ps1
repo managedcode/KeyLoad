@@ -92,7 +92,7 @@ function Export-FcIndividualReports([object] $Plan, [string] $Output) {
     for ($index = 0; $index -lt $Plan.inputs.Count; $index++) {
         $name = 'input-' + $index.ToString('D4') + '.cobertura'
         $item = $Plan.inputs[$index]
-        Invoke-FcMergeLogged $ToolPackageRoot ([string[]] @($item.path)) $Output $name 'cobertura' `
+        $null = Invoke-FcMergeLogged $ToolPackageRoot ([string[]] @($item.path)) $Output $name 'cobertura' `
             ([int] $bounds.applicationCleanupTimeoutSeconds) ([int] $bounds.maximumManifestBytes) ([long] $bounds.maximumFileBytes)
     }
 }
@@ -102,10 +102,10 @@ function Invoke-FcMergeCommands([object] $Plan, [string] $Output, [string[]] $In
     $timeout = [int] $bounds.applicationCleanupTimeoutSeconds
     $characters = [int] $bounds.maximumManifestBytes
     $bytes = [long] $bounds.maximumFileBytes
-    Invoke-FcMergeLogged $ToolPackageRoot $Inputs $Output 'merged.coverage' 'coverage' $timeout $characters $bytes
+    $null = Invoke-FcMergeLogged $ToolPackageRoot $Inputs $Output 'merged.coverage' 'coverage' $timeout $characters $bytes
     $mergedInput = [string[]] @((Join-Path $Output 'merged.coverage'))
-    Invoke-FcMergeLogged $ToolPackageRoot $mergedInput $Output 'merged.xml' 'xml' $timeout $characters $bytes
-    Invoke-FcMergeLogged $ToolPackageRoot $mergedInput $Output 'merged.cobertura' 'cobertura' $timeout $characters $bytes
+    $null = Invoke-FcMergeLogged $ToolPackageRoot $mergedInput $Output 'merged.xml' 'xml' $timeout $characters $bytes
+    $null = Invoke-FcMergeLogged $ToolPackageRoot $mergedInput $Output 'merged.cobertura' 'cobertura' $timeout $characters $bytes
 }
 
 function Invoke-FcRepeatedInputCommands([object] $Plan, [string] $Output, [string[]] $Inputs) {
@@ -116,11 +116,11 @@ function Invoke-FcRepeatedInputCommands([object] $Plan, [string] $Output, [strin
     $timeout = [int] $bounds.applicationCleanupTimeoutSeconds
     $characters = [int] $bounds.maximumManifestBytes
     $bytes = [long] $bounds.maximumFileBytes
-    Invoke-FcMergeLogged $ToolPackageRoot $twice.ToArray() $Output 'repeated-input-control.coverage' 'coverage' `
+    $null = Invoke-FcMergeLogged $ToolPackageRoot $twice.ToArray() $Output 'repeated-input-control.coverage' 'coverage' `
         $timeout $characters $bytes
     $controlInput = [string[]] @((Join-Path $Output 'repeated-input-control.coverage'))
-    Invoke-FcMergeLogged $ToolPackageRoot $controlInput $Output 'repeated-input-control.xml' 'xml' $timeout $characters $bytes
-    Invoke-FcMergeLogged $ToolPackageRoot $controlInput $Output 'repeated-input-control.cobertura' 'cobertura' $timeout $characters $bytes
+    $null = Invoke-FcMergeLogged $ToolPackageRoot $controlInput $Output 'repeated-input-control.xml' 'xml' $timeout $characters $bytes
+    $null = Invoke-FcMergeLogged $ToolPackageRoot $controlInput $Output 'repeated-input-control.cobertura' 'cobertura' $timeout $characters $bytes
 }
 
 function Assert-FcMergeInputsUnchanged([object] $Plan) {

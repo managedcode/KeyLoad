@@ -29,7 +29,7 @@ function Read-FcAssemblyMetadataStrings([object] $Reader) {
         if ($Reader.GetString($type.Namespace) -cne 'System.Reflection' -or
             $Reader.GetString($type.Name) -cne 'AssemblyMetadataAttribute') { continue }
         if ($type.ResolutionScope.Kind -ne [Reflection.Metadata.HandleKind]::AssemblyReference -or
-            $Reader.GetString($Reader.GetAssemblyReference([Reflection.Metadata.AssemblyReferenceHandle] $type.ResolutionScope).Name) -cne 'System.Runtime') {
+            $Reader.GetString($Reader.GetAssemblyReference([Reflection.Metadata.AssemblyReferenceHandle] $type.ResolutionScope).Name) -cnotin @('System.Runtime','netstandard')) {
             throw $script:FcCompileIdentity.InvalidReceipt
         }
         $signature = [byte[]] $Reader.GetBlobBytes($member.Signature)

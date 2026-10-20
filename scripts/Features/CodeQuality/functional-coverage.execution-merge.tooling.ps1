@@ -87,14 +87,14 @@ function Invoke-FcToolingMerges([object[]] $Inputs) {
     $paths = @($Inputs | ForEach-Object { $_.path })
     Export-FcToolingInputs $paths
     $merged = Join-Path $OutputDirectory 'merged.coverage'
-    Invoke-FcMergeLogged $ToolPackageRoot $paths $OutputDirectory 'merged.coverage' 'coverage' `
+    $null = Invoke-FcMergeLogged $ToolPackageRoot $paths $OutputDirectory 'merged.coverage' 'coverage' `
         $TimeoutSeconds $MaximumOutputCharacters $MaximumFileBytes
     Export-FcToolingMerged $merged
     $twice = [Collections.Generic.List[string]]::new()
     foreach ($path in $paths) { $twice.Add($path) }
     foreach ($path in $paths) { $twice.Add($path) }
     $control = Join-Path $OutputDirectory 'repeated-input-control.coverage'
-    Invoke-FcMergeLogged $ToolPackageRoot $twice.ToArray() $OutputDirectory 'repeated-input-control.coverage' 'coverage' `
+    $null = Invoke-FcMergeLogged $ToolPackageRoot $twice.ToArray() $OutputDirectory 'repeated-input-control.coverage' 'coverage' `
         $TimeoutSeconds $MaximumOutputCharacters $MaximumFileBytes
     Export-FcToolingControl $control
     $mergedCounts = Read-FcMergeCoverage (Join-Path $OutputDirectory 'merged.cobertura') $MaximumFileBytes
@@ -119,24 +119,24 @@ function Assert-FcToolingLineUnion([int] $InputCount, [object] $Merged) {
 function Export-FcToolingInputs([string[]] $Paths) {
     for ($index = 0; $index -lt $Paths.Count; $index++) {
         $name = 'input-' + $index.ToString('D4') + '.cobertura'
-        Invoke-FcMergeLogged $ToolPackageRoot ([string[]] @($Paths[$index])) $OutputDirectory $name 'cobertura' `
+        $null = Invoke-FcMergeLogged $ToolPackageRoot ([string[]] @($Paths[$index])) $OutputDirectory $name 'cobertura' `
             $TimeoutSeconds $MaximumOutputCharacters $MaximumFileBytes
     }
 }
 
 function Export-FcToolingMerged([string] $Merged) {
     $input = [string[]] @($Merged)
-    Invoke-FcMergeLogged $ToolPackageRoot $input $OutputDirectory 'merged.xml' 'xml' `
+    $null = Invoke-FcMergeLogged $ToolPackageRoot $input $OutputDirectory 'merged.xml' 'xml' `
         $TimeoutSeconds $MaximumOutputCharacters $MaximumFileBytes
-    Invoke-FcMergeLogged $ToolPackageRoot $input $OutputDirectory 'merged.cobertura' 'cobertura' `
+    $null = Invoke-FcMergeLogged $ToolPackageRoot $input $OutputDirectory 'merged.cobertura' 'cobertura' `
         $TimeoutSeconds $MaximumOutputCharacters $MaximumFileBytes
 }
 
 function Export-FcToolingControl([string] $Control) {
     $input = [string[]] @($Control)
-    Invoke-FcMergeLogged $ToolPackageRoot $input $OutputDirectory 'repeated-input-control.xml' 'xml' `
+    $null = Invoke-FcMergeLogged $ToolPackageRoot $input $OutputDirectory 'repeated-input-control.xml' 'xml' `
         $TimeoutSeconds $MaximumOutputCharacters $MaximumFileBytes
-    Invoke-FcMergeLogged $ToolPackageRoot $input $OutputDirectory 'repeated-input-control.cobertura' 'cobertura' `
+    $null = Invoke-FcMergeLogged $ToolPackageRoot $input $OutputDirectory 'repeated-input-control.cobertura' 'cobertura' `
         $TimeoutSeconds $MaximumOutputCharacters $MaximumFileBytes
 }
 

@@ -11,7 +11,7 @@ $script:FunctionalCoverage = [ordered]@{
     SettingsCopyName = 'functional-coverage.settings.xml'
     DeploymentDirectory = 'tests/KeyLoad.UnitTests/bin/Debug/net10.0'
     SourceDirectory = 'src/KeyLoad.Query'
-    SourceCount = 262
+    SourceCount = 259
     ContributorSourceCount = 21
     ContributorClassCount = 10
     ContributorCaseCount = 25
@@ -225,7 +225,7 @@ function Get-FcCompiledProjectRoster([string] $Root) {
     $sources = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
     foreach ($entry in $document.SelectNodes('/Solution/Folder/Project')) {
         $relative = [string] $entry.Path
-        if ($relative -cnotmatch '\A(src|build|analyzers)/(KeyLoad\.[A-Za-z0-9.]+)/\2\.csproj\z') { continue }
+        if ($relative -cnotmatch '\A(src|build|analyzers)/(KeyLoad(?:\.[A-Za-z0-9.]+)?)/\2\.csproj\z') { continue }
         $role = if ($Matches[1] -ceq 'src') { 'production' } else { 'infrastructure' }
         $name = $Matches[2]
         $path = Resolve-FcPath $Root $relative

@@ -21,7 +21,7 @@ function Read-FcContributors([object] $SourceManifest, [object] $Bounds, [string
     }
     $allowedModules = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
     foreach ($module in $ModuleRoster) {
-        if ($module -cnotmatch '\AKeyLoad\.[A-Za-z0-9.]{1,96}\z' -or -not $allowedModules.Add($module)) {
+        if ($module -cnotmatch '\AKeyLoad(?:\.[A-Za-z0-9.]{1,96})?\z' -or -not $allowedModules.Add($module)) {
             throw $script:FcContributors.Invalid
         }
     }
@@ -49,7 +49,7 @@ function Read-FcContributors([object] $SourceManifest, [object] $Bounds, [string
         if (-not $identities.Add($identity)) { throw $script:FcContributors.Invalid }
         Assert-FcUniqueLabels $entry.requirements '\AREQ-[A-Z0-9-]{1,64}\z'
         Assert-FcUniqueLabels $entry.acceptance '\AAC-[A-Z0-9-]{1,64}\z'
-        Assert-FcUniqueLabels $entry.executedModules '\AKeyLoad\.[A-Za-z0-9.]{1,96}\z'
+        Assert-FcUniqueLabels $entry.executedModules '\AKeyLoad(?:\.[A-Za-z0-9.]{1,96})?\z'
         foreach ($module in $entry.executedModules) {
             if (-not $allowedModules.Contains([string]$module) -or
                 $module -cin @('KeyLoad.AppHost','KeyLoad.LoadTests.AppHost','KeyLoad.Analyzers')) { throw $script:FcContributors.Invalid }

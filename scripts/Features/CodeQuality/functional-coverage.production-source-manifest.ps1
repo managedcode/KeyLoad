@@ -141,10 +141,34 @@ function Get-PsmCentralInputs([string] $Root, [string] $ProjectName, [bool] $IsT
     @($inputs.ToArray())
 }
 
+function Get-PsmProjectTargetFramework([string] $Root, [string] $Tree, [string] $ProjectName) {
+    $path = Resolve-FcPath $Root ($Tree + '/obj/project.assets.json')
+    $bytes = Read-PsmBounded $path
+    $document = $null
+    try {
+        $options = [System.Text.Json.JsonDocumentOptions]::new()
+        $options.MaxDepth = $script:Psm.MaximumJsonDepth
+        $document = [System.Text.Json.JsonDocument]::Parse([ReadOnlyMemory[byte]]::new($bytes), $options)
+        Assert-PsmUniqueJsonProperties $document.RootElement 0
+        $restore = $document.RootElement.GetProperty('project').GetProperty('restore')
+        $projectPath = Resolve-FcPath $Root ($Tree + '/' + $ProjectName + '.csproj')
+        if ($restore.GetProperty('projectPath').GetString() -cne $projectPath) { throw $script:Psm.InvalidReceipt }
+        $frameworks = $restore.GetProperty('originalTargetFrameworks')
+        if ($frameworks.ValueKind -ne [System.Text.Json.JsonValueKind]::Array -or
+            $frameworks.GetArrayLength() -ne 1) { throw $script:Psm.InvalidReceipt }
+        $framework = $frameworks[0].GetString()
+        if ($framework -cnotmatch '\Anet(?:standard)?[0-9]{1,2}\.[0-9]{1,2}\z') { throw $script:Psm.InvalidReceipt }
+        $framework
+    }
+    catch [System.Text.Json.JsonException] { throw $script:Psm.InvalidReceipt }
+    finally { if ($null -ne $document) { $document.Dispose() } }
+}
+
 function Get-PsmProjectIdentity([string] $Root, [string] $ProjectName, [bool] $IsTest) {
     $tree = Get-FcProjectSourceDirectory $ProjectName $IsTest
-    $dll = $tree + '/bin/Debug/net10.0/' + $ProjectName + '.dll'
-    $pdb = $tree + '/bin/Debug/net10.0/' + $ProjectName + '.pdb'
+    $framework = Get-PsmProjectTargetFramework $Root $tree $ProjectName
+    $dll = $tree + '/bin/Debug/' + $framework + '/' + $ProjectName + '.dll'
+    $pdb = $tree + '/bin/Debug/' + $framework + '/' + $ProjectName + '.pdb'
     $sources = @(Get-PsmCompiledSources $Root $ProjectName $IsTest $dll)
     Assert-PsmSourceTree $Root $ProjectName $IsTest $sources
     $central = @(Get-PsmCentralInputs $Root $ProjectName $IsTest)
