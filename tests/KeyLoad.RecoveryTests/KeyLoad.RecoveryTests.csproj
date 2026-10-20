@@ -3,6 +3,7 @@
     <OutputType>Exe</OutputType>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
+    <NoWarn>$(NoWarn);KLD0035;KLD0036;KLD0037</NoWarn>
     <GenerateTestingPlatformEntryPoint>false</GenerateTestingPlatformEntryPoint>
     <GenerateTestingPlatformApplicationHelper>true</GenerateTestingPlatformApplicationHelper>
   </PropertyGroup>
@@ -20,4 +21,8 @@
     <ProjectReference Include="../../src/KeyLoad.Storage.ZoneTree/KeyLoad.Storage.ZoneTree.csproj" />
     <PackageReference Include="TUnit" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../analyzers/KeyLoad.Analyzers/KeyLoad.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" IsAspireProjectResource="false" PrivateAssets="all" />
+  </ItemGroup>
+  <Import Project="$(MSBuildThisFileDirectory)../../build/CodeQuality/FunctionalCompilationIdentity.targets" />
 </Project>

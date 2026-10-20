@@ -17,9 +17,9 @@ internal sealed class SiteContentCoverageModeTests
             path.EndsWith("measurements.mjs", StringComparison.Ordinal) ||
             path.EndsWith("measurement-loader.mjs", StringComparison.Ordinal))).IsFalse();
 
-        var repository = Environment.GetEnvironmentVariable(SiteTokens.RepositoryEnvironment);
-        var coverageRoot = Environment.GetEnvironmentVariable(SiteCoverageTokens.CoverageRootEnvironment);
-        var revision = Environment.GetEnvironmentVariable(SitePublicationTokens.SourceRevisionEnvironment);
+        var repository = SiteEnvironmentConfiguration.Capture().Value.Repository;
+        var coverageRoot = SiteEnvironmentConfiguration.Capture().Value.CoverageRoot;
+        var revision = SiteEnvironmentConfiguration.Capture().Value.SourceRevision;
         if (repository is null || coverageRoot is null || revision is null)
         {
             throw new InvalidOperationException(SiteCoverageTokens.InvalidRootFailure);

@@ -1,7 +1,6 @@
 #pragma warning disable ORLEANSEXP005
 using System.Diagnostics.CodeAnalysis;
 using KeyLoad.Clustering;
-using KeyLoad.Core;
 using KeyLoad.Server;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;

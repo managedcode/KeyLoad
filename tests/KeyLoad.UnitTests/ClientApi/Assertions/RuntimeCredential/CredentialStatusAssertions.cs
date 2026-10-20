@@ -1,5 +1,4 @@
 using System.Security.Cryptography;
-using KeyLoad.Core;
 using KeyLoad.Storage;
 using KeyLoad.UnitTests.Features.OrleansExecution;
 using ManagedCode.Communication;

@@ -1,13 +1,12 @@
 using KeyLoad.Core;
-using KeyLoad.Server;
 using KeyLoad.Server.Features.Search;
 
 namespace KeyLoad.RecoveryTests.Features.Search;
 
 internal static class TextOnlineCrashProof
 {
-    private const int CorruptTrailerDistance = 1;
-    private const byte CorruptTrailerMask = 1;
+    private const int ChecksumByteOffset = 1;
+    private const byte ChecksumDamageMask = 1;
     private const double LiteralExpectedSingleHitScore = 1d / 61d;
     private const string ChangedText = "ОНОВЛЕНО";
     private const string RemovedEnglishText = "hello";
@@ -34,7 +33,6 @@ internal static class TextOnlineCrashProof
             await LiteralAsync(runtime, healthyRequest);
             return;
         }
-        await CorruptRepairAsync(runtime, original.Request);
         var healthy = original.Request with
         {
             CommandId = Guid.NewGuid()
@@ -49,8 +47,8 @@ internal static class TextOnlineCrashProof
             result, CancellationToken.None);
     }
 
-    private static async Task CorruptRepairAsync(TextOnlineCrashRuntime runtime,
-        OnlineTextIndexMaintenanceRequest request)
+    internal static async Task CapturePublicationAsync(string root, TextOnlineCrashRuntime runtime,
+        OnlineTextIndexMaintenanceRequest request, OnlineTextIndexMaintenanceResult receipt)
     {
         var database = runtime.Canonical.Database;
         var budget = new ReadExecutionBudget(runtime.Canonical.Options.Core.DatabaseLimits, database.EvaluationClock);
@@ -58,28 +56,29 @@ internal static class TextOnlineCrashProof
             ?? throw new InvalidOperationException(TextIncrementalCrashProtocol.Invalid);
         var path = Path.Combine(runtime.PhysicalRoot, TextOnlineRoot.DirectoryName,
             original.Authority.Leaf, TextOnlineStagingFiles.FileName);
-        var bytes = await File.ReadAllBytesAsync(path);
-        var invalid = bytes.ToArray();
-        invalid[^CorruptTrailerDistance] ^= CorruptTrailerMask;
-        var failures = new List<Exception>();
-        await ServerFailureObserver.ObserveAsync(async () =>
+        await TextIncrementalEvidenceFiles.WriteAsync(root, TextOnlineCrashScenario.ReceiptFile,
+            receipt, CancellationToken.None);
+        await TextIncrementalEvidenceFiles.WriteAsync(root, TextOnlineCrashScenario.PublicationLeafFile,
+            original.Authority.Leaf, CancellationToken.None);
+        await TextIncrementalEvidenceFiles.WriteAsync(root, TextOnlineCrashScenario.PublicationBytesFile,
+            await File.ReadAllBytesAsync(path), CancellationToken.None);
+    }
+
+    internal static async Task ReplacePublicationAsync(string root, bool repair, CancellationToken token)
+    {
+        var leaf = await TextIncrementalEvidenceFiles.ReadAsync<string>(root,
+            TextOnlineCrashScenario.PublicationLeafFile, token);
+        var bytes = await TextIncrementalEvidenceFiles.ReadAsync<byte[]>(root,
+            TextOnlineCrashScenario.PublicationBytesFile, token);
+        if (!repair)
         {
-            await File.WriteAllBytesAsync(path, invalid);
-            var refused = false;
-            try
-            {
-                _ = await TextOnlineCrashFlow.RunAsync(runtime, request, CancellationToken.None);
-            }
-            catch (KeyLoadException error) when (error.Code == ErrorCode.Corruption) { refused = true; }
-            if (!refused)
-            {
-                throw new InvalidOperationException(TextIncrementalCrashProtocol.Invalid);
-            }
-        }, failures);
-        await ServerFailureObserver.ObserveAsync(() => File.WriteAllBytesAsync(path, bytes), failures);
-        ServerFailureObserver.ThrowIfAny(failures);
-        _ = await TextOnlineCrashFlow.RunAsync(runtime, request, CancellationToken.None);
-        await LiteralAsync(runtime, request);
+            var envelope = OrleansSerialization.Deserialize<TextEnvelope>(bytes);
+            var damaged = envelope.Sha256.ToArray();
+            damaged[^ChecksumByteOffset] ^= ChecksumDamageMask;
+            bytes = OrleansSerialization.Serialize(envelope with { Sha256 = damaged });
+        }
+        var path = Path.Combine(root, TextOnlineRoot.DirectoryName, leaf, TextOnlineStagingFiles.FileName);
+        await File.WriteAllBytesAsync(path, bytes, token);
     }
 
     private static async Task LiteralAsync(TextOnlineCrashRuntime runtime, OnlineTextIndexMaintenanceRequest request)

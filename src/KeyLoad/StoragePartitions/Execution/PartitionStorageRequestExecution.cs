@@ -128,7 +128,7 @@ internal sealed class PartitionStorageRequestExecution(DatabaseEngine database, 
         };
         if (request.Envelope.CommandKind == OperationKind.OnlineTextPublicationPhase)
         {
-            id = DatabaseEngine.Payload<OnlineTextPublicationPhaseCommand>(
+            id = OperationProtocol.Payload<OnlineTextPublicationPhaseCommand>(
                 GrainPayload.Read<Command<DatabaseCommand>>(request.Payload)).SessionId;
         }
         if (checkpoint)

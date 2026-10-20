@@ -1,4 +1,3 @@
-using KeyLoad.Core;
 using KeyLoad.Storage;
 
 namespace KeyLoad.UnitTests.Features.InternalSerialization;

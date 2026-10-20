@@ -20,6 +20,6 @@ internal sealed record InitialPrincipalEpochClusterState(PartitionRef Partition,
             Revoked = revoked
         };
     internal ApiKeyRecord Credential(bool replacement = false, bool expired = false)
-        => DatabaseEngine.Credential(KeyId, PrincipalId, replacement ? ReplacementSecret : OriginalSecret,
+        => AuthorizationExecution.Credential(KeyId, PrincipalId, replacement ? ReplacementSecret : OriginalSecret,
             expired ? DateTimeOffset.UnixEpoch : null);
 }

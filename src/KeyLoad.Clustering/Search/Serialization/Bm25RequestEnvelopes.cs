@@ -12,7 +12,7 @@ internal static class Bm25RequestEnvelopes
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
         }
-        var verified = DatabaseEngine.SnapshotCommand(operation, scope.Limits);
+        var verified = CommandExecutionIdentity.SnapshotCommand(operation, scope.Limits);
         if (verified.Value!.Kind != OperationKind.Bm25CorpusPublicationPhase)
         {
             throw Errors.Fail(ErrorCode.PermissionDenied, GrainRoutingProtocol.AdministrationRequired);

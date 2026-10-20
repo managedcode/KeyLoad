@@ -16,9 +16,9 @@ internal static class AnalyzerFixture
     internal const string ProgramPath = "/repo/src/KeyLoad/Program.cs";
     internal const string ServerEndpointsPath = "/repo/src/KeyLoad/ApiEndpoints.cs";
     internal const string ServerHostingPath = "/repo/src/KeyLoad/Hosting.cs";
-    internal const string ContractPath = "/repo/src/KeyLoad.Clustering/Sample/Contracts/Dto.cs";
-    internal const string ClusteringModelsPath = "/repo/src/KeyLoad.Clustering/Sample/Models.cs";
-    internal const string GeneratedPath = "/repo/src/KeyLoad.Clustering/Sample/Generated.g.cs";
+    internal const string ContractPath = "/repo/src/KeyLoad.Clustering/Transport/Contracts/Dto.cs";
+    internal const string ClusteringModelsPath = "/repo/src/KeyLoad.Clustering/Transport/Models.cs";
+    internal const string GeneratedPath = "/repo/src/KeyLoad.Clustering/Transport/Generated.g.cs";
     private const string SupportPath = "/repo/src/Support.cs";
     private const string PlatformAssembliesName = "TRUSTED_PLATFORM_ASSEMBLIES";
     private const string MissingPlatformAssemblies = "Trusted platform assemblies are unavailable.";

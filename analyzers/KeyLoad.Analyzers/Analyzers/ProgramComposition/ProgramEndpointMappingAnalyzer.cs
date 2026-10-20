@@ -25,7 +25,6 @@ public sealed class ProgramEndpointMappingAnalyzer : DiagnosticAnalyzer
         isEnabledByDefault: true,
         description: CodeQualityDiagnosticText.EndpointMappingDescription);
 
-    private const string ServerAssemblyName = "KeyLoad";
     private const string AggregateMethodName = "MapKeyLoadApi";
 
     /// <inheritdoc/>
@@ -34,7 +33,10 @@ public sealed class ProgramEndpointMappingAnalyzer : DiagnosticAnalyzer
     /// <inheritdoc/>
     public override void Initialize(AnalysisContext context)
     {
-        System.ArgumentNullException.ThrowIfNull(context);
+        if (context is null)
+        {
+            throw new System.ArgumentNullException(nameof(context));
+        }
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
         context.RegisterSyntaxNodeAction(AnalyzeInvocation, SyntaxKind.InvocationExpression);
@@ -42,10 +44,7 @@ public sealed class ProgramEndpointMappingAnalyzer : DiagnosticAnalyzer
 
     private static void AnalyzeInvocation(SyntaxNodeAnalysisContext context)
     {
-        if (!string.Equals(context.SemanticModel.Compilation.AssemblyName,
-                ServerAssemblyName,
-                StringComparison.Ordinal) ||
-            !string.Equals(Path.GetFileName(context.Node.SyntaxTree.FilePath),
+        if (!string.Equals(Path.GetFileName(context.Node.SyntaxTree.FilePath),
                 CodeQualitySourceNames.ProgramFile,
                 StringComparison.OrdinalIgnoreCase) ||
             !context.Node.Ancestors().OfType<GlobalStatementSyntax>().Any() ||

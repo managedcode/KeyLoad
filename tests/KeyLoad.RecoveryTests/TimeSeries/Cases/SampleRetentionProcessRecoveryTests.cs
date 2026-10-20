@@ -9,7 +9,6 @@ internal sealed class SampleRetentionProcessRecoveryTests
 {
     private const string TrialPrefix = "keyload-series-retention-crash-";
     private const int MutationIndex = 0;
-    private const int TimeoutSeconds = 25;
 
     [Test]
     [Arguments(CommitStage.HeaderWritten)]
@@ -23,7 +22,7 @@ internal sealed class SampleRetentionProcessRecoveryTests
         var callerToken = TestContext.Current!.Execution.CancellationToken;
         using var admission = await StorageTrialLease.AcquireAsync(callerToken);
         using var process = StartCrashProcess(root, stage);
-        using var timeoutTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(TimeoutSeconds), TimeProvider.System);
+        using var timeoutTimeout = new CancellationTokenSource(RecoveryExecutionOptions.TrialPolicy.Value.CompositionTimeout, TimeProvider.System);
         using var timeout = CancellationTokenSource.CreateLinkedTokenSource(callerToken, timeoutTimeout.Token);
         try
         {
@@ -36,7 +35,7 @@ internal sealed class SampleRetentionProcessRecoveryTests
         }
         finally
         {
-            using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(30), TimeProvider.System);
+            using var cleanup = new CancellationTokenSource(RecoveryExecutionOptions.TrialPolicy.Value.RetentionVerificationTimeout, TimeProvider.System);
             await StopAndDeleteAsync(process, root, cleanup.Token);
         }
     }

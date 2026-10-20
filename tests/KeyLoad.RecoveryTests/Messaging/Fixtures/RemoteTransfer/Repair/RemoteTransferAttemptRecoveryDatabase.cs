@@ -6,6 +6,7 @@ namespace KeyLoad.RecoveryTests.Features.Messaging;
 
 internal static class RemoteTransferAttemptRecoveryDatabase
 {
+    [ConfigurationBinding]
     internal static DatabaseEngine Open(ZoneTreeStore store) => new(store, new AuthorizationPolicy(),
         RecoveryExecutionOptions.DatabaseLimits(new()
         {

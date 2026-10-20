@@ -38,7 +38,7 @@ internal static class ModelRootClusterSeed
         await SqlClusterProtocol.EqualAsync<MutationReceipt[]>([new(queue ? "enqueue" : "appendEvents", resource, ModelRootClusterState.Item, 1L)], receipt.Mutations.ToArray());
         var state = new ModelRootClusterState(partition, queue, headerRoot, resource, reader, key, seed, receipt, null!);
         await ConfigureAsync(root, state, 1L, false, false, token);
-        await McpCallerAssertions.SdkStatusAsync(await root.Sdk.ConfigureApiKeyAsync(Guid.NewGuid(), DatabaseEngine.Credential(reader, reader, key), token));
+        await McpCallerAssertions.SdkStatusAsync(await root.Sdk.ConfigureApiKeyAsync(Guid.NewGuid(), AuthorizationExecution.Credential(reader, reader, key), token));
         var raw = await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.QueryAstAsync(state.Ast(), token));
         await Assert.That(raw.Rows.Length).IsEqualTo(1);
         await Assert.That(raw.Cursor).IsNull();

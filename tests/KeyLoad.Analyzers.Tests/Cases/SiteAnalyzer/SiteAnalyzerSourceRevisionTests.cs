@@ -39,7 +39,7 @@ internal sealed class SiteAnalyzerSourceRevisionTests
     }
 
     [Test]
-    public async Task PresentInvalidDedicatedRevisionFailsWithoutTriggerFallbackAsync()
+    public async Task PresentInvalidDedicatedRevisionCannotUseTriggerRevisionAsync()
     {
         using var scope = new SiteAnalyzerCoverageTestScope();
         var valid = CreateRevisionEnvironment(SiteAnalyzerCoverageTokens.SiteRevisionA, SiteAnalyzerCoverageTokens.TriggerRevisionB);

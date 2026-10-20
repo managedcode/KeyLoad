@@ -44,7 +44,7 @@ internal static class GraphIncomingReadScope
         {
             throw Errors.Fail(ErrorCode.Validation, ResourceKindConflict);
         }
-        DatabaseEngine.BindAuthenticatedReadResourceLifetime(metadata, partition, resource, lifetime!);
+        ResourceExecutionQueriesResourceLifetimeReadBinding.BindAuthenticatedReadResourceLifetime(metadata, partition, resource, lifetime!);
         return resource;
     }
 
@@ -67,7 +67,7 @@ internal static class GraphIncomingReadScope
         {
             throw Errors.Fail(ErrorCode.Validation, ResourceKindConflict);
         }
-        DatabaseEngine.BindAuthenticatedReadResourceLifetime(metadata, partition, resource, lifetime!);
+        ResourceExecutionQueriesResourceLifetimeReadBinding.BindAuthenticatedReadResourceLifetime(metadata, partition, resource, lifetime!);
         return resource;
     }
 

@@ -1,19 +1,26 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
-    <LangVersion>14.0</LangVersion>
-    <Nullable>enable</Nullable>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <ImplicitUsings>disable</ImplicitUsings>
     <IsPackable>false</IsPackable>
     <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+    <NoWarn>$(NoWarn);KLD0035;KLD0036</NoWarn>
   </PropertyGroup>
-
+  <Target Name="LoadKeyLoadAnalyzerForOwnSource" BeforeTargets="CoreCompile" Condition="'$(KeyLoadAnalyzeOwnSource)' == 'true'">
+    <Error Condition="!Exists('$(TargetPath)')" Text="KeyLoad analyzer source analysis requires its completed compiler output." />
+    <ItemGroup>
+      <Analyzer Include="$(TargetPath)" />
+    </ItemGroup>
+  </Target>
+  <Target Name="AnalyzeKeyLoadAnalyzerSource" AfterTargets="Build" Condition="'$(KeyLoadAnalyzeOwnSource)' != 'true' and '$(DesignTimeBuild)' != 'true'">
+    <MSBuild Projects="$(MSBuildProjectFullPath)" Targets="Compile" Properties="KeyLoadAnalyzeOwnSource=true;NonExistentFile=$(IntermediateOutputPath)analyzer-source-analysis.required" />
+  </Target>
+  <Import Project="$(MSBuildThisFileDirectory)../../build/CodeQuality/FunctionalCompilationIdentity.targets" />
   <ItemGroup>
-    <Reference Include="Microsoft.CodeAnalysis" Private="false">
-      <HintPath>$(MSBuildSDKsPath)/../Roslyn/bincore/Microsoft.CodeAnalysis.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.CodeAnalysis.CSharp" Private="false">
-      <HintPath>$(MSBuildSDKsPath)/../Roslyn/bincore/Microsoft.CodeAnalysis.CSharp.dll</HintPath>
-    </Reference>
+    <PackageReference Include="Microsoft.CodeAnalysis.Common" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" PrivateAssets="all" />
+  </ItemGroup>
+  <ItemGroup>
+    <AdditionalFiles Include="AnalyzerReleases.Unshipped.md" />
   </ItemGroup>
 </Project>

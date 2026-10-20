@@ -2,7 +2,7 @@ using Microsoft.CodeAnalysis;
 
 namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
 
-/// <summary>AC-CQ-008: analyzes both centrally excluded infrastructure projects via Roslyn.</summary>
+/// <summary>AC-CQ-008: analyzes compiler and test infrastructure sources through real Roslyn compilations.</summary>
 internal sealed class NumericAnalyzerSelfInventoryTests
 {
     [Test]

@@ -1,4 +1,3 @@
-using KeyLoad.Core;
 using KeyLoad.Storage;
 
 namespace KeyLoad.UnitTests.Features.ResourceExecution;
@@ -34,7 +33,7 @@ internal sealed class HeavyRouteAdmissionFixture : IDisposable
         Outcome = Harness.Store.Read(view => view.ReadOwnedValue(KeySpace.PartitionOutcome(Harness.Partition, "root", Seed.CommandId)))
             ?? throw new InvalidOperationException("The original admission source outcome must exist.");
         await PersistAsync(false, 1L);
-        Harness.Submit(OperationKind.ConfigureApiKey, new ConfigureApiKeyRequest(DatabaseEngine.Credential(Reader, Reader, Secret))).Get<bool>();
+        Harness.Submit(OperationKind.ConfigureApiKey, new ConfigureApiKeyRequest(AuthorizationExecution.Credential(Reader, Reader, Secret))).Get<bool>();
     }
     internal async Task PersistAsync(bool use, long epoch)
     {

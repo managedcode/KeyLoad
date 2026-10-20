@@ -8,7 +8,7 @@ internal static partial class SiteProductCopy
 {
     internal static Task<string> ReadSourceAsync(string relativePath)
     {
-        var repository = Environment.GetEnvironmentVariable(SiteTokens.RepositoryEnvironment);
+        var repository = SiteEnvironmentConfiguration.Capture().Value.Repository;
         if (string.IsNullOrWhiteSpace(repository) || !Path.IsPathFullyQualified(repository))
         {
             throw new InvalidOperationException(SiteProductCopyTokens.MissingRepository);

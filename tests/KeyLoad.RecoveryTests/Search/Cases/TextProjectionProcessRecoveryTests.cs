@@ -9,8 +9,6 @@ internal sealed class TextProjectionProcessRecoveryTests
     private const string TrialPrefix = "keyload-execution-text-process-";
     private const string StoreDirectoryName = "canonical";
     private const string ReceiptFileName = "canonical-cut.bin";
-    private const int TimeoutSeconds = 45;
-    private const int CleanupSeconds = 30;
 
     [Test]
     [Arguments(TextFaultStage.OwnerFlushed, false)]
@@ -35,7 +33,7 @@ internal sealed class TextProjectionProcessRecoveryTests
         var receiptPath = Path.Combine(root, ReceiptFileName);
         using var admission = await StorageTrialLease.AcquireAsync(callerToken);
         Process? process = null;
-        using var timeoutTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(TimeoutSeconds), TimeProvider.System);
+        using var timeoutTimeout = new CancellationTokenSource(RecoveryExecutionOptions.TrialPolicy.Value.SearchProjectionTimeout, TimeProvider.System);
         using var timeout = CancellationTokenSource.CreateLinkedTokenSource(callerToken, timeoutTimeout.Token);
         Exception? activeFailure = null;
         try
@@ -60,7 +58,7 @@ internal sealed class TextProjectionProcessRecoveryTests
         }
         finally
         {
-            using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(CleanupSeconds), TimeProvider.System);
+            using var cleanup = new CancellationTokenSource(RecoveryExecutionOptions.TrialPolicy.Value.CleanupTimeout, TimeProvider.System);
             await RecoveryProcessCleanup.SettleAsync(process, root, source, activeFailure, cleanup.Token);
         }
     }

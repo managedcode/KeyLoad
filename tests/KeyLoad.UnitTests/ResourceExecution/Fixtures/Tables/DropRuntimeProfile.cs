@@ -33,7 +33,7 @@ internal sealed class DropRuntimeProfile : IAsyncDisposable
         await ServerFailureObserver.ObserveAsync(() =>
         {
             profile.Attach();
-            _ = profile.Node.Services.GetRequiredService<IDropTableExecution>();
+            _ = profile.Node.PhysicalServices.GetRequiredService<IDropTableExecution>();
             return Task.CompletedTask;
         }, failures).ConfigureAwait(false);
         if (failures.Count != DropRuntimeProtocol.NoFailures)

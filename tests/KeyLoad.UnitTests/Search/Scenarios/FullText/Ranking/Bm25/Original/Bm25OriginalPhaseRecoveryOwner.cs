@@ -1,5 +1,4 @@
 using System.Diagnostics.CodeAnalysis;
-using KeyLoad.Core;
 using KeyLoad.Core.Features.CommandOutcomes.Contracts;
 using KeyLoad.Core.Features.Search;
 using KeyLoad.Server;

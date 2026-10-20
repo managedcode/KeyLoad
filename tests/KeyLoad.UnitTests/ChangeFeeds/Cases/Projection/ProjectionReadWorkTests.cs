@@ -1,5 +1,3 @@
-using KeyLoad.Core;
-
 using static KeyLoad.UnitTests.Features.ChangeFeeds.ChangeFeedTestActions;
 
 namespace KeyLoad.UnitTests.Features.ChangeFeeds;

@@ -1,6 +1,5 @@
 using System.Runtime.ExceptionServices;
 using System.Text.Json;
-using KeyLoad.Core;
 using KeyLoad.Core.Features.Authorization;
 using KeyLoad.Storage.ZoneTree;
 using Microsoft.Extensions.Options;
@@ -47,7 +46,7 @@ internal sealed class RuntimeJournalReopenFixture : IDisposable
         Database.Bootstrap(new PrincipalRecord(RootId, "system", [new(Wildcard, Wildcard, Capability.All)], [Wildcard])
         {
             ClusterAdministrator = true
-        }, DatabaseEngine.Credential(RootKeyId, RootId, RootSecret));
+        }, AuthorizationExecution.Credential(RootKeyId, RootId, RootSecret));
         Database.ConfigureRuntimeJournal(Options.Create(options));
         Submit(new(RuntimeJournalAction.BootstrapIdentity, string.Empty, Guid.Empty, 0, 0, null,
             ReadOnlyMemory<byte>.Empty, new(StringComparer.Ordinal), []), RootId);

@@ -16,7 +16,7 @@ internal static class FileStorageComposition
     {
         builder.Services.AddOptions<FileStorageOptions>()
             .Bind(builder.Configuration.GetSection(FileStorageOptions.SectionName))
-            .Validate(value => value.IsValid(), "File storage settings are invalid.").ValidateOnStart();
+            .Validate(value => value.IsValid(), FileStorageOptions.InvalidSettings).ValidateOnStart();
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddControllers().AddApplicationPart(typeof(FileStorageController).Assembly)
             .ConfigureApplicationPartManager(manager => manager.FeatureProviders.Add(new FileStorageControllerDiscovery()));

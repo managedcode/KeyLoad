@@ -13,6 +13,7 @@ internal sealed record SiteIsolatedGitHubInputs(string Capture, string Receipt, 
         return new(capture, receipt, metadata);
     }
 
+    [KeyLoad.ConfigurationBinding]
     public static string Required(string name)
     {
         var value = Environment.GetEnvironmentVariable(name);

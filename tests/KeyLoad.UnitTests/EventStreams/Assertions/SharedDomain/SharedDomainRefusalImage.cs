@@ -1,4 +1,3 @@
-using KeyLoad.Core;
 using KeyLoad.Storage;
 using ManagedCode.Communication.Commands;
 using static KeyLoad.RecoveryTests.Features.EventStreams.SharedDomainProtocol;

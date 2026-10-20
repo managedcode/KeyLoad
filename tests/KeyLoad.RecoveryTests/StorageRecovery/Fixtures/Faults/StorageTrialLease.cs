@@ -2,7 +2,7 @@ namespace KeyLoad.RecoveryTests.Features.StorageRecovery;
 
 internal sealed class StorageTrialLease : IDisposable
 {
-    private static readonly SemaphoreSlim TrialSlots = new(MaximumConcurrentStorageTrials, MaximumConcurrentStorageTrials);
+    private static readonly SemaphoreSlim TrialSlots = new(RecoveryExecutionOptions.TrialPolicy.Value.MaximumConcurrentStorageTrials, RecoveryExecutionOptions.TrialPolicy.Value.MaximumConcurrentStorageTrials);
     private static int activeStorageTrials;
     private static int maximumObservedStorageTrials;
     private int disposed;
@@ -11,7 +11,7 @@ internal sealed class StorageTrialLease : IDisposable
     {
     }
 
-    internal const int MaximumConcurrentStorageTrials = 4;
+    internal static int MaximumConcurrentStorageTrials => RecoveryExecutionOptions.TrialPolicy.Value.MaximumConcurrentStorageTrials;
 
     internal static int ActiveStorageTrials => Volatile.Read(ref activeStorageTrials);
 

@@ -14,4 +14,8 @@
     <ProjectReference Include="../KeyLoad.Core/KeyLoad.Core.csproj" />
     <ProjectReference Include="../KeyLoad.Client/KeyLoad.Client.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../analyzers/KeyLoad.Analyzers/KeyLoad.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" IsAspireProjectResource="false" PrivateAssets="all" />
+  </ItemGroup>
+  <Import Project="$(MSBuildThisFileDirectory)../../build/CodeQuality/FunctionalCompilationIdentity.targets" />
 </Project>

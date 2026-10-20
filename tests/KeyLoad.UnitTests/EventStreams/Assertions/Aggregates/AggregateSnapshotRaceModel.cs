@@ -1,5 +1,4 @@
 using KeyLoad.Client;
-using KeyLoad.Core;
 
 namespace KeyLoad.UnitTests.Features.EventStreams;
 

@@ -1,20 +1,18 @@
 namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
 
-internal sealed class SiteHeavyChildAdmission(int capacity, int maximumQueued, TimeSpan admissionDeadline)
+internal sealed class SiteHeavyChildAdmission(Microsoft.Extensions.Options.IOptions<SiteHeavyChildOptions> options)
 {
     private readonly System.Threading.Lock _sync = new();
     private readonly LinkedList<Waiter> _pending = new();
-    private readonly int _capacity = RequirePositive(capacity);
-    private readonly int _maximumQueued = RequirePositive(maximumQueued);
-    private readonly TimeSpan _admissionDeadline = RequirePositive(admissionDeadline);
+    private readonly SiteHeavyChildOptions _policy = options.Value;
     private int _active;
     private InvalidOperationException? _failure;
 
     internal static SiteHeavyChildAdmission Shared
     {
         get;
-    } = new(SiteHeavyChildTokens.ActiveCapacity,
-        SiteHeavyChildTokens.MaximumQueued, TimeSpan.FromMinutes(SiteHeavyChildTokens.AdmissionMinutes));
+    } = new(SiteHeavyChildConfiguration.Bind(SiteExecutionConfiguration.Options.Value.HeavyChildCapacity,
+        SiteExecutionConfiguration.Options.Value.MaximumQueued, SiteExecutionConfiguration.Options.Value.AdmissionDeadline));
 
     internal int PendingCount
     {
@@ -48,7 +46,7 @@ internal sealed class SiteHeavyChildAdmission(int capacity, int maximumQueued, T
         var waiter = Enqueue(token);
         try
         {
-            await waiter.Completion.Task.WaitAsync(_admissionDeadline, TimeProvider.System, token);
+            await waiter.Completion.Task.WaitAsync(_policy.AdmissionDeadline, TimeProvider.System, token);
             return new(this);
         }
         catch (Exception)
@@ -68,12 +66,12 @@ internal sealed class SiteHeavyChildAdmission(int capacity, int maximumQueued, T
             }
             token.ThrowIfCancellationRequested();
             var waiter = new Waiter(token);
-            if (_active < _capacity && _pending.Count == SiteTokens.Zero)
+            if (_active < _policy.Capacity && _pending.Count == SiteTokens.Zero)
             {
                 Grant(waiter);
                 return waiter;
             }
-            if (_pending.Count >= _maximumQueued)
+            if (_pending.Count >= _policy.MaximumQueued)
             {
                 throw new InvalidOperationException(SiteHeavyChildTokens.QueueFull);
             }
@@ -138,7 +136,7 @@ internal sealed class SiteHeavyChildAdmission(int capacity, int maximumQueued, T
 
     private void Drain()
     {
-        while (_active < _capacity && _pending.First is { } first)
+        while (_active < _policy.Capacity && _pending.First is { } first)
         {
             _pending.RemoveFirst();
             var waiter = first.Value;
@@ -161,18 +159,6 @@ internal sealed class SiteHeavyChildAdmission(int capacity, int maximumQueued, T
         {
             _active--;
         }
-    }
-
-    private static int RequirePositive(int value)
-    {
-        ArgumentOutOfRangeException.ThrowIfLessThan(value, SiteTokens.One);
-        return value;
-    }
-
-    private static TimeSpan RequirePositive(TimeSpan value)
-    {
-        ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(value, TimeSpan.Zero);
-        return value;
     }
 
     private sealed class Waiter(CancellationToken token)

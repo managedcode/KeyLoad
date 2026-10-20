@@ -1,8 +1,8 @@
 $script:CoverageTokens = [ordered]@{
     SchemaVersion = 1
-    RequiredSourceCount = 71
-    RequiredConfigurationCount = 8
-    RequiredExecutableCount = 55
+    RequiredSourceCount = 69
+    RequiredConfigurationCount = 10
+    RequiredExecutableCount = 53
     RequiredDeclarationCount = 16
     RequiredPipelineCount = 18
     RequiredModuleLinePercent = 80

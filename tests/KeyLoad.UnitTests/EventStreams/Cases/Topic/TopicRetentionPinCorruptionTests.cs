@@ -1,4 +1,3 @@
-using KeyLoad.Core;
 using static KeyLoad.UnitTests.Features.EventStreams.TopicRetentionCorruptionFixture;
 namespace KeyLoad.UnitTests.Features.EventStreams;
 

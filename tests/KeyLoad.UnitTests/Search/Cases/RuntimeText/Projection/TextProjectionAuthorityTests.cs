@@ -1,4 +1,3 @@
-using KeyLoad.Core;
 using KeyLoad.Query;
 using KeyLoad.Server.Features.Search;
 using KeyLoad.Storage;

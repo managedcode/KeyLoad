@@ -9,7 +9,7 @@ internal static class GrainBm25CorpusPublicationCommand
 {
     internal static string Resolve(DecodedGrainRequest request)
     {
-        var phase = DatabaseEngine.Payload<Bm25CorpusPublicationPhaseCommand>(Read(request));
+        var phase = OperationProtocol.Payload<Bm25CorpusPublicationPhaseCommand>(Read(request));
         var partition = phase.Current.Partition;
         JsonData.Identifier(partition.TenantId);
         JsonData.Identifier(partition.DatabaseId);
@@ -47,7 +47,7 @@ internal static class GrainBm25CorpusPublicationCommand
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
         }
-        var phase = DatabaseEngine.Payload<Bm25CorpusPublicationPhaseCommand>(operation);
+        var phase = OperationProtocol.Payload<Bm25CorpusPublicationPhaseCommand>(operation);
         if (phase.CommandId != operation.CommandId || phase.Current is null || phase.Current.Partition is null)
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);

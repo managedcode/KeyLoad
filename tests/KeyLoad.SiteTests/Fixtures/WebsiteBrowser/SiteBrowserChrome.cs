@@ -9,7 +9,7 @@ internal sealed class SiteBrowserChrome : IAsyncDisposable
     private readonly SiteBrowserProcessStart processOwner;
     private readonly HttpClient http = new()
     {
-        Timeout = TimeSpan.FromMilliseconds(SiteBrowserTokens.BrowserCommandTimeoutMilliseconds),
+        Timeout = SiteExecutionConfiguration.Options.Value.BrowserCommandTimeout,
     };
     private SiteBrowserCdpClient? cdp;
     public Process Process => processOwner.Process;

@@ -53,7 +53,7 @@ internal static class QueueLifecyclePublicSeed
     {
         await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(), principal, token));
         var saved = await McpCallerAssertions.SdkStatusAsync(await root.Sdk.ConfigureApiKeyAsync(Guid.NewGuid(),
-            DatabaseEngine.Credential(principal.Id, principal.Id, key), token));
+            AuthorizationExecution.Credential(principal.Id, principal.Id, key), token));
         await Assert.That(saved.IsSuccess).IsTrue();
     }
 }

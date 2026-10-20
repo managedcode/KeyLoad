@@ -11,7 +11,6 @@ namespace KeyLoad.Analyzers.Features.CodeQuality;
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class AggregateTypeCodeLineCountAnalyzer : DiagnosticAnalyzer
 {
-    private readonly TimeProvider clock;
     private const int MaximumTypeCodeLines = 200;
     private static readonly ImmutableArray<DiagnosticDescriptor> Rules =
         [NumericQualityRuleDescriptors.AggregateTypeCodeLines];
@@ -26,51 +25,37 @@ public sealed class AggregateTypeCodeLineCountAnalyzer : DiagnosticAnalyzer
         SyntaxKind.DelegateDeclaration
     ];
 
-    /// <summary>Creates the compiler-owned analyzer with the system clock.</summary>
-    public AggregateTypeCodeLineCountAnalyzer() : this(TimeProvider.System) { }
-
-    /// <summary>Creates the analyzer with an explicit clock for exception expiry.</summary>
-    /// <param name="timeProvider">Borrowed clock used to evaluate dated migration exceptions.</param>
-    public AggregateTypeCodeLineCountAnalyzer(TimeProvider timeProvider)
-    {
-        ArgumentNullException.ThrowIfNull(timeProvider);
-        clock = timeProvider;
-    }
-
     /// <inheritdoc/>
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => Rules;
 
     /// <inheritdoc/>
     public override void Initialize(AnalysisContext context)
     {
-        ArgumentNullException.ThrowIfNull(context);
+        if (context is null)
+        {
+            throw new System.ArgumentNullException(nameof(context));
+        }
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
         context.RegisterCompilationStartAction(RegisterCompilationAnalysis);
     }
 
-    private void RegisterCompilationAnalysis(CompilationStartAnalysisContext context)
+    private static void RegisterCompilationAnalysis(CompilationStartAnalysisContext context)
     {
-        var utcDate = DateOnly.FromDateTime(clock.GetUtcNow().UtcDateTime);
         var measurements = new AggregateTypeCodeLineAccumulator();
         context.RegisterSyntaxNodeAction(
-            nodeContext => MeasureDeclaration(nodeContext, utcDate, measurements),
+            nodeContext => MeasureDeclaration(nodeContext, measurements),
             TypeDeclarationKinds);
         context.RegisterCompilationEndAction(endContext => ReportMeasurements(endContext, measurements));
     }
 
     private static void MeasureDeclaration(
         SyntaxNodeAnalysisContext context,
-        DateOnly utcDate,
         AggregateTypeCodeLineAccumulator measurements)
     {
         if (context.SemanticModel.GetDeclaredSymbol(
                 context.Node, context.CancellationToken) is not INamedTypeSymbol type ||
-            type.IsImplicitlyDeclared ||
-            AggregateTypeLimitException.IsAllowed(
-                type.ContainingAssembly.Identity.Name,
-                type.ToDisplayString(SymbolDisplayFormat.CSharpErrorMessageFormat),
-                utcDate))
+            type.IsImplicitlyDeclared)
         {
             return;
         }

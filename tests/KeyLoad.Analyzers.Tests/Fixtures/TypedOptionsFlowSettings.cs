@@ -1,6 +1,6 @@
 namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
 
-/// <summary>Actual marked options used by the execution registration and execution regression.</summary>
+/// <summary>Actual marked options used by the execution registration and execution verification.</summary>
 [KeyLoad.ConfigurationOptions]
 internal sealed class TypedOptionsFlowSettings
 {

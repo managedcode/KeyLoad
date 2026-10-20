@@ -23,7 +23,7 @@ internal sealed class SiteVectorAssetBrowserTests
         {
             [SiteVectorAssetTokens.CacheDisabledField] = true,
         }, token);
-        using var http = new HttpClient { Timeout = TimeSpan.FromMilliseconds(SiteBrowserTokens.BrowserCommandTimeoutMilliseconds) };
+        using var http = new HttpClient { Timeout = SiteExecutionConfiguration.Options.Value.BrowserCommandTimeout };
         using var response = await http.GetAsync(new Uri(browser.BaseUrl + missingModule.Replace(Path.DirectorySeparatorChar, '/')), token);
         await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.NotFound);
         await browser.Chrome.NavigateAsync(browser.BaseUrl + SiteAssetTokens.IndexHtml, token);
@@ -33,7 +33,7 @@ internal sealed class SiteVectorAssetBrowserTests
         var scene = await cdp.EvaluateAsync(SiteBrowserUiTokens.SceneIdleSnapshotScript, false, token);
         await Assert.That(scene.GetProperty(SiteBrowserUiTokens.CanvasCountField).GetInt32()).IsEqualTo(SiteTokens.Zero);
         await Assert.That((await cdp.EvaluateAsync(SiteBrowserUiTokens.MotionDisabledScript, false, token)).GetBoolean()).IsTrue();
-        await Task.Delay(TimeSpan.FromMilliseconds(SiteBrowserUiTokens.SceneIdleWaitMilliseconds), TimeProvider.System, token);
+        await Task.Delay(SiteExecutionConfiguration.Options.Value.SceneIdleWait, TimeProvider.System, token);
         foreach (var error in browser.Chrome.ReadErrors())
         {
             await Assert.That(error.Event).IsEqualTo(SiteBrowserUiTokens.ConsoleEvent);

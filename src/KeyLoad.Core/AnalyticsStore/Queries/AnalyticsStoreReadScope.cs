@@ -10,11 +10,11 @@ internal sealed record AnalyticsStoreReadScope(PrincipalRecord Principal, Resour
     internal static AnalyticsStoreReadScope Open(DatabaseEngine database, IKeyValueView view,
         string principalId, PartitionRef partition, string store)
     {
-        DatabaseEngine.ValidatePartition(partition);
+        EngineResourceAccess.ValidatePartition(partition);
         JsonData.Identifier(store);
         var principal = database.Principal(view, principalId, database.EvaluationClock.GetUtcNow());
         database.Authorization.Require(principal, partition, store, Capability.AnalyticsRead);
-        var resource = DatabaseEngine.BindAuthorizedReadResource(view, partition, store, ResourceKind.AnalyticsStore);
+        var resource = ResourceExecutionQueriesResourceLifetimeReadBinding.BindAuthorizedReadResource(view, partition, store, ResourceKind.AnalyticsStore);
         AnalyticsStoreValidation.ValidateSchema(resource);
         var lifetime = ResourceLifetimeCatalog.Read(view, partition.TenantId, partition.DatabaseId, store, resource)
             ?? throw Errors.Fail(ErrorCode.Corruption, AnalyticsStoreValidation.Invalid);

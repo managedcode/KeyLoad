@@ -5,7 +5,7 @@ internal static class TextOnlineProcessAssertions
     private const int TrackedBilingualRecords = 2;
     internal static async Task VerifyAsync(string root, string mode, CancellationToken token)
     {
-        if (mode is TextOnlineCrashScenario.Prepare or TextOnlineCrashScenario.Fault)
+        if (mode is TextOnlineCrashScenario.Prepare or TextOnlineCrashScenario.Fault or TextOnlineCrashScenario.Corrupt)
         {
             return;
         }

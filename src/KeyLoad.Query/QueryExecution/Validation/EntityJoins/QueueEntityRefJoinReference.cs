@@ -35,7 +35,7 @@ internal static class QueueEntityRefJoinReference
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidReference);
         }
-        DatabaseEngine.ValidatePartition(reference.Partition);
+        EngineResourceAccess.ValidatePartition(reference.Partition);
         JsonData.Identifier(reference.Collection);
         JsonData.Identifier(reference.Id);
         return reference;

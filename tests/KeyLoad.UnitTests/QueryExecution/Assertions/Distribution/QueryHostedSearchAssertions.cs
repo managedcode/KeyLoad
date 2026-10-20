@@ -1,6 +1,5 @@
 using System.Collections.Immutable;
 using System.Security.Cryptography;
-using KeyLoad.Core;
 
 namespace KeyLoad.UnitTests.Features.QueryExecution;
 

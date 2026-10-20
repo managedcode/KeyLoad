@@ -97,6 +97,6 @@ internal sealed class SiteHeavyChildCleanupTests
         await live.WaitExitedAsync(token);
     }
 
-    private static SiteHeavyChildAdmission NewAdmission() => new(SiteTokens.One,
-        SiteHeavyChildTokens.FixtureQueueCapacity, TimeSpan.FromMinutes(SiteHeavyChildTokens.AdmissionMinutes));
+    private static SiteHeavyChildAdmission NewAdmission() => new(SiteHeavyChildConfiguration.Bind(SiteTokens.One,
+        SiteHeavyChildTokens.FixtureQueueCapacity, SiteExecutionConfiguration.Options.Value.AdmissionDeadline));
 }

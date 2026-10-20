@@ -1,5 +1,3 @@
-using KeyLoad.Core;
-
 namespace KeyLoad.UnitTests.Features.Search;
 
 internal sealed class AnnSeedCancellationTests

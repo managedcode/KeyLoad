@@ -8,7 +8,6 @@ namespace KeyLoad.RecoveryTests;
 
 internal sealed class SubscriptionProcessRecoveryTests
 {
-    private const int OriginalProcessSeconds = 20;
     private const string RetainedRootKey = "KeyLoad.SubscriptionProcessing.RetainedRoot";
 
     [Test]
@@ -26,7 +25,7 @@ internal sealed class SubscriptionProcessRecoveryTests
         using var admission = await StorageTrialLease.AcquireAsync(token);
         var child = CommandIdempotencyProcessChild.Create(CommandIdempotencyProcess.OutputLimitCharacters,
             CrashFixtureValues.CrashMarker);
-        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(OriginalProcessSeconds), TimeProvider.System);
+        using var timeout = new CancellationTokenSource(RecoveryExecutionOptions.TrialPolicy.Value.ProjectionTimeout, TimeProvider.System);
         using var lifetime = CancellationTokenSource.CreateLinkedTokenSource(token, timeout.Token);
         Exception? primary = null;
         try
@@ -50,8 +49,7 @@ internal sealed class SubscriptionProcessRecoveryTests
             primary = failure;
             primary.Data[RetainedRootKey] = root;
         }
-        using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(
-            CommandIdempotencyProcessRecoveryTests.CleanupTimeoutSeconds), TimeProvider.System);
+        using var cleanup = new CancellationTokenSource(RecoveryExecutionOptions.TrialPolicy.Value.CleanupTimeout, TimeProvider.System);
         var failures = new List<Exception>();
         await CommandIdempotencyProcess.SettleActiveAsync(child, failures, cleanup.Token);
         if (!child.IsSettled)

@@ -37,7 +37,6 @@ internal sealed class CompilationIdentityPackageRootFixture : IAsyncDisposable
     private const string ProjectTemplate = """
         <Project Sdk="Microsoft.NET.Sdk">
           <PropertyGroup>
-            <TargetFramework>net10.0</TargetFramework>
             <AssemblyName>CompilationIdentityPackageRootFixture</AssemblyName>
             <EnableDefaultCompileItems>true</EnableDefaultCompileItems>
             <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
@@ -46,9 +45,7 @@ internal sealed class CompilationIdentityPackageRootFixture : IAsyncDisposable
           </PropertyGroup>
           <Import Project="$(TUnitPropsPath)" />
           <Import Project="Counterfeit.props" Condition="'$(IncludeCounterfeit)' == 'true'" />
-          <ItemGroup>
-            <ProjectReference Remove="$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)/../../analyzers/KeyLoad.Analyzers/KeyLoad.Analyzers.csproj'))" />
-          </ItemGroup>
+          <Import Project="../../build/CodeQuality/FunctionalCompilationIdentity.targets" />
         </Project>
         """;
     private static readonly string[] CentralFiles =

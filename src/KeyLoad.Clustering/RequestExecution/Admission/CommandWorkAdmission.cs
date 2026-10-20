@@ -15,7 +15,7 @@ internal static class CommandWorkAdmission
         }
         var kind = request.Envelope.CommandKind
             ?? throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
-        if (kind == OperationKind.DropTable || DatabaseEngine.IsResourceFreeCommandWork(kind))
+        if (kind == OperationKind.DropTable || ResourceExecutionQueriesCommandResultBinding.IsResourceFreeCommandWork(kind))
         {
             work.Bind([]); // Dropping a resource cannot retain its closing lifetime.
             return null;

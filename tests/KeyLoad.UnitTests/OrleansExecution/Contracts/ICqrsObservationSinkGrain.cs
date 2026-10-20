@@ -1,5 +1,6 @@
 namespace KeyLoad.UnitTests.Features.OrleansExecution;
 
+[global::Orleans.CodeGeneration.Version(1)]
 internal interface ICqrsObservationSinkGrain : global::Orleans.IGrainWithGuidKey
 {
     Task RecordAsync(string eventName);

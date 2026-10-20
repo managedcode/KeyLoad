@@ -103,7 +103,7 @@ internal static class AnnSeedCollector
             buffer.DependencySha256 = AnnDependencyIdentity.Capture(database, view, partition, budget, work);
         }
         database.Authorization.Require(principal, partition, collection, Capability.VectorSearch);
-        var resource = DatabaseEngine.BindAuthorizedReadResource(metadata, partition, collection, ResourceKind.Collection);
+        var resource = ResourceExecutionQueriesResourceLifetimeReadBinding.BindAuthorizedReadResource(metadata, partition, collection, ResourceKind.Collection);
         if (!AnnSeedSourceValidator.IdentityEquals(resource.Name, collection, work))
         {
             throw Errors.Fail(ErrorCode.Corruption, InvalidAuthority);

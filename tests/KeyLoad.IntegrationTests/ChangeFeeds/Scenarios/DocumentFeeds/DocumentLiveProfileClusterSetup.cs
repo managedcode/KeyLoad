@@ -20,7 +20,7 @@ internal static class DocumentLiveProfileClusterSetup
             new(state.Partition.TenantId, state.Partition.DatabaseId, resource), token));
         await PrincipalAsync(root, state, 1L, true, false, token);
         await McpCallerAssertions.SdkStatusAsync(await root.Sdk.ConfigureApiKeyAsync(Guid.NewGuid(),
-            DatabaseEngine.Credential(state.Key.Split('.')[0], state.PrincipalId, state.Key), token));
+            AuthorizationExecution.Credential(state.Key.Split('.')[0], state.PrincipalId, state.Key), token));
         await CommitAsync(root, state,
             [new PutDocument(DocumentLiveProfileClusterState.Collection, "a", DocumentLiveProfileClusterState.Json(1), 0L, Access: new("live-owner")),
              new PutDocument(DocumentLiveProfileClusterState.Collection, "hidden", DocumentLiveProfileClusterState.Json(99), 0L, Access: new("other-owner"))],

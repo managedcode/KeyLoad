@@ -12,7 +12,7 @@ internal static class CommandIdempotencyProcess
 
     internal static async Task RunAsync(string root, CancellationToken callerToken)
     {
-        using var timeoutTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(CommandIdempotencyProcessRecoveryTests.RunTimeoutSeconds), TimeProvider.System);
+        using var timeoutTimeout = new CancellationTokenSource(RecoveryExecutionOptions.TrialPolicy.Value.CommandTimeout, TimeProvider.System);
         using var timeout = CancellationTokenSource.CreateLinkedTokenSource(callerToken, timeoutTimeout.Token);
         CommandIdempotencyProcessChild? active = null;
         Exception? primary = null;

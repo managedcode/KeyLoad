@@ -50,7 +50,7 @@ internal sealed class StoragePublicationRecoveryTests
         }
 
         using var process = Process.Start(start)!;
-        using var timeoutTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(20), TimeProvider.System);
+        using var timeoutTimeout = new CancellationTokenSource(RecoveryExecutionOptions.TrialPolicy.Value.ProjectionTimeout, TimeProvider.System);
         using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutTimeout.Token);
         try
         {
@@ -123,9 +123,9 @@ internal sealed class StoragePublicationRecoveryTests
                 Directory.Delete(root, true);
                 return;
             }
-            catch (IOException) when (clock.GetElapsedTime(started) < TimeSpan.FromSeconds(5))
+            catch (IOException) when (clock.GetElapsedTime(started) < RecoveryExecutionOptions.ProcessReadiness().Value.OwnershipTimeout)
             {
-                await Task.Delay(TimeSpan.FromMilliseconds(25), clock, cancellationToken);
+                await Task.Delay(RecoveryExecutionOptions.ProcessReadiness().Value.OwnershipPollInterval, clock, cancellationToken);
             }
         }
     }

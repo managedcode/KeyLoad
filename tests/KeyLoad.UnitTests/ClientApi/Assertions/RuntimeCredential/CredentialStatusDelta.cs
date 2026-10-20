@@ -1,4 +1,3 @@
-using KeyLoad.Core;
 using P = KeyLoad.UnitTests.Features.ClientApi.CredentialStatusProtocol;
 
 namespace KeyLoad.UnitTests.Features.ClientApi;

@@ -6,7 +6,7 @@ internal static class SiteCoverageModeSelector
     {
         get
         {
-            var value = Environment.GetEnvironmentVariable(SiteCoverageTokens.BenchmarkModeEnvironment);
+            var value = SiteEnvironmentConfiguration.Capture().Value.BenchmarkMode;
             return Resolve(value);
         }
     }

@@ -20,7 +20,7 @@ public sealed class AdminQueueReader(DatabaseEngine database)
     {
         ArgumentNullException.ThrowIfNull(request);
         ArgumentNullException.ThrowIfNull(request.Lane);
-        DatabaseEngine.ValidatePartition(request.Lane.Partition);
+        EngineResourceAccess.ValidatePartition(request.Lane.Partition);
         JsonData.Identifier(request.Lane.Queue);
         AdminReadAuthority.ValidatePage(request.Limit, request.AfterId);
         var budget = new ReadExecutionBudget(database.OperationLimitsOptions, database.EvaluationClock, cancellationToken);

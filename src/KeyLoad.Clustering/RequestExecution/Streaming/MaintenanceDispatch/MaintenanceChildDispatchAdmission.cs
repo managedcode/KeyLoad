@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using KeyLoad.Core.Features.ResourceExecution;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace KeyLoad.Clustering;
 
@@ -8,6 +9,9 @@ internal sealed class MaintenanceChildDispatchAdmission(byte[]? ownedPayload) : 
     private CancellationTokenSource? cancellation;
     private GrainRequestIdentityScope? identity;
     private List<Exception>? cleanup;
+    private DecodedGrainRequest? observedRequest;
+    private IGrainContext? observedContext;
+    private GrainRequestPhaseSettlement? observation;
     private bool disposed;
     internal CancellationToken Token => cancellation?.Token
         ?? throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest);
@@ -29,6 +33,38 @@ internal sealed class MaintenanceChildDispatchAdmission(byte[]? ownedPayload) : 
         }
         cancellation = CancellationTokenSource.CreateLinkedTokenSource(token, execution.OriginalProducer.Cancellation);
         identity = GrainRequestIdentityScope.ForChild(services, parent.Envelope, actorId, commandId, cancellation.Token);
+        if (codec.HasPhaseObserver)
+        {
+            observedRequest = verified;
+            observedContext = services.GetRequiredService<IGrainContextAccessor>().GrainContext;
+            observation = new(codec);
+            observation.SetIdentity(verified);
+        }
+    }
+
+    internal ValueTask ObserveStartedAsync(GrainRequestCodec codec)
+        => observedRequest is { } request
+            ? codec.ObservePhaseAsync(request, GrainRequestPhase.RequestStarted, observedContext, Token)
+            : ValueTask.CompletedTask;
+
+    internal async Task JoinObservationAsync(List<Exception> failures)
+    {
+        if (observation is null)
+        {
+            return;
+        }
+        try
+        {
+            await observation.SettleAsync(observedContext).ConfigureAwait(true);
+        }
+        catch (Exception failure) when (CqrsBoundaryErrors.IsNonFatal(failure))
+        {
+            failures.Add(failure);
+        }
+        catch (Exception failure) when (!CqrsBoundaryErrors.IsNonFatal(failure))
+        {
+            failures.Add(failure);
+        }
     }
 
     // The sole caller has awaited the actual Task before closing these local scopes.

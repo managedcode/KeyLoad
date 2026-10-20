@@ -7,7 +7,7 @@ internal sealed record SiteIsolatedInputs(SiteTestInputs Site, string Aggregate)
 
     public static SiteIsolatedInputs Read()
     {
-        var input = Environment.GetEnvironmentVariable(AggregateEnvironment);
+        var input = SiteEnvironmentConfiguration.Capture().Value.Aggregate;
         if (string.IsNullOrWhiteSpace(input) || !Path.IsPathFullyQualified(input) ||
             !File.Exists(Path.Combine(input, "aggregate.json")))
         {

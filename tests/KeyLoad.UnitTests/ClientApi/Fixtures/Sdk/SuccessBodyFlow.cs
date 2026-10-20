@@ -87,7 +87,7 @@ internal sealed class SuccessBodyFlow : IAsyncDisposable
         var token = linked.Token;
         var principal = scenario.Principal();
         await Assert.That(scenario.Fixture.Database.Submit(OperationKind.ConfigureApiKey, new ConfigureApiKeyRequest(
-            global::KeyLoad.Core.DatabaseEngine.Credential(P.KeyId, principal.Id, P.ApiKey))).Get<bool>()).IsTrue();
+            global::KeyLoad.Core.AuthorizationExecution.Credential(P.KeyId, principal.Id, P.ApiKey))).Get<bool>()).IsTrue();
         await DeclaredResponseEofAssertions.EmptyAsync(scenario);
         var options = UnitClientOptions.Execution();
         var endpoint = new SuccessBodyEndpoint(scenario, principal, tasks, body,

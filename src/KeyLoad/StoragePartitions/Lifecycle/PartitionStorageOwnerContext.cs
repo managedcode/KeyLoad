@@ -3,6 +3,7 @@ namespace KeyLoad.Server;
 /// <summary>Retains physical cleanup on the same execution Orleans context which opened the session.</summary>
 internal sealed class PartitionStorageOwnerContext
 {
+    private const int NoFailures = 0;
     private readonly IGrainContext context;
     private readonly IGrainContextAccessor accessor;
 
@@ -27,7 +28,7 @@ internal sealed class PartitionStorageOwnerContext
             var failures = new List<Exception>();
             Task? original = null;
             ServerFailureObserver.Observe(() => original = operation(), failures);
-            if (failures.Count == 0)
+            if (failures.Count == NoFailures)
             {
                 published.SetResult(original!);
             }

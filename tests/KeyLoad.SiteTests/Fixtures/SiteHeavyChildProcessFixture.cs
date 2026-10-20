@@ -151,11 +151,11 @@ internal sealed class SiteHeavyChildProcessFixture : IAsyncDisposable
 
     private static async Task WaitUntilAsync(Func<bool> condition, CancellationToken token)
     {
-        using var deadlineTimeout = new CancellationTokenSource(TimeSpan.FromMilliseconds(SiteHeavyChildTokens.FixtureDeadlineMilliseconds), TimeProvider.System);
+        using var deadlineTimeout = new CancellationTokenSource(SiteExecutionConfiguration.Options.Value.ChildDeadline, TimeProvider.System);
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(token, deadlineTimeout.Token);
         while (!condition())
         {
-            await Task.Delay(TimeSpan.FromMilliseconds(SiteHeavyChildTokens.FixturePollMilliseconds), TimeProvider.System, deadline.Token);
+            await Task.Delay(SiteExecutionConfiguration.Options.Value.ChildPoll, TimeProvider.System, deadline.Token);
         }
     }
 
@@ -186,7 +186,7 @@ internal sealed class SiteHeavyChildProcessFixture : IAsyncDisposable
     {
         try
         {
-            await running.WaitAsync(TimeSpan.FromMilliseconds(SiteHeavyChildTokens.FixtureDeadlineMilliseconds), TimeProvider.System);
+            await running.WaitAsync(SiteExecutionConfiguration.Options.Value.ChildDeadline, TimeProvider.System);
         }
         catch (Exception error) when (running.IsCompleted && error is OperationCanceledException or InvalidOperationException or Win32Exception or TimeoutException)
         {

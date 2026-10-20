@@ -26,7 +26,10 @@ public sealed class TypedConfigurationAnalyzer : DiagnosticAnalyzer
     /// <inheritdoc/>
     public override void Initialize(AnalysisContext context)
     {
-        ArgumentNullException.ThrowIfNull(context);
+        if (context is null)
+        {
+            throw new System.ArgumentNullException(nameof(context));
+        }
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
         context.RegisterOperationAction(AnalyzeOperation, Microsoft.CodeAnalysis.OperationKind.Invocation,
@@ -37,8 +40,7 @@ public sealed class TypedConfigurationAnalyzer : DiagnosticAnalyzer
 
     private static void AnalyzeOperation(OperationAnalysisContext context)
     {
-        if (!CodeQualityAssemblyNames.IsProduction(context.Compilation.AssemblyName) ||
-            context.Operation.IsImplicit)
+        if (context.Operation.IsImplicit)
         {
             return;
         }
@@ -123,8 +125,7 @@ public sealed class TypedConfigurationAnalyzer : DiagnosticAnalyzer
 
     private static void AnalyzeSymbol(SymbolAnalysisContext context)
     {
-        if (!CodeQualityAssemblyNames.IsProduction(context.Compilation.AssemblyName) ||
-            context.Symbol.IsImplicitlyDeclared ||
+        if (context.Symbol.IsImplicitlyDeclared ||
             ConfigurationOwnership.IsWithinBinding(context.Compilation, context.Symbol) ||
             ConfigurationOwnership.IsWithinOptions(context.Compilation, context.Symbol))
         {

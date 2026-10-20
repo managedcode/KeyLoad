@@ -1,4 +1,3 @@
-using KeyLoad.Core;
 using KeyLoad.UnitTests.Features.ResourceExecution;
 using ManagedCode.Communication.Commands;
 namespace KeyLoad.UnitTests.Features.Search;

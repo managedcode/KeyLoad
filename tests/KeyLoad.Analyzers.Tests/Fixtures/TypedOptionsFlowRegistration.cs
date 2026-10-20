@@ -11,6 +11,8 @@ internal static class TypedOptionsFlowRegistration
     internal const string DeadlineKey = nameof(TypedOptionsFlowSettings.Deadline);
     private const string InvalidPolicy = "Admission capacity and deadline must be positive.";
 
+    internal static TypedOptionsFlowSettings CreateDefaults() => new();
+
     internal static ServiceProvider CreateProvider(TypedOptionsFlowState state,
         string? capacity = null, string? deadline = null)
     {

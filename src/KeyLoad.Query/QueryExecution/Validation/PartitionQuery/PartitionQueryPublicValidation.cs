@@ -63,7 +63,7 @@ internal static class PartitionQueryPublicValidation
             {
                 throw Errors.Fail(ErrorCode.Validation, InvalidRequest);
             }
-            DatabaseEngine.ValidatePartition(partition);
+            EngineResourceAccess.ValidatePartition(partition);
         }
         var ordered = partitions.OrderBy(item => item.TenantId, StringComparer.Ordinal)
             .ThenBy(item => item.DatabaseId, StringComparer.Ordinal)

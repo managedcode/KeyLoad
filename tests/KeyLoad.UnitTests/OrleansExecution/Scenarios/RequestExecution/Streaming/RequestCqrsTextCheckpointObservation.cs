@@ -1,4 +1,3 @@
-using KeyLoad.Core;
 using KeyLoad.Server.Features.Search;
 using KeyLoad.UnitTests.Features.Messaging;
 using KeyLoad.UnitTests.Features.Search;

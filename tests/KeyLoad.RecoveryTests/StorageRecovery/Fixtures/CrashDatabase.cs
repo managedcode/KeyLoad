@@ -21,7 +21,7 @@ internal static class CrashDatabase
         {
             ClusterAdministrator = true
         },
-            DatabaseEngine.Credential(CrashFixtureValues.Principal, CrashFixtureValues.Principal, CrashFixtureValues.Credential));
+            AuthorizationExecution.Credential(CrashFixtureValues.Principal, CrashFixtureValues.Principal, CrashFixtureValues.Credential));
         return database;
     }
 

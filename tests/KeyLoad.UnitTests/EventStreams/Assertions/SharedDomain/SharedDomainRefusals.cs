@@ -1,4 +1,3 @@
-using KeyLoad.Core;
 using KeyLoad.RecoveryTests.Features.EventStreams;
 using static KeyLoad.RecoveryTests.Features.EventStreams.SharedDomainProtocol;
 

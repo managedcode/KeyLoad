@@ -20,7 +20,7 @@ internal static class PartitionRecordValidation
         ArgumentNullException.ThrowIfNull(partition);
         ArgumentNullException.ThrowIfNull(family);
         ValidateBounds(maxRecords, maxRetainedBytes, maxExaminedBytes);
-        DatabaseEngine.ValidatePartition(partition);
+        EngineResourceAccess.ValidatePartition(partition);
         if (!ContainsFamily(family))
         {
             throw Errors.Fail(ErrorCode.UnsupportedCapability, UnsupportedFamily);

@@ -10,7 +10,7 @@ internal sealed partial class FileStorageController
 {
     /// <inheritdoc />
     [FileStorageCapability(Capability.BlobWrite)]
-    public override async Task<Result> UploadChunkAsync([FromForm(Name = "")] FileUploadPayload payload, CancellationToken cancellationToken)
+    public override async Task<Result> UploadChunkAsync([FromForm(Name = FileStorageProtocol.EmptyPath)] FileUploadPayload payload, CancellationToken cancellationToken)
     {
         FileChunkAdmission.Validate(payload, serverOptions);
         var descriptor = payload.Payload;
@@ -63,10 +63,10 @@ internal sealed partial class FileStorageController
     /// <inheritdoc />
     [NonAction]
     public override IActionResult AbortChunks(string uploadId)
-        => throw Errors.Fail(ErrorCode.PermissionDenied, "Use the authorized asynchronous upload abort action.");
+        => throw Errors.Fail(ErrorCode.PermissionDenied, AsyncAbortRequired);
 
     /// <summary>Authorizes and joins the library abort before releasing the metadata reservation.</summary>
-    [HttpDelete("upload-chunks/{uploadId}"), FileStorageCapability(Capability.BlobWrite)]
+    [HttpDelete(ChunkRoute), FileStorageCapability(Capability.BlobWrite)]
     public async Task<IActionResult> AbortUploadAsync(string uploadId, CancellationToken cancellationToken)
     {
         var id = Files.UploadId(uploadId);

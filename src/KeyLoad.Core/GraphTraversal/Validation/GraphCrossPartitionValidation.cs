@@ -31,8 +31,8 @@ internal static class GraphCrossPartitionValidation
         }
         try
         {
-            DatabaseEngine.ValidatePartition(source);
-            DatabaseEngine.ValidatePartition(destination.Partition);
+            EngineResourceAccess.ValidatePartition(source);
+            EngineResourceAccess.ValidatePartition(destination.Partition);
             JsonData.Identifier(graph);
             JsonData.Identifier(edgeId);
             JsonData.Identifier(destination.Collection);
@@ -60,7 +60,7 @@ internal static class GraphCrossPartitionValidation
         try
         {
             budget.Check();
-            DatabaseEngine.ValidatePartition(request.Target.Partition);
+            EngineResourceAccess.ValidatePartition(request.Target.Partition);
             JsonData.Identifier(request.Graph);
             JsonData.Identifier(request.Target.Collection);
             JsonData.Identifier(request.Target.Id);
@@ -169,8 +169,8 @@ internal static class GraphCrossPartitionValidation
         EntityReferenceLifetime.RequireBound(edge.To);
         try
         {
-            DatabaseEngine.ValidatePartition(edge.From.Partition);
-            DatabaseEngine.ValidatePartition(edge.To.Partition);
+            EngineResourceAccess.ValidatePartition(edge.From.Partition);
+            EngineResourceAccess.ValidatePartition(edge.To.Partition);
             JsonData.Identifier(edge.Id);
             JsonData.Identifier(edge.Label);
             JsonData.Identifier(edge.From.Collection);

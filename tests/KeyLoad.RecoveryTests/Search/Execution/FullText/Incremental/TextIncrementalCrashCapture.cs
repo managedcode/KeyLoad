@@ -1,5 +1,6 @@
 using System.Text.Json;
 using KeyLoad.Clustering;
+using KeyLoad.Core;
 
 namespace KeyLoad.RecoveryTests.Features.Search;
 

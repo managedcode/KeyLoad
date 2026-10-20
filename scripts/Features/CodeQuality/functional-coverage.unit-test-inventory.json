@@ -74472,6 +74472,26 @@
       ],
       "nonContributorReason": "required-control",
       "reviewBasis": "Real Aspire project graph, linked filesystem parent and configured identity are evaluated without starting server processes or database operations. Required startup composition control; no runtime coverage contribution."
+    },
+    {
+      "className": "KeyLoad.UnitTests.Features.OrleansExecution.ServerApplicationOwnershipTests",
+      "reportClassName": "KeyLoad.UnitTests.Features.OrleansExecution.ServerApplicationOwnershipTests(RequestCqrsHostedRuntimeFixture)",
+      "methodName": "ServerOwnsApplicationAssetsAndRespondsAfterDatabaseStartup",
+      "instanceName": "ServerOwnsApplicationAssetsAndRespondsAfterDatabaseStartup",
+      "sourcePath": "tests/KeyLoad.UnitTests/OrleansExecution/Cases/RequestCqrs/ServerApplicationOwnershipTests.cs",
+      "sourceSha256": "2e65fb43dd30947fe9da7c9734b5597dde0a2c0dd51989ae08687d5f3c25ff44",
+      "lineNumber": 12,
+      "endLineNumber": 20,
+      "classification": "required-non-contributor",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-TEST-011"
+      ],
+      "acceptance": [
+        "AC-TEST-011"
+      ],
+      "nonContributorReason": "required-control",
+      "reviewBasis": "The production host starts with Orleans and storage, retains its own application identity and answers its readiness endpoint. Required host-composition control; it does not qualify SDK operations or cluster coverage."
     }
   ],
   "coverageGroups": [

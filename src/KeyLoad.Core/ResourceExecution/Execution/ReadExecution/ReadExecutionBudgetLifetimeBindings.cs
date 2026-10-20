@@ -117,8 +117,8 @@ internal sealed class ReadExecutionBudgetLifetimeBindings(ReadExecutionBudget wo
         var bindingView = new AuthenticatedResourceLifetimeReadView(authorizedLocalView, this);
         for (var index = FirstDefinitionIndex; index < definitions.Length; index++)
         {
-            DatabaseEngine.BindAuthenticatedReadResourceLifetime(bindingView, coverage.Partition,
-                definitions[index], coverage.Lifetimes[index]);
+            ResourceExecutionQueriesResourceLifetimeReadBinding.BindAuthenticatedReadResourceLifetime(bindingView, coverage.Partition,
+                            definitions[index], coverage.Lifetimes[index]);
         }
         work.Check();
         return coverage;

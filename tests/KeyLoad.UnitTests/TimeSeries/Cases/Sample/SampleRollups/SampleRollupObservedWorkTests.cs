@@ -1,5 +1,3 @@
-using KeyLoad.Core;
-
 namespace KeyLoad.UnitTests.Features.TimeSeries;
 
 internal sealed class SampleRollupObservedWorkTests

@@ -13,8 +13,7 @@ internal static class ScalarIndexProcessRecovery
 
     internal static async Task RunAsync(string root, CancellationToken callerToken)
     {
-        using var runLimit = new CancellationTokenSource(TimeSpan.FromSeconds(
-            CommandIdempotencyProcessRecoveryTests.RunTimeoutSeconds), TimeProvider.System);
+        using var runLimit = new CancellationTokenSource(RecoveryExecutionOptions.TrialPolicy.Value.CommandTimeout, TimeProvider.System);
         using var run = CancellationTokenSource.CreateLinkedTokenSource(callerToken, runLimit.Token);
         CommandIdempotencyProcessChild? active = null;
         Exception? primary = null;

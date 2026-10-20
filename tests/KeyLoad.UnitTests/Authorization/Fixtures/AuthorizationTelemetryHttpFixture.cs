@@ -1,5 +1,4 @@
 using System.Net;
-using KeyLoad.Core;
 using KeyLoad.Server;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -106,7 +105,7 @@ internal sealed class AuthorizationTelemetryHttpFixture : IDisposable, IAsyncDis
         Database.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(new(
             AuthorizationTelemetryTestProtocol.Member, Database.Partition.TenantId,
             [new(Database.Partition.DatabaseId, AuthorizationTelemetryTestProtocol.Resource, Capability.All)], []))).Get<PrincipalRecord>();
-        var configured = Database.Submit(OperationKind.ConfigureApiKey, new ConfigureApiKeyRequest(DatabaseEngine.Credential(
+        var configured = Database.Submit(OperationKind.ConfigureApiKey, new ConfigureApiKeyRequest(AuthorizationExecution.Credential(
             AuthorizationTelemetryTestProtocol.Member, AuthorizationTelemetryTestProtocol.Member,
             AuthorizationTelemetryTestProtocol.MemberKey))).Get<bool>();
         if (!configured)

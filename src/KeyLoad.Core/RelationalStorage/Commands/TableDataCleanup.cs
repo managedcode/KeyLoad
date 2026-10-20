@@ -26,7 +26,7 @@ internal static class TableDataCleanup
             limits.MaxScanRecords, (key, value) =>
             {
                 var entry = OrleansSerialization.Deserialize<AtomicPartitionCatalogEntry>(value);
-                DatabaseEngine.ValidatePartition(entry.Partition);
+                EngineResourceAccess.ValidatePartition(entry.Partition);
                 if (entry.Version != AtomicPartitionRosterProtocol.CurrentVersion
                     || !key.SequenceEqual(AtomicPartitionRosterKeys.Partition(entry.Partition)))
                 {

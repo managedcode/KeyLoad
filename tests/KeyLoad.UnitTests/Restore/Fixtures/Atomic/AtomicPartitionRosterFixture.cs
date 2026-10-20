@@ -1,5 +1,4 @@
 using System.Text.Json;
-using KeyLoad.Core;
 using KeyLoad.Core.Features.Authorization;
 using KeyLoad.Core.Features.BackupRestore.Execution;
 using KeyLoad.Core.Features.BackupRestore.Serialization;
@@ -145,7 +144,7 @@ internal sealed class AtomicPartitionRosterFixture : IDisposable
         Database.Bootstrap(new(RootPrincipalId, RootTenantId, [new(Wildcard, Wildcard, Capability.All)], [Wildcard])
         {
             ClusterAdministrator = true
-        }, DatabaseEngine.Credential(RootPrincipalId, RootPrincipalId, RootCredential));
+        }, AuthorizationExecution.Credential(RootPrincipalId, RootPrincipalId, RootCredential));
     }
 
     private DatabaseEngine CreateDatabase(ZoneTreeStore store)

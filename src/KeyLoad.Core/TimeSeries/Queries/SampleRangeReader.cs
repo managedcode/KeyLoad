@@ -22,7 +22,7 @@ internal static class SampleRangeReader
         var metadata = budget.CreateView(view);
         var principal = database.Principal(metadata, principalId, clock.GetUtcNow());
         database.Authorization.Require(principal, request.Partition, request.Set, Capability.SeriesRead);
-        var resource = DatabaseEngine.BindAuthorizedReadResource(metadata, request.Partition, request.Set, ResourceKind.TimeSeries);
+        var resource = ResourceExecutionQueriesResourceLifetimeReadBinding.BindAuthorizedReadResource(metadata, request.Partition, request.Set, ResourceKind.TimeSeries);
         var retention = SampleRetentionStateReader.Read(view, request.Partition, request.Set, request.SeriesId, budget);
         var from = retention is not null && retention.BeforeUtcTicks > request.From.UtcTicks
             ? SampleRetentionStateReader.Before(retention) : request.From;

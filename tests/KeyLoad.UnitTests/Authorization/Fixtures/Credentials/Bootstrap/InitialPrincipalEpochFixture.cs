@@ -1,4 +1,3 @@
-using KeyLoad.Core;
 using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.UnitTests.Features.Authorization;
@@ -38,7 +37,7 @@ internal sealed class InitialPrincipalEpochFixture : IDisposable
             Revoked = revoked
         };
     internal static ApiKeyRecord Credential(bool replacement = false, bool expired = false)
-        => DatabaseEngine.Credential(KeyId, Reader, replacement ? ReplacementSecret : OriginalSecret,
+        => AuthorizationExecution.Credential(KeyId, Reader, replacement ? ReplacementSecret : OriginalSecret,
             expired ? DateTimeOffset.UnixEpoch : null);
     internal Command<DatabaseCommand> Configuration(long epoch)
         => Operation(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(Principal(epoch)));

@@ -1,7 +1,6 @@
 using System.Buffers.Binary;
 using System.Security.Cryptography;
 using System.Text;
-using KeyLoad.Core;
 using KeyLoad.Core.Features.TimeSeries;
 
 namespace KeyLoad.UnitTests.Features.TimeSeries;

@@ -13,7 +13,7 @@ internal static class SeededWalCorruptionFlow
         var trial = new SeededWalCorruptionTrial(seed);
         var owner = new SeededWalCorruptionProcessOwner(trial);
         var failures = new List<Exception>();
-        using var originalDeadline = new CancellationTokenSource(TimeSpan.FromSeconds(CommandIdempotencyProcessRecoveryTests.RunTimeoutSeconds), TimeProvider.System);
+        using var originalDeadline = new CancellationTokenSource(RecoveryExecutionOptions.TrialPolicy.Value.CommandTimeout, TimeProvider.System);
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(callerToken, originalDeadline.Token);
         await ServerFailureObserver.ObserveAsync(async () =>
         {
@@ -35,7 +35,7 @@ internal static class SeededWalCorruptionFlow
             await ServerFailureObserver.ObserveAsync(() => SeededWalCorruptionFiles.RequireOriginalAuthorityAsync(trial, deadline.Token), failures);
         }
         await ServerFailureObserver.ObserveAsync(() => SeededWalCorruptionFiles.RequireHistoryAsync(owner), failures);
-        using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(CommandIdempotencyProcessRecoveryTests.CleanupTimeoutSeconds), TimeProvider.System);
+        using var cleanup = new CancellationTokenSource(RecoveryExecutionOptions.TrialPolicy.Value.CleanupTimeout, TimeProvider.System);
         await ServerFailureObserver.ObserveAsync(async () => await SeededWalCorruptionEvidence.SaveAsync(trial, owner, failures, cleanup.Token), failures);
         await CleanupAsync(trial, owner, failures);
         CommandIdempotencyProcessFailureHandling.ThrowFailures(failures);
@@ -69,7 +69,7 @@ internal static class SeededWalCorruptionFlow
     }
     private static async Task RepairAsync(SeededWalCorruptionTrial trial, List<Exception> failures)
     {
-        using var repair = new CancellationTokenSource(TimeSpan.FromSeconds(CommandIdempotencyProcessRecoveryTests.CleanupTimeoutSeconds), TimeProvider.System);
+        using var repair = new CancellationTokenSource(RecoveryExecutionOptions.TrialPolicy.Value.CleanupTimeout, TimeProvider.System);
         await ServerFailureObserver.ObserveAsync(() => trial.RepairAsync(repair.Token), failures);
         await ServerFailureObserver.ObserveAsync(() => SeededWalCorruptionFiles.RequireRestoredAsync(trial, repair.Token), failures);
         ServerFailureObserver.Observe(() => RecoveryFileInventory.AssertHandlesReleased(trial.Root), failures);

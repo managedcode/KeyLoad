@@ -31,7 +31,7 @@ internal static class GraphSearchValidation
             throw Errors.Fail(ErrorCode.Validation, InvalidRequest);
         }
         SearchRequestValidation.Validate(request.Search, limits, request.Retriever is not null, queryExecution);
-        DatabaseEngine.ValidatePartition(request.Search.Partition);
+        EngineResourceAccess.ValidatePartition(request.Search.Partition);
         JsonData.Identifier(request.Search.Collection);
         ValidateScope(request.Scope, request.Search.Partition, limits, budget, execution);
         ValidateRetriever(request.Retriever, request.Search.Partition, limits, budget, execution);

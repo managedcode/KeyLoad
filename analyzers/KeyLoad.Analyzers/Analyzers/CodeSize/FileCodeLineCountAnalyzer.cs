@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
@@ -19,7 +18,10 @@ public sealed class FileCodeLineCountAnalyzer : DiagnosticAnalyzer
     /// <inheritdoc/>
     public override void Initialize(AnalysisContext context)
     {
-        ArgumentNullException.ThrowIfNull(context);
+        if (context is null)
+        {
+            throw new System.ArgumentNullException(nameof(context));
+        }
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
         context.RegisterSyntaxTreeAction(AnalyzeFile);

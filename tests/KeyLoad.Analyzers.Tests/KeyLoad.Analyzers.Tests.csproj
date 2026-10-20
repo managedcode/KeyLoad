@@ -3,22 +3,21 @@
     <OutputType>Exe</OutputType>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
+    <NoWarn>$(NoWarn);KLD0035;KLD0036;KLD0037</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="TUnit" />
     <PackageReference Include="Microsoft.Orleans.Server" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Common" ExcludeAssets="compile;runtime" PrivateAssets="all" />
-    <ProjectReference Include="../../analyzers/KeyLoad.Analyzers/KeyLoad.Analyzers.csproj" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Common" PrivateAssets="all" />
     <ProjectReference Include="../../src/KeyLoad.Abstractions/KeyLoad.Abstractions.csproj" />
     <ProjectReference Include="../../src/KeyLoad.Diagnostics/KeyLoad.Diagnostics.csproj" />
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.CodeAnalysis" Private="true">
-      <HintPath>$(MSBuildSDKsPath)/../Roslyn/bincore/Microsoft.CodeAnalysis.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.CodeAnalysis.CSharp" Private="true">
-      <HintPath>$(MSBuildSDKsPath)/../Roslyn/bincore/Microsoft.CodeAnalysis.CSharp.dll</HintPath>
-    </Reference>
+    <ProjectReference Include="../../analyzers/KeyLoad.Analyzers/KeyLoad.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="true" IsAspireProjectResource="false" PrivateAssets="all" />
+  </ItemGroup>
+  <Import Project="$(MSBuildThisFileDirectory)../../build/CodeQuality/FunctionalCompilationIdentity.targets" />
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" PrivateAssets="all" />
   </ItemGroup>
 </Project>

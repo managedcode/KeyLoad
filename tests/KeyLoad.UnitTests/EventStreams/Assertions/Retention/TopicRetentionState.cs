@@ -1,6 +1,5 @@
 using System.Security.Cryptography;
 using System.Text;
-using KeyLoad.Core;
 using KeyLoad.Storage;
 
 namespace KeyLoad.UnitTests.Features.EventStreams;

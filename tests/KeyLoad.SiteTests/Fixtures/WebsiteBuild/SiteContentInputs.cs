@@ -4,8 +4,8 @@ internal sealed record SiteContentInputs(string Repository, string SiteRevision)
 {
     public static SiteContentInputs FromEnvironment()
     {
-        var repository = Environment.GetEnvironmentVariable(SiteTokens.RepositoryEnvironment);
-        var revision = Environment.GetEnvironmentVariable(SitePublicationTokens.SourceRevisionEnvironment);
+        var repository = SiteEnvironmentConfiguration.Capture().Value.Repository;
+        var revision = SiteEnvironmentConfiguration.Capture().Value.SourceRevision;
         if (repository is null || !Path.IsPathFullyQualified(repository) || !Directory.Exists(repository) ||
             !SiteCoverageSourceManifestWriter.IsRevision(revision))
         {

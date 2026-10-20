@@ -171,17 +171,18 @@ internal sealed class TypedConfigurationInjectionTests
     }
 
     [Test]
-    public async Task GeneratedAndExternalConfigurationCallsRetainTheirBoundariesAsync()
+    public async Task ConfigurationReadsAreCheckedInEveryAssemblyAsync()
     {
         const string source = """
             internal static class Subject
             {
                 private const string Setting = "KEYLOAD_POLICY";
-                internal static string Execute() => System.Environment.GetEnvironmentVariable(Setting);
+                internal static string Execute() => [|System.Environment.GetEnvironmentVariable(Setting)|];
             }
             """;
 
-        await MagicRuntimeFixture.AssertConfigurationAsync(source, path: AnalyzerFixture.GeneratedPath);
+        await MagicRuntimeFixture.AssertConfigurationAsync(source.Replace("[|", string.Empty, StringComparison.Ordinal)
+            .Replace("|]", string.Empty, StringComparison.Ordinal), path: AnalyzerFixture.GeneratedPath);
         await MagicRuntimeFixture.AssertConfigurationAsync(source, assemblyName: AnalyzerFixture.ExternalAssembly);
         await MagicRuntimeFixture.AssertConfigurationAsync(source, assemblyName: AnalyzerFixture.UnitTestAssembly);
     }

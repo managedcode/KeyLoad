@@ -174,7 +174,7 @@ internal sealed class RecurringDueCoordinatorGrain(GrainRequestCodec codec, Back
         {
             throw Errors.Fail(ErrorCode.Validation, DueCoordinatorFields.InvalidHint);
         }
-        DatabaseEngine.ValidatePartition(hint.Lane.Partition);
+        EngineResourceAccess.ValidatePartition(hint.Lane.Partition);
         JsonData.Identifier(hint.Lane.Queue);
         JsonData.Identifier(hint.CreatorPrincipalId);
     }

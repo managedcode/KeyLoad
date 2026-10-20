@@ -6,8 +6,6 @@ namespace KeyLoad.RecoveryTests.Features.Search;
 
 internal sealed class EventProjectionProcessRecoveryTests
 {
-    private const int TimeoutSeconds = 45;
-    private const int CleanupSeconds = 30;
     private const int MarkerOutputLimit = 8_192;
 
     [Test]
@@ -23,7 +21,7 @@ internal sealed class EventProjectionProcessRecoveryTests
         var callerToken = TestContext.Current!.Execution.CancellationToken;
         using var admission = await StorageTrialLease.AcquireAsync(callerToken);
         Process? process = null;
-        using var timeoutTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(TimeoutSeconds), TimeProvider.System);
+        using var timeoutTimeout = new CancellationTokenSource(RecoveryExecutionOptions.TrialPolicy.Value.SearchProjectionTimeout, TimeProvider.System);
         using var timeout = CancellationTokenSource.CreateLinkedTokenSource(callerToken, timeoutTimeout.Token);
         Exception? activeFailure = null;
         try
@@ -45,7 +43,7 @@ internal sealed class EventProjectionProcessRecoveryTests
         }
         finally
         {
-            using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(CleanupSeconds), TimeProvider.System);
+            using var cleanup = new CancellationTokenSource(RecoveryExecutionOptions.TrialPolicy.Value.CleanupTimeout, TimeProvider.System);
             await RecoveryProcessCleanup.SettleAsync(process, root, root, activeFailure, cleanup.Token);
         }
     }

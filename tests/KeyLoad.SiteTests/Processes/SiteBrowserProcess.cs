@@ -35,7 +35,7 @@ internal static class SiteBrowserProcess
         {
             throw new InvalidOperationException(SiteBrowserTokens.BrowserVersionMissing);
         }
-        using var timeoutTimeout = new CancellationTokenSource(TimeSpan.FromMilliseconds(SiteBrowserTokens.BrowserStartupTimeoutMilliseconds), TimeProvider.System);
+        using var timeoutTimeout = new CancellationTokenSource(SiteExecutionConfiguration.Options.Value.BrowserStartupTimeout, TimeProvider.System);
         using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutTimeout.Token);
         var stdout = SiteProcessOutput.ReadAsync(process.StandardOutput, SiteBrowserTokens.BrowserResponseExceeded, timeout.Token);
         var stderr = SiteProcessOutput.ReadAsync(process.StandardError, SiteBrowserTokens.BrowserResponseExceeded, timeout.Token);

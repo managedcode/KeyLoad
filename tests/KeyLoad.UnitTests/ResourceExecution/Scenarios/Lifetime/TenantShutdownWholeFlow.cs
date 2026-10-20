@@ -1,5 +1,4 @@
 using KeyLoad.Clustering;
-using KeyLoad.Core;
 using ManagedCode.Communication;
 
 namespace KeyLoad.UnitTests.Features.ResourceExecution;

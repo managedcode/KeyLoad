@@ -1,4 +1,3 @@
-using KeyLoad.Core;
 using KeyLoad.Core.Features.DocumentStorage;
 using KeyLoad.Query;
 using KeyLoad.Query.Features.Search;

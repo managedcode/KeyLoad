@@ -3,6 +3,7 @@ namespace KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
 /// <summary>Retains typed Aspire references for the client that owns workload execution outside the resource graph.</summary>
 internal sealed class LoadTestClientSettings
 {
+    private const string ReferenceUnavailable = "The selected database reference is unavailable.";
     private readonly Dictionary<string, object> values = new(StringComparer.Ordinal);
     internal IReadOnlyDictionary<string, object> Values => values;
     internal HashSet<string> Resources { get; } = new(StringComparer.Ordinal);
@@ -20,7 +21,7 @@ internal sealed class LoadTestClientSettings
             token.ThrowIfCancellationRequested();
             resolved.Add(name, value is IValueProvider reference
                 ? await reference.GetValueAsync(token).ConfigureAwait(false)
-                    ?? throw new InvalidOperationException("The selected database reference is unavailable.")
+                    ?? throw new InvalidOperationException(ReferenceUnavailable)
                 : (string)value);
         }
         return resolved;

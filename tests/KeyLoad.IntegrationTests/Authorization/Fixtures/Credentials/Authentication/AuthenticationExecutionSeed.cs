@@ -16,10 +16,11 @@ internal static class AuthenticationExecutionSeed
         var root = new KeyLoadClient(http, host.AdminKey, IntegrationClientOptions.Execution());
         var partition = new PartitionRef(McpDocumentProtocol.TenantPrefix + Guid.NewGuid().ToString(McpCallerProtocol.GuidFormat),
             McpDocumentProtocol.Database, McpDocumentProtocol.Domain, Guid.NewGuid().ToString(McpCallerProtocol.GuidFormat));
-        var document = new McpDocumentScenario(partition);
-        await McpCallerAssertions.SdkSuccessAsync(await root.ConfigureResourceAsync(Guid.NewGuid(),
-            new(partition.TenantId, partition.DatabaseId,
-                new(McpDocumentProtocol.Collection, ResourceKind.Collection, partition.TransactionDomainId)), token));
+        var creationId = Guid.NewGuid();
+        var definition = new ResourceDefinition(McpDocumentProtocol.Collection, ResourceKind.Collection, partition.TransactionDomainId);
+        var document = McpDocumentScenario.ForCreation(partition, creationId, definition);
+        await McpCallerAssertions.SdkSuccessAsync(await root.ConfigureResourceAsync(creationId,
+            new(partition.TenantId, partition.DatabaseId, definition), token));
         var command = document.Command(Guid.NewGuid());
         var receipt = await McpCallerAssertions.SdkSuccessAsync(await root.CommitAsync(command, token));
         var reader = new PrincipalRecord(AuthenticationExecutionProtocol.PrincipalPrefix + Guid.NewGuid().ToString(McpCallerProtocol.GuidFormat),

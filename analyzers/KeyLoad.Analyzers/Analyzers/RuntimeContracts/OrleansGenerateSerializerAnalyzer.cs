@@ -21,7 +21,8 @@ public sealed class OrleansGenerateSerializerAnalyzer : DiagnosticAnalyzer
         CodeQualityDiagnosticCategories.Reliability,
         DiagnosticSeverity.Error,
         isEnabledByDefault: true,
-        description: CodeQualityDiagnosticText.OrleansSerializerDescription);
+        description: CodeQualityDiagnosticText.OrleansSerializerDescription,
+        customTags: [WellKnownDiagnosticTags.CompilationEnd]);
 
     /// <inheritdoc/>
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [Rule];
@@ -29,7 +30,10 @@ public sealed class OrleansGenerateSerializerAnalyzer : DiagnosticAnalyzer
     /// <inheritdoc/>
     public override void Initialize(AnalysisContext context)
     {
-        System.ArgumentNullException.ThrowIfNull(context);
+        if (context is null)
+        {
+            throw new System.ArgumentNullException(nameof(context));
+        }
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
         context.RegisterCompilationStartAction(AnalyzeCompilation);
@@ -37,8 +41,7 @@ public sealed class OrleansGenerateSerializerAnalyzer : DiagnosticAnalyzer
 
     private static void AnalyzeCompilation(CompilationStartAnalysisContext context)
     {
-        if (!CodeQualityAssemblyNames.IsProduction(context.Compilation.AssemblyName) ||
-            context.Compilation.GetTypeByMetadataName(
+        if (context.Compilation.GetTypeByMetadataName(
                 OrleansMetadataNames.GenerateSerializerAttribute) is not { } generateSerializerAttribute)
         {
             return;

@@ -1,6 +1,5 @@
 using System.Text;
 using KeyLoad.Clustering;
-using KeyLoad.Core;
 using KeyLoad.Server;
 
 namespace KeyLoad.UnitTests.Features.ClientApi;

@@ -25,7 +25,7 @@ internal static class OperationalPolicyMetadataNames
     internal const string FileStreamOptions = "System.IO.FileStreamOptions";
     internal const string StreamWriter = "System.IO.StreamWriter";
     internal const string StreamReader = "System.IO.StreamReader";
-    internal const string FileBufferSizeProperty = nameof(System.IO.FileStreamOptions.BufferSize);
+    internal const string FileBufferSizeProperty = "BufferSize";
     internal const string FileBufferSizeParameter = "bufferSize";
     internal const string RetryOptions = "Polly.Retry.RetryStrategyOptions";
     internal const string GenericRetryOptions = "Polly.Retry.RetryStrategyOptions`1";

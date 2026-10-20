@@ -18,6 +18,7 @@ internal static class MaintenanceChildDispatch
         try
         {
             admission.Open(parent, signed, actorId, commandId, services, codec, binding, token);
+            await admission.ObserveStartedAsync(codec).ConfigureAwait(true);
             result = await executeChild(signed, admission.Token).ConfigureAwait(true);
         }
         catch (Exception failure) when (CqrsBoundaryErrors.IsNonFatal(failure))
@@ -32,6 +33,7 @@ internal static class MaintenanceChildDispatch
         {
             await admission.CancelAsync(failures).ConfigureAwait(true);
         }
+        await admission.JoinObservationAsync(failures).ConfigureAwait(true);
         admission.PrepareCleanup(failures);
         admission.Dispose();
         if (failures.Count != NoFailures && result?.Error is { } original)

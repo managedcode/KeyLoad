@@ -31,7 +31,7 @@ internal static class RowRevisionInferenceClusterSeed
             await root.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(), reader, token)));
         var key = reader.Id + P.CredentialSeparator + Guid.NewGuid().ToString(McpCallerProtocol.GuidFormat);
         await McpCallerAssertions.SdkStatusAsync(await root.Sdk.ConfigureApiKeyAsync(Guid.NewGuid(),
-            DatabaseEngine.Credential(reader.Id, reader.Id, key), token));
+            AuthorizationExecution.Credential(reader.Id, reader.Id, key), token));
         var state = new RowRevisionInferenceClusterState(partition, reader, key);
         state.RootOriginals.Add((command, receipt));
         await RowRevisionInferenceClusterCurrent.CaptureOutboxAsync(root, state, P.InitialRecords, token);

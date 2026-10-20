@@ -5,11 +5,11 @@ namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
 internal static class SiteIsolatedGitHubProcess
 {
     public static Task<SiteProcessResult> RunAsync(ProcessStartInfo start, CancellationToken token) =>
-        RunAsync(start, TimeSpan.FromMinutes(SiteIsolatedGitHubTokens.DeadlineMinutes), admission: null, token);
+        RunAsync(start, SiteExecutionConfiguration.Options.Value.GitHubDeadline, admission: null, token);
 
     public static Task<SiteProcessResult> RunProbeAsync(ProcessStartInfo start, CancellationToken token,
         SiteHeavyChildAdmission? admission = null) =>
-        RunAsync(start, TimeSpan.FromSeconds(SiteIsolatedGitHubTokens.DeadlineSeconds), admission, token);
+        RunAsync(start, SiteExecutionConfiguration.Options.Value.IsolatedProcessDeadline, admission, token);
 
     private static async Task<SiteProcessResult> RunAsync(ProcessStartInfo start, TimeSpan bound,
         SiteHeavyChildAdmission? admission, CancellationToken token)

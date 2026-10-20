@@ -11,7 +11,7 @@ internal static class CredentialVerifierR53Flow
         McpOfficialClient oldSession, CredentialSubjectReplacementState state, CancellationToken token)
     {
         var verifier = new CredentialVerifierR53State(state);
-        verifier.Replacement = DatabaseEngine.Credential(state.First.Identity.Credential.Id,
+        verifier.Replacement = AuthorizationExecution.Credential(state.First.Identity.Credential.Id,
             state.First.Identity.Principal.Id, verifier.Secret, state.First.Identity.Credential.ExpiresAt);
         await Assert.That(verifier.Replacement.Id).IsEqualTo(state.First.Identity.Credential.Id);
         await Assert.That(verifier.Replacement.PrincipalId).IsEqualTo(state.First.Identity.Credential.PrincipalId);

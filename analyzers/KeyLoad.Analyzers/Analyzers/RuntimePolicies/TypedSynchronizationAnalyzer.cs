@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.CodeAnalysis;
@@ -29,7 +28,10 @@ public sealed class TypedSynchronizationAnalyzer : DiagnosticAnalyzer
     /// <inheritdoc/>
     public override void Initialize(AnalysisContext context)
     {
-        ArgumentNullException.ThrowIfNull(context);
+        if (context is null)
+        {
+            throw new System.ArgumentNullException(nameof(context));
+        }
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
         context.RegisterCompilationStartAction(static startContext =>

@@ -37,7 +37,7 @@ internal static class QueryValidation
         }
 
         var query = request.Query;
-        DatabaseEngine.ValidatePartition(request.Partition);
+        EngineResourceAccess.ValidatePartition(request.Partition);
         JsonData.Identifier(query.Collection);
         ValidateModelSource(request, query);
         if (query.Projection.IsDefault || query.Order.IsDefault

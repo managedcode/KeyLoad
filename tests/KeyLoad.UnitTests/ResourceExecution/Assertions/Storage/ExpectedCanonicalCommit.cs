@@ -1,5 +1,3 @@
-using KeyLoad.Core;
-
 namespace KeyLoad.UnitTests;
 
 internal static class ExpectedCanonicalCommit

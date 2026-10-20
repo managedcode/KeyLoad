@@ -37,7 +37,7 @@ internal static class MultiLaneReceiveAdmission
             {
                 throw Errors.Fail(ErrorCode.Validation, Invalid);
             }
-            DatabaseEngine.ValidatePartition(leaf.Lane.Partition);
+            EngineResourceAccess.ValidatePartition(leaf.Lane.Partition);
             JsonData.Identifier(leaf.Lane.Queue);
             messages += leaf.MaxMessages;
             bytes += leaf.MaxBytes;

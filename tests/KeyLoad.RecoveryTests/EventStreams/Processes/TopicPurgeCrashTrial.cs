@@ -20,8 +20,7 @@ internal static class TopicPurgeCrashTrial
         var child = CommandIdempotencyProcessChild.Create(CommandIdempotencyProcess.OutputLimitCharacters,
             CrashFixtureValues.CrashMarker);
         Exception? primary = null;
-        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(
-            CommandIdempotencyProcessRecoveryTests.RunTimeoutSeconds), TimeProvider.System);
+        using var timeout = new CancellationTokenSource(RecoveryExecutionOptions.TrialPolicy.Value.CommandTimeout, TimeProvider.System);
         using var linked = CancellationTokenSource.CreateLinkedTokenSource(callerToken, timeout.Token);
         try
         {
@@ -44,8 +43,7 @@ internal static class TopicPurgeCrashTrial
             primary = failure;
             primary.Data[RetainedRootKey] = root;
         }
-        using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(
-            CommandIdempotencyProcessRecoveryTests.CleanupTimeoutSeconds), TimeProvider.System);
+        using var cleanup = new CancellationTokenSource(RecoveryExecutionOptions.TrialPolicy.Value.CleanupTimeout, TimeProvider.System);
         var failures = new List<Exception>();
         await CommandIdempotencyProcess.SettleActiveAsync(child, failures, cleanup.Token);
         if (!child.IsSettled)

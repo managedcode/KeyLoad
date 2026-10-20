@@ -1,4 +1,3 @@
-using KeyLoad.Core;
 using static KeyLoad.UnitTests.Features.EventStreams.EventQueueStateEnvelopeCommands;
 using static KeyLoad.UnitTests.Features.EventStreams.EventQueueStateEnvelopeProtocol;
 

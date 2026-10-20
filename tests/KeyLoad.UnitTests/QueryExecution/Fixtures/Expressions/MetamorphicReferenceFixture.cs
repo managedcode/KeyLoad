@@ -1,5 +1,4 @@
 using System.Collections.Immutable;
-using KeyLoad.Core;
 using KeyLoad.Storage;
 using KeyLoad.UnitTests.Features.ResourceExecution;
 
@@ -35,7 +34,7 @@ internal sealed class MetamorphicReferenceFixture(int seed) : IDisposable
         Outcome = Harness.Store.Read(view => view.ReadOwnedValue(KeySpace.PartitionOutcome(Harness.Partition, "root", Seed.CommandId)))
             ?? throw new InvalidOperationException("The original generated-corpus outcome must exist.");
         await PolicyAsync(false, 1L);
-        Harness.Submit(OperationKind.ConfigureApiKey, new ConfigureApiKeyRequest(DatabaseEngine.Credential(
+        Harness.Submit(OperationKind.ConfigureApiKey, new ConfigureApiKeyRequest(AuthorizationExecution.Credential(
             MetamorphicReferenceData.Reader, MetamorphicReferenceData.Reader, MetamorphicReferenceData.Secret))).Get<bool>();
     }
     internal async Task PolicyAsync(bool use, long epoch)

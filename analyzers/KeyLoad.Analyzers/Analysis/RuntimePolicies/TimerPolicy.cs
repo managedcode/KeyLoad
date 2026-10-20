@@ -23,7 +23,7 @@ internal static class TimerPolicy
         argument.Parameter?.Name is DueTime or Period or Interval;
 
     internal static bool IsOperationalProperty(Compilation compilation, IPropertySymbol property) =>
-        property.Name is nameof(System.Threading.PeriodicTimer.Period) or nameof(System.Timers.Timer.Interval) &&
+        property.Name is "Period" or nameof(System.Timers.Timer.Interval) &&
         (RuntimeIs(compilation, property.ContainingType, PeriodicTimer) ||
          RuntimeIs(compilation, property.ContainingType, TimersTimer));
 

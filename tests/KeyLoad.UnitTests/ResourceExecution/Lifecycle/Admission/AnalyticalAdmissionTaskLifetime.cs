@@ -1,5 +1,3 @@
-using KeyLoad.Core;
-
 namespace KeyLoad.UnitTests.Features.ResourceExecution;
 
 /// <summary>Retains admitted-work test tasks until their real completion is observed.</summary>

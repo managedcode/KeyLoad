@@ -5,11 +5,33 @@ internal sealed class AdminHttpMetricsMiddleware(RequestDelegate next, TimeProvi
     private readonly TimeProvider time = clock ?? TimeProvider.System;
     private const int RouteTemplateGetEndpointEmptyCount = 0;
 
+    private const string CommandsPrefix = "/commands";
+    private const string DocumentsPrefix = "/documents";
+    private const string StreamsPrefix = "/streams";
+    private const string EventsPrefix = "/events";
+    private const string SubscriptionsPrefix = "/subscriptions";
+    private const string QueuesPrefix = "/queues";
+    private const string InboxPrefix = "/inbox";
+    private const string GraphPrefix = "/graph";
+    private const string SearchPrefix = "/search";
+    private const string SeriesPrefix = "/series";
+    private const string QueryPrefix = "/query";
+    private const string AdminResourcesPrefix = "/admin/resources";
+    private const string AdminPrincipalsPrefix = "/admin/principals";
+    private const string AdminApiKeysPrefix = "/admin/api-keys";
+    private const string AdminOutboxPrefix = "/admin/outbox";
+    private const string AdminProjectionsPrefix = "/admin/projections";
+    private const string AdminDispatchPrefix = "/admin/dispatch";
+    private const string AdminBackupPrefix = "/admin/backup";
+    private const string AdminTablesPrefix = "/admin/tables";
+    private const string ChangesPrefix = "/changes";
+    private const string AnalyticsPrefix = "/analytics";
+
     private static readonly string[] ApiPrefixes =
     [
-        "/commands", "/documents", "/streams", "/events", "/subscriptions", "/queues", "/inbox",
-        "/graph", "/search", "/series", "/query", "/admin/resources", "/admin/principals", "/admin/api-keys",
-        "/admin/outbox", "/admin/projections", "/admin/dispatch", "/admin/backup", "/admin/tables", "/changes", "/analytics"
+        CommandsPrefix, DocumentsPrefix, StreamsPrefix, EventsPrefix, SubscriptionsPrefix, QueuesPrefix, InboxPrefix,
+        GraphPrefix, SearchPrefix, SeriesPrefix, QueryPrefix, AdminResourcesPrefix, AdminPrincipalsPrefix, AdminApiKeysPrefix,
+        AdminOutboxPrefix, AdminProjectionsPrefix, AdminDispatchPrefix, AdminBackupPrefix, AdminTablesPrefix, ChangesPrefix, AnalyticsPrefix
     ];
     private const string McpPrefix = "/mcp";
     private const string AdmissionPath = "/admin/admission";

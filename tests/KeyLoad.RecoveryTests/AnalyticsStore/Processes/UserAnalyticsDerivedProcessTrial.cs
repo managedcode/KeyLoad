@@ -20,8 +20,7 @@ internal static class UserAnalyticsDerivedProcessTrial
         using var admission = await StorageTrialLease.AcquireAsync(callerToken);
         var temporaryRoot = StorageTrialDirectory.ResolveExistingDirectory(new DirectoryInfo(Path.GetTempPath()));
         var root = Path.Combine(temporaryRoot, Prefix + Guid.NewGuid().ToString(GuidFormat));
-        using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(
-            CommandIdempotencyProcessRecoveryTests.RunTimeoutSeconds), TimeProvider.System);
+        using var deadline = new CancellationTokenSource(RecoveryExecutionOptions.TrialPolicy.Value.CommandTimeout, TimeProvider.System);
         using var linked = CancellationTokenSource.CreateLinkedTokenSource(callerToken, deadline.Token);
         CommandIdempotencyProcessChild? active = null;
         Exception? primary = null;
@@ -80,8 +79,7 @@ internal static class UserAnalyticsDerivedProcessTrial
 
     private static async Task CleanupAsync(string root, CommandIdempotencyProcessChild? active, Exception? primary)
     {
-        using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(
-            CommandIdempotencyProcessRecoveryTests.CleanupTimeoutSeconds), TimeProvider.System);
+        using var deadline = new CancellationTokenSource(RecoveryExecutionOptions.TrialPolicy.Value.CleanupTimeout, TimeProvider.System);
         var failures = new List<Exception>();
         if (active is not null)
         {

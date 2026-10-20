@@ -95,7 +95,7 @@ internal static class EntityReferenceLifetime
         {
             throw Errors.Fail(ErrorCode.FormatUnsupported, MissingBinding);
         }
-        DatabaseEngine.ValidatePartition(reference.Partition);
+        EngineResourceAccess.ValidatePartition(reference.Partition);
         JsonData.Identifier(reference.Collection);
         JsonData.Identifier(reference.Id);
     }

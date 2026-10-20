@@ -1,5 +1,3 @@
-using KeyLoad.Core;
-
 namespace KeyLoad.UnitTests.Features.Authorization;
 
 internal sealed class ResourcePolicyUpdateTests

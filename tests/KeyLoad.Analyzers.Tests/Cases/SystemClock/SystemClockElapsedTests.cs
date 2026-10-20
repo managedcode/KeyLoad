@@ -2,7 +2,7 @@ using Microsoft.CodeAnalysis;
 
 namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
 
-/// <summary>AC-TIME-004: execution compiler clock bypass regressions.</summary>
+/// <summary>AC-TIME-004: execution compiler clock bypass detection.</summary>
 internal sealed class SystemClockElapsedTests
 {
     [Test]

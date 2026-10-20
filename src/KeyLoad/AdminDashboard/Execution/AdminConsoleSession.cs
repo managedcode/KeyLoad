@@ -14,8 +14,8 @@ internal sealed class AdminConsoleSession(AdminConsoleConnection connection, IOp
     private Task? pending;
     private long epoch;
     internal AdminNodeSnapshot? Snapshot { get; private set; }
-    internal AdminMeasurements Measurements { get; } = new(options.Value);
-    internal AdminConsoleData Data { get; } = new(options.Value);
+    internal AdminMeasurements Measurements { get; } = new(options);
+    internal AdminConsoleData Data { get; } = new(options);
     internal string Status { get; private set; } = AdminConsoleText.Connect;
     internal bool Connected => Snapshot is not null && connection.Client is not null;
     internal TimeSpan PollInterval => options.Value.PollInterval;

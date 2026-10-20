@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using System.Text.Json;
 using KeyLoad.Core;
-using KeyLoad.Core.Features.Authorization;
+using KeyLoad.RecoveryTests.Features.EventStreams;
 using KeyLoad.RecoveryTests.Features.StorageRecovery;
 using KeyLoad.Storage.ZoneTree;
 using ManagedCode.Communication.Commands;
@@ -24,7 +24,7 @@ internal sealed class ProjectionProcessRecoveryTests
         var cancellationToken = TestContext.Current!.Execution.CancellationToken;
         using var admission = await StorageTrialLease.AcquireAsync(cancellationToken);
         using var process = StartCrashProcess(root, stage, index);
-        using var timeoutTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(20), TimeProvider.System);
+        using var timeoutTimeout = new CancellationTokenSource(RecoveryExecutionOptions.TrialPolicy.Value.ProjectionTimeout, TimeProvider.System);
         using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutTimeout.Token);
         try
         {
@@ -33,10 +33,7 @@ internal sealed class ProjectionProcessRecoveryTests
             await process.WaitForExitAsync(timeout.Token);
             await StorageRecoveryProcessTests.WaitForKilledProcessFilesAsync(root, timeout.Token);
             using var store = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
-            var database = new DatabaseEngine(store, new AuthorizationPolicy(), RecoveryExecutionOptions.DatabaseLimits(new()
-            {
-                MaxOutboxRecords = 1
-            }), RecoveryExecutionOptions.DueWork(), RecoveryExecutionOptions.EventSource(), RecoveryExecutionOptions.Messaging(), RecoveryExecutionOptions.GraphExecution(), RecoveryExecutionOptions.ChangeFeedExecution(), RecoveryExecutionOptions.RuntimeClaimsExecution(), RecoveryExecutionOptions.TimeSeriesExecution());
+            var database = ProjectionRecoveryDatabase.Open(store);
             await AssertRecoveredProcessCutAsync(database, stage);
             await RetryRecoveredCommandAsync(root, database, timeout.Token);
         }

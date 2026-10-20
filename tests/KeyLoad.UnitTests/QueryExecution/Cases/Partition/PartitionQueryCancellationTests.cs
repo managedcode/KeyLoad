@@ -1,4 +1,3 @@
-using KeyLoad.Core;
 using KeyLoad.Query;
 
 namespace KeyLoad.UnitTests.Features.QueryExecution;

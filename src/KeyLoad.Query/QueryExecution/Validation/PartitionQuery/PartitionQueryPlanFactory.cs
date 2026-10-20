@@ -73,7 +73,7 @@ internal static class PartitionQueryPlanFactory
                 throw Errors.Fail(ErrorCode.Validation, InvalidPartitionsMessage);
             }
 
-            DatabaseEngine.ValidatePartition(partition);
+            EngineResourceAccess.ValidatePartition(partition);
         }
         var sorted = partitions.OrderBy(static item => item.TenantId, StringComparer.Ordinal)
             .ThenBy(static item => item.DatabaseId, StringComparer.Ordinal)

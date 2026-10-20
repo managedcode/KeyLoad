@@ -149,7 +149,7 @@ internal static class DueWorkRecordDecoder
 
     private static void ValidateLane(QueueLaneRef lane)
     {
-        DatabaseEngine.ValidatePartition(lane.Partition);
+        EngineResourceAccess.ValidatePartition(lane.Partition);
         JsonData.Identifier(lane.Queue);
     }
 

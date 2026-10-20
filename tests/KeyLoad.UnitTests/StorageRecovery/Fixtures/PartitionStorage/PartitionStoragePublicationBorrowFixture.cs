@@ -1,5 +1,4 @@
 using System.Security.Cryptography;
-using KeyLoad.Core;
 using KeyLoad.Core.Features.Authorization;
 using KeyLoad.Server;
 using Microsoft.Extensions.DependencyInjection;

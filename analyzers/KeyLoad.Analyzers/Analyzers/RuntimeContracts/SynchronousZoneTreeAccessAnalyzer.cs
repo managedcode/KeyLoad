@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
@@ -23,7 +22,10 @@ public sealed class SynchronousZoneTreeAccessAnalyzer : DiagnosticAnalyzer
     /// <inheritdoc/>
     public override void Initialize(AnalysisContext context)
     {
-        ArgumentNullException.ThrowIfNull(context);
+        if (context is null)
+        {
+            throw new System.ArgumentNullException(nameof(context));
+        }
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.Analyze | GeneratedCodeAnalysisFlags.ReportDiagnostics);
         context.EnableConcurrentExecution();
         context.RegisterOperationAction(AnalyzeInvocation, Microsoft.CodeAnalysis.OperationKind.Invocation);
@@ -63,7 +65,7 @@ public sealed class SynchronousZoneTreeAccessAnalyzer : DiagnosticAnalyzer
         };
         if (resource is not null && ZoneTreeDispatchAnalysis.RuntimeResource(resource))
         {
-            context.ReportDiagnostic(Diagnostic.Create(Rule, resource.Syntax.GetLocation(), nameof(IAsyncDisposable.DisposeAsync)));
+            context.ReportDiagnostic(Diagnostic.Create(Rule, resource.Syntax.GetLocation(), "DisposeAsync"));
         }
     }
 }

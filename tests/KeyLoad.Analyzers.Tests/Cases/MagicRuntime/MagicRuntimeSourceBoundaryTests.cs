@@ -1,17 +1,23 @@
 namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
 
-/// <summary>AC-CQ-031: runtime ownership includes infrastructure and benchmarks without admitting test data.</summary>
+/// <summary>AC-CQ-031: runtime policies apply regardless of the source assembly name.</summary>
 internal sealed class MagicRuntimeSourceBoundaryTests
 {
     private const string BenchmarkAssembly = "KeyLoad.Benchmarks";
     private const string AppHostAssembly = "KeyLoad.AppHost";
+    private const string LoadTestAppHostAssembly = "KeyLoad.LoadTests.AppHost";
     private const string AnalyzerAssembly = "KeyLoad.Analyzers";
 
     [Test]
     [Arguments(AnalyzerFixture.ServerAssembly)]
     [Arguments(AnalyzerFixture.CoreAssembly)]
     [Arguments(AppHostAssembly)]
+    [Arguments(LoadTestAppHostAssembly)]
     [Arguments(BenchmarkAssembly)]
+    [Arguments(AnalyzerFixture.UnitTestAssembly)]
+    [Arguments(AnalyzerFixture.CoreTestAssembly)]
+    [Arguments(AnalyzerFixture.ExternalAssembly)]
+    [Arguments(AnalyzerAssembly)]
     public async Task RuntimeAssembliesIncludeInfrastructureAndBenchmarkPoliciesAsync(string assemblyName)
     {
         const string durationSource = """
@@ -32,25 +38,18 @@ internal sealed class MagicRuntimeSourceBoundaryTests
     }
 
     [Test]
-    [Arguments(AnalyzerFixture.UnitTestAssembly)]
-    [Arguments(AnalyzerFixture.CoreTestAssembly)]
-    [Arguments(AnalyzerFixture.ExternalAssembly)]
-    [Arguments(AnalyzerAssembly)]
-    public async Task TestDataExternalAndAnalyzerInfrastructureAreOutsideNewRuntimeRulesAsync(string assemblyName)
+    [Arguments(AnalyzerFixture.ServerAssembly)]
+    [Arguments(LoadTestAppHostAssembly)]
+    public async Task ExecutableConfigurationReadsRequireTheirBindingOwnerAsync(string assemblyName)
     {
         const string source = """
             internal static class Subject
             {
-                internal static bool Execute(string value)
-                {
-                    System.Threading.Tasks.Task.Delay(1);
-                    return value == "ready";
-                }
+                private const string Setting = "KeyLoad:Policy";
+                internal static string? Execute() => [|System.Environment.GetEnvironmentVariable(Setting)|];
             }
             """;
-
-        await MagicRuntimeFixture.AssertDurationAsync(source, assemblyName);
-        await MagicRuntimeFixture.AssertStringAsync(source, assemblyName);
+        await MagicRuntimeFixture.AssertConfigurationAsync(source, assemblyName);
     }
 
     [Test]

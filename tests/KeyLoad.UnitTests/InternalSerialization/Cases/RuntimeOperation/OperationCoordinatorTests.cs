@@ -1,5 +1,3 @@
-using KeyLoad.Core;
-
 namespace KeyLoad.UnitTests.Features.InternalSerialization;
 
 internal sealed class OperationCoordinatorTests

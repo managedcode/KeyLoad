@@ -33,7 +33,7 @@ internal sealed class SeededWalCorruptionProcessOwner(SeededWalCorruptionTrial t
         }, failures);
         await ServerFailureObserver.ObserveAsync(() => child.WaitAndJoinAsync(token), failures);
         ServerFailureObserver.Observe(() => exit = child.ExitCode, failures);
-        using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(CommandIdempotencyProcessRecoveryTests.CleanupTimeoutSeconds), TimeProvider.System);
+        using var cleanup = new CancellationTokenSource(RecoveryExecutionOptions.TrialPolicy.Value.CleanupTimeout, TimeProvider.System);
         await CommandIdempotencyProcess.SettleActiveAsync(child, failures, cleanup.Token);
         History.Add(new(phase, signal, signaled, exit, child.IsSettled, child.IsDisposed));
         if (child.IsSettled && child.IsDisposed)

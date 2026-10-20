@@ -1,4 +1,3 @@
-using KeyLoad.Core;
 using KeyLoad.Storage;
 using KeyLoad.UnitTests.Features.Messaging;
 using TUnit.Assertions.Enums;

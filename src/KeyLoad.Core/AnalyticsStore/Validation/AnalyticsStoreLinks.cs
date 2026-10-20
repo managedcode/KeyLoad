@@ -62,7 +62,7 @@ internal static class AnalyticsStoreLinks
         {
             database.Authorization.Require(principal, partition, link.Collection, Capability.DocumentsRead);
             var definition = stored
-                ? DatabaseEngine.BindAuthorizedReadResource(view, partition, link.Collection, ResourceKind.Collection)
+                ? ResourceExecutionQueriesResourceLifetimeReadBinding.BindAuthorizedReadResource(view, partition, link.Collection, ResourceKind.Collection)
                 : database.Resource(view, partition, link.Collection, ResourceKind.Collection);
             var lifetime = ResourceLifetimeCatalog.Read(view, partition.TenantId, partition.DatabaseId,
                 link.Collection, definition) ?? throw Errors.Fail(ErrorCode.NotFound, Unavailable);

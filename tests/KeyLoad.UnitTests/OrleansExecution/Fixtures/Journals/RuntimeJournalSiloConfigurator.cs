@@ -1,6 +1,5 @@
 #pragma warning disable ORLEANSEXP005
 using KeyLoad.Clustering;
-using KeyLoad.Core;
 using KeyLoad.Server;
 using ManagedCode.Communication.CQRS;
 using ManagedCode.Communication.Orleans.Converters;

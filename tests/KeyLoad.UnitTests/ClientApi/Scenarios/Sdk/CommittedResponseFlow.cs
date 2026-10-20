@@ -15,7 +15,7 @@ internal static class CommittedResponseFlow
         var token = linked.Token;
         var principal = scenario.Principal();
         var credential = scenario.Fixture.Database.Submit(OperationKind.ConfigureApiKey, new ConfigureApiKeyRequest(
-            global::KeyLoad.Core.DatabaseEngine.Credential(CommittedResponseProtocol.ApiKeyId, principal.Id,
+            global::KeyLoad.Core.AuthorizationExecution.Credential(CommittedResponseProtocol.ApiKeyId, principal.Id,
                 CommittedResponseProtocol.ApiKey))).Get<bool>();
         await Assert.That(credential).IsTrue();
         var command = scenario.Command(CommittedResponseProtocol.Document, CommittedResponseProtocol.OriginalJson,

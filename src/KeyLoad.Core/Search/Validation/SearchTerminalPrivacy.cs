@@ -83,7 +83,7 @@ internal static class SearchTerminalPrivacy
         }
         VectorProjectionEligibility.ValidateLineage(lineage, target.Partition, document, vector);
         database.Authorization.Require(principal, target.Partition, lineage.SourceDocument.Collection, Capability.DocumentsRead);
-        var sourceResource = DatabaseEngine.BindAuthorizedReadResource(budget.CreateView(current), target.Partition,
+        var sourceResource = ResourceExecutionQueriesResourceLifetimeReadBinding.BindAuthorizedReadResource(budget.CreateView(current), target.Partition,
             lineage.SourceDocument.Collection, ResourceKind.Collection);
         database.Authorization.RequireFieldUse(principal, sourceResource, lineage.InputField);
         var originalResource = budget.ReadRecord<ResourceDefinition>(captured,

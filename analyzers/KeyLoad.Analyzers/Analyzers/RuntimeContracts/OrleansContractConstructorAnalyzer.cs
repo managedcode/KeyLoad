@@ -30,7 +30,10 @@ public sealed class OrleansContractConstructorAnalyzer : DiagnosticAnalyzer
     /// <inheritdoc/>
     public override void Initialize(AnalysisContext context)
     {
-        System.ArgumentNullException.ThrowIfNull(context);
+        if (context is null)
+        {
+            throw new System.ArgumentNullException(nameof(context));
+        }
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
         context.RegisterSyntaxNodeAction(
@@ -42,11 +45,7 @@ public sealed class OrleansContractConstructorAnalyzer : DiagnosticAnalyzer
     {
         if (context.Node is not ConstructorDeclarationSyntax constructor ||
             context.ContainingSymbol?.ContainingType is not { } containingType ||
-            !IsProductionAssembly(context.SemanticModel.Compilation.AssemblyName) ||
-            (!HasGenerateSerializer(containingType) &&
-             !IsSharedOrleansContract(
-                 context.SemanticModel.Compilation.AssemblyName,
-                 constructor.SyntaxTree.FilePath)))
+            !HasGenerateSerializer(containingType))
         {
             return;
         }
@@ -90,22 +89,4 @@ public sealed class OrleansContractConstructorAnalyzer : DiagnosticAnalyzer
                 OrleansMetadataNames.GenerateSerializerAttribute,
                 StringComparison.Ordinal));
 
-    private static bool IsSharedOrleansContract(
-        string? assemblyName,
-        string filePath)
-    {
-        if (!string.Equals(
-                assemblyName,
-                CodeQualityAssemblyNames.OrleansContracts,
-                StringComparison.Ordinal))
-        {
-            return false;
-        }
-
-        var normalizedPath = filePath.Replace('\\', '/');
-        return normalizedPath.Contains(CodeQualitySourceNames.ContractsDirectorySegment, StringComparison.Ordinal);
-    }
-
-    private static bool IsProductionAssembly(string? assemblyName) =>
-        CodeQualityAssemblyNames.IsProduction(assemblyName);
 }

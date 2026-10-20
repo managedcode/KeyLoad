@@ -1,5 +1,3 @@
-using KeyLoad.Core;
-
 namespace KeyLoad.UnitTests.Features.ChangeFeeds;
 
 /// <summary>Calibrates quotas from genuine persisted producer and projection entries.</summary>

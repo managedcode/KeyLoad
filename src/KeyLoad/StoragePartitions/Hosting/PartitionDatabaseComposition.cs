@@ -42,7 +42,7 @@ internal static class PartitionDatabaseComposition
             {
                 ClusterAdministrator = true
             },
-                DatabaseEngine.Credential(PartitionStoreProtocol.AdministratorId, PartitionStoreProtocol.AdministratorId,
+                AuthorizationExecution.Credential(PartitionStoreProtocol.AdministratorId, PartitionStoreProtocol.AdministratorId,
                     options.AdminKey));
         }
     }

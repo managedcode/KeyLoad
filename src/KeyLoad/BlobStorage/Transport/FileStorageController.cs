@@ -12,10 +12,18 @@ namespace KeyLoad.Server;
 
 /// <summary>Composes the Storage server with canonical KeyLoad metadata and fresh authorization.</summary>
 [ApiController, Authorize, ServiceFilter(typeof(FileStorageResourceFilter))]
-[Route("api/storage/{tenant}/{database}/{domain}/{partition}/{resource}")]
+[Route(RootRoute)]
 internal sealed partial class FileStorageController(IFileSystemStorage storage, ChunkUploadService chunks, StorageServerOptions options)
     : StorageControllerBase<IFileSystemStorage>(storage, chunks, options)
 {
+    private const string RootRoute = "api/storage/{tenant}/{database}/{domain}/{partition}/{resource}";
+    private const string ChunkRoute = "upload-chunks/{uploadId}";
+    private const string MetadataRoute = "metadata/{*path}";
+    private const string ListRoute = "list";
+    private const string FileRoute = "files/{*path}";
+    private const string CleanupRoute = "cleanup";
+    private const string AsyncAbortRequired = "Use the authorized asynchronous upload abort action.";
+
     private FileStorageRequest Files => HttpContext.RequestServices.GetRequiredService<FileStorageRequest>();
     private readonly StorageServerOptions serverOptions = options;
 

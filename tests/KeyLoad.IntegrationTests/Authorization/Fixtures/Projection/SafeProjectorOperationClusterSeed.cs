@@ -37,7 +37,7 @@ internal static class SafeProjectorOperationClusterSeed
         await SqlClusterProtocol.EqualAsync(principal, await McpCallerAssertions.SdkSuccessAsync(
             await root.Sdk.ConfigurePrincipalAsync(principalId, principal, token)));
         var credentialId = Guid.NewGuid();
-        var credential = DatabaseEngine.Credential(reader, reader, key);
+        var credential = AuthorizationExecution.Credential(reader, reader, key);
         await McpCallerAssertions.SdkStatusAsync(await root.Sdk.ConfigureApiKeyAsync(credentialId, credential, token));
         var seed = new CommandRequest(Guid.NewGuid(), partition,
         [

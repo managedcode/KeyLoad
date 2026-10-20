@@ -119,7 +119,7 @@ internal sealed class TypedConfigurationDurationTests
     }
 
     [Test]
-    public async Task BindingMetadataCannotIntroducePerClassTimeoutFallbacksAsync()
+    public async Task BindingMetadataCannotIntroducePerClassTimeoutDefaultsAsync()
     {
         const string source = """
             [KeyLoad.ConfigurationBinding]

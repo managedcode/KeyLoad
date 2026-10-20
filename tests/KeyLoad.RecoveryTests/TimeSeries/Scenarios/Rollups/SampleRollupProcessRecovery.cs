@@ -14,8 +14,7 @@ internal static class SampleRollupProcessRecovery
 
     internal static async Task RunAsync(string root, bool drop, CancellationToken callerToken)
     {
-        using var limit = new CancellationTokenSource(TimeSpan.FromSeconds(
-            CommandIdempotencyProcessRecoveryTests.RunTimeoutSeconds), TimeProvider.System);
+        using var limit = new CancellationTokenSource(RecoveryExecutionOptions.TrialPolicy.Value.CommandTimeout, TimeProvider.System);
         using var run = CancellationTokenSource.CreateLinkedTokenSource(callerToken, limit.Token);
         CommandIdempotencyProcessChild? active = null;
         Exception? primary = null;

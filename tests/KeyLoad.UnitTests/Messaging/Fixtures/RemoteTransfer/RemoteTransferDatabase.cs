@@ -1,5 +1,4 @@
 using System.Text.Json;
-using KeyLoad.Core;
 using KeyLoad.Core.Features.Authorization;
 using KeyLoad.Core.Features.Messaging;
 using KeyLoad.Storage;
@@ -53,7 +52,7 @@ internal sealed class RemoteTransferDatabase : IDisposable
         {
             ClusterAdministrator = true
         },
-            DatabaseEngine.Credential(RootPrincipal, RootPrincipal, RootCredential));
+            AuthorizationExecution.Credential(RootPrincipal, RootPrincipal, RootCredential));
         Configure(SourceQueue, sourceFields, sourceHeaders);
         Configure(DestinationQueue, destinationFields, destinationHeaders, destinationPolicy);
     }

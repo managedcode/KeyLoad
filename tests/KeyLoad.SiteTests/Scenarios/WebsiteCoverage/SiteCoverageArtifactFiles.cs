@@ -34,7 +34,7 @@ internal static class SiteCoverageArtifactFiles
         }
 
         await using var input = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read,
-            SiteTokens.ProcessOutputBufferCharacters, FileOptions.Asynchronous | FileOptions.SequentialScan);
+            SiteExecutionConfiguration.Options.Value.ProcessOutputBufferCharacters, FileOptions.Asynchronous | FileOptions.SequentialScan);
         using var output = new MemoryStream((int)info.Length);
         var buffer = new byte[SiteTokens.ProcessOutputBufferCharacters];
         while (true)
@@ -143,7 +143,7 @@ internal static class SiteCoverageArtifactFiles
 
     public static string RequiredCoverageRoot()
     {
-        var root = Environment.GetEnvironmentVariable(SiteCoverageTokens.CoverageRootEnvironment);
+        var root = SiteEnvironmentConfiguration.Capture().Value.CoverageRoot;
         return root is not null && Path.IsPathFullyQualified(root)
             ? Path.GetFullPath(root) : throw SiteCoverageJson.Invalid(SiteCoverageTokens.InvalidRootFailure);
     }

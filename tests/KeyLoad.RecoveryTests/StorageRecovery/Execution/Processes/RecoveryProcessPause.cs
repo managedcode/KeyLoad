@@ -16,10 +16,15 @@ internal static class RecoveryProcessPause
         paused.Wait();
     }
 
-    internal static async Task WaitForKillAsync()
+    internal static async Task WriteAcknowledgementAsync()
     {
         await StandardOutput.WriteAsync(AcknowledgementLine);
         await StandardOutput.FlushAsync();
+    }
+
+    internal static async Task WaitForKillAsync()
+    {
+        await WriteAcknowledgementAsync();
         await Task.Delay(Timeout.InfiniteTimeSpan, TimeProvider.System);
     }
 }

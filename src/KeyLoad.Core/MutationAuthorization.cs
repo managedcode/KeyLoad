@@ -2,148 +2,156 @@ using System.Collections.Immutable;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core;
-
-public sealed partial class DatabaseEngine
+/// <summary>Executes MutationAuthorization operations against the caller's database context.</summary>
+public static class MutationAuthorization
 {
-    private const string MissingMutationSequenceMessage = "A mutation sequence is missing.";
-    private const string MissingMutationEntryMessage = "A mutation entry is missing.";
+    internal const string MissingMutationSequenceMessage = "A mutation sequence is missing.";
+    internal const string MissingMutationEntryMessage = "A mutation entry is missing.";
     // An inbox retry checks current permissions without re-evaluating the old CAS or applying effects again.
-    private void ReauthorizeEffects(IKeyValueView view, PrincipalRecord principal, PartitionRef partition, ImmutableArray<Mutation> effects)
+    internal static void ReauthorizeEffects(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, PartitionRef partition, ImmutableArray<Mutation> effects)
     {
         if (effects.IsDefault)
         {
             throw Errors.Fail(ErrorCode.Validation, MissingMutationSequenceMessage);
         }
+
         foreach (var effect in effects)
         {
             if (effect is null)
             {
                 throw Errors.Fail(ErrorCode.Validation, MissingMutationEntryMessage);
             }
-            ReauthorizeEffect(view, principal, partition, effect);
+
+            engine.ReauthorizeEffect(view, principal, partition, effect);
         }
     }
 
-    private void ReauthorizeEffect(IKeyValueView view, PrincipalRecord principal, PartitionRef partition, Mutation effect)
+    internal static void ReauthorizeEffect(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, PartitionRef partition, Mutation effect)
     {
         if (effect is UpsertAnalyticsEvents or DeleteAnalyticsEvents)
         {
-            AuthorizeAnalyticsMutation(view, principal, partition, effect);
+            engine.AuthorizeAnalyticsMutation(view, principal, partition, effect);
             return;
         }
+
         if (effect is AdvanceQueueDeadline deadline)
         {
-            AuthorizeQueueDeadline(view, principal, partition, deadline);
+            engine.AuthorizeQueueDeadline(view, principal, partition, deadline);
             return;
         }
+
         if (effect is RedriveQueueMessage or CancelQueueMessage or ParkPendingQueueMessage)
         {
-            AuthorizeQueueLifecycle(view, principal, partition, effect);
+            engine.AuthorizeQueueLifecycle(view, principal, partition, effect);
             return;
         }
+
         if (effect is ConfigureRecurringSchedule or EmitRecurringOccurrences or CancelRecurringSchedule or CompareExchangeSaga or ExpireSaga)
         {
-            ReauthorizeRecurringSagaEffect(view, principal, partition, effect);
+            engine.ReauthorizeRecurringSagaEffect(view, principal, partition, effect);
             return;
         }
+
         if (effect is ApplyVectorProjection projection)
         {
-            ReauthorizeVectorProjection(view, principal, partition, projection);
+            engine.ReauthorizeVectorProjection(view, principal, partition, projection);
             return;
         }
+
         if (effect is CreateQueueTransfer or AcceptQueueTransfer or CompleteQueueTransfer or AdvanceQueueTransferAttempt or AdvanceQueueTransferRepair)
         {
-            ReauthorizeQueueTransfer(view, principal, partition, effect);
+            engine.ReauthorizeQueueTransfer(view, principal, partition, effect);
             return;
         }
+
         if (effect is ApplyCrossPartitionReverseEdge or CompleteCrossPartitionReverseEdge)
         {
-            ReauthorizeGraphDelivery(view, principal, partition, effect);
+            engine.ReauthorizeGraphDelivery(view, principal, partition, effect);
             return;
         }
-        AuthorizeComposition(view, principal, partition, effect);
-        var resource = ReauthorizeEffectResource(view, partition, effect);
-        ReauthorizeEffectDocument(view, principal, partition, effect, resource);
-        ReauthorizeEffectFields(principal, resource, effect);
-        ReauthorizeEffectHeaders(principal, resource, effect);
-        ReauthorizeEffectIndexes(principal, resource, effect);
-        ReauthorizeEffectVertices(view, principal, partition, effect);
+
+        engine.AuthorizeComposition(view, principal, partition, effect);
+        var resource = engine.ReauthorizeEffectResource(view, partition, effect);
+        engine.ReauthorizeEffectDocument(view, principal, partition, effect, resource);
+        engine.ReauthorizeEffectFields(principal, resource, effect);
+        engine.ReauthorizeEffectHeaders(principal, resource, effect);
+        engine.ReauthorizeEffectIndexes(principal, resource, effect);
+        engine.ReauthorizeEffectVertices(view, principal, partition, effect);
     }
 
-    private void ReauthorizeEffectDocument(IKeyValueView view, PrincipalRecord principal, PartitionRef partition, Mutation effect, ResourceDefinition resource)
+    internal static void ReauthorizeEffectDocument(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, PartitionRef partition, Mutation effect, ResourceDefinition resource)
     {
         var documentId = effect switch
         {
-            InsertTypedRow insert => Features.RelationalStorage.RelationalRowValidation.InsertIdentity(resource, insert.Json, OperationLimitsOptions),
+            InsertTypedRow insert => Features.RelationalStorage.RelationalRowValidation.InsertIdentity(resource, insert.Json, engine.OperationLimitsOptions),
             PutDocument put => put.Id,
             PatchDocument patch => patch.Id,
             DeleteDocument delete => delete.Id,
             PutVector vector => vector.Id,
             _ => null
         };
-        var document = documentId is null ? null : view.GetRecord<DocumentRecord>(DocumentKey(partition, effect.Resource, documentId));
+        var document = documentId is null ? null : view.GetRecord<DocumentRecord>(DocumentStorageExecutionDocuments.DocumentKey(partition, effect.Resource, documentId));
         if (document is not null)
         {
-            Authorization.RequireWriteRow(principal, document.Access);
+            engine.Authorization.RequireWriteRow(principal, document.Access);
         }
+
         if (effect is PutDocument replacement)
         {
-            Authorization.RequireWriteRow(principal, replacement.Access ?? document?.Access ?? new RowAccess());
+            engine.Authorization.RequireWriteRow(principal, replacement.Access ?? document?.Access ?? new RowAccess());
             if (document is { Deleted: false })
             {
-                Authorization.RequireReplacement(principal, resource, replacement.ExplicitReplacement);
+                engine.Authorization.RequireReplacement(principal, resource, replacement.ExplicitReplacement);
             }
         }
+
         if (effect is InsertTypedRow)
         {
-            Authorization.RequireWriteRow(principal, document?.Access ?? new RowAccess());
+            engine.Authorization.RequireWriteRow(principal, document?.Access ?? new RowAccess());
         }
     }
 
-    private ResourceDefinition ReauthorizeEffectResource(IKeyValueView view, PartitionRef partition, Mutation effect)
-        => effect is InsertTypedRow ? BatchResource(view, partition, effect.Resource)
-            : Resource(view, partition, effect.Resource);
-
-    private void ReauthorizeEffectFields(PrincipalRecord principal, ResourceDefinition resource, Mutation effect)
+    internal static ResourceDefinition ReauthorizeEffectResource(this DatabaseEngine engine, IKeyValueView view, PartitionRef partition, Mutation effect) => effect is InsertTypedRow ? engine.BatchResource(view, partition, effect.Resource) : engine.Resource(view, partition, effect.Resource);
+    internal static void ReauthorizeEffectFields(this DatabaseEngine engine, PrincipalRecord principal, ResourceDefinition resource, Mutation effect)
     {
         if (effect is PatchDocument patchFields)
         {
             foreach (var field in patchFields.Patches)
             {
-                Authorization.RequireFieldWrite(principal, resource, field.Path);
+                engine.Authorization.RequireFieldWrite(principal, resource, field.Path);
             }
+
             return;
         }
+
         if (effect is PutVector vectorField)
         {
-            Authorization.RequireFieldUse(principal, resource, vectorField.Field);
-            Authorization.RequireFieldWrite(principal, resource, vectorField.Field);
+            engine.Authorization.RequireFieldUse(principal, resource, vectorField.Field);
+            engine.Authorization.RequireFieldWrite(principal, resource, vectorField.Field);
             return;
         }
+
         if (effect is InsertTypedRow or PutDocument or AppendEvents or PublishTopic or EnqueueMessage or UpsertEdge or AppendSamples)
         {
             foreach (var policy in resource.FieldPolicies)
             {
-                Authorization.RequireFieldWrite(principal, resource, policy.Path);
+                engine.Authorization.RequireFieldWrite(principal, resource, policy.Path);
             }
         }
     }
 
-    private void ReauthorizeEffectHeaders(PrincipalRecord principal, ResourceDefinition resource, Mutation effect)
+    internal static void ReauthorizeEffectHeaders(this DatabaseEngine engine, PrincipalRecord principal, ResourceDefinition resource, Mutation effect)
     {
         if (effect is AppendEvents or PublishTopic or EnqueueMessage)
         {
             foreach (var policy in resource.HeaderPolicies)
             {
-                Authorization.RequireFieldWrite(principal, resource with
-                {
-                    FieldPolicies = resource.HeaderPolicies
-                }, policy.Path);
+                engine.Authorization.RequireFieldWrite(principal, resource with { FieldPolicies = resource.HeaderPolicies }, policy.Path);
             }
         }
     }
 
-    private void ReauthorizeEffectIndexes(PrincipalRecord principal, ResourceDefinition resource, Mutation effect)
+    internal static void ReauthorizeEffectIndexes(this DatabaseEngine engine, PrincipalRecord principal, ResourceDefinition resource, Mutation effect)
     {
         if (effect is InsertTypedRow or PutDocument or PatchDocument or DeleteDocument)
         {
@@ -151,23 +159,24 @@ public sealed partial class DatabaseEngine
             {
                 foreach (var field in index.Fields)
                 {
-                    Authorization.RequireFieldUse(principal, resource, field);
+                    engine.Authorization.RequireFieldUse(principal, resource, field);
                 }
             }
         }
     }
 
-    private void ReauthorizeEffectVertices(IKeyValueView view, PrincipalRecord principal, PartitionRef partition, Mutation effect)
+    internal static void ReauthorizeEffectVertices(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, PartitionRef partition, Mutation effect)
     {
         if (effect is UpsertEdge upsert)
         {
-            VisibleVertex(view, principal, upsert.From);
-            VisibleVertex(view, principal, upsert.To);
+            engine.VisibleVertex(view, principal, upsert.From);
+            engine.VisibleVertex(view, principal, upsert.To);
         }
-        if (effect is DeleteEdge remove && view.GetRecord<EdgeRecord>(EdgeKey(partition, remove.Graph, remove.EdgeId)) is { } edge)
+
+        if (effect is DeleteEdge remove && view.GetRecord<EdgeRecord>(GraphTraversalStorage.EdgeKey(partition, remove.Graph, remove.EdgeId)) is { } edge)
         {
-            VisibleVertex(view, principal, edge.From);
-            VisibleVertex(view, principal, edge.To);
+            engine.VisibleVertex(view, principal, edge.From);
+            engine.VisibleVertex(view, principal, edge.To);
         }
     }
 }

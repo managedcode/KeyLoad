@@ -41,8 +41,8 @@ internal sealed record SiteTestInputs(string Repository, string Aggregate, strin
         var runId = id.ToString(System.Globalization.CultureInfo.InvariantCulture);
         if (id <= 0 || !SiteTokens.MeasuredRevisionPattern.IsMatch(website) ||
             !SiteTokens.MeasuredRevisionPattern.IsMatch(measured) ||
-            website != Environment.GetEnvironmentVariable(SitePublicationTokens.SourceRevisionEnvironment) ||
-            control != Environment.GetEnvironmentVariable(SitePublicationTokens.ControlRevisionEnvironment) ||
+            website != SiteEnvironmentConfiguration.Capture().Value.SourceRevision ||
+            control != SiteEnvironmentConfiguration.Capture().Value.ControlRevision ||
             run.GetProperty(ReceiptRunUrl).GetString() != SiteTokens.EvidenceBase + runId ||
             !Directory.Exists(repository) || !File.Exists(Path.Combine(aggregate, SiteIsolatedGitHubTokens.Manifest)) ||
             !File.Exists(Path.Combine(repository, SiteAssetTokens.BuilderRelativePath)))

@@ -19,7 +19,7 @@ internal static class ImplementationTermSymbols
         {
             var info = model.GetSymbolInfo(node, cancellationToken);
             if (info.Symbol is null && info.CandidateReason == CandidateReason.MemberGroup &&
-                info.CandidateSymbols is [IMethodSymbol method])
+                info.CandidateSymbols.Length == 1 && info.CandidateSymbols[0] is IMethodSymbol method)
             {
                 return method;
             }
@@ -119,7 +119,7 @@ internal static class ImplementationTermSymbols
     internal static bool Measurement(ISymbol? symbol) =>
         symbol is IFieldSymbol or IPropertySymbol or IMethodSymbol && symbol.ContainingAssembly.Name is "KeyLoad.Comparisons" or "KeyLoad.AppHost" or "KeyLoad.LoadTests.AppHost" or "KeyLoad.ComparisonHost" &&
         Array.Exists(ImplementationTermCatalog.MeasurementMembers, member => member == symbol.ToDisplayString()) ||
-        symbol is IFieldSymbol { Name: "Samples", ContainingType: { } owner } &&
+        symbol is IFieldSymbol { Name: ImplementationTermCatalog.MeasurementSamplesMember, ContainingType: { } owner } &&
         owner.ToDisplayString() == "KeyLoad.SiteTests.Features.BenchmarkComparisons.SiteIsolatedFields" ||
         TypeMeans(ValueType(symbol), MeasurementType, new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default)) ||
         TypeMeans(symbol?.ContainingType, MeasurementType, new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default));

@@ -3,6 +3,7 @@
     <OutputType>Exe</OutputType>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
+    <NoWarn>$(NoWarn);KLD0035;KLD0036;KLD0037</NoWarn>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
@@ -10,6 +11,7 @@
     <AssemblyMetadata Include="KeyLoadCoveragePackageRoot" Value="$([System.IO.Path]::Combine('$(NuGetPackageRoot)', 'dotnet-coverage', '$(KeyLoadCoverageToolVersion)'))" />
     <PackageDownload Include="dotnet-coverage" Version="[$(KeyLoadCoverageToolVersion)]" />
     <Using Include="KeyLoad.Features.InternalSerialization" />
+    <Using Include="KeyLoad.Core" />
     <Using Include="KeyLoad.RecoveryTests.Features.OrleansExecution" />
   </ItemGroup>
   <ItemGroup>
@@ -27,4 +29,8 @@
     <PackageReference Include="Microsoft.Orleans.TestingHost" PrivateAssets="all" />
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../analyzers/KeyLoad.Analyzers/KeyLoad.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" IsAspireProjectResource="false" PrivateAssets="all" />
+  </ItemGroup>
+  <Import Project="$(MSBuildThisFileDirectory)../../build/CodeQuality/FunctionalCompilationIdentity.targets" />
 </Project>

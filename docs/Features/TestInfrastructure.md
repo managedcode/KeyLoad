@@ -29,6 +29,12 @@ Test report retention (REQ/AC-TEST-001/002/005, AC-MP-012): CI retains the actua
 
 [ADR-117](../ADR/ADR-117-tunit-ci-entry.md) defines the test entry: CI invokes TUnit/Microsoft.Testing.Platform directly after build through `scripts/Features/TestInfrastructure/run-tests.mjs`, and the TUnit fixtures own the Aspire testing builder, resource startup, readiness, discovered endpoints, real clients and joined shutdown. Unit and recovery suites use the same entry without acquiring a cluster topology. The closed suites are `analyzers`, `unit`, `recovery`, `cluster`, `comparison` and `site`.
 
+The production ASP.NET Core host uses the `KeyLoad` assembly as its application
+identity, including when an in-process test owns the host lifetime. Static asset
+discovery therefore uses the server's copied manifests. Storage inspection starts
+the referenced recovery assembly from its actual compiled location; it never
+selects a different build configuration by constructing a `bin/Release` path.
+
 Real process-recovery scenarios live directly in `KeyLoad.RecoveryTests`, under their feature and role folders. Its `Program.cs` passes ordinary arguments unchanged to the generated Microsoft.Testing.Platform application helper. An explicit `--recovery-process` argument selects a child scenario in that same test assembly. Existing fault phases, acknowledgement markers, exit codes, physical-file checks, abrupt termination and joined process/readers remain observable. Parent tests launch the actual assembly; no additional host project or replacement test runner is involved. Process-kill evidence remains separate from power-loss qualification.
 
 | Requirement | Acceptance | Tests / evidence |

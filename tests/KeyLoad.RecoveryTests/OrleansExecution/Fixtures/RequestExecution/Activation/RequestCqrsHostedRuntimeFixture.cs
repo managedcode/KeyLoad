@@ -11,6 +11,7 @@ using TUnit.Core.Interfaces;
 namespace KeyLoad.RecoveryTests.Features.OrleansExecution;
 
 /// <summary>Runs the production server composition with execution Orleans membership and silo-local storage.</summary>
+[ConfigurationBinding]
 internal sealed class RequestCqrsHostedRuntimeFixture : IAsyncInitializer, IAsyncDisposable
 {
     private const string DirectoryPrefix = "keyload-cqrs-host-";

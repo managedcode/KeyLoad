@@ -1,6 +1,5 @@
 using System.Collections.Immutable;
 using System.Text.Json;
-using KeyLoad.Core;
 using KeyLoad.Query;
 
 namespace KeyLoad.UnitTests.Features.QueryExecution;

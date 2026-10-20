@@ -22,7 +22,7 @@ internal sealed class SiteBrowserStaticHostTests
         var baseUri = new Uri(host.BaseUrl);
         using var client = new HttpClient
         {
-            Timeout = TimeSpan.FromMilliseconds(SiteBrowserTokens.BrowserCommandTimeoutMilliseconds),
+            Timeout = SiteExecutionConfiguration.Options.Value.BrowserCommandTimeout,
         };
 
         await AssertContentType(client, baseUri, SiteBrowserTokens.ProbeHtmlFileName, SiteBrowserTokens.HtmlContentType);

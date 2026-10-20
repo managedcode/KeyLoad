@@ -25,11 +25,11 @@ internal static class ImplementationSourceIdentity
         }
         var separator = identity.LastIndexOf('|');
         if (separator <= 0 || identity.Length - separator - 1 != 64 ||
-            !identity.AsSpan(separator + 1).ToArray().All(char.IsAsciiHexDigitLower))
+            !identity.Substring(separator + 1).All(character => character is >= '0' and <= '9' or >= 'a' and <= 'f'))
         {
             return false;
         }
-        var path = identity[..separator].Replace('\\', '/');
+        var path = identity.Substring(0, separator).Replace('\\', '/');
         var source = model.Compilation.SyntaxTrees.FirstOrDefault(tree =>
             tree.FilePath.Replace('\\', '/').EndsWith("/" + path, StringComparison.Ordinal));
         if (source is null)

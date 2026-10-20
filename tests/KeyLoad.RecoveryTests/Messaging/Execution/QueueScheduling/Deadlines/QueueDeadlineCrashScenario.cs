@@ -1,3 +1,4 @@
+using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
 
 namespace KeyLoad.RecoveryTests;

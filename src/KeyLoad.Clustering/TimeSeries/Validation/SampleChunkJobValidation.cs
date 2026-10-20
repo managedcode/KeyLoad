@@ -9,7 +9,7 @@ internal static class SampleChunkJobValidation
     {
         ArgumentNullException.ThrowIfNull(hint);
         ArgumentNullException.ThrowIfNull(hint.Partition);
-        DatabaseEngine.ValidatePartition(hint.Partition);
+        EngineResourceAccess.ValidatePartition(hint.Partition);
         JsonData.Identifier(hint.Set);
         JsonData.Identifier(hint.Series);
         JsonData.Identifier(hint.Creator);

@@ -52,7 +52,7 @@ internal static class SharedDomainChildFailureObservation
     private static async Task<byte[]> ReadBoundedAsync(string path, CancellationToken token)
     {
         await using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read,
-            SharedDomainChildProgressProtocol.MaximumBytes, FileOptions.Asynchronous | FileOptions.SequentialScan);
+            RecoveryExecutionOptions.TrialPolicy.Value.ProgressReadBufferBytes, FileOptions.Asynchronous | FileOptions.SequentialScan);
         var length = stream.Length;
         if (length <= MissingLength || length > SharedDomainChildProgressProtocol.MaximumBytes)
         {

@@ -1,4 +1,3 @@
-using KeyLoad.Core;
 using KeyLoad.Core.Features.Search;
 using KeyLoad.UnitTests.Features.TestInfrastructure;
 using ManagedCode.Communication.CQRS;

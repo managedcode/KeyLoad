@@ -1,5 +1,4 @@
 using System.Text.Json;
-using KeyLoad.Core;
 using KeyLoad.Core.Features.Authorization;
 
 namespace KeyLoad.UnitTests.Features.ResourceExecution;
@@ -29,10 +28,10 @@ internal sealed class ZoneTreePointCacheAuthorizationTests
             ClusterAdministrator = true
         };
         var user = new PrincipalRecord(UserId, UserTenant, [], []);
-        database.Bootstrap(root, DatabaseEngine.Credential(RootId, RootId, RootSecret));
+        database.Bootstrap(root, AuthorizationExecution.Credential(RootId, RootId, RootSecret));
         Submit(database, OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(user), RootId);
         Submit(database, OperationKind.ConfigureApiKey,
-            new ConfigureApiKeyRequest(DatabaseEngine.Credential(UserCredentialId, UserId, UserSecret,
+            new ConfigureApiKeyRequest(AuthorizationExecution.Credential(UserCredentialId, UserId, UserSecret,
                 BeforeExpiry.AddSeconds(1))), RootId);
 
         await Assert.That(database.Authenticate(UserSecret, BeforeExpiry)).IsEqualTo(UserId);
@@ -41,11 +40,11 @@ internal sealed class ZoneTreePointCacheAuthorizationTests
             database.Authenticate(UserSecret, BeforeExpiry.AddSeconds(2)));
         var afterExpiry = store.GetPointCacheDiagnostics();
         Submit(database, OperationKind.ConfigureApiKey,
-            new ConfigureApiKeyRequest(DatabaseEngine.Credential(SecondUserCredentialId, UserId, SecondUserSecret)), RootId);
+            new ConfigureApiKeyRequest(AuthorizationExecution.Credential(SecondUserCredentialId, UserId, SecondUserSecret)), RootId);
         await Assert.That(database.Authenticate(SecondUserSecret, BeforeExpiry)).IsEqualTo(UserId);
 
         Submit(database, OperationKind.ConfigureApiKey,
-            new ConfigureApiKeyRequest(DatabaseEngine.Credential(UserCredentialId, UserId, UserSecret) with
+            new ConfigureApiKeyRequest(AuthorizationExecution.Credential(UserCredentialId, UserId, UserSecret) with
             {
                 Revoked = true
             }), RootId);

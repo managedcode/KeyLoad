@@ -1,4 +1,3 @@
-using KeyLoad.Core;
 using KeyLoad.Core.Features.Authorization;
 using KeyLoad.Storage.ZoneTree;
 using Microsoft.Extensions.Options;
@@ -23,5 +22,5 @@ internal static class TestDatabaseEngineFactory
             [new(AllFields, AllFields, Capability.All)], [AllFields])
         {
             ClusterAdministrator = true
-        }, DatabaseEngine.Credential(principalId, principalId, credential));
+        }, AuthorizationExecution.Credential(principalId, principalId, credential));
 }

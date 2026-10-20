@@ -1,4 +1,3 @@
-using KeyLoad.Core;
 using KeyLoad.UnitTests.Features.Authorization;
 using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;

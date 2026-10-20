@@ -1,5 +1,4 @@
 using System.Collections.Immutable;
-using KeyLoad.Core;
 using TUnit.Assertions.Enums;
 
 namespace KeyLoad.UnitTests.Features.TimeSeries;

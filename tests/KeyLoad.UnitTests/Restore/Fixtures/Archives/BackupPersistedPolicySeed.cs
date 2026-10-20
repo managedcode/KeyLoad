@@ -1,4 +1,3 @@
-using KeyLoad.Core;
 using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
 
@@ -32,8 +31,8 @@ internal static class BackupPersistedPolicySeed
             FieldPolicies = [new("/secret", "private")]
         };
 
-    internal static ApiKeyRecord LiveKey => DatabaseEngine.Credential(LiveKeyId, Reader, LiveSecret);
-    internal static ApiKeyRecord RevokedKey => DatabaseEngine.Credential(RevokedKeyId, Reader, RevokedSecret) with { Revoked = true };
+    internal static ApiKeyRecord LiveKey => AuthorizationExecution.Credential(LiveKeyId, Reader, LiveSecret);
+    internal static ApiKeyRecord RevokedKey => AuthorizationExecution.Credential(RevokedKeyId, Reader, RevokedSecret) with { Revoked = true };
 
     internal static Command<DatabaseCommand> Create<T>(DatabaseEngine database, OperationKind kind, T request, Guid id)
         => database.CreateCommand(kind, id, Root, database.EvaluationClock.GetUtcNow(),

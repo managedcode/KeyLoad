@@ -83,7 +83,7 @@ internal static class AtomicPartitionRosterKeyValidation
     {
         try
         {
-            DatabaseEngine.ValidatePartition(candidate);
+            EngineResourceAccess.ValidatePartition(candidate);
         }
         catch (KeyLoadException)
         {

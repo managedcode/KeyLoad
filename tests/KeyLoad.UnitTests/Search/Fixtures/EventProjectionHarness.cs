@@ -1,5 +1,4 @@
 using System.Text.Json;
-using KeyLoad.Core;
 using KeyLoad.Core.Features.Authorization;
 using KeyLoad.Storage.ZoneTree;
 using ManagedCode.Communication;
@@ -31,7 +30,7 @@ internal sealed class EventProjectionHarness : IDisposable
         Database.Bootstrap(new(RootId, SystemTenant, [new(Wildcard, Wildcard, Capability.All)], [Wildcard])
         {
             ClusterAdministrator = true
-        }, DatabaseEngine.Credential(RootId, RootId, RootCredential));
+        }, AuthorizationExecution.Credential(RootId, RootId, RootCredential));
         bootstrapped = true;
     }
 

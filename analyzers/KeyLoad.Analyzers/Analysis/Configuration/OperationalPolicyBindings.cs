@@ -10,22 +10,22 @@ internal static class OperationalPolicyBindings
     internal static bool IsNonblockingWait(Compilation compilation, IInvocationOperation invocation) =>
         invocation.TargetMethod.Name == MagicRuntimeMetadataNames.WaitAsync &&
         MagicRuntimeOperations.IsType(compilation, invocation.TargetMethod.ContainingType, MagicRuntimeMetadataNames.Semaphore) &&
-        invocation.Arguments is [var timeout, var cancellation] &&
+        invocation.Arguments.Length == 2 && invocation.Arguments[0] is var timeout && invocation.Arguments[1] is var cancellation &&
         timeout.Value.Type?.SpecialType == SpecialType.System_Int32 &&
         timeout.Value.ConstantValue is { HasValue: true, Value: int milliseconds } &&
         milliseconds == OperationalPolicyMetadataNames.NonblockingWaitMilliseconds &&
         MagicRuntimeOperations.IsType(compilation, cancellation.Parameter?.Type, OperationalPolicyMetadataNames.CancellationToken) &&
-        invocation.TargetMethod.ReturnType is INamedTypeSymbol { TypeArguments: [var result] } &&
+        invocation.TargetMethod.ReturnType is INamedTypeSymbol { TypeArguments.Length: 1 } returned && returned.TypeArguments[0] is var result &&
         result.SpecialType == SpecialType.System_Boolean;
 
     internal static bool IsCoalescedWakeSignal(Compilation compilation, IObjectCreationOperation creation) =>
         MagicRuntimeOperations.IsType(compilation, creation.Type, OperationalPolicyMetadataNames.BoundedChannel) &&
-        creation.Arguments is [var capacity] && capacity.Value.ConstantValue is
+        creation.Arguments.Length == 1 && creation.Arguments[0] is var capacity && capacity.Value.ConstantValue is
         { HasValue: true, Value: int slots } && slots == OperationalPolicyMetadataNames.WakeSignalCapacity &&
         creation.Parent is IArgumentOperation { Parent: IInvocationOperation invocation } &&
         invocation.TargetMethod.Name == OperationalPolicyMetadataNames.CreateBounded &&
         MagicRuntimeOperations.IsType(compilation, invocation.TargetMethod.ContainingType, OperationalPolicyMetadataNames.Channel) &&
-        invocation.TargetMethod.TypeArguments is [var item] && item.SpecialType == SpecialType.System_Boolean &&
+        invocation.TargetMethod.TypeArguments.Length == 1 && invocation.TargetMethod.TypeArguments[0] is var item && item.SpecialType == SpecialType.System_Boolean &&
         creation.Initializer?.Initializers.OfType<ISimpleAssignmentOperation>().Any(assignment =>
             assignment.Target is IPropertyReferenceOperation property && property.Property.Name == OperationalPolicyMetadataNames.FullMode &&
             assignment.Value is IFieldReferenceOperation mode && mode.Field.Name == OperationalPolicyMetadataNames.DropWrite &&

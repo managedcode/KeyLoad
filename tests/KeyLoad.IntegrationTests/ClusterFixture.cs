@@ -16,6 +16,7 @@ using static KeyLoad.IntegrationTests.Features.StorageReplication.ClusterFixture
 namespace KeyLoad.IntegrationTests;
 
 /// <summary>Owns the real Aspire Orleans application shared by public SDK integration scenarios.</summary>
+[ConfigurationBinding]
 internal sealed partial class ClusterFixture : AspireFixture<Projects.KeyLoad_AppHost>, IKeyedDataSource
 {
     private readonly RemoteTransferCoordinatorFixtureSelection? transferCoordinator;

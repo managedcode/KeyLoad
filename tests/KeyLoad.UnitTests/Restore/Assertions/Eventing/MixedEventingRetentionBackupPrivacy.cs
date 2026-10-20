@@ -1,4 +1,3 @@
-using KeyLoad.Core;
 using KeyLoad.UnitTests.Features.Messaging;
 
 namespace KeyLoad.UnitTests.Features.BackupRestore;

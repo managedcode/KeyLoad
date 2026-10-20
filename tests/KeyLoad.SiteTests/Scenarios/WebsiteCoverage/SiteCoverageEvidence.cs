@@ -8,7 +8,7 @@ internal static class SiteCoverageEvidence
     public static async Task CaptureAsync(SiteCoverageFixtureDirectory temporary, string sourcePath,
         RuntimeSiteCoverageReceipt receipt, CancellationToken cancellationToken)
     {
-        var configuredRoot = Environment.GetEnvironmentVariable(SiteCoverageTokens.CoverageRootEnvironment);
+        var configuredRoot = SiteEnvironmentConfiguration.Capture().Value.CoverageRoot;
         if (configuredRoot is null || !Path.IsPathFullyQualified(configuredRoot) ||
             SiteCoverageSourceManifestWriter.Hash(receipt.Bytes) != receipt.Sha256)
         {

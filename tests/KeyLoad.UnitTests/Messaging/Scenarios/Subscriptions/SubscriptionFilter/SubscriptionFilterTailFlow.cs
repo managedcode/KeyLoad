@@ -1,5 +1,3 @@
-using KeyLoad.Core;
-
 namespace KeyLoad.UnitTests.Features.Messaging;
 
 internal static class SubscriptionFilterTailFlow

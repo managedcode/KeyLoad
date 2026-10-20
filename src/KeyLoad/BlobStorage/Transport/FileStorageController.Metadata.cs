@@ -10,7 +10,7 @@ internal sealed partial class FileStorageController
     private FileStorageCursor Cursors => HttpContext.RequestServices.GetRequiredService<FileStorageCursor>();
 
     /// <summary>Reads the current authorized canonical file metadata.</summary>
-    [HttpGet("metadata/{*path}"), FileStorageCapability(Capability.BlobRead)]
+    [HttpGet(MetadataRoute), FileStorageCapability(Capability.BlobRead)]
     public async Task<Result<BlobMetadata>> MetadataAsync(string path, CancellationToken cancellationToken)
     {
         var state = await Files.ReadAsync(path, Capability.BlobRead, Guid.Empty, cancellationToken);
@@ -20,7 +20,7 @@ internal sealed partial class FileStorageController
     }
 
     /// <summary>Lists a bounded metadata page after the caller's encrypted scope-bound cursor.</summary>
-    [HttpGet("list"), FileStorageCapability(Capability.BlobRead)]
+    [HttpGet(ListRoute), FileStorageCapability(Capability.BlobRead)]
     public async Task<Result<BlobMetadata[]>> ListAsync([FromQuery] string? after, CancellationToken cancellationToken)
     {
         var state = await Files.ReadAsync(string.Empty, Capability.BlobRead, Guid.Empty, cancellationToken, true, Cursors.Decode(Files, after));
@@ -32,7 +32,7 @@ internal sealed partial class FileStorageController
     }
 
     /// <summary>Retires visibility atomically; physical versions remain accounted until authorized cleanup.</summary>
-    [HttpDelete("files/{*path}"), FileStorageCapability(Capability.BlobDelete)]
+    [HttpDelete(FileRoute), FileStorageCapability(Capability.BlobDelete)]
     public async Task<IActionResult> DeleteFileAsync(string path, CancellationToken cancellationToken)
     {
         _ = await Files.DeleteAsync(path, cancellationToken);
@@ -40,7 +40,7 @@ internal sealed partial class FileStorageController
     }
 
     /// <summary>Reclaims a bounded page of joined retired objects through the configured provider.</summary>
-    [HttpPost("cleanup"), FileStorageCapability(Capability.BlobManage)]
+    [HttpPost(CleanupRoute), FileStorageCapability(Capability.BlobManage)]
     public async Task<Result<int>> CleanupAsync([FromQuery] string? after, CancellationToken cancellationToken)
     {
         var page = await Files.ReadAsync(string.Empty, Capability.BlobManage, Guid.Empty, cancellationToken, true, Cursors.Decode(Files, after));

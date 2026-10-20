@@ -24,7 +24,7 @@ internal static class MachineKeySemanticSymbols
         ArgumentSyntax argument,
         SeparatedSyntaxList<ArgumentSyntax> arguments,
         bool allowFirstLogicalParameter,
-        bool allowUnboundFallback)
+        bool allowUnresolvedParameter)
     {
         var parameter = (context.SemanticModel.GetOperation(argument, context.CancellationToken) as IArgumentOperation)
             ?.Parameter ?? ResolveParameter(method, argument, arguments);
@@ -43,10 +43,10 @@ internal static class MachineKeySemanticSymbols
         var namedArgument = argument.NameColon?.Name.Identifier.ValueText;
         if (namedArgument is not null)
         {
-            return allowUnboundFallback && IsExplicitKeyParameter(namedArgument);
+            return allowUnresolvedParameter && IsExplicitKeyParameter(namedArgument);
         }
 
-        return allowUnboundFallback &&
+        return allowUnresolvedParameter &&
                allowFirstLogicalParameter &&
                arguments.IndexOf(argument) == 0 &&
                argument.NameColon is null;

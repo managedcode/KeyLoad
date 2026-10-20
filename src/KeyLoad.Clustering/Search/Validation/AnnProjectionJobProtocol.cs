@@ -18,7 +18,7 @@ internal static class AnnProjectionJobProtocol
 
     internal static string GrainKey(ProjectionConsumerRef consumer, long generation, Guid nodeId)
     {
-        global::KeyLoad.Core.DatabaseEngine.ValidatePartition(consumer.Partition);
+        global::KeyLoad.Core.EngineResourceAccess.ValidatePartition(consumer.Partition);
         global::KeyLoad.Core.JsonData.Identifier(consumer.Name);
         if (nodeId == Guid.Empty)
         {

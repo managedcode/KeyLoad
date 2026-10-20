@@ -203,7 +203,7 @@ NuGet publication follow root policy.
 | Project/module | Purpose and entry points | Canonical slices / protected boundary |
 |---|---|---|
 | src/KeyLoad.Abstractions | CommandRequest.cs, PartitionRef.cs, Mutation.cs and `<SliceName>/` contract folders | Shared public and storage contracts for every canonical slice. |
-| src/KeyLoad.Core | DatabaseEngine.cs, AtomicCommandCommit.cs, DocumentStorage/Execution/Documents.cs, Messaging/Execution/Messaging.cs, GraphTraversal/, TimeSeries/, Search/ | Node-local engine, authorization evaluation and atomic transactions; model effects share the ordered commit. |
+| src/KeyLoad.Core | DatabaseEngine.cs, AtomicCommandCommit.cs, CommandOutcomeApplication.cs, DocumentStorage/Execution/DocumentStorageExecutionDocuments.cs, Messaging/Execution/MessagingExecutionMessaging.cs, GraphTraversal/, TimeSeries/, Search/ | Shared node-local execution context and feature-owned operation components; authorization and model effects share the ordered atomic commit. |
 | src/KeyLoad.Diagnostics | Models/DatabasePhaseKind.cs, Models/DatabasePhaseSnapshot.cs | BCL-only scalar phase observations, with no database state, public control endpoint or framework dependency. |
 | src/KeyLoad.Storage.ZoneTree | ZoneTreeStore.cs, StorageEngine/Execution/ZoneTreeStoreRuntime.cs, StorageEngine/Recovery/ZoneTreeCheckpointManager.cs | StorageEngine, PointCache and Restore; files, WAL, checkpoints and local archives stay with the silo-local ZoneTree owner. |
 | src/KeyLoad.Query | QueryExecution/Queries/QueryEngine.cs, QueryExecution/Execution/SqlParser.cs, Search/Queries/QueryExecution/SearchEngine.cs, ChangeFeeds/Queries/LiveQueryExecutor.cs | QueryExecution, Search, ChangeFeeds; one authorized typed AST and bounded read cut. |
@@ -393,10 +393,13 @@ tests do not prove power-loss durability.
 
 Document CRUD handlers and transaction-scoped image carriers belong to
 `Core/DocumentStorage/`; admission and inbox ownership belong to
-`Core/ResourceExecution/`. The oversized aggregate `DatabaseEngine` partial type
-is a recorded handler-extraction deviation
-([ADR-041](ADR/ADR-041-read-only-public-collections.md)); splitting files alone
-does not satisfy the type limit.
+`Core/ResourceExecution/`. `DatabaseEngine` holds the shared storage context,
+validated policy snapshots and node-local admission state. Feature-owned static
+operation components contain the command, query and validation implementations;
+extension methods pass that same context explicitly. They preserve the existing
+atomic transaction and persisted authorization boundary. Local numeric checks
+and complete runtime qualification are separate gates
+([ADR-041](ADR/ADR-041-read-only-public-collections.md)).
 
 ```mermaid
 classDiagram

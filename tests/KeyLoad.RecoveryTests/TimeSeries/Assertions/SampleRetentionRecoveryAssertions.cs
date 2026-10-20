@@ -10,6 +10,8 @@ namespace KeyLoad.RecoveryTests.Features.TimeSeries;
 internal static class SampleRetentionRecoveryAssertions
 {
     private const string Principal = CrashFixtureValues.Principal;
+    [ImmutableTemporalData]
+    private static readonly TimeSpan ExpectedWindow = TimeSpan.FromMinutes(1);
 
     internal static async Task VerifyRecoveredPageAsync(string root, CommitStage stage,
         CancellationToken cancellationToken)
@@ -152,7 +154,7 @@ internal static class SampleRetentionRecoveryAssertions
         await Assert.That(aggregate).IsEqualTo(Oracle(expectedValues));
         var windows = database.AggregateSampleWindows(Principal, new(SampleRetentionCrashScenario.Partition,
             SampleRetentionCrashScenario.SeriesSet, SampleRetentionCrashScenario.SeriesId,
-            SampleRetentionCrashScenario.Start, SampleRetentionCrashScenario.Start.AddMinutes(4), TimeSpan.FromMinutes(1)));
+            SampleRetentionCrashScenario.Start, SampleRetentionCrashScenario.Start.AddMinutes(4), ExpectedWindow));
         var expectedWindowCounts = Enumerable.Range(0, SampleRetentionCrashScenario.SampleCount)
             .Select(index => (long)(all.Contains(index) ? 1 : 0)).ToArray();
         for (var index = 0; index < SampleRetentionCrashScenario.SampleCount; index++)

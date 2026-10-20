@@ -84,7 +84,7 @@ internal static partial class TextSeedCollector
         var view = budget.CreateView(raw);
         var principal = database.Principal(view, principalId, database.EvaluationClock.GetUtcNow());
         var partition = pin.Consumer.Partition;
-        var consumer = DatabaseEngine.RequireActiveProjectionConsumer(view, principal, pin.Consumer, pin.Generation);
+        var consumer = ChangeFeedsQueriesProjectionConsumerAuthority.RequireActiveProjectionConsumer(view, principal, pin.Consumer, pin.Generation);
         if (!consumer.Definition.Resources.SequenceEqual([pin.Collection], StringComparer.Ordinal)
             || !consumer.Definition.MutationKinds.SequenceEqual(MutationKinds, StringComparer.Ordinal))
         {
@@ -92,10 +92,10 @@ internal static partial class TextSeedCollector
         }
         RequireOwner(database, view, principalId, pin);
         database.Authorization.Require(principal, partition, pin.Collection, Capability.Query | Capability.DocumentsRead);
-        var resource = DatabaseEngine.BindAuthorizedReadResource(view, partition, pin.Collection, ResourceKind.Collection);
+        var resource = ResourceExecutionQueriesResourceLifetimeReadBinding.BindAuthorizedReadResource(view, partition, pin.Collection, ResourceKind.Collection);
         database.Authorization.RequireFieldUse(principal, resource, pin.Field);
         var head = database.ReadOutboxHead(view, partition);
-        DatabaseEngine.RequireTextProjectionHistory(head, consumer.Checkpoint);
+        SearchValidation.RequireTextProjectionHistory(head, consumer.Checkpoint);
         var appliedBytes = view.ReadOwnedValue(KeySpace.AppliedBytes) ?? throw Errors.Fail(ErrorCode.Corruption, InvalidScope);
         var applied = OrleansSerialization.Deserialize<long>(appliedBytes);
         if (applied < EmptyPosition || consumer.Checkpoint > head.Tail)
@@ -117,7 +117,7 @@ internal static partial class TextSeedCollector
         {
             var bounded = budget.CreateView(view);
             var principal = database.Principal(bounded, principalId, database.EvaluationClock.GetUtcNow());
-            var state = DatabaseEngine.RequireReleasedProjectionConsumer(bounded, principal, pin.Consumer, pin.Generation);
+            var state = ChangeFeedsQueriesProjectionConsumerAuthority.RequireReleasedProjectionConsumer(bounded, principal, pin.Consumer, pin.Generation);
             if (!state.Definition.Resources.SequenceEqual([pin.Collection], StringComparer.Ordinal)
                 || !state.Definition.MutationKinds.SequenceEqual(MutationKinds, StringComparer.Ordinal))
             {
@@ -126,7 +126,7 @@ internal static partial class TextSeedCollector
             RequireOwner(database, bounded, principalId, pin);
             if (bounded is KeyLoad.Core.Features.ResourceExecution.IResourceLifetimeReadBindingView)
             {
-                _ = DatabaseEngine.BindAuthorizedReadResource(bounded, pin.Consumer.Partition, pin.Collection, ResourceKind.Collection);
+                _ = ResourceExecutionQueriesResourceLifetimeReadBinding.BindAuthorizedReadResource(bounded, pin.Consumer.Partition, pin.Collection, ResourceKind.Collection);
             }
             budget.Check();
             return true;

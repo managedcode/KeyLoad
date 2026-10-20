@@ -38,7 +38,6 @@ internal static class McpCatalogExpectations
             ["rows", "eventCount"]),
         new("keyload_tables_drop", false, true, true, McpExpectedBody.Object, true,
             ["tenantId", "databaseId", "resourceName"], ["tenantId", "databaseId", "resourceName", "receipt"]),
-        .. McpBlobCatalogExpectations.Entries,
         .. McpEventFeedDiscoveryExpectations.Entries,
         .. McpRemoteGraphDiscoveryExpectations.Entries,
         .. McpAdditionalDiscoveryExpectations.Entries,

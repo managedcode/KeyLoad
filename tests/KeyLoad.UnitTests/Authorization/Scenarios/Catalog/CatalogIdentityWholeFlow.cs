@@ -1,4 +1,3 @@
-using KeyLoad.Core;
 using KeyLoad.Server;
 using KeyLoad.Storage;
 
@@ -31,7 +30,7 @@ internal static class CatalogIdentityWholeFlow
         await CatalogIdentityAssertions.ReceiptAsync(db.Store, seed, receipt, before, expectedToken, 1L, "putDocument");
         var seedOutcome = CatalogIdentityAssertions.Outcome(db.Store, seed, CatalogIdentityProtocol.Root);
         await ConfigureAsync(db, CatalogIdentityProtocol.Principal);
-        await Assert.That(db.Submit(OperationKind.ConfigureApiKey, new ConfigureApiKeyRequest(DatabaseEngine.Credential(
+        await Assert.That(db.Submit(OperationKind.ConfigureApiKey, new ConfigureApiKeyRequest(AuthorizationExecution.Credential(
             CatalogIdentityProtocol.Key, CatalogIdentityProtocol.Reader, CatalogIdentityProtocol.Secret))).Get<bool>()).IsTrue();
         await CatalogIdentityAssertions.HealthyAsync(db, db.Database, db.Store, db.Partition, false, false, 1L, token);
         await CatalogIdentityFault.RunAsync(db, credential, token);

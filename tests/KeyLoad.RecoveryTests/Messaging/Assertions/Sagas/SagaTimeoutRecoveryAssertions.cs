@@ -9,6 +9,7 @@ namespace KeyLoad.RecoveryTests.Features.Messaging;
 
 internal static class SagaTimeoutRecoveryAssertions
 {
+    [ImmutableTemporalData]
     private static readonly TimeSpan TimeoutTtl = TimeSpan.FromDays(1);
 
     internal static async Task VerifyAsync(string root, CommitStage stage, CancellationToken cancellationToken)

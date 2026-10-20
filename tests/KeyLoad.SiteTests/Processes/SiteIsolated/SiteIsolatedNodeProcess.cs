@@ -5,7 +5,6 @@ namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
 
 internal static class SiteIsolatedNodeProcess
 {
-    private const int DeadlineSeconds = 300;
     private const string ProbeFailure = "The isolated real Node probe failed.";
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
@@ -44,7 +43,7 @@ internal static class SiteIsolatedNodeProcess
         }
         lease?.MarkStarted(process);
 
-        using var deadlineTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(DeadlineSeconds), TimeProvider.System);
+        using var deadlineTimeout = new CancellationTokenSource(SiteExecutionConfiguration.Options.Value.IsolatedProcessDeadline, TimeProvider.System);
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, deadlineTimeout.Token);
         var stdout = SiteProcessOutput.ReadAsync(process.StandardOutput, ProbeFailure, deadline.Token);
         var stderr = SiteProcessOutput.ReadAsync(process.StandardError, ProbeFailure, deadline.Token);

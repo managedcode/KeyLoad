@@ -15,4 +15,8 @@
     <PackageReference Include="ManagedCode.Orleans.Graph" />
     <PackageReference Include="ManagedCode.Orleans.Identity.Core" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../analyzers/KeyLoad.Analyzers/KeyLoad.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" IsAspireProjectResource="false" PrivateAssets="all" />
+  </ItemGroup>
+  <Import Project="$(MSBuildThisFileDirectory)../../build/CodeQuality/FunctionalCompilationIdentity.targets" />
 </Project>

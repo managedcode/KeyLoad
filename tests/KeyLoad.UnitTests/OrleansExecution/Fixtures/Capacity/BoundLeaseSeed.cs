@@ -1,4 +1,3 @@
-using KeyLoad.Core;
 using Microsoft.Extensions.DependencyInjection;
 using K = KeyLoad.UnitTests.Features.OrleansExecution.BoundLeaseProtocol;
 

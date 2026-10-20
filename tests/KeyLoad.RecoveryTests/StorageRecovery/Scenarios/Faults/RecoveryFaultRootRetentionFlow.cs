@@ -19,16 +19,14 @@ internal static class RecoveryFaultRootRetentionFlow
 
     internal static async Task RunAsync(CancellationToken callerToken)
     {
-        using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(
-            CommandIdempotencyProcessRecoveryTests.RunTimeoutSeconds), TimeProvider.System);
+        using var deadline = new CancellationTokenSource(RecoveryExecutionOptions.TrialPolicy.Value.CommandTimeout, TimeProvider.System);
         using var lifetime = CancellationTokenSource.CreateLinkedTokenSource(callerToken, deadline.Token);
         var trial = new SeededWalCorruptionTrial(SavedSeed);
         var owner = new SeededWalCorruptionProcessOwner(trial);
         var attempt = new FailedAttempt();
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(() => OwnedAsync(trial, owner, attempt, lifetime.Token), failures);
-        using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(
-            CommandIdempotencyProcessRecoveryTests.CleanupTimeoutSeconds), TimeProvider.System);
+        using var cleanup = new CancellationTokenSource(RecoveryExecutionOptions.TrialPolicy.Value.CleanupTimeout, TimeProvider.System);
         if (attempt.Child is { } child)
         {
             await CommandIdempotencyProcess.SettleActiveAsync(child, failures, cleanup.Token);

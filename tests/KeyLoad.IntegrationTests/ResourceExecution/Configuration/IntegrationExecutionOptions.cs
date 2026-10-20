@@ -7,6 +7,7 @@ using Microsoft.Extensions.Options;
 namespace KeyLoad.IntegrationTests;
 
 /// <summary>Explicit execution options composition for standalone database and query fixtures.</summary>
+[ConfigurationBinding]
 internal static class IntegrationExecutionOptions
 {
     internal static IOptions<ZoneTreeStorageExecutionOptions> StorageExecution(ZoneTreeStorageExecutionOptions? configured = null)

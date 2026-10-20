@@ -12,7 +12,7 @@ internal static class ConfiguredCountingSignal
 {
     internal static bool IsConfigured(Compilation compilation, IObjectCreationOperation creation, CancellationToken cancellationToken) =>
         MagicRuntimeOperations.IsType(compilation, creation.Type, MagicRuntimeMetadataNames.Semaphore) &&
-        creation.Arguments is [var initial, var maximum] &&
+        creation.Arguments.Length == 2 && creation.Arguments[0] is var initial && creation.Arguments[1] is var maximum &&
         initial.Value.ConstantValue is { HasValue: true, Value: int count } && count == OperationalPolicyMetadataNames.EmptySignalCount &&
         IsCapacity(compilation, maximum.Value, new HashSet<ISymbol>(SymbolEqualityComparer.Default), cancellationToken);
 
@@ -41,7 +41,7 @@ internal static class ConfiguredCountingSignal
         CancellationToken cancellationToken) =>
         invocation.TargetMethod.Name == OperationalPolicyMetadataNames.Minimum &&
         MagicRuntimeOperations.IsType(compilation, invocation.TargetMethod.ContainingType, OperationalPolicyMetadataNames.Math) &&
-        invocation.Arguments is [var ceiling, var configured] && IsIntegerCeiling(ceiling.Value) &&
+        invocation.Arguments.Length == 2 && invocation.Arguments[0] is var ceiling && invocation.Arguments[1] is var configured && IsIntegerCeiling(ceiling.Value) &&
         IsCapacity(compilation, configured.Value, visited, cancellationToken);
 
     private static bool IsIntegerCeiling(IOperation operation) => operation switch
@@ -87,7 +87,7 @@ internal static class ConfiguredCountingSignal
 
     private static ExpressionSyntax? FindReturn(MethodDeclarationSyntax method) =>
         method.ExpressionBody?.Expression ??
-        (method.Body?.Statements.OfType<ReturnStatementSyntax>().Take(2).ToArray() is [var statement] ? statement.Expression : null);
+        (method.Body?.Statements.OfType<ReturnStatementSyntax>().Take(2).ToArray() is { Length: 1 } statements ? statements[0].Expression : null);
 
     private static bool IsSnapshot(Compilation compilation, IOperation operation, CancellationToken cancellationToken) => operation switch
     {

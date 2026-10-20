@@ -21,7 +21,7 @@ internal static class RelationalInnerJoinDispatch
                 }
                 database.Authorization.Require(principal, request.Partition, join.Collection,
                     Capability.Query | Capability.DocumentsRead);
-                var rightResource = DatabaseEngine.BindAuthorizedReadResource(budget.CreateView(view), request.Partition, join.Collection, ResourceKind.Collection);
+                var rightResource = ResourceExecutionQueriesResourceLifetimeReadBinding.BindAuthorizedReadResource(budget.CreateView(view), request.Partition, join.Collection, ResourceKind.Collection);
                 budget.CaptureResourceLifetimes(database, budget.CreateView(view), request.Partition,
                     leftResource.Name == rightResource.Name ? [leftResource] : [leftResource, rightResource]);
                 return RelationalInnerJoinExecutor.Execute(database, view, principal, leftResource, rightResource,

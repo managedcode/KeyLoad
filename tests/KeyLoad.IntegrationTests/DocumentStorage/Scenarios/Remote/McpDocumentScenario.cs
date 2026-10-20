@@ -1,12 +1,18 @@
 using System.Collections.Immutable;
+using System.Text.Json;
 using KeyLoad.Client;
+using KeyLoad.Core.Features.InternalSerialization;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.Server;
+using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.IntegrationTests.Features.DocumentStorage;
 
 /// <summary>Creates independently scoped real Orleans collections through the actual public HTTP SDK.</summary>
 /// <param name="Partition">The newly configured actual partition identity.</param>
-internal sealed record McpDocumentScenario(PartitionRef Partition)
+/// <param name="Lifetime">The identity derived from the original resource creation command.</param>
+internal sealed record McpDocumentScenario(PartitionRef Partition, EntityRefLifetime Lifetime)
 {
     /// <summary>Gets the actual document reference used by both public protocol adapters.</summary>
     internal EntityRef Reference => new(Partition, McpDocumentProtocol.Collection, McpDocumentProtocol.Entity);
@@ -36,10 +42,23 @@ internal sealed record McpDocumentScenario(PartitionRef Partition)
         {
             FieldPolicies = policies
         };
-        await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigureResourceAsync(Guid.NewGuid(),
+        var commandId = Guid.NewGuid();
+        await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigureResourceAsync(commandId,
             new(partition.TenantId, partition.DatabaseId, definition),
             cancellationToken));
-        return new(partition);
+        return ForCreation(partition, commandId, definition);
+    }
+
+    internal static McpDocumentScenario ForCreation(PartitionRef partition, Guid commandId, ResourceDefinition definition)
+    {
+        var request = new ConfigureResourceRequest(partition.TenantId, partition.DatabaseId, definition);
+        var fingerprint = DatabaseCommandFingerprint.Compute(commandId, OperationKind.ConfigureResource,
+            PartitionStoreProtocol.AdministratorId, JsonSerializer.Serialize(request, JsonDefaults.Options));
+        var original = Command<DatabaseCommand>.Create(nameof(DatabaseCommand),
+            new DatabaseCommand(OperationKind.ConfigureResource, OrleansSerialization.Serialize(request), fingerprint), commandId);
+        original.UserId = PartitionStoreProtocol.AdministratorId;
+        var lifetime = ResourceLifetimeIdentity.Create(original, request.TenantId, request.DatabaseId, definition);
+        return new(partition, new(lifetime.Incarnation.Value));
     }
 
     /// <summary>Creates an actual canonical mutation preserving the caller's stable command identity.</summary>

@@ -1,3 +1,4 @@
+using KeyLoad.Core;
 using KeyLoad.RecoveryTests.Features.DocumentStorage;
 using KeyLoad.Server;
 using KeyLoad.Storage;

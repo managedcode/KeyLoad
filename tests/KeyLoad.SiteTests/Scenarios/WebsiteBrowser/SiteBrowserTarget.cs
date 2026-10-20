@@ -9,7 +9,7 @@ internal static class SiteBrowserTarget
     public static async Task<Uri> WaitForEndpointFile(Process process, string profilePath,
         CancellationToken cancellationToken)
     {
-        using var deadlineTimeout = new CancellationTokenSource(TimeSpan.FromMilliseconds(SiteBrowserTokens.BrowserStartupTimeoutMilliseconds), TimeProvider.System);
+        using var deadlineTimeout = new CancellationTokenSource(SiteExecutionConfiguration.Options.Value.BrowserStartupTimeout, TimeProvider.System);
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, deadlineTimeout.Token);
         var portFile = Path.Combine(profilePath, SiteBrowserTokens.ActivePortFile);
         while (!deadline.IsCancellationRequested)
@@ -28,7 +28,7 @@ internal static class SiteBrowserTarget
                 }
             }
 
-            await Task.Delay(TimeSpan.FromMilliseconds(SiteBrowserTokens.BrowserRetryMilliseconds), TimeProvider.System, deadline.Token);
+            await Task.Delay(SiteExecutionConfiguration.Options.Value.BrowserRetry, TimeProvider.System, deadline.Token);
         }
 
         throw new InvalidOperationException(SiteBrowserTokens.BrowserStartupTimeout);

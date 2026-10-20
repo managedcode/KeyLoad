@@ -23,7 +23,7 @@ internal static class GraphReferenceLifetimeReads
         var cut = profile.Source.Store.Position;
         var traversal = database.Traverse(PartitionStoreProtocol.AdministratorId, DropRuntimeProtocol.Partition,
             graph, from, Depth, Vertices, Edges, cancellationToken: token);
-        await DropRuntimeAssertions.SameAsync(new global::KeyLoad.GraphTraversal([anchor, target], [edge]), traversal);
+        await DropRuntimeAssertions.SameAsync(new global::KeyLoad.GraphTraversal([target, anchor], [edge]), traversal);
         var path = database.ShortestPath(PartitionStoreProtocol.AdministratorId,
             new(GraphReferenceLifetimeProtocol.Version, DropRuntimeProtocol.Partition, graph, from, to, Depth, Vertices, Edges), cancellationToken: token);
         await DropRuntimeAssertions.SameAsync(new GraphShortestPathResult(GraphReferenceLifetimeProtocol.Version, true, Depth, [anchor, target], [edge], cut), path);

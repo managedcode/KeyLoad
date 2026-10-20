@@ -13,9 +13,9 @@ internal sealed class ProcessReadinessOptions
 
     internal void Validate()
     {
-        if (OwnershipTimeout <= TimeSpan.Zero || OwnershipTimeout > TimeSpan.FromSeconds(MaximumOwnershipSeconds)
+        if (OwnershipTimeout <= TimeSpan.Zero || OwnershipTimeout.TotalSeconds > MaximumOwnershipSeconds
             || OwnershipPollInterval <= TimeSpan.Zero
-            || OwnershipPollInterval > TimeSpan.FromMilliseconds(MaximumPollMilliseconds)
+            || OwnershipPollInterval.TotalMilliseconds > MaximumPollMilliseconds
             || OwnershipPollInterval >= OwnershipTimeout)
         {
             throw new InvalidOperationException(Invalid);

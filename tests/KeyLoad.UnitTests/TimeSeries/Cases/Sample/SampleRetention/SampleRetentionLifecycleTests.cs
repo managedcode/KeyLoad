@@ -1,5 +1,4 @@
 using System.Text.Json;
-using KeyLoad.Core;
 using KeyLoad.Core.Features.Authorization;
 using KeyLoad.Core.Features.TimeSeries;
 using KeyLoad.Storage;
@@ -210,7 +209,7 @@ internal sealed class SampleRetentionLifecycleTests
         {
             ClusterAdministrator = true
         },
-            DatabaseEngine.Credential("root", "root", "root.unit-test-credential-32-characters"));
+            AuthorizationExecution.Credential("root", "root", "root.unit-test-credential-32-characters"));
         database.Apply(database.CreateCommand(OperationKind.ConfigureResource, Guid.NewGuid(), "root", TimeProvider.System.GetUtcNow(), JsonSerializer.Serialize(new ConfigureResourceRequest("tenant", "database",
                 new ResourceDefinition(SampleAggregateTestData.Set, ResourceKind.TimeSeries, "orders")), JsonDefaults.Options)));
         return database;

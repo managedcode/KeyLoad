@@ -12,13 +12,12 @@ internal static class SubscriptionFilterProcessTrial
     private const string Dotnet = "dotnet";
     private const string GuidFormat = "N";
     private const string CrashMarker = "crash-point";
-    private const int OriginalProcessSeconds = 20;
 
     internal static async Task RunAsync(CommitStage stage, int index, CancellationToken token)
     {
         var root = Path.Combine(Path.GetTempPath(), DirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
         using var admission = await StorageTrialLease.AcquireAsync(token);
-        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(OriginalProcessSeconds), TimeProvider.System);
+        using var timeout = new CancellationTokenSource(RecoveryExecutionOptions.TrialPolicy.Value.ProjectionTimeout, TimeProvider.System);
         using var lifetime = CancellationTokenSource.CreateLinkedTokenSource(token, timeout.Token);
         using var process = Process.Start(Start(root, stage, index))!;
         var failures = new List<Exception>();

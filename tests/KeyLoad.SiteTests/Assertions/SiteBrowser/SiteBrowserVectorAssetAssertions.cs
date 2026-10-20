@@ -90,7 +90,7 @@ internal static class SiteBrowserVectorAssetAssertions
             }, cancellationToken);
             await cdp.EvaluateAsync(SiteBrowserUiTokens.SceneScrollScript, false, cancellationToken);
             await Assert.That(await cdp.WaitForExpressionAsync(SiteVectorAssetTokens.ReadyPredicate, cancellationToken)).IsTrue();
-            await Task.Delay(TimeSpan.FromMilliseconds(SiteBrowserUiTokens.SceneSettleWaitMilliseconds), TimeProvider.System, cancellationToken);
+            await Task.Delay(SiteExecutionConfiguration.Options.Value.SceneSettleWait, TimeProvider.System, cancellationToken);
             await AssertReadyMarkAsync(cdp, cancellationToken);
             var current = await ReadMarkAsync(cdp, cancellationToken);
             await Assert.That(current.GetProperty(SiteVectorAssetTokens.WidthField).GetDouble())

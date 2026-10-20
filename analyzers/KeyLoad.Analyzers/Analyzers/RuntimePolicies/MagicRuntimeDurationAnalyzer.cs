@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -26,7 +25,10 @@ public sealed class MagicRuntimeDurationAnalyzer : DiagnosticAnalyzer
     /// <inheritdoc/>
     public override void Initialize(AnalysisContext context)
     {
-        ArgumentNullException.ThrowIfNull(context);
+        if (context is null)
+        {
+            throw new System.ArgumentNullException(nameof(context));
+        }
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
         context.RegisterSyntaxNodeAction(AnalyzeLiteral, SyntaxKind.NumericLiteralExpression);
@@ -34,8 +36,7 @@ public sealed class MagicRuntimeDurationAnalyzer : DiagnosticAnalyzer
 
     private static void AnalyzeLiteral(SyntaxNodeAnalysisContext context)
     {
-        if (!CodeQualityAssemblyNames.IsProduction(context.Compilation.AssemblyName) ||
-            context.Node is not LiteralExpressionSyntax literal ||
+        if (context.Node is not LiteralExpressionSyntax literal ||
             LiteralDeclarationOwnership.IsNamedConstant(literal) ||
             LiteralDeclarationOwnership.IsNumericMetadata(literal) ||
             LiteralDeclarationOwnership.IsOptionsDefault(context))

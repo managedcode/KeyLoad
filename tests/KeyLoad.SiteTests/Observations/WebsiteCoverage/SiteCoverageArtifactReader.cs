@@ -119,7 +119,7 @@ internal static class SiteCoverageArtifactReader
             var bytes = await SiteCoverageArtifactFiles.ReadBoundedAsync(path, result, cancellationToken).ConfigureAwait(false);
             using var document = JsonDocument.Parse(bytes, SiteCoverageTokens.JsonDocumentOptions);
             SiteCoverageArtifactMetadata.ValidateEnvelope(document.RootElement, runtime);
-            var artifactRoot = Environment.GetEnvironmentVariable(SiteCoverageTokens.CoverageRootEnvironment)!;
+            var artifactRoot = SiteEnvironmentConfiguration.Capture().Value.CoverageRoot!;
             var receiptIdentity = SiteCoverageArtifactFiles.RelativePath(artifactRoot, path);
             var receiptHash = SiteCoverageSourceManifestWriter.Hash(bytes);
             var snapshots = SiteCoverageRanges.ParseScripts(document.RootElement.GetProperty(SiteCoverageTokens.Result),
@@ -140,7 +140,7 @@ internal static class SiteCoverageArtifactReader
         }
         catch (Exception exception) when (SiteCoverageArtifactFiles.IsCoverageReadFailure(exception))
         {
-            var artifactRoot = Environment.GetEnvironmentVariable(SiteCoverageTokens.CoverageRootEnvironment)!;
+            var artifactRoot = SiteEnvironmentConfiguration.Capture().Value.CoverageRoot!;
             result.Errors.Add($"{SiteCoverageArtifactFiles.RelativePath(artifactRoot, path)}{SiteCoverageTokens.ErrorSeparator}{exception.Message}");
         }
     }

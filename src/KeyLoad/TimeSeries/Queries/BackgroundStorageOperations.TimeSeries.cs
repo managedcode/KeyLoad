@@ -1,4 +1,5 @@
 using KeyLoad.Clustering;
+using KeyLoad.Core;
 using KeyLoad.Core.Features.TimeSeries;
 
 namespace KeyLoad.Server;

@@ -106,7 +106,7 @@ internal sealed class McpOutputSchemaTests
     {
         using var database = new TestDatabase();
         var commandId = Guid.NewGuid();
-        var credential = global::KeyLoad.Core.DatabaseEngine.Credential("status-execution-key", "root", "status-execution-secret");
+        var credential = global::KeyLoad.Core.AuthorizationExecution.Credential("status-execution-key", "root", "status-execution-secret");
         var request = new ConfigureApiKeyRequest(credential);
         var original = database.Submit(OperationKind.ConfigureApiKey, request, id: commandId);
         await Assert.That(Errors.Code(original.Problem)).IsNull();

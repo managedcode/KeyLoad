@@ -48,6 +48,6 @@ internal static class QueueOrderedRetryPublicSeed
     {
         await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(), principal, token));
         await Assert.That((await McpCallerAssertions.SdkStatusAsync(await root.Sdk.ConfigureApiKeyAsync(Guid.NewGuid(),
-            DatabaseEngine.Credential(principal.Id, principal.Id, key), token))).IsSuccess).IsTrue();
+            AuthorizationExecution.Credential(principal.Id, principal.Id, key), token))).IsSuccess).IsTrue();
     }
 }

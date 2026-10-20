@@ -107,8 +107,8 @@ internal static class RemoteTransferCoordination
         {
             throw Errors.Fail(ErrorCode.Validation, RemoteTransferCoordinationProtocol.InvalidHint);
         }
-        DatabaseEngine.ValidatePartition(hint.Source.Partition);
-        DatabaseEngine.ValidatePartition(hint.Destination.Partition);
+        EngineResourceAccess.ValidatePartition(hint.Source.Partition);
+        EngineResourceAccess.ValidatePartition(hint.Destination.Partition);
         JsonData.Identifier(hint.Fingerprint);
         JsonData.Identifier(hint.IntentDigest);
         JsonData.Identifier(subject);

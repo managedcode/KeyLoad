@@ -101,7 +101,7 @@ internal static class PartitionQueryPlanValidation
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidPlanMessage);
         }
-        DatabaseEngine.ValidatePartition(leaf.Partition);
+        EngineResourceAccess.ValidatePartition(leaf.Partition);
         partitions[index] = leaf.Partition;
         return leaf.Request;
     }

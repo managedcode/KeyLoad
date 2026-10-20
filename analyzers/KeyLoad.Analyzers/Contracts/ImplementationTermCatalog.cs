@@ -8,6 +8,7 @@ internal static class ImplementationTermCatalog
     internal const string Title = "Implementation terminology requires explicit approval";
     internal const string Message = "Term '{0}' requires explicit owner approval in this implementation context";
     internal const string Description = "Only the explicitly approved execution runtime, domain and testing meanings are permitted. Renaming an unauthorized mechanism does not authorize it.";
+    internal const string MeasurementSamplesMember = "Samples";
     internal const string NamespacePrefix = "KeyLoad.";
     internal const string RuleVocabularyType = "KeyLoad.Analyzers.Features.CodeQuality.ImplementationTermCatalog";
     internal const string RuleReaderType = "KeyLoad.Analyzers.Features.CodeQuality.ImplementationTermReader";

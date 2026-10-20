@@ -6,7 +6,7 @@ internal static class SiteBuilderDiagnostics
 {
     internal static string GetEvidenceRoot()
     {
-        var configuredRoot = Environment.GetEnvironmentVariable(SiteCoverageTokens.CoverageRootEnvironment);
+        var configuredRoot = SiteEnvironmentConfiguration.Capture().Value.CoverageRoot;
         if (string.IsNullOrWhiteSpace(configuredRoot) || !Path.IsPathFullyQualified(configuredRoot))
         {
             throw new InvalidOperationException(SiteBuilderTokens.CoverageRootMissing);

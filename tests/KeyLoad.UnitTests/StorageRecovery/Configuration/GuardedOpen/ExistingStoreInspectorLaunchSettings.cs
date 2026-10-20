@@ -6,26 +6,26 @@ namespace KeyLoad.UnitTests.Features.StorageRecovery;
 internal static class ExistingStoreInspectorLaunchSettings
 {
     private const string DotnetCommand = "dotnet";
+    private const string ExecuteAssembly = "exec";
+    private const string DependenciesOption = "--depsfile";
+    private const string RuntimeOption = "--runtimeconfig";
+    private const string DependenciesExtension = ".deps.json";
+    private const string RuntimeExtension = ".runtimeconfig.json";
     private const string SolutionName = "KeyLoad.slnx";
     private const string RecoveryProcessProject = "KeyLoad.RecoveryTests.csproj";
     private const string TestsDirectory = "tests";
     private const string RecoveryProcessDirectory = "KeyLoad.RecoveryTests";
-    private const string BuildOutputDirectory = "bin";
-    private const string ReleaseConfiguration = "Release";
-    private const string TargetFramework = "net10.0";
-    private const string RecoveryProcessAssembly = "KeyLoad.RecoveryTests.dll";
     private const string InspectorMode = "existing-store-inspect";
     private const string RepositoryMissingMessage = "The KeyLoad repository root is unavailable.";
-    private const string ReleaseHostMissingMessage = "The Release RecoveryProcess assembly is not built.";
+    private const string RecoveryHostMissingMessage = "The referenced recovery process assembly is unavailable.";
 
     internal static (ProcessStartInfo StartInfo, string AssemblyPath) Create()
     {
         var root = FindRepositoryRoot();
-        var assembly = Path.Combine(root, TestsDirectory, RecoveryProcessDirectory, BuildOutputDirectory,
-            ReleaseConfiguration, TargetFramework, RecoveryProcessAssembly);
+        var assembly = typeof(CrashScenarioDispatcher).Assembly.Location;
         if (!File.Exists(assembly))
         {
-            throw new FileNotFoundException(ReleaseHostMissingMessage, assembly);
+            throw new FileNotFoundException(RecoveryHostMissingMessage, assembly);
         }
 
         var start = new ProcessStartInfo(DotnetCommand)
@@ -36,6 +36,12 @@ internal static class ExistingStoreInspectorLaunchSettings
             RedirectStandardError = true,
             WorkingDirectory = root
         };
+        var host = typeof(ExistingStoreInspectorLaunchSettings).Assembly.Location;
+        start.ArgumentList.Add(ExecuteAssembly);
+        start.ArgumentList.Add(DependenciesOption);
+        start.ArgumentList.Add(Path.ChangeExtension(host, DependenciesExtension));
+        start.ArgumentList.Add(RuntimeOption);
+        start.ArgumentList.Add(Path.ChangeExtension(host, RuntimeExtension));
         start.ArgumentList.Add(assembly);
         start.ArgumentList.Add(CrashFixtureValues.ProcessMode);
         start.ArgumentList.Add(InspectorMode);

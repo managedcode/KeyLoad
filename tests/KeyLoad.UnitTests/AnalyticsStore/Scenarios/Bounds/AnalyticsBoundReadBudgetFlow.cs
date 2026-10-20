@@ -1,4 +1,3 @@
-using KeyLoad.Core;
 using D = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreTestData;
 
 namespace KeyLoad.UnitTests.Features.AnalyticsStore;

@@ -85,7 +85,7 @@ internal sealed class GraphVertexVisibility(DatabaseEngine database, IKeyValueVi
         }
         database.Authorization.Require(principal, vertex.Partition, vertex.Collection, Capability.DocumentsRead);
         var resourceView = budget.CreateView(view);
-        var resource = DatabaseEngine.BindAuthorizedReadResource(resourceView, vertex.Partition, vertex.Collection, ResourceKind.Collection);
+        var resource = ResourceExecutionQueriesResourceLifetimeReadBinding.BindAuthorizedReadResource(resourceView, vertex.Partition, vertex.Collection, ResourceKind.Collection);
         admitCollection?.Invoke(vertex.Partition, vertex.Collection);
         collections[key] = new(true, resource.SchemaVersion);
     }

@@ -1,6 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
 using KeyLoad.Clustering;
-using KeyLoad.Core;
 using KeyLoad.Core.Features.Messaging;
 using Microsoft.Extensions.Options;
 using Orleans.TestingHost;

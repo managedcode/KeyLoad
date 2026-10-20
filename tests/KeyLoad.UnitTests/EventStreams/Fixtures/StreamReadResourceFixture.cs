@@ -1,5 +1,4 @@
 using System.Text.Json;
-using KeyLoad.Core;
 using KeyLoad.Core.Features.Authorization;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
@@ -58,7 +57,7 @@ internal sealed class StreamReadResourceFixture : IDisposable
             {
                 ClusterAdministrator = true
             },
-                DatabaseEngine.Credential(AdministratorId, AdministratorId, CredentialSecret));
+                AuthorizationExecution.Credential(AdministratorId, AdministratorId, CredentialSecret));
             ConfigureResource(protectedFields);
             ConfigureReader();
             AppendEvents(eventCount);

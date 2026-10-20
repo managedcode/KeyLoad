@@ -13,6 +13,7 @@ using Orleans.Serialization;
 
 namespace KeyLoad.RecoveryTests.Features.OrleansExecution;
 
+[ConfigurationBinding]
 internal sealed class RequestCqrsHostedProfile(TimeProvider clock, IOptions<GrainRoutingOptions> routing,
     IGrainRequestPhaseObserver? observer, IGrainRequestPurposeObserver? purposeObserver,
     bool runtimeText, bool runtimeAnn, DatabaseLimits? limits, RequestCqrsHostedClusterNode? clusterNode = null,

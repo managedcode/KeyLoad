@@ -49,6 +49,7 @@ internal sealed class SystemClockSemanticTests
                 internal static TimeProvider SystemProvider() => TimeProvider.System;
                 internal static DateTime Minimum() => DateTime.MinValue;
                 internal static DateTimeOffset Maximum() => DateTimeOffset.MaxValue;
+                internal static string ClockMemberName() => nameof(DateTime.UtcNow);
                 internal DateTime InstanceNow() => clockData.Now;
             }
             internal sealed class ClockData

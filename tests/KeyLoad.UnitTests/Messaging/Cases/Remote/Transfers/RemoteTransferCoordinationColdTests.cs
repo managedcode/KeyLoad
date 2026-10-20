@@ -1,4 +1,3 @@
-using KeyLoad.Core;
 using KeyLoad.Core.Features.Messaging;
 
 namespace KeyLoad.UnitTests.Features.Messaging;

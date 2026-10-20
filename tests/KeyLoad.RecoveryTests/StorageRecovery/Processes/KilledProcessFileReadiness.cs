@@ -3,11 +3,9 @@ namespace KeyLoad.RecoveryTests.Features.StorageRecovery;
 
 internal static class KilledProcessFileReadiness
 {
-    private const int ReadinessTimeoutSeconds = 5;
-    private const int PollIntervalMilliseconds = 25;
     private const string MetadataWalPath = "tree/0.meta.wal";
-    private static readonly TimeSpan ReadinessTimeout = TimeSpan.FromSeconds(ReadinessTimeoutSeconds);
-    private static readonly TimeSpan PollInterval = TimeSpan.FromMilliseconds(PollIntervalMilliseconds);
+    private static readonly TimeSpan ReadinessTimeout = RecoveryExecutionOptions.ProcessReadiness().Value.OwnershipTimeout;
+    private static readonly TimeSpan PollInterval = RecoveryExecutionOptions.ProcessReadiness().Value.OwnershipPollInterval;
     private static readonly string[] RequiredLockedFiles = ["owner.lock", "commands.wal"];
 
     internal static async Task WaitAsync(string root, CancellationToken cancellationToken)

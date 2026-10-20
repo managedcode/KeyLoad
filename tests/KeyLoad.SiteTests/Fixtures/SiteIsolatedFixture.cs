@@ -13,7 +13,7 @@ internal sealed record SiteIsolatedFixture(SiteIsolatedInputs Inputs, string Roo
     {
         var inputs = SiteIsolatedInputs.Read();
         var token = TestContext.Current!.Execution.CancellationToken;
-        var coverage = Environment.GetEnvironmentVariable(SiteBrowserTokens.CoverageEnvironment);
+        var coverage = SiteEnvironmentConfiguration.Capture().Value.CoverageMode;
         if (string.IsNullOrWhiteSpace(coverage) || !Path.IsPathFullyQualified(coverage))
         {
             throw new InvalidOperationException(SiteIsolatedInputs.MissingEvidence);

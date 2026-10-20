@@ -1,5 +1,4 @@
 using System.Text.Json;
-using KeyLoad.Core;
 using KeyLoad.Core.Features.Authorization;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
@@ -27,7 +26,7 @@ internal sealed class ReadCountingZoneTreeStore : IAtomicStore
         Database.Bootstrap(new(RootPrincipal, Tenant, [new("*", "*", Capability.All)], ["*"])
         {
             ClusterAdministrator = true
-        }, DatabaseEngine.Credential(RootPrincipal, RootPrincipal, RootCredential));
+        }, AuthorizationExecution.Credential(RootPrincipal, RootPrincipal, RootCredential));
         Configure(GraphSearchTestSupport.Documents, ResourceKind.Collection);
         Configure(GraphSearchTestSupport.Projects, ResourceKind.Collection);
         Configure(GraphSearchTestSupport.Graph, ResourceKind.Graph);

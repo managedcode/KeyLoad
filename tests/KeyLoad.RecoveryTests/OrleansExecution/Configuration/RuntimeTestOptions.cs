@@ -33,12 +33,12 @@ internal sealed record RuntimeTestOptions
         && RestartHeldJobDelay >= StartupTimeout + ShutdownTimeout + CompletionTimeout
         && RestartHeldJobDelay + CompletionTimeout <= RestartCompletionTimeout
         && OrdinaryCollectionAge >= StartupTimeout + ShutdownTimeout + CompletionTimeout
-        && OrdinaryCollectionAge <= TimeSpan.FromDays(OrdinaryCollectionDays);
+        && OrdinaryCollectionAge.TotalDays <= OrdinaryCollectionDays;
 
-    private static bool Bounded(TimeSpan duration) => duration >= TimeSpan.FromMilliseconds(MinimumDurationMilliseconds)
-        && duration <= TimeSpan.FromSeconds(MaximumTimeoutSeconds);
+    private static bool Bounded(TimeSpan duration) => duration.TotalMilliseconds >= MinimumDurationMilliseconds
+        && duration.TotalSeconds <= MaximumTimeoutSeconds;
 
     private static bool RestartBounded(TimeSpan duration)
-        => duration >= TimeSpan.FromMilliseconds(MinimumDurationMilliseconds)
-            && duration <= TimeSpan.FromSeconds(MaximumRestartTimeoutSeconds);
+        => duration.TotalMilliseconds >= MinimumDurationMilliseconds
+            && duration.TotalSeconds <= MaximumRestartTimeoutSeconds;
 }

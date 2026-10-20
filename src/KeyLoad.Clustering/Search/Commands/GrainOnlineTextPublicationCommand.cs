@@ -9,7 +9,7 @@ internal static class GrainOnlineTextPublicationCommand
 {
     internal static string Resolve(DecodedGrainRequest request)
     {
-        var phase = DatabaseEngine.Payload<OnlineTextPublicationPhaseCommand>(Read(request));
+        var phase = OperationProtocol.Payload<OnlineTextPublicationPhaseCommand>(Read(request));
         var partition = phase.Request.Consumer.Partition;
         ArgumentNullException.ThrowIfNull(partition);
         JsonData.Identifier(partition.TenantId);
@@ -29,7 +29,7 @@ internal static class GrainOnlineTextPublicationCommand
         {
             throw Errors.Fail(ErrorCode.PermissionDenied, GrainRoutingProtocol.AdministrationRequired);
         }
-        var phase = DatabaseEngine.Payload<OnlineTextPublicationPhaseCommand>(operation);
+        var phase = OperationProtocol.Payload<OnlineTextPublicationPhaseCommand>(operation);
         if (maintenance is null)
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest);
@@ -52,7 +52,7 @@ internal static class GrainOnlineTextPublicationCommand
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
         }
-        var phase = DatabaseEngine.Payload<OnlineTextPublicationPhaseCommand>(operation);
+        var phase = OperationProtocol.Payload<OnlineTextPublicationPhaseCommand>(operation);
         if (phase.Request.CommandId != operation.CommandId || phase.Result.CommandId != operation.CommandId)
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);

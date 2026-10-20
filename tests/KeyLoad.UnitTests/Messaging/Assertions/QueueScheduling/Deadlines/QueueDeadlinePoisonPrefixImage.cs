@@ -1,4 +1,3 @@
-using KeyLoad.Core;
 using TUnit.Assertions.Enums;
 
 namespace KeyLoad.UnitTests.Features.Messaging;

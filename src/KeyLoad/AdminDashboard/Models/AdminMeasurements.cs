@@ -1,15 +1,19 @@
+using Microsoft.Extensions.Options;
 namespace KeyLoad.Server;
 
 /// <summary>Keeps bounded measurements tied to one observed node and process.</summary>
-/// <param name="options">Validated retained-history bounds.</param>
-internal sealed class AdminMeasurements(AdminConsoleOptions options)
+/// <param name="execution">Validated retained-history bounds.</param>
+internal sealed class AdminMeasurements(IOptions<AdminConsoleOptions> execution)
 {
+    private readonly AdminConsoleOptions options = execution.Value;
+    private const int EmptyCount = 0;
+    private const int LatestOffset = 1;
     private const double Percent = 100;
     private AdminNodeSnapshot? previous;
     internal List<double> Rates { get; } = [];
     internal double? Latency { get; private set; }
     internal double? ErrorPercent { get; private set; }
-    internal double? Rate => Rates.Count == 0 ? null : Rates[^1];
+    internal double? Rate => Rates.Count == EmptyCount ? null : Rates[^LatestOffset];
 
     internal void Clear()
     {
@@ -34,10 +38,10 @@ internal sealed class AdminMeasurements(AdminConsoleOptions options)
         Rates.Add(completed / (next.CapturedAt - before.CapturedAt).TotalSeconds);
         if (Rates.Count > options.HistoryLimit)
         {
-            Rates.RemoveAt(0);
+            Rates.RemoveAt(EmptyCount);
         }
-        Latency = completed == 0 ? null : (next.Http.ElapsedMilliseconds - before.Http.ElapsedMilliseconds) / completed;
-        ErrorPercent = completed == 0 ? null : Percent * (next.Http.FailedRequests - before.Http.FailedRequests) / completed;
+        Latency = completed == EmptyCount ? null : (next.Http.ElapsedMilliseconds - before.Http.ElapsedMilliseconds) / completed;
+        ErrorPercent = completed == EmptyCount ? null : Percent * (next.Http.FailedRequests - before.Http.FailedRequests) / completed;
         previous = next;
     }
 }

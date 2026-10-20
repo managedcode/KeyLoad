@@ -26,14 +26,6 @@
       "classification": "executable"
     },
     {
-      "path": "analyzers/KeyLoad.Analyzers/Validation/AggregateTypeLimitException.cs",
-      "classification": "executable"
-    },
-    {
-      "path": "analyzers/KeyLoad.Analyzers/Contracts/CodeQualityAssemblyNames.cs",
-      "classification": "executable"
-    },
-    {
       "path": "analyzers/KeyLoad.Analyzers/Contracts/CodeQualityDiagnosticText.cs",
       "classification": "declaration-only"
     },
@@ -310,7 +302,9 @@
     "Directory.Packages.props",
     ".editorconfig",
     "global.json",
-    "scripts/Features/CodeQuality/site-analyzer-coverage.settings.xml"
+    "scripts/Features/CodeQuality/site-analyzer-coverage.settings.xml",
+    "analyzers/KeyLoad.Analyzers/AnalyzerReleases.Unshipped.md",
+    "build/CodeQuality/FunctionalCompilationIdentity.targets"
   ],
   "thresholds": {
     "moduleLinePercent": 80,
@@ -348,8 +342,7 @@
     {
       "diagnostic": "KLD0021",
       "sources": [
-        "analyzers/KeyLoad.Analyzers/Analyzers/RuntimeContracts/OrleansContractConstructorAnalyzer.cs",
-        "analyzers/KeyLoad.Analyzers/Contracts/CodeQualityAssemblyNames.cs"
+        "analyzers/KeyLoad.Analyzers/Analyzers/RuntimeContracts/OrleansContractConstructorAnalyzer.cs"
       ]
     },
     {
@@ -363,8 +356,7 @@
       "sources": [
         "analyzers/KeyLoad.Analyzers/Analyzers/RuntimeContracts/OrleansGenerateSerializerAnalyzer.cs",
         "analyzers/KeyLoad.Analyzers/Analysis/RuntimeContracts/OrleansSerializerAnalysis.cs",
-        "analyzers/KeyLoad.Analyzers/Analysis/RuntimeContracts/OrleansSerializerTypeGraph.cs",
-        "analyzers/KeyLoad.Analyzers/Contracts/CodeQualityAssemblyNames.cs"
+        "analyzers/KeyLoad.Analyzers/Analysis/RuntimeContracts/OrleansSerializerTypeGraph.cs"
       ]
     },
     {
@@ -387,7 +379,6 @@
         "analyzers/KeyLoad.Analyzers/Analyzers/CodeSize/AggregateTypeCodeLineCountAnalyzer.cs",
         "analyzers/KeyLoad.Analyzers/Analysis/CodeSize/AggregateTypeCodeLineAccumulator.cs",
         "analyzers/KeyLoad.Analyzers/Analysis/CodeSize/AggregateTypeCodeMeasurement.cs",
-        "analyzers/KeyLoad.Analyzers/Validation/AggregateTypeLimitException.cs",
         "analyzers/KeyLoad.Analyzers/Analysis/CodeSize/NumericCodeLineCounter.cs",
         "analyzers/KeyLoad.Analyzers/Contracts/NumericQualityRuleDescriptors.cs"
       ]
@@ -422,8 +413,7 @@
         "analyzers/KeyLoad.Analyzers/Analyzers/RuntimePolicies/MagicRuntimeDurationAnalyzer.cs",
         "analyzers/KeyLoad.Analyzers/Analysis/LiteralDeclarationOwnership.cs",
         "analyzers/KeyLoad.Analyzers/Analysis/Configuration/ConfigurationOwnership.cs",
-        "analyzers/KeyLoad.Analyzers/Analysis/RuntimePolicies/MagicRuntimeOperations.cs",
-        "analyzers/KeyLoad.Analyzers/Contracts/CodeQualityAssemblyNames.cs"
+        "analyzers/KeyLoad.Analyzers/Analysis/RuntimePolicies/MagicRuntimeOperations.cs"
       ]
     },
     {
@@ -433,7 +423,6 @@
         "analyzers/KeyLoad.Analyzers/Analysis/LiteralDeclarationOwnership.cs",
         "analyzers/KeyLoad.Analyzers/Analysis/Configuration/ConfigurationOwnership.cs",
         "analyzers/KeyLoad.Analyzers/Analysis/RuntimePolicies/MagicRuntimeOperations.cs",
-        "analyzers/KeyLoad.Analyzers/Contracts/CodeQualityAssemblyNames.cs",
         "analyzers/KeyLoad.Analyzers/Analysis/MachineKey/MachineKeyLiteralClassifier.cs",
         "analyzers/KeyLoad.Analyzers/Analysis/MachineKey/MachineKeySemanticSymbols.cs",
         "analyzers/KeyLoad.Analyzers/Contracts/MachineKeyRuleCatalog.cs"
@@ -451,7 +440,6 @@
         "analyzers/KeyLoad.Analyzers/Analysis/Configuration/OptionsSnapshotCapture.cs",
         "analyzers/KeyLoad.Analyzers/Analysis/Configuration/SerializedOptionsSnapshotContract.cs",
         "analyzers/KeyLoad.Analyzers/Analysis/RuntimePolicies/MagicRuntimeOperations.cs",
-        "analyzers/KeyLoad.Analyzers/Contracts/CodeQualityAssemblyNames.cs",
         "analyzers/KeyLoad.Analyzers/Analysis/Configuration/ConfiguredCountingSignal.cs",
         "analyzers/KeyLoad.Analyzers/Analysis/Configuration/SerializedOptionsMetadata.cs",
         "analyzers/KeyLoad.Analyzers/Analysis/RuntimePolicies/HardcodedPolicyReturns.cs",

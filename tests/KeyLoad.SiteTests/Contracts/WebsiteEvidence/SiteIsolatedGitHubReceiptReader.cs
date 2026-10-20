@@ -39,9 +39,9 @@ internal static class SiteIsolatedGitHubReceiptReader
     {
         var source = metadata[SiteIsolatedGitHubTokens.Source];
         if (source?[SiteIsolatedGitHubTokens.Website]?.GetValue<string>() !=
-            Environment.GetEnvironmentVariable(SitePublicationTokens.SourceRevisionEnvironment) ||
+            SiteEnvironmentConfiguration.Capture().Value.SourceRevision ||
             source?[SiteIsolatedGitHubTokens.Control]?.GetValue<string>() !=
-            Environment.GetEnvironmentVariable(SitePublicationTokens.ControlRevisionEnvironment))
+            SiteEnvironmentConfiguration.Capture().Value.ControlRevision)
         {
             throw new InvalidDataException(SiteIsolatedGitHubTokens.InvalidReceipt);
         }

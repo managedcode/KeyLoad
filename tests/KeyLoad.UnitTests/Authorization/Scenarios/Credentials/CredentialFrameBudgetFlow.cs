@@ -1,4 +1,3 @@
-using KeyLoad.Core;
 using KeyLoad.Storage;
 
 namespace KeyLoad.UnitTests.Features.Authorization;
@@ -23,7 +22,7 @@ internal static class CredentialFrameBudgetFlow
         var subject = new PrincipalRecord(PrincipalId, Tenant, [], []) { PolicyEpoch = FirstEpoch };
         await Assert.That(Errors.Code(fixture.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(subject)).Problem)).IsNull();
         await Assert.That(Errors.Code(fixture.Submit(OperationKind.ConfigureApiKey,
-            new ConfigureApiKeyRequest(DatabaseEngine.Credential(CredentialId, PrincipalId, Secret))).Problem)).IsNull();
+            new ConfigureApiKeyRequest(AuthorizationExecution.Credential(CredentialId, PrincipalId, Secret))).Problem)).IsNull();
         var expected = fixture.Store.Read(view => checked(Size(view, KeySpace.ApiKey(CredentialId))
             + Size(view, KeySpace.Principal(PrincipalId))));
         var before = Image(fixture);

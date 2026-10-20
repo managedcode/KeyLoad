@@ -31,7 +31,7 @@ internal static class Bm25CorpusShape
         {
             throw Errors.Fail(ErrorCode.Corruption, Bm25CorpusProtocol.Invalid);
         }
-        DatabaseEngine.ValidatePartition(current.Partition);
+        EngineResourceAccess.ValidatePartition(current.Partition);
         JsonData.Identifier(current.Collection);
         JsonData.Identifier(current.PrincipalId);
         var statistics = current.Statistics;

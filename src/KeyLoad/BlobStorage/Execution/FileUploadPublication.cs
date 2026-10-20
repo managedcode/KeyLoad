@@ -7,7 +7,6 @@ namespace KeyLoad.Server;
 
 internal static class FileUploadPublication
 {
-    private const int CleanupTimeoutSeconds = 5;
 
     internal static async Task<BlobMetadata> ExecuteAsync(FileStorageRequest files, FileUpload reserved,
         Func<FileUpload, CancellationToken, Task<BlobMetadata>> upload, CancellationToken token,
@@ -43,7 +42,7 @@ internal static class FileUploadPublication
 
     private static async Task AbortJoinedAsync(FileStorageRequest files, FileUpload staged)
     {
-        using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(CleanupTimeoutSeconds));
+        using var deadline = new CancellationTokenSource(files.CleanupTimeout);
         try
         {
             var aborted = await files.AbortAsync(staged, staged.ObjectId, deadline.Token);

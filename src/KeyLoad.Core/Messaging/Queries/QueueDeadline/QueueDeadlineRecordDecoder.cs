@@ -35,7 +35,7 @@ internal static class QueueDeadlineRecordDecoder
             throw Errors.Fail(ErrorCode.Corruption, DueWorkProtocol.InvalidRecord);
         }
         var lane = new QueueLaneRef(new(tenant, db, domain, partition), queue);
-        DatabaseEngine.ValidatePartition(lane.Partition);
+        EngineResourceAccess.ValidatePartition(lane.Partition);
         JsonData.Identifier(queue);
         JsonData.Identifier(id);
         var metadata = ReadMetadata(database, view, lane, id, space, value, page);

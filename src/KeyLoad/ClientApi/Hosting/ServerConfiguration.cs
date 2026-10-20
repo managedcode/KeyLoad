@@ -22,7 +22,11 @@ internal static class ServerConfiguration
         Action<IServiceCollection, NodeOptions>? configureServices = null,
         CancellationToken startupCancellation = default)
     {
-        var builder = WebApplication.CreateBuilder(args);
+        var builder = WebApplication.CreateBuilder(new WebApplicationOptions
+        {
+            Args = args,
+            ApplicationName = typeof(ServerConfiguration).Assembly.GetName().Name
+        });
         await ConfigureBuilderAsync(builder, authenticationExecutionObserver,
             lifecycleParticipantFactory, phaseObserver, purposeObserver, configureServices, startupCancellation);
         var app = builder.Build();

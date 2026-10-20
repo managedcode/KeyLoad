@@ -1,0 +1,35 @@
+using KeyLoad.Core.Features.Messaging;
+using KeyLoad.Storage;
+
+namespace KeyLoad.Core;
+/// <summary>Executes MessagingValidationQueueDeadLetters operations against the caller's database context.</summary>
+public static class MessagingValidationQueueDeadLetters
+{
+    internal static QueueDeadLetterAdmissionPlan PrepareQueueDeadLetterAdmission(IKeyValueView view, QueueLaneRef lane, QueuePolicy policy, MessageMetadata metadata, long bodyBytes, QueueCounters counters)
+    {
+        var body = StoredMessageBody.Read(view, MessagingExecutionMessaging.QueueKey(MessagingCommandsQueueSweepTransitions.MessageBodySpace, lane, metadata.Id)) ?? throw Errors.Fail(ErrorCode.Corruption, MessagingCommandsQueueSweepTransitions.MissingIndexedBody);
+        var order = MessagingValidationQueueOrderingQueueOrderMutationPreparation.PrepareQueueParkOrder(view, lane, policy, body.Body, metadata);
+        var fits = MessagingCommands.FitsQueueDeadLetter(policy, counters, bodyBytes);
+        if (metadata.StateVersion == long.MaxValue || fits && counters.NextParkedSequence == long.MaxValue)
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, MessagingValidationQueueLifecycleQueueLifecycleIncrementCapacity.QueueLifecycleIncrementCapacityDetail);
+        }
+
+        var updated = metadata with
+        {
+            ActiveOrderSequence = order.ActiveOrderSequence,
+            StateVersion = checked(metadata.StateVersion + QueueLifecycleProtocol.Increment),
+            LeaseOwner = null,
+            LeaseUntil = null,
+            NotBefore = null,
+            SafeFailureCode = MessagingCommandsQueueSweepTransitions.AttemptsExhausted
+        };
+        if (!fits)
+        {
+            return new(updated with { State = MessageState.PendingDeadLetter, ParkedSequence = QueueLifecycleProtocol.Initial }, counters, order);
+        }
+
+        var sequence = checked(counters.NextParkedSequence + QueueLifecycleProtocol.Increment);
+        return new(updated with { State = MessageState.DeadLettered, ParkedSequence = sequence }, counters with { DeadLetterMessages = checked(counters.DeadLetterMessages + QueueLifecycleProtocol.Increment), DeadLetterBytes = checked(counters.DeadLetterBytes + bodyBytes), NextParkedSequence = sequence }, order);
+    }
+}

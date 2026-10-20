@@ -1,4 +1,3 @@
-using KeyLoad.Core;
 using KeyLoad.Core.Features.TimeSeries;
 
 namespace KeyLoad.UnitTests.Features.TimeSeries;

@@ -24,26 +24,25 @@ public sealed class UnauthorizedImplementationTermAnalyzer : DiagnosticAnalyzer
     /// <inheritdoc/>
     public override void Initialize(AnalysisContext context)
     {
-        ArgumentNullException.ThrowIfNull(context);
+        if (context is null)
+        {
+            throw new System.ArgumentNullException(nameof(context));
+        }
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.Analyze | GeneratedCodeAnalysisFlags.ReportDiagnostics);
         context.EnableConcurrentExecution();
         context.RegisterCompilationStartAction(start =>
         {
-            if (start.Compilation.AssemblyName?.StartsWith(ImplementationTermCatalog.NamespacePrefix, StringComparison.Ordinal) == true)
-            {
-                var testOwners = new Lazy<System.Collections.Generic.HashSet<INamedTypeSymbol>>(
-                    () => ImplementationTestOwnership.Read(start.Compilation, start.CancellationToken));
-                start.RegisterSyntaxTreeAction(tree => AnalyzeTree(tree, start.Compilation, testOwners));
-            }
+            var testOwners = new Lazy<System.Collections.Generic.HashSet<INamedTypeSymbol>>(
+                () => ImplementationTestOwnership.Read(start.Compilation, start.CancellationToken));
+            start.RegisterSemanticModelAction(model => AnalyzeTree(model, testOwners));
         });
     }
 
-    private static void AnalyzeTree(SyntaxTreeAnalysisContext context, Compilation compilation,
+    private static void AnalyzeTree(SemanticModelAnalysisContext context,
         Lazy<System.Collections.Generic.HashSet<INamedTypeSymbol>> testOwners)
     {
-        var root = context.Tree.GetRoot(context.CancellationToken);
-        var model = compilation.GetSemanticModel(context.Tree);
-        var permissions = new ImplementationTermPermissions(model, testOwners);
+        var root = context.SemanticModel.SyntaxTree.GetRoot(context.CancellationToken);
+        var permissions = new ImplementationTermPermissions(context.SemanticModel, testOwners);
         foreach (var token in root.DescendantTokens())
         {
             context.CancellationToken.ThrowIfCancellationRequested();
@@ -64,7 +63,7 @@ public sealed class UnauthorizedImplementationTermAnalyzer : DiagnosticAnalyzer
         trivia.IsKind(SyntaxKind.MultiLineCommentTrivia) || trivia.IsKind(SyntaxKind.SingleLineDocumentationCommentTrivia) ||
         trivia.IsKind(SyntaxKind.MultiLineDocumentationCommentTrivia);
 
-    private static void AnalyzeText(SyntaxTreeAnalysisContext context, ImplementationTermPermissions permissions,
+    private static void AnalyzeText(SemanticModelAnalysisContext context, ImplementationTermPermissions permissions,
         SyntaxNode node, string text, Location location)
     {
         foreach (var match in ImplementationTermReader.Read(text).Distinct())

@@ -27,7 +27,7 @@ internal static class EventMessageSensitiveSafeR52Seed
             [EventMessageSensitivePublicProtocol.GrantBefore]);
         await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(), worker, token));
         await McpCallerAssertions.SdkStatusAsync(await root.Sdk.ConfigureApiKeyAsync(Guid.NewGuid(),
-            KeyLoad.Core.DatabaseEngine.Credential(id, id, key), token));
+            KeyLoad.Core.AuthorizationExecution.Credential(id, id, key), token));
         var state = new EventMessageSensitiveSafeR52State(new(partition, resource, worker, key, subscription, dataAuthority, header));
         if (subscription)
         {

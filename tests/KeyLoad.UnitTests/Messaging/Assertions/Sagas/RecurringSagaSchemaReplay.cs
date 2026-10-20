@@ -1,4 +1,3 @@
-using KeyLoad.Core;
 using KeyLoad.Core.Features.CommandOutcomes.Contracts;
 using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.Storage;

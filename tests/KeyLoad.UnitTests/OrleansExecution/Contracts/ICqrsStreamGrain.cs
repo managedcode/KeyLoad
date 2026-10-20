@@ -8,6 +8,7 @@ namespace KeyLoad.UnitTests.Features.OrleansExecution;
     SourceMethods = new string[] { nameof(AllowedAsync) },
     TargetMethods = new string[] { nameof(ICqrsLeafGrain.ObserveAsync) })]
 [AllowGrainCall(typeof(ICqrsObservationSinkGrain), AllowAllMethods = true)]
+[global::Orleans.CodeGeneration.Version(1)]
 internal interface ICqrsStreamGrain : global::Orleans.IGrainWithGuidKey
 {
     IAsyncEnumerable<CqrsStreamChunk<CqrsProgress, CqrsResult>> AllowedAsync(

@@ -10,7 +10,7 @@ internal static class OnlineTextRequestEnvelopes
         TimeSpan lifetime, Guid requestId, Command<DatabaseCommand> operation, DateTimeOffset expiry)
     {
         RequireExpiry(now, lifetime, expiry);
-        var verified = DatabaseEngine.SnapshotCommand(operation, scope.Limits);
+        var verified = CommandExecutionIdentity.SnapshotCommand(operation, scope.Limits);
         if (verified.Value!.Kind != OperationKind.OnlineTextPublicationPhase)
         {
             throw Errors.Fail(ErrorCode.PermissionDenied, GrainRoutingProtocol.AdministrationRequired);

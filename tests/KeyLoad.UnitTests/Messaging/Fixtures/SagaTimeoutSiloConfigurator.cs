@@ -1,5 +1,4 @@
 using KeyLoad.Clustering;
-using KeyLoad.Core;
 using KeyLoad.Server;
 using ManagedCode.Communication.Orleans.Converters;
 using ManagedCode.Communication.Orleans.Extensions;

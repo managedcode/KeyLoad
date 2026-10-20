@@ -10,6 +10,9 @@ namespace KeyLoad.Analyzers.Features.CodeQuality;
 public sealed class SystemClockAccessAnalyzer : DiagnosticAnalyzer
 {
     private const string DiagnosticsNamespace = "System.Diagnostics";
+    private const string EnvironmentType = "Environment";
+    private const string TickCountProperty = "TickCount";
+    private const string TickCount64Property = "TickCount64";
 
     /// <summary>Stable identifier for this analyzer's diagnostic.</summary>
     public const string DiagnosticId = "KLD0022";
@@ -29,7 +32,10 @@ public sealed class SystemClockAccessAnalyzer : DiagnosticAnalyzer
     /// <inheritdoc/>
     public override void Initialize(AnalysisContext context)
     {
-        System.ArgumentNullException.ThrowIfNull(context);
+        if (context is null)
+        {
+            throw new System.ArgumentNullException(nameof(context));
+        }
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
         context.RegisterOperationAction(AnalyzePropertyReference, Microsoft.CodeAnalysis.OperationKind.PropertyReference);
@@ -40,6 +46,10 @@ public sealed class SystemClockAccessAnalyzer : DiagnosticAnalyzer
 
     private static void AnalyzePropertyReference(OperationAnalysisContext context)
     {
+        if (context.Operation.Parent is INameOfOperation)
+        {
+            return;
+        }
         var property = ((IPropertyReferenceOperation)context.Operation).Property;
         if (!IsStopwatch(property.ContainingType) && (!property.IsStatic || !IsCurrentTimeProperty(property)))
         {
@@ -54,10 +64,10 @@ public sealed class SystemClockAccessAnalyzer : DiagnosticAnalyzer
 
     private static bool IsCurrentTimeProperty(IPropertySymbol property)
     {
-        if (property.ContainingType.Name == nameof(System.Environment) &&
+        if (property.ContainingType.Name == EnvironmentType &&
             property.ContainingType.ContainingNamespace.ToDisplayString() == CodeQualitySourceNames.SystemNamespace)
         {
-            return property.Name is nameof(System.Environment.TickCount) or nameof(System.Environment.TickCount64);
+            return property.Name is TickCountProperty or TickCount64Property;
         }
         if (property.ContainingType.SpecialType == SpecialType.System_DateTime)
         {

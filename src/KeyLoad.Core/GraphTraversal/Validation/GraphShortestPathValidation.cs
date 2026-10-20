@@ -95,7 +95,7 @@ internal static class GraphShortestPathValidation
         try
         {
             budget.Check();
-            DatabaseEngine.ValidatePartition(request.Partition);
+            EngineResourceAccess.ValidatePartition(request.Partition);
             budget.Check();
             JsonData.Identifier(request.Graph);
             ValidateEntity(request.From, budget);
@@ -114,7 +114,7 @@ internal static class GraphShortestPathValidation
             throw Errors.Fail(ErrorCode.Validation, InvalidRequest);
         }
         budget.Check();
-        DatabaseEngine.ValidatePartition(entity.Partition);
+        EngineResourceAccess.ValidatePartition(entity.Partition);
         budget.Check();
         JsonData.Identifier(entity.Collection);
         budget.Check();
@@ -178,7 +178,7 @@ internal static class GraphShortestPathValidation
             throw Errors.Fail(ErrorCode.Validation, InvalidRequest);
         }
         budget.Check();
-        DatabaseEngine.ValidatePartition(entity.Partition);
+        EngineResourceAccess.ValidatePartition(entity.Partition);
         budget.Check();
         JsonData.Identifier(entity.Collection);
         budget.Check();

@@ -35,7 +35,7 @@ internal static class ExecutableUnitSyntax
             (SyntaxNode?)local.ExpressionBody?.Expression,
         PropertyDeclarationSyntax property => property.ExpressionBody?.Expression,
         IndexerDeclarationSyntax indexer => indexer.ExpressionBody?.Expression,
-        SimpleLambdaExpressionSyntax simple => simple.Body,
+        SimpleLambdaExpressionSyntax lambda => lambda.Body,
         ParenthesizedLambdaExpressionSyntax parenthesized => parenthesized.Body,
         AnonymousMethodExpressionSyntax anonymous => anonymous.Block,
         _ => null

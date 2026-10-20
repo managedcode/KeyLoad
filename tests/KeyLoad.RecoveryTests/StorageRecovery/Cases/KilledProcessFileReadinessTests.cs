@@ -5,9 +5,8 @@ internal sealed class KilledProcessFileReadinessTests
 {
     private const string TreeDirectoryName = "tree";
     private const string MetadataWalPath = "tree/0.meta.wal";
-    private const int ReadinessBoundSeconds = 5;
-    private static readonly TimeSpan ReadinessBound = TimeSpan.FromSeconds(ReadinessBoundSeconds);
-    private static readonly TimeSpan ObservationBound = ReadinessBound + TimeSpan.FromSeconds(1);
+    private static readonly TimeSpan ReadinessBound = RecoveryExecutionOptions.ProcessReadiness().Value.OwnershipTimeout;
+    private static readonly TimeSpan ObservationBound = ReadinessBound + RecoveryExecutionOptions.TrialPolicy.Value.ReadinessObservationSlack;
 
     [Test]
     [Arguments("owner.lock")]

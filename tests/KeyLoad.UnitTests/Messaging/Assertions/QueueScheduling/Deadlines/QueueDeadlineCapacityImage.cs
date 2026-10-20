@@ -1,4 +1,3 @@
-using KeyLoad.Core;
 using KeyLoad.Core.Features.Messaging;
 using static KeyLoad.UnitTests.Features.Messaging.QueueDeadlineCapacityProtocol;
 

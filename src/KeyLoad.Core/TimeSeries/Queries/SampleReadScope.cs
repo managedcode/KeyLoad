@@ -16,7 +16,7 @@ internal sealed record SampleReadScope(
     {
         ArgumentNullException.ThrowIfNull(database);
         ArgumentNullException.ThrowIfNull(view);
-        DatabaseEngine.ValidatePartition(partition);
+        EngineResourceAccess.ValidatePartition(partition);
         if (string.IsNullOrWhiteSpace(principalId))
         {
             throw Errors.Fail(ErrorCode.Unauthenticated, InvalidSeriesIdentity);
@@ -26,7 +26,7 @@ internal sealed record SampleReadScope(
         ValidateIdentifier(seriesId);
         var principal = database.Principal(view, principalId, database.EvaluationClock.GetUtcNow());
         database.Authorization.Require(principal, partition, set, Capability.SeriesRead);
-        var resource = DatabaseEngine.BindAuthorizedReadResource(view, partition, set, ResourceKind.TimeSeries);
+        var resource = ResourceExecutionQueriesResourceLifetimeReadBinding.BindAuthorizedReadResource(view, partition, set, ResourceKind.TimeSeries);
         return new(principal, resource, SampleReadKeys.Prefix(partition, set, seriesId));
     }
 

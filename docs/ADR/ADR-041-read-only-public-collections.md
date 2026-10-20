@@ -112,9 +112,9 @@ wire shape and bytes are mandatory. Compilation is not throughput or resource pr
 
 ## Rollout, rollback and verification
 
-### DatabaseEngine size deviation
+### DatabaseEngine operation ownership
 
-The existing DatabaseEngine partial type exceeds type_max_loc across its business files; cohesive extraction under canonical feature paths does not make the aggregate compliant. This bounded existing deviation (exception_policy) covers the existing DatabaseEngine partial declarations only, with removal target 2026-11-01: a shared engine of at most 200 lines coordinating typed feature handlers under their canonical slices with the same silo-local atomic transaction and persisted authorization boundary. Do not expand it with new behavior or claim the aggregate type limit passes; files stay within 400 lines and functions within 64. Verification requires the real numeric gate plus full real-store, recovery and replicated-cluster behavior after extraction. Existing ResourceProtocolFailureTests cover explicit null resource, retention and queue-policy inputs through the real commit path, and retry, watermark and fingerprint behavior must survive extraction.
+`DatabaseEngine` owns the shared execution context, validated policy snapshots and node-local admission state. Feature-owned static operation components implement commands, reads and validation through extension methods receiving that same context. There is one implementation of each operation and the existing silo-local atomic transaction and persisted authorization boundary remain shared. KLD0031 applies the same aggregate 200-line limit to every type without an assembly/type/date exemption; files remain bounded to 400 code lines and methods to 64. A strict local Core build passes the numeric rules after extraction. Complete verification still requires real-store, recovery and replicated-cluster execution for the exact delivered source. Existing ResourceProtocolFailureTests cover explicit null resource, retention and queue-policy inputs through the real commit path; retry, watermark and fingerprint behavior require their own execution evidence.
 
 Rebuild all solution binaries together and deploy only after exact GitHub proof.
 Valid persisted JSON/frame data needs no conversion. Rollback restores contracts

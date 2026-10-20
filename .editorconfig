@@ -502,24 +502,6 @@ dotnet_diagnostic.CA1823.severity = none
 dotnet_diagnostic.IDE0044.severity = none
 dotnet_diagnostic.IDE0051.severity = none
 
-# These Razor partials reference generated instance members and mutable fields too.
-[src/Apps/Prostir.WebApp/**/{MainLayout.PlaceNavigation.cs,AgentResourcesPanel.Rows.cs,FlowCanvasEditor.Canvas.cs}]
-dotnet_diagnostic.CA1822.severity = none
-dotnet_diagnostic.CA1823.severity = none
-dotnet_diagnostic.IDE0044.severity = none
-dotnet_diagnostic.IDE0051.severity = none
-
-[**/AgentKnowledgePanel.Upload.cs]
-dotnet_diagnostic.IDE0044.severity = none
-
-[**/AgentChannelsPanel.Scope.cs]
-dotnet_diagnostic.IDE0044.severity = none
-
-# EF Core migrations
-[**/Migrations/*.cs]
-dotnet_diagnostic.IDE0161.severity = none
-dotnet_diagnostic.CA1861.severity = none
-
 # Verify settings for test files
 [*.{received,verified}.{txt,xml,json}]
 charset = utf-8-bom

@@ -11,7 +11,7 @@ internal static class SiteBrowserNavigation
             ?? throw new InvalidOperationException(SiteBrowserTokens.BrowserProtocolFailure);
         var loaderId = navigation.TryGetProperty(SiteBrowserTokens.LoaderIdField, out var loader)
             ? loader.GetString() : null;
-        using var timeoutTimeout = new CancellationTokenSource(TimeSpan.FromMilliseconds(SiteBrowserTokens.BrowserCommandTimeoutMilliseconds), TimeProvider.System);
+        using var timeoutTimeout = new CancellationTokenSource(SiteExecutionConfiguration.Options.Value.BrowserCommandTimeout, TimeProvider.System);
         using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutTimeout.Token);
         while (true)
         {
@@ -27,7 +27,7 @@ internal static class SiteBrowserNavigation
                 }
             }
 
-            await Task.Delay(TimeSpan.FromMilliseconds(SiteBrowserTokens.NavigationPollDelayMilliseconds), TimeProvider.System, timeout.Token);
+            await Task.Delay(SiteExecutionConfiguration.Options.Value.NavigationPollDelay, TimeProvider.System, timeout.Token);
         }
     }
 

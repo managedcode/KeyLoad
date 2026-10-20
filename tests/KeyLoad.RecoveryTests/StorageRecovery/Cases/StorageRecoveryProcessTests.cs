@@ -37,7 +37,7 @@ internal sealed class StorageRecoveryProcessTests
         var mutationIndex = random.Next(3);
         using var admission = await StorageTrialLease.AcquireAsync(cancellationToken);
         using var process = Process.Start(CreateRecoveryProcessStart(root, stage, mutationIndex))!;
-        using var timeoutTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(15), TimeProvider.System);
+        using var timeoutTimeout = new CancellationTokenSource(RecoveryExecutionOptions.TrialPolicy.Value.ShortRecoveryTimeout, TimeProvider.System);
         using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutTimeout.Token);
         Exception? originalFailure = null;
         int[]? values = null;

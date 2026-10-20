@@ -4,8 +4,8 @@ internal static class SiteIsolatedBrowserStartup
 {
     public static async Task<SiteBrowserSession> StartAsync(SiteIsolatedFixture fixture, CancellationToken token)
     {
-        var browserPath = Environment.GetEnvironmentVariable(SiteBrowserTokens.BrowserEnvironment);
-        var coverage = Environment.GetEnvironmentVariable(SiteBrowserTokens.CoverageEnvironment);
+        var browserPath = SiteEnvironmentConfiguration.Capture().Value.Browser;
+        var coverage = SiteEnvironmentConfiguration.Capture().Value.CoverageMode;
         if (string.IsNullOrWhiteSpace(browserPath) || string.IsNullOrWhiteSpace(coverage) ||
             !Path.IsPathFullyQualified(coverage))
         {

@@ -23,8 +23,7 @@ internal static class TextIncrementalProcessTrial
     {
         using var admission = await StorageTrialLease.AcquireAsync(callerToken);
         var root = Path.Combine(Path.GetTempPath(), Prefix + Guid.NewGuid().ToString("N"));
-        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(
-            CommandIdempotencyProcessRecoveryTests.RunTimeoutSeconds), TimeProvider.System);
+        using var timeout = new CancellationTokenSource(RecoveryExecutionOptions.TrialPolicy.Value.CommandTimeout, TimeProvider.System);
         using var linked = CancellationTokenSource.CreateLinkedTokenSource(callerToken, timeout.Token);
         CommandIdempotencyProcessChild? active = null;
         Exception? primary = null;
@@ -94,8 +93,7 @@ internal static class TextIncrementalProcessTrial
 
     private static async Task CleanupAsync(string root, CommandIdempotencyProcessChild? active, Exception? primary)
     {
-        using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(
-            CommandIdempotencyProcessRecoveryTests.CleanupTimeoutSeconds), TimeProvider.System);
+        using var cleanup = new CancellationTokenSource(RecoveryExecutionOptions.TrialPolicy.Value.CleanupTimeout, TimeProvider.System);
         var failures = new List<Exception>();
         if (active is not null)
         {

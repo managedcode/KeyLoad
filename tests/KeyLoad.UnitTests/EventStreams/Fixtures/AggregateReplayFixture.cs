@@ -1,5 +1,4 @@
 using System.Text.Json;
-using KeyLoad.Core;
 using KeyLoad.Core.Features.Authorization;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
@@ -60,7 +59,7 @@ internal sealed class AggregateReplayFixture : IDisposable
             database.Bootstrap(new(RootId, SystemTenant, [new(Wildcard, Wildcard, Capability.All)], [Wildcard])
             {
                 ClusterAdministrator = true
-            }, DatabaseEngine.Credential(RootId, RootId, RootCredential));
+            }, AuthorizationExecution.Credential(RootId, RootId, RootCredential));
             ConfigureResource(protectedFields);
             ConfigurePrincipal(WorkerId, Capability.EventsReplay | Capability.EventsRead | Capability.EventsSnapshotsManage,
                 protectedFields ? [PayloadReadGrant, PayloadUseGrant, HeaderReadGrant, HeaderUseGrant] : []);

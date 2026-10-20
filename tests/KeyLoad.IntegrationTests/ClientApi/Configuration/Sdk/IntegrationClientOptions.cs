@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.IntegrationTests;
 
+[ConfigurationBinding]
 internal static class IntegrationClientOptions
 {
     internal static IOptions<KeyLoadClientExecutionOptions> Execution(KeyLoadClientExecutionOptions? configured = null)

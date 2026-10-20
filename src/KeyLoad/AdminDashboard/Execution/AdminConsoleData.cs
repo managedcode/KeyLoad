@@ -5,12 +5,15 @@ using KeyLoad.Client;
 using KeyLoad.Query;
 using ManagedCode.Communication;
 using ManagedCode.Storage.Core.Models;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
 
-internal sealed class AdminConsoleData(AdminConsoleOptions options)
+internal sealed class AdminConsoleData(IOptions<AdminConsoleOptions> execution)
 {
+    private readonly AdminConsoleOptions options = execution.Value;
     private static readonly CompositeFormat QueueCounts = CompositeFormat.Parse(AdminConsoleText.QueueCounts);
+    private const long EmptyCut = 0;
     private const string NextFile = "X-KeyLoad-Next-File";
     internal ImmutableArray<AdminResourceInfo> Resources { get; private set; } = [];
     internal ImmutableArray<AdminResourceInfo> Catalog { get; private set; } = [];
@@ -30,7 +33,7 @@ internal sealed class AdminConsoleData(AdminConsoleOptions options)
         Files = [];
         Selected = null;
         After = null;
-        Cut = 0;
+        Cut = EmptyCut;
         Description = AdminConsoleText.Records;
     }
 

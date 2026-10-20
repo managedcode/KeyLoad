@@ -28,15 +28,15 @@ public sealed class GrainInterfaceVersionAnalyzer : DiagnosticAnalyzer
     /// <inheritdoc/>
     public override void Initialize(AnalysisContext context)
     {
-        System.ArgumentNullException.ThrowIfNull(context);
+        if (context is null)
+        {
+            throw new System.ArgumentNullException(nameof(context));
+        }
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
         context.RegisterCompilationStartAction(static startContext =>
         {
-            if (!string.Equals(startContext.Compilation.AssemblyName,
-                    CodeQualityAssemblyNames.OrleansContracts,
-                    StringComparison.Ordinal) ||
-                startContext.Compilation.GetTypeByMetadataName(OrleansMetadataNames.GrainInterface) is not { } grainInterface)
+            if (startContext.Compilation.GetTypeByMetadataName(OrleansMetadataNames.GrainInterface) is not { } grainInterface)
             {
                 return;
             }
@@ -51,9 +51,6 @@ public sealed class GrainInterfaceVersionAnalyzer : DiagnosticAnalyzer
     {
         if (context.Symbol is not INamedTypeSymbol type ||
             type.TypeKind != TypeKind.Interface ||
-            string.Equals(type.ContainingNamespace.ToDisplayString(),
-                CodeQualitySourceNames.OrleansNamespace,
-                StringComparison.Ordinal) ||
             SymbolEqualityComparer.Default.Equals(type, grainInterface) ||
             !type.AllInterfaces.Any(candidate =>
                 SymbolEqualityComparer.Default.Equals(candidate, grainInterface)) ||

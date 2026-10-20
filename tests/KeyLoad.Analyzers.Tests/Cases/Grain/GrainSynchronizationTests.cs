@@ -76,11 +76,11 @@ internal sealed class GrainSynchronizationTests
             namespace Application;
             internal sealed class Monitor
             {
-                internal int Sample() => 42;
+                internal int Measure() => 42;
             }
             internal sealed class Subject(Monitor monitor)
             {
-                internal int Read() => monitor.Sample();
+                internal int Read() => monitor.Measure();
             }
             """;
 

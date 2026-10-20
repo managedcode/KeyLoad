@@ -1,4 +1,3 @@
-using KeyLoad.Core;
 using KeyLoad.UnitTests.Features.InternalSerialization;
 using ManagedCode.Communication.Commands;
 

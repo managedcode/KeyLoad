@@ -6,9 +6,12 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
 
-internal sealed class FileStorageRequest(IHttpContextAccessor accessor, IFileSystemStorage storage, IOptions<NodeOptions> node)
+internal sealed class FileStorageRequest(IHttpContextAccessor accessor, IFileSystemStorage storage, IOptions<NodeOptions> node,
+    IOptions<FileStorageOptions> execution)
 {
     private const char CommandSeparator = ':';
+
+    internal TimeSpan CleanupTimeout => execution.Value.CleanupTimeout;
 
     internal HttpContext Context => accessor.HttpContext ?? throw Errors.Fail(ErrorCode.Unauthenticated, FileStorageProtocol.Invalid);
     internal FileStorageScope Scope => Context.Features.Get<FileStorageScope>()

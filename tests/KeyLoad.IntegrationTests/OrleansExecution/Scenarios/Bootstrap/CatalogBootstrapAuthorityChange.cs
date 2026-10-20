@@ -13,7 +13,7 @@ internal static class CatalogBootstrapAuthorityChange
         var command = Guid.NewGuid();
         if (variant == P.KeyRevoked)
         {
-            var credential = DatabaseEngine.Credential(P.Root, P.Root, fixture.AdminKey) with
+            var credential = AuthorizationExecution.Credential(P.Root, P.Root, fixture.AdminKey) with
             {
                 Revoked = true
             };

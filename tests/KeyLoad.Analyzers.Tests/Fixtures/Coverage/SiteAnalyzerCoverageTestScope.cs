@@ -134,6 +134,7 @@ internal sealed class SiteAnalyzerCoverageTestScope : IDisposable
         File.Copy(source, destination);
     }
 
+    [KeyLoad.ConfigurationBinding]
     private static string FindRepositoryRoot()
     {
         var repository = Environment.GetEnvironmentVariable(SiteAnalyzerCoverageTokens.RepositoryVariable);

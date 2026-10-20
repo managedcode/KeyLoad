@@ -7,4 +7,8 @@
     <PackageReference Include="Microsoft.Orleans.Sdk" PrivateAssets="all" />
     <ProjectReference Include="../KeyLoad.Core/KeyLoad.Core.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../analyzers/KeyLoad.Analyzers/KeyLoad.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" IsAspireProjectResource="false" PrivateAssets="all" />
+  </ItemGroup>
+  <Import Project="$(MSBuildThisFileDirectory)../../build/CodeQuality/FunctionalCompilationIdentity.targets" />
 </Project>

@@ -2,11 +2,8 @@ namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
 
 internal sealed class SiteBrowserSessionAdmission
 {
-    private const int ActiveCapacity = SiteTokens.One;
-    private const int MaximumQueued = SiteHeavyChildTokens.MaximumQueued;
-    private const int AdmissionMinutes = SiteHeavyChildTokens.AdmissionMinutes;
-    private readonly SiteHeavyChildAdmission _pool = new(ActiveCapacity, MaximumQueued,
-        TimeSpan.FromMinutes(AdmissionMinutes));
+    private readonly SiteHeavyChildAdmission _pool = new(SiteHeavyChildConfiguration.Bind(SiteExecutionConfiguration.Options.Value.BrowserSessionCapacity, SiteExecutionConfiguration.Options.Value.MaximumQueued,
+        SiteExecutionConfiguration.Options.Value.AdmissionDeadline));
 
     internal static SiteBrowserSessionAdmission Shared { get; } = new();
 

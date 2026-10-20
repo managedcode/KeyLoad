@@ -1,5 +1,4 @@
 using System.Text.Json;
-using KeyLoad.Core;
 using KeyLoad.Core.Features.Authorization;
 using KeyLoad.Storage.ZoneTree;
 using KeyLoad.UnitTests.Features.Messaging;
@@ -63,7 +62,7 @@ internal sealed class TransactionProtocolTests
                 {
                     ClusterAdministrator = true
                 },
-                    DatabaseEngine.Credential("root", "root", "root.frame-test-credential-32-characters"));
+                    AuthorizationExecution.Credential("root", "root", "root.frame-test-credential-32-characters"));
                 Result<object> Submit<T>(OperationKind kind, Guid id, T payload)
                     => database.ApplyEmbedded(database.CreateCommand(kind, id, "root", TimeProvider.System.GetUtcNow(),
                         JsonSerializer.Serialize(payload, JsonDefaults.Options)), TestContext.Current!.Execution.CancellationToken);

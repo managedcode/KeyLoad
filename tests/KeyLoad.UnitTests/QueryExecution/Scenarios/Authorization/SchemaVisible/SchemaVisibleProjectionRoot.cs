@@ -1,4 +1,3 @@
-using KeyLoad.Core;
 using KeyLoad.Query;
 using KeyLoad.Storage.ZoneTree;
 using static KeyLoad.UnitTests.Features.QueryExecution.BinderFieldLineageProtocol;

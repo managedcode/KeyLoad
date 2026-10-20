@@ -1,5 +1,3 @@
-using KeyLoad.Core;
-
 namespace KeyLoad.UnitTests.Features.EventStreams;
 
 internal sealed class AggregateSnapshotTests

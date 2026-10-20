@@ -15,7 +15,7 @@ internal static class SiteCoverageSourceManifestWriter
         var repository = RequiredPath(SiteTokens.RepositoryEnvironment);
         var artifactRoot = RequiredPath(SiteCoverageTokens.CoverageRootEnvironment);
         var nodeCoverage = RequiredPath(SiteCoverageTokens.NodeCoverageEnvironment);
-        var revision = Environment.GetEnvironmentVariable(SitePublicationTokens.SourceRevisionEnvironment);
+        var revision = SiteEnvironmentConfiguration.Capture().Value.SourceRevision;
         if (!Directory.Exists(repository) || !Directory.Exists(artifactRoot) || !IsRevision(revision) ||
             !PathsEqual(nodeCoverage, Path.Combine(artifactRoot, SiteCoverageTokens.NodeDirectory)))
         {
@@ -173,6 +173,7 @@ internal static class SiteCoverageSourceManifestWriter
 
     internal static string Hash(ReadOnlySpan<byte> bytes) => Convert.ToHexStringLower(SHA256.HashData(bytes));
 
+    [KeyLoad.ConfigurationBinding]
     private static string RequiredPath(string name)
     {
         var value = Environment.GetEnvironmentVariable(name);

@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 namespace KeyLoad.IntegrationTests;
 
 /// <summary>Explicit validated execution options for admission and cache policy checks.</summary>
+[ConfigurationBinding]
 internal static class IntegrationAdmissionOptions
 {
     internal static IOptions<CommandAdmissionLimits> Command(CommandAdmissionLimits? configured = null)

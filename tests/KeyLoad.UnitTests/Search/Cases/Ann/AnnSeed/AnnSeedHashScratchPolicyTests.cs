@@ -1,6 +1,5 @@
 using System.Collections.Immutable;
 using System.Globalization;
-using KeyLoad.Core;
 using KeyLoad.Core.Features.Search;
 using KeyLoad.Server;
 using Microsoft.Extensions.Configuration;

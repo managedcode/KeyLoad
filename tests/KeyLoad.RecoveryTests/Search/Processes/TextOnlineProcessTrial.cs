@@ -16,15 +16,14 @@ internal static class TextOnlineProcessTrial
     private const int SuccessExit = 0;
     private static readonly Guid Incarnation = new("bc1cb10f-c51f-4429-99d1-adb5b1b786cc");
     private static readonly string[] Modes = [TextOnlineCrashScenario.Prepare,
-        TextOnlineCrashScenario.Fault, TextOnlineCrashScenario.Recover,
+        TextOnlineCrashScenario.Fault, TextOnlineCrashScenario.Corrupt, TextOnlineCrashScenario.Recover,
         TextOnlineCrashScenario.Verify];
 
     internal static async Task RunAsync(TextFaultStage stage, CancellationToken callerToken)
     {
         using var admission = await StorageTrialLease.AcquireAsync(callerToken);
         var root = Path.Combine(Path.GetTempPath(), Prefix + Guid.NewGuid().ToString("N"));
-        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(
-            CommandIdempotencyProcessRecoveryTests.RunTimeoutSeconds), TimeProvider.System);
+        using var timeout = new CancellationTokenSource(RecoveryExecutionOptions.TrialPolicy.Value.CommandTimeout, TimeProvider.System);
         using var linked = CancellationTokenSource.CreateLinkedTokenSource(callerToken, timeout.Token);
         CommandIdempotencyProcessChild? active = null;
         Exception? primary = null;
@@ -33,6 +32,10 @@ internal static class TextOnlineProcessTrial
             Directory.CreateDirectory(root);
             foreach (var mode in Modes)
             {
+                if (mode == TextOnlineCrashScenario.Corrupt)
+                {
+                    await TextOnlineCrashProof.ReplacePublicationAsync(root, repair: false, linked.Token);
+                }
                 var killed = mode is TextOnlineCrashScenario.Prepare or TextOnlineCrashScenario.Fault;
                 active = CreateChild(mode);
                 active.Start(CreateStart(root, stage, mode));
@@ -42,6 +45,10 @@ internal static class TextOnlineProcessTrial
                 RecoveryFileInventory.AssertHandlesReleased(root);
                 active.CloseProcessAfterJoin();
                 active = null;
+                if (mode == TextOnlineCrashScenario.Corrupt)
+                {
+                    await TextOnlineCrashProof.ReplacePublicationAsync(root, repair: true, linked.Token);
+                }
                 await TextOnlineProcessAssertions.VerifyAsync(root, mode, linked.Token);
             }
         }
@@ -54,7 +61,7 @@ internal static class TextOnlineProcessTrial
     {
         var marker = mode switch
         {
-            TextOnlineCrashScenario.Prepare => CrashFixtureValues.Acknowledgement,
+            TextOnlineCrashScenario.Prepare or TextOnlineCrashScenario.Corrupt => CrashFixtureValues.Acknowledgement,
             TextOnlineCrashScenario.Fault => CrashFixtureValues.CrashMarker,
             _ => null
         };
@@ -94,8 +101,7 @@ internal static class TextOnlineProcessTrial
 
     private static async Task CleanupAsync(string root, CommandIdempotencyProcessChild? active, Exception? primary)
     {
-        using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(
-            CommandIdempotencyProcessRecoveryTests.CleanupTimeoutSeconds), TimeProvider.System);
+        using var cleanup = new CancellationTokenSource(RecoveryExecutionOptions.TrialPolicy.Value.CleanupTimeout, TimeProvider.System);
         var failures = new List<Exception>();
         if (active is not null)
         {

@@ -1,5 +1,4 @@
 using KeyLoad.Clustering;
-using KeyLoad.Core;
 using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.UnitTests.Features.OrleansExecution;
 using ManagedCode.Communication;
@@ -64,7 +63,7 @@ internal sealed class SdkProblemBoundaryScenario(ConnectionScenario execution, S
         Principal = db.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(record)).Get<PrincipalRecord>();
         await SdkProblemBoundaryAssertions.EqualAsync(record, Principal);
         await Assert.That(db.Submit(OperationKind.ConfigureApiKey, new ConfigureApiKeyRequest(
-            DatabaseEngine.Credential(P.KeyId, Principal.Id, P.Secret))).Get<bool>()).IsTrue();
+            AuthorizationExecution.Credential(P.KeyId, Principal.Id, P.Secret))).Get<bool>()).IsTrue();
         Seed = new(Guid.NewGuid(), db.Partition,
             [new PutDocument(Forbidden.Collection, P.Document, P.SeedJson, P.InitialRevision),
              new PutDocument(P.Allowed, P.Document, P.SeedJson, P.InitialRevision)]);

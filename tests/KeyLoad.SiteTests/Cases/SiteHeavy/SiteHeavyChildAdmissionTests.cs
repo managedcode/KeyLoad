@@ -6,8 +6,8 @@ internal sealed class SiteHeavyChildAdmissionTests
     public async Task AC_BC_FAIL_014_RealChildrenRespectCapacityAndFifo()
     {
         var token = TestContext.Current!.Execution.CancellationToken;
-        var admission = new SiteHeavyChildAdmission(SiteHeavyChildTokens.ActiveCapacity,
-            SiteHeavyChildTokens.FixtureQueueCapacity, TimeSpan.FromMinutes(SiteHeavyChildTokens.AdmissionMinutes));
+        var admission = new SiteHeavyChildAdmission(SiteHeavyChildConfiguration.Bind(SiteHeavyChildTokens.ActiveCapacity,
+            SiteHeavyChildTokens.FixtureQueueCapacity, SiteExecutionConfiguration.Options.Value.AdmissionDeadline));
         await using var first = await SiteHeavyChildProcessFixture.CreateAsync(token);
         await using var second = await SiteHeavyChildProcessFixture.CreateAsync(token);
         await using var third = await SiteHeavyChildProcessFixture.CreateAsync(token);
@@ -51,8 +51,8 @@ internal sealed class SiteHeavyChildAdmissionTests
     public async Task AC_BC_FAIL_014_CancelledQueuedChildNeverStartsAndFreesPendingSlot()
     {
         var token = TestContext.Current!.Execution.CancellationToken;
-        var admission = new SiteHeavyChildAdmission(SiteTokens.One, SiteTokens.One,
-            TimeSpan.FromMinutes(SiteHeavyChildTokens.AdmissionMinutes));
+        var admission = new SiteHeavyChildAdmission(SiteHeavyChildConfiguration.Bind(SiteTokens.One, SiteTokens.One,
+            SiteExecutionConfiguration.Options.Value.AdmissionDeadline));
         using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(token);
         await using var active = await SiteHeavyChildProcessFixture.CreateAsync(token);
         await using var cancelled = await SiteHeavyChildProcessFixture.CreateAsync(token);
@@ -78,8 +78,8 @@ internal sealed class SiteHeavyChildAdmissionTests
     public async Task AC_BC_FAIL_014_FullQueueRejectsChildBeforeStart()
     {
         var token = TestContext.Current!.Execution.CancellationToken;
-        var admission = new SiteHeavyChildAdmission(SiteTokens.One, SiteTokens.One,
-            TimeSpan.FromMinutes(SiteHeavyChildTokens.AdmissionMinutes));
+        var admission = new SiteHeavyChildAdmission(SiteHeavyChildConfiguration.Bind(SiteTokens.One, SiteTokens.One,
+            SiteExecutionConfiguration.Options.Value.AdmissionDeadline));
         await using var active = await SiteHeavyChildProcessFixture.CreateAsync(token);
         await using var pending = await SiteHeavyChildProcessFixture.CreateAsync(token);
         await using var rejected = await SiteHeavyChildProcessFixture.CreateAsync(token);
@@ -101,8 +101,8 @@ internal sealed class SiteHeavyChildAdmissionTests
     public async Task AC_BC_FAIL_014_QueueDeadlineRejectsChildBeforeStart()
     {
         var token = TestContext.Current!.Execution.CancellationToken;
-        var admission = new SiteHeavyChildAdmission(SiteTokens.One, SiteTokens.One,
-            TimeSpan.FromMilliseconds(SiteHeavyChildTokens.FixtureQueueMilliseconds));
+        var admission = new SiteHeavyChildAdmission(SiteHeavyChildConfiguration.Bind(SiteTokens.One, SiteTokens.One,
+            SiteExecutionConfiguration.Options.Value.ChildQueueDeadline));
         await using var active = await SiteHeavyChildProcessFixture.CreateAsync(token);
         await using var rejected = await SiteHeavyChildProcessFixture.CreateAsync(token);
         await using var successor = await SiteHeavyChildProcessFixture.CreateAsync(token);

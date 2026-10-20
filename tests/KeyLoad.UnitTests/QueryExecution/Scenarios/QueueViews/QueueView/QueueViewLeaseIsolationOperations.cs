@@ -1,4 +1,3 @@
-using KeyLoad.Core;
 using KeyLoad.Core.Features.CommandOutcomes.Contracts;
 using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;

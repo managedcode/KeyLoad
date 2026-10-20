@@ -101,7 +101,7 @@ internal sealed class LiteralMachineKeyArgumentBindingTests
     }
 
     [Test]
-    public async Task DynamicPropertyLookupUsesNamedAndPositionalKeyFallbackAsync()
+    public async Task DynamicPropertyLookupBindsNamedAndPositionalKeysAsync()
     {
         const string namedKey = "\"named-key\"";
         const string positionalKey = "\"positional-key\"";

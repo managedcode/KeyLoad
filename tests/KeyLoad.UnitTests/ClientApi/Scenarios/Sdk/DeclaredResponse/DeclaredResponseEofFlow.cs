@@ -43,7 +43,7 @@ internal static class DeclaredResponseEofFlow
             var token = linked.Token;
             var principal = scenario.Principal();
             await Assert.That(scenario.Fixture.Database.Submit(OperationKind.ConfigureApiKey, new ConfigureApiKeyRequest(
-                global::KeyLoad.Core.DatabaseEngine.Credential(KeyId, principal.Id, ApiKey))).Get<bool>()).IsTrue();
+                global::KeyLoad.Core.AuthorizationExecution.Credential(KeyId, principal.Id, ApiKey))).Get<bool>()).IsTrue();
             await DeclaredResponseEofAssertions.EmptyAsync(scenario);
             endpoint = new(scenario, principal, tasks);
             var placement = scenario.Fixture.Database.Database.ReadAtomicPartitionPlacement(Root,

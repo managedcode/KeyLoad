@@ -29,7 +29,7 @@ internal static class SampleChunkWorkKey
             throw Errors.Fail(ErrorCode.Corruption, SampleChunkLifecycleProtocol.Corrupt);
         }
         var scope = new PartitionRef(tenant, database, domain, partition);
-        DatabaseEngine.ValidatePartition(scope);
+        EngineResourceAccess.ValidatePartition(scope);
         JsonData.Identifier(set);
         JsonData.Identifier(series);
         return (scope, set, series, windowId);

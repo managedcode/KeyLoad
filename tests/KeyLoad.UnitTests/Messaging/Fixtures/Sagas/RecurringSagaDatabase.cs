@@ -1,5 +1,4 @@
 using System.Text.Json;
-using KeyLoad.Core;
 using KeyLoad.Core.Features.Authorization;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
@@ -51,7 +50,7 @@ internal sealed class RecurringSagaDatabase : IDisposable
         Database.Bootstrap(new(RootPrincipal, TenantId, [new("*", "*", Capability.All)], ["*"])
         {
             ClusterAdministrator = true
-        }, DatabaseEngine.Credential(RootPrincipal, RootPrincipal, Credential));
+        }, AuthorizationExecution.Credential(RootPrincipal, RootPrincipal, Credential));
         ConfigureQueueDefinition(Queue, fields, headers, queuePolicy, null);
         ConfigureQueueDefinition(TimeoutQueue, null, null, timeoutQueuePolicy, null);
     }

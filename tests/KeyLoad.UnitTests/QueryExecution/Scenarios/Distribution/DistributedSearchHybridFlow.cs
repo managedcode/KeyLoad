@@ -1,6 +1,5 @@
 using System.Collections.Immutable;
 using System.Security.Cryptography;
-using KeyLoad.Core;
 using KeyLoad.Query.Features.QueryExecution;
 using KeyLoad.Query.Features.Search;
 using KeyLoad.UnitTests.Features.DocumentStorage;

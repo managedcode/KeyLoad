@@ -1,4 +1,3 @@
-using KeyLoad.Core;
 using KeyLoad.Storage;
 using TUnit.Assertions.Enums;
 
@@ -50,7 +49,7 @@ internal sealed class RuntimeJournalQuotaAndIdentityTests
         var principal = new PrincipalRecord(RuntimeJournalFixture.JournalPrincipal, "system", [], []);
         await Assert.ThrowsExactlyAsync<KeyLoadException>(() => Task.Run(() => fixture.SubmitOperation(
             OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(principal)).Get<PrincipalRecord>()));
-        var credential = DatabaseEngine.Credential("runtime-journal-public", RuntimeJournalFixture.JournalPrincipal,
+        var credential = AuthorizationExecution.Credential("runtime-journal-public", RuntimeJournalFixture.JournalPrincipal,
             "runtime-journal.unit-test-credential-32-characters");
         await Assert.ThrowsExactlyAsync<KeyLoadException>(() => Task.Run(() => fixture.SubmitOperation(
             OperationKind.ConfigureApiKey, new ConfigureApiKeyRequest(credential)).Get<ApiKeyRecord>()));

@@ -1,5 +1,4 @@
 using KeyLoad.Clustering;
-using KeyLoad.Core;
 using KeyLoad.UnitTests.Features.Messaging;
 using TUnit.Assertions.Enums;
 

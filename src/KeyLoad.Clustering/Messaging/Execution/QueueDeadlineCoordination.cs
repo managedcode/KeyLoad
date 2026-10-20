@@ -19,7 +19,7 @@ internal static class QueueDeadlineCoordination
         {
             throw Errors.Fail(ErrorCode.Validation, DueCoordinatorFields.InvalidHint);
         }
-        DatabaseEngine.ValidatePartition(hint.Lane.Partition);
+        EngineResourceAccess.ValidatePartition(hint.Lane.Partition);
         JsonData.Identifier(hint.Lane.Queue);
         var subject = options.Value.QueueDeadlinePrincipalId
             ?? throw Errors.Fail(ErrorCode.UnsupportedCapability, UnavailablePrincipal);

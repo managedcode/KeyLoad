@@ -77,7 +77,7 @@ internal static class CommandOutcomePartitionIdentity
 
         try
         {
-            DatabaseEngine.ValidatePartition(value);
+            EngineResourceAccess.ValidatePartition(value);
             return new(CommandOutcomeScopeKind.Partition, value);
         }
         catch (KeyLoadException error) when (error.Code == ErrorCode.Validation)

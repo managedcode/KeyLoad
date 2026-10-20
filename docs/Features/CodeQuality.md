@@ -53,7 +53,7 @@ unless stated otherwise. A criterion with no automated case names its evidence.
 
 | Requirement | Acceptance (pass condition) | Verified by |
 |---|---|---|
-| REQ-CQ-001: the Prostir EditorConfig is the source of truth and every project builds with strict SDK/style analysis | AC-CQ-001: `TreatWarningsAsErrors`, `CodeAnalysisTreatWarningsAsErrors`, `EnableNETAnalyzers`, `EnforceCodeStyleInBuild`, all `RunAnalyzers*` switches, `AnalysisLevel=latest-all` and XML documentation are on; the `EnforceKeyLoadCodeQuality` target fails the build before compilation when any is off; the analyzer is attached to every project except itself and its tests | Release solution build with `-warnaserror` (CI `Build and test KeyLoad`); a build with `-p:RunAnalyzers=false` must fail |
+| REQ-CQ-001: the repository EditorConfig is the source of truth and every project builds with strict SDK/style analysis | AC-CQ-001: `TreatWarningsAsErrors`, `CodeAnalysisTreatWarningsAsErrors`, `EnableNETAnalyzers`, `EnforceCodeStyleInBuild`, all `RunAnalyzers*` switches, `AnalysisLevel=latest-all` and XML documentation are on; the shared build properties configure these policies; every project explicitly references the analyzer, and the analyzer project checks its own compiled source | Debug solution build with `-warnaserror`; Linux CI records delivered-source qualification separately |
 | REQ-CQ-002: KeyLoad-owned Roslyn rules are editable and proven by real compilations | AC-CQ-002: compiler cases assert diagnostic ID, severity and exact span for the rules they exercise. AC-CQ-004: eighteen rules have unique enabled IDs and expected severities. Each rule selects its generated-code contract; KLD0038 and KLD0039 analyze generated code. | `DiagnosticContractTests` (`AllEighteenRulesHaveUniqueEnabledIdsAndExpectedSeveritiesAsync`) and the existing compiler case folders; focused compiler execution evidence for KLD0038/KLD0039 remains open. |
 | REQ-CQ-003: compiler SARIF is retained, including for failed builds | AC-CQ-003: each project writes `artifacts/code-quality/<project>/<configuration>/<framework>/diagnostics.sarif`; CI uploads `code-quality-<os>` even when the build fails, and an upload never turns a failed build green | Workflow review of `Directory.Build.targets` and the `Save build diagnostics` step (explicit review exception) |
 | REQ-CQ-004: quality gates are enforced and qualification is stated honestly | AC-CQ-005: no required gate is skipped, disabled or downgraded to pass. AC-CQ-006: documentation and status record source configuration, local checks and exact-source Linux evidence separately. AC-CQ-022: the complete solution passes the strict Release build and `dotnet format --verify-no-changes`; repairs preserve public signatures, persisted bytes, signed identities, cancellation and lifetime rules. AC-CQ-023: every source-bound method with cyclomatic complexity above 20 is reviewed and, where it helps, split along a real responsibility | Governance check `node scripts/Features/RepositoryGovernance/verify.mjs`; review of `docs/implementation/status.json`; Release build and formatter gates (AC-CQ-022) |
@@ -73,7 +73,7 @@ unless stated otherwise. A criterion with no automated case names its evidence.
 
 ## Build policy
 
-- Every project builds in Release with `-warnaserror`; warnings are errors.
+- Local development builds every project in Debug with `-warnaserror`; warnings are errors.
   `TreatWarningsAsErrors` and `CodeAnalysisTreatWarningsAsErrors` stay on.
   Diagnostics are repaired at the source, never silenced, lowered in severity or
   turned off.
@@ -93,8 +93,8 @@ unless stated otherwise. A criterion with no automated case names its evidence.
 
 ## Analyzer rules
 
-`KeyLoad.Analyzers` is attached centrally and compiles against the Roslyn that
-ships with the pinned SDK. Each rule declares its generated-code contract through
+Every project references `KeyLoad.Analyzers` explicitly. The analyzer compiles
+against centrally pinned Roslyn NuGet packages, without SDK DLL references. Each rule declares its generated-code contract through
 the Roslyn API. Analysis is concurrent and cancellable, and diagnostic IDs are
 unique and never reused.
 
@@ -139,8 +139,15 @@ Rule behaviour follows these constraints:
   constants. Serializer field IDs and protocol bytes are not deployment policy.
 - A literal or policy value hidden behind a constant, a default parameter, a
   getter or an options clone that overwrites policy is still reported.
-- Test input and expected-data assemblies are outside KLD0035/KLD0036; their
-  configuration helpers still follow the options path.
+- Analyzer execution does not select assemblies by name or exclude test projects.
+  Project references belong to each `.csproj`. The analyzer implementation checks
+  its own source after compilation. Its owner-approved project-local `NoWarn` setting
+  disables only literal rules KLD0035/KLD0036 in the analyzer implementation;
+  semantic, structural and SDK rules remain enabled.
+- Owner-approved project-local `NoWarn` settings also disable KLD0035/KLD0036/KLD0037
+  in the six projects marked `IsTestProject`, including the comparison host.
+  Structural limits and SDK diagnostics remain enabled. Runtime projects retain
+  all three rules.
 
 Authoring a rule: add a public `[DiagnosticAnalyzer(LanguageNames.CSharp)]` class
 under the slice, allocate the next unused `KLD` ID, call

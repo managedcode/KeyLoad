@@ -46,7 +46,7 @@ internal static class CatalogBootstrapAuthoritySeed
         args.Add(McpCallerProtocol.CommandId, command);
         await SqlClusterProtocol.EqualAsync(principal, (await McpCallerAssertions.SuccessAsync<PrincipalRecord>(
             await root.Mcp.Client.InvokeKeyLoadToolAsync(McpCallerTools.PrincipalsConfigure, args, token))).Value);
-        var credential = DatabaseEngine.Credential(principal.Id, principal.Id, secret);
+        var credential = AuthorizationExecution.Credential(principal.Id, principal.Id, secret);
         var credentialCommand = Guid.NewGuid();
         await McpCallerAssertions.SdkStatusAsync(await root.Sdk.ConfigureApiKeyAsync(credentialCommand, credential, token));
         var credentialArgs = McpOfficialClient.Arguments(new ConfigureApiKeyRequest(credential));

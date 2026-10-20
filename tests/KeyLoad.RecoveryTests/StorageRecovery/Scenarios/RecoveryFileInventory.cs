@@ -17,7 +17,7 @@ internal static class RecoveryFileInventory
                      .Order(StringComparer.Ordinal))
         {
             await using var input = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite,
-                bufferSize: 4_096, FileOptions.Asynchronous | FileOptions.SequentialScan);
+                bufferSize: RecoveryExecutionOptions.TrialPolicy.Value.FileBufferBytes, FileOptions.Asynchronous | FileOptions.SequentialScan);
             var digest = await SHA256.HashDataAsync(input, cancellationToken);
             files.Add(Path.GetRelativePath(directory, path), Convert.ToHexString(digest));
         }

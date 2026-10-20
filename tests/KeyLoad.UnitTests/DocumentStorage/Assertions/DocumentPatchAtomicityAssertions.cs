@@ -1,4 +1,3 @@
-using KeyLoad.Core;
 using KeyLoad.Query;
 using ManagedCode.Communication;
 using static KeyLoad.UnitTests.Features.DocumentStorage.DocumentPatchAtomicityContract;

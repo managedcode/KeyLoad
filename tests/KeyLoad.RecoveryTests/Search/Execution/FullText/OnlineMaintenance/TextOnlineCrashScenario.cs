@@ -13,6 +13,9 @@ internal static class TextOnlineCrashScenario
     internal const string OriginalAlias = "keyload.crashhost.text-online-original";
     internal const string Prepare = "execution-text-online-prepare";
     internal const string Fault = "execution-text-online-fault";
+    internal const string Corrupt = "execution-text-online-corrupt";
+    internal const string PublicationLeafFile = "text-online-publication-leaf.bin";
+    internal const string PublicationBytesFile = "text-online-publication-bytes.bin";
     internal const string Recover = "execution-text-online-recover";
     internal const string Verify = "execution-text-online-verify";
     internal const string OriginalFile = "text-online-original.bin";
@@ -22,7 +25,7 @@ internal static class TextOnlineCrashScenario
 
     internal static async Task<bool> TryRunAsync(string[] args)
     {
-        if (args.Length != ExpectedArgumentCount || args[ModeArgument] is not (Prepare or Fault or Recover or Verify))
+        if (args.Length != ExpectedArgumentCount || args[ModeArgument] is not (Prepare or Fault or Corrupt or Recover or Verify))
         {
             return false;
         }
@@ -31,6 +34,11 @@ internal static class TextOnlineCrashScenario
             or TextFaultStage.OnlineCatalogPendingFlushed))
         {
             throw new InvalidOperationException(TextIncrementalCrashProtocol.Invalid);
+        }
+        if (args[ModeArgument] == Corrupt)
+        {
+            await RequireColdCorruptionAsync(args[RootArgument], Guid.Parse(args[IncarnationArgument]));
+            return true;
         }
         var boundary = new TextCrashBoundary(stage) { Armed = args[ModeArgument] == Fault };
         var failures = new List<Exception>();
@@ -61,9 +69,31 @@ internal static class TextOnlineCrashScenario
         if (mode == Fault)
         {
             _ = await TextOnlineCrashFlow.RunAsync(runtime, retained.Request, CancellationToken.None,
-                result => TextIncrementalEvidenceFiles.WriteAsync(root, ReceiptFile, result, CancellationToken.None));
+                result => TextOnlineCrashProof.CapturePublicationAsync(root, runtime, retained.Request, result));
             throw new InvalidOperationException(TextIncrementalCrashProtocol.Invalid);
         }
         await TextOnlineCrashProof.RecoverAsync(root, runtime, retained, mode == Verify);
     }
+    private static async Task RequireColdCorruptionAsync(string root, Guid incarnation)
+    {
+        var refused = false;
+        try
+        {
+            await using var runtime = new TextOnlineCrashRuntime(root, incarnation, null);
+            await runtime.Canonical.ResumeAppliedAsync(CancellationToken.None);
+            var original = await TextIncrementalEvidenceFiles.ReadAsync<TextOnlineCrashOriginal>(root,
+                OriginalFile, CancellationToken.None);
+            _ = await TextOnlineCrashFlow.RunAsync(runtime, original.Request, CancellationToken.None);
+        }
+        catch (KeyLoadException error) when (error.Code == ErrorCode.Corruption)
+        {
+            refused = true;
+        }
+        if (!refused)
+        {
+            throw new InvalidOperationException(TextIncrementalCrashProtocol.Invalid);
+        }
+        await RecoveryProcessPause.WriteAcknowledgementAsync();
+    }
+
 }

@@ -45,15 +45,15 @@ internal sealed class GrainInterfaceVersionTests
         await Assert.That(findings).IsEmpty();
     }
 
-    /// <summary>Verifies external assembly is ignored.</summary>
+    /// <summary>Verifies grain version enforcement regardless of assembly name.</summary>
     [Test]
-    public async Task ExternalAssemblyIsIgnoredAsync()
+    public async Task EveryAssemblyRequiresGrainInterfaceVersionsAsync()
     {
         const string source = """
             public interface IExternalGrain : Orleans.IGrainWithStringKey;
             """;
         var findings = await AnalyzerFixture.AnalyzeAsync(new GrainInterfaceVersionAnalyzer(), source,
             AnalyzerFixture.ExternalAssembly);
-        await Assert.That(findings).IsEmpty();
+        await AnalyzerFixture.AssertFindingAsync(findings, Id, DiagnosticSeverity.Error, source, "IExternalGrain");
     }
 }

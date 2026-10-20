@@ -26,7 +26,7 @@ internal static class RequiredProcessingPolicyClusterSetup
                 new(RequiredProcessingPolicyClusterState.Derived, ResourceKind.Collection, state.Partition.TransactionDomainId)), token));
         await PrincipalAsync(root, state, 1L, false, token);
         await McpCallerAssertions.SdkStatusAsync(await root.Sdk.ConfigureApiKeyAsync(Guid.NewGuid(),
-            DatabaseEngine.Credential(state.Key.Split('.')[0], state.Worker, state.Key), token));
+            AuthorizationExecution.Credential(state.Key.Split('.')[0], state.Worker, state.Key), token));
         await EnqueueAsync(root, state, "first", token);
         return state;
     }

@@ -24,7 +24,7 @@ internal static class FileMetadataKeys
     internal static void Validate(FileAddress address, bool allowEmpty = false)
     {
         ArgumentNullException.ThrowIfNull(address);
-        DatabaseEngine.ValidatePartition(address.Partition);
+        EngineResourceAccess.ValidatePartition(address.Partition);
         JsonData.Identifier(address.Resource);
         var path = address.Path;
         if (path is null || path.Length > FileStorageProtocol.MaximumPathCharacters

@@ -50,9 +50,9 @@ internal sealed class ProgramEndpointMappingTests
         await Assert.That(findings).IsEmpty();
     }
 
-    /// <summary>Verifies direct mapping outside server program is ignored.</summary>
+    /// <summary>Verifies endpoint composition applies to every executable assembly.</summary>
     [Test]
-    public async Task DirectMappingOutsideServerProgramIsIgnoredAsync()
+    public async Task DirectMappingInEveryProgramIsReportedAsync()
     {
         var external = await AnalyzerFixture.AnalyzeAsync(new ProgramEndpointMappingAnalyzer(),
             Source, AnalyzerFixture.ExternalAssembly, AnalyzerFixture.ProgramPath,
@@ -60,7 +60,8 @@ internal sealed class ProgramEndpointMappingTests
         var extension = await AnalyzerFixture.AnalyzeAsync(new ProgramEndpointMappingAnalyzer(),
             Source, AnalyzerFixture.ServerAssembly, AnalyzerFixture.ServerEndpointsPath,
             executable: true, additionalSource: AggregateSource);
-        await Assert.That(external).IsEmpty();
+        await AnalyzerFixture.AssertFindingAsync(external, Id, DiagnosticSeverity.Error,
+            Source, "app.MapGet", AnalyzerFixture.ProgramPath);
         await Assert.That(extension).IsEmpty();
     }
 

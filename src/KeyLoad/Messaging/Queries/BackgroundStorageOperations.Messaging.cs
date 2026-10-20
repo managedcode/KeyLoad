@@ -67,7 +67,7 @@ internal sealed partial class BackgroundStorageOperations
         {
             token.ThrowIfCancellationRequested();
             ArgumentNullException.ThrowIfNull(hint);
-            DatabaseEngine.ValidatePartition(hint.Lane.Partition);
+            EngineResourceAccess.ValidatePartition(hint.Lane.Partition);
             if (hint.Kind == DueWorkKind.Saga)
             {
                 var eligible = SagaTimeoutEligibility.Read(Database, hint, clock.GetUtcNow());
@@ -89,7 +89,7 @@ internal sealed partial class BackgroundStorageOperations
             {
                 throw Errors.Fail(ErrorCode.Validation, DueCoordinatorFields.InvalidHint);
             }
-            DatabaseEngine.ValidatePartition(hint.Lane.Partition);
+            EngineResourceAccess.ValidatePartition(hint.Lane.Partition);
             JsonData.Identifier(hint.Lane.Queue);
             var subject = due.Value.QueueDeadlinePrincipalId
                 ?? throw Errors.Fail(ErrorCode.UnsupportedCapability, QueueDeadlineCoordination.UnavailablePrincipal);

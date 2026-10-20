@@ -15,7 +15,7 @@ internal static class AnnProjectionPinValidation
         AnnMaintenanceRequest request)
     {
         var consumer = request.Consumer;
-        var state = DatabaseEngine.RequireActiveProjectionConsumer(view, principal, consumer, request.IndexGeneration);
+        var state = ChangeFeedsQueriesProjectionConsumerAuthority.RequireActiveProjectionConsumer(view, principal, consumer, request.IndexGeneration);
         RequireOwner(database, view, principal, partition, request);
         RequireMaintenanceProfile(database, state, principal, request);
         if (consumer.Partition != partition || !state.Definition.Resources.IsEmpty

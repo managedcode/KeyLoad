@@ -45,12 +45,13 @@ internal static class CrossTenantClusterWholeFlow
     {
         var partition = new PartitionRef(McpDocumentProtocol.TenantPrefix + Guid.NewGuid().ToString(McpCallerProtocol.GuidFormat),
             McpDocumentProtocol.Database, McpDocumentProtocol.Domain, Guid.NewGuid().ToString(McpCallerProtocol.GuidFormat));
-        var scenario = new McpDocumentScenario(partition);
-        var resource = new ResourceDefinition(McpDocumentProtocol.Collection, ResourceKind.Collection, scenario.Partition.TransactionDomainId)
+        var resource = new ResourceDefinition(McpDocumentProtocol.Collection, ResourceKind.Collection, partition.TransactionDomainId)
         {
             Indexes = [new(Index, ["/secret"])]
         };
-        await McpCallerAssertions.SdkSuccessAsync(await admin.ConfigureResourceAsync(Guid.NewGuid(),
+        var creationId = Guid.NewGuid();
+        var scenario = McpDocumentScenario.ForCreation(partition, creationId, resource);
+        await McpCallerAssertions.SdkSuccessAsync(await admin.ConfigureResourceAsync(creationId,
             new(scenario.Partition.TenantId, scenario.Partition.DatabaseId, resource), token));
         await scenario.SeedAsync(fixture, token);
         return scenario;

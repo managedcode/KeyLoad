@@ -6,7 +6,7 @@ internal sealed class SiteBrowserSessionAdmissionTests
     public async Task AC_BC_CHROME_001_RealSessionsSerializeAndQueuedCancellationSettles()
     {
         var token = TestContext.Current!.Execution.CancellationToken;
-        var browserPath = Environment.GetEnvironmentVariable(SiteBrowserTokens.BrowserEnvironment);
+        var browserPath = SiteEnvironmentConfiguration.Capture().Value.Browser;
         await using var temporary = SiteTempDirectory.Create();
         var admission = SiteBrowserSessionAdmission.Shared;
         var firstProfile = CreateProfile(temporary.Path, "first");

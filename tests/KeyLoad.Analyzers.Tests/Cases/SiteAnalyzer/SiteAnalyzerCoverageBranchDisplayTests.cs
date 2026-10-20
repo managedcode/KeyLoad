@@ -42,18 +42,18 @@ internal sealed class SiteAnalyzerCoverageBranchDisplayTests
     {
         using var scope = new SiteAnalyzerCoverageTestScope();
         await scope.PrepareAsync();
-        foreach (var sample in ObservedDisplays)
+        foreach (var measurement in ObservedDisplays)
         {
-            await scope.WriteFixtureAsync(CreateCoverageReport(sample.Display));
+            await scope.WriteFixtureAsync(CreateCoverageReport(measurement.Display));
             var result = await scope.RunAsync(SiteAnalyzerCoverageTokens.ModeVerify);
             using var report = SiteAnalyzerCoverageTestScope.ReadJson(scope.SummaryPath);
             var module = report.RootElement.GetProperty(SiteAnalyzerCoverageTokens.JsonSummaryProperty);
             await Assert.That(module.ValueKind).IsEqualTo(JsonValueKind.Object);
             await Assert.That(module.GetProperty(SiteAnalyzerCoverageTokens.JsonBranchesCovered).GetInt64())
-                .IsEqualTo(BranchRecordCount * sample.Covered);
+                .IsEqualTo(BranchRecordCount * measurement.Covered);
             await Assert.That(module.GetProperty(SiteAnalyzerCoverageTokens.JsonBranchesValid).GetInt64())
-                .IsEqualTo(BranchRecordCount * sample.Total);
-            var expectedPass = sample.Covered * CoveragePercentScale >= sample.Total * BranchThresholdPercent;
+                .IsEqualTo(BranchRecordCount * measurement.Total);
+            var expectedPass = measurement.Covered * CoveragePercentScale >= measurement.Total * BranchThresholdPercent;
             await Assert.That(report.RootElement.GetProperty(SiteAnalyzerCoverageTokens.JsonPassedProperty).GetBoolean())
                 .IsEqualTo(expectedPass);
             await Assert.That(result.ExitCode == SiteAnalyzerCoverageTokens.SuccessExitCode).IsEqualTo(expectedPass);

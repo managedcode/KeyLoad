@@ -12,7 +12,7 @@ internal static class SiteCoverageGate
     {
         sessionMode = SiteCoverageModeSelector.Current;
         var repository = RequiredPath(SiteTokens.RepositoryEnvironment);
-        var revision = Environment.GetEnvironmentVariable(SitePublicationTokens.SourceRevisionEnvironment);
+        var revision = SiteEnvironmentConfiguration.Capture().Value.SourceRevision;
         await SiteQualificationSource.RequireCheckoutAsync(repository, revision ?? string.Empty, CancellationToken.None);
         if (sessionMode == SiteCoverageMode.Measured)
         {
@@ -32,7 +32,7 @@ internal static class SiteCoverageGate
         var artifactRoot = RequiredPath(SiteCoverageTokens.CoverageRootEnvironment);
         var manifestHash = await SiteCoverageSourceManifestWriter.VerifyManifestAsync(artifactRoot).ConfigureAwait(false);
         var manifest = await ReadManifestAsync(artifactRoot).ConfigureAwait(false);
-        if (Environment.GetEnvironmentVariable(SitePublicationTokens.SourceRevisionEnvironment) != manifest.SourceRevision)
+        if (SiteEnvironmentConfiguration.Capture().Value.SourceRevision != manifest.SourceRevision)
         {
             throw new InvalidOperationException(SiteCoverageTokens.SourceMismatchFailure);
         }
@@ -176,6 +176,7 @@ internal static class SiteCoverageGate
         return manifest;
     }
 
+    [KeyLoad.ConfigurationBinding]
     private static string RequiredPath(string name)
     {
         var value = Environment.GetEnvironmentVariable(name);

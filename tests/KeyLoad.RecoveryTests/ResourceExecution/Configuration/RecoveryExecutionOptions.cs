@@ -8,8 +8,18 @@ using Microsoft.Extensions.Options;
 namespace KeyLoad.RecoveryTests;
 
 /// <summary>Explicit validated execution options composition for genuine test-owned engine and replica fixtures.</summary>
+[ConfigurationBinding]
 internal static class RecoveryExecutionOptions
 {
+    internal static IOptions<RecoveryTrialOptions> TrialPolicy { get; } = Trial();
+
+    private static IOptions<RecoveryTrialOptions> Trial()
+    {
+        var settings = new RecoveryTrialOptions();
+        settings.Validate();
+        return Options.Create(settings);
+    }
+
     internal static IOptions<ProcessReadinessOptions> ProcessReadiness()
     {
         var settings = new ProcessReadinessOptions();

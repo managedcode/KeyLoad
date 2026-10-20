@@ -5,9 +5,10 @@ namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
 
 internal static class SiteAnalyzerCoverageProcess
 {
+    private static readonly Microsoft.Extensions.Options.IOptions<CoverageProcessOptions> Policy = CoverageProcessConfiguration.Capture();
     private static readonly SemaphoreSlim ProcessSlots = new(
-        SiteAnalyzerCoverageTokens.MaximumConcurrentPowerShellProcesses,
-        SiteAnalyzerCoverageTokens.MaximumConcurrentPowerShellProcesses);
+        Policy.Value.MaximumConcurrentProcesses,
+        Policy.Value.MaximumConcurrentProcesses);
 
     internal static Task<(int ExitCode, string StandardOutput, string StandardError)> ReadPowerShellRuntimeAsync(string workingDirectory) =>
         RunAsync(
@@ -25,7 +26,7 @@ internal static class SiteAnalyzerCoverageProcess
         string workingDirectory,
         IReadOnlyDictionary<string, string?>? environmentOverrides = null)
     {
-        using var timeout = new CancellationTokenSource(SiteAnalyzerCoverageTokens.ProcessTimeoutMilliseconds);
+        using var timeout = new CancellationTokenSource(Policy.Value.ProcessTimeout);
         await ProcessSlots.WaitAsync(timeout.Token);
         try
         {
@@ -159,7 +160,7 @@ internal static class SiteAnalyzerCoverageProcess
             if (!process.HasExited)
             {
                 process.Kill(entireProcessTree: true);
-                using var cleanupTimeout = new CancellationTokenSource(SiteAnalyzerCoverageTokens.CleanupTimeoutMilliseconds);
+                using var cleanupTimeout = new CancellationTokenSource(Policy.Value.CleanupTimeout);
                 await process.WaitForExitAsync(cleanupTimeout.Token);
             }
         }
@@ -173,7 +174,7 @@ internal static class SiteAnalyzerCoverageProcess
     {
         try
         {
-            using var timeout = new CancellationTokenSource(SiteAnalyzerCoverageTokens.CleanupTimeoutMilliseconds);
+            using var timeout = new CancellationTokenSource(Policy.Value.CleanupTimeout);
             await capture.WaitAsync(timeout.Token);
         }
         catch (Exception error) when (IsNonFatalCleanupFailure(error))

@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <Target Name="CaptureKeyLoadFunctionalCompilationIdentity" BeforeTargets="CoreCompile"
-          Condition="'$(IsCrossTargetingBuild)' != 'true' and '$(DesignTimeBuild)' != 'true' and '$(TargetFramework)' == 'net10.0'">
+          Condition="'$(IsCrossTargetingBuild)' != 'true' and '$(DesignTimeBuild)' != 'true'">
     <ItemGroup>
       <_KeyLoadCompileIdentityTUnitVersion Include="@(PackageVersion)" Condition="'%(PackageVersion.Identity)' == 'TUnit'" />
     </ItemGroup>
@@ -118,7 +118,7 @@
   </Target>
 
   <Target Name="VerifyKeyLoadFunctionalCompilationIdentityInputs" AfterTargets="CoreCompile"
-          Condition="'$(IsCrossTargetingBuild)' != 'true' and '$(DesignTimeBuild)' != 'true' and '$(TargetFramework)' == 'net10.0'">
+          Condition="'$(IsCrossTargetingBuild)' != 'true' and '$(DesignTimeBuild)' != 'true'">
     <GetFileHash Files="@(_KeyLoadCompileIdentitySource)" Algorithm="SHA256">
       <Output TaskParameter="Items" ItemName="_KeyLoadCompileIdentityVerifiedSource" />
     </GetFileHash>

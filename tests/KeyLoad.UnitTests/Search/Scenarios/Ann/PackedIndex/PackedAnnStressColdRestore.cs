@@ -1,4 +1,3 @@
-using KeyLoad.Core;
 using KeyLoad.Query.Features.Search;
 using KeyLoad.Storage.ZoneTree;
 using KeyLoad.UnitTests.Features.Messaging;

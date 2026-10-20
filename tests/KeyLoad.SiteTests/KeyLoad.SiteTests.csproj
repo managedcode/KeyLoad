@@ -3,8 +3,14 @@
     <OutputType>Exe</OutputType>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
+    <NoWarn>$(NoWarn);KLD0035;KLD0036;KLD0037</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="TUnit" />
+    <ProjectReference Include="../../src/KeyLoad.Abstractions/KeyLoad.Abstractions.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../analyzers/KeyLoad.Analyzers/KeyLoad.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" IsAspireProjectResource="false" PrivateAssets="all" />
+  </ItemGroup>
+  <Import Project="$(MSBuildThisFileDirectory)../../build/CodeQuality/FunctionalCompilationIdentity.targets" />
 </Project>

@@ -12,14 +12,9 @@ internal sealed class AggregateTypeCodeLineAccumulator
 
     internal void Add(INamedTypeSymbol type, int codeLines, Location location)
     {
-        measurements.AddOrUpdate(
-            type,
-            static (symbol, state) => new AggregateTypeCodeMeasurement(symbol, state.CodeLines, state.Location),
-            static (symbol, current, state) => new AggregateTypeCodeMeasurement(
-                symbol,
-                current.CodeLines + state.CodeLines,
-                EarlierLocation(current.Location, state.Location)),
-            (CodeLines: codeLines, Location: location));
+        measurements.AddOrUpdate(type, new AggregateTypeCodeMeasurement(type, codeLines, location),
+            (symbol, current) => new AggregateTypeCodeMeasurement(symbol,
+                current.CodeLines + codeLines, EarlierLocation(current.Location, location)));
     }
 
     internal AggregateTypeCodeMeasurement[] Snapshot() => measurements.Values.ToArray();

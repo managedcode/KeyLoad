@@ -106,21 +106,6 @@ internal sealed class AggregateTypeCodeLineCountAnalyzerTests
         await Assert.That(findings).IsEmpty();
     }
 
-    [Test]
-    public async Task OnlyExactCoreDatabaseEngineTypeGetsExpiringExceptionAsync()
-    {
-        await Assert.That(AggregateTypeLimitException.IsAllowed(
-            "KeyLoad.Core", "KeyLoad.Core.DatabaseEngine", new DateOnly(2026, 10, 31))).IsTrue();
-        await Assert.That(AggregateTypeLimitException.IsAllowed(
-            "KeyLoad.Core", "KeyLoad.Core.DatabaseEngine", new DateOnly(2026, 11, 1))).IsFalse();
-        await Assert.That(AggregateTypeLimitException.IsAllowed(
-            "KeyLoad.Other", "KeyLoad.Core.DatabaseEngine", new DateOnly(2026, 10, 31))).IsFalse();
-        await Assert.That(AggregateTypeLimitException.IsAllowed(
-            "KeyLoad.Core", "KeyLoad.DatabaseEngine", new DateOnly(2026, 10, 31))).IsFalse();
-        await Assert.That(AggregateTypeLimitException.IsAllowed(
-            "KeyLoad.Core", "KeyLoad.OtherType", new DateOnly(2026, 10, 31))).IsFalse();
-    }
-
     private static (string First, string Second) CreatePartialType(int count)
     {
         const string firstHeader = "internal partial class Subject";

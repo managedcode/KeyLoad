@@ -1,4 +1,3 @@
-using KeyLoad.Core;
 using KeyLoad.Server;
 using ManagedCode.Communication;
 using Microsoft.Extensions.DependencyInjection;

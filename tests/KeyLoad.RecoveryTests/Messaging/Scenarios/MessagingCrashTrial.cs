@@ -8,7 +8,6 @@ namespace KeyLoad.RecoveryTests.Features.Messaging;
 
 internal static class MessagingCrashTrial
 {
-    private const int TrialTimeoutSeconds = 90;
     private const int MaximumOutputCharacters = 8_192;
 
     internal static async Task RunAsync(string prefix, string mode, CommitStage stage, int mutationIndex,
@@ -17,7 +16,7 @@ internal static class MessagingCrashTrial
         using var admission = await StorageTrialLease.AcquireAsync(callerToken);
         var root = Path.Combine(Path.GetTempPath(), prefix + Guid.NewGuid().ToString("N"));
         CommandIdempotencyProcessChild? child = null;
-        using var timeoutTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(TrialTimeoutSeconds), TimeProvider.System);
+        using var timeoutTimeout = new CancellationTokenSource(RecoveryExecutionOptions.TrialPolicy.Value.CommandTimeout, TimeProvider.System);
         using var timeout = CancellationTokenSource.CreateLinkedTokenSource(callerToken, timeoutTimeout.Token);
         Exception? activeFailure = null;
         try

@@ -1,4 +1,3 @@
-using KeyLoad.Core;
 using KeyLoad.Core.Features.RuntimeJournaling.Identity;
 
 namespace KeyLoad.UnitTests.Features.ResourceExecution;

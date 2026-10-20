@@ -13,7 +13,7 @@ internal static class SiteCoverageNodeProcess
             throw new InvalidOperationException(SiteCoverageTokens.NodeVersionFailure);
         }
 
-        using var deadlineTimeout = new CancellationTokenSource(TimeSpan.FromMilliseconds(SiteTokens.NodeTimeoutMilliseconds), TimeProvider.System);
+        using var deadlineTimeout = new CancellationTokenSource(SiteExecutionConfiguration.Options.Value.NodeTimeout, TimeProvider.System);
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, deadlineTimeout.Token);
         var standardOutput = SiteProcessOutput.ReadAsync(process.StandardOutput, SiteTokens.NodeOutputExceeded,
             deadline.Token);

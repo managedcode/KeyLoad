@@ -46,7 +46,7 @@ internal static class DistributedSearchValidation
             {
                 throw Errors.Fail(ErrorCode.Validation, InvalidShape);
             }
-            DatabaseEngine.ValidatePartition(partition);
+            EngineResourceAccess.ValidatePartition(partition);
             if (!unique.Add(partition))
             {
                 throw Errors.Fail(ErrorCode.Validation, InvalidShape);

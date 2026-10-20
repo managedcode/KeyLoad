@@ -13,8 +13,8 @@ internal static class RemoteTransferAttemptReadShape
             throw Errors.Fail(ErrorCode.Validation, RemoteTransferAttemptProtocol.Invalid);
         }
         RequireRepairFields(request);
-        DatabaseEngine.ValidatePartition(request.Source.Partition);
-        DatabaseEngine.ValidatePartition(request.Destination.Partition);
+        EngineResourceAccess.ValidatePartition(request.Source.Partition);
+        EngineResourceAccess.ValidatePartition(request.Destination.Partition);
         JsonData.Identifier(request.Source.Queue);
         JsonData.Identifier(request.Destination.Queue);
     }

@@ -1,5 +1,4 @@
 using System.Globalization;
-using KeyLoad.Core;
 
 namespace KeyLoad.UnitTests.Features.ResourceExecution;
 

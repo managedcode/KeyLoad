@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using KeyLoad.Core;
 using KeyLoad.RecoveryTests.Features.DocumentStorage;
 using KeyLoad.Storage.ZoneTree;
 using ManagedCode.Communication;

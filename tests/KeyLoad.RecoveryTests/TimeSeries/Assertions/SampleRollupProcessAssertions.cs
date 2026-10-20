@@ -19,6 +19,8 @@ internal static class SampleRollupProcessAssertions
     private const double Average = 4;
     private const int HalfMinute = 30;
     private const int OffsetHours = -5;
+    [ImmutableTemporalData]
+    private static readonly TimeSpan ExpectedOffset = TimeSpan.FromHours(OffsetHours);
 
     internal static async Task VerifyStageAsync(string root, string mode, bool drop, CancellationToken token)
     {
@@ -56,7 +58,7 @@ internal static class SampleRollupProcessAssertions
         var end = SampleRollupCrashContract.End;
         SampleRecord[] expected = [new(SampleRollupCrashContract.Series, new("a", start, 2), 1, SampleRollupCrashContract.Tags),
             new(SampleRollupCrashContract.Series, new("b", start.AddSeconds(HalfMinute), 4), 2, SampleRollupCrashContract.Tags),
-            new(SampleRollupCrashContract.Series, new("c", start.AddSeconds(HalfMinute).ToOffset(TimeSpan.FromHours(OffsetHours)), 6), 3, SampleRollupCrashContract.Tags),
+            new(SampleRollupCrashContract.Series, new("c", start.AddSeconds(HalfMinute).ToOffset(ExpectedOffset), 6), 3, SampleRollupCrashContract.Tags),
             new(SampleRollupCrashContract.Series, new("boundary", end, 8), 4, SampleRollupCrashContract.Tags)];
         await Assert.That(actual.Samples.SequenceEqual(expected)).IsTrue();
         await Assert.That(actual.Rollup).IsEqualTo(new SampleRollupResult(revision, absent ? null :

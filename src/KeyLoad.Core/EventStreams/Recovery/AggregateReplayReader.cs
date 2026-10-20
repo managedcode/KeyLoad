@@ -38,7 +38,7 @@ internal static class AggregateReplayReader
         var principal = database.Principal(metadataView, principalId, database.EvaluationClock.GetUtcNow());
         database.Authorization.Require(principal, request.Stream.Partition, request.Stream.StreamSet,
             Capability.EventsReplay | Capability.EventsRead);
-        var resource = DatabaseEngine.BindAuthorizedReadResource(metadataView, request.Stream.Partition, request.Stream.StreamSet, ResourceKind.StreamSet);
+        var resource = ResourceExecutionQueriesResourceLifetimeReadBinding.BindAuthorizedReadResource(metadataView, request.Stream.Partition, request.Stream.StreamSet, ResourceKind.StreamSet);
         database.Authorization.RequireReplayInput(principal, resource);
         var head = ReadHead(view, request.Stream, budget);
         ValidateHead(head);
@@ -65,7 +65,7 @@ internal static class AggregateReplayReader
 
         ArgumentNullException.ThrowIfNull(request);
         ArgumentNullException.ThrowIfNull(request.Stream);
-        DatabaseEngine.ValidatePartition(request.Stream.Partition);
+        EngineResourceAccess.ValidatePartition(request.Stream.Partition);
         JsonData.Identifier(request.Stream.StreamSet);
         JsonData.Identifier(request.Stream.StreamId);
         JsonData.Identifier(request.ReducerVersion);

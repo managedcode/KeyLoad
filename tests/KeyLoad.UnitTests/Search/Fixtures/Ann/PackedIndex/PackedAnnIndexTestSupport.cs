@@ -1,5 +1,4 @@
 using System.Collections.Immutable;
-using KeyLoad.Core;
 using KeyLoad.Query.Features.Search;
 
 namespace KeyLoad.UnitTests.Features.Search;

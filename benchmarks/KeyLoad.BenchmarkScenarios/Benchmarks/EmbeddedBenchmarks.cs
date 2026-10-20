@@ -148,7 +148,7 @@ public class EmbeddedBenchmarks : IDisposable
             {
                 ClusterAdministrator = true
             },
-                DatabaseEngine.Credential(PrincipalId, PrincipalId, BenchmarkCredential));
+                AuthorizationExecution.Credential(PrincipalId, PrincipalId, BenchmarkCredential));
             Submit(OperationKind.ConfigureResource,
                 new ConfigureResourceRequest(TenantId, DatabaseId,
                     new(CollectionId, ResourceKind.Collection, CollectionId)));

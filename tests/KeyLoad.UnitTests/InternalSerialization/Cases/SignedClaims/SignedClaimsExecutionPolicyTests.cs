@@ -1,5 +1,3 @@
-using KeyLoad.Core;
-
 namespace KeyLoad.UnitTests.Features.InternalSerialization;
 
 /// <summary>AC-CQ-034: execution signed claim admission retains real leases and canonical claim bytes.</summary>

@@ -1,4 +1,3 @@
-using KeyLoad.Core;
 using KeyLoad.UnitTests.Features.Messaging;
 using ManagedCode.Communication.Commands;
 using TUnit.Assertions.Enums;

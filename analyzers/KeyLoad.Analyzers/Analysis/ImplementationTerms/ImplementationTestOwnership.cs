@@ -30,8 +30,9 @@ internal static class ImplementationTestOwnership
                 }
             }
         }
-        while (pending.TryDequeue(out var owner))
+        while (pending.Count != 0)
         {
+            var owner = pending.Dequeue();
             token.ThrowIfCancellationRequested();
             if (!owners.Add(owner.OriginalDefinition))
             {

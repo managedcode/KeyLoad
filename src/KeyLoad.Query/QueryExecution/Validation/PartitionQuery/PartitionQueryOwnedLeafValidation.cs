@@ -23,7 +23,7 @@ internal static class PartitionQueryOwnedLeafValidation
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidDetail);
         }
-        DatabaseEngine.ValidatePartition(leaf.Partition);
+        EngineResourceAccess.ValidatePartition(leaf.Partition);
         JsonData.Identifier(request.Tenant);
         if (leaf.MaxCandidates < MinimumCount || leaf.MaxCandidates > limits.MaxResults
             || leaf.MaxExaminedRecords < EmptyRecords || leaf.MaxExaminedRecords > limits.MaxScanRecords

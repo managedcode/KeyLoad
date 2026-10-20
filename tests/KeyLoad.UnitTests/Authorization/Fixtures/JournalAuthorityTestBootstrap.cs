@@ -1,5 +1,4 @@
 using System.Text.Json;
-using KeyLoad.Core;
 using KeyLoad.Server;
 using Microsoft.Extensions.Options;
 

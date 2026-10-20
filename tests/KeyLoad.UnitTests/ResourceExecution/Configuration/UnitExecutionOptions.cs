@@ -1,4 +1,3 @@
-using KeyLoad.Core;
 using KeyLoad.Query;
 using KeyLoad.Storage.ZoneTree;
 using KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
@@ -7,6 +6,7 @@ using Microsoft.Extensions.Options;
 namespace KeyLoad.UnitTests;
 
 /// <summary>Explicit execution options composition for standalone database and query fixtures.</summary>
+[ConfigurationBinding]
 internal static partial class UnitExecutionOptions
 {
 

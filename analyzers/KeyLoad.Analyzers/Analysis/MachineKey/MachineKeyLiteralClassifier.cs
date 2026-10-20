@@ -92,7 +92,7 @@ internal static class MachineKeyLiteralClassifier
             argument,
             invocation.ArgumentList.Arguments,
             allowFirstLogicalParameter,
-            allowUnboundFallback: boundMethod is null);
+            allowUnresolvedParameter: boundMethod is null);
     }
 
     private static bool IsKeyedMutationMethod(string methodName) =>
@@ -127,7 +127,7 @@ internal static class MachineKeyLiteralClassifier
             argument,
             argumentList.Arguments,
             allowFirstLogicalParameter,
-            allowUnboundFallback: false);
+            allowUnresolvedParameter: false);
     }
 
     private static bool IsMachineKeyAttributeArgument(AttributeArgumentSyntax argument)

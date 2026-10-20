@@ -26,7 +26,7 @@ internal static class GraphSearchFieldAuthority
         {
             throw Errors.Fail(ErrorCode.Conflict, InvalidGraphResource);
         }
-        DatabaseEngine.BindAuthenticatedReadResourceLifetime(metadata, partition, graph, lifetime!);
+        ResourceExecutionQueriesResourceLifetimeReadBinding.BindAuthenticatedReadResourceLifetime(metadata, partition, graph, lifetime!);
         if (usesLabels)
         {
             database.Authorization.RequireFieldUse(principal, graph, LabelField);

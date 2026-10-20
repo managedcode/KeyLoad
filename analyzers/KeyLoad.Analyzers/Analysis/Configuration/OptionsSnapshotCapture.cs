@@ -29,7 +29,7 @@ internal static class OptionsSnapshotCapture
         property.ExpressionBody?.Expression ?? property.AccessorList?.Accessors
             .Where(static accessor => accessor.IsKind(SyntaxKind.GetAccessorDeclaration))
             .Select(static accessor => accessor.ExpressionBody?.Expression ??
-                (accessor.Body?.Statements is [ReturnStatementSyntax statement] ? statement.Expression : null))
+                (accessor.Body?.Statements is { Count: 1 } statements && statements[0] is ReturnStatementSyntax statement ? statement.Expression : null))
             .FirstOrDefault();
 
     private static bool IsFrozenField(Compilation compilation, IOperation operation, CancellationToken cancellationToken) => operation switch

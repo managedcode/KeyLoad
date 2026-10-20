@@ -1,5 +1,4 @@
 using System.Text.Json;
-using KeyLoad.Core;
 using KeyLoad.UnitTests.Features.EventStreams;
 
 namespace KeyLoad.UnitTests.Features.QueryExecution;

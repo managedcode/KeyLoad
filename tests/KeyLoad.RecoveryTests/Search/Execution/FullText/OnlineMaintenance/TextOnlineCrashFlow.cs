@@ -1,5 +1,6 @@
 using KeyLoad.Clustering;
 using KeyLoad.Clustering.Features.Search;
+using KeyLoad.Core;
 
 namespace KeyLoad.RecoveryTests.Features.Search;
 
