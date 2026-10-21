@@ -52,6 +52,7 @@ internal static class ServerConfiguration
         CancellationToken startupCancellation = default)
     {
         startupCancellation.ThrowIfCancellationRequested();
+        builder.WebHost.UseStaticWebAssets();
         builder.AddServiceDefaults();
         builder.Services.AddRuntimeOptions(builder.Configuration);
         var node = ServerNodeOptionsComposition.Read(builder.Configuration);
@@ -135,7 +136,9 @@ internal static class ServerConfiguration
         OrleansHealthEndpoints.Map(app);
         AdminStaticAssets.Map(app);
         app.MapStaticAssets().AllowAnonymous();
-        app.MapRazorComponents<AdminApp>().AddInteractiveServerRenderMode().AllowAnonymous();
+        // The shell owns the complete CSP, including frame-ancestors 'none'.
+        app.MapRazorComponents<AdminApp>().AddInteractiveServerRenderMode(options =>
+            options.ContentSecurityFrameAncestorsPolicy = null).AllowAnonymous();
         app.MapKeyLoadApi();
         app.MapControllers();
         app.MapMcp(McpFramingProtocol.Path);

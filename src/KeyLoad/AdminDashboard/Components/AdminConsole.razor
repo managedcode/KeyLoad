@@ -53,11 +53,11 @@
                             <FluentButton Type="ButtonType.Submit" Appearance="ButtonAppearance.Primary">Load resources</FluentButton>
                         </form>
                     </FluentCard>
-                    <AdminDataView View="view" />
+                    <AdminDataView View="@view" Catalog="Session.Data.Catalog" />
                 }
                 else
                 {
-                    <AdminObservations Snapshot="Session.Snapshot!" Rates="Session.Measurements.Rates" Latency="Session.Measurements.Latency" ErrorPercent="Session.Measurements.ErrorPercent" View="view" />
+                    <AdminObservations Snapshot="Session.Snapshot!" Rates="Session.Measurements.Rates" Latency="Session.Measurements.Latency" ErrorPercent="Session.Measurements.ErrorPercent" View="@view" />
                 }
             }
         </main>

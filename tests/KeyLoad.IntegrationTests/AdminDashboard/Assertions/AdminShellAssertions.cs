@@ -34,9 +34,18 @@ internal static class AdminShellAssertions
         using var head = await client.SendAsync(request, cancellationToken);
         await VerifyHeadersAsync(head);
         await Assert.That((await head.Content.ReadAsByteArrayAsync(cancellationToken)).Length).IsEqualTo(0);
+        await VerifyFrameworkAsync(client, cancellationToken);
         await AdminFaviconAssertions.VerifyAsync(fixture, cancellationToken);
         using var forbidden = await client.PostAsync(new Uri(RootPath, UriKind.Relative), content: null, cancellationToken);
         await Assert.That(forbidden.StatusCode).IsEqualTo(HttpStatusCode.Unauthorized);
+    }
+
+    private static async Task VerifyFrameworkAsync(HttpClient client, CancellationToken cancellationToken)
+    {
+        using var script = await client.GetAsync(new Uri("/_framework/blazor.web.js", UriKind.Relative), cancellationToken);
+        await Assert.That(script.StatusCode).IsEqualTo(HttpStatusCode.OK);
+        await Assert.That(script.Content.Headers.ContentType?.MediaType).IsEqualTo("text/javascript");
+        await Assert.That((await script.Content.ReadAsByteArrayAsync(cancellationToken)).Length).IsGreaterThan(0);
     }
 
     private static async Task VerifyHeadersAsync(HttpResponseMessage response)

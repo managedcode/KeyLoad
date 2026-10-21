@@ -30,16 +30,6 @@ internal sealed class ClusterFixtureDiagnostics : IAsyncDisposable
     private readonly CancellationTokenSource lifetime = new();
     private readonly ConcurrentDictionary<string, ConcurrentQueue<string>> nodeLogs = new(StringComparer.Ordinal);
     private readonly ConcurrentDictionary<string, ConcurrentQueue<string>> nodeFailures = new(StringComparer.Ordinal);
-    private const string RequestFailureMarker = "Database request failed";
-    private const string GrainFailureMarker = "Orleans request rejected:";
-    private const string RpcFailureMarker = "Orleans request stream failed";
-    private const string RpcOriginalCauseMarker = "Orleans original stream cause";
-    private const string StartupFailureMarker = "Unhandled exception.";
-    private const string HostStartupFailureMarker = "Hosting failed to start";
-    private const string DatabaseStartupFailureMarker = "KeyLoad.KeyLoadException:";
-    private const string MaintenanceFailureMarker = "Node-owned replica maintenance failed";
-    private const int FailureLinesPerNode = 3;
-    private const int MaximumCapturedLineBytes = 1_024;
     private readonly ConcurrentDictionary<string, Task> logCapture = new(StringComparer.Ordinal);
     private Task? resourceCapture;
     private readonly ConcurrentDictionary<string, LogSubscriptionEvidence> logEvidence = new(StringComparer.Ordinal);
@@ -182,7 +172,7 @@ internal sealed class ClusterFixtureDiagnostics : IAsyncDisposable
                 foreach (var line in batch)
                 {
                     observation.Received();
-                    CaptureLogLine(buffer, failures, line.Content);
+                    BoundedDiagnosticLog.CaptureLogLine(buffer, failures, line.Content);
                 }
             }
         }
@@ -207,33 +197,7 @@ internal sealed class ClusterFixtureDiagnostics : IAsyncDisposable
         var tail = ReadTail(name);
         return nodeFailures.TryGetValue(name, out var buffer)
             ? buffer.ToArray().Select(line => BoundedDiagnosticLog.ClipUtf8(
-                ReplicaReadFailureEvidence.Attach(line, tail), MaximumCapturedLineBytes)).ToArray() : [];
-    }
-
-    internal static void CaptureLogLine(ConcurrentQueue<string> buffer, ConcurrentQueue<string> failures, string line)
-    {
-        var content = BoundedDiagnosticLog.ClipUtf8(line, MaximumCapturedLineBytes);
-        AppendLogLine(buffer, content, ClusterFixtureProtocol.CapturedLogLinesPerNode);
-        if (content.Contains(RequestFailureMarker, StringComparison.Ordinal)
-            || content.Contains(GrainFailureMarker, StringComparison.Ordinal)
-            || content.Contains(RpcFailureMarker, StringComparison.Ordinal)
-            || content.Contains(RpcOriginalCauseMarker, StringComparison.Ordinal)
-            || content.Contains(MaintenanceFailureMarker, StringComparison.Ordinal)
-            || content.Contains(StartupFailureMarker, StringComparison.Ordinal)
-            || content.Contains(HostStartupFailureMarker, StringComparison.Ordinal)
-            || content.Contains(DatabaseStartupFailureMarker, StringComparison.Ordinal))
-        {
-            AppendLogLine(failures, content, FailureLinesPerNode);
-        }
-    }
-
-    private static void AppendLogLine(ConcurrentQueue<string> buffer, string line, int maximumLines)
-    {
-        buffer.Enqueue(line);
-        while (buffer.Count > maximumLines)
-        {
-            buffer.TryDequeue(out _);
-        }
+                ReplicaReadFailureEvidence.Attach(line, tail), BoundedDiagnosticLog.MaximumCapturedLineBytes)).ToArray() : [];
     }
 
 }

@@ -26,8 +26,8 @@ internal static class AdminFaviconAssertions
         + "img-src 'self' data:; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; object-src 'none'";
     private const string NoSniff = "nosniff";
     private const string NoReferrer = "no-referrer";
-    private const string NoIndexMarkup = "<meta name=\"robots\" content=\"noindex,nofollow\" />";
-    private const string ThemeColorMarkup = "<meta name=\"theme-color\" content=\"#f7f6f2\" />";
+    private const string NoIndexMarkup = "<meta name=\"robots\" content=\"noindex,nofollow\">";
+    private const string ThemeColorMarkup = "<meta name=\"theme-color\" content=\"#f7f6f2\">";
     private const string ConsoleFaviconSvgHref = "href=\"/admin/logo.svg\"";
     private const string ConsoleFaviconIcoHref = "href=\"/admin/favicon.ico\"";
     private const string ConsoleFavicon32Href = "href=\"/admin/favicon-32x32.png\"";

@@ -6,13 +6,13 @@
         <h2>Resources by category</h2>
         <p>Counts describe this bounded page.</p>
         <div id="catalog-chips" class="actions">
-            @foreach (var kind in Session.Data.Catalog.Select(item => item.Kind).Distinct())
+            @foreach (var kind in Catalog.Select(item => item.Kind).Distinct())
             {
-                <FluentButton OnClick="@(() => filter = filter == kind ? null : kind)">@kind (@Session.Data.Catalog.Count(item => item.Kind == kind))</FluentButton>
+                <FluentButton OnClick="@(() => filter = filter == kind ? null : kind)">@kind (@Catalog.Count(item => item.Kind == kind))</FluentButton>
             }
         </div>
         <div id="catalog-table" class="table-scroll">
-            <FluentDataGrid Items="@(Session.Data.Catalog.Where(item => filter is null || item.Kind == filter).AsQueryable())" TGridItem="AdminResourceInfo">
+            <FluentDataGrid Items="@(Catalog.Where(item => filter is null || item.Kind == filter).AsQueryable())" TGridItem="AdminResourceInfo">
                 <PropertyColumn Property="@(item => item.Name)" Title="Name" />
                 <PropertyColumn Property="@(item => item.Kind)" Title="Kind" />
                 <PropertyColumn Property="@(item => item.TransactionDomainId)" Title="Transaction domain" />
@@ -33,7 +33,7 @@ else
             <div id="resource-list" class="resource-list">
                 @foreach (var item in Session.Data.Resources)
                 {
-                    <FluentButton OnClick="@(() => SelectAsync(item))" aria-pressed="@(Session.Data.Selected == item)">@item.Name <small>@item.Kind · @item.TransactionDomainId</small></FluentButton>
+                    <FluentButton Title="@item.Name" OnClick="@(() => SelectAsync(item))" aria-pressed="@(Session.Data.Selected == item)">@item.Name <small>@item.Kind · @item.TransactionDomainId</small></FluentButton>
                 }
                 @if (Session.Data.Resources.IsEmpty) { <p class="empty">No matching resources on this page.</p> }
             </div>
@@ -46,16 +46,16 @@ else
             <div id="data-table" class="table-scroll">
                 @if (Session.Data.Selected?.Kind == ResourceKind.Collection)
                 {
-                    <FluentDataGrid Items="Session.Data.Rows.AsQueryable()" TGridItem="QueryRow">
+                    <FluentDataGrid Items="Session.Data.Rows.ToArray().AsQueryable()" TGridItem="QueryRow">
                         <PropertyColumn Property="@(item => item.EntityId)" Title="Entity" />
                         <PropertyColumn Property="@(item => item.Revision)" Title="Revision" />
                         <TemplateColumn Title="Document" Context="row"><span class="preview">@row.Json</span></TemplateColumn>
-                        <TemplateColumn Title="Details" Context="row"><FluentButton OnClick="@(() => details = row.Json)">View JSON</FluentButton></TemplateColumn>
+                        <TemplateColumn Title="Details" Context="row"><FluentButton Title="View JSON" OnClick="@(() => details = row.Json)">View JSON</FluentButton></TemplateColumn>
                     </FluentDataGrid>
                 }
                 else if (Session.Data.Selected?.Kind == ResourceKind.WorkQueue)
                 {
-                    <FluentDataGrid Items="Session.Data.Messages.AsQueryable()" TGridItem="AdminQueueItem">
+                    <FluentDataGrid Items="Session.Data.Messages.ToArray().AsQueryable()" TGridItem="AdminQueueItem">
                         <PropertyColumn Property="@(item => item.Id)" Title="Message" />
                         <PropertyColumn Property="@(item => item.State)" Title="State" />
                         <PropertyColumn Property="@(item => item.Attempts)" Title="Attempts" />
@@ -92,12 +92,14 @@ else
 
 @code {
     [Parameter, EditorRequired] public string View { get; set; } = string.Empty;
+    [Parameter, EditorRequired] public System.Collections.Immutable.ImmutableArray<AdminResourceInfo> Catalog { get; set; } = [];
     private string? details;
     private ResourceKind? filter;
     private string? priorView;
     protected override void OnParametersSet()
     {
-        if (priorView != View || !Session.Connected || Session.Data.Selected is null) { details = null; filter = null; }
+        if (priorView != View || !Session.Connected) { details = null; filter = null; }
+        if (Session.Data.Selected is null) { details = null; }
         priorView = View;
     }
     private Task SelectAsync(AdminResourceInfo item) { details = null; return Session.LoadDataAsync(item); }

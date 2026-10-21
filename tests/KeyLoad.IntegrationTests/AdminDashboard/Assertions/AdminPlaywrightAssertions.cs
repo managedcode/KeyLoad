@@ -13,6 +13,34 @@ internal static class AdminPlaywrightAssertions
     private const string CurrentAttribute = "aria-current";
     private const string CurrentPage = "page";
 
+    internal static async Task InteractiveAsync(IPage page, string address)
+    {
+        var errors = new System.Collections.Concurrent.ConcurrentQueue<string>();
+        EventHandler<IConsoleMessage> capture = (_, message) =>
+        {
+            if (message.Type == "error" && errors.Count < 20)
+            {
+                errors.Enqueue(message.Text[..Math.Min(message.Text.Length, 512)]);
+            }
+        };
+        page.Console += capture;
+        try
+        {
+            await page.GotoAsync(address);
+            await page.Locator(".console[data-interactive=true]").WaitForAsync();
+        }
+        catch (Exception failure)
+        {
+            var body = await page.Locator("body").InnerTextAsync();
+            throw new InvalidOperationException("Console startup failed: " + page.Url + " | "
+                + body[..Math.Min(body.Length, 512)] + " | " + string.Join(Environment.NewLine, errors), failure);
+        }
+        finally
+        {
+            page.Console -= capture;
+        }
+    }
+
     internal static async Task ViewportsAsync(IPage page)
     {
         var directory = Path.Combine(ClusterFixtureDiagnostics.FindRepositoryRoot().FullName, AdminBrowserProtocol.EvidenceDirectory);

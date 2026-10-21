@@ -54,6 +54,18 @@ In scope: read-only runtime administration, authenticated typed HTTP/.NET SDK/of
 
 Actors: an operator with a current persisted administrator principal, an unauthorized/revoked/expired caller, and an unauthenticated visitor loading only the credential-free server-rendered shell. Authorization is reloaded freshly on the connection grain. The API key is submitted over the Blazor Server circuit, retained in circuit memory and cleared on disconnect/disposal. Server-owned HTTP reads target Kestrel's listening address using the existing typed SDK and Bearer authentication; every operation reloads persisted credentials and administrator authority. The browser cannot select the server destination. User enters tenant/database and atomic partition key; a resource supplies its persisted transaction-domain identity. A catalog resource is not a physical partition. Scope defaults are editable conveniences, not claims about all database tenants.
 
+Server composition enables the SDK's static web assets manifest for execution
+from build output, including Aspire project resources without a launch profile.
+The shell owns the complete Content-Security-Policy response header, including
+`frame-ancestors 'none'`; interactive rendering adds no second frame policy.
+The real shell test requires a nonempty JavaScript bootstrap response as well as
+the original security headers, and the browser case requires a live server circuit.
+Circuit-owned HTTP reads select an actual Kestrel listener after excluding the
+explicitly configured HTTP/2-only and SQL wire ports.
+The data view receives the current catalog as a component parameter, so an
+asynchronous scope load updates the rendered resources even when the selected
+view name stays the same.
+
 
 ## Criteria and pass/fail
 

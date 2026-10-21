@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Text;
 
 namespace KeyLoad.IntegrationTests.Features.StorageReplication;
@@ -5,6 +6,17 @@ namespace KeyLoad.IntegrationTests.Features.StorageReplication;
 /// <summary>Applies the fixture's unchanged final diagnostic line and UTF-8 byte limits.</summary>
 internal static class BoundedDiagnosticLog
 {
+    private const string RequestFailureMarker = "Database request failed";
+    private const string GrainFailureMarker = "Orleans request rejected:";
+    private const string RpcFailureMarker = "Orleans request stream failed";
+    private const string RpcOriginalCauseMarker = "Orleans original stream cause";
+    private const string StartupFailureMarker = "Unhandled exception.";
+    private const string HostStartupFailureMarker = "Hosting failed to start";
+    private const string DatabaseStartupFailureMarker = "KeyLoad.KeyLoadException:";
+    private const string MaintenanceFailureMarker = "Node-owned replica maintenance failed";
+    private const string RenderingFailureMarker = "Unhandled exception rendering component";
+    private const int FailureLinesPerNode = 3;
+    internal const int MaximumCapturedLineBytes = 1_024;
     private const int MaximumLines = 80;
     private const int MaximumUtf8Bytes = 8_192;
 
@@ -106,5 +118,32 @@ internal static class BoundedDiagnosticLog
         }
 
         return builder.ToString();
+    }
+
+    internal static void CaptureLogLine(ConcurrentQueue<string> buffer, ConcurrentQueue<string> failures, string line)
+    {
+        var content = BoundedDiagnosticLog.ClipUtf8(line, MaximumCapturedLineBytes);
+        AppendLogLine(buffer, content, ClusterFixtureProtocol.CapturedLogLinesPerNode);
+        if (content.Contains(RequestFailureMarker, StringComparison.Ordinal)
+            || content.Contains(GrainFailureMarker, StringComparison.Ordinal)
+            || content.Contains(RpcFailureMarker, StringComparison.Ordinal)
+            || content.Contains(RpcOriginalCauseMarker, StringComparison.Ordinal)
+            || content.Contains(MaintenanceFailureMarker, StringComparison.Ordinal)
+            || content.Contains(StartupFailureMarker, StringComparison.Ordinal)
+            || content.Contains(HostStartupFailureMarker, StringComparison.Ordinal)
+            || content.Contains(DatabaseStartupFailureMarker, StringComparison.Ordinal)
+            || content.Contains(RenderingFailureMarker, StringComparison.Ordinal))
+        {
+            AppendLogLine(failures, content, FailureLinesPerNode);
+        }
+    }
+
+    private static void AppendLogLine(ConcurrentQueue<string> buffer, string line, int maximumLines)
+    {
+        buffer.Enqueue(line);
+        while (buffer.Count > maximumLines)
+        {
+            buffer.TryDequeue(out _);
+        }
     }
 }

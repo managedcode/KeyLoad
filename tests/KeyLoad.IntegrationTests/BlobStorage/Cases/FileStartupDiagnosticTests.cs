@@ -15,10 +15,10 @@ internal sealed class FileStartupDiagnosticTests
     {
         var tail = new ConcurrentQueue<string>();
         var causes = new ConcurrentQueue<string>();
-        ClusterFixtureDiagnostics.CaptureLogLine(tail, causes, Cause);
+        BoundedDiagnosticLog.CaptureLogLine(tail, causes, Cause);
         for (var index = NoFrames; index < StackDepth; index++)
         {
-            ClusterFixtureDiagnostics.CaptureLogLine(tail, causes, Frame);
+            BoundedDiagnosticLog.CaptureLogLine(tail, causes, Frame);
         }
         await Assert.That(causes.Single()).IsEqualTo(Cause);
         await Assert.That(tail.Contains(Cause)).IsFalse();

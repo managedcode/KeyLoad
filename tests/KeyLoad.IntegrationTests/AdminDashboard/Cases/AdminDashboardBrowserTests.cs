@@ -13,12 +13,11 @@ internal sealed class AdminDashboardBrowserTests(ClusterFixture fixture)
     private const string EmptyTenantPrefix = "dashboard-empty-";
     private const string EmptyDatabase = "empty-database";
     private const string GuidFormat = "N";
-    private const string Interactive = ".console[data-interactive=true]";
     private const string DataTable = "#data-table";
     private const string Status = "#status-message";
-    private const string Tenant = "#tenant-id";
-    private const string Database = "#database-id";
-    private const string ScopeSubmit = "#scope-form button[type=submit]";
+    private const string Tenant = "#tenant-id input";
+    private const string Database = "#database-id input";
+    private const string ScopeSubmit = "#scope-form fluent-button[type=submit]";
     private const string InjectionAbsent = "window.dashboardInjection !== true";
     private const string CleanStorage = "localStorage.length === 0 && sessionStorage.length === 0";
     private const string Collections = "collections";
@@ -37,14 +36,20 @@ internal sealed class AdminDashboardBrowserTests(ClusterFixture fixture)
         var page = browser.Page;
         var errors = new List<string>();
         page.PageError += (_, error) => errors.Add(error);
-        await page.GotoAsync(new Uri(http.BaseAddress!, AdminPath).AbsoluteUri);
-        await page.Locator(Interactive).WaitForAsync();
+        await AdminPlaywrightAssertions.InteractiveAsync(page, new Uri(http.BaseAddress!, AdminPath).AbsoluteUri);
         await ConnectAsync(page, fixture.AdminKey);
         await SelectAsync(page, Collections);
+        await Assertions.Expect(page.Locator(Status)).ToHaveTextAsync("Resources updated.");
         await page.Locator(Tenant).FillAsync(scenario.Partition.TenantId);
         await page.Locator(Database).FillAsync(scenario.Partition.DatabaseId);
-        await page.Locator("#partition-key").FillAsync(scenario.Partition.PartitionKey);
+        await page.Locator("#partition-key input").FillAsync(scenario.Partition.PartitionKey);
         await page.Locator(ScopeSubmit).ClickAsync();
+        await Assertions.Expect(page.Locator(Status)).ToHaveTextAsync("Resources updated.");
+        await Assertions.Expect(page.Locator(Tenant)).ToHaveValueAsync(scenario.Partition.TenantId);
+        await Assertions.Expect(page.Locator(Database)).ToHaveValueAsync(scenario.Partition.DatabaseId);
+        await Assertions.Expect(page.Locator("#resource-list")).ToContainTextAsync(AdminDashboardScenario.Collection);
+        await File.WriteAllTextAsync(Path.Combine(TestContext.ResultsDirectory, "admin-resources.aria.txt"),
+            await page.Locator("#resource-list").AriaSnapshotAsync(), deadline.Token);
         await page.GetByRole(AriaRole.Button, new() { Name = AdminDashboardScenario.Collection }).ClickAsync();
         await Assertions.Expect(page.Locator(DataTable)).ToContainTextAsync(AdminDashboardScenario.DocumentId);
         await page.GetByRole(AriaRole.Button, new() { Name = "View JSON" }).ClickAsync();
@@ -59,7 +64,7 @@ internal sealed class AdminDashboardBrowserTests(ClusterFixture fixture)
         await Assert.That(await page.EvaluateAsync<bool>(CleanStorage)).IsTrue();
         await Assertions.Expect(page.Locator("body")).Not.ToContainTextAsync(AdminDashboardScenario.DocumentId);
         await Assertions.Expect(page.Locator("body")).Not.ToContainTextAsync(fixture.AdminKey);
-        await page.Locator("#api-key").FillAsync(InvalidCredential);
+        await page.Locator("#api-key input").FillAsync(InvalidCredential);
         await page.Locator("#connect-button").ClickAsync();
         await Assertions.Expect(page.Locator(Status)).ToContainTextAsync("Administrator authorization failed");
         await ConnectAsync(page, fixture.AdminKey);
@@ -69,8 +74,9 @@ internal sealed class AdminDashboardBrowserTests(ClusterFixture fixture)
 
     private static async Task ConnectAsync(IPage page, string key)
     {
-        await page.Locator("#api-key").FillAsync(key);
+        await page.Locator("#api-key input").FillAsync(key);
         await page.Locator("#connect-button").ClickAsync();
+        await Assertions.Expect(page.Locator(Status)).ToHaveTextAsync("Live observations updated.");
         await Assertions.Expect(page.Locator("#connection-state")).ToHaveTextAsync("Connected");
     }
 
@@ -96,10 +102,12 @@ internal sealed class AdminDashboardBrowserTests(ClusterFixture fixture)
         await Assertions.Expect(page.Locator(DataTable)).ToContainTextAsync(AdminDashboardScenario.MessageId);
         await SelectAsync(page, Catalog);
         await Assertions.Expect(page.Locator("#catalog-table")).ToContainTextAsync(AdminDashboardScenario.Collection);
-        foreach (var view in new[] { "files", "cluster", "storage", "performance", "errors", "overview" })
+        foreach (var item in new (string View, string Content)[] { ("files", "#resource-list"), ("cluster", "#topology"),
+                     ("storage", "#disk-table"), ("performance", "#perf-stats"), ("errors", "#error-table"), ("overview", "#activity-chart") })
         {
-            await SelectAsync(page, view);
-            await Assertions.Expect(page.Locator("[data-view=" + view + "]")).ToHaveAttributeAsync("aria-current", "page");
+            await SelectAsync(page, item.View);
+            await Assertions.Expect(page.Locator("[data-view=" + item.View + "]")).ToHaveAttributeAsync("aria-current", "page");
+            await Assertions.Expect(page.Locator(item.Content)).ToBeVisibleAsync();
         }
         await Assertions.Expect(page.Locator("#topology .node")).ToHaveCountAsync(3);
         await Assertions.Expect(page.Locator("#topology .self")).ToHaveCountAsync(1);
