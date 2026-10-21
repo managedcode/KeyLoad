@@ -11,6 +11,7 @@
     <Using Include="KeyLoad.Features.InternalSerialization" />
   </ItemGroup>
   <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.Orleans.TestingHost" PrivateAssets="all" />
     <InternalsVisibleTo Include="KeyLoad.UnitTests" />
     <InternalsVisibleTo Include="KeyLoad.IntegrationTests" />
