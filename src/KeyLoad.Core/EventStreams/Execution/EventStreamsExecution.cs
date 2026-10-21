@@ -98,8 +98,8 @@ public static class EventStreamsExecution
 
         var data = item with
         {
-            PayloadJson = JsonData.Validate(item.PayloadJson, engine.Limits),
-            HeadersJson = JsonData.Validate(item.HeadersJson, engine.Limits)
+            PayloadJson = JsonData.ValidateContent(item.PayloadJson, engine.Limits),
+            HeadersJson = JsonData.ValidateContent(item.HeadersJson, engine.Limits)
         };
         if (retained is not null)
         {

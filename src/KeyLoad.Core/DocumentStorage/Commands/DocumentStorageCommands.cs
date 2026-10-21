@@ -40,7 +40,7 @@ public static class DocumentStorageCommands
         }
 
         Features.RelationalStorage.RelationalRowValidation.ValidateRow(resource, put.Id, put.Json, engine.Limits);
-        var json = JsonData.ValidateDocument(put.Json, engine.Limits);
+        var json = JsonData.ValidateContent(put.Json, engine.Limits);
         foreach (var policy in resource.FieldPolicies)
         {
             engine.Authorization.RequireFieldWrite(principal, resource, policy.Path);

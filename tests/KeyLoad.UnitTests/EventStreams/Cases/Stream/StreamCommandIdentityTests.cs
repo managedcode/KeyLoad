@@ -36,7 +36,10 @@ internal sealed class StreamCommandIdentityTests
     {
         using var fixture = new StreamReadResourceFixture();
         var commandId = Guid.NewGuid();
-        var operation = Operation(fixture.Database, commandId, Append(fixture.Partition, commandId));
+        var data = RetainedAppendIdentityFixture.Data(EventId);
+        var command = new CommandRequest(commandId, fixture.Partition,
+            [new AppendEvents(StreamSetName, StreamId, [data], ExpectedStreamRevision.NoStream)]);
+        var operation = Operation(fixture.Database, commandId, command);
 
         var committed = fixture.Apply(operation);
         var receipt = committed.Get<CommitReceipt>();
@@ -46,6 +49,27 @@ internal sealed class StreamCommandIdentityTests
         await ReplayResultAssertions.Same<CommitReceipt>(replay, committed);
         await Assert.That(fixture.EventSourceHead.TailPosition).IsEqualTo(1L);
         await Assert.That(fixture.Read().Events.Select(record => record.Revision).SequenceEqual([1L])).IsTrue();
+        await Assert.That(fixture.Read().Events.Single().Data).IsEqualTo(data);
+
+        var duplicate = new CommandRequest(Guid.NewGuid(), fixture.Partition,
+            [new AppendEvents(StreamSetName, StreamId, [data], ExpectedStreamRevision.Exact(1))]);
+        var duplicateResult = fixture.Apply(Operation(fixture.Database, duplicate.CommandId, duplicate));
+        await Assert.That(Errors.Code(duplicateResult.Problem)).IsEqualTo(ErrorCode.DuplicateEventId);
+        await Assert.That(duplicateResult.Value).IsNull();
+        var changed = data with
+        {
+            PayloadJson = "{\"a\":\"A\",\"minusZero\":0,\"z\":1}",
+            HeadersJson = "{\"a\":\"o\",\"z\":\"trace\"}"
+        };
+        var conflict = new CommandRequest(Guid.NewGuid(), fixture.Partition,
+            [new AppendEvents(StreamSetName, StreamId, [changed], ExpectedStreamRevision.Exact(1))]);
+        var conflicted = fixture.Apply(Operation(fixture.Database, conflict.CommandId, conflict));
+        await Assert.That(Errors.Code(conflicted.Problem)).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(conflicted.Problem?.Detail).IsEqualTo("The event ID was reused with different content.");
+        await Assert.That(conflicted.Value).IsNull();
+        await Assert.That(fixture.EventSourceHead.TailPosition).IsEqualTo(1L);
+        await Assert.That(fixture.Read().Events.Single().Data).IsEqualTo(data);
+        await ReplayResultAssertions.Same<CommitReceipt>(fixture.Apply(operation), committed);
     }
 
     [Test]

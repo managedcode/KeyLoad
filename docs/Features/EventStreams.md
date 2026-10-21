@@ -42,6 +42,12 @@ Topics and group delivery belong to [Messaging](Messaging.md), CDC/system projec
 
 ## Current replay and event identity contract
 
+Append validates payload and header JSON with the existing size, nesting and
+numeric rules while retaining the original strings. Property order, whitespace,
+escapes and numeric spelling remain part of retained event content. Identical
+content under an already retained EventId returns DuplicateEventId; changed text
+returns Conflict. Authorized read projection still applies current field policies.
+
 Under ADR-075, `AggregateReplayReduction.Reduce` accepts the complete current
 page, exact reducer, validated `IOptions<AggregateReplayWorkerLimits>` and
 cancellation. Every event must match the reducer's current event schema exactly.

@@ -7,7 +7,7 @@ using KeyLoad.Storage;
 
 namespace KeyLoad.Core;
 
-/// <summary>Validates canonical JSON and builds stable operation fingerprints and scalar paths.</summary>
+/// <summary>Validates JSON and builds stable operation fingerprints and scalar paths.</summary>
 public static class JsonData
 {
     private const int NoRetainedBytes = 0;
@@ -35,7 +35,7 @@ public static class JsonData
     public static string Validate(string json, DatabaseLimits limits, bool requireObject = true)
         => ValidateCore(json, limits, requireObject, preserveContent: false);
 
-    internal static string ValidateDocument(string json, DatabaseLimits limits)
+    internal static string ValidateContent(string json, DatabaseLimits limits)
         => ValidateCore(json, limits, requireObject: true, preserveContent: true);
 
     private static string ValidateCore(string json, DatabaseLimits limits, bool requireObject, bool preserveContent)

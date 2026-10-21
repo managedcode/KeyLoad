@@ -25,7 +25,9 @@ internal sealed class RetainedAppendIdentityFixture : IDisposable
         get; set;
     }
     internal StoreIdentity ColdIdentity { get; set; } = null!;
-    internal static EventData Data(string id) => new(id, "Created", "{\"value\":1}", "{\"trace\":\"original\"}");
+    internal static EventData Data(string id) => new(id, "Created",
+        "{ \"z\" : 1.00, \"a\" : \"\\u0041\", \"minusZero\" : -0 }",
+        "{ \"z\" : \"trace\", \"a\" : \"\\u006f\" }");
     internal async Task InitializeAsync()
     {
         Harness.Configure(Streams, ResourceKind.StreamSet);
