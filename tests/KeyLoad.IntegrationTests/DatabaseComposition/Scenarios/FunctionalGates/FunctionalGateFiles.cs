@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Security.Cryptography;
 using System.Text;
+using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.OrleansExecution;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
 using ManagedCode.Communication;
@@ -54,7 +55,9 @@ internal static class FunctionalGateFiles
         using var content = new ByteArrayContent(bytes);
         using var request = UploadRequest(string.Join('/', path, name), content);
         using var response = await context.Writer.SendStorageAsync(request, token);
-        await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
+        await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK)
+            .Because(await response.Content.ReadAsStringAsync(token));
+        await Assert.That(response.Headers.Contains(McpCallerProtocol.RequestHeader)).IsFalse();
         var uploaded = await response.Content.ReadFromJsonAsync<Result<StorageMetadata>>(JsonDefaults.Options, token);
         await Assert.That(uploaded.IsSuccess).IsTrue();
         await Assert.That(uploaded.Value?.Length).IsEqualTo((ulong)bytes.Length);

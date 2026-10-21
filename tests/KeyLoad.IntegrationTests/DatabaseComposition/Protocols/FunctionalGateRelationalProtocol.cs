@@ -42,7 +42,7 @@ internal static class FunctionalGateRelationalProtocol
     internal const int First = 0;
     internal const int Second = 1;
     internal const int TableCount = 3;
-    internal const int Dialect = 2;
+    internal const int Dialect = SqlOperationProtocol.DefaultQueryDialectVersion;
     internal const long Absent = 0;
     internal const long Initial = 1;
     internal const long Updated = 2;

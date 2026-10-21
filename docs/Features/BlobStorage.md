@@ -82,6 +82,9 @@ creation and model binding. Every metadata operation reloads credentials, grants
 row policy and resource lifetime through the existing connection-grain path.
 Metadata/list/delete/cleanup use those same checks. Paging cursors are encrypted
 and bound to the principal, policy epoch and physical resource namespace.
+Each metadata call retains its own signed operation identity. Native Storage HTTP
+responses do not publish one metadata step's request ID as the identity of the
+whole transfer; SDK and MCP operation response identities remain unchanged.
 
 Routes start at `/api/storage/{tenant}/{database}/{domain}/{partition}/{resource}`.
 Native transfer suffixes are `upload`, `upload/stream`, `download/{path}`,

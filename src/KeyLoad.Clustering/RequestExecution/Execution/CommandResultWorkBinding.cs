@@ -12,7 +12,7 @@ internal static class CommandResultWorkBinding
 
     internal static async Task BindBeforePublicationAsync(DatabaseEngine database, ICommitCoordinator coordinator,
         TimeProvider clock, DecodedGrainRequest request, GrainOperationReply reply,
-        IResourceLifetimeWorkBinding binding, CancellationToken token)
+        ReadExecutionBudget work, IResourceLifetimeWorkBinding binding, CancellationToken token)
     {
         if (reply.Error is not null)
         {
@@ -20,9 +20,7 @@ internal static class CommandResultWorkBinding
         }
         try
         {
-            var work = new ReadExecutionBudget(database.OperationLimitsOptions, clock, token);
-            work.ConstrainLifetime(request.Envelope.ExpiresAt);
-            work.AttachResourceLifetimeBinding(binding);
+            work.RequireResourceLifetimeBinding(binding);
             var proof = RequireProof(request, reply);
             await BindCurrentAsync(database, coordinator, clock, request, proof, proof.Lifetimes,
                 work, binding, token).ConfigureAwait(true);

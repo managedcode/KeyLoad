@@ -46,6 +46,7 @@ public sealed class AnalyticsStoreGeneration : IDisposable
         options = AnalyticsStoreOptions.Create(ownedEmptyDirectory, snapshot.Limits, names,
             snapshot.Request.Metrics.Where(value => value.Operation != AnalyticsAggregateKind.Count)
                 .Select(value => value.Metric).Distinct(StringComparer.Ordinal).Count(), failures);
+        IncludeCapturedTimestamps();
         options.Queries.MaxGroups = snapshot.Request.MaxGroups;
         options.Queries.Timeout = snapshot.Work.RemainingLifetime;
     }
@@ -120,6 +121,26 @@ public sealed class AnalyticsStoreGeneration : IDisposable
         }
 
         return AnalyticsStoreResult.Create(snapshot, dimensions, result);
+    }
+
+    private void IncludeCapturedTimestamps()
+    {
+        // The engine compares timestamps with system UTC; canonical rows already own their exact UTC values.
+        var now = TimeProvider.System.GetUtcNow();
+        var latest = now;
+        foreach (var row in snapshot.Rows)
+        {
+            snapshot.Work.Check();
+            if (row.Timestamp > latest)
+            {
+                latest = row.Timestamp;
+            }
+        }
+        var skew = latest - now;
+        if (skew > options.Ingestion.MaxFutureSkew)
+        {
+            options.Ingestion.MaxFutureSkew = skew;
+        }
     }
 
     /// <summary>Joins the actual execution close; failures retain an unjoined generation for its physical owner.</summary>

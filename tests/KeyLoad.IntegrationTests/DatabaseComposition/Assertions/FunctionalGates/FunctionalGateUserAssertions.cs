@@ -22,7 +22,8 @@ internal static class FunctionalGateUserAssertions
         var sdk = await caller.Sdk.GetAsync(reference, token);
         await Assert.That(sdk.IsFailed).IsTrue();
         await Assert.That(sdk.Value).IsNull();
-        await Assert.That(sdk.Problem!.ErrorCode).IsEqualTo(ErrorCode.PermissionDenied.ToString());
+        await Assert.That(sdk.Problem!.ErrorCode).IsEqualTo(ErrorCode.PermissionDenied.ToString())
+            .Because(sdk.Problem.Detail ?? string.Empty);
         await McpCallerAssertions.ErrorAsync(await caller.Mcp.CallAsync(McpCallerTools.DocumentsGet,
             new GetDocumentRequest(reference), token), ErrorCode.PermissionDenied, dispatched: true);
     }
@@ -33,7 +34,8 @@ internal static class FunctionalGateUserAssertions
         var sdk = await caller.Sdk.CommitAsync(command, token);
         await Assert.That(sdk.IsFailed).IsTrue();
         await Assert.That(sdk.Value).IsNull();
-        await Assert.That(sdk.Problem!.ErrorCode).IsEqualTo(ErrorCode.PermissionDenied.ToString());
+        await Assert.That(sdk.Problem!.ErrorCode).IsEqualTo(ErrorCode.PermissionDenied.ToString())
+            .Because(sdk.Problem.Detail ?? string.Empty);
         var mcp = await caller.Mcp.CallAsync(McpCallerTools.DocumentsCommit, command, token);
         await McpCallerAssertions.ErrorAsync(mcp, ErrorCode.PermissionDenied, dispatched: true);
         if (detail is not null)
@@ -42,5 +44,17 @@ internal static class FunctionalGateUserAssertions
             await Assert.That(mcp.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error)
                 .GetProperty(McpCallerProtocol.ProblemDetail).GetString()).IsEqualTo(McpPermissionDenied);
         }
+    }
+
+    internal static async Task RevisionConflictAsync(RequestCqrsClusterCallers caller, CommandRequest command,
+        CancellationToken token)
+    {
+        var sdk = await caller.Sdk.CommitAsync(command, token);
+        await Assert.That(sdk.IsFailed).IsTrue();
+        await Assert.That(sdk.Value).IsNull();
+        await Assert.That(sdk.Problem!.ErrorCode).IsEqualTo(ErrorCode.RevisionConflict.ToString());
+        await Assert.That(sdk.Problem.Detail).IsEqualTo("The expected revision does not match.");
+        await McpCallerAssertions.ErrorAsync(await caller.Mcp.CallAsync(McpCallerTools.DocumentsCommit,
+            command, token), ErrorCode.RevisionConflict, dispatched: true);
     }
 }

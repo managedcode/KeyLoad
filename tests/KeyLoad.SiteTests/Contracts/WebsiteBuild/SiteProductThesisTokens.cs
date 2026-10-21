@@ -2,7 +2,7 @@ namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
 
 internal static class SiteProductThesisTokens
 {
-    internal const string Ai = "AI-execution database";
+    internal const string Ai = "AI database";
     internal const string NoDatabaseStack = "Agents shouldn't need a dozen databases";
     internal const string Future = "Why we think this is the future";
     internal const string StackRationale = "Why .NET, Orleans and ZoneTree";

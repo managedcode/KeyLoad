@@ -29,6 +29,10 @@ explicitly a new read rather than a persisted snapshot token. Aggregation suppor
 Count, Sum, Average, Min and Max, grouped by declared dimensions. Count selects no
 source metric. Requested groups, captured records, bytes, query lifetime and output
 are bounded by actual server limits; overflow fails the complete aggregate.
+Canonical timestamps may be ahead of system UTC. Each disposable generation
+configures the engine's ingestion skew to include its latest already captured
+timestamp. Original timestamps, capture limits and complete-ingestion checks stay
+authoritative; the requested range alone cannot expand ingestion skew.
 
 Initial entity links target existing, readable, nondeleted collection documents in
 the same atomic partition. They use the existing canonical EntityRef identity and

@@ -1227,6 +1227,86 @@
       ]
     },
     {
+      "className": "KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsTimestampRangeTests",
+      "reportClassName": "KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsTimestampRangeTests",
+      "methodName": "CanonicalTimestampRangesPreserveExactRowsAndCompleteAggregates",
+      "instanceName": "CanonicalTimestampRangesPreserveExactRowsAndCompleteAggregates(-2, 0)",
+      "sourcePath": "tests/KeyLoad.UnitTests/AnalyticsStore/Cases/AnalyticsTimestampRangeTests.cs",
+      "sourceSha256": "c49d0e4e1faa1d34ee3d4334f24ddb4472aff28483ef07a22db9db56be4eac17",
+      "lineNumber": 10,
+      "endLineNumber": 45,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-ANALYTICS-003",
+        "REQ-ANALYTICS-004"
+      ],
+      "acceptance": [
+        "AC-ANALYTICS-003",
+        "AC-ANALYTICS-004"
+      ]
+    },
+    {
+      "className": "KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsTimestampRangeTests",
+      "reportClassName": "KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsTimestampRangeTests",
+      "methodName": "CanonicalTimestampRangesPreserveExactRowsAndCompleteAggregates",
+      "instanceName": "CanonicalTimestampRangesPreserveExactRowsAndCompleteAggregates(-2, 1)",
+      "sourcePath": "tests/KeyLoad.UnitTests/AnalyticsStore/Cases/AnalyticsTimestampRangeTests.cs",
+      "sourceSha256": "c49d0e4e1faa1d34ee3d4334f24ddb4472aff28483ef07a22db9db56be4eac17",
+      "lineNumber": 10,
+      "endLineNumber": 45,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-ANALYTICS-003",
+        "REQ-ANALYTICS-004"
+      ],
+      "acceptance": [
+        "AC-ANALYTICS-003",
+        "AC-ANALYTICS-004"
+      ]
+    },
+    {
+      "className": "KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsTimestampRangeTests",
+      "reportClassName": "KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsTimestampRangeTests",
+      "methodName": "CanonicalTimestampRangesPreserveExactRowsAndCompleteAggregates",
+      "instanceName": "CanonicalTimestampRangesPreserveExactRowsAndCompleteAggregates(2, 0)",
+      "sourcePath": "tests/KeyLoad.UnitTests/AnalyticsStore/Cases/AnalyticsTimestampRangeTests.cs",
+      "sourceSha256": "c49d0e4e1faa1d34ee3d4334f24ddb4472aff28483ef07a22db9db56be4eac17",
+      "lineNumber": 10,
+      "endLineNumber": 45,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-ANALYTICS-003",
+        "REQ-ANALYTICS-004"
+      ],
+      "acceptance": [
+        "AC-ANALYTICS-003",
+        "AC-ANALYTICS-004"
+      ]
+    },
+    {
+      "className": "KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsTimestampRangeTests",
+      "reportClassName": "KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsTimestampRangeTests",
+      "methodName": "CanonicalTimestampRangesPreserveExactRowsAndCompleteAggregates",
+      "instanceName": "CanonicalTimestampRangesPreserveExactRowsAndCompleteAggregates(2, 1)",
+      "sourcePath": "tests/KeyLoad.UnitTests/AnalyticsStore/Cases/AnalyticsTimestampRangeTests.cs",
+      "sourceSha256": "c49d0e4e1faa1d34ee3d4334f24ddb4472aff28483ef07a22db9db56be4eac17",
+      "lineNumber": 10,
+      "endLineNumber": 45,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-ANALYTICS-003",
+        "REQ-ANALYTICS-004"
+      ],
+      "acceptance": [
+        "AC-ANALYTICS-003",
+        "AC-ANALYTICS-004"
+      ]
+    },
+    {
       "className": "KeyLoad.UnitTests.Features.Authorization.AuthorizationCredentialHttpExportTests",
       "reportClassName": "KeyLoad.UnitTests.Features.Authorization.AuthorizationCredentialHttpExportTests",
       "methodName": "RevokedCredentialKeepsSafeProblemThenSameSecretRepairReplayAndLiteralHealthyExports",
@@ -73280,7 +73360,7 @@
     },
     {
       "groupId": "unit-functional-05",
-      "selector": "/KeyLoad.UnitTests/*/(AdminHttpMetricsM*)|(AdminS*)|(AggregateReplayWorkerV*)|(AggregateS*)|(AnalyticsBounds*)|(AnalyticsComm*)|(AnalyticsStoreT*)|(AnnLifetimeA*)|(AnnProjectionPinC*)|(AnnPublicPr*)|(AnnSeedB*)|(AtomicPartitionRosterReg*)|(Authe*)|(BackupCr*)|(CacheP*)|(CanonicalJsonT*)|(CanonicalK*)|(CanonicalV*)|(CatalogA*)|(ChunkManifestC*)|(ChunkMultiblockB*)|(ChunkMultiblockR*)|(ChunkSelectedI*)|(CliBackupE*)|(CliBackupRestoreF*)|(ClusterStartupE*)|(CommandObservedP*)|(CommandOutcomeP*)|(ConnectionA*)|(ConnectionG*)|(ConnectionPo*)|(CoreS*)|(CqrsI*)|(CurrentS*)|(Curs*)|(DatabaseCompositionC*)|(DatabasePhaseB*)|(DocumentD*)|(DocumentLiv*)|(DocumentMutationImageF*)|(DocumentR*)|(DueWorkK*)|(EqualityAccessPathT*)|(Ge*)|(GraphCrossPartitionD*)|(GraphP*)|(GraphSearchO*)|(GraphSearchR*)|(GraphShortestPathI*)|(GraphTraversalD*)|(He*)|(KeyCodecG*)|(McpCommandD*)|(McpGatewayA*)|(McpRep*)|(McpU*)|(MetadataFormatF*)|(Mo*)|(N*)|(OrleansWalL*)|(OutboxP*)|(PackedAnnN*)|(PackedAnnRec*)|(Pai*)|(PartitionQueryG*)|(PartitionQueryPublicB*)|(PartitionRecordV*)|(PartitionRo*)|(PartitionStorageT*)|(Prepare*)|(ProjectionCh*)|(ProjectionD*)|(ProjectionE*)|(PublicR*)|(Q2*)|(QueueDeadLetterS*)|(QueueEx*)|(QueueLifecycleI*)|(QueuePo*)|(QueueRea*)|(QueueV*)|(ReadCutL*)|(ReadG*)|(RequestCqrsAnnEnrollmentA*)|(RequestCqrsR*)|(RequestF*)|(ResourcePolicyUpdateR*)|(Resp*)|(RetainedA*)|(Revo*)|(RowRevisionB*)|(SagaTimeoutA*)|(SampleAggregateB*)|(SampleChunkExe*)|(SampleChunkPe*)|(SampleRetentionL*)|(SampleRetentionReadB*)|(SampleRollupL*)|(SdkPo*)|(SearchT*)|(SqlA*)|(SqlClientP*)|(SqlComm*)|(SqlGraphPathO*)|(SqlGraphSearchP*)|(SqlInnerJoinE*)|(SqlOf*)|(SqlParserA*)|(SqlTo*)|(StreamR*)|(SubscriptionD*)|(SubscriptionPe*)|(Tea*)|(Ten*)|(TextA*)|(TextCapturedC*)|(TextG*)|(TextProjectionL*)|(Th*)|(TopicRetentionBo*)|(TopicRetentionP*)|(TransactionT*)|(ValueH*)|(W*)|(ZoneTreeCoordinatedPointCacheB*)|(ZoneTreeE*)|(ZoneTreePointCacheL*)|(ZoneTreePointCacheOwnerP*)|(ZoneTreeS*)/(*)&(!AcRoc002CanonicalSystemKeysKeepExactBytesThroughReadOnlyPublicProperties*)&(!CapabilityManifestAdvertisesSearchProfileWithoutChangingQ1Dialect*)&(!CountOnlyShapeDefaultsDepthToZero*)&(!EnabledBankStartsWithTheExactEmptyFixedSchema*)&(!MarkerValuesAreSharedClosedEnumsAndSuccessHasNoDiagnosticAllocation*)&(!NonAnalyticsIssuanceRetainsPublicIdentityInFrozenFingerprint*)&(!SelectedTextMismatchHasClosedWriterParityAndHealthyContinuation*)&(!UniqueIndexConflictHasClosedWriterParityAndHealthyContinuation*)",
+      "selector": "/KeyLoad.UnitTests/*/(AdminHttpMetricsM*)|(AdminS*)|(AggregateReplayWorkerV*)|(AggregateS*)|(AnalyticsBounds*)|(AnalyticsComm*)|(AnalyticsStoreT*)|(AnalyticsT*)|(AnnLifetimeA*)|(AnnProjectionPinC*)|(AnnPublicPr*)|(AnnSeedB*)|(AtomicPartitionRosterReg*)|(Authe*)|(BackupCr*)|(CacheP*)|(CanonicalJsonT*)|(CanonicalK*)|(CanonicalV*)|(CatalogA*)|(ChunkManifestC*)|(ChunkMultiblockB*)|(ChunkMultiblockR*)|(ChunkSelectedI*)|(CliBackupE*)|(CliBackupRestoreF*)|(ClusterStartupE*)|(CommandObservedP*)|(CommandOutcomeP*)|(ConnectionA*)|(ConnectionG*)|(ConnectionPo*)|(CoreS*)|(CqrsI*)|(CurrentS*)|(Curs*)|(DatabaseCompositionC*)|(DatabasePhaseB*)|(DocumentD*)|(DocumentLiv*)|(DocumentMutationImageF*)|(DocumentR*)|(DueWorkK*)|(EqualityAccessPathT*)|(Ge*)|(GraphCrossPartitionD*)|(GraphP*)|(GraphSearchO*)|(GraphSearchR*)|(GraphShortestPathI*)|(GraphTraversalD*)|(He*)|(KeyCodecG*)|(McpCommandD*)|(McpGatewayA*)|(McpRep*)|(McpU*)|(MetadataFormatF*)|(Mo*)|(N*)|(OrleansWalL*)|(OutboxP*)|(PackedAnnN*)|(PackedAnnRec*)|(Pai*)|(PartitionQueryG*)|(PartitionQueryPublicB*)|(PartitionRecordV*)|(PartitionRo*)|(PartitionStorageT*)|(Prepare*)|(ProjectionCh*)|(ProjectionD*)|(ProjectionE*)|(PublicR*)|(Q2*)|(QueueDeadLetterS*)|(QueueEx*)|(QueueLifecycleI*)|(QueuePo*)|(QueueRea*)|(QueueV*)|(ReadCutL*)|(ReadG*)|(RequestCqrsAnnEnrollmentA*)|(RequestCqrsR*)|(RequestF*)|(ResourcePolicyUpdateR*)|(Resp*)|(RetainedA*)|(Revo*)|(RowRevisionB*)|(SagaTimeoutA*)|(SampleAggregateB*)|(SampleChunkExe*)|(SampleChunkPe*)|(SampleRetentionL*)|(SampleRetentionReadB*)|(SampleRollupL*)|(SdkPo*)|(SearchT*)|(SqlA*)|(SqlClientP*)|(SqlComm*)|(SqlGraphPathO*)|(SqlGraphSearchP*)|(SqlInnerJoinE*)|(SqlOf*)|(SqlParserA*)|(SqlTo*)|(StreamR*)|(SubscriptionD*)|(SubscriptionPe*)|(Tea*)|(Ten*)|(TextA*)|(TextCapturedC*)|(TextG*)|(TextProjectionL*)|(Th*)|(TopicRetentionBo*)|(TopicRetentionP*)|(TransactionT*)|(ValueH*)|(W*)|(ZoneTreeCoordinatedPointCacheB*)|(ZoneTreeE*)|(ZoneTreePointCacheL*)|(ZoneTreePointCacheOwnerP*)|(ZoneTreeS*)/(*)&(!AcRoc002CanonicalSystemKeysKeepExactBytesThroughReadOnlyPublicProperties*)&(!CapabilityManifestAdvertisesSearchProfileWithoutChangingQ1Dialect*)&(!CountOnlyShapeDefaultsDepthToZero*)&(!EnabledBankStartsWithTheExactEmptyFixedSchema*)&(!MarkerValuesAreSharedClosedEnumsAndSuccessHasNoDiagnosticAllocation*)&(!NonAnalyticsIssuanceRetainsPublicIdentityInFrozenFingerprint*)&(!SelectedTextMismatchHasClosedWriterParityAndHealthyContinuation*)&(!UniqueIndexConflictHasClosedWriterParityAndHealthyContinuation*)",
       "classNames": [
         "KeyLoad.UnitTests.Features.AdminDashboard.AdminHttpMetricsMiddlewareTests",
         "KeyLoad.UnitTests.Features.AdminDashboard.AdminStorageObservationTests",
@@ -73432,7 +73512,8 @@
         "KeyLoad.UnitTests.Features.TimeSeries.SampleRetentionLifecycleTests",
         "KeyLoad.UnitTests.Features.TimeSeries.SampleRetentionReadBudgetTests",
         "KeyLoad.UnitTests.Features.TimeSeries.SampleRollupLeaseDropTests",
-        "KeyLoad.UnitTests.Features.TimeSeries.SampleRollupLimitTests"
+        "KeyLoad.UnitTests.Features.TimeSeries.SampleRollupLimitTests",
+        "KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsTimestampRangeTests"
       ],
       "excludedMethodNames": [
         "AcRoc002CanonicalSystemKeysKeepExactBytesThroughReadOnlyPublicProperties",
@@ -73992,7 +74073,11 @@
         "KeyLoad.UnitTests.Features.TimeSeries.SampleRetentionLifecycleTests|AcSeries016UnknownAndCorruptRetentionRecordsFailClosed|AcSeries016UnknownAndCorruptRetentionRecordsFailClosed",
         "KeyLoad.UnitTests.Features.TimeSeries.SampleRollupLeaseDropTests|AcSeries022QueuedDropWaitsForRealReadLeaseThenReplaysAndRecreatesHealthyBucket|AcSeries022QueuedDropWaitsForRealReadLeaseThenReplaysAndRecreatesHealthyBucket",
         "KeyLoad.UnitTests.Features.TimeSeries.SampleRollupLimitTests|AcSeries023BucketIdentityCapRejectsNewBucketButAllowsCasCorrection|AcSeries023BucketIdentityCapRejectsNewBucketButAllowsCasCorrection",
-        "KeyLoad.UnitTests.Features.TimeSeries.SampleRollupLimitTests|AcSeries023ChargedRawBytesRejectWholeBucketAndSmallerRangeRemainsHealthy|AcSeries023ChargedRawBytesRejectWholeBucketAndSmallerRangeRemainsHealthy"
+        "KeyLoad.UnitTests.Features.TimeSeries.SampleRollupLimitTests|AcSeries023ChargedRawBytesRejectWholeBucketAndSmallerRangeRemainsHealthy|AcSeries023ChargedRawBytesRejectWholeBucketAndSmallerRangeRemainsHealthy",
+        "KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsTimestampRangeTests|CanonicalTimestampRangesPreserveExactRowsAndCompleteAggregates|CanonicalTimestampRangesPreserveExactRowsAndCompleteAggregates(-2, 0)",
+        "KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsTimestampRangeTests|CanonicalTimestampRangesPreserveExactRowsAndCompleteAggregates|CanonicalTimestampRangesPreserveExactRowsAndCompleteAggregates(-2, 1)",
+        "KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsTimestampRangeTests|CanonicalTimestampRangesPreserveExactRowsAndCompleteAggregates|CanonicalTimestampRangesPreserveExactRowsAndCompleteAggregates(2, 0)",
+        "KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsTimestampRangeTests|CanonicalTimestampRangesPreserveExactRowsAndCompleteAggregates|CanonicalTimestampRangesPreserveExactRowsAndCompleteAggregates(2, 1)"
       ]
     }
   ]

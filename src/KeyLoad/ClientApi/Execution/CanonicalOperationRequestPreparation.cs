@@ -19,7 +19,11 @@ internal static class CanonicalOperationRequestPreparation
         }
         var actual = CanonicalOperationSigning.Create(context.RequestServices, principal,
             readKind, commandKind, commandId, payload, cancellationToken);
-        OperationResponseHeaders.Publish(context, actual.RequestId);
+        // Native file transfers compose several signed metadata operations in one HTTP response.
+        if (readKind != GrainReadKind.FileMetadata && commandKind != OperationKind.FileMetadata)
+        {
+            OperationResponseHeaders.Publish(context, actual.RequestId);
+        }
         RequestFailureDiagnostic.MarkOperationDispatch(context, actual.Command);
         return actual;
     }

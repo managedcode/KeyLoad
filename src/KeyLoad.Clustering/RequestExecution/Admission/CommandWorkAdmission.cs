@@ -7,7 +7,7 @@ namespace KeyLoad.Clustering;
 internal static class CommandWorkAdmission
 {
     internal static Command<DatabaseCommand>? Bind(DatabaseEngine database, DecodedGrainRequest request, PrincipalRecord principal,
-        TimeProvider clock, CapabilityWorkLifetime? work, Command<DatabaseCommand>? originalIntent = null)
+        TimeProvider clock, CapabilityWorkLifetime? work, ReadExecutionBudget budget, Command<DatabaseCommand>? originalIntent = null)
     {
         if (work is null)
         {
@@ -22,12 +22,12 @@ internal static class CommandWorkAdmission
         }
         var operation = originalIntent ?? (CarriesVerifiedOperation(kind)
             ? database.OwnCommand(GrainPayload.Read<Command<DatabaseCommand>>(request.Payload))
-            : database.CreateCommand(kind, request.Envelope.CommandId, principal.Id, clock.GetUtcNow(), request.Payload));
+            : database.CreateCommand(kind, request.Envelope.CommandId, principal.Id, clock.GetUtcNow(), request.Payload, budget));
         if (operation.Value!.Kind != kind || operation.CommandId != request.Envelope.CommandId || operation.UserId != principal.Id)
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
         }
-        database.ValidateResourceEffectSubmission(operation, clock.GetUtcNow(), work);
+        database.ValidateResourceEffectSubmission(operation, clock.GetUtcNow(), work, budget);
         return operation;
     }
 

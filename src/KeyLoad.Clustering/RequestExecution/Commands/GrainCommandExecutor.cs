@@ -43,14 +43,20 @@ internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoord
         var stage = GrainFailureStage.CapabilityExecution;
         try
         {
+            var budget = new ReadExecutionBudget(database.OperationLimitsOptions, clock, operationToken);
+            budget.ConstrainLifetime(request.Envelope.ExpiresAt);
+            if (work is not null)
+            {
+                budget.AttachResourceLifetimeBinding(work);
+            }
             var principal = await CommandCapabilityAuthorization.AuthorizeAsync(database, coordinator,
                 clock, settings, codec, request, context, operationToken).ConfigureAwait(true);
             var kind = request.Envelope.CommandKind
                 ?? throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
             await CommandCapabilityAuthorization.ObserveAndValidateAsync(database, clock, settings,
                 codec, request, GrainRequestPhase.BeforeSubmit, context, operationToken).ConfigureAwait(true);
-            var original = CommandWorkAdmission.Bind(database, request, principal, clock, work);
-            var result = await SubmitCommandAsync(kind, request, principal, operationToken).ConfigureAwait(true);
+            var original = CommandWorkAdmission.Bind(database, request, principal, clock, work, budget);
+            var result = await SubmitCommandAsync(kind, request, principal, budget, operationToken).ConfigureAwait(true);
             stage = GrainFailureStage.ReplyEncoding;
             await ObservePhaseAsync(request, GrainRequestPhase.SubmitReturned, context, operationToken).ConfigureAwait(true);
             var reply = GrainReplyFactory.Operation(result: result, cancellationToken: operationToken, options: options);
@@ -63,12 +69,9 @@ internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoord
                 WorkProof = CommandWorkAdmission.Capture(request, work, principal.PolicyEpoch)
             };
             await CommandResultWorkBinding.BindBeforePublicationAsync(database, coordinator, clock,
-                request, reply, work, operationToken).ConfigureAwait(true);
+                request, reply, budget, work, operationToken).ConfigureAwait(true);
             if (original is not null && kind is OperationKind.Receive or OperationKind.ReceiveSubscription)
             {
-                var budget = new ReadExecutionBudget(database.OperationLimitsOptions, clock, operationToken);
-                budget.ConstrainLifetime(request.Envelope.ExpiresAt);
-                budget.AttachResourceLifetimeBinding(work);
                 result = database.ResolveAppliedSubmissionOutcome(original, budget);
                 var current = GrainReplyFactory.Operation(result: result, cancellationToken: operationToken, options: options);
                 return current.Error is null ? current with { WorkProof = reply.WorkProof } : current;
@@ -91,7 +94,7 @@ internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoord
     }
 
     private async Task<Result<object>> SubmitCommandAsync(OperationKind kind, DecodedGrainRequest request,
-        PrincipalRecord principal, CancellationToken operationToken)
+        PrincipalRecord principal, ReadExecutionBudget budget, CancellationToken operationToken)
     {
         return kind switch
         {
@@ -99,7 +102,7 @@ internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoord
                 ?? throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest))
                 .ExecuteAsync(request.Envelope.RequestId, request.Envelope.CommandId, principal.Id,
                     GrainPayload.Read<DropTableRequest>(request.Payload), request.Envelope.ExpiresAt, operationToken).ConfigureAwait(true),
-            OperationKind.Batch => await SubmitBatchAsync(request, principal, operationToken).ConfigureAwait(true),
+            OperationKind.Batch => await SubmitBatchAsync(request, principal, budget, operationToken).ConfigureAwait(true),
             OperationKind.CommitProjectionBatch => await SubmitCheckpointAsync(request, principal,
                 operationToken).ConfigureAwait(true),
             OperationKind.OnlineTextPublicationPhase => await GrainOnlineTextPublicationCommand.SubmitAsync(
@@ -107,14 +110,14 @@ internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoord
             OperationKind.Bm25CorpusPublicationPhase => await GrainBm25CorpusPublicationCommand.SubmitAsync(
                 database, coordinator, request, principal, operationToken).ConfigureAwait(true),
             _ => await coordinator.RuntimeSubmitAsync(kind, request.Envelope.CommandId, principal.Id,
-                request.Payload, cancellationToken: operationToken).ConfigureAwait(true)
+                request.Payload, sourcePlanningBudget: budget, cancellationToken: operationToken).ConfigureAwait(true)
         };
     }
 
     private Task<Result<object>> SubmitBatchAsync(DecodedGrainRequest request, PrincipalRecord principal,
-        CancellationToken token)
+        ReadExecutionBudget budget, CancellationToken token)
         => coordinator.RuntimeSubmitAsync(OperationKind.Batch, request.Envelope.CommandId,
-                principal.Id, request.Payload, cancellationToken: token);
+                principal.Id, request.Payload, sourcePlanningBudget: budget, cancellationToken: token);
 
     private Task<Result<object>> SubmitCheckpointAsync(DecodedGrainRequest request, PrincipalRecord principal,
         CancellationToken cancellationToken)

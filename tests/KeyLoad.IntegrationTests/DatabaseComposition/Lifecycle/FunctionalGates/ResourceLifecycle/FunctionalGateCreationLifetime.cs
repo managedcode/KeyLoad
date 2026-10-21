@@ -5,10 +5,10 @@ using KeyLoad.Storage;
 
 namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
 
-/// <summary>Independent version-one identity oracle over the original caller-owned creation, never returned document values.</summary>
+/// <summary>Independent creation-identity oracle over the original caller-owned creation, never returned document values.</summary>
 internal static class FunctionalGateCreationLifetime
 {
-    private const string IncarnationDomain = "keyload:resource-incarnation:v1";
+    private const string IncarnationDomain = "keyload:resource-incarnation";
     private const string IdProperty = "id";
     private const string KindProperty = "kind";
     private const string PayloadProperty = "payloadJson";

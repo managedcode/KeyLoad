@@ -116,7 +116,10 @@ internal sealed class FunctionalGateUsers : IAsyncDisposable
         // Grant only the actual read-only principal in the current database, on its original open connections.
         await SetPolicyAsync(context, DeniedIndex, WriteCapabilities, token);
         await FunctionalGateUserAssertions.EqualDocumentAsync(context, callers[DeniedIndex], context.Anchor, anchor, token);
-        await FunctionalGateUserAssertions.RefusedWriteAsync(callers[DeniedIndex], command, EpochFence, token);
+        // A capability refusal can precede commit. Establish an actual retained apply-time failure.
+        var retainedFailure = new CommandRequest(Guid.NewGuid(), context.Partition,
+            [new PutDocument(probe.Collection, probe.Id, AuthJson, ExpectedRevision: FirstRevision)]);
+        await FunctionalGateUserAssertions.RevisionConflictAsync(callers[DeniedIndex], retainedFailure, token);
         await FunctionalGateUserAssertions.EqualDocumentAsync(context, context.Administrator, probe, absent, token);
         var admitted = command with
         {
@@ -130,6 +133,13 @@ internal sealed class FunctionalGateUsers : IAsyncDisposable
             receipt.Mutations.ToArray());
         var present = new DocumentReadResult(new(probe, FirstRevision, AuthJson, false, []));
         await FunctionalGateUserAssertions.EqualDocumentAsync(context, callers[DeniedIndex], probe, present, token);
+        await FunctionalGateUserAssertions.EqualDocumentAsync(context, context.Administrator, probe, present, token);
+
+        // This precondition would now allow a write; the original retained failure must still win.
+        await FunctionalGateUserAssertions.RevisionConflictAsync(callers[DeniedIndex], retainedFailure, token);
+        await SetPolicyAsync(context, DeniedIndex, WriteCapabilities, token);
+        await FunctionalGateUserAssertions.RefusedWriteAsync(callers[DeniedIndex], retainedFailure, EpochFence, token);
+        await FunctionalGateUserAssertions.RefusedWriteAsync(callers[DeniedIndex], admitted, EpochFence, token);
         await FunctionalGateUserAssertions.EqualDocumentAsync(context, context.Administrator, probe, present, token);
 
         await SetPolicyAsync(context, DeniedIndex, Capability.None, token);

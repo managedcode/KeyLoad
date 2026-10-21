@@ -36,7 +36,7 @@ internal static class TypedEndpointJoinProtocol
     internal const string BlockedUseGrant = "join.pk.blocked";
     internal const int SourceCount = 3;
     internal const long FirstRevision = 1;
-    internal const int Dialect = 2;
+    internal const int Dialect = SqlOperationProtocol.DefaultQueryDialectVersion;
     internal const int ColdCuts = 2;
     internal static string[] Messages => [MatchedMessage, MissingMessage, HiddenMessage];
 
