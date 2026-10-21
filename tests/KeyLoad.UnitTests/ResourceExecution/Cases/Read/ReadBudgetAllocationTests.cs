@@ -144,7 +144,7 @@ internal sealed class ReadBudgetAllocationTests
 
     private sealed class StoreFixture : IDisposable
     {
-        private readonly string directory = Path.Combine(Path.GetTempPath(), TemporaryDirectoryPrefix + Guid.NewGuid().ToString("N"));
+        private readonly string directory = Path.Combine(AppContext.BaseDirectory, TemporaryDirectoryPrefix + Guid.NewGuid().ToString("N"));
         public ZoneTreeStore Store
         {
             get;

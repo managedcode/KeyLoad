@@ -19,7 +19,7 @@ internal sealed class ServerSynchronousCancellationWholeFlowTests
     [Arguments(true)]
     public async Task CanceledOriginalFileWritePreservesIdentityTokenAndBytesThenHealthyWriteCompletes(bool asynchronousInvocation)
     {
-        var path = Path.Combine(Path.GetTempPath(), FilePrefix + Guid.NewGuid().ToString(GuidFormat) + FileSuffix);
+        var path = Path.Combine(AppContext.BaseDirectory, FilePrefix + Guid.NewGuid().ToString(GuidFormat) + FileSuffix);
         try
         {
             await File.WriteAllTextAsync(path, Initial, TestContext.Current!.Execution.CancellationToken);

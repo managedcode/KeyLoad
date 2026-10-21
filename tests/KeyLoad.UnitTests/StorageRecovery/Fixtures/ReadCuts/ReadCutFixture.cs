@@ -14,7 +14,7 @@ internal sealed class ReadCutFixture : IDisposable
     private readonly TimeProvider clock;
     private ExceptionDispatchInfo? originalAcquisitionFailure;
 
-    internal string DirectoryPath { get; } = Path.Combine(Path.GetTempPath(), DirectoryPrefix + Guid.NewGuid().ToString("N"));
+    internal string DirectoryPath { get; } = Path.Combine(AppContext.BaseDirectory, DirectoryPrefix + Guid.NewGuid().ToString("N"));
     internal ZoneTreeStore Store
     {
         get; private set;

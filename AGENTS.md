@@ -211,6 +211,18 @@ default Debug configuration. Do not force Release or build both configurations
 for development checks. Keep compiled source identities and test artifact paths
 aligned with the selected configuration.
 
+All test-owned temporary files, directories, storage and logs live below the
+executing test assembly's `AppContext.BaseDirectory`, beside its binaries in
+`bin/Debug` or `bin/Release` for the selected configuration. Allocate a unique
+directory per execution and join all owned work before cleanup. Retain required
+failure evidence in that same output tree. Never use system temporary locations
+such as `/tmp`, `/var`, `Path.GetTempPath()`, `Path.GetTempFileName()` or
+`Directory.CreateTempSubdirectory()`, or create scratch files in source folders.
+Child processes receive their test-owned paths explicitly.
+Framework IPC endpoints use `tests/bin/<configuration>/ipc`, keeping their
+configured Unix socket paths within the framework's length bound. The framework
+owns unique socket names and joined cleanup; never remove another run's files.
+
 Required development commands:
 
 ```sh

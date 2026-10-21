@@ -13,7 +13,7 @@ internal sealed class RuntimeJournalReopenFixture : IDisposable
     private const string RootKeyId = "runtime-journal-root-key";
     private const string RootSecret = "runtime-journal-reopen.unit-test-credential-32-characters";
     private const string Wildcard = "*";
-    private readonly string directory = Path.Combine(Path.GetTempPath(), DirectoryPrefix + Guid.NewGuid().ToString("N"));
+    private readonly string directory = Path.Combine(AppContext.BaseDirectory, DirectoryPrefix + Guid.NewGuid().ToString("N"));
     private ZoneTreeStore? store;
     private readonly RuntimeJournalOptions options = new();
 

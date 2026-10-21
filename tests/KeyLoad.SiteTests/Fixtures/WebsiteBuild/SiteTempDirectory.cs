@@ -7,7 +7,7 @@ internal sealed class SiteTempDirectory(string path) : IAsyncDisposable
 
     public static SiteTempDirectory Create()
     {
-        var path = System.IO.Path.Combine(System.IO.Path.GetTempPath(),
+        var path = System.IO.Path.Combine(AppContext.BaseDirectory,
             $"{SiteAssetTokens.TempDirectoryPrefix}{Guid.NewGuid():N}");
         Directory.CreateDirectory(path);
         return new(path);

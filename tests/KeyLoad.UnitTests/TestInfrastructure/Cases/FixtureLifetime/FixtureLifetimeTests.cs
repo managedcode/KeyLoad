@@ -110,7 +110,7 @@ internal sealed class FixtureLifetimeTests
     }
 
     private static string NewDirectory()
-        => Path.Combine(Path.GetTempPath(), DirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
+        => Path.Combine(AppContext.BaseDirectory, DirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
 
     private static void DeleteDirectory(string directory)
     {

@@ -20,7 +20,7 @@ internal static class PartitionStorageFlow
     internal static async Task RunAsync(CancellationToken token)
     {
         var failures = new List<Exception>();
-        var directory = Path.Combine(StorageTrialDirectory.ResolveExistingDirectory(new(Path.GetTempPath())),
+        var directory = Path.Combine(StorageTrialDirectory.ResolveExistingDirectory(new(AppContext.BaseDirectory)),
             DirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
         using var ports = new TestClusterPortAllocator();
         await ServerFailureObserver.ObserveAsync(async () =>

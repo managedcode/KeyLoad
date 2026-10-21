@@ -27,7 +27,7 @@ internal sealed class CliBackupRestoreFixture
     private bool rootOwned;
     private bool storeClosed;
 
-    internal string Root { get; } = Path.Combine(StorageTrialDirectory.ResolveExistingDirectory(new(Path.GetTempPath())),
+    internal string Root { get; } = Path.Combine(StorageTrialDirectory.ResolveExistingDirectory(new(AppContext.BaseDirectory)),
         RootPrefix + Guid.NewGuid().ToString("N"));
     internal string SourceDirectory => Path.Combine(Root, "source");
     internal string BackupDirectory => Path.Combine(Root, BackupDirectoryName);

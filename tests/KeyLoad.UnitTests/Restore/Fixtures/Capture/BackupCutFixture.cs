@@ -10,7 +10,7 @@ internal sealed class BackupCutFixture : IDisposable
 {
     private const string RootPrefix = "keyload-execution-backup-cut-";
     private const string AllFiles = "*";
-    private readonly string root = Path.Combine(StorageTrialDirectory.ResolveExistingDirectory(new(Path.GetTempPath())),
+    private readonly string root = Path.Combine(StorageTrialDirectory.ResolveExistingDirectory(new(AppContext.BaseDirectory)),
         RootPrefix + Guid.NewGuid().ToString("N"));
 
     internal string Source => Path.Combine(root, MetadataTestContract.SourceDirectoryName);

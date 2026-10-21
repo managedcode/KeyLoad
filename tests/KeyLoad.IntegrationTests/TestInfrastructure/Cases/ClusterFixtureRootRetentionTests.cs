@@ -29,7 +29,7 @@ internal sealed class ClusterFixtureRootRetentionTests
     [Test]
     public async Task FailedCleanupRetainsOwnerThenExactReopenAndHealthyRelease()
     {
-        var root = Path.Combine(Path.GetTempPath(), RootPrefix + Guid.NewGuid().ToString(GuidFormat));
+        var root = Path.Combine(AppContext.BaseDirectory, RootPrefix + Guid.NewGuid().ToString(GuidFormat));
         var directory = Path.Combine(root, StoreDirectory);
         var failures = new List<Exception>();
         var released = false;
@@ -80,7 +80,7 @@ internal sealed class ClusterFixtureRootRetentionTests
     [Test]
     public async Task NeverBuiltWithoutCleanupFailuresReleasesItsOwnedRoot()
     {
-        var root = Path.Combine(Path.GetTempPath(), RootPrefix + Guid.NewGuid().ToString(GuidFormat));
+        var root = Path.Combine(AppContext.BaseDirectory, RootPrefix + Guid.NewGuid().ToString(GuidFormat));
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {

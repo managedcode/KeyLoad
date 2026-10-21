@@ -44,7 +44,7 @@ internal sealed class PathMapFixture : IDisposable
 
     private static string CreateRootPath()
     {
-        var temporary = Path.GetFullPath(Path.GetTempPath());
+        var temporary = Path.GetFullPath(AppContext.BaseDirectory);
         var current = Path.GetPathRoot(temporary)!;
         foreach (var segment in temporary.Substring(current.Length).Split(
             [Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar], StringSplitOptions.RemoveEmptyEntries))

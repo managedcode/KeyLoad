@@ -17,7 +17,7 @@ internal static class AnalyticsStoreTestProjection
     internal static async Task RunAsync(AnalyticsAggregateSnapshot snapshot, AnalyticsAggregateResult expected,
         CancellationToken token)
     {
-        var path = Path.Combine(Path.GetTempPath(), Prefix + Guid.NewGuid().ToString("N"));
+        var path = Path.Combine(AppContext.BaseDirectory, Prefix + Guid.NewGuid().ToString("N"));
         AnalyticsStoreGeneration? generation = null;
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>

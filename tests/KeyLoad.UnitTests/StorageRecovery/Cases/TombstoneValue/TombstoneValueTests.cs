@@ -193,7 +193,7 @@ internal sealed class TombstoneValueTests
 
     private static string CreateDirectory()
     {
-        var directory = Path.Combine(Path.GetTempPath(),
+        var directory = Path.Combine(AppContext.BaseDirectory,
             "keyload-tombstone-values-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(directory);
         return directory;

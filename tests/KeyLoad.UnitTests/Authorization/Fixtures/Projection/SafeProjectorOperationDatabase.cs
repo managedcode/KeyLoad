@@ -31,7 +31,7 @@ internal sealed class SafeProjectorOperationDatabase
 
     internal static async Task RunAsync(Func<SafeProjectorOperationDatabase, Task> operation, CancellationToken callerToken)
     {
-        var directory = Path.Combine(Path.GetTempPath(), SafeProjectorOperationProtocol.DirectoryPrefix
+        var directory = Path.Combine(AppContext.BaseDirectory, SafeProjectorOperationProtocol.DirectoryPrefix
             + Guid.NewGuid().ToString(SafeProjectorOperationProtocol.GuidFormat));
         var failures = new List<Exception>();
         SafeProjectorOperationDatabase? owner = null;

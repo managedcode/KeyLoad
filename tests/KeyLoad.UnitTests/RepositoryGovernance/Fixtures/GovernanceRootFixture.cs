@@ -27,7 +27,7 @@ internal sealed class GovernanceRootFixture : IDisposable
         GovernanceRootFixture? fixture = null;
         try
         {
-            fixture = new GovernanceRootFixture(Path.Combine(Path.GetTempPath(),
+            fixture = new GovernanceRootFixture(Path.Combine(AppContext.BaseDirectory,
                 $"{TemporaryDirectoryPrefix}{Guid.NewGuid():N}"));
             Directory.CreateDirectory(fixture.Root);
             var source = GovernanceNodeProcess.RepositoryRoot;

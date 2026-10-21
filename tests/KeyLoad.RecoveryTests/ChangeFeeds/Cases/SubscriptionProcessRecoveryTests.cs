@@ -20,7 +20,7 @@ internal sealed class SubscriptionProcessRecoveryTests
     [Arguments(CommitStage.ApplyCompleted, 0)]
     public async Task SubscriptionProcessingCrashRecoversEffectsInboxOutcomeAndCheckpointTogether(CommitStage stage, int index)
     {
-        var root = Path.Combine(Path.GetTempPath(), "keyload-subscription-crash-" + Guid.NewGuid().ToString("N"));
+        var root = Path.Combine(AppContext.BaseDirectory, "keyload-subscription-crash-" + Guid.NewGuid().ToString("N"));
         var token = TestContext.Current!.Execution.CancellationToken;
         using var admission = await StorageTrialLease.AcquireAsync(token);
         var child = CommandIdempotencyProcessChild.Create(CommandIdempotencyProcess.OutputLimitCharacters,

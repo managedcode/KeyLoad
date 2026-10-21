@@ -17,7 +17,7 @@ internal sealed class EventProjectionProcessRecoveryTests
     public async Task AcLineage001002003ProjectionAndReceiptRecoverAsOneCanonicalCut(
         CommitStage stage, int mutationIndex)
     {
-        var root = Path.Combine(Path.GetTempPath(), "keyload-event-projection-crash-" + Guid.NewGuid().ToString("N"));
+        var root = Path.Combine(AppContext.BaseDirectory, "keyload-event-projection-crash-" + Guid.NewGuid().ToString("N"));
         var callerToken = TestContext.Current!.Execution.CancellationToken;
         using var admission = await StorageTrialLease.AcquireAsync(callerToken);
         Process? process = null;

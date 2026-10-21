@@ -17,7 +17,7 @@ internal sealed class CachePolicyEpochOwner : IDisposable
     internal string Directory
     {
         get;
-    } = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "keyload-cache-policy-" + Guid.NewGuid().ToString("N"));
+    } = System.IO.Path.Combine(AppContext.BaseDirectory, "keyload-cache-policy-" + Guid.NewGuid().ToString("N"));
     internal CacheMemoryBudget Budget
     {
         get;

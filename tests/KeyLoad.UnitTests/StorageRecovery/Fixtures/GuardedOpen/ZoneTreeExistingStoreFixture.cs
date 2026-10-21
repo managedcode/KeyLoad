@@ -22,7 +22,7 @@ internal sealed class ZoneTreeExistingStoreFixture : IDisposable
     private const string GuidFormat = "N";
     private const string KeyText = "guard/committed";
     private const string ValueText = "original committed record";
-    private readonly string root = Path.Combine(Path.GetTempPath(), TemporaryPrefix + Guid.NewGuid().ToString(GuidFormat));
+    private readonly string root = Path.Combine(AppContext.BaseDirectory, TemporaryPrefix + Guid.NewGuid().ToString(GuidFormat));
 
     internal ZoneTreeExistingStoreFixture()
     {

@@ -8,7 +8,7 @@ internal sealed class SeededWalCorruptionTrial(int seed)
     private const int MaximumJournalBytes = 1_048_576;
     private const int ByteBits = 8;
     private const string Invalid = "The seeded execution WAL original is unavailable or changed.";
-    internal string Root { get; } = Path.Combine(Path.GetTempPath(), "keyload-seeded-wal-corruption-" + Guid.NewGuid().ToString("N"));
+    internal string Root { get; } = Path.Combine(AppContext.BaseDirectory, "keyload-seeded-wal-corruption-" + Guid.NewGuid().ToString("N"));
     internal int Seed { get; } = seed;
     internal byte[] Original { get; private set; } = [];
     internal byte[] Damaged { get; private set; } = [];

@@ -20,7 +20,7 @@ internal sealed class ServerContractSerializationTests
     [Test]
     public async Task FreshServerReceiptSurvivesCheckedEnvelopeRoundTrip()
     {
-        var original = new TextOwnerReceipt(TextProtocol.FormatVersion, Path.GetTempPath(),
+        var original = new TextOwnerReceipt(TextProtocol.FormatVersion, AppContext.BaseDirectory,
             string.Empty, Guid.NewGuid(), null, []);
         var decoded = TextEnvelopeCodec.Decode<TextOwnerReceipt>(TextEnvelopeCodec.Encode(original));
         await Assert.That(decoded.FormatVersion).IsEqualTo(original.FormatVersion);

@@ -7,7 +7,7 @@ namespace KeyLoad.UnitTests.Features.BackupRestore;
 
 internal sealed class ArchiveEntryFixture
 {
-    internal string Root { get; } = Path.Combine(Path.GetTempPath(), P.Prefix + Guid.NewGuid().ToString(P.GuidFormat));
+    internal string Root { get; } = Path.Combine(AppContext.BaseDirectory, P.Prefix + Guid.NewGuid().ToString(P.GuidFormat));
     internal TestDatabase Source
     {
         get;

@@ -18,8 +18,8 @@ internal sealed class CheckpointBatchTests
     [Arguments(3)]
     public async Task EntireBatchIsValidatedBeforeFirstApply(int invalidCase)
     {
-        var path = Path.Combine(Path.GetTempPath(), Prefix + Guid.NewGuid().ToString(GuidFormat));
-        var options = new ZoneTreeStoreOptions(Path.GetTempPath()).ResolveExecutionOptions(
+        var path = Path.Combine(AppContext.BaseDirectory, Prefix + Guid.NewGuid().ToString(GuidFormat));
+        var options = new ZoneTreeStoreOptions(AppContext.BaseDirectory).ResolveExecutionOptions(
             Microsoft.Extensions.Options.Options.Create(new ZoneTreeStorageExecutionOptions()));
         var applied = 0;
         try

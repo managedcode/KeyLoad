@@ -23,7 +23,7 @@ internal sealed class RequestCqrsHostedRuntimeFixture : IAsyncInitializer, IAsyn
     private readonly Lock lifecycle = new();
     private readonly RequestCqrsHostedProfile profile;
     private readonly TestClusterPortAllocator ports = new();
-    private readonly string directory = Path.Combine(StorageTrialDirectory.ResolveExistingDirectory(new(Path.GetTempPath())),
+    private readonly string directory = Path.Combine(StorageTrialDirectory.ResolveExistingDirectory(new(AppContext.BaseDirectory)),
         DirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
     private WebApplication? application;
     private string[]? arguments;

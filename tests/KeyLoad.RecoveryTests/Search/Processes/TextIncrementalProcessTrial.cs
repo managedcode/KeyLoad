@@ -22,7 +22,7 @@ internal static class TextIncrementalProcessTrial
     internal static async Task RunAsync(TextFaultStage stage, CancellationToken callerToken)
     {
         using var admission = await StorageTrialLease.AcquireAsync(callerToken);
-        var root = Path.Combine(Path.GetTempPath(), Prefix + Guid.NewGuid().ToString("N"));
+        var root = Path.Combine(AppContext.BaseDirectory, Prefix + Guid.NewGuid().ToString("N"));
         using var timeout = new CancellationTokenSource(RecoveryExecutionOptions.TrialPolicy.Value.CommandTimeout, TimeProvider.System);
         using var linked = CancellationTokenSource.CreateLinkedTokenSource(callerToken, timeout.Token);
         CommandIdempotencyProcessChild? active = null;

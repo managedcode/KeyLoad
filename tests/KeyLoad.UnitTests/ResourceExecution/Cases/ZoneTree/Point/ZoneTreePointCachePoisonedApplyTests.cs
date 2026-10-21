@@ -13,7 +13,7 @@ internal sealed class ZoneTreePointCachePoisonedApplyTests
     public async Task PoisonedApplyCannotServeHitsAndColdReopenReplaysTheDurableFrame()
     {
         var shouldFail = false;
-        var directory = Path.Combine(Path.GetTempPath(), "keyload-point-cache-poison-" + Guid.NewGuid().ToString("N"));
+        var directory = Path.Combine(AppContext.BaseDirectory, "keyload-point-cache-poison-" + Guid.NewGuid().ToString("N"));
         using var budget = new CacheMemoryBudget(UnitAdmissionOptions.Cache(new()));
         try
         {

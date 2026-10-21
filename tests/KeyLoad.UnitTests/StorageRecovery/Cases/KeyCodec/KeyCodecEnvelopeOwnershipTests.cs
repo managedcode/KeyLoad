@@ -12,7 +12,7 @@ internal sealed class KeyCodecEnvelopeOwnershipTests
     [Test]
     public async Task StageEnvelopeAndReopenPreserveOwnedKeyAndValueBytes()
     {
-        var directory = Path.Combine(Path.GetTempPath(), DirectoryPrefix + Guid.NewGuid().ToString("N"));
+        var directory = Path.Combine(AppContext.BaseDirectory, DirectoryPrefix + Guid.NewGuid().ToString("N"));
         if (Directory.Exists(directory))
         {
             throw new InvalidOperationException("The generated storage directory must be unowned.");

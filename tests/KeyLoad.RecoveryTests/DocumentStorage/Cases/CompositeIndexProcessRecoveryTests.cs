@@ -8,7 +8,7 @@ internal sealed class CompositeIndexProcessRecoveryTests
     [Test]
     public async Task AcDstoreIndexProcess001ReferenceModelSurvivesAcknowledgedAndInflightRestart()
     {
-        var root = Path.Combine(Path.GetTempPath(), TrialRootPrefix + Guid.NewGuid().ToString("N"));
+        var root = Path.Combine(AppContext.BaseDirectory, TrialRootPrefix + Guid.NewGuid().ToString("N"));
         var cancellationToken = TestContext.Current!.Execution.CancellationToken;
         using var admission = await StorageTrialLease.AcquireAsync(cancellationToken);
         await CompositeIndexProcessRecovery.RunAsync(root, cancellationToken);

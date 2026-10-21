@@ -21,7 +21,7 @@ internal static class PeriodicMaintenanceFlow
 
     internal static async Task RunAsync(bool failSweep, CancellationToken testToken)
     {
-        var root = Path.Combine(StorageTrialDirectory.ResolveExistingDirectory(new(Path.GetTempPath())),
+        var root = Path.Combine(StorageTrialDirectory.ResolveExistingDirectory(new(AppContext.BaseDirectory)),
             RootPrefix + Guid.NewGuid().ToString(GuidFormat));
         var injected = failSweep ? new InvalidOperationException(InjectedFailure) : null;
         using var periodic = new PeriodicMaintenanceBarrier(injected);

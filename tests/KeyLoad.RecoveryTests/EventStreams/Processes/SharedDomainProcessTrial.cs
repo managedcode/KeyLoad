@@ -18,7 +18,7 @@ internal static class SharedDomainProcessTrial
     internal static async Task RunAsync(CommitStage stage, int index, CancellationToken callerToken)
     {
         using var admission = await StorageTrialLease.AcquireAsync(callerToken);
-        var root = Path.Combine(Path.GetTempPath(), RootPrefix + Guid.NewGuid().ToString("N"));
+        var root = Path.Combine(AppContext.BaseDirectory, RootPrefix + Guid.NewGuid().ToString("N"));
         var child = CommandIdempotencyProcessChild.Create(CommandIdempotencyProcess.OutputLimitCharacters,
             CrashFixtureValues.CrashMarker);
         Exception? primary = null;

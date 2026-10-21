@@ -34,7 +34,7 @@ internal sealed class TestDatabase : IDisposable
         ClaimsExecutionOptions? claimsExecution = null,
         TimeProvider? timeProvider = null, TimeSeriesExecutionOptions? timeSeriesExecution = null)
     {
-        Directory = directory ?? Path.Combine(StorageTrialDirectory.ResolveExistingDirectory(new(Path.GetTempPath())),
+        Directory = directory ?? Path.Combine(StorageTrialDirectory.ResolveExistingDirectory(new(AppContext.BaseDirectory)),
             DirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
         if (System.IO.Directory.Exists(Directory))
         {

@@ -22,7 +22,7 @@ internal sealed class PartitionStoragePublicationBorrowFixture : IAsyncDisposabl
 
     internal PartitionStoragePublicationBorrowFixture()
     {
-        DirectoryPath = Path.Combine(Path.GetTempPath(), RootPrefix + Guid.NewGuid().ToString(GuidFormat));
+        DirectoryPath = Path.Combine(AppContext.BaseDirectory, RootPrefix + Guid.NewGuid().ToString(GuidFormat));
         options = new()
         {
             DataDirectory = DirectoryPath,

@@ -27,7 +27,7 @@ internal sealed class CqrsClusterFixture : IAsyncInitializer, IAsyncDisposable
     public async Task InitializeAsync()
     {
         using var deadline = new CancellationTokenSource(StartupBound, TimeProvider.System);
-        var logRoot = Path.Combine(Directory.GetCurrentDirectory(), "logs");
+        var logRoot = Path.Combine(AppContext.BaseDirectory, "logs");
         try
         {
             await Cluster.DeployAsync(deadline.Token);

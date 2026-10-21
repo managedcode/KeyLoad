@@ -10,6 +10,7 @@ internal sealed class TUnitSelectionTests
     private const string RevisionEnvironment = "GITHUB_SHA";
     private const string SuiteEnvironment = "KeyLoadTests__Suite";
     private const string IntrinsicEnvironment = "DOTNET_EnableHWIntrinsic";
+    private const string PipeDirectoryEnvironment = "TESTINGPLATFORM_PIPE_DIRECTORY";
     private const string ParallelismArgument = "--maximum-parallel-tests";
     private const string FilterArgument = "--treenode-filter";
     private const string UnitSuite = "unit";
@@ -33,8 +34,11 @@ internal sealed class TUnitSelectionTests
         var selected = selection.RootElement.GetProperty(SelectionProperty);
         var args = selected.GetProperty(ArgumentsProperty).EnumerateArray().Select(value => value.GetString()).ToArray();
         var environment = selected.GetProperty(EnvironmentProperty);
-        await Assert.That(args[0]).IsEqualTo("test");
-        await Assert.That(args[2]).IsEqualTo("tests/" + project);
+        await Assert.That(Path.IsPathFullyQualified(args[0]!)).IsTrue();
+        await Assert.That(args[0]).EndsWith(Path.Combine("tests", project, "bin", "Debug", "net10.0", project + ".dll"));
+        await Assert.That(args).DoesNotContain("--project");
+        await Assert.That(args).DoesNotContain("--no-build");
+        await Assert.That(args).DoesNotContain("--no-restore");
         await Assert.That(args[Array.IndexOf(args, "--output") + 1]).IsEqualTo("Detailed");
         await Assert.That(args[Array.IndexOf(args, ParallelismArgument) + 1]).IsEqualTo(ExpectedDefaultParallelism);
         await AssertDefaultSelectionAsync(selection.RootElement.GetProperty(Explicit20Property), ExpectedExplicit20Parallelism, suite)
@@ -48,6 +52,12 @@ internal sealed class TUnitSelectionTests
         await Assert.That(environment.GetProperty(RevisionEnvironment).GetString()).IsEqualTo("original-revision");
         await Assert.That(environment.TryGetProperty(SuiteEnvironment, out _)).IsFalse();
         await Assert.That(environment.TryGetProperty(IntrinsicEnvironment, out _)).IsFalse();
+        foreach (var key in new[] { "TMPDIR", "TMP", "TEMP" })
+        {
+            await Assert.That(environment.GetProperty(key).GetString()).IsEqualTo(Path.GetDirectoryName(args[0]));
+        }
+        await Assert.That(environment.GetProperty(PipeDirectoryEnvironment).GetString())
+            .EndsWith(Path.Combine("tests", "bin", "Debug", "ipc"));
     }
 
     private static async Task AssertDefaultSelectionAsync(JsonElement selection, string expected, string suite)

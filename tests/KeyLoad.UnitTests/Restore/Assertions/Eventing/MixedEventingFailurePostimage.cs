@@ -13,13 +13,15 @@ internal static class MixedEventingFailurePostimage
         byte[] outcomeKey, long repairedCut, long appliedIndex)
     {
         var locator = KeySpace.OutcomeLocator(state.Partition, operation.UserId!, operation.CommandId);
-        var admitted = new[] { outcomeKey, locator, KeySpace.AppliedBytes, KeySpace.ClockBytes }
+        var admitted = new[] { outcomeKey, locator, KeySpace.AppliedBytes, KeySpace.LastCommandBytes, KeySpace.ClockBytes }
             .Select(static key => Convert.ToHexString(key) + ":").ToArray();
         var original = corruptRaw.Append(Convert.ToHexString(restoredKey) + ":" + Convert.ToHexString(restoredValue));
         await Assert.That(WithoutMetadata(QueueWholeFlowStorage.Bytes(source.Store), admitted))
             .IsEquivalentTo(WithoutMetadata(original, admitted), CollectionOrdering.Matching);
         await Assert.That(source.Store.Position).IsEqualTo(checked(repairedCut + SingleFailureCommit));
         await Assert.That(source.Store.Read(view => view.ReadOwnedValue(locator)))
+            .IsEquivalentTo(outcomeKey, CollectionOrdering.Matching);
+        await Assert.That(source.Store.Read(view => OrleansSerialization.Deserialize<byte[]>(view.ReadOwnedValue(KeySpace.LastCommandBytes)!)))
             .IsEquivalentTo(outcomeKey, CollectionOrdering.Matching);
         await Assert.That(source.Store.Read(view => OrleansSerialization.Deserialize<long>(view.ReadOwnedValue(KeySpace.AppliedBytes)!)))
             .IsEqualTo(appliedIndex);

@@ -24,7 +24,7 @@ internal sealed class ZoneTreePointCacheFileFixture : IDisposable
         Guid? incarnation = null, byte[]? signingKey = null, int maxKeyBytes = 128)
     {
         ObjectDisposedException.ThrowIf(Volatile.Read(ref disposeStarted) != 0, this);
-        var directory = Path.Combine(Path.GetTempPath(), "keyload-point-cache-" + Guid.NewGuid().ToString("N"));
+        var directory = Path.Combine(AppContext.BaseDirectory, "keyload-point-cache-" + Guid.NewGuid().ToString("N"));
         directories.Add(directory);
         return OpenStoreAt(directory, maxEntries, maxValueBytes, maxPinsPerEntry, incarnation, signingKey, maxKeyBytes);
     }

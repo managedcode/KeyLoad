@@ -79,7 +79,7 @@ internal sealed partial class ClusterFixture : AspireFixture<Projects.KeyLoad_Ap
     public string Root
     {
         get; private set;
-    } = ClusterDataDirectory.Resolve(Path.Combine(Path.GetTempPath(),
+    } = ClusterDataDirectory.Resolve(Path.Combine(AppContext.BaseDirectory,
         ClusterFixtureProtocol.RootDirectoryPrefix + Guid.NewGuid().ToString(ClusterFixtureProtocol.GuidFormat)));
 
     /// <summary>Gets the actual started Aspire application and its allocated endpoint model.</summary>

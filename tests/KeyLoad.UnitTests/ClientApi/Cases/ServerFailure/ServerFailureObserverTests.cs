@@ -108,7 +108,7 @@ internal sealed class ServerFailureObserverTests
         }
     }
 
-    private static string NewPath() => Path.Combine(Path.GetTempPath(), FilePrefix + Guid.NewGuid().ToString(GuidFormat) + FileSuffix);
+    private static string NewPath() => Path.Combine(AppContext.BaseDirectory, FilePrefix + Guid.NewGuid().ToString(GuidFormat) + FileSuffix);
 
     /// <summary>A real synchronous file cleanup executes inline and an empty failure list emits no exception.</summary>
     [Test]

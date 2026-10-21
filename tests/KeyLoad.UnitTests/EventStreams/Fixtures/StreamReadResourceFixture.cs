@@ -42,7 +42,7 @@ internal sealed class StreamReadResourceFixture : IDisposable
 
     public StreamReadResourceFixture(int eventCount = 0, bool protectedFields = false, string? directory = null, TimeProvider? timeProvider = null)
     {
-        var ownedDirectory = directory ?? Path.Combine(Path.GetTempPath(), DirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
+        var ownedDirectory = directory ?? Path.Combine(AppContext.BaseDirectory, DirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
         if (System.IO.Directory.Exists(ownedDirectory))
         {
             throw new ArgumentException(FreshDirectoryRequired, nameof(directory));

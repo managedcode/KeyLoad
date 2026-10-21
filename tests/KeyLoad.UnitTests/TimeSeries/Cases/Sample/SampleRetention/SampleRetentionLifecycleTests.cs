@@ -140,7 +140,7 @@ internal sealed class SampleRetentionLifecycleTests
     [Test]
     public async Task AcSeries016ReopenPreservesFloorCountsAndPurgedSampleIdentitySequence()
     {
-        var path = Path.Combine(Path.GetTempPath(), "keyload-series-retention-" + Guid.NewGuid().ToString("N"));
+        var path = Path.Combine(AppContext.BaseDirectory, "keyload-series-retention-" + Guid.NewGuid().ToString("N"));
         ZoneTreeStore? store = null;
         try
         {

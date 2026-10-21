@@ -17,7 +17,7 @@ internal sealed class ClusterStartupPathTests
     [Arguments(5)]
     public async Task LinkedParentBuildsRequestedProjectNodesWithoutCredentialFiles(int nodes)
     {
-        var directory = Path.Combine(Path.GetTempPath(), "keyload-startup-path-" + Guid.NewGuid().ToString("N"));
+        var directory = Path.Combine(AppContext.BaseDirectory, "keyload-startup-path-" + Guid.NewGuid().ToString("N"));
         var physical = Path.Combine(directory, "physical");
         var linked = Path.Combine(directory, "linked");
         Directory.CreateDirectory(physical);

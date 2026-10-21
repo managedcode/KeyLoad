@@ -12,7 +12,7 @@ internal sealed class AdminStorageObservationTests
     [Test]
     public async Task AcAd002RealFileLengthAndMissingDirectoryAreHonest()
     {
-        var root = Path.Combine(Path.GetTempPath(), Prefix + Guid.NewGuid().ToString("N"));
+        var root = Path.Combine(AppContext.BaseDirectory, Prefix + Guid.NewGuid().ToString("N"));
         try
         {
             Directory.CreateDirectory(root);
@@ -34,7 +34,7 @@ internal sealed class AdminStorageObservationTests
     [Test]
     public async Task AcAd002EnumerationLimitAndCancellationNeverProduceCompleteZero()
     {
-        var root = Path.Combine(Path.GetTempPath(), Prefix + Guid.NewGuid().ToString("N"));
+        var root = Path.Combine(AppContext.BaseDirectory, Prefix + Guid.NewGuid().ToString("N"));
         try
         {
             Directory.CreateDirectory(root);
@@ -57,7 +57,7 @@ internal sealed class AdminStorageObservationTests
     [Test]
     public async Task AcAd002SymbolicFileIsNotFollowedOrReportedAsComplete()
     {
-        var root = Path.Combine(Path.GetTempPath(), Prefix + Guid.NewGuid().ToString("N"));
+        var root = Path.Combine(AppContext.BaseDirectory, Prefix + Guid.NewGuid().ToString("N"));
         var external = root + "-external";
         try
         {

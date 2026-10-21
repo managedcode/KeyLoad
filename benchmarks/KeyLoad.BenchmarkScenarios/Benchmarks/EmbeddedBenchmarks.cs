@@ -129,7 +129,7 @@ public class EmbeddedBenchmarks : IDisposable
     {
         internal const string InactiveFixtureMessage = "The benchmark fixture is not initialized.";
         private const string GuidFormat = "N";
-        private readonly string directory = Path.Combine(Path.GetTempPath(),
+        private readonly string directory = Path.Combine(AppContext.BaseDirectory,
             TemporaryDirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
         private ZoneTreeStore? store;
         private DatabaseEngine? database;

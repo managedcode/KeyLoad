@@ -19,7 +19,7 @@ internal sealed class RawStorageFixtureZoneTreeEngine : IDisposable
     {
         this.corpus = corpus;
         this.readScratch = readScratch;
-        directory = Path.Combine(Path.GetTempPath(), TemporaryDirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
+        directory = Path.Combine(AppContext.BaseDirectory, TemporaryDirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
         try
         {
             tree = CreateTree(directory).OpenOrCreate();

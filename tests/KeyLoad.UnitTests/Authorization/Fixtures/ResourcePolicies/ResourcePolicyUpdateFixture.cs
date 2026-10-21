@@ -36,7 +36,7 @@ internal sealed class ResourcePolicyUpdateFixture : IDisposable
 
     internal ResourcePolicyUpdateFixture(long initialSchemaVersion = 1)
     {
-        DirectoryPath = Path.Combine(Path.GetTempPath(), DirectoryPrefix + Guid.NewGuid().ToString("N"));
+        DirectoryPath = Path.Combine(AppContext.BaseDirectory, DirectoryPrefix + Guid.NewGuid().ToString("N"));
         Open();
         Database.Bootstrap(new(RootId, SystemTenant, [new(Wildcard, Wildcard, Capability.All)], [Wildcard])
         {

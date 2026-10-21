@@ -18,7 +18,7 @@ internal sealed class StoragePublicationRecoveryTests
     [Arguments("install", CommitStage.JournalSwapped)]
     public async Task ProcessKillDuringCheckpointPublicationRecoversOneCompleteGeneration(string mode, CommitStage stage)
     {
-        var root = Path.Combine(Path.GetTempPath(), "keyload-checkpoint-crash-" + Guid.NewGuid().ToString("N"));
+        var root = Path.Combine(AppContext.BaseDirectory, "keyload-checkpoint-crash-" + Guid.NewGuid().ToString("N"));
         var cancellationToken = TestContext.Current!.Execution.CancellationToken;
         using var admission = await StorageTrialLease.AcquireAsync(cancellationToken);
         try
@@ -132,7 +132,7 @@ internal sealed class StoragePublicationRecoveryTests
     [Test]
     public async Task CorruptCompleteFrameFailsClosedInsteadOfBeingDiscardedAsATornTail()
     {
-        var root = Path.Combine(Path.GetTempPath(), "keyload-corruption-" + Guid.NewGuid().ToString("N"));
+        var root = Path.Combine(AppContext.BaseDirectory, "keyload-corruption-" + Guid.NewGuid().ToString("N"));
         try
         {
             using (var store = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution()))
@@ -157,7 +157,7 @@ internal sealed class StoragePublicationRecoveryTests
     [Test]
     public async Task VerifiedBackupRestoresDataWithNewIdentityAndPausedDispatch()
     {
-        var temporaryDirectory = StorageTrialDirectory.ResolveExistingDirectory(new(Path.GetTempPath()));
+        var temporaryDirectory = StorageTrialDirectory.ResolveExistingDirectory(new(AppContext.BaseDirectory));
         var root = Path.Combine(temporaryDirectory, "keyload-backup-" + Guid.NewGuid().ToString("N"));
         var backup = root + "-backup";
         var restored = root + "-restored";

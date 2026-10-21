@@ -22,7 +22,7 @@ internal sealed class DatabaseCompositionProcessRecoveryTests
     [Arguments(CommitStage.ApplyCompleted, 0)]
     public async Task AcComp004006008ProcessKillRecoversOneCompositionCutAndStableRetry(CommitStage stage, int index)
     {
-        var root = Path.Combine(Path.GetTempPath(), "keyload-composition-crash-" + Guid.NewGuid().ToString("N"));
+        var root = Path.Combine(AppContext.BaseDirectory, "keyload-composition-crash-" + Guid.NewGuid().ToString("N"));
         var cancellationToken = TestContext.Current!.Execution.CancellationToken;
         using var admission = await StorageTrialLease.AcquireAsync(cancellationToken);
         using var process = StartCrashProcess(root, stage, index);

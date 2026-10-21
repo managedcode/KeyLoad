@@ -34,7 +34,7 @@ internal sealed partial class FunctionalGateFixture : IAsyncDisposable
         get;
     }
     internal int ReplicaCount { get; }
-    internal string Root { get; } = ClusterDataDirectory.Resolve(Path.Combine(Path.GetTempPath(), "keyload-functional-" + Guid.NewGuid().ToString("N")));
+    internal string Root { get; } = ClusterDataDirectory.Resolve(Path.Combine(AppContext.BaseDirectory, "keyload-functional-" + Guid.NewGuid().ToString("N")));
     internal bool PreserveEvidence
     {
         get; set;

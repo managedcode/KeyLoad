@@ -11,7 +11,7 @@ internal sealed class TemporaryFrameFile : IDisposable
     public TemporaryFrameFile(byte[] content)
     {
         Path = System.IO.Path.Combine(
-            System.IO.Path.GetTempPath(),
+            AppContext.BaseDirectory,
             $"{FilePrefix}{Guid.NewGuid():N}{FileExtension}");
         File.WriteAllBytes(Path, content);
     }

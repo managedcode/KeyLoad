@@ -18,7 +18,7 @@ internal sealed class SampleRetentionProcessRecoveryTests
     [Arguments(CommitStage.ApplyCompleted)]
     public async Task AcSeries013015016ProcessKillRecoversOldOrCompleteRetentionPage(CommitStage stage)
     {
-        var root = Path.Combine(Path.GetTempPath(), TrialPrefix + Guid.NewGuid().ToString("N"));
+        var root = Path.Combine(AppContext.BaseDirectory, TrialPrefix + Guid.NewGuid().ToString("N"));
         var callerToken = TestContext.Current!.Execution.CancellationToken;
         using var admission = await StorageTrialLease.AcquireAsync(callerToken);
         using var process = StartCrashProcess(root, stage);

@@ -7,7 +7,7 @@ internal static class SiteCoverageArtifactReader
     public static async Task<SiteCoverageCollection> ReadAsync(string repository, string artifactRoot,
         SiteCoverageSourceManifest manifest, CancellationToken cancellationToken)
     {
-        var result = new SiteCoverageCollection();
+        var result = new SiteCoverageCollection(artifactRoot);
         var sources = manifest.Sources.ToDictionary(source => source.Path, StringComparer.Ordinal);
         var nodeRoot = Path.Combine(artifactRoot, SiteCoverageTokens.NodeDirectory);
         var browserRoot = Path.Combine(artifactRoot, SiteCoverageTokens.BrowserDirectory,
@@ -81,7 +81,7 @@ internal static class SiteCoverageArtifactReader
             var metadata = SiteCoverageArtifactMetadata.ParseMetadata(metadataBytes, manifest, sources);
             var listedNames = metadata.CoverageFiles.ToHashSet(StringComparer.Ordinal);
             SiteCoverageArtifactMetadata.ValidateSessionFiles(directory, listedNames);
-            var artifactRoot = SiteCoverageArtifactFiles.RequiredCoverageRoot();
+            var artifactRoot = result.ArtifactRoot;
             var relativeMetadata = SiteCoverageArtifactFiles.RelativePath(artifactRoot, metadataPath);
             var firstReceiptIndex = result.Receipts.Count;
             var receiptPaths = new List<string>();
@@ -106,7 +106,7 @@ internal static class SiteCoverageArtifactReader
         }
         catch (Exception exception) when (SiteCoverageArtifactFiles.IsCoverageReadFailure(exception))
         {
-            result.Errors.Add($"{SiteCoverageArtifactFiles.RelativePath(SiteCoverageArtifactFiles.RequiredCoverageRoot(), metadataPath)}{SiteCoverageTokens.ErrorSeparator}{exception.Message}");
+            result.Errors.Add($"{SiteCoverageArtifactFiles.RelativePath(result.ArtifactRoot, metadataPath)}{SiteCoverageTokens.ErrorSeparator}{exception.Message}");
         }
     }
 
@@ -119,7 +119,7 @@ internal static class SiteCoverageArtifactReader
             var bytes = await SiteCoverageArtifactFiles.ReadBoundedAsync(path, result, cancellationToken).ConfigureAwait(false);
             using var document = JsonDocument.Parse(bytes, SiteCoverageTokens.JsonDocumentOptions);
             SiteCoverageArtifactMetadata.ValidateEnvelope(document.RootElement, runtime);
-            var artifactRoot = SiteEnvironmentConfiguration.Capture().Value.CoverageRoot!;
+            var artifactRoot = result.ArtifactRoot;
             var receiptIdentity = SiteCoverageArtifactFiles.RelativePath(artifactRoot, path);
             var receiptHash = SiteCoverageSourceManifestWriter.Hash(bytes);
             var snapshots = SiteCoverageRanges.ParseScripts(document.RootElement.GetProperty(SiteCoverageTokens.Result),
@@ -140,7 +140,7 @@ internal static class SiteCoverageArtifactReader
         }
         catch (Exception exception) when (SiteCoverageArtifactFiles.IsCoverageReadFailure(exception))
         {
-            var artifactRoot = SiteEnvironmentConfiguration.Capture().Value.CoverageRoot!;
+            var artifactRoot = result.ArtifactRoot;
             result.Errors.Add($"{SiteCoverageArtifactFiles.RelativePath(artifactRoot, path)}{SiteCoverageTokens.ErrorSeparator}{exception.Message}");
         }
     }

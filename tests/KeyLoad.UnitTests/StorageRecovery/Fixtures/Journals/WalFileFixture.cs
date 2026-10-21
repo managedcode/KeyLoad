@@ -27,7 +27,7 @@ internal sealed class WalFileFixture : IDisposable
     internal string DirectoryPath
     {
         get;
-    } = Path.Combine(Path.GetTempPath(),
+    } = Path.Combine(AppContext.BaseDirectory,
         DirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
     internal string JournalPath => Path.Combine(DirectoryPath, JournalFileName);
     internal string IdentityPath => Path.Combine(DirectoryPath, IdentityFileName);

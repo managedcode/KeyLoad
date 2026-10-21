@@ -81,7 +81,7 @@ internal sealed class ReadDiagnosticsTests
     [Test]
     public async Task AcMp011ReopenStartsNewDiagnosticsSessionWithoutChangingStoredValues()
     {
-        var directory = Path.Combine(Path.GetTempPath(), "keyload-read-diagnostics-" + Guid.NewGuid().ToString("N"));
+        var directory = Path.Combine(AppContext.BaseDirectory, "keyload-read-diagnostics-" + Guid.NewGuid().ToString("N"));
         try
         {
             Guid priorSession;
@@ -125,7 +125,7 @@ internal sealed class ReadDiagnosticsTests
 
     private sealed class StoreFixture : IDisposable
     {
-        public string Directory { get; } = Path.Combine(Path.GetTempPath(), "keyload-read-diagnostics-" + Guid.NewGuid().ToString("N"));
+        public string Directory { get; } = Path.Combine(AppContext.BaseDirectory, "keyload-read-diagnostics-" + Guid.NewGuid().ToString("N"));
         public ZoneTreeStore Store
         {
             get;

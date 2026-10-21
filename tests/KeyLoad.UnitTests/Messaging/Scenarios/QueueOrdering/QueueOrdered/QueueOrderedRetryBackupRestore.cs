@@ -13,7 +13,7 @@ internal static class QueueOrderedRetryBackupRestore
     internal static async Task RunAsync(ZoneTreeStore source, QueueOrderedRetryState original, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
-        var root = Path.Combine(StorageTrialDirectory.ResolveExistingDirectory(new(Path.GetTempPath())),
+        var root = Path.Combine(StorageTrialDirectory.ResolveExistingDirectory(new(AppContext.BaseDirectory)),
             Prefix + Guid.NewGuid().ToString("N"));
         var backup = Path.Combine(root, Backup);
         var target = Path.Combine(root, Target);

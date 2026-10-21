@@ -31,7 +31,7 @@ internal sealed class AtomicPartitionRosterFixture : IDisposable
     private const string DestinationPartitionKey = "destination";
     internal static readonly PartitionRef Source = new(TenantId, DatabaseId, TransactionDomainId, SourcePartitionKey);
     internal static readonly PartitionRef Destination = new(TenantId, DatabaseId, TransactionDomainId, DestinationPartitionKey);
-    private readonly string directory = Path.Combine(StorageTrialDirectory.ResolveExistingDirectory(new(Path.GetTempPath())), DirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
+    private readonly string directory = Path.Combine(StorageTrialDirectory.ResolveExistingDirectory(new(AppContext.BaseDirectory)), DirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
     private readonly DatabaseLimits limits;
     private readonly int? maxFrameBytes;
     private readonly TimeProvider timeProvider = TimeProvider.System;

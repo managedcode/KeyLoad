@@ -11,7 +11,7 @@ internal sealed class SampleRollupProcessRecoveryTests
     [Arguments(true)]
     public async Task AcSeries022AcknowledgedAndJournalFlushedProcessCutsRetainRollupAuthority(bool drop)
     {
-        var root = Path.Combine(Path.GetTempPath(), TrialPrefix + Guid.NewGuid().ToString("N"));
+        var root = Path.Combine(AppContext.BaseDirectory, TrialPrefix + Guid.NewGuid().ToString("N"));
         var token = TestContext.Current!.Execution.CancellationToken;
         using var admission = await StorageTrialLease.AcquireAsync(token);
         await SampleRollupProcessRecovery.RunAsync(root, drop, token);

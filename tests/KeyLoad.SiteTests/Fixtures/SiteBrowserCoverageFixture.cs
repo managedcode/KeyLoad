@@ -65,7 +65,7 @@ internal sealed class SiteBrowserCoverageFixture : IDisposable
 
         var selected = matches[SiteCoverageTokens.Zero];
         var node = await FindMappedNodeAsync(coverageRoot, inputs.Repository, manifest, cancellationToken);
-        var root = Path.Combine(coverageRoot, SiteCoverageTokens.RuntimeEvidenceDirectory,
+        var root = Path.Combine(AppContext.BaseDirectory, SiteCoverageTokens.RuntimeEvidenceDirectory,
             SiteBrowserCoverageTokens.BrowserFixturePrefix + Guid.NewGuid().ToString(SiteCoverageTokens.CompactGuidFormat));
         var sessionId = Path.GetFileName(selected.Path);
         var browserFiles = selected.Metadata.CoverageFiles.ToDictionary(name => name,
@@ -88,14 +88,14 @@ internal sealed class SiteBrowserCoverageFixture : IDisposable
     public string BrowserReceiptPath(string name) => BrowserReceiptPathFor(SessionId, name);
 
     public string BrowserReceiptPathFor(string sessionId, string name) => SiteCoverageArtifactFiles.RelativePath(
-        SiteCoverageArtifactFiles.RequiredCoverageRoot(), Path.Combine(SessionPath(sessionId), name));
+        Root, Path.Combine(SessionPath(sessionId), name));
 
     public string MetadataPath(string sessionId) => SiteCoverageArtifactFiles.RelativePath(
-        SiteCoverageArtifactFiles.RequiredCoverageRoot(), Path.Combine(SessionPath(sessionId),
+        Root, Path.Combine(SessionPath(sessionId),
             SiteCoverageTokens.MetadataFile));
 
     public string NodeReceiptPath => SiteCoverageArtifactFiles.RelativePath(
-        SiteCoverageArtifactFiles.RequiredCoverageRoot(), Path.Combine(Root, SiteCoverageTokens.NodeDirectory, NodeName));
+        Root, Path.Combine(Root, SiteCoverageTokens.NodeDirectory, NodeName));
 
     public (string Name, byte[] Bytes) EmptyBrowserFile => browserFiles.Select(file =>
     {

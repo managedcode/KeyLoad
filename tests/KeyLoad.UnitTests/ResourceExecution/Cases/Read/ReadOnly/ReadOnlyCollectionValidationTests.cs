@@ -68,7 +68,7 @@ internal sealed class ReadOnlyCollectionValidationTests
     [Test]
     public async Task AcRoc003And004OwnedScanAndPointResultsStayIndependentOfCallerAndStoreBuffers()
     {
-        var directory = Path.Combine(Path.GetTempPath(), "keyload-readonly-contract-" + Guid.NewGuid().ToString("N"));
+        var directory = Path.Combine(AppContext.BaseDirectory, "keyload-readonly-contract-" + Guid.NewGuid().ToString("N"));
         try
         {
             using var store = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());

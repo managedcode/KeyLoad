@@ -19,7 +19,7 @@ internal sealed class ZoneTreeMaintenancePolicyTests
     public async Task InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen(
         long intervalTicks, long lifetimeTicks)
     {
-        var path = Path.Combine(Path.GetTempPath(), DirectoryPrefix + Guid.NewGuid().ToString("N"));
+        var path = Path.Combine(AppContext.BaseDirectory, DirectoryPrefix + Guid.NewGuid().ToString("N"));
         var invalid = Options.Create(new ZoneTreeStorageExecutionOptions
         {
             MaintenanceInterval = TimeSpan.FromTicks(intervalTicks),

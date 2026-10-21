@@ -21,7 +21,7 @@ internal sealed class SiteMetadataTestScope : IAsyncDisposable
     internal static async Task<SiteMetadataTestScope> CreateAsync(SiteIsolatedFixture sourceFixture, CancellationToken token)
     {
         var inputs = sourceFixture.Inputs.Site;
-        var path = Path.Combine(Path.GetTempPath(), SiteMetadataTokens.TestDirectoryPrefix + Guid.NewGuid().ToString("N"));
+        var path = Path.Combine(AppContext.BaseDirectory, SiteMetadataTokens.TestDirectoryPrefix + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(path);
         try
         {

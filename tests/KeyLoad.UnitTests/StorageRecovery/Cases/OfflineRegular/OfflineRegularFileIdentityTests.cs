@@ -59,7 +59,7 @@ internal sealed class OfflineRegularFileIdentityTests
 
     private static async Task WithDirectoryAsync(Func<string, Task> action)
     {
-        var root = Path.Combine(Path.GetTempPath(), RootPrefix + Guid.NewGuid().ToString("N"));
+        var root = Path.Combine(AppContext.BaseDirectory, RootPrefix + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(root);
         try
         {

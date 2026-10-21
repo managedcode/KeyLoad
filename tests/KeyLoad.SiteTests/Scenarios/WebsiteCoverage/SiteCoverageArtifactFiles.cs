@@ -12,7 +12,7 @@ internal static class SiteCoverageArtifactFiles
             return [];
         }
 
-        if (!HasNoLinkedAncestors(RequiredCoverageRoot(), directory))
+        if (!HasNoLinkedAncestors(result.ArtifactRoot, directory))
         {
             result.Errors.Add(SiteCoverageTokens.CoveragePathFailure);
             return [];
@@ -28,7 +28,7 @@ internal static class SiteCoverageArtifactFiles
         if (!info.Exists || info.Length < SiteCoverageTokens.Zero || info.Length > SiteCoverageTokens.RuntimeMaximumFileBytes ||
             ++result.FilesRead > SiteCoverageTokens.RuntimeMaximumFiles ||
             result.BytesRead + info.Length > SiteCoverageTokens.RuntimeMaximumBytes ||
-            !HasNoLinkedAncestors(RequiredCoverageRoot(), path))
+            !HasNoLinkedAncestors(result.ArtifactRoot, path))
         {
             throw SiteCoverageJson.Invalid(SiteCoverageTokens.InvalidCoverageFailure);
         }
@@ -91,7 +91,7 @@ internal static class SiteCoverageArtifactFiles
             return [];
         }
 
-        if (!HasNoLinkedAncestors(RequiredCoverageRoot(), directory))
+        if (!HasNoLinkedAncestors(result.ArtifactRoot, directory))
         {
             result.Errors.Add(SiteCoverageTokens.CoveragePathFailure);
             return [];

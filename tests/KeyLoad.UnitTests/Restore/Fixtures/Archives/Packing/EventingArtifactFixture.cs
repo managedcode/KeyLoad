@@ -27,7 +27,7 @@ internal sealed class EventingArtifactFixture
     private const string SourceDirectory = "source";
     internal const string Handler = "backup-handler";
     internal const string Json = "{\"retained\":true}";
-    internal string Root { get; } = Path.Combine(StorageTrialDirectory.ResolveExistingDirectory(new(Path.GetTempPath())),
+    internal string Root { get; } = Path.Combine(StorageTrialDirectory.ResolveExistingDirectory(new(AppContext.BaseDirectory)),
         Prefix + Guid.NewGuid().ToString("N"));
     internal TestDatabase Source { get; private set; } = null!;
     internal ZoneTreeStore? Target

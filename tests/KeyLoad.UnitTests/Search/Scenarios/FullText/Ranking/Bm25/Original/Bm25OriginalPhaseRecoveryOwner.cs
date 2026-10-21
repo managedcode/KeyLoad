@@ -24,7 +24,7 @@ internal sealed class Bm25OriginalPhaseRecoveryOwner
 
     private Bm25OriginalPhaseRecoveryOwner()
     {
-        var directory = Path.Combine(Path.GetTempPath(), DirectoryPrefix + Guid.NewGuid().ToString("N"));
+        var directory = Path.Combine(AppContext.BaseDirectory, DirectoryPrefix + Guid.NewGuid().ToString("N"));
         Source = new(directory: directory);
         originalIdentity = Source.Store.Identity;
     }

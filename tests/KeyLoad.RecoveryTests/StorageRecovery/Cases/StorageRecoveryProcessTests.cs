@@ -32,7 +32,7 @@ internal sealed class StorageRecoveryProcessTests
     private static async Task RunSeededCrashTrialAsync(int batch, int trial, SeededCrashChoice random,
         StreamWriter evidence, CancellationToken cancellationToken)
     {
-        var root = Path.Combine(Path.GetTempPath(), $"keyload-crash-{batch}-{trial}-{Guid.NewGuid():N}");
+        var root = Path.Combine(AppContext.BaseDirectory, $"keyload-crash-{batch}-{trial}-{Guid.NewGuid():N}");
         var stage = (CommitStage)random.Next(5);
         var mutationIndex = random.Next(3);
         using var admission = await StorageTrialLease.AcquireAsync(cancellationToken);

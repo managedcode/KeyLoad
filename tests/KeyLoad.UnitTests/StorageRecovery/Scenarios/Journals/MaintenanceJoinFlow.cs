@@ -11,7 +11,7 @@ internal static class MaintenanceJoinFlow
 
     internal static async Task RunAsync(CancellationToken testToken)
     {
-        var root = Path.Combine(Path.GetTempPath(), RootPrefix + Guid.NewGuid().ToString("N"));
+        var root = Path.Combine(AppContext.BaseDirectory, RootPrefix + Guid.NewGuid().ToString("N"));
         var failures = new List<Exception>();
         ZoneTreeStore? store = null;
         Task? disposal = null;

@@ -141,7 +141,7 @@ internal sealed class PreparedTransactionTests
 
     private static string CreateTemporaryDirectory()
     {
-        var directory = Path.Combine(Path.GetTempPath(), TemporaryDirectoryPrefix + Guid.NewGuid().ToString("N"));
+        var directory = Path.Combine(AppContext.BaseDirectory, TemporaryDirectoryPrefix + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(directory);
         return directory;
     }

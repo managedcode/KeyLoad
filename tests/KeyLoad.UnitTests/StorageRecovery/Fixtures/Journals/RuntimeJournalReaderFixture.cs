@@ -15,7 +15,7 @@ internal sealed class RuntimeJournalReaderFixture : IDisposable
     internal const string RootPrefix = "keyload-runtime-journal-reader-";
     private const string InvalidCurrentIdentity = "The current execution identity envelope is invalid.";
 
-    private readonly string root = Path.Combine(Path.GetTempPath(), RootPrefix + Guid.NewGuid().ToString(GuidFormat));
+    private readonly string root = Path.Combine(AppContext.BaseDirectory, RootPrefix + Guid.NewGuid().ToString(GuidFormat));
 
     internal RuntimeJournalReaderFixture()
     {

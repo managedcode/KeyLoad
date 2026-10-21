@@ -10,7 +10,7 @@ internal sealed class ArtifactTests
     [Test]
     public async Task ChunkedCartographBackupRoundTripsAndManagedCodeStorageTransfersIt()
     {
-        var root = Path.Combine(Path.GetTempPath(), "keyload-artifact-" + Guid.NewGuid().ToString("N"));
+        var root = Path.Combine(AppContext.BaseDirectory, "keyload-artifact-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(root);
         try
         {
@@ -41,7 +41,7 @@ internal sealed class ArtifactTests
     [Test]
     public async Task AcBackup001PackRejectsMissingCanonicalFileBeforePublishingArchive()
     {
-        var root = Path.Combine(Path.GetTempPath(), "keyload-artifact-missing-" + Guid.NewGuid().ToString("N"));
+        var root = Path.Combine(AppContext.BaseDirectory, "keyload-artifact-missing-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(root);
         try
         {
@@ -61,7 +61,7 @@ internal sealed class ArtifactTests
     [Test]
     public async Task AcBackup002NonemptyDestinationRejectsBeforeArchiveIsOpened()
     {
-        var root = Path.Combine(Path.GetTempPath(), "keyload-artifact-destination-" + Guid.NewGuid().ToString("N"));
+        var root = Path.Combine(AppContext.BaseDirectory, "keyload-artifact-destination-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(root);
         try
         {

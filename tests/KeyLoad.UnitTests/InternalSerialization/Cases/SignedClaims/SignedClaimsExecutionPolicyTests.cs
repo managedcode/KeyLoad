@@ -89,7 +89,7 @@ internal sealed class SignedClaimsExecutionPolicyTests
     [Arguments(8193)]
     public async Task InvalidAdmissionRejectsBeforePhysicalStoreCreationAsync(int maximumCharacters)
     {
-        var directory = Path.Combine(Path.GetTempPath(), "signed-claims-invalid-" + Guid.NewGuid().ToString("N"));
+        var directory = Path.Combine(AppContext.BaseDirectory, "signed-claims-invalid-" + Guid.NewGuid().ToString("N"));
         var failure = Assert.ThrowsExactly<InvalidOperationException>(() =>
         {
             using var database = new TestDatabase(directory: directory,

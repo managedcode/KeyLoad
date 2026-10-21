@@ -25,7 +25,7 @@ internal sealed class PartitionHostRecoveryFixture : IDisposable
 
     internal PartitionHostRecoveryFixture()
     {
-        directory = Path.Combine(StorageTrialDirectory.ResolveExistingDirectory(new(Path.GetTempPath())),
+        directory = Path.Combine(StorageTrialDirectory.ResolveExistingDirectory(new(AppContext.BaseDirectory)),
             Prefix + Guid.NewGuid().ToString(GuidFormat));
         Options = new()
         {

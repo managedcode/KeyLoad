@@ -28,7 +28,7 @@ internal sealed class TextProjectionProcessRecoveryTests
     private static async Task RunTrialAsync(TextFaultStage stage, bool replacement,
         CancellationToken callerToken)
     {
-        var root = Path.Combine(Path.GetTempPath(), TrialPrefix + Guid.NewGuid().ToString("N"));
+        var root = Path.Combine(AppContext.BaseDirectory, TrialPrefix + Guid.NewGuid().ToString("N"));
         var source = Path.Combine(root, StoreDirectoryName);
         var receiptPath = Path.Combine(root, ReceiptFileName);
         using var admission = await StorageTrialLease.AcquireAsync(callerToken);

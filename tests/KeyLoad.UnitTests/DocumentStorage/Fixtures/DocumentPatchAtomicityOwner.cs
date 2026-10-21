@@ -23,7 +23,7 @@ internal sealed class DocumentPatchAtomicityOwner
 
     private DocumentPatchAtomicityOwner()
     {
-        var directory = Path.Combine(StorageTrialDirectory.ResolveExistingDirectory(new(Path.GetTempPath())),
+        var directory = Path.Combine(StorageTrialDirectory.ResolveExistingDirectory(new(AppContext.BaseDirectory)),
             DirectoryPrefix + Guid.NewGuid().ToString("N"));
         Source = new(directory: directory);
         originalIdentity = Source.Store.Identity;

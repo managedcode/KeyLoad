@@ -1,5 +1,5 @@
 import { spawn } from 'node:child_process';
-import { accessSync, constants, realpathSync, statSync } from 'node:fs';
+import { accessSync, constants, mkdirSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -56,24 +56,17 @@ export function runtimeSelection(input, inherited = process.env) {
   if (suite === 'cluster' && !values.has('Filter')) values.set('Filter', ordinaryClusterFilter);
   if (suite === 'unit' && !values.has('Filter')) values.set('Filter', ordinaryUnitFilter);
   const environment = { ...inherited };
-  if (process.platform === 'darwin') {
-    // Storage roots reject symlink ancestors; MTP pipes need a short existing Unix base.
-    for (const [key, fallback] of [['TMPDIR', '/private/tmp'],
-      ['TESTINGPLATFORM_PIPE_DIRECTORY', '/private/tmp']]) {
-      try {
-        const selected = environment[key] || fallback;
-        if (!path.isAbsolute(selected)) throw new Error('Relative directory.');
-        const physical = realpathSync.native(selected);
-        if (!statSync(physical).isDirectory()) throw new Error('Not a directory.');
-        accessSync(physical, constants.R_OK | constants.W_OK | constants.X_OK);
-        environment[key] = physical;
-      } catch {
-        throw new Error(`Invalid execution macOS ${key} directory.`);
-      }
-    }
+  const output = path.resolve(root, 'tests', project, 'bin', 'Debug', 'net10.0');
+  for (const key of ['TMPDIR', 'TMP', 'TEMP']) {
+    environment[key] = output;
+  }
+  environment.TESTINGPLATFORM_PIPE_DIRECTORY = path.resolve(root, 'tests', 'bin', 'Debug', 'ipc');
+  if (process.platform !== 'win32'
+    && Buffer.byteLength(environment.TESTINGPLATFORM_PIPE_DIRECTORY, 'utf8') > 66) {
+    throw new Error('Execution test IPC output path is too long for Unix domain sockets.');
   }
   for (const key of ['KeyLoadTests__Suite', 'KeyLoadTests__HeavyLoad__Enabled']) delete environment[key];
-  const args = ['test', '--project', `tests/${project}`, '--no-build', '--no-restore',
+  const args = [path.join(output, `${project}.dll`),
     '--output', 'Detailed', '--github-reporter-style', 'full', '--maximum-parallel-tests', String(parallel),
     '--results-directory', path.resolve(root, values.get('ResultsDirectory') ?? `TestResults/${suite}`)];
   args.push('--timeout', `${values.get('TimeoutMinutes') ?? (suite === 'cluster' ? 60 : 30)}m`);
@@ -103,6 +96,8 @@ export function runtimeSelection(input, inherited = process.env) {
 
 export async function runTests(input) {
   const selection = runtimeSelection(input);
+  accessSync(selection.args[0], constants.R_OK);
+  mkdirSync(selection.environment.TESTINGPLATFORM_PIPE_DIRECTORY, { recursive: true });
   const child = spawn('dotnet', selection.args, { cwd: root, env: selection.environment, stdio: 'inherit' });
   const interrupt = () => child.kill('SIGINT');
   const terminate = () => child.kill('SIGTERM');

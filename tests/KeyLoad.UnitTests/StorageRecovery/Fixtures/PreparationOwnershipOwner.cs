@@ -17,7 +17,7 @@ internal sealed class PreparationOwnershipOwner(string root, ZoneTreeStore store
 
     internal static async Task RunAsync(Func<PreparationOwnershipOwner, Task> operation)
     {
-        var root = Path.Combine(Path.GetTempPath(), "keyload-execution-prepare-" + Guid.NewGuid().ToString("N"));
+        var root = Path.Combine(AppContext.BaseDirectory, "keyload-execution-prepare-" + Guid.NewGuid().ToString("N"));
         var failures = new List<Exception>();
         ZoneTreeStore? store = null;
         await ServerFailureObserver.ObserveAsync(async () =>

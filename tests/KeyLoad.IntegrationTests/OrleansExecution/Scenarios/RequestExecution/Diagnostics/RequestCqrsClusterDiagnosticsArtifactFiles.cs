@@ -19,7 +19,7 @@ internal static class RequestCqrsClusterDiagnosticsArtifactFiles
     internal const int MaximumArtifactBytes = 16 * 1_024;
 
     internal static string DataRootPath(Guid id)
-        => Path.Combine(Path.GetTempPath(), DataRootPrefix + id.ToString("N"));
+        => Path.Combine(AppContext.BaseDirectory, DataRootPrefix + id.ToString("N"));
 
     internal static void CreateDataRootDirectory(string path)
     {

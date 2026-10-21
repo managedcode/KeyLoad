@@ -8,7 +8,7 @@ internal sealed class ScopedRangeStoreFixture : IDisposable
     private const string TemporaryDirectoryPrefix = "keyload-scoped-range-";
     private const string GuidFormat = "N";
     private const string CloseNotJoined = "The original scoped range owner close is unknown; retain its root.";
-    private readonly string directory = Path.Combine(Path.GetTempPath(),
+    private readonly string directory = Path.Combine(AppContext.BaseDirectory,
         TemporaryDirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
     private bool closeAttempted;
     private bool closeReturned;

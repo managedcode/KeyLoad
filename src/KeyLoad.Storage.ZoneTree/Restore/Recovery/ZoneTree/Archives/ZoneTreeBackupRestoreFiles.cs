@@ -113,7 +113,7 @@ internal static class ZoneTreeBackupRestoreFiles
         CopyExactBytes(original, copied, original.Length, buffer, cancellationToken);
         copied.Flush(true);
         copied.Position = FileStartPosition;
-        return new(name, copied.Length, ComputeChecksum(copied, buffer, cancellationToken));
+        return new(name, copied.Length, ZoneTreeBackupFileChecksum.Compute(copied, copied.Length, buffer, cancellationToken));
     }
 
     private static void WriteManifest(string directory, ZoneTreeBackupRestoreManifest manifest, int streamBufferBytes)
@@ -129,11 +129,6 @@ internal static class ZoneTreeBackupRestoreFiles
     {
         cancellationToken.ThrowIfCancellationRequested();
         var source = Path.Combine(backup, item.Name);
-        if ((File.GetAttributes(source) & FileAttributes.ReparsePoint) != NoFileAttributes)
-        {
-            throw Errors.Fail(ErrorCode.Corruption, BackupFileIsLink);
-        }
-
         using var sourceFile = ZoneTreeBackupArchiveJournalOpen.Open(source, streamBufferBytes);
         if (sourceFile.Length != item.Length)
         {
@@ -145,11 +140,7 @@ internal static class ZoneTreeBackupRestoreFiles
         CopyExactBytes(sourceFile, file, item.Length, buffer, cancellationToken);
         file.Flush(true);
         file.Position = FileStartPosition;
-        if (file.Length != item.Length
-            || !string.Equals(ComputeChecksum(file, buffer, cancellationToken), item.Checksum, StringComparison.Ordinal))
-        {
-            throw Errors.Fail(ErrorCode.Corruption, BackupFileVerificationFailed);
-        }
+        ZoneTreeBackupFileChecksum.Verify(file, item, buffer, cancellationToken);
     }
 
     private static void CopyExactBytes(FileStream source, FileStream destination, long remaining, byte[] buffer, CancellationToken cancellationToken)
@@ -169,21 +160,6 @@ internal static class ZoneTreeBackupRestoreFiles
         if (source.ReadByte() != EndOfStream)
         {
             throw Errors.Fail(ErrorCode.Corruption, BackupFileVerificationFailed);
-        }
-    }
-
-    private static string ComputeChecksum(FileStream file, byte[] buffer, CancellationToken cancellationToken)
-    {
-        using var hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
-        while (true)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            var count = file.Read(buffer);
-            if (count == NoReadBytes)
-            {
-                return Convert.ToHexStringLower(hash.GetHashAndReset());
-            }
-            hash.AppendData(buffer.AsSpan(FirstBufferByte, count));
         }
     }
 

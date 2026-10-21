@@ -11,7 +11,7 @@ internal sealed class ScopedRangeBudgetTests
     [Test]
     public async Task AcMp002RangeObserverRejectsBeforeVisitorAndOwnedPageCopy()
     {
-        var directory = Path.Combine(Path.GetTempPath(), "keyload-scoped-budget-" + Guid.NewGuid().ToString("N"));
+        var directory = Path.Combine(AppContext.BaseDirectory, "keyload-scoped-budget-" + Guid.NewGuid().ToString("N"));
         try
         {
             using var store = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());

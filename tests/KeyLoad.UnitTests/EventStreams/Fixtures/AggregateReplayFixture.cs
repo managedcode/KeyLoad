@@ -48,7 +48,7 @@ internal sealed class AggregateReplayFixture : IDisposable
     internal AggregateReplayFixture(DatabaseLimits? limits = null, bool protectedFields = false,
         TimeProvider? timeProvider = null)
     {
-        directory = Path.Combine(Path.GetTempPath(), DirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
+        directory = Path.Combine(AppContext.BaseDirectory, DirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
         if (Directory.Exists(directory))
         {
             throw new InvalidOperationException(FreshDirectoryMessage);

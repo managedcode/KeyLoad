@@ -10,7 +10,7 @@ internal static class RuntimeConstructorCycleFlow
 
     internal static async Task RunAsync(CancellationToken token)
     {
-        var directory = Path.Combine(Path.GetTempPath(), RootPrefix + Guid.NewGuid().ToString(GuidFormat));
+        var directory = Path.Combine(AppContext.BaseDirectory, RootPrefix + Guid.NewGuid().ToString(GuidFormat));
         var failures = new List<Exception>();
         WebApplication? application = null;
         await ServerFailureObserver.ObserveAsync(async () =>

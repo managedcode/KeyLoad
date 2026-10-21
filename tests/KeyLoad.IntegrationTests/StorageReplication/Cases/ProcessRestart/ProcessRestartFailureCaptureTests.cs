@@ -153,7 +153,7 @@ internal sealed class ProcessRestartFailureCaptureTests
         internal string Path
         {
             get;
-        } = System.IO.Path.Combine(System.IO.Path.GetTempPath(),
+        } = System.IO.Path.Combine(AppContext.BaseDirectory,
             DirectoryPrefix + Guid.NewGuid().ToString("N"));
 
         internal ReceiptDirectory() => Directory.CreateDirectory(Path);

@@ -10,7 +10,7 @@ internal sealed class CheckpointTests
     [Test]
     public async Task CompactionPreservesLogicalPositionAndDropsSupersededPayloads()
     {
-        var root = Path.Combine(Path.GetTempPath(), "keyload-compact-" + Guid.NewGuid().ToString("N"));
+        var root = Path.Combine(AppContext.BaseDirectory, "keyload-compact-" + Guid.NewGuid().ToString("N"));
         try
         {
             using (var store = new ZoneTreeStore(new(root), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution()))
@@ -52,7 +52,7 @@ internal sealed class CheckpointTests
     [Test]
     public async Task ReplicaInstallReplacesOldKeysPreservesNodeIdentityAndRejectsStaleScope()
     {
-        var root = Path.Combine(Path.GetTempPath(), "keyload-install-" + Guid.NewGuid().ToString("N"));
+        var root = Path.Combine(AppContext.BaseDirectory, "keyload-install-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(root);
         var incarnation = Guid.NewGuid();
         var signing = RandomNumberGenerator.GetBytes(32);
@@ -97,7 +97,7 @@ internal sealed class CheckpointTests
     [Test]
     public async Task IncompleteOrCorruptCheckpointIsRejectedBeforeTouchingLiveState()
     {
-        var root = Path.Combine(Path.GetTempPath(), "keyload-checkpoint-corrupt-" + Guid.NewGuid().ToString("N"));
+        var root = Path.Combine(AppContext.BaseDirectory, "keyload-checkpoint-corrupt-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(root);
         try
         {

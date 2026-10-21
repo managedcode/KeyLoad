@@ -120,7 +120,7 @@ internal sealed class ClusterFailureReceiptsTests
     {
         private const string DirectoryPrefix = "keyload-failure-receipts-";
 
-        internal string Path { get; } = System.IO.Path.Combine(System.IO.Path.GetTempPath(), DirectoryPrefix + Guid.NewGuid().ToString("N"));
+        internal string Path { get; } = System.IO.Path.Combine(AppContext.BaseDirectory, DirectoryPrefix + Guid.NewGuid().ToString("N"));
 
         internal ReceiptDirectory() => Directory.CreateDirectory(Path);
 

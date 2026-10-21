@@ -29,9 +29,13 @@ internal static class SharedDomainRecoveryImage
         var original = scope.Partition;
         var expectedApplied = SharedDomainRecoverySeed.AppliedPosition(input) + (committed ? FirstRevision : NoRevision);
         var appliedKey = Convert.ToHexString(KeySpace.AppliedBytes) + RowSeparator;
+        var lastCommandKey = Convert.ToHexString(KeySpace.LastCommandBytes) + RowSeparator;
+        var originalOutcome = KeySpace.PartitionOutcome(original, input.Original.UserId!, input.Original.CommandId);
         var expected = WithoutScope(input.SeedImage, original).Select(row =>
             row.StartsWith(appliedKey, StringComparison.Ordinal)
-                ? appliedKey + Convert.ToHexString(OrleansSerialization.Serialize(expectedApplied)) : row);
+                ? appliedKey + Convert.ToHexString(OrleansSerialization.Serialize(expectedApplied))
+                : committed && row.StartsWith(lastCommandKey, StringComparison.Ordinal)
+                    ? lastCommandKey + Convert.ToHexString(OrleansSerialization.Serialize(originalOutcome)) : row);
         await Assert.That(store.Read(view => OrleansSerialization.Deserialize<long>(view.ReadOwnedValue(KeySpace.AppliedBytes)
             ?? throw new InvalidOperationException(RuntimeMissing)))).IsEqualTo(expectedApplied);
         await Assert.That(WithoutScope(SharedDomainStoredImage.Capture(store), original))

@@ -17,7 +17,7 @@ internal sealed class AggregateReplayProcessRecoveryTests
     [Arguments(CommitStage.ApplyCompleted, 0)]
     public async Task AcEvent008SnapshotAndOutcomeRecoverAtomicallyWithStableRetry(CommitStage stage, int index)
     {
-        var root = Path.Combine(Path.GetTempPath(), "keyload-aggregate-replay-crash-" + Guid.NewGuid().ToString("N"));
+        var root = Path.Combine(AppContext.BaseDirectory, "keyload-aggregate-replay-crash-" + Guid.NewGuid().ToString("N"));
         var cancellationToken = TestContext.Current!.Execution.CancellationToken;
         using var admission = await StorageTrialLease.AcquireAsync(cancellationToken);
         using var process = StartCrashProcess(root, stage, index);

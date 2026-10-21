@@ -47,7 +47,7 @@ internal sealed class ClusterTelemetryResourceTests
         builder.Environment.EnvironmentName = environmentName;
         builder.Configuration[ReceiverConfiguration] = configuredReceiver ? ModelReceiver : null;
         builder.Configuration[LegacyReceiverConfiguration] = null;
-        var root = Path.Combine(Path.GetTempPath(), RootPrefix + Guid.NewGuid().ToString(GuidFormat));
+        var root = Path.Combine(AppContext.BaseDirectory, RootPrefix + Guid.NewGuid().ToString(GuidFormat));
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {

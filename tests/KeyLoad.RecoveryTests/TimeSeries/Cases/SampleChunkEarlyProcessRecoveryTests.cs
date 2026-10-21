@@ -9,7 +9,7 @@ internal sealed class SampleChunkEarlyProcessRecoveryTests
     [Arguments(SampleChunkEarlyCut.Correction)]
     public async Task AcChunk012JournalFlushedOpenAppendAndCorrectionRecoverCompleteLiteralThenColdHealthy(SampleChunkEarlyCut cut)
     {
-        var root = Path.Combine(Path.GetTempPath(), RootPrefix + Guid.NewGuid().ToString("N"));
+        var root = Path.Combine(AppContext.BaseDirectory, RootPrefix + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(root);
         await SampleChunkProcessRecovery.RunEarlyAsync(root, cut, TestContext.Current!.Execution.CancellationToken);
     }

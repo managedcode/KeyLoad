@@ -10,7 +10,7 @@ internal sealed class AnnProcessRecoveryTests
     [Test]
     public async Task AcAnn007PendingPublicationAndJournalFlushedCheckpointRecoverArraysAndHealthyReplay()
     {
-        var root = Path.Combine(Path.GetTempPath(), Prefix + Guid.NewGuid().ToString(GuidFormat));
+        var root = Path.Combine(AppContext.BaseDirectory, Prefix + Guid.NewGuid().ToString(GuidFormat));
         var token = TestContext.Current!.Execution.CancellationToken;
         using var admission = await StorageTrialLease.AcquireAsync(token);
         await AnnProcessRecovery.RunAsync(root, token);

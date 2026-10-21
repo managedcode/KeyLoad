@@ -9,7 +9,7 @@ internal sealed class OfflineRegularFileLockTests
     [Test]
     public async Task AcEpoch012InteropWithBclFileShareLocksInBothDirections()
     {
-        var root = Path.Combine(Path.GetTempPath(), RootPrefix + Guid.NewGuid().ToString("N"));
+        var root = Path.Combine(AppContext.BaseDirectory, RootPrefix + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(root);
         var path = Path.Combine(root, "locked.bin");
         await File.WriteAllBytesAsync(path, [0x31, 0x42]);

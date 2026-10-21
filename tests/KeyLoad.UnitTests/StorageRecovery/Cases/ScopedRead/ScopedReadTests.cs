@@ -68,7 +68,7 @@ internal sealed class ScopedReadTests
     [Test]
     public async Task AcRoc003StoreIdentityDoesNotAliasCallerSigningKeyAndReopensWithOriginalBytes()
     {
-        var directory = Path.Combine(Path.GetTempPath(), SigningKeyDirectoryPrefix + Guid.NewGuid().ToString("N"));
+        var directory = Path.Combine(AppContext.BaseDirectory, SigningKeyDirectoryPrefix + Guid.NewGuid().ToString("N"));
         var callerKey = Enumerable.Range(1, SigningKeyLength).Select(static value => (byte)value).ToArray();
         var expectedKey = callerKey.ToArray();
         try

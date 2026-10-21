@@ -15,7 +15,7 @@ internal sealed class ReadCutReplacementTests
     [Test]
     public async Task AcCut003InstallRejectsActiveLeaseWithoutTouchingTheOldTree()
     {
-        var root = Path.Combine(Path.GetTempPath(), "keyload-read-cut-replace-" + Guid.NewGuid().ToString("N"));
+        var root = Path.Combine(AppContext.BaseDirectory, "keyload-read-cut-replace-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(root);
         var incarnation = Guid.NewGuid();
         var installCallbacks = 0;

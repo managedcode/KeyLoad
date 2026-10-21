@@ -6,7 +6,7 @@ namespace KeyLoad.UnitTests.Features.BackupRestore;
 
 internal sealed class MetadataBackupFixture : IDisposable
 {
-    private readonly string root = Path.Combine(StorageTrialDirectory.ResolveExistingDirectory(new(Path.GetTempPath())),
+    private readonly string root = Path.Combine(StorageTrialDirectory.ResolveExistingDirectory(new(AppContext.BaseDirectory)),
         MetadataTestContract.DirectoryPrefix + Guid.NewGuid().ToString(MetadataTestContract.GuidFormat));
 
     internal string SourceDirectory => Path.Combine(root, MetadataTestContract.SourceDirectoryName);

@@ -14,7 +14,7 @@ internal sealed class PartitionRecordFixture : IDisposable
     internal const string DomainId = "domain-a";
     internal const string PartitionKey = "partition-a";
     private const string DirectoryPrefix = "keyload-partition-record-pages-";
-    private readonly string directory = Path.Combine(Path.GetTempPath(),
+    private readonly string directory = Path.Combine(AppContext.BaseDirectory,
         DirectoryPrefix + Guid.NewGuid().ToString("N"));
     private ZoneTreeStore? store;
 

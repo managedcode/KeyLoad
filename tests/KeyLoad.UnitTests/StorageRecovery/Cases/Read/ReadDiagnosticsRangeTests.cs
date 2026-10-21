@@ -159,7 +159,7 @@ internal sealed class ReadDiagnosticsRangeTests
 
     private sealed class StoreFixture : IDisposable
     {
-        private readonly string directory = Path.Combine(Path.GetTempPath(), "keyload-read-diagnostics-" + Guid.NewGuid().ToString("N"));
+        private readonly string directory = Path.Combine(AppContext.BaseDirectory, "keyload-read-diagnostics-" + Guid.NewGuid().ToString("N"));
         public ZoneTreeStore Store
         {
             get;

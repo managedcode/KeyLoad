@@ -12,7 +12,7 @@ internal static class ChecksumProfileProcess
 
     internal static async Task RunAsync(CancellationToken callerToken)
     {
-        var root = Path.Combine(Path.GetTempPath(), Prefix + Guid.NewGuid().ToString(GuidFormat));
+        var root = Path.Combine(AppContext.BaseDirectory, Prefix + Guid.NewGuid().ToString(GuidFormat));
         using var originalTimeout = new CancellationTokenSource(RecoveryExecutionOptions.TrialPolicy.Value.CommandTimeout, TimeProvider.System);
         using var timeout = CancellationTokenSource.CreateLinkedTokenSource(callerToken, originalTimeout.Token);
         CommandIdempotencyProcessChild? active = null;

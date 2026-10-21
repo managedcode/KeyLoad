@@ -16,6 +16,7 @@ Repository rules describe current ownership, execution and qualification. The
 | REQ-MCAF-007 | AC-MCAF-007: status distinguishes local checks from complete exact-source Linux qualification. | Original build, TUnit, Aspire and GitHub artifacts. |
 | REQ-MCAF-008 | AC-MCAF-008: transient plan, brainstorm and acceptance working files are absent from the checkout. | Validator and real root/nested negative cases. |
 | REQ-MCAF-009 | AC-MCAF-009: scans stay inside the selected repository and do not follow symbolic links. | bounded path and traversal implementation. |
+| REQ-MCAF-010 | AC-MCAF-010: test-owned temporary storage and files live below the executing assembly output directory; system temporary APIs and direct system temporary path creation are rejected. | Validator source checks and real positive and negative TUnit cases; runtime ownership and cleanup remain separately verified. |
 
 ```mermaid
 flowchart LR
@@ -33,7 +34,8 @@ flowchart LR
 - Tool: `scripts/Features/RepositoryGovernance/verify.mjs`, using Node.js built-ins.
 - Decision: [ADR-032](../ADR/ADR-032-mcaf-governance.md).
 - Tests: `GovernanceWorkingFileTests`, using the actual validator with a
-  test-owned tree assembled from the current solution and policy files.
+  test-owned tree assembled from the current solution and policy files, and
+  `GovernanceTestOutputPathTests` for executable temporary path creation.
 
 Run `node scripts/Features/RepositoryGovernance/verify.mjs` from the repository
 root. Its success is structural evidence, not database, durability, performance

@@ -27,7 +27,7 @@ internal sealed class ZoneTreeCoordinatedPointCacheFileFixture : IDisposable
         Action<CommitStage, long, int>? faultObserver = null)
     {
         ObjectDisposedException.ThrowIf(Volatile.Read(ref disposeStarted) != 0, this);
-        var directory = Path.Combine(Path.GetTempPath(), DirectoryPrefix + Guid.NewGuid().ToString(DirectoryTokenFormat));
+        var directory = Path.Combine(AppContext.BaseDirectory, DirectoryPrefix + Guid.NewGuid().ToString(DirectoryTokenFormat));
         directories.Add(directory);
         var options = new ZoneTreeStoreOptions(directory) { FaultObserver = faultObserver };
         if (embedded)

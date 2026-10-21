@@ -17,7 +17,7 @@ internal static class RuntimeAnalyticsBounds
             snapshot.Work.ConstrainResultBytes(maximum);
         }
 
-        var path = Path.Combine(Path.GetTempPath(), Prefix + Guid.NewGuid().ToString("N"));
+        var path = Path.Combine(AppContext.BaseDirectory, Prefix + Guid.NewGuid().ToString("N"));
         AnalyticsStoreGeneration? generation = null;
         AnalyticsAggregateResult? result = null;
         var failures = new List<Exception>();

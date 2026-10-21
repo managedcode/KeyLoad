@@ -19,7 +19,7 @@ internal static class FunctionalColdReopenProfileProtocol
     internal const string Benchmark = "Benchmarks:Enabled";
     private const string GuidFormat = "N";
     private const string Prefix = "keyload-functional-cold-profile-";
-    internal static string NewRoot() => Path.Combine(Path.GetTempPath(), Prefix + Guid.NewGuid().ToString(GuidFormat));
+    internal static string NewRoot() => Path.Combine(AppContext.BaseDirectory, Prefix + Guid.NewGuid().ToString(GuidFormat));
 
     internal static IDistributedApplicationBuilder Create(string root, int nodes, bool cold, bool faults,
         params KeyValuePair<string, string?>[] overrides)

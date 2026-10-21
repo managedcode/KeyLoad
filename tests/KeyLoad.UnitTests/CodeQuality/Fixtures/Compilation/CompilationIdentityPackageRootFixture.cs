@@ -53,7 +53,7 @@ internal sealed class CompilationIdentityPackageRootFixture : IAsyncDisposable
     private static readonly string[] RepositoryFiles =
     [.. CentralFiles, "LICENSE", NuGetConfigFile, ProducerRelativePath];
 
-    internal string Root { get; } = Path.Combine(Path.GetFullPath(Path.GetTempPath()), FixturePrefix + Guid.NewGuid().ToString(GuidFormat));
+    internal string Root { get; } = Path.Combine(Path.GetFullPath(AppContext.BaseDirectory), FixturePrefix + Guid.NewGuid().ToString(GuidFormat));
     internal string ProjectPath => Path.Combine(Root, ProjectRelativePath.Replace('/', Path.DirectorySeparatorChar));
     internal string OutputDirectory => Path.Combine(Path.GetDirectoryName(ProjectPath)!, "bin", Configuration, TargetFramework);
     internal string DllPath => Path.Combine(OutputDirectory, TestAssemblyName + ".dll");

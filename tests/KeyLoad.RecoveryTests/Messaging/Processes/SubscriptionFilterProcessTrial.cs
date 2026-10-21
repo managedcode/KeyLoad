@@ -15,7 +15,7 @@ internal static class SubscriptionFilterProcessTrial
 
     internal static async Task RunAsync(CommitStage stage, int index, CancellationToken token)
     {
-        var root = Path.Combine(Path.GetTempPath(), DirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
+        var root = Path.Combine(AppContext.BaseDirectory, DirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
         using var admission = await StorageTrialLease.AcquireAsync(token);
         using var timeout = new CancellationTokenSource(RecoveryExecutionOptions.TrialPolicy.Value.ProjectionTimeout, TimeProvider.System);
         using var lifetime = CancellationTokenSource.CreateLinkedTokenSource(token, timeout.Token);

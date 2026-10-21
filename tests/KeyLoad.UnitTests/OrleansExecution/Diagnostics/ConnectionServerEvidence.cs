@@ -27,7 +27,7 @@ internal sealed class ConnectionServerEvidence
             throw new InvalidOperationException(MissingOwner);
         }
         clusterId = actual;
-        var directory = Path.Combine(Directory.GetCurrentDirectory(), "logs");
+        var directory = Path.Combine(AppContext.BaseDirectory, "logs");
         Directory.CreateDirectory(directory);
         var path = Path.Combine(directory, actual + "_" + Role(index) + ".log");
         services.AddSingleton<ILoggerProvider>(_ => new FileLoggerProvider(path));

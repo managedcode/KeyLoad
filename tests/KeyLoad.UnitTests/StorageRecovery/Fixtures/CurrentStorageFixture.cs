@@ -11,7 +11,7 @@ internal sealed class CurrentStorageFixture : IDisposable
     private const string RestoredName = "restored";
     private const string SnapshotName = "snapshot.bin";
     private const string InvalidSnapshotName = "invalid-snapshot.bin";
-    private readonly string root = Path.Combine(Path.GetTempPath(), RootPrefix + Guid.NewGuid().ToString("N"));
+    private readonly string root = Path.Combine(AppContext.BaseDirectory, RootPrefix + Guid.NewGuid().ToString("N"));
 
     internal CurrentStorageFixture() => Directory.CreateDirectory(root);
 

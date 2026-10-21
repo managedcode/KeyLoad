@@ -11,7 +11,7 @@ internal sealed class SiteAnalyzerCoverageTestScope : IDisposable
     internal SiteAnalyzerCoverageTestScope(bool copyRepository = false)
     {
         sourceRepository = FindRepositoryRoot();
-        tempRoot = Path.Combine(Path.GetTempPath(), SiteAnalyzerCoverageTokens.CoverageDirectoryName, Guid.NewGuid().ToString("N"));
+        tempRoot = Path.Combine(AppContext.BaseDirectory, SiteAnalyzerCoverageTokens.CoverageDirectoryName, Guid.NewGuid().ToString("N"));
         Repository = copyRepository ? Path.Combine(tempRoot, SiteAnalyzerCoverageTokens.RepoDirectoryName) : sourceRepository;
         evidenceRoot = Path.Combine(tempRoot, SiteAnalyzerCoverageTokens.EvidenceDirectoryName);
         Directory.CreateDirectory(Repository);

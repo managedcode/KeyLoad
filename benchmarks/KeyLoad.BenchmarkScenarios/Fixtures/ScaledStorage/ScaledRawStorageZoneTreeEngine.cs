@@ -40,7 +40,7 @@ internal sealed class ScaledRawStorageZoneTreeEngine : IDisposable
 
     public void Initialize()
     {
-        var directory = Path.Combine(Path.GetTempPath(), DirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
+        var directory = Path.Combine(AppContext.BaseDirectory, DirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
         _directory = directory;
         CheckPreparation();
         var mutableBound = Math.Max(settings.MinimumMutableSegmentRecords,

@@ -31,7 +31,7 @@ internal sealed class FrameBudgetTests
     [Test]
     public async Task AcWal002IncrementalFrameAccountingMatchesBinaryPayloadAtExactLimits()
     {
-        var root = Path.Combine(Path.GetTempPath(), TemporaryDirectoryPrefix + Guid.NewGuid().ToString("N"));
+        var root = Path.Combine(AppContext.BaseDirectory, TemporaryDirectoryPrefix + Guid.NewGuid().ToString("N"));
         try
         {
             for (var trial = 0; trial < BoundaryTrials; trial++)

@@ -62,7 +62,7 @@ internal sealed class ZoneTreeStorageExecutionOptionsTests
             MaxFrameBytes = 1,
             MaxSnapshotBytes = 1
         });
-        var path = Path.Combine(Path.GetTempPath(), DirectoryPrefix + Guid.NewGuid().ToString("N"));
+        var path = Path.Combine(AppContext.BaseDirectory, DirectoryPrefix + Guid.NewGuid().ToString("N"));
         var descriptor = new ZoneTreeStoreOptions(path)
         {
             MaxFrameBytes = ZoneTreeStorageExecutionOptions.DefaultMaxFrameBytes,
@@ -115,7 +115,7 @@ internal sealed class ZoneTreeStorageExecutionOptionsTests
     [Test]
     public async Task InvalidPolicyFailsBeforeDirectoryOwnershipIsCreated()
     {
-        var path = Path.Combine(Path.GetTempPath(), DirectoryPrefix + Guid.NewGuid().ToString("N"));
+        var path = Path.Combine(AppContext.BaseDirectory, DirectoryPrefix + Guid.NewGuid().ToString("N"));
         var invalid = Options.Create(new ZoneTreeStorageExecutionOptions { CheckpointBatchRecords = 0 });
         Assert.ThrowsExactly<InvalidOperationException>(() =>
         {
@@ -129,7 +129,7 @@ internal sealed class ZoneTreeStorageExecutionOptionsTests
     [Arguments(4097)]
     public async Task InvalidStreamBufferFailsBeforeDirectoryOwnershipIsCreated(int bufferBytes)
     {
-        var path = Path.Combine(Path.GetTempPath(), DirectoryPrefix + Guid.NewGuid().ToString("N"));
+        var path = Path.Combine(AppContext.BaseDirectory, DirectoryPrefix + Guid.NewGuid().ToString("N"));
         var invalid = Options.Create(new ZoneTreeStorageExecutionOptions { StreamBufferBytes = bufferBytes });
         Assert.ThrowsExactly<InvalidOperationException>(() =>
         {
@@ -167,7 +167,7 @@ internal sealed class ZoneTreeStorageExecutionOptionsTests
     private sealed class StorageExecutionFixture : IDisposable
     {
         private readonly TimeProvider clock;
-        internal string DirectoryPath { get; } = Path.Combine(Path.GetTempPath(), DirectoryPrefix + Guid.NewGuid().ToString("N"));
+        internal string DirectoryPath { get; } = Path.Combine(AppContext.BaseDirectory, DirectoryPrefix + Guid.NewGuid().ToString("N"));
         internal ZoneTreeStore Store
         {
             get; private set;

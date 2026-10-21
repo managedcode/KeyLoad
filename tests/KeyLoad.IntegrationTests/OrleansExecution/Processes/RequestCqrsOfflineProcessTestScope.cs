@@ -1,6 +1,5 @@
 using KeyLoad.Clustering;
 using KeyLoad.IntegrationTests.Features.StorageRecovery;
-using KeyLoad.IntegrationTests.Features.StorageReplication;
 using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Features.OrleansExecution;
@@ -85,7 +84,7 @@ internal sealed class RequestCqrsOfflineProcessTestScope : IAsyncDisposable
 
     private static string CreatePrivateRoot()
     {
-        var parent = Path.Combine(ClusterFixtureDiagnostics.FindRepositoryRoot().FullName,
+        var parent = Path.Combine(AppContext.BaseDirectory,
             "artifacts", "qualification");
         Directory.CreateDirectory(parent);
         var root = Path.Combine(parent, "cluster-routing-offline-process-" + Guid.NewGuid().ToString("N"));

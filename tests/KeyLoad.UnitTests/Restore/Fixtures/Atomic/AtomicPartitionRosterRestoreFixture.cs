@@ -23,7 +23,7 @@ internal sealed class AtomicPartitionRosterRestoreFixture
     internal const string LiteralJson = "{\"restored\":true}";
     internal const long LocalApplied = 0;
     internal const long NewApplied = 1;
-    internal string Root { get; } = Path.Combine(StorageTrialDirectory.ResolveExistingDirectory(new(Path.GetTempPath())), DirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
+    internal string Root { get; } = Path.Combine(StorageTrialDirectory.ResolveExistingDirectory(new(AppContext.BaseDirectory)), DirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
     internal AtomicPartitionRosterFixture Source { get; private set; } = null!;
     internal ZoneTreeStore Target { get; private set; } = null!;
     internal DatabaseEngine Database { get; private set; } = null!;

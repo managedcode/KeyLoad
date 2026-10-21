@@ -48,7 +48,7 @@ internal sealed class TransactionProtocolTests
     [Test]
     public async Task OversizedCompiledFrameRetainsFailureReplayBeforeHealthyCommitAndColdOpen()
     {
-        var root = Path.Combine(Path.GetTempPath(), "keyload-frame-budget-" + Guid.NewGuid().ToString("N"));
+        var root = Path.Combine(AppContext.BaseDirectory, "keyload-frame-budget-" + Guid.NewGuid().ToString("N"));
         try
         {
             Guid rejectedId;

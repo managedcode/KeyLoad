@@ -151,7 +151,7 @@ internal sealed class SourceReadBudgetTests
         string directory;
         do
         {
-            directory = Path.Combine(Path.GetTempPath(), FailureDirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
+            directory = Path.Combine(AppContext.BaseDirectory, FailureDirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
         }
         while (Directory.Exists(directory) || File.Exists(directory));
 

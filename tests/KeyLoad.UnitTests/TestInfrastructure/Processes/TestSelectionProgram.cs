@@ -31,7 +31,8 @@ internal static class TestSelectionProgram
             const selectedArgs = Object.freeze(['--KeyLoadTests:Suite='+suite, '--KeyLoadTests:Filter=/*/*/ActualCase/*',
               '--KeyLoadTests:ReportTrx=true', '--KeyLoadTests:CoverageSettings=settings.xml',
               '--KeyLoadTests:CoverageOutput=coverage.xml']);
-            const inherited = Object.freeze({ GITHUB_SHA: 'original-revision' });
+            const inherited = Object.freeze({ GITHUB_SHA: 'original-revision',
+              TMPDIR: 'inherited-scratch', TESTINGPLATFORM_PIPE_DIRECTORY: 'inherited-pipes' });
             const originalArgs = JSON.stringify(selectedArgs);
             const selected = runtimeSelection(selectedArgs, inherited);
             if (JSON.stringify(selectedArgs) !== originalArgs

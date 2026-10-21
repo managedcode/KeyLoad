@@ -10,7 +10,7 @@ internal sealed class CommandIdempotencyProcessRecoveryTests
     [Test]
     public async Task AcDocument006OneHundredCommandRetriesSurviveRealProcessRestart()
     {
-        var root = Path.Combine(Path.GetTempPath(), "keyload-document-command-restart-" + Guid.NewGuid().ToString("N"));
+        var root = Path.Combine(AppContext.BaseDirectory, "keyload-document-command-restart-" + Guid.NewGuid().ToString("N"));
         var cancellationToken = TestContext.Current!.Execution.CancellationToken;
         using var admission = await StorageTrialLease.AcquireAsync(cancellationToken);
         await CommandIdempotencyProcess.RunAsync(root, cancellationToken);

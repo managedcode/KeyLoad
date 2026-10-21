@@ -98,7 +98,7 @@ internal sealed class StreamFixtureLifetimeTests
         string directory;
         do
         {
-            directory = Path.Combine(Path.GetTempPath(), prefix + Guid.NewGuid().ToString(GuidFormat));
+            directory = Path.Combine(AppContext.BaseDirectory, prefix + Guid.NewGuid().ToString(GuidFormat));
         }
         while (Directory.Exists(directory) || File.Exists(directory));
 

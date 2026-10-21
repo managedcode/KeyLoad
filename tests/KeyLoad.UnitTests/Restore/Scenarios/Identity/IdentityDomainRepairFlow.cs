@@ -21,7 +21,7 @@ internal static class IdentityDomainRepairFlow
 
     internal static async Task RunAsync(bool negativeGeneration, CancellationToken token)
     {
-        var root = Path.Combine(Path.GetTempPath(), RootPrefix + Guid.NewGuid().ToString(GuidFormat));
+        var root = Path.Combine(AppContext.BaseDirectory, RootPrefix + Guid.NewGuid().ToString(GuidFormat));
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(() => CompleteAsync(root, negativeGeneration, token), failures);
         if (failures.Count == NoFailures)

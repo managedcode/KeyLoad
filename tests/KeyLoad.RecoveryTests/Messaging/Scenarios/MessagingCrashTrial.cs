@@ -14,7 +14,7 @@ internal static class MessagingCrashTrial
         Func<string, CommitStage, CancellationToken, Task> verify, CancellationToken callerToken)
     {
         using var admission = await StorageTrialLease.AcquireAsync(callerToken);
-        var root = Path.Combine(Path.GetTempPath(), prefix + Guid.NewGuid().ToString("N"));
+        var root = Path.Combine(AppContext.BaseDirectory, prefix + Guid.NewGuid().ToString("N"));
         CommandIdempotencyProcessChild? child = null;
         using var timeoutTimeout = new CancellationTokenSource(RecoveryExecutionOptions.TrialPolicy.Value.CommandTimeout, TimeProvider.System);
         using var timeout = CancellationTokenSource.CreateLinkedTokenSource(callerToken, timeoutTimeout.Token);

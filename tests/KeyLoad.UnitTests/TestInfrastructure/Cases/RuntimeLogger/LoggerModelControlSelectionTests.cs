@@ -150,7 +150,7 @@ internal sealed class LoggerModelControlSelectionTests
 
     private static string Argument(string setting, string value) => ArgumentPrefix + setting + ArgumentSeparator + value;
 
-    private static string NewRoot() => Path.Combine(Path.GetTempPath(), RootPrefix + Guid.NewGuid().ToString(GuidFormat));
+    private static string NewRoot() => Path.Combine(AppContext.BaseDirectory, RootPrefix + Guid.NewGuid().ToString(GuidFormat));
 
     private static string RepositoryRoot()
     {

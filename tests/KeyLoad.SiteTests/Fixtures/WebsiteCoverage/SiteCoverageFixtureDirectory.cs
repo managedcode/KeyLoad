@@ -4,7 +4,7 @@ namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
 
 internal sealed class SiteCoverageFixtureDirectory : IAsyncDisposable
 {
-    private static readonly string TemporaryPrefix = Path.Combine(Path.GetTempPath(),
+    private static readonly string TemporaryPrefix = Path.Combine(AppContext.BaseDirectory,
         SiteCoverageTokens.FixtureTemporaryDirectoryPrefix);
 
     public string Root { get; private set; } = string.Empty;

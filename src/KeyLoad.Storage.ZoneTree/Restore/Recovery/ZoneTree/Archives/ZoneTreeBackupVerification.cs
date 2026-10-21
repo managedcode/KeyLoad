@@ -1,11 +1,11 @@
 using Microsoft.Extensions.Options;
+using static KeyLoad.Storage.ZoneTree.ZoneTreePersistenceFormat;
 
 namespace KeyLoad.Storage.ZoneTree;
 
 internal static class ZoneTreeBackupVerification
 {
-    private const string VerificationPrefix = "keyload-backup-verification-";
-    private const string GuidFormat = "N";
+    private const int FileStartPosition = 0;
 
     internal static (StoreIdentity Identity, long Position) Verify(string directory,
         IOptions<ZoneTreeStorageExecutionOptions> executionOptions, CancellationToken cancellationToken = default)
@@ -13,33 +13,17 @@ internal static class ZoneTreeBackupVerification
         var policy = executionOptions.Value;
         policy.Validate();
         cancellationToken.ThrowIfCancellationRequested();
-        var staging = Path.Combine(Path.GetTempPath(), VerificationPrefix + Guid.NewGuid().ToString(GuidFormat));
-        ZoneTreeStoreFiles.CreatePrivateDirectory(staging);
-        (StoreIdentity Identity, long Position) result;
-        try
-        {
-            var identity = ZoneTreeBackupRestoreFiles.ReadAndVerify(directory, staging, policy, out var position, cancellationToken);
-            result = (identity, position);
-        }
-        catch (Exception failure)
-        {
-            RemoveStaging(staging, failure);
-            throw;
-        }
-
-        RemoveStaging(staging);
-        return result;
-    }
-
-    private static void RemoveStaging(string staging, Exception? verificationFailure = null)
-    {
-        try
-        {
-            Directory.Delete(staging, recursive: true);
-        }
-        catch (Exception cleanupFailure) when (verificationFailure is not null)
-        {
-            throw new AggregateException(verificationFailure, cleanupFailure);
-        }
+        var manifest = ZoneTreeBackupRestoreFiles.ReadManifestDefinition(directory, policy);
+        var identityFile = manifest.Files.Single(file => file.Name == IdentityFileName);
+        var identityBytes = ZoneTreeBackupRestoreFiles.ReadAndVerifyIdentityFile(directory, identityFile,
+            policy.MaximumIdentityFileBytes, policy.StreamBufferBytes);
+        var journalFile = manifest.Files.Single(file => file.Name == JournalFileName);
+        using var journal = ZoneTreeBackupArchiveJournalOpen.Open(Path.Combine(directory, JournalFileName),
+            policy.StreamBufferBytes);
+        ZoneTreeBackupFileChecksum.Verify(journal, journalFile, new byte[policy.FileBufferBytes], cancellationToken);
+        var identity = ZoneTreeIdentityFile.Read(identityBytes.Span);
+        journal.Position = FileStartPosition;
+        ZoneTreeBackupJournalValidation.Verify(journal, identity, manifest.Position, policy, cancellationToken);
+        return (identity, manifest.Position);
     }
 }

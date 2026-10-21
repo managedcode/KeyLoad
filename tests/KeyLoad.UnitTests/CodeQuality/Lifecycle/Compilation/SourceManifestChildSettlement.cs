@@ -47,7 +47,7 @@ internal static class SourceManifestChildSettlement
             throw new OptionsValidationException(TestExecutionOptions.SectionName, typeof(TestExecutionOptions),
                 [TestExecutionOptions.ValidationMessage]);
         }
-        var root = Path.Combine(Path.GetTempPath(), DirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
+        var root = Path.Combine(AppContext.BaseDirectory, DirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
         var failures = new List<Exception>();
         using var process = new Process { StartInfo = CreateStartInfo(root) };
         SourceManifestChildJoined? joined = null;

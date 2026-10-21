@@ -19,7 +19,7 @@ internal sealed record SiteIsolatedFixture(SiteIsolatedInputs Inputs, string Roo
             throw new InvalidOperationException(SiteIsolatedInputs.MissingEvidence);
         }
 
-        var root = Path.Combine(coverage, "isolated-site-input-" + Guid.NewGuid().ToString("N"));
+        var root = Path.Combine(AppContext.BaseDirectory, "isolated-site-input-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(Path.Combine(root, "isolated"));
         var projectionPath = Path.Combine(root, "isolated", "projection.json");
         var result = await SiteIsolatedNodeProcess.RunAsync(inputs.Site, new

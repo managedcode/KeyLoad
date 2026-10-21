@@ -17,7 +17,7 @@ internal sealed class BackupIndexedDocumentDedupFixture : IDisposable
     private const string SystemNamespace = ZoneTreePersistenceFormat.SystemNamespace;
     private const string LastAppliedKey = ZoneTreePersistenceFormat.LastAppliedKey;
     private const string ClockKey = ZoneTreePersistenceFormat.ClockKey;
-    private readonly string root = Path.Combine(Path.GetTempPath(), DirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
+    private readonly string root = Path.Combine(AppContext.BaseDirectory, DirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
     private ZoneTreeStore? restoredStore;
 
     internal const string Collection = "backup_documents";

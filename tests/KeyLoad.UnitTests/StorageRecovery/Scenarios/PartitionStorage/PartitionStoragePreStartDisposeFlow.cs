@@ -21,7 +21,7 @@ internal static class PartitionStoragePreStartDisposeFlow
     internal static async Task RunAsync(CancellationToken token)
     {
         var failures = new List<Exception>();
-        var root = Path.Combine(StorageTrialDirectory.ResolveExistingDirectory(new(Path.GetTempPath())),
+        var root = Path.Combine(StorageTrialDirectory.ResolveExistingDirectory(new(AppContext.BaseDirectory)),
             RootPrefix + Guid.NewGuid().ToString(GuidFormat));
         var directory = Path.Combine(root, DirectoryName);
         using var ports = new TestClusterPortAllocator();

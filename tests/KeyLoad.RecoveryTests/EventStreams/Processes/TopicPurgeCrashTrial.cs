@@ -16,7 +16,7 @@ internal static class TopicPurgeCrashTrial
     internal static async Task RunAsync(CommitStage stage, int index, bool pinned, CancellationToken callerToken)
     {
         using var admission = await StorageTrialLease.AcquireAsync(callerToken);
-        var root = Path.Combine(Path.GetTempPath(), RootPrefix + Guid.NewGuid().ToString("N"));
+        var root = Path.Combine(AppContext.BaseDirectory, RootPrefix + Guid.NewGuid().ToString("N"));
         var child = CommandIdempotencyProcessChild.Create(CommandIdempotencyProcess.OutputLimitCharacters,
             CrashFixtureValues.CrashMarker);
         Exception? primary = null;

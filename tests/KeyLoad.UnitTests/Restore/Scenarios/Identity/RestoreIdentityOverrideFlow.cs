@@ -9,7 +9,7 @@ internal static class RestoreIdentityOverrideFlow
     internal static async Task RunAsync(bool emptyDestination, CancellationToken token)
     {
         var failures = new List<Exception>();
-        var root = Path.Combine(Path.GetTempPath(), "keyload-restore-identity-" + Guid.NewGuid().ToString("N"));
+        var root = Path.Combine(AppContext.BaseDirectory, "keyload-restore-identity-" + Guid.NewGuid().ToString("N"));
         var ownsRoot = false;
         await ServerFailureObserver.ObserveAsync(async () =>
         {

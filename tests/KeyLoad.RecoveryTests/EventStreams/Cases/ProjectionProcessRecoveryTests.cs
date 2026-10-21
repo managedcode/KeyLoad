@@ -20,7 +20,7 @@ internal sealed class ProjectionProcessRecoveryTests
     [Arguments(CommitStage.ApplyCompleted, 0)]
     public async Task ProjectionCrashRecoversEffectsOutboxReceiptOutcomeAndCheckpointTogether(CommitStage stage, int index)
     {
-        var root = Path.Combine(Path.GetTempPath(), "keyload-projection-crash-" + Guid.NewGuid().ToString("N"));
+        var root = Path.Combine(AppContext.BaseDirectory, "keyload-projection-crash-" + Guid.NewGuid().ToString("N"));
         var cancellationToken = TestContext.Current!.Execution.CancellationToken;
         using var admission = await StorageTrialLease.AcquireAsync(cancellationToken);
         using var process = StartCrashProcess(root, stage, index);

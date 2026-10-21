@@ -21,7 +21,7 @@ internal sealed class KilledProcessFileReadinessFixture : IAsyncDisposable
 
     internal KilledProcessFileReadinessFixture()
     {
-        Root = Path.Combine(Path.GetTempPath(), "keyload-readiness-" + Guid.NewGuid().ToString("N"));
+        Root = Path.Combine(AppContext.BaseDirectory, "keyload-readiness-" + Guid.NewGuid().ToString("N"));
         try
         {
             using var store = new ZoneTreeStore(new(Root), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());

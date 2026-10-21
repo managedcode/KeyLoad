@@ -1,6 +1,7 @@
 import { lstat, readFile, readdir } from 'node:fs/promises';
 import { dirname, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { testOutputPathDiagnostics } from './test-output-paths.mjs';
 
 const SCRIPT_DIRECTORY = dirname(fileURLToPath(import.meta.url));
 const DEFAULT_ROOT = resolve(SCRIPT_DIRECTORY, '../../..');
@@ -238,6 +239,10 @@ async function validate(root) {
   await validateSolutionInventory(root, inventory, diagnostics);
   await validateProjectResponsibilities(root, inventory, diagnostics);
   await validateRootPolicy(root, diagnostics);
+  for (const repositoryPath of inventory.sourceFiles) {
+    if (!/^(?:tests|benchmarks)\//.test(repositoryPath)) continue;
+    diagnostics.push(...testOutputPathDiagnostics(repositoryPath, await readUtf8(root, repositoryPath)));
+  }
   await validateRequiredFiles(root, diagnostics);
   await validateLocalPolicies(root, inventory.projects, MODULE_PATHS, diagnostics);
   return {

@@ -147,7 +147,7 @@ internal sealed class StoreLifetimeTests
         public string Path
         {
             get;
-        } = System.IO.Path.Combine(System.IO.Path.GetTempPath(),
+        } = System.IO.Path.Combine(AppContext.BaseDirectory,
             TemporaryDirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
 
         public void Dispose()

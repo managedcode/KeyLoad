@@ -1,7 +1,8 @@
 namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
 
-internal sealed class SiteCoverageCollection
+internal sealed class SiteCoverageCollection(string artifactRoot)
 {
+    public string ArtifactRoot { get; } = Path.GetFullPath(artifactRoot);
     public Dictionary<string, List<SiteCoverageScriptSnapshot>> SnapshotsBySource { get; } = new(StringComparer.Ordinal);
     public List<SiteCoverageReceipt> Receipts { get; } = [];
     public List<SiteCoverageBrowserSession> BrowserSessions { get; } = [];
