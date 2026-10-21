@@ -153,7 +153,7 @@ async function emitContentHtml(output, siteRevision) {
   html = html.replaceAll(BUILD.documentationBlob, `/blob/${siteRevision}/docs`)
     .replaceAll(BUILD.documentationTree, `/tree/${siteRevision}/docs`);
   html = replaceRequired(html, ' data-isolated-catalog="data/isolated-catalog.json"', '');
-  html = replaceRequired(html, '<p class="section-intro">Each database and execution topology has its own Linux runner. Separate TUnit tests use one live database session; the initial million-record load is measured separately, with no warmup or reset.</p>',
+  html = replaceRequired(html, '<p class="section-intro">Each database and topology has its own Linux runner. Separate TUnit tests use one live database session; the initial million-record load is measured separately, with no warmup or reset.</p>',
     '<p class="section-intro">Verified execution comparison results will appear here after a completed benchmark run.</p>');
   html = replaceRequired(html, '<div class="qualification-note"><span class="qualification-mark" aria-hidden="true">i</span><p><strong>Early development.</strong> Cluster qualification is in progress. These measurements describe the recorded run conditions; they do not establish production readiness, a winner or power-loss durability.</p></div>', '');
   html = replaceRequired(html, '<noscript><p>Enable JavaScript to explore the measurements. The original aggregate and authenticated GitHub run remain available:</p><!-- KEYLOAD_ISOLATED_EVIDENCE --></noscript>', '');
