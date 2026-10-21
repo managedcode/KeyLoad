@@ -4,7 +4,6 @@ internal static class ServerProtocol
 {
     internal const string ConfigurationSection = "KeyLoad";
     internal const string HealthPrefix = "/health";
-    internal const string InternalPrefix = "/internal";
     internal const string ReadyPath = "/health/ready";
     internal const string ReadyStatus = "ready";
     internal const string PrincipalItem = "keyload-principal";

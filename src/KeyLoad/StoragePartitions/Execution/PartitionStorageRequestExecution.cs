@@ -153,10 +153,22 @@ internal sealed class PartitionStorageRequestExecution(DatabaseEngine database, 
         }
         lock (gate)
         {
+            EvictSettled();
             if (!active.TryAdd(id, (kind, original)))
             {
                 throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest);
             }
+        }
+    }
+
+    /// <summary>A session whose original producer settled after its request returned holds no abortable work.</summary>
+    private void EvictSettled()
+    {
+        var settled = active.Where(entry => entry.Value.Work.Settlement.IsCompleted)
+            .Select(entry => entry.Key).ToArray();
+        foreach (var id in settled)
+        {
+            _ = active.Remove(id);
         }
     }
 

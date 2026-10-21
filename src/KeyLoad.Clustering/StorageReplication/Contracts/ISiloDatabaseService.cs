@@ -12,6 +12,8 @@ public partial interface ISiloDatabaseService : IGrainService
     Task<SiloStorageCut> ReadCutAsync(CancellationToken cancellationToken);
     /// <summary>Reads an exact admitted retry after current persisted authorization and fingerprint checks.</summary>
     Task<StoredCommand?> ReadStoredCommandAsync(Command<DatabaseCommand> operation, CancellationToken cancellationToken);
+    /// <summary>Reads the last committed command for completing an interrupted storage copy.</summary>
+    Task<StoredCommand?> ReadLastCommittedCommandAsync(CancellationToken cancellationToken);
     /// <summary>Evaluates business time and deterministic command decisions at the selected store.</summary>
     Task<Command<DatabaseCommand>> PrepareAsync(Command<DatabaseCommand> operation, CancellationToken cancellationToken);
     /// <summary>Applies exactly the prepared operation through ZoneTree's atomic commit gate.</summary>

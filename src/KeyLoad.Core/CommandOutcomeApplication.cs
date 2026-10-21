@@ -57,6 +57,11 @@ internal static class CommandOutcomeApplication
         if (replicationIndex > AtomicCommandCommit.AtomicCommandCommitInitialSequence)
         {
             transaction.PutRecord(KeySpace.AppliedBytes, replicationIndex);
+            if (persistOutcome)
+            {
+                // The last canonical outcome key lets another writer complete a one-position copy gap.
+                transaction.PutRecord(KeySpace.LastCommandBytes, resultKey);
+            }
         }
 
         if (!persistOutcome || replicationIndex <= AtomicCommandCommit.AtomicCommandCommitInitialSequence)

@@ -9,7 +9,7 @@ Two independent startup options describe a deployment:
 | Option | Meaning | Rule |
 |---|---|---|
 | `KeyLoad:SiloCount` | Number of Orleans silos in the cluster | Positive. Orleans owns membership and scaling; KeyLoad imposes no maximum. |
-| `KeyLoad:ReplicaCount` | Number of copies of each partition's data | Positive, not larger than `SiloCount`. Default 3. |
+| `KeyLoad:ReplicaCount` | Number of copies of each partition's data | Positive, not larger than `SiloCount`. Default 1. |
 
 Every silo runs the same server image with its own silo-local ZoneTree owner. A write is copied through Orleans calls to the ZoneTree owners of `ReplicaCount` silos and is acknowledged after every configured copy confirms persisted apply:
 

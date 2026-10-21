@@ -21,8 +21,7 @@ internal static class DatabaseAuthenticationComposition
     internal static bool IsProtected(HttpRequest request)
         => !AdminStaticAssets.IsPublicRequest(request)
             && !IsPublicFrameworkRequest(request)
-            && !request.Path.StartsWithSegments(ServerProtocol.HealthPrefix, StringComparison.OrdinalIgnoreCase)
-            && !request.Path.StartsWithSegments(ServerProtocol.InternalPrefix, StringComparison.OrdinalIgnoreCase);
+            && !request.Path.StartsWithSegments(ServerProtocol.HealthPrefix, StringComparison.OrdinalIgnoreCase);
 
     private const string CircuitPath = "/_blazor";
     private const string FrameworkPath = "/_framework";

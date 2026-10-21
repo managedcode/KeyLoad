@@ -34,6 +34,9 @@ internal sealed partial class PartitionStorageGrainService(GrainId grainId, Silo
     public Task<StoredCommand?> ReadStoredCommandAsync(Command<DatabaseCommand> operation, CancellationToken cancellationToken)
         => Task.FromResult(Isolated.Host.Database.ReadStoredCommand(operation, cancellationToken));
 
+    public Task<StoredCommand?> ReadLastCommittedCommandAsync(CancellationToken cancellationToken)
+        => Task.FromResult(Isolated.Host.Database.ReadLastCommittedCommand(cancellationToken));
+
     public Task<StorageOperationResult> ApplyAsync(Command<DatabaseCommand> operation, long sequence, CancellationToken cancellationToken)
         => Task.FromResult(Isolated.Host.Database.ApplyStorageOperation(operation, sequence, cancellationToken));
 

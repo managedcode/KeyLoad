@@ -48,10 +48,28 @@ internal sealed class SampleChunkWorkerGrain(BackgroundStorageClient storage,
     {
         while (pending.TryPeek(out var hint))
         {
-            await ScheduleJoinedAsync(hint, token).ConfigureAwait(true);
+            token.ThrowIfCancellationRequested();
+            await ScheduleBufferedAsync(hint, token).ConfigureAwait(true);
             pending.Dequeue();
         }
         after = await CycleAsync(after, token).ConfigureAwait(true);
+    }
+
+    /// <summary>A refused or unreachable hint leaves the buffer; the persisted chunk record remains the durable source.</summary>
+    private async Task ScheduleBufferedAsync(SampleChunkWorkHint hint, CancellationToken token)
+    {
+        try
+        {
+            await ScheduleJoinedAsync(hint, token).ConfigureAwait(true);
+        }
+        catch (KeyLoadException refusal) when (!token.IsCancellationRequested)
+        {
+            SampleChunkJobDiagnostics.Failed(diagnostics, refusal.Code);
+        }
+        catch (Exception failure) when (!token.IsCancellationRequested && GrainBoundaryErrors.Handles(failure))
+        {
+            SampleChunkJobDiagnostics.Failed(diagnostics, ErrorCode.OwnershipLost);
+        }
     }
 
     private async Task<byte[]?> CycleAsync(byte[]? after, CancellationToken token)

@@ -119,7 +119,6 @@ internal static class ServerConfiguration
             app.Services.GetRequiredService<ILogger<ServerErrorMiddleware>>(), app.Services.GetRequiredService<TimeProvider>()).InvokeAsync);
         AdminStaticAssets.UseHeaders(app);
         app.UseRouting();
-        app.UseAntiforgery();
         app.MapWhen(context => !DatabaseAuthenticationComposition.IsProtected(context.Request),
             branch =>
             {
@@ -131,6 +130,8 @@ internal static class ServerConfiguration
         app.Use(next => new DatabaseIdentityMiddleware(next).InvokeAsync);
         app.UseAuthentication();
         app.UseAuthorization();
+        // Antiforgery tokens bind to the authenticated identity, so the middleware follows authorization.
+        app.UseAntiforgery();
         app.MapDefaultEndpoints();
         DatabaseReadinessEndpoints.Map(app);
         OrleansHealthEndpoints.Map(app);

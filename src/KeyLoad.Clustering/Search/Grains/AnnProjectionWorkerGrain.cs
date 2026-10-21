@@ -50,12 +50,29 @@ internal sealed class AnnProjectionWorkerGrain(BackgroundStorageClient storage,
         while (pending.TryPeek(out var hint))
         {
             token.ThrowIfCancellationRequested();
-            await GrainFactory.GetGrain<IAnnProjectionCoordinatorGrain>(
-                AnnProjectionJobProtocol.GrainKey(hint.Consumer, hint.Generation, hint.NodeId))
-                .ScheduleAsync(hint.Consumer, hint.Generation, hint.NodeId, token).ConfigureAwait(true);
+            await ScheduleBufferedAsync(hint, token).ConfigureAwait(true);
             pending.Dequeue();
         }
         after = await CycleAsync(after, token).ConfigureAwait(true);
+    }
+
+    /// <summary>A refused or unreachable hint leaves the buffer; the persisted projection record remains the durable source.</summary>
+    private async Task ScheduleBufferedAsync(AnnProjectionWorkerEvent hint, CancellationToken token)
+    {
+        try
+        {
+            await GrainFactory.GetGrain<IAnnProjectionCoordinatorGrain>(
+                AnnProjectionJobProtocol.GrainKey(hint.Consumer, hint.Generation, hint.NodeId))
+                .ScheduleAsync(hint.Consumer, hint.Generation, hint.NodeId, token).ConfigureAwait(true);
+        }
+        catch (KeyLoadException refusal) when (!token.IsCancellationRequested)
+        {
+            AnnProjectionJobDiagnostics.Failed(diagnostics, refusal.Code);
+        }
+        catch (Exception failure) when (!token.IsCancellationRequested && GrainBoundaryErrors.Handles(failure))
+        {
+            AnnProjectionJobDiagnostics.Failed(diagnostics, ErrorCode.OwnershipLost);
+        }
     }
 
     private async Task<byte[]?> CycleAsync(byte[]? after, CancellationToken token)

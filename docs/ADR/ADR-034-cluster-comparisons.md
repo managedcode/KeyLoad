@@ -39,7 +39,7 @@ claims unsupported by each engine's consistency and durability contract.
 
 | Engine | Required proof and boundary |
 |---|---|
-| KeyLoad | The configured number of ready Orleans silos (three by default) with `KeyLoad:ReplicaCount` silo-local ZoneTree owners; persisted authorization and required-copy acknowledged receipts. Process-kill proof does not establish power-loss durability. |
+| KeyLoad | The configured number of ready Orleans silos (one by default) with `KeyLoad:ReplicaCount` silo-local ZoneTree owners; persisted authorization and required-copy acknowledged receipts. Process-kill proof does not establish power-loss durability. |
 | PostgreSQL + pgvector | Actual primary/standby membership, configured synchronous quorum and observed replication/WAL state. Exact, HNSW and IVFFlat workloads require their own accuracy and concurrent-update results. No automatic-failover claim follows from a replication probe. |
 | Qdrant | Actual peer agreement, collection replication/write-consistency settings and active seeded shard copies. No transactional/WAL equivalence is inferred. |
 | RabbitMQ | Connected nodes and online quorum-queue members; persistent messages, publisher confirms, manual ACK and ordered barriers. |

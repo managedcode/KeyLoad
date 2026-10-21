@@ -44,7 +44,6 @@ internal sealed class ZoneTreeMaintenanceLifetime : IDisposable
         lock (disposalGate)
         {
             ObjectDisposedException.ThrowIf(disposed, this);
-            originalSweepFailure?.Throw();
             try
             {
                 var uptime = clock.GetElapsedTime(TimestampEpoch).Ticks / TimeSpan.TicksPerMillisecond;
@@ -56,7 +55,8 @@ internal sealed class ZoneTreeMaintenanceLifetime : IDisposable
             }
             catch (Exception failure)
             {
-                originalSweepFailure = ExceptionDispatchInfo.Capture(failure);
+                // Later sweeps keep running; the first failure is still reported by the joined close.
+                originalSweepFailure ??= ExceptionDispatchInfo.Capture(failure);
                 throw;
             }
         }

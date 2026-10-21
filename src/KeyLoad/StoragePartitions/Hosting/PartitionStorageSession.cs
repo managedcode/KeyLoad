@@ -20,6 +20,7 @@ internal sealed class PartitionStorageSession : ISharedDatabaseSession, IAsyncDi
     private Task? closing;
     private PartitionStorageOwnerContext? ownerContext;
     private IGrainTimer? maintenanceTimer;
+    private ILogger? maintenanceLogger;
     private const string OwnerContextRequired = "Physical storage must open and execute on its Orleans owner context.";
 
     internal PartitionStorageSession(PartitionHostOwnership ownership)
@@ -32,6 +33,7 @@ internal sealed class PartitionStorageSession : ISharedDatabaseSession, IAsyncDi
         IGrainFactory grains, IServiceScopeFactory? scopeFactory, PartitionStorageOwnerContext context)
     {
         ownerContext = context;
+        maintenanceLogger = logger;
         if (!ReferenceEquals(context.Current, context.Context))
         {
             throw new InvalidOperationException(OwnerContextRequired);
@@ -66,10 +68,10 @@ internal sealed class PartitionStorageSession : ISharedDatabaseSession, IAsyncDi
             {
                 Host.SweepMaintenance();
             }
-            catch (Exception)
+            catch (Exception failure) when (CqrsBoundaryErrors.IsNonFatal(failure))
             {
-                maintenanceTimer?.Dispose();
-                throw;
+                // The timer keeps running so cache release resumes on the next tick.
+                PartitionStorageDiagnostics.MaintenanceSweepFailed(maintenanceLogger!, failure);
             }
         }
         return Task.CompletedTask;

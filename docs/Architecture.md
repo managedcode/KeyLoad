@@ -81,7 +81,9 @@ own; scaling means adding silos to the Orleans cluster.
   write through ordinary Orleans calls to the ZoneTree owner Grain Services on
   `KeyLoad:ReplicaCount` silos. The write is acknowledged after every configured
   copy confirms persisted apply. `ReplicaCount` is positive, defaults
-  to 3 and is not larger than `KeyLoad:SiloCount`
+  to 1 and is not larger than `KeyLoad:SiloCount`; `KeyLoad:StorageMode` selects
+  `IsolatedVolumes` (each silo owns its own disk, the default) or `SharedVolume`
+  (one shared disk, `ReplicaCount=1`)
   ([ADR-143](ADR/ADR-143-independent-silo-replica-topology.md)). An unfinished original command can complete on
   a missing copy through a stable-ID retry; unrelated gaps require explicit
   recovery and general empty-copy restoration remains unqualified.

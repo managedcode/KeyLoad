@@ -57,7 +57,9 @@ membership, transport, placement or movement mechanism of its own.
   ordinary Orleans calls to the ZoneTree owner Grain Services on
   `KeyLoad:ReplicaCount` silos. The write is acknowledged after every configured
   copy confirms persisted apply. `ReplicaCount` is positive, defaults
-  to 3 and is not larger than `KeyLoad:SiloCount`
+  to 1 and is not larger than `KeyLoad:SiloCount`; `KeyLoad:StorageMode` selects
+  `IsolatedVolumes` (each silo owns its own disk, the default) or `SharedVolume`
+  (one shared disk, `ReplicaCount=1`)
   ([ADR-143](../ADR/ADR-143-independent-silo-replica-topology.md)). An unfinished original command can complete on
   a missing copy through a stable-ID retry; unrelated gaps require explicit
   recovery and general empty-copy restoration remains unqualified.
@@ -107,7 +109,7 @@ Baseline end-to-end scenario: `Company → Project → Document → Chunk`. A do
 |---|---|---|
 | Embedded | Storage core and models in the application process | Local tools, tests, small applications |
 | Single node | One Orleans silo and one copy (`KeyLoad:SiloCount=1`, `KeyLoad:ReplicaCount=1`), local data directory | Development and single-node configurations without copy fault tolerance |
-| Cluster | `KeyLoad:SiloCount` Orleans silos, `KeyLoad:ReplicaCount` data copies (default 3), a ZoneTree owner on every silo | Main server topology, scaling and fault tolerance |
+| Cluster | `KeyLoad:SiloCount` Orleans silos, `KeyLoad:ReplicaCount` data copies (default 1, configurable up to the silo count), a ZoneTree owner on every silo | Main server topology, scaling and fault tolerance |
 
 External PostgreSQL, Redis, Elasticsearch, Kafka or a separate vector server are not required dependencies. PostgreSQL is used as a benchmark competitor. Optional embedded libraries may keep their own files in the KeyLoad directory. The base configuration is managed-first; a managed ANN implementation is qualified. USearch, with a C++ core and a C# binding, stays an optional research baseline. Transitive/dependencies are checked separately. [S11][S12]
 
@@ -997,7 +999,7 @@ For time series, an affinity of `(tenant, seriesGroup, timeWindow)` can be decla
 
 ### 28.4. Copies and scaling
 
-`KeyLoad:SiloCount` sets the number of Orleans silos; `KeyLoad:ReplicaCount` sets the number of data copies of each partition (positive, no larger than SiloCount, default 3). Both are read at startup; there is no live resizing ([ADR-143](../ADR/ADR-143-independent-silo-replica-topology.md)). Scaling means adding silos; Orleans performs placement, directory and activation migration.
+`KeyLoad:SiloCount` sets the number of Orleans silos; `KeyLoad:ReplicaCount` sets the number of data copies of each partition (positive, no larger than SiloCount, default 1). Both are read at startup; there is no live resizing ([ADR-143](../ADR/ADR-143-independent-silo-replica-topology.md)). Scaling means adding silos; Orleans performs placement, directory and activation migration.
 
 A write is acknowledged after durable local apply on every configured copy (see Section 6). Deployment policy checks for fully independent fault domains.
 
