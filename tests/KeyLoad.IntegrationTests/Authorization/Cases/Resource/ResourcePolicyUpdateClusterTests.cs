@@ -4,19 +4,23 @@ using KeyLoad.IntegrationTests.Features.ClientApi;
 namespace KeyLoad.IntegrationTests.Features.Authorization;
 
 /// <summary>AC-RPOL-004: policy CAS and current persisted authorization through real SDK and official MCP callers.</summary>
-[ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = McpCallerProtocol.FixtureKey)]
 [NotInParallel]
-internal sealed class ResourcePolicyUpdateClusterTests(ClusterFixture fixture)
+internal sealed class ResourcePolicyUpdateClusterTests : IAsyncDisposable
 {
+    private readonly ClusterFixture fixture = new();
+
     [Test]
     public async Task AcRpol004PolicyAckFencesReadersCursorsAndStaleRetriedUpdatesAcrossCluster()
     {
+        await fixture.InitializeAsync();
         using var deadline = McpCallerDeadline.Create();
         var state = await WarmAsync(deadline.Token);
         await PolicyEpochPublicCold.RunAsync(fixture, state, deadline.Token);
         await PolicyEpochPublicCold.RunAsync(fixture, state, deadline.Token);
         await QueryOnlyEpochR46Flow.RunAsync(fixture, state, deadline.Token);
     }
+
+    public ValueTask DisposeAsync() => fixture.DisposeAsync();
 
     private async Task<PolicyEpochPublicState> WarmAsync(CancellationToken token)
     {

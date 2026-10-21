@@ -21,10 +21,12 @@ internal static class EventMessageSensitiveSafeR52Flow
                 EventMessageSensitivePublicProtocol.Classification, EventMessageSensitivePublicProtocol.GrantAfter);
             var definition = state.Model.Header ? state.Model.Resource with
             {
+                SchemaVersion = state.Model.Resource.SchemaVersion + 1L,
                 HeaderPolicies = [policy]
             }
                 : state.Model.Resource with
                 {
+                    SchemaVersion = state.Model.Resource.SchemaVersion + 1L,
                     FieldPolicies = [policy]
                 };
             state.Model.Resource = await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.ConfigureResourceAsync(Guid.NewGuid(),

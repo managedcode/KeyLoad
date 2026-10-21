@@ -8,7 +8,7 @@ namespace KeyLoad.IntegrationTests.Features.Authorization;
 internal static class AdversarialAuthorityAssertions
 {
     internal static Task DocumentAsync(AdversarialAuthoritySeed seed, DocumentResult actual)
-        => SqlClusterProtocol.EqualAsync(new DocumentResult(seed.Scenario.Reference,
+        => SqlClusterProtocol.EqualAsync(new DocumentResult(seed.Scenario.StoredReference,
             McpCallerProtocol.FirstRevision, McpDocumentProtocol.InitialJson, false, []), actual);
 
     internal static async Task<AdversarialAuthorityImage> ImageAsync(KeyLoadClient root,
@@ -34,7 +34,7 @@ internal static class AdversarialAuthorityAssertions
         var official = await PublicReadAssertions.RequiredDocumentAsync(await session.CallAsync(
             McpCallerTools.DocumentsGet, new GetDocumentRequest(state.Owned.Scenario.Reference), token));
         await DocumentAsync(state.Owned, official.Value);
-        await Assert.That(official.Value.Reference).IsEqualTo(state.Owned.Scenario.Reference);
+        await Assert.That(official.Value.Reference).IsEqualTo(state.Owned.Scenario.StoredReference);
         await Assert.That(official.Value.Revision).IsEqualTo(McpCallerProtocol.FirstRevision);
     }
 

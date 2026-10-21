@@ -56,10 +56,13 @@ internal static class EventMessageSensitiveSafeR52Current
                     McpCallerTools.EventsRead, request, () => root.Sdk.ReadEventSourceAsync(request, token), token);
                 await LiteralPageAsync(actual, state);
                 await Assert.That(actual.CutPosition).IsGreaterThan((long)EventMessageSensitiveSafeR52Protocol.EmptyCount);
-                await SqlClusterProtocol.EqualAsync(state.Page! with
+                await Assert.That(actual.CutPosition).IsGreaterThanOrEqualTo(state.Page!.CutPosition);
+                await SqlClusterProtocol.EqualAsync(state.Page with
                 {
-                    CutPosition = actual.CutPosition
+                    CutPosition = actual.CutPosition,
+                    Cursor = actual.Cursor
                 }, actual);
+                await ContinuationAsync(root, state, actual, route, token);
             }
             else
             {
@@ -75,6 +78,19 @@ internal static class EventMessageSensitiveSafeR52Current
         }
         await SqlClusterProtocol.EqualAsync(state.Outbox, await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.OutboxStatusAsync(state.Model.Partition, token)));
         await SqlClusterProtocol.EqualAsync(state.Outbox, (await McpCallerAssertions.SuccessAsync<OutboxStatus>(await root.Mcp.CallAsync(McpCallerTools.OutboxStatus, new GetOutboxStatusRequest(state.Model.Partition), token))).Value);
+    }
+
+    private static async Task ContinuationAsync(RequestCqrsClusterCallers root, EventMessageSensitiveSafeR52State state,
+        EventSourcePage page, int route, CancellationToken token)
+    {
+        await Assert.That(string.IsNullOrWhiteSpace(page.Cursor)).IsFalse();
+        var request = new ReadEventSourceRequest(state.Model.Source, Cursor: page.Cursor);
+        var actual = await QueueLifecyclePublicRoutes.CallAsync(root, route, state.Model.Partition,
+            McpCallerTools.EventsRead, request, () => root.Sdk.ReadEventSourceAsync(request, token), token);
+        await Assert.That(actual.CutPosition).IsGreaterThanOrEqualTo(page.CutPosition);
+        await Assert.That(string.IsNullOrWhiteSpace(actual.Cursor)).IsFalse();
+        await SqlClusterProtocol.EqualAsync(new EventSourcePage(page.Source, page.Head, [], actual.Cursor,
+            actual.CutPosition, false), actual);
     }
 
     private static async Task LiteralPageAsync(EventSourcePage page, EventMessageSensitiveSafeR52State state)

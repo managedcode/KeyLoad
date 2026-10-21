@@ -14,6 +14,7 @@ internal sealed class RequiredProcessingPolicyClusterState(PartitionRef partitio
     internal string Key { get; } = key;
     internal bool Header { get; } = header;
     internal ResourceDefinition Resource { get; set; } = null!;
+    internal EntityRefLifetime DerivedLifetime { get; set; } = null!;
     internal List<(CommandRequest Request, CommitReceipt Receipt)> Producers { get; } = [];
     internal List<Delivery> Deliveries { get; } = [];
     internal ProcessingRequest Refused { get; set; } = null!;
@@ -23,6 +24,7 @@ internal sealed class RequiredProcessingPolicyClusterState(PartitionRef partitio
     internal CommitReceipt HealthyReceipt { get; set; } = null!;
     internal QueueLaneRef Lane => new(Partition, Queue);
     internal EntityRef Reference(string id) => new(Partition, Derived, id);
+    internal EntityRef StoredReference(string id) => Reference(id) with { Lifetime = DerivedLifetime };
     internal string Payload => Header ? "{\"value\":1}" : "{\"secret\":\"BODY-PROCESSING-CANARY\",\"value\":1}";
     internal string Headers => Header ? "{\"secret\":\"HEADER-PROCESSING-CANARY\",\"trace\":\"one\"}" : "{\"trace\":\"one\"}";
     internal static string EffectJson(string id) => id == "first" ? "{\"processed\":1}" : "{\"processed\":2}";

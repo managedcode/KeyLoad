@@ -39,9 +39,11 @@ internal static class EventMessageSensitivePublicOperations
             EventMessageSensitivePublicProtocol.Classification, EventMessageSensitivePublicProtocol.GrantAfter, RequiredForProcessing: required);
         var definition = state.Header ? state.Resource with
         {
+            SchemaVersion = state.Resource.SchemaVersion + 1L,
             HeaderPolicies = [policy]
         } : state.Resource with
         {
+            SchemaVersion = state.Resource.SchemaVersion + 1L,
             FieldPolicies = [policy]
         };
         var request = new ConfigureResourceRequest(state.Partition.TenantId, state.Partition.DatabaseId, definition)

@@ -27,6 +27,7 @@ internal static class PolicyEpochAuthorityOutage
                 stopped.Add(node);
                 await fixture.KillServerAsync(node, Scenario, token);
             }
+            await PolicyEpochMembership.WaitForSurvivorAsync(fixture, token);
             await ReadAvailableAsync(reader, state, cursors, token);
             await ClusterReplicationTestSupport.MissingCopiesAsync(await root.CommitAsync(state.Seed, token));
             var available = await PolicyEpochPublicAssertions.ImageAsync(root, state.Scenario, token);

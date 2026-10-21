@@ -25,17 +25,28 @@ internal static class EventMessageSensitiveSafeR52Refusals
             await SdkAsync(await caller.Sdk.ReceiveAsync((ReceiveRequest)request, token), code, detail, state);
         }
         await EventMessageSensitiveSafeR52Current.RequireAsync(root, state, token);
-        var reply = await caller.Mcp.CallAsync(tool, request, token);
-        await McpCallerAssertions.ErrorAsync(reply, code, dispatched: code != ErrorCode.Unauthenticated || state.Model.DataAuthority);
-        await McpProblemAsync(reply, code, state);
+        await McpAsync(caller, state, tool, request, code, token);
         await EventMessageSensitiveSafeR52Current.RequireAsync(root, state, token);
         var sql = SqlClusterProtocol.Call(state.Model.Partition, tool, request);
         await SqlAsync(await caller.Sdk.ExecuteSqlAsync(sql, token), code, detail, state);
         await EventMessageSensitiveSafeR52Current.RequireAsync(root, state, token);
-        reply = await caller.Mcp.CallAsync(SqlOperationProtocol.ToolName, sql, token);
-        await McpCallerAssertions.ErrorAsync(reply, code, dispatched: code != ErrorCode.Unauthenticated || state.Model.DataAuthority);
-        await McpProblemAsync(reply, code, state);
+        await McpAsync(caller, state, SqlOperationProtocol.ToolName, sql, code, token);
         await EventMessageSensitiveSafeR52Current.RequireAsync(root, state, token);
+    }
+
+    private static async Task McpAsync(RequestCqrsClusterCallers caller, EventMessageSensitiveSafeR52State state,
+        string tool, object request, ErrorCode code, CancellationToken token)
+    {
+        if (code == ErrorCode.Unauthenticated && !state.Model.DataAuthority)
+        {
+            var failure = await Assert.ThrowsAsync<HttpRequestException>(() => caller.Mcp.CallAsync(tool, request, token));
+            await Assert.That(failure!.StatusCode).IsEqualTo(System.Net.HttpStatusCode.Unauthorized);
+            await PrivateAsync(Encoding.UTF8.GetBytes(failure.Message), state);
+            return;
+        }
+        var reply = await caller.Mcp.CallAsync(tool, request, token);
+        await McpCallerAssertions.ErrorAsync(reply, code, dispatched: true);
+        await McpProblemAsync(reply, code, state);
     }
 
     private static async Task SdkAsync<T>(ManagedCode.Communication.Result<T> result, ErrorCode code,

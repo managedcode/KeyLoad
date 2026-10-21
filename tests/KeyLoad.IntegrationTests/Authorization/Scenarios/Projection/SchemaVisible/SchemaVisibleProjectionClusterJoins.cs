@@ -28,7 +28,7 @@ internal static class SchemaVisibleProjectionClusterJoins
     private const string Prefix = "SELECT TOP (10) r.name AS exposed FROM EVENTS('";
     private const string Middle = "','source',1) AS e INNER JOIN [";
     private const string BeforePredicate = "] AS r ON e.payload.[to] = r.entity_ref WHERE ";
-    private const string SupportedSql = "e.payload.public";
+    private const string SupportedSql = "e.payload.[public]";
     private const string AbsentSql = "e.absent";
     private const string Suffix = " = 'probe' ORDER BY e.revision ASC";
 
@@ -63,11 +63,11 @@ internal static class SchemaVisibleProjectionClusterJoins
             var events = state.Collection + EventsSuffix;
             var target = state.Collection + TargetSuffix;
             yield return (new(state.Partition, Prefix + events + Middle + target + BeforePredicate
-                + (supported ? SupportedSql : AbsentSql) + Suffix, AllowFullScan: true, QueryDialectVersion: P.Q2),
+                + (supported ? SupportedSql : AbsentSql) + Suffix, AllowFullScan: true, QueryDialectVersion: P.QueryDialect),
                 new(state.Partition, new(events, SourceAlias, [new(NamePath, P.ValueAlias, TargetAlias)],
                     new Comparison(new FieldOperand(supported ? Supported : Absent), P.Equal, ValueOperand.Create(Probe)),
                     [new(RevisionPath, false)], P.Limit, ModelSource: new(ModelQuerySourceKind.Events, Stream, Generation),
-                    InnerJoin: new(target, TargetAlias, ReferenceOperand, EntityOperand)), AllowFullScan: true, AstVersion: P.Q2));
+                    InnerJoin: new(target, TargetAlias, ReferenceOperand, EntityOperand)), AllowFullScan: true, AstVersion: P.QueryDialect));
         }
     }
 }

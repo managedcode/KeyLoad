@@ -1,6 +1,7 @@
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.OrleansExecution;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
+using KeyLoad.IntegrationTests.Features.ResourceExecution;
 
 namespace KeyLoad.IntegrationTests.Features.Authorization;
 
@@ -10,9 +11,10 @@ internal static class InitialPrincipalEpochClusterSetup
     {
         var suffix = Guid.NewGuid().ToString("N");
         var partition = new PartitionRef("epoch-tenant-" + suffix, "epoch-database", "epoch-domain", "epoch-partition-" + suffix);
-        await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.ConfigureResourceAsync(Guid.NewGuid(),
-            new(partition.TenantId, partition.DatabaseId, new(InitialPrincipalEpochClusterState.Collection,
-                ResourceKind.Collection, partition.TransactionDomainId)), token));
+        var creationId = Guid.NewGuid();
+        var definition = new ResourceDefinition(InitialPrincipalEpochClusterState.Collection, ResourceKind.Collection, partition.TransactionDomainId);
+        var creation = new ConfigureResourceRequest(partition.TenantId, partition.DatabaseId, definition);
+        await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.ConfigureResourceAsync(creationId, creation, token));
         var seed = new CommandRequest(Guid.NewGuid(), partition,
             [new PutDocument(InitialPrincipalEpochClusterState.Collection, "record", "{\"value\":0}", 0L)]);
         var receipt = await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.CommitAsync(seed, token));
@@ -23,7 +25,8 @@ internal static class InitialPrincipalEpochClusterSetup
         {
             PolicyEpoch = epoch
         };
-        return new(partition, id, "epoch-key-" + suffix, seed, receipt, Guid.NewGuid(), refused);
+        return new(partition, id, "epoch-key-" + suffix, seed, receipt, Guid.NewGuid(), refused,
+            ResourceCreationLifetime.Create(creationId, creation));
     }
 
     internal static async Task PrincipalAsync(RequestCqrsClusterCallers root, InitialPrincipalEpochClusterState state,

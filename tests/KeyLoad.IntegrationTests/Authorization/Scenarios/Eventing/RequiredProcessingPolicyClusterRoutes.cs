@@ -11,9 +11,10 @@ internal static class RequiredProcessingPolicyClusterRoutes
         ProcessingRequest request, int route, CancellationToken token)
         => QueueLifecyclePublicRoutes.CallAsync(reader, route, state.Partition, RequiredProcessingPolicyClusterState.Tool, request,
             () => reader.Sdk.CommitProcessingAsync(request, token), token);
-    internal static async Task<Delivery> ReceiveAsync(RequestCqrsClusterCallers reader, RequiredProcessingPolicyClusterState state, string id, CancellationToken token)
+    internal static async Task<ReceiveResult> ReceiveAsync(RequestCqrsClusterCallers reader, RequiredProcessingPolicyClusterState state,
+        string id, ReceiveRequest request, CancellationToken token)
     {
-        var request = new ReceiveRequest(Guid.NewGuid(), state.Lane, LeaseSeconds: state.Resource.QueuePolicy.MaxLeaseSeconds);
+        await Assert.That(request.Lane).IsEqualTo(state.Lane);
         var actual = await McpCallerAssertions.SdkSuccessAsync(await reader.Sdk.ReceiveAsync(request, token));
         await Assert.That(actual.Deliveries.Length).IsEqualTo(1);
         var delivery = actual.Deliveries[0];
@@ -25,7 +26,7 @@ internal static class RequiredProcessingPolicyClusterRoutes
         await Assert.That(actual.Token.AtomicPartitionId).IsEqualTo(state.Partition.AtomicPartitionId);
         await Assert.That(actual.Token.Position).IsGreaterThan(0L);
         state.Deliveries.Add(delivery);
-        return delivery;
+        return actual;
     }
     internal static async Task<CommitReceipt> CompleteAsync(RequestCqrsClusterCallers reader,
         RequiredProcessingPolicyClusterState state, ProcessingRequest request, string id, CancellationToken token)

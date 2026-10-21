@@ -14,12 +14,13 @@ internal sealed class QueueBodyAccountingTests
     private const int SingleReadyRecord = 1;
     private const string MalformedStoredJson = "{";
     private const string EmptyPayloadJson = "{}";
+    private const string LiteralHeaders = "{ \"z\": \"Київ\", \"a\": true }";
 
     [Test]
     public async Task AcMp006_StoredBytesDriveExactStoredAndInFlightQuotas()
     {
         var message = new EnqueueMessage(QueueName, MessageId,
-            LargePayloadPrefix + new string('界', UnicodeCharacters) + LargePayloadSuffix);
+            LargePayloadPrefix + new string('界', UnicodeCharacters) + LargePayloadSuffix, LiteralHeaders);
         using var baseline = new TestDatabase();
         baseline.Configure(QueueName, ResourceKind.WorkQueue);
         baseline.Commit(message);
@@ -37,6 +38,8 @@ internal sealed class QueueBodyAccountingTests
         var receiveId = Guid.NewGuid();
         var delivery = await Assert.That(exact.Submit(OperationKind.Receive,
             new ReceiveRequest(receiveId, lane), id: receiveId).Get<ReceiveResult>().Deliveries).HasSingleItem();
+        await Assert.That(delivery.PayloadJson).IsEqualTo(message.PayloadJson);
+        await Assert.That(delivery.HeadersJson).IsEqualTo(message.HeadersJson);
         await Assert.That(Counters(exact).InFlightBytes).IsEqualTo(storedBytes);
         var ackId = Guid.NewGuid();
         exact.Submit(OperationKind.Delivery,

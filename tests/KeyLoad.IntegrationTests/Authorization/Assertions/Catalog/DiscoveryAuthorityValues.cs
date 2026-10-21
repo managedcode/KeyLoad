@@ -8,7 +8,7 @@ namespace KeyLoad.IntegrationTests.Features.Authorization;
 internal static class DiscoveryAuthorityValues
 {
     internal static DocumentResult Expected(DiscoveryAuthorityState state)
-        => new(state.Scenario.Reference, McpCallerProtocol.FirstRevision, McpDocumentProtocol.InitialJson, false, []);
+        => new(state.Scenario.StoredReference, McpCallerProtocol.FirstRevision, McpDocumentProtocol.InitialJson, false, []);
 
     internal static async Task<Guid> FirstAsync(McpOfficialClient session, DiscoveryAuthorityState state, CancellationToken token)
     {

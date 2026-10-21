@@ -9,11 +9,11 @@ namespace KeyLoad.IntegrationTests.Features.Authorization;
 internal static class SensitiveAuthorityAssertions
 {
     internal static Task RedactedAsync(McpDocumentScenario scenario, DocumentResult actual)
-        => DocumentAsync(new DocumentResult(scenario.Reference, McpCallerProtocol.FirstRevision,
+        => DocumentAsync(new DocumentResult(scenario.StoredReference, McpCallerProtocol.FirstRevision,
             SensitiveAuthorityProtocol.RedactedJson, true, [McpDocumentProtocol.ProtectedPath]), actual);
 
     internal static Task RawAsync(McpDocumentScenario scenario, DocumentResult actual, bool patched)
-        => DocumentAsync(new DocumentResult(scenario.Reference,
+        => DocumentAsync(new DocumentResult(scenario.StoredReference,
             patched ? SensitiveAuthorityProtocol.PatchedRevision : McpCallerProtocol.FirstRevision,
             patched ? SensitiveAuthorityProtocol.PatchedJson : McpDocumentProtocol.InitialJson, false, []), actual);
 

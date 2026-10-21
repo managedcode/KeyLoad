@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.Json;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.Messaging;
 using KeyLoad.IntegrationTests.Features.OrleansExecution;
@@ -19,20 +20,41 @@ internal static class EventMessageSensitivePublicRefusals
         string tool, object request, Func<Task<ManagedCode.Communication.Result<T>>> sdk, ErrorCode code, CancellationToken token)
     {
         await SdkAsync(await sdk(), code);
-        var reply = await callers.Mcp.CallAsync(tool, request, token);
-        await McpCallerAssertions.ErrorAsync(reply, code, dispatched: code != ErrorCode.Unauthenticated || state.DataAuthority);
-        await PrivateAsync(JsonDefaults.Serialize(reply));
+        await McpAsync(callers, state, tool, request, code, token);
         var sql = KeyLoad.IntegrationTests.Features.QueryExecution.SqlClusterProtocol.Call(state.Partition, tool, request);
         await SdkAsync(await callers.Sdk.ExecuteSqlAsync(sql, token), code);
-        reply = await callers.Mcp.CallAsync(SqlOperationProtocol.ToolName, sql, token);
-        await McpCallerAssertions.ErrorAsync(reply, code, dispatched: code != ErrorCode.Unauthenticated || state.DataAuthority);
+        await McpAsync(callers, state, SqlOperationProtocol.ToolName, sql, code, token);
+    }
+
+    private static async Task McpAsync(RequestCqrsClusterCallers callers, EventMessageSensitivePublicState state,
+        string tool, object request, ErrorCode code, CancellationToken token)
+    {
+        if (code == ErrorCode.Unauthenticated && !state.DataAuthority)
+        {
+            var failure = await Assert.ThrowsAsync<HttpRequestException>(() => callers.Mcp.CallAsync(tool, request, token));
+            await Assert.That(failure!.StatusCode).IsEqualTo(System.Net.HttpStatusCode.Unauthorized);
+            await PrivateAsync(Encoding.UTF8.GetBytes(failure.Message));
+            await Assert.That(failure.Message.Contains(state.Key, StringComparison.Ordinal)).IsFalse();
+            return;
+        }
+        var reply = await callers.Mcp.CallAsync(tool, request, token);
+        await McpCallerAssertions.ErrorAsync(reply, code, dispatched: true);
         await PrivateAsync(JsonDefaults.Serialize(reply));
+        await McpCallerAssertions.DoesNotDiscloseAsync(reply, state.Key,
+            EventMessageSensitivePublicProtocol.BodyCanary);
     }
 
     private static async Task SdkAsync<T>(ManagedCode.Communication.Result<T> result, ErrorCode code)
     {
         await SagaTimeoutClusterAssertions.AssertSdkErrorAsync(result, code);
-        await Assert.That(result.Value).IsNull();
+        if (result.Value is JsonElement value)
+        {
+            await Assert.That(value.ValueKind).IsEqualTo(JsonValueKind.Undefined);
+        }
+        else
+        {
+            await Assert.That(result.Value).IsNull();
+        }
         await PrivateAsync(JsonDefaults.Serialize(result));
     }
 

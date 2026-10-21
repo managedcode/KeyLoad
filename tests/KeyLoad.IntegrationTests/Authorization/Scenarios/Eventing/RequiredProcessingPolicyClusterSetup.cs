@@ -2,6 +2,7 @@ using KeyLoad.Core;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.OrleansExecution;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
+using KeyLoad.IntegrationTests.Features.ResourceExecution;
 
 namespace KeyLoad.IntegrationTests.Features.Authorization;
 
@@ -21,9 +22,11 @@ internal static class RequiredProcessingPolicyClusterSetup
         state.Resource = await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.ConfigureResourceAsync(Guid.NewGuid(),
             new(state.Partition.TenantId, state.Partition.DatabaseId, resource), token));
         await SqlClusterProtocol.EqualAsync(resource, state.Resource);
-        await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.ConfigureResourceAsync(Guid.NewGuid(),
-            new(state.Partition.TenantId, state.Partition.DatabaseId,
-                new(RequiredProcessingPolicyClusterState.Derived, ResourceKind.Collection, state.Partition.TransactionDomainId)), token));
+        var creationId = Guid.NewGuid();
+        var creation = new ConfigureResourceRequest(state.Partition.TenantId, state.Partition.DatabaseId,
+            new(RequiredProcessingPolicyClusterState.Derived, ResourceKind.Collection, state.Partition.TransactionDomainId));
+        await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.ConfigureResourceAsync(creationId, creation, token));
+        state.DerivedLifetime = ResourceCreationLifetime.Create(creationId, creation);
         await PrincipalAsync(root, state, 1L, false, token);
         await McpCallerAssertions.SdkStatusAsync(await root.Sdk.ConfigureApiKeyAsync(Guid.NewGuid(),
             AuthorizationExecution.Credential(state.Key.Split('.')[0], state.Worker, state.Key), token));

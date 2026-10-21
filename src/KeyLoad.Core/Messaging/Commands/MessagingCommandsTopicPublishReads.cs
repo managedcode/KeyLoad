@@ -70,8 +70,8 @@ public static class MessagingCommandsTopicPublishReads
             var idKey = KeySpace.Partition(TopicEventIdKeySpace, source.Partition, source.Resource, source.Generation, item.EventId);
             var data = item with
             {
-                PayloadJson = JsonData.Validate(item.PayloadJson, engine.Limits),
-                HeadersJson = JsonData.Validate(item.HeadersJson, engine.Limits)
+                PayloadJson = JsonData.ValidateContent(item.PayloadJson, engine.Limits),
+                HeadersJson = JsonData.ValidateContent(item.HeadersJson, engine.Limits)
             };
             if (tx.ReadOwnedValue(EventStreamsCommandsTopicRetentionCommands.PurgedTopicIdentityKey(source, item.EventId)) is { } purgedBytes)
             {

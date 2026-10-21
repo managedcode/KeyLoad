@@ -37,6 +37,7 @@ internal sealed class EventMessageSensitivePublicState(PartitionRef partition, R
     internal object HealthyRequest { get; set; } = null!;
     internal object Healthy { get; set; } = null!;
     internal NodeStatus Before { get; set; } = null!;
+    internal (CommandRequest Command, CommitReceipt Receipt)? Redrive { get; set; }
     internal List<(CommandRequest Command, CommitReceipt Receipt)> Commands { get; } = [];
     internal List<(object Command, CommitReceipt Receipt)> Completions { get; } = [];
 }

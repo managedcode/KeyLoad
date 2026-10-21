@@ -1,3 +1,4 @@
+using System.Text.Json;
 using TUnit.Assertions.Enums;
 
 namespace KeyLoad.UnitTests.Features.Messaging;
@@ -10,24 +11,33 @@ internal sealed class TopicPublicationTests
     private const string EventStorageSpace = "topic-event";
     private const string ResourceName = "orders";
     private const string EventType = "Created";
+    private const string LiteralPayload = "{ \"z\": \"Київ\", \"a\": [null,2] }";
+    private const string LiteralHeaders = "{ \"z\": \"correlation\", \"a\": \"é\" }";
 
     [Test]
     public async Task ExactSerializedEventQuotaAcceptsOrderedBatchAndOneByteShortRollsBack()
     {
-        var events = new[] { new EventData("exact-a", EventType, "{}"), new EventData("exact-b", EventType, "{}") };
+        var events = new[] { new EventData("exact-a", EventType, LiteralPayload, LiteralHeaders),
+            new EventData("exact-b", EventType, LiteralPayload, LiteralHeaders) };
         using var exact = new TestDatabase();
         var publicationTime = SourceReadBusinessTime.Next(exact);
         var exactBytes = ExpectedRawEventBytes(exact, events, publicationTime);
         ConfigureTopic(exact, exactBytes, time: publicationTime);
         var exactId = Guid.NewGuid();
-        var receipt = exact.Submit(OperationKind.Batch, new CommandRequest(exactId, exact.Partition,
-            [new PublishTopic(TopicName, [.. events])]), id: exactId, time: publicationTime).Get<CommitReceipt>();
+        var publication = new CommandRequest(exactId, exact.Partition, [new PublishTopic(TopicName, [.. events])]);
+        var command = exact.Database.CreateCommand(OperationKind.Batch, exactId, "root", publicationTime,
+            JsonSerializer.Serialize(publication, JsonDefaults.Options));
+        var receipt = exact.SubmitAtOriginalTime(exact.Database, command).Get<CommitReceipt>();
         var rawBytes = exact.Store.Read(view => RawEvent(view, exact, 1).LongLength + RawEvent(view, exact, 2).LongLength);
         await Assert.That(rawBytes).IsEqualTo(exactBytes);
         await Assert.That(receipt.Mutations[0].Revision).IsEqualTo(2L);
-        var page = exact.Database.ReadEventSource("root", new(new(exact.Partition, TopicName, EventSourceKind.Topic)));
+        var request = new ReadEventSourceRequest(new(exact.Partition, TopicName, EventSourceKind.Topic));
+        var page = exact.Database.ReadEventSource("root", request);
+        await Assert.That(page.Events.Select(record => record.Data)).IsEquivalentTo(events, CollectionOrdering.Matching);
         await Assert.That(page.Events.Select(record => record.Position)).IsEquivalentTo(new long[] { 1, 2 }, CollectionOrdering.Matching);
         await Assert.That(page.Events.Select(record => record.EventSequence)).IsEquivalentTo(new long[] { 1, 2 }, CollectionOrdering.Matching);
+
+        await TopicPublicationCold.VerifyAsync(exact, command, receipt, request, page);
 
         using var shortQuota = new TestDatabase();
         ConfigureTopic(shortQuota, exactBytes - 1, time: publicationTime);

@@ -15,6 +15,8 @@ internal static class SafeProjectorOperationClusterErrors
     {
         await Assert.That(actual.IsSuccess).IsFalse();
         await Assert.That(actual.Value is null).IsTrue();
+        await Assert.That(actual.Problem?.ErrorCode).IsEqualTo(code.ToString());
+        await Assert.That(actual.Problem?.Detail).IsEqualTo(detail);
         await SqlClusterProtocol.EqualAsync(Errors.Problem(code, detail), actual.Problem);
         await Assert.That(JsonSerializer.Serialize(actual.Problem, JsonDefaults.Options)
             .Contains(SafeProjectorOperationClusterProtocol.Canary, StringComparison.Ordinal)).IsFalse();

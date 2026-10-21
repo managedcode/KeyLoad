@@ -41,5 +41,5 @@ internal static class ConcurrentPrincipalAuthorityAssertions
     }
 
     private static DocumentResult Expected(McpDocumentScenario scenario)
-        => new(scenario.Reference, McpCallerProtocol.FirstRevision, McpDocumentProtocol.InitialJson, false, []);
+        => new(scenario.StoredReference, McpCallerProtocol.FirstRevision, McpDocumentProtocol.InitialJson, false, []);
 }

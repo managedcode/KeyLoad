@@ -66,7 +66,7 @@ public static class MessagingExecutionMessaging
             engine.Authorization.RequireFieldWrite(principal, resource with { FieldPolicies = resource.HeaderPolicies }, policy.Path);
         }
 
-        var body = new MessageBody(message.MessageId, JsonData.Validate(message.PayloadJson, engine.Limits), JsonData.Validate(message.HeadersJson, engine.Limits), message.OrderingKey, JsonData.Fingerprint(message));
+        var body = new MessageBody(message.MessageId, JsonData.ValidateContent(message.PayloadJson, engine.Limits), JsonData.ValidateContent(message.HeadersJson, engine.Limits), message.OrderingKey, JsonData.Fingerprint(message));
         PersistEnqueuedMessage(tx, lane, message, resource, body, now);
         return new(MessagingCommandsQueueSweepTransitions.EnqueueReceiptKind, message.Queue, message.MessageId, MessagingSingleElementCount);
     }

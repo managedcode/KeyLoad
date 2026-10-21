@@ -1,3 +1,4 @@
+using System.Text.Json;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.OrleansExecution;
 using KeyLoad.Query;
@@ -17,6 +18,8 @@ internal static class SchemaVisibleProjectionClusterBindings
             {
                 await SafeProjectorOperationClusterImages.ObserveAsync(root, history, async () =>
                 {
+                    await File.WriteAllTextAsync(Path.Combine(TestContext.ResultsDirectory, "schema-binding-request.json"),
+                        JsonSerializer.Serialize(new { IsAst = ast, SqlRequest = request.Sql, AstRequest = request.Ast }, JsonDefaults.Options), token);
                     var actual = ast ? await reader.Sdk.QueryAstAsync(request.Ast, token)
                         : await reader.Sdk.QueryAsync(request.Sql, token);
                     await SafeProjectorOperationClusterErrors.SdkAsync(actual, ErrorCode.Validation, P.BindingDetail);

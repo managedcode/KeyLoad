@@ -43,7 +43,7 @@ internal static class RequiredProcessingPolicyClusterValues
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 var present = id == "first" ? phase >= 1 : phase >= 3;
-                var expected = new DocumentReadResult(present ? new(state.Reference(id), 1L, RequiredProcessingPolicyClusterState.EffectJson(id), false, []) : null);
+                var expected = new DocumentReadResult(present ? new(state.StoredReference(id), 1L, RequiredProcessingPolicyClusterState.EffectJson(id), false, []) : null);
                 var document = await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.GetAsync(state.Reference(id), token));
                 await SqlClusterProtocol.EqualAsync(expected, document);
                 values.Add(document);

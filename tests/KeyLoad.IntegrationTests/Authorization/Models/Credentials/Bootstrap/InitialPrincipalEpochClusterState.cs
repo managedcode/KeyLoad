@@ -3,7 +3,7 @@ using KeyLoad.Core;
 namespace KeyLoad.IntegrationTests.Features.Authorization;
 
 internal sealed record InitialPrincipalEpochClusterState(PartitionRef Partition, string PrincipalId, string KeyId,
-    CommandRequest Seed, CommitReceipt SeedReceipt, Guid RefusedId, PrincipalRecord Refused)
+    CommandRequest Seed, CommitReceipt SeedReceipt, Guid RefusedId, PrincipalRecord Refused, EntityRefLifetime Lifetime)
 {
     internal Guid PrincipalCommandId { get; } = Guid.NewGuid();
     internal const string Collection = "epoch-documents";
@@ -12,6 +12,7 @@ internal sealed record InitialPrincipalEpochClusterState(PartitionRef Partition,
     internal string OriginalSecret => KeyId + ".original-credential-at-least-32";
     internal string ReplacementSecret => KeyId + ".replacement-credential-at-least-32";
     internal EntityRef Reference => new(Partition, Collection, "record");
+    internal EntityRef StoredReference => Reference with { Lifetime = Lifetime };
     internal PrincipalRecord Principal(long epoch, bool granted = true, bool revoked = false)
         => new(PrincipalId, Partition.TenantId,
             granted ? [new(Partition.DatabaseId, Collection, Capability.DocumentsRead | Capability.DocumentsWrite)] : [], [])

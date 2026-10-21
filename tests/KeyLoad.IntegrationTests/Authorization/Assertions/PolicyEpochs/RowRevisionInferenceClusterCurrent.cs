@@ -15,7 +15,7 @@ internal static class RowRevisionInferenceClusterCurrent
             var json = id == P.Own ? P.Original : state.HiddenJson;
             var revision = id == P.Own ? P.OriginalRevision : state.HiddenRevision;
             DocumentReadResult expected = new(id == P.Hidden && state.HiddenDeleted
-                ? null : new(reference, revision, json, false, []));
+                ? null : new(state.StoredReference(id), revision, json, false, []));
             await SqlClusterProtocol.EqualAsync(expected, await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.GetAsync(reference, token)));
             await SqlClusterProtocol.EqualAsync(expected, (await McpCallerAssertions.SuccessAsync<DocumentReadResult>(
                 await root.Mcp.CallAsync(McpCallerTools.DocumentsGet, new GetDocumentRequest(reference), token))).Value);

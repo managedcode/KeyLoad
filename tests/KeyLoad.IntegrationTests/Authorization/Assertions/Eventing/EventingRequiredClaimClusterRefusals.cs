@@ -10,10 +10,9 @@ namespace KeyLoad.IntegrationTests.Features.Authorization;
 internal static class EventingRequiredClaimClusterRefusals
 {
     internal static async Task ReceiveAsync(RequestCqrsClusterCallers root, RequestCqrsClusterCallers reader,
-        EventingRequiredClaimClusterState state, ErrorCode code, string detail, CancellationToken token)
+        EventingRequiredClaimClusterState state, ReceiveRequest request, ErrorCode code, string detail, CancellationToken token)
     {
         var input = state.Input;
-        var request = state.Denied;
         var sql = SqlClusterProtocol.Call(input.Partition, McpCallerTools.MessagesReceive, request);
         await EventingRequiredClaimClusterCurrent.ObserveAsync(root, state, async () =>
             await SdkAsync(await reader.Sdk.ReceiveAsync(request, token), code, detail), token);

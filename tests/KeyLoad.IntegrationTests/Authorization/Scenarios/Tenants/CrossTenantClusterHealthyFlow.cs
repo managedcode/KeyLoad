@@ -41,6 +41,6 @@ internal static class CrossTenantClusterHealthyFlow
         var read = await PublicReadAssertions.RequiredDocumentAsync(await mcp.CallAsync(McpCallerTools.DocumentsGet,
             new GetDocumentRequest(owned.Reference), token));
         await Assert.That(JsonDefaults.Serialize(read.Value).AsSpan().SequenceEqual(JsonDefaults.Serialize(
-            new DocumentResult(owned.Reference, 2, CrossTenantClusterWholeFlow.HealthyJson, false, [])))).IsTrue();
+            new DocumentResult(owned.StoredReference, 2, CrossTenantClusterWholeFlow.HealthyJson, false, [])))).IsTrue();
     }
 }

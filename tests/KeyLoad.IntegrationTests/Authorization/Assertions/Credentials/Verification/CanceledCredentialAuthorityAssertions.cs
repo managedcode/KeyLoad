@@ -30,7 +30,7 @@ internal static class CanceledCredentialAuthorityAssertions
     }
 
     private static DocumentResult Expected(McpDocumentScenario scenario)
-        => new(scenario.Reference with { Lifetime = scenario.Lifetime }, McpCallerProtocol.FirstRevision,
+        => new(scenario.StoredReference, McpCallerProtocol.FirstRevision,
             McpDocumentProtocol.InitialJson, false, []);
 }
 

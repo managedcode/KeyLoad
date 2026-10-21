@@ -1,11 +1,7 @@
 using System.Collections.Immutable;
-using System.Text.Json;
 using KeyLoad.Client;
-using KeyLoad.Core.Features.InternalSerialization;
-using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.Server;
-using ManagedCode.Communication.Commands;
+using KeyLoad.IntegrationTests.Features.ResourceExecution;
 
 namespace KeyLoad.IntegrationTests.Features.DocumentStorage;
 
@@ -16,6 +12,8 @@ internal sealed record McpDocumentScenario(PartitionRef Partition, EntityRefLife
 {
     /// <summary>Gets the actual document reference used by both public protocol adapters.</summary>
     internal EntityRef Reference => new(Partition, McpDocumentProtocol.Collection, McpDocumentProtocol.Entity);
+
+    internal EntityRef StoredReference => Reference with { Lifetime = Lifetime };
 
     /// <summary>Creates a real resource in a unique tenant without changing cluster configuration.</summary>
     /// <param name="fixture">The actual execution Aspire Orleans application.</param>
@@ -50,16 +48,7 @@ internal sealed record McpDocumentScenario(PartitionRef Partition, EntityRefLife
     }
 
     internal static McpDocumentScenario ForCreation(PartitionRef partition, Guid commandId, ResourceDefinition definition)
-    {
-        var request = new ConfigureResourceRequest(partition.TenantId, partition.DatabaseId, definition);
-        var fingerprint = DatabaseCommandFingerprint.Compute(commandId, OperationKind.ConfigureResource,
-            PartitionStoreProtocol.AdministratorId, JsonSerializer.Serialize(request, JsonDefaults.Options));
-        var original = Command<DatabaseCommand>.Create(nameof(DatabaseCommand),
-            new DatabaseCommand(OperationKind.ConfigureResource, OrleansSerialization.Serialize(request), fingerprint), commandId);
-        original.UserId = PartitionStoreProtocol.AdministratorId;
-        var lifetime = ResourceLifetimeIdentity.Create(original, request.TenantId, request.DatabaseId, definition);
-        return new(partition, new(lifetime.Incarnation.Value));
-    }
+        => new(partition, ResourceCreationLifetime.Create(commandId, new(partition.TenantId, partition.DatabaseId, definition)));
 
     /// <summary>Creates an actual canonical mutation preserving the caller's stable command identity.</summary>
     /// <param name="commandId">The caller-owned stable command GUID.</param>

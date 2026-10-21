@@ -1,7 +1,8 @@
 namespace KeyLoad.IntegrationTests.Features.Authorization;
 
-internal sealed class RowRevisionInferenceClusterState(PartitionRef partition, PrincipalRecord reader, string key)
+internal sealed class RowRevisionInferenceClusterState(PartitionRef partition, PrincipalRecord reader, string key, EntityRefLifetime lifetime)
 {
+    internal EntityRef StoredReference(string id) => new(Partition, RowRevisionInferenceClusterProtocol.Collection, id) { Lifetime = lifetime };
     internal PartitionRef Partition
     {
         get;

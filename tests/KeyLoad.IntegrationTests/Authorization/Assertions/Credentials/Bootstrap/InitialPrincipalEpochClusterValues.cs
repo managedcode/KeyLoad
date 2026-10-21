@@ -26,7 +26,7 @@ internal static class InitialPrincipalEpochClusterValues
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             document = await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.GetAsync(state.Reference, token));
-            await SqlClusterProtocol.EqualAsync(new DocumentReadResult(new(state.Reference, revision,
+            await SqlClusterProtocol.EqualAsync(new DocumentReadResult(new(state.StoredReference, revision,
                 revision == 1L ? "{\"value\":0}" : "{\"value\":7}", false, [])), document);
         }, failures);
         await ServerFailureObserver.ObserveAsync(async () =>
@@ -58,7 +58,7 @@ internal static class InitialPrincipalEpochClusterValues
     internal static async Task DocumentAsync(RequestCqrsClusterCallers reader, InitialPrincipalEpochClusterState state,
         long revision, CancellationToken token)
     {
-        var expected = new DocumentReadResult(new(state.Reference, revision, revision == 1L ? "{\"value\":0}" : "{\"value\":7}", false, []));
+        var expected = new DocumentReadResult(new(state.StoredReference, revision, revision == 1L ? "{\"value\":0}" : "{\"value\":7}", false, []));
         await SqlClusterProtocol.EqualAsync(expected, await McpCallerAssertions.SdkSuccessAsync(await reader.Sdk.GetAsync(state.Reference, token)));
         await SqlClusterProtocol.EqualAsync(expected, (await McpCallerAssertions.SuccessAsync<DocumentReadResult>(
             await reader.Mcp.CallAsync(McpCallerTools.DocumentsGet, new GetDocumentRequest(state.Reference), token))).Value);

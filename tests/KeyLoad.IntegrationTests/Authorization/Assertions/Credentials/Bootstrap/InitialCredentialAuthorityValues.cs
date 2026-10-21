@@ -7,7 +7,7 @@ namespace KeyLoad.IntegrationTests.Features.Authorization;
 internal static class InitialCredentialAuthorityValues
 {
     private static DocumentResult Expected(InitialCredentialAuthorityState state)
-        => new(state.Seed.Scenario.Reference, McpCallerProtocol.FirstRevision, McpDocumentProtocol.InitialJson, false, []);
+        => new(state.Seed.Scenario.StoredReference, McpCallerProtocol.FirstRevision, McpDocumentProtocol.InitialJson, false, []);
 
     internal static async Task HealthyAsync(global::KeyLoad.Client.KeyLoadClient root, global::KeyLoad.Client.KeyLoadClient reader, McpOfficialClient session,
         InitialCredentialAuthorityState state, CancellationToken token)

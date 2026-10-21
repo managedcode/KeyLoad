@@ -24,7 +24,7 @@ internal static class EventMessageSensitivePublicContinuation
         }, token));
     }
 
-    internal static async Task HealthyAsync(RequestCqrsClusterCallers root, RequestCqrsClusterCallers worker,
+    internal static async Task HealthyAsync(ClusterFixture fixture, RequestCqrsClusterCallers root, RequestCqrsClusterCallers worker,
         RequestCqrsClusterCallers inspector, EventMessageSensitivePublicState state, CancellationToken token)
     {
         if (!state.Subscription)
@@ -36,7 +36,7 @@ internal static class EventMessageSensitivePublicContinuation
             await Assert.That(parked!.Metadata.State).IsEqualTo(MessageState.DeadLettered);
             var command = new CommandRequest(Guid.NewGuid(), state.Partition,
                 [new RedriveQueueMessage(state.Resource.Name, request.Id, parked.Metadata.StateVersion, parked.Metadata.DeliveryGeneration)]);
-            state.Commands.Add((command, await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.CommitAsync(command, token))));
+            await EventMessageSensitivePublicLifecycle.RedriveAsync(fixture, root, state, command, token);
         }
         state.HealthyId = Guid.NewGuid();
         state.HealthyRequest = EventMessageSensitivePublicOperations.Receive(state, state.HealthyId, true);

@@ -28,7 +28,7 @@ internal static class CrossTenantClusterStateAssertions
     {
         var actual = await PublicReadAssertions.DocumentAsync(await admin.GetAsync(scenario.Reference, token));
         await Assert.That(actual).IsNotNull();
-        await SqlClusterProtocol.EqualAsync(new DocumentResult(scenario.Reference, McpCallerProtocol.FirstRevision,
+        await SqlClusterProtocol.EqualAsync(new DocumentResult(scenario.StoredReference, McpCallerProtocol.FirstRevision,
             McpDocumentProtocol.InitialJson, false, []), actual);
         return actual!;
     }
@@ -40,7 +40,7 @@ internal static class CrossTenantClusterStateAssertions
     {
         var document = await PublicReadAssertions.DocumentAsync(await admin.GetAsync(scenario.Reference, token));
         await Assert.That(document).IsNotNull();
-        await Assert.That(document!.Reference).IsEqualTo(scenario.Reference);
+        await Assert.That(document!.Reference).IsEqualTo(scenario.StoredReference);
         await Assert.That(document.Revision).IsEqualTo(revision);
         await Assert.That(document.Json).IsEqualTo(json);
         await Assert.That(document.Redacted).IsFalse();

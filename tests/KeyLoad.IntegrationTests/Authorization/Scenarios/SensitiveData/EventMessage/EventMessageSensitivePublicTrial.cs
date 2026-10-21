@@ -33,6 +33,7 @@ internal static class EventMessageSensitivePublicTrial
             async root =>
             {
                 await EventMessageSensitiveSafeR52Flow.AfterSecondColdAsync(fixture, root, states.Safe, deadline.Token);
+                await EventMessageSensitivePublicLifecycle.ReplayAsync(fixture, states.Original, deadline.Token);
                 return true;
             }, deadline.Token);
     }
@@ -45,16 +46,16 @@ internal static class EventMessageSensitivePublicTrial
                 {
                     if (cold)
                     {
-                        await ColdAsync(root, worker, state, token);
+                        await ColdAsync(fixture, root, worker, state, token);
                     }
                     else
                     {
-                        await LiveAsync(root, worker, inspector, state, token);
+                        await LiveAsync(fixture, root, worker, inspector, state, token);
                     }
                     return true;
                 }, token), token);
 
-    private static async Task LiveAsync(RequestCqrsClusterCallers root, RequestCqrsClusterCallers worker,
+    private static async Task LiveAsync(ClusterFixture fixture, RequestCqrsClusterCallers root, RequestCqrsClusterCallers worker,
         RequestCqrsClusterCallers inspector, EventMessageSensitivePublicState state, CancellationToken token)
     {
         var caller = state.DataAuthority ? root : worker;
@@ -78,11 +79,12 @@ internal static class EventMessageSensitivePublicTrial
         await EventMessageSensitivePublicRefusals.ReceiveAsync(caller, state, fresh, ErrorCode.PermissionDenied, token);
         await EventMessageSensitivePublicContinuation.RepairAsync(root, caller, state, token);
         await EventMessageSensitivePublicRefusals.ReceiveAsync(caller, state, state.OriginalRequest, ErrorCode.PermissionDenied, token);
-        await EventMessageSensitivePublicContinuation.HealthyAsync(root, worker, inspector, state, token);
+        await EventMessageSensitivePublicContinuation.HealthyAsync(fixture, root, worker, inspector, state, token);
         await EventMessageSensitivePublicAssertions.ReplayAsync(root, caller, state, token);
+        await EventMessageSensitivePublicLifecycle.ReplayAsync(fixture, state, token);
     }
 
-    private static async Task ColdAsync(RequestCqrsClusterCallers root, RequestCqrsClusterCallers worker,
+    private static async Task ColdAsync(ClusterFixture fixture, RequestCqrsClusterCallers root, RequestCqrsClusterCallers worker,
         EventMessageSensitivePublicState state, CancellationToken token)
     {
         var after = await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.StatusAsync(token));
@@ -93,6 +95,7 @@ internal static class EventMessageSensitivePublicTrial
         var caller = state.DataAuthority ? root : worker;
         await EventMessageSensitivePublicRefusals.ReceiveAsync(caller, state, state.OriginalRequest, ErrorCode.PermissionDenied, token);
         await EventMessageSensitivePublicAssertions.ReplayAsync(root, caller, state, token);
+        await EventMessageSensitivePublicLifecycle.ReplayAsync(fixture, state, token);
         await EventMessageSensitivePublicContinuation.FinishAsync(root, caller, state, token);
     }
 }

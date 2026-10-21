@@ -58,7 +58,7 @@ internal static class RowRevisionInferenceClusterRecovery
         {
             var reference = new EntityRef(state.Partition, P.Collection, id);
             DocumentReadResult expected = new(id == P.Hidden && state.HiddenDeleted ? null
-                : new(reference, id == P.Hidden ? P.HealthyRevision : P.OriginalRevision,
+                : new(state.StoredReference(id), id == P.Hidden ? P.HealthyRevision : P.OriginalRevision,
                     id == P.Hidden ? state.HiddenJson : P.Original, false, []));
             await SqlClusterProtocol.EqualAsync(expected, await McpCallerAssertions.SdkSuccessAsync(await reader.Sdk.GetAsync(reference, token)));
             await RowRevisionInferenceClusterCurrent.RequireAsync(root, state, token);

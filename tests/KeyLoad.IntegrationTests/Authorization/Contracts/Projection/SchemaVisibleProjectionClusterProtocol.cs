@@ -39,6 +39,6 @@ internal static class SchemaVisibleProjectionClusterProtocol
     internal const int Second = 1;
     internal const int Third = 2;
     internal const int Limit = 10;
-    internal const int Q2 = 2;
+    internal const int QueryDialect = SqlOperationProtocol.DefaultQueryDialectVersion;
     internal const int ColdCuts = 2;
 }
