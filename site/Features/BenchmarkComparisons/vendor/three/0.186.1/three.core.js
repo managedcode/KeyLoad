@@ -11996,7 +11996,7 @@ class Object3D extends EventDispatcher {
 
 		/**
 		 * The type property is used for detecting the object type
-		 * in context of serialization/deserialization....
+		 * in context of serialization/deserialization.
 		 *
 		 * @type {string}
 		 * @readonly
@@ -14541,7 +14541,7 @@ class Color {
 	 * Copies the given color into this color, and then converts this color from
 	 * `SRGBColorSpace` to `LinearSRGBColorSpace`.
 	 *
-	 * @param {Color} color - The color to copy/convert..
+	 * @param {Color} color - The color to copy/convert.
 	 * @return {Color} A reference to this color.
 	 */
 	copySRGBToLinear( color ) {
@@ -14558,7 +14558,7 @@ class Color {
 	 * Copies the given color into this color, and then converts this color from
 	 * `LinearSRGBColorSpace` to `SRGBColorSpace`.
 	 *
-	 * @param {Color} color - The color to copy/convert..
+	 * @param {Color} color - The color to copy/convert.
 	 * @return {Color} A reference to this color.
 	 */
 	copyLinearToSRGB( color ) {
@@ -21118,7 +21118,7 @@ class Material extends EventDispatcher {
 
 		/**
 		 * The type property is used for detecting the object type
-		 * in context of serialization/deserialization....
+		 * in context of serialization/deserialization.
 		 *
 		 * @type {string}
 		 * @readonly
@@ -31392,7 +31392,7 @@ class Curve {
 
 		/**
 		 * The type property is used for detecting the object type
-		 * in context of serialization/deserialization....
+		 * in context of serialization/deserialization.
 		 *
 		 * @type {string}
 		 * @readonly
@@ -32661,28 +32661,28 @@ class CubicBezierCurve extends Curve {
 		 *
 		 * @type {Vector2}
 		 */
-		this = v0;
+		this.v0 = v0;
 
 		/**
 		 * The first control point.
 		 *
 		 * @type {Vector2}
 		 */
-		this = v1;
+		this.v1 = v1;
 
 		/**
 		 * The second control point.
 		 *
 		 * @type {Vector2}
 		 */
-		this = v2;
+		this.v2 = v2;
 
 		/**
 		 * The end point.
 		 *
 		 * @type {Vector2}
 		 */
-		this = v3;
+		this.v3 = v3;
 
 	}
 
@@ -32697,7 +32697,7 @@ class CubicBezierCurve extends Curve {
 
 		const point = optionalTarget;
 
-		const v0 = this, v1 = this, v2 = this, v3 = this;
+		const v0 = this.v0, v1 = this.v1, v2 = this.v2, v3 = this.v3;
 
 		point.set(
 			CubicBezier( t, v0.x, v1.x, v2.x, v3.x ),
@@ -32712,10 +32712,10 @@ class CubicBezierCurve extends Curve {
 
 		super.copy( source );
 
-		this.copy( source );
-		this.copy( source );
-		this.copy( source );
-		this.copy( source );
+		this.v0.copy( source.v0 );
+		this.v1.copy( source.v1 );
+		this.v2.copy( source.v2 );
+		this.v3.copy( source.v3 );
 
 		return this;
 
@@ -32725,10 +32725,10 @@ class CubicBezierCurve extends Curve {
 
 		const data = super.toJSON();
 
-		data = this.toArray();
-		data = this.toArray();
-		data = this.toArray();
-		data = this.toArray();
+		data.v0 = this.v0.toArray();
+		data.v1 = this.v1.toArray();
+		data.v2 = this.v2.toArray();
+		data.v3 = this.v3.toArray();
 
 		return data;
 
@@ -32738,10 +32738,10 @@ class CubicBezierCurve extends Curve {
 
 		super.fromJSON( json );
 
-		this.fromArray( json );
-		this.fromArray( json );
-		this.fromArray( json );
-		this.fromArray( json );
+		this.v0.fromArray( json.v0 );
+		this.v1.fromArray( json.v1 );
+		this.v2.fromArray( json.v2 );
+		this.v3.fromArray( json.v3 );
 
 		return this;
 
@@ -32784,28 +32784,28 @@ class CubicBezierCurve3 extends Curve {
 		 *
 		 * @type {Vector3}
 		 */
-		this = v0;
+		this.v0 = v0;
 
 		/**
 		 * The first control point.
 		 *
 		 * @type {Vector3}
 		 */
-		this = v1;
+		this.v1 = v1;
 
 		/**
 		 * The second control point.
 		 *
 		 * @type {Vector3}
 		 */
-		this = v2;
+		this.v2 = v2;
 
 		/**
 		 * The end point.
 		 *
 		 * @type {Vector3}
 		 */
-		this = v3;
+		this.v3 = v3;
 
 	}
 
@@ -32820,7 +32820,7 @@ class CubicBezierCurve3 extends Curve {
 
 		const point = optionalTarget;
 
-		const v0 = this, v1 = this, v2 = this, v3 = this;
+		const v0 = this.v0, v1 = this.v1, v2 = this.v2, v3 = this.v3;
 
 		point.set(
 			CubicBezier( t, v0.x, v1.x, v2.x, v3.x ),
@@ -32836,10 +32836,10 @@ class CubicBezierCurve3 extends Curve {
 
 		super.copy( source );
 
-		this.copy( source );
-		this.copy( source );
-		this.copy( source );
-		this.copy( source );
+		this.v0.copy( source.v0 );
+		this.v1.copy( source.v1 );
+		this.v2.copy( source.v2 );
+		this.v3.copy( source.v3 );
 
 		return this;
 
@@ -32849,10 +32849,10 @@ class CubicBezierCurve3 extends Curve {
 
 		const data = super.toJSON();
 
-		data = this.toArray();
-		data = this.toArray();
-		data = this.toArray();
-		data = this.toArray();
+		data.v0 = this.v0.toArray();
+		data.v1 = this.v1.toArray();
+		data.v2 = this.v2.toArray();
+		data.v3 = this.v3.toArray();
 
 		return data;
 
@@ -32862,10 +32862,10 @@ class CubicBezierCurve3 extends Curve {
 
 		super.fromJSON( json );
 
-		this.fromArray( json );
-		this.fromArray( json );
-		this.fromArray( json );
-		this.fromArray( json );
+		this.v0.fromArray( json.v0 );
+		this.v1.fromArray( json.v1 );
+		this.v2.fromArray( json.v2 );
+		this.v3.fromArray( json.v3 );
 
 		return this;
 
@@ -32906,14 +32906,14 @@ class LineCurve extends Curve {
 		 *
 		 * @type {Vector2}
 		 */
-		this = v1;
+		this.v1 = v1;
 
 		/**
 		 * The end point.
 		 *
 		 * @type {Vector2}
 		 */
-		this = v2;
+		this.v2 = v2;
 
 	}
 
@@ -32930,12 +32930,12 @@ class LineCurve extends Curve {
 
 		if ( t === 1 ) {
 
-			point.copy( this );
+			point.copy( this.v2 );
 
 		} else {
 
-			point.copy( this ).sub( this );
-			point.multiplyScalar( t ).add( this );
+			point.copy( this.v2 ).sub( this.v1 );
+			point.multiplyScalar( t ).add( this.v1 );
 
 		}
 
@@ -32952,7 +32952,7 @@ class LineCurve extends Curve {
 
 	getTangent( t, optionalTarget = new Vector2() ) {
 
-		return optionalTarget.subVectors( this, this ).normalize();
+		return optionalTarget.subVectors( this.v2, this.v1 ).normalize();
 
 	}
 
@@ -32966,8 +32966,8 @@ class LineCurve extends Curve {
 
 		super.copy( source );
 
-		this.copy( source );
-		this.copy( source );
+		this.v1.copy( source.v1 );
+		this.v2.copy( source.v2 );
 
 		return this;
 
@@ -32977,8 +32977,8 @@ class LineCurve extends Curve {
 
 		const data = super.toJSON();
 
-		data = this.toArray();
-		data = this.toArray();
+		data.v1 = this.v1.toArray();
+		data.v2 = this.v2.toArray();
 
 		return data;
 
@@ -32988,8 +32988,8 @@ class LineCurve extends Curve {
 
 		super.fromJSON( json );
 
-		this.fromArray( json );
-		this.fromArray( json );
+		this.v1.fromArray( json.v1 );
+		this.v2.fromArray( json.v2 );
 
 		return this;
 
@@ -33030,14 +33030,14 @@ class LineCurve3 extends Curve {
 		 *
 		 * @type {Vector3}
 		 */
-		this = v1;
+		this.v1 = v1;
 
 		/**
 		 * The end point.
 		 *
 		 * @type {Vector2}
 		 */
-		this = v2;
+		this.v2 = v2;
 
 	}
 
@@ -33054,12 +33054,12 @@ class LineCurve3 extends Curve {
 
 		if ( t === 1 ) {
 
-			point.copy( this );
+			point.copy( this.v2 );
 
 		} else {
 
-			point.copy( this ).sub( this );
-			point.multiplyScalar( t ).add( this );
+			point.copy( this.v2 ).sub( this.v1 );
+			point.multiplyScalar( t ).add( this.v1 );
 
 		}
 
@@ -33076,7 +33076,7 @@ class LineCurve3 extends Curve {
 
 	getTangent( t, optionalTarget = new Vector3() ) {
 
-		return optionalTarget.subVectors( this, this ).normalize();
+		return optionalTarget.subVectors( this.v2, this.v1 ).normalize();
 
 	}
 
@@ -33090,8 +33090,8 @@ class LineCurve3 extends Curve {
 
 		super.copy( source );
 
-		this.copy( source );
-		this.copy( source );
+		this.v1.copy( source.v1 );
+		this.v2.copy( source.v2 );
 
 		return this;
 
@@ -33101,8 +33101,8 @@ class LineCurve3 extends Curve {
 
 		const data = super.toJSON();
 
-		data = this.toArray();
-		data = this.toArray();
+		data.v1 = this.v1.toArray();
+		data.v2 = this.v2.toArray();
 
 		return data;
 
@@ -33112,8 +33112,8 @@ class LineCurve3 extends Curve {
 
 		super.fromJSON( json );
 
-		this.fromArray( json );
-		this.fromArray( json );
+		this.v1.fromArray( json.v1 );
+		this.v2.fromArray( json.v2 );
 
 		return this;
 
@@ -33171,21 +33171,21 @@ class QuadraticBezierCurve extends Curve {
 		 *
 		 * @type {Vector2}
 		 */
-		this = v0;
+		this.v0 = v0;
 
 		/**
 		 * The control point.
 		 *
 		 * @type {Vector2}
 		 */
-		this = v1;
+		this.v1 = v1;
 
 		/**
 		 * The end point.
 		 *
 		 * @type {Vector2}
 		 */
-		this = v2;
+		this.v2 = v2;
 
 	}
 
@@ -33200,7 +33200,7 @@ class QuadraticBezierCurve extends Curve {
 
 		const point = optionalTarget;
 
-		const v0 = this, v1 = this, v2 = this;
+		const v0 = this.v0, v1 = this.v1, v2 = this.v2;
 
 		point.set(
 			QuadraticBezier( t, v0.x, v1.x, v2.x ),
@@ -33215,9 +33215,9 @@ class QuadraticBezierCurve extends Curve {
 
 		super.copy( source );
 
-		this.copy( source );
-		this.copy( source );
-		this.copy( source );
+		this.v0.copy( source.v0 );
+		this.v1.copy( source.v1 );
+		this.v2.copy( source.v2 );
 
 		return this;
 
@@ -33227,9 +33227,9 @@ class QuadraticBezierCurve extends Curve {
 
 		const data = super.toJSON();
 
-		data = this.toArray();
-		data = this.toArray();
-		data = this.toArray();
+		data.v0 = this.v0.toArray();
+		data.v1 = this.v1.toArray();
+		data.v2 = this.v2.toArray();
 
 		return data;
 
@@ -33239,9 +33239,9 @@ class QuadraticBezierCurve extends Curve {
 
 		super.fromJSON( json );
 
-		this.fromArray( json );
-		this.fromArray( json );
-		this.fromArray( json );
+		this.v0.fromArray( json.v0 );
+		this.v1.fromArray( json.v1 );
+		this.v2.fromArray( json.v2 );
 
 		return this;
 
@@ -33283,21 +33283,21 @@ class QuadraticBezierCurve3 extends Curve {
 		 *
 		 * @type {Vector3}
 		 */
-		this = v0;
+		this.v0 = v0;
 
 		/**
 		 * The control point.
 		 *
 		 * @type {Vector3}
 		 */
-		this = v1;
+		this.v1 = v1;
 
 		/**
 		 * The end point.
 		 *
 		 * @type {Vector3}
 		 */
-		this = v2;
+		this.v2 = v2;
 
 	}
 
@@ -33312,7 +33312,7 @@ class QuadraticBezierCurve3 extends Curve {
 
 		const point = optionalTarget;
 
-		const v0 = this, v1 = this, v2 = this;
+		const v0 = this.v0, v1 = this.v1, v2 = this.v2;
 
 		point.set(
 			QuadraticBezier( t, v0.x, v1.x, v2.x ),
@@ -33328,9 +33328,9 @@ class QuadraticBezierCurve3 extends Curve {
 
 		super.copy( source );
 
-		this.copy( source );
-		this.copy( source );
-		this.copy( source );
+		this.v0.copy( source.v0 );
+		this.v1.copy( source.v1 );
+		this.v2.copy( source.v2 );
 
 		return this;
 
@@ -33340,9 +33340,9 @@ class QuadraticBezierCurve3 extends Curve {
 
 		const data = super.toJSON();
 
-		data = this.toArray();
-		data = this.toArray();
-		data = this.toArray();
+		data.v0 = this.v0.toArray();
+		data.v1 = this.v1.toArray();
+		data.v2 = this.v2.toArray();
 
 		return data;
 
@@ -33352,9 +33352,9 @@ class QuadraticBezierCurve3 extends Curve {
 
 		super.fromJSON( json );
 
-		this.fromArray( json );
-		this.fromArray( json );
-		this.fromArray( json );
+		this.v0.fromArray( json.v0 );
+		this.v1.fromArray( json.v1 );
+		this.v2.fromArray( json.v2 );
 
 		return this;
 
@@ -46096,7 +46096,7 @@ class Light extends Object3D {
 	 * Constructs a new light.
 	 *
 	 * @param {(number|Color|string)} [color=0xffffff] - The light's color.
-	 * @param {number} [intensity=1] - The light's strength/intensity......
+	 * @param {number} [intensity=1] - The light's strength/intensity.
 	 */
 	constructor( color, intensity = 1 ) {
 
@@ -46174,7 +46174,7 @@ class HemisphereLight extends Light {
 	 *
 	 * @param {(number|Color|string)} [skyColor=0xffffff] - The light's sky color.
 	 * @param {(number|Color|string)} [groundColor=0xffffff] - The light's ground color.
-	 * @param {number} [intensity=1] - The light's strength/intensity......
+	 * @param {number} [intensity=1] - The light's strength/intensity.
 	 */
 	constructor( skyColor, groundColor, intensity ) {
 
@@ -47270,7 +47270,7 @@ class SpotLight extends Light {
 	 * Constructs a new spot light.
 	 *
 	 * @param {(number|Color|string)} [color=0xffffff] - The light's color.
-	 * @param {number} [intensity=1] - The light's strength/intensity..... measured in candela (cd).
+	 * @param {number} [intensity=1] - The light's strength/intensity measured in candela (cd).
 	 * @param {number} [distance=0] - Maximum range of the light. `0` means no limit.
 	 * @param {number} [angle=Math.PI/3] - Maximum angle of light dispersion from its direction whose upper bound is `Math.PI/2`.
 	 * @param {number} [penumbra=0] - Percent of the spotlight cone that is attenuated due to penumbra. Value range is `[0,1]`.
@@ -47479,7 +47479,7 @@ class PointLight extends Light {
 	 * Constructs a new point light.
 	 *
 	 * @param {(number|Color|string)} [color=0xffffff] - The light's color.
-	 * @param {number} [intensity=1] - The light's strength/intensity..... measured in candela (cd).
+	 * @param {number} [intensity=1] - The light's strength/intensity measured in candela (cd).
 	 * @param {number} [distance=0] - Maximum range of the light. `0` means no limit.
 	 * @param {number} [decay=2] - The amount the light dims along the distance of the light.
 	 */
@@ -47887,7 +47887,7 @@ class DirectionalLight extends Light {
 	 * Constructs a new directional light.
 	 *
 	 * @param {(number|Color|string)} [color=0xffffff] - The light's color.
-	 * @param {number} [intensity=1] - The light's strength/intensity......
+	 * @param {number} [intensity=1] - The light's strength/intensity.
 	 */
 	constructor( color, intensity ) {
 
@@ -47980,7 +47980,7 @@ class AmbientLight extends Light {
 	 * Constructs a new ambient light.
 	 *
 	 * @param {(number|Color|string)} [color=0xffffff] - The light's color.
-	 * @param {number} [intensity=1] - The light's strength/intensity......
+	 * @param {number} [intensity=1] - The light's strength/intensity.
 	 */
 	constructor( color, intensity ) {
 
@@ -48032,7 +48032,7 @@ class RectAreaLight extends Light {
 	 * Constructs a new area light.
 	 *
 	 * @param {(number|Color|string)} [color=0xffffff] - The light's color.
-	 * @param {number} [intensity=1] - The light's strength/intensity......
+	 * @param {number} [intensity=1] - The light's strength/intensity.
 	 * @param {number} [width=10] - The width of the light.
 	 * @param {number} [height=10] - The height of the light.
 	 */
@@ -48476,7 +48476,7 @@ class LightProbe extends Light {
 	 * Constructs a new light probe.
 	 *
 	 * @param {SphericalHarmonics3} sh - The spherical harmonics which represents encoded lighting information.
-	 * @param {number} [intensity=1] - The light's strength/intensity......
+	 * @param {number} [intensity=1] - The light's strength/intensity.
 	 */
 	constructor( sh = new SphericalHarmonics3(), intensity = 1 ) {
 
@@ -50676,7 +50676,7 @@ class StereoCamera {
 
 		/**
 		 * The type property is used for detecting the object type
-		 * in context of serialization/deserialization....
+		 * in context of serialization/deserialization.
 		 *
 		 * @type {string}
 		 * @readonly
