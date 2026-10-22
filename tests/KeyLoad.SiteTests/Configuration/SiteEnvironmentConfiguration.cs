@@ -9,6 +9,7 @@ internal static class SiteEnvironmentConfiguration
     {
         Repository = Environment.GetEnvironmentVariable(SiteTokens.RepositoryEnvironment),
         Browser = Environment.GetEnvironmentVariable(SiteBrowserTokens.BrowserEnvironment),
+        PipeDirectory = Environment.GetEnvironmentVariable(SiteBrowserTokens.PipeDirectoryEnvironment),
         CoverageMode = Environment.GetEnvironmentVariable(SiteBrowserTokens.CoverageEnvironment),
         BenchmarkMode = Environment.GetEnvironmentVariable(SiteCoverageTokens.BenchmarkModeEnvironment),
         CoverageRoot = Environment.GetEnvironmentVariable(SiteCoverageTokens.CoverageRootEnvironment),

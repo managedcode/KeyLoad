@@ -37,6 +37,14 @@ internal sealed class SiteBrowserProcessStart : IAsyncDisposable
             CreateNoWindow = true,
         };
         start.ArgumentList.Add(SiteBrowserTokens.ChromeHeadlessArgument);
+        var pipes = SiteEnvironmentConfiguration.Capture().Value.PipeDirectory;
+        if (pipes is null || !Path.IsPathFullyQualified(pipes) || !Directory.Exists(pipes))
+        {
+            throw new InvalidOperationException(SiteBrowserTokens.BrowserStartFailure);
+        }
+        start.Environment[SiteBrowserTokens.TemporaryDirectoryEnvironment] = pipes;
+        start.Environment[SiteBrowserTokens.TemporaryPathEnvironment] = pipes;
+        start.Environment[SiteBrowserTokens.TemporaryFilesEnvironment] = pipes;
         start.ArgumentList.Add(SiteBrowserTokens.RemoteDebuggingArgument);
         start.ArgumentList.Add(SiteBrowserTokens.UserDataArgumentPrefix + profilePath);
         start.ArgumentList.Add(SiteBrowserTokens.NoFirstRunArgument);

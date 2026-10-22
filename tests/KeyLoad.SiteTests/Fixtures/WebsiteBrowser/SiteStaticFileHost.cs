@@ -107,7 +107,7 @@ internal sealed class SiteStaticFileHost : IAsyncDisposable
             HttpListenerContext context;
             try
             {
-                context = await listener.GetContextAsync().WaitAsync(cancellationToken);
+                context = await listener.GetContextAsync();
             }
             catch (Exception exception) when (exception is OperationCanceledException or HttpListenerException or ObjectDisposedException)
             {

@@ -15,6 +15,8 @@ internal sealed class SiteContentBrowserTests
         await Assert.That(build.StandardError.Length).IsEqualTo(SiteTokens.Zero);
 
         await using var browser = await SiteContentBrowserStartup.StartAsync(inputs, temporary.Output, token);
+        await Assert.That(browser.Chrome.Process.StartInfo.Environment[SiteBrowserTokens.TemporaryDirectoryEnvironment])
+            .IsEqualTo(SiteEnvironmentConfiguration.Capture().Value.PipeDirectory);
         var cdp = browser.Chrome.Cdp;
         await Assert.That(await cdp.WaitForExpressionAsync(SiteContentBrowserTokens.ContentReadyPredicate, token)).IsTrue();
         await SiteBrowserVisualAssertions.AssertSceneIsLazyBeforeHeroNavigation(cdp, token);

@@ -3,6 +3,10 @@ namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
 internal static class SiteBrowserTokens
 {
     public const string BrowserEnvironment = "KEYLOAD_SITE_BROWSER";
+    public const string PipeDirectoryEnvironment = "TESTINGPLATFORM_PIPE_DIRECTORY";
+    public const string TemporaryDirectoryEnvironment = "TMPDIR";
+    public const string TemporaryPathEnvironment = "TMP";
+    public const string TemporaryFilesEnvironment = "TEMP";
     public const string CoverageEnvironment = SiteCoverageTokens.CoverageRootEnvironment;
     public const string BrowserDirectory = SiteCoverageTokens.BrowserDirectory;
     public const string SessionsDirectory = SiteCoverageTokens.SessionsDirectory;

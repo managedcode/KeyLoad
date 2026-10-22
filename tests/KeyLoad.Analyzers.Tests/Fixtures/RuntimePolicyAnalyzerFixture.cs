@@ -38,7 +38,8 @@ internal static class RuntimePolicyAnalyzerFixture
     private static ImmutableArray<MetadataReference> CreateReferences()
     {
         var root = SiteAnalyzerCoverageXmlBuilder.FindRepositoryRoot();
-        var output = Path.Combine(root, "build", "KeyLoad.AppHost", "bin", "Debug", "net10.0");
+        var configuration = new DirectoryInfo(AppContext.BaseDirectory).Parent!.Name;
+        var output = Path.Combine(root, "build", "KeyLoad.AppHost", "bin", configuration, "net10.0");
         var platform = (string)AppContext.GetData(PlatformAssemblies)!;
         return Directory.EnumerateFiles(output, "*.dll").Concat(platform.Split(Path.PathSeparator))
             .DistinctBy(Path.GetFileName, StringComparer.OrdinalIgnoreCase)

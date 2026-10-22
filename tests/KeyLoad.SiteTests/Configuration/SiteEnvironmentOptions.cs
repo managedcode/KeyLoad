@@ -5,6 +5,7 @@ internal sealed class SiteEnvironmentOptions
 {
     public string? Repository { get; set; }
     public string? Browser { get; set; }
+    public string? PipeDirectory { get; set; }
     public string? CoverageMode { get; set; }
     public string? BenchmarkMode { get; set; }
     public string? CoverageRoot { get; set; }
