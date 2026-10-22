@@ -115,6 +115,7 @@ internal sealed class ProgramCompositionRootTests
     [Arguments("await Application.RunAsync(args);", "internal static System.Threading.Tasks.Task RunAsync(string[] args) => System.Threading.Tasks.Task.CompletedTask;")]
     [Arguments("await Application.RunAsync(args).ConfigureAwait(false);", "internal static System.Threading.Tasks.Task RunAsync(string[] args) => System.Threading.Tasks.Task.CompletedTask;")]
     [Arguments("return await Application.RunAsync(args);", "internal static System.Threading.Tasks.Task<int> RunAsync(string[] args) => System.Threading.Tasks.Task.FromResult(0);")]
+    [Arguments("return Application.Run(args);", "internal static int Run(string[] args) => 0;")]
     public async Task ForwardingOnlyEntryReportsLocatedErrorAsync(string entry, string method)
     {
         var source = entry + "\ninternal static class Application { " + method + " }";
@@ -122,6 +123,18 @@ internal sealed class ProgramCompositionRootTests
             source, AnalyzerFixture.ServerAssembly, AnalyzerFixture.ProgramPath, executable: true);
         await AnalyzerFixture.AssertFindingAsync(findings, Id, DiagnosticSeverity.Error,
             source, entry, AnalyzerFixture.ProgramPath);
+    }
+
+    [Test]
+    [Arguments("if (args.Length > 0) System.Console.WriteLine(args[0]);")]
+    [Arguments("System.Console.WriteLine(args.Length);")]
+    [Arguments("System.Console.ReadLine();")]
+    [Arguments("return 0;")]
+    public async Task DirectStatementsAndNonLifecycleCallsKeepVisibleComposition(string source)
+    {
+        var findings = await AnalyzerFixture.AnalyzeAsync(new ProgramCompositionRootAnalyzer(), source,
+            AnalyzerFixture.ServerAssembly, AnalyzerFixture.ProgramPath, executable: true);
+        await Assert.That(findings).IsEmpty();
     }
 
 }

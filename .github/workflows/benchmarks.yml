@@ -37,6 +37,18 @@ jobs:
           global-json-file: global.json
       - name: Restore .NET packages once
         run: dotnet restore KeyLoad.slnx
+      - name: Prepare the pinned Aspire runtime inside the archive inputs
+        shell: bash
+        run: |
+          aspire_version=$(jq -er '."msbuild-sdks"."Aspire.AppHost.Sdk"' global.json)
+          [[ "$aspire_version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
+          aspire_rid="linux-${RUNNER_ARCH,,}"
+          [[ "$aspire_rid" == linux-x64 || "$aspire_rid" == linux-arm64 ]]
+          aspire_cli="$NUGET_PACKAGES/aspire.cli.$aspire_rid/$aspire_version/tools/net10.0/$aspire_rid"
+          dotnet dnx --yes "aspire.cli@$aspire_version" -- setup --install-path "$aspire_cli" --non-interactive
+          test -x "$aspire_cli/bundle/dcp/dcp"
+          test -x "$aspire_cli/bundle/dashboard/Aspire.Dashboard"
+          printf 'AspireCliBundlePath=%s/bundle\n' "$aspire_cli" >> "$GITHUB_ENV"
       - name: Build the complete solution once
         run: dotnet build KeyLoad.slnx --no-restore --configuration Release -p:AspireCliInvocationMode=DnxPinned -warnaserror
       - name: Build current Debug analyzer for execution formatting

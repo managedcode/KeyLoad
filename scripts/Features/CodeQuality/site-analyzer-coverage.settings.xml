@@ -5,13 +5,16 @@
   <DoesNotReturnAttribute>None</DoesNotReturnAttribute>
   <CodeCoverage>
     <ModulePaths>
+      <IncludeDirectories>
+        <Directory>tests/KeyLoad.Analyzers.Tests/bin/Debug/net10.0</Directory>
+      </IncludeDirectories>
       <Include>
         <ModulePath>^(.+[\\/])?KeyLoad\.Analyzers\.dll$</ModulePath>
       </Include>
     </ModulePaths>
     <SkipAutoProperties>False</SkipAutoProperties>
-    <EnableDynamicManagedInstrumentation>True</EnableDynamicManagedInstrumentation>
-    <EnableStaticManagedInstrumentation>False</EnableStaticManagedInstrumentation>
+    <EnableDynamicManagedInstrumentation>False</EnableDynamicManagedInstrumentation>
+    <EnableStaticManagedInstrumentation>True</EnableStaticManagedInstrumentation>
     <EnableDynamicInstrumentation>False</EnableDynamicInstrumentation>
     <EnableStaticInstrumentation>False</EnableStaticInstrumentation>
   </CodeCoverage>
