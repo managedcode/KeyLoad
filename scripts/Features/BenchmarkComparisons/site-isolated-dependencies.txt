@@ -4,6 +4,7 @@ scripts/Features/BenchmarkComparisons/aggregate-json.mjs
 scripts/Features/BenchmarkComparisons/compiled-test-bundle-contract.mjs
 scripts/Features/BenchmarkComparisons/document-functional-gate.mjs
 scripts/Features/BenchmarkComparisons/document-functional-trx.ps1
+scripts/Features/BenchmarkComparisons/files.mjs
 scripts/Features/BenchmarkComparisons/functional-process-evidence.mjs
 scripts/Features/BenchmarkComparisons/isolated-github-api.mjs
 scripts/Features/BenchmarkComparisons/isolated-github-contract.mjs
@@ -14,7 +15,6 @@ scripts/Features/BenchmarkComparisons/isolated-github-stream.mjs
 scripts/Features/BenchmarkComparisons/isolated-github-transport.mjs
 scripts/Features/BenchmarkComparisons/isolated-github-validation.mjs
 scripts/Features/BenchmarkComparisons/isolated-github-zip.mjs
-scripts/Features/BenchmarkComparisons/files.mjs
 scripts/Features/BenchmarkComparisons/process-contracts.mjs
 scripts/Features/BenchmarkComparisons/process.mjs
 scripts/Features/BenchmarkComparisons/server-resource-evidence.mjs

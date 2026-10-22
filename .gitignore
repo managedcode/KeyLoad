@@ -433,7 +433,9 @@ _TeamCity*
 !.axoCover/settings.json
 
 # Coverlet is a free, cross platform Code Coverage Tool
-coverage*[.json, .xml, .info]
+coverage*.json
+coverage*.xml
+coverage*.info
 
 # Visual Studio code coverage results
 *.coverage
@@ -664,14 +666,7 @@ backups/
 **/packages.lock.json
 **/.aspire/
 build/KeyLoad.AppHost/aspire.config.json
-**/coverage/
-# Analyzer coverage assertion and fixture sources remain tracked.
-!/tests/KeyLoad.Analyzers.Tests/Assertions/Coverage/
-/tests/KeyLoad.Analyzers.Tests/Assertions/Coverage/*
-!/tests/KeyLoad.Analyzers.Tests/Assertions/Coverage/*.cs
-!/tests/KeyLoad.Analyzers.Tests/Fixtures/Coverage/
-/tests/KeyLoad.Analyzers.Tests/Fixtures/Coverage/*
-!/tests/KeyLoad.Analyzers.Tests/Fixtures/Coverage/*.cs
+/coverage/
 BenchmarkDotNet.Artifacts/
 .env
 .env.*
