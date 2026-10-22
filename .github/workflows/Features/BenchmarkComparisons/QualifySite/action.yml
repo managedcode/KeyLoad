@@ -22,7 +22,7 @@ runs:
         done
         mkdir -p "$base"
         {
-          printf 'EVIDENCE_DIR=%s\nKEYLOAD_SITE_REPOSITORY=%s\n' "$base" "$GITHUB_WORKSPACE/website"
+          printf 'EVIDENCE_DIR=%s\nKEYLOAD_SITE_REPOSITORY=%s\n' "$base" "$GITHUB_WORKSPACE/w"
           printf 'KEYLOAD_SITE_COVERAGE=%s/js-coverage\n' "$base"
           printf 'KEYLOAD_SITE_ISOLATED_CAPTURE=%s/isolated-capture\nKEYLOAD_SITE_ISOLATED_ARCHIVE_RECEIPT=%s/isolated-capture/archive-receipt.json\nKEYLOAD_SITE_ISOLATED_AGGREGATE=%s/isolated-capture/input/aggregate\n' "$base" "$base" "$base"
         } >> "$GITHUB_ENV"
@@ -59,7 +59,8 @@ runs:
       uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         ref: ${{ steps.source.outputs.revision }}
-        path: website
+        # Keep the TUnit monitor socket below the Unix 103-byte path limit.
+        path: w
         persist-credentials: false
     - name: Download current benchmark source
       if: steps.source.outputs.benchmark_mode == 'measured'
@@ -71,7 +72,7 @@ runs:
     - name: Check source revisions and browser tools
       shell: bash
       run: |
-        [[ "$(git -C website rev-parse HEAD)" == "$KEYLOAD_SITE_SOURCE_REVISION" ]]
+        [[ "$(git -C w rev-parse HEAD)" == "$KEYLOAD_SITE_SOURCE_REVISION" ]]
         if [[ "$KEYLOAD_SITE_BENCHMARK_MODE" == measured ]]; then
           [[ "$(git -C measured-isolated rev-parse HEAD)" == "$KEYLOAD_SITE_ISOLATED_MEASURED_REVISION" ]]
           test -f measured-isolated/.github/workflows/benchmarks.yml
@@ -80,28 +81,28 @@ runs:
         else
           [[ "$KEYLOAD_SITE_BENCHMARK_MODE" == none ]]
         fi
-        git -C website rev-parse HEAD > "$EVIDENCE_DIR/website-revision.txt"
+        git -C w rev-parse HEAD > "$EVIDENCE_DIR/website-revision.txt"
         git -C control rev-parse HEAD > "$EVIDENCE_DIR/control-revision.txt"
         closure="scripts/Features/BenchmarkComparisons/site-isolated-dependencies.txt"
-        cmp "control/$closure" "website/$closure"
+        cmp "control/$closure" "w/$closure"
         node control/scripts/Features/BenchmarkComparisons/session-source-closure.mjs --verify="control/$closure" > "$EVIDENCE_DIR/session-source-closure.json"
         LC_ALL=C sort -u "control/$closure" > "$EVIDENCE_DIR/isolated-dependencies.txt"
         cmp "control/$closure" "$EVIDENCE_DIR/isolated-dependencies.txt"
-        sha256sum "website/$closure" >> "$EVIDENCE_DIR/executed-evidence-tools.sha256"
+        sha256sum "w/$closure" >> "$EVIDENCE_DIR/executed-evidence-tools.sha256"
         while IFS= read -r relative; do
           [[ "$relative" =~ ^(scripts/Features/BenchmarkComparisons/[^/]+\.(mjs|ps1)|scripts/Features/CodeQuality/functional-coverage\.(shared|parse|execution-merge\.trx)\.ps1|site/Features/BenchmarkComparisons/[^/]+\.mjs|site/scripts/build\.mjs)$ ]]
-          for root in control website; do
+          for root in control w; do
             [[ -f "$root/$relative" && ! -L "$root/$relative" ]]
             [[ "$(realpath -e "$root/$relative")" == "$GITHUB_WORKSPACE/$root/$relative" ]]
           done
-          cmp "control/$relative" "website/$relative"
-          sha256sum "website/$relative" >> "$EVIDENCE_DIR/executed-isolated-dependencies.sha256"
+          cmp "control/$relative" "w/$relative"
+          sha256sum "w/$relative" >> "$EVIDENCE_DIR/executed-isolated-dependencies.sha256"
         done < "control/$closure"
         for action in BuildIsolatedSite QualifySite DeploySite; do
           for file in AGENTS.md action.yml; do
             relative=".github/workflows/Features/BenchmarkComparisons/$action/$file"
-            cmp "control/$relative" "website/$relative"
-            sha256sum "website/$relative" >> "$EVIDENCE_DIR/executed-evidence-tools.sha256"
+            cmp "control/$relative" "w/$relative"
+            sha256sum "w/$relative" >> "$EVIDENCE_DIR/executed-evidence-tools.sha256"
           done
         done
         node --version > "$EVIDENCE_DIR/node-version.txt"
@@ -110,15 +111,15 @@ runs:
         "$chrome" --version > "$EVIDENCE_DIR/browser-version.txt"
         printf 'KEYLOAD_SITE_BROWSER=%s\n' "$chrome" >> "$GITHUB_ENV"
         mkdir -p "$KEYLOAD_SITE_COVERAGE/node"
-        cd website || exit
+        cd w || exit
         git ls-files -z | xargs -0 sha256sum > "$EVIDENCE_DIR/source.sha256"
     - name: Set up .NET
       uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
       with:
-        global-json-file: website/global.json
+        global-json-file: w/global.json
     - name: Build and test code analyzers
       id: analyzers
-      working-directory: website
+      working-directory: w
       shell: bash
       run: |
         dotnet --info > "$EVIDENCE_DIR/dotnet-info.txt"
@@ -132,17 +133,17 @@ runs:
         node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=analyzers --KeyLoadTests:ReportTrx=true "--KeyLoadTests:ResultsDirectory=$EVIDENCE_DIR/analyzer-tests" "--KeyLoadTests:CoverageSettings=$EVIDENCE_DIR/analyzer-coverage/coverage.config.xml" "--KeyLoadTests:CoverageOutput=$EVIDENCE_DIR/analyzer-coverage/coverage.cobertura.xml"
     - name: Check analyzer test coverage
       if: (success() || failure()) && steps.analyzers.outcome != 'skipped'
-      working-directory: website
+      working-directory: w
       shell: pwsh
       run: ./scripts/Features/CodeQuality/site-analyzer-coverage.ps1 -Mode Verify -Repository "$env:KEYLOAD_SITE_REPOSITORY" -Contract "$env:KEYLOAD_SITE_REPOSITORY/scripts/Features/CodeQuality/site-analyzer-coverage.contract.json" -EvidenceRoot "$env:EVIDENCE_DIR/analyzer-coverage" -CoverageReport "$env:EVIDENCE_DIR/analyzer-coverage/coverage.cobertura.xml"
     - name: Build website tests
-      working-directory: website
+      working-directory: w
       shell: bash
       run: |
         dotnet restore tests/KeyLoad.SiteTests/KeyLoad.SiteTests.csproj
         dotnet build tests/KeyLoad.SiteTests/KeyLoad.SiteTests.csproj --no-restore -warnaserror
     - name: Check website test formatting and repository rules
-      working-directory: website
+      working-directory: w
       shell: bash
       run: |
         dotnet format analyzers/KeyLoad.Analyzers/KeyLoad.Analyzers.csproj --verify-no-changes --no-restore --severity warn --verbosity minimal > "$EVIDENCE_DIR/format-analyzers.txt" 2>&1
@@ -150,7 +151,7 @@ runs:
         dotnet format tests/KeyLoad.SiteTests/KeyLoad.SiteTests.csproj --verify-no-changes --no-restore --severity warn --verbosity minimal > "$EVIDENCE_DIR/format-site-tests.txt" 2>&1
         node scripts/Features/RepositoryGovernance/verify.mjs
     - name: Run all website tests
-      working-directory: website
+      working-directory: w
       shell: bash
       env:
         NODE_V8_COVERAGE: ${{ github.workspace }}/artifacts/site-evidence/js-coverage/node
@@ -193,8 +194,8 @@ runs:
         path: |
           _site
           artifacts/site-evidence
-          website/artifacts/code-quality/KeyLoad.SiteTests
-          website/artifacts/code-quality/KeyLoad.Analyzers
-          website/artifacts/code-quality/KeyLoad.Analyzers.Tests
-          website/tests/KeyLoad.Analyzers.Tests/bin/Debug/net10.0/KeyLoad.Analyzers.dll
-          website/tests/KeyLoad.Analyzers.Tests/bin/Debug/net10.0/KeyLoad.Analyzers.pdb
+          w/artifacts/code-quality/KeyLoad.SiteTests
+          w/artifacts/code-quality/KeyLoad.Analyzers
+          w/artifacts/code-quality/KeyLoad.Analyzers.Tests
+          w/tests/KeyLoad.Analyzers.Tests/bin/Debug/net10.0/KeyLoad.Analyzers.dll
+          w/tests/KeyLoad.Analyzers.Tests/bin/Debug/net10.0/KeyLoad.Analyzers.pdb

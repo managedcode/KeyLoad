@@ -4,8 +4,18 @@ internal static class TestSelectionProgram
 {
     internal const string Source = """
             import { pathToFileURL } from 'node:url';
-            const { runtimeSelection } = await import(pathToFileURL(process.argv[1]));
+            const { runtimeSelection, executionPipeDirectory } = await import(pathToFileURL(process.argv[1]));
             const suite = process.argv[2];
+            if (process.platform !== 'win32') {
+              const directory = executionPipeDirectory('/home/runner/work/KeyLoad/KeyLoad/w');
+              if (Buffer.byteLength(directory + '/MONITORTOHOST_' + '0'.repeat(32)) > 103) {
+                throw new Error('The website monitor socket exceeds its Unix path bound.');
+              }
+              for (const root of ['/home/runner/work/KeyLoad/KeyLoad/website', '/' + 'é'.repeat(30)]) {
+                let rejected = false; try { executionPipeDirectory(root); } catch { rejected = true; }
+                if (!rejected) throw new Error('An oversized Unix monitor socket path was accepted.');
+              }
+            }
             for (const bad of [[], ['--KeyLoadTests:Suite=unknown'], ['--KeyLoadTests:Suite=unit','--KeyLoadTests:Suite=cluster'],
               ['--KeyLoadTests:Suite=unit-scalar'],
               ['--KeyLoadTests:Suite=unit','--KeyLoadTests:Execution:MaximumParallelTests=51'],

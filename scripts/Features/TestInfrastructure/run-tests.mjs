@@ -13,6 +13,8 @@ const heavyLoadEnabledOption = 'HeavyLoad:Enabled';
 const heavyLoadFilter = '/*/*/HeavyDocumentLoadClusterTests/*';
 const ordinaryClusterFilter = '/*/*/*/*[Category!=HeavyLoad]';
 const ordinaryUnitFilter = '/KeyLoad.UnitTests/*/*/*';
+// TUnit's MONITORTOHOST_ plus a 32-character ID and separator consume 47 bytes.
+const maximumUnixPipeDirectoryBytes = 56;
 const projects = new Map([
   ['analyzers', 'KeyLoad.Analyzers.Tests'], ['unit', 'KeyLoad.UnitTests'],
   ['recovery', 'KeyLoad.RecoveryTests'],
@@ -24,6 +26,14 @@ const mapped = new Map([
   ['CoverageFormat', '--coverage-output-format'], ['Execution:MaximumParallelTests', '--maximum-parallel-tests']
 ]);
 // Selection only: workloads and Aspire resource lifetimes belong to the C# TUnit tests.
+export function executionPipeDirectory(repository) {
+  const directory = path.resolve(repository, 'tests', 'bin', 'Debug', 'ipc');
+  if (process.platform !== 'win32' && Buffer.byteLength(directory, 'utf8') > maximumUnixPipeDirectoryBytes) {
+    throw new Error('Execution test IPC output path is too long for Unix domain sockets.');
+  }
+  return directory;
+}
+
 export function runtimeSelection(input, inherited = process.env) {
   if (simdOptions.some(key => inherited[key] !== undefined && inherited[key] !== '' && inherited[key] !== '1')) {
     throw new Error('Execution SIMD must remain enabled.');
@@ -60,11 +70,7 @@ export function runtimeSelection(input, inherited = process.env) {
   for (const key of ['TMPDIR', 'TMP', 'TEMP']) {
     environment[key] = output;
   }
-  environment.TESTINGPLATFORM_PIPE_DIRECTORY = path.resolve(root, 'tests', 'bin', 'Debug', 'ipc');
-  if (process.platform !== 'win32'
-    && Buffer.byteLength(environment.TESTINGPLATFORM_PIPE_DIRECTORY, 'utf8') > 66) {
-    throw new Error('Execution test IPC output path is too long for Unix domain sockets.');
-  }
+  environment.TESTINGPLATFORM_PIPE_DIRECTORY = executionPipeDirectory(root);
   for (const key of ['KeyLoadTests__Suite', 'KeyLoadTests__HeavyLoad__Enabled']) delete environment[key];
   const args = [path.join(output, `${project}.dll`),
     '--output', 'Detailed', '--github-reporter-style', 'full', '--maximum-parallel-tests', String(parallel),
