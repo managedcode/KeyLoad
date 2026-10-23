@@ -55,11 +55,6 @@ public sealed record DocumentComparisonContract
     {
         get; init;
     }
-    /// <summary>Gets excluded warmup operations.</summary>
-    public required int Warmup
-    {
-        get; init;
-    }
     /// <summary>Gets deterministic seed.</summary>
     public required int Seed
     {
@@ -102,7 +97,7 @@ public sealed record DocumentComparisonContract
             || !value.Scenarios.SequenceEqual(Enum.GetNames<DocumentComparisonScenario>().Where(name => name != nameof(DocumentComparisonScenario.Ingest)))
             || value.Ingestion.Scenario != nameof(DocumentComparisonScenario.Ingest) || value.Ingestion.Records != DocumentMeasurementValues.IngestionRecords
             || !value.Ingestion.Clients.SequenceEqual([DocumentMeasurementValues.SingleItemCount, DocumentMeasurementValues.BaselineConcurrentClients, DocumentMeasurementValues.MaximumClients]) || value.Operations != DocumentMeasurementValues.SmallDatasetRecords || value.Repetitions != DocumentMeasurementValues.CanonicalRepetitions
-            || value.Clients != DocumentMeasurementValues.OrdinaryClients || value.Warmup != DocumentMeasurementValues.CanonicalWarmup || value.Seed != DocumentMeasurementValues.CanonicalSeed || value.PayloadBytes != DocumentMeasurementValues.CanonicalPayloadBytes
+            || value.Clients != DocumentMeasurementValues.OrdinaryClients || value.Seed != DocumentMeasurementValues.CanonicalSeed || value.PayloadBytes != DocumentMeasurementValues.CanonicalPayloadBytes
             || value.MaximumOutstandingPerClient != DocumentMeasurementValues.SingleItemCount || value.TimeoutSeconds != DocumentMeasurementValues.OperationTimeoutSeconds
             || value.LatencyHistogram.ResolutionMicroseconds != DocumentMeasurementValues.HistogramResolutionMicroseconds || value.LatencyHistogram.MaximumMilliseconds != DocumentMeasurementValues.MaximumLatencyMilliseconds
             || value.LatencyHistogram.Overflow != DocumentProtocolText.FailQualification)

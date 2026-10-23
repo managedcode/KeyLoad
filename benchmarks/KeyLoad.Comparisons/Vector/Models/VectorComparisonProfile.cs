@@ -46,8 +46,6 @@ public sealed record VectorComparisonProfile
     public int PayloadBytes => VectorComparisonProfileValues.PayloadBytes;
     /// <summary>Gets the number of distinct deterministic query vectors.</summary>
     public int QueryVectorCount => VectorComparisonProfileValues.QueryVectorCount;
-    /// <summary>Gets the unmeasured warmup request count.</summary>
-    public int WarmupQueries => VectorComparisonProfileValues.WarmupQueries;
     /// <summary>Gets the measured search request count.</summary>
     public int MeasuredQueries => VectorComparisonProfileValues.Scale100kCount;
     /// <summary>Gets the closed-loop query concurrency.</summary>

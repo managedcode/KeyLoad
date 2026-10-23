@@ -22,7 +22,7 @@ internal static partial class ComparisonProgressLine
     private const string InvalidEvidence = "The isolated progress evidence path is invalid.";
     private const string Workers = "workers";
     private const string Failures = "failures";
-    private const string MarkerPattern = "\\AKeyLoadBenchmarkProgress phase=(?:oracle|initialize|warmup|prepare|measure|validate|complete)"
+    private const string MarkerPattern = "\\AKeyLoadBenchmarkProgress phase=(?:oracle|initialize|prepare|measure|validate|complete)"
         + " repetition=([0-9]{1,10}) completed=([0-9]{1,10}) total=([0-9]{1,10}) failed=([0-9]{1,10})"
         + " elapsedSeconds=([0-9]+(?:\\.[0-9]+)?)\\z";
 

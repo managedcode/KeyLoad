@@ -74,7 +74,7 @@ public sealed class ScaledComparisonCorpus : IComparisonCorpus
     }
 
     /// <inheritdoc />
-    public BenchmarkDocument Input(Scenario scenario, int repetition, int operation, bool warmup)
+    public BenchmarkDocument Input(Scenario scenario, int repetition, int operation)
     {
         const int SingleMeasurementRepetitionIndex = 0;
         const int NoObservedItems = 0;
@@ -86,7 +86,7 @@ public sealed class ScaledComparisonCorpus : IComparisonCorpus
         {
             ArgumentOutOfRangeException.ThrowIfNotEqual(repetition, SingleMeasurementRepetitionIndex);
         }
-        if (operation < NoObservedItems || operation >= (warmup ? profile.Warmup : profile.Operations))
+        if (operation < NoObservedItems || operation >= profile.Operations)
         {
             throw new ArgumentOutOfRangeException(nameof(operation));
         }
@@ -104,8 +104,7 @@ public sealed class ScaledComparisonCorpus : IComparisonCorpus
             Scenario.DocumentDelete => DeleteIdentityBlock,
             _ => throw new ArgumentOutOfRangeException(nameof(scenario))
         };
-        var ordinal = warmup ? operation : profile.Warmup + operation;
-        return CreateMutationDocument(checked(profile.Documents + block * (profile.Operations + profile.Warmup) + ordinal));
+        return CreateMutationDocument(checked(profile.Documents + block * profile.Operations + operation));
     }
 
     /// <summary>Creates one deterministic document in the disjoint mutation identity range.</summary>
@@ -118,7 +117,7 @@ public sealed class ScaledComparisonCorpus : IComparisonCorpus
         const char PayloadPaddingCharacter = 'x';
         const string ScaledMutationPayloadSizeMismatchDetail = "Scaled mutation payload size mismatch.";
 
-        if (number < profile.Documents || number >= checked(profile.Documents + MutationIdentityBlockCount * (profile.Operations + profile.Warmup)))
+        if (number < profile.Documents || number >= checked(profile.Documents + MutationIdentityBlockCount * profile.Operations))
         {
             throw new ArgumentOutOfRangeException(nameof(number));
         }

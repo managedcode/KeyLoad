@@ -70,7 +70,7 @@ public sealed class DocumentComparisonCorpus : IComparisonCorpus
         };
     }
     /// <inheritdoc/>
-    public BenchmarkDocument Input(Scenario scenario, int repetition, int operation, bool warmup) => CreateDocument(operation);
+    public BenchmarkDocument Input(Scenario scenario, int repetition, int operation) => CreateDocument(operation);
     private sealed class LazyDocuments(DocumentComparisonCorpus owner) : IReadOnlyList<BenchmarkDocument>
     {
         public int Count => owner.records;

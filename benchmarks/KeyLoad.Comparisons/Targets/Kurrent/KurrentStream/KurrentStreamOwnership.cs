@@ -12,7 +12,7 @@ internal sealed class KurrentStreamOwnership
         ArgumentNullException.ThrowIfNull(workloadOptions);
         var options = workloadOptions.Value;
         options.Validate();
-        Capacity = checked(options.Documents + options.Repetitions * checked(options.Warmup + options.Operations)
+        Capacity = checked(options.Documents + options.Repetitions * options.Operations
             + KurrentConstants.OwnershipProbeCount);
     }
 

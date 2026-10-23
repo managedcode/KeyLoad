@@ -5,10 +5,10 @@ internal static class ComparisonMutationValidation
     private const string SentinelChanged = "MutationSentinelChanged";
     internal static async Task ValidateAsync(IReadOnlyList<IComparisonSession> sessions, BenchmarkDataset dataset, Scenario scenario, BenchmarkDocument[] inputs, OperationSample[] samples, OperationResult?[] outputs, TimeProvider timeProvider, CancellationToken cancellationToken)
     {
-        const int WarmupRepetitionIndex = -1;
+        const int BeforeFirstIndex = -1;
         const int FirstElementIndex = 0;
 
-        var next = WarmupRepetitionIndex;
+        var next = BeforeFirstIndex;
         await Task.WhenAll(sessions.Select(async session =>
         {
             while (true)

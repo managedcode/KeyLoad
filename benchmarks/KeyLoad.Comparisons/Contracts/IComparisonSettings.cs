@@ -13,11 +13,6 @@ public interface IComparisonSettings
     {
         get;
     }
-    /// <summary>Gets the bounded warmup setting.</summary>
-    int Warmup
-    {
-        get;
-    }
     /// <summary>Gets the bounded repetitions setting.</summary>
     int Repetitions
     {

@@ -17,7 +17,6 @@ internal static class TimeSeriesIntensiveFrameLabels
     internal const string EpochUtcTicks = "epochUtcTicks";
     internal const string SampleCount = "sampleCount";
     internal const string OperationCount = "operationCount";
-    internal const string WarmupCount = "warmupCount";
     internal const string RepetitionCount = "repetitionCount";
     internal const string Concurrency = "concurrency";
     internal const string OperationTimeoutTicks = "operationTimeoutTicks";
@@ -29,7 +28,6 @@ internal static class TimeSeriesIntensiveFrameLabels
     internal const string SeedInsertion = "seedInsertion";
     internal const string PhasePlans = "phasePlans";
     internal const string SeedReadbacks = "seedReadbacks";
-    internal const string WarmupReadbacks = "warmupReadbacks";
     internal const string MeasuredReadbacks = "measuredReadbacks";
     internal const string SeriesId = "seriesId";
     internal const string EventId = "eventId";

@@ -13,7 +13,7 @@ internal static class ComparisonMutationProbe
         await using var session = await target.OpenSessionAsync(token);
         using var deadline = ComparisonDeadline.Create(dataset.Options.TimeoutSeconds, cancellationToken: token, timeProvider: timeProvider);
         var number = dataset.Options.Documents + MutationIdentityBlockCount * dataset.Options.Repetitions
-            * (dataset.Options.Operations + dataset.Options.Warmup) + AbsentDocumentIdentityOffset;
+            * dataset.Options.Operations + AbsentDocumentIdentityOffset;
         var updated = dataset.CreateDocument(number);
         var deleted = dataset.CreateDocument(number + SingleItemCount);
         var missing = dataset.CreateDocument(number + AbsentReadbackIdentityOffset);

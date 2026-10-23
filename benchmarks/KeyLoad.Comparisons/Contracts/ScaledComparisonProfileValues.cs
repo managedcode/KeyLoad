@@ -3,7 +3,6 @@ namespace KeyLoad.Comparisons;
 internal static class ScaledComparisonProfileValues
 {
     internal const int Scale100kCount = 100_000;
-    internal const int WarmupQueries = 256;
     internal const int RepetitionCount = 1;
     internal const int QueryConcurrency = 16;
     internal const int PayloadBytes = 1_024;

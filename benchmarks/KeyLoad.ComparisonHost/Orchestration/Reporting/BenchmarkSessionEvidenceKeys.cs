@@ -45,6 +45,5 @@ internal static class BenchmarkSessionEvidenceKeys
     internal const string JobEnvironment = "KEYLOAD_COMPARISON_JOB_ID";
     internal const string FirstEndpointEnvironment = "Benchmarks__Execution__Endpoints__0";
     internal const string OperationsEnvironment = "Benchmarks__Operations";
-    internal const string WarmupEnvironment = "Benchmarks__Warmup";
     internal const string ApiKeyEnvironment = "Benchmarks__Execution__ApiKey";
 }

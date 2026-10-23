@@ -10,7 +10,6 @@ internal static class VectorComparisonProfileValues
     internal const int CorpusSeed = 1729;
     internal const int PayloadBytes = 1024;
     internal const int QueryVectorCount = 64;
-    internal const int WarmupQueries = 256;
     internal const int Scale100kCount = 100_000;
     internal const int QueryConcurrency = 16;
     internal const int OperationTimeoutSeconds = 30;

@@ -4,7 +4,6 @@ internal sealed record DocumentComparisonSettings(int Documents, int Concurrency
 {
     public int Seed => DocumentComparisonContract.Current.Seed;
     public int Operations => DocumentComparisonContract.Current.Operations;
-    public int Warmup => DocumentComparisonContract.Current.Warmup;
     public int Repetitions => DocumentComparisonContract.Current.Repetitions;
     public int PayloadBytes => DocumentComparisonContract.Current.PayloadBytes;
     public int Dimensions => DocumentMeasurementValues.DocumentSchemaDimensions;

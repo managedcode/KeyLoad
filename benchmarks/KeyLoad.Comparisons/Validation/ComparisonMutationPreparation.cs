@@ -8,14 +8,14 @@ internal static class ComparisonMutationPreparation
 
     internal static async Task PrepareAsync(IReadOnlyList<IComparisonSession> sessions, BenchmarkDocument[] inputs, Scenario scenario, int timeoutSeconds, TimeProvider timeProvider, CancellationToken cancellationToken)
     {
-        const int WarmupRepetitionIndex = -1;
+        const int BeforeFirstIndex = -1;
 
         if (!Required(scenario))
         {
             return;
         }
 
-        var next = WarmupRepetitionIndex;
+        var next = BeforeFirstIndex;
         await Task.WhenAll(sessions.Select(async session =>
         {
             while (true)

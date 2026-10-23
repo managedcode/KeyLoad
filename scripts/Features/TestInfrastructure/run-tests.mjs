@@ -67,8 +67,9 @@ export function runtimeSelection(input, inherited = process.env) {
   if (suite === 'unit' && !values.has('Filter')) values.set('Filter', ordinaryUnitFilter);
   const environment = { ...inherited };
   const output = path.resolve(root, 'tests', project, 'bin', 'Debug', 'net10.0');
+  // Aspire DCP binds Unix sockets below the temp directory; the short shared ipc folder keeps them within the platform bound.
   for (const key of ['TMPDIR', 'TMP', 'TEMP']) {
-    environment[key] = output;
+    environment[key] = executionPipeDirectory(root);
   }
   environment.TESTINGPLATFORM_PIPE_DIRECTORY = executionPipeDirectory(root);
   for (const key of ['KeyLoadTests__Suite', 'KeyLoadTests__HeavyLoad__Enabled']) delete environment[key];

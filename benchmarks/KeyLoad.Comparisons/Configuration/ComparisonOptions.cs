@@ -8,10 +8,8 @@ namespace KeyLoad.Comparisons;
 public sealed record ComparisonOptions : IComparisonSettings
 {
     private const int MinimumCount = 1;
-    private const int MinimumWarmup = 0;
     private const int MaximumDocuments = 1_000_000;
     private const int MaximumOperations = 1_000_000;
-    private const int MaximumWarmup = 100_000;
     private const int MaximumRepetitions = 20;
     private const int MaximumConcurrency = 128;
     private const int MinimumPayloadBytes = 128;
@@ -35,8 +33,6 @@ public sealed record ComparisonOptions : IComparisonSettings
     public int Documents { get; init; } = 1_000;
     /// <summary>Gets or initializes the number of measured operations in each repetition.</summary>
     public int Operations { get; init; } = 1_000;
-    /// <summary>Gets or initializes the number of unmeasured warmup operations per repetition.</summary>
-    public int Warmup { get; init; } = 50;
     /// <summary>Gets or initializes the number of measured repetitions.</summary>
     public int Repetitions { get; init; } = 3;
     /// <summary>Gets or initializes the maximum number of concurrent workers.</summary>
@@ -75,7 +71,6 @@ public sealed record ComparisonOptions : IComparisonSettings
     public bool IsValid() => Enum.IsDefined(Topology)
         && Documents is >= MinimumCount and <= MaximumDocuments
         && Operations is >= MinimumCount and <= MaximumOperations
-        && Warmup is >= MinimumWarmup and <= MaximumWarmup
         && Repetitions is >= MinimumCount and <= MaximumRepetitions
         && Concurrency is >= MinimumCount and <= MaximumConcurrency
         && PayloadBytes is >= MinimumPayloadBytes and <= MaximumPayloadBytes

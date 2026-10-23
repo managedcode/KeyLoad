@@ -25,7 +25,6 @@ public sealed record ScaledComparisonProfile : IComparisonSettings
     /// <inheritdoc />
     public int Operations => ScaledComparisonProfileValues.Scale100kCount;
     /// <inheritdoc />
-    public int Warmup => ScaledComparisonProfileValues.WarmupQueries;
     /// <inheritdoc />
     public int Repetitions => ScaledComparisonProfileValues.RepetitionCount;
     /// <inheritdoc />

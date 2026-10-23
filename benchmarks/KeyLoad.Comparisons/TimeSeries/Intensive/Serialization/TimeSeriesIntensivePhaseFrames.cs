@@ -7,27 +7,26 @@ internal static class TimeSeriesIntensivePhaseFrames
         const int NoObservedItems = 0;
 
         frame.String(TimeSeriesIntensiveFrameLabels.PhasePlans);
-        frame.Count(TimeSeriesIntensiveProfile.RepetitionCount * (TimeSeriesIntensiveProfile.WarmupCount + TimeSeriesIntensiveProfile.OperationCount));
+        frame.Count(TimeSeriesIntensiveProfile.RepetitionCount * TimeSeriesIntensiveProfile.OperationCount);
         for (var repetition = NoObservedItems; repetition < TimeSeriesIntensiveProfile.RepetitionCount; repetition++)
         {
-            Phase(frame, repetition, true);
-            Phase(frame, repetition, false);
+            Phase(frame, repetition);
         }
     }
 
-    private static void Phase(TimeSeriesIntensiveDigestWriter frame, int repetition, bool warmup)
+    private static void Phase(TimeSeriesIntensiveDigestWriter frame, int repetition)
     {
         const int FirstElementIndex = 0;
 
-        var count = warmup ? TimeSeriesIntensiveProfile.WarmupCount : TimeSeriesIntensiveProfile.OperationCount;
-        var series = TimeSeriesIntensivePlans.PhaseSeries(repetition, warmup);
+        var count = TimeSeriesIntensiveProfile.OperationCount;
+        var series = TimeSeriesIntensivePlans.PhaseSeries(repetition);
         for (var index = FirstElementIndex; index < count; index++)
         {
             frame.Field(TimeSeriesIntensiveFrameLabels.Repetition, repetition);
-            frame.Field(TimeSeriesIntensiveFrameLabels.Phase, warmup ? TimeSeriesIntensiveProfile.WarmupPhase : TimeSeriesIntensiveProfile.MeasuredPhase);
+            frame.Field(TimeSeriesIntensiveFrameLabels.Phase, TimeSeriesIntensiveProfile.MeasuredPhase);
             frame.Field(TimeSeriesIntensiveFrameLabels.SeriesId, series);
             frame.Field(TimeSeriesIntensiveFrameLabels.Index, index);
-            frame.Field(TimeSeriesIntensiveFrameLabels.CommandPurpose, TimeSeriesIntensivePlans.CommandPurpose(repetition, warmup, index));
+            frame.Field(TimeSeriesIntensiveFrameLabels.CommandPurpose, TimeSeriesIntensivePlans.CommandPurpose(repetition, index));
             frame.String(TimeSeriesIntensiveFrameLabels.AppendSample);
             TimeSeriesIntensiveResultFrames.AppendSample(frame, TimeSeriesIntensiveCorpus.AppendSample(index));
             Queries(frame, TimeSeriesIntensivePlans.Read(index));

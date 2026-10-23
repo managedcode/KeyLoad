@@ -31,7 +31,6 @@
   "operations": 100000,
   "repetitions": 3,
   "clients": 16,
-  "warmup": 256,
   "seed": 1729,
   "payloadBytes": 1024,
   "maximumOutstandingPerClient": 1,

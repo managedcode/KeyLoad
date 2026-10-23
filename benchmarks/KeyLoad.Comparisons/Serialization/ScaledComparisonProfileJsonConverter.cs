@@ -22,7 +22,6 @@ public sealed class ScaledComparisonProfileJsonConverter : JsonConverter<ScaledC
     private const string SeedProperty = "seed";
     private const string TimeoutSecondsProperty = "timeoutSeconds";
     private const string TopKProperty = "topK";
-    private const string WarmupProperty = "warmup";
     /// <inheritdoc />
     public override ScaledComparisonProfile Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
@@ -53,7 +52,6 @@ public sealed class ScaledComparisonProfileJsonConverter : JsonConverter<ScaledC
     {
         Require(root, DocumentsProperty, profile.Documents);
         Require(root, OperationsProperty, profile.Operations);
-        Require(root, WarmupProperty, profile.Warmup);
         Require(root, RepetitionsProperty, profile.Repetitions);
         Require(root, ConcurrencyProperty, profile.Concurrency);
         Require(root, PayloadBytesProperty, profile.PayloadBytes);
@@ -79,7 +77,6 @@ public sealed class ScaledComparisonProfileJsonConverter : JsonConverter<ScaledC
     {
         writer.WriteNumber(DocumentsProperty, profile.Documents);
         writer.WriteNumber(OperationsProperty, profile.Operations);
-        writer.WriteNumber(WarmupProperty, profile.Warmup);
         writer.WriteNumber(RepetitionsProperty, profile.Repetitions);
         writer.WriteNumber(ConcurrencyProperty, profile.Concurrency);
         writer.WriteNumber(PayloadBytesProperty, profile.PayloadBytes);

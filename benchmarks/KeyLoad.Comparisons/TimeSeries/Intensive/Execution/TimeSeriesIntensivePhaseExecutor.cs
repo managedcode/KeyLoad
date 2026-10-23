@@ -24,7 +24,7 @@ internal sealed class TimeSeriesIntensivePhaseExecutor(ITimeSeriesIntensiveTarge
         workers.Release();
         await workers.JoinAsync().ConfigureAwait(false);
         var wall = timeProvider.GetTimestamp() - started;
-        var measurement = !phase.Warmup && ledger.Complete
+        var measurement = ledger.Complete
             ? TimeSeriesIntensiveSummary.Calculate(ledger.Attempts.Span, wall, timeProvider.TimestampFrequency) : null;
         return new(ledger.Complete, ledger.Succeeded, wall, workers.WorkersStarted,
             concurrency.PeakRequests, concurrency.PeakResponses, measurement);
@@ -38,7 +38,7 @@ internal sealed class TimeSeriesIntensivePhaseExecutor(ITimeSeriesIntensiveTarge
         await workers.Start.ConfigureAwait(false);
         try
         {
-            foreach (var index in TimeSeriesIntensiveWorkerPartition.Indices(worker, phase.Count))
+            foreach (var index in TimeSeriesIntensiveWorkerPartition.Indices(worker, TimeSeriesIntensivePreparedPhase.Count))
             {
                 if (workers.IsCancellationRequested)
                 {

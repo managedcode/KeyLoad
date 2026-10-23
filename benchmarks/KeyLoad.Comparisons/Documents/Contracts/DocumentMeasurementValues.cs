@@ -7,14 +7,12 @@ internal static class DocumentMeasurementValues
     internal const int ReadUpdate50CycleLength = 2;
     internal const int MixedCrudUpdatePosition = 2;
     internal const int PermutationStrideIncrement = 2;
-    internal const int WarmupCorpusMultiplier = 2;
     internal const int DocumentSchemaVersion = 1;
     internal const int DefaultUnusedTopK = 10;
     internal const int BaselineConcurrentClients = 10;
     internal const int CanonicalPayloadBytes = 1024;
     internal const int CanonicalRepetitions = 3;
     internal const int CanonicalSeed = 1729;
-    internal const int CanonicalWarmup = 256;
     internal const int DevelopmentMaximumOperations = 1000;
     internal const int DevelopmentMaximumRecords = 1024;
     internal const int DevelopmentMinimumRecords = 100;

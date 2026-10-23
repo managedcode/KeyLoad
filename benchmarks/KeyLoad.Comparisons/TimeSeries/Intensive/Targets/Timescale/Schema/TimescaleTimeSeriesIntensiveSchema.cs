@@ -80,7 +80,6 @@ internal static class TimescaleTimeSeriesIntensiveSchema
         for (var repetition = NoObservedItems; repetition < TimeSeriesIntensiveProfile.RepetitionCount; repetition++)
         {
             var suffix = repetition.ToString(CultureInfo.InvariantCulture);
-            names.Add(TimeSeriesIntensiveProfile.WarmSeriesPrefix + suffix);
             names.Add(TimeSeriesIntensiveProfile.MeasuredSeriesPrefix + suffix);
         }
 

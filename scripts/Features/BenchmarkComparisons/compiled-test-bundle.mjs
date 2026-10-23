@@ -92,7 +92,7 @@ export async function importCompiledRuntime(directory, environment = process.env
   process.stdout.write('Compiled runtime: source and archive verified; importing original files.\n');
   await requireRuntimeDestination(context.workspace, inventory);
   await runBundle('tar', ['--extract', '--gzip', '--file', path.join(directory, runtimeBundle.archive),
-    '--directory', context.workspace, '--no-same-owner', '--no-same-permissions', '--keep-old-files', '--no-overwrite-dir'], context.workspace, 1048576);
+    '--directory', context.workspace, '--no-same-owner', '--no-same-permissions', '--keep-old-files'], context.workspace, 1048576);
   for (const entry of inventory) {
     const actual = await hashRuntimeFile(path.join(context.workspace, entry.path));
     requireRuntime(actual.bytes === entry.bytes && actual.sha256 === entry.sha256

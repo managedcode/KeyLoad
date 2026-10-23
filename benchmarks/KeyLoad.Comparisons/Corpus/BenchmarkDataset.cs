@@ -90,9 +90,8 @@ public sealed class BenchmarkDataset : IComparisonCorpus
     /// <param name="scenario">The workload scenario selecting the input policy.</param>
     /// <param name="repetition">The zero-based measurement repetition.</param>
     /// <param name="operation">The operation index within the repetition.</param>
-    /// <param name="warmup">Whether the operation belongs to the warmup phase.</param>
     /// <returns>The deterministic document selected or generated for the operation.</returns>
-    public BenchmarkDocument Input(Scenario scenario, int repetition, int operation, bool warmup)
+    public BenchmarkDocument Input(Scenario scenario, int repetition, int operation)
     {
         const int UpdateIdentityBlock = 1;
         const int DeleteIdentityBlock = 2;
@@ -108,9 +107,8 @@ public sealed class BenchmarkDataset : IComparisonCorpus
                 Scenario.DocumentDelete => DeleteIdentityBlock,
                 _ => NoObservedItems
             };
-            return CreateDocument(options.Documents + range * options.Repetitions * (options.Operations + options.Warmup)
-                + repetition * (options.Operations + options.Warmup)
-                + (warmup ? operation : options.Warmup + operation));
+            return CreateDocument(options.Documents + range * options.Repetitions * options.Operations
+                + repetition * options.Operations + operation);
         }
 
         var count = scenario is Scenario.GraphNeighbors or Scenario.GraphTraverse ? GraphVertexCount : Documents.Length;

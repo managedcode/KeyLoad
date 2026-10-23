@@ -12,7 +12,6 @@ internal static class VectorProfileJsonFields
     internal const string Seed = "seed";
     internal const string PayloadBytes = "payloadBytes";
     internal const string QueryVectorCount = "queryVectorCount";
-    internal const string WarmupQueries = "warmupQueries";
     internal const string MeasuredQueries = "measuredQueries";
     internal const string Concurrency = "concurrency";
     internal const string TimeoutSeconds = "timeoutSeconds";

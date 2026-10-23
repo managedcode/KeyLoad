@@ -31,5 +31,5 @@ public interface IComparisonCorpus
     /// <summary>Creates one deterministic document by numeric identity.</summary>
     BenchmarkDocument CreateDocument(int number);
     /// <summary>Selects one operation input without retaining an input table.</summary>
-    BenchmarkDocument Input(Scenario scenario, int repetition, int operation, bool warmup);
+    BenchmarkDocument Input(Scenario scenario, int repetition, int operation);
 }

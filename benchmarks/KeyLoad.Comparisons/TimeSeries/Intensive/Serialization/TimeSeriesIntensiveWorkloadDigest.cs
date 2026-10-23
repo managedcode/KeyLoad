@@ -28,7 +28,6 @@ internal static class TimeSeriesIntensiveWorkloadDigest
         frame.Field(TimeSeriesIntensiveFrameLabels.EpochUtcTicks, TimeSeriesIntensiveProfile.Epoch.UtcTicks);
         frame.Field(TimeSeriesIntensiveFrameLabels.SampleCount, TimeSeriesIntensiveProfile.SampleCount);
         frame.Field(TimeSeriesIntensiveFrameLabels.OperationCount, TimeSeriesIntensiveProfile.OperationCount);
-        frame.Field(TimeSeriesIntensiveFrameLabels.WarmupCount, TimeSeriesIntensiveProfile.WarmupCount);
         frame.Field(TimeSeriesIntensiveFrameLabels.RepetitionCount, TimeSeriesIntensiveProfile.RepetitionCount);
         frame.Field(TimeSeriesIntensiveFrameLabels.Concurrency, TimeSeriesIntensiveProfile.Concurrency);
         frame.Field(TimeSeriesIntensiveFrameLabels.OperationTimeoutTicks, operationTimeout.Ticks);

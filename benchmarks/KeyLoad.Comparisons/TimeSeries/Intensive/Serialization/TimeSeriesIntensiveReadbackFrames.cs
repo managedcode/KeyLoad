@@ -13,24 +13,17 @@ internal static class TimeSeriesIntensiveReadbackFrames
             Readback(frame, readback);
         }
 
-        frame.String(TimeSeriesIntensiveFrameLabels.WarmupReadbacks);
-        frame.Count(TimeSeriesIntensiveProfile.RepetitionCount);
-        for (var repetition = NoObservedItems; repetition < TimeSeriesIntensiveProfile.RepetitionCount; repetition++)
-        {
-            PhaseReadbacks(frame, repetition, true);
-        }
-
         frame.String(TimeSeriesIntensiveFrameLabels.MeasuredReadbacks);
         frame.Count(TimeSeriesIntensiveProfile.RepetitionCount * TimeSeriesIntensiveProfile.AppendReadbackCount);
         for (var repetition = NoObservedItems; repetition < TimeSeriesIntensiveProfile.RepetitionCount; repetition++)
         {
-            PhaseReadbacks(frame, repetition, false);
+            PhaseReadbacks(frame, repetition);
         }
     }
 
-    private static void PhaseReadbacks(TimeSeriesIntensiveDigestWriter frame, int repetition, bool warmup)
+    private static void PhaseReadbacks(TimeSeriesIntensiveDigestWriter frame, int repetition)
     {
-        foreach (var readback in TimeSeriesIntensivePlans.AppendReadbacks(repetition, warmup))
+        foreach (var readback in TimeSeriesIntensivePlans.AppendReadbacks(repetition))
         {
             Readback(frame, readback);
         }

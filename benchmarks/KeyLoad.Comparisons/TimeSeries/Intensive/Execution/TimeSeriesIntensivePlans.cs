@@ -14,22 +14,17 @@ internal static class TimeSeriesIntensivePlans
         return new(from, from.AddMinutes(TimeSeriesIntensiveProfile.RangeMinutes), latest);
     }
 
-    internal static string PhaseSeries(int repetition, bool warmup)
+    internal static string PhaseSeries(int repetition)
     {
         ValidateRepetition(repetition);
-        return (warmup ? TimeSeriesIntensiveProfile.WarmSeriesPrefix : TimeSeriesIntensiveProfile.MeasuredSeriesPrefix) + repetition.ToString(CultureInfo.InvariantCulture);
+        return TimeSeriesIntensiveProfile.MeasuredSeriesPrefix + repetition.ToString(CultureInfo.InvariantCulture);
     }
 
-    internal static string CommandPurpose(int repetition, bool warmup, int index)
+    internal static string CommandPurpose(int repetition, int index)
     {
         ValidateRepetition(repetition);
         TimeSeriesIntensiveCorpus.ValidateIndex(index);
-        if (warmup)
-        {
-            ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(index, TimeSeriesIntensiveProfile.WarmupCount);
-        }
-
-        return (warmup ? TimeSeriesIntensiveProfile.WarmupPhase : TimeSeriesIntensiveProfile.MeasuredPhase) + TimeSeriesIntensiveProfile.CommandSeparator + repetition.ToString(CultureInfo.InvariantCulture)
+        return TimeSeriesIntensiveProfile.MeasuredPhase + TimeSeriesIntensiveProfile.CommandSeparator + repetition.ToString(CultureInfo.InvariantCulture)
             + TimeSeriesIntensiveProfile.CommandSeparator + index.ToString(CultureInfo.InvariantCulture);
     }
 
@@ -55,13 +50,13 @@ internal static class TimeSeriesIntensivePlans
         }
     }
 
-    internal static IEnumerable<TimeSeriesIntensiveReadback> AppendReadbacks(int repetition, bool warmup)
+    internal static IEnumerable<TimeSeriesIntensiveReadback> AppendReadbacks(int repetition)
     {
         const int NoObservedItems = 0;
         const int SingleItemCount = 1;
 
-        var series = PhaseSeries(repetition, warmup);
-        var count = warmup ? TimeSeriesIntensiveProfile.WarmupCount : TimeSeriesIntensiveProfile.OperationCount;
+        var series = PhaseSeries(repetition);
+        var count = TimeSeriesIntensiveProfile.OperationCount;
         for (var first = NoObservedItems; first < count; first += TimeSeriesIntensiveProfile.RawLimit)
         {
             var size = Math.Min(TimeSeriesIntensiveProfile.RawLimit, count - first);
@@ -81,12 +76,7 @@ internal static class TimeSeriesIntensivePlans
 
         for (var repetition = NoObservedItems; repetition < TimeSeriesIntensiveProfile.RepetitionCount; repetition++)
         {
-            if (string.Equals(seriesId, PhaseSeries(repetition, true), StringComparison.Ordinal))
-            {
-                return TimeSeriesIntensiveProfile.WarmupCount;
-            }
-
-            if (string.Equals(seriesId, PhaseSeries(repetition, false), StringComparison.Ordinal))
+            if (string.Equals(seriesId, PhaseSeries(repetition), StringComparison.Ordinal))
             {
                 return TimeSeriesIntensiveProfile.OperationCount;
             }

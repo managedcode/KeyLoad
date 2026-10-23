@@ -8,7 +8,6 @@ internal static class TimeSeriesIntensiveProfile
     internal const int RandomSeed = 1729;
     internal const int SampleCount = 4096;
     internal const int OperationCount = 10000;
-    internal const int WarmupCount = 256;
     internal const int RepetitionCount = 5;
     internal const int Concurrency = 16;
     internal const int RawLimit = 1000;
@@ -42,9 +41,7 @@ internal static class TimeSeriesIntensiveProfile
     internal const string AppendEventPrefix = "a-";
     internal const string SeedEventFormat = "D6";
     internal const string AppendEventFormat = "D5";
-    internal const string WarmSeriesPrefix = "warm-r";
     internal const string MeasuredSeriesPrefix = "measured-r";
-    internal const string WarmupPhase = "warmup";
     internal const string MeasuredPhase = "measured";
     internal const string CommandSeparator = ":";
     internal const string GuidFormat = "N";

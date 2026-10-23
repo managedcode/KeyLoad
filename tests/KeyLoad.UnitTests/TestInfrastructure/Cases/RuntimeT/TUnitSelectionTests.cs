@@ -54,7 +54,7 @@ internal sealed class TUnitSelectionTests
         await Assert.That(environment.TryGetProperty(IntrinsicEnvironment, out _)).IsFalse();
         foreach (var key in new[] { "TMPDIR", "TMP", "TEMP" })
         {
-            await Assert.That(environment.GetProperty(key).GetString()).IsEqualTo(Path.GetDirectoryName(args[0]));
+            await Assert.That(environment.GetProperty(key).GetString()).EndsWith(Path.Combine("tests", "bin", "Debug", "ipc"));
         }
         await Assert.That(environment.GetProperty(PipeDirectoryEnvironment).GetString())
             .EndsWith(Path.Combine("tests", "bin", "Debug", "ipc"));

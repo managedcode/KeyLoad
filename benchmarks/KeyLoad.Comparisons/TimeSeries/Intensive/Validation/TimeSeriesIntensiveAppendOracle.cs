@@ -4,14 +4,14 @@ namespace KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries.Intensive
 
 internal static class TimeSeriesIntensiveAppendOracle
 {
-    internal static void ValidateReceipts(string runId, int repetition, bool warmup, IReadOnlyList<TimeSeriesIntensiveAppendReceipt> receipts)
+    internal static void ValidateReceipts(string runId, int repetition, IReadOnlyList<TimeSeriesIntensiveAppendReceipt> receipts)
     {
         const int FirstElementIndex = 0;
         const int SingleItemCount = 1;
         const int AdjacentElementOffset = 1;
 
         ArgumentNullException.ThrowIfNull(receipts);
-        var series = TimeSeriesIntensivePlans.PhaseSeries(repetition, warmup);
+        var series = TimeSeriesIntensivePlans.PhaseSeries(repetition);
         var count = TimeSeriesIntensivePlans.WholeSeriesCount(series);
         if (receipts.Count != count)
         {
@@ -22,7 +22,7 @@ internal static class TimeSeriesIntensiveAppendOracle
         for (var index = FirstElementIndex; index < count; index++)
         {
             var receipt = receipts[index];
-            var command = TimeSeriesIntensivePlans.CommandId(runId, TimeSeriesIntensivePlans.CommandPurpose(repetition, warmup, index));
+            var command = TimeSeriesIntensivePlans.CommandId(runId, TimeSeriesIntensivePlans.CommandPurpose(repetition, index));
             if (receipt is null || receipt.CommandId != command || receipt.Sequence < SingleItemCount || receipt.Sequence > count)
             {
                 throw new ComparisonFailureException(TimeSeriesIntensiveErrors.ReceiptIdentity);

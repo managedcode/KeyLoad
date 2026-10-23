@@ -6,7 +6,7 @@ internal static class ComparisonValidation
     private const string WriteMismatch = "WriteReadbackMismatch";
     private const string EventMismatch = "EventIdentityRevisionOrPayloadMismatch";
     private const string PointMismatch = "PointReadMismatch";
-    private const string WarmupQueueMismatch = "WarmupQueueMismatch";
+    private const string QueueCycleMismatch = "QueueCycleMismatch";
     private const string VectorMismatch = "ExactRecallOrProjectionMismatch";
     private const string GraphMismatch = "GraphReachabilityMismatch";
 
@@ -95,7 +95,7 @@ internal static class ComparisonValidation
 
         if (scenario == Scenario.QueueCycle && !BenchmarkDataset.SameDocument(output.Message, input))
         {
-            throw new ComparisonFailureException(WarmupQueueMismatch);
+            throw new ComparisonFailureException(QueueCycleMismatch);
         }
 
         if (scenario == Scenario.StreamRead && !BenchmarkDataset.SameEvent(output.Event, input))

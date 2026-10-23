@@ -21,7 +21,6 @@ public sealed class VectorComparisonProfileJsonConverter : JsonConverter<VectorC
         Require(root, VectorProfileJsonFields.Seed, profile.Seed);
         Require(root, VectorProfileJsonFields.PayloadBytes, profile.PayloadBytes);
         Require(root, VectorProfileJsonFields.QueryVectorCount, profile.QueryVectorCount);
-        Require(root, VectorProfileJsonFields.WarmupQueries, profile.WarmupQueries);
         Require(root, VectorProfileJsonFields.MeasuredQueries, profile.MeasuredQueries);
         Require(root, VectorProfileJsonFields.Concurrency, profile.Concurrency);
         Require(root, VectorProfileJsonFields.TimeoutSeconds, profile.TimeoutSeconds);
@@ -52,7 +51,6 @@ public sealed class VectorComparisonProfileJsonConverter : JsonConverter<VectorC
         writer.WriteNumber(VectorProfileJsonFields.Seed, value.Seed);
         writer.WriteNumber(VectorProfileJsonFields.PayloadBytes, value.PayloadBytes);
         writer.WriteNumber(VectorProfileJsonFields.QueryVectorCount, value.QueryVectorCount);
-        writer.WriteNumber(VectorProfileJsonFields.WarmupQueries, value.WarmupQueries);
         writer.WriteNumber(VectorProfileJsonFields.MeasuredQueries, value.MeasuredQueries);
         writer.WriteNumber(VectorProfileJsonFields.Concurrency, value.Concurrency);
         writer.WriteNumber(VectorProfileJsonFields.TimeoutSeconds, value.TimeoutSeconds);
