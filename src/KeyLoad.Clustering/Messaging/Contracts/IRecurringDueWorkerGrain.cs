@@ -1,4 +1,3 @@
-using KeyLoad.Core.Features.Messaging;
 using Orleans.CodeGeneration;
 
 namespace KeyLoad.Clustering;
@@ -8,5 +7,4 @@ namespace KeyLoad.Clustering;
 internal interface IRecurringDueWorkerGrain : IGrainWithStringKey
 {
     Task WakeAsync(CancellationToken cancellationToken);
-    Task EnqueueAsync(DueWorkHint hint, CancellationToken cancellationToken);
 }

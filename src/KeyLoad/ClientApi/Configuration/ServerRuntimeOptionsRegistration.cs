@@ -26,7 +26,7 @@ internal static class ServerRuntimeOptionsRegistration
     {
         services.AddDueCoordinationOptions(configuration);
         services.AddOptions<BackgroundWorkerOptions>().Bind(configuration.GetSection(BackgroundWorkerOptions.SectionName))
-            .Validate(options => options.FlushInterval > TimeSpan.Zero && options.MaximumBufferedEvents > 0,
+            .Validate(options => options.FlushInterval > TimeSpan.Zero,
                 BackgroundWorkerOptions.SectionName).ValidateOnStart();
         services.AddOptions<RuntimeDurableJobOptions>().Bind(configuration.GetSection(RuntimeDurableJobOptions.SectionName))
             .Validate(options => options.IsValid(), RuntimeDurableJobOptions.ValidationMessage).ValidateOnStart();

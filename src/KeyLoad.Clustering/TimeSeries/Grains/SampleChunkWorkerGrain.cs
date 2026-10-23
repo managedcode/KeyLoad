@@ -6,12 +6,13 @@ using Orleans.Concurrency;
 namespace KeyLoad.Clustering;
 
 /// <summary>Buffers time-series hints per execution stateless worker activation and flushes on a grain timer.</summary>
-[StatelessWorker]
+[StatelessWorker(MaximumLocalPollers)]
 internal sealed class SampleChunkWorkerGrain(BackgroundStorageClient storage,
     IOptions<BackgroundWorkerOptions> batching, ILogger<SampleChunkWorkerGrain> diagnostics)
     : Grain, ISampleChunkWorkerGrain
 {
-    private readonly Queue<SampleChunkWorkHint> pending = new();
+    /// <summary>One polling activation per silo; a second poller would only re-read the same persisted pages.</summary>
+    private const int MaximumLocalPollers = 1;
     private byte[]? after;
     private IGrainFactory grains => GrainFactory;
 
@@ -33,45 +34,12 @@ internal sealed class SampleChunkWorkerGrain(BackgroundStorageClient storage,
         return Task.CompletedTask;
     }
 
-    public Task EnqueueAsync(SampleChunkWorkHint hint, CancellationToken cancellationToken)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-        if (pending.Count >= batching.Value.MaximumBufferedEvents)
-        {
-            throw Errors.Fail(ErrorCode.ResourceExhausted, BackgroundWorkerOptions.BufferFull);
-        }
-        pending.Enqueue(hint);
-        return Task.CompletedTask;
-    }
-
     private async Task FlushAsync(CancellationToken token)
     {
-        while (pending.TryPeek(out var hint))
-        {
-            token.ThrowIfCancellationRequested();
-            await ScheduleBufferedAsync(hint, token).ConfigureAwait(true);
-            pending.Dequeue();
-        }
         after = await CycleAsync(after, token).ConfigureAwait(true);
     }
 
     /// <summary>A refused or unreachable hint leaves the buffer; the persisted chunk record remains the durable source.</summary>
-    private async Task ScheduleBufferedAsync(SampleChunkWorkHint hint, CancellationToken token)
-    {
-        try
-        {
-            await ScheduleJoinedAsync(hint, token).ConfigureAwait(true);
-        }
-        catch (KeyLoadException refusal) when (!token.IsCancellationRequested)
-        {
-            SampleChunkJobDiagnostics.Failed(diagnostics, refusal.Code);
-        }
-        catch (Exception failure) when (!token.IsCancellationRequested && GrainBoundaryErrors.Handles(failure))
-        {
-            SampleChunkJobDiagnostics.Failed(diagnostics, ErrorCode.OwnershipLost);
-        }
-    }
-
     private async Task<byte[]?> CycleAsync(byte[]? after, CancellationToken token)
     {
         try

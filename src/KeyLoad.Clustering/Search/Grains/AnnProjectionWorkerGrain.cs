@@ -6,13 +6,14 @@ using Orleans.Concurrency;
 namespace KeyLoad.Clustering;
 
 /// <summary>Activation-local ANN hints; canonical records remain the durable work source.</summary>
-[StatelessWorker]
+[StatelessWorker(MaximumLocalPollers)]
 internal sealed class AnnProjectionWorkerGrain(BackgroundStorageClient storage,
     IServiceProvider services, TimeProvider clock, IOptions<DatabaseLimits> limits,
     IOptions<BackgroundWorkerOptions> batching, ILogger<AnnProjectionWorkerGrain> diagnostics)
     : Grain, IAnnProjectionWorkerGrain
 {
-    private readonly Queue<AnnProjectionWorkerEvent> pending = new();
+    /// <summary>One polling activation per silo; a second poller would only re-read the same persisted pages.</summary>
+    private const int MaximumLocalPollers = 1;
     private byte[]? after;
     private IGrainFactory grains => GrainFactory;
 
@@ -34,47 +35,12 @@ internal sealed class AnnProjectionWorkerGrain(BackgroundStorageClient storage,
         return Task.CompletedTask;
     }
 
-    public Task EnqueueAsync(AnnProjectionWorkerEvent hint, CancellationToken cancellationToken)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-        if (pending.Count >= batching.Value.MaximumBufferedEvents)
-        {
-            throw Errors.Fail(ErrorCode.ResourceExhausted, BackgroundWorkerOptions.BufferFull);
-        }
-        pending.Enqueue(hint);
-        return Task.CompletedTask;
-    }
-
     private async Task FlushAsync(CancellationToken token)
     {
-        while (pending.TryPeek(out var hint))
-        {
-            token.ThrowIfCancellationRequested();
-            await ScheduleBufferedAsync(hint, token).ConfigureAwait(true);
-            pending.Dequeue();
-        }
         after = await CycleAsync(after, token).ConfigureAwait(true);
     }
 
     /// <summary>A refused or unreachable hint leaves the buffer; the persisted projection record remains the durable source.</summary>
-    private async Task ScheduleBufferedAsync(AnnProjectionWorkerEvent hint, CancellationToken token)
-    {
-        try
-        {
-            await GrainFactory.GetGrain<IAnnProjectionCoordinatorGrain>(
-                AnnProjectionJobProtocol.GrainKey(hint.Consumer, hint.Generation, hint.NodeId))
-                .ScheduleAsync(hint.Consumer, hint.Generation, hint.NodeId, token).ConfigureAwait(true);
-        }
-        catch (KeyLoadException refusal) when (!token.IsCancellationRequested)
-        {
-            AnnProjectionJobDiagnostics.Failed(diagnostics, refusal.Code);
-        }
-        catch (Exception failure) when (!token.IsCancellationRequested && GrainBoundaryErrors.Handles(failure))
-        {
-            AnnProjectionJobDiagnostics.Failed(diagnostics, ErrorCode.OwnershipLost);
-        }
-    }
-
     private async Task<byte[]?> CycleAsync(byte[]? after, CancellationToken token)
     {
         try

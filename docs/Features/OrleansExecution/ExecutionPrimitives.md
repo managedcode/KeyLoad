@@ -12,7 +12,7 @@ This specification states which Orleans 10.4 primitive KeyLoad uses for each kin
 | Commands of one logical partition | Partition grain | Canonical partition id from the shared ID helper |
 | A node's ZoneTree files | Storage host DI singleton (lifecycle participant) plus one storage Grain Service per silo | One per silo; remote callers use `GetGrainService(SiloAddress)` |
 | Copies of a write | Grain Service calls to the target silos | Target silos from `IClusterMembershipService` |
-| Queue deadlines, due and recurring work, remote queue transfers, ANN projection, time-series chunks | `[StatelessWorker(maxLocalWorkers, removeIdleWorkers: false)]` grain with a `RegisterGrainTimer` flush | One grain key per queue, index or series from the shared ID helper |
+| Queue deadlines, due and recurring work, remote queue transfers, ANN projection, time-series chunks | `[StatelessWorker(1)]` grain that sweeps persisted work pages on a `RegisterGrainTimer` tick; one polling activation per silo | One pool key per work kind from the shared ID helper |
 | Durable periodic work (≥ 1 minute) | Reminders | Owning grain |
 | One-time due work | Durable Jobs with idempotent `IDurableJobHandler` | Target grain |
 | Streamed results | `IAsyncEnumerable<T>` grain methods | Call-scoped |
@@ -25,8 +25,8 @@ flowchart LR
     Part -->|Orleans call| Svc[Storage Grain Service on a chosen silo]
     Svc --> Host[Storage host singleton]
     Host --> Zt[(ZoneTree)]
-    Ev[Events from apply] --> Wk[StatelessWorker buffer]
-    Wk -->|timer flush| Part
+    Records[(Persisted due work)] --> Wk[StatelessWorker sweep]
+    Wk -->|timer tick| Part
 ```
 
 ## Connection and request lifetimes
@@ -35,14 +35,14 @@ One Orleans grain per accepted client connection runs that connection's independ
 
 ## Background work
 
-Background work never checks leadership. A stateless worker accepts events, buffers them in memory and, on an Orleans grain timer, writes the batch through the normal partition grain → ZoneTree owner path. The flush interval is a typed option (for example 5 seconds). The buffer is lost on a silo crash, so a worker buffers only work that can be rebuilt from committed ZoneTree records from a persisted watermark; clients are acknowledged only after the authoritative commit.
+Background work never checks leadership. Each silo hosts one polling activation per work kind; on every grain-timer tick it reads the next page of persisted due, deadline, transfer, chunk or projection records from the storage owner and dispatches them through the normal coordinator grain → partition grain → ZoneTree owner path. The sweep interval is a typed option (for example 5 seconds). Nothing is buffered in memory: the persisted records are the only work source, dispatch is idempotent through stable command identities, and clients are acknowledged only after the authoritative commit. Reminders are not used; the sweep replaces them.
 
 ## Requirements and acceptance
 
 | Requirement | Acceptance |
 |---|---|
 | REQ-ORL-001: use the primitive listed above for each kind of work; do not add custom schedulers, coordinators, leader election or transports. | AC-ORL-001: a source review lists every grain, Grain Service, stateless worker, timer, reminder and durable job with the work it owns; none checks leadership or opens its own transport. |
-| REQ-ORL-002: stateless worker pools stay bounded. | AC-ORL-002: under saturation the number of local activations per key never exceeds `maxLocalWorkers`, buffered items and bytes stay within their typed limits, and the overflow path is an explicit refusal. |
+| REQ-ORL-002: stateless worker pools stay bounded. | AC-ORL-002: each silo runs at most one polling activation per work kind, every sweep reads one bounded page, and a page that cannot be dispatched stays persisted for the next tick. |
 | REQ-ORL-003: `[OneWay]` carries only advisory, loss-tolerant signals. | AC-ORL-003: dropping or duplicating such a signal changes no committed state and the affected operation still completes. |
 | REQ-ORL-004: interleaving is enabled only where the invariant allows it. | AC-ORL-004: a long operation on a connection does not block close or cancel (`[AlwaysInterleave]`); concurrent operations keep separate identity and authorization. |
 | REQ-ORL-005: durable jobs and reminders have idempotent effects. | AC-ORL-005: a job retried after a handler failure or a provider restart produces the effect exactly once or an explicit no-op. |
@@ -51,10 +51,10 @@ Background work never checks leadership. A stateless worker accepts events, buff
 | REQ-ORL-008: Orleans messaging is not database history. | AC-ORL-008: committed events and queue messages are read from ZoneTree, never from Orleans streams, observers or broadcast channels. |
 | REQ-ORL-009: only `ITransactionalState` participates in Orleans transactions. | AC-ORL-009: no document claims cross-partition ACID from Orleans transactions; same-partition atomic batches remain the atomicity contract. |
 | REQ-ORL-010: identifiers come from one shared helper per identity kind. | AC-ORL-010: case-variant or non-canonical keys are rejected at routing and storage boundaries; the helper round-trips canonical keys unchanged. |
-| REQ-ORL-011: background work uses stateless workers with timer flush and no leadership check. | AC-ORL-011: events produced by committed apply are flushed within the configured interval; a silo crash between buffer and flush loses no acknowledged data and the work is rebuilt from the persisted watermark. |
+| REQ-ORL-011: background work uses stateless workers with timer sweeps and no leadership check. | AC-ORL-011: committed due records are dispatched within the configured interval; a silo crash between commit and sweep loses no acknowledged data because the next sweep reads the same persisted records. |
 | REQ-ORL-012: Orleans telemetry is exported with fixed, privacy-safe metadata. | AC-ORL-012: exported spans, metrics and logs carry no credentials, payloads or unbounded labels and keep trace parentage across grain calls. |
 | REQ-ORL-013: one connection grain owns its client's operations. | AC-ORL-013: repeated operations from one connection reuse one activation; independent principals and commands stay isolated; disconnect removes the activation. |
 
 ## Verification
 
-Real TUnit operations through the .NET SDK and official MCP client against the Aspire-owned Docker cluster, plus focused unit tests of the stateless-worker buffer and the ID helper. AC-ORL-011 requires the current StatelessWorker event-buffer and grain-timer path; source presence does not qualify its actual cancellation, flush and joined shutdown behavior.
+Real TUnit operations through the .NET SDK and official MCP client against the Aspire-owned Docker cluster, plus focused unit tests of the stateless-worker sweep and the ID helper. AC-ORL-011 requires the current StatelessWorker sweep and grain-timer path; source presence does not qualify its actual cancellation and joined shutdown behavior.

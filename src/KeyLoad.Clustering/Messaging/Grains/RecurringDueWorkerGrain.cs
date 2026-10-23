@@ -6,13 +6,14 @@ using Orleans.Concurrency;
 
 namespace KeyLoad.Clustering;
 
-/// <summary>Bounded queue events are flushed by execution timers; persisted due records survive activation loss.</summary>
-[StatelessWorker]
+/// <summary>Sweeps persisted due, deadline and transfer records on a grain timer; nothing is buffered in memory.</summary>
+[StatelessWorker(MaximumLocalPollers)]
 internal sealed class RecurringDueWorkerGrain(BackgroundStorageClient storage,
     TimeProvider clock, IOptions<DueCoordinationOptions> options, IOptions<BackgroundWorkerOptions> batching,
     ILogger<RecurringDueWorkerGrain> diagnostics) : Grain, IRecurringDueWorkerGrain
 {
-    private readonly Queue<DueWorkHint> pending = new();
+    /// <summary>One polling activation per silo; a second poller would only re-read the same persisted pages.</summary>
+    private const int MaximumLocalPollers = 1;
     private DueSweepCursor? due;
     private QueueDeadlineCursor? deadlines;
     private RemoteTransferPendingCursor? transfers;
@@ -36,24 +37,8 @@ internal sealed class RecurringDueWorkerGrain(BackgroundStorageClient storage,
         return Task.CompletedTask;
     }
 
-    public Task EnqueueAsync(DueWorkHint hint, CancellationToken cancellationToken)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-        if (pending.Count >= batching.Value.MaximumBufferedEvents)
-        {
-            throw Errors.Fail(ErrorCode.ResourceExhausted, BackgroundWorkerOptions.BufferFull);
-        }
-        pending.Enqueue(hint);
-        return Task.CompletedTask;
-    }
-
     private async Task FlushAsync(CancellationToken token)
     {
-        while (pending.TryPeek(out var hint))
-        {
-            await Dispatch(hint, token).ConfigureAwait(true);
-            pending.Dequeue();
-        }
         due = await RunCycleAsync(due, token).ConfigureAwait(true);
         deadlines = await RunQueueCycleAsync(deadlines, token).ConfigureAwait(true);
         transfers = await RunTransferCycleAsync(transfers, token).ConfigureAwait(true);

@@ -94,12 +94,11 @@ own; scaling means adding silos to the Orleans cluster.
   Orleans -> results are gathered -> returned to the caller.
 - **Background work.** Queue deadlines, due and recurring work, remote
   transfers, ANN projection and time-series chunk work never check leadership.
-  Orleans `[StatelessWorker]` grains share a logical pool key. Orleans automatically
-  creates and retires activations as load changes; application code does not address
-  individual activations. Each activation accepts events, buffers them in memory
-  and, on an Orleans timer whose
-  interval is a typed option (for example 5 seconds), write the batch through
-  the normal grain -> ZoneTree owner path.
+  Orleans `[StatelessWorker(1)]` grains share one pool key per work kind, so each
+  silo runs one polling activation. On an Orleans grain timer whose interval is a
+  typed option (for example 5 seconds) the activation reads the next page of
+  persisted due records from the storage owner and dispatches them through the
+  normal grain -> ZoneTree owner path. Nothing is buffered in memory.
 - **Identifiers.** Every grain key and every identifier for objects, counters
   and storage keys comes from one shared helper per identity kind. Keys are
   case-sensitive.

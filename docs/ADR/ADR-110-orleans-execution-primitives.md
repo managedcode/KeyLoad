@@ -15,7 +15,7 @@ Each KeyLoad responsibility uses exactly one Orleans primitive:
 | A node's ZoneTree | One DI singleton storage host per silo plus one Grain Service as its remote surface | A Grain Service is one per silo, never collected, and can be called on a specific silo with `GrainServiceClient<T>.GetGrainService(SiloAddress)` |
 | Copies of a write | The writer calls the storage Grain Service on each target silo | Orleans replicates no application data; target silos come from membership |
 | Finding silos | `IClusterMembershipService.CurrentSnapshot` / `MembershipUpdates` (or `ISiloStatusOracle.GetActiveSilos()`) | Execution, public, per-silo view of Active silos; `IManagementGrain.GetHosts` is for clients and diagnostics |
-| Buffered background work (queue deadlines, due and recurring work, ANN projection, time-series chunks) | `[StatelessWorker]` grain with a grain timer flush | Local-first pool; buffers events and writes them on a `RegisterGrainTimer` tick; no leadership check |
+| Background work (queue deadlines, due and recurring work, ANN projection, time-series chunks) | `[StatelessWorker(1)]` grain with a grain timer sweep | One polling activation per silo reads persisted work pages on a `RegisterGrainTimer` tick; no leadership check |
 | Durable periodic work of a minute or more | Reminders (`IRemindable`, `RegisterOrUpdateReminder`) | Definition is persisted and reactivates the grain; minimum period 1 minute; missed ticks are skipped |
 | One-time due work | Durable Jobs (`ILocalDurableJobManager.ScheduleJobAsync`, `IDurableJobHandler`) | Persisted, at-least-once, handlers must be idempotent; alpha package |
 | Per-request context | `RequestContext` through ManagedCode.Orleans.Identity | Small values flow down the call chain, never back; carries the verified subject only |
@@ -30,8 +30,8 @@ flowchart LR
     Membership[IClusterMembershipService] --> Part
     Svc --> Host[Storage host singleton]
     Host --> Files[(ZoneTree files)]
-    Events[Background events] --> Worker[StatelessWorker buffer]
-    Worker -->|timer flush| Part
+    Records[(Persisted due work)] --> Worker[StatelessWorker sweep]
+    Worker -->|timer tick| Part
 ```
 
 ## Rules taken from the Orleans source
@@ -42,8 +42,8 @@ flowchart LR
 4. **Calling a specific silo.** Use the protected `GetGrainService(SiloAddress)` through a public wrapper on the client. The `GrainId` and `uint` overloads route by the consistent ring, which changes on every membership change, and are not used for data ownership. A restarted silo has a new `SiloAddress`.
 5. **Messages.** Grain calls are at-most-once with no ordering guarantee. Replication calls carry a per-partition sequence number, apply is idempotent and retries are explicit; a write is acknowledged after every configured copy confirms durable apply.
 6. **Single activation is not a storage fence.** The directory may briefly allow a duplicate activation; correctness of persisted effects comes from idempotent, sequence-checked apply at the storage owner.
-7. **StatelessWorker identity.** All activations of a stateless worker share one `GrainId`; each has only an ephemeral, non-addressable `ActivationId`. Up to `MaxLocal` activations per silo (default: processor count). A stable worker identity comes from the grain key (one key per queue, index, series or silo), produced by the shared ID helper. Use `[StatelessWorker(maxLocalWorkers, removeIdleWorkers: false)]` for buffering workers.
-8. **Buffered events are disposable.** A worker's buffer is in memory and is lost on a silo crash (`OnDeactivateAsync` does not run then). Buffer only work that can be rebuilt from committed ZoneTree records from a persisted watermark, and never acknowledge a client before the authoritative commit.
+7. **StatelessWorker identity.** All activations of a stateless worker share one `GrainId`; each has only an ephemeral, non-addressable `ActivationId`. KeyLoad pins `maxLocalWorkers` to 1, so each silo runs one activation per pool key. A stable worker identity comes from the grain key (one key per queue, index, series or silo), produced by the shared ID helper. Use `[StatelessWorker(maxLocalWorkers, removeIdleWorkers: false)]` for buffering workers.
+8. **Nothing is buffered.** A worker holds no in-memory event queue; every tick re-reads persisted records from a watermark, so a silo crash loses no work and nothing is acknowledged before the authoritative commit.
 9. **Timers.** `RegisterGrainTimer` with `GrainTimerCreationOptions { DueTime, Period, Interleave, KeepAlive }`; the period counts from callback completion, ticks never overlap, and timers stop on deactivation. The flush interval is a typed option (for example 5 seconds).
 10. **Keys are case-sensitive.** String grain keys are compared as raw UTF-8 bytes with no normalization, so "Tenant" and "tenant" are different grains. Every key is produced by one shared helper per identity kind that sanitizes user input, strictly validates at every routing and storage boundary (an id is valid only if sanitizing it changes nothing), compares ordinally and encodes order-preserving storage keys — the same pattern ZoneTree.Analytics uses (`Text.Name`, `Text.ValidateStoredName`, `RollupDefinition.Id`, `KeyCodec`, `Text.StableHash`).
 11. **Caches.** Per-entity hot state lives in grain activation memory; per-silo shared caches live in the storage host singleton, bounded and tagged with the policy/commit epoch they were built from. Broadcast channels reach one grain per subscribing type, not every silo, and observers are best-effort, so per-silo invalidation is a Grain Service call to each Active silo or validation on read.

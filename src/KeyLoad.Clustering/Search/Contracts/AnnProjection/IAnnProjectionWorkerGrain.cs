@@ -7,5 +7,4 @@ namespace KeyLoad.Clustering;
 internal interface IAnnProjectionWorkerGrain : IGrainWithStringKey
 {
     Task WakeAsync(CancellationToken cancellationToken);
-    Task EnqueueAsync(AnnProjectionWorkerEvent hint, CancellationToken cancellationToken);
 }

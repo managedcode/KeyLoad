@@ -1,4 +1,3 @@
-using KeyLoad.Core.Features.TimeSeries;
 using Orleans.CodeGeneration;
 
 namespace KeyLoad.Clustering;
@@ -8,5 +7,4 @@ namespace KeyLoad.Clustering;
 internal interface ISampleChunkWorkerGrain : IGrainWithStringKey
 {
     Task WakeAsync(CancellationToken cancellationToken);
-    Task EnqueueAsync(SampleChunkWorkHint hint, CancellationToken cancellationToken);
 }
