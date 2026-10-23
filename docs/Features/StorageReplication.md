@@ -51,7 +51,7 @@ General restoration of an empty or lagging data copy is not qualified by this
 implementation.
 
 Reads select an available storage owner with the highest observed
-canonical cut, preferring the executing silo when cuts match. A requested minimum
+canonical cut, preferring the executing silo when cuts match. The commit grain caches the selected owners and their canonical position per membership version and re-reads silo cuts only after a membership change or a failed copy. A requested minimum
 token must be reached locally before reading, and current persisted credentials,
 resource permissions and projection rules still apply. Observing a cut alone
 does not prove equal data or a distributed snapshot.

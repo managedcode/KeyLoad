@@ -5,21 +5,26 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Clustering;
 
-/// <summary>Copies prepared commands through execution storage services under the owning grain's ordering.</summary>
+/// <summary>Copies prepared commands through execution storage services under the owning grain's ordering.
+/// The owner set and its canonical position are cached per membership version; cuts are re-read only after
+/// a membership change or a failed copy, not on every write.</summary>
 internal sealed class SiloStorageCopyExecution(SiloDatabaseClient storage, IClusterMembershipService membership,
     IOptions<ReplicaCopyOptions> options, Guid incarnation, ILogger diagnostics)
 {
     private readonly record struct AvailableCopy(SiloAddress Address, string Name, SiloStorageCut Cut);
 
-    /// <summary>Applies one command to every selected copy; any failure after the first persisted copy is uncertain.</summary>
+    private AvailableCopy[]? cachedOwners;
+    private MembershipVersion cachedVersion;
+
     internal async Task<Result<object>> ApplyAsync(Command<DatabaseCommand> operation, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         var owners = await OwnersAsync(cancellationToken).ConfigureAwait(true);
-        var prepared = await PrepareAsync(owners, operation, cancellationToken).ConfigureAwait(true);
         var persisted = StorageCopyContract.UnpersistedCopies;
+        var completed = false;
         try
         {
+            var prepared = await PrepareAsync(owners, operation, cancellationToken).ConfigureAwait(true);
             StorageOperationResult? original = null;
             foreach (var owner in owners)
             {
@@ -32,6 +37,8 @@ internal sealed class SiloStorageCopyExecution(SiloDatabaseClient storage, IClus
                     throw Errors.Fail(ErrorCode.UnknownWriteOutcome, StorageCopyContract.DifferentOutcomes);
                 }
             }
+            Advance(owners, prepared.Sequence);
+            completed = true;
             return StorageCopyAcknowledgements.Attach(original!.Result, owners.Length);
         }
         catch (Exception error) when (error is not KeyLoadException { Code: ErrorCode.UnknownWriteOutcome }
@@ -40,21 +47,30 @@ internal sealed class SiloStorageCopyExecution(SiloDatabaseClient storage, IClus
         {
             throw Errors.Fail(ErrorCode.UnknownWriteOutcome, StorageCopyContract.WriteUncertain, error);
         }
+        finally
+        {
+            if (!completed)
+            {
+                cachedOwners = null;
+            }
+        }
     }
 
-    /// <summary>Reads the most advanced available cut of this incarnation.</summary>
     internal async Task<SiloStorageCut> ReadCutAsync(CancellationToken cancellationToken)
         => (await ReadAvailableAsync(cancellationToken).ConfigureAwait(true)).Cut;
 
-    /// <summary>Selects the most advanced available copy, preferring the caller's silo on ties.</summary>
     internal async Task<SiloAddress> GetReadOwnerAsync(SiloAddress preferredSilo, CancellationToken cancellationToken)
         => (await ReadAvailableAsync(cancellationToken, preferredSilo).ConfigureAwait(true)).Address;
 
-    /// <summary>Owners are the copies holding the most data, so a joining or lagging silo never displaces a complete copy.</summary>
     private async Task<AvailableCopy[]> OwnersAsync(CancellationToken cancellationToken)
     {
         var settings = options.Value;
         settings.Validate();
+        var version = membership.CurrentSnapshot.Version;
+        if (cachedOwners is { } cached && cachedVersion.Equals(version))
+        {
+            return cached;
+        }
         var available = await ReadAvailableCopiesAsync(cancellationToken).ConfigureAwait(true);
         var owners = available.OrderByDescending(copy => copy.Cut.Position)
             .ThenBy(copy => copy.Name, StringComparer.Ordinal).Take(settings.ReplicaCount).ToArray();
@@ -62,7 +78,21 @@ internal sealed class SiloStorageCopyExecution(SiloDatabaseClient storage, IClus
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, StorageCopyContract.OwnersUnavailable);
         }
+        cachedOwners = owners;
+        cachedVersion = version;
         return owners;
+    }
+
+    /// <summary>Records that every owner persisted <paramref name="sequence"/>, so the next write needs no cut reads.</summary>
+    private static void Advance(AvailableCopy[] owners, long sequence)
+    {
+        for (var index = StorageCopyContract.FirstOwner; index < owners.Length; index++)
+        {
+            if (owners[index].Cut.Position < sequence)
+            {
+                owners[index] = owners[index] with { Cut = owners[index].Cut with { Position = sequence } };
+            }
+        }
     }
 
     private async Task<AvailableCopy[]> ReadAvailableCopiesAsync(CancellationToken cancellationToken)
@@ -86,7 +116,6 @@ internal sealed class SiloStorageCopyExecution(SiloDatabaseClient storage, IClus
         return [.. available];
     }
 
-    /// <summary>A silo whose store is closed, mismatched or unreachable is excluded instead of failing every operation.</summary>
     private async Task<SiloStorageCut?> TryReadCutAsync(SiloAddress silo, CancellationToken cancellationToken)
     {
         try
@@ -110,7 +139,7 @@ internal sealed class SiloStorageCopyExecution(SiloDatabaseClient storage, IClus
     private async Task<AvailableCopy> ReadAvailableAsync(CancellationToken cancellationToken, SiloAddress? preferredSilo = null)
     {
         AvailableCopy? selected = null;
-        foreach (var copy in await ReadAvailableCopiesAsync(cancellationToken).ConfigureAwait(true))
+        foreach (var copy in await OwnersAsync(cancellationToken).ConfigureAwait(true))
         {
             if (selected is not { } current || copy.Cut.Position > current.Cut.Position
                 || copy.Cut.Position == current.Cut.Position && copy.Address.Equals(preferredSilo))
@@ -143,7 +172,6 @@ internal sealed class SiloStorageCopyExecution(SiloDatabaseClient storage, IClus
         return new(maximum + StorageCopyContract.NextSequence, prepared);
     }
 
-    /// <summary>Completes the last canonical command on copies one position behind, whichever client issued it.</summary>
     private async Task CompleteCopyGapAsync(AvailableCopy[] owners, long maximum, CancellationToken cancellationToken)
     {
         if (maximum - owners[^StorageCopyContract.LastOwnerFromEnd].Cut.Position != StorageCopyContract.NextSequence)
@@ -171,6 +199,7 @@ internal sealed class SiloStorageCopyExecution(SiloDatabaseClient storage, IClus
             }
             completed++;
         }
+        Advance(owners, maximum);
         StorageCopyDiagnostics.CopyGapCompleted(diagnostics, maximum, completed);
     }
 }

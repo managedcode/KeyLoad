@@ -79,8 +79,10 @@ own; scaling means adding silos to the Orleans cluster.
 - **Copies.** The writer finds the target silos through Orleans
   membership (`IClusterMembershipService` / `IManagementGrain`) and sends the
   write through ordinary Orleans calls to the ZoneTree owner Grain Services on
-  `KeyLoad:ReplicaCount` silos. The write is acknowledged after every configured
-  copy confirms persisted apply. `ReplicaCount` is positive, defaults
+  `KeyLoad:ReplicaCount` silos. The owner set and its canonical position are
+  cached per Orleans membership version; silo cuts are re-read only after a
+  membership change or a failed copy, not on every write. The write is
+  acknowledged after every configured copy confirms persisted apply. `ReplicaCount` is positive, defaults
   to 1 and is not larger than `KeyLoad:SiloCount`; `KeyLoad:StorageMode` selects
   `IsolatedVolumes` (each silo owns its own disk, the default) or `SharedVolume`
   (one shared disk, `ReplicaCount=1`)
