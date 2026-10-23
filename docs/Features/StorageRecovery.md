@@ -198,7 +198,7 @@ Complete-frame length mismatch (REQ-STORAGE-017 / AC-WAL-003): `StoreOpenPreflig
 flowchart LR
     Transaction[Owned ordered transaction] --> Codec[Orleans generated binary payload]
     Codec --> Commit[Checksum and disk flush]
-    Commit --> Execution[ZoneTree Sync WAL]
+    Commit --> Execution[ZoneTree materialization, engine WAL disabled]
     Reopen[Journal recovery] --> Validate[Version checksum complete decode and ordered keys]
     Validate --> Apply[Apply verified mutations]
 ```

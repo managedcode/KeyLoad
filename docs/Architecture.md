@@ -129,8 +129,9 @@ Two storage modes are required. With a **shared volume**, all silos can reach th
 configured partition paths without copying data. One ordinary Orleans grain owns
 each open physical partition; the other silos call it. Orleans owns activation
 placement and movement. The storage owner closes its actual handles before another
-activation reopens that partition. ZoneTree's WAL opens with exclusive file
-sharing, so several live writable instances over the same files are unsupported.
+activation reopens that partition. The store's owner lock and `commands.wal` open with
+exclusive file sharing, so several live writable instances over the same files are
+unsupported.
 The actual filesystem must preserve the required locking and flush semantics.
 
 With **isolated volumes**, typed Orleans calls reach the owners of the required

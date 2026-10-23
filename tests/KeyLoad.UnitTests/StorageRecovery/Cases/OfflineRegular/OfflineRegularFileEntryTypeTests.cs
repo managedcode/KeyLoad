@@ -6,6 +6,8 @@ namespace KeyLoad.UnitTests.Features.StorageRecovery;
 internal sealed class OfflineRegularFileEntryTypeTests
 {
     private const string RootPrefix = "ft-";
+    // Unix domain socket paths are limited to 104 bytes on macOS; a short unique suffix keeps the test root within it.
+    private const int ShortIdentityLength = 8;
 
     [Test]
     public async Task AcEpoch012RejectsDirectorySymlinkSocketAndDeviceWithoutChangingTargets()
@@ -40,7 +42,7 @@ internal sealed class OfflineRegularFileEntryTypeTests
 
     private static async Task WithDirectoryAsync(Func<string, Task> action)
     {
-        var root = Path.Combine(AppContext.BaseDirectory, RootPrefix + Guid.NewGuid().ToString("N"));
+        var root = Path.Combine(AppContext.BaseDirectory, RootPrefix + Guid.NewGuid().ToString("N")[..ShortIdentityLength]);
         Directory.CreateDirectory(root);
         try
         {

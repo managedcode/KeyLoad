@@ -41,7 +41,9 @@ internal static class ZoneTreeTreeFactory
             .SetMarkValueDeletedDelegate(static (ref Memory<byte> value) => value = new byte[] { DeletedValueMarker })
             .ConfigureWriteAheadLogOptions(o =>
             {
-                o.WriteAheadLogMode = WriteAheadLogMode.Sync;
+                // commands.wal is the only redo log and is replayed from the last checkpoint on every open,
+                // so the engine WAL would fsync every mutation a second time without adding recovery coverage.
+                o.WriteAheadLogMode = WriteAheadLogMode.None;
                 o.CompressionMethod = CompressionMethod.None;
             })
             .ConfigureDiskSegmentOptions(o => o.CompressionMethod = CompressionMethod.None);

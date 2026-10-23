@@ -27,7 +27,7 @@ The provider now computes the low32 bits of XXH3-64 over its explicit
 little-endian WAL header and exact key/value bytes. Use the published provider
 unchanged. KeyLoad owns no substitute checksum implementation or alternate
 reader. Its own current identity, atomic WAL and unversioned checkpoint contracts, generated
-aliases/field IDs, raw-byte serializers, Sync WAL, uncompressed provider,
+aliases/field IDs, raw-byte serializers, journal-only durability (engine WAL disabled), uncompressed provider,
 node-local locks/apply ownership, canonical outcomes and required-copy ACK barriers remain
 the existing contract. New qualification creates current stores and reopens those
 same stores with the same published dependency cohort. An earlier development
@@ -46,7 +46,7 @@ cohort is not converted or presented as this current-format evidence.
   exact position, node/incarnation and current generation; afterwards verify
   full original/fresh receipts, changed-body Conflict and cold healthy effects.
   ChecksumProfileRecoveryTests owns these whole operations.
-- REQ-EXECUTION-WAL-PROFILE-002 -> AC-EXECUTION-WAL-PROFILE-002: current Sync WAL,
+- REQ-EXECUTION-WAL-PROFILE-002 -> AC-EXECUTION-WAL-PROFILE-002: current journal-only durability,
   ordinary/scalar operation suites, real process recovery and genuine Aspire cluster
   snapshot install/ordered tail/public SDK and official MCP replay/cold gates
   pass with original source/DLL/PDB/package/image identities. checksum

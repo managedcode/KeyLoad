@@ -79,9 +79,14 @@ internal sealed class OrleansWalSuccessorTests
         var options = new ZoneTreeStoreOptions(files.DirectoryPath)
             .ResolveExecutionOptions(UnitExecutionOptions.StorageExecution());
         var path = Path.Combine(files.DirectoryPath, CheckpointFileName);
-        using (var tree = ZoneTreeTreeFactory.Open(options))
+        // The engine runs without its own WAL, so the committed record lives in commands.wal, not in the closed tree:
+        // the checkpoint is written from the known baseline mutation at the requested position.
+        using (var output = new FileStream(path, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None,
+            options.FileBufferBytes, FileOptions.WriteThrough))
         {
-            ZoneTreeCheckpointWriter.Write(path, options, identity, position, InitialAppliedPosition, tree);
+            ZoneTreeCheckpointWriter.WriteMutations(output, options,
+                new StorageSnapshot(identity.Incarnation, position, InitialAppliedPosition, ExpectedRecordCount),
+                visit => visit(new StorageMutation(BaselineKey, BaselineValue)));
         }
 
         using (var input = File.OpenRead(path))

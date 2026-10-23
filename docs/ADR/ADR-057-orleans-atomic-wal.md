@@ -13,10 +13,16 @@ flowchart LR
     Stage[Ordered owned mutations] --> Orleans[Generated binary codec and bounded output]
     Orleans --> Journal[Versioned checksummed commands WAL]
     Journal --> Flush[Flush to disk before apply]
-    Flush --> Tree[ZoneTree bytes and Sync WAL]
+    Flush --> Tree[ZoneTree bytes, engine WAL disabled]
     Journal --> Verify[Verify checksum sequence complete decode and keys]
     Verify --> Replay[Replay whole valid frame]
 ```
+
+The checksummed `commands.wal` is the only redo log. Every open replays it from the last
+checkpoint into the ZoneTree materialization, so the engine runs with
+`WriteAheadLogMode.None`: its own synchronous WAL duplicated each mutation's fsync under the
+commit gate without adding recovery coverage. `tree/0.meta.wal` remains the engine's segment
+metadata log and is unaffected by that mode.
 
 ## Current-format admission and rollback
 
