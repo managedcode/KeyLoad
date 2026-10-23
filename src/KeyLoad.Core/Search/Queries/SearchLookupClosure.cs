@@ -14,7 +14,7 @@ internal static class SearchLookupClosure
         source.CaptureExact(ResourceLifetimeCatalog.Key(partition.TenantId, partition.DatabaseId, collection));
         if (textField is not null)
         {
-            SearchQueriesBm25CorpusCapturedLookups.CaptureBm25CorpusReadLookups(source, principal, partition, collection, textField, tokenizer);
+            Bm25CorpusCapturedLookups.CaptureBm25CorpusReadLookups(source, principal, partition, collection, textField, tokenizer);
         }
         if (vectorField is null)
         {

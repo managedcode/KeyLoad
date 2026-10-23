@@ -40,7 +40,7 @@ internal static class VectorProjectionEligibility
             return false;
         }
         var metadata = budget.CreateView(view);
-        _ = ResourceExecutionQueriesResourceLifetimeReadBinding.BindAuthorizedReadResource(metadata, partition,
+        _ = ResourceLifetimeReadBinding.BindAuthorizedReadResource(metadata, partition,
             sourceResource.Name, ResourceKind.Collection);
         EntityReferenceLifetime.RequireStored(metadata, lineage.SourceDocument, sourceResource);
         if (lifetime is not null)

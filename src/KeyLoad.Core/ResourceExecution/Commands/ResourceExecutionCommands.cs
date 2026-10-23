@@ -94,7 +94,7 @@ public static class ResourceExecutionCommands
 
     internal static void ValidateResourcePolicies(ResourceDefinition definition)
     {
-        MessagingValidationTargetInboxValidation.ValidateInboxPolicy(definition);
+        TargetInboxValidation.ValidateInboxPolicy(definition);
         if (definition.FilePolicy is null || !definition.FilePolicy.IsValid())
         {
             throw Errors.Fail(ErrorCode.Validation, global::KeyLoad.Core.Features.BlobStorage.FileStorageProtocol.Invalid);

@@ -19,14 +19,14 @@ public static class EventStreamsValidation
             var parts = KeyCodec.Decode(key);
             if (parts.Length != TopicPurgeGroupKeyComponents || parts[TopicPurgeGroupIdIndex] is not string id || !KeyCodec.Encode(parts).AsSpan().SequenceEqual(key))
             {
-                throw Errors.Fail(ErrorCode.Corruption, EventStreamsExecutionEventSources.EventSourceRetainedHistoryDetail);
+                throw Errors.Fail(ErrorCode.Corruption, EventSources.EventSourceRetainedHistoryDetail);
             }
 
             JsonData.Identifier(id);
             var group = OrleansSerialization.Deserialize<GroupState>(value);
             if (group.Generation < TopicPurgePositiveIdentity || group.OwnershipEpoch < TopicPurgePositiveIdentity || group.Checkpoint < TopicPurgeInitialCheckpoint || group.IssuedPosition < group.Checkpoint || group.IssuedPosition > tail || group.Definition is null || group.Definition.Policy is null)
             {
-                throw Errors.Fail(ErrorCode.Corruption, EventStreamsExecutionEventSources.EventSourceRetainedHistoryDetail);
+                throw Errors.Fail(ErrorCode.Corruption, EventSources.EventSourceRetainedHistoryDetail);
             }
 
             ValidateTopicPurgeDefinition(group.Definition);
@@ -34,7 +34,7 @@ public static class EventStreamsValidation
         }
         catch (KeyLoadException failure) when (failure.Code is ErrorCode.Validation or ErrorCode.Corruption or ErrorCode.FormatUnsupported)
         {
-            throw Errors.Fail(ErrorCode.Corruption, EventStreamsExecutionEventSources.EventSourceRetainedHistoryDetail);
+            throw Errors.Fail(ErrorCode.Corruption, EventSources.EventSourceRetainedHistoryDetail);
         }
     }
 
@@ -42,9 +42,9 @@ public static class EventStreamsValidation
     {
         JsonData.Identifier(definition.DataPrincipalId);
         var policy = definition.Policy;
-        if (policy.MaxWindow is < MessagingExecutionSubscriptionGroups.SubscriptionGroupsMinimumPositiveCount or > MessagingExecutionSubscriptionGroups.SubscriptionGroupsMaximumSubscriptionWindow || policy.MaxAttempts is < MessagingExecutionSubscriptionGroups.SubscriptionGroupsMinimumPositiveCount or > MessagingExecutionSubscriptionGroups.SubscriptionGroupsMaximumSubscriptionAttempts || policy.MaxLeaseSeconds is < MessagingExecutionSubscriptionGroups.SubscriptionGroupsMinimumPositiveCount or > MessagingExecutionSubscriptionGroups.SubscriptionGroupsMaximumSubscriptionLeaseSeconds || policy.RetryBaseMilliseconds < MessagingExecutionSubscriptionGroups.SubscriptionGroupsMinimumPositiveCount || policy.RetryMaxMilliseconds < policy.RetryBaseMilliseconds || definition.EventTypes.IsDefault || definition.EventTypes.Length > MessagingExecutionSubscriptionGroups.SubscriptionGroupsMaximumSubscriptionEventTypes || definition.EventTypes.Distinct(StringComparer.Ordinal).Count() != definition.EventTypes.Length)
+        if (policy.MaxWindow is < SubscriptionGroups.SubscriptionGroupsMinimumPositiveCount or > SubscriptionGroups.SubscriptionGroupsMaximumSubscriptionWindow || policy.MaxAttempts is < SubscriptionGroups.SubscriptionGroupsMinimumPositiveCount or > SubscriptionGroups.SubscriptionGroupsMaximumSubscriptionAttempts || policy.MaxLeaseSeconds is < SubscriptionGroups.SubscriptionGroupsMinimumPositiveCount or > SubscriptionGroups.SubscriptionGroupsMaximumSubscriptionLeaseSeconds || policy.RetryBaseMilliseconds < SubscriptionGroups.SubscriptionGroupsMinimumPositiveCount || policy.RetryMaxMilliseconds < policy.RetryBaseMilliseconds || definition.EventTypes.IsDefault || definition.EventTypes.Length > SubscriptionGroups.SubscriptionGroupsMaximumSubscriptionEventTypes || definition.EventTypes.Distinct(StringComparer.Ordinal).Count() != definition.EventTypes.Length)
         {
-            throw Errors.Fail(ErrorCode.Corruption, EventStreamsExecutionEventSources.EventSourceRetainedHistoryDetail);
+            throw Errors.Fail(ErrorCode.Corruption, EventSources.EventSourceRetainedHistoryDetail);
         }
 
         foreach (var type in definition.EventTypes)
@@ -58,16 +58,16 @@ public static class EventStreamsValidation
         try
         {
             var identity = OrleansSerialization.Deserialize<RetainedTopicEventIdentity>(value);
-            if (identity.Generation != source.Generation || identity.Position < TopicPurgePositiveIdentity || identity.Position >= firstAvailablePosition || identity.ContentDigest is null || identity.ContentDigest.Length != MessagingCommandsTopicPublishReads.RetainedTopicDigestCharacters || identity.ContentDigest.AsSpan().IndexOfAnyExcept(RetainedDigestCharacters) >= FirstRetainedDigestCharacter)
+            if (identity.Generation != source.Generation || identity.Position < TopicPurgePositiveIdentity || identity.Position >= firstAvailablePosition || identity.ContentDigest is null || identity.ContentDigest.Length != TopicPublishReads.RetainedTopicDigestCharacters || identity.ContentDigest.AsSpan().IndexOfAnyExcept(RetainedDigestCharacters) >= FirstRetainedDigestCharacter)
             {
-                throw Errors.Fail(ErrorCode.Corruption, EventStreamsExecutionEventSources.EventSourceRetainedHistoryDetail);
+                throw Errors.Fail(ErrorCode.Corruption, EventSources.EventSourceRetainedHistoryDetail);
             }
 
             return identity;
         }
         catch (KeyLoadException failure) when (failure.Code is ErrorCode.Corruption or ErrorCode.FormatUnsupported)
         {
-            throw Errors.Fail(ErrorCode.Corruption, EventStreamsExecutionEventSources.EventSourceRetainedHistoryDetail);
+            throw Errors.Fail(ErrorCode.Corruption, EventSources.EventSourceRetainedHistoryDetail);
         }
     }
 }

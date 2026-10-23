@@ -17,7 +17,7 @@ public static class MessagingCommandsQueueDeadlines
         var resource = engine.Resource(tx, partition, request.Queue, ResourceKind.WorkQueue);
         if (resource.Paused || engine.DispatchPaused(tx))
         {
-            throw Errors.Fail(ErrorCode.DispatchPaused, MessagingCommandsQueueSweepTransitions.DispatchPausedMessage);
+            throw Errors.Fail(ErrorCode.DispatchPaused, QueueSweepTransitions.DispatchPausedMessage);
         }
 
         var metadata = MessagingValidationQueueDeadlines.RequireQueueDeadlineState(tx, lane, request, now);
@@ -27,28 +27,28 @@ public static class MessagingCommandsQueueDeadlines
         }
 
         var leased = request.Kind == QueueDeadlineKind.ExpireLease;
-        var key = MessagingExecutionMessaging.QueueKey(leased ? MessagingCommandsQueueSweepTransitions.LeasedQueueSpace : MessagingCommandsQueueSweepTransitions.ScheduledQueueSpace, lane, request.ExpectedDeadline, metadata.Id);
+        var key = MessagingExecutionMessaging.QueueKey(leased ? QueueSweepTransitions.LeasedQueueSpace : QueueSweepTransitions.ScheduledQueueSpace, lane, request.ExpectedDeadline, metadata.Id);
         var value = tx.ReadOwnedValue(key) ?? throw Errors.Fail(ErrorCode.Corruption, QueueLifecycleProtocol.MissingReference);
-        var counters = engine.ApplyDueEntry(tx, lane, resource.QueuePolicy, now, leased, new(key, value), MessagingValidationQueueDeadLettersQueueDeadLetterAuthority.RequireQueueLifecycleCounters(tx, lane), operation);
-        tx.PutRecord(MessagingExecutionMessaging.QueueKey(MessagingCommandsQueueSweepTransitions.QueueCountersSpace, lane), counters);
-        var updated = tx.GetRecord<MessageMetadata>(MessagingExecutionMessaging.QueueKey(MessagingCommandsQueueSweepTransitions.MessageMetadataSpace, lane, metadata.Id)) ?? throw Errors.Fail(ErrorCode.Corruption, QueueLifecycleProtocol.MissingMetadata);
+        var counters = engine.ApplyDueEntry(tx, lane, resource.QueuePolicy, now, leased, new(key, value), QueueDeadLetterAuthority.RequireQueueLifecycleCounters(tx, lane), operation);
+        tx.PutRecord(MessagingExecutionMessaging.QueueKey(QueueSweepTransitions.QueueCountersSpace, lane), counters);
+        var updated = tx.GetRecord<MessageMetadata>(MessagingExecutionMessaging.QueueKey(QueueSweepTransitions.MessageMetadataSpace, lane, metadata.Id)) ?? throw Errors.Fail(ErrorCode.Corruption, QueueLifecycleProtocol.MissingMetadata);
         return new(QueueDeadlineProtocol.ReceiptKind, lane.Queue, metadata.Id, updated.StateVersion);
     }
 
     internal static MutationReceipt ExpireQueueDeadlineMessage(IAtomicTransaction tx, QueueLaneRef lane, QueuePolicy policy, MessageMetadata metadata)
     {
-        var body = StoredMessageBody.Read(tx, MessagingExecutionMessaging.QueueKey(MessagingCommandsQueueSweepTransitions.MessageBodySpace, lane, metadata.Id)) ?? throw Errors.Fail(ErrorCode.Corruption, QueueLifecycleProtocol.MissingBody);
+        var body = StoredMessageBody.Read(tx, MessagingExecutionMessaging.QueueKey(QueueSweepTransitions.MessageBodySpace, lane, metadata.Id)) ?? throw Errors.Fail(ErrorCode.Corruption, QueueLifecycleProtocol.MissingBody);
         if (body.Body.Id != metadata.Id)
         {
             throw Errors.Fail(ErrorCode.Corruption, QueueLifecycleProtocol.MissingBody);
         }
 
-        var removal = MessagingValidationQueueLifecycleQueueLifecycleRemovalPreparation.PrepareQueueLifecycleRemoval(tx, lane, metadata, MessagingValidationQueueDeadLettersQueueDeadLetterAuthority.RequireQueueLifecycleCounters(tx, lane), body.Bytes);
-        var counters = MessagingCommandsQueueLifecycleQueueLifecycleAccounting.ReleaseQueueStored(removal.Counters, body.Bytes);
-        var order = MessagingValidationQueueOrderingQueueOrderMutationPreparation.PrepareQueueOrderRemoval(tx, lane, policy, body.Body, metadata);
-        MessagingValidationQueueDeadlinesQueueDueTransitionPreparation.RequireQueueDueStateCapacity(metadata);
-        MessagingCommandsQueueLifecycleQueueLifecycleRemovalApply.ApplyQueueLifecycleRemoval(tx, removal);
-        MessagingCommandsQueueOrderingQueuePreparedOrderApply.ApplyQueuePreparedOrderRemoval(tx, order);
+        var removal = QueueLifecycleRemovalPreparation.PrepareQueueLifecycleRemoval(tx, lane, metadata, QueueDeadLetterAuthority.RequireQueueLifecycleCounters(tx, lane), body.Bytes);
+        var counters = QueueLifecycleAccounting.ReleaseQueueStored(removal.Counters, body.Bytes);
+        var order = QueueOrderMutationPreparation.PrepareQueueOrderRemoval(tx, lane, policy, body.Body, metadata);
+        QueueDueTransitionPreparation.RequireQueueDueStateCapacity(metadata);
+        QueueLifecycleRemovalApply.ApplyQueueLifecycleRemoval(tx, removal);
+        QueuePreparedOrderApply.ApplyQueuePreparedOrderRemoval(tx, order);
         var updated = metadata with
         {
             State = MessageState.Expired,
@@ -57,9 +57,9 @@ public static class MessagingCommandsQueueDeadlines
             LeaseOwner = null,
             LeaseUntil = null
         };
-        tx.Delete(MessagingExecutionMessaging.QueueKey(MessagingCommandsQueueSweepTransitions.MessageBodySpace, lane, metadata.Id));
-        tx.PutRecord(MessagingExecutionMessaging.QueueKey(MessagingCommandsQueueSweepTransitions.MessageMetadataSpace, lane, metadata.Id), updated);
-        tx.PutRecord(MessagingExecutionMessaging.QueueKey(MessagingCommandsQueueSweepTransitions.QueueCountersSpace, lane), counters);
+        tx.Delete(MessagingExecutionMessaging.QueueKey(QueueSweepTransitions.MessageBodySpace, lane, metadata.Id));
+        tx.PutRecord(MessagingExecutionMessaging.QueueKey(QueueSweepTransitions.MessageMetadataSpace, lane, metadata.Id), updated);
+        tx.PutRecord(MessagingExecutionMessaging.QueueKey(QueueSweepTransitions.QueueCountersSpace, lane), counters);
         return new(QueueDeadlineProtocol.ReceiptKind, lane.Queue, metadata.Id, updated.StateVersion);
     }
 }

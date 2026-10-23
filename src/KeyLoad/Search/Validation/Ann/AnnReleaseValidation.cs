@@ -12,7 +12,7 @@ internal static class AnnReleaseValidation
         database.Store.Read(view =>
         {
             var current = database.Principal(view, principal.Id, database.EvaluationClock.GetUtcNow());
-            _ = ChangeFeedsQueriesProjectionConsumerAuthority.RequireReleasedProjectionConsumer(view, current, request.Consumer, request.IndexGeneration);
+            _ = ProjectionConsumerAuthority.RequireReleasedProjectionConsumer(view, current, request.Consumer, request.IndexGeneration);
             AnnProjectionPinValidation.RequireOwner(database, view, current, request.Consumer.Partition, request);
             token.ThrowIfCancellationRequested();
             return true;

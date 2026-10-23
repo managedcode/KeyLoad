@@ -31,7 +31,7 @@ public static class MessagingExecutionMessaging
             counters = new(MessagingInitialSequence, MessagingInitialSequence, MessagingInitialSequence, MessagingInitialSequence, MessagingInitialSequence);
         }
 
-        MessagingValidationQueueDeadLettersQueueDeadLetterAuthority.RequireQueueDeadLetterAuthority(view, lane, counters);
+        QueueDeadLetterAuthority.RequireQueueDeadLetterAuthority(view, lane, counters);
         return counters;
     }
 
@@ -42,18 +42,18 @@ public static class MessagingExecutionMessaging
         var resource = engine.Resource(tx, partition, message.Queue, ResourceKind.WorkQueue);
         if (resource.Paused)
         {
-            throw Errors.Fail(ErrorCode.DispatchPaused, MessagingCommandsQueueSweepTransitions.QueuePaused);
+            throw Errors.Fail(ErrorCode.DispatchPaused, QueueSweepTransitions.QueuePaused);
         }
 
         var lane = new QueueLaneRef(partition, message.Queue);
-        if (tx.ReadOwnedValue(QueueKey(MessagingCommandsQueueSweepTransitions.MessageMetadataSpace, lane, message.MessageId)) is not null)
+        if (tx.ReadOwnedValue(QueueKey(QueueSweepTransitions.MessageMetadataSpace, lane, message.MessageId)) is not null)
         {
-            throw Errors.Fail(ErrorCode.Conflict, MessagingCommandsQueueSweepTransitions.DuplicateMessageId);
+            throw Errors.Fail(ErrorCode.Conflict, QueueSweepTransitions.DuplicateMessageId);
         }
 
         if (message.ExpiresAt <= now || message.ExpiresAt <= message.NotBefore)
         {
-            throw Errors.Fail(ErrorCode.Validation, MessagingCommandsQueueSweepTransitions.InvalidMessageExpiry);
+            throw Errors.Fail(ErrorCode.Validation, QueueSweepTransitions.InvalidMessageExpiry);
         }
 
         foreach (var policy in resource.FieldPolicies)
@@ -68,7 +68,7 @@ public static class MessagingExecutionMessaging
 
         var body = new MessageBody(message.MessageId, JsonData.ValidateContent(message.PayloadJson, engine.Limits), JsonData.ValidateContent(message.HeadersJson, engine.Limits), message.OrderingKey, JsonData.Fingerprint(message));
         PersistEnqueuedMessage(tx, lane, message, resource, body, now);
-        return new(MessagingCommandsQueueSweepTransitions.EnqueueReceiptKind, message.Queue, message.MessageId, MessagingSingleElementCount);
+        return new(QueueSweepTransitions.EnqueueReceiptKind, message.Queue, message.MessageId, MessagingSingleElementCount);
     }
 
     internal static void PersistEnqueuedMessage(IAtomicTransaction tx, QueueLaneRef lane, EnqueueMessage message, ResourceDefinition resource, MessageBody body, DateTimeOffset now)
@@ -78,7 +78,7 @@ public static class MessagingExecutionMessaging
         var size = payload.LongLength;
         if (counters.StoredMessages >= resource.QueuePolicy.MaxStoredMessages || size > resource.QueuePolicy.MaxStoredBytes - counters.StoredBytes)
         {
-            throw Errors.Fail(ErrorCode.ResourceExhausted, MessagingCommandsQueueSweepTransitions.StoredQuotaExhausted);
+            throw Errors.Fail(ErrorCode.ResourceExhausted, QueueSweepTransitions.StoredQuotaExhausted);
         }
 
         var scheduled = message.NotBefore > now;
@@ -95,10 +95,10 @@ public static class MessagingExecutionMessaging
         var readySequence = scheduled ? MessagingInitialSequence : checked(counters.NextReadySequence + MessagingAdjacentElementOffset);
         var metadata = new MessageMetadata(message.MessageId, scheduled ? MessageState.Scheduled : MessageState.Ready, MessagingEmptyElementCount, MessagingSingleElementCount, readySequence, message.NotBefore, message.ExpiresAt);
         (metadata, counters) = MessagingCommandsQueueOrdering.AdmitQueueOrder(tx, lane, resource.QueuePolicy, body, metadata, counters);
-        tx.Put(QueueKey(MessagingCommandsQueueSweepTransitions.MessageBodySpace, lane, message.MessageId), payload);
-        tx.PutRecord(QueueKey(MessagingCommandsQueueSweepTransitions.MessageMetadataSpace, lane, message.MessageId), metadata);
-        tx.PutRecord(scheduled ? QueueKey(MessagingCommandsQueueSweepTransitions.ScheduledQueueSpace, lane, message.NotBefore!.Value, message.MessageId) : QueueKey(MessagingCommandsQueueSweepTransitions.ReadyQueueSpace, lane, readySequence, message.MessageId), message.MessageId);
-        tx.PutRecord(QueueKey(MessagingCommandsQueueSweepTransitions.QueueCountersSpace, lane), counters with { StoredMessages = counters.StoredMessages + MessagingAdjacentElementOffset, StoredBytes = counters.StoredBytes + size, NextReadySequence = scheduled ? counters.NextReadySequence : readySequence });
+        tx.Put(QueueKey(QueueSweepTransitions.MessageBodySpace, lane, message.MessageId), payload);
+        tx.PutRecord(QueueKey(QueueSweepTransitions.MessageMetadataSpace, lane, message.MessageId), metadata);
+        tx.PutRecord(scheduled ? QueueKey(QueueSweepTransitions.ScheduledQueueSpace, lane, message.NotBefore!.Value, message.MessageId) : QueueKey(QueueSweepTransitions.ReadyQueueSpace, lane, readySequence, message.MessageId), message.MessageId);
+        tx.PutRecord(QueueKey(QueueSweepTransitions.QueueCountersSpace, lane), counters with { StoredMessages = counters.StoredMessages + MessagingAdjacentElementOffset, StoredBytes = counters.StoredBytes + size, NextReadySequence = scheduled ? counters.NextReadySequence : readySequence });
     }
 
     internal static void Sweep(this DatabaseEngine engine, IAtomicTransaction tx, QueueLaneRef lane, QueuePolicy policy, DateTimeOffset now, Command<DatabaseCommand> operation) => engine.SweepDueEntries(tx, lane, policy, now, operation);

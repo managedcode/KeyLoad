@@ -7,13 +7,13 @@ public static class MessagingExecutionRemoteTransfer
 {
     internal static void AuthorizeAdvanceQueueTransferAttempt(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, PartitionRef partition, AdvanceQueueTransferAttempt request)
     {
-        MessagingExecutionRemoteTransferRemoteTransferInspection.ValidateTransferSource(request.SourceQueue, request.TransferId, partition);
+        RemoteTransferInspection.ValidateTransferSource(request.SourceQueue, request.TransferId, partition);
         if (request.ExpectedGeneration < RemoteTransferAttemptProtocol.FirstGeneration || string.IsNullOrEmpty(request.FailureWitness))
         {
             throw Errors.Fail(ErrorCode.Validation, RemoteTransferAttemptProtocol.Invalid);
         }
 
-        MessagingExecutionRemoteTransferRemoteTransferAuthorization.RequireTransferAdministrator(principal);
+        RemoteTransferAuthorization.RequireTransferAdministrator(principal);
         engine.RequireTransferCapabilities(principal, request.SourceQueue, Capability.QueueInspect);
         engine.RequireTransferCapabilities(principal, request.SourceQueue, Capability.QueuePublish);
         var resource = engine.Resource(view, partition, request.SourceQueue.Queue, ResourceKind.WorkQueue);

@@ -24,7 +24,7 @@ internal static class VectorProjectionValidation
         ArgumentNullException.ThrowIfNull(request.SourceDocument.Partition);
         if (request.SourceStream.Partition != partition || request.SourceDocument.Partition != partition || request.SourceStream.Generation < GenerationValidationBoundary || request.SourceEventRevision < SourceEventRevisionValidationBoundary || request.SourceDocumentRevision < SourceDocumentRevisionValidationBoundary || request.ReducerGeneration < ReducerGenerationValidationBoundary)
         {
-            throw Errors.Fail(ErrorCode.Validation, SearchCommandsVectorProjectionApply.InvalidProjectionMessage);
+            throw Errors.Fail(ErrorCode.Validation, VectorProjectionApply.InvalidProjectionMessage);
         }
 
         JsonData.Identifier(request.SourceStream.StreamSet);
@@ -43,7 +43,7 @@ internal static class VectorProjectionValidation
         JsonData.Identifier(request.Target.Space.Version);
         if (!Enum.IsDefined(request.Target.Space.Metric) || request.Target.Space.Dimension is < DimensionFirstCount or > DimensionValidationBound || request.Target.Values.IsDefault || request.Target.Values.Length != request.Target.Space.Dimension || request.Target.Values.Any(value => !float.IsFinite(value)))
         {
-            throw Errors.Fail(ErrorCode.Validation, SearchCommandsVectorProjectionApply.InvalidProjectionMessage);
+            throw Errors.Fail(ErrorCode.Validation, VectorProjectionApply.InvalidProjectionMessage);
         }
     }
 
@@ -60,26 +60,26 @@ internal static class VectorProjectionValidation
         AggregateReplayReader.ValidateHead(head);
         if (head.Generation != stream.Generation)
         {
-            throw Errors.Fail(ErrorCode.TokenInvalidated, SearchCommandsVectorProjectionApply.SourceEventMismatchMessage);
+            throw Errors.Fail(ErrorCode.TokenInvalidated, VectorProjectionApply.SourceEventMismatchMessage);
         }
 
         if (request.SourceEventRevision < head.FirstAvailableRevision)
         {
-            throw Errors.Fail(ErrorCode.HistoryUnavailable, SearchCommandsVectorProjectionApply.SourceEventMissingMessage);
+            throw Errors.Fail(ErrorCode.HistoryUnavailable, VectorProjectionApply.SourceEventMissingMessage);
         }
 
         if (request.SourceEventRevision > head.TailRevision)
         {
-            throw Errors.Fail(ErrorCode.RevisionConflict, SearchCommandsVectorProjectionApply.SourceEventMismatchMessage);
+            throw Errors.Fail(ErrorCode.RevisionConflict, VectorProjectionApply.SourceEventMismatchMessage);
         }
 
         var eventKey = KeySpace.Partition(EventSpace, partition, stream.StreamSet, stream.StreamId, stream.Generation, request.SourceEventRevision);
-        var record = view.GetRecord<EventRecord>(eventKey) ?? throw Errors.Fail(ErrorCode.Corruption, SearchCommandsVectorProjectionApply.ProjectionLineageCorruptMessage);
+        var record = view.GetRecord<EventRecord>(eventKey) ?? throw Errors.Fail(ErrorCode.Corruption, VectorProjectionApply.ProjectionLineageCorruptMessage);
         VectorProjectionValidation.ValidateProjectionEventRecord(request, record);
         var identity = view.GetRecord<EventIdentity>(KeySpace.Partition(EventIdentitySpace, partition, stream.StreamSet, stream.StreamId, stream.Generation, record.Data.EventId));
         if (identity is null || identity.StreamId != stream.StreamId || identity.Generation != stream.Generation || identity.Revision != record.Revision)
         {
-            throw Errors.Fail(ErrorCode.Corruption, SearchCommandsVectorProjectionApply.ProjectionLineageCorruptMessage);
+            throw Errors.Fail(ErrorCode.Corruption, VectorProjectionApply.ProjectionLineageCorruptMessage);
         }
     }
 
@@ -89,7 +89,7 @@ internal static class VectorProjectionValidation
         const int SchemaVersionValidationBoundary = 1;
         if (record.Stream != request.SourceStream || record.Revision != request.SourceEventRevision || record.EventSequence < EventSequenceValidationBoundary || record.Data is null || record.Data.SchemaVersion < SchemaVersionValidationBoundary)
         {
-            throw Errors.Fail(ErrorCode.Corruption, SearchCommandsVectorProjectionApply.ProjectionLineageCorruptMessage);
+            throw Errors.Fail(ErrorCode.Corruption, VectorProjectionApply.ProjectionLineageCorruptMessage);
         }
 
         try
@@ -98,12 +98,12 @@ internal static class VectorProjectionValidation
         }
         catch (KeyLoadException)
         {
-            throw Errors.Fail(ErrorCode.Corruption, SearchCommandsVectorProjectionApply.ProjectionLineageCorruptMessage);
+            throw Errors.Fail(ErrorCode.Corruption, VectorProjectionApply.ProjectionLineageCorruptMessage);
         }
 
         if (record.Data.EventId != request.SourceEventId)
         {
-            throw Errors.Fail(ErrorCode.RevisionConflict, SearchCommandsVectorProjectionApply.SourceEventMismatchMessage);
+            throw Errors.Fail(ErrorCode.RevisionConflict, VectorProjectionApply.SourceEventMismatchMessage);
         }
     }
 
@@ -111,7 +111,7 @@ internal static class VectorProjectionValidation
     {
         if (!VectorProjectionPolicy.TargetIsAtLeastAsRestrictive(source, target))
         {
-            throw Errors.Fail(ErrorCode.PermissionDenied, SearchCommandsVectorProjectionApply.ProjectionClassificationMessage);
+            throw Errors.Fail(ErrorCode.PermissionDenied, VectorProjectionApply.ProjectionClassificationMessage);
         }
     }
 
@@ -131,16 +131,16 @@ internal static class VectorProjectionValidation
         var vector = view.GetRecord<VectorRecord>(KeySpace.Partition(VisibleVectorReads.VectorKeySpace, partition, target.Collection, target.Field, target.Id));
         if (vector is null || vector.DocumentId != target.Id || vector.Field != target.Field || vector.Space != target.Space || vector.DocumentRevision != target.ExpectedDocumentRevision || effect.Receipt.Revision != vector.DocumentRevision || !VectorProjectionPolicy.MatchesCanonicalVector(effect.Fingerprint, target.Collection, vector))
         {
-            throw Errors.Fail(ErrorCode.Corruption, SearchCommandsVectorProjectionApply.ProjectionEffectCorruptMessage);
+            throw Errors.Fail(ErrorCode.Corruption, VectorProjectionApply.ProjectionEffectCorruptMessage);
         }
     }
 
     internal static void ValidateEffectReceipt(MutationReceipt receipt, PutVector target)
     {
         const int RevisionValidationBoundary = 1;
-        if (receipt is null || receipt.Kind != SearchCommandsVectorProjectionApply.ProjectionKind || receipt.Resource != target.Collection || receipt.Id != target.Id || receipt.Revision < RevisionValidationBoundary)
+        if (receipt is null || receipt.Kind != VectorProjectionApply.ProjectionKind || receipt.Resource != target.Collection || receipt.Id != target.Id || receipt.Revision < RevisionValidationBoundary)
         {
-            throw Errors.Fail(ErrorCode.Corruption, SearchCommandsVectorProjectionApply.ProjectionEffectCorruptMessage);
+            throw Errors.Fail(ErrorCode.Corruption, VectorProjectionApply.ProjectionEffectCorruptMessage);
         }
     }
 }

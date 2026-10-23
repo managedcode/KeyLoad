@@ -23,8 +23,8 @@ public static class MessagingValidationQueueOrdering
 
         var first = page.Records[QueueOrderProtocol.Initial];
         var reference = view.GetRecord<QueueOrderReference>(first.Key.ToArray()) ?? throw Errors.Fail(ErrorCode.RecoveryRequired, QueueOrderProtocol.MissingAuthority);
-        var head = view.GetRecord<MessageMetadata>(MessagingExecutionMessaging.QueueKey(MessagingCommandsQueueSweepTransitions.MessageMetadataSpace, lane, reference.MessageId)) ?? throw Errors.Fail(ErrorCode.RecoveryRequired, QueueOrderProtocol.MissingAuthority);
-        var headBody = StoredMessageBody.Read(view, MessagingExecutionMessaging.QueueKey(MessagingCommandsQueueSweepTransitions.MessageBodySpace, lane, head.Id)) ?? throw Errors.Fail(ErrorCode.RecoveryRequired, QueueOrderProtocol.MissingAuthority);
+        var head = view.GetRecord<MessageMetadata>(MessagingExecutionMessaging.QueueKey(QueueSweepTransitions.MessageMetadataSpace, lane, reference.MessageId)) ?? throw Errors.Fail(ErrorCode.RecoveryRequired, QueueOrderProtocol.MissingAuthority);
+        var headBody = StoredMessageBody.Read(view, MessagingExecutionMessaging.QueueKey(QueueSweepTransitions.MessageBodySpace, lane, head.Id)) ?? throw Errors.Fail(ErrorCode.RecoveryRequired, QueueOrderProtocol.MissingAuthority);
         if (headBody.Body.Id != head.Id || MessagingCommandsQueueOrdering.RequireQueueOrderingKey(headBody.Body) != orderingKey || head.State is not (MessageState.Ready or MessageState.Scheduled or MessageState.Leased or MessageState.PendingDeadLetter or MessageState.DeadLettered) || policy.ParkedHeadPolicy == QueueParkedHeadPolicy.Continue && head.State is MessageState.PendingDeadLetter or MessageState.DeadLettered)
         {
             throw Errors.Fail(ErrorCode.RecoveryRequired, QueueOrderProtocol.InvalidAuthority);

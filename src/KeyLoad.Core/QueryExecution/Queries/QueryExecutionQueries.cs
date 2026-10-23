@@ -69,7 +69,7 @@ public static class QueryExecutionQueries
             }
 
             engine.Authorization.Require(principal, partition, resourceName, Capability.Query | capability);
-            var resource = ResourceExecutionQueriesResourceLifetimeReadBinding.BindAuthorizedReadResource(budgetedView, partition, resourceName, kind);
+            var resource = ResourceLifetimeReadBinding.BindAuthorizedReadResource(budgetedView, partition, resourceName, kind);
             if (source.Kind == ModelQuerySourceKind.QueueMessages && source.Generation != QueueModelGeneration)
             {
                 throw Errors.Fail(ErrorCode.Validation, InvalidQueueSourceGenerationDetail);

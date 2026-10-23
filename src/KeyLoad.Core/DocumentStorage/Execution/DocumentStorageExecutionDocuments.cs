@@ -167,7 +167,7 @@ public static class DocumentStorageExecutionDocuments
         }
 
         beforeResourceAdmission?.Invoke(view);
-        var resource = ResourceExecutionQueriesResourceLifetimeReadBinding.BindAuthorizedReadResource(view, partition, collection, ResourceKind.Collection);
+        var resource = ResourceLifetimeReadBinding.BindAuthorizedReadResource(view, partition, collection, ResourceKind.Collection);
         return read(raw, principal, resource);
     });
     /// <summary>Reads one visible document from the caller's existing storage cut.</summary>

@@ -53,11 +53,11 @@ public static class ChangeFeedsQueries
             return;
         }
 
-        if (names.Length == ChangeFeedsExecutionProjectionOutbox.ProjectionAcceptsEmptyResourcesLength)
+        if (names.Length == ProjectionOutbox.ProjectionAcceptsEmptyResourcesLength)
         {
             foreach (var resource in PartitionResourceCatalog.Capture(view, partition, engine.Limits))
             {
-                _ = ResourceExecutionQueriesResourceLifetimeReadBinding.BindAuthorizedReadResource(view, partition, resource.Name);
+                _ = ResourceLifetimeReadBinding.BindAuthorizedReadResource(view, partition, resource.Name);
             }
 
             return;
@@ -65,7 +65,7 @@ public static class ChangeFeedsQueries
 
         foreach (var name in names)
         {
-            _ = ResourceExecutionQueriesResourceLifetimeReadBinding.BindAuthorizedReadResource(view, partition, name);
+            _ = ResourceLifetimeReadBinding.BindAuthorizedReadResource(view, partition, name);
         }
     }
 }

@@ -31,15 +31,15 @@ public static class SearchQueries
         return engine.Store.Read<AnnProjectionWorkPage>(view =>
         {
             var bounded = budget.CreateView(view);
-            var page = bounded.Scan(KeyCodec.Encode(ChangeFeedsExecutionProjectionOutbox.ProjectionConsumerSpace), engine.Limits.MaxScanRecords, after);
+            var page = bounded.Scan(KeyCodec.Encode(ProjectionOutbox.ProjectionConsumerSpace), engine.Limits.MaxScanRecords, after);
             var items = ImmutableArray.CreateBuilder<AnnProjectionWork>();
             var rejected = ImmutableArray.CreateBuilder<ErrorCode>();
             foreach (var row in page.Records)
             {
                 var current = OrleansSerialization.Deserialize<ProjectionConsumerInfo>(row.Value.Span);
-                if (!row.Key.Span.SequenceEqual(ChangeFeedsExecutionProjectionOutbox.ConsumerKey(current.Consumer)))
+                if (!row.Key.Span.SequenceEqual(ProjectionOutbox.ConsumerKey(current.Consumer)))
                 {
-                    throw Errors.Fail(ErrorCode.Corruption, SearchCommandsProjectionMaintenanceConfiguration.InvalidMaintenanceAuthority);
+                    throw Errors.Fail(ErrorCode.Corruption, ProjectionMaintenanceConfiguration.InvalidMaintenanceAuthority);
                 }
 
                 if (current.Released || current.Definition.AnnMaintenance is null)
@@ -65,13 +65,13 @@ public static class SearchQueries
     {
         var current = binding is null ? engine.ReadProjectionMaintenanceEligibility(view, consumer, generation, budget) : engine.ReadProjectionMaintenanceEligibilityCore(view, consumer, generation, budget, null, true);
         var bounded = budget.CreateView(view);
-        var authority = current.MaintenanceAuthority ?? throw Errors.Fail(ErrorCode.TokenInvalidated, SearchCommandsProjectionMaintenanceConfiguration.InvalidMaintenanceAuthority);
+        var authority = current.MaintenanceAuthority ?? throw Errors.Fail(ErrorCode.TokenInvalidated, ProjectionMaintenanceConfiguration.InvalidMaintenanceAuthority);
         var principal = engine.Principal(bounded, authority.PrincipalId, engine.EvaluationClock.GetUtcNow());
         var placement = engine.ReadAtomicPartitionPlacement(bounded, principal.Id, consumer.Partition);
         var physical = new PhysicalShardRecord(placement.PhysicalShardId, placement.Incarnation);
         if (physical.Incarnation != engine.Store.Identity.Incarnation)
         {
-            throw Errors.Fail(ErrorCode.OwnershipLost, SearchCommandsProjectionMaintenanceConfiguration.InvalidMaintenanceAuthority);
+            throw Errors.Fail(ErrorCode.OwnershipLost, ProjectionMaintenanceConfiguration.InvalidMaintenanceAuthority);
         }
 
         return new(current, principal, engine.Store.Identity.NodeId, physical, engine.ReadOutboxHead(bounded, consumer.Partition).Tail);

@@ -27,7 +27,7 @@ internal static class AnnDependencyIdentity
                 }
                 if (resource.TransactionDomainId == partition.TransactionDomainId)
                 {
-                    _ = ResourceExecutionQueriesResourceLifetimeMetadataReadBinding.BindAuthorizedReadResourceMetadata(budget.CreateView(view),
+                    _ = ResourceLifetimeMetadataReadBinding.BindAuthorizedReadResourceMetadata(budget.CreateView(view),
                         partition.TenantId, partition.DatabaseId, resource.TransactionDomainId,
                         resource.Name, resource.Kind, budget);
                     Append(hash, key, work);

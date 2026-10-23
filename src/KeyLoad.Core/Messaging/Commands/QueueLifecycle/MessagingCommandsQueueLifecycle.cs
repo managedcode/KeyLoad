@@ -28,18 +28,18 @@ public static class MessagingCommandsQueueLifecycle
         QueueDeadLetterAdmissionPlan? deadLetter = null;
         if (command.Action == DeliveryAction.Nack && metadata.Attempts >= resource.QueuePolicy.MaxAttempts)
         {
-            var released = MessagingCommandsQueueLifecycleQueueLifecycleAccounting.ReleaseQueueInFlight(counters, lease.BodyBytes);
-            deadLetter = MessagingValidationQueueDeadLetters.PrepareQueueDeadLetterAdmission(tx, command.Lane, resource.QueuePolicy, metadata, lease.BodyBytes, released);
+            var released = QueueLifecycleAccounting.ReleaseQueueInFlight(counters, lease.BodyBytes);
+            deadLetter = QueueDeadLetters.PrepareQueueDeadLetterAdmission(tx, command.Lane, resource.QueuePolicy, metadata, lease.BodyBytes, released);
         }
 
-        tx.Delete(MessagingExecutionMessaging.QueueKey(MessagingCommandsQueueSweepTransitions.LeasedQueueSpace, command.Lane, metadata.LeaseUntil!.Value, metadata.Id));
+        tx.Delete(MessagingExecutionMessaging.QueueKey(QueueSweepTransitions.LeasedQueueSpace, command.Lane, metadata.LeaseUntil!.Value, metadata.Id));
         MessageMetadata updated;
         if (command.Action == DeliveryAction.Renew)
         {
             var seconds = command.LeaseSeconds ?? DefaultRenewalSeconds;
             if (seconds < QueueDeliveryTransitionMinimumPositiveCount || seconds > resource.QueuePolicy.MaxLeaseSeconds)
             {
-                throw Errors.Fail(ErrorCode.Validation, MessagingCommandsQueueSweepTransitions.InvalidRenewal);
+                throw Errors.Fail(ErrorCode.Validation, QueueSweepTransitions.InvalidRenewal);
             }
 
             var deadline = now.AddSeconds(seconds);
@@ -48,16 +48,16 @@ public static class MessagingCommandsQueueLifecycle
                 LeaseUntil = deadline,
                 StateVersion = metadata.StateVersion + QueueDeliveryTransitionVersionOne
             };
-            tx.PutRecord(MessagingExecutionMessaging.QueueKey(MessagingCommandsQueueSweepTransitions.LeasedQueueSpace, command.Lane, deadline, metadata.Id), metadata.Id);
+            tx.PutRecord(MessagingExecutionMessaging.QueueKey(QueueSweepTransitions.LeasedQueueSpace, command.Lane, deadline, metadata.Id), metadata.Id);
         }
         else
         {
-            counters = MessagingCommandsQueueLifecycleQueueLifecycleAccounting.ReleaseQueueInFlight(counters, lease.BodyBytes);
+            counters = QueueLifecycleAccounting.ReleaseQueueInFlight(counters, lease.BodyBytes);
             updated = engine.CompleteDeliveryAction(tx, command.Lane, resource.QueuePolicy, command.Action, metadata, lease.BodyBytes, now, ref counters, operation, deadLetter);
         }
 
-        tx.PutRecord(MessagingExecutionMessaging.QueueKey(MessagingCommandsQueueSweepTransitions.MessageMetadataSpace, command.Lane, metadata.Id), updated);
-        tx.PutRecord(MessagingExecutionMessaging.QueueKey(MessagingCommandsQueueSweepTransitions.QueueCountersSpace, command.Lane), counters);
+        tx.PutRecord(MessagingExecutionMessaging.QueueKey(QueueSweepTransitions.MessageMetadataSpace, command.Lane, metadata.Id), updated);
+        tx.PutRecord(MessagingExecutionMessaging.QueueKey(QueueSweepTransitions.QueueCountersSpace, command.Lane), counters);
         return new(command.CommandId, engine.Token(tx, command.Lane.Partition, position), [new(command.Action.ToString(), command.Lane.Queue, metadata.Id, updated.StateVersion)], engine.Durability, engine.AcknowledgedPersistedCopies);
     }
 
@@ -65,10 +65,10 @@ public static class MessagingCommandsQueueLifecycle
     {
         if (action == DeliveryAction.Ack)
         {
-            counters = MessagingCommandsQueueLifecycleQueueLifecycleAccounting.ReleaseQueueStored(counters, bodyBytes);
-            var body = StoredMessageBody.Read(tx, MessagingExecutionMessaging.QueueKey(MessagingCommandsQueueSweepTransitions.MessageBodySpace, lane, metadata.Id)) ?? throw Errors.Fail(ErrorCode.Corruption, MessagingCommandsQueueSweepTransitions.MissingIndexedBody);
-            MessagingCommandsQueueOrderingQueueOrderTransitions.RemoveQueueOrder(tx, lane, policy, body.Body, metadata);
-            tx.Delete(MessagingExecutionMessaging.QueueKey(MessagingCommandsQueueSweepTransitions.MessageBodySpace, lane, metadata.Id));
+            counters = QueueLifecycleAccounting.ReleaseQueueStored(counters, bodyBytes);
+            var body = StoredMessageBody.Read(tx, MessagingExecutionMessaging.QueueKey(QueueSweepTransitions.MessageBodySpace, lane, metadata.Id)) ?? throw Errors.Fail(ErrorCode.Corruption, QueueSweepTransitions.MissingIndexedBody);
+            QueueOrderTransitions.RemoveQueueOrder(tx, lane, policy, body.Body, metadata);
+            tx.Delete(MessagingExecutionMessaging.QueueKey(QueueSweepTransitions.MessageBodySpace, lane, metadata.Id));
             return metadata with
             {
                 State = MessageState.Acked,
@@ -85,7 +85,7 @@ public static class MessagingCommandsQueueLifecycle
         }
 
         var available = policy.RetryJitter == QueueRetryJitter.None ? now.AddMilliseconds(engine.QueueRetryCap(policy, metadata.Attempts)) : engine.QueueRetryAt(operation ?? throw Errors.Fail(ErrorCode.Corruption, QueueRetryProtocol.MissingDecision), lane, policy, metadata, ReadOnlySpan<byte>.Empty);
-        tx.PutRecord(MessagingExecutionMessaging.QueueKey(MessagingCommandsQueueSweepTransitions.ScheduledQueueSpace, lane, available, metadata.Id), metadata.Id);
+        tx.PutRecord(MessagingExecutionMessaging.QueueKey(QueueSweepTransitions.ScheduledQueueSpace, lane, available, metadata.Id), metadata.Id);
         return metadata with
         {
             State = MessageState.Scheduled,
@@ -93,7 +93,7 @@ public static class MessagingCommandsQueueLifecycle
             LeaseOwner = null,
             LeaseUntil = null,
             NotBefore = available,
-            SafeFailureCode = MessagingCommandsQueueSweepTransitions.RetryRequested
+            SafeFailureCode = QueueSweepTransitions.RetryRequested
         };
     }
 }

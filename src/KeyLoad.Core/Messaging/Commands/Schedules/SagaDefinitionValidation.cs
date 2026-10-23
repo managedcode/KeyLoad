@@ -6,7 +6,7 @@ internal static class SagaDefinitionValidation
 {
     internal static CompareExchangeSaga NormalizeSagaRequest(this DatabaseEngine engine, CompareExchangeSaga request, PartitionRef partition, DateTimeOffset now)
     {
-        if (request.SagaId == Guid.Empty || request.ExpectedRevision < MessagingCommandsSchedulesSagaCommands.SagaCommandsInitialSequence || !Enum.IsDefined(request.Phase))
+        if (request.SagaId == Guid.Empty || request.ExpectedRevision < SagaCommands.SagaCommandsInitialSequence || !Enum.IsDefined(request.Phase))
         {
             throw Errors.Fail(ErrorCode.Validation, RecurringSagaProtocol.InvalidRequest);
         }
@@ -77,11 +77,11 @@ internal static class SagaDefinitionValidation
     internal static void ValidateTimeoutDefinition(SagaTimeoutDefinition timeout, QueueLaneRef source, PartitionRef partition, DateTimeOffset deadline)
     {
         ArgumentNullException.ThrowIfNull(timeout);
-        if (timeout.Queue is null || timeout.Queue.Partition != partition || timeout.Queue.Partition != source.Partition || timeout.TimeToLive is { } ttl && (ttl <= TimeSpan.Zero || ttl.Ticks > MessagingCommandsSchedulesSagaCommands.MaximumTimeoutTtlTicks))
+        if (timeout.Queue is null || timeout.Queue.Partition != partition || timeout.Queue.Partition != source.Partition || timeout.TimeToLive is { } ttl && (ttl <= TimeSpan.Zero || ttl.Ticks > SagaCommands.MaximumTimeoutTtlTicks))
         {
             throw Errors.Fail(ErrorCode.Validation, RecurringSagaProtocol.InvalidRequest);
         }
 
-        _ = MessagingCommandsSchedulesSagaCommands.AddTtl(deadline, timeout.TimeToLive);
+        _ = SagaCommands.AddTtl(deadline, timeout.TimeToLive);
     }
 }

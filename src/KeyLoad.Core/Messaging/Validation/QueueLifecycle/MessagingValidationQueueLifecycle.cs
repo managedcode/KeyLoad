@@ -19,7 +19,7 @@ public static class MessagingValidationQueueLifecycle
             engine.RequireBudget(examined);
         }
 
-        var metadata = view.VisitRange(KeyCodec.Encode([MessagingCommandsQueueSweepTransitions.MessageMetadataSpace, request.TenantId, request.DatabaseId]), engine.MessagingExecution.QueueScanPageSize, (key, value) =>
+        var metadata = view.VisitRange(KeyCodec.Encode([QueueSweepTransitions.MessageMetadataSpace, request.TenantId, request.DatabaseId]), engine.MessagingExecution.QueueScanPageSize, (key, value) =>
         {
             var parts = KeyCodec.Decode(key);
             if (!QueuePolicyResourceKey(parts, request.Definition.Name))
@@ -35,7 +35,7 @@ public static class MessagingValidationQueueLifecycle
 
             var lane = new QueueLaneRef(new(request.TenantId, request.DatabaseId, (string)parts[QueueOrderProtocol.DomainKeyComponent]!, (string)parts[QueueOrderProtocol.PartitionKeyComponent]!), request.Definition.Name);
             _ = MessagingExecutionMessaging.Counters(view, lane);
-            if (view.ReadValue(MessagingExecutionMessaging.QueueKey(MessagingCommandsQueueSweepTransitions.MessageBodySpace, lane, item.Id), static _ =>
+            if (view.ReadValue(MessagingExecutionMessaging.QueueKey(QueueSweepTransitions.MessageBodySpace, lane, item.Id), static _ =>
             {
             }, Observe))
             {
@@ -59,7 +59,7 @@ public static class MessagingValidationQueueLifecycle
 
     internal static void RequireQueuePolicyBodyAbsence(this DatabaseEngine engine, IKeyValueView view, ConfigureResourceRequest request, StorageReadObserver observe)
     {
-        var bodies = view.VisitRange(KeyCodec.Encode([MessagingCommandsQueueSweepTransitions.MessageBodySpace, request.TenantId, request.DatabaseId]), engine.MessagingExecution.QueueScanPageSize, (key, _) =>
+        var bodies = view.VisitRange(KeyCodec.Encode([QueueSweepTransitions.MessageBodySpace, request.TenantId, request.DatabaseId]), engine.MessagingExecution.QueueScanPageSize, (key, _) =>
         {
             if (QueuePolicyResourceKey(KeyCodec.Decode(key), request.Definition.Name))
             {

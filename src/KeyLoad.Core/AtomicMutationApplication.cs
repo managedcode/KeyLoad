@@ -69,7 +69,7 @@ public static class AtomicMutationApplication
             tx.PutRecord(KeySpace.Partition(DocumentEpochSpace, partition, collection), checked(engine.DocumentEpoch(tx, partition, collection) + AtomicMutationApplicationAdjacentElementOffset));
         }
 
-        ResourceExecutionAdmissionResourceEffectCompositionScopes.RequireCompleteCompositionEffects(tx, operation, preparingComposition);
+        ResourceEffectCompositionScopes.RequireCompleteCompositionEffects(tx, operation, preparingComposition);
         return receipts.Count == receipts.Capacity ? receipts.MoveToImmutable() : receipts.ToImmutable();
     }
 
@@ -106,7 +106,7 @@ public static class AtomicMutationApplication
     {
         if (++count > engine.Limits.MaxBatchMutations)
         {
-            throw Errors.Fail(ErrorCode.ResourceExhausted, AuthorizationCommandsCommandAuthorization.MutationCountBudgetMessage);
+            throw Errors.Fail(ErrorCode.ResourceExhausted, CommandAuthorization.MutationCountBudgetMessage);
         }
     }
 

@@ -112,7 +112,7 @@ public static class DatabaseCompositionIdentity
             var document = engine.VisibleVertex(budget.CreateView(view), principal, reference);
             if (document.Reference != reference)
             {
-                throw Errors.Fail(ErrorCode.Corruption, DatabaseCompositionExecutionDatabaseCompositionTypedEndpointJoin.TypedJoinRecordMismatch);
+                throw Errors.Fail(ErrorCode.Corruption, DatabaseCompositionTypedEndpointJoin.TypedJoinRecordMismatch);
             }
         }
     }

@@ -23,7 +23,7 @@ public static class EngineResourceAccess
         ArgumentNullException.ThrowIfNull(engine);
         ArgumentNullException.ThrowIfNull(view);
         ArgumentNullException.ThrowIfNull(partition);
-        return ResourceExecutionQueriesResourceDefinitionBinding.BindResourceDefinition(view, partition, name, kind);
+        return ResourceDefinitionBinding.BindResourceDefinition(view, partition, name, kind);
     }
 
     /// <summary>Creates a commit token from the local storage identity in the command's existing execution view.</summary>

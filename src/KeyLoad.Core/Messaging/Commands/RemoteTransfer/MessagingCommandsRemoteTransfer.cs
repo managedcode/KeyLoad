@@ -29,7 +29,7 @@ public static class MessagingCommandsRemoteTransfer
 
         var witness = engine.Verify<RemoteTransferAcceptFailureClaims>(request.FailureWitness, engine.Limits.MaxBatchBytes);
         var hint = new RemoteTransferCoordinationHint(record.Source, record.Destination, record.TransferId, record.PrincipalId, record.Fingerprint, RemoteTransferCoordinationIdentity.IntentDigest(record.IntentToken), engine.Token(tx, partition, engine.Store.Position), state.Generation, state.Ceiling);
-        MessagingValidationRemoteTransferRemoteTransferFailureWitness.RequireRemoteTransferFailureWitness(witness, hint);
+        RemoteTransferFailureWitness.RequireRemoteTransferFailureWitness(witness, hint);
         if (!RemoteTransferCapacityRepair.Improved(witness))
         {
             throw Errors.Fail(ErrorCode.RevisionConflict, RemoteTransferAttemptProtocol.Stale);
@@ -63,6 +63,6 @@ public static class MessagingCommandsRemoteTransfer
         };
         tx.PutRecord(key, updated);
         tx.PutRecord(RemoteTransferStorage.SourceCapacityKey(request.SourceQueue), next);
-        return MessagingCommandsRemoteTransferRemoteTransferCommands.TransferMutationReceipt(RemoteTransferAttemptProtocol.AdvanceKind, request.SourceQueue, request.TransferId, nextGeneration);
+        return RemoteTransferCommands.TransferMutationReceipt(RemoteTransferAttemptProtocol.AdvanceKind, request.SourceQueue, request.TransferId, nextGeneration);
     }
 }

@@ -31,7 +31,7 @@ internal static class AggregateReplayReader
         var principal = database.Principal(metadataView, principalId, database.EvaluationClock.GetUtcNow());
         database.Authorization.Require(principal, request.Stream.Partition, request.Stream.StreamSet,
             Capability.EventsReplay | Capability.EventsRead);
-        var resource = ResourceExecutionQueriesResourceLifetimeReadBinding.BindAuthorizedReadResource(metadataView, request.Stream.Partition, request.Stream.StreamSet, ResourceKind.StreamSet);
+        var resource = ResourceLifetimeReadBinding.BindAuthorizedReadResource(metadataView, request.Stream.Partition, request.Stream.StreamSet, ResourceKind.StreamSet);
         database.Authorization.RequireReplayInput(principal, resource);
         var head = ReadHead(view, request.Stream, budget);
         ValidateHead(head);

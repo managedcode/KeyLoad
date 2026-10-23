@@ -11,7 +11,7 @@ public static class SearchValidationOnlineText
         OnlineTextPublicationShape.Require(command, engine.Limits.MaxScanRecords);
         var request = command.Request;
         var source = command.Result.PublishedCut;
-        var consumer = ChangeFeedsQueriesProjectionConsumerAuthority.RequireActiveProjectionConsumer(view, principal, request.Consumer, request.ConsumerGeneration);
+        var consumer = ProjectionConsumerAuthority.RequireActiveProjectionConsumer(view, principal, request.Consumer, request.ConsumerGeneration);
         if (!consumer.Definition.Resources.SequenceEqual([request.Collection], StringComparer.Ordinal) || !consumer.Definition.MutationKinds.SequenceEqual([MutationDiscriminatorNames.PutDocument, MutationDiscriminatorNames.PatchDocument, MutationDiscriminatorNames.DeleteDocument], StringComparer.Ordinal))
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, OnlineTextPublicationProtocol.InvalidPublication);

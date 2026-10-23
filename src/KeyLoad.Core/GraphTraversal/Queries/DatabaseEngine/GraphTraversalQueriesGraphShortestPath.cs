@@ -38,7 +38,7 @@ public static class GraphTraversalQueriesGraphShortestPath
             var budgetedView = budget.CreateView(view);
             var principal = engine.Principal(budgetedView, principalId, engine.Clock.GetUtcNow());
             engine.Authorization.Require(principal, request.Partition, request.Graph, Capability.GraphRead);
-            var graph = ResourceExecutionQueriesResourceLifetimeReadBinding.BindAuthorizedReadResource(budgetedView, request.Partition, request.Graph, ResourceKind.Graph);
+            var graph = ResourceLifetimeReadBinding.BindAuthorizedReadResource(budgetedView, request.Partition, request.Graph, ResourceKind.Graph);
             if (labels is { Length: > GraphShortestPathEmptyElementCount })
             {
                 engine.Authorization.RequireFieldUse(principal, graph, LabelField);

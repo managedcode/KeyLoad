@@ -130,7 +130,7 @@ public static class ProtocolValidation
 
         if (mutation is RedriveQueueMessage or CancelQueueMessage or ParkPendingQueueMessage)
         {
-            MessagingValidationQueueLifecycleQueueLifecycleConditions.ValidateQueueLifecycleShape(mutation);
+            QueueLifecycleConditions.ValidateQueueLifecycleShape(mutation);
             return;
         }
 

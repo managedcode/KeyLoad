@@ -44,7 +44,7 @@ public static class ResourceExecutionExecution
             throw Errors.Fail(ErrorCode.TokenInvalidated, CommandOutcomes.EarlierOutcomeIncarnationMessage);
         }
 
-        StorageExecutionIdentityDatabaseCommandContentIdentity.RequireOriginalCommandContent(operation, outcome);
+        DatabaseCommandContentIdentity.RequireOriginalCommandContent(operation, outcome);
         CommandOutcomeKeyResolver.ValidateSelectedScope(view, operation, selection);
     }
 }

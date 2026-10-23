@@ -25,7 +25,7 @@ public static class ChangeFeedsCommands
     {
         var request = OperationProtocol.Payload<ReleaseProjectionConsumerRequest>(operation);
         OperationProtocol.RequireEnvelopeId(operation, request.CommandId);
-        return OperationProtocol.Result(ChangeFeedsExecutionProjectionOutbox.ReleaseProjectionConsumer(transaction, request));
+        return OperationProtocol.Result(ProjectionOutbox.ReleaseProjectionConsumer(transaction, request));
     }
 
     internal static Result<object> ExecutePurgeOutbox(this DatabaseEngine engine, IAtomicTransaction transaction, Command<DatabaseCommand> operation)

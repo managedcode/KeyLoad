@@ -19,7 +19,7 @@ public static class MessagingCommands
 
     internal static MessageMetadata AdmitQueueDeadLetter(IAtomicTransaction tx, QueueLaneRef lane, QueuePolicy policy, MessageMetadata metadata, long bodyBytes, ref QueueCounters counters, QueueDeadLetterAdmissionPlan? prepared = null)
     {
-        var admission = prepared ?? MessagingValidationQueueDeadLetters.PrepareQueueDeadLetterAdmission(tx, lane, policy, metadata, bodyBytes, counters);
-        return MessagingCommandsQueueOrderingQueuePreparedOrderApply.ApplyQueueDeadLetterAdmission(tx, lane, admission, ref counters);
+        var admission = prepared ?? QueueDeadLetters.PrepareQueueDeadLetterAdmission(tx, lane, policy, metadata, bodyBytes, counters);
+        return QueuePreparedOrderApply.ApplyQueueDeadLetterAdmission(tx, lane, admission, ref counters);
     }
 }

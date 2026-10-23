@@ -8,10 +8,10 @@ public static class MessagingValidation
     {
         if (metadata.Id != id || body.Id != id)
         {
-            throw Errors.Fail(ErrorCode.Corruption, MessagingCommandsQueueReadyClaims.MissingReadyBody);
+            throw Errors.Fail(ErrorCode.Corruption, QueueReadyClaims.MissingReadyBody);
         }
 
-        if (metadata.State != MessageState.Ready || metadata.ReadySequence < MessagingCommandsQueueReadyClaims.QueueReadyClaimsVersionOne || metadata.Attempts < QueueRetryProtocol.Initial || metadata.StateVersion < MessagingCommandsQueueReadyClaims.QueueReadyClaimsVersionOne || metadata.LeaseVersion < QueueRetryProtocol.Initial || metadata.DeliveryGeneration < MessagingCommandsQueueReadyClaims.QueueReadyClaimsVersionOne || !actualKey.SequenceEqual(MessagingExecutionMessaging.QueueKey(MessagingCommandsQueueSweepTransitions.ReadyQueueSpace, lane, metadata.ReadySequence, id)))
+        if (metadata.State != MessageState.Ready || metadata.ReadySequence < QueueReadyClaims.QueueReadyClaimsVersionOne || metadata.Attempts < QueueRetryProtocol.Initial || metadata.StateVersion < QueueReadyClaims.QueueReadyClaimsVersionOne || metadata.LeaseVersion < QueueRetryProtocol.Initial || metadata.DeliveryGeneration < QueueReadyClaims.QueueReadyClaimsVersionOne || !actualKey.SequenceEqual(MessagingExecutionMessaging.QueueKey(QueueSweepTransitions.ReadyQueueSpace, lane, metadata.ReadySequence, id)))
         {
             throw Errors.Fail(ErrorCode.RecoveryRequired, QueueRetryProtocol.StaleDecision);
         }

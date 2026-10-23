@@ -25,7 +25,7 @@ internal static class AnnPublicAcquisition
     {
         var metadata = budget.CreateView(view);
         var principal = database.Principal(metadata, manifest.PrincipalId, database.EvaluationClock.GetUtcNow());
-        var consumer = ChangeFeedsQueriesProjectionConsumerAuthority.RequireActiveProjectionConsumer(metadata, principal,
+        var consumer = ProjectionConsumerAuthority.RequireActiveProjectionConsumer(metadata, principal,
             manifest.Consumer, manifest.IndexGeneration);
         var profile = consumer.Definition.AnnMaintenance;
         if (profile is not null && (profile.Collection != manifest.Collection

@@ -16,7 +16,7 @@ public static class MessagingValidationQueueDeadlines
 
     internal static MessageMetadata RequireQueueDeadlineState(IKeyValueView view, QueueLaneRef lane, AdvanceQueueDeadline request, DateTimeOffset now)
     {
-        var metadata = view.GetRecord<MessageMetadata>(MessagingExecutionMessaging.QueueKey(MessagingCommandsQueueSweepTransitions.MessageMetadataSpace, lane, request.MessageId)) ?? throw Errors.Fail(ErrorCode.NotFound, QueueLifecycleProtocol.MissingMetadata);
+        var metadata = view.GetRecord<MessageMetadata>(MessagingExecutionMessaging.QueueKey(QueueSweepTransitions.MessageMetadataSpace, lane, request.MessageId)) ?? throw Errors.Fail(ErrorCode.NotFound, QueueLifecycleProtocol.MissingMetadata);
         var deadline = request.Kind switch
         {
             QueueDeadlineKind.PromoteScheduled => metadata.NotBefore,

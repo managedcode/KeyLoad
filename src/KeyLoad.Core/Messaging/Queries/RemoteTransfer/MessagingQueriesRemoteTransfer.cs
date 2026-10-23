@@ -25,10 +25,10 @@ public static class MessagingQueriesRemoteTransfer
             throw Errors.Fail(ErrorCode.PermissionDenied, RemoteTransferAttemptProtocol.Invalid);
         }
 
-        MessagingExecutionRemoteTransferRemoteTransferAuthorization.RequireTransferAdministrator(principal);
+        RemoteTransferAuthorization.RequireTransferAdministrator(principal);
         engine.RequireTransferCapabilities(principal, lane, Capability.QueueInspect);
         engine.RequireTransferCapabilities(principal, lane, Capability.QueuePublish);
-        var resource = ResourceExecutionQueriesResourceLifetimeReadBinding.BindAuthorizedReadResource(view, lane.Partition, lane.Queue, ResourceKind.WorkQueue);
+        var resource = ResourceLifetimeReadBinding.BindAuthorizedReadResource(view, lane.Partition, lane.Queue, ResourceKind.WorkQueue);
         engine.RequireTransferInspector(principal, lane, resource);
         engine.RequireTransferPublisher(principal, lane, resource);
         if (request.Purpose == RemoteTransferRepairProtocol.ReadPurpose)

@@ -7,7 +7,7 @@ public static class BlobStorageCommandsFileMetadata
 {
     internal static FileUpload ReserveFile(IAtomicTransaction transaction, PrincipalRecord principal, FileMetadataMutation request)
     {
-        var pair = ResourceExecutionQueriesResourceDefinitionBinding.ReadBoundResourcePair(transaction, request.Address.Partition, request.Address.Resource, ResourceKind.BlobStore);
+        var pair = ResourceDefinitionBinding.ReadBoundResourcePair(transaction, request.Address.Partition, request.Address.Resource, ResourceKind.BlobStore);
         var key = FileMetadataKeys.Upload(request.Address, pair.Lifetime.Incarnation, request.UploadId);
         var existing = transaction.GetRecord<FileUpload>(key);
         if (existing is not null)
@@ -27,7 +27,7 @@ public static class BlobStorageCommandsFileMetadata
         }
 
         var policy = pair.Definition.FilePolicy;
-        var quota = BlobStorageValidationFileAuthorization.ReadFileQuota(transaction, request.Address, pair.Lifetime.Incarnation);
+        var quota = FileAuthorization.ReadFileQuota(transaction, request.Address, pair.Lifetime.Incarnation);
         if (request.UploadId == Guid.Empty || request.Length < FileStorageProtocol.EmptyCount || request.Length > policy.MaximumFileBytes || quota.ActiveUploads >= policy.MaximumUploads || quota.Objects >= policy.MaximumObjects || request.Length > policy.MaximumStoredBytes - quota.AllocatedBytes)
         {
             throw Errors.Fail(ErrorCode.ResourceExhausted, FileStorageProtocol.Invalid);
@@ -47,16 +47,16 @@ public static class BlobStorageCommandsFileMetadata
 
     internal static object ChangeFileUpload(IAtomicTransaction transaction, PrincipalRecord principal, FileMetadataMutation request, DateTime evaluatedAt)
     {
-        var pair = ResourceExecutionQueriesResourceDefinitionBinding.ReadBoundResourcePair(transaction, request.Address.Partition, request.Address.Resource, ResourceKind.BlobStore);
+        var pair = ResourceDefinitionBinding.ReadBoundResourcePair(transaction, request.Address.Partition, request.Address.Resource, ResourceKind.BlobStore);
         var key = FileMetadataKeys.Upload(request.Address, pair.Lifetime.Incarnation, request.UploadId);
         var upload = transaction.GetRecord<FileUpload>(key) ?? throw Errors.Fail(ErrorCode.NotFound, FileStorageProtocol.Invalid);
         RequireFileUpload(upload, principal, request, pair.Definition, pair.Lifetime);
         return request.Action switch
         {
             FileMetadataAction.Stage => StageFile(transaction, key, upload, request),
-            FileMetadataAction.Publish => BlobStorageCommandsFilePublication.PublishFile(transaction, key, upload, request, pair.Definition.FilePolicy, evaluatedAt),
-            FileMetadataAction.Abort => BlobStorageCommandsFilePublication.AbortFile(transaction, key, upload, request),
-            FileMetadataAction.Reclaim => BlobStorageCommandsFilePublication.ReclaimFile(transaction, key, upload),
+            FileMetadataAction.Publish => FilePublication.PublishFile(transaction, key, upload, request, pair.Definition.FilePolicy, evaluatedAt),
+            FileMetadataAction.Abort => FilePublication.AbortFile(transaction, key, upload, request),
+            FileMetadataAction.Reclaim => FilePublication.ReclaimFile(transaction, key, upload),
             _ => throw Errors.Fail(ErrorCode.Validation, FileStorageProtocol.Invalid)
         };
     }

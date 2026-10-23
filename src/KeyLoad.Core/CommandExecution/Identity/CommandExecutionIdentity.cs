@@ -26,7 +26,7 @@ public static class CommandExecutionIdentity
         ArgumentNullException.ThrowIfNull(operation);
         ArgumentNullException.ThrowIfNull(limits);
         ValidateDatabaseCommand(operation, limits);
-        using var buffer = new CommandExecutionIdentityDatabaseCommandSnapshotBuffer.CommandSnapshotBuffer(limits.MaxBatchBytes);
+        using var buffer = new DatabaseCommandSnapshotBuffer.CommandSnapshotBuffer(limits.MaxBatchBytes);
         OrleansSerialization.Serialize(operation, buffer);
         var owned = OrleansSerialization.Deserialize<Command<DatabaseCommand>>(buffer.GetBuffer().AsSpan(SnapshotStart, checked((int)buffer.Length)));
         ValidateDatabaseCommand(owned, limits);
@@ -42,7 +42,7 @@ public static class CommandExecutionIdentity
         }
 
         RequireBudget(checked((long)input.Input.Length + input.RetryDecisions.Length + input.ResourceAdmission.Length), limits.MaxBatchBytes);
-        _ = OrleansSerialization.Deserialize(input.Input.Span, CommandExecutionExecutionDatabaseCommandInputTypes.OperationPayloadType(input.Kind) ?? throw Errors.Fail(ErrorCode.UnsupportedCapability, CommandExecutionValidation.UnsupportedDatabaseCommand), ValidationProfile.PublicInputElements);
+        _ = OrleansSerialization.Deserialize(input.Input.Span, DatabaseCommandInputTypes.OperationPayloadType(input.Kind) ?? throw Errors.Fail(ErrorCode.UnsupportedCapability, CommandExecutionValidation.UnsupportedDatabaseCommand), ValidationProfile.PublicInputElements);
     }
 
     internal static Command<DatabaseCommand> CreatePreparedCommand(this DatabaseEngine engine, OperationKind kind, Guid id, string principalId, DateTimeOffset evaluatedAt, ReadOnlyMemory<byte> input, string fingerprint, ReadExecutionBudget? work, IKeyValueView? admissionView = null)
@@ -53,7 +53,7 @@ public static class CommandExecutionIdentity
         byte[] admission;
         if (admissionView is not null)
         {
-            if (ResourceExecutionAdmissionResourceEffectCompositionScopes.RequiresCompositionEffectCapture(operation))
+            if (ResourceEffectCompositionScopes.RequiresCompositionEffectCapture(operation))
             {
                 throw Errors.Fail(ErrorCode.UnsupportedCapability, CommandExecutionValidation.UnsupportedDatabaseCommand);
             }

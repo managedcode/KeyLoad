@@ -22,7 +22,7 @@ public static class MessagingCommandsQueueRetries
         {
             if (choices.Count >= engine.Limits.MaxBatchMutations)
             {
-                throw Errors.Fail(ErrorCode.ResourceExhausted, AuthorizationCommandsCommandAuthorization.MutationCountBudgetMessage);
+                throw Errors.Fail(ErrorCode.ResourceExhausted, CommandAuthorization.MutationCountBudgetMessage);
             }
 
             var delay = engine.ChooseQueueRetryDelay(original, input.Lane, input.Policy, input.Metadata);

@@ -30,20 +30,20 @@ public static class ProjectionBatchExecution
         var upper = request.ThroughSequence ?? head.Tail;
         if (upper < state.Checkpoint || upper > head.Tail)
         {
-            throw Errors.Fail(ErrorCode.TokenInvalidated, ChangeFeedsExecutionProjectionOutbox.InvalidProjectionUpperSequence);
+            throw Errors.Fail(ErrorCode.TokenInvalidated, ProjectionOutbox.InvalidProjectionUpperSequence);
         }
 
         return upper;
     }
 
-    internal static byte[] ProjectionReceiptKey(ProjectionBatchClaims claims) => KeySpace.Partition(ChangeFeedsExecutionProjectionOutbox.ProjectionReceiptSpace, claims.Consumer.Partition, claims.Consumer.Name, claims.IndexGeneration, claims.After, claims.Through);
+    internal static byte[] ProjectionReceiptKey(ProjectionBatchClaims claims) => KeySpace.Partition(ProjectionOutbox.ProjectionReceiptSpace, claims.Consumer.Partition, claims.Consumer.Name, claims.IndexGeneration, claims.After, claims.Through);
     internal static ProjectionBatchClaims ProjectionClaims(this DatabaseEngine engine, IKeyValueView view, CommitProjectionBatchRequest request, DateTimeOffset now, bool allowExpiredReceipt = false)
     {
         const string ProjectionBatchScopeMismatchDetail = "The projection batch belongs to a different generation or scope.";
         const string ExpiredProjectionBatchTokenDetail = "The projection batch token expired.";
         var claims = engine.Verify<ProjectionBatchClaims>(request.Token);
-        var state = ChangeFeedsValidationProjectionConsumerIdentity.ProjectionConsumer(view, request.Consumer);
-        if (claims.Purpose != ChangeFeedsExecutionProjectionOutbox.ProjectionBatchTokenPurpose || claims.Incarnation != engine.Store.Identity.Incarnation || claims.Consumer != request.Consumer || claims.IndexGeneration != state.Definition.IndexGeneration || state.Released || claims.Through < claims.After)
+        var state = ProjectionConsumerIdentity.ProjectionConsumer(view, request.Consumer);
+        if (claims.Purpose != ProjectionOutbox.ProjectionBatchTokenPurpose || claims.Incarnation != engine.Store.Identity.Incarnation || claims.Consumer != request.Consumer || claims.IndexGeneration != state.Definition.IndexGeneration || state.Released || claims.Through < claims.After)
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, ProjectionBatchScopeMismatchDetail);
         }
@@ -79,9 +79,9 @@ public static class ProjectionBatchExecution
             return new(completed.Receipt, true, completed.Checkpoint);
         }
 
-        var state = ChangeFeedsValidationProjectionConsumerIdentity.ProjectionConsumer(tx, request.Consumer);
+        var state = ProjectionConsumerIdentity.ProjectionConsumer(tx, request.Consumer);
         var head = engine.ReadOutboxHead(tx, request.Consumer.Partition);
-        ChangeFeedsExecutionProjectionOutbox.CheckOutboxPosition(head, claims.After);
+        ProjectionOutbox.CheckOutboxPosition(head, claims.After);
         if (state.Checkpoint != claims.After || claims.Through > head.Tail)
         {
             throw Errors.Fail(ErrorCode.Conflict, ChangedProjectionCheckpointDetail);
@@ -91,7 +91,7 @@ public static class ProjectionBatchExecution
         {
             if (request.Effects.Length != EmptyEffectsLength)
             {
-                throw Errors.Fail(ErrorCode.Validation, ChangeFeedsExecutionProjectionOutbox.EmptyProjectionBatchEffectsDetail);
+                throw Errors.Fail(ErrorCode.Validation, ProjectionOutbox.EmptyProjectionBatchEffectsDetail);
             }
 
             var emptyReceipt = new CommitReceipt(request.CommandId, engine.Token(tx, request.Consumer.Partition, position), [], engine.Durability, engine.AcknowledgedPersistedCopies);
@@ -106,7 +106,7 @@ public static class ProjectionBatchExecution
                     throw Errors.Fail(ErrorCode.BudgetExceeded, ChangeFeedsExecution.InvalidAnnSettlement);
                 }
 
-                tx.PutRecord(ChangeFeedsExecutionProjectionOutbox.ConsumerKey(request.Consumer), settled);
+                tx.PutRecord(ProjectionOutbox.ConsumerKey(request.Consumer), settled);
                 tx.PutRecord(key, new ProjectionReceipt(fingerprint, emptyReceipt, state.Checkpoint));
             }
 
@@ -117,7 +117,7 @@ public static class ProjectionBatchExecution
         var receipt = new CommitReceipt(request.CommandId, engine.Token(tx, request.Consumer.Partition, position), effects, engine.Durability, engine.AcknowledgedPersistedCopies);
         var after = engine.ReadOutboxHead(tx, request.Consumer.Partition);
         var usedReserve = effects.Length > EffectsLengthValidationBoundary && (after.StoredRecords > engine.Limits.MaxOutboxRecords || after.StoredBytes > engine.Limits.MaxOutboxBytes);
-        tx.PutRecord(ChangeFeedsExecutionProjectionOutbox.ConsumerKey(request.Consumer), state with { Checkpoint = claims.Through, LastProgressReservationCut = usedReserve ? head.FirstAvailable : state.LastProgressReservationCut });
+        tx.PutRecord(ProjectionOutbox.ConsumerKey(request.Consumer), state with { Checkpoint = claims.Through, LastProgressReservationCut = usedReserve ? head.FirstAvailable : state.LastProgressReservationCut });
         tx.PutRecord(key, new ProjectionReceipt(fingerprint, receipt, claims.Through));
         return new(receipt, false, claims.Through);
     }

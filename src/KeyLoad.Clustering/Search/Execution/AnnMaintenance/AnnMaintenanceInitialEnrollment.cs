@@ -23,7 +23,7 @@ internal static class AnnMaintenanceInitialEnrollment
             ? original : null;
         var configureId = AnnMaintenanceChildIdentity.Create(request.CommandId,
             AnnMaintenancePhase.Configure, InitialSequence);
-        global::KeyLoad.Core.SearchCommandsProjectionMaintenanceConfiguration.RequireInitialMaintenanceReservation(configured,
+        global::KeyLoad.Core.ProjectionMaintenanceConfiguration.RequireInitialMaintenanceReservation(configured,
             new ConfigureProjectionConsumerRequest(configureId, request.Consumer, configured.Definition)
             {
                 InitialAnnMaintenance = initial

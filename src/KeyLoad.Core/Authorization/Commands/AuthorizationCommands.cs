@@ -9,7 +9,7 @@ public static class AuthorizationCommands
         const int EmptyMutationsLength = 0;
         if (!allowEmpty && request.Mutations.Length == EmptyMutationsLength || request.Mutations.Length > engine.Limits.MaxBatchMutations)
         {
-            throw Errors.Fail(ErrorCode.ResourceExhausted, AuthorizationCommandsCommandAuthorization.MutationCountBudgetMessage);
+            throw Errors.Fail(ErrorCode.ResourceExhausted, CommandAuthorization.MutationCountBudgetMessage);
         }
 
         foreach (var mutation in request.Mutations)
@@ -17,7 +17,7 @@ public static class AuthorizationCommands
             ProtocolValidation.ValidateMutationStructure(mutation);
             if (allowEmpty && mutation is QueueToGraph or GraphToQueueMutation or AdvanceQueueDeadline)
             {
-                throw Errors.Fail(ErrorCode.UnsupportedCapability, AuthorizationCommandsCommandAuthorization.CompositionBatchRequiredMessage);
+                throw Errors.Fail(ErrorCode.UnsupportedCapability, CommandAuthorization.CompositionBatchRequiredMessage);
             }
 
             JsonData.Identifier(mutation.Resource);
@@ -61,7 +61,7 @@ public static class AuthorizationCommands
             StoreAggregateSnapshot => Capability.EventsSnapshotsManage | Capability.EventsRead,
             PutVector => Capability.DocumentsWrite,
             global::KeyLoad.ApplyVectorProjection => Capability.DocumentsWrite,
-            _ => throw Errors.Fail(ErrorCode.UnsupportedCapability, AuthorizationCommandsCommandAuthorization.UnsupportedBatchMutationMessage)
+            _ => throw Errors.Fail(ErrorCode.UnsupportedCapability, CommandAuthorization.UnsupportedBatchMutationMessage)
         };
     }
 }

@@ -11,7 +11,7 @@ public static class DatabaseCompositionValidation
         var retained = visible.Reference;
         if (retained is null || retained.Partition != incoming.Partition || retained.Collection != incoming.Collection || retained.Id != incoming.Id)
         {
-            throw Errors.Fail(ErrorCode.Corruption, DatabaseCompositionExecutionDatabaseCompositionTypedEndpointJoin.TypedJoinRecordMismatch);
+            throw Errors.Fail(ErrorCode.Corruption, DatabaseCompositionTypedEndpointJoin.TypedJoinRecordMismatch);
         }
 
         var definition = engine.Resource(chargedView, incoming.Partition, incoming.Collection, ResourceKind.Collection);
@@ -20,7 +20,7 @@ public static class DatabaseCompositionValidation
         EntityReferenceLifetime.RequireDocument(visible, actual);
         if (visible.Reference != bound)
         {
-            throw Errors.Fail(ErrorCode.Corruption, DatabaseCompositionExecutionDatabaseCompositionTypedEndpointJoin.TypedJoinRecordMismatch);
+            throw Errors.Fail(ErrorCode.Corruption, DatabaseCompositionTypedEndpointJoin.TypedJoinRecordMismatch);
         }
 
         return bound;

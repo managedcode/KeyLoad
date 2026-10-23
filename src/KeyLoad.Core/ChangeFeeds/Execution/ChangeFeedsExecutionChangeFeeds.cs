@@ -28,7 +28,7 @@ public static class ChangeFeedsExecutionChangeFeeds
         ArgumentNullException.ThrowIfNull(partition);
         ArgumentNullException.ThrowIfNull(collection);
         engine.Authorization.Require(principal, partition, collection, Capability.ChangesRead | Capability.DocumentsRead);
-        var resource = ResourceExecutionQueriesResourceLifetimeReadBinding.BindAuthorizedReadResource(view, partition, collection, ResourceKind.Collection);
+        var resource = ResourceLifetimeReadBinding.BindAuthorizedReadResource(view, partition, collection, ResourceKind.Collection);
         var tail = engine.ReadOutboxHead(view, partition).Tail;
         return (engine.ChangeCursor(view, principal, resource, partition, tail), tail);
     }
@@ -116,7 +116,7 @@ public static class ChangeFeedsExecutionChangeFeeds
         JsonData.Identifier(request.Collection);
         var now = engine.Clock.GetUtcNow();
         engine.Authorization.Require(principal, request.Partition, request.Collection, Capability.ChangesRead | Capability.DocumentsRead);
-        var resource = ResourceExecutionQueriesResourceLifetimeReadBinding.BindAuthorizedReadResource(view, request.Partition, request.Collection, ResourceKind.Collection);
+        var resource = ResourceLifetimeReadBinding.BindAuthorizedReadResource(view, request.Partition, request.Collection, ResourceKind.Collection);
         if (request.Limit < LimitValidationBoundary || request.Limit > engine.Limits.MaxResults || request.MaxBytes < MaxBytesValidationBoundary || request.MaxBytes > engine.Limits.MaxBatchBytes || request.Start is not (ChangeFeedStart.Beginning or ChangeFeedStart.Now))
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, InvalidChangeReadBoundsDetail);
@@ -135,7 +135,7 @@ public static class ChangeFeedsExecutionChangeFeeds
             after = claims.After;
         }
 
-        ChangeFeedsExecutionProjectionOutbox.CheckOutboxPosition(head, after);
+        ProjectionOutbox.CheckOutboxPosition(head, after);
         return (resource, head, after);
     }
 
@@ -147,7 +147,7 @@ public static class ChangeFeedsExecutionChangeFeeds
         var changes = new List<T>();
         var through = after;
         var bytes = BytesInitialValue;
-        foreach (var entry in ChangeFeedsExecutionProjectionOutbox.ReadOutboxRange(view, request.Partition, after, head.Tail, request.Limit))
+        foreach (var entry in ProjectionOutbox.ReadOutboxRange(view, request.Partition, after, head.Tail, request.Limit))
         {
             var visible = engine.VisibleChange(view, principal, resource, request.Partition, entry);
             var change = visible is null ? null : project(resource, visible);

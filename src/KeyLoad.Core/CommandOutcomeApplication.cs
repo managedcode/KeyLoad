@@ -17,17 +17,17 @@ internal static class CommandOutcomeApplication
         Partition = partitionScope.Partition,
         CanonicalSequence = canonicalSequence,
         OnlineTextAuthority = onlineTextAuthority,
-        RemoteTransferFailureAuthority = MessagingExecutionRemoteTransferRemoteTransferFailureCapture.HasRemoteTransferCapacityFailure(result) ? transferFailure : null
+        RemoteTransferFailureAuthority = RemoteTransferFailureCapture.HasRemoteTransferCapacityFailure(result) ? transferFailure : null
     };
     internal static StoredOutcome ReplayCommand(this DatabaseEngine engine, IAtomicTransaction transaction, Command<DatabaseCommand> operation, StoredOutcome previous, CommandOutcomeSelection selection, bool siloLocal)
     {
-        StorageExecutionExecutionStorageOperationApply.RequireStoredCanonicalSequence(transaction, previous, siloLocal);
+        StorageOperationApply.RequireStoredCanonicalSequence(transaction, previous, siloLocal);
         if (previous.Incarnation != engine.Store.Identity.Incarnation)
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, AtomicCommandCommit.PreviousCommandIncarnationMessage);
         }
 
-        StorageExecutionIdentityDatabaseCommandContentIdentity.RequireOriginalCommandContent(operation, previous);
+        DatabaseCommandContentIdentity.RequireOriginalCommandContent(operation, previous);
         CommandOutcomeKeyResolver.ValidateSelectedScope(transaction, operation, selection);
         var current = engine.EvaluateCommand(operation, engine.Clock.GetUtcNow());
         var principal = engine.Principal(transaction, operation.UserId!, current.Timestamp);

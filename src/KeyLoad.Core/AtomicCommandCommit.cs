@@ -58,7 +58,7 @@ public static class AtomicCommandCommit
                 admitted = engine.PrepareQueueRetryInView(transaction, admitted);
             }
 
-            var sequence = siloLocal ? StorageExecutionExecutionStorageOperationApply.InitialCanonicalSequence : canonicalSequence ?? StorageExecutionExecutionStorageOperationApply.SelectNextCanonicalSequence(transaction);
+            var sequence = siloLocal ? StorageOperationApply.InitialCanonicalSequence : canonicalSequence ?? StorageOperationApply.SelectNextCanonicalSequence(transaction);
             var result = engine.ApplyCommittedCommand(transaction, admitted, position, sequence, siloLocal, cancellationToken);
             cancellationToken.ThrowIfCancellationRequested();
             return result;
@@ -79,7 +79,7 @@ public static class AtomicCommandCommit
 
         if (!siloLocal)
         {
-            StorageExecutionExecutionStorageOperationApply.RequireNextCanonicalSequence(rosterTransaction, replicationIndex);
+            StorageOperationApply.RequireNextCanonicalSequence(rosterTransaction, replicationIndex);
         }
 
         outcome = outcome with
@@ -98,7 +98,7 @@ public static class AtomicCommandCommit
         persistOutcome = false;
         var authorizationPending = false;
         long policyEpoch = AtomicCommandCommitInitialSequence;
-        var onlineTextAuthority = SearchCommandsOnlineTextPublicationCommands.CaptureOnlineTextOutcomeAuthority(operation);
+        var onlineTextAuthority = OnlineTextPublicationCommands.CaptureOnlineTextOutcomeAuthority(operation);
         global::KeyLoad.Core.Features.Messaging.RemoteTransferAcceptFailureAuthority? transferFailure = null;
         Result<object> result;
         global::KeyLoad.Core.Features.DatabaseComposition.CompositionOutcomeAuthority? compositionAuthority = null;
@@ -119,7 +119,7 @@ public static class AtomicCommandCommit
 
             if (!siloLocal)
             {
-                StorageExecutionExecutionStorageOperationApply.RequireNextCanonicalSequence(transaction, replicationIndex);
+                StorageOperationApply.RequireNextCanonicalSequence(transaction, replicationIndex);
             }
 
             engine.RequireOriginalEffectAdmission(transaction, principal, operation);
@@ -147,7 +147,7 @@ public static class AtomicCommandCommit
             result = ManagedCode.Communication.Result<object>.Fail(Errors.Problem(ErrorCode.Validation, InvalidCommandJsonMessage));
         }
 
-        return engine.BuildStoredOutcome(operation, fingerprint, policyEpoch, result, compositionAuthority, partitionScope, onlineTextAuthority, transferFailure, selection.Outcome?.CanonicalSequence ?? (persistOutcome ? replicationIndex : StorageExecutionExecutionStorageOperationApply.ReadCanonicalSequence(transaction)));
+        return engine.BuildStoredOutcome(operation, fingerprint, policyEpoch, result, compositionAuthority, partitionScope, onlineTextAuthority, transferFailure, selection.Outcome?.CanonicalSequence ?? (persistOutcome ? replicationIndex : StorageOperationApply.ReadCanonicalSequence(transaction)));
     }
 
     internal static void ValidateCommandClock(AtomicPartitionRosterTransaction view, DateTimeOffset evaluatedAt)

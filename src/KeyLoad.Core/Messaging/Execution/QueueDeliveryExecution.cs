@@ -13,12 +13,12 @@ public static class QueueDeliveryExecution
         var policy = resource.QueuePolicy;
         if (engine.DispatchPaused(tx) || resource.Paused)
         {
-            throw Errors.Fail(ErrorCode.DispatchPaused, MessagingCommandsQueueSweepTransitions.DispatchPausedMessage);
+            throw Errors.Fail(ErrorCode.DispatchPaused, QueueSweepTransitions.DispatchPausedMessage);
         }
 
         if (request.MaxMessages < MessagingExecutionMessaging.MessagingMinimumPositiveCount || request.MaxMessages > engine.MessagingExecution.MaximumReceiveMessages || request.MaxBytes is < MessagingExecutionMessaging.MessagingMinimumPositiveCount || request.MaxBytes > engine.Limits.MaxBatchBytes || request.LeaseSeconds < MessagingExecutionMessaging.MessagingMinimumPositiveCount || request.LeaseSeconds > policy.MaxLeaseSeconds)
         {
-            throw Errors.Fail(ErrorCode.Validation, MessagingCommandsQueueSweepTransitions.InvalidReceiveBudget);
+            throw Errors.Fail(ErrorCode.Validation, QueueSweepTransitions.InvalidReceiveBudget);
         }
 
         engine.Sweep(tx, request.Lane, policy, now, operation);
@@ -30,22 +30,22 @@ public static class QueueDeliveryExecution
     {
         if (claims.Incarnation != engine.Store.Identity.Incarnation || claims.Lane != lane || claims.PrincipalId != principal.Id)
         {
-            throw Errors.Fail(ErrorCode.TokenInvalidated, MessagingCommandsQueueSweepTransitions.InvalidDeliveryTokenScope);
+            throw Errors.Fail(ErrorCode.TokenInvalidated, QueueSweepTransitions.InvalidDeliveryTokenScope);
         }
 
-        var metadata = view.GetRecord<MessageMetadata>(MessagingExecutionMessaging.QueueKey(MessagingCommandsQueueSweepTransitions.MessageMetadataSpace, lane, claims.MessageId)) ?? throw Errors.Fail(ErrorCode.NotFound, MessagingCommandsQueueSweepTransitions.MissingLeasedMessage);
+        var metadata = view.GetRecord<MessageMetadata>(MessagingExecutionMessaging.QueueKey(QueueSweepTransitions.MessageMetadataSpace, lane, claims.MessageId)) ?? throw Errors.Fail(ErrorCode.NotFound, QueueSweepTransitions.MissingLeasedMessage);
         if (metadata.State != MessageState.Leased || metadata.LeaseOwner != principal.Id || metadata.LeaseVersion != claims.LeaseVersion || metadata.DeliveryGeneration != claims.DeliveryGeneration)
         {
-            throw Errors.Fail(ErrorCode.StaleLease, MessagingCommandsQueueSweepTransitions.StaleDeliveryLease);
+            throw Errors.Fail(ErrorCode.StaleLease, QueueSweepTransitions.StaleDeliveryLease);
         }
 
         if (metadata.LeaseUntil <= now)
         {
-            throw Errors.Fail(ErrorCode.LeaseExpired, MessagingCommandsQueueSweepTransitions.ExpiredDeliveryLease);
+            throw Errors.Fail(ErrorCode.LeaseExpired, QueueSweepTransitions.ExpiredDeliveryLease);
         }
 
-        var body = StoredMessageBody.Read(view, MessagingExecutionMessaging.QueueKey(MessagingCommandsQueueSweepTransitions.MessageBodySpace, lane, claims.MessageId)) ?? throw Errors.Fail(ErrorCode.Corruption, MessagingCommandsQueueSweepTransitions.MissingLeasedBody);
-        MessagingValidationQueueLeases.RequireQueueLeaseAuthority(view, lane, claims.MessageId, metadata, body.Body);
+        var body = StoredMessageBody.Read(view, MessagingExecutionMessaging.QueueKey(QueueSweepTransitions.MessageBodySpace, lane, claims.MessageId)) ?? throw Errors.Fail(ErrorCode.Corruption, QueueSweepTransitions.MissingLeasedBody);
+        QueueLeases.RequireQueueLeaseAuthority(view, lane, claims.MessageId, metadata, body.Body);
         return new(claims, metadata, body.Bytes);
     }
 
@@ -61,22 +61,22 @@ public static class QueueDeliveryExecution
         JsonData.Identifier(request.HandlerScope);
         if (request.ExecutionGeneration < MessagingExecutionMessaging.MessagingMinimumPositiveCount)
         {
-            throw Errors.Fail(ErrorCode.Validation, MessagingCommandsQueueSweepTransitions.InvalidHandlerGeneration);
+            throw Errors.Fail(ErrorCode.Validation, QueueSweepTransitions.InvalidHandlerGeneration);
         }
 
         var claims = engine.Verify<DeliveryClaims>(request.Token);
         if (claims.Incarnation != engine.Store.Identity.Incarnation || claims.Lane != request.Lane || claims.PrincipalId != principal.Id)
         {
-            throw Errors.Fail(ErrorCode.TokenInvalidated, MessagingCommandsQueueSweepTransitions.InvalidDeliveryTokenScope);
+            throw Errors.Fail(ErrorCode.TokenInvalidated, QueueSweepTransitions.InvalidDeliveryTokenScope);
         }
 
-        var inboxKey = MessagingExecutionMessaging.QueueKey(MessagingCommandsQueueSweepTransitions.InboxQueueSpace, request.Lane, claims.MessageId, request.HandlerScope, request.ExecutionGeneration);
+        var inboxKey = MessagingExecutionMessaging.QueueKey(QueueSweepTransitions.InboxQueueSpace, request.Lane, claims.MessageId, request.HandlerScope, request.ExecutionGeneration);
         var fingerprint = JsonData.Fingerprint(new { request.Lane, claims.MessageId, request.HandlerScope, request.ExecutionGeneration, request.Effects, principal.Id });
         if (tx.GetRecord<InboxRecord>(inboxKey) is { } completed)
         {
             if (completed.Fingerprint != fingerprint)
             {
-                throw Errors.Fail(ErrorCode.Conflict, MessagingCommandsQueueSweepTransitions.InboxEffectConflict);
+                throw Errors.Fail(ErrorCode.Conflict, QueueSweepTransitions.InboxEffectConflict);
             }
 
             return completed.Receipt;
@@ -111,7 +111,7 @@ public static class QueueDeliveryExecution
     {
         var principal = engine.Principal(view, principalId, engine.Clock.GetUtcNow());
         engine.Authorization.Require(principal, lane.Partition, lane.Queue, Capability.QueueInspect);
-        var resource = ResourceExecutionQueriesResourceLifetimeReadBinding.BindAuthorizedReadResource(view, lane.Partition, lane.Queue, ResourceKind.WorkQueue);
+        var resource = ResourceLifetimeReadBinding.BindAuthorizedReadResource(view, lane.Partition, lane.Queue, ResourceKind.WorkQueue);
         var metadata = view.GetRecord<MessageMetadata>(MessagingExecutionMessaging.QueueKey(MessagingExecutionMessaging.MessagingMessageMetadataKeySpace, lane, id));
         if (metadata is null)
         {
@@ -141,14 +141,14 @@ public static class QueueDeliveryExecution
 
         if (retainedDeadLetter)
         {
-            _ = MessagingValidationQueueDeadLettersQueueDeadLetterAuthority.RequireQueueLifecycleCounters(view, lane);
+            _ = QueueDeadLetterAuthority.RequireQueueLifecycleCounters(view, lane);
             if (metadata.State == MessageState.DeadLettered)
             {
-                MessagingValidationQueueDeadLettersQueueDeadLetterAuthority.RequireQueueParkedAuthority(view, lane, metadata);
+                QueueDeadLetterAuthority.RequireQueueParkedAuthority(view, lane, metadata);
             }
             else
             {
-                MessagingValidationQueueDeadLettersQueueDeadLetterAuthority.RequireQueuePendingAuthority(view, lane, metadata);
+                QueueDeadLetterAuthority.RequireQueuePendingAuthority(view, lane, metadata);
             }
         }
 

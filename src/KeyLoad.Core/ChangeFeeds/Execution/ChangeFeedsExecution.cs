@@ -17,11 +17,11 @@ public static class ChangeFeedsExecution
         }
 
         Features.Search.AnnProjectionPinValidation.RequireOwner(engine, view, principal, request.Consumer.Partition, request);
-        return ChangeFeedsValidationProjectionConsumerIdentity.ProjectionConsumer(view, request.Consumer);
+        return ProjectionConsumerIdentity.ProjectionConsumer(view, request.Consumer);
     });
     internal static CommitProjectionBatchRequest? CreateAnnInitialSettlementIntent(this DatabaseEngine engine, PrincipalRecord principal, AnnMaintenanceRequest original, AnnMaintenanceResult result, Guid childCommandId)
     {
-        var initial = engine.Store.Read(view => ChangeFeedsValidationProjectionConsumerIdentity.ProjectionConsumer(view, original.Consumer));
+        var initial = engine.Store.Read(view => ProjectionConsumerIdentity.ProjectionConsumer(view, original.Consumer));
         if (initial.InitialAnnMaintenance is not { } reserved)
         {
             return null;
@@ -52,7 +52,7 @@ public static class ChangeFeedsExecution
         var now = engine.Clock.GetUtcNow();
         var fresh = engine.Principal(view, principal.Id, now);
         ProjectionBatchExecution.RequireProjectionAdministrator(fresh);
-        var state = ChangeFeedsValidationProjectionConsumerIdentity.ProjectionConsumer(view, original.Consumer);
+        var state = ProjectionConsumerIdentity.ProjectionConsumer(view, original.Consumer);
         var authority = RequireAnnSettlementAuthority(state, fresh);
         Features.Search.AnnProjectionPinValidation.RequireOwner(engine, view, fresh, original.Consumer.Partition, original);
         if (state.Released || state.Checkpoint != checkpoint || state.Definition.IndexGeneration != original.IndexGeneration || state.InitialAnnMaintenance is not { } exact || !global::KeyLoad.AnnMaintenanceRequestIdentity.Same(exact, original) || childCommandId == Guid.Empty || result.CommandId != original.CommandId || result.Consumer != original.Consumer || result.IndexGeneration != original.IndexGeneration)
@@ -103,7 +103,7 @@ public static class ChangeFeedsExecution
         }
 
         var proof = engine.Verify<AnnProjectionSettlementClaims>(token);
-        var state = ChangeFeedsValidationProjectionConsumerIdentity.ProjectionConsumer(view, request.Consumer);
+        var state = ProjectionConsumerIdentity.ProjectionConsumer(view, request.Consumer);
         var authority = RequireAnnSettlementAuthority(state, principal);
         var original = state.InitialAnnMaintenance;
         if (original is null || state.Released || request.Effects.Length != AnnSettlementEffectsLength || proof.Purpose != AnnProjectionSettlementClaims.SettlementPurpose || proof.Incarnation != engine.Store.Identity.Incarnation || proof.Incarnation != authority.Incarnation || proof.PrincipalId != principal.Id || proof.PolicyEpoch != principal.PolicyEpoch || proof.ConfigureCommandId != authority.ConfigureCommandId || proof.Consumer != request.Consumer || proof.IndexGeneration != state.Definition.IndexGeneration || proof.InitialCommandId != original.CommandId || proof.SettlementCommandId != request.CommandId || proof.NodeId != original.NodeId || proof.Checkpoint != state.Checkpoint || batch.After != proof.Checkpoint || batch.Through != proof.Checkpoint || proof.ExpiresAt != batch.ExpiresAt || !completed && proof.ExpiresAt <= now || proof.InitialRequestSha256 is null || proof.OriginalResultSha256 is null || proof.InitialRequestSha256.Length != System.Security.Cryptography.SHA256.HashSizeInBytes || proof.OriginalResultSha256.Length != System.Security.Cryptography.SHA256.HashSizeInBytes || !System.Security.Cryptography.CryptographicOperations.FixedTimeEquals(proof.InitialRequestSha256, System.Security.Cryptography.SHA256.HashData(OrleansSerialization.Serialize(original))) || !OrleansSerialization.Serialize(proof.PhysicalPlacement).AsSpan().SequenceEqual(OrleansSerialization.Serialize(original.Placement)) || completed && !state.InitialAnnMaintenanceSettled)
@@ -114,5 +114,5 @@ public static class ChangeFeedsExecution
         return state;
     }
 
-    internal static byte[] ProjectionReceiptKey(ProjectionBatchClaims claims, CommitProjectionBatchRequest request) => request.InitialAnnMaintenanceSettlement is null ? ProjectionBatchExecution.ProjectionReceiptKey(claims) : KeySpace.Partition(ChangeFeedsExecutionProjectionOutbox.ProjectionReceiptSpace, claims.Consumer.Partition, claims.Consumer.Name, claims.IndexGeneration, AnnProjectionSettlementClaims.SettlementPurpose, request.CommandId);
+    internal static byte[] ProjectionReceiptKey(ProjectionBatchClaims claims, CommitProjectionBatchRequest request) => request.InitialAnnMaintenanceSettlement is null ? ProjectionBatchExecution.ProjectionReceiptKey(claims) : KeySpace.Partition(ProjectionOutbox.ProjectionReceiptSpace, claims.Consumer.Partition, claims.Consumer.Name, claims.IndexGeneration, AnnProjectionSettlementClaims.SettlementPurpose, request.CommandId);
 }

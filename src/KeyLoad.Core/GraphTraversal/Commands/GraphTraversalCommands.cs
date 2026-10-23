@@ -122,7 +122,7 @@ public static class GraphTraversalCommands
         var intent = GraphCrossPartitionRecords.Read<GraphCrossPartitionDeliveryIntent>(view, key);
         if (intent is not null)
         {
-            var definition = ResourceExecutionQueriesResourceDefinitionBinding.BindResourceDefinition(view, destination.Partition, destination.Collection, ResourceKind.Collection);
+            var definition = ResourceDefinitionBinding.BindResourceDefinition(view, destination.Partition, destination.Collection, ResourceKind.Collection);
             destination = EntityReferenceLifetime.Bind(view, destination, definition);
             EntityReferenceLifetime.RequireStored(view, intent.Destination, definition);
             GraphCrossPartitionValidation.ValidateIntent(intent, source, graph, edgeId, destination, limits);

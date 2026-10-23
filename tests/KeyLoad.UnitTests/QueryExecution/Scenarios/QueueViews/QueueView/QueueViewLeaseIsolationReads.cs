@@ -19,9 +19,10 @@ internal static class QueueViewLeaseIsolationReads
                 QueueViewLeaseIsolationRows.Page(state, hidden)));
             var decoded = SqlOperationTestData.Compile(new(state.Partition,
                 hidden ? HiddenSql : QueueSql, AllowFullScan: true), cancellationToken: state.Token);
-            var request = OrleansSerialization.Deserialize<QueryRequest>(decoded.Payload.Span);
+            // The SQL gateway lowers SELECT once and ships the typed plan.
+            var request = OrleansSerialization.Deserialize<AstQueryRequest>(decoded.Payload.Span);
             await ObserveAsync(state, async () => await QueueViewLeaseIsolationRows.SameAsync(
-                queries.Execute(Reader, request, cancellationToken: state.Token), QueueViewLeaseIsolationRows.Page(state, hidden)));
+                queries.ExecuteAst(Reader, request, cancellationToken: state.Token), QueueViewLeaseIsolationRows.Page(state, hidden)));
         }
         await ExplainAsync(state, queries);
     }

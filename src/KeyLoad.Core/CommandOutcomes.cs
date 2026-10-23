@@ -79,7 +79,7 @@ public static class CommandOutcomes
             throw Errors.Fail(ErrorCode.PermissionDenied, ChangedOutcomePrincipalPolicyMessage);
         }
 
-        BlobStorageValidationFileAuthorization.ValidateFileCachedOutcome(view, principal, operation);
+        FileAuthorization.ValidateFileCachedOutcome(view, principal, operation);
         engine.ValidateBm25CachedOutcome(view, principal, operation, previous);
         engine.ValidateOnlineTextCachedOutcome(view, principal, operation, previous);
         engine.ValidateCompositionOutcome(view, principal, operation, previous);
@@ -165,7 +165,7 @@ public static class CommandOutcomes
     {
         var cached = result.Get<ReceiveSubscriptionResult>();
         var subscription = OperationProtocol.Payload<ReceiveSubscriptionRequest>(operation).Subscription;
-        var state = MessagingExecutionSubscriptionGroups.Group(view, subscription);
+        var state = SubscriptionGroups.Group(view, subscription);
         if (cached.Status.Generation != state.Generation || cached.Status.OwnershipEpoch != state.OwnershipEpoch)
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, EarlierSubscriptionGenerationMessage);
