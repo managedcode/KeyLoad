@@ -54,26 +54,25 @@ internal sealed class TextIncrementalMaintenanceService : ITextMaintenance, ISel
 
     public Task<TextMaintenanceCapabilityResult> ExecuteAsync(PrincipalRecord principal,
         TextMaintenanceCapabilityRequest request, CancellationToken cancellationToken)
-        => Task.FromResult(worker.Run(() => Execute(principal, request, null, null, cancellationToken)));
+        => worker.RunAsync(() => ExecuteExclusiveAsync(principal, request, null, null, cancellationToken));
 
     public Task<TextMaintenanceCapabilityResult> ExecuteBoundAsync(PrincipalRecord principal,
         TextMaintenanceCapabilityRequest request, DateTimeOffset originalExpiry,
         IResourceLifetimeWorkBinding binding, CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(binding);
-        return Task.FromResult(worker.Run(() => Execute(principal, request, originalExpiry, binding, token)));
+        return worker.RunAsync(() => ExecuteExclusiveAsync(principal, request, originalExpiry, binding, token));
     }
 
-    private TextMaintenanceCapabilityResult Execute(PrincipalRecord principal,
+    /// <summary>Waits for the selected readers to drain, runs the exclusive stage synchronously, then releases the write admission.</summary>
+    private async Task<TextMaintenanceCapabilityResult> ExecuteExclusiveAsync(PrincipalRecord principal,
         TextMaintenanceCapabilityRequest request, DateTimeOffset? originalExpiry, IResourceLifetimeWorkBinding? binding, CancellationToken token)
     {
+        await selectedAdmission.WaitForWriteAsync(token);
         var failures = new List<Exception>();
         TextMaintenanceCapabilityResult? result = null;
-        ServerFailureObserver.Observe(() =>
-        {
-            using var exclusive = new TextSelectedWriteLease(selectedAdmission, token);
-            ServerFailureObserver.Observe(() => result = ExecuteExclusive(principal, request, originalExpiry, binding, token), failures);
-        }, failures);
+        ServerFailureObserver.Observe(() => result = ExecuteExclusive(principal, request, originalExpiry, binding, token), failures);
+        ServerFailureObserver.Observe(selectedAdmission.ExitWrite, failures);
         ServerFailureObserver.ThrowIfAny(failures);
         return result!;
     }
@@ -117,18 +116,16 @@ internal sealed class TextIncrementalMaintenanceService : ITextMaintenance, ISel
         {
             await work.CancelAndJoinStagesAsync();
         }
-        await worker.RunCleanupAsync(() =>
+        await worker.RunCleanupAsync(async () =>
         {
+            await selectedAdmission.WaitForWriteAsync(CancellationToken.None);
             var failures = new List<Exception>();
             ServerFailureObserver.Observe(() =>
             {
-                using var exclusive = new TextSelectedWriteLease(selectedAdmission, CancellationToken.None);
-                ServerFailureObserver.Observe(() =>
-                {
-                    RequireSelectedSettled();
-                    sessions.Retire(sessionId);
-                }, failures);
+                RequireSelectedSettled();
+                sessions.Retire(sessionId);
             }, failures);
+            ServerFailureObserver.Observe(selectedAdmission.ExitWrite, failures);
             ServerFailureObserver.ThrowIfAny(failures);
         });
     }

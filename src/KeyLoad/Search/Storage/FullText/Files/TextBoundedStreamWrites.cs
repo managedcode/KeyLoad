@@ -100,8 +100,6 @@ internal sealed class TextBoundedStreamWrites(IFileStream original, TextResource
         completed.SetResult();
     }
 
-    internal void JoinForDisposal() => JoinForDisposalAsync().GetAwaiter().GetResult();
-
     internal Task JoinForDisposalAsync()
     {
         lock (gate)

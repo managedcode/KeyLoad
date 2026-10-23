@@ -13,30 +13,30 @@ internal static class KeyCodecDecimal
     private const int MaximumScale = 28;
     private const string MaximumCoefficient = "79228162514264337593543950335";
 
-    internal static void Write(Stream stream, decimal value)
+    internal static void Write(ref KeyBufferWriter writer, decimal value)
     {
-        stream.WriteByte(KeyCodecTokens.DecimalTag);
+        writer.Write((byte)KeyCodecTokens.DecimalTag);
         if (value == ZeroNumber)
         {
-            stream.WriteByte(ZeroSign);
+            writer.Write((byte)ZeroSign);
             return;
         }
 
         var negative = value < ZeroNumber;
-        stream.WriteByte(negative ? (byte)NegativeSign : (byte)PositiveSign);
+        writer.Write(negative ? (byte)NegativeSign : (byte)PositiveSign);
         var parts = decimal.GetBits(decimal.Abs(value));
         var magnitude = (BigInteger)(uint)parts[LowWordIndex] | (BigInteger)(uint)parts[MiddleWordIndex] << MiddleWordShift | (BigInteger)(uint)parts[HighWordIndex] << HighWordShift;
         var scale = (parts[FlagsWordIndex] >> ScaleShift) & ScaleMask;
         var digits = magnitude.ToString(CultureInfo.InvariantCulture);
         var exponent = digits.Length - scale;
         digits = digits.TrimEnd(ZeroDigit);
-        WriteOrderedDigit(stream, negative, (byte)(exponent + ExponentBias));
+        WriteOrderedDigit(ref writer, negative, (byte)(exponent + ExponentBias));
         foreach (var digit in digits)
         {
-            WriteOrderedDigit(stream, negative, (byte)(digit - ZeroDigit + DigitOffset));
+            WriteOrderedDigit(ref writer, negative, (byte)(digit - ZeroDigit + DigitOffset));
         }
 
-        WriteOrderedDigit(stream, negative, DigitTerminator);
+        WriteOrderedDigit(ref writer, negative, DigitTerminator);
     }
 
     internal static decimal Read(ReadOnlySpan<byte> key, ref int offset)
@@ -147,6 +147,6 @@ internal static class KeyCodecDecimal
         return digits.ToString();
     }
 
-    private static void WriteOrderedDigit(Stream stream, bool negative, byte value)
-        => stream.WriteByte(negative ? (byte)~value : value);
+    private static void WriteOrderedDigit(ref KeyBufferWriter writer, bool negative, byte value)
+        => writer.Write(negative ? (byte)~value : value);
 }

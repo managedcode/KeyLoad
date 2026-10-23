@@ -1,13 +1,14 @@
 namespace KeyLoad.Server.Features.Search;
 
-/// <summary>Bounds synchronous execution work and joins accepted work before releasing its owner.</summary>
+/// <summary>Admits one maintenance operation at a time and joins the accepted operation before releasing its owner.</summary>
 internal sealed class TextIncrementalWorker : IAsyncDisposable
 {
     private readonly Lock gate = new();
     private TaskCompletionSource? active;
     private bool closed;
 
-    internal T Run<T>(Func<T> operation)
+    /// <summary>Runs one operation now; a second concurrent operation is refused as a bound, never queued.</summary>
+    internal async Task<T> RunAsync<T>(Func<Task<T>> operation)
     {
         TaskCompletionSource original;
         lock (gate)
@@ -22,19 +23,16 @@ internal sealed class TextIncrementalWorker : IAsyncDisposable
         }
         try
         {
-            return operation();
+            return await operation();
         }
         finally
         {
-            lock (gate)
-            {
-                original.TrySetResult();
-                active = null;
-            }
+            Release(original);
         }
     }
 
-    internal async Task RunCleanupAsync(Action operation)
+    /// <summary>Waits for the active operation, then runs cleanup as the only active work.</summary>
+    internal async Task RunCleanupAsync(Func<Task> operation)
     {
         TaskCompletionSource original;
         while (true)
@@ -55,15 +53,20 @@ internal sealed class TextIncrementalWorker : IAsyncDisposable
         }
         try
         {
-            operation();
+            await operation();
         }
         finally
         {
-            lock (gate)
-            {
-                original.TrySetResult();
-                active = null;
-            }
+            Release(original);
+        }
+    }
+
+    private void Release(TaskCompletionSource original)
+    {
+        lock (gate)
+        {
+            original.TrySetResult();
+            active = null;
         }
     }
 
