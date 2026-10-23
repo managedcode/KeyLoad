@@ -54,7 +54,9 @@ internal sealed class SqlClientPreCancellationTests
         using var cancellation = new CancellationTokenSource();
         await cancellation.CancelAsync();
         var request = new SqlOperationRequest(new(Tenant, Database, Domain, Partition), sql);
-        var client = new KeyLoadClient(server.Client, ApiKey, UnitClientOptions.Execution());
+        // The original 256-character inspection window is the SDK scan bound for these outcomes.
+        var client = new KeyLoadClient(server.Client, ApiKey, UnitClientOptions.Execution(
+            new KeyLoadClientExecutionOptions { MaximumSqlInspectionBytes = OriginalInspectionCharacters }));
         var result = await client.ExecuteSqlAsync(request, cancellation.Token);
         await Assert.That(result.IsFailed).IsTrue();
         await Assert.That(result.Problem!.ErrorCode).IsEqualTo(expected.ToString());

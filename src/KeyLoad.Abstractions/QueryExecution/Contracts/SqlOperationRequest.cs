@@ -4,7 +4,7 @@ namespace KeyLoad;
 
 /// <summary>Compiles one SQL SELECT or CALL into one existing authorized database operation.</summary>
 /// <param name="Partition">Partition for Q1 SELECT; CALL binds scope through its canonical arguments.</param>
-/// <param name="Sql">One admitted Q1/Q2 SELECT or Q1 CALL exact_public_operation(@arguments) statement.</param>
+/// <param name="Sql">One admitted SELECT, INSERT, CREATE TABLE, DROP TABLE or EXEC exact_public_operation @arguments statement.</param>
 /// <param name="Parameters">Scalar SELECT parameters or one CALL argument-envelope object parameter.</param>
 /// <param name="AllowFullScan">Explicit Q1 full-scan consent.</param>
 /// <param name="Cursor">Optional Q1 continuation; unavailable for CALL.</param>

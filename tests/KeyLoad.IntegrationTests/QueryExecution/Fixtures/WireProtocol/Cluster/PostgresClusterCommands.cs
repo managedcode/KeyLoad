@@ -4,7 +4,7 @@ namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 
 internal static class PostgresClusterCommands
 {
-    private const string JoinedSql = "SELECT l.order_id AS order_id, l.detail AS left_detail, r.name AS right_name, r.id AS customer_id FROM budgetorders AS l INNER JOIN budgetcustomers AS r ON l.customer_id = r.id ORDER BY l.order_id ASC LIMIT 10";
+    private const string JoinedSql = "SELECT l.order_id AS order_id, l.detail AS left_detail, r.name AS right_name, r.id AS customer_id FROM budgetorders AS l INNER JOIN budgetcustomers AS r ON l.customer_id = r.id ORDER BY l.order_id ASC OFFSET 0 ROWS FETCH NEXT 10 ROWS ONLY";
     private const string UnsupportedSql = "BEGIN";
     private const string InvalidCommand = "The execution SQL checks command is outside its frozen literal inventory.";
 

@@ -43,7 +43,7 @@ internal static class RelationalSqlClusterJoinBudgetData
         + $"{RightAlias}.{NameColumn} AS {NameOutput}, {RightAlias}.{CustomerIdColumn} AS {CustomerIdOutput} "
         + $"FROM {LeftCollection} AS {LeftAlias} "
         + $"INNER JOIN {RightCollection} AS {RightAlias} ON {LeftAlias}.{CustomerColumn} = {RightAlias}.{CustomerIdColumn} "
-        + $"ORDER BY {LeftAlias}.{OrderColumn} ASC LIMIT 10";
+        + $"ORDER BY {LeftAlias}.{OrderColumn} ASC OFFSET 0 ROWS FETCH NEXT 10 ROWS ONLY";
 
     internal static PartitionRef Partition(string suffix)
         => new(TenantPrefix + suffix, Database, TransactionDomain, Guid.NewGuid().ToString("N"));

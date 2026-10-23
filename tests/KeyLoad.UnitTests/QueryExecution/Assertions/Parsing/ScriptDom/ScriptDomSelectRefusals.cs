@@ -43,5 +43,11 @@ internal static class ScriptDomSelectRefusals
          ("SELECT title FROM offsetleft WITH (NOLOCK)", ErrorCode.UnsupportedCapability),
          ("SELECT title FROM offsetleft; DELETE FROM offsetleft", ErrorCode.UnsupportedCapability),
          ("SELECT TOP (1) title FROM offsetleft\nGO", ErrorCode.UnsupportedCapability),
-         ("SELECT TOP (1) title FROM offsetleft\nGO 2", ErrorCode.UnsupportedCapability)];
+         ("SELECT TOP (1) title FROM offsetleft\nGO 2", ErrorCode.UnsupportedCapability),
+         ("SELECT title FROM offsetleft GROUP BY title", ErrorCode.UnsupportedCapability),
+         ("SELECT title FROM offsetleft UNION SELECT title FROM offsetleft", ErrorCode.UnsupportedCapability),
+         ("WITH c AS (SELECT title FROM offsetleft) SELECT title FROM c", ErrorCode.UnsupportedCapability),
+         ("SELECT title FROM offsetleft WHERE title LIKE 'a%'", ErrorCode.UnsupportedCapability),
+         ("SELECT title FROM offsetleft WHERE title IN (SELECT title FROM offsetleft)", ErrorCode.UnsupportedCapability),
+         ("SELECT CASE WHEN title IS NULL THEN 1 ELSE 0 END AS flag FROM offsetleft", ErrorCode.UnsupportedCapability)];
 }

@@ -12,7 +12,7 @@ public sealed partial class KeyLoadClient
     /// <returns>The canonical selected result or a typed problem.</returns>
     public Task<Result<JsonElement>> ExecuteSqlAsync(SqlOperationRequest request, CancellationToken cancellationToken = default)
         => Send<JsonElement>(SqlOperationProtocol.Route, request,
-            SqlWriteClassifier.MayWriteRequest(request, ExecutionOptions, cancellationToken), null, cancellationToken);
+            SqlWriteClassifier.MayWriteRequest(request, ExecutionOptions), null, cancellationToken);
 
     /// <summary>Executes a parsed query request.</summary>
     /// <param name="request">Typed query and requested page controls.</param>

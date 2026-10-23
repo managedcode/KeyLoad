@@ -10,7 +10,7 @@ internal static class LeftFilteredJoinProtocol
     internal const string NameReadGrant = "name.read";
     internal const string Prefix = "SELECT l.order_id AS order_id, r.name AS customer_name, l.total AS total "
         + "FROM filteredorders AS l INNER JOIN filteredcustomers AS r ON l.customer_id = r.id ";
-    internal const string Order = "ORDER BY l.order_id ASC LIMIT 10";
+    internal const string Order = "ORDER BY l.order_id ASC OFFSET 0 ROWS FETCH NEXT 10 ROWS ONLY";
     internal const string Sql = Prefix + "WHERE l.total >= @minimum AND NOT (l.total IS NULL) " + Order;
     internal const string LeftA = "{\"order_id\":\"a\",\"customer_id\":\"c1\",\"total\":7}";
     internal const string LeftB = "{\"order_id\":\"b\",\"customer_id\":\"c2\",\"total\":2}";

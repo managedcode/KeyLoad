@@ -17,6 +17,8 @@ internal static class PostgresMessageProtocol
     internal const int PasswordChallenge = 3;
     internal const int AuthenticationOk = 0;
     internal const string ServerVersion = "server_version";
+    // Npgsql and psql parse server_version into a numeric PostgreSQL version before any query; the value lets the
+    // driver connect and claims nothing about PostgreSQL features. Every result is one jsonb keyload_result cell.
     internal const string ServerVersionValue = "18.0 (KeyLoad execution-sql)";
     internal const string Profile = "keyload_protocol_profile";
     internal const string ProfileValue = "execution-sql-jsonb-result";

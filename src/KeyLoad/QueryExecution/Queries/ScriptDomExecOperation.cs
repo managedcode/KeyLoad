@@ -10,6 +10,12 @@ internal static class ScriptDomExecOperation
     private const int FirstIndex = 0;
     private const int ParameterPrefixLength = 1;
     private const string ParameterPrefix = "@";
+    /// <summary>Cluster administration and credential tools stay outside the SQL surface; the SDK and MCP own them.</summary>
+    private static readonly HashSet<string> AdministrationTools = new(StringComparer.Ordinal)
+    {
+        McpToolNames.AdminBackup, McpToolNames.AdminAdmission, McpToolNames.AdminStatus, McpToolNames.AdminDispatch,
+        McpToolNames.PrincipalsConfigure, McpToolNames.CredentialsConfigure
+    };
 
     internal static McpDecodedOperation Compile(SqlOperationRequest request, ExecuteStatement statement,
         int maximumPayloadBytes, int? positionalParameterCount, Action checkBudget, CancellationToken token)
@@ -43,7 +49,8 @@ internal static class ScriptDomExecOperation
         }
         var binding = ParameterName(parameter.ParameterValue, positionalParameterCount);
         var arguments = BindArguments(request.Parameters, binding, checkBudget, token);
-        if (name == SqlOperationProtocol.ToolName || !McpOperationCatalog.TryGet(name, out var descriptor)
+        if (name == SqlOperationProtocol.ToolName || AdministrationTools.Contains(name)
+            || !McpOperationCatalog.TryGet(name, out var descriptor)
             || descriptor.ReadKind.HasValue == descriptor.CommandKind.HasValue)
         {
             throw ScriptDomOperationErrors.Unsupported();

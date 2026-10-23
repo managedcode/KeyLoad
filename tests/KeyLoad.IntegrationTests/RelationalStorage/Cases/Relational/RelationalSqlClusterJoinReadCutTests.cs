@@ -23,7 +23,7 @@ internal sealed class RelationalSqlClusterJoinReadCutTests(ClusterFixture fixtur
     private const string RightGenerationField = "right_generation";
     private const string QueryText = "SELECT l.key AS order_key, r.name AS customer_name, l.title AS customer_id, "
         + "l.count AS left_generation, r.generation AS right_generation FROM agentrows AS l "
-        + "INNER JOIN joincustomers AS r ON l.title = r.id ORDER BY l.key ASC LIMIT 10";
+        + "INNER JOIN joincustomers AS r ON l.title = r.id ORDER BY l.key ASC OFFSET 0 ROWS FETCH NEXT 10 ROWS ONLY";
     private const int QueryDialectVersion = SqlOperationProtocol.DefaultQueryDialectVersion;
     private const int FirstReaderRoute = 0;
     private const int ReaderRouteCount = 4;

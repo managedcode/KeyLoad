@@ -199,13 +199,14 @@ original application owner settles; this boundary does not create or replace a
 resource, detach work, alter a timeout, or delete unsuccessful evidence.
 
 SQL trivia parsing receives a required explicit configured work chunk. Query and
-Server consume QueryExecutionOptions.SqlBudgetCheckInterval; SDK conservative
-prefix inspection consumes KeyLoadClientExecutionOptions.SqlBudgetCheckInterval
-1..256 with default 256 for both trivia and keyword boundaries. SQL comment pairs
-have immutable atomic width two, so a configured one-character interval permits
-that minimum grammatical atom while retaining bounded positive progress. Preserve
-original default known-read/unknown-write cancellation outcomes and first-token
-offsets; SqlTriviaExecutionPolicyTests joins AC-CQ-034/035 to real parser/SDK owners.
+Server consume QueryExecutionOptions.SqlBudgetCheckInterval, 1..256 with default
+256. SQL comment pairs have immutable atomic width two, so a configured
+one-character interval permits that minimum grammatical atom while retaining
+bounded positive progress. The SDK does not parse: its read/write classification
+scans the first KeyLoadClientExecutionOptions.MaximumSqlInspectionBytes
+characters (1..65 536, default 65 536) for a complete leading SELECT keyword and
+classifies a keyword cut by that bound as a possible write.
+SqlTriviaExecutionPolicyTests joins AC-CQ-034/035 to the real parser and SDK owners.
 
 TimeSeries chunk encoding requires the centrally registered execution
 TimeSeriesExecutionOptions wrapper at its codec entry. HashChunkBytes 1..65536,

@@ -22,6 +22,7 @@ internal sealed class SqlTriviaExecutionPolicyTests
     private const string SuccessReply = "{}";
     private const string ApiKey = "sql-inspection-policy-test-key";
     private const int OriginalInterval = 256;
+    private const int OriginalInspectionBytes = 65_536;
     private const int Depth = 2;
     private const int TokenLimit = 16;
 
@@ -34,8 +35,8 @@ internal sealed class SqlTriviaExecutionPolicyTests
         provider.GetRequiredService<IStartupValidator>().Validate();
         await Assert.That(provider.GetRequiredService<IOptions<QueryExecutionOptions>>().Value.SqlBudgetCheckInterval)
             .IsEqualTo(OriginalInterval);
-        await Assert.That(provider.GetRequiredService<IOptions<KeyLoadClientExecutionOptions>>().Value.SqlBudgetCheckInterval)
-            .IsEqualTo(OriginalInterval);
+        await Assert.That(provider.GetRequiredService<IOptions<KeyLoadClientExecutionOptions>>().Value.MaximumSqlInspectionBytes)
+            .IsEqualTo(OriginalInspectionBytes);
     }
 
     [Test]
@@ -106,7 +107,7 @@ internal sealed class SqlTriviaExecutionPolicyTests
             using var provider = Provider(configuration);
             provider.GetRequiredService<IStartupValidator>().Validate();
             var options = provider.GetRequiredService<IOptions<KeyLoadClientExecutionOptions>>();
-            await Assert.That(options.Value.SqlBudgetCheckInterval).IsEqualTo(interval);
+            await Assert.That(options.Value.MaximumSqlInspectionBytes).IsEqualTo(interval);
             var calls = 0;
             SqlOperationRequest? received = null;
             await using var server = await KeyLoadClientKestrelServer.StartAsync(async context =>
@@ -142,7 +143,7 @@ internal sealed class SqlTriviaExecutionPolicyTests
 
     [Test]
     [Arguments(0)]
-    [Arguments(257)]
+    [Arguments(65_537)]
     public async Task InvalidClientCadenceFailsStartupBeforeInspection(int interval)
     {
         var configuration = Configuration(interval, includeQuery: false);
@@ -167,7 +168,7 @@ internal sealed class SqlTriviaExecutionPolicyTests
         if (interval is { } value)
         {
             var text = value.ToString(CultureInfo.InvariantCulture);
-            settings[$"{KeyLoadClientExecutionOptions.SectionName}:{nameof(KeyLoadClientExecutionOptions.SqlBudgetCheckInterval)}"] = text;
+            settings[$"{KeyLoadClientExecutionOptions.SectionName}:{nameof(KeyLoadClientExecutionOptions.MaximumSqlInspectionBytes)}"] = text;
             if (includeQuery)
             {
                 settings[$"{QueryExecutionOptions.SectionName}:{nameof(QueryExecutionOptions.SqlBudgetCheckInterval)}"] = text;

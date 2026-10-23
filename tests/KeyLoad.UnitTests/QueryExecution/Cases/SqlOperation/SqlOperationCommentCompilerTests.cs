@@ -19,6 +19,11 @@ internal sealed class SqlOperationCommentCompilerTests
             {
                 Sql = SqlOperationCommentTestData.Call(item.Name)
             };
+            if (SqlOperationCompilerTests.AdministrationTools.Contains(item.Name))
+            {
+                await SqlOperationTestData.Reject(commented, ErrorCode.UnsupportedCapability);
+                continue;
+            }
             var expected = SqlOperationTestData.Find(item.Name).Decode(arguments);
             var actual = SqlOperationTestData.Compile(commented);
             await SqlOperationTestData.Same(actual, expected);
@@ -57,8 +62,10 @@ internal sealed class SqlOperationCommentCompilerTests
     }
 
     [Test]
-    public async Task AcSqlc003SelectAndExplainRetainRawSqlAndOriginalQueryOptions()
+    public async Task AcSqlc003CommentedSelectLowersToTheSameTypedPlanAsThePlainText()
     {
+        var limits = Microsoft.Extensions.Options.Options.Create(SqlOperationTestData.Limits);
+        var execution = UnitExecutionOptions.QueryExecution();
         foreach (var sql in new[] { SqlOperationCommentTestData.Select, SqlOperationCommentTestData.Top })
         {
             var parameters = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
@@ -67,11 +74,15 @@ internal sealed class SqlOperationCommentCompilerTests
             };
             var request = new SqlOperationRequest(McpCanonicalTestData.Partition, sql, parameters,
                 AllowFullScan: true, Cursor: SqlOperationTestData.Cursor);
-            var expected = SqlOperationTestData.Find(McpCatalogExpectations.QueryExecute).Decode(
+            var query = new QueryRequest(request.Partition, sql, parameters, true, request.Cursor);
+            var budget = new global::KeyLoad.Core.ReadExecutionBudget(limits);
+            var plan = global::KeyLoad.Query.Features.QueryExecution.ScriptDomQueryAdapter.Lower(
+                global::KeyLoad.Features.QueryExecution.ScriptDomSyntax.Parse(sql, limits, budget.Check, CancellationToken.None),
+                query, limits, execution, budget, null, CancellationToken.None);
+            var expected = SqlOperationTestData.Find(McpCatalogExpectations.QueryAst).Decode(
                 new Dictionary<string, JsonElement>(StringComparer.Ordinal)
                 {
-                    [McpCatalogProtocol.Request] = JsonSerializer.SerializeToElement(
-                        new QueryRequest(request.Partition, sql, parameters, true, request.Cursor), JsonDefaults.Options)
+                    [McpCatalogProtocol.Request] = JsonSerializer.SerializeToElement(plan, JsonDefaults.Options)
                 });
             await SqlOperationTestData.Same(SqlOperationTestData.Compile(request), expected);
         }

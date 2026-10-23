@@ -14,7 +14,6 @@ internal static class SdkPolicySnapshotFlow
     private const string Domain = "sdk-policy-domain";
     private const string PartitionKey = "sdk-policy-partition";
     private const string Select = "SELECT 1";
-    private const string NestedSelect = "/* /* */ */ SELECT 1";
     private const string SafeDetail = "retained-policy-probe";
     private const string NodeId = "retained-policy-healthy";
     private const string ContentType = "application/json";
@@ -50,9 +49,7 @@ internal static class SdkPolicySnapshotFlow
             var configured = new KeyLoadClientExecutionOptions
             {
                 MaximumProblemBodyBytes = 1,
-                MaximumSqlInspectionBytes = 512,
-                MaximumSqlInspectionDepth = 2,
-                SqlBudgetCheckInterval = 32
+                MaximumSqlInspectionBytes = 512
             };
             var options = Options.Create(configured);
             var retained = new KeyLoadClient(server.Client, ApiKey, options);
@@ -67,12 +64,6 @@ internal static class SdkPolicySnapshotFlow
             configured.MaximumSqlInspectionBytes = 1;
             await SqlPairAsync(retained, new KeyLoadClient(server.Client, ApiKey, options), Select, cancellation.Token);
             configured.MaximumSqlInspectionBytes = 512;
-            configured.MaximumSqlInspectionDepth = 1;
-            await SqlPairAsync(retained, new KeyLoadClient(server.Client, ApiKey, options), NestedSelect, cancellation.Token);
-            configured.MaximumSqlInspectionDepth = 2;
-            configured.SqlBudgetCheckInterval = 1;
-            await SqlPairAsync(retained, new KeyLoadClient(server.Client, ApiKey, options), Select, cancellation.Token);
-            configured.SqlBudgetCheckInterval = 32;
             configured.MaximumProblemBodyBytes = 0;
             var invalid = Assert.ThrowsExactly<OptionsValidationException>(
                 () => _ = new KeyLoadClient(server.Client, ApiKey, options));

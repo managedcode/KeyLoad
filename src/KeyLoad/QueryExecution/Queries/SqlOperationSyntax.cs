@@ -3,10 +3,6 @@ namespace KeyLoad.Server;
 /// <summary>Stable procedural SQL tokens and safe diagnostics, independent of target execution.</summary>
 internal static class SqlOperationSyntax
 {
-    internal const string Select = "SELECT";
-    internal const string Table = "TABLE";
-    internal const string Explain = "EXPLAIN";
-    internal const string Call = "CALL";
     internal const string Invalid = "The unified SQL statement or bound arguments are invalid.";
     internal const string Unsupported = "The unified SQL version, statement or target operation is unsupported.";
     internal const string TextExceeded = "The unified SQL text exceeds its byte budget.";

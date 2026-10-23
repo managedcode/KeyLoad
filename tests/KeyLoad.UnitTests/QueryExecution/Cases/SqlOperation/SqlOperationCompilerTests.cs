@@ -10,10 +10,11 @@ internal sealed class SqlOperationCompilerTests
     private const string SpacedCall = " \texec\r\nkeyload_query_capabilities @arguments ; \n";
 
     [Test]
-    public async Task AcAiSql005SelectAndExplainPreserveExactQ1InputWithoutParsingTwice()
+    public async Task AcAiSql005SelectLowersOnceToTheTypedPlanAndShipsTheAstOperation()
     {
-        foreach (var sql in new[] { SqlOperationTestData.Select, SqlOperationTestData.Top,
-                     SqlOperationTestData.InvalidSelect })
+        var limits = Microsoft.Extensions.Options.Options.Create(SqlOperationTestData.Limits);
+        var execution = UnitExecutionOptions.QueryExecution();
+        foreach (var sql in new[] { SqlOperationTestData.Select, SqlOperationTestData.Top })
         {
             var parameters = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
             {
@@ -21,19 +22,31 @@ internal sealed class SqlOperationCompilerTests
             };
             var request = new SqlOperationRequest(McpCanonicalTestData.Partition, sql, parameters,
                 AllowFullScan: true, Cursor: SqlOperationTestData.Cursor);
-            var expected = SqlOperationTestData.Find(McpCatalogExpectations.QueryExecute).Decode(
+            var query = new QueryRequest(request.Partition, sql, parameters, true, request.Cursor);
+            var budget = new global::KeyLoad.Core.ReadExecutionBudget(limits);
+            var plan = global::KeyLoad.Query.Features.QueryExecution.ScriptDomQueryAdapter.Lower(
+                global::KeyLoad.Features.QueryExecution.ScriptDomSyntax.Parse(sql, limits, budget.Check, CancellationToken.None),
+                query, limits, execution, budget, null, CancellationToken.None);
+            var expected = SqlOperationTestData.Find(McpCatalogExpectations.QueryAst).Decode(
                 new Dictionary<string, JsonElement>(StringComparer.Ordinal)
                 {
-                    [McpCatalogProtocol.Request] = JsonSerializer.SerializeToElement(
-                        new QueryRequest(request.Partition, sql, parameters, true, request.Cursor), JsonDefaults.Options)
+                    [McpCatalogProtocol.Request] = JsonSerializer.SerializeToElement(plan, JsonDefaults.Options)
                 });
             await SqlOperationTestData.Same(SqlOperationTestData.Compile(request), expected);
         }
+        await SqlOperationTestData.Reject(new SqlOperationRequest(McpCanonicalTestData.Partition,
+            SqlOperationTestData.InvalidSelect, AllowFullScan: true), ErrorCode.UnsupportedCapability);
         await SqlOperationTestData.Reject(SqlOperationTestData.Call(McpCatalogExpectations.QueryCapabilities) with
         {
             Sql = "SELECT TOP () * FROM orders"
         }, ErrorCode.Validation);
     }
+
+    internal static readonly HashSet<string> AdministrationTools = new(StringComparer.Ordinal)
+    {
+        McpCatalogExpectations.AdminBackup, McpCatalogExpectations.AdminAdmission, McpCatalogExpectations.AdminStatus,
+        McpCatalogExpectations.AdminDispatch, McpCatalogExpectations.PrincipalsConfigure, McpCatalogExpectations.CredentialsConfigure
+    };
 
     [Test]
     public async Task AcAiSql006AllCanonicalBodyReadsAndCommandsKeepExactKindsIdsAndPayloads()
@@ -43,6 +56,12 @@ internal sealed class SqlOperationCompilerTests
             var arguments = item.Arguments();
             var before = JsonSerializer.Serialize(arguments, JsonDefaults.Options);
             var request = SqlOperationTestData.Call(item.Name, arguments);
+            if (AdministrationTools.Contains(item.Name))
+            {
+                // Cluster administration and credential tools are reachable through the SDK and MCP only, never through SQL.
+                await SqlOperationTestData.Reject(request, ErrorCode.UnsupportedCapability);
+                continue;
+            }
             var expected = SqlOperationTestData.Find(item.Name).Decode(arguments);
             var compiled = SqlOperationTestData.Compile(request);
             await SqlOperationTestData.Same(compiled, expected);
@@ -54,12 +73,13 @@ internal sealed class SqlOperationCompilerTests
     [Test]
     public async Task AcAiSql005NoBodyOperationsAcceptAnEmptyBoundObjectAndOptionalSemicolon()
     {
-        foreach (var name in new[] { McpCatalogExpectations.QueryCapabilities, McpCatalogExpectations.AdminBackup,
-                     McpCatalogExpectations.AdminAdmission, McpCatalogExpectations.AdminStatus })
+        var request = SqlOperationTestData.Call(McpCatalogExpectations.QueryCapabilities);
+        await SqlOperationTestData.Same(SqlOperationTestData.Compile(request),
+            SqlOperationTestData.Find(McpCatalogExpectations.QueryCapabilities).Decode(null));
+        foreach (var name in new[] { McpCatalogExpectations.AdminBackup, McpCatalogExpectations.AdminAdmission,
+                     McpCatalogExpectations.AdminStatus })
         {
-            var request = SqlOperationTestData.Call(name);
-            await SqlOperationTestData.Same(SqlOperationTestData.Compile(request),
-                SqlOperationTestData.Find(name).Decode(null));
+            await SqlOperationTestData.Reject(SqlOperationTestData.Call(name), ErrorCode.UnsupportedCapability);
         }
         var spaced = SqlOperationTestData.Request(SpacedCall,
             JsonSerializer.Deserialize<JsonElement>(SqlOperationTestData.EmptyObject));

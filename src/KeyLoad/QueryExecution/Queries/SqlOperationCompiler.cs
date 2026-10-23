@@ -72,10 +72,6 @@ internal static class SqlOperationCompiler
         }
         var query = new QueryRequest(request.Partition, request.Sql, request.Parameters,
             request.AllowFullScan, request.Cursor, request.QueryDialectVersion);
-        if (positionalParameterCount is null)
-        {
-            return Decode(McpToolNames.QueryExecute, query, maximumPayloadBytes, budget.Check, token);
-        }
         var ast = global::KeyLoad.Query.Features.QueryExecution.ScriptDomQueryAdapter.Lower(statement, query,
             limitsOptions, queryOptions, budget, positionalParameterCount, token);
         return Decode(McpToolNames.QueryAst, ast, maximumPayloadBytes, budget.Check, token);

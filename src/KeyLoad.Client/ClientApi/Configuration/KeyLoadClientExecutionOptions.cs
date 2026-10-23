@@ -16,45 +16,19 @@ public sealed class KeyLoadClientExecutionOptions
     public const string ResponseValidationMessage = "The SDK response body budget must be positive and at most 16 MiB.";
     private const int MinimumProblemBodyBytes = 1;
     private const int DefaultSqlInspectionBytes = 65_536;
-    private const int DefaultSqlInspectionDepth = 32;
-    private const int DefaultSqlBudgetCheckInterval = 256;
 
     /// <summary>The maximum UTF-8 bytes retained when decoding one HTTP problem.</summary>
     public int MaximumProblemBodyBytes { get; set; } = DefaultProblemBodyBytes;
     /// <summary>The inclusive byte ceiling presented to the JSON decoder for one successful response.</summary>
     public int MaximumResponseBodyBytes { get; set; } = MaximumResponseBodyByteCeiling;
-    /// <summary>The byte ceiling for conservative local SQL write classification.</summary>
+    /// <summary>The character ceiling scanned for the first SQL keyword when a failed request is classified as read or write.</summary>
     public int MaximumSqlInspectionBytes { get; set; } = DefaultSqlInspectionBytes;
-    /// <summary>The nesting ceiling for conservative local SQL trivia inspection.</summary>
-    public int MaximumSqlInspectionDepth { get; set; } = DefaultSqlInspectionDepth;
-    /// <summary>The SQL trivia work cadence and conservative pre-cancellation prefix width.</summary>
-    public int SqlBudgetCheckInterval { get; set; } = DefaultSqlBudgetCheckInterval;
 
     /// <summary>Checks the positive budget against its existing protocol ceiling.</summary>
     /// <returns>Whether the SDK can consume this budget.</returns>
     public bool IsValid() => MaximumProblemBodyBytes is >= MinimumProblemBodyBytes and <= DefaultProblemBodyBytes
         && MaximumResponseBodyBytes is >= MinimumProblemBodyBytes and <= MaximumResponseBodyByteCeiling
-        && MaximumSqlInspectionBytes is >= MinimumProblemBodyBytes and <= DefaultSqlInspectionBytes
-        && MaximumSqlInspectionDepth is >= MinimumProblemBodyBytes and <= DefaultSqlInspectionDepth
-        && SqlBudgetCheckInterval is >= MinimumProblemBodyBytes and <= DefaultSqlBudgetCheckInterval;
-
-    /// <summary>Maps the validated SDK snapshot to the selected parser's local inspection policy.</summary>
-    /// <param name="configured">The original centrally snapshotted SDK execution bounds.</param>
-    /// <returns>Validated execution parser limits with the unchanged client byte and nesting ceilings.</returns>
-    [ConfigurationBinding]
-    internal static IOptions<DatabaseLimits> SqlInspection(KeyLoadClientExecutionOptions configured)
-    {
-        ArgumentNullException.ThrowIfNull(configured);
-        configured.Validate();
-        var limits = new DatabaseLimits
-        {
-            MaxQueryBytes = configured.MaximumSqlInspectionBytes,
-            MaxQueryDepth = configured.MaximumSqlInspectionDepth,
-            MaxQueryTokens = configured.MaximumSqlInspectionBytes
-        };
-        limits.Validate();
-        return Options.Create(limits);
-    }
+        && MaximumSqlInspectionBytes is >= MinimumProblemBodyBytes and <= DefaultSqlInspectionBytes;
 
     /// <summary>Captures and validates the caller's execution values for one client lifetime.</summary>
     [ConfigurationBinding]
@@ -66,9 +40,7 @@ public sealed class KeyLoadClientExecutionOptions
         {
             MaximumProblemBodyBytes = value.MaximumProblemBodyBytes,
             MaximumResponseBodyBytes = value.MaximumResponseBodyBytes,
-            MaximumSqlInspectionBytes = value.MaximumSqlInspectionBytes,
-            MaximumSqlInspectionDepth = value.MaximumSqlInspectionDepth,
-            SqlBudgetCheckInterval = value.SqlBudgetCheckInterval
+            MaximumSqlInspectionBytes = value.MaximumSqlInspectionBytes
         };
         copy.Validate();
         return Options.Create(copy);

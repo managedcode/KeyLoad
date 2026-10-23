@@ -24,6 +24,7 @@
     "implementation": "closed PostgreSQL3.0 TLS/API-key session source; qualification pending",
     "initialProfile": {
       "name": "execution-sql-jsonb-result",
+      "serverVersionParameter": "The startup server_version value only lets Npgsql and psql parse a PostgreSQL version and connect; it claims no PostgreSQL feature set, catalog or SQL dialect. Stock drivers need type loading disabled and see one jsonb keyload_result cell per statement.",
       "transport": "execution Kestrel TLS ConnectionContext/Pipelines; not HTTP",
       "authentication": "same persisted API-key verifier, verified subject only, fresh credential/policy every Execute",
       "result": "one JSONB keyload_result containing entire canonical result",

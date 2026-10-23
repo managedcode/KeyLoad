@@ -13,7 +13,7 @@ internal static class SqlOperationCommentTestData
     internal const string LineBreak = "\r\n";
     internal const string CrLfCall = "-- leading\r\nEXEC-- root\r\nkeyload_query_capabilities-- target\r\n@arguments-- parameter\r\n;-- end";
     internal const string UnicodeBlock = "/* é 漢 🙂 */ ";
-    internal const string Select = "/* lead /* nested */ */ SELECT '-- literal /* intact */' FROM orders WHERE status = @status";
+    internal const string Select = "/* lead /* nested */ */ SELECT status /* -- intact inside a comment */ FROM orders WHERE status = @status";
     internal const string Top = "-- leading\r\nSELECT /* root */ TOP (1) * FROM orders WHERE status = @status";
     internal const string Document = "{\"text\":\"/* document */ -- intact\"}";
     internal const string OpenBlock = "/*";

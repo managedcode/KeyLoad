@@ -11,6 +11,4 @@ public static class SqlOperationProtocol
     public const string Route = "/query/sql";
     /// <summary>Official MCP unified SQL adapter identity.</summary>
     public const string ToolName = "keyload_sql_execute";
-    /// <summary>Procedure invocation keyword in the versioned unified SQL language.</summary>
-    public const string CallKeyword = "CALL";
 }
