@@ -5,8 +5,6 @@ namespace KeyLoad.Storage.ZoneTree;
 internal sealed class ZoneTreeRangeWork(ZoneTreeReadCounters counters, StorageReadObserver? observer,
     int maximumRecords, long maximumWorkBytes, CancellationToken cancellationToken)
 {
-    private const int NoMarkerBytes = 0;
-
     private long providerBytes;
     private int examinedEntries;
     internal long ReadBytes
@@ -27,7 +25,7 @@ internal sealed class ZoneTreeRangeWork(ZoneTreeReadCounters counters, StorageRe
             throw Errors.Fail(ErrorCode.BudgetExceeded, ExhaustedRangeRecordsMessage);
         }
 
-        var providerCharge = bytes + (hasMarker ? StorageValueHeaderBytes : NoMarkerBytes);
+        var providerCharge = bytes + (hasMarker ? StorageValueHeaderBytes : 0);
         if (providerCharge > maximumWorkBytes - providerBytes)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, ExhaustedRangeBytesMessage);

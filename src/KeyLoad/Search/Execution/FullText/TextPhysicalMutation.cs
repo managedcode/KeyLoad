@@ -2,8 +2,6 @@ namespace KeyLoad.Server.Features.Search;
 
 internal static class TextPhysicalMutation
 {
-    private const int NoPhysicalFailures = 0;
-
     internal static void DeleteDirectory(TextOpenFileGroups openFiles, string path,
         Action mutation, List<Exception> failures)
     {
@@ -12,7 +10,7 @@ internal static class TextPhysicalMutation
             mutation();
             openFiles.DetachDirectory(path, ambiguous: false);
         }, failures);
-        if (failures.Count != NoPhysicalFailures)
+        if (failures.Count != 0)
         {
             ServerFailureObserver.Observe(
                 () => openFiles.DetachDirectory(path, ambiguous: true), failures);

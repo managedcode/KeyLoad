@@ -5,7 +5,6 @@ namespace KeyLoad.Core.Features.AnalyticsStore;
 
 internal static class AnalyticsStoreResult
 {
-    private const int EqualDimensionOrder = 0;
     private const string Invalid = "The execution analytics result does not cover the original canonical input.";
     internal static AnalyticsAggregateResult Create(AnalyticsAggregateSnapshot snapshot, AnalyticsStoreDimensions captured, AnalyticsResult actual)
     {
@@ -63,11 +62,11 @@ internal static class AnalyticsStoreResult
         foreach (var name in groupBy)
         {
             var compared = StringComparer.Ordinal.Compare(left.Dimensions[name], right.Dimensions[name]);
-            if (compared != EqualDimensionOrder)
+            if (compared != 0)
             {
                 return compared;
             }
         }
-        return EqualDimensionOrder;
+        return 0;
     }
 }

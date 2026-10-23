@@ -9,7 +9,6 @@ namespace KeyLoad.UnitTests.Features.QueryExecution;
 internal static class QueryAdapterIndexedFlow
 {
     private const int ColdWaves = 2;
-    private const int FirstWave = 0;
     private static readonly Guid SeedId = new("a02d5f0a-c3a0-429b-b8e6-dd38be6dd6b4");
 
     internal static async Task RunAsync()
@@ -34,7 +33,7 @@ internal static class QueryAdapterIndexedFlow
                 var position = fixture.Store.Position;
                 var identity = JsonDefaults.Serialize(fixture.Store.Identity);
                 fixture.Store.Dispose();
-                for (var wave = FirstWave; wave < ColdWaves; wave++)
+                for (var wave = 0; wave < ColdWaves; wave++)
                 {
                     await ColdAsync(fixture, operation, receipt, image, position, identity);
                 }

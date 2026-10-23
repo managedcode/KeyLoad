@@ -16,12 +16,9 @@ public sealed class DueCoordinationOptions
     public const int NoUncertaintyRetries = 0;
 
     private const int DefaultDispatchDeadlineSeconds = 5;
-    private const int DefaultPollIntervalSeconds = 1;
     private const int DefaultMinimumCycleCadenceMilliseconds = 500;
-    private const int MaximumDurationMinutes = 1;
-    private const int MaximumUncertaintyRetries = 1;
-    private static readonly TimeSpan MaximumDuration = TimeSpan.FromMinutes(MaximumDurationMinutes);
-    private static readonly TimeSpan MaximumPollInterval = TimeSpan.FromSeconds(DefaultPollIntervalSeconds);
+    private static readonly TimeSpan MaximumDuration = TimeSpan.FromMinutes(1);
+    private static readonly TimeSpan MaximumPollInterval = TimeSpan.FromSeconds(1);
     private static readonly TimeSpan MinimumPermittedCycleCadence =
         TimeSpan.FromMilliseconds(DefaultMinimumCycleCadenceMilliseconds);
 
@@ -29,7 +26,7 @@ public sealed class DueCoordinationOptions
     public TimeSpan DispatchDeadline { get; set; } = TimeSpan.FromSeconds(DefaultDispatchDeadlineSeconds);
 
     /// <summary>Gets or sets the interval between bounded observations of canonical due work.</summary>
-    public TimeSpan PollInterval { get; set; } = TimeSpan.FromSeconds(DefaultPollIntervalSeconds);
+    public TimeSpan PollInterval { get; set; } = TimeSpan.FromSeconds(1);
 
     /// <summary>Gets or sets the minimum interval between consecutive discovery cycle starts.</summary>
     public TimeSpan MinimumCycleCadence
@@ -39,7 +36,7 @@ public sealed class DueCoordinationOptions
         TimeSpan.FromMilliseconds(DefaultMinimumCycleCadenceMilliseconds);
 
     /// <summary>Gets or sets the bounded retry count for an uncertain outcome, preserving command identity.</summary>
-    public int UncertaintyRetryCount { get; set; } = MaximumUncertaintyRetries;
+    public int UncertaintyRetryCount { get; set; } = 1;
 
     /// <summary>Gets or sets an existing persisted principal for queue deadline dispatch; null disables that branch.</summary>
     public string? QueueDeadlinePrincipalId
@@ -57,7 +54,7 @@ public sealed class DueCoordinationOptions
     /// <returns>Whether all durations are within the accepted startup bounds.</returns>
     public bool IsValid() => IsBounded(DispatchDeadline) && IsBounded(PollInterval) && IsBounded(MinimumCycleCadence)
         && PollInterval <= MaximumPollInterval && MinimumCycleCadence >= MinimumPermittedCycleCadence
-        && UncertaintyRetryCount is >= NoUncertaintyRetries and <= MaximumUncertaintyRetries
+        && UncertaintyRetryCount is >= NoUncertaintyRetries and <= 1
         && IsQueuePrincipalValid() && IsTransferSubjectValid();
 
     private bool IsQueuePrincipalValid()

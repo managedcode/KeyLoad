@@ -15,7 +15,6 @@ internal static class CoverageMergeChildProcess
     private const string StartFailure = "The execution coverage tooling child process did not start.";
     private const string TimeoutFailure = "The original execution coverage tooling child did not settle.";
     private const string FailStopMessage = "The execution coverage tooling child or original readers did not settle.";
-    private const int FailStopExitCode = 1;
     private const int InfiniteWaitMilliseconds = Timeout.Infinite;
 
     internal sealed record Result(int ExitCode, string StandardOutput, string StandardError,
@@ -199,7 +198,7 @@ internal static class CoverageMergeChildProcess
         }
         finally
         {
-            Environment.Exit(FailStopExitCode);
+            Environment.Exit(1);
         }
         throw new InvalidOperationException(FailStopMessage);
     }

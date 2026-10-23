@@ -11,7 +11,6 @@ internal static class QueryAdapterBranchFlow
     private const string Principal = "root";
     private const string Collection = "orders";
     private const int ColdWaves = 2;
-    private const int FirstWave = 0;
     private static readonly Guid SeedId = new("6f4b7b40-8d34-41dd-ae6e-f902d9c97615");
 
     internal static async Task RunAsync()
@@ -35,7 +34,7 @@ internal static class QueryAdapterBranchFlow
                 var position = fixture.Store.Position;
                 var identity = JsonDefaults.Serialize(fixture.Store.Identity);
                 fixture.Store.Dispose();
-                for (var wave = FirstWave; wave < ColdWaves; wave++)
+                for (var wave = 0; wave < ColdWaves; wave++)
                 {
                     await ColdAsync(fixture, operation, receipt, image, position, identity);
                 }

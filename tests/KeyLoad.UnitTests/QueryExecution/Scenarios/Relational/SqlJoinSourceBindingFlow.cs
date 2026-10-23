@@ -2,7 +2,6 @@ namespace KeyLoad.UnitTests.Features.QueryExecution;
 
 internal static class SqlJoinSourceBindingFlow
 {
-    private const int FirstSelection = 0;
     private const string TypedFailure = "The bounded relational join is invalid.";
     private const string QueueFailure = "The queue entity-reference join is unsupported.";
     private const string EventFailure = "The event entity-reference join is unsupported.";
@@ -19,7 +18,7 @@ internal static class SqlJoinSourceBindingFlow
         {
             Query = healthy.Query with
             {
-                Projection = [healthy.Query.Projection[FirstSelection] with { SourceAlias = SqlJoinSourceBindingFixture.Unbound }]
+                Projection = [healthy.Query.Projection[0] with { SourceAlias = SqlJoinSourceBindingFixture.Unbound }]
             }
         };
         foreach (var request in new[] { Q2CapabilityFixtures.JsonRoundTrip(invalid), Q2CapabilityFixtures.RuntimeRoundTrip(invalid) })

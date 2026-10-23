@@ -11,7 +11,6 @@ namespace KeyLoad.UnitTests.Features.OrleansExecution;
 [NotInParallel]
 internal sealed class RuntimeJournalStorageTests(RuntimeRuntimeJournalFixture fixture)
 {
-    private const int FirstPatternIndex = 0;
     private const int BinaryReplayPayloadBytes = 98_304;
     private const string KindProperty = "kind";
     private const string DurableKind = "durable";
@@ -51,7 +50,7 @@ internal sealed class RuntimeJournalStorageTests(RuntimeRuntimeJournalFixture fi
     {
         var grainId = NewName("binary-replay");
         var grain = fixture.Grains.GetGrain<IRuntimeJournalReplayGrain>(grainId);
-        var expected = Enumerable.Range(FirstPatternIndex, BinaryReplayPayloadBytes)
+        var expected = Enumerable.Range(0, BinaryReplayPayloadBytes)
             .Select(index => (byte)(index % byte.MaxValue)).ToArray();
         await grain.SetAsync(expected);
         var originalActivation = await grain.GetActivationTokenAsync();

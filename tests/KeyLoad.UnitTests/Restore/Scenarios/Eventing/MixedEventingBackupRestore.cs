@@ -5,8 +5,6 @@ namespace KeyLoad.UnitTests.Features.BackupRestore;
 
 internal static class MixedEventingBackupRestore
 {
-    private const int RestoreAuthorityCommits = 1;
-
     internal static (StoreIdentity Identity, long Position) Capture(TestDatabase source, string backup, CancellationToken token)
     {
         source.Store.CreateBackup(backup, token);
@@ -22,6 +20,6 @@ internal static class MixedEventingBackupRestore
         await Assert.That(identity.NodeId).IsNotEqualTo(capture.Identity.NodeId);
         await Assert.That(identity.SigningKey.Span.SequenceEqual(capture.Identity.SigningKey.Span)).IsFalse();
         await Assert.That(identity.DispatchPaused).IsTrue();
-        return checked(capture.Position + RestoreAuthorityCommits);
+        return checked(capture.Position + 1);
     }
 }

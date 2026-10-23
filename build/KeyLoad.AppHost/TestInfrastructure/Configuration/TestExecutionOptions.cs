@@ -14,7 +14,6 @@ internal sealed class TestExecutionOptions
     private const int MaximumMinutes = 180;
     private const int ApplicationCleanupSeconds = 30;
     private const int ImageCleanupSeconds = 45;
-    private const int GraceSeconds = 1;
     private const int SettlementSeconds = 5;
     private const int PollMilliseconds = 100;
     private const int ProtectedMovementSetupSeconds = 50;
@@ -22,10 +21,8 @@ internal sealed class TestExecutionOptions
     private const int ProtectedMovementCleanupSeconds = 30;
     private const int MaximumArgumentCharacters = 4096;
     private const int DefaultOutputCharacters = 4_096;
-    private const int MinimumOutputCharacters = 1;
     private const int MaximumOutputCharacters = 65_536;
     private const int DefaultMaximumParallelTests = 50;
-    private const int MinimumMaximumParallelTests = 1;
     private const int MaximumMaximumParallelTests = 50;
 
     public TimeSpan OrdinaryTimeout { get; set; } = TimeSpan.FromMinutes(OrdinaryMinutes);
@@ -36,7 +33,7 @@ internal sealed class TestExecutionOptions
     public TimeSpan VectorTimeout { get; set; } = TimeSpan.FromMinutes(VectorMinutes);
     public TimeSpan ApplicationCleanupTimeout { get; set; } = TimeSpan.FromSeconds(ApplicationCleanupSeconds);
     public TimeSpan ImageCleanupTimeout { get; set; } = TimeSpan.FromSeconds(ImageCleanupSeconds);
-    public TimeSpan TerminationGrace { get; set; } = TimeSpan.FromSeconds(GraceSeconds);
+    public TimeSpan TerminationGrace { get; set; } = TimeSpan.FromSeconds(1);
     public TimeSpan ProcessSettlementTimeout { get; set; } = TimeSpan.FromSeconds(SettlementSeconds);
     public TimeSpan ProtectedMovementSetupRequestLifetime { get; set; } = TimeSpan.FromSeconds(ProtectedMovementSetupSeconds);
     public TimeSpan ProtectedMovementOutcomeRequestLifetime { get; set; } = TimeSpan.FromSeconds(ProtectedMovementOutcomeSeconds);
@@ -59,10 +56,10 @@ internal sealed class TestExecutionOptions
         && ProtectedMovementOutcomeRequestLifetime.Ticks <= ProtectedMovementOutcomeSeconds * TimeSpan.TicksPerSecond
         && Bounded(ProtectedMovementCaptureCleanupTimeout)
         && ProtectedMovementCaptureCleanupTimeout.Ticks <= ProtectedMovementCleanupSeconds * TimeSpan.TicksPerSecond
-        && MaximumFilterCharacters is >= MinimumOutputCharacters and <= MaximumArgumentCharacters
-        && MaximumPathCharacters is >= MinimumOutputCharacters and <= MaximumArgumentCharacters
-        && MaximumParallelTests is >= MinimumMaximumParallelTests and <= MaximumMaximumParallelTests
-        && CleanupOutputCharacters is >= MinimumOutputCharacters and <= MaximumOutputCharacters;
+        && MaximumFilterCharacters is >= 1 and <= MaximumArgumentCharacters
+        && MaximumPathCharacters is >= 1 and <= MaximumArgumentCharacters
+        && MaximumParallelTests is >= 1 and <= MaximumMaximumParallelTests
+        && CleanupOutputCharacters is >= 1 and <= MaximumOutputCharacters;
 
     internal static bool Bounded(TimeSpan value) => value > TimeSpan.Zero && value.Ticks <= MaximumMinutes * TimeSpan.TicksPerMinute;
 }

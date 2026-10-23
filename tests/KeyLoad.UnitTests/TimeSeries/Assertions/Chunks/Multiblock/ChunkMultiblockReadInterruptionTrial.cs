@@ -5,7 +5,6 @@ namespace KeyLoad.UnitTests.Features.TimeSeries;
 
 internal static class ChunkMultiblockReadInterruptionTrial
 {
-    private const int OriginalDeadlineSeconds = 1;
     private const int PastDeadlineSeconds = 2;
 
     internal static async Task RequireAsync(ChunkSelectedIntegrityFixture fixture,
@@ -16,7 +15,7 @@ internal static class ChunkMultiblockReadInterruptionTrial
         var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(new()
         {
             MaxQueryReadBytes = checked((int)recipe.TotalBytes),
-            QueryDeadlineSeconds = OriginalDeadlineSeconds
+            QueryDeadlineSeconds = 1
         }), clock, cancellation.Token);
         Action afterWork = cancelled ? cancellation.Cancel : () => clock.Advance(TimeSpan.FromSeconds(PastDeadlineSeconds));
         clock.Arm(() => budget.ReadBytes == recipe.FirstBytes, afterWork);

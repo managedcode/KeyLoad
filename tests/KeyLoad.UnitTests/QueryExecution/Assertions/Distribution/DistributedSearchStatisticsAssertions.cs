@@ -7,7 +7,6 @@ internal static class DistributedSearchStatisticsAssertions
 {
     private const int CorpusDocuments = 2;
     private const int CorpusLength = 2;
-    private const int TermDocuments = 1;
     private const double UnitFrequencyScale = 2.2;
     private const double UnitLengthScale = 1.2;
 
@@ -19,7 +18,7 @@ internal static class DistributedSearchStatisticsAssertions
             QueryFixture.Partition, fixture.DestinationOwner, token);
         var statistics = DistributedSearchStatisticsFlow.Combine(fixture.Source, source, destination, token);
         var expectedStatistics = new DistributedTextStatistics(["source", "destination"],
-            CorpusDocuments, CorpusLength, [TermDocuments, TermDocuments]);
+            CorpusDocuments, CorpusLength, [1, 1]);
         await Assert.That(JsonSerializer.Serialize(statistics, JsonDefaults.Options))
             .IsEqualTo(JsonSerializer.Serialize(expectedStatistics, JsonDefaults.Options));
         var sourceRows = DistributedSearchStatisticsFlow.Rank(fixture.Source, source, statistics, token);
@@ -28,9 +27,9 @@ internal static class DistributedSearchStatisticsAssertions
         RankedDocument[] expected =
         [
             new(new(fixture.ExpectedDestinationReference, QueryFixture.First,
-                QueryFixture.ProjectedJson, true, [QueryFixture.Secret]), Math.Log(CorpusDocuments) * UnitFrequencyScale / (TermDocuments + UnitLengthScale)),
+                QueryFixture.ProjectedJson, true, [QueryFixture.Secret]), Math.Log(CorpusDocuments) * UnitFrequencyScale / (1 + UnitLengthScale)),
             new(new(fixture.ExpectedSourceReference, QueryFixture.First,
-                QueryDataset.SourceProjected, true, [QueryFixture.Secret]), Math.Log(CorpusDocuments) * UnitFrequencyScale / (TermDocuments + UnitLengthScale))
+                QueryDataset.SourceProjected, true, [QueryFixture.Secret]), Math.Log(CorpusDocuments) * UnitFrequencyScale / (1 + UnitLengthScale))
         ];
         await Assert.That(JsonSerializer.Serialize(actual, JsonDefaults.Options))
             .IsEqualTo(JsonSerializer.Serialize(expected, JsonDefaults.Options));

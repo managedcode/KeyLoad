@@ -7,7 +7,6 @@ internal sealed class AuthenticationReaderFailureTests
 {
     private const string PrivateMarker = "execution-auth-truncated-private-marker";
     private const int RequestCapacity = 16_384;
-    private const int TruncatedByteCount = 1;
 
     [Test]
     public async Task GenuinePrincipalReplyRetainsTypedIdentityAndAuthorityFields()
@@ -45,7 +44,7 @@ internal sealed class AuthenticationReaderFailureTests
             Id = PrivateMarker
         };
         var valid = OrleansSerialization.Serialize(new GrainValue(principal));
-        var truncated = valid[..^TruncatedByteCount];
+        var truncated = valid[..^1];
 
         await AssertSafeValidationAsync(() => McpAuthentication.Inspect(truncated, UnitMcpOptions.Execution(), CancellationToken.None));
         await AssertSafeValidationAsync(() => McpAuthentication.ReadPrincipal(truncated, UnitMcpOptions.Execution(), CancellationToken.None));
@@ -60,7 +59,7 @@ internal sealed class AuthenticationReaderFailureTests
             Id = PrivateMarker
         };
         var valid = OrleansSerialization.Serialize(new GrainValue(principal));
-        var truncated = valid[..^TruncatedByteCount];
+        var truncated = valid[..^1];
         var limits = new McpMemoryLimits();
         var memory = new McpMemoryBudget(Microsoft.Extensions.Options.Options.Create(new KeyLoad.Server.McpMemoryLimits { DataBytes = limits.DataBytes, ControlBytes = limits.ControlBytes, IngressBytes = limits.IngressBytes }));
 

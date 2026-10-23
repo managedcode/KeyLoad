@@ -4,8 +4,6 @@ namespace KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries.Intensive
 
 internal static class TimescaleTimeSeriesIntensiveReceipt
 {
-    private const int LastElementOffset = 1;
-
     internal static TimeSeriesIntensiveAppendReceipt ValidateScalar(TimeSeriesIntensiveAppendReceipt? actual,
         Guid expectedCommandId)
     {
@@ -41,7 +39,7 @@ internal static class TimescaleTimeSeriesIntensiveReceipt
                 throw Invalid();
             }
         }
-        var terminal = actual[^LastElementOffset];
+        var terminal = actual[^1];
         return new(terminal.CommandId, terminal.Sequence);
     }
 

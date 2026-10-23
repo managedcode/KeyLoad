@@ -6,8 +6,6 @@ namespace KeyLoad.Server;
 /// <summary>Private structural schema options; canonical request and result serialization never uses this projection.</summary>
 internal static class McpSchemaProjection
 {
-    private const int RequiredFamilyMatches = 1;
-
     /// <summary>Copies canonical options while replacing only the two opaque strict format converter families with execution metadata.</summary>
     /// <returns>A read-only options copy used exclusively by the JSON Schema exporter.</returns>
     internal static JsonSerializerOptions Create()
@@ -19,7 +17,7 @@ internal static class McpSchemaProjection
         var options = new JsonSerializerOptions(JsonDefaults.Options);
         var byteMatches = ByteMatchesInitialValue;
         var arrayMatches = ArrayMatchesInitialValue;
-        for (var index = options.Converters.Count - RequiredFamilyMatches; index >= IndexValidationBoundary; index--)
+        for (var index = options.Converters.Count - 1; index >= IndexValidationBoundary; index--)
         {
             var converter = options.Converters[index];
             var bytes = converter.CanConvert(typeof(ReadOnlyMemory<byte>));
@@ -41,7 +39,7 @@ internal static class McpSchemaProjection
                 options.Converters.RemoveAt(index);
             }
         }
-        if (byteMatches != RequiredFamilyMatches || arrayMatches != RequiredFamilyMatches)
+        if (byteMatches != 1 || arrayMatches != 1)
         {
             throw new InvalidOperationException(McpCatalogProtocol.ConverterConfiguration);
         }

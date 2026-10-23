@@ -11,7 +11,6 @@ internal sealed class RawStorageCorpus
     private const int OriginalMarker = 0x5A;
     private const int AlternateMarker = 0xA5;
     private const int ValueSeedBytes = 4;
-    private const int MinimumRecordCount = 1;
     private const int MaximumRecordCount = 4096;
     private const int SmallPayloadBytes = 32;
     private const int LargePayloadBytes = 1024;
@@ -61,7 +60,7 @@ internal sealed class RawStorageCorpus
 
     private static void Validate(int recordCount, int valueBytes)
     {
-        if (recordCount is < MinimumRecordCount or > MaximumRecordCount)
+        if (recordCount is < 1 or > MaximumRecordCount)
         {
             throw new ArgumentOutOfRangeException(nameof(recordCount));
         }

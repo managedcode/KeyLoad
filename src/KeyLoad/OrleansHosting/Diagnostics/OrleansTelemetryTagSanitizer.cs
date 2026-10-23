@@ -5,7 +5,6 @@ namespace KeyLoad.Server.Features.OrleansHosting.Diagnostics;
 
 internal static class OrleansTelemetryTagSanitizer
 {
-    private const int EmptyStringLength = 0;
     internal static void Scrub(Activity activity, int maximumTagValueCharacters)
     {
         foreach (var (key, value) in activity.TagObjects.ToArray())
@@ -29,7 +28,7 @@ internal static class OrleansTelemetryTagSanitizer
             return escaped;
         }
 
-        if (value is not string text || text.Length == EmptyStringLength || text.Length > maximumTagValueCharacters)
+        if (value is not string text || text.Length == 0 || text.Length > maximumTagValueCharacters)
         {
             return null;
         }

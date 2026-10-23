@@ -12,7 +12,6 @@ internal static class OnlineTextProgressFrames
     internal const int FirstProgressSequence = 2;
     internal const int First = 0;
     internal const int Step = 1;
-    private const int OneTerminal = 1;
     private const byte ControlPayload = 1;
     internal static readonly OnlineTextPhase[] Grammar =
         [OnlineTextPhase.Captured, OnlineTextPhase.Seeded, OnlineTextPhase.CaughtUp,
@@ -39,7 +38,7 @@ internal static class OnlineTextProgressFrames
         {
             frames.Add(frame);
         }
-        await Assert.That(frames.Count(frame => frame.Kind == CqrsStreamChunkKind.Completed)).IsEqualTo(OneTerminal);
+        await Assert.That(frames.Count(frame => frame.Kind == CqrsStreamChunkKind.Completed)).IsEqualTo(1);
         await Assert.That(frames.Count(frame => frame.Kind == CqrsStreamChunkKind.Failed)).IsEqualTo(First);
         return [.. frames];
     }

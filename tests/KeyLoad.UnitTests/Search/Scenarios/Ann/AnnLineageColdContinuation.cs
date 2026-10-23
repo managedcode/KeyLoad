@@ -10,8 +10,6 @@ namespace KeyLoad.UnitTests.Features.Search;
 
 internal static class AnnLineageColdContinuation
 {
-    private const int MaximumReaders = 1;
-
     internal static async Task RunAsync(TestDatabase database, AnnMaintenanceRequest request,
         global::KeyLoad.Clustering.AnnMaintenanceCapabilityResult publication)
     {
@@ -63,7 +61,7 @@ internal static class AnnLineageColdContinuation
         {
             await using var owner = AnnOwnership.Create(directory, store.Identity,
                 Options.Create(new AnnExecutionOptions()), UnitExecutionOptions.PackedAnn(),
-                Options.Create(new PackedAnnStorageOptions()), MaximumReaders);
+                Options.Create(new PackedAnnStorageOptions()), 1);
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 var seeds = new AnnSeedOptions();

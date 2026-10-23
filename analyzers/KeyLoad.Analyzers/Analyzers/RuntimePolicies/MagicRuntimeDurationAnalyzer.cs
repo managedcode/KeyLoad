@@ -38,6 +38,7 @@ public sealed class MagicRuntimeDurationAnalyzer : DiagnosticAnalyzer
     {
         if (context.Node is not LiteralExpressionSyntax literal ||
             LiteralDeclarationOwnership.IsNamedConstant(literal) ||
+            LiteralDeclarationOwnership.IsTrivialNumber(context) ||
             LiteralDeclarationOwnership.IsNumericMetadata(literal) ||
             LiteralDeclarationOwnership.IsOptionsDefault(context))
         {

@@ -2,8 +2,6 @@ namespace KeyLoad.Query.Features.Search;
 
 internal readonly struct PreparedPackedSimilarity : IPackedAnnSimilarity
 {
-    private const int MinimumPositiveCount = 1;
-
     private const string InvalidVector = "Vector dimensions or values are invalid.";
     private const int MaxDimension = 4_096;
     private readonly ReadOnlyMemory<float> query;
@@ -28,7 +26,7 @@ internal readonly struct PreparedPackedSimilarity : IPackedAnnSimilarity
     {
         ArgumentNullException.ThrowIfNull(vectors);
         SimilarityMetricMath.ValidateMetric(metric);
-        if (query.Length is < MinimumPositiveCount or > MaxDimension || vectors.Dimension != query.Length)
+        if (query.Length is < 1 or > MaxDimension || vectors.Dimension != query.Length)
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidVector);
         }

@@ -17,7 +17,6 @@ public sealed class HelixDbVectorTarget(HttpClient http, string image, string ru
     private const string CommittedReadsStrongSearchConsistency = "execution committed reads; strong search consistency";
     private const string POSTV2QueryJSONOperationTree = "POST /query JSON operation tree";
     private const string IsolatedLocalServerNoAuthentication = "isolated local server; no authentication";
-    private const int SingleResultCardinality = 1;
     private const string RuntimeSingleLocalWriterNoReplicationConfigured = "single execution local writer; no replication configured";
     private const string PersistentDirectory = "persistent execution directory";
     private const string StrongSearchConsistency = "strong search consistency";
@@ -25,7 +24,6 @@ public sealed class HelixDbVectorTarget(HttpClient http, string image, string ru
     private const string NoEXPLAINEndpointExecutedAST = "No execution EXPLAIN endpoint; executed AST=";
     private const int CanonicalTopK = 10;
     private const string ObservedIndexLifecycle = "; observed index lifecycle=";
-    private const int EmptyResultCount = 0;
     private readonly IOptions<ComparisonExecutionOptions> execution = ComparisonExecutionOptions.Require(executionOptions);
     private ComparisonExecutionOptions Policy => execution.Value;
     private const string RunIdentityFormat = "N";
@@ -44,7 +42,7 @@ public sealed class HelixDbVectorTarget(HttpClient http, string image, string ru
         get; private set;
     } = new(HelixDbTokens.TokenHelixDB, V0PinnedServerImage, OnePersistentLocalServerHELIXDATADIR, XHelixAwaitDurableTrueDiskFlush, CommittedReadsStrongSearchConsistency, POSTV2QueryJSONOperationTree, IsolatedLocalServerNoAuthentication, image)
     {
-        Cluster = new(SingleResultCardinality, SingleResultCardinality, RuntimeSingleLocalWriterNoReplicationConfigured, [PersistentDirectory, StrongSearchConsistency])
+        Cluster = new(1, 1, RuntimeSingleLocalWriterNoReplicationConfigured, [PersistentDirectory, StrongSearchConsistency])
     };
 
     /// <inheritdoc/>
@@ -107,7 +105,7 @@ public sealed class HelixDbVectorTarget(HttpClient http, string image, string ru
     {
         ArgumentNullException.ThrowIfNull(update);
         using var response = await HelixDbProtocol.QueryAsync(http, HelixDbProtocol.Batch(HelixDbVectorAst.Update(label, update), true), true, Policy, token: cancellationToken, timeProvider: timeProvider).ConfigureAwait(false);
-        if (HelixDbProtocol.Rows(response).GetArrayLength() != SingleResultCardinality)
+        if (HelixDbProtocol.Rows(response).GetArrayLength() != 1)
         {
             throw new ComparisonFailureException(HelixDbTokens.TokenHelixDbUpdateCardinalityMismatch);
         }
@@ -118,11 +116,11 @@ public sealed class HelixDbVectorTarget(HttpClient http, string image, string ru
     {
         using var response = await HelixDbProtocol.QueryAsync(http, HelixDbProtocol.Batch(HelixDbVectorAst.Read(label, id), false), false, Policy, token: cancellationToken, timeProvider: timeProvider).ConfigureAwait(false);
         var rows = HelixDbProtocol.Rows(response);
-        if (rows.GetArrayLength() > SingleResultCardinality)
+        if (rows.GetArrayLength() > 1)
         {
             throw new ComparisonFailureException(HelixDbTokens.TokenHelixDbInvalidRows);
         }
-        return rows.GetArrayLength() == EmptyResultCount ? null : HelixDbVectorStorage.Read(rows[EmptyResultCount]);
+        return rows.GetArrayLength() == 0 ? null : HelixDbVectorStorage.Read(rows[0]);
     }
 
     /// <inheritdoc/>

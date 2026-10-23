@@ -4,8 +4,6 @@ namespace KeyLoad.Comparisons.Targets;
 
 internal static class HelixDbDocumentAst
 {
-    private const int SingleResultCardinality = 1;
-    private const int EmptyResultCount = 0;
     internal static JsonObject Lookup(string label, string id) => HelixDbProtocol.Nodes(label, HelixDbProtocol.Compare(HelixDbTokens.TokenEq, HelixDbTokens.TokenId, HelixDbTokens.TokenString, id));
     internal static JsonObject Read(string label, string id) => HelixDbProtocol.Project(Lookup(label, id), HelixDbTokens.TokenId, HelixDbTokens.TokenPayload);
     internal static JsonObject Add(string label, BenchmarkDocument document) => HelixDbProtocol.Node(HelixDbTokens.TokenAddN, new() { [HelixDbTokens.TokenLabel] = label, [HelixDbTokens.TokenProperties] = new JsonArray { new JsonArray(HelixDbTokens.TokenId, HelixDbProtocol.Value(HelixDbTokens.TokenString, document.Id)), new JsonArray(HelixDbTokens.TokenNumber, HelixDbProtocol.Value(HelixDbTokens.TokenI64, document.Number)), new JsonArray(HelixDbTokens.TokenPayload, HelixDbProtocol.Value(HelixDbTokens.TokenString, document.Json)) } });
@@ -25,10 +23,10 @@ internal static class HelixDbDocumentAst
     internal static JsonObject Graph(string label, string id, int depth)
     {
         var branches = new JsonArray();
-        for (var hops = SingleResultCardinality; hops <= depth; hops++)
+        for (var hops = 1; hops <= depth; hops++)
         {
             JsonNode traversal = JsonValue.Create(HelixDbTokens.TokenContext)!;
-            for (var hop = EmptyResultCount; hop < hops; hop++)
+            for (var hop = 0; hop < hops; hop++)
             {
                 traversal = HelixDbProtocol.Node(HelixDbTokens.TokenOut, new()
                 {

@@ -6,8 +6,6 @@ namespace KeyLoad.Comparisons.Targets;
 /// <summary>Owns SurrealDB HTTP framing and its execution response-envelope validation.</summary>
 internal static class SurrealDbVectorProtocol
 {
-    private const int SingleResultCardinality = 1;
-    private const int EmptyResultCount = 0;
     private const char RecordSeparator = ':';
     private const string CREATEONLY = "CREATE ONLY ";
     private const string SETNumber = " SET number = ";
@@ -44,12 +42,12 @@ internal static class SurrealDbVectorProtocol
     private const string ResultKey = "result";
     internal static JsonElement SingleResult(JsonElement root)
     {
-        if (root.ValueKind != JsonValueKind.Array || root.GetArrayLength() != SingleResultCardinality)
+        if (root.ValueKind != JsonValueKind.Array || root.GetArrayLength() != 1)
         {
             throw new InvalidDataException(InvalidResponse);
         }
 
-        return root[EmptyResultCount].GetProperty(ResultKey);
+        return root[0].GetProperty(ResultKey);
     }
 
     internal static string ReadRequiredString(JsonElement element, string name) => element.TryGetProperty(name, out var property) && property.ValueKind == JsonValueKind.String ? property.GetString()! : throw new InvalidDataException(InvalidResponse);
@@ -62,7 +60,7 @@ internal static class SurrealDbVectorProtocol
         }
 
         var vector = new float[value.GetArrayLength()];
-        var index = EmptyResultCount;
+        var index = 0;
         foreach (var component in value.EnumerateArray())
         {
             var number = component.GetSingle();
@@ -86,12 +84,12 @@ internal static class SurrealDbVectorProtocol
 
         var value = id.GetString()!;
         var separator = value.LastIndexOf(RecordSeparator);
-        if (separator < EmptyResultCount || !value.AsSpan(EmptyResultCount, separator).SequenceEqual(table))
+        if (separator < 0 || !value.AsSpan(0, separator).SequenceEqual(table))
         {
             throw new InvalidDataException(InvalidResponse);
         }
 
-        return value[(separator + SingleResultCardinality)..];
+        return value[(separator + 1)..];
     }
 
     internal static string CreateBatchSql(string table, List<VectorDocument> batch, int recordBuilderCapacity, int vectorComponentBuilderCapacity)
@@ -131,14 +129,14 @@ internal static class SurrealDbVectorProtocol
     private static string FormatVector(ReadOnlySpan<float> vector, int vectorComponentBuilderCapacity)
     {
         var result = CreateVectorBuilder(vector.Length, vectorComponentBuilderCapacity).Append(VectorArrayStart);
-        for (var index = EmptyResultCount; index < vector.Length; index++)
+        for (var index = 0; index < vector.Length; index++)
         {
             if (!float.IsFinite(vector[index]))
             {
                 throw new InvalidDataException(SurrealDbTokens.TokenSurrealDbInvalidVector);
             }
 
-            if (index != EmptyResultCount)
+            if (index != 0)
             {
                 result.Append(VectorComponentSeparator);
             }
@@ -149,5 +147,5 @@ internal static class SurrealDbVectorProtocol
         return result.Append(VectorArrayEnd).ToString();
     }
 
-    private static string RecordKey(string id) => id.Length == CanonicalTopK && id[EmptyResultCount] == VectorRecordPrefix && id.AsSpan(SingleResultCardinality).IndexOfAnyExceptInRange(Character48, Character57) < EmptyResultCount ? SurrealDbTokens.TokenV + id[SingleResultCardinality..] : throw new InvalidDataException(SurrealDbTokens.TokenSurrealDbInvalidRecordId);
+    private static string RecordKey(string id) => id.Length == CanonicalTopK && id[0] == VectorRecordPrefix && id.AsSpan(1).IndexOfAnyExceptInRange(Character48, Character57) < 0 ? SurrealDbTokens.TokenV + id[1..] : throw new InvalidDataException(SurrealDbTokens.TokenSurrealDbInvalidRecordId);
 }

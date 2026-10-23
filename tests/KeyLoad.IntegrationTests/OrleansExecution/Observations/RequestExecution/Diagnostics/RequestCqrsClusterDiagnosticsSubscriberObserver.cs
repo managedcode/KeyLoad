@@ -6,7 +6,6 @@ namespace KeyLoad.IntegrationTests.Features.OrleansExecution.Helpers;
 
 internal sealed class RequestCqrsClusterDiagnosticsSubscriberObserver : IAsyncDisposable
 {
-    private const int SingleResourceCount = 1;
     private CancellationTokenSource? lifetime;
     private CancellationToken lifetimeToken;
     private IAsyncEnumerator<LogSubscriber>? enumerator;
@@ -55,7 +54,7 @@ internal sealed class RequestCqrsClusterDiagnosticsSubscriberObserver : IAsyncDi
         try
         {
             var observed = new HashSet<string>(StringComparer.Ordinal);
-            var required = actualResourceId is null ? RequestCqrsClusterProtocol.NodeCount : SingleResourceCount;
+            var required = actualResourceId is null ? RequestCqrsClusterProtocol.NodeCount : 1;
             while (observed.Count < required)
             {
                 var active = enumerator

@@ -12,7 +12,6 @@ internal sealed class ClusterFixtureStartupEvidence : IDisposable
     private const string SnapshotFormat = "Aspire startup: observed={0}; ensure={1}; api={2}; errors={3}; timeouts={4}; "
         + "configKnown={5}; configExists={6}; lockMs={7}; fileMs={8}; readMs={9}; buildMs={10}; retries={11}; phases={12}.";
     private static readonly CompositeFormat SnapshotTemplate = CompositeFormat.Parse(SnapshotFormat);
-    private const int LockPhase = 1;
     private const int FilePhase = 2;
     private const int ReadPhase = 4;
     private const int ClientPhase = 8;
@@ -151,7 +150,7 @@ internal sealed class ClusterFixtureStartupEvidence : IDisposable
         {
             phases |= entry.Name switch
             {
-                ClusterFixtureStartupProfile.LockEvent => LockPhase,
+                ClusterFixtureStartupProfile.LockEvent => 1,
                 ClusterFixtureStartupProfile.FileEvent => FilePhase,
                 ClusterFixtureStartupProfile.ReadEvent => ReadPhase,
                 ClusterFixtureStartupProfile.ClientEvent => ClientPhase,

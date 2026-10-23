@@ -11,9 +11,6 @@ internal sealed class HttpTelemetryPrivacyOptions
     private const int DefaultMaximumTags = 32;
     private const int DefaultMaximumBaggageItems = 8;
     private const int DefaultMaximumParentLinks = 32;
-    private const int MinimumTags = 1;
-    private const int MinimumBaggageItems = 0;
-    private const int MinimumParentLinks = 0;
     /// <summary>Gets or sets the maximum span tags examined and removed.</summary>
     public int MaximumTags { get; set; } = DefaultMaximumTags;
     /// <summary>Gets or sets the maximum local ancestor links examined before inherited baggage access.</summary>
@@ -22,7 +19,7 @@ internal sealed class HttpTelemetryPrivacyOptions
     public int MaximumBaggageItems { get; set; } = DefaultMaximumBaggageItems;
     /// <summary>Checks every bound against the closed reviewed limits.</summary>
     /// <returns>Whether the supplied bounds are safe.</returns>
-    public bool IsValid() => MaximumTags is >= MinimumTags and <= DefaultMaximumTags
-        && MaximumBaggageItems is >= MinimumBaggageItems and <= DefaultMaximumBaggageItems
-        && MaximumParentLinks is >= MinimumParentLinks and <= DefaultMaximumParentLinks;
+    public bool IsValid() => MaximumTags is >= 1 and <= DefaultMaximumTags
+        && MaximumBaggageItems is >= 0 and <= DefaultMaximumBaggageItems
+        && MaximumParentLinks is >= 0 and <= DefaultMaximumParentLinks;
 }

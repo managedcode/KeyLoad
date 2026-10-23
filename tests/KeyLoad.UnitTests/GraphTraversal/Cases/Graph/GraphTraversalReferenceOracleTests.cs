@@ -35,11 +35,8 @@ internal sealed class GraphTraversalReferenceOracleTests
     private const string EdgeFilteredDownstream = "v-filtered-downstream";
     private const int RequestedVertices = 20;
     private const int RequestedEdges = 20;
-    private const int StartDepth = 0;
-    private const int FirstHopDepth = 1;
     private const int BoundedDepth = 2;
     private const int DeeperCycleDepth = 4;
-    private const int OneLess = 1;
 
     private static readonly GraphTraversalReferenceVertex Start = new(OrdersCollection, StartId);
     private static readonly GraphTraversalReferenceVertex Left = new(ProjectsCollection, LeftId);
@@ -49,7 +46,7 @@ internal sealed class GraphTraversalReferenceOracleTests
     private static readonly GraphTraversalReferenceVertex Hidden = new(ProjectsCollection, HiddenId);
     private static readonly GraphTraversalReferenceVertex HiddenTarget = new(OrdersCollection, HiddenTargetId);
     private static readonly GraphTraversalReferenceVertex Filtered = new(ProjectsCollection, FilteredId);
-    private static readonly int[] DepthCases = [StartDepth, FirstHopDepth, BoundedDepth, DeeperCycleDepth];
+    private static readonly int[] DepthCases = [0, 1, BoundedDepth, DeeperCycleDepth];
     private static readonly GraphTraversalReferenceVertex[] ExpectedBoundedVertices = [Join, Right, Start, Left, Direct];
     private static readonly GraphTraversalReferenceEdge[] Edges =
     [
@@ -100,7 +97,7 @@ internal sealed class GraphTraversalReferenceOracleTests
 
         var bounded = GraphTraversalReferenceBfsOracle.Read(Edges, AliceVisibleVertices, Start,
             BoundedDepth, RequestedVertices, RequestedEdges, [Walk]);
-        await Assert.That(bounded.ShortestDepths[Direct]).IsEqualTo(FirstHopDepth);
+        await Assert.That(bounded.ShortestDepths[Direct]).IsEqualTo(1);
         await Assert.That(bounded.ShortestDepths[Join]).IsEqualTo(BoundedDepth);
         await Assert.That(ExpandVertices(database, bounded))
             .IsEquivalentTo(ExpectedBoundedVertices.Select(vertex => Vertex(database, vertex)), CollectionOrdering.Matching);
@@ -127,11 +124,11 @@ internal sealed class GraphTraversalReferenceOracleTests
 
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => database.Database.Traverse(
             Alice, database.Partition, GraphName, Vertex(database, Start), BoundedDepth,
-            requiredVertices - OneLess, requiredEdges, [Walk], cancellationToken)).Code)
+            requiredVertices - 1, requiredEdges, [Walk], cancellationToken)).Code)
             .IsEqualTo(ErrorCode.BudgetExceeded);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => database.Database.Traverse(
             Alice, database.Partition, GraphName, Vertex(database, Start), BoundedDepth,
-            requiredVertices, requiredEdges - OneLess, [Walk], cancellationToken)).Code)
+            requiredVertices, requiredEdges - 1, [Walk], cancellationToken)).Code)
             .IsEqualTo(ErrorCode.BudgetExceeded);
     }
 

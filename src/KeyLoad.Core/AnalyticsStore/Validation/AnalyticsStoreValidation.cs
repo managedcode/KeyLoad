@@ -4,12 +4,7 @@ namespace KeyLoad.Core.Features.AnalyticsStore;
 
 internal static class AnalyticsStoreValidation
 {
-    private const int NoConfiguredEntries = 0;
-    private const int RootPathSegments = 0;
-    private const int LinkPathSegments = 1;
     private const int FieldPathSegments = 2;
-    private const int ParentPathIndex = 0;
-    private const int FieldPathIndex = 1;
     internal const string Invalid = "The analytics store request is invalid.";
     internal const string UnavailableBinding = "The requested field binding is unavailable.";
     internal const string Budget = "The analytics store work budget is exceeded.";
@@ -27,7 +22,7 @@ internal static class AnalyticsStoreValidation
         }
         var schema = definition.AnalyticsSchema;
         if (schema is null || !Names(schema.Dimensions) || !Names(schema.Metrics)
-            || definition.Indexes.Length != NoConfiguredEntries || definition.HeaderPolicies.Length != NoConfiguredEntries
+            || definition.Indexes.Length != 0 || definition.HeaderPolicies.Length != 0
             || definition.Authority != DocumentAuthority.Document || definition.RelationalSchema is not null)
         {
             throw Errors.Fail(ErrorCode.Validation, Invalid);
@@ -36,18 +31,18 @@ internal static class AnalyticsStoreValidation
         foreach (var policy in definition.FieldPolicies)
         {
             var path = JsonData.PathSegments(policy.Path);
-            if (path.Length == RootPathSegments)
+            if (path.Length == 0)
             {
                 continue;
             }
 
-            if (path[ParentPathIndex] == Links && path.Length == LinkPathSegments)
+            if (path[0] == Links && path.Length == 1)
             {
                 continue;
             }
 
-            var fields = path[ParentPathIndex] == Dimensions ? schema.Dimensions : path[ParentPathIndex] == Metrics ? schema.Metrics : default;
-            if (fields.IsDefault || path.Length > FieldPathSegments || path.Length == FieldPathSegments && !fields.Contains(path[FieldPathIndex], StringComparer.Ordinal))
+            var fields = path[0] == Dimensions ? schema.Dimensions : path[0] == Metrics ? schema.Metrics : default;
+            if (fields.IsDefault || path.Length > FieldPathSegments || path.Length == FieldPathSegments && !fields.Contains(path[1], StringComparer.Ordinal))
             {
                 throw Errors.Fail(ErrorCode.Validation, Invalid);
             }

@@ -8,11 +8,6 @@ namespace KeyLoad.Storage.ZoneTree;
 
 internal static class ZoneTreeJournalCodec
 {
-    private const int EmptyMutationCount = 0;
-    private const int NoRemainingBytes = 0;
-    private const int FirstRecordIndex = 0;
-    private const int EqualKeys = 0;
-
     internal const string JournalPayloadInvalid = "The redo journal mutation payload is invalid.";
     internal const string JournalRecordsInvalid = "The redo journal keys are not strictly ordered unique records.";
 
@@ -36,7 +31,7 @@ internal static class ZoneTreeJournalCodec
 
     internal static StorageMutation[] Deserialize(byte[] payload)
     {
-        if (payload is null || payload.Length == EmptyMutationCount)
+        if (payload is null || payload.Length == 0)
         {
             throw Errors.Fail(ErrorCode.Corruption, JournalPayloadInvalid);
         }
@@ -47,7 +42,7 @@ internal static class ZoneTreeJournalCodec
             using var session = Sessions.GetSession();
             var reader = Reader.Create(payload.AsSpan(), session);
             records = Serializer.Deserialize(ref reader);
-            if (records is null || records.Length == EmptyMutationCount || reader.Remaining != NoRemainingBytes)
+            if (records is null || records.Length == 0 || reader.Remaining != 0)
             {
                 throw Errors.Fail(ErrorCode.Corruption, JournalPayloadInvalid);
             }
@@ -72,7 +67,7 @@ internal static class ZoneTreeJournalCodec
     {
         var records = new ZoneTreeJournalMutation[mutations.Length];
         ReadOnlyMemory<byte>? previousKey = null;
-        for (var index = FirstRecordIndex; index < mutations.Length; index++)
+        for (var index = 0; index < mutations.Length; index++)
         {
             var mutation = mutations[index] ?? throw Errors.Fail(ErrorCode.Corruption, JournalRecordsInvalid);
             ValidateKey(mutation.Key, previousKey);
@@ -92,7 +87,7 @@ internal static class ZoneTreeJournalCodec
     {
         var mutations = new StorageMutation[records.Length];
         ReadOnlyMemory<byte>? previousKey = null;
-        for (var index = FirstRecordIndex; index < records.Length; index++)
+        for (var index = 0; index < records.Length; index++)
         {
             var record = records[index];
             ValidateKind(record);
@@ -115,7 +110,7 @@ internal static class ZoneTreeJournalCodec
 
     private static void ValidateKey(ReadOnlyMemory<byte> key, ReadOnlyMemory<byte>? previousKey)
     {
-        if (key.IsEmpty || previousKey is { } previous && previous.Span.SequenceCompareTo(key.Span) >= EqualKeys)
+        if (key.IsEmpty || previousKey is { } previous && previous.Span.SequenceCompareTo(key.Span) >= 0)
         {
             throw Errors.Fail(ErrorCode.Corruption, JournalRecordsInvalid);
         }

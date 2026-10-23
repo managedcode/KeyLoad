@@ -10,9 +10,7 @@ internal static class AdapterVectorWholeFlow
     private const string SecondValue = "second";
     private const string VectorParameter = "vector";
     private const string ScopeGraph = "vector-scope";
-    private const int RootDepth = 0;
     private const int ScopeVertices = 2;
-    private const int ScopeEdges = 1;
     internal const string Collection = "vectors";
     internal const string FirstJson = """{"value":"first"}""";
     internal const string SecondJson = """{"value":"second"}""";
@@ -24,7 +22,7 @@ internal static class AdapterVectorWholeFlow
     internal static GraphSearchRequest Typed(TestDatabase database, bool invalid = false)
         => new(1, new(database.Partition, Collection, VectorField: "/embedding", Vector: invalid ? [1] : [1, 0], Space: Space()), Scope: new(new(ScopeGraph,
             [new(database.Partition, Collection, "a"), new(database.Partition, Collection, "b")],
-            RootDepth, ScopeVertices, ScopeEdges)));
+            0, ScopeVertices, 1)));
     internal static SqlGraphSearchRequest SqlRequest(TestDatabase database, bool invalid = false)
         => new(1, new(database.Partition, Sql, new Dictionary<string, JsonElement>(StringComparer.Ordinal)
         {

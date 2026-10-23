@@ -16,7 +16,6 @@ public sealed partial class HelixDbTarget(HttpClient http, string runId, string 
     private const string CommittedReadsAndDirectedGraphTraversal = "committed execution reads and directed graph traversal";
     private const string POSTV2QueryOperationTree = "POST /query operation tree";
     private const string IsolatedLocalServerNoAuthentication = "isolated local server; no authentication";
-    private const int SingleResultCardinality = 1;
     private const string SingleLocalWriterNoReplicationConfigured = "single local writer; no replication configured";
     private const string HELIXDATADIRPersistentDirectory = "HELIX_DATA_DIR persistent directory";
     private readonly IOptions<ComparisonExecutionOptions> execution = ComparisonExecutionOptions.Require(executionOptions);
@@ -33,7 +32,7 @@ public sealed partial class HelixDbTarget(HttpClient http, string runId, string 
         get;
     } = new(HelixDbTokens.TokenHelixDB, RuntimeV0PinnedServerImage, OnePersistentLocalWriter, XHelixAwaitDurableTrueDiskFlush, CommittedReadsAndDirectedGraphTraversal, POSTV2QueryOperationTree, IsolatedLocalServerNoAuthentication, image)
     {
-        Cluster = new(SingleResultCardinality, SingleResultCardinality, SingleLocalWriterNoReplicationConfigured, [HELIXDATADIRPersistentDirectory])
+        Cluster = new(1, 1, SingleLocalWriterNoReplicationConfigured, [HELIXDATADIRPersistentDirectory])
     };
 
     /// <inheritdoc/>

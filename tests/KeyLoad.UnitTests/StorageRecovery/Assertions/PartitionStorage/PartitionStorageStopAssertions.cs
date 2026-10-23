@@ -5,7 +5,6 @@ namespace KeyLoad.UnitTests.Features.StorageRecovery;
 
 internal static class PartitionStorageStopAssertions
 {
-    private const int NoFaults = 0;
     private const string StartingStop =
         "Attempted to shutdown a silo which is not in the Running state. This silo is in the Starting state.";
 
@@ -16,7 +15,7 @@ internal static class PartitionStorageStopAssertions
         var physical = owner!;
         var late = lower!;
         await Assert.That(originals[C.HostCloseIndex] is { IsFaulted: true }).IsTrue();
-        await Assert.That(originalFaults.Count > NoFaults).IsTrue();
+        await Assert.That(originalFaults.Count > 0).IsTrue();
         await RequireOriginalAsync(originals[C.HostCloseIndex]).ConfigureAwait(false);
         await Assert.That(originals[C.LowerCloseIndex] is { IsCompletedSuccessfully: true }).IsTrue();
         await Assert.That(originals[C.OwnerCloseIndex] is { IsCompletedSuccessfully: true }).IsTrue();
@@ -45,7 +44,7 @@ internal static class PartitionStorageStopAssertions
 
     private static async Task RequireLeafAsync(Exception original)
     {
-        if (original is AggregateException aggregate && aggregate.InnerExceptions.Count > NoFaults)
+        if (original is AggregateException aggregate && aggregate.InnerExceptions.Count > 0)
         {
             foreach (var failure in aggregate.InnerExceptions)
             {

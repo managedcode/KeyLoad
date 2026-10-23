@@ -8,11 +8,6 @@ namespace KeyLoad.Features.InternalSerialization;
 
 internal static class ContractValidation
 {
-    private const int RootGraphDepth = 1;
-    private const int LeafHeight = 0;
-    private const int ChildDepthStep = 1;
-    private const int DictionaryKeyIndex = 0;
-    private const int DictionaryValueIndex = 1;
     private static readonly ConcurrentDictionary<Type, MemberValidation[]> Members = new();
     private static readonly ConcurrentDictionary<Type, PropertyInfo> CollectionDefaults = new();
 
@@ -24,7 +19,7 @@ internal static class ContractValidation
         }
         if (!IsScalar(value))
         {
-            _ = Visit(value, new GraphValidationState(), null, profile, RootGraphDepth);
+            _ = Visit(value, new GraphValidationState(), null, profile, 1);
         }
     }
 
@@ -38,12 +33,12 @@ internal static class ContractValidation
             {
                 throw Errors.Fail(ErrorCode.Corruption, PayloadVersion.InvalidPayload);
             }
-            return LeafHeight;
+            return 0;
         }
         var type = value.GetType();
         if (IsScalar(value))
         {
-            return LeafHeight;
+            return 0;
         }
         var tracked = !type.IsValueType;
         if (state.Enter(value, tracked, validation, depth, out var completedHeight))
@@ -52,7 +47,7 @@ internal static class ContractValidation
         }
         try
         {
-            var height = checked(ChildDepthStep + VisitChildren(value, type, state, validation, profile, depth + ChildDepthStep));
+            var height = checked(1 + VisitChildren(value, type, state, validation, profile, depth + 1));
             state.Complete(value, tracked, validation, height);
             return height;
         }
@@ -70,7 +65,7 @@ internal static class ContractValidation
             return Visit(surrogate, state, null, profile, depth);
         }
         ValidateCollection(value, type);
-        var height = LeafHeight;
+        var height = 0;
         if (value is IDictionary dictionary)
         {
             foreach (DictionaryEntry entry in dictionary)
@@ -110,10 +105,10 @@ internal static class ContractValidation
         var members = Members.GetOrAdd(type, GetMembers);
         if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(KeyValuePair<,>))
         {
-            return Math.Max(Visit(members[DictionaryKeyIndex].Read(value), state, validation?.DictionaryKey, profile, depth),
-                Visit(members[DictionaryValueIndex].Read(value), state, validation?.DictionaryValue, profile, depth));
+            return Math.Max(Visit(members[0].Read(value), state, validation?.DictionaryKey, profile, depth),
+                Visit(members[1].Read(value), state, validation?.DictionaryValue, profile, depth));
         }
-        var height = LeafHeight;
+        var height = 0;
         foreach (var member in members)
         {
             height = Math.Max(height, Visit(member.Read(value), state, member.Value, profile, depth));

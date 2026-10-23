@@ -7,7 +7,6 @@ internal static class PackedBackupCutTransfer
 {
     private const string Journal = "commands.wal";
     private const int PieceBytes = 1_024;
-    private const int FirstPiece = 1;
     private const string PieceEnvironment = "KEYLOAD_BACKUP__PIECEBYTES";
     private const string PieceValue = "1024";
     private const string Pack = "pack-backup";
@@ -36,7 +35,7 @@ internal static class PackedBackupCutTransfer
         }
         var actual = BackupArtifact.Inspect(artifact);
         var expected = files.Select(row => (Name: row.Key, Bytes: row.Value.LongLength,
-            Pieces: Math.Max(FirstPiece, checked((row.Value.Length + PieceBytes - FirstPiece) / PieceBytes))))
+            Pieces: Math.Max(1, checked((row.Value.Length + PieceBytes - 1) / PieceBytes))))
             .OrderBy(row => row.Name, StringComparer.Ordinal);
         await Assert.That(actual.OrderBy(row => row.Name, StringComparer.Ordinal))
             .IsEquivalentTo(expected, CollectionOrdering.Matching);

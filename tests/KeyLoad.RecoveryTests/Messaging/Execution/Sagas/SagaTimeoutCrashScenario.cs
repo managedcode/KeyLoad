@@ -20,9 +20,8 @@ internal static class SagaTimeoutCrashScenario
     private const string ConfigureSagaCommandIdText = "f64ff08b-299d-42ae-a39e-b6536fdb7295";
     private const string ExpireCommandIdText = "842223f3-9f76-4ba2-8a62-c3bb0f0fe8f2";
 
-    private const int TimeoutMessageLifetimeDays = 1;
     [ImmutableTemporalData]
-    private static readonly TimeSpan TimeoutMessageLifetime = TimeSpan.FromDays(TimeoutMessageLifetimeDays);
+    private static readonly TimeSpan TimeoutMessageLifetime = TimeSpan.FromDays(1);
     internal const string Mode = "saga-timeout-crash";
     internal const string OperationFile = "saga-timeout-operation.json";
     internal const string SeedTailFile = "saga-timeout-seed-tail.txt";

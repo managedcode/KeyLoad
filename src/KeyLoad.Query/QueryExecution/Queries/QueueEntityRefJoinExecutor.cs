@@ -11,7 +11,6 @@ namespace KeyLoad.Query.Features.QueryExecution;
 internal static class QueueEntityRefJoinExecutor
 {
     private const string CorruptReference = "The queue join selected a document with an inconsistent stored identity.";
-    private const int EqualOrder = 0;
 
     private sealed record Candidate(DocumentRecord Left, DocumentRecord Right);
 
@@ -87,7 +86,7 @@ internal static class QueueEntityRefJoinExecutor
             return;
         }
         var worst = candidates.Max ?? throw Errors.Fail(ErrorCode.Corruption, CorruptReference);
-        if (StringComparer.Ordinal.Compare(candidate.Left.Reference.Id, worst.Left.Reference.Id) >= EqualOrder)
+        if (StringComparer.Ordinal.Compare(candidate.Left.Reference.Id, worst.Left.Reference.Id) >= 0)
         {
             return;
         }

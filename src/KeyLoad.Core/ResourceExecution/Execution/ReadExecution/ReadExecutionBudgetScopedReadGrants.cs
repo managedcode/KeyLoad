@@ -5,7 +5,6 @@ namespace KeyLoad.Core.Features.ResourceExecution.Execution;
 /// <summary>Owns scoped read-grant reservations on the same operation ledger, lifetime and cancellation state.</summary>
 internal sealed class ReadExecutionBudgetScopedReadGrants(ReadExecutionBudget budget)
 {
-    private const int EmptyElementCount = 0;
     private const string ExaminedRecordsExceeded = "The read execution examined-record budget is exceeded.";
 
     private const string GrantOwnerMismatch = "The read grant belongs to a different operation.";
@@ -131,7 +130,7 @@ internal sealed class ReadExecutionBudgetScopedReadGrants(ReadExecutionBudget bu
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, ReadExecutionBudget.ReadBytesExceeded);
         }
-        if (grant.RemainingRecords == EmptyElementCount || reservedGrantRecords == EmptyElementCount
+        if (grant.RemainingRecords == 0 || reservedGrantRecords == 0
             || examinedGrantRecords >= budget.MaximumScanRecords)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, ExaminedRecordsExceeded);

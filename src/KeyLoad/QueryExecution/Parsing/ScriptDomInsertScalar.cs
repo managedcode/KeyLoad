@@ -35,7 +35,7 @@ internal static class ScriptDomInsertScalar
                 Parameter(writer, parameters.ReadScalar(value));
                 break;
             case Dom.ParenthesisExpression grouped:
-                Write(writer, grouped.Expression, parameters, maximumDepth, depth + NextDepth, checkBudget, token);
+                Write(writer, grouped.Expression, parameters, maximumDepth, depth + 1, checkBudget, token);
                 break;
             default:
                 throw ScriptDomOperationErrors.Unsupported();
@@ -73,8 +73,8 @@ internal static class ScriptDomInsertScalar
             .Replace(DotUpperExponent, ZeroDotUpperExponent, StringComparison.Ordinal);
         var prefix = text.StartsWith(Negative, StringComparison.Ordinal) ? Negative.Length : Empty;
         var significant = prefix;
-        while (significant + NextDigit < text.Length && text[significant] == ZeroDigit
-            && char.IsAsciiDigit(text[significant + NextDigit]))
+        while (significant + 1 < text.Length && text[significant] == ZeroDigit
+            && char.IsAsciiDigit(text[significant + 1]))
         {
             significant++;
         }
@@ -89,9 +89,7 @@ internal static class ScriptDomInsertScalar
         catch (JsonException) { throw ScriptDomOperationErrors.Invalid(); }
     }
     private const int Empty = 0;
-    private const int NextDigit = 1;
     private const char ZeroDigit = '0';
-    private const int NextDepth = 1;
     private const string DepthExceeded = "The SQL INSERT expression exceeds its existing depth limit.";
     private const string DotExponent = ".e";
     private const string ZeroDotExponent = ".0e";

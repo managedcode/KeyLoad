@@ -13,8 +13,6 @@ internal sealed class HeavyDocumentLoadScenario(ClusterFixture fixture) : IAsync
     private CancellationTokenSource? lifetime;
     private Task? originals;
     private int disposed;
-    private const int SdkReaderLane = 0;
-    private const int McpReaderLane = 1;
     private const int McpQueryLane = 2;
 
     internal async Task RunAsync(CancellationToken token)
@@ -128,7 +126,7 @@ internal sealed class HeavyDocumentLoadScenario(ClusterFixture fixture) : IAsync
             await HeavyDocumentLoadReadback.VerifySentinelAsync(result, partition).ConfigureAwait(false);
             if (concurrent)
             {
-                overlap.ReadOverlapped(SdkReaderLane);
+                overlap.ReadOverlapped(0);
             }
         }
     }
@@ -146,7 +144,7 @@ internal sealed class HeavyDocumentLoadScenario(ClusterFixture fixture) : IAsync
             await HeavyDocumentLoadReadback.VerifySentinelAsync(result.Value, partition).ConfigureAwait(false);
             if (concurrent)
             {
-                overlap.ReadOverlapped(McpReaderLane);
+                overlap.ReadOverlapped(1);
             }
         }
     }

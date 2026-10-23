@@ -61,12 +61,7 @@ internal static class RowVisibilityRetirement
             {
                 charge.Dispose();
             }
-            catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is null)
-            {
-                releaseFailure = error;
-                throw;
-            }
-            catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is not null)
+            catch (Exception error)
             {
                 releaseFailure = error;
                 throw;

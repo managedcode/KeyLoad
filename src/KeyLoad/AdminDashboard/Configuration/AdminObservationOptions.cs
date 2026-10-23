@@ -8,7 +8,6 @@ internal sealed class AdminObservationOptions
 {
     internal const string SectionName = "KeyLoad:AdminObservation";
     internal const string ValidationMessage = "Administrative observation limits must be positive and within their accepted ceilings.";
-    private const int MinimumPositiveCount = 1;
     private const int MaximumEntryCeiling = 2_048;
     private const int MaximumRetainedFileCeiling = 200;
     private const int MaximumRecentFailureCeiling = 50;
@@ -20,10 +19,10 @@ internal sealed class AdminObservationOptions
     public int MaximumRecentFailures { get; set; } = MaximumRecentFailureCeiling;
     public TimeSpan ScanDeadline { get; set; } = TimeSpan.FromMilliseconds(MaximumScanMilliseconds);
 
-    internal bool IsValid() => MaximumEntries is >= MinimumPositiveCount and <= MaximumEntryCeiling
-        && MaximumRetainedFiles is >= MinimumPositiveCount and <= MaximumRetainedFileCeiling
+    internal bool IsValid() => MaximumEntries is >= 1 and <= MaximumEntryCeiling
+        && MaximumRetainedFiles is >= 1 and <= MaximumRetainedFileCeiling
         && MaximumRetainedFiles <= MaximumEntries
-        && MaximumRecentFailures is >= MinimumPositiveCount and <= MaximumRecentFailureCeiling
+        && MaximumRecentFailures is >= 1 and <= MaximumRecentFailureCeiling
         && ScanDeadline > TimeSpan.Zero && ScanDeadline <= MaximumScanDeadline;
 
     internal void Validate()

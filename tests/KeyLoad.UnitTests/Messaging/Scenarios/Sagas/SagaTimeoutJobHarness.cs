@@ -10,7 +10,6 @@ internal sealed class SagaTimeoutJobHarness(
     IServiceProvider services,
     RuntimeTestOptions profile)
 {
-    private const int NoNewShardClaims = 0;
     private const string JobsDidNotSettle = "Execution job shards retained scheduled jobs beyond the test bound.";
 
     internal async Task<DurableJob> ScheduleAsync(DueWorkHint hint, DateTimeOffset dueTime,
@@ -26,7 +25,7 @@ internal sealed class SagaTimeoutJobHarness(
 
     internal async Task<List<IJobShard>> CaptureOwnedShardsAsync(DateTimeOffset maxDueTime,
         CancellationToken cancellationToken)
-        => await AssignJobShardsAsync(maxDueTime, NoNewShardClaims, cancellationToken);
+        => await AssignJobShardsAsync(maxDueTime, 0, cancellationToken);
 
     internal async Task<List<IJobShard>> RecoverShardsAsync(DateTimeOffset maxDueTime,
         CancellationToken cancellationToken)

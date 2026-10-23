@@ -6,9 +6,6 @@ internal sealed record ValueValidation(bool Required, ValueValidation? Element,
     ValueValidation? DictionaryKey = null, ValueValidation? DictionaryValue = null)
 {
     private const int DictionaryArgumentCount = 2;
-    private const int SequenceArgumentCount = 1;
-    private const int FirstTypeArgumentIndex = 0;
-    private const int ValueTypeArgumentIndex = 1;
     internal static ValueValidation Create(NullabilityInfo info)
     {
         var required = !info.Type.IsValueType && info.ReadState == NullabilityState.NotNull;
@@ -21,9 +18,9 @@ internal sealed record ValueValidation(bool Required, ValueValidation? Element,
         var type = Nullable.GetUnderlyingType(info.Type) ?? info.Type;
         if (arguments.Length == DictionaryArgumentCount && (IsKeyValuePair(type) || IsDictionary(type) || type.GetInterfaces().Any(IsDictionary)))
         {
-            return new(required, null, Create(arguments[FirstTypeArgumentIndex]), Create(arguments[ValueTypeArgumentIndex]));
+            return new(required, null, Create(arguments[0]), Create(arguments[1]));
         }
-        return new(required, arguments.Length == SequenceArgumentCount ? Create(arguments[FirstTypeArgumentIndex]) : null);
+        return new(required, arguments.Length == 1 ? Create(arguments[0]) : null);
     }
 
     private static bool IsDictionary(Type type)

@@ -2,11 +2,7 @@ namespace KeyLoad.Core.Features.TimeSeries;
 
 internal static class SampleChunkWire
 {
-    private const int MinimumEncodedBytes = 1;
-
-    private const int ZigZagSignFlagBits = 1;
     private const int Int64SignBitIndex = 63;
-    private const int ZigZagSignFlagMask = 1;
 
     internal const string PayloadAlias = "keyload.core.SampleChunkPayload";
     internal const int CurrentVersion = 1;
@@ -22,7 +18,7 @@ internal static class SampleChunkWire
 
     internal static void ValidateMaximum(int maximumBytes)
     {
-        if (maximumBytes is < MinimumEncodedBytes or > MaximumEncodedBytes)
+        if (maximumBytes is < 1 or > MaximumEncodedBytes)
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidMaximum);
         }
@@ -57,10 +53,10 @@ internal static class SampleChunkWire
     }
 
     internal static ulong ZigZag(long value)
-        => unchecked((ulong)((value << ZigZagSignFlagBits) ^ (value >> Int64SignBitIndex)));
+        => unchecked((ulong)((value << 1) ^ (value >> Int64SignBitIndex)));
 
     internal static long UnZigZag(ulong value)
-        => unchecked((long)(value >> ZigZagSignFlagBits) ^ -((long)value & ZigZagSignFlagMask));
+        => unchecked((long)(value >> 1) ^ -((long)value & 1));
 
     internal static void Require(bool condition)
     {

@@ -6,7 +6,6 @@ namespace KeyLoad.UnitTests.Features.CodeQuality.Helpers;
 
 internal static class PathMapScenario
 {
-    private const int RejectedReaderExitCode = 1;
     private const string SourceDrift = "Compiled source bytes do not match the current source inventory.";
     private const string EscapingPath = "A coverage path is unsafe or escapes the repository.";
 
@@ -86,7 +85,7 @@ internal static class PathMapScenario
     private static async Task AssertSafeRejectionAsync(ProductionSourceManifestProcessResult result,
         string expectedFailure)
     {
-        await Assert.That(result.ExitCode).IsEqualTo(RejectedReaderExitCode);
+        await Assert.That(result.ExitCode).IsEqualTo(1);
         await Assert.That(result.StandardOutput).IsEmpty();
         await Assert.That(result.StandardError.Trim()).IsEqualTo(expectedFailure);
         await PathMapAssertions.SettledAsync(result);

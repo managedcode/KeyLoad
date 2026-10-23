@@ -9,8 +9,6 @@ namespace KeyLoad.IntegrationTests.Features.ClientApi;
 [NotInParallel]
 internal sealed class McpConcurrentIdentityTests(ClusterFixture fixture)
 {
-    private const int FirstSuccess = 0;
-    private const int SecondSuccess = 1;
     private const int FirstDenial = 2;
     private const int SecondDenial = 3;
     private const int OperationCount = 4;
@@ -35,8 +33,8 @@ internal sealed class McpConcurrentIdentityTests(ClusterFixture fixture)
             secondClient.CallAsync(McpCallerTools.DocumentsGet, new GetDocumentRequest(second.Reference), deadline.Token),
             firstClient.CallAsync(McpCallerTools.DocumentsGet, new GetDocumentRequest(second.Reference), deadline.Token),
             secondClient.CallAsync(McpCallerTools.DocumentsGet, new GetDocumentRequest(first.Reference), deadline.Token));
-        var firstRead = await PublicReadAssertions.RequiredDocumentAsync(calls[FirstSuccess]);
-        var secondRead = await PublicReadAssertions.RequiredDocumentAsync(calls[SecondSuccess]);
+        var firstRead = await PublicReadAssertions.RequiredDocumentAsync(calls[0]);
+        var secondRead = await PublicReadAssertions.RequiredDocumentAsync(calls[1]);
         var firstDenied = await McpCallerAssertions.ErrorAsync(calls[FirstDenial], ErrorCode.PermissionDenied, dispatched: true);
         var secondDenied = await McpCallerAssertions.ErrorAsync(calls[SecondDenial], ErrorCode.PermissionDenied, dispatched: true);
         await global::KeyLoad.IntegrationTests.Features.Authorization.ConcurrentPrincipalAuthorityAssertions.LiteralAsync(first, firstRead.Value);

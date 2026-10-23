@@ -9,7 +9,6 @@ internal sealed class VectorAttachmentAdmissionWholeFlowTests
 {
     private const string Denied = "denied-vector-reader";
     private const string Tenant = "tenant";
-    private const int AttachmentItems = 1;
     private const string UnsupportedDetail = "This expression is outside the supported Q1 C# subset.";
     private const string LimitDetail = "The query vector attachment exceeds its item budget.";
     private const string DeniedDetail = "The principal cannot perform this operation in this scope.";
@@ -49,7 +48,7 @@ internal sealed class VectorAttachmentAdmissionWholeFlowTests
         GraphSearchRequest? lowered = null;
         var error = Assert.ThrowsExactly<KeyLoadException>(() => lowered = KeyLoadQuery.From<VectorAttachmentDocument>(
             db.Partition, AdapterVectorWholeFlow.Collection,
-            UnitClientOptions.Translation(new QueryTranslationOptions { MaximumConstantArrayItems = AttachmentItems }))
+            UnitClientOptions.Translation(new QueryTranslationOptions { MaximumConstantArrayItems = 1 }))
             .AttachVector(row => row.Embedding, canonical.Search.Vector!.Value,
                 AdapterVectorWholeFlow.Space(), canonical.Scope!));
         await Assert.That(error.Code).IsEqualTo(ErrorCode.BudgetExceeded);

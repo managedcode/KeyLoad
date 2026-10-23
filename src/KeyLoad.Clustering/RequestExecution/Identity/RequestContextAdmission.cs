@@ -7,8 +7,6 @@ namespace KeyLoad.Clustering;
 
 internal static class RequestContextAdmission
 {
-    private const int EmptyContextBytes = 0;
-
     internal static void Admit(IServiceProvider services, ClaimsPrincipal? principal,
         GrainRequestContextState state, CancellationToken cancellationToken, SiloAddress? placement = null)
     {
@@ -33,7 +31,7 @@ internal static class RequestContextAdmission
         if (placement is not null)
         {
             var remaining = checked(options.Value.MaximumContextBytes - (int)stateBytes);
-            if (remaining <= EmptyContextBytes)
+            if (remaining <= 0)
             {
                 throw Errors.Fail(ErrorCode.BudgetExceeded, GrainRoutingProtocol.ReplyBudgetExceeded);
             }

@@ -6,8 +6,8 @@ namespace KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
 
 /// <summary>Measures checked sequential and deterministic shuffled ZoneTree reads at the selected scale.</summary>
 [MemoryDiagnoser]
-[SimpleJob(RuntimeMoniker.Net10_0, launchCount: LaunchCount, warmupCount: WarmupCount,
-    iterationCount: IterationCount, invocationCount: InvocationCount)]
+[SimpleJob(RuntimeMoniker.Net10_0, launchCount: 1, warmupCount: WarmupCount,
+    iterationCount: IterationCount, invocationCount: 1)]
 [Config(typeof(ScaledStorageReadUnrollConfiguration))]
 public class ScaledStorageReadBenchmarks : IDisposable
 {
@@ -17,10 +17,8 @@ public class ScaledStorageReadBenchmarks : IDisposable
     private const int HundredThousand = 100_000;
     private const int OneMillion = 1_000_000;
     private const int ReadsPerInvocation = 1_000_000;
-    private const int LaunchCount = 1;
     private const int WarmupCount = 8;
     private const int IterationCount = 10;
-    private const int InvocationCount = 1;
     private const string InvalidEngineMessage = "The scaled benchmark engine label is unsupported.";
     private const string InvalidCountMessage = "The scaled benchmark record-count selection is unsupported.";
     private const string InactiveMessage = "The scaled benchmark fixture is not initialized.";

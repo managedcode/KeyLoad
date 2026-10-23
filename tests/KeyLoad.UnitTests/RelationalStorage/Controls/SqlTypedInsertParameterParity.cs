@@ -18,7 +18,7 @@ internal static class SqlTypedInsertParameterParity
         var request = new SqlOperationRequest(fixture.Partition, WireSql, values,
             CommandId: state.Created.Command.CommandId);
         var wire = SqlOperationCompiler.CompileSession(request, limits, limits.Value.MaxBatchBytes,
-            UnitExecutionOptions.QueryExecution(), SlotCount, token);
+            UnitExecutionOptions.QueryExecution(), 1, token);
         await SqlTypedInsertAssertions.SameAsync(state.Created.Command.Payload, wire.Payload);
         await SqlTypedInsertAssertions.SameAsync(state.Created.Result,
             SqlTypedInsertLiteral.Apply(fixture.Database, wire, state.Created.At));
@@ -31,12 +31,12 @@ internal static class SqlTypedInsertParameterParity
         {
             Sql = InvalidSlot
         },
-            limits, limits.Value.MaxBatchBytes, UnitExecutionOptions.QueryExecution(), SlotCount, token), ErrorCode.Validation);
+            limits, limits.Value.MaxBatchBytes, UnitExecutionOptions.QueryExecution(), 1, token), ErrorCode.Validation);
         await RefuseAsync(() => SqlOperationCompiler.CompileSession(request with
         {
             Sql = SqlTypedInsertLiteral.Sql
         },
-            limits, limits.Value.MaxBatchBytes, UnitExecutionOptions.QueryExecution(), SlotCount, token), ErrorCode.Validation);
+            limits, limits.Value.MaxBatchBytes, UnitExecutionOptions.QueryExecution(), 1, token), ErrorCode.Validation);
         await SqlTypedInsertAssertions.UnchangedAsync(fixture.Store, image, cut);
         await SqlTypedInsertHot.ReplayAsync(fixture, state.Created);
         await SqlTypedInsertAssertions.ImageAsync(fixture, fixture.Store, fixture.Database, repaired: false);
@@ -51,7 +51,6 @@ internal static class SqlTypedInsertParameterParity
             ?? throw new InvalidOperationException(MissingFailure);
         await Assert.That(error.Code).IsEqualTo(expected);
     }
-    private const int SlotCount = 1;
     private const string CanonicalSlot = "p1";
     private const string MissingFailure = "The original execution INSERT parameter refusal is missing.";
     private const string WireSql = "INSERT INTO [sql-values] (id,title,amount,active,price,at) VALUES (N'one',N'alpha',7,$01,12.5,N'2026-10-14T00:00:00Z'),(N'two',N'beta',NULL,NULL,NULL,NULL)";

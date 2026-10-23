@@ -11,7 +11,6 @@ internal static class QueryAdapterBranchPages
     private const string Collection = "orders";
     private const string AccessPath = "bounded-full-scan";
     private const long Revision = 1;
-    private const int FirstPage = 1;
     private const int SecondPage = 2;
     private const decimal BranchBoundary = 3m;
     private const string AJson = "{\"number\":2,\"status\":\"open\"}";
@@ -21,7 +20,7 @@ internal static class QueryAdapterBranchPages
     internal static async Task RunAsync(QueryEngine engine, ZoneTreeStore store, PartitionRef partition)
     {
         var original = KeyLoadQuery.From<QueryAdapterOrder>(partition, Collection, UnitClientOptions.Translation());
-        var a = original.Where(row => row.Number > BranchBoundary).OrderBy(row => row.Number).Take(FirstPage);
+        var a = original.Where(row => row.Number > BranchBoundary).OrderBy(row => row.Number).Take(1);
         var b = original.Where(row => row.Status == "open").OrderByDescending(row => row.Status).Take(SecondPage);
         var first = new QueryPage([new("b", Revision, BJson, false, [])], null, store.Position, AccessPath);
         var second = new QueryPage([new("a", Revision, AJson, false, [])], null, store.Position, AccessPath);

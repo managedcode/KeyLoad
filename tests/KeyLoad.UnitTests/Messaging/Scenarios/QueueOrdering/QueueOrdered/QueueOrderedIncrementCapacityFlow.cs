@@ -7,7 +7,6 @@ internal static class QueueOrderedIncrementCapacityFlow
 {
     private const int MaximumAttempts = 2;
     private const int StoredMessages = 3;
-    private const int ParkedMessages = 1;
     private const int FaultFailureRepairCommits = 3;
 
     internal static async Task RunAsync(QueueLifecycleCeilingFault fault, CancellationToken token)
@@ -18,7 +17,7 @@ internal static class QueueOrderedIncrementCapacityFlow
         {
             MaxAttempts = MaximumAttempts,
             MaxStoredMessages = StoredMessages,
-            MaxDeadLetterMessages = ParkedMessages,
+            MaxDeadLetterMessages = 1,
             OrderingProfile = QueueOrderingProfile.StrictPerKey,
             ParkedHeadPolicy = QueueParkedHeadPolicy.Continue,
             RetryJitter = QueueRetryJitter.Full

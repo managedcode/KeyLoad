@@ -10,9 +10,6 @@ internal sealed class CanonicalVectorPublicMetricTests
     private const string Collection = "public-metric-oracle";
     private const string Field = "/embedding";
     private const string Root = "root";
-    private const int FirstCoordinate = 0;
-    private const int SecondCoordinate = 1;
-    private const int TailCoordinates = 1;
 
     [Test]
     [Arguments(DistanceMetric.DotProduct)]
@@ -78,9 +75,9 @@ internal sealed class CanonicalVectorPublicMetricTests
 
     private static global::System.Collections.Immutable.ImmutableArray<float> Coordinates(float first, float second)
     {
-        var values = new float[Vector<float>.Count + TailCoordinates];
-        values[FirstCoordinate] = first;
-        values[SecondCoordinate] = second;
+        var values = new float[Vector<float>.Count + 1];
+        values[0] = first;
+        values[1] = second;
         return [.. values];
     }
 }

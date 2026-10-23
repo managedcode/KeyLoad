@@ -6,7 +6,6 @@ namespace KeyLoad.Core.Features.Search;
 internal static class VectorFieldProfiles
 {
     private const int MaximumProfiles = 32;
-    private const int MinimumDimension = 1;
     private const int MaximumDimension = 4_096;
     private const string Invalid = "The configured vector field profile is invalid.";
     private const string OverBudget = "The configured vector field profiles exceed their budget.";
@@ -25,7 +24,7 @@ internal static class VectorFieldProfiles
         foreach (var profile in definition.VectorProfiles)
         {
             if (profile is null || profile.Space is null || string.IsNullOrEmpty(profile.Field)
-                || profile.Space.Dimension is < MinimumDimension or > MaximumDimension || !Enum.IsDefined(profile.Space.Metric)
+                || profile.Space.Dimension is < 1 or > MaximumDimension || !Enum.IsDefined(profile.Space.Metric)
                 || !fields.Add(profile.Field))
             {
                 throw Errors.Fail(invalidCode, Invalid);

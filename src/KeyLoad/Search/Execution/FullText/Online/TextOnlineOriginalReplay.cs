@@ -7,8 +7,6 @@ internal sealed class TextOnlineOriginalReplay(DatabaseEngine database, ServerRu
     TimeProvider clock, TextResourceOwnership resources, TextOnlineSessions sessions,
     TextOnlineCatalogOwner catalog, Func<TextOnlineSession, Task> cleanupSession)
 {
-    private const int NoRetainedSessions = 0;
-
     internal async Task<OnlineTextCapabilityResult?> ExecuteAsync(PrincipalRecord principal,
         OnlineTextCapabilityRequest request, DateTimeOffset expiry, CancellationToken token, ReadExecutionBudget? originalBudget = null)
     {
@@ -35,7 +33,7 @@ internal sealed class TextOnlineOriginalReplay(DatabaseEngine database, ServerRu
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            if (retained.Length == NoRetainedSessions)
+            if (retained.Length == 0)
             {
                 admitted = resources.ReserveLease(budget);
             }

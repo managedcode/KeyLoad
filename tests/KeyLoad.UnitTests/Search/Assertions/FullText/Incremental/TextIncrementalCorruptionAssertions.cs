@@ -9,7 +9,6 @@ namespace KeyLoad.UnitTests.Features.Search;
 internal static class TextIncrementalCorruptionAssertions
 {
     private const byte DamageMask = 0xFF;
-    private const int LastByte = 1;
     private const int TrackedRecords = 2;
     private const string CorruptionDetail = "The execution text projection is corrupt.";
 
@@ -25,7 +24,7 @@ internal static class TextIncrementalCorruptionAssertions
         var path = Path.Combine(root, leaf, TextIncrementalProtocol.ManifestFile);
         var original = await File.ReadAllBytesAsync(path, token);
         var damaged = original.ToArray();
-        damaged[^LastByte] ^= DamageMask;
+        damaged[^1] ^= DamageMask;
         var restore = build with
         {
             CommandId = Guid.NewGuid(),

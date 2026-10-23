@@ -17,11 +17,7 @@ internal static class OpenSearchSessionQueryExecution
     private const string SessionShardFailure = "SessionQueryShardFailure";
     private const string SessionCardinalityMismatch = "SessionQueryCardinalityMismatch";
     private const int SessionCorpusRows = 1_000_000;
-    private const int SessionEmptyFailures = 0;
     private const int SessionCandidateLimit = 2;
-    private const int SessionRangeWidth = 1;
-    private const int SessionExpectedRows = 1;
-    private const int SessionFirstRow = 0;
 
     /// <inheritdoc/>
     internal static async Task BuildIndexesAsync(HttpClient client, string index, TimeProvider timeProvider,
@@ -67,7 +63,7 @@ internal static class OpenSearchSessionQueryExecution
             }, deadline.Token).ConfigureAwait(false);
         var result = rebuilt.RootElement;
         if (result.GetProperty(OpenSearchNames.SearchTimedOut).GetBoolean() || result.GetProperty(OpenSearchNames.Total).GetInt32() != SessionCorpusRows
-            || result.GetProperty(OpenSearchNames.Updated).GetInt32() != SessionCorpusRows || result.GetProperty(SessionFailuresProperty).GetArrayLength() != SessionEmptyFailures)
+            || result.GetProperty(OpenSearchNames.Updated).GetInt32() != SessionCorpusRows || result.GetProperty(SessionFailuresProperty).GetArrayLength() != 0)
         {
             throw new ComparisonFailureException(SessionBackfillIncomplete);
         }
@@ -96,7 +92,7 @@ internal static class OpenSearchSessionQueryExecution
                                 [SessionIdField] = new
                                 {
                                     gte = expected.Id,
-                                    lt = ScaledComparisonCorpus.Id(expected.Number + SessionRangeWidth)
+                                    lt = ScaledComparisonCorpus.Id(expected.Number + 1)
                                 }
                             }
                         }
@@ -106,16 +102,16 @@ internal static class OpenSearchSessionQueryExecution
         };
         using var response = await OpenSearchHttp.SendJsonAsync(client, HttpMethod.Post, SessionPathPrefix + index + OpenSearchNames.SearchSuffix, body, cancellationToken).ConfigureAwait(false);
         var root = response.RootElement;
-        if (root.GetProperty(OpenSearchNames.SearchTimedOut).GetBoolean() || root.GetProperty(OpenSearchNames.ShardsObject).GetProperty(OpenSearchNames.Failed).GetInt32() != SessionEmptyFailures)
+        if (root.GetProperty(OpenSearchNames.SearchTimedOut).GetBoolean() || root.GetProperty(OpenSearchNames.ShardsObject).GetProperty(OpenSearchNames.Failed).GetInt32() != 0)
         {
             throw new ComparisonFailureException(SessionShardFailure);
         }
         var hits = root.GetProperty(SessionHitsProperty);
         var rows = hits.GetProperty(SessionHitsProperty);
-        if (hits.GetProperty(OpenSearchNames.Total).GetProperty(OpenSearchNames.AggregationValue).GetInt32() != SessionExpectedRows || rows.GetArrayLength() != SessionExpectedRows)
+        if (hits.GetProperty(OpenSearchNames.Total).GetProperty(OpenSearchNames.AggregationValue).GetInt32() != 1 || rows.GetArrayLength() != 1)
         {
             throw new ComparisonFailureException(SessionCardinalityMismatch);
         }
-        BenchmarkSessionQueryContract.Require(OpenSearchDocument.Read(rows[SessionFirstRow].GetProperty(OpenSearchNames.Source)), expected);
+        BenchmarkSessionQueryContract.Require(OpenSearchDocument.Read(rows[0].GetProperty(OpenSearchNames.Source)), expected);
     }
 }

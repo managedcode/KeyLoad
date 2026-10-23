@@ -22,7 +22,6 @@ internal sealed class McpExecutionOptions
     private const int MaximumAgentGuideBytesCeiling = 8_192;
     private const int MaximumTransportMethodCharactersCeiling = 64;
     private const int MaximumTransportNameCharactersCeiling = 256;
-    private const int MinimumPositiveBudget = 1;
     private const int ReplyWrapperDepth = 3;
     private const int MaximumDepthCeiling = 64;
     private const int MaximumReplyDepthCeiling = 61;
@@ -111,5 +110,5 @@ internal sealed class McpExecutionOptions
         }
     }
 
-    private static bool Bounded(int value, int maximum) => value >= MinimumPositiveBudget && value <= maximum;
+    private static bool Bounded(int value, int maximum) => value >= 1 && value <= maximum;
 }

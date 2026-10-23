@@ -7,12 +7,11 @@ namespace KeyLoad.UnitTests.Features.OrleansExecution;
 /// <summary>Borrows the shared production Orleans cluster and its original execution options.</summary>
 internal sealed class CommandObservedPolicyRuntime : IAsyncDisposable
 {
-    private const int SourceIndex = 0;
     private readonly RequestCqrsHostedCluster hosts;
     private readonly ConnectionOperationObservation observation;
     private readonly Lock lifecycle = new();
     private Task? disposal;
-    internal RequestCqrsHostedRuntimeFixture Source => hosts.Nodes[SourceIndex];
+    internal RequestCqrsHostedRuntimeFixture Source => hosts.Nodes[0];
     internal CommandObservedPolicyDatabase Database
     {
         get;

@@ -8,7 +8,6 @@ namespace KeyLoad.UnitTests.Features.OrleansExecution;
 
 internal static class ConnectionProducerCleanupFlow
 {
-    private const int EmptyOrder = 0;
     private const int ExpectedFailures = 3;
     private static readonly TimeSpan Bound = TimeSpan.FromSeconds(10);
 
@@ -20,9 +19,9 @@ internal static class ConnectionProducerCleanupFlow
         var notificationFailure = new IOException("execution-awaited-notification-cleanup");
         var arrived = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var release = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-        var producerOrder = EmptyOrder;
-        var notificationOrder = EmptyOrder;
-        var order = EmptyOrder;
+        var producerOrder = 0;
+        var notificationOrder = 0;
+        var order = 0;
         using var deadline = new CancellationTokenSource(Bound, TimeProvider.System);
         using var token = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token,
             TestContext.Current!.Execution.CancellationToken);
@@ -39,7 +38,7 @@ internal static class ConnectionProducerCleanupFlow
         }
         async ValueTask NotifyAsync()
         {
-            await Assert.That(Volatile.Read(ref producerOrder)).IsGreaterThan(EmptyOrder);
+            await Assert.That(Volatile.Read(ref producerOrder)).IsGreaterThan(0);
             notificationOrder = Interlocked.Increment(ref order);
             arrived.SetResult();
             await release.Task;

@@ -5,7 +5,6 @@ namespace KeyLoad.RecoveryTests.Features.Search;
 
 internal static class AnnCrashReplay
 {
-    private const int FirstPage = 0;
     internal static async Task<(AnnMaintenanceCapabilityResult Result, ProjectionBatchResult Receipt)> FinishAsync(
         DatabaseEngine database, AnnCrashRuntime runtime, AnnCrashCommandOwner commands, AnnMaintenanceRequest request,
         AnnMaintenanceCapabilityResult began)
@@ -21,7 +20,7 @@ internal static class AnnCrashReplay
         }
         var upper = began.Source!.ThroughSequence;
         var finished = false;
-        for (var number = FirstPage; number < AnnCrashContract.MaximumPages; number++)
+        for (var number = 0; number < AnnCrashContract.MaximumPages; number++)
         {
             var page = AnnCrashOperations.Read(database, request, upper);
             if (page.ThroughSequence == page.Consumer.Checkpoint)

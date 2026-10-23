@@ -16,8 +16,6 @@ public sealed record MessagingExecutionOptions
     private const int MaximumQueueScanPageSize = 100_000;
     private const int DefaultMaximumDeliveryItems = 100;
     private const int MaximumReceiveLanesCeiling = 8;
-    private const int MinimumWorkCount = 1;
-    private const int MinimumRetryExponent = 0;
     private const int MaximumSafeRetryExponent = 20;
 
     /// <summary>Gets the maximum events in one authorized topic publication.</summary>
@@ -38,13 +36,13 @@ public sealed record MessagingExecutionOptions
     public int MaximumReceiveEvents { get; init; } = DefaultMaximumDeliveryItems;
 
     /// <summary>Checks independent work budgets and the existing retry arithmetic safety ceiling.</summary>
-    public bool IsValid() => MaximumTopicEvents >= MinimumWorkCount
-        && MaximumOccurrenceCatchUp >= MinimumWorkCount
-        && MaximumRetryExponent >= MinimumRetryExponent && MaximumRetryExponent <= MaximumSafeRetryExponent
-        && QueueScanPageSize >= MinimumWorkCount && QueueScanPageSize <= MaximumQueueScanPageSize
-        && MaximumReceiveMessages is >= MinimumWorkCount and <= DefaultMaximumDeliveryItems
-        && MaximumReceiveEvents is >= MinimumWorkCount and <= DefaultMaximumDeliveryItems
-        && MaximumReceiveLanes is >= MinimumWorkCount and <= MaximumReceiveLanesCeiling;
+    public bool IsValid() => MaximumTopicEvents >= 1
+        && MaximumOccurrenceCatchUp >= 1
+        && MaximumRetryExponent >= 0 && MaximumRetryExponent <= MaximumSafeRetryExponent
+        && QueueScanPageSize >= 1 && QueueScanPageSize <= MaximumQueueScanPageSize
+        && MaximumReceiveMessages is >= 1 and <= DefaultMaximumDeliveryItems
+        && MaximumReceiveEvents is >= 1 and <= DefaultMaximumDeliveryItems
+        && MaximumReceiveLanes is >= 1 and <= MaximumReceiveLanesCeiling;
 
     /// <summary>Rejects invalid settings before database recovery or command admission.</summary>
     public void Validate()

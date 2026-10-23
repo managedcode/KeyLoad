@@ -8,7 +8,6 @@ internal static class ChunkMultiblockBoundaryAggregates
     private const double HealthyMaximum = 8;
     private const double InitialAverage = 2;
     private const double Minimum = -0d;
-    private const int OneWindow = 1;
 
     internal static async Task RequireAsync(ChunkSelectedIntegrityFixture fixture, bool healthy, SampleRecord[] expected)
     {
@@ -24,7 +23,7 @@ internal static class ChunkMultiblockBoundaryAggregates
         var windows = TimeSeriesReadOperations.AggregateSampleWindows(fixture.Owner, SampleChunkCanonicalFixture.Principal,
             new(fixture.Partition, SampleChunkCanonicalFixture.Set, SampleChunkCanonicalFixture.Series,
                 SampleChunkCanonicalFixture.Start, SampleChunkCanonicalFixture.Until, TimeSpan.FromHours(1)));
-        await Assert.That(windows.Windows.Length).IsEqualTo(OneWindow);
+        await Assert.That(windows.Windows.Length).IsEqualTo(1);
         await Assert.That(windows.Windows[0]).IsEqualTo(new SampleAggregateWindow(
             SampleChunkCanonicalFixture.Start, SampleChunkCanonicalFixture.Until, aggregate));
         var unrelated = fixture.Owner.ReadSamples(SampleChunkCanonicalFixture.Principal, fixture.Partition,

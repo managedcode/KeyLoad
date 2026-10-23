@@ -10,8 +10,6 @@ internal static class ProjectProcessChild
     private const string ProcessSelectionExecutable = "/usr/bin/pgrep";
     private const string ParentSelectionArgument = "-P";
     private const string UnsupportedOperatingSystem = "Execution project process ownership requires a supported operating system.";
-    private const int MissingProcessId = 0;
-    private const int RequiredMatches = 1;
 
     internal static async Task<int> ReadAsync(int launchProcessId, string executable,
         IOptions<TestExecutionOptions> options, CancellationToken token)
@@ -36,7 +34,7 @@ internal static class ProjectProcessChild
                 matches.Add(child);
             }
         }
-        if (matches.Count != RequiredMatches)
+        if (matches.Count != 1)
         {
             throw new InvalidOperationException(ProcessFaultCommandProtocol.Refused);
         }
@@ -57,7 +55,7 @@ internal static class ProjectProcessChild
             .ConfigureAwait(false);
         var children = output.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries)
             .Select(value => int.Parse(value, NumberStyles.None, CultureInfo.InvariantCulture)).ToArray();
-        if (children.Any(child => child <= MissingProcessId) || children.Distinct().Count() != children.Length)
+        if (children.Any(child => child <= 0) || children.Distinct().Count() != children.Length)
         {
             throw new InvalidOperationException(ProcessFaultCommandProtocol.Refused);
         }

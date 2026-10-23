@@ -5,8 +5,6 @@ namespace KeyLoad.Storage.ZoneTree.IO;
 
 internal static class OfflineRegularFile
 {
-    private const int FirstValidDescriptor = 0;
-    private const int NoBufferBytes = 0;
     private const char NullPathCharacter = '\0';
     private const uint RegularType = 0x8000;
     private const int MaximumBufferBytes = 65536;
@@ -35,7 +33,7 @@ internal static class OfflineRegularFile
     internal static FileStream OpenReadOnlyObservation(string path, int bufferSize)
     {
         ValidatePath(path);
-        if (bufferSize is <= NoBufferBytes or > MaximumBufferBytes)
+        if (bufferSize is <= 0 or > MaximumBufferBytes)
         {
             throw new ArgumentOutOfRangeException(nameof(bufferSize));
         }
@@ -125,7 +123,7 @@ internal static class OfflineRegularFile
         {
             throw OfflineErrors.Unsupported();
         }
-        if (descriptor < FirstValidDescriptor)
+        if (descriptor < 0)
         {
             throw OfflineErrors.FromErrno(Marshal.GetLastPInvokeError(), isMac);
         }
@@ -177,7 +175,7 @@ internal static class OfflineRegularFile
         ValidatePath(path);
         if (access is not (FileAccess.Read or FileAccess.ReadWrite)
             || share is not (FileShare.Read or FileShare.None)
-            || bufferSize is <= NoBufferBytes or > MaximumBufferBytes)
+            || bufferSize is <= 0 or > MaximumBufferBytes)
         {
             throw new ArgumentOutOfRangeException(nameof(access));
         }

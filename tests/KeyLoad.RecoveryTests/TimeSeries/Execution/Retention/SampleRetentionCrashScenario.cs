@@ -13,20 +13,14 @@ internal static class SampleRetentionCrashScenario
 
     private const int CorpusStartYear = 2026;
     private const int CorpusStartMonth = 10;
-    private const int CorpusStartDay = 1;
-    private const int CorpusStartHour = 0;
-    private const int CorpusStartMinute = 0;
-    private const int CorpusStartSecond = 0;
     private const int RetentionCutoffMinutes = 3;
     private const string ExpiryCommandIdText = "f526509a-5b21-4e9d-8e3e-8751bbd1ea4a";
     private const string EventIdPrefix = "retention-event-";
     private const int FirstSampleIndex = 0;
-    private const int FirstSampleValue = 1;
     private const int SecondSampleValue = 2;
     private const int ThirdSampleValue = 4;
     private const string BinaryFileExtension = ".bin";
     private const string SampleNamespace = "sample";
-    private const int FirstSampleSequence = 1;
     private const string SampleIdentityNamespace = "sample-id";
     private const string SampleSequenceNamespace = "sample-sequence";
 
@@ -48,12 +42,12 @@ internal static class SampleRetentionCrashScenario
     } = new(CrashFixtureValues.Tenant,
         CrashFixtureValues.Database, CrashFixtureValues.Orders, CrashFixtureValues.Partition);
 
-    internal static DateTimeOffset Start { get; } = new(CorpusStartYear, CorpusStartMonth, CorpusStartDay, CorpusStartHour, CorpusStartMinute, CorpusStartSecond, TimeSpan.Zero);
+    internal static DateTimeOffset Start { get; } = new(CorpusStartYear, CorpusStartMonth, 1, 0, 0, 0, TimeSpan.Zero);
     internal static DateTimeOffset Cutoff { get; } = Start.AddMinutes(RetentionCutoffMinutes);
     internal static Guid ExpiryCommandId { get; } = Guid.Parse(ExpiryCommandIdText);
 
     internal static string EventId(int index) => EventIdPrefix + index.ToString(System.Globalization.CultureInfo.InvariantCulture);
-    internal static double Value(int index) => index switch { FirstSampleIndex => FirstSampleValue, FirstSampleValue => SecondSampleValue, SecondSampleValue => ThirdSampleValue, FourthSampleIndex => FourthSampleValue, _ => throw new ArgumentOutOfRangeException(nameof(index)) };
+    internal static double Value(int index) => index switch { FirstSampleIndex => 1, 1 => SecondSampleValue, SecondSampleValue => ThirdSampleValue, FourthSampleIndex => FourthSampleValue, _ => throw new ArgumentOutOfRangeException(nameof(index)) };
     internal static DateTimeOffset Timestamp(int index) => Start.AddMinutes(index);
     internal static string SampleFile(int index) => SampleFilePrefix + index.ToString(System.Globalization.CultureInfo.InvariantCulture) + BinaryFileExtension;
     internal static string IdentityFile(int index) => IdentityFilePrefix + index.ToString(System.Globalization.CultureInfo.InvariantCulture) + BinaryFileExtension;
@@ -122,7 +116,7 @@ internal static class SampleRetentionCrashScenario
     }
 
     internal static byte[] SampleKey(int index) => KeySpace.Partition(SampleNamespace, Partition, SeriesSet,
-        SeriesId, Timestamp(index), (long)index + FirstSampleSequence);
+        SeriesId, Timestamp(index), (long)index + 1);
 
     internal static byte[] IdentityKey(int index) => KeySpace.Partition(SampleIdentityNamespace, Partition, SeriesSet,
         SeriesId, EventId(index));

@@ -6,7 +6,6 @@ namespace KeyLoad.RecoveryTests.Features.Search;
 
 internal static class TextOnlineCrashFlow
 {
-    private const int InitialReplayPage = 0;
     internal static async Task<OnlineTextIndexMaintenanceResult> RunAsync(TextOnlineCrashRuntime runtime,
         OnlineTextIndexMaintenanceRequest request, CancellationToken token,
         Func<OnlineTextIndexMaintenanceResult, Task>? afterOriginalCommit = null)
@@ -43,7 +42,7 @@ internal static class TextOnlineCrashFlow
         OnlineTextIndexMaintenanceRequest request, OnlineTextCapabilityResult state, DateTimeOffset expiry,
         CancellationToken token)
     {
-        for (var number = InitialReplayPage; number < runtime.Canonical.Options.Core.TextMaintenance.Value.MaximumReplayPages; number++)
+        for (var number = 0; number < runtime.Canonical.Options.Core.TextMaintenance.Value.MaximumReplayPages; number++)
         {
             var page = runtime.Canonical.Database.ReadProjectionBatch(CrashFixtureValues.Principal,
                 new(request.Consumer, ThroughSequence: state.CurrentCut!.ThroughSequence));

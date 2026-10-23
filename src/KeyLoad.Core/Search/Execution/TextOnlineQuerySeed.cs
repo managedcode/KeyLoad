@@ -5,8 +5,6 @@ namespace KeyLoad.Core.Features.Search;
 
 internal static partial class TextSeedCollector
 {
-    private const int EmptyDocumentCapacity = 0;
-    private const int FirstDocumentCapacity = 1;
     private const int DocumentCapacityGrowthFactor = 2;
     internal static TextSeedCapture CaptureOnlineQueryView(DatabaseEngine database, IKeyValueView raw,
         string principalId, TextSeedPin pin, ReadExecutionBudget budget)
@@ -19,7 +17,7 @@ internal static partial class TextSeedCollector
                 budget.ChargeBytes(value.Length);
                 if (documents.Count == documents.Capacity)
                 {
-                    var capacity = documents.Capacity == EmptyDocumentCapacity ? FirstDocumentCapacity
+                    var capacity = documents.Capacity == 0 ? 1
                         : (int)Math.Min(database.Limits.MaxScanRecords, checked((long)documents.Capacity * DocumentCapacityGrowthFactor));
                     if (capacity <= documents.Count)
                     {

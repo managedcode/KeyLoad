@@ -8,7 +8,6 @@ namespace KeyLoad.Server.Features.Search;
 internal static class AnnLoadedSources
 {
     private const int MinimumBytes = 1024;
-    private const int EmptyExaminedRecords = 0;
 
     internal static AnnLoadedSource Load(string root, AnnPointer pointer,
         AnnMaintenanceRequest request, AnnSeed current, IOptions<PackedAnnOptions> policy,
@@ -55,7 +54,7 @@ internal static class AnnLoadedSources
         var cut = new AnnSeedCut(source.NodeId, source.Incarnation, source.StoreFormatVersion,
             source.KeyCodecVersion, source.ReadGeneration, source.Position, source.AppliedPosition,
             source.ThroughSequence, source.OutboxFirstAvailable);
-        var seed = new AnnSeed(scope, cut, snapshot.Records, digest, owned, peak, EmptyExaminedRecords, work.Units)
+        var seed = new AnnSeed(scope, cut, snapshot.Records, digest, owned, peak, 0, work.Units)
         {
             DependencySha256 = source.DependencySha256,
             ProjectionCheckpoint = source.ThroughSequence

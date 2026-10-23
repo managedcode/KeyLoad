@@ -14,7 +14,6 @@ internal sealed class ServerExecutionOptions
     private const int MaximumDeadlineMinutes = 2;
     private const int MaximumHttpBodyBytes = 33_554_432;
     private const int MaximumSupportedJsonDepth = 64;
-    private const int MinimumPositiveCount = 1;
     private const int DefaultHttp2Port = 8081;
     private const int MaximumTcpPort = 65535;
     private static readonly TimeSpan MaximumDeadline = TimeSpan.FromMinutes(MaximumDeadlineMinutes);
@@ -39,9 +38,9 @@ internal sealed class ServerExecutionOptions
     /// <summary>Checks execution durations and public parser bounds before admitting work.</summary>
     /// <returns>Whether configured values preserve the accepted server limits.</returns>
     public bool IsValid() => IsBounded(ReadyTimeout) && IsBounded(ShutdownTimeout)
-        && MaximumBodyBytes is >= MinimumPositiveCount and <= MaximumHttpBodyBytes
-        && MaximumJsonDepth is >= MinimumPositiveCount and <= MaximumSupportedJsonDepth
-        && Http2Port is >= MinimumPositiveCount and <= MaximumTcpPort;
+        && MaximumBodyBytes is >= 1 and <= MaximumHttpBodyBytes
+        && MaximumJsonDepth is >= 1 and <= MaximumSupportedJsonDepth
+        && Http2Port is >= 1 and <= MaximumTcpPort;
 
     private static bool IsBounded(TimeSpan duration)
         => duration > TimeSpan.Zero && duration <= MaximumDeadline;

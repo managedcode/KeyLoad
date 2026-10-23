@@ -7,7 +7,6 @@ internal static class AnalyticsStoreOptions
 {
     internal const string Site = "keyload-analytics-store";
     internal const string Event = "canonical-event";
-    private const int SingleWorker = 1;
     private const int MinimumSegmentItems = 1_000;
     private const int MinimumDiskSegmentItems = 10_000;
 
@@ -29,7 +28,7 @@ internal static class AnalyticsStoreOptions
         options.Rollups.Granularities = Granularity.None;
         options.Rollups.Definitions.Clear();
         options.Sessions.Enabled = false;
-        options.Sessions.MaxCachedSessions = SingleWorker;
+        options.Sessions.MaxCachedSessions = 1;
         options.Privacy.VisitorIdentification = VisitorIdentification.None;
         options.Privacy.GeoPrecision = GeoPrecision.None;
         options.Privacy.CollectUserAgentDetails = false;
@@ -42,14 +41,14 @@ internal static class AnalyticsStoreOptions
         options.Web.GeoLocator = null;
         options.Web.UserAgentParser = null;
         options.Web.BotDetectors.Clear();
-        options.Ingestion.WorkerCount = SingleWorker;
+        options.Ingestion.WorkerCount = 1;
         options.Ingestion.QueueCapacity = limits.MaxScanRecords;
         options.Ingestion.MaxBufferedRollupRows = limits.MaxScanRecords;
         options.Ingestion.QueueFullBehavior = QueueFullBehavior.Drop;
         options.Retention.RawEvents = null;
         options.Queries.Timeout = TimeSpan.FromSeconds(limits.QueryDeadlineSeconds);
-        options.Queries.MaxDegreeOfParallelism = SingleWorker;
-        options.Queries.MaxGroupBy = Math.Max(SingleWorker, dimensions.Count);
+        options.Queries.MaxDegreeOfParallelism = 1;
+        options.Queries.MaxGroupBy = Math.Max(1, dimensions.Count);
         options.Queries.MaxGroups = limits.MaxResults;
         options.Queries.MaxTimeBuckets = limits.MaxResults;
         options.Queries.MaxFilledRows = limits.MaxResults;

@@ -7,8 +7,6 @@ namespace KeyLoad.Clustering;
 
 internal static class GrainReplyFactory
 {
-    private const int RejectedDetailEmptyCount = 0;
-
     private const string Cancelled = "The database request was cancelled.";
     private const string Unavailable = "The database request could not complete. Retry the same command ID for writes.";
     private const string InterruptedWrite = "The write outcome is unknown. Retry the same command ID.";
@@ -116,6 +114,6 @@ internal static class GrainReplyFactory
     private static GrainOperationReply Rejected(ErrorCode code, string? detail, IOptions<GrainRoutingOptions> options) => new()
     {
         Error = Enum.IsDefined(code) ? code : ErrorCode.OwnershipLost,
-        SafeDetail = detail is { Length: > RejectedDetailEmptyCount } && detail.Length <= options.Value.MaximumDetailCharacters ? detail : Unavailable
+        SafeDetail = detail is { Length: > 0 } && detail.Length <= options.Value.MaximumDetailCharacters ? detail : Unavailable
     };
 }

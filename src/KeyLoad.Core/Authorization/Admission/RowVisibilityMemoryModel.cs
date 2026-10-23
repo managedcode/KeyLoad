@@ -5,9 +5,6 @@ namespace KeyLoad.Core.Features.Authorization;
 internal static class RowVisibilityMemoryModel
 {
     private const int ObjectHeaderPointers = 2;
-    private const int StringLengthFields = 1;
-    private const int StringTerminatorCharacters = 1;
-    private const int AlignmentTrailingByte = 1;
     internal const int SingleEntry = 1;
     internal const int MetadataOnly = 0;
 
@@ -27,10 +24,10 @@ internal static class RowVisibilityMemoryModel
     private static long ObjectBytes<T>() where T : struct
         => Align(ObjectHeaderPointers * IntPtr.Size + Unsafe.SizeOf<T>());
     private static long Align(long bytes)
-        => (bytes + IntPtr.Size - AlignmentTrailingByte) / IntPtr.Size * IntPtr.Size;
+        => (bytes + IntPtr.Size - 1) / IntPtr.Size * IntPtr.Size;
     private static long StringBytes(string value)
-        => Align(ObjectHeaderPointers * IntPtr.Size + StringLengthFields * sizeof(int)
-            + ((long)value.Length + StringTerminatorCharacters) * sizeof(char));
+        => Align(ObjectHeaderPointers * IntPtr.Size + 1 * sizeof(int)
+            + ((long)value.Length + 1) * sizeof(char));
     private readonly record struct OwnerLayout(object Gate, object Budget, object Charge, object Head, object ReleaseFailure, bool Closed, bool Released);
     private readonly record struct LeaseLayout(object Owner, object Entry, object Charge, object ReleaseFailure, bool ChargeReleased, bool PinReleased);
     private readonly record struct EntryLayout(RowVisibilityScope Scope, object Budget, object Charge,

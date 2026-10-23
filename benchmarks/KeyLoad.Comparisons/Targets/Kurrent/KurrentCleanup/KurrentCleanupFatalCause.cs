@@ -4,9 +4,6 @@ namespace KeyLoad.Comparisons.Targets;
 
 internal static class KurrentCleanupFatalCause
 {
-    private const int FirstAggregateIndex = 0;
-    private const int PreviousIndexOffset = 1;
-
     internal static ExceptionDispatchInfo? Find(Exception error)
     {
         ArgumentNullException.ThrowIfNull(error);
@@ -25,8 +22,8 @@ internal static class KurrentCleanupFatalCause
             }
             if (current is AggregateException aggregate)
             {
-                for (var index = aggregate.InnerExceptions.Count - PreviousIndexOffset;
-                    index >= FirstAggregateIndex; index--)
+                for (var index = aggregate.InnerExceptions.Count - 1;
+                    index >= 0; index--)
                 {
                     pending.Push(aggregate.InnerExceptions[index]);
                 }

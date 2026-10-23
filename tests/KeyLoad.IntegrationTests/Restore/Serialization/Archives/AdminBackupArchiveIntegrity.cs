@@ -7,7 +7,6 @@ namespace KeyLoad.IntegrationTests.Features.BackupRestore.Helpers;
 internal static class AdminBackupArchiveIntegrity
 {
     private const string BackupManifestName = "backup.json";
-    private const int EmptyManifestBytes = 0;
     private const string InvalidManifestLength = "The fixture backup manifest exceeds its execution file bound.";
     private const string ChangedManifestLength = "The fixture backup manifest changed while its digest was captured.";
 
@@ -23,7 +22,7 @@ internal static class AdminBackupArchiveIntegrity
             Options = FileOptions.Asynchronous | FileOptions.SequentialScan
         });
         var length = manifest.Length;
-        if (length <= EmptyManifestBytes || length > policy.MaximumBackupManifestBytes)
+        if (length <= 0 || length > policy.MaximumBackupManifestBytes)
         {
             throw new InvalidDataException(InvalidManifestLength);
         }

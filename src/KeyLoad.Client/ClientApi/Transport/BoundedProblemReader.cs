@@ -6,10 +6,6 @@ namespace KeyLoad.Client.Features.ClientApi;
 
 internal static class BoundedProblemReader
 {
-    private const int OverflowProbeBytes = 1;
-    private const int EmptyBodyLength = 0;
-    private const int BodyStart = 0;
-
     public static async Task<Problem?> ReadAsync(HttpContent content, JsonSerializerOptions options,
         int maximumProblemBodyBytes, CancellationToken cancellationToken)
     {
@@ -18,16 +14,16 @@ internal static class BoundedProblemReader
             return null;
         }
 
-        var buffer = ArrayPool<byte>.Shared.Rent(maximumProblemBodyBytes + OverflowProbeBytes);
+        var buffer = ArrayPool<byte>.Shared.Rent(maximumProblemBodyBytes + 1);
         try
         {
             await using var body = await content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
-            var count = EmptyBodyLength;
+            var count = 0;
             while (count <= maximumProblemBodyBytes)
             {
-                var read = await body.ReadAsync(buffer.AsMemory(count, maximumProblemBodyBytes + OverflowProbeBytes - count), cancellationToken)
+                var read = await body.ReadAsync(buffer.AsMemory(count, maximumProblemBodyBytes + 1 - count), cancellationToken)
                     .ConfigureAwait(false);
-                if (read == EmptyBodyLength)
+                if (read == 0)
                 {
                     break;
                 }
@@ -42,7 +38,7 @@ internal static class BoundedProblemReader
 
             try
             {
-                return JsonSerializer.Deserialize<Problem>(buffer.AsSpan(BodyStart, count), options);
+                return JsonSerializer.Deserialize<Problem>(buffer.AsSpan(0, count), options);
             }
             catch (JsonException)
             {

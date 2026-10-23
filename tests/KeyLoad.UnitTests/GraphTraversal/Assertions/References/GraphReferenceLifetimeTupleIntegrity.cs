@@ -124,13 +124,13 @@ internal static class GraphReferenceLifetimeTupleIntegrity
         }).ToArray();
 
     private static async Task UnchangedAsync(DropRuntimeProfile profile, OwnerCut[] expected,
-        int sourceFixtureCommits = NoFixtureCommits)
+        int sourceFixtureCommits = 0)
     {
         await Assert.That(profile.Hosts.Nodes.Length).IsEqualTo(DropRuntimeProtocol.RuntimeNodes);
         await Assert.That(expected.Length).IsEqualTo(DropRuntimeProtocol.RuntimeNodes);
         foreach (var cut in expected)
         {
-            var delta = ReferenceEquals(cut.Owner, profile.Source) ? sourceFixtureCommits : NoFixtureCommits;
+            var delta = ReferenceEquals(cut.Owner, profile.Source) ? sourceFixtureCommits : 0;
             await Assert.That(cut.Owner.Store.Identity.NodeId).IsEqualTo(cut.NodeId);
             await Assert.That(cut.Owner.Store.Identity.Incarnation).IsEqualTo(cut.Incarnation);
             await Assert.That(cut.Owner.Store.Position).IsEqualTo(cut.Position + delta);
@@ -139,7 +139,6 @@ internal static class GraphReferenceLifetimeTupleIntegrity
         }
     }
 
-    private const int NoFixtureCommits = 0;
     private sealed record OwnerCut(RequestCqrsHostedDatabase Owner, Guid NodeId, Guid Incarnation,
         long Position, long Applied, string[] Image);
 

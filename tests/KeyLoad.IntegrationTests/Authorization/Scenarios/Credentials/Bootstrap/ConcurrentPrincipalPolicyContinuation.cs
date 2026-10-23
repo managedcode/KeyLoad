@@ -7,7 +7,6 @@ namespace KeyLoad.IntegrationTests.Features.Authorization;
 
 internal static class ConcurrentPrincipalPolicyContinuation
 {
-    private const int RestrictedAdvance = 1;
     private const int RevokedAdvance = 2;
     private const int RepairedAdvance = 3;
 
@@ -19,7 +18,7 @@ internal static class ConcurrentPrincipalPolicyContinuation
         await PersistAsync(fixture, original with
         {
             Grants = [],
-            PolicyEpoch = original.PolicyEpoch + RestrictedAdvance
+            PolicyEpoch = original.PolicyEpoch + 1
         }, token);
         var restricted = await ConcurrentPrincipalAuthorityAssertions.CaptureAsync(fixture, first, second, token);
         await ConcurrentAsync(DeniedAsync(firstClient, first, firstIdentity, token),

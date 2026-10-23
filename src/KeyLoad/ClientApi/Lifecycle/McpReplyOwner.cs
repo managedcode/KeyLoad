@@ -8,8 +8,6 @@ namespace KeyLoad.Server;
 /// <summary>Owns one complete reply wrapper and its borrowed execution structured-content document until response draining.</summary>
 internal sealed class McpReplyOwner : IDisposable
 {
-    private const int ThrowIfDisposedEmptyRead = 0;
-
     private readonly byte[] bytes;
     private readonly JsonDocument document;
     private readonly bool isError;
@@ -102,5 +100,5 @@ internal sealed class McpReplyOwner : IDisposable
         }
     }
 
-    private void ThrowIfDisposed() => ObjectDisposedException.ThrowIf(Volatile.Read(ref disposed) != ThrowIfDisposedEmptyRead, this);
+    private void ThrowIfDisposed() => ObjectDisposedException.ThrowIf(Volatile.Read(ref disposed) != 0, this);
 }

@@ -4,7 +4,6 @@ public static class CommandExecutionIdentityDatabaseCommandSnapshotBuffer
 {
     internal sealed class CommandSnapshotBuffer(int maximumBytes) : MemoryStream
     {
-        private const int SingleByte = 1;
         public override void Write(byte[] buffer, int offset, int count)
         {
             ValidateBufferArguments(buffer, offset, count);
@@ -20,7 +19,7 @@ public static class CommandExecutionIdentityDatabaseCommandSnapshotBuffer
 
         public override void WriteByte(byte value)
         {
-            RequireLength(Position + SingleByte);
+            RequireLength(Position + 1);
             base.WriteByte(value);
         }
 

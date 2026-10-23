@@ -7,7 +7,6 @@ internal static class ScaledRawStorageSettings
     private const int SmallPayloadBytes = 32;
     private const int LargePayloadBytes = 1024;
     private const int KeyBytes = 16;
-    private const int ReservedMissKeyCount = 1;
     private const int OrderBytes = sizeof(int);
     private const int ScratchCopies = 3;
     private const string InvalidCountMessage = "The scaled execution fixture count is unsupported.";
@@ -53,7 +52,7 @@ internal static class ScaledRawStorageSettings
 
     internal static long CapacityBound(int recordCount, int payloadBytes, long requiredHeadroomBytes)
     {
-        var keysAndOrder = checked(((long)recordCount + ReservedMissKeyCount) * KeyBytes
+        var keysAndOrder = checked(((long)recordCount + 1) * KeyBytes
             + ((long)recordCount * OrderBytes));
         var values = checked((long)recordCount * payloadBytes);
         var scratch = checked((long)payloadBytes * ScratchCopies);

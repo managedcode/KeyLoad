@@ -5,8 +5,6 @@ namespace KeyLoad.Comparisons.Targets;
 public sealed partial class HelixDbTarget : IBenchmarkSessionQueries
 {
     private const int SessionCandidateLimit = 2;
-    private const int SessionExpectedRows = 1;
-    private const int SessionFirstRow = 0;
     private const string SessionCardinalityMismatch = "SessionQueryCardinalityMismatch";
 
     private bool ownsSessionNumberEqualityIndex;
@@ -32,11 +30,11 @@ public sealed partial class HelixDbTarget : IBenchmarkSessionQueries
         using var response = await HelixDbProtocol.QueryAsync(http, HelixDbProtocol.Batch(query, false), false, Policy,
             timeProvider, cancellationToken).ConfigureAwait(false);
         var rows = HelixDbProtocol.Rows(response);
-        if (rows.GetArrayLength() != SessionExpectedRows)
+        if (rows.GetArrayLength() != 1)
         {
             throw new ComparisonFailureException(SessionCardinalityMismatch);
         }
-        BenchmarkSessionQueryContract.Require(new(rows[SessionFirstRow].GetProperty(HelixDbTokens.TokenId).GetString()!,
-            rows[SessionFirstRow].GetProperty(HelixDbTokens.TokenPayload).GetString()!), expected);
+        BenchmarkSessionQueryContract.Require(new(rows[0].GetProperty(HelixDbTokens.TokenId).GetString()!,
+            rows[0].GetProperty(HelixDbTokens.TokenPayload).GetString()!), expected);
     }
 }

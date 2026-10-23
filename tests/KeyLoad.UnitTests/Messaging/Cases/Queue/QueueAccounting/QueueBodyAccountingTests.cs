@@ -11,7 +11,6 @@ internal sealed class QueueBodyAccountingTests
     private const string LargePayloadPrefix = "{\"text\":\"";
     private const string LargePayloadSuffix = "\"}";
     private const int UnicodeCharacters = 1_000;
-    private const int SingleReadyRecord = 1;
     private const string MalformedStoredJson = "{";
     private const string EmptyPayloadJson = "{}";
     private const string LiteralHeaders = "{ \"z\": \"Київ\", \"a\": true }";
@@ -126,7 +125,7 @@ internal sealed class QueueBodyAccountingTests
         var key = BodyKey(db, MessageId);
         var original = db.Store.Read(view => view.ReadOwnedValue(key)!);
         var lane = new QueueLaneRef(db.Partition, QueueName);
-        var readyKey = db.Store.Read(view => view.Scan(ReadyPrefix(db), SingleReadyRecord).Records.Single().Key.ToArray());
+        var readyKey = db.Store.Read(view => view.Scan(ReadyPrefix(db), 1).Records.Single().Key.ToArray());
         db.Store.Commit((tx, _) => { tx.Delete(key); return true; });
         await QueueBodyFailureAssertions.RejectWithoutEffects(db, lane, Guid.NewGuid(), key, readyKey, null);
         var malformed = runtimeTruncation ? original[..^1] : Encoding.UTF8.GetBytes(MalformedStoredJson);

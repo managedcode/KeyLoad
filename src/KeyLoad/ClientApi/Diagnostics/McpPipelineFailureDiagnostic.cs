@@ -6,7 +6,6 @@ namespace KeyLoad.Server;
 internal static class McpPipelineFailureDiagnostic
 {
     private const int FailureEventId = 5;
-    private const int OriginalFailureCount = 1;
     private const string FailureMessage = "MCP execution pipeline rejected at {Stage} with {Code} for {MethodCategory}.";
     private static readonly Action<ILogger, McpPipelineFailureStage, ErrorCode, McpPipelineMethodCategory, Exception?> LogRejected =
         LoggerMessage.Define<McpPipelineFailureStage, ErrorCode, McpPipelineMethodCategory>(LogLevel.Warning,
@@ -24,7 +23,7 @@ internal static class McpPipelineFailureDiagnostic
         ServerFailureObserver.Observe(() => LogRejected(
             context.RequestServices.GetRequiredService<ILogger<McpSessionPipeline>>(), stage, original.Code,
             Category(message), null), failures);
-        if (failures.Count > OriginalFailureCount)
+        if (failures.Count > 1)
         {
             ServerFailureObserver.ThrowIfAny(failures);
         }
@@ -49,7 +48,7 @@ internal static class McpPipelineFailureDiagnostic
             context.RequestServices.GetRequiredService<ILogger<McpSessionPipeline>>(), stage,
             original is KeyLoadException canonical ? canonical.Code : null, ExceptionCategory(original),
             Category(message), null), failures);
-        if (failures.Count > OriginalFailureCount)
+        if (failures.Count > 1)
         {
             ServerFailureObserver.ThrowIfAny(failures);
         }

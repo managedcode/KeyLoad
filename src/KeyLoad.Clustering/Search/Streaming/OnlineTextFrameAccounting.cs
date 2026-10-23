@@ -6,20 +6,17 @@ internal sealed class OnlineTextFrameAccounting(IOptions<GrainRoutingOptions> op
 {
     private readonly int maximumFrames = options.Value.MaximumTotalFrames;
     // The connected grain awaited its actual StartedAsync before dispatching this parent body.
-    private const int ParentStartedFrameCount = 1;
-    private const int ProgressFrameIncrement = 1;
-    private int observed = ParentStartedFrameCount;
-    private const int ParentTerminalReservation = 1;
+    private int observed = 1;
     private const int TaskExchangeMessages = 2;
 
-    internal void AdmitProgress() => Admit(ProgressFrameIncrement);
+    internal void AdmitProgress() => Admit(1);
 
     // Keep the original whole-operation ceiling for the actual Task request/reply pair.
     internal void AdmitChildExchange() => Admit(TaskExchangeMessages);
 
     private void Admit(int count)
     {
-        if (count > maximumFrames - ParentTerminalReservation - observed)
+        if (count > maximumFrames - 1 - observed)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, GrainRoutingProtocol.ReplyBudgetExceeded);
         }

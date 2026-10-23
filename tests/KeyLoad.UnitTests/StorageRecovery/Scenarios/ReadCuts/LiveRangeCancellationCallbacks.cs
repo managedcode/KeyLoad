@@ -6,8 +6,6 @@ namespace KeyLoad.UnitTests.Features.StorageRecovery;
 internal sealed class LiveRangeCancellationCallbacks(CancellationTokenSource selected, bool staged,
     bool reverse, LiveRangeCancellationPhase phase)
 {
-    private const int NoCallbacks = 0;
-    private const int FirstCallback = 1;
     private const int StagedCallback = 2;
     private const string StagedFirst = "staged-first-not-published";
     private const string StagedSecond = "staged-second-not-published";
@@ -32,7 +30,7 @@ internal sealed class LiveRangeCancellationCallbacks(CancellationTokenSource sel
     private void Observe(long bytes)
     {
         observed++;
-        var cancel = phase == LiveRangeCancellationPhase.BaselineObserver && observed == FirstCallback
+        var cancel = phase == LiveRangeCancellationPhase.BaselineObserver && observed == 1
             || phase == LiveRangeCancellationPhase.StagedObserver && observed == StagedCallback;
         if (cancel)
         {
@@ -56,10 +54,10 @@ internal sealed class LiveRangeCancellationCallbacks(CancellationTokenSource sel
     internal async Task RequireCountsAsync()
     {
         var visitorSelected = phase is LiveRangeCancellationPhase.VisitorStop or LiveRangeCancellationPhase.VisitorContinue;
-        var expectedDelivered = visitorSelected ? FirstCallback : NoCallbacks;
-        var expectedObserved = phase == LiveRangeCancellationPhase.Before ? NoCallbacks
-            : phase == LiveRangeCancellationPhase.BaselineObserver ? FirstCallback
-            : staged ? StagedCallback : FirstCallback;
+        var expectedDelivered = visitorSelected ? 1 : 0;
+        var expectedObserved = phase == LiveRangeCancellationPhase.Before ? 0
+            : phase == LiveRangeCancellationPhase.BaselineObserver ? 1
+            : staged ? StagedCallback : 1;
         await Assert.That(delivered).IsEqualTo(expectedDelivered);
         await Assert.That(observed).IsEqualTo(expectedObserved);
     }

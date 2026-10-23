@@ -13,7 +13,6 @@ namespace KeyLoad.Cli.Features.BackupRestore;
 
 internal static class CliBackupRestore
 {
-    private const int SourceArgumentIndex = 1;
     private const int DestinationArgumentIndex = 2;
     private const string MessagesBaseName = "KeyLoad.Cli.Restore.CliBackupRestoreMessages";
     private const string BackupVerifiedMessageKey = "BackupVerified";
@@ -66,7 +65,7 @@ internal static class CliBackupRestore
     private static void CreateBackup(string[] args, IOptions<ZoneTreeStorageExecutionOptions> storageOptions,
         IOptions<ZoneTreePointCacheExecutionOptions> cacheOptions)
     {
-        using (var store = OpenBackupSource(Path.GetFullPath(args[SourceArgumentIndex]), storageOptions, cacheOptions))
+        using (var store = OpenBackupSource(Path.GetFullPath(args[1]), storageOptions, cacheOptions))
         {
             store.CreateBackup(Path.GetFullPath(args[DestinationArgumentIndex]));
         }
@@ -90,13 +89,13 @@ internal static class CliBackupRestore
     private static void Compact(string[] args, IOptions<ZoneTreeStorageExecutionOptions> storageOptions,
         IOptions<ZoneTreePointCacheExecutionOptions> cacheOptions)
     {
-        using var store = new ZoneTreeStore(new(Path.GetFullPath(args[SourceArgumentIndex])), storageOptions, cacheOptions);
+        using var store = new ZoneTreeStore(new(Path.GetFullPath(args[1])), storageOptions, cacheOptions);
         Console.WriteLine(JsonSerializer.Serialize(store.Compact(), JsonDefaults.Options));
     }
 
     private static void Restore(string[] args, IOptions<ZoneTreeStorageExecutionOptions> storageOptions)
     {
-        var backup = Path.GetFullPath(args[SourceArgumentIndex]);
+        var backup = Path.GetFullPath(args[1]);
         var destination = Path.GetFullPath(args[DestinationArgumentIndex]);
         StoreIdentity identity;
         try
@@ -129,17 +128,17 @@ internal static class CliBackupRestore
 
     private static void PackBackup(string[] args, IOptions<CliBackupExecutionOptions> backupOptions)
     {
-        BackupArtifact.Pack(args[SourceArgumentIndex], args[DestinationArgumentIndex], backupOptions.Value.PieceBytes);
+        BackupArtifact.Pack(args[1], args[DestinationArgumentIndex], backupOptions.Value.PieceBytes);
         Console.WriteLine(GetMessage(ArchiveCreatedMessageKey));
     }
 
     private static void InspectArtifact(string[] args) => Console.WriteLine(JsonSerializer.Serialize(
-        BackupArtifact.Inspect(args[SourceArgumentIndex]).Select(item => new { item.Name, item.Bytes, item.Pieces }),
+        BackupArtifact.Inspect(args[1]).Select(item => new { item.Name, item.Bytes, item.Pieces }),
         JsonDefaults.Options));
 
     private static async Task CopyArtifactAsync(string[] args)
     {
-        var copied = await ArtifactTransfer.CopyToFileStorageAsync(args[SourceArgumentIndex], args[DestinationArgumentIndex]);
+        var copied = await ArtifactTransfer.CopyToFileStorageAsync(args[1], args[DestinationArgumentIndex]);
         if (copied.IsFailed)
         {
             throw Errors.Fail(ErrorCode.RecoveryRequired, GetMessage(ArchiveTransferFailedMessageKey));
@@ -150,7 +149,7 @@ internal static class CliBackupRestore
 
     private static void UnpackBackup(string[] args)
     {
-        BackupArtifact.Unpack(args[SourceArgumentIndex], args[DestinationArgumentIndex]);
+        BackupArtifact.Unpack(args[1], args[DestinationArgumentIndex]);
         Console.WriteLine(GetMessage(BackupExtractedMessageKey));
     }
 

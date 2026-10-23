@@ -17,8 +17,6 @@ public sealed record GraphExecutionOptions
     private const int MaximumConformingVertices = 10_000;
     private const int MaximumConformingEdges = 50_000;
     private const int MaximumConformingLabels = 64;
-    private const int MinimumDepth = 0;
-    private const int MinimumWorkCount = 1;
 
     /// <summary>Gets the maximum admitted graph edge depth, including zero-hop work.</summary>
     public int MaximumDepth { get; init; } = DefaultMaximumDepth;
@@ -30,10 +28,10 @@ public sealed record GraphExecutionOptions
     public int MaximumLabels { get; init; } = DefaultMaximumLabels;
 
     /// <summary>Checks the positive work bounds and existing graph conformance ceilings.</summary>
-    public bool IsValid() => MaximumDepth >= MinimumDepth && MaximumDepth <= MaximumConformingDepth
-        && MaximumVertices >= MinimumWorkCount && MaximumVertices <= MaximumConformingVertices
-        && MaximumEdges >= MinimumWorkCount && MaximumEdges <= MaximumConformingEdges
-        && MaximumLabels >= MinimumWorkCount && MaximumLabels <= MaximumConformingLabels;
+    public bool IsValid() => MaximumDepth >= 0 && MaximumDepth <= MaximumConformingDepth
+        && MaximumVertices >= 1 && MaximumVertices <= MaximumConformingVertices
+        && MaximumEdges >= 1 && MaximumEdges <= MaximumConformingEdges
+        && MaximumLabels >= 1 && MaximumLabels <= MaximumConformingLabels;
 
     /// <summary>Rejects invalid settings before database or traversal admission.</summary>
     public void Validate()

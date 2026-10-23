@@ -4,9 +4,6 @@ namespace KeyLoad.RecoveryTests.Features.TimeSeries;
 
 internal static class ChunkMultiblockProcessRows
 {
-    private const int NoBlocks = 0;
-    private const int OneBlock = 1;
-
     internal static async Task RequireAsync(ChunkMultiblockCrashSnapshot actual, bool merge, bool prepared, bool healthy)
     {
         var rows = ChunkMultiblockCrashData.Expected(healthy, prepared, merge);
@@ -22,7 +19,7 @@ internal static class ChunkMultiblockProcessRows
                 : ChunkMultiblockCrashProtocol.PreparedSequence, null, [.. rows], actual.Position);
         await Assert.That(JsonSerializer.Serialize(actual.Window, JsonDefaults.Options)).IsEqualTo(JsonSerializer.Serialize(model, JsonDefaults.Options));
         await Assert.That(JsonSerializer.Serialize(actual.RawRows, JsonDefaults.Options)).IsEqualTo(JsonSerializer.Serialize(rows, JsonDefaults.Options));
-        await Assert.That(actual.EncodedBlocks.Length).IsEqualTo(prepared ? (merge ? OneBlock : NoBlocks) : !healthy && !merge ? OneBlock : ChunkMultiblockCrashProtocol.PublishedBlocks);
+        await Assert.That(actual.EncodedBlocks.Length).IsEqualTo(prepared ? (merge ? 1 : 0) : !healthy && !merge ? 1 : ChunkMultiblockCrashProtocol.PublishedBlocks);
         for (var index = 0; index < rows.Length; index++)
         {
             await Assert.That(actual.RawRows[index].Sample.Timestamp.Ticks).IsEqualTo(rows[index].Sample.Timestamp.Ticks);

@@ -5,8 +5,6 @@ namespace KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
 internal static class ScaleServerCgroupEnvelopeReader
 {
     private const char WhitespaceSeparator = ' ';
-    private const int PeriodFieldIndex = 1;
-    private const int NoLimit = 0;
     private const int CpuLimitFieldCount = 2;
 
     private const string CpuMaximum = "cpu.max";
@@ -86,23 +84,23 @@ internal static class ScaleServerCgroupEnvelopeReader
     internal static bool TryAccumulateCpuLimit(string cpuText, bool isRoot, ref decimal? cpu)
     {
         var parts = cpuText.Trim().Split(WhitespaceSeparator, StringSplitOptions.RemoveEmptyEntries);
-        if (isRoot && parts.Length == PeriodFieldIndex && parts[NoLimit] == Unlimited)
+        if (isRoot && parts.Length == 1 && parts[0] == Unlimited)
         {
             return true;
         }
 
-        if (parts.Length != CpuLimitFieldCount || !long.TryParse(parts[PeriodFieldIndex], NumberStyles.None, CultureInfo.InvariantCulture,
-                out var period) || period <= NoLimit)
+        if (parts.Length != CpuLimitFieldCount || !long.TryParse(parts[1], NumberStyles.None, CultureInfo.InvariantCulture,
+                out var period) || period <= 0)
         {
             return false;
         }
 
-        if (parts[NoLimit] == Unlimited)
+        if (parts[0] == Unlimited)
         {
             return true;
         }
 
-        if (!long.TryParse(parts[NoLimit], NumberStyles.None, CultureInfo.InvariantCulture, out var quota) || quota <= NoLimit)
+        if (!long.TryParse(parts[0], NumberStyles.None, CultureInfo.InvariantCulture, out var quota) || quota <= 0)
         {
             return false;
         }
@@ -120,7 +118,7 @@ internal static class ScaleServerCgroupEnvelopeReader
             return true;
         }
 
-        if (!long.TryParse(limitText, NumberStyles.None, CultureInfo.InvariantCulture, out var limit) || limit <= NoLimit)
+        if (!long.TryParse(limitText, NumberStyles.None, CultureInfo.InvariantCulture, out var limit) || limit <= 0)
         {
             return false;
         }

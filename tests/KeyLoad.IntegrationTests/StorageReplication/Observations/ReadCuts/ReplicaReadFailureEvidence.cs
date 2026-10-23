@@ -13,7 +13,6 @@ internal static class ReplicaReadFailureEvidence
     private const string Join = " | ";
     private const string GuidFormat = "D";
     private const int GuidCharacters = 36;
-    private const int FirstStage = 1;
     private const int LastStage = 8;
     private const int MaximumFlags = 7;
 
@@ -65,6 +64,6 @@ internal static class ReplicaReadFailureEvidence
         return int.TryParse(value[Stage.Length..split], NumberStyles.None, CultureInfo.InvariantCulture, out stage)
             && int.TryParse(value[(split + Flags.Length)..^Period.Length], NumberStyles.None,
                 CultureInfo.InvariantCulture, out flags)
-            && stage >= FirstStage && stage <= LastStage && flags >= 0 && flags <= MaximumFlags;
+            && stage >= 1 && stage <= LastStage && flags >= 0 && flags <= MaximumFlags;
     }
 }

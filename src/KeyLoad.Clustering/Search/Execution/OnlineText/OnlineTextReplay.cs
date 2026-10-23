@@ -5,13 +5,12 @@ namespace KeyLoad.Clustering;
 
 internal static class OnlineTextReplay
 {
-    private const int FirstReplayPage = 0;
     internal static async Task<OnlineTextCapabilityResult> RunAsync(OnlineTextChildCalls children,
         OnlineTextIndexMaintenanceRequest request, OnlineTextCapabilityResult state, int maximumPages,
         ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer)
     {
         var token = writer.CancellationToken;
-        for (var number = FirstReplayPage; number < maximumPages; number++)
+        for (var number = 0; number < maximumPages; number++)
         {
             var upper = state.CurrentCut?.ThroughSequence
                 ?? throw Errors.Fail(ErrorCode.Corruption, GrainRoutingProtocol.InvalidRequest);

@@ -5,8 +5,6 @@ namespace KeyLoad.UnitTests.Features.ClientApi;
 /// <summary>AC-MCP-004/005: conservative ingress and authentication ownership projection.</summary>
 internal sealed class McpMemoryProjectionIngressTests
 {
-    private const int ZeroCapacity = 0;
-    private const int OneByteCapacity = 1;
     private const long IngressAtZero = 17_076_956;
     private const long IngressAtOne = 17_077_675;
     private const long AuthenticationAtEmptyShape = 17_112_764;
@@ -21,8 +19,8 @@ internal sealed class McpMemoryProjectionIngressTests
     [Test]
     public async Task IngressUsesWorstBoundedShapeAndPreservesExactCapacityAccounting()
     {
-        await Assert.That(new KeyLoad.Server.McpMemoryProjection(UnitMcpOptions.Execution()).Ingress(ZeroCapacity)).IsEqualTo(IngressAtZero);
-        await Assert.That(new KeyLoad.Server.McpMemoryProjection(UnitMcpOptions.Execution()).Ingress(OneByteCapacity)).IsEqualTo(IngressAtOne);
+        await Assert.That(new KeyLoad.Server.McpMemoryProjection(UnitMcpOptions.Execution()).Ingress(0)).IsEqualTo(IngressAtZero);
+        await Assert.That(new KeyLoad.Server.McpMemoryProjection(UnitMcpOptions.Execution()).Ingress(1)).IsEqualTo(IngressAtOne);
     }
 
     /// <summary>Named metadata, writer, escaping and structure equations keep their minimum rounded capacities.</summary>

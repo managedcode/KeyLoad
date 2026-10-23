@@ -3,8 +3,6 @@ namespace KeyLoad.UnitTests.Features.CodeQuality;
 
 internal static class CoverageDeploymentClosure
 {
-    private const int InitialBufferOffset = 0;
-    private const int NoBytesRead = 0;
     private const int EndOfFile = -1;
     private const string SourceShrankDuringCopyMessage =
         "A source execution coverage file shrank during fixture creation.";
@@ -135,12 +133,12 @@ internal static class CoverageDeploymentClosure
         while (remaining > 0)
         {
             var requested = (int)Math.Min(buffer.Length, remaining);
-            var read = input.Read(buffer, InitialBufferOffset, requested);
-            if (read == NoBytesRead)
+            var read = input.Read(buffer, 0, requested);
+            if (read == 0)
             {
                 throw new InvalidDataException(SourceShrankDuringCopyMessage);
             }
-            output.Write(buffer, InitialBufferOffset, read);
+            output.Write(buffer, 0, read);
             remaining -= read;
         }
         if (input.ReadByte() != EndOfFile)

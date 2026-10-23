@@ -16,8 +16,9 @@ data assemblies do not define runtime policy for these new rules. Generated code
 uses the exclusion API. Existing diagnostics keep their IDs and severity.
 
 A blanket syntax ban introduces thousands of findings, including data and
-structural arithmetic. An arbitrary global allowance for zero/one would hide real
-timeout policies. The selected semantic contexts give actionable diagnostics and
+structural arithmetic. Zero and one are exempt: they express emptiness, the first
+element and the next step, and naming them produced over a thousand `= 0` and
+`= 1` constants that hid nothing. Durations still come from typed options. The selected semantic contexts give actionable diagnostics and
 require a behavior-preserving source refactor in the same stage. The root policy still applies
 to uncovered contexts. A broader source refactor needs an explicit contract
 extension; do not silently add a suppression baseline or change analyzer severity.

@@ -2,8 +2,6 @@ namespace KeyLoad.Server;
 
 internal static class ScriptDomContextIdentity
 {
-    private const int SingleCommand = 1;
-    private const int FirstCommand = 0;
     private const int PrefixLength = 2;
     private const int HexGuidLength = 32;
     private const string BinaryPrefix = "0x";
@@ -13,8 +11,8 @@ internal static class ScriptDomContextIdentity
     {
         checkBudget();
         token.ThrowIfCancellationRequested();
-        if (statement.Commands.Count != SingleCommand
-            || statement.Commands[FirstCommand] is not global::Microsoft.SqlServer.TransactSql.ScriptDom.GeneralSetCommand
+        if (statement.Commands.Count != 1
+            || statement.Commands[0] is not global::Microsoft.SqlServer.TransactSql.ScriptDom.GeneralSetCommand
             {
                 CommandType: global::Microsoft.SqlServer.TransactSql.ScriptDom.GeneralSetCommandType.ContextInfo,
                 Parameter: global::Microsoft.SqlServer.TransactSql.ScriptDom.BinaryLiteral value

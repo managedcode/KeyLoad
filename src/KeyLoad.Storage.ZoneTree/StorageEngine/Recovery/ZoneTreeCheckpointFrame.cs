@@ -5,8 +5,6 @@ namespace KeyLoad.Storage.ZoneTree;
 
 internal readonly struct ZoneTreeCheckpointFrame
 {
-    private const int EmptyFrameLength = 0;
-
     private ZoneTreeCheckpointFrame(ulong magic, long position, byte[] header, byte[] payload)
     {
         Magic = magic;
@@ -45,7 +43,7 @@ internal readonly struct ZoneTreeCheckpointFrame
         var magic = BinaryPrimitives.ReadUInt64LittleEndian(header);
         var length = BinaryPrimitives.ReadInt32LittleEndian(header.AsSpan(ZoneTreePersistenceFormat.PayloadLengthOffset));
         var position = BinaryPrimitives.ReadInt64LittleEndian(header.AsSpan(ZoneTreePersistenceFormat.SequenceOffset));
-        if (length <= EmptyFrameLength || length > options.MaxFrameBytes || input.Length - input.Position < length)
+        if (length <= 0 || length > options.MaxFrameBytes || input.Length - input.Position < length)
         {
             throw Errors.Fail(ErrorCode.Corruption, ZoneTreePersistenceFormat.CheckpointLengthInvalid);
         }

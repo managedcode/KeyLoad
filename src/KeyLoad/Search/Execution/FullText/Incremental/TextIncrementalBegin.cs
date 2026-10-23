@@ -8,7 +8,6 @@ namespace KeyLoad.Server.Features.Search;
 
 internal static class TextIncrementalBegin
 {
-    private const int OriginalFailureOnlyCount = 1;
     internal static TextMaintenanceCapabilityResult Run(DatabaseEngine database, string root, PrincipalRecord principal,
         TextMaintenanceCapabilityRequest request, ServerRuntimeOptions configured, TimeProvider clock,
         CancellationTokenSource shutdown, TextIncrementalSessions sessions, Action<TextFaultStage>? faultObserver,
@@ -96,7 +95,7 @@ internal static class TextIncrementalBegin
             {
                 ServerFailureObserver.Observe(reservation.CompleteAfterJoinedCleanup, failures);
             }
-            if (captured is null && failures.Count == OriginalFailureOnlyCount)
+            if (captured is null && failures.Count == 1)
             {
                 ServerFailureObserver.Observe(work.DisposeAfterStage, failures);
             }

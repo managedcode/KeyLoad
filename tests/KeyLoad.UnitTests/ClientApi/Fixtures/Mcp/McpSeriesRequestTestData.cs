@@ -4,7 +4,6 @@ namespace KeyLoad.UnitTests.Features.ClientApi;
 internal static class McpSeriesRequestTestData
 {
     private const int RangeMinutes = 2;
-    private const int WidthMinutes = 1;
     private const int MaximumPoints = 11;
     private const int MaximumWindows = 2;
     private const int Limit = 10;
@@ -13,7 +12,7 @@ internal static class McpSeriesRequestTestData
     private const string TagValue = "metric";
     private static readonly DateTimeOffset Until = DateTimeOffset.UnixEpoch.AddMinutes(RangeMinutes);
     [ImmutableTemporalData]
-    private static readonly TimeSpan Width = TimeSpan.FromMinutes(WidthMinutes);
+    private static readonly TimeSpan Width = TimeSpan.FromMinutes(1);
 
     internal static ReadLatestSampleRequest Latest() => new(McpCanonicalTestData.Partition,
         McpCanonicalTestData.Resource, McpCanonicalTestData.Entity, Until);

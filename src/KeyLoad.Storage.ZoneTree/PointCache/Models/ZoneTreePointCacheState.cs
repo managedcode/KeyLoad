@@ -3,8 +3,6 @@ namespace KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
 /// <summary>One cache owner's synchronized admission, index and diagnostic state.</summary>
 internal sealed class ZoneTreePointCacheState : IDisposable
 {
-    private const int IndexReservationEntries = 0;
-
     internal const long EntryMetadataBytes = 320;
     internal readonly Lock Gate = new();
     internal readonly ZoneTreePointCacheOptions Options;
@@ -37,7 +35,7 @@ internal sealed class ZoneTreePointCacheState : IDisposable
         ArgumentNullException.ThrowIfNull(options);
         options.Validate();
         Options = options;
-        if (!options.MemoryBudget.TryReserve(options.IndexChargeBytes, IndexReservationEntries, out var reservation))
+        if (!options.MemoryBudget.TryReserve(options.IndexChargeBytes, 0, out var reservation))
         {
             return;
         }

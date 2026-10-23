@@ -10,7 +10,6 @@ public sealed record EventSourceExecutionOptions
     public const string ValidationMessage = "The event source lifetime and append admission limits are invalid.";
     private const int DefaultCursorLifetimeHours = 24;
     private const int DefaultMaximumAppendEvents = 256;
-    private const int MinimumAppendEvents = 1;
     private const int MaximumCursorLifetimeDays = 365;
     private static readonly TimeSpan MaximumCursorLifetime = TimeSpan.FromDays(MaximumCursorLifetimeDays);
 
@@ -23,7 +22,7 @@ public sealed record EventSourceExecutionOptions
     /// <summary>Checks that the continuation lifetime remains positive and bounded.</summary>
     /// <returns>Whether the configured event cursor lifetime is valid.</returns>
     public bool IsValid() => CursorLifetime > TimeSpan.Zero && CursorLifetime <= MaximumCursorLifetime
-        && MaximumAppendEvents is >= MinimumAppendEvents and <= DefaultMaximumAppendEvents;
+        && MaximumAppendEvents is >= 1 and <= DefaultMaximumAppendEvents;
 
     /// <summary>Rejects invalid settings before event reads are admitted.</summary>
     /// <exception cref="InvalidOperationException">The configured continuation lifetime is invalid.</exception>

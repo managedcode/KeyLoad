@@ -10,7 +10,6 @@ namespace KeyLoad.Server;
 [ConfigurationBinding]
 internal static class ServerRuntimeOptionsRegistration
 {
-    private const int NoCount = 0;
     private const string InvalidCopies = "Invalid storage mode or silo/data-copy count; SharedVolume requires ReplicaCount 1.";
     internal static IServiceCollection AddRuntimeOptions(this IServiceCollection services, IConfiguration configuration)
     {
@@ -27,7 +26,7 @@ internal static class ServerRuntimeOptionsRegistration
     {
         services.AddDueCoordinationOptions(configuration);
         services.AddOptions<BackgroundWorkerOptions>().Bind(configuration.GetSection(BackgroundWorkerOptions.SectionName))
-            .Validate(options => options.FlushInterval > TimeSpan.Zero && options.MaximumBufferedEvents > NoCount,
+            .Validate(options => options.FlushInterval > TimeSpan.Zero && options.MaximumBufferedEvents > 0,
                 BackgroundWorkerOptions.SectionName).ValidateOnStart();
         services.AddOptions<RuntimeDurableJobOptions>().Bind(configuration.GetSection(RuntimeDurableJobOptions.SectionName))
             .Validate(options => options.IsValid(), RuntimeDurableJobOptions.ValidationMessage).ValidateOnStart();

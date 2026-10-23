@@ -8,7 +8,6 @@ internal static class BackupPieceBoundaryAssertions
     private const string ManifestName = "backup.json";
     private const string JournalName = "commands.wal";
     private const string IdentityName = "identity.json";
-    private const int SinglePiece = 1;
     private const string InvalidPieceDetail = "The backup archive piece size is invalid.";
 
     internal static async Task ArchiveAsync(string artifact, IReadOnlyDictionary<string, byte[]> files,
@@ -18,9 +17,9 @@ internal static class BackupPieceBoundaryAssertions
         await Assert.That(files[IdentityName].Length).IsLessThanOrEqualTo(piece);
         (string Name, long Bytes, int Pieces)[] expected =
         [
-            (ManifestName, files[ManifestName].LongLength, SinglePiece),
+            (ManifestName, files[ManifestName].LongLength, 1),
             (JournalName, files[JournalName].LongLength, journalPieces),
-            (IdentityName, files[IdentityName].LongLength, SinglePiece)
+            (IdentityName, files[IdentityName].LongLength, 1)
         ];
         await Assert.That(BackupArtifact.Inspect(artifact)).IsEquivalentTo(expected, CollectionOrdering.Matching);
     }

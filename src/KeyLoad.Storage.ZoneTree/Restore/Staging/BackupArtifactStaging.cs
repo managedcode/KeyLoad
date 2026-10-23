@@ -6,8 +6,6 @@ namespace KeyLoad.Storage.ZoneTree.Restore;
 internal sealed class BackupArtifactStaging
 {
     private const int CanonicalPayloadCount = 3;
-    private const int NoOwnedFilesCount = 0;
-    private const int NoFailuresCount = 0;
 
     private readonly BackupArtifactPublication publication;
     private readonly List<string> ownedFiles = new(CanonicalPayloadCount);
@@ -87,7 +85,7 @@ internal sealed class BackupArtifactStaging
         var failures = new List<Exception>();
         RemoveOwnedFiles(failures);
         BackupArtifactFailurePolicy.TryCapture(() => publication.Cleanup(failures), failures.Add);
-        if (failures.Count > NoFailuresCount)
+        if (failures.Count > 0)
         {
             throw new AggregateException(failures);
         }
@@ -95,7 +93,7 @@ internal sealed class BackupArtifactStaging
 
     private void RemoveOwnedFiles(List<Exception> failures)
     {
-        if (ownedFiles.Count == NoOwnedFilesCount)
+        if (ownedFiles.Count == 0)
         {
             return;
         }

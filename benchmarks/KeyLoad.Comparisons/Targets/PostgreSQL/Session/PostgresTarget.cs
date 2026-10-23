@@ -6,9 +6,6 @@ public sealed partial class PostgresTarget : IBenchmarkSessionQueries
     private const string SessionReadSql = "SELECT id,body::text FROM documents WHERE id=$1 AND (body->>'number')::integer >= $2 AND (body->>'number')::integer < $3 ORDER BY id LIMIT 2";
     private const string MissingSessionRow = "SessionQueryMissingRow";
     private const string ExtraSessionRow = "SessionQueryExtraRow";
-    private const int SessionRangeWidth = 1;
-    private const int SessionIdColumn = 0;
-    private const int SessionPayloadColumn = 1;
 
     /// <inheritdoc/>
     public async Task BuildSessionIndexesAsync(CancellationToken cancellationToken)
@@ -29,13 +26,13 @@ public sealed partial class PostgresTarget : IBenchmarkSessionQueries
         command.CommandText = SessionReadSql;
         command.Parameters.AddWithValue(expected.Id);
         command.Parameters.AddWithValue(expected.Number);
-        command.Parameters.AddWithValue(expected.Number + SessionRangeWidth);
+        command.Parameters.AddWithValue(expected.Number + 1);
         await using var reader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
         if (!await reader.ReadAsync(cancellationToken).ConfigureAwait(false))
         {
             throw new ComparisonFailureException(MissingSessionRow);
         }
-        BenchmarkSessionQueryContract.Require(new(reader.GetString(SessionIdColumn), reader.GetString(SessionPayloadColumn)), expected);
+        BenchmarkSessionQueryContract.Require(new(reader.GetString(0), reader.GetString(1)), expected);
         if (await reader.ReadAsync(cancellationToken).ConfigureAwait(false))
         {
             throw new ComparisonFailureException(ExtraSessionRow);

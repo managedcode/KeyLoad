@@ -6,7 +6,6 @@ namespace KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
 /// <summary>Owns one non-concurrent raw ZoneTree fixture and its exact binary corpus.</summary>
 internal sealed class RawStorageFixture : IDisposable
 {
-    private const int MinimumMaximumWrites = 1;
     private const int SmallPayloadBytes = 32;
     private const int LargePayloadBytes = 1024;
     private const string UnavailableMessage = "The raw storage fixture cannot continue after an incomplete execution operation.";
@@ -112,7 +111,7 @@ internal sealed class RawStorageFixture : IDisposable
 
     private static void ValidateArguments(int recordCount, int valueBytes, int maximumWrites, int maximumRecords)
     {
-        if (recordCount < MinimumMaximumWrites || recordCount > maximumRecords)
+        if (recordCount < 1 || recordCount > maximumRecords)
         {
             throw new ArgumentOutOfRangeException(nameof(recordCount));
         }
@@ -122,7 +121,7 @@ internal sealed class RawStorageFixture : IDisposable
             throw new ArgumentOutOfRangeException(nameof(valueBytes));
         }
 
-        if (maximumWrites < MinimumMaximumWrites || maximumWrites < recordCount)
+        if (maximumWrites < 1 || maximumWrites < recordCount)
         {
             throw new ArgumentOutOfRangeException(nameof(maximumWrites));
         }

@@ -8,19 +8,17 @@ namespace KeyLoad.IntegrationTests.Features.DocumentStorage;
 /// <summary>Untimed complete ordered execution readback and stable original operation oracles.</summary>
 internal static class HeavyDocumentLoadReadback
 {
-    private const int SentinelOrdinal = 0;
-    private const int SentinelPageSize = 1;
     private const string CursorFailure = "Heavy Orleans cursor failed to advance.";
     private const string ExtraRecordFailure = "Heavy Orleans readback contains extra records.";
     private readonly record struct DocumentMarker;
 
     internal static EntityRef Sentinel(PartitionRef partition)
-        => new(partition, McpDocumentProtocol.Collection, HeavyDocumentLoadProtocol.Id(SentinelOrdinal));
+        => new(partition, McpDocumentProtocol.Collection, HeavyDocumentLoadProtocol.Id(0));
     internal static AstQueryRequest SentinelQuery(PartitionRef partition)
     {
-        var id = HeavyDocumentLoadProtocol.Id(SentinelOrdinal);
+        var id = HeavyDocumentLoadProtocol.Id(0);
         return KeyLoadQuery.From<DocumentMarker>(partition, McpDocumentProtocol.Collection, IntegrationClientOptions.Translation())
-            .Where(row => QueryFunctions.DocumentId(row) == id).Take(SentinelPageSize).ToRequest(allowFullScan: true);
+            .Where(row => QueryFunctions.DocumentId(row) == id).Take(1).ToRequest(allowFullScan: true);
     }
     internal static async Task VerifyReceiptAsync(CommitReceipt receipt, CommandRequest command, int ordinal)
     {
@@ -38,13 +36,13 @@ internal static class HeavyDocumentLoadReadback
         await Assert.That(actual).IsNotNull();
         await Assert.That(actual!.Reference).IsEqualTo(Sentinel(partition));
         await Assert.That(actual.Revision).IsEqualTo(HeavyDocumentLoadProtocol.CreatedRevision);
-        await Assert.That(actual.Json).IsEqualTo(HeavyDocumentLoadProtocol.Json(SentinelOrdinal));
+        await Assert.That(actual.Json).IsEqualTo(HeavyDocumentLoadProtocol.Json(0));
     }
     internal static async Task VerifySentinelPageAsync(QueryPage page)
     {
         await Assert.That(page.Rows).HasSingleItem();
-        await Assert.That(page.Rows[0].EntityId).IsEqualTo(HeavyDocumentLoadProtocol.Id(SentinelOrdinal));
-        await Assert.That(page.Rows[0].Json).IsEqualTo(HeavyDocumentLoadProtocol.Json(SentinelOrdinal));
+        await Assert.That(page.Rows[0].EntityId).IsEqualTo(HeavyDocumentLoadProtocol.Id(0));
+        await Assert.That(page.Rows[0].Json).IsEqualTo(HeavyDocumentLoadProtocol.Json(0));
         await Assert.That(page.Rows[0].Revision).IsEqualTo(HeavyDocumentLoadProtocol.CreatedRevision);
     }
     internal static async Task VerifyAsync(KeyLoadClient client, PartitionRef partition, CancellationToken token)

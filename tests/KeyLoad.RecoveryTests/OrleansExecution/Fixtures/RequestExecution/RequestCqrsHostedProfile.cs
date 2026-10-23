@@ -32,7 +32,6 @@ internal sealed class RequestCqrsHostedProfile(TimeProvider clock, IOptions<Grai
     private const string PublicUrls = "--urls=http://127.0.0.1:0";
     private const string WarningLogLevel = "--Logging:LogLevel:Default=Warning";
     private const int SigningKeyBytes = 32;
-    private const int OneSilo = 1;
     private const string DefaultDenyRequired = "The production host must register its execution default-deny grain policy.";
     internal TimeProvider Clock { get; } = clock;
     internal IOptions<GrainRoutingOptions> Routing { get; } = routing;
@@ -64,8 +63,8 @@ internal sealed class RequestCqrsHostedProfile(TimeProvider clock, IOptions<Grai
             Setting(nameof(NodeOptions.SiloName), identity),
             Setting(nameof(NodeOptions.ClusterId), ClusterNode?.ClusterId ?? identity),
             Setting(nameof(NodeOptions.SiloPort), siloPort.ToString(CultureInfo.InvariantCulture)),
-            Setting(nameof(NodeOptions.SiloCount), (ClusterNode?.SiloCount ?? OneSilo).ToString(CultureInfo.InvariantCulture)),
-            Setting(nameof(NodeOptions.ReplicaCount), (ClusterNode?.ReplicaCount ?? OneSilo).ToString(CultureInfo.InvariantCulture)),
+            Setting(nameof(NodeOptions.SiloCount), (ClusterNode?.SiloCount ?? 1).ToString(CultureInfo.InvariantCulture)),
+            Setting(nameof(NodeOptions.ReplicaCount), (ClusterNode?.ReplicaCount ?? 1).ToString(CultureInfo.InvariantCulture)),
             Setting(nameof(NodeOptions.Incarnation), (ClusterNode?.Incarnation ?? Guid.NewGuid()).ToString(GuidFormat)),
             Setting(nameof(NodeOptions.SigningKey), ClusterNode?.SigningKey ?? Convert.ToBase64String(RandomNumberGenerator.GetBytes(SigningKeyBytes))),
             Setting(nameof(NodeOptions.AdminKey), Credential)];

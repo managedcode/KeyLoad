@@ -22,7 +22,6 @@ internal sealed class RequestCqrsClusterDiagnostics : IAsyncDisposable
     private const string OversizedArtifactMessage = "The bounded C1 MCP rejection artifact exceeded its byte limit.";
     private const string IncompleteSubscriptionMessage = "C1 diagnostics cannot be saved before every original subscription joins.";
     private const int MaximumArtifactBytes = 16 * 1_024;
-    private const int ArtifactVersion = 1;
     private const int RpcArtifactVersion = 2;
     private const string RpcReadbackMessage = "The owned RPC diagnostic export did not retain the complete original records.";
 
@@ -136,7 +135,7 @@ internal sealed class RequestCqrsClusterDiagnostics : IAsyncDisposable
     private string WriteArtifact()
     {
         var records = nodes.SelectMany(node => node.Snapshot()).ToArray();
-        var artifact = new RequestCqrsClusterMcpRejectionArtifact(ArtifactVersion, waveId, records);
+        var artifact = new RequestCqrsClusterMcpRejectionArtifact(1, waveId, records);
         var bytes = JsonSerializer.SerializeToUtf8Bytes(artifact);
         if (bytes.Length > MaximumArtifactBytes)
         {

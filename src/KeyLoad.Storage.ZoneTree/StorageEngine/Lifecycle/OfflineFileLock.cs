@@ -5,14 +5,12 @@ namespace KeyLoad.Storage.ZoneTree.IO;
 
 internal static class OfflineFileLock
 {
-    private const int CallSuccess = 0;
-    private const int LockShared = 1;
     private const int LockExclusive = 2;
     private const int LockNonBlocking = 4;
     private const int LockUnlock = 8;
 
     internal static void Acquire(SafeFileHandle handle, FileShare share) => Apply(handle,
-        (share == FileShare.Read ? LockShared : LockExclusive) | LockNonBlocking);
+        (share == FileShare.Read ? 1 : LockExclusive) | LockNonBlocking);
 
     internal static void Close(SafeFileHandle? handle, bool releaseLock, Exception? primaryFailure)
     {
@@ -61,7 +59,7 @@ internal static class OfflineFileLock
         {
             throw OfflineErrors.Unsupported();
         }
-        if (result != CallSuccess)
+        if (result != 0)
         {
             throw OfflineErrors.FromErrno(Marshal.GetLastPInvokeError(), isMac);
         }

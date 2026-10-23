@@ -3,8 +3,6 @@ namespace KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
 /// <summary>Owns a reserved key/fill charge until publication or idempotent disposal.</summary>
 internal sealed class ZoneTreePointCacheCandidate : IDisposable
 {
-    private const int PendingState = 0;
-    private const int AdoptedState = 1;
     private const int ReleasedState = 2;
 
     private readonly IZoneTreePointCacheCandidateOwner _owner;
@@ -43,7 +41,7 @@ internal sealed class ZoneTreePointCacheCandidate : IDisposable
 
     internal ICacheMemoryReservation? Reservation => _reservation;
 
-    internal bool IsPending => _state == PendingState;
+    internal bool IsPending => _state == 0;
 
     internal ZoneTreePointCacheEntry CreateEntry(IZoneTreePointCacheCandidateOwner owner,
         byte[] value, long generation)
@@ -63,14 +61,14 @@ internal sealed class ZoneTreePointCacheCandidate : IDisposable
 
     internal void MarkAdopted()
     {
-        _state = AdoptedState;
+        _state = 1;
         _key = null;
         _reservation = null;
     }
 
     internal ICacheMemoryReservation? MarkReleased()
     {
-        if (_state != PendingState)
+        if (_state != 0)
         {
             return null;
         }

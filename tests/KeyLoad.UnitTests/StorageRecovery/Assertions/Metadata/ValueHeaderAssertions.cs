@@ -4,7 +4,6 @@ namespace KeyLoad.UnitTests.Features.StorageRecovery;
 
 internal static class ValueHeaderAssertions
 {
-    private const int NoDisclosure = 0;
     private const string Invalid = "A execution stored record has an invalid value header.";
 
     internal static async Task RequireAsync(ZoneTreeStoreRuntime runtime, ZoneTreeStore store, ZoneTreeExistingStoreFixture files)
@@ -37,8 +36,8 @@ internal static class ValueHeaderAssertions
                     }, observer: _ => observed++))));
             await UnchangedAsync(runtime, store, files, identity, journal);
         }
-        await Assert.That(observed).IsEqualTo(NoDisclosure);
-        await Assert.That(delivered).IsEqualTo(NoDisclosure);
+        await Assert.That(observed).IsEqualTo(0);
+        await Assert.That(delivered).IsEqualTo(0);
         await ValueHeaderSnapshot.RequireAsync(store, files);
         await UnchangedAsync(runtime, store, files, identity, journal);
     }

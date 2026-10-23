@@ -5,9 +5,7 @@ internal static class ClusterTopologyNodeNames
 {
     private const string FunctionalEphemeralOwnershipRequired = "Functional topology requires explicit ephemeral ownership.";
     private const string NodeNamePrefix = "node";
-    private const int FirstNodeOrdinal = 1;
     private const int DefaultSiloCount = 3;
-    private const int MinimumBenchmarkNodes = 1;
     private const int DistributedBenchmarkNodes = 3;
 
     internal static string[] Read(int? benchmarkNodeCount, int? functionalNodeCount, bool ephemeral, int siloCount = DefaultSiloCount)
@@ -20,16 +18,16 @@ internal static class ClusterTopologyNodeNames
         {
             throw new ArgumentException(FunctionalEphemeralOwnershipRequired, nameof(functionalNodeCount));
         }
-        if (benchmarkNodeCount is not null && benchmarkNodeCount.Value is not (MinimumBenchmarkNodes or DistributedBenchmarkNodes))
+        if (benchmarkNodeCount is not null && benchmarkNodeCount.Value is not (1 or DistributedBenchmarkNodes))
         {
             throw new ArgumentOutOfRangeException(nameof(benchmarkNodeCount));
         }
         var selectedCount = benchmarkNodeCount ?? functionalNodeCount ?? siloCount;
-        if (selectedCount < FirstNodeOrdinal)
+        if (selectedCount < 1)
         {
             throw new ArgumentOutOfRangeException(nameof(siloCount));
         }
-        return Enumerable.Range(FirstNodeOrdinal, selectedCount).Select(index => NodeNamePrefix + index.ToString(
+        return Enumerable.Range(1, selectedCount).Select(index => NodeNamePrefix + index.ToString(
             System.Globalization.CultureInfo.InvariantCulture)).ToArray();
     }
 }

@@ -27,7 +27,7 @@ internal static class ScriptDomNullPredicateLowering
 
         // ScriptDOM folds DISTINCT FROM NULL into BooleanIsNullExpression. Inspect
         // only the original execution operator span, never operand text or trivia text.
-        for (var index = operandEnd + NextTokenOffset; index <= test.LastTokenIndex; index++)
+        for (var index = operandEnd + 1; index <= test.LastTokenIndex; index++)
         {
             context.Check(depth);
             if (tokens[index].TokenType == Dom.TSqlTokenType.Distinct)
@@ -39,5 +39,4 @@ internal static class ScriptDomNullPredicateLowering
     }
 
     private const int FirstTokenIndex = 0;
-    private const int NextTokenOffset = 1;
 }

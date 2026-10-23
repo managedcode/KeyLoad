@@ -9,7 +9,6 @@ namespace KeyLoad.UnitTests.Features.OrleansExecution;
 
 internal static class RequestCqrsAnnProgressControls
 {
-    private const int ZeroReplay = 0;
     private const int RepeatedReplay = 2;
 
     // Controlled execution CQRS grammar inputs reuse the genuine Build reply; they execute no ANN owner work.
@@ -19,7 +18,7 @@ internal static class RequestCqrsAnnProgressControls
         await Assert.That(request.Mode).IsEqualTo(AnnMaintenanceMode.Build);
         await Assert.That(genuineReply.Error).IsNull();
         await Assert.That(genuineReply.SafeDetail).IsNull();
-        await RequireAsync(fixture, request, genuineReply, ZeroReplay, token);
+        await RequireAsync(fixture, request, genuineReply, 0, token);
         await RequireAsync(fixture, request, genuineReply, RepeatedReplay, token);
     }
 

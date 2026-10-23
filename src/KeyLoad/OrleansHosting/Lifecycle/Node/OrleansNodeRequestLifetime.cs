@@ -6,7 +6,6 @@ namespace KeyLoad.Server.Features.OrleansHosting;
 /// <summary>Owns the original request registry and both startup cancellation sources until their known owners join.</summary>
 internal sealed class OrleansNodeRequestLifetime(IOptions<GrainRoutingOptions> options) : IAsyncDisposable
 {
-    private const int NoCloseFailures = 0;
     private readonly RequestWorkOwner work = new(options);
     private CancellationTokenSource? localInitializationCancellation;
     private CancellationTokenSource? bootstrapCancellation;
@@ -53,7 +52,7 @@ internal sealed class OrleansNodeRequestLifetime(IOptions<GrainRoutingOptions> o
     {
         var terminalFailures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(() => DisposeAsync().AsTask(), terminalFailures);
-        failures.AddRange(closeFailures.Count > NoCloseFailures ? closeFailures : terminalFailures);
+        failures.AddRange(closeFailures.Count > 0 ? closeFailures : terminalFailures);
     }
 
     /// <summary>Called only after the node's original known-owner join predicate permits releasing these resources.</summary>

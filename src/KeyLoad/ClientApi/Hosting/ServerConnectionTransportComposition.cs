@@ -19,7 +19,6 @@ internal static class ServerConnectionTransportComposition
     private const string HttpsPortFormat = "https://*:{0}";
     private const string Http2AddressFormat = "http://0.0.0.0:{0}";
     private const char UrlSeparator = ';';
-    private const int InitialEndpointIndex = 0;
     private static readonly System.Text.CompositeFormat Http2Address = System.Text.CompositeFormat.Parse(Http2AddressFormat);
     private static readonly System.Text.CompositeFormat HttpAddress = System.Text.CompositeFormat.Parse(HttpPortFormat);
     private static readonly System.Text.CompositeFormat HttpsAddress = System.Text.CompositeFormat.Parse(HttpsPortFormat);
@@ -54,7 +53,7 @@ internal static class ServerConnectionTransportComposition
         var urls = !string.IsNullOrWhiteSpace(addresses)
             ? addresses.Split(UrlSeparator, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
             : ReadPortListeners(configuration);
-        var index = InitialEndpointIndex;
+        var index = 0;
         foreach (var url in urls)
         {
             var name = PreservedEndpointPrefix + index.ToString(CultureInfo.InvariantCulture);
@@ -68,7 +67,7 @@ internal static class ServerConnectionTransportComposition
         var listeners = new List<string>();
         AddPorts(listeners, configuration[WebHostDefaults.HttpPortsKey], HttpAddress);
         AddPorts(listeners, configuration[WebHostDefaults.HttpsPortsKey], HttpsAddress);
-        return listeners.Count == InitialEndpointIndex ? [DefaultServerAddress] : listeners.ToArray();
+        return listeners.Count == 0 ? [DefaultServerAddress] : listeners.ToArray();
     }
 
     private static void AddPorts(List<string> listeners, string? configuredPorts, System.Text.CompositeFormat format)

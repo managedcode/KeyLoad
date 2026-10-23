@@ -7,8 +7,6 @@ namespace KeyLoad.UnitTests.Features.Authorization;
 
 internal static class GenerationVisibilityCold
 {
-    private const int EmptyCacheEntries = 0;
-
     internal static async Task RunAsync(TestDatabase db, CacheMemoryBudget memory, CommandRequest original,
         byte[] originalOutcome, CommandRequest current, CommitReceipt receipt, byte[] currentOutcome, Func<DatabaseEngine, ZoneTreeStore, CancellationToken, Task> verifyWrites, CancellationToken token)
     {
@@ -28,7 +26,7 @@ internal static class GenerationVisibilityCold
                     UnitExecutionOptions.RuntimeClaimsExecution(), null, db.Database.EvaluationClock);
                 var database = create(cold);
                 using var cache = database.ConfigureRowVisibility(memory);
-                await Assert.That(memory.GetSnapshot().RetainedEntries).IsEqualTo(EmptyCacheEntries);
+                await Assert.That(memory.GetSnapshot().RetainedEntries).IsEqualTo(0);
                 await Assert.That(cold.Identity.NodeId).IsEqualTo(identity.NodeId);
                 await Assert.That(cold.Identity.Incarnation).IsEqualTo(identity.Incarnation);
                 await Assert.That(cold.Identity.ReadGeneration).IsGreaterThanOrEqualTo(identity.ReadGeneration);

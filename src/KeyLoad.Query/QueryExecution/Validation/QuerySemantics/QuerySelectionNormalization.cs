@@ -6,7 +6,6 @@ namespace KeyLoad.Query;
 
 internal static class QuerySelectionNormalization
 {
-    private const int MinimumPositiveCount = 1;
     private const string QueryProjectionEntryIsMissingDetail = "A query projection entry is missing.";
     private const string QueryProjectionHasDuplicateAliasesOrAnInvalidStarDetail = "The query projection has duplicate aliases or an invalid star.";
     private const string QueryOrderingEntryIsMissingDetail = "A query ordering entry is missing.";
@@ -30,7 +29,7 @@ internal static class QuerySelectionNormalization
             };
         }).ToImmutableArray();
         if (projection.Select(s => s.Alias).Distinct(StringComparer.Ordinal).Count() != projection.Length
-            || projection.Length > MinimumPositiveCount && projection.Any(s => s.Path == SqlSyntax.Star))
+            || projection.Length > 1 && projection.Any(s => s.Path == SqlSyntax.Star))
         {
             throw Errors.Fail(ErrorCode.Validation, QueryProjectionHasDuplicateAliasesOrAnInvalidStarDetail);
         }

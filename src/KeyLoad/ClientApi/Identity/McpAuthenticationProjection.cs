@@ -5,28 +5,21 @@ namespace KeyLoad.Server;
 // Counts the public projection of the principal decoded by the generated Orleans codec.
 internal sealed class McpAuthenticationProjection(bool enforceMcpBounds, IOptions<McpExecutionOptions> options)
 {
-    private const int GetScalarPropertyCountEmptyCount = 0;
-    private const int ObjectDepthSingleItemCount = 1;
-    private const int GetArrayPropertyCountEmptyCount = 0;
-    private const int GetArrayDepthSingleItemCount = 1;
-    private const int AddDepthStep = 1;
-
     private readonly McpExecutionOptions settings = options.Value;
     private const int ContainerTokens = 2;
-    private const int ScalarTokens = 1;
     internal const int PrincipalProperties = 12;
     internal const int GrantProperties = 3;
     private const int PrincipalScalarValues = 8;
     private const int PrincipalArrayValues = 4;
     private const int PrincipalMinimumTokens = ContainerTokens + PrincipalProperties + PrincipalScalarValues + PrincipalArrayValues * ContainerTokens;
-    private const int GrantMinimumTokens = ContainerTokens + GrantProperties * (ScalarTokens + ScalarTokens);
-    internal static McpFrameShape Scalar => new(ScalarTokens, GetScalarPropertyCountEmptyCount);
+    private const int GrantMinimumTokens = ContainerTokens + GrantProperties * (1 + 1);
+    internal static McpFrameShape Scalar => new(1, 0);
 
     internal McpFrameShape Principal(PrincipalRecord principal, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         var shape = Object(PrincipalProperties);
-        for (var index = GetScalarPropertyCountEmptyCount; index < PrincipalScalarValues; index++)
+        for (var index = 0; index < PrincipalScalarValues; index++)
         {
             shape = Add(shape, Scalar);
         }
@@ -47,7 +40,7 @@ internal sealed class McpAuthenticationProjection(bool enforceMcpBounds, IOption
             if (value is ScopeGrant)
             {
                 child = Object(GrantProperties);
-                for (var index = GetScalarPropertyCountEmptyCount; index < GrantProperties; index++)
+                for (var index = 0; index < GrantProperties; index++)
                 {
                     child = Add(child, Scalar);
                 }
@@ -57,12 +50,12 @@ internal sealed class McpAuthenticationProjection(bool enforceMcpBounds, IOption
         return shape;
     }
 
-    internal McpFrameShape Object(int properties) => Check(new(ContainerTokens + properties, properties, ObjectDepthSingleItemCount));
-    internal static McpFrameShape Array => new(ContainerTokens, GetArrayPropertyCountEmptyCount, GetArrayDepthSingleItemCount);
+    internal McpFrameShape Object(int properties) => Check(new(ContainerTokens + properties, properties, 1));
+    internal static McpFrameShape Array => new(ContainerTokens, 0, 1);
 
     internal McpFrameShape Add(McpFrameShape container, McpFrameShape child) => Check(new(
         checked(container.TokenCount + child.TokenCount), checked(container.PropertyCount + child.PropertyCount),
-        Math.Max(container.Depth, checked(child.Depth + AddDepthStep))));
+        Math.Max(container.Depth, checked(child.Depth + 1))));
 
     internal McpFrameShape Check(McpFrameShape shape)
     {
@@ -79,7 +72,7 @@ internal sealed class McpAuthenticationProjection(bool enforceMcpBounds, IOption
     {
         const int RequireCountAbsentCount = 0;
 
-        var tokens = PrincipalMinimumTokens + (long)count * (typeof(T) == typeof(ScopeGrant) ? GrantMinimumTokens : ScalarTokens);
+        var tokens = PrincipalMinimumTokens + (long)count * (typeof(T) == typeof(ScopeGrant) ? GrantMinimumTokens : 1);
         var properties = PrincipalProperties + (typeof(T) == typeof(ScopeGrant) ? (long)count * GrantProperties : RequireCountAbsentCount);
         if (enforceMcpBounds && (tokens > settings.MaximumTokens || properties > settings.MaximumProperties))
         {

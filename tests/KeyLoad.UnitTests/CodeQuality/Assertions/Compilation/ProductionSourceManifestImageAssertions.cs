@@ -9,8 +9,6 @@ internal static class ProductionSourceManifestImageAssertions
 {
     private const int ExpectedReferenceCount = 3;
     private const int CentralInputCount = 6;
-    private const int UnitIndex = 0;
-    private const int RecoveryIndex = 1;
     private const int ClusterIndex = 2;
     private const string UnitSuite = "unit";
     private const string RecoverySuite = "recovery";
@@ -55,13 +53,13 @@ internal static class ProductionSourceManifestImageAssertions
     internal static async Task AssertImagesAsync(string evidenceRoot, JsonElement references, string settingsHash)
     {
         await Assert.That(references.GetArrayLength()).IsEqualTo(ExpectedReferenceCount);
-        await AssertReferenceAsync(references[UnitIndex], UnitSuite, UnitFileName);
-        await AssertReferenceAsync(references[RecoveryIndex], RecoverySuite, RecoveryFileName);
+        await AssertReferenceAsync(references[0], UnitSuite, UnitFileName);
+        await AssertReferenceAsync(references[1], RecoverySuite, RecoveryFileName);
         await AssertReferenceAsync(references[ClusterIndex], ClusterSuite, ClusterFileName);
-        await Assert.That(references[RecoveryIndex].GetProperty(FileNameProperty).GetString()).IsNotEqualTo(
+        await Assert.That(references[1].GetProperty(FileNameProperty).GetString()).IsNotEqualTo(
             references[ClusterIndex].GetProperty(FileNameProperty).GetString());
-        await AssertImageAsync(evidenceRoot, references[UnitIndex], "tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj");
-        await AssertImageAsync(evidenceRoot, references[RecoveryIndex], "tests/KeyLoad.RecoveryTests/KeyLoad.RecoveryTests.csproj");
+        await AssertImageAsync(evidenceRoot, references[0], "tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj");
+        await AssertImageAsync(evidenceRoot, references[1], "tests/KeyLoad.RecoveryTests/KeyLoad.RecoveryTests.csproj");
         await AssertImageAsync(evidenceRoot, references[ClusterIndex], "tests/KeyLoad.IntegrationTests/KeyLoad.IntegrationTests.csproj");
         await AssertSettingsAsync(evidenceRoot, settingsHash);
     }

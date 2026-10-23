@@ -5,13 +5,12 @@ namespace KeyLoad.UnitTests.Features.CodeQuality;
 internal static class SourceProcessOutput
 {
     private const string OutputFailure = "The execution source process exceeded its captured output bound.";
-    private const int MinimumReadLength = 1;
     private const int InitialOutputCapacity = 512;
 
     internal static async Task<string> ReadBoundedAsync(StreamReader reader, int maximumCharacters)
     {
         var builder = new StringBuilder(Math.Min(maximumCharacters, InitialOutputCapacity));
-        var buffer = new char[Math.Max(MinimumReadLength, maximumCharacters)];
+        var buffer = new char[Math.Max(1, maximumCharacters)];
         var exceeded = false;
         while (true)
         {

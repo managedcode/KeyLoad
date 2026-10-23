@@ -13,8 +13,6 @@ public sealed record DatabaseLimits
     public const string ValidationMessage = "Database execution limits must be positive; reserved outbox budgets cannot be negative.";
     private const uint QueueTransferAttemptCeilingField = 20;
     private const uint QueueTransferRepairCeilingField = 21;
-    private const int MinimumExecutionBudget = 1;
-    private const int NoReservedBudget = 0;
     private const int DefaultMaxDocumentBytes = 1_048_576;
     private const int DefaultMaxJsonDepth = 32;
     private const int DefaultMaxBatchMutations = 256;
@@ -113,29 +111,29 @@ public sealed record DatabaseLimits
 
     /// <summary>Checks that execution budgets are positive and optional reserved budgets are nonnegative.</summary>
     /// <returns>Whether the configured budgets are valid.</returns>
-    public bool IsValid() => MaxDocumentBytes >= MinimumExecutionBudget
-        && MaxJsonDepth >= MinimumExecutionBudget
-        && MaxBatchMutations >= MinimumExecutionBudget
-        && MaxBatchBytes >= MinimumExecutionBudget
-        && MaxScanRecords >= MinimumExecutionBudget
-        && MaxResults >= MinimumExecutionBudget
-        && WriterQueueCapacity >= MinimumExecutionBudget
-        && MaxConcurrentQueries >= MinimumExecutionBudget
-        && MaxQueryBytes >= MinimumExecutionBudget
-        && MaxQueryDepth >= MinimumExecutionBudget
-        && MaxQueryTokens >= MinimumExecutionBudget
-        && QueryDeadlineSeconds >= MinimumExecutionBudget
-        && MaxQueryReadBytes >= MinimumExecutionBudget
-        && MaxSearchTextTokens >= MinimumExecutionBudget
-        && MaxOutboxRecords >= MinimumExecutionBudget
-        && MaxOutboxBytes >= MinimumExecutionBudget
-        && ReservedOutboxRecords >= NoReservedBudget
-        && ReservedOutboxBytes >= NoReservedBudget
-        && MaxProjectionConsumers >= MinimumExecutionBudget
-        && MaxProjectionBatchBytes >= MinimumExecutionBudget
-        && (MaxQueueTransferAcceptAttempts is null || MaxQueueTransferAcceptAttempts >= MinimumExecutionBudget
+    public bool IsValid() => MaxDocumentBytes >= 1
+        && MaxJsonDepth >= 1
+        && MaxBatchMutations >= 1
+        && MaxBatchBytes >= 1
+        && MaxScanRecords >= 1
+        && MaxResults >= 1
+        && WriterQueueCapacity >= 1
+        && MaxConcurrentQueries >= 1
+        && MaxQueryBytes >= 1
+        && MaxQueryDepth >= 1
+        && MaxQueryTokens >= 1
+        && QueryDeadlineSeconds >= 1
+        && MaxQueryReadBytes >= 1
+        && MaxSearchTextTokens >= 1
+        && MaxOutboxRecords >= 1
+        && MaxOutboxBytes >= 1
+        && ReservedOutboxRecords >= 0
+        && ReservedOutboxBytes >= 0
+        && MaxProjectionConsumers >= 1
+        && MaxProjectionBatchBytes >= 1
+        && (MaxQueueTransferAcceptAttempts is null || MaxQueueTransferAcceptAttempts >= 1
             && MaxQueueTransferAcceptAttempts <= MaxScanRecords)
-        && (MaxQueueTransferRepairAttempts is null || MaxQueueTransferRepairAttempts >= MinimumExecutionBudget
+        && (MaxQueueTransferRepairAttempts is null || MaxQueueTransferRepairAttempts >= 1
             && MaxQueueTransferRepairAttempts <= MaxScanRecords);
 
     /// <summary>Rejects invalid budgets before database operations are admitted.</summary>

@@ -12,14 +12,13 @@ internal static class SqlNumericRefusalContinuation
     private const string DecimalOverflowSql = "SELECT * FROM orders WHERE number = 79228162514264337593543950336 ORDER BY id";
     private const string NegativeOverflowSql = "SELECT * FROM orders WHERE number = -79228162514264337593543950336 ORDER BY id";
     private const string ExponentOverflowSql = "SELECT * FROM orders WHERE number = 1e100 ORDER BY id";
-    private const int SingleResultByte = 1;
 
     internal static async Task RunAsync(TestDatabase db, QueryEngine engine)
     {
         await RefusalsAsync(db, db.Store, engine);
         await SqlNumericRefusalAssertions.HealthyAsync(db, db.Store, engine, DecimalEndpointsSql);
         var bounded = new QueryEngine(db.Database, UnitExecutionOptions.QueryExecution(
-            new QueryExecutionOptions { MaximumResultBytes = SingleResultByte }));
+            new QueryExecutionOptions { MaximumResultBytes = 1 }));
         await SqlNumericRefusalAssertions.RefusedAsync(db, db.Store, bounded, HealthySql, ErrorCode.BudgetExceeded);
         await SqlNumericRefusalAssertions.HealthyAsync(db, db.Store, engine, HealthySql);
         await ColdAsync(db);

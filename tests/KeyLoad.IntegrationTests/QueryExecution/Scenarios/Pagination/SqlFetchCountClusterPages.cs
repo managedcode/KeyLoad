@@ -36,7 +36,6 @@ internal static class SqlFetchCountClusterPages
     }
 
     private const int WindowCount = 2;
-    private const int WindowOffset = 1;
     private const string CombinedWindow = "SELECT label AS label FROM fetch_count ORDER BY label ASC OFFSET 1 ROWS FETCH NEXT 2 ROWS ONLY";
     private static async Task WindowAsync(RequestCqrsClusterCallers caller, PostgresClusterCaller wire, CancellationToken token)
     {
@@ -46,7 +45,7 @@ internal static class SqlFetchCountClusterPages
         {
             Query = ast.Query with
             {
-                Offset = WindowOffset
+                Offset = 1
             }
         };
         var pages = new[]

@@ -9,8 +9,6 @@ namespace KeyLoad.UnitTests.Features.OrleansExecution;
 
 internal static class RequestCqrsAnnOriginalReplay
 {
-    private const int EmptyPayload = 0;
-
     internal static async Task RequireAsync(RequestCqrsHostedRuntimeFixture fixture,
         AnnMaintenanceRequest request, AnnMaintenanceResult expected, CancellationToken token)
     {
@@ -67,7 +65,7 @@ internal static class RequestCqrsAnnOriginalReplay
             id, fixture.Clock, fixture.RoutingOptions,
             new CqrsStreamPurpose(() => fixture.Codec.VerifyRequest(signed, id)), token);
         await Assert.That(reply.Error).IsEqualTo(expected);
-        await Assert.That(reply.Payload.Length).IsEqualTo(EmptyPayload);
+        await Assert.That(reply.Payload.Length).IsEqualTo(0);
         await Assert.That(fixture.Database.ReadCanonicalCut().AppliedPosition).IsEqualTo(journal.AppliedPosition);
         await Assert.That(fixture.Database.ReadCanonicalCut().AppliedPosition).IsEqualTo(journal.AppliedPosition);
         await UnchangedAsync(fixture, canonical, cut, execution, runtimeRootCore);

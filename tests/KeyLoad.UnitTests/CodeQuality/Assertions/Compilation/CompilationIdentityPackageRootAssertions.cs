@@ -11,11 +11,6 @@ namespace KeyLoad.UnitTests.Features.CodeQuality.Assertions;
 
 internal static class CompilationIdentityPackageRootAssertions
 {
-    private const int SuccessfulExit = 0;
-    private const int RejectedExit = 1;
-    private const int SingleCodeViewRecord = 1;
-    private const int FirstCodeViewRecord = 0;
-    private const int GuidByteOffset = 0;
     private const int GuidByteCount = 16;
     private const int PdbStampByteOffset = 16;
     private const int PdbStampByteCount = 4;
@@ -32,13 +27,13 @@ internal static class CompilationIdentityPackageRootAssertions
 
     internal static async Task SuccessfulProcessAsync(ProductionSourceManifestProcessResult result)
     {
-        await Assert.That(result.ExitCode).IsEqualTo(SuccessfulExit);
+        await Assert.That(result.ExitCode).IsEqualTo(0);
         await Assert.That(result.OriginalExitJoined && result.StandardOutputJoined && result.StandardErrorJoined && result.ProcessDisposed).IsTrue();
     }
 
     internal static async Task CounterfeitRejectedAsync(ProductionSourceManifestProcessResult result)
     {
-        await Assert.That(result.ExitCode).IsEqualTo(RejectedExit);
+        await Assert.That(result.ExitCode).IsEqualTo(1);
         await Assert.That(result.StandardOutput + result.StandardError).Contains(GuardMessage);
         await Assert.That(result.OriginalExitJoined && result.StandardOutputJoined && result.StandardErrorJoined && result.ProcessDisposed).IsTrue();
     }
@@ -79,16 +74,16 @@ internal static class CompilationIdentityPackageRootAssertions
         await Assert.That(pe.GetMetadataReader().GetGuid(module.Mvid)).IsNotEqualTo(Guid.Empty);
         await Assert.That(dllHash.Length).IsEqualTo(SHA256.HashSizeInBytes);
         var entries = pe.ReadDebugDirectory().Where(entry => entry.Type == DebugDirectoryEntryType.CodeView).ToArray();
-        await Assert.That(entries.Length).IsEqualTo(SingleCodeViewRecord);
-        var codeView = pe.ReadCodeViewDebugDirectoryData(entries[FirstCodeViewRecord]);
+        await Assert.That(entries.Length).IsEqualTo(1);
+        var codeView = pe.ReadCodeViewDebugDirectoryData(entries[0]);
         using var pdb = File.OpenRead(fixture.PdbPath);
         var pdbHash = await SHA256.HashDataAsync(pdb, cancellationToken);
         pdb.Position = 0;
         using var provider = MetadataReaderProvider.FromPortablePdbStream(pdb, MetadataStreamOptions.LeaveOpen);
         var identifier = provider.GetMetadataReader().DebugMetadataHeader!.Id;
         await Assert.That(identifier.Length).IsEqualTo(PdbIdentifierBytes);
-        await Assert.That(new Guid(identifier.AsSpan(GuidByteOffset, GuidByteCount))).IsEqualTo(codeView.Guid);
-        await Assert.That(BinaryPrimitives.ReadUInt32LittleEndian(identifier.AsSpan(PdbStampByteOffset, PdbStampByteCount))).IsEqualTo(entries[FirstCodeViewRecord].Stamp);
+        await Assert.That(new Guid(identifier.AsSpan(0, GuidByteCount))).IsEqualTo(codeView.Guid);
+        await Assert.That(BinaryPrimitives.ReadUInt32LittleEndian(identifier.AsSpan(PdbStampByteOffset, PdbStampByteCount))).IsEqualTo(entries[0].Stamp);
         await Assert.That(pdbHash.Length).IsEqualTo(SHA256.HashSizeInBytes);
     }
 

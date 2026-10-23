@@ -35,7 +35,6 @@ internal static class UserAnalyticsProcessProtocol
     internal const double SecondValue = 20d;
     internal const double UpdatedValue = 40d;
     private const int BusinessEpochDays = 2;
-    private const int WindowSeconds = 1;
     private const int MaximumGroups = 10;
     private const long EventCount = 2;
     private const double ExpectedCount = 2d;
@@ -49,7 +48,7 @@ internal static class UserAnalyticsProcessProtocol
     internal static AnalyticsEventData Event(string id, double amount)
         => new(id, Epoch, ImmutableDictionary<string, string>.Empty.Add(Region, North),
             ImmutableDictionary<string, double>.Empty.Add(Amount, amount), null, []);
-    internal static AggregateAnalyticsRequest Query() => new(Partition, Store, Epoch.AddSeconds(-WindowSeconds), Epoch.AddSeconds(WindowSeconds),
+    internal static AggregateAnalyticsRequest Query() => new(Partition, Store, Epoch.AddSeconds(-1), Epoch.AddSeconds(1),
         [Region], [new(Count, string.Empty, AnalyticsAggregateKind.Count), new(Sum, Amount, AnalyticsAggregateKind.Sum),
             new(Average, Amount, AnalyticsAggregateKind.Average), new(Minimum, Amount, AnalyticsAggregateKind.Min),
             new(Maximum, Amount, AnalyticsAggregateKind.Max)], MaximumGroups);

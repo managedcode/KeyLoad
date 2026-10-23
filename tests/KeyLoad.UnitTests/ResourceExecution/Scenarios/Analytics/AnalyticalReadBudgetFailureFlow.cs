@@ -12,7 +12,7 @@ internal static class AnalyticalReadBudgetFailureFlow
         {
             using var fixture = new TestDatabase(new()
             {
-                MaxConcurrentQueries = OneQuery
+                MaxConcurrentQueries = 1
             });
             await ServerFailureObserver.ObserveAsync(async () =>
             {
@@ -49,16 +49,14 @@ internal static class AnalyticalReadBudgetFailureFlow
             new(fixture.Partition, Collection, Field, Term)));
         await Assert.That(rejected.Code).IsEqualTo(ErrorCode.BudgetExceeded);
         await Assert.That(rejected.Message).IsEqualTo(ReadBytesExceeded);
-        await Assert.That(owner.QueryReadsInFlight).IsEqualTo(NoQueries);
+        await Assert.That(owner.QueryReadsInFlight).IsEqualTo(0);
         await Assert.That(await search.SearchAsync(Principal, healthy)).IsEmpty();
-        await Assert.That(owner.QueryReadsInFlight).IsEqualTo(NoQueries);
+        await Assert.That(owner.QueryReadsInFlight).IsEqualTo(0);
         await SearchReadBudgetAssertions.CancelledAsync(search, healthy);
-        await Assert.That(owner.QueryReadsInFlight).IsEqualTo(NoQueries);
+        await Assert.That(owner.QueryReadsInFlight).IsEqualTo(0);
         await Assert.That(await search.SearchAsync(Principal, healthy)).IsEmpty();
         await SearchReadBudgetAssertions.UnchangedAsync(store, image, position, identity);
     }
-    private const int OneQuery = 1;
-    private const int NoQueries = 0;
     private const string Principal = "root";
     private const string Collection = "orders";
     private const string EmptyCollection = "empty";

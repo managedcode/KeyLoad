@@ -5,8 +5,6 @@ internal sealed class ScaleServerResourceSampler(string resourceName, string[] e
     private const int ContainerImageFieldIndex = 4;
     private const int ContainerIncarnationFieldIndex = 5;
 
-    private const int ToRecordEmptyValue = 0;
-
     private const string RunningContainerState = "running";
 
     private const string CgroupRoot = "/sys/fs/cgroup";
@@ -220,7 +218,7 @@ internal sealed class ScaleServerResourceSampler(string resourceName, string[] e
     }
 
     internal ScaleServerContainer? ToRecord()
-        => _samples == ToRecordEmptyValue || _containerId is null || _imageId is null || _startedAt is null || _state is null
+        => _samples == 0 || _containerId is null || _imageId is null || _startedAt is null || _state is null
             || _cpuLimit is null || _memoryLimit is null ? null
             : new(resourceName, _containerId, _imageId, _startedAt, _state, _cpuLimit, _memoryLimit,
                 _effectiveEnvelope!.CpuQuota, _effectiveEnvelope.CpuSet, _effectiveEnvelope.MemoryLimitBytes,

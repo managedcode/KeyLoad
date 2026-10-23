@@ -9,7 +9,6 @@ internal static class QueryAdapterCursorFlow
 {
     private const string Principal = "root";
     private const string Collection = "orders";
-    private const int FirstWave = 0;
     private const int ColdWaves = 2;
     private static readonly Guid SeedId = new("2feebf49-780b-40c1-b2d9-25fce0e1b547");
 
@@ -33,7 +32,7 @@ internal static class QueryAdapterCursorFlow
                 var position = fixture.Store.Position;
                 var identity = JsonDefaults.Serialize(fixture.Store.Identity);
                 fixture.Store.Dispose();
-                for (var wave = FirstWave; wave < ColdWaves; wave++)
+                for (var wave = 0; wave < ColdWaves; wave++)
                 {
                     await ColdAsync(fixture, operation, receipt, image, position, identity);
                 }

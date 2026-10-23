@@ -4,7 +4,6 @@ namespace KeyLoad.UnitTests.Features.OrleansExecution;
 
 internal sealed class ConnectionAwaitedCallback(Exception? failure)
 {
-    private const int FirstInvocation = 1;
     private int invocations;
     internal TaskCompletionSource Arrived { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
     internal TaskCompletionSource Release { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -12,7 +11,7 @@ internal sealed class ConnectionAwaitedCallback(Exception? failure)
 
     internal async ValueTask NotifyAsync(CancellationToken ownerShutdown)
     {
-        if (Interlocked.Increment(ref invocations) != FirstInvocation)
+        if (Interlocked.Increment(ref invocations) != 1)
         {
             throw new InvalidOperationException(ConnectionProtocol.DuplicateObservation);
         }

@@ -4,12 +4,11 @@ namespace KeyLoad.Storage.ZoneTree;
 
 internal static class ZoneTreeValueHeader
 {
-    private const int MarkerOffset = 0;
     private const string Invalid = "A execution stored record has an invalid value header.";
 
     internal static void RequireLive(ReadOnlySpan<byte> value)
     {
-        if (value.IsEmpty || value[MarkerOffset] != LiveValueMarker)
+        if (value.IsEmpty || value[0] != LiveValueMarker)
         {
             throw Errors.Fail(ErrorCode.Corruption, Invalid);
         }

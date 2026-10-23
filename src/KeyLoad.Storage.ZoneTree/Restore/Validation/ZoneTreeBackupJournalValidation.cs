@@ -6,9 +6,6 @@ namespace KeyLoad.Storage.ZoneTree;
 
 internal static class ZoneTreeBackupJournalValidation
 {
-    private const int InitialJournalPosition = 0;
-    private const int FileStartPosition = 0;
-
     private const string JournalIncomplete = "The backup redo journal is incomplete.";
     private const string ManifestCutMismatch = "The backup journal does not match its manifest cut.";
 
@@ -54,16 +51,16 @@ internal static class ZoneTreeBackupJournalValidation
     {
         if (journal.Length < HeaderLength)
         {
-            return InitialJournalPosition;
+            return 0;
         }
         journal.ReadExactly(header);
-        journal.Position = FileStartPosition;
+        journal.Position = 0;
         // Recovery bounds each frame; a compacted checkpoint can have later WAL frames.
         // The observer validates every record without materializing a tree or imposing
         // the standalone-snapshot whole-file size limit on the combined journal.
         var magic = BinaryPrimitives.ReadUInt64LittleEndian(header);
         return magic == CheckpointMagic
             ? ZoneTreeCheckpointReader.Read(journal, options, _ => cancellationToken.ThrowIfCancellationRequested()).Position
-            : InitialJournalPosition;
+            : 0;
     }
 }

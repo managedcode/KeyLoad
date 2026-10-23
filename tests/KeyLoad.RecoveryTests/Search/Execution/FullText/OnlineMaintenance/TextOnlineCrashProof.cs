@@ -5,7 +5,6 @@ namespace KeyLoad.RecoveryTests.Features.Search;
 
 internal static class TextOnlineCrashProof
 {
-    private const int ChecksumByteOffset = 1;
     private const byte ChecksumDamageMask = 1;
     private const double LiteralExpectedSingleHitScore = 1d / 61d;
     private const string ChangedText = "ОНОВЛЕНО";
@@ -74,7 +73,7 @@ internal static class TextOnlineCrashProof
         {
             var envelope = OrleansSerialization.Deserialize<TextEnvelope>(bytes);
             var damaged = envelope.Sha256.ToArray();
-            damaged[^ChecksumByteOffset] ^= ChecksumDamageMask;
+            damaged[^1] ^= ChecksumDamageMask;
             bytes = OrleansSerialization.Serialize(envelope with { Sha256 = damaged });
         }
         var path = Path.Combine(root, TextOnlineRoot.DirectoryName, leaf, TextOnlineStagingFiles.FileName);

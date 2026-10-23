@@ -8,7 +8,6 @@ namespace KeyLoad.UnitTests.Features.TimeSeries;
 internal static class SampleRawIntegrityAssertions
 {
     private const int MaximumImageRecords = 4096;
-    private const int OneMutation = 1;
     private const string ImageBound = "The complete time-series fixture image exceeds its bound.";
     private const string ExpiryKind = "expireSamples";
 
@@ -69,7 +68,7 @@ internal static class SampleRawIntegrityAssertions
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(fixture.Partition.AtomicPartitionId);
         await Assert.That(receipt.Token.Position).IsEqualTo(expectedApplied);
         await Assert.That(fixture.Owner.LastApplied).IsEqualTo(expectedApplied);
-        await Assert.That(receipt.Mutations.Length).IsEqualTo(OneMutation);
+        await Assert.That(receipt.Mutations.Length).IsEqualTo(1);
         var expected = new MutationReceipt(ExpiryKind, SampleAggregateTestData.Set, SampleAggregateTestData.Series, 3);
         await Assert.That(OrleansSerialization.Serialize(receipt.Mutations[0]).SequenceEqual(
             OrleansSerialization.Serialize(expected))).IsTrue();

@@ -11,7 +11,6 @@ internal static class VerifiedBackupMixedCutRefusal
     private const string CliTarget = "mixed-cut-cli-target";
     private const string CorruptionCode = "Corruption";
     private const string CorruptionType = "urn:keyload:error:Corruption";
-    private const int FailedOperationExit = 1;
     private const int CorruptionStatus = (int)System.Net.HttpStatusCode.BadRequest;
 
     internal static async Task RunAsync(EventingArtifactFixture fixture,
@@ -42,7 +41,7 @@ internal static class VerifiedBackupMixedCutRefusal
     private static async Task RequireCliFailureAsync(CliBackupRestoreProcessResult result)
     {
         await CliBackupRestoreAssertions.RejectedProcessAsync(result);
-        await Assert.That(result.ExitCode).IsEqualTo(FailedOperationExit);
+        await Assert.That(result.ExitCode).IsEqualTo(1);
         await Assert.That(result.StandardOutput).IsEqualTo(string.Empty);
         var expected = Errors.Problem(ErrorCode.Corruption, Detail);
         await Assert.That(expected.Type).IsEqualTo(CorruptionType);

@@ -6,11 +6,10 @@ namespace KeyLoad.Server;
 /// <summary>Rejects excessive or duplicate JSON argument structure before canonical DTO allocation.</summary>
 internal sealed class SqlOperationParameterBounds(IOptions<DatabaseLimits> limitsOptions, CancellationToken cancellationToken)
 {
-    private const int InitialContainerDepth = 1;
     private readonly DatabaseLimits limits = limitsOptions.Value;
     private int tokens;
 
-    internal void Visit(JsonElement value, int depth = InitialContainerDepth)
+    internal void Visit(JsonElement value, int depth = 1)
     {
         const int DepthStep = 1;
 

@@ -15,15 +15,10 @@ internal sealed class OrleansTelemetryOptions
     private const int DefaultMaximumEvents = 24;
     private const int DefaultMaximumBaggageItems = 8;
     private const int DefaultMaximumTagValueCharacters = 256;
-    private const int MinimumMaximumTags = 1;
-    private const int MinimumMaximumParentLinks = 0;
-    private const int MinimumMaximumEvents = 1;
-    private const int MinimumMaximumBaggageItems = 0;
     private const int AbsoluteMaximumTags = 32;
     private const int AbsoluteMaximumParentLinks = 32;
     private const int AbsoluteMaximumEvents = 24;
     private const int AbsoluteMaximumBaggageItems = 8;
-    private const int MinimumMaximumTagValueCharacters = 1;
     private const int AbsoluteMaximumTagValueCharacters = 256;
 
     /// <summary>Gets or sets the maximum tags inspected on one activity.</summary>
@@ -48,12 +43,12 @@ internal sealed class OrleansTelemetryOptions
     /// <summary>Checks that all privacy budgets are bounded by the reviewed contract.</summary>
     /// <returns>Whether every configured limit is within its safe range.</returns>
     public bool IsValid()
-        => MaximumTags >= MinimumMaximumTags && MaximumTags <= AbsoluteMaximumTags
-            && MaximumParentLinks >= MinimumMaximumParentLinks
+        => MaximumTags >= 1 && MaximumTags <= AbsoluteMaximumTags
+            && MaximumParentLinks >= 0
             && MaximumParentLinks <= AbsoluteMaximumParentLinks
-            && MaximumEvents >= MinimumMaximumEvents && MaximumEvents <= AbsoluteMaximumEvents
-            && MaximumBaggageItems >= MinimumMaximumBaggageItems
+            && MaximumEvents >= 1 && MaximumEvents <= AbsoluteMaximumEvents
+            && MaximumBaggageItems >= 0
             && MaximumBaggageItems <= AbsoluteMaximumBaggageItems
-            && MaximumTagValueCharacters >= MinimumMaximumTagValueCharacters
+            && MaximumTagValueCharacters >= 1
             && MaximumTagValueCharacters <= AbsoluteMaximumTagValueCharacters;
 }

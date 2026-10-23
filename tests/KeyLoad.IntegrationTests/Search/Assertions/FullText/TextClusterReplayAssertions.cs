@@ -18,14 +18,13 @@ internal static class TextClusterReplayAssertions
     private const int SecondRankDenominator = 62;
     private const int BothBranches = 2;
     private const int MutationCount = 3;
-    private const int InitialPosition = 0;
 
     internal static async Task ReceiptAsync(CommandRequest command, CommitReceipt receipt)
     {
         await Assert.That(receipt.CommandId).IsEqualTo(command.CommandId);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(command.Partition.AtomicPartitionId);
         await Assert.That(receipt.Token.Incarnation).IsNotEqualTo(Guid.Empty);
-        await Assert.That(receipt.Token.Position > InitialPosition).IsTrue();
+        await Assert.That(receipt.Token.Position > 0).IsTrue();
         await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
         await Assert.That(receipt.PersistedCopies).IsEqualTo(3);
         await Assert.That(receipt.Mutations.Length).IsEqualTo(MutationCount);

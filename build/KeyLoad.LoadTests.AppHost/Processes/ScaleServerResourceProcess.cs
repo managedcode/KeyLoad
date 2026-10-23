@@ -6,7 +6,6 @@ namespace KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
 
 internal static partial class ScaleServerResourceProcess
 {
-    private const int RunAsyncFirstPositiveCount = 1;
     private const string ProcessAndCleanupFailureMessage = "Server resource process failed and cleanup also failed.";
 
     private const string ScaleServerResourceProcessMetadataName = "libc";
@@ -59,7 +58,7 @@ internal static partial class ScaleServerResourceProcess
             throw new InvalidDataException(MessageText);
         }
 
-        var errorLimit = Math.Min(budget.Settings.MaxFileBytes, Math.Max(RunAsyncFirstPositiveCount, limit / budget.Settings.StandardErrorOutputDivisor));
+        var errorLimit = Math.Min(budget.Settings.MaxFileBytes, Math.Max(1, limit / budget.Settings.StandardErrorOutputDivisor));
         var outputLimit = limit - errorLimit;
         process.Start();
         var output = ReadBoundedAsync(process.StandardOutput.BaseStream, outputLimit, budget.Settings.RuntimeReadBufferBytes, cancellationToken);

@@ -11,7 +11,6 @@ public static class PredicateEvaluator
     private const string OperandIsInvalidDetail = "An operand is invalid.";
     private const string PredicateIsInvalidDetail = "A predicate is invalid.";
     private const string QueryComparisonsRequireValuesOfTheSameScalarTypeDetail = "Query comparisons require values of the same scalar type.";
-    private const int EqualOrder = 0;
     private const string ComparisonOperatorIsInvalidDetail = "The comparison operator is invalid.";
 
     private const string MissingParameter = "A required query parameter is missing.";
@@ -104,12 +103,12 @@ public static class PredicateEvaluator
         var order = KeyCodec.Encode(left).AsSpan().SequenceCompareTo(KeyCodec.Encode(right));
         return operation switch
         {
-            SqlSyntax.Equals => order == EqualOrder,
-            SqlSyntax.NotEquals or SqlSyntax.AlternateNotEquals => order != EqualOrder,
-            SqlSyntax.Greater => order > EqualOrder,
-            SqlSyntax.GreaterOrEqual => order >= EqualOrder,
-            SqlSyntax.Less => order < EqualOrder,
-            SqlSyntax.LessOrEqual => order <= EqualOrder,
+            SqlSyntax.Equals => order == 0,
+            SqlSyntax.NotEquals or SqlSyntax.AlternateNotEquals => order != 0,
+            SqlSyntax.Greater => order > 0,
+            SqlSyntax.GreaterOrEqual => order >= 0,
+            SqlSyntax.Less => order < 0,
+            SqlSyntax.LessOrEqual => order <= 0,
             _ => throw Errors.Fail(ErrorCode.Validation, ComparisonOperatorIsInvalidDetail)
         };
     }

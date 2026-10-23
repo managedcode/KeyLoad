@@ -9,7 +9,6 @@ internal static class OfflineDescriptorDuplicate
 {
     private const string Libc = "libc";
     private const string DuplicateEntryPoint = "dup";
-    private const int FirstValidDescriptor = 0;
 
     internal static SafeFileHandle Create(SafeFileHandle original)
     {
@@ -56,7 +55,7 @@ internal static class OfflineDescriptorDuplicate
         var duplicate = Marshal.GetDelegateForFunctionPointer<DuplicateDescriptor>(
             NativeLibrary.GetExport(library, DuplicateEntryPoint));
         var descriptor = duplicate(original.DangerousGetHandle().ToInt32());
-        if (descriptor < FirstValidDescriptor)
+        if (descriptor < 0)
         {
             throw new IOException("The execution test descriptor could not be duplicated.", new Win32Exception(Marshal.GetLastPInvokeError()));
         }

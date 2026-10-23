@@ -3,7 +3,6 @@ namespace KeyLoad.AppHost.Features.TestInfrastructure;
 /// <summary>Obtains the launch owner's actual exit status from its execution Aspire owner.</summary>
 internal static class ProjectProcessExitObservation
 {
-    private const int SuccessfulExit = 0;
     private const string UnexpectedSuccessfulExit = "The deliberately killed execution launch owner reported a successful exit.";
 
     internal static async Task<int> ReadAsync(ResourceNotificationService notifications,
@@ -14,7 +13,7 @@ internal static class ProjectProcessExitObservation
             && update.Snapshot.StartTimeStamp?.ToUniversalTime().Ticks == original.AspireStartTimeUtcTicks
             && update.Snapshot.ExitCode is not null, token).ConfigureAwait(false);
         var code = terminal.Snapshot.ExitCode!.Value;
-        if (code == SuccessfulExit)
+        if (code == 0)
         {
             throw new InvalidDataException(UnexpectedSuccessfulExit);
         }

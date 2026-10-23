@@ -7,7 +7,6 @@ namespace KeyLoad.UnitTests.Features.CodeQuality;
 internal sealed record CoverageToolPackage(string Version, string PackageRoot)
 {
     private const int VersionComponentCount = 3;
-    private const int InitialVersionComponent = 0;
     private const char VersionSeparator = '.';
     private const string ToolAssemblyPath = "tools/net8.0/any/dotnet-coverage.dll";
     private const char PathSeparator = '/';
@@ -55,6 +54,6 @@ internal sealed record CoverageToolPackage(string Version, string PackageRoot)
         var components = value.Split(VersionSeparator);
         return components.Length == VersionComponentCount
             && components.All(component => int.TryParse(component, NumberStyles.None,
-                CultureInfo.InvariantCulture, out var number) && number >= InitialVersionComponent);
+                CultureInfo.InvariantCulture, out var number) && number >= 0);
     }
 }

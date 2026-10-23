@@ -5,7 +5,6 @@ namespace KeyLoad.IntegrationTests.Features.ClientApi;
 
 internal sealed class SdkProblemBudgetPublicCallers : IAsyncDisposable
 {
-    private const int MinimumProblemBytes = 1;
     private readonly HttpClient http;
     private SdkProblemBudgetPublicCallers(HttpClient http, KeyLoadClient minimum,
         KeyLoadClient normal, McpOfficialClient mcp)
@@ -36,7 +35,7 @@ internal sealed class SdkProblemBudgetPublicCallers : IAsyncDisposable
         try
         {
             var minimum = new KeyLoadClient(http, secret, IntegrationClientOptions.Execution(
-                new KeyLoadClientExecutionOptions { MaximumProblemBodyBytes = MinimumProblemBytes }));
+                new KeyLoadClientExecutionOptions { MaximumProblemBodyBytes = 1 }));
             var normal = new KeyLoadClient(http, secret, IntegrationClientOptions.Execution());
             var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node3, secret, token);
             return new(http, minimum, normal, mcp);

@@ -7,10 +7,7 @@ namespace KeyLoad.Core;
 internal sealed class QueueDeadlineScan(DatabaseEngine database, IKeyValueView view,
     QueueDeadlineCursor cursor, DuePrefixCursor bounds, DuePageState page)
 {
-    private const int EqualOrder = 0;
     private const int IndexedRecordCost = 2;
-    private const int MetadataRecordCost = 1;
-    private const int LookaheadRecordCost = 1;
     private readonly PriorityQueue<QueueDeadlineHint, DateTimeOffset> hints = new();
     private readonly ImmutableArray<ErrorCode>.Builder rejected = ImmutableArray.CreateBuilder<ErrorCode>();
     private byte[]? last = bounds.LastKey?.ToArray();
@@ -22,17 +19,17 @@ internal sealed class QueueDeadlineScan(DatabaseEngine database, IKeyValueView v
     internal bool Visit(ReadOnlySpan<byte> key, ReadOnlySpan<byte> value)
     {
         page.Check();
-        if (key.SequenceCompareTo(upper.AsSpan()) > EqualOrder)
+        if (key.SequenceCompareTo(upper.AsSpan()) > 0)
         {
             page.ExamineRecord();
             atUpper = true;
             return false;
         }
-        var records = cursor.Next == QueueDeadlineCursor.MetadataIndex ? MetadataRecordCost : IndexedRecordCost;
-        if (page.ExaminedRecords + records + LookaheadRecordCost > page.MaximumRecordsPerPage)
+        var records = cursor.Next == QueueDeadlineCursor.MetadataIndex ? 1 : IndexedRecordCost;
+        if (page.ExaminedRecords + records + 1 > page.MaximumRecordsPerPage)
         {
             page.ExamineRecord();
-            if (records + LookaheadRecordCost > page.MaximumRecordsPerPage)
+            if (records + 1 > page.MaximumRecordsPerPage)
             {
                 throw Errors.Fail(ErrorCode.BudgetExceeded, DueWorkProtocol.RangeBytesExceeded);
             }

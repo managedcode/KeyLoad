@@ -7,8 +7,6 @@ namespace KeyLoad.Comparisons.Targets;
 
 internal static class SurrealDbVectorStorage
 {
-    private const int SingleResultCardinality = 1;
-    private const int EmptyResultCount = 0;
     private const string InvalidReadbackOrder = "SurrealDbReadbackOrderingInvalid";
     private const string InvalidResponse = "SurrealDbInvalidResponse";
     private const string NumberKey = "number";
@@ -17,8 +15,8 @@ internal static class SurrealDbVectorStorage
     private const string PayloadKey = "payload";
     internal static async IAsyncEnumerable<VectorReadback> ReadbackAsync(HttpClient http, string table, ComparisonExecutionOptions policy, int corpusCount, TimeProvider timeProvider, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        var seen = EmptyResultCount;
-        var after = -SingleResultCardinality;
+        var seen = 0;
+        var after = -1;
         while (true)
         {
             using var response = await SurrealDbSqlTransport.QueryAsync(http, SurrealDbVectorProtocol.ReadbackSql(table, after, policy.ReadbackBatchCapacity), policy, cancellationToken: cancellationToken, timeProvider: timeProvider).ConfigureAwait(false);
@@ -28,7 +26,7 @@ internal static class SurrealDbVectorStorage
                 throw new InvalidDataException(InvalidResponse);
             }
 
-            if (rows.GetArrayLength() == EmptyResultCount)
+            if (rows.GetArrayLength() == 0)
             {
                 break;
             }
@@ -60,16 +58,16 @@ internal static class SurrealDbVectorStorage
     {
         using var response = await SurrealDbSqlTransport.QueryAsync(http, SurrealDbVectorProtocol.ReadOneSql(table, id), policy, cancellationToken: cancellationToken, timeProvider: timeProvider).ConfigureAwait(false);
         var result = SurrealDbVectorProtocol.SingleResult(response.RootElement);
-        if (result.ValueKind != JsonValueKind.Array || result.GetArrayLength() > SingleResultCardinality)
+        if (result.ValueKind != JsonValueKind.Array || result.GetArrayLength() > 1)
         {
             throw new InvalidDataException(InvalidResponse);
         }
-        if (result.GetArrayLength() == EmptyResultCount)
+        if (result.GetArrayLength() == 0)
         {
             return null;
         }
 
-        var row = result[EmptyResultCount];
+        var row = result[0];
         var vector = SurrealDbVectorProtocol.ReadVector(row.GetProperty(EmbeddingKey));
         return new(row.GetProperty(NumberKey).GetInt32(), SurrealDbVectorProtocol.ReadRecordId(table, row.GetProperty(IdKey)), vector.Length, VectorComparisonCorpus.HashVector(vector), Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(SurrealDbVectorProtocol.ReadRequiredString(row, PayloadKey)))));
     }

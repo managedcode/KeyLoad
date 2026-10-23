@@ -10,10 +10,8 @@ internal sealed class AtomicPartitionRosterFrameBudgetTests
 {
     private const string RootPrincipalId = "root";
     private const string DocumentId = "roster-document";
-    private const int NoFrameBytes = 0;
     private const int JournalFrameLimit = int.MaxValue;
     private const int DocumentPayloadBudgetDivisor = 4;
-    private const int OneRosterMutation = 1;
 
     [Test]
     public async Task AcBackup004RosterFrameExhaustionPersistsRejectedOutcomeWithoutEffect()
@@ -30,7 +28,7 @@ internal sealed class AtomicPartitionRosterFrameBudgetTests
         await Assert.That(Errors.Code(successful.Problem)).IsNull();
         var mutations = ReadLatestMutations(calibration.JournalPath);
         var rosterKey = AtomicPartitionRosterKeys.Partition(AtomicPartitionRosterFixture.Source);
-        await Assert.That(mutations.Count(mutation => mutation.Key.Span.SequenceEqual(rosterKey))).IsEqualTo(OneRosterMutation);
+        await Assert.That(mutations.Count(mutation => mutation.Key.Span.SequenceEqual(rosterKey))).IsEqualTo(1);
         var withoutRoster = mutations.Where(mutation => !mutation.Key.Span.SequenceEqual(rosterKey)).ToArray();
         var frameLimit = ZoneTreeJournalCodec.Serialize(withoutRoster, JournalFrameLimit).Length;
         var completeLength = ZoneTreeJournalCodec.Serialize(mutations, JournalFrameLimit).Length;
@@ -60,7 +58,7 @@ internal sealed class AtomicPartitionRosterFrameBudgetTests
     private static StorageMutation[] ReadLatestMutations(string journalPath)
     {
         var bytes = File.ReadAllBytes(journalPath);
-        var offset = NoFrameBytes;
+        var offset = 0;
         StorageMutation[]? latest = null;
         while (offset < bytes.Length)
         {

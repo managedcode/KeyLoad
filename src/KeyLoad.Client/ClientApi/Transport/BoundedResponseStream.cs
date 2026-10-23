@@ -3,7 +3,6 @@ namespace KeyLoad.Client.Features.ClientApi;
 /// <summary>Admits one finite JSON response without owning or buffering its original body.</summary>
 internal sealed class BoundedResponseStream(Stream body, int maximumBytes) : Stream
 {
-    private const int OverflowProbeBytes = 1;
     private const string Excess = "The SDK response exceeded its configured byte limit.";
     private int consumed;
 
@@ -44,7 +43,7 @@ internal sealed class BoundedResponseStream(Stream body, int maximumBytes) : Str
     public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         => ReadAsync(buffer.AsMemory(offset, count), cancellationToken).AsTask();
 
-    private int Allowed(int requested) => Math.Min(requested, maximumBytes - consumed + OverflowProbeBytes);
+    private int Allowed(int requested) => Math.Min(requested, maximumBytes - consumed + 1);
 
     private void Charge(int read)
     {

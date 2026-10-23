@@ -5,11 +5,6 @@ namespace KeyLoad.Storage.ZoneTree;
 
 internal static class ZoneTreeJournalRecovery
 {
-    private const int InitialJournalPosition = 0;
-    private const int FileStartPosition = 0;
-    private const int EmptyFrameLength = 0;
-    private const int NextJournalSequenceIncrement = 1;
-
     internal static void Recover(ZoneTreeStoreRuntime runtime)
     {
         var header = new byte[HeaderLength];
@@ -30,15 +25,15 @@ internal static class ZoneTreeJournalRecovery
     {
         if (runtime.Journal.Length < HeaderLength)
         {
-            return InitialJournalPosition;
+            return 0;
         }
 
         runtime.Journal.ReadExactly(header);
-        runtime.Journal.Position = FileStartPosition;
+        runtime.Journal.Position = 0;
         var magic = BinaryPrimitives.ReadUInt64LittleEndian(header);
         if (magic != CheckpointMagic)
         {
-            return InitialJournalPosition;
+            return 0;
         }
 
         var checkpoint = ZoneTreeCheckpointReader.Read(runtime.Journal, runtime.Options, runtime.Apply);
@@ -83,8 +78,8 @@ internal static class ZoneTreeJournalRecovery
 
         var length = BinaryPrimitives.ReadInt32LittleEndian(header.AsSpan(PayloadLengthOffset));
         var sequence = BinaryPrimitives.ReadInt64LittleEndian(header.AsSpan(SequenceOffset));
-        if (length <= EmptyFrameLength || length > maxFrameBytes || position == long.MaxValue
-            || sequence != position + NextJournalSequenceIncrement)
+        if (length <= 0 || length > maxFrameBytes || position == long.MaxValue
+            || sequence != position + 1)
         {
             throw Errors.Fail(ErrorCode.Corruption, JournalSequenceInvalid);
         }

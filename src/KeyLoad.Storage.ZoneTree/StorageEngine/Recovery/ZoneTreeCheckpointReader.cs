@@ -4,13 +4,6 @@ namespace KeyLoad.Storage.ZoneTree;
 
 internal static class ZoneTreeCheckpointReader
 {
-    private const int InitialRecordCount = 0;
-    private const int InitialAppliedPosition = 0;
-    private const int InitialSnapshotPosition = 0;
-    private const int EmptyRecordCount = 0;
-    private const int EmptyKeyLength = 0;
-    private const int EqualKeys = 0;
-
     internal static StorageSnapshot Read(FileStream input, ZoneTreeStoreOptions options,
         Action<StorageMutation>? apply = null, Action<StorageMutation>? validate = null,
         ZoneTreeCheckpointBudget? work = null)
@@ -41,8 +34,8 @@ internal static class ZoneTreeCheckpointReader
     {
         using var digest = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
         ZoneTreeCheckpointMetadata? metadata = null;
-        long count = InitialRecordCount;
-        long applied = InitialAppliedPosition;
+        long count = 0;
+        long applied = 0;
         ReadOnlyMemory<byte>? previousKey = null;
         var appliedKey = KeyCodec.Encode(ZoneTreePersistenceFormat.SystemNamespace, ZoneTreePersistenceFormat.LastAppliedKey);
         while (true)
@@ -71,7 +64,7 @@ internal static class ZoneTreeCheckpointReader
 
                 ApplyRecords(frame.Payload, appliedKey, apply, mutation =>
                 {
-                    budget.Charge(InitialRecordCount);
+                    budget.Charge(0);
                     validate?.Invoke(mutation);
                 }, ref count, ref applied, ref previousKey);
             }
@@ -95,7 +88,7 @@ internal static class ZoneTreeCheckpointReader
             throw Errors.Fail(ErrorCode.FormatUnsupported, ZoneTreePersistenceFormat.SnapshotFormatUnsupported);
         }
 
-        if (metadata.Position < InitialSnapshotPosition || metadata.AppliedPosition < InitialSnapshotPosition || metadata.Incarnation == Guid.Empty
+        if (metadata.Position < 0 || metadata.AppliedPosition < 0 || metadata.Incarnation == Guid.Empty
             || frame.Position != metadata.Position)
         {
             throw Errors.Fail(ErrorCode.Corruption, ZoneTreePersistenceFormat.CheckpointCutInvalid);
@@ -115,14 +108,14 @@ internal static class ZoneTreeCheckpointReader
         var records = OrleansSerialization.Deserialize<StorageMutation[]>(payload);
         var lastKey = previousKey;
         var nextApplied = applied;
-        if (records.Length == EmptyRecordCount)
+        if (records.Length == 0)
         {
             throw Errors.Fail(ErrorCode.Corruption, ZoneTreePersistenceFormat.CheckpointRecordsInvalid);
         }
         foreach (var mutation in records)
         {
-            if (mutation is null || mutation.Key.Length == EmptyKeyLength || mutation.Value is null
-                || lastKey is { } priorKey && priorKey.Span.SequenceCompareTo(mutation.Key.Span) >= EqualKeys)
+            if (mutation is null || mutation.Key.Length == 0 || mutation.Value is null
+                || lastKey is { } priorKey && priorKey.Span.SequenceCompareTo(mutation.Key.Span) >= 0)
             {
                 throw Errors.Fail(ErrorCode.Corruption, ZoneTreePersistenceFormat.CheckpointRecordsInvalid);
             }
@@ -131,7 +124,7 @@ internal static class ZoneTreeCheckpointReader
             if (mutation.Key.Span.SequenceEqual(appliedKey.Span))
             {
                 nextApplied = OrleansSerialization.Deserialize<long>(mutation.Value.Value.Span);
-                if (nextApplied < InitialAppliedPosition)
+                if (nextApplied < 0)
                 {
                     throw Errors.Fail(ErrorCode.Corruption, ZoneTreePersistenceFormat.CheckpointRecordsInvalid);
                 }

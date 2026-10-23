@@ -2,8 +2,6 @@ namespace KeyLoad.UnitTests.Features.DatabaseComposition;
 
 internal sealed class TypedQueueGraphReplayTests
 {
-    private const int PartitionFault = 0;
-    private const int CollectionFault = 1;
     private const int IdFault = 2;
 
     [Test]
@@ -11,7 +9,7 @@ internal sealed class TypedQueueGraphReplayTests
     {
         foreach (var from in new[] { true, false })
         {
-            foreach (var component in new[] { PartitionFault, CollectionFault, IdFault })
+            foreach (var component in new[] { 0, 1, IdFault })
             {
                 var failures = new List<Exception>();
                 await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>

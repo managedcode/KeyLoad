@@ -2,9 +2,7 @@ namespace KeyLoad.Storage.ZoneTree;
 
 internal sealed class ZoneTreeStagedEntryComparer : IComparer<ZoneTreeStagedEntry>
 {
-    private const int EqualKeys = 0;
     private const int LowerKey = -1;
-    private const int HigherKey = 1;
 
     internal static ZoneTreeStagedEntryComparer Instance { get; } = new();
 
@@ -12,7 +10,7 @@ internal sealed class ZoneTreeStagedEntryComparer : IComparer<ZoneTreeStagedEntr
     {
         if (ReferenceEquals(left, right))
         {
-            return EqualKeys;
+            return 0;
         }
         if (left is null)
         {
@@ -20,11 +18,11 @@ internal sealed class ZoneTreeStagedEntryComparer : IComparer<ZoneTreeStagedEntr
         }
         if (right is null)
         {
-            return HigherKey;
+            return 1;
         }
         if (left.IsHigh)
         {
-            return HigherKey;
+            return 1;
         }
         if (right.IsHigh)
         {

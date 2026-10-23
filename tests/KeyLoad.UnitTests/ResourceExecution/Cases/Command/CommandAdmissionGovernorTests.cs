@@ -5,8 +5,6 @@ internal sealed class CommandAdmissionGovernorTests
     private const long FullDataLaneRetainedByteCapacity = 4_096;
     private const int ReservedDispatchCommandCapacity = 2;
     private const long ReservedDispatchRetainedByteCapacity = 8_200;
-    private const int DispatchReservationPayloadBytes = 1;
-    private const int DispatchReservationPayloadCharacters = 1;
     private static CommandAdmissionLease Reserve(CommandAdmissionGovernor governor, OperationKind kind, PrincipalRecord principal,
         int bytes, int characters, CancellationToken? cancellationToken = null)
         => governor.Reserve(kind, principal, bytes, characters, cancellationToken ?? TestContext.Current!.Execution.CancellationToken);
@@ -72,7 +70,7 @@ internal sealed class CommandAdmissionGovernorTests
             MaxRetainedBytes = FullDataLaneRetainedByteCapacity,
             ReservedControlCommands = ReservedDispatchCommandCapacity,
             ReservedControlBytes = ReservedDispatchRetainedByteCapacity,
-            MaxControlPayloadBytes = DispatchReservationPayloadBytes
+            MaxControlPayloadBytes = 1
         }));
         using var data = Reserve(governor, OperationKind.Batch, Principal(), 0, 0);
         var fullData = governor.Snapshot();
@@ -80,15 +78,15 @@ internal sealed class CommandAdmissionGovernorTests
             Reserve(governor, OperationKind.Batch, Principal("other"), 0, 0)).Code).IsEqualTo(ErrorCode.ResourceExhausted);
         await Assert.That(governor.Snapshot()).IsEqualTo(fullData);
         using var dispatch = Reserve(governor, OperationKind.SetDispatch, Principal("root"),
-            DispatchReservationPayloadBytes, DispatchReservationPayloadCharacters);
+            1, 1);
         using var secondDispatch = Reserve(governor, OperationKind.SetDispatch, Principal("root"),
-            DispatchReservationPayloadBytes, DispatchReservationPayloadCharacters);
+            1, 1);
         var fullControl = governor.Snapshot();
         await Assert.That(fullControl.ControlCommands).IsEqualTo(ReservedDispatchCommandCapacity);
         await Assert.That(fullControl.ControlRetainedBytes).IsEqualTo(ReservedDispatchRetainedByteCapacity);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() =>
             Reserve(governor, OperationKind.SetDispatch, Principal("root"),
-                DispatchReservationPayloadBytes, DispatchReservationPayloadCharacters)).Code).IsEqualTo(ErrorCode.ResourceExhausted);
+                1, 1)).Code).IsEqualTo(ErrorCode.ResourceExhausted);
         await Assert.That(governor.Snapshot()).IsEqualTo(fullControl);
         dispatch.Dispose();
         dispatch.Dispose();

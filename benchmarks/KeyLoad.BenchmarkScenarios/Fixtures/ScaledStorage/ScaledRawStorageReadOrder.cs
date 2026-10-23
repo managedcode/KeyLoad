@@ -8,7 +8,6 @@ namespace KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
 /// <summary>Retains one deterministic shuffled permutation and independent wrapping cursors.</summary>
 internal sealed class ScaledRawStorageReadOrder
 {
-    private const int MinimumRecordCount = 1;
     private const int MaximumRecordCount = 1_000_000;
     private readonly int cancellationCheckInterval;
     private const int EncodedIndexBytes = sizeof(int);
@@ -23,7 +22,7 @@ internal sealed class ScaledRawStorageReadOrder
     /// <summary>Builds the scale SplitMix64 Fisher-Yates order within the supplied cancellation scope.</summary>
     public ScaledRawStorageReadOrder(int recordCount, IOptions<ScaledStorageExecutionOptions> executionOptions, CancellationToken cancellationToken = default)
     {
-        if (recordCount is < MinimumRecordCount or > MaximumRecordCount)
+        if (recordCount is < 1 or > MaximumRecordCount)
         {
             throw new ArgumentOutOfRangeException(nameof(recordCount));
         }

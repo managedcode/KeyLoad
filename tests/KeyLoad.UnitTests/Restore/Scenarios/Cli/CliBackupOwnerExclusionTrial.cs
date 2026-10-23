@@ -12,7 +12,6 @@ internal static class CliBackupOwnerExclusionTrial
 {
     private const int MaximumFixtureRows = 128;
     private const string AdditionalBackupName = "cli-owner-exclusion-backup";
-    private const int RejectedCliExitCode = 1;
     private const int UnavailableSourceStatusCode = 503;
     private const string UnavailableSourceType = "urn:keyload:error:RecoveryRequired";
     private const string UnavailableSourceCode = "RecoveryRequired";
@@ -63,7 +62,7 @@ internal static class CliBackupOwnerExclusionTrial
         var result = await CliBackupRestoreProcess.RunAsync(options,
             ["backup", fixture.Source, destination], token);
         await CliBackupRestoreAssertions.RejectedProcessAsync(result);
-        await Assert.That(result.ExitCode).IsEqualTo(RejectedCliExitCode);
+        await Assert.That(result.ExitCode).IsEqualTo(1);
         await Assert.That(result.StandardError.Length <= options.Value.CleanupOutputCharacters).IsTrue();
         var problem = JsonSerializer.Deserialize<Problem>(result.StandardError, JsonDefaults.Options);
         await Assert.That(problem).IsNotNull();

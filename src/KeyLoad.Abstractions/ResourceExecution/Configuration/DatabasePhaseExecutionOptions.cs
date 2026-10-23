@@ -10,10 +10,8 @@ public sealed record DatabasePhaseExecutionOptions
     public const string SectionName = "KeyLoad:DatabasePhaseExecution";
     /// <summary>The validation failure detail.</summary>
     public const string ValidationMessage = "The database phase execution settings are invalid.";
-    private const int SingleStripe = 1;
     private const int TwoStripes = 2;
     private const int DefaultStripeCount = 4;
-    private const int MinimumCasAttempts = 1;
     private const int DefaultMaximumCasAttempts = 4;
 
     /// <summary>Whether this physical process records optional phase counters.</summary>
@@ -27,8 +25,8 @@ public sealed record DatabasePhaseExecutionOptions
     public int MaximumCasAttempts { get; init; } = DefaultMaximumCasAttempts;
 
     /// <summary>Whether settings preserve the existing qualified memory and work ceilings.</summary>
-    public bool IsValid() => StripeCount is SingleStripe or TwoStripes or DefaultStripeCount
-        && MaximumCasAttempts is >= MinimumCasAttempts and <= DefaultMaximumCasAttempts;
+    public bool IsValid() => StripeCount is 1 or TwoStripes or DefaultStripeCount
+        && MaximumCasAttempts is >= 1 and <= DefaultMaximumCasAttempts;
 
     /// <summary>Rejects malformed settings before physical resource ownership.</summary>
     public void Validate()

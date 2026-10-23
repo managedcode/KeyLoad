@@ -8,14 +8,6 @@ namespace KeyLoad.Core.Features.StoragePartitions.Queries;
 /// <summary>Reads exact bounded raw records from a caller-owned committed view.</summary>
 internal static class PartitionRecordPageReader
 {
-    private const int InitialRetainedBytes = 0;
-    private const int InitialExaminedBytes = 0;
-    private const int MinimumReadBytes = 0;
-    private const int EmptyPageRecordCount = 0;
-    private const int MinimumExaminedByteCount = 0;
-
-    private const int LastReturnedRecordOffset = 1;
-
     private const string ExaminedBudgetExceeded = "The partition record page exceeds its examined-byte budget.";
     internal const string RetainedBudgetExceeded = "The partition record page exceeds its retained-byte budget.";
     private const string RuntimeInvalidAccounting = "The storage view returned inconsistent range accounting.";
@@ -37,19 +29,17 @@ internal static class PartitionRecordPageReader
         string family, int maxRecords, long maxRetainedBytes, long maxExaminedBytes,
         StorageReadObserver? observer, ReadOnlyMemory<byte> afterKey, CancellationToken cancellationToken)
     {
-
         cancellationToken.ThrowIfCancellationRequested();
         var prefix = PartitionRecordValidation.ValidateRequest(view, partition, family,
             maxRecords, maxRetainedBytes, maxExaminedBytes, afterKey, out var ownedAfterKey);
         var records = new List<KeyValueRecord>();
-        long retainedBytes = InitialRetainedBytes;
-        long examinedBytes = InitialExaminedBytes;
+        long retainedBytes = 0;
+        long examinedBytes = 0;
 
         void ChargeExamined(long byteCount)
         {
-
             cancellationToken.ThrowIfCancellationRequested();
-            if (byteCount < MinimumExaminedByteCount || byteCount > maxExaminedBytes - examinedBytes)
+            if (byteCount < 0 || byteCount > maxExaminedBytes - examinedBytes)
             {
                 throw Errors.Fail(ErrorCode.BudgetExceeded, ExaminedBudgetExceeded);
             }
@@ -76,9 +66,9 @@ internal static class PartitionRecordPageReader
         var range = view.VisitRange(prefix, maxRecords, RetainRecord, ownedAfterKey,
             observer: ChargeExamined, cancellationToken: cancellationToken);
         cancellationToken.ThrowIfCancellationRequested();
-        if (range.ReadBytes != examinedBytes || range.ReadBytes < MinimumReadBytes
+        if (range.ReadBytes != examinedBytes || range.ReadBytes < 0
             || range.Records != records.Count || range.StoppedByVisitor
-            || (range.HasMore && records.Count == EmptyPageRecordCount))
+            || (range.HasMore && records.Count == 0))
         {
             throw Errors.Fail(ErrorCode.Corruption, RuntimeInvalidAccounting);
         }
@@ -86,7 +76,7 @@ internal static class PartitionRecordPageReader
         ReadOnlyMemory<byte>? continuation = null;
         if (range.HasMore)
         {
-            var continuationKey = records[^LastReturnedRecordOffset].Key;
+            var continuationKey = records[^1].Key;
             ReserveContinuation(continuationKey.Length, maxRetainedBytes, ref retainedBytes);
             continuation = continuationKey.ToArray();
         }

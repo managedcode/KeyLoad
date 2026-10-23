@@ -4,8 +4,6 @@ namespace KeyLoad.Core.Features.TimeSeries;
 
 internal static class SampleLatestReader
 {
-    private const int OneSample = 1;
-
     internal static LatestSampleResult Read(DatabaseEngine database, IKeyValueView view, string principalId,
         ReadLatestSampleRequest request, ReadExecutionBudget budget)
     {
@@ -15,7 +13,7 @@ internal static class SampleLatestReader
         var retention = SampleRetentionStateReader.Read(view, request.Partition, request.Set, request.SeriesId, budget);
         SampleRecord? selected = null;
         budget.Check();
-        view.VisitReverseRange(scope.Prefix, OneSample, (key, value) =>
+        view.VisitReverseRange(scope.Prefix, 1, (key, value) =>
         {
             var sample = SampleRawReadDecoder.Read(key, value,
                 request.Partition, request.Set, request.SeriesId);

@@ -8,7 +8,6 @@ internal sealed class QueueLifecycleRecorder(DatabaseEngine database, QueueLaneR
     Func<string, EnqueueMessage> literal)
 {
     private const int MetadataReadBound = 16;
-    private const int NextCommitPosition = 1;
     private const string Subject = "root";
     private const string MetadataFamily = "message-meta";
     private const string CounterFamily = "queue-counters";
@@ -36,7 +35,7 @@ internal sealed class QueueLifecycleRecorder(DatabaseEngine database, QueueLaneR
         var store = owner.Store;
         var placement = owner.ReadAtomicPartitionPlacement(Subject, lane.Partition);
         var token = new CommitToken(placement.Incarnation, lane.Partition.AtomicPartitionId,
-            checked(owner.LastApplied + NextCommitPosition));
+            checked(owner.LastApplied + 1));
         var before = store.Read(view =>
         {
             var page = view.Scan(KeySpace.Partition(MetadataFamily, lane.Partition, lane.Queue), MetadataReadBound);

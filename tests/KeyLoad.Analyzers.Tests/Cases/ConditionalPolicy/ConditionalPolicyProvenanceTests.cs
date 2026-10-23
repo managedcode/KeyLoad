@@ -31,7 +31,6 @@ internal sealed class ConditionalPolicyProvenanceTests
             internal static class Subject
             {
                 private const int PredicateOnlyDeadline = 15;
-                private const int PatternTag = 1;
                 internal static System.Threading.Tasks.Task Conditional(
                     Microsoft.Extensions.Options.IOptions<Policy> configured, bool choose, System.TimeSpan supplied) =>
                     System.Threading.Tasks.Task.Delay(choose ? configured.Value.Timeout : supplied);
@@ -52,7 +51,7 @@ internal sealed class ConditionalPolicyProvenanceTests
                 internal static System.Threading.Tasks.Task PredicateOnly(bool ready, int supplied) =>
                     System.Threading.Tasks.Task.Delay(PredicateOnlyDeadline > 0 && ready ? supplied : supplied);
                 internal static System.Threading.Tasks.Task PatternOnly(int mode, int supplied) =>
-                    System.Threading.Tasks.Task.Delay(mode switch { PatternTag => supplied, _ => supplied });
+                    System.Threading.Tasks.Task.Delay(mode switch { 1 => supplied, _ => supplied });
             }
             """;
 

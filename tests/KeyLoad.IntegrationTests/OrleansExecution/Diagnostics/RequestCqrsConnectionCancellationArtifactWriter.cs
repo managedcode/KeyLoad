@@ -5,7 +5,6 @@ namespace KeyLoad.IntegrationTests.Features.OrleansExecution;
 
 internal static class RequestCqrsConnectionCancellationArtifactWriter
 {
-    private const int ArtifactVersion = 1;
     private const int MaximumKilobytes = 16;
     private const int BytesPerKilobyte = 1_024;
     private const int MaximumArtifactBytes = MaximumKilobytes * BytesPerKilobyte;
@@ -19,7 +18,7 @@ internal static class RequestCqrsConnectionCancellationArtifactWriter
 
     internal static string Write(Guid waveId, RequestCqrsConnectionCancellationNodeSnapshot[] nodes)
     {
-        var original = new RequestCqrsConnectionCancellationArtifact(ArtifactVersion, waveId, nodes);
+        var original = new RequestCqrsConnectionCancellationArtifact(1, waveId, nodes);
         var bytes = JsonSerializer.SerializeToUtf8Bytes(original);
         if (bytes.Length > MaximumArtifactBytes)
         {

@@ -8,9 +8,6 @@ namespace KeyLoad.Query;
 internal sealed class RelationalQueryOperandBinding(Dictionary<string, RelationalColumn> columns,
     Dictionary<string, JsonElement>? parameters)
 {
-    private const int TopLevelSegments = 1;
-    private const int ColumnSegment = 0;
-
     internal Type Field(string path)
     {
         if (path == SqlSyntax.MetadataIdPath)
@@ -22,7 +19,7 @@ internal sealed class RelationalQueryOperandBinding(Dictionary<string, Relationa
             return typeof(decimal);
         }
         var segments = JsonData.PathSegments(path);
-        if (segments.Length != TopLevelSegments || !columns.TryGetValue(segments[ColumnSegment], out var column))
+        if (segments.Length != 1 || !columns.TryGetValue(segments[0], out var column))
         {
             throw Errors.Fail(ErrorCode.Validation, RelationalQueryBinding.InvalidDetail);
         }

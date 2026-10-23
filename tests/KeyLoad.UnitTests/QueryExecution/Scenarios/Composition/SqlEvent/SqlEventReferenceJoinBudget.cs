@@ -7,7 +7,6 @@ namespace KeyLoad.UnitTests.Features.QueryExecution;
 internal static class SqlEventReferenceJoinBudget
 {
     private const int TenObservedRecords = 10;
-    private const int BoundaryByte = 1;
 
     internal static async Task RunAsync(TestDatabase database)
     {
@@ -60,14 +59,14 @@ internal static class SqlEventReferenceJoinBudget
         var normal = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution()).Execute("root", request);
         await SqlEventReferenceJoinAssertions.PageAsync(normal, position);
         var observedBytes = JsonDefaults.Serialize(normal).Length;
-        await Assert.That(observedBytes).IsGreaterThan(BoundaryByte);
+        await Assert.That(observedBytes).IsGreaterThan(1);
         var exact = Engine(database, database.Database.Limits,
             new global::KeyLoad.Query.QueryExecutionOptions { MaximumResultBytes = observedBytes });
         await SqlEventReferenceJoinAssertions.PageAsync(exact.Execute("root", request), position);
         await SqlEventReferenceJoinAssertions.PageAsync(exact.ExecuteAst("root",
             SqlEventReferenceJoinFixture.Ast(database.Partition)), position);
         var oneLess = Engine(database, database.Database.Limits,
-            new global::KeyLoad.Query.QueryExecutionOptions { MaximumResultBytes = observedBytes - BoundaryByte });
+            new global::KeyLoad.Query.QueryExecutionOptions { MaximumResultBytes = observedBytes - 1 });
         await SqlEventReferenceJoinAssertions.RejectAsync(database,
             () => oneLess.Execute("root", request), ErrorCode.BudgetExceeded);
         await SqlEventReferenceJoinAssertions.RejectAsync(database,
@@ -83,7 +82,7 @@ internal static class SqlEventReferenceJoinBudget
             .Execute("root", ast, budget);
         await SqlEventReferenceJoinAssertions.PageAsync(observed, position);
         var observedBytes = budget.ReadBytes;
-        await Assert.That(observedBytes).IsGreaterThan(BoundaryByte);
+        await Assert.That(observedBytes).IsGreaterThan(1);
         var exact = Engine(database, database.Database.Limits with
         {
             MaxQueryReadBytes = observedBytes
@@ -93,7 +92,7 @@ internal static class SqlEventReferenceJoinBudget
         await SqlEventReferenceJoinAssertions.PageAsync(exact.ExecuteAst("root", ast), position);
         var oneLess = Engine(database, database.Database.Limits with
         {
-            MaxQueryReadBytes = observedBytes - BoundaryByte
+            MaxQueryReadBytes = observedBytes - 1
         });
         await SqlEventReferenceJoinAssertions.RejectAsync(database, () => oneLess.Execute("root",
             SqlEventReferenceJoinFixture.Request(database.Partition)), ErrorCode.BudgetExceeded);

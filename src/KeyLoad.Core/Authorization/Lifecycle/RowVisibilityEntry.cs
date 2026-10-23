@@ -42,24 +42,14 @@ internal sealed class RowVisibilityEntry(
                 acquired = null;
                 index.Add(id);
             }
-            catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is null)
-            {
-                primary = error;
-                throw;
-            }
-            catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is not null)
+            catch (Exception error)
             {
                 primary = error;
                 throw;
             }
             finally { acquired?.Dispose(); }
         }
-        catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is null)
-        {
-            RowVisibilityFailureLedger.ThrowJoined(primary, error);
-            throw;
-        }
-        catch (Exception error) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(error) is not null)
+        catch (Exception error)
         {
             RowVisibilityFailureLedger.ThrowJoined(primary, error);
             throw;

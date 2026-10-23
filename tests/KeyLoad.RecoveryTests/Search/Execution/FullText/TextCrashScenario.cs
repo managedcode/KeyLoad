@@ -10,8 +10,6 @@ namespace KeyLoad.RecoveryTests.Features.Search;
 
 internal static class TextCrashScenario
 {
-    private const int ModeArgumentFromEnd = 1;
-
     internal const string Mode = "execution-text-projection-process";
     private const int ArgumentCount = 5;
     private const string FirstDocumentId = "execution-a";
@@ -37,7 +35,7 @@ internal static class TextCrashScenario
         const int TryRunAsyncArgsComponentIndex = 3;
 
         ArgumentNullException.ThrowIfNull(args);
-        if (args.Length != ArgumentCount || !string.Equals(args[^ModeArgumentFromEnd], Mode, StringComparison.Ordinal))
+        if (args.Length != ArgumentCount || !string.Equals(args[^1], Mode, StringComparison.Ordinal))
         {
             return false;
         }

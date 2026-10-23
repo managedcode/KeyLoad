@@ -9,8 +9,6 @@ namespace KeyLoad.Storage.ZoneTree;
 
 internal sealed class ZoneTreeStoreRuntime : IDisposable
 {
-    private const int ValueMarkerOffset = 0;
-
     private bool disposed;
     private readonly Lock disposalGate = new();
     private bool closeAttempted;
@@ -132,7 +130,7 @@ internal sealed class ZoneTreeStoreRuntime : IDisposable
             {
                 var logicalValue = mutation.Value.Value;
                 var value = new byte[logicalValue.Length + StorageValueHeaderBytes];
-                value[ValueMarkerOffset] = LiveValueMarker;
+                value[0] = LiveValueMarker;
                 logicalValue.Span.CopyTo(value.AsSpan(StorageValueHeaderBytes));
                 Tree.Upsert(key, value);
             }

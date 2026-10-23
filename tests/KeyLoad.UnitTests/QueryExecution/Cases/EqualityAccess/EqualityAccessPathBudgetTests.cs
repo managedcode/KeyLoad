@@ -5,7 +5,6 @@ internal sealed class EqualityAccessPathBudgetTests
 {
     private const int ReadBudgetBytes = 8_192;
     private const int PayloadLength = 16_384;
-    private const int OneCandidate = 1;
     private const string PayloadPrefix = "{\"status\":\"open\",\"payload\":\"";
     private const string PayloadSuffix = "\"}";
     private const char PayloadCharacter = 'x';
@@ -37,7 +36,7 @@ internal sealed class EqualityAccessPathBudgetTests
     public async Task AcAisql008ReversedIndexCandidatesPreserveTheSharedLimitAndPointFollowup(bool parameterized)
     {
         using var db = EqualityAccessPathSupport.Create();
-        var engine = QueryBudgetReadOwner.Create(db, db.Database.Limits with { MaxScanRecords = OneCandidate });
+        var engine = QueryBudgetReadOwner.Create(db, db.Database.Limits with { MaxScanRecords = 1 });
         foreach (var reversed in new[] { false, true })
         {
             var request = EqualityAccessPathSupport.Request(db, indexed: true, parameterized, reversed);

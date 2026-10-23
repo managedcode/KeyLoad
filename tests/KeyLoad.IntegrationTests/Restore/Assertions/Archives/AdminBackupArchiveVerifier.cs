@@ -18,7 +18,6 @@ internal static class AdminBackupArchiveVerifier
     private const string BackupCategory = "backup";
     private const string RestoreDirectoryPrefix = "keyload-sdk-backup-restore-";
     private const string RelativePathSeparator = "/";
-    private const int SingleMatchingManifestCount = 1;
     private const string OccupiedRestoreDirectory = "The unique test restore destination is already occupied.";
     private const string MissingRestoredRecord = "The restored archive did not contain the committed document.";
     private const string ArchiveDirectoryMissing = "The observed backup archive directory is absent.";
@@ -26,7 +25,6 @@ internal static class AdminBackupArchiveVerifier
     private const string ArchivePathOutsideFixture = "An observed backup path resolved outside its fixture-owned root.";
     private const string MissingSiloIdentity = "The dashboard did not report the executing physical silo.";
     private const string SiloDirectoryOutsideFixture = "The actual silo name did not resolve to one fixture-owned node directory.";
-    private const int EmptyInventoryCount = 0;
     private const string DataEnvironment = "KeyLoad__DataDirectory";
     private static readonly string[] Nodes =
         [McpCallerProtocol.Node1, McpCallerProtocol.Node2, McpCallerProtocol.Node3];
@@ -112,13 +110,13 @@ internal static class AdminBackupArchiveVerifier
             await Assert.That(snapshot.ActiveSilos.Contains(silo, StringComparer.Ordinal)).IsTrue();
             var manifests = snapshot.Storage.Files.Where(file => file.Category == BackupCategory
                 && string.Equals(file.Path, expectedManifest, StringComparison.Ordinal)).ToArray();
-            if (manifests.Length == EmptyInventoryCount)
+            if (manifests.Length == 0)
             {
                 continue;
             }
-            await Assert.That(manifests.Length).IsEqualTo(SingleMatchingManifestCount);
+            await Assert.That(manifests.Length).IsEqualTo(1);
             var manifest = manifests.Single();
-            await Assert.That(manifest.Bytes).IsGreaterThan(EmptyInventoryCount);
+            await Assert.That(manifest.Bytes).IsGreaterThan(0);
             var siloDirectory = ResolveSiloDirectory(fixture, silo);
             var archiveDirectory = ResolveArchiveDirectory(fixture.Root, siloDirectory, receipt.Id);
             await VerifyRetainedArchiveFilesAsync(snapshot.Storage.Files, archivePrefix, fixture.Root,

@@ -8,7 +8,6 @@ internal sealed class TextExecutionOptions
 {
     internal const string SectionName = "KeyLoad:TextExecution";
     internal const string ValidationMessage = "Execution text inventory, generation and workspace settings exceed their accepted ceilings.";
-    private const int MinimumPositiveBudget = 1;
     private const int MaximumFileCeiling = 512;
     private const int MaximumDirectoryCeiling = 32;
     private const int MaximumDepthCeiling = 8;
@@ -34,17 +33,17 @@ internal sealed class TextExecutionOptions
     public int MaximumActiveLeases { get; set; } = MaximumActiveLeaseCeiling;
     internal int MaximumEntries => checked(MaximumFiles + MaximumDirectories);
 
-    internal bool IsValid() => MaximumFiles is >= MinimumPositiveBudget and <= MaximumFileCeiling
-        && MaximumDirectories is >= MinimumPositiveBudget and <= MaximumDirectoryCeiling
-        && MaximumDepth is >= MinimumPositiveBudget and <= MaximumDepthCeiling
-        && MaximumDiskBytes is >= MinimumPositiveBudget and <= MaximumDiskByteCeiling
-        && MutableSegmentMaximumItems is >= MinimumPositiveBudget and <= MaximumMutableSegmentItemCeiling
-        && HashBufferBytes is >= MinimumPositiveBudget and <= MaximumHashBufferByteCeiling
-        && FileBufferBytes is >= MinimumPositiveBudget and <= MaximumFileBufferByteCeiling
-        && MaximumGenerations is >= MinimumPositiveBudget and <= MaximumGenerationCeiling
-        && MaximumOwnerReceiptBytes is >= MinimumPositiveBudget and <= MaximumOwnerReceiptByteCeiling
-        && MaximumActiveLeases is >= MinimumPositiveBudget and <= MaximumActiveLeaseCeiling
-        && PostingsBoundCheckInterval is >= MinimumPositiveBudget and <= MaximumPostingsCheckInterval;
+    internal bool IsValid() => MaximumFiles is >= 1 and <= MaximumFileCeiling
+        && MaximumDirectories is >= 1 and <= MaximumDirectoryCeiling
+        && MaximumDepth is >= 1 and <= MaximumDepthCeiling
+        && MaximumDiskBytes is >= 1 and <= MaximumDiskByteCeiling
+        && MutableSegmentMaximumItems is >= 1 and <= MaximumMutableSegmentItemCeiling
+        && HashBufferBytes is >= 1 and <= MaximumHashBufferByteCeiling
+        && FileBufferBytes is >= 1 and <= MaximumFileBufferByteCeiling
+        && MaximumGenerations is >= 1 and <= MaximumGenerationCeiling
+        && MaximumOwnerReceiptBytes is >= 1 and <= MaximumOwnerReceiptByteCeiling
+        && MaximumActiveLeases is >= 1 and <= MaximumActiveLeaseCeiling
+        && PostingsBoundCheckInterval is >= 1 and <= MaximumPostingsCheckInterval;
 
     internal void Validate()
     {

@@ -4,12 +4,10 @@ namespace KeyLoad.Storage.ZoneTree.IO;
 
 internal static class OfflineRegularFileOpenFlags
 {
-    private const int LinuxReadOnly = 0;
     private const int LinuxReadWrite = 0x2;
     private const int LinuxX64NoFollow = 0x20000;
     private const int LinuxArm64NoFollow = 0x8000;
     private const int LinuxCloseOnExec = 0x80000;
-    private const int MacReadOnly = 0;
     private const int MacReadWrite = 0x2;
     private const int MacNoFollow = 0x100;
     private const int MacCloseOnExec = 0x1000000;
@@ -24,12 +22,12 @@ internal static class OfflineRegularFileOpenFlags
         var flags = isMac ? MacNoFollow | MacCloseOnExec : LinuxNoFollow() | LinuxCloseOnExec;
         if (isMac)
         {
-            flags |= access == FileAccess.Read ? MacReadOnly : MacReadWrite;
+            flags |= access == FileAccess.Read ? 0 : MacReadWrite;
             flags |= MacNonBlocking;
         }
         else
         {
-            flags |= access == FileAccess.Read ? LinuxReadOnly : LinuxReadWrite;
+            flags |= access == FileAccess.Read ? 0 : LinuxReadWrite;
             flags |= LinuxNonBlocking;
         }
         if (writeThrough)

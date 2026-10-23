@@ -12,7 +12,6 @@ internal sealed class RecurringDueWorkerGrain(BackgroundStorageClient storage,
     TimeProvider clock, IOptions<DueCoordinationOptions> options, IOptions<BackgroundWorkerOptions> batching,
     ILogger<RecurringDueWorkerGrain> diagnostics) : Grain, IRecurringDueWorkerGrain
 {
-    private const int NoRejectedDueHints = 0;
     private readonly Queue<DueWorkHint> pending = new();
     private DueSweepCursor? due;
     private QueueDeadlineCursor? deadlines;
@@ -77,7 +76,7 @@ internal sealed class RecurringDueWorkerGrain(BackgroundStorageClient storage,
             {
                 RecurringDueDiagnostics.PrefixRejected(diagnostics, error);
             }
-            else if (discovery.Page!.Rejected.Length > NoRejectedDueHints)
+            else if (discovery.Page!.Rejected.Length > 0)
             {
                 RecurringDueDiagnostics.PageRejected(diagnostics, discovery.Page.Rejected.Length);
             }

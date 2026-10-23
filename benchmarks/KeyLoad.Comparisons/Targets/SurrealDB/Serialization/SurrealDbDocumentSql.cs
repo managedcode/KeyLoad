@@ -16,7 +16,6 @@ internal static class SurrealDbDocumentSql
     private static readonly System.Text.CompositeFormat UPDATESETPayloadRETURNAFTERFormat = System.Text.CompositeFormat.Parse(UPDATESETPayloadRETURNAFTERFormatTemplate);
     private const string DELETERETURNBEFOREFormatTemplate = "DELETE {0}:{1} RETURN BEFORE;";
     private static readonly System.Text.CompositeFormat DELETERETURNBEFOREFormat = System.Text.CompositeFormat.Parse(DELETERETURNBEFOREFormatTemplate);
-    private const int SingleResultCardinality = 1;
     private const string RelationTraversal = "->";
     private const string GraphKeyProjection = ".key";
     private const char VectorComponentSeparator = ',';
@@ -42,7 +41,7 @@ internal static class SurrealDbDocumentSql
     };
     internal static string Graph(string table, string edge, string id, int depth)
     {
-        var paths = Enumerable.Range(SingleResultCardinality, depth).Select(hops => string.Concat(Enumerable.Repeat(RelationTraversal + edge + RelationTraversal + table, hops)) + GraphKeyProjection);
+        var paths = Enumerable.Range(1, depth).Select(hops => string.Concat(Enumerable.Repeat(RelationTraversal + edge + RelationTraversal + table, hops)) + GraphKeyProjection);
         return string.Format(System.Globalization.CultureInfo.InvariantCulture, RETURNArraySortArrayDifferenceArrayDistinctArrayFormat, string.Join(VectorComponentSeparator, paths), table, Key(id), JsonSerializer.Serialize(id));
     }
 }

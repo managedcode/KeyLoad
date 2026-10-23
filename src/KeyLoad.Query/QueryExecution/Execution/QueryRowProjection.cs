@@ -10,9 +10,6 @@ namespace KeyLoad.Query.Features.QueryExecution;
 /// <summary>Projects persisted authorized fields into the caller's exact selected row shape.</summary>
 internal static class QueryRowProjection
 {
-    private const int SingleSelection = 1;
-    private const int FirstSelectionIndex = 0;
-
     internal static QueryRow Project(DatabaseEngine database, PrincipalRecord principal, ResourceDefinition resource, DocumentRecord document,
         ImmutableArray<Selection> selections,
         IReadOnlyDictionary<string, string[]>? paths = null)
@@ -35,7 +32,7 @@ internal static class QueryRowProjection
         DocumentProjection projection, ResourceDefinition? sourceResource = null)
     {
         var safe = projection.Value;
-        if (selections.Length == SingleSelection && selections[FirstSelectionIndex].Path == SqlSyntax.Star)
+        if (selections.Length == 1 && selections[0].Path == SqlSyntax.Star)
         {
             return new(document.Reference.Id, document.Revision, safe.Json, safe.Redacted, safe.RedactedFields);
         }

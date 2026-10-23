@@ -56,15 +56,13 @@ internal static class McpHttpPipeline
         }
     }
 
-    private const int NoBodyCapacity = 0;
-
     private static int Capacity(HttpRequest request, int maximumBytes)
     {
         if (!HttpMethods.IsPost(request.Method))
         {
-            return NoBodyCapacity;
+            return 0;
         }
-        if (request.ContentLength is < NoBodyCapacity || request.ContentLength > maximumBytes)
+        if (request.ContentLength is < 0 || request.ContentLength > maximumBytes)
         {
             throw Errors.Fail(ErrorCode.ResourceExhausted, ServerProtocol.BodyExceeded);
         }

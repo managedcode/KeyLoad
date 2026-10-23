@@ -5,9 +5,6 @@ namespace KeyLoad.Storage.ZoneTree;
 
 internal static class ZoneTreeBackupFileChecksum
 {
-    private const int NoRemainingBytes = 0;
-    private const int FirstBufferByte = 0;
-    private const int NoReadBytes = 0;
     private const int EndOfStream = -1;
 
     internal static void Verify(FileStream file, ZoneTreeBackupRestoreManifestFile item, byte[] buffer,
@@ -28,15 +25,15 @@ internal static class ZoneTreeBackupFileChecksum
         }
         using var hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
         var remaining = length;
-        while (remaining > NoRemainingBytes)
+        while (remaining > 0)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            var count = file.Read(buffer.AsSpan(FirstBufferByte, (int)Math.Min(remaining, buffer.Length)));
-            if (count == NoReadBytes)
+            var count = file.Read(buffer.AsSpan(0, (int)Math.Min(remaining, buffer.Length)));
+            if (count == 0)
             {
                 throw Errors.Fail(ErrorCode.Corruption, BackupFileVerificationFailed);
             }
-            hash.AppendData(buffer.AsSpan(FirstBufferByte, count));
+            hash.AppendData(buffer.AsSpan(0, count));
             remaining -= count;
         }
         cancellationToken.ThrowIfCancellationRequested();

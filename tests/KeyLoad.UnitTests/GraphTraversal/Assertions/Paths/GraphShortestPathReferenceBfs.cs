@@ -3,8 +3,6 @@ namespace KeyLoad.UnitTests.Features.GraphTraversal;
 /// <summary>Independent directed BFS over test-owned logical vertices and edges.</summary>
 internal static class GraphShortestPathReferenceBfs
 {
-    private const int StartDepth = 0;
-
     internal static GraphShortestPathReference Find(
         IReadOnlyCollection<GraphShortestPathReferenceEdge> graph,
         GraphShortestPathReferenceVertex start,
@@ -18,7 +16,7 @@ internal static class GraphShortestPathReferenceBfs
             return new(true, [start], [], 0);
         }
         var previous = new Dictionary<GraphShortestPathReferenceVertex, GraphShortestPathReferenceEdge>();
-        var depths = new Dictionary<GraphShortestPathReferenceVertex, int> { [start] = StartDepth };
+        var depths = new Dictionary<GraphShortestPathReferenceVertex, int> { [start] = 0 };
         var pending = new Queue<GraphShortestPathReferenceVertex>();
         var examinedEdges = 0;
         pending.Enqueue(start);

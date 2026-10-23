@@ -8,7 +8,6 @@ namespace KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
 internal sealed class ScaledRawStorageCorpus
 {
     private const int KeyBytes = 16;
-    private const int MinimumRecordCount = 1;
     private const int MaximumRecordCount = 1_000_000;
     private const int SmallValueBytes = 32;
     private const int LargeValueBytes = 1024;
@@ -78,7 +77,7 @@ internal sealed class ScaledRawStorageCorpus
 
     private static void ValidateArguments(int recordCount, int valueBytes)
     {
-        if (recordCount is < MinimumRecordCount or > MaximumRecordCount)
+        if (recordCount is < 1 or > MaximumRecordCount)
         {
             throw new ArgumentOutOfRangeException(nameof(recordCount));
         }

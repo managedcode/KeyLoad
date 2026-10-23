@@ -2,8 +2,6 @@ namespace KeyLoad.Core.Features.AnalyticsStore;
 
 internal static class AnalyticsAggregateValidation
 {
-    private const int EmptyGroupCount = 0;
-    private const int EmptyMetricNameLength = 0;
     internal static void Require(DatabaseEngine database, AnalyticsStoreReadScope scope, AggregateAnalyticsRequest request)
     {
         AnalyticsStoreValidation.Range(request.FromInclusive, request.ToExclusive);
@@ -11,7 +9,7 @@ internal static class AnalyticsAggregateValidation
             || request.GroupBy.Distinct(StringComparer.Ordinal).Count() != request.GroupBy.Length
             || request.Metrics.IsDefaultOrEmpty || request.Metrics.Any(value => value is null)
             || request.Metrics.Select(value => value.Name).Distinct(StringComparer.Ordinal).Count() != request.Metrics.Length
-            || request.MaxGroups <= EmptyGroupCount || request.MaxGroups > database.Limits.MaxResults
+            || request.MaxGroups <= 0 || request.MaxGroups > database.Limits.MaxResults
             || request.Metrics.Length > database.Limits.MaxResults)
         {
             throw Errors.Fail(ErrorCode.Validation, AnalyticsStoreValidation.Invalid);
@@ -37,7 +35,7 @@ internal static class AnalyticsAggregateValidation
 
             if (metric.Operation == AnalyticsAggregateKind.Count)
             {
-                if (metric.Metric is null || metric.Metric.Length != EmptyMetricNameLength)
+                if (metric.Metric is null || metric.Metric.Length != 0)
                 {
                     throw Errors.Fail(ErrorCode.Validation, AnalyticsStoreValidation.Invalid);
                 }

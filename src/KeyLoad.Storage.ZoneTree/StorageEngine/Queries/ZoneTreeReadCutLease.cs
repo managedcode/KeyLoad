@@ -6,10 +6,6 @@ namespace KeyLoad.Storage.ZoneTree;
 
 internal sealed class ZoneTreeReadCutLease : IDisposable
 {
-    private const int ValueMarkerOffset = 0;
-    private const int ExaminedKeyRecordCount = 0;
-    private const int VisitedRecordCount = 1;
-
     private const string InvalidValueHeaderMessage = "A execution read-cut contains an invalid value header.";
     private readonly Action<ZoneTreeReadCutLease> release;
     private readonly CancellationTokenSource cancellation;
@@ -75,7 +71,7 @@ internal sealed class ZoneTreeReadCutLease : IDisposable
         try
         {
             work.ChargeExaminedKey(key.Length, CancellationToken);
-            admitBeforeRead(key.Length, ExaminedKeyRecordCount);
+            admitBeforeRead(key.Length, 0);
             source.Seek(key);
             work.BeforeAdvance(CancellationToken);
             var found = source.Next();
@@ -87,7 +83,7 @@ internal sealed class ZoneTreeReadCutLease : IDisposable
             if (!source.CurrentKey.Span.SequenceEqual(key))
             {
                 work.ChargeExaminedKey(source.CurrentKey.Length, CancellationToken);
-                admitBeforeRead(source.CurrentKey.Length, ExaminedKeyRecordCount);
+                admitBeforeRead(source.CurrentKey.Length, 0);
                 return false;
             }
             ReadExactValue(source, reader, admitBeforeRead);
@@ -109,11 +105,11 @@ internal sealed class ZoneTreeReadCutLease : IDisposable
     {
         var raw = source.CurrentValue;
         work.ChargeRecord(source.CurrentKey.Length, raw.Length, CancellationToken);
-        if (raw.IsEmpty || raw.Span[ValueMarkerOffset] != LiveValueMarker)
+        if (raw.IsEmpty || raw.Span[0] != LiveValueMarker)
         {
             throw Errors.Fail(ErrorCode.Corruption, InvalidValueHeaderMessage);
         }
-        admitBeforeRead((long)source.CurrentKey.Length + raw.Length, VisitedRecordCount);
+        admitBeforeRead((long)source.CurrentKey.Length + raw.Length, 1);
         reader(raw.Span[StorageValueHeaderBytes..]);
         work.Check(CancellationToken);
     }
@@ -186,17 +182,17 @@ internal sealed class ZoneTreeReadCutLease : IDisposable
             if (!key.Span.StartsWith(prefix))
             {
                 work.ChargeExaminedKey(key.Length, CancellationToken);
-                admitBeforeCopy?.Invoke(key.Length, ExaminedKeyRecordCount);
+                admitBeforeCopy?.Invoke(key.Length, 0);
                 break;
             }
 
             var rawValue = source.CurrentValue;
             work.ChargeRecord(key.Length, rawValue.Length, CancellationToken);
-            if (rawValue.IsEmpty || rawValue.Span[ValueMarkerOffset] != LiveValueMarker)
+            if (rawValue.IsEmpty || rawValue.Span[0] != LiveValueMarker)
             {
                 throw Errors.Fail(ErrorCode.Corruption, InvalidValueHeaderMessage);
             }
-            admitBeforeCopy?.Invoke((long)key.Length + rawValue.Length, VisitedRecordCount);
+            admitBeforeCopy?.Invoke((long)key.Length + rawValue.Length, 1);
 
             var keepGoing = copyBytes
                 ? visitor(key.ToArray(), rawValue.Span[StorageValueHeaderBytes..].ToArray())

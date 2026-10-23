@@ -9,7 +9,6 @@ internal sealed class ClusterStartupEvidenceTests
     private const string MissingFilesKey = "missingFiles";
     private const string EventsKey = "events";
     private const int ExpectedServerFiles = 2;
-    private const int FirstServerFile = 0;
 
     [Test]
     public async Task OriginalCancelledStartupJoinsEvidenceThenFreshSignedWriteReplayAndCloseAreHealthy()
@@ -116,7 +115,7 @@ internal sealed class ClusterStartupEvidenceTests
         {
             await Assert.That(file.InspectedBytes).IsGreaterThan(0);
         }
-        await Assert.That(trace.Events.Any(item => item.Role == files[FirstServerFile].Role && item.Event == "LogSiloStartingWithGC"
+        await Assert.That(trace.Events.Any(item => item.Role == files[0].Role && item.Event == "LogSiloStartingWithGC"
             && item.Category == "Orleans.Runtime.Silo")).IsTrue();
         await Assert.That(JsonSerializer.Serialize(trace.Events).Contains(
             ConnectionProtocol.FirstJson, StringComparison.Ordinal)).IsFalse();

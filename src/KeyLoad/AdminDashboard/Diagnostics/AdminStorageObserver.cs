@@ -5,8 +5,6 @@ namespace KeyLoad.Server;
 
 internal static class AdminStorageObserver
 {
-    private const int MissingObservedFilesEmptyCount = 0;
-
     private const string Unavailable = "Node storage observation is unavailable.";
 
     internal static AdminStorageSnapshot Read(string directory, IOptions<AdminObservationOptions> options, CancellationToken cancellationToken, TimeProvider? clock = null)
@@ -34,5 +32,5 @@ internal static class AdminStorageObserver
 
     internal static bool FileFailure(Exception error) => error is IOException or UnauthorizedAccessException or SecurityException;
 
-    private static AdminStorageSnapshot Missing() => new(null, null, null, MissingObservedFilesEmptyCount, false, [], Unavailable);
+    private static AdminStorageSnapshot Missing() => new(null, null, null, 0, false, [], Unavailable);
 }

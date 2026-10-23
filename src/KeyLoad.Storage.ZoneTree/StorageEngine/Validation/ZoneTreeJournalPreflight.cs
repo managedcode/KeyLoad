@@ -8,14 +8,11 @@ namespace KeyLoad.Storage.ZoneTree;
 // The caller holds the owner lock and retains this same journal handle through ordered recovery.
 internal static class ZoneTreeJournalPreflight
 {
-    private const int FileStartPosition = 0;
-    private const int InitialJournalPosition = 0;
-
     internal static void Validate(FileStream journal, ZoneTreeStoreOptions options, int identityVersion)
     {
         try
         {
-            journal.Position = FileStartPosition;
+            journal.Position = 0;
             var header = new byte[HeaderLength];
             var position = ReadCheckpoint(journal, options, header);
             while (journal.Length - journal.Position >= HeaderLength)
@@ -29,7 +26,7 @@ internal static class ZoneTreeJournalPreflight
         finally
         {
             // Only ordinary recovery applies verified records and truncates an incomplete current tail.
-            journal.Position = FileStartPosition;
+            journal.Position = 0;
         }
     }
 
@@ -37,14 +34,14 @@ internal static class ZoneTreeJournalPreflight
     {
         if (journal.Length < HeaderLength)
         {
-            return InitialJournalPosition;
+            return 0;
         }
         journal.ReadExactly(header);
-        journal.Position = FileStartPosition;
+        journal.Position = 0;
         var magic = BinaryPrimitives.ReadUInt64LittleEndian(header);
         if (magic != CheckpointMagic)
         {
-            return InitialJournalPosition;
+            return 0;
         }
         // Normal recovery also supplies an apply callback. A no-op preserves those same bounds;
         // the complete journal may exceed the standalone snapshot limit because it contains a tail.

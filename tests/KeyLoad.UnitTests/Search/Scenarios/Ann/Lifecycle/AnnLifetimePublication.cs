@@ -4,7 +4,6 @@ namespace KeyLoad.UnitTests.Features.Search;
 
 internal static class AnnLifetimePublication
 {
-    private const int FirstPage = 0;
     private const int MaximumPages = 3;
     private const int PageLimit = AnnLifetimeProtocol.Count;
     private const string Incomplete = "The execution ANN lifetime publication did not settle its bounded exact upper.";
@@ -14,7 +13,7 @@ internal static class AnnLifetimePublication
     {
         var completed = false;
         CommitProjectionBatchRequest? emptyIntent = null;
-        for (var number = FirstPage; number < MaximumPages; number++)
+        for (var number = 0; number < MaximumPages; number++)
         {
             var page = database.Database.ReadProjectionBatch(AnnProjectionPinTestSupport.Principal,
                 new(request.Consumer, PageLimit, AnnMaintenanceTestData.PageBytes, upper));

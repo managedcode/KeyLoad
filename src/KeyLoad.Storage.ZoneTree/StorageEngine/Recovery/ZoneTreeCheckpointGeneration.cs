@@ -4,10 +4,6 @@ namespace KeyLoad.Storage.ZoneTree;
 
 internal static class ZoneTreeCheckpointGeneration
 {
-    private const int NextReadGenerationIncrement = 1;
-    private const int ObserverNonMutationIndex = 0;
-    private const int InitialJournalPosition = 0;
-
     internal static void Replace(ZoneTreeStoreRuntime runtime, string temporary, long cut, bool replaceTree)
     {
         string? retiredTree;
@@ -38,7 +34,7 @@ internal static class ZoneTreeCheckpointGeneration
         runtime.Identity = runtime.Identity with
         {
             FormatVersion = CurrentDataEpoch,
-            ReadGeneration = replaceTree ? checked(runtime.Identity.ReadGeneration + NextReadGenerationIncrement) : runtime.Identity.ReadGeneration
+            ReadGeneration = replaceTree ? checked(runtime.Identity.ReadGeneration + 1) : runtime.Identity.ReadGeneration
         };
         ZoneTreeIdentityFile.Write(Path.Combine(runtime.Options.Directory, IdentityFileName), runtime.Identity, runtime.Options.IdentityBufferBytes);
         runtime.Journal.Flush(true);
@@ -56,15 +52,15 @@ internal static class ZoneTreeCheckpointGeneration
 
     private static void Swap(ZoneTreeStoreRuntime runtime, string temporary, long cut, bool replaceTree)
     {
-        runtime.Options.FaultObserver?.Invoke(CommitStage.InstallPrepared, cut, ObserverNonMutationIndex);
+        runtime.Options.FaultObserver?.Invoke(CommitStage.InstallPrepared, cut, 0);
         runtime.Journal.Dispose();
         File.Move(temporary, Path.Combine(runtime.Options.Directory, JournalFileName), true);
-        runtime.Options.FaultObserver?.Invoke(CommitStage.JournalSwapped, cut, ObserverNonMutationIndex);
+        runtime.Options.FaultObserver?.Invoke(CommitStage.JournalSwapped, cut, 0);
         runtime.Journal = ZoneTreeStoreFiles.OpenJournal(runtime.Options);
         if (replaceTree)
         {
             runtime.Tree = ZoneTreeTreeFactory.Open(runtime.Options);
-            runtime.SetPosition(InitialJournalPosition);
+            runtime.SetPosition(0);
             ZoneTreeJournalRecovery.Recover(runtime);
             runtime.Maintenance = new(runtime.Tree, runtime.Options.MaintenanceExecution, TimeProvider.System);
             return;

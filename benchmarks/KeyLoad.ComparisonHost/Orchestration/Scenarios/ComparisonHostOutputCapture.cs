@@ -7,7 +7,6 @@ internal static class ComparisonHostOutputCapture
 {
     private const int MaximumCapturedCharacters = 32_768;
     private const int CaptureChunkCharacters = 4_096;
-    private const int NoCharacters = 0;
 
     internal static async Task<string> CaptureAsync(StreamReader reader, CancellationToken cancellationToken)
     {
@@ -15,12 +14,12 @@ internal static class ComparisonHostOutputCapture
         var text = new StringBuilder();
         var buffer = new char[CaptureChunkCharacters];
         int count;
-        while ((count = await reader.ReadAsync(buffer.AsMemory(), cancellationToken)) > NoCharacters)
+        while ((count = await reader.ReadAsync(buffer.AsMemory(), cancellationToken)) > 0)
         {
             var remaining = MaximumCapturedCharacters - text.Length;
-            if (remaining > NoCharacters)
+            if (remaining > 0)
             {
-                text.Append(buffer, NoCharacters, Math.Min(count, remaining));
+                text.Append(buffer, 0, Math.Min(count, remaining));
             }
         }
         return text.ToString();

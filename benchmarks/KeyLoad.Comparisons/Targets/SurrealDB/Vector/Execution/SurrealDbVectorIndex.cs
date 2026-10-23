@@ -12,8 +12,6 @@ internal static class SurrealDbVectorIndex
     private const string DimensionSetting = "DIMENSION";
     private const string ConstructionSetting = "EFC";
     private const string NeighborsSetting = "M";
-    private const int FirstSettingOrdinal = 0;
-    private const int SettingValueOffset = 1;
     private const string RuntimeHnsw = "HNSW";
     private const string RuntimeCosine = "COSINE";
     private const string Float32 = "F32";
@@ -61,11 +59,11 @@ internal static class SurrealDbVectorIndex
     private static bool HasNumericSetting(string definition, string setting, int expected)
     {
         var tokens = definition.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries);
-        for (var ordinal = FirstSettingOrdinal; ordinal < tokens.Length - SettingValueOffset; ordinal++)
+        for (var ordinal = 0; ordinal < tokens.Length - 1; ordinal++)
         {
             if (tokens[ordinal].Equals(setting, StringComparison.OrdinalIgnoreCase))
             {
-                return int.TryParse(tokens[ordinal + SettingValueOffset], NumberStyles.None, CultureInfo.InvariantCulture, out var actual)
+                return int.TryParse(tokens[ordinal + 1], NumberStyles.None, CultureInfo.InvariantCulture, out var actual)
                     && actual == expected;
             }
         }

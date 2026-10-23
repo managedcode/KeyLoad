@@ -4,8 +4,6 @@ internal static class WorkloadTestReports
 {
     private const string ReportsDirectory = "RuntimeTestResults";
     private const string ReportPattern = "*.trx";
-    private const int MaximumReports = 1;
-    private const int OverflowDetectionFile = 1;
     private const long MaximumReportBytes = 8 * 1024 * 1024;
     private const string InvalidReport = "The execution workload TRX report exceeded its retention bounds.";
 
@@ -20,8 +18,8 @@ internal static class WorkloadTestReports
         {
             return;
         }
-        var reports = Directory.EnumerateFiles(source, ReportPattern).Take(MaximumReports + OverflowDetectionFile).ToArray();
-        if (reports.Length > MaximumReports)
+        var reports = Directory.EnumerateFiles(source, ReportPattern).Take(1 + 1).ToArray();
+        if (reports.Length > 1)
         {
             throw new InvalidDataException(InvalidReport);
         }

@@ -7,7 +7,6 @@ namespace KeyLoad.Comparisons;
 [ConfigurationOptions]
 public sealed class ComparisonSerializationOptions
 {
-    private const int MinimumPositiveCapacity = 1;
     private const int DefaultSurrealDbBatchRecordBuilderCapacity = 12_000;
     private const int DefaultSurrealDbVectorComponentBuilderCapacity = 12;
     private const int DefaultPostgresVectorComponentBuilderCapacity = 14;
@@ -24,9 +23,9 @@ public sealed class ComparisonSerializationOptions
 
     /// <summary>Checks the original inclusive reservation ceilings.</summary>
     /// <returns>Whether every configured reservation is supported.</returns>
-    public bool IsValid() => SurrealDbBatchRecordBuilderCapacity is >= MinimumPositiveCapacity and <= DefaultSurrealDbBatchRecordBuilderCapacity
-        && SurrealDbVectorComponentBuilderCapacity is >= MinimumPositiveCapacity and <= DefaultSurrealDbVectorComponentBuilderCapacity
-        && PostgresVectorComponentBuilderCapacity is >= MinimumPositiveCapacity and <= DefaultPostgresVectorComponentBuilderCapacity;
+    public bool IsValid() => SurrealDbBatchRecordBuilderCapacity is >= 1 and <= DefaultSurrealDbBatchRecordBuilderCapacity
+        && SurrealDbVectorComponentBuilderCapacity is >= 1 and <= DefaultSurrealDbVectorComponentBuilderCapacity
+        && PostgresVectorComponentBuilderCapacity is >= 1 and <= DefaultPostgresVectorComponentBuilderCapacity;
 
     /// <summary>Rejects invalid policy before execution target ownership.</summary>
     /// <returns>This validated policy.</returns>

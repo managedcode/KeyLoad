@@ -125,12 +125,11 @@ internal sealed class TypedConfigurationFileBufferTests
         const string source = """
             internal static class Subject
             {
-                private const int NoBuffer = 0;
                 internal static void Execute(string path)
                 {
-                    var options = new System.IO.FileStreamOptions { [|BufferSize = NoBuffer|] };
+                    var options = new System.IO.FileStreamOptions { [|BufferSize = 0|] };
                     using var file = [|new System.IO.FileStream(path, System.IO.FileMode.Open,
-                        System.IO.FileAccess.Read, System.IO.FileShare.Read, NoBuffer)|];
+                        System.IO.FileAccess.Read, System.IO.FileShare.Read, 0)|];
                 }
             }
             """;

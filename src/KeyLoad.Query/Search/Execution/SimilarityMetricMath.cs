@@ -4,16 +4,14 @@ namespace KeyLoad.Query.Features.Search;
 
 internal static class SimilarityMetricMath
 {
-    private const int ZeroMagnitude = 0;
-    private const int FirstCoordinateIndex = 0;
     private const int PairUnrollWidth = 2;
 
     private const string InvalidMetric = "The vector metric is invalid.";
 
     internal static double Norm(ReadOnlySpan<float> values)
     {
-        double result = ZeroMagnitude;
-        var index = FirstCoordinateIndex;
+        double result = 0;
+        var index = 0;
         for (; index + Vector<float>.Count <= values.Length; index += Vector<float>.Count)
         {
             Vector.Widen(new Vector<float>(values[index..]), out var first, out var second);
@@ -27,7 +25,7 @@ internal static class SimilarityMetricMath
     }
 
     internal static double QueryNorm(ReadOnlySpan<float> query, DistanceMetric metric)
-        => metric == DistanceMetric.Cosine ? Norm(query) : ZeroMagnitude;
+        => metric == DistanceMetric.Cosine ? Norm(query) : 0;
 
     internal static double Score(ReadOnlySpan<float> query, ReadOnlySpan<float> candidate,
         DistanceMetric metric, double queryNorm)
@@ -51,12 +49,12 @@ internal static class SimilarityMetricMath
 
     private static double Cosine(ReadOnlySpan<float> source, ReadOnlySpan<float> candidate, double queryNorm)
     {
-        if (queryNorm == ZeroMagnitude)
+        if (queryNorm == 0)
         {
-            return ZeroMagnitude;
+            return 0;
         }
-        double dot = ZeroMagnitude, candidateNorm = ZeroMagnitude;
-        var index = FirstCoordinateIndex;
+        double dot = 0, candidateNorm = 0;
+        var index = 0;
         for (; index + Vector<float>.Count <= source.Length; index += Vector<float>.Count)
         {
             Vector.Widen(new Vector<float>(source[index..]), out var left1, out var left2);
@@ -69,13 +67,13 @@ internal static class SimilarityMetricMath
             dot += (double)source[index] * candidate[index];
             candidateNorm += (double)candidate[index] * candidate[index];
         }
-        return candidateNorm == ZeroMagnitude ? ZeroMagnitude : dot / Math.Sqrt(queryNorm * candidateNorm);
+        return candidateNorm == 0 ? 0 : dot / Math.Sqrt(queryNorm * candidateNorm);
     }
 
     private static double Dot(ReadOnlySpan<float> left, ReadOnlySpan<float> right)
     {
-        double result = ZeroMagnitude;
-        var index = FirstCoordinateIndex;
+        double result = 0;
+        var index = 0;
         for (; index + Vector<float>.Count <= left.Length; index += Vector<float>.Count)
         {
             Vector.Widen(new Vector<float>(left[index..]), out var left1, out var left2);
@@ -91,8 +89,8 @@ internal static class SimilarityMetricMath
 
     private static double DistanceSquared(ReadOnlySpan<float> left, ReadOnlySpan<float> right)
     {
-        double result = ZeroMagnitude;
-        var index = FirstCoordinateIndex;
+        double result = 0;
+        var index = 0;
         for (; index + Vector<float>.Count <= left.Length; index += Vector<float>.Count)
         {
             Vector.Widen(new Vector<float>(left[index..]), out var left1, out var left2);

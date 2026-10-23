@@ -9,7 +9,6 @@ internal static class PartitionStorageProducerDisposeFlow
 {
     private const string DirectoryPrefix = "keyload-execution-workers-";
     private const string GuidFormat = "N";
-    private const int OneSilo = 1;
 
     internal static async Task RunAsync(CancellationToken token)
     {
@@ -19,7 +18,7 @@ internal static class PartitionStorageProducerDisposeFlow
         using var ports = new TestClusterPortAllocator();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            var port = ports.AllocateConsecutivePortPairs(OneSilo).Item1;
+            var port = ports.AllocateConsecutivePortPairs(1).Item1;
             var profile = new RequestCqrsHostedProfile(TimeProvider.System, UnitRoutingOptions.Routing(),
                 null, null, false, false, null);
             var arguments = profile.Arguments(directory, port);

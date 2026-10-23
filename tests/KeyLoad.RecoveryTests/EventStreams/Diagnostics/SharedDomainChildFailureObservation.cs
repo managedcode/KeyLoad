@@ -9,8 +9,6 @@ internal static class SharedDomainChildFailureObservation
     private const string Kind = "SharedDomainOriginalChildFailure";
     private const string WitnessKey = "KeyLoad.SharedDomainCrash.OriginalChildProgress";
     private const int MaximumCharacters = 1024;
-    private const int MissingLength = 0;
-    private const int EofProbeBytes = 1;
 
     internal static async Task ReportAsync(string root, CommitStage stage, int mutationIndex,
         Exception primary, CancellationToken token)
@@ -21,7 +19,7 @@ internal static class SharedDomainChildFailureObservation
         {
             var info = new FileInfo(path);
             if (info.LinkTarget is not null || (info.Attributes & FileAttributes.ReparsePoint) != default
-                || info.Length <= MissingLength || info.Length > SharedDomainChildProgressProtocol.MaximumBytes)
+                || info.Length <= 0 || info.Length > SharedDomainChildProgressProtocol.MaximumBytes)
             {
                 throw new InvalidDataException(SharedDomainChildProgressProtocol.Invalid);
             }
@@ -54,14 +52,14 @@ internal static class SharedDomainChildFailureObservation
         await using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read,
             RecoveryExecutionOptions.TrialPolicy.Value.ProgressReadBufferBytes, FileOptions.Asynchronous | FileOptions.SequentialScan);
         var length = stream.Length;
-        if (length <= MissingLength || length > SharedDomainChildProgressProtocol.MaximumBytes)
+        if (length <= 0 || length > SharedDomainChildProgressProtocol.MaximumBytes)
         {
             throw new InvalidDataException(SharedDomainChildProgressProtocol.Invalid);
         }
         var bytes = new byte[checked((int)length)];
         await stream.ReadExactlyAsync(bytes, token).ConfigureAwait(false);
-        var probe = new byte[EofProbeBytes];
-        if (await stream.ReadAsync(probe, token).ConfigureAwait(false) != MissingLength)
+        var probe = new byte[1];
+        if (await stream.ReadAsync(probe, token).ConfigureAwait(false) != 0)
         {
             throw new InvalidDataException(SharedDomainChildProgressProtocol.Invalid);
         }
@@ -73,7 +71,7 @@ internal static class SharedDomainChildFailureObservation
         if (witness.Version != SharedDomainChildProgressProtocol.Version || !Enum.IsDefined(witness.Phase)
             || witness.SeedOrdinal < SharedDomainChildProgressProtocol.InitialOrdinal
             || witness.SeedOrdinal > SharedDomainProtocol.QueueScopeIndex
-            || !double.IsFinite(witness.ElapsedMilliseconds) || witness.ElapsedMilliseconds < MissingLength
+            || !double.IsFinite(witness.ElapsedMilliseconds) || witness.ElapsedMilliseconds < 0
             || witness.StorePosition < SharedDomainChildProgressProtocol.EmptyPosition)
         {
             throw new InvalidDataException(SharedDomainChildProgressProtocol.Invalid);

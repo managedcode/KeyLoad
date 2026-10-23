@@ -9,8 +9,6 @@ internal static class ProductionSourceManifestAssertions
 {
     private const int SchemaVersion = 3;
     private const int CentralInputCount = 6;
-    private const int FirstProductIndex = 0;
-    private const int MinimumOwnedSourceCount = 1;
     private const string Sha256Pattern = "\\A[0-9a-f]{64}\\z";
     private const string SchemaVersionProperty = "schemaVersion";
     private const string ProductsProperty = "compiledProducts";
@@ -88,7 +86,7 @@ internal static class ProductionSourceManifestAssertions
         await Assert.That(products.Select(product => product.GetProperty(ModuleProperty).GetString()
             ?? throw new InvalidDataException("A compiled product module is missing.")).Order(StringComparer.Ordinal))
             .IsEquivalentTo(projects.Keys.Order(StringComparer.Ordinal), TUnit.Assertions.Enums.CollectionOrdering.Matching);
-        for (var index = FirstProductIndex; index < products.Length; index++)
+        for (var index = 0; index < products.Length; index++)
         {
             var product = products[index];
             await AssertFieldsAsync(product, [ModuleProperty, RoleProperty, SourcesProperty, CompiledIdentityProperty]);
@@ -97,7 +95,7 @@ internal static class ProductionSourceManifestAssertions
             var expectedRole = project.StartsWith("src/", StringComparison.Ordinal) ? "production" : "infrastructure";
             await Assert.That(product.GetProperty(RoleProperty).GetString()).IsEqualTo(expectedRole);
             var sourceRows = product.GetProperty(SourcesProperty).EnumerateArray().ToArray();
-            await Assert.That(sourceRows.Length).IsGreaterThan(MinimumOwnedSourceCount);
+            await Assert.That(sourceRows.Length).IsGreaterThan(1);
             var sourceRoot = Path.GetDirectoryName(project)!.Replace(Path.DirectorySeparatorChar, '/') + "/";
             foreach (var source in sourceRows)
             {

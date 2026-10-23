@@ -12,7 +12,6 @@ internal static class CliClientConfiguration
     private const string StatusTimeoutEnvironmentVariableName = "KEYLOAD_CLI_STATUS_TIMEOUT";
     private const string ProblemBodyEnvironmentVariableName = "KEYLOAD_CLIENT__MAXPROBLEMBODYBYTES";
     private const string ConnectionValidationMessage = "The CLI endpoint and credential must be present.";
-    private const int EndpointArgument = 1;
 
     internal static CliClientRuntimeOptions Read(string[] args)
     {
@@ -21,7 +20,7 @@ internal static class CliClientConfiguration
             options.ApiKey = Environment.GetEnvironmentVariable(KeyEnvironmentVariableName)
                 ?? throw Errors.Fail(ErrorCode.Unauthenticated,
                     CliClientApi.GetMessage(CliClientApi.MissingCredentialMessageKey));
-            options.Endpoint = new Uri(args[EndpointArgument]);
+            options.Endpoint = new Uri(args[1]);
         }, options => options.IsValid(), ConnectionValidationMessage);
         var execution = Create<CliExecutionOptions>(options =>
         {

@@ -4,9 +4,6 @@ namespace KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
 [ConfigurationOptions]
 public sealed class RawStorageExecutionOptions
 {
-    private const int IsValidMaximumWritesEmptyCount = 0;
-    private const int IsValidMaximumRecordsEmptyCount = 0;
-
     /// <summary>The execution raw benchmark execution section.</summary>
     public const string SectionName = "RawStorageExecution";
     /// <summary>Rejection raised before raw fixture storage ownership.</summary>
@@ -21,8 +18,8 @@ public sealed class RawStorageExecutionOptions
 
     /// <summary>Checks fixture admission within the existing execution microbenchmark ceilings.</summary>
     /// <returns>Whether raw execution ownership can start.</returns>
-    public bool IsValid() => MaximumWrites is > IsValidMaximumWritesEmptyCount and <= MutationAttemptCeiling
-        && MaximumRecords is > IsValidMaximumRecordsEmptyCount and <= RecordCountCeiling;
+    public bool IsValid() => MaximumWrites is > 0 and <= MutationAttemptCeiling
+        && MaximumRecords is > 0 and <= RecordCountCeiling;
 
     /// <summary>Rejects invalid direct fixture policy before allocation.</summary>
     public void Validate()

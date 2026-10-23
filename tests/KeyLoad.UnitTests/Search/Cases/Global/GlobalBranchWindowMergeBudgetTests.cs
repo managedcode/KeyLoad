@@ -7,14 +7,13 @@ internal sealed class GlobalBranchWindowMergeBudgetTests
 {
     private const int MaximumCandidates = 2;
     private const int ExaminedCandidates = 3;
-    private const int SelectedLimit = 1;
 
     [Test]
     public async Task AcRank003ExactByteBoundaryChargesEveryExaminedDuplicate()
     {
         var candidate = GlobalBranchTestSupport.Candidate("shared", 0.8);
         var lower = GlobalBranchTestSupport.Candidate("lower", 0.7);
-        var request = GlobalBranchTestSupport.Request(["left", "right"], limit: SelectedLimit);
+        var request = GlobalBranchTestSupport.Request(["left", "right"], limit: 1);
         var windows = ImmutableArray.Create(
             GlobalBranchTestSupport.Window("left", [candidate, lower]),
             GlobalBranchTestSupport.Window("right", [candidate]));
@@ -24,7 +23,7 @@ internal sealed class GlobalBranchWindowMergeBudgetTests
             MaxBatchBytes = checked((int)exactBytes),
             MaxQueryReadBytes = exactBytes,
             MaxScanRecords = ExaminedCandidates,
-            MaxResults = SelectedLimit
+            MaxResults = 1
         };
         var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(limits));
 
@@ -68,7 +67,7 @@ internal sealed class GlobalBranchWindowMergeBudgetTests
     [Test]
     public async Task AcRank003MalformedExaminedCandidateStillConsumesItsBytes()
     {
-        var request = GlobalBranchTestSupport.Request(["w"], limit: SelectedLimit);
+        var request = GlobalBranchTestSupport.Request(["w"], limit: 1);
         var windows = ImmutableArray.Create(GlobalBranchTestSupport.Window("w",
             [GlobalBranchTestSupport.Candidate("bad", double.NaN)]));
         var exactBytes = GlobalBranchTestSupport.InputBytes(request, windows);
@@ -77,7 +76,7 @@ internal sealed class GlobalBranchWindowMergeBudgetTests
             MaxBatchBytes = checked((int)exactBytes),
             MaxQueryReadBytes = exactBytes,
             MaxScanRecords = MaximumCandidates,
-            MaxResults = SelectedLimit
+            MaxResults = 1
         };
         var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(limits));
 

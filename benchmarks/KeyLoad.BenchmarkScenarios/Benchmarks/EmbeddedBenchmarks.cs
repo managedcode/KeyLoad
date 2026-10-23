@@ -15,7 +15,6 @@ public class EmbeddedBenchmarks : IDisposable
     private const float SixthVectorCoordinate = 6;
     private const float FifthVectorCoordinate = 5;
     private const float FourthVectorCoordinate = 4;
-    private const int FirstVectorCoordinate = 1;
     private const int SecondVectorCoordinate = 2;
     private const int ThirdVectorCoordinate = 3;
 
@@ -92,7 +91,7 @@ public class EmbeddedBenchmarks : IDisposable
     /// <summary>Computes cosine similarity over the existing eight-dimensional input pair.</summary>
     [Benchmark]
     public double ExactCosine()
-        => SearchEngine.Similarity([FirstVectorCoordinate, SecondVectorCoordinate, ThirdVectorCoordinate, FourthVectorCoordinate, FifthVectorCoordinate, SixthVectorCoordinate, SeventhVectorCoordinate, EighthVectorCoordinate], [EighthVectorCoordinate, SeventhVectorCoordinate, SixthVectorCoordinate, FifthVectorCoordinate, FourthVectorCoordinate, ThirdVectorCoordinate, SecondVectorCoordinate, FirstVectorCoordinate], DistanceMetric.Cosine);
+        => SearchEngine.Similarity([1, SecondVectorCoordinate, ThirdVectorCoordinate, FourthVectorCoordinate, FifthVectorCoordinate, SixthVectorCoordinate, SeventhVectorCoordinate, EighthVectorCoordinate], [EighthVectorCoordinate, SeventhVectorCoordinate, SixthVectorCoordinate, FifthVectorCoordinate, FourthVectorCoordinate, ThirdVectorCoordinate, SecondVectorCoordinate, 1], DistanceMetric.Cosine);
 
     /// <summary>Releases the fixture's database, store and temporary directory.</summary>
     [GlobalCleanup]

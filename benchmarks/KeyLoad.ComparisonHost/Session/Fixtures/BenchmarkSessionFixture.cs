@@ -13,7 +13,6 @@ internal sealed class BenchmarkSessionFixture : IAsyncInitializer, IAsyncDisposa
     internal const string Measured = "measured";
     internal const string Failed = "failed";
     internal const string Unavailable = "unavailable";
-    private const int UnverifiedRecords = 0;
     private const double NoElapsedMeasurement = 0;
     private const string Success = "success";
     private const string Failure = "failure";
@@ -99,12 +98,12 @@ internal sealed class BenchmarkSessionFixture : IAsyncInitializer, IAsyncDisposa
         try
         {
             report = input.Execution.UnsupportedReason is { } reason
-                ? new(id, Unavailable, reason, UnverifiedRecords, new BenchmarkSessionOptions().Records, UnverifiedRecords, [], NoElapsedMeasurement)
+                ? new(id, Unavailable, reason, 0, new BenchmarkSessionOptions().Records, 0, [], NoElapsedMeasurement)
                 : await operation(session ?? throw new InvalidOperationException(BenchmarkSessionHostSettings.Profile), token);
         }
         catch (Exception error) when (CqrsRuntimeFailures.FindFatal(error) is null)
         {
-            report = new(id, Failed, error.GetType().Name, UnverifiedRecords, new BenchmarkSessionOptions().Records, UnverifiedRecords, [], NoElapsedMeasurement);
+            report = new(id, Failed, error.GetType().Name, 0, new BenchmarkSessionOptions().Records, 0, [], NoElapsedMeasurement);
             await BenchmarkSessionFixtureDisposal.RetainFailureAsync(error, RetainAsync(report));
             throw;
         }

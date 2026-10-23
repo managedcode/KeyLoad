@@ -8,8 +8,6 @@ namespace KeyLoad.AppHost.Features.TestInfrastructure;
 internal static class ProjectProcessParent
 {
     private const int MaximumAncestors = 32;
-    private const int InitialAncestor = 0;
-    private const int MissingProcessId = 0;
     private const string UnsupportedOperatingSystem = "Execution project process ownership requires a supported operating system.";
     private const string ProcessStatusExecutable = "/bin/ps";
     private const string ProcessSelectionArgument = "-p";
@@ -22,7 +20,7 @@ internal static class ProjectProcessParent
         using var timeout = new CancellationTokenSource(options.Value.ProcessSettlementTimeout, TimeProvider.System);
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(token, timeout.Token);
         var current = processId;
-        for (var depth = InitialAncestor; depth < MaximumAncestors; depth++)
+        for (var depth = 0; depth < MaximumAncestors; depth++)
         {
             deadline.Token.ThrowIfCancellationRequested();
             if (current == launchProcessId)
@@ -32,7 +30,7 @@ internal static class ProjectProcessParent
             var parent = OperatingSystem.IsWindows()
                 ? ProjectProcessParentWindows.Read(current, children: false, options, deadline.Token).Single()
                 : await ReadUnixAsync(current, options, deadline.Token).ConfigureAwait(false);
-            if (parent <= MissingProcessId || parent == current)
+            if (parent <= 0 || parent == current)
             {
                 break;
             }

@@ -4,9 +4,6 @@ namespace KeyLoad.Storage.ZoneTree;
 
 internal sealed class ZoneTreeCheckpointManager(ZoneTreeStoreRuntime runtime)
 {
-    private const int InitialAppliedPosition = 0;
-    private const int ObserverNonMutationIndex = 0;
-
     internal StorageSnapshot CreateSnapshot(string path, long? expectedAppliedPosition)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
@@ -35,7 +32,7 @@ internal sealed class ZoneTreeCheckpointManager(ZoneTreeStoreRuntime runtime)
     }
 
     private long AppliedPosition() => runtime.View.ReadOwnedValue(KeyCodec.Encode(SystemNamespace, LastAppliedKey)) is { } value
-        ? OrleansSerialization.Deserialize<long>(value) : InitialAppliedPosition;
+        ? OrleansSerialization.Deserialize<long>(value) : 0;
 
     internal StorageSnapshot Compact()
     {
@@ -105,9 +102,9 @@ internal sealed class ZoneTreeCheckpointManager(ZoneTreeStoreRuntime runtime)
             throw Errors.Fail(ErrorCode.TokenInvalidated, StagedSnapshotScopeInvalid);
         }
 
-        runtime.Options.FaultObserver?.Invoke(CommitStage.SnapshotWritten, snapshot.Position, ObserverNonMutationIndex);
+        runtime.Options.FaultObserver?.Invoke(CommitStage.SnapshotWritten, snapshot.Position, 0);
         input.Flush(true);
-        runtime.Options.FaultObserver?.Invoke(CommitStage.SnapshotFlushed, snapshot.Position, ObserverNonMutationIndex);
+        runtime.Options.FaultObserver?.Invoke(CommitStage.SnapshotFlushed, snapshot.Position, 0);
         return snapshot;
     }
 

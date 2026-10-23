@@ -4,9 +4,6 @@ namespace KeyLoad.Clustering;
 
 internal static class MultiLaneReceiveAdmission
 {
-    private const int NoRequestedMessages = 0;
-    private const int NoRequestedPayloadBytes = 0;
-    private const int NoLeaseDurationSeconds = 0;
     internal const string Invalid = "The multi-lane receive request is invalid.";
     internal const string Interrupted = MultiLaneReceiveProtocol.Interrupted;
     internal const string Exceeded = "The multi-lane receive budget was exceeded.";
@@ -25,15 +22,15 @@ internal static class MultiLaneReceiveAdmission
         }
         var ids = new HashSet<Guid> { request.RequestId };
         var lanes = new HashSet<QueueLaneRef>();
-        long messages = NoRequestedMessages;
-        long bytes = NoRequestedPayloadBytes;
+        long messages = 0;
+        long bytes = 0;
         foreach (var leaf in request.Requests)
         {
             token.ThrowIfCancellationRequested();
             if (leaf is null || leaf.Lane is null || leaf.Lane.Partition is null
                 || leaf.RequestId == Guid.Empty || !ids.Add(leaf.RequestId) || !lanes.Add(leaf.Lane)
-                || leaf.MaxMessages <= NoRequestedMessages || leaf.MaxBytes <= NoRequestedPayloadBytes
-                || leaf.LeaseSeconds <= NoLeaseDurationSeconds)
+                || leaf.MaxMessages <= 0 || leaf.MaxBytes <= 0
+                || leaf.LeaseSeconds <= 0)
             {
                 throw Errors.Fail(ErrorCode.Validation, Invalid);
             }

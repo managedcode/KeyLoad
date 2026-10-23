@@ -33,7 +33,7 @@ internal static class RequestWorkCompletion
     {
         lock (gate)
         {
-            if (lease.Dependencies.Count != EmptyDependencies)
+            if (lease.Dependencies.Count != 0)
             {
                 throw Errors.Fail(ErrorCode.OwnershipLost, RequestWorkLimits.LeaseIdentityMessage);
             }
@@ -47,7 +47,6 @@ internal static class RequestWorkCompletion
             return true;
         }
     }
-    private const int EmptyDependencies = 0;
 
     internal static void PrepareDisposal(Lock gate, RequestWorkLease lease, Exception? original, Exception? cleanup)
     {

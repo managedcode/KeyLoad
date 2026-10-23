@@ -7,7 +7,6 @@ namespace KeyLoad.UnitTests.Features.ResourceExecution;
 /// <summary>Owns the existing production Orleans hosts and joins original table operations before storage closes.</summary>
 internal sealed class DropRuntimeProfile : IAsyncDisposable
 {
-    private const int SourceIndex = 0;
     private readonly List<Task> originals = [];
     private readonly Dictionary<Task, Exception> expectedFailures = [];
     private readonly Lock lifecycle = new();
@@ -15,7 +14,7 @@ internal sealed class DropRuntimeProfile : IAsyncDisposable
     private bool retain;
     internal RequestCqrsHostedCluster Hosts { get; }
     internal DropCommandPhaseObserver Observer { get; }
-    internal RequestCqrsHostedRuntimeFixture Node => Hosts.Nodes[SourceIndex];
+    internal RequestCqrsHostedRuntimeFixture Node => Hosts.Nodes[0];
     internal RequestCqrsHostedDatabase Source => Node.Database;
 
     private DropRuntimeProfile(RequestCqrsHostedCluster hosts, DropCommandPhaseObserver observer)

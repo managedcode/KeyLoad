@@ -5,7 +5,6 @@ namespace KeyLoad.Clustering;
 
 internal sealed class GrainCountingWriter : IBufferWriter<byte>, IDisposable
 {
-    private const int UnspecifiedSizeHint = 0;
     private readonly GrainRoutingOptions settings;
     private readonly int maximumBytes;
     private readonly CancellationToken cancellationToken;
@@ -43,13 +42,13 @@ internal sealed class GrainCountingWriter : IBufferWriter<byte>, IDisposable
         scratch.AsSpan(StartEmptyCount, count).Clear();
     }
 
-    public Memory<byte> GetMemory(int sizeHint = UnspecifiedSizeHint)
+    public Memory<byte> GetMemory(int sizeHint = 0)
     {
         EnsureCapacity(sizeHint);
         return scratch;
     }
 
-    public Span<byte> GetSpan(int sizeHint = UnspecifiedSizeHint)
+    public Span<byte> GetSpan(int sizeHint = 0)
     {
         EnsureCapacity(sizeHint);
         return scratch;

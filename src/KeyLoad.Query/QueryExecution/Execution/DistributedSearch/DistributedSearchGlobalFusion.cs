@@ -8,7 +8,6 @@ internal static class DistributedSearchGlobalFusion
 {
     private const string IncompleteBranch = "The complete distributed search branch exceeds its original result budget.";
     private const string ConflictingRevision = "The distributed search branches disagree on a selected revision.";
-    private const int FirstElement = 0;
 
     internal static ImmutableArray<GlobalBranchCandidate> Select(SearchRequest request,
         ImmutableArray<GlobalBranchWindow> text, ImmutableArray<GlobalBranchWindow> vector,
@@ -66,7 +65,7 @@ internal static class DistributedSearchGlobalFusion
         var admission = new GlobalBranchByteAdmission(budget.MaximumResultBytes, budget);
         admission.Accept(PartitionQueryRetention.CandidateArrayBytes(candidates.Length));
         var result = new SearchScore[candidates.Length];
-        for (var index = FirstElement; index < candidates.Length; index++)
+        for (var index = 0; index < candidates.Length; index++)
         {
             budget.Check();
             result[index] = new(candidates[index].Reference, candidates[index].Score);

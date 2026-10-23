@@ -4,11 +4,6 @@ namespace KeyLoad.Storage.ZoneTree;
 
 internal static class ZoneTreeMetadataFile
 {
-    private const int OverBudgetProbeBytes = 1;
-    private const int NoReadBytes = 0;
-    private const int EndOfStreamRead = 0;
-    private const int FirstBufferByte = 0;
-
     private static FileStream Open(string path, int streamBufferBytes, string unsupportedDetail)
     {
         try
@@ -29,12 +24,12 @@ internal static class ZoneTreeMetadataFile
             throw Errors.Fail(ErrorCode.FormatUnsupported, unsupportedDetail);
         }
 
-        var bytes = new byte[maximumBytes + OverBudgetProbeBytes];
-        var count = NoReadBytes;
+        var bytes = new byte[maximumBytes + 1];
+        var count = 0;
         while (count < bytes.Length)
         {
             var read = file.Read(bytes, count, bytes.Length - count);
-            if (read == EndOfStreamRead)
+            if (read == 0)
             {
                 break;
             }
@@ -47,6 +42,6 @@ internal static class ZoneTreeMetadataFile
             throw Errors.Fail(ErrorCode.FormatUnsupported, unsupportedDetail);
         }
 
-        return new ReadOnlyMemory<byte>(bytes, FirstBufferByte, count);
+        return new ReadOnlyMemory<byte>(bytes, 0, count);
     }
 }

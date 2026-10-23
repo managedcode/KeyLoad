@@ -5,8 +5,6 @@ namespace KeyLoad.Server;
 
 internal static class ApiGrainDispatch
 {
-    private const int ReadAsyncValueEmptyCount = 0;
-
     internal static Task<IResult> ReadAsync<T>(HttpContext context, GrainReadKind kind, T payload) =>
         ExecuteAsync(context, kind, null, Guid.Empty,
             kind is GrainReadKind.AstQuery or GrainReadKind.LiveQueryStart or GrainReadKind.LiveQueryRead
@@ -17,7 +15,7 @@ internal static class ApiGrainDispatch
                 : OrleansSerialization.Serialize(payload));
 
     internal static Task<IResult> ReadAsync(HttpContext context, GrainReadKind kind) =>
-        ExecuteAsync(context, kind, null, Guid.Empty, OrleansSerialization.Serialize(ReadAsyncValueEmptyCount));
+        ExecuteAsync(context, kind, null, Guid.Empty, OrleansSerialization.Serialize(0));
 
     internal static Task<IResult> SubmitAsync<T>(HttpContext context, OperationKind kind, Guid commandId, T payload) =>
         ExecuteAsync(context, null, kind, commandId, OrleansSerialization.Serialize(payload, ValidationProfile.PublicInputElements));

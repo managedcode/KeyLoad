@@ -7,7 +7,6 @@ internal static class ClusterTelemetryResources
     private const string DisabledContent = "false";
     private const string DisabledExemplars = "always_off";
     private const string InvalidExporterRegistration = "The pinned Aspire project exporter registration is invalid.";
-    private const int ExporterEnvironmentOffset = 1;
 
     internal static void Apply(IResourceBuilder<ProjectResource> resource)
     {
@@ -15,8 +14,8 @@ internal static class ClusterTelemetryResources
         var annotations = resource.Resource.Annotations;
         var exporter = annotations.OfType<OtlpExporterAnnotation>().Single();
         var exporterIndex = annotations.IndexOf(exporter);
-        if (exporterIndex + ExporterEnvironmentOffset >= annotations.Count
-            || annotations[exporterIndex + ExporterEnvironmentOffset] is not EnvironmentCallbackAnnotation exporterEnvironment)
+        if (exporterIndex + 1 >= annotations.Count
+            || annotations[exporterIndex + 1] is not EnvironmentCallbackAnnotation exporterEnvironment)
         {
             throw new InvalidOperationException(InvalidExporterRegistration);
         }

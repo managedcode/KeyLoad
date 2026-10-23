@@ -10,14 +10,13 @@ public sealed record CommandInboxExecutionOptions
     public const string SectionName = "KeyLoad:CommandInboxExecution";
     /// <summary>The startup rejection for an invalid control scheduling burst.</summary>
     public const string ValidationMessage = "The command control burst must be between one and eight.";
-    private const int MinimumControlBurst = 1;
     private const int DefaultMaximumControlBurst = 8;
 
     /// <summary>The maximum consecutive control commands before a waiting data command is read.</summary>
     public int MaximumControlBurst { get; init; } = DefaultMaximumControlBurst;
 
     /// <summary>Checks the original eight-command fairness ceiling.</summary>
-    public bool IsValid() => MaximumControlBurst is >= MinimumControlBurst and <= DefaultMaximumControlBurst;
+    public bool IsValid() => MaximumControlBurst is >= 1 and <= DefaultMaximumControlBurst;
 
     /// <summary>Rejects invalid scheduling before the inbox owns a execution semaphore.</summary>
     public void Validate()

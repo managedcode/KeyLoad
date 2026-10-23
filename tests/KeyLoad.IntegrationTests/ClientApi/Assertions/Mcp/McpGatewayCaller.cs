@@ -8,8 +8,6 @@ namespace KeyLoad.IntegrationTests.Features.ClientApi;
 /// <summary>Exercises graph discovery and invocation through the genuine official MCP SDK.</summary>
 internal static class McpGatewayCaller
 {
-    private const int ExactNameSearchLimit = 1;
-
     /// <summary>Invokes a canonical operation through the public gateway meta tool.</summary>
     internal static ValueTask<CallToolResult> InvokeKeyLoadToolAsync(this McpClient client,
         string toolName, IReadOnlyDictionary<string, object?>? arguments = null,
@@ -28,14 +26,14 @@ internal static class McpGatewayCaller
             new Dictionary<string, object?>(StringComparer.Ordinal)
             {
                 [McpDiscoveryProtocol.Query] = toolName,
-                [McpCallerProtocol.MaximumResults] = ExactNameSearchLimit
+                [McpCallerProtocol.MaximumResults] = 1
             }, cancellationToken: cancellationToken);
         await Assert.That(reply.IsError is true).IsFalse();
         var envelope = reply.StructuredContent
             ?? throw new InvalidOperationException(McpCallerProtocol.MissingStructuredResult);
         await Assert.That(envelope.GetProperty(McpCallerProtocol.RequestId).ValueKind).IsEqualTo(JsonValueKind.Null);
         var matches = envelope.GetProperty(McpCallerProtocol.Result).GetProperty(McpCallerProtocol.Matches);
-        await Assert.That(matches.GetArrayLength()).IsLessThanOrEqualTo(ExactNameSearchLimit);
+        await Assert.That(matches.GetArrayLength()).IsLessThanOrEqualTo(1);
         var tools = matches.EnumerateArray().Select(match =>
             match.GetProperty(McpCallerProtocol.Tool).Deserialize<Tool>(McpJsonUtilities.DefaultOptions)
                 ?? throw new InvalidOperationException(McpCallerProtocol.MissingDiscoveredTool)).ToArray();

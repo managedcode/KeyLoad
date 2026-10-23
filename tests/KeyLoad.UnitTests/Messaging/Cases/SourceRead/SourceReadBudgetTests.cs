@@ -14,7 +14,6 @@ internal sealed class SourceReadBudgetTests
     private const string TopicEventSpace = "topic-event";
     private const string FailureDirectoryPrefix = "keyload-source-read-failure-";
     private const string GuidFormat = "N";
-    private const int TooSmallBatchByteLimit = 1;
 
     [Test]
     public async Task AcMp005ExactRawReadBudgetSucceedsAndOneByteShortBudgetFails()
@@ -90,7 +89,7 @@ internal sealed class SourceReadBudgetTests
         ConfigureTopic(empty, TopicName);
         var limited = new DatabaseEngine(empty.Store, empty.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new()
         {
-            MaxBatchBytes = TooSmallBatchByteLimit
+            MaxBatchBytes = 1
         }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
         var envelopeError = Assert.ThrowsExactly<KeyLoadException>(() => limited.ReadEventSource("root",
             new(new(empty.Partition, TopicName, EventSourceKind.Topic))));
@@ -108,7 +107,7 @@ internal sealed class SourceReadBudgetTests
                 using var unexpected = CreateTopicDatabase(
                     new()
                     {
-                        MaxBatchBytes = TooSmallBatchByteLimit
+                        MaxBatchBytes = 1
                     }, directory);
             });
             await Assert.That(failure.Code).IsEqualTo(ErrorCode.ResourceExhausted);

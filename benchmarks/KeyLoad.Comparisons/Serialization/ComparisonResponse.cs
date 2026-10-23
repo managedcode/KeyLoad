@@ -6,7 +6,6 @@ namespace KeyLoad.Comparisons;
 /// <summary>Bounds actual execution HTTP body consumption, including chunked responses.</summary>
 public static class ComparisonResponse
 {
-    private const int EmptyResultCount = 0;
     private const string LimitFailure = "ComparisonResponseLimitExceeded";
     /// <summary>Parses a response only after enforcing the configured body ceiling.</summary>
     /// <param name = "content">The execution HTTP response content.</param>
@@ -41,8 +40,8 @@ public static class ComparisonResponse
         {
             while (true)
             {
-                var count = await input.ReadAsync(buffer.AsMemory(EmptyResultCount, policy.ReadBufferBytes), token).ConfigureAwait(false);
-                if (count == EmptyResultCount)
+                var count = await input.ReadAsync(buffer.AsMemory(0, policy.ReadBufferBytes), token).ConfigureAwait(false);
+                if (count == 0)
                 {
                     break;
                 }
@@ -52,10 +51,10 @@ public static class ComparisonResponse
                     throw new ComparisonFailureException(LimitFailure);
                 }
 
-                await body.WriteAsync(buffer.AsMemory(EmptyResultCount, count), token).ConfigureAwait(false);
+                await body.WriteAsync(buffer.AsMemory(0, count), token).ConfigureAwait(false);
             }
 
-            return body.GetBuffer().AsMemory(EmptyResultCount, checked((int)body.Length));
+            return body.GetBuffer().AsMemory(0, checked((int)body.Length));
         }
         finally
         {

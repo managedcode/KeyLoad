@@ -7,7 +7,6 @@ namespace KeyLoad.Features.ResourceExecution;
 /// <summary>Owns a bounded reusable UTF-8 input loan for canonical JSON text decoding.</summary>
 internal static class PooledJsonText
 {
-    private const int FirstWrittenByte = 0;
     private const int MaximumRetainedArrayBytes = 262_144;
     private const int MaximumArraysPerBucket = 2;
     private static readonly ArrayPool<byte> Buffers = ArrayPool<byte>.Create(
@@ -21,7 +20,7 @@ internal static class PooledJsonText
         try
         {
             var written = Encoding.UTF8.GetBytes(value.AsSpan(), buffer);
-            return JsonDefaults.Deserialize<T>(buffer.AsSpan(FirstWrittenByte, written));
+            return JsonDefaults.Deserialize<T>(buffer.AsSpan(0, written));
         }
         finally
         {

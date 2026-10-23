@@ -10,7 +10,6 @@ namespace KeyLoad.Server.Features.Authorization.Diagnostics;
 
 internal sealed class HttpTelemetryPrivacyProcessor(IOptions<HttpTelemetryPrivacyOptions> options) : BaseProcessor<Activity>
 {
-    private const int InitialParentCount = 0;
     private static readonly Meter PrivacyMeter = new(HttpTelemetryPrivacyPolicy.PrivacyMeter);
     private static readonly Counter<long> Suppressed = PrivacyMeter.CreateCounter<long>(HttpTelemetryPrivacyPolicy.SuppressedCounter);
     public override void OnStart(Activity data)
@@ -74,7 +73,7 @@ internal sealed class HttpTelemetryPrivacyProcessor(IOptions<HttpTelemetryPrivac
     }
     private bool HasBoundedAncestry(Activity data)
     {
-        var examined = InitialParentCount;
+        var examined = 0;
         for (var parent = data.Parent; parent is not null; parent = parent.Parent)
         {
             if (++examined > options.Value.MaximumParentLinks)

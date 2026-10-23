@@ -4,14 +4,12 @@ namespace KeyLoad.RecoveryTests.Features.Search;
 
 internal sealed class TextCrashBoundary(TextFaultStage expected)
 {
-    private const int GetObservedEmptyRead = 0;
-
     private int observed;
     internal bool Armed
     {
         get; set;
     }
-    internal bool Observed => Volatile.Read(ref observed) != GetObservedEmptyRead;
+    internal bool Observed => Volatile.Read(ref observed) != 0;
 
     internal void Observe(TextFaultStage stage)
     {

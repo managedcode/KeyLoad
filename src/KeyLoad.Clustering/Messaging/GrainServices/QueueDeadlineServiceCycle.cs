@@ -7,8 +7,6 @@ namespace KeyLoad.Clustering;
 
 internal static class QueueDeadlineServiceCycle
 {
-    private const int NoRejectedRecords = 0;
-
     internal static async Task<QueueDeadlineCursor?> RunAsync(BackgroundStorageClient storage,
         IGrainFactory factory, TimeProvider clock, ILogger<RecurringDueWorkerGrain> diagnostics,
         IOptions<DueCoordinationOptions> options, QueueDeadlineCursor? cursor, CancellationToken cancellationToken)
@@ -23,7 +21,7 @@ internal static class QueueDeadlineServiceCycle
                 return cursor;
             }
             var page = discovery.Page ?? throw Errors.Fail(ErrorCode.Corruption, DueCoordinatorFields.InvalidHint);
-            if (page.Rejected.Length > NoRejectedRecords)
+            if (page.Rejected.Length > 0)
             {
                 RecurringDueDiagnostics.PageRejected(diagnostics, page.Rejected.Length);
             }

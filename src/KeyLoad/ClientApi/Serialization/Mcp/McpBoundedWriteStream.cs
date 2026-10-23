@@ -5,7 +5,6 @@ namespace KeyLoad.Server;
 /// <summary>Owns one fixed execution buffer for sequential canonical JSON writes.</summary>
 internal sealed class McpBoundedWriteStream : Stream
 {
-    private const int SingleByteWidth = 1;
     private const string UnsupportedOperation = "The canonical JSON stream supports sequential writes only.";
     private readonly MemoryStream buffer;
     private readonly int maximumBytes;
@@ -88,7 +87,7 @@ internal sealed class McpBoundedWriteStream : Stream
     /// <inheritdoc />
     public override void WriteByte(byte value)
     {
-        ValidateWrite(SingleByteWidth);
+        ValidateWrite(1);
         buffer.WriteByte(value);
     }
 

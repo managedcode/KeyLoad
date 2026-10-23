@@ -5,7 +5,6 @@ namespace KeyLoad.Comparisons.Targets;
 /// <summary>Owns SurrealDB HTTP framing and its execution response-envelope validation.</summary>
 internal static class SurrealDbSqlTransport
 {
-    private const int EmptyResultCount = 0;
     private const string SuccessfulStatus = "OK";
     private const string ApiPath = "sql";
     private const string Namespace = "main";
@@ -60,7 +59,7 @@ internal static class SurrealDbSqlTransport
 
     private static void ValidateResponse(JsonElement root, bool create)
     {
-        if (root.ValueKind != JsonValueKind.Array || root.GetArrayLength() == EmptyResultCount)
+        if (root.ValueKind != JsonValueKind.Array || root.GetArrayLength() == 0)
         {
             throw new InvalidDataException(InvalidResponse);
         }

@@ -6,13 +6,11 @@ namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
 /// <summary>Exercises the original writer and two read roles on distinct original model resources.</summary>
 internal static class FunctionalGateColdConcurrentPrimary
 {
-    private const int WriterIndex = 0;
-
     internal static async Task RunAsync(FunctionalGateContext context, FunctionalGateColdState state,
         int index, CancellationToken token)
     {
         var model = state.Models.Single(value => value.Index == index);
-        if (index == WriterIndex)
+        if (index == 0)
         {
             await SqlClusterProtocol.EqualAsync(model.Receipt,
                 await context.SdkAsync(context.Writer.Sdk.CommitAsync(model.Command, token)));

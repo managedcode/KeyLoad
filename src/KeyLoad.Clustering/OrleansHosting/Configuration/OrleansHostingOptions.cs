@@ -7,7 +7,6 @@ namespace KeyLoad.Clustering;
 public sealed class OrleansHostingOptions
 {
     private const int MinimumSharedSecretBytes = 32;
-    private const int AutomaticListenPort = 0;
     private const int MaximumListenPort = 65535;
     /// <summary>Configuration shared by silos in one authenticated discovery group.</summary>
     public const string SectionName = "KeyLoad:RapidMembership";
@@ -25,5 +24,5 @@ public sealed class OrleansHostingOptions
     /// <returns>Whether the configuration can be used by the membership provider.</returns>
     public bool IsValid() => !string.IsNullOrWhiteSpace(SharedSecret)
         && Encoding.UTF8.GetByteCount(SharedSecret) >= MinimumSharedSecretBytes
-        && ListenPort is >= AutomaticListenPort and <= MaximumListenPort && DiscoveryNetworks is not null;
+        && ListenPort is >= 0 and <= MaximumListenPort && DiscoveryNetworks is not null;
 }

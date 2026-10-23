@@ -29,7 +29,6 @@ internal static class RelationalSqlClusterJoinBudgetData
     private const string NameOutput = "right_name";
     private const int WorkRows = 3;
     private const int SourcesPerPair = 2;
-    private const int InitialSeedIndex = 1;
     private const int ReadPayloadCharacters = 3_000;
     private const int ResultPayloadCharacters = 2_500;
     private const string SmallValue = "small";
@@ -73,11 +72,11 @@ internal static class RelationalSqlClusterJoinBudgetData
         var count = healthy || kind == JoinBudgetKind.ResultBytes ? 1 : WorkRows;
         var references = ImmutableArray.CreateBuilder<EntityRef>(count * SourcesPerPair);
         var position = 0L;
-        var expectedOrderId = LeftIdPrefix + (healthy ? HealthyMarker : OverBudgetMarker) + "-" + InitialSeedIndex.ToString(CultureInfo.InvariantCulture);
-        var expectedCustomerId = CustomerIdPrefix + (healthy ? HealthyMarker : OverBudgetMarker) + "-" + InitialSeedIndex.ToString(CultureInfo.InvariantCulture);
+        var expectedOrderId = LeftIdPrefix + (healthy ? HealthyMarker : OverBudgetMarker) + "-" + 1.ToString(CultureInfo.InvariantCulture);
+        var expectedCustomerId = CustomerIdPrefix + (healthy ? HealthyMarker : OverBudgetMarker) + "-" + 1.ToString(CultureInfo.InvariantCulture);
         var expectedDetail = Payload(kind, healthy);
         var expectedName = Payload(kind, healthy);
-        for (var index = InitialSeedIndex; index <= count; index++)
+        for (var index = 1; index <= count; index++)
         {
             var orderId = LeftIdPrefix + (healthy ? HealthyMarker : OverBudgetMarker) + "-" + index.ToString(CultureInfo.InvariantCulture);
             var customerId = CustomerIdPrefix + (healthy ? HealthyMarker : OverBudgetMarker) + "-" + index.ToString(CultureInfo.InvariantCulture);

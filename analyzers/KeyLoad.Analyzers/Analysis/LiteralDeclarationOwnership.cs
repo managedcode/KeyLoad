@@ -25,6 +25,25 @@ internal static class LiteralDeclarationOwnership
         return false;
     }
 
+    /// <summary>Zero and one express emptiness, the first element and the next step; naming them hides nothing.
+    /// Inside a duration, timeout or calendar argument they still name a policy and stay reported.</summary>
+    internal static bool IsTrivialNumber(SyntaxNodeAnalysisContext context) =>
+        context.Node is LiteralExpressionSyntax literal && literal.Token.ValueText is "0" or "1" &&
+        !IsTemporalArgument(context, literal);
+
+    private static bool IsTemporalArgument(SyntaxNodeAnalysisContext context, SyntaxNode literal)
+    {
+        if (literal.Ancestors().OfType<ArgumentSyntax>().FirstOrDefault()?.Parent?.Parent is not ExpressionSyntax target ||
+            context.SemanticModel.GetSymbolInfo(target, context.CancellationToken).Symbol is not IMethodSymbol method)
+        {
+            return false;
+        }
+
+        var owner = method.ContainingType;
+        return MagicRuntimeMetadataNames.TemporalTypes.Any(name =>
+            MagicRuntimeOperations.IsType(context.Compilation, owner, name));
+    }
+
     internal static bool IsNumericMetadata(SyntaxNode node) =>
         node.Ancestors().Any(static ancestor => ancestor is AttributeArgumentSyntax or EnumMemberDeclarationSyntax);
 

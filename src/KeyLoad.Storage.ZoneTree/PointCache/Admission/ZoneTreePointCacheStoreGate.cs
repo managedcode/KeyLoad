@@ -3,7 +3,6 @@ namespace KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
 /// <summary>Acquires actual storage gates without a wait queue or recursive entry.</summary>
 internal static class ZoneTreePointCacheStoreGate
 {
-    private const int NoWaitMilliseconds = 0;
     private const string DisposalInOperation = "A store cannot be disposed from within its own operation.";
 
     internal static bool CanBeginDisposal(ZoneTreeStoreRuntime runtime, ZoneTreePointCacheLifecycle lifecycle)
@@ -41,7 +40,7 @@ internal static class ZoneTreePointCacheStoreGate
             failure = ZoneTreePointCacheControlResult.Busy;
             var gate = runtime.Gate;
             return !gate.IsReadLockHeld && !gate.IsWriteLockHeld && !gate.IsUpgradeableReadLockHeld
-                && gate.TryEnterWriteLock(NoWaitMilliseconds);
+                && gate.TryEnterWriteLock(0);
         }
         catch (ObjectDisposedException) when (lifecycle.IsClosing)
         {
@@ -64,7 +63,7 @@ internal static class ZoneTreePointCacheStoreGate
             failure = ZoneTreePointCacheOwnerStatus.Busy;
             var gate = runtime.Gate;
             return !gate.IsReadLockHeld && !gate.IsWriteLockHeld && !gate.IsUpgradeableReadLockHeld
-                && gate.TryEnterReadLock(NoWaitMilliseconds);
+                && gate.TryEnterReadLock(0);
         }
         catch (ObjectDisposedException) when (lifecycle.IsClosing)
         {

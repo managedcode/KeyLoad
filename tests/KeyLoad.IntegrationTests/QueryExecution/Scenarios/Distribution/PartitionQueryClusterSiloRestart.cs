@@ -10,7 +10,6 @@ namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 internal static class PartitionQueryClusterSiloRestart
 {
     private const string AddedId = "after-silo-restart";
-    private const int AddedRank = 0;
     private const string AddedValue = "survivor-committed";
     private const string CleanupFailureKey = "KeyLoad.PartitionQuery.SiloRestartCleanup";
 
@@ -63,7 +62,7 @@ internal static class PartitionQueryClusterSiloRestart
             return status.IsSuccess && status.Value!.RoutingReady;
         }, cancellationToken).ConfigureAwait(false);
         var target = scenario.Partitions[1];
-        var row = new PartitionQueryClusterInputRow(target, AddedId, AddedRank, AddedValue);
+        var row = new PartitionQueryClusterInputRow(target, AddedId, 0, AddedValue);
         var payload = System.Text.Json.JsonSerializer.Serialize(new Dictionary<string, object?>(StringComparer.Ordinal)
         {
             [PartitionQueryClusterProtocol.RankJsonProperty] = row.Rank,

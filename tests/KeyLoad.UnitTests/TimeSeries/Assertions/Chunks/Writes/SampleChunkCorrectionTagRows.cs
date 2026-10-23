@@ -11,7 +11,6 @@ internal static class SampleChunkCorrectionTagRows
     private const long MergedRevision = 8;
     private const long CorrectedGeneration = 2;
     private const long MergedGeneration = 3;
-    private const int SelectedLimit = 1;
     private const double TaggedValue = 8;
     private const string Pointer = "/visible";
     private const string TaggedScalar = "23";
@@ -42,12 +41,12 @@ internal static class SampleChunkCorrectionTagRows
     {
         await ObserveAsync(store, async () =>
         {
-            var rows = tag is null ? All() : tag == TaggedScalar ? All()[^SelectedLimit..] : [];
+            var rows = tag is null ? All() : tag == TaggedScalar ? All()[^1..] : [];
             var request = fixture.Request with
             {
                 TagPointer = tag is null ? null : Pointer,
                 TagValue = tag,
-                Limit = tag is null ? SampleChunkCanonicalFixture.OutputLimit : SelectedLimit
+                Limit = tag is null ? SampleChunkCanonicalFixture.OutputLimit : 1
             };
             var expected = new SampleChunkWindowResult(fixture.WindowId, SampleChunkCanonicalFixture.Start,
                 SampleChunkCanonicalFixture.Until, merged ? MergedGeneration : CorrectedGeneration,
@@ -63,7 +62,7 @@ internal static class SampleChunkCorrectionTagRows
             var failure = Assert.ThrowsExactly<KeyLoadException>(() => database.ReadSampleChunkWindow(
                 SampleChunkCanonicalFixture.Principal, fixture.Request with
                 {
-                    Limit = SelectedLimit
+                    Limit = 1
                 }));
             await EqualAsync(Errors.Problem(ErrorCode.BudgetExceeded, Exhausted), failure.ToProblem());
         });

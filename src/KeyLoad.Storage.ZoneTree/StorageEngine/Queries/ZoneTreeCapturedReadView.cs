@@ -4,12 +4,6 @@ namespace KeyLoad.Storage.ZoneTree;
 internal sealed class ZoneTreeCapturedReadView : IKeyValueView, IDisposable
 {
     private const int MaximumRequestedRecords = int.MaxValue;
-    private const int NoImportedRecords = 0;
-    private const int FirstRecordIndex = 0;
-    private const int EmptyRecordCount = 0;
-    private const int EqualKeyComparison = 0;
-    private const int LastRecordOffset = 1;
-    private const int InitialCapacity = 1;
     private const int CapacityGrowthFactor = 2;
     private const long ArrayHeaderPointerSlots = 3;
     private const long KeyValueArrayHeaderPointerSlots = 6;
@@ -42,7 +36,7 @@ internal sealed class ZoneTreeCapturedReadView : IKeyValueView, IDisposable
         ArgumentNullException.ThrowIfNull(reader);
         RequireLookup(key);
         var location = ZoneTreeCapturedReadLookup.Find(records, key, records.Count);
-        if (location >= FirstRecordIndex)
+        if (location >= 0)
         {
             var record = records[location];
             observer?.Invoke(checked((long)key.Length + record.Value.Length));
@@ -58,7 +52,7 @@ internal sealed class ZoneTreeCapturedReadView : IKeyValueView, IDisposable
         byte[]? result = null;
         ReadValue(key, value =>
         {
-            admitRetained(checked(value.Length + ArrayHeaderPointerSlots * IntPtr.Size), NoImportedRecords);
+            admitRetained(checked(value.Length + ArrayHeaderPointerSlots * IntPtr.Size), 0);
             result = value.ToArray();
         });
         return result;
@@ -69,18 +63,18 @@ internal sealed class ZoneTreeCapturedReadView : IKeyValueView, IDisposable
         var result = new List<KeyValueRecord>();
         var scan = VisitRange(prefix, maxRecords, (key, value) =>
         {
-            admitRetained(checked((long)key.Length + value.Length + KeyValueArrayHeaderPointerSlots * IntPtr.Size), NoImportedRecords);
+            admitRetained(checked((long)key.Length + value.Length + KeyValueArrayHeaderPointerSlots * IntPtr.Size), 0);
             if (result.Count == result.Capacity)
             {
-                var capacity = Math.Max(InitialCapacity, checked(result.Capacity * CapacityGrowthFactor));
-                admitRetained(checked((long)IntPtr.Size * capacity + ArrayHeaderPointerSlots * IntPtr.Size), NoImportedRecords);
+                var capacity = Math.Max(1, checked(result.Capacity * CapacityGrowthFactor));
+                admitRetained(checked((long)IntPtr.Size * capacity + ArrayHeaderPointerSlots * IntPtr.Size), 0);
                 result.Capacity = capacity;
             }
-            admitRetained(checked(RecordObjectHeaderPointerSlots * IntPtr.Size + RecordMemoryFieldCount * System.Runtime.CompilerServices.Unsafe.SizeOf<ReadOnlyMemory<byte>>()), NoImportedRecords);
+            admitRetained(checked(RecordObjectHeaderPointerSlots * IntPtr.Size + RecordMemoryFieldCount * System.Runtime.CompilerServices.Unsafe.SizeOf<ReadOnlyMemory<byte>>()), 0);
             result.Add(new(key.ToArray(), value.ToArray()));
             return true;
         }, afterKey);
-        admitRetained(checked((long)IntPtr.Size * result.Count + ArrayHeaderPointerSlots * IntPtr.Size), NoImportedRecords);
+        admitRetained(checked((long)IntPtr.Size * result.Count + ArrayHeaderPointerSlots * IntPtr.Size), 0);
         return new([.. result], scan.HasMore);
     }
 
@@ -102,15 +96,15 @@ internal sealed class ZoneTreeCapturedReadView : IKeyValueView, IDisposable
         ArgumentNullException.ThrowIfNull(visitor);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(maxRecords);
         RequireRange(prefix);
-        var delivered = EmptyRecordCount;
-        long examined = EmptyRecordCount;
-        for (var offset = FirstRecordIndex; offset < records.Count; offset++)
+        var delivered = 0;
+        long examined = 0;
+        for (var offset = 0; offset < records.Count; offset++)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            var record = records[reverse ? records.Count - LastRecordOffset - offset : offset];
+            var record = records[reverse ? records.Count - 1 - offset : offset];
             if (!record.Key.Span.StartsWith(prefix)
-                || afterKey is not null && record.Key.Span.SequenceCompareTo(afterKey) <= EqualKeyComparison
-                || untilKey is not null && record.Key.Span.SequenceCompareTo(untilKey) >= EqualKeyComparison)
+                || afterKey is not null && record.Key.Span.SequenceCompareTo(afterKey) <= 0
+                || untilKey is not null && record.Key.Span.SequenceCompareTo(untilKey) >= 0)
             {
                 continue;
             }
@@ -144,7 +138,7 @@ internal sealed class ZoneTreeCapturedReadView : IKeyValueView, IDisposable
                 return;
             }
         }
-        if (exactKeys.BinarySearch(key, BinaryKeyComparer.Instance) >= EqualKeyComparison)
+        if (exactKeys.BinarySearch(key, BinaryKeyComparer.Instance) >= 0)
         {
             return;
         }

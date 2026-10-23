@@ -9,7 +9,6 @@ namespace KeyLoad.Query.Features.ChangeFeeds;
 /// <summary>Owns live-query snapshot and delta mapping over the caller's existing database cut.</summary>
 internal sealed class LiveQueryExecutor(DatabaseEngine database, QueryEngine queryEngine)
 {
-    private const int EmptyElementCount = 0;
     private const string LiveQuerySnapshotExceedsItsCompleteResultSetBudgetDetail = "The live-query snapshot exceeds its complete result-set budget.";
     private const string LiveQueryCursorBelongsToADifferentQueryDetail = "The live-query cursor belongs to a different query.";
     private const string LiveQueryProfileRequiresAnUnorderedCompleteScalarResultSetDetail = "The live-query profile requires an unordered complete scalar result set.";
@@ -48,7 +47,7 @@ internal sealed class LiveQueryExecutor(DatabaseEngine database, QueryEngine que
         using var reservation = database.AdmitQuery(cancellationToken);
         var query = LiveRequest(request.Query);
         var hash = QueryEngine.QueryHash(query);
-        var prepared = new PreparedQuery(query.Query, EmptyElementCount, database.Limits.MaxScanRecords);
+        var prepared = new PreparedQuery(query.Query, 0, database.Limits.MaxScanRecords);
         budget.Check();
         return database.WithQueryView(principalId, query.Partition, query.Query.Collection, Capability.ChangesRead,
             (view, principal, resource) => ReadView(budget.CreateView(view), principal, resource, query, hash, prepared, request,
@@ -140,8 +139,8 @@ internal sealed class LiveQueryExecutor(DatabaseEngine database, QueryEngine que
     {
         request = QueryValidation.Normalize(request, database.Limits, queryEngine.Execution);
         if (request.Query.ModelSource is not null || request.Cursor is not null
-            || request.Query.Order.Length != EmptyElementCount || request.Query.Explain
-            || request.Query.Offset != EmptyElementCount)
+            || request.Query.Order.Length != 0 || request.Query.Explain
+            || request.Query.Offset != 0)
         {
             throw Errors.Fail(ErrorCode.UnsupportedCapability,
                 LiveQueryProfileRequiresAnUnorderedCompleteScalarResultSetDetail);

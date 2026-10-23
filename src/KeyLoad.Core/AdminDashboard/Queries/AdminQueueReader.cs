@@ -6,8 +6,6 @@ namespace KeyLoad.Core;
 /// <param name="database">Borrowed canonical engine.</param>
 public sealed class AdminQueueReader(DatabaseEngine database)
 {
-    private const int LastQueueMessageOffset = 1;
-
     private const string CounterSpace = "queue-counters";
     private const string MetadataSpace = "message-meta";
 
@@ -49,7 +47,7 @@ public sealed class AdminQueueReader(DatabaseEngine database)
                     metadata.NotBefore, metadata.ExpiresAt, metadata.LeaseUntil));
                 return true;
             }, after, cancellationToken: budget.Cancellation);
-        var page = new AdminQueuePage(counters, [.. items], scan.HasMore ? items[^LastQueueMessageOffset].Id : null, AdminReadAuthority.Position(view));
+        var page = new AdminQueuePage(counters, [.. items], scan.HasMore ? items[^1].Id : null, AdminReadAuthority.Position(view));
         budget.CheckResult(page);
         return page;
     }

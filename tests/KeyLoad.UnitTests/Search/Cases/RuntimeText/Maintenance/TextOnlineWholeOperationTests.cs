@@ -6,7 +6,6 @@ namespace KeyLoad.UnitTests.Features.Search;
 internal sealed class TextOnlineWholeOperationTests
 {
     private const int TrackedBilingualRecords = 2;
-    private const int FirstCapturedOwner = 0;
     [Test]
     public async Task OrderedPublicationPreservesFullOriginalReceiptAndSameViewBilingualReads()
     {
@@ -65,7 +64,7 @@ internal sealed class TextOnlineWholeOperationTests
                     CommandId = Guid.NewGuid()
                 };
                 _ = await runtime.PhaseAsync(fixture, id, competing, OnlineTextCapabilityKind.ResolveOriginal, expiry, token);
-                if (index == FirstCapturedOwner)
+                if (index == 0)
                 {
                     _ = await runtime.PhaseAsync(fixture, id, competing, OnlineTextCapabilityKind.Capture, expiry, token);
                 }

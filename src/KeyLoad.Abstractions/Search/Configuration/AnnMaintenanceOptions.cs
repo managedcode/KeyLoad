@@ -10,9 +10,8 @@ public sealed record AnnMaintenanceOptions
     public const string ValidationMessage = "The ANN maintenance page bound is invalid.";
     private const int DefaultPages = 32;
     private const int MaximumPages = 64;
-    private const int MinimumPages = 1;
     /// <summary>Maximum actual page/checkpoint operations before this request stops with BudgetExceeded.</summary>
     public int MaximumReplayPages { get; init; } = DefaultPages;
     /// <summary>Validates the closed bounded execution parent page count.</summary>
-    public bool IsValid() => MaximumReplayPages is >= MinimumPages and <= MaximumPages;
+    public bool IsValid() => MaximumReplayPages is >= 1 and <= MaximumPages;
 }

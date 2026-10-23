@@ -5,8 +5,6 @@ namespace KeyLoad.Storage.ZoneTree;
 
 internal static class ZoneTreeBackupVerification
 {
-    private const int FileStartPosition = 0;
-
     internal static (StoreIdentity Identity, long Position) Verify(string directory,
         IOptions<ZoneTreeStorageExecutionOptions> executionOptions, CancellationToken cancellationToken = default)
     {
@@ -22,7 +20,7 @@ internal static class ZoneTreeBackupVerification
             policy.StreamBufferBytes);
         ZoneTreeBackupFileChecksum.Verify(journal, journalFile, new byte[policy.FileBufferBytes], cancellationToken);
         var identity = ZoneTreeIdentityFile.Read(identityBytes.Span);
-        journal.Position = FileStartPosition;
+        journal.Position = 0;
         ZoneTreeBackupJournalValidation.Verify(journal, identity, manifest.Position, policy, cancellationToken);
         return (identity, manifest.Position);
     }

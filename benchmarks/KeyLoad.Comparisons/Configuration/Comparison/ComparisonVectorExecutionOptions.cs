@@ -8,15 +8,14 @@ public sealed partial class ComparisonExecutionOptions
 {
     private const int DefaultVectorCancellationCheckInterval = 4_096;
     private const int DefaultVectorYieldBatchSize = 256;
-    private const int PowerOfTwoMaskAdjustment = 1;
 
     /// <summary>The maximum records between cancellation checks during vector hashing and exact scans.</summary>
     public int VectorCancellationCheckInterval { get; set; } = DefaultVectorCancellationCheckInterval;
     /// <summary>The vector records streamed before yielding asynchronous ingestion control.</summary>
     public int VectorYieldBatchSize { get; set; } = DefaultVectorYieldBatchSize;
 
-    internal int VectorCancellationCheckMask => VectorCancellationCheckInterval - PowerOfTwoMaskAdjustment;
-    internal int VectorYieldBatchMask => VectorYieldBatchSize - PowerOfTwoMaskAdjustment;
+    internal int VectorCancellationCheckMask => VectorCancellationCheckInterval - 1;
+    internal int VectorYieldBatchMask => VectorYieldBatchSize - 1;
 
     private void ValidateVectorPolicy()
     {

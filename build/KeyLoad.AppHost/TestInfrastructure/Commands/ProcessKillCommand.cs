@@ -13,7 +13,6 @@ internal static class ProcessKillCommand
     private const string DisplayName = "Test abrupt process exit";
     private const string CompletedMessage = "The selected Aspire process was killed and its exit was joined.";
     private const int ArgumentCount = 5;
-    private const int MinimumIdentity = 1;
 
     internal static void Apply(IDistributedApplicationBuilder builder, IResourceBuilder<ProjectResource> resource,
         bool ephemeral)
@@ -100,5 +99,5 @@ internal static class ProcessKillCommand
 
     private static bool Read(ExecuteCommandContext context, string argument, out long value)
         => long.TryParse(context.Arguments.GetString(argument), NumberStyles.None, CultureInfo.InvariantCulture,
-            out value) && value >= MinimumIdentity;
+            out value) && value >= 1;
 }

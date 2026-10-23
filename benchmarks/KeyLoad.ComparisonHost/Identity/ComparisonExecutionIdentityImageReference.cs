@@ -8,15 +8,10 @@ internal static class ComparisonExecutionIdentityImageReference
 {
     private const char AsciiDigitEnd = '9';
     private const char AsciiDigitStart = '0';
-    private const int EmptySegmentLength = 0;
-    private const int FirstCharacterIndex = 0;
     private const char HexadecimalLetterEnd = 'f';
-    private const int LastCharacterOffset = 1;
     private const char LowercaseAsciiEnd = 'z';
     private const char LowercaseAsciiStart = 'a';
     private const int MaximumOciTagCharacters = 128;
-    private const int MinimumRegistryPort = 1;
-    private const int SeparatorWidth = 1;
     private const char UnderscoreCharacter = '_';
     private const char UppercaseAsciiEnd = 'Z';
     private const char UppercaseAsciiStart = 'A';
@@ -37,18 +32,18 @@ internal static class ComparisonExecutionIdentityImageReference
     /// <returns>True only for a syntactically complete immutable reference.</returns>
     internal static bool IsValid(string value, IOptions<ComparisonHostExecutionOptions> executionOptions)
     {
-        if (value.Length == EmptySegmentLength || value.Length > executionOptions.Value.MaximumImageReferenceCharacters)
+        if (value.Length == 0 || value.Length > executionOptions.Value.MaximumImageReferenceCharacters)
         {
             return false;
         }
 
         var digestSeparator = value.LastIndexOf(ImageDigestSeparator);
-        if (digestSeparator <= FirstCharacterIndex || value.IndexOf(ImageDigestSeparator, StringComparison.Ordinal) != digestSeparator)
+        if (digestSeparator <= 0 || value.IndexOf(ImageDigestSeparator, StringComparison.Ordinal) != digestSeparator)
         {
             return false;
         }
 
-        var digest = value.AsSpan(digestSeparator + SeparatorWidth);
+        var digest = value.AsSpan(digestSeparator + 1);
         if (digest.Length != Sha256Prefix.Length + Sha256HexLength
             || !digest.StartsWith(Sha256Prefix, StringComparison.Ordinal)
             || !IsLowercaseSha256(digest[Sha256Prefix.Length..]))
@@ -56,17 +51,17 @@ internal static class ComparisonExecutionIdentityImageReference
             return false;
         }
 
-        var taggedImage = value.AsSpan(FirstCharacterIndex, digestSeparator);
+        var taggedImage = value.AsSpan(0, digestSeparator);
         var pathSeparator = taggedImage.IndexOf(RegistryPathSeparator);
         var tagSeparator = taggedImage.LastIndexOf(TagSeparator);
-        if (pathSeparator <= FirstCharacterIndex || tagSeparator <= pathSeparator || tagSeparator >= taggedImage.Length - LastCharacterOffset)
+        if (pathSeparator <= 0 || tagSeparator <= pathSeparator || tagSeparator >= taggedImage.Length - 1)
         {
             return false;
         }
 
         return IsValidRegistry(taggedImage[..pathSeparator])
-            && IsValidRepositoryPath(taggedImage[(pathSeparator + SeparatorWidth)..tagSeparator])
-            && IsValidTag(taggedImage[(tagSeparator + SeparatorWidth)..]);
+            && IsValidRepositoryPath(taggedImage[(pathSeparator + 1)..tagSeparator])
+            && IsValidTag(taggedImage[(tagSeparator + 1)..]);
     }
 
     private static bool IsLowercaseSha256(ReadOnlySpan<char> digest)
@@ -85,12 +80,12 @@ internal static class ComparisonExecutionIdentityImageReference
     private static bool IsValidRegistry(ReadOnlySpan<char> registry)
     {
         var portSeparator = registry.LastIndexOf(TagSeparator);
-        if (portSeparator >= FirstCharacterIndex)
+        if (portSeparator >= 0)
         {
             if (registry.IndexOf(TagSeparator) != portSeparator
-                || !int.TryParse(registry[(portSeparator + SeparatorWidth)..], NumberStyles.None,
+                || !int.TryParse(registry[(portSeparator + 1)..], NumberStyles.None,
                     CultureInfo.InvariantCulture, out var port)
-                || port is < MinimumRegistryPort or > MaximumRegistryPort)
+                || port is < 1 or > MaximumRegistryPort)
             {
                 return false;
             }
@@ -107,23 +102,23 @@ internal static class ComparisonExecutionIdentityImageReference
     }
 
     private static bool IsValidRegistryLabel(string label)
-        => label.Length > EmptySegmentLength
-            && IsLowercaseAlphaNumeric(label[FirstCharacterIndex])
-            && IsLowercaseAlphaNumeric(label[^LastCharacterOffset])
+        => label.Length > 0
+            && IsLowercaseAlphaNumeric(label[0])
+            && IsLowercaseAlphaNumeric(label[^1])
             && label.All(static character => IsLowercaseAlphaNumeric(character) || character == RepositorySegmentSeparator);
 
     private static bool IsValidRepositoryPath(ReadOnlySpan<char> path)
-        => path.Length > EmptySegmentLength && path.ToString().Split(RegistryPathSeparator).All(IsValidRepositorySegment);
+        => path.Length > 0 && path.ToString().Split(RegistryPathSeparator).All(IsValidRepositorySegment);
 
     private static bool IsValidRepositorySegment(string segment)
-        => segment.Length > EmptySegmentLength
+        => segment.Length > 0
             && segment is not CurrentDirectorySegment and not ParentDirectorySegment
             && segment.All(static character => IsLowercaseAlphaNumeric(character)
                 || character is RegistryLabelSeparator or UnderscoreCharacter or RepositorySegmentSeparator);
 
     private static bool IsValidTag(ReadOnlySpan<char> tag)
-        => tag.Length is > EmptySegmentLength and <= MaximumOciTagCharacters
-            && IsTagStartCharacter(tag[FirstCharacterIndex])
+        => tag.Length is > 0 and <= MaximumOciTagCharacters
+            && IsTagStartCharacter(tag[0])
             && tag.ToString().All(IsTagCharacter);
 
     private static bool IsTagStartCharacter(char character)

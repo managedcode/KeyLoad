@@ -6,8 +6,6 @@ namespace KeyLoad.Core.Features.ResourceExecution;
 
 internal static class ResourceLifetimeCoverageValidation
 {
-    private const int FirstResourceIndex = 0;
-
     internal static ResourceLifetimeCoverage Capture(IKeyValueView view, PartitionRef partition,
         ImmutableArray<ResourceDefinition> definitions, int maximumBytes)
     {
@@ -35,7 +33,7 @@ internal static class ResourceLifetimeCoverageValidation
             throw Errors.Fail(ErrorCode.Corruption, ResourceLifetimeValidationMessages.MissingAuthority);
         }
         var names = new HashSet<string>(StringComparer.Ordinal);
-        for (var index = FirstResourceIndex; index < definitions.Length; index++)
+        for (var index = 0; index < definitions.Length; index++)
         {
             var definition = definitions[index];
             if (definition is null || definition.TransactionDomainId != partition.TransactionDomainId

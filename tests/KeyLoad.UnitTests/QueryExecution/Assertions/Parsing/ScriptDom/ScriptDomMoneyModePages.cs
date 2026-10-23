@@ -29,9 +29,9 @@ internal static class ScriptDomMoneyModePages
         var statement = global::KeyLoad.Features.QueryExecution.ScriptDomSyntax.Parse(wire.Sql,
             database.Database.OperationLimitsOptions, budget.Check, CancellationToken.None);
         global::KeyLoad.Features.QueryExecution.ScriptDomSyntax.ValidateSessionSlots(statement,
-            SingleSlot, budget.Check, CancellationToken.None);
+            1, budget.Check, CancellationToken.None);
         var ast = global::KeyLoad.Query.Features.QueryExecution.ScriptDomQueryAdapter.Lower(statement, wire,
-            database.Database.OperationLimitsOptions, UnitExecutionOptions.QueryExecution(), budget, SingleSlot, CancellationToken.None);
+            database.Database.OperationLimitsOptions, UnitExecutionOptions.QueryExecution(), budget, 1, CancellationToken.None);
         await SqlOffsetPages.ExactAsync(engine.ExecuteAst(SqlOffsetProtocol.Reader, ast), expected);
         var unsupported = Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute(SqlOffsetProtocol.Reader, wire));
         await Assert.That(unsupported.Code).IsEqualTo(ErrorCode.UnsupportedCapability);
@@ -50,7 +50,7 @@ internal static class ScriptDomMoneyModePages
         var statement = global::KeyLoad.Features.QueryExecution.ScriptDomSyntax.Parse(
             Prefix + slot + Suffix, database.Database.OperationLimitsOptions, budget.Check, CancellationToken.None);
         global::KeyLoad.Features.QueryExecution.ScriptDomSyntax.ValidateSessionSlots(statement,
-            SingleSlot, budget.Check, CancellationToken.None);
+            1, budget.Check, CancellationToken.None);
     }
     private const string Prefix = "SELECT TOP (1) title FROM offsetleft WHERE order_id = ";
     private const string Suffix = " ORDER BY order_id";
@@ -58,7 +58,6 @@ internal static class ScriptDomMoneyModePages
     private const string SlotSql = Prefix + "$01" + Suffix;
     private const string NamedParameter = "wanted";
     private const string SlotParameter = "p1";
-    private const int SingleSlot = 1;
     private const long Revision = 1;
     private static readonly string[] InvalidSlots = ["$0", "$2", "$2147483648", "$1.5", "@wanted"];
 }

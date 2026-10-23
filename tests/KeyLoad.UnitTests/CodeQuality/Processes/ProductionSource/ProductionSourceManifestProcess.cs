@@ -12,8 +12,6 @@ internal static class ProductionSourceManifestProcess
 {
     internal const string Failure = "The execution source-manifest producer process failed.";
     private const string DeadlineFailure = "The execution source-manifest producer exceeded its operation deadline.";
-    private const int FirstCapturedStreamIndex = 0;
-    private const int SecondCapturedStreamIndex = 1;
 
     internal static string RepositoryRoot => ProductionSourceManifestProcessStart.RepositoryRoot;
 
@@ -127,7 +125,7 @@ internal static class ProductionSourceManifestProcess
             return null;
         }
         var captured = await Task.WhenAll(output, error).ConfigureAwait(false);
-        return new(process.ExitCode, captured[FirstCapturedStreamIndex], captured[SecondCapturedStreamIndex],
+        return new(process.ExitCode, captured[0], captured[1],
             exit.IsCompletedSuccessfully, output.IsCompletedSuccessfully, error.IsCompletedSuccessfully, false);
     }
 

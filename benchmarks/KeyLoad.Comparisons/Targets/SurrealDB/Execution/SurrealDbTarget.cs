@@ -15,7 +15,6 @@ public sealed partial class SurrealDbTarget(HttpClient http, string runId, strin
     private const string CommittedPrimaryDirectedGraphAndExactCosine = "committed primary; execution directed graph and exact cosine KNN";
     private const string POSTSqlJSON = "POST /sql JSON";
     private const string RootBasicAuthentication = "root Basic authentication";
-    private const int SingleResultCardinality = 1;
     private const string SingleCommunityNode = "single Community node";
     private const string PersistentRocksDBDirectory = "persistent RocksDB directory";
     private const string DEFINETABLESCHEMALESSDEFINETABLESCHEMALESSFormatTemplate = "DEFINE TABLE {0} SCHEMALESS; DEFINE TABLE {1} SCHEMALESS;";
@@ -40,7 +39,7 @@ public sealed partial class SurrealDbTarget(HttpClient http, string runId, strin
         get; private set;
     } = new(SurrealDbTokens.TokenSurrealDB, SurrealDbTokens.TokenUnverified, OnePersistentRocksDBNode, SingleCommittedWriteNotFaultQualified, CommittedPrimaryDirectedGraphAndExactCosine, POSTSqlJSON, RootBasicAuthentication, image)
     {
-        Cluster = new(SingleResultCardinality, SingleResultCardinality, SingleCommunityNode, [PersistentRocksDBDirectory])
+        Cluster = new(1, 1, SingleCommunityNode, [PersistentRocksDBDirectory])
     };
 
     /// <inheritdoc/>

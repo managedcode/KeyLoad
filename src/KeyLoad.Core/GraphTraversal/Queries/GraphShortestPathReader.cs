@@ -7,8 +7,6 @@ namespace KeyLoad.Core.Features.GraphTraversal;
 /// <summary>Runs explicit bounded breadth-first depth frontiers over execution adjacency ranges.</summary>
 internal sealed class GraphShortestPathReader
 {
-    private const int ZeroHops = 0;
-    private const int OneHop = 1;
     private const string EdgeSpace = "edge";
     private const string AdjacencySpace = "adjacency";
     private const string OutDirection = "out";
@@ -53,10 +51,10 @@ internal sealed class GraphShortestPathReader
         if (visibility.MatchesTarget(from, request.To))
         {
             foundVertices = [from];
-            return FoundResult(ZeroHops);
+            return FoundResult(0);
         }
         var frontier = new List<EntityRef> { from };
-        for (var depth = ZeroHops; depth < request.MaxDepth && frontier.Count > EmptyFrontierCount; depth++)
+        for (var depth = 0; depth < request.MaxDepth && frontier.Count > EmptyFrontierCount; depth++)
         {
             budget.Check();
             var next = new List<EntityRef>();
@@ -66,7 +64,7 @@ internal sealed class GraphShortestPathReader
                 VisitAdjacency(vertex, depth, next);
                 if (foundVertices is not null)
                 {
-                    return FoundResult(checked(depth + OneHop));
+                    return FoundResult(checked(depth + 1));
                 }
             }
             frontier = next;
@@ -78,7 +76,7 @@ internal sealed class GraphShortestPathReader
     {
         var prefix = KeySpace.Partition(AdjacencySpace, request.Partition, request.Graph,
             OutDirection, source.Collection, source.Id);
-        var maxRecords = checked(request.MaxEdges - examinedEdges + OneHop);
+        var maxRecords = checked(request.MaxEdges - examinedEdges + 1);
         var stoppedAtTarget = false;
         var scan = budget.VisitRange(view, prefix, maxRecords, (key, value) =>
         {
@@ -141,7 +139,7 @@ internal sealed class GraphShortestPathReader
         next.Add(validEdge.To);
         if (visibility.MatchesTarget(validEdge.To, request.To))
         {
-            foundVertices = ReconstructVertices(validEdge.To, checked(depth + OneHop));
+            foundVertices = ReconstructVertices(validEdge.To, checked(depth + 1));
             return true;
         }
         return false;
@@ -151,9 +149,9 @@ internal sealed class GraphShortestPathReader
     {
         const int StartVertexIndex = 0;
 
-        var path = new EntityRef[checked(hops + OneHop)];
+        var path = new EntityRef[checked(hops + 1)];
         var current = target;
-        for (var index = hops; index > ZeroHops; index--)
+        for (var index = hops; index > 0; index--)
         {
             budget.Check();
             path[index] = current;

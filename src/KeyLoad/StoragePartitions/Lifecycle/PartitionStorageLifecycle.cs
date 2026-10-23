@@ -5,7 +5,6 @@ internal sealed class PartitionStorageLifecycle(PartitionHostApplicationOwner ow
     : ILifecycleParticipant<ISiloLifecycle>
 {
     private const string LifecycleName = "KeyLoad.PartitionStorage";
-    private const int NoOriginalFailures = 0;
     private const int AfterRequestDrainStage = ServiceLifecycleStage.RuntimeStorageServices - 1;
     private readonly Lock gate = new();
     private Task? closing;
@@ -51,7 +50,7 @@ internal sealed class PartitionStorageLifecycle(PartitionHostApplicationOwner ow
         {
             return;
         }
-        if (failure is AggregateException aggregate && aggregate.InnerExceptions.Count > NoOriginalFailures)
+        if (failure is AggregateException aggregate && aggregate.InnerExceptions.Count > 0)
         {
             foreach (var original in aggregate.InnerExceptions)
             {

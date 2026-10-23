@@ -11,7 +11,6 @@ internal static class BackupRequiredFileAccessAssertions
     private const string RestoreStagingPattern = ".keyload-restore-*";
     private const string MissingParent = "The owned backup fixture has no parent directory.";
     private const string MissingName = "The owned backup input has no file name.";
-    private const int RefusedCliExitCode = 1;
     private const int RestoreUnavailableStatusCode = 503;
     private const string RestoreUnavailableType = "urn:keyload:error:RecoveryRequired";
     private const string RestoreUnavailableCode = "RecoveryRequired";
@@ -20,7 +19,7 @@ internal static class BackupRequiredFileAccessAssertions
     internal static async Task RefusedCliAsync(CliBackupRestoreProcessResult result)
     {
         await CliBackupRestoreAssertions.RejectedProcessAsync(result);
-        await Assert.That(result.ExitCode).IsEqualTo(RefusedCliExitCode);
+        await Assert.That(result.ExitCode).IsEqualTo(1);
         var problem = JsonSerializer.Deserialize<Problem>(result.StandardError, JsonDefaults.Options);
         await Assert.That(problem).IsNotNull();
         await Assert.That(problem!.Type).IsEqualTo(RestoreUnavailableType);

@@ -12,13 +12,12 @@ internal static class ExclusiveOwnerContentionProfile
     internal const string Invalid = "Exclusive owner contention requires an explicit ephemeral cold CLUSTER functional topology.";
     private const string Enabled = "true";
     private const int RequiredFunctionalSilos = 3;
-    private const int SectionPresence = 1;
 
     internal static bool Read(IConfiguration configuration, AppHostControlOptions options)
     {
         var section = configuration.GetSection(Setting);
         var selected = section.Value;
-        var nested = section.GetChildren().Take(SectionPresence).Any();
+        var nested = section.GetChildren().Take(1).Any();
         if (selected is null && !nested)
         {
             return false;

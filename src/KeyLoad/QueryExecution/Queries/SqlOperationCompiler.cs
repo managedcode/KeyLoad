@@ -25,7 +25,7 @@ internal static class SqlOperationCompiler
     {
         SqlOperationBounds.Validate(request, limitsOptions, maximumPayloadBytes, queryOptions, token);
         SqlOriginalMutationIdentity.ValidateDeclared(request.CommandId);
-        if (positionalParameterCount is < MinimumParameterCount || positionalParameterCount > queryOptions.Value.MaximumParameters)
+        if (positionalParameterCount is < 0 || positionalParameterCount > queryOptions.Value.MaximumParameters)
         {
             throw ScriptDomOperationErrors.Invalid();
         }
@@ -38,8 +38,8 @@ internal static class SqlOperationCompiler
         if (identityControl && statement is global::Microsoft.SqlServer.TransactSql.ScriptDom.SetCommandStatement control)
         {
             if (request.CommandId.HasValue || request.AllowFullScan || request.Cursor is not null
-                || request.Parameters is { Count: > MinimumParameterCount }
-                || positionalParameterCount != MinimumParameterCount)
+                || request.Parameters is { Count: > 0 }
+                || positionalParameterCount != 0)
             {
                 throw ScriptDomOperationErrors.Invalid();
             }
@@ -104,6 +104,5 @@ internal static class SqlOperationCompiler
         token.ThrowIfCancellationRequested();
         return operation;
     }
-    private const int MinimumParameterCount = 0;
 }
 

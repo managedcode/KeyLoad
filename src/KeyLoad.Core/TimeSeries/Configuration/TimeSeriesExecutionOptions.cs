@@ -11,7 +11,6 @@ public sealed record TimeSeriesExecutionOptions
     private const int DefaultMaximumAppendSamples = 10_000;
     private const int DefaultHashChunkBytes = 65_536;
     private const int DefaultTextCancellationCheckIntervalCodeUnits = 16_383;
-    private const int MinimumWorkCount = 1;
     private const int DefaultMaximumChunkWindows = 32;
     private const int DefaultMaximumChunkWindowRecords = 4_096;
     private const int DefaultMaximumChunkCorrections = 256;
@@ -39,15 +38,15 @@ public sealed record TimeSeriesExecutionOptions
     public int MaximumRollupBuckets { get; init; } = TimeSeriesReadDefaults.MaxWindows;
 
     /// <summary>Whether admission and codec execution satisfy the central policy bounds.</summary>
-    public bool IsValid() => MaximumAppendSamples is >= MinimumWorkCount and <= DefaultMaximumAppendSamples
-        && MaximumChunkWindows is >= MinimumWorkCount and <= DefaultMaximumChunkWindows
-        && MaximumChunkWindowRecords is >= MinimumWorkCount and <= DefaultMaximumChunkWindowRecords
-        && MaximumChunkCorrections is >= MinimumWorkCount and <= DefaultMaximumChunkCorrections
-        && MaximumPendingChunkWindows is >= MinimumWorkCount and <= DefaultMaximumPendingChunkWindows
+    public bool IsValid() => MaximumAppendSamples is >= 1 and <= DefaultMaximumAppendSamples
+        && MaximumChunkWindows is >= 1 and <= DefaultMaximumChunkWindows
+        && MaximumChunkWindowRecords is >= 1 and <= DefaultMaximumChunkWindowRecords
+        && MaximumChunkCorrections is >= 1 and <= DefaultMaximumChunkCorrections
+        && MaximumPendingChunkWindows is >= 1 and <= DefaultMaximumPendingChunkWindows
         && MaximumPendingChunkWindows <= MaximumChunkWindows
-        && HashChunkBytes is >= MinimumWorkCount and <= DefaultHashChunkBytes
-        && MaximumRollupBuckets is >= MinimumWorkCount and <= TimeSeriesReadDefaults.MaxWindows
-        && TextCancellationCheckIntervalCodeUnits is >= MinimumWorkCount and <= DefaultTextCancellationCheckIntervalCodeUnits;
+        && HashChunkBytes is >= 1 and <= DefaultHashChunkBytes
+        && MaximumRollupBuckets is >= 1 and <= TimeSeriesReadDefaults.MaxWindows
+        && TextCancellationCheckIntervalCodeUnits is >= 1 and <= DefaultTextCancellationCheckIntervalCodeUnits;
 
     /// <summary>Rejects invalid settings before operation admission.</summary>
     public void Validate()

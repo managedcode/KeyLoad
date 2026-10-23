@@ -14,7 +14,6 @@ internal static class SubscriptionFilterCrashScenario
     internal const string ReplacementType = "Changed";
     internal const long OriginalGeneration = 1;
     internal const int WindowSize = 3;
-    private const int UnacknowledgedDeliveryIndex = 1;
     internal static SubscriptionRef Subscription => SubscriptionCrashScenario.Subscription;
     internal static Guid CommandId => SubscriptionCrashScenario.CommandId;
 
@@ -51,7 +50,7 @@ internal static class SubscriptionFilterCrashScenario
             },
                 ExpectedGeneration: OriginalGeneration), CommandId);
         await File.WriteAllBytesAsync(Path.Combine(directory, OperationFile), JsonDefaults.Serialize(operation));
-        await File.WriteAllBytesAsync(Path.Combine(directory, OldTokenFile), JsonDefaults.Serialize(received.Deliveries[UnacknowledgedDeliveryIndex].Token));
+        await File.WriteAllBytesAsync(Path.Combine(directory, OldTokenFile), JsonDefaults.Serialize(received.Deliveries[1].Token));
         boundary.Position = checked(store.Position + OriginalGeneration);
         boundary.Armed = true;
         db.Apply(operation).Get<SubscriptionInfo>();

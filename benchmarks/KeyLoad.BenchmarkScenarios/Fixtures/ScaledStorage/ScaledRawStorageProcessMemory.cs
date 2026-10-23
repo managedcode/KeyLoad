@@ -9,7 +9,6 @@ internal static partial class ScaledRawStorageProcessMemory
 {
     private const string LibraryName = "/usr/lib/libSystem.B.dylib";
     private const string GetResourceUsageEntryPoint = "getrusage";
-    private const int CurrentProcessUsage = 0;
     private const int ResourceUsageSizeBytes = 144;
     private const int MaximumResidentSetSizeOffsetBytes = 32;
     private const string NonCurrentProcessMessage = "Peak process memory can only be read for the current process.";
@@ -44,7 +43,7 @@ internal static partial class ScaledRawStorageProcessMemory
     {
         const int EmptyGetResourceUsage = 0;
 
-        if (GetResourceUsage(CurrentProcessUsage, out var usage) != EmptyGetResourceUsage)
+        if (GetResourceUsage(0, out var usage) != EmptyGetResourceUsage)
         {
             throw new Win32Exception(Marshal.GetLastPInvokeError());
         }

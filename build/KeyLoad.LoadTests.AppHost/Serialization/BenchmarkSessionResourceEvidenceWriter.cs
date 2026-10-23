@@ -8,7 +8,6 @@ namespace KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
 /// <summary>Retains original lifetime-wide execution container observations without inventing per-case attribution.</summary>
 internal static class BenchmarkSessionResourceEvidenceWriter
 {
-    private const int EmptyArtifactBytes = 0;
     private const string StateFile = "session-state.json";
     private const string Sidecar = "session-resource-evidence.json";
     private const string Schema = "session-resource-evidence";
@@ -25,7 +24,7 @@ internal static class BenchmarkSessionResourceEvidenceWriter
         {
             return;
         }
-        if (state.LinkTarget is not null || state.Length <= EmptyArtifactBytes || state.Length > settings.MaxWorkerBytes)
+        if (state.LinkTarget is not null || state.Length <= 0 || state.Length > settings.MaxWorkerBytes)
         {
             throw new InvalidDataException(Schema);
         }

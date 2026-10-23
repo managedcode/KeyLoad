@@ -7,7 +7,6 @@ internal static class QueueDispatchCasFlow
     private const int Initial = QueueDispatchCasFixture.InitialVersion;
     private const int Step = QueueDispatchCasFixture.VersionStep;
     private const int ColdCycles = 2;
-    private const int InvalidZero = 0;
     private const int InvalidNegative = -1;
 
     internal static async Task RunAsync(QueueDispatchCasFixture fixture)
@@ -71,7 +70,7 @@ internal static class QueueDispatchCasFlow
 
     private static async Task RefusalsAsync(QueueDispatchCasFixture fixture)
     {
-        foreach (var invalid in new[] { InvalidZero, InvalidNegative })
+        foreach (var invalid in new[] { 0, InvalidNegative })
         {
             await QueueDispatchCasAssertions.FailureAsync(fixture,
                 fixture.Apply(fixture.Command(Guid.NewGuid(), invalid, true)), ErrorCode.Validation, false, Initial);

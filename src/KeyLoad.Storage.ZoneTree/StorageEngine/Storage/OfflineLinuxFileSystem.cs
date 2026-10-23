@@ -9,7 +9,6 @@ internal static partial class OfflineLinuxFileSystem
     private const string OpenEntryPoint = "open";
     private const string FileLockEntryPoint = "flock";
     private const uint NoCreationPermissions = 0;
-    private const int CallSuccess = 0;
     private const string StatxEntryPoint = "statx";
     private const int DeviceComponentBitWidth = 32;
 
@@ -30,7 +29,7 @@ internal static partial class OfflineLinuxFileSystem
 
     private static OfflineFileMetadata Read(string path, int flags, int directory = AtCurrentDirectory)
     {
-        if (Statx(directory, path, flags, RequiredMask, out var value) != CallSuccess)
+        if (Statx(directory, path, flags, RequiredMask, out var value) != 0)
         {
             throw OfflineErrors.FromErrno(Marshal.GetLastPInvokeError(), isMac: false);
         }

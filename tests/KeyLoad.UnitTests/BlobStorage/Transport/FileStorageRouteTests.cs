@@ -9,7 +9,6 @@ namespace KeyLoad.UnitTests.Features.BlobStorage;
 internal sealed class FileStorageRouteTests
 {
     private const int ExpectedActions = 12;
-    private const int OneCapability = 1;
     private const string UploadRoute = "api/storage/{tenant}/{database}/{domain}/{partition}/{resource}/upload";
     private const string AbortRoute = "api/storage/{tenant}/{database}/{domain}/{partition}/{resource}/upload-chunks/{uploadId}";
 
@@ -23,10 +22,10 @@ internal sealed class FileStorageRouteTests
             .OfType<ControllerActionDescriptor>().Where(action => action.ControllerTypeInfo.AsType() == typeof(FileStorageController)).ToArray();
         await Assert.That(actions.Length).IsEqualTo(ExpectedActions);
         await Assert.That(actions.Any(action => action.AttributeRouteInfo?.Template == UploadRoute)).IsTrue();
-        await Assert.That(actions.Count(action => action.AttributeRouteInfo?.Template == AbortRoute)).IsEqualTo(OneCapability);
+        await Assert.That(actions.Count(action => action.AttributeRouteInfo?.Template == AbortRoute)).IsEqualTo(1);
         foreach (var action in actions)
         {
-            await Assert.That(action.EndpointMetadata.OfType<FileStorageCapabilityAttribute>().Count()).IsEqualTo(OneCapability);
+            await Assert.That(action.EndpointMetadata.OfType<FileStorageCapabilityAttribute>().Count()).IsEqualTo(1);
         }
     }
 }

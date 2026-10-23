@@ -3,7 +3,6 @@ namespace KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
 /// <summary>A privately owned positive value whose bytes remain charged while pinned.</summary>
 internal sealed class ZoneTreePointCacheEntry : IDisposable
 {
-    private const int NoActivePins = 0;
     private const string LiveChargeReleaseMessage = "A live or pinned cache entry cannot release its charge.";
 
     private readonly IZoneTreePointCacheCandidateOwner _owner;
@@ -77,7 +76,7 @@ internal sealed class ZoneTreePointCacheEntry : IDisposable
             return;
         }
 
-        if (_ownsCharge && (!Retired || PinCount != NoActivePins))
+        if (_ownsCharge && (!Retired || PinCount != 0))
         {
             throw new InvalidOperationException(LiveChargeReleaseMessage);
         }

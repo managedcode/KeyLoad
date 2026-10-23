@@ -10,7 +10,6 @@ namespace KeyLoad.UnitTests.Features.Search;
 internal static class TextIncrementalIntentCorruptionTrial
 {
     private const byte DamageMask = 0xFF;
-    private const int LastByte = 1;
     private const string CorruptionDetail = "The execution text projection is corrupt.";
 
     internal static async Task RunAsync(TestDatabase database, CancellationToken token)
@@ -28,7 +27,7 @@ internal static class TextIncrementalIntentCorruptionTrial
         await Assert.That(new FileInfo(path).Length).IsLessThanOrEqualTo((long)database.Database.Limits.MaxBatchBytes);
         var bytes = await File.ReadAllBytesAsync(path, token);
         var damaged = bytes.ToArray();
-        damaged[^LastByte] ^= DamageMask;
+        damaged[^1] ^= DamageMask;
         var image = QueueWholeFlowStorage.Bytes(database.Store);
         var position = database.Store.Position;
         var failures = new List<Exception>();

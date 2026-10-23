@@ -4,9 +4,6 @@ namespace KeyLoad.Core.Features.Search;
 
 internal static class CanonicalTextTerms
 {
-    private const int EmptyElementCount = 0;
-    private const int BudgetCheckRemainder = 0;
-
     private const string DocumentTokenExceeded = "The document text token budget is exceeded.";
     private const string WordExceeded = "The text token budget is exceeded.";
 
@@ -15,11 +12,11 @@ internal static class CanonicalTextTerms
     {
         budget.Check();
         var word = new StringBuilder();
-        var words = EmptyElementCount;
-        var runes = EmptyElementCount;
+        var words = 0;
+        var runes = 0;
         foreach (var rune in text.Normalize(NormalizationForm.FormKC).EnumerateRunes())
         {
-            if (++runes % checkInterval == BudgetCheckRemainder)
+            if (++runes % checkInterval == 0)
             {
                 budget.Check();
             }
@@ -27,7 +24,7 @@ internal static class CanonicalTextTerms
             {
                 word.Append(Rune.ToLowerInvariant(rune));
             }
-            else if (word.Length != EmptyElementCount)
+            else if (word.Length != 0)
             {
                 ChargeToken(ref words, budget, maximumWords);
                 yield return word.ToString();
@@ -38,7 +35,7 @@ internal static class CanonicalTextTerms
                 throw Errors.Fail(ErrorCode.BudgetExceeded, WordExceeded);
             }
         }
-        if (word.Length != EmptyElementCount)
+        if (word.Length != 0)
         {
             ChargeToken(ref words, budget, maximumWords);
             yield return word.ToString();

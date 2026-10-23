@@ -8,9 +8,7 @@ namespace KeyLoad.UnitTests.Features.Authorization;
 internal static class GenerationVisibilityPartialScanFlow
 {
     internal const string Reader = "visibility-partial-scan-reader";
-    private const int PartialScanRecords = 1;
     private const int RefusedOperations = 2;
-    private const int InitialOperationIndex = 0;
     private const string MissingCache = "The shared budget refused the bounded scan owner.";
     private const string MissingDraft = "The current authorized scope refused its genuine draft.";
     private const string CandidateBudget = "The query access path exceeds its candidate budget.";
@@ -59,7 +57,7 @@ internal static class GenerationVisibilityPartialScanFlow
         => new(db.Store, db.Database.Authorization,
             UnitExecutionOptions.DatabaseLimits(db.Database.Limits with
             {
-                MaxScanRecords = PartialScanRecords
+                MaxScanRecords = 1
             }),
             UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(),
             UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(),
@@ -85,7 +83,7 @@ internal static class GenerationVisibilityPartialScanFlow
         var identity = db.Store.Identity;
         var cut = db.Store.Position;
         var queries = new QueryEngine(limited, UnitExecutionOptions.QueryExecution());
-        for (var operation = InitialOperationIndex; operation < RefusedOperations; operation++)
+        for (var operation = 0; operation < RefusedOperations; operation++)
         {
             var failure = Assert.ThrowsExactly<KeyLoadException>(() => queries.Execute(Reader,
                 new(db.Partition, GenerationVisibilityAssertions.Sql, AllowFullScan: true), cancellationToken: token));

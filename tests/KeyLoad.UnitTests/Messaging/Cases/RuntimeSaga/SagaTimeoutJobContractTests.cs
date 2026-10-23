@@ -20,13 +20,10 @@ internal sealed class SagaTimeoutJobContractTests
     private const int ExpectedMetadataFieldCount = 11;
     private const int SagaRevision = 7;
     private const int InvalidRevision = -1;
-    private const int NonUtcOffsetHours = 1;
     private const int CanonicalYear = 2035;
-    private const int CanonicalMonth = 1;
-    private const int CanonicalDay = 1;
     private const string SagaIdentifier = "f298d10a-8993-4eef-a5b5-804c8bf3453f";
-    private static readonly DateTimeOffset CanonicalDeadline = new(CanonicalYear, CanonicalMonth,
-        CanonicalDay, 0, 0, 0, TimeSpan.Zero);
+    private static readonly DateTimeOffset CanonicalDeadline = new(CanonicalYear, 1,
+        1, 0, 0, 0, TimeSpan.Zero);
 
     [Test]
     public async Task MetadataRoundTripsOnlyTheBoundedCanonicalHint()
@@ -61,7 +58,7 @@ internal sealed class SagaTimeoutJobContractTests
         var invalidDeadline = new Dictionary<string, string>(metadata, StringComparer.Ordinal)
         {
             [SagaTimeoutJobContract.DeadlineKey] = TimeProvider.System.GetUtcNow()
-                .ToOffset(TimeSpan.FromHours(NonUtcOffsetHours)).ToString(UtcTimestampFormat, CultureInfo.InvariantCulture)
+                .ToOffset(TimeSpan.FromHours(1)).ToString(UtcTimestampFormat, CultureInfo.InvariantCulture)
         };
 
         await Assert.ThrowsExactlyAsync<KeyLoadException>(() => Task.Run(() => SagaTimeoutJobContract.Parse(extra)));

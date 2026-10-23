@@ -18,7 +18,6 @@ internal static class ComparisonHostLaunchSettings
     private const string InvalidConfigurationAssignment = "The execution workload test requires configuration assignments.";
     private const string ConfigurationSeparator = ":";
     private const string EnvironmentSeparator = "__";
-    private const int AssignmentSeparatorLength = 1;
 
     private const string DotnetCommand = "dotnet";
     private const string SolutionName = "KeyLoad.slnx";
@@ -90,7 +89,7 @@ internal static class ComparisonHostLaunchSettings
             {
                 throw new InvalidOperationException(InvalidConfigurationAssignment);
             }
-            startInfo.Environment[argument[ArgumentPrefixLength..separator].Replace(ConfigurationSeparator, EnvironmentSeparator, StringComparison.Ordinal)] = argument[(separator + AssignmentSeparatorLength)..];
+            startInfo.Environment[argument[ArgumentPrefixLength..separator].Replace(ConfigurationSeparator, EnvironmentSeparator, StringComparison.Ordinal)] = argument[(separator + 1)..];
         }
         return startInfo;
     }

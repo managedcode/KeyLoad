@@ -6,9 +6,6 @@ internal sealed class CoverageDeploymentSnapshot
 {
     private const int PermissionMask = 0x1ff;
     private const int UnboundedPathCharacters = int.MaxValue;
-    private const int InitialBufferOffset = 0;
-    private const int NoBytesRead = 0;
-    private const int NoBytesRemaining = 0;
     private const int EndOfFile = -1;
     private const string SourceChangedDuringCaptureMessage =
         "A execution coverage source file changed while its identity was captured.";
@@ -116,15 +113,15 @@ internal sealed class CoverageDeploymentSnapshot
         }
         using var digest = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
         var remaining = expectedLength;
-        while (remaining > NoBytesRemaining)
+        while (remaining > 0)
         {
             var requested = (int)Math.Min(buffer.Length, remaining);
-            var read = stream.Read(buffer, InitialBufferOffset, requested);
-            if (read == NoBytesRead)
+            var read = stream.Read(buffer, 0, requested);
+            if (read == 0)
             {
                 throw new InvalidDataException(SourceChangedDuringCaptureMessage);
             }
-            digest.AppendData(buffer, InitialBufferOffset, read);
+            digest.AppendData(buffer, 0, read);
             remaining -= read;
         }
         if (stream.ReadByte() != EndOfFile)

@@ -3,9 +3,6 @@ namespace KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
 /// <summary>Owns exact local cache bindings; callers provide the real store writer boundary.</summary>
 internal sealed class ZoneTreePointCacheControlState
 {
-    private const int UnassignedRevision = 0;
-    private const int EmptyDiagnosticCounter = 0;
-
     internal readonly Lock TransitionGate = new();
     internal readonly ZoneTreePointCacheOptions Options;
     internal readonly ICacheReadPermit Permit;
@@ -48,7 +45,7 @@ internal sealed class ZoneTreePointCacheControlState
 
     internal bool Retire(long withdrawnRevision)
     {
-        if (withdrawnRevision <= UnassignedRevision)
+        if (withdrawnRevision <= 0)
         {
             return false;
         }
@@ -139,7 +136,7 @@ internal sealed class ZoneTreePointCacheControlState
 
     private static ZoneTreePointCacheSnapshot EmptySnapshot(bool closed)
     {
-        return new ZoneTreePointCacheSnapshot(true, false, closed, EmptyDiagnosticCounter, EmptyDiagnosticCounter, EmptyDiagnosticCounter, EmptyDiagnosticCounter, EmptyDiagnosticCounter, EmptyDiagnosticCounter,
-            EmptyDiagnosticCounter, EmptyDiagnosticCounter, EmptyDiagnosticCounter, EmptyDiagnosticCounter, EmptyDiagnosticCounter, EmptyDiagnosticCounter, EmptyDiagnosticCounter, EmptyDiagnosticCounter, EmptyDiagnosticCounter);
+        return new ZoneTreePointCacheSnapshot(true, false, closed, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0);
     }
 }

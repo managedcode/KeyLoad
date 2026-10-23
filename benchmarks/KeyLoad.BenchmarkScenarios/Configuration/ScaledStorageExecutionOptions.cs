@@ -19,7 +19,6 @@ public sealed class ScaledStorageExecutionOptions
     private const int MaximumCancellationCheckInterval = 256;
     private const int MaximumRecordsPerValueChunk = 4096;
     private const int MaximumPreparationHours = 24;
-    private const int MinimumPositiveBudget = 0;
     private static readonly TimeSpan MaximumPreparationTimeout = TimeSpan.FromHours(MaximumPreparationHours);
 
     /// <summary>The full preparation deadline including capacity admission and verification.</summary>
@@ -43,13 +42,13 @@ public sealed class ScaledStorageExecutionOptions
     /// <returns>Whether execution fixture ownership can begin.</returns>
     public bool IsValid() => PreparationTimeout > TimeSpan.Zero
         && PreparationTimeout <= MaximumPreparationTimeout
-        && MaximumProcessBytes > MinimumPositiveBudget && RequiredHeadroomBytes > MinimumPositiveBudget
+        && MaximumProcessBytes > 0 && RequiredHeadroomBytes > 0
         && MaximumProcessBytes <= long.MaxValue - RequiredHeadroomBytes
         && MinimumQualificationCapacityBytes >= MaximumProcessBytes + RequiredHeadroomBytes
-        && MinimumMutableSegmentRecords > MinimumPositiveBudget
-        && MutableSegmentSlackRecords > MinimumPositiveBudget && MutableSegmentSlackRecords <= DefaultMutableSegmentSlackRecords
-        && CancellationCheckInterval > MinimumPositiveBudget && CancellationCheckInterval <= MaximumCancellationCheckInterval
-        && RecordsPerValueChunk > MinimumPositiveBudget && RecordsPerValueChunk <= MaximumRecordsPerValueChunk;
+        && MinimumMutableSegmentRecords > 0
+        && MutableSegmentSlackRecords > 0 && MutableSegmentSlackRecords <= DefaultMutableSegmentSlackRecords
+        && CancellationCheckInterval > 0 && CancellationCheckInterval <= MaximumCancellationCheckInterval
+        && RecordsPerValueChunk > 0 && RecordsPerValueChunk <= MaximumRecordsPerValueChunk;
 
     /// <summary>Rejects invalid standalone composition before storage allocation.</summary>
     public void Validate()

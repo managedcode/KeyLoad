@@ -8,7 +8,6 @@ namespace KeyLoad.UnitTests.Features.Messaging;
 internal static class QueueLifecycleCeilingFailureAssertions
 {
     private const string Exhausted = "The queue lifecycle version or sequence is exhausted.";
-    private const int FailureCommit = 1;
     private const string Separator = ":";
 
     internal static async Task<Result<object>> FailAsync(DatabaseEngine database, QueueLifecycleCeilingRows rows,
@@ -22,8 +21,8 @@ internal static class QueueLifecycleCeilingFailureAssertions
         var identity = OrleansSerialization.Serialize(store.Identity);
         var result = Apply(database, rows, principal, time);
         await RefusalAsync(result);
-        await Assert.That(store.Position).IsEqualTo(position + FailureCommit);
-        await Assert.That(database.LastApplied).IsEqualTo(canonicalPosition + FailureCommit);
+        await Assert.That(store.Position).IsEqualTo(position + 1);
+        await Assert.That(database.LastApplied).IsEqualTo(canonicalPosition + 1);
         await Assert.That(OrleansSerialization.Serialize(store.Identity).AsSpan().SequenceEqual(identity)).IsTrue();
         await Assert.That(Domain(store, rows, principal)).IsEquivalentTo(domain, CollectionOrdering.Matching);
         await Assert.That(QueueWholeFlowStorage.Clock(store)).IsEqualTo(time);

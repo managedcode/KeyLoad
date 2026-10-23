@@ -17,7 +17,6 @@ internal sealed class SqlClusterAdmissionTests
     private const string Database = "agentdb";
     private const string Domain = "agent";
     private const int SiloCount = 3;
-    private const int NoControlCommands = 0;
     private const string AdmissionDrainTimeout = "HTTP control admission did not drain within the bounded observation window.";
     private static readonly TimeSpan AdmissionDrainDeadline = TimeSpan.FromSeconds(5);
     private static readonly TimeSpan AdmissionPollInterval = TimeSpan.FromMilliseconds(50);
@@ -90,8 +89,8 @@ internal sealed class SqlClusterAdmissionTests
         var admission = await WaitForControlCommandsDrainedAsync(sdk, cancellationToken);
         await Assert.That(admission.Http!.Limits.MaxReservedBytes).IsEqualTo(DataBytes);
         await Assert.That(admission.Http.Limits.HeavyReadReservedBytes).IsEqualTo(HeavyReadBytes);
-        await Assert.That(admission.Http.Node.ControlCommands).IsEqualTo(NoControlCommands);
-        await Assert.That(admission.Http.VerifiedScopes.ControlCommands).IsEqualTo(NoControlCommands);
+        await Assert.That(admission.Http.Node.ControlCommands).IsEqualTo(0);
+        await Assert.That(admission.Http.VerifiedScopes.ControlCommands).IsEqualTo(0);
         var status = await McpCallerAssertions.SdkSuccessAsync(await sdk.StatusAsync(cancellationToken));
         await Assert.That(status.RoutingReady).IsTrue();
         await Assert.That(status.SiloCount).IsEqualTo(SiloCount);
@@ -111,8 +110,8 @@ internal sealed class SqlClusterAdmissionTests
             deadline.Token.ThrowIfCancellationRequested();
             ThrowIfAdmissionDrainExpired(started);
             var http = admission.Http!;
-            if (http.Node.ControlCommands == NoControlCommands
-                && http.VerifiedScopes.ControlCommands == NoControlCommands)
+            if (http.Node.ControlCommands == 0
+                && http.VerifiedScopes.ControlCommands == 0)
             {
                 return admission;
             }

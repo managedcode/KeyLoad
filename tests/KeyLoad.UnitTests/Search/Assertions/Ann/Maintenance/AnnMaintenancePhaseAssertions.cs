@@ -6,7 +6,6 @@ namespace KeyLoad.UnitTests.Features.Search;
 internal static class AnnMaintenancePhaseAssertions
 {
     private const int MaximumPages = 12;
-    private const int FirstPage = 0;
     internal static async Task RejectAtomicParentAsync(TestDatabase database, AnnMaintenanceRequest request)
     {
         var state = AnnMaintenanceTestData.Snapshot(database);
@@ -46,7 +45,7 @@ internal static class AnnMaintenancePhaseAssertions
     {
         var completed = false;
         CommitProjectionBatchRequest? emptyIntent = null;
-        for (var number = FirstPage; number < MaximumPages; number++)
+        for (var number = 0; number < MaximumPages; number++)
         {
             var page = AnnMaintenanceTestData.Read(database, request, upper);
             if (page.ThroughSequence == page.Consumer.Checkpoint)

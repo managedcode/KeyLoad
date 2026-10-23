@@ -17,9 +17,8 @@ internal static class RecurringScheduleCrashScenario
     private const string IdentitySeparator = "-";
     private const string CounterHexFormat = "x16";
 
-    private const int OccurrenceIntervalDays = 1;
     [ImmutableTemporalData]
-    private static readonly TimeSpan OccurrenceInterval = TimeSpan.FromDays(OccurrenceIntervalDays);
+    private static readonly TimeSpan OccurrenceInterval = TimeSpan.FromDays(1);
     internal const string Mode = "recurring-schedule-crash";
     internal const string OperationFile = "recurring-schedule-operation.json";
     internal const string SeedTailFile = "recurring-schedule-seed-tail.txt";

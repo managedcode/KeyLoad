@@ -31,8 +31,8 @@ internal sealed class MagicRuntimeDurationBoundaryTests
                 internal int Execute()
                 {
                     using var semaphore = new SemaphoreSlim([|0|], [|1|]);
-                    var arithmetic = [|1|] + [|1000|];
-                    return Delay([|0|]) + Wait([|1|]) + FromSeconds([|1|]) + CancelAfter([|0|]) + arithmetic;
+                    var arithmetic = 1 + [|1000|];
+                    return Delay(0) + Wait(1) + FromSeconds(1) + CancelAfter(0) + arithmetic;
                 }
             }
             """;

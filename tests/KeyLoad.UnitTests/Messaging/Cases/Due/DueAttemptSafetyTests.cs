@@ -3,7 +3,6 @@ namespace KeyLoad.UnitTests.Features.Messaging;
 
 internal sealed class DueAttemptSafetyTests
 {
-    private const int MaximumOccurrences = 1;
     private const string Payload = "{\"task\":\"run\"}";
     private const string Headers = "{}";
 
@@ -121,7 +120,7 @@ internal sealed class DueAttemptSafetyTests
         Guid commandId, DateTimeOffset evaluatedAt)
     {
         var request = new CommandRequest(commandId, fixture.Partition,
-            [new EmitRecurringOccurrences(fixture.Queue, scheduleId, generation, MaximumOccurrences)]);
+            [new EmitRecurringOccurrences(fixture.Queue, scheduleId, generation, 1)]);
         return fixture.Apply(OperationKind.Batch, request, id: commandId, time: evaluatedAt);
     }
 

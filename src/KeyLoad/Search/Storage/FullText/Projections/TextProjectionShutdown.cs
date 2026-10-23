@@ -4,10 +4,6 @@ namespace KeyLoad.Server.Features.Search;
 
 internal sealed class TextProjectionShutdown(string root, IOptions<DatabaseLimits> limitsOptions, Guid sourceNodeId, TextProjectionState state, TextProjectionPhysicalGate physicalGate, Action<TextFaultStage>? faultObserver, IOptions<TextExecutionOptions> executionOptions, TextResourceOwnership? resources = null)
 {
-    private const int FailureEmptyCount = 0;
-    private const int FailureSingleItemCount = 1;
-    private const int FailureIndexEmptyCount = 0;
-
     private readonly DatabaseLimits limits = limitsOptions.Value;
     internal void Run(TextGenerationSlot?[] slots)
     {
@@ -55,7 +51,7 @@ internal sealed class TextProjectionShutdown(string root, IOptions<DatabaseLimit
         {
             ServerFailureObserver.Observe(() => physicalGate.Run(() => TextFiles.DeleteBuildingGeneration(
                 root, generation.Leaf, sourceNodeId, limits, executionOptions: executionOptions, resources: resources)), failures);
-            if (failures.Count == FailureEmptyCount)
+            if (failures.Count == 0)
             {
                 slot.SharedReservation?.CompleteAfterJoinedCleanup();
             }
@@ -72,7 +68,7 @@ internal sealed class TextProjectionShutdown(string root, IOptions<DatabaseLimit
         var failures = new List<Exception>();
         ServerFailureObserver.Observe(() => physicalGate.Run(() => TextFiles.DeleteBuildingGeneration(
             root, slot.Leaf, sourceNodeId, limits, executionOptions: executionOptions, resources: resources)), failures);
-        if (failures.Count == FailureEmptyCount)
+        if (failures.Count == 0)
         {
             slot.SharedReservation?.CompleteAfterJoinedCleanup();
         }
@@ -82,8 +78,8 @@ internal sealed class TextProjectionShutdown(string root, IOptions<DatabaseLimit
     private static Exception? Failure(List<Exception> failures)
         => failures.Count switch
         {
-            FailureEmptyCount => null,
-            FailureSingleItemCount => failures[FailureIndexEmptyCount],
+            0 => null,
+            1 => failures[0],
             _ => new AggregateException(failures)
         };
 }

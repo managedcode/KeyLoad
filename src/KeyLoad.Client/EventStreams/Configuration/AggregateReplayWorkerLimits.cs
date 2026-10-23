@@ -6,7 +6,6 @@ namespace KeyLoad.Client;
 [ConfigurationOptions]
 public sealed record AggregateReplayWorkerLimits
 {
-    private const int MinimumPositiveBudget = 0;
     private const int MaximumEventCeiling = 65_536;
     private const int MaximumStateByteCeiling = 16_777_216;
     private const int MaximumInputByteCeiling = 67_108_864;
@@ -29,10 +28,10 @@ public sealed record AggregateReplayWorkerLimits
 
     /// <summary>Checks the configured budgets against the existing replay ceilings.</summary>
     /// <returns>Whether the worker can safely execute within these budgets.</returns>
-    public bool IsValid() => MaximumEvents is > MinimumPositiveBudget and <= MaximumEventCeiling &&
-        MaximumStateBytes is > MinimumPositiveBudget and <= MaximumStateByteCeiling &&
-        MaximumInputBytes is > MinimumPositiveBudget and <= MaximumInputByteCeiling &&
-        MaximumJsonDepth is > MinimumPositiveBudget and <= MaximumJsonDepthCeiling;
+    public bool IsValid() => MaximumEvents is > 0 and <= MaximumEventCeiling &&
+        MaximumStateBytes is > 0 and <= MaximumStateByteCeiling &&
+        MaximumInputBytes is > 0 and <= MaximumInputByteCeiling &&
+        MaximumJsonDepth is > 0 and <= MaximumJsonDepthCeiling;
 
     /// <summary>Rejects invalid standalone settings before caller execution.</summary>
     public void Validate()

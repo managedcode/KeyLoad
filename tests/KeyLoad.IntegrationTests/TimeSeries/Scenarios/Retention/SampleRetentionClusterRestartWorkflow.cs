@@ -12,7 +12,6 @@ internal static class SampleRetentionClusterRestartWorkflow
     private const string SiloRestoreFailureKey = "KeyLoad.RetentionFollowerRestoreFailure";
     private const int NodeCount = TimeSeriesClusterScenario.NodeCount;
     private const int FirstNode = TimeSeriesClusterScenario.FirstNode;
-    private const int McpNodeIndex = 1;
 
     internal static async Task RunAsync(ClusterFixture fixture, CancellationToken callerToken)
     {
@@ -25,7 +24,7 @@ internal static class SampleRetentionClusterRestartWorkflow
         var selectedSilo = await SelectRestartableSiloAsync(clients, writer, cancellationToken);
         var node = ClusterReplicationTestSupport.NodeName(selectedSilo + FirstNode);
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture,
-            ClusterReplicationTestSupport.NodeName(McpNodeIndex + FirstNode), fixture.AdminKey, cancellationToken);
+            ClusterReplicationTestSupport.NodeName(1 + FirstNode), fixture.AdminKey, cancellationToken);
         await ExecuteWithRestartCleanupAsync(fixture,
             new(clients, scenario, writer, selectedSilo, node, mcp), cancellationToken);
     }
@@ -135,7 +134,7 @@ internal static class SampleRetentionClusterRestartWorkflow
         CancellationToken cancellationToken)
     {
         var selectedSilo = Enumerable.Range(0, NodeCount)
-            .First(index => index != writer && index != McpNodeIndex);
+            .First(index => index != writer && index != 1);
         await Assert.That((await clients[selectedSilo].StatusAsync(cancellationToken)).IsSuccess).IsTrue();
         return selectedSilo;
     }

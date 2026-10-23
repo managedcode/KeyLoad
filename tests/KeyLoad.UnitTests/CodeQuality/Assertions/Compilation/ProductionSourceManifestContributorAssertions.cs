@@ -4,13 +4,10 @@ namespace KeyLoad.UnitTests.Features.CodeQuality.Assertions;
 
 internal static class ProductionSourceManifestContributorAssertions
 {
-    private const int RegistrySchemaVersion = 1;
     private const int ExpectedUnitRows = 50;
-    private const int ExpectedRecoveryRows = 1;
     private const int ExpectedClusterRows = 11;
     private const int MaximumIdentityFieldCharacters = 512;
     private const int MaximumOperationCharacters = 4096;
-    private const int MinimumFieldCount = 1;
     private const string RegistryPath = "scripts/Features/CodeQuality/functional-coverage.product-contributors.json";
     private const string QueryContractPath = "scripts/Features/CodeQuality/functional-coverage.contract.json";
     private const string SchemaVersionProperty = "schemaVersion";
@@ -71,7 +68,7 @@ internal static class ProductionSourceManifestContributorAssertions
     private static async Task AssertRegistryShapeAsync(JsonElement registry)
     {
         await ProductionSourceManifestValueAssertions.FieldsAsync(registry, [SchemaVersionProperty, ContributorsProperty]);
-        await Assert.That(registry.GetProperty(SchemaVersionProperty).GetInt32()).IsEqualTo(RegistrySchemaVersion);
+        await Assert.That(registry.GetProperty(SchemaVersionProperty).GetInt32()).IsEqualTo(1);
         await Assert.That(registry.GetProperty(ContributorsProperty).ValueKind).IsEqualTo(JsonValueKind.Array);
     }
 
@@ -119,7 +116,7 @@ internal static class ProductionSourceManifestContributorAssertions
         await Assert.That(suiteCounts.Keys.Order(StringComparer.Ordinal)).IsEquivalentTo(
             Suites.Order(StringComparer.Ordinal), TUnit.Assertions.Enums.CollectionOrdering.Matching);
         await Assert.That(suiteCounts[UnitSuite]).IsEqualTo(ExpectedUnitRows);
-        await Assert.That(suiteCounts[RecoverySuite]).IsEqualTo(ExpectedRecoveryRows);
+        await Assert.That(suiteCounts[RecoverySuite]).IsEqualTo(1);
         await Assert.That(suiteCounts[ClusterSuite]).IsEqualTo(ExpectedClusterRows);
     }
 
@@ -172,7 +169,7 @@ internal static class ProductionSourceManifestContributorAssertions
     private static async Task AssertUniqueStringsAsync(JsonElement element, HashSet<string>? allowed)
     {
         await Assert.That(element.ValueKind).IsEqualTo(JsonValueKind.Array);
-        await Assert.That(element.GetArrayLength()).IsGreaterThanOrEqualTo(MinimumFieldCount);
+        await Assert.That(element.GetArrayLength()).IsGreaterThanOrEqualTo(1);
         var seen = new HashSet<string>(StringComparer.Ordinal);
         foreach (var item in element.EnumerateArray())
         {

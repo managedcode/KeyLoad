@@ -4,7 +4,6 @@ namespace KeyLoad.UnitTests.Features.Search;
 internal static class PackedAnnOwnedSimilarityTestSupport
 {
     private const int OrdinaryVectorOrdinal = 23;
-    private const int SubnormalPosition = 0;
 
     internal static TestDatabase CreateDatabase()
     {
@@ -17,9 +16,9 @@ internal static class PackedAnnOwnedSimilarityTestSupport
     {
         var zero = new float[dimension];
         var signedZero = new float[dimension];
-        signedZero[SubnormalPosition] = -0f;
+        signedZero[0] = -0f;
         var subnormal = new float[dimension];
-        subnormal[SubnormalPosition] = float.Epsilon;
+        subnormal[0] = float.Epsilon;
         if (dimension > 1)
         {
             subnormal[^1] = -float.Epsilon;

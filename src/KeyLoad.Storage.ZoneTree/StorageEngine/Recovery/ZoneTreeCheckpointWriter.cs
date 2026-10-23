@@ -5,13 +5,6 @@ namespace KeyLoad.Storage.ZoneTree;
 
 internal static class ZoneTreeCheckpointWriter
 {
-    private const int InitialSnapshotPosition = 0;
-    private const int InitialRecordCount = 0;
-    private const int ObserverNonMutationIndex = 0;
-    private const int EmptyBatchBytes = 0;
-    private const int EmptyBatchCount = 0;
-    private const int SingleRecordIncrement = 1;
-
     internal static StorageSnapshot WriteMutations(FileStream output, ZoneTreeStoreOptions options,
         StorageSnapshot snapshot, Action<Action<StorageMutation>> visit)
     {
@@ -19,8 +12,8 @@ internal static class ZoneTreeCheckpointWriter
         ArgumentNullException.ThrowIfNull(options);
         ArgumentNullException.ThrowIfNull(visit);
         ZoneTreeCheckpointPublication.RequireStream(output);
-        if (snapshot.Incarnation == Guid.Empty || snapshot.Position < InitialSnapshotPosition || snapshot.AppliedPosition < InitialSnapshotPosition
-            || snapshot.RecordCount < InitialRecordCount)
+        if (snapshot.Incarnation == Guid.Empty || snapshot.Position < 0 || snapshot.AppliedPosition < 0
+            || snapshot.RecordCount < 0)
         {
             throw Errors.Fail(ErrorCode.Corruption, ZoneTreePersistenceFormat.CheckpointCutInvalid);
         }
@@ -40,9 +33,9 @@ internal static class ZoneTreeCheckpointWriter
         var footer = new ZoneTreeCheckpointFooter(records, Convert.ToHexStringLower(digest.GetHashAndReset()));
         WriteFrame(output, options, ZoneTreePersistenceFormat.CheckpointEndMagic, metadata.Position,
             OrleansSerialization.Serialize(footer), null);
-        options.FaultObserver?.Invoke(CommitStage.SnapshotWritten, metadata.Position, ObserverNonMutationIndex);
+        options.FaultObserver?.Invoke(CommitStage.SnapshotWritten, metadata.Position, 0);
         output.Flush(true);
-        options.FaultObserver?.Invoke(CommitStage.SnapshotFlushed, metadata.Position, ObserverNonMutationIndex);
+        options.FaultObserver?.Invoke(CommitStage.SnapshotFlushed, metadata.Position, 0);
         ZoneTreeCheckpointPublication.RequireReplayable(output, options, work: budget);
         return snapshot;
     }
@@ -73,9 +66,9 @@ internal static class ZoneTreeCheckpointWriter
         var footer = new ZoneTreeCheckpointFooter(records, Convert.ToHexStringLower(digest.GetHashAndReset()));
         WriteFrame(output, options, ZoneTreePersistenceFormat.CheckpointEndMagic, metadata.Position,
             OrleansSerialization.Serialize(footer), null);
-        options.FaultObserver?.Invoke(CommitStage.SnapshotWritten, metadata.Position, ObserverNonMutationIndex);
+        options.FaultObserver?.Invoke(CommitStage.SnapshotWritten, metadata.Position, 0);
         output.Flush(true);
-        options.FaultObserver?.Invoke(CommitStage.SnapshotFlushed, metadata.Position, ObserverNonMutationIndex);
+        options.FaultObserver?.Invoke(CommitStage.SnapshotFlushed, metadata.Position, 0);
         ZoneTreeCheckpointPublication.RequireReplayable(output, options, work: budget);
         return new(metadata.Incarnation, metadata.Position, metadata.AppliedPosition, records);
     }
@@ -88,8 +81,8 @@ internal static class ZoneTreeCheckpointWriter
         IncrementalHash digest, ZoneTreeCheckpointBudget budget)
     {
         var batch = new List<StorageMutation>();
-        long batchBytes = EmptyBatchBytes;
-        long records = InitialRecordCount;
+        long batchBytes = 0;
+        long records = 0;
         using (var iterator = tree.CreateIterator(IteratorType.NoRefresh))
         {
             while (iterator.Next())
@@ -106,12 +99,12 @@ internal static class ZoneTreeCheckpointWriter
                 {
                     WriteBatch(output, options, position, batch, digest);
                     batch.Clear();
-                    batchBytes = EmptyBatchBytes;
+                    batchBytes = 0;
                 }
             }
         }
 
-        if (batch.Count != EmptyBatchCount)
+        if (batch.Count != 0)
         {
             WriteBatch(output, options, position, batch, digest);
         }
@@ -123,8 +116,8 @@ internal static class ZoneTreeCheckpointWriter
         Action<Action<StorageMutation>> visit, IncrementalHash digest, ZoneTreeCheckpointBudget budget)
     {
         var batch = new List<StorageMutation>();
-        long batchBytes = EmptyBatchBytes;
-        long records = InitialRecordCount;
+        long batchBytes = 0;
+        long records = 0;
         visit(mutation =>
         {
             if (mutation is null || mutation.Key.IsEmpty || mutation.Value is not { } value)
@@ -136,17 +129,17 @@ internal static class ZoneTreeCheckpointWriter
             var copy = new StorageMutation(mutation.Key.ToArray(), value.ToArray());
             batch.Add(copy);
             batchBytes = checked(batchBytes + copy.Key.Length + copy.Value!.Value.Length);
-            records = checked(records + SingleRecordIncrement);
+            records = checked(records + 1);
             if (batchBytes >= options.CheckpointBatchBytes
                 || batch.Count >= options.CheckpointBatchRecords)
             {
                 WriteBatch(output, options, position, batch, digest);
                 batch.Clear();
-                batchBytes = EmptyBatchBytes;
+                batchBytes = 0;
             }
         });
 
-        if (batch.Count != EmptyBatchCount)
+        if (batch.Count != 0)
         {
             WriteBatch(output, options, position, batch, digest);
         }

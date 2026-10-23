@@ -6,7 +6,6 @@ namespace KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
 internal static class ZoneTreePointCacheReads
 {
     private const string ForeignEntryMessage = "The cache entry belongs to a different owner.";
-    private const int NoActivePins = 0;
     private const string MissingPinMessage = "The cache entry has no active pin.";
 
     internal static bool TryPin(ZoneTreePointCacheState state, ReadOnlySpan<byte> key, long generation,
@@ -64,14 +63,14 @@ internal static class ZoneTreePointCacheReads
 
         lock (state.Gate)
         {
-            if (entry.PinCount <= NoActivePins)
+            if (entry.PinCount <= 0)
             {
                 throw new InvalidOperationException(MissingPinMessage);
             }
 
             entry.PinCount--;
             state.ActivePins--;
-            if (entry.PinCount == NoActivePins && entry.Retired)
+            if (entry.PinCount == 0 && entry.Retired)
             {
                 state.RetiredPinnedEntries--;
                 ZoneTreePointCacheRetirement.ReleaseEntry(state, entry);

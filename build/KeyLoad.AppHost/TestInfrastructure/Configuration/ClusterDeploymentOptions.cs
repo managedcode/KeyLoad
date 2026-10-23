@@ -10,7 +10,6 @@ internal sealed record ClusterDeploymentOptions
 {
     private const int DefaultSiloCount = 3;
     private const int DefaultFirstPublicPort = 5101;
-    private const int MinimumPositive = 1;
     private const string SiloCountKey = "KeyLoad:SiloCount";
     private const string ReplicaCountKey = "KeyLoad:ReplicaCount";
     private const string StorageModeKey = "KeyLoad:StorageMode";
@@ -31,11 +30,11 @@ internal sealed record ClusterDeploymentOptions
     public int FirstPublicPort { get; init; } = DefaultFirstPublicPort;
     [ConfigurationKeyName(LoggingKey)]
     public string LoggingLevel { get; init; } = DefaultLoggingLevel;
-    internal bool IsValid() => SiloCount >= MinimumPositive
-        && ReplicaCount >= MinimumPositive && ReplicaCount <= SiloCount
+    internal bool IsValid() => SiloCount >= 1
+        && ReplicaCount >= 1 && ReplicaCount <= SiloCount
         && Enum.IsDefined(StorageMode)
-        && (StorageMode != StorageAccessMode.SharedVolume || ReplicaCount == MinimumPositive)
+        && (StorageMode != StorageAccessMode.SharedVolume || ReplicaCount == 1)
         && !string.IsNullOrWhiteSpace(LoggingLevel)
-        && FirstPublicPort >= MinimumPositive
+        && FirstPublicPort >= 1
         && FirstPublicPort <= IPEndPoint.MaxPort;
 }

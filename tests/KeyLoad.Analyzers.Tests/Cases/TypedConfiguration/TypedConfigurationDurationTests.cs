@@ -86,13 +86,12 @@ internal sealed class TypedConfigurationDurationTests
         const string source = """
             internal static class Subject
             {
-                private const int ImmediateTimeout = 0;
                 internal static void Execute(System.Threading.Tasks.Task task, System.Threading.SemaphoreSlim gate)
                 {
-                    [|task.Wait(ImmediateTimeout)|];
-                    [|gate.WaitAsync(ImmediateTimeout)|];
-                    using var source = [|new System.Threading.CancellationTokenSource(ImmediateTimeout)|];
-                    [|source.CancelAfter(ImmediateTimeout)|];
+                    [|task.Wait(0)|];
+                    [|gate.WaitAsync(0)|];
+                    using var source = [|new System.Threading.CancellationTokenSource(0)|];
+                    [|source.CancelAfter(0)|];
                 }
             }
             """;

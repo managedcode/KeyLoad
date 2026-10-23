@@ -7,7 +7,6 @@ namespace KeyLoad.Query.Features.QueryExecution;
 
 internal static class DistributedTextStatisticsLeaf
 {
-    private const int NoTextLength = 0;
     private const string CanonicalTextRequired = "The distributed statistics require the canonical text profile.";
     private const string ReceivingPrincipalChanged = "The distributed statistics receiving principal changed.";
 
@@ -89,7 +88,7 @@ internal static class DistributedTextStatisticsLeaf
             });
             return ranker.CaptureStatistics();
         }
-        var documents = NoTextLength;
+        var documents = 0;
         database.VisitVisibleDocuments(view, principal, request.Partition, request.Collection, budget,
             document =>
             {
@@ -99,6 +98,6 @@ internal static class DistributedTextStatisticsLeaf
                     documents++;
                 }
             });
-        return DistributedTextStatisticsCapture.Copy([], documents, NoTextLength, [], budget);
+        return DistributedTextStatisticsCapture.Copy([], documents, 0, [], budget);
     }
 }

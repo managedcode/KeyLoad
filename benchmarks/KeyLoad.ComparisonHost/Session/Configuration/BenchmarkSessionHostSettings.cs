@@ -9,7 +9,6 @@ namespace KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
 internal sealed record BenchmarkSessionHostSettings(string SessionId, IsolatedHostSettings Execution)
 {
     internal const string Profile = BenchmarkSessionContract.Profile;
-    private const int MissingJobId = 0;
     private const string SessionSetting = "Benchmarks:Session";
     private const string SessionIdSetting = "Benchmarks:SessionId";
     private const string SectionPrefix = "Benchmarks:";
@@ -48,7 +47,7 @@ internal sealed record BenchmarkSessionHostSettings(string SessionId, IsolatedHo
         var image = target == IsolatedHostConstants.KeyLoad || unsupported is not null ? null
             : IsolatedHostSettings.Required(configuration, IsolatedHostConstants.Image);
         var execution = ComparisonExecutionRegistration.ReadHost(configuration);
-        if (job is <= MissingJobId || !Path.IsPathFullyQualified(output)
+        if (job is <= 0 || !Path.IsPathFullyQualified(output)
             || target != IsolatedHostConstants.KeyLoad && unsupported is null && !ComparisonExecutionIdentityImageReference.IsValid(image!, execution))
         {
             throw new InvalidOperationException(Profile);

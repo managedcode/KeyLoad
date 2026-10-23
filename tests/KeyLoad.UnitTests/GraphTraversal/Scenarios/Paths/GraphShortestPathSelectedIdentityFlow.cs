@@ -4,8 +4,6 @@ namespace KeyLoad.UnitTests.Features.GraphTraversal;
 
 internal static class GraphShortestPathSelectedIdentityFlow
 {
-    private const int OneCommit = 1;
-
     internal static async Task Run(GraphTraversalIntegrityFault fault, bool filtered)
     {
         using var database = new TestDatabase();
@@ -15,7 +13,7 @@ internal static class GraphShortestPathSelectedIdentityFlow
         var healthyImage = CanonicalStoreImage.Bytes(database.Store);
         var healthyPosition = database.Store.Position;
         var ownedFault = GraphTraversalIntegrityFaultRows.Install(database.Store, state, fault);
-        await Assert.That(database.Store.Position).IsEqualTo(healthyPosition + OneCommit);
+        await Assert.That(database.Store.Position).IsEqualTo(healthyPosition + 1);
         await GraphShortestPathIntegrityAssertions.Refuse(database.Database, database.Store, state, filtered, token);
         await GraphShortestPathIntegrityAssertions.Refuse(database.Database, database.Store, state, filtered, token);
         var corruptImage = CanonicalStoreImage.Bytes(database.Store);
@@ -30,7 +28,7 @@ internal static class GraphShortestPathSelectedIdentityFlow
             await GraphTraversalIntegrityAssertions.Image(cold, corruptImage, corruptPosition);
             await GraphShortestPathIntegrityAssertions.Refuse(owner, cold, state, filtered, token);
             GraphTraversalIntegrityFaultRows.Repair(cold, ownedFault);
-            await GraphTraversalIntegrityAssertions.Image(cold, healthyImage, corruptPosition + OneCommit);
+            await GraphTraversalIntegrityAssertions.Image(cold, healthyImage, corruptPosition + 1);
             await GraphShortestPathIntegrityAssertions.Healthy(owner, cold, state, null, filtered, token);
             await GraphTraversalIntegrityAssertions.Replay(owner, cold, state.SeedCommand, state.SeedReceipt);
             continuation = GraphTraversalIntegrityFixture.Continue(owner, state);

@@ -4,24 +4,19 @@ namespace KeyLoad.Storage.ZoneTree;
 
 internal static class ZoneTreeRangeReader
 {
-    private const int EqualKeys = 0;
-    private const int NoDeliveredRecords = 0;
     private const int LowerKey = -1;
-    private const int HigherKey = 1;
-    private const int NoValueBytes = 0;
 
-    private const int MinimumRequestedRecords = 1;
     internal static StorageScanResult Visit(ZoneTreeStoreRuntime runtime, byte[] prefix, int maxRecords,
         StorageRecordVisitor visitor, SortedSet<ZoneTreeStagedEntry>? changes, byte[]? afterKey,
         byte[]? untilKey, StorageReadObserver? observer, CancellationToken cancellationToken, bool reverse = false)
     {
         runtime.ReadCounters.RangeAttempt();
         Validate(prefix, maxRecords, visitor, runtime.Options.MaximumRangeRecords, cancellationToken);
-        var lower = afterKey is not null && BinaryKeyComparer.Instance.Compare(afterKey, prefix) > EqualKeys ? afterKey : prefix;
+        var lower = afterKey is not null && BinaryKeyComparer.Instance.Compare(afterKey, prefix) > 0 ? afterKey : prefix;
         var prefixSuccessor = reverse ? ZoneTreeRangeBounds.PrefixSuccessor(prefix) : null;
-        if ((untilKey is not null && BinaryKeyComparer.Instance.Compare(lower, untilKey) >= EqualKeys)
+        if ((untilKey is not null && BinaryKeyComparer.Instance.Compare(lower, untilKey) >= 0)
             || (reverse && prefixSuccessor is not null
-                && BinaryKeyComparer.Instance.Compare(lower, prefixSuccessor) >= EqualKeys))
+                && BinaryKeyComparer.Instance.Compare(lower, prefixSuccessor) >= 0))
         {
             return default;
         }
@@ -39,23 +34,23 @@ internal static class ZoneTreeRangeReader
     {
         var hasBaseline = baseline.MoveNext();
         var hasStaged = staged.MoveNext();
-        var delivered = NoDeliveredRecords;
+        var delivered = 0;
         while (hasBaseline || hasStaged)
         {
             work.Check();
             var comparison = hasBaseline && hasStaged
-                ? baseline.Key.Span.SequenceCompareTo(staged.Key) * (reverse ? LowerKey : HigherKey)
-                : hasBaseline ? LowerKey : HigherKey;
+                ? baseline.Key.Span.SequenceCompareTo(staged.Key) * (reverse ? LowerKey : 1)
+                : hasBaseline ? LowerKey : 1;
             if (ProcessCurrent(baseline, staged, work, comparison, maxRecords, visitor, ref delivered) is { } result)
             {
                 return result;
             }
 
-            if (hasBaseline && comparison <= EqualKeys)
+            if (hasBaseline && comparison <= 0)
             {
                 hasBaseline = baseline.MoveNext();
             }
-            if (hasStaged && comparison >= EqualKeys)
+            if (hasStaged && comparison >= 0)
             {
                 hasStaged = staged.MoveNext();
             }
@@ -68,12 +63,12 @@ internal static class ZoneTreeRangeReader
         ZoneTreeStagedCursor staged, ZoneTreeRangeWork work, int comparison, int maxRecords,
         StorageRecordVisitor visitor, ref int delivered)
     {
-        var useStaged = comparison >= EqualKeys;
+        var useStaged = comparison >= 0;
         var key = useStaged ? staged.Key.AsSpan() : baseline.Key.Span;
         var value = useStaged ? staged.Value : null;
         if (useStaged)
         {
-            work.ChargeStaged((long)staged.Key.Length + (value?.Length ?? NoValueBytes), value is null);
+            work.ChargeStaged((long)staged.Key.Length + (value?.Length ?? 0), value is null);
         }
 
         var live = !useStaged || value is not null;
@@ -102,7 +97,7 @@ internal static class ZoneTreeRangeReader
         ArgumentNullException.ThrowIfNull(prefix);
         ArgumentNullException.ThrowIfNull(visitor);
         cancellationToken.ThrowIfCancellationRequested();
-        if (maxRecords < MinimumRequestedRecords || maxRecords > maximumRecords)
+        if (maxRecords < 1 || maxRecords > maximumRecords)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, InvalidRangeLimitMessage);
         }

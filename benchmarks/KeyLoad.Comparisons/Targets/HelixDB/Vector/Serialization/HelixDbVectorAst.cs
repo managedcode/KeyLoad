@@ -5,7 +5,6 @@ namespace KeyLoad.Comparisons.Targets;
 internal static class HelixDbVectorAst
 {
     private const int FilteredCorpusModulo = 100;
-    private const int EmptyResultCount = 0;
     private const int CanonicalRecordIdWidth = 10;
     private const int ExcludedStableRemainder = 9;
     internal static JsonObject Add(string label, VectorDocument document)
@@ -16,7 +15,7 @@ internal static class HelixDbVectorAst
             new JsonArray(HelixDbTokens.TokenId, HelixDbProtocol.Value(HelixDbTokens.TokenString, document.Id)),
             new JsonArray(HelixDbTokens.TokenPayload, HelixDbProtocol.Value(HelixDbTokens.TokenString, document.Payload)),
             new JsonArray(HelixDbTokens.TokenEmbedding, Vector(document.Embedding.Span)),
-            new JsonArray(HelixDbTokens.TokenFiltered, HelixDbProtocol.Value(HelixDbTokens.TokenBool, document.Number % FilteredCorpusModulo == EmptyResultCount)),
+            new JsonArray(HelixDbTokens.TokenFiltered, HelixDbProtocol.Value(HelixDbTokens.TokenBool, document.Number % FilteredCorpusModulo == 0)),
             new JsonArray(HelixDbTokens.TokenStable, HelixDbProtocol.Value(HelixDbTokens.TokenBool, document.Number % CanonicalRecordIdWidth != ExcludedStableRemainder))
         };
         return HelixDbProtocol.Node(HelixDbTokens.TokenAddN, new()

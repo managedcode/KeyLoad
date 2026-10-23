@@ -7,8 +7,6 @@ internal static class RedisSessionQueryExecution
     private const string SessionIndexUnavailable = "SelectedRedisProfileHasNoSecondaryIndexLifecycle";
     private const string SessionPrimaryUnavailable = "SessionRedisPrimaryUnavailable";
     private const string SessionReadCommand = "EVAL_RO";
-    private const int SessionKeyCount = 1;
-    private const int SessionRangeWidth = 1;
 
     private const string SessionQuery = """
         local payload = redis.call('GET', KEYS[1])
@@ -38,7 +36,7 @@ internal static class RedisSessionQueryExecution
         var expected = BenchmarkSessionQueryContract.Expected(ordinal, stableStart, stableCount);
         // Join the original execution request, matching this target's existing document-session cancellation contract.
         var result = await connection.GetDatabase().ExecuteAsync(SessionReadCommand,
-            new object[] { SessionQuery, SessionKeyCount, prefix + expected.Id, expected.Id, expected.Number, expected.Number + SessionRangeWidth },
+            new object[] { SessionQuery, 1, prefix + expected.Id, expected.Id, expected.Number, expected.Number + 1 },
             CommandFlags.DemandMaster).ConfigureAwait(false);
         cancellationToken.ThrowIfCancellationRequested();
         BenchmarkSessionQueryContract.Require(result.IsNull ? null : new(expected.Id, result.ToString()), expected);

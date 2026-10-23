@@ -22,9 +22,7 @@ internal static class AppHostControlOptionsRegistration
     private const string DataRootSetting = "KeyLoad:DataRoot";
     private const string InvalidLoggerModelControl = "The C1 logger model control selection is invalid.";
     private const string FunctionalNodeCountSetting = "KeyLoadTests:FunctionalNodeCount";
-    private const int MinimumFunctionalNodes = 1;
     private const string InvalidFunctionalTopology = "Functional topology requires a positive number of real ephemeral silos and an exclusive owned data root.";
-    private const int SectionPresenceCount = 1;
 
     internal static IOptions<AppHostControlOptions> Bind(IConfiguration configuration)
     {
@@ -48,13 +46,13 @@ internal static class AppHostControlOptionsRegistration
     {
         var section = configuration.GetSection(FunctionalNodeCountSetting);
         var selected = section.Value;
-        var nested = section.GetChildren().Take(SectionPresenceCount).Any();
+        var nested = section.GetChildren().Take(1).Any();
         if (selected is null && !nested)
         {
             return null;
         }
         if (!int.TryParse(selected, System.Globalization.NumberStyles.None, System.Globalization.CultureInfo.InvariantCulture,
-                out var count) || count < MinimumFunctionalNodes || nested
+                out var count) || count < 1 || nested
             || configuration[EphemeralSetting] != LoggerModelControlEnabledValue
             || string.IsNullOrWhiteSpace(configuration[DataRootSetting])
             || !Path.IsPathFullyQualified(configuration[DataRootSetting]!)
@@ -86,7 +84,7 @@ internal static class AppHostControlOptionsRegistration
     {
         var control = configuration.GetSection(LoggerModelControlSetting);
         var selected = control.Value;
-        var hasNestedSelection = control.GetChildren().Take(SectionPresenceCount).Any();
+        var hasNestedSelection = control.GetChildren().Take(1).Any();
         if (selected is null && !hasNestedSelection)
         {
             return false;
@@ -108,6 +106,6 @@ internal static class AppHostControlOptionsRegistration
     private static bool HasSection(IConfiguration configuration, string key)
     {
         var section = configuration.GetSection(key);
-        return section.Value is not null || section.GetChildren().Take(SectionPresenceCount).Any();
+        return section.Value is not null || section.GetChildren().Take(1).Any();
     }
 }

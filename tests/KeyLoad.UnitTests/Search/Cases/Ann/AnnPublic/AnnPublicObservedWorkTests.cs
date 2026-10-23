@@ -4,7 +4,6 @@ internal sealed class AnnPublicObservedWorkTests
 {
     private const int Threshold = 3;
     private const int Breadth = 3;
-    private const int ExpiryStep = 1;
     private const string Deadline = "The read execution deadline is exceeded.";
 
     [Test]
@@ -31,7 +30,7 @@ internal sealed class AnnPublicObservedWorkTests
                     }
                     else
                     {
-                        clock.Advance(TimeSpan.FromSeconds(database.Database.Limits.QueryDeadlineSeconds + ExpiryStep));
+                        clock.Advance(TimeSpan.FromSeconds(database.Database.Limits.QueryDeadlineSeconds + 1));
                     }
                 });
             AnnSearchPage? partial = null;

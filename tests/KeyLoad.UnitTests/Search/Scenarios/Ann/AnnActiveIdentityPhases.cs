@@ -5,7 +5,6 @@ namespace KeyLoad.UnitTests.Features.Search;
 internal static class AnnActiveIdentityPhases
 {
     private const int MaximumPages = 12;
-    private const int FirstPage = 0;
     private const string InvalidUpper = "The real identity fixture did not reach its exact upper.";
     private const string PageBoundExceeded = "The real identity fixture exceeded the unchanged twelve-page bound.";
 
@@ -15,7 +14,7 @@ internal static class AnnActiveIdentityPhases
         ProjectionBatchResult? checkpoint = null;
         CommitProjectionBatchRequest? empty = null;
         var complete = false;
-        for (var number = FirstPage; number < MaximumPages; number++)
+        for (var number = 0; number < MaximumPages; number++)
         {
             var page = AnnMaintenanceTestData.Read(database, request, upper);
             if (page.ThroughSequence == page.Consumer.Checkpoint)

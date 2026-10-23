@@ -7,8 +7,6 @@ namespace KeyLoad.Core.Features.GraphTraversal.Serialization;
 internal static class GraphCrossPartitionCapacityWriter
 {
     private const int RemovedRecordCount = -1;
-    private const int UnchangedRecordCount = 0;
-    private const int AddedRecordCount = 1;
 
     private const string MissingCounter = "Graph projection capacity metadata is missing for stored rows.";
     private const string InvalidCounter = "Graph projection capacity metadata is malformed.";
@@ -99,7 +97,7 @@ internal static class GraphCrossPartitionCapacityWriter
     }
 
     private static int RecordDelta(int? currentLength, byte[]? nextValue)
-        => currentLength.HasValue ? nextValue is null ? RemovedRecordCount : UnchangedRecordCount : nextValue is null ? UnchangedRecordCount : AddedRecordCount;
+        => currentLength.HasValue ? nextValue is null ? RemovedRecordCount : 0 : nextValue is null ? 0 : 1;
 
     private static long ByteDelta(int? currentLength, byte[]? nextValue, int maxBytes)
     {

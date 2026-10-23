@@ -13,7 +13,6 @@ public sealed record ChangeFeedExecutionOptions
     private const int MaximumLifetimeDays = 365;
     private const int DefaultMaximumProjectionResources = 256;
     private const int DefaultMaximumProjectionMutationKinds = 32;
-    private const int MinimumWorkCount = 1;
     private static readonly TimeSpan MaximumLifetime = TimeSpan.FromDays(MaximumLifetimeDays);
 
     /// <summary>Maximum age of a newly issued signed change cursor.</summary>
@@ -28,8 +27,8 @@ public sealed record ChangeFeedExecutionOptions
     /// <summary>Whether durations and projection work remain positive and bounded.</summary>
     public bool IsValid() => CursorLifetime > TimeSpan.Zero && CursorLifetime <= MaximumLifetime
         && ProjectionBatchLifetime > TimeSpan.Zero && ProjectionBatchLifetime <= MaximumLifetime
-        && MaximumProjectionResources is >= MinimumWorkCount and <= DefaultMaximumProjectionResources
-        && MaximumProjectionMutationKinds is >= MinimumWorkCount and <= DefaultMaximumProjectionMutationKinds;
+        && MaximumProjectionResources is >= 1 and <= DefaultMaximumProjectionResources
+        && MaximumProjectionMutationKinds is >= 1 and <= DefaultMaximumProjectionMutationKinds;
 
     /// <summary>Rejects invalid settings before operation admission.</summary>
     public void Validate()

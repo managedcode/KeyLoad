@@ -18,7 +18,6 @@ public sealed record ZoneTreeStorageExecutionOptions
     private const long DefaultMaximumRangeWorkBytes = 67_108_864;
     private const int DefaultMaximumReadCutRecords = 5_000_000;
     private const long DefaultMaximumReadCutExaminedBytes = 1_073_741_824;
-    private const int DefaultMaximumReadCutElapsedMinutes = 1;
     private const int DefaultFileBufferBytes = 65_536;
     private const int DefaultIdentityBufferBytes = 4_096;
     private const int DefaultStreamBufferBytes = 4_096;
@@ -26,7 +25,6 @@ public sealed record ZoneTreeStorageExecutionOptions
     private const int DefaultMaximumIdentityFileBytes = 4_096;
     private const int DefaultMaintenanceIntervalSeconds = 30;
     private const int DefaultBlockCacheLifetimeSeconds = 60;
-    private const int MinimumPositiveBudget = 1;
     private const long MaximumTimerMilliseconds = 4_294_967_294;
     private static readonly TimeSpan MaximumTimerDuration = TimeSpan.FromMilliseconds(MaximumTimerMilliseconds);
 
@@ -47,7 +45,7 @@ public sealed record ZoneTreeStorageExecutionOptions
     /// <summary>The maximum admitted provider byte budget for a captured execution read cut.</summary>
     public long MaximumReadCutExaminedBytes { get; init; } = DefaultMaximumReadCutExaminedBytes;
     /// <summary>The maximum admitted duration of a captured execution read cut.</summary>
-    public TimeSpan MaximumReadCutElapsed { get; init; } = TimeSpan.FromMinutes(DefaultMaximumReadCutElapsedMinutes);
+    public TimeSpan MaximumReadCutElapsed { get; init; } = TimeSpan.FromMinutes(1);
 
     /// <summary>The interval of the physically owned execution cache-cleanup task.</summary>
     public TimeSpan MaintenanceInterval { get; init; } = TimeSpan.FromSeconds(DefaultMaintenanceIntervalSeconds);
@@ -67,18 +65,18 @@ public sealed record ZoneTreeStorageExecutionOptions
 
     /// <summary>Checks positive budgets without inventing relationships between independently valid limits.</summary>
     /// <returns>Whether every budget can be consumed by the execution storage owners.</returns>
-    public bool IsValid() => MaxFrameBytes >= MinimumPositiveBudget && MaxSnapshotBytes >= MinimumPositiveBudget
-        && CheckpointBatchBytes >= MinimumPositiveBudget && CheckpointBatchRecords >= MinimumPositiveBudget
-        && MaximumRangeRecords >= MinimumPositiveBudget && MaximumRangeWorkBytes >= MinimumPositiveBudget
-        && MaximumReadCutRecords >= MinimumPositiveBudget && MaximumReadCutExaminedBytes >= MinimumPositiveBudget
+    public bool IsValid() => MaxFrameBytes >= 1 && MaxSnapshotBytes >= 1
+        && CheckpointBatchBytes >= 1 && CheckpointBatchRecords >= 1
+        && MaximumRangeRecords >= 1 && MaximumRangeWorkBytes >= 1
+        && MaximumReadCutRecords >= 1 && MaximumReadCutExaminedBytes >= 1
         && MaximumReadCutElapsed > TimeSpan.Zero && MaximumReadCutElapsed <= MaximumTimerDuration
-        && MaintenanceInterval.TotalMilliseconds >= MinimumPositiveBudget && MaintenanceInterval <= MaximumTimerDuration
+        && MaintenanceInterval.TotalMilliseconds >= 1 && MaintenanceInterval <= MaximumTimerDuration
         && BlockCacheLifetime >= TimeSpan.Zero && BlockCacheLifetime <= MaximumTimerDuration
-        && FileBufferBytes is >= MinimumPositiveBudget and <= DefaultFileBufferBytes
-        && IdentityBufferBytes is >= MinimumPositiveBudget and <= DefaultIdentityBufferBytes
-        && StreamBufferBytes is >= MinimumPositiveBudget and <= DefaultStreamBufferBytes
-        && MaximumBackupManifestBytes is >= MinimumPositiveBudget and <= DefaultMaximumBackupManifestBytes
-        && MaximumIdentityFileBytes is >= MinimumPositiveBudget and <= DefaultMaximumIdentityFileBytes;
+        && FileBufferBytes is >= 1 and <= DefaultFileBufferBytes
+        && IdentityBufferBytes is >= 1 and <= DefaultIdentityBufferBytes
+        && StreamBufferBytes is >= 1 and <= DefaultStreamBufferBytes
+        && MaximumBackupManifestBytes is >= 1 and <= DefaultMaximumBackupManifestBytes
+        && MaximumIdentityFileBytes is >= 1 and <= DefaultMaximumIdentityFileBytes;
 
     /// <summary>Rejects invalid policy before opening files or admitting execution work.</summary>
     public void Validate()

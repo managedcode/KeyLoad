@@ -10,7 +10,6 @@ public sealed record HttpAdmissionLimits
     public const string SectionName = "KeyLoad:HttpAdmission";
     /// <summary>The startup rejection for invalid admission settings.</summary>
     public const string ValidationMessage = "HTTP admission limits are invalid.";
-    private const int MinimumPositiveBudget = 1;
     private const int DefaultMaxRequests = 32;
     private const long DefaultMaxReservedBytes = 1_073_741_824;
     private const int DefaultMaxTenantRequests = 16;
@@ -23,7 +22,6 @@ public sealed record HttpAdmissionLimits
     private const int DefaultMaxControlBodyBytes = 65_536;
     private const long DefaultHeavyReadReservedBytes = 67_108_864;
     private const long DefaultOtherReservedBytes = 8_388_608;
-    private const int NoReservedBytes = 0;
     private const int MaximumBodyBytes = 33_554_432;
     private const long MaximumReadReservationBytes = 1_073_741_824;
 
@@ -68,10 +66,10 @@ public sealed record HttpAdmissionLimits
     /// <exception cref="ArgumentException">One or more configured limits are invalid.</exception>
     public void Validate()
     {
-        if (MaxRequests < MinimumPositiveBudget || MaxReservedBytes < MinimumPositiveBudget || MaxTenantRequests < MinimumPositiveBudget || MaxPrincipalRequests < MinimumPositiveBudget
-            || ReservedControlRequests < MinimumPositiveBudget || ReservedControlBytes < MinimumPositiveBudget || MaxTenantControlRequests < MinimumPositiveBudget || MaxPrincipalControlRequests < MinimumPositiveBudget
-            || MaxBodyBytes is < MinimumPositiveBudget or > MaximumBodyBytes || MaxControlBodyBytes < MinimumPositiveBudget || MaxControlBodyBytes > MaxBodyBytes
-            || HeavyReadReservedBytes is < NoReservedBytes or > MaximumReadReservationBytes || OtherReservedBytes is < NoReservedBytes or > MaximumReadReservationBytes)
+        if (MaxRequests < 1 || MaxReservedBytes < 1 || MaxTenantRequests < 1 || MaxPrincipalRequests < 1
+            || ReservedControlRequests < 1 || ReservedControlBytes < 1 || MaxTenantControlRequests < 1 || MaxPrincipalControlRequests < 1
+            || MaxBodyBytes is < 1 or > MaximumBodyBytes || MaxControlBodyBytes < 1 || MaxControlBodyBytes > MaxBodyBytes
+            || HeavyReadReservedBytes is < 0 or > MaximumReadReservationBytes || OtherReservedBytes is < 0 or > MaximumReadReservationBytes)
         {
             throw new ArgumentException(ValidationMessage);
         }

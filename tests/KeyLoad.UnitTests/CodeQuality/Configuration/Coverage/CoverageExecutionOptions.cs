@@ -6,7 +6,6 @@ internal sealed class CoverageExecutionOptions
 {
     internal const string SectionName = "KeyLoadTests:RuntimeCoverage";
     internal const string ValidationMessage = "Execution functional coverage limits or settlement durations are invalid.";
-    private const int MinimumValue = 1;
     private const int MinimumClosureFiles = 2;
     private const int DefaultDescriptorBytes = 65_536;
     private const int DefaultMaximumFiles = 4_096;
@@ -41,17 +40,17 @@ internal sealed class CoverageExecutionOptions
     public TimeSpan ProcessStopTimeout { get; set; } = TimeSpan.FromSeconds(DefaultProcessStopSeconds);
     public TimeSpan ApplicationCleanupTimeout { get; set; } = TimeSpan.FromSeconds(DefaultApplicationCleanupSeconds);
 
-    internal bool IsValid() => MaximumDescriptorBytes is >= MinimumValue and <= CoverageProtocol.MaximumDescriptorFormatBytes
+    internal bool IsValid() => MaximumDescriptorBytes is >= 1 and <= CoverageProtocol.MaximumDescriptorFormatBytes
         && MaximumFiles is >= MinimumClosureFiles and <= FormatMaximumFiles
-        && ReadBufferBytes is >= MinimumValue and <= FormatMaximumReadBufferBytes
+        && ReadBufferBytes is >= 1 and <= FormatMaximumReadBufferBytes
         && ReadBufferBytes <= MaximumFileBytes
-        && MaximumTotalBytes is >= MinimumValue and <= FormatMaximumTotalBytes
-        && MaximumFileBytes is >= MinimumValue and <= FormatMaximumFileBytes
+        && MaximumTotalBytes is >= 1 and <= FormatMaximumTotalBytes
+        && MaximumFileBytes is >= 1 and <= FormatMaximumFileBytes
         && MaximumFileBytes <= MaximumTotalBytes
-        && MaximumPathCharacters is >= MinimumValue and <= CoverageProtocol.MaximumPathFormatCharacters
-        && MaximumManifestBytes is >= MinimumValue and <= FormatMaximumManifestBytes
+        && MaximumPathCharacters is >= 1 and <= CoverageProtocol.MaximumPathFormatCharacters
+        && MaximumManifestBytes is >= 1 and <= FormatMaximumManifestBytes
         && MaximumManifestBytes <= MaximumFileBytes
-        && MaximumReportBytes is >= MinimumValue and <= FormatMaximumReportBytes
+        && MaximumReportBytes is >= 1 and <= FormatMaximumReportBytes
         && WholeSeconds(ShutdownTimeout) && WholeSeconds(SettlementTimeout)
         && WholeSeconds(ProcessStopTimeout) && WholeSeconds(ApplicationCleanupTimeout)
         && ShutdownTimeout + SettlementTimeout < ProcessStopTimeout

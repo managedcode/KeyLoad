@@ -8,11 +8,7 @@ internal sealed class CommandIdempotencyProcessOutputReader
     private const string AcknowledgementFailure = "The original command process did not finish its pre-restart retries.";
     private const string ChildSignalFailure = "The original document recovery child did not emit its required boundary signal.";
     private const string OutputLimitFailure = "The document command RecoveryProcess output exceeded its fixed bound.";
-    private const int WitnessUnreported = 0;
-    private const int WitnessReported = 1;
     private int witnessReported;
-    private const int EmptyRetainedCharacters = 0;
-    private const int BufferStartIndex = 0;
     private const string RetainedErrorMarker = "KEYLOAD_ORIGINAL_CHILD_STDERR";
     private readonly bool retainOutput;
     private StringBuilder? retained;
@@ -51,7 +47,7 @@ internal sealed class CommandIdempotencyProcessOutputReader
     {
         get; private set;
     }
-    internal bool TryMarkWitnessReported() => Interlocked.Exchange(ref witnessReported, WitnessReported) == WitnessUnreported;
+    internal bool TryMarkWitnessReported() => Interlocked.Exchange(ref witnessReported, 1) == 0;
 
     internal async Task ReadAsync(StreamReader reader)
     {
@@ -75,7 +71,7 @@ internal sealed class CommandIdempotencyProcessOutputReader
 
     internal void ReportRetainedOutput()
     {
-        if (retained is null || Interlocked.Exchange(ref retainedReported, WitnessReported) != WitnessUnreported)
+        if (retained is null || Interlocked.Exchange(ref retainedReported, 1) != 0)
         {
             return;
         }
@@ -105,10 +101,10 @@ internal sealed class CommandIdempotencyProcessOutputReader
         {
             characters = checked(characters + read);
             WitnessTotal = characters;
-            if (retainOutput && (retained?.Length ?? EmptyRetainedCharacters) < WitnessLimit)
+            if (retainOutput && (retained?.Length ?? 0) < WitnessLimit)
             {
                 retained ??= new StringBuilder();
-                retained.Append(buffer, BufferStartIndex, Math.Min(read, WitnessLimit - retained.Length));
+                retained.Append(buffer, 0, Math.Min(read, WitnessLimit - retained.Length));
             }
             if (!exceeded)
             {

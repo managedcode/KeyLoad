@@ -8,7 +8,6 @@ internal sealed class ClientResourceSampler : IAsyncDisposable
 {
     private readonly TimeProvider timeProvider;
     private readonly ComparisonExecutionOptions settings;
-    private const int NoResources = 0;
     private readonly System.Threading.Lock gate = new();
     private readonly Process process = Process.GetCurrentProcess();
     private readonly CancellationTokenSource lifetime = new();
@@ -58,7 +57,7 @@ internal sealed class ClientResourceSampler : IAsyncDisposable
         await lifetime.CancelAsync();
         await sampler;
         process.Refresh();
-        return new(Math.Max(NoResources, elapsedCpu.TotalSeconds), Math.Max(NoResources, bytes), Math.Max(peak, process.WorkingSet64),
+        return new(Math.Max(0, elapsedCpu.TotalSeconds), Math.Max(0, bytes), Math.Max(peak, process.WorkingSet64),
             settings.ResourceSampleIntervalMilliseconds);
     }
 

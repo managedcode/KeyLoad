@@ -3,7 +3,6 @@ namespace KeyLoad.Server;
 internal sealed class AdminHttpMetricsMiddleware(RequestDelegate next, TimeProvider? clock = null)
 {
     private readonly TimeProvider time = clock ?? TimeProvider.System;
-    private const int RouteTemplateGetEndpointEmptyCount = 0;
 
     private const string CommandsPrefix = ApiRoutes.Commands;
     private const string DocumentsPrefix = "/documents";
@@ -95,7 +94,7 @@ internal sealed class AdminHttpMetricsMiddleware(RequestDelegate next, TimeProvi
     }
 
     private static string RouteTemplate(HttpContext context) =>
-        context.GetEndpoint() is RouteEndpoint { RoutePattern.RawText: { Length: > RouteTemplateGetEndpointEmptyCount } template }
+        context.GetEndpoint() is RouteEndpoint { RoutePattern.RawText: { Length: > 0 } template }
             ? template
             : AdminDashboardProtocol.UnmatchedRoute;
 }

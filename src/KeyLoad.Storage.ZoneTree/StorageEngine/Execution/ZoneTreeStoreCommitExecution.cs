@@ -6,9 +6,6 @@ namespace KeyLoad.Storage.ZoneTree;
 /// <summary>Compiles and publishes one atomic transaction under the original runtime commit gate.</summary>
 internal static class ZoneTreeStoreCommitExecution
 {
-    private const int NextJournalSequenceIncrement = 1;
-    private const int NoMutations = 0;
-
     internal static T Commit<T>(ZoneTreeStoreRuntime runtime, Func<IAtomicTransaction, long, T> compile)
     {
         ArgumentNullException.ThrowIfNull(compile);
@@ -18,7 +15,7 @@ internal static class ZoneTreeStoreCommitExecution
         {
             runtime.Check();
             var tx = new ZoneTreeTransaction(runtime);
-            var nextPosition = checked(runtime.Position + NextJournalSequenceIncrement);
+            var nextPosition = checked(runtime.Position + 1);
             T result;
             try
             {
@@ -29,7 +26,7 @@ internal static class ZoneTreeStoreCommitExecution
                 tx.EndPreparationContext();
             }
             var changes = tx.PrepareChanges();
-            if (changes.Length == NoMutations)
+            if (changes.Length == 0)
             {
                 holdOutcome = DatabasePhaseOutcome.Completed;
                 return result;

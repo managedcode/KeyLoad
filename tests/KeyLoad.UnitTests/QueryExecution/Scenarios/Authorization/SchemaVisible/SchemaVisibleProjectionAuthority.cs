@@ -66,7 +66,7 @@ internal static class SchemaVisibleProjectionAuthority
     internal static ResourceDefinition Mixed(ResourceDefinition resource) => resource with
     {
         SchemaVersion = P.MixedVersion,
-        FieldPolicies = [resource.FieldPolicies[P.First] with { SchemaReadGrant = null }, resource.FieldPolicies[SecondPolicy]]
+        FieldPolicies = [resource.FieldPolicies[P.First] with { SchemaReadGrant = null }, resource.FieldPolicies[1]]
     };
 
     private static string[] DomainImage(TestDatabase fixture) => fixture.Store.Read(view =>
@@ -84,5 +84,4 @@ internal static class SchemaVisibleProjectionAuthority
         return rows.ToArray();
     });
 
-    private const int SecondPolicy = 1;
 }

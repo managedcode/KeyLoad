@@ -35,7 +35,6 @@ internal static class ControlledColdShutdownEvidence
     private const string CanceledField = " canceled=";
     private const string MatchesObserverField = " matchesObserver=";
     private const string MatchesCallerField = " matchesCaller=";
-    private const int MissingTaskId = 0;
     private const int MissingTaskStatus = -1;
     private const int CapturePhase = 0;
     private const int JoinedPhase = 1;
@@ -51,7 +50,7 @@ internal static class ControlledColdShutdownEvidence
             return boundedWait ? original.WaitAsync(observation) : original;
         }, captured).ConfigureAwait(false);
         failures.AddRange(captured);
-        var taskId = original?.Id ?? MissingTaskId;
+        var taskId = original?.Id ?? 0;
         var status = original is null ? MissingTaskStatus : (int)original.Status;
         var observerRequested = observation.IsCancellationRequested;
         var callerRequested = caller.IsCancellationRequested;
@@ -91,7 +90,7 @@ internal static class ControlledColdShutdownEvidence
         {
             error.Data[Node] = node;
             error.Data[Phase] = (int)stage;
-            error.Data[Present] = taskId != MissingTaskId;
+            error.Data[Present] = taskId != 0;
             error.Data[TaskIdentity] = taskId;
             error.Data[Before] = status;
             error.Data[ObservationRequested] = observerRequested;

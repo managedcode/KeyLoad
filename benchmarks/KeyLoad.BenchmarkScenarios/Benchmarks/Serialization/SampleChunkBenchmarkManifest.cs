@@ -8,7 +8,6 @@ namespace KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
 
 internal static class SampleChunkBenchmarkManifest
 {
-    private const int DescribeSingleItemCount = 1;
     private const string DescribeResultText = "development_codec_microbenchmark_control_only";
     private const string DescribeDescribeResultText = "SHA256_seed_sample_lane_Int32LE";
 
@@ -53,7 +52,7 @@ internal static class SampleChunkBenchmarkManifest
         string head, string sourceInventory)
         => new
         {
-            schemaVersion = DescribeSingleItemCount,
+            schemaVersion = 1,
             scope = DescribeResultText,
             fixture = nameof(SampleChunkSerializationBenchmarks),
             sourceHead = head,

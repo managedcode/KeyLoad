@@ -20,9 +20,6 @@ internal static class CompiledSourceEvidence
     private const char InputSeparator = '\n';
     private const string InvalidAttribute = "The compiled source attribute is invalid.";
     private const string IncompleteIdentity = "The observed managed assembly has no complete compilation source identity.";
-    private const int UnobservedSourceCount = 0;
-    private const int CustomAttributeProlog = 1;
-    private const int MinimumSources = 1;
     private const int MaximumSources = 5_000;
 
     internal static (int Count, string Sha256) Read(string assembly)
@@ -31,7 +28,7 @@ internal static class CompiledSourceEvidence
         using var portable = new PEReader(stream, PEStreamOptions.PrefetchMetadata);
         var reader = portable.GetMetadataReader();
         var inputs = new List<string>();
-        var count = UnobservedSourceCount;
+        var count = 0;
         foreach (var handle in reader.GetAssemblyDefinition().GetCustomAttributes())
         {
             var attribute = reader.GetCustomAttribute(handle);
@@ -40,7 +37,7 @@ internal static class CompiledSourceEvidence
                 continue;
             }
             var value = reader.GetBlobReader(attribute.Value);
-            if (value.ReadUInt16() != CustomAttributeProlog)
+            if (value.ReadUInt16() != 1)
             {
                 throw new InvalidDataException(InvalidAttribute);
             }
@@ -55,7 +52,7 @@ internal static class CompiledSourceEvidence
                 count = int.Parse(text!, NumberStyles.None, CultureInfo.InvariantCulture);
             }
         }
-        if (count is < MinimumSources or > MaximumSources
+        if (count is < 1 or > MaximumSources
             || inputs.Count(value => value.StartsWith(Source + AttributeSeparator, StringComparison.Ordinal)) != count)
         {
             throw new InvalidDataException(IncompleteIdentity);

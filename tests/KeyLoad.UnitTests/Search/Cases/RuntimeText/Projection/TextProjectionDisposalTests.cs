@@ -16,7 +16,6 @@ internal sealed class TextProjectionDisposalTests
     private const string DocumentId = "one";
     private const string Payload = "{\"text\":\"needle original\"}";
     private const int Callers = 8;
-    private const int AdmissionPollMilliseconds = 1;
     private static readonly TimeSpan WaitLimit = TimeSpan.FromSeconds(15);
 
     [Test]
@@ -85,7 +84,7 @@ internal sealed class TextProjectionDisposalTests
             {
                 // The held execution lease saturates this generation until shutdown fences admission.
             }
-            await Task.Delay(TimeSpan.FromMilliseconds(AdmissionPollMilliseconds), TimeProvider.System, cancellation);
+            await Task.Delay(TimeSpan.FromMilliseconds(1), TimeProvider.System, cancellation);
         }
     }
 

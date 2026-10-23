@@ -4,7 +4,6 @@ using KeyLoad.Cli.Features.ClientApi;
 
 internal static class CliCommandDispatcher
 {
-    private const int CommandArgumentIndex = 0;
     private const int OneOperandArguments = 2;
     private const int TwoOperandArguments = 3;
     private const string StatusCommand = "status";
@@ -18,7 +17,7 @@ internal static class CliCommandDispatcher
 
     internal static bool TryGetCommand(string[] args, out CliCommand command)
     {
-        command = args[CommandArgumentIndex] switch
+        command = args[0] switch
         {
             StatusCommand when args.Length == OneOperandArguments => CliCommand.Status,
             BackupCommand when args.Length == TwoOperandArguments => CliCommand.Backup,

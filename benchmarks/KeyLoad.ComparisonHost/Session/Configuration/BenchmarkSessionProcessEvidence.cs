@@ -16,7 +16,6 @@ internal static class BenchmarkSessionProcessEvidence
     private const string KeyLoad = "KeyLoad";
     private const string ServersRequired = "The KeyLoad workload requires observed execution server processes.";
     private const string ServerTopologyMismatch = "The observed execution server process set does not match the selected topology.";
-    private const int MinimumProcessId = 1;
     private const int MaximumCharacters = 131_072;
     private static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web);
 
@@ -37,7 +36,7 @@ internal static class BenchmarkSessionProcessEvidence
             || servers.Select(server => server.Name).Distinct(StringComparer.Ordinal).Count() != servers.Length
             || servers.Select(server => server.ProcessId).Distinct().Count() != servers.Length
             || servers.Select(server => server.AspireProcessId).Distinct().Count() != servers.Length
-            || servers.Any(server => server.AspireStartedAtUtc is null || server.AspireProcessId is not >= MinimumProcessId
+            || servers.Any(server => server.AspireStartedAtUtc is null || server.AspireProcessId is not >= 1
                 || server.AspireProcessStartedAtUtc is null
                 || server.AspireProcessStartedAtUtc > server.StartedAtUtc))
         {

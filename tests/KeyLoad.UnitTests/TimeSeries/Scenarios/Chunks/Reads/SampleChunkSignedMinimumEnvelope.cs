@@ -10,7 +10,6 @@ internal static class SampleChunkSignedMinimumEnvelope
     private const char StandardSlash = '/';
     private const char UrlMinus = '-';
     private const char UrlUnderscore = '_';
-    private const int NextCharacter = 1;
 
     internal static string Create(GrainRequestCodec codec, PrincipalRecord reader, Guid requestId,
         ReadSampleChunkWindowRequest request)
@@ -37,7 +36,7 @@ internal static class SampleChunkSignedMinimumEnvelope
         var changed = OrleansSerialization.Serialize(envelope);
         var encoded = Convert.ToBase64String(changed).TrimEnd(Padding)
             .Replace(StandardPlus, UrlMinus).Replace(StandardSlash, UrlUnderscore);
-        return original[..(original.IndexOf(Separator, StringComparison.Ordinal) + NextCharacter)] + encoded
+        return original[..(original.IndexOf(Separator, StringComparison.Ordinal) + 1)] + encoded
             + original[original.LastIndexOf(Separator)..];
     }
 

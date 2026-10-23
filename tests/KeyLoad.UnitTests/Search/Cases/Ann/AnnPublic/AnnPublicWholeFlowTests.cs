@@ -5,16 +5,13 @@ namespace KeyLoad.UnitTests.Features.Search;
 internal sealed class AnnPublicWholeFlowTests
 {
     private const int ExactThreshold = 3;
-    private const int ApproximateThreshold = 0;
     private const int FullBreadth = 3;
-    private const int NarrowBreadth = 1;
-    private const int TooSmallResult = 1;
     private const long MissingGeneration = 2;
 
     [Test]
     [Arguments(ExactThreshold, FullBreadth, AnnPageMode.Exact)]
-    [Arguments(ApproximateThreshold, FullBreadth, AnnPageMode.Approximate)]
-    [Arguments(ApproximateThreshold, NarrowBreadth, AnnPageMode.Approximate)]
+    [Arguments(0, FullBreadth, AnnPageMode.Approximate)]
+    [Arguments(0, 1, AnnPageMode.Approximate)]
     public Task ActualProvisionedSearchReportsModeOrBoundedRefusalThenHealthyAndEmptyPages(int threshold, int breadth, AnnPageMode mode)
         => AnnPublicWholeFlow.RunAsync(threshold, breadth, async (database, runtime, pin) =>
         {
@@ -22,7 +19,7 @@ internal sealed class AnnPublicWholeFlowTests
             var cut = database.Store.Position;
             var request = AnnPublicWholeFlow.Request(database, pin);
             var engine = AnnPublicWholeFlow.Engine(database, runtime);
-            if (threshold == ApproximateThreshold && breadth == NarrowBreadth)
+            if (threshold == 0 && breadth == 1)
             {
                 await BoundedThenHealthyAsync(database, runtime, pin, request);
                 return;
@@ -60,7 +57,7 @@ internal sealed class AnnPublicWholeFlowTests
                 {
                     IndexGeneration = MissingGeneration
                 }), ErrorCode.HistoryUnavailable);
-            await FailureAsync(() => AnnPublicWholeFlow.Engine(database, runtime, bytes: TooSmallResult)
+            await FailureAsync(() => AnnPublicWholeFlow.Engine(database, runtime, bytes: 1)
                 .ApproximateSearchAsync(AnnProjectionPinTestSupport.Principal, request), ErrorCode.BudgetExceeded);
             await AnnPublicWholeFlow.UnchangedAsync(database, image, cut);
             await Assert.That(AnnFixtureFileSnapshot.Capture(database.Directory)).IsEquivalentTo(files, CollectionOrdering.Matching);
@@ -71,9 +68,9 @@ internal sealed class AnnPublicWholeFlowTests
 
     [Test]
     [Arguments(FullBreadth, AnnPageMode.Approximate)]
-    [Arguments(NarrowBreadth, AnnPageMode.Approximate)]
+    [Arguments(1, AnnPageMode.Approximate)]
     public Task ActualFilteredSearchDeduplicatesIdsOrRefusesInsufficientBreadthThenRemainsHealthy(int breadth, AnnPageMode mode)
-        => AnnPublicWholeFlow.RunAsync(ApproximateThreshold, breadth, async (database, runtime, pin) =>
+        => AnnPublicWholeFlow.RunAsync(0, breadth, async (database, runtime, pin) =>
         {
             var image = AnnMaintenanceTestData.Snapshot(database);
             var cut = database.Store.Position;
@@ -86,7 +83,7 @@ internal sealed class AnnPublicWholeFlowTests
                     AllowedIds = ["seed-00000", "missing-ann-id", "seed-00000"]
                 }
             };
-            if (breadth == NarrowBreadth)
+            if (breadth == 1)
             {
                 await BoundedThenHealthyAsync(database, runtime, pin, request);
                 return;

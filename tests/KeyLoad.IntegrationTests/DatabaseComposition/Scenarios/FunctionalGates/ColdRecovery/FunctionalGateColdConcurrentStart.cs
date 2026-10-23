@@ -3,7 +3,6 @@ namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
 /// <summary>Releases one fixed eight-caller wave only after every actual owned public session is ready.</summary>
 internal sealed class FunctionalGateColdConcurrentStart
 {
-    private const int ArrivalStep = 1;
     private const string TooManyCallers = "The original cold wave contains too many public callers.";
     private readonly TaskCompletionSource ready = new(TaskCreationOptions.RunContinuationsAsynchronously);
     private int arrivals;
@@ -13,7 +12,7 @@ internal sealed class FunctionalGateColdConcurrentStart
     internal async Task EnterAsync(CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
-        var count = Interlocked.Add(ref arrivals, ArrivalStep);
+        var count = Interlocked.Add(ref arrivals, 1);
         if (count > FunctionalGateColdWorkloadProvision.TotalWorkloadIdentities)
         {
             throw new InvalidOperationException(TooManyCallers);

@@ -13,8 +13,8 @@ internal static class ScriptDomGraphPath
         {
             throw SqlGraphPathSyntax.Invalid();
         }
-        var graph = ScriptDomGraphScalar.String(arguments[GraphIndex], context, ValueDepth);
-        var fromCollection = ScriptDomGraphScalar.String(arguments[FromCollectionIndex], context, ValueDepth);
+        var graph = ScriptDomGraphScalar.String(arguments[0], context, ValueDepth);
+        var fromCollection = ScriptDomGraphScalar.String(arguments[1], context, ValueDepth);
         var fromId = ScriptDomGraphScalar.String(arguments[FromIdIndex], context, ValueDepth);
         var toCollection = ScriptDomGraphScalar.String(arguments[ToCollectionIndex], context, ValueDepth);
         var toId = ScriptDomGraphScalar.String(arguments[ToIdIndex], context, ValueDepth);
@@ -35,8 +35,6 @@ internal static class ScriptDomGraphPath
         return new(SqlGraphPathSyntax.Version, partition, graph, new(partition, fromCollection, fromId),
             new(partition, toCollection, toId), depth, vertices, edges, labels);
     }
-    private const int GraphIndex = 0;
-    private const int FromCollectionIndex = 1;
     private const int FromIdIndex = 2;
     private const int ToCollectionIndex = 3;
     private const int ToIdIndex = 4;

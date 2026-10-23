@@ -6,7 +6,6 @@ namespace KeyLoad.Server;
 internal sealed class McpMemoryProjection
 {
     private readonly McpExecutionOptions settings;
-    private const int WorstShapeTokenSlack = 1;
     private const int MinimumPropertyWireBytes = 4;
     private const long InputExpansionMultiplier = 6;
 
@@ -23,7 +22,7 @@ internal sealed class McpMemoryProjection
     internal long Ingress(int capacity)
     {
         ValidateBound(capacity, settings.MaximumRequestCapacityBytes, nameof(capacity));
-        var tokens = Math.Min((long)capacity + WorstShapeTokenSlack, settings.MaximumTokens);
+        var tokens = Math.Min((long)capacity + 1, settings.MaximumTokens);
         var properties = Math.Min(capacity / MinimumPropertyWireBytes, settings.MaximumProperties);
         return checked(capacity + settings.IngressScratchBytes +
             McpMemoryProjectionComponents.Metadata(capacity, tokens) +
@@ -39,7 +38,7 @@ internal sealed class McpMemoryProjection
     internal long Inspection(int bytes)
     {
         ValidateBound(bytes, settings.MaximumRequestCapacityBytes, nameof(bytes));
-        var tokens = Math.Min((long)bytes + WorstShapeTokenSlack, settings.MaximumTokens);
+        var tokens = Math.Min((long)bytes + 1, settings.MaximumTokens);
         var properties = Math.Min(bytes / MinimumPropertyWireBytes, settings.MaximumProperties);
         return checked(McpMemoryProjectionComponents.Metadata(bytes, tokens) +
             McpMemoryProjectionComponents.Structure(bytes, tokens, properties) +
@@ -169,7 +168,7 @@ internal sealed class McpMemoryProjection
     }
 
     private McpFrameShape WorstShape(int bytes) => new(
-        (int)Math.Min((long)bytes + WorstShapeTokenSlack, settings.MaximumTokens),
+        (int)Math.Min((long)bytes + 1, settings.MaximumTokens),
         Math.Min(bytes / MinimumPropertyWireBytes, settings.MaximumProperties), settings.MaximumReplyDepth);
 
     private long InputExpansion(int wireBytes) => checked(InputExpansionMultiplier * wireBytes + settings.EnvelopeAllowanceBytes);

@@ -17,7 +17,6 @@ internal sealed class McpSchemaEnumTests
     private const string CombinedText = "Cosine, Euclidean";
     private const string FlagsText = "DocumentsRead, DocumentsWrite";
     private const string InvalidText = "missing-metric";
-    private const int NumericValue = 1;
 
     private sealed record EnumProbe(DistanceMetric Metric, DistanceMetric? Optional, Capability Grants, Capability? OptionalGrants);
 
@@ -47,7 +46,7 @@ internal sealed class McpSchemaEnumTests
         await Assert.That(Parse(NumericText)).IsEqualTo(DistanceMetric.Euclidean);
         await Assert.That(Parse(MixedCaseText)).IsEqualTo(DistanceMetric.Cosine);
         await Assert.That(Parse(CombinedText)).IsEqualTo(DistanceMetric.Euclidean);
-        await Assert.That(JsonSerializer.Deserialize<DistanceMetric>(NumericValue.ToString(System.Globalization.CultureInfo.InvariantCulture),
+        await Assert.That(JsonSerializer.Deserialize<DistanceMetric>(1.ToString(System.Globalization.CultureInfo.InvariantCulture),
             JsonDefaults.Options)).IsEqualTo(DistanceMetric.Euclidean);
         await Assert.That(JsonSerializer.Deserialize<Capability>(JsonSerializer.Serialize(FlagsText), JsonDefaults.Options))
             .IsEqualTo(Capability.DocumentsRead | Capability.DocumentsWrite);

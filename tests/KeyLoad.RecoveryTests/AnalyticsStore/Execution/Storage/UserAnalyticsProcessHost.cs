@@ -10,12 +10,10 @@ namespace KeyLoad.RecoveryTests.Features.AnalyticsStore;
 /// <summary>Uses the production silo and Grain Service owner for local generation process recovery.</summary>
 internal static class UserAnalyticsProcessHost
 {
-    private const int DynamicPort = 0;
-
     internal static async Task RunAsync(string root, Func<PartitionHost, ServerRuntimeOptions, Task> body,
         CancellationToken token)
     {
-        using var reservation = new TcpListener(IPAddress.Loopback, DynamicPort);
+        using var reservation = new TcpListener(IPAddress.Loopback, 0);
         reservation.Start();
         var endpoint = (IPEndPoint)reservation.LocalEndpoint;
         var failures = new List<Exception>();

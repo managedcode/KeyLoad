@@ -12,8 +12,6 @@ internal static partial class ProjectProcessParentWindows
     private const uint ProcessSnapshotFlag = 0x00000002;
     private const uint IgnoredProcessId = 0;
     private const int NoMoreFiles = 18;
-    private const int InitialOutputCharacters = 0;
-    private const int OutputRowSeparatorCharacters = 1;
     private const string LibraryName = "kernel32.dll";
     private const string SnapshotEntryPoint = "CreateToolhelp32Snapshot";
     private const string FirstEntryPoint = "Process32FirstW";
@@ -32,7 +30,7 @@ internal static partial class ProjectProcessParentWindows
         }
         var entry = new ProcessEntry { Size = (uint)sizeof(ProcessEntry) };
         var matches = new List<int>();
-        var characters = InitialOutputCharacters;
+        var characters = 0;
         var available = ReadFirst(snapshot, ref entry);
         while (available)
         {
@@ -40,7 +38,7 @@ internal static partial class ProjectProcessParentWindows
             if (children ? entry.ParentProcessId == (uint)processId : entry.ProcessId == (uint)processId)
             {
                 var selected = checked((int)(children ? entry.ProcessId : entry.ParentProcessId));
-                characters += selected.ToString(CultureInfo.InvariantCulture).Length + OutputRowSeparatorCharacters;
+                characters += selected.ToString(CultureInfo.InvariantCulture).Length + 1;
                 if (characters > options.Value.CleanupOutputCharacters)
                 {
                     throw new InvalidOperationException(ProcessFaultCommandProtocol.Refused);

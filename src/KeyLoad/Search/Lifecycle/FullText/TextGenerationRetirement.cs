@@ -2,8 +2,6 @@ namespace KeyLoad.Server.Features.Search;
 
 internal static class TextGenerationRetirement
 {
-    private const int NoReaderPins = 0;
-
     internal static void Adopt(TextResourceReservation? originalReservation, bool retiring, bool retired, ref TextResourceReservation? reservation)
     {
         if (reservation is not null || retiring || retired)
@@ -15,7 +13,7 @@ internal static class TextGenerationRetirement
 
     internal static void Release(bool retired, int pins, ref TextResourceReservation? reservation)
     {
-        if (!retired || pins != NoReaderPins)
+        if (!retired || pins != 0)
         {
             throw TextErrors.Ownership();
         }
@@ -30,7 +28,7 @@ internal static class TextGenerationRetirement
         {
             return Task.FromException(readerFailure);
         }
-        if (pins == NoReaderPins)
+        if (pins == 0)
         {
             return Task.CompletedTask;
         }
@@ -48,7 +46,7 @@ internal static class TextGenerationRetirement
         {
             throw new AggregateException(readerFailure);
         }
-        if (!retiring || pins != NoReaderPins || readerCount != NoReaderPins)
+        if (!retiring || pins != 0 || readerCount != 0)
         {
             throw TextErrors.Ownership();
         }
@@ -70,12 +68,12 @@ internal static class TextGenerationRetirement
 
     internal static void ReleasePin(ref int pins, ref TaskCompletionSource? quiet)
     {
-        if (pins <= NoReaderPins)
+        if (pins <= 0)
         {
             throw TextErrors.Ownership();
         }
         pins--;
-        if (pins == NoReaderPins)
+        if (pins == 0)
         {
             quiet?.TrySetResult();
         }

@@ -6,10 +6,9 @@ namespace KeyLoad.Clustering;
 internal sealed class EventFeedPubSubCountingWriter(int maximum,
     IOptions<GrainRoutingOptions> routing, CancellationToken cancellationToken) : IBufferWriter<byte>, IDisposable
 {
-    private const int UnspecifiedSizeHint = 0;
     private readonly GrainCountingWriter original = new(maximum, routing, cancellationToken);
     internal long Length => original.Length;
-    public Memory<byte> GetMemory(int sizeHint = UnspecifiedSizeHint)
+    public Memory<byte> GetMemory(int sizeHint = 0)
     {
         try
         {
@@ -20,7 +19,7 @@ internal sealed class EventFeedPubSubCountingWriter(int maximum,
             throw Errors.Fail(ErrorCode.ResourceExhausted, EventFeedPubSubProtocol.Capacity, error);
         }
     }
-    public Span<byte> GetSpan(int sizeHint = UnspecifiedSizeHint)
+    public Span<byte> GetSpan(int sizeHint = 0)
     {
         try
         {

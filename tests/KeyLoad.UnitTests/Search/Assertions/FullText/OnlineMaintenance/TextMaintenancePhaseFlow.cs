@@ -5,8 +5,6 @@ namespace KeyLoad.UnitTests.Features.Search;
 /// <summary>Runs the original persisted page intent, actual execution postings and actual canonical checkpoint ACK.</summary>
 internal static class TextMaintenancePhaseFlow
 {
-    private const int EmptyEffects = 0;
-
     internal static async Task<TextMaintenanceCapabilityResult> FinishAsync(
         TestDatabase fixture, TextMaintenanceTestRuntime runtime,
         TextIndexMaintenanceRequest request, CancellationToken cancellationToken)
@@ -33,7 +31,7 @@ internal static class TextMaintenancePhaseFlow
         var actual = await TextMaintenanceCommit.ExecuteAsync<ProjectionBatchResult>(fixture,
             OperationKind.CommitProjectionBatch, original, checkpointId, cancellationToken);
         await Assert.That(actual.Receipt.CommandId).IsEqualTo(checkpointId);
-        await Assert.That(actual.Receipt.Mutations.Length).IsEqualTo(EmptyEffects);
+        await Assert.That(actual.Receipt.Mutations.Length).IsEqualTo(0);
         _ = await runtime.PhaseAsync(fixture, request,
             TextMaintenanceCapabilityKind.SettleCheckpoint, acknowledged: actual, token: cancellationToken);
         var complete = await runtime.PhaseAsync(fixture, request,

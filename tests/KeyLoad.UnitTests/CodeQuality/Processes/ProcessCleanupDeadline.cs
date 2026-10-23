@@ -5,7 +5,6 @@ namespace KeyLoad.UnitTests.Features.CodeQuality.Processes;
 internal sealed class ProcessCleanupDeadline : IAsyncDisposable
 {
     private const string FailStopMessage = "An owned execution process or its original readers did not settle within the cleanup bound.";
-    private const int FailStopExitCode = 1;
 
     private readonly TimeProvider timeProvider;
     private readonly TimeSpan timeout;
@@ -69,7 +68,7 @@ internal sealed class ProcessCleanupDeadline : IAsyncDisposable
         }
         finally
         {
-            Environment.Exit(FailStopExitCode);
+            Environment.Exit(1);
         }
         throw new InvalidOperationException(FailStopMessage);
     }

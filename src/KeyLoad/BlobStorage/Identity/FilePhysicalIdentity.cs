@@ -10,7 +10,6 @@ internal static class FilePhysicalIdentity
     private const string PhysicalFamily = "file-content";
     private const int MaximumUploadIdCharacters = 128;
     private const int GuidBytes = 16;
-    private const int HashStart = 0;
     private const char IdentitySeparator = '\0';
     internal static string Resource(FileAddress address, ResourceIncarnation incarnation)
         => Convert.ToHexStringLower(SHA256.HashData(KeyCodec.Encode(PhysicalFamily,
@@ -24,7 +23,7 @@ internal static class FilePhysicalIdentity
             throw Errors.Fail(ErrorCode.Validation, FileStorageProtocol.Invalid);
         }
         var hash = SHA256.HashData(Encoding.UTF8.GetBytes(string.Join(IdentitySeparator, scope, principal, publicId)));
-        return new Guid(hash.AsSpan(HashStart, GuidBytes));
+        return new Guid(hash.AsSpan(0, GuidBytes));
     }
 
     internal static string Object(Guid objectId)

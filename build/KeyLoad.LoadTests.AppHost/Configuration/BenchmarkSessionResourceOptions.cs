@@ -11,7 +11,6 @@ internal sealed class BenchmarkSessionResourceOptions
     internal const string Section = "Benchmarks";
     internal const string Profile = BenchmarkSessionContract.Profile;
     private const string BenchmarkSettingPrefix = "Benchmarks:";
-    private const int StandaloneNodes = 1;
     private const int ReplicatedNodes = 3;
     public bool Session
     {
@@ -42,7 +41,7 @@ internal sealed class BenchmarkSessionResourceOptions
             [new ValidateOptions<BenchmarkSessionResourceOptions>(Options.DefaultName, value => !value.Session
                 || value.EvidenceProfile == Profile && !string.IsNullOrWhiteSpace(value.SessionId)
                     && BenchmarkSessionContract.Targets.Contains(value.Target!)
-                    && value.NodeCount is StandaloneNodes or ReplicatedNodes
+                    && value.NodeCount is 1 or ReplicatedNodes
                     && !BenchmarkSessionContract.ForbiddenOverrides.Any(name =>
                         !string.IsNullOrEmpty(configuration[BenchmarkSettingPrefix + name])), Profile)]));
         _ = options.Value;

@@ -10,9 +10,6 @@ internal static partial class GrainFailureDiagnostics
 {
     private const int FailureEventId = 3;
     private const int MaximumAggregateDepth = 4;
-    private const int InitialAggregateDepth = 0;
-    private const int NoInnerExceptions = 0;
-    private const int PrimaryExceptionIndex = 0;
     private const string FailureMessage = "Orleans request rejected: {RequestId} at {Stage} ({Category}) with {ErrorCode}. Closed cause {CauseKind}.";
     private const string StageMetadataKeyValue = "KeyLoad.Orleans.ClusterRouting.GrainFailureStage";
     private const string PartitionQueryLifetimeRequest = "The partition query lifetime request is invalid.";
@@ -90,18 +87,18 @@ internal static partial class GrainFailureDiagnostics
         {
             return GrainFailureCauseKind.Unobserved;
         }
-        var depth = InitialAggregateDepth;
+        var depth = 0;
         while (error is AggregateException aggregate)
         {
             if (depth >= MaximumAggregateDepth)
             {
                 return GrainFailureCauseKind.AggregateDepthLimit;
             }
-            if (aggregate.InnerExceptions.Count == NoInnerExceptions)
+            if (aggregate.InnerExceptions.Count == 0)
             {
                 return GrainFailureCauseKind.Other;
             }
-            error = aggregate.InnerExceptions[PrimaryExceptionIndex];
+            error = aggregate.InnerExceptions[0];
             depth++;
         }
         return error switch

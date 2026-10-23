@@ -2,7 +2,6 @@ namespace KeyLoad.UnitTests.Features.Authorization;
 
 internal static class SafeProjectorOperationCold
 {
-    private const int FirstColdOwner = 0;
     private const int ColdOwners = 2;
     private const long HealthyDocumentEpoch = 3;
 
@@ -14,7 +13,7 @@ internal static class SafeProjectorOperationCold
             SafeProjectorOperationProtocol.HealthySafe, SafeProjectorOperationProtocol.HealthyRevision, false, owner.CallerToken);
         var feed = await SafeProjectorOperationChanges.CurrentAsync(owner, history.State,
             SafeProjectorOperationProtocol.FinalMaskedEpoch, false, owner.CallerToken, history.PublicPatch, history.HealthyPatch);
-        for (var cold = FirstColdOwner; cold < ColdOwners; cold++)
+        for (var cold = 0; cold < ColdOwners; cold++)
         {
             var image = TeamRowPolicyAssertions.Image(owner.Store);
             var position = owner.Store.Position;

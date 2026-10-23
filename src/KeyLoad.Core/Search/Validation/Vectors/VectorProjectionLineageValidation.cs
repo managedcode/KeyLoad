@@ -6,13 +6,6 @@ namespace KeyLoad.Core.Features.Search;
 /// <summary>Validates the complete stored lineage shape and bound source reference without resolving a new authority.</summary>
 internal static class VectorProjectionLineageValidation
 {
-    private const int HasInvalidSourceLineageGenerationValidationBoundary = 1;
-    private const int HasInvalidSourceLineageSourceEventRevisionValidationBoundary = 1;
-    private const int HasInvalidSourceLineageSourceDocumentRevisionValidationBoundary = 1;
-    private const int HasInvalidSourceLineageSourceSchemaVersionValidationBoundary = 1;
-    private const int HasInvalidSourceLineageSourcePolicyEpochValidationBoundary = 0;
-    private const int HasInvalidSourceLineageTargetSchemaVersionValidationBoundary = 1;
-    private const int HasInvalidSourceLineageReducerGenerationValidationBoundary = 1;
     private const string LineageCorrupt = "The stored vector projection lineage is corrupt.";
 
     internal static void ValidateLineage(VectorProjectionLineage lineage, PartitionRef partition,
@@ -35,10 +28,10 @@ internal static class VectorProjectionLineageValidation
 
     private static bool HasInvalidSourceLineage(VectorProjectionLineage lineage, PartitionRef partition)
         => lineage.SourceStream?.Partition != partition || lineage.SourceDocument?.Partition != partition
-            || lineage.SourceStream.Generation < HasInvalidSourceLineageGenerationValidationBoundary || lineage.SourceEventRevision < HasInvalidSourceLineageSourceEventRevisionValidationBoundary
-            || lineage.SourceDocumentRevision < HasInvalidSourceLineageSourceDocumentRevisionValidationBoundary || lineage.SourceSchemaVersion < HasInvalidSourceLineageSourceSchemaVersionValidationBoundary
-            || lineage.SourcePolicyEpoch < HasInvalidSourceLineageSourcePolicyEpochValidationBoundary || lineage.TargetSchemaVersion < HasInvalidSourceLineageTargetSchemaVersionValidationBoundary
-            || lineage.ReducerGeneration < HasInvalidSourceLineageReducerGenerationValidationBoundary || lineage.SourceEventId is null
+            || lineage.SourceStream.Generation < 1 || lineage.SourceEventRevision < 1
+            || lineage.SourceDocumentRevision < 1 || lineage.SourceSchemaVersion < 1
+            || lineage.SourcePolicyEpoch < 0 || lineage.TargetSchemaVersion < 1
+            || lineage.ReducerGeneration < 1 || lineage.SourceEventId is null
             || lineage.InputField is null || lineage.ReducerId is null || lineage.ReducerVersion is null
             || lineage.TargetCollection is null || lineage.TargetId is null || lineage.TargetField is null
             || lineage.TargetSpace is null || lineage.SourceClassifications.IsDefault;

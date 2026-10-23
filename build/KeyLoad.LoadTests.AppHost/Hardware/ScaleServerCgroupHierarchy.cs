@@ -5,7 +5,6 @@ namespace KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
 internal static class ScaleServerCgroupHierarchy
 {
     private const string UnlimitedCgroupValue = "max";
-    private const int SingleMountSeparatorLength = 1;
 
     private const string MountInfoSeparator = " - ";
 
@@ -62,7 +61,7 @@ internal static class ScaleServerCgroupHierarchy
 
             var before = line[..separator].Split(SpaceCharacter, StringSplitOptions.RemoveEmptyEntries);
             var after = line[(separator + ElementIndex)..].Split(SpaceCharacter, StringSplitOptions.RemoveEmptyEntries);
-            if (before.Length < IsRootMountBoundaryValue || after.Length < SingleMountSeparatorLength || after[FirstIndex] != CgroupV2)
+            if (before.Length < IsRootMountBoundaryValue || after.Length < 1 || after[FirstIndex] != CgroupV2)
             {
                 continue;
             }

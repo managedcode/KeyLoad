@@ -7,8 +7,6 @@ namespace KeyLoad.AppHost.Features.TestInfrastructure;
 /// <summary>Reads the selected execution Aspire process without accepting a caller-supplied process owner.</summary>
 internal static class ProjectProcessIdentity
 {
-    private const int MinimumProcessId = 1;
-
     internal static ProcessFaultCommandProtocol.LaunchIdentity ReadLaunch(ResourceNotificationService notifications, string resourceName)
     {
         ArgumentNullException.ThrowIfNull(notifications);
@@ -22,7 +20,7 @@ internal static class ProjectProcessIdentity
         }
         var value = current.Snapshot.Properties.Single(property => property.Name == ProcessFaultCommandProtocol.ProcessIdProperty).Value;
         if (!int.TryParse(Convert.ToString(value, CultureInfo.InvariantCulture), NumberStyles.None,
-                CultureInfo.InvariantCulture, out var processId) || processId < MinimumProcessId)
+                CultureInfo.InvariantCulture, out var processId) || processId < 1)
         {
             throw new InvalidOperationException(ProcessFaultCommandProtocol.Refused);
         }

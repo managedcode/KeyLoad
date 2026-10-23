@@ -14,7 +14,7 @@ internal sealed class GeneralRuntimeNumericTests
                 internal Policy()
                 {
                     Capacity = 64;
-                    System.Console.WriteLine([|1|]);
+                    System.Console.WriteLine([|2|]);
                 }
             }
             """;
@@ -23,13 +23,13 @@ internal sealed class GeneralRuntimeNumericTests
     }
 
     [Test]
-    [Arguments("return [|0|] + [|1|] - [|1|];")]
+    [Arguments("return [|2|] + [|3|] - 1 + 0;")]
     [Arguments("return -[|2147483648|];")]
     [Arguments("return new byte[[|32|]];")]
     [Arguments("return (byte)[|0xFFu|];")]
     [Arguments("return [|1.5m|] + [|2e3m|];")]
     [Arguments("return [|1.5f|] + [|2e3d|];")]
-    [Arguments("var total = [|0|]; for (var index = [|0|]; index < count; index++) total += [|1|]; return total;")]
+    [Arguments("var total = 0; for (var index = 0; index < count; index += [|2|]) total += 1; return total;")]
     public async Task ArithmeticAllocationLoopsAndConversionsRequireNamedValuesAsync(string operation)
     {
         var source = $$"""
@@ -50,7 +50,7 @@ internal sealed class GeneralRuntimeNumericTests
             {
                 private readonly int capacity = [|16|];
                 internal int Limit { get; } = [|64|];
-                internal int Execute(int count = [|1|]) => count + capacity + Limit;
+                internal int Execute(int count = [|2|]) => count + capacity + Limit;
             }
             """;
 

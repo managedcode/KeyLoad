@@ -5,17 +5,13 @@ namespace KeyLoad.Core.Features.TimeSeries;
 
 internal sealed class SampleAggregateAccumulator
 {
-    private const int EmptySampleCount = 0;
-    private const int EmptySum = 0;
-
-    private const int RuntimeOneBucket = 1;
     private const string NonFiniteAggregate = "The time-series aggregate is not finite.";
-    private readonly DoubleTimeSeriesSummer sum = new(TimeSpan.MaxValue, RuntimeOneBucket, Strategy.Sum);
-    private readonly DoubleTimeSeriesSummer minimum = new(TimeSpan.MaxValue, RuntimeOneBucket, Strategy.Min);
-    private readonly DoubleTimeSeriesSummer maximum = new(TimeSpan.MaxValue, RuntimeOneBucket, Strategy.Max);
+    private readonly DoubleTimeSeriesSummer sum = new(TimeSpan.MaxValue, 1, Strategy.Sum);
+    private readonly DoubleTimeSeriesSummer minimum = new(TimeSpan.MaxValue, 1, Strategy.Min);
+    private readonly DoubleTimeSeriesSummer maximum = new(TimeSpan.MaxValue, 1, Strategy.Max);
     private double finiteGuardSum;
 
-    internal static SampleAggregate Empty => new(EmptySampleCount, EmptySum, null, null, null);
+    internal static SampleAggregate Empty => new(0, 0, null, null, null);
 
     internal void Add(SampleRecord sample)
     {
@@ -53,7 +49,7 @@ internal sealed class SampleAggregateAccumulator
 
     internal static SampleAggregate Reconstruct(long count, double total, double? minimum, double? maximum)
     {
-        if (count == EmptySampleCount)
+        if (count == 0)
         {
             return Empty;
         }

@@ -10,8 +10,6 @@ internal static class ScaleServerMountReader
     private const string FilesystemSizeField = "size";
     private const string FilesystemAvailableField = "avail";
 
-    private const int ReadNonnegativeBoundaryValue = 0;
-
     private const string TargetField = "target";
     private const string Docker = "docker";
     private const string Findmnt = "findmnt";
@@ -189,7 +187,7 @@ internal static class ScaleServerMountReader
     }
 
     private static long ReadNonnegative(JsonElement value)
-        => value.ValueKind == JsonValueKind.Number && value.TryGetInt64(out var number) && number >= ReadNonnegativeBoundaryValue
+        => value.ValueKind == JsonValueKind.Number && value.TryGetInt64(out var number) && number >= 0
             ? number : throw new FormatException();
 
     private static bool IsPathWithin(string path, string directory)

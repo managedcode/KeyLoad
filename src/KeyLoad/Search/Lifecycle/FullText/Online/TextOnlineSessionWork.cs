@@ -5,8 +5,6 @@ namespace KeyLoad.Server.Features.Search;
 
 internal static class TextOnlineSessionWork
 {
-    private const int SuccessfulCleanupFailureCount = 0;
-
     internal static byte[] Open(Guid id, OnlineTextIndexMaintenanceRequest request, MaintenanceSessionWork work)
     {
         if (id == Guid.Empty || request.CommandId == Guid.Empty)
@@ -60,15 +58,15 @@ internal static class TextOnlineSessionWork
         {
             ServerFailureObserver.Observe(execution.Dispose, failures);
         }
-        if (failures.Count == SuccessfulCleanupFailureCount && cleanup is not null)
+        if (failures.Count == 0 && cleanup is not null)
         {
             ServerFailureObserver.Observe(cleanup, failures);
         }
-        if (failures.Count == SuccessfulCleanupFailureCount)
+        if (failures.Count == 0)
         {
             ServerFailureObserver.Observe(() => session.OperationReservation?.CompleteAfterJoinedCleanup(), failures);
         }
-        if (failures.Count == SuccessfulCleanupFailureCount)
+        if (failures.Count == 0)
         {
             ServerFailureObserver.Observe(session.Work.DisposeAfterStage, failures);
         }

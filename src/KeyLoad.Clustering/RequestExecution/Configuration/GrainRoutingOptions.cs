@@ -11,13 +11,11 @@ public sealed class GrainRoutingOptions
     /// <summary>The startup failure for unsafe request and execution lifetimes.</summary>
     public const string ValidationMessage = "Grain request lifetimes must be positive, at most two minutes, and issuance must fit the accepted future window.";
 
-    private const int DefaultLifetimeMinutes = 1;
     private const int MaximumFutureMinutes = 2;
     private const int MaximumProducerCount = 64;
     private const int MaximumFrameCount = 128;
     private const int MaximumConnectionCount = 4_096;
     private const int MaximumOperationsPerConnection = 8;
-    private const int MinimumPositiveCount = 1;
     private const int MaximumReplyBytesCeiling = 16_777_216;
     private const int MaximumInitialReplyBufferBytes = 4_096;
     private const int MaximumStartedBytesCeiling = 8_192;
@@ -32,11 +30,11 @@ public sealed class GrainRoutingOptions
     private static readonly TimeSpan MaximumDuration = TimeSpan.FromMinutes(MaximumFutureMinutes);
 
     /// <summary>Gets or sets the expiry interval stamped on newly signed requests.</summary>
-    public TimeSpan RequestLifetime { get; set; } = TimeSpan.FromMinutes(DefaultLifetimeMinutes);
+    public TimeSpan RequestLifetime { get; set; } = TimeSpan.FromMinutes(1);
     /// <summary>Gets or sets the accepted future expiry window during request validation.</summary>
     public TimeSpan MaximumFuture { get; set; } = TimeSpan.FromMinutes(MaximumFutureMinutes);
     /// <summary>Gets or sets the cancellation lifetime shared by execution stream producers and consumers.</summary>
-    public TimeSpan ExecutionLifetime { get; set; } = TimeSpan.FromMinutes(DefaultLifetimeMinutes);
+    public TimeSpan ExecutionLifetime { get; set; } = TimeSpan.FromMinutes(1);
     /// <summary>Gets or sets the maximum active request stream producers admitted by one silo.</summary>
     public int MaximumRequestProducers { get; set; } = MaximumProducerCount;
     /// <summary>Gets or sets the maximum active request and capability frames admitted by one silo.</summary>
@@ -86,23 +84,23 @@ public sealed class GrainRoutingOptions
     /// <returns>Whether every configured interval preserves the accepted expiry bounds.</returns>
     public bool IsValid() => IsBounded(RequestLifetime) && IsBounded(MaximumFuture) && IsBounded(ExecutionLifetime)
         && RequestLifetime <= MaximumFuture
-        && MaximumRequestProducers is >= MinimumPositiveCount and <= MaximumProducerCount
-        && MaximumTotalFrames is >= MinimumPositiveCount and <= MaximumFrameCount
+        && MaximumRequestProducers is >= 1 and <= MaximumProducerCount
+        && MaximumTotalFrames is >= 1 and <= MaximumFrameCount
         && MaximumRequestProducers <= MaximumTotalFrames
-        && MaximumConnections is >= MinimumPositiveCount and <= MaximumConnectionCount
-        && MaximumConnectionOperations is >= MinimumPositiveCount and <= MaximumOperationsPerConnection
+        && MaximumConnections is >= 1 and <= MaximumConnectionCount
+        && MaximumConnectionOperations is >= 1 and <= MaximumOperationsPerConnection
         && IsBounded(ConnectionIdleTimeout)
-        && MaximumReplyBytes is >= MinimumPositiveCount and <= MaximumReplyBytesCeiling
-        && InitialReplyBufferBytes is >= MinimumPositiveCount and <= MaximumInitialReplyBufferBytes
-        && MaximumStartedBytes is >= MinimumPositiveCount and <= MaximumStartedBytesCeiling
-        && MaximumFailedBytes is >= MinimumPositiveCount and <= MaximumFailedBytesCeiling
-        && MaximumCompletedBytes is >= MinimumPositiveCount and <= MaximumCompletedBytesCeiling
-        && MaximumAggregateBytes is >= MinimumPositiveCount and <= MaximumAggregateBytesCeiling
-        && MaximumScratchBytes is >= MinimumPositiveCount and <= MaximumScratchBytesCeiling
-        && MinimumScratchBytes is >= MinimumPositiveCount and <= MinimumScratchBytesCeiling
-        && MaximumDetailCharacters is >= MinimumPositiveCount and <= MaximumDetailCharactersCeiling
-        && MaximumPrincipalBytes is >= MinimumPositiveCount and <= MaximumPrincipalBytesCeiling
-        && MaximumContextBytes is >= MinimumPositiveCount and <= MaximumContextBytesCeiling
+        && MaximumReplyBytes is >= 1 and <= MaximumReplyBytesCeiling
+        && InitialReplyBufferBytes is >= 1 and <= MaximumInitialReplyBufferBytes
+        && MaximumStartedBytes is >= 1 and <= MaximumStartedBytesCeiling
+        && MaximumFailedBytes is >= 1 and <= MaximumFailedBytesCeiling
+        && MaximumCompletedBytes is >= 1 and <= MaximumCompletedBytesCeiling
+        && MaximumAggregateBytes is >= 1 and <= MaximumAggregateBytesCeiling
+        && MaximumScratchBytes is >= 1 and <= MaximumScratchBytesCeiling
+        && MinimumScratchBytes is >= 1 and <= MinimumScratchBytesCeiling
+        && MaximumDetailCharacters is >= 1 and <= MaximumDetailCharactersCeiling
+        && MaximumPrincipalBytes is >= 1 and <= MaximumPrincipalBytesCeiling
+        && MaximumContextBytes is >= 1 and <= MaximumContextBytesCeiling
         && MinimumScratchBytes <= MaximumScratchBytes;
 
     /// <summary>Rejects an invalid captured routing snapshot before execution execution.</summary>

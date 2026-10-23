@@ -11,7 +11,6 @@ namespace KeyLoad.UnitTests.Features.OrleansExecution;
 internal static class RequestCqrsAnnSettlementReplayFlow
 {
     private const string AlteredProofSuffix = "-changed";
-    private const int EmptyPayload = 0;
 
     internal static async Task RunAsync(RequestCqrsHostedRuntimeFixture fixture,
         AnnMaintenanceRequest original, AnnMaintenanceResult result, CancellationToken token)
@@ -60,7 +59,7 @@ internal static class RequestCqrsAnnSettlementReplayFlow
         var files = AnnFixtureFileSnapshot.Capture(fixture.Database.Directory);
         var reply = await InvokeAsync(fixture, changed, token);
         await Assert.That(reply.Error).IsEqualTo(ErrorCode.Conflict);
-        await Assert.That(reply.Payload.Length).IsEqualTo(EmptyPayload);
+        await Assert.That(reply.Payload.Length).IsEqualTo(0);
         await UnchangedAsync(fixture, image, cut, files);
     }
 

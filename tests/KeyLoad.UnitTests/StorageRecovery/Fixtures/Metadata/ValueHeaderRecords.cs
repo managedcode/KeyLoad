@@ -10,7 +10,6 @@ internal static class ValueHeaderRecords
     internal const long HealthyPosition = 2;
     internal const int CompleteRecords = 2;
     internal const int MarkerBytes = 1;
-    private const int MarkerOffset = 0;
     private const byte InvalidMarker = 2;
     private const string HealthyKeyText = "healthy/execution-header";
     private const string HealthyValueText = "canonical continuation after execution header repair";
@@ -22,7 +21,7 @@ internal static class ValueHeaderRecords
     internal static byte[] InvalidBytes(ZoneTreeExistingStoreFixture files)
     {
         var bytes = new byte[files.Value.Length + MarkerBytes];
-        bytes[MarkerOffset] = InvalidMarker;
+        bytes[0] = InvalidMarker;
         files.Value.CopyTo(bytes.AsSpan(MarkerBytes));
         return bytes;
     }

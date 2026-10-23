@@ -10,7 +10,6 @@ public sealed record CommandAdmissionLimits
     public const string SectionName = "KeyLoad:CommandAdmission";
     /// <summary>The startup rejection for invalid admission settings.</summary>
     public const string ValidationMessage = "Command admission limits must be positive.";
-    private const int MinimumPositiveBudget = 1;
     private const int DefaultMaxCommands = 256;
     private const long DefaultMaxRetainedBytes = 134_217_728;
     private const int DefaultMaxTenantCommands = 128;
@@ -53,9 +52,9 @@ public sealed record CommandAdmissionLimits
     /// <exception cref="ArgumentException">One or more configured limits are not positive.</exception>
     public void Validate()
     {
-        if (MaxCommands < MinimumPositiveBudget || MaxRetainedBytes < MinimumPositiveBudget || MaxTenantCommands < MinimumPositiveBudget || MaxPrincipalCommands < MinimumPositiveBudget
-            || ReservedControlCommands < MinimumPositiveBudget || ReservedControlBytes < MinimumPositiveBudget || MaxControlPayloadBytes < MinimumPositiveBudget
-            || MaxTenantControlCommands < MinimumPositiveBudget || MaxPrincipalControlCommands < MinimumPositiveBudget)
+        if (MaxCommands < 1 || MaxRetainedBytes < 1 || MaxTenantCommands < 1 || MaxPrincipalCommands < 1
+            || ReservedControlCommands < 1 || ReservedControlBytes < 1 || MaxControlPayloadBytes < 1
+            || MaxTenantControlCommands < 1 || MaxPrincipalControlCommands < 1)
         {
             throw new ArgumentException(ValidationMessage);
         }

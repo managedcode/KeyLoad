@@ -3,7 +3,6 @@ namespace KeyLoad.UnitTests.Features.InternalSerialization;
 internal sealed class EncodedTypeMeasureTests
 {
     private const int ConcurrentOperations = 20;
-    private const int FirstOperation = 0;
 
     [Test]
     public async Task RegisteredTypeFramesResolveBeforeCompleteLiteralPayloadRoundtrip()
@@ -31,7 +30,7 @@ internal sealed class EncodedTypeMeasureTests
         var token = TestContext.Current!.Execution.CancellationToken;
         var admitted = 0;
         var started = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-        await Parallel.ForEachAsync(Enumerable.Range(FirstOperation, ConcurrentOperations),
+        await Parallel.ForEachAsync(Enumerable.Range(0, ConcurrentOperations),
             new ParallelOptions { MaxDegreeOfParallelism = ConcurrentOperations, CancellationToken = token },
             async (_, cancellationToken) =>
             {
@@ -49,14 +48,14 @@ internal sealed class EncodedTypeMeasureTests
         await cancelled.CancelAsync();
         var cancelledAdmissions = 0;
         var failure = await Assert.ThrowsAsync<OperationCanceledException>(async () =>
-            await Parallel.ForEachAsync(Enumerable.Range(FirstOperation, ConcurrentOperations),
+            await Parallel.ForEachAsync(Enumerable.Range(0, ConcurrentOperations),
                 new ParallelOptions { MaxDegreeOfParallelism = ConcurrentOperations, CancellationToken = cancelled.Token },
                 (_, _) =>
                 {
                     Interlocked.Increment(ref cancelledAdmissions);
                     return ValueTask.CompletedTask;
                 }));
-        await Assert.That(cancelledAdmissions).IsEqualTo(FirstOperation);
+        await Assert.That(cancelledAdmissions).IsEqualTo(0);
         await Assert.That(failure!.CancellationToken).IsEqualTo(cancelled.Token);
         await EncodedTypeFrameFixture.RequireAsync(EncodedTypeFrameFixture.Command());
         await EncodedTypeFrameFixture.RequireAsync(EncodedTypeFrameFixture.Counters());

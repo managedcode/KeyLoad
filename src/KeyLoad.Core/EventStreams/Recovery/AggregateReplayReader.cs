@@ -5,13 +5,6 @@ namespace KeyLoad.Core;
 
 internal static class AggregateReplayReader
 {
-    private const int ContinuationLookaheadRecords = 1;
-    private const int LastReplayEventOffset = 1;
-
-    private const int ReadHeadTailRevisionEmptyCount = 0;
-    private const int ReadHeadFirstAvailableRevisionSingleItemCount = 1;
-    private const int ReadHeadGenerationSingleItemCount = 1;
-
     internal const string StreamHeadKeySpace = "stream-head";
     private const string EventSpace = "event";
     private const string EventIdentitySpace = "event-id";
@@ -83,7 +76,7 @@ internal static class AggregateReplayReader
     private static StreamHead ReadHead(IKeyValueView view, StreamRef stream, ReadExecutionBudget budget)
         => budget.ReadRecord<StreamHead>(view,
             KeySpace.Partition(StreamHeadKeySpace, stream.Partition, stream.StreamSet, stream.StreamId))
-            ?? new StreamHead(ReadHeadTailRevisionEmptyCount, ReadHeadFirstAvailableRevisionSingleItemCount, ReadHeadGenerationSingleItemCount);
+            ?? new StreamHead(0, 1, 1);
 
     private static AggregateSnapshotState? ReadSnapshot(IKeyValueView view, StreamRef stream,
         DatabaseLimits limits, ReadExecutionBudget budget)
@@ -132,7 +125,7 @@ internal static class AggregateReplayReader
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, ReplayEventsExceededMessage);
         }
-        var scanLimit = (int)Math.Min(maximumEvents, requiredCount + ContinuationLookaheadRecords);
+        var scanLimit = (int)Math.Min(maximumEvents, requiredCount + 1);
         var records = new List<EventRecord>(scanLimit);
         var resultBytes = ResultBytesInitialValue;
         var prefix = KeySpace.Partition(EventSpace, stream.Partition, stream.StreamSet, stream.StreamId, stream.Generation);
@@ -143,7 +136,7 @@ internal static class AggregateReplayReader
             var expectedRevision = checked(afterRevision + records.Count + VisitorSingleItemCount);
             var record = OrleansSerialization.Deserialize<EventRecord>(value);
             ValidateEvent(record, key, stream, expectedRevision, head, limits);
-            if (records.Count > VisitorEmptyCount && record.EventSequence <= records[^LastReplayEventOffset].EventSequence)
+            if (records.Count > VisitorEmptyCount && record.EventSequence <= records[^1].EventSequence)
             {
                 throw Errors.Fail(ErrorCode.Corruption, InvalidEventRecordMessage);
             }

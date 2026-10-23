@@ -6,8 +6,6 @@ namespace KeyLoad.UnitTests.Features.OrleansExecution;
 internal sealed class RequestCqrsProducerNotificationSettlementTests
 {
     private const int ExpectedFailureCount = 2;
-    private const int PrimaryFailureIndex = 0;
-    private const int NotificationFailureIndex = 1;
     [Test]
     public async Task AwaitedOriginalSettlementKeepsExactProducerLeaseUntilNotificationJoins()
     {
@@ -52,8 +50,8 @@ internal sealed class RequestCqrsProducerNotificationSettlementTests
         await Assert.That(result is AggregateException).IsTrue();
         var combined = (AggregateException)result!;
         await Assert.That(combined.InnerExceptions.Count).IsEqualTo(ExpectedFailureCount);
-        await Assert.That(ReferenceEquals(combined.InnerExceptions[PrimaryFailureIndex], primary)).IsTrue();
-        await Assert.That(ReferenceEquals(combined.InnerExceptions[NotificationFailureIndex], notification)).IsTrue();
+        await Assert.That(ReferenceEquals(combined.InnerExceptions[0], primary)).IsTrue();
+        await Assert.That(ReferenceEquals(combined.InnerExceptions[1], notification)).IsTrue();
         await owner.DrainAsync();
         await Assert.That(owner.IsJoined).IsTrue();
     }

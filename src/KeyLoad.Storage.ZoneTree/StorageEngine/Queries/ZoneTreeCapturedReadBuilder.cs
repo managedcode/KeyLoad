@@ -5,11 +5,6 @@ namespace KeyLoad.Storage.ZoneTree;
 /// <summary>Copies only admitted original snapshot scopes after sharing their original work and retained-buffer admission.</summary>
 internal sealed class ZoneTreeCapturedReadBuilder(ZoneTreeReadCutLease original, Action<long, int> admit) : IScopedReadCapture
 {
-    private const int NoImportedRecords = 0;
-    private const int EmptyScopeLength = 0;
-    private const int FirstRecordIndex = 0;
-    private const int NextRecordOffset = 1;
-    private const int InitialCapacity = 1;
     private const int CapacityGrowthFactor = 2;
     private const long ArrayHeaderPointerSlots = 3;
     private const long KeyValueArrayHeaderPointerSlots = 6;
@@ -23,12 +18,12 @@ internal sealed class ZoneTreeCapturedReadBuilder(ZoneTreeReadCutLease original,
     private bool transferred;
     private int prefixBaseRecords;
 
-    public void AdmitRetainedBytes(long bytes) => admit(bytes, NoImportedRecords);
+    public void AdmitRetainedBytes(long bytes) => admit(bytes, 0);
 
     public void CapturePrefix(byte[] prefix)
     {
         ArgumentNullException.ThrowIfNull(prefix);
-        if (prefix.Length == EmptyScopeLength)
+        if (prefix.Length == 0)
         {
             throw new ArgumentException(EmptyScope, nameof(prefix));
         }
@@ -49,7 +44,7 @@ internal sealed class ZoneTreeCapturedReadBuilder(ZoneTreeReadCutLease original,
     public void CaptureExact(byte[] key)
     {
         ArgumentNullException.ThrowIfNull(key);
-        if (key.Length == EmptyScopeLength)
+        if (key.Length == 0)
         {
             throw new ArgumentException(EmptyScope, nameof(key));
         }
@@ -63,9 +58,9 @@ internal sealed class ZoneTreeCapturedReadBuilder(ZoneTreeReadCutLease original,
         original.ReadExact(key, value =>
         {
             ReserveRecord();
-            admit(checked((long)ownedKey.Length + value.Length + KeyValueArrayHeaderPointerSlots * IntPtr.Size), NoImportedRecords);
+            admit(checked((long)ownedKey.Length + value.Length + KeyValueArrayHeaderPointerSlots * IntPtr.Size), 0);
             var location = ZoneTreeCapturedReadLookup.Find(records, ownedKey, records.Count);
-            if (location >= FirstRecordIndex)
+            if (location >= 0)
             {
                 throw Errors.Fail(ErrorCode.Corruption, DuplicatePoint);
             }
@@ -80,7 +75,7 @@ internal sealed class ZoneTreeCapturedReadBuilder(ZoneTreeReadCutLease original,
         ArgumentNullException.ThrowIfNull(reader);
         CaptureExact(key);
         var location = ZoneTreeCapturedReadLookup.Find(records, key, records.Count);
-        if (location < FirstRecordIndex)
+        if (location < 0)
         {
             return false;
         }
@@ -93,7 +88,7 @@ internal sealed class ZoneTreeCapturedReadBuilder(ZoneTreeReadCutLease original,
         ArgumentNullException.ThrowIfNull(visitor);
         CapturePrefix(prefix);
         var first = ZoneTreeCapturedReadLookup.Find(records, prefix, records.Count);
-        var index = first >= FirstRecordIndex ? first : ~first;
+        var index = first >= 0 ? first : ~first;
         while (index < records.Count)
         {
             var record = records[index];
@@ -102,7 +97,7 @@ internal sealed class ZoneTreeCapturedReadBuilder(ZoneTreeReadCutLease original,
                 return;
             }
             // The callback may insert admitted dependency points; resume from the original owned key.
-            index = ZoneTreeCapturedReadLookup.Find(records, record.Key.Span, records.Count) + NextRecordOffset;
+            index = ZoneTreeCapturedReadLookup.Find(records, record.Key.Span, records.Count) + 1;
         }
     }
 
@@ -128,7 +123,7 @@ internal sealed class ZoneTreeCapturedReadBuilder(ZoneTreeReadCutLease original,
     private bool RetainPrefixRecord(ReadOnlySpan<byte> key, ReadOnlySpan<byte> value)
     {
         var location = ZoneTreeCapturedReadLookup.Find(records, key, prefixBaseRecords);
-        if (location >= FirstRecordIndex)
+        if (location >= 0)
         {
             if (!records[location].Value.Span.SequenceEqual(value))
             {
@@ -143,14 +138,14 @@ internal sealed class ZoneTreeCapturedReadBuilder(ZoneTreeReadCutLease original,
     private void AdmitPrefixRecord(long bytes, int count)
     {
         admit(bytes, count);
-        if (count == NoImportedRecords)
+        if (count == 0)
         {
             return;
         }
         ReserveRecord();
         // The owning captured-record visitor copies borrowed key/value only after this callback.
         // Raw bytes include the value header and conservatively charge that header again.
-        admit(checked(bytes + KeyValueArrayHeaderPointerSlots * IntPtr.Size), NoImportedRecords);
+        admit(checked(bytes + KeyValueArrayHeaderPointerSlots * IntPtr.Size), 0);
     }
 
     private void ReserveRecord()
@@ -159,20 +154,20 @@ internal sealed class ZoneTreeCapturedReadBuilder(ZoneTreeReadCutLease original,
         {
             return;
         }
-        var next = Math.Max(InitialCapacity, checked(records.Capacity * CapacityGrowthFactor));
-        admit(checked((long)Unsafe.SizeOf<ZoneTreeCapturedReadRecord>() * next + ArrayHeaderPointerSlots * IntPtr.Size), NoImportedRecords);
+        var next = Math.Max(1, checked(records.Capacity * CapacityGrowthFactor));
+        admit(checked((long)Unsafe.SizeOf<ZoneTreeCapturedReadRecord>() * next + ArrayHeaderPointerSlots * IntPtr.Size), 0);
         records.Capacity = next;
     }
 
     private void ReserveScope(List<byte[]> scopes, int bytes)
     {
-        admit(checked(bytes + ArrayHeaderPointerSlots * IntPtr.Size), NoImportedRecords);
+        admit(checked(bytes + ArrayHeaderPointerSlots * IntPtr.Size), 0);
         if (scopes.Count < scopes.Capacity)
         {
             return;
         }
-        var next = Math.Max(InitialCapacity, checked(scopes.Capacity * CapacityGrowthFactor));
-        admit(checked((long)IntPtr.Size * next + ArrayHeaderPointerSlots * IntPtr.Size), NoImportedRecords);
+        var next = Math.Max(1, checked(scopes.Capacity * CapacityGrowthFactor));
+        admit(checked((long)IntPtr.Size * next + ArrayHeaderPointerSlots * IntPtr.Size), 0);
         scopes.Capacity = next;
     }
 

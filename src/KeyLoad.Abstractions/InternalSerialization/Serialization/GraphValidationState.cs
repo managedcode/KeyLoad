@@ -4,8 +4,6 @@ namespace KeyLoad.Features.InternalSerialization;
 // member and required in another. Cached height also protects a later, deeper shared path.
 internal sealed class GraphValidationState
 {
-    private const int LeafHeight = 0;
-    private const int SharedRootDepth = 1;
     private readonly HashSet<object> active = new(ReferenceEqualityComparer.Instance);
     private readonly Dictionary<GraphKey, int> completed = new(GraphKeyComparer.Instance);
     private int visits;
@@ -22,7 +20,7 @@ internal sealed class GraphValidationState
 
     internal bool Enter(object value, bool tracked, ValueValidation? validation, int depth, out int height)
     {
-        height = LeafHeight;
+        height = 0;
         RequireDepth(depth);
         if (!tracked)
         {
@@ -34,7 +32,7 @@ internal sealed class GraphValidationState
         }
         if (completed.TryGetValue(new(value, validation), out height))
         {
-            RequireDepth(checked(depth + height - SharedRootDepth));
+            RequireDepth(checked(depth + height - 1));
             return true;
         }
         _ = active.Add(value);

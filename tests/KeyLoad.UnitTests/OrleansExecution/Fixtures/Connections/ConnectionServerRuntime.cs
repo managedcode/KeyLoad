@@ -9,7 +9,6 @@ namespace KeyLoad.UnitTests.Features.OrleansExecution;
 internal sealed class ConnectionServerRuntime : IAsyncDisposable
 {
     internal const string NotStarted = "The actual execution Server cluster is not started.";
-    private const int SourceIndex = 0;
     private const string FailureRoot = "KeyLoad.RuntimeConnection.ServerRoot";
     private readonly IGrainRequestPhaseObserver observer;
     private readonly IGrainRequestPurposeObserver? purposeObserver;
@@ -39,7 +38,7 @@ internal sealed class ConnectionServerRuntime : IAsyncDisposable
     internal bool IsDisposalJoined => hosts is not null && hosts.Nodes.All(node => node.IsDisposalJoined);
     internal RequestCqrsHostedCluster Hosts => hosts
         ?? throw new InvalidOperationException(NotStarted);
-    internal RequestCqrsHostedRuntimeFixture Source => Hosts.Nodes[SourceIndex];
+    internal RequestCqrsHostedRuntimeFixture Source => Hosts.Nodes[0];
 
     internal ConnectionServerRuntime(GrainRoutingOptions? routing, IGrainRequestPhaseObserver observer,
         IGrainRequestPurposeObserver? purposeObserver, ConnectionOperationObservation connectionObserver)

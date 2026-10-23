@@ -7,7 +7,6 @@ namespace KeyLoad.UnitTests.Features.Search;
 /// <summary>Uses the production progress writer and real bounded CQRS producer, without a mirror shape validator.</summary>
 internal static class AnnSettledProgressFrames
 {
-    private const int OneFinal = 1;
     internal static async Task<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>[]> CreateAsync(
         Guid requestId, AnnMaintenancePhase[] phases)
     {
@@ -25,7 +24,7 @@ internal static class AnnSettledProgressFrames
         {
             frames.Add(frame);
         }
-        await Assert.That(frames.Count(value => value.Kind == CqrsStreamChunkKind.Completed)).IsEqualTo(OneFinal);
+        await Assert.That(frames.Count(value => value.Kind == CqrsStreamChunkKind.Completed)).IsEqualTo(1);
         return frames.Where(value => value.Kind == CqrsStreamChunkKind.Progress).ToArray();
     }
 }

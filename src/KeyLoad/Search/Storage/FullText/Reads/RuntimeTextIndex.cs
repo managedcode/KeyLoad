@@ -9,9 +9,6 @@ namespace KeyLoad.Server.Features.Search;
 
 internal static class RuntimeTextIndex
 {
-    private const int LowerBoundRecordEmptyCount = 0;
-    private const int LowerBoundPreviousTokenEmptyCount = 0;
-
     internal static IndexOfTokenRecordPreviousToken<ulong, ulong> Open(string directory, IFileStreamProvider fileStreamProvider, IOptions<TextExecutionOptions> executionOptions)
     {
         const int DisabledBloomFilterBits = 0;
@@ -38,8 +35,8 @@ internal static class RuntimeTextIndex
         => new()
         {
             Token = token,
-            Record = LowerBoundRecordEmptyCount,
-            PreviousToken = LowerBoundPreviousTokenEmptyCount
+            Record = 0,
+            PreviousToken = 0
         };
 
     internal static void ValidatePath(string directory)

@@ -10,28 +10,26 @@ internal sealed class HelixDbSession(HttpClient http, string label, int count, i
 {
     private readonly TimeProvider timeProvider = provider ?? TimeProvider.System;
     private ComparisonExecutionOptions Policy => executionOptions.Value;
-    private const int EmptyResultCount = 0;
-    private const int SingleResultCardinality = 1;
     public async Task<FoundDocument?> ReadAsync(BenchmarkDocument document, CancellationToken cancellationToken)
     {
         using var response = await QueryAsync(HelixDbDocumentAst.Read(label, document.Id), false, cancellationToken).ConfigureAwait(false);
         var rows = HelixDbProtocol.Rows(response);
-        if (rows.GetArrayLength() > SingleResultCardinality)
+        if (rows.GetArrayLength() > 1)
         {
             throw new ComparisonFailureException(HelixDbTokens.TokenHelixDbInvalidRows);
         }
-        return rows.GetArrayLength() == EmptyResultCount ? null : Read(rows[EmptyResultCount]);
+        return rows.GetArrayLength() == 0 ? null : Read(rows[0]);
     }
 
     public async IAsyncEnumerable<FoundDocument> ReadCorpusAsync([EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        var after = -SingleResultCardinality;
-        var seen = EmptyResultCount;
+        var after = -1;
+        var seen = 0;
         while (true)
         {
             using var response = await QueryAsync(HelixDbDocumentAst.Page(label, after, Policy.ReadbackBatchCapacity), false, cancellationToken).ConfigureAwait(false);
             var rows = HelixDbProtocol.Rows(response);
-            if (rows.GetArrayLength() == EmptyResultCount)
+            if (rows.GetArrayLength() == 0)
             {
                 break;
             }
@@ -39,7 +37,7 @@ internal sealed class HelixDbSession(HttpClient http, string label, int count, i
             foreach (var row in rows.EnumerateArray())
             {
                 var number = row.GetProperty(HelixDbTokens.TokenNumber).GetInt32();
-                if (number <= after || (count >= EmptyResultCount && seen >= count))
+                if (number <= after || (count >= 0 && seen >= count))
                 {
                     throw new ComparisonFailureException(HelixDbTokens.TokenHelixDbCorpusOrderMismatch);
                 }
@@ -50,7 +48,7 @@ internal sealed class HelixDbSession(HttpClient http, string label, int count, i
             }
         }
 
-        if (count >= EmptyResultCount && seen != count)
+        if (count >= 0 && seen != count)
         {
             throw new ComparisonFailureException(HelixDbTokens.TokenScaledCorpusReadbackCountMismatch);
         }
@@ -65,7 +63,7 @@ internal sealed class HelixDbSession(HttpClient http, string label, int count, i
 
         if (scenario is Scenario.GraphNeighbors or Scenario.GraphTraverse)
         {
-            using var response = await QueryAsync(HelixDbDocumentAst.Graph(label, document.Id, scenario == Scenario.GraphNeighbors ? SingleResultCardinality : depth), false, cancellationToken).ConfigureAwait(false);
+            using var response = await QueryAsync(HelixDbDocumentAst.Graph(label, document.Id, scenario == Scenario.GraphNeighbors ? 1 : depth), false, cancellationToken).ConfigureAwait(false);
             return new(Vertices: HelixDbProtocol.Rows(response).EnumerateArray().Select(row => row.GetProperty(HelixDbTokens.TokenId).GetString()!).ToImmutableArray());
         }
 
@@ -107,8 +105,8 @@ internal sealed class HelixDbSession(HttpClient http, string label, int count, i
     private static FoundDocument Read(JsonElement row) => new(row.GetProperty(HelixDbTokens.TokenId).GetString()!, row.GetProperty(HelixDbTokens.TokenPayload).GetString()!);
     private static void RequireOne(JsonElement result, Scenario scenario)
     {
-        var count = result.ValueKind == JsonValueKind.Array && result.GetArrayLength() == SingleResultCardinality ? result[EmptyResultCount].GetInt64() : result.GetInt64();
-        if (count != SingleResultCardinality)
+        var count = result.ValueKind == JsonValueKind.Array && result.GetArrayLength() == 1 ? result[0].GetInt64() : result.GetInt64();
+        if (count != 1)
         {
             throw new ComparisonFailureException(scenario == Scenario.DocumentUpdate ? ComparisonMutationFailures.UpdateMissing : ComparisonMutationFailures.DeleteMissing);
         }

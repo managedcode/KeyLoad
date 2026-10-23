@@ -25,8 +25,6 @@ public sealed record QueryExecutionOptions
     private const int DefaultSqlBudgetCheckInterval = 256;
     private const int MaximumConformingSearchResults = 1_000;
     private const int MaximumConformingSearchTextBytes = 4_096;
-    private const int MinimumResultByteCount = 1;
-    private const int MinimumWorkCount = 1;
     private const int MaximumConformingPartitions = 8;
     private const int MaximumCursorLifetimeDays = 365;
     private static readonly TimeSpan MaximumCursorLifetime = TimeSpan.FromDays(MaximumCursorLifetimeDays);
@@ -75,15 +73,15 @@ public sealed record QueryExecutionOptions
 
     /// <summary>Checks that the configured duration remains positive and bounded.</summary>
     /// <returns>Whether the configured lifetime is valid.</returns>
-    public bool IsValid() => (MaximumResultBytes is null or >= MinimumResultByteCount) && CursorLifetime > TimeSpan.Zero && CursorLifetime <= MaximumCursorLifetime
-        && MaximumProjection >= MinimumWorkCount && MaximumOrdering >= MinimumWorkCount
-        && MaximumParameters is >= MinimumWorkCount and <= DefaultMaximumParameters && MaximumInValues >= MinimumWorkCount
-        && MaximumPartitions >= MinimumWorkCount && MaximumPartitions <= MaximumConformingPartitions
-        && MaximumConcurrentPartitionLeaves is >= MinimumWorkCount and <= MaximumConformingPartitions
-        && MaximumSearchResults >= MinimumWorkCount && MaximumSearchResults <= MaximumConformingSearchResults
-        && MaximumSearchTextBytes >= MinimumWorkCount && MaximumSearchTextBytes <= MaximumConformingSearchTextBytes
-        && TextBudgetCheckInterval >= MinimumWorkCount && MaximumDocumentWords >= MinimumWorkCount
-        && MaximumWordCharacters >= MinimumWorkCount && SqlBudgetCheckInterval is >= MinimumWorkCount and <= DefaultSqlBudgetCheckInterval;
+    public bool IsValid() => (MaximumResultBytes is null or >= 1) && CursorLifetime > TimeSpan.Zero && CursorLifetime <= MaximumCursorLifetime
+        && MaximumProjection >= 1 && MaximumOrdering >= 1
+        && MaximumParameters is >= 1 and <= DefaultMaximumParameters && MaximumInValues >= 1
+        && MaximumPartitions >= 1 && MaximumPartitions <= MaximumConformingPartitions
+        && MaximumConcurrentPartitionLeaves is >= 1 and <= MaximumConformingPartitions
+        && MaximumSearchResults >= 1 && MaximumSearchResults <= MaximumConformingSearchResults
+        && MaximumSearchTextBytes >= 1 && MaximumSearchTextBytes <= MaximumConformingSearchTextBytes
+        && TextBudgetCheckInterval >= 1 && MaximumDocumentWords >= 1
+        && MaximumWordCharacters >= 1 && SqlBudgetCheckInterval is >= 1 and <= DefaultSqlBudgetCheckInterval;
 
     /// <summary>Rejects invalid settings before query execution is admitted.</summary>
     /// <exception cref="InvalidOperationException">The configured continuation lifetime is invalid.</exception>

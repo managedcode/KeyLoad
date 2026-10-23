@@ -7,7 +7,6 @@ namespace KeyLoad.UnitTests.Features.TimeSeries;
 
 internal sealed class SampleRollupLimitTests
 {
-    private const int OneBucket = 1;
     private const int ReadByteLimit = 1024;
     private const int LargeTagLength = 2048;
     private const string LargeTagsPrefix = "{\"payload\":\"";
@@ -19,7 +18,7 @@ internal sealed class SampleRollupLimitTests
         SampleRollupWholeFlow.Seed(db);
         var engine = Engine(db, UnitExecutionOptions.TimeSeriesExecution().Value with
         {
-            MaximumRollupBuckets = OneBucket
+            MaximumRollupBuckets = 1
         });
         Apply(engine, db.Partition, SampleRollupWholeFlow.Refresh(0)).Get<CommitReceipt>();
         var raw = SampleRollupWholeFlow.Raw(db);

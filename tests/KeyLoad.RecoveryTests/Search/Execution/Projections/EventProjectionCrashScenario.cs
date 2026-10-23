@@ -7,9 +7,6 @@ namespace KeyLoad.RecoveryTests.Features.Search;
 
 internal static class EventProjectionCrashScenario
 {
-    private const int ProjectionRequestValuesSingleItemCount = 1;
-    private const int ProjectionRequestValuesEmptyCount = 0;
-
     internal const string Mode = "event-projection-process";
     internal const string OperationFile = "event-projection-operation.bin";
     internal const string PositionFile = "event-projection-before-position.bin";
@@ -92,7 +89,7 @@ internal static class EventProjectionCrashScenario
     internal static ApplyVectorProjection ProjectionRequest()
         => new(Stream, EventRevision, EventId, new(Partition, Collection, SourceId), DocumentRevision,
             InputField, ReducerId, ReducerVersion, Generation,
-            new(Collection, TargetId, VectorField, [ProjectionRequestValuesSingleItemCount, ProjectionRequestValuesEmptyCount], Space, DocumentRevision));
+            new(Collection, TargetId, VectorField, [1, 0], Space, DocumentRevision));
 
     internal static byte[] DocumentKey(string id)
         => DocumentStorageKeys.RecordKey(Partition, Collection, id);

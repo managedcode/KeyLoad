@@ -17,12 +17,10 @@ public sealed class SurrealDbVectorTarget(HttpClient http, string image, string 
     private const string SingleNodeCommittedReads = "single-node committed reads";
     private const string SurrealDBHTTPSqlJSON = "SurrealDB HTTP /sql JSON";
     private const string RootBasicAuthentication = "root Basic authentication";
-    private const int SingleResultCardinality = 1;
     private const string SingleSurrealDBCommunityNodeNoReplicationConfigured = "single SurrealDB Community node; no replication configured";
     private const string PersistentRocksDBPath = "persistent RocksDB path";
     private const string DEFINETABLEIFNOTEXISTSSCHEMALESSFormatTemplate = "DEFINE TABLE IF NOT EXISTS {0} SCHEMALESS;";
     private static readonly System.Text.CompositeFormat DEFINETABLEIFNOTEXISTSSCHEMALESSFormat = System.Text.CompositeFormat.Parse(DEFINETABLEIFNOTEXISTSSCHEMALESSFormatTemplate);
-    private const int EmptyResultCount = 0;
     private const char VectorRecordPrefix = 'v';
     private const string HTTPSqlRocksDBPersistentBackend = "; HTTP /sql; RocksDB persistent backend";
     private const string SurrealDBProfileIsUnavailable = "SurrealDB profile is unavailable.";
@@ -58,7 +56,7 @@ public sealed class SurrealDbVectorTarget(HttpClient http, string image, string 
         get; private set;
     } = new(SurrealDbTokens.TokenSurrealDB, SurrealDbTokens.TokenUnverified, SurrealDBCommunityOnePersistentRocksDBNode, SingleNodeAcknowledgedWriteCommitDurabilityNotFault, SingleNodeCommittedReads, SurrealDBHTTPSqlJSON, RootBasicAuthentication, image)
     {
-        Cluster = new(SingleResultCardinality, SingleResultCardinality, SingleSurrealDBCommunityNodeNoReplicationConfigured, [PersistentRocksDBPath])
+        Cluster = new(1, 1, SingleSurrealDBCommunityNodeNoReplicationConfigured, [PersistentRocksDBPath])
     };
 
     /// <inheritdoc/>
@@ -72,10 +70,10 @@ public sealed class SurrealDbVectorTarget(HttpClient http, string image, string 
         ownsData = true;
         readbackIndexDefinition = await SurrealDbReadbackIndex.CreateAsync(http, table, Policy, token: cancellationToken, timeProvider: timeProvider).ConfigureAwait(false);
         var batch = new List<VectorDocument>(Policy.WriteBatchCapacity);
-        var count = EmptyResultCount;
+        var count = 0;
         await foreach (var document in documents.WithCancellation(cancellationToken).ConfigureAwait(false))
         {
-            if (document.Embedding.Length == EmptyResultCount || document.Number < EmptyResultCount || !document.Id.StartsWith(VectorRecordPrefix))
+            if (document.Embedding.Length == 0 || document.Number < 0 || !document.Id.StartsWith(VectorRecordPrefix))
             {
                 throw new InvalidDataException(SurrealDbTokens.TokenSurrealDbInvalidSeedDocument);
             }
@@ -89,7 +87,7 @@ public sealed class SurrealDbVectorTarget(HttpClient http, string image, string 
             }
         }
 
-        if (batch.Count != EmptyResultCount)
+        if (batch.Count != 0)
         {
             await IngestBatchAsync(batch, cancellationToken).ConfigureAwait(false);
         }
@@ -118,7 +116,7 @@ public sealed class SurrealDbVectorTarget(HttpClient http, string image, string 
             Policy.RecordEvidence(exactParameters);
             serialization.RecordEvidence(exactParameters);
             exactParameters[ReadbackIndexEvidence] = readbackIndexDefinition ?? throw new InvalidOperationException(InvalidResponse);
-            return new(VectorIndexKind.Exact, NoANNIndexSurrealDBBruteForceKNN, exactParameters, EmptyResultCount);
+            return new(VectorIndexKind.Exact, NoANNIndexSurrealDBBruteForceKNN, exactParameters, 0);
         }
 
         if (profile.IndexKind != VectorIndexKind.Hnsw)
@@ -173,7 +171,7 @@ public sealed class SurrealDbVectorTarget(HttpClient http, string image, string 
         using var response = await SurrealDbSqlTransport.QueryAsync(http,
             SurrealDbVectorProtocol.UpdateSql(table, update.Id, update.Embedding.Span, serialization.SurrealDbVectorComponentBuilderCapacity), Policy, cancellationToken: cancellationToken, timeProvider: timeProvider).ConfigureAwait(false);
         var updated = SurrealDbVectorProtocol.SingleResult(response.RootElement);
-        if (updated.ValueKind != JsonValueKind.Array || updated.GetArrayLength() != SingleResultCardinality)
+        if (updated.ValueKind != JsonValueKind.Array || updated.GetArrayLength() != 1)
         {
             throw new ComparisonFailureException(ComparisonMutationFailures.UpdateMissing);
         }

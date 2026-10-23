@@ -19,10 +19,8 @@ public sealed record ZoneTreePointCacheExecutionOptions
     /// <summary>The unchanged default simultaneous pin budget for one entry.</summary>
     public const int DefaultMaxPinsPerEntry = 1_024;
     internal const int DefaultVictimAttempts = 16;
-    private const int MinimumPositiveBudget = 1;
     private const int MaximumEntryCapacity = 4_096;
     private const int MaximumKeyCapacity = 16_384;
-    private const int MinimumValueCapacity = 0;
     private const int MaximumValueCapacity = 1_048_576;
     private const int MaximumPinCapacity = 4_096;
     private const long MaximumRetentionCapacity = 268_435_456;
@@ -48,13 +46,13 @@ public sealed record ZoneTreePointCacheExecutionOptions
 
     internal static bool AreValid(int maxEntries, long maxRetainedBytes, int maxKeyBytes,
         int maxValueBytes, int maxPinsPerEntry, int maximumVictimAttempts)
-        => maxEntries is >= MinimumPositiveBudget and <= MaximumEntryCapacity
-            && maxKeyBytes is >= MinimumPositiveBudget and <= MaximumKeyCapacity
-            && maxValueBytes is >= MinimumValueCapacity and <= MaximumValueCapacity
-            && maxPinsPerEntry is >= MinimumPositiveBudget and <= MaximumPinCapacity
+        => maxEntries is >= 1 and <= MaximumEntryCapacity
+            && maxKeyBytes is >= 1 and <= MaximumKeyCapacity
+            && maxValueBytes is >= 0 and <= MaximumValueCapacity
+            && maxPinsPerEntry is >= 1 and <= MaximumPinCapacity
             && maxRetainedBytes >= ZoneTreePointCacheLedger.IndexCharge(maxEntries) + ZoneTreePointCacheState.EntryMetadataBytes
             && maxRetainedBytes <= MaximumRetentionCapacity
-            && maximumVictimAttempts is >= MinimumPositiveBudget and <= MaximumEvictionWork;
+            && maximumVictimAttempts is >= 1 and <= MaximumEvictionWork;
 
     /// <summary>Rejects unsafe policy before allocating an index or reserving shared memory.</summary>
     public void Validate()

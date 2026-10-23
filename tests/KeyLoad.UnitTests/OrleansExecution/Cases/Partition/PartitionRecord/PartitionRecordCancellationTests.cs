@@ -5,7 +5,6 @@ namespace KeyLoad.UnitTests.Features.OrleansExecution;
 internal sealed class PartitionRecordCancellationTests
 {
     private const string Family = "document";
-    private const int BaselinePageRecords = 1;
     private const long MaximumPageBytes = 64L * 1024 * 1024;
 
     private static readonly PartitionRef Partition = new(PartitionRecordFixture.TenantId,
@@ -19,7 +18,7 @@ internal sealed class PartitionRecordCancellationTests
         var rows = PartitionRecordCancellationSeed.Create(Partition, Family);
         PartitionRecordFixture.Seed(fixture.Store, rows);
         var baselinePage = PartitionRecordFixture.Read(fixture.Store, Partition, Family,
-            BaselinePageRecords, MaximumPageBytes, MaximumPageBytes);
+            1, MaximumPageBytes, MaximumPageBytes);
         var baseline = fixture.Store.GetReadDiagnostics();
         var position = fixture.Store.Position;
         var outcome = PartitionRecordCancellationRunner.Run(fixture.Store, Partition, Family,
@@ -92,10 +91,10 @@ internal sealed class PartitionRecordCancellationTests
         var position = fixture.Store.Position;
         var charges = new List<long>();
         var page = fixture.Store.Read(view => KeyLoad.Core.Features.StoragePartitions.Queries.PartitionRecordPageReader.Read(
-            view, Partition, Family, BaselinePageRecords, MaximumPageBytes, MaximumPageBytes, charges.Add));
+            view, Partition, Family, 1, MaximumPageBytes, MaximumPageBytes, charges.Add));
         await Assert.That(charges.SequenceEqual(rows.Select(row => (long)row.Key.Length + row.Value.Length))).IsTrue();
         await Assert.That(page.ExaminedBytes).IsEqualTo(charges.Sum());
-        await Assert.That(page.Records.Length).IsEqualTo(BaselinePageRecords);
+        await Assert.That(page.Records.Length).IsEqualTo(1);
         await Assert.That(page.HasMore).IsTrue();
         await Assert.That(page.Continuation.HasValue).IsTrue();
         await Assert.That(page.Continuation!.Value.Span.SequenceEqual(rows[0].Key)).IsTrue();

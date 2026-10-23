@@ -5,7 +5,6 @@ namespace KeyLoad.Server.Features.Search;
 
 internal sealed class TextOnlineSessions(int maximumSessions)
 {
-    private const int EmptySessionCapacity = 0;
     private readonly Lock gate = new();
     private readonly Dictionary<Guid, TextOnlineSession> sessions = [];
     private readonly Dictionary<Guid, MaintenanceSessionWork> work = [];
@@ -16,7 +15,7 @@ internal sealed class TextOnlineSessions(int maximumSessions)
         lock (gate)
         {
             ObjectDisposedException.ThrowIf(closed, this);
-            if (maximumSessions <= EmptySessionCapacity || work.Count >= maximumSessions || !work.TryAdd(id, original))
+            if (maximumSessions <= 0 || work.Count >= maximumSessions || !work.TryAdd(id, original))
             {
                 throw TextErrors.Busy();
             }

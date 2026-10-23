@@ -9,8 +9,6 @@ internal sealed class QueryCandidateReader(DatabaseEngine database, IKeyValueVie
     ResourceDefinition resource, AstQueryRequest request, ReadExecutionBudget budget, Action<DocumentRecord> accept,
     PartitionQueryLeafReadGrant? leafGrant = null, long? visibilitySourceEpoch = null)
 {
-    private const int EmptyElementCount = 0;
-
     private const string PointPath = "point";
     private const string IndexPathPrefix = "index:";
     private const string FullScanPath = "bounded-full-scan";
@@ -50,7 +48,7 @@ internal sealed class QueryCandidateReader(DatabaseEngine database, IKeyValueVie
         {
             var prefixFields = index.Fields.TakeWhile(field => equality.ContainsKey(field)
                 && field is not SqlSyntax.MetadataIdPath and not SqlSyntax.MetadataRevisionPath).ToArray();
-            if (prefixFields.Length == EmptyElementCount
+            if (prefixFields.Length == 0
                 || prefixFields.Length < index.Fields.Length && (!index.IncludeNull || !index.IncludeMissing))
             {
                 continue;

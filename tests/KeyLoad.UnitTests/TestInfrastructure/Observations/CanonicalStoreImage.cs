@@ -8,7 +8,6 @@ internal static class CanonicalStoreImage
 {
     private const int PageRecords = 4_096;
     private const int MaximumPages = 16;
-    private const int EqualKeys = 0;
 
     internal static string[] Bytes(ZoneTreeStore store) => store.Read(Bytes);
 
@@ -21,7 +20,7 @@ internal static class CanonicalStoreImage
             var page = view.Scan([], PageRecords, after);
             foreach (var row in page.Records)
             {
-                if (after is not null && row.Key.Span.SequenceCompareTo(after) <= EqualKeys)
+                if (after is not null && row.Key.Span.SequenceCompareTo(after) <= 0)
                 {
                     throw new InvalidOperationException("The execution full-store continuation did not advance.");
                 }

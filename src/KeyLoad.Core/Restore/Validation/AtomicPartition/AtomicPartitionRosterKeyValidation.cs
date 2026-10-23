@@ -6,9 +6,6 @@ namespace KeyLoad.Core.Features.BackupRestore.Validation;
 
 internal static class AtomicPartitionRosterKeyValidation
 {
-    private const int NoComponents = 0;
-    private const int FamilyComponentIndex = 0;
-    private const int TenantComponentIndex = 1;
     private const int DatabaseComponentIndex = 2;
     private const int DomainComponentIndex = 3;
     private const int PartitionKeyComponentIndex = 4;
@@ -21,7 +18,7 @@ internal static class AtomicPartitionRosterKeyValidation
     {
         var components = KeyCodec.Decode(key);
         partition = null;
-        if (components.Length == NoComponents || components[FamilyComponentIndex] is not string family)
+        if (components.Length == 0 || components[0] is not string family)
         {
             return false;
         }
@@ -43,7 +40,7 @@ internal static class AtomicPartitionRosterKeyValidation
     private static PartitionRef ReadScopedPartition(object?[] components, ReadOnlySpan<byte> key)
     {
         if (components.Length < MinimumScopedComponentCount
-            || components[TenantComponentIndex] is not string tenant
+            || components[1] is not string tenant
             || components[DatabaseComponentIndex] is not string database
             || components[DomainComponentIndex] is not string domain
             || components[PartitionKeyComponentIndex] is not string partitionKey)

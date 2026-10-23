@@ -5,9 +5,6 @@ namespace KeyLoad.Core;
 
 internal static class DueWorkCursor
 {
-    private const int EmptyElementCount = 0;
-    private const int EqualOrder = 0;
-
     internal static DueSweepCursor Match(StoreIdentity identity, DueSweepCursor? supplied)
     {
         if (supplied is null || supplied.Incarnation != identity.Incarnation
@@ -52,10 +49,10 @@ internal static class DueWorkCursor
 
     private static bool Valid(DuePrefixCursor? cursor)
         => cursor is not null && (cursor.HasUpperBound
-            ? cursor.UpperKey is { IsDefault: false, Length: > EmptyElementCount and <= DueWorkProtocol.MaximumKeyBytes }
+            ? cursor.UpperKey is { IsDefault: false, Length: > 0 and <= DueWorkProtocol.MaximumKeyBytes }
             : cursor.UpperKey is null && cursor.LastKey is null)
             && (cursor.LastKey is null || cursor.LastKey is
-            { IsDefault: false, Length: > EmptyElementCount and <= DueWorkProtocol.MaximumKeyBytes })
+            { IsDefault: false, Length: > 0 and <= DueWorkProtocol.MaximumKeyBytes })
             && (cursor.LastKey is null || cursor.UpperKey is { } upper
-                && cursor.LastKey.Value.AsSpan().SequenceCompareTo(upper.AsSpan()) <= EqualOrder);
+                && cursor.LastKey.Value.AsSpan().SequenceCompareTo(upper.AsSpan()) <= 0);
 }

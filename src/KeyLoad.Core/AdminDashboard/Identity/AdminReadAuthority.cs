@@ -4,8 +4,6 @@ namespace KeyLoad.Core;
 
 internal static class AdminReadAuthority
 {
-    private const int InitialAdminReadPosition = 0;
-
     private const string AdministratorRequired = "Cluster administration is required.";
     private const string InvalidPageLimit = "The administration page limit must be between one and one hundred.";
 
@@ -33,5 +31,5 @@ internal static class AdminReadAuthority
     }
 
     internal static long Position(IKeyValueView view) => view.ReadOwnedValue(KeySpace.Applied.ToArray()) is { } value
-        ? OrleansSerialization.Deserialize<long>(value) : InitialAdminReadPosition;
+        ? OrleansSerialization.Deserialize<long>(value) : 0;
 }

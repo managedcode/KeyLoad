@@ -6,7 +6,6 @@ namespace KeyLoad.RecoveryTests.Features.EventStreams;
 
 internal static class SharedDomainStoredImage
 {
-    private const int TenantComponent = 1;
     private const int DatabaseComponent = 2;
     private const int DomainComponent = 3;
     private const int PartitionKeyComponent = 4;
@@ -33,7 +32,7 @@ internal static class SharedDomainStoredImage
     internal static bool Owns(ReadOnlySpan<byte> key, PartitionRef partition)
     {
         var values = KeyCodec.Decode(key);
-        return (values.Length >= ScopeComponentCount && Equals(values[TenantComponent], partition.TenantId)
+        return (values.Length >= ScopeComponentCount && Equals(values[1], partition.TenantId)
             && Equals(values[DatabaseComponent], partition.DatabaseId) && Equals(values[DomainComponent], partition.TransactionDomainId)
             && Equals(values[PartitionKeyComponent], partition.PartitionKey))
             || key.SequenceEqual(AtomicPartitionRosterKeys.Partition(partition));

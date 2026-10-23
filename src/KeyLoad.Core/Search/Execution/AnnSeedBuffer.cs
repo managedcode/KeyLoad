@@ -5,10 +5,8 @@ namespace KeyLoad.Core.Features.Search;
 
 internal sealed class AnnSeedBuffer
 {
-    private const int EmptyRecordCapacity = 0;
     private const int RecordArrayGrowthFactor = 2;
     private const int ReferenceSlotBytes = 8;
-    private const int FirstRecordIndex = 0;
 
     internal const string CorruptSource = "The canonical ANN seed source is inconsistent.";
     private readonly int maximumRecords;
@@ -122,7 +120,6 @@ internal sealed class AnnSeedBuffer
 
     private VectorRecord[] Trim()
     {
-
         if (records.Length == count)
         {
             return records;
@@ -132,7 +129,7 @@ internal sealed class AnnSeedBuffer
         var finalOwned = checked(owned - currentAllowance + finalAllowance);
         Admit(finalOwned, checked(owned + finalAllowance));
         var exact = new VectorRecord[count];
-        for (var index = FirstRecordIndex; index < count; index++)
+        for (var index = 0; index < count; index++)
         {
             work.Charge();
             exact[index] = records[index];
@@ -153,7 +150,6 @@ internal sealed class AnnSeedBuffer
 
     private void PreflightRow(long rowBytes, long idAllowance)
     {
-
         var nextOwned = owned;
         var growthPeak = owned;
         if (count == records.Length)
@@ -169,7 +165,7 @@ internal sealed class AnnSeedBuffer
     }
 
     private int NextCapacity()
-        => records.Length == EmptyRecordCapacity ? Math.Min(initialRecordCapacity, maximumRecords)
+        => records.Length == 0 ? Math.Min(initialRecordCapacity, maximumRecords)
             : Math.Min(maximumRecords, checked(records.Length * RecordArrayGrowthFactor));
 
     private void EnsureCapacity()
@@ -185,7 +181,7 @@ internal sealed class AnnSeedBuffer
         var nextPeak = checked(owned + nextAllowance);
         Admit(nextOwned, nextPeak);
         var expanded = new VectorRecord[next];
-        for (var index = FirstRecordIndex; index < count; index++)
+        for (var index = 0; index < count; index++)
         {
             work.Charge();
             expanded[index] = records[index];

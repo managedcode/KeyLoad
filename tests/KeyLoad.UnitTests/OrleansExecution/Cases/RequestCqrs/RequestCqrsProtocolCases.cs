@@ -14,7 +14,6 @@ internal static class RequestCqrsProtocolCases
     private const string ExtraExtension = "privateDiagnostic";
     private const string UnknownErrorName = "FuturePrivateError";
     private const string ProblemTypePrefix = "urn:keyload:error:";
-    private const int ExtraReplyByte = 1;
 
     internal static async Task AcCrs004ClosedProblemMapsEveryDefinedErrorCodeExactly()
     {
@@ -47,7 +46,7 @@ internal static class RequestCqrsProtocolCases
         await Assert.That(GrainByteCounter.Measure(serializer, payload, execution.Length, fixture.RoutingOptions, CancellationToken.None))
             .IsEqualTo((long)execution.Length);
         var oneUnder = Assert.ThrowsExactly<KeyLoadException>(() =>
-            GrainByteCounter.Measure(serializer, payload, execution.Length - ExtraReplyByte, fixture.RoutingOptions, CancellationToken.None));
+            GrainByteCounter.Measure(serializer, payload, execution.Length - 1, fixture.RoutingOptions, CancellationToken.None));
         await Assert.That(oneUnder.Code).IsEqualTo(ErrorCode.BudgetExceeded);
 
         using var cancelled = new CancellationTokenSource();
@@ -71,7 +70,7 @@ internal static class RequestCqrsProtocolCases
 
         using var bounded = new GrainCountingWriter(32, UnitRoutingOptions.Routing(), CancellationToken.None);
         var overScratch = Assert.ThrowsExactly<KeyLoadException>(() =>
-            bounded.GetSpan(UnitRoutingOptions.Routing().Value.MaximumScratchBytes + ExtraReplyByte));
+            bounded.GetSpan(UnitRoutingOptions.Routing().Value.MaximumScratchBytes + 1));
         await Assert.That(overScratch.Code).IsEqualTo(ErrorCode.BudgetExceeded);
     }
 
@@ -90,7 +89,7 @@ internal static class RequestCqrsProtocolCases
         await Assert.That(GrainByteCounter.Measure(serializer, chunk, execution.Length, fixture.RoutingOptions, CancellationToken.None))
             .IsEqualTo((long)execution.Length);
         var oneUnder = Assert.ThrowsExactly<KeyLoadException>(() =>
-            GrainByteCounter.Measure(serializer, chunk, execution.Length - ExtraReplyByte, fixture.RoutingOptions, CancellationToken.None));
+            GrainByteCounter.Measure(serializer, chunk, execution.Length - 1, fixture.RoutingOptions, CancellationToken.None));
         await Assert.That(oneUnder.Code).IsEqualTo(ErrorCode.BudgetExceeded);
     }
 
@@ -124,7 +123,7 @@ internal static class RequestCqrsProtocolCases
                 problem.Instance = "/private/partition/key";
                 break;
             case RequestCqrsProblemMutation.ExcessDetail:
-                problem.Detail = new string('x', UnitRoutingOptions.Routing().Value.MaximumDetailCharacters + ExtraReplyByte);
+                problem.Detail = new string('x', UnitRoutingOptions.Routing().Value.MaximumDetailCharacters + 1);
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(mutation));

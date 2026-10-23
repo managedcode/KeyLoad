@@ -13,4 +13,13 @@ internal static class MagicRuntimeMetadataNames
     internal const string Wait = "Wait";
     internal const string WaitAsync = "WaitAsync";
     internal const string CancelAfter = "CancelAfter";
+    internal const string DateTime = "System.DateTime";
+    internal const string DateTimeOffset = "System.DateTimeOffset";
+    internal const string Timer = "System.Threading.Timer";
+    internal const string PeriodicTimer = "System.Threading.PeriodicTimer";
+    internal const string TimeProvider = "System.TimeProvider";
+
+    /// <summary>Members of these types take durations, timeouts, counts of time units or calendar components.</summary>
+    internal static readonly string[] TemporalTypes =
+        [TimeSpan, Task, GenericTask, Semaphore, CancellationSource, DateTime, DateTimeOffset, Timer, PeriodicTimer, TimeProvider];
 }

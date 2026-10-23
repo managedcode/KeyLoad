@@ -2,7 +2,6 @@ namespace KeyLoad.UnitTests.Features.DatabaseComposition;
 
 internal static class TypedQueueGraphPrimaryIdentityFlow
 {
-    private const int NextOffsetSeconds = 1;
     private const string ForeignPrimaryJson = """{"id":"foreign","name":"literal"}""";
     private const string MissingPrimaryJson = """{"name":"literal"}""";
     private const string NonTextPrimaryJson = """{"id":7,"name":"literal"}""";
@@ -56,7 +55,7 @@ internal static class TypedQueueGraphPrimaryIdentityFlow
                 var reverse = await QueueGraphIdentityFlow.CompileAsync(engine, new(Guid.NewGuid(), source.Fixture.Partition,
                     [new GraphToQueueMutation(QueueGraphIdentityState.Queue, QueueGraphIdentityState.Graph,
                         source.From, QueueGraphReplayState.ReversePrefix)]),
-                    new DateTimeOffset(source.Healthy.Timestamp).AddSeconds(NextOffsetSeconds));
+                    new DateTimeOffset(source.Healthy.Timestamp).AddSeconds(1));
                 var nextPosition = checked(engine.LastApplied + 1);
                 var receipt = engine.Apply(reverse).Get<CommitReceipt>();
                 await QueueGraphReplayAssertions.ReverseReceiptAsync(source, store, reverse.CommandId, receipt, nextPosition);
@@ -67,7 +66,7 @@ internal static class TypedQueueGraphPrimaryIdentityFlow
                         QueueGraphReplayState.ContinuationJson),
                      new GraphToQueueMutation(QueueGraphIdentityState.Queue, QueueGraphIdentityState.Graph,
                         source.From, QueueGraphReplayState.NextPrefix)]),
-                    new DateTimeOffset(reverse.Timestamp).AddSeconds(NextOffsetSeconds));
+                    new DateTimeOffset(reverse.Timestamp).AddSeconds(1));
                 replay = new(source, reverse, OrleansSerialization.Serialize(receipt), next, continuation);
                 await QueueGraphReplayAssertions.ContinueAsync(replay, engine, store);
                 source.ColdImage = global::KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(store);

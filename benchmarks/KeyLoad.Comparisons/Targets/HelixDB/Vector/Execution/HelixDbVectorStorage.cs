@@ -8,13 +8,11 @@ namespace KeyLoad.Comparisons.Targets;
 /// <summary>Owns bounded ingestion and execution ordered vector/value readback.</summary>
 internal static class HelixDbVectorStorage
 {
-    private const int EmptyResultCount = 0;
-    private const int SingleResultCardinality = 1;
     internal static async Task<int> IngestAsync(HttpClient http, string label, IAsyncEnumerable<VectorDocument> documents, ComparisonExecutionOptions policy, TimeProvider timeProvider, CancellationToken token)
     {
         var entries = new JsonArray();
         var names = new JsonArray();
-        var count = EmptyResultCount;
+        var count = 0;
         await foreach (var document in documents.WithCancellation(token).ConfigureAwait(false))
         {
             var name = HelixDbTokens.TokenD + count.ToString(System.Globalization.CultureInfo.InvariantCulture);
@@ -29,7 +27,7 @@ internal static class HelixDbVectorStorage
             }
         }
 
-        if (entries.Count != EmptyResultCount)
+        if (entries.Count != 0)
         {
             using var response = await HelixDbProtocol.QueryAsync(http, HelixDbProtocol.Batch(entries, true, names), true, policy, token: token, timeProvider: timeProvider).ConfigureAwait(false);
         }
@@ -39,13 +37,13 @@ internal static class HelixDbVectorStorage
 
     internal static async IAsyncEnumerable<VectorReadback> ReadbackAsync(HttpClient http, string label, int count, ComparisonExecutionOptions policy, TimeProvider timeProvider, [EnumeratorCancellation] CancellationToken token)
     {
-        var after = -SingleResultCardinality;
-        var seen = EmptyResultCount;
+        var after = -1;
+        var seen = 0;
         while (true)
         {
             using var response = await HelixDbProtocol.QueryAsync(http, HelixDbProtocol.Batch(HelixDbVectorAst.Page(label, after, policy.ReadbackBatchCapacity), false), false, policy, token: token, timeProvider: timeProvider).ConfigureAwait(false);
             var rows = HelixDbProtocol.Rows(response);
-            if (rows.GetArrayLength() == EmptyResultCount)
+            if (rows.GetArrayLength() == 0)
             {
                 break;
             }
@@ -73,7 +71,7 @@ internal static class HelixDbVectorStorage
     internal static VectorReadback Read(JsonElement row)
     {
         var vector = row.GetProperty(HelixDbTokens.TokenEmbedding).EnumerateArray().Select(component => component.GetSingle()).ToArray();
-        if (vector.Length == EmptyResultCount || vector.Any(value => !float.IsFinite(value)))
+        if (vector.Length == 0 || vector.Any(value => !float.IsFinite(value)))
         {
             throw new ComparisonFailureException(HelixDbTokens.TokenHelixDbInvalidStoredVector);
         }

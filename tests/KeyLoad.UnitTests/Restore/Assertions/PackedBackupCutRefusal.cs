@@ -11,7 +11,6 @@ internal static class PackedBackupCutRefusal
     private const string Restore = "restore";
     private const string Staging = ".keyload-restore-*";
     private const int Status = 400;
-    private const int FailureExit = 1;
 
     internal static async Task RunAsync(string root, string unpacked, string target, string cliTarget,
         Guid incarnation, byte[] signingKey, CancellationToken token)
@@ -25,7 +24,7 @@ internal static class PackedBackupCutRefusal
         var result = await CliBackupRestoreProcess.RunAsync(CliBackupRestoreProcess.CaptureExecutionOptions(),
             [Restore, unpacked, cliTarget], token);
         await CliBackupRestoreAssertions.RejectedProcessAsync(result);
-        await Assert.That(result.ExitCode).IsEqualTo(FailureExit);
+        await Assert.That(result.ExitCode).IsEqualTo(1);
         await Assert.That(result.StandardOutput).IsEqualTo(string.Empty);
         var expected = Errors.Problem(ErrorCode.Corruption, Detail);
         await Assert.That(expected.Type).IsEqualTo(Type);

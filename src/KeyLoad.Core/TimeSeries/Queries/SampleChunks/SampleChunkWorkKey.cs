@@ -6,7 +6,6 @@ namespace KeyLoad.Core.Features.TimeSeries;
 internal static class SampleChunkWorkKey
 {
     private const int ComponentCount = 8;
-    private const int TenantIndex = 1;
     private const int DatabaseIndex = 2;
     private const int DomainIndex = 3;
     private const int PartitionIndex = 4;
@@ -20,7 +19,7 @@ internal static class SampleChunkWorkKey
         var parts = KeyCodec.Decode(key);
         if (parts.Length != ComponentCount || parts[SampleChunkLifecycleProtocol.FirstIndex] is not string family
             || family != PartitionRecordFamilies.SampleChunkWindow
-            || parts[TenantIndex] is not string tenant || parts[DatabaseIndex] is not string database
+            || parts[1] is not string tenant || parts[DatabaseIndex] is not string database
             || parts[DomainIndex] is not string domain || parts[PartitionIndex] is not string partition
             || parts[SetIndex] is not string set || parts[SeriesIndex] is not string series
             || parts[WindowIndex] is not string id || !Guid.TryParseExact(id, GuidFormat, out var windowId)

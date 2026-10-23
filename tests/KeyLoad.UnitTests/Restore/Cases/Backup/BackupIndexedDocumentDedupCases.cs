@@ -8,7 +8,6 @@ namespace KeyLoad.UnitTests.Features.BackupRestore;
 internal sealed class BackupIndexedDocumentDedupCases
 {
     private const string RootPrincipal = "root";
-    private const int AuthorityResetCommits = 1;
     private const string SystemNamespace = ZoneTreePersistenceFormat.SystemNamespace;
     private const string DispatchPausedKey = ZoneTreePersistenceFormat.DispatchPausedKey;
     private static readonly Guid SeedCommandId = Guid.Parse("fbeb87ad-22a1-4bce-86c0-74948a9a7da0");
@@ -38,7 +37,7 @@ internal sealed class BackupIndexedDocumentDedupCases
             sourceCut, manifest.Position);
         await BackupIndexedDocumentDedupAssertions.AssertOldOutcomePreserved(fixture.TargetStore,
             fixture.Partition, SeedCommandId, originalOutcome);
-        await AssertPreRestoreReplayFence(fixture, database, firstOperation, sourceCut + AuthorityResetCommits,
+        await AssertPreRestoreReplayFence(fixture, database, firstOperation, sourceCut + 1,
             originalOutcome);
         await BackupIndexedDocumentDedupAssertions.AssertPreRestoreContent(database, fixture.Source);
         await ReplayPostRestoreAndWriteHealthy(fixture, database);
@@ -114,7 +113,7 @@ internal sealed class BackupIndexedDocumentDedupCases
         await Assert.That(restored.Incarnation).IsNotEqualTo(source.Incarnation);
         await Assert.That(restored.DispatchPaused).IsTrue();
         await Assert.That(manifestPosition).IsEqualTo(sourceCut);
-        await Assert.That(fixture.TargetStore.Position).IsEqualTo(sourceCut + AuthorityResetCommits);
+        await Assert.That(fixture.TargetStore.Position).IsEqualTo(sourceCut + 1);
         foreach (var key in new[] { ZoneTreePersistenceFormat.LastAppliedKey, ZoneTreePersistenceFormat.ClockKey })
         {
             await Assert.That(ReadSystem(fixture.TargetStore, key)).IsNotNull();

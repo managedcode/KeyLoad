@@ -7,7 +7,6 @@ namespace KeyLoad.IntegrationTests.Features.ChangeFeeds;
 /// <summary>Joins every real caller while retaining initiating and disposal failures in original order.</summary>
 internal sealed class FeedLiveClusterConnections(ClusterFixture fixture)
 {
-    private const int NoCallers = 0;
     private readonly List<RequestCqrsClusterCallers> callers = [];
     internal ClusterFixture Fixture => fixture;
 
@@ -38,7 +37,7 @@ internal sealed class FeedLiveClusterConnections(ClusterFixture fixture)
         }
         finally
         {
-            for (var index = owner.callers.Count; index > NoCallers;)
+            for (var index = owner.callers.Count; index > 0;)
             {
                 var caller = owner.callers[--index];
                 await ServerFailureObserver.ObserveAsync(() => caller.DisposeAsync().AsTask(), failures);

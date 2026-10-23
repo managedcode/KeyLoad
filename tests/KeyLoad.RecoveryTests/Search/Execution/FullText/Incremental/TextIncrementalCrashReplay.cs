@@ -5,7 +5,6 @@ namespace KeyLoad.RecoveryTests.Features.Search;
 
 internal static class TextIncrementalCrashReplay
 {
-    private const int FirstPage = 0;
     internal static async Task<(TextMaintenanceCapabilityResult State, ProjectionBatchResult? Receipt)> FinishAsync(
         TextIncrementalCrashRuntime runtime, TextIndexMaintenanceRequest request, CancellationToken token)
     {
@@ -16,7 +15,7 @@ internal static class TextIncrementalCrashReplay
             await TextIncrementalCheckpointEvidence.RecordCommandAsync(runtime, request, original, token);
             (state, receipt) = await CompleteIntentAsync(runtime, request, original, token);
         }
-        for (var number = FirstPage; number < TextIncrementalCrashProtocol.MaximumPages; number++)
+        for (var number = 0; number < TextIncrementalCrashProtocol.MaximumPages; number++)
         {
             var page = runtime.Database.ReadProjectionBatch(CrashFixtureValues.Principal,
                 new(request.Consumer, ThroughSequence: state.ReplayUpperSequence));

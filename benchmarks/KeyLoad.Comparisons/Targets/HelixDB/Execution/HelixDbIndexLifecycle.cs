@@ -8,8 +8,6 @@ internal static class HelixDbIndexLifecycle
     private const string ProviderANNOpaqueTuning = "provider-execution ANN; opaque tuning";
     private const string CompletedOperation = "; completed operation=";
     private const string CompletedReceipt = "; completed receipt=";
-    private const int SingleResultCardinality = 1;
-    private const int EmptyResultCount = 0;
     internal static async Task<string> ExecuteAsync(HttpClient http, JsonObject definition, ComparisonExecutionOptions policy, TimeProvider timeProvider, CancellationToken token)
     {
         using var indexDeadline = new ComparisonCancellationSource(timeProvider, token);
@@ -71,5 +69,5 @@ internal static class HelixDbIndexLifecycle
         }
     }
 
-    private static JsonElement Single(JsonElement value) => value.ValueKind == JsonValueKind.Array && value.GetArrayLength() == SingleResultCardinality ? value[EmptyResultCount] : value;
+    private static JsonElement Single(JsonElement value) => value.ValueKind == JsonValueKind.Array && value.GetArrayLength() == 1 ? value[0] : value;
 }

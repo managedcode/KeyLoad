@@ -3,10 +3,8 @@ namespace KeyLoad.Server.Features.OrleansHosting;
 /// <summary>Publishes the same application silo after Active and joins borrowed work before execution teardown.</summary>
 internal sealed class OrleansNodeLifecycle(OrleansNode node, ServerConnectionRegistry connections) : ILifecycleParticipant<ISiloLifecycle>, IHostedService
 {
-    private const int PublicationStageOffset = 1;
-
     public void Participate(ISiloLifecycle lifecycle)
-        => lifecycle.Subscribe(nameof(OrleansNodeLifecycle), ServiceLifecycleStage.Active + PublicationStageOffset,
+        => lifecycle.Subscribe(nameof(OrleansNodeLifecycle), ServiceLifecycleStage.Active + 1,
             token =>
             {
                 node.PublishRuntime(token);

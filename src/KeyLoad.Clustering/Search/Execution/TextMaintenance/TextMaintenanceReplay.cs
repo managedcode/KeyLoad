@@ -4,15 +4,13 @@ namespace KeyLoad.Clustering;
 
 internal static class TextMaintenanceReplay
 {
-    private const int InitialPage = 0;
-
     internal static async Task<ProjectionBatchResult?> RunAsync(TextMaintenanceChildCalls children,
         TextIndexMaintenanceRequest request, TextMaintenanceCapabilityResult state,
         ProjectionBatchResult? checkpoint, int maximumPages,
         ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer)
     {
         var token = writer.CancellationToken;
-        for (var pageNumber = InitialPage; pageNumber < maximumPages; pageNumber++)
+        for (var pageNumber = 0; pageNumber < maximumPages; pageNumber++)
         {
             var page = await children.ReadAsync<ReadProjectionBatchRequest, ProjectionBatch>(GrainReadKind.ProjectionBatch,
                 new(request.Consumer, children.Limits.MaxResults,

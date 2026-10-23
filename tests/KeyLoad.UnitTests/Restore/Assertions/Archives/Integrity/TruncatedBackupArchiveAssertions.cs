@@ -10,7 +10,6 @@ internal static class TruncatedBackupArchiveAssertions
     private const string DetailProperty = "detail";
     private const string UnsupportedCode = "FormatUnsupported";
     private const string MissingManifest = "The backup manifest is unsupported.";
-    private const int FailedExitCode = 1;
     private const string MissingRefusal = "The original truncated archive unexpectedly published.";
 
     internal static async Task<Exception> RefusalAsync(CliBackupRestoreFixture fixture, string output,
@@ -53,7 +52,7 @@ internal static class TruncatedBackupArchiveAssertions
     internal static async Task RejectedRestoreAsync(CliBackupRestoreProcessResult result, string destination)
     {
         await CliBackupRestoreAssertions.RejectedProcessAsync(result);
-        await Assert.That(result.ExitCode).IsEqualTo(FailedExitCode);
+        await Assert.That(result.ExitCode).IsEqualTo(1);
         await Assert.That(result.StandardOutput).IsEmpty();
         await Assert.That(result.OriginalExitJoined).IsTrue();
         await Assert.That(result.StandardOutputJoined).IsTrue();

@@ -7,8 +7,6 @@ namespace KeyLoad.IntegrationTests.Features.RelationalStorage;
 internal static class RelationalSqlClusterJoinPageAssertions
 {
     private const int SourceCount = 2;
-    private const int LeftSourceIndex = 0;
-    private const int RightSourceIndex = 1;
     private const string LeftAlias = "l";
     private const string RightAlias = "r";
     private const string CustomerId = "customer_id";
@@ -35,8 +33,8 @@ internal static class RelationalSqlClusterJoinPageAssertions
         foreach (var row in page.Rows)
         {
             var sources = row.Sources!.Value;
-            await Assert.That(sources[LeftSourceIndex].Revision).IsEqualTo(expectedLeftRevision);
-            await Assert.That(sources[RightSourceIndex].Revision).IsEqualTo(expectedRightRevision);
+            await Assert.That(sources[0].Revision).IsEqualTo(expectedLeftRevision);
+            await Assert.That(sources[1].Revision).IsEqualTo(expectedRightRevision);
         }
     }
 
@@ -47,14 +45,14 @@ internal static class RelationalSqlClusterJoinPageAssertions
             await Assert.That(row.Sources.HasValue).IsTrue();
             var sources = row.Sources!.Value;
             await Assert.That(sources.Length).IsEqualTo(SourceCount);
-            await Assert.That(sources[LeftSourceIndex].Alias).IsEqualTo(LeftAlias);
-            await Assert.That(sources[LeftSourceIndex].EntityId).IsEqualTo(row.EntityId);
-            await Assert.That(sources[LeftSourceIndex].Revision).IsEqualTo(row.Revision);
-            await Assert.That(sources[RightSourceIndex].Alias).IsEqualTo(RightAlias);
+            await Assert.That(sources[0].Alias).IsEqualTo(LeftAlias);
+            await Assert.That(sources[0].EntityId).IsEqualTo(row.EntityId);
+            await Assert.That(sources[0].Revision).IsEqualTo(row.Revision);
+            await Assert.That(sources[1].Alias).IsEqualTo(RightAlias);
             using var json = JsonDocument.Parse(row.Json);
-            await Assert.That(sources[RightSourceIndex].EntityId)
+            await Assert.That(sources[1].EntityId)
                 .IsEqualTo(json.RootElement.GetProperty(CustomerId).GetString());
-            await Assert.That(sources[RightSourceIndex].Revision).IsGreaterThan(0);
+            await Assert.That(sources[1].Revision).IsGreaterThan(0);
         }
     }
 }

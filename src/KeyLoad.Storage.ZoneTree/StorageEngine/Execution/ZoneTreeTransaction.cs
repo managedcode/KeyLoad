@@ -5,9 +5,6 @@ namespace KeyLoad.Storage.ZoneTree;
 
 internal sealed class ZoneTreeTransaction(ZoneTreeStoreRuntime runtime, bool preparing = false) : IAtomicTransaction, IAtomicCommitCandidateValidation
 {
-    private const int NoValueBytes = 0;
-    private const int NoStagedBytes = 0;
-
     private StorageMutation[]? preparedChanges;
     private byte[]? preparedPayload;
     private long stagedBytes;
@@ -37,7 +34,7 @@ internal sealed class ZoneTreeTransaction(ZoneTreeStoreRuntime runtime, bool pre
             return preparing ? ZoneTreePreparationReads.ReadOwnedValue(runtime, key) : runtime.View.ReadOwnedValue(key);
         }
 
-        runtime.ReadCounters.Point(owned: true, (long)key.Length + (entry!.Value?.Length ?? NoValueBytes));
+        runtime.ReadCounters.Point(owned: true, (long)key.Length + (entry!.Value?.Length ?? 0));
         return entry.Value?.ToArray();
     }
 
@@ -51,7 +48,7 @@ internal sealed class ZoneTreeTransaction(ZoneTreeStoreRuntime runtime, bool pre
                 : runtime.View.ReadValue(key, reader, observer);
         }
 
-        var bytes = (long)key.Length + (staged!.Value?.Length ?? NoValueBytes);
+        var bytes = (long)key.Length + (staged!.Value?.Length ?? 0);
         runtime.ReadCounters.Point(owned: false, bytes);
         observer?.Invoke(bytes);
         if (staged.Value is null)
@@ -64,12 +61,12 @@ internal sealed class ZoneTreeTransaction(ZoneTreeStoreRuntime runtime, bool pre
     }
 
     private static long MutationBytes(byte[] key, byte[]? value)
-        => key.LongLength + (value?.LongLength ?? NoStagedBytes);
+        => key.LongLength + (value?.LongLength ?? 0);
 
     private void Stage(byte[] key, byte[]? value)
     {
         var replacing = Changes.TryGetValue(new(key, null), out var previous);
-        var bytes = stagedBytes - (replacing ? MutationBytes(key, previous!.Value) : NoStagedBytes)
+        var bytes = stagedBytes - (replacing ? MutationBytes(key, previous!.Value) : 0)
             + MutationBytes(key, value);
         if (bytes > runtime.Options.MaxFrameBytes)
         {
@@ -94,7 +91,7 @@ internal sealed class ZoneTreeTransaction(ZoneTreeStoreRuntime runtime, bool pre
     {
         preparedPayload = null;
         preparedChanges = null;
-        stagedBytes = NoStagedBytes;
+        stagedBytes = 0;
         Changes.Clear();
     }
 
@@ -112,7 +109,7 @@ internal sealed class ZoneTreeTransaction(ZoneTreeStoreRuntime runtime, bool pre
                 throw Errors.Fail(ErrorCode.Corruption, ZoneTreeJournalCodec.JournalRecordsInvalid);
             }
             if (mutation.Key.Length > runtime.Options.MaxFrameBytes
-                || (long)mutation.Key.Length + (mutation.Value?.Length ?? NoValueBytes) > runtime.Options.MaxFrameBytes)
+                || (long)mutation.Key.Length + (mutation.Value?.Length ?? 0) > runtime.Options.MaxFrameBytes)
             {
                 throw Errors.Fail(ErrorCode.ResourceExhausted, TransactionFrameLimitExceeded);
             }
@@ -120,11 +117,11 @@ internal sealed class ZoneTreeTransaction(ZoneTreeStoreRuntime runtime, bool pre
             candidate.Remove(row);
             candidate.Add(row);
         }
-        if (candidate.Count == NoStagedBytes)
+        if (candidate.Count == 0)
         {
             return;
         }
-        long rawBytes = NoStagedBytes;
+        long rawBytes = 0;
         foreach (var row in candidate)
         {
             rawBytes = checked(rawBytes + MutationBytes(row.Key, row.Value));

@@ -10,7 +10,6 @@ internal static class AdminDispatchQueueVerifier
     private const string Message = "dispatch-message";
     private const string Payload = "{\"value\":\"dispatch-ready\"}";
     private const string Headers = "{}";
-    private const int PageMessages = 1;
 
     internal static async Task<QueueLaneRef> SeedAsync(KeyLoadClient sdk, PartitionRef partition,
         CancellationToken cancellationToken)
@@ -27,7 +26,7 @@ internal static class AdminDispatchQueueVerifier
         CancellationToken cancellationToken)
     {
         var before = await McpCallerAssertions.SdkSuccessAsync(await sdk.BrowseQueueAsync(new(lane), cancellationToken));
-        var request = new ReceiveRequest(Guid.NewGuid(), lane, PageMessages);
+        var request = new ReceiveRequest(Guid.NewGuid(), lane, 1);
         var denied = await sdk.ReceiveAsync(request, cancellationToken);
         await Assert.That(denied.IsFailed).IsTrue();
         await Assert.That(denied.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.DispatchPaused));
@@ -41,7 +40,7 @@ internal static class AdminDispatchQueueVerifier
     internal static async Task DeliverAndAcknowledgeAsync(KeyLoadClient sdk, McpOfficialClient mcp, QueueLaneRef lane,
         CancellationToken cancellationToken)
     {
-        var request = new ReceiveRequest(Guid.NewGuid(), lane, PageMessages);
+        var request = new ReceiveRequest(Guid.NewGuid(), lane, 1);
         var received = await McpCallerAssertions.SdkSuccessAsync(await sdk.ReceiveAsync(request, cancellationToken));
         var replay = await McpCallerAssertions.SuccessAsync<ReceiveResult>(await mcp.CallAsync(
             McpCallerTools.MessagesReceive, request, cancellationToken));
@@ -59,7 +58,7 @@ internal static class AdminDispatchQueueVerifier
         var message = await PublicReadAssertions.MessageAsync(await sdk.InspectAsync(new(lane, Message), cancellationToken));
         await Assert.That(message!.Metadata.State).IsEqualTo(MessageState.Acked);
         var empty = await McpCallerAssertions.SdkSuccessAsync(await sdk.ReceiveAsync(
-            new(Guid.NewGuid(), lane, PageMessages), cancellationToken));
+            new(Guid.NewGuid(), lane, 1), cancellationToken));
         await Assert.That(empty.Deliveries).IsEmpty();
     }
 }

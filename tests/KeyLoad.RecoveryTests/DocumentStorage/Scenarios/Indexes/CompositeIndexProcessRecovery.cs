@@ -7,7 +7,6 @@ namespace KeyLoad.RecoveryTests.Features.DocumentStorage;
 
 internal static class CompositeIndexProcessRecovery
 {
-    private const int CutMutationIndex = 0;
     private const string DotnetHost = "dotnet";
     private const string UnsuccessfulExitMessage = "The composite-index recovery RecoveryProcess exited unsuccessfully.";
 
@@ -87,7 +86,7 @@ internal static class CompositeIndexProcessRecovery
         foreach (var argument in new[]
         {
             typeof(CrashScenarioDispatcher).Assembly.Location, CrashFixtureValues.ProcessMode, root, CommitStage.JournalFlushed.ToString(),
-            CutMutationIndex.ToString(CultureInfo.InvariantCulture), mode
+            0.ToString(CultureInfo.InvariantCulture), mode
         })
         {
             start.ArgumentList.Add(argument);

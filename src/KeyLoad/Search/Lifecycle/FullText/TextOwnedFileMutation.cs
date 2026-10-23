@@ -2,8 +2,6 @@ namespace KeyLoad.Server.Features.Search;
 
 internal static class TextOwnedFileMutation
 {
-    private const int NoPhysicalFailures = 0;
-
     internal static void DeleteOwnedFile(Lock gate, TextOpenFileGroups openFiles, Action check, string path, Action mutation)
     {
         lock (gate)
@@ -15,7 +13,7 @@ internal static class TextOwnedFileMutation
                 mutation();
                 openFiles.Detach(path);
             }, failures);
-            if (failures.Count != NoPhysicalFailures)
+            if (failures.Count != 0)
             {
                 ServerFailureObserver.Observe(() => openFiles.MarkAmbiguous(path), failures);
             }
@@ -35,7 +33,7 @@ internal static class TextOwnedFileMutation
                 mutation();
                 openFiles.Replace(source, destination, backup);
             }, failures);
-            if (failures.Count != NoPhysicalFailures)
+            if (failures.Count != 0)
             {
                 ServerFailureObserver.Observe(() => openFiles.MarkAmbiguous(source, destination, backup), failures);
             }

@@ -5,13 +5,10 @@ namespace KeyLoad.Core.Features.TimeSeries;
 
 internal static class SampleAggregateWindowReader
 {
-    private const int ExclusiveUpperTickOffset = 1;
-    private const int MinimumRequestedWindows = 1;
-
     private const string InvalidWidth = "The time-series window width must be positive.";
     private const string InvalidWindowBudget = "The time-series window budget is invalid.";
     private const string WindowBudgetExceeded = "The time-series window budget is exceeded.";
-    private static readonly long AfterMaximumUtcTicks = DateTimeOffset.MaxValue.UtcTicks + ExclusiveUpperTickOffset;
+    private static readonly long AfterMaximumUtcTicks = DateTimeOffset.MaxValue.UtcTicks + 1;
 
     internal static SampleAggregateWindowsResult Read(DatabaseEngine database, IKeyValueView view,
         string principalId, AggregateSampleWindowsRequest request, ReadExecutionBudget budget)
@@ -68,7 +65,7 @@ internal static class SampleAggregateWindowReader
 
     private static void ValidateWindowLimit(int maxWindows, int serverMaximum)
     {
-        if (maxWindows < MinimumRequestedWindows || maxWindows > serverMaximum)
+        if (maxWindows < 1 || maxWindows > serverMaximum)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, InvalidWindowBudget);
         }

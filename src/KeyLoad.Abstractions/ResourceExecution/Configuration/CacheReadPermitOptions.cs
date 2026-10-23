@@ -10,8 +10,7 @@ public sealed record CacheReadPermitOptions
     public const string ValidationMessage = "Cache prepare and lease validity must be positive, ordered and at most one minute.";
     private const int DefaultPrepareValiditySeconds = 10;
     private const int DefaultLeaseValiditySeconds = 15;
-    private const int MaximumLeaseValidityMinutes = 1;
-    private static readonly TimeSpan MaximumLeaseValidity = TimeSpan.FromMinutes(MaximumLeaseValidityMinutes);
+    private static readonly TimeSpan MaximumLeaseValidity = TimeSpan.FromMinutes(1);
 
     /// <summary>Gets the maximum prepare age at acceptance; the exact boundary is rejected.</summary>
     public TimeSpan PrepareValidity { get; init; } = TimeSpan.FromSeconds(DefaultPrepareValiditySeconds);

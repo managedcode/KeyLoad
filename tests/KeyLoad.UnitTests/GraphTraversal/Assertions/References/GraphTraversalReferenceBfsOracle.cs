@@ -5,11 +5,6 @@ namespace KeyLoad.UnitTests.Features.GraphTraversal;
 /// <summary>Computes a test-owned BFS without using production graph readers or key encodings.</summary>
 internal static class GraphTraversalReferenceBfsOracle
 {
-    private const int RootDepth = 0;
-    private const int OneHop = 1;
-    private const int NoLabels = 0;
-    private const int NoEdgesExamined = 0;
-
     internal static GraphTraversalReferenceResult Read(
         IReadOnlyCollection<GraphTraversalReferenceEdge> graph,
         IReadOnlySet<GraphTraversalReferenceVertex> visibleVertices,
@@ -20,13 +15,13 @@ internal static class GraphTraversalReferenceBfsOracle
         string[]? labels = null)
     {
         var adjacency = Adjacency(graph);
-        var allowedLabels = labels is { Length: > NoLabels }
+        var allowedLabels = labels is { Length: > 0 }
             ? new HashSet<string>(labels, StringComparer.Ordinal)
             : null;
-        var depths = new Dictionary<GraphTraversalReferenceVertex, int> { [start] = RootDepth };
+        var depths = new Dictionary<GraphTraversalReferenceVertex, int> { [start] = 0 };
         var pending = new Queue<GraphTraversalReferenceVertex>();
         var traversedEdges = new Dictionary<string, GraphTraversalReferenceEdge>(StringComparer.Ordinal);
-        var examinedEdges = NoEdgesExamined;
+        var examinedEdges = 0;
         pending.Enqueue(start);
 
         while (pending.TryDequeue(out var current))
@@ -69,7 +64,7 @@ internal static class GraphTraversalReferenceBfsOracle
     private static void RememberVertex(Dictionary<GraphTraversalReferenceVertex, int> depths,
         Queue<GraphTraversalReferenceVertex> pending, GraphTraversalReferenceVertex vertex, int previousDepth)
     {
-        depths.Add(vertex, checked(previousDepth + OneHop));
+        depths.Add(vertex, checked(previousDepth + 1));
         pending.Enqueue(vertex);
     }
 

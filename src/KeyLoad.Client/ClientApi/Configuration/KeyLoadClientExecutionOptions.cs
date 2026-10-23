@@ -14,7 +14,6 @@ public sealed class KeyLoadClientExecutionOptions
     private const int MaximumResponseBodyByteCeiling = 16_777_216;
     /// <summary>The rejection for an invalid successful-response budget.</summary>
     public const string ResponseValidationMessage = "The SDK response body budget must be positive and at most 16 MiB.";
-    private const int MinimumProblemBodyBytes = 1;
     private const int DefaultSqlInspectionBytes = 65_536;
 
     /// <summary>The maximum UTF-8 bytes retained when decoding one HTTP problem.</summary>
@@ -26,9 +25,9 @@ public sealed class KeyLoadClientExecutionOptions
 
     /// <summary>Checks the positive budget against its existing protocol ceiling.</summary>
     /// <returns>Whether the SDK can consume this budget.</returns>
-    public bool IsValid() => MaximumProblemBodyBytes is >= MinimumProblemBodyBytes and <= DefaultProblemBodyBytes
-        && MaximumResponseBodyBytes is >= MinimumProblemBodyBytes and <= MaximumResponseBodyByteCeiling
-        && MaximumSqlInspectionBytes is >= MinimumProblemBodyBytes and <= DefaultSqlInspectionBytes;
+    public bool IsValid() => MaximumProblemBodyBytes is >= 1 and <= DefaultProblemBodyBytes
+        && MaximumResponseBodyBytes is >= 1 and <= MaximumResponseBodyByteCeiling
+        && MaximumSqlInspectionBytes is >= 1 and <= DefaultSqlInspectionBytes;
 
     /// <summary>Captures and validates the caller's execution values for one client lifetime.</summary>
     [ConfigurationBinding]
@@ -51,7 +50,7 @@ public sealed class KeyLoadClientExecutionOptions
     {
         if (!IsValid())
         {
-            var detail = MaximumResponseBodyBytes is < MinimumProblemBodyBytes or > MaximumResponseBodyByteCeiling
+            var detail = MaximumResponseBodyBytes is < 1 or > MaximumResponseBodyByteCeiling
                 ? ResponseValidationMessage : ValidationMessage;
             throw new OptionsValidationException(SectionName, typeof(KeyLoadClientExecutionOptions), [detail]);
         }

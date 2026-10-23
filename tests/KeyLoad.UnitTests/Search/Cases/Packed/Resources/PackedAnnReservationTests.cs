@@ -9,7 +9,6 @@ internal sealed class PackedAnnReservationTests
     private const int SparseDimension = 1_024;
     private const int ConstructionConnections = 4;
     private const int ConstructionEf = 4;
-    private const int ConstructionLevel = 1;
 
     [Test]
     public async Task AcAnn001BuildScratchReportedReservationIsInclusiveAndOneByteBelowFails()
@@ -126,7 +125,7 @@ internal sealed class PackedAnnReservationTests
             Connections = ConstructionConnections,
             EfConstruction = ConstructionEf,
             EfSearch = 1,
-            MaxLevel = ConstructionLevel,
+            MaxLevel = 1,
             ExactThreshold = 128,
             Seed = PackedAnnTestData.CorpusSeed
         };

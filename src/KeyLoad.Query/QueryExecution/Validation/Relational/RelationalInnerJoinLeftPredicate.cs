@@ -7,14 +7,12 @@ namespace KeyLoad.Query;
 /// <summary>Validates and evaluates left-side predicates within the original authorized join view.</summary>
 internal static class RelationalInnerJoinLeftPredicate
 {
-    private const int SingleFieldSegment = 1;
-    private const int FirstSegment = 0;
     private const string UnsupportedShapeDetail = "The query AST version is unsupported.";
     private const string UnsupportedDetail = "The relational join predicate must use declared top-level left fields.";
 
     private static bool IsSupported(Predicate predicate)
         => PredicateEvaluator.Fields(predicate).All(field =>
-            JsonData.PathSegments(field).Length == SingleFieldSegment
+            JsonData.PathSegments(field).Length == 1
             && field is not SqlSyntax.MetadataIdPath and not SqlSyntax.MetadataRevisionPath);
 
     internal static void ValidateParameters(Predicate? predicate, Dictionary<string, JsonElement>? parameters)
@@ -33,7 +31,7 @@ internal static class RelationalInnerJoinLeftPredicate
         foreach (var field in PredicateEvaluator.Fields(request.Query.Filter))
         {
             var segments = JsonData.PathSegments(field);
-            if (segments.Length != SingleFieldSegment || !leftColumns.ContainsKey(segments[FirstSegment]))
+            if (segments.Length != 1 || !leftColumns.ContainsKey(segments[0]))
             {
                 throw Errors.Fail(ErrorCode.UnsupportedCapability, UnsupportedDetail);
             }
