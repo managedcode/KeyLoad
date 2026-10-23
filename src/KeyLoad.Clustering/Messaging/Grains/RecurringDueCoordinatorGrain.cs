@@ -153,10 +153,10 @@ internal sealed class RecurringDueCoordinatorGrain(GrainRequestCodec codec, Back
     {
         var connectionId = ConnectionExecutionIdentity.Resolve(services);
         using var identity = new GrainRequestIdentityScope(services, principal, requestId, commandId, cancellationToken, connectionId: connectionId);
-        var signed = codec.CreateCommand(requestId, principal.Id, OperationKind.Batch, commandId, payload);
+        var envelope = codec.CreateCommand(requestId, principal.Id, OperationKind.Batch, commandId, payload);
         var request = GrainFactory.GetGrain<IConnectionGrain>(connectionId);
         return await GrainRequestStreamConsumer.DrainAsync(
-            createStream: token => request.ExecuteStreamAsync(signed, token), serializer: chunkSerializer, requestId: requestId, clock: clock,
+            createStream: token => request.ExecuteStreamAsync(envelope, token), serializer: chunkSerializer, requestId: requestId, clock: clock,
             cancellationToken: cancellationToken, options: routingOptions).ConfigureAwait(true);
     }
 

@@ -7,7 +7,7 @@ using ModelContextProtocol.Server;
 
 namespace KeyLoad.Server;
 
-/// <summary>Adapts admitted gateway operations to the existing signed Orleans execution path.</summary>
+/// <summary>Adapts admitted gateway operations to the existing Orleans execution path.</summary>
 internal sealed class McpToolDispatcher(HttpContext context, McpRequestState state)
 {
     private const string FailureLog = "MCP database operation failed with {ExceptionType}.";

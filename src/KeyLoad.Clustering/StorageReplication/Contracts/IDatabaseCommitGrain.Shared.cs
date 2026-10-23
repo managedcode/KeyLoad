@@ -3,7 +3,7 @@ namespace KeyLoad.Clustering;
 public partial interface IDatabaseCommitGrain
 {
     /// <summary>Awaits the original local request at the one open shared-file owner.</summary>
-    Task<GrainOperationReply> ExecuteSharedAsync(string signedRequest, string? actorKey, CancellationToken cancellationToken);
+    Task<GrainOperationReply> ExecuteSharedAsync(GrainRequestEnvelope envelope, string? actorKey, CancellationToken cancellationToken);
 
     /// <summary>Cancels and joins the original shared-file maintenance session.</summary>
     Task AbortSharedMaintenanceAsync(GrainReadKind kind, Guid sessionId);

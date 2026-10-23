@@ -6,7 +6,7 @@ REQ-TEXT-MAINTENANCE-SQL-001 / AC-TEXT-MAINTENANCE-SQL-001: the original first B
 
 REQ-TEXT-MAINTENANCE-SQL-002 / AC-TEXT-MAINTENANCE-SQL-002: any fixture correction must be supported by authentic current producer/compiler API evidence. Keep all independent successful receipt/state/privacy/no-effect/refusal/replay assertions. If owning syntax/parameter/detail proof remains incomplete, retain the actual SDK Validation and official MCP Validation400 failures as unresolved; do not invent success or change product diagnostics from the failure alone.
 
-If a diagnostic witness is necessary, preserve the original exception as primary and avoid caller credentials, document content, signed request and arbitrary raw SQL/error text. No new timeout, sleep, skip, count/cap change, provider substitute, dependency or public operation.
+If a diagnostic witness is necessary, preserve the original exception as primary and avoid caller credentials, document content, request envelopes and arbitrary raw SQL/error text. No new timeout, sleep, skip, count/cap change, provider substitute, dependency or public operation.
 
 ```mermaid
 flowchart TD

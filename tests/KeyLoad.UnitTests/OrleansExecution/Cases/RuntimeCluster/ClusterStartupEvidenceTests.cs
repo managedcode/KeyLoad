@@ -11,7 +11,7 @@ internal sealed class ClusterStartupEvidenceTests
     private const int ExpectedServerFiles = 2;
 
     [Test]
-    public async Task OriginalCancelledStartupJoinsEvidenceThenFreshSignedWriteReplayAndCloseAreHealthy()
+    public async Task OriginalCancelledStartupJoinsEvidenceThenFreshWriteReplayAndCloseAreHealthy()
     {
         await using var failed = new RequestCqrsHostedRuntimeFixture();
         using var cancelled = new CancellationTokenSource();
@@ -56,7 +56,7 @@ internal sealed class ClusterStartupEvidenceTests
                 await Assert.That(initiating).IsNotNull();
                 await Assert.That(scenario.Stored(Document)).IsNull();
                 System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(
-                    initiating ?? throw new InvalidOperationException("The signed operation did not cancel.")).Throw();
+                    initiating ?? throw new InvalidOperationException("The operation did not cancel.")).Throw();
             });
         }
         catch (OperationCanceledException failure) { observed = failure; }

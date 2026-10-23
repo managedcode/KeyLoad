@@ -34,14 +34,14 @@ internal sealed class AnnProjectionJobDispatch(GrainRequestCodec codec, IService
             }
             execution.OriginalProducer.AdmitPublication();
             payload = OrleansSerialization.Serialize(original);
-            var signed = codec.Issue(GrainRequestEnvelopeConstruction.Command(requestId, codec.Incarnation,
+            var envelope = codec.Issue(GrainRequestEnvelopeConstruction.Command(requestId, codec.Incarnation,
                 principal.Id, OperationKind.MaintainAnnIndex, original.CommandId, payload,
                 expiry < context.Now + context.Lifetime ? expiry : context.Now + context.Lifetime));
             using var identity = new GrainRequestIdentityScope(services, principal, requestId,
                 original.CommandId, token, connectionId: connectionId);
             try
             {
-                result = await ReadAsync(grains, signed, requestId, original, connectionId, token).ConfigureAwait(true);
+                result = await ReadAsync(grains, envelope, requestId, original, connectionId, token).ConfigureAwait(true);
             }
             catch (Exception failure) when (CqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
             catch (Exception failure) when (!CqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
@@ -67,13 +67,13 @@ internal sealed class AnnProjectionJobDispatch(GrainRequestCodec codec, IService
         catch (Exception failure) when (!CqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
     }
 
-    private async Task<AnnMaintenanceResult> ReadAsync(global::Orleans.IGrainFactory grains, string signed,
+    private async Task<AnnMaintenanceResult> ReadAsync(global::Orleans.IGrainFactory grains, GrainRequestEnvelope envelope,
         Guid requestId, AnnMaintenanceRequest original, Guid connectionId, CancellationToken token)
     {
         var actor = grains.GetGrain<IConnectionGrain>(connectionId);
-        var purpose = new CqrsStreamPurpose(() => codec.Verify(signed));
+        var purpose = new CqrsStreamPurpose(() => codec.Decode(envelope));
         var reply = await GrainRequestStreamConsumer.DrainWithPurposeAsync(
-            streamToken => actor.ExecuteStreamAsync(signed, streamToken), serializer, requestId,
+            streamToken => actor.ExecuteStreamAsync(envelope, streamToken), serializer, requestId,
             clock, routing, purpose, token).ConfigureAwait(true);
         return Read(reply, original);
     }

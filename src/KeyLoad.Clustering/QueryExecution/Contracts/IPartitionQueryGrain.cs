@@ -7,6 +7,6 @@ internal interface IPartitionQueryGrain : IGrainWithStringKey
     Task<(SiloAddress Address, PhysicalShardRecord Owner)> ResolveOwnerAsync(Guid incarnation,
         CancellationToken cancellationToken);
 
-    Task<GrainOperationReply> ExecuteAsync(SiloAddress owner, string signedRequest,
+    Task<GrainOperationReply> ExecuteAsync(SiloAddress owner, GrainRequestEnvelope envelope,
         CancellationToken cancellationToken);
 }

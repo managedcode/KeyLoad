@@ -33,10 +33,10 @@ internal sealed class PartitionQueryLeafDispatch(DatabaseEngine database, string
             source.Definition, source.Coverage, source.Principal);
         parent.ChargeBytes(OrleansSerialization.Measure(metadata));
         var childId = Guid.NewGuid();
-        var signed = codec.CreatePartitionQueryLeaf(childId, principalId,
+        var child = codec.CreatePartitionQueryLeaf(childId, principalId,
             OrleansSerialization.Serialize(metadata), parent.ExpiresAt);
-        parent.ChargeBytes(checked((long)sizeof(char) * signed.Length));
-        return new(childToken => RunAsync(target, selected.Address, selected.Owner, signed, childId, childToken),
+        parent.ChargeBytes(OrleansSerialization.Measure(child));
+        return new(childToken => RunAsync(target, selected.Address, selected.Owner, child, childId, childToken),
             (result, childToken) => Complete(parent, grant, result, childToken));
     }
 
@@ -50,11 +50,11 @@ internal sealed class PartitionQueryLeafDispatch(DatabaseEngine database, string
     }
 
     private async Task<PartitionQueryOwnedLeaf> RunAsync(IPartitionQueryGrain target, SiloAddress address,
-        PhysicalShardRecord owner, string signed, Guid childId, CancellationToken token)
+        PhysicalShardRecord owner, GrainRequestEnvelope child, Guid childId, CancellationToken token)
     {
         using var identity = GrainRequestIdentityScope.ForChild(services, original.Envelope,
             childId, Guid.Empty, token);
-        var reply = await target.ExecuteAsync(address, signed, token).ConfigureAwait(true);
+        var reply = await target.ExecuteAsync(address, child, token).ConfigureAwait(true);
         token.ThrowIfCancellationRequested();
         if (reply.Error is { } error)
         {

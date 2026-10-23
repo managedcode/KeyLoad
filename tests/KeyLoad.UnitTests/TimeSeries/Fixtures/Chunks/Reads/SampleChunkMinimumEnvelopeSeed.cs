@@ -2,15 +2,14 @@ using KeyLoad.UnitTests.Features.OrleansExecution;
 
 namespace KeyLoad.UnitTests.Features.TimeSeries;
 
-internal static class SampleChunkSignedMinimumSeed
+internal static class SampleChunkMinimumEnvelopeSeed
 {
-    private const string ReaderId = "execution-signed-chunk-minimum-reader";
+    private const string ReaderId = "execution-chunk-minimum-reader";
     private const long NextPosition = 1;
-    private const int AppendIndex = 1;
     private const string AppendKind = "appendSamples";
     private const int PersistedCopies = 2;
 
-    internal static async Task<SampleChunkSignedMinimumState> RunAsync(ConnectionServerDatabase owner)
+    internal static async Task<SampleChunkMinimumEnvelopeState> RunAsync(ConnectionServerDatabase owner)
     {
         owner.Configure(SampleAggregateTestData.Set, ResourceKind.TimeSeries);
         var window = Guid.NewGuid();
@@ -46,11 +45,11 @@ internal static class SampleChunkSignedMinimumSeed
         return new(request, reader, commands.ToArray());
     }
 
-    internal static async Task ReplayAsync(ConnectionServerDatabase owner, SampleChunkSignedMinimumState state)
+    internal static async Task ReplayAsync(ConnectionServerDatabase owner, SampleChunkMinimumEnvelopeState state)
     {
         foreach (var original in state.Commands)
         {
-            await SampleChunkSignedMinimumAssertions.ObserveAsync(owner.Store, async () =>
+            await SampleChunkMinimumEnvelopeAssertions.ObserveAsync(owner.Store, async () =>
             {
                 var replay = owner.Submit(OperationKind.Batch, original.Request,
                     id: original.Request.CommandId).Get<CommitReceipt>();
@@ -58,7 +57,4 @@ internal static class SampleChunkSignedMinimumSeed
             });
         }
     }
-
-    internal static CommitToken Earlier(SampleChunkSignedMinimumState state)
-        => state.Commands[AppendIndex].Receipt.Token;
 }

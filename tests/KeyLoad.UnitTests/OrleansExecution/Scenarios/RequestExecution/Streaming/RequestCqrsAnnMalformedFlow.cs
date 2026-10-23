@@ -11,7 +11,7 @@ internal static class RequestCqrsAnnMalformedFlow
         GrainOperationReply original, RequestCqrsAnnFault fault, CancellationToken token)
     {
         var id = Guid.NewGuid();
-        var signed = fixture.Codec.CreateCommand(id, RequestCqrsAnnTestData.Principal,
+        var envelope = fixture.Codec.CreateCommand(id, RequestCqrsAnnTestData.Principal,
             OperationKind.MaintainAnnIndex, request.CommandId, OrleansSerialization.Serialize(request));
         var producer = new RequestCqrsProducerObservation();
         var serializer = fixture.Services
@@ -20,13 +20,13 @@ internal static class RequestCqrsAnnMalformedFlow
             execution => RequestCqrsAnnProducer.Run(id, original, fault, producer,
                 fixture.RoutingOptions.Value.MaximumTotalFrames, execution), serializer, id, fixture.Clock,
             producer.MarkActivationSettled, fixture.RoutingOptions, null,
-            new CqrsStreamPurpose(() => fixture.Codec.VerifyRequest(signed, id)), token);
+            new CqrsStreamPurpose(() => fixture.Codec.DecodeRequest(envelope, id)), token);
         KeyLoadException? failure = null;
         try
         {
             _ = await GrainRequestStreamConsumer.DrainWithPurposeAsync(_ => stream, serializer, id,
                 fixture.Clock, fixture.RoutingOptions,
-                new CqrsStreamPurpose(() => fixture.Codec.VerifyRequest(signed, id)), token);
+                new CqrsStreamPurpose(() => fixture.Codec.DecodeRequest(envelope, id)), token);
         }
         catch (KeyLoadException error) { failure = error; }
         await producer.ProducerSettled.Task.WaitAsync(token);

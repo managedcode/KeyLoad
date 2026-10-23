@@ -2,10 +2,10 @@ using KeyLoad.UnitTests.Features.OrleansExecution;
 
 namespace KeyLoad.UnitTests.Features.TimeSeries;
 
-internal sealed class SampleChunkSignedMinimumWholeFlowTests
+internal sealed class SampleChunkMinimumEnvelopeWholeFlowTests
 {
     [Test]
-    public Task MinimumPayloadMacRefusalFreshGrantRepairOriginalReceiptsAndTwoColdOwners()
+    public Task MinimumPayloadScopeRefusalFreshGrantRepairOriginalReceiptsAndTwoColdOwners()
         => ConnectionScenario.RunAsync(async scenario =>
         {
             using var deadline = new CancellationTokenSource(scenario.Timing.StartupTimeout, TimeProvider.System);
@@ -13,6 +13,6 @@ internal sealed class SampleChunkSignedMinimumWholeFlowTests
                 TestContext.Current!.Execution.CancellationToken, deadline.Token);
             await scenario.InitializeAsync(caller.Token);
             deadline.CancelAfter(scenario.Timing.CompletionTimeout);
-            await SampleChunkSignedMinimumFlow.RunAsync(scenario, caller.Token);
+            await SampleChunkMinimumEnvelopeFlow.RunAsync(scenario, caller.Token);
         });
 }

@@ -83,13 +83,13 @@ internal sealed partial class OrleansNode(IServiceProvider applicationServices, 
         await factory.GetGrain<IAnnProjectionWorkerGrain>(BackgroundWorkerIdentity.AnnProjection()).WakeAsync(cancellationToken);
     }
 
-    public Task<GrainOperationReply> ExecuteAsync(Guid requestId, string signedRequest, bool command,
+    public Task<GrainOperationReply> ExecuteAsync(Guid requestId, GrainRequestEnvelope envelope, bool command,
         CancellationToken cancellationToken)
-        => requests.ExecuteAsync(CurrentRequestTarget, true, requestId, signedRequest, command, cancellationToken);
+        => requests.ExecuteAsync(CurrentRequestTarget, true, requestId, envelope, command, cancellationToken);
 
-    internal Task<GrainOperationReply> ExecuteStartupRequestAsync(Guid requestId, string signedRequest,
+    internal Task<GrainOperationReply> ExecuteStartupRequestAsync(Guid requestId, GrainRequestEnvelope envelope,
         bool command, CancellationToken cancellationToken)
-        => requests.ExecuteAsync(CurrentRequestTarget, false, requestId, signedRequest, command, cancellationToken);
+        => requests.ExecuteAsync(CurrentRequestTarget, false, requestId, envelope, command, cancellationToken);
 
     private NodeRequestTarget CurrentRequestTarget => new(Grains, applicationServices, DatabaseReady);
 

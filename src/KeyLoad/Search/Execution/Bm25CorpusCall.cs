@@ -11,7 +11,7 @@ internal static class Bm25CorpusCall
     private const int OriginalFailureIndex = 0;
 
     internal static async Task<CommitReceipt> ExecuteAsync(OrleansNode node, PartitionHost partition,
-        PrincipalRecord principal, Guid requestId, Guid commandId, string signed,
+        PrincipalRecord principal, Guid requestId, Guid commandId, GrainRequestEnvelope envelope,
         ReadExecutionBudget work, CancellationToken token)
     {
         GrainOperationReply? reply = null;
@@ -23,7 +23,7 @@ internal static class Bm25CorpusCall
             {
                 work.Check();
                 token.ThrowIfCancellationRequested();
-                reply = await node.ExecuteAsync(requestId, signed, true, token);
+                reply = await node.ExecuteAsync(requestId, envelope, true, token);
             }, failures);
         }
         catch (Exception failure) when (CqrsBoundaryErrors.IsNonFatal(failure))

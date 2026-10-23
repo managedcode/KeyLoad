@@ -7,8 +7,8 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Clustering;
 
-internal sealed class OnlineTextChildCalls(DecodedGrainRequest parent, string signedParent,
-    Func<string, CancellationToken, Task<GrainOperationReply>> executeChild, Func<Guid, Task> abort,
+internal sealed class OnlineTextChildCalls(DecodedGrainRequest parent, GrainRequestEnvelope parentEnvelope,
+    Func<GrainRequestEnvelope, CancellationToken, Task<GrainOperationReply>> executeChild, Func<Guid, Task> abort,
     IServiceProvider services, GrainRequestCodec codec, ILogger diagnostics,
     OnlineTextFrameAccounting frames, IGrainContext context, IResourceLifetimeWorkBinding binding)
 {
@@ -56,26 +56,26 @@ internal sealed class OnlineTextChildCalls(DecodedGrainRequest parent, string si
         codec.ValidateScope(parent.Envelope);
         GrainIdentityContext.Validate(parent.Envelope, parent.Envelope.RequestId);
         frames.AdmitChildExchange();
-        var verified = await executeChild(signedParent, token).ConfigureAwait(true);
+        var verified = await executeChild(parentEnvelope, token).ConfigureAwait(true);
         if (verified.Error is { } failure)
         {
             throw Errors.Fail(failure, verified.SafeDetail ?? GrainRoutingProtocol.InvalidRequest);
         }
     }
 
-    private async Task<TResult> DispatchAsync<TResult>(Func<Guid, string, string> sign,
+    private async Task<TResult> DispatchAsync<TResult>(Func<Guid, string, GrainRequestEnvelope> sign,
         Guid commandId, CancellationToken token) where TResult : class
     {
         token.ThrowIfCancellationRequested();
         codec.ValidateScope(parent.Envelope);
         GrainIdentityContext.Validate(parent.Envelope, parent.Envelope.RequestId);
         var actorId = Guid.NewGuid();
-        var signed = sign(actorId, parent.Envelope.PrincipalId!);
+        var child = sign(actorId, parent.Envelope.PrincipalId!);
         var invoked = false;
         GrainOperationReply reply;
         try
         {
-            reply = await MaintenanceChildDispatch.ExecuteAsync(parent, signed, actorId, commandId,
+            reply = await MaintenanceChildDispatch.ExecuteAsync(parent, child, actorId, commandId,
                 (value, cancellation) =>
                 {
                     frames.AdmitChildExchange();

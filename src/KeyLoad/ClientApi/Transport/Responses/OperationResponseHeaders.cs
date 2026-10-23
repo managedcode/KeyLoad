@@ -19,7 +19,7 @@ internal static class OperationResponseHeaders
         context.Response.OnStarting(static value => ((HeaderState)value).StartAsync(), state);
     }
 
-    /// <summary>Atomically publishes the actual signed operation GUID immediately before actor dispatch.</summary>
+    /// <summary>Atomically publishes the actual issued operation GUID immediately before actor dispatch.</summary>
     /// <param name="context">The registered public HTTP request.</param>
     /// <param name="requestId">The fresh server-generated operation identity.</param>
     internal static void Publish(HttpContext context, Guid requestId)

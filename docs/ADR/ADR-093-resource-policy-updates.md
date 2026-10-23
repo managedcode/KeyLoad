@@ -15,7 +15,7 @@ Implementation contract: [ResourcePolicyUpdates](../Features/Authorization/Resou
 
 ```mermaid
 flowchart LR
-  Request[Existing signed request] --> Authority[Persisted administrator]
+  Request[Existing request envelope] --> Authority[Persisted administrator]
   Authority --> CAS[Expected resource version]
   CAS --> Shape[Only policy arrays may change]
   Shape --> Commit[Canonical metadata and outcome]

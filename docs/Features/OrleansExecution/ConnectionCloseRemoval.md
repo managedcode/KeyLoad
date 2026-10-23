@@ -10,15 +10,15 @@ REQ-CONNECTION-CLOSE-003 / AC-CONNECTION-CLOSE-003: preserve the held callback c
 
 ```mermaid
 flowchart TD
-    A[Held caller callback] --> B[Signed close and caller settlement]
+    A[Held caller callback] --> B[Typed close control and caller settlement]
     B --> C[Management removal barrier]
     C --> D{Exact count equals zero}
     D -->|No| E[Bounded ownership witness and original assertion]
     D -->|Yes| F[Fresh owner and second principal replay]
-    F --> G[Same signed close and same removal barrier]
+    F --> G[Same close control and same removal barrier]
     G --> H[Exact zero count]
 ```
 
-Producer behaviour: `ConnectionGrain.CloseAsync` verifies the same signed owner, awaits `operations.CloseAsync`, then calls `DeactivateOnIdle` in `finally`. It does not await management-inventory removal, so test continuations that call it directly must use the same bounded removal barrier before requiring zero.
+Producer behaviour: `ConnectionGrain.CloseAsync` validates the same typed close control, awaits `operations.CloseAsync`, then calls `DeactivateOnIdle` in `finally`. It does not await management-inventory removal, so test continuations that call it directly must use the same bounded removal barrier before requiring zero.
 
 Ownership: the existing OrleansExecution unit fixture and its two close-continuation helpers; the product ConnectionGrain is unchanged unless a separate source-proven cause is found. No new case, public API, provider, topology, bound, persistence format or dependency. SDK/MCP, UI and benchmarks: N/A, this is a close lifecycle regression.

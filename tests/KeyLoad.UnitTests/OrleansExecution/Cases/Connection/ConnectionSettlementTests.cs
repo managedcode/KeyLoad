@@ -45,13 +45,13 @@ internal sealed class ConnectionSettlementTests
             var principal = scenario.Principal();
             var requestId = Guid.NewGuid();
             var command = scenario.Command("disposed-original");
-            var signed = scenario.Fixture.Codec.CreateCommand(requestId, principal.Id, OperationKind.Batch,
+            var envelope = scenario.Fixture.Codec.CreateCommand(requestId, principal.Id, OperationKind.Batch,
                 command.CommandId, OrleansSerialization.Serialize(command));
             var held = scenario.Observation.Hold(requestId);
             using (new GrainRequestIdentityScope(scenario.Fixture.Cluster.ServiceProvider, principal,
                 requestId, command.CommandId, token, connectionId: scenario.Fixture.ConnectionId))
             {
-                var stream = scenario.Connection.ExecuteStreamAsync(signed, token)
+                var stream = scenario.Connection.ExecuteStreamAsync(envelope, token)
                     .WithBatchSize(GrainRequestStreamProtocol.BatchSize);
                 await scenario.AssertActivationCountAsync(ConnectionProtocol.AbsentActivations, token);
                 await using var iterator = stream.GetAsyncEnumerator(token);

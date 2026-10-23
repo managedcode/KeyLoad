@@ -20,13 +20,13 @@ internal static class MultiLaneReceiveFlow
         var principal = GrainRequestAuthority.Reload(fixture.Database.Database, principalId,
             fixture.Database.Database.EvaluationClock);
         var actor = Guid.NewGuid();
-        var signed = fixture.Codec.CreateCommand(actor, principal.Id, kind, commandId,
+        var envelope = fixture.Codec.CreateCommand(actor, principal.Id, kind, commandId,
             OrleansSerialization.Serialize(request));
         using var identity = new GrainRequestIdentityScope(fixture.Services, principal,
             actor, commandId, token, connectionId: fixture.ConnectionId);
         var reply = await GrainRequestStreamConsumer.DrainAsync(
             createStream: cancellation => fixture.Grains.GetGrain<IConnectionGrain>(fixture.ConnectionId)
-                .ExecuteStreamAsync(signed, cancellation),
+                .ExecuteStreamAsync(envelope, cancellation),
             serializer: fixture.Services.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>(),
             requestId: actor, clock: fixture.Database.Database.EvaluationClock,
             options: fixture.RoutingOptions, cancellationToken: token);

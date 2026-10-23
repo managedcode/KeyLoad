@@ -19,14 +19,14 @@ internal static class PartitionStorageRead
         var clock = source.GetRequiredService<TimeProvider>();
         var principal = database.Store.Read(view => database.Principal(view, P.Root, clock.GetUtcNow()));
         var requestId = Guid.NewGuid();
-        var signed = source.GetRequiredService<GrainRequestCodec>().CreateRead(requestId, principal.Id, GrainReadKind.Document,
+        var envelope = source.GetRequiredService<GrainRequestCodec>().CreateRead(requestId, principal.Id, GrainReadKind.Document,
             OrleansSerialization.Serialize(new GetDocumentRequest(P.Reference(), minimum)));
         var connectionId = source.GetRequiredService<ConnectionOwnerIdentity>().Id;
         using var scope = new GrainRequestIdentityScope(source, principal, requestId, Guid.Empty,
             token, connectionId: connectionId);
         var connection = source.GetRequiredService<IGrainFactory>().GetGrain<IConnectionGrain>(connectionId);
         var reply = await GrainRequestStreamConsumer.DrainAsync(
-            execution => connection.ExecuteStreamAsync(signed, execution),
+            execution => connection.ExecuteStreamAsync(envelope, execution),
             source.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>(),
             requestId, clock, source.GetRequiredService<IOptions<GrainRoutingOptions>>(), token).ConfigureAwait(false);
         await Assert.That(reply.Error).IsNull();

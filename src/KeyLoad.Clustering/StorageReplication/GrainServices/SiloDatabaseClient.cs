@@ -21,18 +21,18 @@ public sealed class SiloDatabaseClient(IServiceProvider services) : GrainService
             .GetReadOwnerAsync(local.SiloAddress, cancellationToken);
 
     /// <summary>Awaits one self-contained Task leaf at the selected storage owner.</summary>
-    public Task<GrainOperationReply> ExecuteAsync(SiloAddress owner, string signedRequest, CancellationToken cancellationToken)
-        => On(owner).ExecuteAsync(signedRequest, cancellationToken);
+    public Task<GrainOperationReply> ExecuteAsync(SiloAddress owner, GrainRequestEnvelope envelope, CancellationToken cancellationToken)
+        => On(owner).ExecuteAsync(envelope, cancellationToken);
 
     /// <summary>Joins the selected owner's original execution maintenance cleanup after the parent stops.</summary>
     public Task AbortMaintenanceAsync(SiloAddress owner, GrainReadKind kind, Guid sessionId)
         => On(owner).AbortMaintenanceAsync(kind, sessionId);
 
     /// <summary>Resolves storage through Orleans, keeping partition activation placement separate from open files.</summary>
-    public async Task<GrainOperationReply> ExecuteCommandAsync(Guid incarnation, string signedRequest,
+    public async Task<GrainOperationReply> ExecuteCommandAsync(Guid incarnation, GrainRequestEnvelope envelope,
         string actorKey, CancellationToken cancellationToken)
     {
         var owner = await ReadOwnerAsync(incarnation, cancellationToken).ConfigureAwait(true);
-        return await On(owner).ExecuteCommandAsync(signedRequest, actorKey, cancellationToken).ConfigureAwait(true);
+        return await On(owner).ExecuteCommandAsync(envelope, actorKey, cancellationToken).ConfigureAwait(true);
     }
 }

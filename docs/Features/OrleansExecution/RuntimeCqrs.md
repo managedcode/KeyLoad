@@ -38,7 +38,7 @@ request and result identity, operation-specific progress, byte/frame limits,
 execution deadlines and concurrent resource admission. It must not duplicate the
 library's producer, transport or dispatcher.
 
-The signed request and bounded progress contracts are in
+The request envelope and bounded progress contracts are in
 [CqrsRequestV2](CqrsRequest.md). TestCluster mechanism cases use
 the real published Graph, Communication and Orleans packages. Their observers
 record actual runtime calls, context and producer settlement; they do not create

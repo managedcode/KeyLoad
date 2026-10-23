@@ -16,24 +16,24 @@ internal sealed class OrleansNodeRequestExecutor(IOptions<GrainRoutingOptions> r
 
     internal Task<GrainOperationReply> ExecuteAsync(IGrainFactory? factory, IServiceProvider? runtime,
         bool databaseReady, bool requireDatabaseReady,
-        Guid requestId, string signedRequest, bool command, CancellationToken cancellationToken)
+        Guid requestId, GrainRequestEnvelope envelope, bool command, CancellationToken cancellationToken)
         => ExecuteCoreAsync(factory, runtime, databaseReady, requireDatabaseReady,
-            requestId, signedRequest, command, null, cancellationToken);
+            requestId, envelope, command, null, cancellationToken);
 
     internal Task<GrainOperationReply> ExecuteAsync(NodeRequestTarget target, bool requireDatabaseReady,
-        Guid requestId, string signedRequest, bool command, CancellationToken cancellationToken)
+        Guid requestId, GrainRequestEnvelope envelope, bool command, CancellationToken cancellationToken)
         => ExecuteAsync(target.Factory, target.Runtime, target.DatabaseReady,
-            requireDatabaseReady, requestId, signedRequest, command, cancellationToken);
+            requireDatabaseReady, requestId, envelope, command, cancellationToken);
 
     internal Task<GrainOperationReply> ExecuteWithProgressAsync(NodeRequestTarget target,
-        Guid requestId, string signedRequest, Func<GrainRequestProgress, CancellationToken, ValueTask> progress,
+        Guid requestId, GrainRequestEnvelope envelope, Func<GrainRequestProgress, CancellationToken, ValueTask> progress,
         CancellationToken cancellationToken)
         => ExecuteCoreAsync(target.Factory, target.Runtime, target.DatabaseReady, true,
-            requestId, signedRequest, false, progress, cancellationToken);
+            requestId, envelope, false, progress, cancellationToken);
 
     private async Task<GrainOperationReply> ExecuteCoreAsync(IGrainFactory? factory, IServiceProvider? runtime,
         bool databaseReady, bool requireDatabaseReady,
-        Guid requestId, string signedRequest, bool command,
+        Guid requestId, GrainRequestEnvelope envelope, bool command,
         Func<GrainRequestProgress, CancellationToken, ValueTask>? progress, CancellationToken cancellationToken)
     {
         if (requireDatabaseReady && !databaseReady)
@@ -46,7 +46,7 @@ internal sealed class OrleansNodeRequestExecutor(IOptions<GrainRoutingOptions> r
         var clock = services.GetRequiredService<TimeProvider>();
         using var deadline = new CancellationTokenSource(routingOptions.Value.ExecutionLifetime, clock);
         using var execution = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, deadline.Token);
-        var reply = await DrainAsync(grains, services, connectionId, requestId, signedRequest, command, clock,
+        var reply = await DrainAsync(grains, services, connectionId, requestId, envelope, command, clock,
             progress, execution.Token, cancellationToken);
         if (reply.Error is { } error)
         {
@@ -56,7 +56,7 @@ internal sealed class OrleansNodeRequestExecutor(IOptions<GrainRoutingOptions> r
     }
 
     private async Task<GrainOperationReply> DrainAsync(IGrainFactory grains, IServiceProvider services,
-        Guid connectionId, Guid requestId, string signedRequest, bool command, TimeProvider clock,
+        Guid connectionId, Guid requestId, GrainRequestEnvelope envelope, bool command, TimeProvider clock,
         Func<GrainRequestProgress, CancellationToken, ValueTask>? progress,
         CancellationToken executionToken, CancellationToken callerToken)
     {
@@ -65,11 +65,11 @@ internal sealed class OrleansNodeRequestExecutor(IOptions<GrainRoutingOptions> r
         try
         {
             Func<CancellationToken, IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>> source =
-                token => grains.GetGrain<IConnectionGrain>(connectionId).ExecuteStreamAsync(signedRequest, token);
+                token => grains.GetGrain<IConnectionGrain>(connectionId).ExecuteStreamAsync(envelope, token);
             var serializer = services.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>();
             var purpose = new CqrsStreamPurpose(() =>
             {
-                var request = services.GetRequiredService<GrainRequestCodec>().VerifyRequest(signedRequest, requestId);
+                var request = services.GetRequiredService<GrainRequestCodec>().DecodeRequest(envelope, requestId);
                 originalOperation = new(request.Envelope.CommandId, request.Envelope.ReadKind, request.Envelope.CommandKind);
                 return request;
             });

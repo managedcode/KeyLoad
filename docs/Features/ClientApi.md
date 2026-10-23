@@ -41,7 +41,7 @@ ClientApi owns transport/session registration and lifetime; QueryExecution owns 
 
 AC-CLIENT-CONNECTION-002 includes error propagation: capacity rejection and invalid signed-close scope must preserve KeyLoadException Code, StatusCode and safe message across the actual RPC. ADR-125 freezes `keyload.error` generated serialization with stable Code field0 and StatusCode field1.
 
-A connection parent that needs a signed child capability (MultiLane receive, Ann, Text and OnlineText maintenance) borrows its own actual `ExecuteStreamAsync` implementation, never an outgoing RPC to the same activation. The delegate is supplied privately by the owner; it is not a public interface, a new dispatcher or an authorization capability. Parent validation, fresh persisted principal, child signed envelope, original expiry and cancellation, bounded stream admission and joined producer cleanup are unchanged.
+A connection parent that needs a child envelope capability (MultiLane receive, Ann, Text and OnlineText maintenance) borrows its own actual `ExecuteStreamAsync` implementation, never an outgoing RPC to the same activation. The delegate is supplied privately by the owner; it is not a public interface, a new dispatcher or an authorization capability. Parent validation, fresh persisted principal, child envelope, original expiry and cancellation, bounded stream admission and joined producer cleanup are unchanged.
 
 Shared authenticated .NET SDK/CLI transport. [ADR-035](../ADR/ADR-035-memory-performance.md)
 and [memory/performance acceptance](../ADR/ADR-035-memory-performance.md) govern

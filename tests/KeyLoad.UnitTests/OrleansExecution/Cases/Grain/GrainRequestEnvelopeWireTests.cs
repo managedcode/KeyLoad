@@ -2,7 +2,7 @@ using KeyLoad.Clustering;
 
 namespace KeyLoad.UnitTests;
 
-/// <summary>AC-ROUTE-001/AC-IS-001: execution envelope fields and signed-purpose fencing remain stable.</summary>
+/// <summary>AC-ROUTE-001/AC-IS-001: execution envelope fields and purpose fencing remain stable.</summary>
 internal sealed class GrainRequestEnvelopeWireTests
 {
     private const string Principal = "root";
@@ -45,17 +45,15 @@ internal sealed class GrainRequestEnvelopeWireTests
     }
 
     [Test]
-    public async Task ActualDatabaseSignedReadPreservesPayloadAndVersionedPurpose()
+    public async Task IssuedReadPreservesPayloadAndVersionedPurpose()
     {
         using var fixture = new TestDatabase();
-        var codec = new GrainRequestCodec(fixture.Database.Store.Identity.Incarnation, fixture.Database.Store.Identity.SigningKey,
+        var codec = new GrainRequestCodec(fixture.Database.Store.Identity.Incarnation,
             fixture.Database.OperationLimitsOptions, TimeProvider.System, UnitRoutingOptions.Routing());
         var requestId = Guid.NewGuid();
         var payload = OrleansSerialization.Serialize(new GetDocumentRequest(new(fixture.Partition, Principal, Principal)));
-        var token = codec.CreateRead(requestId, Principal, GrainReadKind.Document, payload);
-        var envelope = fixture.Database.Verify<GrainRequestEnvelope>(token);
-        var request = codec.VerifyRead(token, requestId);
-        await Assert.That(token.StartsWith(GrainContracts.SignedTokenPrefix, StringComparison.Ordinal)).IsTrue();
+        var envelope = codec.CreateRead(requestId, Principal, GrainReadKind.Document, payload);
+        var request = codec.DecodeRead(envelope, requestId);
         await Assert.That(request.Payload.Span.SequenceEqual(payload)).IsTrue();
         await Assert.That(request.Envelope.RequestId).IsEqualTo(requestId);
         await Assert.That(envelope.Incarnation).IsEqualTo(fixture.Store.Identity.Incarnation);
@@ -69,33 +67,30 @@ internal sealed class GrainRequestEnvelopeWireTests
     public async Task DefaultOrEmptyPayloadIsRejectedAtTheRealScopeBoundary(bool missing)
     {
         using var fixture = new TestDatabase();
-        var codec = new GrainRequestCodec(fixture.Database.Store.Identity.Incarnation, fixture.Database.Store.Identity.SigningKey,
+        var codec = new GrainRequestCodec(fixture.Database.Store.Identity.Incarnation,
             fixture.Database.OperationLimitsOptions, TimeProvider.System, UnitRoutingOptions.Routing());
         var requestId = Guid.NewGuid();
-        var token = codec.CreateRead(requestId, Principal, GrainReadKind.QueryCapabilities, OrleansSerialization.Serialize(NoDtoMarker));
-        var envelope = fixture.Database.Verify<GrainRequestEnvelope>(token) with
+        var invalid = codec.CreateRead(requestId, Principal, GrainReadKind.QueryCapabilities, OrleansSerialization.Serialize(NoDtoMarker)) with
         {
             Payload = missing ? default : ReadOnlyMemory<byte>.Empty
         };
-        var invalid = fixture.Database.Sign(envelope);
-        await Assert.That(fixture.Database.Verify<GrainRequestEnvelope>(invalid).Payload.IsEmpty).IsTrue();
-        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => codec.VerifyRead(invalid, requestId)).Code)
+        await Assert.That(invalid.Payload.IsEmpty).IsTrue();
+        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => codec.DecodeRead(invalid, requestId)).Code)
             .IsEqualTo(ErrorCode.TokenInvalidated);
     }
 
     [Test]
-    public async Task SignatureWithUnsupportedPurposeIsInvalidated()
+    public async Task UnsupportedPurposeIsInvalidated()
     {
         using var fixture = new TestDatabase();
-        var codec = new GrainRequestCodec(fixture.Database.Store.Identity.Incarnation, fixture.Database.Store.Identity.SigningKey,
+        var codec = new GrainRequestCodec(fixture.Database.Store.Identity.Incarnation,
             fixture.Database.OperationLimitsOptions, TimeProvider.System, UnitRoutingOptions.Routing());
         var requestId = Guid.NewGuid();
-        var token = codec.CreateRead(requestId, Principal, GrainReadKind.QueryCapabilities, OrleansSerialization.Serialize(NoDtoMarker));
-        var envelope = fixture.Database.Verify<GrainRequestEnvelope>(token) with
+        var envelope = codec.CreateRead(requestId, Principal, GrainReadKind.QueryCapabilities, OrleansSerialization.Serialize(NoDtoMarker)) with
         {
             Purpose = UnsupportedPurpose
         };
-        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => codec.VerifyRead(fixture.Database.Sign(envelope), requestId)).Code)
+        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => codec.DecodeRead(envelope, requestId)).Code)
             .IsEqualTo(ErrorCode.TokenInvalidated);
     }
 }

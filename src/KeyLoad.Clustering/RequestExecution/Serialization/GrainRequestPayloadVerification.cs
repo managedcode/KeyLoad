@@ -2,15 +2,15 @@ namespace KeyLoad.Clustering;
 
 internal static class GrainRequestPayloadVerification
 {
-    internal static DecodedGrainRequest VerifyRead(GrainRequestCodec codec, string signedRequest, Guid actorId)
+    internal static DecodedGrainRequest DecodeRead(GrainRequestCodec codec, GrainRequestEnvelope request, Guid actorId)
     {
-        var request = codec.VerifyRequest(signedRequest, actorId);
-        if (request.Envelope.ReadKind is null)
+        var decoded = codec.DecodeRequest(request, actorId);
+        if (decoded.Envelope.ReadKind is null)
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
         }
 
-        return request;
+        return decoded;
     }
 
     internal static DecodedGrainRequest VerifyRequest(DecodedGrainRequest request, Guid actorId)
@@ -20,17 +20,15 @@ internal static class GrainRequestPayloadVerification
         return request;
     }
 
-    internal static DecodedGrainRequest Verify(GrainRequestCodec originalCodec,
-        int maximumTokenCharacters, string signedRequest)
+    internal static DecodedGrainRequest Decode(GrainRequestCodec codec, GrainRequestEnvelope request)
     {
-        if (string.IsNullOrEmpty(signedRequest) || signedRequest.Length > maximumTokenCharacters)
+        if (request is null)
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
         }
 
-        var request = originalCodec.VerifySigned<GrainRequestEnvelope>(signedRequest, maximumTokenCharacters);
-        originalCodec.ValidateVerifiedScope(request);
-        if (request.Payload.Length > originalCodec.Limits.MaxBatchBytes)
+        codec.ValidateVerifiedScope(request);
+        if (request.Payload.Length > codec.Limits.MaxBatchBytes)
         {
             throw Errors.Fail(ErrorCode.ResourceExhausted, GrainRoutingProtocol.InvalidRequest);
         }

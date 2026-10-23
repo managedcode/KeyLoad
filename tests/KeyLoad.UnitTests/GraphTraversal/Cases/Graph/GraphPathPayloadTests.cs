@@ -111,7 +111,7 @@ internal sealed class GraphPathPayloadTests
     public async Task AppendedReadKindsPassTheSignedEnvelopeValidator()
     {
         using var database = new TestDatabase();
-        var codec = new GrainRequestCodec(database.Database.Store.Identity.Incarnation, database.Database.Store.Identity.SigningKey,
+        var codec = new GrainRequestCodec(database.Database.Store.Identity.Incarnation,
             database.Database.OperationLimitsOptions, TimeProvider.System, UnitRoutingOptions.Routing());
         var partition = database.Partition;
         var direct = new GraphShortestPathRequest(1, partition, Graph,
@@ -129,7 +129,7 @@ internal sealed class GraphPathPayloadTests
     {
         var requestId = Guid.NewGuid();
         var token = codec.CreateRead(requestId, Principal, kind, payload);
-        var verified = codec.VerifyRead(token, requestId);
+        var verified = codec.DecodeRead(token, requestId);
         await Assert.That(verified.Envelope.ReadKind).IsEqualTo(kind);
         await Assert.That(verified.Payload.Span.SequenceEqual(payload.Span)).IsTrue();
     }

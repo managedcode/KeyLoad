@@ -22,9 +22,9 @@ internal static class ConnectionAwaitedSettlementCalls
         {
             using var identity = new GrainRequestIdentityScope(scenario.Fixture.Cluster.ServiceProvider,
                 principal, requestId, command.CommandId, token, connectionId: connectionId);
-            var signed = scenario.Fixture.Codec.CreateCommand(requestId, principal.Id, OperationKind.Batch,
+            var envelope = scenario.Fixture.Codec.CreateCommand(requestId, principal.Id, OperationKind.Batch,
                 command.CommandId, OrleansSerialization.Serialize(command));
-            return await GrainRequestStreamConsumer.DrainAsync(execution => scenario.Fixture.Cluster.Client.GetGrain<IConnectionGrain>(connectionId).ExecuteStreamAsync(signed, execution),
+            return await GrainRequestStreamConsumer.DrainAsync(execution => scenario.Fixture.Cluster.Client.GetGrain<IConnectionGrain>(connectionId).ExecuteStreamAsync(envelope, execution),
                 scenario.Fixture.Cluster.ServiceProvider.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>(),
                 requestId, scenario.Fixture.Clock, scenario.Fixture.RoutingOptions, token);
         }
@@ -48,9 +48,9 @@ internal static class ConnectionAwaitedSettlementCalls
         {
             using var identity = new GrainRequestIdentityScope(scenario.Fixture.Cluster.ServiceProvider,
                 principal, requestId, command.CommandId, token, connectionId: scenario.Fixture.ConnectionId);
-            var signed = scenario.Fixture.Codec.CreateCommand(requestId, principal.Id, OperationKind.Batch,
+            var envelope = scenario.Fixture.Codec.CreateCommand(requestId, principal.Id, OperationKind.Batch,
                 command.CommandId, OrleansSerialization.Serialize(command));
-            await using var iterator = scenario.Connection.ExecuteStreamAsync(signed, token)
+            await using var iterator = scenario.Connection.ExecuteStreamAsync(envelope, token)
                 .WithBatchSize(GrainRequestStreamProtocol.BatchSize).GetAsyncEnumerator(token);
             await Assert.That(await iterator.MoveNextAsync()).IsTrue();
             await Assert.That(iterator.Current.Kind).IsEqualTo(CqrsStreamChunkKind.Started);

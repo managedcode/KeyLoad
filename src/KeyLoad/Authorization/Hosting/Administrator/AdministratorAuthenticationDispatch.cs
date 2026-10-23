@@ -6,7 +6,7 @@ namespace KeyLoad.Server;
 internal static class AdministratorAuthenticationDispatch
 {
     internal static async Task<GrainOperationReply> SendAsync(OrleansNode node, Guid requestId,
-        string signed, Action onDispatch, CancellationToken token)
+        GrainRequestEnvelope envelope, Action onDispatch, CancellationToken token)
     {
         var failures = new List<Exception>();
         GrainOperationReply? reply = null;
@@ -18,7 +18,7 @@ internal static class AdministratorAuthenticationDispatch
                 await ServerFailureObserver.ObserveAsync(async () =>
                 {
                     onDispatch();
-                    reply = await node.ExecuteStartupRequestAsync(requestId, signed, command: false,
+                    reply = await node.ExecuteStartupRequestAsync(requestId, envelope, command: false,
                         cancellationToken: token);
                 }, failures);
             }

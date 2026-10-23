@@ -10,7 +10,7 @@ OrleansExecution is how a public database operation reaches the data. Microsoft 
 
 In scope:
 
-- One Orleans connection grain per connected client, and per-operation execution inside it (signed request identity, fresh persisted authorization, bounded admission, cancellation, backpressure, CQRS result and progress streams, idempotent command outcomes).
+- One Orleans connection grain per connected client, and per-operation execution inside it (typed request envelope identity, fresh persisted authorization, bounded admission, cancellation, backpressure, CQRS result and progress streams, idempotent command outcomes).
 - Logical partition grains: ordinary Orleans grains that serialize and route the commands of one logical partition.
 - The silo-local ZoneTree owner (an Orleans Grain Service) and its silo lifecycle: one host, ordered startup, request drain and joined shutdown before files close.
 - Copies to `KeyLoad:ReplicaCount` silos through ordinary Orleans calls, with acknowledgement from every configured copy.

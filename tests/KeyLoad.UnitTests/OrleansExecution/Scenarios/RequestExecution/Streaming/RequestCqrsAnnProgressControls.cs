@@ -28,7 +28,7 @@ internal static class RequestCqrsAnnProgressControls
         var image = QueueWholeFlowStorage.Bytes(fixture.Database.Store);
         var cut = fixture.Database.Store.Position;
         var id = Guid.NewGuid();
-        var signed = fixture.Codec.CreateCommand(id, RequestCqrsAnnTestData.Principal,
+        var envelope = fixture.Codec.CreateCommand(id, RequestCqrsAnnTestData.Principal,
             OperationKind.MaintainAnnIndex, request.CommandId, OrleansSerialization.Serialize(request));
         var observed = new RequestCqrsProducerObservation();
         var frames = new List<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>();
@@ -38,10 +38,10 @@ internal static class RequestCqrsAnnProgressControls
             execution => RequestCqrsAnnProducer.Run(id, genuineReply, null, observed,
                 fixture.RoutingOptions.Value.MaximumTotalFrames, execution, replayCount),
             serializer, id, fixture.Clock, observed.MarkActivationSettled, fixture.RoutingOptions, null,
-            new CqrsStreamPurpose(() => fixture.Codec.VerifyRequest(signed, id)), token);
+            new CqrsStreamPurpose(() => fixture.Codec.DecodeRequest(envelope, id)), token);
         var reply = await GrainRequestStreamConsumer.DrainWithPurposeAsync(
             execution => ObserveAsync(stream, frames, execution), serializer, id, fixture.Clock, fixture.RoutingOptions,
-            new CqrsStreamPurpose(() => fixture.Codec.VerifyRequest(signed, id)), token);
+            new CqrsStreamPurpose(() => fixture.Codec.DecodeRequest(envelope, id)), token);
         await observed.ProducerSettled.Task.WaitAsync(token);
         await observed.ActivationSettled.Task.WaitAsync(token);
         await Assert.That(observed.ProducerSettlementCount).IsEqualTo(RequestCqrsAnnTestData.OneSettlement);

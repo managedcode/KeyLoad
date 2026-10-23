@@ -7,7 +7,7 @@ using Microsoft.Extensions.Options;
 namespace KeyLoad.Clustering;
 
 internal sealed class TextMaintenanceChildCalls(DecodedGrainRequest parent,
-    Func<string, CancellationToken, Task<GrainOperationReply>> executeChild, Func<Guid, Task> abort,
+    Func<GrainRequestEnvelope, CancellationToken, Task<GrainOperationReply>> executeChild, Func<Guid, Task> abort,
     IServiceProvider services, GrainRequestCodec codec, ILogger diagnostics, IResourceLifetimeWorkBinding binding)
 {
     internal Guid ParentRequestId => parent.Envelope.RequestId;
@@ -38,13 +38,13 @@ internal sealed class TextMaintenanceChildCalls(DecodedGrainRequest parent,
         OperationKind? command, Guid commandId, CancellationToken token) where TResult : class
     {
         var actorId = Guid.NewGuid();
-        string signed;
+        GrainRequestEnvelope child;
         try
         {
             token.ThrowIfCancellationRequested();
             codec.ValidateScope(parent.Envelope);
             GrainIdentityContext.Validate(parent.Envelope, parent.Envelope.RequestId);
-            signed = codec.CreateTextMaintenanceChild(actorId, parent.Envelope.PrincipalId!, read, command,
+            child = codec.CreateTextMaintenanceChild(actorId, parent.Envelope.PrincipalId!, read, command,
                 commandId, payload, parent.Envelope.ExpiresAt);
         }
         catch (Exception)
@@ -56,7 +56,7 @@ internal sealed class TextMaintenanceChildCalls(DecodedGrainRequest parent,
         GrainOperationReply reply;
         try
         {
-            reply = await MaintenanceChildDispatch.ExecuteAsync(parent, signed, actorId, commandId,
+            reply = await MaintenanceChildDispatch.ExecuteAsync(parent, child, actorId, commandId,
                 (value, cancellation) =>
                 {
                     invoked = true;

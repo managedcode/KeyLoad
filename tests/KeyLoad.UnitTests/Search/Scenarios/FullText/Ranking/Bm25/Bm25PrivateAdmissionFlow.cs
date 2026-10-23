@@ -99,11 +99,11 @@ internal static class Bm25PrivateAdmissionFlow
         CancellationToken token)
     {
         var routing = UnitRoutingOptions.Routing();
-        var codec = new KeyLoad.Clustering.GrainRequestCodec(database.Database.Store.Identity.Incarnation, database.Database.Store.Identity.SigningKey,
+        var codec = new KeyLoad.Clustering.GrainRequestCodec(database.Database.Store.Identity.Incarnation,
             database.Database.OperationLimitsOptions, database.Database.EvaluationClock, routing);
         var expiry = database.Database.EvaluationClock.GetUtcNow().Add(routing.Value.RequestLifetime);
-        var signed = codec.CreateBm25CorpusPublication(Guid.NewGuid(), operation, expiry);
-        var decoded = codec.Verify(signed);
+        var envelope = codec.CreateBm25CorpusPublication(Guid.NewGuid(), operation, expiry);
+        var decoded = codec.Decode(envelope);
         await Assert.That(decoded.Envelope.CommandId).IsEqualTo(operation.CommandId);
         await Assert.That(decoded.Envelope.PrincipalId).IsEqualTo(Root);
         await Assert.That(decoded.Envelope.Purpose).IsEqualTo(KeyLoad.Clustering.Bm25RequestScope.Purpose);

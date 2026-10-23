@@ -29,7 +29,7 @@ internal sealed class PartitionQueryGrain(GrainRequestCodec codec, SiloDatabaseC
         return (address, new(nodeId, incarnation));
     }
 
-    public async Task<GrainOperationReply> ExecuteAsync(SiloAddress owner, string signedRequest,
+    public async Task<GrainOperationReply> ExecuteAsync(SiloAddress owner, GrainRequestEnvelope envelope,
         CancellationToken cancellationToken)
     {
         var requestId = Guid.Empty;
@@ -37,7 +37,7 @@ internal sealed class PartitionQueryGrain(GrainRequestCodec codec, SiloDatabaseC
         {
             ArgumentNullException.ThrowIfNull(owner);
             cancellationToken.ThrowIfCancellationRequested();
-            var request = codec.Verify(signedRequest);
+            var request = codec.Decode(envelope);
             requestId = request.Envelope.RequestId;
             GrainIdentityContext.Validate(request.Envelope, requestId);
             if (!QueryLifetimeReadScope.Validate(request.Envelope))
@@ -56,7 +56,7 @@ internal sealed class PartitionQueryGrain(GrainRequestCodec codec, SiloDatabaseC
             {
                 throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
             }
-            return await storage.On(owner).ExecuteAsync(signedRequest, cancellationToken).ConfigureAwait(true);
+            return await storage.On(owner).ExecuteAsync(envelope, cancellationToken).ConfigureAwait(true);
         }
         catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error))
         {

@@ -10,17 +10,17 @@ internal static class QueryHostedSearchRead
     internal static async Task<GrainOperationReply> ExecuteAsync(RequestCqrsHostedRuntimeFixture node,
         QueryHostedSearchDataset data, Guid requestId, CancellationToken token)
     {
-        var signed = node.Codec.CreateRead(requestId, data.Principal.Id, GrainReadKind.DistributedSearch,
+        var envelope = node.Codec.CreateRead(requestId, data.Principal.Id, GrainReadKind.DistributedSearch,
             OrleansSerialization.Serialize(data.Request));
         var local = node.Services.GetRequiredService<ILocalSiloDetails>();
         using var identity = new GrainRequestIdentityScope(node.Services, data.Principal, requestId,
             Guid.Empty, token, placement: local.SiloAddress, connectionId: node.ConnectionId);
         var connection = node.Grains.GetGrain<IConnectionGrain>(node.ConnectionId);
         return await GrainRequestStreamConsumer.DrainWithPurposeAsync(
-            execution => connection.ExecuteStreamAsync(signed, execution),
+            execution => connection.ExecuteStreamAsync(envelope, execution),
             node.Services.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>(),
             requestId, node.Clock, node.RoutingOptions,
-            new CqrsStreamPurpose(() => node.Codec.VerifyRequest(signed, requestId)), token).ConfigureAwait(false);
+            new CqrsStreamPurpose(() => node.Codec.DecodeRequest(envelope, requestId)), token).ConfigureAwait(false);
     }
 
     internal static DistributedSearchPage Page(GrainOperationReply reply)

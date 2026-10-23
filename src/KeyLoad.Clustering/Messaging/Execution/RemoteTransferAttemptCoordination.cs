@@ -1,10 +1,11 @@
+using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.Core.Features.Messaging;
 
 namespace KeyLoad.Clustering;
 
 internal static class RemoteTransferAttemptCoordination
 {
-    internal static async Task<RemoteTransferCoordinationHint> RefreshAsync(RemoteTransferSignedExecution execution,
+    internal static async Task<RemoteTransferCoordinationHint> RefreshAsync(RemoteTransferEnvelopeExecution execution,
         RemoteTransferCoordinationHint hint, string intentToken, CancellationToken token)
     {
         if (hint.AcceptAttemptCeiling is null && hint.RepairCeiling is null)
@@ -26,7 +27,7 @@ internal static class RemoteTransferAttemptCoordination
         return current;
     }
 
-    internal static async Task AdvanceAsync(RemoteTransferSignedExecution execution, GrainRequestCodec codec, RemoteTransferCoordinationHint hint,
+    internal static async Task AdvanceAsync(RemoteTransferEnvelopeExecution execution, GrainRequestCodec codec, RemoteTransferCoordinationHint hint,
         string intentToken, CancellationToken token)
     {
         if (hint.AcceptAttemptCeiling is not { } ceiling || hint.AcceptGeneration >= ceiling
@@ -41,7 +42,7 @@ internal static class RemoteTransferAttemptCoordination
             return;
         }
         var witness = value.FailureWitness ?? throw Errors.Fail(ErrorCode.RecoveryRequired, RemoteTransferAttemptProtocol.Unavailable);
-        var claims = codec.VerifySigned<RemoteTransferAcceptFailureClaims>(witness, codec.Limits.MaxBatchBytes);
+        var claims = CoreClaims.Decode<RemoteTransferAcceptFailureClaims>(witness, codec.Limits.MaxBatchBytes);
         var digest = claims.OutcomeDigest;
         var id = RemoteTransferAttemptIdentity.AdvanceId(hint, hint.AcceptGeneration, digest);
         var reply = await execution.ApplyAsync(hint.PrincipalId, new(id, hint.Source.Partition,
@@ -52,7 +53,7 @@ internal static class RemoteTransferAttemptCoordination
         }
     }
 
-    private static async Task<RemoteTransferCoordinationReadResult> ReadAsync(RemoteTransferSignedExecution execution,
+    private static async Task<RemoteTransferCoordinationReadResult> ReadAsync(RemoteTransferEnvelopeExecution execution,
         RemoteTransferCoordinationHint hint, string intentToken, string purpose, CancellationToken token)
     {
         var request = new RemoteTransferCoordinationReadRequest(purpose, hint.Source, hint.Destination,

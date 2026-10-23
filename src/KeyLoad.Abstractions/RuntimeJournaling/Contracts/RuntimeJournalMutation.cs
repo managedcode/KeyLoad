@@ -2,7 +2,7 @@ using System.Collections.Immutable;
 
 namespace KeyLoad;
 
-/// <summary>A server-issued, bounded journal mutation behind the private signed request purpose.</summary>
+/// <summary>A server-issued, bounded journal mutation behind the private request purpose.</summary>
 [Orleans.GenerateSerializer]
 [Orleans.Alias(RuntimeJournalAliases.Mutation)]
 public sealed record RuntimeJournalMutation(

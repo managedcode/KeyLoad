@@ -18,9 +18,9 @@ internal sealed class RuntimeJournalStartupRequests(IGrainFactory grains, GrainR
     internal async Task<bool> TryVerifyAsync(CancellationToken cancellationToken)
     {
         var requestId = Guid.NewGuid();
-        var signed = codec.CreateRuntimeJournalRead(requestId, GrainReadKind.RuntimeJournalCatalog,
+        var envelope = codec.CreateRuntimeJournalRead(requestId, GrainReadKind.RuntimeJournalCatalog,
             OrleansSerialization.Serialize(GrainContracts.NoDtoMarker));
-        var reply = await SendAsync(null, requestId, Guid.Empty, signed, cancellationToken);
+        var reply = await SendAsync(null, requestId, Guid.Empty, envelope, cancellationToken);
         var value = GrainPayload.Read<GrainValue>(reply.Payload).Value;
         return value switch
         {
@@ -36,9 +36,9 @@ internal sealed class RuntimeJournalStartupRequests(IGrainFactory grains, GrainR
         var mutation = new RuntimeJournalMutation(RuntimeJournalAction.BootstrapIdentity, string.Empty,
             Guid.Empty, InitialOwnerGeneration, InitialContentRevision, null, ReadOnlyMemory<byte>.Empty, new(StringComparer.Ordinal), []);
         var requestId = Guid.NewGuid();
-        var signed = codec.CreateRuntimeJournalCommand(requestId, administrator.Id, commandId,
+        var envelope = codec.CreateRuntimeJournalCommand(requestId, administrator.Id, commandId,
             OrleansSerialization.Serialize(mutation));
-        _ = await SendAsync(administrator, requestId, commandId, signed, cancellationToken);
+        _ = await SendAsync(administrator, requestId, commandId, envelope, cancellationToken);
         if (!await TryVerifyAsync(cancellationToken))
         {
             throw Errors.Fail(ErrorCode.RecoveryRequired, AuthorityNotCommitted);
@@ -46,7 +46,7 @@ internal sealed class RuntimeJournalStartupRequests(IGrainFactory grains, GrainR
     }
 
     private async Task<GrainOperationReply> SendAsync(PrincipalRecord? principal, Guid requestId,
-        Guid commandId, string signed, CancellationToken cancellationToken)
+        Guid commandId, GrainRequestEnvelope envelope, CancellationToken cancellationToken)
     {
         var connectionId = ConnectionExecutionIdentity.Resolve(services);
         using var identity = principal is null
@@ -55,7 +55,7 @@ internal sealed class RuntimeJournalStartupRequests(IGrainFactory grains, GrainR
                 connectionId: connectionId);
         var serializer = services.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>();
         var reply = await GrainRequestStreamConsumer.DrainAsync(
-            createStream: token => grains.GetGrain<IConnectionGrain>(connectionId).ExecuteStreamAsync(signed, token), serializer: serializer,
+            createStream: token => grains.GetGrain<IConnectionGrain>(connectionId).ExecuteStreamAsync(envelope, token), serializer: serializer,
             requestId: requestId, clock: clock, cancellationToken: cancellationToken, options: routingOptions);
         if (reply.Error is { } error)
         {

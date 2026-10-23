@@ -8,8 +8,8 @@ namespace KeyLoad.Clustering;
 
 internal static class OnlineTextExecution
 {
-    internal static async Task<OnlineTextIndexMaintenanceResult> ExecuteAsync(DecodedGrainRequest parent, string signedParent,
-        Func<string, CancellationToken, Task<GrainOperationReply>> executeChild, Func<Guid, Task> abort,
+    internal static async Task<OnlineTextIndexMaintenanceResult> ExecuteAsync(DecodedGrainRequest parent, GrainRequestEnvelope parentEnvelope,
+        Func<GrainRequestEnvelope, CancellationToken, Task<GrainOperationReply>> executeChild, Func<Guid, Task> abort,
         IServiceProvider services, GrainRequestCodec codec,
         IOptions<GrainRoutingOptions> routing, ILogger diagnostics, global::Orleans.Runtime.IGrainContext context,
         ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer, IResourceLifetimeWorkBinding binding)
@@ -17,7 +17,7 @@ internal static class OnlineTextExecution
         ArgumentNullException.ThrowIfNull(binding);
         var request = GrainPayload.ReadCommand<OnlineTextIndexMaintenanceRequest>(parent.Payload);
         var frames = new OnlineTextFrameAccounting(routing);
-        var children = new OnlineTextChildCalls(parent, signedParent, executeChild, abort,
+        var children = new OnlineTextChildCalls(parent, parentEnvelope, executeChild, abort,
             services, codec, diagnostics, frames, context, binding);
         OnlineTextIndexMaintenanceResult result;
         try

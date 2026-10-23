@@ -126,9 +126,9 @@ internal sealed class SdkProblemBoundaryScenario(ConnectionScenario execution, S
     internal async Task<GrainOperationReply> ReadAsync(EntityRef reference, CancellationToken token)
     {
         var requestId = Guid.NewGuid();
-        var signed = execution.Fixture.Codec.CreateRead(requestId, Principal.Id, GrainReadKind.Document,
+        var envelope = execution.Fixture.Codec.CreateRead(requestId, Principal.Id, GrainReadKind.Document,
             OrleansSerialization.Serialize(new GetDocumentRequest(reference)));
-        var original = tasks.Retain(execution.InvokeAsync(Principal, requestId, Guid.Empty, signed, token));
+        var original = tasks.Retain(execution.InvokeAsync(Principal, requestId, Guid.Empty, envelope, token));
         var reply = await tasks.CompleteAsync(original);
         await execution.Observation.Read(requestId).Disposed.Task.WaitAsync(token);
         return reply;

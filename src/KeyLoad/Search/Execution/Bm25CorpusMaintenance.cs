@@ -43,9 +43,9 @@ internal static class Bm25CorpusMaintenance
         var principal = partition.Database.Store.Read(view => partition.Database.Principal(
             work.CreateView(view), actual.UserId!, partition.Database.EvaluationClock.GetUtcNow()));
         var requestId = Guid.NewGuid();
-        var signed = node.CatalogRequestCodec().CreateBm25CorpusPublication(requestId, actual, envelopeExpiry);
+        var envelope = node.CatalogRequestCodec().CreateBm25CorpusPublication(requestId, actual, envelopeExpiry);
         return await Bm25CorpusCall.ExecuteAsync(node, partition, principal, requestId,
-            actual.CommandId, signed, work, token);
+            actual.CommandId, envelope, work, token);
     }
 
     private static async Task ReadCurrentViewAsync(PartitionHost partition, DateTimeOffset originalExpiry,

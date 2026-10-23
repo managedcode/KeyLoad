@@ -67,7 +67,7 @@ internal static class RequestCqrsAnnSettlementReplayFlow
         CommitProjectionBatchRequest request, CancellationToken token)
     {
         var id = Guid.NewGuid();
-        var signed = fixture.Codec.CreateCommand(id, RequestCqrsAnnTestData.Principal,
+        var envelope = fixture.Codec.CreateCommand(id, RequestCqrsAnnTestData.Principal,
             OperationKind.CommitProjectionBatch, request.CommandId, OrleansSerialization.Serialize(request));
         var principal = fixture.Database.Store.Read(view => fixture.Database.Database.Principal(view,
             RequestCqrsAnnTestData.Principal, fixture.Clock.GetUtcNow()));
@@ -75,7 +75,7 @@ internal static class RequestCqrsAnnSettlementReplayFlow
         using var identity = new GrainRequestIdentityScope(fixture.Services, principal,
             id, request.CommandId, token, connectionId: fixture.ConnectionId);
         return await GrainRequestStreamConsumer.DrainAsync(
-            execution => connection.ExecuteStreamAsync(signed, execution),
+            execution => connection.ExecuteStreamAsync(envelope, execution),
             fixture.Services.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>(),
             id, fixture.Clock, fixture.RoutingOptions, token);
     }

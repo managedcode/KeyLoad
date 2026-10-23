@@ -2,7 +2,7 @@ using ManagedCode.Communication.CQRS;
 
 namespace KeyLoad.Clustering;
 
-/// <summary>Validates the exact completed online-text phases of one verified signed parent request.</summary>
+/// <summary>Validates the exact completed online-text phases of one verified parent request.</summary>
 internal sealed class OnlineTextMaintenanceStreamShape(Guid requestId)
 {
     private OnlineTextPhase? phase;

@@ -127,3 +127,4 @@ source artifacts own those checks.
 | [ADR-140: Deterministic first issuance of new Analytics command identity](ADR-140-new-analytics-command-identity.md) |
 | [ADR-142: One live benchmark session per database and topology](ADR-142-shared-live-benchmark-sessions.md) |
 | [ADR-143: Silo count and replica count](ADR-143-independent-silo-replica-topology.md) |
+| [ADR-144: Typed Orleans request envelopes](ADR-144-typed-request-envelopes.md) |

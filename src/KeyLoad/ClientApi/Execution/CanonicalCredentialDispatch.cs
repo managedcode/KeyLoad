@@ -4,10 +4,10 @@ namespace KeyLoad.Server;
 
 internal static class CanonicalCredentialDispatch
 {
-    internal static string Prepare(GrainRequestCodec codec, string credential, Guid requestId)
+    internal static GrainRequestEnvelope Prepare(GrainRequestCodec codec, string credential, Guid requestId)
         => codec.CreateRead(requestId, null, GrainReadKind.Authenticate, OrleansSerialization.Serialize(credential));
 
-    internal static async Task<GrainOperationReply> ReadAsync(OrleansNode node, string signed,
+    internal static async Task<GrainOperationReply> ReadAsync(OrleansNode node, GrainRequestEnvelope envelope,
         ServerConnectionOperation connection, Guid requestId, Action? onStarted = null)
     {
         GrainOperationReply? result = null;
@@ -18,7 +18,7 @@ internal static class CanonicalCredentialDispatch
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 onStarted?.Invoke();
-                result = await node.ExecuteAsync(requestId, signed, false, connection.Token);
+                result = await node.ExecuteAsync(requestId, envelope, false, connection.Token);
             }, failures);
         }, failures);
         ServerFailureObserver.ThrowIfAny(failures);

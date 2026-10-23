@@ -4,7 +4,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
 
-/// <summary>Shares authenticated signed request-actor dispatch across public protocol adapters.</summary>
+/// <summary>Shares authenticated request-actor dispatch across public protocol adapters.</summary>
 internal static class CanonicalOperationGateway
 {
     /// <summary>Executes one operation using the current persisted middleware principal.</summary>
@@ -75,7 +75,7 @@ internal static class CanonicalOperationGateway
             using var connection = ServerConnectionFeature.Acquire(context, cancellationToken);
             using var requestContext = node.OpenRequestContext(actual.Principal, requestId,
                 commandId, connection.Token, connection.Id);
-            reply = await node.ExecuteAsync(requestId, actual.SignedRequest, actual.Command, connection.Token);
+            reply = await node.ExecuteAsync(requestId, actual.Envelope, actual.Command, connection.Token);
             outcome = DatabasePhaseOutcome.Completed;
         }
         catch (Exception failure) when (failure is OperationCanceledException or KeyLoadException { Code: ErrorCode.Cancelled })

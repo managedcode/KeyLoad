@@ -7,7 +7,7 @@ namespace KeyLoad.Clustering;
 internal static class RemoteTransferCoordination
 {
     internal static async Task<DueDispatchResult> ExecuteAsync(RemoteTransferCoordinationHint hint, string owner,
-        GrainRequestCodec codec, RemoteTransferSignedExecution execution, TimeProvider clock,
+        GrainRequestCodec codec, RemoteTransferEnvelopeExecution execution, TimeProvider clock,
         IOptions<DueCoordinationOptions> options, RuntimeJournalAdmission admission, CancellationToken cancellationToken)
     {
         var subject = options.Value.TransferCoordinatorPrincipalId
@@ -50,7 +50,7 @@ internal static class RemoteTransferCoordination
         return await CompleteAsync(execution, codec, hint, receipt, lifetime.Token).ConfigureAwait(true);
     }
 
-    private static async Task<DueDispatchResult> CompleteAsync(RemoteTransferSignedExecution execution, GrainRequestCodec codec,
+    private static async Task<DueDispatchResult> CompleteAsync(RemoteTransferEnvelopeExecution execution, GrainRequestCodec codec,
         RemoteTransferCoordinationHint hint, QueueTransferReceiptInspection receipt, CancellationToken token)
     {
         var source = await SourceAsync(execution, hint, token).ConfigureAwait(true);
@@ -74,7 +74,7 @@ internal static class RemoteTransferCoordination
         return new(reply.Error);
     }
 
-    private static async Task<QueueTransferInspection?> SourceAsync(RemoteTransferSignedExecution execution,
+    private static async Task<QueueTransferInspection?> SourceAsync(RemoteTransferEnvelopeExecution execution,
         RemoteTransferCoordinationHint hint, CancellationToken token)
     {
         var source = await execution.ReadAsync<QueueTransferInspection>(hint.PrincipalId, GrainReadKind.QueueTransfer,
@@ -87,7 +87,7 @@ internal static class RemoteTransferCoordination
         return source;
     }
 
-    private static async Task<QueueTransferReceiptInspection?> TargetAsync(RemoteTransferSignedExecution execution,
+    private static async Task<QueueTransferReceiptInspection?> TargetAsync(RemoteTransferEnvelopeExecution execution,
         RemoteTransferCoordinationHint hint, CancellationToken token)
     {
         var receipt = await execution.ReadAsync<QueueTransferReceiptInspection>(hint.PrincipalId, GrainReadKind.QueueTransferReceipt,

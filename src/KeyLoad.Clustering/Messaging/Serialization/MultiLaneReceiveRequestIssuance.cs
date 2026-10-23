@@ -3,7 +3,7 @@ namespace KeyLoad.Clustering;
 /// <summary>Issues the original bounded multi-lane receive child without changing its execution payload.</summary>
 internal static class MultiLaneReceiveRequestIssuance
 {
-    internal static string CreateMultiLaneReceiveChild(GrainRequestCodec codec, Guid requestId, string principalId, Guid commandId,
+    internal static GrainRequestEnvelope CreateMultiLaneReceiveChild(GrainRequestCodec codec, Guid requestId, string principalId, Guid commandId,
         byte[] payload, DateTimeOffset expiry)
     {
         var context = codec.LifetimeReadContext;

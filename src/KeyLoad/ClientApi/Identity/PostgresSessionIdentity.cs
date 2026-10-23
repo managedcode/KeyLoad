@@ -19,7 +19,7 @@ internal sealed class PostgresSessionIdentity(string subject, byte[] credential,
         var node = services.GetRequiredService<OrleansNode>();
         var codec = services.GetRequiredService<GrainRequestCodec>();
         var requestId = Guid.NewGuid();
-        var signed = CanonicalCredentialDispatch.Prepare(codec, Utf8.GetString(credential), requestId);
+        var envelope = CanonicalCredentialDispatch.Prepare(codec, Utf8.GetString(credential), requestId);
         PrincipalRecord? principal = null;
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
@@ -27,7 +27,7 @@ internal sealed class PostgresSessionIdentity(string subject, byte[] credential,
             using var connection = owner.Acquire(token);
             await ServerFailureObserver.ObserveAsync(async () =>
             {
-                var reply = await CanonicalCredentialDispatch.ReadAsync(node, signed, connection, requestId);
+                var reply = await CanonicalCredentialDispatch.ReadAsync(node, envelope, connection, requestId);
                 principal = McpAuthentication.ReadPrincipal(reply.Payload.Span,
                     services.GetRequiredService<IOptions<McpExecutionOptions>>(), connection.Token);
                 if (!StringComparer.Ordinal.Equals(principal.Id, Subject))

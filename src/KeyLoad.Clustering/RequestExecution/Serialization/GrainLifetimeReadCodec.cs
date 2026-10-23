@@ -3,7 +3,7 @@ namespace KeyLoad.Clustering;
 /// <summary>Builds the current lifetime read envelopes before the original codec signs them.</summary>
 internal static class GrainLifetimeReadCodec
 {
-    internal static string CreatePartitionQueryLeaf(this GrainRequestCodec codec, Guid requestId, string principalId,
+    internal static GrainRequestEnvelope CreatePartitionQueryLeaf(this GrainRequestCodec codec, Guid requestId, string principalId,
         ReadOnlyMemory<byte> payload, DateTimeOffset expiresAt)
     {
         var context = codec.LifetimeReadContext;
@@ -15,7 +15,7 @@ internal static class GrainLifetimeReadCodec
         });
     }
 
-    internal static string CreateDistributedSearchLeaf(this GrainRequestCodec codec, Guid requestId, string principalId,
+    internal static GrainRequestEnvelope CreateDistributedSearchLeaf(this GrainRequestCodec codec, Guid requestId, string principalId,
         ReadOnlyMemory<byte> payload, DateTimeOffset expiresAt)
     {
         var context = codec.LifetimeReadContext;

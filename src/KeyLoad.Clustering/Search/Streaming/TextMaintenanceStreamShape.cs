@@ -2,7 +2,7 @@ using ManagedCode.Communication.CQRS;
 
 namespace KeyLoad.Clustering;
 
-/// <summary>Validates completed execution text phases of one original signed maintenance operation.</summary>
+/// <summary>Validates completed execution text phases of one original verified maintenance operation.</summary>
 internal sealed class TextMaintenanceStreamShape(Guid requestId)
 {
     private TextIndexMaintenancePhase? phase;

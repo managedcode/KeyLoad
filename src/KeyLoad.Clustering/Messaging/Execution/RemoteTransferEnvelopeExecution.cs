@@ -5,7 +5,7 @@ using Orleans.Serialization;
 
 namespace KeyLoad.Clustering;
 
-internal sealed class RemoteTransferSignedExecution(GrainRequestCodec codec, BackgroundStorageClient storage,
+internal sealed class RemoteTransferEnvelopeExecution(GrainRequestCodec codec, BackgroundStorageClient storage,
     RemoteTransferCoordinationHint hint,
     IServiceProvider services, IGrainFactory grainFactory, TimeProvider clock,
     Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> serializer,
@@ -17,8 +17,8 @@ internal sealed class RemoteTransferSignedExecution(GrainRequestCodec codec, Bac
         var principal = await CurrentPrincipalAsync(subject, token).ConfigureAwait(true);
         var connection = ConnectionExecutionIdentity.Resolve(services);
         using var identity = new GrainRequestIdentityScope(services, principal, requestId, Guid.Empty, token, connectionId: connection);
-        var signed = codec.CreateRead(requestId, principal.Id, kind, payload);
-        var reply = await DrainAsync(connection, requestId, signed, token).ConfigureAwait(true);
+        var envelope = codec.CreateRead(requestId, principal.Id, kind, payload);
+        var reply = await DrainAsync(connection, requestId, envelope, token).ConfigureAwait(true);
         if (reply.Error is { } error)
         {
             throw Errors.Fail(error, reply.SafeDetail ?? RemoteTransferCoordinationProtocol.InvalidResult);
@@ -33,8 +33,8 @@ internal sealed class RemoteTransferSignedExecution(GrainRequestCodec codec, Bac
         var principal = await CurrentPrincipalAsync(subject, token).ConfigureAwait(true);
         var connection = ConnectionExecutionIdentity.Resolve(services);
         using var identity = new GrainRequestIdentityScope(services, principal, requestId, request.CommandId, token, connectionId: connection);
-        var signed = codec.CreateCommand(requestId, principal.Id, OperationKind.Batch, request.CommandId, OrleansSerialization.Serialize(request));
-        return await DrainAsync(connection, requestId, signed, token).ConfigureAwait(true);
+        var envelope = codec.CreateCommand(requestId, principal.Id, OperationKind.Batch, request.CommandId, OrleansSerialization.Serialize(request));
+        return await DrainAsync(connection, requestId, envelope, token).ConfigureAwait(true);
     }
 
     private async Task<PrincipalRecord> CurrentPrincipalAsync(string subject, CancellationToken token)
@@ -47,7 +47,7 @@ internal sealed class RemoteTransferSignedExecution(GrainRequestCodec codec, Bac
         return principal;
     }
 
-    private Task<GrainOperationReply> DrainAsync(Guid connection, Guid requestId, string signed, CancellationToken token)
-        => GrainRequestStreamConsumer.DrainAsync(original => grainFactory.GetGrain<IConnectionGrain>(connection).ExecuteStreamAsync(signed, original),
+    private Task<GrainOperationReply> DrainAsync(Guid connection, Guid requestId, GrainRequestEnvelope envelope, CancellationToken token)
+        => GrainRequestStreamConsumer.DrainAsync(original => grainFactory.GetGrain<IConnectionGrain>(connection).ExecuteStreamAsync(envelope, original),
             serializer, requestId, clock, routing, token);
 }

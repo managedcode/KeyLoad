@@ -19,11 +19,11 @@ public partial interface ISiloDatabaseService : IGrainService
     /// <summary>Applies exactly the prepared operation through ZoneTree's atomic commit gate.</summary>
     Task<StorageOperationResult> ApplyAsync(Command<DatabaseCommand> operation, long sequence, CancellationToken cancellationToken);
     /// <summary>Awaits a self-contained request on the execution stateless-worker pool.</summary>
-    Task<GrainOperationReply> ExecuteAsync(string signedRequest, CancellationToken cancellationToken);
+    Task<GrainOperationReply> ExecuteAsync(GrainRequestEnvelope envelope, CancellationToken cancellationToken);
     /// <summary>Joins a server-owned maintenance session's actual cleanup after cancellation or revocation.</summary>
     Task AbortMaintenanceAsync(GrainReadKind kind, Guid sessionId);
     /// <summary>Executes the original partition-ordered command through this silo's execution worker pool.</summary>
-    Task<GrainOperationReply> ExecuteCommandAsync(string signedRequest, string actorKey,
+    Task<GrainOperationReply> ExecuteCommandAsync(GrainRequestEnvelope envelope, string actorKey,
         CancellationToken cancellationToken);
     /// <summary>Observes the exact addressed silo after the caller verified current administrator authority.</summary>
     Task<NodeStatus> ReadStatusAsync(CancellationToken cancellationToken);

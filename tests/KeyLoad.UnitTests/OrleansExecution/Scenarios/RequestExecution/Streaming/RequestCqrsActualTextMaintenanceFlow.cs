@@ -75,7 +75,7 @@ internal static class RequestCqrsActualTextMaintenanceFlow
         TextIndexMaintenanceRequest request, bool expectWork, CancellationToken token)
     {
         var id = Guid.NewGuid();
-        var signed = fixture.Codec.CreateCommand(id, TextMaintenanceTestValues.Principal,
+        var envelope = fixture.Codec.CreateCommand(id, TextMaintenanceTestValues.Principal,
             OperationKind.MaintainTextIndex, request.CommandId, OrleansSerialization.Serialize(request));
         var principal = fixture.Database.Store.Read(view => fixture.Database.Database.Principal(view,
             TextMaintenanceTestValues.Principal, fixture.Clock.GetUtcNow()));
@@ -84,10 +84,10 @@ internal static class RequestCqrsActualTextMaintenanceFlow
         using var identity = new GrainRequestIdentityScope(fixture.Services, principal,
             id, request.CommandId, token, connectionId: fixture.ConnectionId);
         var reply = await GrainRequestStreamConsumer.DrainWithPurposeAsync(
-            execution => ObserveAsync(connection.ExecuteStreamAsync(signed, execution), frames, execution),
+            execution => ObserveAsync(connection.ExecuteStreamAsync(envelope, execution), frames, execution),
             fixture.Services.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>(),
             id, fixture.Clock, fixture.RoutingOptions,
-            new CqrsStreamPurpose(() => fixture.Codec.VerifyRequest(signed, id)), token);
+            new CqrsStreamPurpose(() => fixture.Codec.DecodeRequest(envelope, id)), token);
         if (reply.Error is not null)
         {
             var phases = frames.Where(frame => frame.Kind == CqrsStreamChunkKind.Progress)

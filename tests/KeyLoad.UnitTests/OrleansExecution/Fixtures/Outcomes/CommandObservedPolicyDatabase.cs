@@ -30,7 +30,7 @@ internal sealed class CommandObservedPolicyDatabase(Func<RequestCqrsHostedRuntim
         var commandId = id ?? Guid.NewGuid();
         var operationId = requestId ?? Guid.NewGuid();
         var subject = Store.Read(view => Database.Principal(view, principal, actual.Clock.GetUtcNow()));
-        var signed = actual.Codec.CreateCommand(operationId, subject.Id, kind, commandId,
+        var envelope = actual.Codec.CreateCommand(operationId, subject.Id, kind, commandId,
             OrleansSerialization.Serialize(payload));
         var failures = new List<Exception>();
         GrainOperationReply? reply = null;
@@ -42,7 +42,7 @@ internal sealed class CommandObservedPolicyDatabase(Func<RequestCqrsHostedRuntim
             {
                 reply = await GrainRequestStreamConsumer.DrainAsync(
                     createStream: original => actual.Grains.GetGrain<IConnectionGrain>(actual.ConnectionId)
-                        .ExecuteStreamAsync(signed, original),
+                        .ExecuteStreamAsync(envelope, original),
                     serializer: actual.Services.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>(),
                     requestId: operationId, clock: actual.Clock, options: actual.RoutingOptions,
                     cancellationToken: token).ConfigureAwait(false);

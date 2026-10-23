@@ -19,9 +19,9 @@ internal sealed class PublicCommandTransportTests
         var decoded = Decode(database, operation);
         await Assert.That(decoded.CommandId).IsEqualTo(operation.CommandId);
         await Assert.That(decoded.CommandKind).IsEqualTo(operation.Value!.Kind);
-        var codec = new GrainRequestCodec(database.Database.Store.Identity.Incarnation, database.Database.Store.Identity.SigningKey,
+        var codec = new GrainRequestCodec(database.Database.Store.Identity.Incarnation,
             database.Database.OperationLimitsOptions, TimeProvider.System, UnitRoutingOptions.Routing());
-        var request = codec.Verify(codec.CreateCommand(Guid.NewGuid(), operation.UserId!,
+        var request = codec.Decode(codec.CreateCommand(Guid.NewGuid(), operation.UserId!,
             operation.Value.Kind, operation.CommandId, decoded.Payload));
         var actorKey = GrainPartitionResolver.Resolve(request);
         var executor = new GrainCommandExecutor(database.Database, new EmbeddedCoordinator(database.Database), TimeProvider.System, UnitRoutingOptions.Routing());
@@ -32,7 +32,7 @@ internal sealed class PublicCommandTransportTests
         var originalOutcome = PublicNormalizationFixture.StoredBytes(database, operation);
         await Assert.That(Errors.Code(stored.Result.Problem)).IsEqualTo(result.Error);
         await Assert.That(stored.Result.Problem?.Detail).IsEqualTo(result.SafeDetail);
-        var retry = codec.Verify(codec.CreateCommand(Guid.NewGuid(), operation.UserId!,
+        var retry = codec.Decode(codec.CreateCommand(Guid.NewGuid(), operation.UserId!,
             operation.Value.Kind, operation.CommandId, decoded.Payload));
         await Assert.That(retry.Envelope.RequestId).IsNotEqualTo(request.Envelope.RequestId);
         var repeated = await SignedGrainRequestTestContext.ExecuteAsync(executor, retry, actorKey, CancellationToken.None);

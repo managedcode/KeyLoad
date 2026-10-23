@@ -25,7 +25,7 @@ The safe first code stage is therefore an internal prerequisite: exercise the
 real Q1 leaf operator on multiple atomic partitions in one `TestDatabase`, then
 merge only its bounded owned results. It prepares generated structures
 and verifies correct order/cut/policy bookkeeping without publishing a route or
-calling another grain. The existing signed request identity, persisted
+calling another grain. The existing request envelope identity, persisted
 authorization, `QueryEngine` admission/compiler and `DatabaseEngine.WithQueryView`
 remain authoritative.
 

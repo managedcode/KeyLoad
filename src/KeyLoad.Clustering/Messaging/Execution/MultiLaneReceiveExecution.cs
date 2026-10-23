@@ -11,7 +11,7 @@ namespace KeyLoad.Clustering;
 internal static class MultiLaneReceiveExecution
 {
     internal static async Task<MultiLaneReceiveResult> ExecuteAsync(DecodedGrainRequest parent,
-        Func<string, CancellationToken, Task<GrainOperationReply>> executeChild,
+        Func<GrainRequestEnvelope, CancellationToken, Task<GrainOperationReply>> executeChild,
         IServiceProvider services, GrainRequestCodec codec, TimeProvider clock,
         ILogger diagnostics, IResourceLifetimeWorkBinding binding,
         CancellationToken token)
@@ -55,7 +55,7 @@ internal static class MultiLaneReceiveExecution
     }
 
     private static async Task<MultiLaneReceiveDispatchResult> DispatchAsync(ReceiveRequest leaf,
-        Func<string, CancellationToken, Task<GrainOperationReply>> executeChild,
+        Func<GrainRequestEnvelope, CancellationToken, Task<GrainOperationReply>> executeChild,
         IServiceProvider services, GrainRequestCodec codec,
         TimeProvider clock, ILogger diagnostics, DecodedGrainRequest parent,
         IResourceLifetimeWorkBinding binding, Guid incarnation, int precedingOutcomes, CancellationToken token)
@@ -66,10 +66,10 @@ internal static class MultiLaneReceiveExecution
         var transferred = false;
         try
         {
-            var signed = codec.CreateMultiLaneReceiveChild(actorId, parent.Envelope.PrincipalId!, leaf.RequestId,
+            var child = codec.CreateMultiLaneReceiveChild(actorId, parent.Envelope.PrincipalId!, leaf.RequestId,
                 payload, parent.Envelope.ExpiresAt);
             transferred = true;
-            var reply = await MaintenanceChildDispatch.ExecuteAsync(parent, signed, actorId, leaf.RequestId,
+            var reply = await MaintenanceChildDispatch.ExecuteAsync(parent, child, actorId, leaf.RequestId,
                 (request, cancellation) =>
                 {
                     invoked = true;

@@ -7,7 +7,7 @@ internal static class CanonicalConnectionDispatch
     internal static async Task<object?> ExecuteAsync(IServiceProvider services, ServerConnectionFeature owner,
         PrincipalRecord principal, McpDecodedOperation operation, CancellationToken token)
     {
-        var actual = CanonicalOperationSigning.Create(services, principal, operation.ReadKind,
+        var actual = CanonicalOperationIssuance.Create(services, principal, operation.ReadKind,
             operation.CommandKind, operation.CommandId, operation.Payload, token);
         var node = services.GetRequiredService<OrleansNode>();
         object? result = null;
@@ -21,7 +21,7 @@ internal static class CanonicalConnectionDispatch
                     connection.Token, connection.Id);
                 await ServerFailureObserver.ObserveAsync(async () =>
                 {
-                    var reply = await node.ExecuteAsync(actual.RequestId, actual.SignedRequest, actual.Command,
+                    var reply = await node.ExecuteAsync(actual.RequestId, actual.Envelope, actual.Command,
                         connection.Token);
                     var value = OrleansSerialization.Deserialize<GrainValue>(reply.Payload.Span).Value;
                     connection.Token.ThrowIfCancellationRequested();

@@ -20,11 +20,11 @@ internal sealed class RequestCqrsIdentityProbeGrain(
 {
     public Task<int> CapabilityCallsAsync() => Task.FromResult(ledger.Count);
 
-    public Task<RequestCqrsProbeResult> ValidateAsync(string signedRequest, Guid actorRequestId)
+    public Task<RequestCqrsProbeResult> ValidateAsync(GrainRequestEnvelope signedRequest, Guid actorRequestId)
     {
         try
         {
-            var decoded = codec.VerifyRequest(signedRequest, actorRequestId);
+            var decoded = codec.DecodeRequest(signedRequest, actorRequestId);
             GrainIdentityContext.Validate(decoded.Envelope, actorRequestId);
             var calls = ledger.RecordCall();
             var state = RequestContext.Get(GrainRequestStreamProtocol.ContextKey) as GrainRequestContextState;

@@ -15,7 +15,7 @@ internal sealed class PartitionStorageRequestExecution(DatabaseEngine database, 
     private readonly Lock gate = new();
     private readonly Dictionary<Guid, (GrainReadKind Kind, RequestWorkLease Work)> active = [];
 
-    internal async Task<GrainOperationReply> ExecuteAsync(string signed, string? actorKey, IGrainContext context,
+    internal async Task<GrainOperationReply> ExecuteAsync(GrainRequestEnvelope envelope, string? actorKey, IGrainContext context,
         CancellationToken token)
     {
         var requestId = Guid.Empty;
@@ -23,7 +23,7 @@ internal sealed class PartitionStorageRequestExecution(DatabaseEngine database, 
         try
         {
             token.ThrowIfCancellationRequested();
-            var request = codec.Verify(signed);
+            var request = codec.Decode(envelope);
             requestId = request.Envelope.RequestId;
             command = request.Envelope.CommandKind is not null;
             GrainIdentityContext.Validate(request.Envelope, requestId);

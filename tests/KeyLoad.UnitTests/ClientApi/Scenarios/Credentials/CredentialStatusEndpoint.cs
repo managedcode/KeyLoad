@@ -56,9 +56,9 @@ internal sealed class CredentialStatusEndpoint(CredentialStatusState state)
         await CredentialStatusAssertions.EqualAsync(new ConfigureApiKeyRequest(key), request);
         await Assert.That(context.Request.Headers[P.CommandHeader].SingleOrDefault()).IsEqualTo(id.ToString());
         var requestId = Guid.NewGuid();
-        var signed = state.Scenario.Fixture.Codec.CreateCommand(requestId, principal.Id, OperationKind.ConfigureApiKey,
+        var envelope = state.Scenario.Fixture.Codec.CreateCommand(requestId, principal.Id, OperationKind.ConfigureApiKey,
             id, OrleansSerialization.Serialize(request));
-        var actual = state.Tasks.Retain(state.Scenario.InvokeAsync(principal, requestId, id, signed, context.RequestAborted));
+        var actual = state.Tasks.Retain(state.Scenario.InvokeAsync(principal, requestId, id, envelope, context.RequestAborted));
         var reply = await state.Tasks.CompleteAsync(actual);
         await state.Scenario.Observation.Read(requestId).Disposed.Task.WaitAsync(context.RequestAborted);
         await WriteReplyAsync(context, step, reply);

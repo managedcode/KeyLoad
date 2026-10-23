@@ -52,7 +52,7 @@ internal static class RequestCqrsAnnOriginalReplay
             global::KeyLoad.Server.Features.Search.AnnProtocol.RootDirectory));
         var execution = runtimeRootCore ? AnnFixtureFileSnapshot.Capture(fixture.Database.Directory) : [];
         var id = Guid.NewGuid();
-        var signed = fixture.Codec.CreateCommand(id, RequestCqrsAnnTestData.Principal,
+        var envelope = fixture.Codec.CreateCommand(id, RequestCqrsAnnTestData.Principal,
             OperationKind.MaintainAnnIndex, original.CommandId, OrleansSerialization.Serialize(original));
         var principal = fixture.Database.Store.Read(view => fixture.Database.Database.Principal(view,
             RequestCqrsAnnTestData.Principal, fixture.Clock.GetUtcNow()));
@@ -60,10 +60,10 @@ internal static class RequestCqrsAnnOriginalReplay
         using var identity = new GrainRequestIdentityScope(fixture.Services, principal,
             id, original.CommandId, token, connectionId: fixture.ConnectionId);
         var reply = await GrainRequestStreamConsumer.DrainWithPurposeAsync(
-            execution => connection.ExecuteStreamAsync(signed, execution),
+            execution => connection.ExecuteStreamAsync(envelope, execution),
             fixture.Services.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>(),
             id, fixture.Clock, fixture.RoutingOptions,
-            new CqrsStreamPurpose(() => fixture.Codec.VerifyRequest(signed, id)), token);
+            new CqrsStreamPurpose(() => fixture.Codec.DecodeRequest(envelope, id)), token);
         await Assert.That(reply.Error).IsEqualTo(expected);
         await Assert.That(reply.Payload.Length).IsEqualTo(0);
         await Assert.That(fixture.Database.ReadCanonicalCut().AppliedPosition).IsEqualTo(journal.AppliedPosition);

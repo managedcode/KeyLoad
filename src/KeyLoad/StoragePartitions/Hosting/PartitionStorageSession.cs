@@ -96,10 +96,10 @@ internal sealed class PartitionStorageSession : ISharedDatabaseSession, IAsyncDi
     public Task<Result<object>> ApplyAsync(Command<DatabaseCommand> operation, CancellationToken cancellationToken)
         => Host.Coordinator.SubmitVerifiedAsync(operation, cancellationToken);
 
-    public Task<GrainOperationReply> ExecuteAsync(string signedRequest, string? actorKey,
+    public Task<GrainOperationReply> ExecuteAsync(GrainRequestEnvelope envelope, string? actorKey,
         IGrainContext owner, CancellationToken cancellationToken)
         => (requests ?? throw new InvalidOperationException(ServicesUnavailable))
-            .ExecuteAsync(signedRequest, actorKey, owner, cancellationToken);
+            .ExecuteAsync(envelope, actorKey, owner, cancellationToken);
 
     public Task AbortMaintenanceAsync(GrainReadKind kind, Guid sessionId)
         => (requests ?? throw new InvalidOperationException(ServicesUnavailable)).AbortAsync(kind, sessionId);

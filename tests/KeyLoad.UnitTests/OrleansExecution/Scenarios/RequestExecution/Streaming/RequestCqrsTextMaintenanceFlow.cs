@@ -37,9 +37,9 @@ internal static class RequestCqrsTextMaintenanceFlow
         TextIndexMaintenanceRequest request, byte[] payload, RequestCqrsTextFault? fault, CancellationToken token)
     {
         var id = Guid.NewGuid();
-        var signed = fixture.Codec.CreateCommand(id, TextMaintenanceTestValues.Principal,
+        var envelope = fixture.Codec.CreateCommand(id, TextMaintenanceTestValues.Principal,
             OperationKind.MaintainTextIndex, request.CommandId, OrleansSerialization.Serialize(request));
-        var purpose = new CqrsStreamPurpose(() => fixture.Codec.VerifyRequest(signed, id));
+        var purpose = new CqrsStreamPurpose(() => fixture.Codec.DecodeRequest(envelope, id));
         var producer = new RequestCqrsProducerObservation();
         var kinds = new List<CqrsStreamChunkKind>();
         var phases = new List<TextIndexMaintenancePhase>();

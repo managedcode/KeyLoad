@@ -3,7 +3,7 @@ using KeyLoad.Diagnostics.Features.ResourceExecution;
 
 namespace KeyLoad.Server;
 
-/// <summary>Resolves the current persisted identity through the execution signed authentication read.</summary>
+/// <summary>Resolves the current persisted identity through the execution authentication read.</summary>
 internal static class DatabaseCredentialResolver
 {
     /// <summary>Fetches the owned execution principal envelope without publishing an operation execution identity.</summary>
@@ -21,7 +21,7 @@ internal static class DatabaseCredentialResolver
         }
         var requestId = Guid.NewGuid();
         var codec = context.RequestServices.GetRequiredService<GrainRequestCodec>();
-        var token = CanonicalCredentialDispatch.Prepare(codec,
+        var envelope = CanonicalCredentialDispatch.Prepare(codec,
             key[ServerProtocol.BearerPrefix.Length..], requestId);
         RequestFailureDiagnostic.MarkCredentialDispatch(context);
         var started = DatabasePhaseTelemetry.Begin();
@@ -32,7 +32,7 @@ internal static class DatabaseCredentialResolver
         {
             var node = context.RequestServices.GetRequiredService<OrleansNode>();
             using var connection = ServerConnectionFeature.Acquire(context, context.RequestAborted);
-            reply = await CanonicalCredentialDispatch.ReadAsync(node, token, connection, requestId, () =>
+            reply = await CanonicalCredentialDispatch.ReadAsync(node, envelope, connection, requestId, () =>
             {
                 if (executionObserver is not null)
                 {

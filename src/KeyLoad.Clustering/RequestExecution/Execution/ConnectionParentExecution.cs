@@ -52,8 +52,8 @@ internal static class ConnectionParentExecution
         }
     }
 
-    internal static async Task<GrainOperationReply> ExecuteAsync(DecodedGrainRequest request, string signedParent,
-        Func<string, CancellationToken, Task<GrainOperationReply>> executeChild,
+    internal static async Task<GrainOperationReply> ExecuteAsync(DecodedGrainRequest request, GrainRequestEnvelope parentEnvelope,
+        Func<GrainRequestEnvelope, CancellationToken, Task<GrainOperationReply>> executeChild,
         Func<GrainReadKind, Guid, Task> abortMaintenance,
         IServiceProvider services, GrainRequestCodec codec, TimeProvider clock,
         IOptions<GrainRoutingOptions> options, ILogger diagnostics, IGrainContext context,
@@ -61,7 +61,7 @@ internal static class ConnectionParentExecution
     {
         if (request.Envelope.CommandKind == OperationKind.MaintainOnlineTextIndex)
         {
-            var result = await OnlineTextExecution.ExecuteAsync(request, signedParent, executeChild,
+            var result = await OnlineTextExecution.ExecuteAsync(request, parentEnvelope, executeChild,
                 id => abortMaintenance(GrainReadKind.OnlineTextMaintenance, id), services, codec,
                 options, diagnostics, context, writer, purpose.WorkBinding).ConfigureAwait(true);
             return GrainReplyFactory.ParentValue(result, options, writer.CancellationToken);

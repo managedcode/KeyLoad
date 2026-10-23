@@ -89,9 +89,9 @@ public enum GrainReadKind
     SampleRollup,
     /// <summary>Publishes the eligible execution lexical generation at an acknowledged applied cut.</summary>
     WaitForIndex,
-    /// <summary>Executes one signed internal administrator ANN maintenance phase on the exact execution owner.</summary>
+    /// <summary>Executes one issued internal administrator ANN maintenance phase on the exact execution owner.</summary>
     AnnMaintenance,
-    /// <summary>Executes one signed protected execution text maintenance stage on its exact owner.</summary>
+    /// <summary>Executes one issued protected execution text maintenance stage on its exact owner.</summary>
     TextMaintenance,
     /// <summary>Reads one provisioned vector-only execution ANN generation under current policy.</summary>
     ApproximateSearch = 52,

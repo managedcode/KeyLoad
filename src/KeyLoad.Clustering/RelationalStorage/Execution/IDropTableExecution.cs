@@ -9,7 +9,7 @@ public interface IDropTableExecution
     /// <param name="commandId">The stable original command identity from the existing command envelope.</param>
     /// <param name="principalId">The verified subject; persisted authority is checked freshly at each execution step.</param>
     /// <param name="request">The original bounded public request.</param>
-    /// <param name="originalExpiry">The unchanged signed request expiry; execution stages cannot renew it.</param>
+    /// <param name="originalExpiry">The unchanged request envelope expiry; execution stages cannot renew it.</param>
     /// <param name="cancellationToken">The original request cancellation and deadline.</param>
     /// <returns>The original execution operation result; successful JSON contains DropTableResult.</returns>
     Task<Result<object>> ExecuteAsync(Guid requestId, Guid commandId, string principalId,

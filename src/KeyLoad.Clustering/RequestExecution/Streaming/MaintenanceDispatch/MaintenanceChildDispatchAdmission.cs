@@ -16,14 +16,14 @@ internal sealed class MaintenanceChildDispatchAdmission(byte[]? ownedPayload) : 
     internal CancellationToken Token => cancellation?.Token
         ?? throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest);
 
-    internal void Open(DecodedGrainRequest parent, string signed, Guid actorId, Guid commandId,
+    internal void Open(DecodedGrainRequest parent, GrainRequestEnvelope child, Guid actorId, Guid commandId,
         IServiceProvider services, GrainRequestCodec codec,
         IResourceLifetimeWorkBinding binding, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
         codec.ValidateScope(parent.Envelope);
         GrainIdentityContext.Validate(parent.Envelope, parent.Envelope.RequestId);
-        var verified = codec.VerifyRequest(signed, actorId);
+        var verified = codec.DecodeRequest(child, actorId);
         if (verified.Envelope.PrincipalId != parent.Envelope.PrincipalId || verified.Envelope.CommandId != commandId
             || verified.Envelope.ExpiresAt != parent.Envelope.ExpiresAt
             || binding is not IRequestWorkBinding execution

@@ -1,6 +1,6 @@
 namespace KeyLoad.Clustering;
 
-/// <summary>Classifies one verified signed operation without retaining authority or changing execution.</summary>
+/// <summary>Classifies one verified operation without retaining authority or changing execution.</summary>
 internal sealed class CqrsStreamPurpose(Func<DecodedGrainRequest>? resolve = null)
 {
     private RequestWorkLease? work;

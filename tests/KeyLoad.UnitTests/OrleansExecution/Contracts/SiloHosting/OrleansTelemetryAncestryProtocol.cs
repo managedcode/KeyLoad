@@ -12,7 +12,7 @@ internal static class OrleansTelemetryAncestryProtocol
     internal const string PutKind = "putDocument";
     internal const string Root = "root";
     internal const string MissingParent = "The real telemetry parent activity was not created.";
-    internal const string MissingReceipt = "The real signed operation returned no receipt.";
+    internal const string MissingReceipt = "The real operation returned no receipt.";
     internal const int MaximumParentLinks = 32;
     internal const int OneLink = 1;
     internal const int NoLocalParents = 0;

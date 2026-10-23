@@ -71,7 +71,7 @@ AppHost owns topology/test runner readiness, dependencies and shutdown. Every te
 
 This is the accepted public discovery contract for ADR-039. The meta names
 are the package's canonical pattern; existing database DTOs, SQL, HTTP SDK,
-signed envelopes and persisted formats do not change. Update callers and docs
+request envelopes and persisted formats do not change. Update callers and docs
 atomically and remove obsolete direct operation-tool routes. No second full
 catalog endpoint or compatibility fallback remains. Source-only rollback reverts
 the composition/caller changes together without touching data or receipts.

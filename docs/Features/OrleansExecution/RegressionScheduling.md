@@ -10,11 +10,11 @@ flowchart LR
     T --> L[Owned connection fixture]
     T --> R[Second owned connection fixture]
     S --> D[Original shared database, connection and codec]
-    L --> LB[Actual signed RequestStarted barrier]
-    R --> RB[Actual signed RequestStarted barrier]
+    L --> LB[Actual RequestStarted barrier]
+    R --> RB[Actual RequestStarted barrier]
     LB --> J[Both barriers entered before either releases]
     RB --> J
-    J --> F[Original producers settle, records commit, signed connections close]
+    J --> F[Original producers settle, records commit, connections close]
 ```
 
 ## Requirements and acceptance

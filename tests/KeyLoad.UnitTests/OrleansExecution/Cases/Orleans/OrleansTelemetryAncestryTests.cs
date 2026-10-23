@@ -4,6 +4,6 @@ namespace KeyLoad.UnitTests.Features.OrleansExecution;
 internal sealed class OrleansTelemetryAncestryTests
 {
     [Test]
-    public Task RealSignedWriteSuppressesDeepClientTelemetryThenExportsInclusiveAndShallowSpans()
+    public Task RealWriteSuppressesDeepClientTelemetryThenExportsInclusiveAndShallowSpans()
         => OrleansTelemetryAncestryFlow.RunAsync();
 }

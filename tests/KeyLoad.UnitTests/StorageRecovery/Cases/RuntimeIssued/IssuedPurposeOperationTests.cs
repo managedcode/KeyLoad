@@ -2,12 +2,12 @@ using KeyLoad.UnitTests.Features.OrleansExecution;
 
 namespace KeyLoad.UnitTests.Features.StorageRecovery;
 
-internal sealed class SignedPurposeOperationTests
+internal sealed class IssuedPurposeOperationTests
 {
     [Test]
-    public Task OriginalSignedPurposeRefusesBeforeRoutingThenSameOwnerRepairReplayAndTwoColdCuts()
+    public Task OriginalIssuedPurposeRefusesBeforeRoutingThenSameOwnerRepairReplayAndTwoColdCuts()
     {
-        var observation = new SignedPurposeObservation();
+        var observation = new IssuedPurposeObservation();
         return ConnectionScenario.RunAsync(async scenario =>
         {
             using var deadline = new CancellationTokenSource(scenario.Timing.StartupTimeout, TimeProvider.System);
@@ -15,7 +15,7 @@ internal sealed class SignedPurposeOperationTests
                 TestContext.Current!.Execution.CancellationToken, deadline.Token);
             await scenario.InitializeAsync(caller.Token);
             deadline.CancelAfter(scenario.Timing.CompletionTimeout);
-            await SignedPurposeOperation.RunAsync(scenario, observation, caller.Token);
+            await IssuedPurposeOperation.RunAsync(scenario, observation, caller.Token);
         }, purposeObserver: observation);
     }
 }

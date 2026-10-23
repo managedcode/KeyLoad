@@ -21,16 +21,16 @@ public sealed class ConnectionGrain(GrainRequestCodec codec, SiloDatabaseClient 
 
     /// <inheritdoc />
     public IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> ExecuteStreamAsync(
-        string signedRequest, CancellationToken cancellationToken)
+        GrainRequestEnvelope envelope, CancellationToken cancellationToken)
     {
-        var request = codec.Verify(signedRequest);
+        var request = codec.Decode(envelope);
         GrainIdentityContext.ValidateConnection(request.Envelope, this.GetPrimaryKey());
         return ConnectionOperationStream.Run(operations, request.Envelope.RequestId,
-            token => CreateStream(request, signedRequest, token), cancellationToken);
+            token => CreateStream(request, envelope, token), cancellationToken);
     }
 
     private IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> CreateStream(
-        DecodedGrainRequest request, string signed, CancellationToken token)
+        DecodedGrainRequest request, GrainRequestEnvelope envelope, CancellationToken token)
     {
         var requestId = request.Envelope.RequestId;
         var purpose = new CqrsStreamPurpose();
@@ -40,13 +40,13 @@ public sealed class ConnectionGrain(GrainRequestCodec codec, SiloDatabaseClient 
             : () => settlement.SettleAsync(((IGrainBase)this).GrainContext);
         return CqrsStreamLifetime.RunBoundWithAwaitedSettlement(
             execution => CqrsStream.Create<GrainRequestProgress, GrainOperationReply>(
-                writer => ExecuteAsync(request, signed, writer, purpose, settlement), execution),
+                writer => ExecuteAsync(request, envelope, writer, purpose, settlement), execution),
             serializer, requestId, clock, settled, options, owner, purpose,
             services.GetRequiredService<IOptions<DatabaseLimits>>(),
             () => owner.Acquire(requestId, RequestWorkKind.RequestProducer), token);
     }
 
-    private async ValueTask<Result<GrainOperationReply>> ExecuteAsync(DecodedGrainRequest request, string signed,
+    private async ValueTask<Result<GrainOperationReply>> ExecuteAsync(DecodedGrainRequest request, GrainRequestEnvelope envelope,
         ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer, CqrsStreamPurpose purpose,
         GrainRequestPhaseSettlement? settlement)
     {
@@ -70,12 +70,12 @@ public sealed class ConnectionGrain(GrainRequestCodec codec, SiloDatabaseClient 
             }
             stage = GrainFailureStage.CapabilityExecution;
             var owner = await storage.ReadOwnerAsync(request.Envelope.Incarnation, writer.CancellationToken).ConfigureAwait(true);
-            var reply = await ExecuteLeafAsync(request, signed, owner, purpose.WorkBinding,
+            var reply = await ExecuteLeafAsync(request, envelope, owner, purpose.WorkBinding,
                 writer.CancellationToken).ConfigureAwait(true);
             if (ConnectionParentExecution.Handles(request.Envelope.CommandKind) && reply.Error is null)
             {
-                reply = await ConnectionParentExecution.ExecuteAsync(request, signed,
-                    (child, cancellation) => ExecuteLeafAsync(codec.Verify(child), child, owner,
+                reply = await ConnectionParentExecution.ExecuteAsync(request, envelope,
+                    (child, cancellation) => ExecuteLeafAsync(codec.Decode(child), child, owner,
                         purpose.WorkBinding, cancellation),
                     (kind, id) => storage.AbortMaintenanceAsync(owner, kind, id), services, codec, clock,
                     options, diagnostics, ((IGrainBase)this).GrainContext, writer, purpose).ConfigureAwait(true);
@@ -90,18 +90,18 @@ public sealed class ConnectionGrain(GrainRequestCodec codec, SiloDatabaseClient 
         }
     }
 
-    private Task<GrainOperationReply> ExecuteLeafAsync(DecodedGrainRequest request, string signed,
+    private Task<GrainOperationReply> ExecuteLeafAsync(DecodedGrainRequest request, GrainRequestEnvelope envelope,
         SiloAddress owner, RequestWorkLease binding, CancellationToken token)
         => request.Envelope.CommandKind is not null && !ConnectionParentExecution.Handles(request.Envelope.CommandKind)
-            ? ConnectionCommandExecution.ExecuteAsync(request, signed, GrainFactory,
+            ? ConnectionCommandExecution.ExecuteAsync(request, envelope, GrainFactory,
                 services, codec, clock, binding, token)
-            : storage.ExecuteAsync(owner, signed, token);
+            : storage.ExecuteAsync(owner, envelope, token);
 
     /// <inheritdoc />
-    public async Task CloseAsync(string signedControl, CancellationToken cancellationToken)
+    public async Task CloseAsync(GrainConnectionCloseControl closeControl, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        codec.VerifyConnectionClose(signedControl, this.GetPrimaryKey());
+        codec.ValidateConnectionClose(closeControl, this.GetPrimaryKey());
         try
         {
             await operations.CloseAsync().ConfigureAwait(true);

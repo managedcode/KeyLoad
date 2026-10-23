@@ -2,7 +2,7 @@ namespace KeyLoad.Clustering;
 
 internal interface IGrainRequestPurposeObserver
 {
-    string? BeforeSign(GrainRequestEnvelope original);
+    string? BeforeIssue(GrainRequestEnvelope original);
 
-    void RejectedAfterMac(GrainRequestEnvelope actual, KeyLoadException failure, GrainRequestScopeCut cut);
+    void RejectedAfterDecode(GrainRequestEnvelope actual, KeyLoadException failure, GrainRequestScopeCut cut);
 }

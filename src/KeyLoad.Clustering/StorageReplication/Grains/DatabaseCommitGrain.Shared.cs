@@ -57,8 +57,8 @@ public sealed partial class DatabaseCommitGrain
     }
 
     /// <inheritdoc />
-    public Task<GrainOperationReply> ExecuteSharedAsync(string signedRequest, string? actorKey, CancellationToken cancellationToken)
-        => this.WithCallChainReentrancyAsync(() => Shared.ExecuteAsync(signedRequest, actorKey,
+    public Task<GrainOperationReply> ExecuteSharedAsync(GrainRequestEnvelope envelope, string? actorKey, CancellationToken cancellationToken)
+        => this.WithCallChainReentrancyAsync(() => Shared.ExecuteAsync(envelope, actorKey,
             ((IGrainBase)this).GrainContext, cancellationToken));
 
     /// <inheritdoc />

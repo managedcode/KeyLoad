@@ -8,7 +8,7 @@ namespace KeyLoad.Clustering;
 /// <summary>Keeps actual command admission, original budget and returned-outcome publication in one boundary.</summary>
 internal static class ConnectionCommandExecution
 {
-    internal static async Task<GrainOperationReply> ExecuteAsync(DecodedGrainRequest request, string signed,
+    internal static async Task<GrainOperationReply> ExecuteAsync(DecodedGrainRequest request, GrainRequestEnvelope envelope,
         global::Orleans.IGrainFactory grains, IServiceProvider services, GrainRequestCodec codec, TimeProvider clock,
         IResourceLifetimeWorkBinding binding, CancellationToken token)
     {
@@ -24,7 +24,7 @@ internal static class ConnectionCommandExecution
             work.ConstrainLifetime(request.Envelope.ExpiresAt);
             work.AttachResourceLifetimeBinding(binding);
             var target = grains.GetGrain<ICommandPartitionGrain>(partition);
-            var reply = await target.ExecuteAsync(signed, token).ConfigureAwait(true);
+            var reply = await target.ExecuteAsync(envelope, token).ConfigureAwait(true);
             CommandResultWorkBinding.BindReturned(request, reply, work, binding);
             return reply;
         }

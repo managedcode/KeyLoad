@@ -4,7 +4,7 @@ using L = KeyLoad.UnitTests.Features.RelationalStorage.SqlCreateTableLiteral;
 
 namespace KeyLoad.UnitTests.Features.OrleansExecution;
 
-/// <summary>Preserves the administrator law through the public signed command and production Orleans hosts.</summary>
+/// <summary>Preserves the administrator law through the public command envelope and production Orleans hosts.</summary>
 internal static class ResourceAdministrationFlow
 {
     private const string Root = "root";
@@ -42,7 +42,7 @@ internal static class ResourceAdministrationFlow
         var request = new DropTableRequest(partition.TenantId, partition.DatabaseId, L.Table);
         var requestId = Guid.NewGuid();
         var commandId = Guid.NewGuid();
-        var signed = node.Codec.CreateCommand(requestId, principal.Id, OperationKind.DropTable, commandId,
+        var envelope = node.Codec.CreateCommand(requestId, principal.Id, OperationKind.DropTable, commandId,
             OrleansSerialization.Serialize(request));
         var revoked = principal with
         {
@@ -51,7 +51,7 @@ internal static class ResourceAdministrationFlow
         };
         await CommandObservedPolicyAssertions.EqualAsync(revoked, source.Submit(OperationKind.ConfigurePrincipal,
             new ConfigurePrincipalRequest(revoked), cancellationToken: token).Get<PrincipalRecord>());
-        await RefusedAsync(cluster, node, principal, signed, requestId, commandId, token);
+        await RefusedAsync(cluster, node, principal, envelope, requestId, commandId, token);
         var repaired = principal with
         {
             PolicyEpoch = checked(revoked.PolicyEpoch + EpochStep)
@@ -97,7 +97,7 @@ internal static class ResourceAdministrationFlow
     }
 
     private static async Task RefusedAsync(RequestCqrsHostedCluster cluster, RequestCqrsHostedRuntimeFixture node,
-        PrincipalRecord principal, string signed, Guid requestId, Guid commandId, CancellationToken token)
+        PrincipalRecord principal, GrainRequestEnvelope envelope, Guid requestId, Guid commandId, CancellationToken token)
     {
         await Task.WhenAll(cluster.Nodes.Select(actual => actual.Database.Coordinator.ReadBarrierAsync(token)));
         var before = cluster.Nodes.Select(actual => new
@@ -107,7 +107,7 @@ internal static class ResourceAdministrationFlow
             Identity = OrleansSerialization.Serialize(actual.Database.Store.Identity),
             Cut = actual.Database.ReadCanonicalCut()
         }).ToArray();
-        var reply = await RequestCqrsCommandStream.InvokeAsync(node, signed, principal,
+        var reply = await RequestCqrsCommandStream.InvokeAsync(node, envelope, principal,
             requestId, commandId, TerminalSequence, ErrorCode.PermissionDenied);
         await Assert.That(reply.Error).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(reply.SafeDetail).IsEqualTo(GrainRoutingProtocol.AdministrationRequired);

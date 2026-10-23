@@ -2,14 +2,14 @@ namespace KeyLoad.Clustering;
 
 internal static class GrainRequestPurposeObservation
 {
-    internal static GrainRequestEnvelope BeforeSign(IGrainRequestPurposeObserver? observer,
+    internal static GrainRequestEnvelope BeforeIssue(IGrainRequestPurposeObserver? observer,
         GrainRequestEnvelope original)
     {
         if (observer is null)
         {
             return original;
         }
-        var purpose = observer.BeforeSign(original);
+        var purpose = observer.BeforeIssue(original);
         return purpose is null ? original : original with
         {
             Purpose = purpose
@@ -32,7 +32,7 @@ internal static class GrainRequestPurposeObservation
         {
             try
             {
-                observer.RejectedAfterMac(actual, failure, cut);
+                observer.RejectedAfterDecode(actual, failure, cut);
             }
             catch (Exception observation) when (CqrsBoundaryErrors.IsNonFatal(observation))
             {

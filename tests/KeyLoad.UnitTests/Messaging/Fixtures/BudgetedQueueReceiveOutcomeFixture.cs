@@ -85,7 +85,7 @@ internal sealed class BudgetedQueueReceiveOutcomeFixture : IDisposable
         var result = Database.SubmitIssued(operation);
         if (!OrleansSerialization.Serialize(operation).SequenceEqual(signedIntent))
         {
-            throw new InvalidOperationException("The original signed receive intent was changed during submission.");
+            throw new InvalidOperationException("The original receive intent was changed during submission.");
         }
         return (operation, result, signedIntent);
     }

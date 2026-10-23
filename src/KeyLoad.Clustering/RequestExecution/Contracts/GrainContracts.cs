@@ -12,7 +12,6 @@ internal static class GrainContracts
     internal const string AdministratorAuthenticationResultAlias = "keyload.execution-administrator-auth-result";
     internal const string CommandObservationHandleAlias = "keyload.execution-command-observation-handle";
     internal const string CommandObservationResultAlias = "keyload.execution-command-observation-result";
-    internal const string SignedTokenPrefix = "KLT2.";
     internal const int NoDtoMarker = 0;
     internal const int PurposeField = 0;
     internal const int RequestIdField = 1;

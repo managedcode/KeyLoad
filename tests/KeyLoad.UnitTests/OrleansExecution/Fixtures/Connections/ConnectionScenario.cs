@@ -86,31 +86,31 @@ internal sealed class ConnectionScenario : IAsyncDisposable
     internal Task<GrainOperationReply> CommandAsync(PrincipalRecord principal, Guid requestId,
         CommandRequest command, CancellationToken cancellationToken)
     {
-        var signed = Fixture.Codec.CreateCommand(requestId, principal.Id, OperationKind.Batch,
+        var envelope = Fixture.Codec.CreateCommand(requestId, principal.Id, OperationKind.Batch,
             command.CommandId, OrleansSerialization.Serialize(command));
-        return InvokeAsync(principal, requestId, command.CommandId, signed, cancellationToken);
+        return InvokeAsync(principal, requestId, command.CommandId, envelope, cancellationToken);
     }
 
     internal Task<GrainOperationReply> ReadAsync(PrincipalRecord principal, Guid requestId,
         string documentId, CancellationToken cancellationToken)
     {
-        var signed = Fixture.Codec.CreateRead(requestId, principal.Id, GrainReadKind.Document,
+        var envelope = Fixture.Codec.CreateRead(requestId, principal.Id, GrainReadKind.Document,
             OrleansSerialization.Serialize(new GetDocumentRequest(Reference(documentId))));
-        return InvokeAsync(principal, requestId, Guid.Empty, signed, cancellationToken);
+        return InvokeAsync(principal, requestId, Guid.Empty, envelope, cancellationToken);
     }
 
     internal Task<GrainOperationReply> InvokeAsync(PrincipalRecord principal, Guid requestId,
-        Guid commandId, string signed, CancellationToken cancellationToken)
-        => calls.Retain(requestId, () => InvokeCoreAsync(principal, requestId, commandId, signed, cancellationToken));
+        Guid commandId, GrainRequestEnvelope envelope, CancellationToken cancellationToken)
+        => calls.Retain(requestId, () => InvokeCoreAsync(principal, requestId, commandId, envelope, cancellationToken));
 
     private async Task<GrainOperationReply> InvokeCoreAsync(PrincipalRecord principal, Guid requestId,
-        Guid commandId, string signed, CancellationToken cancellationToken)
+        Guid commandId, GrainRequestEnvelope envelope, CancellationToken cancellationToken)
     {
         using var bounded = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, calls.Token);
         using var identity = new GrainRequestIdentityScope(Fixture.Cluster.ServiceProvider, principal,
             requestId, commandId, bounded.Token, connectionId: Fixture.ConnectionId);
         return await GrainRequestStreamConsumer.DrainAsync(
-            token => Connection.ExecuteStreamAsync(signed, token),
+            token => Connection.ExecuteStreamAsync(envelope, token),
             Fixture.Cluster.ServiceProvider.GetRequiredService<
                 Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>(),
             requestId, Fixture.Clock, Fixture.RoutingOptions, bounded.Token);

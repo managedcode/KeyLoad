@@ -2,7 +2,7 @@ using KeyLoad.Clustering;
 
 namespace KeyLoad.UnitTests.Features.StorageRecovery;
 
-internal sealed class SignedPurposeObservation : IGrainRequestPurposeObserver
+internal sealed class IssuedPurposeObservation : IGrainRequestPurposeObserver
 {
     private const string InvalidPurpose = "keyload-test-unsupported-request-purpose";
     private readonly Lock gate = new();
@@ -22,7 +22,7 @@ internal sealed class SignedPurposeObservation : IGrainRequestPurposeObserver
         }
     }
 
-    public string? BeforeSign(GrainRequestEnvelope value)
+    public string? BeforeIssue(GrainRequestEnvelope value)
     {
         lock (gate)
         {
@@ -42,7 +42,7 @@ internal sealed class SignedPurposeObservation : IGrainRequestPurposeObserver
         }
     }
 
-    public void RejectedAfterMac(GrainRequestEnvelope actual, KeyLoadException failure, GrainRequestScopeCut cut)
+    public void RejectedAfterDecode(GrainRequestEnvelope actual, KeyLoadException failure, GrainRequestScopeCut cut)
     {
         lock (gate)
         {

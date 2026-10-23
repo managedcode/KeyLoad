@@ -18,17 +18,17 @@ internal static class RequestCqrsMalformedTextFlow
         var bytes = KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(fixture.Database.Store);
         var requestId = Guid.NewGuid();
         var commandId = Guid.NewGuid();
-        var signed = fixture.Codec.CreateCommand(requestId, principal.Id, OperationKind.MaintainTextIndex,
+        var envelope = fixture.Codec.CreateCommand(requestId, principal.Id, OperationKind.MaintainTextIndex,
             commandId, OrleansSerialization.Serialize(false));
         var frames = new List<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>();
         using (var identity = new GrainRequestIdentityScope(fixture.Services, principal,
             requestId, commandId, token, connectionId: fixture.ConnectionId))
         {
             var reply = await GrainRequestStreamConsumer.DrainWithPurposeAsync(
-                execution => ObserveAsync(connection.ExecuteStreamAsync(signed, execution), frames, execution),
+                execution => ObserveAsync(connection.ExecuteStreamAsync(envelope, execution), frames, execution),
                 fixture.Services.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>(),
                 requestId, fixture.Clock, fixture.RoutingOptions,
-                new CqrsStreamPurpose(() => fixture.Codec.VerifyRequest(signed, requestId)), token);
+                new CqrsStreamPurpose(() => fixture.Codec.DecodeRequest(envelope, requestId)), token);
             await Assert.That(reply.Error).IsEqualTo(ErrorCode.Validation);
             await Assert.That(reply.Payload.IsEmpty).IsTrue();
             await Assert.That(reply.SafeDetail).IsEqualTo(GrainRoutingProtocol.InvalidRequest);

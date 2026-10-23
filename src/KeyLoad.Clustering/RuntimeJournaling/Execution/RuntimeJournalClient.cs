@@ -78,14 +78,14 @@ internal sealed class RuntimeJournalClient(
         var token = deadline.Token;
         var codec = await PrepareAsync(payload, token);
         var requestId = Guid.NewGuid();
-        var signed = codec.CreateRuntimeJournalRead(requestId, kind, payload);
+        var issued = codec.CreateRuntimeJournalRead(requestId, kind, payload);
         var connectionId = ConnectionExecutionIdentity.Resolve(services);
         using var identity = GrainRequestIdentityScope.ForRuntimeJournal(services, requestId,
             Guid.Empty, connectionId, token);
         var actor = grains.GetGrain<IConnectionGrain>(connectionId);
         var reply = await DrainAsRuntimeJournalCallerAsync(ReadCoreCallerMethod, () =>
             GrainRequestStreamConsumer.DrainAsync(
-                createStream: streamToken => actor.ExecuteStreamAsync(signed, streamToken), serializer: chunkSerializer, requestId: requestId,
+                createStream: streamToken => actor.ExecuteStreamAsync(issued, streamToken), serializer: chunkSerializer, requestId: requestId,
                 clock: clock, cancellationToken: token, options: routingOptions));
         return Decode<T>(reply, allowNull);
     }
@@ -98,13 +98,13 @@ internal sealed class RuntimeJournalClient(
         var token = deadline.Token;
         var codec = await PrepareAsync(payload, token);
         var requestId = Guid.NewGuid();
-        var signed = codec.CreateRuntimeJournalCommand(requestId, RuntimeJournalIdentity.ProtectedPrincipalId, commandId, payload);
+        var issued = codec.CreateRuntimeJournalCommand(requestId, RuntimeJournalIdentity.ProtectedPrincipalId, commandId, payload);
         var connectionId = ConnectionExecutionIdentity.Resolve(services);
         using var identity = GrainRequestIdentityScope.ForRuntimeJournal(services, requestId, commandId, connectionId, token);
         var actor = grains.GetGrain<IConnectionGrain>(connectionId);
         return await DrainAsRuntimeJournalCallerAsync(SendCommandCallerMethod, () =>
             GrainRequestStreamConsumer.DrainAsync(
-                createStream: streamToken => actor.ExecuteStreamAsync(signed, streamToken), serializer: chunkSerializer, requestId: requestId,
+                createStream: streamToken => actor.ExecuteStreamAsync(issued, streamToken), serializer: chunkSerializer, requestId: requestId,
                 clock: clock, cancellationToken: token, options: routingOptions));
     }
 
@@ -144,7 +144,7 @@ internal sealed class RuntimeJournalClient(
 
     private static void ValidateDatabaseLimits(DatabaseLimits limits, ReadOnlyMemory<byte> payload)
     {
-        // The signed-token wrapper has its own additive envelope allowance. Bound the complete execution DTO here.
+        // The envelope has its own additive allowance. Bound the complete execution DTO here.
         if (payload.Length > limits.MaxBatchBytes)
         {
             throw Errors.Fail(ErrorCode.ResourceExhausted, GrainRoutingProtocol.InvalidRequest);

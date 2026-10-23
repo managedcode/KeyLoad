@@ -31,7 +31,7 @@ flowchart LR
 
 ## Connection and request lifetimes
 
-One Orleans grain per accepted client connection runs that connection's independent operations in parallel within typed bounds (ADR-125). Each operation keeps its own signed request id, fresh persisted authorization, cancellation and cleanup. No grain is created per request and no completed-request history is kept. Disconnect or idle expiry stops admission, joins the original operations and requests `DeactivateOnIdle`.
+One Orleans grain per accepted client connection runs that connection's independent operations in parallel within typed bounds (ADR-125). Each operation keeps its own request envelope id, fresh persisted authorization, cancellation and cleanup. No grain is created per request and no completed-request history is kept. Disconnect or idle expiry stops admission, joins the original operations and requests `DeactivateOnIdle`.
 
 ## Background work
 

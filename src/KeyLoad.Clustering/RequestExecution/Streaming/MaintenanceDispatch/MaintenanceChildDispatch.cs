@@ -6,9 +6,9 @@ namespace KeyLoad.Clustering;
 /// <summary>Joins one execution Task child before restoring its identity and owned payload.</summary>
 internal static class MaintenanceChildDispatch
 {
-    internal static async Task<GrainOperationReply> ExecuteAsync(DecodedGrainRequest parent, string signed,
+    internal static async Task<GrainOperationReply> ExecuteAsync(DecodedGrainRequest parent, GrainRequestEnvelope child,
         Guid actorId, Guid commandId,
-        Func<string, CancellationToken, Task<GrainOperationReply>> executeChild,
+        Func<GrainRequestEnvelope, CancellationToken, Task<GrainOperationReply>> executeChild,
         IServiceProvider services, GrainRequestCodec codec, IResourceLifetimeWorkBinding binding,
         byte[]? ownedPayload, CancellationToken token)
     {
@@ -17,9 +17,9 @@ internal static class MaintenanceChildDispatch
         GrainOperationReply? result = null;
         try
         {
-            admission.Open(parent, signed, actorId, commandId, services, codec, binding, token);
+            admission.Open(parent, child, actorId, commandId, services, codec, binding, token);
             await admission.ObserveStartedAsync(codec).ConfigureAwait(true);
-            result = await executeChild(signed, admission.Token).ConfigureAwait(true);
+            result = await executeChild(child, admission.Token).ConfigureAwait(true);
         }
         catch (Exception failure) when (CqrsBoundaryErrors.IsNonFatal(failure))
         {

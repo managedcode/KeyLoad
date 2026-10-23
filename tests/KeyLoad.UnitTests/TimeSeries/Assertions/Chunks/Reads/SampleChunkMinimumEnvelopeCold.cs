@@ -6,13 +6,13 @@ using KeyLoad.UnitTests.Features.OrleansExecution;
 
 namespace KeyLoad.UnitTests.Features.TimeSeries;
 
-internal static class SampleChunkSignedMinimumCold
+internal static class SampleChunkMinimumEnvelopeCold
 {
     private const int FirstWave = 0;
     private const int ColdWaves = 2;
     private const int LocalPersistedCopies = 1;
 
-    internal static async Task RunAsync(ConnectionColdSource owner, SampleChunkSignedMinimumState state,
+    internal static async Task RunAsync(ConnectionColdSource owner, SampleChunkMinimumEnvelopeState state,
         SampleRawIntegrityCut expected, CancellationToken token)
     {
         for (var wave = FirstWave; wave < ColdWaves; wave++)
@@ -26,14 +26,14 @@ internal static class SampleChunkSignedMinimumCold
                 var reopened = stores.Canonical;
                 await SampleRawIntegrityAssertions.UnchangedAsync(reopened, expected);
                 var database = owner.CreateDatabase(reopened);
-                var codec = new GrainRequestCodec(database.Store.Identity.Incarnation, database.Store.Identity.SigningKey,
+                var codec = new GrainRequestCodec(database.Store.Identity.Incarnation,
             database.OperationLimitsOptions, owner.Clock, owner.RoutingOptions);
-                await SampleChunkSignedMinimumAssertions.ObserveAsync(reopened, () =>
+                await SampleChunkMinimumEnvelopeAssertions.ObserveAsync(reopened, () =>
                 {
                     var id = Guid.NewGuid();
-                    var signed = SampleChunkSignedMinimumEnvelope.Create(codec, state.Reader, id, state.Request);
-                    var decoded = SampleChunkSignedMinimumEnvelope.Decode(codec, signed, id, state.Request);
-                    SampleChunkSignedMinimumAssertions.Page(state.Request,
+                    var issued = SampleChunkMinimumEnvelopeIssuance.Create(codec, state.Reader, id, state.Request);
+                    var decoded = SampleChunkMinimumEnvelopeIssuance.Decode(codec, issued, id, state.Request);
+                    SampleChunkMinimumEnvelopeAssertions.Page(state.Request,
                         database.ReadSampleChunkWindow(state.Reader.Id, decoded, token));
                     return Task.CompletedTask;
                 });
@@ -48,11 +48,11 @@ internal static class SampleChunkSignedMinimumCold
     }
 
     internal static async Task ReplayAsync(DatabaseEngine database, ZoneTreeStore store,
-        SampleChunkSignedMinimumState state, CancellationToken token)
+        SampleChunkMinimumEnvelopeState state, CancellationToken token)
     {
         foreach (var original in state.Commands)
         {
-            await SampleChunkSignedMinimumAssertions.ObserveAsync(store, () =>
+            await SampleChunkMinimumEnvelopeAssertions.ObserveAsync(store, () =>
             {
                 var operation = database.CreateCommand(OperationKind.Batch, original.Request.CommandId, SampleChunkCanonicalFixture.Principal, default, JsonSerializer.Serialize(original.Request, JsonDefaults.Options));
                 var replay = database.ApplyEmbedded(operation, cancellationToken: token).Get<CommitReceipt>();

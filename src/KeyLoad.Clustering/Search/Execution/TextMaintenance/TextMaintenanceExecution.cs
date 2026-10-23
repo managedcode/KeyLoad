@@ -9,7 +9,7 @@ namespace KeyLoad.Clustering;
 internal static class TextMaintenanceExecution
 {
     internal static async Task<TextIndexMaintenanceResult> ExecuteAsync(DecodedGrainRequest parent,
-        Func<string, CancellationToken, Task<GrainOperationReply>> executeChild, Func<Guid, Task> abort,
+        Func<GrainRequestEnvelope, CancellationToken, Task<GrainOperationReply>> executeChild, Func<Guid, Task> abort,
         IServiceProvider services, GrainRequestCodec codec,
         IOptions<GrainRoutingOptions> routing, ILogger diagnostics,
         ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer, CqrsStreamPurpose purpose, IResourceLifetimeWorkBinding binding)

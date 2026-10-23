@@ -7,19 +7,19 @@ namespace KeyLoad.Clustering;
 internal static class AnnMaintenanceChildDispatch
 {
     internal static async Task<TResult> ExecuteAsync<TResult>(DecodedGrainRequest parent,
-        Func<string, CancellationToken, Task<GrainOperationReply>> executeChild,
+        Func<GrainRequestEnvelope, CancellationToken, Task<GrainOperationReply>> executeChild,
         IServiceProvider services, GrainRequestCodec codec, ILogger diagnostics,
         IResourceLifetimeWorkBinding binding, byte[] payload, GrainReadKind? read,
         OperationKind? command, Guid commandId, CancellationToken token) where TResult : class
     {
         var actorId = Guid.NewGuid();
-        string signed;
+        GrainRequestEnvelope child;
         try
         {
             token.ThrowIfCancellationRequested();
             codec.ValidateScope(parent.Envelope);
             GrainIdentityContext.Validate(parent.Envelope, parent.Envelope.RequestId);
-            signed = codec.CreateAnnMaintenanceChild(actorId, parent.Envelope.PrincipalId!, read,
+            child = codec.CreateAnnMaintenanceChild(actorId, parent.Envelope.PrincipalId!, read,
                 command, commandId, payload, parent.Envelope.ExpiresAt);
         }
         catch (Exception)
@@ -31,7 +31,7 @@ internal static class AnnMaintenanceChildDispatch
         GrainOperationReply reply;
         try
         {
-            reply = await MaintenanceChildDispatch.ExecuteAsync(parent, signed, actorId, commandId,
+            reply = await MaintenanceChildDispatch.ExecuteAsync(parent, child, actorId, commandId,
                 (value, cancellation) =>
                 {
                     invoked = true;

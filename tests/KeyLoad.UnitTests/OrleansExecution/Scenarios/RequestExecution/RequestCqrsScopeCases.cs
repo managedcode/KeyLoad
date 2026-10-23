@@ -83,10 +83,10 @@ internal static class RequestCqrsScopeCases
                 await Assert.That(RequestContext.Get(GrainRequestStreamProtocol.ContextKey))
                     .IsEqualTo(new GrainRequestContextState(requestId, Guid.Empty, fixture.ConnectionId,
                         fixture.Services.GetRequiredService<ILocalSiloDetails>().SiloAddress));
-                var signed = fixture.Codec.CreateRead(requestId, null, GrainReadKind.Authenticate,
+                var envelope = fixture.Codec.CreateRead(requestId, null, GrainReadKind.Authenticate,
                     OrleansSerialization.Serialize(0));
                 var result = await fixture.Grains.GetGrain<IRequestCqrsIdentityProbeGrain>(requestId)
-                    .ValidateAsync(signed, requestId);
+                    .ValidateAsync(envelope, requestId);
                 await Assert.That(result.Accepted).IsTrue();
                 await Assert.That(result.Subject).IsNull();
             }

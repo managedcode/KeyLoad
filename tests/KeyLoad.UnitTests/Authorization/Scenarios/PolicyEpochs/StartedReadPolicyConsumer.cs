@@ -14,7 +14,7 @@ internal static class StartedReadPolicyConsumer
         CancellationToken selected, CancellationToken parent)
     {
         var fixture = scenario.Fixture;
-        var signed = fixture.Codec.CreateRead(requestId, principal.Id, GrainReadKind.Document,
+        var envelope = fixture.Codec.CreateRead(requestId, principal.Id, GrainReadKind.Document,
             OrleansSerialization.Serialize(new GetDocumentRequest(scenario.Reference(StartedReadPolicyProtocol.Document))));
         var frames = new List<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>();
         OperationCanceledException? cancellation = null;
@@ -26,7 +26,7 @@ internal static class StartedReadPolicyConsumer
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 var bounded = CqrsStreamLifetime.RunWithPurpose(
-                    token => scenario.Connection.ExecuteStreamAsync(signed, token).WithBatchSize(GrainRequestStreamProtocol.BatchSize),
+                    token => scenario.Connection.ExecuteStreamAsync(envelope, token).WithBatchSize(GrainRequestStreamProtocol.BatchSize),
                     fixture.Cluster.ServiceProvider.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>(),
                     requestId, fixture.Clock, static () => { }, fixture.RoutingOptions, null,
                     new CqrsStreamPurpose(), selected);

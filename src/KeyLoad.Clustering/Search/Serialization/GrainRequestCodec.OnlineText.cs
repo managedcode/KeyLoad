@@ -5,21 +5,21 @@ namespace KeyLoad.Clustering;
 
 public sealed partial class GrainRequestCodec
 {
-    internal string CreateOnlineTextPublication(Guid actor, Command<DatabaseCommand> operation, DateTimeOffset expiry)
+    internal GrainRequestEnvelope CreateOnlineTextPublication(Guid actor, Command<DatabaseCommand> operation, DateTimeOffset expiry)
         => Issue(OnlineTextRequestEnvelopes.Publication(this, clock.GetUtcNow(), settings.RequestLifetime,
             actor, operation, expiry));
 
-    internal string CreateOnlineTextCapability(Guid actor, string principal, OnlineTextCapabilityRequest request,
+    internal GrainRequestEnvelope CreateOnlineTextCapability(Guid actor, string principal, OnlineTextCapabilityRequest request,
         DateTimeOffset expiry)
         => Issue(OnlineTextRequestEnvelopes.Capability(this, clock.GetUtcNow(), settings.RequestLifetime,
             actor, principal, request, expiry));
 
-    internal string CreateOnlineTextProjectionRead(Guid actor, string principal, ReadProjectionBatchRequest request,
+    internal GrainRequestEnvelope CreateOnlineTextProjectionRead(Guid actor, string principal, ReadProjectionBatchRequest request,
         DateTimeOffset expiry)
         => Issue(OnlineTextRequestEnvelopes.ProjectionRead(this, clock.GetUtcNow(), settings.RequestLifetime,
             actor, principal, request, expiry));
 
-    internal string CreateOnlineTextCheckpoint(Guid actor, string principal, CommitProjectionBatchRequest request,
+    internal GrainRequestEnvelope CreateOnlineTextCheckpoint(Guid actor, string principal, CommitProjectionBatchRequest request,
         DateTimeOffset expiry)
         => Issue(OnlineTextRequestEnvelopes.Checkpoint(this, clock.GetUtcNow(), settings.RequestLifetime,
             actor, principal, request, expiry));

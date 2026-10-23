@@ -72,9 +72,9 @@ internal static class AdministratorAuthenticationRequests
             var requestId = Guid.NewGuid();
             var codec = node.CatalogRequestCodec();
             var input = new AdministratorAuthenticationRequest(secret, bytes, records, resultBytes, originalExpiry);
-            var signed = codec.CreateAdministratorAuthentication(requestId, input);
+            var envelope = codec.CreateAdministratorAuthentication(requestId, input);
             var reply = await AdministratorAuthenticationDispatch.SendAsync(node, requestId,
-                signed, () => dispatched = true, token);
+                envelope, () => dispatched = true, token);
             if (reply.Payload.IsEmpty || reply.Payload.Length > resultBytes)
             {
                 throw Errors.Fail(ErrorCode.BudgetExceeded, AdministratorAuthenticationProtocol.BudgetExceeded);

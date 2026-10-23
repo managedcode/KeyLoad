@@ -7,7 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace KeyLoad.UnitTests.Features.OrleansExecution;
 
-/// <summary>Checks the production execution storage policy, refused direct calls and original signed command replay.</summary>
+/// <summary>Checks the production execution storage policy, refused direct calls and original command envelope replay.</summary>
 internal sealed class ConnectionGraphPolicyTests
 {
     private const string Document = "execution-graph-policy-following";
@@ -64,15 +64,15 @@ internal sealed class ConnectionGraphPolicyTests
         var principal = scenario.Principal();
         var command = scenario.Command(Document);
         var requestId = Guid.NewGuid();
-        var signed = scenario.Fixture.Codec.CreateCommand(requestId, principal.Id, OperationKind.Batch,
+        var envelope = scenario.Fixture.Codec.CreateCommand(requestId, principal.Id, OperationKind.Batch,
             command.CommandId, OrleansSerialization.Serialize(command));
-        var partition = GrainPartitionResolver.Resolve(scenario.Fixture.Codec.Verify(signed));
+        var partition = GrainPartitionResolver.Resolve(scenario.Fixture.Codec.Decode(envelope));
         var grains = scenario.Fixture.Cluster.Client;
         var cut = scenario.Fixture.Database.ReadCanonicalCut();
         using var identity = new GrainRequestIdentityScope(scenario.Fixture.Cluster.ServiceProvider,
             principal, requestId, command.CommandId, token, connectionId: scenario.Fixture.ConnectionId);
         var partitionFailure = await Assert.ThrowsExactlyAsync<InvalidOperationException>(
-            () => grains.GetGrain<ICommandPartitionGrain>(partition).ExecuteAsync(signed, token));
+            () => grains.GetGrain<ICommandPartitionGrain>(partition).ExecuteAsync(envelope, token));
         await Assert.That(partitionFailure!.Message).IsEqualTo(
             $"Transition from {Constants.ClientCallerId} to {typeof(ICommandPartitionGrain).FullName} is not allowed.");
         await Assert.That(scenario.Fixture.Database.ReadCanonicalCut()).IsEqualTo(cut);

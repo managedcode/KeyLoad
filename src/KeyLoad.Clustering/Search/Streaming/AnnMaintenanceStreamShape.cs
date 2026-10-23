@@ -2,7 +2,7 @@ using ManagedCode.Communication.CQRS;
 
 namespace KeyLoad.Clustering;
 
-/// <summary>Validates the ordered ANN phases of one verified signed execution maintenance operation.</summary>
+/// <summary>Validates the ordered ANN phases of one verified execution maintenance operation.</summary>
 internal sealed class AnnMaintenanceStreamShape(Guid requestId)
 {
     private AnnMaintenancePhase? phase;

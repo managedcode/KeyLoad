@@ -3,9 +3,9 @@ using KeyLoad.UnitTests.Features.OrleansExecution;
 
 namespace KeyLoad.UnitTests.Features.StorageRecovery;
 
-internal static class SignedPurposeCold
+internal static class IssuedPurposeCold
 {
-    internal static async Task RequireAsync(ConnectionColdSource fixture, SignedPurposeCut expected,
+    internal static async Task RequireAsync(ConnectionColdSource fixture, IssuedPurposeCut expected,
         EntityRef reference, string json, CancellationToken token)
     {
         for (var cold = 0; cold < 2; cold++)

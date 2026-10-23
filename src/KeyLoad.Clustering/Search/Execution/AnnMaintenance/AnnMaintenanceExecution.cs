@@ -8,7 +8,7 @@ namespace KeyLoad.Clustering;
 internal static class AnnMaintenanceExecution
 {
     internal static async Task<AnnMaintenanceResult> ExecuteAsync(DecodedGrainRequest parent,
-        Func<string, CancellationToken, Task<GrainOperationReply>> executeChild, Func<Guid, Task> abort,
+        Func<GrainRequestEnvelope, CancellationToken, Task<GrainOperationReply>> executeChild, Func<Guid, Task> abort,
         IServiceProvider services, GrainRequestCodec codec,
         IOptions<GrainRoutingOptions> routing, ILogger diagnostics,
         ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer, CqrsStreamPurpose purpose)

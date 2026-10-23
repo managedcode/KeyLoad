@@ -19,7 +19,7 @@ public interface ISharedDatabaseSession
     Task<Result<object>> ApplyAsync(Command<DatabaseCommand> operation, CancellationToken cancellationToken);
 
     /// <summary>Awaits the original local request Task, using the currently executing grain context.</summary>
-    Task<GrainOperationReply> ExecuteAsync(string signedRequest, string? actorKey,
+    Task<GrainOperationReply> ExecuteAsync(GrainRequestEnvelope envelope, string? actorKey,
         IGrainContext owner, CancellationToken cancellationToken);
 
     /// <summary>Cancels and joins the actual maintenance work in this session.</summary>

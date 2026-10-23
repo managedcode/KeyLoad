@@ -41,9 +41,9 @@ internal static class MultiLaneConnectionOwnerTrial
         var principal = GrainRequestAuthority.Reload(fixture.Database.Database, ConnectionProtocol.Root,
             fixture.Clock);
         var actor = Guid.NewGuid();
-        var signed = fixture.Codec.CreateCommand(actor, principal.Id, kind, commandId,
+        var envelope = fixture.Codec.CreateCommand(actor, principal.Id, kind, commandId,
             OrleansSerialization.Serialize(request));
-        return await scenario.InvokeAsync(principal, actor, commandId, signed, token);
+        return await scenario.InvokeAsync(principal, actor, commandId, envelope, token);
     }
 
     private static async Task RequireOwnersAsync(ConnectionScenario scenario,

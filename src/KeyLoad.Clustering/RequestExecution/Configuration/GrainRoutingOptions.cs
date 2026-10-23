@@ -2,11 +2,11 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Clustering;
 
-/// <summary>Centrally configured lifetimes for signed requests and their joined execution execution streams.</summary>
+/// <summary>Centrally configured lifetimes for issued request envelopes and their joined execution execution streams.</summary>
 [ConfigurationOptions]
 public sealed class GrainRoutingOptions
 {
-    /// <summary>The centrally bound signed request execution section.</summary>
+    /// <summary>The centrally bound request envelope execution section.</summary>
     public const string SectionName = "KeyLoad:GrainRouting";
     /// <summary>The startup failure for unsafe request and execution lifetimes.</summary>
     public const string ValidationMessage = "Grain request lifetimes must be positive, at most two minutes, and issuance must fit the accepted future window.";
@@ -29,7 +29,7 @@ public sealed class GrainRoutingOptions
     private const int MaximumContextBytesCeiling = 256;
     private static readonly TimeSpan MaximumDuration = TimeSpan.FromMinutes(MaximumFutureMinutes);
 
-    /// <summary>Gets or sets the expiry interval stamped on newly signed requests.</summary>
+    /// <summary>Gets or sets the expiry interval stamped on newly issued envelopes.</summary>
     public TimeSpan RequestLifetime { get; set; } = TimeSpan.FromMinutes(1);
     /// <summary>Gets or sets the accepted future expiry window during request validation.</summary>
     public TimeSpan MaximumFuture { get; set; } = TimeSpan.FromMinutes(MaximumFutureMinutes);

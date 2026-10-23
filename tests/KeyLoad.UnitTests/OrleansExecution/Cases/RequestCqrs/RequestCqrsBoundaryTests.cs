@@ -9,8 +9,8 @@ internal sealed class RequestCqrsBoundaryTests(RequestCqrsHostedRuntimeFixture f
         => RequestCqrsIdentityCases.AcCrs006ActualClientAndSiloConvertersCarryPersistedPrincipalAndRequestState(fixture);
 
     [Test]
-    public Task AcCrs006AbsentPrincipalIsAcceptedOnlyForSignedAuthentication()
-        => RequestCqrsIdentityCases.AcCrs006AbsentPrincipalIsAcceptedOnlyForSignedAuthentication(fixture);
+    public Task AcCrs006AbsentPrincipalIsAcceptedOnlyForAuthentication()
+        => RequestCqrsIdentityCases.AcCrs006AbsentPrincipalIsAcceptedOnlyForAuthentication(fixture);
 
     [Test]
     public Task AcCrs006PresentNullPrincipalEntryIsNotAnonymousAuthentication()
@@ -29,8 +29,8 @@ internal sealed class RequestCqrsBoundaryTests(RequestCqrsHostedRuntimeFixture f
         => RequestCqrsIdentityCases.AcCrs006InvalidContextIsDeniedBeforeCapability(fixture, invalid);
 
     [Test]
-    public Task AcCrs006SignedRequestKeyAndForgedAuthenticationPrincipalAreDeniedBeforeCapability()
-        => RequestCqrsIdentityCases.AcCrs006SignedRequestKeyAndForgedAuthenticationPrincipalAreDeniedBeforeCapability(fixture);
+    public Task AcCrs006RequestKeyAndForgedAuthenticationPrincipalAreDeniedBeforeCapability()
+        => RequestCqrsIdentityCases.AcCrs006RequestKeyAndForgedAuthenticationPrincipalAreDeniedBeforeCapability(fixture);
 
     [Test]
     public Task AcCrs006ScopePublishesOnlyPersistedIdentityAndRestoresEveryPriorKey()

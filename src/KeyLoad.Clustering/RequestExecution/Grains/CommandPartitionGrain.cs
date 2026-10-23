@@ -5,7 +5,7 @@ public sealed class CommandPartitionGrain(SiloDatabaseClient storage, GrainReque
     : Grain, ICommandPartitionGrain
 {
     /// <inheritdoc />
-    public Task<GrainOperationReply> ExecuteAsync(string signedRequest, CancellationToken cancellationToken)
-        => storage.ExecuteCommandAsync(codec.Incarnation, signedRequest,
+    public Task<GrainOperationReply> ExecuteAsync(GrainRequestEnvelope envelope, CancellationToken cancellationToken)
+        => storage.ExecuteCommandAsync(codec.Incarnation, envelope,
             this.GetPrimaryKeyString(), cancellationToken);
 }

@@ -31,10 +31,10 @@ internal sealed class DistributedSearchRemoteExecution(DatabaseEngine database, 
             phase.MaxResultBytes, phase.Witness, phase.Statistics, phase.Scope, phase.SourceWindowId, phase.Selected, source.Definition, source.Coverage, source.Principal);
         parent.ChargeBytes(OrleansSerialization.Measure(request));
         var childId = Guid.NewGuid();
-        var signed = codec.CreateDistributedSearchLeaf(childId, principalId,
+        var child = codec.CreateDistributedSearchLeaf(childId, principalId,
             OrleansSerialization.Serialize(request), parent.ExpiresAt);
-        parent.ChargeBytes(checked((long)sizeof(char) * signed.Length));
-        return new(request, childToken => RunAsync(target, selected.Address, signed, childId, childToken),
+        parent.ChargeBytes(OrleansSerialization.Measure(child));
+        return new(request, childToken => RunAsync(target, selected.Address, child, childId, childToken),
             (result, childToken) => Complete(parent, grant, result, childToken));
     }
 
@@ -69,11 +69,11 @@ internal sealed class DistributedSearchRemoteExecution(DatabaseEngine database, 
     }
 
     private async Task<DistributedSearchLeafResult> RunAsync(IPartitionQueryGrain target, SiloAddress owner,
-        string signed, Guid childId, CancellationToken token)
+        GrainRequestEnvelope child, Guid childId, CancellationToken token)
     {
         using var identity = GrainRequestIdentityScope.ForChild(services, original.Envelope,
             childId, Guid.Empty, token);
-        var reply = await target.ExecuteAsync(owner, signed, token).ConfigureAwait(true);
+        var reply = await target.ExecuteAsync(owner, child, token).ConfigureAwait(true);
         token.ThrowIfCancellationRequested();
         if (reply.Error is { } error)
         {

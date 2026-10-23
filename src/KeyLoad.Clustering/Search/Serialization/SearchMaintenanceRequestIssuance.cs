@@ -3,7 +3,7 @@ namespace KeyLoad.Clustering;
 /// <summary>Issues bounded maintenance children with each original purpose and expiry law.</summary>
 internal static class SearchMaintenanceRequestIssuance
 {
-    internal static string CreateAnnMaintenanceChild(GrainRequestCodec codec, Guid requestId, string principalId,
+    internal static GrainRequestEnvelope CreateAnnMaintenanceChild(GrainRequestCodec codec, Guid requestId, string principalId,
         GrainReadKind? readKind, OperationKind? commandKind, Guid commandId, byte[] payload, DateTimeOffset expiry)
     {
         var context = codec.LifetimeReadContext;
@@ -26,7 +26,7 @@ internal static class SearchMaintenanceRequestIssuance
         _ = AnnMaintenanceChildScope.Validate(envelope);
         return codec.Issue(envelope);
     }
-    internal static string CreateTextMaintenanceChild(GrainRequestCodec codec, Guid requestId, string principalId,
+    internal static GrainRequestEnvelope CreateTextMaintenanceChild(GrainRequestCodec codec, Guid requestId, string principalId,
         GrainReadKind? readKind, OperationKind? commandKind, Guid commandId, byte[] payload, DateTimeOffset expiry)
     {
         var context = codec.LifetimeReadContext;

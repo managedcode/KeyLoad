@@ -95,7 +95,7 @@ telemetry details:
   observation beyond the validated 256-record bound still sets WasTruncated and
   fails the operation.
 
-AC-ORL-012 executes real signed writes, reads and a genuine failure
+AC-ORL-012 executes real envelope writes, reads and a genuine failure
 against the actual store, verifies terminal outcome and state, captures exported
 metrics and trace parentage, and proves that no payload, SQL, credential,
 principal, raw routing ID, private exception text or exemplar attribute escapes.

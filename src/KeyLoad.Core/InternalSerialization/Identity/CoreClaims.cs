@@ -37,23 +37,12 @@ internal static class CoreClaims
 
     internal static T Verify<T>(ReadOnlySpan<byte> key, string token, int maximumCharacters)
     {
-        const int MinimumTokenCharacters = 1;
         const int PayloadSegmentIndex = 0;
         const int SignatureSegmentIndex = 1;
 
-        ArgumentNullException.ThrowIfNull(token);
-        ArgumentOutOfRangeException.ThrowIfLessThan(maximumCharacters, MinimumTokenCharacters);
         try
         {
-            if (token.Length > maximumCharacters || !token.StartsWith(Prefix, StringComparison.Ordinal))
-            {
-                throw new FormatException();
-            }
-            var parts = token[Prefix.Length..].Split(Separator);
-            if (parts.Length != TokenParts)
-            {
-                throw new FormatException();
-            }
+            var parts = Segments(token, maximumCharacters);
             var bytes = Convert.FromBase64String(Pad(parts[PayloadSegmentIndex]));
             var mac = Convert.FromBase64String(Pad(parts[SignatureSegmentIndex]));
             if (!CryptographicOperations.FixedTimeEquals(Signature(key, bytes), mac))
@@ -70,6 +59,40 @@ internal static class CoreClaims
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, InvalidToken);
         }
+    }
+
+    /// <summary>Reads the claims a token carries without checking its signature. The owning database verifies the
+    /// signature when the token is applied; callers derive identities from a witness that owner handed them over Orleans.</summary>
+    internal static T Decode<T>(string token, int maximumCharacters)
+    {
+        const int PayloadSegmentIndex = 0;
+
+        try
+        {
+            return OrleansSerialization.Deserialize<T>(Convert.FromBase64String(Pad(Segments(token, maximumCharacters)[PayloadSegmentIndex])));
+        }
+        catch (FormatException)
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, InvalidToken);
+        }
+        catch (KeyLoadException error) when (error.Code == ErrorCode.Corruption)
+        {
+            throw Errors.Fail(ErrorCode.TokenInvalidated, InvalidToken);
+        }
+    }
+
+    private static string[] Segments(string token, int maximumCharacters)
+    {
+        const int MinimumTokenCharacters = 1;
+
+        ArgumentNullException.ThrowIfNull(token);
+        ArgumentOutOfRangeException.ThrowIfLessThan(maximumCharacters, MinimumTokenCharacters);
+        if (token.Length > maximumCharacters || !token.StartsWith(Prefix, StringComparison.Ordinal))
+        {
+            throw new FormatException();
+        }
+        var parts = token[Prefix.Length..].Split(Separator);
+        return parts.Length == TokenParts ? parts : throw new FormatException();
     }
 
     private static byte[] Signature(ReadOnlySpan<byte> key, ReadOnlySpan<byte> bytes)

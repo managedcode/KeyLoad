@@ -12,7 +12,7 @@ KeyLoad's privacy processor bounds local Parent links by validated MaximumParent
 The actual .NET10 getter scans ancestors even when every node has no baggage.
 Reuse the fixed baggage_limit suppression reason and Recorded flag; never replace propagation.
 
-AC-ORL-ANCESTRY-001: The genuine signed streamed Batch writes a literal document under
+AC-ORL-ANCESTRY-001: The genuine streamed Batch writes a literal document under
 33 actual local parent links. A passive listener must observe actual Orleans Application Client spans
 with that direct local parent and Recorded=false; those exact SpanIds must not reach the exporter.
 The operation and original command replay both return independently complete receipts using the retained
@@ -33,7 +33,7 @@ fixture's internal nested-finally disposal semantics are unchanged; no stronger 
 
 ```mermaid
 flowchart LR
- A[Persist scoped writer] --> B[33 real parents: signed write and replay]
+ A[Persist scoped writer] --> B[33 real parents: real write and replay]
  B --> C[Actual client suppressed; full model and receipt]
  C --> D[Restore ambient; 32 parents inclusive]
  D --> E[span exported; full model and replay]
@@ -41,7 +41,7 @@ flowchart LR
  F --> G[No truncation; join all owners]
 ```
 
-AC-ORL-ANCESTRY-001..003 map to `OrleansTelemetryAncestryTests.RealSignedWriteSuppressesDeepClientTelemetryThenExportsInclusiveAndShallowSpans`.
+AC-ORL-ANCESTRY-001..003 map to `OrleansTelemetryAncestryTests.RealWriteSuppressesDeepClientTelemetryThenExportsInclusiveAndShallowSpans`.
 
 The MaximumParentLinks option and the pre-Baggage hooks belong to the production telemetry privacy
 processor. A TestCluster with node-local ZoneTree and the retained journal is not the Docker

@@ -6,7 +6,7 @@ using Microsoft.Extensions.Options;
 namespace KeyLoad.Clustering;
 
 internal sealed class AnnMaintenanceChildCalls(DecodedGrainRequest parent,
-    Func<string, CancellationToken, Task<GrainOperationReply>> executeChild, Func<Guid, Task> abort,
+    Func<GrainRequestEnvelope, CancellationToken, Task<GrainOperationReply>> executeChild, Func<Guid, Task> abort,
     IServiceProvider services, GrainRequestCodec codec, ILogger diagnostics, IResourceLifetimeWorkBinding binding)
 {
     internal Guid ParentRequestId => parent.Envelope.RequestId;

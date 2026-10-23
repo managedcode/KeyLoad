@@ -64,7 +64,7 @@ internal static class RequestCqrsRoutingCases
         var commandId = Guid.NewGuid();
         var command = Command(commandId, fixture.Database.Partition, documentId);
         var requestId = Guid.NewGuid();
-        var signed = fixture.Codec.CreateCommand(requestId, writer.Id, OperationKind.Batch, commandId,
+        var envelope = fixture.Codec.CreateCommand(requestId, writer.Id, OperationKind.Batch, commandId,
             OrleansSerialization.Serialize(command));
         var revoked = writer with
         {
@@ -74,7 +74,7 @@ internal static class RequestCqrsRoutingCases
         fixture.Database.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(revoked));
         var deniedPosition = fixture.Database.Store.Position;
 
-        var denied = await RequestCqrsCommandStream.InvokeAsync(fixture, signed, writer, requestId, commandId,
+        var denied = await RequestCqrsCommandStream.InvokeAsync(fixture, envelope, writer, requestId, commandId,
             PostStartFailedSequence, expectedError: ErrorCode.Unauthenticated);
         await Assert.That(denied.Error).IsEqualTo(ErrorCode.Unauthenticated);
         await Assert.That(fixture.Database.Store.Position).IsEqualTo(deniedPosition);
@@ -103,10 +103,10 @@ internal static class RequestCqrsRoutingCases
         var commandId = Guid.NewGuid();
         var requestId = Guid.NewGuid();
         var command = Command(commandId, fixture.Database.Partition, documentId);
-        var signed = fixture.Codec.CreateCommand(requestId, writer.Id, OperationKind.Batch, commandId,
+        var envelope = fixture.Codec.CreateCommand(requestId, writer.Id, OperationKind.Batch, commandId,
             OrleansSerialization.Serialize(command));
         var beforeMissing = fixture.Database.Store.Position;
-        await RequestCqrsCommandStream.AssertPreStreamRefusalAsync(fixture, signed, null, requestId,
+        await RequestCqrsCommandStream.AssertPreStreamRefusalAsync(fixture, envelope, null, requestId,
             commandId, ErrorCode.TokenInvalidated);
         await Assert.That(fixture.Database.Store.Position).IsEqualTo(beforeMissing);
         await Assert.That(OutcomeStoreOracle.ReadPartition(fixture.Database.Store, fixture.Database.Partition, writer.Id, commandId)).IsNull();

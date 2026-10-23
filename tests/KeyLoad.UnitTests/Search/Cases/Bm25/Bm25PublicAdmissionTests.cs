@@ -18,7 +18,7 @@ internal sealed class Bm25PublicAdmissionTests
             var execution = Assert.ThrowsExactly<KeyLoadException>(() => flow.Database.Database.CreateCommand(
                 OperationKind.Bm25CorpusPublicationPhase, original.CommandId, original.UserId!, new DateTimeOffset(original.Timestamp), payload));
             await Assert.That(execution.Code).IsEqualTo(ErrorCode.UnsupportedCapability);
-            var codec = new KeyLoad.Clustering.GrainRequestCodec(flow.Database.Database.Store.Identity.Incarnation, flow.Database.Database.Store.Identity.SigningKey,
+            var codec = new KeyLoad.Clustering.GrainRequestCodec(flow.Database.Database.Store.Identity.Incarnation,
             flow.Database.Database.OperationLimitsOptions, TimeProvider.System, UnitRoutingOptions.Routing());
             var generic = Assert.ThrowsExactly<KeyLoadException>(() => codec.CreateCommand(Guid.NewGuid(),
                 original.UserId!, OperationKind.Bm25CorpusPublicationPhase, original.CommandId, payload));
@@ -35,8 +35,8 @@ internal sealed class Bm25PublicAdmissionTests
             await before.RequireAsync(CanonicalStoreCut.Read(flow.Database));
             var healthyDescriptor = CopyDescriptor(descriptor, OperationKind.Batch);
             await Assert.That(healthyDescriptor.CreateTool().Name).IsEqualTo(descriptor.Name);
-            var signed = codec.CreateCommand(Guid.NewGuid(), original.UserId!, OperationKind.Batch, original.CommandId, payload);
-            await Assert.That(codec.Verify(signed).Envelope.CommandKind).IsEqualTo(OperationKind.Batch);
+            var envelope = codec.CreateCommand(Guid.NewGuid(), original.UserId!, OperationKind.Batch, original.CommandId, payload);
+            await Assert.That(codec.Decode(envelope).Envelope.CommandKind).IsEqualTo(OperationKind.Batch);
             var result = flow.Database.SubmitIssued(original);
             await Assert.That(Errors.Code(result.Problem)).IsNull();
             await ReplayResultAssertions.SameAsync(result,

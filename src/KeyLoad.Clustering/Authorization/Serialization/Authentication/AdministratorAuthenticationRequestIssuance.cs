@@ -5,7 +5,7 @@ namespace KeyLoad.Clustering;
 /// <summary>Issues bounded execution authentication authority and clears the original secret bytes.</summary>
 internal static class AdministratorAuthenticationRequestIssuance
 {
-    internal static string Create(GrainRequestCodec codec,
+    internal static GrainRequestEnvelope Create(GrainRequestCodec codec,
         TimeProvider clock, GrainRoutingOptions settings, Guid requestId,
         AdministratorAuthenticationRequest request)
     {

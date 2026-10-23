@@ -67,8 +67,8 @@ internal static class OrleansRuntimeTelemetryWorkflows
             var documentId = NewDocumentId();
             var requestId = Guid.NewGuid();
             var commandId = Guid.NewGuid();
-            var signed = SignWrite(fixture, principal, requestId, commandId, documentId);
-            var reply = await RequestCqrsCommandStream.InvokeAsync(fixture, signed, principal, requestId,
+            var envelope = IssueWrite(fixture, principal, requestId, commandId, documentId);
+            var reply = await RequestCqrsCommandStream.InvokeAsync(fixture, envelope, principal, requestId,
                 commandId, OrleansRuntimeTelemetryTokens.CompletedTerminalSequence);
             await Assert.That(reply.Error).IsNull();
             await Assert.That(sentinel.WasInjected).IsTrue();
@@ -95,10 +95,10 @@ internal static class OrleansRuntimeTelemetryWorkflows
         {
             await OrleansRuntimeTelemetryAssertions.AssertIsolatedParentAsync(parent);
             var requestId = Guid.NewGuid();
-            var signed = fixture.Codec.CreateRead(requestId, principal.Id, GrainReadKind.Document,
+            var envelope = fixture.Codec.CreateRead(requestId, principal.Id, GrainReadKind.Document,
                 OrleansSerialization.Serialize(new GetDocumentRequest(new(fixture.Database.Partition,
                     OrleansRuntimeTelemetryTokens.Collection, documentId))));
-            var reply = await ReadAsync(fixture, principal, requestId, signed);
+            var reply = await ReadAsync(fixture, principal, requestId, envelope);
             await Assert.That(reply.Payload.IsEmpty).IsFalse();
             var record = OrleansSerialization.Deserialize<GrainValue>(reply.Payload.Span).Value as DocumentResult;
             await Assert.That(record).IsNotNull();
@@ -126,8 +126,8 @@ internal static class OrleansRuntimeTelemetryWorkflows
             var requestId = Guid.NewGuid();
             var commandId = Guid.NewGuid();
             var id = documentId ?? NewDocumentId();
-            var signed = SignWrite(fixture, principal, requestId, commandId, id);
-            reply = await RequestCqrsCommandStream.InvokeAsync(fixture, signed, principal, requestId,
+            var envelope = IssueWrite(fixture, principal, requestId, commandId, id);
+            reply = await RequestCqrsCommandStream.InvokeAsync(fixture, envelope, principal, requestId,
                 commandId, OrleansRuntimeTelemetryTokens.CompletedTerminalSequence);
             await AssertDocumentRevisionAsync(fixture, id, 1);
             operationParent = new(parent.TraceId, parent.SpanId);
@@ -142,14 +142,14 @@ internal static class OrleansRuntimeTelemetryWorkflows
         var documentId = NewDocumentId();
         var requestId = Guid.NewGuid();
         var commandId = Guid.NewGuid();
-        var signed = SignWrite(fixture, principal, requestId, commandId, documentId);
+        var envelope = IssueWrite(fixture, principal, requestId, commandId, documentId);
         var revoked = principal with
         {
             Revoked = true,
             PolicyEpoch = principal.PolicyEpoch + 1
         };
         fixture.Database.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(revoked));
-        var reply = await RequestCqrsCommandStream.InvokeAsync(fixture, signed, principal, requestId,
+        var reply = await RequestCqrsCommandStream.InvokeAsync(fixture, envelope, principal, requestId,
             commandId, OrleansRuntimeTelemetryTokens.FailedTerminalSequence,
             expectedError: ErrorCode.Unauthenticated);
         await Assert.That(reply.Error).IsEqualTo(ErrorCode.Unauthenticated);
@@ -157,13 +157,13 @@ internal static class OrleansRuntimeTelemetryWorkflows
     }
 
     private static async Task<GrainOperationReply> ReadAsync(RequestCqrsHostedRuntimeFixture fixture,
-        PrincipalRecord principal, Guid requestId, string signed)
+        PrincipalRecord principal, Guid requestId, GrainRequestEnvelope envelope)
     {
         using var deadline = new CancellationTokenSource(RequestCqrsRoutingTests.InvocationBound, TimeProvider.System);
         using var identity = new GrainRequestIdentityScope(fixture.Services, principal,
             requestId, Guid.Empty, deadline.Token, connectionId: fixture.ConnectionId);
         var request = fixture.Grains.GetGrain<IConnectionGrain>(fixture.ConnectionId);
-        var stream = request.ExecuteStreamAsync(signed, deadline.Token).WithBatchSize(GrainRequestStreamProtocol.BatchSize);
+        var stream = request.ExecuteStreamAsync(envelope, deadline.Token).WithBatchSize(GrainRequestStreamProtocol.BatchSize);
         await using var iterator = stream.GetAsyncEnumerator(deadline.Token);
         if (!await iterator.MoveNextAsync())
         {
@@ -193,7 +193,7 @@ internal static class OrleansRuntimeTelemetryWorkflows
             .Get<PrincipalRecord>();
     }
 
-    private static string SignWrite(RequestCqrsHostedRuntimeFixture fixture, PrincipalRecord principal,
+    private static GrainRequestEnvelope IssueWrite(RequestCqrsHostedRuntimeFixture fixture, PrincipalRecord principal,
         Guid requestId, Guid commandId, string documentId)
     {
         var command = new CommandRequest(commandId, fixture.Database.Partition,

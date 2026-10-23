@@ -1,7 +1,7 @@
 using KeyLoad.Core.Features.ResourceExecution;
 namespace KeyLoad.Clustering;
 
-/// <summary>Borrowed node-local text owner; every invocation is an independently signed request capability.</summary>
+/// <summary>Borrowed node-local text owner; every invocation is an independently issued request capability.</summary>
 internal interface ITextMaintenance
 {
     Task<TextMaintenanceCapabilityResult> ExecuteAsync(PrincipalRecord principal,

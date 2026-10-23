@@ -1,6 +1,6 @@
 namespace KeyLoad.UnitTests;
 
-/// <summary>Invalid signed request scope cases.</summary>
+/// <summary>Invalid request envelope scope cases.</summary>
 internal enum GrainRequestMutation
 {
     /// <summary>A different protocol purpose.</summary>

@@ -4,11 +4,11 @@ namespace KeyLoad.Clustering;
 
 public sealed partial class GrainRequestCodec
 {
-    internal string CreateRuntimeJournalRead(Guid requestId, GrainReadKind kind, ReadOnlyMemory<byte> payload)
+    internal GrainRequestEnvelope CreateRuntimeJournalRead(Guid requestId, GrainReadKind kind, ReadOnlyMemory<byte> payload)
         => Issue(GrainRequestCapabilityEnvelopes.RuntimeJournalRead(this, clock,
             settings.RequestLifetime, requestId, RuntimeJournalIdentity.ProtectedPrincipalId, kind, payload));
 
-    internal string CreateRuntimeJournalCommand(Guid requestId, string principalId, Guid commandId,
+    internal GrainRequestEnvelope CreateRuntimeJournalCommand(Guid requestId, string principalId, Guid commandId,
         ReadOnlyMemory<byte> payload)
         => Issue(GrainRequestCapabilityEnvelopes.RuntimeJournalCommand(this, clock,
             settings.RequestLifetime, requestId, principalId, commandId, payload));

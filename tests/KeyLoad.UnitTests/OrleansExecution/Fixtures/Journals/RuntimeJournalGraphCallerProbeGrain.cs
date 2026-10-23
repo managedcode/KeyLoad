@@ -46,7 +46,7 @@ internal sealed class RuntimeJournalGraphCallerProbeGrain(
     private async Task<(bool Denied, bool Restored)> DenyWrongMethodAsync(CancellationToken cancellationToken)
     {
         var requestId = Guid.NewGuid();
-        var signed = CreateCatalogRequest(requestId);
+        var envelope = CreateCatalogRequest(requestId);
         var before = RequestContextHelper.CaptureCurrentCaller();
         var denied = false;
         await RequestContextHelper.RunWithCurrentCallerAsync(RuntimeJournalClient.CallerIdentity,
@@ -55,7 +55,7 @@ internal sealed class RuntimeJournalGraphCallerProbeGrain(
                 try
                 {
                     cancellationToken.ThrowIfCancellationRequested();
-                    await ReadRequestAsync(signed, cancellationToken).ConfigureAwait(true);
+                    await ReadRequestAsync(envelope, cancellationToken).ConfigureAwait(true);
                 }
                 catch (InvalidOperationException failure)
                 {
@@ -70,7 +70,7 @@ internal sealed class RuntimeJournalGraphCallerProbeGrain(
     private async Task<(bool Denied, bool Restored)> DenyWrongTargetAsync(CancellationToken cancellationToken)
     {
         var requestId = Guid.NewGuid();
-        var signed = CreateCatalogRequest(requestId);
+        var envelope = CreateCatalogRequest(requestId);
         var before = RequestContextHelper.CaptureCurrentCaller();
         var denied = false;
         await RequestContextHelper.RunWithCurrentCallerAsync(RuntimeJournalClient.CallerIdentity,
@@ -80,7 +80,7 @@ internal sealed class RuntimeJournalGraphCallerProbeGrain(
                 {
                     cancellationToken.ThrowIfCancellationRequested();
                     await grains.GetGrain<ICommandPartitionGrain>(RuntimeJournalGraphCallerProtocol.ProbeAlias)
-                        .ExecuteAsync(signed, cancellationToken).ConfigureAwait(true);
+                        .ExecuteAsync(envelope, cancellationToken).ConfigureAwait(true);
                 }
                 catch (InvalidOperationException failure)
                 {
@@ -92,14 +92,14 @@ internal sealed class RuntimeJournalGraphCallerProbeGrain(
         return (denied, Equals(before, RequestContextHelper.CaptureCurrentCaller()));
     }
 
-    private string CreateCatalogRequest(Guid requestId)
+    private GrainRequestEnvelope CreateCatalogRequest(Guid requestId)
         => codec.CreateRuntimeJournalRead(requestId, GrainReadKind.RuntimeJournalCatalog,
             OrleansSerialization.Serialize(GrainContracts.NoDtoMarker));
 
-    private async Task ReadRequestAsync(string signed, CancellationToken cancellationToken)
+    private async Task ReadRequestAsync(GrainRequestEnvelope envelope, CancellationToken cancellationToken)
     {
         await foreach (var chunk in grains.GetGrain<IConnectionGrain>(connectionOwner.Id)
-                           .ExecuteStreamAsync(signed, cancellationToken).ConfigureAwait(true))
+                           .ExecuteStreamAsync(envelope, cancellationToken).ConfigureAwait(true))
         {
             _ = chunk;
         }
