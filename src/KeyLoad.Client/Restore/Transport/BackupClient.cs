@@ -1,4 +1,3 @@
-using KeyLoad.Client.Features.ClientApi;
 using ManagedCode.Communication;
 
 namespace KeyLoad.Client;
@@ -14,7 +13,7 @@ public static class BackupClient
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(client);
-        return client.Send<BackupReceipt>(ClientApiRoutes.AdminBackup, null, true, null, cancellationToken,
+        return client.Send<BackupReceipt>(ApiRoutes.AdminBackup, null, true, null, cancellationToken,
             HttpMethod.Post);
     }
 }

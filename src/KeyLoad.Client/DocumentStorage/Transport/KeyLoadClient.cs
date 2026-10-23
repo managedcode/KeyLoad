@@ -1,4 +1,3 @@
-using KeyLoad.Client.Features.ClientApi;
 using ManagedCode.Communication;
 
 namespace KeyLoad.Client;
@@ -14,7 +13,7 @@ public sealed partial class KeyLoadClient
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(minimumToken);
-        return Send<DocumentReadResult>(ClientApiRoutes.DocumentsGet, new GetDocumentRequest(reference, minimumToken),
+        return Send<DocumentReadResult>(ApiRoutes.DocumentsGet, new GetDocumentRequest(reference, minimumToken),
             false, null, cancellationToken);
     }
 
@@ -23,5 +22,5 @@ public sealed partial class KeyLoadClient
     /// <param name="cancellationToken">Token that cancels the HTTP operation.</param>
     /// <returns>A document response whose Document field is null when absent, or a classified problem.</returns>
     public Task<Result<DocumentReadResult>> GetAsync(EntityRef reference, CancellationToken cancellationToken = default)
-        => Send<DocumentReadResult>(ClientApiRoutes.DocumentsGet, new GetDocumentRequest(reference), false, null, cancellationToken);
+        => Send<DocumentReadResult>(ApiRoutes.DocumentsGet, new GetDocumentRequest(reference), false, null, cancellationToken);
 }

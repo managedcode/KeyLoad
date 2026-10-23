@@ -2,7 +2,7 @@
 
 Parent [Search](../Search.md), [FullTextProjection](FullTextProjection.md), ADR-071 and ADR-078 remain authoritative. This contract changes no public API, serializer alias/field ID, package, storage format, tokenizer, scorer, provider, transport or routing.
 
-The selected current dependency pair is ZoneTree2.0.1 and ZoneTree.FullTextSearch1.0.9. The cached published FTS archive SHA256 is `7ea1fbb7aba0ad00391d78d2f414166b500335f5b1affe43c305d861b55719ff`; its nuspec identifies release source `c0993e2c65186708f3b087741082545bf49224fd`, MIT and ZoneTree>=1.8.7. This is a local package/source identity observation, not fresh feed, signature, publication or runtime proof. Historical1.9.8/scalar/two-node prose does not define the current qualification profile. The normal product keeps mandatory supported SIMD and one/three-node qualification; no disabled-SIMD mode or new competitor evaluation is introduced.
+The selected dependency pair is the published ZoneTree and ZoneTree.FullTextSearch packages at the versions centrally pinned in `Directory.Packages.props`; the FTS package is MIT licensed. Package identity on the local feed cache is an observation, not fresh feed, signature, publication or runtime proof. Historical scalar/two-node prose does not define the current qualification profile. The normal product keeps mandatory supported SIMD and one/three-node qualification; no disabled-SIMD mode or new competitor evaluation is introduced.
 
 ## Selected capability and API boundary
 

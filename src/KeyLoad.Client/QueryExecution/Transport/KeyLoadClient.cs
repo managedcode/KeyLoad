@@ -1,5 +1,4 @@
 using System.Text.Json;
-using KeyLoad.Client.Features.ClientApi;
 using KeyLoad.Query;
 using ManagedCode.Communication;
 
@@ -20,13 +19,13 @@ public sealed partial class KeyLoadClient
     /// <param name="cancellationToken">Token that cancels the HTTP operation.</param>
     /// <returns>The typed query page.</returns>
     public Task<Result<QueryPage>> QueryAsync(QueryRequest request, CancellationToken cancellationToken = default)
-        => Send<QueryPage>(ClientApiRoutes.Query, request, false, null, cancellationToken);
+        => Send<QueryPage>(ApiRoutes.Query, request, false, null, cancellationToken);
     /// <summary>Executes a canonical AST query request.</summary>
     /// <param name="request">Typed Q1 AST and requested page controls.</param>
     /// <param name="cancellationToken">Token that cancels the HTTP operation.</param>
     /// <returns>The typed query page.</returns>
     public Task<Result<QueryPage>> QueryAstAsync(AstQueryRequest request, CancellationToken cancellationToken = default)
-        => Send<QueryPage>(ClientApiRoutes.QueryAst, request, false, null, cancellationToken);
+        => Send<QueryPage>(ApiRoutes.QueryAst, request, false, null, cancellationToken);
     /// <summary>Builds and executes the immutable request from a typed query builder.</summary>
     /// <typeparam name="T">Application record type used to translate the builder expressions.</typeparam>
     /// <param name="query">Typed query builder.</param>
@@ -43,5 +42,5 @@ public sealed partial class KeyLoadClient
     /// <param name="cancellationToken">Token that cancels the HTTP operation.</param>
     /// <returns>The capability manifest.</returns>
     public Task<Result<QueryCapabilityManifest>> QueryCapabilitiesAsync(CancellationToken cancellationToken = default)
-        => Send<QueryCapabilityManifest>(ClientApiRoutes.QueryCapabilities, null, false, null, cancellationToken);
+        => Send<QueryCapabilityManifest>(ApiRoutes.QueryCapabilities, null, false, null, cancellationToken);
 }

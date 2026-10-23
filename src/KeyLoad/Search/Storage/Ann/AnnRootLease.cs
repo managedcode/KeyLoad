@@ -2,11 +2,13 @@ using KeyLoad.Storage.ZoneTree.IO;
 
 namespace KeyLoad.Server.Features.Search;
 
+/// <summary>Owns the ANN root receipt: readers take the short receipt gate, writers serialize file work on the write gate.</summary>
 internal sealed class AnnRootLease : IDisposable
 {
     private const int RootReceiptOwnershipFrames = 4;
     private const UnixFileMode PrivateDirectory = UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute;
     private readonly FileStream ownership;
+    private readonly Lock writeGate = new();
     private readonly Lock receiptGate = new();
     private bool disposed;
     private bool uncertainOriginal;
@@ -26,6 +28,7 @@ internal sealed class AnnRootLease : IDisposable
     {
         get;
     }
+
     internal AnnRootReceipt Receipt
     {
         get
@@ -35,10 +38,6 @@ internal sealed class AnnRootLease : IDisposable
                 RequireStable();
                 return receipt;
             }
-        }
-        private set
-        {
-            receipt = value;
         }
     }
 
@@ -107,7 +106,7 @@ internal sealed class AnnRootLease : IDisposable
 
     internal void Unpublish(AnnOwnedKey key, AnnExecutionOptions options, bool releaseOriginal = false)
     {
-        lock (receiptGate)
+        lock (writeGate)
         {
             SaveOriginal(AnnPublication.PrepareUnpublish(Receipt, key, releaseOriginal), options);
         }
@@ -118,19 +117,21 @@ internal sealed class AnnRootLease : IDisposable
 
     private void Update(Func<AnnRootReceipt, AnnRootReceipt> replace)
     {
-        lock (receiptGate)
+        lock (writeGate)
         {
-            RequireStable();
-            receipt = replace(receipt);
+            var next = replace(Receipt);
+            lock (receiptGate)
+            {
+                receipt = next;
+            }
         }
     }
 
     internal AnnMaintenanceResult? AdmitOriginal(PrincipalRecord principal, AnnMaintenanceRequest request,
         ProjectionConsumerInfo configured, KeyLoad.Core.Features.Search.AnnSeed current, AnnExecutionOptions options)
     {
-        lock (receiptGate)
+        lock (writeGate)
         {
-            ObjectDisposedException.ThrowIf(disposed, this);
             var admitted = AnnOriginalOperations.Admit(Receipt, principal, request, configured, current, options);
             SaveOriginal(admitted.Receipt, options);
             return admitted.Result;
@@ -139,7 +140,7 @@ internal sealed class AnnRootLease : IDisposable
 
     internal void StartOriginal(AnnMaintenanceRequest request, AnnExecutionOptions options)
     {
-        lock (receiptGate)
+        lock (writeGate)
         {
             SaveOriginal(AnnOriginalOperations.Start(Receipt, request), options);
         }
@@ -149,7 +150,7 @@ internal sealed class AnnRootLease : IDisposable
         AnnMaintenanceResult result, KeyLoad.Core.Features.Search.AnnSeed current, AnnExecutionOptions options,
         CommitProjectionBatchRequest? settlementIntent)
     {
-        lock (receiptGate)
+        lock (writeGate)
         {
             SaveOriginal(AnnOriginalOperations.Settle(Receipt, principal, request, result, current, settlementIntent, options), options);
         }
@@ -157,15 +158,15 @@ internal sealed class AnnRootLease : IDisposable
 
     internal void CompleteOriginalRelease(AnnOwnedKey key, AnnExecutionOptions options)
     {
-        lock (receiptGate)
+        lock (writeGate)
         {
             SaveOriginal(AnnOriginalOperations.CompleteRelease(Receipt, key), options);
         }
     }
 
+    /// <summary>Persists the next receipt on the caller's write gate; the receipt gate is taken only to swap the reference.</summary>
     private void SaveOriginal(AnnRootReceipt next, AnnExecutionOptions options)
     {
-        ObjectDisposedException.ThrowIf(disposed, this);
         if (ReferenceEquals(Receipt, next))
         {
             return;
@@ -179,19 +180,32 @@ internal sealed class AnnRootLease : IDisposable
         {
             AnnRootReceipts.Replace(Root, next, options);
         }
-        catch (Exception) { uncertainOriginal = true; throw; }
-        Receipt = next;
+        catch (Exception)
+        {
+            lock (receiptGate)
+            {
+                uncertainOriginal = true;
+            }
+            throw;
+        }
+        lock (receiptGate)
+        {
+            receipt = next;
+        }
     }
 
     public void Dispose()
     {
-        lock (receiptGate)
+        lock (writeGate)
         {
-            if (disposed)
+            lock (receiptGate)
             {
-                return;
+                if (disposed)
+                {
+                    return;
+                }
+                disposed = true;
             }
-            disposed = true;
             ownership.Dispose();
         }
     }

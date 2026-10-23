@@ -1,6 +1,6 @@
 namespace KeyLoad.Client;
 
-internal static class AggregateReplayProtocol
+internal static class AggregateReplayClientProtocol
 {
     internal const int InvalidSchemaVersion = 0;
     internal const int MissingGeneration = 0;

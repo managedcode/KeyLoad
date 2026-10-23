@@ -4,7 +4,7 @@ Decision: [ADR-078](../../ADR/ADR-078-full-text-projection.md). ZoneTree.FullTex
 
 |Requirement|Acceptance and automated evidence|
 |---|---|
-|REQ-FTS-001: the selected provider stays a derived index|AC-FTS-001: the published/source-bound ZoneTree.FullTextSearch 1.0.9 and ZoneTree posting files are used; exact canonical identities/scores/ties and all RRF branch ranks agree on a real-store Unicode/digit/short/repeated/missing-field/collision corpus|
+|REQ-FTS-001: the selected provider stays a derived index|AC-FTS-001: the published ZoneTree.FullTextSearch package at the version centrally pinned in `Directory.Packages.props` and ZoneTree posting files are used; exact canonical identities/scores/ties and all RRF branch ranks agree on a real-store Unicode/digit/short/repeated/missing-field/collision corpus|
 |REQ-FTS-002: scope, privacy and freshness remain canonical|AC-FTS-002: a source cut/read-generation/incarnation/partition/principal/policy/schema/field mismatch cannot reuse a generation; mutation/delete/revocation/hidden-row tests preserve persisted checks and never leak unauthorized counts or payload|
 |REQ-FTS-003: lease, storage and work are bounded|AC-FTS-003: saturation, exact/excess posting/record/token/metadata/disk/file/deadline bounds and cancellation return exact failures without partial success; handles release and the following request succeeds|
 |REQ-FTS-004: staged generations and restart cannot supply partial truth|AC-FTS-004: actual write/publication interruption, malformed/unknown/link generation and reopen/rebuild tests preserve canonical bytes, recognize only owned cleanup and serve only a fully verified source cut|
@@ -29,7 +29,7 @@ Client/MCP wire changes are N/A (the existing SearchRequest and search output st
 
 ## Selected-provider capability audit
 
-REQ-FTS-AUDIT-001 / AC-FTS-AUDIT-001 retain the centrally pinned ZoneTree.FullTextSearch 1.0.9 / ZoneTree 1.9.8 and the execution `IndexOfTokenRecordPreviousToken<ulong,ulong>` derived generation; there is no alternative provider.
+REQ-FTS-AUDIT-001 / AC-FTS-AUDIT-001 retain the centrally pinned ZoneTree.FullTextSearch and ZoneTree packages from `Directory.Packages.props` and the execution `IndexOfTokenRecordPreviousToken<ulong,ulong>` derived generation; there is no alternative provider.
 
 |Capability|Actual ownership/API|Exact proof/boundary|
 |---|---|---|

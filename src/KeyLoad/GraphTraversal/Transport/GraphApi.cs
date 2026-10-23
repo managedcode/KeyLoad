@@ -2,7 +2,7 @@ namespace KeyLoad.Server;
 
 internal static class GraphApi
 {
-    private const string TraversePath = "/graph/traverse";
+    private const string TraversePath = ApiRoutes.GraphTraverse;
     internal static void Map(WebApplication app)
     {
         app.MapPost(TraversePath, (TraverseRequest request, HttpContext context) =>

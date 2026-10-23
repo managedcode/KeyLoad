@@ -3,11 +3,13 @@ using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Orleans.Placement;
 using Orleans.Serialization;
 
 namespace KeyLoad.Clustering;
 
 /// <summary>Owns one server-issued connection and joins its independent execution response streams.</summary>
+[Immovable(ImmovableKind.Any), PreferLocalPlacement]
 public sealed class ConnectionGrain(GrainRequestCodec codec, SiloDatabaseClient storage,
     IOptions<GrainRoutingOptions> options, ILogger<ConnectionGrain> diagnostics,
     Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> serializer, TimeProvider clock,

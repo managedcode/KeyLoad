@@ -78,14 +78,14 @@ internal static class SampleChunkTestData
     internal static SampleRecord Row(string id, DateTimeOffset timestamp, long sequence, double value, string tags)
         => new(Series, new(id, timestamp, value), sequence, tags);
 
-    internal static ReadExecutionBudget Budget(DatabaseLimits? limits = null,
+    internal static ReadExecutionBudget Budget(DatabaseLimits? limits = null, TimeProvider? clock = null,
         CancellationToken cancellationToken = default)
-        => new(UnitExecutionOptions.DatabaseLimits(limits ?? new DatabaseLimits()), cancellationToken: cancellationToken);
+        => new(UnitExecutionOptions.DatabaseLimits(limits ?? new DatabaseLimits()), clock, cancellationToken);
 
     internal static ReadExecutionBudget ChargedDecodeBudget(ReadOnlySpan<byte> bytes,
-        DatabaseLimits? limits = null, CancellationToken cancellationToken = default)
+        DatabaseLimits? limits = null, TimeProvider? clock = null, CancellationToken cancellationToken = default)
     {
-        var budget = Budget(limits, cancellationToken);
+        var budget = Budget(limits, clock, cancellationToken);
         budget.ChargeBytes(bytes.Length);
         return budget;
     }

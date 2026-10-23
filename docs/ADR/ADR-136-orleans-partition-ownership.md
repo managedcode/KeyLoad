@@ -109,4 +109,4 @@ are separate gates. Process-kill recovery does not prove power-loss durability.
 - [Grain placement and activation repartitioning](https://learn.microsoft.com/en-us/dotnet/orleans/grains/grain-placement)
 - [Stateless worker grains](https://learn.microsoft.com/en-us/dotnet/orleans/grains/stateless-worker-grains)
 - [Grain Services](https://learn.microsoft.com/en-us/dotnet/orleans/grains/grainservices)
-- [Pinned ZoneTree WAL opening](https://github.com/ZoneTree/ZoneTree/blob/ec774af2223bd87457a0aa985908f0b4e508e4c8/src/ZoneTree/WAL/Sync/SyncFileSystemWriteAheadLog.cs#L55-L63)
+- [Pinned ZoneTree WAL opening](https://github.com/ZoneTree/ZoneTree/blob/dea002a935e0de8ed6bae98b526556c440b6b467/src/ZoneTree/WAL/Sync/SyncFileSystemWriteAheadLog.cs)

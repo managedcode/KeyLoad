@@ -6,12 +6,12 @@ namespace KeyLoad.Server;
 
 internal static class QueryApi
 {
-    private const string QueryPath = "/query";
+    private const string QueryPath = ApiRoutes.Query;
     private const string SearchPath = "/query/search";
-    private const string AstPath = "/query/ast";
-    private const string CapabilitiesPath = "/query/capabilities";
-    private const string LiveStartPath = "/query/live/start";
-    private const string LiveReadPath = "/query/live/read";
+    private const string AstPath = ApiRoutes.QueryAst;
+    private const string CapabilitiesPath = ApiRoutes.QueryCapabilities;
+    private const string LiveStartPath = ApiRoutes.LiveQueryStart;
+    private const string LiveReadPath = ApiRoutes.LiveQueryRead;
 
     internal static void Map(WebApplication app)
     {

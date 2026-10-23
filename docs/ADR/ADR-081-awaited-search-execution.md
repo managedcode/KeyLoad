@@ -10,7 +10,7 @@ ADR-034, ADR-078, AC-MCP-001 and AC-SQLVIEW-003.
 Source inspection establishes an integration hazard: pinned ZoneTree1.9.8
 `ZoneTreeMaintainer.WaitForBackgroundThreads()` synchronously waits on its async
 method, whose merge-thread join await captures the current context.
-ZoneTree.FullTextSearch1.0.9 calls that path during eviction/disposal. KeyLoad
+ZoneTree.FullTextSearch calls that path during eviction/disposal. KeyLoad
 currently invokes synchronous search and projection settlement inside the
 Orleans read turn. A continuation can require the turn blocked by that wait.
 Task.Run in the dependency does not itself inherit the Orleans scheduler; the

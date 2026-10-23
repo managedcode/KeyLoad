@@ -2,7 +2,7 @@ namespace KeyLoad.Server;
 
 internal static class TimeSeriesApi
 {
-    private const string ReadPath = "/series/read";
+    private const string ReadPath = ApiRoutes.SeriesRead;
 
     internal static void Map(WebApplication app)
     {

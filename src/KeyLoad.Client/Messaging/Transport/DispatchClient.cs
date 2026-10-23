@@ -1,4 +1,3 @@
-using KeyLoad.Client.Features.ClientApi;
 using ManagedCode.Communication;
 
 namespace KeyLoad.Client;
@@ -24,7 +23,7 @@ public static class DispatchClient
         {
             throw new ArgumentException(InvalidCommandId, nameof(commandId));
         }
-        var path = string.Concat(ClientApiRoutes.AdminDispatch, ClientApiRoutes.DispatchPausedQuery,
+        var path = string.Concat(ApiRoutes.AdminDispatch, ApiRoutes.DispatchPausedQuery,
             paused ? PausedQueryValue : UnpausedQueryValue);
         return client.Send<bool>(path, null, true, commandId, cancellationToken, HttpMethod.Post);
     }

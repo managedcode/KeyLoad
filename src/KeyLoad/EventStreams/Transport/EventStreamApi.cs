@@ -4,15 +4,15 @@ namespace KeyLoad.Server;
 
 internal static class EventStreamApi
 {
-    private const string StreamReadPath = "/streams/read";
-    private const string EventReadPath = "/events/read";
-    private const string ConfigurePath = "/subscriptions/configure";
-    private const string SeekPath = "/subscriptions/seek";
-    private const string PausePath = "/subscriptions/pause";
-    private const string ReceivePath = "/subscriptions/receive";
-    private const string DeliveryPath = "/subscriptions/delivery";
-    private const string ProcessPath = "/subscriptions/process";
-    private const string StatusPath = "/subscriptions/status";
+    private const string StreamReadPath = ApiRoutes.StreamsRead;
+    private const string EventReadPath = ApiRoutes.EventsRead;
+    private const string ConfigurePath = ApiRoutes.SubscriptionsConfigure;
+    private const string SeekPath = ApiRoutes.SubscriptionsSeek;
+    private const string PausePath = ApiRoutes.SubscriptionsPause;
+    private const string ReceivePath = ApiRoutes.SubscriptionsReceive;
+    private const string DeliveryPath = ApiRoutes.SubscriptionsDelivery;
+    private const string ProcessPath = ApiRoutes.SubscriptionsProcess;
+    private const string StatusPath = ApiRoutes.SubscriptionsStatus;
 
     internal static void Map(WebApplication app)
     {

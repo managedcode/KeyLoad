@@ -2,8 +2,8 @@ namespace KeyLoad.Server;
 
 internal static class DocumentApi
 {
-    private const string CommandPath = "/commands";
-    private const string GetPath = "/documents/get";
+    private const string CommandPath = ApiRoutes.Commands;
+    private const string GetPath = ApiRoutes.DocumentsGet;
 
     internal static bool IsCommandPath(PathString path) => path == CommandPath;
 

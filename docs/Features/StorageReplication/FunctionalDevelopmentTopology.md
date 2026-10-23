@@ -36,12 +36,12 @@ that layout.
 | Separate files for each silo | Actual Aspire mounts, distinct persisted store identities and physical file identities; SDK/MCP/SQL model operations, receipt replay and two joined cold reopens over the retained roots. | Supported topology; physical-file runtime qualification is open. |
 | All silos read the same live ZoneTree files | Actual same-file identity across the processes plus a supported coherent open/read/write, recovery and ownership contract, followed by the complete public operation flow. | Positive qualification is open. The pinned engine and current owner do not provide this mode. |
 
-ZoneTree 2.0.1 is bound to source commit
-`ec774af2223bd87457a0aa985908f0b4e508e4c8`. Its ordinary
-[loader](https://github.com/ZoneTree/ZoneTree/blob/ec774af2223bd87457a0aa985908f0b4e508e4c8/src/ZoneTree/Core/ZoneTreeLoader.cs#L132-L190)
+The centrally pinned ZoneTree package is bound to source commit
+`dea002a935e0de8ed6bae98b526556c440b6b467`. Its ordinary
+[loader](https://github.com/ZoneTree/ZoneTree/blob/dea002a935e0de8ed6bae98b526556c440b6b467/src/ZoneTree/Core/ZoneTreeLoader.cs)
 opens writable metadata/recovery state; it exposes no qualified whole-tree
 read-only open for concurrent independent processes. The selected execution
-[sync WAL](https://github.com/ZoneTree/ZoneTree/blob/ec774af2223bd87457a0aa985908f0b4e508e4c8/src/ZoneTree/WAL/Sync/SyncFileSystemWriteAheadLog.cs#L55-L62)
+[sync WAL](https://github.com/ZoneTree/ZoneTree/blob/dea002a935e0de8ed6bae98b526556c440b6b467/src/ZoneTree/WAL/Sync/SyncFileSystemWriteAheadLog.cs)
 uses `FileAccess.ReadWrite` with `FileShare.None`. Individual segment read sharing
 does not establish a coherent cross-process database contract. KeyLoad acquires
 its exclusive `node.owner.lock` before opening identity, either store or recovery.

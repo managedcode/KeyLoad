@@ -5,7 +5,7 @@ internal sealed class AdminHttpMetricsMiddleware(RequestDelegate next, TimeProvi
     private readonly TimeProvider time = clock ?? TimeProvider.System;
     private const int RouteTemplateGetEndpointEmptyCount = 0;
 
-    private const string CommandsPrefix = "/commands";
+    private const string CommandsPrefix = ApiRoutes.Commands;
     private const string DocumentsPrefix = "/documents";
     private const string StreamsPrefix = "/streams";
     private const string EventsPrefix = "/events";
@@ -13,16 +13,16 @@ internal sealed class AdminHttpMetricsMiddleware(RequestDelegate next, TimeProvi
     private const string QueuesPrefix = "/queues";
     private const string InboxPrefix = "/inbox";
     private const string GraphPrefix = "/graph";
-    private const string SearchPrefix = "/search";
+    private const string SearchPrefix = ApiRoutes.Search;
     private const string SeriesPrefix = "/series";
-    private const string QueryPrefix = "/query";
-    private const string AdminResourcesPrefix = "/admin/resources";
-    private const string AdminPrincipalsPrefix = "/admin/principals";
-    private const string AdminApiKeysPrefix = "/admin/api-keys";
+    private const string QueryPrefix = ApiRoutes.Query;
+    private const string AdminResourcesPrefix = ApiRoutes.ResourcesConfigure;
+    private const string AdminPrincipalsPrefix = ApiRoutes.PrincipalsConfigure;
+    private const string AdminApiKeysPrefix = ApiRoutes.ApiKeysConfigure;
     private const string AdminOutboxPrefix = "/admin/outbox";
     private const string AdminProjectionsPrefix = "/admin/projections";
-    private const string AdminDispatchPrefix = "/admin/dispatch";
-    private const string AdminBackupPrefix = "/admin/backup";
+    private const string AdminDispatchPrefix = ApiRoutes.AdminDispatch;
+    private const string AdminBackupPrefix = ApiRoutes.AdminBackup;
     private const string AdminTablesPrefix = "/admin/tables";
     private const string ChangesPrefix = "/changes";
     private const string AnalyticsPrefix = "/analytics";
@@ -34,8 +34,8 @@ internal sealed class AdminHttpMetricsMiddleware(RequestDelegate next, TimeProvi
         AdminOutboxPrefix, AdminProjectionsPrefix, AdminDispatchPrefix, AdminBackupPrefix, AdminTablesPrefix, ChangesPrefix, AnalyticsPrefix
     ];
     private const string McpPrefix = "/mcp";
-    private const string AdmissionPath = "/admin/admission";
-    private const string StatusPath = "/status";
+    private const string AdmissionPath = ApiRoutes.AdmissionStatus;
+    private const string StatusPath = ApiRoutes.Status;
     private const int ErrorStatus = 400;
 
     private static readonly string[] RecognizedMethods =

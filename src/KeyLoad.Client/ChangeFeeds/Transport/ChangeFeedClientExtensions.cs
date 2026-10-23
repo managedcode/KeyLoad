@@ -1,4 +1,3 @@
-using KeyLoad.Client.Features.ClientApi;
 using ManagedCode.Communication;
 
 namespace KeyLoad.Client;
@@ -14,7 +13,7 @@ public static class ChangeFeedClientExtensions
     public static Task<Result<ChangeFeedPage>> ReadChangesAsync(this KeyLoadClient client, ReadChangeFeedRequest request, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(client);
-        return client.Send<ChangeFeedPage>(ClientApiRoutes.ChangesRead, request, false, null, cancellationToken);
+        return client.Send<ChangeFeedPage>(ApiRoutes.ChangesRead, request, false, null, cancellationToken);
     }
     /// <summary>Starts a bounded live query snapshot.</summary>
     /// <param name="client">The authenticated SDK client.</param>
@@ -24,7 +23,7 @@ public static class ChangeFeedClientExtensions
     public static Task<Result<LiveQuerySnapshot>> StartLiveQueryAsync(this KeyLoadClient client, StartLiveQueryRequest request, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(client);
-        return client.Send<LiveQuerySnapshot>(ClientApiRoutes.LiveQueryStart, request, false, null, cancellationToken);
+        return client.Send<LiveQuerySnapshot>(ApiRoutes.LiveQueryStart, request, false, null, cancellationToken);
     }
     /// <summary>Reads a bounded page from an existing live query.</summary>
     /// <param name="client">The authenticated SDK client.</param>
@@ -34,7 +33,7 @@ public static class ChangeFeedClientExtensions
     public static Task<Result<LiveQueryPage>> ReadLiveQueryAsync(this KeyLoadClient client, ReadLiveQueryRequest request, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(client);
-        return client.Send<LiveQueryPage>(ClientApiRoutes.LiveQueryRead, request, false, null, cancellationToken);
+        return client.Send<LiveQueryPage>(ApiRoutes.LiveQueryRead, request, false, null, cancellationToken);
     }
     /// <summary>Reads the status of one projection outbox.</summary>
     /// <param name="client">The authenticated SDK client.</param>
@@ -44,7 +43,7 @@ public static class ChangeFeedClientExtensions
     public static Task<Result<OutboxStatus>> OutboxStatusAsync(this KeyLoadClient client, PartitionRef partition, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(client);
-        return client.Send<OutboxStatus>(ClientApiRoutes.OutboxStatus, new GetOutboxStatusRequest(partition), false, null, cancellationToken);
+        return client.Send<OutboxStatus>(ApiRoutes.OutboxStatus, new GetOutboxStatusRequest(partition), false, null, cancellationToken);
     }
     /// <summary>Purges an eligible prefix of one projection outbox.</summary>
     /// <param name="client">The authenticated SDK client.</param>
@@ -55,7 +54,7 @@ public static class ChangeFeedClientExtensions
     {
         ArgumentNullException.ThrowIfNull(client);
         ArgumentNullException.ThrowIfNull(request);
-        return client.Send<OutboxHead>(ClientApiRoutes.OutboxPurge, request, true, request.CommandId, cancellationToken);
+        return client.Send<OutboxHead>(ApiRoutes.OutboxPurge, request, true, request.CommandId, cancellationToken);
     }
     /// <summary>Creates or updates one projection consumer.</summary>
     /// <param name="client">The authenticated SDK client.</param>
@@ -66,7 +65,7 @@ public static class ChangeFeedClientExtensions
     {
         ArgumentNullException.ThrowIfNull(client);
         ArgumentNullException.ThrowIfNull(request);
-        return client.Send<ProjectionConsumerInfo>(ClientApiRoutes.ProjectionsConfigure, request, true, request.CommandId, cancellationToken);
+        return client.Send<ProjectionConsumerInfo>(ApiRoutes.ProjectionsConfigure, request, true, request.CommandId, cancellationToken);
     }
     /// <summary>Reads one bounded projection outbox batch.</summary>
     /// <param name="client">The authenticated SDK client.</param>
@@ -76,7 +75,7 @@ public static class ChangeFeedClientExtensions
     public static Task<Result<ProjectionBatch>> ReadProjectionAsync(this KeyLoadClient client, ReadProjectionBatchRequest request, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(client);
-        return client.Send<ProjectionBatch>(ClientApiRoutes.ProjectionsRead, request, false, null, cancellationToken);
+        return client.Send<ProjectionBatch>(ApiRoutes.ProjectionsRead, request, false, null, cancellationToken);
     }
     /// <summary>Commits one projection batch result using its stable command identifier.</summary>
     /// <param name="client">The authenticated SDK client.</param>
@@ -87,7 +86,7 @@ public static class ChangeFeedClientExtensions
     {
         ArgumentNullException.ThrowIfNull(client);
         ArgumentNullException.ThrowIfNull(request);
-        return client.Send<ProjectionBatchResult>(ClientApiRoutes.ProjectionsCommit, request, true, request.CommandId, cancellationToken);
+        return client.Send<ProjectionBatchResult>(ApiRoutes.ProjectionsCommit, request, true, request.CommandId, cancellationToken);
     }
     /// <summary>Releases one projection consumer lease.</summary>
     /// <param name="client">The authenticated SDK client.</param>
@@ -98,6 +97,6 @@ public static class ChangeFeedClientExtensions
     {
         ArgumentNullException.ThrowIfNull(client);
         ArgumentNullException.ThrowIfNull(request);
-        return client.Send<ProjectionConsumerInfo>(ClientApiRoutes.ProjectionsRelease, request, true, request.CommandId, cancellationToken);
+        return client.Send<ProjectionConsumerInfo>(ApiRoutes.ProjectionsRelease, request, true, request.CommandId, cancellationToken);
     }
 }

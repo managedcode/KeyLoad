@@ -4,13 +4,13 @@ namespace KeyLoad.Server;
 
 internal static class ChangeFeedApi
 {
-    private const string ReadPath = "/changes/read";
-    private const string OutboxPath = "/admin/outbox/status";
-    private const string PurgePath = "/admin/outbox/purge";
-    private const string ConfigureProjectionPath = "/admin/projections/configure";
-    private const string ReadProjectionPath = "/admin/projections/read";
-    private const string CommitProjectionPath = "/admin/projections/commit";
-    private const string ReleaseProjectionPath = "/admin/projections/release";
+    private const string ReadPath = ApiRoutes.ChangesRead;
+    private const string OutboxPath = ApiRoutes.OutboxStatus;
+    private const string PurgePath = ApiRoutes.OutboxPurge;
+    private const string ConfigureProjectionPath = ApiRoutes.ProjectionsConfigure;
+    private const string ReadProjectionPath = ApiRoutes.ProjectionsRead;
+    private const string CommitProjectionPath = ApiRoutes.ProjectionsCommit;
+    private const string ReleaseProjectionPath = ApiRoutes.ProjectionsRelease;
 
     internal static void Map(WebApplication app)
     {

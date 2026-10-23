@@ -43,10 +43,11 @@ internal sealed class ReadCutCancellationTests
     [Test]
     public async Task AcCut002IdleLeaseExpiryFailsBeforeAnotherAdvanceAndStillReleasesSlot()
     {
-        using var fixture = new ReadCutFixture();
+        var clock = new ReadCutAdvancingClock();
+        using var fixture = new ReadCutFixture(clock);
         fixture.Store.Commit((tx, _) => { tx.Put(ReadCutFixture.Key(RecordId), ReadCutFixture.Value(RowValue)); return true; });
         var lease = fixture.Capture(ReadCutFixture.Limits(4, 128, TimeSpan.FromSeconds(1)));
-        await Task.Delay(TimeSpan.FromMilliseconds(1_100), TimeProvider.System);
+        clock.Advance(TimeSpan.FromMilliseconds(1_100));
         var expired = Assert.ThrowsExactly<KeyLoadException>(() => lease.VisitPrefix(
             ReadCutFixture.Key(string.Empty), static (_, _) => true));
         await Assert.That(expired.Code).IsEqualTo(ErrorCode.BudgetExceeded);

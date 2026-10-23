@@ -1,4 +1,3 @@
-using KeyLoad.Client.Features.ClientApi;
 using ManagedCode.Communication;
 
 namespace KeyLoad.Client;
@@ -17,6 +16,6 @@ public static class DropTableClientExtensions
     {
         ArgumentNullException.ThrowIfNull(client);
         ArgumentNullException.ThrowIfNull(request);
-        return client.Send<DropTableResult>(ClientApiRoutes.TablesDrop, request, true, commandId, cancellationToken);
+        return client.Send<DropTableResult>(ApiRoutes.TablesDrop, request, true, commandId, cancellationToken);
     }
 }

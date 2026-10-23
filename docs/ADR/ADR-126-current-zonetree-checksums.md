@@ -14,9 +14,9 @@ cross-profile reproduction is recorded in [upstream issue182](https://github.com
 The maintainer closed that issue after [PR184](https://github.com/ZoneTree/ZoneTree/pull/184)
 and published [ZoneTree2.0.0](https://github.com/ZoneTree/ZoneTree/releases/tag/release.0.0).
 
-Select the actually published ZoneTree2.0.0 as the current provider and
-centrally pin its System.IO.Hashing10.0.12 dependency. Keep the selected
-ZoneTree.FullTextSearch1.0.9; its published dependency minimum1.8.7 admits this
+Select the published ZoneTree package as the current provider and centrally pin
+it, its System.IO.Hashing dependency and ZoneTree.FullTextSearch in
+`Directory.Packages.props`; the FTS package's declared ZoneTree minimum admits that
 resolution, but only real indexing/search/reopen tests establish compatibility.
 The original NuGet package was downloaded from its declared feed URL; its SHA-512
 matches the NuGet catalog and SHA-256 is

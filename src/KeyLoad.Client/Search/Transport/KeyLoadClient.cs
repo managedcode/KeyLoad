@@ -1,4 +1,3 @@
-using KeyLoad.Client.Features.ClientApi;
 using ManagedCode.Communication;
 
 namespace KeyLoad.Client;
@@ -10,5 +9,5 @@ public sealed partial class KeyLoadClient
     /// <param name="cancellationToken">Token that cancels the HTTP operation.</param>
     /// <returns>The ranked documents.</returns>
     public Task<Result<RankedDocument[]>> SearchAsync(SearchRequest request, CancellationToken cancellationToken = default)
-        => Send<RankedDocument[]>(ClientApiRoutes.Search, request, false, null, cancellationToken);
+        => Send<RankedDocument[]>(ApiRoutes.Search, request, false, null, cancellationToken);
 }

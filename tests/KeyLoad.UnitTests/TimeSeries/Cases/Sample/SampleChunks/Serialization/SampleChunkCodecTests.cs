@@ -181,9 +181,10 @@ internal sealed class SampleChunkCodecTests
         var decodeCancelled = Assert.ThrowsExactly<OperationCanceledException>(() =>
             SampleChunkCodec.Decode(encoded, decodeBudget, UnitExecutionOptions.TimeSeriesExecution()));
         var deadlineLimits = new DatabaseLimits { QueryDeadlineSeconds = 1 };
-        var deadlineBudget = SampleChunkTestData.Budget(deadlineLimits);
-        var decodeDeadlineBudget = SampleChunkTestData.ChargedDecodeBudget(encoded, deadlineLimits);
-        await Task.Delay(TimeSpan.FromMilliseconds(1_100), TimeProvider.System);
+        var deadlineClock = new SampleRollupWorkClock();
+        var deadlineBudget = SampleChunkTestData.Budget(deadlineLimits, clock: deadlineClock);
+        var decodeDeadlineBudget = SampleChunkTestData.ChargedDecodeBudget(encoded, deadlineLimits, clock: deadlineClock);
+        deadlineClock.Advance(TimeSpan.FromMilliseconds(1_100));
         var encodeDeadline = Assert.ThrowsExactly<KeyLoadException>(() => SampleChunkCodec.Encode(records, deadlineBudget, UnitExecutionOptions.TimeSeriesExecution()));
         var decodeDeadline = Assert.ThrowsExactly<KeyLoadException>(() => SampleChunkCodec.Decode(encoded, decodeDeadlineBudget, UnitExecutionOptions.TimeSeriesExecution()));
 

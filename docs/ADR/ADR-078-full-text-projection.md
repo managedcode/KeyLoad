@@ -7,10 +7,9 @@ Related: REQ-ZT-003, REQ-FTS-001..006 / AC-FTS-001..006 in
 
 ## provider and authority
 
-Pin the actual MIT ZoneTree.FullTextSearch1.0.9 package, release source
-`c0993e2c65186708f3b087741082545bf49224fd`, package SHA256
-`7ea1fbb7aba0ad00391d78d2f414166b500335f5b1affe43c305d861b55719ff`.
-ZoneTree remains centrally pinned1.9.8. Use its real public
+Pin the published MIT ZoneTree.FullTextSearch package; its exact version, like
+ZoneTree's, is centrally pinned in `Directory.Packages.props` and is not repeated
+here. Use its real public
 `IndexOfTokenRecordPreviousToken<ulong,ulong>` and primary ZoneTree iterator;
 do not copy its implementation or use its unbounded/partial-cancellation search.
 Canonical records, policy, exact BM25 statistics/ranks, vector/RRF accumulation,

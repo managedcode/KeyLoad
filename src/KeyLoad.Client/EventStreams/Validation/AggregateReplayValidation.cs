@@ -13,8 +13,8 @@ internal static class AggregateReplayValidation
     internal static void ValidateReducer(AggregateReplayReducer reducer)
     {
         ArgumentNullException.ThrowIfNull(reducer);
-        if (string.IsNullOrWhiteSpace(reducer.Version) || reducer.StateSchemaVersion <= AggregateReplayProtocol.InvalidSchemaVersion ||
-            reducer.EventSchemaVersion <= AggregateReplayProtocol.InvalidSchemaVersion || reducer.Apply is null)
+        if (string.IsNullOrWhiteSpace(reducer.Version) || reducer.StateSchemaVersion <= AggregateReplayClientProtocol.InvalidSchemaVersion ||
+            reducer.EventSchemaVersion <= AggregateReplayClientProtocol.InvalidSchemaVersion || reducer.Apply is null)
         {
             throw new ArgumentException(AggregateReplayMessages.InvalidReducer, nameof(reducer));
         }
@@ -42,7 +42,7 @@ internal static class AggregateReplayValidation
         AggregateReplayWorkerLimits limits,
         AggregateReplayInput input)
     {
-        if (page.Head.FirstAvailableRevision != AggregateReplayProtocol.FirstRetainedRevision)
+        if (page.Head.FirstAvailableRevision != AggregateReplayClientProtocol.FirstRetainedRevision)
         {
             throw new InvalidDataException(AggregateReplayMessages.IncompleteHistory);
         }
@@ -57,10 +57,10 @@ internal static class AggregateReplayValidation
         AggregateReplayWorkerLimits limits,
         AggregateReplayInput input)
     {
-        if (snapshot.SnapshotVersion <= AggregateReplayProtocol.NoRevision || snapshot.SourceRevision < AggregateReplayProtocol.NoRevision ||
+        if (snapshot.SnapshotVersion <= AggregateReplayClientProtocol.NoRevision || snapshot.SourceRevision < AggregateReplayClientProtocol.NoRevision ||
             snapshot.SourceRevision > page.Head.TailRevision ||
-            snapshot.SourceRevision < page.Head.FirstAvailableRevision - AggregateReplayProtocol.RevisionStep ||
-            snapshot.StateSchemaVersion <= AggregateReplayProtocol.InvalidSchemaVersion ||
+            snapshot.SourceRevision < page.Head.FirstAvailableRevision - AggregateReplayClientProtocol.RevisionStep ||
+            snapshot.StateSchemaVersion <= AggregateReplayClientProtocol.InvalidSchemaVersion ||
             !string.Equals(snapshot.ReducerVersion, reducer.Version, StringComparison.Ordinal) ||
             snapshot.StateSchemaVersion != reducer.StateSchemaVersion)
         {
@@ -74,9 +74,9 @@ internal static class AggregateReplayValidation
     {
         if (page.Stream is null || page.Stream.Partition is null || page.Head is null ||
             string.IsNullOrWhiteSpace(page.Stream.StreamSet) || string.IsNullOrWhiteSpace(page.Stream.StreamId) ||
-            page.Stream.Generation <= AggregateReplayProtocol.MissingGeneration || page.Head.Generation != page.Stream.Generation ||
-            page.Head.TailRevision < AggregateReplayProtocol.NoRevision || page.Head.FirstAvailableRevision <= AggregateReplayProtocol.NoRevision ||
-            page.Head.FirstAvailableRevision - AggregateReplayProtocol.RevisionStep > page.Head.TailRevision || page.CutPosition < AggregateReplayProtocol.NoPosition)
+            page.Stream.Generation <= AggregateReplayClientProtocol.MissingGeneration || page.Head.Generation != page.Stream.Generation ||
+            page.Head.TailRevision < AggregateReplayClientProtocol.NoRevision || page.Head.FirstAvailableRevision <= AggregateReplayClientProtocol.NoRevision ||
+            page.Head.FirstAvailableRevision - AggregateReplayClientProtocol.RevisionStep > page.Head.TailRevision || page.CutPosition < AggregateReplayClientProtocol.NoPosition)
         {
             throw new InvalidDataException(AggregateReplayMessages.InvalidHead);
         }
@@ -101,14 +101,14 @@ internal static class AggregateReplayValidation
         {
             throw new InvalidDataException(AggregateReplayMessages.EventLimitExceeded);
         }
-        var sourceRevision = page.Snapshot?.SourceRevision ?? AggregateReplayProtocol.NoRevision;
+        var sourceRevision = page.Snapshot?.SourceRevision ?? AggregateReplayClientProtocol.NoRevision;
         if (sourceRevision > page.Head.TailRevision || page.Head.TailRevision - sourceRevision != page.Events.Length)
         {
             throw new InvalidDataException(AggregateReplayMessages.IncompleteTail);
         }
         HashSet<string> eventIds = new(StringComparer.Ordinal);
-        long priorSequence = AggregateReplayProtocol.NoSequence;
-        for (var index = AggregateReplayProtocol.FirstEventIndex; index < page.Events.Length; index++)
+        long priorSequence = AggregateReplayClientProtocol.NoSequence;
+        for (var index = AggregateReplayClientProtocol.FirstEventIndex; index < page.Events.Length; index++)
         {
             cancellationToken.ThrowIfCancellationRequested();
             var record = page.Events[index] ?? throw new InvalidDataException(AggregateReplayMessages.NullEvent);
@@ -130,8 +130,8 @@ internal static class AggregateReplayValidation
     {
         var data = record.Data;
         if (data is null || record.Stream != page.Stream ||
-            record.Revision != sourceRevision + index + AggregateReplayProtocol.RevisionStep ||
-            record.EventSequence <= priorSequence || record.EventSequence <= AggregateReplayProtocol.NoSequence ||
+            record.Revision != sourceRevision + index + AggregateReplayClientProtocol.RevisionStep ||
+            record.EventSequence <= priorSequence || record.EventSequence <= AggregateReplayClientProtocol.NoSequence ||
             string.IsNullOrWhiteSpace(data.EventId) || string.IsNullOrWhiteSpace(data.EventType) ||
             !eventIds.Add(data.EventId))
         {

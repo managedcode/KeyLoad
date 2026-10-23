@@ -1,4 +1,3 @@
-using KeyLoad.Client.Features.ClientApi;
 using ManagedCode.Communication;
 
 namespace KeyLoad.Client;
@@ -12,6 +11,6 @@ public sealed partial class KeyLoadClient
     public Task<Result<CommitInboxResult>> CommitInboxAsync(CommitInboxRequest request, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(request);
-        return Send<CommitInboxResult>(ClientApiRoutes.InboxCommit, request, true, request.CommandId, cancellationToken);
+        return Send<CommitInboxResult>(ApiRoutes.InboxCommit, request, true, request.CommandId, cancellationToken);
     }
 }

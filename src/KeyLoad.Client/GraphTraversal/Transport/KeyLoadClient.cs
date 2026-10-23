@@ -1,4 +1,3 @@
-using KeyLoad.Client.Features.ClientApi;
 using ManagedCode.Communication;
 
 namespace KeyLoad.Client;
@@ -10,5 +9,5 @@ public sealed partial class KeyLoadClient
     /// <param name="cancellationToken">Token that cancels the HTTP operation.</param>
     /// <returns>The typed graph traversal result.</returns>
     public Task<Result<GraphTraversal>> TraverseAsync(TraverseRequest request, CancellationToken cancellationToken = default)
-        => Send<GraphTraversal>(ClientApiRoutes.GraphTraverse, request, false, null, cancellationToken);
+        => Send<GraphTraversal>(ApiRoutes.GraphTraverse, request, false, null, cancellationToken);
 }
