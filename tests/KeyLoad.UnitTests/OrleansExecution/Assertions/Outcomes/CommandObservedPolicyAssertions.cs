@@ -8,7 +8,8 @@ namespace KeyLoad.UnitTests.Features.OrleansExecution;
 
 internal static class CommandObservedPolicyAssertions
 {
-    private const string ExpectedStoredHeadersJson = "{\"secret\":\"private-header\",\"trace\":\"visible\"}";
+    // Messaging preserves header JSON content exactly (JsonData.ValidateContent), so the stored headers equal the enqueued text.
+    private const string ExpectedStoredHeadersJson = P.Headers;
 
     internal static async Task EqualAsync<T>(T expected, T actual)
         => await Assert.That(JsonElement.DeepEquals(Project(expected), Project(actual))).IsTrue();

@@ -26,12 +26,13 @@ public sealed class ConnectionGrain(GrainRequestCodec codec, SiloDatabaseClient 
         var request = codec.Verify(signedRequest);
         GrainIdentityContext.ValidateConnection(request.Envelope, this.GetPrimaryKey());
         return ConnectionOperationStream.Run(operations, request.Envelope.RequestId,
-            token => CreateStream(signedRequest, request.Envelope.RequestId, token), cancellationToken);
+            token => CreateStream(request, signedRequest, token), cancellationToken);
     }
 
     private IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> CreateStream(
-        string signed, Guid requestId, CancellationToken token)
+        DecodedGrainRequest request, string signed, CancellationToken token)
     {
+        var requestId = request.Envelope.RequestId;
         var purpose = new CqrsStreamPurpose();
         var owner = borrowWorkOwner();
         var settlement = codec.HasPhaseObserver ? new GrainRequestPhaseSettlement(codec) : null;
@@ -39,23 +40,24 @@ public sealed class ConnectionGrain(GrainRequestCodec codec, SiloDatabaseClient 
             : () => settlement.SettleAsync(((IGrainBase)this).GrainContext);
         return CqrsStreamLifetime.RunBoundWithAwaitedSettlement(
             execution => CqrsStream.Create<GrainRequestProgress, GrainOperationReply>(
-                writer => ExecuteAsync(signed, requestId, writer, purpose, settlement), execution),
+                writer => ExecuteAsync(request, signed, writer, purpose, settlement), execution),
             serializer, requestId, clock, settled, options, owner, purpose,
             services.GetRequiredService<IOptions<DatabaseLimits>>(),
             () => owner.Acquire(requestId, RequestWorkKind.RequestProducer), token);
     }
 
-    private async ValueTask<Result<GrainOperationReply>> ExecuteAsync(string signed, Guid requestId,
+    private async ValueTask<Result<GrainOperationReply>> ExecuteAsync(DecodedGrainRequest request, string signed,
         ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer, CqrsStreamPurpose purpose,
         GrainRequestPhaseSettlement? settlement)
     {
+        var requestId = request.Envelope.RequestId;
         var command = false;
         var stage = GrainFailureStage.EnvelopeVerification;
         try
         {
             purpose.RequireAdmission();
             writer.CancellationToken.ThrowIfCancellationRequested();
-            var request = codec.VerifyRequest(signed, requestId);
+            codec.ValidateVerifiedScope(request.Envelope);
             GrainIdentityContext.ValidateConnection(request.Envelope, this.GetPrimaryKey());
             settlement?.SetIdentity(request);
             purpose.Bind(request);

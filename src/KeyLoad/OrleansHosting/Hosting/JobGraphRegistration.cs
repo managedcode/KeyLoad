@@ -61,10 +61,6 @@ internal static class JobGraphRegistration
             nameof(IDatabaseCommitGrain.GetReadOwnerAsync));
         Add<IConnectionGrain, ICommandPartitionGrain>(graph, nameof(IConnectionGrain.ExecuteStreamAsync),
             nameof(ICommandPartitionGrain.ExecuteAsync));
-        Add<IConnectionGrain, IRequestWorkerGrain>(graph, nameof(IConnectionGrain.ExecuteStreamAsync),
-            nameof(IRequestWorkerGrain.ExecuteAsync));
-        Add<ICommandPartitionGrain, IRequestWorkerGrain>(graph, nameof(ICommandPartitionGrain.ExecuteAsync),
-            nameof(IRequestWorkerGrain.ExecuteCommandAsync));
         AddSharedQueries(graph);
     }
 

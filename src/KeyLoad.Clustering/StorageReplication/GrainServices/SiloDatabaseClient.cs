@@ -22,8 +22,7 @@ public sealed class SiloDatabaseClient(IServiceProvider services) : GrainService
 
     /// <summary>Awaits one self-contained Task leaf at the selected storage owner.</summary>
     public Task<GrainOperationReply> ExecuteAsync(SiloAddress owner, string signedRequest, CancellationToken cancellationToken)
-        => grains.GetGrain<IRequestWorkerGrain>(RequestWorkerIdentity.ForRequests())
-            .ExecuteAsync(owner, signedRequest, cancellationToken);
+        => On(owner).ExecuteAsync(signedRequest, cancellationToken);
 
     /// <summary>Joins the selected owner's original execution maintenance cleanup after the parent stops.</summary>
     public Task AbortMaintenanceAsync(SiloAddress owner, GrainReadKind kind, Guid sessionId)
@@ -34,7 +33,6 @@ public sealed class SiloDatabaseClient(IServiceProvider services) : GrainService
         string actorKey, CancellationToken cancellationToken)
     {
         var owner = await ReadOwnerAsync(incarnation, cancellationToken).ConfigureAwait(true);
-        return await grains.GetGrain<IRequestWorkerGrain>(RequestWorkerIdentity.ForRequests())
-            .ExecuteCommandAsync(owner, signedRequest, actorKey, cancellationToken).ConfigureAwait(true);
+        return await On(owner).ExecuteCommandAsync(signedRequest, actorKey, cancellationToken).ConfigureAwait(true);
     }
 }
