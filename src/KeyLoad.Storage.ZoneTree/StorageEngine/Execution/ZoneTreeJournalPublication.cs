@@ -1,6 +1,7 @@
 using System.Buffers.Binary;
 using System.Security.Cryptography;
 using KeyLoad.Diagnostics.Features.ResourceExecution;
+using KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
 using static KeyLoad.Storage.ZoneTree.ZoneTreePersistenceFormat;
 
 namespace KeyLoad.Storage.ZoneTree;
@@ -19,6 +20,21 @@ internal static class ZoneTreeJournalPublication
         {
             WriteAndFlushJournal(runtime, header, payload, nextPosition);
             runtime.Options.FaultObserver?.Invoke(CommitStage.JournalFlushed, nextPosition, ObserverNonMutationIndex);
+            Apply(runtime, changes, nextPosition);
+        }
+        catch (Exception original)
+        {
+            runtime.Poisoned = true;
+            throw Errors.Fail(ErrorCode.UnknownWriteOutcome, UnknownWriteOutcome, original);
+        }
+    }
+
+    /// <summary>Applies the durable mutations under the exclusive gate; readers waited only for this step.</summary>
+    private static void Apply(ZoneTreeStoreRuntime runtime, StorageMutation[] changes, long nextPosition)
+    {
+        ZoneTreePhaseGate.EnterApply(runtime);
+        try
+        {
             for (var i = FirstMutationIndex; i < changes.Length; i++)
             {
                 runtime.Apply(changes[i]);
@@ -28,10 +44,9 @@ internal static class ZoneTreeJournalPublication
             runtime.SetPosition(nextPosition);
             runtime.Options.FaultObserver?.Invoke(CommitStage.ApplyCompleted, nextPosition, changes.Length);
         }
-        catch (Exception original)
+        finally
         {
-            runtime.Poisoned = true;
-            throw Errors.Fail(ErrorCode.UnknownWriteOutcome, UnknownWriteOutcome, original);
+            ZoneTreePhaseGate.ExitApply(runtime);
         }
     }
 

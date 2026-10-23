@@ -13,11 +13,13 @@ public enum DatabasePhaseKind
     AuthorizedOperationBarrier = 3,
     /// <summary>The authorized read capability invocation.</summary>
     AuthorizedReadCapability = 4,
+    /// <summary>The provider Commit upgrade to the exclusive apply lock after the journal flush; readers waited only here.</summary>
+    ProviderApplyGateWait = 26,
     /// <summary>The provider's actual Read reader-lock acquisition.</summary>
     ProviderReadGateWait = 27,
-    /// <summary>The provider's actual Commit writer-lock acquisition.</summary>
+    /// <summary>The provider's Commit acquisition of the writer-ordering lock; readers keep running.</summary>
     ProviderWriteGateWait = 28,
-    /// <summary>The provider Commit writer-lock hold, including no-change calls.</summary>
+    /// <summary>The provider Commit hold from writer-ordering acquisition through release, including no-change calls.</summary>
     ProviderWriteGateHold = 29,
     /// <summary>Existing atomic redo writes through their Flush(true).</summary>
     AtomicJournalWriteFlush = 30,

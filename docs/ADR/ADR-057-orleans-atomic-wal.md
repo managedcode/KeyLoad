@@ -24,6 +24,13 @@ checkpoint into the ZoneTree materialization, so the engine runs with
 commit gate without adding recovery coverage. `tree/0.meta.wal` remains the engine's segment
 metadata log and is unaffected by that mode.
 
+The commit gate is one `ReaderWriterLockSlim` per open store. A writer holds the
+upgradeable lock while it compiles the transaction, appends the frame and runs
+`Flush(true)`, so concurrent readers keep running through the fsync; it upgrades to
+the exclusive lock only to apply the durable mutations and advance the position.
+Readers wait for a writer only during that in-memory apply, and a frame becomes
+visible only after it is durable.
+
 ## Current-format admission and rollback
 
 Fresh stores use the current identity, WAL and checkpoint contracts. Valid current

@@ -3,7 +3,8 @@ using KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
 
 namespace KeyLoad.Storage.ZoneTree;
 
-/// <summary>Compiles and publishes one atomic transaction under the original runtime commit gate.</summary>
+/// <summary>Compiles and publishes one atomic transaction: writers are ordered by the upgradeable gate while readers
+/// keep running through compilation and the journal flush; the exclusive gate covers only the apply.</summary>
 internal static class ZoneTreeStoreCommitExecution
 {
     internal static T Commit<T>(ZoneTreeStoreRuntime runtime, Func<IAtomicTransaction, long, T> compile)

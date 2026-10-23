@@ -31,11 +31,11 @@ internal static class ZoneTreeStorePreparationExecution
     }
 
     internal static T Fork<T>(ZoneTreeStoreRuntime runtime, IEnumerable<ZoneTreeStagedEntry> inherited,
-        Func<IAtomicTransaction, T> prepare, bool requireWriteGate = false)
+        Func<IAtomicTransaction, T> prepare, bool requireCommitGate = false)
     {
         ArgumentNullException.ThrowIfNull(prepare);
-        if (requireWriteGate ? !runtime.Gate.IsWriteLockHeld
-            : !runtime.Gate.IsReadLockHeld && !runtime.Gate.IsWriteLockHeld)
+        var commitHeld = runtime.Gate.IsUpgradeableReadLockHeld || runtime.Gate.IsWriteLockHeld;
+        if (requireCommitGate ? !commitHeld : !runtime.Gate.IsReadLockHeld && !commitHeld)
         {
             throw new InvalidOperationException(MissingGate);
         }

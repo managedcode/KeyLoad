@@ -21,7 +21,7 @@ internal sealed class ZoneTreeTransaction(ZoneTreeStoreRuntime runtime, bool pre
         {
             throw new InvalidOperationException(ZoneTreeStorePreparationExecution.OutsideTransactionCallback);
         }
-        return ZoneTreeStorePreparationExecution.Fork(runtime, Changes, prepare, requireWriteGate: true);
+        return ZoneTreeStorePreparationExecution.Fork(runtime, Changes, prepare, requireCommitGate: true);
     }
 
     internal void EndPreparationContext() => preparationContextOpen = false;

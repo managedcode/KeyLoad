@@ -2,47 +2,29 @@ using KeyLoad.Diagnostics.Features.ResourceExecution;
 
 namespace KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
 
+/// <summary>Owns the store gate protocol: readers share the gate, one writer at a time compiles and flushes the journal
+/// under the upgradeable lock while readers continue, and the writer holds the exclusive lock only while it applies.</summary>
 internal static class ZoneTreePhaseGate
 {
     internal static void EnterRead(ZoneTreeStoreRuntime runtime)
-    {
-        var started = DatabasePhaseTelemetry.Begin();
-        try
-        {
-            runtime.Gate.EnterReadLock();
-        }
-        catch (Exception)
-        {
-            DatabasePhaseTelemetry.End(DatabasePhaseKind.ProviderReadGateWait, DatabasePhaseOutcome.Faulted, started);
-            throw;
-        }
-
-        DatabasePhaseTelemetry.End(DatabasePhaseKind.ProviderReadGateWait, DatabasePhaseOutcome.Completed, started);
-    }
+        => Enter(runtime.Gate.EnterReadLock, DatabasePhaseKind.ProviderReadGateWait);
 
     internal static long EnterCommit(ZoneTreeStoreRuntime runtime)
     {
-        var started = DatabasePhaseTelemetry.Begin();
-        try
-        {
-            runtime.Gate.EnterWriteLock();
-        }
-        catch (Exception)
-        {
-            DatabasePhaseTelemetry.End(DatabasePhaseKind.ProviderWriteGateWait, DatabasePhaseOutcome.Faulted, started);
-            throw;
-        }
-
-        var holdStarted = DatabasePhaseTelemetry.Begin();
-        DatabasePhaseTelemetry.End(DatabasePhaseKind.ProviderWriteGateWait, DatabasePhaseOutcome.Completed, started);
-        return holdStarted;
+        Enter(runtime.Gate.EnterUpgradeableReadLock, DatabasePhaseKind.ProviderWriteGateWait);
+        return DatabasePhaseTelemetry.Begin();
     }
+
+    internal static void EnterApply(ZoneTreeStoreRuntime runtime)
+        => Enter(runtime.Gate.EnterWriteLock, DatabasePhaseKind.ProviderApplyGateWait);
+
+    internal static void ExitApply(ZoneTreeStoreRuntime runtime) => runtime.Gate.ExitWriteLock();
 
     internal static void ExitCommit(ZoneTreeStoreRuntime runtime, long started, DatabasePhaseOutcome outcome)
     {
         try
         {
-            runtime.Gate.ExitWriteLock();
+            runtime.Gate.ExitUpgradeableReadLock();
         }
         catch (Exception)
         {
@@ -51,5 +33,21 @@ internal static class ZoneTreePhaseGate
         }
 
         DatabasePhaseTelemetry.End(DatabasePhaseKind.ProviderWriteGateHold, outcome, started);
+    }
+
+    private static void Enter(Action enter, DatabasePhaseKind phase)
+    {
+        var started = DatabasePhaseTelemetry.Begin();
+        try
+        {
+            enter();
+        }
+        catch (Exception)
+        {
+            DatabasePhaseTelemetry.End(phase, DatabasePhaseOutcome.Faulted, started);
+            throw;
+        }
+
+        DatabasePhaseTelemetry.End(phase, DatabasePhaseOutcome.Completed, started);
     }
 }

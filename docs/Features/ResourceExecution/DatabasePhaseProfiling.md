@@ -43,8 +43,8 @@ tested through the actual replicated cluster.
 
 ## Closed phase inventory
 
-Ten current boundaries retain IDs 0–4 and 27–31 within the bank's fixed capacity
-of32 phase slots. Undefined phase slots are rejected without recording counters;
+Eleven current boundaries retain IDs 0–4 and 26–31 within the bank's fixed capacity
+of 32 phase slots. Undefined phase slots are rejected without recording counters;
 the six outcomes,16 buckets and128KiB startup ceiling are unchanged.
 
 A replicated write is ordinary Orleans calls to the ZoneTree owners on ReplicaCount silos with acknowledgement from every configured copy after durable local apply; its profiling boundaries are not part of this inventory yet.
@@ -56,9 +56,10 @@ A replicated write is ordinary Orleans calls to the ZoneTree owners on ReplicaCo
 |02 AuthorizedAuthenticationBarrier|Verified authentication's coordinator ReadBarrierAsync await.|
 |03 AuthorizedOperationBarrier|Verified operation's separate coordinator ReadBarrierAsync await.|
 |04 AuthorizedReadCapability|Verified grain capability call/result; excludes encoding.|
+|26 ProviderApplyGateWait|Actual Store.Commit EnterWriteLock after the journal Flush(true) to acquire/failure; readers wait on the writer only during this apply.|
 |27 ProviderReadGateWait|Actual Store.Read EnterReadLock to acquire/failure.|
-|28 ProviderWriteGateWait|Actual Store.Commit EnterWriteLock to acquire/failure.|
-|29 ProviderWriteGateHold|Commit acquire through original ExitWriteLock; no-change calls included.|
+|28 ProviderWriteGateWait|Actual Store.Commit EnterUpgradeableReadLock to acquire/failure; it orders writers while readers keep running.|
+|29 ProviderWriteGateHold|Commit acquire through original ExitUpgradeableReadLock; no-change calls included.|
 |30 AtomicJournalWriteFlush|Existing header/payload writes through Flush(true), inside original poison try.|
 |31 TreeMutation|Actual Runtime.Apply cache/value/Sync-WAL/tree work; not isolated fsync.|
 

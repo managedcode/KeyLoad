@@ -36,7 +36,7 @@ internal sealed class ZoneTreePreparationTransaction : IAtomicTransaction, IAtom
     private void Check()
     {
         if (!active || Environment.CurrentManagedThreadId != thread
-            || !runtime.Gate.IsReadLockHeld && !runtime.Gate.IsWriteLockHeld)
+            || !runtime.Gate.IsReadLockHeld && !runtime.Gate.IsWriteLockHeld && !runtime.Gate.IsUpgradeableReadLockHeld)
         {
             throw new InvalidOperationException(OutsideCallback);
         }
