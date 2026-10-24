@@ -11,9 +11,7 @@ internal static class SqlBetweenSymmetricClusterPages
             var capabilities = await global::KeyLoad.IntegrationTests.ClientApi.McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.QueryCapabilitiesAsync(token));
             await global::TUnit.Assertions.Assert.That(capabilities.ReadProfiles.Contains(SqlBetweenSymmetricClusterCases.Profile)).IsTrue();
             var mcp = (await global::KeyLoad.IntegrationTests.ClientApi.McpCallerAssertions.SuccessAsync<QueryCapabilityManifest>(
-                await caller.Mcp.CallAsync(global::KeyLoad.IntegrationTests.ClientApi.McpCallerTools.QueryCapabilities, new
-                {
-                }, token))).Value;
+                await caller.Mcp.CallWithoutBodyAsync(global::KeyLoad.IntegrationTests.ClientApi.McpCallerTools.QueryCapabilities, token))).Value;
             await global::TUnit.Assertions.Assert.That(mcp.ReadProfiles.Contains(SqlBetweenSymmetricClusterCases.Profile)).IsTrue();
             var failures = new List<Exception>();
             await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>

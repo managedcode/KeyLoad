@@ -19,8 +19,10 @@ internal static class McpGraphPathInputSchemaAssertions
         McpDiscoveryProtocol.AllowFullScan, McpDiscoveryProtocol.Cursor, McpDiscoveryProtocol.QueryDialectVersion];
     private static readonly ImmutableArray<string> QueryRequired =
     [McpDiscoveryProtocol.Partition, McpDiscoveryProtocol.Sql];
-    private static readonly ImmutableArray<string> EntityProperties =
+    private static readonly ImmutableArray<string> EntityRequired =
     [McpDiscoveryProtocol.Partition, McpDiscoveryProtocol.Collection, McpDiscoveryProtocol.Id];
+    private static readonly ImmutableArray<string> EntityProperties = EntityRequired.Add(McpDiscoveryProtocol.Lifetime);
+    private static readonly ImmutableArray<string> LifetimeFields = [McpDiscoveryProtocol.Incarnation];
     private static readonly ImmutableArray<string> PartitionRequired =
     [McpDiscoveryProtocol.TenantId, McpDiscoveryProtocol.DatabaseId,
         McpDiscoveryProtocol.TransactionDomainId, McpDiscoveryProtocol.PartitionKey];
@@ -83,11 +85,25 @@ internal static class McpGraphPathInputSchemaAssertions
     private static async Task VerifyEntityAsync(JsonElement schema, JsonElement root)
     {
         schema = Resolve(root, schema);
-        await VerifyFieldsAsync(root, schema, EntityProperties, EntityProperties);
+        await VerifyFieldsAsync(root, schema, EntityProperties, EntityRequired);
         var properties = schema.GetProperty(McpDiscoveryProtocol.Properties);
         await VerifyPartitionAsync(properties.GetProperty(McpDiscoveryProtocol.Partition), root);
         await VerifyTypeAsync(properties.GetProperty(McpDiscoveryProtocol.Collection), McpDiscoveryProtocol.String, root);
         await VerifyTypeAsync(properties.GetProperty(McpDiscoveryProtocol.Id), McpDiscoveryProtocol.String, root);
+        await VerifyLifetimeAsync(properties.GetProperty(McpDiscoveryProtocol.Lifetime), root);
+    }
+
+    private static async Task VerifyLifetimeAsync(JsonElement schema, JsonElement root)
+    {
+        schema = Resolve(root, schema);
+        await VerifyExactTypeSetAsync(schema, root, McpDiscoveryProtocol.Object, McpDiscoveryProtocol.Null);
+        await Assert.That(schema.GetProperty(McpDiscoveryProtocol.AdditionalProperties).GetBoolean()).IsFalse();
+        var properties = schema.GetProperty(McpDiscoveryProtocol.Properties);
+        await Assert.That(properties.EnumerateObject().Select(property => property.Name)
+            .ToHashSet(StringComparer.Ordinal).SetEquals(LifetimeFields)).IsTrue();
+        await Assert.That(schema.GetProperty(McpDiscoveryProtocol.Required).EnumerateArray().Select(field => field.GetString()!)
+            .ToHashSet(StringComparer.Ordinal).SetEquals(LifetimeFields)).IsTrue();
+        await VerifyTypeAsync(properties.GetProperty(McpDiscoveryProtocol.Incarnation), McpDiscoveryProtocol.String, root);
     }
 
     private static async Task VerifyPartitionAsync(JsonElement schema, JsonElement root)

@@ -12,9 +12,7 @@ internal static class SqlBooleanTruthClusterPages
             await global::TUnit.Assertions.Assert.That(capabilities.ReadProfiles.Contains(SqlBooleanTruthClusterCases.Profile)).IsTrue();
             await global::TUnit.Assertions.Assert.That(capabilities.ReadProfiles.Contains(SqlBooleanTruthClusterCases.OperandProfile)).IsTrue();
             var mcp = (await global::KeyLoad.IntegrationTests.ClientApi.McpCallerAssertions.SuccessAsync<QueryCapabilityManifest>(
-                await caller.Mcp.CallAsync(global::KeyLoad.IntegrationTests.ClientApi.McpCallerTools.QueryCapabilities, new
-                {
-                }, token))).Value;
+                await caller.Mcp.CallWithoutBodyAsync(global::KeyLoad.IntegrationTests.ClientApi.McpCallerTools.QueryCapabilities, token))).Value;
             await global::TUnit.Assertions.Assert.That(mcp.ReadProfiles.Contains(SqlBooleanTruthClusterCases.Profile)).IsTrue();
             await global::TUnit.Assertions.Assert.That(mcp.ReadProfiles.Contains(SqlBooleanTruthClusterCases.OperandProfile)).IsTrue();
             var failures = new List<Exception>();

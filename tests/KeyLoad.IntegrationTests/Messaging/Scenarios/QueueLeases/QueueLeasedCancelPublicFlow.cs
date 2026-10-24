@@ -42,7 +42,7 @@ internal static class QueueLeasedCancelPublicFlow
         await Assert.That(delivery.Id).IsEqualTo(QueueLeasedCancelPublicAssertions.Target);
         await Assert.That(delivery.Attempt).IsEqualTo(1);
         await Assert.That(delivery.LeaseVersion).IsEqualTo(1L);
-        await Assert.That(delivery.PayloadJson).IsEqualTo(QueueLifecyclePublicProtocol.CanonicalPayload);
+        await Assert.That(delivery.PayloadJson).IsEqualTo(QueueLifecyclePublicProtocol.Payload);
         await Assert.That(delivery.HeadersJson).IsEqualTo(QueueLifecyclePublicProtocol.Headers);
         var leased = await PublicReadAssertions.MessageAsync(await callers.Sdk.InspectAsync(
             new(owner.Lane, QueueLeasedCancelPublicAssertions.Target), token));
@@ -52,7 +52,7 @@ internal static class QueueLeasedCancelPublicFlow
         await Assert.That(leased.Metadata.LeaseOwner).IsNotNull();
         var expectedLeased = new MessageInspection(new MessageMetadata(QueueLeasedCancelPublicAssertions.Target,
             MessageState.Leased, 1, 2L, 1L, null, null, leased.Metadata.LeaseOwner, 1L, delivery.LeaseUntil),
-            QueueLifecyclePublicProtocol.CanonicalPayload, QueueLifecyclePublicProtocol.Headers);
+            QueueLifecyclePublicProtocol.Payload, QueueLifecyclePublicProtocol.Headers);
         await Assert.That(JsonDefaults.Serialize(leased).SequenceEqual(JsonDefaults.Serialize(expectedLeased))).IsTrue();
         var state = new QueueLeasedCancelPublicState(owner, request, claimed, leased);
         await DeniedAsync(fixture, state, token);
@@ -113,7 +113,7 @@ internal static class QueueLeasedCancelPublicFlow
         await Assert.That(result.Deliveries.Select(d => d.Id)).IsEquivalentTo(ids, CollectionOrdering.Matching);
         foreach (var delivery in result.Deliveries)
         {
-            await Assert.That(delivery.PayloadJson).IsEqualTo(QueueLifecyclePublicProtocol.CanonicalPayload);
+            await Assert.That(delivery.PayloadJson).IsEqualTo(QueueLifecyclePublicProtocol.Payload);
             await Assert.That(delivery.HeadersJson).IsEqualTo(QueueLifecyclePublicProtocol.Headers);
             var ack = new DeliveryCommand(Guid.NewGuid(), state.Owner.Lane, delivery.Token, DeliveryAction.Ack);
             var receipt = await QueueLifecyclePublicRoutes.CallAsync(callers, state.Owner.Route, state.Owner.Partition,

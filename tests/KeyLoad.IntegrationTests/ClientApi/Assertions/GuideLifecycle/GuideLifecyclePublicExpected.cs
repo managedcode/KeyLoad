@@ -8,6 +8,7 @@ internal static class GuideLifecyclePublicExpected
     internal const string MimeType = "text/markdown";
     internal const string Description = "How to discover and safely use KeyLoad operations.";
     internal const int MaximumBytes = 8192;
+    internal const string CompleteResult = "complete";
     internal const string Markdown = """
         # KeyLoad agent quickstart
 

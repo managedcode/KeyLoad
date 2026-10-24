@@ -8,7 +8,7 @@ namespace KeyLoad.IntegrationTests.EventStreams;
 /// <param name="Partition">The unique configured tenant partition.</param>
 internal sealed record McpEventStreamScenario(PartitionRef Partition)
 {
-    /// <summary>Gets the immutable producer events with deliberately unsorted payload and header JSON.</summary>
+    /// <summary>Gets the immutable producer events with deliberately unsorted payload and header JSON; reads return the caller's exact text.</summary>
     internal static ImmutableArray<EventData> InputEvents
     {
         get;
@@ -29,20 +29,6 @@ internal sealed record McpEventStreamScenario(PartitionRef Partition)
             SchemaVersion: McpEventStreamTokens.EventSchemaVersion, OccurredAt: McpEventStreamTokens.OccurredAt,
             CorrelationId: McpEventStreamTokens.CorrelationId,
             CausationId: McpEventStreamTokens.CausationIdShipped)
-    ];
-
-    /// <summary>Gets the independent handcrafted canonical persisted event oracle.</summary>
-    internal static ImmutableArray<EventData> ExpectedEvents
-    {
-        get;
-    } =
-    [
-        InputEvents[0] with { PayloadJson = McpEventStreamTokens.CanonicalInitialPayload,
-            HeadersJson = McpEventStreamTokens.CanonicalInitialHeaders },
-        InputEvents[1] with { PayloadJson = McpEventStreamTokens.CanonicalPaidPayload,
-            HeadersJson = McpEventStreamTokens.CanonicalPaidHeaders },
-        InputEvents[2] with { PayloadJson = McpEventStreamTokens.CanonicalShippedPayload,
-            HeadersJson = McpEventStreamTokens.CanonicalShippedHeaders }
     ];
 
     /// <summary>Gets the canonical stream identity configured by the scenario.</summary>

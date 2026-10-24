@@ -78,11 +78,25 @@ internal static class GraphIncomingMcpSchemaAssertions
     private static async Task VerifyEntityAsync(JsonElement root, JsonElement schema)
     {
         schema = Resolve(root, schema);
-        await VerifyObjectAsync(schema, EntityFields);
+        await VerifyObjectAsync(schema, EntityFields.Add(GraphIncomingMcpProtocol.Lifetime), EntityFields);
         var properties = schema.GetProperty(GraphIncomingMcpProtocol.Properties);
+        await VerifyLifetimeAsync(root, properties.GetProperty(GraphIncomingMcpProtocol.Lifetime));
         await VerifyPrimitiveAsync(root, properties.GetProperty(GraphIncomingMcpProtocol.Collection), GraphIncomingMcpProtocol.String);
         await VerifyPrimitiveAsync(root, properties.GetProperty(GraphIncomingMcpProtocol.EntityId), GraphIncomingMcpProtocol.String);
         await VerifyPartitionAsync(root, properties.GetProperty(GraphIncomingMcpProtocol.Partition));
+    }
+
+    private static async Task VerifyLifetimeAsync(JsonElement root, JsonElement schema)
+    {
+        schema = Resolve(root, schema);
+        await VerifyExactTypeSetAsync(root, schema, GraphIncomingMcpProtocol.Object, NullType);
+        await Assert.That(schema.GetProperty(GraphIncomingMcpProtocol.AdditionalProperties).GetBoolean()).IsFalse();
+        var properties = schema.GetProperty(GraphIncomingMcpProtocol.Properties);
+        await Assert.That(properties.EnumerateObject().Select(item => item.Name).ToImmutableHashSet(StringComparer.Ordinal)
+            .SetEquals([GraphIncomingMcpProtocol.Incarnation])).IsTrue();
+        await Assert.That(schema.GetProperty(GraphIncomingMcpProtocol.Required).EnumerateArray().Select(item => item.GetString()!)
+            .ToImmutableHashSet(StringComparer.Ordinal).SetEquals([GraphIncomingMcpProtocol.Incarnation])).IsTrue();
+        await VerifyPrimitiveAsync(root, properties.GetProperty(GraphIncomingMcpProtocol.Incarnation), GraphIncomingMcpProtocol.String);
     }
 
     private static async Task VerifyPartitionAsync(JsonElement root, JsonElement schema)

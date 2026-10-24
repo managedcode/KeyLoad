@@ -62,14 +62,14 @@ internal static class AtomicProducerClusterDocumentRefusalAssertions
             McpCallerTools.DocumentsGet, document, token))).Value).IsNull();
         await Assert.That((await PublicReadAssertions.MessageAsync(await mcp.CallAsync(
             McpCallerTools.MessagesInspect, message, token))).Value).IsNull();
-        await Assert.That(await SqlClusterProtocol.SdkAsync<DocumentResult?>(sdk,
-            SqlClusterProtocol.Call(seed.Lane.Partition, McpCallerTools.DocumentsGet, document), token)).IsNull();
-        await Assert.That(await SqlClusterProtocol.McpAsync<DocumentResult?>(mcp,
-            SqlClusterProtocol.Call(seed.Lane.Partition, McpCallerTools.DocumentsGet, document), token)).IsNull();
-        await Assert.That(await SqlClusterProtocol.SdkAsync<MessageInspection?>(sdk,
-            SqlClusterProtocol.Call(seed.Lane.Partition, McpCallerTools.MessagesInspect, message), token)).IsNull();
-        await Assert.That(await SqlClusterProtocol.McpAsync<MessageInspection?>(mcp,
-            SqlClusterProtocol.Call(seed.Lane.Partition, McpCallerTools.MessagesInspect, message), token)).IsNull();
+        await Assert.That((await SqlClusterProtocol.SdkAsync<DocumentReadResult>(sdk,
+            SqlClusterProtocol.Call(seed.Lane.Partition, McpCallerTools.DocumentsGet, document), token)).Document).IsNull();
+        await Assert.That((await SqlClusterProtocol.McpAsync<DocumentReadResult>(mcp,
+            SqlClusterProtocol.Call(seed.Lane.Partition, McpCallerTools.DocumentsGet, document), token)).Document).IsNull();
+        await Assert.That((await SqlClusterProtocol.SdkAsync<MessageInspectionResult>(sdk,
+            SqlClusterProtocol.Call(seed.Lane.Partition, McpCallerTools.MessagesInspect, message), token)).Message).IsNull();
+        await Assert.That((await SqlClusterProtocol.McpAsync<MessageInspectionResult>(mcp,
+            SqlClusterProtocol.Call(seed.Lane.Partition, McpCallerTools.MessagesInspect, message), token)).Message).IsNull();
         await AtomicProducerClusterEventAssertions.PublicAsync(mcp, seed, QueueProducerClusterProtocol.Refused,
             new(new(QueueProducerClusterProtocol.EmptyStreamRevision, QueueProducerClusterProtocol.FirstAvailableEventRevision,
                 QueueProducerClusterProtocol.InitialEventGeneration), []), token);

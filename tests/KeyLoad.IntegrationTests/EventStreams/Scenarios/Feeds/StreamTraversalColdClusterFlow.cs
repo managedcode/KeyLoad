@@ -7,7 +7,7 @@ namespace KeyLoad.IntegrationTests.EventStreams;
 
 internal static class StreamTraversalColdClusterFlow
 {
-    private static readonly EventData Fourth = McpEventStreamScenario.ExpectedEvents[StreamTraversalTestProtocol.Empty] with
+    private static readonly EventData Fourth = McpEventStreamScenario.InputEvents[StreamTraversalTestProtocol.Empty] with
     {
         EventId = "traversal-delivered",
         PayloadJson = "{\"status\":\"delivered\"}",
@@ -48,8 +48,8 @@ internal static class StreamTraversalColdClusterFlow
             new(scenario.Stream, Limit: StreamTraversalTestProtocol.First), token));
         var backward = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.ReadStreamAsync(
             new(scenario.Stream, Limit: StreamTraversalTestProtocol.First, Direction: StreamReadDirection.Backward), token));
-        await RequireFirstAsync(scenario, first, StreamTraversalTestProtocol.First, McpEventStreamScenario.ExpectedEvents[StreamTraversalTestProtocol.Empty], original);
-        await RequireFirstAsync(scenario, backward, StreamTraversalTestProtocol.Third, McpEventStreamScenario.ExpectedEvents[StreamTraversalTestProtocol.Second], original);
+        await RequireFirstAsync(scenario, first, StreamTraversalTestProtocol.First, McpEventStreamScenario.InputEvents[StreamTraversalTestProtocol.Empty], original);
+        await RequireFirstAsync(scenario, backward, StreamTraversalTestProtocol.Third, McpEventStreamScenario.InputEvents[StreamTraversalTestProtocol.Second], original);
         var fourthCommand = new CommandRequest(Guid.NewGuid(), scenario.Partition,
             [new AppendEvents(McpEventStreamTokens.StreamSet, McpEventStreamTokens.StreamId,
                 [Fourth], ExpectedStreamRevision.Exact(StreamTraversalTestProtocol.Third), StreamTraversalTestProtocol.First)]);
@@ -82,14 +82,14 @@ internal static class StreamTraversalColdClusterFlow
         StreamPage first, StreamPage backward, CommitReceipt fourth, CancellationToken token)
     {
         await StreamTraversalClusterAssertions.RoutesAsync(callers, scenario, new(scenario.Stream, Cursor: first.Cursor),
-            [StreamTraversalTestProtocol.Second, StreamTraversalTestProtocol.Third], [McpEventStreamScenario.ExpectedEvents[StreamTraversalTestProtocol.First], McpEventStreamScenario.ExpectedEvents[StreamTraversalTestProtocol.Second]],
+            [StreamTraversalTestProtocol.Second, StreamTraversalTestProtocol.Third], [McpEventStreamScenario.InputEvents[StreamTraversalTestProtocol.First], McpEventStreamScenario.InputEvents[StreamTraversalTestProtocol.Second]],
             StreamTraversalTestProtocol.Third, first.SnapshotCutPosition, fourth.Token.Position, token);
         await StreamTraversalClusterAssertions.RoutesAsync(callers, scenario,
             new(scenario.Stream, Direction: StreamReadDirection.Backward, Cursor: backward.Cursor),
-            [StreamTraversalTestProtocol.Second, StreamTraversalTestProtocol.First], [McpEventStreamScenario.ExpectedEvents[StreamTraversalTestProtocol.First], McpEventStreamScenario.ExpectedEvents[StreamTraversalTestProtocol.Empty]],
+            [StreamTraversalTestProtocol.Second, StreamTraversalTestProtocol.First], [McpEventStreamScenario.InputEvents[StreamTraversalTestProtocol.First], McpEventStreamScenario.InputEvents[StreamTraversalTestProtocol.Empty]],
             StreamTraversalTestProtocol.Third, backward.SnapshotCutPosition, fourth.Token.Position, token);
         var fresh = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.ReadStreamAsync(new(scenario.Stream), token));
         await StreamTraversalClusterAssertions.RoutesAsync(callers, scenario, new(scenario.Stream), [StreamTraversalTestProtocol.First, StreamTraversalTestProtocol.Second, StreamTraversalTestProtocol.Third, StreamTraversalTestProtocol.Fourth],
-            [.. McpEventStreamScenario.ExpectedEvents, Fourth], StreamTraversalTestProtocol.Fourth, fresh.CutPosition, fourth.Token.Position, token);
+            [.. McpEventStreamScenario.InputEvents, Fourth], StreamTraversalTestProtocol.Fourth, fresh.CutPosition, fourth.Token.Position, token);
     }
 }

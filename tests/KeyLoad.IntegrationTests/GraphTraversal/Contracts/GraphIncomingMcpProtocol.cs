@@ -15,6 +15,8 @@ internal static class GraphIncomingMcpProtocol
     internal const string Projection = "projection";
     internal const string EntityId = "id";
     internal const string Collection = "collection";
+    internal const string Lifetime = "lifetime";
+    internal const string Incarnation = "incarnation";
     internal const string Partition = "partition";
     internal const string TenantId = "tenantId";
     internal const string DatabaseId = "databaseId";

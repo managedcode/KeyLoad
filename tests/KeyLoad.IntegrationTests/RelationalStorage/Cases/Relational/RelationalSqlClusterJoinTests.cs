@@ -17,9 +17,9 @@ internal sealed class RelationalSqlClusterJoinTests(ClusterFixture fixture)
     private const string CustomerNameField = "customer_name";
     private const string CustomerIdField = "customer_id";
     private const string AccessPath = "bounded-primary-key-inner-join";
-    private const string QueryText = "SELECT l.key AS order_key, r.name AS customer_name, l.title AS customer_id "
+    private const string QueryText = "SELECT l.[key] AS order_key, r.name AS customer_name, l.title AS customer_id "
         + "FROM agentrows AS l INNER JOIN joincustomers AS r ON l.title = r.id "
-        + "ORDER BY l.key ASC OFFSET 0 ROWS FETCH NEXT 10 ROWS ONLY";
+        + "ORDER BY l.[key] ASC OFFSET 0 ROWS FETCH NEXT 10 ROWS ONLY";
     private const int QueryDialectVersion = SqlOperationProtocol.DefaultQueryDialectVersion;
 
     [Test]

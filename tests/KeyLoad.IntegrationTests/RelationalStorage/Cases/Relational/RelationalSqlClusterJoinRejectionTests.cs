@@ -12,22 +12,25 @@ internal sealed class RelationalSqlClusterJoinRejectionTests(ClusterFixture fixt
     private const string Prefix = RelationalSqlClusterJoinRejectionFlow.Prefix;
     private const string Join = RelationalSqlClusterJoinRejectionFlow.Join;
     private const string Order = RelationalSqlClusterJoinRejectionFlow.Order;
-    private const int Q2 = RelationalSqlClusterJoinRejectionFlow.Q2;
+    private const int Dialect = RelationalSqlClusterJoinRejectionFlow.Dialect;
+    private const int NextDialect = Dialect + 1;
+    private const int LaterDialect = Dialect + 2;
 
     [Test]
-    [Arguments(Prefix + Join + Order, 1, ErrorCode.UnsupportedCapability)]
-    [Arguments(Prefix + Join + Order, 3, ErrorCode.UnsupportedCapability)]
-    [Arguments(Prefix + "LEFT JOIN joincustomers AS r ON l.title = r.id " + Order, Q2, ErrorCode.UnsupportedCapability)]
-    [Arguments(Prefix + "RIGHT JOIN joincustomers AS r ON l.title = r.id " + Order, Q2, ErrorCode.UnsupportedCapability)]
-    [Arguments(Prefix + "FULL JOIN joincustomers AS r ON l.title = r.id " + Order, Q2, ErrorCode.UnsupportedCapability)]
-    [Arguments(Prefix + "CROSS JOIN joincustomers AS r " + Order, Q2, ErrorCode.UnsupportedCapability)]
-    [Arguments(Prefix + "NATURAL JOIN joincustomers AS r " + Order, Q2, ErrorCode.UnsupportedCapability)]
-    [Arguments(Prefix + Join + "WHERE r.name = 'Ada' " + Order, Q2, ErrorCode.UnsupportedCapability)]
-    [Arguments("SELECT * FROM agentrows AS l " + Join + Order, Q2, ErrorCode.Validation)]
-    [Arguments("SELECT l.key AS repeated, r.name AS repeated FROM agentrows AS l " + Join + Order, Q2, ErrorCode.Validation)]
-    [Arguments(Prefix + Join + "ORDER BY l.key DESC LIMIT 10", Q2, ErrorCode.Validation)]
-    [Arguments(Prefix + Join + "ORDER BY l.count ASC LIMIT 10", Q2, ErrorCode.Validation)]
-    public async Task RejectedJoinOnFourPublicPathsPreservesRowsAndCompleteHealthyPage(string text, int dialect, ErrorCode code)
+    [Arguments(Prefix + Join + Order, NextDialect, ErrorCode.UnsupportedCapability, true)]
+    [Arguments(Prefix + Join + Order, LaterDialect, ErrorCode.UnsupportedCapability, true)]
+    [Arguments(Prefix + "LEFT JOIN joincustomers AS r ON l.title = r.id " + Order, Dialect, ErrorCode.UnsupportedCapability, true)]
+    [Arguments(Prefix + "RIGHT JOIN joincustomers AS r ON l.title = r.id " + Order, Dialect, ErrorCode.UnsupportedCapability, true)]
+    [Arguments(Prefix + "FULL JOIN joincustomers AS r ON l.title = r.id " + Order, Dialect, ErrorCode.UnsupportedCapability, true)]
+    [Arguments(Prefix + "CROSS JOIN joincustomers AS r " + Order, Dialect, ErrorCode.UnsupportedCapability, true)]
+    [Arguments(Prefix + "NATURAL JOIN joincustomers AS r " + Order, Dialect, ErrorCode.Validation, true)]
+    [Arguments(Prefix + Join + "WHERE r.name = 'Ada' " + Order, Dialect, ErrorCode.UnsupportedCapability, true)]
+    [Arguments("SELECT TOP (10) * FROM agentrows AS l " + Join + Order, Dialect, ErrorCode.UnsupportedCapability, true)]
+    [Arguments("SELECT TOP (10) l.[key] AS repeated, r.name AS repeated FROM agentrows AS l " + Join + Order, Dialect, ErrorCode.Validation, true)]
+    [Arguments(Prefix + Join + "ORDER BY l.[key] DESC", Dialect, ErrorCode.Validation, false)]
+    [Arguments(Prefix + Join + "ORDER BY l.count ASC", Dialect, ErrorCode.Validation, false)]
+    public async Task RejectedJoinOnFourPublicPathsPreservesRowsAndCompleteHealthyPage(string text, int dialect, ErrorCode code,
+        bool refusedBeforeDispatch)
     {
         using var deadline = McpCallerDeadline.Create();
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
@@ -52,7 +55,7 @@ internal sealed class RelationalSqlClusterJoinRejectionTests(ClusterFixture fixt
         var officialQuery = await mcp.CallAsync(McpCallerTools.QueryExecute, query, deadline.Token);
         var officialSql = await mcp.CallAsync(SqlOperationProtocol.ToolName, sql, deadline.Token);
         await McpCallerAssertions.ErrorAsync(officialQuery, code, dispatched: true);
-        await McpCallerAssertions.ErrorAsync(officialSql, code, dispatched: true);
+        await McpCallerAssertions.ErrorAsync(officialSql, code, dispatched: !refusedBeforeDispatch);
         await McpCallerAssertions.DoesNotDiscloseAsync(officialQuery, fixture.AdminKey, RelationalSqlClusterJoinRejectionFlow.PrivateName);
         await McpCallerAssertions.DoesNotDiscloseAsync(officialSql, fixture.AdminKey, RelationalSqlClusterJoinRejectionFlow.PrivateName);
         await RelationalSqlClusterJoinRejectionFlow.VerifyRowsAsync(sdk, scenario, seed.RightLifetime, rows, deadline.Token);

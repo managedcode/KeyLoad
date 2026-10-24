@@ -29,7 +29,10 @@ internal static class GuideLifecyclePublicGuidance
                 Description = GuideLifecyclePublicExpected.Description,
                 MimeType = GuideLifecyclePublicExpected.MimeType
             }],
-            NextCursor = null
+            NextCursor = null,
+            TimeToLive = TimeSpan.Zero,
+            CacheScope = CacheScope.Private,
+            ResultType = GuideLifecyclePublicExpected.CompleteResult
         };
         var actual = await session.Client.ListResourcesAsync(new ListResourcesRequestParams(), token);
         await SqlClusterProtocol.EqualAsync(expected, actual);
@@ -43,7 +46,10 @@ internal static class GuideLifecyclePublicGuidance
                 Uri = GuideLifecyclePublicExpected.ResourceUri,
                 MimeType = GuideLifecyclePublicExpected.MimeType,
                 Text = GuideLifecyclePublicExpected.Markdown
-            }]
+            }],
+            TimeToLive = TimeSpan.Zero,
+            CacheScope = CacheScope.Private,
+            ResultType = GuideLifecyclePublicExpected.CompleteResult
         };
         var read = await session.Client.ReadResourceAsync(Resource, cancellationToken: token);
         await SqlClusterProtocol.EqualAsync(expectedRead, read);
@@ -64,7 +70,10 @@ internal static class GuideLifecyclePublicGuidance
                 Description = GuideLifecyclePublicExpected.Description,
                 Arguments = []
             }],
-            NextCursor = null
+            NextCursor = null,
+            TimeToLive = TimeSpan.Zero,
+            CacheScope = CacheScope.Private,
+            ResultType = GuideLifecyclePublicExpected.CompleteResult
         };
         var actual = await session.Client.ListPromptsAsync(new ListPromptsRequestParams(), token);
         await SqlClusterProtocol.EqualAsync(expected, actual);
@@ -78,7 +87,8 @@ internal static class GuideLifecyclePublicGuidance
             {
                 Role = Role.User,
                 Content = new TextContentBlock { Text = GuideLifecyclePublicExpected.Markdown }
-            }]
+            }],
+            ResultType = GuideLifecyclePublicExpected.CompleteResult
         };
         var get = await session.Client.GetPromptAsync(GuideLifecyclePublicExpected.PromptName, cancellationToken: token);
         await SqlClusterProtocol.EqualAsync(expectedGet, get);

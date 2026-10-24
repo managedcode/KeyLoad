@@ -39,15 +39,25 @@ internal static class LeftFilteredJoinAssertions
         await Assert.That(json.RootElement.GetProperty(OrderIdFieldKey).GetString()).IsEqualTo("a");
         await Assert.That(json.RootElement.GetProperty(TotalFieldKey).GetInt32()).IsEqualTo(7);
         await Assert.That(json.RootElement.GetProperty(CustomerNameFieldKey).GetString()).IsEqualTo(masked ? null : "Ada");
-        await RelationalSqlClusterJoinPageAssertions.SameRowsAsync(direct, unified);
-        await RelationalSqlClusterJoinPageAssertions.SameRowsAsync(direct, official);
-        await RelationalSqlClusterJoinPageAssertions.SameRowsAsync(direct, queryReply);
+        await SamePageAsync(direct, unified);
+        await SamePageAsync(direct, official);
+        await SamePageAsync(direct, queryReply);
         var literal = LeftFilteredJoinProtocol.Query(state.Partition) with
         {
             Sql = LeftFilteredJoinProtocol.Prefix + "WHERE l.total = 7 " + LeftFilteredJoinProtocol.Order,
             Parameters = null
         };
-        await RelationalSqlClusterJoinPageAssertions.SameRowsAsync(direct,
+        await SamePageAsync(direct,
             await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.QueryAsync(literal, token)));
+    }
+
+    // The direct row's sources are asserted literally above; the projection has no customer_id output.
+    private static async Task SamePageAsync(QueryPage direct, QueryPage actual)
+    {
+        await Assert.That(actual.CutPosition).IsGreaterThanOrEqualTo(direct.CutPosition);
+        await SqlClusterProtocol.EqualAsync(direct with
+        {
+            CutPosition = actual.CutPosition
+        }, actual);
     }
 }

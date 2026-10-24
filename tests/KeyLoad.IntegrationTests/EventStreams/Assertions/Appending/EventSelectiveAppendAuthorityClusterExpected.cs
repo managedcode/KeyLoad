@@ -9,15 +9,15 @@ internal static class EventSelectiveAppendAuthorityClusterExpected
     internal const string ChangedPolicyDetail = "The principal policy changed since this command was evaluated.";
     private const string FourthId = "r44-selective-append-fourth";
     private const string FourthPayload = "{\"step\":4}";
-    internal static EventData Fourth => McpEventStreamScenario.ExpectedEvents[0] with
+    internal static EventData Fourth => McpEventStreamScenario.InputEvents[0] with
     {
         EventId = FourthId,
         PayloadJson = FourthPayload
     };
 
     internal static EventData[] Data(bool updated) => updated
-        ? [.. McpEventStreamScenario.ExpectedEvents, Fourth]
-        : McpEventStreamScenario.ExpectedEvents.ToArray();
+        ? [.. McpEventStreamScenario.InputEvents, Fourth]
+        : McpEventStreamScenario.InputEvents.ToArray();
 
     internal static async Task PageAsync(EventSelectiveAppendAuthorityClusterState state,
         StreamPage page, EventData[] expected, long first, long head,

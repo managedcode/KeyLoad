@@ -20,7 +20,7 @@ internal static class EventAppendClusterAuthorization
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 official = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node3, identity.Secret, token);
-                var expected = McpEventStreamScenario.ExpectedEvents.ToArray();
+                var expected = McpEventStreamScenario.InputEvents.ToArray();
                 var before = await EventAppendClusterAssertions.PageAsync(reader, official, scenario, expected, token);
                 var fresh = EventAppendClusterFlow.Command(scenario, [McpEventStreamScenario.InputEvents[EventAppendClusterProtocol.FirstEventIndex] with
                     { EventId = EventAppendClusterProtocol.PartialEventId }], ExpectedStreamRevision.Any);

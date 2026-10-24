@@ -11,9 +11,7 @@ internal static class QueryCapabilityVersionClusterManifest
         var expected = QueryCapabilityVersionClusterExpected.Manifest(QueryCapabilityVersionClusterRequests.Limits());
         await SqlClusterProtocol.EqualAsync(expected, await McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.QueryCapabilitiesAsync(token)));
         await SqlClusterProtocol.EqualAsync(expected, (await McpCallerAssertions.SuccessAsync<QueryCapabilityManifest>(
-            await caller.Mcp.CallAsync(McpCallerTools.QueryCapabilities, new
-            {
-            }, token))).Value);
+            await caller.Mcp.CallWithoutBodyAsync(McpCallerTools.QueryCapabilities, token))).Value);
         await SqlClusterProtocol.EqualAsync(expected, await SqlClusterProtocol.SdkAsync<QueryCapabilityManifest>(caller.Sdk,
             SqlClusterProtocol.NoBodyCall(partition, McpCallerTools.QueryCapabilities), token));
         await SqlClusterProtocol.EqualAsync(expected, await SqlClusterProtocol.McpAsync<QueryCapabilityManifest>(caller.Mcp,

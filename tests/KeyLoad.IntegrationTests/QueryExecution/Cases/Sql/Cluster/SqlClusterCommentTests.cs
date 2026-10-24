@@ -11,8 +11,8 @@ internal sealed class SqlClusterCommentTests(ClusterFixture fixture)
 {
     private const string Prefix = "-- client\r\n/* outer /* nested */ ; CALL ignored */";
     private const string Suffix = ";/* complete */-- EOF";
-    private const string Call = "CALL/* dispatch */ ";
-    private const string Arguments = "/* name */(/* bind */@args/* value */)";
+    private const string Call = "EXEC/* dispatch */ ";
+    private const string Arguments = "/* name */ /* bind */@args/* value */";
     private const string CommentedSelect = "/* SELECT */SELECT/* fields */ * FROM agentrows-- source\r\n"
         + "WHERE 'alpha'/* value */ = title ORDER/* order */ BY id;-- EOF";
     private const string Unclosed = "/* missing close";
@@ -59,7 +59,7 @@ internal sealed class SqlClusterCommentTests(ClusterFixture fixture)
             await Assert.That(rejected.IsFailed).IsTrue();
             await Assert.That(rejected.Problem!.ErrorCode).IsEqualTo(nameof(ErrorCode.Validation));
         }
-        await Assert.That(await McpCallerAssertions.SdkSuccessAsync(
+        await Assert.That(await PublicReadAssertions.DocumentAsync(
             await sdk.GetAsync(scenario.First, deadline.Token))).IsNull();
         var receipt = await SqlClusterProtocol.SdkAsync<CommitReceipt>(sdk, request, deadline.Token);
         await Assert.That(receipt.CommandId).IsEqualTo(command.CommandId);

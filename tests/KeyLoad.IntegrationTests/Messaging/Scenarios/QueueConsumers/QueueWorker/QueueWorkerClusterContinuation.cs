@@ -33,13 +33,15 @@ internal static class QueueWorkerClusterContinuation
             await Assert.That(result.Unacknowledged).IsEmpty();
             await Assert.That(result.Failures).IsEmpty();
         }
+        using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
+        var producer = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         await ImagesAsync(sdk, mcp, seed, handlers, acknowledgements, token);
-        await QueueWorkerClusterReplay.AcksAsync(sdk, mcp, seed, handlers, acknowledgements, token);
+        await QueueWorkerClusterReplay.AcksAsync(sdk, producer, mcp, seed, handlers, acknowledgements, token);
         await QueueWorkerClusterEmptyBudget.RunAsync(sdk, mcp, seed, token);
         await ImagesAsync(sdk, mcp, seed, handlers, acknowledgements, token);
         await QueueProducerClusterCold.RestartAsync(fixture, token);
         await ImagesAsync(sdk, mcp, seed, handlers, acknowledgements, token);
-        await QueueWorkerClusterReplay.AcksAsync(sdk, mcp, seed, handlers, acknowledgements, token);
+        await QueueWorkerClusterReplay.AcksAsync(sdk, producer, mcp, seed, handlers, acknowledgements, token);
         await QueueWorkerClusterHealthy.RunAsync(sdk, mcp, seed, token);
     }
 

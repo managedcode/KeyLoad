@@ -40,7 +40,7 @@ internal static class QueueProducerClusterLiteralAssertions
     {
         await QueueProducerClusterAssertions.EqualAsync(await QueueProducerClusterAssertions.ImageAsync(client, seed,
             QueueProducerClusterProtocol.Original, token), original);
-        await Assert.That(await McpCallerAssertions.SdkSuccessAsync(await client.GetAsync(
+        await Assert.That(await PublicReadAssertions.DocumentAsync(await client.GetAsync(
             QueueProducerClusterAssertions.Document(seed, QueueProducerClusterProtocol.Refused), token))).IsNull();
         await AtomicProducerClusterEventAssertions.AbsentAsync(client, seed, QueueProducerClusterProtocol.Refused, token);
     }

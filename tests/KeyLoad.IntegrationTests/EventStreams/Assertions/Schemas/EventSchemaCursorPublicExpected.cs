@@ -55,7 +55,7 @@ internal static class EventSchemaCursorPublicExpected
             await SqlClusterProtocol.EqualAsync(scenario.Stream, page.Events[index].Stream);
             await Assert.That(page.Events[index].Revision).IsEqualTo(index + 1L);
             await Assert.That(page.Events[index].EventSequence).IsEqualTo(index + 1L);
-            await SqlClusterProtocol.EqualAsync(McpEventStreamScenario.ExpectedEvents[index], page.Events[index].Data);
+            await SqlClusterProtocol.EqualAsync(McpEventStreamScenario.InputEvents[index], page.Events[index].Data);
         }
         await Assert.That(page.HasMore).IsFalse();
         await Assert.That(page.Cursor).IsNull();

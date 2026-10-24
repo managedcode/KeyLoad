@@ -17,7 +17,7 @@ internal static class StrongReadSessionProtocol
     internal const string KillScenario = "strong-session-absence-failover";
     internal const string MissingState = "The original acknowledged session state is unavailable.";
     internal const string WrongIncarnation = "The document session token belongs to another incarnation.";
-    internal const string WrongScope = "The document session token belongs to another atomic partition or placement.";
+    internal const string WrongScope = "The document session token belongs to another atomic partition.";
     internal const string InvalidPosition = "The document session token position must be positive.";
     internal const string FuturePosition = "The document session token is beyond the current committed storage cut.";
     internal const string ScopeDenied = "The principal cannot perform this operation in this scope.";

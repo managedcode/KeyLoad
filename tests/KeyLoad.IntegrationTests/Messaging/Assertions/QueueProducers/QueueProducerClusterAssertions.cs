@@ -1,3 +1,4 @@
+using System.Text.Json;
 using KeyLoad.Client;
 using KeyLoad.IntegrationTests.ClientApi;
 using ManagedCode.Communication;
@@ -12,6 +13,12 @@ internal static class QueueProducerClusterAssertions
     {
         await Assert.That(result.IsFailed).IsTrue();
         await Assert.That(result.Value).IsNull();
+        await Assert.That(result.Problem!.ErrorCode).IsEqualTo(expected.ToString());
+    }
+    internal static async Task DeniedAsync(Result<JsonElement> result, ErrorCode expected)
+    {
+        await Assert.That(result.IsFailed).IsTrue();
+        await Assert.That(result.Value.ValueKind).IsEqualTo(JsonValueKind.Undefined);
         await Assert.That(result.Problem!.ErrorCode).IsEqualTo(expected.ToString());
     }
     internal static EntityRef Document(QueueProducerClusterSeed seed, string id)

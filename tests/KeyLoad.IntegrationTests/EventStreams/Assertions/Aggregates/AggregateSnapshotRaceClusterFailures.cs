@@ -23,14 +23,15 @@ internal static class AggregateSnapshotRaceClusterFailures
         await Assert.That(actual.ProblemJson.Contains(AggregateReplayClusterTokens.PrivateHeader, StringComparison.Ordinal)).IsFalse();
     }
     internal static async Task CommandsAsync(RequestCqrsClusterCallers reader, AggregateSnapshotRaceClusterState state,
-        bool fenced, CancellationToken token)
+        bool fenced, bool rawInputDenied, CancellationToken token)
     {
         if (fenced)
         {
             foreach (var command in state.Commands)
             {
-                await RejectedAsync(reader, command, ErrorCode.PermissionDenied,
-                    "The principal policy changed since this command was evaluated.", token);
+                await RejectedAsync(reader, command, ErrorCode.PermissionDenied, rawInputDenied
+                    ? "Complete replay input requires every raw-read and raw-use grant."
+                    : "The principal policy changed since this command was evaluated.", token);
             }
         }
         else

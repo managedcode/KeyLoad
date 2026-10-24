@@ -23,7 +23,7 @@ internal static class AggregateSnapshotRaceClusterFlow
                     await AggregateSnapshotRaceClusterCurrent.ObserveAsync(root, state, async () =>
                     {
                         await AggregateSnapshotRaceClusterCurrent.RequireAsync(reader, state, token);
-                        await AggregateSnapshotRaceClusterFailures.CommandsAsync(reader, state, false, token);
+                        await AggregateSnapshotRaceClusterFailures.CommandsAsync(reader, state, false, false, token);
                     }, token);
                     await AggregateSnapshotRaceClusterPolicy.RepairAsync(root, reader, state, token);
                 }, token);

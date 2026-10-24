@@ -8,7 +8,7 @@ internal static class ProjectionPublicProtocol
     internal const string Source = "feed-source";
     internal const string Target = "feed-derived";
     internal const string Consumer = "projection";
-    internal const string NextConsumer = "projection";
+    internal const string NextConsumer = "next-projection";
     internal const string IdentityPrefix = "projection-admin-";
     internal const string KeyPrefix = "projection-key-";
     internal const string Separator = ".";

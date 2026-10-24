@@ -20,7 +20,7 @@ internal static class StreamCatchupClusterAssertions
             var data = expected[index];
             var revision = data.EventId == StreamCatchupColdClusterFlow.TailEvent.EventId
                 ? StreamCatchupColdClusterFlow.TailRevision
-                : McpEventStreamScenario.ExpectedEvents.IndexOf(data) + McpEventStreamTokens.FirstEventRevision;
+                : McpEventStreamScenario.InputEvents.IndexOf(data) + McpEventStreamTokens.FirstEventRevision;
             await Assert.That(actual.Events[index].RecordedAt).IsNotEqualTo(default(DateTimeOffset));
             records[index] = new(scenario.Stream, revision, revision, data, actual.Events[index].RecordedAt);
         }
@@ -33,8 +33,8 @@ internal static class StreamCatchupClusterAssertions
         McpEventStreamScenario scenario, long tail, long minimum, CancellationToken token)
     {
         var expected = tail == StreamCatchupColdClusterFlow.CatchupRevision
-            ? McpEventStreamScenario.ExpectedEvents.ToArray()
-            : McpEventStreamScenario.ExpectedEvents.Append(StreamCatchupColdClusterFlow.TailEvent).ToArray();
+            ? McpEventStreamScenario.InputEvents.ToArray()
+            : McpEventStreamScenario.InputEvents.Append(StreamCatchupColdClusterFlow.TailEvent).ToArray();
         await RoutesAsync(callers, scenario, scenario.ReadRequest(McpEventStreamTokens.InitialRevision,
             McpEventStreamTokens.ExpectedEventCount + McpEventStreamTokens.FirstEventRevision), expected, tail, minimum, token);
     }

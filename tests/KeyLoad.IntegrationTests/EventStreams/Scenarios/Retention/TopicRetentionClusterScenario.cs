@@ -36,7 +36,7 @@ internal sealed record TopicRetentionClusterScenario(PartitionRef Partition, Eve
     {
         var command = new CommandRequest(Guid.NewGuid(), Partition,
             [new PublishTopic("topic", [new("event4", "Created", "{\"n\":4}")])]);
-        return new(Partition, "CALL keyload_documents_commit(@arguments)",
+        return new(Partition, "EXEC keyload_documents_commit @arguments",
             new Dictionary<string, JsonElement>(StringComparer.Ordinal)
             {
                 [ArgumentsKey] = JsonSerializer.SerializeToElement(new { request = command }, JsonDefaults.Options)

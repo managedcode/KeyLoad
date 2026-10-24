@@ -11,9 +11,7 @@ internal static class CapabilityOutputClusterPages
     {
         var sdkManifest = await McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.QueryCapabilitiesAsync(token));
         var officialManifest = (await McpCallerAssertions.SuccessAsync<QueryCapabilityManifest>(
-            await caller.Mcp.CallAsync(McpCallerTools.QueryCapabilities, new
-            {
-            }, token))).Value;
+            await caller.Mcp.CallWithoutBodyAsync(McpCallerTools.QueryCapabilities, token))).Value;
         await SqlClusterProtocol.EqualAsync(state.Manifest, sdkManifest);
         await SqlClusterProtocol.EqualAsync(state.Manifest, officialManifest);
         foreach (var version in new[] { 1 })

@@ -37,7 +37,8 @@ internal static class RemoteTransferCoordinatorClusterTrial
             created = await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(seed.Create, token));
             await RemoteTransferColdAssertions.ReceiptLiteralAsync(created, seed.Create, seed.Scenario.SourceQueue,
                 seed.TransferId, RemoteTransferColdProtocol.CreateKind, RemoteTransferColdProtocol.CreateRevision);
-            intent = await RemoteTransferColdAssertions.SourceAsync(sdk, mcp, seed, null, token);
+            intent = await RemoteTransferColdAssertions.SourceAsync(sdk, mcp, seed,
+                fullTarget ? null : await RemoteTransferCoordinatorClusterWait.DeliveredAsync(sdk, seed, token), token);
             hint = RemoteTransferCoordinatorClusterAssertions.Hint(seed, created, intent);
             if (fullTarget)
             {

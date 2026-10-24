@@ -18,7 +18,7 @@ internal static class RelationalSqlClusterJoinBudgetData
     internal const string DetailColumn = "detail";
     internal const string CustomerIdColumn = "id";
     internal const string NameColumn = "name";
-    internal const int DialectVersion = 2;
+    internal const int DialectVersion = SqlOperationProtocol.DefaultQueryDialectVersion;
     private const string Database = "agentdb";
     private const string TransactionDomain = "agent";
     private const string TenantPrefix = "join-budget-";

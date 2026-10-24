@@ -41,7 +41,7 @@ internal static class McpEventStreamAssertions
             expectedEvents.Select(data => data.EventId))).IsTrue();
         await Assert.That(mcpPage.Events.Select(record => record.Data).SequenceEqual(expectedEvents)).IsTrue();
         await Assert.That(mcpPage.Events.Select(record => record.EventSequence).SequenceEqual(
-            expectedEvents.Select(data => (long)McpEventStreamScenario.ExpectedEvents.IndexOf(data)
+            expectedEvents.Select(data => (long)McpEventStreamScenario.InputEvents.IndexOf(data)
                 + McpEventStreamTokens.FirstExpectedSequence))).IsTrue();
         await Assert.That(mcpPage.Events.All(record => record.Stream == scenario.Stream)).IsTrue();
         await Assert.That(mcpPage.Events.All(record => record.RecordedAt != default)).IsTrue();

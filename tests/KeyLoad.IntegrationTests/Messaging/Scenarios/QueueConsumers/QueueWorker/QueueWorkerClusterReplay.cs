@@ -5,7 +5,7 @@ namespace KeyLoad.IntegrationTests.Messaging;
 
 internal static class QueueWorkerClusterReplay
 {
-    internal static async Task AcksAsync(KeyLoadClient sdk, McpOfficialClient mcp, QueueWorkerClusterSeed seed,
+    internal static async Task AcksAsync(KeyLoadClient sdk, KeyLoadClient producer, McpOfficialClient mcp, QueueWorkerClusterSeed seed,
         QueueWorkerClusterHandlerLifecycle handlers, QueueWorkerOperationObservation[] originals, CancellationToken token)
     {
         foreach (var original in originals)
@@ -24,7 +24,7 @@ internal static class QueueWorkerClusterReplay
             await QueueWorkerClusterContinuation.ImagesAsync(sdk, mcp, seed, handlers, originals, token);
         }
         await QueueWorkerClusterAssertions.EqualAsync(await McpCallerAssertions.SdkSuccessAsync(
-            await sdk.CommitAsync(seed.Producer, token)), seed.Receipt);
+            await producer.CommitAsync(seed.Producer, token)), seed.Receipt);
         await QueueWorkerClusterContinuation.ImagesAsync(sdk, mcp, seed, handlers, originals, token);
     }
 }

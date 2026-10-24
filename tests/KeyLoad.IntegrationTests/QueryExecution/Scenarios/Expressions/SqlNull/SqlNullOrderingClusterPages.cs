@@ -42,9 +42,7 @@ internal static class SqlNullOrderingClusterPages
     {
         var sdk = await McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.QueryCapabilitiesAsync(token));
         var mcp = (await McpCallerAssertions.SuccessAsync<QueryCapabilityManifest>(
-            await caller.Mcp.CallAsync(McpCallerTools.QueryCapabilities, new
-            {
-            }, token))).Value;
+            await caller.Mcp.CallWithoutBodyAsync(McpCallerTools.QueryCapabilities, token))).Value;
         await global::TUnit.Assertions.Assert.That(sdk.ReadProfiles.Contains(SqlNullOrderingClusterProtocol.Profile)).IsTrue();
         await global::TUnit.Assertions.Assert.That(mcp.ReadProfiles.Contains(SqlNullOrderingClusterProtocol.Profile)).IsTrue();
         await global::TUnit.Assertions.Assert.That(sdk.ReadProfiles.Contains(SqlNullOrderingClusterProtocol.UsingProfile)).IsTrue();

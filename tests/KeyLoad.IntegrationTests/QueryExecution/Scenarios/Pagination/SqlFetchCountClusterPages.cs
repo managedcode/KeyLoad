@@ -70,9 +70,7 @@ internal static class SqlFetchCountClusterPages
     {
         var sdk = await McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.QueryCapabilitiesAsync(token));
         var mcp = (await McpCallerAssertions.SuccessAsync<QueryCapabilityManifest>(
-            await caller.Mcp.CallAsync(McpCallerTools.QueryCapabilities, new
-            {
-            }, token))).Value;
+            await caller.Mcp.CallWithoutBodyAsync(McpCallerTools.QueryCapabilities, token))).Value;
         await global::TUnit.Assertions.Assert.That(sdk.ReadProfiles.Contains(SqlFetchCountClusterProtocol.Profile)).IsTrue();
         await global::TUnit.Assertions.Assert.That(mcp.ReadProfiles.Contains(SqlFetchCountClusterProtocol.Profile)).IsTrue();
     }

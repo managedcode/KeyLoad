@@ -6,7 +6,7 @@ namespace KeyLoad.IntegrationTests.TimeSeries;
 
 internal static class SampleRollupClusterWriteParity
 {
-    private const string CommitSql = "CALL keyload_documents_commit(@arguments)";
+    private const string CommitSql = "EXEC keyload_documents_commit @arguments";
     private const string Arguments = "arguments";
     private const int SampleLimit = 10;
     internal static async Task VerifyAsync(KeyLoadClient sdk, McpOfficialClient mcp, TimeSeriesClusterScenario scenario,

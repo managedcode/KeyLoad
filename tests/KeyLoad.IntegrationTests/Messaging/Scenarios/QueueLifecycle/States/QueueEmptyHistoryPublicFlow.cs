@@ -104,7 +104,7 @@ internal static class QueueEmptyHistoryPublicFlow
         var delivery = await Assert.That(result.Deliveries).HasSingleItem();
         await Assert.That(result.RequestId).IsEqualTo(request.RequestId);
         await Assert.That(delivery.Id).IsEqualTo(expectedId);
-        await Assert.That(delivery.PayloadJson).IsEqualTo(QueueLifecyclePublicProtocol.CanonicalPayload);
+        await Assert.That(delivery.PayloadJson).IsEqualTo(QueueLifecyclePublicProtocol.Payload);
         await Assert.That(delivery.HeadersJson).IsEqualTo(QueueLifecyclePublicProtocol.Headers);
         await Assert.That(delivery.Attempt).IsEqualTo(1);
         await Assert.That(delivery.LeaseVersion).IsEqualTo(1L);

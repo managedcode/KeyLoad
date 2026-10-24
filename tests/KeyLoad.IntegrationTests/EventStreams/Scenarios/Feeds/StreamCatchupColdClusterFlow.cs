@@ -9,7 +9,7 @@ internal static class StreamCatchupColdClusterFlow
 {
     internal const long CatchupRevision = 3;
     internal const long TailRevision = 4;
-    internal static readonly EventData TailEvent = McpEventStreamScenario.ExpectedEvents[0] with
+    internal static readonly EventData TailEvent = McpEventStreamScenario.InputEvents[0] with
     {
         EventId = "catchup-delivered",
         PayloadJson = "{\"status\":\"delivered\"}",

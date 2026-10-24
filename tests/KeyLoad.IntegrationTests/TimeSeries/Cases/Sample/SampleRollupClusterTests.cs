@@ -9,7 +9,7 @@ namespace KeyLoad.IntegrationTests.TimeSeries;
 [NotInParallel]
 internal sealed class SampleRollupClusterTests(ClusterFixture fixture)
 {
-    private const string ReadSql = "CALL keyload_series_read_rollup(@arguments)";
+    private const string ReadSql = "EXEC keyload_series_read_rollup @arguments";
     private const string Arguments = "arguments";
     [Test]
     public async Task AcSeries024SdkOfficialMcpSqlLateCorrectionAndOriginalReceiptParity()

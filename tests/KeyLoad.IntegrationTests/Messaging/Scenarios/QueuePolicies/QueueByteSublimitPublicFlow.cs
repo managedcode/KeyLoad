@@ -43,7 +43,7 @@ internal static class QueueByteSublimitPublicFlow
         await Assert.That(delivery.Attempt).IsEqualTo(1);
         await Assert.That(delivery.LeaseVersion).IsEqualTo(1L);
         await Assert.That(delivery.DeliveryGeneration).IsEqualTo(1L);
-        await Assert.That(delivery.PayloadJson).IsEqualTo(QueueLifecyclePublicProtocol.CanonicalPayload);
+        await Assert.That(delivery.PayloadJson).IsEqualTo(QueueLifecyclePublicProtocol.Payload);
         await Assert.That(delivery.HeadersJson).IsEqualTo(QueueLifecyclePublicProtocol.Headers);
         await QueueLeaseClusterAssertions.EqualAsync(await McpCallerAssertions.SdkSuccessAsync(
             await callers.Sdk.ReceiveAsync(request, token)), claim);
@@ -82,7 +82,7 @@ internal static class QueueByteSublimitPublicFlow
         var claim = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.ReceiveAsync(request, token));
         var sibling = await Assert.That(claim.Deliveries).HasSingleItem();
         await Assert.That(sibling.Id).IsEqualTo(QueueByteSublimitPublicAssertions.Second);
-        await Assert.That(sibling.PayloadJson).IsEqualTo(QueueLifecyclePublicProtocol.CanonicalPayload);
+        await Assert.That(sibling.PayloadJson).IsEqualTo(QueueLifecyclePublicProtocol.Payload);
         await Assert.That(sibling.HeadersJson).IsEqualTo(QueueLifecyclePublicProtocol.Headers);
         var ack = new DeliveryCommand(Guid.NewGuid(), owner.Lane, sibling.Token, DeliveryAction.Ack);
         await CompleteAsync(callers, owner, ack, QueueByteSublimitPublicAssertions.Second, 3L, token);
@@ -109,7 +109,7 @@ internal static class QueueByteSublimitPublicFlow
         await Assert.That(delivery.Attempt).IsEqualTo(1);
         await Assert.That(delivery.LeaseVersion).IsEqualTo(3L);
         await Assert.That(delivery.DeliveryGeneration).IsEqualTo(2L);
-        await Assert.That(delivery.PayloadJson).IsEqualTo(QueueLifecyclePublicProtocol.CanonicalPayload);
+        await Assert.That(delivery.PayloadJson).IsEqualTo(QueueLifecyclePublicProtocol.Payload);
         await Assert.That(delivery.HeadersJson).IsEqualTo(QueueLifecyclePublicProtocol.Headers);
         await QueueLeaseClusterAssertions.EqualAsync(await McpCallerAssertions.SdkSuccessAsync(
             await callers.Sdk.ReceiveAsync(request, token)), claim.Value);
@@ -149,7 +149,7 @@ internal static class QueueByteSublimitPublicFlow
         var replay = await McpCallerAssertions.SuccessAsync<ReceiveResult>(
             await callers.Mcp.CallAsync(McpCallerTools.MessagesReceive, request, token));
         await QueueLeaseClusterAssertions.EqualAsync(replay.Value, claim);
-        await Assert.That(delivery.PayloadJson).IsEqualTo(QueueLifecyclePublicProtocol.CanonicalPayload);
+        await Assert.That(delivery.PayloadJson).IsEqualTo(QueueLifecyclePublicProtocol.Payload);
         await Assert.That(delivery.HeadersJson).IsEqualTo(QueueLifecyclePublicProtocol.Headers);
         var ack = new DeliveryCommand(Guid.NewGuid(), state.Owner.Lane, delivery.Token, DeliveryAction.Ack);
         var receipt = await QueueLifecyclePublicRoutes.CallAsync(callers, state.Owner.Route, state.Owner.Partition,

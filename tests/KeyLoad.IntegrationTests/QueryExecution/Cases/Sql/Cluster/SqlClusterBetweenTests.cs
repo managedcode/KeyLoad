@@ -13,12 +13,13 @@ internal sealed class SqlClusterBetweenTests(ClusterFixture fixture)
 {
     private const string Between = "BETWEEN";
     private const string NotBetween = "NOT BETWEEN";
-    private const string Dialect = "Q1";
+    private const string Dialect = "TSQL.ScriptDOM180";
     private static ImmutableArray<string> ExpectedPredicates
     {
         get;
     } =
-        ["comparison", "AND", "OR", "NOT", "IN", Between, NotBetween, "IS NULL", "IS MISSING"];
+        ["comparison", "AND", "OR", "NOT", "IN", "NOT IN", Between, NotBetween, "IS NULL", "IS NOT NULL",
+            "IS DISTINCT FROM", "IS NOT DISTINCT FROM", "AST.IS MISSING"];
 
     [Test]
     public async Task AcSqlc006AInclusiveAndThreeValuedRangesMatchIndependentRowsOnSdkAndOfficialMcp()
@@ -59,13 +60,16 @@ internal sealed class SqlClusterBetweenTests(ClusterFixture fixture)
         var scenario = await SqlClusterBetweenScenario.CreateAsync(sdk, deadline.Token);
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node3,
             fixture.AdminKey, deadline.Token);
-        foreach (var predicate in new[] { SqlClusterBetweenScenario.Malformed, SqlClusterBetweenScenario.QuotedOperator,
-            SqlClusterBetweenScenario.EagerMismatch, SqlClusterBetweenScenario.MissingParameter })
+        foreach (var predicate in new[] { SqlClusterBetweenScenario.Malformed, SqlClusterBetweenScenario.QuotedOperator })
         {
-            await RejectAsync(sdk, mcp, scenario.Request(predicate), ErrorCode.Validation, deadline.Token);
+            await RejectAsync(sdk, mcp, scenario.Request(predicate), ErrorCode.Validation, false, deadline.Token);
+        }
+        foreach (var predicate in new[] { SqlClusterBetweenScenario.EagerMismatch, SqlClusterBetweenScenario.MissingParameter })
+        {
+            await RejectAsync(sdk, mcp, scenario.Request(predicate), ErrorCode.Validation, true, deadline.Token);
         }
         await RejectAsync(sdk, mcp, scenario.Request(SqlClusterBetweenScenario.NonScalarParameter,
-            SqlClusterBetweenScenario.Parameters(nonScalar: true)), ErrorCode.UnsupportedCapability, deadline.Token);
+            SqlClusterBetweenScenario.Parameters(nonScalar: true)), ErrorCode.UnsupportedCapability, true, deadline.Token);
         await VerifyAsync(sdk, mcp, scenario,
             scenario.Request(SqlClusterBetweenScenario.Positive, SqlClusterBetweenScenario.Parameters()),
             [SqlClusterBetweenScenario.Lower, SqlClusterBetweenScenario.Middle, SqlClusterBetweenScenario.Upper], deadline.Token);
@@ -86,13 +90,14 @@ internal sealed class SqlClusterBetweenTests(ClusterFixture fixture)
         await SqlClusterProtocol.EqualAsync(page.Rows, official.Rows);
     }
 
+    // A syntax refusal happens while the gateway compiles the SQL envelope, before an operation is dispatched.
     private static async Task RejectAsync(KeyLoadClient sdk, McpOfficialClient mcp, SqlOperationRequest request,
-        ErrorCode error, CancellationToken cancellationToken)
+        ErrorCode error, bool dispatched, CancellationToken cancellationToken)
     {
         var result = await sdk.ExecuteSqlAsync(request, cancellationToken);
         await Assert.That(result.IsFailed).IsTrue();
         await Assert.That(result.Problem!.ErrorCode).IsEqualTo(error.ToString());
         await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(SqlOperationProtocol.ToolName, request, cancellationToken),
-            error, dispatched: true);
+            error, dispatched);
     }
 }

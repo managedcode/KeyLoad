@@ -28,7 +28,8 @@ internal sealed class SqlModelViewClusterParityTests(ClusterFixture fixture)
                 await AssertQueueParityWithoutEffectsAsync(sdk, mcp, scenario, deadline.Token);
             }, failures);
         }, failures);
-        await ServerFailureObserver.ObserveAsync(() => ModelRootClusterFlow.RunAsync(fixture, scenario.Partition, deadline.Token), failures);
+        await ServerFailureObserver.ObserveAsync(() => ModelRootClusterFlow.RunAsync(fixture, scenario.Partition,
+            SqlModelViewClusterScenario.ExpectedEvents.Length, deadline.Token), failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }
 

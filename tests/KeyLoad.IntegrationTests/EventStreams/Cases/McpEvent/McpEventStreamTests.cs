@@ -33,7 +33,7 @@ internal sealed class McpEventStreamTests(ClusterFixture fixture)
             McpCallerTools.StreamsRead,
             scenario.ReadRequest(McpEventStreamTokens.InitialRevision, McpEventStreamTokens.ExpectedEventCount), deadline.Token));
         await McpEventStreamAssertions.EqualPageAsync(scenario, sdkPage, mcpPage.Value,
-            McpEventStreamScenario.ExpectedEvents.ToArray(), hasMore: false, appendReceiptPosition: original.Token.Position,
+            McpEventStreamScenario.InputEvents.ToArray(), hasMore: false, appendReceiptPosition: original.Token.Position,
             previousCutPosition: McpEventStreamTokens.InitialCutPosition);
         await Assert.That(mcpPage.RequestId).IsNotEqualTo(retry.RequestId);
     }
@@ -56,7 +56,7 @@ internal sealed class McpEventStreamTests(ClusterFixture fixture)
         var firstMcp = await McpCallerAssertions.SuccessAsync<StreamPage>(await session.CallAsync(
             McpCallerTools.StreamsRead, firstRequest, deadline.Token));
         var lastCut = await McpEventStreamAssertions.EqualPageAsync(scenario, firstSdk, firstMcp.Value,
-            McpEventStreamScenario.ExpectedEvents.Take(McpEventStreamTokens.ExpectedFirstPageCount).ToArray(), hasMore: true,
+            McpEventStreamScenario.InputEvents.Take(McpEventStreamTokens.ExpectedFirstPageCount).ToArray(), hasMore: true,
             appendReceiptPosition: appendReceipt.Token.Position,
             previousCutPosition: McpEventStreamTokens.InitialCutPosition);
         await Assert.That(firstMcp.Value.Events.Length).IsEqualTo(McpEventStreamTokens.ExpectedFirstPageCount);
@@ -70,7 +70,7 @@ internal sealed class McpEventStreamTests(ClusterFixture fixture)
         var secondMcp = await McpCallerAssertions.SuccessAsync<StreamPage>(await session.CallAsync(
             McpCallerTools.StreamsRead, secondRequest, deadline.Token));
         lastCut = await McpEventStreamAssertions.EqualPageAsync(scenario, secondSdk, secondMcp.Value,
-            McpEventStreamScenario.ExpectedEvents.Skip(McpEventStreamTokens.ExpectedFirstPageCount).ToArray(), hasMore: false,
+            McpEventStreamScenario.InputEvents.Skip(McpEventStreamTokens.ExpectedFirstPageCount).ToArray(), hasMore: false,
             appendReceiptPosition: appendReceipt.Token.Position, previousCutPosition: lastCut);
         await Assert.That(secondMcp.Value.Events.Length).IsEqualTo(McpEventStreamTokens.ExpectedSecondPageCount);
         await Assert.That(secondMcp.Value.Events[0].Revision).IsEqualTo(McpEventStreamTokens.LastEventRevision);
@@ -109,7 +109,7 @@ internal sealed class McpEventStreamTests(ClusterFixture fixture)
         var initialMcp = await McpCallerAssertions.SuccessAsync<StreamPage>(await session.CallAsync(
             McpCallerTools.StreamsRead, healthyRequest, deadline.Token));
         var lastCut = await McpEventStreamAssertions.EqualPageAsync(scenario, initialSdk, initialMcp.Value,
-            McpEventStreamScenario.ExpectedEvents.ToArray(), hasMore: false, appendReceiptPosition: appendReceipt.Token.Position,
+            McpEventStreamScenario.InputEvents.ToArray(), hasMore: false, appendReceiptPosition: appendReceipt.Token.Position,
             previousCutPosition: McpEventStreamTokens.InitialCutPosition);
         var foreignId = await VerifyForeignTenantDenialAsync(sdk, session, healthyRequest, identity, deadline.Token);
         var invalidLimitId = await VerifyInvalidLimitAsync(sdk, session, scenario, identity, deadline.Token);
@@ -119,7 +119,7 @@ internal sealed class McpEventStreamTests(ClusterFixture fixture)
         var healthyMcp = await McpCallerAssertions.SuccessAsync<StreamPage>(await session.CallAsync(
             McpCallerTools.StreamsRead, healthyRequest, deadline.Token));
         await McpEventStreamAssertions.EqualPageAsync(scenario, healthySdk, healthyMcp.Value,
-            McpEventStreamScenario.ExpectedEvents.ToArray(), hasMore: false, appendReceiptPosition: appendReceipt.Token.Position,
+            McpEventStreamScenario.InputEvents.ToArray(), hasMore: false, appendReceiptPosition: appendReceipt.Token.Position,
             previousCutPosition: lastCut);
         await Assert.That(new[] { initialMcp.RequestId, foreignId, invalidLimitId, staleId, healthyMcp.RequestId }.Distinct().Count())
             .IsEqualTo(McpEventStreamTokens.ExpectedProtectedCallCount);

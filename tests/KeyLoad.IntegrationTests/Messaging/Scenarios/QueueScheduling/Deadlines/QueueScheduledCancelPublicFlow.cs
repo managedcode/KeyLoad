@@ -114,7 +114,7 @@ internal static class QueueScheduledCancelPublicFlow
         await Assert.That(JsonDefaults.Serialize(replay).SequenceEqual(JsonDefaults.Serialize(result))).IsTrue();
         foreach (var delivery in result.Deliveries)
         {
-            await Assert.That(delivery.PayloadJson).IsEqualTo(QueueLifecyclePublicProtocol.CanonicalPayload);
+            await Assert.That(delivery.PayloadJson).IsEqualTo(QueueLifecyclePublicProtocol.Payload);
             await Assert.That(delivery.HeadersJson).IsEqualTo(QueueLifecyclePublicProtocol.Headers);
             await Assert.That(delivery.Attempt).IsEqualTo(1);
             await Assert.That(delivery.LeaseVersion).IsEqualTo(1L);

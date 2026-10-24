@@ -10,7 +10,7 @@ internal static class QueueWorkerClusterByteProtocol
     internal const string BodyPrefix = "{\"body\":\"";
     internal const string RawSuffix = "\",\"secret\":\"omit\"}";
     internal const string ProjectedSuffix = "\"}";
-    internal const string PrivatePath = "secret";
+    internal const string PrivatePath = "/secret";
     internal const string Classification = "worker-private";
     internal const string WriteGrant = "pii.write";
     internal static string Payload => BodyPrefix + new string(SourceCharacter, SourceCharacters) + RawSuffix;

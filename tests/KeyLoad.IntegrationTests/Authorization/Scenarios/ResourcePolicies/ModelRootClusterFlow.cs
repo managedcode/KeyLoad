@@ -7,16 +7,21 @@ namespace KeyLoad.IntegrationTests.Authorization;
 
 internal static class ModelRootClusterFlow
 {
-    internal static async Task RunAsync(ClusterFixture fixture, PartitionRef partition, CancellationToken token)
+    private const long NoEventSequence = 0;
+
+    // The event sequence is partition-wide, so it continues after the events already in the partition.
+    internal static async Task RunAsync(ClusterFixture fixture, PartitionRef partition, long priorEvents, CancellationToken token)
     {
         var states = new List<ModelRootClusterState>();
+        var events = priorEvents;
         await RootAsync(fixture, async root =>
         {
             foreach (var queue in new[] { false, true })
             {
                 foreach (var header in new[] { false, true })
                 {
-                    var state = await ModelRootClusterSeed.RunAsync(root, partition, queue, header, token);
+                    var sequence = queue ? NoEventSequence : ++events;
+                    var state = await ModelRootClusterSeed.RunAsync(root, partition, queue, header, sequence, token);
                     states.Add(state);
                     await WaveAsync(fixture, root, state, false, false, token);
                     await ModelRootClusterSeed.ConfigureAsync(root, state, 2L, true, false, token);

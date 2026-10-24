@@ -42,15 +42,15 @@ internal sealed class RelationalSqlClusterAtomicityTests(ClusterFixture fixture)
     private static async Task VerifyRollbackAsync(KeyLoadClient sdk, McpOfficialClient mcp, RelationalSqlClusterScenario scenario,
         string invalidId, CancellationToken cancellationToken)
     {
-        await Assert.That(await McpCallerAssertions.SdkSuccessAsync(await sdk.GetAsync(
+        await Assert.That(await PublicReadAssertions.DocumentAsync(await sdk.GetAsync(
             new(scenario.Partition, RelationalSqlClusterTokens.Documents, RelationalSqlClusterTokens.RolledBackId), cancellationToken))).IsNull();
         var invalid = new GetDocumentRequest(new(scenario.Partition, RelationalSqlClusterTokens.Table, invalidId));
-        await Assert.That(await SqlClusterProtocol.McpAsync<DocumentResult?>(mcp,
-            SqlClusterProtocol.Call(scenario.Partition, McpCallerTools.DocumentsGet, invalid), cancellationToken)).IsNull();
+        await Assert.That((await SqlClusterProtocol.McpAsync<DocumentReadResult>(mcp,
+            SqlClusterProtocol.Call(scenario.Partition, McpCallerTools.DocumentsGet, invalid), cancellationToken)).Document).IsNull();
         var queue = scenario.Inspect(RelationalSqlClusterTokens.RolledBackId);
-        await Assert.That(await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectAsync(queue, cancellationToken))).IsNull();
-        await Assert.That(await SqlClusterProtocol.McpAsync<MessageInspection?>(mcp,
-            SqlClusterProtocol.Call(scenario.Partition, McpCallerTools.MessagesInspect, queue), cancellationToken)).IsNull();
+        await Assert.That(await PublicReadAssertions.MessageAsync(await sdk.InspectAsync(queue, cancellationToken))).IsNull();
+        await Assert.That((await SqlClusterProtocol.McpAsync<MessageInspectionResult>(mcp,
+            SqlClusterProtocol.Call(scenario.Partition, McpCallerTools.MessagesInspect, queue), cancellationToken)).Message).IsNull();
         var request = scenario.ReadStream(RelationalSqlClusterTokens.RolledBackId);
         var stream = await McpCallerAssertions.SdkSuccessAsync(await sdk.ReadStreamAsync(request, cancellationToken));
         var official = await SqlClusterProtocol.McpAsync<StreamPage>(mcp,

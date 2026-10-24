@@ -38,8 +38,12 @@ internal static class ScopedCommandIdentityClusterOracle
         var after = await McpCallerAssertions.SdkSuccessAsync(await sdk.StatusAsync(token));
         await Assert.That(after.Incarnation).IsEqualTo(before.Incarnation);
         var cut = await ReadCutAsync(sdk, document.Reference.Partition, scenario.Collection, token);
-        await Assert.That(actual.Token.Position).IsGreaterThan(before.CutPosition);
-        await Assert.That(actual.Token.Position).IsLessThanOrEqualTo(cut.CutPosition);
+        // The receipt token is a canonical commit sequence, while a query cut is the local store position; they are
+        // separate spaces (several commands can share one store commit), so the token is checked by a session read.
+        await Assert.That(actual.Token.Position).IsGreaterThan(0L);
+        var session = await McpCallerAssertions.SdkSuccessAsync(await sdk.GetAsync(document.Reference, actual.Token,
+            cancellationToken: token));
+        await Assert.That(session.Document!.Json).IsEqualTo(document.Json);
         await EqualAsync(new QueryRow[] { new(document.Reference.Id, document.Revision, document.Json, false, []) },
             cut.Rows.ToArray());
         var expected = new CommitReceipt(issuedId,

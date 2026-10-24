@@ -18,9 +18,9 @@ internal static class EventReferenceSelectProtocol
     internal const string FirstJson = "{\"id\":\"c1\",\"name\":\"Ada\"}";
     internal const string HiddenJson = "{\"id\":\"c2\",\"name\":\"Lin\"}";
     internal const string RepairedJson = "{\"id\":\"m\",\"name\":\"Max\"}";
-    internal const string Prefix = "SELECT e.eventId AS event_id, d.name AS customer_name, e.payload.score AS score FROM ";
-    internal const string Suffix = " AS e INNER JOIN eventcustomers AS d ON e.payload.to = d.entity_ref "
-        + "WHERE e.payload.score >= @minimum ORDER BY e.revision ASC LIMIT 10";
+    internal const string Prefix = "SELECT TOP (10) e.eventId AS event_id, d.name AS customer_name, e.payload.score AS score FROM ";
+    internal const string Suffix = " AS e INNER JOIN eventcustomers AS d ON e.payload.[to] = d.entity_ref "
+        + "WHERE e.payload.score >= @minimum ORDER BY e.revision ASC";
 
     internal static string Sql(string streamSet = StreamSet, long generation = 1)
         => Prefix + "EVENTS('" + streamSet + "','" + Stream + "'," + generation.ToString(System.Globalization.CultureInfo.InvariantCulture) + ")" + Suffix;

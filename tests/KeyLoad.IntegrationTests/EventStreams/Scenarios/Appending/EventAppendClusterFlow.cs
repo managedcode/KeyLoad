@@ -16,7 +16,7 @@ internal static class EventAppendClusterFlow
         var originalCommand = scenario.AppendCommand(Guid.NewGuid());
         var original = await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(originalCommand, token));
         await EventAppendClusterAssertions.ReceiptAsync(original, originalCommand, EventAppendClusterProtocol.SeedRevision);
-        var expected = McpEventStreamScenario.ExpectedEvents.ToArray();
+        var expected = McpEventStreamScenario.InputEvents.ToArray();
         var initial = await EventAppendClusterAssertions.PageAsync(sdk, official, scenario, expected, token);
         var partialFailure = await RejectBoundariesAsync(sdk, official, scenario, originalCommand, fixture.AdminKey, token);
         await EventAppendClusterAuthorization.RunAsync(fixture, scenario, originalCommand, token);
@@ -40,7 +40,7 @@ internal static class EventAppendClusterFlow
         var receipt = await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(healthy, token));
         await EventAppendClusterAssertions.ReceiptAsync(receipt, healthy, EventAppendClusterProtocol.HealthyRevision);
         await EventAppendClusterAssertions.ReceiptIdentityAsync(winner.Receipt, receipt);
-        EventData[] healthyExpected = [.. expected, McpEventStreamScenario.ExpectedEvents[EventAppendClusterProtocol.FirstEventIndex] with
+        EventData[] healthyExpected = [.. expected, McpEventStreamScenario.InputEvents[EventAppendClusterProtocol.FirstEventIndex] with
         { EventId = EventAppendClusterProtocol.PartialEventId, PayloadJson = EventAppendClusterProtocol.HealthyExpected }];
         var complete = await EventAppendClusterAssertions.PageAsync(sdk, official, scenario, healthyExpected, token);
         await EventAppendClusterAssertions.PrefixAsync(afterWinner, complete);
@@ -112,7 +112,7 @@ internal static class EventAppendClusterFlow
             EventAppendClusterProtocol.RevisionDetail, credential, official: sdkWon);
         await EventAppendClusterAssertions.RejectedAsync(sdk, official, sdkWon ? second : first, ErrorCode.RevisionConflict,
             EventAppendClusterProtocol.RevisionDetail, credential, token);
-        return (command, receipt, McpEventStreamScenario.ExpectedEvents[EventAppendClusterProtocol.FirstEventIndex] with
+        return (command, receipt, McpEventStreamScenario.InputEvents[EventAppendClusterProtocol.FirstEventIndex] with
         {
             EventId = sdkWon ? EventAppendClusterProtocol.SdkEventId : EventAppendClusterProtocol.McpEventId,
             PayloadJson = sdkWon ? EventAppendClusterProtocol.SdkExpected : EventAppendClusterProtocol.McpExpected

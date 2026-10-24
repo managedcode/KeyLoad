@@ -15,10 +15,10 @@ internal static class QueueByteSublimitPublicAssertions
         MessageMetadata first, MessageMetadata second, CancellationToken token)
     {
         await QueueLeasedCancelPublicAssertions.MessageAsync(callers, state.Owner, First,
-            new(first, first.State == MessageState.Acked ? null : QueueLifecyclePublicProtocol.CanonicalPayload,
+            new(first, first.State == MessageState.Acked ? null : QueueLifecyclePublicProtocol.Payload,
                 first.State == MessageState.Acked ? null : QueueLifecyclePublicProtocol.Headers), token);
         await QueueLeasedCancelPublicAssertions.MessageAsync(callers, state.Owner, Second,
-            new(second, second.State == MessageState.Acked ? null : QueueLifecyclePublicProtocol.CanonicalPayload,
+            new(second, second.State == MessageState.Acked ? null : QueueLifecyclePublicProtocol.Payload,
                 second.State == MessageState.Acked ? null : QueueLifecyclePublicProtocol.Headers), token);
         var witness = await PublicReadAssertions.DocumentAsync(await callers.Sdk.GetAsync(
             new(state.Owner.Partition, QueueLifecyclePublicProtocol.Collection, Witness), token));

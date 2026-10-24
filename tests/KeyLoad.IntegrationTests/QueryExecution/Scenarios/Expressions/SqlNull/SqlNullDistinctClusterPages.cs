@@ -19,9 +19,7 @@ internal static class SqlNullDistinctClusterPages
             await global::TUnit.Assertions.Assert.That(capabilities.ReadProfiles.Contains(SqlNullDistinctClusterCases.UnicodeProfile)).IsTrue();
             await global::TUnit.Assertions.Assert.That(capabilities.ReadProfiles.Contains(SqlNullDistinctClusterCases.NumericSeparatorProfile)).IsTrue();
             var mcp = (await global::KeyLoad.IntegrationTests.ClientApi.McpCallerAssertions.SuccessAsync<QueryCapabilityManifest>(
-                await caller.Mcp.CallAsync(global::KeyLoad.IntegrationTests.ClientApi.McpCallerTools.QueryCapabilities, new
-                {
-                }, token))).Value;
+                await caller.Mcp.CallWithoutBodyAsync(global::KeyLoad.IntegrationTests.ClientApi.McpCallerTools.QueryCapabilities, token))).Value;
             await global::TUnit.Assertions.Assert.That(mcp.ReadProfiles.Contains(SqlNullDistinctClusterCases.Profile)).IsTrue();
             await global::TUnit.Assertions.Assert.That(mcp.ReadProfiles.Contains(SqlNullDistinctClusterCases.NullSynonymProfile)).IsTrue();
             await global::TUnit.Assertions.Assert.That(mcp.ReadProfiles.Contains(SqlNullDistinctClusterCases.PositiveProfile)).IsTrue();

@@ -23,7 +23,7 @@ internal static class ProjectionPublicOperations
     {
         var status = await ProjectionPublicAssertions.PhaseAsync(root.Sdk, state, checkpoint, released, purged, token);
         await ProjectionPublicAssertions.ExactAsync(status, (await McpCallerAssertions.SuccessAsync<OutboxStatus>(
-            await root.Mcp.CallAsync(McpCallerTools.OutboxStatus, state.Partition, token))).Value);
+            await root.Mcp.CallAsync(McpCallerTools.OutboxStatus, new GetOutboxStatusRequest(state.Partition), token))).Value);
         foreach (var item in new[] {
             new GetDocumentRequest(new(state.Partition, ProjectionPublicProtocol.Source, "input"), state.SourceReceipt.Token),
             new GetDocumentRequest(new(state.Partition, ProjectionPublicProtocol.Target, "effect"), state.Completed.Receipt.Token) })

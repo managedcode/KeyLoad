@@ -53,7 +53,7 @@ internal static class ProjectionPublicHealthy
             new ProjectionConsumerInfo(state.Consumer, state.Definition, 2L, true),
             new ProjectionConsumerInfo(consumer, definition, 4L, false)), status.Consumers);
         await ProjectionPublicAssertions.ExactAsync(status, (await McpCallerAssertions.SuccessAsync<OutboxStatus>(
-            await root.Mcp.CallAsync(McpCallerTools.OutboxStatus, state.Partition, token))).Value);
+            await root.Mcp.CallAsync(McpCallerTools.OutboxStatus, new GetOutboxStatusRequest(state.Partition), token))).Value);
         var document = new GetDocumentRequest(new(state.Partition, ProjectionPublicProtocol.Target, "healthy"), completed.Receipt.Token);
         var expectedDocument = new DocumentReadResult(new(state.StoredTarget("healthy"), 1L, ProjectionPublicProtocol.EffectJson, false, []));
         await ProjectionPublicAssertions.ExactAsync(expectedDocument,

@@ -7,7 +7,7 @@ namespace KeyLoad.IntegrationTests.QueryExecution;
 internal static class ComposedProjectionLineageClusterFlow
 {
     private const string OriginalSelection = "d.name AS customer_name";
-    private const string ExpandedSelection = "q.payload.to.id AS reference_id, d.name AS customer_name";
+    private const string ExpandedSelection = "q.payload.[to].id AS reference_id, d.name AS customer_name";
     private const string LeftPredicate = "q.payload.score >= @minimum";
     private const string RightPredicate = "d.name = 'Ada'";
 

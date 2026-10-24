@@ -9,7 +9,7 @@ namespace KeyLoad.IntegrationTests.Authorization;
 internal static class ModelRootClusterSeed
 {
     internal static async Task<ModelRootClusterState> RunAsync(RequestCqrsClusterCallers root, PartitionRef partition,
-        bool queue, bool headerRoot, CancellationToken token)
+        bool queue, bool headerRoot, long eventSequence, CancellationToken token)
     {
         var suffix = Guid.NewGuid().ToString(McpCallerProtocol.GuidFormat);
         var resource = "root-" + suffix;
@@ -44,14 +44,14 @@ internal static class ModelRootClusterSeed
         await Assert.That(raw.Cursor).IsNull();
         await Assert.That(raw.AccessPath).IsEqualTo(state.AccessPath);
         var row = raw.Rows.Single();
-        await OriginalRowAsync(row, queue);
+        await OriginalRowAsync(row, queue, eventSequence);
         return state with
         {
             Original = row
         };
     }
 
-    private static async Task OriginalRowAsync(QueryRow row, bool queue)
+    private static async Task OriginalRowAsync(QueryRow row, bool queue, long eventSequence)
     {
         await Assert.That(row.EntityId).IsEqualTo(ModelRootClusterState.Item);
         await Assert.That(row.Revision).IsEqualTo(1L);
@@ -78,7 +78,7 @@ internal static class ModelRootClusterSeed
             await Assert.That(json.RootElement.GetProperty(ModelRootClusterState.EventTypeField).GetString()).IsEqualTo(ModelRootClusterState.Type);
             await Assert.That(json.RootElement.GetProperty(ModelRootClusterState.SchemaVersionField).GetInt32()).IsEqualTo(1);
             await Assert.That(json.RootElement.GetProperty(ModelRootClusterState.RevisionField).GetInt64()).IsEqualTo(1L);
-            await Assert.That(json.RootElement.GetProperty(ModelRootClusterState.EventSequenceField).GetInt64()).IsEqualTo(1L);
+            await Assert.That(json.RootElement.GetProperty(ModelRootClusterState.EventSequenceField).GetInt64()).IsEqualTo(eventSequence);
             await Assert.That(json.RootElement.GetProperty(ModelRootClusterState.RecordedAtField).GetDateTimeOffset()).IsGreaterThan(DateTimeOffset.UnixEpoch);
         }
     }

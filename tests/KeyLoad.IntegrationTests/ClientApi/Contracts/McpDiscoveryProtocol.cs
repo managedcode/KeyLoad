@@ -30,6 +30,8 @@ internal static class McpDiscoveryProtocol
     internal const string ScheduleId = "scheduleId";
     internal const string SagaId = "sagaId";
     internal const string Id = "id";
+    internal const string Lifetime = "lifetime";
+    internal const string Incarnation = "incarnation";
     internal const string Partition = "partition";
     internal const string AtomicPartitionId = "atomicPartitionId";
     internal const string Graph = "graph";

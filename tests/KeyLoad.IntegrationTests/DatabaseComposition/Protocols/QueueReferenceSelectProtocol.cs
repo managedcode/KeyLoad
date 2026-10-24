@@ -16,9 +16,9 @@ internal static class QueueReferenceSelectProtocol
     internal const string FirstJson = "{\"id\":\"c1\",\"name\":\"Ada\"}";
     internal const string HiddenJson = "{\"id\":\"c2\",\"name\":\"Lin\"}";
     internal const string RepairedJson = "{\"id\":\"m\",\"name\":\"Max\"}";
-    internal const string Prefix = "SELECT q.id AS message_id, d.name AS customer_name, q.payload.score AS score FROM ";
-    internal const string Suffix = " AS q INNER JOIN queuecustomers AS d ON q.payload.to = d.entity_ref "
-        + "WHERE q.payload.score >= @minimum ORDER BY q.id ASC LIMIT 10";
+    internal const string Prefix = "SELECT TOP (10) q.id AS message_id, d.name AS customer_name, q.payload.score AS score FROM ";
+    internal const string Suffix = " AS q INNER JOIN queuecustomers AS d ON q.payload.[to] = d.entity_ref "
+        + "WHERE q.payload.score >= @minimum ORDER BY q.id ASC";
     internal static string Sql(string queue = Queue) => Prefix + "QUEUE_MESSAGES('" + queue + "')" + Suffix;
 
     internal static QueryRequest Request(PartitionRef partition, string queue = Queue)

@@ -7,7 +7,7 @@ namespace KeyLoad.IntegrationTests.Messaging;
 internal static class SubscriptionFilterClusterSqlReplay
 {
     private const string Parameter = "args";
-    private const string ConfigureCall = "CALL keyload_subscriptions_configure(@args)";
+    private const string ConfigureCall = "EXEC keyload_subscriptions_configure @args";
 
     internal static async Task RunAsync(KeyLoadClient manager, McpOfficialClient mcp,
         SubscriptionFilterClusterUpdated updated, CancellationToken token)

@@ -19,7 +19,7 @@ internal static class TargetInboxClusterProtocol
     internal const string CommandHeader = "X-KeyLoad-Command-Id";
     internal const int NoFailures = 0;
     internal const string Tool = "keyload_inbox_commit";
-    internal const string Sql = "CALL keyload_inbox_commit(@args)";
+    internal const string Sql = "EXEC keyload_inbox_commit @args";
     internal const string Arguments = "args";
     internal const string Payload = "{\"processed\":true}";
     internal const string Cold = "target-inbox-cold";

@@ -12,7 +12,7 @@ internal static class QueueScheduledCancelPublicAssertions
     internal static Task MessageAsync(RequestCqrsClusterCallers callers, QueueScheduledCancelPublicState state,
         string id, MessageMetadata metadata, bool body, CancellationToken token)
         => QueueLeasedCancelPublicAssertions.MessageAsync(callers, state.Owner, id,
-            new(metadata, body ? QueueLifecyclePublicProtocol.CanonicalPayload : null,
+            new(metadata, body ? QueueLifecyclePublicProtocol.Payload : null,
                 body ? QueueLifecyclePublicProtocol.Headers : null), token);
 
     internal static async Task CutAsync(RequestCqrsClusterCallers callers, QueueScheduledCancelPublicState state,

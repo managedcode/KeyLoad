@@ -33,9 +33,11 @@ internal static class QueryRuleOptimizationClusterPages
         await SqlClusterProtocol.EqualAsync(ast, json);
         var sql = QueryRuleOptimizationClusterRequests.Sql(state.Partition, collection, shape, reference);
         var path = QueryRuleOptimizationClusterData.Path(collection, shape, reference, state.IncludeNull, state.IncludeMissing);
+        // Reserved document metadata predicates (revision) need no field-use grant; only protected body fields are refused.
+        var refused = denied && shape is not (QueryRuleOptimizationClusterData.RevisionOneShape or QueryRuleOptimizationClusterData.RawShadowShape);
         for (var route = 0; route < Routes; route++)
         {
-            if (denied)
+            if (refused)
             {
                 await QueryRuleOptimizationClusterRefusals.CheckAsync(reader, json, sql, route, true, token);
                 continue;
@@ -54,7 +56,7 @@ internal static class QueryRuleOptimizationClusterPages
                 await QueryRuleOptimizationClusterRefusals.CheckAsync(reader, noAstConsent, noSqlConsent, route, false, token);
             }
         }
-        if (!denied)
+        if (!refused)
         {
             await ExplainAsync(reader, json, path, token);
             return;

@@ -41,7 +41,7 @@ internal static class RemoteTransferRepairClusterHealthy
             seed.Scenario.SourcePartition, [new CompleteQueueTransfer(seed.Scenario.SourceQueue, seed.TransferId, proof.ReceiptToken)]);
         var completed = await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(complete, token));
         await RemoteTransferColdAssertions.ReceiptLiteralAsync(completed, complete, seed.Scenario.SourceQueue,
-            seed.TransferId, RemoteTransferProtocol.CompleteReceiptKind, RemoteTransferRepairClusterProtocol.InitialGeneration);
+            seed.TransferId, RemoteTransferProtocol.CompleteReceiptKind, RemoteTransferColdProtocol.CompleteRevision);
         await QueueProducerClusterAssertions.ReplayAsync(sdk, mcp, complete, completed, token);
         if (original.Stage == QueueTransferRepairStage.Accept)
         {

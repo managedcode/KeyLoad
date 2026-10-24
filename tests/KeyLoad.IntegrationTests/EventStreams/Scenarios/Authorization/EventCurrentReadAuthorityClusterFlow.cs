@@ -83,7 +83,7 @@ internal static class EventCurrentReadAuthorityClusterFlow
         foreach (var page in new[] { result.Sdk, result.Mcp })
         {
             await EventCurrentReadAuthorityClusterExpected.PageAsync(state, page,
-                [McpEventStreamScenario.ExpectedEvents[0]], 1L, 3L,
+                [McpEventStreamScenario.InputEvents[0]], 1L, 3L,
                 null, true);
             await SqlClusterProtocol.EqualAsync(state.CurrentPage.Events.Take(1).ToArray(), page.Events.ToArray());
         }
@@ -124,7 +124,7 @@ internal static class EventCurrentReadAuthorityClusterFlow
             foreach (var page in new[] { result.Sdk, result.Mcp })
             {
                 await EventCurrentReadAuthorityClusterExpected.PageAsync(state, page,
-                    McpEventStreamScenario.ExpectedEvents.Skip(1).ToArray(), 2L, 3L,
+                    McpEventStreamScenario.InputEvents.Skip(1).ToArray(), 2L, 3L,
                     captured.SnapshotCutPosition, false);
                 await SqlClusterProtocol.EqualAsync(state.CurrentPage.Events.Skip(1).Take(2).ToArray(), page.Events.ToArray());
             }

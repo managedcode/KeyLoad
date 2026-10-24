@@ -22,8 +22,9 @@ internal static class ModelHeadClusterRequests
         id = "ready", state = "Ready", attempts = 0, stateVersion = 1L, notBefore = ModelHeadClusterState.NotBefore,
         expiresAt = (DateTimeOffset?)null, payload = new { visible = "queue" }, headers = new { trace = "source" }
     }, JsonDefaults.Options))] : [Event("created", "Created", "first", 1L), Event("paid", "Paid", "second", 2L)];
+    // Event reads select only public fields, so their rows carry no source redaction metadata (SafeProjectorOperation.md).
     private static QueryRow Event(string id, string kind, string visible, long revision)
-        => Row(id, revision, JsonSerializer.Serialize(new
+        => new(id, revision, JsonSerializer.Serialize(new
         {
             eventId = id,
             eventType = kind,
@@ -32,7 +33,7 @@ internal static class ModelHeadClusterRequests
             eventSequence = revision,
             visible,
             trace = "source"
-        }, JsonDefaults.Options));
+        }, JsonDefaults.Options), false, []);
     private static QueryRow Row(string id, long revision, string json)
         => new(id, revision, json, true, ["/payload/secret", "/headers/privateHeader"]);
     internal static string Path(bool queue) => queue ? "model-scan:queue-messages" : "model-scan:events";

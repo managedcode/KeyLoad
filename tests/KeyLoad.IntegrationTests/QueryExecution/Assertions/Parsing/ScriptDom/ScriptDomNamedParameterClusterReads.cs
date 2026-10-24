@@ -48,7 +48,7 @@ internal static class ScriptDomNamedParameterClusterReads
                 break;
             case 3:
                 await ScriptDomNamedParameterClusterRefusals.McpAsync(await reader.Mcp.CallAsync(
-                    SqlOperationProtocol.ToolName, envelope, token), state.Original.Identity.Secret, dispatched: true);
+                    SqlOperationProtocol.ToolName, envelope, token), state.Original.Identity.Secret, dispatched: false);
                 break;
         }
     }
