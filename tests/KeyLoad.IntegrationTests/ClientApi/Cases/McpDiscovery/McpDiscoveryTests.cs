@@ -1,11 +1,11 @@
 using System.Net;
-using KeyLoad.IntegrationTests.Features.DocumentStorage;
-using KeyLoad.IntegrationTests.Features.OrleansExecution;
-using KeyLoad.IntegrationTests.Features.QueryExecution;
+using KeyLoad.IntegrationTests.DocumentStorage;
+using KeyLoad.IntegrationTests.OrleansExecution;
+using KeyLoad.IntegrationTests.QueryExecution;
 using KeyLoad.Query;
 using ModelContextProtocol.Protocol;
 
-namespace KeyLoad.IntegrationTests.Features.ClientApi;
+namespace KeyLoad.IntegrationTests.ClientApi;
 
 /// <summary>AC-MCPGW-001/002/004: compact discovery resolves canonical capabilities through the genuine official client.</summary>
 /// <param name="fixture">The initialized actual execution Aspire Orleans application.</param>
@@ -115,19 +115,19 @@ internal sealed class McpDiscoveryTests(ClusterFixture fixture)
         var reader = new global::KeyLoad.Client.KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         await using var session = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node3,
             fixture.AdminKey, deadline.Token);
-        var before = await global::KeyLoad.IntegrationTests.Features.Authorization.CanceledCredentialAuthorityAssertions.CaptureAsync(
+        var before = await global::KeyLoad.IntegrationTests.Authorization.CanceledCredentialAuthorityAssertions.CaptureAsync(
             reader, scenario, deadline.Token);
         using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token);
         await cancellation.CancelAsync();
         await Assert.ThrowsAsync<OperationCanceledException>(() => session.Client.InvokeKeyLoadToolAsync(
             McpCallerTools.QueryCapabilities, cancellationToken: cancellation.Token).AsTask());
         await SqlClusterProtocol.EqualAsync(before,
-            await global::KeyLoad.IntegrationTests.Features.Authorization.CanceledCredentialAuthorityAssertions.CaptureAsync(
+            await global::KeyLoad.IntegrationTests.Authorization.CanceledCredentialAuthorityAssertions.CaptureAsync(
                 reader, scenario, deadline.Token));
         var next = await McpCallerAssertions.SuccessAsync<QueryCapabilityManifest>(await session.Client.InvokeKeyLoadToolAsync(
             McpCallerTools.QueryCapabilities, cancellationToken: deadline.Token));
         await Assert.That(next.Value.ReadOnly).IsTrue();
-        await global::KeyLoad.IntegrationTests.Features.Authorization.CanceledCredentialAuthorityAssertions.HealthyAsync(
+        await global::KeyLoad.IntegrationTests.Authorization.CanceledCredentialAuthorityAssertions.HealthyAsync(
             reader, session, scenario, before, deadline.Token);
     }
 }

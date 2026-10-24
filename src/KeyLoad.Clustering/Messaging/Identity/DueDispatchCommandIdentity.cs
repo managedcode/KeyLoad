@@ -1,5 +1,5 @@
 using System.Security.Cryptography;
-using KeyLoad.Core.Features.Messaging;
+using KeyLoad.Core.Messaging;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Clustering;

@@ -1,6 +1,6 @@
 using System.Text.Json;
-using KeyLoad.Core.Features.InternalSerialization;
-using KeyLoad.Features.InternalSerialization;
+using KeyLoad.Core.InternalSerialization;
+using KeyLoad.InternalSerialization;
 using KeyLoad.Storage;
 using ManagedCode.Communication.Commands;
 
@@ -42,7 +42,7 @@ public static class CommandExecutionExecution
         payload = payload.ToArray();
         var identity = kind switch
         {
-            OperationKind.FileMetadata => Identity<global::KeyLoad.Core.Features.BlobStorage.FileMetadataMutation>(payload),
+            OperationKind.FileMetadata => Identity<global::KeyLoad.Core.BlobStorage.FileMetadataMutation>(payload),
             OperationKind.Batch => engine.BatchIdentity(payload, work),
             OperationKind.Receive => Identity<ReceiveRequest>(payload),
             OperationKind.Delivery => Identity<DeliveryCommand>(payload),

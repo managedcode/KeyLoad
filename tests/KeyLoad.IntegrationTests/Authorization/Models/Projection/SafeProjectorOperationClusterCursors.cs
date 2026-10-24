@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.Authorization;
+namespace KeyLoad.IntegrationTests.Authorization;
 
 internal sealed record SafeProjectorOperationClusterCursors(string SdkQuery, string McpQuery, string Feed)
 {

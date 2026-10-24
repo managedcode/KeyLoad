@@ -1,7 +1,7 @@
 using System.Text;
 using Aspire.Hosting.ApplicationModel;
 
-namespace KeyLoad.IntegrationTests.Features.StorageReplication;
+namespace KeyLoad.IntegrationTests.StorageReplication;
 
 /// <summary>REQ/AC-TEST-007: restart failure receipts retain bounded safe snapshots.</summary>
 internal sealed class ProcessRestartFailureCaptureTests

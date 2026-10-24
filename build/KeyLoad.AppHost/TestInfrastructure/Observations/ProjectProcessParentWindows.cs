@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 using Microsoft.Extensions.Options;
 using Microsoft.Win32.SafeHandles;
 
-namespace KeyLoad.AppHost.Features.TestInfrastructure;
+namespace KeyLoad.AppHost.TestInfrastructure;
 
 /// <summary>Reads selected Windows process and parent identifiers from one execution Toolhelp snapshot.</summary>
 internal static partial class ProjectProcessParentWindows

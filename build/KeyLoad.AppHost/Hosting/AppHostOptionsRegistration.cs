@@ -1,6 +1,6 @@
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
-using KeyLoad.AppHost.Features.TestInfrastructure;
+using KeyLoad.AppHost.TestInfrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;

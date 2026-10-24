@@ -1,7 +1,7 @@
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 
-namespace KeyLoad.UnitTests.Features.InternalSerialization;
+namespace KeyLoad.UnitTests.InternalSerialization;
 
 internal sealed class CheckpointBatchTests
 {

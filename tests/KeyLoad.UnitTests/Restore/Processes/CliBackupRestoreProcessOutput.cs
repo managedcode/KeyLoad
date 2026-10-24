@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace KeyLoad.UnitTests.Features.BackupRestore;
+namespace KeyLoad.UnitTests.BackupRestore;
 
 internal sealed class CliBackupRestoreProcessOutput
 {

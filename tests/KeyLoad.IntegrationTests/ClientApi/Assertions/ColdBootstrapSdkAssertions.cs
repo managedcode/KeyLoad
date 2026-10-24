@@ -1,7 +1,7 @@
 using System.Text;
 using KeyLoad.Client;
 
-namespace KeyLoad.IntegrationTests.Features.ClientApi;
+namespace KeyLoad.IntegrationTests.ClientApi;
 
 internal static class ColdBootstrapSdkAssertions
 {

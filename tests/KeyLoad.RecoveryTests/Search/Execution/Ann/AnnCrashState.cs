@@ -1,9 +1,9 @@
 using System.Text.Json;
 using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Core.Features.Search;
+using KeyLoad.Core.Search;
 
-namespace KeyLoad.RecoveryTests.Features.Search;
+namespace KeyLoad.RecoveryTests.Search;
 
 internal static class AnnCrashState
 {

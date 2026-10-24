@@ -2,7 +2,7 @@ using KeyLoad.Storage.ZoneTree;
 using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
 
-namespace KeyLoad.UnitTests.Features.ResourceExecution;
+namespace KeyLoad.UnitTests.ResourceExecution;
 
 internal static class TenantAdmissionCold
 {

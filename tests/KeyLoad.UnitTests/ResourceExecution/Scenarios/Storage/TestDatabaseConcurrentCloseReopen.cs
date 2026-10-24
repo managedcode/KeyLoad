@@ -1,9 +1,9 @@
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
 using KeyLoad.Storage.ZoneTree.IO;
-using KeyLoad.UnitTests.Features.StorageRecovery;
+using KeyLoad.UnitTests.StorageRecovery;
 
-namespace KeyLoad.UnitTests.Features.ResourceExecution;
+namespace KeyLoad.UnitTests.ResourceExecution;
 
 internal static class TestDatabaseConcurrentCloseReopen
 {

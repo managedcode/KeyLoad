@@ -1,7 +1,7 @@
-using KeyLoad.Core.Features.InternalSerialization;
+using KeyLoad.Core.InternalSerialization;
 using ManagedCode.Communication.Commands;
 
-namespace KeyLoad.Core.Features.ResourceExecution;
+namespace KeyLoad.Core.ResourceExecution;
 
 internal static class ResourceEffectAdmissionValidation
 {

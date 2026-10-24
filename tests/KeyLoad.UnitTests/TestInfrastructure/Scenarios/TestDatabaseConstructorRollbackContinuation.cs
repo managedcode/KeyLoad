@@ -1,9 +1,9 @@
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
-using KeyLoad.UnitTests.Features.ResourceExecution;
-using KeyLoad.UnitTests.Features.StorageRecovery;
+using KeyLoad.UnitTests.ResourceExecution;
+using KeyLoad.UnitTests.StorageRecovery;
 
-namespace KeyLoad.UnitTests.Features.TestInfrastructure;
+namespace KeyLoad.UnitTests.TestInfrastructure;
 
 internal static class TestDatabaseConstructorRollbackContinuation
 {

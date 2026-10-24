@@ -1,9 +1,9 @@
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using KeyLoad.Server;
-using P = KeyLoad.UnitTests.Features.ClientApi.SdkProblemBoundaryProtocol;
+using P = KeyLoad.UnitTests.ClientApi.SdkProblemBoundaryProtocol;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 internal static class SdkProblemBoundaryWire
 {

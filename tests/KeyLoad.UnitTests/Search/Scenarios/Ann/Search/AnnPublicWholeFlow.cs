@@ -5,7 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 internal static class AnnPublicWholeFlow
 {

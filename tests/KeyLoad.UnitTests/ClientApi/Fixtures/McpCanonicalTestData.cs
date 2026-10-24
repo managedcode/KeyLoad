@@ -1,9 +1,9 @@
 using System.Collections.Immutable;
 using System.Text.Json;
 using KeyLoad.Query;
-using KeyLoad.UnitTests.Features.GraphTraversal;
+using KeyLoad.UnitTests.GraphTraversal;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>Actual public contract instances for public JSON, execution payload and stable-identity assertions.</summary>
 internal static class McpCanonicalTestData
@@ -52,9 +52,9 @@ internal static class McpCanonicalTestData
     internal static ImmutableArray<McpDecodeCase> Commands() =>
     [
         Case(McpCatalogExpectations.DocumentsCommit, new CommandRequest(StableId, Partition, Effects()), CommandKey),
-        Case(KeyLoad.UnitTests.Features.Search.SearchMcpCatalogEntries.All.Single(entry =>
+        Case(KeyLoad.UnitTests.Search.SearchMcpCatalogEntries.All.Single(entry =>
             entry.CommandKind == OperationKind.MaintainAnnIndex).Name, McpSearchRequestTestData.Ann(), CommandKey),
-        Case(KeyLoad.UnitTests.Features.Search.SearchMcpCatalogEntries.All.Single(entry =>
+        Case(KeyLoad.UnitTests.Search.SearchMcpCatalogEntries.All.Single(entry =>
             entry.CommandKind == OperationKind.MaintainTextIndex).Name, McpSearchRequestTestData.Text(), CommandKey),
         Case(QueueDispatchMcpCatalogAssertions.Tool, new QueueDispatchControlRequest(Tenant, Database,
             Resource, Generation, true), null),
@@ -127,7 +127,7 @@ internal static class McpCanonicalTestData
         Read(McpCatalogExpectations.ProjectionsRead, new ReadProjectionBatchRequest(Consumer)),
         Read(WaitForIndexProtocol.Tool, new WaitForIndexRequest(Partition, Resource, FieldPath, new CommitToken(StableId, Partition.AtomicPartitionId, WaitMinimumPosition))),
         Read(WaitForAnnIndexProtocol.Tool, McpSearchRequestTestData.Wait()),
-        Read(KeyLoad.UnitTests.Features.Search.SearchMcpCatalogEntries.All.Single(entry =>
+        Read(KeyLoad.UnitTests.Search.SearchMcpCatalogEntries.All.Single(entry =>
             entry.ReadKind == KeyLoad.Clustering.GrainReadKind.ApproximateSearch).Name, McpSearchRequestTestData.Search()),
         Read(McpCatalogExpectations.SearchExecute, new SearchRequest(Partition, Resource)),
         Read(McpCatalogExpectations.SearchGraph, new GraphSearchRequest(1, new(Partition, Resource),

@@ -1,7 +1,7 @@
 using System.Runtime.ExceptionServices;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace KeyLoad.AppHost.Features.TestInfrastructure;
+namespace KeyLoad.AppHost.TestInfrastructure;
 
 internal static class TestSuiteOutput
 {

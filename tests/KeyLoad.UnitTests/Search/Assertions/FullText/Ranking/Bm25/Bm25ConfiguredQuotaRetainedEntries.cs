@@ -1,6 +1,6 @@
-using KeyLoad.UnitTests.Features.ResourceExecution;
+using KeyLoad.UnitTests.ResourceExecution;
 using ManagedCode.Communication.Commands;
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 internal sealed record Bm25ConfiguredQuotaRetainedEntries(byte[][] Entries)
 {

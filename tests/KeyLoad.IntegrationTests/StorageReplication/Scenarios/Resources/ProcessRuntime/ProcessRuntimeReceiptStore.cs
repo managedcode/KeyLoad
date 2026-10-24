@@ -1,7 +1,7 @@
 using System.Globalization;
 using System.Text.Json;
 
-namespace KeyLoad.IntegrationTests.Features.StorageReplication;
+namespace KeyLoad.IntegrationTests.StorageReplication;
 
 /// <summary>Persists the original execution process fault and exact compilation evidence.</summary>
 internal static class ProcessRuntimeReceiptStore

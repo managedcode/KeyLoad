@@ -1,5 +1,5 @@
 using KeyLoad.Server;
 
-namespace KeyLoad.UnitTests.Features.StorageRecovery;
+namespace KeyLoad.UnitTests.StorageRecovery;
 
 internal sealed record UserAnalyticsHostBoundRuntime(UserAnalyticsRuntime Runtime, UserAnalyticsHostBoundWork Work);

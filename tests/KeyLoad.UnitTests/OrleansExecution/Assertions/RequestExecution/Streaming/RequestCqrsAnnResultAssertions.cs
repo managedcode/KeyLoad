@@ -1,11 +1,11 @@
 using System.Security.Cryptography;
 using KeyLoad.Query;
-using KeyLoad.Server.Features.Search;
-using KeyLoad.UnitTests.Features.Messaging;
-using KeyLoad.UnitTests.Features.Search;
+using KeyLoad.Server.Search;
+using KeyLoad.UnitTests.Messaging;
+using KeyLoad.UnitTests.Search;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal static class RequestCqrsAnnResultAssertions
 {

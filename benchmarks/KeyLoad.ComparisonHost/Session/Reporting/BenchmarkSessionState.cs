@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
 using KeyLoad.Comparisons;
 
-namespace KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonHost.BenchmarkComparisons;
 
 internal sealed record BenchmarkSessionState(string SchemaVersion, string SessionId, string Target, int NodeCount,
     string? SourceRevision, long? RunId, int? Attempt, long? JobId, string? Repository, string? Ref, string? Workflow,

@@ -1,9 +1,9 @@
 using Aspire.Hosting.ApplicationModel;
 using KeyLoad.Client;
-using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.StorageReplication;
+using KeyLoad.IntegrationTests.ClientApi;
+using KeyLoad.IntegrationTests.StorageReplication;
 
-namespace KeyLoad.IntegrationTests.Features.Search;
+namespace KeyLoad.IntegrationTests.Search;
 
 /// <summary>AC-GSEARCH-006: committed graph writes remain readable across a scoped Orleans silo loss.</summary>
 [ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = McpCallerProtocol.FixtureKey)]

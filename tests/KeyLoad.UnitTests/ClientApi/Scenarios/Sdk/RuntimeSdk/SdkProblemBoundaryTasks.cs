@@ -1,7 +1,7 @@
 using System.Collections.Concurrent;
 using KeyLoad.Server;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 internal sealed class SdkProblemBoundaryTasks
 {

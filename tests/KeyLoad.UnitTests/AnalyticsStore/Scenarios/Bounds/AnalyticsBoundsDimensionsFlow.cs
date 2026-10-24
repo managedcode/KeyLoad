@@ -1,9 +1,9 @@
-using D = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreTestData;
-using N = KeyLoad.UnitTests.Features.AnalyticsStore.RuntimeAnalyticsBounds;
-using O = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreTestOperations;
-using P = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsBoundsData;
+using D = KeyLoad.UnitTests.AnalyticsStore.AnalyticsStoreTestData;
+using N = KeyLoad.UnitTests.AnalyticsStore.RuntimeAnalyticsBounds;
+using O = KeyLoad.UnitTests.AnalyticsStore.AnalyticsStoreTestOperations;
+using P = KeyLoad.UnitTests.AnalyticsStore.AnalyticsBoundsData;
 
-namespace KeyLoad.UnitTests.Features.AnalyticsStore;
+namespace KeyLoad.UnitTests.AnalyticsStore;
 
 internal static class AnalyticsBoundsDimensionsFlow
 {

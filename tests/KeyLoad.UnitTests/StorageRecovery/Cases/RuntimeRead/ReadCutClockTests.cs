@@ -1,6 +1,6 @@
-using KeyLoad.UnitTests.Features.ResourceExecution;
+using KeyLoad.UnitTests.ResourceExecution;
 
-namespace KeyLoad.UnitTests.Features.StorageRecovery;
+namespace KeyLoad.UnitTests.StorageRecovery;
 
 /// <summary>AC-TIME-002: real execution snapshot expiry follows its explicit monotonic provider.</summary>
 internal sealed class ReadCutClockTests

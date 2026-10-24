@@ -2,7 +2,7 @@ using System.Text.Json;
 using ManagedCode.Communication;
 using ModelContextProtocol.Protocol;
 
-namespace KeyLoad.IntegrationTests.Features.ClientApi;
+namespace KeyLoad.IntegrationTests.ClientApi;
 
 internal static class PublicReadAssertions
 {

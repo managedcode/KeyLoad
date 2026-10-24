@@ -1,7 +1,7 @@
 using System.Text.Json;
 using KeyLoad.Core;
 using ManagedCode.Communication.Commands;
-namespace KeyLoad.RecoveryTests.Features.EventStreams;
+namespace KeyLoad.RecoveryTests.EventStreams;
 
 internal static class TopicPurgeContinuation
 {

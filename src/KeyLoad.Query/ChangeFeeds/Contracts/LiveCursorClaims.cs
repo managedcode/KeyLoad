@@ -1,4 +1,4 @@
-namespace KeyLoad.Query.Features.ChangeFeeds;
+namespace KeyLoad.Query.ChangeFeeds;
 
 [global::Orleans.GenerateSerializer, global::Orleans.Alias(LiveCursorContract.Alias)]
 internal sealed record LiveCursorClaims(

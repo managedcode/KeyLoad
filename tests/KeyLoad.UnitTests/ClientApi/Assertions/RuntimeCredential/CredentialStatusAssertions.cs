@@ -1,10 +1,10 @@
 using System.Security.Cryptography;
 using KeyLoad.Storage;
-using KeyLoad.UnitTests.Features.OrleansExecution;
+using KeyLoad.UnitTests.OrleansExecution;
 using ManagedCode.Communication;
-using P = KeyLoad.UnitTests.Features.ClientApi.CredentialStatusProtocol;
+using P = KeyLoad.UnitTests.ClientApi.CredentialStatusProtocol;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 internal static class CredentialStatusAssertions
 {

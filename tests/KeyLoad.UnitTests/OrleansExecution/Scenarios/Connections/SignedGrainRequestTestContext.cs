@@ -1,7 +1,7 @@
 using KeyLoad.Clustering;
 using ManagedCode.Orleans.Identity.Core.Constants;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 /// <summary>Supplies the closed context for direct real-database leaf tests, without replacing persisted authorization.</summary>
 internal static class SignedGrainRequestTestContext

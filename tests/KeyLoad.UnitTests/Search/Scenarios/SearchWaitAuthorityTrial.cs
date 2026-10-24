@@ -1,8 +1,8 @@
 using KeyLoad.Query;
 using KeyLoad.Server;
-using KeyLoad.Server.Features.Search;
+using KeyLoad.Server.Search;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 /// <summary>Owns actual replica-applied seed, precisely damaged execution authority and failure-preserving original cleanup.</summary>
 internal static class SearchWaitAuthorityTrial

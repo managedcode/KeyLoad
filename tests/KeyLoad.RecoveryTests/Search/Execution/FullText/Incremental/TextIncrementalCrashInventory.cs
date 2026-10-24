@@ -1,9 +1,9 @@
 using KeyLoad.Core;
 using KeyLoad.Server;
-using KeyLoad.Server.Features.Search;
+using KeyLoad.Server.Search;
 using ZoneTree.FullTextSearch.Index;
 
-namespace KeyLoad.RecoveryTests.Features.Search;
+namespace KeyLoad.RecoveryTests.Search;
 
 internal static class TextIncrementalCrashInventory
 {

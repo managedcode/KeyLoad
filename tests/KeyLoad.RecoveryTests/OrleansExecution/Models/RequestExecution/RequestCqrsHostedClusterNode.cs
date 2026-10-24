@@ -1,4 +1,4 @@
-namespace KeyLoad.RecoveryTests.Features.OrleansExecution;
+namespace KeyLoad.RecoveryTests.OrleansExecution;
 
 /// <summary>Authenticated in-memory membership settings for one production host in an owned two-silo test cluster.</summary>
 internal sealed class RequestCqrsHostedClusterNode(string clusterId, string siloName, Guid incarnation,

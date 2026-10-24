@@ -1,12 +1,12 @@
 using System.Globalization;
 using System.Text.Json;
 using Aspire.Hosting.ApplicationModel;
-using KeyLoad.AppHost.Features.StorageRecovery;
-using KeyLoad.AppHost.Features.TestInfrastructure;
+using KeyLoad.AppHost.StorageRecovery;
+using KeyLoad.AppHost.TestInfrastructure;
 using Microsoft.Extensions.DependencyInjection;
-using P = KeyLoad.IntegrationTests.Features.DatabaseComposition.FunctionalGateFileOwnershipProtocol;
+using P = KeyLoad.IntegrationTests.DatabaseComposition.FunctionalGateFileOwnershipProtocol;
 
-namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
+namespace KeyLoad.IntegrationTests.DatabaseComposition;
 
 /// <summary>Compares execution configured paths and exact process launches for the live-file refusal operation.</summary>
 internal static class FunctionalGateFileOwnershipAssertions

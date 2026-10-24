@@ -1,10 +1,10 @@
 using KeyLoad.Client;
-using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.OrleansExecution;
+using KeyLoad.IntegrationTests.ClientApi;
+using KeyLoad.IntegrationTests.OrleansExecution;
 using KeyLoad.Server;
-using static KeyLoad.IntegrationTests.Features.StorageReplication.StrongReadSessionProtocol;
+using static KeyLoad.IntegrationTests.StorageReplication.StrongReadSessionProtocol;
 
-namespace KeyLoad.IntegrationTests.Features.StorageReplication;
+namespace KeyLoad.IntegrationTests.StorageReplication;
 
 internal static class StrongReadSessionFailover
 {

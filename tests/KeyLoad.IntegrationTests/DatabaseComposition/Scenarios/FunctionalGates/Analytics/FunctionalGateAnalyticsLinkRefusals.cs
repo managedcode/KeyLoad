@@ -1,8 +1,8 @@
 using System.Text.Json;
-using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.QueryExecution;
+using KeyLoad.IntegrationTests.ClientApi;
+using KeyLoad.IntegrationTests.QueryExecution;
 
-namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
+namespace KeyLoad.IntegrationTests.DatabaseComposition;
 
 internal static class FunctionalGateAnalyticsLinkRefusals
 {

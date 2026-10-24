@@ -1,11 +1,11 @@
 using System.Text;
 using System.Text.Json;
-using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.Messaging;
-using KeyLoad.IntegrationTests.Features.OrleansExecution;
-using KeyLoad.IntegrationTests.Features.QueryExecution;
+using KeyLoad.IntegrationTests.ClientApi;
+using KeyLoad.IntegrationTests.Messaging;
+using KeyLoad.IntegrationTests.OrleansExecution;
+using KeyLoad.IntegrationTests.QueryExecution;
 using ModelContextProtocol.Protocol;
-namespace KeyLoad.IntegrationTests.Features.Authorization;
+namespace KeyLoad.IntegrationTests.Authorization;
 
 internal static class EventMessageSensitiveSafeR52Refusals
 {

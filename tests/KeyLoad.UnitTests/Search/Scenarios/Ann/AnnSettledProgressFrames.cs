@@ -2,7 +2,7 @@ using KeyLoad.Clustering;
 using ManagedCode.Communication;
 using ManagedCode.Communication.CQRS;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 /// <summary>Uses the production progress writer and real bounded CQRS producer, without a mirror shape validator.</summary>
 internal static class AnnSettledProgressFrames

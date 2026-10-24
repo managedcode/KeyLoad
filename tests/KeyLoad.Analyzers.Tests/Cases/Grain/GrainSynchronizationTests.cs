@@ -1,4 +1,4 @@
-namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
+namespace KeyLoad.Analyzers.Tests.CodeQuality;
 
 /// <summary>AC-CQ-025: verifies actual Orleans inheritance without confusing shared helper services.</summary>
 internal sealed class GrainSynchronizationTests

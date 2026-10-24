@@ -2,13 +2,13 @@ using System.Globalization;
 using KeyLoad.Client;
 using KeyLoad.Query;
 using KeyLoad.Server;
-using KeyLoad.UnitTests.Features.ClientApi;
+using KeyLoad.UnitTests.ClientApi;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 /// <summary>AC-CQ-034/035 and AC-SQLC-004/005: execution SQL work and conservative cancellation policy.</summary>
 internal sealed class SqlTriviaExecutionPolicyTests
@@ -159,7 +159,7 @@ internal sealed class SqlTriviaExecutionPolicyTests
     {
         var limits = UnitExecutionOptions.DatabaseLimits(new DatabaseLimits { MaxQueryDepth = depth, MaxQueryTokens = TokenLimit });
         var budget = new global::KeyLoad.Core.ReadExecutionBudget(limits, cancellationToken: token);
-        return global::KeyLoad.Features.QueryExecution.ScriptDomSyntax.Parse(sql, limits, budget.Check, token);
+        return global::KeyLoad.QueryExecution.ScriptDomSyntax.Parse(sql, limits, budget.Check, token);
     }
 
     private static IConfigurationRoot Configuration(int? interval, bool includeQuery = true)

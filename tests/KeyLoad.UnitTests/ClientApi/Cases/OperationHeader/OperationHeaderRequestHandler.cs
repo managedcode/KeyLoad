@@ -1,7 +1,7 @@
 using KeyLoad.Server;
 using Microsoft.AspNetCore.Http;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>Publishes actual response IDs through one instance-owned concurrency handler for each Kestrel host.</summary>
 internal sealed class OperationHeaderRequestHandler(bool requireConcurrentRequests)

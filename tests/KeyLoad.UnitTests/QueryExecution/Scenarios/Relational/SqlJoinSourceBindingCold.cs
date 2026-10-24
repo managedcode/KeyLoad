@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal static class SqlJoinSourceBindingCold
 {
@@ -8,7 +8,7 @@ internal static class SqlJoinSourceBindingCold
         global::KeyLoad.CommandRequest command, global::KeyLoad.CommitReceipt receipt)
     {
         var identity = database.Store.Identity;
-        var before = global::KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(database.Store);
+        var before = global::KeyLoad.UnitTests.Messaging.QueueWholeFlowStorage.Bytes(database.Store);
         var position = database.Store.Position;
         database.Store.Dispose();
         for (var cut = 0; cut < ColdOwners; cut++)

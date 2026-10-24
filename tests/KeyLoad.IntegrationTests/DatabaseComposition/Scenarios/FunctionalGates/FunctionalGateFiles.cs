@@ -2,13 +2,13 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Security.Cryptography;
 using System.Text;
-using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.OrleansExecution;
-using KeyLoad.IntegrationTests.Features.QueryExecution;
+using KeyLoad.IntegrationTests.ClientApi;
+using KeyLoad.IntegrationTests.OrleansExecution;
+using KeyLoad.IntegrationTests.QueryExecution;
 using ManagedCode.Communication;
 using StorageMetadata = ManagedCode.Storage.Core.Models.BlobMetadata;
 
-namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
+namespace KeyLoad.IntegrationTests.DatabaseComposition;
 
 /// <summary>Requires real execution file transfers; removing the old protocol cannot make this gate pass.</summary>
 internal static class FunctionalGateFiles

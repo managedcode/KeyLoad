@@ -1,6 +1,6 @@
 using ManagedCode.Communication.Commands;
 
-namespace KeyLoad.UnitTests.Features.Messaging;
+namespace KeyLoad.UnitTests.Messaging;
 
 internal static class CorruptSubscriptionProcessingAssertions
 {

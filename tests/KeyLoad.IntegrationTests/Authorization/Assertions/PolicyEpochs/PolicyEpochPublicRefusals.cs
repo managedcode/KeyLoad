@@ -1,11 +1,11 @@
 using System.Text;
 using System.Text.Json;
 using KeyLoad.Client;
-using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.OrleansExecution;
-using KeyLoad.IntegrationTests.Features.QueryExecution;
+using KeyLoad.IntegrationTests.ClientApi;
+using KeyLoad.IntegrationTests.OrleansExecution;
+using KeyLoad.IntegrationTests.QueryExecution;
 
-namespace KeyLoad.IntegrationTests.Features.Authorization;
+namespace KeyLoad.IntegrationTests.Authorization;
 
 internal static class PolicyEpochPublicRefusals
 {
@@ -72,7 +72,7 @@ internal static class PolicyEpochPublicRefusals
         await Assert.That(error!.StatusCode).IsEqualTo(global::System.Net.HttpStatusCode.Unauthorized);
         await Assert.That(error.Message.Contains(credential, StringComparison.Ordinal)).IsFalse();
         await Assert.That(error.Message.Contains(ResourcePolicyUpdateClusterProtocol.SecretValue, StringComparison.Ordinal)).IsFalse();
-        await KeyLoad.IntegrationTests.Features.ClientApi.McpUnauthorizedProbe.VerifyAsync(
+        await KeyLoad.IntegrationTests.ClientApi.McpUnauthorizedProbe.VerifyAsync(
             fixture, McpCallerProtocol.Node2, credential, token);
     }
 

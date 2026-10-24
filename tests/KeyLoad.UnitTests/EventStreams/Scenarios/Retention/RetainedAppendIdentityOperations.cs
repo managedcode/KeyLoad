@@ -1,11 +1,11 @@
 using KeyLoad.Server;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
-using KeyLoad.UnitTests.Features.Messaging;
-using KeyLoad.UnitTests.Features.ResourceExecution;
-using KeyLoad.UnitTests.Features.StorageRecovery.Assertions;
+using KeyLoad.UnitTests.Messaging;
+using KeyLoad.UnitTests.ResourceExecution;
+using KeyLoad.UnitTests.StorageRecovery.Assertions;
 
-namespace KeyLoad.UnitTests.Features.EventStreams;
+namespace KeyLoad.UnitTests.EventStreams;
 
 internal static class RetainedAppendIdentityOperations
 {

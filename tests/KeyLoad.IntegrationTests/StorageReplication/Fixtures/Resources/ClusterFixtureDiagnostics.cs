@@ -4,11 +4,11 @@ using System.Runtime.ExceptionServices;
 using System.Text;
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
-using KeyLoad.IntegrationTests.Features.StorageReplication.Processes;
+using KeyLoad.IntegrationTests.StorageReplication.Processes;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace KeyLoad.IntegrationTests.Features.StorageReplication;
+namespace KeyLoad.IntegrationTests.StorageReplication;
 
 /// <summary>Owns Orleans resource log capture and bounded signed-discovery failure artifacts.</summary>
 internal sealed class ClusterFixtureDiagnostics : IAsyncDisposable

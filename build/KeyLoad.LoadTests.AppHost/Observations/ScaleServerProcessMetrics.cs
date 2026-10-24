@@ -1,6 +1,6 @@
 using System.Globalization;
 
-namespace KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
+namespace KeyLoad.LoadTests.AppHost.BenchmarkComparisons;
 
 /// <summary>Reads bounded Linux process metrics while checking process and cgroup identity.</summary>
 internal static class ScaleServerProcessMetrics

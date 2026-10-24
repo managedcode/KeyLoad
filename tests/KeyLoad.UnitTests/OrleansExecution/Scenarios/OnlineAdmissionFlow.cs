@@ -1,6 +1,6 @@
-using KeyLoad.UnitTests.Features.Search;
+using KeyLoad.UnitTests.Search;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal static class OnlineAdmissionFlow
 {

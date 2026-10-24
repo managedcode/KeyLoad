@@ -1,9 +1,9 @@
 using KeyLoad.Client;
-using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.RecoveryTests.Features.EventStreams;
-using static KeyLoad.RecoveryTests.Features.EventStreams.SharedDomainProtocol;
+using KeyLoad.IntegrationTests.ClientApi;
+using KeyLoad.RecoveryTests.EventStreams;
+using static KeyLoad.RecoveryTests.EventStreams.SharedDomainProtocol;
 
-namespace KeyLoad.IntegrationTests.Features.EventStreams;
+namespace KeyLoad.IntegrationTests.EventStreams;
 
 internal static class SharedDomainPublicDocuments
 {

@@ -1,10 +1,10 @@
 using System.Text.Json;
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree.IO;
-using KeyLoad.UnitTests.Features.OrleansExecution;
-using P = KeyLoad.UnitTests.Features.BackupRestore.ArchiveEntryProtocol;
+using KeyLoad.UnitTests.OrleansExecution;
+using P = KeyLoad.UnitTests.BackupRestore.ArchiveEntryProtocol;
 
-namespace KeyLoad.UnitTests.Features.BackupRestore;
+namespace KeyLoad.UnitTests.BackupRestore;
 
 internal static class ArchiveEntryRefusal
 {

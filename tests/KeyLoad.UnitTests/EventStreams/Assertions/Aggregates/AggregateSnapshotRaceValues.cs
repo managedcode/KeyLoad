@@ -1,11 +1,11 @@
 using KeyLoad.Server;
 using KeyLoad.Storage;
-using KeyLoad.UnitTests.Features.ResourceExecution;
-using KeyLoad.UnitTests.Features.StorageRecovery.Assertions;
+using KeyLoad.UnitTests.ResourceExecution;
+using KeyLoad.UnitTests.StorageRecovery.Assertions;
 using ManagedCode.Communication;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.EventStreams;
+namespace KeyLoad.UnitTests.EventStreams;
 
 internal static class AggregateSnapshotRaceValues
 {
@@ -26,7 +26,7 @@ internal static class AggregateSnapshotRaceValues
     {
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
-            await Assert.That(KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(fixture.Store))
+            await Assert.That(KeyLoad.UnitTests.Messaging.QueueWholeFlowStorage.Bytes(fixture.Store))
                 .IsEquivalentTo(image, CollectionOrdering.Matching), failures);
         await ServerFailureObserver.ObserveAsync(() => ReadCutStoreStateAssertions.AssertIdentityAndPositionAsync(
             fixture.Store, identity, position), failures);

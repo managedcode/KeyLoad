@@ -1,8 +1,8 @@
 using System.Text.Json;
-using KeyLoad.IntegrationTests.Features.DocumentStorage;
+using KeyLoad.IntegrationTests.DocumentStorage;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.IntegrationTests.Features.Authorization;
+namespace KeyLoad.IntegrationTests.Authorization;
 
 internal static class FoundationOtlpClusterSnapshotAssertions
 {

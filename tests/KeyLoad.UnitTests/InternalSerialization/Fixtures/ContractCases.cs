@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
 using KeyLoad.Query;
 
-namespace KeyLoad.UnitTests.Features.InternalSerialization;
+namespace KeyLoad.UnitTests.InternalSerialization;
 
 internal static class ContractCases
 {

@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal sealed class RapidMembershipConfigurationTests
 {

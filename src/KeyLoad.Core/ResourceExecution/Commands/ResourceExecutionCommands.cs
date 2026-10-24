@@ -1,5 +1,5 @@
-using KeyLoad.Core.Features.Authorization;
-using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.Core.Authorization;
+using KeyLoad.Core.ResourceExecution;
 using KeyLoad.Storage;
 using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
@@ -44,9 +44,9 @@ public static class ResourceExecutionCommands
         JsonData.Identifier(request.Definition.Name);
         JsonData.Identifier(request.Definition.TransactionDomainId);
         var definition = request.Definition;
-        Features.RelationalStorage.RelationalRowValidation.ValidateSchema(definition);
-        Features.AnalyticsStore.AnalyticsStoreValidation.ValidateSchema(definition);
-        Features.Search.VectorFieldProfiles.Validate(definition);
+        RelationalStorage.RelationalRowValidation.ValidateSchema(definition);
+        AnalyticsStore.AnalyticsStoreValidation.ValidateSchema(definition);
+        Search.VectorFieldProfiles.Validate(definition);
         if (!Enum.IsDefined(definition.Kind) || !Enum.IsDefined(definition.Authority) || definition.Indexes.Any(index => index is null || index.Fields.Any(string.IsNullOrEmpty)) || definition.FieldPolicies.Concat(definition.HeaderPolicies).Any(policy => policy is null || policy.Path is null))
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidResourceSchemaMessage);
@@ -97,7 +97,7 @@ public static class ResourceExecutionCommands
         TargetInboxValidation.ValidateInboxPolicy(definition);
         if (definition.FilePolicy is null || !definition.FilePolicy.IsValid())
         {
-            throw Errors.Fail(ErrorCode.Validation, global::KeyLoad.Core.Features.BlobStorage.FileStorageProtocol.Invalid);
+            throw Errors.Fail(ErrorCode.Validation, global::KeyLoad.Core.BlobStorage.FileStorageProtocol.Invalid);
         }
 
         var q = definition.QueuePolicy;

@@ -2,7 +2,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 
-namespace KeyLoad.IntegrationTests.Features.StorageReplication.Processes;
+namespace KeyLoad.IntegrationTests.StorageReplication.Processes;
 
 /// <summary>Bounds child output and settles the original process and stream tasks on every failure path.</summary>
 internal static partial class OwnedProcessLifetime

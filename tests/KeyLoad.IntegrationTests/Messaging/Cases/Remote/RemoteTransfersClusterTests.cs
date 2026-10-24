@@ -1,7 +1,7 @@
 using KeyLoad.Client;
-using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.ClientApi;
 
-namespace KeyLoad.IntegrationTests.Features.Messaging;
+namespace KeyLoad.IntegrationTests.Messaging;
 
 /// <summary>Proves F1 transfer intent, signed destination receipt and source completion through real Orleans callers.</summary>
 [ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = McpCallerProtocol.FixtureKey)]

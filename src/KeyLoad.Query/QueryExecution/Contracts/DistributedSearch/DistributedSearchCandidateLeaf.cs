@@ -1,6 +1,6 @@
-using KeyLoad.Query.Features.Search;
+using KeyLoad.Query.Search;
 
-namespace KeyLoad.Query.Features.QueryExecution;
+namespace KeyLoad.Query.QueryExecution;
 
 [global::Orleans.GenerateSerializer]
 [global::Orleans.Alias(DistributedSearchAliases.CandidateLeaf)]

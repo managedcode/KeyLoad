@@ -1,7 +1,7 @@
 using KeyLoad.Server;
 using ManagedCode.Communication.Commands;
 
-namespace KeyLoad.UnitTests.Features.StorageRecovery;
+namespace KeyLoad.UnitTests.StorageRecovery;
 
 internal static class TransactionalReadViewContinuation
 {

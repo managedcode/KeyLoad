@@ -1,7 +1,7 @@
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
 
-namespace KeyLoad.UnitTests.Features.StorageRecovery;
+namespace KeyLoad.UnitTests.StorageRecovery;
 
 /// <summary>Keeps the original metadata fixture quarantined after an uncertain inspection or store close.</summary>
 internal sealed class MetadataEntryOpenOwner

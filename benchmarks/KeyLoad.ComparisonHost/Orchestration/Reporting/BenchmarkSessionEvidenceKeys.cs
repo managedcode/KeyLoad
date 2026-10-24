@@ -1,4 +1,4 @@
-namespace KeyLoad.ComparisonHost.Features.BenchmarkOrchestration;
+namespace KeyLoad.ComparisonHost.BenchmarkOrchestration;
 
 /// <summary>Named structural fields of the original session envelope and its explicit execution startup inputs.</summary>
 internal static class BenchmarkSessionEvidenceKeys

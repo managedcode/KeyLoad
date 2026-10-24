@@ -1,21 +1,21 @@
 using KeyLoad.Clustering;
-using KeyLoad.UnitTests.Features.Search;
+using KeyLoad.UnitTests.Search;
 using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.DependencyInjection;
 using Orleans.Serialization;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal static class RequestCqrsAnnOriginalReplay
 {
     internal static async Task RequireAsync(RequestCqrsHostedRuntimeFixture fixture,
         AnnMaintenanceRequest request, AnnMaintenanceResult expected, CancellationToken token)
     {
-        var canonical = global::KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(fixture.Database.Store);
+        var canonical = global::KeyLoad.UnitTests.Messaging.QueueWholeFlowStorage.Bytes(fixture.Database.Store);
         var cut = fixture.Database.Store.Position;
         var runtimeRootCore = Directory.Exists(Path.Combine(fixture.Database.Directory,
-            global::KeyLoad.Server.Features.Search.AnnProtocol.RootDirectory));
+            global::KeyLoad.Server.Search.AnnProtocol.RootDirectory));
         var execution = runtimeRootCore ? AnnFixtureFileSnapshot.Capture(fixture.Database.Directory) : [];
         var actual = await RequestCqrsAnnInvocation.RunAsync(fixture, request, token, retainedReplay: true);
         await Assert.That(OrleansSerialization.Serialize(actual.Result).AsSpan()
@@ -45,11 +45,11 @@ internal static class RequestCqrsAnnOriginalReplay
     private static async Task RefuseAsync(RequestCqrsHostedRuntimeFixture fixture,
         AnnMaintenanceRequest original, ErrorCode expected, CancellationToken token)
     {
-        var canonical = global::KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(fixture.Database.Store);
+        var canonical = global::KeyLoad.UnitTests.Messaging.QueueWholeFlowStorage.Bytes(fixture.Database.Store);
         var cut = fixture.Database.Store.Position;
         var journal = fixture.Database.ReadCanonicalCut();
         var runtimeRootCore = Directory.Exists(Path.Combine(fixture.Database.Directory,
-            global::KeyLoad.Server.Features.Search.AnnProtocol.RootDirectory));
+            global::KeyLoad.Server.Search.AnnProtocol.RootDirectory));
         var execution = runtimeRootCore ? AnnFixtureFileSnapshot.Capture(fixture.Database.Directory) : [];
         var id = Guid.NewGuid();
         var envelope = fixture.Codec.CreateCommand(id, RequestCqrsAnnTestData.Principal,
@@ -75,9 +75,9 @@ internal static class RequestCqrsAnnOriginalReplay
         long cut, (string Path, string Bytes)[] files, bool runtimeRootCore)
     {
         await Assert.That(fixture.Database.Store.Position).IsEqualTo(cut);
-        await Assert.That(global::KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(fixture.Database.Store).SequenceEqual(expected, StringComparer.Ordinal)).IsTrue();
+        await Assert.That(global::KeyLoad.UnitTests.Messaging.QueueWholeFlowStorage.Bytes(fixture.Database.Store).SequenceEqual(expected, StringComparer.Ordinal)).IsTrue();
         await Assert.That(Directory.Exists(Path.Combine(fixture.Database.Directory,
-            global::KeyLoad.Server.Features.Search.AnnProtocol.RootDirectory))).IsEqualTo(runtimeRootCore);
+            global::KeyLoad.Server.Search.AnnProtocol.RootDirectory))).IsEqualTo(runtimeRootCore);
         if (runtimeRootCore)
         {
             await Assert.That(AnnFixtureFileSnapshot.Capture(fixture.Database.Directory))

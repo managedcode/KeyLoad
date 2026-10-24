@@ -3,7 +3,7 @@ using System.Text.Json;
 using KeyLoad.Client;
 using Microsoft.AspNetCore.Http;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 internal sealed class KeyLoadClientTransportTests
 {

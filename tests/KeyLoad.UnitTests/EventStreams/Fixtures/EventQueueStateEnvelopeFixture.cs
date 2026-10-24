@@ -1,9 +1,9 @@
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
-using KeyLoad.UnitTests.Features.Messaging;
-using static KeyLoad.UnitTests.Features.EventStreams.EventQueueStateEnvelopeProtocol;
+using KeyLoad.UnitTests.Messaging;
+using static KeyLoad.UnitTests.EventStreams.EventQueueStateEnvelopeProtocol;
 
-namespace KeyLoad.UnitTests.Features.EventStreams;
+namespace KeyLoad.UnitTests.EventStreams;
 
 internal sealed class EventQueueStateEnvelopeFixture : IDisposable
 {
@@ -56,7 +56,7 @@ internal sealed class EventQueueStateEnvelopeFixture : IDisposable
     internal void Reopen()
     {
         RequireOriginalRoot();
-        var identity = KeyLoad.UnitTests.Features.StorageRecovery.Assertions.ReadCutStoreStateAssertions.SnapshotIdentity(Store);
+        var identity = KeyLoad.UnitTests.StorageRecovery.Assertions.ReadCutStoreStateAssertions.SnapshotIdentity(Store);
         Store.Dispose();
         Store = new(new(Owner.Directory)
         {

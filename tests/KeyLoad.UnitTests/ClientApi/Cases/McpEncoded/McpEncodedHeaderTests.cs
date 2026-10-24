@@ -1,7 +1,7 @@
 using KeyLoad.Server;
 using ModelContextProtocol.Protocol;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>AC-MCP-003/005/007: the guard matches the actual public SDK header decoding before early reflection.</summary>
 internal sealed class McpEncodedHeaderTests

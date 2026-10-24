@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.Authorization;
+namespace KeyLoad.IntegrationTests.Authorization;
 
 /// <summary>Stable values for the persisted resource-policy Orleans scenario.</summary>
 internal static class ResourcePolicyUpdateClusterProtocol

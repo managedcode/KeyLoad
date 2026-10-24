@@ -2,7 +2,7 @@ using System.Buffers.Binary;
 
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
+namespace KeyLoad.BenchmarkScenarios.BenchmarkComparisons;
 
 /// <summary>Generates compact immutable scale keys and deterministic values for one dataset.</summary>
 internal sealed class ScaledRawStorageCorpus

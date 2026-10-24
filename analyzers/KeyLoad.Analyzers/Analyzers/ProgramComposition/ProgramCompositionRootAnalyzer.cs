@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 
-namespace KeyLoad.Analyzers.Features.CodeQuality;
+namespace KeyLoad.Analyzers.CodeQuality;
 
 /// <summary>Keeps process composition visible in executable Program.cs files.</summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]

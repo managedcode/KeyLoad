@@ -1,8 +1,8 @@
 using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.Testing;
-using KeyLoad.IntegrationTests.Features.StorageReplication;
+using KeyLoad.IntegrationTests.StorageReplication;
 
-namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
+namespace KeyLoad.IntegrationTests.DatabaseComposition;
 
 /// <summary>Validates the exact execution project silo model selected by the functional fixture.</summary>
 internal static class FunctionalGateProjectModel

@@ -2,7 +2,7 @@ using System.Security.Claims;
 using KeyLoad.Clustering;
 using ManagedCode.Orleans.Identity.Core.Constants;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal sealed class RequestCqrsClientContext : IDisposable
 {

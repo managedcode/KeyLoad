@@ -1,4 +1,4 @@
-namespace KeyLoad.Server.Features.Search;
+namespace KeyLoad.Server.Search;
 
 /// <summary>Bounds synchronous execution work and joins accepted work before releasing its owner.</summary>
 internal sealed class AnnWorker : IAsyncDisposable

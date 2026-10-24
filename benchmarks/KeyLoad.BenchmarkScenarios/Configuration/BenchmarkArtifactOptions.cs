@@ -1,4 +1,4 @@
-namespace KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
+namespace KeyLoad.BenchmarkScenarios.BenchmarkComparisons;
 
 /// <summary>Captures explicit output selection and original source provenance for generated-runner artifacts.</summary>
 [ConfigurationOptions]

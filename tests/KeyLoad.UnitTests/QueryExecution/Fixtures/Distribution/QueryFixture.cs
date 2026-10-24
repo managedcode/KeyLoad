@@ -1,9 +1,9 @@
-using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.Core.ResourceExecution;
 using KeyLoad.Storage;
-using KeyLoad.UnitTests.Features.DocumentStorage;
+using KeyLoad.UnitTests.DocumentStorage;
 using ManagedCode.Communication.Commands;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 /// <summary>Owns independent canonical stores for execution query leaf and authority checks.</summary>
 internal sealed class QueryFixture(DocumentPatchAtomicityOwner source, DocumentPatchAtomicityOwner destination)

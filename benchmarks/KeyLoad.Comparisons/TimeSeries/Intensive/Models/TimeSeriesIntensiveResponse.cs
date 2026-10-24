@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 
-namespace KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries.Intensive;
+namespace KeyLoad.Comparisons.BenchmarkComparisons.TimeSeries.Intensive;
 
 internal readonly record struct TimeSeriesIntensiveResponse(ImmutableArray<SampleRecord> Raw = default,
     SampleRecord? Latest = null, SampleAggregate? Aggregate = null,

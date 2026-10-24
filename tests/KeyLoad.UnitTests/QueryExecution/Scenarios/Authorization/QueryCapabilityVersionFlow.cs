@@ -1,6 +1,6 @@
 using KeyLoad.Server;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal static class QueryCapabilityVersionFlow
 {

@@ -1,7 +1,7 @@
 using KeyLoad.Core;
 using KeyLoad.Query;
 using KeyLoad.Storage.ZoneTree;
-using KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
+using KeyLoad.Storage.ZoneTree.ResourceExecution;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.IntegrationTests;
@@ -80,9 +80,9 @@ internal static class IntegrationExecutionOptions
         return Options.Create(value);
     }
 
-    internal static IOptions<KeyLoad.Query.Features.Search.PackedAnnOptions> PackedAnn(KeyLoad.Query.Features.Search.PackedAnnOptions? configured = null)
+    internal static IOptions<KeyLoad.Query.Search.PackedAnnOptions> PackedAnn(KeyLoad.Query.Search.PackedAnnOptions? configured = null)
     {
-        var value = configured ?? new KeyLoad.Query.Features.Search.PackedAnnOptions();
+        var value = configured ?? new KeyLoad.Query.Search.PackedAnnOptions();
         value.Validate();
         return Options.Create(value);
     }

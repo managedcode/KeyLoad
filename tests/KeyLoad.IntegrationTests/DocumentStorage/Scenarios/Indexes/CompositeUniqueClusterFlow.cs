@@ -1,8 +1,8 @@
 using KeyLoad.Client;
-using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.ClientApi;
 using KeyLoad.Server;
 
-namespace KeyLoad.IntegrationTests.Features.DocumentStorage;
+namespace KeyLoad.IntegrationTests.DocumentStorage;
 
 internal static class CompositeUniqueClusterFlow
 {

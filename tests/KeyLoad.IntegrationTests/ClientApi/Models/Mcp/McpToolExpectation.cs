@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 
-namespace KeyLoad.IntegrationTests.Features.ClientApi;
+namespace KeyLoad.IntegrationTests.ClientApi;
 
 /// <summary>Independent expected public schema and side-effect metadata for one frozen tool.</summary>
 /// <param name="Name">The stable public tool name.</param>

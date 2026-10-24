@@ -1,8 +1,8 @@
 using System.Collections.Immutable;
-using KeyLoad.IntegrationTests.Features.QueryExecution;
-using P = KeyLoad.IntegrationTests.Features.DatabaseComposition.FunctionalGateUserAnalyticsProtocol;
+using KeyLoad.IntegrationTests.QueryExecution;
+using P = KeyLoad.IntegrationTests.DatabaseComposition.FunctionalGateUserAnalyticsProtocol;
 
-namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
+namespace KeyLoad.IntegrationTests.DatabaseComposition;
 
 internal static class FunctionalGateUserAnalyticsReads
 {

@@ -1,7 +1,7 @@
-using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.StorageReplication;
+using KeyLoad.IntegrationTests.ClientApi;
+using KeyLoad.IntegrationTests.StorageReplication;
 
-namespace KeyLoad.IntegrationTests.Features.QueryExecution;
+namespace KeyLoad.IntegrationTests.QueryExecution;
 
 [ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = PublicQueryStorageSelection.Key)]
 [NotInParallel]

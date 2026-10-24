@@ -1,7 +1,7 @@
-using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.Search;
+using KeyLoad.IntegrationTests.ClientApi;
+using KeyLoad.IntegrationTests.Search;
 
-namespace KeyLoad.IntegrationTests.Features.Authorization;
+namespace KeyLoad.IntegrationTests.Authorization;
 
 internal sealed record SqlLabelAuthorityState(GraphSearchClusterScenario Scenario,
     McpPersistedIdentity Identity, Guid RepairCommand, PrincipalRecord RepairResult);

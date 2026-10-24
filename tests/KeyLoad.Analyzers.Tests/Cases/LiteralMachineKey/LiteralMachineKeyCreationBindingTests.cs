@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 
-namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
+namespace KeyLoad.Analyzers.Tests.CodeQuality;
 
 /// <summary>AC-BC-027 and AC-CQ-009: construction binds keys independently from value positions.</summary>
 internal sealed class LiteralMachineKeyCreationBindingTests

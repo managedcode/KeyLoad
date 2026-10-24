@@ -3,7 +3,7 @@ using System.Text;
 using KeyLoad.Comparisons;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonHost.BenchmarkComparisons;
 
 /// <summary>Emits bounded live progress from original settled operation outcomes.</summary>
 internal sealed class DocumentHostProgress(IOptions<ComparisonExecutionOptions> execution, TimeProvider clock)

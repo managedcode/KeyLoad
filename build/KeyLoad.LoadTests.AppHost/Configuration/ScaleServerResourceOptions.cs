@@ -1,5 +1,5 @@
 
-namespace KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
+namespace KeyLoad.LoadTests.AppHost.BenchmarkComparisons;
 
 /// <summary>Central policy for bounded execution server resource observation.</summary>
 [ConfigurationOptions]

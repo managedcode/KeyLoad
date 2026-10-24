@@ -1,4 +1,4 @@
-using KeyLoad.Server.Features.Search;
+using KeyLoad.Server.Search;
 using KeyLoad.Storage.ZoneTree.IO;
 
 namespace KeyLoad.Server;
@@ -109,7 +109,7 @@ internal static class PartitionRootAdmission
 
     private static bool IsCurrentDirectory(string name) => name is PartitionStoreProtocol.CanonicalDirectory
         or SearchIndexDirectory or AnnIndexDirectory or TextIncrementalProtocol.RootDirectory or BackupDirectory
-            or KeyLoad.Server.Features.Search.TextOnlineRoot.DirectoryName
+            or KeyLoad.Server.Search.TextOnlineRoot.DirectoryName
             or UserAnalyticsGenerationPaths.DirectoryName;
 
     private static KeyLoadException Unsupported() => Errors.Fail(ErrorCode.FormatUnsupported, InvalidLayout);

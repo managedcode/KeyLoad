@@ -1,4 +1,4 @@
-namespace KeyLoad.Core.Features.Search;
+namespace KeyLoad.Core.Search;
 
 /// <summary>Call-scoped original read authority; no signing key or persistence/transport identity is copied.</summary>
 internal readonly record struct SearchReadAuthority(Guid NodeId, Guid Incarnation, int DataEpoch,

@@ -1,4 +1,4 @@
-using KeyLoad.Core.Features.AnalyticsStore;
+using KeyLoad.Core.AnalyticsStore;
 using ZoneTree.Analytics;
 
 namespace KeyLoad.Core;

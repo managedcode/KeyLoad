@@ -1,7 +1,7 @@
 using Aspire.Hosting.ApplicationModel;
 using KeyLoad.Server;
 
-namespace KeyLoad.IntegrationTests.Features.OrleansExecution.Helpers;
+namespace KeyLoad.IntegrationTests.OrleansExecution.Helpers;
 
 /// <summary>Stores only fixed execution capture-completion observations for one cleanup owner.</summary>
 internal sealed class RequestCqrsResourceCompletionEvidence

@@ -1,4 +1,4 @@
-namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
+namespace KeyLoad.Analyzers.Tests.CodeQuality;
 
 /// <summary>AC-CQ-034/037: actual immutable serializer output data is distinct from runtime injection.</summary>
 internal sealed class SerializedOptionsSnapshotTests

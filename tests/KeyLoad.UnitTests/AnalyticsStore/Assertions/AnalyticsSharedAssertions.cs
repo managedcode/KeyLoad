@@ -1,8 +1,8 @@
-using KeyLoad.Core.Features.AnalyticsStore;
-using KeyLoad.Core.Features.ResourceExecution;
-using P = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsSharedProtocol;
+using KeyLoad.Core.AnalyticsStore;
+using KeyLoad.Core.ResourceExecution;
+using P = KeyLoad.UnitTests.AnalyticsStore.AnalyticsSharedProtocol;
 
-namespace KeyLoad.UnitTests.Features.AnalyticsStore;
+namespace KeyLoad.UnitTests.AnalyticsStore;
 
 internal static class AnalyticsSharedAssertions
 {
@@ -22,7 +22,7 @@ internal static class AnalyticsSharedAssertions
     internal static async Task PageAsync(TestDatabase fixture, AnalyticsEventData expected, CancellationToken token)
     {
         var position = fixture.Store.Position;
-        var image = KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(fixture.Store);
+        var image = KeyLoad.UnitTests.Messaging.QueueWholeFlowStorage.Bytes(fixture.Store);
         var page = fixture.Database.ReadAnalyticsEvents(P.Root,
             new(fixture.Partition, P.Store, P.Epoch.AddSeconds(-1), P.Epoch.AddSeconds(1), 10, null), token);
         await AnalyticsStoreTestOperations.EqualAsync(new AnalyticsEventsPage([new(expected.Id, expected.Timestamp, expected.Dimensions,
@@ -32,7 +32,7 @@ internal static class AnalyticsSharedAssertions
             view.ReadOwnedValue(AnalyticsStoreKeys.Generation(fixture.Partition, P.Store))!));
         await Assert.That(generation).IsEqualTo(1L);
         await Assert.That(fixture.Store.Position).IsEqualTo(position);
-        await Assert.That(KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(fixture.Store)
+        await Assert.That(KeyLoad.UnitTests.Messaging.QueueWholeFlowStorage.Bytes(fixture.Store)
             .SequenceEqual(image, StringComparer.Ordinal)).IsTrue();
     }
 

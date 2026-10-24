@@ -1,5 +1,5 @@
 
-namespace KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
+namespace KeyLoad.LoadTests.AppHost.BenchmarkComparisons;
 
 /// <summary>Central execution database memory and WAL deployment policy for comparison cells.</summary>
 [ConfigurationOptions]

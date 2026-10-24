@@ -1,7 +1,7 @@
-using KeyLoad.Core.Features.StoragePartitions.Contracts;
+using KeyLoad.Core.StoragePartitions.Contracts;
 using KeyLoad.Storage;
 
-namespace KeyLoad.Core.Features.Search;
+namespace KeyLoad.Core.Search;
 
 internal sealed class AnnLifetimeResourceResolver(AnnReadLifetimeMetadata metadata, AnnSeedWork work, PrincipalRecord targetPrincipal)
 {

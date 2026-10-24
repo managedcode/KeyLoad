@@ -1,10 +1,10 @@
 using System.Text.Json;
 using KeyLoad.Query;
 using KeyLoad.Storage;
-using KeyLoad.UnitTests.Features.Search;
+using KeyLoad.UnitTests.Search;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal sealed class SqlGraphSearchResultCompositionTests
 {

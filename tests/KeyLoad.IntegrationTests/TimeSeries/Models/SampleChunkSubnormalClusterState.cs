@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.TimeSeries;
+namespace KeyLoad.IntegrationTests.TimeSeries;
 
 internal sealed record SampleChunkSubnormalClusterState(
     SampleChunkClusterScenario Scenario,

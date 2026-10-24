@@ -1,9 +1,9 @@
 using System.Text;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
-using KeyLoad.UnitTests.Features.StorageRecovery.Assertions;
+using KeyLoad.UnitTests.StorageRecovery.Assertions;
 
-namespace KeyLoad.UnitTests.Features.StorageRecovery;
+namespace KeyLoad.UnitTests.StorageRecovery;
 
 internal static class CapturedReadScopeScenario
 {

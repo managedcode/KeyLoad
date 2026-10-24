@@ -1,8 +1,8 @@
 using System.Collections.Immutable;
-using KeyLoad.Core.Features.StoragePartitions.Contracts;
+using KeyLoad.Core.StoragePartitions.Contracts;
 using KeyLoad.Storage;
 
-namespace KeyLoad.Core.Features.ResourceExecution;
+namespace KeyLoad.Core.ResourceExecution;
 
 internal static class ResourceLifetimeCoverageValidation
 {

@@ -1,6 +1,6 @@
 using System.Text.Json;
 
-namespace KeyLoad.UnitTests.Features.ResourceExecution;
+namespace KeyLoad.UnitTests.ResourceExecution;
 
 [NotInParallel]
 internal sealed class JsonTextAllocationTests

@@ -1,4 +1,4 @@
-namespace KeyLoad.Query.Features.QueryExecution;
+namespace KeyLoad.Query.QueryExecution;
 
 internal sealed class DistributedSearchPreparedLeaf(DistributedSearchOwnedLeaf actualRequest,
     Func<CancellationToken, Task<DistributedSearchLeafResult>> run,

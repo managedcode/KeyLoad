@@ -1,10 +1,10 @@
 using KeyLoad.Clustering;
-using KeyLoad.Core.Features.ResourceExecution;
-using KeyLoad.RecoveryTests.Features.ResourceExecution;
+using KeyLoad.Core.ResourceExecution;
+using KeyLoad.RecoveryTests.ResourceExecution;
 using KeyLoad.Server;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.UnitTests.Features.StorageRecovery;
+namespace KeyLoad.UnitTests.StorageRecovery;
 
 /// <summary>Actual physical-host work ownership for bounded execution component reads.</summary>
 internal sealed class UserAnalyticsHostBoundWork : IAsyncDisposable

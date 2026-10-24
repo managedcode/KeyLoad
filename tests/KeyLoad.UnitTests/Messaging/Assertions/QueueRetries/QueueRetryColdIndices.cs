@@ -2,7 +2,7 @@ using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.Messaging;
+namespace KeyLoad.UnitTests.Messaging;
 
 internal static class QueueRetryColdIndices
 {
@@ -88,7 +88,7 @@ internal static class QueueRetryColdIndices
     {
         var key = KeySpace.Partition(QueueRetryColdProtocol.Parked, lane.Partition, lane.Queue,
             QueueRetryColdProtocol.FirstSequence, QueueRetryColdProtocol.Retry);
-        var value = new KeyLoad.Core.Features.Messaging.QueueDeadLetterReference(QueueRetryColdProtocol.Retry,
+        var value = new KeyLoad.Core.Messaging.QueueDeadLetterReference(QueueRetryColdProtocol.Retry,
             QueueRetryColdProtocol.FirstSequence, QueueRetryColdProtocol.FirstSequence, QueueRetryColdProtocol.ExhaustedCode);
         return Convert.ToHexString(key) + ":" + Convert.ToHexString(OrleansSerialization.Serialize(value));
     }

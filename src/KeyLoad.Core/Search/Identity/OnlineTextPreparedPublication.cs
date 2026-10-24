@@ -1,4 +1,4 @@
-namespace KeyLoad.Core.Features.Search;
+namespace KeyLoad.Core.Search;
 
 internal sealed record OnlineTextPreparedPublication(
     OnlineTextPublicationPhaseCommand Command,

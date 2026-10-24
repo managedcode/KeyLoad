@@ -1,6 +1,6 @@
-using KeyLoad.UnitTests.Features.DocumentStorage;
+using KeyLoad.UnitTests.DocumentStorage;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 internal sealed record SdkProblemBoundaryCut(string[] Rows, long Position,
     (long AppliedPosition, long StorePosition) Cut, byte[] Identity, OutboxSnapshot Outbox);

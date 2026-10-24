@@ -1,7 +1,7 @@
 using System.Text.Json;
 using KeyLoad.Server;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>AC-MCP-007: canonical structured-result and safe-error wrapper schemas.</summary>
 internal sealed class McpOutputSchemaTests

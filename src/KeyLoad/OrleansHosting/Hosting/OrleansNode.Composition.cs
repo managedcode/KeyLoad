@@ -1,5 +1,5 @@
 using KeyLoad.Clustering;
-using KeyLoad.Server.Features.OrleansHosting;
+using KeyLoad.Server.OrleansHosting;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;

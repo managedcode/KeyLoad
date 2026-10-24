@@ -1,14 +1,14 @@
 using KeyLoad.Clustering;
-using KeyLoad.RecoveryTests.Features.StorageRecovery;
+using KeyLoad.RecoveryTests.StorageRecovery;
 using KeyLoad.Server;
-using KeyLoad.Server.Features.Search;
+using KeyLoad.Server.Search;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Orleans.TestingHost;
 using TUnit.Core.Interfaces;
 
-namespace KeyLoad.RecoveryTests.Features.OrleansExecution;
+namespace KeyLoad.RecoveryTests.OrleansExecution;
 
 /// <summary>Runs the production server composition with execution Orleans membership and silo-local storage.</summary>
 [ConfigurationBinding]

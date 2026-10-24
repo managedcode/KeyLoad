@@ -1,7 +1,7 @@
 using Cartograph.Catalog;
 using Cartograph.Format;
 
-namespace KeyLoad.UnitTests.Features.BackupRestore;
+namespace KeyLoad.UnitTests.BackupRestore;
 
 internal static class CliBackupRestoreInvalidCatalogArtifact
 {

@@ -2,11 +2,11 @@ using System.Collections.Immutable;
 using KeyLoad.Query;
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
-using KeyLoad.UnitTests.Features.Authorization;
-using static KeyLoad.UnitTests.Features.QueryExecution.BinderFieldLineageProtocol;
-using P = KeyLoad.UnitTests.Features.QueryExecution.SchemaVisibleProjectionProtocol;
+using KeyLoad.UnitTests.Authorization;
+using static KeyLoad.UnitTests.QueryExecution.BinderFieldLineageProtocol;
+using P = KeyLoad.UnitTests.QueryExecution.SchemaVisibleProjectionProtocol;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal static class SchemaVisibleProjectionAssertions
 {

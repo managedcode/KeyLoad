@@ -1,9 +1,9 @@
 using Aspire.Hosting.ApplicationModel;
-using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.StorageReplication;
+using KeyLoad.IntegrationTests.ClientApi;
+using KeyLoad.IntegrationTests.StorageReplication;
 using KeyLoad.Server;
 
-namespace KeyLoad.IntegrationTests.Features.QueryExecution;
+namespace KeyLoad.IntegrationTests.QueryExecution;
 
 internal static class QueryCursorRequestIdentityR47Cold
 {

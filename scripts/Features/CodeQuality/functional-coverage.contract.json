@@ -316,10 +316,10 @@
       "PartitionQueryPublicMergeTests"
     ],
     "filter": "/KeyLoad.UnitTests/*/PartitionQuery*/*",
-    "testNamespace": "KeyLoad.UnitTests.Features.QueryExecution",
+    "testNamespace": "KeyLoad.UnitTests.QueryExecution",
     "exactCases": [
       {
-        "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryAuthorizationTests",
+        "className": "KeyLoad.UnitTests.QueryExecution.PartitionQueryAuthorizationTests",
         "methodName": "DenialInLaterPartitionReturnsNoPartialRowsAndDoesNotChangeTheStore",
         "instanceName": "DenialInLaterPartitionReturnsNoPartialRowsAndDoesNotChangeTheStore",
         "acceptance": [
@@ -334,7 +334,7 @@
         "operationOutcomeAndState": "later-leaf persisted denial produces PermissionDenied, unchanged store position and healthy allowed-leaf read"
       },
       {
-        "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryCancellationTests",
+        "className": "KeyLoad.UnitTests.QueryExecution.PartitionQueryCancellationTests",
         "methodName": "ObservedReadProgressCancelsTheOriginalBudgetAndLeavesNoPartialResult",
         "instanceName": "ObservedReadProgressCancelsTheOriginalBudgetAndLeavesNoPartialResult",
         "acceptance": [
@@ -349,7 +349,7 @@
         "operationOutcomeAndState": "cancels after observed actual execution bytes with original caller token; no page is returned and a subsequent one-row query succeeds"
       },
       {
-        "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryContractTests",
+        "className": "KeyLoad.UnitTests.QueryExecution.PartitionQueryContractTests",
         "methodName": "GeneratedPlanAndCompleteResultRoundTripWithStableFields",
         "instanceName": "GeneratedPlanAndCompleteResultRoundTripWithStableFields",
         "acceptance": [
@@ -364,7 +364,7 @@
         "operationOutcomeAndState": "execution plan and result round trip are checked alongside a real ZoneTree query, duplicate textual IDs/full partition identity, and exact rows"
       },
       {
-        "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryContractTests",
+        "className": "KeyLoad.UnitTests.QueryExecution.PartitionQueryContractTests",
         "methodName": "MismatchedLeafRequestPartitionFailsBeforeAnyStorageRead",
         "instanceName": "MismatchedLeafRequestPartitionFailsBeforeAnyStorageRead",
         "acceptance": [
@@ -379,7 +379,7 @@
         "operationOutcomeAndState": "real plan validation rejects mismatched leaf partition as Validation before storage position changes"
       },
       {
-        "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryContractTests",
+        "className": "KeyLoad.UnitTests.QueryExecution.PartitionQueryContractTests",
         "methodName": "EmptyOversizedAndNullPartitionSetsFailAsValidation",
         "instanceName": "EmptyOversizedAndNullPartitionSetsFailAsValidation",
         "acceptance": [
@@ -394,7 +394,7 @@
         "operationOutcomeAndState": "real plan factory rejects empty/oversized/null leaf input and preserves store position"
       },
       {
-        "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryGrantTests",
+        "className": "KeyLoad.UnitTests.QueryExecution.PartitionQueryGrantTests",
         "methodName": "ActualReadBytesAndExaminedRecordsAdmitExactlyAndRejectOneLess",
         "instanceName": "ActualReadBytesAndExaminedRecordsAdmitExactlyAndRejectOneLess",
         "acceptance": [
@@ -409,7 +409,7 @@
         "operationOutcomeAndState": "measured ZoneTree observer charges exact bytes/records; exact allowances pass and each one-under bound returns BudgetExceeded"
       },
       {
-        "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryGrantTests",
+        "className": "KeyLoad.UnitTests.QueryExecution.PartitionQueryGrantTests",
         "methodName": "MaxBatchAdmitsTheCompleteMergeAtItsExactBoundAndNoRowsBelowIt",
         "instanceName": "MaxBatchAdmitsTheCompleteMergeAtItsExactBoundAndNoRowsBelowIt",
         "acceptance": [
@@ -424,7 +424,7 @@
         "operationOutcomeAndState": "independent serialization/retention bound admits a complete real merge at exact bytes and rejects one byte less"
       },
       {
-        "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryGrantTests",
+        "className": "KeyLoad.UnitTests.QueryExecution.PartitionQueryGrantTests",
         "methodName": "OneGrantChargesIndexRangeAndDocumentPointReadsTogether",
         "instanceName": "OneGrantChargesIndexRangeAndDocumentPointReadsTogether",
         "acceptance": [
@@ -439,7 +439,7 @@
         "operationOutcomeAndState": "execution index range plus point read share the leaf allowance; exact bound passes and one-under examined cap rejects"
       },
       {
-        "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryMergeTests",
+        "className": "KeyLoad.UnitTests.QueryExecution.PartitionQueryMergeTests",
         "methodName": "RealZoneTreeLeavesMatchIndependentGlobalOrderBeforeProjection",
         "instanceName": "RealZoneTreeLeavesMatchIndependentGlobalOrderBeforeProjection",
         "acceptance": [
@@ -454,7 +454,7 @@
         "operationOutcomeAndState": "independent seeded oracle compares full ordered references and projected values/revisions/read-cut witnesses and independently sizes retained result"
       },
       {
-        "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryMergeTests",
+        "className": "KeyLoad.UnitTests.QueryExecution.PartitionQueryMergeTests",
         "methodName": "FullReferenceTiesUseOrdinalUnicodePartitionOrder",
         "instanceName": "FullReferenceTiesUseOrdinalUnicodePartitionOrder",
         "acceptance": [
@@ -469,7 +469,7 @@
         "operationOutcomeAndState": "actual rows and JSON follow independent ordinal ordering for Unicode partition ties"
       },
       {
-        "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryMergeTests",
+        "className": "KeyLoad.UnitTests.QueryExecution.PartitionQueryMergeTests",
         "methodName": "IndependentRetainedOracleIncludesPersistedRedactionMetadata",
         "instanceName": "IndependentRetainedOracleIncludesPersistedRedactionMetadata",
         "acceptance": [
@@ -484,7 +484,7 @@
         "operationOutcomeAndState": "real persisted field policy removes the secret, exposes exact redaction metadata and matches independent retained-size oracle"
       },
       {
-        "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryMergeTests",
+        "className": "KeyLoad.UnitTests.QueryExecution.PartitionQueryMergeTests",
         "methodName": "InvalidLeafSetIsRejectedAndAHealthyQueryStillRuns",
         "instanceName": "InvalidLeafSetIsRejectedAndAHealthyQueryStillRuns",
         "acceptance": [
@@ -499,7 +499,7 @@
         "operationOutcomeAndState": "duplicate real partition request returns Validation with unchanged position, then healthy query returns seeded row"
       },
       {
-        "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryPublicAuthorizationTests",
+        "className": "KeyLoad.UnitTests.QueryExecution.PartitionQueryPublicAuthorizationTests",
         "methodName": "LaterPartitionDenialReturnsNoPartialPageAndDoesNotMutateStore",
         "instanceName": "LaterPartitionDenialReturnsNoPartialPageAndDoesNotMutateStore",
         "acceptance": [
@@ -514,7 +514,7 @@
         "operationOutcomeAndState": "later persisted denial returns no page, preserves store position and a healthy authorized page follows"
       },
       {
-        "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryPublicAuthorizationTests",
+        "className": "KeyLoad.UnitTests.QueryExecution.PartitionQueryPublicAuthorizationTests",
         "methodName": "ExpectedOwnerMismatchFailsClosedAndProtectedFieldUseStillApplies",
         "instanceName": "ExpectedOwnerMismatchFailsClosedAndProtectedFieldUseStillApplies",
         "acceptance": [
@@ -531,7 +531,7 @@
         "operationOutcomeAndState": "Invokes the actual public query path twice and checks exact OwnershipLost and PermissionDenied results; the typed terminal failures are the observed denied operation outcomes and neither returns a page. Root independently reviewed the full body against the accepted AC-CQ-039 operation/outcome criterion."
       },
       {
-        "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryPublicBudgetTests",
+        "className": "KeyLoad.UnitTests.QueryExecution.PartitionQueryPublicBudgetTests",
         "methodName": "OversizedRequestAndPublicPageRetentionFailAtTheirExactBoundaries",
         "instanceName": "OversizedRequestAndPublicPageRetentionFailAtTheirExactBoundaries",
         "acceptance": [
@@ -546,7 +546,7 @@
         "operationOutcomeAndState": "oversized request fails before store reads; exact complete public retention succeeds and one byte under fails"
       },
       {
-        "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryPublicContractTests",
+        "className": "KeyLoad.UnitTests.QueryExecution.PartitionQueryPublicContractTests",
         "methodName": "GeneratedPublicPageRoundTripsFullReferencesAndPerLeafWitnesses",
         "instanceName": "GeneratedPublicPageRoundTripsFullReferencesAndPerLeafWitnesses",
         "acceptance": [
@@ -561,7 +561,7 @@
         "operationOutcomeAndState": "real query page round-trips through execution codec; full references, per-leaf cuts/policy/schema/path and exact bytes are checked"
       },
       {
-        "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryPublicContractTests",
+        "className": "KeyLoad.UnitTests.QueryExecution.PartitionQueryPublicContractTests",
         "methodName": "DefaultEmptyOversizedDuplicateAndUnsupportedRequestsFailBeforeStorageRead",
         "instanceName": "DefaultEmptyOversizedDuplicateAndUnsupportedRequestsFailBeforeStorageRead",
         "acceptance": [
@@ -576,7 +576,7 @@
         "operationOutcomeAndState": "public engine rejects invalid/default/duplicate/unsupported requests with exact error codes and unchanged store position"
       },
       {
-        "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryPublicMergeTests",
+        "className": "KeyLoad.UnitTests.QueryExecution.PartitionQueryPublicMergeTests",
         "methodName": "QueryMergesEveryAuthorizedPartitionInCanonicalOrderWithoutCollapsingEqualIds",
         "instanceName": "QueryMergesEveryAuthorizedPartitionInCanonicalOrderWithoutCollapsingEqualIds",
         "acceptance": [
@@ -591,7 +591,7 @@
         "operationOutcomeAndState": "real multi-partition rows match independent expected JSON/order; equal IDs retain distinct partition identity and both witnesses"
       },
       {
-        "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryMcpContractTests",
+        "className": "KeyLoad.UnitTests.QueryExecution.PartitionQueryMcpContractTests",
         "methodName": "FrozenGeneratedAliasesAndFieldIdsRemainExact",
         "instanceName": "FrozenGeneratedAliasesAndFieldIdsRemainExact",
         "acceptance": [
@@ -606,7 +606,7 @@
         "operationOutcomeAndState": "executes and independently verifies full real page state before generated alias/field-ID contract assertions"
       },
       {
-        "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryMcpContractTests",
+        "className": "KeyLoad.UnitTests.QueryExecution.PartitionQueryMcpContractTests",
         "methodName": "LocalCatalogMatchesExactPartitionQuerySchemaAndEffectHints",
         "instanceName": "LocalCatalogMatchesExactPartitionQuerySchemaAndEffectHints",
         "acceptance": [
@@ -621,7 +621,7 @@
         "operationOutcomeAndState": "decodes actual catalog request, executes and verifies complete query page, then checks exact local schema/hints"
       },
       {
-        "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryMcpContractTests",
+        "className": "KeyLoad.UnitTests.QueryExecution.PartitionQueryMcpContractTests",
         "methodName": "PublicAndRequestBodiesRoundTripTheSameTypedValues",
         "instanceName": "PublicAndRequestBodiesRoundTripTheSameTypedValues",
         "acceptance": [
@@ -636,7 +636,7 @@
         "operationOutcomeAndState": "execution and public request codecs preserve typed values; each decoded request executes and equal pages are checked"
       },
       {
-        "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryMcpContractTests",
+        "className": "KeyLoad.UnitTests.QueryExecution.PartitionQueryMcpContractTests",
         "methodName": "PublicAndPageBodiesRoundTripRowsAndLeafWitnesses",
         "instanceName": "PublicAndPageBodiesRoundTripRowsAndLeafWitnesses",
         "acceptance": [
@@ -651,7 +651,7 @@
         "operationOutcomeAndState": "real page is decoded both ways and each result is checked against persisted row and cut witness"
       },
       {
-        "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryMcpContractTests",
+        "className": "KeyLoad.UnitTests.QueryExecution.PartitionQueryMcpContractTests",
         "methodName": "McpReadDecoderUsesTheActualGeneratedPartitionQueryRequest",
         "instanceName": "McpReadDecoderUsesTheActualGeneratedPartitionQueryRequest",
         "acceptance": [
@@ -666,7 +666,7 @@
         "operationOutcomeAndState": "official-catalog descriptor decodes actual generated request; forbidden mode returns no-read error and allowed request executes with full page verification"
       },
       {
-        "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryMcpContractTests",
+        "className": "KeyLoad.UnitTests.QueryExecution.PartitionQueryMcpContractTests",
         "methodName": "InvalidPublicVersionFailsBeforeStorageRead",
         "instanceName": "InvalidPublicVersionFailsBeforeStorageRead",
         "acceptance": [
@@ -681,7 +681,7 @@
         "operationOutcomeAndState": "public QueryEngine returns typed Validation and zero execution read calls with unchanged position"
       },
       {
-        "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryMcpContractTests",
+        "className": "KeyLoad.UnitTests.QueryExecution.PartitionQueryMcpContractTests",
         "methodName": "UnsupportedAstVersionFailsBeforeStorageRead",
         "instanceName": "UnsupportedAstVersionFailsBeforeStorageRead",
         "acceptance": [

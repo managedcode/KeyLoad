@@ -1,4 +1,4 @@
-namespace KeyLoad.Core.Features.TimeSeries;
+namespace KeyLoad.Core.TimeSeries;
 
 internal sealed class SampleChunkEncodingPlan
 {

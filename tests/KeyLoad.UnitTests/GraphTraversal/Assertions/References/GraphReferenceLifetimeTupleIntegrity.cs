@@ -1,12 +1,12 @@
-using KeyLoad.Core.Features.DocumentStorage;
+using KeyLoad.Core.DocumentStorage;
 using KeyLoad.Server;
 using KeyLoad.Storage;
-using KeyLoad.UnitTests.Features.Messaging;
-using KeyLoad.UnitTests.Features.ResourceExecution;
+using KeyLoad.UnitTests.Messaging;
+using KeyLoad.UnitTests.ResourceExecution;
 using ManagedCode.Communication.Commands;
-using static KeyLoad.UnitTests.Features.GraphTraversal.GraphReferenceLifetimeProtocol;
+using static KeyLoad.UnitTests.GraphTraversal.GraphReferenceLifetimeProtocol;
 
-namespace KeyLoad.UnitTests.Features.GraphTraversal;
+namespace KeyLoad.UnitTests.GraphTraversal;
 
 /// <summary>Proves actual local corruption rollback and repaired storage while every canonical copy retains its cut.</summary>
 internal static class GraphReferenceLifetimeTupleIntegrity

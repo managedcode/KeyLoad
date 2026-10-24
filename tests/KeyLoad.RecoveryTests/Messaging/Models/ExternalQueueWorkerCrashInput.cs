@@ -1,4 +1,4 @@
-namespace KeyLoad.RecoveryTests.Features.Messaging;
+namespace KeyLoad.RecoveryTests.Messaging;
 
 [Orleans.GenerateSerializer, Orleans.Alias(ExternalQueueWorkerCrashProtocol.InputAlias)]
 internal sealed record ExternalQueueWorkerCrashInput([property: Orleans.Id(0)] string Endpoint,

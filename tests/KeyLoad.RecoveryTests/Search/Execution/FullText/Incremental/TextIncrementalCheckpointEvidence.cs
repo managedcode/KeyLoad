@@ -1,4 +1,4 @@
-namespace KeyLoad.RecoveryTests.Features.Search;
+namespace KeyLoad.RecoveryTests.Search;
 
 /// <summary>Retains test evidence of the actual command and ACK, never projection authority.</summary>
 internal static class TextIncrementalCheckpointEvidence

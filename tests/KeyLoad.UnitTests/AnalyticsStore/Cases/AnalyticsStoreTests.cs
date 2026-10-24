@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.AnalyticsStore;
+namespace KeyLoad.UnitTests.AnalyticsStore;
 
 /// <summary>Actual canonical ordered execution apply plus disposable execution analytics; not public CLUSTER qualification.</summary>
 internal sealed class AnalyticsStoreTests

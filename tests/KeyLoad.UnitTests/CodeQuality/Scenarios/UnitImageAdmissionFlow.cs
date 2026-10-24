@@ -1,10 +1,10 @@
 using System.Text.Json.Nodes;
-using KeyLoad.AppHost.Features.TestInfrastructure;
+using KeyLoad.AppHost.TestInfrastructure;
 using KeyLoad.Server;
-using KeyLoad.UnitTests.Features.CodeQuality.Processes;
+using KeyLoad.UnitTests.CodeQuality.Processes;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.UnitTests.Features.CodeQuality.Helpers;
+namespace KeyLoad.UnitTests.CodeQuality.Helpers;
 
 internal static class UnitImageAdmissionFlow
 {

@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 using System.Text.Json;
-namespace KeyLoad.IntegrationTests.Features.ClientApi;
+namespace KeyLoad.IntegrationTests.ClientApi;
 
 /// <summary>Independently freezes direct and SQL shortest-path tool schemas.</summary>
 internal static class McpGraphPathSchemaAssertions

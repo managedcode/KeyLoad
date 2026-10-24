@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.QueryExecution;
+namespace KeyLoad.IntegrationTests.QueryExecution;
 
 /// <summary>Builds the frozen Q1.Search statement from a real graph Orleans scenario.</summary>
 internal static class SqlGraphSearchClusterScenario

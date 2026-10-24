@@ -1,7 +1,7 @@
 using System.Diagnostics;
-using KeyLoad.UnitTests.Features.CodeQuality.Helpers;
+using KeyLoad.UnitTests.CodeQuality.Helpers;
 
-namespace KeyLoad.UnitTests.Features.CodeQuality.Processes;
+namespace KeyLoad.UnitTests.CodeQuality.Processes;
 
 internal static class CompiledDocumentBudgetReader
 {

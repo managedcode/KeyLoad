@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.Messaging;
+namespace KeyLoad.IntegrationTests.Messaging;
 
 internal sealed record SubscriptionCachedEmptyPublicState(ConfigureSubscriptionRequest Configure, SubscriptionInfo Configured,
     ReceiveSubscriptionRequest Empty, ReceiveSubscriptionResult Original, CommandRequest Publish, CommitReceipt Published,

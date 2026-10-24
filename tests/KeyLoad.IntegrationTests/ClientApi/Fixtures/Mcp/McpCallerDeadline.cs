@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.ClientApi;
+namespace KeyLoad.IntegrationTests.ClientApi;
 
 /// <summary>Owns provider-backed operation deadlines linked to the actual TUnit test lifetime.</summary>
 internal sealed class McpCallerDeadline : IDisposable

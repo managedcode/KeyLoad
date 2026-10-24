@@ -4,7 +4,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Operations;
 
-namespace KeyLoad.Analyzers.Features.CodeQuality;
+namespace KeyLoad.Analyzers.CodeQuality;
 
 /// <summary>Requires synchronous execution engine access while preserving asynchronous Orleans and transport calls.</summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]

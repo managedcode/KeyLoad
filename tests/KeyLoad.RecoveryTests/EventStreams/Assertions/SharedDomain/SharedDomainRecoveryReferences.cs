@@ -1,7 +1,7 @@
-using KeyLoad.Core.Features.ResourceExecution;
-using static KeyLoad.RecoveryTests.Features.EventStreams.SharedDomainProtocol;
+using KeyLoad.Core.ResourceExecution;
+using static KeyLoad.RecoveryTests.EventStreams.SharedDomainProtocol;
 
-namespace KeyLoad.RecoveryTests.Features.EventStreams;
+namespace KeyLoad.RecoveryTests.EventStreams;
 
 /// <summary>Derives literal expected lifetimes only from the original child-issued resource commands.</summary>
 internal static class SharedDomainRecoveryReferences

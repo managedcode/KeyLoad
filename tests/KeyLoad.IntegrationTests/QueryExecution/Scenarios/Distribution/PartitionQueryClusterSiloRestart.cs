@@ -1,10 +1,10 @@
 using Aspire.Hosting.ApplicationModel;
 using KeyLoad.Client;
-using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.StorageReplication;
+using KeyLoad.IntegrationTests.ClientApi;
+using KeyLoad.IntegrationTests.StorageReplication;
 using KeyLoad.Server;
 
-namespace KeyLoad.IntegrationTests.Features.QueryExecution;
+namespace KeyLoad.IntegrationTests.QueryExecution;
 
 /// <summary>Owns the real silo interruption, survivor query and bounded rejoin cleanup.</summary>
 internal static class PartitionQueryClusterSiloRestart

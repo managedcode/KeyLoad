@@ -1,6 +1,6 @@
 using System.Runtime.ExceptionServices;
 
-namespace KeyLoad.Core.Features.AnalyticsStore;
+namespace KeyLoad.Core.AnalyticsStore;
 
 /// <summary>Retains the first execution storage failure without publishing events or dimensions to telemetry.</summary>
 internal sealed class AnalyticsStoreFailures : ZoneTree.Logger.ILogger

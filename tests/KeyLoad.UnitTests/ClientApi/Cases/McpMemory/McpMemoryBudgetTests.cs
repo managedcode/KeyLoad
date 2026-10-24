@@ -1,6 +1,6 @@
 using KeyLoad.Server;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>AC-MCP-004/005: byte leases isolate memory lanes and preserve held capacity across failed growth.</summary>
 internal sealed class McpMemoryBudgetTests

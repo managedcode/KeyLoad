@@ -1,4 +1,4 @@
-namespace KeyLoad.AppHost.Features.TestInfrastructure;
+namespace KeyLoad.AppHost.TestInfrastructure;
 
 /// <summary>Obtains the launch owner's actual exit status from its execution Aspire owner.</summary>
 internal static class ProjectProcessExitObservation

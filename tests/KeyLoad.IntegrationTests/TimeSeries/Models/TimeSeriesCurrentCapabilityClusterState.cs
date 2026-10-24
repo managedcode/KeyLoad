@@ -1,6 +1,6 @@
-using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.ClientApi;
 
-namespace KeyLoad.IntegrationTests.Features.TimeSeries;
+namespace KeyLoad.IntegrationTests.TimeSeries;
 
 internal sealed record TimeSeriesCurrentCapabilityClusterState(TimeSeriesClusterScenario Scenario,
     McpPersistedIdentity Identity, CommandRequest Command, CommitReceipt Receipt, CommandRequest ReaderCommand, CommitReceipt ReaderReceipt,

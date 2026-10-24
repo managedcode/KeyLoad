@@ -1,7 +1,7 @@
 using KeyLoad.Client;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.IntegrationTests.Features.Messaging;
+namespace KeyLoad.IntegrationTests.Messaging;
 
 internal static class QueueWorkerClusterProtocol
 {

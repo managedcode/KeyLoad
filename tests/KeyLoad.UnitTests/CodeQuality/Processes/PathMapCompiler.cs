@@ -1,9 +1,9 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using KeyLoad.UnitTests.Features.CodeQuality.Assertions;
-using KeyLoad.UnitTests.Features.CodeQuality.Helpers;
+using KeyLoad.UnitTests.CodeQuality.Assertions;
+using KeyLoad.UnitTests.CodeQuality.Helpers;
 
-namespace KeyLoad.UnitTests.Features.CodeQuality.Processes;
+namespace KeyLoad.UnitTests.CodeQuality.Processes;
 
 internal static class PathMapCompiler
 {

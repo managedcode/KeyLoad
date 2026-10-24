@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 /// <summary>Borrows the real Server silo's factory and serializers; it owns no replacement cluster.</summary>
 internal sealed class ConnectionServerCluster(Func<RequestCqrsHostedRuntimeFixture> source)

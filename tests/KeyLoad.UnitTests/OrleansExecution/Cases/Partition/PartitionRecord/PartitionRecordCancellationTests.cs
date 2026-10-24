@@ -1,6 +1,6 @@
-using KeyLoad.UnitTests.Features.OrleansExecution.Helpers;
+using KeyLoad.UnitTests.OrleansExecution.Helpers;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal sealed class PartitionRecordCancellationTests
 {
@@ -55,13 +55,13 @@ internal sealed class PartitionRecordCancellationTests
         PartitionRecordFixture.Seed(fixture.Store, rows);
         var position = fixture.Store.Position;
         var sentinel = new InvalidOperationException("Caller examined-work admission rejected the execution read.");
-        KeyLoad.Core.Features.StoragePartitions.Contracts.PartitionRecordPage? page = null;
+        KeyLoad.Core.StoragePartitions.Contracts.PartitionRecordPage? page = null;
         Exception? failure = null;
         var observations = 0;
         long observedBytes = 0;
         try
         {
-            page = fixture.Store.Read(view => KeyLoad.Core.Features.StoragePartitions.Queries.PartitionRecordPageReader.Read(
+            page = fixture.Store.Read(view => KeyLoad.Core.StoragePartitions.Queries.PartitionRecordPageReader.Read(
                 view, Partition, Family, rows.Length, MaximumPageBytes, MaximumPageBytes, bytes =>
                 {
                     observations++;
@@ -90,7 +90,7 @@ internal sealed class PartitionRecordCancellationTests
         PartitionRecordFixture.Seed(fixture.Store, rows);
         var position = fixture.Store.Position;
         var charges = new List<long>();
-        var page = fixture.Store.Read(view => KeyLoad.Core.Features.StoragePartitions.Queries.PartitionRecordPageReader.Read(
+        var page = fixture.Store.Read(view => KeyLoad.Core.StoragePartitions.Queries.PartitionRecordPageReader.Read(
             view, Partition, Family, 1, MaximumPageBytes, MaximumPageBytes, charges.Add));
         await Assert.That(charges.SequenceEqual(rows.Select(row => (long)row.Key.Length + row.Value.Length))).IsTrue();
         await Assert.That(page.ExaminedBytes).IsEqualTo(charges.Sum());

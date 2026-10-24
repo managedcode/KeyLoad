@@ -1,11 +1,11 @@
 using System.Text.Json;
 using Aspire.Hosting;
-using KeyLoad.AppHost.Features.TestInfrastructure;
-using KeyLoad.Diagnostics.Features.ResourceExecution;
+using KeyLoad.AppHost.TestInfrastructure;
+using KeyLoad.Diagnostics.ResourceExecution;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.IntegrationTests.Features.StorageReplication;
+namespace KeyLoad.IntegrationTests.StorageReplication;
 
 internal static class ClusterFixtureApplicationStartup
 {

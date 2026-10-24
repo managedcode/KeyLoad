@@ -1,9 +1,9 @@
 using KeyLoad.Core;
-using KeyLoad.Core.Features.Search;
-using KeyLoad.Query.Features.Search;
+using KeyLoad.Core.Search;
+using KeyLoad.Query.Search;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.Server.Features.Search;
+namespace KeyLoad.Server.Search;
 
 /// <summary>Verifies exact owned publication without unpublishing, promoting or selecting a directory.</summary>
 internal static class AnnProjectionAuthority

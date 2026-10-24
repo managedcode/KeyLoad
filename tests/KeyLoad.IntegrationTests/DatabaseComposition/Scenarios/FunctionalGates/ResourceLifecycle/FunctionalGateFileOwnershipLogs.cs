@@ -1,9 +1,9 @@
 using System.Text;
 using Aspire.Hosting.ApplicationModel;
 using Microsoft.Extensions.DependencyInjection;
-using P = KeyLoad.IntegrationTests.Features.DatabaseComposition.FunctionalGateFileOwnershipProtocol;
+using P = KeyLoad.IntegrationTests.DatabaseComposition.FunctionalGateFileOwnershipProtocol;
 
-namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
+namespace KeyLoad.IntegrationTests.DatabaseComposition;
 
 /// <summary>Retains the original bounded execution refusal prefix while separating batch traversal from stream ownership.</summary>
 internal static class FunctionalGateFileOwnershipLogs

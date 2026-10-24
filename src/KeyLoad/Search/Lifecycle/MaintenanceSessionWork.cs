@@ -1,10 +1,10 @@
 using System.Collections.Immutable;
 using KeyLoad.Core;
-using KeyLoad.Core.Features.ResourceExecution;
-using KeyLoad.Core.Features.StoragePartitions.Contracts;
+using KeyLoad.Core.ResourceExecution;
+using KeyLoad.Core.StoragePartitions.Contracts;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.Server.Features.Search;
+namespace KeyLoad.Server.Search;
 
 /// <summary>Owns one storage maintenance session budget and ledger independently of its temporary request stages.</summary>
 internal sealed class MaintenanceSessionWork : IDisposable, IResourceLifetimeWorkBinding

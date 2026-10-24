@@ -1,8 +1,8 @@
-using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.StorageReplication;
+using KeyLoad.IntegrationTests.ClientApi;
+using KeyLoad.IntegrationTests.StorageReplication;
 using KeyLoad.Server;
 
-namespace KeyLoad.IntegrationTests.Features.Messaging;
+namespace KeyLoad.IntegrationTests.Messaging;
 
 internal static class QueueParkedPolicyClusterCold
 {

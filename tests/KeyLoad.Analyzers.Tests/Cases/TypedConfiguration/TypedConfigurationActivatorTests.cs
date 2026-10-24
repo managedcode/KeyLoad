@@ -1,4 +1,4 @@
-namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
+namespace KeyLoad.Analyzers.Tests.CodeQuality;
 
 /// <summary>AC-CQ-035/037: known execution reflection construction cannot bypass owned options.</summary>
 internal sealed class TypedConfigurationActivatorTests

@@ -2,7 +2,7 @@ using System.Text;
 
 using KeyLoad.RecoveryTests;
 
-namespace KeyLoad.UnitTests.Features.StorageRecovery;
+namespace KeyLoad.UnitTests.StorageRecovery;
 
 internal sealed class ExistingStoreInspectorPipeCapture
 {

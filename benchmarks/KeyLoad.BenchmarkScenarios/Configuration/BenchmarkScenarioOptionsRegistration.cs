@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
+namespace KeyLoad.BenchmarkScenarios.BenchmarkComparisons;
 
 /// <summary>Binds standalone execution fixtures before they acquire storage ownership.</summary>
 [ConfigurationBinding]

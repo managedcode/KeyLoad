@@ -1,9 +1,9 @@
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
-using KeyLoad.UnitTests.Features.ResourceExecution;
+using KeyLoad.UnitTests.ResourceExecution;
 using ManagedCode.Communication;
 
-namespace KeyLoad.UnitTests.Features.EventStreams;
+namespace KeyLoad.UnitTests.EventStreams;
 
 internal sealed class RetainedAppendIdentityFixture : IDisposable
 {
@@ -45,7 +45,7 @@ internal sealed class RetainedAppendIdentityFixture : IDisposable
         CommandRequest command, MutationReceipt[] effects)
     {
         var position = checked(database.LastApplied + 1);
-        var result = KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Apply(database, OperationKind.Batch,
+        var result = KeyLoad.UnitTests.Messaging.QueueWholeFlowStorage.Apply(database, OperationKind.Batch,
             command, command.CommandId, Epoch);
         var receipt = result.Get<CommitReceipt>();
         await RetainedAppendIdentityAssertions.ReceiptAsync(receipt, command.CommandId,

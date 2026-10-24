@@ -1,6 +1,6 @@
 using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Server.Features.OrleansHosting;
+using KeyLoad.Server.OrleansHosting;
 
 namespace KeyLoad.Server;
 

@@ -1,9 +1,9 @@
 using System.Text.Json;
-using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.QueryExecution;
+using KeyLoad.IntegrationTests.ClientApi;
+using KeyLoad.IntegrationTests.QueryExecution;
 using ManagedCode.Communication;
 
-namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
+namespace KeyLoad.IntegrationTests.DatabaseComposition;
 
 internal static class FunctionalGateAnalyticsMixedPublicCalls
 {

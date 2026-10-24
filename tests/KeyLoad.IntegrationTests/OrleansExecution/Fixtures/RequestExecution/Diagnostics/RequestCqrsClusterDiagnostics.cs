@@ -1,10 +1,10 @@
 using System.Text.Json;
 using Aspire.Hosting.ApplicationModel;
-using KeyLoad.IntegrationTests.Features.OrleansExecution.Helpers;
-using KeyLoad.IntegrationTests.Features.StorageReplication;
+using KeyLoad.IntegrationTests.OrleansExecution.Helpers;
+using KeyLoad.IntegrationTests.StorageReplication;
 using KeyLoad.Server;
 
-namespace KeyLoad.IntegrationTests.Features.OrleansExecution;
+namespace KeyLoad.IntegrationTests.OrleansExecution;
 
 /// <summary>Captures only closed MCP rejection values from one actual C1 Aspire wave.</summary>
 internal sealed class RequestCqrsClusterDiagnostics : IAsyncDisposable

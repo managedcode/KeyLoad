@@ -2,7 +2,7 @@ using System.Collections.Immutable;
 using KeyLoad.Storage;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.Core.Features.TimeSeries;
+namespace KeyLoad.Core.TimeSeries;
 
 internal static class SampleChunkWindowSeal
 {

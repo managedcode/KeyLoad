@@ -1,7 +1,7 @@
 using KeyLoad.Core;
-using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.Core.ResourceExecution;
 
-namespace KeyLoad.Query.Features.QueryExecution;
+namespace KeyLoad.Query.QueryExecution;
 
 internal static class PartitionQueryPublicExecution
 {

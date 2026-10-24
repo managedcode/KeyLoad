@@ -2,10 +2,10 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using KeyLoad.Server;
-using KeyLoad.UnitTests.Features.BackupRestore;
-using KeyLoad.UnitTests.Features.TestInfrastructure;
+using KeyLoad.UnitTests.BackupRestore;
+using KeyLoad.UnitTests.TestInfrastructure;
 
-namespace KeyLoad.UnitTests.Features.CodeQuality;
+namespace KeyLoad.UnitTests.CodeQuality;
 
 internal static class CoverageMergeChildProcess
 {

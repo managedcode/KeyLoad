@@ -2,7 +2,7 @@ using System.Buffers;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace KeyLoad.Features.ResourceExecution;
+namespace KeyLoad.ResourceExecution;
 
 /// <summary>Owns a bounded reusable UTF-8 input loan for canonical JSON text decoding.</summary>
 internal static class PooledJsonText

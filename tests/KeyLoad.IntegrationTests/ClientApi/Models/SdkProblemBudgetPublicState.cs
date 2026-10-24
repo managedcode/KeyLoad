@@ -1,5 +1,5 @@
-using KeyLoad.IntegrationTests.Features.DocumentStorage;
-namespace KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.DocumentStorage;
+namespace KeyLoad.IntegrationTests.ClientApi;
 
 internal sealed record SdkProblemBudgetPublicState(McpPersistedIdentity Identity,
     CommandRequest Seed, CommitReceipt SeedReceipt, CommandRequest Denied, CommandRequest Healthy,

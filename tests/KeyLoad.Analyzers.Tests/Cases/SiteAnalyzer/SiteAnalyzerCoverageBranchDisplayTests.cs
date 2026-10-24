@@ -1,6 +1,6 @@
 using System.Text.Json;
 
-namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
+namespace KeyLoad.Analyzers.Tests.CodeQuality;
 
 /// <summary>AC-BC-027 and AC-CQ-009: execution display precision never replaces integer branch evidence.</summary>
 [NotInParallel(SiteAnalyzerCoverageTokens.ProcessIsolationKey)]

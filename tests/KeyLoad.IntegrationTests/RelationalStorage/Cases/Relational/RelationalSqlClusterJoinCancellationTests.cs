@@ -1,8 +1,8 @@
 using KeyLoad.Client;
-using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.QueryExecution;
+using KeyLoad.IntegrationTests.ClientApi;
+using KeyLoad.IntegrationTests.QueryExecution;
 
-namespace KeyLoad.IntegrationTests.Features.RelationalStorage;
+namespace KeyLoad.IntegrationTests.RelationalStorage;
 
 /// <summary>Checks caller cancellation and a healthy joined read through actual Orleans clients.</summary>
 [ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = McpCallerProtocol.FixtureKey)]

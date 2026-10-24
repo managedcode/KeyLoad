@@ -1,8 +1,8 @@
 using System.Collections.Immutable;
-using KeyLoad.IntegrationTests.Features.GraphTraversal;
-using KeyLoad.IntegrationTests.Features.QueryExecution;
+using KeyLoad.IntegrationTests.GraphTraversal;
+using KeyLoad.IntegrationTests.QueryExecution;
 
-namespace KeyLoad.IntegrationTests.Features.ClientApi;
+namespace KeyLoad.IntegrationTests.ClientApi;
 
 /// <summary>The accepted ADR-039 public schema and effect oracle, independent of server implementation objects.</summary>
 internal static class McpCatalogExpectations

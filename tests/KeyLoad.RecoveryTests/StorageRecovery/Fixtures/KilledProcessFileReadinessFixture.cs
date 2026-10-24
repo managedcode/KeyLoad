@@ -2,7 +2,7 @@ using System.Runtime.ExceptionServices;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 
-namespace KeyLoad.RecoveryTests.Features.StorageRecovery;
+namespace KeyLoad.RecoveryTests.StorageRecovery;
 
 internal sealed class KilledProcessFileReadinessFixture : IAsyncDisposable
 {

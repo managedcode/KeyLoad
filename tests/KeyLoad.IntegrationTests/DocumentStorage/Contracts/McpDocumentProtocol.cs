@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.DocumentStorage;
+namespace KeyLoad.IntegrationTests.DocumentStorage;
 
 /// <summary>Named genuine document scenario values and public expected outcome bounds.</summary>
 internal static class McpDocumentProtocol

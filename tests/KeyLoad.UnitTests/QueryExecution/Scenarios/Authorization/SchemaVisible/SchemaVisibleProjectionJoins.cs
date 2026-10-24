@@ -1,8 +1,8 @@
 using KeyLoad.Query;
-using J = KeyLoad.UnitTests.Features.QueryExecution.SqlEventReferenceJoinFixture;
-using P = KeyLoad.UnitTests.Features.QueryExecution.SchemaVisibleProjectionProtocol;
+using J = KeyLoad.UnitTests.QueryExecution.SqlEventReferenceJoinFixture;
+using P = KeyLoad.UnitTests.QueryExecution.SchemaVisibleProjectionProtocol;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal static class SchemaVisibleProjectionJoins
 {

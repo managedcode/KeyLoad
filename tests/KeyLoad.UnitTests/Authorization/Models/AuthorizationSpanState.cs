@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.Authorization;
+namespace KeyLoad.UnitTests.Authorization;
 
 internal sealed record AuthorizationSpanState(string Source, bool Recorded, string TraceId,
     string SpanId, string ParentSpanId, string[] Events, AuthorizationLinkState[] Links,

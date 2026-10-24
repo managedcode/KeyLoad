@@ -1,10 +1,10 @@
 using System.Text.Json;
-using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.ClientApi;
 using ManagedCode.Communication;
 using ModelContextProtocol.Protocol;
-using P = KeyLoad.IntegrationTests.Features.QueryExecution.ScriptDomNamedParameterClusterProtocol;
+using P = KeyLoad.IntegrationTests.QueryExecution.ScriptDomNamedParameterClusterProtocol;
 
-namespace KeyLoad.IntegrationTests.Features.QueryExecution;
+namespace KeyLoad.IntegrationTests.QueryExecution;
 
 internal static class ScriptDomNamedParameterClusterRefusals
 {

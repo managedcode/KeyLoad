@@ -1,7 +1,7 @@
-using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.Core.ResourceExecution;
 using KeyLoad.Storage;
 
-namespace KeyLoad.UnitTests.Features.Messaging;
+namespace KeyLoad.UnitTests.Messaging;
 
 internal sealed class SourceReadBudgetTests
 {

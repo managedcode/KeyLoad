@@ -1,7 +1,7 @@
 using KeyLoad.Query;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.IntegrationTests.Features.QueryExecution;
+namespace KeyLoad.IntegrationTests.QueryExecution;
 
 internal sealed record MetamorphicPublicPlan(QueryRequest Sql, AstQueryRequest Parsed, AstQueryRequest Json, AstQueryRequest CSharp)
 {

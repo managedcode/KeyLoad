@@ -1,9 +1,9 @@
 using System.Security.Cryptography;
 using System.Text.Json;
 using System.Text.RegularExpressions;
-using KeyLoad.UnitTests.Features.CodeQuality.Processes;
+using KeyLoad.UnitTests.CodeQuality.Processes;
 
-namespace KeyLoad.UnitTests.Features.CodeQuality.Assertions;
+namespace KeyLoad.UnitTests.CodeQuality.Assertions;
 
 internal static class ProductionSourceManifestImageAssertions
 {

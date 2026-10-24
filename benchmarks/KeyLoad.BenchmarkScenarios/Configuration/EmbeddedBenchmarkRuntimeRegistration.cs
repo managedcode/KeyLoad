@@ -1,9 +1,9 @@
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
-using KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
+using KeyLoad.Storage.ZoneTree.ResourceExecution;
 using Microsoft.Extensions.Configuration;
 
-namespace KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
+namespace KeyLoad.BenchmarkScenarios.BenchmarkComparisons;
 
 /// <summary>Binds the actual generated runner's environment to execution fixture policies.</summary>
 [ConfigurationBinding]

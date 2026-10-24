@@ -1,9 +1,9 @@
 using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Core.Features.Authorization;
-using KeyLoad.Core.Features.ResourceExecution;
-using KeyLoad.Query.Features.Search;
-using KeyLoad.Server.Features.Search;
+using KeyLoad.Core.Authorization;
+using KeyLoad.Core.ResourceExecution;
+using KeyLoad.Query.Search;
+using KeyLoad.Server.Search;
 
 namespace KeyLoad.Server;
 

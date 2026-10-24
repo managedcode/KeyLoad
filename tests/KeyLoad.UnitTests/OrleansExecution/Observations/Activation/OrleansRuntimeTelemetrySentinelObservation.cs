@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using System.Globalization;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal sealed record OrleansRuntimeTelemetrySentinelObservation(
     OrleansRuntimeTelemetryMutation Mutation,

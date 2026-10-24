@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.ClientApi;
+namespace KeyLoad.IntegrationTests.ClientApi;
 
 /// <summary>Named public wire and qualification bounds for genuine official MCP callers.</summary>
 internal static class McpCallerProtocol

@@ -1,5 +1,5 @@
 using System.Collections.Immutable;
-using KeyLoad.Core.Features.StoragePartitions.Contracts;
+using KeyLoad.Core.StoragePartitions.Contracts;
 
 namespace KeyLoad.Clustering;
 

@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.RelationalStorage;
+namespace KeyLoad.IntegrationTests.RelationalStorage;
 
 internal enum JoinBudgetKind
 {

@@ -1,8 +1,8 @@
 using System.Collections.Immutable;
-using KeyLoad.Query.Features.Search;
-using static KeyLoad.UnitTests.Features.Search.AnnProviderQualificationProtocol;
+using KeyLoad.Query.Search;
+using static KeyLoad.UnitTests.Search.AnnProviderQualificationProtocol;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 internal static class AnnProviderQualificationCorpus
 {

@@ -1,4 +1,4 @@
-namespace KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
+namespace KeyLoad.Storage.ZoneTree.ResourceExecution;
 
 /// <summary>Bounded fill admission and generation-checked candidate publication.</summary>
 internal static class ZoneTreePointCacheFills

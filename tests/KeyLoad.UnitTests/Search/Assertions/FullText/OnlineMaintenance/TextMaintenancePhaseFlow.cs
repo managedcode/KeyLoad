@@ -1,6 +1,6 @@
 using KeyLoad.Clustering;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 /// <summary>Runs the original persisted page intent, actual execution postings and actual canonical checkpoint ACK.</summary>
 internal static class TextMaintenancePhaseFlow

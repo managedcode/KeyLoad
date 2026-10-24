@@ -1,9 +1,9 @@
-using KeyLoad.UnitTests.Features.ResourceExecution;
+using KeyLoad.UnitTests.ResourceExecution;
 using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
-using P = KeyLoad.UnitTests.Features.TimeSeries.SampleChunkCanonicalFixture;
+using P = KeyLoad.UnitTests.TimeSeries.SampleChunkCanonicalFixture;
 
-namespace KeyLoad.UnitTests.Features.TimeSeries;
+namespace KeyLoad.UnitTests.TimeSeries;
 
 internal static class SampleSequenceIntegrityAssertions
 {

@@ -1,7 +1,7 @@
 using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Jobs;
 
-namespace KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
+namespace KeyLoad.BenchmarkScenarios.BenchmarkComparisons;
 
 /// <summary>Provides the reflection-created BenchmarkDotNet loop policy for raw storage.</summary>
 public sealed class RawStorageUnrollConfiguration : ManualConfig

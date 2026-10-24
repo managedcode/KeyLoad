@@ -1,12 +1,12 @@
 using System.Security.Cryptography;
 using KeyLoad.Core;
-using KeyLoad.RecoveryTests.Features.DocumentStorage;
+using KeyLoad.RecoveryTests.DocumentStorage;
 using KeyLoad.Storage.ZoneTree;
 using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
-using static KeyLoad.RecoveryTests.Features.EventStreams.SharedDomainProtocol;
+using static KeyLoad.RecoveryTests.EventStreams.SharedDomainProtocol;
 
-namespace KeyLoad.RecoveryTests.Features.EventStreams;
+namespace KeyLoad.RecoveryTests.EventStreams;
 
 internal static class SharedDomainCrashScenario
 {

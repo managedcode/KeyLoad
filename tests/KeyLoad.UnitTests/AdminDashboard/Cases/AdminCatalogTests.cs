@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.AdminDashboard;
+namespace KeyLoad.UnitTests.AdminDashboard;
 
 internal sealed class AdminCatalogTests
 {

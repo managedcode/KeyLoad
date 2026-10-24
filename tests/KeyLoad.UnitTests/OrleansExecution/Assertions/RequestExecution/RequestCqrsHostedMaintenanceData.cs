@@ -1,7 +1,7 @@
-using KeyLoad.Server.Features.Search;
-using KeyLoad.UnitTests.Features.Search;
+using KeyLoad.Server.Search;
+using KeyLoad.UnitTests.Search;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 /// <summary>Production storage setup and independent persisted outcome replay.</summary>
 internal static class RequestCqrsHostedMaintenanceData

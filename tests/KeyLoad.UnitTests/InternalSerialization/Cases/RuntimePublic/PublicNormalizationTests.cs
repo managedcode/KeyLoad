@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.InternalSerialization;
+namespace KeyLoad.UnitTests.InternalSerialization;
 
 internal sealed class PublicNormalizationTests
 {
@@ -97,7 +97,7 @@ internal sealed class PublicNormalizationTests
     {
         using var database = new TestDatabase();
         var operation = PublicNormalizationFixture.Create(database, PublicShape.NullGrant,
-            targetPrincipal: KeyLoad.Core.Features.RuntimeJournaling.Identity.RuntimeJournalIdentity.ProtectedPrincipalId);
+            targetPrincipal: KeyLoad.Core.RuntimeJournaling.Identity.RuntimeJournalIdentity.ProtectedPrincipalId);
         await PublicNormalizationChecks.DurableFailureAsync(database, operation, ErrorCode.PermissionDenied,
             "The runtime journal request is invalid.");
     }

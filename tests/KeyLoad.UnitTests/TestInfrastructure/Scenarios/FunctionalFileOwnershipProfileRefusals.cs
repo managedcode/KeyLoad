@@ -1,9 +1,9 @@
-using KeyLoad.AppHost.Features.StorageRecovery;
-using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.AppHost.Hosting;
-using P = KeyLoad.UnitTests.Features.TestInfrastructure.FunctionalColdReopenProfileProtocol;
+using KeyLoad.AppHost.StorageRecovery;
+using KeyLoad.AppHost.TestInfrastructure;
+using P = KeyLoad.UnitTests.TestInfrastructure.FunctionalColdReopenProfileProtocol;
 
-namespace KeyLoad.UnitTests.Features.TestInfrastructure;
+namespace KeyLoad.UnitTests.TestInfrastructure;
 
 internal static class FunctionalFileOwnershipProfileRefusals
 {

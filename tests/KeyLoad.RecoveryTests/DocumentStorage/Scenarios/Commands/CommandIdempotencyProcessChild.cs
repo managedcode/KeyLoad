@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using System.Runtime.ExceptionServices;
 
-namespace KeyLoad.RecoveryTests.Features.DocumentStorage;
+namespace KeyLoad.RecoveryTests.DocumentStorage;
 
 internal sealed class CommandIdempotencyProcessChild
 {

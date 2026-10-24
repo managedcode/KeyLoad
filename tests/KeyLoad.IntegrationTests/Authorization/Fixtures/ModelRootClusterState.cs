@@ -1,6 +1,6 @@
 using KeyLoad.Query;
 
-namespace KeyLoad.IntegrationTests.Features.Authorization;
+namespace KeyLoad.IntegrationTests.Authorization;
 
 internal sealed record ModelRootClusterState(PartitionRef Partition, bool Queue, bool HeaderRoot, string Resource,
     string Reader, string Key, CommandRequest Seed, CommitReceipt Receipt, QueryRow Original)

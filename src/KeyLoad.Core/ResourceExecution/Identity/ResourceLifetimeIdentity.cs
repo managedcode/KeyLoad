@@ -1,9 +1,9 @@
 using System.Security.Cryptography;
-using KeyLoad.Core.Features.InternalSerialization;
+using KeyLoad.Core.InternalSerialization;
 using KeyLoad.Storage;
 using ManagedCode.Communication.Commands;
 
-namespace KeyLoad.Core.Features.ResourceExecution;
+namespace KeyLoad.Core.ResourceExecution;
 
 /// <summary>Derives active creation identity from the original canonical operation without changing its fingerprint.</summary>
 internal static class ResourceLifetimeIdentity

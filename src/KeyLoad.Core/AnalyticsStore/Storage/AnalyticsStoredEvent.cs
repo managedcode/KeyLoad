@@ -1,4 +1,4 @@
-namespace KeyLoad.Core.Features.AnalyticsStore;
+namespace KeyLoad.Core.AnalyticsStore;
 
 [Orleans.GenerateSerializer]
 [Orleans.Alias(AnalyticsStoredEvent.Alias)]

@@ -1,8 +1,8 @@
 using KeyLoad.Storage;
 using ManagedCode.Communication.Commands;
-using static KeyLoad.RecoveryTests.Features.EventStreams.SharedDomainProtocol;
+using static KeyLoad.RecoveryTests.EventStreams.SharedDomainProtocol;
 
-namespace KeyLoad.UnitTests.Features.EventStreams;
+namespace KeyLoad.UnitTests.EventStreams;
 
 internal static class SharedDomainRefusalImage
 {

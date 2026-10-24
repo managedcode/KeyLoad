@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 /// <summary>AC-SQLC-002/004: trivia boundaries and bounded scalar progress.</summary>
 internal sealed class SqlTriviaReaderTests
@@ -113,7 +113,7 @@ internal sealed class SqlTriviaReaderTests
     {
         var options = UnitExecutionOptions.DatabaseLimits(new DatabaseLimits { MaxQueryDepth = depth });
         var budget = new global::KeyLoad.Core.ReadExecutionBudget(options);
-        using var reader = new global::KeyLoad.Features.QueryExecution.ScriptDomBoundedReader(sql, budget.Check);
+        using var reader = new global::KeyLoad.QueryExecution.ScriptDomBoundedReader(sql, budget.Check);
         var parser = new global::Microsoft.SqlServer.TransactSql.ScriptDom.TSql180Parser(true,
             global::Microsoft.SqlServer.TransactSql.ScriptDom.SqlEngineType.Standalone);
         var tokens = parser.GetTokenStream(reader, out var errors);
@@ -121,14 +121,14 @@ internal sealed class SqlTriviaReaderTests
         {
             throw new InvalidOperationException("The execution token fixture is malformed.");
         }
-        global::KeyLoad.Features.QueryExecution.ScriptDomTokenBounds.Require(tokens, options.Value, budget.Check);
+        global::KeyLoad.QueryExecution.ScriptDomTokenBounds.Require(tokens, options.Value, budget.Check);
         return tokens;
     }
 
     private static async Task CopyAsync(string sql)
     {
         var budget = new global::KeyLoad.Core.ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits());
-        using var reader = new global::KeyLoad.Features.QueryExecution.ScriptDomBoundedReader(sql, budget.Check);
+        using var reader = new global::KeyLoad.QueryExecution.ScriptDomBoundedReader(sql, budget.Check);
         var copied = new global::System.Text.StringBuilder();
         var buffer = new char[OriginalChunkCharacters];
         while (await reader.ReadAsync(buffer.AsMemory(), TestContext.Current!.Execution.CancellationToken) is var count && count > 0)

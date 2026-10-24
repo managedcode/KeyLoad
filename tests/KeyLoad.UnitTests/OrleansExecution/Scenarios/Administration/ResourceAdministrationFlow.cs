@@ -1,8 +1,8 @@
 using KeyLoad.Clustering;
 using KeyLoad.Server;
-using L = KeyLoad.UnitTests.Features.RelationalStorage.SqlCreateTableLiteral;
+using L = KeyLoad.UnitTests.RelationalStorage.SqlCreateTableLiteral;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 /// <summary>Preserves the administrator law through the public command envelope and production Orleans hosts.</summary>
 internal static class ResourceAdministrationFlow

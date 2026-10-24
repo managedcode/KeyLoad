@@ -1,8 +1,8 @@
-using KeyLoad.Features.QueryExecution;
+using KeyLoad.QueryExecution;
 using Microsoft.Extensions.Options;
 using Dom = Microsoft.SqlServer.TransactSql.ScriptDom;
 
-namespace KeyLoad.Query.Features.QueryExecution;
+namespace KeyLoad.Query.QueryExecution;
 
 internal static class ScriptDomGraphShape
 {

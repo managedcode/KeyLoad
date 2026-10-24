@@ -3,7 +3,7 @@ using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal static class QueryAdapterIndexedPages
 {

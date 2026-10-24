@@ -1,7 +1,7 @@
-using static KeyLoad.UnitTests.Features.EventStreams.EventQueueStateEnvelopeCommands;
-using static KeyLoad.UnitTests.Features.EventStreams.EventQueueStateEnvelopeProtocol;
+using static KeyLoad.UnitTests.EventStreams.EventQueueStateEnvelopeCommands;
+using static KeyLoad.UnitTests.EventStreams.EventQueueStateEnvelopeProtocol;
 
-namespace KeyLoad.UnitTests.Features.EventStreams;
+namespace KeyLoad.UnitTests.EventStreams;
 
 internal static class EventQueueStateEnvelopeQueueContinuation
 {
@@ -74,7 +74,7 @@ internal static class EventQueueStateEnvelopeQueueContinuation
         _ = await SubmitAsync(fixture, state, OperationKind.Processing, request.CommandId, request, fixture.ScheduledAt, expected);
         await Assert.That(fixture.Store.Position).IsEqualTo(expectedPosition);
         await Assert.That(fixture.Database.LastApplied).IsEqualTo(expectedCanonicalPosition);
-        await Assert.That(KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Clock(fixture.Store)).IsEqualTo(fixture.ScheduledAt);
+        await Assert.That(KeyLoad.UnitTests.Messaging.QueueWholeFlowStorage.Clock(fixture.Store)).IsEqualTo(fixture.ScheduledAt);
         await Assert.That(Domain(fixture, request.CommandId)).IsEquivalentTo(before,
             TUnit.Assertions.Enums.CollectionOrdering.Matching);
         await EventQueueStateEnvelopeHistoryAssertions.InboxAsync(fixture, state);
@@ -91,7 +91,7 @@ internal static class EventQueueStateEnvelopeQueueContinuation
         var locator = Convert.ToHexString(KeySpace.OutcomeLocator(fixture.Partition, Root, id)) + RowSeparator;
         var clock = Convert.ToHexString(KeySpace.Clock.Span) + RowSeparator;
         var applied = Convert.ToHexString(KeySpace.AppliedBytes) + RowSeparator;
-        return KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(fixture.Store)
+        return KeyLoad.UnitTests.Messaging.QueueWholeFlowStorage.Bytes(fixture.Store)
             .Where(row => !row.StartsWith(outcome, StringComparison.Ordinal)
                 && !row.StartsWith(locator, StringComparison.Ordinal)
                 && !row.StartsWith(clock, StringComparison.Ordinal)

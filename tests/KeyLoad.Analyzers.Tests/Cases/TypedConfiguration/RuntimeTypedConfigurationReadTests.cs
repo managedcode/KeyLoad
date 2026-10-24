@@ -1,4 +1,4 @@
-namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
+namespace KeyLoad.Analyzers.Tests.CodeQuality;
 
 /// <summary>AC-CQ-035/037: execution provider/debug/environment reads remain inside binding.</summary>
 internal sealed class RuntimeTypedConfigurationReadTests

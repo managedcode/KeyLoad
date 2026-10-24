@@ -1,6 +1,6 @@
 using System.Text.Json;
 using KeyLoad.Core;
-using KeyLoad.Core.Features.Authorization;
+using KeyLoad.Core.Authorization;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 using ManagedCode.Communication;

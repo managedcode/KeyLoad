@@ -103,6 +103,6 @@ public static class QueryExecutionQueries
             return;
         }
 
-        Features.QueryExecution.ModelQueryReadRows.Visit(engine, view, principal, partition, resource, source, budget, explain, accept);
+        QueryExecution.ModelQueryReadRows.Visit(engine, view, principal, partition, resource, source, budget, explain, accept);
     }
 }

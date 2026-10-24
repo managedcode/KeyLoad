@@ -1,4 +1,4 @@
-namespace KeyLoad.AppHost.Features.TestInfrastructure;
+namespace KeyLoad.AppHost.TestInfrastructure;
 
 /// <summary>Creates execution silo resource names for configured and explicitly qualified comparison topologies.</summary>
 internal static class ClusterTopologyNodeNames

@@ -1,9 +1,9 @@
 using KeyLoad.Client;
-using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.OrleansExecution;
-using KeyLoad.IntegrationTests.Features.QueryExecution;
+using KeyLoad.IntegrationTests.ClientApi;
+using KeyLoad.IntegrationTests.OrleansExecution;
+using KeyLoad.IntegrationTests.QueryExecution;
 
-namespace KeyLoad.IntegrationTests.Features.GraphTraversal;
+namespace KeyLoad.IntegrationTests.GraphTraversal;
 
 internal static class GraphIncomingPublicPolicy
 {

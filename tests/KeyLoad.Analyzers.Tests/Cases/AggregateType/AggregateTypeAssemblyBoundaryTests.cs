@@ -1,6 +1,6 @@
 using Microsoft.CodeAnalysis;
 
-namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
+namespace KeyLoad.Analyzers.Tests.CodeQuality;
 
 /// <summary>The type-size limit applies to the original database engine without a named exemption.</summary>
 internal sealed class AggregateTypeAssemblyBoundaryTests

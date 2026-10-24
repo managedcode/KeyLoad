@@ -1,4 +1,4 @@
-namespace KeyLoad.Client.Features.ClientApi;
+namespace KeyLoad.Client.ClientApi;
 
 internal static class ClientTransportMessages
 {

@@ -2,7 +2,7 @@ using KeyLoad.Clustering;
 using KeyLoad.Server;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal static class RequestDrainLifecycleFlow
 {

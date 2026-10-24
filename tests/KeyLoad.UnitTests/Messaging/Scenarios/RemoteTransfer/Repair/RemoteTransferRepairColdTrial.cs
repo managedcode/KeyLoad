@@ -1,6 +1,6 @@
-using KeyLoad.Core.Features.Messaging;
+using KeyLoad.Core.Messaging;
 
-namespace KeyLoad.UnitTests.Features.Messaging;
+namespace KeyLoad.UnitTests.Messaging;
 
 internal static class RemoteTransferRepairColdTrial
 {

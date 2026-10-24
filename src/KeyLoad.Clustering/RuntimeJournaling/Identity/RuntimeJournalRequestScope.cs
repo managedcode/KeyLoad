@@ -1,4 +1,4 @@
-using KeyLoad.Core.Features.RuntimeJournaling.Identity;
+using KeyLoad.Core.RuntimeJournaling.Identity;
 
 namespace KeyLoad.Clustering;
 

@@ -1,8 +1,8 @@
 using KeyLoad.Core;
-using KeyLoad.Core.Features.DocumentStorage;
-using KeyLoad.Core.Features.GraphTraversal;
-using KeyLoad.Core.Features.ResourceExecution;
-using KeyLoad.Query.Features.Search;
+using KeyLoad.Core.DocumentStorage;
+using KeyLoad.Core.GraphTraversal;
+using KeyLoad.Core.ResourceExecution;
+using KeyLoad.Query.Search;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Query;

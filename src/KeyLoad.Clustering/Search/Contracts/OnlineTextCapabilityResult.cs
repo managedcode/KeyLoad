@@ -1,5 +1,5 @@
 using ManagedCode.Communication.Commands;
-namespace KeyLoad.Clustering.Features.Search;
+namespace KeyLoad.Clustering.Search;
 
 [global::Orleans.GenerateSerializer, global::Orleans.Alias(OnlineTextRequestScope.CapabilityResultAlias)]
 internal sealed record OnlineTextCapabilityResult(

@@ -1,10 +1,10 @@
 using KeyLoad.Server;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
-using KeyLoad.UnitTests.Features.Messaging;
-using KeyLoad.UnitTests.Features.StorageRecovery;
+using KeyLoad.UnitTests.Messaging;
+using KeyLoad.UnitTests.StorageRecovery;
 
-namespace KeyLoad.UnitTests.Features.ResourceExecution;
+namespace KeyLoad.UnitTests.ResourceExecution;
 
 internal static class ResourceIncarnationCold
 {

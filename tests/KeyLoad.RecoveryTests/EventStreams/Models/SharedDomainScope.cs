@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 
-namespace KeyLoad.RecoveryTests.Features.EventStreams;
+namespace KeyLoad.RecoveryTests.EventStreams;
 
 internal sealed record SharedDomainScope(PartitionRef Partition, string? Documents, string? Streams, string? Queue, string Payload)
 {

@@ -2,7 +2,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using KeyLoad.Server;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>Independent public JSON and actual typed execution-payload assertions for MCP DTO cases.</summary>
 internal static class McpPayloadAssertions

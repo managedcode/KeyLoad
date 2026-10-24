@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.Authorization;
+namespace KeyLoad.IntegrationTests.Authorization;
 
 internal sealed record SafeProjectorOperationClusterSelection(string Id, string SqlSource, string Path,
     string MaskedJson, string RawJson, string? HiddenSourcePath)

@@ -1,6 +1,6 @@
 using System.ComponentModel;
 
-namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
+namespace KeyLoad.SiteTests.BenchmarkComparisons;
 
 internal sealed class SiteHeavyChildCleanupTests
 {

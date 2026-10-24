@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.GraphTraversal;
+namespace KeyLoad.UnitTests.GraphTraversal;
 
 /// <summary>Independent directed edge input for bounded reachability expectations.</summary>
 internal sealed record GraphTraversalReferenceEdge(

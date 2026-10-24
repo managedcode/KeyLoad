@@ -1,4 +1,4 @@
-namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
+namespace KeyLoad.SiteTests.BenchmarkComparisons;
 
 /// <summary>Current executable session intake and browser source inventory.</summary>
 internal static class SiteCoverageSourceInventory

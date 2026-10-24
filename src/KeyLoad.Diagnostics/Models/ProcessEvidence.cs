@@ -1,4 +1,4 @@
-namespace KeyLoad.Diagnostics.Features.ResourceExecution;
+namespace KeyLoad.Diagnostics.ResourceExecution;
 
 /// <summary>Detached identity of one observed execution process; it establishes no resource equivalence or readiness.</summary>
 /// <param name="Name">The actual owning resource or workload-client name.</param>

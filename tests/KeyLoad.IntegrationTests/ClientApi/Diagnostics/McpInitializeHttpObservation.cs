@@ -1,7 +1,7 @@
 using System.Text.Json;
 using KeyLoad.Server;
 
-namespace KeyLoad.IntegrationTests.Features.ClientApi;
+namespace KeyLoad.IntegrationTests.ClientApi;
 
 /// <summary>Passively records bounded HTTP completion facts during execution initialization only.</summary>
 internal sealed class McpInitializeHttpObservation(HttpMessageHandler inner) : DelegatingHandler(inner)

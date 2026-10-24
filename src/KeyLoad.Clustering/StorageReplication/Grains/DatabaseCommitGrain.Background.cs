@@ -1,6 +1,6 @@
 using KeyLoad.Core;
-using KeyLoad.Core.Features.Messaging;
-using KeyLoad.Core.Features.TimeSeries;
+using KeyLoad.Core.Messaging;
+using KeyLoad.Core.TimeSeries;
 
 namespace KeyLoad.Clustering;
 

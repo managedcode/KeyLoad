@@ -1,4 +1,4 @@
-namespace KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
+namespace KeyLoad.Storage.ZoneTree.ResourceExecution;
 
 /// <summary>Centrally configured disposable cache retention, lookup, pin and eviction work limits.</summary>
 [ConfigurationOptions]

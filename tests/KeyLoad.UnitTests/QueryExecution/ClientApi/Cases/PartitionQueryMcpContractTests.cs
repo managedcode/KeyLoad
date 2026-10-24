@@ -1,10 +1,10 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using KeyLoad.Query;
-using KeyLoad.UnitTests.Features.ClientApi;
-using KeyLoad.UnitTests.Features.Search;
+using KeyLoad.UnitTests.ClientApi;
+using KeyLoad.UnitTests.Search;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal sealed class PartitionQueryMcpContractTests
 {

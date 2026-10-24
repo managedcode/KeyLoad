@@ -1,8 +1,8 @@
-using KeyLoad.Core.Features.Search;
+using KeyLoad.Core.Search;
 using KeyLoad.Storage;
 using ManagedCode.Communication.Commands;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 internal static class TextBm25EligibilityPolicy
 {

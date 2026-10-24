@@ -1,4 +1,4 @@
-namespace KeyLoad.Server.Features.Search;
+namespace KeyLoad.Server.Search;
 
 /// <summary>Actual disposable execution-generation boundaries for owned process recovery trials.</summary>
 internal enum TextFaultStage

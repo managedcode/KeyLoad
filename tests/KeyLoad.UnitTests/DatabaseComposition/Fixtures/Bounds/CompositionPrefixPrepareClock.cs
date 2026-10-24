@@ -1,6 +1,6 @@
-using D = KeyLoad.UnitTests.Features.DatabaseComposition.CompositionPrefixPrepareData;
+using D = KeyLoad.UnitTests.DatabaseComposition.CompositionPrefixPrepareData;
 
-namespace KeyLoad.UnitTests.Features.DatabaseComposition;
+namespace KeyLoad.UnitTests.DatabaseComposition;
 
 internal static class CompositionPrefixPrepareClock
 {

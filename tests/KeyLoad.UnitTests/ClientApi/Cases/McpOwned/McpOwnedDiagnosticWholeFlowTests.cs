@@ -1,9 +1,9 @@
 using System.Text.Json;
-using KeyLoad.UnitTests.Features.Messaging;
-using KeyLoad.UnitTests.Features.Search;
+using KeyLoad.UnitTests.Messaging;
+using KeyLoad.UnitTests.Search;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 internal sealed class McpOwnedDiagnosticWholeFlowTests
 {

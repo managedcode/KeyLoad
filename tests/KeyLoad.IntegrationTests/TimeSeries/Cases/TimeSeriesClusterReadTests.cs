@@ -1,7 +1,7 @@
 using KeyLoad.Client;
-using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.ClientApi;
 
-namespace KeyLoad.IntegrationTests.Features.TimeSeries;
+namespace KeyLoad.IntegrationTests.TimeSeries;
 
 /// <summary>AC-SERIES-008..011: real SDK and official MCP reads share persisted state and authority.</summary>
 [ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = McpCallerProtocol.FixtureKey)]

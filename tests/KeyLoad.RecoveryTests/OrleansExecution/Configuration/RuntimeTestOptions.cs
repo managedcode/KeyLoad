@@ -1,4 +1,4 @@
-namespace KeyLoad.RecoveryTests.Features.OrleansExecution;
+namespace KeyLoad.RecoveryTests.OrleansExecution;
 
 /// <summary>Central timing profile shared by real execution journal and job fixtures.</summary>
 [ConfigurationOptions]

@@ -1,10 +1,10 @@
 using System.Text.Json;
 using KeyLoad.Storage.ZoneTree;
-using KeyLoad.UnitTests.Features.ResourceExecution;
+using KeyLoad.UnitTests.ResourceExecution;
 using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
 
-namespace KeyLoad.UnitTests.Features.Messaging;
+namespace KeyLoad.UnitTests.Messaging;
 
 internal static class SubscriptionPausedDrainFlow
 {

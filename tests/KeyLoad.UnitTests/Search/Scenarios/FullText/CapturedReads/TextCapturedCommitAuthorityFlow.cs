@@ -1,8 +1,8 @@
 using KeyLoad.Server;
-using A = KeyLoad.UnitTests.Features.Search.TextCapturedCommitAuthorityAssertions;
-using P = KeyLoad.UnitTests.Features.Search.TextCapturedCommitAuthorityProtocol;
+using A = KeyLoad.UnitTests.Search.TextCapturedCommitAuthorityAssertions;
+using P = KeyLoad.UnitTests.Search.TextCapturedCommitAuthorityProtocol;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 internal static class TextCapturedCommitAuthorityFlow
 {

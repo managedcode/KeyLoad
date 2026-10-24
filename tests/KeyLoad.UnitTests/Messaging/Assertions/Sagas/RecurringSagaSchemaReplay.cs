@@ -1,11 +1,11 @@
-using KeyLoad.Core.Features.CommandOutcomes.Contracts;
-using KeyLoad.Core.Features.InternalSerialization;
+using KeyLoad.Core.CommandOutcomes.Contracts;
+using KeyLoad.Core.InternalSerialization;
 using KeyLoad.Storage;
-using KeyLoad.UnitTests.Features.Authorization;
-using KeyLoad.UnitTests.Features.ResourceExecution;
+using KeyLoad.UnitTests.Authorization;
+using KeyLoad.UnitTests.ResourceExecution;
 using ManagedCode.Communication;
 
-namespace KeyLoad.UnitTests.Features.Messaging;
+namespace KeyLoad.UnitTests.Messaging;
 
 internal static class RecurringSagaSchemaReplay
 {

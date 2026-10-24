@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace KeyLoad.ComparisonHost.Features.BenchmarkOrchestration;
+namespace KeyLoad.ComparisonHost.BenchmarkOrchestration;
 
 internal sealed class ComparisonResourceLogBuffer(int maximumLines, int maximumBytes, int maximumLineBytes)
 {

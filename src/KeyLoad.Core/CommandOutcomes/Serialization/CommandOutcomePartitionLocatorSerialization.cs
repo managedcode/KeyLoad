@@ -1,6 +1,6 @@
 using KeyLoad.Storage;
 
-namespace KeyLoad.Core.Features.CommandOutcomes.Serialization;
+namespace KeyLoad.Core.CommandOutcomes.Serialization;
 
 internal static class CommandOutcomePartitionLocatorSerialization
 {

@@ -1,9 +1,9 @@
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
-using KeyLoad.UnitTests.Features.Messaging;
+using KeyLoad.UnitTests.Messaging;
 using ManagedCode.Communication;
 
-namespace KeyLoad.UnitTests.Features.DatabaseComposition;
+namespace KeyLoad.UnitTests.DatabaseComposition;
 
 internal static class QueueGraphReplayAssertions
 {
@@ -113,7 +113,7 @@ internal static class QueueGraphReplayAssertions
         var expected = continued ? new DocumentRecord(reference, 1, QueueGraphReplayState.ContinuationJson,
             new(), new DateTimeOffset(state.Next.Timestamp)) : null;
         await Assert.That(JsonDefaults.Serialize(store.Read(view => view.GetRecord<DocumentRecord>(
-            global::KeyLoad.Core.Features.DocumentStorage.DocumentStorageKeys.RecordKey(reference))))
+            global::KeyLoad.Core.DocumentStorage.DocumentStorageKeys.RecordKey(reference))))
             .AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
     }
 }

@@ -2,7 +2,7 @@ using KeyLoad.Server;
 using KeyLoad.Storage;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.UnitTests.Features.StorageRecovery;
+namespace KeyLoad.UnitTests.StorageRecovery;
 
 internal sealed record PartitionStorageImage(StoreIdentity Identity, long Position, KeyValueRecord[] Rows)
 {

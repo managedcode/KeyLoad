@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>Owns the real ephemeral Kestrel host, caller, and request handler for execution header-start checks.</summary>
 internal sealed class OperationHeaderTestServer : IAsyncDisposable

@@ -3,7 +3,7 @@ using System.Text;
 using Aspire.Hosting;
 using Aspire.Hosting.Testing;
 
-namespace KeyLoad.IntegrationTests.Features.StorageReplication;
+namespace KeyLoad.IntegrationTests.StorageReplication;
 
 internal sealed class ClusterNodeHttpEvidence(DistributedApplication app)
 {

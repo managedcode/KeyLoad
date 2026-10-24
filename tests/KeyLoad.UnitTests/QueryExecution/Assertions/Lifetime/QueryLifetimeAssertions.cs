@@ -1,6 +1,6 @@
-using KeyLoad.Query.Features.QueryExecution;
+using KeyLoad.Query.QueryExecution;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal static class QueryLifetimeAssertions
 {

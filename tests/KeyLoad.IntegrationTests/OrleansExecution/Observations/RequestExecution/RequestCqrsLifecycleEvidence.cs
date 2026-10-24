@@ -2,7 +2,7 @@ using System.Text;
 using KeyLoad.Clustering;
 using KeyLoad.Server;
 
-namespace KeyLoad.IntegrationTests.Features.OrleansExecution.Helpers;
+namespace KeyLoad.IntegrationTests.OrleansExecution.Helpers;
 
 /// <summary>Owns fixed, test-only lifecycle facts without retaining request or log content.</summary>
 internal sealed class RequestCqrsLifecycleEvidence

@@ -1,9 +1,9 @@
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
-using KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
+using KeyLoad.Storage.ZoneTree.ResourceExecution;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
+namespace KeyLoad.BenchmarkScenarios.BenchmarkComparisons;
 
 /// <summary>Holds the validated execution snapshots borrowed by an embedded benchmark owner.</summary>
 internal sealed record EmbeddedBenchmarkRuntimeOptions(IOptions<DatabaseLimits> Database,

@@ -5,7 +5,7 @@ using KeyLoad.AppHost.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.AppHost.Features.TestInfrastructure;
+namespace KeyLoad.AppHost.TestInfrastructure;
 
 /// <summary>Deliberately kills only the selected ephemeral execution server process and joins its actual exit.</summary>
 internal static class ProcessKillCommand

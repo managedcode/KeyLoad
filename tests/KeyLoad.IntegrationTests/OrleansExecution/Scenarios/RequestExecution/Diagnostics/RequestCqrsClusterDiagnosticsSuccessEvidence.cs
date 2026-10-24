@@ -1,5 +1,5 @@
 
-namespace KeyLoad.IntegrationTests.Features.OrleansExecution.Helpers;
+namespace KeyLoad.IntegrationTests.OrleansExecution.Helpers;
 
 internal static class RequestCqrsClusterDiagnosticsSuccessEvidence
 {

@@ -1,7 +1,7 @@
-using KeyLoad.UnitTests.Features.DocumentStorage;
-using P = KeyLoad.UnitTests.Features.ClientApi.SdkProblemBoundaryProtocol;
+using KeyLoad.UnitTests.DocumentStorage;
+using P = KeyLoad.UnitTests.ClientApi.SdkProblemBoundaryProtocol;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 internal static class SdkProblemBoundaryOutbox
 {

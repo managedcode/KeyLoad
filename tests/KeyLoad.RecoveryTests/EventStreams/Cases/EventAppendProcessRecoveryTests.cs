@@ -1,6 +1,6 @@
 using KeyLoad.Storage.ZoneTree;
 
-namespace KeyLoad.RecoveryTests.Features.EventStreams;
+namespace KeyLoad.RecoveryTests.EventStreams;
 
 internal sealed class EventAppendProcessRecoveryTests
 {

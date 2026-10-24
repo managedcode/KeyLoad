@@ -1,8 +1,8 @@
 using System.Collections.Immutable;
-using KeyLoad.Core.Features.ResourceExecution;
-using KeyLoad.Core.Features.StoragePartitions.Contracts;
+using KeyLoad.Core.ResourceExecution;
+using KeyLoad.Core.StoragePartitions.Contracts;
 
-namespace KeyLoad.Core.Features.Search;
+namespace KeyLoad.Core.Search;
 
 internal sealed record AnnReadLifetimeMetadata(ResourceDefinition Definition,
     ResourceLifetimeCoverage Coverage, PrincipalRecord Principal, ImmutableArray<ResourceDefinition> Definitions)

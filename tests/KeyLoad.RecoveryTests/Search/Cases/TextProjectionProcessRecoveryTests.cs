@@ -1,8 +1,8 @@
 using System.Diagnostics;
-using KeyLoad.RecoveryTests.Features.StorageRecovery;
-using KeyLoad.Server.Features.Search;
+using KeyLoad.RecoveryTests.StorageRecovery;
+using KeyLoad.Server.Search;
 
-namespace KeyLoad.RecoveryTests.Features.Search;
+namespace KeyLoad.RecoveryTests.Search;
 
 internal sealed class TextProjectionProcessRecoveryTests
 {

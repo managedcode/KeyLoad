@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
 using KeyLoad.Core;
-using KeyLoad.Core.Features.ResourceExecution;
-using KeyLoad.Core.Features.RuntimeJournaling.Identity;
+using KeyLoad.Core.ResourceExecution;
+using KeyLoad.Core.RuntimeJournaling.Identity;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Clustering;

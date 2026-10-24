@@ -1,8 +1,8 @@
 using System.Text.Json;
 using KeyLoad.Client;
-using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.ClientApi;
 
-namespace KeyLoad.IntegrationTests.Features.RelationalStorage;
+namespace KeyLoad.IntegrationTests.RelationalStorage;
 
 /// <summary>AC-REL-004-JOIN-001/005/006: public rejection leaves committed rows and healthy Q2 callers intact.</summary>
 [ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = McpCallerProtocol.FixtureKey)]

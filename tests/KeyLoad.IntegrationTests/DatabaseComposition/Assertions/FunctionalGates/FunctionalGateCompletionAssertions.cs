@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
+namespace KeyLoad.IntegrationTests.DatabaseComposition;
 
 /// <summary>Checks actual successful public calls and persisted user identities without estimated credits.</summary>
 internal static class FunctionalGateCompletionAssertions

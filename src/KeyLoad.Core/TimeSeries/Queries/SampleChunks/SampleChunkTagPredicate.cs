@@ -1,6 +1,6 @@
 using System.Text.Json;
 
-namespace KeyLoad.Core.Features.TimeSeries;
+namespace KeyLoad.Core.TimeSeries;
 
 internal static class SampleChunkTagPredicate
 {

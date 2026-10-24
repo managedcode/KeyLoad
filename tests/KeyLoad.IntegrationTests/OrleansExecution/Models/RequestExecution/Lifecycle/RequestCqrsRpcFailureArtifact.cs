@@ -1,3 +1,3 @@
-namespace KeyLoad.IntegrationTests.Features.OrleansExecution;
+namespace KeyLoad.IntegrationTests.OrleansExecution;
 
 internal sealed record RequestCqrsRpcFailureArtifact(int Version, Guid WaveId, RequestCqrsRpcFailureRecord[] Failures);

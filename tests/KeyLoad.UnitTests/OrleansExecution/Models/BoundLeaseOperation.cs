@@ -1,7 +1,7 @@
 using KeyLoad.Clustering;
-using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.Core.ResourceExecution;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal sealed record BoundLeaseOperation(RequestWorkOwner Owner,
     ResourceLifetimeWorkResultRetention Ledger, RequestWorkLease Parent,

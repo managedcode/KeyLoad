@@ -6,7 +6,7 @@ Set-StrictMode -Version Latest
 . (Join-Path $PSScriptRoot '../CodeQuality/functional-coverage.execution-merge.trx.ps1')
 $method = 'MillionAcknowledgedDocumentsRemainCorrectDuringSdkAndOfficialMcpReads'
 $expected = @([ordered]@{
-    className = 'KeyLoad.IntegrationTests.Features.DocumentStorage.HeavyDocumentLoadClusterTests'
+    className = 'KeyLoad.IntegrationTests.DocumentStorage.HeavyDocumentLoadClusterTests'
     methodName = $method
     instanceName = $method
 })

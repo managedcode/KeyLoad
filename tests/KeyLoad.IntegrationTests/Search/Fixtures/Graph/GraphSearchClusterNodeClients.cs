@@ -1,7 +1,7 @@
 using KeyLoad.Client;
-using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.ClientApi;
 
-namespace KeyLoad.IntegrationTests.Features.Search;
+namespace KeyLoad.IntegrationTests.Search;
 
 /// <summary>Owns actual Aspire-discovered administrative and reader HTTP clients for all Orleans nodes.</summary>
 internal sealed class GraphSearchClusterNodeClients : IDisposable

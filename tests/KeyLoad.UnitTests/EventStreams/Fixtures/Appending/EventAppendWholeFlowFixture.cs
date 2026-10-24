@@ -2,7 +2,7 @@ using System.Text.Json;
 using ManagedCode.Communication;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.EventStreams;
+namespace KeyLoad.UnitTests.EventStreams;
 
 internal sealed class EventAppendWholeFlowFixture : IDisposable
 {
@@ -105,7 +105,7 @@ internal sealed class EventAppendWholeFlowFixture : IDisposable
     internal async Task AssertFailedReplayAsync(CommandRequest command, Result<object> original)
     {
         var position = Database.Store.Position;
-        var before = KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(Database.Store);
+        var before = KeyLoad.UnitTests.Messaging.QueueWholeFlowStorage.Bytes(Database.Store);
         var retry = Submit(command);
         await Assert.That(OrleansSerialization.Serialize(retry))
             .IsEquivalentTo(OrleansSerialization.Serialize(original), CollectionOrdering.Matching);
@@ -114,7 +114,7 @@ internal sealed class EventAppendWholeFlowFixture : IDisposable
         await Assert.That(retry.Value).IsNull();
         await Assert.That(original.Value).IsNull();
         await Assert.That(Database.Store.Position).IsEqualTo(position);
-        await Assert.That(KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(Database.Store))
+        await Assert.That(KeyLoad.UnitTests.Messaging.QueueWholeFlowStorage.Bytes(Database.Store))
             .IsEquivalentTo(before, CollectionOrdering.Matching);
     }
 

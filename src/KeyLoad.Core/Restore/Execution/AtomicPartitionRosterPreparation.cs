@@ -1,7 +1,7 @@
 using KeyLoad.Storage;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.Core.Features.BackupRestore.Execution;
+namespace KeyLoad.Core.BackupRestore.Execution;
 
 /// <summary>Preserves roster publication context while the execution provider owns a discard-only child callback.</summary>
 internal static class AtomicPartitionRosterPreparation

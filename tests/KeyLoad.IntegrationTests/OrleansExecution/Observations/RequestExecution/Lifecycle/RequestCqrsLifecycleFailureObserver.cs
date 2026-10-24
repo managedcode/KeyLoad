@@ -1,6 +1,6 @@
 using KeyLoad.Server;
 
-namespace KeyLoad.IntegrationTests.Features.OrleansExecution.Helpers;
+namespace KeyLoad.IntegrationTests.OrleansExecution.Helpers;
 
 /// <summary>Captures the first lifecycle snapshot immediately after a real cleanup failure is appended.</summary>
 internal static class RequestCqrsLifecycleFailureObserver

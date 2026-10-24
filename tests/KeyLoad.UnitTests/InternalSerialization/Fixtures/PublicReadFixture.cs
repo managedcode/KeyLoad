@@ -3,7 +3,7 @@ using KeyLoad.Clustering;
 using KeyLoad.Query;
 using KeyLoad.Server;
 
-namespace KeyLoad.UnitTests.Features.InternalSerialization;
+namespace KeyLoad.UnitTests.InternalSerialization;
 
 internal static class PublicReadFixture
 {

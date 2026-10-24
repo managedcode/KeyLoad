@@ -1,9 +1,9 @@
 using KeyLoad.Client;
-using KeyLoad.Core.Features.Messaging;
-using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.QueryExecution;
+using KeyLoad.Core.Messaging;
+using KeyLoad.IntegrationTests.ClientApi;
+using KeyLoad.IntegrationTests.QueryExecution;
 
-namespace KeyLoad.IntegrationTests.Features.Messaging;
+namespace KeyLoad.IntegrationTests.Messaging;
 
 internal static class RemoteTransferRepairClusterHealthy
 {

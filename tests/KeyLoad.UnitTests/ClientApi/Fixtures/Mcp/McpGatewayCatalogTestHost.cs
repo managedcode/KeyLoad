@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>Builds the real package factory and production catalog owner for execution graph cases.</summary>
 internal sealed class McpGatewayCatalogTestHost : IAsyncDisposable

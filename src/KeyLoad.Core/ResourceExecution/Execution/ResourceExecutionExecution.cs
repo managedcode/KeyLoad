@@ -1,5 +1,5 @@
-using KeyLoad.Core.Features.CommandOutcomes.Execution;
-using KeyLoad.Core.Features.CommandOutcomes.Identity;
+using KeyLoad.Core.CommandOutcomes.Execution;
+using KeyLoad.Core.CommandOutcomes.Identity;
 using KeyLoad.Storage;
 using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
@@ -23,7 +23,7 @@ public static class ResourceExecutionExecution
                 engine.AuthorizeOperation(view, principal, normalized);
                 var scope = CommandOutcomePartitionIdentity.Resolve(normalized);
                 var selection = CommandOutcomeKeyResolver.Select(view, normalized.UserId!, normalized.CommandId, scope);
-                var outcome = selection.Outcome ?? throw Errors.Fail(ErrorCode.RecoveryRequired, CommandOutcomes.MissingDurableOutcomeMessage);
+                var outcome = selection.Outcome ?? throw Errors.Fail(ErrorCode.RecoveryRequired, CommandOutcomeOperations.MissingDurableOutcomeMessage);
                 engine.ValidateStoredSubmissionIdentity(view, normalized, selection, outcome);
                 return engine.ReadValidatedSubmissionOutcome(view, normalized, verifiedSelection: selection);
             }
@@ -41,7 +41,7 @@ public static class ResourceExecutionExecution
     {
         if (outcome.Incarnation != engine.Store.Identity.Incarnation)
         {
-            throw Errors.Fail(ErrorCode.TokenInvalidated, CommandOutcomes.EarlierOutcomeIncarnationMessage);
+            throw Errors.Fail(ErrorCode.TokenInvalidated, CommandOutcomeOperations.EarlierOutcomeIncarnationMessage);
         }
 
         DatabaseCommandContentIdentity.RequireOriginalCommandContent(operation, outcome);

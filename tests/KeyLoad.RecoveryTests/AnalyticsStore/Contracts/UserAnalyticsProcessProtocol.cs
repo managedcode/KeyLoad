@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 
-namespace KeyLoad.RecoveryTests.Features.AnalyticsStore;
+namespace KeyLoad.RecoveryTests.AnalyticsStore;
 
 internal static class UserAnalyticsProcessProtocol
 {

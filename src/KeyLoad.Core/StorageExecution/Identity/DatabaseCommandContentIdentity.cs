@@ -1,4 +1,4 @@
-using KeyLoad.Features.InternalSerialization;
+using KeyLoad.InternalSerialization;
 using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.Core;

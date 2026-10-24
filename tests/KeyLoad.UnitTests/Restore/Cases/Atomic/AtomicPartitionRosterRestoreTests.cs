@@ -1,6 +1,6 @@
-using KeyLoad.UnitTests.Features.ResourceExecution;
+using KeyLoad.UnitTests.ResourceExecution;
 
-namespace KeyLoad.UnitTests.Features.BackupRestore;
+namespace KeyLoad.UnitTests.BackupRestore;
 
 internal sealed class AtomicPartitionRosterRestoreTests
 {

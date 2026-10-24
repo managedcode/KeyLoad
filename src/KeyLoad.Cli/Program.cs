@@ -1,6 +1,6 @@
 using System.Text.Json;
 using KeyLoad;
-using KeyLoad.Cli.Features.ClientApi;
+using KeyLoad.Cli.ClientApi;
 
 const int NoArguments = 0;
 const int InvalidCommandExitCode = 2;

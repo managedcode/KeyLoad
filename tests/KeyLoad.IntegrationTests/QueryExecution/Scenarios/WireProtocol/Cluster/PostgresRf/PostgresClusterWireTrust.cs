@@ -1,7 +1,7 @@
 using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
 
-namespace KeyLoad.IntegrationTests.Features.QueryExecution;
+namespace KeyLoad.IntegrationTests.QueryExecution;
 
 internal static class PostgresClusterWireTrust
 {

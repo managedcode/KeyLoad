@@ -1,7 +1,7 @@
 using System.Security.Cryptography;
 using KeyLoad.Storage.ZoneTree;
 
-namespace KeyLoad.RecoveryTests.Features.Search;
+namespace KeyLoad.RecoveryTests.Search;
 
 internal static class TextCanonicalStateCapture
 {

@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
+namespace KeyLoad.IntegrationTests.DatabaseComposition;
 
 internal sealed record FunctionalGateDropTable(int Index, EntityRef OriginalReference,
     Guid ParentId, DropTableRequest Request, DropTableResult OriginalDrop,

@@ -2,7 +2,7 @@ using System.Security.Cryptography;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 
-namespace KeyLoad.UnitTests.Features.BackupRestore;
+namespace KeyLoad.UnitTests.BackupRestore;
 
 internal sealed class CurrentJournalSignatureAuthority : IDisposable
 {

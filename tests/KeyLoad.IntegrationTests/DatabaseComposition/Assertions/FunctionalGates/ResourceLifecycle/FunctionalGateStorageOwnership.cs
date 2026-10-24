@@ -1,6 +1,6 @@
-using KeyLoad.IntegrationTests.Features.StorageRecovery;
+using KeyLoad.IntegrationTests.StorageRecovery;
 
-namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
+namespace KeyLoad.IntegrationTests.DatabaseComposition;
 
 /// <summary>Checks release of the original node-local storage locks without changing their owned roots.</summary>
 internal static class FunctionalGateStorageOwnership

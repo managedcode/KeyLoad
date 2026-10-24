@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.QueryExecution;
+namespace KeyLoad.IntegrationTests.QueryExecution;
 
 internal sealed record SqlBetweenSymmetricClusterState(SqlNullOrderingClusterState Seed, long LowRevision, string LowJson, CommitReceipt Current)
 {

@@ -2,7 +2,7 @@ using System.Globalization;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 
-namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
+namespace KeyLoad.Analyzers.Tests.CodeQuality;
 
 /// <summary>AC-CQ-008: checks source spans and trivia within executable units.</summary>
 internal sealed class ExecutableUnitSpanAndTriviaAnalyzerTests

@@ -1,6 +1,6 @@
 using Microsoft.CodeAnalysis;
 
-namespace KeyLoad.Analyzers.Features.CodeQuality;
+namespace KeyLoad.Analyzers.CodeQuality;
 
 internal sealed class AggregateTypeCodeMeasurement(INamedTypeSymbol type, int codeLines, Location location)
 {

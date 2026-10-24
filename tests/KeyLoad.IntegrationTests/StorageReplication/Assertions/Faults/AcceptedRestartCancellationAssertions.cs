@@ -1,6 +1,6 @@
-using KeyLoad.AppHost.Features.TestInfrastructure;
+using KeyLoad.AppHost.TestInfrastructure;
 
-namespace KeyLoad.IntegrationTests.Features.StorageReplication;
+namespace KeyLoad.IntegrationTests.StorageReplication;
 
 /// <summary>Proves interrupted execution health settlement preserves the actual accepted replacement.</summary>
 internal static class AcceptedRestartCancellationAssertions

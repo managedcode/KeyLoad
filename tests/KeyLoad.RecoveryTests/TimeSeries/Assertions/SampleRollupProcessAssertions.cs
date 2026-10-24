@@ -1,7 +1,7 @@
 using System.Text.Json;
-using KeyLoad.RecoveryTests.Features.DocumentStorage;
+using KeyLoad.RecoveryTests.DocumentStorage;
 
-namespace KeyLoad.RecoveryTests.Features.TimeSeries;
+namespace KeyLoad.RecoveryTests.TimeSeries;
 
 internal static class SampleRollupProcessAssertions
 {

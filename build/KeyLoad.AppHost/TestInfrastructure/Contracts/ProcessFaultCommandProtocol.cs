@@ -1,4 +1,4 @@
-namespace KeyLoad.AppHost.Features.TestInfrastructure;
+namespace KeyLoad.AppHost.TestInfrastructure;
 
 /// <summary>Binds an abrupt test fault to the actual Aspire project process and both startup identities.</summary>
 internal static class ProcessFaultCommandProtocol

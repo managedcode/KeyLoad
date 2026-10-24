@@ -1,6 +1,6 @@
 using System.Runtime.CompilerServices;
 
-namespace KeyLoad.Features.InternalSerialization;
+namespace KeyLoad.InternalSerialization;
 
 // Record payloads can have expensive structural equality. Memoization always compares the
 // payload by identity while retaining the applicable collection-nullability contract.

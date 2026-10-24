@@ -1,7 +1,7 @@
 using System.Text.Json;
-using P = KeyLoad.IntegrationTests.Features.DatabaseComposition.FunctionalGateCompositionProtocol;
+using P = KeyLoad.IntegrationTests.DatabaseComposition.FunctionalGateCompositionProtocol;
 
-namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
+namespace KeyLoad.IntegrationTests.DatabaseComposition;
 
 /// <summary>Exercises actual SQL typed INSERT and atomic document/typed-row link, unlink and delete.</summary>
 internal static class FunctionalGateComposition

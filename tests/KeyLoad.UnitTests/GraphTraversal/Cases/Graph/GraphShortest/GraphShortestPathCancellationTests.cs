@@ -1,6 +1,6 @@
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.GraphTraversal;
+namespace KeyLoad.UnitTests.GraphTraversal;
 
 internal sealed class GraphShortestPathCancellationTests
 {

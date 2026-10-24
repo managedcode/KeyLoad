@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.Messaging;
+namespace KeyLoad.IntegrationTests.Messaging;
 
 internal sealed class QueueDueDatabaseScopeClusterState(MessagingClusterIdentity identity, DateTimeOffset due,
     QueueDueDatabaseScopeClusterLane allowed, QueueDueDatabaseScopeClusterLane denied)

@@ -1,9 +1,9 @@
 using KeyLoad.Client;
-using KeyLoad.RecoveryTests.Features.OrleansExecution;
+using KeyLoad.RecoveryTests.OrleansExecution;
 using KeyLoad.Server;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace KeyLoad.IntegrationTests.Features.Authorization;
+namespace KeyLoad.IntegrationTests.Authorization;
 
 internal static class AuthenticationExecutionCold
 {

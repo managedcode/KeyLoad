@@ -1,9 +1,9 @@
-using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.AppHost.Hosting;
+using KeyLoad.AppHost.TestInfrastructure;
 using Microsoft.Extensions.Options;
-using P = KeyLoad.UnitTests.Features.TestInfrastructure.FunctionalColdReopenProfileProtocol;
+using P = KeyLoad.UnitTests.TestInfrastructure.FunctionalColdReopenProfileProtocol;
 
-namespace KeyLoad.UnitTests.Features.TestInfrastructure;
+namespace KeyLoad.UnitTests.TestInfrastructure;
 
 internal static class FunctionalColdReopenProfileRefusals
 {

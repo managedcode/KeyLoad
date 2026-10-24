@@ -2,7 +2,7 @@ using System.Collections.Immutable;
 using System.Text.Json;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 /// <summary>Commits through the actual canonical engine and verifies its persisted outcome.</summary>
 internal static class TextWaitSeed

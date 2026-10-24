@@ -1,8 +1,8 @@
 using KeyLoad.Core;
-using KeyLoad.Core.Features.Authorization;
+using KeyLoad.Core.Authorization;
 using KeyLoad.Storage.ZoneTree;
 
-namespace KeyLoad.RecoveryTests.Features.EventStreams;
+namespace KeyLoad.RecoveryTests.EventStreams;
 
 internal static class SharedDomainRecoveryDatabase
 {

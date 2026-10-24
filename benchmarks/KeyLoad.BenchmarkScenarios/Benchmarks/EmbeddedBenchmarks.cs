@@ -1,10 +1,10 @@
 using BenchmarkDotNet.Attributes;
 using KeyLoad.Core;
-using KeyLoad.Core.Features.Authorization;
+using KeyLoad.Core.Authorization;
 using KeyLoad.Query;
 using KeyLoad.Storage.ZoneTree;
 
-namespace KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
+namespace KeyLoad.BenchmarkScenarios.BenchmarkComparisons;
 
 /// <summary>Provides embedded scenarios for BenchmarkDotNet's generated external consumer.</summary>
 [MemoryDiagnoser]

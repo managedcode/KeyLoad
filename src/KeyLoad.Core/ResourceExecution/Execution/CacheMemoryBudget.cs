@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.Core.Features.ResourceExecution;
+namespace KeyLoad.Core.ResourceExecution;
 
 /// <summary>Atomically admits modeled retained cache bytes and entries for one node.</summary>
 public sealed class CacheMemoryBudget : ICacheMemoryBudget, IDisposable

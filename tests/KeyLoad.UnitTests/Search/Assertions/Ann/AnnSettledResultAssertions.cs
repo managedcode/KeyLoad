@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 /// <summary>Checks the complete source and original child receipt, not only count or generation.</summary>
 internal static class AnnSettledResultAssertions

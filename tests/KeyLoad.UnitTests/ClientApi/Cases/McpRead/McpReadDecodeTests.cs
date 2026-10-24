@@ -3,7 +3,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using KeyLoad.Server;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>AC-MCP-003: every body-bearing read DTO and exact no-body contracts.</summary>
 internal sealed class McpReadDecodeTests

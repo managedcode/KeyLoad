@@ -1,10 +1,10 @@
-using KeyLoad.Core.Features.CommandOutcomes.Contracts;
-using KeyLoad.UnitTests.Features.ResourceExecution;
+using KeyLoad.Core.CommandOutcomes.Contracts;
+using KeyLoad.UnitTests.ResourceExecution;
 using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
-using static KeyLoad.UnitTests.Features.Search.AnnProviderQualificationProtocol;
+using static KeyLoad.UnitTests.Search.AnnProviderQualificationProtocol;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 internal static class AnnProviderQualificationHistoryAssertions
 {

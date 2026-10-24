@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.Authorization;
+namespace KeyLoad.IntegrationTests.Authorization;
 
 internal sealed record CredentialAuthorityState(DiscoveryAuthorityState Document, Guid RepairCommandId)
 {

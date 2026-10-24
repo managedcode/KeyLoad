@@ -1,8 +1,8 @@
 using System.Globalization;
 using System.Text.Json;
-using P = KeyLoad.IntegrationTests.Features.DatabaseComposition.FunctionalGateCompositionProtocol;
+using P = KeyLoad.IntegrationTests.DatabaseComposition.FunctionalGateCompositionProtocol;
 
-namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
+namespace KeyLoad.IntegrationTests.DatabaseComposition;
 
 internal sealed record FunctionalGateCompositionState(string Id, string Collection, int Iteration)
 {

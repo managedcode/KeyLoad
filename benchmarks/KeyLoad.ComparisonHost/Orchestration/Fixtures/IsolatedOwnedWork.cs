@@ -1,11 +1,11 @@
 using System.Runtime.ExceptionServices;
 using Aspire.Hosting;
-using KeyLoad.AppHost.Features.TestInfrastructure;
+using KeyLoad.AppHost.TestInfrastructure;
 using KeyLoad.Comparisons;
-using KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
+using KeyLoad.LoadTests.AppHost.BenchmarkComparisons;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.ComparisonHost.Features.BenchmarkOrchestration;
+namespace KeyLoad.ComparisonHost.BenchmarkOrchestration;
 
 internal sealed class IsolatedOwnedWork : IAsyncDisposable
 {

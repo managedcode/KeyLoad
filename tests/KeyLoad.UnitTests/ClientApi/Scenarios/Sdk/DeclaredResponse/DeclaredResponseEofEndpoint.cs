@@ -1,10 +1,10 @@
 using System.Text.Json;
-using KeyLoad.UnitTests.Features.OrleansExecution;
+using KeyLoad.UnitTests.OrleansExecution;
 using Microsoft.AspNetCore.Http;
-using static KeyLoad.UnitTests.Features.ClientApi.DeclaredResponseEofProtocol;
-using P = KeyLoad.UnitTests.Features.ClientApi.DeclaredResponseEofProtocol;
+using static KeyLoad.UnitTests.ClientApi.DeclaredResponseEofProtocol;
+using P = KeyLoad.UnitTests.ClientApi.DeclaredResponseEofProtocol;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 internal sealed class DeclaredResponseEofEndpoint(ConnectionScenario scenario, PrincipalRecord principal,
     DeclaredResponseEofTasks tasks)

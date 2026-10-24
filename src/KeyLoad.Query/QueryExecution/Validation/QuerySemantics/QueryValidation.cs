@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
 using System.Text.Json;
 using KeyLoad.Core;
-using KeyLoad.Query.Features.QueryExecution;
+using KeyLoad.Query.QueryExecution;
 
 namespace KeyLoad.Query;
 
@@ -65,7 +65,7 @@ internal static class QueryValidation
         var parameters = NormalizeParameters(request.Parameters, predicates);
         if (query.ModelSource is null)
         {
-            global::KeyLoad.Query.Features.QueryExecution.EventEntityRefJoinBinding.ValidateJoinPredicate(query, filter, parameters);
+            global::KeyLoad.Query.QueryExecution.EventEntityRefJoinBinding.ValidateJoinPredicate(query, filter, parameters);
         }
         else if (join is not null)
         {
@@ -94,8 +94,8 @@ internal static class QueryValidation
     {
         var hasJoin = query.InnerJoin is not null;
         if (hasJoin && (query.Alias is null || query.ModelSource is not null
-                && !global::KeyLoad.Query.Features.QueryExecution.QueueEntityRefJoinBinding.IsSupportedSource(query)
-                && !global::KeyLoad.Query.Features.QueryExecution.EventEntityRefJoinBinding.IsSupportedSource(query)
+                && !global::KeyLoad.Query.QueryExecution.QueueEntityRefJoinBinding.IsSupportedSource(query)
+                && !global::KeyLoad.Query.QueryExecution.EventEntityRefJoinBinding.IsSupportedSource(query)
                 || request.Cursor is not null || query.Explain
                 || !request.AllowFullScan || projection.Any(selection => selection.SourceAlias is null)
                 || StringComparer.Ordinal.Equals(query.Collection, query.InnerJoin!.Collection)

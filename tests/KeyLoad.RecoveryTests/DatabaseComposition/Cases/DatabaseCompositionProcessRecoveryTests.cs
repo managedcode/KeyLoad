@@ -1,13 +1,13 @@
 using System.Diagnostics;
 using System.Globalization;
 using KeyLoad.Core;
-using KeyLoad.Core.Features.Authorization;
-using KeyLoad.RecoveryTests.Features.StorageRecovery;
+using KeyLoad.Core.Authorization;
+using KeyLoad.RecoveryTests.StorageRecovery;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 using ManagedCode.Communication.Commands;
 
-namespace KeyLoad.RecoveryTests.Features.DatabaseComposition;
+namespace KeyLoad.RecoveryTests.DatabaseComposition;
 
 internal sealed class DatabaseCompositionProcessRecoveryTests
 {

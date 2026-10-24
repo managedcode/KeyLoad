@@ -1,7 +1,7 @@
 using KeyLoad.Client;
 using KeyLoad.Query;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal sealed class QueryAdapterContractTests
 {

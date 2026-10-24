@@ -1,8 +1,8 @@
-using KeyLoad.Core.Features.DocumentStorage;
+using KeyLoad.Core.DocumentStorage;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 
-namespace KeyLoad.UnitTests.Features.GraphTraversal;
+namespace KeyLoad.UnitTests.GraphTraversal;
 
 internal static class GraphVertexAuthorityFault
 {

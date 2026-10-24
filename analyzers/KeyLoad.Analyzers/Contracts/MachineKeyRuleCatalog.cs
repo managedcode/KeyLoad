@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 
-namespace KeyLoad.Analyzers.Features.CodeQuality;
+namespace KeyLoad.Analyzers.CodeQuality;
 
 internal static class MachineKeyRuleCatalog
 {

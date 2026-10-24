@@ -1,6 +1,6 @@
-using KeyLoad.UnitTests.Features.Messaging;
+using KeyLoad.UnitTests.Messaging;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal static class RequestCqrsAnnWholeFlow
 {

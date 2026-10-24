@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.TimeSeries;
+namespace KeyLoad.UnitTests.TimeSeries;
 
 internal static class SampleChunkRetainedBudgetTrial
 {
@@ -48,12 +48,12 @@ internal static class SampleChunkRetainedBudgetTrial
         {
             if (precedingRead)
             {
-                _ = budget.Read(view, global::KeyLoad.Core.Features.TimeSeries.SampleChunkKeys.Window(
+                _ = budget.Read(view, global::KeyLoad.Core.TimeSeries.SampleChunkKeys.Window(
                     fixture.Partition, SampleChunkCanonicalFixture.Set, SampleChunkCanonicalFixture.Series, fixture.WindowId));
             }
             var request = new ReadSampleChunkWindowRequest(fixture.Partition, SampleChunkCanonicalFixture.Set,
                 SampleChunkCanonicalFixture.Series, fixture.WindowId, null, null, SampleChunkCanonicalFixture.OutputLimit);
-            return global::KeyLoad.Core.Features.TimeSeries.SampleChunkWindowReader.Read(fixture.Owner,
+            return global::KeyLoad.Core.TimeSeries.SampleChunkWindowReader.Read(fixture.Owner,
                 budget.CreateView(view), SampleChunkCanonicalFixture.Principal, request, budget,
                 UnitExecutionOptions.TimeSeriesExecution(), fixture.Store.Position);
         });

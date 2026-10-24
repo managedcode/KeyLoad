@@ -1,4 +1,4 @@
-namespace KeyLoad.Query.Features.QueryExecution;
+namespace KeyLoad.Query.QueryExecution;
 
 /// <summary>Derives execution transport and task retention downward inside each original leaf allocation.</summary>
 internal static class PartitionQueryParallelRetention

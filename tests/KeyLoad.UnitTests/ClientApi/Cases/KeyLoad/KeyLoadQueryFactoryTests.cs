@@ -2,7 +2,7 @@ using System.Text.Json;
 using KeyLoad.Client;
 using KeyLoad.Query;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 internal sealed class KeyLoadQueryFactoryTests
 {

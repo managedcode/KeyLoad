@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.StorageReplication;
+namespace KeyLoad.IntegrationTests.StorageReplication;
 
 /// <summary>Stable fixture-only names and profile keys used by the Aspire Orleans test environment.</summary>
 internal static class ClusterFixtureProtocol

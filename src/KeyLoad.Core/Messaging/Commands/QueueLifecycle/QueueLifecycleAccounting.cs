@@ -1,4 +1,4 @@
-using KeyLoad.Core.Features.Messaging;
+using KeyLoad.Core.Messaging;
 
 namespace KeyLoad.Core;
 /// <summary>Executes QueueLifecycleAccounting operations against the caller's database context.</summary>

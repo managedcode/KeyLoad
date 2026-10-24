@@ -1,7 +1,7 @@
 using KeyLoad.Storage;
 using ManagedCode.Communication.Commands;
 
-namespace KeyLoad.RecoveryTests.Features.AnalyticsStore;
+namespace KeyLoad.RecoveryTests.AnalyticsStore;
 
 [Orleans.GenerateSerializer]
 [Orleans.Alias(UserAnalyticsProcessProtocol.EvidenceAlias)]

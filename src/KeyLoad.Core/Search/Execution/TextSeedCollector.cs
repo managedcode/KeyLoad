@@ -1,8 +1,8 @@
 using System.Security.Cryptography;
-using KeyLoad.Core.Features.DocumentStorage;
+using KeyLoad.Core.DocumentStorage;
 using KeyLoad.Storage;
 
-namespace KeyLoad.Core.Features.Search;
+namespace KeyLoad.Core.Search;
 
 internal static partial class TextSeedCollector
 {
@@ -124,7 +124,7 @@ internal static partial class TextSeedCollector
                 throw Errors.Fail(ErrorCode.TokenInvalidated, InvalidScope);
             }
             RequireOwner(database, bounded, principalId, pin);
-            if (bounded is KeyLoad.Core.Features.ResourceExecution.IResourceLifetimeReadBindingView)
+            if (bounded is KeyLoad.Core.ResourceExecution.IResourceLifetimeReadBindingView)
             {
                 _ = ResourceLifetimeReadBinding.BindAuthorizedReadResource(bounded, pin.Consumer.Partition, pin.Collection, ResourceKind.Collection);
             }

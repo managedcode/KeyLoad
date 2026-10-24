@@ -1,6 +1,6 @@
 using KeyLoad.Query;
 
-namespace KeyLoad.UnitTests.Features.ChangeFeeds;
+namespace KeyLoad.UnitTests.ChangeFeeds;
 
 internal sealed record FeedVertexAuthorityState(TestDatabase Creation, CommandRequest Seed, CommitReceipt Receipt,
     DateTimeOffset CommittedAt, AstQueryRequest Query, string FeedCursor, string LiveCursor,

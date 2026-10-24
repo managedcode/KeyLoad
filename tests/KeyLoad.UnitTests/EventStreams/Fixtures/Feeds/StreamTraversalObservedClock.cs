@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.EventStreams;
+namespace KeyLoad.UnitTests.EventStreams;
 
 /// <summary>Controls UTC token expiry while borrowing the original monotonic deadline/timer owner.</summary>
 internal sealed class StreamTraversalObservedClock(TimeProvider source) : TimeProvider

@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
-using static KeyLoad.UnitTests.Features.Search.TextProviderAuditProtocol;
+using static KeyLoad.UnitTests.Search.TextProviderAuditProtocol;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 internal static class TextProviderAuditProducer
 {

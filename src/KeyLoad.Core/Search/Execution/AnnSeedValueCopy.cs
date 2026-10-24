@@ -1,4 +1,4 @@
-namespace KeyLoad.Core.Features.Search;
+namespace KeyLoad.Core.Search;
 
 /// <summary>Copies validated ANN seed values while retaining the original per-value work debit.</summary>
 internal static class AnnSeedValueCopy

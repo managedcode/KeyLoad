@@ -1,9 +1,9 @@
 using Aspire.Hosting.ApplicationModel;
 using KeyLoad.Client;
-using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.StorageReplication;
+using KeyLoad.IntegrationTests.ClientApi;
+using KeyLoad.IntegrationTests.StorageReplication;
 
-namespace KeyLoad.IntegrationTests.Features.Search;
+namespace KeyLoad.IntegrationTests.Search;
 
 /// <summary>AC-FTS-005: real Orleans search remains tied to canonical state after silo loss and restart.</summary>
 [ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = McpCallerProtocol.FixtureKey)]

@@ -1,7 +1,7 @@
 using Aspire.Hosting.ApplicationModel;
-using KeyLoad.IntegrationTests.Features.StorageReplication;
+using KeyLoad.IntegrationTests.StorageReplication;
 
-namespace KeyLoad.IntegrationTests.Features.TimeSeries;
+namespace KeyLoad.IntegrationTests.TimeSeries;
 
 internal static class SampleChunkSubnormalClusterCold
 {

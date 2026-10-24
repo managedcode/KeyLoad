@@ -1,6 +1,6 @@
-using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.OrleansExecution;
-namespace KeyLoad.IntegrationTests.Features.QueryExecution;
+using KeyLoad.IntegrationTests.ClientApi;
+using KeyLoad.IntegrationTests.OrleansExecution;
+namespace KeyLoad.IntegrationTests.QueryExecution;
 
 internal static class SqlFetchCountClusterMinimumToken
 {

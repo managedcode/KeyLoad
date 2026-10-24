@@ -1,4 +1,4 @@
-namespace KeyLoad.Core.Features.ResourceExecution;
+namespace KeyLoad.Core.ResourceExecution;
 
 /// <summary>Returns one exact modeled charge to its owning node budget at most once.</summary>
 internal sealed class CacheMemoryReservation : ICacheMemoryReservation

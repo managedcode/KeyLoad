@@ -1,11 +1,11 @@
 using KeyLoad.Client;
 using KeyLoad.Core;
 using KeyLoad.Query;
-using KeyLoad.RecoveryTests.Features.Messaging;
+using KeyLoad.RecoveryTests.Messaging;
 using KeyLoad.Server;
-using KeyLoad.Server.Features.Search;
+using KeyLoad.Server.Search;
 using KeyLoad.Storage.ZoneTree;
-using KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
+using KeyLoad.Storage.ZoneTree.ResourceExecution;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 
@@ -109,13 +109,13 @@ internal static class CrashExecutionOptions
     internal static DatabaseLimits RemoteTransferRepairLimits()
         => DatabaseLimits(new DatabaseLimits
         {
-            MaxQueueTransferRepairAttempts = Features.Messaging.RemoteTransferRepairCrashProtocol.Ceiling
+            MaxQueueTransferRepairAttempts = global::KeyLoad.RecoveryTests.Messaging.RemoteTransferRepairCrashProtocol.Ceiling
         }).Value;
 
     internal static DatabaseLimits RemoteTransferAttemptLimits()
         => DatabaseLimits(new DatabaseLimits
         {
-            MaxQueueTransferAcceptAttempts = Features.Messaging.RemoteTransferAttemptCrashProtocol.Ceiling
+            MaxQueueTransferAcceptAttempts = global::KeyLoad.RecoveryTests.Messaging.RemoteTransferAttemptCrashProtocol.Ceiling
         }).Value;
 
     internal static IOptions<DueWorkExecutionOptions> DueWork()

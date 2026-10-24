@@ -1,8 +1,8 @@
 using System.Text.Json;
-using KeyLoad.UnitTests.Features.Messaging;
+using KeyLoad.UnitTests.Messaging;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 internal sealed class McpScopeDeniedDiagnosticWholeFlowTests
 {

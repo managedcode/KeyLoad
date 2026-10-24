@@ -4,7 +4,7 @@ using ZoneTree.Comparers;
 using ZoneTree.Options;
 using ZoneTree.Serializers;
 
-namespace KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
+namespace KeyLoad.BenchmarkScenarios.BenchmarkComparisons;
 
 internal sealed class ScaledRawStorageZoneTreeEngine : IDisposable
 {

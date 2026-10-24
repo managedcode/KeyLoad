@@ -2,10 +2,10 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using KeyLoad.Server;
 using KeyLoad.Storage;
-using KeyLoad.UnitTests.Features.Messaging;
+using KeyLoad.UnitTests.Messaging;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 internal sealed class ConfiguredVectorProfileNullArrayTests
 {

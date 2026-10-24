@@ -1,9 +1,9 @@
 using System.Collections.Immutable;
 using System.Text.Json;
 using KeyLoad.Client;
-using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.ClientApi;
 
-namespace KeyLoad.IntegrationTests.Features.QueryExecution;
+namespace KeyLoad.IntegrationTests.QueryExecution;
 
 internal static class SqlModelViewClusterParityAssertions
 {

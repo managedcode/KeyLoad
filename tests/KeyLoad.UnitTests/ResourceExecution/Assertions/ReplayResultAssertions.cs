@@ -1,7 +1,7 @@
 using System.Text.Json;
 using ManagedCode.Communication;
 
-namespace KeyLoad.UnitTests.Features.ResourceExecution;
+namespace KeyLoad.UnitTests.ResourceExecution;
 
 // Structural replay assertions preserve ordered fields and exact user JSON strings without
 // assuming ImmutableArray backing identity or equal execution reference graphs.

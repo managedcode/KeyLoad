@@ -1,7 +1,7 @@
 using System.Runtime.ExceptionServices;
 using ManagedCode.Communication.CQRS;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 internal static class AnnSeedCancellationFailures
 {

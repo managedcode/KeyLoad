@@ -1,6 +1,6 @@
 using KeyLoad.Storage;
 
-namespace KeyLoad.Core.Features.ChangeFeeds;
+namespace KeyLoad.Core.ChangeFeeds;
 
 internal static class StoredOutboxReader
 {

@@ -1,7 +1,7 @@
 using System.Numerics;
 using KeyLoad.Query;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 internal sealed class VectorMetricValidationTests
 {

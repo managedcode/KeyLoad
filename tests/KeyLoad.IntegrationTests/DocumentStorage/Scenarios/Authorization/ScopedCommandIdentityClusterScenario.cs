@@ -1,7 +1,7 @@
 using KeyLoad.Client;
-using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.ClientApi;
 
-namespace KeyLoad.IntegrationTests.Features.DocumentStorage;
+namespace KeyLoad.IntegrationTests.DocumentStorage;
 
 /// <summary>Owns two independently named logical partitions in one real transaction domain.</summary>
 internal sealed record ScopedCommandIdentityClusterScenario(PartitionRef FirstPartition, PartitionRef SecondPartition,

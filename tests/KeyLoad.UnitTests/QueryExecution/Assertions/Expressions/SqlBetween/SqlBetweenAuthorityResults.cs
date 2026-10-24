@@ -1,8 +1,8 @@
 using KeyLoad.Query;
 using KeyLoad.Storage.ZoneTree;
-using KeyLoad.UnitTests.Features.Authorization;
+using KeyLoad.UnitTests.Authorization;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal static class SqlBetweenAuthorityResults
 {

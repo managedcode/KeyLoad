@@ -1,6 +1,6 @@
 using Orleans.Metadata;
 
-namespace KeyLoad.RecoveryTests.Features.OrleansExecution;
+namespace KeyLoad.RecoveryTests.OrleansExecution;
 
 internal sealed class RequestCqrsGrainComponentConfigurator(
     GrainClassMap grainClassMap, IServiceProvider serviceProvider) : IConfigureGrainTypeComponents

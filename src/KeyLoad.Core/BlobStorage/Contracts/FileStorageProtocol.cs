@@ -1,4 +1,4 @@
-namespace KeyLoad.Core.Features.BlobStorage;
+namespace KeyLoad.Core.BlobStorage;
 
 internal static class FileStorageProtocol
 {

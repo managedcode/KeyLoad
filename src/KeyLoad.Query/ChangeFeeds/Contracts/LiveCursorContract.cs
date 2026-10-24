@@ -1,4 +1,4 @@
-namespace KeyLoad.Query.Features.ChangeFeeds;
+namespace KeyLoad.Query.ChangeFeeds;
 
 internal static class LiveCursorContract
 {

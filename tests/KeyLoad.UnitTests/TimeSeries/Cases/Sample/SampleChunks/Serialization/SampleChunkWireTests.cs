@@ -1,6 +1,6 @@
-using KeyLoad.UnitTests.Features.InternalSerialization;
+using KeyLoad.UnitTests.InternalSerialization;
 
-namespace KeyLoad.UnitTests.Features.TimeSeries;
+namespace KeyLoad.UnitTests.TimeSeries;
 
 internal sealed class SampleChunkWireTests
 {

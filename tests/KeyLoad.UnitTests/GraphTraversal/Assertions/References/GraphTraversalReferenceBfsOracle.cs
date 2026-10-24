@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 
-namespace KeyLoad.UnitTests.Features.GraphTraversal;
+namespace KeyLoad.UnitTests.GraphTraversal;
 
 /// <summary>Computes a test-owned BFS without using production graph readers or key encodings.</summary>
 internal static class GraphTraversalReferenceBfsOracle

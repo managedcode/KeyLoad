@@ -1,7 +1,7 @@
 using ZoneTree;
 using ZoneTree.FullTextSearch;
 
-namespace KeyLoad.Server.Features.Search;
+namespace KeyLoad.Server.Search;
 
 /// <summary>Borrowed read ownership; the generation slot alone disposes its execution index.</summary>
 internal interface ITextSelectedIndexLeaseOwner

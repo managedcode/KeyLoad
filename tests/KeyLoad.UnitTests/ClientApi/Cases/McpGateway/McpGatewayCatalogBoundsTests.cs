@@ -1,6 +1,6 @@
 using KeyLoad.Server;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>AC-MCPGW-005: hard bounds reject before gateway graph search can run.</summary>
 internal sealed class McpGatewayCatalogBoundsTests

@@ -1,3 +1,3 @@
-namespace KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
+namespace KeyLoad.LoadTests.AppHost.BenchmarkComparisons;
 
 internal sealed record ScaleServerMount(string ContainerPath, string MountType, string FileSystem, long CapacityBytes, long AvailableBytes);

@@ -1,11 +1,11 @@
-using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.Messaging;
-using KeyLoad.IntegrationTests.Features.OrleansExecution;
-using KeyLoad.IntegrationTests.Features.StorageReplication;
+using KeyLoad.IntegrationTests.ClientApi;
+using KeyLoad.IntegrationTests.Messaging;
+using KeyLoad.IntegrationTests.OrleansExecution;
+using KeyLoad.IntegrationTests.StorageReplication;
 using KeyLoad.Server;
-using P = KeyLoad.IntegrationTests.Features.Search.GraphSearchPathPolicyClusterProtocol;
+using P = KeyLoad.IntegrationTests.Search.GraphSearchPathPolicyClusterProtocol;
 
-namespace KeyLoad.IntegrationTests.Features.Search;
+namespace KeyLoad.IntegrationTests.Search;
 
 internal static class GraphSearchPathPolicyClusterFlow
 {

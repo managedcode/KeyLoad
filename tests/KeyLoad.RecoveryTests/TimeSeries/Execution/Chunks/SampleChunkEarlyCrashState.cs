@@ -1,5 +1,5 @@
 using KeyLoad.Core;
-using KeyLoad.Core.Features.TimeSeries;
+using KeyLoad.Core.TimeSeries;
 using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.RecoveryTests;

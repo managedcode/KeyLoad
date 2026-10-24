@@ -1,9 +1,9 @@
 using KeyLoad.Core;
-using KeyLoad.Core.Features.ResourceExecution;
-using KeyLoad.Core.Features.ResourceExecution.Execution;
+using KeyLoad.Core.ResourceExecution;
+using KeyLoad.Core.ResourceExecution.Execution;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.Query.Features.QueryExecution;
+namespace KeyLoad.Query.QueryExecution;
 
 internal static partial class DistributedSearchCoordinator
 {

@@ -1,7 +1,7 @@
 using KeyLoad.Server;
-using KeyLoad.UnitTests.Features.OrleansExecution;
+using KeyLoad.UnitTests.OrleansExecution;
 
-namespace KeyLoad.UnitTests.Features.StorageRecovery;
+namespace KeyLoad.UnitTests.StorageRecovery;
 
 internal static class IssuedPurposeCold
 {

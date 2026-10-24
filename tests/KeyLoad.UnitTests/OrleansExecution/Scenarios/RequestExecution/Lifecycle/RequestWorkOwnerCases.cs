@@ -1,7 +1,7 @@
 using KeyLoad.Clustering;
 using KeyLoad.Server;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal static class RequestWorkOwnerCases
 {

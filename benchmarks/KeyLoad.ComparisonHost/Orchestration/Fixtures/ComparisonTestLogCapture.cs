@@ -6,7 +6,7 @@ using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.ComparisonHost.Features.BenchmarkOrchestration;
+namespace KeyLoad.ComparisonHost.BenchmarkOrchestration;
 
 internal sealed class ComparisonTestLogCapture : IAsyncDisposable
 {

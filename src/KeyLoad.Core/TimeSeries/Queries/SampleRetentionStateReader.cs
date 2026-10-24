@@ -1,7 +1,7 @@
-using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.Core.ResourceExecution;
 using KeyLoad.Storage;
 
-namespace KeyLoad.Core.Features.TimeSeries;
+namespace KeyLoad.Core.TimeSeries;
 
 internal static class SampleRetentionStateReader
 {

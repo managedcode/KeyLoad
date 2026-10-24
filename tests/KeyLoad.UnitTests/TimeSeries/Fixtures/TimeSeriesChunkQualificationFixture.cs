@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
-using KeyLoad.UnitTests.Features.Authorization;
+using KeyLoad.UnitTests.Authorization;
 
-namespace KeyLoad.UnitTests.Features.TimeSeries;
+namespace KeyLoad.UnitTests.TimeSeries;
 
 internal sealed class TimeSeriesChunkQualificationFixture : IDisposable
 {

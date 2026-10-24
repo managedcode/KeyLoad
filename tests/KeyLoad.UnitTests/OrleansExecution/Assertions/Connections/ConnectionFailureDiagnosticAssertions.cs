@@ -1,6 +1,6 @@
 using KeyLoad.Clustering;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 /// <summary>Checks actual execution failure diagnostics together with original connection effects and replay.</summary>
 internal static class ConnectionFailureDiagnosticAssertions

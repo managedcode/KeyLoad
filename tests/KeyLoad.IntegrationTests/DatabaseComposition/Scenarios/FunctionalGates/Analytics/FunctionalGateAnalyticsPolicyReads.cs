@@ -1,9 +1,9 @@
 using System.Text.Json;
-using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.QueryExecution;
-using P = KeyLoad.IntegrationTests.Features.DatabaseComposition.FunctionalGateUserAnalyticsProtocol;
+using KeyLoad.IntegrationTests.ClientApi;
+using KeyLoad.IntegrationTests.QueryExecution;
+using P = KeyLoad.IntegrationTests.DatabaseComposition.FunctionalGateUserAnalyticsProtocol;
 
-namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
+namespace KeyLoad.IntegrationTests.DatabaseComposition;
 
 internal static class FunctionalGateAnalyticsPolicyReads
 {

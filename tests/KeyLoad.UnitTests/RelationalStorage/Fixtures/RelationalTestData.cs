@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Text;
 using ManagedCode.Communication;
 
-namespace KeyLoad.UnitTests.Features.RelationalStorage;
+namespace KeyLoad.UnitTests.RelationalStorage;
 
 internal static class RelationalTestData
 {

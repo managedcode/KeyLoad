@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 
-namespace KeyLoad.Core.Features.GraphTraversal;
+namespace KeyLoad.Core.GraphTraversal;
 
 internal sealed class GraphIncomingEdgesPageBuilder
 {

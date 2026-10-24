@@ -1,5 +1,5 @@
 using KeyLoad.Storage.ZoneTree;
-namespace KeyLoad.UnitTests.Features.RelationalStorage;
+namespace KeyLoad.UnitTests.RelationalStorage;
 
 internal static class SqlCreateTableOutcomeBytes
 {

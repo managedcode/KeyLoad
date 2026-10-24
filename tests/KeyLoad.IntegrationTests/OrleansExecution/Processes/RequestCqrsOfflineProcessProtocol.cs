@@ -1,8 +1,8 @@
 using System.Diagnostics;
 using System.Globalization;
-using KeyLoad.IntegrationTests.Features.StorageRecovery;
+using KeyLoad.IntegrationTests.StorageRecovery;
 
-namespace KeyLoad.IntegrationTests.Features.OrleansExecution;
+namespace KeyLoad.IntegrationTests.OrleansExecution;
 
 internal static class RequestCqrsOfflineProcessProtocol
 {

@@ -1,8 +1,8 @@
 using KeyLoad.Clustering;
-using KeyLoad.IntegrationTests.Features.OrleansExecution;
+using KeyLoad.IntegrationTests.OrleansExecution;
 using KeyLoad.Server;
 
-namespace KeyLoad.IntegrationTests.Features.Messaging;
+namespace KeyLoad.IntegrationTests.Messaging;
 
 internal static class QueueDeadlineClusterCallers
 {

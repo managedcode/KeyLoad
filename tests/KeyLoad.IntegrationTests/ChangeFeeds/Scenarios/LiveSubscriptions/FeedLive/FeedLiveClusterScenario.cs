@@ -1,10 +1,10 @@
 using KeyLoad.Client;
-using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.OrleansExecution;
-using KeyLoad.IntegrationTests.Features.Search;
+using KeyLoad.IntegrationTests.ClientApi;
+using KeyLoad.IntegrationTests.OrleansExecution;
+using KeyLoad.IntegrationTests.Search;
 using KeyLoad.Query;
 
-namespace KeyLoad.IntegrationTests.Features.ChangeFeeds;
+namespace KeyLoad.IntegrationTests.ChangeFeeds;
 
 internal sealed record FeedLiveClusterScenario(PartitionRef Partition, McpPersistedIdentity Identity,
     CommandRequest Original, CommitReceipt Receipt)

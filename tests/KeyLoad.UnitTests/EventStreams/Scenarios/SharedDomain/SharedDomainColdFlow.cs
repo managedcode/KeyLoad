@@ -1,8 +1,8 @@
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
-using KeyLoad.UnitTests.Features.StorageRecovery.Assertions;
+using KeyLoad.UnitTests.StorageRecovery.Assertions;
 
-namespace KeyLoad.UnitTests.Features.EventStreams;
+namespace KeyLoad.UnitTests.EventStreams;
 
 internal static class SharedDomainColdFlow
 {

@@ -1,11 +1,11 @@
-using KeyLoad.Core.Features.CommandOutcomes.Contracts;
+using KeyLoad.Core.CommandOutcomes.Contracts;
 using KeyLoad.Storage;
-using KeyLoad.UnitTests.Features.ResourceExecution;
+using KeyLoad.UnitTests.ResourceExecution;
 using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
-using static KeyLoad.RecoveryTests.Features.EventStreams.SharedDomainProtocol;
+using static KeyLoad.RecoveryTests.EventStreams.SharedDomainProtocol;
 
-namespace KeyLoad.UnitTests.Features.EventStreams;
+namespace KeyLoad.UnitTests.EventStreams;
 
 internal static class SharedDomainHistoryOperations
 {

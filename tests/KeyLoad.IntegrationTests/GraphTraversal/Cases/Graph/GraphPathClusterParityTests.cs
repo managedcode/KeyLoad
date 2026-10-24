@@ -1,8 +1,8 @@
 using System.Collections.Immutable;
 using KeyLoad.Client;
-using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.ClientApi;
 
-namespace KeyLoad.IntegrationTests.Features.GraphTraversal;
+namespace KeyLoad.IntegrationTests.GraphTraversal;
 
 /// <summary>AC-GRAPH-009: actual SDK and official MCP expose the same bounded shortest-path result.</summary>
 [ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = McpCallerProtocol.FixtureKey)]

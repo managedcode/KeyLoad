@@ -1,7 +1,7 @@
 using System.Diagnostics;
-using KeyLoad.Server.Features.OrleansHosting.Contracts;
+using KeyLoad.Server.OrleansHosting.Contracts;
 
-namespace KeyLoad.Server.Features.OrleansHosting.Diagnostics;
+namespace KeyLoad.Server.OrleansHosting.Diagnostics;
 
 internal static class OrleansTelemetryTagSanitizer
 {

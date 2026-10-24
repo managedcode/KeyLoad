@@ -1,10 +1,10 @@
 using KeyLoad.Clustering;
 using KeyLoad.Server;
-using KeyLoad.Server.Features.Search;
+using KeyLoad.Server.Search;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 internal sealed class TextMaintenanceTestRuntime : IAsyncDisposable
 {

@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
 using System.Text;
-using KeyLoad.Core.Features.Authorization;
-using KeyLoad.Core.Features.Messaging;
+using KeyLoad.Core.Authorization;
+using KeyLoad.Core.Messaging;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core;

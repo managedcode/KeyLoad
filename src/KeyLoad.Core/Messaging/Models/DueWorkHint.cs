@@ -1,4 +1,4 @@
-namespace KeyLoad.Core.Features.Messaging;
+namespace KeyLoad.Core.Messaging;
 
 /// <summary>Carries bounded original due-work identity without its retained business payload.</summary>
 [global::Orleans.GenerateSerializer, global::Orleans.Alias(DueWorkAliases.Hint)]

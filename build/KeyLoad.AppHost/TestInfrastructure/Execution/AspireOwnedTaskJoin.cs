@@ -1,6 +1,6 @@
 using System.Runtime.ExceptionServices;
 
-namespace KeyLoad.AppHost.Features.TestInfrastructure;
+namespace KeyLoad.AppHost.TestInfrastructure;
 
 internal static class AspireOwnedTaskJoin
 {

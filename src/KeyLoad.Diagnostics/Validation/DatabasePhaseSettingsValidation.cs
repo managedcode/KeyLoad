@@ -1,4 +1,4 @@
-namespace KeyLoad.Diagnostics.Features.ResourceExecution;
+namespace KeyLoad.Diagnostics.ResourceExecution;
 
 /// <summary>Checks the qualified reservation and retry ceilings at the BCL boundary.</summary>
 internal static class DatabasePhaseSettingsValidation

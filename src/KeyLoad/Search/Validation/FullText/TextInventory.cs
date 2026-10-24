@@ -2,7 +2,7 @@ using System.Security.Cryptography;
 using KeyLoad.Core;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.Server.Features.Search;
+namespace KeyLoad.Server.Search;
 
 internal static class TextInventory
 {

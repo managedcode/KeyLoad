@@ -2,7 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Orleans.Serialization;
 using Orleans.Serialization.Codecs;
 
-namespace KeyLoad.UnitTests.Features.InternalSerialization;
+namespace KeyLoad.UnitTests.InternalSerialization;
 
 // Independently invokes the official serializer to author semantic/corruption fixtures.
 internal sealed class SerializerFixture : IDisposable

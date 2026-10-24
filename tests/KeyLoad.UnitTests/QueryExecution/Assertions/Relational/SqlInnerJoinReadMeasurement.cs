@@ -1,6 +1,6 @@
-using KeyLoad.Core.Features.DocumentStorage;
+using KeyLoad.Core.DocumentStorage;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal static class SqlInnerJoinReadMeasurement
 {

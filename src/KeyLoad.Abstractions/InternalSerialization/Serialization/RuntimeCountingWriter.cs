@@ -1,6 +1,6 @@
 using System.Buffers;
 
-namespace KeyLoad.Features.InternalSerialization;
+namespace KeyLoad.InternalSerialization;
 
 internal sealed class RuntimeCountingWriter : IBufferWriter<byte>, IDisposable
 {

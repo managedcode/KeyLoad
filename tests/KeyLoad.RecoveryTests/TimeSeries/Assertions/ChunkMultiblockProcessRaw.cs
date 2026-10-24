@@ -1,6 +1,6 @@
 using KeyLoad.Core;
 
-namespace KeyLoad.RecoveryTests.Features.TimeSeries;
+namespace KeyLoad.RecoveryTests.TimeSeries;
 
 internal static class ChunkMultiblockProcessRaw
 {

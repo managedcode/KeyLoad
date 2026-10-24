@@ -1,6 +1,6 @@
-using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.OrleansExecution;
-namespace KeyLoad.IntegrationTests.Features.TimeSeries;
+using KeyLoad.IntegrationTests.ClientApi;
+using KeyLoad.IntegrationTests.OrleansExecution;
+namespace KeyLoad.IntegrationTests.TimeSeries;
 
 internal static class TimeSeriesResourceTagPolicyClusterTrial
 {

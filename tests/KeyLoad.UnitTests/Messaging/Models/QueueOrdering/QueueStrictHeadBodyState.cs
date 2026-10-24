@@ -1,5 +1,5 @@
 using ManagedCode.Communication.Commands;
-namespace KeyLoad.UnitTests.Features.Messaging;
+namespace KeyLoad.UnitTests.Messaging;
 
 internal sealed record QueueStrictHeadBodyState(QueueOrderedRetryState Queue, MessageState HeadState,
     DateTimeOffset ScheduledAt, byte[] BodyKey, byte[] OriginalBody, Command<DatabaseCommand> BlockedReceive,

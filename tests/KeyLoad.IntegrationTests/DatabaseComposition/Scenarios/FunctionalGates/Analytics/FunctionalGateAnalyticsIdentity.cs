@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
 using System.Text.Json;
 
-namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
+namespace KeyLoad.IntegrationTests.DatabaseComposition;
 
 /// <summary>Fresh public requests preserve values and array order while rebuilding every Analytics map.</summary>
 internal static class FunctionalGateAnalyticsIdentity

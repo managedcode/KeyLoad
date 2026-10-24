@@ -1,6 +1,6 @@
 using KeyLoad.Storage;
 
-namespace KeyLoad.Core.Features.ResourceExecution.Execution;
+namespace KeyLoad.Core.ResourceExecution.Execution;
 
 /// <summary>Executes gate-scoped reads through the same original budget and execution observers.</summary>
 internal static class ReadExecutionBudgetStorageReads

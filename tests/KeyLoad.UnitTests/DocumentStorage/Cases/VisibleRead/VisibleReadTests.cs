@@ -1,7 +1,7 @@
-using KeyLoad.Core.Features.DocumentStorage;
-using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.Core.DocumentStorage;
+using KeyLoad.Core.ResourceExecution;
 
-namespace KeyLoad.UnitTests.Features.DocumentStorage;
+namespace KeyLoad.UnitTests.DocumentStorage;
 
 internal sealed class VisibleReadTests
 {

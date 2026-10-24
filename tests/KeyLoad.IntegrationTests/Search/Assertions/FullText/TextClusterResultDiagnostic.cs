@@ -1,6 +1,6 @@
 using System.Globalization;
 
-namespace KeyLoad.IntegrationTests.Features.Search;
+namespace KeyLoad.IntegrationTests.Search;
 
 /// <summary>Describes only closed field differences for the fixed three-document execution Orleans corpus.</summary>
 internal static class TextClusterResultDiagnostic

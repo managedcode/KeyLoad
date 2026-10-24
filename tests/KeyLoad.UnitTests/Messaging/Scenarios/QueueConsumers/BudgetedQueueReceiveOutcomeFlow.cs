@@ -1,8 +1,8 @@
 using ManagedCode.Communication;
-using A = KeyLoad.UnitTests.Features.Messaging.BudgetedQueueReceiveOutcomeAssertions;
-using P = KeyLoad.UnitTests.Features.Messaging.BudgetedQueueReceiveOutcomeProtocol;
+using A = KeyLoad.UnitTests.Messaging.BudgetedQueueReceiveOutcomeAssertions;
+using P = KeyLoad.UnitTests.Messaging.BudgetedQueueReceiveOutcomeProtocol;
 
-namespace KeyLoad.UnitTests.Features.Messaging;
+namespace KeyLoad.UnitTests.Messaging;
 
 internal static class BudgetedQueueReceiveOutcomeFlow
 {

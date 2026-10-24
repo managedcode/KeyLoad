@@ -1,8 +1,8 @@
 using System.Security.Cryptography;
-using KeyLoad.Core.Features.ResourceExecution.Execution;
+using KeyLoad.Core.ResourceExecution.Execution;
 using KeyLoad.Storage;
 
-namespace KeyLoad.Core.Features.GraphTraversal.Serialization;
+namespace KeyLoad.Core.GraphTraversal.Serialization;
 
 internal static class GraphCrossPartitionRecords
 {

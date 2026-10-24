@@ -1,8 +1,8 @@
-using KeyLoad.Core.Features.Messaging;
-using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.Core.Messaging;
+using KeyLoad.IntegrationTests.ClientApi;
 using KeyLoad.Server;
 
-namespace KeyLoad.IntegrationTests.Features.Messaging;
+namespace KeyLoad.IntegrationTests.Messaging;
 
 internal static class RemoteTransferAttemptClusterTrial
 {

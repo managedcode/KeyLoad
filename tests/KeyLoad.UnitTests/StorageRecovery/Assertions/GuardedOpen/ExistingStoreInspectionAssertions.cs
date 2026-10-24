@@ -2,7 +2,7 @@ using KeyLoad.RecoveryTests;
 using KeyLoad.Storage;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.StorageRecovery;
+namespace KeyLoad.UnitTests.StorageRecovery;
 
 internal static class ExistingStoreInspectionAssertions
 {

@@ -1,7 +1,7 @@
-using KeyLoad.Core.Features.ChangeFeeds;
-using KeyLoad.Server.Features.Search;
+using KeyLoad.Core.ChangeFeeds;
+using KeyLoad.Server.Search;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 /// <summary>Owns complete canonical outbox/pin and original durable intent observations, never checkpoint authority.</summary>
 internal sealed class TextIncrementalExpirySnapshot

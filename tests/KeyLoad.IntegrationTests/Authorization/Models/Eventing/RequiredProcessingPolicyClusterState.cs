@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.Authorization;
+namespace KeyLoad.IntegrationTests.Authorization;
 
 internal sealed class RequiredProcessingPolicyClusterState(PartitionRef partition, string worker, string key, bool header)
 {

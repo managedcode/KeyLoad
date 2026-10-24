@@ -1,11 +1,11 @@
 using System.Text.Json;
-using KeyLoad.Core.Features.CommandOutcomes.Contracts;
-using KeyLoad.Core.Features.InternalSerialization;
+using KeyLoad.Core.CommandOutcomes.Contracts;
+using KeyLoad.Core.InternalSerialization;
 using KeyLoad.Storage;
 using ManagedCode.Communication;
-using P = KeyLoad.UnitTests.Features.ClientApi.CredentialStatusProtocol;
+using P = KeyLoad.UnitTests.ClientApi.CredentialStatusProtocol;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 internal static class CredentialStatusOutcome
 {

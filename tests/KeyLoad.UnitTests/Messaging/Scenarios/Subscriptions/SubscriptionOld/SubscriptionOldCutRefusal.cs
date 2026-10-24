@@ -1,9 +1,9 @@
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
-using KeyLoad.UnitTests.Features.StorageRecovery.Assertions;
+using KeyLoad.UnitTests.StorageRecovery.Assertions;
 using ManagedCode.Communication.Commands;
 
-namespace KeyLoad.UnitTests.Features.Messaging;
+namespace KeyLoad.UnitTests.Messaging;
 
 internal static class SubscriptionOldCutRefusal
 {

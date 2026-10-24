@@ -1,4 +1,4 @@
-namespace KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
+namespace KeyLoad.BenchmarkScenarios.BenchmarkComparisons;
 
 /// <summary>Holds the generated runner's explicit engine and qualification-scale selectors.</summary>
 [ConfigurationOptions]

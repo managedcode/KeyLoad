@@ -1,6 +1,6 @@
-using P = KeyLoad.UnitTests.Features.Authorization.StartedReadPolicyProtocol;
+using P = KeyLoad.UnitTests.Authorization.StartedReadPolicyProtocol;
 
-namespace KeyLoad.UnitTests.Features.Authorization;
+namespace KeyLoad.UnitTests.Authorization;
 
 internal sealed class StartedReadPolicyTests
 {

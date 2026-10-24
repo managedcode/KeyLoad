@@ -1,6 +1,6 @@
 using KeyLoad.Server;
 
-namespace KeyLoad.UnitTests.Features.BackupRestore;
+namespace KeyLoad.UnitTests.BackupRestore;
 
 internal static class EventingArtifactFixtureLifetime
 {

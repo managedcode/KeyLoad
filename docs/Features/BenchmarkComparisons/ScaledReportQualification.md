@@ -57,7 +57,7 @@ Hardware descriptors are observations, not proof of identical physical machines.
 
 `Benchmarks` contains exactly the parent's two methods by two payload sizes.
 Namespace and type are exactly
-`KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons` and
+`KeyLoad.BenchmarkScenarios.BenchmarkComparisons` and
 `ScaledStorageReadBenchmarks`. Parameters contain exactly three unique names,
 `Engine`, `RecordCount`, `PayloadBytes`, in any order; compare canonical decimal
 counts/sizes and exact lowercase engine values. Reject duplicates, extra names,

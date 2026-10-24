@@ -1,7 +1,7 @@
 using KeyLoad.Clustering;
 using ManagedCode.Communication;
 
-namespace KeyLoad.UnitTests.Features.ResourceExecution;
+namespace KeyLoad.UnitTests.ResourceExecution;
 
 internal static class TenantShutdownWholeFlow
 {

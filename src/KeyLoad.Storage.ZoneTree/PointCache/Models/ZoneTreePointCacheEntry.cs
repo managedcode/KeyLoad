@@ -1,4 +1,4 @@
-namespace KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
+namespace KeyLoad.Storage.ZoneTree.ResourceExecution;
 
 /// <summary>A privately owned positive value whose bytes remain charged while pinned.</summary>
 internal sealed class ZoneTreePointCacheEntry : IDisposable

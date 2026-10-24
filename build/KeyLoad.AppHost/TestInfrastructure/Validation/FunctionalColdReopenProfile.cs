@@ -1,7 +1,7 @@
 using KeyLoad.AppHost.Hosting;
 using Microsoft.Extensions.Configuration;
 
-namespace KeyLoad.AppHost.Features.TestInfrastructure;
+namespace KeyLoad.AppHost.TestInfrastructure;
 
 /// <summary>Admits execution faults only for an explicit cold functional test topology.</summary>
 [ConfigurationBinding]

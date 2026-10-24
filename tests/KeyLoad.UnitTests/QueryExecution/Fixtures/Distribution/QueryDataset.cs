@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 /// <summary>Seeds canonical query data and persisted policies in independent real stores.</summary>
 internal sealed class QueryDataset(QueryFixture fixture)

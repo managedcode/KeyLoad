@@ -1,6 +1,6 @@
-using static KeyLoad.UnitTests.Features.QueryExecution.QueueViewLeaseIsolationProtocol;
+using static KeyLoad.UnitTests.QueryExecution.QueueViewLeaseIsolationProtocol;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal static class QueueViewLeaseIsolationSource
 {

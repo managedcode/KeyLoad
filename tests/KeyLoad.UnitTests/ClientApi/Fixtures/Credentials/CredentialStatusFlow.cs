@@ -1,8 +1,8 @@
 using KeyLoad.Clustering;
 using KeyLoad.Server;
-using KeyLoad.UnitTests.Features.OrleansExecution;
+using KeyLoad.UnitTests.OrleansExecution;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 internal sealed class CredentialStatusFlow : IAsyncDisposable
 {

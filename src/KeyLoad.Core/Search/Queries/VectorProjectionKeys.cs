@@ -1,4 +1,4 @@
-namespace KeyLoad.Core.Features.Search;
+namespace KeyLoad.Core.Search;
 
 /// <summary>Builds private canonical keys for vector provenance and idempotent effects.</summary>
 internal static class VectorProjectionKeys

@@ -1,10 +1,10 @@
 using KeyLoad.Server;
-using KeyLoad.UnitTests.Features.ClientApi;
-using D = KeyLoad.UnitTests.Features.ClientApi.DeclaredResponseEofProtocol;
-using N = KeyLoad.UnitTests.Features.OrleansExecution.ConnectionIdentityCollisionProtocol;
-using P = KeyLoad.UnitTests.Features.OrleansExecution.ConnectionCallerFactoryProtocol;
+using KeyLoad.UnitTests.ClientApi;
+using D = KeyLoad.UnitTests.ClientApi.DeclaredResponseEofProtocol;
+using N = KeyLoad.UnitTests.OrleansExecution.ConnectionIdentityCollisionProtocol;
+using P = KeyLoad.UnitTests.OrleansExecution.ConnectionCallerFactoryProtocol;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal static class ConnectionCallerFactoryFlow
 {

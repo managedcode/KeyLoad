@@ -1,6 +1,6 @@
-using S = KeyLoad.IntegrationTests.Features.DatabaseComposition.FunctionalGateSearch;
+using S = KeyLoad.IntegrationTests.DatabaseComposition.FunctionalGateSearch;
 
-namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
+namespace KeyLoad.IntegrationTests.DatabaseComposition;
 
 internal static class FunctionalGateSearchVectors
 {

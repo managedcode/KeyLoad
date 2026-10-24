@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.Messaging;
+namespace KeyLoad.IntegrationTests.Messaging;
 
 internal sealed record QueueDispatchCasClusterState(QueueLaneRef Lane, ResourceDefinition Definition,
     MessagingClusterIdentity Member, CommandRequest Original, CommitReceipt Receipt,

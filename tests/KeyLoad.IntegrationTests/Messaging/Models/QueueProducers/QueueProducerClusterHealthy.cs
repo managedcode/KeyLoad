@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.Messaging;
+namespace KeyLoad.IntegrationTests.Messaging;
 
 internal sealed record QueueProducerClusterHealthy(QueueProducerClusterOriginal Original,
     CommandRequest Command, CommitReceipt Receipt, DeliveryCommand Ack, CommitReceipt AckReceipt,

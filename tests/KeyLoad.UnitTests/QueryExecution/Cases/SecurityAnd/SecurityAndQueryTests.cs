@@ -1,7 +1,7 @@
 using System.Text.Json;
 using KeyLoad.Query;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal sealed class SecurityAndQueryTests
 {
@@ -46,7 +46,7 @@ internal sealed class SecurityAndQueryTests
         await Assert.That(exception.Code).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => queries.Execute("reader",
             new(db.Partition, "SELECT * FROM orders ORDER BY \"odd.name\"", AllowFullScan: true))).Code).IsEqualTo(ErrorCode.PermissionDenied);
-        await KeyLoad.UnitTests.Features.Authorization.NestedSensitiveCurrentPolicyContinuation.RunAsync(db,
+        await KeyLoad.UnitTests.Authorization.NestedSensitiveCurrentPolicyContinuation.RunAsync(db,
             TestContext.Current!.Execution.CancellationToken);
     }
     [Test]
@@ -62,7 +62,7 @@ internal sealed class SecurityAndQueryTests
         await Assert.That(first.Cursor).IsNotNull();
         Reader(db, true, 2);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute("reader", request with { Cursor = first.Cursor })).Code).IsEqualTo(ErrorCode.Unauthenticated);
-        await KeyLoad.UnitTests.Features.Authorization.PolicyEpochCursorContinuation.RunAsync(db, request, first.Cursor!,
+        await KeyLoad.UnitTests.Authorization.PolicyEpochCursorContinuation.RunAsync(db, request, first.Cursor!,
             TestContext.Current!.Execution.CancellationToken);
     }
     [Test]
@@ -142,7 +142,7 @@ internal sealed class SecurityAndQueryTests
         var lane = new QueueLaneRef(db.Partition, "jobs");
         await Assert.That(Errors.Code(db.Submit(OperationKind.Receive, new ReceiveRequest(id, lane), "worker", id).Problem)).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(db.Database.InspectMessage("root", lane, "m1")!.Metadata.State).IsEqualTo(MessageState.Ready);
-        await KeyLoad.UnitTests.Features.Authorization.EventingRequiredClaimFlow.RunAllAsync(
+        await KeyLoad.UnitTests.Authorization.EventingRequiredClaimFlow.RunAllAsync(
             TestContext.Current!.Execution.CancellationToken);
     }
 }

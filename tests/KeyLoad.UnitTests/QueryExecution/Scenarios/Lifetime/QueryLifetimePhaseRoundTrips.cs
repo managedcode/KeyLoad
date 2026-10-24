@@ -1,10 +1,10 @@
 using System.Collections.Immutable;
 using KeyLoad.Query;
-using KeyLoad.Query.Features.QueryExecution;
-using KeyLoad.Query.Features.Search;
+using KeyLoad.Query.QueryExecution;
+using KeyLoad.Query.Search;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal sealed class QueryLifetimePhaseRoundTrips(QueryLifetimeFlow flow)
 {

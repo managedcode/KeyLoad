@@ -1,6 +1,6 @@
 using KeyLoad.Server;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>AC-MCP-004/005: pre-operation reservations account for inputs, serializers and reply modes.</summary>
 internal sealed class McpMemoryProjectionOperationTests

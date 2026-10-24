@@ -2,7 +2,7 @@ using System.Reflection;
 using System.Text;
 using KeyLoad.Storage;
 
-namespace KeyLoad.UnitTests.Features.ResourceExecution;
+namespace KeyLoad.UnitTests.ResourceExecution;
 
 internal sealed class ReadOnlyCollectionContractTests
 {

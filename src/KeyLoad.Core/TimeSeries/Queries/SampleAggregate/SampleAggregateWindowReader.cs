@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
 using KeyLoad.Storage;
 
-namespace KeyLoad.Core.Features.TimeSeries;
+namespace KeyLoad.Core.TimeSeries;
 
 internal static class SampleAggregateWindowReader
 {

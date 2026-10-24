@@ -3,7 +3,7 @@ using Orleans.Serialization.Buffers;
 using Orleans.Serialization.Codecs;
 using Orleans.Serialization.WireProtocol;
 
-namespace KeyLoad.UnitTests.Features.StorageRecovery.Serialization;
+namespace KeyLoad.UnitTests.StorageRecovery.Serialization;
 
 /// <summary>Removes only the current generated StoreIdentity reader-capability field for a execution negative input.</summary>
 internal static class IdentityCapabilityOmission

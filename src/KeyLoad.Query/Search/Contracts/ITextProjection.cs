@@ -1,6 +1,6 @@
 using KeyLoad.Core;
 
-namespace KeyLoad.Query.Features.Search;
+namespace KeyLoad.Query.Search;
 
 /// <summary>Supplies a physical-owner text projection inside the canonical read gate.</summary>
 public interface ITextProjection : IDisposable

@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
+namespace KeyLoad.Analyzers.Tests.CodeQuality;
 
 [KeyLoad.ConfigurationBinding]
 internal static class CoverageProcessConfiguration

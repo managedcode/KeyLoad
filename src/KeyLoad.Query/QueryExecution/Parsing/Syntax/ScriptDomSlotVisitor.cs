@@ -1,6 +1,6 @@
 using Dom = Microsoft.SqlServer.TransactSql.ScriptDom;
 
-namespace KeyLoad.Features.QueryExecution;
+namespace KeyLoad.QueryExecution;
 
 internal sealed class ScriptDomSlotVisitor(ScriptDomCheckedTokens bounds, int? positionalCount,
     Action checkBudget, CancellationToken cancellationToken) : Dom.TSqlFragmentVisitor

@@ -2,7 +2,7 @@ using System.Text.Json;
 using KeyLoad.Query;
 using KeyLoad.Storage;
 
-namespace KeyLoad.Core.Features.QueryExecution;
+namespace KeyLoad.Core.QueryExecution;
 
 /// <summary>Reads and validates one retained event stream without replay or mutation.</summary>
 internal static class ModelEventQueryRows

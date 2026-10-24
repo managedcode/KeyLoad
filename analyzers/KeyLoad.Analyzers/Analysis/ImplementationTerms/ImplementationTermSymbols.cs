@@ -5,7 +5,7 @@ using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace KeyLoad.Analyzers.Features.CodeQuality;
+namespace KeyLoad.Analyzers.CodeQuality;
 
 internal static class ImplementationTermSymbols
 {
@@ -120,7 +120,7 @@ internal static class ImplementationTermSymbols
         symbol is IFieldSymbol or IPropertySymbol or IMethodSymbol && symbol.ContainingAssembly.Name is "KeyLoad.Comparisons" or "KeyLoad.AppHost" or "KeyLoad.LoadTests.AppHost" or "KeyLoad.ComparisonHost" &&
         Array.Exists(ImplementationTermCatalog.MeasurementMembers, member => member == symbol.ToDisplayString()) ||
         symbol is IFieldSymbol { Name: ImplementationTermCatalog.MeasurementSamplesMember, ContainingType: { } owner } &&
-        owner.ToDisplayString() == "KeyLoad.SiteTests.Features.BenchmarkComparisons.SiteIsolatedFields" ||
+        owner.ToDisplayString() == "KeyLoad.SiteTests.BenchmarkComparisons.SiteIsolatedFields" ||
         TypeMeans(ValueType(symbol), MeasurementType, new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default)) ||
         TypeMeans(symbol?.ContainingType, MeasurementType, new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default));
 

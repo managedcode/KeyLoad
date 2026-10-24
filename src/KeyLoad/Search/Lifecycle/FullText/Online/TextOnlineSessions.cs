@@ -1,7 +1,7 @@
 using KeyLoad.Clustering;
 using KeyLoad.Core;
 
-namespace KeyLoad.Server.Features.Search;
+namespace KeyLoad.Server.Search;
 
 internal sealed class TextOnlineSessions(int maximumSessions)
 {

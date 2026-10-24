@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.AppHost.Features.TestInfrastructure.Processes;
+namespace KeyLoad.AppHost.TestInfrastructure.Processes;
 
 /// <summary>Bounds child output and settles the original process and stream tasks on every failure path.</summary>
 internal static class LocalClusterOwnedProcessLifetime

@@ -1,7 +1,7 @@
 using System.Text.Json;
 using KeyLoad.RecoveryTests;
 
-namespace KeyLoad.UnitTests.Features.StorageRecovery;
+namespace KeyLoad.UnitTests.StorageRecovery;
 
 internal static class ExistingStoreInspectorProcess
 {

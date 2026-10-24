@@ -1,8 +1,8 @@
-using KeyLoad.Core.Features.Authorization;
+using KeyLoad.Core.Authorization;
 using KeyLoad.Server;
 using Microsoft.Extensions.Logging;
 
-namespace KeyLoad.UnitTests.Features.StorageRecovery;
+namespace KeyLoad.UnitTests.StorageRecovery;
 
 internal sealed class PartitionHostRecoveryLease(PartitionHostRecoveryAttempt attempt) : IAsyncDisposable
 {

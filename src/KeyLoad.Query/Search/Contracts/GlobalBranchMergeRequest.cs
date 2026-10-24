@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 
-namespace KeyLoad.Query.Features.Search;
+namespace KeyLoad.Query.Search;
 
 [global::Orleans.GenerateSerializer]
 [global::Orleans.Alias(GlobalBranchProtocol.MergeRequestAlias)]

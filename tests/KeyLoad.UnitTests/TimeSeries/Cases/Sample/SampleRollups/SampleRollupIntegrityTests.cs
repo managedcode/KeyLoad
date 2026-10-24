@@ -1,7 +1,7 @@
-using KeyLoad.Core.Features.TimeSeries;
+using KeyLoad.Core.TimeSeries;
 using KeyLoad.Storage;
 
-namespace KeyLoad.UnitTests.Features.TimeSeries;
+namespace KeyLoad.UnitTests.TimeSeries;
 
 internal sealed class SampleRollupIntegrityTests
 {

@@ -1,7 +1,7 @@
 using KeyLoad.Core;
-using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.Core.ResourceExecution;
 
-namespace KeyLoad.Query.Features.QueryExecution;
+namespace KeyLoad.Query.QueryExecution;
 
 /// <summary>Executes the canonical leaf under mandatory source metadata and lifetime coverage.</summary>
 internal static class PartitionQueryLifetimeLeafExecution

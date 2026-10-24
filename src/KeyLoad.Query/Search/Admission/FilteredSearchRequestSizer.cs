@@ -1,7 +1,7 @@
 using System.Text.Json;
 using KeyLoad.Core;
 
-namespace KeyLoad.Query.Features.Search;
+namespace KeyLoad.Query.Search;
 
 /// <summary>Measures canonical request bytes without retaining an unbounded serialized copy.</summary>
 internal static class FilteredSearchRequestSizer

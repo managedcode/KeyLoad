@@ -2,7 +2,7 @@ using System.Text.Json;
 using KeyLoad.Clustering;
 using KeyLoad.Server;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>AC-MCP-001/006/007: actual immutable catalog matches the frozen public contract.</summary>
 internal sealed class McpCatalogTests
@@ -47,7 +47,7 @@ internal sealed class McpCatalogTests
             await Assert.That(actual.OutputSchema.GetProperty(TypeKey).GetString()).IsEqualTo(ObjectType);
         }
         await QueueDispatchMcpCatalogAssertions.RequireAsync();
-        await global::KeyLoad.UnitTests.Features.QueryExecution.DistributedSearchMcpSchemaAssertions.RequireAsync();
+        await global::KeyLoad.UnitTests.QueryExecution.DistributedSearchMcpSchemaAssertions.RequireAsync();
     }
 
     /// <summary>Rejects case-changed names and prevents internal authentication or membership discovery.</summary>

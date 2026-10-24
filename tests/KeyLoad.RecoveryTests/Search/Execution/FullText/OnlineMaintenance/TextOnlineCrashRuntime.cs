@@ -1,11 +1,11 @@
-using KeyLoad.Clustering.Features.Search;
+using KeyLoad.Clustering.Search;
 using KeyLoad.Core;
 using KeyLoad.Query;
-using KeyLoad.Query.Features.Search;
+using KeyLoad.Query.Search;
 using KeyLoad.Server;
-using KeyLoad.Server.Features.Search;
+using KeyLoad.Server.Search;
 
-namespace KeyLoad.RecoveryTests.Features.Search;
+namespace KeyLoad.RecoveryTests.Search;
 
 internal sealed class TextOnlineCrashRuntime : IAsyncDisposable
 {

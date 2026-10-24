@@ -1,6 +1,6 @@
 using KeyLoad.Server;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 /// <summary>Joins the actual maintenance owner while retaining the initiating assertion/operation and cleanup failures.</summary>
 internal static class TextIncrementalIntentOwner

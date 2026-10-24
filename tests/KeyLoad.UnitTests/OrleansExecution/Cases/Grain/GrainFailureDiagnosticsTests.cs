@@ -1,9 +1,9 @@
 using System.Text.Json;
 using KeyLoad.Clustering;
-using KeyLoad.UnitTests.Features.TestInfrastructure;
+using KeyLoad.UnitTests.TestInfrastructure;
 using Microsoft.Extensions.Logging;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 /// <summary>AC-ROUTE-008: internal rejection diagnostics stay typed and private.</summary>
 [NotInParallel(LoggingEventSourceIsolation.Key)]

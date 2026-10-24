@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
 using KeyLoad.Storage;
 
-namespace KeyLoad.Core.Features.GraphTraversal;
+namespace KeyLoad.Core.GraphTraversal;
 
 /// <summary>Re-reads and projects only the selected shortest path for bounded output.</summary>
 internal sealed class GraphShortestPathResultProjector(DatabaseEngine database, IKeyValueView view,

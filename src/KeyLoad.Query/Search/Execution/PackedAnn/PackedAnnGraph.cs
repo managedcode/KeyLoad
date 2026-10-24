@@ -1,4 +1,4 @@
-namespace KeyLoad.Query.Features.Search;
+namespace KeyLoad.Query.Search;
 
 internal sealed class PackedAnnGraph
 {

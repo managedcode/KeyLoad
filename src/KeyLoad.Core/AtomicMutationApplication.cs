@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
-using KeyLoad.Core.Features.DatabaseComposition;
-using KeyLoad.Core.Features.DocumentStorage;
-using KeyLoad.Core.Features.Messaging;
+using KeyLoad.Core.DatabaseComposition;
+using KeyLoad.Core.DocumentStorage;
+using KeyLoad.Core.Messaging;
 using KeyLoad.Storage;
 using ManagedCode.Communication.Commands;
 
@@ -127,13 +127,13 @@ public static class AtomicMutationApplication
         ApplyCrossPartitionReverseEdge edge => engine.ApplyGraphReverseDelivery(tx, principal, partition, edge),
         CompleteCrossPartitionReverseEdge edge => engine.CompleteGraphReverseDelivery(tx, principal, partition, edge),
         AppendSamples samples => engine.Append(tx, principal, partition, samples, now),
-        OpenSampleChunkWindow window => global::KeyLoad.Core.Features.TimeSeries.SampleChunkWindowOpen.Execute(engine, tx, principal, partition, window, engine.TimeSeriesOptions),
-        SealSampleChunkWindow window => global::KeyLoad.Core.Features.TimeSeries.SampleChunkWindowSeal.Execute(engine, tx, principal, partition, window, engine.TimeSeriesOptions),
-        MergeSampleChunkWindow window => global::KeyLoad.Core.Features.TimeSeries.SampleChunkWindowMerge.Execute(engine, tx, principal, partition, window, engine.TimeSeriesOptions),
-        DropSampleChunkWindow window => global::KeyLoad.Core.Features.TimeSeries.SampleChunkWindowDrop.Execute(engine, tx, principal, partition, window, engine.TimeSeriesOptions),
+        OpenSampleChunkWindow window => global::KeyLoad.Core.TimeSeries.SampleChunkWindowOpen.Execute(engine, tx, principal, partition, window, engine.TimeSeriesOptions),
+        SealSampleChunkWindow window => global::KeyLoad.Core.TimeSeries.SampleChunkWindowSeal.Execute(engine, tx, principal, partition, window, engine.TimeSeriesOptions),
+        MergeSampleChunkWindow window => global::KeyLoad.Core.TimeSeries.SampleChunkWindowMerge.Execute(engine, tx, principal, partition, window, engine.TimeSeriesOptions),
+        DropSampleChunkWindow window => global::KeyLoad.Core.TimeSeries.SampleChunkWindowDrop.Execute(engine, tx, principal, partition, window, engine.TimeSeriesOptions),
         ExpireSamples samples => engine.Expire(tx, principal, partition, samples, now),
-        RefreshSampleRollup rollup => global::KeyLoad.Core.Features.TimeSeries.SampleRollupCommands.Refresh(engine, tx, principal, partition, rollup, engine.TimeSeriesExecution.MaximumRollupBuckets),
-        DropSampleRollup rollup => global::KeyLoad.Core.Features.TimeSeries.SampleRollupCommands.Drop(engine, tx, principal, partition, rollup),
+        RefreshSampleRollup rollup => global::KeyLoad.Core.TimeSeries.SampleRollupCommands.Refresh(engine, tx, principal, partition, rollup, engine.TimeSeriesExecution.MaximumRollupBuckets),
+        DropSampleRollup rollup => global::KeyLoad.Core.TimeSeries.SampleRollupCommands.Drop(engine, tx, principal, partition, rollup),
         StoreAggregateSnapshot snapshot => engine.SaveAggregateSnapshot(tx, principal, partition, snapshot),
         PutVector vector => engine.Upsert(tx, principal, partition, vector),
         CreateQueueTransfer transfer => engine.ApplyCreateQueueTransfer(tx, principal, partition, transfer, now),

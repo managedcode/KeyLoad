@@ -1,6 +1,6 @@
 using KeyLoad.Server;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>AC-MCP-004: independent configured pools reject invalid limits before hosting.</summary>
 internal sealed class McpMemoryLimitsTests

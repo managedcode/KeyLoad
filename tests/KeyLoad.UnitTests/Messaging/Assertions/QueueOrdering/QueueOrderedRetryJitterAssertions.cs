@@ -1,11 +1,11 @@
 using System.Buffers.Binary;
 using System.Collections.Immutable;
 using System.Security.Cryptography;
-using KeyLoad.Core.Features.Messaging;
+using KeyLoad.Core.Messaging;
 using KeyLoad.Storage;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.Messaging;
+namespace KeyLoad.UnitTests.Messaging;
 
 internal static class QueueOrderedRetryJitterAssertions
 {

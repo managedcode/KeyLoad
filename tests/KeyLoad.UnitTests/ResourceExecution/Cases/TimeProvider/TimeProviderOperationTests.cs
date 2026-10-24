@@ -1,10 +1,10 @@
 using System.Text.Json;
 using KeyLoad.Query;
 using KeyLoad.Storage;
-using KeyLoad.UnitTests.Features.DocumentStorage;
+using KeyLoad.UnitTests.DocumentStorage;
 using ManagedCode.Communication;
 
-namespace KeyLoad.UnitTests.Features.ResourceExecution;
+namespace KeyLoad.UnitTests.ResourceExecution;
 
 /// <summary>AC-TIME-001/002: real engine commands and queries observe their borrowed provider.</summary>
 internal sealed class TimeProviderOperationTests
@@ -99,7 +99,7 @@ internal sealed class TimeProviderOperationTests
         var before = fixture.Store.Position;
         clock.MoveUtc(Epoch.AddYears(1));
         var record = fixture.Store.Read(view => budget.CreateView(view).GetRecord<DocumentRecord>(
-            KeyLoad.Core.Features.DocumentStorage.DocumentStorageKeys.RecordKey(new(fixture.Partition, Collection, Entity))));
+            KeyLoad.Core.DocumentStorage.DocumentStorageKeys.RecordKey(new(fixture.Partition, Collection, Entity))));
         await Assert.That(record!.Json).IsEqualTo(Json);
         clock.Advance(TimeSpan.FromSeconds(DeadlineSeconds + 1));
         var error = Assert.ThrowsExactly<KeyLoadException>(() => fixture.Store.Read(view => budget.CreateView(view)));

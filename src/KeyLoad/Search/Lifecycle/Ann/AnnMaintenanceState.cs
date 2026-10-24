@@ -1,7 +1,7 @@
 using KeyLoad.Clustering;
 using KeyLoad.Core;
 
-namespace KeyLoad.Server.Features.Search;
+namespace KeyLoad.Server.Search;
 
 /// <summary>Serializes the original execution generation/session transitions and joined shutdown.</summary>
 internal sealed class AnnMaintenanceState(Func<AnnGenerationOwner> createOwner)

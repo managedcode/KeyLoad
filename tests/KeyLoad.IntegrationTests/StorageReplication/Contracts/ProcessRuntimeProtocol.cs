@@ -1,8 +1,8 @@
 using System.Text;
-using KeyLoad.AppHost.Features.TestInfrastructure;
-using KeyLoad.Diagnostics.Features.ResourceExecution;
+using KeyLoad.AppHost.TestInfrastructure;
+using KeyLoad.Diagnostics.ResourceExecution;
 
-namespace KeyLoad.IntegrationTests.Features.StorageReplication;
+namespace KeyLoad.IntegrationTests.StorageReplication;
 
 /// <summary>Names the actual execution resource lifecycle and owned restart artifacts.</summary>
 internal static class ProcessRuntimeProtocol

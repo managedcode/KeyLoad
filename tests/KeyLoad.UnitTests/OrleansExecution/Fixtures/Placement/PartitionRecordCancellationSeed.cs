@@ -1,6 +1,6 @@
 using System.Globalization;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution.Helpers;
+namespace KeyLoad.UnitTests.OrleansExecution.Helpers;
 
 internal static class PartitionRecordCancellationSeed
 {

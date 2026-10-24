@@ -1,4 +1,4 @@
-namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
+namespace KeyLoad.Analyzers.Tests.CodeQuality;
 
 /// <summary>AC-CQ-033/037: general string, character and interpolation contexts require identities.</summary>
 internal sealed class GeneralRuntimeTextTests

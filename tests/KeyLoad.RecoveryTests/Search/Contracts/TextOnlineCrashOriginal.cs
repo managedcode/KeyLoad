@@ -1,4 +1,4 @@
-namespace KeyLoad.RecoveryTests.Features.Search;
+namespace KeyLoad.RecoveryTests.Search;
 
 [global::Orleans.GenerateSerializer, global::Orleans.Alias(TextOnlineCrashScenario.OriginalAlias)]
 internal sealed record TextOnlineCrashOriginal(

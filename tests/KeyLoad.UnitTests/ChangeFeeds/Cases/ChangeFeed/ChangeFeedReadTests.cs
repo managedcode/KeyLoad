@@ -1,10 +1,10 @@
 using System.Text.Json;
-using KeyLoad.Core.Features.Authorization;
+using KeyLoad.Core.Authorization;
 using KeyLoad.Storage.ZoneTree;
 using ManagedCode.Communication;
-using static KeyLoad.UnitTests.Features.ChangeFeeds.ChangeFeedTestActions;
+using static KeyLoad.UnitTests.ChangeFeeds.ChangeFeedTestActions;
 
-namespace KeyLoad.UnitTests.Features.ChangeFeeds;
+namespace KeyLoad.UnitTests.ChangeFeeds;
 
 internal sealed class ChangeFeedReadTests
 {

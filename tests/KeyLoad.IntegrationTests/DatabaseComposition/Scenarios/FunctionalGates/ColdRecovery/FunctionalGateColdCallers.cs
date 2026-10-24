@@ -1,6 +1,6 @@
-using KeyLoad.IntegrationTests.Features.OrleansExecution;
+using KeyLoad.IntegrationTests.OrleansExecution;
 
-namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
+namespace KeyLoad.IntegrationTests.DatabaseComposition;
 
 internal static class FunctionalGateColdCallers
 {

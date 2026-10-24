@@ -1,8 +1,8 @@
 using KeyLoad.Clustering;
-using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.Core.ResourceExecution;
 using KeyLoad.Server;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal static class BoundLeaseDisposalFollowing
 {

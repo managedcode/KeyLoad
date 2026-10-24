@@ -1,9 +1,9 @@
 using System.Diagnostics;
-using KeyLoad.RecoveryTests.Features.AnalyticsStore;
-using KeyLoad.UnitTests.Features.CodeQuality.Assertions;
-using KeyLoad.UnitTests.Features.CodeQuality.Processes;
+using KeyLoad.RecoveryTests.AnalyticsStore;
+using KeyLoad.UnitTests.CodeQuality.Assertions;
+using KeyLoad.UnitTests.CodeQuality.Processes;
 
-namespace KeyLoad.UnitTests.Features.CodeQuality.Cases;
+namespace KeyLoad.UnitTests.CodeQuality.Cases;
 
 internal sealed class RecoveryProcessEntryPointTests
 {

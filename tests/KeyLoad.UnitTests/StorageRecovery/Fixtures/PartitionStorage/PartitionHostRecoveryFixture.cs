@@ -1,9 +1,9 @@
 using System.Security.Cryptography;
-using KeyLoad.RecoveryTests.Features.StorageRecovery;
+using KeyLoad.RecoveryTests.StorageRecovery;
 using KeyLoad.Server;
 using Microsoft.Extensions.Logging;
 
-namespace KeyLoad.UnitTests.Features.StorageRecovery;
+namespace KeyLoad.UnitTests.StorageRecovery;
 
 internal sealed class PartitionHostRecoveryFixture : IDisposable
 {

@@ -1,6 +1,6 @@
 using KeyLoad.Query;
 
-namespace KeyLoad.IntegrationTests.Features.RelationalStorage;
+namespace KeyLoad.IntegrationTests.RelationalStorage;
 
 /// <summary>Proves existing database query budgets through real Orleans SDK and official MCP callers.</summary>
 [NotInParallel]

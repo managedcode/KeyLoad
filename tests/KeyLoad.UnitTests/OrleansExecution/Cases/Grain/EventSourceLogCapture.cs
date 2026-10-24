@@ -2,7 +2,7 @@ using System.Collections.Concurrent;
 using System.Diagnostics.Tracing;
 using Microsoft.Extensions.Logging.EventSource;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 /// <summary>Observes the real Microsoft logging EventSource provider without replacing process output.</summary>
 internal sealed class EventSourceLogCapture : EventListener

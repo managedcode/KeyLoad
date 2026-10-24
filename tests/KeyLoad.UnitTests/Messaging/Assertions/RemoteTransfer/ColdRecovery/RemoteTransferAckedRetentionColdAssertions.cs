@@ -1,7 +1,7 @@
-using KeyLoad.Core.Features.Messaging;
+using KeyLoad.Core.Messaging;
 using ManagedCode.Communication;
 
-namespace KeyLoad.UnitTests.Features.Messaging;
+namespace KeyLoad.UnitTests.Messaging;
 
 internal static class RemoteTransferAckedRetentionColdAssertions
 {

@@ -1,7 +1,7 @@
 using System.Text.Json;
-using KeyLoad.UnitTests.Features.ClientApi;
+using KeyLoad.UnitTests.ClientApi;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 /// <summary>Checks the execution nullable Q2 source and join fields in the unit MCP catalog.</summary>
 internal static class PartitionQueryMcpInnerJoinSchemaAssertions

@@ -1,7 +1,7 @@
 using System.Globalization;
 using System.Text.Json;
 
-namespace KeyLoad.Core.Features.ResourceExecution;
+namespace KeyLoad.Core.ResourceExecution;
 
 /// <summary>Writes the existing canonical JSON ordering and numeric representation incrementally.</summary>
 internal static class CanonicalJsonWriter

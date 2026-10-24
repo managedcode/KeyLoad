@@ -1,7 +1,7 @@
 using Aspire.Hosting;
-using KeyLoad.AppHost.Features.TestInfrastructure;
+using KeyLoad.AppHost.TestInfrastructure;
 
-namespace KeyLoad.ComparisonHost.Features.BenchmarkOrchestration;
+namespace KeyLoad.ComparisonHost.BenchmarkOrchestration;
 
 /// <summary>Joins the original execution workload and selected database-state observer on every completion path.</summary>
 internal static class IsolatedClientExecution

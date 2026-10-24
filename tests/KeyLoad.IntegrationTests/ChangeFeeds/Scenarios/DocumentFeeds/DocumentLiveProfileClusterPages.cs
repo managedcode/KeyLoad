@@ -1,7 +1,7 @@
-using KeyLoad.IntegrationTests.Features.OrleansExecution;
-using KeyLoad.IntegrationTests.Features.QueryExecution;
+using KeyLoad.IntegrationTests.OrleansExecution;
+using KeyLoad.IntegrationTests.QueryExecution;
 
-namespace KeyLoad.IntegrationTests.Features.ChangeFeeds;
+namespace KeyLoad.IntegrationTests.ChangeFeeds;
 
 internal static class DocumentLiveProfileClusterPages
 {

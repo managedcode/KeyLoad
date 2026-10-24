@@ -1,4 +1,4 @@
-namespace KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries;
+namespace KeyLoad.Comparisons.BenchmarkComparisons.TimeSeries;
 
 internal static class TimeSeriesComparisonTargetErrors
 {

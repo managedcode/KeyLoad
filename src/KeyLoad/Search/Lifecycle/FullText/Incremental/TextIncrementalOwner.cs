@@ -3,7 +3,7 @@ using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.Options;
 using ZoneTree.FullTextSearch.Index;
 
-namespace KeyLoad.Server.Features.Search;
+namespace KeyLoad.Server.Search;
 
 internal sealed class TextIncrementalOwner : IDisposable
 {

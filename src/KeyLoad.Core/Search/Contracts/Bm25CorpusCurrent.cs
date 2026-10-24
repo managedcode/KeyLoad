@@ -1,6 +1,6 @@
-using KeyLoad.Query.Features.QueryExecution;
+using KeyLoad.Query.QueryExecution;
 
-namespace KeyLoad.Core.Features.Search;
+namespace KeyLoad.Core.Search;
 
 [global::Orleans.GenerateSerializer, global::Orleans.Alias(Bm25CorpusProtocol.CurrentAlias)]
 internal sealed record Bm25CorpusCurrent(

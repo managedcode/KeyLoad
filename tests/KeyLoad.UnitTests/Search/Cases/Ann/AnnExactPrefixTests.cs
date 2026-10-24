@@ -2,7 +2,7 @@ using System.Collections.Immutable;
 using System.Text.Json;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 internal sealed class AnnExactPrefixTests
 {

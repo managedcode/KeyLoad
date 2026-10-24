@@ -1,4 +1,4 @@
-namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
+namespace KeyLoad.Analyzers.Tests.CodeQuality;
 
 /// <summary>AC-CQ-034/037: named constants cannot hide operational deadlines.</summary>
 internal sealed class TypedConfigurationDurationTests

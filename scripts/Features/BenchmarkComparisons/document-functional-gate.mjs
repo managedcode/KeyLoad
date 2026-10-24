@@ -18,7 +18,7 @@ export const FUNCTIONAL = Object.freeze({
   job: 'KeyLoad functional CLUSTER million-record ingestion', artifact: 'keyload-functional-heavy-load',
   steps: Object.freeze(['Test exclusive heavy-load admission', 'Test ingestion while SDK and MCP reads are active', 'Save original functional load results and execution process receipts']),
   archive: 'archives/keyload-functional-heavy-load.zip',
-  className: 'KeyLoad.IntegrationTests.Features.DocumentStorage.HeavyDocumentLoadClusterTests',
+  className: 'KeyLoad.IntegrationTests.DocumentStorage.HeavyDocumentLoadClusterTests',
   methodName: 'MillionAcknowledgedDocumentsRemainCorrectDuringSdkAndOfficialMcpReads',
   files: Object.freeze(['github/functional/original.trx', 'github/functional/execution-process-startup.json',
     'github/functional/execution-process-before-shutdown.json', 'github/functional/execution-process-shutdown.json']),

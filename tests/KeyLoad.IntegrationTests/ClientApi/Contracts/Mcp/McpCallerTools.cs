@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.ClientApi;
+namespace KeyLoad.IntegrationTests.ClientApi;
 
 /// <summary>Independent public-name oracle frozen by ADR-039 rather than copied from runtime catalog objects.</summary>
 internal static class McpCallerTools

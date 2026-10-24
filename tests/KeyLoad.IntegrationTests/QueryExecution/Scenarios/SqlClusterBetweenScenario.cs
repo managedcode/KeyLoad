@@ -1,8 +1,8 @@
 using System.Text.Json;
 using KeyLoad.Client;
-using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.ClientApi;
 
-namespace KeyLoad.IntegrationTests.Features.QueryExecution;
+namespace KeyLoad.IntegrationTests.QueryExecution;
 
 /// <summary>Independent actual Orleans corpus and literal row oracle for AC-SQLC-006A.</summary>
 internal sealed record SqlClusterBetweenScenario(PartitionRef Partition, long CommittedPosition)

@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 
-namespace KeyLoad.Diagnostics.Features.ResourceExecution;
+namespace KeyLoad.Diagnostics.ResourceExecution;
 
 /// <summary>A bounded, callback-free, cumulative phase counter bank.</summary>
 public sealed class DatabasePhaseBank

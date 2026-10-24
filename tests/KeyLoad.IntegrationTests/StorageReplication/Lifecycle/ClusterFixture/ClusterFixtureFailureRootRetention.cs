@@ -1,8 +1,8 @@
 using System.Runtime.CompilerServices;
-using KeyLoad.IntegrationTests.Features.TestInfrastructure;
+using KeyLoad.IntegrationTests.TestInfrastructure;
 using KeyLoad.Server;
 
-namespace KeyLoad.IntegrationTests.Features.StorageReplication;
+namespace KeyLoad.IntegrationTests.StorageReplication;
 
 /// <summary>Opt-in failure evidence retention after every original owned cleanup stage has settled.</summary>
 internal sealed class ClusterFixtureFailureRootRetention

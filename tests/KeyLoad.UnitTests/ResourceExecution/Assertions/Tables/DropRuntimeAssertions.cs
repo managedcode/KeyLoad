@@ -1,11 +1,11 @@
 using KeyLoad.Clustering;
-using KeyLoad.Core.Features.DocumentStorage;
-using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.Core.DocumentStorage;
+using KeyLoad.Core.ResourceExecution;
 using KeyLoad.Server;
 using KeyLoad.Storage;
-using KeyLoad.UnitTests.Features.Messaging;
+using KeyLoad.UnitTests.Messaging;
 
-namespace KeyLoad.UnitTests.Features.ResourceExecution;
+namespace KeyLoad.UnitTests.ResourceExecution;
 
 internal static class DropRuntimeAssertions
 {

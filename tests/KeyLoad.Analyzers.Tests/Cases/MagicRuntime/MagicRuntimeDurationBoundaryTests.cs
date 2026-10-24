@@ -1,4 +1,4 @@
-namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
+namespace KeyLoad.Analyzers.Tests.CodeQuality;
 
 /// <summary>AC-CQ-029 and AC-CQ-031: general numeric scope preserves every previously narrow boundary example.</summary>
 internal sealed class MagicRuntimeDurationBoundaryTests

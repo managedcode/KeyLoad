@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.StorageRecovery;
+namespace KeyLoad.UnitTests.StorageRecovery;
 
 /// <summary>Owner-advanced operation clock for read-cut elapsed limits; it never waits on the system clock.</summary>
 internal sealed class ReadCutAdvancingClock : TimeProvider

@@ -1,7 +1,7 @@
 using System.Text;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 internal sealed class EventProjectionInputTests
 {

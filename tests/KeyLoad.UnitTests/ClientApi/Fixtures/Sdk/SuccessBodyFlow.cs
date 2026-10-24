@@ -1,11 +1,11 @@
 using KeyLoad.Client;
 using KeyLoad.Clustering;
 using KeyLoad.Server;
-using KeyLoad.UnitTests.Features.OrleansExecution;
-using D = KeyLoad.UnitTests.Features.ClientApi.DeclaredResponseEofProtocol;
-using P = KeyLoad.UnitTests.Features.ClientApi.SuccessBodyProtocol;
+using KeyLoad.UnitTests.OrleansExecution;
+using D = KeyLoad.UnitTests.ClientApi.DeclaredResponseEofProtocol;
+using P = KeyLoad.UnitTests.ClientApi.SuccessBodyProtocol;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 internal sealed class SuccessBodyFlow : IAsyncDisposable
 {

@@ -1,9 +1,9 @@
 using KeyLoad.Query;
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
-using static KeyLoad.UnitTests.Features.QueryExecution.BinderFieldLineageProtocol;
+using static KeyLoad.UnitTests.QueryExecution.BinderFieldLineageProtocol;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal static class BinderFieldLineageCold
 {

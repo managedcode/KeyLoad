@@ -1,11 +1,11 @@
 using System.Text.Json;
 using KeyLoad.Client;
 using KeyLoad.Server;
-using KeyLoad.UnitTests.Features.DocumentStorage;
-using KeyLoad.UnitTests.Features.ResourceExecution;
-using static KeyLoad.UnitTests.Features.ClientApi.SdkResponseAdmissionProtocol;
+using KeyLoad.UnitTests.DocumentStorage;
+using KeyLoad.UnitTests.ResourceExecution;
+using static KeyLoad.UnitTests.ClientApi.SdkResponseAdmissionProtocol;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 internal static class SdkResponseAdmissionFlow
 {

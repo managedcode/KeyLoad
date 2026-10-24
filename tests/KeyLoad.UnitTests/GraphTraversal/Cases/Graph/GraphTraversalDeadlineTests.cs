@@ -1,7 +1,7 @@
 using KeyLoad.Storage;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.GraphTraversal;
+namespace KeyLoad.UnitTests.GraphTraversal;
 
 /// <summary>/ AC-GRAPH-003/004: elapsed time stops an admitted real traversal without partial success or writes.</summary>
 internal sealed class GraphTraversalDeadlineTests

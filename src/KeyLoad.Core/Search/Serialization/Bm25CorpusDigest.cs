@@ -1,6 +1,6 @@
 using System.Security.Cryptography;
 
-namespace KeyLoad.Core.Features.Search;
+namespace KeyLoad.Core.Search;
 
 internal static class Bm25CorpusDigest
 {

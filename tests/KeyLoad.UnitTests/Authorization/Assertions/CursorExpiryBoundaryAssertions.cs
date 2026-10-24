@@ -1,7 +1,7 @@
 using KeyLoad.Query;
-using KeyLoad.UnitTests.Features.ResourceExecution;
+using KeyLoad.UnitTests.ResourceExecution;
 
-namespace KeyLoad.UnitTests.Features.Authorization;
+namespace KeyLoad.UnitTests.Authorization;
 
 internal static class CursorExpiryBoundaryAssertions
 {

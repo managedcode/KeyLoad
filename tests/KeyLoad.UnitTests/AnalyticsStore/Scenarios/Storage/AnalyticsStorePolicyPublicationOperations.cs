@@ -1,9 +1,9 @@
 using System.Collections.Immutable;
-using D = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreTestData;
-using O = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreTestOperations;
-using S = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStorePolicyPublicationData;
+using D = KeyLoad.UnitTests.AnalyticsStore.AnalyticsStoreTestData;
+using O = KeyLoad.UnitTests.AnalyticsStore.AnalyticsStoreTestOperations;
+using S = KeyLoad.UnitTests.AnalyticsStore.AnalyticsStorePolicyPublicationData;
 
-namespace KeyLoad.UnitTests.Features.AnalyticsStore;
+namespace KeyLoad.UnitTests.AnalyticsStore;
 
 internal static class AnalyticsStorePolicyPublicationOperations
 {

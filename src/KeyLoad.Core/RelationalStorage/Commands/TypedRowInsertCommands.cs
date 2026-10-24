@@ -8,7 +8,7 @@ public static class TypedRowInsertCommands
     {
         var resource = engine.Resource(transaction, partition, insert.Collection, ResourceKind.Collection);
         engine.RequireTypedInsertPermissions(principal, partition, resource);
-        var id = Features.RelationalStorage.RelationalRowValidation.InsertIdentity(resource, insert.Json, engine.OperationLimitsOptions);
+        var id = RelationalStorage.RelationalRowValidation.InsertIdentity(resource, insert.Json, engine.OperationLimitsOptions);
         if (transaction.GetRecord<DocumentRecord>(DocumentStorageExecutionDocuments.DocumentKey(partition, insert.Collection, id)) is { } previous)
         {
             engine.Authorization.RequireWriteRow(principal, previous.Access);

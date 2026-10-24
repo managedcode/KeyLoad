@@ -1,9 +1,9 @@
-using KeyLoad.Core.Features.GraphTraversal.Serialization;
-using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.Core.GraphTraversal.Serialization;
+using KeyLoad.Core.ResourceExecution;
 using KeyLoad.Storage;
-using D = KeyLoad.UnitTests.Features.DatabaseComposition.CompositionPrefixPrepareData;
+using D = KeyLoad.UnitTests.DatabaseComposition.CompositionPrefixPrepareData;
 
-namespace KeyLoad.UnitTests.Features.DatabaseComposition;
+namespace KeyLoad.UnitTests.DatabaseComposition;
 
 internal static class GraphMutationEffectClosureFlow
 {

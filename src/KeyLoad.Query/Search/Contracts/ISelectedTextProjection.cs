@@ -1,7 +1,7 @@
 using KeyLoad.Core;
 using KeyLoad.Storage;
 
-namespace KeyLoad.Query.Features.Search;
+namespace KeyLoad.Query.Search;
 
 /// <summary>Acquires an explicitly maintained execution generation under its canonical read owner.</summary>
 public interface ISelectedTextProjection

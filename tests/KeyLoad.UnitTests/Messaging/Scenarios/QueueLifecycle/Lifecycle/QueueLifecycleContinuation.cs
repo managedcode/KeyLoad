@@ -1,7 +1,7 @@
 using KeyLoad.Storage.ZoneTree;
-using KeyLoad.UnitTests.Features.QueryExecution;
+using KeyLoad.UnitTests.QueryExecution;
 
-namespace KeyLoad.UnitTests.Features.Messaging;
+namespace KeyLoad.UnitTests.Messaging;
 
 internal static class QueueLifecycleContinuation
 {

@@ -1,6 +1,6 @@
 using System.Text.Json;
 
-namespace KeyLoad.IntegrationTests.Features.Search;
+namespace KeyLoad.IntegrationTests.Search;
 
 /// <summary>Checks graph-search replies against fixed graph-distance expectations.</summary>
 internal static class GraphSearchClusterAssertions

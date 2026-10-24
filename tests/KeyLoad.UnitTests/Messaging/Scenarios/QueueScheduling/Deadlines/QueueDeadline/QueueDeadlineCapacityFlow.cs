@@ -1,8 +1,8 @@
 using KeyLoad.Storage.ZoneTree;
 using ManagedCode.Communication;
-using static KeyLoad.UnitTests.Features.Messaging.QueueDeadlineCapacityProtocol;
+using static KeyLoad.UnitTests.Messaging.QueueDeadlineCapacityProtocol;
 
-namespace KeyLoad.UnitTests.Features.Messaging;
+namespace KeyLoad.UnitTests.Messaging;
 
 internal static class QueueDeadlineCapacityFlow
 {

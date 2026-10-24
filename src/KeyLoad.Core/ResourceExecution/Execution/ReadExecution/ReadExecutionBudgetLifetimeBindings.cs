@@ -1,8 +1,8 @@
 using System.Collections.Immutable;
-using KeyLoad.Core.Features.StoragePartitions.Contracts;
+using KeyLoad.Core.StoragePartitions.Contracts;
 using KeyLoad.Storage;
 
-namespace KeyLoad.Core.Features.ResourceExecution.Execution;
+namespace KeyLoad.Core.ResourceExecution.Execution;
 
 /// <summary>Retains observed execution pairs and deduplicated dependencies inside the original operation budget.</summary>
 internal sealed class ReadExecutionBudgetLifetimeBindings(ReadExecutionBudget work)

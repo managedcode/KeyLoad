@@ -1,8 +1,8 @@
 using System.Collections.Immutable;
 using KeyLoad.Client;
-using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.ClientApi;
 
-namespace KeyLoad.IntegrationTests.Features.EventStreams;
+namespace KeyLoad.IntegrationTests.EventStreams;
 
 /// <summary>Creates a real scoped StreamSet and stable typed append for Orleans caller parity.</summary>
 /// <param name="Partition">The unique configured tenant partition.</param>

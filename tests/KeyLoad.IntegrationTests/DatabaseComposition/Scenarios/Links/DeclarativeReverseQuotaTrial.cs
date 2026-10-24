@@ -1,8 +1,8 @@
-using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.OrleansExecution;
-using KeyLoad.IntegrationTests.Features.QueryExecution;
+using KeyLoad.IntegrationTests.ClientApi;
+using KeyLoad.IntegrationTests.OrleansExecution;
+using KeyLoad.IntegrationTests.QueryExecution;
 
-namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
+namespace KeyLoad.IntegrationTests.DatabaseComposition;
 
 internal static class DeclarativeReverseQuotaTrial
 {
@@ -79,7 +79,7 @@ internal static class DeclarativeReverseQuotaTrial
             await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.CompleteAsync(ack, token)));
         await SqlClusterProtocol.EqualAsync(receipt, (await McpCallerAssertions.SuccessAsync<CommitReceipt>(
             await callers.Mcp.CallAsync(McpCallerTools.MessagesComplete, ack, token))).Value);
-        await global::KeyLoad.IntegrationTests.Features.Messaging.SagaTimeoutClusterAssertions.AssertSdkErrorAsync(
+        await global::KeyLoad.IntegrationTests.Messaging.SagaTimeoutClusterAssertions.AssertSdkErrorAsync(
             await callers.Sdk.ReceiveAsync(originalRequest, token), ErrorCode.StaleLease);
         await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(McpCallerTools.MessagesReceive,
             originalRequest, token), ErrorCode.StaleLease, dispatched: true);

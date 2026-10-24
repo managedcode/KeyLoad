@@ -1,4 +1,4 @@
-namespace KeyLoad.Core.Features.Authorization;
+namespace KeyLoad.Core.Authorization;
 
 internal sealed class RowVisibilityLease(
     RowVisibilityCache owner, RowVisibilityEntry entry, ICacheMemoryReservation charge) : IDisposable

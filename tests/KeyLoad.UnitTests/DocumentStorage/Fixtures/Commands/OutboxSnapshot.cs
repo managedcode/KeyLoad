@@ -1,4 +1,4 @@
 using System.Collections.Immutable;
-namespace KeyLoad.UnitTests.Features.DocumentStorage;
+namespace KeyLoad.UnitTests.DocumentStorage;
 
 internal sealed record OutboxSnapshot(byte[]? HeadBytes, ImmutableArray<byte[]> EntryBytes, long Tail);

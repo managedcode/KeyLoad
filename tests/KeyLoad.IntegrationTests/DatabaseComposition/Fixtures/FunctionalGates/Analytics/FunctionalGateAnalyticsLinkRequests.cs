@@ -1,8 +1,8 @@
 using System.Collections.Immutable;
-using A = KeyLoad.IntegrationTests.Features.DatabaseComposition.FunctionalGateUserAnalyticsProtocol;
-using P = KeyLoad.IntegrationTests.Features.DatabaseComposition.FunctionalGateAnalyticsLinkProtocol;
+using A = KeyLoad.IntegrationTests.DatabaseComposition.FunctionalGateUserAnalyticsProtocol;
+using P = KeyLoad.IntegrationTests.DatabaseComposition.FunctionalGateAnalyticsLinkProtocol;
 
-namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
+namespace KeyLoad.IntegrationTests.DatabaseComposition;
 
 internal static class FunctionalGateAnalyticsLinkRequests
 {

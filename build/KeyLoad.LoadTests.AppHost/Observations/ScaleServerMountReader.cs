@@ -1,6 +1,6 @@
 using System.Text.Json;
 
-namespace KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
+namespace KeyLoad.LoadTests.AppHost.BenchmarkComparisons;
 
 internal static class ScaleServerMountReader
 {

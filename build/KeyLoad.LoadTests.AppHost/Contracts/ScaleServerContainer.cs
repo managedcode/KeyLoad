@@ -1,4 +1,4 @@
-namespace KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
+namespace KeyLoad.LoadTests.AppHost.BenchmarkComparisons;
 
 internal sealed record ScaleServerContainer(string Resource, string ContainerId, string ImageId, string StartedAt,
     string State, string CpuLimit, string MemoryLimitBytes, string EffectiveCpuQuota, string EffectiveCpuSet,

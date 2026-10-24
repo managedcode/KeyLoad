@@ -1,8 +1,8 @@
 using System.Text.Json;
-using KeyLoad.Core.Features.InternalSerialization;
-using KeyLoad.UnitTests.Features.Authorization;
+using KeyLoad.Core.InternalSerialization;
+using KeyLoad.UnitTests.Authorization;
 
-namespace KeyLoad.UnitTests.Features.DatabaseComposition;
+namespace KeyLoad.UnitTests.DatabaseComposition;
 
 internal static class CompositionBoundReferenceAssertions
 {

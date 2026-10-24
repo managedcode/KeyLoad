@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
-using KeyLoad.Core.Features.AnalyticsStore;
-using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.Core.AnalyticsStore;
+using KeyLoad.Core.ResourceExecution;
 
 namespace KeyLoad.Core;
 /// <summary>Executes AnalyticsReads operations against the caller's database context.</summary>

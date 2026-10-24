@@ -1,4 +1,4 @@
-namespace KeyLoad.Core.Features.Search;
+namespace KeyLoad.Core.Search;
 
 internal readonly record struct AnnSeedCut(Guid NodeId, Guid Incarnation,
     int StoreFormatVersion, int KeyCodecVersion, long ReadGeneration,

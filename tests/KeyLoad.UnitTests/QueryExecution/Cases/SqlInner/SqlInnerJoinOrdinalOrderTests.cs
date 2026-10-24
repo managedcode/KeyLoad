@@ -1,8 +1,8 @@
-using KeyLoad.Core.Features.DocumentStorage;
+using KeyLoad.Core.DocumentStorage;
 using KeyLoad.Query;
 using KeyLoad.Storage;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal sealed class SqlInnerJoinOrdinalOrderTests
 {

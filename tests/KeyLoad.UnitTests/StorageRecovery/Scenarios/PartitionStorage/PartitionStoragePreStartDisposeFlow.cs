@@ -1,11 +1,11 @@
-using KeyLoad.RecoveryTests.Features.StorageRecovery;
+using KeyLoad.RecoveryTests.StorageRecovery;
 using KeyLoad.Server;
 using KeyLoad.Storage;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Orleans.TestingHost;
 
-namespace KeyLoad.UnitTests.Features.StorageRecovery;
+namespace KeyLoad.UnitTests.StorageRecovery;
 
 internal static class PartitionStoragePreStartDisposeFlow
 {

@@ -1,5 +1,5 @@
-using KeyLoad.IntegrationTests.Features.ClientApi;
-namespace KeyLoad.IntegrationTests.Features.QueryExecution;
+using KeyLoad.IntegrationTests.ClientApi;
+namespace KeyLoad.IntegrationTests.QueryExecution;
 
 internal sealed record SqlFetchCountClusterState(McpPersistedIdentity Writer, McpPersistedIdentity Reader,
     CommandRequest Seed, CommitReceipt Receipt)

@@ -1,4 +1,4 @@
 using ManagedCode.Communication.Commands;
-namespace KeyLoad.UnitTests.Features.Authorization;
+namespace KeyLoad.UnitTests.Authorization;
 
 internal sealed record InitialPrincipalEpochState(Command<DatabaseCommand> Operation, CommitReceipt Receipt, byte[] Outcome);

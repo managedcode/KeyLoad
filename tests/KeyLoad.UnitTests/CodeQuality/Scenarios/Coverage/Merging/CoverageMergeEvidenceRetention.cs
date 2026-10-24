@@ -1,7 +1,7 @@
 using KeyLoad.Server;
 using TUnit.Core.Interfaces;
 
-namespace KeyLoad.UnitTests.Features.CodeQuality;
+namespace KeyLoad.UnitTests.CodeQuality;
 
 internal static class CoverageMergeEvidenceRetention
 {

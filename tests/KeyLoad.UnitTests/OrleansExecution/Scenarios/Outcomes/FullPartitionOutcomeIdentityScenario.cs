@@ -1,9 +1,9 @@
 using System.Text.Json;
-using KeyLoad.Core.Features.Authorization;
+using KeyLoad.Core.Authorization;
 using KeyLoad.Storage.ZoneTree;
 using ManagedCode.Communication.Commands;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal static class FullPartitionOutcomeIdentityScenario
 {

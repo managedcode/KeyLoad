@@ -1,5 +1,5 @@
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal sealed class RemotePartitionDeadlineTests
 {

@@ -1,10 +1,10 @@
 using System.Text.Json;
-using KeyLoad.UnitTests.Features.ResourceExecution;
+using KeyLoad.UnitTests.ResourceExecution;
 using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
 using TUnit.Assertions.Exceptions;
 
-namespace KeyLoad.UnitTests.Features.EventStreams;
+namespace KeyLoad.UnitTests.EventStreams;
 
 internal sealed class StreamCommandIdentityTests
 {

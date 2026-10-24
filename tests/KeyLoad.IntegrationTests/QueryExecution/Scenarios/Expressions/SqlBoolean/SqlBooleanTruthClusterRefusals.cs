@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.QueryExecution;
+namespace KeyLoad.IntegrationTests.QueryExecution;
 
 internal static class SqlBooleanTruthClusterRefusals
 {
@@ -6,7 +6,7 @@ internal static class SqlBooleanTruthClusterRefusals
         ErrorCode code, CancellationToken token, bool ast = false, bool healthy = false,
         SqlBooleanTruthClusterCase? astCase = null)
     {
-        await global::KeyLoad.IntegrationTests.Features.OrleansExecution.RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerProtocol.Node2, state.Seed.Reader.Secret, async caller =>
+        await global::KeyLoad.IntegrationTests.OrleansExecution.RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, global::KeyLoad.IntegrationTests.ClientApi.McpCallerProtocol.Node2, state.Seed.Reader.Secret, async caller =>
         {
             var sql = SqlBooleanTruthClusterCases.Prefix + clause + SqlBooleanTruthClusterCases.Tail;
             var request = SqlNullOrderingClusterProtocol.Operation(sql);
@@ -14,7 +14,7 @@ internal static class SqlBooleanTruthClusterRefusals
             await global::TUnit.Assertions.Assert.That(result.IsSuccess).IsFalse();
             await global::TUnit.Assertions.Assert.That(result.Value.ValueKind).IsEqualTo(global::System.Text.Json.JsonValueKind.Undefined);
             await global::TUnit.Assertions.Assert.That(result.Problem?.ErrorCode).IsEqualTo(code.ToString());
-            await global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerAssertions.ErrorAsync(await caller.Mcp.CallAsync(SqlOperationProtocol.ToolName, request, token), code, dispatched: true);
+            await global::KeyLoad.IntegrationTests.ClientApi.McpCallerAssertions.ErrorAsync(await caller.Mcp.CallAsync(SqlOperationProtocol.ToolName, request, token), code, dispatched: true);
             if (ast)
             {
                 var operation = SqlBooleanTruthClusterCases.Ast(PostgresClusterState.Partition,
@@ -23,12 +23,12 @@ internal static class SqlBooleanTruthClusterRefusals
                 await global::TUnit.Assertions.Assert.That(typed.IsSuccess).IsFalse();
                 await global::TUnit.Assertions.Assert.That(typed.Value).IsNull();
                 await global::TUnit.Assertions.Assert.That(typed.Problem?.ErrorCode).IsEqualTo(code.ToString());
-                await global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerAssertions.ErrorAsync(await caller.Mcp.CallAsync(global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerTools.QueryAst, operation, token), code, dispatched: true);
+                await global::KeyLoad.IntegrationTests.ClientApi.McpCallerAssertions.ErrorAsync(await caller.Mcp.CallAsync(global::KeyLoad.IntegrationTests.ClientApi.McpCallerTools.QueryAst, operation, token), code, dispatched: true);
             }
             var failures = new List<Exception>();
             await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
             {
-                await using var wire = await PostgresClusterCaller.ConnectAsync(fixture.App, global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerProtocol.Node3,
+                await using var wire = await PostgresClusterCaller.ConnectAsync(fixture.App, global::KeyLoad.IntegrationTests.ClientApi.McpCallerProtocol.Node3,
                     state.Seed.Reader.Principal.Id, state.Seed.Reader.Secret, PostgresClusterCertificate.RootPath(fixture), token);
                 await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
                 {
@@ -49,7 +49,7 @@ internal static class SqlBooleanTruthClusterRefusals
     }
 
     internal static async Task InvalidAsync(ClusterFixture fixture, SqlBooleanTruthClusterState state,
-        global::KeyLoad.IntegrationTests.Features.OrleansExecution.RequestCqrsClusterCallers root, CancellationToken token)
+        global::KeyLoad.IntegrationTests.OrleansExecution.RequestCqrsClusterCallers root, CancellationToken token)
     {
         var before = await SqlBooleanTruthClusterImage.ReadAsync(root, state, token);
         await SqlBooleanOperandClusterControls.InvalidAsync(fixture, state, root, token);

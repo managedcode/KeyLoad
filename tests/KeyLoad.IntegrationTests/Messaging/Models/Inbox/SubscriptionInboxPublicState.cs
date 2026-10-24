@@ -1,5 +1,5 @@
 
-namespace KeyLoad.IntegrationTests.Features.Messaging;
+namespace KeyLoad.IntegrationTests.Messaging;
 
 internal sealed record SubscriptionInboxPublicState(ReceiveSubscriptionRequest First, ReceiveSubscriptionResult FirstResult,
     SubscriptionProcessingRequest Processing, SubscriptionProcessingResult ProcessingResult,

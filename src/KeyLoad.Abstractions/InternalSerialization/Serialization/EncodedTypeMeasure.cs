@@ -1,4 +1,4 @@
-using KeyLoad.Features.InternalSerialization;
+using KeyLoad.InternalSerialization;
 using Orleans.Serialization.Buffers;
 
 namespace KeyLoad;

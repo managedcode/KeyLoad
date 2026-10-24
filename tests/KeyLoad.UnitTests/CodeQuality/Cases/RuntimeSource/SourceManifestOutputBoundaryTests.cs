@@ -1,8 +1,8 @@
-using KeyLoad.AppHost.Features.TestInfrastructure;
-using KeyLoad.UnitTests.Features.CodeQuality.Helpers;
+using KeyLoad.AppHost.TestInfrastructure;
+using KeyLoad.UnitTests.CodeQuality.Helpers;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.UnitTests.Features.CodeQuality.Cases;
+namespace KeyLoad.UnitTests.CodeQuality.Cases;
 
 internal sealed class SourceManifestOutputBoundaryTests
 {

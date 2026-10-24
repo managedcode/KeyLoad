@@ -1,4 +1,4 @@
-namespace KeyLoad.Core.Features.CommandOutcomes.Contracts;
+namespace KeyLoad.Core.CommandOutcomes.Contracts;
 
 internal readonly record struct CommandOutcomePartitionScope(CommandOutcomeScopeKind Kind, PartitionRef? Partition)
 {

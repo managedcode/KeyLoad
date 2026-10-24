@@ -1,6 +1,6 @@
 using Microsoft.Playwright;
 
-namespace KeyLoad.IntegrationTests.Features.AdminDashboard;
+namespace KeyLoad.IntegrationTests.AdminDashboard;
 
 [NotInParallel]
 internal sealed class AdminBrowserLifetimeTests

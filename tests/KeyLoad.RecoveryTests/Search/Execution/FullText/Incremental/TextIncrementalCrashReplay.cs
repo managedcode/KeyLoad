@@ -1,7 +1,7 @@
 using KeyLoad.Clustering;
 using KeyLoad.Core;
 
-namespace KeyLoad.RecoveryTests.Features.Search;
+namespace KeyLoad.RecoveryTests.Search;
 
 internal static class TextIncrementalCrashReplay
 {

@@ -1,9 +1,9 @@
 using System.Text;
 using System.Text.Json;
-using KeyLoad.Core.Features.Messaging;
+using KeyLoad.Core.Messaging;
 using KeyLoad.Storage;
 
-namespace KeyLoad.UnitTests.Features.Messaging;
+namespace KeyLoad.UnitTests.Messaging;
 
 internal sealed class RemoteTransferRetentionTests
 {

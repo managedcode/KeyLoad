@@ -1,7 +1,7 @@
 using KeyLoad.Query;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 /// <summary>canonical vector failure and successful replacement share the document revision boundary.</summary>
 internal sealed class CanonicalVectorAtomicRevisionTests

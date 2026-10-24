@@ -1,4 +1,4 @@
-namespace KeyLoad.Query.Features.Search;
+namespace KeyLoad.Query.Search;
 
 internal static class PackedAnnLayerSearch
 {

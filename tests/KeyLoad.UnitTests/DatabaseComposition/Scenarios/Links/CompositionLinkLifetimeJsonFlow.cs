@@ -1,11 +1,11 @@
-using KeyLoad.UnitTests.Features.Authorization;
+using KeyLoad.UnitTests.Authorization;
 using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
-using A = KeyLoad.UnitTests.Features.DatabaseComposition.CompositionLinkLifetimeJsonAssertions;
-using P = KeyLoad.UnitTests.Features.DatabaseComposition.CompositionLinkLifetimeJsonProtocol;
-using S = KeyLoad.UnitTests.Features.DatabaseComposition.CompositionLinkLifetimeJsonSeed;
+using A = KeyLoad.UnitTests.DatabaseComposition.CompositionLinkLifetimeJsonAssertions;
+using P = KeyLoad.UnitTests.DatabaseComposition.CompositionLinkLifetimeJsonProtocol;
+using S = KeyLoad.UnitTests.DatabaseComposition.CompositionLinkLifetimeJsonSeed;
 
-namespace KeyLoad.UnitTests.Features.DatabaseComposition;
+namespace KeyLoad.UnitTests.DatabaseComposition;
 
 internal static class CompositionLinkLifetimeJsonFlow
 {

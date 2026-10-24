@@ -1,7 +1,7 @@
-using KeyLoad.UnitTests.Features.DocumentStorage;
-using static KeyLoad.UnitTests.Features.QueryExecution.QueueViewLeaseIsolationProtocol;
+using KeyLoad.UnitTests.DocumentStorage;
+using static KeyLoad.UnitTests.QueryExecution.QueueViewLeaseIsolationProtocol;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal static class QueueViewLeaseIsolationFlow
 {

@@ -1,4 +1,4 @@
-namespace KeyLoad.Cli.Features.BackupRestore;
+namespace KeyLoad.Cli.BackupRestore;
 
 /// <summary>Archive work policy validated before the standalone CLI opens files.</summary>
 [ConfigurationOptions]

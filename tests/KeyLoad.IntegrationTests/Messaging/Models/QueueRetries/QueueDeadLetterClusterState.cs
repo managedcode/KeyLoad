@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.Messaging;
+namespace KeyLoad.IntegrationTests.Messaging;
 
 internal sealed record QueueDeadLetterClusterState(PartitionRef Partition, CommandRequest Producer,
     CommitReceipt Produced, DeliveryCommand Nack, CommitReceipt Completed, CommandRequest Refused)

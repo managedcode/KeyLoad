@@ -1,6 +1,6 @@
-using KeyLoad.IntegrationTests.Features.OrleansExecution;
+using KeyLoad.IntegrationTests.OrleansExecution;
 using KeyLoad.Server;
-namespace KeyLoad.IntegrationTests.Features.Messaging;
+namespace KeyLoad.IntegrationTests.Messaging;
 
 [NotInParallel]
 internal sealed class CompetingInboxPublicTests

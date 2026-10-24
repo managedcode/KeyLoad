@@ -1,8 +1,8 @@
-using KeyLoad.UnitTests.Features.Authorization;
-using D = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreTestData;
-using O = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreTestOperations;
+using KeyLoad.UnitTests.Authorization;
+using D = KeyLoad.UnitTests.AnalyticsStore.AnalyticsStoreTestData;
+using O = KeyLoad.UnitTests.AnalyticsStore.AnalyticsStoreTestOperations;
 
-namespace KeyLoad.UnitTests.Features.AnalyticsStore;
+namespace KeyLoad.UnitTests.AnalyticsStore;
 
 internal static class AnalyticsMapColdFlow
 {

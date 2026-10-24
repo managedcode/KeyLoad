@@ -1,7 +1,7 @@
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
 
-namespace KeyLoad.UnitTests.Features.StorageRecovery;
+namespace KeyLoad.UnitTests.StorageRecovery;
 
 internal static class JournalOriginalFailureRecovery
 {

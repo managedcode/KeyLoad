@@ -2,7 +2,7 @@ using System.Text;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 
-namespace KeyLoad.UnitTests.Features.EventStreams;
+namespace KeyLoad.UnitTests.EventStreams;
 
 internal sealed class StreamFixtureLifetimeTests
 {

@@ -1,11 +1,11 @@
 using System.Text.Json;
 using KeyLoad.Client;
-using KeyLoad.Core.Features.InternalSerialization;
-using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.Core.InternalSerialization;
+using KeyLoad.Core.ResourceExecution;
 using KeyLoad.Server;
 using ManagedCode.Communication.Commands;
 
-namespace KeyLoad.IntegrationTests.Features.ClientApi;
+namespace KeyLoad.IntegrationTests.ClientApi;
 
 internal static class ColdBootstrapSdkFlow
 {

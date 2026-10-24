@@ -1,10 +1,10 @@
 using System.Collections.Immutable;
 using Aspire.Hosting.ApplicationModel;
 using KeyLoad.Client;
-using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.StorageReplication;
+using KeyLoad.IntegrationTests.ClientApi;
+using KeyLoad.IntegrationTests.StorageReplication;
 
-namespace KeyLoad.IntegrationTests.Features.TimeSeries;
+namespace KeyLoad.IntegrationTests.TimeSeries;
 
 internal static class SampleRetentionClusterRestartWorkflow
 {

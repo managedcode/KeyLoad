@@ -1,9 +1,9 @@
 using System.Text.Json;
 using KeyLoad.Query;
-using KeyLoad.UnitTests.Features.GraphTraversal;
-using P = KeyLoad.UnitTests.Features.QueryExecution.ScriptDomOrdinalParameterProtocol;
+using KeyLoad.UnitTests.GraphTraversal;
+using P = KeyLoad.UnitTests.QueryExecution.ScriptDomOrdinalParameterProtocol;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal static class ScriptDomOrdinalGraphAdmission
 {

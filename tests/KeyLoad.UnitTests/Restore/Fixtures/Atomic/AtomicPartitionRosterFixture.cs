@@ -1,16 +1,16 @@
 using System.Text.Json;
-using KeyLoad.Core.Features.Authorization;
-using KeyLoad.Core.Features.BackupRestore.Execution;
-using KeyLoad.Core.Features.BackupRestore.Serialization;
-using KeyLoad.Core.Features.ResourceExecution;
-using KeyLoad.Core.Features.StoragePartitions.Contracts;
-using KeyLoad.RecoveryTests.Features.StorageRecovery;
+using KeyLoad.Core.Authorization;
+using KeyLoad.Core.BackupRestore.Execution;
+using KeyLoad.Core.BackupRestore.Serialization;
+using KeyLoad.Core.ResourceExecution;
+using KeyLoad.Core.StoragePartitions.Contracts;
+using KeyLoad.RecoveryTests.StorageRecovery;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 using ManagedCode.Communication;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.UnitTests.Features.BackupRestore;
+namespace KeyLoad.UnitTests.BackupRestore;
 
 internal sealed class AtomicPartitionRosterFixture : IDisposable
 {

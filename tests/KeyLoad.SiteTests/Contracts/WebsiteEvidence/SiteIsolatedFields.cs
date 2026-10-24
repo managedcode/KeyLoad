@@ -1,4 +1,4 @@
-namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
+namespace KeyLoad.SiteTests.BenchmarkComparisons;
 
 /// <summary>Exact machine-readable fields in isolated evidence and browser contracts.</summary>
 internal static class SiteIsolatedFields

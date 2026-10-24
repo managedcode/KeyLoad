@@ -1,5 +1,5 @@
 
-namespace KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonHost.BenchmarkComparisons;
 
 [ConfigurationOptions]
 internal sealed class ComparisonHostExecutionOptions

@@ -1,4 +1,4 @@
-namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
+namespace KeyLoad.SiteTests.BenchmarkComparisons;
 
 [NotInParallel(SiteIsolatedGitHubFields.RuntimeFixtureKey)]
 internal sealed class SiteIsolatedGitHubIntegrityTests

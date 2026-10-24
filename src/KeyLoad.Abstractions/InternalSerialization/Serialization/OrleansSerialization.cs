@@ -1,5 +1,5 @@
 using System.Text.Json;
-using KeyLoad.Features.InternalSerialization;
+using KeyLoad.InternalSerialization;
 using Microsoft.Extensions.DependencyInjection;
 using Orleans.Serialization;
 using Orleans.Serialization.Buffers;

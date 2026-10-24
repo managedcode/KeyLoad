@@ -1,9 +1,9 @@
 using KeyLoad.Client;
-using KeyLoad.UnitTests.Features.OrleansExecution;
+using KeyLoad.UnitTests.OrleansExecution;
 using ManagedCode.Communication;
-using P = KeyLoad.UnitTests.Features.ClientApi.SdkProblemBoundaryProtocol;
+using P = KeyLoad.UnitTests.ClientApi.SdkProblemBoundaryProtocol;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 internal static class SdkProblemBoundaryStages
 {

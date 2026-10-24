@@ -1,6 +1,6 @@
 using System.Security.Cryptography;
 
-namespace KeyLoad.Core.Features.TimeSeries;
+namespace KeyLoad.Core.TimeSeries;
 
 [Orleans.GenerateSerializer, Orleans.Alias(SampleChunkMaintenanceIdentity.SerializerAlias)]
 internal sealed record SampleChunkMaintenanceIdentity([property: Orleans.Id(0)] PartitionRef Partition,

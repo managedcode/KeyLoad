@@ -1,6 +1,6 @@
 using System.Text.Json;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal static class SqlInnerJoinPageAssertions
 {

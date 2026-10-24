@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.Messaging;
+namespace KeyLoad.IntegrationTests.Messaging;
 
 internal sealed record QueueLeaseClusterAcknowledged(QueueLeaseClusterOriginal Original,
     DeliveryCommand Ack, CommitReceipt AckReceipt, MessageInspection Acked,

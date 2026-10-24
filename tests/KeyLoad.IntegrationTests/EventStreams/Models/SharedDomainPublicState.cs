@@ -1,8 +1,8 @@
 using System.Collections.Immutable;
-using KeyLoad.IntegrationTests.Features.Messaging;
-using KeyLoad.RecoveryTests.Features.EventStreams;
+using KeyLoad.IntegrationTests.Messaging;
+using KeyLoad.RecoveryTests.EventStreams;
 
-namespace KeyLoad.IntegrationTests.Features.EventStreams;
+namespace KeyLoad.IntegrationTests.EventStreams;
 
 internal sealed class SharedDomainPublicState(ImmutableArray<SharedDomainScope> scopes, MessagingClusterIdentity identity)
 {

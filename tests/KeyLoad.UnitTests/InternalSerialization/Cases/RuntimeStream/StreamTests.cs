@@ -1,6 +1,6 @@
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.InternalSerialization;
+namespace KeyLoad.UnitTests.InternalSerialization;
 
 internal sealed class StreamTests
 {

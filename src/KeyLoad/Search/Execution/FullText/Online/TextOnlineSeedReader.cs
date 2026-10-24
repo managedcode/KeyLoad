@@ -1,10 +1,10 @@
 using KeyLoad.Core;
-using KeyLoad.Core.Features.DocumentStorage;
-using KeyLoad.Core.Features.ResourceExecution.Execution;
-using KeyLoad.Core.Features.Search;
+using KeyLoad.Core.DocumentStorage;
+using KeyLoad.Core.ResourceExecution.Execution;
+using KeyLoad.Core.Search;
 using KeyLoad.Storage.ZoneTree;
 
-namespace KeyLoad.Server.Features.Search;
+namespace KeyLoad.Server.Search;
 
 internal sealed class TextOnlineSeedReader(ZoneTreeReadCutLease execution,
     ReadExecutionBudget budget, ReadExecutionBudgetReadGrant grant, TextSeedPin scope)

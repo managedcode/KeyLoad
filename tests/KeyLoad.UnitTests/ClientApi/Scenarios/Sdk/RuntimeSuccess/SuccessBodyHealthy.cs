@@ -1,7 +1,7 @@
-using D = KeyLoad.UnitTests.Features.ClientApi.DeclaredResponseEofProtocol;
-using P = KeyLoad.UnitTests.Features.ClientApi.SuccessBodyProtocol;
+using D = KeyLoad.UnitTests.ClientApi.DeclaredResponseEofProtocol;
+using P = KeyLoad.UnitTests.ClientApi.SuccessBodyProtocol;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 internal static class SuccessBodyHealthy
 {

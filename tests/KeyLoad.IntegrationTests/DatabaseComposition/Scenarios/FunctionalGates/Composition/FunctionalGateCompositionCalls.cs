@@ -1,11 +1,11 @@
 using System.Collections.Immutable;
 using System.Text.Json;
-using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.QueryExecution;
-using KeyLoad.IntegrationTests.Features.StorageReplication;
-using P = KeyLoad.IntegrationTests.Features.DatabaseComposition.FunctionalGateCompositionProtocol;
+using KeyLoad.IntegrationTests.ClientApi;
+using KeyLoad.IntegrationTests.QueryExecution;
+using KeyLoad.IntegrationTests.StorageReplication;
+using P = KeyLoad.IntegrationTests.DatabaseComposition.FunctionalGateCompositionProtocol;
 
-namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
+namespace KeyLoad.IntegrationTests.DatabaseComposition;
 
 internal static class FunctionalGateCompositionCalls
 {

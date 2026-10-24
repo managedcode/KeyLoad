@@ -1,9 +1,9 @@
 using KeyLoad.Server;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
-using P = KeyLoad.UnitTests.Features.StorageRecovery.PartitionStorageProducerDisposeProtocol;
+using P = KeyLoad.UnitTests.StorageRecovery.PartitionStorageProducerDisposeProtocol;
 
-namespace KeyLoad.UnitTests.Features.StorageRecovery;
+namespace KeyLoad.UnitTests.StorageRecovery;
 
 internal static class PartitionStorageProducerDisposeTrial
 {

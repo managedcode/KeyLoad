@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 
-namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
+namespace KeyLoad.Analyzers.Tests.CodeQuality;
 
 /// <summary>AC-BC-027 and AC-CQ-009: invocation binding distinguishes actual keys from values.</summary>
 internal sealed class LiteralMachineKeyArgumentBindingTests

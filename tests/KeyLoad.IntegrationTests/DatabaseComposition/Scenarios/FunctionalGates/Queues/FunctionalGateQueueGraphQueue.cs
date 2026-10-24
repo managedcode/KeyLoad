@@ -1,7 +1,7 @@
-using KeyLoad.IntegrationTests.Features.ClientApi;
-using P = KeyLoad.IntegrationTests.Features.DatabaseComposition.FunctionalGateQueueGraphProtocol;
+using KeyLoad.IntegrationTests.ClientApi;
+using P = KeyLoad.IntegrationTests.DatabaseComposition.FunctionalGateQueueGraphProtocol;
 
-namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
+namespace KeyLoad.IntegrationTests.DatabaseComposition;
 
 internal static class FunctionalGateQueueGraphQueue
 {

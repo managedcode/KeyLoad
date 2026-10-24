@@ -7,7 +7,7 @@ using KeyLoad.Server;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.IntegrationTests.Features.Authorization;
+namespace KeyLoad.IntegrationTests.Authorization;
 
 internal sealed class FoundationOtlpClusterReceiver : IDisposable
 {

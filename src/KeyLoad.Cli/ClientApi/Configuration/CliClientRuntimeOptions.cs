@@ -1,7 +1,7 @@
 using KeyLoad.Client;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.Cli.Features.ClientApi;
+namespace KeyLoad.Cli.ClientApi;
 
 internal sealed record CliClientRuntimeOptions(
     IOptions<CliConnectionOptions> Connection, IOptions<CliExecutionOptions> Execution,

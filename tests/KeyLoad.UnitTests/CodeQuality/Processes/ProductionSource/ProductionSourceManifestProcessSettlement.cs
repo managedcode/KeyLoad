@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using KeyLoad.Server;
 
-namespace KeyLoad.UnitTests.Features.CodeQuality.Processes;
+namespace KeyLoad.UnitTests.CodeQuality.Processes;
 
 internal static class ProductionSourceManifestProcessSettlement
 {

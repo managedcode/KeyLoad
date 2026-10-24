@@ -1,4 +1,4 @@
-namespace KeyLoad.Client.Features.ClientApi;
+namespace KeyLoad.Client.ClientApi;
 
 /// <summary>Admits one finite JSON response without owning or buffering its original body.</summary>
 internal sealed class BoundedResponseStream(Stream body, int maximumBytes) : Stream

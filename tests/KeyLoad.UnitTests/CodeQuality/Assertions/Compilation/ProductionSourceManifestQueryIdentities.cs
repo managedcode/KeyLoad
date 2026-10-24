@@ -1,6 +1,6 @@
 using System.Text.Json;
 
-namespace KeyLoad.UnitTests.Features.CodeQuality.Assertions;
+namespace KeyLoad.UnitTests.CodeQuality.Assertions;
 
 internal static class ProductionSourceManifestQueryIdentities
 {

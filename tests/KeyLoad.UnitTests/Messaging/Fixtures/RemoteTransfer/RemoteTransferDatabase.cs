@@ -1,11 +1,11 @@
 using System.Text.Json;
-using KeyLoad.Core.Features.Authorization;
-using KeyLoad.Core.Features.Messaging;
+using KeyLoad.Core.Authorization;
+using KeyLoad.Core.Messaging;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 using ManagedCode.Communication;
 
-namespace KeyLoad.UnitTests.Features.Messaging;
+namespace KeyLoad.UnitTests.Messaging;
 
 internal sealed class RemoteTransferDatabase : IDisposable
 {

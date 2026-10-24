@@ -2,7 +2,7 @@ using KeyLoad.Core;
 using KeyLoad.Storage;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.RecoveryTests.Features.EventStreams;
+namespace KeyLoad.RecoveryTests.EventStreams;
 
 internal static class EventAppendQueueAssertions
 {

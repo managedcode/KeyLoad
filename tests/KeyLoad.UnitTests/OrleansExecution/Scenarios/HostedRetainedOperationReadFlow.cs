@@ -1,9 +1,9 @@
 using System.Globalization;
 using KeyLoad.Storage;
-using KeyLoad.UnitTests.Features.DocumentStorage;
+using KeyLoad.UnitTests.DocumentStorage;
 using ManagedCode.Communication.Commands;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal static class HostedRetainedOperationReadFlow
 {

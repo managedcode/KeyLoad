@@ -1,5 +1,5 @@
-using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.ClientApi;
 
-namespace KeyLoad.IntegrationTests.Features.GraphTraversal;
+namespace KeyLoad.IntegrationTests.GraphTraversal;
 
 internal sealed record GraphLabelUseClusterState(McpPersistedIdentity Reader, CommandRequest Seed, CommitReceipt Receipt);

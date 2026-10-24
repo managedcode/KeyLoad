@@ -1,6 +1,6 @@
 using System.Runtime.ExceptionServices;
 
-namespace KeyLoad.Core.Features.ResourceExecution.Execution;
+namespace KeyLoad.Core.ResourceExecution.Execution;
 
 /// <summary>Owns the original monotonic lifetime, absolute deadline, cancellation stages and first uncertain failure.</summary>
 internal struct ReadExecutionBudgetLifetime

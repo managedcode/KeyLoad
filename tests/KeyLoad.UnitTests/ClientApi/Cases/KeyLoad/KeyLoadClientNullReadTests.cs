@@ -3,7 +3,7 @@ using KeyLoad.Client;
 using ManagedCode.Communication;
 using Microsoft.AspNetCore.Http;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 internal sealed class KeyLoadClientNullReadTests
 {

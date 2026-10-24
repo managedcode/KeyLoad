@@ -1,7 +1,7 @@
-using KeyLoad.Core.Features.StoragePartitions.Contracts;
+using KeyLoad.Core.StoragePartitions.Contracts;
 using KeyLoad.Storage.ZoneTree;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal static class PartitionRecordOwnedCutAssertions
 {

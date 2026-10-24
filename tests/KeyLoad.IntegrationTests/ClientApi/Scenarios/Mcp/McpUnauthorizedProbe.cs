@@ -3,7 +3,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 
-namespace KeyLoad.IntegrationTests.Features.ClientApi;
+namespace KeyLoad.IntegrationTests.ClientApi;
 
 /// <summary>Observes the actual pre-handler HTTP authentication boundary without hand-building an MCP message.</summary>
 internal static class McpUnauthorizedProbe

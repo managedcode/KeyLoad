@@ -1,6 +1,6 @@
 using KeyLoad.Server;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>AC-MCPGW-002: the published gateway factory searches canonical operation metadata.</summary>
 internal sealed class McpGatewayGraphCatalogTests

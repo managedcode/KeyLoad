@@ -1,17 +1,17 @@
 using Aspire.Hosting;
-using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.AppHost.Hosting;
+using KeyLoad.AppHost.TestInfrastructure;
 using KeyLoad.Client;
 using KeyLoad.Clustering;
-using KeyLoad.IntegrationTests.Features.Messaging;
-using KeyLoad.IntegrationTests.Features.StorageReplication;
+using KeyLoad.IntegrationTests.Messaging;
+using KeyLoad.IntegrationTests.StorageReplication;
 using KeyLoad.Query;
 using KeyLoad.Server;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using TUnit.Aspire;
 using TUnit.Core.Interfaces;
-using static KeyLoad.IntegrationTests.Features.StorageReplication.ClusterFixtureResourceCleanup;
+using static KeyLoad.IntegrationTests.StorageReplication.ClusterFixtureResourceCleanup;
 
 namespace KeyLoad.IntegrationTests;
 
@@ -21,9 +21,9 @@ internal sealed partial class ClusterFixture : AspireFixture<Projects.KeyLoad_Ap
 {
     private readonly RemoteTransferCoordinatorFixtureSelection? transferCoordinator;
     private readonly long? commandBytes;
-    private readonly Features.Authorization.FoundationOtlpClusterSelection? telemetry;
-    private readonly Features.Messaging.QueueDeadlineClusterSelection? queueDeadline;
-    private readonly Features.QueryExecution.PostgresClusterFixtureOwnership runtimeSql = new();
+    private readonly Authorization.FoundationOtlpClusterSelection? telemetry;
+    private readonly Messaging.QueueDeadlineClusterSelection? queueDeadline;
+    private readonly QueryExecution.PostgresClusterFixtureOwnership runtimeSql = new();
     private readonly HttpAdmissionLimits? httpAdmission;
     private readonly DatabaseLimits? databaseLimits;
     private readonly QueryExecutionOptions? queryExecution;
@@ -39,16 +39,16 @@ internal sealed partial class ClusterFixture : AspireFixture<Projects.KeyLoad_Ap
     {
     }
 
-    internal ClusterFixture(Features.Authorization.FoundationOtlpClusterSelection selection)
-        => telemetry = Features.Authorization.FoundationOtlpClusterConfiguration.Validate(selection);
+    internal ClusterFixture(Authorization.FoundationOtlpClusterSelection selection)
+        => telemetry = Authorization.FoundationOtlpClusterConfiguration.Validate(selection);
 
     internal ClusterFixture(RemoteTransferCoordinatorFixtureSelection selection)
         => transferCoordinator = RemoteTransferCoordinatorFixtureConfiguration.Validate(selection);
 
-    internal ClusterFixture(Features.Messaging.QueueDeadlineClusterSelection queueDeadline)
+    internal ClusterFixture(Messaging.QueueDeadlineClusterSelection queueDeadline)
         => this.queueDeadline = queueDeadline;
 
-    internal ClusterFixture(Features.QueryExecution.PostgresClusterSelection selection)
+    internal ClusterFixture(QueryExecution.PostgresClusterSelection selection)
         => runtimeSql = new(selection);
 
     /// <summary>Creates an Orleans fixture with a smaller command admission budget.</summary>
@@ -168,7 +168,7 @@ internal sealed partial class ClusterFixture : AspireFixture<Projects.KeyLoad_Ap
             diagnostics = null;
         }
         await ServerFailureObserver.ObserveAsync(() => base.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
-        _ = await Features.QueryExecution.PostgresClusterFixtureOwnership.ReleaseRootAsync(!stopped, failures,
+        _ = await QueryExecution.PostgresClusterFixtureOwnership.ReleaseRootAsync(!stopped, failures,
             () => ClusterFixtureFailureRootRetention.For(this).ReleaseAsync(
                 () => DeleteOwnedRootAsync(Root, failures))).ConfigureAwait(false);
         await ClusterFixtureFailureRootRetention.For(this).CompleteAsync(Root, () =>

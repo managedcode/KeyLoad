@@ -1,11 +1,11 @@
 using KeyLoad.Clustering;
-using KeyLoad.Core.Features.Search;
+using KeyLoad.Core.Search;
 using KeyLoad.Query;
-using KeyLoad.Query.Features.Search;
+using KeyLoad.Query.Search;
 using KeyLoad.Server;
 using ManagedCode.Communication.Commands;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 internal sealed class Bm25CorpusPublicationFlow(TestDatabase database)
 {
@@ -58,7 +58,7 @@ internal sealed class Bm25CorpusPublicationFlow(TestDatabase database)
 
     internal CommitReceipt Publish(Command<DatabaseCommand> operation) => database.SubmitIssued(operation).Get<CommitReceipt>();
 
-    internal KeyLoad.Query.Features.QueryExecution.DistributedTextStatistics? Current(string term = Term)
+    internal KeyLoad.Query.QueryExecution.DistributedTextStatistics? Current(string term = Term)
         => database.Database.WithQueryView(Subject, database.Partition, Collection,
             (view, principal, resource) => database.Database.ReadBm25CorpusCurrent(view, principal, resource,
                 database.Partition, Collection, Field, TextProjectionProtocol.TokenizerVersion, [term], database.CreateReadWork(Token)));

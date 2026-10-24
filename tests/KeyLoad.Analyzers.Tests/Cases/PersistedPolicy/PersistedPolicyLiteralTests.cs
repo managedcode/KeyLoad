@@ -1,4 +1,4 @@
-namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
+namespace KeyLoad.Analyzers.Tests.CodeQuality;
 
 /// <summary>AC-CQ-037: persisted caller policy and frozen request defaults remain serialized data.</summary>
 internal sealed class PersistedPolicyLiteralTests

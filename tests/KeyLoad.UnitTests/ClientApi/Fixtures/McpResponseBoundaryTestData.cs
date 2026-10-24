@@ -1,7 +1,7 @@
 using System.Text;
 using KeyLoad.Server;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>Creates genuine serialized or explicitly encoded JSON for response and transport boundary checks.</summary>
 internal static class McpResponseBoundaryTestData

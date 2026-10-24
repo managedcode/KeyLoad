@@ -2,7 +2,7 @@ using System.Text;
 using ModelContextProtocol;
 using ModelContextProtocol.Protocol;
 
-namespace KeyLoad.IntegrationTests.Features.ClientApi;
+namespace KeyLoad.IntegrationTests.ClientApi;
 
 /// <summary>Independent assertions for the official MCP resource and prompt APIs.</summary>
 internal static class McpAgentGuideClusterAssertions

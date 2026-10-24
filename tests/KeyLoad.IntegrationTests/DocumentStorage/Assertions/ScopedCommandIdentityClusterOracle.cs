@@ -1,7 +1,7 @@
 using KeyLoad.Client;
-using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.ClientApi;
 
-namespace KeyLoad.IntegrationTests.Features.DocumentStorage;
+namespace KeyLoad.IntegrationTests.DocumentStorage;
 
 /// <summary>Independent literal state with authenticated execution placement and original commit cuts.</summary>
 internal static class ScopedCommandIdentityClusterOracle

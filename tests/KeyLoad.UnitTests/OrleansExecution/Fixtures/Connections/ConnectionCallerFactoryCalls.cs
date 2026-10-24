@@ -1,8 +1,8 @@
 using KeyLoad.Clustering;
 using KeyLoad.Server;
-using P = KeyLoad.UnitTests.Features.OrleansExecution.ConnectionCallerFactoryProtocol;
+using P = KeyLoad.UnitTests.OrleansExecution.ConnectionCallerFactoryProtocol;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal sealed class ConnectionCallerFactoryCalls(ConnectionIdentityCollisionState state,
     ConnectionOperationGate gate, List<Exception> failures, CancellationToken token) : IAsyncDisposable

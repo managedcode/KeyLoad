@@ -1,7 +1,7 @@
 using System.Globalization;
 using KeyLoad.Comparisons;
 
-namespace KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
+namespace KeyLoad.LoadTests.AppHost.BenchmarkComparisons;
 
 internal sealed record IsolatedResourceContext(IDistributedApplicationBuilder Builder,
     BenchmarkSessionSelection Selection, LoadTestClientSettings Client, string Root)

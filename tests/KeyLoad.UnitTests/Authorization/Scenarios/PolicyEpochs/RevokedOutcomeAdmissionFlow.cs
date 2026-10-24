@@ -1,9 +1,9 @@
-using KeyLoad.Query.Features.QueryExecution;
+using KeyLoad.Query.QueryExecution;
 using KeyLoad.Server;
-using KeyLoad.UnitTests.Features.Messaging;
-using KeyLoad.UnitTests.Features.StorageRecovery.Assertions;
+using KeyLoad.UnitTests.Messaging;
+using KeyLoad.UnitTests.StorageRecovery.Assertions;
 
-namespace KeyLoad.UnitTests.Features.Authorization;
+namespace KeyLoad.UnitTests.Authorization;
 
 internal static class RevokedOutcomeAdmissionFlow
 {

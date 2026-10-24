@@ -1,6 +1,6 @@
 using Microsoft.CodeAnalysis;
 
-namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
+namespace KeyLoad.Analyzers.Tests.CodeQuality;
 
 /// <summary>AC-CQ-004: verifies literal machine key tests with real compiler fixtures.</summary>
 internal sealed class LiteralMachineKeyTests

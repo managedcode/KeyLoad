@@ -1,7 +1,7 @@
 using System.Globalization;
 using KeyLoad.Query;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal sealed class LiveQueryPermutationOracle(TestDatabase db, QueryEngine engine, AstQueryRequest query)
 {
@@ -25,7 +25,7 @@ internal sealed class LiveQueryPermutationOracle(TestDatabase db, QueryEngine en
 
     internal void Capture()
     {
-        originalImage = global::KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(db.Store);
+        originalImage = global::KeyLoad.UnitTests.Messaging.QueueWholeFlowStorage.Bytes(db.Store);
         originalPosition = db.Store.Position;
     }
 
@@ -55,7 +55,7 @@ internal sealed class LiveQueryPermutationOracle(TestDatabase db, QueryEngine en
         var empty = engine.ReadLiveQuery(Root, new(query, page.Cursor, Limit: PageLimit));
         await PageAsync(empty, [], trial + RevisionAdvance);
         await Assert.That(db.Store.Position).IsEqualTo(originalPosition);
-        await Assert.That(global::KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(db.Store)
+        await Assert.That(global::KeyLoad.UnitTests.Messaging.QueueWholeFlowStorage.Bytes(db.Store)
             .SequenceEqual(originalImage, StringComparer.Ordinal)).IsTrue();
     }
 

@@ -1,8 +1,8 @@
 using System.Text;
 using System.Text.Json;
-using KeyLoad.UnitTests.Features.ClientApi;
+using KeyLoad.UnitTests.ClientApi;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 /// <summary>AC-AISQL-007: reject byte/structure overages and cancellation before canonical decoding.</summary>
 internal sealed class SqlOperationBudgetTests

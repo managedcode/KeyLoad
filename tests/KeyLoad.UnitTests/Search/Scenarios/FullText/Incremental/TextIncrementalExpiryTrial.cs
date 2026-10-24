@@ -1,8 +1,8 @@
 using KeyLoad.Clustering;
-using KeyLoad.UnitTests.Features.Messaging;
+using KeyLoad.UnitTests.Messaging;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 /// <summary>Owns only the original genuine page, actual signed expiry and immutable failed execution ACK.</summary>
 internal static class TextIncrementalExpiryTrial

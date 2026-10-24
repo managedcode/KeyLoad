@@ -1,7 +1,7 @@
 using KeyLoad.Server;
-using KeyLoad.UnitTests.Features.BackupRestore;
+using KeyLoad.UnitTests.BackupRestore;
 
-namespace KeyLoad.UnitTests.Features.CodeQuality;
+namespace KeyLoad.UnitTests.CodeQuality;
 
 internal static class CoverageMergeScenario
 {

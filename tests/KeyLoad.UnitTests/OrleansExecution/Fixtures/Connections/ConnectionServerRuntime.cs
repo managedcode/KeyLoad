@@ -3,7 +3,7 @@ using KeyLoad.Server;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 /// <summary>Borrows two production Server silos from the shared execution Orleans fixture.</summary>
 internal sealed class ConnectionServerRuntime : IAsyncDisposable

@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.RepositoryGovernance;
+namespace KeyLoad.UnitTests.RepositoryGovernance;
 
 /// <summary>AC-MCAF-009: the actual validator rejects transient working files at any depth.</summary>
 internal sealed class GovernanceWorkingFileTests

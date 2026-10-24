@@ -2,7 +2,7 @@ using System.Text.Json;
 
 using KeyLoad.Storage;
 
-namespace KeyLoad.UnitTests.Features.Messaging;
+namespace KeyLoad.UnitTests.Messaging;
 
 internal static class QueueRetryLeaseRenewFirst
 {

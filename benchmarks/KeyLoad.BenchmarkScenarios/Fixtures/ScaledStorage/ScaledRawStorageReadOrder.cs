@@ -3,7 +3,7 @@ using System.Security.Cryptography;
 
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
+namespace KeyLoad.BenchmarkScenarios.BenchmarkComparisons;
 
 /// <summary>Retains one deterministic shuffled permutation and independent wrapping cursors.</summary>
 internal sealed class ScaledRawStorageReadOrder

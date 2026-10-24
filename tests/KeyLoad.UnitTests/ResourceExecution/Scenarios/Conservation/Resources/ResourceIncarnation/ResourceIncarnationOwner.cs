@@ -1,7 +1,7 @@
 using KeyLoad.Server;
-using KeyLoad.UnitTests.Features.StorageRecovery;
+using KeyLoad.UnitTests.StorageRecovery;
 
-namespace KeyLoad.UnitTests.Features.ResourceExecution;
+namespace KeyLoad.UnitTests.ResourceExecution;
 
 internal static class ResourceIncarnationOwner
 {

@@ -1,7 +1,7 @@
 using Aspire.Hosting.ApplicationModel;
 using KeyLoad.Server;
 
-namespace KeyLoad.IntegrationTests.Features.OrleansExecution.Helpers;
+namespace KeyLoad.IntegrationTests.OrleansExecution.Helpers;
 
 /// <summary>Owns execution stream completion and the memoized join for one diagnostics test scope.</summary>
 internal sealed class RequestCqrsClusterDiagnosticsScopeStreamOwner(ResourceLoggerService logger,

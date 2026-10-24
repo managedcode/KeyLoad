@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
+namespace KeyLoad.IntegrationTests.DatabaseComposition;
 
 [NotInParallel]
 internal sealed class FunctionalDatabaseGateTests

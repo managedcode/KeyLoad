@@ -1,7 +1,7 @@
 using KeyLoad.Storage.ZoneTree;
 using ManagedCode.Communication;
 
-namespace KeyLoad.UnitTests.Features.ChangeFeeds;
+namespace KeyLoad.UnitTests.ChangeFeeds;
 
 internal static class ProjectionCheckpointRetentionAssertions
 {

@@ -1,10 +1,10 @@
 using System.Collections.Immutable;
-using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.QueryExecution;
-using KeyLoad.IntegrationTests.Features.RelationalStorage;
-using P = KeyLoad.IntegrationTests.Features.DatabaseComposition.FunctionalGateRelationalProtocol;
+using KeyLoad.IntegrationTests.ClientApi;
+using KeyLoad.IntegrationTests.QueryExecution;
+using KeyLoad.IntegrationTests.RelationalStorage;
+using P = KeyLoad.IntegrationTests.DatabaseComposition.FunctionalGateRelationalProtocol;
 
-namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
+namespace KeyLoad.IntegrationTests.DatabaseComposition;
 
 internal static class FunctionalGateDrop
 {

@@ -1,6 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 /// <summary>Checks genuine progress on every observed execution physical owner in the original cluster.</summary>
 internal static class QueryHostedReadAssertions

@@ -2,7 +2,7 @@ using KeyLoad.Query;
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal static class QueryAdapterCursorPages
 {

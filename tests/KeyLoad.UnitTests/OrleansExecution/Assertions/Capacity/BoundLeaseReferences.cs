@@ -1,7 +1,7 @@
-using KeyLoad.Core.Features.ResourceExecution;
-using K = KeyLoad.UnitTests.Features.OrleansExecution.BoundLeaseProtocol;
+using KeyLoad.Core.ResourceExecution;
+using K = KeyLoad.UnitTests.OrleansExecution.BoundLeaseProtocol;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal static class BoundLeaseReferences
 {

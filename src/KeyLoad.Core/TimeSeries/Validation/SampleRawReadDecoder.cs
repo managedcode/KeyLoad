@@ -1,4 +1,4 @@
-namespace KeyLoad.Core.Features.TimeSeries;
+namespace KeyLoad.Core.TimeSeries;
 
 internal static class SampleRawReadDecoder
 {
@@ -15,7 +15,7 @@ internal static class SampleRawReadDecoder
             throw Errors.Fail(ErrorCode.Corruption, CorruptSample);
         }
 
-        var canonical = KeySpace.Partition(KeyLoad.Core.Features.StoragePartitions.Contracts.PartitionRecordFamilies.Sample,
+        var canonical = KeySpace.Partition(KeyLoad.Core.StoragePartitions.Contracts.PartitionRecordFamilies.Sample,
             partition, set, series, record.Sample.Timestamp, record.Sequence);
         if (!key.SequenceEqual(canonical))
         {

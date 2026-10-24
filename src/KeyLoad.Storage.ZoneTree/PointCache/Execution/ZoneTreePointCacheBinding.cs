@@ -1,4 +1,4 @@
-namespace KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
+namespace KeyLoad.Storage.ZoneTree.ResourceExecution;
 
 /// <summary>Immutable acceptance and helper identity used as one read-admission epoch.</summary>
 internal sealed record ZoneTreePointCacheBinding(

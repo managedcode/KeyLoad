@@ -1,10 +1,10 @@
 using System.Text.Json;
 using KeyLoad.Clustering;
 using KeyLoad.Server;
-using KeyLoad.UnitTests.Features.TestInfrastructure;
+using KeyLoad.UnitTests.TestInfrastructure;
 using Microsoft.Extensions.Logging;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 /// <summary>AC-CRS-005 and AC-ROUTE-009: interrupted request streams preserve outcome uncertainty and privacy.</summary>
 [NotInParallel(LoggingEventSourceIsolation.Key)]

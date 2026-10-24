@@ -1,4 +1,4 @@
-using KeyLoad.Core.Features.TimeSeries;
+using KeyLoad.Core.TimeSeries;
 
 namespace KeyLoad.Core;
 /// <summary>Executes SampleReads operations against the caller's database context.</summary>

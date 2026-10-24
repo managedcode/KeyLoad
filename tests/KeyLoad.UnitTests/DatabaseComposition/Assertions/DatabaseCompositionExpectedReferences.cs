@@ -1,7 +1,7 @@
-using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.Core.ResourceExecution;
 using KeyLoad.Storage;
 
-namespace KeyLoad.UnitTests.Features.DatabaseComposition;
+namespace KeyLoad.UnitTests.DatabaseComposition;
 
 /// <summary>Captures the actual catalog identity before an operation without reading its document result.</summary>
 internal static class DatabaseCompositionExpectedReferences

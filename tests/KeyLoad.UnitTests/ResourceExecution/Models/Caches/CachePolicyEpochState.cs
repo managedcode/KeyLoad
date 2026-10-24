@@ -1,8 +1,8 @@
 using KeyLoad.Storage.ZoneTree;
 using ManagedCode.Communication;
-using P = KeyLoad.UnitTests.Features.ResourceExecution.CachePolicyEpochProtocol;
+using P = KeyLoad.UnitTests.ResourceExecution.CachePolicyEpochProtocol;
 
-namespace KeyLoad.UnitTests.Features.ResourceExecution;
+namespace KeyLoad.UnitTests.ResourceExecution;
 
 internal sealed class CachePolicyEpochState(CachePolicyEpochOwner owner)
 {

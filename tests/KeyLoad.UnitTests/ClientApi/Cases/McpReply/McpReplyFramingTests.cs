@@ -1,7 +1,7 @@
 using System.Text;
 using KeyLoad.Server;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>AC-MCP-003/005/007: canonical replies leave room for the three execution envelope containers.</summary>
 internal sealed class McpReplyFramingTests

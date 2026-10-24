@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
-using KeyLoad.IntegrationTests.Features.ResourceExecution;
+using KeyLoad.IntegrationTests.ResourceExecution;
 
-namespace KeyLoad.IntegrationTests.Features.Authorization;
+namespace KeyLoad.IntegrationTests.Authorization;
 
 internal sealed record SafeProjectorOperationClusterState(PartitionRef Partition, string Collection, string Reader,
     string Key, ResourceDefinition Resource, Guid ResourceId, Guid PrincipalId, PrincipalRecord InitialPrincipal,

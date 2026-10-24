@@ -1,9 +1,9 @@
-namespace KeyLoad.IntegrationTests.Features.QueryExecution;
+namespace KeyLoad.IntegrationTests.QueryExecution;
 
 internal static class SqlDollarStringClusterControls
 {
     internal static async Task InvalidAsync(ClusterFixture fixture, SqlNullDistinctClusterState state,
-        global::KeyLoad.IntegrationTests.Features.OrleansExecution.RequestCqrsClusterCallers root, CancellationToken token)
+        global::KeyLoad.IntegrationTests.OrleansExecution.RequestCqrsClusterCallers root, CancellationToken token)
     {
         var before = await SqlNullDistinctClusterImage.ReadAsync(root, state, token);
         foreach (var clause in new[] { "label = $tag$unfinished", "label = $TAG$low$tag$",

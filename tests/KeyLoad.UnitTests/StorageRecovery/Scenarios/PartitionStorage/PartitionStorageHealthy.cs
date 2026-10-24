@@ -1,9 +1,9 @@
 using KeyLoad.Server;
 using ManagedCode.Communication;
 using Microsoft.Extensions.DependencyInjection;
-using P = KeyLoad.UnitTests.Features.StorageRecovery.PartitionStorageProtocol;
+using P = KeyLoad.UnitTests.StorageRecovery.PartitionStorageProtocol;
 
-namespace KeyLoad.UnitTests.Features.StorageRecovery;
+namespace KeyLoad.UnitTests.StorageRecovery;
 
 internal static class PartitionStorageHealthy
 {

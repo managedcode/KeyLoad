@@ -1,4 +1,4 @@
-namespace KeyLoad.Core.Features.Search;
+namespace KeyLoad.Core.Search;
 
 [global::Orleans.GenerateSerializer, global::Orleans.Alias(OnlineTextPublicationProtocol.PhaseCommandAlias)]
 internal sealed record OnlineTextPublicationPhaseCommand(

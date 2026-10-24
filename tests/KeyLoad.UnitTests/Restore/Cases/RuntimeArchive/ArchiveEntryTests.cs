@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.BackupRestore;
+namespace KeyLoad.UnitTests.BackupRestore;
 
 [NotInParallel]
 internal sealed class ArchiveEntryTests

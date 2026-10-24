@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
 using KeyLoad.Client;
 
-namespace KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries.Intensive;
+namespace KeyLoad.Comparisons.BenchmarkComparisons.TimeSeries.Intensive;
 
 internal sealed class KeyLoadTimeSeriesIntensiveContext
 {

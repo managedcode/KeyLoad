@@ -1,4 +1,4 @@
-using KeyLoad.Query.Features.QueryExecution;
+using KeyLoad.Query.QueryExecution;
 
 namespace KeyLoad.Query;
 

@@ -2,7 +2,7 @@ using KeyLoad.Storage;
 using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
 
-namespace KeyLoad.UnitTests.Features.BackupRestore;
+namespace KeyLoad.UnitTests.BackupRestore;
 
 internal sealed record RestoreIdentityOverrideState(
     Command<DatabaseCommand> Seed, Result<object> SeedResult, byte[] SeedOutcome, StoreIdentity SourceIdentity,

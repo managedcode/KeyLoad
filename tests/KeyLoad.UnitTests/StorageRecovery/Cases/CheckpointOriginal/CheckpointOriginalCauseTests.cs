@@ -1,7 +1,7 @@
 using KeyLoad.Server;
-using P = KeyLoad.UnitTests.Features.StorageRecovery.CheckpointOriginalCauseProtocol;
+using P = KeyLoad.UnitTests.StorageRecovery.CheckpointOriginalCauseProtocol;
 
-namespace KeyLoad.UnitTests.Features.StorageRecovery;
+namespace KeyLoad.UnitTests.StorageRecovery;
 
 internal sealed class CheckpointOriginalCauseTests
 {

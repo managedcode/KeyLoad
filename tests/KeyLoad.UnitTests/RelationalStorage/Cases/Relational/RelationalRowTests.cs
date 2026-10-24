@@ -2,7 +2,7 @@ using System.Globalization;
 using System.Text;
 using System.Text.Json;
 
-namespace KeyLoad.UnitTests.Features.RelationalStorage;
+namespace KeyLoad.UnitTests.RelationalStorage;
 
 internal sealed class RelationalRowTests
 {

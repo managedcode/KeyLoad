@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 internal sealed class AnnSeedVisibilityTests
 {

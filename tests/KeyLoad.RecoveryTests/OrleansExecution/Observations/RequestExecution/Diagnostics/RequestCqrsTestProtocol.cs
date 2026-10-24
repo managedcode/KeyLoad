@@ -1,4 +1,4 @@
-namespace KeyLoad.RecoveryTests.Features.OrleansExecution;
+namespace KeyLoad.RecoveryTests.OrleansExecution;
 
 internal static class RequestCqrsTestProtocol
 {

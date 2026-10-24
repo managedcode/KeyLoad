@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace KeyLoad.ComparisonHost.Features.BenchmarkOrchestration;
+namespace KeyLoad.ComparisonHost.BenchmarkOrchestration;
 
 /// <summary>Retains a bounded prefix while joining the complete original redirected stream.</summary>
 internal static class ComparisonHostOutputCapture

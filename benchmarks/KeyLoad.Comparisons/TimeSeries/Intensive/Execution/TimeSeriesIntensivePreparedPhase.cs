@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 
-namespace KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries.Intensive;
+namespace KeyLoad.Comparisons.BenchmarkComparisons.TimeSeries.Intensive;
 
 internal sealed record TimeSeriesIntensivePreparedPhase(TimeSeriesIntensiveScenario Scenario, int Repetition,
     string SeriesId, ImmutableArray<Guid> Commands, TimeSeriesIntensiveAppendValidation? Appends)

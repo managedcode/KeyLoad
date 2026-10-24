@@ -1,8 +1,8 @@
 using System.Text;
 using System.Text.Json;
-using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.Core.ResourceExecution;
 
-namespace KeyLoad.Core.Features.InternalSerialization;
+namespace KeyLoad.Core.InternalSerialization;
 
 /// <summary>Canonicalizes only a first-issued typed analytics batch; retained execution operations remain untouched.</summary>
 internal static class AnalyticsIdentity

@@ -1,6 +1,6 @@
-using KeyLoad.RecoveryTests.Features.StorageRecovery;
+using KeyLoad.RecoveryTests.StorageRecovery;
 
-namespace KeyLoad.RecoveryTests.Features.DocumentStorage;
+namespace KeyLoad.RecoveryTests.DocumentStorage;
 
 internal sealed class ScalarIndexProcessRecoveryTests
 {

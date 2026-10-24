@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal static class SqlInnerJoinPrimaryIdentityFixture
 {
@@ -56,7 +56,7 @@ internal static class SqlInnerJoinPrimaryIdentityFixture
         var faults = new List<SqlInnerJoinIdentityFault>();
         foreach (var left in new[] { true, false })
         {
-            var key = global::KeyLoad.Core.Features.DocumentStorage.DocumentStorageKeys.RecordKey(database.Partition,
+            var key = global::KeyLoad.Core.DocumentStorage.DocumentStorageKeys.RecordKey(database.Partition,
                 left ? Left : Right, left ? LastLeft : LastRight);
             var bytes = database.Store.Read(view => view.ReadOwnedValue(key)) ?? throw new InvalidOperationException(MissingOriginal);
             var row = global::KeyLoad.OrleansSerialization.Deserialize<global::KeyLoad.DocumentRecord>(bytes);

@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using System.Text;
 
-namespace KeyLoad.UnitTests.Features.RepositoryGovernance;
+namespace KeyLoad.UnitTests.RepositoryGovernance;
 
 internal static class GovernanceNodeProcess
 {

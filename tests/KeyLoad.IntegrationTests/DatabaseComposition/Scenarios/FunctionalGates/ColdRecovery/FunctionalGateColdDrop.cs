@@ -1,10 +1,10 @@
 using System.Collections.Immutable;
 using System.Text.Json;
-using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.QueryExecution;
-using KeyLoad.IntegrationTests.Features.RelationalStorage;
+using KeyLoad.IntegrationTests.ClientApi;
+using KeyLoad.IntegrationTests.QueryExecution;
+using KeyLoad.IntegrationTests.RelationalStorage;
 
-namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
+namespace KeyLoad.IntegrationTests.DatabaseComposition;
 
 internal static class FunctionalGateColdDrop
 {

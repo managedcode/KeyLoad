@@ -1,10 +1,10 @@
 using System.Runtime.Serialization;
 using System.Text.Json;
 using KeyLoad.Clustering;
-using KeyLoad.UnitTests.Features.TestInfrastructure;
+using KeyLoad.UnitTests.TestInfrastructure;
 using Microsoft.Extensions.Logging;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 /// <summary>Exercises the real reply mapper and execution logging boundary without exposing exception content.</summary>
 [NotInParallel(LoggingEventSourceIsolation.Key)]

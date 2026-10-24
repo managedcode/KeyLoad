@@ -1,8 +1,8 @@
-using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.OrleansExecution;
-using static KeyLoad.IntegrationTests.Features.ResourceExecution.EarlyAdmissionQualificationProtocol;
+using KeyLoad.IntegrationTests.ClientApi;
+using KeyLoad.IntegrationTests.OrleansExecution;
+using static KeyLoad.IntegrationTests.ResourceExecution.EarlyAdmissionQualificationProtocol;
 
-namespace KeyLoad.IntegrationTests.Features.ResourceExecution;
+namespace KeyLoad.IntegrationTests.ResourceExecution;
 
 internal static class SlowBodyAdmissionReturnCounters
 {

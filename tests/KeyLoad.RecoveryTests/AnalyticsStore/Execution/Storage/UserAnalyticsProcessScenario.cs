@@ -1,9 +1,9 @@
 using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Server;
-using P = KeyLoad.RecoveryTests.Features.AnalyticsStore.UserAnalyticsProcessProtocol;
+using P = KeyLoad.RecoveryTests.AnalyticsStore.UserAnalyticsProcessProtocol;
 
-namespace KeyLoad.RecoveryTests.Features.AnalyticsStore;
+namespace KeyLoad.RecoveryTests.AnalyticsStore;
 
 internal static class UserAnalyticsProcessScenario
 {

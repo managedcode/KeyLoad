@@ -1,9 +1,9 @@
 using System.Collections.Immutable;
 using System.Text.Json;
 using KeyLoad.Core;
-using KeyLoad.Core.Features.DocumentStorage;
-using KeyLoad.Core.Features.RelationalStorage;
-using KeyLoad.Query.Features.QueryExecution;
+using KeyLoad.Core.DocumentStorage;
+using KeyLoad.Core.RelationalStorage;
+using KeyLoad.Query.QueryExecution;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Query;

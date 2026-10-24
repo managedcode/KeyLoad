@@ -2,7 +2,7 @@ using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.BackupRestore;
+namespace KeyLoad.UnitTests.BackupRestore;
 
 /// <summary>AC-SQLC-011/AC-BACKUP-002: verified staging publishes without changing the original backup.</summary>
 internal sealed class BackupRestoreStagingJoinTests

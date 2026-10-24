@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Operations;
 
-namespace KeyLoad.Analyzers.Features.CodeQuality;
+namespace KeyLoad.Analyzers.CodeQuality;
 
 /// <summary>Enforces execution typed-options ownership for runtime configuration and operational policy.</summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]

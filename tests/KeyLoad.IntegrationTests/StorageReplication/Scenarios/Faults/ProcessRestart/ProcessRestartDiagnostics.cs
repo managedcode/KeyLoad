@@ -1,10 +1,10 @@
 using System.Globalization;
 using System.Text;
 using Aspire.Hosting.ApplicationModel;
-using KeyLoad.Diagnostics.Features.ResourceExecution;
+using KeyLoad.Diagnostics.ResourceExecution;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
-namespace KeyLoad.IntegrationTests.Features.StorageReplication;
+namespace KeyLoad.IntegrationTests.StorageReplication;
 
 /// <summary>Projects execution Aspire and process data into a closed diagnostic vocabulary.</summary>
 internal static class ProcessRestartDiagnostics

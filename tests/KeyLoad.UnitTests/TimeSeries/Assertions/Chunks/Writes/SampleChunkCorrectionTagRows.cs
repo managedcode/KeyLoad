@@ -1,7 +1,7 @@
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
 
-namespace KeyLoad.UnitTests.Features.TimeSeries;
+namespace KeyLoad.UnitTests.TimeSeries;
 
 internal static class SampleChunkCorrectionTagRows
 {

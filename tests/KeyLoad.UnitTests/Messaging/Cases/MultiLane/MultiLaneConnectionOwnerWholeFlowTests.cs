@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.Messaging;
+namespace KeyLoad.UnitTests.Messaging;
 
 /// <summary>Actual connection-local child claims, replay and joined healthy continuation.</summary>
 internal sealed class MultiLaneConnectionOwnerWholeFlowTests

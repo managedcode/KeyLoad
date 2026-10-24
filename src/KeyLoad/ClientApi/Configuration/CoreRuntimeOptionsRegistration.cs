@@ -33,12 +33,12 @@ internal static class CoreRuntimeOptionsRegistration
             .Validate(options => options.IsValid(), TimeSeriesExecutionOptions.ValidationMessage).ValidateOnStart();
         services.AddOptions<ClaimsExecutionOptions>().Bind(configuration.GetSection(ClaimsExecutionOptions.SectionName))
             .Validate(options => options.IsValid(), ClaimsExecutionOptions.ValidationMessage).ValidateOnStart();
-        services.AddOptions<KeyLoad.Query.Features.Search.PackedAnnOptions>().Bind(configuration.GetSection(KeyLoad.Query.Features.Search.PackedAnnOptions.SectionName))
-            .Validate(options => options.IsValid(), KeyLoad.Query.Features.Search.PackedAnnOptions.ValidationMessage).ValidateOnStart();
-        services.AddOptions<KeyLoad.Query.Features.Search.PackedAnnStorageOptions>().Bind(configuration.GetSection(KeyLoad.Query.Features.Search.PackedAnnStorageOptions.SectionName))
-            .Validate(options => options.IsValid(), KeyLoad.Query.Features.Search.PackedAnnStorageOptions.ValidationMessage).ValidateOnStart();
-        services.AddOptions<KeyLoad.Core.Features.Search.AnnSeedOptions>().Bind(configuration.GetSection(KeyLoad.Core.Features.Search.AnnSeedOptions.SectionName))
-            .Validate(options => options.IsValid(), KeyLoad.Core.Features.Search.AnnSeedOptions.ValidationMessage).ValidateOnStart();
+        services.AddOptions<KeyLoad.Query.Search.PackedAnnOptions>().Bind(configuration.GetSection(KeyLoad.Query.Search.PackedAnnOptions.SectionName))
+            .Validate(options => options.IsValid(), KeyLoad.Query.Search.PackedAnnOptions.ValidationMessage).ValidateOnStart();
+        services.AddOptions<KeyLoad.Query.Search.PackedAnnStorageOptions>().Bind(configuration.GetSection(KeyLoad.Query.Search.PackedAnnStorageOptions.SectionName))
+            .Validate(options => options.IsValid(), KeyLoad.Query.Search.PackedAnnStorageOptions.ValidationMessage).ValidateOnStart();
+        services.AddOptions<KeyLoad.Core.Search.AnnSeedOptions>().Bind(configuration.GetSection(KeyLoad.Core.Search.AnnSeedOptions.SectionName))
+            .Validate(options => options.IsValid(), KeyLoad.Core.Search.AnnSeedOptions.ValidationMessage).ValidateOnStart();
         services.AddOptions<AnnMaintenanceOptions>().Bind(configuration.GetSection(AnnMaintenanceOptions.SectionName))
             .Validate(options => options.IsValid(), AnnMaintenanceOptions.ValidationMessage).ValidateOnStart();
         services.AddOptions<TextIndexMaintenanceOptions>().Bind(configuration.GetSection(TextIndexMaintenanceOptions.SectionName))

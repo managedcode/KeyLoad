@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 
-namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
+namespace KeyLoad.SiteTests.BenchmarkComparisons;
 
 internal sealed class SiteProductThesisTests
 {

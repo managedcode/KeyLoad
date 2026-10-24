@@ -1,7 +1,7 @@
 using KeyLoad.Core;
-using KeyLoad.Query.Features.Search;
+using KeyLoad.Query.Search;
 
-namespace KeyLoad.Query.Features.QueryExecution;
+namespace KeyLoad.Query.QueryExecution;
 
 internal static class DistributedSearchReplyShapeValidation
 {

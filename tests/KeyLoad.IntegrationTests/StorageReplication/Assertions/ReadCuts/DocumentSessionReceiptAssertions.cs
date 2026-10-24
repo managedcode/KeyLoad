@@ -1,9 +1,9 @@
 using KeyLoad.Client;
-using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.QueryExecution;
-using static KeyLoad.IntegrationTests.Features.StorageReplication.DocumentSessionReadClusterProtocol;
+using KeyLoad.IntegrationTests.ClientApi;
+using KeyLoad.IntegrationTests.QueryExecution;
+using static KeyLoad.IntegrationTests.StorageReplication.DocumentSessionReadClusterProtocol;
 
-namespace KeyLoad.IntegrationTests.Features.StorageReplication;
+namespace KeyLoad.IntegrationTests.StorageReplication;
 
 /// <summary>Checks literal complete operations and explicit execution authority rather than health-only readiness.</summary>
 internal static class DocumentSessionReceiptAssertions

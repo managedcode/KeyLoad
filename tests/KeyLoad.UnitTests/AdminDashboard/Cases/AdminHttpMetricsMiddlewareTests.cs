@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Routing.Patterns;
 
-namespace KeyLoad.UnitTests.Features.AdminDashboard;
+namespace KeyLoad.UnitTests.AdminDashboard;
 
 internal sealed class AdminHttpMetricsMiddlewareTests
 {

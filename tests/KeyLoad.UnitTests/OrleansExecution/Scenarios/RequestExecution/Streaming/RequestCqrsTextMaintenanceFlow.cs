@@ -1,10 +1,10 @@
 using KeyLoad.Clustering;
-using KeyLoad.UnitTests.Features.Search;
+using KeyLoad.UnitTests.Search;
 using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.DependencyInjection;
 using Orleans.Serialization;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal static class RequestCqrsTextMaintenanceFlow
 {
@@ -19,7 +19,7 @@ internal static class RequestCqrsTextMaintenanceFlow
         var request = (await RequestCqrsHostedMaintenanceData.RequestAsync(fixture.Database, token));
         var payload = OrleansSerialization.Serialize(false);
         var cut = fixture.Database.Store.Position;
-        var bytes = KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(fixture.Database.Store);
+        var bytes = KeyLoad.UnitTests.Messaging.QueueWholeFlowStorage.Bytes(fixture.Database.Store);
         if (fault is not null)
         {
             var rejected = await ConsumeAsync(fixture, request, payload, fault, token);
@@ -27,7 +27,7 @@ internal static class RequestCqrsTextMaintenanceFlow
             await Assert.That(((KeyLoadException)rejected.Error!).Code).IsEqualTo(
                 fault == RequestCqrsTextFault.FrameBudget ? ErrorCode.BudgetExceeded : ErrorCode.OwnershipLost);
             await Assert.That(fixture.Database.Store.Position).IsEqualTo(cut);
-            await Assert.That(KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(fixture.Database.Store)
+            await Assert.That(KeyLoad.UnitTests.Messaging.QueueWholeFlowStorage.Bytes(fixture.Database.Store)
                 .AsSpan().SequenceEqual(bytes)).IsTrue();
         }
         await RequestCqrsActualTextMaintenanceFlow.RunAsync(fixture, mode, request, lifetime, token);

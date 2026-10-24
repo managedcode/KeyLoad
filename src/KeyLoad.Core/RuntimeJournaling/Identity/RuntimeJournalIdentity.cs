@@ -1,4 +1,4 @@
-namespace KeyLoad.Core.Features.RuntimeJournaling.Identity;
+namespace KeyLoad.Core.RuntimeJournaling.Identity;
 
 /// <summary>Enforces the private identity boundary for runtime journal requests.</summary>
 public static class RuntimeJournalIdentity

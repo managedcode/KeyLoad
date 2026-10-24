@@ -1,7 +1,7 @@
 using System.IO.Compression;
 using System.Text.Json.Nodes;
 
-namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
+namespace KeyLoad.SiteTests.BenchmarkComparisons;
 
 /// <summary>Compares published preparation evidence with each original same-run artifact ZIP.</summary>
 internal static class SiteSessionPreparationArchives

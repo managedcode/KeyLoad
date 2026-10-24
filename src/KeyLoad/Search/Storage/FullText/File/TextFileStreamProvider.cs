@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Options;
 using ZoneTree.AbstractFileStream;
 
-namespace KeyLoad.Server.Features.Search;
+namespace KeyLoad.Server.Search;
 
 internal sealed partial class TextFileStreamProvider(string root, string leaf, Guid sourceNodeId, IOptions<TextExecutionOptions> executionOptions, TextResourceOwnership? resources = null, bool allowReadOnlyInventory = false)
     : IFileStreamProvider

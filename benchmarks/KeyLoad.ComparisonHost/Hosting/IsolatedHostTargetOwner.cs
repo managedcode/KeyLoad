@@ -5,7 +5,7 @@ using KeyLoad.Comparisons;
 using KeyLoad.Comparisons.Targets;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonHost.BenchmarkComparisons;
 
 /// <summary>Owns only one execution target and tracks partial HTTP construction until ownership transfers.</summary>
 internal sealed class IsolatedHostTargetOwner(IOptions<ComparisonExecutionOptions> executionOptions,

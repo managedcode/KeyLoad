@@ -1,9 +1,9 @@
-using KeyLoad.Core.Features.BackupRestore.Execution;
-using KeyLoad.Core.Features.BackupRestore.Serialization;
-using KeyLoad.Core.Features.StoragePartitions.Contracts;
+using KeyLoad.Core.BackupRestore.Execution;
+using KeyLoad.Core.BackupRestore.Serialization;
+using KeyLoad.Core.StoragePartitions.Contracts;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.UnitTests.Features.BackupRestore;
+namespace KeyLoad.UnitTests.BackupRestore;
 
 internal sealed class AtomicPartitionRosterBudgetTests
 {

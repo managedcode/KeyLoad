@@ -1,4 +1,4 @@
-using KeyLoad.Core.Features.TimeSeries;
+using KeyLoad.Core.TimeSeries;
 using Orleans.DurableJobs;
 
 namespace KeyLoad.Clustering;

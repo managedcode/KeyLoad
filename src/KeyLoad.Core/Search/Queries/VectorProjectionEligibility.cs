@@ -1,8 +1,8 @@
-using KeyLoad.Core.Features.DocumentStorage;
-using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.Core.DocumentStorage;
+using KeyLoad.Core.ResourceExecution;
 using KeyLoad.Storage;
 
-namespace KeyLoad.Core.Features.Search;
+namespace KeyLoad.Core.Search;
 
 /// <summary>Revalidates the current source authority for a derived vector inside its read cut.</summary>
 internal static class VectorProjectionEligibility

@@ -1,9 +1,9 @@
 using System.Text.Json;
-using KeyLoad.Core.Features.RuntimeJournaling.Identity;
+using KeyLoad.Core.RuntimeJournaling.Identity;
 using KeyLoad.Storage;
 using ManagedCode.Communication;
 
-namespace KeyLoad.UnitTests.Features.Authorization;
+namespace KeyLoad.UnitTests.Authorization;
 
 internal sealed class JournalPrincipalIntegrityTests
 {

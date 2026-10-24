@@ -1,4 +1,4 @@
-namespace KeyLoad.Diagnostics.Features.ResourceExecution;
+namespace KeyLoad.Diagnostics.ResourceExecution;
 
 /// <summary>Names immutable schema and arithmetic values used by the phase bank.</summary>
 internal static class DatabasePhaseValues

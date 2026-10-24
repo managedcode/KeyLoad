@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 
-namespace KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries;
+namespace KeyLoad.Comparisons.BenchmarkComparisons.TimeSeries;
 
 internal interface ITimeSeriesAggregationTarget
 {

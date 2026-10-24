@@ -1,8 +1,8 @@
 using System.Collections.Immutable;
-using KeyLoad.Core.Features.StoragePartitions.Contracts;
-using KeyLoad.Query.Features.Search;
+using KeyLoad.Core.StoragePartitions.Contracts;
+using KeyLoad.Query.Search;
 
-namespace KeyLoad.Query.Features.QueryExecution;
+namespace KeyLoad.Query.QueryExecution;
 
 [global::Orleans.GenerateSerializer]
 [global::Orleans.Alias(DistributedSearchAliases.OwnedLeaf)]

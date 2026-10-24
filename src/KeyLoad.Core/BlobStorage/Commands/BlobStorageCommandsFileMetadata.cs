@@ -1,4 +1,4 @@
-using KeyLoad.Core.Features.BlobStorage;
+using KeyLoad.Core.BlobStorage;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core;

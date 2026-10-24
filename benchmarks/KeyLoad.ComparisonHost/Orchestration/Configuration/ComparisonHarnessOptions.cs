@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.ComparisonHost.Features.BenchmarkOrchestration;
+namespace KeyLoad.ComparisonHost.BenchmarkOrchestration;
 
 [ConfigurationOptions]
 internal sealed partial record ComparisonHarnessOptions

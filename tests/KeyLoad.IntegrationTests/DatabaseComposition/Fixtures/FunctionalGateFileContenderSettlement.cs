@@ -1,6 +1,6 @@
 using KeyLoad.Server;
 
-namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
+namespace KeyLoad.IntegrationTests.DatabaseComposition;
 
 /// <summary>Owns the original contender cleanup proof before healthy storage can be released.</summary>
 internal sealed class FunctionalGateFileContenderSettlement(bool enabled)

@@ -1,6 +1,6 @@
-using KeyLoad.Core.Features.RuntimeJournaling.Contracts;
+using KeyLoad.Core.RuntimeJournaling.Contracts;
 
-namespace KeyLoad.Core.Features.RuntimeJournaling.Models;
+namespace KeyLoad.Core.RuntimeJournaling.Models;
 
 [Orleans.GenerateSerializer]
 [Orleans.Alias(RuntimeJournalProtocol.QuotaAlias)]

@@ -1,4 +1,4 @@
-namespace KeyLoad.Core.Features.BackupRestore.Serialization;
+namespace KeyLoad.Core.BackupRestore.Serialization;
 
 internal static class AtomicPartitionRosterProtocol
 {

@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal static class SqlJoinSourceBindingFlow
 {
@@ -10,7 +10,7 @@ internal static class SqlJoinSourceBindingFlow
         global::KeyLoad.PartitionRef partition, string kind, global::KeyLoad.CommandRequest command, global::KeyLoad.CommitReceipt receipt)
     {
         var engine = new global::KeyLoad.Query.QueryEngine(owner, UnitExecutionOptions.QueryExecution());
-        var before = global::KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(store);
+        var before = global::KeyLoad.UnitTests.Messaging.QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
         var identity = global::KeyLoad.JsonDefaults.Serialize(store.Identity);
         var healthy = SqlJoinSourceBindingFixture.Ast(partition, kind);
@@ -42,7 +42,7 @@ internal static class SqlJoinSourceBindingFlow
 
     internal static async Task UnchangedAsync(global::KeyLoad.Storage.ZoneTree.ZoneTreeStore store, string[] before, long position, byte[] identity)
     {
-        await Assert.That(global::KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(store)).IsEquivalentTo(before, global::TUnit.Assertions.Enums.CollectionOrdering.Matching);
+        await Assert.That(global::KeyLoad.UnitTests.Messaging.QueueWholeFlowStorage.Bytes(store)).IsEquivalentTo(before, global::TUnit.Assertions.Enums.CollectionOrdering.Matching);
         await Assert.That(store.Position).IsEqualTo(position);
         await Assert.That(global::KeyLoad.JsonDefaults.Serialize(store.Identity).AsSpan().SequenceEqual(identity)).IsTrue();
     }

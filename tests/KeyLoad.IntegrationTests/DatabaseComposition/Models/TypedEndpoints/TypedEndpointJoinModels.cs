@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 
-namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
+namespace KeyLoad.IntegrationTests.DatabaseComposition;
 
 internal sealed record TypedEndpointJoinModels(DocumentResult First, DocumentResult Second,
     DocumentResult Hidden, DocumentResult? Missing, ImmutableArray<MessageInspection> Sources,

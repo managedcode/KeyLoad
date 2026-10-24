@@ -1,6 +1,6 @@
 using System.Net;
 
-namespace KeyLoad.IntegrationTests.Features.ResourceExecution;
+namespace KeyLoad.IntegrationTests.ResourceExecution;
 
 internal sealed class SlowBodyAdmissionReturnBody(byte[] body) : HttpContent
 {

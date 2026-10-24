@@ -1,8 +1,8 @@
-using KeyLoad.Core.Features.TimeSeries;
+using KeyLoad.Core.TimeSeries;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 
-namespace KeyLoad.UnitTests.Features.TimeSeries;
+namespace KeyLoad.UnitTests.TimeSeries;
 
 internal sealed class SampleChunkStoreFixture : IDisposable
 {

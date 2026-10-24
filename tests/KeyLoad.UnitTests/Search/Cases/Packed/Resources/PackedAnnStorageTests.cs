@@ -1,8 +1,8 @@
-using KeyLoad.Query.Features.Search;
+using KeyLoad.Query.Search;
 using Microsoft.Extensions.Options;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 internal sealed class PackedAnnStorageTests
 {

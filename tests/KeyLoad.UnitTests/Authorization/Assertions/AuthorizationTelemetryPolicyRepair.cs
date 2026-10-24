@@ -1,15 +1,15 @@
-namespace KeyLoad.UnitTests.Features.Authorization;
+namespace KeyLoad.UnitTests.Authorization;
 
 internal static class AuthorizationTelemetryPolicyRepair
 {
     private const long RepairedPolicyEpoch = 2;
 
     internal static (string[] Bytes, long Position) Capture(TestDatabase database)
-        => (global::KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(database.Store), database.Store.Position);
+        => (global::KeyLoad.UnitTests.Messaging.QueueWholeFlowStorage.Bytes(database.Store), database.Store.Position);
 
     internal static async Task UnchangedAsync(TestDatabase database, (string[] Bytes, long Position) original)
     {
-        await Assert.That(global::KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(database.Store))
+        await Assert.That(global::KeyLoad.UnitTests.Messaging.QueueWholeFlowStorage.Bytes(database.Store))
             .IsEquivalentTo(original.Bytes, global::TUnit.Assertions.Enums.CollectionOrdering.Matching);
         await Assert.That(database.Store.Position).IsEqualTo(original.Position);
     }

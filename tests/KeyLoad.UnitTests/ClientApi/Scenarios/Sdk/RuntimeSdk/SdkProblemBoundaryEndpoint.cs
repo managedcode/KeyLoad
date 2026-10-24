@@ -1,10 +1,10 @@
 using System.Text.Json;
 using KeyLoad.Clustering;
-using KeyLoad.UnitTests.Features.OrleansExecution;
+using KeyLoad.UnitTests.OrleansExecution;
 using Microsoft.AspNetCore.Http;
-using P = KeyLoad.UnitTests.Features.ClientApi.SdkProblemBoundaryProtocol;
+using P = KeyLoad.UnitTests.ClientApi.SdkProblemBoundaryProtocol;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>Controlled Kestrel framing of genuine Orleans replies, not production HTTP authentication/emission.</summary>
 internal sealed class SdkProblemBoundaryEndpoint(SdkProblemBoundaryScenario scenario,

@@ -1,7 +1,7 @@
 using System.Text.Json;
 using ManagedCode.Communication;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal static class AtomicPartitionScopeLifecycleCommands
 {

@@ -1,4 +1,4 @@
-namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
+namespace KeyLoad.Analyzers.Tests.CodeQuality;
 
 /// <summary>AC-CQ-031: runtime policies apply regardless of the source assembly name.</summary>
 internal sealed class MagicRuntimeSourceBoundaryTests

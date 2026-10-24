@@ -1,4 +1,4 @@
-using KeyLoad.Core.Features.AnalyticsStore;
+using KeyLoad.Core.AnalyticsStore;
 
 namespace KeyLoad.Core;
 /// <summary>Executes AnalyticsStoreQueries operations against the caller's database context.</summary>

@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonHost.BenchmarkComparisons;
 
 /// <summary>Creates execution options around strict immutable host inputs without changing their parsing contracts.</summary>
 [KeyLoad.ConfigurationBinding]

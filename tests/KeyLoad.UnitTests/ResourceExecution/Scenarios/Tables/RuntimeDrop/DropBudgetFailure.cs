@@ -2,7 +2,7 @@ using System.Globalization;
 using System.Text.Json;
 using KeyLoad.Server;
 
-namespace KeyLoad.UnitTests.Features.ResourceExecution;
+namespace KeyLoad.UnitTests.ResourceExecution;
 
 internal static class DropBudgetFailure
 {

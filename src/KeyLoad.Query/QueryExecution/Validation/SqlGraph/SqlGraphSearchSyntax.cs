@@ -1,5 +1,5 @@
 
-namespace KeyLoad.Query.Features.QueryExecution;
+namespace KeyLoad.Query.QueryExecution;
 
 /// <summary>Stable tokens and validation diagnostics for Q1.Search.</summary>
 internal static class SqlGraphSearchSyntax

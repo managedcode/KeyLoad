@@ -1,8 +1,8 @@
 using System.Globalization;
-using KeyLoad.Features.QueryExecution;
+using KeyLoad.QueryExecution;
 using Dom = Microsoft.SqlServer.TransactSql.ScriptDom;
 
-namespace KeyLoad.Query.Features.QueryExecution;
+namespace KeyLoad.Query.QueryExecution;
 
 internal static class ScriptDomWindowLowering
 {

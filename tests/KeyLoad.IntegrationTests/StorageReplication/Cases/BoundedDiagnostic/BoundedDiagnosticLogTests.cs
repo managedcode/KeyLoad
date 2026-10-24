@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace KeyLoad.IntegrationTests.Features.StorageReplication;
+namespace KeyLoad.IntegrationTests.StorageReplication;
 
 internal sealed class BoundedDiagnosticLogTests
 {

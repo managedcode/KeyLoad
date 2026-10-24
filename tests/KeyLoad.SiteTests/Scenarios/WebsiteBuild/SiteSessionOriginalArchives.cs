@@ -1,7 +1,7 @@
 using System.IO.Compression;
 using System.Text.Json.Nodes;
 
-namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
+namespace KeyLoad.SiteTests.BenchmarkComparisons;
 
 /// <summary>Checks suite bytes against the same-run original worker ZIPs before any extracted output exists.</summary>
 internal static class SiteSessionOriginalArchives

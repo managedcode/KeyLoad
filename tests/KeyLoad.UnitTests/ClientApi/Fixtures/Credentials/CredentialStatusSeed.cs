@@ -1,9 +1,9 @@
 using System.Security.Cryptography;
 using System.Text;
-using KeyLoad.UnitTests.Features.OrleansExecution;
-using P = KeyLoad.UnitTests.Features.ClientApi.CredentialStatusProtocol;
+using KeyLoad.UnitTests.OrleansExecution;
+using P = KeyLoad.UnitTests.ClientApi.CredentialStatusProtocol;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 internal static class CredentialStatusSeed
 {

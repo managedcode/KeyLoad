@@ -1,4 +1,4 @@
-namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
+namespace KeyLoad.SiteTests.BenchmarkComparisons;
 
 internal sealed class SiteHeavyChildAdmission(Microsoft.Extensions.Options.IOptions<SiteHeavyChildOptions> options)
 {

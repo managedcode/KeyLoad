@@ -1,14 +1,14 @@
 using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Server;
-using KeyLoad.Server.Features.Search;
+using KeyLoad.Server.Search;
 using KeyLoad.Storage.ZoneTree;
 using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace KeyLoad.RecoveryTests.Features.Search;
+namespace KeyLoad.RecoveryTests.Search;
 
 /// <summary>Owns real canonical storage and execution text files across abrupt process recovery.</summary>
 internal sealed class TextIncrementalCrashRuntime : IAsyncDisposable

@@ -1,9 +1,9 @@
 using KeyLoad.Core;
-using KeyLoad.Query.Features.Search;
+using KeyLoad.Query.Search;
 using KeyLoad.Storage;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.Query.Features.QueryExecution;
+namespace KeyLoad.Query.QueryExecution;
 
 internal static class DistributedTextStatisticsLeaf
 {
@@ -12,7 +12,7 @@ internal static class DistributedTextStatisticsLeaf
 
     internal static DistributedTextWitness Execute(DatabaseEngine database, string principalId,
         SearchRequest request, PhysicalShardRecord owner, string tenant,
-        IOptions<QueryExecutionOptions> options, ReadExecutionBudget budget, global::KeyLoad.Core.Features.ResourceExecution.Execution.ReadExecutionBudgetReadGrant grant, PartitionQueryLifetimeMetadata? metadata = null)
+        IOptions<QueryExecutionOptions> options, ReadExecutionBudget budget, global::KeyLoad.Core.ResourceExecution.Execution.ReadExecutionBudgetReadGrant grant, PartitionQueryLifetimeMetadata? metadata = null)
     {
         ArgumentNullException.ThrowIfNull(database);
         ArgumentNullException.ThrowIfNull(request);
@@ -42,7 +42,7 @@ internal static class DistributedTextStatisticsLeaf
     private static DistributedTextWitness Capture(DatabaseEngine database, IKeyValueView view,
         PrincipalRecord principal, ResourceDefinition resource, string digest, SearchRequest request,
         PhysicalShardRecord owner, string tenant, QueryExecutionOptions execution,
-        ReadExecutionBudget budget, global::KeyLoad.Core.Features.ResourceExecution.Execution.ReadExecutionBudgetReadGrant grant,
+        ReadExecutionBudget budget, global::KeyLoad.Core.ResourceExecution.Execution.ReadExecutionBudgetReadGrant grant,
         PartitionQueryLifetimeMetadata? metadata)
     {
         budget.Check();

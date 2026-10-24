@@ -1,9 +1,9 @@
 using KeyLoad.Query;
-using KeyLoad.Query.Features.Search;
-using KeyLoad.Server.Features.Search;
+using KeyLoad.Query.Search;
+using KeyLoad.Server.Search;
 using KeyLoad.Storage;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 internal sealed class TextGenerationCapacityTests
 {

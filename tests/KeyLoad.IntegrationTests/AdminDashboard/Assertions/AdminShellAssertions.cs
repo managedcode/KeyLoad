@@ -1,8 +1,8 @@
 using System.Net;
 using Aspire.Hosting.Testing;
-using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.ClientApi;
 
-namespace KeyLoad.IntegrationTests.Features.AdminDashboard;
+namespace KeyLoad.IntegrationTests.AdminDashboard;
 
 internal static class AdminShellAssertions
 {

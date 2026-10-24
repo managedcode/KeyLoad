@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
 using KeyLoad.Core;
 
-namespace KeyLoad.Query.Features.Search;
+namespace KeyLoad.Query.Search;
 
 /// <summary>Holds the caller's bounded, ordinal output allowlist for one search.</summary>
 internal sealed class FilteredSearchEligibility

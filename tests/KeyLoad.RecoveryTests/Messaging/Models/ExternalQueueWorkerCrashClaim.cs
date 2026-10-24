@@ -1,4 +1,4 @@
-namespace KeyLoad.RecoveryTests.Features.Messaging;
+namespace KeyLoad.RecoveryTests.Messaging;
 
 [Orleans.GenerateSerializer, Orleans.Alias(ExternalQueueWorkerCrashProtocol.ClaimAlias)]
 internal sealed record ExternalQueueWorkerCrashClaim([property: Orleans.Id(0)] Delivery Delivery,

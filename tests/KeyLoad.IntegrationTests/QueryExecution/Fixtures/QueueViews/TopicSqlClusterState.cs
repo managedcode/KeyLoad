@@ -1,8 +1,8 @@
 using System.Collections.Immutable;
-using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.ClientApi;
 using KeyLoad.Query;
 
-namespace KeyLoad.IntegrationTests.Features.QueryExecution;
+namespace KeyLoad.IntegrationTests.QueryExecution;
 
 internal sealed record TopicSqlClusterState(PartitionRef Partition, CommandRequest Command, CommitReceipt Receipt,
     EventSourcePage Original, MessageInspection OriginalQueue, McpPersistedIdentity Identity)

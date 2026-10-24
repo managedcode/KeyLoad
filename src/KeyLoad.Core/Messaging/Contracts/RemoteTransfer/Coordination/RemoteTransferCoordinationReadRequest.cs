@@ -1,4 +1,4 @@
-namespace KeyLoad.Core.Features.Messaging;
+namespace KeyLoad.Core.Messaging;
 
 [global::Orleans.GenerateSerializer, global::Orleans.Alias(RemoteTransferCoordinationReadRequestFields.Alias)]
 internal sealed record RemoteTransferCoordinationReadRequest(

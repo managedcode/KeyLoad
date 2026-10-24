@@ -1,8 +1,8 @@
 using KeyLoad.Clustering;
-using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.Core.ResourceExecution;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.RecoveryTests.Features.ResourceExecution;
+namespace KeyLoad.RecoveryTests.ResourceExecution;
 
 /// <summary>Owns an unattached result ledger until its original lease accepts ownership.</summary>
 internal sealed class PendingResultRetention(IOptions<DatabaseLimits> options) : IDisposable

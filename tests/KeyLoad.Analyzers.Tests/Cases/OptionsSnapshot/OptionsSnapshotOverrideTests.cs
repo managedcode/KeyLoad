@@ -1,4 +1,4 @@
-namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
+namespace KeyLoad.Analyzers.Tests.CodeQuality;
 
 /// <summary>AC-CQ-034/037: a execution Value base cannot authorize hidden clone defaults.</summary>
 internal sealed class OptionsSnapshotOverrideTests

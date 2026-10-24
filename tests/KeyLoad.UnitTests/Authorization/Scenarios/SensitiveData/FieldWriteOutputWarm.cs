@@ -1,7 +1,7 @@
-using KeyLoad.UnitTests.Features.Messaging;
-using P = KeyLoad.UnitTests.Features.Authorization.FieldWriteOutputProtocol;
+using KeyLoad.UnitTests.Messaging;
+using P = KeyLoad.UnitTests.Authorization.FieldWriteOutputProtocol;
 
-namespace KeyLoad.UnitTests.Features.Authorization;
+namespace KeyLoad.UnitTests.Authorization;
 
 internal static class FieldWriteOutputWarm
 {

@@ -1,4 +1,4 @@
-namespace KeyLoad.Cli.Features.ClientApi;
+namespace KeyLoad.Cli.ClientApi;
 
 /// <summary>The command's centrally resolved endpoint and credential.</summary>
 [ConfigurationOptions]

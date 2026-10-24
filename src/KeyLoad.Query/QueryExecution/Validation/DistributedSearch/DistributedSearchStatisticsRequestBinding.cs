@@ -1,9 +1,9 @@
 using System.Collections.Immutable;
 using KeyLoad.Core;
-using KeyLoad.Query.Features.Search;
+using KeyLoad.Query.Search;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.Query.Features.QueryExecution;
+namespace KeyLoad.Query.QueryExecution;
 
 internal static class DistributedSearchStatisticsRequestBinding
 {

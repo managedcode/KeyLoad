@@ -1,6 +1,6 @@
 using KeyLoad.Query;
 
-namespace KeyLoad.UnitTests.Features.Authorization;
+namespace KeyLoad.UnitTests.Authorization;
 
 internal static class ModelRootPolicyRequests
 {

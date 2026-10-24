@@ -1,4 +1,4 @@
-namespace KeyLoad.Query.Features.QueryExecution;
+namespace KeyLoad.Query.QueryExecution;
 
 /// <summary>Canonical Q1/Q2 syntax tokens, numeric limits, and stable error details.</summary>
 internal static class SqlSyntax

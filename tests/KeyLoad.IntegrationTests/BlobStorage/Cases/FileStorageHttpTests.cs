@@ -1,8 +1,8 @@
-using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.DatabaseComposition;
-using KeyLoad.IntegrationTests.Features.OrleansExecution;
+using KeyLoad.IntegrationTests.ClientApi;
+using KeyLoad.IntegrationTests.DatabaseComposition;
+using KeyLoad.IntegrationTests.OrleansExecution;
 
-namespace KeyLoad.IntegrationTests.Features.BlobStorage;
+namespace KeyLoad.IntegrationTests.BlobStorage;
 
 [NotInParallel]
 internal sealed class FileStorageHttpTests

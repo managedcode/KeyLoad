@@ -2,7 +2,7 @@ using System.Collections.Immutable;
 using System.Text.Json;
 using KeyLoad.Query;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal sealed class PartitionQueryPublicTestSupport : IDisposable
 {

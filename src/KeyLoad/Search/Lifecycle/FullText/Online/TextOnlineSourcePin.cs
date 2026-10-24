@@ -1,10 +1,10 @@
 using KeyLoad.Core;
-using KeyLoad.Core.Features.ResourceExecution.Execution;
-using KeyLoad.Core.Features.Search;
+using KeyLoad.Core.ResourceExecution.Execution;
+using KeyLoad.Core.Search;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 
-namespace KeyLoad.Server.Features.Search;
+namespace KeyLoad.Server.Search;
 
 internal sealed class TextOnlineSourcePin : IDisposable
 {

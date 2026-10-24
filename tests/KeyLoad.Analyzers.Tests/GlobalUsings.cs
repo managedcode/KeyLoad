@@ -1,1 +1,1 @@
-global using KeyLoad.Analyzers.Features.CodeQuality;
+global using KeyLoad.Analyzers.CodeQuality;

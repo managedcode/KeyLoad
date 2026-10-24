@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace KeyLoad.RecoveryTests.Features.DocumentStorage;
+namespace KeyLoad.RecoveryTests.DocumentStorage;
 
 internal sealed class CommandIdempotencyProcessOutputReader
 {

@@ -1,6 +1,6 @@
-using KeyLoad.Server.Features.Search;
+using KeyLoad.Server.Search;
 
-namespace KeyLoad.RecoveryTests.Features.Search;
+namespace KeyLoad.RecoveryTests.Search;
 
 internal sealed class TextOnlineProcessRecoveryTests
 {

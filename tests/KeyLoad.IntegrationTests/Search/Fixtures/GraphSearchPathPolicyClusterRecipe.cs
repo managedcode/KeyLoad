@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
-using P = KeyLoad.IntegrationTests.Features.Search.GraphSearchPathPolicyClusterProtocol;
+using P = KeyLoad.IntegrationTests.Search.GraphSearchPathPolicyClusterProtocol;
 
-namespace KeyLoad.IntegrationTests.Features.Search;
+namespace KeyLoad.IntegrationTests.Search;
 
 internal static class GraphSearchPathPolicyClusterRecipe
 {

@@ -1,8 +1,8 @@
 using System.Diagnostics;
-using KeyLoad.AppHost.Features.TestInfrastructure;
+using KeyLoad.AppHost.TestInfrastructure;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.UnitTests.Features.CodeQuality.Processes;
+namespace KeyLoad.UnitTests.CodeQuality.Processes;
 
 internal static class UnitImageAdmissionReader
 {

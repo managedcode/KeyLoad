@@ -2,7 +2,7 @@ using System.Runtime.ExceptionServices;
 using System.Text.Json;
 using Orleans.TestingHost;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal static class ClusterStartupEvidence
 {

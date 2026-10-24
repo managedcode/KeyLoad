@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.QueryExecution;
+namespace KeyLoad.IntegrationTests.QueryExecution;
 
 /// <summary>Frozen public operation vocabulary for the real same-owner partition-query cases.</summary>
 internal static class PartitionQueryClusterProtocol

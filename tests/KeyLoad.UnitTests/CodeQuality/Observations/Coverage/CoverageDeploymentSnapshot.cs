@@ -1,6 +1,6 @@
 using System.Security.Cryptography;
 
-namespace KeyLoad.UnitTests.Features.CodeQuality;
+namespace KeyLoad.UnitTests.CodeQuality;
 
 internal sealed class CoverageDeploymentSnapshot
 {

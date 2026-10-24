@@ -1,5 +1,5 @@
-using KeyLoad.Core.Features.StoragePartitions.Contracts;
-namespace KeyLoad.Core.Features.TimeSeries;
+using KeyLoad.Core.StoragePartitions.Contracts;
+namespace KeyLoad.Core.TimeSeries;
 
 internal static class SampleChunkKeys
 {

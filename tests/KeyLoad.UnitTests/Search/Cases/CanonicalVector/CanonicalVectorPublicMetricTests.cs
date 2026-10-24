@@ -2,7 +2,7 @@ using System.Numerics;
 using KeyLoad.Query;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 /// <summary>persisted exact top-k across all metrics, cancellation and healthy reuse.</summary>
 internal sealed class CanonicalVectorPublicMetricTests

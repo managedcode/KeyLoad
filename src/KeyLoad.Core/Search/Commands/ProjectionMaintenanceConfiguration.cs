@@ -41,7 +41,7 @@ public static class ProjectionMaintenanceConfiguration
         }
 
         var principal = engine.Principal(view, operation.UserId!, engine.Clock.GetUtcNow());
-        Features.Search.AnnProjectionPinValidation.RequireOwner(engine, view, principal, configure.Consumer.Partition, original);
+        Search.AnnProjectionPinValidation.RequireOwner(engine, view, principal, configure.Consumer.Partition, original);
         if (OrleansSerialization.Measure(original) > engine.Limits.MaxBatchBytes)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, InvalidMaintenanceProfile);
@@ -82,7 +82,7 @@ public static class ProjectionMaintenanceConfiguration
 
     internal static void RequireProjectionMaintenanceResource(ResourceDefinition resource, AnnProjectionMaintenanceProfile profile)
     {
-        Features.Search.VectorFieldProfiles.Validate(resource, ErrorCode.Corruption);
+        Search.VectorFieldProfiles.Validate(resource, ErrorCode.Corruption);
         var configured = resource.VectorProfiles.FirstOrDefault(item => item.Field == profile.Field);
         if (configured is not null && configured.Space != profile.Space)
         {

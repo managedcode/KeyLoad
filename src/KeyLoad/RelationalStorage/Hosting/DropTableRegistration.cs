@@ -1,6 +1,6 @@
 using KeyLoad.Clustering;
 
-namespace KeyLoad.Server.Features.ResourceExecution;
+namespace KeyLoad.Server.ResourceExecution;
 
 internal static class DropTableRegistration
 {

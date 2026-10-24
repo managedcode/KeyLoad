@@ -1,6 +1,6 @@
-using P = KeyLoad.IntegrationTests.Features.DatabaseComposition.FunctionalGateAnalyticsMixedPublicProtocol;
+using P = KeyLoad.IntegrationTests.DatabaseComposition.FunctionalGateAnalyticsMixedPublicProtocol;
 
-namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
+namespace KeyLoad.IntegrationTests.DatabaseComposition;
 
 internal static class FunctionalGateAnalyticsMixedPublic
 {

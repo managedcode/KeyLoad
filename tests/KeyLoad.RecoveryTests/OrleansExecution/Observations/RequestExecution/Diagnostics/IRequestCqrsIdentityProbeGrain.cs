@@ -1,6 +1,6 @@
 using KeyLoad.Clustering;
 
-namespace KeyLoad.RecoveryTests.Features.OrleansExecution;
+namespace KeyLoad.RecoveryTests.OrleansExecution;
 
 [global::Orleans.Alias(RequestCqrsTestProtocol.ProbeAlias)]
 [global::Orleans.CodeGeneration.Version(1)]

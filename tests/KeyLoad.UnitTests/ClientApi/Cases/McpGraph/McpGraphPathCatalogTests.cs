@@ -1,7 +1,7 @@
 using System.Text.Json;
 using KeyLoad.Server;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>AC-MCP-001 independently freezes both public GraphPath tool bodies, outputs and hints.</summary>
 internal sealed class McpGraphPathCatalogTests

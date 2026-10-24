@@ -1,8 +1,8 @@
 using KeyLoad.Query;
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
-using KeyLoad.UnitTests.Features.ResourceExecution;
-namespace KeyLoad.UnitTests.Features.Search;
+using KeyLoad.UnitTests.ResourceExecution;
+namespace KeyLoad.UnitTests.Search;
 
 internal static class SharedSearchReadBudgetFlow
 {

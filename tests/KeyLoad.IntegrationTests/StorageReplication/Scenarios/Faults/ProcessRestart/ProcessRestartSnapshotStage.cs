@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.StorageReplication;
+namespace KeyLoad.IntegrationTests.StorageReplication;
 
 /// <summary>Closed snapshot points around the original Aspire start operation.</summary>
 internal enum ProcessRestartSnapshotStage

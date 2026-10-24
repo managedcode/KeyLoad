@@ -33,7 +33,7 @@ AC-ANN-001–006 must pass before the kernel is described as qualified. No fabri
 
 ## Kernel internal API
 
-Namespace: KeyLoad.Query.Features.Search. These computational objects are not persisted or passed between grains; no serialization DTO or alias is introduced by the kernel.
+Namespace: KeyLoad.Query.Search. These computational objects are not persisted or passed between grains; no serialization DTO or alias is introduced by the kernel.
 
 ```csharp
 internal sealed record PackedAnnOptions; // init properties and defaults below

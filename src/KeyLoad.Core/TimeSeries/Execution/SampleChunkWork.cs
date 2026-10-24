@@ -1,4 +1,4 @@
-namespace KeyLoad.Core.Features.TimeSeries;
+namespace KeyLoad.Core.TimeSeries;
 
 // Ordered apply uses the already admitted deterministic codec/transaction bounds.
 // It must not make replica-local cancellation or elapsed-clock decisions.

@@ -1,9 +1,9 @@
 using System.Security.Cryptography;
 using KeyLoad.Query;
-using KeyLoad.UnitTests.Features.Messaging;
+using KeyLoad.UnitTests.Messaging;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 internal static class TextWaitObservationAssertions
 {

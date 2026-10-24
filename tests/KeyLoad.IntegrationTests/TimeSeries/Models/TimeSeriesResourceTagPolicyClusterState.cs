@@ -1,5 +1,5 @@
-using KeyLoad.IntegrationTests.Features.ClientApi;
-namespace KeyLoad.IntegrationTests.Features.TimeSeries;
+using KeyLoad.IntegrationTests.ClientApi;
+namespace KeyLoad.IntegrationTests.TimeSeries;
 
 internal sealed class TimeSeriesResourceTagPolicyClusterState(TimeSeriesClusterScenario scenario,
     McpPersistedIdentity reader, ResourceDefinition definition, CommandRequest append, CommitReceipt receipt, Guid createId, Guid windowId,

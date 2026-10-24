@@ -1,4 +1,4 @@
-namespace KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
+namespace KeyLoad.Storage.ZoneTree.ResourceExecution;
 
 /// <summary>Owns exact local cache bindings; callers provide the real store writer boundary.</summary>
 internal sealed class ZoneTreePointCacheControlState

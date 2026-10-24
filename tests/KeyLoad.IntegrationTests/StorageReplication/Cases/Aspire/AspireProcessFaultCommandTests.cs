@@ -1,12 +1,12 @@
 using Aspire.Hosting.ApplicationModel;
-using KeyLoad.AppHost.Features.TestInfrastructure;
+using KeyLoad.AppHost.TestInfrastructure;
 using KeyLoad.Client;
-using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.DocumentStorage;
-using KeyLoad.IntegrationTests.Features.EventStreams;
+using KeyLoad.IntegrationTests.ClientApi;
+using KeyLoad.IntegrationTests.DocumentStorage;
+using KeyLoad.IntegrationTests.EventStreams;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace KeyLoad.IntegrationTests.Features.StorageReplication;
+namespace KeyLoad.IntegrationTests.StorageReplication;
 
 /// <summary>Verifies real resource command refusal without effects, then original SDK/MCP fault recovery.</summary>
 [ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = McpCallerProtocol.FixtureKey)]

@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.StorageRecovery;
+namespace KeyLoad.UnitTests.StorageRecovery;
 
 /// <summary>Bounds complete execution recovery-fixture image observation; a remaining row must refuse the proof.</summary>
 [ConfigurationOptions]

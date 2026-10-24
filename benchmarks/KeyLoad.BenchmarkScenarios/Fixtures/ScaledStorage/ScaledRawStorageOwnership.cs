@@ -1,4 +1,4 @@
-namespace KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
+namespace KeyLoad.BenchmarkScenarios.BenchmarkComparisons;
 
 /// <summary>Roots the one scaled fixture and serializes its actual close attempts.</summary>
 internal static class ScaledRawStorageOwnership

@@ -1,7 +1,7 @@
-using KeyLoad.Core.Features.StoragePartitions.Contracts;
+using KeyLoad.Core.StoragePartitions.Contracts;
 using KeyLoad.Storage;
 
-namespace KeyLoad.Core.Features.StoragePartitions.Validation;
+namespace KeyLoad.Core.StoragePartitions.Validation;
 
 /// <summary>Validates a family-scoped page request before execution traversal.</summary>
 internal static class PartitionRecordValidation

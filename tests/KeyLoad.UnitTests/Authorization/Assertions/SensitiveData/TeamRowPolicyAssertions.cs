@@ -5,7 +5,7 @@ using KeyLoad.Query;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 
-namespace KeyLoad.UnitTests.Features.Authorization;
+namespace KeyLoad.UnitTests.Authorization;
 
 internal static class TeamRowPolicyAssertions
 {
@@ -52,9 +52,9 @@ internal static class TeamRowPolicyAssertions
         }, JsonDefaults.Options);
         QueryRow[] explanation = [new("explain", AbsentRevision, plan)];
         var explanationRequest = new AstQueryRequest(db.Partition,
-            new(TeamRowPolicyFlow.Collection, null, [new(global::KeyLoad.Query.Features.QueryExecution.SqlSyntax.Star,
-                global::KeyLoad.Query.Features.QueryExecution.SqlSyntax.Star)], null,
-                [new(global::KeyLoad.Query.Features.QueryExecution.SqlSyntax.MetadataIdPath, false)], global::KeyLoad.Query.Features.QueryExecution.SqlSyntax.DefaultLimit, Explain: true), AllowFullScan: true);
+            new(TeamRowPolicyFlow.Collection, null, [new(global::KeyLoad.Query.QueryExecution.SqlSyntax.Star,
+                global::KeyLoad.Query.QueryExecution.SqlSyntax.Star)], null,
+                [new(global::KeyLoad.Query.QueryExecution.SqlSyntax.MetadataIdPath, false)], global::KeyLoad.Query.QueryExecution.SqlSyntax.DefaultLimit, Explain: true), AllowFullScan: true);
         var explain = queries.ExecuteAst(TeamRowPolicyFlow.Reader, explanationRequest, cancellationToken: token);
         await Assert.That(JsonDefaults.Serialize(explain.Rows).AsSpan().SequenceEqual(JsonDefaults.Serialize(explanation))).IsTrue();
         await Assert.That(explain.CutPosition).IsEqualTo(cut);

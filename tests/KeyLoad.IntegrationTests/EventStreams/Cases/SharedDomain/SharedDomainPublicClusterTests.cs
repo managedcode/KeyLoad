@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.EventStreams;
+namespace KeyLoad.IntegrationTests.EventStreams;
 
 [NotInParallel]
 internal sealed class SharedDomainPublicClusterTests

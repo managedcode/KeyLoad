@@ -3,7 +3,7 @@ using ManagedCode.Communication.Commands;
 using ManagedCode.Communication.Orleans.Converters;
 using ManagedCode.Communication.Orleans.Surrogates;
 
-namespace KeyLoad.Features.InternalSerialization;
+namespace KeyLoad.InternalSerialization;
 
 // Inspect the selected library's actual generated surrogates; do not mirror their wire contracts.
 internal static class CommunicationContracts

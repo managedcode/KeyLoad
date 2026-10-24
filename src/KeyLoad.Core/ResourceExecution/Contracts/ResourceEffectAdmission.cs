@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 
-namespace KeyLoad.Core.Features.ResourceExecution;
+namespace KeyLoad.Core.ResourceExecution;
 
 [Orleans.GenerateSerializer]
 [Orleans.Alias(ResourceEffectAdmissionProtocol.Alias)]

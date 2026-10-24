@@ -1,17 +1,17 @@
-namespace KeyLoad.IntegrationTests.Features.QueryExecution;
+namespace KeyLoad.IntegrationTests.QueryExecution;
 
 internal static class SqlBooleanTruthClusterSetup
 {
     internal static async Task<SqlNullOrderingClusterState> CreateAsync(ClusterFixture fixture, CancellationToken token)
     {
-        return await global::KeyLoad.IntegrationTests.Features.OrleansExecution.RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerProtocol.Node1,
+        return await global::KeyLoad.IntegrationTests.OrleansExecution.RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, global::KeyLoad.IntegrationTests.ClientApi.McpCallerProtocol.Node1,
             fixture.AdminKey, async root =>
         {
             var partition = PostgresClusterState.Partition;
             var resource = new ResourceDefinition(SqlNullOrderingClusterProtocol.Collection, ResourceKind.Collection,
                 partition.TransactionDomainId);
             var actual = await SqlClusterProtocol.SdkAsync<ResourceDefinition>(root.Sdk,
-                SqlClusterProtocol.Call(partition, global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerTools.ResourcesConfigure,
+                SqlClusterProtocol.Call(partition, global::KeyLoad.IntegrationTests.ClientApi.McpCallerTools.ResourcesConfigure,
                     new ConfigureResourceRequest(partition.TenantId, partition.DatabaseId, resource), Guid.NewGuid()), token);
             await SqlClusterProtocol.EqualAsync(resource, actual);
             var writer = await PostgresClusterSeed.IdentityAsync(root.Sdk, SqlNullOrderingClusterProtocol.WriterMarker,
@@ -20,10 +20,10 @@ internal static class SqlBooleanTruthClusterSetup
                 Capability.DocumentsRead | Capability.Query, token, resource.Name);
             var seed = new CommandRequest(Guid.NewGuid(), partition,
                 [.. SqlBooleanTruthClusterState.Rows.Select(row => new PutDocument(resource.Name, row.Id, row.Json))]);
-            var receipt = await global::KeyLoad.IntegrationTests.Features.OrleansExecution.RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerProtocol.Node2,
+            var receipt = await global::KeyLoad.IntegrationTests.OrleansExecution.RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, global::KeyLoad.IntegrationTests.ClientApi.McpCallerProtocol.Node2,
                 writer.Secret, async caller =>
             {
-                var committed = await global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.CommitAsync(seed, token));
+                var committed = await global::KeyLoad.IntegrationTests.ClientApi.McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.CommitAsync(seed, token));
                 await SqlNullOrderingClusterAssertions.ReceiptAsync(seed, committed);
                 return committed;
             }, token);

@@ -1,6 +1,6 @@
-using P = KeyLoad.UnitTests.Features.OrleansExecution.CommandObservedPolicyProtocol;
+using P = KeyLoad.UnitTests.OrleansExecution.CommandObservedPolicyProtocol;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal static class CommandObservedReturnEdgeAssertions
 {

@@ -1,4 +1,4 @@
-namespace KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
+namespace KeyLoad.LoadTests.AppHost.BenchmarkComparisons;
 
 internal sealed record ScaleServerHardware(string Kernel, string Architecture, string CpuVendor,
     int CpuFamily, int CpuModel, int CpuStepping, int LogicalCpuCount, int PhysicalCoreCount,

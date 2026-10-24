@@ -1,9 +1,9 @@
 using System.Text.Json;
 using KeyLoad.Client;
 using KeyLoad.Query;
-using static KeyLoad.UnitTests.Features.QueryExecution.QueryEquivalentIntegerDecimalProtocol;
+using static KeyLoad.UnitTests.QueryExecution.QueryEquivalentIntegerDecimalProtocol;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal static class QueryEquivalentIntegerDecimalRequests
 {

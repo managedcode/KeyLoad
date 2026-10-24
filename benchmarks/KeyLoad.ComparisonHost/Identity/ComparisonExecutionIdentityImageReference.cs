@@ -1,7 +1,7 @@
 using System.Globalization;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonHost.BenchmarkComparisons;
 
 /// <summary>Validates bounded registry, repository, tag and immutable digest references.</summary>
 internal static class ComparisonExecutionIdentityImageReference

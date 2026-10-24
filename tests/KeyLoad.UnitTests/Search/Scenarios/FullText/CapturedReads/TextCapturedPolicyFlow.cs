@@ -1,9 +1,9 @@
-using KeyLoad.Core.Features.CommandOutcomes.Contracts;
-using KeyLoad.Core.Features.CommandOutcomes.Execution;
-using KeyLoad.Query.Features.Search;
+using KeyLoad.Core.CommandOutcomes.Contracts;
+using KeyLoad.Core.CommandOutcomes.Execution;
+using KeyLoad.Query.Search;
 using KeyLoad.Server;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 internal static class TextCapturedPolicyFlow
 {

@@ -2,9 +2,9 @@ using System.Collections.Immutable;
 using System.Security.Cryptography;
 using System.Text;
 using KeyLoad.Client;
-using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.ClientApi;
 
-namespace KeyLoad.IntegrationTests.Features.Search;
+namespace KeyLoad.IntegrationTests.Search;
 
 /// <summary>Seeds an independently specified multi-collection graph for public Orleans search tests.</summary>
 internal sealed record GraphSearchClusterScenario(PartitionRef Partition)

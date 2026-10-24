@@ -1,4 +1,4 @@
-using KeyLoad.Core.Features.QueryExecution;
+using KeyLoad.Core.QueryExecution;
 using KeyLoad.Query;
 using KeyLoad.Storage;
 

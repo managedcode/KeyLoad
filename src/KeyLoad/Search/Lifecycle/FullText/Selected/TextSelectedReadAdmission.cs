@@ -1,4 +1,4 @@
-namespace KeyLoad.Server.Features.Search;
+namespace KeyLoad.Server.Search;
 
 /// <summary>Orders execution reader ownership before maintenance canonical-view admission.</summary>
 internal sealed class TextSelectedReadAdmission(int maximumReaders, TextResourceOwnership? resources = null)

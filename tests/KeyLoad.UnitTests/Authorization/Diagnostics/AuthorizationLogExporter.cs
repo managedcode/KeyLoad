@@ -2,7 +2,7 @@ using Microsoft.Extensions.Options;
 using OpenTelemetry;
 using OpenTelemetry.Logs;
 
-namespace KeyLoad.UnitTests.Features.Authorization;
+namespace KeyLoad.UnitTests.Authorization;
 
 internal sealed class AuthorizationLogExporter(IOptions<AuthorizationTelemetryCaptureOptions> options)
     : BaseExporter<LogRecord>

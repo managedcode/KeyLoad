@@ -1,7 +1,7 @@
-using KeyLoad.IntegrationTests.Features.Messaging;
-using static KeyLoad.IntegrationTests.Features.EventStreams.SharedDomainPublicProtocol;
+using KeyLoad.IntegrationTests.Messaging;
+using static KeyLoad.IntegrationTests.EventStreams.SharedDomainPublicProtocol;
 
-namespace KeyLoad.IntegrationTests.Features.EventStreams;
+namespace KeyLoad.IntegrationTests.EventStreams;
 
 internal static class SharedDomainPublicAuthority
 {

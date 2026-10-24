@@ -1,4 +1,4 @@
-namespace KeyLoad.Query.Features.Search;
+namespace KeyLoad.Query.Search;
 
 /// <summary>Permanent generated contract and algorithm identities for execution text generations.</summary>
 public static class TextProjectionProtocol

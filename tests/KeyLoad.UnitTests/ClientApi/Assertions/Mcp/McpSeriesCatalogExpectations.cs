@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
 using KeyLoad.Clustering;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>Independent frozen time-series operations in the public MCP contract inventory.</summary>
 internal static class McpSeriesCatalogExpectations

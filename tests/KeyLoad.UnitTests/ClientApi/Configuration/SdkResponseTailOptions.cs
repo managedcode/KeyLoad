@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>Typed timer policy for the real held-response operation and original caller.</summary>
 [ConfigurationOptions]

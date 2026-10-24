@@ -1,7 +1,7 @@
-using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.DocumentStorage;
+using KeyLoad.IntegrationTests.ClientApi;
+using KeyLoad.IntegrationTests.DocumentStorage;
 
-namespace KeyLoad.IntegrationTests.Features.Authorization;
+namespace KeyLoad.IntegrationTests.Authorization;
 
 internal sealed record AuthenticationExecutionState(McpDocumentScenario Document, PrincipalRecord Reader,
     ApiKeyRecord Credential, string Secret, CommandRequest OriginalCommand, CommitReceipt OriginalReceipt)

@@ -1,6 +1,6 @@
 using KeyLoad.Storage.ZoneTree.IO;
 
-namespace KeyLoad.IntegrationTests.Features.StorageRecovery;
+namespace KeyLoad.IntegrationTests.StorageRecovery;
 
 internal static class StorageOwnershipFiles
 {

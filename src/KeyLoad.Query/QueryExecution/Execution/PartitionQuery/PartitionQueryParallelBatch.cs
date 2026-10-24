@@ -1,6 +1,6 @@
 using System.Runtime.ExceptionServices;
 
-namespace KeyLoad.Query.Features.QueryExecution;
+namespace KeyLoad.Query.QueryExecution;
 
 /// <summary>Joins a fixed admitted batch of independently authorized execution children.</summary>
 internal static class PartitionQueryParallelBatch

@@ -1,6 +1,6 @@
-using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.ClientApi;
 
-namespace KeyLoad.IntegrationTests.Features.ChangeFeeds;
+namespace KeyLoad.IntegrationTests.ChangeFeeds;
 
 /// <summary>REQ/AC-FEED-002/003/005: genuine Orleans persisted privacy, cursor and live-query continuation.</summary>
 [ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = McpCallerProtocol.FixtureKey)]

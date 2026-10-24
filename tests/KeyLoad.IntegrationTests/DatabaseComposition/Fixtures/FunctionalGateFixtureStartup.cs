@@ -1,9 +1,9 @@
 using System.Globalization;
-using KeyLoad.AppHost.Features.TestInfrastructure;
-using KeyLoad.IntegrationTests.Features.StorageReplication;
+using KeyLoad.AppHost.TestInfrastructure;
+using KeyLoad.IntegrationTests.StorageReplication;
 using KeyLoad.Server;
 
-namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
+namespace KeyLoad.IntegrationTests.DatabaseComposition;
 
 /// <summary>Owns original functional startup arguments and failure cleanup before publication.</summary>
 internal static class FunctionalGateFixtureStartup
@@ -45,7 +45,7 @@ internal static class FunctionalGateFixtureStartup
         }
         if (exclusiveOwnerContention)
         {
-            arguments.Add(KeyLoad.AppHost.Features.StorageRecovery.ExclusiveOwnerContentionProfile.EnabledArgument);
+            arguments.Add(KeyLoad.AppHost.StorageRecovery.ExclusiveOwnerContentionProfile.EnabledArgument);
         }
         return arguments;
     }

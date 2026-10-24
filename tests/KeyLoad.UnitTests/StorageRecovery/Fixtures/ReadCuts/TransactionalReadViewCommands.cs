@@ -1,7 +1,7 @@
-using KeyLoad.UnitTests.Features.StorageRecovery.Assertions;
+using KeyLoad.UnitTests.StorageRecovery.Assertions;
 using ManagedCode.Communication.Commands;
 
-namespace KeyLoad.UnitTests.Features.StorageRecovery;
+namespace KeyLoad.UnitTests.StorageRecovery;
 
 internal static class TransactionalReadViewCommands
 {

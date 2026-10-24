@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal static class SqlInnerJoinCancellationWholeState
 {
@@ -12,7 +12,7 @@ internal static class SqlInnerJoinCancellationWholeState
     {
         await Assert.That(database.Store.Position).IsEqualTo(position);
         await Assert.That(Convert.ToHexString(OrleansSerialization.Serialize(database.Store.Identity))).IsEqualTo(identity);
-        await Assert.That(global::KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(database.Store))
+        await Assert.That(global::KeyLoad.UnitTests.Messaging.QueueWholeFlowStorage.Bytes(database.Store))
             .IsEquivalentTo(before, TUnit.Assertions.Enums.CollectionOrdering.Matching);
     }
 

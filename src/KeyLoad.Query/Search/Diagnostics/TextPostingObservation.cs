@@ -1,4 +1,4 @@
-namespace KeyLoad.Query.Features.Search;
+namespace KeyLoad.Query.Search;
 
 /// <summary>Flows one bounded posting-observation callback within its original call.</summary>
 internal sealed class TextPostingObservation : IDisposable

@@ -4,7 +4,7 @@ using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Storage;
 
-namespace KeyLoad.Query.Features.QueryExecution;
+namespace KeyLoad.Query.QueryExecution;
 
 /// <summary>Executes the authorized captured scalar view and builds its bounded continuation page.</summary>
 internal static class QueryViewExecution

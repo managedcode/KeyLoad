@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.ClientApi;
+namespace KeyLoad.IntegrationTests.ClientApi;
 
 internal static class GuideLifecyclePublicExpected
 {

@@ -1,6 +1,6 @@
-using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.Core.ResourceExecution;
 
-namespace KeyLoad.UnitTests.Features.AnalyticsStore;
+namespace KeyLoad.UnitTests.AnalyticsStore;
 
 /// <summary>Builds complete expected references from original creation commands, independently of stored rows and read outputs.</summary>
 internal static class AnalyticsExpectedResourceCreation

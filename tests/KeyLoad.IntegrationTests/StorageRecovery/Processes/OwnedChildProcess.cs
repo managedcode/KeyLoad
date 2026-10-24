@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-namespace KeyLoad.IntegrationTests.Features.StorageRecovery;
+namespace KeyLoad.IntegrationTests.StorageRecovery;
 
 internal static class OwnedChildProcess
 {

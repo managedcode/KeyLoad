@@ -1,6 +1,6 @@
-using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.Core.ResourceExecution;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 /// <summary>Seeds both canonical partitions through the actual two-copy Orleans command owner.</summary>
 internal sealed class QueryHostedSearchDataset(RequestCqrsHostedCluster cluster)

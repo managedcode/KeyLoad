@@ -1,6 +1,6 @@
 using System.Security.Cryptography;
 
-namespace KeyLoad.Server.Features.Search;
+namespace KeyLoad.Server.Search;
 
 internal static class TextEnvelopeCodec
 {

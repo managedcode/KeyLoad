@@ -1,4 +1,4 @@
-namespace KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonHost.BenchmarkComparisons;
 
 internal static class ComparisonHostConstants
 {

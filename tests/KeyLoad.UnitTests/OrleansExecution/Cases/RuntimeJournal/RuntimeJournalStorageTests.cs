@@ -1,11 +1,11 @@
 #pragma warning disable ORLEANSEXP005
 using System.Buffers;
 using KeyLoad.Clustering;
-using KeyLoad.Core.Features.RuntimeJournaling.Contracts;
+using KeyLoad.Core.RuntimeJournaling.Contracts;
 using Orleans.Journaling;
 using Orleans.Storage;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 [RuntimeJournalDataSource]
 [NotInParallel]

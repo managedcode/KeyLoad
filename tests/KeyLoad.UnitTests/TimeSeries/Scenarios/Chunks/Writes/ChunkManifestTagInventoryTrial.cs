@@ -1,7 +1,7 @@
 using System.Security.Cryptography;
-using KeyLoad.Core.Features.TimeSeries;
+using KeyLoad.Core.TimeSeries;
 
-namespace KeyLoad.UnitTests.Features.TimeSeries;
+namespace KeyLoad.UnitTests.TimeSeries;
 
 internal static class ChunkManifestTagInventoryTrial
 {

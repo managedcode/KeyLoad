@@ -1,7 +1,7 @@
 using Aspire.Hosting.Testing;
 using KeyLoad.Client;
 
-namespace KeyLoad.IntegrationTests.Features.OrleansExecution;
+namespace KeyLoad.IntegrationTests.OrleansExecution;
 
 [ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = "cluster")]
 [NotInParallel]

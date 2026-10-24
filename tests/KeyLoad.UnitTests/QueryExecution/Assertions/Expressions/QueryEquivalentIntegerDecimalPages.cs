@@ -1,10 +1,10 @@
 using KeyLoad.Query;
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
-using KeyLoad.UnitTests.Features.Authorization;
-using static KeyLoad.UnitTests.Features.QueryExecution.QueryEquivalentIntegerDecimalProtocol;
+using KeyLoad.UnitTests.Authorization;
+using static KeyLoad.UnitTests.QueryExecution.QueryEquivalentIntegerDecimalProtocol;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal static class QueryEquivalentIntegerDecimalPages
 {

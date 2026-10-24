@@ -4,9 +4,9 @@ using KeyLoad.Storage.ZoneTree;
 using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.DependencyInjection;
 using Orleans.Serialization;
-using P = KeyLoad.UnitTests.Features.OrleansExecution.CommandObservedPolicyProtocol;
+using P = KeyLoad.UnitTests.OrleansExecution.CommandObservedPolicyProtocol;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 /// <summary>Uses the execution source connection, canonical outcomes and coordinator without owning storage.</summary>
 internal sealed class CommandObservedPolicyDatabase(Func<RequestCqrsHostedRuntimeFixture> source)

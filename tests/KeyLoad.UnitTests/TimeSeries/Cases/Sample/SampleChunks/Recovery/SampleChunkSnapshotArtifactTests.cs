@@ -1,7 +1,7 @@
 using System.Text.Json;
 using KeyLoad.RecoveryTests;
 
-namespace KeyLoad.UnitTests.Features.TimeSeries;
+namespace KeyLoad.UnitTests.TimeSeries;
 
 internal sealed class SampleChunkSnapshotArtifactTests
 {

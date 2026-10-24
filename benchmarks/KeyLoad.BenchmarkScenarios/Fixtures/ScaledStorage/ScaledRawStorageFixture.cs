@@ -1,7 +1,7 @@
 using System.Runtime.ExceptionServices;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
+namespace KeyLoad.BenchmarkScenarios.BenchmarkComparisons;
 
 internal sealed class ScaledRawStorageFixture : IDisposable
 {

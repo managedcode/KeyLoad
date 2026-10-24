@@ -1,6 +1,6 @@
 using System.Text.Json;
 
-namespace KeyLoad.UnitTests.Features.TestInfrastructure;
+namespace KeyLoad.UnitTests.TestInfrastructure;
 
 internal sealed class TUnitSelectionTests
 {

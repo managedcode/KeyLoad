@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.OrleansExecution;
+namespace KeyLoad.IntegrationTests.OrleansExecution;
 
 internal readonly record struct RequestCqrsCleanupCompletionSnapshot(
     RequestCqrsCompletionCallSnapshot Node1,

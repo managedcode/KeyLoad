@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
-using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.Core.ResourceExecution;
 
-namespace KeyLoad.Core.Features.Search;
+namespace KeyLoad.Core.Search;
 
 /// <summary>Validates the complete stored lineage shape and bound source reference without resolving a new authority.</summary>
 internal static class VectorProjectionLineageValidation

@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 
-namespace KeyLoad.UnitTests.Features.InternalSerialization;
+namespace KeyLoad.UnitTests.InternalSerialization;
 
 [global::Orleans.GenerateSerializer, global::Orleans.Alias(NullableMetadataFixtures.CollectionsAlias)]
 internal sealed record NullableMetadataCollections(

@@ -1,6 +1,6 @@
 using Microsoft.CodeAnalysis;
 
-namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
+namespace KeyLoad.Analyzers.Tests.CodeQuality;
 
 internal sealed class VocabularySourceIdentityTests
 {
@@ -60,7 +60,7 @@ internal sealed class VocabularySourceIdentityTests
         var word = RuntimePolicyAnalyzerFixture.Word("DataWord");
         var relative = "src/KeyLoad/" + (featurePath ? "TimeSeries/" : "Policies/") + word + ".cs";
         var metadata = $"[assembly: System.Reflection.AssemblyMetadata(\"KeyLoad.FunctionalCompileIdentity.Source\", \"{relative}|{new string('a', 64)}\")]";
-        const string owner = "namespace KeyLoad.Core.Features.TimeSeries { internal class Subject { } }";
+        const string owner = "namespace KeyLoad.Core.TimeSeries { internal class Subject { } }";
         var findings = await RuntimePolicyAnalyzerFixture.AnalyzeAsync(new UnauthorizedImplementationTermAnalyzer(),
             "KeyLoad.PolicyChecks", false, ("/repo/build/Identity.g.cs", metadata), ("/repo/" + relative, owner));
         await Assert.That(findings).IsEmpty();

@@ -1,7 +1,7 @@
 using System.Text.Json;
 using KeyLoad.Storage;
 
-namespace KeyLoad.Core.Features.Messaging;
+namespace KeyLoad.Core.Messaging;
 
 /// <summary>Decodes persisted source records directly from their gate-scoped bytes.</summary>
 internal static class SourceEventReader

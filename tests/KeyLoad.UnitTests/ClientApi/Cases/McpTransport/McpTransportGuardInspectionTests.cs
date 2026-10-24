@@ -1,7 +1,7 @@
 using KeyLoad.Server;
 using ModelContextProtocol.Protocol;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>AC-MCP-002/003/004: actual framing-checked UTF-8 is matched without inspecting business authority.</summary>
 internal sealed class McpTransportGuardInspectionTests

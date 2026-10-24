@@ -1,6 +1,6 @@
 using ManagedCode.Communication;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal static class QueueViewLeaseIsolationHistoryReplay
 {

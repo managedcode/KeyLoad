@@ -1,10 +1,10 @@
 using KeyLoad.Core;
-using KeyLoad.Core.Features.Search;
+using KeyLoad.Core.Search;
 using Microsoft.Extensions.Options;
 using ZoneTree;
 using ZoneTree.FullTextSearch;
 
-namespace KeyLoad.Server.Features.Search;
+namespace KeyLoad.Server.Search;
 
 internal sealed class TextOnlineGeneration(string root, OnlineTextCurrentPublication original,
     TextIncrementalManifest manifest, IOptions<TextExecutionOptions> options, TextResourceOwnership resources) : ITextSelectedIndexLeaseOwner, IDisposable

@@ -1,6 +1,6 @@
 using System.Text.Json.Nodes;
 
-namespace KeyLoad.Core.Features.Authorization;
+namespace KeyLoad.Core.Authorization;
 
 /// <summary>Enforces persisted resource, row, and sensitive-field access policy.</summary>
 public sealed class AuthorizationPolicy : IAuthorizationPolicy

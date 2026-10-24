@@ -1,4 +1,4 @@
-namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
+namespace KeyLoad.Analyzers.Tests.CodeQuality;
 
 /// <summary>AC-CQ-037: an empty scheduling signal retains its configured admission authority.</summary>
 internal sealed class ConfiguredCountingSignalTests

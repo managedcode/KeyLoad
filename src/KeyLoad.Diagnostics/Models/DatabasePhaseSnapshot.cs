@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 
-namespace KeyLoad.Diagnostics.Features.ResourceExecution;
+namespace KeyLoad.Diagnostics.ResourceExecution;
 
 /// <summary>A detached cumulative, non-atomic observation of completed scopes.</summary>
 /// <param name="Enabled">Whether the physical bank was enabled.</param>

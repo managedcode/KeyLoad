@@ -1,8 +1,8 @@
 using KeyLoad.Core;
-using KeyLoad.Query.Features.Search;
+using KeyLoad.Query.Search;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.Server.Features.Search;
+namespace KeyLoad.Server.Search;
 
 internal sealed class TextProjectionLease(RuntimeTextProjection owner, TextGeneration generation,
     TextGenerationSlot slot, ReadExecutionBudget budget, Func<string, ulong> tokenHash,

@@ -1,9 +1,9 @@
 using System.Text.Json;
 using KeyLoad.Client;
-using KeyLoad.Core.Features.Authorization;
+using KeyLoad.Core.Authorization;
 using KeyLoad.Query;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal sealed class QueryAdapterValidationTests
 {

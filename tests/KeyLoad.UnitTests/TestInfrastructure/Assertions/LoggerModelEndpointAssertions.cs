@@ -1,7 +1,7 @@
 using Aspire.Hosting.ApplicationModel;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.TestInfrastructure.Cases;
+namespace KeyLoad.UnitTests.TestInfrastructure.Cases;
 
 internal static class LoggerModelEndpointAssertions
 {

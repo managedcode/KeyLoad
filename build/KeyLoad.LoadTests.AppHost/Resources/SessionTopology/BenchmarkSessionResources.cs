@@ -3,7 +3,7 @@ using KeyLoad.Comparisons;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-namespace KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
+namespace KeyLoad.LoadTests.AppHost.BenchmarkComparisons;
 
 /// <summary>Composes selected database infrastructure and exposes execution endpoints to a separately owned workload client.</summary>
 internal static class BenchmarkSessionResources

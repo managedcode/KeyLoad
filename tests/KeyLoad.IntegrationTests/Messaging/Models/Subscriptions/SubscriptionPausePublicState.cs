@@ -1,5 +1,5 @@
 
-namespace KeyLoad.IntegrationTests.Features.Messaging;
+namespace KeyLoad.IntegrationTests.Messaging;
 
 internal sealed record SubscriptionPausePublicState(ReceiveSubscriptionRequest Claim, ReceiveSubscriptionResult Claimed,
     SetSubscriptionPausedRequest Pause, SubscriptionInfo Paused,

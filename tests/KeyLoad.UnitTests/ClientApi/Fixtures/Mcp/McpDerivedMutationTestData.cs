@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 internal static class McpDerivedMutationTestData
 {

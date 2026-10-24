@@ -3,7 +3,7 @@ using KeyLoad.Query;
 using KeyLoad.Server;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 internal sealed class AnnPublicMaintenanceReservationTests
 {

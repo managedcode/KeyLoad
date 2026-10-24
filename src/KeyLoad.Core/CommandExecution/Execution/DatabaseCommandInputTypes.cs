@@ -4,9 +4,9 @@ public static class DatabaseCommandInputTypes
 {
     internal static Type? OperationPayloadType(OperationKind kind) => kind switch
     {
-        OperationKind.Bm25CorpusPublicationPhase => typeof(global::KeyLoad.Core.Features.Search.Bm25CorpusPublicationPhaseCommand),
-        OperationKind.OnlineTextPublicationPhase => typeof(global::KeyLoad.Core.Features.Search.OnlineTextPublicationPhaseCommand),
-        OperationKind.FileMetadata => typeof(global::KeyLoad.Core.Features.BlobStorage.FileMetadataMutation),
+        OperationKind.Bm25CorpusPublicationPhase => typeof(global::KeyLoad.Core.Search.Bm25CorpusPublicationPhaseCommand),
+        OperationKind.OnlineTextPublicationPhase => typeof(global::KeyLoad.Core.Search.OnlineTextPublicationPhaseCommand),
+        OperationKind.FileMetadata => typeof(global::KeyLoad.Core.BlobStorage.FileMetadataMutation),
         OperationKind.Batch => typeof(CommandRequest),
         OperationKind.Receive => typeof(ReceiveRequest),
         OperationKind.Delivery => typeof(DeliveryCommand),

@@ -2,11 +2,11 @@ using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
 using KeyLoad.AppHost.Hosting;
 using KeyLoad.Server;
-using KeyLoad.UnitTests.Features.TestInfrastructure.Helpers;
+using KeyLoad.UnitTests.TestInfrastructure.Helpers;
 using Microsoft.Extensions.DependencyInjection;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.TestInfrastructure.Cases;
+namespace KeyLoad.UnitTests.TestInfrastructure.Cases;
 
 internal sealed class LoggerModelControlSelectionTests
 {

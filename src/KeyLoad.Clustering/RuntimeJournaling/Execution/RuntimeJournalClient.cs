@@ -1,5 +1,5 @@
 using KeyLoad.Core;
-using KeyLoad.Core.Features.RuntimeJournaling.Identity;
+using KeyLoad.Core.RuntimeJournaling.Identity;
 using ManagedCode.Communication.CQRS;
 using ManagedCode.Orleans.Graph.Extensions;
 using Microsoft.Extensions.Options;

@@ -1,7 +1,7 @@
 using KeyLoad.Storage.ZoneTree.IO;
-using KeyLoad.UnitTests.Features.OrleansExecution;
+using KeyLoad.UnitTests.OrleansExecution;
 
-namespace KeyLoad.UnitTests.Features.StorageRecovery;
+namespace KeyLoad.UnitTests.StorageRecovery;
 
 /// <summary>Current node-owner special-file rejection remains a real execution filesystem flow.</summary>
 internal sealed class PartitionRootAdmissionSpecialEntryTests

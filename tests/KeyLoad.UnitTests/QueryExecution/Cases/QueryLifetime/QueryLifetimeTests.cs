@@ -1,6 +1,6 @@
 using KeyLoad.Query;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal sealed class QueryLifetimeTests
 {
@@ -15,7 +15,7 @@ internal sealed class QueryLifetimeTests
             await QueryLifetimeAssertions.UnchangedAsync(flow, async () =>
             {
                 await Assert.That(flow.Query().Candidates.Length).IsEqualTo(QueryLifetimeProtocol.NoRows);
-                var expected = new KeyLoad.Query.Features.QueryExecution.DistributedTextStatistics(
+                var expected = new KeyLoad.Query.QueryExecution.DistributedTextStatistics(
                     [QueryLifetimeProtocol.Text], QueryLifetimeProtocol.NoRows, QueryLifetimeProtocol.NoRows,
                     [QueryLifetimeProtocol.NoRows]);
                 await Assert.That(JsonDefaults.Serialize(flow.Statistics().Witness.Statistics).AsSpan()

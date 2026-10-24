@@ -1,8 +1,8 @@
 using System.Runtime.InteropServices;
 using System.Text;
-using KeyLoad.Core.Features.StoragePartitions.Contracts;
+using KeyLoad.Core.StoragePartitions.Contracts;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal static class PartitionRecordOwnedCutContinuation
 {

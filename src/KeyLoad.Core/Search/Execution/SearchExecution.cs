@@ -1,5 +1,5 @@
-using KeyLoad.Core.Features.Search;
-using KeyLoad.Query.Features.QueryExecution;
+using KeyLoad.Core.Search;
+using KeyLoad.Query.QueryExecution;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core;

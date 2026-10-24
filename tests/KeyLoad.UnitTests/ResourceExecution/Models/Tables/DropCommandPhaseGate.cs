@@ -1,6 +1,6 @@
 using KeyLoad.Clustering;
 
-namespace KeyLoad.UnitTests.Features.ResourceExecution;
+namespace KeyLoad.UnitTests.ResourceExecution;
 
 /// <summary>Retains the actual selected command identity and cancellation through execution producer settlement.</summary>
 internal sealed class DropCommandPhaseGate(Guid commandId, GrainRequestPhase phase, Exception? failure)

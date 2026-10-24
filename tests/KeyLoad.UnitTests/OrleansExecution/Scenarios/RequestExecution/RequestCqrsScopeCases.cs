@@ -3,7 +3,7 @@ using KeyLoad.Clustering;
 using ManagedCode.Orleans.Identity.Core.Constants;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal static class RequestCqrsScopeCases
 {

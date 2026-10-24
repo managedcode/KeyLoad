@@ -1,9 +1,9 @@
-using KeyLoad.RecoveryTests.Features.StorageRecovery;
+using KeyLoad.RecoveryTests.StorageRecovery;
 using KeyLoad.Server;
 using Orleans.TestingHost;
-using P = KeyLoad.UnitTests.Features.StorageRecovery.PartitionStorageProducerDisposeProtocol;
+using P = KeyLoad.UnitTests.StorageRecovery.PartitionStorageProducerDisposeProtocol;
 
-namespace KeyLoad.UnitTests.Features.StorageRecovery;
+namespace KeyLoad.UnitTests.StorageRecovery;
 
 internal static class PartitionStorageProducerDisposeFlow
 {

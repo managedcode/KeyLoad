@@ -1,9 +1,9 @@
 using System.Security.Cryptography;
 using System.Text;
 using KeyLoad.Client;
-using KeyLoad.IntegrationTests.Features.DocumentStorage;
+using KeyLoad.IntegrationTests.DocumentStorage;
 
-namespace KeyLoad.IntegrationTests.Features.ClientApi;
+namespace KeyLoad.IntegrationTests.ClientApi;
 
 /// <summary>A genuinely configured database principal and credential used by independent official callers.</summary>
 /// <param name="Principal">The actual persisted identity and grants.</param>

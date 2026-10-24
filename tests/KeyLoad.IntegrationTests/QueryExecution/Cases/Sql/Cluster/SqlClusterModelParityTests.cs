@@ -1,9 +1,9 @@
 using KeyLoad.Client;
-using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.RelationalStorage;
+using KeyLoad.IntegrationTests.ClientApi;
+using KeyLoad.IntegrationTests.RelationalStorage;
 using KeyLoad.Query;
 
-namespace KeyLoad.IntegrationTests.Features.QueryExecution;
+namespace KeyLoad.IntegrationTests.QueryExecution;
 
 /// <summary>AC-AISQL-004/006: SQL wraps the actual persisted Orleans model operations and their canonical results.</summary>
 [ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = McpCallerProtocol.FixtureKey)]

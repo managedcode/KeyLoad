@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 
-namespace KeyLoad.Core.Features.Search;
+namespace KeyLoad.Core.Search;
 
 /// <summary>Validates canonical projection effects and compares current effective field classifications.</summary>
 internal static class VectorProjectionPolicy

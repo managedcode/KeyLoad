@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace KeyLoad.Query.Features.Search;
+namespace KeyLoad.Query.Search;
 
 internal static class SearchRequestValidation
 {

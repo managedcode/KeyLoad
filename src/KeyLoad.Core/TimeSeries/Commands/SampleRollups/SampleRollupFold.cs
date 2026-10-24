@@ -1,6 +1,6 @@
 using KeyLoad.Storage;
 
-namespace KeyLoad.Core.Features.TimeSeries;
+namespace KeyLoad.Core.TimeSeries;
 
 internal static class SampleRollupFold
 {
@@ -35,7 +35,7 @@ internal static class SampleRollupFold
         {
             throw Errors.Fail(ErrorCode.Corruption, SampleRollupProtocol.Corrupt);
         }
-        var canonical = KeySpace.Partition(KeyLoad.Core.Features.StoragePartitions.Contracts.PartitionRecordFamilies.Sample, partition,
+        var canonical = KeySpace.Partition(KeyLoad.Core.StoragePartitions.Contracts.PartitionRecordFamilies.Sample, partition,
             request.SeriesSet, request.SeriesId, record.Sample.Timestamp, record.Sequence);
         if (!key.SequenceEqual(canonical))
         {

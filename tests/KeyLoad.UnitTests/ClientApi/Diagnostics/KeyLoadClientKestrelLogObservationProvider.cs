@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>Observes only closed execution host log identities under the original logging filters.</summary>
 internal sealed class KeyLoadClientKestrelLogObservationProvider(KeyLoadClientKestrelObservation observation) : ILoggerProvider

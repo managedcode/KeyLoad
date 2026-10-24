@@ -1,7 +1,7 @@
 using KeyLoad.Client;
-using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.ClientApi;
 
-namespace KeyLoad.IntegrationTests.Features.QueryExecution;
+namespace KeyLoad.IntegrationTests.QueryExecution;
 
 /// <summary>Independent persisted queue and document used by real SQL delivery and cancellation callers.</summary>
 internal sealed record SqlClusterDeliveryScenario(PartitionRef Partition, long CommittedPosition)

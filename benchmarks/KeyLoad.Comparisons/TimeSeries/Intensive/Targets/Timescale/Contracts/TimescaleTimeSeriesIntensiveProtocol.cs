@@ -1,6 +1,6 @@
 using NpgsqlTypes;
 
-namespace KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries.Intensive;
+namespace KeyLoad.Comparisons.BenchmarkComparisons.TimeSeries.Intensive;
 
 internal static class TimescaleTimeSeriesIntensiveProtocol
 {

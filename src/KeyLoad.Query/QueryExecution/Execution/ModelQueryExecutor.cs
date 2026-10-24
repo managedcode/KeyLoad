@@ -4,7 +4,7 @@ using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Storage;
 
-namespace KeyLoad.Query.Features.QueryExecution;
+namespace KeyLoad.Query.QueryExecution;
 
 internal sealed class ModelQueryExecutor(DatabaseEngine database, QueryEngine queries)
 {

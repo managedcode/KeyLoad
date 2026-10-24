@@ -1,4 +1,4 @@
-namespace KeyLoad.Server.Features.Search;
+namespace KeyLoad.Server.Search;
 
 internal sealed class TextResourceReservation(TextResourceOwnership owner, string? generation)
 {

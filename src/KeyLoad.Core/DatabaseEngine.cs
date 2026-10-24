@@ -1,6 +1,6 @@
-using KeyLoad.Core.Features.Authorization;
-using KeyLoad.Core.Features.ResourceExecution;
-using KeyLoad.Core.Features.RuntimeJournaling.Contracts;
+using KeyLoad.Core.Authorization;
+using KeyLoad.Core.ResourceExecution;
+using KeyLoad.Core.RuntimeJournaling.Contracts;
 using KeyLoad.Storage;
 using Microsoft.Extensions.Options;
 

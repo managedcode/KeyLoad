@@ -1,9 +1,9 @@
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
-using KeyLoad.UnitTests.Features.StorageRecovery.Assertions;
+using KeyLoad.UnitTests.StorageRecovery.Assertions;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.EventStreams;
+namespace KeyLoad.UnitTests.EventStreams;
 
 internal static class RetainedAppendIdentityAssertions
 {
@@ -21,7 +21,7 @@ internal static class RetainedAppendIdentityAssertions
     }
     internal static async Task ConservedAsync(ZoneTreeStore store, string[] image, long position, StoreIdentity identity)
     {
-        await Assert.That(KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(store)).IsEquivalentTo(image, CollectionOrdering.Matching);
+        await Assert.That(KeyLoad.UnitTests.Messaging.QueueWholeFlowStorage.Bytes(store)).IsEquivalentTo(image, CollectionOrdering.Matching);
         await ReadCutStoreStateAssertions.AssertIdentityAndPositionAsync(store, identity, position);
     }
 }

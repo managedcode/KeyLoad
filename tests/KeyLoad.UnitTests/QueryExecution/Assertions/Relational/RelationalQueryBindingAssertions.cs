@@ -1,9 +1,9 @@
 using KeyLoad.Query;
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
-using static KeyLoad.UnitTests.Features.QueryExecution.RelationalQueryBindingFixture;
+using static KeyLoad.UnitTests.QueryExecution.RelationalQueryBindingFixture;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal static class RelationalQueryBindingAssertions
 {

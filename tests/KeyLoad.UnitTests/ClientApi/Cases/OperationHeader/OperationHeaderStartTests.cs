@@ -1,7 +1,7 @@
 using System.Net;
 using KeyLoad.Server;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>AC-MCP-003/005/007 and AC-ROUTE-001: execution response start safely publishes request identities.</summary>
 internal sealed class OperationHeaderStartTests

@@ -2,7 +2,7 @@ using KeyLoad.Clustering;
 using ManagedCode.Orleans.Graph.Extensions;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 [GrainType(RuntimeJournalGraphCallerProtocol.ProbeAlias)]
 internal sealed class RuntimeJournalGraphCallerProbeGrain(

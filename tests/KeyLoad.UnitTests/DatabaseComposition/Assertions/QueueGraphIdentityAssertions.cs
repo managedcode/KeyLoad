@@ -1,9 +1,9 @@
 using System.Text.Json;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
-using KeyLoad.UnitTests.Features.Messaging;
+using KeyLoad.UnitTests.Messaging;
 
-namespace KeyLoad.UnitTests.Features.DatabaseComposition;
+namespace KeyLoad.UnitTests.DatabaseComposition;
 
 internal static class QueueGraphIdentityAssertions
 {
@@ -25,7 +25,7 @@ internal static class QueueGraphIdentityAssertions
         await Assert.That(store.Position).IsEqualTo(position);
         await Assert.That(JsonDefaults.Serialize(store.Identity).AsSpan().SequenceEqual(identity)).IsTrue();
         await Assert.That(store.Read(view => view.GetRecord<DocumentRecord>(
-            global::KeyLoad.Core.Features.DocumentStorage.DocumentStorageKeys.RecordKey(
+            global::KeyLoad.Core.DocumentStorage.DocumentStorageKeys.RecordKey(
                 new(state.Fixture.Partition, QueueGraphIdentityState.Collection, QueueGraphIdentityState.Marker))))).IsNull();
         await Assert.That(store.Read(view => view.GetRecord<EdgeRecord>(KeySpace.Partition(
             "edge", state.Fixture.Partition, QueueGraphIdentityState.Graph,
@@ -41,7 +41,7 @@ internal static class QueueGraphIdentityAssertions
         foreach (var expected in new[] { state.First, state.Second })
         {
             var actual = store.Read(view => view.GetRecord<DocumentRecord>(
-                global::KeyLoad.Core.Features.DocumentStorage.DocumentStorageKeys.RecordKey(expected.Reference)));
+                global::KeyLoad.Core.DocumentStorage.DocumentStorageKeys.RecordKey(expected.Reference)));
             await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
             var publicExpected = new DocumentResult(expected.Reference, 1, expected.Json, false, []);
             await Assert.That(JsonDefaults.Serialize(engine.GetDocument(QueueGraphIdentityState.Root, expected.Reference))
@@ -51,7 +51,7 @@ internal static class QueueGraphIdentityAssertions
         var expectedMarker = healthy ? new DocumentRecord(marker, 1, QueueGraphIdentityState.MarkerJson,
             new(), new DateTimeOffset(state.Healthy.Timestamp)) : null;
         await Assert.That(JsonDefaults.Serialize(store.Read(view => view.GetRecord<DocumentRecord>(
-            global::KeyLoad.Core.Features.DocumentStorage.DocumentStorageKeys.RecordKey(marker))))
+            global::KeyLoad.Core.DocumentStorage.DocumentStorageKeys.RecordKey(marker))))
             .AsSpan().SequenceEqual(JsonDefaults.Serialize(expectedMarker))).IsTrue();
         var edge = new EdgeRecord(QueueGraphIdentityState.Prefix + QueueGraphIdentityState.Message, state.BoundFrom,
             state.BoundTo, QueueGraphIdentityState.Label, QueueGraphIdentityState.AttributesJson, 1);

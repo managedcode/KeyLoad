@@ -1,7 +1,7 @@
 using KeyLoad.Clustering;
-using KeyLoad.Clustering.Features.Search;
+using KeyLoad.Clustering.Search;
 using KeyLoad.Core;
-using KeyLoad.Core.Features.Search;
+using KeyLoad.Core.Search;
 using ManagedCode.Communication.Commands;
 using Microsoft.Extensions.Options;
 

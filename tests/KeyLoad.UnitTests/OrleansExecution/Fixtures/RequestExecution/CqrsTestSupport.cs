@@ -1,7 +1,7 @@
-using KeyLoad.UnitTests.Features.TestInfrastructure;
+using KeyLoad.UnitTests.TestInfrastructure;
 using ManagedCode.Communication.CQRS;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal static class CqrsTestSupport
 {

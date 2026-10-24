@@ -1,6 +1,6 @@
 using Microsoft.CodeAnalysis;
 
-namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
+namespace KeyLoad.Analyzers.Tests.CodeQuality;
 
 /// <summary>AC-CQ-008: checks nested executable constructs and control-flow forms.</summary>
 internal sealed class ControlFlowNestingExtendedConstructTests

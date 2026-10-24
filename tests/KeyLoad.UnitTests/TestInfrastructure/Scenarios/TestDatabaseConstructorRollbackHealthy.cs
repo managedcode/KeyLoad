@@ -1,7 +1,7 @@
 using KeyLoad.Server;
-using KeyLoad.UnitTests.Features.ResourceExecution;
+using KeyLoad.UnitTests.ResourceExecution;
 
-namespace KeyLoad.UnitTests.Features.TestInfrastructure;
+namespace KeyLoad.UnitTests.TestInfrastructure;
 
 internal static class TestDatabaseConstructorRollbackHealthy
 {

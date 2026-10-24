@@ -1,6 +1,6 @@
 using System.Globalization;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 internal static class TextBoundedFilePreparation
 {

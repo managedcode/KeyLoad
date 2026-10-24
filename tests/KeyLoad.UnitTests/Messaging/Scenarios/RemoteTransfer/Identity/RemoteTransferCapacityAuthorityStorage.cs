@@ -1,11 +1,11 @@
-using KeyLoad.Core.Features.Messaging;
+using KeyLoad.Core.Messaging;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
-using KeyLoad.UnitTests.Features.StorageRecovery.Assertions;
+using KeyLoad.UnitTests.StorageRecovery.Assertions;
 using TUnit.Assertions.Enums;
-using static KeyLoad.UnitTests.Features.Messaging.RemoteTransferCapacityAuthorityProtocol;
+using static KeyLoad.UnitTests.Messaging.RemoteTransferCapacityAuthorityProtocol;
 
-namespace KeyLoad.UnitTests.Features.Messaging;
+namespace KeyLoad.UnitTests.Messaging;
 
 internal static class RemoteTransferCapacityAuthorityStorage
 {

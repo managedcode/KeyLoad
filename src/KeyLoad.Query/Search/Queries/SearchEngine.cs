@@ -1,5 +1,5 @@
 using KeyLoad.Core;
-using KeyLoad.Query.Features.Search;
+using KeyLoad.Query.Search;
 
 namespace KeyLoad.Query;
 

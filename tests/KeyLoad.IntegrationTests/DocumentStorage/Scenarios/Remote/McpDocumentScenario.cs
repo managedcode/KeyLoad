@@ -1,9 +1,9 @@
 using System.Collections.Immutable;
 using KeyLoad.Client;
-using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.ResourceExecution;
+using KeyLoad.IntegrationTests.ClientApi;
+using KeyLoad.IntegrationTests.ResourceExecution;
 
-namespace KeyLoad.IntegrationTests.Features.DocumentStorage;
+namespace KeyLoad.IntegrationTests.DocumentStorage;
 
 /// <summary>Creates independently scoped real Orleans collections through the actual public HTTP SDK.</summary>
 /// <param name="Partition">The newly configured actual partition identity.</param>

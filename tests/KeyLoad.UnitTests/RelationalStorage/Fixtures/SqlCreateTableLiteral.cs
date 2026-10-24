@@ -1,6 +1,6 @@
 using KeyLoad.Server;
 using ManagedCode.Communication;
-namespace KeyLoad.UnitTests.Features.RelationalStorage;
+namespace KeyLoad.UnitTests.RelationalStorage;
 
 internal static class SqlCreateTableLiteral
 {

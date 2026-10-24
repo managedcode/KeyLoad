@@ -1,4 +1,4 @@
-namespace KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonHost.BenchmarkComparisons;
 
 /// <summary>Uses TUnit sharing and lifecycle with an explicit workload owner constructor.</summary>
 [AttributeUsage(AttributeTargets.Class)]

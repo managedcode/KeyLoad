@@ -2,7 +2,7 @@ using System.Collections.Concurrent;
 using System.Diagnostics.Tracing;
 using Microsoft.Extensions.Logging.EventSource;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>Captures formatted events from the actual Microsoft logging EventSource provider.</summary>
 internal sealed class McpTransportEventSourceCapture : EventListener

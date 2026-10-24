@@ -1,9 +1,9 @@
 using System.Collections.Immutable;
 using KeyLoad.Client;
-using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.ClientApi;
 using KeyLoad.Query;
 
-namespace KeyLoad.IntegrationTests.Features.QueryExecution;
+namespace KeyLoad.IntegrationTests.QueryExecution;
 
 /// <summary>Seeds one real partition with fixed-history event and ready-queue model rows.</summary>
 internal sealed record SqlModelViewClusterScenario(PartitionRef Partition, CommandRequest Original, CommitReceipt Receipt)

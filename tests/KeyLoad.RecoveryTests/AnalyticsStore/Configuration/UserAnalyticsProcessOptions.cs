@@ -3,7 +3,7 @@ using System.Security.Cryptography;
 using KeyLoad.Clustering;
 using KeyLoad.Server;
 
-namespace KeyLoad.RecoveryTests.Features.AnalyticsStore;
+namespace KeyLoad.RecoveryTests.AnalyticsStore;
 
 /// <summary>Stable actual database identity and independent execution loopback silo settings for the process fixture.</summary>
 internal static class UserAnalyticsProcessOptions

@@ -3,7 +3,7 @@ using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
 using ManagedCode.Communication.Commands;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal static class SparseCompositePrefixOperations
 {

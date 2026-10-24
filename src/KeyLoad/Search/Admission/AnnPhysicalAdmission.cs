@@ -1,6 +1,6 @@
-using KeyLoad.Query.Features.Search;
+using KeyLoad.Query.Search;
 
-namespace KeyLoad.Server.Features.Search;
+namespace KeyLoad.Server.Search;
 
 internal static class AnnPhysicalAdmission
 {

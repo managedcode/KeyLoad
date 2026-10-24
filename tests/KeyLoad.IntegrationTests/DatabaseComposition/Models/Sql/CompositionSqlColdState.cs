@@ -1,6 +1,6 @@
-using KeyLoad.IntegrationTests.Features.RelationalStorage;
+using KeyLoad.IntegrationTests.RelationalStorage;
 
-namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
+namespace KeyLoad.IntegrationTests.DatabaseComposition;
 
 internal sealed record CompositionSqlColdState(RelationalSqlClusterScenario Scenario, QueueGraphLink Link,
     CommandRequest Forward, CommitReceipt ForwardReceipt, CommandRequest Reverse, CommitReceipt ReverseReceipt,

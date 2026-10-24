@@ -1,9 +1,9 @@
-using KeyLoad.Server.Features.Authorization.Contracts;
+using KeyLoad.Server.Authorization.Contracts;
 using Microsoft.Extensions.Options;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
 
-namespace KeyLoad.UnitTests.Features.Authorization;
+namespace KeyLoad.UnitTests.Authorization;
 
 internal sealed class AuthorizationMetricExporter(IOptions<AuthorizationTelemetryCaptureOptions> options)
     : BaseExporter<Metric>

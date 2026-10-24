@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>Passes original requests, tokens and unconsumed responses through the default execution HTTP chain.</summary>
 internal sealed class KeyLoadClientKestrelObservedHandler(KeyLoadClientKestrelObservation observation) : DelegatingHandler

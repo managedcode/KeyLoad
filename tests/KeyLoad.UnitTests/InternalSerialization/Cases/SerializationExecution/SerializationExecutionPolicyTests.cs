@@ -1,8 +1,8 @@
 using System.Text;
-using KeyLoad.Core.Features.InternalSerialization;
-using KeyLoad.Features.ResourceExecution;
+using KeyLoad.Core.InternalSerialization;
+using KeyLoad.ResourceExecution;
 
-namespace KeyLoad.UnitTests.Features.InternalSerialization;
+namespace KeyLoad.UnitTests.InternalSerialization;
 
 /// <summary>AC-IS-003/007: execution serializers preserve canonical bytes across buffer boundaries.</summary>
 internal sealed class SerializationExecutionPolicyTests

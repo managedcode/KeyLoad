@@ -1,10 +1,10 @@
 using KeyLoad.Core;
-using KeyLoad.Core.Features.ResourceExecution.Execution;
-using KeyLoad.Query.Features.Search;
+using KeyLoad.Core.ResourceExecution.Execution;
+using KeyLoad.Query.Search;
 using KeyLoad.Storage;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.Query.Features.QueryExecution;
+namespace KeyLoad.Query.QueryExecution;
 
 internal static class DistributedSearchCandidateExecution
 {

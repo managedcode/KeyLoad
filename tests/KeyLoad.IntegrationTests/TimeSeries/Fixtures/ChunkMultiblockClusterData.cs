@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
 using System.Globalization;
 
-namespace KeyLoad.IntegrationTests.Features.TimeSeries;
+namespace KeyLoad.IntegrationTests.TimeSeries;
 
 internal static class ChunkMultiblockClusterData
 {

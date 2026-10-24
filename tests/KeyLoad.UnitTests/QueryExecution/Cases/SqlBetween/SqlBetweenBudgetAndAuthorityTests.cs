@@ -1,9 +1,9 @@
 using System.Text;
 using KeyLoad.Query;
 using KeyLoad.Server;
-using KeyLoad.UnitTests.Features.Authorization;
+using KeyLoad.UnitTests.Authorization;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal sealed class SqlBetweenBudgetAndAuthorityTests
 {
@@ -25,19 +25,19 @@ internal sealed class SqlBetweenBudgetAndAuthorityTests
         var byteCount = Encoding.UTF8.GetByteCount(RangeSql);
         var exact = new DatabaseLimits { MaxQueryBytes = byteCount };
         var budget = new global::KeyLoad.Core.ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(exact));
-        using var reader = new global::KeyLoad.Features.QueryExecution.ScriptDomBoundedReader(RangeSql, budget.Check);
+        using var reader = new global::KeyLoad.QueryExecution.ScriptDomBoundedReader(RangeSql, budget.Check);
         var parser = new global::Microsoft.SqlServer.TransactSql.ScriptDom.TSql180Parser(true,
             global::Microsoft.SqlServer.TransactSql.ScriptDom.SqlEngineType.Standalone);
         var tokens = parser.GetTokenStream(reader, out var errors);
         await Assert.That(errors.Count).IsEqualTo(0);
-        global::KeyLoad.Features.QueryExecution.ScriptDomTokenBounds.Require(tokens,
+        global::KeyLoad.QueryExecution.ScriptDomTokenBounds.Require(tokens,
             exact with
             {
                 MaxQueryTokens = 10
             }, budget.Check);
         await Assert.That(new SqlParser(RangeSql, UnitExecutionOptions.DatabaseLimits(exact), UnitExecutionOptions.QueryExecution()).Parse().Filter).IsTypeOf<Logical>();
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => new SqlParser(RangeSql, UnitExecutionOptions.DatabaseLimits(exact with { MaxQueryBytes = byteCount - 1 }), UnitExecutionOptions.QueryExecution()).Parse()).Code).IsEqualTo(ErrorCode.BudgetExceeded);
-        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => global::KeyLoad.Features.QueryExecution.ScriptDomTokenBounds.Require(tokens,
+        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => global::KeyLoad.QueryExecution.ScriptDomTokenBounds.Require(tokens,
             exact with
             {
                 MaxQueryTokens = 9

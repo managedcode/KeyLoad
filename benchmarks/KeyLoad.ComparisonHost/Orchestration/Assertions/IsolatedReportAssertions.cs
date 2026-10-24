@@ -1,7 +1,7 @@
 using Aspire.Hosting.ApplicationModel;
 using KeyLoad.Comparisons;
 
-namespace KeyLoad.ComparisonHost.Features.BenchmarkOrchestration;
+namespace KeyLoad.ComparisonHost.BenchmarkOrchestration;
 
 /// <summary>Checks the selected real database graph before execution client execution.</summary>
 internal static class IsolatedReportAssertions

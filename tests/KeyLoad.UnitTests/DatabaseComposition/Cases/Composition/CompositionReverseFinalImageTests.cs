@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.DatabaseComposition;
+namespace KeyLoad.UnitTests.DatabaseComposition;
 
 internal sealed class CompositionReverseFinalImageTests
 {

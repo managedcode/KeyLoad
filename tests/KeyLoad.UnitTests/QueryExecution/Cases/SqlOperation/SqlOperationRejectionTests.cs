@@ -1,8 +1,8 @@
 using System.Text.Json;
 using KeyLoad.Server;
-using KeyLoad.UnitTests.Features.ClientApi;
+using KeyLoad.UnitTests.ClientApi;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 /// <summary>AC-AISQL-005/006: malformed input never reaches a database operation.</summary>
 internal sealed class SqlOperationRejectionTests

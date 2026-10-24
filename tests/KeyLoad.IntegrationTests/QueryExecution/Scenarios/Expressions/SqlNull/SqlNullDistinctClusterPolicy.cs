@@ -1,9 +1,9 @@
-namespace KeyLoad.IntegrationTests.Features.QueryExecution;
+namespace KeyLoad.IntegrationTests.QueryExecution;
 
 internal static class SqlNullDistinctClusterPolicy
 {
     internal static async Task RunAsync(ClusterFixture fixture, SqlNullDistinctClusterState state,
-        global::KeyLoad.IntegrationTests.Features.OrleansExecution.RequestCqrsClusterCallers root, CancellationToken token)
+        global::KeyLoad.IntegrationTests.OrleansExecution.RequestCqrsClusterCallers root, CancellationToken token)
     {
         var original = state.Seed.Reader.Principal;
         var denied = original with
@@ -11,7 +11,7 @@ internal static class SqlNullDistinctClusterPolicy
             PolicyEpoch = original.PolicyEpoch + SqlNullOrderingClusterProtocol.DenialAdvance,
             Grants = [new(PostgresClusterState.Partition.DatabaseId, SqlNullOrderingClusterProtocol.Collection, Capability.DocumentsRead)]
         };
-        await SqlClusterProtocol.EqualAsync(denied, await global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerAssertions.SdkSuccessAsync(
+        await SqlClusterProtocol.EqualAsync(denied, await global::KeyLoad.IntegrationTests.ClientApi.McpCallerAssertions.SdkSuccessAsync(
             await root.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(), denied, token)));
         var before = await SqlNullDistinctClusterImage.ReadAsync(root, state, token);
         await SqlNullDistinctClusterRefusals.RejectAsync(fixture, state,
@@ -52,7 +52,7 @@ internal static class SqlNullDistinctClusterPolicy
         {
             PolicyEpoch = original.PolicyEpoch + SqlNullOrderingClusterProtocol.RepairAdvance
         };
-        await SqlClusterProtocol.EqualAsync(repaired, await global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerAssertions.SdkSuccessAsync(
+        await SqlClusterProtocol.EqualAsync(repaired, await global::KeyLoad.IntegrationTests.ClientApi.McpCallerAssertions.SdkSuccessAsync(
             await root.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(), repaired, token)));
         await SqlNullDistinctClusterPages.HealthyAsync(fixture, state, token);
     }

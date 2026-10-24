@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.StorageReplication;
+namespace KeyLoad.IntegrationTests.StorageReplication;
 
 /// <summary>Closed failure points recorded for an unchanged execution restart attempt.</summary>
 internal enum ProcessRestartStage

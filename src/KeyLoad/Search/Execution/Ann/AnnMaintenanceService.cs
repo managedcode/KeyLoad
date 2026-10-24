@@ -1,10 +1,10 @@
 using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Core.Features.ResourceExecution;
-using KeyLoad.Query.Features.Search;
+using KeyLoad.Core.ResourceExecution;
+using KeyLoad.Query.Search;
 using KeyLoad.Storage;
 
-namespace KeyLoad.Server.Features.Search;
+namespace KeyLoad.Server.Search;
 
 internal sealed class AnnMaintenanceService(string directory, DatabaseEngine database,
     ServerRuntimeOptions configured, TimeProvider clock) : IAnnMaintenance, IAnnProjection, IAsyncDisposable

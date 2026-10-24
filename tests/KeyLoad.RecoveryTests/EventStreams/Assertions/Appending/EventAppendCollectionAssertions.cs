@@ -1,10 +1,10 @@
 using System.Text.Json;
 using KeyLoad.Core;
-using KeyLoad.Core.Features.InternalSerialization;
-using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.Core.InternalSerialization;
+using KeyLoad.Core.ResourceExecution;
 using KeyLoad.Storage;
 
-namespace KeyLoad.RecoveryTests.Features.EventStreams;
+namespace KeyLoad.RecoveryTests.EventStreams;
 
 internal static class EventAppendCollectionAssertions
 {

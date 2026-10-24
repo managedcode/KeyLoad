@@ -1,4 +1,4 @@
-namespace KeyLoad.Core.Features.RuntimeJournaling.Contracts;
+namespace KeyLoad.Core.RuntimeJournaling.Contracts;
 
 internal static class RuntimeJournalProtocol
 {

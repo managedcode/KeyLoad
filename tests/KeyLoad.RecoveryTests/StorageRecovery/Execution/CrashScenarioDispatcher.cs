@@ -1,5 +1,5 @@
-using KeyLoad.RecoveryTests.Features.DocumentStorage;
-using KeyLoad.RecoveryTests.Features.Search;
+using KeyLoad.RecoveryTests.DocumentStorage;
+using KeyLoad.RecoveryTests.Search;
 using KeyLoad.Storage.ZoneTree;
 
 namespace KeyLoad.RecoveryTests;
@@ -9,24 +9,24 @@ internal static class CrashScenarioDispatcher
     internal static Task RunAsync(string directory, ZoneTreeStore store,
         CanonicalCrashBoundary boundary, string mode) => mode switch
         {
-            global::KeyLoad.RecoveryTests.Features.Messaging.RemoteTransferRepairCrashProtocol.AcceptMode
-                => global::KeyLoad.RecoveryTests.Features.Messaging.RemoteTransferRepairCrashScenario.RunAsync(directory, store, boundary, QueueTransferRepairStage.Accept),
-            global::KeyLoad.RecoveryTests.Features.Messaging.RemoteTransferRepairCrashProtocol.CompleteMode
-                => global::KeyLoad.RecoveryTests.Features.Messaging.RemoteTransferRepairCrashScenario.RunAsync(directory, store, boundary, QueueTransferRepairStage.Complete),
-            global::KeyLoad.RecoveryTests.Features.Messaging.RemoteTransferAttemptCrashProtocol.Mode
-                => global::KeyLoad.RecoveryTests.Features.Messaging.RemoteTransferAttemptCrashScenario.RunAsync(directory, store, boundary),
-            global::KeyLoad.RecoveryTests.Features.Messaging.TargetInboxCrashProtocol.Mode
-                => global::KeyLoad.RecoveryTests.Features.Messaging.TargetInboxCrashScenario.RunAsync(directory, store, boundary),
-            global::KeyLoad.RecoveryTests.Features.Messaging.LocalInboxProcessingCrashContract.Mode
-                => global::KeyLoad.RecoveryTests.Features.Messaging.LocalInboxProcessingCrashScenario.RunAsync(directory, store, boundary),
+            global::KeyLoad.RecoveryTests.Messaging.RemoteTransferRepairCrashProtocol.AcceptMode
+                => global::KeyLoad.RecoveryTests.Messaging.RemoteTransferRepairCrashScenario.RunAsync(directory, store, boundary, QueueTransferRepairStage.Accept),
+            global::KeyLoad.RecoveryTests.Messaging.RemoteTransferRepairCrashProtocol.CompleteMode
+                => global::KeyLoad.RecoveryTests.Messaging.RemoteTransferRepairCrashScenario.RunAsync(directory, store, boundary, QueueTransferRepairStage.Complete),
+            global::KeyLoad.RecoveryTests.Messaging.RemoteTransferAttemptCrashProtocol.Mode
+                => global::KeyLoad.RecoveryTests.Messaging.RemoteTransferAttemptCrashScenario.RunAsync(directory, store, boundary),
+            global::KeyLoad.RecoveryTests.Messaging.TargetInboxCrashProtocol.Mode
+                => global::KeyLoad.RecoveryTests.Messaging.TargetInboxCrashScenario.RunAsync(directory, store, boundary),
+            global::KeyLoad.RecoveryTests.Messaging.LocalInboxProcessingCrashContract.Mode
+                => global::KeyLoad.RecoveryTests.Messaging.LocalInboxProcessingCrashScenario.RunAsync(directory, store, boundary),
             CrashFixtureValues.ProjectionMode => ProjectionCrashScenario.RunAsync(directory, store, boundary),
             CrashFixtureValues.SubscriptionMode => SubscriptionCrashScenario.RunAsync(directory, store, boundary),
             SubscriptionFilterCrashScenario.Mode => SubscriptionFilterCrashScenario.RunAsync(directory, store, boundary),
             DatabaseCompositionCrashScenario.Mode => DatabaseCompositionCrashScenario.RunAsync(directory, store, boundary),
             AggregateReplayCrashScenario.Mode => AggregateReplayCrashScenario.RunAsync(directory, store, boundary),
             EventAppendCrashContract.Mode => EventAppendCrashScenario.RunAsync(directory, store, boundary),
-            global::KeyLoad.RecoveryTests.Features.EventStreams.SharedDomainCrashProtocol.Mode
-                => global::KeyLoad.RecoveryTests.Features.EventStreams.SharedDomainCrashScenario.RunAsync(directory, store, boundary),
+            global::KeyLoad.RecoveryTests.EventStreams.SharedDomainCrashProtocol.Mode
+                => global::KeyLoad.RecoveryTests.EventStreams.SharedDomainCrashScenario.RunAsync(directory, store, boundary),
             TopicPurgeCrashContract.Mode => TopicPurgeCrashScenario.RunAsync(directory, store, boundary, false),
             TopicPurgeCrashContract.Mode + TopicPurgeCrashContract.PinnedSuffix => TopicPurgeCrashScenario.RunAsync(directory, store, boundary, true),
             SampleRollupCrashContract.PrepareMode or SampleRollupCrashContract.RefreshFaultMode

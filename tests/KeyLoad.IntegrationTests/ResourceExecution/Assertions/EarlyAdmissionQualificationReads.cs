@@ -1,10 +1,10 @@
 using System.Text.Json;
-using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.OrleansExecution;
-using KeyLoad.IntegrationTests.Features.QueryExecution;
-using static KeyLoad.IntegrationTests.Features.ResourceExecution.EarlyAdmissionQualificationProtocol;
+using KeyLoad.IntegrationTests.ClientApi;
+using KeyLoad.IntegrationTests.OrleansExecution;
+using KeyLoad.IntegrationTests.QueryExecution;
+using static KeyLoad.IntegrationTests.ResourceExecution.EarlyAdmissionQualificationProtocol;
 
-namespace KeyLoad.IntegrationTests.Features.ResourceExecution;
+namespace KeyLoad.IntegrationTests.ResourceExecution;
 
 internal static class EarlyAdmissionQualificationReads
 {

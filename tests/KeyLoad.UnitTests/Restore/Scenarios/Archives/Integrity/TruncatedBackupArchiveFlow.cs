@@ -1,8 +1,8 @@
-using KeyLoad.AppHost.Features.TestInfrastructure;
+using KeyLoad.AppHost.TestInfrastructure;
 using KeyLoad.Storage.ZoneTree.Restore;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.UnitTests.Features.BackupRestore;
+namespace KeyLoad.UnitTests.BackupRestore;
 
 internal static class TruncatedBackupArchiveFlow
 {

@@ -5,7 +5,7 @@ using KeyLoad.Clustering;
 using KeyLoad.Server;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace KeyLoad.IntegrationTests.Features.OrleansExecution.Helpers;
+namespace KeyLoad.IntegrationTests.OrleansExecution.Helpers;
 
 internal sealed class RequestCqrsClusterDiagnosticsTestScope(Guid waveId, RequestCqrsLifecycleEvidence lifecycle) : IAsyncDisposable
 {

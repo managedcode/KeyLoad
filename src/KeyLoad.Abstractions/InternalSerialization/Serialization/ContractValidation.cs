@@ -4,7 +4,7 @@ using System.Collections.Immutable;
 using System.Reflection;
 using System.Text.Json;
 
-namespace KeyLoad.Features.InternalSerialization;
+namespace KeyLoad.InternalSerialization;
 
 internal static class ContractValidation
 {

@@ -1,5 +1,5 @@
 using ManagedCode.Communication.Commands;
-namespace KeyLoad.UnitTests.Features.DatabaseComposition;
+namespace KeyLoad.UnitTests.DatabaseComposition;
 
 internal sealed record QueueGraphIdentityState(
     TestDatabase Fixture,

@@ -3,9 +3,9 @@ using System.Net.Sockets;
 using KeyLoad.Server;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
-using P = KeyLoad.RecoveryTests.Features.AnalyticsStore.UserAnalyticsProcessProtocol;
+using P = KeyLoad.RecoveryTests.AnalyticsStore.UserAnalyticsProcessProtocol;
 
-namespace KeyLoad.RecoveryTests.Features.AnalyticsStore;
+namespace KeyLoad.RecoveryTests.AnalyticsStore;
 
 /// <summary>Uses the production silo and Grain Service owner for local generation process recovery.</summary>
 internal static class UserAnalyticsProcessHost

@@ -1,12 +1,12 @@
 using System.Diagnostics;
 using System.Text;
-using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.AppHost.Hosting;
+using KeyLoad.AppHost.TestInfrastructure;
 using KeyLoad.Server;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.UnitTests.Features.CodeQuality.Processes;
+namespace KeyLoad.UnitTests.CodeQuality.Processes;
 
 internal static class ProductionSourceManifestProcess
 {

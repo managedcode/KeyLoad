@@ -1,7 +1,7 @@
 using KeyLoad.Storage.ZoneTree.IO;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.Server.Features.Search;
+namespace KeyLoad.Server.Search;
 
 internal static class TextLiveGenerationMetadata
 {

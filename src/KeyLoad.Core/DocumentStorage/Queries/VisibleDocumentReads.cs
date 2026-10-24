@@ -1,7 +1,7 @@
-using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.Core.ResourceExecution;
 using KeyLoad.Storage;
 
-namespace KeyLoad.Core.Features.DocumentStorage;
+namespace KeyLoad.Core.DocumentStorage;
 
 /// <summary>Decodes visible documents without retaining a raw scan page.</summary>
 internal static class VisibleDocumentReads

@@ -2,7 +2,7 @@ using System.Collections.Immutable;
 using System.Text.Json;
 using KeyLoad.Clustering;
 
-namespace KeyLoad.UnitTests.Features.GraphTraversal;
+namespace KeyLoad.UnitTests.GraphTraversal;
 
 internal sealed class GraphPathPayloadTests
 {

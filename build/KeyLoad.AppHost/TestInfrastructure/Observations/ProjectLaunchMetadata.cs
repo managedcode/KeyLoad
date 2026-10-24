@@ -3,7 +3,7 @@ using System.Reflection;
 using System.Text.Json;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.AppHost.Features.TestInfrastructure;
+namespace KeyLoad.AppHost.TestInfrastructure;
 
 /// <summary>Reads the same execution SDK run properties used by Aspire's project launch.</summary>
 internal static class ProjectLaunchMetadata

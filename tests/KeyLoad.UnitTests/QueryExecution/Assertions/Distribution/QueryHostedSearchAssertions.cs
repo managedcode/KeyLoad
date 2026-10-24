@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
 using System.Security.Cryptography;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal static class QueryHostedSearchAssertions
 {

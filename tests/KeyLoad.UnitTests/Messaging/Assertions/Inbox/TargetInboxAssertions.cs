@@ -1,8 +1,8 @@
-using KeyLoad.Core.Features.Messaging;
-using KeyLoad.Core.Features.StoragePartitions.Contracts;
+using KeyLoad.Core.Messaging;
+using KeyLoad.Core.StoragePartitions.Contracts;
 using KeyLoad.Storage.ZoneTree;
 using TUnit.Assertions.Enums;
-namespace KeyLoad.UnitTests.Features.Messaging;
+namespace KeyLoad.UnitTests.Messaging;
 
 internal static class TargetInboxAssertions
 {

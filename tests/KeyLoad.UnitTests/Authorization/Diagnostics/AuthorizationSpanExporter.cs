@@ -3,7 +3,7 @@ using System.Text.Json;
 using Microsoft.Extensions.Options;
 using OpenTelemetry;
 
-namespace KeyLoad.UnitTests.Features.Authorization;
+namespace KeyLoad.UnitTests.Authorization;
 
 internal sealed class AuthorizationSpanExporter(IOptions<AuthorizationTelemetryCaptureOptions> options)
     : BaseExporter<Activity>

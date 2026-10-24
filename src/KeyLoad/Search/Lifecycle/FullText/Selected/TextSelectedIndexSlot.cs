@@ -5,7 +5,7 @@ using ZoneTree;
 using ZoneTree.FullTextSearch;
 using ZoneTree.FullTextSearch.Index;
 
-namespace KeyLoad.Server.Features.Search;
+namespace KeyLoad.Server.Search;
 
 internal sealed class TextSelectedIndexSlot(string root, string leaf, Guid node,
     IOptions<TextExecutionOptions> options, TextResourceOwnership? resources = null) : IDisposable, ITextSelectedIndexLeaseOwner

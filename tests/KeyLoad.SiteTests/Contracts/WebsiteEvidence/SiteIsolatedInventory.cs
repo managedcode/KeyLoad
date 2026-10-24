@@ -1,4 +1,4 @@
-namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
+namespace KeyLoad.SiteTests.BenchmarkComparisons;
 
 /// <summary>Current authenticated comparison inventory only.</summary>
 internal static class SiteIsolatedInventory

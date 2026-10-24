@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 [RequestCqrsHostedDataSource]
 internal sealed class ProgressAdmissionTests(RequestCqrsHostedRuntimeFixture fixture)

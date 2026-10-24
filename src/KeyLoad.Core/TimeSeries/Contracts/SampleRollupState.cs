@@ -1,4 +1,4 @@
-namespace KeyLoad.Core.Features.TimeSeries;
+namespace KeyLoad.Core.TimeSeries;
 
 [global::Orleans.GenerateSerializer, global::Orleans.Alias(RuntimeSampleRollup.Alias)]
 internal sealed record SampleRollupState(

@@ -1,6 +1,6 @@
 using Aspire.Hosting.Testing;
 
-namespace KeyLoad.IntegrationTests.Features.QueryExecution;
+namespace KeyLoad.IntegrationTests.QueryExecution;
 
 internal sealed class PostgresClusterFixtureOwnership(PostgresClusterSelection? selection = null)
 {

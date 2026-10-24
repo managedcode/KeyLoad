@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Configuration;
 
-namespace KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
+namespace KeyLoad.LoadTests.AppHost.BenchmarkComparisons;
 
 /// <summary>Optional benchmark cohort metadata forwarded from validated execution host options.</summary>
 [ConfigurationOptions]

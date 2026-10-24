@@ -2,7 +2,7 @@ using System.Text.Json;
 using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
 
-namespace KeyLoad.UnitTests.Features.Messaging;
+namespace KeyLoad.UnitTests.Messaging;
 
 internal sealed class QueueOrderedRetryState(PartitionRef partition, DateTimeOffset time, QueueParkedHeadPolicy parkedHead,
     string principal = QueueOrderedRetryProtocol.Root)

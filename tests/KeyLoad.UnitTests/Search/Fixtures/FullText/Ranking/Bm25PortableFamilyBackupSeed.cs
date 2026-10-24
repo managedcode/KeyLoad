@@ -1,8 +1,8 @@
-using KeyLoad.Core.Features.Search;
-using KeyLoad.Query.Features.Search;
-using KeyLoad.UnitTests.Features.BackupRestore;
+using KeyLoad.Core.Search;
+using KeyLoad.Query.Search;
+using KeyLoad.UnitTests.BackupRestore;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 internal static class Bm25PortableFamilyBackupSeed
 {

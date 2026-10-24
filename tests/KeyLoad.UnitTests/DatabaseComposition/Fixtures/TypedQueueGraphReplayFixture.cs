@@ -1,5 +1,5 @@
 using ManagedCode.Communication.Commands;
-namespace KeyLoad.UnitTests.Features.DatabaseComposition;
+namespace KeyLoad.UnitTests.DatabaseComposition;
 
 internal static class TypedQueueGraphReplayFixture
 {
@@ -54,7 +54,7 @@ internal static class TypedQueueGraphReplayFixture
             {
                 CommandId = Guid.NewGuid()
             }, at.AddSeconds(HealthyOffsetSeconds));
-        var key = global::KeyLoad.Core.Features.DocumentStorage.DocumentStorageKeys.RecordKey(from ? first : second);
+        var key = global::KeyLoad.Core.DocumentStorage.DocumentStorageKeys.RecordKey(from ? first : second);
         var original = db.Store.Read(view => view.ReadOwnedValue(key))!;
         var state = new QueueGraphIdentityState(db, first, second, at,
             new(boundFrom, FirstRevision, FirstJson, new(), at), new(boundTo, FirstRevision, SecondJson, new(), at),

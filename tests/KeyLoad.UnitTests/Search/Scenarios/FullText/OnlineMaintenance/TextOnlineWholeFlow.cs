@@ -1,7 +1,7 @@
 using KeyLoad.Clustering;
-using KeyLoad.Clustering.Features.Search;
+using KeyLoad.Clustering.Search;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 internal static class TextOnlineWholeFlow
 {

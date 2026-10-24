@@ -1,4 +1,4 @@
-namespace KeyLoad.Query.Features.Search;
+namespace KeyLoad.Query.Search;
 
 internal sealed record AnnSearchResult(AnnCandidate[] Candidates, AnnSearchMode Mode,
     long WorkUnits, long DistanceEvaluations, long EdgeVisits)

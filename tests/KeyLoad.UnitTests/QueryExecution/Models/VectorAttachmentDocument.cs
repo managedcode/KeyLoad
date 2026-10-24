@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
 using System.Text.Json.Serialization;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal sealed record VectorAttachmentDocument([property: JsonPropertyName(VectorAttachmentDocument.ValueProperty)] string Value)
 {

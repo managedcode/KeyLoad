@@ -1,6 +1,6 @@
 using KeyLoad.Storage;
 
-namespace KeyLoad.Core.Features.ResourceExecution;
+namespace KeyLoad.Core.ResourceExecution;
 
 /// <summary>Observes a real provider-owned discard-only transaction with one original read ledger.</summary>
 internal sealed class ResourceEffectPreparationTransaction : ResourceEffectObservationView, IAtomicTransaction,

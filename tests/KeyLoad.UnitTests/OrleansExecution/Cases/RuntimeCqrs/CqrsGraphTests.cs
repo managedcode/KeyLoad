@@ -1,6 +1,6 @@
 using ManagedCode.Communication.CQRS;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 [CqrsDataSource]
 internal sealed class CqrsGraphTests(CqrsClusterFixture fixture)

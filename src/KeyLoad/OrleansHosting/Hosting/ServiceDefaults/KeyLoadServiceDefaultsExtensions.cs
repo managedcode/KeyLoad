@@ -1,9 +1,9 @@
-using KeyLoad.Server.Features.Authorization.Configuration;
-using KeyLoad.Server.Features.Authorization.Contracts;
-using KeyLoad.Server.Features.Authorization.Diagnostics;
-using KeyLoad.Server.Features.OrleansHosting.Configuration;
-using KeyLoad.Server.Features.OrleansHosting.Contracts;
-using KeyLoad.Server.Features.OrleansHosting.Diagnostics;
+using KeyLoad.Server.Authorization.Configuration;
+using KeyLoad.Server.Authorization.Contracts;
+using KeyLoad.Server.Authorization.Diagnostics;
+using KeyLoad.Server.OrleansHosting.Configuration;
+using KeyLoad.Server.OrleansHosting.Contracts;
+using KeyLoad.Server.OrleansHosting.Diagnostics;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Options;
 using OpenTelemetry.Logs;

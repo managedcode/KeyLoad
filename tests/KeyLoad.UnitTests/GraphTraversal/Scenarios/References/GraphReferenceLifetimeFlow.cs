@@ -1,8 +1,8 @@
-using KeyLoad.Core.Features.GraphTraversal.Serialization;
-using KeyLoad.UnitTests.Features.ResourceExecution;
-using static KeyLoad.UnitTests.Features.GraphTraversal.GraphReferenceLifetimeProtocol;
+using KeyLoad.Core.GraphTraversal.Serialization;
+using KeyLoad.UnitTests.ResourceExecution;
+using static KeyLoad.UnitTests.GraphTraversal.GraphReferenceLifetimeProtocol;
 
-namespace KeyLoad.UnitTests.Features.GraphTraversal;
+namespace KeyLoad.UnitTests.GraphTraversal;
 
 internal static class GraphReferenceLifetimeFlow
 {

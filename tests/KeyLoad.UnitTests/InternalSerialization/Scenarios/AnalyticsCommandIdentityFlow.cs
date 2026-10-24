@@ -1,10 +1,10 @@
-using KeyLoad.UnitTests.Features.Authorization;
+using KeyLoad.UnitTests.Authorization;
 using ManagedCode.Communication.Commands;
-using A = KeyLoad.UnitTests.Features.InternalSerialization.AnalyticsCommandIdentityAssertions;
-using D = KeyLoad.UnitTests.Features.InternalSerialization.AnalyticsCommandIdentityData;
-using O = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreTestOperations;
+using A = KeyLoad.UnitTests.InternalSerialization.AnalyticsCommandIdentityAssertions;
+using D = KeyLoad.UnitTests.InternalSerialization.AnalyticsCommandIdentityData;
+using O = KeyLoad.UnitTests.AnalyticsStore.AnalyticsStoreTestOperations;
 
-namespace KeyLoad.UnitTests.Features.InternalSerialization;
+namespace KeyLoad.UnitTests.InternalSerialization;
 
 internal static class AnalyticsCommandIdentityFlow
 {

@@ -1,9 +1,9 @@
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 using ManagedCode.Communication;
-using static KeyLoad.UnitTests.Features.Messaging.SubscriptionContinuationProtocol;
+using static KeyLoad.UnitTests.Messaging.SubscriptionContinuationProtocol;
 
-namespace KeyLoad.UnitTests.Features.Messaging;
+namespace KeyLoad.UnitTests.Messaging;
 
 internal static class SubscriptionLeaseVersionExhaustionFlow
 {

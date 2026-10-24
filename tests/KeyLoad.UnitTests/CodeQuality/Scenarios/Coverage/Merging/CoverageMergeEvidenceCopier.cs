@@ -1,7 +1,7 @@
 using System.Security.Cryptography;
 using TUnit.Core.Interfaces;
 
-namespace KeyLoad.UnitTests.Features.CodeQuality;
+namespace KeyLoad.UnitTests.CodeQuality;
 
 internal static class CoverageMergeEvidenceCopier
 {

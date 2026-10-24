@@ -2,7 +2,7 @@ using KeyLoad.Core;
 using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
 
-namespace KeyLoad.RecoveryTests.Features.Search;
+namespace KeyLoad.RecoveryTests.Search;
 
 /// <summary>Executes execution ANN recovery fixture commands against the actual canonical atomic store.</summary>
 internal sealed class AnnCrashCommandOwner(DatabaseEngine database)

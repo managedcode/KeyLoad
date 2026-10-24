@@ -1,8 +1,8 @@
 using KeyLoad.Core;
-using KeyLoad.Query.Features.Search;
+using KeyLoad.Query.Search;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.Server.Features.Search;
+namespace KeyLoad.Server.Search;
 
 internal sealed class TextOnlineRoot
 {
@@ -126,7 +126,7 @@ internal sealed class TextOnlineRoot
             throw TextErrors.Corrupt();
         }
         budget?.ChargeBytes(OrleansSerialization.Measure(staging.Request));
-        var actual = KeyLoad.Core.Features.Search.OnlineTextParentIdentity.Fingerprint(staging.PrincipalId, staging.Request);
+        var actual = KeyLoad.Core.Search.OnlineTextParentIdentity.Fingerprint(staging.PrincipalId, staging.Request);
         if (actual != staging.ParentFingerprint)
         {
             throw TextErrors.Mismatch();

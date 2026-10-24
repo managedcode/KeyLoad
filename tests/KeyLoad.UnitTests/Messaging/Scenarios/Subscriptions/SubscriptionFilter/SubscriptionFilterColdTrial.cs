@@ -1,11 +1,11 @@
 using System.Text.Json;
 using KeyLoad.Storage.ZoneTree;
-using KeyLoad.UnitTests.Features.ResourceExecution;
+using KeyLoad.UnitTests.ResourceExecution;
 using ManagedCode.Communication;
 using TUnit.Assertions.Enums;
-using static KeyLoad.UnitTests.Features.Messaging.SubscriptionTestActions;
+using static KeyLoad.UnitTests.Messaging.SubscriptionTestActions;
 
-namespace KeyLoad.UnitTests.Features.Messaging;
+namespace KeyLoad.UnitTests.Messaging;
 
 internal static class SubscriptionFilterColdTrial
 {

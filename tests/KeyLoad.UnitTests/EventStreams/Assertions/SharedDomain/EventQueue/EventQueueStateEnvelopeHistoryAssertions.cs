@@ -1,13 +1,13 @@
 using KeyLoad.Storage;
-using KeyLoad.UnitTests.Features.Messaging;
-using KeyLoad.UnitTests.Features.ResourceExecution;
-using KeyLoad.UnitTests.Features.StorageRecovery.Assertions;
+using KeyLoad.UnitTests.Messaging;
+using KeyLoad.UnitTests.ResourceExecution;
+using KeyLoad.UnitTests.StorageRecovery.Assertions;
 using ManagedCode.Communication;
 using TUnit.Assertions.Enums;
-using static KeyLoad.UnitTests.Features.EventStreams.EventQueueStateEnvelopeCommands;
-using static KeyLoad.UnitTests.Features.EventStreams.EventQueueStateEnvelopeProtocol;
+using static KeyLoad.UnitTests.EventStreams.EventQueueStateEnvelopeCommands;
+using static KeyLoad.UnitTests.EventStreams.EventQueueStateEnvelopeProtocol;
 
-namespace KeyLoad.UnitTests.Features.EventStreams;
+namespace KeyLoad.UnitTests.EventStreams;
 
 internal static class EventQueueStateEnvelopeHistoryAssertions
 {

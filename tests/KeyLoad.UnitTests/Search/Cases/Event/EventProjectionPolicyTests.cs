@@ -1,8 +1,8 @@
-using KeyLoad.Core.Features.Authorization;
-using KeyLoad.Core.Features.Search;
+using KeyLoad.Core.Authorization;
+using KeyLoad.Core.Search;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 internal sealed class EventProjectionPolicyTests
 {

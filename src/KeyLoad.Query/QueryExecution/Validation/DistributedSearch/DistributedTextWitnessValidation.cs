@@ -1,7 +1,7 @@
 using KeyLoad.Core;
 using KeyLoad.Storage;
 
-namespace KeyLoad.Query.Features.QueryExecution;
+namespace KeyLoad.Query.QueryExecution;
 
 internal static class DistributedTextWitnessValidation
 {
@@ -9,7 +9,7 @@ internal static class DistributedTextWitnessValidation
 
     internal static void Require(DatabaseEngine database, IKeyValueView view, PrincipalRecord principal,
         ResourceDefinition resource, string digest, DistributedTextWitness witness,
-        PartitionRef partition, global::KeyLoad.Core.Features.ResourceExecution.Execution.ReadExecutionBudgetReadGrant grant, ReadExecutionBudget budget)
+        PartitionRef partition, global::KeyLoad.Core.ResourceExecution.Execution.ReadExecutionBudgetReadGrant grant, ReadExecutionBudget budget)
     {
         ArgumentNullException.ThrowIfNull(database);
         ArgumentNullException.ThrowIfNull(view);

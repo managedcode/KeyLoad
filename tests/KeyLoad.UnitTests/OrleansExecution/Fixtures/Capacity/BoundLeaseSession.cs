@@ -1,9 +1,9 @@
 using KeyLoad.Clustering;
-using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.Core.ResourceExecution;
 using KeyLoad.Server;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal sealed class BoundLeaseSession
 {

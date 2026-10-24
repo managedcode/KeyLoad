@@ -1,6 +1,6 @@
 using System.Text.Json;
 
-namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
+namespace KeyLoad.SiteTests.BenchmarkComparisons;
 
 internal sealed record SiteTestInputs(string Repository, string Aggregate, string EvidenceRun,
     string MeasuredRevision, string SiteRevision)

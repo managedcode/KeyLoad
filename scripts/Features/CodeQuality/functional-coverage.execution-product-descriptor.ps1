@@ -101,7 +101,7 @@ function Get-PolicyBounds([string] $Root) {
     $snapshot = Get-FcTestIdentitySnapshot $Root
     $assemblyPath = Resolve-FcPath $Root $snapshot.compiledIdentity.dll
     $assembly = [Reflection.Assembly]::LoadFrom($assemblyPath)
-    $type = $assembly.GetType('KeyLoad.UnitTests.Features.CodeQuality.CoverageExecutionOptions', $true)
+    $type = $assembly.GetType('KeyLoad.UnitTests.CodeQuality.CoverageExecutionOptions', $true)
     $options = [Activator]::CreateInstance($type, $true)
     $validation = $type.GetMethod('IsValid', [Reflection.BindingFlags] 'Instance,NonPublic')
     if ($null -eq $validation -or -not $validation.Invoke($options, @())) {

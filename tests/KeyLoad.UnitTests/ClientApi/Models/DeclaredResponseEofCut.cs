@@ -1,6 +1,6 @@
-using KeyLoad.UnitTests.Features.DocumentStorage;
+using KeyLoad.UnitTests.DocumentStorage;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 internal sealed record DeclaredResponseEofCut(string[] Rows, long PhysicalPosition,
     (long AppliedPosition, long StorePosition) Cut, OutboxSnapshot Outbox, byte[] Outcome);

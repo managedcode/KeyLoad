@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.Messaging;
+namespace KeyLoad.IntegrationTests.Messaging;
 
 internal sealed record SubscriptionFilterClusterOriginal(SubscriptionFilterClusterSeed Seed,
     ReceiveSubscriptionRequest FirstRequest, ReceiveSubscriptionResult First,

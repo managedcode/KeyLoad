@@ -1,6 +1,6 @@
 using KeyLoad.Core;
 
-namespace KeyLoad.IntegrationTests.Features.Authorization;
+namespace KeyLoad.IntegrationTests.Authorization;
 
 internal sealed record InitialPrincipalEpochClusterState(PartitionRef Partition, string PrincipalId, string KeyId,
     CommandRequest Seed, CommitReceipt SeedReceipt, Guid RefusedId, PrincipalRecord Refused, EntityRefLifetime Lifetime)

@@ -1,9 +1,9 @@
 using KeyLoad.Server;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using P = KeyLoad.UnitTests.Features.StorageRecovery.PartitionStorageProtocol;
+using P = KeyLoad.UnitTests.StorageRecovery.PartitionStorageProtocol;
 
-namespace KeyLoad.UnitTests.Features.StorageRecovery;
+namespace KeyLoad.UnitTests.StorageRecovery;
 
 internal static class PartitionStorageReplay
 {

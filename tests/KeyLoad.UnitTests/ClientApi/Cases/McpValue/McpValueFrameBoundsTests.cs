@@ -1,7 +1,7 @@
 using System.Text;
 using KeyLoad.Server;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>AC-MCP-003/004/005: arbitrary JSON-value framing retains the shared strict parser and resource limits.</summary>
 internal sealed class McpValueFrameBoundsTests

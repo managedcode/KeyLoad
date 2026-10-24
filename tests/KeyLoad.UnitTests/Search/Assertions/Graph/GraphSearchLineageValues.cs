@@ -1,8 +1,8 @@
 using System.Text.Json;
 using KeyLoad.Query;
-using KeyLoad.UnitTests.Features.GraphTraversal;
+using KeyLoad.UnitTests.GraphTraversal;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 internal static class GraphSearchLineageValues
 {

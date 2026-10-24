@@ -1,4 +1,4 @@
-namespace KeyLoad.AppHost.Features.OrleansHosting;
+namespace KeyLoad.AppHost.OrleansHosting;
 
 internal static class ClusterTelemetryResources
 {

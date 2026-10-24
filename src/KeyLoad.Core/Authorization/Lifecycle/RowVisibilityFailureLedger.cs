@@ -1,7 +1,7 @@
 using System.Runtime.ExceptionServices;
 using ManagedCode.Communication.CQRS;
 
-namespace KeyLoad.Core.Features.Authorization;
+namespace KeyLoad.Core.Authorization;
 
 internal static class RowVisibilityFailureLedger
 {

@@ -1,8 +1,8 @@
 using KeyLoad.Query;
-using KeyLoad.UnitTests.Features.Messaging;
+using KeyLoad.UnitTests.Messaging;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 /// <summary>Independent full wait/result and bilingual canonical/execution-page oracles around actual execution failure and recovery.</summary>
 internal static class SearchWaitAuthorityState

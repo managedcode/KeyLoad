@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 
-namespace KeyLoad.Core.Features.Messaging;
+namespace KeyLoad.Core.Messaging;
 
 /// <summary>Reports one bounded execution queue-deadline read and its real cursor.</summary>
 [Orleans.GenerateSerializer, Orleans.Alias(QueueDeadlinePage.SerializerAlias)]

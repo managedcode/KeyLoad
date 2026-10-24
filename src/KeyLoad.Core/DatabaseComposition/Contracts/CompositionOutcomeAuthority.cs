@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 
-namespace KeyLoad.Core.Features.DatabaseComposition;
+namespace KeyLoad.Core.DatabaseComposition;
 
 /// <summary>Private canonical row authority selected by a committed composition.</summary>
 [Orleans.GenerateSerializer]

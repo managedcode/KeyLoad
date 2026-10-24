@@ -1,4 +1,4 @@
-namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
+namespace KeyLoad.Analyzers.Tests.CodeQuality;
 
 /// <summary>AC-CQ-034/037: exact execution timer intervals are configured execution policy.</summary>
 internal sealed class TypedConfigurationTimerTests

@@ -1,7 +1,7 @@
-using KeyLoad.UnitTests.Features.Messaging;
-using P = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsSharedProtocol;
+using KeyLoad.UnitTests.Messaging;
+using P = KeyLoad.UnitTests.AnalyticsStore.AnalyticsSharedProtocol;
 
-namespace KeyLoad.UnitTests.Features.AnalyticsStore;
+namespace KeyLoad.UnitTests.AnalyticsStore;
 
 internal static class AnalyticsSharedFlow
 {

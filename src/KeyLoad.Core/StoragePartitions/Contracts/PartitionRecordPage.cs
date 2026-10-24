@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
 using KeyLoad.Storage;
 
-namespace KeyLoad.Core.Features.StoragePartitions.Contracts;
+namespace KeyLoad.Core.StoragePartitions.Contracts;
 
 /// <summary>Owns one bounded page of exact canonical partition records.</summary>
 /// <param name="Records">Independent raw key/value copies in encoded order.</param>

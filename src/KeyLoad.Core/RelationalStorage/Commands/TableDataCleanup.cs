@@ -1,8 +1,8 @@
-using KeyLoad.Core.Features.BackupRestore.Serialization;
-using KeyLoad.Core.Features.StoragePartitions.Contracts;
+using KeyLoad.Core.BackupRestore.Serialization;
+using KeyLoad.Core.StoragePartitions.Contracts;
 using KeyLoad.Storage;
 
-namespace KeyLoad.Core.Features.RelationalStorage;
+namespace KeyLoad.Core.RelationalStorage;
 
 /// <summary>Collects the actual table-owned records before one bounded atomic table removal.</summary>
 internal static class TableDataCleanup

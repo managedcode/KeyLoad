@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
 using ManagedCode.Communication;
 
-namespace KeyLoad.UnitTests.Features.TimeSeries;
+namespace KeyLoad.UnitTests.TimeSeries;
 
 internal sealed class SampleChunkCanonicalFixture : IDisposable
 {

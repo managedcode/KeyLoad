@@ -1,9 +1,9 @@
 using System.Text.Json;
 using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
-using P = KeyLoad.UnitTests.Features.Messaging.BudgetedQueueReceiveOutcomeProtocol;
+using P = KeyLoad.UnitTests.Messaging.BudgetedQueueReceiveOutcomeProtocol;
 
-namespace KeyLoad.UnitTests.Features.Messaging;
+namespace KeyLoad.UnitTests.Messaging;
 
 internal sealed class BudgetedQueueReceiveOutcomeFixture : IDisposable
 {

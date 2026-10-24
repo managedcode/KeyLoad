@@ -2,7 +2,7 @@ export const EXECUTION = Object.freeze({
   schema: 'keyload.execution-serialization', completeSchema: 'keyload.execution-serialization.complete',
   repository: 'managedcode/KeyLoad', ref: 'refs/heads/main', workflow: 'Benchmarks',
   workflowPath: '.github/workflows/benchmarks.yml', job: 'execution-serialization', jobName: 'Measure execution serialization',
-  namespace: 'KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons', jobId: 'OrleansSerialization',
+  namespace: 'KeyLoad.BenchmarkScenarios.BenchmarkComparisons', jobId: 'OrleansSerialization',
   sdk: '10.0.401',
   types: Object.freeze(['DocumentSerializationBenchmarks', 'CommandSerializationBenchmarks',
     'StorageSerializationBenchmarks']),

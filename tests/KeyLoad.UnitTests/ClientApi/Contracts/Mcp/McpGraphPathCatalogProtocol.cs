@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>Exact property and route names in the independent shortest-path MCP oracle.</summary>
 internal static class McpGraphPathCatalogProtocol

@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
-using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.ClientApi;
 
-namespace KeyLoad.IntegrationTests.Features.TimeSeries;
+namespace KeyLoad.IntegrationTests.TimeSeries;
 
 internal sealed class SeriesUtcTiePublicState(TimeSeriesClusterScenario scenario, ImmutableArray<SampleData> original,
     McpPersistedIdentity reader)

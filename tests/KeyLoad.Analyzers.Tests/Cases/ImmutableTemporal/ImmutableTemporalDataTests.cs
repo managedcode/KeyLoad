@@ -1,4 +1,4 @@
-namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
+namespace KeyLoad.Analyzers.Tests.CodeQuality;
 
 /// <summary>AC-CQ-037: a genuine temporal-data field never grants execution policy.</summary>
 internal sealed class ImmutableTemporalDataTests

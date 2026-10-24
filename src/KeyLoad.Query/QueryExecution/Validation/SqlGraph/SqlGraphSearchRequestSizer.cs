@@ -1,6 +1,6 @@
 using System.Text.Json;
 
-namespace KeyLoad.Query.Features.QueryExecution;
+namespace KeyLoad.Query.QueryExecution;
 
 /// <summary>Measures a whole typed SQL graph request without retaining serialized bytes.</summary>
 internal static class SqlGraphSearchRequestSizer

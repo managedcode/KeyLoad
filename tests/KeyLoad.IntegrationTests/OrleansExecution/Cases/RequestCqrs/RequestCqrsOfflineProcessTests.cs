@@ -1,6 +1,6 @@
-using KeyLoad.IntegrationTests.Features.StorageRecovery;
+using KeyLoad.IntegrationTests.StorageRecovery;
 
-namespace KeyLoad.IntegrationTests.Features.OrleansExecution;
+namespace KeyLoad.IntegrationTests.OrleansExecution;
 
 [NotInParallel]
 internal sealed class RequestCqrsOfflineProcessTests

@@ -1,4 +1,4 @@
-namespace KeyLoad.Core.Features.BlobStorage;
+namespace KeyLoad.Core.BlobStorage;
 
 [Orleans.GenerateSerializer, Orleans.Alias(FileQuota.ContractAlias)]
 internal sealed record FileQuota([property: Orleans.Id(0)] long AllocatedBytes = FileStorageProtocol.EmptyCount,

@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.IntegrationTests.Features.DocumentStorage;
+namespace KeyLoad.IntegrationTests.DocumentStorage;
 
 /// <summary>AC-METH-005: broad, disabled or covered execution selections fail before acquiring a private Orleans fixture.</summary>
 internal sealed class HeavyDocumentLoadAdmissionTests

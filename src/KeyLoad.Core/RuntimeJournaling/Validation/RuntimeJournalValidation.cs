@@ -1,9 +1,9 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Security.Cryptography;
 using System.Text;
-using KeyLoad.Core.Features.RuntimeJournaling.Contracts;
+using KeyLoad.Core.RuntimeJournaling.Contracts;
 
-namespace KeyLoad.Core.Features.RuntimeJournaling.Validation;
+namespace KeyLoad.Core.RuntimeJournaling.Validation;
 
 internal static class RuntimeJournalValidation
 {

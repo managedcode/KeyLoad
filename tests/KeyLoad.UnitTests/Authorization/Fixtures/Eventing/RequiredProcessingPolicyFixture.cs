@@ -2,7 +2,7 @@ using System.Text.Json;
 using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
 
-namespace KeyLoad.UnitTests.Features.Authorization;
+namespace KeyLoad.UnitTests.Authorization;
 
 internal sealed class RequiredProcessingPolicyFixture(bool header) : IDisposable
 {

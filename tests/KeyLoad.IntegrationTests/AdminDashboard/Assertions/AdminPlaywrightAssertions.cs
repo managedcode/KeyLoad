@@ -1,7 +1,7 @@
-using KeyLoad.IntegrationTests.Features.StorageReplication;
+using KeyLoad.IntegrationTests.StorageReplication;
 using Microsoft.Playwright;
 
-namespace KeyLoad.IntegrationTests.Features.AdminDashboard;
+namespace KeyLoad.IntegrationTests.AdminDashboard;
 
 internal static class AdminPlaywrightAssertions
 {

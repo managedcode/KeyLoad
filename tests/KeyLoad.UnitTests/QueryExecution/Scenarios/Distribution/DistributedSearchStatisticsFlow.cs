@@ -1,9 +1,9 @@
 using KeyLoad.Query;
-using KeyLoad.Query.Features.QueryExecution;
-using KeyLoad.Query.Features.Search;
-using KeyLoad.UnitTests.Features.DocumentStorage;
+using KeyLoad.Query.QueryExecution;
+using KeyLoad.Query.Search;
+using KeyLoad.UnitTests.DocumentStorage;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal static class DistributedSearchStatisticsFlow
 {

@@ -8,7 +8,7 @@
     <GenerateTestingPlatformApplicationHelper>true</GenerateTestingPlatformApplicationHelper>
   </PropertyGroup>
   <ItemGroup>
-    <Using Include="KeyLoad.Features.InternalSerialization" />
+    <Using Include="KeyLoad.InternalSerialization" />
   </ItemGroup>
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />

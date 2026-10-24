@@ -2,7 +2,7 @@ using System.Collections.Immutable;
 using System.Runtime.InteropServices;
 using ManagedCode.Communication;
 
-namespace KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries.Intensive;
+namespace KeyLoad.Comparisons.BenchmarkComparisons.TimeSeries.Intensive;
 
 internal static class KeyLoadTimeSeriesIntensiveResult
 {

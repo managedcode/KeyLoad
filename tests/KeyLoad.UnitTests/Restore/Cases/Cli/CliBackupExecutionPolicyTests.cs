@@ -2,7 +2,7 @@ using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 using KeyLoad.Storage.ZoneTree.Restore;
 
-namespace KeyLoad.UnitTests.Features.BackupRestore;
+namespace KeyLoad.UnitTests.BackupRestore;
 
 internal sealed class CliBackupExecutionPolicyTests
 {

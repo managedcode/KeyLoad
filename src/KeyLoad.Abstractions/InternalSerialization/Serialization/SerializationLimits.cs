@@ -1,4 +1,4 @@
-namespace KeyLoad.Features.InternalSerialization;
+namespace KeyLoad.InternalSerialization;
 
 // Structural safety fences retain the existing JSON depth and the configured HTTP body ceiling.
 // They do not replace operation-specific admission, accounting or decoded heap qualification.

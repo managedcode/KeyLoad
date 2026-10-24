@@ -1,6 +1,6 @@
 using Aspire.Hosting.ApplicationModel;
 
-namespace KeyLoad.IntegrationTests.Features.OrleansExecution.Helpers;
+namespace KeyLoad.IntegrationTests.OrleansExecution.Helpers;
 
 internal static class RequestCqrsClusterResourceStreamCompletion
 {

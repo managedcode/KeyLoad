@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.Authorization;
+namespace KeyLoad.IntegrationTests.Authorization;
 
 [NotInParallel]
 internal sealed class EventingRequiredClaimClusterTests

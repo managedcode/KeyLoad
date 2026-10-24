@@ -1,5 +1,5 @@
 
-namespace KeyLoad.IntegrationTests.Features.Messaging;
+namespace KeyLoad.IntegrationTests.Messaging;
 
 internal sealed record RemoteTransferColdSeed(MessagingClusterScenario Scenario,
     MessagingClusterIdentity Identity, Guid TransferId, CommandRequest Create, EnqueueMessage Message)

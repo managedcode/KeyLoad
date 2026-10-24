@@ -1,8 +1,8 @@
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
-using KeyLoad.UnitTests.Features.QueryExecution;
+using KeyLoad.UnitTests.QueryExecution;
 
-namespace KeyLoad.UnitTests.Features.ResourceExecution;
+namespace KeyLoad.UnitTests.ResourceExecution;
 
 internal static class HeavyRouteAdmissionCold
 {

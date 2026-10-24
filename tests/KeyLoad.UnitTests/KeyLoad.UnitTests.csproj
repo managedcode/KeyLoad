@@ -10,9 +10,9 @@
     <AssemblyMetadata Include="KeyLoadCoverageToolVersion" Value="$(KeyLoadCoverageToolVersion)" />
     <AssemblyMetadata Include="KeyLoadCoveragePackageRoot" Value="$([System.IO.Path]::Combine('$(NuGetPackageRoot)', 'dotnet-coverage', '$(KeyLoadCoverageToolVersion)'))" />
     <PackageDownload Include="dotnet-coverage" Version="[$(KeyLoadCoverageToolVersion)]" />
-    <Using Include="KeyLoad.Features.InternalSerialization" />
+    <Using Include="KeyLoad.InternalSerialization" />
     <Using Include="KeyLoad.Core" />
-    <Using Include="KeyLoad.RecoveryTests.Features.OrleansExecution" />
+    <Using Include="KeyLoad.RecoveryTests.OrleansExecution" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../../src/KeyLoad.Storage.ZoneTree/KeyLoad.Storage.ZoneTree.csproj" />

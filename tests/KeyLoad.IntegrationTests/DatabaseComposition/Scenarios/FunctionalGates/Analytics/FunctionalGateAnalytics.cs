@@ -1,9 +1,9 @@
 using System.Collections.Immutable;
 using System.Globalization;
 using System.Text.Json;
-using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.ClientApi;
 
-namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
+namespace KeyLoad.IntegrationTests.DatabaseComposition;
 
 /// <summary>Exercises persisted execution series through the same SDK and official MCP callers.</summary>
 internal static class FunctionalGateAnalytics

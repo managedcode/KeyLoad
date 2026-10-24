@@ -1,8 +1,8 @@
 using KeyLoad.Query;
-using KeyLoad.UnitTests.Features.Messaging;
+using KeyLoad.UnitTests.Messaging;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal static class SqlEventReferenceJoinBudget
 {
@@ -78,7 +78,7 @@ internal static class SqlEventReferenceJoinBudget
         var ast = SqlEventReferenceJoinFixture.Ast(database.Partition);
         var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits));
         var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
-        var observed = new global::KeyLoad.Query.Features.QueryExecution.ModelQueryExecutor(database.Database, engine)
+        var observed = new global::KeyLoad.Query.QueryExecution.ModelQueryExecutor(database.Database, engine)
             .Execute("root", ast, budget);
         await SqlEventReferenceJoinAssertions.PageAsync(observed, position);
         var observedBytes = budget.ReadBytes;

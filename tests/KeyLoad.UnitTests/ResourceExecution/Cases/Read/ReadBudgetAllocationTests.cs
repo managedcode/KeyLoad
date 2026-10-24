@@ -2,7 +2,7 @@ using System.Text;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 
-namespace KeyLoad.UnitTests.Features.ResourceExecution;
+namespace KeyLoad.UnitTests.ResourceExecution;
 
 internal sealed class ReadBudgetAllocationTests
 {

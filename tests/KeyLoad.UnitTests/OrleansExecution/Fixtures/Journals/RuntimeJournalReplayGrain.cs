@@ -2,7 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Orleans.Journaling;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 /// <summary>Runtime activation used by the execution journal replay integration test.</summary>
 [GrainType(RuntimeJournalReplayProtocol.InterfaceAlias)]

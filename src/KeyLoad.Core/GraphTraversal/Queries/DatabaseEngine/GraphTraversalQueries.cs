@@ -1,10 +1,10 @@
-using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.Core.ResourceExecution;
 
 namespace KeyLoad.Core;
 /// <summary>Executes GraphTraversalQueries operations against the caller's database context.</summary>
 public static class GraphTraversalQueries
 {
-    internal static GraphTraversal TraverseBound(this DatabaseEngine engine, string principalId, TraverseRequest request, ReadExecutionBudget budget, IResourceLifetimeWorkBinding binding)
+    internal static global::KeyLoad.GraphTraversal TraverseBound(this DatabaseEngine engine, string principalId, TraverseRequest request, ReadExecutionBudget budget, IResourceLifetimeWorkBinding binding)
     {
         ArgumentNullException.ThrowIfNull(request);
         ArgumentNullException.ThrowIfNull(budget);

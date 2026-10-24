@@ -1,8 +1,8 @@
 using KeyLoad.Clustering;
 using ManagedCode.Communication.CQRS;
-using static KeyLoad.UnitTests.Features.Search.OnlineTextProgressFrames;
+using static KeyLoad.UnitTests.Search.OnlineTextProgressFrames;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 internal sealed class OnlineTextMaintenanceStreamShapeTests
 {

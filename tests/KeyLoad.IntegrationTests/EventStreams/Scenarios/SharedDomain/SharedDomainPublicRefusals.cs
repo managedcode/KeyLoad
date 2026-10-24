@@ -1,8 +1,8 @@
 using KeyLoad.Client;
-using KeyLoad.IntegrationTests.Features.ClientApi;
-using static KeyLoad.RecoveryTests.Features.EventStreams.SharedDomainProtocol;
+using KeyLoad.IntegrationTests.ClientApi;
+using static KeyLoad.RecoveryTests.EventStreams.SharedDomainProtocol;
 
-namespace KeyLoad.IntegrationTests.Features.EventStreams;
+namespace KeyLoad.IntegrationTests.EventStreams;
 
 internal static class SharedDomainPublicRefusals
 {

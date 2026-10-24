@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.QueryExecution;
+namespace KeyLoad.IntegrationTests.QueryExecution;
 
 internal static class SqlStringContinuationClusterControls
 {
@@ -9,19 +9,19 @@ internal static class SqlStringContinuationClusterControls
     private const string InvalidBytes = "label = E'\\xc3'\n'plain'";
 
     internal static async Task InvalidAsync(ClusterFixture fixture, SqlNullDistinctClusterState state,
-        global::KeyLoad.IntegrationTests.Features.OrleansExecution.RequestCqrsClusterCallers root,
+        global::KeyLoad.IntegrationTests.OrleansExecution.RequestCqrsClusterCallers root,
         CancellationToken token)
     {
         var before = await SqlNullDistinctClusterImage.ReadAsync(root, state, token);
-        await global::KeyLoad.IntegrationTests.Features.OrleansExecution.RequestCqrsClusterCallers.RunOwnedAsync(
-            fixture.App, global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerProtocol.Node2,
+        await global::KeyLoad.IntegrationTests.OrleansExecution.RequestCqrsClusterCallers.RunOwnedAsync(
+            fixture.App, global::KeyLoad.IntegrationTests.ClientApi.McpCallerProtocol.Node2,
             state.Seed.Reader.Secret, async caller =>
         {
             var failures = new List<Exception>();
             await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
             {
                 await using var wire = await PostgresClusterCaller.ConnectAsync(fixture.App,
-                    global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerProtocol.Node3,
+                    global::KeyLoad.IntegrationTests.ClientApi.McpCallerProtocol.Node3,
                     state.Seed.Reader.Principal.Id, state.Seed.Reader.Secret,
                     PostgresClusterCertificate.RootPath(fixture), token);
                 await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
@@ -36,9 +36,9 @@ internal static class SqlStringContinuationClusterControls
     }
 
     private static async Task RefuseThenHealthyAsync(
-        global::KeyLoad.IntegrationTests.Features.OrleansExecution.RequestCqrsClusterCallers caller,
+        global::KeyLoad.IntegrationTests.OrleansExecution.RequestCqrsClusterCallers caller,
         PostgresClusterCaller wire,
-        global::KeyLoad.IntegrationTests.Features.OrleansExecution.RequestCqrsClusterCallers root,
+        global::KeyLoad.IntegrationTests.OrleansExecution.RequestCqrsClusterCallers root,
         SqlNullDistinctClusterState state, CancellationToken token)
     {
         var before = await SqlNullDistinctClusterImage.ReadAsync(root, state, token);
@@ -51,7 +51,7 @@ internal static class SqlStringContinuationClusterControls
             await global::TUnit.Assertions.Assert.That(result.Value.ValueKind)
                 .IsEqualTo(global::System.Text.Json.JsonValueKind.Undefined);
             await global::TUnit.Assertions.Assert.That(result.Problem?.ErrorCode).IsEqualTo(code.ToString());
-            await global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerAssertions.ErrorAsync(
+            await global::KeyLoad.IntegrationTests.ClientApi.McpCallerAssertions.ErrorAsync(
                 await caller.Mcp.CallAsync(SqlOperationProtocol.ToolName, request, token), code, dispatched: true);
             await PostgresClusterAssertions.ErrorAsync(wire.ExecuteAsync<QueryPage>(sql, [], prepared: true, token),
                 code == ErrorCode.Validation ? SqlNullOrderingClusterProtocol.ValidationSqlState

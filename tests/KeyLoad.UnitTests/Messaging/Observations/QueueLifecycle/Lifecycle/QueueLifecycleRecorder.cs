@@ -2,7 +2,7 @@ using KeyLoad.Storage;
 using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
 
-namespace KeyLoad.UnitTests.Features.Messaging;
+namespace KeyLoad.UnitTests.Messaging;
 
 internal sealed class QueueLifecycleRecorder(DatabaseEngine database, QueueLaneRef lane,
     Func<string, EnqueueMessage> literal)

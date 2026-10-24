@@ -1,6 +1,6 @@
-[assembly: System.Runtime.CompilerServices.InternalsVisibleTo(KeyLoad.Features.InternalSerialization.PayloadVersion.TestAssembly)]
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo(KeyLoad.InternalSerialization.PayloadVersion.TestAssembly)]
 
-namespace KeyLoad.Features.InternalSerialization;
+namespace KeyLoad.InternalSerialization;
 
 [Orleans.GenerateSerializer]
 [Orleans.Alias(PayloadVersion.Alias)]

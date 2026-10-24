@@ -1,8 +1,8 @@
-using KeyLoad.UnitTests.Features.DocumentStorage;
-using KeyLoad.UnitTests.Features.Messaging;
-using KeyLoad.UnitTests.Features.StorageRecovery.Assertions;
+using KeyLoad.UnitTests.DocumentStorage;
+using KeyLoad.UnitTests.Messaging;
+using KeyLoad.UnitTests.StorageRecovery.Assertions;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal static class QueueViewLeaseIsolationImages
 {

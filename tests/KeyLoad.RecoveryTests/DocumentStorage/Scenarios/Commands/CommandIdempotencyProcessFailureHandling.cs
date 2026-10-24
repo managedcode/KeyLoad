@@ -1,7 +1,7 @@
 using System.Runtime.ExceptionServices;
 using ManagedCode.Communication.CQRS;
 
-namespace KeyLoad.RecoveryTests.Features.DocumentStorage;
+namespace KeyLoad.RecoveryTests.DocumentStorage;
 
 internal static class CommandIdempotencyProcessFailureHandling
 {

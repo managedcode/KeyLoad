@@ -2,7 +2,7 @@ using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 
-namespace KeyLoad.Analyzers.Features.CodeQuality;
+namespace KeyLoad.Analyzers.CodeQuality;
 
 /// <summary>Reports executable units whose code line count exceeds 64.</summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]

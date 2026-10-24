@@ -1,12 +1,12 @@
 using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Core.Features.Search;
+using KeyLoad.Core.Search;
 using KeyLoad.Query;
-using KeyLoad.Query.Features.Search;
+using KeyLoad.Query.Search;
 using ManagedCode.Communication.Commands;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.Server.Features.Search;
+namespace KeyLoad.Server.Search;
 
 internal static class Bm25CorpusMaintenance
 {

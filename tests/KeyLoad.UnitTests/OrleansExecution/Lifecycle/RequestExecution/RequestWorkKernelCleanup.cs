@@ -2,7 +2,7 @@ using KeyLoad.Clustering;
 using KeyLoad.Server;
 using ManagedCode.Communication.CQRS;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal static class RequestWorkKernelCleanup
 {

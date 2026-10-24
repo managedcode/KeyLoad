@@ -1,11 +1,11 @@
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
-using KeyLoad.UnitTests.Features.Messaging;
+using KeyLoad.UnitTests.Messaging;
 using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
-using static KeyLoad.UnitTests.Features.ResourceExecution.ResourcePairBindingState;
+using static KeyLoad.UnitTests.ResourceExecution.ResourcePairBindingState;
 
-namespace KeyLoad.UnitTests.Features.ResourceExecution;
+namespace KeyLoad.UnitTests.ResourceExecution;
 
 internal static class ResourcePairBindingFlow
 {

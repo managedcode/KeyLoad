@@ -3,7 +3,7 @@ using System.Text.Json.Nodes;
 using KeyLoad.Clustering;
 using KeyLoad.Server;
 
-namespace KeyLoad.UnitTests.Features.EventStreams;
+namespace KeyLoad.UnitTests.EventStreams;
 
 internal sealed class StreamTraversalMcpSchemaTests
 {

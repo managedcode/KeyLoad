@@ -1,8 +1,8 @@
 using KeyLoad.Clustering;
-using KeyLoad.IntegrationTests.Features.StorageRecovery;
+using KeyLoad.IntegrationTests.StorageRecovery;
 using KeyLoad.Server;
 
-namespace KeyLoad.IntegrationTests.Features.OrleansExecution;
+namespace KeyLoad.IntegrationTests.OrleansExecution;
 
 internal sealed class RequestCqrsOfflineProcessTestScope : IAsyncDisposable
 {

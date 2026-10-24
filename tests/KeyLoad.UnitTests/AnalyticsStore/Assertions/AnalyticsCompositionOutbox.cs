@@ -1,9 +1,9 @@
-using KeyLoad.UnitTests.Features.Authorization;
-using KeyLoad.UnitTests.Features.Messaging;
-using D = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreTestData;
-using P = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsCompositionData;
+using KeyLoad.UnitTests.Authorization;
+using KeyLoad.UnitTests.Messaging;
+using D = KeyLoad.UnitTests.AnalyticsStore.AnalyticsStoreTestData;
+using P = KeyLoad.UnitTests.AnalyticsStore.AnalyticsCompositionData;
 
-namespace KeyLoad.UnitTests.Features.AnalyticsStore;
+namespace KeyLoad.UnitTests.AnalyticsStore;
 
 internal static class AnalyticsCompositionOutbox
 {

@@ -1,8 +1,8 @@
 using System.Collections.Immutable;
 using System.Globalization;
-using P = KeyLoad.IntegrationTests.Features.DatabaseComposition.FunctionalGateUserAnalyticsProtocol;
+using P = KeyLoad.IntegrationTests.DatabaseComposition.FunctionalGateUserAnalyticsProtocol;
 
-namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
+namespace KeyLoad.IntegrationTests.DatabaseComposition;
 
 internal sealed record FunctionalGateUserAnalyticsState(string Store, DateTimeOffset From, string Cohort,
     AnalyticsEventData First, AnalyticsEventData Second, AnalyticsEventData Third)

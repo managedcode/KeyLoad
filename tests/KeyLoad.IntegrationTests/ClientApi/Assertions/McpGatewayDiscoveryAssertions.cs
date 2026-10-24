@@ -1,6 +1,6 @@
 using ModelContextProtocol.Protocol;
 
-namespace KeyLoad.IntegrationTests.Features.ClientApi;
+namespace KeyLoad.IntegrationTests.ClientApi;
 
 /// <summary>Checks compact public discovery independently of the server's internal catalog.</summary>
 internal static class McpGatewayDiscoveryAssertions

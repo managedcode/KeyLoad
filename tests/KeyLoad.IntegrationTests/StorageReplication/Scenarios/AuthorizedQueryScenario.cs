@@ -3,9 +3,9 @@ using System.Text;
 using System.Text.Json;
 using KeyLoad.Client;
 using KeyLoad.Query;
-using static KeyLoad.IntegrationTests.Features.StorageReplication.ClusterReplicationTestSupport;
+using static KeyLoad.IntegrationTests.StorageReplication.ClusterReplicationTestSupport;
 
-namespace KeyLoad.IntegrationTests.Features.StorageReplication;
+namespace KeyLoad.IntegrationTests.StorageReplication;
 
 internal static class AuthorizedQueryScenario
 {

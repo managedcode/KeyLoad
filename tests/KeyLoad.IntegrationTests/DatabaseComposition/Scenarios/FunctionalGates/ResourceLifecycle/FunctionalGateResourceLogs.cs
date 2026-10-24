@@ -1,7 +1,7 @@
-using KeyLoad.IntegrationTests.Features.StorageReplication;
+using KeyLoad.IntegrationTests.StorageReplication;
 using KeyLoad.Server;
 
-namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
+namespace KeyLoad.IntegrationTests.DatabaseComposition;
 
 /// <summary>Writes joined execution resource logs and the original retained startup snapshot without consulting a stopped provider.</summary>
 internal static class FunctionalGateResourceLogs

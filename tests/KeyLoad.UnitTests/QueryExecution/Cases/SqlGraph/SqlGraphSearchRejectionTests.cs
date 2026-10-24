@@ -1,8 +1,8 @@
 using System.Text.Json;
 using KeyLoad.Query;
-using KeyLoad.UnitTests.Features.Search;
+using KeyLoad.UnitTests.Search;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal sealed class SqlGraphSearchRejectionTests
 {
@@ -87,7 +87,7 @@ internal sealed class SqlGraphSearchRejectionTests
     public async Task ParameterCountAndCompleteRequestBoundsAreEnforced()
     {
         using var database = new TestDatabase();
-        var engine = new QueryEngine(new KeyLoad.Core.DatabaseEngine(database.Store, new KeyLoad.Core.Features.Authorization.AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(new()
+        var engine = new QueryEngine(new KeyLoad.Core.DatabaseEngine(database.Store, new KeyLoad.Core.Authorization.AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(new()
         {
             MaxQueryBytes = 512
         }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution()), UnitExecutionOptions.QueryExecution());

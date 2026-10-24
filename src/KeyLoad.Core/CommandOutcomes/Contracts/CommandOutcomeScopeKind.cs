@@ -1,6 +1,6 @@
-namespace KeyLoad.Core.Features.CommandOutcomes.Contracts;
+namespace KeyLoad.Core.CommandOutcomes.Contracts;
 
-[global::Orleans.GenerateSerializer, global::Orleans.Alias(global::KeyLoad.Core.Features.InternalSerialization.CoreAliases.CommandOutcomeScopeKind)]
+[global::Orleans.GenerateSerializer, global::Orleans.Alias(global::KeyLoad.Core.InternalSerialization.CoreAliases.CommandOutcomeScopeKind)]
 internal enum CommandOutcomeScopeKind : int
 {
     Unknown = 0,

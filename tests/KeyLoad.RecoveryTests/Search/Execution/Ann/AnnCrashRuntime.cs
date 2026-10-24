@@ -1,11 +1,11 @@
 using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Server;
-using KeyLoad.Server.Features.Search;
+using KeyLoad.Server.Search;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace KeyLoad.RecoveryTests.Features.Search;
+namespace KeyLoad.RecoveryTests.Search;
 
 internal sealed class AnnCrashRuntime : IAsyncDisposable
 {

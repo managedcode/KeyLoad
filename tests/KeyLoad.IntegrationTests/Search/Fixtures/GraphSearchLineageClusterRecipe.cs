@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 
-namespace KeyLoad.IntegrationTests.Features.Search;
+namespace KeyLoad.IntegrationTests.Search;
 
 internal static class GraphSearchLineageClusterRecipe
 {

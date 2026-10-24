@@ -1,10 +1,10 @@
 using System.Text;
 using System.Text.Json;
-using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.Messaging;
-using KeyLoad.IntegrationTests.Features.OrleansExecution;
+using KeyLoad.IntegrationTests.ClientApi;
+using KeyLoad.IntegrationTests.Messaging;
+using KeyLoad.IntegrationTests.OrleansExecution;
 
-namespace KeyLoad.IntegrationTests.Features.Authorization;
+namespace KeyLoad.IntegrationTests.Authorization;
 
 internal static class EventMessageSensitivePublicRefusals
 {
@@ -21,7 +21,7 @@ internal static class EventMessageSensitivePublicRefusals
     {
         await SdkAsync(await sdk(), code);
         await McpAsync(callers, state, tool, request, code, token);
-        var sql = KeyLoad.IntegrationTests.Features.QueryExecution.SqlClusterProtocol.Call(state.Partition, tool, request);
+        var sql = KeyLoad.IntegrationTests.QueryExecution.SqlClusterProtocol.Call(state.Partition, tool, request);
         await SdkAsync(await callers.Sdk.ExecuteSqlAsync(sql, token), code);
         await McpAsync(callers, state, SqlOperationProtocol.ToolName, sql, code, token);
     }

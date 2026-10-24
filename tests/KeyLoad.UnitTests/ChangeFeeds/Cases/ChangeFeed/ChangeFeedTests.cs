@@ -1,8 +1,8 @@
 using TUnit.Assertions.Enums;
 
-using static KeyLoad.UnitTests.Features.ChangeFeeds.ChangeFeedTestActions;
+using static KeyLoad.UnitTests.ChangeFeeds.ChangeFeedTestActions;
 
-namespace KeyLoad.UnitTests.Features.ChangeFeeds;
+namespace KeyLoad.UnitTests.ChangeFeeds;
 
 internal sealed class ChangeFeedTests
 {

@@ -1,4 +1,4 @@
-namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
+namespace KeyLoad.Analyzers.Tests.CodeQuality;
 
 /// <summary>AC-CQ-030 and AC-CQ-031: execution string discrimination requires named constants.</summary>
 internal sealed class MagicRuntimeStringComparisonTests

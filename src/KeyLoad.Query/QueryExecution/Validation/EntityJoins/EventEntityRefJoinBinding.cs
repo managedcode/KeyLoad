@@ -1,8 +1,8 @@
 using KeyLoad.Core;
-using KeyLoad.Core.Features.RelationalStorage;
+using KeyLoad.Core.RelationalStorage;
 using KeyLoad.Storage;
 
-namespace KeyLoad.Query.Features.QueryExecution;
+namespace KeyLoad.Query.QueryExecution;
 
 /// <summary>Binds the closed event-reference join to current persisted resources and field authority.</summary>
 internal static class EventEntityRefJoinBinding

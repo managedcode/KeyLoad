@@ -1,7 +1,7 @@
 using System.Text.Json;
 using KeyLoad.Core;
 
-namespace KeyLoad.Query.Features.Search;
+namespace KeyLoad.Query.Search;
 
 internal sealed class TextRanker
 {
@@ -95,15 +95,15 @@ internal sealed class TextRanker
 
     public SearchScore[] Rank() => Rank(corpusCount, totalLength, frequency);
 
-    internal KeyLoad.Query.Features.QueryExecution.DistributedTextStatistics CaptureStatistics()
+    internal KeyLoad.Query.QueryExecution.DistributedTextStatistics CaptureStatistics()
     {
-        return KeyLoad.Query.Features.QueryExecution.DistributedTextStatisticsCapture.Copy(
+        return KeyLoad.Query.QueryExecution.DistributedTextStatisticsCapture.Copy(
             terms, corpusCount, totalLength, frequency, budget);
     }
 
-    internal SearchScore[] Rank(KeyLoad.Query.Features.QueryExecution.DistributedTextStatistics statistics)
+    internal SearchScore[] Rank(KeyLoad.Query.QueryExecution.DistributedTextStatistics statistics)
     {
-        KeyLoad.Query.Features.QueryExecution.DistributedTextStatisticsValidation.Require(statistics, terms, budget);
+        KeyLoad.Query.QueryExecution.DistributedTextStatisticsValidation.Require(statistics, terms, budget);
         return Rank(statistics.DocumentCount, statistics.TotalLength, statistics.DocumentFrequencies);
     }
 

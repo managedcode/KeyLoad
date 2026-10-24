@@ -1,8 +1,8 @@
 using KeyLoad.Client;
-using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.OrleansExecution;
+using KeyLoad.IntegrationTests.ClientApi;
+using KeyLoad.IntegrationTests.OrleansExecution;
 
-namespace KeyLoad.IntegrationTests.Features.ChangeFeeds;
+namespace KeyLoad.IntegrationTests.ChangeFeeds;
 
 internal static class ProjectionPublicAssertions
 {

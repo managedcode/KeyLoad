@@ -1,6 +1,6 @@
 using KeyLoad.Server;
 
-namespace KeyLoad.UnitTests.Features.ResourceExecution;
+namespace KeyLoad.UnitTests.ResourceExecution;
 
 /// <summary>AC-AISQL-007: generic SQL uses the bounded heavy data lane and preserves direct control capacity.</summary>
 internal sealed class SqlAdmissionTests

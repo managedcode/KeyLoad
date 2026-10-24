@@ -1,9 +1,9 @@
 using System.Text.Json;
 using KeyLoad.Client;
-using KeyLoad.UnitTests.Features.ClientApi;
+using KeyLoad.UnitTests.ClientApi;
 using Microsoft.AspNetCore.Http;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 /// <summary>AC-SQLC-005: actual SQL HTTP replies preserve conservative outcomes.</summary>
 internal sealed class SqlClientOutcomeTests

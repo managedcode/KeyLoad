@@ -11,7 +11,7 @@ using Orleans.Configuration;
 using Orleans.Metadata;
 using Orleans.Serialization;
 
-namespace KeyLoad.RecoveryTests.Features.OrleansExecution;
+namespace KeyLoad.RecoveryTests.OrleansExecution;
 
 [ConfigurationBinding]
 internal sealed class RequestCqrsHostedProfile(TimeProvider clock, IOptions<GrainRoutingOptions> routing,

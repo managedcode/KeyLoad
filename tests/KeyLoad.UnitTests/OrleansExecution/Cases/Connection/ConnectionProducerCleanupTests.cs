@@ -1,7 +1,7 @@
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 [RequestCqrsHostedDataSource]
-[NotInParallel(KeyLoad.UnitTests.Features.OrleansExecution.RequestCqrsFixtureScheduling.SharedSession)]
+[NotInParallel(KeyLoad.UnitTests.OrleansExecution.RequestCqrsFixtureScheduling.SharedSession)]
 internal sealed class ConnectionProducerCleanupTests(RequestCqrsHostedRuntimeFixture fixture)
 {
     [Test]

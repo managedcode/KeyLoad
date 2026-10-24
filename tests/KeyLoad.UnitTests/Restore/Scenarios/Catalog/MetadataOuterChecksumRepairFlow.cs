@@ -2,7 +2,7 @@ using KeyLoad.Server;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 
-namespace KeyLoad.UnitTests.Features.BackupRestore;
+namespace KeyLoad.UnitTests.BackupRestore;
 
 internal static class MetadataOuterChecksumRepairFlow
 {
@@ -22,7 +22,7 @@ internal static class MetadataOuterChecksumRepairFlow
     }
 
     private static async Task CompleteAsync(
-        global::Microsoft.Extensions.Options.IOptions<global::KeyLoad.AppHost.Features.TestInfrastructure.TestExecutionOptions> options,
+        global::Microsoft.Extensions.Options.IOptions<global::KeyLoad.AppHost.TestInfrastructure.TestExecutionOptions> options,
         MetadataBackupFixture fixture, CancellationToken token)
     {
         var source = BackupJournalRepairAssertions.Read(fixture.SourceDirectory, token);
@@ -52,7 +52,7 @@ internal static class MetadataOuterChecksumRepairFlow
     }
 
     private static async Task RefuseAsync(
-        global::Microsoft.Extensions.Options.IOptions<global::KeyLoad.AppHost.Features.TestInfrastructure.TestExecutionOptions> options,
+        global::Microsoft.Extensions.Options.IOptions<global::KeyLoad.AppHost.TestInfrastructure.TestExecutionOptions> options,
         MetadataBackupFixture fixture, string destination,
         Dictionary<string, byte[]> original,
         (StoreIdentity Identity, long Position, string[] Rows) source, CancellationToken token)

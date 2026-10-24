@@ -1,8 +1,8 @@
 using System.Security.Claims;
-using KeyLoad.Diagnostics.Features.ResourceExecution;
+using KeyLoad.Diagnostics.ResourceExecution;
 using KeyLoad.Server;
 
-namespace KeyLoad.IntegrationTests.Features.Authorization;
+namespace KeyLoad.IntegrationTests.Authorization;
 
 internal static class AuthenticationExecutionAssertions
 {

@@ -1,15 +1,15 @@
 using System.Text;
 using KeyLoad.Clustering;
 using KeyLoad.Server;
-using KeyLoad.UnitTests.Features.Messaging;
-using KeyLoad.UnitTests.Features.OrleansExecution;
+using KeyLoad.UnitTests.Messaging;
+using KeyLoad.UnitTests.OrleansExecution;
 using ManagedCode.Communication;
 using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using P = KeyLoad.UnitTests.Features.Authorization.StartedReadPolicyProtocol;
+using P = KeyLoad.UnitTests.Authorization.StartedReadPolicyProtocol;
 
-namespace KeyLoad.UnitTests.Features.Authorization;
+namespace KeyLoad.UnitTests.Authorization;
 
 internal static class StartedReadPolicyAssertions
 {

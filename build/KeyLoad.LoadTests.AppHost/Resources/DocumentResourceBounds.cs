@@ -1,6 +1,6 @@
 using System.Globalization;
 
-namespace KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
+namespace KeyLoad.LoadTests.AppHost.BenchmarkComparisons;
 
 /// <summary>Frozen document execution budgets and the actual client configuration.</summary>
 internal static class DocumentResourceBounds

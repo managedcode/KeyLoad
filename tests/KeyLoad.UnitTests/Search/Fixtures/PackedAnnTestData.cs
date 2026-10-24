@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
 using KeyLoad.Storage;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 internal static class PackedAnnTestData
 {

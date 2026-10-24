@@ -1,8 +1,8 @@
 using KeyLoad.Client;
-using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.StorageReplication;
+using KeyLoad.IntegrationTests.ClientApi;
+using KeyLoad.IntegrationTests.StorageReplication;
 
-namespace KeyLoad.IntegrationTests.Features.QueryExecution;
+namespace KeyLoad.IntegrationTests.QueryExecution;
 
 /// <summary>AC-PQUERY-006 caller parity on first, second and empty partitions sharing one Orleans owner.</summary>
 [ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = PublicQueryStorageSelection.Key)]

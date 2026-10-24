@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 internal sealed class GraphSearchReachabilitySortClock(CancellationTokenSource? cancellation = null,
     long? cancelAt = null, long? deadlineAt = null) : TimeProvider

@@ -1,7 +1,7 @@
-using KeyLoad.IntegrationTests.Features.QueryExecution;
-using P = KeyLoad.IntegrationTests.Features.DatabaseComposition.FunctionalGateCompositionProtocol;
+using KeyLoad.IntegrationTests.QueryExecution;
+using P = KeyLoad.IntegrationTests.DatabaseComposition.FunctionalGateCompositionProtocol;
 
-namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
+namespace KeyLoad.IntegrationTests.DatabaseComposition;
 
 internal static class FunctionalGateCompositionAssertions
 {

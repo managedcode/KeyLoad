@@ -5,7 +5,7 @@ using KeyLoad.Storage.ZoneTree;
 using ManagedCode.Communication;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.RecoveryTests.Features.Messaging;
+namespace KeyLoad.RecoveryTests.Messaging;
 
 internal static class QueueEnqueueProcessAssertions
 {

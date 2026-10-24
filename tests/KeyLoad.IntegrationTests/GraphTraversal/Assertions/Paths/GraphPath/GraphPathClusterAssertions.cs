@@ -1,8 +1,8 @@
-using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.ClientApi;
 using ManagedCode.Communication;
 using ModelContextProtocol.Protocol;
 
-namespace KeyLoad.IntegrationTests.Features.GraphTraversal;
+namespace KeyLoad.IntegrationTests.GraphTraversal;
 
 internal static class GraphPathClusterAssertions
 {

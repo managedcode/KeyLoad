@@ -1,6 +1,6 @@
 using System.Runtime.ExceptionServices;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 /// <summary>Retains original test/client/handler failures while attempting every real cleanup.</summary>
 internal static class SqlClientCancellationCleanup

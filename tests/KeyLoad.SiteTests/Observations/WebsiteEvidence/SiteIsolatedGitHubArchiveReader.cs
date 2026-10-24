@@ -1,7 +1,7 @@
 using System.IO.Compression;
 using System.Text.Json.Nodes;
 
-namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
+namespace KeyLoad.SiteTests.BenchmarkComparisons;
 
 internal static class SiteIsolatedGitHubArchiveReader
 {

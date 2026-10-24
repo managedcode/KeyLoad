@@ -1,4 +1,4 @@
-namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
+namespace KeyLoad.Analyzers.Tests.CodeQuality;
 
 /// <summary>AC-CQ-009 and AC-BC-027: prove complete analyzer source and configuration inventories.</summary>
 [NotInParallel(SiteAnalyzerCoverageTokens.ProcessIsolationKey)]

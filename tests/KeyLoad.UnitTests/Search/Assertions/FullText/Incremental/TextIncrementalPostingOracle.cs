@@ -1,10 +1,10 @@
 using KeyLoad.Server;
-using KeyLoad.Server.Features.Search;
+using KeyLoad.Server.Search;
 using Microsoft.Extensions.Options;
 using TUnit.Assertions.Enums;
 using ZoneTree.FullTextSearch.Index;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 internal static class TextIncrementalPostingOracle
 {

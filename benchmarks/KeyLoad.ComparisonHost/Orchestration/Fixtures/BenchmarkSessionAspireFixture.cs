@@ -2,15 +2,15 @@ using System.Runtime.ExceptionServices;
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.Testing;
-using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.AppHost.Hosting;
+using KeyLoad.AppHost.TestInfrastructure;
 using KeyLoad.Comparisons;
-using KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
+using KeyLoad.LoadTests.AppHost.BenchmarkComparisons;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace KeyLoad.ComparisonHost.Features.BenchmarkOrchestration;
+namespace KeyLoad.ComparisonHost.BenchmarkOrchestration;
 
 /// <summary>Owns the single Aspire deployment, execution workload runner and original artifact lifetime.</summary>
 internal static class BenchmarkSessionAspireFixture

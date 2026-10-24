@@ -1,7 +1,7 @@
 using System.Text.Json;
-using KeyLoad.IntegrationTests.Features.QueryExecution;
+using KeyLoad.IntegrationTests.QueryExecution;
 
-namespace KeyLoad.IntegrationTests.Features.RelationalStorage;
+namespace KeyLoad.IntegrationTests.RelationalStorage;
 
 /// <summary>Checks exact two-source metadata on every page returned by an Orleans SQL join caller.</summary>
 internal static class RelationalSqlClusterJoinPageAssertions

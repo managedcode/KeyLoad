@@ -1,11 +1,11 @@
 using System.Text.Json;
-using KeyLoad.Core.Features.DocumentStorage;
+using KeyLoad.Core.DocumentStorage;
 using KeyLoad.Query;
 using KeyLoad.Storage;
 using ManagedCode.Communication;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.DocumentStorage;
+namespace KeyLoad.UnitTests.DocumentStorage;
 
 internal static class DocumentCrudFixture
 {

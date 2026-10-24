@@ -1,6 +1,6 @@
-using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.ClientApi;
 
-namespace KeyLoad.IntegrationTests.Features.TimeSeries;
+namespace KeyLoad.IntegrationTests.TimeSeries;
 
 [ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = SampleChunkRetentionClusterProtocol.FixtureKey)]
 [NotInParallel]

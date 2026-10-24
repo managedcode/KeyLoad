@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.Authorization;
+namespace KeyLoad.UnitTests.Authorization;
 
 // First-created genuine bytes, private to this fixture and never independently reencoded.
 internal sealed record SafeProjectorOperationOutcomeImage(byte[] Outcome, byte[]? Locator)

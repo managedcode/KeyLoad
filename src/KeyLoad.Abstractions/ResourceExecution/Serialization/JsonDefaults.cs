@@ -1,6 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using KeyLoad.Features.ResourceExecution;
+using KeyLoad.ResourceExecution;
 
 namespace KeyLoad;
 

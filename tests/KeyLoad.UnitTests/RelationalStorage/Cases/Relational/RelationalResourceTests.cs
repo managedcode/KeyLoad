@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace KeyLoad.UnitTests.Features.RelationalStorage;
+namespace KeyLoad.UnitTests.RelationalStorage;
 
 internal sealed class RelationalResourceTests
 {

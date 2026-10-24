@@ -2,7 +2,7 @@ using System.Text;
 using System.Text.Json;
 using KeyLoad.Server;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>AC-MCP-004: the actual owned stream rejects overflow before appending and clears its private capacity.</summary>
 internal sealed class McpBoundedWriteStreamTests

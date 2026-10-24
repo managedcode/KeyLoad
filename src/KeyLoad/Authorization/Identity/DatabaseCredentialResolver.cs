@@ -1,5 +1,5 @@
 using KeyLoad.Clustering;
-using KeyLoad.Diagnostics.Features.ResourceExecution;
+using KeyLoad.Diagnostics.ResourceExecution;
 
 namespace KeyLoad.Server;
 

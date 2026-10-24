@@ -1,7 +1,7 @@
 using System.Globalization;
 using System.Text;
 
-namespace KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
+namespace KeyLoad.LoadTests.AppHost.BenchmarkComparisons;
 
 internal static class IsolatedOpenSearchResources
 {

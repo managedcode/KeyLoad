@@ -2,10 +2,10 @@ using System.Globalization;
 using System.Text.Json;
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
-using KeyLoad.AppHost.Features.TestInfrastructure;
+using KeyLoad.AppHost.TestInfrastructure;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace KeyLoad.IntegrationTests.Features.StorageReplication;
+namespace KeyLoad.IntegrationTests.StorageReplication;
 
 /// <summary>Invokes the original Aspire resource command and retains the exact killed process identity and exit.</summary>
 internal static class AspireProcessFaultCommand

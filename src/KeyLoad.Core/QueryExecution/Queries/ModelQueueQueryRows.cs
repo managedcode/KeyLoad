@@ -2,7 +2,7 @@ using System.Text.Json;
 using KeyLoad.Query;
 using KeyLoad.Storage;
 
-namespace KeyLoad.Core.Features.QueryExecution;
+namespace KeyLoad.Core.QueryExecution;
 
 /// <summary>Reads and validates one existing queue lane without delivery or lease authority.</summary>
 internal static class ModelQueueQueryRows

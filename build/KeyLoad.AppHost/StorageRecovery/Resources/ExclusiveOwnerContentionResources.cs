@@ -1,4 +1,4 @@
-namespace KeyLoad.AppHost.Features.StorageRecovery;
+namespace KeyLoad.AppHost.StorageRecovery;
 
 /// <summary>Adds three explicit processes competing for the existing owner's physical database files.</summary>
 internal static class ExclusiveOwnerContentionResources

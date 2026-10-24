@@ -1,4 +1,4 @@
-namespace KeyLoad.Server.Features.OrleansHosting;
+namespace KeyLoad.Server.OrleansHosting;
 
 /// <summary>Publishes the same application silo after Active and joins borrowed work before execution teardown.</summary>
 internal sealed class OrleansNodeLifecycle(OrleansNode node, ServerConnectionRegistry connections) : ILifecycleParticipant<ISiloLifecycle>, IHostedService

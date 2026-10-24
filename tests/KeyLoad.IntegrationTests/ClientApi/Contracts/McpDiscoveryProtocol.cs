@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.ClientApi;
+namespace KeyLoad.IntegrationTests.ClientApi;
 
 /// <summary>Named canonical schema keys and required constructor fields in the accepted public contract.</summary>
 internal static class McpDiscoveryProtocol

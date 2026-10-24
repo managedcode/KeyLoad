@@ -1,5 +1,5 @@
-using KeyLoad.UnitTests.Features.ResourceExecution;
-namespace KeyLoad.UnitTests.Features.Search;
+using KeyLoad.UnitTests.ResourceExecution;
+namespace KeyLoad.UnitTests.Search;
 
 internal sealed class Bm25PublicAdmissionTests
 {

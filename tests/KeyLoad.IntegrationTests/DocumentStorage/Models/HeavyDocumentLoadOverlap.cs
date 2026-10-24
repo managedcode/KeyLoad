@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.DocumentStorage;
+namespace KeyLoad.IntegrationTests.DocumentStorage;
 
 /// <summary>Bounded original task witnesses and one common admitted-client start barrier.</summary>
 internal sealed class HeavyDocumentLoadOverlap

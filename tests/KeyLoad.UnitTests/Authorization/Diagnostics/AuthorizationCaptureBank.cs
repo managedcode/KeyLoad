@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.UnitTests.Features.Authorization;
+namespace KeyLoad.UnitTests.Authorization;
 
 internal sealed class AuthorizationCaptureBank<T>(IOptions<AuthorizationTelemetryCaptureOptions> options)
 {

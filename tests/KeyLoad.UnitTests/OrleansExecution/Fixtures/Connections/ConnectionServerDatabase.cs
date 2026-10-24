@@ -1,8 +1,8 @@
-using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.Core.ResourceExecution;
 using KeyLoad.Storage.ZoneTree;
 using ManagedCode.Communication;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 /// <summary>Borrows the actual canonical database and submits setup through its execution Orleans coordinator.</summary>
 internal sealed class ConnectionServerDatabase(Func<RequestCqrsHostedRuntimeFixture> source,

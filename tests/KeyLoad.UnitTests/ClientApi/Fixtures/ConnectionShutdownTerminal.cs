@@ -1,7 +1,7 @@
 using KeyLoad.Server;
 using Microsoft.AspNetCore.Connections;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 internal sealed class ConnectionShutdownTerminal(Exception? original)
 {

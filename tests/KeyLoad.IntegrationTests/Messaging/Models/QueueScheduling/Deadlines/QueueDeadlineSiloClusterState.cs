@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.Messaging;
+namespace KeyLoad.IntegrationTests.Messaging;
 
 internal sealed class QueueDeadlineSiloClusterState(QueueLaneRef lane, MessagingClusterIdentity identity,
     DateTimeOffset due, OutboxStatus baseline)

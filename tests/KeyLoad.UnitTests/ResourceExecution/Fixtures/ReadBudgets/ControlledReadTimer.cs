@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.ResourceExecution;
+namespace KeyLoad.UnitTests.ResourceExecution;
 
 /// <summary>Execution ITimer ownership for the explicit controlled test clock.</summary>
 internal sealed class ControlledReadTimer(ControlledReadClock clock, TimerCallback callback, object? state) : ITimer

@@ -1,11 +1,11 @@
 using KeyLoad.Query;
-using KeyLoad.Query.Features.Search;
+using KeyLoad.Query.Search;
 using KeyLoad.Server;
-using KeyLoad.Server.Features.Search;
-using KeyLoad.UnitTests.Features.Messaging;
-using KeyLoad.UnitTests.Features.Search;
+using KeyLoad.Server.Search;
+using KeyLoad.UnitTests.Messaging;
+using KeyLoad.UnitTests.Search;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal static class RequestCqrsAnnPinnedLifetimeFlow
 {

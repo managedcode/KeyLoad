@@ -1,10 +1,10 @@
 using KeyLoad.Clustering;
 using ManagedCode.Communication;
 using ManagedCode.Communication.CQRS;
-using static KeyLoad.UnitTests.Features.Search.OnlineTextProgressFrames;
+using static KeyLoad.UnitTests.Search.OnlineTextProgressFrames;
 using Chunk = ManagedCode.Communication.CQRS.CqrsStreamChunk<KeyLoad.Clustering.GrainRequestProgress, KeyLoad.Clustering.GrainOperationReply>;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 internal static class OnlineTextProgressShapeRefusals
 {

@@ -1,6 +1,6 @@
 using KeyLoad.Server;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>AC-ROUTE-003/REP-004: actual stage faults remain observable without substituting node shutdown work.</summary>
 internal sealed class ServerFailureObserverTests

@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 [RequestCqrsHostedDataSource(textMaintenance: true)]
 internal sealed class RequestCqrsTextMaintenanceTests(RequestCqrsHostedRuntimeFixture fixture)

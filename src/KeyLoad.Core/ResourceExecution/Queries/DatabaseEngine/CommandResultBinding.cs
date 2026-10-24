@@ -1,5 +1,5 @@
 using System.Collections.Immutable;
-using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.Core.ResourceExecution;
 
 namespace KeyLoad.Core;
 /// <summary>Executes CommandResultBinding operations against the caller's database context.</summary>
@@ -22,7 +22,7 @@ public static class CommandResultBinding
             var principal = engine.Principal(charged, verifiedPrincipalId, engine.EvaluationClock.GetUtcNow());
             if (principal.PolicyEpoch != expectedPolicyEpoch)
             {
-                throw Errors.Fail(ErrorCode.PermissionDenied, CommandOutcomes.ChangedOutcomePrincipalPolicyMessage);
+                throw Errors.Fail(ErrorCode.PermissionDenied, CommandOutcomeOperations.ChangedOutcomePrincipalPolicyMessage);
             }
 
             foreach (var lifetime in lifetimes)

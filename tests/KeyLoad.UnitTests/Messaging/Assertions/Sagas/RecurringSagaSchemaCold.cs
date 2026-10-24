@@ -1,8 +1,8 @@
 using KeyLoad.Server;
-using KeyLoad.UnitTests.Features.Authorization;
-using static KeyLoad.UnitTests.Features.Messaging.RecurringSagaSchemaProtocol;
+using KeyLoad.UnitTests.Authorization;
+using static KeyLoad.UnitTests.Messaging.RecurringSagaSchemaProtocol;
 
-namespace KeyLoad.UnitTests.Features.Messaging;
+namespace KeyLoad.UnitTests.Messaging;
 
 internal static class RecurringSagaSchemaCold
 {

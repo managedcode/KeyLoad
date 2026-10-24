@@ -1,9 +1,9 @@
 using System.Globalization;
-using KeyLoad.Diagnostics.Features.ResourceExecution;
+using KeyLoad.Diagnostics.ResourceExecution;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.UnitTests.Features.ResourceExecution;
+namespace KeyLoad.UnitTests.ResourceExecution;
 
 internal sealed class DatabasePhaseExecutionOptionsTests
 {

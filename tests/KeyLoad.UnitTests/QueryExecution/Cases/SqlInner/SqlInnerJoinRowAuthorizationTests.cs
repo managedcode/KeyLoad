@@ -1,7 +1,7 @@
 using KeyLoad.Query;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal sealed class SqlInnerJoinRowAuthorizationTests
 {
@@ -36,7 +36,7 @@ internal sealed class SqlInnerJoinRowAuthorizationTests
         var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
 
         var beforeDeniedRead = database.Store.Position;
-        var before = global::KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(database.Store);
+        var before = global::KeyLoad.UnitTests.Messaging.QueueWholeFlowStorage.Bytes(database.Store);
         var deniedRows = engine.Execute("reader", new(database.Partition, Sql, AllowFullScan: true, QueryDialectVersion: Dialect));
         await Assert.That(database.Store.Position).IsEqualTo(beforeDeniedRead);
         var administrativeRows = engine.Execute("root", new(database.Partition, Sql, AllowFullScan: true, QueryDialectVersion: Dialect));
@@ -44,13 +44,13 @@ internal sealed class SqlInnerJoinRowAuthorizationTests
         await Assert.That(deniedRows.Rows).IsEmpty();
         await Assert.That(deniedRows.Cursor).IsNull();
         await Assert.That(deniedRows.CutPosition).IsEqualTo(beforeDeniedRead);
-        await Assert.That(global::KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(database.Store)
+        await Assert.That(global::KeyLoad.UnitTests.Messaging.QueueWholeFlowStorage.Bytes(database.Store)
             .SequenceEqual(before)).IsTrue();
         await Assert.That(administrativeRows.Rows.Select(row => row.EntityId)).IsEquivalentTo(["a", "z"], CollectionOrdering.Matching);
         database.Commit(new PutDocument(Left, "a", "{\"order_id\":\"a\",\"customer_id\":\"c1\"}", 1, new("reader")),
             new PutDocument(Right, "c2", "{\"id\":\"c2\",\"name\":\"Lin\"}", 1, new("reader")));
         var repairedPosition = database.Store.Position;
-        var repairedImage = global::KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(database.Store);
+        var repairedImage = global::KeyLoad.UnitTests.Messaging.QueueWholeFlowStorage.Bytes(database.Store);
         var healthy = engine.Execute("reader", new(database.Partition, Sql, AllowFullScan: true, QueryDialectVersion: Dialect));
         await Assert.That(healthy.Rows.Select(row => row.EntityId)).IsEquivalentTo(["a", "z"], CollectionOrdering.Matching);
         var expected = new QueryPage(
@@ -59,7 +59,7 @@ internal sealed class SqlInnerJoinRowAuthorizationTests
             null, repairedPosition, "bounded-primary-key-inner-join");
         await Assert.That(JsonDefaults.Serialize(healthy).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
         await Assert.That(database.Store.Position).IsEqualTo(repairedPosition);
-        await Assert.That(global::KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(database.Store)
+        await Assert.That(global::KeyLoad.UnitTests.Messaging.QueueWholeFlowStorage.Bytes(database.Store)
             .SequenceEqual(repairedImage)).IsTrue();
     }
 

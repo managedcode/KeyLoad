@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 /// <summary>Owns actual canonical ZoneTree state for index read-cut and publication checks.</summary>
 internal sealed class CanonicalReadCutFixture : IDisposable

@@ -1,7 +1,7 @@
 using KeyLoad.Server;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.IntegrationTests.Features.Authorization;
+namespace KeyLoad.IntegrationTests.Authorization;
 
 internal sealed class FoundationOtlpClusterTests
 {

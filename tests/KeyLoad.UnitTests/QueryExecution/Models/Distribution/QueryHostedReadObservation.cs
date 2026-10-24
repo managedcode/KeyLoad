@@ -1,8 +1,8 @@
 using KeyLoad.Clustering;
-using KeyLoad.Query.Features.QueryExecution;
+using KeyLoad.Query.QueryExecution;
 using KeyLoad.Storage.ZoneTree;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal sealed class QueryHostedReadObservation(Guid connectionId, SiloAddress originSilo,
     GrainId expectedProducer, string principalId, int partitions)

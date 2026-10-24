@@ -1,7 +1,7 @@
-using P = KeyLoad.IntegrationTests.Features.DatabaseComposition.FunctionalGateAnalyticsLinkProtocol;
-using R = KeyLoad.IntegrationTests.Features.DatabaseComposition.FunctionalGateRelationalProtocol;
+using P = KeyLoad.IntegrationTests.DatabaseComposition.FunctionalGateAnalyticsLinkProtocol;
+using R = KeyLoad.IntegrationTests.DatabaseComposition.FunctionalGateRelationalProtocol;
 
-namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
+namespace KeyLoad.IntegrationTests.DatabaseComposition;
 
 internal static class FunctionalGateAnalyticsLinkLifecycle
 {

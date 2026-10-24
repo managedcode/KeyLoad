@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 using KeyLoad.Core;
-using KeyLoad.Query.Features.QueryExecution;
+using KeyLoad.Query.QueryExecution;
 
 namespace KeyLoad.Query;
 

@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 
-namespace KeyLoad.IntegrationTests.Features.Authorization;
+namespace KeyLoad.IntegrationTests.Authorization;
 
 internal static class SafeProjectorOperationClusterProtocol
 {

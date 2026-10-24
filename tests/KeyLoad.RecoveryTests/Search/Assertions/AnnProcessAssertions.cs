@@ -1,7 +1,7 @@
 using System.Text.Json;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.RecoveryTests.Features.Search;
+namespace KeyLoad.RecoveryTests.Search;
 
 internal static class AnnProcessAssertions
 {

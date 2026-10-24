@@ -4,7 +4,7 @@ using Aspire.Hosting.Testing;
 using Npgsql;
 using NpgsqlTypes;
 
-namespace KeyLoad.IntegrationTests.Features.QueryExecution;
+namespace KeyLoad.IntegrationTests.QueryExecution;
 
 internal sealed class PostgresClusterCaller : IAsyncDisposable
 {

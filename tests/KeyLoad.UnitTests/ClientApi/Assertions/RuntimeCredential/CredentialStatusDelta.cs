@@ -1,6 +1,6 @@
-using P = KeyLoad.UnitTests.Features.ClientApi.CredentialStatusProtocol;
+using P = KeyLoad.UnitTests.ClientApi.CredentialStatusProtocol;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 internal static class CredentialStatusDelta
 {

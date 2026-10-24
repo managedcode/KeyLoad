@@ -1,7 +1,7 @@
 using System.Globalization;
 using ManagedCode.Communication;
 
-namespace KeyLoad.UnitTests.Features.Messaging;
+namespace KeyLoad.UnitTests.Messaging;
 
 internal sealed class SagaTimeoutTests
 {

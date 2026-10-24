@@ -4,7 +4,7 @@ using KeyLoad.Server;
 using ModelContextProtocol;
 using ModelContextProtocol.Protocol;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>AC-MCP-003/005/007: a fresh execution result retains injected metadata and exact message identity.</summary>
 internal sealed class McpResponseReplacementTests

@@ -2,7 +2,7 @@ using System.Text.Json;
 using KeyLoad.Clustering;
 using KeyLoad.Server;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 internal static class AnnWaitWholeFlow
 {

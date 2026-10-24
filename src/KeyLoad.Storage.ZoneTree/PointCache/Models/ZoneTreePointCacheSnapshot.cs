@@ -1,4 +1,4 @@
-namespace KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
+namespace KeyLoad.Storage.ZoneTree.ResourceExecution;
 
 /// <summary>Nonpersisted cache work and modeled retention, without keys or payloads.</summary>
 /// <param name="Configured">Whether this store configured an embedded or coordinated owner, including initially cold control.</param>

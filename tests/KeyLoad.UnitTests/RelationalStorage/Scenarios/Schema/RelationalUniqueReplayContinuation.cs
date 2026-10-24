@@ -1,9 +1,9 @@
 using KeyLoad.Query;
 using KeyLoad.Storage.ZoneTree;
-using KeyLoad.UnitTests.Features.Messaging;
+using KeyLoad.UnitTests.Messaging;
 using ManagedCode.Communication;
 
-namespace KeyLoad.UnitTests.Features.RelationalStorage;
+namespace KeyLoad.UnitTests.RelationalStorage;
 
 internal static class RelationalUniqueReplayContinuation
 {

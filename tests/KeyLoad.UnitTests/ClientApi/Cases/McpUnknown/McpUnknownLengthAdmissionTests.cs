@@ -3,7 +3,7 @@ using KeyLoad.Clustering;
 using KeyLoad.Server;
 using KeyLoad.Storage;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>AC-CLIENT-009: actual persisted identities and unknown-length frames fit unchanged MCP admission pools.</summary>
 internal sealed class McpUnknownLengthAdmissionTests

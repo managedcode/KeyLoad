@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.GraphTraversal;
+namespace KeyLoad.UnitTests.GraphTraversal;
 
 /// <summary>Independent directed BFS over test-owned logical vertices and edges.</summary>
 internal static class GraphShortestPathReferenceBfs

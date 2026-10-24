@@ -1,11 +1,11 @@
 using System.Diagnostics;
-using KeyLoad.AppHost.Features.TestInfrastructure;
-using KeyLoad.AppHost.Features.TestInfrastructure.Processes;
+using KeyLoad.AppHost.TestInfrastructure;
+using KeyLoad.AppHost.TestInfrastructure.Processes;
 using KeyLoad.Server;
 using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.ComparisonHost.Features.BenchmarkOrchestration;
+namespace KeyLoad.ComparisonHost.BenchmarkOrchestration;
 
 /// <summary>Owns the actual execution workload child and joins its original process and output readers before returning.</summary>
 internal static class BenchmarkSessionClientProcess

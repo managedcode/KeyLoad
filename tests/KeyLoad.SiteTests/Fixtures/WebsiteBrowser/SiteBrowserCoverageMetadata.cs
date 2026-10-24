@@ -1,4 +1,4 @@
-namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
+namespace KeyLoad.SiteTests.BenchmarkComparisons;
 
 internal sealed record SiteBrowserCoverageMetadata(int SchemaVersion, string SourceRevision, string BrowserVersion,
     string[] Origins, SiteBrowserCoverageSource[] Sources, string[] CoverageFiles)

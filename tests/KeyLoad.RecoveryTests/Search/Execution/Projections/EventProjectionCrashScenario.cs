@@ -1,9 +1,9 @@
 using KeyLoad.Core;
-using KeyLoad.Core.Features.DocumentStorage;
+using KeyLoad.Core.DocumentStorage;
 using KeyLoad.Storage.ZoneTree;
 using ManagedCode.Communication.Commands;
 
-namespace KeyLoad.RecoveryTests.Features.Search;
+namespace KeyLoad.RecoveryTests.Search;
 
 internal static class EventProjectionCrashScenario
 {

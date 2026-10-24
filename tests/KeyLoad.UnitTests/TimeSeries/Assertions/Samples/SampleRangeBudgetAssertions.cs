@@ -1,6 +1,6 @@
 using ManagedCode.Communication.Commands;
 
-namespace KeyLoad.UnitTests.Features.TimeSeries;
+namespace KeyLoad.UnitTests.TimeSeries;
 
 internal static class SampleRangeBudgetAssertions
 {

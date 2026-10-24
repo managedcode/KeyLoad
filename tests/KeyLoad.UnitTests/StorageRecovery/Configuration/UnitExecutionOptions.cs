@@ -1,4 +1,4 @@
-using KeyLoad.UnitTests.Features.StorageRecovery;
+using KeyLoad.UnitTests.StorageRecovery;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.UnitTests;

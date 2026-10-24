@@ -1,10 +1,10 @@
 using KeyLoad.Clustering;
-using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.Core.ResourceExecution;
 using KeyLoad.Query;
 using KeyLoad.Server;
-using P = KeyLoad.UnitTests.Features.Authorization.SafeProjectorOperationProtocol;
+using P = KeyLoad.UnitTests.Authorization.SafeProjectorOperationProtocol;
 
-namespace KeyLoad.UnitTests.Features.Authorization;
+namespace KeyLoad.UnitTests.Authorization;
 
 internal static class ResourceLifetimeLedgerChild
 {

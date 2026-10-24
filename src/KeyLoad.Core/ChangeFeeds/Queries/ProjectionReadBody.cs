@@ -1,5 +1,5 @@
 using System.Collections.Immutable;
-using KeyLoad.Core.Features.ChangeFeeds;
+using KeyLoad.Core.ChangeFeeds;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core;

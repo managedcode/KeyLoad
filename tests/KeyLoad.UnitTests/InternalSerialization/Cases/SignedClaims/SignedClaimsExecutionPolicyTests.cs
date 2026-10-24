@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.InternalSerialization;
+namespace KeyLoad.UnitTests.InternalSerialization;
 
 /// <summary>AC-CQ-034: execution signed claim admission retains real leases and canonical claim bytes.</summary>
 internal sealed class SignedClaimsExecutionPolicyTests

@@ -1,6 +1,6 @@
-using KeyLoad.Core.Features.StoragePartitions.Contracts;
+using KeyLoad.Core.StoragePartitions.Contracts;
 
-namespace KeyLoad.Query.Features.QueryExecution;
+namespace KeyLoad.Query.QueryExecution;
 
 [GenerateSerializer, Alias(PartitionQuerySerializationAliases.OwnedLeafRequest)]
 internal sealed record PartitionQueryOwnedLeafRequest(

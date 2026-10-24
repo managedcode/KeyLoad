@@ -1,7 +1,7 @@
 using KeyLoad.Core;
 using KeyLoad.Storage;
 
-namespace KeyLoad.Query.Features.Search;
+namespace KeyLoad.Query.Search;
 
 internal static class Bm25CorpusReuse
 {

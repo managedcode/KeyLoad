@@ -1,4 +1,4 @@
-namespace KeyLoad.Server.Features.Search;
+namespace KeyLoad.Server.Search;
 
 internal sealed class TextProjectionShutdownState(Lock sync, TextProjectionWork work,
     TextProjectionSlotSet slots)

@@ -1,7 +1,7 @@
 using System.Security.Cryptography;
 using KeyLoad.Core;
 
-namespace KeyLoad.Query.Features.QueryExecution;
+namespace KeyLoad.Query.QueryExecution;
 
 internal static class DistributedSearchRequestDigest
 {

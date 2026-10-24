@@ -1,7 +1,7 @@
 using System.Reflection;
 using ManagedCode.TimeSeries.Summers;
 
-namespace KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries;
+namespace KeyLoad.Comparisons.BenchmarkComparisons.TimeSeries;
 
 internal static class TimeSeriesComparisonPackageVersion
 {

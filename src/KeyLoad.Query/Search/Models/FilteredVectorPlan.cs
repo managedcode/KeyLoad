@@ -1,4 +1,4 @@
-namespace KeyLoad.Query.Features.Search;
+namespace KeyLoad.Query.Search;
 
 internal readonly record struct FilteredVectorPlan(
     int EligibleCount,

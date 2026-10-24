@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 /// <summary>Exercises binary durable-state writes, activation replay, and deletion.</summary>
 [Alias(RuntimeJournalReplayProtocol.InterfaceAlias)]

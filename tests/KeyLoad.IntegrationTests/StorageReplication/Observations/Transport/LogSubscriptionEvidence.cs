@@ -1,6 +1,6 @@
 using System.Globalization;
 
-namespace KeyLoad.IntegrationTests.Features.StorageReplication;
+namespace KeyLoad.IntegrationTests.StorageReplication;
 
 internal sealed class LogSubscriptionEvidence(string nodeName)
 {

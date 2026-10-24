@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.EventStreams;
+namespace KeyLoad.IntegrationTests.EventStreams;
 
 internal static class EventAppendClusterProtocol
 {

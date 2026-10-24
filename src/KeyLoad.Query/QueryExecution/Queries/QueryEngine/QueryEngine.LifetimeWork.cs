@@ -1,5 +1,5 @@
 using KeyLoad.Core;
-using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.Core.ResourceExecution;
 
 namespace KeyLoad.Query;
 
@@ -9,8 +9,8 @@ public sealed partial class QueryEngine
         IResourceLifetimeWorkBinding binding, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(binding);
-        return Execute(principalId, budget => global::KeyLoad.Query.Features.QueryExecution.ScriptDomQueryAdapter.Lower(
-            global::KeyLoad.Features.QueryExecution.ScriptDomSyntax.Parse(request.Sql, database.OperationLimitsOptions,
+        return Execute(principalId, budget => global::KeyLoad.Query.QueryExecution.ScriptDomQueryAdapter.Lower(
+            global::KeyLoad.QueryExecution.ScriptDomSyntax.Parse(request.Sql, database.OperationLimitsOptions,
                 budget.Check, cancellationToken), request, database.OperationLimitsOptions, executionOptions, budget,
             cancellationToken), timeProvider, cancellationToken, binding);
     }
@@ -40,7 +40,7 @@ public sealed partial class QueryEngine
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(binding);
-        return Features.QueryExecution.PartitionQueryPublicExecution.Execute(this, principalId, request,
+        return QueryExecution.PartitionQueryPublicExecution.Execute(this, principalId, request,
             expectedOwner, timeProvider, cancellationToken, binding);
     }
     internal Task<GraphSearchResult> SearchSqlBoundAsync(string principalId, SqlGraphSearchRequest request,

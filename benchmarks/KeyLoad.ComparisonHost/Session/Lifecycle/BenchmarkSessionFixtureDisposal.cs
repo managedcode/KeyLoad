@@ -2,7 +2,7 @@ using System.Collections.Immutable;
 using System.Runtime.ExceptionServices;
 using KeyLoad.Comparisons;
 
-namespace KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonHost.BenchmarkComparisons;
 
 /// <summary>Joins the original session operation and each actual execution lifetime before rethrowing their retained failures.</summary>
 internal static class BenchmarkSessionFixtureDisposal

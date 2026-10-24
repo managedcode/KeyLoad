@@ -1,10 +1,10 @@
 using System.Text.Json;
 using KeyLoad.Query;
 using KeyLoad.Storage.ZoneTree;
-using KeyLoad.UnitTests.Features.Messaging;
-using P = KeyLoad.UnitTests.Features.BackupRestore.ArchiveEntryProtocol;
+using KeyLoad.UnitTests.Messaging;
+using P = KeyLoad.UnitTests.BackupRestore.ArchiveEntryProtocol;
 
-namespace KeyLoad.UnitTests.Features.BackupRestore;
+namespace KeyLoad.UnitTests.BackupRestore;
 
 internal static class ArchiveEntryAssertions
 {

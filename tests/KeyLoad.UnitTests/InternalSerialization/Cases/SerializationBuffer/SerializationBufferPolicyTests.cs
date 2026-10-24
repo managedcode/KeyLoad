@@ -1,8 +1,8 @@
 using System.Text;
 using System.Text.Json;
-using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.Core.ResourceExecution;
 
-namespace KeyLoad.UnitTests.Features.InternalSerialization;
+namespace KeyLoad.UnitTests.InternalSerialization;
 
 /// <summary>AC-IS-007: actual serializer buffer sinks retain the independent byte contracts.</summary>
 internal sealed class SerializationBufferPolicyTests

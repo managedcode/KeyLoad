@@ -1,6 +1,6 @@
 using System.Text.Json;
 
-namespace KeyLoad.IntegrationTests.Features.QueryExecution;
+namespace KeyLoad.IntegrationTests.QueryExecution;
 
 /// <summary>Checks additive nullable Q2 join and source-identity fields in the existing MCP schema.</summary>
 internal static class PartitionQueryMcpInnerJoinSchemaAssertions

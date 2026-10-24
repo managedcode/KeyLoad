@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.CodeQuality;
+namespace KeyLoad.UnitTests.CodeQuality;
 
 /// <summary>Owns the bounded snapshot passed to execution CLI deployment and original collector settlement.</summary>
 [ConfigurationOptions]

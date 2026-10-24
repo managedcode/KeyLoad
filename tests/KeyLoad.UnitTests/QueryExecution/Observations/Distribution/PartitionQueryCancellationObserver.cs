@@ -1,7 +1,7 @@
-using KeyLoad.UnitTests.Features.TestInfrastructure;
+using KeyLoad.UnitTests.TestInfrastructure;
 using ManagedCode.Communication.CQRS;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal sealed class PartitionQueryCancellationObserver
 {

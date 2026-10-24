@@ -1,4 +1,4 @@
-namespace KeyLoad.Server.Features.OrleansHosting.Contracts;
+namespace KeyLoad.Server.OrleansHosting.Contracts;
 
 /// <summary>Closed source, tag, event, and suppression policy for execution Orleans telemetry.</summary>
 internal static class OrleansTelemetryPolicy

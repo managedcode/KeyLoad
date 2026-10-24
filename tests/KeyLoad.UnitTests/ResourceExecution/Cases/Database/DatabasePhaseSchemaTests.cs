@@ -1,6 +1,6 @@
-using KeyLoad.Diagnostics.Features.ResourceExecution;
+using KeyLoad.Diagnostics.ResourceExecution;
 
-namespace KeyLoad.UnitTests.Features.ResourceExecution;
+namespace KeyLoad.UnitTests.ResourceExecution;
 
 internal sealed class DatabasePhaseSchemaTests
 {

@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Orleans.DurableJobs;
 using Orleans.Journaling;
 
-namespace KeyLoad.UnitTests.Features.Messaging;
+namespace KeyLoad.UnitTests.Messaging;
 
 internal static class SagaTimeoutJournalFence
 {

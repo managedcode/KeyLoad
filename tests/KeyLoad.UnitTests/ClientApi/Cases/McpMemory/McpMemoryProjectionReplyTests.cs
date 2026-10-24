@@ -1,6 +1,6 @@
 using KeyLoad.Server;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>AC-MCP-004/007: post-reply projections are monotonic and fail closed on invalid arithmetic.</summary>
 internal sealed class McpMemoryProjectionReplyTests

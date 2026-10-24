@@ -1,8 +1,8 @@
 using KeyLoad.Server;
-using KeyLoad.UnitTests.Features.ResourceExecution;
-using static KeyLoad.UnitTests.Features.Search.VectorReferenceLifetimeProtocol;
+using KeyLoad.UnitTests.ResourceExecution;
+using static KeyLoad.UnitTests.Search.VectorReferenceLifetimeProtocol;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 internal static class VectorReferenceLifetimeCalls
 {

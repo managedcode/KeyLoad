@@ -1,6 +1,6 @@
 using KeyLoad.Client;
-using KeyLoad.IntegrationTests.Features.ClientApi;
-namespace KeyLoad.IntegrationTests.Features.QueryExecution;
+using KeyLoad.IntegrationTests.ClientApi;
+namespace KeyLoad.IntegrationTests.QueryExecution;
 
 internal static class SqlFetchCountClusterAssertions
 {

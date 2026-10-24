@@ -1,6 +1,6 @@
 using KeyLoad.Clustering;
 
-namespace KeyLoad.IntegrationTests.Features.OrleansExecution;
+namespace KeyLoad.IntegrationTests.OrleansExecution;
 
 internal sealed record RequestCqrsConnectionCancellationRecord(Guid WaveId, string Node, Guid RequestId,
     GrainFailureStage CallSiteStage, bool RequestActive, bool AdmissionClosed,

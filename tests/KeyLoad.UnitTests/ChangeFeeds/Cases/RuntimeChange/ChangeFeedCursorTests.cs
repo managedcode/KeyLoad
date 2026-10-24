@@ -1,7 +1,7 @@
 using System.Buffers.Text;
-using KeyLoad.Core.Features.InternalSerialization;
+using KeyLoad.Core.InternalSerialization;
 
-namespace KeyLoad.UnitTests.Features.ChangeFeeds;
+namespace KeyLoad.UnitTests.ChangeFeeds;
 
 /// <summary>AC-IS-001: actual persisted change-feed cursors use the owning execution claims codec.</summary>
 internal sealed class ChangeFeedCursorTests

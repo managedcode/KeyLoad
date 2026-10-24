@@ -1,9 +1,9 @@
 using System.Collections.Immutable;
 using KeyLoad.Client;
-using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.ClientApi;
 using KeyLoad.Query;
 
-namespace KeyLoad.IntegrationTests.Features.Authorization;
+namespace KeyLoad.IntegrationTests.Authorization;
 
 /// <summary>Owns the actual persisted Orleans partition, scoped reader and public update calls.</summary>
 internal sealed record ResourcePolicyUpdateClusterScenario(PartitionRef Partition, EntityRef Reference,

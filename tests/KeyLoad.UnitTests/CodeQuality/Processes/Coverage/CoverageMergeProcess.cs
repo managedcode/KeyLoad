@@ -1,12 +1,12 @@
 using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Text.Json;
-using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.AppHost.Hosting;
-using KeyLoad.UnitTests.Features.BackupRestore;
+using KeyLoad.AppHost.TestInfrastructure;
+using KeyLoad.UnitTests.BackupRestore;
 using Microsoft.Extensions.Configuration;
 
-namespace KeyLoad.UnitTests.Features.CodeQuality;
+namespace KeyLoad.UnitTests.CodeQuality;
 
 internal static class CoverageMergeProcess
 {

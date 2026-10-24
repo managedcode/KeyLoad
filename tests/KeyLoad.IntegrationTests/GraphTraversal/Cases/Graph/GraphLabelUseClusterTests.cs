@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.GraphTraversal;
+namespace KeyLoad.IntegrationTests.GraphTraversal;
 
 [NotInParallel]
 internal sealed class GraphLabelUseClusterTests

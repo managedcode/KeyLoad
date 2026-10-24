@@ -26,7 +26,7 @@ public sealed record QueueDeadlineCursor([property: Orleans.Id(0)] Guid Incarnat
             DuePrefixCursor.Empty, DuePrefixCursor.Empty, DuePrefixCursor.Empty);
         }
         var validator = new DueSweepCursor(previous.Incarnation, previous.ReadGeneration,
-            Features.Messaging.DueWorkKind.Schedule, previous.Scheduled, previous.Leased);
+            Messaging.DueWorkKind.Schedule, previous.Scheduled, previous.Leased);
         var second = validator with
         {
             Schedules = previous.Metadata

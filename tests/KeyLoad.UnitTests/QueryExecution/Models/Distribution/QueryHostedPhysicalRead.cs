@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 /// <summary>Retains before and observed execution range counters for one actually selected physical store.</summary>
 internal sealed class QueryHostedPhysicalRead(QueryHostedStorageOwner owner)

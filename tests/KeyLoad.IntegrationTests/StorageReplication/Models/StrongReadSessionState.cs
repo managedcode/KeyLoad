@@ -1,6 +1,6 @@
-using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.ClientApi;
 
-namespace KeyLoad.IntegrationTests.Features.StorageReplication;
+namespace KeyLoad.IntegrationTests.StorageReplication;
 
 internal sealed record StrongReadSessionState(PartitionRef Partition, McpPersistedIdentity Identity,
     StrongReadSessionCommit[] Commits, OutboxStatus Outbox, DocumentResult? Target);

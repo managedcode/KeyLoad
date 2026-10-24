@@ -1,4 +1,4 @@
-namespace KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
+namespace KeyLoad.LoadTests.AppHost.BenchmarkComparisons;
 
 /// <summary>Retains typed Aspire references for the client that owns workload execution outside the resource graph.</summary>
 internal sealed class LoadTestClientSettings

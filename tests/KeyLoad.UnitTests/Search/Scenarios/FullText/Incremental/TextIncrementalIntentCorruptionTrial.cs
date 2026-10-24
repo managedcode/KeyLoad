@@ -1,10 +1,10 @@
 using KeyLoad.Clustering;
 using KeyLoad.Server;
-using KeyLoad.Server.Features.Search;
-using KeyLoad.UnitTests.Features.Messaging;
+using KeyLoad.Server.Search;
+using KeyLoad.UnitTests.Messaging;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 /// <summary>Owns the real prepared page, joined owner, damaged envelope and exact original repair lifetime.</summary>
 internal static class TextIncrementalIntentCorruptionTrial

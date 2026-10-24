@@ -1,9 +1,9 @@
 using System.Globalization;
 using System.Reflection;
-using KeyLoad.Core.Features.TimeSeries;
+using KeyLoad.Core.TimeSeries;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.TimeSeries;
+namespace KeyLoad.UnitTests.TimeSeries;
 
 internal sealed class SampleChunkPayloadContractTests
 {

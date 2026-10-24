@@ -1,13 +1,13 @@
 using System.Collections.Immutable;
 using System.Text.Json;
 using KeyLoad.Clustering;
-using KeyLoad.UnitTests.Features.Authorization;
-using KeyLoad.UnitTests.Features.InternalSerialization;
-using D = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreTestData;
-using N = KeyLoad.UnitTests.Features.AnalyticsStore.RuntimeAnalyticsBounds;
-using O = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreTestOperations;
+using KeyLoad.UnitTests.Authorization;
+using KeyLoad.UnitTests.InternalSerialization;
+using D = KeyLoad.UnitTests.AnalyticsStore.AnalyticsStoreTestData;
+using N = KeyLoad.UnitTests.AnalyticsStore.RuntimeAnalyticsBounds;
+using O = KeyLoad.UnitTests.AnalyticsStore.AnalyticsStoreTestOperations;
 
-namespace KeyLoad.UnitTests.Features.AnalyticsStore;
+namespace KeyLoad.UnitTests.AnalyticsStore;
 
 internal static class AnalyticsMapColdReads
 {

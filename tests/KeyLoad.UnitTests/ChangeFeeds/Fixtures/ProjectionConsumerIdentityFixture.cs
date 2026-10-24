@@ -1,7 +1,7 @@
 using KeyLoad.Storage;
 using ManagedCode.Communication.Commands;
 
-namespace KeyLoad.UnitTests.Features.ChangeFeeds;
+namespace KeyLoad.UnitTests.ChangeFeeds;
 
 internal static class ProjectionConsumerIdentityFixture
 {

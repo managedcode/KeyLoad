@@ -2,7 +2,7 @@ using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.BackupRestore;
+namespace KeyLoad.UnitTests.BackupRestore;
 
 internal static class VerifiedArchiveCancellationTrial
 {

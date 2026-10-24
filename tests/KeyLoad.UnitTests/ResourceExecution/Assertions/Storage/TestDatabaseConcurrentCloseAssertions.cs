@@ -1,8 +1,8 @@
-using KeyLoad.Core.Features.DocumentStorage;
+using KeyLoad.Core.DocumentStorage;
 using KeyLoad.Storage.ZoneTree;
 using ManagedCode.Communication;
 
-namespace KeyLoad.UnitTests.Features.ResourceExecution;
+namespace KeyLoad.UnitTests.ResourceExecution;
 
 internal static class TestDatabaseConcurrentCloseAssertions
 {

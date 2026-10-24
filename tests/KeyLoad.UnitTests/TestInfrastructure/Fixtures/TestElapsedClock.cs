@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.TestInfrastructure;
+namespace KeyLoad.UnitTests.TestInfrastructure;
 
 /// <summary>Keeps a borrowed provider and its monotonic start together across test helper joins.</summary>
 internal sealed class TestElapsedClock(TimeProvider provider)

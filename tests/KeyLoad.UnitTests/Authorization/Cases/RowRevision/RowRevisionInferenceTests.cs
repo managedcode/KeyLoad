@@ -1,6 +1,6 @@
-using P = KeyLoad.UnitTests.Features.Authorization.RowRevisionInferenceProtocol;
+using P = KeyLoad.UnitTests.Authorization.RowRevisionInferenceProtocol;
 
-namespace KeyLoad.UnitTests.Features.Authorization;
+namespace KeyLoad.UnitTests.Authorization;
 
 internal sealed class RowRevisionInferenceTests
 {

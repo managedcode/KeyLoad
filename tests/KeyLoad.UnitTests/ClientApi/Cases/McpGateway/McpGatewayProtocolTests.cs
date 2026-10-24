@@ -2,7 +2,7 @@ using System.Text.Json;
 using KeyLoad.Server;
 using ModelContextProtocol;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>AC-MCPGW-001/002: the official list is the exact fixed meta-tool set.</summary>
 internal sealed class McpGatewayProtocolTests

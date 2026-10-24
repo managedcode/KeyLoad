@@ -1,5 +1,5 @@
 
-namespace KeyLoad.Features.QueryExecution;
+namespace KeyLoad.QueryExecution;
 
 internal sealed class ScriptDomBoundedReader(string text, Action check) : TextReader
 {

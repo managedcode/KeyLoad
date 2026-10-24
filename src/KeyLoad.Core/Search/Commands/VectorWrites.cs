@@ -22,7 +22,7 @@ public static class VectorWrites
         var document = engine.VisibleVertex(tx, principal, new(partition, vector.Collection, vector.Id));
         engine.Authorization.RequireWriteRow(principal, document.Access);
         DocumentStorageExecutionDocuments.CheckRevision(document.Revision, vector.ExpectedDocumentRevision);
-        Features.Search.VectorFieldProfiles.Require(resource, vector);
+        Search.VectorFieldProfiles.Require(resource, vector);
         VectorProjectionApply.PutCanonicalVector(tx, partition, vector, document);
         return new(UpsertKindText, vector.Collection, vector.Id, document.Revision);
     }

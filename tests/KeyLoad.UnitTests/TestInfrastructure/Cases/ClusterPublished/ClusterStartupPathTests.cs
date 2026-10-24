@@ -3,7 +3,7 @@ using Aspire.Hosting.ApplicationModel;
 using KeyLoad.AppHost.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace KeyLoad.UnitTests.Features.TestInfrastructure;
+namespace KeyLoad.UnitTests.TestInfrastructure;
 
 internal sealed class ClusterStartupPathTests
 {

@@ -1,6 +1,6 @@
-using P = KeyLoad.IntegrationTests.Features.OrleansExecution.CatalogBootstrapAuthorityProtocol;
+using P = KeyLoad.IntegrationTests.OrleansExecution.CatalogBootstrapAuthorityProtocol;
 
-namespace KeyLoad.IntegrationTests.Features.OrleansExecution;
+namespace KeyLoad.IntegrationTests.OrleansExecution;
 
 [NotInParallel]
 internal sealed class CatalogBootstrapAuthorityClusterTests

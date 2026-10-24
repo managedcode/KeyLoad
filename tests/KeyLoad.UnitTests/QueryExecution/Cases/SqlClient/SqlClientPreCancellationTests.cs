@@ -1,8 +1,8 @@
 using KeyLoad.Client;
-using KeyLoad.UnitTests.Features.ClientApi;
+using KeyLoad.UnitTests.ClientApi;
 using Microsoft.AspNetCore.Http;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 /// <summary>AC-SQLC-004/005: original SDK cancellation outcomes stay bounded.</summary>
 internal sealed class SqlClientPreCancellationTests

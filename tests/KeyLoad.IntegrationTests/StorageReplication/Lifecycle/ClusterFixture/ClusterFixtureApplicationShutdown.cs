@@ -1,9 +1,9 @@
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
-using KeyLoad.Diagnostics.Features.ResourceExecution;
+using KeyLoad.Diagnostics.ResourceExecution;
 using KeyLoad.Server;
 
-namespace KeyLoad.IntegrationTests.Features.StorageReplication;
+namespace KeyLoad.IntegrationTests.StorageReplication;
 
 internal static class ClusterFixtureApplicationShutdown
 {

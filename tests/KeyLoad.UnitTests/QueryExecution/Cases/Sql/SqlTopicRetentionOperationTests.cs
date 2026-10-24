@@ -1,7 +1,7 @@
 using System.Text.Json;
-using KeyLoad.UnitTests.Features.EventStreams;
+using KeyLoad.UnitTests.EventStreams;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal sealed class SqlTopicRetentionOperationTests
 {

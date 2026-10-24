@@ -1,4 +1,4 @@
-namespace KeyLoad.Features.InternalSerialization;
+namespace KeyLoad.InternalSerialization;
 
 // Completion is scoped to nullability metadata: a shared collection can be nullable in one
 // member and required in another. Cached height also protects a later, deeper shared path.

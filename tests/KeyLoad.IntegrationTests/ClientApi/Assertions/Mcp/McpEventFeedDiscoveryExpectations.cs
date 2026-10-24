@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 
-namespace KeyLoad.IntegrationTests.Features.ClientApi;
+namespace KeyLoad.IntegrationTests.ClientApi;
 
 internal static class McpEventFeedDiscoveryExpectations
 {

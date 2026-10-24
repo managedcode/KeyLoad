@@ -3,7 +3,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
 
-namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
+namespace KeyLoad.Analyzers.Tests.CodeQuality;
 
 internal static class AnalyzerFixture
 {
@@ -91,7 +91,7 @@ internal static class AnalyzerFixture
                 typeof(Orleans.Runtime.IPersistentState<>).Assembly.Location,
                 typeof(Microsoft.AspNetCore.Builder.WebApplication).Assembly.Location,
                 typeof(KeyLoad.ConfigurationOptionsAttribute).Assembly.Location,
-                typeof(KeyLoad.Diagnostics.Features.ResourceExecution.DatabasePhaseBank).Assembly.Location,
+                typeof(KeyLoad.Diagnostics.ResourceExecution.DatabasePhaseBank).Assembly.Location,
                 typeof(Microsoft.Extensions.Options.IOptions<>).Assembly.Location,
                 typeof(Microsoft.Extensions.Configuration.IConfiguration).Assembly.Location,
                 typeof(Microsoft.Extensions.Configuration.ConfigurationBinder).Assembly.Location,

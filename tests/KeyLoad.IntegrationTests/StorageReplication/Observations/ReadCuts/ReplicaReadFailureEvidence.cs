@@ -1,6 +1,6 @@
 using System.Globalization;
 
-namespace KeyLoad.IntegrationTests.Features.StorageReplication;
+namespace KeyLoad.IntegrationTests.StorageReplication;
 
 internal static class ReplicaReadFailureEvidence
 {

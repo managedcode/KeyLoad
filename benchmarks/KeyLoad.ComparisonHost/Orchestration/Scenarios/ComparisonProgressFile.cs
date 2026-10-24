@@ -1,7 +1,7 @@
 using System.Text;
 using System.Threading.Channels;
 
-namespace KeyLoad.ComparisonHost.Features.BenchmarkOrchestration;
+namespace KeyLoad.ComparisonHost.BenchmarkOrchestration;
 
 /// <summary>Serializes one latest marker to a small atomic file independently of test output capture.</summary>
 internal sealed class ComparisonProgressFile

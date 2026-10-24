@@ -1,7 +1,7 @@
 using KeyLoad.Server;
-using C = KeyLoad.UnitTests.Features.StorageRecovery.PartitionStoragePartialClose;
+using C = KeyLoad.UnitTests.StorageRecovery.PartitionStoragePartialClose;
 
-namespace KeyLoad.UnitTests.Features.StorageRecovery;
+namespace KeyLoad.UnitTests.StorageRecovery;
 
 internal static class PartitionStorageStopAssertions
 {

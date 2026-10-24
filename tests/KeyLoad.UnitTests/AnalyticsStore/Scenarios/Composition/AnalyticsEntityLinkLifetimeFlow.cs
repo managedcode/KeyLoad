@@ -1,11 +1,11 @@
 using KeyLoad.Storage;
 using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
-using A = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsEntityLinkLifetimeAssertions;
-using D = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreTestData;
-using F = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsEntityLinkLifetimeFixture;
+using A = KeyLoad.UnitTests.AnalyticsStore.AnalyticsEntityLinkLifetimeAssertions;
+using D = KeyLoad.UnitTests.AnalyticsStore.AnalyticsStoreTestData;
+using F = KeyLoad.UnitTests.AnalyticsStore.AnalyticsEntityLinkLifetimeFixture;
 
-namespace KeyLoad.UnitTests.Features.AnalyticsStore;
+namespace KeyLoad.UnitTests.AnalyticsStore;
 
 internal static class AnalyticsEntityLinkLifetimeFlow
 {

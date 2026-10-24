@@ -1,7 +1,7 @@
-using KeyLoad.Server.Features.Search;
-using static KeyLoad.UnitTests.Features.Search.TextProviderAuditProtocol;
+using KeyLoad.Server.Search;
+using static KeyLoad.UnitTests.Search.TextProviderAuditProtocol;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 internal static class TextProviderAuditManifestDamage
 {

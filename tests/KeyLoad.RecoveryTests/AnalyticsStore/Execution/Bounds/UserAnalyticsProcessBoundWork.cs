@@ -1,11 +1,11 @@
 using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Core.Features.ResourceExecution;
-using KeyLoad.RecoveryTests.Features.ResourceExecution;
+using KeyLoad.Core.ResourceExecution;
+using KeyLoad.RecoveryTests.ResourceExecution;
 using KeyLoad.Server;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.RecoveryTests.Features.AnalyticsStore;
+namespace KeyLoad.RecoveryTests.AnalyticsStore;
 
 /// <summary>Actual physical-host work ownership for execution component reads; no quorum claim.</summary>
 internal sealed class UserAnalyticsProcessBoundWork : IAsyncDisposable

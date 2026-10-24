@@ -1,6 +1,6 @@
-using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.ClientApi;
 
-namespace KeyLoad.IntegrationTests.Features.EventStreams;
+namespace KeyLoad.IntegrationTests.EventStreams;
 
 internal sealed class EventCurrentReadAuthorityClusterState(McpEventStreamScenario scenario,
     McpPersistedIdentity identity, CommandRequest seed, CommitReceipt seedReceipt, StreamPage original, OutboxStatus outbox)

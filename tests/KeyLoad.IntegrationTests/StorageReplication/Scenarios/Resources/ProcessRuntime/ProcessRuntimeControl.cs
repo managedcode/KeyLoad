@@ -2,10 +2,10 @@ using System.Collections.Concurrent;
 using System.Globalization;
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
-using KeyLoad.AppHost.Features.TestInfrastructure;
-using static KeyLoad.IntegrationTests.Features.StorageReplication.ClusterReplicationTestSupport;
+using KeyLoad.AppHost.TestInfrastructure;
+using static KeyLoad.IntegrationTests.StorageReplication.ClusterReplicationTestSupport;
 
-namespace KeyLoad.IntegrationTests.Features.StorageReplication;
+namespace KeyLoad.IntegrationTests.StorageReplication;
 
 /// <summary>Coordinates actual abrupt execution process faults and one retained Aspire restart per fault.</summary>
 internal sealed class ProcessRuntimeControl(DistributedApplication app, IReadOnlyCollection<string> resourceNames,

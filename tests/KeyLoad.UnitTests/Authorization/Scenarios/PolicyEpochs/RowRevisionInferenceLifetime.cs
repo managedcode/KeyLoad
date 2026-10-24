@@ -2,7 +2,7 @@ using KeyLoad.Server;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 
-namespace KeyLoad.UnitTests.Features.Authorization;
+namespace KeyLoad.UnitTests.Authorization;
 
 /// <summary>Owns only these original row-revision fixtures and their actual cold store close observations.</summary>
 internal sealed class RowRevisionInferenceLifetime(TestDatabase original)

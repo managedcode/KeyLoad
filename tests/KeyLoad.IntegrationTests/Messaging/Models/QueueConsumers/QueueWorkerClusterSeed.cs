@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.Messaging;
+namespace KeyLoad.IntegrationTests.Messaging;
 
 internal sealed record QueueWorkerClusterSeed(QueueLaneRef Lane, MessagingClusterIdentity Identity,
     CommandRequest Producer, CommitReceipt Receipt, byte[] SigningKey)

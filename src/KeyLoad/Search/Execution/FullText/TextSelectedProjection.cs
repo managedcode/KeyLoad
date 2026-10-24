@@ -1,8 +1,8 @@
 using KeyLoad.Core;
-using KeyLoad.Query.Features.Search;
+using KeyLoad.Query.Search;
 using KeyLoad.Storage;
 
-namespace KeyLoad.Server.Features.Search;
+namespace KeyLoad.Server.Search;
 
 /// <summary>Owns bootstrap disposal and borrows the partition-owned maintained reader service.</summary>
 internal sealed class TextSelectedProjection(ITextProjection bootstrap,

@@ -1,5 +1,5 @@
-using KeyLoad.Core.Features.CommandOutcomes.Execution;
-using KeyLoad.Core.Features.CommandOutcomes.Identity;
+using KeyLoad.Core.CommandOutcomes.Execution;
+using KeyLoad.Core.CommandOutcomes.Identity;
 using KeyLoad.Storage;
 using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
@@ -38,7 +38,7 @@ public static class RetainedSubmissionOutcome
             {
                 return engine.ReadValidatedSubmissionOutcome(view, normalized);
             }
-            catch (KeyLoadException missing) when (missing.Code == ErrorCode.RecoveryRequired && string.Equals(missing.Message, CommandOutcomes.MissingDurableOutcomeMessage, StringComparison.Ordinal))
+            catch (KeyLoadException missing) when (missing.Code == ErrorCode.RecoveryRequired && string.Equals(missing.Message, CommandOutcomeOperations.MissingDurableOutcomeMessage, StringComparison.Ordinal))
             {
                 work?.Check();
                 return null;

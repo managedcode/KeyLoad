@@ -1,7 +1,7 @@
-using KeyLoad.Core.Features.DocumentStorage;
-using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.Core.DocumentStorage;
+using KeyLoad.Core.ResourceExecution;
 using KeyLoad.Storage;
-namespace KeyLoad.Core.Features.Search;
+namespace KeyLoad.Core.Search;
 
 /// <summary>Captures the exact original-cut dependency closure of existing document/vector readers.</summary>
 internal static class SearchLookupClosure

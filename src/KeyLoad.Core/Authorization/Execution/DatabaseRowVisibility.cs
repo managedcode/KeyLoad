@@ -1,4 +1,4 @@
-using KeyLoad.Core.Features.Authorization;
+using KeyLoad.Core.Authorization;
 
 namespace KeyLoad.Core;
 /// <summary>Executes DatabaseRowVisibility operations against the caller's database context.</summary>

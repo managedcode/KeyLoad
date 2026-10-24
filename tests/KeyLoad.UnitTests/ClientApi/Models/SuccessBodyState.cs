@@ -1,7 +1,7 @@
 using KeyLoad.Client;
-using KeyLoad.UnitTests.Features.OrleansExecution;
+using KeyLoad.UnitTests.OrleansExecution;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 internal sealed class SuccessBodyState(ConnectionScenario scenario, PrincipalRecord principal,
     SuccessBodyEndpoint endpoint, KeyLoadClient client, DeclaredResponseEofTasks tasks,

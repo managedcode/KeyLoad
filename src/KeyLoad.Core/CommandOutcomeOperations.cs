@@ -1,12 +1,12 @@
-using KeyLoad.Core.Features.CommandOutcomes.Execution;
-using KeyLoad.Core.Features.CommandOutcomes.Identity;
+using KeyLoad.Core.CommandOutcomes.Execution;
+using KeyLoad.Core.CommandOutcomes.Identity;
 using KeyLoad.Storage;
 using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.Core;
-/// <summary>Executes CommandOutcomes operations against the caller's database context.</summary>
-public static class CommandOutcomes
+/// <summary>Executes CommandOutcomeOperations against the caller's database context.</summary>
+public static class CommandOutcomeOperations
 {
     internal const string MissingDurableOutcomeMessage = "The applied command has no durable outcome.";
     internal const string EarlierOutcomeIncarnationMessage = "The command belongs to an earlier incarnation.";

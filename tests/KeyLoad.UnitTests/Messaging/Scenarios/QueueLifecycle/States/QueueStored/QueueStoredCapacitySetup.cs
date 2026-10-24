@@ -1,7 +1,7 @@
 using System.Text.Json;
 using ManagedCode.Communication.Commands;
 
-namespace KeyLoad.UnitTests.Features.Messaging;
+namespace KeyLoad.UnitTests.Messaging;
 
 internal static class QueueStoredCapacitySetup
 {

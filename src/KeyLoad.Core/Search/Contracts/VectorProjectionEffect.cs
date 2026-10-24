@@ -1,4 +1,4 @@
-namespace KeyLoad.Core.Features.Search;
+namespace KeyLoad.Core.Search;
 
 /// <summary>Retains the exact effect fingerprint and stable mutation receipt for an active projection.</summary>
 [global::Orleans.GenerateSerializer]

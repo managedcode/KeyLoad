@@ -1,11 +1,11 @@
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
-using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.AppHost.Hosting;
-using KeyLoad.IntegrationTests.Features.StorageReplication;
+using KeyLoad.AppHost.TestInfrastructure;
+using KeyLoad.IntegrationTests.StorageReplication;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
+namespace KeyLoad.IntegrationTests.DatabaseComposition;
 
 /// <summary>Owns one real development silo or the same real three-silo functional scenario through Aspire.</summary>
 internal sealed partial class FunctionalGateFixture : IAsyncDisposable

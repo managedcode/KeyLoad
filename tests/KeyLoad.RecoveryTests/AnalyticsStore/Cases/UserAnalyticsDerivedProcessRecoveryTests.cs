@@ -1,4 +1,4 @@
-namespace KeyLoad.RecoveryTests.Features.AnalyticsStore;
+namespace KeyLoad.RecoveryTests.AnalyticsStore;
 
 internal sealed class UserAnalyticsDerivedProcessRecoveryTests
 {

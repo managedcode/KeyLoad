@@ -15,7 +15,7 @@ public static class PrincipalConfiguration
     internal static Result<object> ExecuteConfigurePrincipal(IAtomicTransaction transaction, Command<DatabaseCommand> operation)
     {
         var principal = OperationProtocol.Payload<ConfigurePrincipalRequest>(operation).Principal;
-        global::KeyLoad.Core.Features.RuntimeJournaling.Identity.RuntimeJournalIdentity.RequireMutablePrincipal(principal.Id);
+        global::KeyLoad.Core.RuntimeJournaling.Identity.RuntimeJournalIdentity.RequireMutablePrincipal(principal.Id);
         ProtocolValidation.ValidatePrincipalStructure(principal);
         JsonData.Identifier(principal.Id);
         JsonData.Identifier(principal.TenantId);
@@ -37,7 +37,7 @@ public static class PrincipalConfiguration
     internal static Result<object> ExecuteConfigureApiKey(this DatabaseEngine engine, IAtomicTransaction transaction, Command<DatabaseCommand> operation)
     {
         var credential = OperationProtocol.Payload<ConfigureApiKeyRequest>(operation).ApiKey;
-        global::KeyLoad.Core.Features.RuntimeJournaling.Identity.RuntimeJournalIdentity.RequirePublicCredential(credential.PrincipalId);
+        global::KeyLoad.Core.RuntimeJournaling.Identity.RuntimeJournalIdentity.RequirePublicCredential(credential.PrincipalId);
         if (credential.Verifier.Length != CredentialVerifierCharacters || !credential.Verifier.All(char.IsAsciiHexDigit))
         {
             throw Errors.Fail(ErrorCode.Validation, CredentialSha256RequiredMessage);

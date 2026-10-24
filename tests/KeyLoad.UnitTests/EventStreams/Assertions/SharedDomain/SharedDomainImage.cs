@@ -1,8 +1,8 @@
-using KeyLoad.RecoveryTests.Features.EventStreams;
+using KeyLoad.RecoveryTests.EventStreams;
 using KeyLoad.Storage;
-using static KeyLoad.RecoveryTests.Features.EventStreams.SharedDomainProtocol;
+using static KeyLoad.RecoveryTests.EventStreams.SharedDomainProtocol;
 
-namespace KeyLoad.UnitTests.Features.EventStreams;
+namespace KeyLoad.UnitTests.EventStreams;
 
 internal static class SharedDomainImage
 {

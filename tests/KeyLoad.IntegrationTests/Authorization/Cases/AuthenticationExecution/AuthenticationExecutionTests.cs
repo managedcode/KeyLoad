@@ -1,7 +1,7 @@
-using KeyLoad.RecoveryTests.Features.OrleansExecution;
+using KeyLoad.RecoveryTests.OrleansExecution;
 using KeyLoad.Server;
 
-namespace KeyLoad.IntegrationTests.Features.Authorization;
+namespace KeyLoad.IntegrationTests.Authorization;
 
 internal sealed class AuthenticationExecutionTests
 {

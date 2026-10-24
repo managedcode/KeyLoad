@@ -2,7 +2,7 @@ using System.Text;
 using KeyLoad.Storage;
 using ManagedCode.Communication;
 
-namespace KeyLoad.Core.Features.Messaging;
+namespace KeyLoad.Core.Messaging;
 
 internal static class RemoteTransferStorage
 {

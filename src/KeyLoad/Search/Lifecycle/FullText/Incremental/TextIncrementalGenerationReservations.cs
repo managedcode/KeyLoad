@@ -1,4 +1,4 @@
-namespace KeyLoad.Server.Features.Search;
+namespace KeyLoad.Server.Search;
 
 /// <summary>Tracks retained execution generation reservations on the original incremental worker.</summary>
 internal sealed class TextIncrementalGenerationReservations

@@ -1,6 +1,6 @@
 using System.Text.Json;
 
-namespace KeyLoad.Core.Features.QueryExecution;
+namespace KeyLoad.Core.QueryExecution;
 
 internal static class TopicModelQueryValidation
 {

@@ -1,9 +1,9 @@
-using KeyLoad.Core.Features.CommandOutcomes.Contracts;
+using KeyLoad.Core.CommandOutcomes.Contracts;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 using ManagedCode.Communication;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal static class FullPartitionOutcomeIdentityAssertions
 {

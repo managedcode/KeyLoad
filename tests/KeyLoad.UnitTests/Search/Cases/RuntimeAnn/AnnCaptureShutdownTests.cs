@@ -1,8 +1,8 @@
 using KeyLoad.Server;
-using KeyLoad.UnitTests.Features.QueryExecution;
+using KeyLoad.UnitTests.QueryExecution;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 internal sealed class AnnCaptureShutdownTests
 {

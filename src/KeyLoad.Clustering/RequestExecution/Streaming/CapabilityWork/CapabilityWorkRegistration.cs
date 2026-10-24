@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
-using KeyLoad.Core.Features.ResourceExecution;
-using KeyLoad.Core.Features.StoragePartitions.Contracts;
+using KeyLoad.Core.ResourceExecution;
+using KeyLoad.Core.StoragePartitions.Contracts;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Clustering;

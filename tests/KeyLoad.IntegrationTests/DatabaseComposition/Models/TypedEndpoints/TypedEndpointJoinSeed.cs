@@ -1,6 +1,6 @@
-using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.ClientApi;
 
-namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
+namespace KeyLoad.IntegrationTests.DatabaseComposition;
 
 internal sealed record TypedEndpointJoinSeed(PartitionRef Partition, ResourceDefinition ToDefinition,
     McpPersistedIdentity Identity, PrincipalRecord Principal, TypedEndpointJoinModels Models);

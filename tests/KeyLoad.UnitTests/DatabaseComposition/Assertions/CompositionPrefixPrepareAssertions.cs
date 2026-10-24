@@ -1,13 +1,13 @@
 using System.Text.Json;
-using KeyLoad.Core.Features.InternalSerialization;
-using KeyLoad.Core.Features.StoragePartitions.Contracts;
+using KeyLoad.Core.InternalSerialization;
+using KeyLoad.Core.StoragePartitions.Contracts;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
-using KeyLoad.UnitTests.Features.Messaging;
+using KeyLoad.UnitTests.Messaging;
 using ManagedCode.Communication;
-using D = KeyLoad.UnitTests.Features.DatabaseComposition.CompositionPrefixPrepareData;
+using D = KeyLoad.UnitTests.DatabaseComposition.CompositionPrefixPrepareData;
 
-namespace KeyLoad.UnitTests.Features.DatabaseComposition;
+namespace KeyLoad.UnitTests.DatabaseComposition;
 
 internal static class CompositionPrefixPrepareAssertions
 {

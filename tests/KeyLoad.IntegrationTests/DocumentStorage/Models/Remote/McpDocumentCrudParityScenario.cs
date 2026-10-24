@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.DocumentStorage;
+namespace KeyLoad.IntegrationTests.DocumentStorage;
 
 /// <summary>Frozen caller-visible document values and commands for the real Orleans CRUD parity cases.</summary>
 internal sealed record McpDocumentCrudParityScenario(PartitionRef Partition)

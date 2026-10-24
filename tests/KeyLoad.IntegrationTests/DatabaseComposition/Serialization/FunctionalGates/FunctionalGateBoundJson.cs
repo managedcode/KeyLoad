@@ -1,7 +1,7 @@
 using System.Text;
 using System.Text.Json;
 
-namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
+namespace KeyLoad.IntegrationTests.DatabaseComposition;
 
 /// <summary>Orders trusted literal expected JSON without borrowing production canonicalization or actual results.</summary>
 internal static class FunctionalGateBoundJson

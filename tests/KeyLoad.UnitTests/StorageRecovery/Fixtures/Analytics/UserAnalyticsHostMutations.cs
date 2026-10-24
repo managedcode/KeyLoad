@@ -1,9 +1,9 @@
 using System.Collections.Immutable;
 using KeyLoad.Server;
 using ManagedCode.Communication.Commands;
-using P = KeyLoad.UnitTests.Features.StorageRecovery.UserAnalyticsHostProtocol;
+using P = KeyLoad.UnitTests.StorageRecovery.UserAnalyticsHostProtocol;
 
-namespace KeyLoad.UnitTests.Features.StorageRecovery;
+namespace KeyLoad.UnitTests.StorageRecovery;
 
 internal static class UserAnalyticsHostMutations
 {

@@ -1,4 +1,4 @@
-namespace KeyLoad.Core.Features.Search;
+namespace KeyLoad.Core.Search;
 
 internal sealed record TextSeedCapture(string PrincipalId, long PolicyEpoch,
     long SchemaVersion, long Position, long AppliedPosition, long UpperSequence,

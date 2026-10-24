@@ -1,6 +1,6 @@
 using KeyLoad.Core;
 
-namespace KeyLoad.Query.Features.Search;
+namespace KeyLoad.Query.Search;
 
 internal sealed class AnnWorkBudget
 {

@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal static class OrleansTelemetryAncestryProtocol
 {

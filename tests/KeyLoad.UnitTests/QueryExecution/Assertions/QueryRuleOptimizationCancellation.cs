@@ -1,8 +1,8 @@
 using KeyLoad.Query;
 using KeyLoad.Storage.ZoneTree;
-using KeyLoad.UnitTests.Features.GraphTraversal;
+using KeyLoad.UnitTests.GraphTraversal;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal static class QueryRuleOptimizationCancellation
 {

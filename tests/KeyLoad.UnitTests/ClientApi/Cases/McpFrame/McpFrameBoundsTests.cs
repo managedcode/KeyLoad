@@ -1,7 +1,7 @@
 using System.Text;
 using KeyLoad.Server;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>AC-MCP-003/004/005: framing is strict, bounded, and rejects hostile wire payloads before SDK parsing.</summary>
 internal sealed class McpFrameBoundsTests

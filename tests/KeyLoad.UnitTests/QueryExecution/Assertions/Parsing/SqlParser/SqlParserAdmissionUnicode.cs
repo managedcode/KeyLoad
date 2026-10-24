@@ -1,11 +1,11 @@
 using System.Text;
 using KeyLoad.Query;
 using KeyLoad.Storage.ZoneTree;
-using KeyLoad.UnitTests.Features.Authorization;
-using KeyLoad.UnitTests.Features.GraphTraversal;
+using KeyLoad.UnitTests.Authorization;
+using KeyLoad.UnitTests.GraphTraversal;
 using Dom = Microsoft.SqlServer.TransactSql.ScriptDom;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal static class SqlParserAdmissionUnicode
 {

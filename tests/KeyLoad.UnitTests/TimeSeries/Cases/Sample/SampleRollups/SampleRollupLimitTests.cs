@@ -1,9 +1,9 @@
 using System.Text.Json;
-using KeyLoad.Core.Features.Authorization;
+using KeyLoad.Core.Authorization;
 using ManagedCode.Communication;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.UnitTests.Features.TimeSeries;
+namespace KeyLoad.UnitTests.TimeSeries;
 
 internal sealed class SampleRollupLimitTests
 {

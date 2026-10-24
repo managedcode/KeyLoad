@@ -1,7 +1,7 @@
-using KeyLoad.Core.Features.Search;
+using KeyLoad.Core.Search;
 using KeyLoad.Storage;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 internal static class Bm25PortableFamilyBytes
 {

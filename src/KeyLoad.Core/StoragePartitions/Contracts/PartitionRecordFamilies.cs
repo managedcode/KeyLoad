@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 
-namespace KeyLoad.Core.Features.StoragePartitions.Contracts;
+namespace KeyLoad.Core.StoragePartitions.Contracts;
 
 /// <summary>Closed ordinal inventory of current partition-key constructor families.</summary>
 internal static class PartitionRecordFamilies
@@ -9,11 +9,11 @@ internal static class PartitionRecordFamilies
     internal const string AggregateSnapshot = "aggregate-snapshot";
     internal const string AnalyticsEvent = "analytics-event";
     internal const string AnalyticsGeneration = "analytics-generation";
-    internal const string Bm25CorpusCurrent = global::KeyLoad.Core.Features.Search.Bm25CorpusProtocol.CurrentFamily;
+    internal const string Bm25CorpusCurrent = global::KeyLoad.Core.Search.Bm25CorpusProtocol.CurrentFamily;
     internal const string DeadLetter = "dead-letter";
-    internal const string FileHead = global::KeyLoad.Core.Features.BlobStorage.FileStorageProtocol.HeadFamily;
-    internal const string FileUpload = global::KeyLoad.Core.Features.BlobStorage.FileStorageProtocol.UploadFamily;
-    internal const string FileQuota = global::KeyLoad.Core.Features.BlobStorage.FileStorageProtocol.QuotaFamily;
+    internal const string FileHead = global::KeyLoad.Core.BlobStorage.FileStorageProtocol.HeadFamily;
+    internal const string FileUpload = global::KeyLoad.Core.BlobStorage.FileStorageProtocol.UploadFamily;
+    internal const string FileQuota = global::KeyLoad.Core.BlobStorage.FileStorageProtocol.QuotaFamily;
     internal const string Document = "document";
     internal const string DocumentEpoch = "document-epoch";
     internal const string Edge = "edge";
@@ -30,19 +30,19 @@ internal static class PartitionRecordFamilies
     internal const string Lease = "lease";
     internal const string MessageBody = "message-body";
     internal const string MessageMetadata = "message-meta";
-    internal const string OnlineTextCurrent = global::KeyLoad.Core.Features.Search.OnlineTextPublicationProtocol.CurrentFamily;
+    internal const string OnlineTextCurrent = global::KeyLoad.Core.Search.OnlineTextPublicationProtocol.CurrentFamily;
     internal const string Outbox = "outbox";
     internal const string OutboxHead = "outbox-head";
     internal const string OutcomeLocator = "outcome-locator";
     internal const string Outcome = "outcome";
-    internal const string ProcessingInbox = global::KeyLoad.Core.Features.Messaging.TargetInboxProtocol.RecordSpace;
-    internal const string ProcessingInboxCapacity = global::KeyLoad.Core.Features.Messaging.TargetInboxProtocol.CapacitySpace;
+    internal const string ProcessingInbox = global::KeyLoad.Core.Messaging.TargetInboxProtocol.RecordSpace;
+    internal const string ProcessingInboxCapacity = global::KeyLoad.Core.Messaging.TargetInboxProtocol.CapacitySpace;
     internal const string ProjectionConsumer = "projection-consumer";
     internal const string ProjectionReceipt = "projection-receipt";
     internal const string QueueCounters = "queue-counters";
-    internal const string QueueDeadLetterOrder = global::KeyLoad.Core.Features.Messaging.QueueLifecycleProtocol.ParkedSpace;
-    internal const string QueueOrder = global::KeyLoad.Core.Features.Messaging.QueueOrderProtocol.Space;
-    internal const string QueuePendingDeadLetter = global::KeyLoad.Core.Features.Messaging.QueueLifecycleProtocol.PendingSpace;
+    internal const string QueueDeadLetterOrder = global::KeyLoad.Core.Messaging.QueueLifecycleProtocol.ParkedSpace;
+    internal const string QueueOrder = global::KeyLoad.Core.Messaging.QueueOrderProtocol.Space;
+    internal const string QueuePendingDeadLetter = global::KeyLoad.Core.Messaging.QueueLifecycleProtocol.PendingSpace;
     internal const string QueueTransferIntent = "queue-transfer-intent";
     internal const string QueueTransferSourceCapacity = "queue-transfer-source-capacity";
     internal const string QueueTransferTargetCapacity = "queue-transfer-target-capacity";

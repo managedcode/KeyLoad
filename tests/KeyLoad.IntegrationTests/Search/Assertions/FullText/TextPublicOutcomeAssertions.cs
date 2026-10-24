@@ -1,11 +1,11 @@
 using System.Globalization;
 using System.Text;
 using System.Text.Json;
-using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.ClientApi;
 using ManagedCode.Communication;
 using ModelContextProtocol.Protocol;
 
-namespace KeyLoad.IntegrationTests.Features.Search;
+namespace KeyLoad.IntegrationTests.Search;
 
 internal static class TextPublicOutcomeAssertions
 {

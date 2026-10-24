@@ -1,9 +1,9 @@
 using Aspire.Hosting.ApplicationModel;
-using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.StorageReplication;
+using KeyLoad.IntegrationTests.ClientApi;
+using KeyLoad.IntegrationTests.StorageReplication;
 using KeyLoad.Server;
 
-namespace KeyLoad.IntegrationTests.Features.ChangeFeeds;
+namespace KeyLoad.IntegrationTests.ChangeFeeds;
 
 internal static class FeedLiveClusterCold
 {

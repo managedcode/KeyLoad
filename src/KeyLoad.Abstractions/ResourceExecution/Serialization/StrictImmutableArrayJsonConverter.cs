@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace KeyLoad.Features.ResourceExecution;
+namespace KeyLoad.ResourceExecution;
 
 internal sealed class StrictImmutableArrayJsonConverter<T> : JsonConverter<ImmutableArray<T>>
 {

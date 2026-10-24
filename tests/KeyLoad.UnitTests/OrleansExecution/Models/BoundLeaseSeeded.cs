@@ -1,6 +1,6 @@
 using ManagedCode.Communication.Commands;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal sealed record BoundLeaseSeeded(RequestCqrsHostedRuntimeFixture Leader,
     RequestCqrsHostedRuntimeFixture Other, PhysicalShardRecord PhysicalOwner,

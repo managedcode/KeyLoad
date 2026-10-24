@@ -1,6 +1,6 @@
 using KeyLoad.Storage;
 
-namespace KeyLoad.Core.Features.ResourceExecution;
+namespace KeyLoad.Core.ResourceExecution;
 
 /// <summary>Binds fresh names once and refuses rebinding of persisted canonical entity references.</summary>
 internal static class EntityReferenceLifetime

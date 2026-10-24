@@ -1,6 +1,6 @@
 using KeyLoad.Server;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>AC-MCP-004/005: successful lease growth and disposal preserve overflow-safe lane accounting.</summary>
 internal sealed class McpMemoryBudgetGrowthTests

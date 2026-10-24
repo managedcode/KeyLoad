@@ -4,7 +4,7 @@ using KeyLoad.Storage.ZoneTree;
 using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
 
-namespace KeyLoad.RecoveryTests.Features.DocumentStorage;
+namespace KeyLoad.RecoveryTests.DocumentStorage;
 
 internal static class CommandIdempotencyCrashAssertions
 {

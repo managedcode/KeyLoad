@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.QueryExecution;
+namespace KeyLoad.IntegrationTests.QueryExecution;
 
 internal sealed record SqlParserAdmissionClusterState(SqlOffsetClusterState Original, CommandRequest Events, CommitReceipt EventReceipt,
     SqlOperationRequest Insert, CommitReceipt InsertReceipt, StreamPage Stream, OutboxStatus Outbox, string RootCredential)

@@ -1,9 +1,9 @@
 using System.Diagnostics;
-using KeyLoad.AppHost.Features.TestInfrastructure;
-using KeyLoad.UnitTests.Features.CodeQuality.Processes;
+using KeyLoad.AppHost.TestInfrastructure;
+using KeyLoad.UnitTests.CodeQuality.Processes;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.UnitTests.Features.CodeQuality.Helpers;
+namespace KeyLoad.UnitTests.CodeQuality.Helpers;
 
 internal static class FunctionalReportAdmissionFlow
 {

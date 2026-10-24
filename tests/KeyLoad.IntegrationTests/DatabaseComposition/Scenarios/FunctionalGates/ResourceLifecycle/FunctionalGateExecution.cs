@@ -1,6 +1,6 @@
 using KeyLoad.Server;
 
-namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
+namespace KeyLoad.IntegrationTests.DatabaseComposition;
 
 internal static class FunctionalGateExecution
 {

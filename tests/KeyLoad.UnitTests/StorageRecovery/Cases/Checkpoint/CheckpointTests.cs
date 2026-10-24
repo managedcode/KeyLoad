@@ -1,7 +1,7 @@
 using System.Security.Cryptography;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
-using KeyLoad.UnitTests.Features.StorageRecovery;
+using KeyLoad.UnitTests.StorageRecovery;
 
 namespace KeyLoad.UnitTests;
 

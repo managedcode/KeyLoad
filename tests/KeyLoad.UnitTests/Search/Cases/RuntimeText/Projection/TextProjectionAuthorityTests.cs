@@ -1,8 +1,8 @@
 using KeyLoad.Query;
-using KeyLoad.Server.Features.Search;
+using KeyLoad.Server.Search;
 using KeyLoad.Storage;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 internal sealed class TextProjectionAuthorityTests
 {
@@ -65,7 +65,7 @@ internal sealed class TextProjectionAuthorityTests
         await Assert.That(policyGeneration).IsNotEqualTo(deletedGeneration);
 
         RevokeReader(database);
-        var revokedImage = KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(database.Store);
+        var revokedImage = KeyLoad.UnitTests.Messaging.QueueWholeFlowStorage.Bytes(database.Store);
         var revokedCut = database.Store.Position;
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() =>
             search.Search(ReaderId, request with

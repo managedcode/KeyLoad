@@ -1,9 +1,9 @@
-namespace KeyLoad.IntegrationTests.Features.QueryExecution;
+namespace KeyLoad.IntegrationTests.QueryExecution;
 
 internal static class SqlBooleanTruthClusterRepair
 {
     internal static async Task<SqlBooleanTruthClusterState> RunAsync(ClusterFixture fixture, SqlBooleanTruthClusterState state,
-        global::KeyLoad.IntegrationTests.Features.OrleansExecution.RequestCqrsClusterCallers root, CancellationToken token)
+        global::KeyLoad.IntegrationTests.OrleansExecution.RequestCqrsClusterCallers root, CancellationToken token)
     {
         var fault = new CommandRequest(Guid.NewGuid(), PostgresClusterState.Partition,
             [new PutDocument(SqlNullOrderingClusterProtocol.Collection, SqlBooleanTruthClusterState.Low,
@@ -42,17 +42,17 @@ internal static class SqlBooleanTruthClusterRepair
     private static async Task<CommitReceipt> CommitAsync(ClusterFixture fixture, SqlBooleanTruthClusterState state,
         CommandRequest command, long revision, CancellationToken token, CommitReceipt? replay = null)
     {
-        return await global::KeyLoad.IntegrationTests.Features.OrleansExecution.RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerProtocol.Node2, state.Seed.Writer.Secret, async writer =>
+        return await global::KeyLoad.IntegrationTests.OrleansExecution.RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, global::KeyLoad.IntegrationTests.ClientApi.McpCallerProtocol.Node2, state.Seed.Writer.Secret, async writer =>
         {
-            var actual = await global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerAssertions.SdkSuccessAsync(await writer.Sdk.CommitAsync(command, token));
+            var actual = await global::KeyLoad.IntegrationTests.ClientApi.McpCallerAssertions.SdkSuccessAsync(await writer.Sdk.CommitAsync(command, token));
             var expected = replay ?? new CommitReceipt(command.CommandId, actual.Token,
                 [new MutationReceipt(SqlBooleanTruthClusterState.PutKind, SqlNullOrderingClusterProtocol.Collection,
                     SqlBooleanTruthClusterState.Low, revision)], DurabilityProfile.ProcessDurable, 3);
             await SqlClusterProtocol.EqualAsync(expected, actual);
             await global::TUnit.Assertions.Assert.That(actual.Token.AtomicPartitionId).IsEqualTo(command.Partition.AtomicPartitionId);
             await global::TUnit.Assertions.Assert.That(actual.Token.Position).IsGreaterThan(default(long));
-            await SqlClusterProtocol.EqualAsync(expected, (await global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerAssertions.SuccessAsync<CommitReceipt>(
-                await writer.Mcp.CallAsync(global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerTools.DocumentsCommit, command, token))).Value);
+            await SqlClusterProtocol.EqualAsync(expected, (await global::KeyLoad.IntegrationTests.ClientApi.McpCallerAssertions.SuccessAsync<CommitReceipt>(
+                await writer.Mcp.CallAsync(global::KeyLoad.IntegrationTests.ClientApi.McpCallerTools.DocumentsCommit, command, token))).Value);
             return actual;
         }, token);
     }

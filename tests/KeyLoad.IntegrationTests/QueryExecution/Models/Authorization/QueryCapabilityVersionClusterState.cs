@@ -1,6 +1,6 @@
-using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.ClientApi;
 
-namespace KeyLoad.IntegrationTests.Features.QueryExecution;
+namespace KeyLoad.IntegrationTests.QueryExecution;
 
 internal sealed record QueryCapabilityVersionClusterState(CommandRequest Seed, CommitReceipt Receipt,
     McpPersistedIdentity Reader, OutboxStatus Outbox)

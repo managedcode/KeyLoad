@@ -1,6 +1,6 @@
 using KeyLoad.Storage;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 /// <summary>Checks node-bound publication against its actual persisted local outcome and canonical cut.</summary>
 internal static class RequestCqrsAnnCheckpointAssertions

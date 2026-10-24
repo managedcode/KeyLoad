@@ -1,7 +1,7 @@
-using KeyLoad.Clustering.Features.Search;
+using KeyLoad.Clustering.Search;
 using KeyLoad.Core;
 
-namespace KeyLoad.Server.Features.Search;
+namespace KeyLoad.Server.Search;
 
 internal sealed class TextOnlineOriginalReplay(DatabaseEngine database, ServerRuntimeOptions options,
     TimeProvider clock, TextResourceOwnership resources, TextOnlineSessions sessions,

@@ -1,10 +1,10 @@
 using System.Buffers.Binary;
 using System.Text;
 using KeyLoad.Storage.ZoneTree;
-using KeyLoad.UnitTests.Features.ResourceExecution;
+using KeyLoad.UnitTests.ResourceExecution;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.UnitTests.Features.StorageRecovery;
+namespace KeyLoad.UnitTests.StorageRecovery;
 
 internal sealed class ZoneTreeStorageExecutionOptionsTests
 {

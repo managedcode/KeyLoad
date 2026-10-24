@@ -1,11 +1,11 @@
 using KeyLoad.Query;
-using KeyLoad.Query.Features.QueryExecution;
-using KeyLoad.Query.Features.Search;
+using KeyLoad.Query.QueryExecution;
+using KeyLoad.Query.Search;
 using KeyLoad.Storage;
-using KeyLoad.UnitTests.Features.BackupRestore;
+using KeyLoad.UnitTests.BackupRestore;
 using ManagedCode.Communication.Commands;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 internal static class Bm25RestoredEligibilityAssertions
 {

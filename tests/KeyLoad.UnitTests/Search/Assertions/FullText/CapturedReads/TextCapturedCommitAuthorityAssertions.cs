@@ -1,8 +1,8 @@
 using KeyLoad.Storage;
-using KeyLoad.UnitTests.Features.Authorization;
-using P = KeyLoad.UnitTests.Features.Search.TextCapturedCommitAuthorityProtocol;
+using KeyLoad.UnitTests.Authorization;
+using P = KeyLoad.UnitTests.Search.TextCapturedCommitAuthorityProtocol;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 internal static class TextCapturedCommitAuthorityAssertions
 {

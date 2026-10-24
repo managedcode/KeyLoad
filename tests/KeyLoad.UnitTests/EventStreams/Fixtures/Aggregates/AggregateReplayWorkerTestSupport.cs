@@ -1,7 +1,7 @@
 using System.Text.Json;
 using KeyLoad.Client;
 
-namespace KeyLoad.UnitTests.Features.EventStreams;
+namespace KeyLoad.UnitTests.EventStreams;
 
 internal static class AggregateReplayWorkerTestSupport
 {

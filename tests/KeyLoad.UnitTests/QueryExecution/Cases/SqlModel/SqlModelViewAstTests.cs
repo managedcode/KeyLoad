@@ -1,6 +1,6 @@
 using KeyLoad.Query;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal sealed class SqlModelViewAstTests
 {
@@ -40,7 +40,7 @@ internal sealed class SqlModelViewAstTests
         using var database = SqlModelViewTestSupport.Create();
         SqlModelViewTestSupport.Seed(database);
         var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
-        var before = global::KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(database.Store);
+        var before = global::KeyLoad.UnitTests.Messaging.QueueWholeFlowStorage.Bytes(database.Store);
         var position = database.Store.Position;
         var queue = engine.ExecuteAst("root", new(database.Partition,
             new SelectQuery(SqlModelViewTestSupport.Queue, null, [new("*", "*")], null, [], 10, Explain: true,
@@ -55,7 +55,7 @@ internal sealed class SqlModelViewAstTests
         await Assert.That(queue.Rows.Single().Json).DoesNotContain("lease");
         await Assert.That(events.Rows.Single().Json).DoesNotContain(SqlModelViewTestSupport.Secret);
         await Assert.That(database.Store.Position).IsEqualTo(position);
-        await Assert.That(global::KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(database.Store)
+        await Assert.That(global::KeyLoad.UnitTests.Messaging.QueueWholeFlowStorage.Bytes(database.Store)
             .SequenceEqual(before)).IsTrue();
     }
 }

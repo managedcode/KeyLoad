@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.Messaging;
+namespace KeyLoad.UnitTests.Messaging;
 
 internal sealed record QueueClaimVersionExhaustionState(QueueLaneRef Lane, DateTimeOffset Time,
     CommandRequest Producer, global::ManagedCode.Communication.Result<object> Produced,

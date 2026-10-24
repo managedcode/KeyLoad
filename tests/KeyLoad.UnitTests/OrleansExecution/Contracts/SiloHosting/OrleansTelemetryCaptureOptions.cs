@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 /// <summary>Bounds retained telemetry records in the execution exporter sink used by this test fixture.</summary>
 [KeyLoad.ConfigurationOptions]

@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>Joins the actual first-chunk/handler/execution SDK race under its original caller-owned wait bound.</summary>
 internal static class KeyLoadClientFirstChunkCoordination

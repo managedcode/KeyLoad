@@ -1,7 +1,7 @@
 using KeyLoad.Client;
 using KeyLoad.Server;
 
-namespace KeyLoad.IntegrationTests.Features.ClientApi;
+namespace KeyLoad.IntegrationTests.ClientApi;
 
 internal sealed class SdkProblemBudgetPublicCallers : IAsyncDisposable
 {

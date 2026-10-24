@@ -1,6 +1,6 @@
-using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.ClientApi;
 using KeyLoad.Server;
-namespace KeyLoad.IntegrationTests.Features.Messaging;
+namespace KeyLoad.IntegrationTests.Messaging;
 
 internal static class CompetingInboxPublicFlow
 {
@@ -38,14 +38,14 @@ internal static class CompetingInboxPublicFlow
             await ServerFailureObserver.ObserveAsync(() => WaveAsync(state, token), failures);
         }
         using var cleanup = new CancellationTokenSource(
-            KeyLoad.IntegrationTests.Features.OrleansExecution.RequestCqrsClusterProtocol.CleanupDeadline, state.Clock);
+            KeyLoad.IntegrationTests.OrleansExecution.RequestCqrsClusterProtocol.CleanupDeadline, state.Clock);
         await ServerFailureObserver.ObserveAsync(() => state.Cold.RequireAsync(cleanup.Token), failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }
     private static async Task BeforePolicyAsync(CompetingInboxPublicState state,
-        KeyLoad.IntegrationTests.Features.OrleansExecution.RequestCqrsClusterCallers root,
-        KeyLoad.IntegrationTests.Features.OrleansExecution.RequestCqrsClusterCallers sdk,
-        KeyLoad.IntegrationTests.Features.OrleansExecution.RequestCqrsClusterCallers official, CancellationToken token)
+        KeyLoad.IntegrationTests.OrleansExecution.RequestCqrsClusterCallers root,
+        KeyLoad.IntegrationTests.OrleansExecution.RequestCqrsClusterCallers sdk,
+        KeyLoad.IntegrationTests.OrleansExecution.RequestCqrsClusterCallers official, CancellationToken token)
     {
         var failures = new List<Exception>();
         for (var index = 0; index < state.Candidates.Length; index++)

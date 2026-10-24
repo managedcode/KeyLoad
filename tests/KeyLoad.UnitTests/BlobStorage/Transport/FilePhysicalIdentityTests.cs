@@ -1,7 +1,7 @@
-using KeyLoad.Core.Features.BlobStorage;
+using KeyLoad.Core.BlobStorage;
 using KeyLoad.Server;
 
-namespace KeyLoad.UnitTests.Features.BlobStorage;
+namespace KeyLoad.UnitTests.BlobStorage;
 
 internal sealed class FilePhysicalIdentityTests
 {

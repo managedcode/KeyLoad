@@ -1,11 +1,11 @@
 using System.Text;
 using System.Text.Json;
 using KeyLoad.Clustering;
-using KeyLoad.UnitTests.Features.OrleansExecution;
+using KeyLoad.UnitTests.OrleansExecution;
 using Microsoft.AspNetCore.Http;
-using P = KeyLoad.UnitTests.Features.ClientApi.CredentialStatusProtocol;
+using P = KeyLoad.UnitTests.ClientApi.CredentialStatusProtocol;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 internal sealed class CredentialStatusEndpoint(CredentialStatusState state)
 {

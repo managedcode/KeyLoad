@@ -1,5 +1,5 @@
 
-namespace KeyLoad.IntegrationTests.Features.QueryExecution;
+namespace KeyLoad.IntegrationTests.QueryExecution;
 
 internal sealed record QueryCursorRequestIdentityR47State(string Credential,
     PartitionRef Partition, QueryRequest OriginalRequest, QueryRequest ChangedRequest,

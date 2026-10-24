@@ -1,7 +1,7 @@
 using ManagedCode.Communication;
 using ManagedCode.Communication.CQRS;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal sealed class CqrsStreamGrain : Grain, ICqrsStreamGrain
 {

@@ -1,4 +1,4 @@
-namespace KeyLoad.Core.Features.BlobStorage;
+namespace KeyLoad.Core.BlobStorage;
 
 [Orleans.GenerateSerializer, Orleans.Alias(FileStorageProtocol.AddressAlias)]
 internal sealed record FileAddress([property: Orleans.Id(0)] PartitionRef Partition,

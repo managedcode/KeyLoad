@@ -1,8 +1,8 @@
 using KeyLoad.Query;
 using ManagedCode.Communication;
-using static KeyLoad.UnitTests.Features.DocumentStorage.DocumentPatchAtomicityContract;
+using static KeyLoad.UnitTests.DocumentStorage.DocumentPatchAtomicityContract;
 
-namespace KeyLoad.UnitTests.Features.DocumentStorage;
+namespace KeyLoad.UnitTests.DocumentStorage;
 
 internal static class DocumentPatchAtomicityAssertions
 {

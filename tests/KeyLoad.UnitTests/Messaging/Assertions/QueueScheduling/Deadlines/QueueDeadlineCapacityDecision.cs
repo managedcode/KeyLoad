@@ -1,8 +1,8 @@
-using KeyLoad.Core.Features.Messaging;
+using KeyLoad.Core.Messaging;
 using ManagedCode.Communication.Commands;
-using static KeyLoad.UnitTests.Features.Messaging.QueueDeadlineCapacityProtocol;
+using static KeyLoad.UnitTests.Messaging.QueueDeadlineCapacityProtocol;
 
-namespace KeyLoad.UnitTests.Features.Messaging;
+namespace KeyLoad.UnitTests.Messaging;
 
 internal static class QueueDeadlineCapacityDecision
 {

@@ -1,4 +1,4 @@
-namespace KeyLoad.Query.Features.QueryExecution;
+namespace KeyLoad.Query.QueryExecution;
 
 internal sealed class PartitionQueryLeafRetention
 {

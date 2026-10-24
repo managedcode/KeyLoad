@@ -1,7 +1,7 @@
 using System.Collections.Concurrent;
 using KeyLoad.Clustering;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal sealed class ConnectionAwaitedSettlementObservation(ConnectionOperationObservation original)
     : IGrainRequestPhaseObserver, RuntimeIGrainRequestPhaseObserver, IGrainRequestProducerDisposedObserver

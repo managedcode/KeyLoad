@@ -1,7 +1,7 @@
 using System.Runtime.ExceptionServices;
 using ManagedCode.Communication.CQRS;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal static class PartitionQueryCancellationFailures
 {

@@ -1,7 +1,7 @@
 using KeyLoad.Client;
-using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.ClientApi;
 
-namespace KeyLoad.IntegrationTests.Features.Messaging;
+namespace KeyLoad.IntegrationTests.Messaging;
 
 /// <summary>Owns unique real work queues in two actual Orleans atomic partitions.</summary>
 internal sealed record MessagingClusterScenario(PartitionRef SourcePartition, PartitionRef DestinationPartition)

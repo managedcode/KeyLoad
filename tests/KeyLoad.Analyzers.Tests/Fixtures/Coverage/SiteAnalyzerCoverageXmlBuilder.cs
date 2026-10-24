@@ -1,7 +1,7 @@
 using System.Text;
 using System.Text.Json;
 
-namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
+namespace KeyLoad.Analyzers.Tests.CodeQuality;
 
 internal static class SiteAnalyzerCoverageXmlBuilder
 {

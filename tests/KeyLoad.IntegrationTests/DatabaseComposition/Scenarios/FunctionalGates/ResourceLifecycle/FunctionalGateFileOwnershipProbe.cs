@@ -1,14 +1,14 @@
 using System.Diagnostics;
 using Aspire.Hosting.ApplicationModel;
-using KeyLoad.AppHost.Features.StorageRecovery;
-using KeyLoad.IntegrationTests.Features.StorageReplication;
+using KeyLoad.AppHost.StorageRecovery;
+using KeyLoad.IntegrationTests.StorageReplication;
 using KeyLoad.Server;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Options;
-using P = KeyLoad.IntegrationTests.Features.DatabaseComposition.FunctionalGateFileOwnershipProtocol;
+using P = KeyLoad.IntegrationTests.DatabaseComposition.FunctionalGateFileOwnershipProtocol;
 
-namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
+namespace KeyLoad.IntegrationTests.DatabaseComposition;
 
 /// <summary>Joins every original competing process before its live owner's files can be released.</summary>
 internal static class FunctionalGateFileOwnershipProbe
@@ -129,7 +129,7 @@ internal static class FunctionalGateFileOwnershipProbe
     {
         var before = failures.Count;
         using var cleanup = new CancellationTokenSource(fixture.App.Services
-            .GetRequiredService<IOptions<KeyLoad.AppHost.Features.TestInfrastructure.TestExecutionOptions>>()
+            .GetRequiredService<IOptions<KeyLoad.AppHost.TestInfrastructure.TestExecutionOptions>>()
             .Value.ApplicationCleanupTimeout, TimeProvider.System);
         await ServerFailureObserver.ObserveAsync(async () =>
         {

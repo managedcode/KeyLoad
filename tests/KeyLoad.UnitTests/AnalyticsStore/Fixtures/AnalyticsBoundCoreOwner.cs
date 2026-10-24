@@ -1,10 +1,10 @@
 using KeyLoad.Clustering;
-using KeyLoad.Core.Features.ResourceExecution;
-using KeyLoad.RecoveryTests.Features.ResourceExecution;
+using KeyLoad.Core.ResourceExecution;
+using KeyLoad.RecoveryTests.ResourceExecution;
 using KeyLoad.Server;
-using D = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreTestData;
+using D = KeyLoad.UnitTests.AnalyticsStore.AnalyticsStoreTestData;
 
-namespace KeyLoad.UnitTests.Features.AnalyticsStore;
+namespace KeyLoad.UnitTests.AnalyticsStore;
 
 internal static class AnalyticsBoundCoreOwner
 {

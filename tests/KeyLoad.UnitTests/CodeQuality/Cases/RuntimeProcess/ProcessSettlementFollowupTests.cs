@@ -1,9 +1,9 @@
 using System.Diagnostics;
 using System.Globalization;
-using KeyLoad.UnitTests.Features.CodeQuality.Helpers;
-using KeyLoad.UnitTests.Features.CodeQuality.Processes;
+using KeyLoad.UnitTests.CodeQuality.Helpers;
+using KeyLoad.UnitTests.CodeQuality.Processes;
 
-namespace KeyLoad.UnitTests.Features.CodeQuality.Cases;
+namespace KeyLoad.UnitTests.CodeQuality.Cases;
 
 internal sealed class ProcessSettlementFollowupTests
 {

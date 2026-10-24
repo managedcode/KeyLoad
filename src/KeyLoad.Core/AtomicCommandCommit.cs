@@ -1,8 +1,8 @@
 using System.Text.Json;
-using KeyLoad.Core.Features.BackupRestore.Execution;
-using KeyLoad.Core.Features.CommandOutcomes.Contracts;
-using KeyLoad.Core.Features.CommandOutcomes.Execution;
-using KeyLoad.Core.Features.CommandOutcomes.Identity;
+using KeyLoad.Core.BackupRestore.Execution;
+using KeyLoad.Core.CommandOutcomes.Contracts;
+using KeyLoad.Core.CommandOutcomes.Execution;
+using KeyLoad.Core.CommandOutcomes.Identity;
 using KeyLoad.Storage;
 using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
@@ -99,9 +99,9 @@ public static class AtomicCommandCommit
         var authorizationPending = false;
         long policyEpoch = AtomicCommandCommitInitialSequence;
         var onlineTextAuthority = OnlineTextPublicationCommands.CaptureOnlineTextOutcomeAuthority(operation);
-        global::KeyLoad.Core.Features.Messaging.RemoteTransferAcceptFailureAuthority? transferFailure = null;
+        global::KeyLoad.Core.Messaging.RemoteTransferAcceptFailureAuthority? transferFailure = null;
         Result<object> result;
-        global::KeyLoad.Core.Features.DatabaseComposition.CompositionOutcomeAuthority? compositionAuthority = null;
+        global::KeyLoad.Core.DatabaseComposition.CompositionOutcomeAuthority? compositionAuthority = null;
         try
         {
             var principal = engine.Principal(transaction, operation.UserId!, engine.Clock.GetUtcNow());

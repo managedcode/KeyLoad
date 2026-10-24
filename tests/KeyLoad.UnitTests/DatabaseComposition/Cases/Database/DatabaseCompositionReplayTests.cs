@@ -1,10 +1,10 @@
 using System.Text.Json;
-using KeyLoad.Core.Features.Authorization;
+using KeyLoad.Core.Authorization;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
-using static KeyLoad.UnitTests.Features.DatabaseComposition.CompositionReplayFixture;
+using static KeyLoad.UnitTests.DatabaseComposition.CompositionReplayFixture;
 
-namespace KeyLoad.UnitTests.Features.DatabaseComposition;
+namespace KeyLoad.UnitTests.DatabaseComposition;
 
 internal sealed class DatabaseCompositionReplayTests
 {

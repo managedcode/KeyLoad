@@ -2,9 +2,9 @@ using System.Text.Json;
 using KeyLoad.Query;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
-using P = KeyLoad.UnitTests.Features.GraphTraversal.GraphTraversalIntegrityFixture;
+using P = KeyLoad.UnitTests.GraphTraversal.GraphTraversalIntegrityFixture;
 
-namespace KeyLoad.UnitTests.Features.GraphTraversal;
+namespace KeyLoad.UnitTests.GraphTraversal;
 
 internal static class GraphSearchIntegrityAssertions
 {

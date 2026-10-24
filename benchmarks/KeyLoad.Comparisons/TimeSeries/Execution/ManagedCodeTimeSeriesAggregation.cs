@@ -2,7 +2,7 @@ using System.Collections.Immutable;
 using ManagedCode.TimeSeries.Abstractions;
 using ManagedCode.TimeSeries.Summers;
 
-namespace KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries;
+namespace KeyLoad.Comparisons.BenchmarkComparisons.TimeSeries;
 
 internal static class ManagedCodeTimeSeriesAggregation
 {

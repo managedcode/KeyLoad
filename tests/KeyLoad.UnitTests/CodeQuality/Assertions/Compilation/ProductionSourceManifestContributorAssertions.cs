@@ -1,6 +1,6 @@
 using System.Text.Json;
 
-namespace KeyLoad.UnitTests.Features.CodeQuality.Assertions;
+namespace KeyLoad.UnitTests.CodeQuality.Assertions;
 
 internal static class ProductionSourceManifestContributorAssertions
 {
@@ -44,11 +44,11 @@ internal static class ProductionSourceManifestContributorAssertions
     };
     private static readonly string[] CandidateIdentities =
     [
-        "cluster|KeyLoad.IntegrationTests.Features.QueryExecution.PartitionQueryPublicClusterTests|AcPquery006SdkAndOfficialMcpReturnIndependentFullReferenceOrder|AcPquery006SdkAndOfficialMcpReturnIndependentFullReferenceOrder",
-        "cluster|KeyLoad.IntegrationTests.Features.DocumentStorage.McpDocumentCrudParityTests|AcDstore001SdkPatchAndMcpDeleteMatchTheMirroredCrudLifecycle|AcDstore001SdkPatchAndMcpDeleteMatchTheMirroredCrudLifecycle",
-        "cluster|KeyLoad.IntegrationTests.Features.DocumentStorage.McpDocumentCrudParityTests|AcDstore001McpPatchAndSdkDeleteMatchTheMirroredCrudLifecycle|AcDstore001McpPatchAndSdkDeleteMatchTheMirroredCrudLifecycle",
-        "cluster|KeyLoad.IntegrationTests.Features.DocumentStorage.McpDocumentCrudParityTests|AcDstore001StaleExplicitReplacementIsRejectedWithoutChangingRevisionTwo|AcDstore001StaleExplicitReplacementIsRejectedWithoutChangingRevisionTwo",
-        "recovery|KeyLoad.RecoveryTests.Features.DocumentStorage.CommandIdempotencyProcessRecoveryTests|AcDocument006OneHundredCommandRetriesSurviveRealProcessRestart|AcDocument006OneHundredCommandRetriesSurviveRealProcessRestart"
+        "cluster|KeyLoad.IntegrationTests.QueryExecution.PartitionQueryPublicClusterTests|AcPquery006SdkAndOfficialMcpReturnIndependentFullReferenceOrder|AcPquery006SdkAndOfficialMcpReturnIndependentFullReferenceOrder",
+        "cluster|KeyLoad.IntegrationTests.DocumentStorage.McpDocumentCrudParityTests|AcDstore001SdkPatchAndMcpDeleteMatchTheMirroredCrudLifecycle|AcDstore001SdkPatchAndMcpDeleteMatchTheMirroredCrudLifecycle",
+        "cluster|KeyLoad.IntegrationTests.DocumentStorage.McpDocumentCrudParityTests|AcDstore001McpPatchAndSdkDeleteMatchTheMirroredCrudLifecycle|AcDstore001McpPatchAndSdkDeleteMatchTheMirroredCrudLifecycle",
+        "cluster|KeyLoad.IntegrationTests.DocumentStorage.McpDocumentCrudParityTests|AcDstore001StaleExplicitReplacementIsRejectedWithoutChangingRevisionTwo|AcDstore001StaleExplicitReplacementIsRejectedWithoutChangingRevisionTwo",
+        "recovery|KeyLoad.RecoveryTests.DocumentStorage.CommandIdempotencyProcessRecoveryTests|AcDocument006OneHundredCommandRetriesSurviveRealProcessRestart|AcDocument006OneHundredCommandRetriesSurviveRealProcessRestart"
     ];
 
     internal static async Task AssertAsync(JsonElement actualRows, string repositoryRoot)

@@ -1,8 +1,8 @@
 using System.Text.Json;
 using KeyLoad.Server;
-using KeyLoad.UnitTests.Features.Search;
+using KeyLoad.UnitTests.Search;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 internal static class McpOwnedDiagnosticAssertions
 {

@@ -1,7 +1,7 @@
 using KeyLoad.Core;
 using KeyLoad.Storage;
 
-namespace KeyLoad.RecoveryTests.Features.DocumentStorage;
+namespace KeyLoad.RecoveryTests.DocumentStorage;
 
 internal static class CompositePhysicalIndexObservation
 {

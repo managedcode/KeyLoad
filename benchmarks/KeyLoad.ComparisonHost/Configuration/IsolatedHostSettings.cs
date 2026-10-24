@@ -2,7 +2,7 @@ using KeyLoad.Comparisons;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonHost.BenchmarkComparisons;
 
 /// <summary>Authenticated execution bindings for one living multi-test database session.</summary>
 [KeyLoad.ConfigurationBinding]

@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.AdminDashboard;
+namespace KeyLoad.IntegrationTests.AdminDashboard;
 
 internal static class AdminBrowserProtocol
 {

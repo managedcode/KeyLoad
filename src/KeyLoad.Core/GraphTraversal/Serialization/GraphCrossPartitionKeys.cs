@@ -1,6 +1,6 @@
-using KeyLoad.Core.Features.StoragePartitions.Contracts;
+using KeyLoad.Core.StoragePartitions.Contracts;
 
-namespace KeyLoad.Core.Features.GraphTraversal.Serialization;
+namespace KeyLoad.Core.GraphTraversal.Serialization;
 
 internal static class GraphCrossPartitionKeys
 {

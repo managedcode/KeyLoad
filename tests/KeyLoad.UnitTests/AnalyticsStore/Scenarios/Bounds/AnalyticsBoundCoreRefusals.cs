@@ -1,6 +1,6 @@
-using D = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreTestData;
+using D = KeyLoad.UnitTests.AnalyticsStore.AnalyticsStoreTestData;
 
-namespace KeyLoad.UnitTests.Features.AnalyticsStore;
+namespace KeyLoad.UnitTests.AnalyticsStore;
 
 internal static class AnalyticsBoundCoreRefusals
 {
@@ -24,7 +24,7 @@ internal static class AnalyticsBoundCoreRefusals
     internal static Task ResultBytesAsync(CancellationToken token)
         => AnalyticsBoundCoreOwner.RunAsync(async (fixture, owner, original) =>
         {
-            var lifetime = fixture.Store.Read(view => KeyLoad.Core.Features.ResourceExecution.ResourceLifetimeCatalog.Read(view,
+            var lifetime = fixture.Store.Read(view => KeyLoad.Core.ResourceExecution.ResourceLifetimeCatalog.Read(view,
                 fixture.Partition.TenantId, fixture.Partition.DatabaseId, D.Store,
                 fixture.Database.Resource(view, fixture.Partition, D.Store)))
                 ?? throw new InvalidOperationException("The actual analytics lifetime is absent.");

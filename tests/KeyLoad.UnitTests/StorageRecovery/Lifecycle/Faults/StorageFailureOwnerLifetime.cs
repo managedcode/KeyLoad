@@ -1,6 +1,6 @@
 using KeyLoad.Server;
 
-namespace KeyLoad.UnitTests.Features.StorageRecovery;
+namespace KeyLoad.UnitTests.StorageRecovery;
 
 /// <summary>Retains actual execution fault-test owners until their original disposal succeeds.</summary>
 internal sealed class StorageFailureOwnerLifetime

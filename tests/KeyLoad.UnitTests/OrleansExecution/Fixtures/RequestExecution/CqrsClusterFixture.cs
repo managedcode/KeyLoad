@@ -1,7 +1,7 @@
 using Orleans.TestingHost;
 using IAsyncInitializer = TUnit.Core.Interfaces.IAsyncInitializer;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal sealed class CqrsClusterFixture : IAsyncInitializer, IAsyncDisposable
 {

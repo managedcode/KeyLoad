@@ -3,9 +3,9 @@ using System.Security.Cryptography;
 using System.Text;
 using KeyLoad.Client;
 using KeyLoad.Core;
-using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.ClientApi;
 
-namespace KeyLoad.IntegrationTests.Features.Messaging;
+namespace KeyLoad.IntegrationTests.Messaging;
 
 /// <summary>Owns one actually persisted scoped principal and API credential for public Orleans callers.</summary>
 internal sealed record MessagingClusterIdentity(PrincipalRecord Principal, ApiKeyRecord Credential, string Secret)

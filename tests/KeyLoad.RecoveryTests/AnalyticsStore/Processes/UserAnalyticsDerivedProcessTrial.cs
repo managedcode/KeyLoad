@@ -1,10 +1,10 @@
 using System.Diagnostics;
-using KeyLoad.RecoveryTests.Features.DocumentStorage;
-using KeyLoad.RecoveryTests.Features.StorageRecovery;
+using KeyLoad.RecoveryTests.DocumentStorage;
+using KeyLoad.RecoveryTests.StorageRecovery;
 using KeyLoad.Server;
-using P = KeyLoad.RecoveryTests.Features.AnalyticsStore.UserAnalyticsProcessProtocol;
+using P = KeyLoad.RecoveryTests.AnalyticsStore.UserAnalyticsProcessProtocol;
 
-namespace KeyLoad.RecoveryTests.Features.AnalyticsStore;
+namespace KeyLoad.RecoveryTests.AnalyticsStore;
 
 internal static class UserAnalyticsDerivedProcessTrial
 {

@@ -2,9 +2,9 @@ using System.Collections.Immutable;
 using System.Security.Cryptography;
 using System.Text;
 using KeyLoad.Client;
-using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.ClientApi;
 
-namespace KeyLoad.IntegrationTests.Features.Search;
+namespace KeyLoad.IntegrationTests.Search;
 
 /// <summary>Persists the canonical three-document text/vector corpus through the actual SDK.</summary>
 internal sealed record TextClusterScenario(PartitionRef Partition, ResourceDefinition Resource, CommitToken SeedToken)

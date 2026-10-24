@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace KeyLoad.UnitTests.Features.BlobStorage;
+namespace KeyLoad.UnitTests.BlobStorage;
 
 internal sealed class FileStorageRouteTests
 {

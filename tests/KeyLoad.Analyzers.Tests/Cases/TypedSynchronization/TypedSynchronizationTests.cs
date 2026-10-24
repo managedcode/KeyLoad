@@ -1,4 +1,4 @@
-namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
+namespace KeyLoad.Analyzers.Tests.CodeQuality;
 
 /// <summary>AC-CQ-025: rejects object and Monitor synchronization with exact semantic locations.</summary>
 internal sealed class TypedSynchronizationTests

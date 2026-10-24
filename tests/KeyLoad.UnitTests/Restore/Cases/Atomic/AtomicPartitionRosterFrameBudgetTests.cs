@@ -1,10 +1,10 @@
 using System.Buffers.Binary;
 using System.Text.Json;
-using KeyLoad.Core.Features.BackupRestore.Serialization;
+using KeyLoad.Core.BackupRestore.Serialization;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 
-namespace KeyLoad.UnitTests.Features.BackupRestore;
+namespace KeyLoad.UnitTests.BackupRestore;
 
 internal sealed class AtomicPartitionRosterFrameBudgetTests
 {

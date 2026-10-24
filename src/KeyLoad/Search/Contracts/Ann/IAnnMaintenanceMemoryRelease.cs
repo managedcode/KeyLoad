@@ -1,4 +1,4 @@
-namespace KeyLoad.Server.Features.Search;
+namespace KeyLoad.Server.Search;
 
 /// <summary>Returns only the exact reciprocal maintenance reservation; the ledger retains shutdown ownership.</summary>
 internal interface IAnnMaintenanceMemoryRelease

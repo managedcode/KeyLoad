@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
-using P = KeyLoad.IntegrationTests.Features.DatabaseComposition.FunctionalGateUserAnalyticsProtocol;
+using P = KeyLoad.IntegrationTests.DatabaseComposition.FunctionalGateUserAnalyticsProtocol;
 
-namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
+namespace KeyLoad.IntegrationTests.DatabaseComposition;
 
 internal sealed record FunctionalGateAnalyticsPolicyState(FunctionalGateUserAnalyticsState Query,
     AnalyticsEventData Owned, AnalyticsEventData Foreign)

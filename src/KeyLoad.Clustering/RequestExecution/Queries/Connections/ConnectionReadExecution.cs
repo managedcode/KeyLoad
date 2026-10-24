@@ -1,6 +1,6 @@
 using KeyLoad.Core;
-using KeyLoad.Core.Features.ResourceExecution;
-using KeyLoad.Diagnostics.Features.ResourceExecution;
+using KeyLoad.Core.ResourceExecution;
+using KeyLoad.Diagnostics.ResourceExecution;
 using Microsoft.Extensions.Logging;
 
 namespace KeyLoad.Clustering;

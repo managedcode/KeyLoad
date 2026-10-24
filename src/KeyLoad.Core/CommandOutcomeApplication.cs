@@ -1,7 +1,7 @@
-using KeyLoad.Core.Features.BackupRestore.Execution;
-using KeyLoad.Core.Features.CommandOutcomes.Contracts;
-using KeyLoad.Core.Features.CommandOutcomes.Execution;
-using KeyLoad.Core.Features.CommandOutcomes.Serialization;
+using KeyLoad.Core.BackupRestore.Execution;
+using KeyLoad.Core.CommandOutcomes.Contracts;
+using KeyLoad.Core.CommandOutcomes.Execution;
+using KeyLoad.Core.CommandOutcomes.Serialization;
 using KeyLoad.Storage;
 using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
@@ -10,7 +10,7 @@ namespace KeyLoad.Core;
 /// <summary>Owns the CommandOutcomeApplication operation contract.</summary>
 internal static class CommandOutcomeApplication
 {
-    internal static StoredOutcome BuildStoredOutcome(this DatabaseEngine engine, Command<DatabaseCommand> operation, string fingerprint, long policyEpoch, Result<object> result, global::KeyLoad.Core.Features.DatabaseComposition.CompositionOutcomeAuthority? compositionAuthority, CommandOutcomePartitionScope partitionScope, global::KeyLoad.Core.Features.Search.OnlineTextOutcomeAuthority? onlineTextAuthority, global::KeyLoad.Core.Features.Messaging.RemoteTransferAcceptFailureAuthority? transferFailure, long canonicalSequence) => new(fingerprint, engine.Store.Identity.Incarnation, policyEpoch, result, operation)
+    internal static StoredOutcome BuildStoredOutcome(this DatabaseEngine engine, Command<DatabaseCommand> operation, string fingerprint, long policyEpoch, Result<object> result, global::KeyLoad.Core.DatabaseComposition.CompositionOutcomeAuthority? compositionAuthority, CommandOutcomePartitionScope partitionScope, global::KeyLoad.Core.Search.OnlineTextOutcomeAuthority? onlineTextAuthority, global::KeyLoad.Core.Messaging.RemoteTransferAcceptFailureAuthority? transferFailure, long canonicalSequence) => new(fingerprint, engine.Store.Identity.Incarnation, policyEpoch, result, operation)
     {
         CompositionAuthority = Errors.Code(result.Problem) is null ? compositionAuthority : null,
         ScopeKind = partitionScope.Kind,

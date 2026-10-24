@@ -1,7 +1,7 @@
 using System.Globalization;
 using System.Text.Json;
 
-namespace KeyLoad.Core.Features.RelationalStorage;
+namespace KeyLoad.Core.RelationalStorage;
 
 internal static class RelationalDecimalValidation
 {

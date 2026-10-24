@@ -1,11 +1,11 @@
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
-using KeyLoad.IntegrationTests.Features.GraphTraversal;
-using KeyLoad.IntegrationTests.Features.StorageReplication;
+using KeyLoad.IntegrationTests.GraphTraversal;
+using KeyLoad.IntegrationTests.StorageReplication;
 using ModelContextProtocol.Protocol;
 
-namespace KeyLoad.IntegrationTests.Features.ClientApi;
+namespace KeyLoad.IntegrationTests.ClientApi;
 
 /// <summary>Retains only the bounded execution schemas needed to diagnose official-client acceptance failures.</summary>
 internal static class McpSchemaEvidence

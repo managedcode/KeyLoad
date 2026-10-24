@@ -1,7 +1,7 @@
 using KeyLoad.Core;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.Server.Features.Search;
+namespace KeyLoad.Server.Search;
 
 /// <summary>Settles the actual execution postings and files before exposing a checkpoint intent.</summary>
 internal static class TextIncrementalGenerationFlow

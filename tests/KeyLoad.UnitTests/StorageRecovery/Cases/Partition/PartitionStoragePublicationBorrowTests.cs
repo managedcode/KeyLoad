@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.StorageRecovery;
+namespace KeyLoad.UnitTests.StorageRecovery;
 
 /// <summary>Actual execution registration borrows physical ownership without another DI disposal capture.</summary>
 internal sealed class PartitionStoragePublicationBorrowTests

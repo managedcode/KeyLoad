@@ -5,7 +5,7 @@ using Microsoft.Extensions.Options;
 using Orleans.Serialization;
 using Orleans.Serialization.Serializers;
 
-namespace KeyLoad.UnitTests.Features.EventStreams;
+namespace KeyLoad.UnitTests.EventStreams;
 
 internal sealed class EventFeedPubSubFreshStateFixture : IDisposable
 {

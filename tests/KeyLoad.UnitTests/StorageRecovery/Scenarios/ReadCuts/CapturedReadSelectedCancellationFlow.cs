@@ -1,8 +1,8 @@
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
-using static KeyLoad.UnitTests.Features.StorageRecovery.CapturedReadScopeScenario;
+using static KeyLoad.UnitTests.StorageRecovery.CapturedReadScopeScenario;
 
-namespace KeyLoad.UnitTests.Features.StorageRecovery;
+namespace KeyLoad.UnitTests.StorageRecovery;
 
 internal static class CapturedReadSelectedCancellationFlow
 {

@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 /// <summary>Operation clock observing actual work in the owning execution store.</summary>
 internal sealed class QueryObservedWorkClock : TimeProvider

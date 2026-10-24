@@ -1,4 +1,4 @@
-namespace KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
+namespace KeyLoad.Storage.ZoneTree.ResourceExecution;
 
 /// <summary>Observes three nonsecret identities from one actual opened physical store and local control.</summary>
 /// <param name="NodeId">The canonical store's actual persisted node identity.</param>

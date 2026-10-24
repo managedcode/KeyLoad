@@ -1,7 +1,7 @@
-using KeyLoad.Core.Features.Search;
-using KeyLoad.Query.Features.Search;
+using KeyLoad.Core.Search;
+using KeyLoad.Query.Search;
 using KeyLoad.Storage.ZoneTree;
-namespace KeyLoad.UnitTests.Features.ResourceExecution;
+namespace KeyLoad.UnitTests.ResourceExecution;
 
 internal static class SearchReadBudgetCost
 {

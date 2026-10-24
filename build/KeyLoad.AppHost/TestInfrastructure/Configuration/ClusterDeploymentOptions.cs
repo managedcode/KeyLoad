@@ -2,7 +2,7 @@ using System.Net;
 using KeyLoad.Clustering;
 using Microsoft.Extensions.Configuration;
 
-namespace KeyLoad.AppHost.Features.TestInfrastructure;
+namespace KeyLoad.AppHost.TestInfrastructure;
 
 /// <summary>Orleans deployment size, physical storage access and required data copies.</summary>
 [ConfigurationOptions]

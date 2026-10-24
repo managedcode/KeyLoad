@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.ResourceExecution;
+namespace KeyLoad.IntegrationTests.ResourceExecution;
 
 [NotInParallel]
 internal sealed class EarlyAdmissionQualificationTests

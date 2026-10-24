@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>Names concrete invalid JSON transport fields without changing business arguments.</summary>
 internal enum McpTransportFrameFault

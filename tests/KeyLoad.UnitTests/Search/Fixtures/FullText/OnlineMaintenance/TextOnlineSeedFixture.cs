@@ -1,8 +1,8 @@
-using KeyLoad.Core.Features.DocumentStorage;
-using KeyLoad.Core.Features.Search;
+using KeyLoad.Core.DocumentStorage;
+using KeyLoad.Core.Search;
 using KeyLoad.Storage.ZoneTree;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 internal sealed record TextOnlineSeedFixture(TextSeedPin Pin, DocumentRecord[] Expected)
 {

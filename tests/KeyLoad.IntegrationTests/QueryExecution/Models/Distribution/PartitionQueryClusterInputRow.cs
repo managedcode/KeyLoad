@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.QueryExecution;
+namespace KeyLoad.IntegrationTests.QueryExecution;
 
 /// <summary>Independent immutable seed and expected-value row for a partition leaf.</summary>
 internal sealed record PartitionQueryClusterInputRow(

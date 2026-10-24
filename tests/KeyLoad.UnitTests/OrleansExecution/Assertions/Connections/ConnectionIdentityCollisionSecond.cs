@@ -1,9 +1,9 @@
-using KeyLoad.UnitTests.Features.ClientApi;
-using KeyLoad.UnitTests.Features.DocumentStorage;
-using D = KeyLoad.UnitTests.Features.ClientApi.DeclaredResponseEofProtocol;
-using P = KeyLoad.UnitTests.Features.OrleansExecution.ConnectionIdentityCollisionProtocol;
+using KeyLoad.UnitTests.ClientApi;
+using KeyLoad.UnitTests.DocumentStorage;
+using D = KeyLoad.UnitTests.ClientApi.DeclaredResponseEofProtocol;
+using P = KeyLoad.UnitTests.OrleansExecution.ConnectionIdentityCollisionProtocol;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal static class ConnectionIdentityCollisionSecond
 {

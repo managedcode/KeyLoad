@@ -2,10 +2,10 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Reflection.PortableExecutable;
 using System.Security.Cryptography;
-using KeyLoad.Diagnostics.Features.ResourceExecution;
+using KeyLoad.Diagnostics.ResourceExecution;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.AppHost.Features.TestInfrastructure;
+namespace KeyLoad.AppHost.TestInfrastructure;
 
 /// <summary>Captures execution launch evidence at its actual Aspire and operating-system owner.</summary>
 internal static class ProjectProcessEvidence

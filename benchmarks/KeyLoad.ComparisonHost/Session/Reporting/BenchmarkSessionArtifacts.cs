@@ -5,7 +5,7 @@ using System.Text.Json;
 using KeyLoad.Comparisons;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonHost.BenchmarkComparisons;
 
 /// <summary>Retains immutable original reports before their execution test assertion can fail.</summary>
 internal static class BenchmarkSessionArtifacts

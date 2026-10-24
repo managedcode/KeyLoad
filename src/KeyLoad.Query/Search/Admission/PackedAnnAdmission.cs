@@ -1,6 +1,6 @@
 using KeyLoad.Core;
 
-namespace KeyLoad.Query.Features.Search;
+namespace KeyLoad.Query.Search;
 
 internal readonly record struct PackedAnnAdmission(int Count, int Dimension, int VectorsPerBlock, int BlockCount,
     int BaseSlots, int UpperOffsetLength, int UpperSlots, long SumLevels, long RetainedBytes,

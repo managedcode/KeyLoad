@@ -1,6 +1,6 @@
 using KeyLoad.Server;
 
-namespace KeyLoad.IntegrationTests.Features.OrleansExecution;
+namespace KeyLoad.IntegrationTests.OrleansExecution;
 
 /// <summary>Retains bounded closed rejection records for one actual Orleans node.</summary>
 internal sealed class RequestCqrsClusterMcpRejectionNodeCapture(string name)

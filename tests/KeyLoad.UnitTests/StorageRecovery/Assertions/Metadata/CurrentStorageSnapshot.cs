@@ -1,7 +1,7 @@
 using KeyLoad.Storage.ZoneTree.IO;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.StorageRecovery;
+namespace KeyLoad.UnitTests.StorageRecovery;
 
 internal static class CurrentStorageSnapshot
 {

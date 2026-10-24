@@ -1,6 +1,6 @@
 using System.Text.Json;
 
-namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
+namespace KeyLoad.IntegrationTests.DatabaseComposition;
 
 internal sealed record TypedEndpointJoinState(TypedEndpointJoinSeed Seed, CommandRequest OriginalDenied,
     JsonElement OriginalProblem, CommandRequest Healthy, CommitReceipt Receipt,

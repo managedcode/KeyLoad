@@ -1,6 +1,6 @@
 using Dom = Microsoft.SqlServer.TransactSql.ScriptDom;
 
-namespace KeyLoad.Features.QueryExecution;
+namespace KeyLoad.QueryExecution;
 
 internal sealed class ScriptDomCheckedTokens(IList<Dom.TSqlParserToken> tokens, global::Microsoft.Extensions.Options.IOptions<DatabaseLimits> limitsOptions, Action check)
     : IList<Dom.TSqlParserToken>

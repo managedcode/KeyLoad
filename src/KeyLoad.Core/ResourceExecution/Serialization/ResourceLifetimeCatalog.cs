@@ -1,7 +1,7 @@
 using KeyLoad.Storage;
 using ManagedCode.Communication.Commands;
 
-namespace KeyLoad.Core.Features.ResourceExecution;
+namespace KeyLoad.Core.ResourceExecution;
 
 /// <summary>Owns the adjacent typed lifetime metadata inside the original catalog transaction.</summary>
 internal static class ResourceLifetimeCatalog

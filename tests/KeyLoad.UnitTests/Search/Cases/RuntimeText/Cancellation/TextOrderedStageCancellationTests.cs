@@ -1,9 +1,9 @@
 using KeyLoad.Clustering;
 using KeyLoad.Query;
 using KeyLoad.Server;
-using KeyLoad.UnitTests.Features.QueryExecution;
+using KeyLoad.UnitTests.QueryExecution;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 internal sealed class TextOrderedStageCancellationTests
 {

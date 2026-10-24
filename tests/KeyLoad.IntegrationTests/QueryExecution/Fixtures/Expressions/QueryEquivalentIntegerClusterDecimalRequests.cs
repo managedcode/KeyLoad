@@ -1,9 +1,9 @@
 using System.Text.Json;
 using KeyLoad.Client;
 using KeyLoad.Query;
-using static KeyLoad.IntegrationTests.Features.QueryExecution.QueryEquivalentIntegerClusterDecimalProtocol;
+using static KeyLoad.IntegrationTests.QueryExecution.QueryEquivalentIntegerClusterDecimalProtocol;
 
-namespace KeyLoad.IntegrationTests.Features.QueryExecution;
+namespace KeyLoad.IntegrationTests.QueryExecution;
 
 internal static class QueryEquivalentIntegerClusterDecimalRequests
 {

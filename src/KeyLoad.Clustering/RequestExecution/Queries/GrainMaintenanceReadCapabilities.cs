@@ -1,5 +1,5 @@
-using KeyLoad.Clustering.Features.Search;
-using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.Clustering.Search;
+using KeyLoad.Core.ResourceExecution;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace KeyLoad.Clustering;

@@ -1,6 +1,6 @@
 using System.Buffers.Binary;
 
-namespace KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
+namespace KeyLoad.BenchmarkScenarios.BenchmarkComparisons;
 
 /// <summary>Retains the immutable deterministic binary inputs used by one ZoneTree fixture.</summary>
 internal sealed class RawStorageCorpus

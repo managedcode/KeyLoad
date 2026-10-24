@@ -1,4 +1,4 @@
-namespace KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
+namespace KeyLoad.LoadTests.AppHost.BenchmarkComparisons;
 
 internal sealed record ScaleServerObservationSnapshot(ScaleServerHardware? Hardware,
     ScaleServerEnvelope? AppHostEnvelope, ScaleServerContainer[] Containers, string[] MissingEvidence,

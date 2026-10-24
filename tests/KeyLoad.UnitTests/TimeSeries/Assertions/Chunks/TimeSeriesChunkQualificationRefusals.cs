@@ -1,8 +1,8 @@
 using KeyLoad.Storage.ZoneTree;
-using KeyLoad.UnitTests.Features.Authorization;
-using KeyLoad.UnitTests.Features.GraphTraversal;
+using KeyLoad.UnitTests.Authorization;
+using KeyLoad.UnitTests.GraphTraversal;
 
-namespace KeyLoad.UnitTests.Features.TimeSeries;
+namespace KeyLoad.UnitTests.TimeSeries;
 
 internal static class TimeSeriesChunkQualificationRefusals
 {

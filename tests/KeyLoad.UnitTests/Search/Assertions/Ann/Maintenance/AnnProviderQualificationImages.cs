@@ -1,9 +1,9 @@
 using KeyLoad.Storage;
-using KeyLoad.UnitTests.Features.Messaging;
-using KeyLoad.UnitTests.Features.StorageRecovery.Assertions;
+using KeyLoad.UnitTests.Messaging;
+using KeyLoad.UnitTests.StorageRecovery.Assertions;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 internal static class AnnProviderQualificationImages
 {

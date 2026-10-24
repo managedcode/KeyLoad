@@ -25,7 +25,7 @@ and the later SDK/official-MCP stages.
 ### Frozen internal contract
 
 These are internal Orleans-generated value contracts in
-`KeyLoad.Query.Features.QueryExecution`; they are not published or sent to a
+`KeyLoad.Query.QueryExecution`; they are not published or sent to a
 grain by this prerequisite. Every type has `[GenerateSerializer]`, a unique
 `keyload.query.<name>.v1` alias and sequential zero-based IDs. The exact names, field order and aliases are frozen for this internal stage.
 

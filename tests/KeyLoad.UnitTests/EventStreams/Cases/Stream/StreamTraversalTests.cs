@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.EventStreams;
+namespace KeyLoad.UnitTests.EventStreams;
 
 internal sealed class StreamTraversalTests
 {

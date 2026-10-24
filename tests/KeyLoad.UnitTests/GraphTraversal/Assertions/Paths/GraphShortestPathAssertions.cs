@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 
-namespace KeyLoad.UnitTests.Features.GraphTraversal;
+namespace KeyLoad.UnitTests.GraphTraversal;
 
 internal static class GraphShortestPathAssertions
 {

@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
-using KeyLoad.Core.Features.Authorization;
-using KeyLoad.Core.Features.DocumentStorage;
+using KeyLoad.Core.Authorization;
+using KeyLoad.Core.DocumentStorage;
 
 namespace KeyLoad.Core;
 /// <summary>Executes DocumentAuthorityIntersection operations against the caller's database context.</summary>

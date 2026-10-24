@@ -1,4 +1,4 @@
-using KeyLoad.Core.Features.Messaging;
+using KeyLoad.Core.Messaging;
 using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.Options;
 using Orleans.Serialization;

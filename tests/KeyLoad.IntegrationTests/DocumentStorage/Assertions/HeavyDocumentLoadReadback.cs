@@ -1,9 +1,9 @@
 using System.Security.Cryptography;
 using KeyLoad.Client;
-using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.ClientApi;
 using KeyLoad.Query;
 
-namespace KeyLoad.IntegrationTests.Features.DocumentStorage;
+namespace KeyLoad.IntegrationTests.DocumentStorage;
 
 /// <summary>Untimed complete ordered execution readback and stable original operation oracles.</summary>
 internal static class HeavyDocumentLoadReadback

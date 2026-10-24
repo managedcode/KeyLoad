@@ -1,10 +1,10 @@
 using KeyLoad.Storage.ZoneTree;
-using KeyLoad.UnitTests.Features.ResourceExecution;
+using KeyLoad.UnitTests.ResourceExecution;
 using ManagedCode.Communication;
 using TUnit.Assertions.Enums;
-using static KeyLoad.UnitTests.Features.Messaging.SubscriptionContinuationProtocol;
+using static KeyLoad.UnitTests.Messaging.SubscriptionContinuationProtocol;
 
-namespace KeyLoad.UnitTests.Features.Messaging;
+namespace KeyLoad.UnitTests.Messaging;
 
 internal static class SubscriptionContinuationAssertions
 {

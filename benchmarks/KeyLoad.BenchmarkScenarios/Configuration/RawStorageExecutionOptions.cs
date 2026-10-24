@@ -1,4 +1,4 @@
-namespace KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
+namespace KeyLoad.BenchmarkScenarios.BenchmarkComparisons;
 
 /// <summary>Bounds admission and execution mutation attempts in one raw fixture.</summary>
 [ConfigurationOptions]

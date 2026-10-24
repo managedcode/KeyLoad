@@ -1,6 +1,6 @@
 using System.Buffers.Binary;
 
-namespace KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries.Intensive;
+namespace KeyLoad.Comparisons.BenchmarkComparisons.TimeSeries.Intensive;
 
 internal readonly record struct TimeSeriesIntensiveHash(ulong First, ulong Second, ulong Third, ulong Fourth)
 {

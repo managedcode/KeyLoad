@@ -4,9 +4,9 @@ using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
-using D = KeyLoad.UnitTests.Features.DatabaseComposition.CompositionPrefixPrepareData;
+using D = KeyLoad.UnitTests.DatabaseComposition.CompositionPrefixPrepareData;
 
-namespace KeyLoad.UnitTests.Features.DatabaseComposition;
+namespace KeyLoad.UnitTests.DatabaseComposition;
 
 // Reopens the actual canonical ZoneTree owner only after its original file lifetime has joined.
 internal sealed class CompositionPrefixPrepareOwner

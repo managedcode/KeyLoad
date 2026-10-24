@@ -1,4 +1,4 @@
-using KeyLoad.Core.Features.GraphTraversal.Validation;
+using KeyLoad.Core.GraphTraversal.Validation;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core;

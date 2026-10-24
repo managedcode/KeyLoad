@@ -1,9 +1,9 @@
 using System.Collections.Immutable;
 using KeyLoad.Query;
-using P = KeyLoad.IntegrationTests.Features.Authorization.SchemaVisibleProjectionClusterProtocol;
-using S = KeyLoad.IntegrationTests.Features.Authorization.SafeProjectorOperationClusterProtocol;
+using P = KeyLoad.IntegrationTests.Authorization.SchemaVisibleProjectionClusterProtocol;
+using S = KeyLoad.IntegrationTests.Authorization.SafeProjectorOperationClusterProtocol;
 
-namespace KeyLoad.IntegrationTests.Features.Authorization;
+namespace KeyLoad.IntegrationTests.Authorization;
 
 internal static class SchemaVisibleProjectionClusterRequests
 {

@@ -2,7 +2,7 @@ using System.Collections.Immutable;
 using Microsoft.Extensions.Options;
 using Npgsql;
 
-namespace KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries;
+namespace KeyLoad.Comparisons.BenchmarkComparisons.TimeSeries;
 
 internal sealed class TimescaleTimeSeriesTarget(string connectionString, IOptions<ComparisonLifecycleOptions> lifecycleOptions,
     string? image = null, TimeProvider? provider = null)

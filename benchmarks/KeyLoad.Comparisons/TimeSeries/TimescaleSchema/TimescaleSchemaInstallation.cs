@@ -2,7 +2,7 @@ using System.Runtime.ExceptionServices;
 using Npgsql;
 using NpgsqlTypes;
 
-namespace KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries;
+namespace KeyLoad.Comparisons.BenchmarkComparisons.TimeSeries;
 
 internal static class TimescaleSchemaInstallation
 {

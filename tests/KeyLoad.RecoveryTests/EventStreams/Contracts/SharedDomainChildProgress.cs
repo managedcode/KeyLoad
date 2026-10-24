@@ -1,4 +1,4 @@
-namespace KeyLoad.RecoveryTests.Features.EventStreams;
+namespace KeyLoad.RecoveryTests.EventStreams;
 
 [Orleans.GenerateSerializer, Orleans.Alias(SharedDomainChildProgressProtocol.Alias)]
 internal sealed record SharedDomainChildProgress(

@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.Authorization;
+namespace KeyLoad.IntegrationTests.Authorization;
 
 internal sealed class EventMessageSensitivePublicState(PartitionRef partition, ResourceDefinition resource,
     PrincipalRecord worker, string key, bool subscription, bool dataAuthority, bool header)

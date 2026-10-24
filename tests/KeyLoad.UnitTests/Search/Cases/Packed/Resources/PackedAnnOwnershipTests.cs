@@ -1,7 +1,7 @@
 using System.Runtime.InteropServices;
-using KeyLoad.Query.Features.Search;
+using KeyLoad.Query.Search;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 internal sealed class PackedAnnOwnershipTests
 {

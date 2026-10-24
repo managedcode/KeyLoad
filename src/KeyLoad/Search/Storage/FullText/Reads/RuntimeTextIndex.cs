@@ -5,7 +5,7 @@ using ZoneTree.FullTextSearch.Index;
 using ZoneTree.FullTextSearch.SearchEngines;
 using ZoneTree.Options;
 
-namespace KeyLoad.Server.Features.Search;
+namespace KeyLoad.Server.Search;
 
 internal static class RuntimeTextIndex
 {

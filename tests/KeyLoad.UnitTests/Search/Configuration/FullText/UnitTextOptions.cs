@@ -1,4 +1,4 @@
-using KeyLoad.Server.Features.Search;
+using KeyLoad.Server.Search;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.UnitTests;

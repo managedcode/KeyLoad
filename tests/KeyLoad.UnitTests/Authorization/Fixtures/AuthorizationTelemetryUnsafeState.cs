@@ -1,7 +1,7 @@
 using System.Diagnostics;
-using KeyLoad.Server.Features.Authorization.Configuration;
+using KeyLoad.Server.Authorization.Configuration;
 
-namespace KeyLoad.UnitTests.Features.Authorization;
+namespace KeyLoad.UnitTests.Authorization;
 
 internal static class AuthorizationTelemetryUnsafeState
 {

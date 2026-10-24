@@ -1,8 +1,8 @@
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
-using KeyLoad.UnitTests.Features.GraphTraversal;
+using KeyLoad.UnitTests.GraphTraversal;
 
-namespace KeyLoad.UnitTests.Features.TimeSeries;
+namespace KeyLoad.UnitTests.TimeSeries;
 
 internal static class TimeSeriesChunkQualificationCurrent
 {

@@ -1,10 +1,10 @@
 using System.Text.Json;
 using KeyLoad.Core;
-using KeyLoad.Features.QueryExecution;
+using KeyLoad.QueryExecution;
 using Microsoft.Extensions.Options;
 using Dom = Microsoft.SqlServer.TransactSql.ScriptDom;
 
-namespace KeyLoad.Query.Features.QueryExecution;
+namespace KeyLoad.Query.QueryExecution;
 
 internal sealed class ScriptDomGraphContext(QueryRequest query, IOptions<DatabaseLimits> limitsOptions, ReadExecutionBudget budget, string parameterDetail)
 {

@@ -1,6 +1,6 @@
 using KeyLoad.Storage.ZoneTree.IO;
 
-namespace KeyLoad.Server.Features.Search;
+namespace KeyLoad.Server.Search;
 
 /// <summary>Owns the ANN root receipt: readers take the short receipt gate, writers serialize file work on the write gate.</summary>
 internal sealed class AnnRootLease : IDisposable
@@ -128,7 +128,7 @@ internal sealed class AnnRootLease : IDisposable
     }
 
     internal AnnMaintenanceResult? AdmitOriginal(PrincipalRecord principal, AnnMaintenanceRequest request,
-        ProjectionConsumerInfo configured, KeyLoad.Core.Features.Search.AnnSeed current, AnnExecutionOptions options)
+        ProjectionConsumerInfo configured, KeyLoad.Core.Search.AnnSeed current, AnnExecutionOptions options)
     {
         lock (writeGate)
         {
@@ -147,7 +147,7 @@ internal sealed class AnnRootLease : IDisposable
     }
 
     internal void SettleOriginal(PrincipalRecord principal, AnnMaintenanceRequest request,
-        AnnMaintenanceResult result, KeyLoad.Core.Features.Search.AnnSeed current, AnnExecutionOptions options,
+        AnnMaintenanceResult result, KeyLoad.Core.Search.AnnSeed current, AnnExecutionOptions options,
         CommitProjectionBatchRequest? settlementIntent)
     {
         lock (writeGate)

@@ -1,4 +1,4 @@
-namespace KeyLoad.Core.Features.Messaging;
+namespace KeyLoad.Core.Messaging;
 
 /// <summary>Carries the actual retained transfer identity and its bounded coordination decisions.</summary>
 [global::Orleans.GenerateSerializer, global::Orleans.Alias(RemoteTransferCoordinationProtocol.HintAlias)]

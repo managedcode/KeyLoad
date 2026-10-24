@@ -1,4 +1,4 @@
-using KeyLoad.Core.Features.TimeSeries;
+using KeyLoad.Core.TimeSeries;
 using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.Options;
 using Orleans.Serialization;

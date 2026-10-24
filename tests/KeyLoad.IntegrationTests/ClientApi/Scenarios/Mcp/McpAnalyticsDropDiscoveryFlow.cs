@@ -1,7 +1,7 @@
-using KeyLoad.IntegrationTests.Features.OrleansExecution;
-using P = KeyLoad.IntegrationTests.Features.ClientApi.McpAnalyticsDropDiscoveryProtocol;
+using KeyLoad.IntegrationTests.OrleansExecution;
+using P = KeyLoad.IntegrationTests.ClientApi.McpAnalyticsDropDiscoveryProtocol;
 
-namespace KeyLoad.IntegrationTests.Features.ClientApi;
+namespace KeyLoad.IntegrationTests.ClientApi;
 
 internal static class McpAnalyticsDropDiscoveryFlow
 {

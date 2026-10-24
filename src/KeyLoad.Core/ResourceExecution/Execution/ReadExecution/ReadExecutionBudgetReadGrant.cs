@@ -1,6 +1,6 @@
 using KeyLoad.Storage;
 
-namespace KeyLoad.Core.Features.ResourceExecution.Execution;
+namespace KeyLoad.Core.ResourceExecution.Execution;
 
 /// <summary>Enforces one fixed leaf ceiling while charging the shared operation ledger.</summary>
 internal sealed class ReadExecutionBudgetReadGrant

@@ -1,10 +1,10 @@
 using System.Text.Json;
-using KeyLoad.Core.Features.InternalSerialization;
-using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.Core.InternalSerialization;
+using KeyLoad.Core.ResourceExecution;
 using KeyLoad.Server;
 using ManagedCode.Communication.Commands;
 
-namespace KeyLoad.IntegrationTests.Features.ResourceExecution;
+namespace KeyLoad.IntegrationTests.ResourceExecution;
 
 /// <summary>Derives the expected lifetime from the caller's original resource creation command.</summary>
 internal static class ResourceCreationLifetime

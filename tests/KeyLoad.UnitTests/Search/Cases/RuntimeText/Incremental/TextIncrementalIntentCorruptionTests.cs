@@ -1,6 +1,6 @@
 using KeyLoad.Server;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 /// <summary>AC-FTS-INCREMENTAL-005: actual original pending intent corruption, repair and immutable healthy continuation.</summary>
 internal sealed class TextIncrementalIntentCorruptionTests

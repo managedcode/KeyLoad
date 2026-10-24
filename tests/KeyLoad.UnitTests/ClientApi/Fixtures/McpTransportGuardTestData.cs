@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Primitives;
 using ModelContextProtocol.Protocol;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>Owns concrete execution headers and serialized wire data for transport-boundary checks.</summary>
 internal static class McpTransportGuardTestData

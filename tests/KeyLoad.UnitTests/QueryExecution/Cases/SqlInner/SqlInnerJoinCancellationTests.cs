@@ -2,7 +2,7 @@ using System.Text.Json;
 using KeyLoad.Query;
 using KeyLoad.Storage.ZoneTree;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal sealed class SqlInnerJoinCancellationTests
 {
@@ -41,7 +41,7 @@ internal sealed class SqlInnerJoinCancellationTests
         var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
         var request = new QueryRequest(database.Partition, QueryText, AllowFullScan: true, QueryDialectVersion: Dialect);
         var position = database.Store.Position;
-        var before = global::KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(database.Store);
+        var before = global::KeyLoad.UnitTests.Messaging.QueueWholeFlowStorage.Bytes(database.Store);
         var identity = Convert.ToHexString(OrleansSerialization.Serialize(database.Store.Identity));
         var baseline = database.Store.GetReadDiagnostics();
         using var cancellation = new CancellationTokenSource();

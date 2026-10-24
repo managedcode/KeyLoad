@@ -1,9 +1,9 @@
 using System.Diagnostics;
 using KeyLoad.Clustering;
-using KeyLoad.Core.Features.Messaging;
+using KeyLoad.Core.Messaging;
 using Orleans.DurableJobs;
 
-namespace KeyLoad.UnitTests.Features.Messaging;
+namespace KeyLoad.UnitTests.Messaging;
 
 [SagaTimeoutDataSource]
 [NotInParallel]

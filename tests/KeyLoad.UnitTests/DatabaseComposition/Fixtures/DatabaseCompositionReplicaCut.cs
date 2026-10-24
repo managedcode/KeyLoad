@@ -1,9 +1,9 @@
 using System.Security.Cryptography;
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
-using KeyLoad.UnitTests.Features.Authorization;
+using KeyLoad.UnitTests.Authorization;
 
-namespace KeyLoad.UnitTests.Features.DatabaseComposition;
+namespace KeyLoad.UnitTests.DatabaseComposition;
 
 /// <summary>Installs the original execution source image into a distinct, same-group physical store.</summary>
 internal sealed class DatabaseCompositionReplicaCut : IDisposable

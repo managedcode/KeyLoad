@@ -3,7 +3,7 @@ using System.Text.Json;
 using KeyLoad.Query;
 using KeyLoad.Server;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>AC-MCP-001/003: all real mutations and recursive AST survive schema wrapping and canonical decode.</summary>
 internal sealed class McpPolymorphicSchemaTests

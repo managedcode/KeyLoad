@@ -1,6 +1,6 @@
 using System.Security.Cryptography;
 
-namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
+namespace KeyLoad.SiteTests.BenchmarkComparisons;
 
 internal static class SiteBuilderDiagnostics
 {

@@ -2,7 +2,7 @@ using System.Collections.Immutable;
 using System.Text.Json;
 using ModelContextProtocol.Protocol;
 
-namespace KeyLoad.IntegrationTests.Features.ClientApi;
+namespace KeyLoad.IntegrationTests.ClientApi;
 
 /// <summary>Checks actual discovered execution schemas against public acceptance without calling internal catalog code.</summary>
 internal static class McpDiscoveryAssertions

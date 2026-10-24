@@ -12,7 +12,7 @@ using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
 
-namespace KeyLoad.UnitTests.Features.Authorization;
+namespace KeyLoad.UnitTests.Authorization;
 
 internal sealed class AuthorizationTelemetryHttpFixture : IDisposable, IAsyncDisposable
 {
@@ -82,7 +82,7 @@ internal sealed class AuthorizationTelemetryHttpFixture : IDisposable, IAsyncDis
                 exportIntervalMilliseconds: options.Value.ExportIntervalMilliseconds)));
         builder.Logging.AddOpenTelemetry(logs => logs.AddProcessor(new SimpleLogRecordExportProcessor(Logs)));
         app = builder.Build();
-        RuntimeSpans.Privacy = app.Services.GetRequiredService<IOptions<KeyLoad.Server.Features.Authorization.Configuration.HttpTelemetryPrivacyOptions>>().Value;
+        RuntimeSpans.Privacy = app.Services.GetRequiredService<IOptions<KeyLoad.Server.Authorization.Configuration.HttpTelemetryPrivacyOptions>>().Value;
         app.UseMiddleware<AdminHttpMetricsMiddleware>();
         if (useServerErrorMiddleware)
         {

@@ -1,5 +1,5 @@
 
-namespace KeyLoad.Features.QueryExecution;
+namespace KeyLoad.QueryExecution;
 
 internal static class ScriptDomErrors
 {

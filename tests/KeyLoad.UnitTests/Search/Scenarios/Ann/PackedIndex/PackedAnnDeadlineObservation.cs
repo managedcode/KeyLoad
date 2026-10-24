@@ -1,7 +1,7 @@
-using KeyLoad.Query.Features.Search;
-using KeyLoad.UnitTests.Features.TestInfrastructure;
+using KeyLoad.Query.Search;
+using KeyLoad.UnitTests.TestInfrastructure;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 internal sealed class PackedAnnDeadlineObservation
 {

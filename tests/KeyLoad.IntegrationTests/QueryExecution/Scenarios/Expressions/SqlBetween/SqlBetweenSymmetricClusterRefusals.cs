@@ -1,11 +1,11 @@
-namespace KeyLoad.IntegrationTests.Features.QueryExecution;
+namespace KeyLoad.IntegrationTests.QueryExecution;
 
 internal static class SqlBetweenSymmetricClusterRefusals
 {
     internal static async Task RejectAsync(ClusterFixture fixture, SqlBetweenSymmetricClusterState state, string clause,
         ErrorCode code, CancellationToken token, bool ast = false, bool healthy = false)
     {
-        await global::KeyLoad.IntegrationTests.Features.OrleansExecution.RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerProtocol.Node2, state.Seed.Reader.Secret, async caller =>
+        await global::KeyLoad.IntegrationTests.OrleansExecution.RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, global::KeyLoad.IntegrationTests.ClientApi.McpCallerProtocol.Node2, state.Seed.Reader.Secret, async caller =>
         {
             var sql = SqlBetweenSymmetricClusterCases.Prefix + clause + SqlBetweenSymmetricClusterCases.Tail;
             var request = SqlNullOrderingClusterProtocol.Operation(sql);
@@ -13,7 +13,7 @@ internal static class SqlBetweenSymmetricClusterRefusals
             await global::TUnit.Assertions.Assert.That(result.IsSuccess).IsFalse();
             await global::TUnit.Assertions.Assert.That(result.Value.ValueKind).IsEqualTo(global::System.Text.Json.JsonValueKind.Undefined);
             await global::TUnit.Assertions.Assert.That(result.Problem?.ErrorCode).IsEqualTo(code.ToString());
-            await global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerAssertions.ErrorAsync(await caller.Mcp.CallAsync(SqlOperationProtocol.ToolName, request, token), code, dispatched: true);
+            await global::KeyLoad.IntegrationTests.ClientApi.McpCallerAssertions.ErrorAsync(await caller.Mcp.CallAsync(SqlOperationProtocol.ToolName, request, token), code, dispatched: true);
             if (ast)
             {
                 var operation = SqlBetweenSymmetricClusterCases.Ast(PostgresClusterState.Partition,
@@ -22,12 +22,12 @@ internal static class SqlBetweenSymmetricClusterRefusals
                 await global::TUnit.Assertions.Assert.That(typed.IsSuccess).IsFalse();
                 await global::TUnit.Assertions.Assert.That(typed.Value).IsNull();
                 await global::TUnit.Assertions.Assert.That(typed.Problem?.ErrorCode).IsEqualTo(code.ToString());
-                await global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerAssertions.ErrorAsync(await caller.Mcp.CallAsync(global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerTools.QueryAst, operation, token), code, dispatched: true);
+                await global::KeyLoad.IntegrationTests.ClientApi.McpCallerAssertions.ErrorAsync(await caller.Mcp.CallAsync(global::KeyLoad.IntegrationTests.ClientApi.McpCallerTools.QueryAst, operation, token), code, dispatched: true);
             }
             var failures = new List<Exception>();
             await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
             {
-                await using var wire = await PostgresClusterCaller.ConnectAsync(fixture.App, global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerProtocol.Node3,
+                await using var wire = await PostgresClusterCaller.ConnectAsync(fixture.App, global::KeyLoad.IntegrationTests.ClientApi.McpCallerProtocol.Node3,
                     state.Seed.Reader.Principal.Id, state.Seed.Reader.Secret, PostgresClusterCertificate.RootPath(fixture), token);
                 await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
                 {
@@ -47,7 +47,7 @@ internal static class SqlBetweenSymmetricClusterRefusals
     }
 
     internal static async Task InvalidAsync(ClusterFixture fixture, SqlBetweenSymmetricClusterState state,
-        global::KeyLoad.IntegrationTests.Features.OrleansExecution.RequestCqrsClusterCallers root, CancellationToken token)
+        global::KeyLoad.IntegrationTests.OrleansExecution.RequestCqrsClusterCallers root, CancellationToken token)
     {
         var before = await SqlBetweenSymmetricClusterImage.ReadAsync(root, state, token);
         foreach (var clause in new[] { "score BETWEEN SYMMETRIC 2 1", "score BETWEEN SYMMETRIC 2 OR 1",

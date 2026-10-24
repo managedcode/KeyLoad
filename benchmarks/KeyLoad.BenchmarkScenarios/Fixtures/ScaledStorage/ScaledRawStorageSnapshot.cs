@@ -1,4 +1,4 @@
-namespace KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
+namespace KeyLoad.BenchmarkScenarios.BenchmarkComparisons;
 
 internal sealed record ScaledRawStorageSnapshot
 {

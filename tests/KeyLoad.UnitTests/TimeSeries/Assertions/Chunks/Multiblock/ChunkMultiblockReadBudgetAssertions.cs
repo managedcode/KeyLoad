@@ -1,7 +1,7 @@
 using System.Text.Json;
 using KeyLoad.Server;
 
-namespace KeyLoad.UnitTests.Features.TimeSeries;
+namespace KeyLoad.UnitTests.TimeSeries;
 
 internal static class ChunkMultiblockReadBudgetAssertions
 {

@@ -1,11 +1,11 @@
 using KeyLoad.Clustering;
-using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.Core.ResourceExecution;
 using ManagedCode.Communication.Commands;
-using A = KeyLoad.UnitTests.Features.OrleansExecution.ConfigureResourceOriginalLifetimeAssertions;
-using L = KeyLoad.UnitTests.Features.RelationalStorage.SqlCreateTableLiteral;
-using O = KeyLoad.UnitTests.Features.OrleansExecution.ConfigureResourceOriginalLifetimeOwner;
+using A = KeyLoad.UnitTests.OrleansExecution.ConfigureResourceOriginalLifetimeAssertions;
+using L = KeyLoad.UnitTests.RelationalStorage.SqlCreateTableLiteral;
+using O = KeyLoad.UnitTests.OrleansExecution.ConfigureResourceOriginalLifetimeOwner;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal static class ConfigureResourceOriginalLifetimeFlow
 {

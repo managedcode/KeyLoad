@@ -1,7 +1,7 @@
 using KeyLoad.Server;
-using KeyLoad.UnitTests.Features.OrleansExecution;
+using KeyLoad.UnitTests.OrleansExecution;
 
-namespace KeyLoad.UnitTests.Features.TimeSeries;
+namespace KeyLoad.UnitTests.TimeSeries;
 
 internal static class SampleChunkMinimumEnvelopeFlow
 {

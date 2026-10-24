@@ -1,6 +1,6 @@
 using KeyLoad.Core;
-using KeyLoad.Core.Features.ResourceExecution.Execution;
-using KeyLoad.Query.Features.QueryExecution;
+using KeyLoad.Core.ResourceExecution.Execution;
+using KeyLoad.Query.QueryExecution;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace KeyLoad.Clustering;

@@ -1,4 +1,4 @@
-namespace KeyLoad.Features.InternalSerialization;
+namespace KeyLoad.InternalSerialization;
 
 internal static class PayloadVersion
 {

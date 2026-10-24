@@ -1,6 +1,6 @@
 using KeyLoad.Storage;
 
-namespace KeyLoad.UnitTests.Features.Authorization;
+namespace KeyLoad.UnitTests.Authorization;
 
 internal sealed class ResourcePolicyUpdateRejectionTests
 {

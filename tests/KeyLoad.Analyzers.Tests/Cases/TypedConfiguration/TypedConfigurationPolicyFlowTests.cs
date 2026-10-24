@@ -1,4 +1,4 @@
-namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
+namespace KeyLoad.Analyzers.Tests.CodeQuality;
 
 /// <summary>AC-CQ-034/037: actual call bindings and authored return flow cannot hide deadlines.</summary>
 internal sealed class TypedConfigurationPolicyFlowTests

@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
 using System.Text.Json;
 
-namespace KeyLoad.IntegrationTests.Features.ClientApi;
+namespace KeyLoad.IntegrationTests.ClientApi;
 
 /// <summary>Checks independent input schemas for both shortest-path MCP contracts.</summary>
 internal static class McpGraphPathInputSchemaAssertions

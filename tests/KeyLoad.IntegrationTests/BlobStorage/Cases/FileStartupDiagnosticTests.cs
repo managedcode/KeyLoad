@@ -1,7 +1,7 @@
 using System.Collections.Concurrent;
-using KeyLoad.IntegrationTests.Features.StorageReplication;
+using KeyLoad.IntegrationTests.StorageReplication;
 
-namespace KeyLoad.IntegrationTests.Features.BlobStorage;
+namespace KeyLoad.IntegrationTests.BlobStorage;
 
 internal sealed class FileStartupDiagnosticTests
 {

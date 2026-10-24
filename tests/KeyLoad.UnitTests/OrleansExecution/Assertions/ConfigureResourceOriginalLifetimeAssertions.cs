@@ -1,10 +1,10 @@
 using System.Text.Json.Nodes;
 using KeyLoad.Clustering;
-using KeyLoad.Core.Features.ResourceExecution;
-using KeyLoad.UnitTests.Features.Authorization;
+using KeyLoad.Core.ResourceExecution;
+using KeyLoad.UnitTests.Authorization;
 using ManagedCode.Communication.Commands;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal static class ConfigureResourceOriginalLifetimeAssertions
 {

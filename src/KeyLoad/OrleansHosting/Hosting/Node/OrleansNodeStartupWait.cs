@@ -1,4 +1,4 @@
-namespace KeyLoad.Server.Features.OrleansHosting;
+namespace KeyLoad.Server.OrleansHosting;
 
 /// <summary>Announces the same original post-active bootstrap without treating pending publication as failure.</summary>
 internal sealed class OrleansNodeStartupWait

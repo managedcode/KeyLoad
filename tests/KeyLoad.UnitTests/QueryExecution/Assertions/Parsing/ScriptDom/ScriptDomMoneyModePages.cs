@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal static class ScriptDomMoneyModePages
 {
@@ -26,11 +26,11 @@ internal static class ScriptDomMoneyModePages
             }
         };
         var budget = new global::KeyLoad.Core.ReadExecutionBudget(database.Database.OperationLimitsOptions);
-        var statement = global::KeyLoad.Features.QueryExecution.ScriptDomSyntax.Parse(wire.Sql,
+        var statement = global::KeyLoad.QueryExecution.ScriptDomSyntax.Parse(wire.Sql,
             database.Database.OperationLimitsOptions, budget.Check, CancellationToken.None);
-        global::KeyLoad.Features.QueryExecution.ScriptDomSyntax.ValidateSessionSlots(statement,
+        global::KeyLoad.QueryExecution.ScriptDomSyntax.ValidateSessionSlots(statement,
             1, budget.Check, CancellationToken.None);
-        var ast = global::KeyLoad.Query.Features.QueryExecution.ScriptDomQueryAdapter.Lower(statement, wire,
+        var ast = global::KeyLoad.Query.QueryExecution.ScriptDomQueryAdapter.Lower(statement, wire,
             database.Database.OperationLimitsOptions, UnitExecutionOptions.QueryExecution(), budget, 1, CancellationToken.None);
         await SqlOffsetPages.ExactAsync(engine.ExecuteAst(SqlOffsetProtocol.Reader, ast), expected);
         var unsupported = Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute(SqlOffsetProtocol.Reader, wire));
@@ -47,9 +47,9 @@ internal static class ScriptDomMoneyModePages
     private static void Validate(TestDatabase database, string slot)
     {
         var budget = new global::KeyLoad.Core.ReadExecutionBudget(database.Database.OperationLimitsOptions);
-        var statement = global::KeyLoad.Features.QueryExecution.ScriptDomSyntax.Parse(
+        var statement = global::KeyLoad.QueryExecution.ScriptDomSyntax.Parse(
             Prefix + slot + Suffix, database.Database.OperationLimitsOptions, budget.Check, CancellationToken.None);
-        global::KeyLoad.Features.QueryExecution.ScriptDomSyntax.ValidateSessionSlots(statement,
+        global::KeyLoad.QueryExecution.ScriptDomSyntax.ValidateSessionSlots(statement,
             1, budget.Check, CancellationToken.None);
     }
     private const string Prefix = "SELECT TOP (1) title FROM offsetleft WHERE order_id = ";

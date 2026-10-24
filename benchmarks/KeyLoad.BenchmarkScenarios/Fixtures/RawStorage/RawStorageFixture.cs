@@ -1,7 +1,7 @@
 using System.Runtime.ExceptionServices;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
+namespace KeyLoad.BenchmarkScenarios.BenchmarkComparisons;
 
 /// <summary>Owns one non-concurrent raw ZoneTree fixture and its exact binary corpus.</summary>
 internal sealed class RawStorageFixture : IDisposable

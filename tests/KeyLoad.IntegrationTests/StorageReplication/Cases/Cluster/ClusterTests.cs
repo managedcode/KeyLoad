@@ -1,4 +1,4 @@
-using KeyLoad.IntegrationTests.Features.StorageReplication;
+using KeyLoad.IntegrationTests.StorageReplication;
 
 namespace KeyLoad.IntegrationTests;
 

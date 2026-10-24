@@ -1,6 +1,6 @@
 using KeyLoad.Storage.ZoneTree;
 
-namespace KeyLoad.RecoveryTests.Features.EventStreams;
+namespace KeyLoad.RecoveryTests.EventStreams;
 
 /// <summary>Records only closed phase metadata before the original fault boundary is armed.</summary>
 internal sealed class SharedDomainChildProgressRecorder(string directory, ZoneTreeStore store)

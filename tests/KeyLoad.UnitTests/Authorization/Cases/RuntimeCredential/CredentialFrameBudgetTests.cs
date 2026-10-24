@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.Authorization;
+namespace KeyLoad.UnitTests.Authorization;
 
 /// <summary>Local real-store credential/owner budget proof; not a execution transport or CLUSTER acknowledgement.</summary>
 internal sealed class CredentialFrameBudgetTests

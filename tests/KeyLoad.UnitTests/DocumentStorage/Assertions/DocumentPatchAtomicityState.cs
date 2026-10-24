@@ -1,6 +1,6 @@
-using KeyLoad.Core.Features.DocumentStorage;
+using KeyLoad.Core.DocumentStorage;
 
-namespace KeyLoad.UnitTests.Features.DocumentStorage;
+namespace KeyLoad.UnitTests.DocumentStorage;
 
 internal sealed record DocumentPatchAtomicityState(long Position, long Applied, byte[] Rows, byte[] Identity, byte[][] Domain)
 {

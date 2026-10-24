@@ -1,10 +1,10 @@
 using System.Diagnostics;
 using System.Globalization;
-using KeyLoad.RecoveryTests.Features.StorageRecovery;
+using KeyLoad.RecoveryTests.StorageRecovery;
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
 
-namespace KeyLoad.RecoveryTests.Features.Messaging;
+namespace KeyLoad.RecoveryTests.Messaging;
 
 internal static class SubscriptionFilterProcessTrial
 {

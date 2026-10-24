@@ -1,6 +1,6 @@
 using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
-namespace KeyLoad.UnitTests.Features.Messaging;
+namespace KeyLoad.UnitTests.Messaging;
 
 internal sealed record QueueAccountingFaultState(QueueLaneRef Lane, DateTimeOffset Start,
     EnqueueMessage Message, CommandRequest Producer, Result<object> Produced,

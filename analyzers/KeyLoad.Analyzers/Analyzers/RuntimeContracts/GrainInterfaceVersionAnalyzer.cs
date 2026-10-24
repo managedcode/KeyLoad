@@ -4,7 +4,7 @@ using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 
-namespace KeyLoad.Analyzers.Features.CodeQuality;
+namespace KeyLoad.Analyzers.CodeQuality;
 
 /// <summary>Requires positive version attributes on KeyLoad Orleans grain interfaces.</summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]

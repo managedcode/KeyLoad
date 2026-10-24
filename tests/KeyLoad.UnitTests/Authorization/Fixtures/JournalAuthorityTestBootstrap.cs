@@ -2,7 +2,7 @@ using System.Text.Json;
 using KeyLoad.Server;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.UnitTests.Features.Authorization;
+namespace KeyLoad.UnitTests.Authorization;
 
 internal static class JournalAuthorityTestBootstrap
 {

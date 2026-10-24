@@ -15,7 +15,7 @@ public static class OperationDispatcher
     {
         OperationKind.Bm25CorpusPublicationPhase => engine.ExecuteBm25CorpusPublication(transaction, principal, operation, position),
         OperationKind.OnlineTextPublicationPhase => engine.ExecuteOnlineTextPublication(transaction, principal, operation),
-        OperationKind.FileMetadata => FileDispatch.ExecuteFileMetadata(transaction, principal, OperationProtocol.Payload<global::KeyLoad.Core.Features.BlobStorage.FileMetadataMutation>(operation), operation.Timestamp),
+        OperationKind.FileMetadata => FileDispatch.ExecuteFileMetadata(transaction, principal, OperationProtocol.Payload<global::KeyLoad.Core.BlobStorage.FileMetadataMutation>(operation), operation.Timestamp),
         OperationKind.Batch => engine.ExecuteBatch(transaction, principal, operation, position, placement),
         OperationKind.Receive => OperationProtocol.Result(engine.Receive(transaction, principal, OperationProtocol.Payload<ReceiveRequest>(operation), operation.Timestamp, position, operation)),
         OperationKind.Delivery => OperationProtocol.Result(engine.CompleteDelivery(transaction, principal, OperationProtocol.Payload<DeliveryCommand>(operation), operation.Timestamp, position, operation)),

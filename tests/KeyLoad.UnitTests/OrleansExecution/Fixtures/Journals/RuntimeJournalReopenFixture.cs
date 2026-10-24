@@ -1,10 +1,10 @@
 using System.Runtime.ExceptionServices;
 using System.Text.Json;
-using KeyLoad.Core.Features.Authorization;
+using KeyLoad.Core.Authorization;
 using KeyLoad.Storage.ZoneTree;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal sealed class RuntimeJournalReopenFixture : IDisposable
 {

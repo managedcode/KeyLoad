@@ -1,10 +1,10 @@
 using System.Text.Json;
 using KeyLoad.Clustering;
 using KeyLoad.Server;
-using KeyLoad.UnitTests.Features.ClientApi;
-using KeyLoad.UnitTests.Features.QueryExecution;
+using KeyLoad.UnitTests.ClientApi;
+using KeyLoad.UnitTests.QueryExecution;
 
-namespace KeyLoad.UnitTests.Features.DatabaseComposition;
+namespace KeyLoad.UnitTests.DatabaseComposition;
 
 /// <summary>AC-COMP-007: composition retains canonical typed execution and public transport contracts.</summary>
 internal sealed class DatabaseCompositionContractTests

@@ -2,7 +2,7 @@ using System.Globalization;
 using KeyLoad.Comparisons;
 using Microsoft.Extensions.Configuration;
 
-namespace KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonHost.BenchmarkComparisons;
 
 /// <summary>Validates the selected execution session and retains original workflow provenance when present.</summary>
 [KeyLoad.ConfigurationBinding]

@@ -1,4 +1,4 @@
-namespace KeyLoad.Core.Features.DocumentStorage;
+namespace KeyLoad.Core.DocumentStorage;
 
 /// <summary>Constructs the canonical persisted document key space.</summary>
 public static class DocumentStorageKeys

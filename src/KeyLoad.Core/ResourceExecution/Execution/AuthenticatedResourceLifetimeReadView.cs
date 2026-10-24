@@ -1,6 +1,6 @@
 using KeyLoad.Storage;
 
-namespace KeyLoad.Core.Features.ResourceExecution.Execution;
+namespace KeyLoad.Core.ResourceExecution.Execution;
 
 /// <summary>Forwards an already charged local view while keeping authenticated source pairs separate from local cursor pairs.</summary>
 internal sealed class AuthenticatedResourceLifetimeReadView(IKeyValueView view, ReadExecutionBudgetLifetimeBindings binding)

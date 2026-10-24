@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using System.Text;
 
-namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
+namespace KeyLoad.Analyzers.Tests.CodeQuality;
 
 internal static class SiteAnalyzerCoverageProcess
 {

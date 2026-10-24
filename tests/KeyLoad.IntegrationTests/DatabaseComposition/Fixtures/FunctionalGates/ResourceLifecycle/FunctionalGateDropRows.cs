@@ -1,7 +1,7 @@
 using System.Text.Json;
-using P = KeyLoad.IntegrationTests.Features.DatabaseComposition.FunctionalGateRelationalProtocol;
+using P = KeyLoad.IntegrationTests.DatabaseComposition.FunctionalGateRelationalProtocol;
 
-namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
+namespace KeyLoad.IntegrationTests.DatabaseComposition;
 
 internal static class FunctionalGateDropRows
 {

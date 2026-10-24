@@ -1,7 +1,7 @@
-using KeyLoad.Query.Features.QueryExecution;
-using K = KeyLoad.UnitTests.Features.OrleansExecution.BoundLeaseProtocol;
+using KeyLoad.Query.QueryExecution;
+using K = KeyLoad.UnitTests.OrleansExecution.BoundLeaseProtocol;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal static class BoundLeaseAssertions
 {

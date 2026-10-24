@@ -1,7 +1,7 @@
 using System.Collections.Concurrent;
 using KeyLoad.Server;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>Retains actual execution tasks; signals do not replace any producer.</summary>
 internal sealed class DeclaredResponseEofTasks

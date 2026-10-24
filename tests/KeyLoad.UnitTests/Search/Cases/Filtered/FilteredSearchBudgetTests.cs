@@ -1,9 +1,9 @@
 using System.Collections.Immutable;
 using KeyLoad.Query;
-using KeyLoad.UnitTests.Features.ResourceExecution;
+using KeyLoad.UnitTests.ResourceExecution;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 internal sealed class FilteredSearchBudgetTests
 {

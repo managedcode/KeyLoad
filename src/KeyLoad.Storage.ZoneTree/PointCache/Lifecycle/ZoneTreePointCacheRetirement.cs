@@ -1,4 +1,4 @@
-namespace KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
+namespace KeyLoad.Storage.ZoneTree.ResourceExecution;
 
 /// <summary>Detaches indexed entries while preserving charges held by active readers.</summary>
 internal static class ZoneTreePointCacheRetirement

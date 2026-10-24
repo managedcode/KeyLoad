@@ -1,9 +1,9 @@
 using KeyLoad.Server;
-using KeyLoad.UnitTests.Features.TestInfrastructure;
+using KeyLoad.UnitTests.TestInfrastructure;
 using Microsoft.Extensions.Logging;
 using ModelContextProtocol.Protocol;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>AC-CLIENT-008: execution captures remain enabled across real provider/listener disposal and recreation.</summary>
 [NotInParallel(LoggingEventSourceIsolation.Key)]

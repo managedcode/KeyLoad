@@ -1,4 +1,4 @@
-namespace KeyLoad.Server.Features.Search;
+namespace KeyLoad.Server.Search;
 
 internal sealed class AnnReadReservation(AnnReadReservations owner, long bytes) : IDisposable
 {

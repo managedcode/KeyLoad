@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal sealed record OrleansActivityCapture(string SourceName, string DisplayName, string TraceId,
     string SpanId, string ParentSpanId, ActivityStatusCode Status, string? StatusDescription,

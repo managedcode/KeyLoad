@@ -1,8 +1,8 @@
 using System.Collections.Immutable;
-using KeyLoad.Core.Features.ResourceExecution;
-using D = KeyLoad.UnitTests.Features.DatabaseComposition.CompositionPrefixPrepareData;
+using KeyLoad.Core.ResourceExecution;
+using D = KeyLoad.UnitTests.DatabaseComposition.CompositionPrefixPrepareData;
 
-namespace KeyLoad.UnitTests.Features.DatabaseComposition;
+namespace KeyLoad.UnitTests.DatabaseComposition;
 
 internal static class CompositionPrefixPrepareCommands
 {

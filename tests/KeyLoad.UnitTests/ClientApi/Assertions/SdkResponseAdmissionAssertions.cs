@@ -1,7 +1,7 @@
 using ManagedCode.Communication;
-using static KeyLoad.UnitTests.Features.ClientApi.SdkResponseAdmissionProtocol;
+using static KeyLoad.UnitTests.ClientApi.SdkResponseAdmissionProtocol;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 internal static class SdkResponseAdmissionAssertions
 {
@@ -16,7 +16,7 @@ internal static class SdkResponseAdmissionAssertions
     {
         await EqualAsync(owner.Original, owner.Expected);
         await Assert.That(owner.Original!.Mutations.All(item => item.CompositionReferences.IsEmpty)).IsTrue();
-        var snapshot = KeyLoad.UnitTests.Features.DocumentStorage.DocumentCommandOutcomeTestSupport.CaptureOutbox(database);
+        var snapshot = KeyLoad.UnitTests.DocumentStorage.DocumentCommandOutcomeTestSupport.CaptureOutbox(database);
         await Assert.That(snapshot.EntryBytes.Length).IsEqualTo(SingleEntry);
         var reference = new EntityRef(database.Partition, Collection, Document);
         var mutation = new PutDocument(Collection, Document, SdkResponseAdmissionProtocol.Json, InitialRevision);

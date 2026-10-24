@@ -1,7 +1,7 @@
 using System.Security.Cryptography;
-using KeyLoad.Server.Features.Search;
+using KeyLoad.Server.Search;
 
-namespace KeyLoad.UnitTests.Features.InternalSerialization;
+namespace KeyLoad.UnitTests.InternalSerialization;
 
 internal sealed class ServerContractSerializationTests
 {

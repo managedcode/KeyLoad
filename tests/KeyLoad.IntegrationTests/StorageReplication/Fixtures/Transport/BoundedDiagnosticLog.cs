@@ -1,7 +1,7 @@
 using System.Collections.Concurrent;
 using System.Text;
 
-namespace KeyLoad.IntegrationTests.Features.StorageReplication;
+namespace KeyLoad.IntegrationTests.StorageReplication;
 
 /// <summary>Applies the fixture's unchanged final diagnostic line and UTF-8 byte limits.</summary>
 internal static class BoundedDiagnosticLog

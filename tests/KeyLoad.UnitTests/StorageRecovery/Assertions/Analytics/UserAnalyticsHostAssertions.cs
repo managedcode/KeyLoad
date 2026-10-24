@@ -1,11 +1,11 @@
 using System.Security.Cryptography;
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
-using KeyLoad.UnitTests.Features.Messaging;
+using KeyLoad.UnitTests.Messaging;
 using ManagedCode.Communication.Commands;
-using P = KeyLoad.UnitTests.Features.StorageRecovery.UserAnalyticsHostProtocol;
+using P = KeyLoad.UnitTests.StorageRecovery.UserAnalyticsHostProtocol;
 
-namespace KeyLoad.UnitTests.Features.StorageRecovery;
+namespace KeyLoad.UnitTests.StorageRecovery;
 
 internal static class UserAnalyticsHostAssertions
 {

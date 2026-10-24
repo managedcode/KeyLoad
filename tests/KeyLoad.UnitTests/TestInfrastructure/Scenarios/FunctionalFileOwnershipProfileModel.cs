@@ -1,13 +1,13 @@
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
-using KeyLoad.AppHost.Features.StorageRecovery;
-using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.AppHost.Hosting;
+using KeyLoad.AppHost.StorageRecovery;
+using KeyLoad.AppHost.TestInfrastructure;
 using KeyLoad.Server;
 using Microsoft.Extensions.DependencyInjection;
-using P = KeyLoad.UnitTests.Features.TestInfrastructure.FunctionalColdReopenProfileProtocol;
+using P = KeyLoad.UnitTests.TestInfrastructure.FunctionalColdReopenProfileProtocol;
 
-namespace KeyLoad.UnitTests.Features.TestInfrastructure;
+namespace KeyLoad.UnitTests.TestInfrastructure;
 
 internal static class FunctionalFileOwnershipProfileModel
 {

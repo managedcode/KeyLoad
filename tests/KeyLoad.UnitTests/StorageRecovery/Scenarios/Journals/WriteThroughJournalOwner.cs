@@ -3,7 +3,7 @@ using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
 using KeyLoad.Storage.ZoneTree.IO;
 
-namespace KeyLoad.UnitTests.Features.StorageRecovery;
+namespace KeyLoad.UnitTests.StorageRecovery;
 
 internal static class WriteThroughJournalOwner
 {

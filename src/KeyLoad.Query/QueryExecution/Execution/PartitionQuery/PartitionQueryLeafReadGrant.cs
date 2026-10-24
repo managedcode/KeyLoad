@@ -1,7 +1,7 @@
-using KeyLoad.Core.Features.ResourceExecution.Execution;
+using KeyLoad.Core.ResourceExecution.Execution;
 using KeyLoad.Storage;
 
-namespace KeyLoad.Query.Features.QueryExecution;
+namespace KeyLoad.Query.QueryExecution;
 
 internal sealed class PartitionQueryLeafReadGrant(ReadExecutionBudgetReadGrant grant, int maximumRecords)
 {

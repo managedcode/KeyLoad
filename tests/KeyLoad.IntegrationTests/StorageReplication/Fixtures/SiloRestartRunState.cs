@@ -1,7 +1,7 @@
 using KeyLoad.Client;
 using KeyLoad.Query;
 
-namespace KeyLoad.IntegrationTests.Features.StorageReplication;
+namespace KeyLoad.IntegrationTests.StorageReplication;
 
 internal sealed record SiloRestartRunState(KeyLoadClient[] Clients, PartitionRef Partition,
     ProjectionConsumerRef ProjectionConsumer, SubscriptionRef Subscription, CommandRequest Command,

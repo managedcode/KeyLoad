@@ -1,7 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
-using K = KeyLoad.UnitTests.Features.OrleansExecution.BoundLeaseProtocol;
+using K = KeyLoad.UnitTests.OrleansExecution.BoundLeaseProtocol;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal static class BoundLeaseSeed
 {

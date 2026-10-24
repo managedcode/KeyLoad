@@ -1,6 +1,6 @@
-using KeyLoad.Diagnostics.Features.ResourceExecution;
+using KeyLoad.Diagnostics.ResourceExecution;
 
-namespace KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
+namespace KeyLoad.Storage.ZoneTree.ResourceExecution;
 
 /// <summary>Owns the store gate protocol: readers share the gate, one writer at a time compiles and flushes the journal
 /// under the upgradeable lock while readers continue, and the writer holds the exclusive lock only while it applies.</summary>

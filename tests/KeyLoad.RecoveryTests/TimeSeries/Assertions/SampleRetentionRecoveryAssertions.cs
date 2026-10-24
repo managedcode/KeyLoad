@@ -1,11 +1,11 @@
 using KeyLoad.Core;
-using KeyLoad.Core.Features.Authorization;
+using KeyLoad.Core.Authorization;
 using KeyLoad.Storage.ZoneTree;
 using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.RecoveryTests.Features.TimeSeries;
+namespace KeyLoad.RecoveryTests.TimeSeries;
 
 internal static class SampleRetentionRecoveryAssertions
 {

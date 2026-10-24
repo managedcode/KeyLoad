@@ -3,7 +3,7 @@ using System.Text.Json;
 using KeyLoad.Client;
 using KeyLoad.Query;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal sealed class LiveQueryTests
 {
@@ -146,7 +146,7 @@ internal sealed class LiveQueryTests
             PolicyEpoch = 2
         })).Get<PrincipalRecord>();
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => engine.ReadLiveQuery("reader", new(query, fresh.Cursor))).Code).IsEqualTo(ErrorCode.TokenInvalidated);
-        await global::KeyLoad.UnitTests.Features.Authorization.LivePolicyEpochContinuation.RunAsync(db, query,
+        await global::KeyLoad.UnitTests.Authorization.LivePolicyEpochContinuation.RunAsync(db, query,
             snapshot.Cursor, fresh.Cursor, reader);
     }
     [Test]

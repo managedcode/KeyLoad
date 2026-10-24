@@ -1,14 +1,14 @@
 using System.Security.Cryptography;
 using KeyLoad.Core;
-using KeyLoad.Core.Features.Authorization;
-using KeyLoad.Core.Features.DocumentStorage;
+using KeyLoad.Core.Authorization;
+using KeyLoad.Core.DocumentStorage;
 using KeyLoad.Query;
-using KeyLoad.RecoveryTests.Features.StorageRecovery;
-using KeyLoad.Server.Features.Search;
+using KeyLoad.RecoveryTests.StorageRecovery;
+using KeyLoad.Server.Search;
 using KeyLoad.Storage.ZoneTree;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.RecoveryTests.Features.Search;
+namespace KeyLoad.RecoveryTests.Search;
 
 internal static class TextProjectionRecoveryAssertions
 {

@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 [Alias(RuntimeJournalGraphCallerProtocol.ProbeAlias)]
 [global::Orleans.CodeGeneration.Version(1)]

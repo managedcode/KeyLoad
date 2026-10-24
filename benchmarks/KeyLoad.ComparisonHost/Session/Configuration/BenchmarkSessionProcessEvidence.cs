@@ -1,11 +1,11 @@
 using System.Collections.Immutable;
 using System.Text.Json;
-using KeyLoad.AppHost.Features.TestInfrastructure;
+using KeyLoad.AppHost.TestInfrastructure;
 using KeyLoad.Comparisons;
-using KeyLoad.Diagnostics.Features.ResourceExecution;
+using KeyLoad.Diagnostics.ResourceExecution;
 using Microsoft.Extensions.Configuration;
 
-namespace KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonHost.BenchmarkComparisons;
 
 /// <summary>Requires real execution process identities before opening a KeyLoad workload client.</summary>
 [ConfigurationBinding]

@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.StorageReplication;
+namespace KeyLoad.IntegrationTests.StorageReplication;
 
 [NotInParallel]
 internal sealed class StrongReadSessionAbsenceClusterTests

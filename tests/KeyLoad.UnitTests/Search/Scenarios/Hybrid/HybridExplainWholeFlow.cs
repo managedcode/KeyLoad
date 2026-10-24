@@ -1,7 +1,7 @@
 using TUnit.Assertions.Enums;
-using static KeyLoad.UnitTests.Features.Search.ThreeWayHybridTestSupport;
+using static KeyLoad.UnitTests.Search.ThreeWayHybridTestSupport;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 internal static class HybridExplainWholeFlow
 {

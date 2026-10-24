@@ -2,7 +2,7 @@ using System.Diagnostics;
 using System.Text;
 using KeyLoad.Server;
 
-namespace KeyLoad.IntegrationTests.Features.StorageRecovery;
+namespace KeyLoad.IntegrationTests.StorageRecovery;
 
 internal static class OwnedChildProcessIo
 {

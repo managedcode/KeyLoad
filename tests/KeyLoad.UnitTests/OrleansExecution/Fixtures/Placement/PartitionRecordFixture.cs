@@ -1,11 +1,11 @@
 using System.Collections.Immutable;
 using System.Text;
-using KeyLoad.Core.Features.StoragePartitions.Contracts;
-using KeyLoad.Core.Features.StoragePartitions.Queries;
+using KeyLoad.Core.StoragePartitions.Contracts;
+using KeyLoad.Core.StoragePartitions.Queries;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal sealed class PartitionRecordFixture : IDisposable
 {

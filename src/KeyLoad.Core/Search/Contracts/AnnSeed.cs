@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 
-namespace KeyLoad.Core.Features.Search;
+namespace KeyLoad.Core.Search;
 
 internal sealed record AnnSeed(AnnSeedScope Scope, AnnSeedCut Cut,
     ImmutableArray<VectorRecord> Records, string CorpusSha256,

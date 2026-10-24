@@ -1,9 +1,9 @@
 using KeyLoad.Storage;
-using KeyLoad.UnitTests.Features.Messaging;
-using KeyLoad.UnitTests.Features.StorageRecovery.Assertions;
-using C = KeyLoad.UnitTests.Features.DatabaseComposition.QueueGraphIdentityState;
+using KeyLoad.UnitTests.Messaging;
+using KeyLoad.UnitTests.StorageRecovery.Assertions;
+using C = KeyLoad.UnitTests.DatabaseComposition.QueueGraphIdentityState;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal static class SqlCompositionParameterAssertions
 {
@@ -31,7 +31,7 @@ internal static class SqlCompositionParameterAssertions
         foreach (var expected in new[] { seed.First, seed.Second })
         {
             var actual = fixture.Store.Read(view => view.GetRecord<DocumentRecord>(
-                KeyLoad.Core.Features.DocumentStorage.DocumentStorageKeys.RecordKey(expected.Reference)));
+                KeyLoad.Core.DocumentStorage.DocumentStorageKeys.RecordKey(expected.Reference)));
             await EqualAsync(actual, expected);
             await EqualAsync(fixture.Database.GetDocument(C.Root, expected.Reference),
                 new DocumentResult(expected.Reference, 1L, expected.Json, false, []));
@@ -46,7 +46,7 @@ internal static class SqlCompositionParameterAssertions
             KeySpace.Partition("edge", fixture.Source.Partition, C.Graph, edge.Id))), forward ? edge : null);
         await EqualAsync(fixture.Database.Traverse(C.Root, fixture.Source.Partition, C.Graph, seed.From),
             new KeyLoad.GraphTraversal(forward ? [from, to] : [from], forward ? [edge] : []));
-        var payload = KeyLoad.UnitTests.Features.DatabaseComposition.QueueGraphIdentityAssertions.Payload(
+        var payload = KeyLoad.UnitTests.DatabaseComposition.QueueGraphIdentityAssertions.Payload(
             new(from, to, C.Label, C.AttributesJson));
         var derived = new MessageInspection(new(SqlCompositionParameterData.ReversePrefix + edge.Id,
             MessageState.Ready, 0, 1L, 1L, null, null), payload, "{}");
@@ -55,7 +55,7 @@ internal static class SqlCompositionParameterAssertions
             reverse ? derived : null);
         var marker = new EntityRef(fixture.Source.Partition, C.Collection, C.Marker);
         await Assert.That(fixture.Store.Read(view => view.GetRecord<DocumentRecord>(
-            KeyLoad.Core.Features.DocumentStorage.DocumentStorageKeys.RecordKey(marker)))).IsNull();
+            KeyLoad.Core.DocumentStorage.DocumentStorageKeys.RecordKey(marker)))).IsNull();
     }
 
     internal static async Task OutboxAsync(SqlCompositionParameterFixture fixture)

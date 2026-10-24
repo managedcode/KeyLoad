@@ -1,6 +1,6 @@
-using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.ClientApi;
 
-namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
+namespace KeyLoad.IntegrationTests.DatabaseComposition;
 
 internal sealed record EventReferenceSelectState(PartitionRef Partition, McpPersistedIdentity Identity,
     CommandRequest Seed, CommitReceipt Receipt, StreamPage OriginalStream, StreamPage OriginalInvalid, CommandRequest? Repair = null, CommitReceipt? RepairReceipt = null);

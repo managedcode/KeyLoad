@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using KeyLoad.Clustering;
 using KeyLoad.Server;
-using KeyLoad.Server.Features.OrleansHosting.Configuration;
+using KeyLoad.Server.OrleansHosting.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
@@ -9,7 +9,7 @@ using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal sealed class OrleansRuntimeTelemetryFixture : IAsyncDisposable
 {

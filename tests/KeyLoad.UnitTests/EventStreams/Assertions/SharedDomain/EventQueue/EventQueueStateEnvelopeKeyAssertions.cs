@@ -1,9 +1,9 @@
 using System.Globalization;
 using System.Text.Json;
 using KeyLoad.Storage;
-using static KeyLoad.UnitTests.Features.EventStreams.EventQueueStateEnvelopeProtocol;
+using static KeyLoad.UnitTests.EventStreams.EventQueueStateEnvelopeProtocol;
 
-namespace KeyLoad.UnitTests.Features.EventStreams;
+namespace KeyLoad.UnitTests.EventStreams;
 
 internal static class EventQueueStateEnvelopeKeyAssertions
 {

@@ -36,7 +36,7 @@ Invalid arguments/options/identifiers/requested space produce typed Validation; 
 
 ## Frozen local API and cut
 
-Namespace: `KeyLoad.Core.Features.Search`. Only new `AnnSeed*.cs` files belong to the implementation worker.
+Namespace: `KeyLoad.Core.Search`. Only new `AnnSeed*.cs` files belong to the implementation worker.
 
 ```csharp
 internal sealed record AnnSeedOptions; // defaults and inclusive bounds below

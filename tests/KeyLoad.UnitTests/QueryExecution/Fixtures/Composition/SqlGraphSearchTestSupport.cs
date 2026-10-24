@@ -1,7 +1,7 @@
 using System.Text.Json;
-using KeyLoad.UnitTests.Features.Search;
+using KeyLoad.UnitTests.Search;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal static class SqlGraphSearchTestSupport
 {

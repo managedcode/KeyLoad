@@ -1,9 +1,9 @@
 using KeyLoad.Core;
-using KeyLoad.Query.Features.Search;
+using KeyLoad.Query.Search;
 using Microsoft.Extensions.Options;
 using ZoneTree.FullTextSearch.Index;
 
-namespace KeyLoad.Server.Features.Search;
+namespace KeyLoad.Server.Search;
 
 internal sealed class TextGeneration
 {

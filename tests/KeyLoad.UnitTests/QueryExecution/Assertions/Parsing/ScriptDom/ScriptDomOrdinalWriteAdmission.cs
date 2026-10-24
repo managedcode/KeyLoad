@@ -1,11 +1,11 @@
 using System.Text.Json;
 using KeyLoad.Server;
-using KeyLoad.UnitTests.Features.GraphTraversal;
-using KeyLoad.UnitTests.Features.RelationalStorage;
+using KeyLoad.UnitTests.GraphTraversal;
+using KeyLoad.UnitTests.RelationalStorage;
 using ManagedCode.Communication;
-using P = KeyLoad.UnitTests.Features.QueryExecution.ScriptDomOrdinalParameterProtocol;
+using P = KeyLoad.UnitTests.QueryExecution.ScriptDomOrdinalParameterProtocol;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal static class ScriptDomOrdinalWriteAdmission
 {

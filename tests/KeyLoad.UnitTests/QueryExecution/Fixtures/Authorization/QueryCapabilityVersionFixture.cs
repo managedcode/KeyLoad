@@ -1,7 +1,7 @@
-using KeyLoad.Core.Features.ResourceExecution;
-using KeyLoad.UnitTests.Features.Authorization;
+using KeyLoad.Core.ResourceExecution;
+using KeyLoad.UnitTests.Authorization;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal sealed class QueryCapabilityVersionFixture : IDisposable
 {

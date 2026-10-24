@@ -1,6 +1,6 @@
 using System.Net;
 using KeyLoad.Clustering;
-using KeyLoad.Server.Features.OrleansHosting;
+using KeyLoad.Server.OrleansHosting;
 using Microsoft.Extensions.Options;
 using Orleans.Configuration;
 
@@ -13,7 +13,7 @@ internal static class OrleansSiloConfiguration
         var options = nodeOptions.Value;
         options.Validate();
         OrleansApplicationServices.RegisterSiloOwners(builder);
-        global::KeyLoad.Server.Features.ResourceExecution.DropTableRegistration.Register(builder.Services);
+        global::KeyLoad.Server.ResourceExecution.DropTableRegistration.Register(builder.Services);
         OrleansPartitionServiceRegistration.Register(builder.Services);
         OrleansRequestServiceRegistration.Register(builder.Services);
         builder.UseOrleans(silo => Configure(silo, options, address));

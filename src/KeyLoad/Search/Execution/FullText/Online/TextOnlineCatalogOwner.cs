@@ -1,7 +1,7 @@
 using KeyLoad.Core;
-using KeyLoad.Core.Features.Search;
+using KeyLoad.Core.Search;
 
-namespace KeyLoad.Server.Features.Search;
+namespace KeyLoad.Server.Search;
 
 internal sealed partial class TextOnlineCatalogOwner(DatabaseEngine database, TextOnlineRoot root,
     ServerRuntimeOptions options, TimeProvider clock, TextResourceOwnership resources,

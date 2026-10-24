@@ -1,8 +1,8 @@
-using KeyLoad.IntegrationTests.Features.OrleansExecution.Helpers;
+using KeyLoad.IntegrationTests.OrleansExecution.Helpers;
 using KeyLoad.Server;
-using static KeyLoad.IntegrationTests.Features.OrleansExecution.RequestCqrsClusterDiagnosticAssertions;
+using static KeyLoad.IntegrationTests.OrleansExecution.RequestCqrsClusterDiagnosticAssertions;
 
-namespace KeyLoad.IntegrationTests.Features.OrleansExecution;
+namespace KeyLoad.IntegrationTests.OrleansExecution;
 
 [NotInParallel]
 internal sealed class RequestCqrsClusterDiagnosticsTests

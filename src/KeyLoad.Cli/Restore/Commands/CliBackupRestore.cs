@@ -5,11 +5,11 @@ using System.Resources;
 using System.Text.Json;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
-using KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
+using KeyLoad.Storage.ZoneTree.ResourceExecution;
 using KeyLoad.Storage.ZoneTree.Restore;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.Cli.Features.BackupRestore;
+namespace KeyLoad.Cli.BackupRestore;
 
 internal static class CliBackupRestore
 {

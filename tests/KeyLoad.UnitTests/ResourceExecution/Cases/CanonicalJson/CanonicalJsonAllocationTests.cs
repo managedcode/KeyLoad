@@ -1,6 +1,6 @@
 using System.Globalization;
 
-namespace KeyLoad.UnitTests.Features.ResourceExecution;
+namespace KeyLoad.UnitTests.ResourceExecution;
 
 internal sealed class CanonicalJsonAllocationTests
 {

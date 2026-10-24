@@ -4,7 +4,7 @@ using System.Text.Json;
 using ManagedCode.Communication;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.Client.Features.ClientApi;
+namespace KeyLoad.Client.ClientApi;
 
 /// <summary>Owns bounded HTTP serialization, response mapping and transport failure classification.</summary>
 internal sealed class KeyLoadClientTransport

@@ -2,12 +2,12 @@ using System.Diagnostics.CodeAnalysis;
 using System.Runtime.ExceptionServices;
 using KeyLoad.Clustering;
 using KeyLoad.Server;
-using KeyLoad.UnitTests.Features.TestInfrastructure;
+using KeyLoad.UnitTests.TestInfrastructure;
 using ManagedCode.Communication.CQRS;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>AC-CRS-003/004: the actual outer HTTP boundary preserves execution fatal exceptions.</summary>
 [NotInParallel(LoggingEventSourceIsolation.Key)]

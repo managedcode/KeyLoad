@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>Passive coordination of one real execution handler and its physical response abort.</summary>
 internal sealed class DeclaredResponseEofBoundary

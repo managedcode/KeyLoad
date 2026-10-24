@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging;
 
-namespace KeyLoad.UnitTests.Features.Authorization;
+namespace KeyLoad.UnitTests.Authorization;
 
 internal static class AuthorizationTelemetryLogging
 {

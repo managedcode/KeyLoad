@@ -1,4 +1,4 @@
-namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
+namespace KeyLoad.Analyzers.Tests.CodeQuality;
 
 /// <summary>AC-CQ-034/037: owned primitive projections retain configured diagnostics budgets.</summary>
 internal sealed class TypedConfigurationDiagnosticsPolicyTests
@@ -7,8 +7,8 @@ internal sealed class TypedConfigurationDiagnosticsPolicyTests
     public async Task ActualBankAndFacadeRejectConstBackedOperationalOperandsAsync()
     {
         const string source = """
-            using Bank = KeyLoad.Diagnostics.Features.ResourceExecution.DatabasePhaseBank;
-            using KeyLoad.Diagnostics.Features.ResourceExecution;
+            using Bank = KeyLoad.Diagnostics.ResourceExecution.DatabasePhaseBank;
+            using KeyLoad.Diagnostics.ResourceExecution;
             internal static class Fields
             {
                 internal const int Stripes = 4;
@@ -31,7 +31,7 @@ internal sealed class TypedConfigurationDiagnosticsPolicyTests
     public async Task TheSameOptionsSnapshotReachesBothPrimitiveProjectionOwnersAsync()
     {
         const string source = """
-            using KeyLoad.Diagnostics.Features.ResourceExecution;
+            using KeyLoad.Diagnostics.ResourceExecution;
             [KeyLoad.ConfigurationOptions]
             internal sealed class Policy
             {
@@ -58,7 +58,7 @@ internal sealed class TypedConfigurationDiagnosticsPolicyTests
     public async Task ApplicationSourceNamesCannotBecomeOwnedPolicyApisAsync(string assemblyName)
     {
         const string source = """
-            namespace KeyLoad.Diagnostics.Features.ResourceExecution
+            namespace KeyLoad.Diagnostics.ResourceExecution
             {
                 internal sealed class DatabasePhaseBank(bool enabled, int stripeCount, int maximumCasAttempts) { }
                 internal static class DatabasePhaseTelemetry
@@ -72,8 +72,8 @@ internal sealed class TypedConfigurationDiagnosticsPolicyTests
                 private const int CasAttempts = 8;
                 internal static void Initialize()
                 {
-                    var bank = new KeyLoad.Diagnostics.Features.ResourceExecution.DatabasePhaseBank(true, Stripes, CasAttempts);
-                    KeyLoad.Diagnostics.Features.ResourceExecution.DatabasePhaseTelemetry.Initialize(false, Stripes, CasAttempts);
+                    var bank = new KeyLoad.Diagnostics.ResourceExecution.DatabasePhaseBank(true, Stripes, CasAttempts);
+                    KeyLoad.Diagnostics.ResourceExecution.DatabasePhaseTelemetry.Initialize(false, Stripes, CasAttempts);
                 }
             }
             """;

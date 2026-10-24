@@ -5,7 +5,7 @@ using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 
-namespace KeyLoad.Analyzers.Features.CodeQuality;
+namespace KeyLoad.Analyzers.CodeQuality;
 
 /// <summary>Requires source-generated serialization for KeyLoad Orleans transport and state types.</summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]

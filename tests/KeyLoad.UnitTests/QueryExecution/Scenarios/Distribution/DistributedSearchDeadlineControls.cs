@@ -1,8 +1,8 @@
-using KeyLoad.Query.Features.QueryExecution;
+using KeyLoad.Query.QueryExecution;
 using KeyLoad.Server;
 using Microsoft.Extensions.Logging.Abstractions;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal static class DistributedSearchDeadlineControls
 {

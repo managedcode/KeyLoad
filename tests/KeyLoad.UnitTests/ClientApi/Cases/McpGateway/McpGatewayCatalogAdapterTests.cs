@@ -1,7 +1,7 @@
 using KeyLoad.Server;
 using Microsoft.AspNetCore.Http;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>AC-MCPGW-004: local invokers preserve descriptor identity and fail closed without request admission.</summary>
 internal sealed class McpGatewayCatalogAdapterTests

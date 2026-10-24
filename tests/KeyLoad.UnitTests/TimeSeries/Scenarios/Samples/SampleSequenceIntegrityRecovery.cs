@@ -1,7 +1,7 @@
 using ManagedCode.Communication.Commands;
-using P = KeyLoad.UnitTests.Features.TimeSeries.SampleChunkCanonicalFixture;
+using P = KeyLoad.UnitTests.TimeSeries.SampleChunkCanonicalFixture;
 
-namespace KeyLoad.UnitTests.Features.TimeSeries;
+namespace KeyLoad.UnitTests.TimeSeries;
 
 internal static class SampleSequenceIntegrityRecovery
 {
@@ -17,7 +17,7 @@ internal static class SampleSequenceIntegrityRecovery
             TimeProvider.System.GetUtcNow(), OrleansSerialization.Serialize(command));
         var image = SampleChunkCorrectionBoundColdAssertions.Image(fixture.Store);
         var cut = fixture.ReadCanonicalCut();
-        var identity = KeyLoad.UnitTests.Features.StorageRecovery.Assertions.ReadCutStoreStateAssertions.SnapshotIdentity(fixture.Store);
+        var identity = KeyLoad.UnitTests.StorageRecovery.Assertions.ReadCutStoreStateAssertions.SnapshotIdentity(fixture.Store);
         var first = Assert.ThrowsExactly<KeyLoadException>(() => fixture.Database.ApplyEmbedded(issued, token));
         await Assert.That(first.Code).IsEqualTo(ErrorCode.Corruption);
         await RefusedAsync(fixture, issued, image, cut);
@@ -25,7 +25,7 @@ internal static class SampleSequenceIntegrityRecovery
         await Assert.That(repeated.Code).IsEqualTo(ErrorCode.Corruption);
         await Assert.That(repeated.Message).IsEqualTo(first.Message);
         await RefusedAsync(fixture, issued, image, cut);
-        await KeyLoad.UnitTests.Features.StorageRecovery.Assertions.ReadCutStoreStateAssertions.AssertIdentityAndPositionAsync(
+        await KeyLoad.UnitTests.StorageRecovery.Assertions.ReadCutStoreStateAssertions.AssertIdentityAndPositionAsync(
             fixture.Store, identity, cut.StorePosition);
         await SampleSequenceIntegrityAssertions.CounterAsync(fixture, OrleansSerialization.Serialize(persistedSequence));
         await SampleSequenceIntegrityAssertions.ReadRefusalAsync(fixture, token);

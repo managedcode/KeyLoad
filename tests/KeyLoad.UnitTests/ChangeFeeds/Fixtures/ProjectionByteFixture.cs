@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.ChangeFeeds;
+namespace KeyLoad.UnitTests.ChangeFeeds;
 
 /// <summary>Calibrates quotas from genuine persisted producer and projection entries.</summary>
 internal static class ProjectionByteFixture

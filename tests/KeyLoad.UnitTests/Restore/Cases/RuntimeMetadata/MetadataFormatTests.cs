@@ -2,12 +2,12 @@ using System.Buffers.Binary;
 using System.Security.Cryptography;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
-using KeyLoad.UnitTests.Features.StorageRecovery;
+using KeyLoad.UnitTests.StorageRecovery;
 using Microsoft.Extensions.DependencyInjection;
 using Orleans.Serialization;
 using Orleans.Serialization.Codecs;
 
-namespace KeyLoad.UnitTests.Features.BackupRestore;
+namespace KeyLoad.UnitTests.BackupRestore;
 
 internal sealed class MetadataFormatTests
 {

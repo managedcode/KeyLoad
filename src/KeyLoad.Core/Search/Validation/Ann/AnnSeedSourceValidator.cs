@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace KeyLoad.Core.Features.Search;
+namespace KeyLoad.Core.Search;
 
 internal static class AnnSeedSourceValidator
 {

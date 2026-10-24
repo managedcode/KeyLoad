@@ -1,6 +1,6 @@
-using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.ClientApi;
 
-namespace KeyLoad.IntegrationTests.Features.QueryExecution;
+namespace KeyLoad.IntegrationTests.QueryExecution;
 
 internal sealed record ModelHeadClusterState(PartitionRef Partition, CommandRequest Seed, CommitReceipt Receipt,
     McpPersistedIdentity Identity, StreamPage Original, OutboxStatus Outbox)

@@ -1,10 +1,10 @@
 using System.Runtime.ExceptionServices;
 using Aspire.Hosting.ApplicationModel;
 using KeyLoad.Clustering;
-using KeyLoad.IntegrationTests.Features.OrleansExecution.Helpers;
+using KeyLoad.IntegrationTests.OrleansExecution.Helpers;
 using KeyLoad.Server;
 
-namespace KeyLoad.IntegrationTests.Features.OrleansExecution;
+namespace KeyLoad.IntegrationTests.OrleansExecution;
 
 /// <summary>Owns and joins the actual execution resource subscriptions for one C1 wave.</summary>
 internal sealed class RequestCqrsClusterDiagnosticsCleanup : IAsyncDisposable

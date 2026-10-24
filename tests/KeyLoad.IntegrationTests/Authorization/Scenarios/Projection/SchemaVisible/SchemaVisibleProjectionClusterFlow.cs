@@ -1,10 +1,10 @@
-using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.OrleansExecution;
-using KeyLoad.IntegrationTests.Features.StorageReplication;
-using P = KeyLoad.IntegrationTests.Features.Authorization.SchemaVisibleProjectionClusterProtocol;
-using S = KeyLoad.IntegrationTests.Features.Authorization.SafeProjectorOperationClusterProtocol;
+using KeyLoad.IntegrationTests.ClientApi;
+using KeyLoad.IntegrationTests.OrleansExecution;
+using KeyLoad.IntegrationTests.StorageReplication;
+using P = KeyLoad.IntegrationTests.Authorization.SchemaVisibleProjectionClusterProtocol;
+using S = KeyLoad.IntegrationTests.Authorization.SafeProjectorOperationClusterProtocol;
 
-namespace KeyLoad.IntegrationTests.Features.Authorization;
+namespace KeyLoad.IntegrationTests.Authorization;
 
 internal static class SchemaVisibleProjectionClusterFlow
 {

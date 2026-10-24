@@ -2,9 +2,9 @@ using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
 using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
-using static KeyLoad.UnitTests.Features.Search.AnnProviderQualificationProtocol;
+using static KeyLoad.UnitTests.Search.AnnProviderQualificationProtocol;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 /// <summary>Uses the actual canonical store and reopens its original identity for provider qualification.</summary>
 internal sealed class AnnProviderQualificationOwner : IDisposable

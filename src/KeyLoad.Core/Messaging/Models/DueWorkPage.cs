@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 
-namespace KeyLoad.Core.Features.Messaging;
+namespace KeyLoad.Core.Messaging;
 
 /// <summary>Reports one real bounded read of the persisted schedule or saga prefix.</summary>
 [Orleans.GenerateSerializer, Orleans.Alias(DueWorkPage.SerializerAlias)]

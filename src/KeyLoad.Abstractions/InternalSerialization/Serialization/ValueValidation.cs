@@ -1,6 +1,6 @@
 using System.Reflection;
 
-namespace KeyLoad.Features.InternalSerialization;
+namespace KeyLoad.InternalSerialization;
 
 internal sealed record ValueValidation(bool Required, ValueValidation? Element,
     ValueValidation? DictionaryKey = null, ValueValidation? DictionaryValue = null)

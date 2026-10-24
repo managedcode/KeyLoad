@@ -1,9 +1,9 @@
-using KeyLoad.RecoveryTests.Features.DocumentStorage;
+using KeyLoad.RecoveryTests.DocumentStorage;
 using KeyLoad.Storage;
 using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
 
-namespace KeyLoad.RecoveryTests.Features.EventStreams;
+namespace KeyLoad.RecoveryTests.EventStreams;
 
 internal static class SharedDomainRecoveryInputReader
 {

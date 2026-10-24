@@ -3,10 +3,10 @@ using System.Security.Cryptography;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Xml.Linq;
-using KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
-using SessionFields = KeyLoad.ComparisonHost.Features.BenchmarkOrchestration.BenchmarkSessionEvidenceKeys;
+using KeyLoad.LoadTests.AppHost.BenchmarkComparisons;
+using SessionFields = KeyLoad.ComparisonHost.BenchmarkOrchestration.BenchmarkSessionEvidenceKeys;
 
-namespace KeyLoad.ComparisonHost.Features.BenchmarkOrchestration;
+namespace KeyLoad.ComparisonHost.BenchmarkOrchestration;
 
 /// <summary>Joins execution runtime identities, immutable case bytes and the completed original TUnit report.</summary>
 internal static class BenchmarkSessionManifest

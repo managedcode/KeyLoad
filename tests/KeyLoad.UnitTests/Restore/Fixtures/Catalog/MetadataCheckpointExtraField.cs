@@ -3,7 +3,7 @@ using KeyLoad.Storage.ZoneTree;
 using Orleans.Serialization.Buffers;
 using Orleans.Serialization.Codecs;
 
-namespace KeyLoad.UnitTests.Features.BackupRestore;
+namespace KeyLoad.UnitTests.BackupRestore;
 
 internal static class MetadataCheckpointExtraField
 {

@@ -1,7 +1,7 @@
 using KeyLoad.Server;
 using ManagedCode.Communication;
 
-namespace KeyLoad.UnitTests.Features.EventStreams;
+namespace KeyLoad.UnitTests.EventStreams;
 
 internal static class AggregateSnapshotRaceCompetitors
 {

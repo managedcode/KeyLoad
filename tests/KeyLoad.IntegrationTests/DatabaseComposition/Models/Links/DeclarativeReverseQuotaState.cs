@@ -1,7 +1,7 @@
 using System.Text.Json;
-using KeyLoad.IntegrationTests.Features.RelationalStorage;
+using KeyLoad.IntegrationTests.RelationalStorage;
 
-namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
+namespace KeyLoad.IntegrationTests.DatabaseComposition;
 
 internal sealed record DeclarativeReverseQuotaState(RelationalSqlClusterScenario Scenario,
     DeclarativeCompositionBudgetState Source, ResourceDefinition Target, CommandRequest Seed, CommitReceipt SeedReceipt,

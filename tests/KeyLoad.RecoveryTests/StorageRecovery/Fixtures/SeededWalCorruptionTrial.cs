@@ -1,6 +1,6 @@
 using System.Security.Cryptography;
 
-namespace KeyLoad.RecoveryTests.Features.StorageRecovery;
+namespace KeyLoad.RecoveryTests.StorageRecovery;
 
 internal sealed class SeededWalCorruptionTrial(int seed)
 {

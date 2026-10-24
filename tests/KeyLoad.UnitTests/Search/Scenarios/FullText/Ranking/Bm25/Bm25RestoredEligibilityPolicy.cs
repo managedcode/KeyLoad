@@ -1,12 +1,12 @@
 using System.Collections.Immutable;
-using KeyLoad.Core.Features.Search;
+using KeyLoad.Core.Search;
 using KeyLoad.Query;
-using KeyLoad.Query.Features.Search;
+using KeyLoad.Query.Search;
 using KeyLoad.Server;
-using KeyLoad.UnitTests.Features.BackupRestore;
+using KeyLoad.UnitTests.BackupRestore;
 using ManagedCode.Communication.Commands;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 internal static class Bm25RestoredEligibilityPolicy
 {

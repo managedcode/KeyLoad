@@ -1,4 +1,4 @@
-namespace KeyLoad.Server.Features.Search;
+namespace KeyLoad.Server.Search;
 
 internal sealed class TextResourceFileReservation(TextResourceOwnership owner,
     object key, string path, long targetLength, Func<long> observeLength)

@@ -1,11 +1,11 @@
 using System.Collections.Immutable;
-using KeyLoad.Core.Features.RuntimeJournaling.Contracts;
-using KeyLoad.Core.Features.RuntimeJournaling.Execution;
-using KeyLoad.Core.Features.RuntimeJournaling.Models;
-using KeyLoad.Core.Features.RuntimeJournaling.Validation;
+using KeyLoad.Core.RuntimeJournaling.Contracts;
+using KeyLoad.Core.RuntimeJournaling.Execution;
+using KeyLoad.Core.RuntimeJournaling.Models;
+using KeyLoad.Core.RuntimeJournaling.Validation;
 using KeyLoad.Storage;
 
-namespace KeyLoad.Core.Features.RuntimeJournaling.Commands;
+namespace KeyLoad.Core.RuntimeJournaling.Commands;
 
 internal static class RuntimeJournalCommandRules
 {

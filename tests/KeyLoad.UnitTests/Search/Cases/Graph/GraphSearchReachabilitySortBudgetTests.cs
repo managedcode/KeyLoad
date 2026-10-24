@@ -1,6 +1,6 @@
-using KeyLoad.Core.Features.GraphTraversal;
+using KeyLoad.Core.GraphTraversal;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 internal sealed class GraphSearchReachabilitySortBudgetTests
 {

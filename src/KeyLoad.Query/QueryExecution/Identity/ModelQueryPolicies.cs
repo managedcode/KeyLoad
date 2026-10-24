@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 
-namespace KeyLoad.Query.Features.QueryExecution;
+namespace KeyLoad.Query.QueryExecution;
 
 /// <summary>Maps source payload and header field grants onto the model-row schema.</summary>
 internal static class ModelQueryPolicies

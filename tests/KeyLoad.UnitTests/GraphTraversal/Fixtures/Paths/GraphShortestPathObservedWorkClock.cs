@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.GraphTraversal;
+namespace KeyLoad.UnitTests.GraphTraversal;
 
 /// <summary>Observes charged execution adjacency work on the original operation thread.</summary>
 internal sealed class GraphShortestPathObservedWorkClock : TimeProvider

@@ -1,4 +1,4 @@
-namespace KeyLoad.Query.Features.QueryExecution;
+namespace KeyLoad.Query.QueryExecution;
 
 /// <summary>A candidate retained only while it belongs to the requested top prefix.</summary>
 internal sealed record PreparedRow(DocumentRecord? SourceDocument, byte[][]? PendingOrderKeys, byte[]? IdKey,

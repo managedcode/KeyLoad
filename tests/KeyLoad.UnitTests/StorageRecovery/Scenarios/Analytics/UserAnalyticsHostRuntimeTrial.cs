@@ -1,7 +1,7 @@
 using KeyLoad.Server;
-using P = KeyLoad.UnitTests.Features.StorageRecovery.UserAnalyticsHostProtocol;
+using P = KeyLoad.UnitTests.StorageRecovery.UserAnalyticsHostProtocol;
 
-namespace KeyLoad.UnitTests.Features.StorageRecovery;
+namespace KeyLoad.UnitTests.StorageRecovery;
 
 internal static class UserAnalyticsHostRuntimeTrial
 {

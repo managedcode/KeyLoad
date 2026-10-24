@@ -1,7 +1,7 @@
-using KeyLoad.Core.Features.Messaging;
-using static KeyLoad.UnitTests.Features.Messaging.QueueDeadlineCapacityProtocol;
+using KeyLoad.Core.Messaging;
+using static KeyLoad.UnitTests.Messaging.QueueDeadlineCapacityProtocol;
 
-namespace KeyLoad.UnitTests.Features.Messaging;
+namespace KeyLoad.UnitTests.Messaging;
 
 internal static class QueueDeadlineCapacityImage
 {

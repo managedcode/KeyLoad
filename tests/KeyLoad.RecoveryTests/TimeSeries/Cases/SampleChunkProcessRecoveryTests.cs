@@ -1,4 +1,4 @@
-namespace KeyLoad.RecoveryTests.Features.TimeSeries;
+namespace KeyLoad.RecoveryTests.TimeSeries;
 
 internal sealed class SampleChunkProcessRecoveryTests
 {

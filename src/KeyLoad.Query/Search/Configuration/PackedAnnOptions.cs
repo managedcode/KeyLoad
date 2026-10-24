@@ -1,4 +1,4 @@
-namespace KeyLoad.Query.Features.Search;
+namespace KeyLoad.Query.Search;
 
 /// <summary>Central resource and construction settings for the disposable packed ANN index.</summary>
 [ConfigurationOptions]

@@ -1,6 +1,6 @@
 using System.Runtime.ExceptionServices;
 
-namespace KeyLoad.IntegrationTests.Features.TestInfrastructure;
+namespace KeyLoad.IntegrationTests.TestInfrastructure;
 
 internal static class ClusterFixtureStartupFailure
 {

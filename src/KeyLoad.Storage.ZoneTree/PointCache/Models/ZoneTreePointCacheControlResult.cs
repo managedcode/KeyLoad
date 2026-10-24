@@ -1,4 +1,4 @@
-namespace KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
+namespace KeyLoad.Storage.ZoneTree.ResourceExecution;
 
 /// <summary>Reports a bounded local cache configuration or binding attempt without database authority.</summary>
 public enum ZoneTreePointCacheControlResult

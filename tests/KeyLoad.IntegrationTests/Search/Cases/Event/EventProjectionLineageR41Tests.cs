@@ -1,6 +1,6 @@
-using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.ClientApi;
 using KeyLoad.Server;
-namespace KeyLoad.IntegrationTests.Features.Search;
+namespace KeyLoad.IntegrationTests.Search;
 
 [ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = "event-projection-lineage-r41"), NotInParallel]
 internal sealed class EventProjectionLineageR41Tests(ClusterFixture fixture)

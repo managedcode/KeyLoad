@@ -1,8 +1,8 @@
 using System.Runtime.InteropServices;
-using KeyLoad.Core.Features.StoragePartitions.Queries;
+using KeyLoad.Core.StoragePartitions.Queries;
 using KeyLoad.Storage.ZoneTree;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal sealed class PartitionRecordPageTests
 {

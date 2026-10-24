@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
-using D = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreTestData;
+using D = KeyLoad.UnitTests.AnalyticsStore.AnalyticsStoreTestData;
 
-namespace KeyLoad.UnitTests.Features.AnalyticsStore;
+namespace KeyLoad.UnitTests.AnalyticsStore;
 
 internal static class AnalyticsBoundsData
 {

@@ -1,9 +1,9 @@
 using KeyLoad.Clustering;
-using KeyLoad.Core.Features.Messaging;
+using KeyLoad.Core.Messaging;
 using Microsoft.Extensions.DependencyInjection;
 using Orleans.DurableJobs;
 
-namespace KeyLoad.UnitTests.Features.Messaging;
+namespace KeyLoad.UnitTests.Messaging;
 
 internal sealed class SagaTimeoutJobHarness(
     IGrainFactory grains,

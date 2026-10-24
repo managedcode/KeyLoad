@@ -1,7 +1,7 @@
 using System.Text.Json;
 using KeyLoad.Storage;
 
-namespace KeyLoad.UnitTests.Features.ResourceExecution;
+namespace KeyLoad.UnitTests.ResourceExecution;
 
 internal sealed class PreparedScalarTests
 {

@@ -1,8 +1,8 @@
-using KeyLoad.Core.Features.Authorization;
-using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.Core.Authorization;
+using KeyLoad.Core.ResourceExecution;
 using KeyLoad.Query;
 
-namespace KeyLoad.UnitTests.Features.Authorization;
+namespace KeyLoad.UnitTests.Authorization;
 
 internal static class GenerationVisibilityAdmissionFlow
 {

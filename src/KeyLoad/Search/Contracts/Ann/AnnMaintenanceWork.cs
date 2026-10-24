@@ -1,6 +1,6 @@
 using KeyLoad.Clustering;
 
-namespace KeyLoad.Server.Features.Search;
+namespace KeyLoad.Server.Search;
 
 internal readonly record struct AnnMaintenanceWork(Guid SessionId, long WorkUnits,
     AnnMaintenanceCapabilityKind? Stage = null, long WrittenBytes = AnnMaintenanceWork.NoWrittenBytes)

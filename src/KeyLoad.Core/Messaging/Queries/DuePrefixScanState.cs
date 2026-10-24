@@ -1,5 +1,5 @@
 using System.Collections.Immutable;
-using KeyLoad.Core.Features.Messaging;
+using KeyLoad.Core.Messaging;
 
 namespace KeyLoad.Core;
 

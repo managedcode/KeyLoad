@@ -2,7 +2,7 @@ using System.Collections.Concurrent;
 using System.Diagnostics.Tracing;
 using Microsoft.Extensions.Logging.EventSource;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>Observes actual Microsoft logging EventSource formatted events for request failure diagnostics.</summary>
 internal sealed class RequestFailureDiagnosticEventSourceCapture : EventListener

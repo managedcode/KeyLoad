@@ -30,10 +30,10 @@ internal static class SqlOperationCompiler
             throw ScriptDomOperationErrors.Invalid();
         }
         var budget = new global::KeyLoad.Core.ReadExecutionBudget(limitsOptions, cancellationToken: token);
-        var statement = global::KeyLoad.Features.QueryExecution.ScriptDomSyntax.Parse(request.Sql, limitsOptions, budget.Check, token);
+        var statement = global::KeyLoad.QueryExecution.ScriptDomSyntax.Parse(request.Sql, limitsOptions, budget.Check, token);
         if (positionalParameterCount is { } count)
         {
-            global::KeyLoad.Features.QueryExecution.ScriptDomSyntax.ValidateSessionSlots(statement, count, budget.Check, token);
+            global::KeyLoad.QueryExecution.ScriptDomSyntax.ValidateSessionSlots(statement, count, budget.Check, token);
         }
         if (identityControl && statement is global::Microsoft.SqlServer.TransactSql.ScriptDom.SetCommandStatement control)
         {
@@ -72,7 +72,7 @@ internal static class SqlOperationCompiler
         }
         var query = new QueryRequest(request.Partition, request.Sql, request.Parameters,
             request.AllowFullScan, request.Cursor, request.QueryDialectVersion);
-        var ast = global::KeyLoad.Query.Features.QueryExecution.ScriptDomQueryAdapter.Lower(statement, query,
+        var ast = global::KeyLoad.Query.QueryExecution.ScriptDomQueryAdapter.Lower(statement, query,
             limitsOptions, queryOptions, budget, positionalParameterCount, token);
         return Decode(McpToolNames.QueryAst, ast, maximumPayloadBytes, budget.Check, token);
     }

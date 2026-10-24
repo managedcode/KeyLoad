@@ -1,10 +1,10 @@
 using System.Diagnostics;
-using KeyLoad.RecoveryTests.Features.DocumentStorage;
-using KeyLoad.RecoveryTests.Features.StorageRecovery;
+using KeyLoad.RecoveryTests.DocumentStorage;
+using KeyLoad.RecoveryTests.StorageRecovery;
 using KeyLoad.Server;
-using KeyLoad.Server.Features.Search;
+using KeyLoad.Server.Search;
 
-namespace KeyLoad.RecoveryTests.Features.Search;
+namespace KeyLoad.RecoveryTests.Search;
 
 internal static class TextIncrementalProcessTrial
 {

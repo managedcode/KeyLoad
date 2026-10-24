@@ -1,7 +1,7 @@
 using System.Collections.Concurrent;
 using System.Text;
 
-namespace KeyLoad.IntegrationTests.Features.StorageReplication;
+namespace KeyLoad.IntegrationTests.StorageReplication;
 
 /// <summary>Retains the real closed execution rejection through shutdown noise and final fixture projection.</summary>
 internal sealed class ClusterFixtureDiagnosticFailureTests

@@ -3,7 +3,7 @@ using KeyLoad.Query;
 using KeyLoad.Server;
 using KeyLoad.Storage;
 
-namespace KeyLoad.UnitTests.Features.Authorization;
+namespace KeyLoad.UnitTests.Authorization;
 
 internal static class SafeProjectorOperationAuthority
 {

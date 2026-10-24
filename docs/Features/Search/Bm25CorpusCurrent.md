@@ -4,7 +4,7 @@ Accepted implementation contract. This is one bounded current-format statistics 
 
 ## Scope and ownership
 
-Core owns derived publication, retained-family admission and read validation under `src/KeyLoad.Core/Search/`. Query owns exact canonical capture and read-only reuse under `src/KeyLoad.Query/Search/`. Core owns the four-field `KeyLoad.Query.Features.QueryExecution.DistributedTextStatistics` contract with internal visibility, serializer alias `keyload.query.distributed-text-statistics` and IDs0–3. Core grants Query internal access.
+Core owns derived publication, retained-family admission and read validation under `src/KeyLoad.Core/Search/`. Query owns exact canonical capture and read-only reuse under `src/KeyLoad.Query/Search/`. Core owns the four-field `KeyLoad.Query.QueryExecution.DistributedTextStatistics` contract with internal visibility, serializer alias `keyload.query.distributed-text-statistics` and IDs0–3. Core grants Query internal access.
 
 Public Search/SDK/MCP results, SQL and initial operation tools remain unchanged. Frontend N/A: no new UI. Execution uses the existing Orleans grains and node-local ZoneTree ownership. Tests use UnitTests/Search and genuine current-format backup fixtures; these do not substitute for the SDK/official MCP tests on the replicated cluster.
 

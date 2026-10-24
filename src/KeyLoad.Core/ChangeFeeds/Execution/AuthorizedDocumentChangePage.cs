@@ -13,12 +13,12 @@ namespace KeyLoad.Core;
 /// <param name="CutPosition">Storage position represented by this page.</param>
 
 [global::Orleans.GenerateSerializer]
-[global::Orleans.Alias(global::KeyLoad.Core.Features.InternalSerialization.CoreAliases.AuthorizedDocumentChangePage)]
+[global::Orleans.Alias(global::KeyLoad.Core.InternalSerialization.CoreAliases.AuthorizedDocumentChangePage)]
 public sealed record AuthorizedDocumentChangePage<T>(
-    [property: global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.AuthorizedDocumentChangePageFields.Changes)] ImmutableArray<T> Changes,
-    [property: global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.AuthorizedDocumentChangePageFields.Cursor)] string Cursor,
-    [property: global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.AuthorizedDocumentChangePageFields.ThroughSequence)] long ThroughSequence,
-    [property: global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.AuthorizedDocumentChangePageFields.Tail)] long Tail,
-    [property: global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.AuthorizedDocumentChangePageFields.FirstAvailable)] long FirstAvailable,
-    [property: global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.AuthorizedDocumentChangePageFields.HasMore)] bool HasMore,
-    [property: global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.AuthorizedDocumentChangePageFields.CutPosition)] long CutPosition);
+    [property: global::Orleans.Id(global::KeyLoad.Core.InternalSerialization.AuthorizedDocumentChangePageFields.Changes)] ImmutableArray<T> Changes,
+    [property: global::Orleans.Id(global::KeyLoad.Core.InternalSerialization.AuthorizedDocumentChangePageFields.Cursor)] string Cursor,
+    [property: global::Orleans.Id(global::KeyLoad.Core.InternalSerialization.AuthorizedDocumentChangePageFields.ThroughSequence)] long ThroughSequence,
+    [property: global::Orleans.Id(global::KeyLoad.Core.InternalSerialization.AuthorizedDocumentChangePageFields.Tail)] long Tail,
+    [property: global::Orleans.Id(global::KeyLoad.Core.InternalSerialization.AuthorizedDocumentChangePageFields.FirstAvailable)] long FirstAvailable,
+    [property: global::Orleans.Id(global::KeyLoad.Core.InternalSerialization.AuthorizedDocumentChangePageFields.HasMore)] bool HasMore,
+    [property: global::Orleans.Id(global::KeyLoad.Core.InternalSerialization.AuthorizedDocumentChangePageFields.CutPosition)] long CutPosition);

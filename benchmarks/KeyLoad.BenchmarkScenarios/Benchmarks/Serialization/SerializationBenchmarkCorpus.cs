@@ -2,7 +2,7 @@ using System.Collections.Immutable;
 using System.Text;
 using KeyLoad.Storage;
 
-namespace KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
+namespace KeyLoad.BenchmarkScenarios.BenchmarkComparisons;
 
 internal static class SerializationBenchmarkCorpus
 {

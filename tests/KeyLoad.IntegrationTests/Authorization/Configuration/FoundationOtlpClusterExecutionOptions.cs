@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.Authorization;
+namespace KeyLoad.IntegrationTests.Authorization;
 
 /// <summary>Frozen bounded policy for the execution dashboard Orleans observation.</summary>
 [ConfigurationOptions]

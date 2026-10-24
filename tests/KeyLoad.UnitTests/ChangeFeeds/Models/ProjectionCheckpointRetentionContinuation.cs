@@ -1,6 +1,6 @@
 using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
-namespace KeyLoad.UnitTests.Features.ChangeFeeds;
+namespace KeyLoad.UnitTests.ChangeFeeds;
 
 internal sealed record ProjectionCheckpointRetentionContinuation(ProjectionCheckpointRetentionState Original,
     Result<object> ProbeFailure, Result<object> Completed, Command<DatabaseCommand> Filtered, Result<object> Advanced,

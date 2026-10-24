@@ -1,4 +1,4 @@
-namespace KeyLoad.Diagnostics.Features.ResourceExecution;
+namespace KeyLoad.Diagnostics.ResourceExecution;
 
 /// <summary>Observed execution launch files and the source metadata captured by their actual compilation.</summary>
 /// <param name="ExecutablePath">The executable observed on the live operating-system process.</param>

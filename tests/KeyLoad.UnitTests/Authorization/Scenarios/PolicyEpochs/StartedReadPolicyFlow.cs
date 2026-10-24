@@ -1,10 +1,10 @@
 using KeyLoad.Clustering;
 using KeyLoad.Server;
-using KeyLoad.UnitTests.Features.Messaging;
-using KeyLoad.UnitTests.Features.OrleansExecution;
-using P = KeyLoad.UnitTests.Features.Authorization.StartedReadPolicyProtocol;
+using KeyLoad.UnitTests.Messaging;
+using KeyLoad.UnitTests.OrleansExecution;
+using P = KeyLoad.UnitTests.Authorization.StartedReadPolicyProtocol;
 
-namespace KeyLoad.UnitTests.Features.Authorization;
+namespace KeyLoad.UnitTests.Authorization;
 
 internal static class StartedReadPolicyFlow
 {

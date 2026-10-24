@@ -2,7 +2,7 @@ using System.Collections.Immutable;
 using System.Text.Json;
 using ManagedCode.Communication.Commands;
 
-namespace KeyLoad.UnitTests.Features.ResourceExecution;
+namespace KeyLoad.UnitTests.ResourceExecution;
 
 internal static class AtomicTriadOutboxFixture
 {

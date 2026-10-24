@@ -1,4 +1,4 @@
-namespace KeyLoad.RecoveryTests.Features.OrleansExecution;
+namespace KeyLoad.RecoveryTests.OrleansExecution;
 
 [global::Orleans.GenerateSerializer, global::Orleans.Alias(RequestCqrsTestProtocol.ObservationAlias)]
 internal sealed record RequestCqrsProbeResult(

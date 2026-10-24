@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 
-namespace KeyLoad.UnitTests.Features.ResourceExecution;
+namespace KeyLoad.UnitTests.ResourceExecution;
 
 internal static class AtomicTriadStagedRecipe
 {

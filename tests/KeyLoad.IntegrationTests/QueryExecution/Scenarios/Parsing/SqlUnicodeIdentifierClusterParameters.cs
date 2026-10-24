@@ -1,9 +1,9 @@
-namespace KeyLoad.IntegrationTests.Features.QueryExecution;
+namespace KeyLoad.IntegrationTests.QueryExecution;
 
 internal static class SqlUnicodeIdentifierClusterParameters
 {
     internal static async Task RequireAsync(
-        global::KeyLoad.IntegrationTests.Features.OrleansExecution.RequestCqrsClusterCallers caller,
+        global::KeyLoad.IntegrationTests.OrleansExecution.RequestCqrsClusterCallers caller,
         PostgresClusterCaller wire, long revision, CancellationToken token)
     {
         var parameters = new Dictionary<string, global::System.Text.Json.JsonElement>
@@ -15,18 +15,18 @@ internal static class SqlUnicodeIdentifierClusterParameters
             new global::KeyLoad.Query.Comparison(new global::KeyLoad.Query.ParameterOperand(Argument), "=", global::KeyLoad.Query.ValueOperand.Create(UnitValue))), [Low]);
         var request = new global::KeyLoad.QueryRequest(PostgresClusterState.Partition,
             ProjectionPrefix + Clause + SqlNullDistinctClusterCases.Tail, parameters, AllowFullScan: true);
-        await SqlNullDistinctClusterImage.PageAsync(await global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerAssertions.SdkSuccessAsync(
+        await SqlNullDistinctClusterImage.PageAsync(await global::KeyLoad.IntegrationTests.ClientApi.McpCallerAssertions.SdkSuccessAsync(
             await caller.Sdk.QueryAsync(request, token)), item, revision);
-        await SqlNullDistinctClusterImage.PageAsync((await global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerAssertions.SuccessAsync<global::KeyLoad.QueryPage>(
-            await caller.Mcp.CallAsync(global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerTools.QueryExecute, request, token))).Value, item, revision);
+        await SqlNullDistinctClusterImage.PageAsync((await global::KeyLoad.IntegrationTests.ClientApi.McpCallerAssertions.SuccessAsync<global::KeyLoad.QueryPage>(
+            await caller.Mcp.CallAsync(global::KeyLoad.IntegrationTests.ClientApi.McpCallerTools.QueryExecute, request, token))).Value, item, revision);
         var ast = SqlNullDistinctClusterCases.Ast(PostgresClusterState.Partition, item) with
         {
             Parameters = parameters
         };
-        await SqlNullDistinctClusterImage.PageAsync(await global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerAssertions.SdkSuccessAsync(
+        await SqlNullDistinctClusterImage.PageAsync(await global::KeyLoad.IntegrationTests.ClientApi.McpCallerAssertions.SdkSuccessAsync(
             await caller.Sdk.QueryAstAsync(ast, token)), item, revision);
-        await SqlNullDistinctClusterImage.PageAsync((await global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerAssertions.SuccessAsync<global::KeyLoad.QueryPage>(
-            await caller.Mcp.CallAsync(global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerTools.QueryAst, ast, token))).Value, item, revision);
+        await SqlNullDistinctClusterImage.PageAsync((await global::KeyLoad.IntegrationTests.ClientApi.McpCallerAssertions.SuccessAsync<global::KeyLoad.QueryPage>(
+            await caller.Mcp.CallAsync(global::KeyLoad.IntegrationTests.ClientApi.McpCallerTools.QueryAst, ast, token))).Value, item, revision);
         foreach (var prepared in new[] { false, true })
         {
             var argument = new global::Npgsql.NpgsqlParameter
@@ -41,7 +41,7 @@ internal static class SqlUnicodeIdentifierClusterParameters
     }
 
     private static async Task WindowsAsync(
-        global::KeyLoad.IntegrationTests.Features.OrleansExecution.RequestCqrsClusterCallers caller,
+        global::KeyLoad.IntegrationTests.OrleansExecution.RequestCqrsClusterCallers caller,
         PostgresClusterCaller wire, long revision, CancellationToken token)
     {
         var item = SqlNullDistinctClusterCases.All.Single(value => value.Clause == SqlUnicodeIdentifierCases.Clause);
@@ -49,10 +49,10 @@ internal static class SqlUnicodeIdentifierClusterParameters
         {
             var sql = SqlNullDistinctClusterCases.Prefix + item.Clause + OrderBy + window;
             var request = new global::KeyLoad.QueryRequest(PostgresClusterState.Partition, sql, AllowFullScan: true);
-            await SqlNullDistinctClusterImage.PageAsync(await global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerAssertions.SdkSuccessAsync(
+            await SqlNullDistinctClusterImage.PageAsync(await global::KeyLoad.IntegrationTests.ClientApi.McpCallerAssertions.SdkSuccessAsync(
                 await caller.Sdk.QueryAsync(request, token)), item, revision);
-            await SqlNullDistinctClusterImage.PageAsync((await global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerAssertions.SuccessAsync<global::KeyLoad.QueryPage>(
-                await caller.Mcp.CallAsync(global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerTools.QueryExecute, request, token))).Value, item, revision);
+            await SqlNullDistinctClusterImage.PageAsync((await global::KeyLoad.IntegrationTests.ClientApi.McpCallerAssertions.SuccessAsync<global::KeyLoad.QueryPage>(
+                await caller.Mcp.CallAsync(global::KeyLoad.IntegrationTests.ClientApi.McpCallerTools.QueryExecute, request, token))).Value, item, revision);
             foreach (var prepared in new[] { false, true })
             {
                 await SqlNullDistinctClusterImage.PageAsync(await wire.ExecuteAsync<global::KeyLoad.QueryPage>(

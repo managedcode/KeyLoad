@@ -1,7 +1,7 @@
 using System.Globalization;
 using KeyLoad.Storage;
 
-namespace KeyLoad.UnitTests.Features.StorageRecovery;
+namespace KeyLoad.UnitTests.StorageRecovery;
 
 internal sealed class KeyCodecCultureContractTests
 {

@@ -3,7 +3,7 @@ using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
 
-namespace KeyLoad.RecoveryTests.Features.StorageRecovery;
+namespace KeyLoad.RecoveryTests.StorageRecovery;
 
 internal static class SeededWalCorruptionEvidence
 {

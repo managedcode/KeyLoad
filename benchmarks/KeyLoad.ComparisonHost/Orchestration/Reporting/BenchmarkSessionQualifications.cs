@@ -1,12 +1,12 @@
 using System.Text.Json;
 using Aspire.Hosting;
 using KeyLoad.Comparisons;
-using KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
+using KeyLoad.LoadTests.AppHost.BenchmarkComparisons;
 using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.ComparisonHost.Features.BenchmarkOrchestration;
+namespace KeyLoad.ComparisonHost.BenchmarkOrchestration;
 
 /// <summary>Validates and retains original workload evidence before the final session disposition.</summary>
 internal static class BenchmarkSessionQualifications

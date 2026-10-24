@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.ResourceExecution;
+namespace KeyLoad.UnitTests.ResourceExecution;
 
 /// <summary>Retains admitted-work test tasks until their real completion is observed.</summary>
 internal sealed class AnalyticalAdmissionTaskLifetime(TimeSpan timeout)

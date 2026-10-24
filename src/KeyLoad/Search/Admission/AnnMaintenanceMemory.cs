@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.Server.Features.Search;
+namespace KeyLoad.Server.Search;
 
 /// <summary>Accounts original maintenance memory under the same gate as slots and public frames.</summary>
 internal sealed class AnnMaintenanceMemory(Lock gate, List<AnnGenerationSlot> slots,

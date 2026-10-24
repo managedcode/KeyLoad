@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.Messaging;
+namespace KeyLoad.IntegrationTests.Messaging;
 
 internal sealed record QueueRenewedDeadlinePublicState(QueueLeaseClusterSeed Seed, ReceiveRequest Request,
     ReceiveResult Claim, Delivery Delivery, DeliveryCommand Renew, CommitReceipt RenewReceipt,

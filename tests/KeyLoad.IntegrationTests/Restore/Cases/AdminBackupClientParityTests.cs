@@ -1,9 +1,9 @@
 using KeyLoad.Client;
-using KeyLoad.IntegrationTests.Features.BackupRestore.Helpers;
-using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.DocumentStorage;
+using KeyLoad.IntegrationTests.BackupRestore.Helpers;
+using KeyLoad.IntegrationTests.ClientApi;
+using KeyLoad.IntegrationTests.DocumentStorage;
 
-namespace KeyLoad.IntegrationTests.Features.BackupRestore;
+namespace KeyLoad.IntegrationTests.BackupRestore;
 
 /// <summary>AC-CLIENT-004/006: admin backup has typed parity across the real public callers.</summary>
 /// <param name="fixture">The actual Aspire-owned execution Orleans application.</param>

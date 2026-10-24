@@ -4,7 +4,7 @@ using Aspire.Hosting.ApplicationModel;
 using KeyLoad.AppHost.Hosting;
 using KeyLoad.Server;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal sealed class ClusterTelemetryResourceTests
 {

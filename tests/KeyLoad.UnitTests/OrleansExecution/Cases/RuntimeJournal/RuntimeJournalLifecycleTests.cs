@@ -1,7 +1,7 @@
-using KeyLoad.Core.Features.RuntimeJournaling.Contracts;
+using KeyLoad.Core.RuntimeJournaling.Contracts;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal sealed class RuntimeJournalLifecycleTests
 {

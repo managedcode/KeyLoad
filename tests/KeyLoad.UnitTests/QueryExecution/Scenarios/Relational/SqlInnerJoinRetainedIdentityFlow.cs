@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal static class SqlInnerJoinRetainedIdentityFlow
 {
@@ -30,7 +30,7 @@ internal static class SqlInnerJoinRetainedIdentityFlow
         {
             var collection = left ? Left : Right;
             var id = left ? LeftId : RightId;
-            var key = global::KeyLoad.Core.Features.DocumentStorage.DocumentStorageKeys.RecordKey(
+            var key = global::KeyLoad.Core.DocumentStorage.DocumentStorageKeys.RecordKey(
                 database.Partition, collection, id);
             var bytes = database.Store.Read(view => view.ReadOwnedValue(key))
                         ?? throw new InvalidOperationException("The original retained join row is absent.");
@@ -139,5 +139,5 @@ internal static class SqlInnerJoinRetainedIdentityFlow
     }
 
     internal static string[] Image(global::KeyLoad.Storage.ZoneTree.ZoneTreeStore store)
-        => global::KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(store);
+        => global::KeyLoad.UnitTests.Messaging.QueueWholeFlowStorage.Bytes(store);
 }

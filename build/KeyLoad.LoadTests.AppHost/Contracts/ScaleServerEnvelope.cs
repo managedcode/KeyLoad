@@ -1,3 +1,3 @@
-namespace KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
+namespace KeyLoad.LoadTests.AppHost.BenchmarkComparisons;
 
 internal sealed record ScaleServerEnvelope(string CpuQuota, string CpuSet, string MemoryLimitBytes);

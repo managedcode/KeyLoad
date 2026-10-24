@@ -4,7 +4,7 @@ using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.Authorization;
+namespace KeyLoad.UnitTests.Authorization;
 
 internal sealed class DeniedCommandReplayClockTests
 {

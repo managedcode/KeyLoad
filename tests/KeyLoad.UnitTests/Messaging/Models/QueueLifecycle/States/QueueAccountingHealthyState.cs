@@ -1,5 +1,5 @@
 using ManagedCode.Communication;
-namespace KeyLoad.UnitTests.Features.Messaging;
+namespace KeyLoad.UnitTests.Messaging;
 
 internal sealed record QueueAccountingHealthyState(CommandRequest Producer, Result<object> Produced,
     ReceiveRequest Claim, Result<object> Claimed, DeliveryCommand Ack, Result<object> Acked,

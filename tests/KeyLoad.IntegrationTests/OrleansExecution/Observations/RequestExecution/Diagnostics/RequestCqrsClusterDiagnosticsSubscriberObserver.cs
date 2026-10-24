@@ -2,7 +2,7 @@ using Aspire.Hosting.ApplicationModel;
 using KeyLoad.Clustering;
 using KeyLoad.Server;
 
-namespace KeyLoad.IntegrationTests.Features.OrleansExecution.Helpers;
+namespace KeyLoad.IntegrationTests.OrleansExecution.Helpers;
 
 internal sealed class RequestCqrsClusterDiagnosticsSubscriberObserver : IAsyncDisposable
 {

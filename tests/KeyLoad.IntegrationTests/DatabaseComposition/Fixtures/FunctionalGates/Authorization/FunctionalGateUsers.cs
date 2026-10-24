@@ -1,10 +1,10 @@
-using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.OrleansExecution;
-using KeyLoad.IntegrationTests.Features.QueryExecution;
+using KeyLoad.IntegrationTests.ClientApi;
+using KeyLoad.IntegrationTests.OrleansExecution;
+using KeyLoad.IntegrationTests.QueryExecution;
 using KeyLoad.Server;
-using static KeyLoad.IntegrationTests.Features.DatabaseComposition.FunctionalGateUserPolicies;
+using static KeyLoad.IntegrationTests.DatabaseComposition.FunctionalGateUserPolicies;
 
-namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
+namespace KeyLoad.IntegrationTests.DatabaseComposition;
 
 /// <summary>Eight real persisted database identities and their independently owned SDK/official MCP sessions.</summary>
 internal sealed class FunctionalGateUsers : IAsyncDisposable

@@ -1,4 +1,4 @@
-namespace KeyLoad.Clustering.Features.Search;
+namespace KeyLoad.Clustering.Search;
 
 internal enum OnlineTextCapabilityKind
 {

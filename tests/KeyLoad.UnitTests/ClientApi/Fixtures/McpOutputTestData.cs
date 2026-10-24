@@ -3,7 +3,7 @@ using System.Text.Json.Nodes;
 using ModelContextProtocol;
 using ModelContextProtocol.Protocol;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>Owns genuine canonical JSON and execution response objects for explicit output-lifetime proofs.</summary>
 internal static class McpOutputTestData

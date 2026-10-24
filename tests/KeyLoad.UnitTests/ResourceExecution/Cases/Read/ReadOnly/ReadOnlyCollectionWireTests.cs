@@ -3,7 +3,7 @@ using System.Text.Json;
 using KeyLoad.Storage;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.ResourceExecution;
+namespace KeyLoad.UnitTests.ResourceExecution;
 
 internal sealed class ReadOnlyCollectionWireTests
 {

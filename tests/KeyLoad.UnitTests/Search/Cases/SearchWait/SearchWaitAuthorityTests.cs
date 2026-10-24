@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 /// <summary>AC-SEARCH-WAIT-001: real minimum/applied authority rejection precedes complete literal execution continuation.</summary>
 internal sealed class SearchWaitAuthorityTests

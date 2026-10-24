@@ -1,7 +1,7 @@
-using KeyLoad.Core.Features.GraphTraversal.Validation;
+using KeyLoad.Core.GraphTraversal.Validation;
 using KeyLoad.Storage;
 
-namespace KeyLoad.Core.Features.GraphTraversal;
+namespace KeyLoad.Core.GraphTraversal;
 
 /// <summary>Reads bounded visible reachability without retaining edge or document payloads.</summary>
 internal sealed class GraphSearchReachabilityReader(

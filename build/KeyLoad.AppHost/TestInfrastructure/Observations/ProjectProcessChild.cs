@@ -2,7 +2,7 @@ using System.Diagnostics;
 using System.Globalization;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.AppHost.Features.TestInfrastructure;
+namespace KeyLoad.AppHost.TestInfrastructure;
 
 /// <summary>Finds the exact SDK executable only among the original Aspire launcher's direct children.</summary>
 internal static class ProjectProcessChild

@@ -1,7 +1,7 @@
 using System.Globalization;
 using KeyLoad.Clustering;
 
-namespace KeyLoad.IntegrationTests.Features.StorageReplication;
+namespace KeyLoad.IntegrationTests.StorageReplication;
 
 /// <summary>Selects physical storage only for the keyed public-query SDK and MCP cases.</summary>
 internal readonly record struct PublicQueryStorageSelection(StorageAccessMode Mode, int ReplicaCount)

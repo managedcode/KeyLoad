@@ -1,5 +1,5 @@
 using KeyLoad.Core;
-using KeyLoad.Core.Features.Messaging;
+using KeyLoad.Core.Messaging;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 

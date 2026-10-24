@@ -1,9 +1,9 @@
-using KeyLoad.Core.Features.CommandOutcomes.Contracts;
-using KeyLoad.Core.Features.CommandOutcomes.Execution;
+using KeyLoad.Core.CommandOutcomes.Contracts;
+using KeyLoad.Core.CommandOutcomes.Execution;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal static class CanonicalOutcomeReadBudgetFlow
 {

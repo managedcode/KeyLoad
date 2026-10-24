@@ -2,7 +2,7 @@ using System.Runtime.ExceptionServices;
 using KeyLoad.Core;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.Server.Features.Search;
+namespace KeyLoad.Server.Search;
 
 internal static class TextSettlement
 {

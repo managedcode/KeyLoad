@@ -1,7 +1,7 @@
 using System.Runtime.ExceptionServices;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
+namespace KeyLoad.LoadTests.AppHost.BenchmarkComparisons;
 
 internal sealed class ScaleServerResourceEvidenceCompletion(IOptions<ScaleServerResourceOptions> options, TimeProvider? provider = null)
 {

@@ -1,14 +1,14 @@
 using System.Text.Json;
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
-using KeyLoad.AppHost.Features.TestInfrastructure;
+using KeyLoad.AppHost.TestInfrastructure;
 using KeyLoad.Comparisons;
-using KeyLoad.Diagnostics.Features.ResourceExecution;
-using KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
+using KeyLoad.Diagnostics.ResourceExecution;
+using KeyLoad.LoadTests.AppHost.BenchmarkComparisons;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.ComparisonHost.Features.BenchmarkOrchestration;
+namespace KeyLoad.ComparisonHost.BenchmarkOrchestration;
 
 /// <summary>Starts only selected database infrastructure, then runs the execution workload client outside Aspire's resource graph.</summary>
 internal static class BenchmarkSessionClientRuntime

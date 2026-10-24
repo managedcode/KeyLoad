@@ -1,4 +1,4 @@
-namespace KeyLoad.Server.Features.Search;
+namespace KeyLoad.Server.Search;
 
 /// <summary>Admits one maintenance operation at a time and joins the accepted operation before releasing its owner.</summary>
 internal sealed class TextIncrementalWorker : IAsyncDisposable

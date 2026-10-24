@@ -2,7 +2,7 @@ using System.Text.Json;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 
-namespace KeyLoad.UnitTests.Features.BackupRestore;
+namespace KeyLoad.UnitTests.BackupRestore;
 
 internal static class CliBackupJournalRepairAssertions
 {

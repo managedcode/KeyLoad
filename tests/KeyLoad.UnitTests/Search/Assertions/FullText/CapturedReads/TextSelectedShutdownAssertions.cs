@@ -1,11 +1,11 @@
 using KeyLoad.Query;
 using KeyLoad.Server;
-using KeyLoad.Server.Features.Search;
-using KeyLoad.UnitTests.Features.Messaging;
-using KeyLoad.UnitTests.Features.QueryExecution;
+using KeyLoad.Server.Search;
+using KeyLoad.UnitTests.Messaging;
+using KeyLoad.UnitTests.QueryExecution;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 internal static class TextSelectedShutdownAssertions
 {

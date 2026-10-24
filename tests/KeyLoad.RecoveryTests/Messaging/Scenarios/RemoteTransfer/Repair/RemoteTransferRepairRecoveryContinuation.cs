@@ -1,8 +1,8 @@
 using KeyLoad.Core;
-using KeyLoad.Core.Features.Messaging;
+using KeyLoad.Core.Messaging;
 using KeyLoad.Storage.ZoneTree;
 
-namespace KeyLoad.RecoveryTests.Features.Messaging;
+namespace KeyLoad.RecoveryTests.Messaging;
 
 internal static class RemoteTransferRepairRecoveryContinuation
 {

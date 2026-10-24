@@ -1,7 +1,7 @@
 using System.Text.Json;
-using KeyLoad.UnitTests.Features.ClientApi;
+using KeyLoad.UnitTests.ClientApi;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 /// <summary>Independent SQL spelling and boundary recipes for the accepted comment grammar.</summary>
 internal static class SqlOperationCommentTestData

@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.QueryExecution;
+namespace KeyLoad.IntegrationTests.QueryExecution;
 
 internal static class SqlBetweenSymmetricClusterFlow
 {
@@ -13,7 +13,7 @@ internal static class SqlBetweenSymmetricClusterFlow
             {
                 await fixture.InitializeAsync();
                 SqlBetweenSymmetricClusterState state;
-                using (var deadline = global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerDeadline.Create())
+                using (var deadline = global::KeyLoad.IntegrationTests.ClientApi.McpCallerDeadline.Create())
                 {
                     var seed = await SqlBetweenSymmetricClusterSetup.CreateAsync(fixture, deadline.Token);
                     state = new(seed, SqlNullOrderingClusterProtocol.SeedRevision, SqlBetweenSymmetricClusterState.HealthyJson, seed.Receipt);
@@ -21,7 +21,7 @@ internal static class SqlBetweenSymmetricClusterFlow
                 state = await WaveAsync(fixture, state, faults: true);
                 for (var cold = 0; cold < SqlNullOrderingClusterProtocol.ColdCuts; cold++)
                 {
-                    using var deadline = global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerDeadline.Create();
+                    using var deadline = global::KeyLoad.IntegrationTests.ClientApi.McpCallerDeadline.Create();
                     await ModelSqlClusterCold.RunAsync(fixture, deadline.Token);
                     state = await WaveAsync(fixture, state, faults: false);
                 }
@@ -32,8 +32,8 @@ internal static class SqlBetweenSymmetricClusterFlow
 
     private static async Task<SqlBetweenSymmetricClusterState> WaveAsync(ClusterFixture fixture, SqlBetweenSymmetricClusterState state, bool faults)
     {
-        using var deadline = global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerDeadline.Create();
-        return await global::KeyLoad.IntegrationTests.Features.OrleansExecution.RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerProtocol.Node1, fixture.AdminKey, async root =>
+        using var deadline = global::KeyLoad.IntegrationTests.ClientApi.McpCallerDeadline.Create();
+        return await global::KeyLoad.IntegrationTests.OrleansExecution.RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, global::KeyLoad.IntegrationTests.ClientApi.McpCallerProtocol.Node1, fixture.AdminKey, async root =>
         {
             var before = await SqlBetweenSymmetricClusterImage.ReadAsync(root, state, deadline.Token);
             await SqlBetweenSymmetricClusterPages.HealthyAsync(fixture, state, deadline.Token);

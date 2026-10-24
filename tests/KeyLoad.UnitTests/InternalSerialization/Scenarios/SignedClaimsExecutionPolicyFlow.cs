@@ -3,7 +3,7 @@ using KeyLoad.Storage;
 using ManagedCode.Communication;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.UnitTests.Features.InternalSerialization;
+namespace KeyLoad.UnitTests.InternalSerialization;
 
 internal static class SignedClaimsExecutionPolicyFlow
 {

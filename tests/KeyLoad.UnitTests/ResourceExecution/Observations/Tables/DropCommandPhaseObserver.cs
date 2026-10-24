@@ -2,7 +2,7 @@ using System.Collections.Concurrent;
 using System.Runtime.ExceptionServices;
 using KeyLoad.Clustering;
 
-namespace KeyLoad.UnitTests.Features.ResourceExecution;
+namespace KeyLoad.UnitTests.ResourceExecution;
 
 /// <summary>Selects execution before-submit or returned-command phases without replacing the production operation.</summary>
 internal sealed class DropCommandPhaseObserver : IGrainRequestPhaseObserver, RuntimeIGrainRequestPhaseObserver

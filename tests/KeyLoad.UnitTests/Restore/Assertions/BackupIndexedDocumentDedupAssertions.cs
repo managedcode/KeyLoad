@@ -1,7 +1,7 @@
 using KeyLoad.Query;
 using KeyLoad.Storage;
 
-namespace KeyLoad.UnitTests.Features.BackupRestore;
+namespace KeyLoad.UnitTests.BackupRestore;
 
 internal static class BackupIndexedDocumentDedupAssertions
 {

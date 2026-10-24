@@ -1,4 +1,4 @@
-namespace KeyLoad.Query.Features.QueryExecution;
+namespace KeyLoad.Query.QueryExecution;
 
 /// <summary>Separates one actual bounded execution child from serialized parent accounting.</summary>
 internal sealed class PartitionQueryPreparedLeaf(

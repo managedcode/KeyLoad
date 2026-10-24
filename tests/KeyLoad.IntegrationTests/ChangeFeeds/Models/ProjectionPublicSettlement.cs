@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.ChangeFeeds;
+namespace KeyLoad.IntegrationTests.ChangeFeeds;
 
 internal sealed record ProjectionPublicSettlement(ProjectionPublicState Original, PrincipalRecord Current,
     CommitProjectionBatchRequest CurrentReplay, ProjectionBatchResult CurrentResult,

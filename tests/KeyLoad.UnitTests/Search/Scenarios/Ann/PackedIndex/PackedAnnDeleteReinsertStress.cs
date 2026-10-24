@@ -1,8 +1,8 @@
 using System.Collections.Immutable;
-using KeyLoad.Query.Features.Search;
-using KeyLoad.UnitTests.Features.Messaging;
+using KeyLoad.Query.Search;
+using KeyLoad.UnitTests.Messaging;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 internal static class PackedAnnDeleteReinsertStress
 {

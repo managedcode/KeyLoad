@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.Cli.Features.BackupRestore;
+namespace KeyLoad.Cli.BackupRestore;
 
 /// <summary>Creates explicit execution policy defaults before standard binding and validation.</summary>
 [ConfigurationBinding]

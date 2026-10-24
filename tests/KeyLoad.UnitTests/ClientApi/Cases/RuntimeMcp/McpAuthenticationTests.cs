@@ -5,7 +5,7 @@ using KeyLoad.Clustering;
 using KeyLoad.Server;
 using KeyLoad.Storage;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 internal sealed class McpAuthenticationTests
 {

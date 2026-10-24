@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 
-namespace KeyLoad.Core.Features.Search;
+namespace KeyLoad.Core.Search;
 
 /// <summary>Records only source identity, policy provenance and reducer metadata beside a derived vector.</summary>
 [global::Orleans.GenerateSerializer]

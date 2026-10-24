@@ -3,7 +3,7 @@ using System.Text.Json;
 using KeyLoad.Server;
 using ModelContextProtocol.Protocol;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>AC-MCP-003/005/007: wrappers preserve canonical values and borrow one explicitly owned document.</summary>
 internal sealed class McpReplyOwnerTests

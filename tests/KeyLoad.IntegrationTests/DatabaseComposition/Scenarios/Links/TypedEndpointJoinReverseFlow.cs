@@ -1,10 +1,10 @@
 using System.Collections.Immutable;
 using System.Text.Json;
-using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.OrleansExecution;
-using KeyLoad.IntegrationTests.Features.QueryExecution;
+using KeyLoad.IntegrationTests.ClientApi;
+using KeyLoad.IntegrationTests.OrleansExecution;
+using KeyLoad.IntegrationTests.QueryExecution;
 
-namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
+namespace KeyLoad.IntegrationTests.DatabaseComposition;
 
 internal static class TypedEndpointJoinReverseFlow
 {
@@ -24,7 +24,7 @@ internal static class TypedEndpointJoinReverseFlow
     }, token);
 
     private static async Task<TypedEndpointJoinState> ExecuteAsync(ClusterFixture fixture, RequestCqrsClusterCallers admin,
-        RequestCqrsClusterCallers callers, TypedEndpointJoinState state, global::KeyLoad.IntegrationTests.Features.ClientApi.McpPersistedIdentity identity, CancellationToken token)
+        RequestCqrsClusterCallers callers, TypedEndpointJoinState state, global::KeyLoad.IntegrationTests.ClientApi.McpPersistedIdentity identity, CancellationToken token)
     {
         var mutation = new GraphToQueueMutation(TypedEndpointJoinProtocol.EmptyQueue,
             TypedEndpointJoinProtocol.Graph, TypedEndpointJoinProtocol.From(state.Seed.Partition), Prefix);
@@ -80,10 +80,10 @@ internal static class TypedEndpointJoinReverseFlow
         return state;
     }
 
-    private static async Task<global::KeyLoad.IntegrationTests.Features.ClientApi.McpPersistedIdentity> CreateIdentityAsync(ClusterFixture fixture,
+    private static async Task<global::KeyLoad.IntegrationTests.ClientApi.McpPersistedIdentity> CreateIdentityAsync(ClusterFixture fixture,
         RequestCqrsClusterCallers admin, TypedEndpointJoinSeed seed, CancellationToken token)
     {
-        var identity = await global::KeyLoad.IntegrationTests.Features.ClientApi.McpPersistedIdentity.CreateAsync(fixture, seed.Partition,
+        var identity = await global::KeyLoad.IntegrationTests.ClientApi.McpPersistedIdentity.CreateAsync(fixture, seed.Partition,
             TypedEndpointJoinProtocol.Graph, Capability.GraphRead | Capability.GraphWrite | Capability.Query, token);
         var expected = seed.Principal with
         {

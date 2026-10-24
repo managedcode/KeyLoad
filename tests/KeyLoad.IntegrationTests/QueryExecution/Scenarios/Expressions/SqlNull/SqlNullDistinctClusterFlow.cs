@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.QueryExecution;
+namespace KeyLoad.IntegrationTests.QueryExecution;
 
 internal static class SqlNullDistinctClusterFlow
 {
@@ -13,7 +13,7 @@ internal static class SqlNullDistinctClusterFlow
             {
                 await fixture.InitializeAsync();
                 SqlNullDistinctClusterState state;
-                using (var deadline = global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerDeadline.Create())
+                using (var deadline = global::KeyLoad.IntegrationTests.ClientApi.McpCallerDeadline.Create())
                 {
                     var seed = await SqlNullOrderingClusterSetup.CreateAsync(fixture, deadline.Token);
                     state = new(seed, SqlNullOrderingClusterProtocol.SeedRevision, SqlNullDistinctClusterState.HealthyJson, seed.Receipt);
@@ -21,7 +21,7 @@ internal static class SqlNullDistinctClusterFlow
                 state = await WaveAsync(fixture, state, faults: true);
                 for (var cold = 0; cold < SqlNullOrderingClusterProtocol.ColdCuts; cold++)
                 {
-                    using var deadline = global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerDeadline.Create();
+                    using var deadline = global::KeyLoad.IntegrationTests.ClientApi.McpCallerDeadline.Create();
                     await ModelSqlClusterCold.RunAsync(fixture, deadline.Token);
                     state = await WaveAsync(fixture, state, faults: false);
                 }
@@ -32,8 +32,8 @@ internal static class SqlNullDistinctClusterFlow
 
     private static async Task<SqlNullDistinctClusterState> WaveAsync(ClusterFixture fixture, SqlNullDistinctClusterState state, bool faults)
     {
-        using var deadline = global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerDeadline.Create();
-        return await global::KeyLoad.IntegrationTests.Features.OrleansExecution.RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerProtocol.Node1, fixture.AdminKey, async root =>
+        using var deadline = global::KeyLoad.IntegrationTests.ClientApi.McpCallerDeadline.Create();
+        return await global::KeyLoad.IntegrationTests.OrleansExecution.RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, global::KeyLoad.IntegrationTests.ClientApi.McpCallerProtocol.Node1, fixture.AdminKey, async root =>
         {
             var before = await SqlNullDistinctClusterImage.ReadAsync(root, state, deadline.Token);
             await SqlNullDistinctClusterPages.HealthyAsync(fixture, state, deadline.Token);

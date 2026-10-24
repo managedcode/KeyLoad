@@ -1,7 +1,7 @@
 using KeyLoad.Clustering;
 using KeyLoad.Server;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 internal sealed class McpAuthenticationProjectionBudgetTests
 {

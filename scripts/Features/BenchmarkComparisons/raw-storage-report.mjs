@@ -1,4 +1,4 @@
-const benchmarkNamespace = 'KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons';
+const benchmarkNamespace = 'KeyLoad.BenchmarkScenarios.BenchmarkComparisons';
 const benchmarkType = 'RawStorageBenchmarks';
 const benchmarkDotNetVersion = /^0\.15\.8(?:$|[+-][0-9A-Za-z.-]+)$/;
 const runtimeVersion = /^\.NET 10\.\d+(?:\.\d+)?(?:[-+][0-9A-Za-z.-]+)?(?: \([^()\r\n]+\))?$/;

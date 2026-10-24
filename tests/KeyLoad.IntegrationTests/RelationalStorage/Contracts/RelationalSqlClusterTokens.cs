@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 
-namespace KeyLoad.IntegrationTests.Features.RelationalStorage;
+namespace KeyLoad.IntegrationTests.RelationalStorage;
 
 /// <summary>Independent typed-row and cross-model data for real Orleans SQL callers.</summary>
 internal static class RelationalSqlClusterTokens

@@ -1,6 +1,6 @@
-using KeyLoad.UnitTests.Features.OrleansExecution;
+using KeyLoad.UnitTests.OrleansExecution;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 internal sealed class CredentialStatusState(ConnectionScenario scenario,
     PrincipalRecord administrator, PrincipalRecord ordinary, ApiKeyRecord caller,

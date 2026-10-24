@@ -1,6 +1,6 @@
 using KeyLoad.Core;
-using KeyLoad.Core.Features.DocumentStorage;
-using KeyLoad.Query.Features.Search;
+using KeyLoad.Core.DocumentStorage;
+using KeyLoad.Query.Search;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Query;
@@ -65,7 +65,7 @@ internal static class SearchBranchExecution
             ranker.AttachProjection(original);
         }
         database.VisitVisibleDocuments(captured, principal, request.Partition, request.Collection, budget, ranker.Visit);
-        var scores = global::KeyLoad.Query.Features.Search.Bm25CorpusReuse.Rank(
+        var scores = global::KeyLoad.Query.Search.Bm25CorpusReuse.Rank(
             database, captured, principal, request, budget, ranker);
         VerifyProjectionCandidates(original, ranker.Terms, scores, budget);
         return scores;

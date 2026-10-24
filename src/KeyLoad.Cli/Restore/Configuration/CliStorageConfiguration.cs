@@ -1,9 +1,9 @@
 using KeyLoad.Storage.ZoneTree;
-using KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
+using KeyLoad.Storage.ZoneTree.ResourceExecution;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.Cli.Features.BackupRestore;
+namespace KeyLoad.Cli.BackupRestore;
 
 /// <summary>Binds optional standalone storage environment overrides before opening files.</summary>
 [ConfigurationBinding]

@@ -1,5 +1,5 @@
-using KeyLoad.IntegrationTests.Features.ClientApi;
-namespace KeyLoad.IntegrationTests.Features.Search;
+using KeyLoad.IntegrationTests.ClientApi;
+namespace KeyLoad.IntegrationTests.Search;
 
 internal sealed class EventProjectionLineageR41State(PartitionRef partition,
  McpPersistedIdentity worker, McpPersistedIdentity reader)

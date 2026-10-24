@@ -1,6 +1,6 @@
 using System.Text.Json;
 
-namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
+namespace KeyLoad.Analyzers.Tests.CodeQuality;
 
 internal sealed class SiteAnalyzerCoverageTestScope : IDisposable
 {

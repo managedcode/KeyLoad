@@ -1,10 +1,10 @@
 using System.Collections.Immutable;
-using KeyLoad.Core.Features.RuntimeJournaling.Contracts;
-using KeyLoad.Core.Features.RuntimeJournaling.Models;
-using KeyLoad.Core.Features.RuntimeJournaling.Validation;
+using KeyLoad.Core.RuntimeJournaling.Contracts;
+using KeyLoad.Core.RuntimeJournaling.Models;
+using KeyLoad.Core.RuntimeJournaling.Validation;
 using KeyLoad.Storage;
 
-namespace KeyLoad.Core.Features.RuntimeJournaling.Execution;
+namespace KeyLoad.Core.RuntimeJournaling.Execution;
 
 internal static class RuntimeJournalCatalogReader
 {

@@ -1,10 +1,10 @@
 using System.Text.Json;
 using KeyLoad.Client;
-using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.QueryExecution;
-using KeyLoad.IntegrationTests.Features.RelationalStorage;
+using KeyLoad.IntegrationTests.ClientApi;
+using KeyLoad.IntegrationTests.QueryExecution;
+using KeyLoad.IntegrationTests.RelationalStorage;
 
-namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
+namespace KeyLoad.IntegrationTests.DatabaseComposition;
 
 internal static class DeclarativeCompositionBudgetFlow
 {
@@ -71,7 +71,7 @@ internal static class DeclarativeCompositionBudgetFlow
         return new(limited, exact, receipt, beforeFirst, beforeSecond, graph);
     }
 
-    internal static async Task ColdAsync(global::KeyLoad.IntegrationTests.Features.OrleansExecution.RequestCqrsClusterCallers callers, RelationalSqlClusterScenario scenario,
+    internal static async Task ColdAsync(global::KeyLoad.IntegrationTests.OrleansExecution.RequestCqrsClusterCallers callers, RelationalSqlClusterScenario scenario,
         DeclarativeCompositionBudgetState state, CancellationToken token)
     {
         var exact = (QueueToGraph)state.Command.Mutations[0];

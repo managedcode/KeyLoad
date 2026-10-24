@@ -3,7 +3,7 @@ using System.Text.Json;
 using KeyLoad.Storage;
 using ManagedCode.Communication;
 
-namespace KeyLoad.UnitTests.Features.ResourceExecution;
+namespace KeyLoad.UnitTests.ResourceExecution;
 
 internal sealed class JsonTextProtocolTests
 {

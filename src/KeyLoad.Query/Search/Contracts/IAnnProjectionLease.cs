@@ -1,8 +1,8 @@
 using System.Collections.Immutable;
-using KeyLoad.Core.Features.Search;
+using KeyLoad.Core.Search;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.Query.Features.Search;
+namespace KeyLoad.Query.Search;
 
 internal interface IAnnProjectionLease : IDisposable
 {

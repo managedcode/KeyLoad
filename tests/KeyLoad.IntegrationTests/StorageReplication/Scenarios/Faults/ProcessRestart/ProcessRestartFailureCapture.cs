@@ -1,6 +1,6 @@
 using Aspire.Hosting;
 
-namespace KeyLoad.IntegrationTests.Features.StorageReplication;
+namespace KeyLoad.IntegrationTests.StorageReplication;
 
 /// <summary>Captures safe Aspire state and actual execution process identity after a restart failure.</summary>
 internal sealed class ProcessRestartFailureCapture

@@ -1,9 +1,9 @@
 using KeyLoad.Server;
 using KeyLoad.Storage;
-using KeyLoad.UnitTests.Features.ResourceExecution;
-using static KeyLoad.UnitTests.Features.GraphTraversal.GraphReferenceLifetimeProtocol;
+using KeyLoad.UnitTests.ResourceExecution;
+using static KeyLoad.UnitTests.GraphTraversal.GraphReferenceLifetimeProtocol;
 
-namespace KeyLoad.UnitTests.Features.GraphTraversal;
+namespace KeyLoad.UnitTests.GraphTraversal;
 
 internal static class GraphReferenceLifetimeReceipt
 {

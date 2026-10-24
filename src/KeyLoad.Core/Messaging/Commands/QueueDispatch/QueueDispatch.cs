@@ -1,5 +1,5 @@
-using KeyLoad.Core.Features.Messaging;
-using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.Core.Messaging;
+using KeyLoad.Core.ResourceExecution;
 using KeyLoad.Storage;
 using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;

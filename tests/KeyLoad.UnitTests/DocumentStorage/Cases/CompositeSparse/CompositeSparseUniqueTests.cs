@@ -1,6 +1,6 @@
 using KeyLoad.Storage;
 
-namespace KeyLoad.UnitTests.Features.DocumentStorage;
+namespace KeyLoad.UnitTests.DocumentStorage;
 
 internal sealed class CompositeSparseUniqueTests
 {

@@ -1,6 +1,6 @@
-using KeyLoad.IntegrationTests.Features.Messaging;
+using KeyLoad.IntegrationTests.Messaging;
 
-namespace KeyLoad.IntegrationTests.Features.Search;
+namespace KeyLoad.IntegrationTests.Search;
 
 internal sealed record GraphSearchPathPolicyClusterState(PartitionRef Partition, MessagingClusterIdentity Identity,
     CommandRequest Seed, CommitReceipt SeedReceipt, OutboxStatus Outbox,

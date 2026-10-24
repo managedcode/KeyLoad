@@ -1,7 +1,7 @@
 using System.Globalization;
 using System.Text;
 
-namespace KeyLoad.AppHost.Features.TestInfrastructure;
+namespace KeyLoad.AppHost.TestInfrastructure;
 
 internal static class AspireTerminalResource
 {

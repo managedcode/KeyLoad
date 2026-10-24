@@ -1,7 +1,7 @@
 using KeyLoad.Server;
 using ModelContextProtocol.Protocol;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>AC-MCP-003/005: missing compared fields cannot reach execution reflected-header errors.</summary>
 internal sealed class McpMissingTransportFieldTests

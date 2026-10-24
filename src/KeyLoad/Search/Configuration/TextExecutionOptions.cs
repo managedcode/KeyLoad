@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.Server.Features.Search;
+namespace KeyLoad.Server.Search;
 
 /// <summary>Bounds disposable execution text generations and their actual physical inventory and workspace.</summary>
 [ConfigurationOptions]

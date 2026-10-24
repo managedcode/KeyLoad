@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>Canonical real public mutation DTOs, independent of catalog discovery.</summary>
 internal static class McpMutationTestData

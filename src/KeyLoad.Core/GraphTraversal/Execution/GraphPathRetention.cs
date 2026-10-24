@@ -1,5 +1,5 @@
 using Microsoft.Extensions.Options;
-namespace KeyLoad.Core.Features.GraphTraversal;
+namespace KeyLoad.Core.GraphTraversal;
 
 /// <summary>Reserves conservative in-memory metadata before path state is retained.</summary>
 internal sealed class GraphPathRetention

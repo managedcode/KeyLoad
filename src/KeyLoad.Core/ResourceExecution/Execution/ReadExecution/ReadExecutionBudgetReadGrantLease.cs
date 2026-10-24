@@ -1,4 +1,4 @@
-namespace KeyLoad.Core.Features.ResourceExecution.Execution;
+namespace KeyLoad.Core.ResourceExecution.Execution;
 
 /// <summary>Scopes an existing original allowance to one sequential execution reader without renewing it.</summary>
 internal sealed class ReadExecutionBudgetReadGrantLease(ReadExecutionBudget owner, ReadExecutionBudgetReadGrant grant) : IDisposable

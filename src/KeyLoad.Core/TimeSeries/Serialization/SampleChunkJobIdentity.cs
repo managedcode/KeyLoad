@@ -1,7 +1,7 @@
 using System.Security.Cryptography;
 using KeyLoad.Storage;
 
-namespace KeyLoad.Core.Features.TimeSeries;
+namespace KeyLoad.Core.TimeSeries;
 
 internal static class SampleChunkJobIdentity
 {

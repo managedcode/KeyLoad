@@ -1,7 +1,7 @@
 using KeyLoad.Core;
-using KeyLoad.Features.QueryExecution;
+using KeyLoad.QueryExecution;
 
-namespace KeyLoad.Query.Features.QueryExecution;
+namespace KeyLoad.Query.QueryExecution;
 
 internal sealed class ScriptDomLoweringContext(global::Microsoft.Extensions.Options.IOptions<DatabaseLimits> limitsOptions,
     global::Microsoft.Extensions.Options.IOptions<QueryExecutionOptions> executionOptions,

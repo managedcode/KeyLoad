@@ -1,5 +1,5 @@
 using ManagedCode.Communication;
-namespace KeyLoad.UnitTests.Features.Authorization;
+namespace KeyLoad.UnitTests.Authorization;
 
 internal sealed class EventMessageSensitiveReplayState(PartitionRef partition, ResourceDefinition resource,
     PrincipalRecord worker, bool subscription, bool dataAuthority, bool header)

@@ -1,4 +1,4 @@
-using KeyLoad.Core.Features.RelationalStorage;
+using KeyLoad.Core.RelationalStorage;
 
 namespace KeyLoad.Query;
 

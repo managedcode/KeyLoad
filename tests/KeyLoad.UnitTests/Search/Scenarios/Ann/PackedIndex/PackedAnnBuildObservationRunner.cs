@@ -1,9 +1,9 @@
 using System.Globalization;
 using System.Runtime.ExceptionServices;
-using KeyLoad.Query.Features.Search;
+using KeyLoad.Query.Search;
 using ManagedCode.Communication.CQRS;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 internal static class PackedAnnBuildObservationRunner
 {

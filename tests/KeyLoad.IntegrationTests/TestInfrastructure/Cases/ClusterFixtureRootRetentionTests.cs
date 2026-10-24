@@ -1,8 +1,8 @@
-using KeyLoad.IntegrationTests.Features.QueryExecution;
+using KeyLoad.IntegrationTests.QueryExecution;
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
 
-namespace KeyLoad.IntegrationTests.Features.TestInfrastructure;
+namespace KeyLoad.IntegrationTests.TestInfrastructure;
 
 /// <summary>Actual local root-release policy and execution store ownership; no injected Aspire stop or Orleans proof.</summary>
 internal sealed class ClusterFixtureRootRetentionTests

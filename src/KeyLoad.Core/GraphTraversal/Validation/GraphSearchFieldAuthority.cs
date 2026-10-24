@@ -1,7 +1,7 @@
-using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.Core.ResourceExecution;
 using KeyLoad.Storage;
 
-namespace KeyLoad.Core.Features.GraphTraversal;
+namespace KeyLoad.Core.GraphTraversal;
 
 /// <summary>Checks one graph expression under the caller's original authorized read cut.</summary>
 internal static class GraphSearchFieldAuthority

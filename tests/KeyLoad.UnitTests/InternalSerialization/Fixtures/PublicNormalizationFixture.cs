@@ -1,7 +1,7 @@
 using System.Text;
 using ManagedCode.Communication.Commands;
 
-namespace KeyLoad.UnitTests.Features.InternalSerialization;
+namespace KeyLoad.UnitTests.InternalSerialization;
 
 internal static class PublicNormalizationFixture
 {

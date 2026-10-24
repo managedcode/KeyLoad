@@ -1,8 +1,8 @@
 using KeyLoad.Storage;
-using static KeyLoad.UnitTests.Features.QueryExecution.BinderFieldLineageProtocol;
-using P = KeyLoad.UnitTests.Features.QueryExecution.SchemaVisibleProjectionProtocol;
+using static KeyLoad.UnitTests.QueryExecution.BinderFieldLineageProtocol;
+using P = KeyLoad.UnitTests.QueryExecution.SchemaVisibleProjectionProtocol;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal static class SchemaVisibleProjectionAuthority
 {

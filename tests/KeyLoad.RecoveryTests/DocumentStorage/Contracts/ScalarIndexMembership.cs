@@ -1,3 +1,3 @@
-namespace KeyLoad.RecoveryTests.Features.DocumentStorage;
+namespace KeyLoad.RecoveryTests.DocumentStorage;
 
 internal sealed record ScalarIndexMembership(string PartitionKey, string Value, string[] DocumentIds);

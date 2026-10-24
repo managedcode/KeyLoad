@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
 using System.Text.Json;
 
-namespace KeyLoad.UnitTests.Features.DocumentStorage;
+namespace KeyLoad.UnitTests.DocumentStorage;
 
 internal sealed class ReadOnlyCoreContractTests
 {
@@ -38,13 +38,13 @@ internal sealed class ReadOnlyCoreContractTests
             partition = database.Partition,
             mutations = (object?)null
         }, JsonDefaults.Options);
-        var before = global::KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(database.Store);
+        var before = global::KeyLoad.UnitTests.Messaging.QueueWholeFlowStorage.Bytes(database.Store);
         var position = database.Store.Position;
         var rejected = Assert.ThrowsExactly<KeyLoadException>(() =>
             database.Database.CreateCommand(OperationKind.Batch, id, RootPrincipal, TimeProvider.System.GetUtcNow(), payload));
         await Assert.That(rejected.Code).IsEqualTo(ErrorCode.Validation);
         await Assert.That(rejected.Message).IsEqualTo("The operation contains invalid protocol JSON.");
-        await Assert.That(global::KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(database.Store))
+        await Assert.That(global::KeyLoad.UnitTests.Messaging.QueueWholeFlowStorage.Bytes(database.Store))
             .IsEquivalentTo(before, global::TUnit.Assertions.Enums.CollectionOrdering.Matching);
         await Assert.That(database.Store.Position).IsEqualTo(position);
         database.Commit(new PutDocument(DocumentCollection, HealthyDocumentId, EmptyDocumentJson));

@@ -1,4 +1,4 @@
 using BenchmarkDotNet.Running;
-using KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
+using KeyLoad.BenchmarkScenarios.BenchmarkComparisons;
 
 BenchmarkSwitcher.FromAssembly(typeof(EmbeddedBenchmarks).Assembly).Run(args);

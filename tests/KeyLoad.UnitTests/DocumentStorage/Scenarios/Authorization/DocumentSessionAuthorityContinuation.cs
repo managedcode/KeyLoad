@@ -1,8 +1,8 @@
-using KeyLoad.UnitTests.Features.Messaging;
+using KeyLoad.UnitTests.Messaging;
 using ManagedCode.Communication.Commands;
-using A = KeyLoad.UnitTests.Features.DocumentStorage.DocumentSessionAuthorityColdAssertions;
+using A = KeyLoad.UnitTests.DocumentStorage.DocumentSessionAuthorityColdAssertions;
 
-namespace KeyLoad.UnitTests.Features.DocumentStorage;
+namespace KeyLoad.UnitTests.DocumentStorage;
 
 internal static class DocumentSessionAuthorityContinuation
 {

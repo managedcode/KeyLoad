@@ -1,6 +1,6 @@
 using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 internal sealed record AnnProviderQualificationHistory(
     Command<DatabaseCommand> Operation, Result<object> Result, long Sequence, byte[] Payload,

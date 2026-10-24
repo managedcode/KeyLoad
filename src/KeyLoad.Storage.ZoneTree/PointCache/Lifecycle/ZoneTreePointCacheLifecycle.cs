@@ -1,4 +1,4 @@
-namespace KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
+namespace KeyLoad.Storage.ZoneTree.ResourceExecution;
 
 /// <summary>Serializes opened-store control installation against its pre-drain closure.</summary>
 internal sealed class ZoneTreePointCacheLifecycle(ZoneTreeStoreRuntime runtime)

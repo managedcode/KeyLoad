@@ -1,11 +1,11 @@
 using System.Diagnostics;
 using System.Text;
-using KeyLoad.IntegrationTests.Features.StorageReplication.Processes;
+using KeyLoad.IntegrationTests.StorageReplication.Processes;
 using KeyLoad.RecoveryTests;
-using KeyLoad.RecoveryTests.Features.Messaging;
+using KeyLoad.RecoveryTests.Messaging;
 using KeyLoad.Server;
 
-namespace KeyLoad.IntegrationTests.Features.Messaging;
+namespace KeyLoad.IntegrationTests.Messaging;
 
 internal sealed class QueueWorkerClusterChild : IAsyncDisposable
 {

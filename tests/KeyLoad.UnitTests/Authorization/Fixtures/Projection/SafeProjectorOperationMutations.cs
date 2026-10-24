@@ -1,11 +1,11 @@
 using System.Collections.Immutable;
 using System.Text.Json;
-using KeyLoad.Core.Features.InternalSerialization;
+using KeyLoad.Core.InternalSerialization;
 using KeyLoad.Server;
 using KeyLoad.Storage;
 using ManagedCode.Communication;
 
-namespace KeyLoad.UnitTests.Features.Authorization;
+namespace KeyLoad.UnitTests.Authorization;
 
 internal static class SafeProjectorOperationMutations
 {
@@ -50,7 +50,7 @@ internal static class SafeProjectorOperationMutations
         await Assert.That(stored.PolicyEpoch).IsEqualTo(policyEpoch);
         await Assert.That(stored.Incarnation).IsEqualTo(command.ExpectedToken.Incarnation);
         await Assert.That(stored.Partition).IsEqualTo(owner.Source.Partition);
-        await Assert.That(stored.ScopeKind).IsEqualTo(KeyLoad.Core.Features.CommandOutcomes.Contracts.CommandOutcomeScopeKind.Partition);
+        await Assert.That(stored.ScopeKind).IsEqualTo(KeyLoad.Core.CommandOutcomes.Contracts.CommandOutcomeScopeKind.Partition);
         await Assert.That(stored.CompositionAuthority is null).IsTrue();
         await Assert.That(stored.OnlineTextAuthority is null).IsTrue();
         await Assert.That(stored.RemoteTransferFailureAuthority is null).IsTrue();

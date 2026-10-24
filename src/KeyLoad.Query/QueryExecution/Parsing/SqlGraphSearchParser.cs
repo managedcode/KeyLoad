@@ -1,5 +1,5 @@
 using KeyLoad.Core;
-using KeyLoad.Query.Features.QueryExecution;
+using KeyLoad.Query.QueryExecution;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Query;
@@ -19,10 +19,10 @@ internal static class SqlGraphSearchParser
         ValidateEnvelope(request);
         SqlGraphSearchRequestSizer.EnsureBounded(request, limits.MaxQueryBytes, maximumParameters, budget.Cancellation);
         budget.Check();
-        var context = new global::KeyLoad.Query.Features.QueryExecution.ScriptDomGraphContext(request.Query, limitsOptions, budget, SqlGraphSearchSyntax.ParameterDetail);
-        var arguments = global::KeyLoad.Query.Features.QueryExecution.ScriptDomGraphShape.Read(request.Query.Sql, limitsOptions, context,
-            global::KeyLoad.Query.Features.QueryExecution.ScriptDomGraphSearch.Function);
-        return global::KeyLoad.Query.Features.QueryExecution.ScriptDomGraphSearch.Read(arguments, context);
+        var context = new global::KeyLoad.Query.QueryExecution.ScriptDomGraphContext(request.Query, limitsOptions, budget, SqlGraphSearchSyntax.ParameterDetail);
+        var arguments = global::KeyLoad.Query.QueryExecution.ScriptDomGraphShape.Read(request.Query.Sql, limitsOptions, context,
+            global::KeyLoad.Query.QueryExecution.ScriptDomGraphSearch.Function);
+        return global::KeyLoad.Query.QueryExecution.ScriptDomGraphSearch.Read(arguments, context);
     }
 
     private static void ValidateEnvelope(SqlGraphSearchRequest request)

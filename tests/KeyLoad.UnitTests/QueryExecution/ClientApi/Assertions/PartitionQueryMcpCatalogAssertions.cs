@@ -2,9 +2,9 @@ using System.Collections.Immutable;
 using System.Text.Json;
 using KeyLoad.Clustering;
 using KeyLoad.Server;
-using KeyLoad.UnitTests.Features.ClientApi;
+using KeyLoad.UnitTests.ClientApi;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal static class PartitionQueryMcpCatalogAssertions
 {

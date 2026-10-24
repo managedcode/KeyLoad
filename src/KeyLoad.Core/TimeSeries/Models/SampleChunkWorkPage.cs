@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 
-namespace KeyLoad.Core.Features.TimeSeries;
+namespace KeyLoad.Core.TimeSeries;
 
 /// <summary>Reports bounded chunk-work hints without exposing retained series contents.</summary>
 [Orleans.GenerateSerializer, Orleans.Alias(SampleChunkWorkPage.SerializerAlias)]

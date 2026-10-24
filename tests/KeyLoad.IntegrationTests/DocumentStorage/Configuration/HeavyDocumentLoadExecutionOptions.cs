@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.DocumentStorage;
+namespace KeyLoad.IntegrationTests.DocumentStorage;
 
 /// <summary>Explicit functional-only admission for the exclusive million-record Orleans case.</summary>
 [ConfigurationOptions]

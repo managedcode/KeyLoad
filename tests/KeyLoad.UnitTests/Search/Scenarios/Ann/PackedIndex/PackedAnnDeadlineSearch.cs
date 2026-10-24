@@ -1,5 +1,5 @@
-using KeyLoad.Query.Features.Search;
-namespace KeyLoad.UnitTests.Features.Search;
+using KeyLoad.Query.Search;
+namespace KeyLoad.UnitTests.Search;
 
 internal readonly record struct PackedAnnDeadlineSearch(
     Task<AnnSearchResult> Search,

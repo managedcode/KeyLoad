@@ -1,6 +1,6 @@
 using KeyLoad.Query;
 
-namespace KeyLoad.UnitTests.Features.ChangeFeeds;
+namespace KeyLoad.UnitTests.ChangeFeeds;
 
 internal static class DocumentLiveProfilePolicy
 {

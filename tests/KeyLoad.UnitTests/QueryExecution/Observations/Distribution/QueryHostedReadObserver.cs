@@ -2,7 +2,7 @@ using System.Collections.Concurrent;
 using KeyLoad.Clustering;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 /// <summary>Holds actual execution search after canonical range reads and joins its original producer.</summary>
 internal sealed class QueryHostedReadObserver : IGrainRequestPhaseObserver

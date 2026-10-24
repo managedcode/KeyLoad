@@ -1,6 +1,6 @@
-using KeyLoad.Diagnostics.Features.ResourceExecution;
+using KeyLoad.Diagnostics.ResourceExecution;
 
-namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
+namespace KeyLoad.IntegrationTests.DatabaseComposition;
 
 internal sealed record FunctionalGatePhysicalFileOwner(string Resource, string Directory,
     Guid NodeId, Guid Incarnation, ProcessEvidence Runtime);

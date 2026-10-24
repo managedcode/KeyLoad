@@ -1,7 +1,7 @@
-using KeyLoad.Server.Features.Search;
-using KeyLoad.UnitTests.Features.Messaging;
+using KeyLoad.Server.Search;
+using KeyLoad.UnitTests.Messaging;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 internal static class ClassificationLineageWholeFlow
 {

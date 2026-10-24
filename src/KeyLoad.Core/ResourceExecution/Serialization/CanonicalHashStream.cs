@@ -1,6 +1,6 @@
 using System.Security.Cryptography;
 
-namespace KeyLoad.Core.Features.ResourceExecution;
+namespace KeyLoad.Core.ResourceExecution;
 
 /// <summary>Forwards canonical UTF-8 bytes to a caller-owned incremental hash.</summary>
 internal sealed class CanonicalHashStream : Stream

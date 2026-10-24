@@ -1,6 +1,6 @@
-using P = KeyLoad.UnitTests.Features.ClientApi.SuccessBodyProtocol;
+using P = KeyLoad.UnitTests.ClientApi.SuccessBodyProtocol;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 internal sealed class SuccessBodyTests
 {

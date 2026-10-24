@@ -1,12 +1,12 @@
 using KeyLoad.Clustering;
-using KeyLoad.Server.Features.Search;
-using KeyLoad.UnitTests.Features.Messaging;
-using KeyLoad.UnitTests.Features.Search;
+using KeyLoad.Server.Search;
+using KeyLoad.UnitTests.Messaging;
+using KeyLoad.UnitTests.Search;
 using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.DependencyInjection;
 using Orleans.Serialization;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal static class RequestCqrsAnnSettlementReplayFlow
 {

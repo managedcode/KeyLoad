@@ -1,4 +1,4 @@
-using KeyLoad.Core.Features.GraphTraversal;
+using KeyLoad.Core.GraphTraversal;
 
 namespace KeyLoad.Core;
 /// <summary>Executes GraphTraversalQueriesGraphShortestPath operations against the caller's database context.</summary>

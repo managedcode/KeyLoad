@@ -1,7 +1,7 @@
 using System.Text.Json;
 using KeyLoad.Server;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>Closed bounded actual test lifecycle facts; no request or response contents are inspected.</summary>
 internal sealed class KeyLoadClientKestrelObservation

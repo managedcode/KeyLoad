@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.ResourceExecution;
+namespace KeyLoad.UnitTests.ResourceExecution;
 
 /// <summary>Explicit test-owned UTC, monotonic time and timers; storage and transport remain real.</summary>
 internal sealed class ControlledReadClock(DateTimeOffset utcNow) : TimeProvider

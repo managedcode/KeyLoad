@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.QueryExecution;
+namespace KeyLoad.IntegrationTests.QueryExecution;
 
 [global::TUnit.Core.NotInParallelAttribute]
 internal sealed class SqlFetchCountClusterWholeFlowTests

@@ -1,10 +1,10 @@
 using System.Diagnostics;
 using System.Globalization;
-using KeyLoad.RecoveryTests.Features.DocumentStorage;
-using KeyLoad.RecoveryTests.Features.StorageRecovery;
+using KeyLoad.RecoveryTests.DocumentStorage;
+using KeyLoad.RecoveryTests.StorageRecovery;
 using KeyLoad.Storage.ZoneTree;
 
-namespace KeyLoad.RecoveryTests.Features.Search;
+namespace KeyLoad.RecoveryTests.Search;
 
 internal static class AnnProcessRecovery
 {

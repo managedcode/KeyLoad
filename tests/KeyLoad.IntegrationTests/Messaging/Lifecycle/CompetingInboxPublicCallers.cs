@@ -1,5 +1,5 @@
-using KeyLoad.IntegrationTests.Features.OrleansExecution;
-namespace KeyLoad.IntegrationTests.Features.Messaging;
+using KeyLoad.IntegrationTests.OrleansExecution;
+namespace KeyLoad.IntegrationTests.Messaging;
 
 internal static class CompetingInboxPublicCallers
 {

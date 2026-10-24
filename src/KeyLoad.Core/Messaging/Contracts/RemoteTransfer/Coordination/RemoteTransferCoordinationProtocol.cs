@@ -1,4 +1,4 @@
-namespace KeyLoad.Core.Features.Messaging;
+namespace KeyLoad.Core.Messaging;
 
 internal static class RemoteTransferCoordinationProtocol
 {

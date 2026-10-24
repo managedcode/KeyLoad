@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 
-namespace KeyLoad.Query.Features.QueryExecution;
+namespace KeyLoad.Query.QueryExecution;
 
 /// <summary>Defines the immutable Q1/Q2 capability vocabulary and exposes the current operation limits.</summary>
 internal static class QueryCapabilityCatalog

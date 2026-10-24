@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 /// <summary>Uses the existing execution TestDatabase replica admission without a second writer or apply owner.</summary>
 internal static class TextMaintenanceCommit

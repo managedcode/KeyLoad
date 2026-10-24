@@ -1,6 +1,6 @@
 using KeyLoad.Clustering;
 
-namespace KeyLoad.UnitTests.Features.Messaging;
+namespace KeyLoad.UnitTests.Messaging;
 
 /// <summary>Expires the parent after its real first child has returned and joined.</summary>
 internal sealed class MultiLaneReceiveExpiryClock : TimeProvider, IGrainRequestPhaseObserver, RuntimeIGrainRequestPhaseObserver

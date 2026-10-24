@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
+namespace KeyLoad.IntegrationTests.DatabaseComposition;
 
 /// <summary>Selects only an ephemeral negative ownership probe beside the original Orleans owners.</summary>
 internal sealed partial class FunctionalGateFixture

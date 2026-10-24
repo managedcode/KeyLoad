@@ -1,4 +1,4 @@
-namespace KeyLoad.Core.Features.ResourceExecution;
+namespace KeyLoad.Core.ResourceExecution;
 
 /// <summary>Admits a fixed number of analytical reads without a wait queue.</summary>
 internal sealed class AnalyticalReadGate

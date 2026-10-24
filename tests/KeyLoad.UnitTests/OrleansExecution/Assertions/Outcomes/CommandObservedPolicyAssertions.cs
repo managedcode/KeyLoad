@@ -1,10 +1,10 @@
 using System.Text.Json;
 using KeyLoad.Clustering;
-using KeyLoad.UnitTests.Features.Authorization;
+using KeyLoad.UnitTests.Authorization;
 using ManagedCode.Communication;
-using P = KeyLoad.UnitTests.Features.OrleansExecution.CommandObservedPolicyProtocol;
+using P = KeyLoad.UnitTests.OrleansExecution.CommandObservedPolicyProtocol;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal static class CommandObservedPolicyAssertions
 {

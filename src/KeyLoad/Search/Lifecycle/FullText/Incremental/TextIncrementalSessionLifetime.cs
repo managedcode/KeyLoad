@@ -1,4 +1,4 @@
-namespace KeyLoad.Server.Features.Search;
+namespace KeyLoad.Server.Search;
 
 /// <summary>Retains an unsettled actual execution owner until its own disposal completes.</summary>
 internal static class TextIncrementalSessionLifetime

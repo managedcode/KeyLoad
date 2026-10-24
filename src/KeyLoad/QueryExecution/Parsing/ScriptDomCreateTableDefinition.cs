@@ -13,7 +13,7 @@ internal static class ScriptDomCreateTableDefinition
             Authority = DocumentAuthority.Document,
             RelationalSchema = syntax.Schema
         };
-        global::KeyLoad.Core.Features.RelationalStorage.RelationalRowValidation.ValidateSchema(definition);
+        global::KeyLoad.Core.RelationalStorage.RelationalRowValidation.ValidateSchema(definition);
         checkBudget();
         token.ThrowIfCancellationRequested();
         return new(partition.TenantId, partition.DatabaseId, definition);

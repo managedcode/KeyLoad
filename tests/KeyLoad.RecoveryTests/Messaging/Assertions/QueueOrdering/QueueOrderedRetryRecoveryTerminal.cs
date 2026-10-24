@@ -2,7 +2,7 @@ using KeyLoad.Core;
 
 using KeyLoad.Storage;
 
-namespace KeyLoad.RecoveryTests.Features.Messaging;
+namespace KeyLoad.RecoveryTests.Messaging;
 
 internal static class QueueOrderedRetryRecoveryTerminal
 {

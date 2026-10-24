@@ -1,4 +1,4 @@
-namespace KeyLoad.Query.Features.Search;
+namespace KeyLoad.Query.Search;
 
 /// <summary>Closed execution snapshot byte and simultaneous restore reservation bounds.</summary>
 [ConfigurationOptions]

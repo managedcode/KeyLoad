@@ -1,9 +1,9 @@
 using System.Security.Cryptography;
 using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Core.Features.Search;
+using KeyLoad.Core.Search;
 
-namespace KeyLoad.Server.Features.Search;
+namespace KeyLoad.Server.Search;
 
 internal static class TextIncrementalCapabilityResult
 {

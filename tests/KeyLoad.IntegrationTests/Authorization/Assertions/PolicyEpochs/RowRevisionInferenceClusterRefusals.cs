@@ -1,11 +1,11 @@
 using System.Text.Json;
-using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.QueryExecution;
+using KeyLoad.IntegrationTests.ClientApi;
+using KeyLoad.IntegrationTests.QueryExecution;
 using ManagedCode.Communication;
 using ModelContextProtocol.Protocol;
-using P = KeyLoad.IntegrationTests.Features.Authorization.RowRevisionInferenceClusterProtocol;
+using P = KeyLoad.IntegrationTests.Authorization.RowRevisionInferenceClusterProtocol;
 
-namespace KeyLoad.IntegrationTests.Features.Authorization;
+namespace KeyLoad.IntegrationTests.Authorization;
 
 internal static class RowRevisionInferenceClusterRefusals
 {

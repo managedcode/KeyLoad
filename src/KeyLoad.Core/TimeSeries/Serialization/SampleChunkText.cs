@@ -1,7 +1,7 @@
 using System.Buffers;
 using System.Text;
 
-namespace KeyLoad.Core.Features.TimeSeries;
+namespace KeyLoad.Core.TimeSeries;
 
 internal static class SampleChunkText
 {

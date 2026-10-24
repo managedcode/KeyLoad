@@ -1,8 +1,8 @@
 using KeyLoad.Client;
-using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.ClientApi;
 using KeyLoad.Server;
 
-namespace KeyLoad.IntegrationTests.Features.DocumentStorage;
+namespace KeyLoad.IntegrationTests.DocumentStorage;
 
 /// <summary>Owns independent public callers, lazy disjoint ingestion and settled reader loops.</summary>
 internal sealed class HeavyDocumentLoadScenario(ClusterFixture fixture) : IAsyncDisposable

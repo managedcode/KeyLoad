@@ -1,9 +1,9 @@
 using KeyLoad.Query;
 using KeyLoad.Server;
-using KeyLoad.UnitTests.Features.Authorization;
-using static KeyLoad.UnitTests.Features.ResourceExecution.ResourcePairBindingState;
+using KeyLoad.UnitTests.Authorization;
+using static KeyLoad.UnitTests.ResourceExecution.ResourcePairBindingState;
 
-namespace KeyLoad.UnitTests.Features.ResourceExecution;
+namespace KeyLoad.UnitTests.ResourceExecution;
 
 internal static class ResourcePairBindingSql
 {

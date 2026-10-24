@@ -1,10 +1,10 @@
 using System.Collections.Immutable;
 using System.Security.Cryptography;
-using KeyLoad.Query.Features.QueryExecution;
-using KeyLoad.Query.Features.Search;
-using KeyLoad.UnitTests.Features.DocumentStorage;
+using KeyLoad.Query.QueryExecution;
+using KeyLoad.Query.Search;
+using KeyLoad.UnitTests.DocumentStorage;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal static class DistributedSearchHybridFlow
 {
@@ -68,7 +68,7 @@ internal static class DistributedSearchHybridFlow
     private static ReadExecutionBudget Budget(DocumentPatchAtomicityOwner owner, CancellationToken token)
         => new(owner.Database.OperationLimitsOptions, owner.Database.EvaluationClock, token);
 
-    private static global::KeyLoad.Core.Features.ResourceExecution.Execution.ReadExecutionBudgetReadGrant Grant(
+    private static global::KeyLoad.Core.ResourceExecution.Execution.ReadExecutionBudgetReadGrant Grant(
         DocumentPatchAtomicityOwner owner, ReadExecutionBudget budget)
         => budget.CreateReadGrant(owner.Database.Limits.MaxQueryReadBytes / IndependentOwners,
             owner.Database.Limits.MaxScanRecords);

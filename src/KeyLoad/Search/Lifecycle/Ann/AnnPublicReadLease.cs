@@ -1,12 +1,12 @@
 using System.Collections.Immutable;
 using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Core.Features.Search;
-using KeyLoad.Query.Features.Search;
+using KeyLoad.Core.Search;
+using KeyLoad.Query.Search;
 using KeyLoad.Storage;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.Server.Features.Search;
+namespace KeyLoad.Server.Search;
 
 internal sealed class AnnPublicReadLease : IAnnProjectionLease
 {

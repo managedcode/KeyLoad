@@ -1,6 +1,6 @@
 using KeyLoad.Core;
-using KeyLoad.Core.Features.GraphTraversal;
-using KeyLoad.Query.Features.Search;
+using KeyLoad.Core.GraphTraversal;
+using KeyLoad.Query.Search;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Query;

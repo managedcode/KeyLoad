@@ -2,9 +2,9 @@ using KeyLoad.Core;
 using KeyLoad.Storage;
 using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
-using static KeyLoad.RecoveryTests.Features.EventStreams.SharedDomainProtocol;
+using static KeyLoad.RecoveryTests.EventStreams.SharedDomainProtocol;
 
-namespace KeyLoad.RecoveryTests.Features.EventStreams;
+namespace KeyLoad.RecoveryTests.EventStreams;
 
 internal static class SharedDomainRecoverySeed
 {

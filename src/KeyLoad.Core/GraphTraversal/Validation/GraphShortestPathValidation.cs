@@ -1,9 +1,9 @@
 using System.Collections.Immutable;
 using System.Text.Json;
-using KeyLoad.Core.Features.GraphTraversal.Validation;
-using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.Core.GraphTraversal.Validation;
+using KeyLoad.Core.ResourceExecution;
 
-namespace KeyLoad.Core.Features.GraphTraversal;
+namespace KeyLoad.Core.GraphTraversal;
 
 /// <summary>Validates shortest-path caller shapes and execution graph records.</summary>
 internal static class GraphShortestPathValidation

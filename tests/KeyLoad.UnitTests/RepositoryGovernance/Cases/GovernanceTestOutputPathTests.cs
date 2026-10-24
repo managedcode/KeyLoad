@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.RepositoryGovernance;
+namespace KeyLoad.UnitTests.RepositoryGovernance;
 
 /// <summary>AC-MCAF-010: executable test paths stay beside the compiled test assembly.</summary>
 internal sealed class GovernanceTestOutputPathTests

@@ -1,7 +1,7 @@
 using KeyLoad.Core;
-using KeyLoad.Core.Features.ResourceExecution.Execution;
+using KeyLoad.Core.ResourceExecution.Execution;
 using KeyLoad.Query;
-using KeyLoad.Query.Features.QueryExecution;
+using KeyLoad.Query.QueryExecution;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 

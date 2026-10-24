@@ -1,10 +1,10 @@
 using KeyLoad.Query;
-using KeyLoad.Query.Features.Search;
+using KeyLoad.Query.Search;
 using KeyLoad.Server;
-using KeyLoad.Server.Features.Search;
+using KeyLoad.Server.Search;
 using KeyLoad.Storage;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 /// <summary>AC-CQ-026: concurrent synchronous shutdown joins real execution readers and permits reopen.</summary>
 internal sealed class TextProjectionDisposalTests

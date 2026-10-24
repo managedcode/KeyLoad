@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using KeyLoad.RecoveryTests;
 
-namespace KeyLoad.UnitTests.Features.StorageRecovery;
+namespace KeyLoad.UnitTests.StorageRecovery;
 
 internal static class ExistingStoreInspectorLaunchSettings
 {

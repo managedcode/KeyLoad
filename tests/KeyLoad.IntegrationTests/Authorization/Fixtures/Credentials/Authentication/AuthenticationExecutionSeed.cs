@@ -1,11 +1,11 @@
 using System.Security.Cryptography;
 using System.Text;
 using KeyLoad.Client;
-using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.DocumentStorage;
-using KeyLoad.RecoveryTests.Features.OrleansExecution;
+using KeyLoad.IntegrationTests.ClientApi;
+using KeyLoad.IntegrationTests.DocumentStorage;
+using KeyLoad.RecoveryTests.OrleansExecution;
 
-namespace KeyLoad.IntegrationTests.Features.Authorization;
+namespace KeyLoad.IntegrationTests.Authorization;
 
 internal static class AuthenticationExecutionSeed
 {

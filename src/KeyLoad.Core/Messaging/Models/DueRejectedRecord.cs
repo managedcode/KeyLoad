@@ -1,4 +1,4 @@
-namespace KeyLoad.Core.Features.Messaging;
+namespace KeyLoad.Core.Messaging;
 
 /// <summary>Reports a rejected persisted discovery record without retaining its contents.</summary>
 [Orleans.GenerateSerializer, Orleans.Alias(DueRejectedRecord.SerializerAlias)]

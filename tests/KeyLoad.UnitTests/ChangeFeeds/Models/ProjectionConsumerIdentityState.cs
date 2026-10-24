@@ -1,6 +1,6 @@
 using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
-namespace KeyLoad.UnitTests.Features.ChangeFeeds;
+namespace KeyLoad.UnitTests.ChangeFeeds;
 
 internal sealed record ProjectionConsumerIdentityState(TestDatabase Creation, PartitionRef Partition, ProjectionConsumerRef Consumer,
     ProjectionConsumerDefinition Definition, Command<DatabaseCommand> Configure, Result<object> Configured,

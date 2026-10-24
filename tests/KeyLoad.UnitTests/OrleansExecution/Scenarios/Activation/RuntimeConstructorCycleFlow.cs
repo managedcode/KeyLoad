@@ -1,7 +1,7 @@
 using KeyLoad.Server;
 using Microsoft.AspNetCore.Builder;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal static class RuntimeConstructorCycleFlow
 {

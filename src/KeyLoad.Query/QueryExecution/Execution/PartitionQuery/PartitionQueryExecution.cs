@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
 using KeyLoad.Core;
-using KeyLoad.Core.Features.ResourceExecution.Execution;
-using KeyLoad.Query.Features.QueryExecution;
+using KeyLoad.Core.ResourceExecution.Execution;
+using KeyLoad.Query.QueryExecution;
 
 namespace KeyLoad.Query;
 

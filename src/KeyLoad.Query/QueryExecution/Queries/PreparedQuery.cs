@@ -4,7 +4,7 @@ using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Storage;
 
-namespace KeyLoad.Query.Features.QueryExecution;
+namespace KeyLoad.Query.QueryExecution;
 
 /// <summary>Owns decoded field paths and the bounded, worst-first query prefix.</summary>
 internal sealed class PreparedQuery

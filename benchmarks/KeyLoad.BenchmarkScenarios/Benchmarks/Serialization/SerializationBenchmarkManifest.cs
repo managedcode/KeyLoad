@@ -3,7 +3,7 @@ using System.Security.Cryptography;
 using System.Text.Json;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
+namespace KeyLoad.BenchmarkScenarios.BenchmarkComparisons;
 
 internal static class SerializationBenchmarkManifest
 {

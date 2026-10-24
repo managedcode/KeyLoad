@@ -1,6 +1,6 @@
 using System.Xml.Linq;
 
-namespace KeyLoad.UnitTests.Features.RepositoryGovernance;
+namespace KeyLoad.UnitTests.RepositoryGovernance;
 
 internal sealed class GovernanceRootFixture : IDisposable
 {

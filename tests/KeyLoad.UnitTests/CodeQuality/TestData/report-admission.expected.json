@@ -2,8 +2,8 @@
   "originalRepository": "/private/tmp/keyload-execution-report-fixture/lane/source",
   "cases": [
     {
-      "className": "KeyLoad.UnitTests.Features.Authorization.GenerationVisibilityTests",
-      "reportClassName": "KeyLoad.UnitTests.Features.Authorization.GenerationVisibilityTests",
+      "className": "KeyLoad.UnitTests.Authorization.GenerationVisibilityTests",
+      "reportClassName": "KeyLoad.UnitTests.Authorization.GenerationVisibilityTests",
       "methodName": "CompleteSqlGraphSetsRemainTenantEpochScopedThroughPinnedRetirementRepairReplayAndCold",
       "instanceName": "CompleteSqlGraphSetsRemainTenantEpochScopedThroughPinnedRetirementRepairReplayAndCold",
       "sourcePath": "tests/KeyLoad.UnitTests/Features/Authorization/Cases/GenerationVisibilityTests.cs",
@@ -22,8 +22,8 @@
       ]
     },
     {
-      "className": "KeyLoad.UnitTests.Features.Authorization.GenerationVisibilityTests",
-      "reportClassName": "KeyLoad.UnitTests.Features.Authorization.GenerationVisibilityTests",
+      "className": "KeyLoad.UnitTests.Authorization.GenerationVisibilityTests",
+      "reportClassName": "KeyLoad.UnitTests.Authorization.GenerationVisibilityTests",
       "methodName": "SharedAdmissionAndCancelledCallerPreserveCanonicalRowsThenHealthyReplayAndCold",
       "instanceName": "SharedAdmissionAndCancelledCallerPreserveCanonicalRowsThenHealthyReplayAndCold",
       "sourcePath": "tests/KeyLoad.UnitTests/Features/Authorization/Cases/GenerationVisibilityTests.cs",

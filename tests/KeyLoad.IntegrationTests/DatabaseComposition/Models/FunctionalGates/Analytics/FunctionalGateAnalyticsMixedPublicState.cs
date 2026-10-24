@@ -1,9 +1,9 @@
 using System.Collections.Immutable;
 using System.Text.Json;
-using A = KeyLoad.IntegrationTests.Features.DatabaseComposition.FunctionalGateUserAnalyticsProtocol;
-using P = KeyLoad.IntegrationTests.Features.DatabaseComposition.FunctionalGateAnalyticsMixedPublicProtocol;
+using A = KeyLoad.IntegrationTests.DatabaseComposition.FunctionalGateUserAnalyticsProtocol;
+using P = KeyLoad.IntegrationTests.DatabaseComposition.FunctionalGateAnalyticsMixedPublicProtocol;
 
-namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
+namespace KeyLoad.IntegrationTests.DatabaseComposition;
 
 internal sealed record FunctionalGateAnalyticsMixedPublicState(string Store, EntityRef Document, string EdgeId,
     string Label, StreamRef Stream, AnalyticsEventData Event, EventData Appended, long OriginalGeneration)

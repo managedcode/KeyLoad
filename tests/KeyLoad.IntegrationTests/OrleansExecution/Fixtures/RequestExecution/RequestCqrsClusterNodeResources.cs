@@ -1,7 +1,7 @@
 using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.Testing;
 
-namespace KeyLoad.IntegrationTests.Features.OrleansExecution.Helpers;
+namespace KeyLoad.IntegrationTests.OrleansExecution.Helpers;
 
 internal static class RequestCqrsClusterNodeResources
 {

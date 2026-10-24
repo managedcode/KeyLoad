@@ -1,7 +1,7 @@
 using KeyLoad.Clustering;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.Server.Features.OrleansHosting;
+namespace KeyLoad.Server.OrleansHosting;
 
 /// <summary>Owns the original request registry and both startup cancellation sources until their known owners join.</summary>
 internal sealed class OrleansNodeRequestLifetime(IOptions<GrainRoutingOptions> options) : IAsyncDisposable

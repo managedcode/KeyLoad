@@ -1,3 +1,3 @@
-namespace KeyLoad.IntegrationTests.Features.StorageRecovery;
+namespace KeyLoad.IntegrationTests.StorageRecovery;
 
 internal sealed record OwnedChildProcessResult(int ExitCode, string Stdout, string Stderr);

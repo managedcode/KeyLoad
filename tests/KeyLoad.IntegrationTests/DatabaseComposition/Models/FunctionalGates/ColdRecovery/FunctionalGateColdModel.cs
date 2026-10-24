@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
+namespace KeyLoad.IntegrationTests.DatabaseComposition;
 
 internal sealed record FunctionalGateColdModel(int Index, CommandRequest Command, CommitReceipt Receipt,
     SqlOperationRequest TableCreate, ResourceDefinition TableDefinition, SqlOperationRequest TableInsert,

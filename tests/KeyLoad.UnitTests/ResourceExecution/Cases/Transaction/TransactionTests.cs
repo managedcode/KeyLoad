@@ -1,6 +1,6 @@
 using KeyLoad.Query;
 
-namespace KeyLoad.UnitTests.Features.ResourceExecution;
+namespace KeyLoad.UnitTests.ResourceExecution;
 
 internal sealed class TransactionTests
 {
@@ -68,6 +68,6 @@ internal sealed class TransactionTests
         await Assert.That(Errors.Code(db.Submit(OperationKind.Batch, new CommandRequest(id, db.Partition,
             [new PutDocument("orders", "o1", "{}"), new EnqueueMessage("other", "m1", "{}")]), id: id).Problem)).IsEqualTo(ErrorCode.Conflict);
         await Assert.That(db.Database.GetDocument("root", new(db.Partition, "orders", "o1"))).IsNull();
-        await global::KeyLoad.UnitTests.Features.OrleansExecution.AtomicPartitionScopeLifecycleTrial.RunAsync(TestContext.Current!.Execution.CancellationToken);
+        await global::KeyLoad.UnitTests.OrleansExecution.AtomicPartitionScopeLifecycleTrial.RunAsync(TestContext.Current!.Execution.CancellationToken);
     }
 }

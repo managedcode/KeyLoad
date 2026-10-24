@@ -1,4 +1,4 @@
-namespace KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
+namespace KeyLoad.Storage.ZoneTree.ResourceExecution;
 
 /// <summary>Acquires actual storage gates without a wait queue or recursive entry.</summary>
 internal static class ZoneTreePointCacheStoreGate

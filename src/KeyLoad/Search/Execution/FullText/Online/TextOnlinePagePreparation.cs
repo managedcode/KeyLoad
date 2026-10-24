@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
 using KeyLoad.Core;
 
-namespace KeyLoad.Server.Features.Search;
+namespace KeyLoad.Server.Search;
 
 internal static class TextOnlinePagePreparation
 {

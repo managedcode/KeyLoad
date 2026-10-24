@@ -1,9 +1,9 @@
 using KeyLoad.Clustering;
-using KeyLoad.UnitTests.Features.Messaging;
-using KeyLoad.UnitTests.Features.Search;
+using KeyLoad.UnitTests.Messaging;
+using KeyLoad.UnitTests.Search;
 using ManagedCode.Communication.CQRS;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal static class RequestCqrsActualTextReplayFlow
 {

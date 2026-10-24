@@ -1,9 +1,9 @@
 using System.Diagnostics;
 using System.Text.Json;
-using KeyLoad.RecoveryTests.Features.DocumentStorage;
+using KeyLoad.RecoveryTests.DocumentStorage;
 using KeyLoad.Server;
 
-namespace KeyLoad.RecoveryTests.Features.StorageRecovery;
+namespace KeyLoad.RecoveryTests.StorageRecovery;
 
 internal static class RecoveryFaultRootRetentionFlow
 {

@@ -5,7 +5,7 @@ using KeyLoad.Storage.ZoneTree;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 /// <summary>Captures the actual source configuration before joined shutdown for strictly offline execution cold reads.</summary>
 internal sealed class ConnectionColdSource

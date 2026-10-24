@@ -1,5 +1,5 @@
-using KeyLoad.Core.Features.RuntimeJournaling.Validation;
-using KeyLoad.Features.InternalSerialization;
+using KeyLoad.Core.RuntimeJournaling.Validation;
+using KeyLoad.InternalSerialization;
 using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.Core;

@@ -1,6 +1,6 @@
 using System.Text.Json;
 
-namespace KeyLoad.IntegrationTests.Features.Messaging;
+namespace KeyLoad.IntegrationTests.Messaging;
 
 internal sealed record QueueLeasedCancelPublicState(QueueLifecyclePublicState Owner,
     ReceiveRequest Claim, ReceiveResult Claimed, MessageInspection Leased)

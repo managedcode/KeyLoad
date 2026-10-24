@@ -1,6 +1,6 @@
 using System.Buffers.Binary;
 
-namespace KeyLoad.Core.Features.TimeSeries;
+namespace KeyLoad.Core.TimeSeries;
 
 internal ref struct SampleChunkReader
 {

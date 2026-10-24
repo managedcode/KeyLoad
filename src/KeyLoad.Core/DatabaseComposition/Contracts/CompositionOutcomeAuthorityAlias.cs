@@ -1,4 +1,4 @@
-namespace KeyLoad.Core.Features.DatabaseComposition;
+namespace KeyLoad.Core.DatabaseComposition;
 
 internal static class CompositionOutcomeAuthorityAlias
 {

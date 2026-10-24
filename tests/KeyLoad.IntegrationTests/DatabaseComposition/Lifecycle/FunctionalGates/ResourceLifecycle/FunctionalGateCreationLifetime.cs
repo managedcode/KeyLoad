@@ -3,7 +3,7 @@ using System.Text.Json;
 using KeyLoad.Server;
 using KeyLoad.Storage;
 
-namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
+namespace KeyLoad.IntegrationTests.DatabaseComposition;
 
 /// <summary>Independent creation-identity oracle over the original caller-owned creation, never returned document values.</summary>
 internal static class FunctionalGateCreationLifetime

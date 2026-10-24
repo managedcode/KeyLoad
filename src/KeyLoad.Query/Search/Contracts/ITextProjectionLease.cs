@@ -1,6 +1,6 @@
 using KeyLoad.Core;
 
-namespace KeyLoad.Query.Features.Search;
+namespace KeyLoad.Query.Search;
 
 /// <summary>Observes canonical tokenization and verifies complete execution candidate coverage.</summary>
 public interface ITextProjectionLease : IDisposable

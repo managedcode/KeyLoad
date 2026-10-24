@@ -1,7 +1,7 @@
 using KeyLoad.Storage.ZoneTree;
 using ManagedCode.Communication.Commands;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 internal sealed class GraphSearchLineageFixture(bool expansion, bool emptyLabels) : IDisposable
 {

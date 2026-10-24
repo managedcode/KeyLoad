@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace KeyLoad.UnitTests.Features.CodeQuality;
+namespace KeyLoad.UnitTests.CodeQuality;
 
 internal static class SourceProcessOutput
 {

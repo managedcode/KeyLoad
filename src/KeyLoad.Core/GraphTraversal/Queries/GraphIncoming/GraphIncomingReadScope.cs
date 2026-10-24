@@ -1,10 +1,10 @@
-using KeyLoad.Core.Features.DocumentStorage;
-using KeyLoad.Core.Features.GraphTraversal.Serialization;
-using KeyLoad.Core.Features.ResourceExecution;
-using KeyLoad.Core.Features.ResourceExecution.Execution;
+using KeyLoad.Core.DocumentStorage;
+using KeyLoad.Core.GraphTraversal.Serialization;
+using KeyLoad.Core.ResourceExecution;
+using KeyLoad.Core.ResourceExecution.Execution;
 using KeyLoad.Storage;
 
-namespace KeyLoad.Core.Features.GraphTraversal;
+namespace KeyLoad.Core.GraphTraversal;
 
 internal static class GraphIncomingReadScope
 {

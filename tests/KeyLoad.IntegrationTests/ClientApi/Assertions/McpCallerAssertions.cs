@@ -6,7 +6,7 @@ using KeyLoad.Clustering;
 using ManagedCode.Communication;
 using ModelContextProtocol.Protocol;
 
-namespace KeyLoad.IntegrationTests.Features.ClientApi;
+namespace KeyLoad.IntegrationTests.ClientApi;
 
 /// <summary>Verifies observable execution SDK envelopes without replacing server behavior or exposing private failures.</summary>
 internal static class McpCallerAssertions

@@ -1,5 +1,5 @@
 using System.Security.Claims;
-using KeyLoad.Core.Features.RuntimeJournaling.Identity;
+using KeyLoad.Core.RuntimeJournaling.Identity;
 using ManagedCode.Orleans.Identity.Core.Constants;
 using Microsoft.Extensions.DependencyInjection;
 

@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal static class SqlLexicalAdmissionFlow
 {
@@ -9,7 +9,7 @@ internal static class SqlLexicalAdmissionFlow
         global::KeyLoad.PartitionRef partition, global::KeyLoad.CommandRequest command, global::KeyLoad.CommitReceipt receipt)
     {
         var engine = new global::KeyLoad.Query.QueryEngine(owner, UnitExecutionOptions.QueryExecution());
-        var before = global::KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(store);
+        var before = global::KeyLoad.UnitTests.Messaging.QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
         var identity = global::KeyLoad.JsonDefaults.Serialize(store.Identity);
         var healthy = SqlJoinSourceBindingFixture.Request(partition, SqlLexicalAdmissionFixture.Kind);

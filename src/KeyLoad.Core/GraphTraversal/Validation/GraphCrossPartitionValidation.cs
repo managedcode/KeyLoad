@@ -1,7 +1,7 @@
 using System.Text.Json;
-using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.Core.ResourceExecution;
 
-namespace KeyLoad.Core.Features.GraphTraversal.Validation;
+namespace KeyLoad.Core.GraphTraversal.Validation;
 
 internal static class GraphCrossPartitionValidation
 {

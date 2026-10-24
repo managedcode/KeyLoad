@@ -1,4 +1,4 @@
-namespace KeyLoad.Server.Features.Search;
+namespace KeyLoad.Server.Search;
 
 /// <summary>Finite execution generation ownership, files and resident reservation admission.</summary>
 [ConfigurationOptions]

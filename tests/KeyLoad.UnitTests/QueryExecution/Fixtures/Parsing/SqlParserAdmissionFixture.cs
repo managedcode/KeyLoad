@@ -1,7 +1,7 @@
-using KeyLoad.UnitTests.Features.Authorization;
-using KeyLoad.UnitTests.Features.ResourceExecution;
+using KeyLoad.UnitTests.Authorization;
+using KeyLoad.UnitTests.ResourceExecution;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal sealed class SqlParserAdmissionFixture : IDisposable
 {

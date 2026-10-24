@@ -1,7 +1,7 @@
 using System.Globalization;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.IntegrationTests.Features.StorageReplication;
+namespace KeyLoad.IntegrationTests.StorageReplication;
 
 /// <summary>AC-TEST-007: actual bounded diagnostic files survive subsequent and concurrent failures.</summary>
 internal sealed class ClusterFailureReceiptsTests

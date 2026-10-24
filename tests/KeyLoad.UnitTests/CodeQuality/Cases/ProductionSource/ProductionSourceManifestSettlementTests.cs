@@ -1,9 +1,9 @@
 using System.Diagnostics;
 using KeyLoad.Server;
-using KeyLoad.UnitTests.Features.CodeQuality.Processes;
+using KeyLoad.UnitTests.CodeQuality.Processes;
 using ManagedCode.Communication.CQRS;
 
-namespace KeyLoad.UnitTests.Features.CodeQuality.Cases;
+namespace KeyLoad.UnitTests.CodeQuality.Cases;
 
 internal sealed class ProductionSourceManifestSettlementTests
 {

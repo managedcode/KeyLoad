@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
 using KeyLoad.Clustering;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 internal static class McpAdminDashboardCatalogEntries
 {

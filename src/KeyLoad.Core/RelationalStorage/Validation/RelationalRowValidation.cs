@@ -2,7 +2,7 @@ using System.Collections.Immutable;
 using System.Text;
 using System.Text.Json;
 
-namespace KeyLoad.Core.Features.RelationalStorage;
+namespace KeyLoad.Core.RelationalStorage;
 
 /// <summary>Enforces persisted typed-row schemas inside the existing canonical mutation boundary.</summary>
 public static class RelationalRowValidation

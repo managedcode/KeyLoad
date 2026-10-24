@@ -1,4 +1,4 @@
-namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
+namespace KeyLoad.Analyzers.Tests.CodeQuality;
 
 /// <summary>AC-CQ-025: execution synchronization targets cannot escape through delegate conversion.</summary>
 internal sealed class SynchronizationDelegateTests

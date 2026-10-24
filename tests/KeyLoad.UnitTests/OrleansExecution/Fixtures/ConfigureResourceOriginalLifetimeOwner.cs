@@ -1,9 +1,9 @@
 using KeyLoad.Clustering;
-using KeyLoad.Core.Features.ResourceExecution;
-using KeyLoad.RecoveryTests.Features.ResourceExecution;
+using KeyLoad.Core.ResourceExecution;
+using KeyLoad.RecoveryTests.ResourceExecution;
 using KeyLoad.Server;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal static class ConfigureResourceOriginalLifetimeOwner
 {

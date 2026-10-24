@@ -1,8 +1,8 @@
 using KeyLoad.Query;
 using KeyLoad.Server;
-using static KeyLoad.UnitTests.Features.QueryExecution.QueryEquivalentIntegerDecimalProtocol;
+using static KeyLoad.UnitTests.QueryExecution.QueryEquivalentIntegerDecimalProtocol;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal static class QueryEquivalentIntegerDecimalFlow
 {

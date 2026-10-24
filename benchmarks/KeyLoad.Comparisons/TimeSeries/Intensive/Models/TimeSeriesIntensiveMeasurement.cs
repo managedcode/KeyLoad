@@ -1,4 +1,4 @@
-namespace KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries.Intensive;
+namespace KeyLoad.Comparisons.BenchmarkComparisons.TimeSeries.Intensive;
 
 internal sealed record TimeSeriesIntensiveMeasurement(int Attempted, int Succeeded, double WallSeconds,
     double Throughput, double ValidationWorkerSeconds, double P50Milliseconds, double P95Milliseconds,

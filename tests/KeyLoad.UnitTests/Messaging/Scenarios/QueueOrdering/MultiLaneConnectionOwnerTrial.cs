@@ -1,8 +1,8 @@
 using KeyLoad.Clustering;
-using KeyLoad.UnitTests.Features.OrleansExecution;
+using KeyLoad.UnitTests.OrleansExecution;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.Messaging;
+namespace KeyLoad.UnitTests.Messaging;
 
 internal static class MultiLaneConnectionOwnerTrial
 {

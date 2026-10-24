@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal sealed record QueryAdapterOrder(decimal Number, string Status)
 {

@@ -1,11 +1,11 @@
 using System.Diagnostics;
 using KeyLoad.Core;
-using KeyLoad.Core.Features.Authorization;
-using KeyLoad.RecoveryTests.Features.StorageRecovery;
+using KeyLoad.Core.Authorization;
+using KeyLoad.RecoveryTests.StorageRecovery;
 using KeyLoad.Storage.ZoneTree;
 using ManagedCode.Communication.Commands;
 
-namespace KeyLoad.RecoveryTests.Features.EventStreams;
+namespace KeyLoad.RecoveryTests.EventStreams;
 
 internal sealed class AggregateReplayProcessRecoveryTests
 {

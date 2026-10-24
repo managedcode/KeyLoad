@@ -5,7 +5,7 @@ using KeyLoad.Server;
 using Microsoft.Extensions.DependencyInjection;
 using Orleans.TestingHost;
 
-namespace KeyLoad.RecoveryTests.Features.OrleansExecution;
+namespace KeyLoad.RecoveryTests.OrleansExecution;
 
 /// <summary>Runs two complete production hosts using the published RapidMembership provider.</summary>
 internal sealed class RequestCqrsHostedCluster : IAsyncDisposable

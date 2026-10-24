@@ -1,4 +1,4 @@
-namespace KeyLoad.Core.Features.StoragePartitions.Contracts;
+namespace KeyLoad.Core.StoragePartitions.Contracts;
 
 internal static class PartitionResourceLifetimeContract
 {

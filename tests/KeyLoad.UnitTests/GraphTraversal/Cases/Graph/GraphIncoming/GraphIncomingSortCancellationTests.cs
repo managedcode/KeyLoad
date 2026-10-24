@@ -1,6 +1,6 @@
-using KeyLoad.Core.Features.GraphTraversal;
+using KeyLoad.Core.GraphTraversal;
 
-namespace KeyLoad.UnitTests.Features.GraphTraversal;
+namespace KeyLoad.UnitTests.GraphTraversal;
 
 internal sealed class GraphIncomingSortCancellationTests
 {

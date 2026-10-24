@@ -1,6 +1,6 @@
 using KeyLoad.Server;
 
-namespace KeyLoad.IntegrationTests.Features.DocumentStorage;
+namespace KeyLoad.IntegrationTests.DocumentStorage;
 
 /// <summary>AC-METH-005: exclusive execution Orleans correctness during one million acknowledged creates.</summary>
 [Category(HeavyDocumentLoadProtocol.Category)]

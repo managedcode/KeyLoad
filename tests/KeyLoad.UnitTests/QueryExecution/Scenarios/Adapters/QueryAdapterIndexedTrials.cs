@@ -3,7 +3,7 @@ using KeyLoad.Client;
 using KeyLoad.Query;
 using KeyLoad.Storage.ZoneTree;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal static class QueryAdapterIndexedTrials
 {

@@ -1,7 +1,7 @@
 using System.Diagnostics;
-using KeyLoad.Server.Features.OrleansHosting.Configuration;
+using KeyLoad.Server.OrleansHosting.Configuration;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal static class OrleansRuntimeTelemetryAssertions
 {

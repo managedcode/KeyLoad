@@ -1,9 +1,9 @@
 using KeyLoad.Core;
-using KeyLoad.Core.Features.DocumentStorage;
-using KeyLoad.Core.Features.Search;
+using KeyLoad.Core.DocumentStorage;
+using KeyLoad.Core.Search;
 using KeyLoad.Storage;
 
-namespace KeyLoad.Query.Features.Search;
+namespace KeyLoad.Query.Search;
 
 internal static class AnnLifetimeProjection
 {

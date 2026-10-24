@@ -3,7 +3,7 @@ using ModelContextProtocol;
 using ModelContextProtocol.Client;
 using ModelContextProtocol.Protocol;
 
-namespace KeyLoad.IntegrationTests.Features.ClientApi;
+namespace KeyLoad.IntegrationTests.ClientApi;
 
 /// <summary>Exercises graph discovery and invocation through the genuine official MCP SDK.</summary>
 internal static class McpGatewayCaller

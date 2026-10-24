@@ -1,9 +1,9 @@
 using KeyLoad.Client;
-using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.OrleansExecution;
-using KeyLoad.IntegrationTests.Features.QueryExecution;
+using KeyLoad.IntegrationTests.ClientApi;
+using KeyLoad.IntegrationTests.OrleansExecution;
+using KeyLoad.IntegrationTests.QueryExecution;
 
-namespace KeyLoad.IntegrationTests.Features.GraphTraversal;
+namespace KeyLoad.IntegrationTests.GraphTraversal;
 
 internal static class GraphIncomingPublicContinuation
 {
@@ -72,7 +72,7 @@ internal static class GraphIncomingPublicContinuation
         await Assert.That(receipt.PersistedCopies).IsEqualTo(3);
         await Assert.That(receipt.Mutations.Length).IsEqualTo(GraphIncomingPublicPolicy.Version);
         var mutation = (PutDocument)command.Mutations.Single();
-        await KeyLoad.IntegrationTests.Features.QueryExecution.SqlClusterProtocol.EqualAsync(
+        await KeyLoad.IntegrationTests.QueryExecution.SqlClusterProtocol.EqualAsync(
             new MutationReceipt(PutKind, mutation.Collection, mutation.Id, revision), receipt.Mutations.Single());
     }
 }

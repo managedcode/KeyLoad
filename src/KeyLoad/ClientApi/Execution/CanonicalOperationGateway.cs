@@ -1,5 +1,5 @@
 using KeyLoad.Clustering;
-using KeyLoad.Diagnostics.Features.ResourceExecution;
+using KeyLoad.Diagnostics.ResourceExecution;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
@@ -18,16 +18,16 @@ internal static class CanonicalOperationGateway
     internal static Task<DispatchedOperationReply> ExecuteAsync(HttpContext context, GrainReadKind? readKind,
         OperationKind? commandKind, Guid commandId, ReadOnlyMemory<byte> payload, CancellationToken cancellationToken)
         => readKind == GrainReadKind.FileMetadata || commandKind == OperationKind.FileMetadata
-            ? throw Errors.Fail(ErrorCode.UnsupportedCapability, global::KeyLoad.Core.Features.BlobStorage.FileStorageProtocol.BoundaryOnly)
+            ? throw Errors.Fail(ErrorCode.UnsupportedCapability, global::KeyLoad.Core.BlobStorage.FileStorageProtocol.BoundaryOnly)
             : ExecuteCoreAsync(context, readKind, commandKind, commandId, payload, cancellationToken);
 
     internal static async Task<object?> ExecuteFileMetadataAsync(HttpContext context,
-        global::KeyLoad.Core.Features.BlobStorage.FileMetadataQuery? query,
-        global::KeyLoad.Core.Features.BlobStorage.FileMetadataMutation? mutation, CancellationToken token)
+        global::KeyLoad.Core.BlobStorage.FileMetadataQuery? query,
+        global::KeyLoad.Core.BlobStorage.FileMetadataMutation? mutation, CancellationToken token)
     {
         if ((query is null) == (mutation is null))
         {
-            throw Errors.Fail(ErrorCode.Validation, global::KeyLoad.Core.Features.BlobStorage.FileStorageProtocol.Invalid);
+            throw Errors.Fail(ErrorCode.Validation, global::KeyLoad.Core.BlobStorage.FileStorageProtocol.Invalid);
         }
         var actual = await RuntimeExecuteAsync(context, query is null ? null : GrainReadKind.FileMetadata,
             mutation is null ? null : OperationKind.FileMetadata, mutation?.CommandId ?? Guid.Empty,

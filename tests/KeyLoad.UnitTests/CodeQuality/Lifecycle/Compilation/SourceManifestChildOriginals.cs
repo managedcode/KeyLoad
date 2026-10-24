@@ -1,9 +1,9 @@
 using System.Diagnostics;
-using KeyLoad.AppHost.Features.TestInfrastructure;
+using KeyLoad.AppHost.TestInfrastructure;
 using KeyLoad.Server;
-using KeyLoad.UnitTests.Features.CodeQuality.Processes;
+using KeyLoad.UnitTests.CodeQuality.Processes;
 
-namespace KeyLoad.UnitTests.Features.CodeQuality.Helpers;
+namespace KeyLoad.UnitTests.CodeQuality.Helpers;
 
 internal sealed class SourceManifestChildOriginals
 {

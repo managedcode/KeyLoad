@@ -1,9 +1,9 @@
 using System.Buffers.Text;
 using KeyLoad.Query;
-using KeyLoad.Query.Features.ChangeFeeds;
-using KeyLoad.Query.Features.QueryExecution;
+using KeyLoad.Query.ChangeFeeds;
+using KeyLoad.Query.QueryExecution;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 /// <summary>AC-IS-001: real query cursors and persisted access paths consume only attributed execution records.</summary>
 internal sealed class QueryCursorTests

@@ -1,7 +1,7 @@
 using System.Globalization;
 using KeyLoad.Storage.ZoneTree.Restore;
 
-namespace KeyLoad.UnitTests.Features.BackupRestore;
+namespace KeyLoad.UnitTests.BackupRestore;
 
 internal static class BackupPieceBoundaryFlow
 {
@@ -26,7 +26,7 @@ internal static class BackupPieceBoundaryFlow
     private const string CliDirectorySuffix = "-cli";
 
     internal static async Task RunAsync(
-        global::Microsoft.Extensions.Options.IOptions<global::KeyLoad.AppHost.Features.TestInfrastructure.TestExecutionOptions> options,
+        global::Microsoft.Extensions.Options.IOptions<global::KeyLoad.AppHost.TestInfrastructure.TestExecutionOptions> options,
         CliBackupRestoreFixture fixture, IReadOnlyDictionary<string, byte[]> files, byte[] key,
         string payload, string environment, CancellationToken token)
     {
@@ -45,7 +45,7 @@ internal static class BackupPieceBoundaryFlow
     }
 
     private static async Task RuntimeAsyncCore(
-        global::Microsoft.Extensions.Options.IOptions<global::KeyLoad.AppHost.Features.TestInfrastructure.TestExecutionOptions> options,
+        global::Microsoft.Extensions.Options.IOptions<global::KeyLoad.AppHost.TestInfrastructure.TestExecutionOptions> options,
         CliBackupRestoreFixture fixture, IReadOnlyDictionary<string, byte[]> files, byte[] key, string payload,
         int piece, int journalPieces, string label, CancellationToken token)
     {
@@ -68,7 +68,7 @@ internal static class BackupPieceBoundaryFlow
     }
 
     private static async Task CliAsync(
-        global::Microsoft.Extensions.Options.IOptions<global::KeyLoad.AppHost.Features.TestInfrastructure.TestExecutionOptions> options,
+        global::Microsoft.Extensions.Options.IOptions<global::KeyLoad.AppHost.TestInfrastructure.TestExecutionOptions> options,
         CliBackupRestoreFixture fixture, IReadOnlyDictionary<string, byte[]> files, byte[] key, string payload,
         string environment, int piece, int journalPieces, string label, CancellationToken token)
     {
@@ -96,7 +96,7 @@ internal static class BackupPieceBoundaryFlow
     }
 
     private static async Task RestoreAsync(
-        global::Microsoft.Extensions.Options.IOptions<global::KeyLoad.AppHost.Features.TestInfrastructure.TestExecutionOptions> options,
+        global::Microsoft.Extensions.Options.IOptions<global::KeyLoad.AppHost.TestInfrastructure.TestExecutionOptions> options,
         CliBackupRestoreFixture fixture, string unpacked, string restored, byte[] key, string payload,
         CancellationToken token)
     {

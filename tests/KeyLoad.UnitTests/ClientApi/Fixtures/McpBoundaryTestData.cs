@@ -4,7 +4,7 @@ using KeyLoad.Server;
 using ModelContextProtocol;
 using ModelContextProtocol.Protocol;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>Owns actual public SDK encoding, metadata and bounded reply objects for execution boundary checks.</summary>
 internal static class McpBoundaryTestData

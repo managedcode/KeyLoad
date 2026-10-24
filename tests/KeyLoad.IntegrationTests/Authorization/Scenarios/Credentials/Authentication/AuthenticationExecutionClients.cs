@@ -1,11 +1,11 @@
 using System.Text.Json;
 using KeyLoad.Client;
-using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.RecoveryTests.Features.OrleansExecution;
+using KeyLoad.IntegrationTests.ClientApi;
+using KeyLoad.RecoveryTests.OrleansExecution;
 using KeyLoad.Server;
 using ModelContextProtocol.Client;
 
-namespace KeyLoad.IntegrationTests.Features.Authorization;
+namespace KeyLoad.IntegrationTests.Authorization;
 
 internal static class AuthenticationExecutionClients
 {

@@ -2,7 +2,7 @@ using System.Collections.Immutable;
 using KeyLoad.Core;
 using ManagedCode.Communication;
 
-namespace KeyLoad.RecoveryTests.Features.Search;
+namespace KeyLoad.RecoveryTests.Search;
 
 internal static class AnnCrashOperations
 {

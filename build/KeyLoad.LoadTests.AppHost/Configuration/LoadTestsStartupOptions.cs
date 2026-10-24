@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Configuration;
 
-namespace KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
+namespace KeyLoad.LoadTests.AppHost.BenchmarkComparisons;
 
 /// <summary>Selects the client-owned load lifecycle and its disposable storage root.</summary>
 [ConfigurationOptions]

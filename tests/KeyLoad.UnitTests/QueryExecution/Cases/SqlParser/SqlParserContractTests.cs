@@ -1,7 +1,7 @@
 using System.Text;
 using KeyLoad.Query;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal sealed class SqlParserContractTests
 {
@@ -67,12 +67,12 @@ internal sealed class SqlParserContractTests
         var bytes = Encoding.UTF8.GetByteCount(SmallSql);
         var exact = new DatabaseLimits { MaxQueryBytes = bytes };
         var budget = new global::KeyLoad.Core.ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(exact));
-        using var reader = new global::KeyLoad.Features.QueryExecution.ScriptDomBoundedReader(SmallSql, budget.Check);
+        using var reader = new global::KeyLoad.QueryExecution.ScriptDomBoundedReader(SmallSql, budget.Check);
         var parser = new global::Microsoft.SqlServer.TransactSql.ScriptDom.TSql180Parser(true,
             global::Microsoft.SqlServer.TransactSql.ScriptDom.SqlEngineType.Standalone);
         var tokens = parser.GetTokenStream(reader, out var errors);
         await Assert.That(errors.Count).IsEqualTo(0);
-        global::KeyLoad.Features.QueryExecution.ScriptDomTokenBounds.Require(tokens, exact with
+        global::KeyLoad.QueryExecution.ScriptDomTokenBounds.Require(tokens, exact with
         {
             MaxQueryTokens = 4
         }, budget.Check);
@@ -81,7 +81,7 @@ internal sealed class SqlParserContractTests
         {
             MaxQueryBytes = bytes - 1
         }), UnitExecutionOptions.QueryExecution())).Code).IsEqualTo(ErrorCode.BudgetExceeded);
-        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => global::KeyLoad.Features.QueryExecution.ScriptDomTokenBounds.Require(tokens,
+        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => global::KeyLoad.QueryExecution.ScriptDomTokenBounds.Require(tokens,
             exact with
             {
                 MaxQueryTokens = 3

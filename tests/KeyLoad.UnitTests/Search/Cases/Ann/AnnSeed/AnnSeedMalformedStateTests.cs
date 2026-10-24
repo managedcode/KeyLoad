@@ -1,9 +1,9 @@
 using System.Collections.Immutable;
-using KeyLoad.Core.Features.DocumentStorage;
+using KeyLoad.Core.DocumentStorage;
 using KeyLoad.Storage;
-using KeyLoad.UnitTests.Features.InternalSerialization;
+using KeyLoad.UnitTests.InternalSerialization;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 internal sealed class AnnSeedMalformedStateTests
 {

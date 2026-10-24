@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.TimeSeries;
+namespace KeyLoad.UnitTests.TimeSeries;
 
 /// <summary>Owner-authorized operation clock; observes real execution work without substituting storage.</summary>
 internal sealed class SampleRollupWorkClock : TimeProvider

@@ -1,10 +1,10 @@
 using Aspire.Hosting.ApplicationModel;
-using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.StorageReplication;
+using KeyLoad.IntegrationTests.ClientApi;
+using KeyLoad.IntegrationTests.StorageReplication;
 using KeyLoad.Server;
-using static KeyLoad.IntegrationTests.Features.EventStreams.SharedDomainPublicProtocol;
+using static KeyLoad.IntegrationTests.EventStreams.SharedDomainPublicProtocol;
 
-namespace KeyLoad.IntegrationTests.Features.EventStreams;
+namespace KeyLoad.IntegrationTests.EventStreams;
 
 internal static class SharedDomainPublicCold
 {

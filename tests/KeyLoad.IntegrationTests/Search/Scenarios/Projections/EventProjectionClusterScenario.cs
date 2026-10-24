@@ -1,9 +1,9 @@
 using System.Security.Cryptography;
 using System.Text;
 using KeyLoad.Client;
-using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.ClientApi;
 
-namespace KeyLoad.IntegrationTests.Features.Search;
+namespace KeyLoad.IntegrationTests.Search;
 
 internal sealed record EventProjectionClusterScenario(PartitionRef Partition, StreamRef Stream,
     string WorkerSecret, string ReaderSecret, Guid CommandId, ApplyVectorProjection Projection)

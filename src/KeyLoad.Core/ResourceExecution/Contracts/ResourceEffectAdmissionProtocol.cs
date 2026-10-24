@@ -1,4 +1,4 @@
-namespace KeyLoad.Core.Features.ResourceExecution;
+namespace KeyLoad.Core.ResourceExecution;
 
 internal static class ResourceEffectAdmissionProtocol
 {

@@ -1,7 +1,7 @@
 using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
 
-namespace KeyLoad.UnitTests.Features.Messaging;
+namespace KeyLoad.UnitTests.Messaging;
 
 internal sealed class CompetingInboxState(PartitionRef partition, DateTimeOffset time, bool equivalent)
 {

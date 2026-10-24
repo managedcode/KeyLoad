@@ -1,11 +1,11 @@
 using System.Text.Json;
 using KeyLoad.Storage.ZoneTree;
-using KeyLoad.UnitTests.Features.Messaging;
-using KeyLoad.UnitTests.Features.ResourceExecution;
+using KeyLoad.UnitTests.Messaging;
+using KeyLoad.UnitTests.ResourceExecution;
 using ManagedCode.Communication;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.BackupRestore;
+namespace KeyLoad.UnitTests.BackupRestore;
 
 internal static class RestoreIdentityOverrideAssertions
 {

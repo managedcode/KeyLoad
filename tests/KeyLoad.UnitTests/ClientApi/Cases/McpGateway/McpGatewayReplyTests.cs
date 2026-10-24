@@ -3,7 +3,7 @@ using KeyLoad.Server;
 using ManagedCode.MCPGateway;
 using ModelContextProtocol.Protocol;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>AC-MCPGW-004/005: metadata replies are bounded and execution invoke results remain identical.</summary>
 internal sealed class McpGatewayReplyTests

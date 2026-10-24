@@ -1,6 +1,6 @@
 using KeyLoad.Storage.ZoneTree;
 
-namespace KeyLoad.UnitTests.Features.ResourceExecution;
+namespace KeyLoad.UnitTests.ResourceExecution;
 
 /// <summary>Coordinates a real ZoneTree read callback holding its storage gate.</summary>
 internal sealed class RealZoneTreeReadGateHold : IAsyncDisposable

@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.TimeSeries;
+namespace KeyLoad.IntegrationTests.TimeSeries;
 
 [NotInParallel]
 internal sealed class TimeSeriesChunkQualificationClusterTests

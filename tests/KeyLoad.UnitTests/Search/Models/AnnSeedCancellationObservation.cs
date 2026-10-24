@@ -1,6 +1,6 @@
-using KeyLoad.Core.Features.Search;
+using KeyLoad.Core.Search;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 internal sealed record AnnSeedCancellationObservation(
     TimeSpan Elapsed,

@@ -1,12 +1,12 @@
 using System.Collections.Immutable;
-using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.Core.ResourceExecution;
 using KeyLoad.Storage;
-using KeyLoad.UnitTests.Features.Authorization;
+using KeyLoad.UnitTests.Authorization;
 using ManagedCode.Communication.Commands;
-using A = KeyLoad.UnitTests.Features.DatabaseComposition.CompositionLinkLifetimeJsonAssertions;
-using P = KeyLoad.UnitTests.Features.DatabaseComposition.CompositionLinkLifetimeJsonProtocol;
+using A = KeyLoad.UnitTests.DatabaseComposition.CompositionLinkLifetimeJsonAssertions;
+using P = KeyLoad.UnitTests.DatabaseComposition.CompositionLinkLifetimeJsonProtocol;
 
-namespace KeyLoad.UnitTests.Features.DatabaseComposition;
+namespace KeyLoad.UnitTests.DatabaseComposition;
 
 internal static class CompositionLinkLifetimeJsonSeed
 {

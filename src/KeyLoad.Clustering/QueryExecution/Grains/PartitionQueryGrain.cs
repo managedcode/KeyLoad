@@ -1,4 +1,4 @@
-using KeyLoad.Query.Features.QueryExecution;
+using KeyLoad.Query.QueryExecution;
 using Microsoft.Extensions.Logging;
 
 namespace KeyLoad.Clustering;

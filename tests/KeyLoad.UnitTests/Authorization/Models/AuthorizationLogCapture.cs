@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging;
 
-namespace KeyLoad.UnitTests.Features.Authorization;
+namespace KeyLoad.UnitTests.Authorization;
 
 internal sealed record AuthorizationLogCapture(string? Category, string? Body, string? Formatted,
     int EventId, string? EventName, LogLevel Level, DateTime Timestamp, string TraceId, string SpanId,

@@ -3,7 +3,7 @@ using System.Text;
 using System.Text.Json;
 using KeyLoad.Server;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>AC-MCP-003/004/007: execution bounded serialization preserves the exact canonical wire contract.</summary>
 internal sealed class McpBoundedJsonTests

@@ -1,4 +1,4 @@
-namespace KeyLoad.Server.Features.OrleansHosting;
+namespace KeyLoad.Server.OrleansHosting;
 
 internal sealed class OrleansCreatedSiloHostedService(IHostedService original) : IHostedService
 {

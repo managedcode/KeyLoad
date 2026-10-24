@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 
-namespace KeyLoad.Query.Features.QueryExecution;
+namespace KeyLoad.Query.QueryExecution;
 
 [GenerateSerializer]
 [Alias(PartitionQuerySerializationAliases.Candidate)]

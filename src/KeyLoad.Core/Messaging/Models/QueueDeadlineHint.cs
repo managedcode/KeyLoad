@@ -1,4 +1,4 @@
-namespace KeyLoad.Core.Features.Messaging;
+namespace KeyLoad.Core.Messaging;
 
 /// <summary>Carries the original queue identity and bounded deadline mutation.</summary>
 [global::Orleans.GenerateSerializer, global::Orleans.Alias(QueueDeadlineHintContract.Alias)]

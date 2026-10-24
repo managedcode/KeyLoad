@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.Messaging;
+namespace KeyLoad.IntegrationTests.Messaging;
 
 internal sealed class QueueParkedPolicyClusterState(PartitionRef partition, ResourceDefinition definition,
     MessagingClusterIdentity identity)

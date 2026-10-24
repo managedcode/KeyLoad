@@ -1,4 +1,4 @@
-namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
+namespace KeyLoad.Analyzers.Tests.CodeQuality;
 
 /// <summary>AC-CQ-034/037: execution IOptions is the execution owner's configuration boundary.</summary>
 internal sealed class TypedConfigurationInjectionTests

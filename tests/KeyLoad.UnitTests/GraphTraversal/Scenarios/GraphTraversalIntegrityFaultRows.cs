@@ -1,8 +1,8 @@
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
-using KeyLoad.UnitTests.Features.InternalSerialization;
+using KeyLoad.UnitTests.InternalSerialization;
 
-namespace KeyLoad.UnitTests.Features.GraphTraversal;
+namespace KeyLoad.UnitTests.GraphTraversal;
 
 internal static class GraphTraversalIntegrityFaultRows
 {

@@ -1,6 +1,6 @@
 using KeyLoad.Comparisons;
 
-namespace KeyLoad.ComparisonHost.Features.BenchmarkOrchestration;
+namespace KeyLoad.ComparisonHost.BenchmarkOrchestration;
 
 internal static class IsolatedTeardownSupport
 {

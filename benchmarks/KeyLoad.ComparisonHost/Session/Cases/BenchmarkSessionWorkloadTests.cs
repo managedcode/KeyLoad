@@ -1,4 +1,4 @@
-namespace KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonHost.BenchmarkComparisons;
 
 /// <summary>Records distinct execution outcomes while every test uses the same live database.</summary>
 [BenchmarkSessionSource]

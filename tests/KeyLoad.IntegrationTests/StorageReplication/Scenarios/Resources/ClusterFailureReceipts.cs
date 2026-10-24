@@ -1,6 +1,6 @@
 using System.Globalization;
 
-namespace KeyLoad.IntegrationTests.Features.StorageReplication;
+namespace KeyLoad.IntegrationTests.StorageReplication;
 
 /// <summary>Preserves the earliest bounded failures and the unchanged last-failure view.</summary>
 internal sealed class ClusterFailureReceipts

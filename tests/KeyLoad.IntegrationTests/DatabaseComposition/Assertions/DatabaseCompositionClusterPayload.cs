@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
+namespace KeyLoad.IntegrationTests.DatabaseComposition;
 
 /// <summary>Independent ordinal-key golden for every public field of the Orleans link fixture.</summary>
 internal static class DatabaseCompositionClusterPayload

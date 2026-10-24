@@ -1,10 +1,10 @@
-using KeyLoad.UnitTests.Features.DocumentStorage;
-using KeyLoad.UnitTests.Features.Messaging;
-using KeyLoad.UnitTests.Features.OrleansExecution;
+using KeyLoad.UnitTests.DocumentStorage;
+using KeyLoad.UnitTests.Messaging;
+using KeyLoad.UnitTests.OrleansExecution;
 using ManagedCode.Communication;
-using static KeyLoad.UnitTests.Features.ClientApi.DeclaredResponseEofProtocol;
+using static KeyLoad.UnitTests.ClientApi.DeclaredResponseEofProtocol;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 internal static class DeclaredResponseEofAssertions
 {

@@ -1,9 +1,9 @@
 using System.Collections.Immutable;
 using KeyLoad.Core;
-using KeyLoad.Core.Features.ResourceExecution;
-using KeyLoad.Core.Features.ResourceExecution.Execution;
+using KeyLoad.Core.ResourceExecution;
+using KeyLoad.Core.ResourceExecution.Execution;
 
-namespace KeyLoad.Query.Features.QueryExecution;
+namespace KeyLoad.Query.QueryExecution;
 
 /// <summary>Uses the existing execution plan and merge with authenticated, individually admitted owner leaves.</summary>
 internal static partial class PartitionQueryRemoteExecution

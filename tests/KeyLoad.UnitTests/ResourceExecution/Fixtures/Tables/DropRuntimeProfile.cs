@@ -2,7 +2,7 @@ using KeyLoad.Clustering;
 using KeyLoad.Server;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace KeyLoad.UnitTests.Features.ResourceExecution;
+namespace KeyLoad.UnitTests.ResourceExecution;
 
 /// <summary>Owns the existing production Orleans hosts and joins original table operations before storage closes.</summary>
 internal sealed class DropRuntimeProfile : IAsyncDisposable

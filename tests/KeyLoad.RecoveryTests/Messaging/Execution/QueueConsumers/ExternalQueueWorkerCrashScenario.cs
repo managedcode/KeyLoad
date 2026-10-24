@@ -1,6 +1,6 @@
 using KeyLoad.Client;
 
-namespace KeyLoad.RecoveryTests.Features.Messaging;
+namespace KeyLoad.RecoveryTests.Messaging;
 
 internal static class ExternalQueueWorkerCrashScenario
 {

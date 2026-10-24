@@ -1,11 +1,11 @@
 using KeyLoad.Clustering;
 using KeyLoad.Query;
 using KeyLoad.Server;
-using KeyLoad.Server.Features.Search;
-using KeyLoad.UnitTests.Features.Messaging;
+using KeyLoad.Server.Search;
+using KeyLoad.UnitTests.Messaging;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 /// <summary>Settles only the actual retained original intent/ACK and verifies complete literal selected pages through execution reopen.</summary>
 internal static class TextIncrementalIntentContinuation

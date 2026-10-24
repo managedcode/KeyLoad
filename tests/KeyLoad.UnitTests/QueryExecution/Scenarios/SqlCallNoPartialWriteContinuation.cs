@@ -1,9 +1,9 @@
 using System.Text.Json;
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
-using KeyLoad.UnitTests.Features.Messaging;
+using KeyLoad.UnitTests.Messaging;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal static class SqlCallNoPartialWriteContinuation
 {
@@ -76,7 +76,7 @@ internal static class SqlCallNoPartialWriteContinuation
 
     private static CommandRequest Decode(McpDecodedOperation operation)
         => OrleansSerialization.Deserialize<CommandRequest>(operation.Payload.Span,
-            global::KeyLoad.Features.InternalSerialization.ValidationProfile.PublicInputElements);
+            global::KeyLoad.InternalSerialization.ValidationProfile.PublicInputElements);
 
     private static async Task RefusedAsync(TestDatabase db, SqlOperationRequest request, ErrorCode code)
     {

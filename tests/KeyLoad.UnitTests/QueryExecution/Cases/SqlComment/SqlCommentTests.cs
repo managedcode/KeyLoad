@@ -3,7 +3,7 @@ using System.Text.Json;
 using KeyLoad.Query;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal sealed class SqlCommentTests
 {
@@ -111,12 +111,12 @@ internal sealed class SqlCommentTests
         var byteCount = Encoding.UTF8.GetByteCount(SqlCommentTestData.ExactBoundedQuery);
         var exactLimits = new DatabaseLimits { MaxQueryBytes = byteCount };
         var budget = new global::KeyLoad.Core.ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(exactLimits));
-        using var reader = new global::KeyLoad.Features.QueryExecution.ScriptDomBoundedReader(SqlCommentTestData.ExactBoundedQuery, budget.Check);
+        using var reader = new global::KeyLoad.QueryExecution.ScriptDomBoundedReader(SqlCommentTestData.ExactBoundedQuery, budget.Check);
         var parser = new global::Microsoft.SqlServer.TransactSql.ScriptDom.TSql180Parser(true,
             global::Microsoft.SqlServer.TransactSql.ScriptDom.SqlEngineType.Standalone);
         var tokens = parser.GetTokenStream(reader, out var errors);
         await Assert.That(errors.Count).IsEqualTo(0);
-        global::KeyLoad.Features.QueryExecution.ScriptDomTokenBounds.Require(tokens,
+        global::KeyLoad.QueryExecution.ScriptDomTokenBounds.Require(tokens,
             exactLimits with
             {
                 MaxQueryTokens = SqlCommentTestData.ExactTokenCount
@@ -125,7 +125,7 @@ internal sealed class SqlCommentTests
             .IsEqualTo(SqlCommentTestData.Collection);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => _ = new SqlParser(SqlCommentTestData.ExactBoundedQuery, UnitExecutionOptions.DatabaseLimits(exactLimits with { MaxQueryBytes = byteCount - 1 }), UnitExecutionOptions.QueryExecution()).Parse()).Code)
             .IsEqualTo(ErrorCode.BudgetExceeded);
-        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => global::KeyLoad.Features.QueryExecution.ScriptDomTokenBounds.Require(tokens,
+        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => global::KeyLoad.QueryExecution.ScriptDomTokenBounds.Require(tokens,
             exactLimits with
             {
                 MaxQueryTokens = SqlCommentTestData.ExcessTokenCount

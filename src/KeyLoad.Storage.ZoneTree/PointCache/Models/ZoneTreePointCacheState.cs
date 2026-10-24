@@ -1,4 +1,4 @@
-namespace KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
+namespace KeyLoad.Storage.ZoneTree.ResourceExecution;
 
 /// <summary>One cache owner's synchronized admission, index and diagnostic state.</summary>
 internal sealed class ZoneTreePointCacheState : IDisposable

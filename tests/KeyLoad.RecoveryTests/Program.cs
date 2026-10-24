@@ -1,8 +1,8 @@
 using System.Globalization;
 using KeyLoad.RecoveryTests;
-using KeyLoad.RecoveryTests.Features.AnalyticsStore;
-using KeyLoad.RecoveryTests.Features.Messaging;
-using KeyLoad.RecoveryTests.Features.Search;
+using KeyLoad.RecoveryTests.AnalyticsStore;
+using KeyLoad.RecoveryTests.Messaging;
+using KeyLoad.RecoveryTests.Search;
 using KeyLoad.Storage.ZoneTree;
 
 if (args.Length == 0 || args[0] != CrashFixtureValues.ProcessMode)

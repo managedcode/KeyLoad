@@ -1,4 +1,4 @@
-namespace KeyLoad.Core.Features.Authorization;
+namespace KeyLoad.Core.Authorization;
 
 /// <summary>Validates the compare-and-set boundary for resource policy updates.</summary>
 internal static class ResourcePolicyUpdates

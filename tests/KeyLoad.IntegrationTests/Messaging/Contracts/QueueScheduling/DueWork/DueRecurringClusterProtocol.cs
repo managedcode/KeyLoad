@@ -1,6 +1,6 @@
 using System.Globalization;
 
-namespace KeyLoad.IntegrationTests.Features.Messaging;
+namespace KeyLoad.IntegrationTests.Messaging;
 
 /// <summary>Independent finite test oracle for autonomous recurrence identities and cadence.</summary>
 internal static class DueRecurringClusterProtocol

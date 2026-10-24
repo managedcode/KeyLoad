@@ -1,4 +1,4 @@
-namespace KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonHost.BenchmarkComparisons;
 
 /// <summary>Closed configuration and output tokens for the isolated execution host.</summary>
 internal static class IsolatedHostConstants

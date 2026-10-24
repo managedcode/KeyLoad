@@ -1,7 +1,7 @@
 using System.Collections.Concurrent;
 using KeyLoad.Client;
 
-namespace KeyLoad.IntegrationTests.Features.Messaging;
+namespace KeyLoad.IntegrationTests.Messaging;
 
 internal sealed class QueueWorkerClusterHandlerLifecycle(bool holdThird)
 {

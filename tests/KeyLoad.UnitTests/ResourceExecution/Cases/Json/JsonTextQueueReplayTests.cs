@@ -1,7 +1,7 @@
 using System.Text.Json;
 using TUnit.Assertions.Exceptions;
 
-namespace KeyLoad.UnitTests.Features.ResourceExecution;
+namespace KeyLoad.UnitTests.ResourceExecution;
 
 internal sealed class JsonTextQueueReplayTests
 {

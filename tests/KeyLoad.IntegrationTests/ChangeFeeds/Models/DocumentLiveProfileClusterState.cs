@@ -1,6 +1,6 @@
 using KeyLoad.Query;
 
-namespace KeyLoad.IntegrationTests.Features.ChangeFeeds;
+namespace KeyLoad.IntegrationTests.ChangeFeeds;
 
 internal sealed class DocumentLiveProfileClusterState(PartitionRef partition, string principalId, string key)
 {

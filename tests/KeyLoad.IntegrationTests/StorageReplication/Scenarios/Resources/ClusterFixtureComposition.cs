@@ -7,7 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace KeyLoad.IntegrationTests.Features.StorageReplication;
+namespace KeyLoad.IntegrationTests.StorageReplication;
 
 internal static class ClusterFixtureComposition
 {
@@ -17,7 +17,7 @@ internal static class ClusterFixtureComposition
         => [$"{ClusterFixtureProtocol.DataRootArgument}{root}", ClusterFixtureProtocol.EphemeralArgument,
             ClusterFixtureProtocol.SiloCountArgument, ClusterFixtureProtocol.StorageModeArgument + storage.Mode,
             ClusterFixtureProtocol.ReplicaCountArgument + storage.ReplicaCount.ToString(System.Globalization.CultureInfo.InvariantCulture),
-            KeyLoad.AppHost.Features.TestInfrastructure.ProcessFaultCommandProtocol.EnabledArgument];
+            KeyLoad.AppHost.TestInfrastructure.ProcessFaultCommandProtocol.EnabledArgument];
 
     internal static KeyLoadClient CreateClient(HttpClient transport, string key)
     {

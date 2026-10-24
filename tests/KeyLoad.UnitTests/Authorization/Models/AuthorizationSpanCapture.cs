@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-namespace KeyLoad.UnitTests.Features.Authorization;
+namespace KeyLoad.UnitTests.Authorization;
 
 internal sealed record AuthorizationSpanCapture(string Source, string Operation, string Display,
     ActivityKind Kind, ActivityStatusCode Status, string? StatusDetail, string? TraceState,

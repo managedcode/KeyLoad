@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using KeyLoad.Server;
 
-namespace KeyLoad.UnitTests.Features.CodeQuality;
+namespace KeyLoad.UnitTests.CodeQuality;
 
 internal static class CoverageCliCollector
 {

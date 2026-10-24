@@ -1,12 +1,12 @@
 using System.Diagnostics;
 using System.Diagnostics.Metrics;
-using KeyLoad.Server.Features.Authorization.Configuration;
-using KeyLoad.Server.Features.Authorization.Contracts;
+using KeyLoad.Server.Authorization.Configuration;
+using KeyLoad.Server.Authorization.Contracts;
 using Microsoft.Extensions.Options;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
 
-namespace KeyLoad.Server.Features.Authorization.Diagnostics;
+namespace KeyLoad.Server.Authorization.Diagnostics;
 
 internal sealed class HttpTelemetryPrivacyProcessor(IOptions<HttpTelemetryPrivacyOptions> options) : BaseProcessor<Activity>
 {

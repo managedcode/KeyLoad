@@ -1,10 +1,10 @@
 using KeyLoad.Server;
-using KeyLoad.UnitTests.Features.DatabaseComposition;
-using KeyLoad.UnitTests.Features.Messaging;
-using KeyLoad.UnitTests.Features.StorageRecovery.Assertions;
-using C = KeyLoad.UnitTests.Features.DatabaseComposition.QueueGraphIdentityState;
+using KeyLoad.UnitTests.DatabaseComposition;
+using KeyLoad.UnitTests.Messaging;
+using KeyLoad.UnitTests.StorageRecovery.Assertions;
+using C = KeyLoad.UnitTests.DatabaseComposition.QueueGraphIdentityState;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal static class SqlCompositionParameterFlow
 {

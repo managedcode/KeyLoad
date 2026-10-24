@@ -1,6 +1,6 @@
-using KeyLoad.IntegrationTests.Features.Authorization;
+using KeyLoad.IntegrationTests.Authorization;
 
-namespace KeyLoad.IntegrationTests.Features.ClientApi;
+namespace KeyLoad.IntegrationTests.ClientApi;
 
 /// <summary>AC-MCP-002/007 and AC-DSTORE-003: both real adapters enforce the same persisted sensitive-field policy.</summary>
 /// <param name="fixture">The initialized actual execution Aspire Orleans application.</param>

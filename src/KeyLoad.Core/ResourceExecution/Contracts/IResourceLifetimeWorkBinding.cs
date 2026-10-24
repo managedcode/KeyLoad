@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
-using KeyLoad.Core.Features.StoragePartitions.Contracts;
+using KeyLoad.Core.StoragePartitions.Contracts;
 
-namespace KeyLoad.Core.Features.ResourceExecution;
+namespace KeyLoad.Core.ResourceExecution;
 
 /// <summary>Associates exact authenticated resource lifetimes with the explicitly supplied original work owner.</summary>
 internal interface IResourceLifetimeWorkBinding

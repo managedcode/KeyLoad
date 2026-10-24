@@ -1,13 +1,13 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Operations;
 
-namespace KeyLoad.Analyzers.Features.CodeQuality;
+namespace KeyLoad.Analyzers.CodeQuality;
 
 internal static class OwnedDiagnosticsPolicy
 {
     private const string AssemblyName = "KeyLoad.Diagnostics";
-    private const string Bank = "KeyLoad.Diagnostics.Features.ResourceExecution.DatabasePhaseBank";
-    private const string Telemetry = "KeyLoad.Diagnostics.Features.ResourceExecution.DatabasePhaseTelemetry";
+    private const string Bank = "KeyLoad.Diagnostics.ResourceExecution.DatabasePhaseBank";
+    private const string Telemetry = "KeyLoad.Diagnostics.ResourceExecution.DatabasePhaseTelemetry";
     private const string Initialize = "Initialize";
     private const string StripeCount = "stripeCount";
     private const string MaximumCasAttempts = "maximumCasAttempts";

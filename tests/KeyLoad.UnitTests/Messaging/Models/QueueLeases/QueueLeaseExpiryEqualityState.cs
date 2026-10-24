@@ -1,5 +1,5 @@
 using ManagedCode.Communication;
-namespace KeyLoad.UnitTests.Features.Messaging;
+namespace KeyLoad.UnitTests.Messaging;
 
 internal sealed record QueueLeaseExpiryEqualityState(
     QueueLaneRef Lane, DateTimeOffset Boundary, CommandRequest Producer, Result<object> Produced,

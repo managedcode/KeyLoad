@@ -1,8 +1,8 @@
-using KeyLoad.Server.Features.Authorization.Contracts;
+using KeyLoad.Server.Authorization.Contracts;
 using OpenTelemetry;
 using OpenTelemetry.Logs;
 
-namespace KeyLoad.Server.Features.Authorization.Diagnostics;
+namespace KeyLoad.Server.Authorization.Diagnostics;
 
 internal sealed class RuntimeLogPrivacyProcessor : BaseProcessor<LogRecord>
 {

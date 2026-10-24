@@ -1,6 +1,6 @@
 using System.Runtime.CompilerServices;
 
-namespace KeyLoad.Core.Features.Authorization;
+namespace KeyLoad.Core.Authorization;
 
 internal static class RowVisibilityMemoryModel
 {

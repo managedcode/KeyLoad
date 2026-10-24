@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-namespace KeyLoad.Server.Features.Authorization.Contracts;
+namespace KeyLoad.Server.Authorization.Contracts;
 
 internal static class HttpTelemetryPrivacyPolicy
 {

@@ -2,7 +2,7 @@ using System.Collections.Concurrent;
 using KeyLoad.Clustering;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 /// <summary>Accounts every actual connection activation using only captured DI service identities and registered consumer IDs.</summary>
 internal sealed class ConnectionServerInventory

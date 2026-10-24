@@ -1,9 +1,9 @@
 using System.Diagnostics;
-using KeyLoad.Server.Features.Authorization.Configuration;
+using KeyLoad.Server.Authorization.Configuration;
 using Microsoft.Extensions.Options;
 using OpenTelemetry;
 
-namespace KeyLoad.UnitTests.Features.Authorization;
+namespace KeyLoad.UnitTests.Authorization;
 
 internal sealed class AuthorizationSpanObservation(IOptions<AuthorizationTelemetryCaptureOptions> options)
     : BaseProcessor<Activity>

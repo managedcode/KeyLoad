@@ -1,9 +1,9 @@
-using KeyLoad.UnitTests.Features.Authorization;
+using KeyLoad.UnitTests.Authorization;
 using ManagedCode.Communication.Commands;
-using A = KeyLoad.UnitTests.Features.DatabaseComposition.CompositionBoundReferenceAssertions;
-using D = KeyLoad.UnitTests.Features.DatabaseComposition.CompositionReverseFinalImageData;
+using A = KeyLoad.UnitTests.DatabaseComposition.CompositionBoundReferenceAssertions;
+using D = KeyLoad.UnitTests.DatabaseComposition.CompositionReverseFinalImageData;
 
-namespace KeyLoad.UnitTests.Features.DatabaseComposition;
+namespace KeyLoad.UnitTests.DatabaseComposition;
 
 internal static class CompositionReverseFinalImageFlow
 {

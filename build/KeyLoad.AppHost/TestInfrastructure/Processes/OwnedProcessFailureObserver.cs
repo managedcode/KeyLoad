@@ -1,4 +1,4 @@
-namespace KeyLoad.AppHost.Features.TestInfrastructure.Processes;
+namespace KeyLoad.AppHost.TestInfrastructure.Processes;
 
 internal static class OwnedProcessFailureObserver
 {

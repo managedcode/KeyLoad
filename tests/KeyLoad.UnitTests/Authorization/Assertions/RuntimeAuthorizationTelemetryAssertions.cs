@@ -1,6 +1,6 @@
-using KeyLoad.Server.Features.Authorization.Contracts;
+using KeyLoad.Server.Authorization.Contracts;
 
-namespace KeyLoad.UnitTests.Features.Authorization;
+namespace KeyLoad.UnitTests.Authorization;
 
 internal static class RuntimeAuthorizationTelemetryAssertions
 {

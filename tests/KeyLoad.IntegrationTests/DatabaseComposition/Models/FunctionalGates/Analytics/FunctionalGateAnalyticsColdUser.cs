@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
-using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.ClientApi;
 
-namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
+namespace KeyLoad.IntegrationTests.DatabaseComposition;
 
 internal sealed record FunctionalGateAnalyticsColdUser(McpPersistedIdentity Identity,
     ImmutableArray<FunctionalGateAnalyticsColdStore> Stores);

@@ -1,14 +1,14 @@
 using System.Collections.Immutable;
 using System.Text.Json;
-using KeyLoad.Core.Features.InternalSerialization;
-using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.Core.InternalSerialization;
+using KeyLoad.Core.ResourceExecution;
 using KeyLoad.Storage;
-using KeyLoad.UnitTests.Features.Authorization;
+using KeyLoad.UnitTests.Authorization;
 using ManagedCode.Communication.Commands;
-using D = KeyLoad.UnitTests.Features.InternalSerialization.AnalyticsCommandIdentityData;
-using O = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreTestOperations;
+using D = KeyLoad.UnitTests.InternalSerialization.AnalyticsCommandIdentityData;
+using O = KeyLoad.UnitTests.AnalyticsStore.AnalyticsStoreTestOperations;
 
-namespace KeyLoad.UnitTests.Features.InternalSerialization;
+namespace KeyLoad.UnitTests.InternalSerialization;
 
 internal static class AnalyticsCommandIdentityAssertions
 {

@@ -1,7 +1,7 @@
 using KeyLoad.Clustering;
-using KeyLoad.Server.Features.Search;
+using KeyLoad.Server.Search;
 
-namespace KeyLoad.RecoveryTests.Features.Search;
+namespace KeyLoad.RecoveryTests.Search;
 
 [global::Orleans.GenerateSerializer, global::Orleans.Alias(TextIncrementalCrashProtocol.ResultAlias)]
 internal sealed record TextIncrementalCrashResult(

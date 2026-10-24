@@ -2,7 +2,7 @@ using System.Text.Json;
 using KeyLoad.Core;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.RecoveryTests.Features.EventStreams;
+namespace KeyLoad.RecoveryTests.EventStreams;
 
 internal static class EventAppendDedupAssertions
 {

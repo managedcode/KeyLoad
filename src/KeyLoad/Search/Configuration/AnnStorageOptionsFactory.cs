@@ -1,7 +1,7 @@
-using KeyLoad.Query.Features.Search;
+using KeyLoad.Query.Search;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.Server.Features.Search;
+namespace KeyLoad.Server.Search;
 
 /// <summary>Composes only validated downward execution storage ceilings from central options and actual reservations.</summary>
 [ConfigurationBinding]

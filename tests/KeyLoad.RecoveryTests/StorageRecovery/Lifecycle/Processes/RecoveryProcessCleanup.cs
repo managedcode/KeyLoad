@@ -1,8 +1,8 @@
 using System.Diagnostics;
-using KeyLoad.RecoveryTests.Features.DocumentStorage;
+using KeyLoad.RecoveryTests.DocumentStorage;
 using KeyLoad.Server;
 
-namespace KeyLoad.RecoveryTests.Features.StorageRecovery;
+namespace KeyLoad.RecoveryTests.StorageRecovery;
 
 internal static class RecoveryProcessCleanup
 {

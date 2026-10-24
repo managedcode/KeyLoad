@@ -2,7 +2,7 @@ using KeyLoad.Clustering;
 using KeyLoad.Core;
 using ManagedCode.Communication;
 
-namespace KeyLoad.Server.Features.Search;
+namespace KeyLoad.Server.Search;
 
 internal sealed class TextOnlineCheckpointWork
 {

@@ -1,4 +1,4 @@
-namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
+namespace KeyLoad.Analyzers.Tests.CodeQuality;
 
 /// <summary>Defines bounded execution of analyzer coverage child processes.</summary>
 [KeyLoad.ConfigurationOptions]

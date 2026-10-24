@@ -1,7 +1,7 @@
 using ManagedCode.TimeSeries.Abstractions;
 using ManagedCode.TimeSeries.Summers;
 
-namespace KeyLoad.Core.Features.TimeSeries;
+namespace KeyLoad.Core.TimeSeries;
 
 internal sealed class SampleAggregateAccumulator
 {

@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
-using KeyLoad.Core.Features.BlobStorage;
-using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.Core.BlobStorage;
+using KeyLoad.Core.ResourceExecution;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core;

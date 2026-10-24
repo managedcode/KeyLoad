@@ -1,4 +1,4 @@
-namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
+namespace KeyLoad.Analyzers.Tests.CodeQuality;
 
 /// <summary>AC-CQ-029 and AC-CQ-031: execution duration policy literals produce exact located errors.</summary>
 internal sealed class MagicRuntimeDurationArgumentTests

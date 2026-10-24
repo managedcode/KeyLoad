@@ -1,5 +1,5 @@
 using ManagedCode.Communication;
-namespace KeyLoad.UnitTests.Features.Messaging;
+namespace KeyLoad.UnitTests.Messaging;
 
 internal sealed record QueueRetryColdState(QueueLaneRef Lane, DateTimeOffset Start, CommandRequest Enqueue,
     Result<object> Enqueued, ReceiveRequest FirstClaim, Result<object> Claimed, Delivery FirstDelivery)

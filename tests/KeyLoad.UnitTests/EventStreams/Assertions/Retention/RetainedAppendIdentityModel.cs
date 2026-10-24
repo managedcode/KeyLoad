@@ -1,6 +1,6 @@
 using KeyLoad.Storage.ZoneTree;
 
-namespace KeyLoad.UnitTests.Features.EventStreams;
+namespace KeyLoad.UnitTests.EventStreams;
 
 internal static class RetainedAppendIdentityModel
 {

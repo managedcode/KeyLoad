@@ -1,4 +1,4 @@
-namespace KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
+namespace KeyLoad.Storage.ZoneTree.ResourceExecution;
 
 /// <summary>Reports a local zero-wait physical owner observation without granting a lease.</summary>
 public enum ZoneTreePointCacheOwnerStatus

@@ -1,10 +1,10 @@
 using System.Text.Json;
-using KeyLoad.Core.Features.DocumentStorage;
+using KeyLoad.Core.DocumentStorage;
 using KeyLoad.Query;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 
-namespace KeyLoad.UnitTests.Features.Authorization;
+namespace KeyLoad.UnitTests.Authorization;
 
 internal static class GenerationVisibilityWriteAssertions
 {
@@ -41,10 +41,10 @@ internal static class GenerationVisibilityWriteAssertions
             ScanBudget = UnitExecutionOptions.DatabaseLimits().Value.MaxScanRecords
         }, JsonDefaults.Options);
         var explanation = new global::KeyLoad.Query.AstQueryRequest(partition,
-            new(TeamRowPolicyFlow.Collection, null, [new(global::KeyLoad.Query.Features.QueryExecution.SqlSyntax.Star,
-                global::KeyLoad.Query.Features.QueryExecution.SqlSyntax.Star)], null,
-                [new(global::KeyLoad.Query.Features.QueryExecution.SqlSyntax.MetadataIdPath, false)],
-                global::KeyLoad.Query.Features.QueryExecution.SqlSyntax.DefaultLimit, Explain: true), AllowFullScan: true);
+            new(TeamRowPolicyFlow.Collection, null, [new(global::KeyLoad.Query.QueryExecution.SqlSyntax.Star,
+                global::KeyLoad.Query.QueryExecution.SqlSyntax.Star)], null,
+                [new(global::KeyLoad.Query.QueryExecution.SqlSyntax.MetadataIdPath, false)],
+                global::KeyLoad.Query.QueryExecution.SqlSyntax.DefaultLimit, Explain: true), AllowFullScan: true);
         await PageAsync(queries.ExecuteAst(TeamRowPolicyFlow.Reader, explanation,
             cancellationToken: token), [new(ExplainId, NoRevision, plan)], cut);
         var reference = new EntityRef(partition, TeamRowPolicyFlow.Collection, TeamRowPolicyFlow.ForeignTeam);

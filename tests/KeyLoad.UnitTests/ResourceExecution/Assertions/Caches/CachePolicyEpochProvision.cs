@@ -1,6 +1,6 @@
-using P = KeyLoad.UnitTests.Features.ResourceExecution.CachePolicyEpochProtocol;
+using P = KeyLoad.UnitTests.ResourceExecution.CachePolicyEpochProtocol;
 
-namespace KeyLoad.UnitTests.Features.ResourceExecution;
+namespace KeyLoad.UnitTests.ResourceExecution;
 
 internal static class CachePolicyEpochProvision
 {

@@ -1,8 +1,8 @@
 using KeyLoad.Core;
-using KeyLoad.Core.Features.ResourceExecution;
-using KeyLoad.Core.Features.RuntimeJournaling.Identity;
+using KeyLoad.Core.ResourceExecution;
+using KeyLoad.Core.RuntimeJournaling.Identity;
 using KeyLoad.Query;
-using KeyLoad.Query.Features.Search;
+using KeyLoad.Query.Search;
 using KeyLoad.Storage;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -46,7 +46,7 @@ internal sealed class ConnectionReadCapabilities(DatabaseEngine localDatabase, I
         if (kind == GrainReadKind.FileMetadata)
         {
             return localDatabase.ReadFileMetadataBound(principal.Id,
-                GrainPayload.Read<global::KeyLoad.Core.Features.BlobStorage.FileMetadataQuery>(request.Payload),
+                GrainPayload.Read<global::KeyLoad.Core.BlobStorage.FileMetadataQuery>(request.Payload),
                 binding, cancellationToken);
         }
         if (UserAnalyticsReadExecution.Handles(kind))

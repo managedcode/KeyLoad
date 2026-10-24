@@ -1,7 +1,7 @@
 using KeyLoad.Clustering;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.Messaging;
+namespace KeyLoad.UnitTests.Messaging;
 
 /// <summary>Real post-commit parent expiry and post-submit execution byte-bound uncertainty.</summary>
 [NotInParallel]

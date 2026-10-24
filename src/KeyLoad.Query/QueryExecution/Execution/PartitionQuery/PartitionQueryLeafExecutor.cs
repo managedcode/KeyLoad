@@ -1,9 +1,9 @@
 using System.Text.Json;
 using KeyLoad.Core;
-using KeyLoad.Core.Features.ResourceExecution.Execution;
+using KeyLoad.Core.ResourceExecution.Execution;
 using KeyLoad.Storage;
 
-namespace KeyLoad.Query.Features.QueryExecution;
+namespace KeyLoad.Query.QueryExecution;
 
 internal sealed class PartitionQueryLeafExecutor(QueryEngine engine, DatabaseEngine database,
     ReadExecutionBudget budget, PhysicalShardRecord? expectedOwner = null, bool receivingLeaf = false)

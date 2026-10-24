@@ -1,8 +1,8 @@
-using KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
+using KeyLoad.ComparisonHost.BenchmarkComparisons;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.ComparisonHost.Features.BenchmarkOrchestration;
+namespace KeyLoad.ComparisonHost.BenchmarkOrchestration;
 
 [ConfigurationBinding]
 internal static class ExecutionPolicyFixture

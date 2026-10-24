@@ -1,8 +1,8 @@
 using System.Net;
-using KeyLoad.IntegrationTests.Features.Authorization;
-using KeyLoad.IntegrationTests.Features.DocumentStorage;
+using KeyLoad.IntegrationTests.Authorization;
+using KeyLoad.IntegrationTests.DocumentStorage;
 
-namespace KeyLoad.IntegrationTests.Features.ClientApi;
+namespace KeyLoad.IntegrationTests.ClientApi;
 
 /// <summary>AC-MCP-002: real execution callers cannot retain authority from an earlier discovery request.</summary>
 /// <param name="fixture">The initialized actual execution Aspire Orleans application.</param>

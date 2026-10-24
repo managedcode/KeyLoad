@@ -1,6 +1,6 @@
-using KeyLoad.Core.Features.CommandOutcomes.Contracts;
+using KeyLoad.Core.CommandOutcomes.Contracts;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal sealed class CommandOutcomeScopeSerializationTests
 {

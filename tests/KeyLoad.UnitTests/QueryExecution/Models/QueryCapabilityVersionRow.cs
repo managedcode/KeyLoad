@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal readonly record struct QueryCapabilityVersionRow([property: JsonPropertyName(QueryCapabilityVersionRow.OrderIdWireName)] string OrderId,
     [property: JsonPropertyName(QueryCapabilityVersionRow.TitleWireName)] string Title, [property: JsonPropertyName(QueryCapabilityVersionRow.ScoreWireName)] decimal Score,

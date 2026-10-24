@@ -1,6 +1,6 @@
-using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.ClientApi;
 
-namespace KeyLoad.IntegrationTests.Features.AdminDashboard;
+namespace KeyLoad.IntegrationTests.AdminDashboard;
 
 internal sealed record AdminDashboardScenario(PartitionRef Partition)
 {

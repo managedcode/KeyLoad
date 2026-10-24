@@ -1,6 +1,6 @@
 using System.Text.Json;
 
-namespace KeyLoad.IntegrationTests.Features.EventStreams;
+namespace KeyLoad.IntegrationTests.EventStreams;
 
 /// <summary>Checks canonical bounded EventStreams results returned by real SDK callers.</summary>
 internal static class McpEventStreamAssertions

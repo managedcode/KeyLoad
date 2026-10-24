@@ -1,11 +1,11 @@
-using KeyLoad.Core.Features.ResourceExecution;
-using KeyLoad.Core.Features.StoragePartitions.Contracts;
+using KeyLoad.Core.ResourceExecution;
+using KeyLoad.Core.StoragePartitions.Contracts;
 using KeyLoad.Query;
-using KeyLoad.Query.Features.QueryExecution;
+using KeyLoad.Query.QueryExecution;
 using KeyLoad.Storage;
-using KeyLoad.UnitTests.Features.DocumentStorage;
+using KeyLoad.UnitTests.DocumentStorage;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 /// <summary>Exercises authorized execution leaf execution against two original real ZoneTree owners.</summary>
 internal sealed class QueryLifetimeFlow(QueryFixture fixture, bool sourceNarrower)

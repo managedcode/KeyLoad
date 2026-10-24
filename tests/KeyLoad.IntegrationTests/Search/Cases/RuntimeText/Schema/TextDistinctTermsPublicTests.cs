@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.Search;
+namespace KeyLoad.IntegrationTests.Search;
 
 [ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = "execution-text-distinct-terms-public")]
 [NotInParallel]

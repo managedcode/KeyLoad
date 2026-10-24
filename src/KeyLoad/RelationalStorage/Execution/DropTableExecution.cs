@@ -2,7 +2,7 @@ using KeyLoad.Clustering;
 using KeyLoad.Core;
 using ManagedCode.Communication;
 
-namespace KeyLoad.Server.Features.ResourceExecution;
+namespace KeyLoad.Server.ResourceExecution;
 
 /// <summary>Submits the authorized table deletion through the execution database command owner.</summary>
 internal sealed class DropTableExecution(PartitionHost partition, TimeProvider clock)

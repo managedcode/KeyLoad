@@ -1,13 +1,13 @@
-using KeyLoad.Core.Features.AnalyticsStore;
-using KeyLoad.Core.Features.DocumentStorage;
-using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.Core.AnalyticsStore;
+using KeyLoad.Core.DocumentStorage;
+using KeyLoad.Core.ResourceExecution;
 using KeyLoad.Server;
 using KeyLoad.Storage;
-using KeyLoad.UnitTests.Features.Authorization;
-using A = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsEntityLinkLifetimeAssertions;
-using D = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreTestData;
+using KeyLoad.UnitTests.Authorization;
+using A = KeyLoad.UnitTests.AnalyticsStore.AnalyticsEntityLinkLifetimeAssertions;
+using D = KeyLoad.UnitTests.AnalyticsStore.AnalyticsStoreTestData;
 
-namespace KeyLoad.UnitTests.Features.AnalyticsStore;
+namespace KeyLoad.UnitTests.AnalyticsStore;
 
 internal sealed class AnalyticsEntityLinkLifetimeFixture(SafeProjectorOperationDatabase owner)
 {

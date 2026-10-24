@@ -1,6 +1,6 @@
-using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.ClientApi;
 
-namespace KeyLoad.IntegrationTests.Features.EventStreams;
+namespace KeyLoad.IntegrationTests.EventStreams;
 
 internal sealed class EventByteBoundPublicState(McpEventStreamScenario scenario,
     McpPersistedIdentity reader, CommandRequest command, CommitReceipt receipt, StreamPage original, OutboxStatus outbox)

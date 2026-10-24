@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.Messaging;
+namespace KeyLoad.IntegrationTests.Messaging;
 
 internal sealed record QueueLeaseClusterOriginal(QueueLeaseClusterSeed Seed,
     ReceiveRequest Claim, ReceiveResult Claimed, Delivery Delivery,

@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.EventSource;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>Keeps this execution provider's closed category admission local to its owning factory.</summary>
 internal static class RequestFailureDiagnosticLoggerFactory

@@ -1,7 +1,7 @@
 using KeyLoad.Storage;
-using static KeyLoad.UnitTests.Features.StorageRecovery.CapturedReadScopeScenario;
+using static KeyLoad.UnitTests.StorageRecovery.CapturedReadScopeScenario;
 
-namespace KeyLoad.UnitTests.Features.StorageRecovery;
+namespace KeyLoad.UnitTests.StorageRecovery;
 
 internal sealed class LiveRangeCancellationCallbacks(CancellationTokenSource selected, bool staged,
     bool reverse, LiveRangeCancellationPhase phase)

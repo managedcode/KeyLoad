@@ -1,10 +1,10 @@
-using KeyLoad.Core.Features.CommandOutcomes.Contracts;
-using KeyLoad.Core.Features.CommandOutcomes.Identity;
-using KeyLoad.Core.Features.CommandOutcomes.Serialization;
+using KeyLoad.Core.CommandOutcomes.Contracts;
+using KeyLoad.Core.CommandOutcomes.Identity;
+using KeyLoad.Core.CommandOutcomes.Serialization;
 using KeyLoad.Storage;
 using ManagedCode.Communication.Commands;
 
-namespace KeyLoad.Core.Features.CommandOutcomes.Execution;
+namespace KeyLoad.Core.CommandOutcomes.Execution;
 
 internal static class CommandOutcomeKeyResolver
 {

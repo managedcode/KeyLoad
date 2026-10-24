@@ -1,6 +1,6 @@
 using ManagedCode.Communication;
 
-namespace KeyLoad.UnitTests.Features.DocumentStorage;
+namespace KeyLoad.UnitTests.DocumentStorage;
 
 internal static class DocumentCommandPrincipalColdReplayContract
 {

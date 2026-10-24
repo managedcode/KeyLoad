@@ -3,7 +3,7 @@ using System.Text.Json;
 using KeyLoad.Comparisons;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
+namespace KeyLoad.LoadTests.AppHost.BenchmarkComparisons;
 
 /// <summary>Retains original lifetime-wide execution container observations without inventing per-case attribution.</summary>
 internal static class BenchmarkSessionResourceEvidenceWriter

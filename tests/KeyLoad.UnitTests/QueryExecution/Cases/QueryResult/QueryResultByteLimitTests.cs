@@ -2,7 +2,7 @@ using KeyLoad.Query;
 using Microsoft.Extensions.Options;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal sealed class QueryResultByteLimitTests
 {

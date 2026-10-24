@@ -3,7 +3,7 @@ using KeyLoad.Server;
 using ModelContextProtocol;
 using ModelContextProtocol.Protocol;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>AC-MCPGW-007: execution resource and prompt replies have one exact bounded static guide.</summary>
 internal sealed class McpAgentGuideContractTests

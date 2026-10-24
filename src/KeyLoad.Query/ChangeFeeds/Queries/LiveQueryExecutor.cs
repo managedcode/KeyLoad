@@ -1,10 +1,10 @@
 using System.Text.Json;
 using KeyLoad.Core;
-using KeyLoad.Core.Features.ResourceExecution;
-using KeyLoad.Query.Features.QueryExecution;
+using KeyLoad.Core.ResourceExecution;
+using KeyLoad.Query.QueryExecution;
 using KeyLoad.Storage;
 
-namespace KeyLoad.Query.Features.ChangeFeeds;
+namespace KeyLoad.Query.ChangeFeeds;
 
 /// <summary>Owns live-query snapshot and delta mapping over the caller's existing database cut.</summary>
 internal sealed class LiveQueryExecutor(DatabaseEngine database, QueryEngine queryEngine)

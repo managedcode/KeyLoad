@@ -1,11 +1,11 @@
 using System.Collections.Immutable;
 using System.Text.Json;
-using KeyLoad.Core.Features.CommandOutcomes.Contracts;
-using KeyLoad.UnitTests.Features.ResourceExecution;
+using KeyLoad.Core.CommandOutcomes.Contracts;
+using KeyLoad.UnitTests.ResourceExecution;
 using ManagedCode.Communication;
-using static KeyLoad.UnitTests.Features.EventStreams.EventQueueStateEnvelopeProtocol;
+using static KeyLoad.UnitTests.EventStreams.EventQueueStateEnvelopeProtocol;
 
-namespace KeyLoad.UnitTests.Features.EventStreams;
+namespace KeyLoad.UnitTests.EventStreams;
 
 internal static class EventQueueStateEnvelopeCommands
 {

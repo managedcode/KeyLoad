@@ -1,12 +1,12 @@
 using System.Security.Cryptography;
 using System.Text.Json;
-using KeyLoad.Core.Features.BackupRestore.Serialization;
-using KeyLoad.RecoveryTests.Features.StorageRecovery;
+using KeyLoad.Core.BackupRestore.Serialization;
+using KeyLoad.RecoveryTests.StorageRecovery;
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
 using ManagedCode.Communication.Commands;
 
-namespace KeyLoad.UnitTests.Features.BackupRestore;
+namespace KeyLoad.UnitTests.BackupRestore;
 
 internal sealed class AtomicPartitionRosterRestoreFixture
 {

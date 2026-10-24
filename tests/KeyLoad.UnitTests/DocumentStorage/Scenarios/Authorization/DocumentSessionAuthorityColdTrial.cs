@@ -1,7 +1,7 @@
-using KeyLoad.UnitTests.Features.Messaging;
-using A = KeyLoad.UnitTests.Features.DocumentStorage.DocumentSessionAuthorityColdAssertions;
+using KeyLoad.UnitTests.Messaging;
+using A = KeyLoad.UnitTests.DocumentStorage.DocumentSessionAuthorityColdAssertions;
 
-namespace KeyLoad.UnitTests.Features.DocumentStorage;
+namespace KeyLoad.UnitTests.DocumentStorage;
 
 internal static class DocumentSessionAuthorityColdTrial
 {

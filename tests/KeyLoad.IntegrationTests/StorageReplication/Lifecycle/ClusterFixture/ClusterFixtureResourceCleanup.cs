@@ -1,5 +1,5 @@
 using KeyLoad.Server;
-namespace KeyLoad.IntegrationTests.Features.StorageReplication;
+namespace KeyLoad.IntegrationTests.StorageReplication;
 
 /// <summary>Preserves original diagnostic failures and deletes files only after joined owner cleanup.</summary>
 internal static class ClusterFixtureResourceCleanup

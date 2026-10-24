@@ -5,7 +5,7 @@ using KeyLoad.Client;
 using ManagedCode.Communication;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries;
+namespace KeyLoad.Comparisons.BenchmarkComparisons.TimeSeries;
 
 internal sealed class KeyLoadTimeSeriesTarget(HttpClient http, string apiKey, IOptions<KeyLoadClientExecutionOptions> clientOptions, IOptions<ComparisonExecutionOptions> executionOptions, string? image = null)
     : ITimeSeriesPersistentTarget

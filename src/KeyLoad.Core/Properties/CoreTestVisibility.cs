@@ -1,12 +1,12 @@
 using System.Runtime.CompilerServices;
 
-[assembly: InternalsVisibleTo(KeyLoad.Core.Features.InternalSerialization.CoreTestVisibility.UnitTestsAssembly)]
-[assembly: InternalsVisibleTo(KeyLoad.Core.Features.InternalSerialization.CoreTestVisibility.IntegrationTestsAssembly)]
-[assembly: InternalsVisibleTo(KeyLoad.Core.Features.InternalSerialization.CoreTestVisibility.BenchmarkScenariosAssembly)]
-[assembly: InternalsVisibleTo(KeyLoad.Core.Features.InternalSerialization.CoreTestVisibility.QueryAssembly)]
-[assembly: InternalsVisibleTo(KeyLoad.Core.Features.InternalSerialization.CoreTestVisibility.RecoveryTestsAssembly)]
+[assembly: InternalsVisibleTo(KeyLoad.Core.InternalSerialization.CoreTestVisibility.UnitTestsAssembly)]
+[assembly: InternalsVisibleTo(KeyLoad.Core.InternalSerialization.CoreTestVisibility.IntegrationTestsAssembly)]
+[assembly: InternalsVisibleTo(KeyLoad.Core.InternalSerialization.CoreTestVisibility.BenchmarkScenariosAssembly)]
+[assembly: InternalsVisibleTo(KeyLoad.Core.InternalSerialization.CoreTestVisibility.QueryAssembly)]
+[assembly: InternalsVisibleTo(KeyLoad.Core.InternalSerialization.CoreTestVisibility.RecoveryTestsAssembly)]
 
-namespace KeyLoad.Core.Features.InternalSerialization;
+namespace KeyLoad.Core.InternalSerialization;
 
 internal static class CoreTestVisibility
 {

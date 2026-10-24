@@ -4,7 +4,7 @@ using System.Text.Json.Nodes;
 using KeyLoad.Core;
 using KeyLoad.Storage;
 
-namespace KeyLoad.Query.Features.QueryExecution;
+namespace KeyLoad.Query.QueryExecution;
 
 /// <summary>Combines only separately authorized execution projections from the same committed view.</summary>
 internal static class QueueEntityRefJoinProjection

@@ -1,11 +1,11 @@
 using System.Buffers.Binary;
 using System.Globalization;
 using System.Security.Cryptography;
-using KeyLoad.Core.Features.Authorization;
+using KeyLoad.Core.Authorization;
 using KeyLoad.Storage.ZoneTree;
 using ManagedCode.Communication;
 
-namespace KeyLoad.UnitTests.Features.GraphTraversal;
+namespace KeyLoad.UnitTests.GraphTraversal;
 
 internal static class GraphStorageReferenceFixture
 {

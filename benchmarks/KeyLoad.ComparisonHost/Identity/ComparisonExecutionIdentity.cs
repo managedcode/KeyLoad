@@ -2,7 +2,7 @@ using System.Globalization;
 using KeyLoad.Comparisons;
 using Microsoft.Extensions.Configuration;
 
-namespace KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonHost.BenchmarkComparisons;
 
 /// <summary>Retains original GitHub provenance when execution belongs to a workflow; local runs have none.</summary>
 /// <param name="Provenance">The actual workflow run and evidence profile, or no publication provenance for local execution.</param>

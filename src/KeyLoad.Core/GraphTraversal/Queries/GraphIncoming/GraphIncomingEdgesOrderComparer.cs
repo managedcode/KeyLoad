@@ -1,6 +1,6 @@
 using System.Runtime.ExceptionServices;
 
-namespace KeyLoad.Core.Features.GraphTraversal;
+namespace KeyLoad.Core.GraphTraversal;
 
 internal sealed class GraphIncomingEdgesOrderComparer(ReadExecutionBudget budget)
     : IComparer<GraphIncomingEdgeRow>

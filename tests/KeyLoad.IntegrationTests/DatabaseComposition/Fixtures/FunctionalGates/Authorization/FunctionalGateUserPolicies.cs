@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 
-namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
+namespace KeyLoad.IntegrationTests.DatabaseComposition;
 
 /// <summary>Defines the same resource grants for the eight persisted functional-gate identities.</summary>
 internal static class FunctionalGateUserPolicies

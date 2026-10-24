@@ -1,4 +1,4 @@
-namespace KeyLoad.Query.Features.QueryExecution;
+namespace KeyLoad.Query.QueryExecution;
 
 /// <summary>Stable tokens, bounds and diagnostics for the closed Q1.GraphPath grammar.</summary>
 internal static class SqlGraphPathSyntax

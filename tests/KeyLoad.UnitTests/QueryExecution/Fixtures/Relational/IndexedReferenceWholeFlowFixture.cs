@@ -2,7 +2,7 @@ using System.Text.Json;
 using KeyLoad.Query;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal static class IndexedReferenceWholeFlowFixture
 {

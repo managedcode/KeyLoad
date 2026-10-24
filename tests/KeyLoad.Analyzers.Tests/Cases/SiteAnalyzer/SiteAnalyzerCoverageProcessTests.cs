@@ -1,4 +1,4 @@
-namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
+namespace KeyLoad.Analyzers.Tests.CodeQuality;
 
 /// <summary>AC-CQ-009 and AC-BC-027: exercise the analyzer coverage gate through its real PowerShell process.</summary>
 [NotInParallel(SiteAnalyzerCoverageTokens.ProcessIsolationKey)]

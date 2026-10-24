@@ -1,7 +1,7 @@
 using System.Globalization;
 using System.Reflection;
 
-namespace KeyLoad.UnitTests.Features.CodeQuality;
+namespace KeyLoad.UnitTests.CodeQuality;
 
 /// <summary>Resolves the original centrally restored execution tool from this actual test assembly.</summary>
 internal sealed record CoverageToolPackage(string Version, string PackageRoot)

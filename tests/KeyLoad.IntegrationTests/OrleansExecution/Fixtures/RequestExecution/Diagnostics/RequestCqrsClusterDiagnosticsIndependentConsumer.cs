@@ -3,7 +3,7 @@ using KeyLoad.Clustering;
 using KeyLoad.Server;
 using Microsoft.Extensions.Logging;
 
-namespace KeyLoad.IntegrationTests.Features.OrleansExecution.Helpers;
+namespace KeyLoad.IntegrationTests.OrleansExecution.Helpers;
 
 /// <summary>Owns one real execution Aspire resource stream independent of the three Orleans captures.</summary>
 internal sealed class RequestCqrsClusterDiagnosticsIndependentConsumer : IAsyncDisposable

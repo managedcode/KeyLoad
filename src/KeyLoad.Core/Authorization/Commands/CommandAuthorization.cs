@@ -1,4 +1,4 @@
-using KeyLoad.Core.Features.RuntimeJournaling.Identity;
+using KeyLoad.Core.RuntimeJournaling.Identity;
 using KeyLoad.Storage;
 using ManagedCode.Communication.Commands;
 
@@ -35,7 +35,7 @@ public static class CommandAuthorization
                 engine.AuthorizeBm25CorpusPublication(view, principal, operation);
                 return null;
             case OperationKind.FileMetadata:
-                engine.AuthorizeFileMetadata(view, principal, OperationProtocol.Payload<global::KeyLoad.Core.Features.BlobStorage.FileMetadataMutation>(operation));
+                engine.AuthorizeFileMetadata(view, principal, OperationProtocol.Payload<global::KeyLoad.Core.BlobStorage.FileMetadataMutation>(operation));
                 return null;
             case OperationKind.Batch:
                 return engine.AuthorizeBatch(view, principal, OperationProtocol.Payload<CommandRequest>(operation));

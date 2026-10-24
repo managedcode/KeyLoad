@@ -1,4 +1,4 @@
-namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
+namespace KeyLoad.Analyzers.Tests.CodeQuality;
 
 /// <summary>AC-CQ-037: actual Value flow proves a single frozen snapshot, not a subtree occurrence.</summary>
 internal sealed class OptionsSnapshotCaptureTests

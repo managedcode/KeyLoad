@@ -1,9 +1,9 @@
-using KeyLoad.Core.Features.TimeSeries;
+using KeyLoad.Core.TimeSeries;
 using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.BackupRestore;
+namespace KeyLoad.UnitTests.BackupRestore;
 
 internal static class SeriesPortableBackupAssertions
 {

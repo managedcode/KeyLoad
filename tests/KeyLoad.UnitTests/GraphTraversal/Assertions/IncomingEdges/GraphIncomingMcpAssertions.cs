@@ -1,6 +1,6 @@
 using System.Reflection;
 
-namespace KeyLoad.UnitTests.Features.GraphTraversal;
+namespace KeyLoad.UnitTests.GraphTraversal;
 
 internal static class GraphIncomingMcpAssertions
 {

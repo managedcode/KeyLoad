@@ -1,9 +1,9 @@
 using System.Text.Json;
 using KeyLoad.Core;
-using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.Core.ResourceExecution;
 using ManagedCode.Communication.Commands;
 
-namespace KeyLoad.RecoveryTests.Features.DocumentStorage;
+namespace KeyLoad.RecoveryTests.DocumentStorage;
 
 internal static class CommandIdempotencyCrashData
 {

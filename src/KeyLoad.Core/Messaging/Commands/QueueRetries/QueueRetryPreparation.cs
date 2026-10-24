@@ -1,8 +1,8 @@
 using System.Collections.Immutable;
 using System.Security.Cryptography;
-using KeyLoad.Core.Features.CommandOutcomes.Execution;
-using KeyLoad.Core.Features.CommandOutcomes.Identity;
-using KeyLoad.Core.Features.Messaging;
+using KeyLoad.Core.CommandOutcomes.Execution;
+using KeyLoad.Core.CommandOutcomes.Identity;
+using KeyLoad.Core.Messaging;
 using KeyLoad.Storage;
 using ManagedCode.Communication.Commands;
 

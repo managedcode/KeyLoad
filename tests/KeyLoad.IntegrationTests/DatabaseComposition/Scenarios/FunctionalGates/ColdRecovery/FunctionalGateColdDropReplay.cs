@@ -1,8 +1,8 @@
-using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.RelationalStorage;
-using KeyLoad.IntegrationTests.Features.StorageReplication;
+using KeyLoad.IntegrationTests.ClientApi;
+using KeyLoad.IntegrationTests.RelationalStorage;
+using KeyLoad.IntegrationTests.StorageReplication;
 
-namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
+namespace KeyLoad.IntegrationTests.DatabaseComposition;
 
 internal static class FunctionalGateColdDropReplay
 {
@@ -19,7 +19,7 @@ internal static class FunctionalGateColdDropReplay
                 var actual = await FunctionalGateDropCalls.InvokeAsync(context, table.ParentId,
                     table.Request, route, token);
                 await FunctionalGateDropAssertions.ResultAsync(context, table.ParentId, table.Request, actual);
-                await KeyLoad.IntegrationTests.Features.QueryExecution.SqlClusterProtocol.EqualAsync(
+                await KeyLoad.IntegrationTests.QueryExecution.SqlClusterProtocol.EqualAsync(
                     table.OriginalDrop, actual);
                 await FunctionalGateColdDropAssertions.AllAsync(context, state, token);
             }

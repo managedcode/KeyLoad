@@ -1,9 +1,9 @@
 using KeyLoad.Client;
 using KeyLoad.Server;
-using KeyLoad.UnitTests.Features.Messaging;
-using KeyLoad.UnitTests.Features.OrleansExecution;
+using KeyLoad.UnitTests.Messaging;
+using KeyLoad.UnitTests.OrleansExecution;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 internal static class CommittedResponseFlow
 {

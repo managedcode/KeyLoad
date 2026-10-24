@@ -1,10 +1,10 @@
 using System.Text.Json;
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
-using KeyLoad.UnitTests.Features.Messaging;
+using KeyLoad.UnitTests.Messaging;
 using ManagedCode.Communication;
 
-namespace KeyLoad.UnitTests.Features.EventStreams;
+namespace KeyLoad.UnitTests.EventStreams;
 
 internal sealed class TopicRetentionFixture : IDisposable
 {
@@ -121,7 +121,7 @@ internal sealed class TopicRetentionFixture : IDisposable
     }
     internal void SetLimits(DatabaseLimits limits)
     {
-        Database = new(Store, new KeyLoad.Core.Features.Authorization.AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(limits),
+        Database = new(Store, new KeyLoad.Core.Authorization.AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(limits),
             UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(),
             UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
     }

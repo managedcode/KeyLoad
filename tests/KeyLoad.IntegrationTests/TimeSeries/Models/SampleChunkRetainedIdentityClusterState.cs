@@ -1,3 +1,3 @@
-namespace KeyLoad.IntegrationTests.Features.TimeSeries;
+namespace KeyLoad.IntegrationTests.TimeSeries;
 
 internal sealed record SampleChunkRetainedIdentityClusterState(CommandRequest Request, OutboxStatus Outbox);

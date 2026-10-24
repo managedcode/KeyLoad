@@ -1,7 +1,7 @@
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
 
-namespace KeyLoad.UnitTests.Features.StorageRecovery;
+namespace KeyLoad.UnitTests.StorageRecovery;
 
 /// <summary>Tracks actual test-owned stores; only a successful original close permits root cleanup.</summary>
 internal sealed class StoreOwnerEntryLifetime

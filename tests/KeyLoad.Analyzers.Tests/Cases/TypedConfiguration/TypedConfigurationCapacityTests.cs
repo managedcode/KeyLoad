@@ -1,4 +1,4 @@
-namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
+namespace KeyLoad.Analyzers.Tests.CodeQuality;
 
 /// <summary>AC-CQ-034/037: execution admission, channel and transport bounds use configured policy.</summary>
 internal sealed class TypedConfigurationCapacityTests

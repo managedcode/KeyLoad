@@ -1,6 +1,6 @@
 using System.Globalization;
 
-namespace KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
+namespace KeyLoad.LoadTests.AppHost.BenchmarkComparisons;
 
 internal static class IsolatedRabbitBootstrap
 {

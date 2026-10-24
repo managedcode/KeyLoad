@@ -1,4 +1,4 @@
-namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
+namespace KeyLoad.Analyzers.Tests.CodeQuality;
 
 /// <summary>AC-CQ-037: serialized record metadata preserves its shape without granting execution ownership.</summary>
 internal sealed class SerializedOptionsMetadataTests

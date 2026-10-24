@@ -2,7 +2,7 @@ using System.Diagnostics;
 using Microsoft.Extensions.Options;
 using OpenTelemetry;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal sealed class OrleansActivityCaptureExporter : BaseExporter<Activity>
 {

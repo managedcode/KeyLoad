@@ -1,7 +1,7 @@
 using KeyLoad.Query;
 using KeyLoad.Storage;
 
-namespace KeyLoad.UnitTests.Features.ResourceExecution;
+namespace KeyLoad.UnitTests.ResourceExecution;
 
 internal static class AtomicTriadStagedIndexes
 {

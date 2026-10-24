@@ -1,7 +1,7 @@
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 
-namespace KeyLoad.UnitTests.Features.EventStreams;
+namespace KeyLoad.UnitTests.EventStreams;
 
 internal sealed class RetainedAppendIdentityFault(RetainedAppendIdentityFixture fixture, string kind)
 {

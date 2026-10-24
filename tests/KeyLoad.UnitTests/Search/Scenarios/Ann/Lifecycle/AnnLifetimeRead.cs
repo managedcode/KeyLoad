@@ -1,8 +1,8 @@
-using KeyLoad.Core.Features.ResourceExecution;
-using KeyLoad.Core.Features.Search;
-using KeyLoad.Core.Features.StoragePartitions.Queries;
+using KeyLoad.Core.ResourceExecution;
+using KeyLoad.Core.Search;
+using KeyLoad.Core.StoragePartitions.Queries;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 internal static class AnnLifetimeRead
 {

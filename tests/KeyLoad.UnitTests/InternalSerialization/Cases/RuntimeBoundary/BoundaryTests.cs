@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
 using KeyLoad.Storage;
 
-namespace KeyLoad.UnitTests.Features.InternalSerialization;
+namespace KeyLoad.UnitTests.InternalSerialization;
 
 internal sealed class BoundaryTests
 {

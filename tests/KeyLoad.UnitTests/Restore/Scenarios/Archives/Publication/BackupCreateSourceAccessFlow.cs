@@ -1,7 +1,7 @@
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
 
-namespace KeyLoad.UnitTests.Features.BackupRestore;
+namespace KeyLoad.UnitTests.BackupRestore;
 
 internal static class BackupCreateSourceAccessFlow
 {
@@ -22,7 +22,7 @@ internal static class BackupCreateSourceAccessFlow
     }
 
     private static async Task CompleteAsync(
-        global::Microsoft.Extensions.Options.IOptions<global::KeyLoad.AppHost.Features.TestInfrastructure.TestExecutionOptions> options,
+        global::Microsoft.Extensions.Options.IOptions<global::KeyLoad.AppHost.TestInfrastructure.TestExecutionOptions> options,
         BackupCutFixture fixture, CancellationToken token)
     {
         var original = BackupJournalRepairAssertions.Read(fixture.Source, token);

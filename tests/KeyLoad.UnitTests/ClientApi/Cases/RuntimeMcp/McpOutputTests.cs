@@ -4,7 +4,7 @@ using KeyLoad.Server;
 using ModelContextProtocol;
 using ModelContextProtocol.Protocol;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>AC-MCP-003/005/007: actual polymorphic SDK messages are bounded before SSE serialization.</summary>
 internal sealed class McpOutputTests

@@ -1,14 +1,14 @@
 using System.Collections.Immutable;
 using Aspire.Hosting.ApplicationModel;
 using KeyLoad.Client;
-using KeyLoad.Core.Features.DocumentStorage;
-using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.Core.DocumentStorage;
+using KeyLoad.IntegrationTests.ClientApi;
 using KeyLoad.Server;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace KeyLoad.IntegrationTests.Features.BackupRestore.Helpers;
+namespace KeyLoad.IntegrationTests.BackupRestore.Helpers;
 
 /// <summary>Finds and restores an administrator backup through current execution storage ownership.</summary>
 internal static class AdminBackupArchiveVerifier

@@ -1,4 +1,4 @@
-namespace KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
+namespace KeyLoad.LoadTests.AppHost.BenchmarkComparisons;
 
 internal sealed class ScaleServerResourceSampler(string resourceName, string[] expectedMountTargets)
 {

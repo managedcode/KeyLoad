@@ -2,10 +2,10 @@ using System.Collections.Immutable;
 using System.Globalization;
 using System.Text.Json;
 using KeyLoad.Client;
-using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.QueryExecution;
+using KeyLoad.IntegrationTests.ClientApi;
+using KeyLoad.IntegrationTests.QueryExecution;
 
-namespace KeyLoad.IntegrationTests.Features.RelationalStorage;
+namespace KeyLoad.IntegrationTests.RelationalStorage;
 
 /// <summary>Builds current typed rows through the actual SDK for the bounded Orleans join cases.</summary>
 internal static class RelationalSqlClusterJoinBudgetData

@@ -1,11 +1,11 @@
 using System.Text.Json;
-using KeyLoad.Core.Features.Authorization;
+using KeyLoad.Core.Authorization;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
 
-namespace KeyLoad.UnitTests.Features.Authorization;
+namespace KeyLoad.UnitTests.Authorization;
 
 internal sealed class ResourcePolicyUpdateFixture : IDisposable
 {
@@ -57,7 +57,7 @@ internal sealed class ResourcePolicyUpdateFixture : IDisposable
     internal byte[]? ResourceBytes() => Store.Read(view => view.ReadOwnedValue(ResourceKey()));
 
     internal byte[]? DocumentBytes() => Store.Read(view => view.ReadOwnedValue(
-        KeyLoad.Core.Features.DocumentStorage.DocumentStorageKeys.RecordKey(Partition, Collection, DocumentId)));
+        KeyLoad.Core.DocumentStorage.DocumentStorageKeys.RecordKey(Partition, Collection, DocumentId)));
 
     internal byte[]? OutcomeBytes(Guid operationId) => Store.Read(view => view.ReadOwnedValue(
         KeySpace.GlobalOutcome(RootId, operationId)));

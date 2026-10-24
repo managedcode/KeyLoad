@@ -1,7 +1,7 @@
 using ManagedCode.Communication.Commands;
-using static KeyLoad.UnitTests.Features.DocumentStorage.DocumentPatchAtomicityContract;
+using static KeyLoad.UnitTests.DocumentStorage.DocumentPatchAtomicityContract;
 
-namespace KeyLoad.UnitTests.Features.DocumentStorage;
+namespace KeyLoad.UnitTests.DocumentStorage;
 
 internal static class DocumentPatchAtomicityTrial
 {

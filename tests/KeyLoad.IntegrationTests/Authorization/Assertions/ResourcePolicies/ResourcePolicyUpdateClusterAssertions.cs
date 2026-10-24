@@ -1,7 +1,7 @@
 using KeyLoad.Client;
-using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.ClientApi;
 
-namespace KeyLoad.IntegrationTests.Features.Authorization;
+namespace KeyLoad.IntegrationTests.Authorization;
 
 /// <summary>Checks policy outcomes through independent public SDK and official MCP callers.</summary>
 internal static class ResourcePolicyUpdateClusterAssertions

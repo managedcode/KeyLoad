@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 
-namespace KeyLoad.Core.Features.Messaging;
+namespace KeyLoad.Core.Messaging;
 
 [global::Orleans.GenerateSerializer, global::Orleans.Alias(QueueRetryProtocol.EnvelopeAlias)]
 internal sealed record QueueRetryDecisions(

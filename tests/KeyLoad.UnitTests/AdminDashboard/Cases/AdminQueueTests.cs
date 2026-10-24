@@ -1,6 +1,6 @@
 using System.Text.Json;
 
-namespace KeyLoad.UnitTests.Features.AdminDashboard;
+namespace KeyLoad.UnitTests.AdminDashboard;
 
 internal sealed class AdminQueueTests
 {

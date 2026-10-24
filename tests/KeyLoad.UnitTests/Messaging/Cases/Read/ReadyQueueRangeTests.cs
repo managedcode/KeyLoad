@@ -1,7 +1,7 @@
 using System.Globalization;
 using KeyLoad.Storage;
 
-namespace KeyLoad.UnitTests.Features.Messaging;
+namespace KeyLoad.UnitTests.Messaging;
 
 internal sealed class ReadyQueueRangeTests
 {

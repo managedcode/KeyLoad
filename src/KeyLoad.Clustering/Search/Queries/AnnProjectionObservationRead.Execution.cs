@@ -1,6 +1,6 @@
 using KeyLoad.Core;
-using KeyLoad.Core.Features.ResourceExecution;
-using KeyLoad.Core.Features.Search;
+using KeyLoad.Core.ResourceExecution;
+using KeyLoad.Core.Search;
 using KeyLoad.Query;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;

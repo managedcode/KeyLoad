@@ -1,7 +1,7 @@
 using KeyLoad.Core;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.Query.Features.QueryExecution;
+namespace KeyLoad.Query.QueryExecution;
 
 /// <summary>Compiles only the frozen Q1.GraphPath expression into the canonical Core request.</summary>
 internal static class SqlGraphPathParser

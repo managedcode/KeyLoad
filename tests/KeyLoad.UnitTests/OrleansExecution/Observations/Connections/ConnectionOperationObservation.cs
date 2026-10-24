@@ -2,7 +2,7 @@ using System.Collections.Concurrent;
 using KeyLoad.Clustering;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal sealed class ConnectionOperationObservation : IGrainRequestPhaseObserver, RuntimeIGrainRequestPhaseObserver,
     IIncomingGrainCallFilter

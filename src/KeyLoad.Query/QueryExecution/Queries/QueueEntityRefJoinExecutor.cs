@@ -1,11 +1,11 @@
 using System.Collections.Immutable;
 using System.Text.Json;
 using KeyLoad.Core;
-using KeyLoad.Core.Features.DocumentStorage;
-using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.Core.DocumentStorage;
+using KeyLoad.Core.ResourceExecution;
 using KeyLoad.Storage;
 
-namespace KeyLoad.Query.Features.QueryExecution;
+namespace KeyLoad.Query.QueryExecution;
 
 /// <summary>Reads queue reference candidates and execution typed documents through one authorized bounded view.</summary>
 internal static class QueueEntityRefJoinExecutor

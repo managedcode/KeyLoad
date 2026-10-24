@@ -1,7 +1,7 @@
-using KeyLoad.AppHost.Features.TestInfrastructure;
-using KeyLoad.Diagnostics.Features.ResourceExecution;
+using KeyLoad.AppHost.TestInfrastructure;
+using KeyLoad.Diagnostics.ResourceExecution;
 
-namespace KeyLoad.IntegrationTests.Features.StorageReplication;
+namespace KeyLoad.IntegrationTests.StorageReplication;
 
 /// <summary>Retains actual process, binary and compilation evidence around the original abrupt fault.</summary>
 /// <param name="Scenario">The qualification scenario.</param>

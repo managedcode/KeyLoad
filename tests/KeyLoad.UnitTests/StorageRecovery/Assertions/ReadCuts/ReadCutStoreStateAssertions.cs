@@ -1,7 +1,7 @@
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 
-namespace KeyLoad.UnitTests.Features.StorageRecovery.Assertions;
+namespace KeyLoad.UnitTests.StorageRecovery.Assertions;
 
 internal static class ReadCutStoreStateAssertions
 {

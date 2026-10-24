@@ -1,11 +1,11 @@
-using KeyLoad.Core.Features.Search;
+using KeyLoad.Core.Search;
 using KeyLoad.Server;
 using KeyLoad.Storage;
-using KeyLoad.UnitTests.Features.Messaging;
-using KeyLoad.UnitTests.Features.ResourceExecution;
-using static KeyLoad.UnitTests.Features.Search.VectorReferenceLifetimeProtocol;
+using KeyLoad.UnitTests.Messaging;
+using KeyLoad.UnitTests.ResourceExecution;
+using static KeyLoad.UnitTests.Search.VectorReferenceLifetimeProtocol;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 /// <summary>Retires and recreates the actual source table before refusing an original typed reference without effects.</summary>
 internal static class VectorReferenceLifetimeFlow

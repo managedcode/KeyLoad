@@ -1,8 +1,8 @@
 using KeyLoad.Storage.ZoneTree;
 using ManagedCode.Communication;
-using P = KeyLoad.UnitTests.Features.Authorization.RowRevisionInferenceProtocol;
+using P = KeyLoad.UnitTests.Authorization.RowRevisionInferenceProtocol;
 
-namespace KeyLoad.UnitTests.Features.Authorization;
+namespace KeyLoad.UnitTests.Authorization;
 
 internal static class RowRevisionBatchInferenceAssertions
 {

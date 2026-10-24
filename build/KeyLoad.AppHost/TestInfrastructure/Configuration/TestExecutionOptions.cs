@@ -1,5 +1,5 @@
 
-namespace KeyLoad.AppHost.Features.TestInfrastructure;
+namespace KeyLoad.AppHost.TestInfrastructure;
 
 /// <summary>Central startup policy for Aspire-owned test execution and child process cleanup.</summary>
 [ConfigurationOptions]

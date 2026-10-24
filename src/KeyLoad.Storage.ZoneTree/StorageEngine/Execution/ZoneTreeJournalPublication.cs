@@ -1,7 +1,7 @@
 using System.Buffers.Binary;
 using System.Security.Cryptography;
-using KeyLoad.Diagnostics.Features.ResourceExecution;
-using KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
+using KeyLoad.Diagnostics.ResourceExecution;
+using KeyLoad.Storage.ZoneTree.ResourceExecution;
 using static KeyLoad.Storage.ZoneTree.ZoneTreePersistenceFormat;
 
 namespace KeyLoad.Storage.ZoneTree;

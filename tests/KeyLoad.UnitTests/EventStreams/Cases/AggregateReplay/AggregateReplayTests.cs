@@ -1,7 +1,7 @@
 using System.Text.Json;
 using KeyLoad.Storage;
 
-namespace KeyLoad.UnitTests.Features.EventStreams;
+namespace KeyLoad.UnitTests.EventStreams;
 
 internal sealed class AggregateReplayTests
 {

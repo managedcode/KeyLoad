@@ -24,7 +24,7 @@ internal sealed class ScriptDomTableLoweringContext
         checkBudget();
         if (++nodes > maximumNodes)
         {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, global::KeyLoad.Features.QueryExecution.ScriptDomErrors.NodesDetail);
+            throw Errors.Fail(ErrorCode.BudgetExceeded, global::KeyLoad.QueryExecution.ScriptDomErrors.NodesDetail);
         }
     }
 }

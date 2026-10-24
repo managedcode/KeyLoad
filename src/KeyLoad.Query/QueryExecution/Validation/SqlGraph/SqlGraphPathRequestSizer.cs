@@ -1,8 +1,8 @@
 using System.Text.Json;
 using KeyLoad.Core;
-using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.Core.ResourceExecution;
 
-namespace KeyLoad.Query.Features.QueryExecution;
+namespace KeyLoad.Query.QueryExecution;
 
 /// <summary>Measures the whole typed path envelope under MaxQueryBytes without retaining serialized bytes.</summary>
 internal static class SqlGraphPathRequestSizer

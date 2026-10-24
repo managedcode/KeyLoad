@@ -1,8 +1,8 @@
 using System.Text.Json;
 using KeyLoad.Server;
-using KeyLoad.UnitTests.Features.ClientApi;
+using KeyLoad.UnitTests.ClientApi;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 /// <summary>AC-AISQL-005/006: SQL lowers to the actual canonical operation decoder without execution.</summary>
 internal sealed class SqlOperationCompilerTests
@@ -24,8 +24,8 @@ internal sealed class SqlOperationCompilerTests
                 AllowFullScan: true, Cursor: SqlOperationTestData.Cursor);
             var query = new QueryRequest(request.Partition, sql, parameters, true, request.Cursor);
             var budget = new global::KeyLoad.Core.ReadExecutionBudget(limits);
-            var plan = global::KeyLoad.Query.Features.QueryExecution.ScriptDomQueryAdapter.Lower(
-                global::KeyLoad.Features.QueryExecution.ScriptDomSyntax.Parse(sql, limits, budget.Check, CancellationToken.None),
+            var plan = global::KeyLoad.Query.QueryExecution.ScriptDomQueryAdapter.Lower(
+                global::KeyLoad.QueryExecution.ScriptDomSyntax.Parse(sql, limits, budget.Check, CancellationToken.None),
                 query, limits, execution, budget, null, CancellationToken.None);
             var expected = SqlOperationTestData.Find(McpCatalogExpectations.QueryAst).Decode(
                 new Dictionary<string, JsonElement>(StringComparer.Ordinal)

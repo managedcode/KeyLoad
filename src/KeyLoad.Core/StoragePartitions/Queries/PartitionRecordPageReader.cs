@@ -1,9 +1,9 @@
 using System.Collections.Immutable;
-using KeyLoad.Core.Features.StoragePartitions.Contracts;
-using KeyLoad.Core.Features.StoragePartitions.Validation;
+using KeyLoad.Core.StoragePartitions.Contracts;
+using KeyLoad.Core.StoragePartitions.Validation;
 using KeyLoad.Storage;
 
-namespace KeyLoad.Core.Features.StoragePartitions.Queries;
+namespace KeyLoad.Core.StoragePartitions.Queries;
 
 /// <summary>Reads exact bounded raw records from a caller-owned committed view.</summary>
 internal static class PartitionRecordPageReader

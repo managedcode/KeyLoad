@@ -1,8 +1,8 @@
-using KeyLoad.Core.Features.GraphTraversal.Models;
-using KeyLoad.Core.Features.GraphTraversal.Validation;
+using KeyLoad.Core.GraphTraversal.Models;
+using KeyLoad.Core.GraphTraversal.Validation;
 using KeyLoad.Storage;
 
-namespace KeyLoad.Core.Features.GraphTraversal.Serialization;
+namespace KeyLoad.Core.GraphTraversal.Serialization;
 
 internal static class GraphCrossPartitionCapacityWriter
 {

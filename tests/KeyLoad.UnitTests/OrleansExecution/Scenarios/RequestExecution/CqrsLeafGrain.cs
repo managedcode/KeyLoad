@@ -3,7 +3,7 @@ using ManagedCode.Orleans.Graph.Extensions;
 using ManagedCode.Orleans.Graph.Interfaces;
 using ManagedCode.Orleans.Graph.Models;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal sealed class CqrsLeafGrain : Grain, ICqrsLeafGrain
 {

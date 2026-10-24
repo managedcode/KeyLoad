@@ -1,8 +1,8 @@
 using System.Text.Json;
-using KeyLoad.UnitTests.Features.QueryExecution;
+using KeyLoad.UnitTests.QueryExecution;
 using ManagedCode.Communication.Commands;
 
-namespace KeyLoad.UnitTests.Features.DatabaseComposition;
+namespace KeyLoad.UnitTests.DatabaseComposition;
 
 internal static class QueueGraphIdentityFlow
 {
@@ -63,7 +63,7 @@ internal static class QueueGraphIdentityFlow
         db.Store.Commit((tx, _) => { tx.Put(state.EndpointKey, corrupted); return true; });
         await QueueGraphIdentityAssertions.RefusesAsync(state, db.Database, db.Store);
         await QueueGraphIdentityAssertions.RefusesAsync(state, db.Database, db.Store);
-        state.ColdImage = global::KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(db.Store);
+        state.ColdImage = global::KeyLoad.UnitTests.Messaging.QueueWholeFlowStorage.Bytes(db.Store);
         state.ColdPosition = db.Store.Position;
         db.Store.Dispose();
         await QueueGraphIdentityCold.RunAsync(state, dirty: true);
@@ -108,7 +108,7 @@ internal static class QueueGraphIdentityFlow
             CommandId = Guid.NewGuid()
         }, at.AddSeconds(2));
         var reference = from ? first : second;
-        var key = global::KeyLoad.Core.Features.DocumentStorage.DocumentStorageKeys.RecordKey(reference);
+        var key = global::KeyLoad.Core.DocumentStorage.DocumentStorageKeys.RecordKey(reference);
         var original = db.Store.Read(view => view.ReadOwnedValue(key))!;
         var source = new MessageInspection(new(QueueGraphIdentityState.Message, MessageState.Ready,
             0, 1, 1, null, null), payload, QueueGraphIdentityState.HeadersJson);
@@ -129,7 +129,7 @@ internal static class QueueGraphIdentityFlow
         var request = new SqlOperationRequest(command.Partition, "EXEC keyload_documents_commit @arguments",
             new Dictionary<string, JsonElement>(StringComparer.Ordinal)
             {
-                [global::KeyLoad.UnitTests.Features.QueryExecution.SqlOperationTestData.Parameter] = JsonSerializer.SerializeToElement(arguments, JsonDefaults.Options)
+                [global::KeyLoad.UnitTests.QueryExecution.SqlOperationTestData.Parameter] = JsonSerializer.SerializeToElement(arguments, JsonDefaults.Options)
             });
         var compiled = SqlOperationTestData.Compile(request);
         await Assert.That(compiled.CommandKind).IsEqualTo(OperationKind.Batch);

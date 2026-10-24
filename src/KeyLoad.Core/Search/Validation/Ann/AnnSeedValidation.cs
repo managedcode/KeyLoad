@@ -1,7 +1,7 @@
 using System.Text;
 using KeyLoad.Storage;
 
-namespace KeyLoad.Core.Features.Search;
+namespace KeyLoad.Core.Search;
 
 internal static class AnnSeedValidation
 {

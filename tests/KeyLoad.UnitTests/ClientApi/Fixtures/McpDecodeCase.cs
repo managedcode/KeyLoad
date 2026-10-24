@@ -1,6 +1,6 @@
 using System.Text.Json;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>Owned public JSON and its independent actual-type decoding operations.</summary>
 internal sealed record McpDecodeCase(string Name, JsonElement Request, Guid CommandId, string? IdMember,

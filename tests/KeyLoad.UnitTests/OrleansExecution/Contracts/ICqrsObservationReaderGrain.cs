@@ -1,6 +1,6 @@
 using ManagedCode.Orleans.Graph.Attributes;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 [AllowClientCall]
 [global::Orleans.CodeGeneration.Version(1)]

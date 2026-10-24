@@ -1,6 +1,6 @@
 using System.Net.Sockets;
 
-namespace KeyLoad.IntegrationTests.Features.QueryExecution;
+namespace KeyLoad.IntegrationTests.QueryExecution;
 
 internal static class PostgresClusterTransportClosed
 {

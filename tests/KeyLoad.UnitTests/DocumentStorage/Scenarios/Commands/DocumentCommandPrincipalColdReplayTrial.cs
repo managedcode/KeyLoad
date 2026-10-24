@@ -1,7 +1,7 @@
 using ManagedCode.Communication.Commands;
-using static KeyLoad.UnitTests.Features.DocumentStorage.DocumentCommandPrincipalColdReplayContract;
+using static KeyLoad.UnitTests.DocumentStorage.DocumentCommandPrincipalColdReplayContract;
 
-namespace KeyLoad.UnitTests.Features.DocumentStorage;
+namespace KeyLoad.UnitTests.DocumentStorage;
 
 internal static class DocumentCommandPrincipalColdReplayTrial
 {

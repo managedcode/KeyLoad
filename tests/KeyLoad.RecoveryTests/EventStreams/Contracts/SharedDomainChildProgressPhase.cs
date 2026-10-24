@@ -1,4 +1,4 @@
-namespace KeyLoad.RecoveryTests.Features.EventStreams;
+namespace KeyLoad.RecoveryTests.EventStreams;
 
 [Orleans.Alias(SharedDomainChildProgressProtocol.PhaseAlias)]
 internal enum SharedDomainChildProgressPhase

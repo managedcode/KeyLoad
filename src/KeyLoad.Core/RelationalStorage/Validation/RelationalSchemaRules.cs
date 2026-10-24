@@ -1,4 +1,4 @@
-namespace KeyLoad.Core.Features.RelationalStorage;
+namespace KeyLoad.Core.RelationalStorage;
 
 internal static class RelationalSchemaRules
 {

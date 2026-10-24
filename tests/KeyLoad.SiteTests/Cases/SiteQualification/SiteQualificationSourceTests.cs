@@ -1,4 +1,4 @@
-namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
+namespace KeyLoad.SiteTests.BenchmarkComparisons;
 
 /// <summary>AC-BC-028/8: provenance uses the actual website checkout.</summary>
 internal sealed class SiteQualificationSourceTests

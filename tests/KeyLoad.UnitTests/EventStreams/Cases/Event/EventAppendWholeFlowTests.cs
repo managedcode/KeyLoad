@@ -1,8 +1,8 @@
 using System.Globalization;
-using KeyLoad.UnitTests.Features.ResourceExecution;
+using KeyLoad.UnitTests.ResourceExecution;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.EventStreams;
+namespace KeyLoad.UnitTests.EventStreams;
 
 internal sealed class EventAppendWholeFlowTests
 {

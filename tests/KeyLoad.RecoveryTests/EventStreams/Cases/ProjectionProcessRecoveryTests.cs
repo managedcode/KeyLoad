@@ -1,8 +1,8 @@
 using System.Diagnostics;
 using System.Text.Json;
 using KeyLoad.Core;
-using KeyLoad.RecoveryTests.Features.EventStreams;
-using KeyLoad.RecoveryTests.Features.StorageRecovery;
+using KeyLoad.RecoveryTests.EventStreams;
+using KeyLoad.RecoveryTests.StorageRecovery;
 using KeyLoad.Storage.ZoneTree;
 using ManagedCode.Communication.Commands;
 

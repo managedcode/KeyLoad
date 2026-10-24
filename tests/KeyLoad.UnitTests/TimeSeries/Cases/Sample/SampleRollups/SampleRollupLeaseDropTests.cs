@@ -1,5 +1,5 @@
 
-namespace KeyLoad.UnitTests.Features.TimeSeries;
+namespace KeyLoad.UnitTests.TimeSeries;
 
 internal sealed class SampleRollupLeaseDropTests
 {

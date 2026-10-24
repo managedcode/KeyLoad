@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-namespace KeyLoad.Server.Features.OrleansHosting.Diagnostics;
+namespace KeyLoad.Server.OrleansHosting.Diagnostics;
 
 /// <summary>Bounds local activity ancestry before the execution inherited baggage getter is accessed.</summary>
 internal static class OrleansTelemetryAncestry

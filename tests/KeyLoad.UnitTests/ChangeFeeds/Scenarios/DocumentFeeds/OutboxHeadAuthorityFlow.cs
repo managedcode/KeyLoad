@@ -1,6 +1,6 @@
 using KeyLoad.Storage.ZoneTree;
 
-namespace KeyLoad.UnitTests.Features.ChangeFeeds;
+namespace KeyLoad.UnitTests.ChangeFeeds;
 
 internal static class OutboxHeadAuthorityFlow
 {

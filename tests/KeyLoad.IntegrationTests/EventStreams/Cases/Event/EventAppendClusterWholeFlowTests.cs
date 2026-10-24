@@ -1,8 +1,8 @@
 using KeyLoad.Client;
-using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.ClientApi;
 using KeyLoad.Server;
 
-namespace KeyLoad.IntegrationTests.Features.EventStreams;
+namespace KeyLoad.IntegrationTests.EventStreams;
 
 /// <summary>Original public OCC/dedup/fresh authorization acceptance through actual Aspire Orleans.</summary>
 /// <param name="fixture">The existing real Orleans resources and discovered public endpoints.</param>

@@ -1,6 +1,6 @@
 using KeyLoad.Server;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>AC-ROUTE-003/REP-004: real canceled file stages retain original cancellation and allow healthy continuation.</summary>
 internal sealed class ServerSynchronousCancellationWholeFlowTests

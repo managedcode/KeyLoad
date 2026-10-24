@@ -1,7 +1,7 @@
 using KeyLoad.Core;
 using KeyLoad.Storage;
 
-namespace KeyLoad.RecoveryTests.Features.Search;
+namespace KeyLoad.RecoveryTests.Search;
 
 internal static class TextIncrementalCrashSeed
 {

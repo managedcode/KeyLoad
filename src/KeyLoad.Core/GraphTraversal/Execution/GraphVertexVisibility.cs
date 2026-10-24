@@ -1,8 +1,8 @@
-using KeyLoad.Core.Features.Authorization;
-using KeyLoad.Core.Features.DocumentStorage;
+using KeyLoad.Core.Authorization;
+using KeyLoad.Core.DocumentStorage;
 using KeyLoad.Storage;
 
-namespace KeyLoad.Core.Features.GraphTraversal;
+namespace KeyLoad.Core.GraphTraversal;
 
 /// <summary>Resolves vertex visibility once per qualified identity within one read cut.</summary>
 internal sealed class GraphVertexVisibility(DatabaseEngine database, IKeyValueView view, PrincipalRecord principal,

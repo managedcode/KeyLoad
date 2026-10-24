@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
+namespace KeyLoad.IntegrationTests.DatabaseComposition;
 
 /// <summary>Retains actual public lifetime witnesses across the original fixture and its cold reopen.</summary>
 internal sealed class FunctionalGateReferenceBindings

@@ -1,5 +1,5 @@
-using KeyLoad.IntegrationTests.Features.ClientApi;
-namespace KeyLoad.IntegrationTests.Features.TimeSeries;
+using KeyLoad.IntegrationTests.ClientApi;
+namespace KeyLoad.IntegrationTests.TimeSeries;
 
 [ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = McpCallerProtocol.FixtureKey)]
 [NotInParallel]

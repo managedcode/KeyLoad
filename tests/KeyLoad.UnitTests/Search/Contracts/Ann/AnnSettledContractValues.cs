@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
-using KeyLoad.Server.Features.Search;
+using KeyLoad.Server.Search;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 /// <summary>Real canonical source/configure/child receipt; the index digest is only supplied codec test data.</summary>
 internal sealed record AnnSettledContractValues(AnnMaintenanceRequest Request,
@@ -39,7 +39,7 @@ internal sealed record AnnSettledContractValues(AnnMaintenanceRequest Request,
         {
             MaintenanceProfile = profile
         };
-        var captured = global::KeyLoad.Core.Features.Search.AnnSeedCollector.CapturePinned(database.Database,
+        var captured = global::KeyLoad.Core.Search.AnnSeedCollector.CapturePinned(database.Database,
             AnnProjectionPinTestSupport.Principal, request, UnitAnnSeedOptions.Execution(),
             new global::KeyLoad.Core.ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits)));
         var source = AnnCanonicalSource.Source(captured);

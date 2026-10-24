@@ -1,9 +1,9 @@
 using System.Security.Cryptography;
 using System.Text.Json;
-using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.Core.ResourceExecution;
 using ManagedCode.Communication.Commands;
 
-namespace KeyLoad.Core.Features.InternalSerialization;
+namespace KeyLoad.Core.InternalSerialization;
 
 // The original public input is fingerprinted without reparsing or changing user content.
 internal static class DatabaseCommandFingerprint

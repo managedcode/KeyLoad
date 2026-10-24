@@ -1,7 +1,7 @@
 using System.Text;
 using Dom = Microsoft.SqlServer.TransactSql.ScriptDom;
 
-namespace KeyLoad.Features.QueryExecution;
+namespace KeyLoad.QueryExecution;
 
 internal static class ScriptDomSyntax
 {

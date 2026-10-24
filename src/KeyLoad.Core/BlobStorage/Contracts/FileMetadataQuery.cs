@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 
-namespace KeyLoad.Core.Features.BlobStorage;
+namespace KeyLoad.Core.BlobStorage;
 
 [Orleans.GenerateSerializer, Orleans.Alias(FileStorageProtocol.QueryAlias)]
 internal sealed record FileMetadataQuery([property: Orleans.Id(0)] FileAddress Address,

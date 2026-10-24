@@ -1,6 +1,6 @@
 using KeyLoad.Server;
 
-namespace KeyLoad.IntegrationTests.Features.Messaging;
+namespace KeyLoad.IntegrationTests.Messaging;
 
 /// <summary>Borrows the original caller lifetime; never invents a transport exception or result.</summary>
 internal sealed class TargetInboxClusterResponseObservation(HttpMessageHandler inner, Guid command,

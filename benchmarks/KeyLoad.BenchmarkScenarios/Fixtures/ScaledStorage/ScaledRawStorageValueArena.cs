@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
+namespace KeyLoad.BenchmarkScenarios.BenchmarkComparisons;
 
 /// <summary>Retains immutable-sized ZoneTree value chunks without per-record memory objects.</summary>
 internal sealed class ScaledRawStorageValueArena

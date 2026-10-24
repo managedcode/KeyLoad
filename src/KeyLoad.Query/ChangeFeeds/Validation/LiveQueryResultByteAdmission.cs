@@ -1,6 +1,6 @@
 using KeyLoad.Core;
 
-namespace KeyLoad.Query.Features.ChangeFeeds;
+namespace KeyLoad.Query.ChangeFeeds;
 
 /// <summary>Admits only live deltas selected by the original feed page boundary.</summary>
 internal sealed class LiveQueryResultByteAdmission(ReadExecutionBudget budget)

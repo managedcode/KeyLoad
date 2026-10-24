@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
-using KeyLoad.Clustering.Features.Search;
+using KeyLoad.Clustering.Search;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 internal sealed class TextOnlineWholeOperationTests
 {
@@ -164,7 +164,7 @@ internal sealed class TextOnlineWholeOperationTests
         var budget = new KeyLoad.Core.ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(fixture.Database.Limits),
             fixture.Database.EvaluationClock, token);
         var publication = fixture.Database.ReadOnlineTextOriginalPublication(TextMaintenanceTestValues.Principal, request, budget)!;
-        var path = Path.Combine(fixture.Directory, KeyLoad.Server.Features.Search.TextOnlineRoot.DirectoryName, publication.Authority.Leaf);
+        var path = Path.Combine(fixture.Directory, KeyLoad.Server.Search.TextOnlineRoot.DirectoryName, publication.Authority.Leaf);
         using (var held = runtime.BorrowCurrent(fixture, TextBilingualAudit.Request(fixture.Partition, "hello"), budget))
         {
             held.BeginRecord(seed.Expected[0].Reference, seed.Expected[0].Revision);

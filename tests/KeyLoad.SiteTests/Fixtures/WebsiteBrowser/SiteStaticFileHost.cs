@@ -1,7 +1,7 @@
 using System.Net;
 using System.Net.Sockets;
 
-namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
+namespace KeyLoad.SiteTests.BenchmarkComparisons;
 
 internal sealed class SiteStaticFileHost : IAsyncDisposable
 {

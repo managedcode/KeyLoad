@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using static KeyLoad.Analyzers.Features.CodeQuality.ImplementationTermCatalog;
+using static KeyLoad.Analyzers.CodeQuality.ImplementationTermCatalog;
 
-namespace KeyLoad.Analyzers.Features.CodeQuality;
+namespace KeyLoad.Analyzers.CodeQuality;
 
 /// <summary>Classifies words and compound identifiers against the canonical implementation vocabulary.</summary>
 internal static class ImplementationTermReader

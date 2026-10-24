@@ -1,6 +1,6 @@
 using System.Xml.Linq;
 
-namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
+namespace KeyLoad.Analyzers.Tests.CodeQuality;
 
 /// <summary>AC-CQ-009 and AC-BC-027: validate execution branch spellings and physical source-line bounds.</summary>
 [NotInParallel(SiteAnalyzerCoverageTokens.ProcessIsolationKey)]

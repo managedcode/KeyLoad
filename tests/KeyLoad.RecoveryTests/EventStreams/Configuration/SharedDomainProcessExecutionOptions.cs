@@ -1,6 +1,6 @@
-using KeyLoad.RecoveryTests.Features.DocumentStorage;
+using KeyLoad.RecoveryTests.DocumentStorage;
 
-namespace KeyLoad.RecoveryTests.Features.EventStreams;
+namespace KeyLoad.RecoveryTests.EventStreams;
 
 [ConfigurationOptions]
 internal sealed class SharedDomainProcessExecutionOptions

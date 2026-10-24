@@ -1,7 +1,7 @@
-using KeyLoad.Core.Features.DatabaseComposition;
+using KeyLoad.Core.DatabaseComposition;
 using KeyLoad.Storage;
 
-namespace KeyLoad.UnitTests.Features.DatabaseComposition;
+namespace KeyLoad.UnitTests.DatabaseComposition;
 
 internal sealed class DatabaseCompositionReplayIntegrityTests
 {

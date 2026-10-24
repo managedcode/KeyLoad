@@ -1,14 +1,14 @@
 using KeyLoad.Storage;
 
-namespace KeyLoad.Core.Features.Messaging;
+namespace KeyLoad.Core.Messaging;
 
 /// <summary>Owns one decoded body and its exact persisted execution byte length.</summary>
 
 [global::Orleans.GenerateSerializer]
-[global::Orleans.Alias(global::KeyLoad.Core.Features.InternalSerialization.CoreAliases.StoredMessageBody)]
+[global::Orleans.Alias(global::KeyLoad.Core.InternalSerialization.CoreAliases.StoredMessageBody)]
 internal readonly record struct StoredMessageBody(
-    [property: global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.StoredMessageBodyFields.Body)] MessageBody Body,
-    [property: global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.StoredMessageBodyFields.Bytes)] long Bytes)
+    [property: global::Orleans.Id(global::KeyLoad.Core.InternalSerialization.StoredMessageBodyFields.Body)] MessageBody Body,
+    [property: global::Orleans.Id(global::KeyLoad.Core.InternalSerialization.StoredMessageBodyFields.Bytes)] long Bytes)
 {
     private const int NoRetainedBytes = 0;
 

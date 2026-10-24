@@ -1,6 +1,6 @@
 using KeyLoad.Storage;
 
-namespace KeyLoad.Core.Features.AnalyticsStore;
+namespace KeyLoad.Core.AnalyticsStore;
 
 internal static class AnalyticsStoreAuthorization
 {

@@ -1,13 +1,13 @@
 using System.Text.Json;
 using KeyLoad.Server;
-using KeyLoad.UnitTests.Features.Messaging;
-namespace KeyLoad.UnitTests.Features.RelationalStorage;
+using KeyLoad.UnitTests.Messaging;
+namespace KeyLoad.UnitTests.RelationalStorage;
 
 internal static class SqlTypedInsertParameterParity
 {
     internal static async Task RunAsync(TestDatabase fixture, SqlTypedInsertState state, CancellationToken token)
     {
-        await global::KeyLoad.UnitTests.Features.QueryExecution.ScriptDomOrdinalWriteAdmission.RunAsync(fixture, state, token);
+        await global::KeyLoad.UnitTests.QueryExecution.ScriptDomOrdinalWriteAdmission.RunAsync(fixture, state, token);
         var image = QueueWholeFlowStorage.Bytes(fixture.Store);
         var cut = fixture.Store.Position;
         var limits = UnitExecutionOptions.DatabaseLimits();

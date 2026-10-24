@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.QueryExecution;
+namespace KeyLoad.IntegrationTests.QueryExecution;
 
 internal static class SqlBooleanOperandClusterParameters
 {
@@ -9,7 +9,7 @@ internal static class SqlBooleanOperandClusterParameters
     private const string WireClause = "score AND $1";
 
     internal static async Task RequireAsync(
-        global::KeyLoad.IntegrationTests.Features.OrleansExecution.RequestCqrsClusterCallers caller,
+        global::KeyLoad.IntegrationTests.OrleansExecution.RequestCqrsClusterCallers caller,
         PostgresClusterCaller wire, long revision, CancellationToken token)
     {
         foreach (var value in new bool?[] { true, false, null })
@@ -26,18 +26,18 @@ internal static class SqlBooleanOperandClusterParameters
             var item = new SqlBooleanTruthClusterCase(Clause, predicate, value == true ? [Low] : []);
             var sql = SqlBooleanTruthClusterCases.Prefix + Clause + SqlBooleanTruthClusterCases.Tail;
             var request = new global::KeyLoad.QueryRequest(PostgresClusterState.Partition, sql, parameters, AllowFullScan: true);
-            await SqlBooleanTruthClusterImage.PageAsync(await global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerAssertions.SdkSuccessAsync(
+            await SqlBooleanTruthClusterImage.PageAsync(await global::KeyLoad.IntegrationTests.ClientApi.McpCallerAssertions.SdkSuccessAsync(
                 await caller.Sdk.QueryAsync(request, token)), item, revision);
-            await SqlBooleanTruthClusterImage.PageAsync((await global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerAssertions.SuccessAsync<global::KeyLoad.QueryPage>(
-                await caller.Mcp.CallAsync(global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerTools.QueryExecute, request, token))).Value, item, revision);
+            await SqlBooleanTruthClusterImage.PageAsync((await global::KeyLoad.IntegrationTests.ClientApi.McpCallerAssertions.SuccessAsync<global::KeyLoad.QueryPage>(
+                await caller.Mcp.CallAsync(global::KeyLoad.IntegrationTests.ClientApi.McpCallerTools.QueryExecute, request, token))).Value, item, revision);
             var ast = SqlBooleanTruthClusterCases.Ast(PostgresClusterState.Partition, item) with
             {
                 Parameters = parameters
             };
-            await SqlBooleanTruthClusterImage.PageAsync(await global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerAssertions.SdkSuccessAsync(
+            await SqlBooleanTruthClusterImage.PageAsync(await global::KeyLoad.IntegrationTests.ClientApi.McpCallerAssertions.SdkSuccessAsync(
                 await caller.Sdk.QueryAstAsync(ast, token)), item, revision);
-            await SqlBooleanTruthClusterImage.PageAsync((await global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerAssertions.SuccessAsync<global::KeyLoad.QueryPage>(
-                await caller.Mcp.CallAsync(global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerTools.QueryAst, ast, token))).Value, item, revision);
+            await SqlBooleanTruthClusterImage.PageAsync((await global::KeyLoad.IntegrationTests.ClientApi.McpCallerAssertions.SuccessAsync<global::KeyLoad.QueryPage>(
+                await caller.Mcp.CallAsync(global::KeyLoad.IntegrationTests.ClientApi.McpCallerTools.QueryAst, ast, token))).Value, item, revision);
             foreach (var prepared in new[] { false, true })
             {
                 var argument = new global::Npgsql.NpgsqlParameter

@@ -1,8 +1,8 @@
-using KeyLoad.Core.Features.Search;
-using KeyLoad.UnitTests.Features.ResourceExecution;
+using KeyLoad.Core.Search;
+using KeyLoad.UnitTests.ResourceExecution;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 internal sealed class Bm25CorpusPublicationTests
 {

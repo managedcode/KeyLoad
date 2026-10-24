@@ -2,7 +2,7 @@ using System.Text.Json;
 using KeyLoad.Query;
 using KeyLoad.Storage;
 
-namespace KeyLoad.Core.Features.QueryExecution;
+namespace KeyLoad.Core.QueryExecution;
 
 /// <summary>Dispatches read-only model source visits and validates their JSON records.</summary>
 internal static class ModelQueryReadRows

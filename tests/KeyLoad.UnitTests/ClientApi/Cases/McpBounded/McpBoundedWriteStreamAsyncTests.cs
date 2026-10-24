@@ -1,7 +1,7 @@
 using System.Text;
 using KeyLoad.Server;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>AC-MCP-004/005: actual stream asynchronous entry points preserve cancellation and owned-byte bounds.</summary>
 internal sealed class McpBoundedWriteStreamAsyncTests

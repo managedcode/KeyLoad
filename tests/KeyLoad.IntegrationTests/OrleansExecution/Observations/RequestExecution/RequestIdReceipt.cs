@@ -1,5 +1,5 @@
 using System.Net;
 
-namespace KeyLoad.IntegrationTests.Features.OrleansExecution;
+namespace KeyLoad.IntegrationTests.OrleansExecution;
 
 internal sealed record RequestIdReceipt(string Path, HttpStatusCode StatusCode, string[] HeaderValues);

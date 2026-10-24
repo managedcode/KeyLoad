@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
+namespace KeyLoad.IntegrationTests.DatabaseComposition;
 
 /// <summary>Execution Orleans exclusion proof; successful concurrent same-file ownership remains unsupported.</summary>
 [NotInParallel]

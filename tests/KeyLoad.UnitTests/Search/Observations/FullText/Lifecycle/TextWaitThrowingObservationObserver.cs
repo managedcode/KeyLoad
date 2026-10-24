@@ -1,7 +1,7 @@
 using KeyLoad.Query;
 using KeyLoad.Storage.ZoneTree;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 internal sealed class TextWaitThrowingObservationObserver(ZoneTreeStore store, IOException failure)
     : IQueryReadCutObserver

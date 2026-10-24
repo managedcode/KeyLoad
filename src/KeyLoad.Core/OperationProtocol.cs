@@ -7,7 +7,7 @@ public static class OperationProtocol
 {
     internal const string MismatchedEnvelopeRequestMessage = "The envelope and request IDs differ.";
     internal static string CommandFingerprint(Command<DatabaseCommand> operation) => operation.Value!.Fingerprint;
-    internal static T Payload<T>(Command<DatabaseCommand> operation) => OrleansSerialization.Deserialize<T>(operation.Value!.Input.Span, KeyLoad.Features.InternalSerialization.ValidationProfile.PublicInputElements);
+    internal static T Payload<T>(Command<DatabaseCommand> operation) => OrleansSerialization.Deserialize<T>(operation.Value!.Input.Span, KeyLoad.InternalSerialization.ValidationProfile.PublicInputElements);
     internal static Result<object> Result<T>(T value) => ManagedCode.Communication.Result<object>.Succeed(value!);
     internal static void RequireEnvelopeId(Command<DatabaseCommand> operation, Guid id)
     {

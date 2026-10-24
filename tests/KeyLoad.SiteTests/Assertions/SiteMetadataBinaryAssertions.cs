@@ -1,6 +1,6 @@
 using System.Buffers.Binary;
 
-namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
+namespace KeyLoad.SiteTests.BenchmarkComparisons;
 
 internal static class SiteMetadataBinaryAssertions
 {

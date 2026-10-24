@@ -1,4 +1,4 @@
-namespace KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
+namespace KeyLoad.Storage.ZoneTree.ResourceExecution;
 
 /// <summary>Controls optional point-value admission for one actual opened storage runtime.</summary>
 /// <remarks>This process-local owner grants no read authority and provides no replicated readiness certificate.</remarks>

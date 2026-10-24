@@ -1,7 +1,7 @@
-using KeyLoad.Core.Features.Search;
+using KeyLoad.Core.Search;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.Server.Features.Search;
+namespace KeyLoad.Server.Search;
 
 /// <summary>Composes validated downward seed limits from the original central policy and resident reservation.</summary>
 [ConfigurationBinding]

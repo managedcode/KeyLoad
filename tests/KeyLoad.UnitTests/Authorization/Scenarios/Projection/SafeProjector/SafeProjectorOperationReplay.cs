@@ -1,9 +1,9 @@
-using KeyLoad.Core.Features.CommandOutcomes.Contracts;
-using KeyLoad.Core.Features.InternalSerialization;
+using KeyLoad.Core.CommandOutcomes.Contracts;
+using KeyLoad.Core.InternalSerialization;
 using KeyLoad.Storage;
 using ManagedCode.Communication;
 
-namespace KeyLoad.UnitTests.Features.Authorization;
+namespace KeyLoad.UnitTests.Authorization;
 
 internal static class SafeProjectorOperationReplay
 {

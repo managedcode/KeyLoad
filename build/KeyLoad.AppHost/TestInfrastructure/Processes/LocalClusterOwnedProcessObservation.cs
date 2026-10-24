@@ -1,4 +1,4 @@
-namespace KeyLoad.AppHost.Features.TestInfrastructure.Processes;
+namespace KeyLoad.AppHost.TestInfrastructure.Processes;
 
 /// <summary>Owns bounded output observation and joins its cancellation wait after the original tasks settle.</summary>
 internal static class LocalClusterOwnedProcessObservation

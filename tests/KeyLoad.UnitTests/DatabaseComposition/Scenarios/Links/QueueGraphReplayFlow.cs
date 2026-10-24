@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.DatabaseComposition;
+namespace KeyLoad.UnitTests.DatabaseComposition;
 
 internal static class QueueGraphReplayFlow
 {
@@ -57,7 +57,7 @@ internal static class QueueGraphReplayFlow
             return true;
         });
         await QueueGraphReplayAssertions.RefusesAsync(state, db.Database, db.Store);
-        source.ColdImage = global::KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(db.Store);
+        source.ColdImage = global::KeyLoad.UnitTests.Messaging.QueueWholeFlowStorage.Bytes(db.Store);
         source.ColdPosition = db.Store.Position;
         db.Store.Dispose();
         await QueueGraphReplayCold.RunAsync(state, dirty: true);

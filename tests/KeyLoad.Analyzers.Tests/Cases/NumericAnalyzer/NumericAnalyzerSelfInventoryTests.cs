@@ -1,6 +1,6 @@
 using Microsoft.CodeAnalysis;
 
-namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
+namespace KeyLoad.Analyzers.Tests.CodeQuality;
 
 /// <summary>AC-CQ-008: analyzes compiler and test infrastructure sources through real Roslyn compilations.</summary>
 internal sealed class NumericAnalyzerSelfInventoryTests

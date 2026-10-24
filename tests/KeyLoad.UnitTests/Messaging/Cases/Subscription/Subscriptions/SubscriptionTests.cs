@@ -1,8 +1,8 @@
 using TUnit.Assertions.Enums;
 
-using static KeyLoad.UnitTests.Features.Messaging.SubscriptionTestActions;
+using static KeyLoad.UnitTests.Messaging.SubscriptionTestActions;
 
-namespace KeyLoad.UnitTests.Features.Messaging;
+namespace KeyLoad.UnitTests.Messaging;
 
 internal sealed class SubscriptionTests
 {

@@ -1,4 +1,4 @@
-namespace KeyLoad.Core.Features.AnalyticsStore;
+namespace KeyLoad.Core.AnalyticsStore;
 
 // Execution Text.Value sanitizes text. This explicit disposable projection representation preserves canonical identity.
 internal sealed class AnalyticsStoreDimensions

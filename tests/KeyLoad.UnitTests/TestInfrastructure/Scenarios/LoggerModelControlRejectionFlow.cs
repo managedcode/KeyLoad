@@ -3,7 +3,7 @@ using KeyLoad.AppHost.Hosting;
 using KeyLoad.Server;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.UnitTests.Features.TestInfrastructure.Helpers;
+namespace KeyLoad.UnitTests.TestInfrastructure.Helpers;
 
 internal static class LoggerModelControlRejectionFlow
 {

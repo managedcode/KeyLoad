@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>Names execution target omissions and concrete JSON type failures.</summary>
 internal enum McpMissingTargetFault

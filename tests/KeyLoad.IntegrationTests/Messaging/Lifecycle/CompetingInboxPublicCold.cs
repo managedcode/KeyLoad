@@ -1,10 +1,10 @@
 using System.Security.Cryptography;
 using Aspire.Hosting.ApplicationModel;
-using KeyLoad.IntegrationTests.Features.QueryExecution;
-using KeyLoad.IntegrationTests.Features.StorageReplication;
+using KeyLoad.IntegrationTests.QueryExecution;
+using KeyLoad.IntegrationTests.StorageReplication;
 using KeyLoad.Server;
 
-namespace KeyLoad.IntegrationTests.Features.Messaging;
+namespace KeyLoad.IntegrationTests.Messaging;
 
 internal sealed class CompetingInboxPublicCold(ClusterFixture fixture)
 {

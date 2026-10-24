@@ -1,12 +1,12 @@
 using System.Collections.Immutable;
 using System.Globalization;
-using KeyLoad.Core.Features.Search;
+using KeyLoad.Core.Search;
 using KeyLoad.Server;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 /// <summary>AC-CQ-034: bound ANN scratch reaches actual allocation, accounting and atomic hash blocks.</summary>
 internal sealed class AnnSeedHashScratchPolicyTests

@@ -1,7 +1,7 @@
 using KeyLoad.Clustering;
 using Microsoft.Extensions.Logging;
 
-namespace KeyLoad.UnitTests.Features.Messaging;
+namespace KeyLoad.UnitTests.Messaging;
 
 internal sealed class MultiLaneReceiveFailureCapture(int maximumRecords) : ILoggerProvider
 {

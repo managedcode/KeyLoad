@@ -1,7 +1,7 @@
 using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
-using KeyLoad.Diagnostics.Features.ResourceExecution;
-using KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
+using KeyLoad.Diagnostics.ResourceExecution;
+using KeyLoad.Storage.ZoneTree.ResourceExecution;
 using ZoneTree;
 using static KeyLoad.Storage.ZoneTree.ZoneTreePersistenceFormat;
 

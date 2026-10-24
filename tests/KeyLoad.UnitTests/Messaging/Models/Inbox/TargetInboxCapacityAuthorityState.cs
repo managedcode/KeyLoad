@@ -1,5 +1,5 @@
 using ManagedCode.Communication;
-namespace KeyLoad.UnitTests.Features.Messaging;
+namespace KeyLoad.UnitTests.Messaging;
 
 internal sealed record TargetInboxCapacityAuthorityState(CommitInboxRequest Original, CommitInboxRequest Second,
     CommitInboxRequest Healthy, byte[] Capacity, byte[] OriginalRecord, byte[] SecondRecord,

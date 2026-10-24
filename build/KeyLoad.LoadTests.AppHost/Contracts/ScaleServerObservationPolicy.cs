@@ -1,4 +1,4 @@
-namespace KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
+namespace KeyLoad.LoadTests.AppHost.BenchmarkComparisons;
 
 /// <summary>Actual primitive observation policy retained with execution measurement evidence.</summary>
 internal sealed record ScaleServerObservationPolicy(double CadenceMilliseconds, double MaximumObservationMilliseconds,

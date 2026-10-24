@@ -1,4 +1,4 @@
-namespace KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries;
+namespace KeyLoad.Comparisons.BenchmarkComparisons.TimeSeries;
 
 internal interface ITimeSeriesPersistentTarget : IAsyncDisposable
 {

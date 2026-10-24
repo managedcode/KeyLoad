@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.Core.Features.ResourceExecution;
+namespace KeyLoad.Core.ResourceExecution;
 
 /// <summary>Maintains one receiver-local finite cache eligibility lease without granting read authority.</summary>
 public sealed class CacheReadPermit : ICacheReadPermit, IDisposable

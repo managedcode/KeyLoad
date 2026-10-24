@@ -1,12 +1,12 @@
 using System.Buffers.Binary;
 using System.Collections.Immutable;
 using System.Security.Cryptography;
-using KeyLoad.Core.Features.Messaging;
+using KeyLoad.Core.Messaging;
 using KeyLoad.Storage.ZoneTree;
 using ManagedCode.Communication.Commands;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.RecoveryTests.Features.Messaging;
+namespace KeyLoad.RecoveryTests.Messaging;
 
 internal static class QueueOrderedRetryRecoveryChoice
 {

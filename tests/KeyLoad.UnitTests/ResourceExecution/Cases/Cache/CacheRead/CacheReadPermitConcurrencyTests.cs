@@ -1,7 +1,7 @@
 using System.Runtime.ExceptionServices;
-using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.Core.ResourceExecution;
 
-namespace KeyLoad.UnitTests.Features.ResourceExecution;
+namespace KeyLoad.UnitTests.ResourceExecution;
 
 internal sealed class CacheReadPermitConcurrencyTests
 {

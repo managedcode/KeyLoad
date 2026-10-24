@@ -1,4 +1,4 @@
-namespace KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
+namespace KeyLoad.Storage.ZoneTree.ResourceExecution;
 
 /// <summary>Performs cold replacement and exact-receipt continuity under the caller's writer gate.</summary>
 internal static class ZoneTreePointCacheControlTransitions

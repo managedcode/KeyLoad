@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.DatabaseComposition;
+namespace KeyLoad.UnitTests.DatabaseComposition;
 
 internal static class TypedQueueGraphPrimaryIdentityFlow
 {
@@ -49,7 +49,7 @@ internal static class TypedQueueGraphPrimaryIdentityFlow
                 await Assert.That(JsonDefaults.Serialize(store.Identity).AsSpan()
                     .SequenceEqual(JsonDefaults.Serialize(identity))).IsTrue();
                 await Assert.That(store.Position).IsEqualTo(source.ColdPosition);
-                await Assert.That(global::KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(store))
+                await Assert.That(global::KeyLoad.UnitTests.Messaging.QueueWholeFlowStorage.Bytes(store))
                     .IsEquivalentTo(source.ColdImage, global::TUnit.Assertions.Enums.CollectionOrdering.Matching);
                 var engine = source.Fixture.CreateConfiguredDatabase(store);
                 var reverse = await QueueGraphIdentityFlow.CompileAsync(engine, new(Guid.NewGuid(), source.Fixture.Partition,
@@ -69,7 +69,7 @@ internal static class TypedQueueGraphPrimaryIdentityFlow
                     new DateTimeOffset(reverse.Timestamp).AddSeconds(1));
                 replay = new(source, reverse, OrleansSerialization.Serialize(receipt), next, continuation);
                 await QueueGraphReplayAssertions.ContinueAsync(replay, engine, store);
-                source.ColdImage = global::KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(store);
+                source.ColdImage = global::KeyLoad.UnitTests.Messaging.QueueWholeFlowStorage.Bytes(store);
                 source.ColdPosition = store.Position;
             }, failures);
         }, failures);

@@ -1,7 +1,7 @@
-using D = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreTestData;
-using O = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreTestOperations;
+using D = KeyLoad.UnitTests.AnalyticsStore.AnalyticsStoreTestData;
+using O = KeyLoad.UnitTests.AnalyticsStore.AnalyticsStoreTestOperations;
 
-namespace KeyLoad.UnitTests.Features.AnalyticsStore;
+namespace KeyLoad.UnitTests.AnalyticsStore;
 
 /// <summary>Complete canonical bytes and original execution cuts, independent from disposable derived directories.</summary>
 internal sealed record AnalyticsStorePolicyPublicationCut(string[] Image, long Position, long Applied,

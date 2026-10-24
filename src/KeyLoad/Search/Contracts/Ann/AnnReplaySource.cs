@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
-using KeyLoad.Core.Features.Search;
+using KeyLoad.Core.Search;
 
-namespace KeyLoad.Server.Features.Search;
+namespace KeyLoad.Server.Search;
 
 // Replay progress is deliberately separate from the actually observed canonical upper source cut.
 internal sealed record AnnReplaySource(AnnSeedScope Scope, string DependencySha256,

@@ -1,4 +1,4 @@
-namespace KeyLoad.Diagnostics.Features.ResourceExecution;
+namespace KeyLoad.Diagnostics.ResourceExecution;
 
 /// <summary>Owns the optional physical-process bank, configured before database work.</summary>
 public static class DatabasePhaseTelemetry

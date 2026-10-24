@@ -1,6 +1,6 @@
 using KeyLoad.Storage;
 
-namespace KeyLoad.Core.Features.Search;
+namespace KeyLoad.Core.Search;
 
 /// <summary>Borrows frozen bytes captured at the original cut; never owns storage or live-cache publication.</summary>
 internal sealed class SearchCapturedReadScope : IKeyValueView

@@ -1,7 +1,7 @@
 using System.Collections.Concurrent;
-using KeyLoad.UnitTests.Features.ClientApi;
+using KeyLoad.UnitTests.ClientApi;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal sealed record ConnectionIdentityCollisionState(ConnectionScenario Scenario,
     PrincipalRecord First, PrincipalRecord Second, CommandRequest Original, CommandRequest Following, Guid OriginalRequest)

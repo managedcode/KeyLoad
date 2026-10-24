@@ -8,10 +8,10 @@ namespace KeyLoad.Core;
 /// <param name="After">Visible document after the mutation.</param>
 
 [global::Orleans.GenerateSerializer]
-[global::Orleans.Alias(global::KeyLoad.Core.Features.InternalSerialization.CoreAliases.AuthorizedDocumentChange)]
+[global::Orleans.Alias(global::KeyLoad.Core.InternalSerialization.CoreAliases.AuthorizedDocumentChange)]
 public sealed record AuthorizedDocumentChange(
-    [property: global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.AuthorizedDocumentChangeFields.Sequence)] long Sequence,
-    [property: global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.AuthorizedDocumentChangeFields.Commit)] CommitToken Commit,
-    [property: global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.AuthorizedDocumentChangeFields.CommittedAt)] DateTimeOffset CommittedAt,
-    [property: global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.AuthorizedDocumentChangeFields.Before)] DocumentRecord? Before,
-    [property: global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.AuthorizedDocumentChangeFields.After)] DocumentRecord After);
+    [property: global::Orleans.Id(global::KeyLoad.Core.InternalSerialization.AuthorizedDocumentChangeFields.Sequence)] long Sequence,
+    [property: global::Orleans.Id(global::KeyLoad.Core.InternalSerialization.AuthorizedDocumentChangeFields.Commit)] CommitToken Commit,
+    [property: global::Orleans.Id(global::KeyLoad.Core.InternalSerialization.AuthorizedDocumentChangeFields.CommittedAt)] DateTimeOffset CommittedAt,
+    [property: global::Orleans.Id(global::KeyLoad.Core.InternalSerialization.AuthorizedDocumentChangeFields.Before)] DocumentRecord? Before,
+    [property: global::Orleans.Id(global::KeyLoad.Core.InternalSerialization.AuthorizedDocumentChangeFields.After)] DocumentRecord After);

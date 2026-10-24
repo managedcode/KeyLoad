@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.Authorization;
+namespace KeyLoad.UnitTests.Authorization;
 
 /// <summary>Actual execution scalar/live V2 continuation and signed unsupported historical-input refusal.</summary>
 internal sealed class ResourceLifetimeCursorTests

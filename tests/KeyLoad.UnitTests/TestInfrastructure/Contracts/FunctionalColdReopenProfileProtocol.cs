@@ -1,9 +1,9 @@
 using System.Globalization;
 using Aspire.Hosting;
-using KeyLoad.AppHost.Features.TestInfrastructure;
+using KeyLoad.AppHost.TestInfrastructure;
 using Microsoft.Extensions.Configuration;
 
-namespace KeyLoad.UnitTests.Features.TestInfrastructure;
+namespace KeyLoad.UnitTests.TestInfrastructure;
 
 internal static class FunctionalColdReopenProfileProtocol
 {

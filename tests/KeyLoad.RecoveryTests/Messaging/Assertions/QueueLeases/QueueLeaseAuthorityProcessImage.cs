@@ -2,7 +2,7 @@ using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
 using ManagedCode.Communication.Commands;
 
-namespace KeyLoad.RecoveryTests.Features.Messaging;
+namespace KeyLoad.RecoveryTests.Messaging;
 
 internal static class QueueLeaseAuthorityProcessImage
 {

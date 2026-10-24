@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.CodeQuality;
+namespace KeyLoad.UnitTests.CodeQuality;
 
 /// <summary>Frozen execution Microsoft coverage output and selection tokens.</summary>
 internal static class CoverageProtocol

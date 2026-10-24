@@ -1,7 +1,7 @@
 using System.Security.Cryptography;
 using KeyLoad.Storage.ZoneTree.IO;
 
-namespace KeyLoad.Server.Features.Search;
+namespace KeyLoad.Server.Search;
 
 internal static class AnnReceiptFiles
 {

@@ -1,12 +1,12 @@
-using KeyLoad.AppHost.Features.TestInfrastructure;
+using KeyLoad.AppHost.TestInfrastructure;
 using KeyLoad.Clustering;
-using KeyLoad.Diagnostics.Features.ResourceExecution;
-using KeyLoad.IntegrationTests.Features.StorageReplication;
+using KeyLoad.Diagnostics.ResourceExecution;
+using KeyLoad.IntegrationTests.StorageReplication;
 using KeyLoad.Server;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
+namespace KeyLoad.IntegrationTests.DatabaseComposition;
 
 internal sealed partial class FunctionalGateFixture
 {

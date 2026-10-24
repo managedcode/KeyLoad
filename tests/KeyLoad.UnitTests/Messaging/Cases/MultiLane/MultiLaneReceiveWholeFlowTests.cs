@@ -1,12 +1,12 @@
 using System.Collections.Immutable;
 using KeyLoad.Clustering;
-using KeyLoad.UnitTests.Features.OrleansExecution;
+using KeyLoad.UnitTests.OrleansExecution;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.Messaging;
+namespace KeyLoad.UnitTests.Messaging;
 
 /// <summary>AC-MSG-007: real execution request actors and canonical ZoneTree independent claims.</summary>
-[RequestCqrsHostedDataSource, NotInParallel(KeyLoad.UnitTests.Features.OrleansExecution.RequestCqrsFixtureScheduling.SharedSession)]
+[RequestCqrsHostedDataSource, NotInParallel(KeyLoad.UnitTests.OrleansExecution.RequestCqrsFixtureScheduling.SharedSession)]
 internal sealed class MultiLaneReceiveWholeFlowTests(RequestCqrsHostedRuntimeFixture fixture)
 {
     [Test]

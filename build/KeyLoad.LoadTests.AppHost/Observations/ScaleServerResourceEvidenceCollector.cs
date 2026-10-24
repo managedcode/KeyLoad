@@ -1,7 +1,7 @@
 using KeyLoad.Comparisons;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
+namespace KeyLoad.LoadTests.AppHost.BenchmarkComparisons;
 
 internal sealed class ScaleServerResourceEvidenceCollector(
     BenchmarkSessionSelection selection, string output,

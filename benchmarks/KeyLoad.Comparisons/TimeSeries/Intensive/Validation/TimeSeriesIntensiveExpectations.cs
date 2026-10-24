@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 
-namespace KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries.Intensive;
+namespace KeyLoad.Comparisons.BenchmarkComparisons.TimeSeries.Intensive;
 
 internal sealed record TimeSeriesIntensiveExpectations(ImmutableArray<TimeSeriesIntensiveReadPlan> Ranges,
     ImmutableArray<ImmutableArray<SampleRecord>> Raw, ImmutableArray<SampleAggregate> Aggregates,

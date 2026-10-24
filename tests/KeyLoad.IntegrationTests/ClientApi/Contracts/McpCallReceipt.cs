@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.ClientApi;
+namespace KeyLoad.IntegrationTests.ClientApi;
 
 /// <summary>The actual canonical decoded value and the server's independent execution identity.</summary>
 /// <typeparam name="T">The actual canonical result type.</typeparam>

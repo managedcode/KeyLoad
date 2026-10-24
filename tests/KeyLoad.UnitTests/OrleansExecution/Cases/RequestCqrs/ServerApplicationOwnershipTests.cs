@@ -3,7 +3,7 @@ using KeyLoad.Server;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 [RequestCqrsHostedDataSource]
 [NotInParallel(RequestCqrsFixtureScheduling.SharedSession)]

@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
+namespace KeyLoad.IntegrationTests.DatabaseComposition;
 
 /// <summary>Releases one fixed eight-caller wave only after every actual owned public session is ready.</summary>
 internal sealed class FunctionalGateColdConcurrentStart

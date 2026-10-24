@@ -1,8 +1,8 @@
 using System.Text.Json;
-using KeyLoad.Core.Features.CommandOutcomes.Identity;
+using KeyLoad.Core.CommandOutcomes.Identity;
 using ManagedCode.Communication.Commands;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal static class CommandOutcomePartitionScopeTestData
 {

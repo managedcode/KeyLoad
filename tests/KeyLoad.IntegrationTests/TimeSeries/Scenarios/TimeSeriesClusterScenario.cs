@@ -1,8 +1,8 @@
 using System.Collections.Immutable;
 using KeyLoad.Client;
-using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.ClientApi;
 
-namespace KeyLoad.IntegrationTests.Features.TimeSeries;
+namespace KeyLoad.IntegrationTests.TimeSeries;
 
 /// <summary>Creates caller-visible TimeSeries state on the actual execution Orleans cluster.</summary>
 internal sealed record TimeSeriesClusterScenario(PartitionRef Partition)

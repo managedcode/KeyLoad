@@ -1,7 +1,7 @@
 using KeyLoad.Storage.ZoneTree;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace KeyLoad.UnitTests.Features.StorageRecovery;
+namespace KeyLoad.UnitTests.StorageRecovery;
 
 internal sealed class PeriodicMaintenanceBarrier : IDisposable
 {

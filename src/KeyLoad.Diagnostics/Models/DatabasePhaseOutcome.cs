@@ -1,4 +1,4 @@
-namespace KeyLoad.Diagnostics.Features.ResourceExecution;
+namespace KeyLoad.Diagnostics.ResourceExecution;
 
 /// <summary>Closed completed-scope outcomes; producer-owned results determine them.</summary>
 public enum DatabasePhaseOutcome

@@ -1,7 +1,7 @@
-using KeyLoad.RecoveryTests.Features.EventStreams;
-using static KeyLoad.RecoveryTests.Features.EventStreams.SharedDomainProtocol;
+using KeyLoad.RecoveryTests.EventStreams;
+using static KeyLoad.RecoveryTests.EventStreams.SharedDomainProtocol;
 
-namespace KeyLoad.UnitTests.Features.EventStreams;
+namespace KeyLoad.UnitTests.EventStreams;
 
 internal static class SharedDomainRefusals
 {

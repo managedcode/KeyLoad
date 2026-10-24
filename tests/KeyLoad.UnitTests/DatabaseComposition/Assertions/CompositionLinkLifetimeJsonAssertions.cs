@@ -1,10 +1,10 @@
 using System.Text.Json;
-using KeyLoad.Core.Features.DocumentStorage;
+using KeyLoad.Core.DocumentStorage;
 using KeyLoad.Storage;
-using KeyLoad.UnitTests.Features.Authorization;
-using P = KeyLoad.UnitTests.Features.DatabaseComposition.CompositionLinkLifetimeJsonProtocol;
+using KeyLoad.UnitTests.Authorization;
+using P = KeyLoad.UnitTests.DatabaseComposition.CompositionLinkLifetimeJsonProtocol;
 
-namespace KeyLoad.UnitTests.Features.DatabaseComposition;
+namespace KeyLoad.UnitTests.DatabaseComposition;
 
 internal static class CompositionLinkLifetimeJsonAssertions
 {

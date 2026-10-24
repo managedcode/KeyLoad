@@ -1,11 +1,11 @@
-using KeyLoad.Core.Features.CommandOutcomes.Contracts;
+using KeyLoad.Core.CommandOutcomes.Contracts;
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
-using KeyLoad.UnitTests.Features.StorageRecovery.Assertions;
+using KeyLoad.UnitTests.StorageRecovery.Assertions;
 using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
 
-namespace KeyLoad.UnitTests.Features.Messaging;
+namespace KeyLoad.UnitTests.Messaging;
 
 internal static class SubscriptionOldCutSavedFailure
 {

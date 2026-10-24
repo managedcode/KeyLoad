@@ -1,9 +1,9 @@
-using KeyLoad.Core.Features.StoragePartitions.Contracts;
-using KeyLoad.Core.Features.StoragePartitions.Queries;
+using KeyLoad.Core.StoragePartitions.Contracts;
+using KeyLoad.Core.StoragePartitions.Queries;
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution.Helpers;
+namespace KeyLoad.UnitTests.OrleansExecution.Helpers;
 
 internal static class PartitionRecordCancellationRunner
 {

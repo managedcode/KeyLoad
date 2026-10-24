@@ -1,7 +1,7 @@
 using TUnit.Assertions.Enums;
-using static KeyLoad.IntegrationTests.Features.Search.ThreeWayHybridClusterScenario;
+using static KeyLoad.IntegrationTests.Search.ThreeWayHybridClusterScenario;
 
-namespace KeyLoad.IntegrationTests.Features.Search;
+namespace KeyLoad.IntegrationTests.Search;
 
 internal static class HybridExplainClusterAssertions
 {

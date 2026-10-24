@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
-using KeyLoad.RecoveryTests.Features.EventStreams;
+using KeyLoad.RecoveryTests.EventStreams;
 
-namespace KeyLoad.UnitTests.Features.EventStreams;
+namespace KeyLoad.UnitTests.EventStreams;
 
 internal sealed class SharedDomainState
 {

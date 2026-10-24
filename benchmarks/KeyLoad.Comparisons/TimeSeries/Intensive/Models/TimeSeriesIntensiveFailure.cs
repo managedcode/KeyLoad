@@ -1,6 +1,6 @@
 using Npgsql;
 
-namespace KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries.Intensive;
+namespace KeyLoad.Comparisons.BenchmarkComparisons.TimeSeries.Intensive;
 
 internal readonly record struct TimeSeriesIntensiveFailure(TimeSeriesIntensiveFailureOrigin Origin,
     ErrorCode? KeyLoadCode, int? HttpStatus, ulong? SqlState)

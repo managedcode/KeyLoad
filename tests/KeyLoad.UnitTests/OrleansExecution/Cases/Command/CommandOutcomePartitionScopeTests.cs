@@ -1,12 +1,12 @@
 using System.Text.Json;
-using KeyLoad.Core.Features.Authorization;
-using KeyLoad.Core.Features.CommandOutcomes.Contracts;
-using KeyLoad.Core.Features.DocumentStorage;
+using KeyLoad.Core.Authorization;
+using KeyLoad.Core.CommandOutcomes.Contracts;
+using KeyLoad.Core.DocumentStorage;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
-using static KeyLoad.UnitTests.Features.OrleansExecution.CommandOutcomePartitionScopeTestData;
+using static KeyLoad.UnitTests.OrleansExecution.CommandOutcomePartitionScopeTestData;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal sealed class CommandOutcomePartitionScopeTests
 {

@@ -2,7 +2,7 @@ using System.Collections.Immutable;
 using KeyLoad.Storage;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.Core.Features.ResourceExecution;
+namespace KeyLoad.Core.ResourceExecution;
 
 internal sealed class ResourceEffectBindingScope(IOptions<DatabaseLimits> options)
 {

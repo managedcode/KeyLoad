@@ -2,7 +2,7 @@ using System.Text;
 using System.Text.Json;
 using KeyLoad.Server;
 
-namespace KeyLoad.IntegrationTests.Features.OrleansExecution.Helpers;
+namespace KeyLoad.IntegrationTests.OrleansExecution.Helpers;
 
 internal static class RequestCqrsClusterDiagnosticsArtifactAssertions
 {

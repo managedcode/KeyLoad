@@ -1,7 +1,7 @@
 using Orleans.Serialization.Buffers;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.InternalSerialization;
+namespace KeyLoad.UnitTests.InternalSerialization;
 
 internal static class EncodedTypeFrameFixture
 {

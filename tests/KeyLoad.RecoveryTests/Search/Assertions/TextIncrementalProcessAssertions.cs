@@ -1,10 +1,10 @@
 using System.Text.Json;
 using KeyLoad.Core;
-using KeyLoad.Core.Features.InternalSerialization;
-using KeyLoad.Core.Features.ResourceExecution;
-using KeyLoad.Server.Features.Search;
+using KeyLoad.Core.InternalSerialization;
+using KeyLoad.Core.ResourceExecution;
+using KeyLoad.Server.Search;
 
-namespace KeyLoad.RecoveryTests.Features.Search;
+namespace KeyLoad.RecoveryTests.Search;
 
 internal static class TextIncrementalProcessAssertions
 {

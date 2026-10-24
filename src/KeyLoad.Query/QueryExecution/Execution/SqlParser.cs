@@ -8,7 +8,7 @@ public sealed class SqlParser
 {
     private const int DefaultDialectVersion = SqlOperationProtocol.DefaultQueryDialectVersion;
     private readonly Microsoft.SqlServer.TransactSql.ScriptDom.TSqlStatement statement;
-    private readonly global::KeyLoad.Query.Features.QueryExecution.ScriptDomLoweringContext context;
+    private readonly global::KeyLoad.Query.QueryExecution.ScriptDomLoweringContext context;
     private readonly int dialectVersion;
 
     /// <summary>Creates the execution T-SQL adapter with centrally validated query limits.</summary>
@@ -30,16 +30,16 @@ public sealed class SqlParser
         execution.Validate();
         if (dialectVersion != DefaultDialectVersion)
         {
-            throw global::KeyLoad.Features.QueryExecution.ScriptDomErrors.Unsupported();
+            throw global::KeyLoad.QueryExecution.ScriptDomErrors.Unsupported();
         }
         this.dialectVersion = dialectVersion;
         var originalBudget = budget ?? new ReadExecutionBudget(limitsOptions);
-        statement = global::KeyLoad.Features.QueryExecution.ScriptDomSyntax.Parse(sql, limitsOptions, originalBudget.Check, originalBudget.Cancellation);
+        statement = global::KeyLoad.QueryExecution.ScriptDomSyntax.Parse(sql, limitsOptions, originalBudget.Check, originalBudget.Cancellation);
         context = new(limitsOptions, executionOptions, originalBudget, limits.MaxQueryTokens);
     }
 
     /// <summary>Lowers supported execution T-SQL into the existing immutable authorized query plan.</summary>
     /// <returns>The canonical typed SELECT plan.</returns>
     public SelectQuery Parse()
-        => global::KeyLoad.Query.Features.QueryExecution.ScriptDomSelectLowering.Read(statement, dialectVersion, context);
+        => global::KeyLoad.Query.QueryExecution.ScriptDomSelectLowering.Read(statement, dialectVersion, context);
 }

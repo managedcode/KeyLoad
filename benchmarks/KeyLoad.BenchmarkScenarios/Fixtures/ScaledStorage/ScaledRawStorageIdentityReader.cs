@@ -1,6 +1,6 @@
 using System.Buffers.Binary;
 
-namespace KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
+namespace KeyLoad.BenchmarkScenarios.BenchmarkComparisons;
 
 internal static class ScaledRawStorageIdentityReader
 {

@@ -1,4 +1,4 @@
-namespace KeyLoad.Core.Features.InternalSerialization;
+namespace KeyLoad.Core.InternalSerialization;
 
 internal static class ValidatedQueueLeaseFields
 {

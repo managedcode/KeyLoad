@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Options;
 using Npgsql;
 
-namespace KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries.Intensive;
+namespace KeyLoad.Comparisons.BenchmarkComparisons.TimeSeries.Intensive;
 
 internal sealed class TimescaleTimeSeriesIntensiveSession : IAsyncDisposable
 {

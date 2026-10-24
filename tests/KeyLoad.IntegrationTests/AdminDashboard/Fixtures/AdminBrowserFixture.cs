@@ -1,7 +1,7 @@
 using KeyLoad.Server;
 using Microsoft.Playwright;
 
-namespace KeyLoad.IntegrationTests.Features.AdminDashboard;
+namespace KeyLoad.IntegrationTests.AdminDashboard;
 
 internal sealed class AdminBrowserFixture : IAsyncDisposable
 {

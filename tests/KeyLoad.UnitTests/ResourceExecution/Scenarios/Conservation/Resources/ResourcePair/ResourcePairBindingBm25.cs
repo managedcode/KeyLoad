@@ -1,11 +1,11 @@
-using KeyLoad.Core.Features.Search;
-using KeyLoad.Query.Features.QueryExecution;
-using KeyLoad.Query.Features.Search;
-using KeyLoad.UnitTests.Features.Messaging;
+using KeyLoad.Core.Search;
+using KeyLoad.Query.QueryExecution;
+using KeyLoad.Query.Search;
+using KeyLoad.UnitTests.Messaging;
 using ManagedCode.Communication.Commands;
-using static KeyLoad.UnitTests.Features.ResourceExecution.ResourcePairBindingState;
+using static KeyLoad.UnitTests.ResourceExecution.ResourcePairBindingState;
 
-namespace KeyLoad.UnitTests.Features.ResourceExecution;
+namespace KeyLoad.UnitTests.ResourceExecution;
 
 internal static class ResourcePairBindingBm25
 {

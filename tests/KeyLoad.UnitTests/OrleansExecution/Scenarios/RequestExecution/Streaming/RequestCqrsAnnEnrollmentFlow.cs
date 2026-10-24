@@ -1,8 +1,8 @@
 using System.Security.Cryptography;
 using KeyLoad.Clustering;
-using KeyLoad.Server.Features.Search;
+using KeyLoad.Server.Search;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal static class RequestCqrsAnnEnrollmentFlow
 {

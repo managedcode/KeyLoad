@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 [global::Orleans.GenerateSerializer]
 [global::Orleans.Alias(CqrsProtocol.SnapshotAlias)]

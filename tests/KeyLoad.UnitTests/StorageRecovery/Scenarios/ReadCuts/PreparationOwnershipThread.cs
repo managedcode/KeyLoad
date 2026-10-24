@@ -1,6 +1,6 @@
 using KeyLoad.Server;
 
-namespace KeyLoad.UnitTests.Features.StorageRecovery;
+namespace KeyLoad.UnitTests.StorageRecovery;
 
 /// <summary>Observes foreign-thread refusal while gated, then joins that original worker after the gate unwinds.</summary>
 internal sealed class PreparationOwnershipThread

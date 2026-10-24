@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.ChangeFeeds;
+namespace KeyLoad.IntegrationTests.ChangeFeeds;
 
 internal static class FeedLiveClusterProtocol
 {

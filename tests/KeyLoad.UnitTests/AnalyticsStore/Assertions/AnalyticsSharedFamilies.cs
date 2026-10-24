@@ -1,12 +1,12 @@
-using KeyLoad.Core.Features.AnalyticsStore;
-using KeyLoad.Core.Features.BackupRestore.Serialization;
-using KeyLoad.Core.Features.ResourceExecution;
-using KeyLoad.Core.Features.StoragePartitions.Contracts;
-using KeyLoad.Core.Features.StoragePartitions.Queries;
+using KeyLoad.Core.AnalyticsStore;
+using KeyLoad.Core.BackupRestore.Serialization;
+using KeyLoad.Core.ResourceExecution;
+using KeyLoad.Core.StoragePartitions.Contracts;
+using KeyLoad.Core.StoragePartitions.Queries;
 using KeyLoad.Storage;
-using P = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsSharedProtocol;
+using P = KeyLoad.UnitTests.AnalyticsStore.AnalyticsSharedProtocol;
 
-namespace KeyLoad.UnitTests.Features.AnalyticsStore;
+namespace KeyLoad.UnitTests.AnalyticsStore;
 
 internal static class AnalyticsSharedFamilies
 {

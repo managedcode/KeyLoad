@@ -1,7 +1,7 @@
 using System.Security.Cryptography;
-using KeyLoad.Core.Features.Search;
+using KeyLoad.Core.Search;
 
-namespace KeyLoad.Server.Features.Search;
+namespace KeyLoad.Server.Search;
 
 internal sealed class AnnHashStream(AnnSeedWork work, long maximumBytes) : Stream
 {

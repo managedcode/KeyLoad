@@ -1,10 +1,10 @@
 using System.Collections.Immutable;
 using KeyLoad.Core;
-using KeyLoad.Core.Features.DocumentStorage;
-using KeyLoad.Query.Features.Search;
+using KeyLoad.Core.DocumentStorage;
+using KeyLoad.Query.Search;
 using KeyLoad.Storage;
 
-namespace KeyLoad.Query.Features.QueryExecution;
+namespace KeyLoad.Query.QueryExecution;
 
 internal static class DistributedSearchCandidateWindow
 {

@@ -1,6 +1,6 @@
 using System.Globalization;
 
-namespace KeyLoad.Core.Features.ResourceExecution;
+namespace KeyLoad.Core.ResourceExecution;
 
 /// <summary>Preserves bounded RFC 6901 pointer encoding and decoding for shared field operations.</summary>
 internal static class JsonPointerPaths

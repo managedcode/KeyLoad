@@ -1,7 +1,7 @@
 using KeyLoad.Server;
-using static KeyLoad.UnitTests.Features.EventStreams.EventQueueStateEnvelopeHistoryAssertions;
+using static KeyLoad.UnitTests.EventStreams.EventQueueStateEnvelopeHistoryAssertions;
 
-namespace KeyLoad.UnitTests.Features.EventStreams;
+namespace KeyLoad.UnitTests.EventStreams;
 
 internal static class EventQueueStateEnvelopeWholeFlow
 {

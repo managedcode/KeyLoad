@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.AnalyticsStore;
+namespace KeyLoad.UnitTests.AnalyticsStore;
 
 internal sealed class AnalyticsBoundReadBudgetTests
 {

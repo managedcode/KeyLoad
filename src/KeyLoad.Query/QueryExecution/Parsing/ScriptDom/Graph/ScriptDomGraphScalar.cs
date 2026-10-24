@@ -1,10 +1,10 @@
 using System.Collections.Immutable;
 using System.Globalization;
 using System.Text.Json;
-using KeyLoad.Features.QueryExecution;
+using KeyLoad.QueryExecution;
 using Dom = Microsoft.SqlServer.TransactSql.ScriptDom;
 
-namespace KeyLoad.Query.Features.QueryExecution;
+namespace KeyLoad.Query.QueryExecution;
 
 internal static class ScriptDomGraphScalar
 {

@@ -1,9 +1,9 @@
 using System.Text.Json;
 using KeyLoad.Query;
-using KeyLoad.UnitTests.Features.Messaging;
+using KeyLoad.UnitTests.Messaging;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal static class SqlEventReferenceJoinAssertions
 {

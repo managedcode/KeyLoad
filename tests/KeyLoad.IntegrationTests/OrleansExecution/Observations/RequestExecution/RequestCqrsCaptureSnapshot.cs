@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.OrleansExecution;
+namespace KeyLoad.IntegrationTests.OrleansExecution;
 
 internal sealed record RequestCqrsCaptureSnapshot(string Node, int Lines, int Candidates,
     int Accepted, int Malformed, int Oversized, bool Saturated,

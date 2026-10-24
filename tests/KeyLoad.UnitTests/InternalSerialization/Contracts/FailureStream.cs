@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.InternalSerialization;
+namespace KeyLoad.UnitTests.InternalSerialization;
 
 // A real Stream boundary that fails writes before retaining data.
 internal sealed class FailureStream(Exception failure, CancellationToken cancellation = default) : Stream

@@ -1,6 +1,6 @@
 using ZoneTree.Analytics;
 
-namespace KeyLoad.Core.Features.AnalyticsStore;
+namespace KeyLoad.Core.AnalyticsStore;
 
 /// <summary>Bounds one disposable derived generation; canonical source rows own retention and acknowledgements.</summary>
 internal static class AnalyticsStoreOptions

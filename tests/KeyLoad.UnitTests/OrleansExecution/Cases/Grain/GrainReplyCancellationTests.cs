@@ -1,8 +1,8 @@
 using KeyLoad.Clustering;
-using KeyLoad.UnitTests.Features.TestInfrastructure;
+using KeyLoad.UnitTests.TestInfrastructure;
 using Microsoft.Extensions.Logging;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 /// <summary>AC-AISQL-013/AC-ROUTE-010: actor replies distinguish incoming cancellation from execution interruption.</summary>
 [NotInParallel(LoggingEventSourceIsolation.Key)]

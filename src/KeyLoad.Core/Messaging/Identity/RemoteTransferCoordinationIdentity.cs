@@ -2,7 +2,7 @@ using System.Security.Cryptography;
 using System.Text;
 using KeyLoad.Storage;
 
-namespace KeyLoad.Core.Features.Messaging;
+namespace KeyLoad.Core.Messaging;
 
 internal static class RemoteTransferCoordinationIdentity
 {

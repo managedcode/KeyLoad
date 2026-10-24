@@ -1,9 +1,9 @@
 using KeyLoad.Server;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
-using P = KeyLoad.UnitTests.Features.StorageRecovery.CheckpointOriginalCauseProtocol;
+using P = KeyLoad.UnitTests.StorageRecovery.CheckpointOriginalCauseProtocol;
 
-namespace KeyLoad.UnitTests.Features.StorageRecovery;
+namespace KeyLoad.UnitTests.StorageRecovery;
 
 internal static class CheckpointOriginalCauseFlow
 {

@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.EventStreams;
+namespace KeyLoad.IntegrationTests.EventStreams;
 
 /// <summary>Named public values for genuine EventStreams Orleans callers.</summary>
 internal static class McpEventStreamTokens

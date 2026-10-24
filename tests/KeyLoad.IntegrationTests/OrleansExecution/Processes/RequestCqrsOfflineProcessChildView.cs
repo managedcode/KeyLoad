@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-namespace KeyLoad.IntegrationTests.Features.OrleansExecution;
+namespace KeyLoad.IntegrationTests.OrleansExecution;
 
 internal sealed class RequestCqrsOfflineProcessChildView(RequestCqrsOfflineProcessOwnedChild owner)
 {

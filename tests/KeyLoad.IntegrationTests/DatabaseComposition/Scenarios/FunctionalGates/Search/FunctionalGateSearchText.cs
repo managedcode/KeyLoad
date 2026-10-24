@@ -1,8 +1,8 @@
 using KeyLoad.Client;
-using KeyLoad.IntegrationTests.Features.QueryExecution;
-using S = KeyLoad.IntegrationTests.Features.DatabaseComposition.FunctionalGateSearch;
+using KeyLoad.IntegrationTests.QueryExecution;
+using S = KeyLoad.IntegrationTests.DatabaseComposition.FunctionalGateSearch;
 
-namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
+namespace KeyLoad.IntegrationTests.DatabaseComposition;
 
 internal static class FunctionalGateSearchText
 {

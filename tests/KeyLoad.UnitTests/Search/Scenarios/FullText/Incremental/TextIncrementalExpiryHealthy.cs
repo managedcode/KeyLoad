@@ -1,6 +1,6 @@
 using KeyLoad.Clustering;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 /// <summary>Releases the actual expired original generation and builds a distinct persisted consumer before literal cold continuation.</summary>
 internal static class TextIncrementalExpiryHealthy

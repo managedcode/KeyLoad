@@ -1,4 +1,4 @@
-using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.Core.ResourceExecution;
 
 namespace KeyLoad.Core;
 /// <summary>Executes EventStreamsQueries operations against the caller's database context.</summary>

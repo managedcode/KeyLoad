@@ -1,7 +1,7 @@
 using KeyLoad.Core;
 using ZoneTree.FullTextSearch.Index;
 
-namespace KeyLoad.Server.Features.Search;
+namespace KeyLoad.Server.Search;
 
 internal static class TextIncrementalPostingWriter
 {

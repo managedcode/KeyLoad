@@ -1,12 +1,12 @@
 using System.Collections.Concurrent;
 using System.Text;
 using System.Text.Json;
-using KeyLoad.UnitTests.Features.OrleansExecution;
+using KeyLoad.UnitTests.OrleansExecution;
 using Microsoft.AspNetCore.Http;
-using D = KeyLoad.UnitTests.Features.ClientApi.DeclaredResponseEofProtocol;
-using P = KeyLoad.UnitTests.Features.ClientApi.SuccessBodyProtocol;
+using D = KeyLoad.UnitTests.ClientApi.DeclaredResponseEofProtocol;
+using P = KeyLoad.UnitTests.ClientApi.SuccessBodyProtocol;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 internal sealed class SuccessBodyEndpoint(ConnectionScenario scenario, PrincipalRecord principal,
     DeclaredResponseEofTasks tasks, string unusable, bool appendPrefix, bool declareLength, int maximumResponseBytes)

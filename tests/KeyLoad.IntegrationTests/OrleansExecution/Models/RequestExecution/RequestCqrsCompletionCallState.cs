@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.OrleansExecution;
+namespace KeyLoad.IntegrationTests.OrleansExecution;
 
 internal enum RequestCqrsCompletionCallState
 {

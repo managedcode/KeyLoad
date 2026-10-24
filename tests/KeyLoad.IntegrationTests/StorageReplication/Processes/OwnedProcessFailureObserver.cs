@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.StorageReplication.Processes;
+namespace KeyLoad.IntegrationTests.StorageReplication.Processes;
 
 internal static class OwnedProcessFailureObserver
 {

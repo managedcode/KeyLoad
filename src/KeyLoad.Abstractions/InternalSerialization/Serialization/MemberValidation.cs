@@ -1,3 +1,3 @@
-namespace KeyLoad.Features.InternalSerialization;
+namespace KeyLoad.InternalSerialization;
 
 internal sealed record MemberValidation(Func<object, object?> Read, ValueValidation? Value);

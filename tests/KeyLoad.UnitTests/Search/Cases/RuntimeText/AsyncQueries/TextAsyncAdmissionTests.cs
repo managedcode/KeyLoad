@@ -1,8 +1,8 @@
 using KeyLoad.Query;
-using KeyLoad.Server.Features.Search;
-using KeyLoad.UnitTests.Features.ResourceExecution;
+using KeyLoad.Server.Search;
+using KeyLoad.UnitTests.ResourceExecution;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 internal sealed class TextAsyncAdmissionTests
 {

@@ -2,7 +2,7 @@ using KeyLoad.Clustering;
 using KeyLoad.Server;
 using Microsoft.Extensions.Logging.Abstractions;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 /// <summary>Owns the physical fixture until original request settlement; borrows the independently verified request owner.</summary>
 internal sealed class RequestDrainLifecycleState : IDisposable

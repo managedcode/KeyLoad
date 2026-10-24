@@ -1,12 +1,12 @@
 using System.Diagnostics;
 using System.Diagnostics.Metrics;
-using KeyLoad.Server.Features.OrleansHosting.Configuration;
-using KeyLoad.Server.Features.OrleansHosting.Contracts;
+using KeyLoad.Server.OrleansHosting.Configuration;
+using KeyLoad.Server.OrleansHosting.Contracts;
 using Microsoft.Extensions.Options;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
 
-namespace KeyLoad.Server.Features.OrleansHosting.Diagnostics;
+namespace KeyLoad.Server.OrleansHosting.Diagnostics;
 
 /// <summary>Scrubs execution Orleans activities before they reach any configured exporter.</summary>
 internal sealed class OrleansTelemetryPrivacyProcessor(IOptions<OrleansTelemetryOptions> configuredOptions)

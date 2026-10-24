@@ -2,7 +2,7 @@ using System.Buffers;
 using System.Text.Json;
 using ManagedCode.Communication;
 
-namespace KeyLoad.Client.Features.ClientApi;
+namespace KeyLoad.Client.ClientApi;
 
 internal static class BoundedProblemReader
 {

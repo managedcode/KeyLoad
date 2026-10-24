@@ -1,6 +1,6 @@
 using Aspire.Hosting.ApplicationModel;
 
-namespace KeyLoad.ComparisonHost.Features.BenchmarkOrchestration;
+namespace KeyLoad.ComparisonHost.BenchmarkOrchestration;
 
 /// <summary>Releases only this workload's host directory after Aspire has joined its session resources.</summary>
 internal static class IsolatedDataCleanup

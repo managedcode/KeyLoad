@@ -1,4 +1,4 @@
-using KeyLoad.Core.Features.InternalSerialization;
+using KeyLoad.Core.InternalSerialization;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core;
@@ -16,7 +16,7 @@ public static class ChangeFeedsExecution
             throw Errors.Fail(ErrorCode.PermissionDenied, InvalidAnnSettlement);
         }
 
-        Features.Search.AnnProjectionPinValidation.RequireOwner(engine, view, principal, request.Consumer.Partition, request);
+        Search.AnnProjectionPinValidation.RequireOwner(engine, view, principal, request.Consumer.Partition, request);
         return ProjectionConsumerIdentity.ProjectionConsumer(view, request.Consumer);
     });
     internal static CommitProjectionBatchRequest? CreateAnnInitialSettlementIntent(this DatabaseEngine engine, PrincipalRecord principal, AnnMaintenanceRequest original, AnnMaintenanceResult result, Guid childCommandId)
@@ -54,7 +54,7 @@ public static class ChangeFeedsExecution
         ProjectionBatchExecution.RequireProjectionAdministrator(fresh);
         var state = ProjectionConsumerIdentity.ProjectionConsumer(view, original.Consumer);
         var authority = RequireAnnSettlementAuthority(state, fresh);
-        Features.Search.AnnProjectionPinValidation.RequireOwner(engine, view, fresh, original.Consumer.Partition, original);
+        Search.AnnProjectionPinValidation.RequireOwner(engine, view, fresh, original.Consumer.Partition, original);
         if (state.Released || state.Checkpoint != checkpoint || state.Definition.IndexGeneration != original.IndexGeneration || state.InitialAnnMaintenance is not { } exact || !global::KeyLoad.AnnMaintenanceRequestIdentity.Same(exact, original) || childCommandId == Guid.Empty || result.CommandId != original.CommandId || result.Consumer != original.Consumer || result.IndexGeneration != original.IndexGeneration)
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, InvalidAnnSettlement);

@@ -1,7 +1,7 @@
-using KeyLoad.Core.Features.ResourceExecution;
-using KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
+using KeyLoad.Core.ResourceExecution;
+using KeyLoad.Storage.ZoneTree.ResourceExecution;
 
-namespace KeyLoad.UnitTests.Features.ResourceExecution;
+namespace KeyLoad.UnitTests.ResourceExecution;
 
 internal sealed class ZoneTreeCoordinatedPointCacheReadTests
 {

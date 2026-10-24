@@ -1,5 +1,5 @@
-using KeyLoad.Core.Features.InternalSerialization;
-using KeyLoad.Core.Features.Messaging;
+using KeyLoad.Core.InternalSerialization;
+using KeyLoad.Core.Messaging;
 using KeyLoad.Storage;
 using ManagedCode.Communication.Commands;
 

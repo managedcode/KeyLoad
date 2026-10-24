@@ -1,6 +1,6 @@
 using System.Text.Json;
 
-namespace KeyLoad.RecoveryTests.Features.DocumentStorage;
+namespace KeyLoad.RecoveryTests.DocumentStorage;
 
 internal static class ScalarIndexReferenceModelAssertions
 {

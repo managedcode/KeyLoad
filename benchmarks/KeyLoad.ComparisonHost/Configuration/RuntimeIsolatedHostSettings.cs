@@ -3,7 +3,7 @@ using System.Globalization;
 using KeyLoad.Comparisons;
 using Microsoft.Extensions.Configuration;
 
-namespace KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonHost.BenchmarkComparisons;
 
 /// <summary>Reads only the selected engine's execution connections and credentials before allocation.</summary>
 [KeyLoad.ConfigurationBinding]

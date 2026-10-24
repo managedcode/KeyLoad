@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.Messaging;
+namespace KeyLoad.IntegrationTests.Messaging;
 
 internal sealed class SubscriptionIndependentCheckpointR52State(SubscriptionFilterClusterSeed seed)
 {

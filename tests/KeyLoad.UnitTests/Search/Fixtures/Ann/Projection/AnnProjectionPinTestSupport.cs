@@ -1,8 +1,8 @@
 using System.Collections.Immutable;
-using KeyLoad.Core.Features.Search;
+using KeyLoad.Core.Search;
 using ManagedCode.Communication;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 internal static class AnnProjectionPinTestSupport
 {

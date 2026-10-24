@@ -1,5 +1,5 @@
 using KeyLoad.Core;
-namespace KeyLoad.RecoveryTests.Features.Messaging;
+namespace KeyLoad.RecoveryTests.Messaging;
 
 internal static class RemoteTransferAttemptCrashSetup
 {

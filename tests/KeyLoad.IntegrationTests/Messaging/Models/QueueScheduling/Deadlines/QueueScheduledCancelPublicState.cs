@@ -1,5 +1,5 @@
 using System.Text.Json;
-namespace KeyLoad.IntegrationTests.Features.Messaging;
+namespace KeyLoad.IntegrationTests.Messaging;
 
 internal sealed record QueueScheduledCancelPublicState(QueueLifecyclePublicState Owner, DateTimeOffset Due)
 {

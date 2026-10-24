@@ -1,4 +1,4 @@
-namespace KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
+namespace KeyLoad.LoadTests.AppHost.BenchmarkComparisons;
 
 /// <summary>Uses session containers and anonymous execution volumes for the selected workload's disposable database storage.</summary>
 internal static class LoadTestResourceLifetime

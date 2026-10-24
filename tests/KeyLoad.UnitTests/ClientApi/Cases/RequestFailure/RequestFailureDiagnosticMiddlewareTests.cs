@@ -1,11 +1,11 @@
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using KeyLoad.Server;
-using KeyLoad.UnitTests.Features.TestInfrastructure;
+using KeyLoad.UnitTests.TestInfrastructure;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>AC-DIAG-001/002: middleware diagnostics retain only closed dispatch evidence.</summary>
 [NotInParallel(LoggingEventSourceIsolation.Key)]

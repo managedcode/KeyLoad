@@ -1,4 +1,4 @@
-namespace KeyLoad.Core.Features.GraphTraversal.Serialization;
+namespace KeyLoad.Core.GraphTraversal.Serialization;
 
 /// <summary>Builds a fixed execution tuple tree independent of the caller's CLR reference sharing.</summary>
 internal static class GraphCrossPartitionFingerprintInput

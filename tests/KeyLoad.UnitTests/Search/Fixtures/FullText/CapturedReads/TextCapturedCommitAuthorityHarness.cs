@@ -1,9 +1,9 @@
 using KeyLoad.Query;
-using KeyLoad.Query.Features.Search;
+using KeyLoad.Query.Search;
 using KeyLoad.Server;
-using KeyLoad.Server.Features.Search;
+using KeyLoad.Server.Search;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 internal sealed class TextCapturedCommitAuthorityHarness : IDisposable
 {
@@ -26,7 +26,7 @@ internal sealed class TextCapturedCommitAuthorityHarness : IDisposable
         SearchRequest request, CancellationToken token)
     {
         this.request = request;
-        database = KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Open(fixture.Store);
+        database = KeyLoad.UnitTests.Messaging.QueueWholeFlowStorage.Open(fixture.Store);
         var options = UnitExecutionOptions.QueryExecution();
         execution = options.Value;
         execution.Validate();

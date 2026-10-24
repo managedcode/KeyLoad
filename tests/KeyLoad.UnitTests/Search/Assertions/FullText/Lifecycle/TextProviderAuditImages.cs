@@ -1,14 +1,14 @@
 using System.Security.Cryptography;
 using System.Text.Json;
-using KeyLoad.Query.Features.Search;
-using KeyLoad.Server.Features.Search;
+using KeyLoad.Query.Search;
+using KeyLoad.Server.Search;
 using KeyLoad.Storage;
-using KeyLoad.UnitTests.Features.Messaging;
-using KeyLoad.UnitTests.Features.StorageRecovery.Assertions;
+using KeyLoad.UnitTests.Messaging;
+using KeyLoad.UnitTests.StorageRecovery.Assertions;
 using TUnit.Assertions.Enums;
-using static KeyLoad.UnitTests.Features.Search.TextProviderAuditProtocol;
+using static KeyLoad.UnitTests.Search.TextProviderAuditProtocol;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 internal static class TextProviderAuditImages
 {

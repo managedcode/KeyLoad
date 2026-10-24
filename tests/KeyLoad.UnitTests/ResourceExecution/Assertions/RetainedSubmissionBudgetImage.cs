@@ -1,6 +1,6 @@
 using ManagedCode.Communication;
 
-namespace KeyLoad.UnitTests.Features.ResourceExecution;
+namespace KeyLoad.UnitTests.ResourceExecution;
 
 internal sealed record RetainedSubmissionBudgetImage(Dictionary<string, string> Rows, long Position,
     (long AppliedPosition, long StorePosition) Cut)

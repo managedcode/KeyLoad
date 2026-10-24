@@ -1,5 +1,5 @@
 
-namespace KeyLoad.RecoveryTests.Features.StorageRecovery;
+namespace KeyLoad.RecoveryTests.StorageRecovery;
 
 internal sealed class KilledProcessFileReadinessTests
 {

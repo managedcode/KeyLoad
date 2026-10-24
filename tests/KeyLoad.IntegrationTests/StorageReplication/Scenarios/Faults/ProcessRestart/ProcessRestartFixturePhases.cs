@@ -1,6 +1,6 @@
-using KeyLoad.AppHost.Features.TestInfrastructure;
+using KeyLoad.AppHost.TestInfrastructure;
 
-namespace KeyLoad.IntegrationTests.Features.StorageReplication;
+namespace KeyLoad.IntegrationTests.StorageReplication;
 
 /// <summary>Composes the actual fixture-owned execution restart acceptance phase separately from health.</summary>
 internal static class ProcessRestartFixturePhases

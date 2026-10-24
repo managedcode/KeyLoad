@@ -1,7 +1,7 @@
 using System.Text.Json;
 using System.Text.RegularExpressions;
 
-namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
+namespace KeyLoad.SiteTests.BenchmarkComparisons;
 
 /// <summary>Independent execution arithmetic for a single original case or concurrent lane, without repetition pooling.</summary>
 internal static class SiteIsolatedOracle

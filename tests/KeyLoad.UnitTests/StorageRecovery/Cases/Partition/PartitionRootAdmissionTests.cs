@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.StorageRecovery;
+namespace KeyLoad.UnitTests.StorageRecovery;
 
 /// <summary>REQ/AC-EXECUTION-007: reject foreign node-root state before owner or store mutation.</summary>
 internal sealed class PartitionRootAdmissionTests
@@ -54,9 +54,9 @@ internal sealed class PartitionRootAdmissionTests
         await AssertRejectedThenHealthyAsync(CanonicalDirectoryName, CreateFile, VerifyFileAsync, File.Delete);
         await AssertRejectedThenHealthyAsync(OwnerLockName, PartitionRootDirectoryOperations.Create, PartitionRootDirectoryOperations.VerifyAsync,
             path => Directory.Delete(path, recursive: true));
-        await AssertRejectedThenHealthyAsync(KeyLoad.Server.Features.Search.TextOnlineRoot.DirectoryName,
+        await AssertRejectedThenHealthyAsync(KeyLoad.Server.Search.TextOnlineRoot.DirectoryName,
             CreateFile, VerifyFileAsync, File.Delete);
-        await AssertRejectedThenHealthyAsync(KeyLoad.Server.Features.Search.TextOnlineRoot.DirectoryName,
+        await AssertRejectedThenHealthyAsync(KeyLoad.Server.Search.TextOnlineRoot.DirectoryName,
             CreateLink, VerifyLinkAsync, File.Delete);
         await AssertRejectedThenHealthyAsync(KeyLoad.Server.UserAnalyticsGenerationPaths.DirectoryName,
             CreateFile, VerifyFileAsync, File.Delete);

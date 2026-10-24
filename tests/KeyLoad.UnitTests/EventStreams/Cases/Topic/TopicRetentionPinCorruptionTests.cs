@@ -1,5 +1,5 @@
-using static KeyLoad.UnitTests.Features.EventStreams.TopicRetentionCorruptionFixture;
-namespace KeyLoad.UnitTests.Features.EventStreams;
+using static KeyLoad.UnitTests.EventStreams.TopicRetentionCorruptionFixture;
+namespace KeyLoad.UnitTests.EventStreams;
 
 internal sealed class TopicRetentionPinCorruptionTests
 {

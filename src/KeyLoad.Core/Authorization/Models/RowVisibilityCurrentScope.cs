@@ -1,4 +1,4 @@
-namespace KeyLoad.Core.Features.Authorization;
+namespace KeyLoad.Core.Authorization;
 
 internal readonly record struct RowVisibilityCurrentScope(
     Guid NodeId, Guid Incarnation, long ReadGeneration, long CutPosition,

@@ -2,7 +2,7 @@ using System.Text;
 using System.Text.Json;
 using KeyLoad.Server;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>AC-MCP-003/005/007: the reflected root identifier is bounded by its actual encoded UTF-8 token.</summary>
 internal sealed class McpIdentifierFramingTests

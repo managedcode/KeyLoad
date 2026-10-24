@@ -1,8 +1,8 @@
 using System.Collections.Immutable;
 using KeyLoad.Query;
-using static KeyLoad.UnitTests.Features.QueryExecution.BinderFieldLineageProtocol;
+using static KeyLoad.UnitTests.QueryExecution.BinderFieldLineageProtocol;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal static class BinderFieldLineageRequests
 {

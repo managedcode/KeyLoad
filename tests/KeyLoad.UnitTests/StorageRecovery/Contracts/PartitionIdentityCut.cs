@@ -1,5 +1,5 @@
 using KeyLoad.Storage;
 
-namespace KeyLoad.UnitTests.Features.StorageRecovery;
+namespace KeyLoad.UnitTests.StorageRecovery;
 
 internal sealed record PartitionIdentityCut(StoreIdentity Identity, long Position, long JournalLength);

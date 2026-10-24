@@ -1,6 +1,6 @@
 using KeyLoad.Storage;
 
-namespace KeyLoad.UnitTests.Features.StorageRecovery;
+namespace KeyLoad.UnitTests.StorageRecovery;
 
 /// <summary>AC-KEYCODEC-001: typed components encode to exactly the bytes of the boxed components they replace.</summary>
 internal sealed class KeyCodecTypedComponentTests

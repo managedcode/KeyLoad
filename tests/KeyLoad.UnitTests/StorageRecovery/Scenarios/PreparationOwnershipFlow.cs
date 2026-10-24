@@ -1,9 +1,9 @@
 using KeyLoad.Server;
 using KeyLoad.Storage;
-using A = KeyLoad.UnitTests.Features.StorageRecovery.PreparationOwnershipAssertions;
-using O = KeyLoad.UnitTests.Features.StorageRecovery.PreparationOwnershipOwner;
+using A = KeyLoad.UnitTests.StorageRecovery.PreparationOwnershipAssertions;
+using O = KeyLoad.UnitTests.StorageRecovery.PreparationOwnershipOwner;
 
-namespace KeyLoad.UnitTests.Features.StorageRecovery;
+namespace KeyLoad.UnitTests.StorageRecovery;
 
 internal static class PreparationOwnershipFlow
 {

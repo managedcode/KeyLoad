@@ -1,7 +1,7 @@
 using System.Text.Json;
 using KeyLoad.Server;
 
-namespace KeyLoad.IntegrationTests.Features.OrleansExecution;
+namespace KeyLoad.IntegrationTests.OrleansExecution;
 
 /// <summary>Preserves the original canceled wait and emits only closed execution observation counters.</summary>
 internal static class RequestCqrsCaptureCancellationDiagnostics

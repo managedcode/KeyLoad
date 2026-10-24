@@ -1,8 +1,8 @@
-using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.ClientApi;
 using KeyLoad.Server;
-using P = KeyLoad.IntegrationTests.Features.Authorization.RowRevisionInferenceClusterProtocol;
+using P = KeyLoad.IntegrationTests.Authorization.RowRevisionInferenceClusterProtocol;
 
-namespace KeyLoad.IntegrationTests.Features.Authorization;
+namespace KeyLoad.IntegrationTests.Authorization;
 
 [NotInParallel]
 internal sealed class RowRevisionInferenceClusterTests

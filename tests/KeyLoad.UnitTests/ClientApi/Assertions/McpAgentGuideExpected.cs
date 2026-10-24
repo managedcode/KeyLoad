@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>Independent exact expectations for the bounded static guidance contract.</summary>
 internal static class McpAgentGuideExpected

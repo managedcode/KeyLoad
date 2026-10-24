@@ -1,5 +1,5 @@
 using KeyLoad.Query;
-namespace KeyLoad.IntegrationTests.Features.ChangeFeeds;
+namespace KeyLoad.IntegrationTests.ChangeFeeds;
 
 [NotInParallel]
 internal sealed class DocumentLiveProfileClusterTests

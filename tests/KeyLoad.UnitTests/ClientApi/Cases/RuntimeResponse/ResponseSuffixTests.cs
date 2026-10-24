@@ -1,6 +1,6 @@
-using P = KeyLoad.UnitTests.Features.ClientApi.ResponseSuffixProtocol;
+using P = KeyLoad.UnitTests.ClientApi.ResponseSuffixProtocol;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 internal sealed class ResponseSuffixTests
 {

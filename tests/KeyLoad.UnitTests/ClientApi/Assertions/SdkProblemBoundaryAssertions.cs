@@ -1,11 +1,11 @@
 using KeyLoad.Clustering;
 using KeyLoad.Server;
-using KeyLoad.UnitTests.Features.DocumentStorage;
+using KeyLoad.UnitTests.DocumentStorage;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using P = KeyLoad.UnitTests.Features.ClientApi.SdkProblemBoundaryProtocol;
+using P = KeyLoad.UnitTests.ClientApi.SdkProblemBoundaryProtocol;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 internal static class SdkProblemBoundaryAssertions
 {

@@ -1,8 +1,8 @@
 using KeyLoad.Storage.ZoneTree;
 using ManagedCode.Communication;
-using P = KeyLoad.UnitTests.Features.Authorization.FieldWriteOutputProtocol;
+using P = KeyLoad.UnitTests.Authorization.FieldWriteOutputProtocol;
 
-namespace KeyLoad.UnitTests.Features.Authorization;
+namespace KeyLoad.UnitTests.Authorization;
 
 internal sealed class FieldWriteOutputState(TestDatabase owner)
 {

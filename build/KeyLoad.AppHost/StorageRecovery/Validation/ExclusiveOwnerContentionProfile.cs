@@ -1,7 +1,7 @@
 using KeyLoad.AppHost.Hosting;
 using Microsoft.Extensions.Configuration;
 
-namespace KeyLoad.AppHost.Features.StorageRecovery;
+namespace KeyLoad.AppHost.StorageRecovery;
 
 /// <summary>Selects only explicit cold CLUSTER functional competing-owner refusal resources.</summary>
 [ConfigurationBinding]

@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.Server.Features.Search;
+namespace KeyLoad.Server.Search;
 
 /// <summary>Retains actual reader completion and retirement failure under the owning generation gate.</summary>
 internal sealed class AnnGenerationReadLifetime(Lock gate, int maximumReaders)

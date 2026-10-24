@@ -1,3 +1,3 @@
-namespace KeyLoad.UnitTests.Features.Messaging;
+namespace KeyLoad.UnitTests.Messaging;
 
 internal sealed record QueuePendingAuthorityCut(long Position, byte[] Identity, string[] Rows);

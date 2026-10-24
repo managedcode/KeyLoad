@@ -4,12 +4,12 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
 
-namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
+namespace KeyLoad.Analyzers.Tests.CodeQuality;
 
 internal static class RuntimePolicyAnalyzerFixture
 {
     internal const string SourcePath = "/repo/src/KeyLoad/Policies/Subject.cs";
-    private const string CatalogName = "KeyLoad.Analyzers.Features.CodeQuality.ImplementationTermCatalog";
+    private const string CatalogName = "KeyLoad.Analyzers.CodeQuality.ImplementationTermCatalog";
     private const string PlatformAssemblies = "TRUSTED_PLATFORM_ASSEMBLIES";
     private static readonly Lazy<ImmutableArray<MetadataReference>> References = new(CreateReferences);
 

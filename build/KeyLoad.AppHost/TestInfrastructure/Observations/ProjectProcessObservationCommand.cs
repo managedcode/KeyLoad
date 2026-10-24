@@ -4,7 +4,7 @@ using System.Text;
 using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.AppHost.Features.TestInfrastructure;
+namespace KeyLoad.AppHost.TestInfrastructure;
 
 /// <summary>Owns bounded execution metadata subprocesses and joins them after every outcome.</summary>
 internal static class ProjectProcessObservationCommand

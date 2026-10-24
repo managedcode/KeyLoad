@@ -1,3 +1,3 @@
-namespace KeyLoad.Core.Features.GraphTraversal.Models;
+namespace KeyLoad.Core.GraphTraversal.Models;
 
 internal sealed record GraphCrossPartitionRecordWrite(byte[] Key, byte[]? Value);

@@ -1,4 +1,4 @@
-using KeyLoad.Core.Features.AnalyticsStore;
+using KeyLoad.Core.AnalyticsStore;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core;

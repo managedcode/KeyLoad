@@ -4,7 +4,7 @@ using Aspire.Hosting.ApplicationModel;
 using KeyLoad.Comparisons;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.ComparisonHost.Features.BenchmarkOrchestration;
+namespace KeyLoad.ComparisonHost.BenchmarkOrchestration;
 
 internal static class IsolatedTeardown
 {

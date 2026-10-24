@@ -1,7 +1,7 @@
 using KeyLoad.Client;
-using static KeyLoad.UnitTests.Features.EventStreams.AggregateReplayWorkerTestSupport;
+using static KeyLoad.UnitTests.EventStreams.AggregateReplayWorkerTestSupport;
 
-namespace KeyLoad.UnitTests.Features.EventStreams;
+namespace KeyLoad.UnitTests.EventStreams;
 
 internal sealed class AggregateReplayWorkerBoundsTests
 {

@@ -1,7 +1,7 @@
-using KeyLoad.UnitTests.Features.StorageRecovery;
+using KeyLoad.UnitTests.StorageRecovery;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.ResourceExecution;
+namespace KeyLoad.UnitTests.ResourceExecution;
 
 internal static class TestDatabaseDeleteFailureInventory
 {

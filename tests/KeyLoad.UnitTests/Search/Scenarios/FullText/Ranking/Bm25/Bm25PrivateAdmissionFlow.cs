@@ -1,10 +1,10 @@
-using KeyLoad.Core.Features.Search;
-using KeyLoad.Query.Features.Search;
-using KeyLoad.UnitTests.Features.ResourceExecution;
+using KeyLoad.Core.Search;
+using KeyLoad.Query.Search;
+using KeyLoad.UnitTests.ResourceExecution;
 using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 internal static class Bm25PrivateAdmissionFlow
 {

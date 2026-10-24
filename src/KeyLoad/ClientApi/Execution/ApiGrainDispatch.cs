@@ -1,5 +1,5 @@
 using KeyLoad.Clustering;
-using KeyLoad.Features.InternalSerialization;
+using KeyLoad.InternalSerialization;
 
 namespace KeyLoad.Server;
 

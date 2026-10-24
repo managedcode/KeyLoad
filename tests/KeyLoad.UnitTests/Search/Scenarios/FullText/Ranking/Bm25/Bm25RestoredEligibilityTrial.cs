@@ -1,7 +1,7 @@
 using KeyLoad.Storage.ZoneTree.Restore;
-using KeyLoad.UnitTests.Features.BackupRestore;
+using KeyLoad.UnitTests.BackupRestore;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 internal static class Bm25RestoredEligibilityTrial
 {

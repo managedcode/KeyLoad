@@ -1,9 +1,9 @@
 using System.Collections.Concurrent;
 using System.Text.Json;
 using Microsoft.AspNetCore.Http;
-using static KeyLoad.UnitTests.Features.ClientApi.SdkResponseAdmissionProtocol;
+using static KeyLoad.UnitTests.ClientApi.SdkResponseAdmissionProtocol;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 internal sealed class SdkResponseAdmissionOwner(TestDatabase database, bool contentLength)
 {

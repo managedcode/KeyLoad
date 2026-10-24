@@ -5,7 +5,7 @@ using ManagedCode.Orleans.Graph.Interfaces;
 using ManagedCode.Orleans.Graph.Models;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 /// <summary>Checks the production execution storage policy, refused direct calls and original command envelope replay.</summary>
 internal sealed class ConnectionGraphPolicyTests

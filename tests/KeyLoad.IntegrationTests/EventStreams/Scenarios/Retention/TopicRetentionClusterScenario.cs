@@ -1,8 +1,8 @@
 using System.Text.Json;
 using KeyLoad.Client;
-using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.ClientApi;
 
-namespace KeyLoad.IntegrationTests.Features.EventStreams;
+namespace KeyLoad.IntegrationTests.EventStreams;
 
 internal sealed record TopicRetentionClusterScenario(PartitionRef Partition, EventSourceRef Source,
     SubscriptionRef Subscription, CommandRequest Publication, CommitReceipt Receipt)

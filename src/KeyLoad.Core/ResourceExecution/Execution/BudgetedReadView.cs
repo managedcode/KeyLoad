@@ -1,7 +1,7 @@
-using KeyLoad.Core.Features.ResourceExecution.Execution;
+using KeyLoad.Core.ResourceExecution.Execution;
 using KeyLoad.Storage;
 
-namespace KeyLoad.Core.Features.ResourceExecution;
+namespace KeyLoad.Core.ResourceExecution;
 
 /// <summary>Charges one read operation before borrowed storage data is copied or consumed.</summary>
 internal sealed class BudgetedReadView : IKeyValueView, IResourceLifetimeReadBindingView,

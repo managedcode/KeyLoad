@@ -1,9 +1,9 @@
 using System.Collections.Immutable;
-using KeyLoad.Core.Features.GraphTraversal.Validation;
+using KeyLoad.Core.GraphTraversal.Validation;
 using KeyLoad.Storage;
 using GraphTraversalResult = global::KeyLoad.GraphTraversal;
 
-namespace KeyLoad.Core.Features.GraphTraversal;
+namespace KeyLoad.Core.GraphTraversal;
 
 /// <summary>Runs bounded breadth-first traversal inside a single storage read gate.</summary>
 internal sealed class GraphTraversalReader(DatabaseEngine database, IKeyValueView view, PrincipalRecord principal,

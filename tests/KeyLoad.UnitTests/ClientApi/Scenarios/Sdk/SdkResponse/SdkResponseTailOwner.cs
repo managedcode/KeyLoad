@@ -3,7 +3,7 @@ using KeyLoad.Client;
 using ManagedCode.Communication;
 using Microsoft.AspNetCore.Http;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>Retains original real HTTP producers; the execution database and transport are borrowed.</summary>
 internal sealed class SdkResponseTailOwner(TestDatabase database)

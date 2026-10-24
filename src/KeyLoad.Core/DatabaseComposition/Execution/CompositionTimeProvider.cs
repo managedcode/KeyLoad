@@ -1,4 +1,4 @@
-namespace KeyLoad.Core.Features.DatabaseComposition;
+namespace KeyLoad.Core.DatabaseComposition;
 
 /// <summary>Freezes elapsed time for replicated derivation; numeric work limits remain active.</summary>
 internal sealed class CompositionTimeProvider : TimeProvider

@@ -1,7 +1,7 @@
 using System.Text.Json;
-using C = KeyLoad.UnitTests.Features.DatabaseComposition.QueueGraphIdentityState;
+using C = KeyLoad.UnitTests.DatabaseComposition.QueueGraphIdentityState;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal static class SqlCompositionParameterData
 {

@@ -1,7 +1,7 @@
-using KeyLoad.Core.Features.StoragePartitions.Contracts;
+using KeyLoad.Core.StoragePartitions.Contracts;
 using KeyLoad.Storage;
 
-namespace KeyLoad.UnitTests.Features.TimeSeries;
+namespace KeyLoad.UnitTests.TimeSeries;
 
 internal sealed class SampleChunkMixedAtomicTests
 {
@@ -71,7 +71,7 @@ internal sealed class SampleChunkMixedAtomicTests
             view.ReadOwnedValue(KeySpace.AppliedBytes) ?? throw new InvalidOperationException(MissingAppliedPosition)));
         await Assert.That(receipt.Token.Position).IsEqualTo(applied);
         var stored = fixture.Owner.Store.Read(view => view.GetRecord<DocumentRecord>(
-            KeyLoad.Core.Features.DocumentStorage.DocumentStorageKeys.RecordKey(reference)));
+            KeyLoad.Core.DocumentStorage.DocumentStorageKeys.RecordKey(reference)));
         await Assert.That(stored).IsNotNull();
         await Assert.That(stored!.UpdatedAt >= before && stored.UpdatedAt <= after).IsTrue();
         var expected = new DocumentRecord(reference, FirstDocumentRevision, Json,

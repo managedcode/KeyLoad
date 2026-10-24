@@ -1,3 +1,3 @@
-namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
+namespace KeyLoad.SiteTests.BenchmarkComparisons;
 
 internal sealed record SiteCoverageCriticalResult(string Path, int CoveragePercent, bool Passed);

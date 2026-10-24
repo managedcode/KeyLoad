@@ -1,8 +1,8 @@
-using KeyLoad.Core.Features.CommandOutcomes.Contracts;
+using KeyLoad.Core.CommandOutcomes.Contracts;
 using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal static class QueueViewLeaseIsolationOperations
 {

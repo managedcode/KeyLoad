@@ -5,7 +5,7 @@ using Microsoft.Extensions.Options;
 using Orleans.Journaling;
 using IAsyncInitializer = TUnit.Core.Interfaces.IAsyncInitializer;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal sealed class RuntimeRuntimeJournalFixture : IAsyncInitializer, IAsyncDisposable
 {

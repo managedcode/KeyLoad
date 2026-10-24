@@ -1,6 +1,6 @@
-using KeyLoad.UnitTests.Features.Authorization;
+using KeyLoad.UnitTests.Authorization;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 /// <summary>Captures the complete canonical source after its execution Orleans read barrier.</summary>
 internal sealed record CommandObservedReturnEdgeSnapshot(string[] Rows, byte[] Identity,

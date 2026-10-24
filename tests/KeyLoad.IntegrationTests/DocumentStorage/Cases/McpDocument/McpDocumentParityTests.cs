@@ -1,7 +1,7 @@
 using KeyLoad.Client;
-using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.ClientApi;
 
-namespace KeyLoad.IntegrationTests.Features.DocumentStorage;
+namespace KeyLoad.IntegrationTests.DocumentStorage;
 
 /// <summary>AC-MCP-005/007 and AC-DSTORE-001: real Orleans MCP and HTTP clients share canonical document outcomes.</summary>
 /// <param name="fixture">The initialized actual execution Aspire Orleans application.</param>

@@ -1,8 +1,8 @@
 using System.Diagnostics;
 using Aspire.Hosting;
-using KeyLoad.Diagnostics.Features.ResourceExecution;
+using KeyLoad.Diagnostics.ResourceExecution;
 
-namespace KeyLoad.IntegrationTests.Features.StorageReplication;
+namespace KeyLoad.IntegrationTests.StorageReplication;
 
 internal static class ProcessRuntimeKilledOwnerValidation
 {

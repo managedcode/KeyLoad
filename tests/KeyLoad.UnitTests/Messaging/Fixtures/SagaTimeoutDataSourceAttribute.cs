@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.Messaging;
+namespace KeyLoad.UnitTests.Messaging;
 
 [AttributeUsage(AttributeTargets.Class)]
 internal sealed class SagaTimeoutDataSourceAttribute : DataSourceGeneratorAttribute<SagaTimeoutFixture>

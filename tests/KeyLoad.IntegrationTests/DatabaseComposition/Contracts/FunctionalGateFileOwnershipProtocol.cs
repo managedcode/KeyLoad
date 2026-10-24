@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
+namespace KeyLoad.IntegrationTests.DatabaseComposition;
 
 /// <summary>Finite evidence bounds for the actual execution same-live-files refusal scenario.</summary>
 internal static class FunctionalGateFileOwnershipProtocol

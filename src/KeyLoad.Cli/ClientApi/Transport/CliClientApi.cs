@@ -5,7 +5,7 @@ using KeyLoad.Client;
 using ManagedCode.Communication;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.Cli.Features.ClientApi;
+namespace KeyLoad.Cli.ClientApi;
 
 internal static class CliClientApi
 {

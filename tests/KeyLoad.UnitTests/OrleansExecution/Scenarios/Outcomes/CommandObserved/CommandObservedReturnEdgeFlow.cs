@@ -2,7 +2,7 @@ using KeyLoad.Clustering;
 using KeyLoad.Server;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 /// <summary>Injects only a controlled real-delivery return-edge failure, never a fabricated transport reply.</summary>
 internal static class CommandObservedReturnEdgeFlow

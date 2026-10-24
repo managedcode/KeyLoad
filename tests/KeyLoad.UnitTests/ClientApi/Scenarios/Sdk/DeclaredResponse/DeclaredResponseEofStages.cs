@@ -1,8 +1,8 @@
 using KeyLoad.Client;
-using KeyLoad.UnitTests.Features.OrleansExecution;
-using static KeyLoad.UnitTests.Features.ClientApi.DeclaredResponseEofProtocol;
+using KeyLoad.UnitTests.OrleansExecution;
+using static KeyLoad.UnitTests.ClientApi.DeclaredResponseEofProtocol;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 internal static class DeclaredResponseEofStages
 {

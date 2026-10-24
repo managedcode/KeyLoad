@@ -1,4 +1,4 @@
-namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
+namespace KeyLoad.SiteTests.BenchmarkComparisons;
 
 /// <summary>Keeps the public site and the runtime console on one byte-identical KeyLoad brand source (ADR-053).</summary>
 internal sealed class SiteBrandParityTests

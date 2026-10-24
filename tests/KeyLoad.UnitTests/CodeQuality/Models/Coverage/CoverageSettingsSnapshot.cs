@@ -1,6 +1,6 @@
 using System.Security.Cryptography;
 
-namespace KeyLoad.UnitTests.Features.CodeQuality;
+namespace KeyLoad.UnitTests.CodeQuality;
 
 /// <summary>Captures and revalidates the canonical execution collector settings used by owned CLI operations.</summary>
 internal sealed record CoverageSettingsSnapshot(string RepositoryRoot, string Path, long Length, string Sha256)

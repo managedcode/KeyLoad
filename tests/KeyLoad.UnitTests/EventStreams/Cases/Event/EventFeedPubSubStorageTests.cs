@@ -4,7 +4,7 @@ using KeyLoad.Clustering;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.UnitTests.Features.EventStreams;
+namespace KeyLoad.UnitTests.EventStreams;
 
 internal sealed class EventFeedPubSubStorageTests
 {

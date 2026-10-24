@@ -1,6 +1,6 @@
-using KeyLoad.Core.Features.InternalSerialization;
+using KeyLoad.Core.InternalSerialization;
 
-namespace KeyLoad.UnitTests.Features.InternalSerialization;
+namespace KeyLoad.UnitTests.InternalSerialization;
 
 [NotInParallel]
 internal sealed class DatabaseCommandFingerprintTests

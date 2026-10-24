@@ -2,7 +2,7 @@ using System.Collections.Immutable;
 using KeyLoad.Core;
 using KeyLoad.Storage;
 
-namespace KeyLoad.Query.Features.QueryExecution;
+namespace KeyLoad.Query.QueryExecution;
 
 internal static class PartitionQueryMerge
 {

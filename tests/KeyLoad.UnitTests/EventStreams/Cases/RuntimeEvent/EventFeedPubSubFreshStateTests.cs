@@ -1,7 +1,7 @@
 using KeyLoad.Clustering;
 using Orleans.Storage;
 
-namespace KeyLoad.UnitTests.Features.EventStreams;
+namespace KeyLoad.UnitTests.EventStreams;
 
 internal sealed class EventFeedPubSubFreshStateTests
 {

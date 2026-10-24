@@ -1,7 +1,7 @@
-using KeyLoad.Core.Features.DocumentStorage;
+using KeyLoad.Core.DocumentStorage;
 using KeyLoad.Storage;
 
-namespace KeyLoad.Core.Features.Search;
+namespace KeyLoad.Core.Search;
 
 /// <summary>Visits visible, revision-matching vector/document pairs within one cut.</summary>
 internal static class VisibleVectorReads

@@ -1,5 +1,5 @@
 
-namespace KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
+namespace KeyLoad.LoadTests.AppHost.BenchmarkComparisons;
 
 /// <summary>Original environment identities captured only at the composition boundary.</summary>
 [ConfigurationOptions]

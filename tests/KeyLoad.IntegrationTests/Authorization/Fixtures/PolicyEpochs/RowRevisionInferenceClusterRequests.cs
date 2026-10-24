@@ -1,6 +1,6 @@
-using P = KeyLoad.IntegrationTests.Features.Authorization.RowRevisionInferenceClusterProtocol;
+using P = KeyLoad.IntegrationTests.Authorization.RowRevisionInferenceClusterProtocol;
 
-namespace KeyLoad.IntegrationTests.Features.Authorization;
+namespace KeyLoad.IntegrationTests.Authorization;
 
 internal static class RowRevisionInferenceClusterRequests
 {

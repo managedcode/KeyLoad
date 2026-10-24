@@ -1,9 +1,9 @@
 using KeyLoad.Server;
-using KeyLoad.UnitTests.Features.Messaging;
+using KeyLoad.UnitTests.Messaging;
 using ManagedCode.Communication.Commands;
-using P = KeyLoad.UnitTests.Features.BackupRestore.ArchiveEntryProtocol;
+using P = KeyLoad.UnitTests.BackupRestore.ArchiveEntryProtocol;
 
-namespace KeyLoad.UnitTests.Features.BackupRestore;
+namespace KeyLoad.UnitTests.BackupRestore;
 
 internal static class ArchiveEntryFlow
 {

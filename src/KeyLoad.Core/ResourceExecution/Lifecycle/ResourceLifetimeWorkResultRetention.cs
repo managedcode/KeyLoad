@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.Core.Features.ResourceExecution;
+namespace KeyLoad.Core.ResourceExecution;
 
 /// <summary>Shares one bounded, deduplicated resource lifetime ledger across an original request and its children.</summary>
 internal sealed class ResourceLifetimeWorkResultRetention : IDisposable

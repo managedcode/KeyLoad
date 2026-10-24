@@ -1,8 +1,8 @@
 using KeyLoad.Storage.ZoneTree;
 using ManagedCode.Communication.Commands;
-using static KeyLoad.UnitTests.Features.ResourceExecution.ResourcePairBindingState;
+using static KeyLoad.UnitTests.ResourceExecution.ResourcePairBindingState;
 
-namespace KeyLoad.UnitTests.Features.ResourceExecution;
+namespace KeyLoad.UnitTests.ResourceExecution;
 
 internal static class ResourcePairBindingAssertions
 {
@@ -20,7 +20,7 @@ internal static class ResourcePairBindingAssertions
             Convert.ToHexString(KeySpace.ClockBytes), Convert.ToHexString(KeySpace.AppliedBytes), Convert.ToHexString(locator),
             Convert.ToHexString(KeySpace.PartitionOutcome(partition, original.UserId!, original.CommandId))
         };
-        await Assert.That(KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(store)
+        await Assert.That(KeyLoad.UnitTests.Messaging.QueueWholeFlowStorage.Bytes(store)
             .Where(row => !allowed.Contains(row.Split(RowSeparator, StringSplitOptions.None)[Zero])).ToArray())
             .IsEquivalentTo(before.Where(row => !allowed.Contains(row.Split(RowSeparator, StringSplitOptions.None)[Zero])).ToArray(),
                 global::TUnit.Assertions.Enums.CollectionOrdering.Matching);

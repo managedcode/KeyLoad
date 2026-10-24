@@ -1,7 +1,7 @@
 using System.Globalization;
 using System.Text;
 
-namespace KeyLoad.IntegrationTests.Features.DocumentStorage;
+namespace KeyLoad.IntegrationTests.DocumentStorage;
 
 /// <summary>Frozen AC-METH-005 functional load bounds, distinct from benchmark measurements.</summary>
 internal static class HeavyDocumentLoadProtocol

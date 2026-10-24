@@ -1,8 +1,8 @@
 using System.Collections.Immutable;
-using KeyLoad.Core.Features.RuntimeJournaling.Contracts;
-using KeyLoad.Core.Features.RuntimeJournaling.Models;
+using KeyLoad.Core.RuntimeJournaling.Contracts;
+using KeyLoad.Core.RuntimeJournaling.Models;
 
-namespace KeyLoad.Core.Features.RuntimeJournaling.Validation;
+namespace KeyLoad.Core.RuntimeJournaling.Validation;
 
 internal static class RuntimeJournalMutationValidation
 {

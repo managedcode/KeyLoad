@@ -4,7 +4,7 @@ using KeyLoad.Server;
 using Orleans.Serialization.Buffers;
 using Orleans.Serialization.Codecs;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 internal sealed class McpAuthenticationEnumTests
 {

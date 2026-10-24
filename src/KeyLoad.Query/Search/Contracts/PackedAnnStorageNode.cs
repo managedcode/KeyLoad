@@ -1,4 +1,4 @@
-namespace KeyLoad.Query.Features.Search;
+namespace KeyLoad.Query.Search;
 
 [Orleans.GenerateSerializer, Orleans.Alias(PackedAnnStorageAliases.Node)]
 internal sealed record PackedAnnStorageNode(

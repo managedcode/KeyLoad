@@ -1,11 +1,11 @@
-using KeyLoad.Core.Features.DocumentStorage;
-using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.Core.DocumentStorage;
+using KeyLoad.Core.ResourceExecution;
 using KeyLoad.Storage;
-using KeyLoad.UnitTests.Features.Authorization;
-using A = KeyLoad.UnitTests.Features.DatabaseComposition.CompositionBoundReferenceAssertions;
-using D = KeyLoad.UnitTests.Features.DatabaseComposition.CompositionBoundReferenceData;
+using KeyLoad.UnitTests.Authorization;
+using A = KeyLoad.UnitTests.DatabaseComposition.CompositionBoundReferenceAssertions;
+using D = KeyLoad.UnitTests.DatabaseComposition.CompositionBoundReferenceData;
 
-namespace KeyLoad.UnitTests.Features.DatabaseComposition;
+namespace KeyLoad.UnitTests.DatabaseComposition;
 
 internal static class CompositionBoundReferenceReads
 {

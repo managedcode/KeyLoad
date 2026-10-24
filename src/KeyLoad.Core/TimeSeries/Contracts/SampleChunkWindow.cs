@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 
-namespace KeyLoad.Core.Features.TimeSeries;
+namespace KeyLoad.Core.TimeSeries;
 
 [Orleans.GenerateSerializer, Orleans.Alias(SampleChunkLifecycleProtocol.WindowAlias)]
 internal sealed record SampleChunkWindow([property: Orleans.Id(0)] int Version,

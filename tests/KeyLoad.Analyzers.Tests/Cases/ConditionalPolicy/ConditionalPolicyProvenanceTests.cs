@@ -1,4 +1,4 @@
-namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
+namespace KeyLoad.Analyzers.Tests.CodeQuality;
 
 /// <summary>AC-CQ-034/037: only conditional result values contribute to execution deadline provenance.</summary>
 internal sealed class ConditionalPolicyProvenanceTests

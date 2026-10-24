@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 
-namespace KeyLoad.Analyzers.Features.CodeQuality;
+namespace KeyLoad.Analyzers.CodeQuality;
 
 internal sealed class AggregateTypeCodeLineAccumulator
 {

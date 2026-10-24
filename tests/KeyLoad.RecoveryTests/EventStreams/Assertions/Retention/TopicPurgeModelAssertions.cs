@@ -5,7 +5,7 @@ using KeyLoad.Core;
 using KeyLoad.Storage;
 using ManagedCode.Communication.Commands;
 using TUnit.Assertions.Enums;
-namespace KeyLoad.RecoveryTests.Features.EventStreams;
+namespace KeyLoad.RecoveryTests.EventStreams;
 
 internal static class TopicPurgeModelAssertions
 {

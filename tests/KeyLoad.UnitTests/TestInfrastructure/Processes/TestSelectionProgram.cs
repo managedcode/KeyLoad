@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.TestInfrastructure;
+namespace KeyLoad.UnitTests.TestInfrastructure;
 
 internal static class TestSelectionProgram
 {

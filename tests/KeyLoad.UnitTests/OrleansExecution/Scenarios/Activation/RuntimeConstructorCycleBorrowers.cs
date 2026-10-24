@@ -1,13 +1,13 @@
 #pragma warning disable ORLEANSEXP005
 using KeyLoad.Clustering;
 using KeyLoad.Server;
-using KeyLoad.Server.Features.OrleansHosting;
+using KeyLoad.Server.OrleansHosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Orleans.DurableJobs;
 using Orleans.Journaling;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal static class RuntimeConstructorCycleBorrowers
 {

@@ -1,5 +1,5 @@
 using KeyLoad.Core;
-using KeyLoad.Core.Features.Search;
+using KeyLoad.Core.Search;
 using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
 

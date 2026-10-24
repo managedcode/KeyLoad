@@ -1,4 +1,4 @@
-namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
+namespace KeyLoad.Analyzers.Tests.CodeQuality;
 
 /// <summary>AC-CQ-035/037: execution providers remain inside actual metadata-owned binding boundaries.</summary>
 internal sealed class TypedConfigurationReadTests

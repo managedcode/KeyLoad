@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using OpenTelemetry;
 
-namespace KeyLoad.UnitTests.Features.Authorization;
+namespace KeyLoad.UnitTests.Authorization;
 
 internal sealed class AuthorizationUnsafeClientSpanProcessor(Func<AuthorizationUnsafeSpanState> state) : BaseProcessor<Activity>
 {

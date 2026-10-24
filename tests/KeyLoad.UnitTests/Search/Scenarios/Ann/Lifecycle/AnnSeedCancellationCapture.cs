@@ -1,8 +1,8 @@
-using KeyLoad.Core.Features.Search;
-using KeyLoad.UnitTests.Features.TestInfrastructure;
+using KeyLoad.Core.Search;
+using KeyLoad.UnitTests.TestInfrastructure;
 using ManagedCode.Communication.CQRS;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 internal static class AnnSeedCancellationCapture
 {

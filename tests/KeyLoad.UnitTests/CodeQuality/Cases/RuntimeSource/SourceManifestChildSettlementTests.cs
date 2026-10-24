@@ -1,6 +1,6 @@
-using KeyLoad.UnitTests.Features.CodeQuality.Helpers;
+using KeyLoad.UnitTests.CodeQuality.Helpers;
 
-namespace KeyLoad.UnitTests.Features.CodeQuality.Cases;
+namespace KeyLoad.UnitTests.CodeQuality.Cases;
 
 internal sealed class SourceManifestChildSettlementTests
 {

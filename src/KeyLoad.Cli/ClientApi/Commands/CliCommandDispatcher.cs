@@ -1,6 +1,6 @@
 using System.Diagnostics;
-using KeyLoad.Cli.Features.BackupRestore;
-using KeyLoad.Cli.Features.ClientApi;
+using KeyLoad.Cli.BackupRestore;
+using KeyLoad.Cli.ClientApi;
 
 internal static class CliCommandDispatcher
 {

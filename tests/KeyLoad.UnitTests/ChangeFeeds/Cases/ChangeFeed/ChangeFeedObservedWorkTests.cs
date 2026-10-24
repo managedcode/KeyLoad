@@ -1,8 +1,8 @@
-using KeyLoad.UnitTests.Features.Messaging;
-using KeyLoad.UnitTests.Features.QueryExecution;
+using KeyLoad.UnitTests.Messaging;
+using KeyLoad.UnitTests.QueryExecution;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.ChangeFeeds;
+namespace KeyLoad.UnitTests.ChangeFeeds;
 
 internal sealed class ChangeFeedObservedWorkTests
 {

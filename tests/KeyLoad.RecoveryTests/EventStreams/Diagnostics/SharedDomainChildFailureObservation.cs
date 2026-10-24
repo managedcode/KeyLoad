@@ -1,7 +1,7 @@
 using System.Text.Json;
 using KeyLoad.Storage.ZoneTree;
 
-namespace KeyLoad.RecoveryTests.Features.EventStreams;
+namespace KeyLoad.RecoveryTests.EventStreams;
 
 /// <summary>Reads only the joined original child's bounded closed metadata on an existing failure.</summary>
 internal static class SharedDomainChildFailureObservation

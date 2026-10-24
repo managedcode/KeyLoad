@@ -4,7 +4,7 @@ using KeyLoad.Server;
 using KeyLoad.Storage;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 internal static class Bm25InvalidationDependencyFlow
 {
@@ -48,7 +48,7 @@ internal static class Bm25InvalidationDependencyFlow
         await MutationAsync(database, new PutDocument(Collection, Mutated, Json, 2,
             new RowAccess(OwnerId: Root), ExplicitReplacement: true), 3);
         var access = database.Store.Read(view => view.GetRecord<DocumentRecord>(
-            KeyLoad.Core.Features.DocumentStorage.DocumentStorageKeys.RecordKey(database.Partition, Collection, Mutated)))!;
+            KeyLoad.Core.DocumentStorage.DocumentStorageKeys.RecordKey(database.Partition, Collection, Mutated)))!;
         await Assert.That(access.Access.OwnerId).IsEqualTo(Root);
         await MutationAsync(database, new DeleteDocument(Collection, Mutated, 3), 4);
         await Assert.That(database.Database.GetDocument(Root,

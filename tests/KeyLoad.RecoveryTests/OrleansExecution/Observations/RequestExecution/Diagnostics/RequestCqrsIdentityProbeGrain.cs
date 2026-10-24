@@ -6,7 +6,7 @@ using ManagedCode.Orleans.Identity.Core.Constants;
 using Microsoft.Extensions.Options;
 using Orleans.Serialization;
 
-namespace KeyLoad.RecoveryTests.Features.OrleansExecution;
+namespace KeyLoad.RecoveryTests.OrleansExecution;
 
 [global::Orleans.GrainType(RequestCqrsTestProtocol.ProbeAlias)]
 internal sealed class RequestCqrsIdentityProbeGrain(

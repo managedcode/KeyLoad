@@ -1,7 +1,7 @@
 using KeyLoad.Server;
-using P = KeyLoad.UnitTests.Features.TimeSeries.SampleChunkCanonicalFixture;
+using P = KeyLoad.UnitTests.TimeSeries.SampleChunkCanonicalFixture;
 
-namespace KeyLoad.UnitTests.Features.TimeSeries;
+namespace KeyLoad.UnitTests.TimeSeries;
 
 internal static class SampleSequenceIntegrityFlow
 {
@@ -55,13 +55,13 @@ internal static class SampleSequenceIntegrityFlow
         await WaveAsync(fixture, token);
         var image = SampleChunkCorrectionBoundColdAssertions.Image(fixture.Store);
         var cut = fixture.ReadCanonicalCut();
-        var identity = KeyLoad.UnitTests.Features.StorageRecovery.Assertions.ReadCutStoreStateAssertions.SnapshotIdentity(fixture.Store);
+        var identity = KeyLoad.UnitTests.StorageRecovery.Assertions.ReadCutStoreStateAssertions.SnapshotIdentity(fixture.Store);
         for (var wave = 0; wave < ColdOwners; wave++)
         {
             token.ThrowIfCancellationRequested();
             fixture.Reopen();
             await Assert.That(SampleChunkCorrectionBoundColdAssertions.Image(fixture.Store)).IsEqualTo(image);
-            await KeyLoad.UnitTests.Features.StorageRecovery.Assertions.ReadCutStoreStateAssertions.AssertIdentityAndPositionAsync(
+            await KeyLoad.UnitTests.StorageRecovery.Assertions.ReadCutStoreStateAssertions.AssertIdentityAndPositionAsync(
                 fixture.Store, identity, cut.StorePosition);
             await Assert.That(fixture.ReadCanonicalCut()).IsEqualTo(cut);
             await WaveAsync(fixture, token);

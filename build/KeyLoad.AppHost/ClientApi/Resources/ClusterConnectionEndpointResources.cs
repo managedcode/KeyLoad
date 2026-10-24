@@ -1,4 +1,4 @@
-namespace KeyLoad.AppHost.Features.ClientApi;
+namespace KeyLoad.AppHost.ClientApi;
 
 /// <summary>Publishes an allocated execution HTTP/2 listener for each server process.</summary>
 internal static class ClusterConnectionEndpointResources

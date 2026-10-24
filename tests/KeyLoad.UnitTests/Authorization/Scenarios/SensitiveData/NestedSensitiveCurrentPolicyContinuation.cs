@@ -2,7 +2,7 @@ using System.Text.Json;
 using KeyLoad.Query;
 using KeyLoad.Storage.ZoneTree;
 
-namespace KeyLoad.UnitTests.Features.Authorization;
+namespace KeyLoad.UnitTests.Authorization;
 
 internal static class NestedSensitiveCurrentPolicyContinuation
 {

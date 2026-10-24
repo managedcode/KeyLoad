@@ -1,5 +1,5 @@
-using KeyLoad.Core.Features.GraphTraversal;
-using KeyLoad.Core.Features.GraphTraversal.Validation;
+using KeyLoad.Core.GraphTraversal;
+using KeyLoad.Core.GraphTraversal.Validation;
 
 namespace KeyLoad.Core;
 /// <summary>Executes GraphIncomingEdges operations against the caller's database context.</summary>

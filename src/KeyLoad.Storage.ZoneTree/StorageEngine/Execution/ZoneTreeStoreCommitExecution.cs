@@ -1,5 +1,5 @@
-using KeyLoad.Diagnostics.Features.ResourceExecution;
-using KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
+using KeyLoad.Diagnostics.ResourceExecution;
+using KeyLoad.Storage.ZoneTree.ResourceExecution;
 
 namespace KeyLoad.Storage.ZoneTree;
 

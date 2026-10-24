@@ -1,4 +1,4 @@
-namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
+namespace KeyLoad.Analyzers.Tests.CodeQuality;
 
 /// <summary>Actual marked options used by the execution registration and execution verification.</summary>
 [KeyLoad.ConfigurationOptions]

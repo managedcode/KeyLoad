@@ -1,4 +1,4 @@
-using KeyLoad.Core.Features.GraphTraversal;
+using KeyLoad.Core.GraphTraversal;
 
 namespace KeyLoad.Core;
 /// <summary>Executes GraphReads operations against the caller's database context.</summary>
@@ -24,14 +24,14 @@ public static class GraphReads
     /// <returns>Qualified vertices and projected edges in deterministic order.</returns>
 
     /// <param name = "engine">The shared database execution context.</param>
-    public static GraphTraversal Traverse(this DatabaseEngine engine, string principalId, PartitionRef partition, string graph, EntityRef start, int maxDepth = DefaultTraversalDepth, int maxVertices = DefaultTraversalVertices, int maxEdges = DefaultTraversalEdges, string[]? labels = null, CancellationToken cancellationToken = default)
+    public static global::KeyLoad.GraphTraversal Traverse(this DatabaseEngine engine, string principalId, PartitionRef partition, string graph, EntityRef start, int maxDepth = DefaultTraversalDepth, int maxVertices = DefaultTraversalVertices, int maxEdges = DefaultTraversalEdges, string[]? labels = null, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(engine);
         var budget = new ReadExecutionBudget(engine.OperationLimitsOptions, engine.Clock, cancellationToken);
         return engine.TraverseRead(principalId, partition, graph, start, maxDepth, maxVertices, maxEdges, labels, budget);
     }
 
-    internal static GraphTraversal TraverseRead(this DatabaseEngine engine, string principalId, PartitionRef partition, string graph, EntityRef start, int maxDepth, int maxVertices, int maxEdges, string[]? labels, ReadExecutionBudget budget)
+    internal static global::KeyLoad.GraphTraversal TraverseRead(this DatabaseEngine engine, string principalId, PartitionRef partition, string graph, EntityRef start, int maxDepth, int maxVertices, int maxEdges, string[]? labels, ReadExecutionBudget budget)
     {
         const string InvalidTraversalBudget = "The graph traversal budget is invalid.";
         budget.Check();

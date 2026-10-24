@@ -1,9 +1,9 @@
 using KeyLoad.Clustering;
-using KeyLoad.Clustering.Features.Search;
+using KeyLoad.Clustering.Search;
 using KeyLoad.Core;
-using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.Core.ResourceExecution;
 
-namespace KeyLoad.Server.Features.Search;
+namespace KeyLoad.Server.Search;
 
 internal sealed partial class TextOnlineMaintenanceService : IOnlineTextMaintenance, IAsyncDisposable
 {

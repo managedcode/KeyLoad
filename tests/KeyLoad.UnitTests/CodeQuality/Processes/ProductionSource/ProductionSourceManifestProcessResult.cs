@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.CodeQuality.Processes;
+namespace KeyLoad.UnitTests.CodeQuality.Processes;
 
 internal sealed record ProductionSourceManifestProcessResult(
     int ExitCode,

@@ -1,7 +1,7 @@
 using System.Text.Json;
-using KeyLoad.IntegrationTests.Features.StorageReplication;
+using KeyLoad.IntegrationTests.StorageReplication;
 
-namespace KeyLoad.IntegrationTests.Features.OrleansExecution;
+namespace KeyLoad.IntegrationTests.OrleansExecution;
 
 internal static class RequestCqrsConnectionCancellationArtifactWriter
 {

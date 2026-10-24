@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
-using KeyLoad.Core.Features.DatabaseComposition;
-using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.Core.DatabaseComposition;
+using KeyLoad.Core.ResourceExecution;
 using KeyLoad.Storage;
 using ManagedCode.Communication.Commands;
 
@@ -27,7 +27,7 @@ public static class ResourceEffectCapture
     internal static ResourceEffectAdmission CaptureResourceEffectAdmission(this DatabaseEngine engine, IKeyValueView raw, Command<DatabaseCommand> operation, string fingerprint, bool preserveBudgetFailure = false, long? preparationPosition = null, ReadExecutionBudget? preparationWork = null)
     {
         var scope = new ResourceEffectBindingScope(engine.OperationLimitsOptions);
-        var preparation = preparationPosition is { } position ? new ResourceEffectPreparationTransaction(new KeyLoad.Core.Features.BackupRestore.Execution.AtomicPartitionRosterTransaction((IAtomicTransaction)raw, engine.OperationLimitsOptions, position, KeyLoad.Core.Features.BackupRestore.Serialization.AtomicPartitionRosterProtocol.NoCanonicalSequence), scope, preparationWork ?? new ReadExecutionBudget(engine.OperationLimitsOptions, CompositionTimeProvider.Instance)) : null;
+        var preparation = preparationPosition is { } position ? new ResourceEffectPreparationTransaction(new KeyLoad.Core.BackupRestore.Execution.AtomicPartitionRosterTransaction((IAtomicTransaction)raw, engine.OperationLimitsOptions, position, KeyLoad.Core.BackupRestore.Serialization.AtomicPartitionRosterProtocol.NoCanonicalSequence), scope, preparationWork ?? new ReadExecutionBudget(engine.OperationLimitsOptions, CompositionTimeProvider.Instance)) : null;
         var view = preparation is null ? new ResourceEffectObservationView(raw, scope) : preparation;
         try
         {

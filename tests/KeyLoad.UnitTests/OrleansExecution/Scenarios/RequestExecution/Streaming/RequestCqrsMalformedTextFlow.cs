@@ -4,7 +4,7 @@ using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.DependencyInjection;
 using Orleans.Serialization;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal static class RequestCqrsMalformedTextFlow
 {
@@ -12,10 +12,10 @@ internal static class RequestCqrsMalformedTextFlow
     {
         var token = TestContext.Current!.Execution.CancellationToken;
         var principal = fixture.Database.Store.Read(view => fixture.Database.Database.Principal(view,
-            KeyLoad.UnitTests.Features.Search.TextMaintenanceTestValues.Principal, fixture.Clock.GetUtcNow()));
+            KeyLoad.UnitTests.Search.TextMaintenanceTestValues.Principal, fixture.Clock.GetUtcNow()));
         var connection = fixture.Grains.GetGrain<IConnectionGrain>(fixture.ConnectionId);
         var cut = fixture.Database.Store.Position;
-        var bytes = KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(fixture.Database.Store);
+        var bytes = KeyLoad.UnitTests.Messaging.QueueWholeFlowStorage.Bytes(fixture.Database.Store);
         var requestId = Guid.NewGuid();
         var commandId = Guid.NewGuid();
         var envelope = fixture.Codec.CreateCommand(requestId, principal.Id, OperationKind.MaintainTextIndex,
@@ -36,7 +36,7 @@ internal static class RequestCqrsMalformedTextFlow
         await Assert.That(frames.Select(x => x.Kind).SequenceEqual(new[] { CqrsStreamChunkKind.Started, CqrsStreamChunkKind.Failed })).IsTrue();
         await AssertMalformedShapeAsync(frames, requestId, fixture);
         await Assert.That(fixture.Database.Store.Position).IsEqualTo(cut);
-        await Assert.That(KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(fixture.Database.Store)
+        await Assert.That(KeyLoad.UnitTests.Messaging.QueueWholeFlowStorage.Bytes(fixture.Database.Store)
             .AsSpan().SequenceEqual(bytes)).IsTrue();
         await RequestCqrsActualTextMaintenanceFlow.RunAsync(fixture, TextIndexMaintenanceMode.Build, token);
     }

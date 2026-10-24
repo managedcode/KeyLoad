@@ -1,8 +1,8 @@
 using KeyLoad.Storage;
-using KeyLoad.UnitTests.Features.Messaging;
-using P = KeyLoad.UnitTests.Features.ResourceExecution.CachePolicyEpochProtocol;
+using KeyLoad.UnitTests.Messaging;
+using P = KeyLoad.UnitTests.ResourceExecution.CachePolicyEpochProtocol;
 
-namespace KeyLoad.UnitTests.Features.ResourceExecution;
+namespace KeyLoad.UnitTests.ResourceExecution;
 
 internal static class CachePolicyEpochAssertions
 {

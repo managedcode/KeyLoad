@@ -33,11 +33,11 @@ internal static class PostgresPreparedDecoder
     internal static (bool Rows, bool UsesProfileDialect) Inspect(string sql, int positionalParameterCount,
         IOptions<DatabaseLimits> limitsOptions, CancellationToken token)
     {
-        var syntax = global::KeyLoad.Features.QueryExecution.ScriptDomSyntax.Parse(sql, limitsOptions,
+        var syntax = global::KeyLoad.QueryExecution.ScriptDomSyntax.Parse(sql, limitsOptions,
             token.ThrowIfCancellationRequested, token);
-        global::KeyLoad.Features.QueryExecution.ScriptDomSyntax.ValidateSessionSlots(syntax,
+        global::KeyLoad.QueryExecution.ScriptDomSyntax.ValidateSessionSlots(syntax,
             positionalParameterCount, token.ThrowIfCancellationRequested, token);
-        var rows = global::KeyLoad.Features.QueryExecution.ScriptDomSyntax.HasQueryRows(syntax);
+        var rows = global::KeyLoad.QueryExecution.ScriptDomSyntax.HasQueryRows(syntax);
         switch (syntax)
         {
             case global::Microsoft.SqlServer.TransactSql.ScriptDom.CreateTableStatement table:

@@ -1,6 +1,6 @@
 using KeyLoad.Server;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 /// <summary>AC-FTS-INCREMENTAL-005: original signed page naturally expires, remains unacknowledged and permits genuine fresh-owner cleanup.</summary>
 internal sealed class TextIncrementalExpiryTests

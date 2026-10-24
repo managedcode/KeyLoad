@@ -1,7 +1,7 @@
 using System.Text.Json;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.DocumentStorage;
+namespace KeyLoad.UnitTests.DocumentStorage;
 
 internal sealed class DocumentSessionReadTests
 {

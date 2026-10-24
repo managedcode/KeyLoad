@@ -1,6 +1,6 @@
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
-namespace KeyLoad.UnitTests.Features.ResourceExecution;
+namespace KeyLoad.UnitTests.ResourceExecution;
 
 internal static class SearchReadBudgetCold
 {

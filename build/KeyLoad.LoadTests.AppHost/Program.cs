@@ -1,4 +1,4 @@
-using KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
+using KeyLoad.LoadTests.AppHost.BenchmarkComparisons;
 using Microsoft.Extensions.DependencyInjection;
 
 var builder = DistributedApplication.CreateBuilder(args);

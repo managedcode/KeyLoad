@@ -1,7 +1,7 @@
 using System.Text.Json;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.GraphTraversal;
+namespace KeyLoad.UnitTests.GraphTraversal;
 
 internal static class GraphStorageRejectedOutcomeAssertions
 {

@@ -1,7 +1,7 @@
-using KeyLoad.AppHost.Features.TestInfrastructure;
-using KeyLoad.Diagnostics.Features.ResourceExecution;
+using KeyLoad.AppHost.TestInfrastructure;
+using KeyLoad.Diagnostics.ResourceExecution;
 
-namespace KeyLoad.IntegrationTests.Features.StorageReplication;
+namespace KeyLoad.IntegrationTests.StorageReplication;
 
 /// <summary>Retains the original joined abrupt process kill pending a genuine Aspire restart.</summary>
 /// <param name="Scenario">The qualification scenario.</param>

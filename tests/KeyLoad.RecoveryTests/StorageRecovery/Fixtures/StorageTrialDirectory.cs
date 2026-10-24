@@ -1,4 +1,4 @@
-namespace KeyLoad.RecoveryTests.Features.StorageRecovery;
+namespace KeyLoad.RecoveryTests.StorageRecovery;
 
 internal static class StorageTrialDirectory
 {

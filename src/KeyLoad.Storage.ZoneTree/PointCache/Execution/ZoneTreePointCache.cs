@@ -1,7 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
+namespace KeyLoad.Storage.ZoneTree.ResourceExecution;
 
 /// <summary>Bounded disposable point-value cache for one physical ZoneTree runtime.</summary>
 internal sealed class ZoneTreePointCache : IDisposable, IZoneTreePointCacheCandidateOwner

@@ -1,6 +1,6 @@
-using KeyLoad.IntegrationTests.Features.DocumentStorage;
+using KeyLoad.IntegrationTests.DocumentStorage;
 
-namespace KeyLoad.IntegrationTests.Features.ClientApi;
+namespace KeyLoad.IntegrationTests.ClientApi;
 
 /// <summary>AC-MCP-003/007: execution public calls reject invalid canonical requests before starting an operation grain.</summary>
 /// <param name="fixture">The initialized actual execution Aspire Orleans application.</param>

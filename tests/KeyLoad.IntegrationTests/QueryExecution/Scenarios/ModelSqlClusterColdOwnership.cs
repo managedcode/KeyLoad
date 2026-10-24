@@ -1,7 +1,7 @@
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
-using KeyLoad.IntegrationTests.Features.StorageReplication;
-namespace KeyLoad.IntegrationTests.Features.QueryExecution;
+using KeyLoad.IntegrationTests.StorageReplication;
+namespace KeyLoad.IntegrationTests.QueryExecution;
 
 internal sealed class ModelSqlClusterColdOwnership
 {

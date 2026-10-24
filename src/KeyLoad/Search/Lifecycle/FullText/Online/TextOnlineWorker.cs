@@ -1,4 +1,4 @@
-namespace KeyLoad.Server.Features.Search;
+namespace KeyLoad.Server.Search;
 
 /// <summary>Bounds actual asynchronous publication and joins accepted work during owner shutdown.</summary>
 internal sealed class TextOnlineWorker : IAsyncDisposable

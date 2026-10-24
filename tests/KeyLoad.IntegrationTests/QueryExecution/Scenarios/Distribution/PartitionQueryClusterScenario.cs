@@ -1,14 +1,14 @@
 using System.Collections.Immutable;
 using System.Text.Json;
 using KeyLoad.Client;
-using KeyLoad.Core.Features.InternalSerialization;
-using KeyLoad.Core.Features.ResourceExecution;
-using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.Core.InternalSerialization;
+using KeyLoad.Core.ResourceExecution;
+using KeyLoad.IntegrationTests.ClientApi;
 using KeyLoad.Query;
 using KeyLoad.Server;
 using ManagedCode.Communication.Commands;
 
-namespace KeyLoad.IntegrationTests.Features.QueryExecution;
+namespace KeyLoad.IntegrationTests.QueryExecution;
 
 /// <summary>Owns real Orleans seed data and the independent leaf/row oracle.</summary>
 internal sealed record PartitionQueryClusterScenario(

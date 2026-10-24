@@ -1,14 +1,14 @@
 using KeyLoad.Clustering;
-using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.Core.ResourceExecution;
 using KeyLoad.Server;
 using KeyLoad.Storage;
 using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Orleans.Serialization;
-using P = KeyLoad.UnitTests.Features.StorageRecovery.PartitionStorageProtocol;
+using P = KeyLoad.UnitTests.StorageRecovery.PartitionStorageProtocol;
 
-namespace KeyLoad.UnitTests.Features.StorageRecovery;
+namespace KeyLoad.UnitTests.StorageRecovery;
 
 internal static class PartitionStorageRead
 {

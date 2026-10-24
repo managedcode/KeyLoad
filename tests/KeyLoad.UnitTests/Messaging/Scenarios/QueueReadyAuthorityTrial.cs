@@ -1,7 +1,7 @@
 using KeyLoad.Storage;
 using ManagedCode.Communication.Commands;
 
-namespace KeyLoad.UnitTests.Features.Messaging;
+namespace KeyLoad.UnitTests.Messaging;
 
 internal static class QueueReadyAuthorityTrial
 {
@@ -43,7 +43,7 @@ internal static class QueueReadyAuthorityTrial
         var received = database.Apply(operation);
         var repairedImage = QueueWholeFlowStorage.Bytes(first);
         var repairedPosition = first.Position;
-        await global::KeyLoad.UnitTests.Features.ResourceExecution.ReplayResultAssertions.Same<ReceiveResult>(database.Apply(operation), received);
+        await global::KeyLoad.UnitTests.ResourceExecution.ReplayResultAssertions.Same<ReceiveResult>(database.Apply(operation), received);
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(first, repairedImage, repairedPosition, identity);
         await QueueReadyAuthorityColdContinuation.RunAsync(database, first, fixture.Directory, lane, received.Get<ReceiveResult>(), expired,
             operation, producer, produced, identity, token);
@@ -163,12 +163,12 @@ internal static class QueueReadyAuthorityTrial
             await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(cold, image, position, identity);
             var stored = OutcomeStoreOracle.Read(cold, original)
                 ?? throw new InvalidOperationException("The repaired original receive outcome is absent.");
-            await global::KeyLoad.UnitTests.Features.ResourceExecution.ReplayResultAssertions.Same<ReceiveResult>(
+            await global::KeyLoad.UnitTests.ResourceExecution.ReplayResultAssertions.Same<ReceiveResult>(
                 stored, ManagedCode.Communication.Result<object>.Succeed(receive));
             var replay = owner.Apply(original);
             if (expired)
             {
-                await global::KeyLoad.UnitTests.Features.ResourceExecution.ReplayResultAssertions.Same<ReceiveResult>(replay, stored);
+                await global::KeyLoad.UnitTests.ResourceExecution.ReplayResultAssertions.Same<ReceiveResult>(replay, stored);
             }
             else
             {

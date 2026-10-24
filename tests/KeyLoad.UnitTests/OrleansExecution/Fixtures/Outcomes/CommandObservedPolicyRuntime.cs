@@ -1,8 +1,8 @@
 using KeyLoad.Server;
 using Microsoft.Extensions.DependencyInjection;
-using P = KeyLoad.UnitTests.Features.OrleansExecution.CommandObservedPolicyProtocol;
+using P = KeyLoad.UnitTests.OrleansExecution.CommandObservedPolicyProtocol;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 /// <summary>Borrows the shared production Orleans cluster and its original execution options.</summary>
 internal sealed class CommandObservedPolicyRuntime : IAsyncDisposable

@@ -1,7 +1,7 @@
 using ManagedCode.Communication.CQRS;
 using ManagedCode.Orleans.Graph.Attributes;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 [AllowClientCall]
 [AllowGrainCall(typeof(ICqrsLeafGrain), AllowAllMethods = false,

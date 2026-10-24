@@ -1,8 +1,8 @@
-using KeyLoad.Core.Features.GraphTraversal.Validation;
+using KeyLoad.Core.GraphTraversal.Validation;
 using KeyLoad.Storage;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.Core.Features.GraphTraversal;
+namespace KeyLoad.Core.GraphTraversal;
 
 /// <summary>Runs explicit bounded breadth-first depth frontiers over execution adjacency ranges.</summary>
 internal sealed class GraphShortestPathReader

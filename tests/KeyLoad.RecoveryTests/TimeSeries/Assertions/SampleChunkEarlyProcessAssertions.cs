@@ -1,7 +1,7 @@
 using System.Text.Json;
 using ManagedCode.Communication;
 
-namespace KeyLoad.RecoveryTests.Features.TimeSeries;
+namespace KeyLoad.RecoveryTests.TimeSeries;
 
 internal static class SampleChunkEarlyProcessAssertions
 {

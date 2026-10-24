@@ -1,7 +1,7 @@
 using KeyLoad.Query;
 using KeyLoad.Storage.ZoneTree;
-using KeyLoad.UnitTests.Features.Messaging;
-namespace KeyLoad.UnitTests.Features.RelationalStorage;
+using KeyLoad.UnitTests.Messaging;
+namespace KeyLoad.UnitTests.RelationalStorage;
 
 internal static class SqlCreateTableAssertions
 {

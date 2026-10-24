@@ -1,10 +1,10 @@
-using KeyLoad.Core.Features.BackupRestore.Serialization;
-using KeyLoad.Core.Features.BackupRestore.Validation;
-using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.Core.BackupRestore.Serialization;
+using KeyLoad.Core.BackupRestore.Validation;
+using KeyLoad.Core.ResourceExecution;
 using KeyLoad.Storage;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.Core.Features.BackupRestore.Execution;
+namespace KeyLoad.Core.BackupRestore.Execution;
 
 internal sealed partial class AtomicPartitionRosterTransaction : IAtomicTransaction, IResourceEffectObservation, IResourceEffectCompletion
 {

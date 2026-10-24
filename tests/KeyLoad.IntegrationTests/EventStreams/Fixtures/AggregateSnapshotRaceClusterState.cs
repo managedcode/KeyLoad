@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 
-namespace KeyLoad.IntegrationTests.Features.EventStreams;
+namespace KeyLoad.IntegrationTests.EventStreams;
 
 internal sealed class AggregateSnapshotRaceClusterState(AggregateReplayClusterScenario scenario,
     CommitReceipt seed)

@@ -1,4 +1,4 @@
-using KeyLoad.Core.Features.Authorization;
+using KeyLoad.Core.Authorization;
 using KeyLoad.Storage.ZoneTree;
 using Microsoft.Extensions.Options;
 

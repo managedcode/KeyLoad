@@ -4,7 +4,7 @@ using Orleans.Serialization.Buffers;
 using Orleans.Serialization.Codecs;
 using Orleans.Serialization.WireProtocol;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 // Author real array boundaries because generated surrogate Values bypasses provider overrides.
 internal static class McpAuthenticationMalformedFixture

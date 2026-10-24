@@ -1,9 +1,9 @@
 using System.Runtime.ExceptionServices;
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
-using KeyLoad.UnitTests.Features.DatabaseComposition;
+using KeyLoad.UnitTests.DatabaseComposition;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal sealed class SqlCompositionParameterFixture : IDisposable
 {

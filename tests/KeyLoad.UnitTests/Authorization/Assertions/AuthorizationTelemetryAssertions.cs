@@ -1,10 +1,10 @@
 using System.Diagnostics;
 using System.Text.Json;
-using KeyLoad.Server.Features.Authorization.Contracts;
+using KeyLoad.Server.Authorization.Contracts;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 
-namespace KeyLoad.UnitTests.Features.Authorization;
+namespace KeyLoad.UnitTests.Authorization;
 
 internal static class AuthorizationTelemetryAssertions
 {

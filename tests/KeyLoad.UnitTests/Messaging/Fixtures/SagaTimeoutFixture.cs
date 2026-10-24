@@ -1,12 +1,12 @@
 using KeyLoad.Clustering;
-using KeyLoad.Core.Features.Messaging;
+using KeyLoad.Core.Messaging;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using Orleans.DurableJobs;
 using IAsyncInitializer = TUnit.Core.Interfaces.IAsyncInitializer;
 
-namespace KeyLoad.UnitTests.Features.Messaging;
+namespace KeyLoad.UnitTests.Messaging;
 
 internal sealed class SagaTimeoutFixture : IAsyncInitializer, IAsyncDisposable
 {

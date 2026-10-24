@@ -4,7 +4,7 @@ using KeyLoad.Server;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 internal static class SdkPolicySnapshotFlow
 {

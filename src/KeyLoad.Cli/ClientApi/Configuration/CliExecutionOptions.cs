@@ -1,4 +1,4 @@
-namespace KeyLoad.Cli.Features.ClientApi;
+namespace KeyLoad.Cli.ClientApi;
 
 /// <summary>The centrally validated deadline for a CLI status request.</summary>
 [ConfigurationOptions]

@@ -1,6 +1,6 @@
-using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.ClientApi;
 
-namespace KeyLoad.IntegrationTests.Features.ChangeFeeds;
+namespace KeyLoad.IntegrationTests.ChangeFeeds;
 
 internal sealed record ProjectionPublicState(PartitionRef Partition, McpPersistedIdentity Identity,
     CommandRequest Source, CommitReceipt SourceReceipt, ProjectionConsumerRef Consumer,

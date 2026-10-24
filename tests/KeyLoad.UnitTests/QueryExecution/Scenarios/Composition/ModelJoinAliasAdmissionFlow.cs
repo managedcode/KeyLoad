@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal static class ModelJoinAliasAdmissionFlow
 {
@@ -12,7 +12,7 @@ internal static class ModelJoinAliasAdmissionFlow
     {
         var kind = events ? SqlJoinSourceBindingFixture.Events : SqlJoinSourceBindingFixture.Queue;
         var healthy = SqlJoinSourceBindingFixture.Ast(partition, kind);
-        var before = global::KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(store);
+        var before = global::KeyLoad.UnitTests.Messaging.QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
         var identity = global::KeyLoad.JsonDefaults.Serialize(store.Identity);
         foreach (var alias in new[] { EmptyAlias, ControlAlias })

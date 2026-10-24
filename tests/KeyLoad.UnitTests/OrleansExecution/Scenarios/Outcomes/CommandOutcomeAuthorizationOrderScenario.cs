@@ -1,9 +1,9 @@
-using KeyLoad.Core.Features.CommandOutcomes.Contracts;
-using KeyLoad.Core.Features.DocumentStorage;
+using KeyLoad.Core.CommandOutcomes.Contracts;
+using KeyLoad.Core.DocumentStorage;
 using KeyLoad.Storage;
 using ManagedCode.Communication.Commands;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal static class CommandOutcomeAuthorizationOrderScenario
 {

@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal static class ScriptDomParsingCancellation
 {
@@ -29,7 +29,7 @@ internal static class ScriptDomParsingCancellation
         var state = new ScriptDomCancellationState(cancellation);
         await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
         {
-            using var observation = global::KeyLoad.Features.QueryExecution.ScriptDomParsingObservation.Enter(state.OnToken);
+            using var observation = global::KeyLoad.QueryExecution.ScriptDomParsingObservation.Enter(state.OnToken);
             await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
             {
                 var operation = Task.Run(() => engine.Execute(SqlOffsetProtocol.Reader,

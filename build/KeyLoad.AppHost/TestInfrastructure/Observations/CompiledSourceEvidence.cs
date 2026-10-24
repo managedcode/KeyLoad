@@ -4,7 +4,7 @@ using System.Reflection.PortableExecutable;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace KeyLoad.AppHost.Features.TestInfrastructure;
+namespace KeyLoad.AppHost.TestInfrastructure;
 
 /// <summary>Reads the original execution MSBuild compilation metadata from an observed managed assembly.</summary>
 internal static class CompiledSourceEvidence

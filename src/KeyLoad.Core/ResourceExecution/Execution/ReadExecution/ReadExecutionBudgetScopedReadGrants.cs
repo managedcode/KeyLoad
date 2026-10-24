@@ -1,6 +1,6 @@
 using KeyLoad.Storage;
 
-namespace KeyLoad.Core.Features.ResourceExecution.Execution;
+namespace KeyLoad.Core.ResourceExecution.Execution;
 
 /// <summary>Owns scoped read-grant reservations on the same operation ledger, lifetime and cancellation state.</summary>
 internal sealed class ReadExecutionBudgetScopedReadGrants(ReadExecutionBudget budget)

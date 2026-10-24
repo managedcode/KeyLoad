@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace KeyLoad.IntegrationTests.Features.QueryExecution;
+namespace KeyLoad.IntegrationTests.QueryExecution;
 
 internal readonly record struct QueryRuleOptimizationClusterRow(
     [property: JsonPropertyName(QueryRuleOptimizationClusterRow.StatusWireName)] string Status,

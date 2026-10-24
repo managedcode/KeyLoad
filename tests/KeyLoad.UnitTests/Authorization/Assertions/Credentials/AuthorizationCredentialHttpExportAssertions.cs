@@ -2,7 +2,7 @@ using System.Net;
 using System.Text.Json;
 using ManagedCode.Communication;
 
-namespace KeyLoad.UnitTests.Features.Authorization;
+namespace KeyLoad.UnitTests.Authorization;
 
 internal static class AuthorizationCredentialHttpExportAssertions
 {

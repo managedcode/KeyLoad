@@ -1,9 +1,9 @@
-using KeyLoad.Query.Features.QueryExecution;
-using KeyLoad.Query.Features.Search;
+using KeyLoad.Query.QueryExecution;
+using KeyLoad.Query.Search;
 using KeyLoad.Server;
-using KeyLoad.Server.Features.Search;
+using KeyLoad.Server.Search;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 internal static class TextBm25EligibilityPages
 {

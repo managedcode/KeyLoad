@@ -1,4 +1,4 @@
-namespace KeyLoad.Server.Features.Search;
+namespace KeyLoad.Server.Search;
 
 internal sealed class TextSelectedReadLease(TextSelectedReadAdmission admission,
     TextResourceReservation? reservation = null) : IDisposable

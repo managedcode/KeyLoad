@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.CodeQuality.Helpers;
+namespace KeyLoad.UnitTests.CodeQuality.Helpers;
 
 internal sealed record SourceManifestChildJoined(Task Original, Task Exit, Task Output,
     Task Error, string Ready, string StandardOutput, string StandardError, bool PendingBeforeCancellation,

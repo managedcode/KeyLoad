@@ -1,8 +1,8 @@
 using System.Text.Json;
 using KeyLoad.Server;
-using KeyLoad.UnitTests.Features.ClientApi;
+using KeyLoad.UnitTests.ClientApi;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 /// <summary>AC-SQLC-002/003: trivia cannot splice tokens, hide statements or relax bound arguments.</summary>
 internal sealed class SqlOperationCommentRejectionTests
@@ -39,12 +39,12 @@ internal sealed class SqlOperationCommentRejectionTests
         var accepted = SqlOperationCommentTestData.Request(
             SqlOperationCommentTestData.Nested(SqlOperationCommentTestData.ShallowDepth) + SqlOperationCommentTestData.PlainCall);
         var budget = new global::KeyLoad.Core.ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(SqlOperationTestData.Limits));
-        using var reader = new global::KeyLoad.Features.QueryExecution.ScriptDomBoundedReader(accepted.Sql, budget.Check);
+        using var reader = new global::KeyLoad.QueryExecution.ScriptDomBoundedReader(accepted.Sql, budget.Check);
         var parser = new global::Microsoft.SqlServer.TransactSql.ScriptDom.TSql180Parser(true,
             global::Microsoft.SqlServer.TransactSql.ScriptDom.SqlEngineType.Standalone);
         var tokens = parser.GetTokenStream(reader, out var errors);
         await Assert.That(errors.Count).IsEqualTo(0);
-        global::KeyLoad.Features.QueryExecution.ScriptDomTokenBounds.Require(tokens, limits, budget.Check);
+        global::KeyLoad.QueryExecution.ScriptDomTokenBounds.Require(tokens, limits, budget.Check);
         await SqlOperationTestData.Same(SqlOperationTestData.Compile(accepted),
             SqlOperationTestData.Find(McpCatalogExpectations.QueryCapabilities).Decode(null));
         var rejected = accepted with

@@ -1,7 +1,7 @@
 using KeyLoad.Storage;
 using ManagedCode.Communication;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal sealed class AtomicPartitionScopeLifecycleState(PartitionRef left, StoreIdentity originalIdentity, Func<EntityRef, EntityRef> expectedReference)
 {

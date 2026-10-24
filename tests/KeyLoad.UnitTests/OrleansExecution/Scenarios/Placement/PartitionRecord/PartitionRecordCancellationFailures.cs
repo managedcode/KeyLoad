@@ -2,7 +2,7 @@ using System.Runtime.ExceptionServices;
 using KeyLoad.Server;
 using ManagedCode.Communication.CQRS;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution.Helpers;
+namespace KeyLoad.UnitTests.OrleansExecution.Helpers;
 
 internal static class PartitionRecordCancellationFailures
 {

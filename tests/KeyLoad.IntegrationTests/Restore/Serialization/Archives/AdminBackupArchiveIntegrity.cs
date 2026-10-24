@@ -1,7 +1,7 @@
 using System.Security.Cryptography;
 using KeyLoad.Storage.ZoneTree;
 
-namespace KeyLoad.IntegrationTests.Features.BackupRestore.Helpers;
+namespace KeyLoad.IntegrationTests.BackupRestore.Helpers;
 
 /// <summary>Captures a bounded digest of the verified fixture-owned backup manifest.</summary>
 internal static class AdminBackupArchiveIntegrity

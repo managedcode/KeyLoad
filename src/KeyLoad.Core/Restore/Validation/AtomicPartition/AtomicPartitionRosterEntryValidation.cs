@@ -1,6 +1,6 @@
-using KeyLoad.Core.Features.BackupRestore.Serialization;
+using KeyLoad.Core.BackupRestore.Serialization;
 
-namespace KeyLoad.Core.Features.BackupRestore.Validation;
+namespace KeyLoad.Core.BackupRestore.Validation;
 
 internal static class AtomicPartitionRosterEntryValidation
 {

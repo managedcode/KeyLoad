@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
-using KeyLoad.Core.Features.ResourceExecution;
-using KeyLoad.Core.Features.Search;
+using KeyLoad.Core.ResourceExecution;
+using KeyLoad.Core.Search;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core;

@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
 using KeyLoad.Core;
 
-namespace KeyLoad.Query.Features.QueryExecution;
+namespace KeyLoad.Query.QueryExecution;
 
 /// <summary>Separates complete selected source redaction from publicly visible policy paths.</summary>
 internal static class QueryProjectionRedactions

@@ -1,4 +1,4 @@
-namespace KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
+namespace KeyLoad.Storage.ZoneTree.ResourceExecution;
 
 /// <summary>Owns a reserved key/fill charge until publication or idempotent disposal.</summary>
 internal sealed class ZoneTreePointCacheCandidate : IDisposable

@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>AC-SQLC-003P: same-instance execution writers and aliased public DTO graphs retain every value.</summary>
 internal sealed class McpPayloadOracleTests

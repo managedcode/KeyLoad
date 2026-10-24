@@ -51,7 +51,7 @@ internal static class RelationalInnerJoinRetainedRows
     {
         if (record is null || record.Reference is null || record.Reference.Id is null
             || record.Reference.Partition != partition || record.Reference.Collection != collection
-            || !key.SequenceEqual(global::KeyLoad.Core.Features.DocumentStorage.DocumentStorageKeys.RecordKey(partition, collection, record.Reference.Id)))
+            || !key.SequenceEqual(global::KeyLoad.Core.DocumentStorage.DocumentStorageKeys.RecordKey(partition, collection, record.Reference.Id)))
         {
             throw Errors.Fail(ErrorCode.Corruption, RetainedRowCorrupt);
         }

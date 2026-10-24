@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
-using P = KeyLoad.IntegrationTests.Features.DatabaseComposition.FunctionalGateUserAnalyticsProtocol;
+using P = KeyLoad.IntegrationTests.DatabaseComposition.FunctionalGateUserAnalyticsProtocol;
 
-namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
+namespace KeyLoad.IntegrationTests.DatabaseComposition;
 
 /// <summary>Independent arithmetic literals, never values read from the execution analytics engine.</summary>
 internal static class FunctionalGateUserAnalyticsExpected

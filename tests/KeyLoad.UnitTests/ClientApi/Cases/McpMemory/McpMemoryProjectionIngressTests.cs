@@ -1,6 +1,6 @@
 using KeyLoad.Server;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>AC-MCP-004/005: conservative ingress and authentication ownership projection.</summary>
 internal sealed class McpMemoryProjectionIngressTests

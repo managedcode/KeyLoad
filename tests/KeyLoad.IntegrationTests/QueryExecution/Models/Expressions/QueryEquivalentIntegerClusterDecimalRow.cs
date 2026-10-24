@@ -1,7 +1,7 @@
 using System.Text.Json.Serialization;
-using static KeyLoad.IntegrationTests.Features.QueryExecution.QueryEquivalentIntegerClusterDecimalProtocol;
+using static KeyLoad.IntegrationTests.QueryExecution.QueryEquivalentIntegerClusterDecimalProtocol;
 
-namespace KeyLoad.IntegrationTests.Features.QueryExecution;
+namespace KeyLoad.IntegrationTests.QueryExecution;
 
 internal readonly record struct QueryEquivalentIntegerClusterDecimalRow(
     [property: JsonPropertyName(ByteField)] byte ByteNumber,

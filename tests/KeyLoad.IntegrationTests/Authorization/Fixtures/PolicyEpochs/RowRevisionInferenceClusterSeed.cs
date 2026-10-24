@@ -1,11 +1,11 @@
 using KeyLoad.Core;
-using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.OrleansExecution;
-using KeyLoad.IntegrationTests.Features.QueryExecution;
-using KeyLoad.IntegrationTests.Features.ResourceExecution;
-using P = KeyLoad.IntegrationTests.Features.Authorization.RowRevisionInferenceClusterProtocol;
+using KeyLoad.IntegrationTests.ClientApi;
+using KeyLoad.IntegrationTests.OrleansExecution;
+using KeyLoad.IntegrationTests.QueryExecution;
+using KeyLoad.IntegrationTests.ResourceExecution;
+using P = KeyLoad.IntegrationTests.Authorization.RowRevisionInferenceClusterProtocol;
 
-namespace KeyLoad.IntegrationTests.Features.Authorization;
+namespace KeyLoad.IntegrationTests.Authorization;
 
 internal static class RowRevisionInferenceClusterSeed
 {

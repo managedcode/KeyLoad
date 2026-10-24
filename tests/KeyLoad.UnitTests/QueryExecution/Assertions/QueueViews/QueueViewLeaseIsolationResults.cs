@@ -1,7 +1,7 @@
 using System.Text.Json;
 using ManagedCode.Communication;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal static class QueueViewLeaseIsolationResults
 {

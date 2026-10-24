@@ -1,6 +1,6 @@
 using KeyLoad.Core;
-using KeyLoad.Core.Features.Messaging;
-using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.Core.Messaging;
+using KeyLoad.Core.ResourceExecution;
 
 namespace KeyLoad.Clustering;
 

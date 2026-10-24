@@ -1,7 +1,7 @@
-using KeyLoad.IntegrationTests.Features.Authorization;
-using KeyLoad.IntegrationTests.Features.DocumentStorage;
+using KeyLoad.IntegrationTests.Authorization;
+using KeyLoad.IntegrationTests.DocumentStorage;
 
-namespace KeyLoad.IntegrationTests.Features.ClientApi;
+namespace KeyLoad.IntegrationTests.ClientApi;
 
 /// <summary>AC-MCP-002/003: persisted grants and server scope govern each actual official tool execution.</summary>
 /// <param name="fixture">The initialized actual execution Aspire Orleans application.</param>

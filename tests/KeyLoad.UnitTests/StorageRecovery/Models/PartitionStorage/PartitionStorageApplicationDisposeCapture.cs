@@ -1,7 +1,7 @@
 using KeyLoad.Server;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace KeyLoad.UnitTests.Features.StorageRecovery;
+namespace KeyLoad.UnitTests.StorageRecovery;
 
 /// <summary>Borrowed actual services captured before their application provider is disposed.</summary>
 internal sealed record PartitionStorageApplicationDisposeCapture(

@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
-using KeyLoad.Core.Features.RelationalStorage;
+using KeyLoad.Core.RelationalStorage;
 
-namespace KeyLoad.UnitTests.Features.RelationalStorage;
+namespace KeyLoad.UnitTests.RelationalStorage;
 
 internal sealed class RelationalSchemaTests
 {

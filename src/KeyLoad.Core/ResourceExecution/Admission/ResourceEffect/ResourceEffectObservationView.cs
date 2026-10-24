@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
 using KeyLoad.Storage;
 
-namespace KeyLoad.Core.Features.ResourceExecution;
+namespace KeyLoad.Core.ResourceExecution;
 
 internal class ResourceEffectObservationView(IKeyValueView inner, ResourceEffectBindingScope scope)
     : IKeyValueView, IResourceEffectObservation

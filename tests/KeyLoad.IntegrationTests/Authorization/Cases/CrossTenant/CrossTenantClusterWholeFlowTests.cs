@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.Authorization;
+namespace KeyLoad.IntegrationTests.Authorization;
 
 [ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = "cluster")]
 [NotInParallel]

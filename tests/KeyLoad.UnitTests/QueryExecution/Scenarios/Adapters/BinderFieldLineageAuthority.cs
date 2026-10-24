@@ -2,10 +2,10 @@ using System.Text.Json;
 using KeyLoad.Server;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
-using KeyLoad.UnitTests.Features.Authorization;
-using static KeyLoad.UnitTests.Features.QueryExecution.BinderFieldLineageProtocol;
+using KeyLoad.UnitTests.Authorization;
+using static KeyLoad.UnitTests.QueryExecution.BinderFieldLineageProtocol;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal static class BinderFieldLineageAuthority
 {

@@ -1,4 +1,4 @@
-namespace KeyLoad.Server.Features.Authorization.Configuration;
+namespace KeyLoad.Server.Authorization.Configuration;
 
 /// <summary>Validated work bounds for shared HTTP telemetry privacy.</summary>
 [KeyLoad.ConfigurationOptions]

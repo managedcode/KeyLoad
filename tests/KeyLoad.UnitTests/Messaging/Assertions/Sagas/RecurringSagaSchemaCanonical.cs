@@ -1,9 +1,9 @@
-using KeyLoad.Core.Features.Messaging;
+using KeyLoad.Core.Messaging;
 using KeyLoad.Storage;
-using KeyLoad.UnitTests.Features.Authorization;
-using static KeyLoad.UnitTests.Features.Messaging.RecurringSagaSchemaProtocol;
+using KeyLoad.UnitTests.Authorization;
+using static KeyLoad.UnitTests.Messaging.RecurringSagaSchemaProtocol;
 
-namespace KeyLoad.UnitTests.Features.Messaging;
+namespace KeyLoad.UnitTests.Messaging;
 
 internal static class RecurringSagaSchemaCanonical
 {

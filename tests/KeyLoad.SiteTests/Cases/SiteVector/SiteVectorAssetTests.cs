@@ -1,6 +1,6 @@
 using System.Xml.Linq;
 
-namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
+namespace KeyLoad.SiteTests.BenchmarkComparisons;
 
 internal sealed class SiteVectorAssetTests
 {

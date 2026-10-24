@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 using KeyLoad.Server;
 using KeyLoad.Storage;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>AC-MCP-003: real metadata, strict collections and actual base64 converters.</summary>
 internal sealed class McpSchemaMetadataTests

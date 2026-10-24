@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.OrleansExecution.Helpers;
+namespace KeyLoad.IntegrationTests.OrleansExecution.Helpers;
 
 /// <summary>Allows private Orleans-root deletion only after every owner and cleanup stage settled.</summary>
 internal static class RequestCqrsClusterDiagnosticsRootGuard

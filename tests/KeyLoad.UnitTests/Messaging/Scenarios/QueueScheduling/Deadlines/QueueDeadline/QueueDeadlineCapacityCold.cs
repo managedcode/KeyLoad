@@ -1,9 +1,9 @@
 using KeyLoad.Storage.ZoneTree;
-using KeyLoad.UnitTests.Features.ResourceExecution;
+using KeyLoad.UnitTests.ResourceExecution;
 using ManagedCode.Communication;
-using static KeyLoad.UnitTests.Features.Messaging.QueueDeadlineCapacityProtocol;
+using static KeyLoad.UnitTests.Messaging.QueueDeadlineCapacityProtocol;
 
-namespace KeyLoad.UnitTests.Features.Messaging;
+namespace KeyLoad.UnitTests.Messaging;
 
 internal static class QueueDeadlineCapacityCold
 {

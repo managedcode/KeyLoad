@@ -1,6 +1,6 @@
 using System.Text.Json;
 
-namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
+namespace KeyLoad.SiteTests.BenchmarkComparisons;
 
 internal sealed class SiteContentBrowserTests
 {

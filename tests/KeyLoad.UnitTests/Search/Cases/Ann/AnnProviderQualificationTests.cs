@@ -1,6 +1,6 @@
-using static KeyLoad.UnitTests.Features.Search.AnnProviderQualificationProtocol;
+using static KeyLoad.UnitTests.Search.AnnProviderQualificationProtocol;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 internal sealed class AnnProviderQualificationTests
 {

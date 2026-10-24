@@ -2,7 +2,7 @@ using System.Globalization;
 using System.Runtime.InteropServices;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
+namespace KeyLoad.LoadTests.AppHost.BenchmarkComparisons;
 
 internal static class ScaleServerHostEvidence
 {

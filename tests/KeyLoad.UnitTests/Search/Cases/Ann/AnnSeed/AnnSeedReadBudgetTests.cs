@@ -1,12 +1,12 @@
-using KeyLoad.Core.Features.DocumentStorage;
-using KeyLoad.Core.Features.ResourceExecution;
-using KeyLoad.Core.Features.Search;
+using KeyLoad.Core.DocumentStorage;
+using KeyLoad.Core.ResourceExecution;
+using KeyLoad.Core.Search;
 using KeyLoad.Storage;
-using KeyLoad.UnitTests.Features.ResourceExecution;
+using KeyLoad.UnitTests.ResourceExecution;
 using Microsoft.Extensions.Options;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 internal sealed class AnnSeedReadBudgetTests
 {

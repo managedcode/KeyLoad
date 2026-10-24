@@ -1,6 +1,6 @@
-using KeyLoad.UnitTests.Features.DocumentStorage;
+using KeyLoad.UnitTests.DocumentStorage;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal sealed class QueueViewLeaseIsolationState(DocumentPatchAtomicityOwner owner, CancellationToken token)
 {

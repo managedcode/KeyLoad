@@ -1,9 +1,9 @@
-using KeyLoad.Core.Features.InternalSerialization;
-using KeyLoad.UnitTests.Features.Authorization;
+using KeyLoad.Core.InternalSerialization;
+using KeyLoad.UnitTests.Authorization;
 using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
 
-namespace KeyLoad.UnitTests.Features.DatabaseComposition;
+namespace KeyLoad.UnitTests.DatabaseComposition;
 
 internal sealed record CompositionLinkFailureImage(long Position, long Applied, byte[] Identity, string[] Rows)
 {

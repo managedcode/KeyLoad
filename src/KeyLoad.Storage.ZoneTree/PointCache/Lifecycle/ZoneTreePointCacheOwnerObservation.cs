@@ -1,4 +1,4 @@
-namespace KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
+namespace KeyLoad.Storage.ZoneTree.ResourceExecution;
 
 /// <summary>Projects nonsecret actual ownership under the execution reader without consulting cache state locks.</summary>
 internal static class ZoneTreePointCacheOwnerObservation

@@ -1,10 +1,10 @@
 using KeyLoad.Clustering;
-using KeyLoad.Core.Features.ResourceExecution;
-using KeyLoad.UnitTests.Features.OrleansExecution;
+using KeyLoad.Core.ResourceExecution;
+using KeyLoad.UnitTests.OrleansExecution;
 using ManagedCode.Communication;
-using P = KeyLoad.UnitTests.Features.ClientApi.SdkProblemBoundaryProtocol;
+using P = KeyLoad.UnitTests.ClientApi.SdkProblemBoundaryProtocol;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 internal sealed class SdkProblemBoundaryScenario(ConnectionScenario execution, SdkProblemBoundaryTasks tasks)
 {

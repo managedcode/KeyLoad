@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
 using KeyLoad.Storage;
 
-namespace KeyLoad.Core.Features.StoragePartitions.Queries;
+namespace KeyLoad.Core.StoragePartitions.Queries;
 
 /// <summary>Reads the bounded resource definitions owned by one atomic partition.</summary>
 internal static class PartitionResourceCatalog

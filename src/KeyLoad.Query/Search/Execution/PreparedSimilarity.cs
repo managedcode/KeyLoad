@@ -1,6 +1,6 @@
 using System.Numerics;
 
-namespace KeyLoad.Query.Features.Search;
+namespace KeyLoad.Query.Search;
 
 internal sealed class PreparedSimilarity : IPackedAnnSimilarity
 {

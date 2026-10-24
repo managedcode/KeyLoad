@@ -1,8 +1,8 @@
-using KeyLoad.Core.Features.ResourceExecution;
-using KeyLoad.UnitTests.Features.Messaging;
+using KeyLoad.Core.ResourceExecution;
+using KeyLoad.UnitTests.Messaging;
 using ManagedCode.Communication.Commands;
 
-namespace KeyLoad.UnitTests.Features.DocumentStorage;
+namespace KeyLoad.UnitTests.DocumentStorage;
 
 internal static class DocumentSessionAuthorityColdAssertions
 {

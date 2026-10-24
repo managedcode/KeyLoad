@@ -1,6 +1,6 @@
 using ZoneTree.AbstractFileStream;
 
-namespace KeyLoad.Server.Features.Search;
+namespace KeyLoad.Server.Search;
 
 internal sealed class TextOpenStream(IFileStream stream)
 {

@@ -1,5 +1,5 @@
 using System.Collections.Immutable;
-using KeyLoad.Core.Features.BlobStorage;
+using KeyLoad.Core.BlobStorage;
 using ManagedCode.Storage.Core.Models;
 using ManagedCode.Storage.FileSystem;
 using Microsoft.Extensions.Options;

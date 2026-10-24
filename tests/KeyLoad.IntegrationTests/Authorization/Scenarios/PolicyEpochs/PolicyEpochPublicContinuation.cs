@@ -1,8 +1,8 @@
 using KeyLoad.Client;
-using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.OrleansExecution;
+using KeyLoad.IntegrationTests.ClientApi;
+using KeyLoad.IntegrationTests.OrleansExecution;
 
-namespace KeyLoad.IntegrationTests.Features.Authorization;
+namespace KeyLoad.IntegrationTests.Authorization;
 
 internal static class PolicyEpochPublicContinuation
 {
@@ -17,7 +17,7 @@ internal static class PolicyEpochPublicContinuation
         MutationReceipt[] expected = [new(PolicyEpochPublicProtocol.PutKind,
             ResourcePolicyUpdateClusterProtocol.Collection, PolicyEpochPublicProtocol.SecondId,
             PolicyEpochPublicProtocol.SeedRevision)];
-        await KeyLoad.IntegrationTests.Features.QueryExecution.SqlClusterProtocol.EqualAsync(expected, receipt.Mutations.ToArray());
+        await KeyLoad.IntegrationTests.QueryExecution.SqlClusterProtocol.EqualAsync(expected, receipt.Mutations.ToArray());
         return await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, fixture.AdminKey,
             root => RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, scenario.Reader.Secret,
                 reader => ContinueAsync(fixture, root.Sdk, reader, scenario, seed, receipt, token), token), token);

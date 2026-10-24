@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>Owns one real temporary wire file used by MCP frame contract tests.</summary>
 internal sealed class TemporaryFrameFile : IDisposable

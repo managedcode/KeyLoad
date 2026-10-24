@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.OrleansExecution.Helpers;
+namespace KeyLoad.IntegrationTests.OrleansExecution.Helpers;
 
 internal sealed class RequestCqrsClusterSubscriberTransitionHooks(
     RequestCqrsClusterDiagnosticsSubscriberObserver observer)

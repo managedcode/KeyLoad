@@ -1,4 +1,4 @@
-namespace KeyLoad.Core.Features.Search;
+namespace KeyLoad.Core.Search;
 
 /// <summary>Stable field identities for one vector's private projection lineage.</summary>
 internal static class VectorProjectionLineageFields

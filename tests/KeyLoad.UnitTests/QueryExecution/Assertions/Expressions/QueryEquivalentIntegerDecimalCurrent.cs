@@ -1,9 +1,9 @@
 using System.Text.Json;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
-using static KeyLoad.UnitTests.Features.QueryExecution.QueryEquivalentIntegerDecimalProtocol;
+using static KeyLoad.UnitTests.QueryExecution.QueryEquivalentIntegerDecimalProtocol;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal static class QueryEquivalentIntegerDecimalCurrent
 {

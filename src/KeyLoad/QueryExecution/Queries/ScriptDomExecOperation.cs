@@ -1,4 +1,4 @@
-using KeyLoad.Features.QueryExecution;
+using KeyLoad.QueryExecution;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace KeyLoad.Server;

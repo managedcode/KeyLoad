@@ -1,5 +1,5 @@
 using System.Collections.Immutable;
-using KeyLoad.Core.Features.BlobStorage;
+using KeyLoad.Core.BlobStorage;
 using ManagedCode.Communication;
 using ManagedCode.Storage.Server.Models;
 using Microsoft.AspNetCore.Mvc;

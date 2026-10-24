@@ -1,4 +1,4 @@
-namespace KeyLoad.Core.Features.Search;
+namespace KeyLoad.Core.Search;
 
 /// <summary>Stable field identities for idempotent projection effects.</summary>
 internal static class VectorProjectionEffectFields

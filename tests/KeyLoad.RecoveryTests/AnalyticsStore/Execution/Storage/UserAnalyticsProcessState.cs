@@ -1,9 +1,9 @@
 using System.Security.Cryptography;
 using KeyLoad.Server;
 using ManagedCode.Communication.Commands;
-using P = KeyLoad.RecoveryTests.Features.AnalyticsStore.UserAnalyticsProcessProtocol;
+using P = KeyLoad.RecoveryTests.AnalyticsStore.UserAnalyticsProcessProtocol;
 
-namespace KeyLoad.RecoveryTests.Features.AnalyticsStore;
+namespace KeyLoad.RecoveryTests.AnalyticsStore;
 
 internal static class UserAnalyticsProcessState
 {

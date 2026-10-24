@@ -1,8 +1,8 @@
-using KeyLoad.Core.Features.RuntimeJournaling.Identity;
+using KeyLoad.Core.RuntimeJournaling.Identity;
 using ManagedCode.Communication.Commands;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.UnitTests.Features.ResourceExecution;
+namespace KeyLoad.UnitTests.ResourceExecution;
 
 internal static class RuntimeJournalBootstrapAdmissionFlow
 {

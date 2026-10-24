@@ -1,9 +1,9 @@
 using KeyLoad.Storage.ZoneTree;
-using KeyLoad.UnitTests.Features.Authorization;
-using KeyLoad.UnitTests.Features.Messaging;
-using static KeyLoad.UnitTests.Features.ResourceExecution.ResourcePairBindingState;
+using KeyLoad.UnitTests.Authorization;
+using KeyLoad.UnitTests.Messaging;
+using static KeyLoad.UnitTests.ResourceExecution.ResourcePairBindingState;
 
-namespace KeyLoad.UnitTests.Features.ResourceExecution;
+namespace KeyLoad.UnitTests.ResourceExecution;
 
 internal static class ResourcePairBindingCold
 {

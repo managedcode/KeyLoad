@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
+namespace KeyLoad.Storage.ZoneTree.ResourceExecution;
 
 /// <summary>Fixed limits for disposable embedded or exact local-binding positive point-value acceleration.</summary>
 /// <param name="MemoryBudget">Externally owned, shared node retention budget.</param>

@@ -1,7 +1,7 @@
 using KeyLoad.Clustering;
 using ManagedCode.Communication;
 
-namespace KeyLoad.Server.Features.Search;
+namespace KeyLoad.Server.Search;
 
 internal sealed partial class TextOnlineSession
 {

@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 /// <summary>Operation clock observing actual work in the owning execution store.</summary>
 internal sealed class AnnPublicObservedWorkClock : TimeProvider

@@ -1,6 +1,6 @@
 using KeyLoad.Storage;
 
-namespace KeyLoad.Query.Features.Search;
+namespace KeyLoad.Query.Search;
 
 /// <summary>Owns bounded original-cut records and the same reader through complete off-gate work and settlement.</summary>
 internal interface ICapturedTextRead : IDisposable

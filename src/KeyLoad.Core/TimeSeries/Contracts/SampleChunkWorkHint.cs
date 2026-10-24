@@ -1,4 +1,4 @@
-namespace KeyLoad.Core.Features.TimeSeries;
+namespace KeyLoad.Core.TimeSeries;
 
 /// <summary>Carries a persisted chunk-window identity and its original idempotent command.</summary>
 [Orleans.GenerateSerializer, Orleans.Alias(SampleChunkWorkHint.SerializerAlias)]

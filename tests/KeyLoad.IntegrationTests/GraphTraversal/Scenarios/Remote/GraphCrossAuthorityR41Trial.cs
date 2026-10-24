@@ -1,7 +1,7 @@
-using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.OrleansExecution;
-using KeyLoad.IntegrationTests.Features.QueryExecution;
-namespace KeyLoad.IntegrationTests.Features.GraphTraversal;
+using KeyLoad.IntegrationTests.ClientApi;
+using KeyLoad.IntegrationTests.OrleansExecution;
+using KeyLoad.IntegrationTests.QueryExecution;
+namespace KeyLoad.IntegrationTests.GraphTraversal;
 
 internal static class GraphCrossAuthorityR41Trial
 {

@@ -1,9 +1,9 @@
-using KeyLoad.Core.Features.Search;
-using KeyLoad.Query.Features.Search;
+using KeyLoad.Core.Search;
+using KeyLoad.Query.Search;
 using KeyLoad.Storage.ZoneTree.IO;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.Server.Features.Search;
+namespace KeyLoad.Server.Search;
 
 internal static class AnnGenerationFiles
 {

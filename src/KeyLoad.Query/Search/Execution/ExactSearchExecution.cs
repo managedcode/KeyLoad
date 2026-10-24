@@ -1,6 +1,6 @@
 using KeyLoad.Core;
 
-namespace KeyLoad.Query.Features.Search;
+namespace KeyLoad.Query.Search;
 
 /// <summary>Prepares and completes exact ranking within the original authorized search work.</summary>
 internal static class ExactSearchExecution

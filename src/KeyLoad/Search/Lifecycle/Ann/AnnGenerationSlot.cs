@@ -1,6 +1,6 @@
-using KeyLoad.Query.Features.Search;
+using KeyLoad.Query.Search;
 
-namespace KeyLoad.Server.Features.Search;
+namespace KeyLoad.Server.Search;
 
 internal sealed class AnnGenerationSlot(AnnGenerationOwner owner, AnnManifest manifest,
     PackedAnnIndex index)

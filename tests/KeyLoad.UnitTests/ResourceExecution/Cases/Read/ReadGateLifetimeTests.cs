@@ -1,6 +1,6 @@
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.ResourceExecution;
+namespace KeyLoad.UnitTests.ResourceExecution;
 
 internal sealed class ReadGateLifetimeTests
 {

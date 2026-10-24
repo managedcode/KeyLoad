@@ -1,6 +1,6 @@
 using KeyLoad.Clustering;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal sealed record ConnectionObservedOperation(GrainRequestProbeIdentity Identity,
     IGrainContext ConnectionContext, IGrainContext ProducerContext, GrainRequestContextState ConnectionIdentity,

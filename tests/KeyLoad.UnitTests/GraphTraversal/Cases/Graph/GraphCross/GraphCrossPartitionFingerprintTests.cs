@@ -1,6 +1,6 @@
-using KeyLoad.Core.Features.GraphTraversal.Serialization;
+using KeyLoad.Core.GraphTraversal.Serialization;
 
-namespace KeyLoad.UnitTests.Features.GraphTraversal;
+namespace KeyLoad.UnitTests.GraphTraversal;
 
 internal sealed class GraphCrossPartitionFingerprintTests
 {

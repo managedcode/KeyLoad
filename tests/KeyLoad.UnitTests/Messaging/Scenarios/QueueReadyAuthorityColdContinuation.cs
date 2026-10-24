@@ -2,7 +2,7 @@ using KeyLoad.Storage;
 using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
 
-namespace KeyLoad.UnitTests.Features.Messaging;
+namespace KeyLoad.UnitTests.Messaging;
 
 internal static class QueueReadyAuthorityColdContinuation
 {
@@ -50,10 +50,10 @@ internal static class QueueReadyAuthorityColdContinuation
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(second, bytes, position, identity);
         foreach (var (command, result) in receipts)
         {
-            await global::KeyLoad.UnitTests.Features.ResourceExecution.ReplayResultAssertions.Same<CommitReceipt>(QueueWholeFlowStorage.Apply(restored,
+            await global::KeyLoad.UnitTests.ResourceExecution.ReplayResultAssertions.Same<CommitReceipt>(QueueWholeFlowStorage.Apply(restored,
                 OperationKind.Delivery, command, command.CommandId, new DateTimeOffset(operation.Timestamp)), result);
         }
-        await global::KeyLoad.UnitTests.Features.ResourceExecution.ReplayResultAssertions.Same<CommitReceipt>(QueueWholeFlowStorage.Apply(restored,
+        await global::KeyLoad.UnitTests.ResourceExecution.ReplayResultAssertions.Same<CommitReceipt>(QueueWholeFlowStorage.Apply(restored,
             OperationKind.Batch, producer, producer.CommandId, new DateTimeOffset(operation.Timestamp)), produced);
         await Assert.That(restored.InspectMessage("root", lane, "input")).IsEqualTo(input);
         await Assert.That(restored.InspectMessage("root", lane, "healthy")).IsEqualTo(new MessageInspection(

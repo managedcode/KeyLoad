@@ -1,7 +1,7 @@
-using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.QueryExecution;
+using KeyLoad.IntegrationTests.ClientApi;
+using KeyLoad.IntegrationTests.QueryExecution;
 
-namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
+namespace KeyLoad.IntegrationTests.DatabaseComposition;
 
 internal static class FunctionalGateColdAuthorization
 {
@@ -39,7 +39,7 @@ internal static class FunctionalGateColdAuthorization
         }
     }
 
-    private static async Task RefuseAsync(KeyLoad.IntegrationTests.Features.OrleansExecution.RequestCqrsClusterCallers caller,
+    private static async Task RefuseAsync(KeyLoad.IntegrationTests.OrleansExecution.RequestCqrsClusterCallers caller,
         CommandRequest command, CancellationToken token)
     {
         var denied = await caller.Sdk.CommitAsync(command, token);

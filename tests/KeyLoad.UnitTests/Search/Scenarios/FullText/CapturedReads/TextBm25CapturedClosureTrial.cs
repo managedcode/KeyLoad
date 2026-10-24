@@ -1,9 +1,9 @@
-using KeyLoad.Core.Features.ResourceExecution;
-using KeyLoad.Query.Features.Search;
+using KeyLoad.Core.ResourceExecution;
+using KeyLoad.Query.Search;
 using KeyLoad.Server;
-using KeyLoad.Server.Features.Search;
+using KeyLoad.Server.Search;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 internal static class TextBm25CapturedClosureTrial
 {

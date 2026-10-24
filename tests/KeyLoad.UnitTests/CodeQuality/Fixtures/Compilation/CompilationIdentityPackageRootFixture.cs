@@ -1,11 +1,11 @@
 using System.Text;
 using System.Text.Json;
 using System.Xml.Linq;
-using KeyLoad.AppHost.Features.TestInfrastructure;
-using KeyLoad.UnitTests.Features.CodeQuality.Processes;
+using KeyLoad.AppHost.TestInfrastructure;
+using KeyLoad.UnitTests.CodeQuality.Processes;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.UnitTests.Features.CodeQuality.Helpers;
+namespace KeyLoad.UnitTests.CodeQuality.Helpers;
 
 internal sealed class CompilationIdentityPackageRootFixture : IAsyncDisposable
 {

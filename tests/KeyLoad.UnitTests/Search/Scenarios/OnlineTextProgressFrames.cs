@@ -3,7 +3,7 @@ using ManagedCode.Communication;
 using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 /// <summary>Collects actual production-writer frames from the real bounded CQRS producer; executes no index effects.</summary>
 internal static class OnlineTextProgressFrames

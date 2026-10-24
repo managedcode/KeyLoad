@@ -3,7 +3,7 @@ using System.Text;
 using System.Text.Json;
 using ManagedCode.Communication;
 
-namespace KeyLoad.IntegrationTests.Features.RelationalStorage;
+namespace KeyLoad.IntegrationTests.RelationalStorage;
 
 internal static class RelationalSqlClusterOriginalQueryObservation
 {

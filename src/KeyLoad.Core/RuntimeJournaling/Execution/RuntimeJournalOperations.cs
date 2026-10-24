@@ -1,10 +1,10 @@
 using System.Collections.Immutable;
-using KeyLoad.Core.Features.RuntimeJournaling.Commands;
-using KeyLoad.Core.Features.RuntimeJournaling.Contracts;
-using KeyLoad.Core.Features.RuntimeJournaling.Execution;
-using KeyLoad.Core.Features.RuntimeJournaling.Identity;
-using KeyLoad.Core.Features.RuntimeJournaling.Models;
-using KeyLoad.Core.Features.RuntimeJournaling.Validation;
+using KeyLoad.Core.RuntimeJournaling.Commands;
+using KeyLoad.Core.RuntimeJournaling.Contracts;
+using KeyLoad.Core.RuntimeJournaling.Execution;
+using KeyLoad.Core.RuntimeJournaling.Identity;
+using KeyLoad.Core.RuntimeJournaling.Models;
+using KeyLoad.Core.RuntimeJournaling.Validation;
 using KeyLoad.Storage;
 using Microsoft.Extensions.Options;
 

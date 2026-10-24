@@ -1,6 +1,6 @@
 using KeyLoad.Storage;
 
-namespace KeyLoad.Core.Features.RuntimeJournaling.Execution;
+namespace KeyLoad.Core.RuntimeJournaling.Execution;
 
 internal static class RuntimeJournalKeys
 {

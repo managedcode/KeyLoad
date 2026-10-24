@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 
-namespace KeyLoad.Core.Features.StoragePartitions.Contracts;
+namespace KeyLoad.Core.StoragePartitions.Contracts;
 
 /// <summary>Binds the complete admitted resource lifetime set to its full atomic partition.</summary>
 [Orleans.GenerateSerializer]

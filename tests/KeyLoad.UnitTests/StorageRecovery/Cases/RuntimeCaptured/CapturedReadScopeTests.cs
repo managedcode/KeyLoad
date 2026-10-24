@@ -1,7 +1,7 @@
-using KeyLoad.UnitTests.Features.StorageRecovery.Assertions;
-using static KeyLoad.UnitTests.Features.StorageRecovery.CapturedReadScopeScenario;
+using KeyLoad.UnitTests.StorageRecovery.Assertions;
+using static KeyLoad.UnitTests.StorageRecovery.CapturedReadScopeScenario;
 
-namespace KeyLoad.UnitTests.Features.StorageRecovery;
+namespace KeyLoad.UnitTests.StorageRecovery;
 
 internal sealed class CapturedReadScopeTests
 {

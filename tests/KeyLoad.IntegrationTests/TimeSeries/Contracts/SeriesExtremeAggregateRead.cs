@@ -1,7 +1,7 @@
 using KeyLoad.Client;
-using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.ClientApi;
 
-namespace KeyLoad.IntegrationTests.Features.TimeSeries;
+namespace KeyLoad.IntegrationTests.TimeSeries;
 
 internal delegate Task<SampleAggregate> SeriesExtremeAggregateRead(KeyLoadClient sdk, McpOfficialClient mcp,
     AggregateSamplesRequest request, SampleAggregate expected, Func<Task> current, CancellationToken token);

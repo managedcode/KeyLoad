@@ -1,5 +1,5 @@
 using System.Collections.Immutable;
-namespace KeyLoad.UnitTests.Features.InternalSerialization;
+namespace KeyLoad.UnitTests.InternalSerialization;
 
 [global::Orleans.GenerateSerializer, global::Orleans.Alias(PairMetadataFixtures.Alias)]
 internal sealed record PairMetadataRecord(

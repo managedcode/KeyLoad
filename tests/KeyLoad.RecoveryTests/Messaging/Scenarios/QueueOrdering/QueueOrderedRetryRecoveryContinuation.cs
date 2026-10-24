@@ -3,7 +3,7 @@ using KeyLoad.Storage.ZoneTree;
 using ManagedCode.Communication.Commands;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.RecoveryTests.Features.Messaging;
+namespace KeyLoad.RecoveryTests.Messaging;
 
 internal static class QueueOrderedRetryRecoveryContinuation
 {

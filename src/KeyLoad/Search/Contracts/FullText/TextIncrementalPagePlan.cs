@@ -1,4 +1,4 @@
-namespace KeyLoad.Server.Features.Search;
+namespace KeyLoad.Server.Search;
 
 internal sealed record TextIncrementalPagePlan(TextIncrementalChange[] Changes,
     TextIncrementalRecord[] Records, ulong NextRecord);

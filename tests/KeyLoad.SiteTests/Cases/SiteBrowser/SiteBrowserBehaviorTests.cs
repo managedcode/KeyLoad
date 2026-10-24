@@ -1,4 +1,4 @@
-namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
+namespace KeyLoad.SiteTests.BenchmarkComparisons;
 
 /// <summary>Runs the current isolated page and preserved hero scene in workflow-provided real Chrome.</summary>
 internal sealed class SiteBrowserBehaviorTests

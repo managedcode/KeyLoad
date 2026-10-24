@@ -1,4 +1,4 @@
-namespace KeyLoad.Query.Features.Search;
+namespace KeyLoad.Query.Search;
 
 /// <summary>Binds a disposable text projection to one authorized canonical storage cut.</summary>
 /// <param name="NodeId">Physical source owner.</param>

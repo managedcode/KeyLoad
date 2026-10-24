@@ -2,7 +2,7 @@ using System.Net;
 using System.Net.Sockets;
 using KeyLoad.Server;
 
-namespace KeyLoad.IntegrationTests.Features.ResourceExecution;
+namespace KeyLoad.IntegrationTests.ResourceExecution;
 
 internal sealed class SlowBodyAdmissionReturnTransport : IDisposable
 {

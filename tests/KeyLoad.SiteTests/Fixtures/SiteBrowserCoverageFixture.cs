@@ -1,7 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
-namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
+namespace KeyLoad.SiteTests.BenchmarkComparisons;
 
 /// <summary>Owned reader inputs copied byte-for-byte from the completed Chrome session and Node builder.</summary>
 internal sealed class SiteBrowserCoverageFixture : IDisposable

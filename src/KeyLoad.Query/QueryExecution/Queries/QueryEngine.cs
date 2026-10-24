@@ -1,8 +1,8 @@
 using System.Collections.Immutable;
 using KeyLoad.Core;
-using KeyLoad.Core.Features.ResourceExecution;
-using KeyLoad.Query.Features.ChangeFeeds;
-using KeyLoad.Query.Features.QueryExecution;
+using KeyLoad.Core.ResourceExecution;
+using KeyLoad.Query.ChangeFeeds;
+using KeyLoad.Query.QueryExecution;
 using KeyLoad.Storage;
 using Microsoft.Extensions.Options;
 
@@ -40,8 +40,8 @@ public sealed partial class QueryEngine
     /// <returns>A bounded page with authorized continuation metadata.</returns>
     public QueryPage Execute(string principalId, QueryRequest request, TimeProvider? timeProvider = null,
         CancellationToken cancellationToken = default)
-        => Execute(principalId, budget => global::KeyLoad.Query.Features.QueryExecution.ScriptDomQueryAdapter.Lower(
-            global::KeyLoad.Features.QueryExecution.ScriptDomSyntax.Parse(request.Sql, database.OperationLimitsOptions, budget.Check, cancellationToken),
+        => Execute(principalId, budget => global::KeyLoad.Query.QueryExecution.ScriptDomQueryAdapter.Lower(
+            global::KeyLoad.QueryExecution.ScriptDomSyntax.Parse(request.Sql, database.OperationLimitsOptions, budget.Check, cancellationToken),
             request, database.OperationLimitsOptions, executionOptions, budget, cancellationToken), timeProvider, cancellationToken);
 
     /// <summary>Executes a bounded Q1.Search statement through the canonical graph-search engine.</summary>

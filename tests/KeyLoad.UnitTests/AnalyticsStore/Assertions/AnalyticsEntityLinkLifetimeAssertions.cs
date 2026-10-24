@@ -1,12 +1,12 @@
-using KeyLoad.Core.Features.AnalyticsStore;
-using KeyLoad.Core.Features.DocumentStorage;
-using KeyLoad.Core.Features.ResourceExecution;
-using KeyLoad.UnitTests.Features.Authorization;
+using KeyLoad.Core.AnalyticsStore;
+using KeyLoad.Core.DocumentStorage;
+using KeyLoad.Core.ResourceExecution;
+using KeyLoad.UnitTests.Authorization;
 using ManagedCode.Communication.Commands;
-using D = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreTestData;
-using O = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreTestOperations;
+using D = KeyLoad.UnitTests.AnalyticsStore.AnalyticsStoreTestData;
+using O = KeyLoad.UnitTests.AnalyticsStore.AnalyticsStoreTestOperations;
 
-namespace KeyLoad.UnitTests.Features.AnalyticsStore;
+namespace KeyLoad.UnitTests.AnalyticsStore;
 
 internal static class AnalyticsEntityLinkLifetimeAssertions
 {

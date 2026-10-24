@@ -1,7 +1,7 @@
 using System.Globalization;
 using System.Xml;
 
-namespace KeyLoad.UnitTests.Features.CodeQuality;
+namespace KeyLoad.UnitTests.CodeQuality;
 
 internal static class CoverageOriginalInputUnionAssertions
 {

@@ -1,6 +1,6 @@
 using System.Buffers.Binary;
 using System.Security.Cryptography;
-using KeyLoad.Core.Features.Messaging;
+using KeyLoad.Core.Messaging;
 using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.Core;

@@ -2,7 +2,7 @@ using System.Security.Cryptography;
 using System.Text.Json.Nodes;
 using System.Xml;
 
-namespace KeyLoad.UnitTests.Features.CodeQuality;
+namespace KeyLoad.UnitTests.CodeQuality;
 
 internal static class CoverageProductEvidenceFiles
 {

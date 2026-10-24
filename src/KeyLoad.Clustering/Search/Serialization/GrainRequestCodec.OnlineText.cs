@@ -1,4 +1,4 @@
-using KeyLoad.Clustering.Features.Search;
+using KeyLoad.Clustering.Search;
 using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.Clustering;

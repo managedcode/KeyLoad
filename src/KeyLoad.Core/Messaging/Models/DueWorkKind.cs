@@ -1,4 +1,4 @@
-namespace KeyLoad.Core.Features.Messaging;
+namespace KeyLoad.Core.Messaging;
 
 /// <summary>Distinguishes the persisted schedule and saga discovery prefixes.</summary>
 [global::Orleans.GenerateSerializer, global::Orleans.Alias(DueWorkAliases.Kind)]

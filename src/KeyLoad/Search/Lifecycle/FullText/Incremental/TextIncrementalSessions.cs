@@ -1,4 +1,4 @@
-namespace KeyLoad.Server.Features.Search;
+namespace KeyLoad.Server.Search;
 
 /// <summary>Owns exact active session identities and preserves failed execution disposals.</summary>
 internal sealed class TextIncrementalSessions

@@ -1,9 +1,9 @@
 using System.Security.Cryptography;
 using System.Text.Json;
-using KeyLoad.UnitTests.Features.CodeQuality.Helpers;
-using KeyLoad.UnitTests.Features.CodeQuality.Processes;
+using KeyLoad.UnitTests.CodeQuality.Helpers;
+using KeyLoad.UnitTests.CodeQuality.Processes;
 
-namespace KeyLoad.UnitTests.Features.CodeQuality.Assertions;
+namespace KeyLoad.UnitTests.CodeQuality.Assertions;
 
 internal static class CompiledDocumentBudgetAssertions
 {

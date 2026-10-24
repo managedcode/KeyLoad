@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.Authorization;
+namespace KeyLoad.UnitTests.Authorization;
 
 [NotInParallel]
 internal sealed class AuthorizationTelemetryWholeFlowTests

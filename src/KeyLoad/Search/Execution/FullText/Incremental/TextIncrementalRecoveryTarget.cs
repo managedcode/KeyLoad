@@ -1,7 +1,7 @@
 using KeyLoad.Core;
-using KeyLoad.Query.Features.Search;
+using KeyLoad.Query.Search;
 
-namespace KeyLoad.Server.Features.Search;
+namespace KeyLoad.Server.Search;
 
 /// <summary>Reconstructs only the original complete intent, never a replacement canonical seed.</summary>
 internal static class TextIncrementalRecoveryTarget

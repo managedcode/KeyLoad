@@ -1,4 +1,4 @@
-using KeyLoad.Core.Features.RuntimeJournaling.Contracts;
+using KeyLoad.Core.RuntimeJournaling.Contracts;
 using KeyLoad.Storage;
 using Microsoft.Extensions.Options;
 

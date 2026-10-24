@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 [AttributeUsage(AttributeTargets.Class)]
 internal sealed class CqrsDataSourceAttribute : DataSourceGeneratorAttribute<CqrsClusterFixture>

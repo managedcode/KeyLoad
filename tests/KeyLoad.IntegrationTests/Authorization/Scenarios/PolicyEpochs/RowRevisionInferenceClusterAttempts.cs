@@ -1,8 +1,8 @@
-using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.OrleansExecution;
-using P = KeyLoad.IntegrationTests.Features.Authorization.RowRevisionInferenceClusterProtocol;
+using KeyLoad.IntegrationTests.ClientApi;
+using KeyLoad.IntegrationTests.OrleansExecution;
+using P = KeyLoad.IntegrationTests.Authorization.RowRevisionInferenceClusterProtocol;
 
-namespace KeyLoad.IntegrationTests.Features.Authorization;
+namespace KeyLoad.IntegrationTests.Authorization;
 
 internal static class RowRevisionInferenceClusterAttempts
 {

@@ -1,7 +1,7 @@
 #pragma warning disable ORLEANSEXP005
 using Orleans.Journaling;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal sealed class RuntimeJournalReadAccumulator : IJournalStorageConsumer, IDisposable
 {

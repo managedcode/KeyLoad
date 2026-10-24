@@ -1,4 +1,4 @@
-namespace KeyLoad.Clustering.Features.Search;
+namespace KeyLoad.Clustering.Search;
 
 [global::Orleans.GenerateSerializer, global::Orleans.Alias(OnlineTextRequestScope.CapabilityRequestAlias)]
 internal sealed record OnlineTextCapabilityRequest(

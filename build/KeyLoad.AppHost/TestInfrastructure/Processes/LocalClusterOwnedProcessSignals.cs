@@ -2,7 +2,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 
-namespace KeyLoad.AppHost.Features.TestInfrastructure.Processes;
+namespace KeyLoad.AppHost.TestInfrastructure.Processes;
 
 /// <summary>Owns execution signaling for one already-owned local CLUSTER child process.</summary>
 internal static partial class LocalClusterOwnedProcessSignals

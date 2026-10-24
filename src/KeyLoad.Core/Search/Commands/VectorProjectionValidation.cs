@@ -1,4 +1,4 @@
-using KeyLoad.Core.Features.Search;
+using KeyLoad.Core.Search;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core;
@@ -122,7 +122,7 @@ internal static class VectorProjectionValidation
         var document = engine.VisibleVertex(transaction, principal, new(partition, vector.Collection, vector.Id));
         engine.Authorization.RequireWriteRow(principal, document.Access);
         DocumentStorageExecutionDocuments.CheckRevision(document.Revision, vector.ExpectedDocumentRevision);
-        Features.Search.VectorFieldProfiles.Require(resource, vector);
+        Search.VectorFieldProfiles.Require(resource, vector);
         return document;
     }
 

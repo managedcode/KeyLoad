@@ -1,7 +1,7 @@
-using KeyLoad.UnitTests.Features.ClientApi;
-using D = KeyLoad.UnitTests.Features.ClientApi.DeclaredResponseEofProtocol;
+using KeyLoad.UnitTests.ClientApi;
+using D = KeyLoad.UnitTests.ClientApi.DeclaredResponseEofProtocol;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal static class ConnectionCallerFactoryHealthy
 {

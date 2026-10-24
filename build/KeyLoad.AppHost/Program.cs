@@ -1,8 +1,8 @@
 using System.Globalization;
 using System.Net;
 using System.Security.Cryptography;
-using KeyLoad.AppHost.Features.StorageRecovery;
-using KeyLoad.AppHost.Features.TestInfrastructure;
+using KeyLoad.AppHost.StorageRecovery;
+using KeyLoad.AppHost.TestInfrastructure;
 using KeyLoad.Clustering;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -156,7 +156,7 @@ internal static class AppHostProgram
             .WithEnvironment(SigningEnvironment, identity.Signing)
             .WithEnvironment(AdminEnvironment, identity.Admin)
             .WithHttpHealthCheck(ReadyPath, endpointName: HttpEndpoint);
-        KeyLoad.AppHost.Features.ClientApi.ClusterConnectionEndpointResources.Apply(resource);
+        KeyLoad.AppHost.ClientApi.ClusterConnectionEndpointResources.Apply(resource);
         ClusterResourceSettings.Apply(builder, resource);
         ProcessKillCommand.Apply(builder, resource, ephemeral);
         return resource;

@@ -1,13 +1,13 @@
 using KeyLoad.Query;
-namespace KeyLoad.IntegrationTests.Features.QueryExecution;
+namespace KeyLoad.IntegrationTests.QueryExecution;
 
 internal static class SqlNullDistinctClusterPages
 {
     internal static async Task HealthyAsync(ClusterFixture fixture, SqlNullDistinctClusterState state, CancellationToken token)
     {
-        await global::KeyLoad.IntegrationTests.Features.OrleansExecution.RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerProtocol.Node2, state.Seed.Reader.Secret, async caller =>
+        await global::KeyLoad.IntegrationTests.OrleansExecution.RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, global::KeyLoad.IntegrationTests.ClientApi.McpCallerProtocol.Node2, state.Seed.Reader.Secret, async caller =>
         {
-            var capabilities = await global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.QueryCapabilitiesAsync(token));
+            var capabilities = await global::KeyLoad.IntegrationTests.ClientApi.McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.QueryCapabilitiesAsync(token));
             await global::TUnit.Assertions.Assert.That(capabilities.ReadProfiles.Contains(SqlNullDistinctClusterCases.Profile)).IsTrue();
             await global::TUnit.Assertions.Assert.That(capabilities.ReadProfiles.Contains(SqlNullDistinctClusterCases.NullSynonymProfile)).IsTrue();
             await global::TUnit.Assertions.Assert.That(capabilities.ReadProfiles.Contains(SqlNullDistinctClusterCases.PositiveProfile)).IsTrue();
@@ -18,8 +18,8 @@ internal static class SqlNullDistinctClusterPages
             await global::TUnit.Assertions.Assert.That(capabilities.ReadProfiles.Contains(SqlNullDistinctClusterCases.BinaryOctalProfile)).IsTrue();
             await global::TUnit.Assertions.Assert.That(capabilities.ReadProfiles.Contains(SqlNullDistinctClusterCases.UnicodeProfile)).IsTrue();
             await global::TUnit.Assertions.Assert.That(capabilities.ReadProfiles.Contains(SqlNullDistinctClusterCases.NumericSeparatorProfile)).IsTrue();
-            var mcp = (await global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerAssertions.SuccessAsync<QueryCapabilityManifest>(
-                await caller.Mcp.CallAsync(global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerTools.QueryCapabilities, new
+            var mcp = (await global::KeyLoad.IntegrationTests.ClientApi.McpCallerAssertions.SuccessAsync<QueryCapabilityManifest>(
+                await caller.Mcp.CallAsync(global::KeyLoad.IntegrationTests.ClientApi.McpCallerTools.QueryCapabilities, new
                 {
                 }, token))).Value;
             await global::TUnit.Assertions.Assert.That(mcp.ReadProfiles.Contains(SqlNullDistinctClusterCases.Profile)).IsTrue();
@@ -37,7 +37,7 @@ internal static class SqlNullDistinctClusterPages
             var failures = new List<Exception>();
             await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
             {
-                await using var wire = await PostgresClusterCaller.ConnectAsync(fixture.App, global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerProtocol.Node3,
+                await using var wire = await PostgresClusterCaller.ConnectAsync(fixture.App, global::KeyLoad.IntegrationTests.ClientApi.McpCallerProtocol.Node3,
                     state.Seed.Reader.Principal.Id, state.Seed.Reader.Secret, PostgresClusterCertificate.RootPath(fixture), token);
                 await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
                 {
@@ -52,7 +52,7 @@ internal static class SqlNullDistinctClusterPages
         }, token);
     }
 
-    internal static async Task CaseAsync(global::KeyLoad.IntegrationTests.Features.OrleansExecution.RequestCqrsClusterCallers caller, PostgresClusterCaller wire,
+    internal static async Task CaseAsync(global::KeyLoad.IntegrationTests.OrleansExecution.RequestCqrsClusterCallers caller, PostgresClusterCaller wire,
         SqlNullDistinctClusterCase item, long revision, CancellationToken token)
     {
         var sql = SqlNullDistinctClusterCases.Prefix + item.Clause + SqlNullDistinctClusterCases.Tail;
@@ -60,9 +60,9 @@ internal static class SqlNullDistinctClusterPages
         await SqlNullDistinctClusterImage.PageAsync(await SqlClusterProtocol.SdkAsync<QueryPage>(caller.Sdk, request, token), item, revision);
         await SqlNullDistinctClusterImage.PageAsync(await SqlClusterProtocol.McpAsync<QueryPage>(caller.Mcp, request, token), item, revision);
         var ast = SqlNullDistinctClusterCases.Ast(PostgresClusterState.Partition, item);
-        await SqlNullDistinctClusterImage.PageAsync(await global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.QueryAstAsync(ast, token)), item, revision);
-        await SqlNullDistinctClusterImage.PageAsync((await global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerAssertions.SuccessAsync<QueryPage>(
-            await caller.Mcp.CallAsync(global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerTools.QueryAst, ast, token))).Value, item, revision);
+        await SqlNullDistinctClusterImage.PageAsync(await global::KeyLoad.IntegrationTests.ClientApi.McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.QueryAstAsync(ast, token)), item, revision);
+        await SqlNullDistinctClusterImage.PageAsync((await global::KeyLoad.IntegrationTests.ClientApi.McpCallerAssertions.SuccessAsync<QueryPage>(
+            await caller.Mcp.CallAsync(global::KeyLoad.IntegrationTests.ClientApi.McpCallerTools.QueryAst, ast, token))).Value, item, revision);
         await SqlNullDistinctClusterImage.PageAsync(await wire.ExecuteAsync<QueryPage>(sql, [], prepared: true, token), item, revision);
         await SqlNullDistinctClusterImage.PageAsync(await wire.ExecuteAsync<QueryPage>(sql, [], prepared: false, token), item, revision);
         if (item.Clause == SqlNullDistinctClusterCases.EscapeClause)

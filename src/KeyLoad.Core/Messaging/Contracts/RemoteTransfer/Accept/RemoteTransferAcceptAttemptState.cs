@@ -1,4 +1,4 @@
-namespace KeyLoad.Core.Features.Messaging;
+namespace KeyLoad.Core.Messaging;
 
 [global::Orleans.GenerateSerializer, global::Orleans.Alias(RemoteTransferAcceptAttemptStateFields.Alias)]
 internal sealed record RemoteTransferAcceptAttemptState(

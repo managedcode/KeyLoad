@@ -1,6 +1,6 @@
-using KeyLoad.UnitTests.Features.Authorization;
+using KeyLoad.UnitTests.Authorization;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal sealed class QueryRuleOptimizationFixture(bool includeNull, bool includeMissing) : IDisposable
 {

@@ -1,5 +1,5 @@
 using System.Collections.Immutable;
 
-namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
+namespace KeyLoad.IntegrationTests.DatabaseComposition;
 
 internal sealed record FunctionalGateColdDropState(ImmutableArray<FunctionalGateColdDropTable> Tables);

@@ -1,4 +1,4 @@
-namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
+namespace KeyLoad.Analyzers.Tests.CodeQuality;
 
 /// <summary>AC-CQ-033/037: every runtime numeric context retains exact literal spans.</summary>
 internal sealed class GeneralRuntimeNumericTests

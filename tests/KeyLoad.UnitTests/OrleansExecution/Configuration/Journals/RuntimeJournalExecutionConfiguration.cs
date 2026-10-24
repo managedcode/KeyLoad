@@ -7,7 +7,7 @@ using Orleans.Journaling;
 using Orleans.Metadata;
 using Orleans.Serialization;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal static class RuntimeJournalExecutionConfiguration
 {

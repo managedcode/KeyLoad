@@ -5,7 +5,7 @@ using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.Configuration;
 using TUnit.Core.Interfaces;
 
-namespace KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonHost.BenchmarkComparisons;
 
 /// <summary>Owns one execution target for all measured tests; setup opens clients without loading the corpus.</summary>
 internal sealed class BenchmarkSessionFixture : IAsyncInitializer, IAsyncDisposable

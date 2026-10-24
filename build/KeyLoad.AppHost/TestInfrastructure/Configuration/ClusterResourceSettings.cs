@@ -26,7 +26,7 @@ internal static class ClusterResourceSettings
     ];
     internal static void Apply(IDistributedApplicationBuilder builder, IResourceBuilder<ProjectResource> resource)
     {
-        KeyLoad.AppHost.Features.OrleansHosting.ClusterTelemetryResources.Apply(resource);
+        KeyLoad.AppHost.OrleansHosting.ClusterTelemetryResources.Apply(resource);
         var options = AppHostOptionsRegistration.Get(builder);
         resource.WithEnvironment(LogEnvironment, options.Cluster.Value.LoggingLevel);
         Copy(resource, options.CommandAdmission.Value, CommandOptions, CommandEnvironment);

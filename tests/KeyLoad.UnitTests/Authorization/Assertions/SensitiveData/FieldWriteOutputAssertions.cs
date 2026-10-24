@@ -1,9 +1,9 @@
 using KeyLoad.Storage;
-using KeyLoad.UnitTests.Features.Messaging;
+using KeyLoad.UnitTests.Messaging;
 using ManagedCode.Communication;
-using P = KeyLoad.UnitTests.Features.Authorization.FieldWriteOutputProtocol;
+using P = KeyLoad.UnitTests.Authorization.FieldWriteOutputProtocol;
 
-namespace KeyLoad.UnitTests.Features.Authorization;
+namespace KeyLoad.UnitTests.Authorization;
 
 internal static class FieldWriteOutputAssertions
 {

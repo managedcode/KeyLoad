@@ -1,6 +1,6 @@
 using KeyLoad.Clustering;
 
-namespace KeyLoad.Server.Features.OrleansHosting;
+namespace KeyLoad.Server.OrleansHosting;
 
 /// <summary>Joins borrowed node producers while the application-owned execution silo remains live.</summary>
 internal static class OrleansNodeHostShutdown

@@ -1,9 +1,9 @@
 using System.Collections.Immutable;
-using D = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreTestData;
-using O = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreTestOperations;
-using P = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsBoundsData;
+using D = KeyLoad.UnitTests.AnalyticsStore.AnalyticsStoreTestData;
+using O = KeyLoad.UnitTests.AnalyticsStore.AnalyticsStoreTestOperations;
+using P = KeyLoad.UnitTests.AnalyticsStore.AnalyticsBoundsData;
 
-namespace KeyLoad.UnitTests.Features.AnalyticsStore;
+namespace KeyLoad.UnitTests.AnalyticsStore;
 
 internal static class AnalyticsBoundsOwner
 {

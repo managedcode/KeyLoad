@@ -1,9 +1,9 @@
 using KeyLoad.Client;
-using KeyLoad.IntegrationTests.Features.Authorization;
-using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.Search;
+using KeyLoad.IntegrationTests.Authorization;
+using KeyLoad.IntegrationTests.ClientApi;
+using KeyLoad.IntegrationTests.Search;
 
-namespace KeyLoad.IntegrationTests.Features.QueryExecution;
+namespace KeyLoad.IntegrationTests.QueryExecution;
 
 /// <summary>AC-GSEARCH-006: Q1 SQL graph search matches the public graph-search result across Orleans.</summary>
 [ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = McpCallerProtocol.FixtureKey)]

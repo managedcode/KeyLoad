@@ -1,7 +1,7 @@
 using System.Text.Json;
 using KeyLoad.Server;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>AC-MCP-003: actual execution enum parser retains numeric, nullable and flags forms.</summary>
 internal sealed class McpSchemaEnumTests

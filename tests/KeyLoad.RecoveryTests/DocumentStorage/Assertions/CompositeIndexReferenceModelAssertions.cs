@@ -1,7 +1,7 @@
 using System.Text.Json;
 using KeyLoad.Core;
 
-namespace KeyLoad.RecoveryTests.Features.DocumentStorage;
+namespace KeyLoad.RecoveryTests.DocumentStorage;
 
 internal static class CompositeIndexReferenceModelAssertions
 {

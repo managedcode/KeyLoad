@@ -1,4 +1,4 @@
-namespace KeyLoad.Query.Features.Search;
+namespace KeyLoad.Query.Search;
 
 /// <summary>Identifier-only execution acquisition scope, without query coordinates or caller authority.</summary>
 internal readonly record struct AnnProjectionSelection(PartitionRef Partition, string Collection,

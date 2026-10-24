@@ -1,5 +1,5 @@
 using System.Collections.Immutable;
-namespace KeyLoad.UnitTests.Features.GraphTraversal;
+namespace KeyLoad.UnitTests.GraphTraversal;
 
 /// <summary>Reference membership, minimum depths, and candidate-work result.</summary>
 internal sealed record GraphTraversalReferenceResult(

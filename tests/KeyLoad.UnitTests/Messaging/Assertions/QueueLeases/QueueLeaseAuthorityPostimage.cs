@@ -4,7 +4,7 @@ using KeyLoad.Storage.ZoneTree;
 using ManagedCode.Communication;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.Messaging;
+namespace KeyLoad.UnitTests.Messaging;
 
 internal static class QueueLeaseAuthorityPostimage
 {

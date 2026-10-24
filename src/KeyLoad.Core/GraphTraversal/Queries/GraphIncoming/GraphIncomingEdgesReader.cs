@@ -1,10 +1,10 @@
-using KeyLoad.Core.Features.GraphTraversal.Serialization;
-using KeyLoad.Core.Features.GraphTraversal.Validation;
-using KeyLoad.Core.Features.ResourceExecution;
-using KeyLoad.Core.Features.ResourceExecution.Execution;
+using KeyLoad.Core.GraphTraversal.Serialization;
+using KeyLoad.Core.GraphTraversal.Validation;
+using KeyLoad.Core.ResourceExecution;
+using KeyLoad.Core.ResourceExecution.Execution;
 using KeyLoad.Storage;
 
-namespace KeyLoad.Core.Features.GraphTraversal;
+namespace KeyLoad.Core.GraphTraversal;
 
 internal sealed class GraphIncomingEdgesReader(DatabaseEngine database, IKeyValueView view,
     PrincipalRecord principal, ReadIncomingGraphEdgesRequest request, ReadExecutionBudget budget,

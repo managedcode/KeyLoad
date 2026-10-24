@@ -1,12 +1,12 @@
 using System.Text.Json;
 using KeyLoad.Core;
-using KeyLoad.Core.Features.Authorization;
-using KeyLoad.RecoveryTests.Features.DocumentStorage;
+using KeyLoad.Core.Authorization;
+using KeyLoad.RecoveryTests.DocumentStorage;
 using KeyLoad.Storage.ZoneTree;
 using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
 using TUnit.Assertions.Enums;
-namespace KeyLoad.RecoveryTests.Features.EventStreams;
+namespace KeyLoad.RecoveryTests.EventStreams;
 
 internal static class TopicPurgeRecoveryOracle
 {

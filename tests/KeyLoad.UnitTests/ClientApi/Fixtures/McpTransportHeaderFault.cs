@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>Names concrete invalid HTTP header conditions.</summary>
 internal enum McpTransportHeaderFault

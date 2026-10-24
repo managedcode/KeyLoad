@@ -2,7 +2,7 @@ using System.Collections.Immutable;
 using ManagedCode.Communication;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal sealed class RuntimeJournalFixture : IDisposable
 {

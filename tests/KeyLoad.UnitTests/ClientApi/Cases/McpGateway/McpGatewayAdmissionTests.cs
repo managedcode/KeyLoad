@@ -1,7 +1,7 @@
 using System.Text.Json.Nodes;
 using KeyLoad.Server;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>AC-MCPGW-003/004: exact inner targets are selected before typed decoding.</summary>
 internal sealed class McpGatewayAdmissionTests

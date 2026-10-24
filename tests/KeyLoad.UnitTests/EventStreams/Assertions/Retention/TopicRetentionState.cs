@@ -2,7 +2,7 @@ using System.Security.Cryptography;
 using System.Text;
 using KeyLoad.Storage;
 
-namespace KeyLoad.UnitTests.Features.EventStreams;
+namespace KeyLoad.UnitTests.EventStreams;
 
 internal static class TopicRetentionState
 {

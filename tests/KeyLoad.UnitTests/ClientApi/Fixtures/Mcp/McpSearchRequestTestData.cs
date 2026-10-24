@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>Complete current search request values for the existing canonical MCP decoder corpus.</summary>
 internal static class McpSearchRequestTestData

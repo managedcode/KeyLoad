@@ -1,5 +1,5 @@
-using KeyLoad.Core.Features.ResourceExecution;
-using KeyLoad.Core.Features.TimeSeries;
+using KeyLoad.Core.ResourceExecution;
+using KeyLoad.Core.TimeSeries;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core;

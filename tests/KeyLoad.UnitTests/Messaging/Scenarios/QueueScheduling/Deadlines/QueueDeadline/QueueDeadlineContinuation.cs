@@ -1,9 +1,9 @@
 using KeyLoad.Storage.ZoneTree;
-using KeyLoad.UnitTests.Features.ResourceExecution;
+using KeyLoad.UnitTests.ResourceExecution;
 using ManagedCode.Communication;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.Messaging;
+namespace KeyLoad.UnitTests.Messaging;
 
 internal static class QueueDeadlineContinuation
 {
@@ -22,7 +22,7 @@ internal static class QueueDeadlineContinuation
         };
         var result = QueueDeadlineOperations.Batch(database, command, due);
         var receipt = result.Get<CommitReceipt>();
-        var expectedReceipt = new MutationReceipt(KeyLoad.Core.Features.Messaging.QueueDeadlineProtocol.ReceiptKind, lane.Queue,
+        var expectedReceipt = new MutationReceipt(KeyLoad.Core.Messaging.QueueDeadlineProtocol.ReceiptKind, lane.Queue,
             metadata.Id, metadata.StateVersion + RuntimeQueueDeadlineProtocol.First);
         await Assert.That(OrleansSerialization.Serialize(receipt.Mutations.Single()).AsSpan()
             .SequenceEqual(OrleansSerialization.Serialize(expectedReceipt))).IsTrue();

@@ -1,5 +1,5 @@
-using KeyLoad.Core.Features.Messaging;
-using KeyLoad.Core.Features.ResourceExecution;
+using KeyLoad.Core.Messaging;
+using KeyLoad.Core.ResourceExecution;
 
 namespace KeyLoad.Core;
 /// <summary>Executes MessagingCoordinationBoundReads operations against the caller's database context.</summary>

@@ -1,6 +1,6 @@
-using KeyLoad.IntegrationTests.Features.Search;
+using KeyLoad.IntegrationTests.Search;
 
-namespace KeyLoad.IntegrationTests.Features.QueryExecution;
+namespace KeyLoad.IntegrationTests.QueryExecution;
 
 /// <summary>Verifies SQL graph-search output against direct graph-search semantics.</summary>
 internal static class SqlGraphSearchClusterAssertions

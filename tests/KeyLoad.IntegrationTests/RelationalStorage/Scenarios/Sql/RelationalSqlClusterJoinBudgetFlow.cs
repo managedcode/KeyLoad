@@ -1,10 +1,10 @@
 using System.Collections.Immutable;
 using System.Text.Json;
 using KeyLoad.Client;
-using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.ClientApi;
 using KeyLoad.Query;
 
-namespace KeyLoad.IntegrationTests.Features.RelationalStorage;
+namespace KeyLoad.IntegrationTests.RelationalStorage;
 
 /// <summary>Runs one rejection and healthy follow-up against an owned real Aspire Orleans fixture.</summary>
 internal static class RelationalSqlClusterJoinBudgetFlow

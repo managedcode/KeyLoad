@@ -1,13 +1,13 @@
 using System.Diagnostics.CodeAnalysis;
-using KeyLoad.Core.Features.CommandOutcomes.Contracts;
-using KeyLoad.Core.Features.Search;
+using KeyLoad.Core.CommandOutcomes.Contracts;
+using KeyLoad.Core.Search;
 using KeyLoad.Server;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
 
-namespace KeyLoad.UnitTests.Features.Search;
+namespace KeyLoad.UnitTests.Search;
 
 internal sealed class Bm25OriginalPhaseRecoveryOwner
 {

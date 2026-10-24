@@ -83,7 +83,7 @@ public static class MutationAuthorization
     {
         var documentId = effect switch
         {
-            InsertTypedRow insert => Features.RelationalStorage.RelationalRowValidation.InsertIdentity(resource, insert.Json, engine.OperationLimitsOptions),
+            InsertTypedRow insert => RelationalStorage.RelationalRowValidation.InsertIdentity(resource, insert.Json, engine.OperationLimitsOptions),
             PutDocument put => put.Id,
             PatchDocument patch => patch.Id,
             DeleteDocument delete => delete.Id,

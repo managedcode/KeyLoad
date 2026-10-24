@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 [global::Orleans.CodeGeneration.Version(1)]
 internal interface ICqrsObservationSinkGrain : global::Orleans.IGrainWithGuidKey

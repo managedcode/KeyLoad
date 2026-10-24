@@ -1,4 +1,4 @@
-namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
+namespace KeyLoad.SiteTests.BenchmarkComparisons;
 
 [KeyLoad.ConfigurationOptions]
 internal sealed class SiteExecutionOptions

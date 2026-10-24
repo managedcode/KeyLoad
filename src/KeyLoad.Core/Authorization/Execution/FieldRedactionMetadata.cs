@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 
-namespace KeyLoad.Core.Features.Authorization;
+namespace KeyLoad.Core.Authorization;
 
 /// <summary>Discloses original omitted paths only when every overlapping policy permits schema visibility.</summary>
 internal static class FieldRedactionMetadata

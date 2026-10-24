@@ -1,4 +1,4 @@
-namespace KeyLoad.Core.Features.Search;
+namespace KeyLoad.Core.Search;
 
 /// <summary>Names stable execution identities for persisted vector projection records.</summary>
 internal static class VectorProjectionAliases

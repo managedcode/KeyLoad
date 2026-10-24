@@ -1,7 +1,7 @@
-using KeyLoad.Core.Features.TimeSeries;
+using KeyLoad.Core.TimeSeries;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.UnitTests.Features.TimeSeries;
+namespace KeyLoad.UnitTests.TimeSeries;
 
 /// <summary>AC-CQ-034/AC-CHUNK-001..004: execution slice policy preserves the frozen chunk contract.</summary>
 internal sealed class SampleChunkExecutionPolicyTests

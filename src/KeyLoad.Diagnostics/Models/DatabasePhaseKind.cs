@@ -1,4 +1,4 @@
-namespace KeyLoad.Diagnostics.Features.ResourceExecution;
+namespace KeyLoad.Diagnostics.ResourceExecution;
 
 /// <summary>Closed source-owned database timing boundaries; IDs are stable.</summary>
 public enum DatabasePhaseKind

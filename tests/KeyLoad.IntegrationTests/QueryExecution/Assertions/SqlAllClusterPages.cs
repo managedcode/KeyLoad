@@ -1,6 +1,6 @@
 using KeyLoad.Query;
 
-namespace KeyLoad.IntegrationTests.Features.QueryExecution;
+namespace KeyLoad.IntegrationTests.QueryExecution;
 
 internal static class SqlAllClusterPages
 {
@@ -9,7 +9,7 @@ internal static class SqlAllClusterPages
     internal const string DuplicateSql = "SELECT ALL TOP (5) score AS score FROM null_ordering WHERE score IS NULL ORDER BY label ASC";
     internal static string Explicit(string sql) => Keyword + sql[DefaultKeyword.Length..];
 
-    internal static async Task DuplicatesAsync(global::KeyLoad.IntegrationTests.Features.OrleansExecution.RequestCqrsClusterCallers caller,
+    internal static async Task DuplicatesAsync(global::KeyLoad.IntegrationTests.OrleansExecution.RequestCqrsClusterCallers caller,
         PostgresClusterCaller wire, CancellationToken token)
     {
         foreach (var sql in new[] { DuplicateSql, DuplicateSql.Replace(Keyword, DefaultKeyword, StringComparison.Ordinal) })
@@ -24,10 +24,10 @@ internal static class SqlAllClusterPages
             new(SqlNullOrderingClusterProtocol.Collection, null, [new(ScorePath, ScoreName)],
                 new NullTest(new FieldOperand(ScorePath), false, false), [new(LabelPath, false)],
                 SqlNullOrderingClusterProtocol.RowCount), AllowFullScan: true);
-        await EqualAsync(await global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerAssertions.SdkSuccessAsync(
+        await EqualAsync(await global::KeyLoad.IntegrationTests.ClientApi.McpCallerAssertions.SdkSuccessAsync(
             await caller.Sdk.QueryAstAsync(ast, token)));
-        await EqualAsync((await global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerAssertions.SuccessAsync<QueryPage>(
-            await caller.Mcp.CallAsync(global::KeyLoad.IntegrationTests.Features.ClientApi.McpCallerTools.QueryAst, ast, token))).Value);
+        await EqualAsync((await global::KeyLoad.IntegrationTests.ClientApi.McpCallerAssertions.SuccessAsync<QueryPage>(
+            await caller.Mcp.CallAsync(global::KeyLoad.IntegrationTests.ClientApi.McpCallerTools.QueryAst, ast, token))).Value);
     }
 
     private static async Task EqualAsync(QueryPage actual)

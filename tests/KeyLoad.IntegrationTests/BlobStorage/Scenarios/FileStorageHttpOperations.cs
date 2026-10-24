@@ -1,12 +1,12 @@
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using KeyLoad.IntegrationTests.Features.DatabaseComposition;
-using KeyLoad.IntegrationTests.Features.OrleansExecution;
+using KeyLoad.IntegrationTests.DatabaseComposition;
+using KeyLoad.IntegrationTests.OrleansExecution;
 using ManagedCode.Communication;
 using ManagedCode.Storage.Core.Models;
 
-namespace KeyLoad.IntegrationTests.Features.BlobStorage;
+namespace KeyLoad.IntegrationTests.BlobStorage;
 
 internal static class FileStorageHttpOperations
 {

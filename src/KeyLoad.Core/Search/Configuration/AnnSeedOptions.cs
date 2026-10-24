@@ -1,4 +1,4 @@
-namespace KeyLoad.Core.Features.Search;
+namespace KeyLoad.Core.Search;
 
 /// <summary>Central admission settings for a disposable authorized ANN source snapshot.</summary>
 [ConfigurationOptions]

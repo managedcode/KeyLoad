@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.InternalSerialization;
+namespace KeyLoad.UnitTests.InternalSerialization;
 
 [global::Orleans.GenerateSerializer, global::Orleans.Alias(GraphFixtures.CollectionsAlias)]
 internal sealed record GraphCollections(

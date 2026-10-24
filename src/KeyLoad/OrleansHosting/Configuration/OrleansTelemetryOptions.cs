@@ -1,4 +1,4 @@
-namespace KeyLoad.Server.Features.OrleansHosting.Configuration;
+namespace KeyLoad.Server.OrleansHosting.Configuration;
 
 /// <summary>Validated bounds for privacy-safe execution Orleans telemetry processing.</summary>
 [KeyLoad.ConfigurationOptions]

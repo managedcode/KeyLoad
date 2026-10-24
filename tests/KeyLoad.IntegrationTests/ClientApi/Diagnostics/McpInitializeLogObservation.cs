@@ -3,7 +3,7 @@ using KeyLoad.Server;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
-namespace KeyLoad.IntegrationTests.Features.ClientApi;
+namespace KeyLoad.IntegrationTests.ClientApi;
 
 /// <summary>Observes only the pinned official caller's execution remote error code during true CreateAsync.</summary>
 internal sealed class McpInitializeLogObservation : ILoggerFactory

@@ -1,7 +1,7 @@
 using System.Text;
 using System.Text.Json;
-using KeyLoad.Core.Features.InternalSerialization;
-using KeyLoad.Features.InternalSerialization;
+using KeyLoad.Core.InternalSerialization;
+using KeyLoad.InternalSerialization;
 using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.Core;

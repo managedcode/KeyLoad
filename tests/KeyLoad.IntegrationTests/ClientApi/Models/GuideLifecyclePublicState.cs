@@ -1,7 +1,7 @@
-using KeyLoad.IntegrationTests.Features.DocumentStorage;
+using KeyLoad.IntegrationTests.DocumentStorage;
 using ManagedCode.Communication;
 
-namespace KeyLoad.IntegrationTests.Features.ClientApi;
+namespace KeyLoad.IntegrationTests.ClientApi;
 
 internal sealed record GuideLifecyclePublicState(McpDocumentScenario Scenario, McpPersistedIdentity Identity,
     CommandRequest Seed, CommitReceipt SeedReceipt,

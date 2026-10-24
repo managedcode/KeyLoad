@@ -3,7 +3,7 @@ using ManagedCode.Orleans.Graph.Extensions;
 using Microsoft.Extensions.Configuration;
 using Orleans.TestingHost;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal sealed class CqrsClientConfigurator : IClientBuilderConfigurator
 {

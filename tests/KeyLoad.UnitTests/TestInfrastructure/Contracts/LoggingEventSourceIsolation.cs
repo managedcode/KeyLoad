@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.TestInfrastructure;
+namespace KeyLoad.UnitTests.TestInfrastructure;
 
 /// <summary>Coordinates execution logging captures which configure one process-wide EventSource filter.</summary>
 internal static class LoggingEventSourceIsolation

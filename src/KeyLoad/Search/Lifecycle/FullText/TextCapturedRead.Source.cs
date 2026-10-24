@@ -1,8 +1,8 @@
-using KeyLoad.Core.Features.Search;
-using KeyLoad.Query.Features.Search;
+using KeyLoad.Core.Search;
+using KeyLoad.Query.Search;
 using KeyLoad.Storage;
 
-namespace KeyLoad.Server.Features.Search;
+namespace KeyLoad.Server.Search;
 
 internal sealed partial class TextCapturedRead
 {

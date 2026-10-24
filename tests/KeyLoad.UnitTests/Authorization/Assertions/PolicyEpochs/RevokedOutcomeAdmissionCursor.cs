@@ -1,7 +1,7 @@
 using KeyLoad.Query;
-using KeyLoad.Query.Features.QueryExecution;
+using KeyLoad.Query.QueryExecution;
 
-namespace KeyLoad.UnitTests.Features.Authorization;
+namespace KeyLoad.UnitTests.Authorization;
 
 internal static class RevokedOutcomeAdmissionCursor
 {

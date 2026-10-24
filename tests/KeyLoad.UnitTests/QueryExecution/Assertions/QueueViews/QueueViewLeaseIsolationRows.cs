@@ -1,8 +1,8 @@
 using System.Collections.Immutable;
 using System.Text.Json;
-using static KeyLoad.UnitTests.Features.QueryExecution.QueueViewLeaseIsolationProtocol;
+using static KeyLoad.UnitTests.QueryExecution.QueueViewLeaseIsolationProtocol;
 
-namespace KeyLoad.UnitTests.Features.QueryExecution;
+namespace KeyLoad.UnitTests.QueryExecution;
 
 internal static class QueueViewLeaseIsolationRows
 {

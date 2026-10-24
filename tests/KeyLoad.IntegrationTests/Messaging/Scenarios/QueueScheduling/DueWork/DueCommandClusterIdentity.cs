@@ -1,7 +1,7 @@
 using System.Security.Cryptography;
 using KeyLoad.Storage;
 
-namespace KeyLoad.IntegrationTests.Features.Messaging;
+namespace KeyLoad.IntegrationTests.Messaging;
 
 /// <summary>Stable caller-chosen command IDs for recurring schedule Orleans cases.</summary>
 internal static class DueCommandClusterIdentity

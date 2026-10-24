@@ -1,7 +1,7 @@
-using KeyLoad.Core.Features.ResourceExecution;
-using P = KeyLoad.UnitTests.Features.OrleansExecution.CommandObservedPolicyProtocol;
+using KeyLoad.Core.ResourceExecution;
+using P = KeyLoad.UnitTests.OrleansExecution.CommandObservedPolicyProtocol;
 
-namespace KeyLoad.UnitTests.Features.OrleansExecution;
+namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal sealed class CommandObservedPolicyScenario(bool header)
 {

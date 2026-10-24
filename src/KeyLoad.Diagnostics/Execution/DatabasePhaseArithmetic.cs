@@ -1,4 +1,4 @@
-namespace KeyLoad.Diagnostics.Features.ResourceExecution;
+namespace KeyLoad.Diagnostics.ResourceExecution;
 
 /// <summary>Integer-only helpers shared by the bounded phase bank and its tests.</summary>
 internal static class DatabasePhaseArithmetic

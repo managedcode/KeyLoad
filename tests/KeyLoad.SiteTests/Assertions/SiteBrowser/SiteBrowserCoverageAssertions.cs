@@ -1,4 +1,4 @@
-namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
+namespace KeyLoad.SiteTests.BenchmarkComparisons;
 
 /// <summary>AC-BC-024/025/028: independently reads genuine Node and Chrome receipts through the final converter.</summary>
 internal static class SiteBrowserCoverageAssertions

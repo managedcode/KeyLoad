@@ -1,6 +1,6 @@
 using Microsoft.Win32.SafeHandles;
 
-namespace KeyLoad.UnitTests.Features.StorageRecovery;
+namespace KeyLoad.UnitTests.StorageRecovery;
 
 internal sealed class ExistingStoreInspectorLifetime : IAsyncDisposable
 {

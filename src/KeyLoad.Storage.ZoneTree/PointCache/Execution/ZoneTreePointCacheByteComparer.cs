@@ -1,4 +1,4 @@
-namespace KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
+namespace KeyLoad.Storage.ZoneTree.ResourceExecution;
 
 /// <summary>Compares encoded keys by complete byte content without allocating span lookups.</summary>
 internal sealed class ZoneTreePointCacheByteComparer : IEqualityComparer<byte[]>,

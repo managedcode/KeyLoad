@@ -1,8 +1,8 @@
 using System.Collections.Immutable;
 using System.Runtime.ExceptionServices;
-using KeyLoad.Core.Features.ResourceExecution;
-using KeyLoad.Core.Features.StoragePartitions.Contracts;
-using KeyLoad.Diagnostics.Features.ResourceExecution;
+using KeyLoad.Core.ResourceExecution;
+using KeyLoad.Core.StoragePartitions.Contracts;
+using KeyLoad.Diagnostics.ResourceExecution;
 using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.Options;
 

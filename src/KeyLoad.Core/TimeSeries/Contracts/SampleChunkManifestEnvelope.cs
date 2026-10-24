@@ -1,4 +1,4 @@
-namespace KeyLoad.Core.Features.TimeSeries;
+namespace KeyLoad.Core.TimeSeries;
 
 [Orleans.GenerateSerializer, Orleans.Alias(SampleChunkManifestEnvelope.SerializerAlias)]
 internal sealed record SampleChunkManifestEnvelope([property: Orleans.Id(0)] ReadOnlyMemory<byte> Encoded,

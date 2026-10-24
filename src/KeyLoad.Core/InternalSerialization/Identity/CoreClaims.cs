@@ -1,7 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
 
-namespace KeyLoad.Core.Features.InternalSerialization;
+namespace KeyLoad.Core.InternalSerialization;
 
 internal static class CoreClaims
 {

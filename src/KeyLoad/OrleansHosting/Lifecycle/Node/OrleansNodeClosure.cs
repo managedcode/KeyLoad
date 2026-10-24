@@ -1,4 +1,4 @@
-namespace KeyLoad.Server.Features.OrleansHosting;
+namespace KeyLoad.Server.OrleansHosting;
 
 /// <summary>Publishes a terminal physical-close permit only after every original borrower cleanup succeeds.</summary>
 internal sealed class OrleansNodeClosure

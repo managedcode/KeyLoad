@@ -1,4 +1,4 @@
-namespace KeyLoad.IntegrationTests.Features.Search;
+namespace KeyLoad.IntegrationTests.Search;
 
 [NotInParallel]
 internal sealed class GraphSearchLineageClusterTests

@@ -1,4 +1,4 @@
-namespace KeyLoad.Core.Features.BlobStorage;
+namespace KeyLoad.Core.BlobStorage;
 
 [Orleans.GenerateSerializer, Orleans.Alias(FileStorageProtocol.UploadAlias)]
 internal sealed record FileUpload([property: Orleans.Id(0)] FileAddress Address,

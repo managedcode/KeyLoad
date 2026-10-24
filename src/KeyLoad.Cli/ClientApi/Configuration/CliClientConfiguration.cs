@@ -2,7 +2,7 @@ using System.Globalization;
 using KeyLoad.Client;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.Cli.Features.ClientApi;
+namespace KeyLoad.Cli.ClientApi;
 
 /// <summary>Resolves the standalone command's sources into validated execution options.</summary>
 [ConfigurationBinding]

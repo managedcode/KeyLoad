@@ -1,5 +1,5 @@
 using System.Text.Json;
-namespace KeyLoad.UnitTests.Features.EventStreams;
+namespace KeyLoad.UnitTests.EventStreams;
 
 internal sealed class StreamReadResourceTests
 {

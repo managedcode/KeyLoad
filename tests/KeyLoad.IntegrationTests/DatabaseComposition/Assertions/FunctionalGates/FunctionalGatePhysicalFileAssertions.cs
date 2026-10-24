@@ -1,11 +1,11 @@
-using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.OrleansExecution;
-using KeyLoad.IntegrationTests.Features.StorageReplication;
+using KeyLoad.IntegrationTests.ClientApi;
+using KeyLoad.IntegrationTests.OrleansExecution;
+using KeyLoad.IntegrationTests.StorageReplication;
 using KeyLoad.Storage.ZoneTree;
 using KeyLoad.Storage.ZoneTree.IO;
-using static KeyLoad.IntegrationTests.Features.DatabaseComposition.FunctionalGatePhysicalFileProtocol;
+using static KeyLoad.IntegrationTests.DatabaseComposition.FunctionalGatePhysicalFileProtocol;
 
-namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
+namespace KeyLoad.IntegrationTests.DatabaseComposition;
 
 /// <summary>Observes actual files; it neither opens a live tree nor changes its ownership.</summary>
 internal static class FunctionalGatePhysicalFileAssertions

@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.GraphTraversal;
+namespace KeyLoad.UnitTests.GraphTraversal;
 
 /// <summary>Advances the permitted operation clock after real execution adjacency work has started.</summary>
 internal sealed class GraphTraversalDeadlineClock : TimeProvider

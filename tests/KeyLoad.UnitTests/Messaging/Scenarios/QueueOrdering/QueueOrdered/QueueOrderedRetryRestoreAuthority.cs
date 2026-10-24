@@ -1,10 +1,10 @@
 using System.Text.Json;
 using KeyLoad.Storage;
-using KeyLoad.UnitTests.Features.ResourceExecution;
+using KeyLoad.UnitTests.ResourceExecution;
 using ManagedCode.Communication.Commands;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.Messaging;
+namespace KeyLoad.UnitTests.Messaging;
 
 internal static class QueueOrderedRetryRestoreAuthority
 {
@@ -132,7 +132,7 @@ internal static class QueueOrderedRetryRestoreAuthority
         await Assert.That(Errors.Code(resolve.Problem)).IsEqualTo(expected);
         if (expected == ErrorCode.PermissionDenied)
         {
-            await Assert.That(resolve.Problem?.Detail).IsEqualTo(CommandOutcomes.ChangedOutcomePrincipalPolicyMessage);
+            await Assert.That(resolve.Problem?.Detail).IsEqualTo(CommandOutcomeOperations.ChangedOutcomePrincipalPolicyMessage);
         }
         await Assert.That(apply.Value).IsNull();
         await Assert.That(resolve.Value).IsNull();

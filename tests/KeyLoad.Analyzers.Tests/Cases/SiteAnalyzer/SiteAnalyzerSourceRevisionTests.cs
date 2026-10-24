@@ -1,4 +1,4 @@
-namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
+namespace KeyLoad.Analyzers.Tests.CodeQuality;
 
 /// <summary>AC-CQ-028: site execution coverage is tied to its selected source checkout.</summary>
 [NotInParallel(SiteAnalyzerCoverageTokens.ProcessIsolationKey)]

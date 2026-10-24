@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
 using KeyLoad.Clustering;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>Independent frozen ADR-039 inventory used by AC-MCP-001 contract assertions.</summary>
 internal static class McpCatalogExpectations
@@ -47,8 +47,8 @@ internal static class McpCatalogExpectations
     internal const string QueryAst = "keyload_query_ast";
     internal const string QueryDistributedSearch = "keyload_query_distributed_search";
     private const string QueryDistributedSearchRoute = "/query/distributed-search";
-    internal const string QueryPartitions = KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryMcpProtocol.Tool;
-    private const string QueryPartitionsRoute = KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryMcpProtocol.Route;
+    internal const string QueryPartitions = KeyLoad.UnitTests.QueryExecution.PartitionQueryMcpProtocol.Tool;
+    private const string QueryPartitionsRoute = KeyLoad.UnitTests.QueryExecution.PartitionQueryMcpProtocol.Route;
     private const string QueryAstRoute = "/query/ast";
     internal const string QueryCapabilities = "keyload_query_capabilities";
     private const string QueryCapabilitiesRoute = "/query/capabilities";
@@ -120,7 +120,7 @@ internal static class McpCatalogExpectations
         ("keyload_analytics_read", "/analytics/read", GrainReadKind.AnalyticsEvents, null),
         ("keyload_analytics_aggregate", "/analytics/aggregate", GrainReadKind.AnalyticsAggregate, null),
         ("keyload_tables_drop", "/admin/tables/drop", null, OperationKind.DropTable),
-        .. KeyLoad.UnitTests.Features.Search.SearchMcpCatalogEntries.All,
+        .. KeyLoad.UnitTests.Search.SearchMcpCatalogEntries.All,
         (DocumentsGet, DocumentsGetRoute, GrainReadKind.Document, null),
         (StreamsRead, StreamsReadRoute, GrainReadKind.Stream, null),
         (StreamsReplay, StreamsReplayRoute, GrainReadKind.AggregateReplay, null),

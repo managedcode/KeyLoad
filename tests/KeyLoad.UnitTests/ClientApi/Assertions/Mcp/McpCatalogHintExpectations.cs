@@ -1,7 +1,7 @@
 using KeyLoad.Clustering;
 using KeyLoad.Server;
 
-namespace KeyLoad.UnitTests.Features.ClientApi;
+namespace KeyLoad.UnitTests.ClientApi;
 
 /// <summary>Independent effects for the complete frozen public operation inventory and fresh official tools.</summary>
 internal static class McpCatalogHintExpectations
