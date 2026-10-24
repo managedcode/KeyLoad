@@ -23,9 +23,9 @@ internal static class DocumentLiveProfileClusterPages
     {
         var receipt = state.Commands[1].Receipt;
         LiveQueryChange[] changes =
-        [new(3L, receipt.Token, LiveQueryChangeKind.Upsert, state.Reference("a"), 2L, DocumentLiveProfileClusterState.Row("a", 2L, 2)),
-         new(4L, receipt.Token, LiveQueryChangeKind.Upsert, state.Reference("b"), 1L, DocumentLiveProfileClusterState.Row("b", 1L, 3)),
-         new(5L, receipt.Token, LiveQueryChangeKind.Remove, state.Reference("a"), 3L, null)];
+        [new(3L, receipt.Token, LiveQueryChangeKind.Upsert, state.StoredReference("a"), 2L, DocumentLiveProfileClusterState.Row("a", 2L, 2)),
+         new(4L, receipt.Token, LiveQueryChangeKind.Upsert, state.StoredReference("b"), 1L, DocumentLiveProfileClusterState.Row("b", 1L, 3)),
+         new(5L, receipt.Token, LiveQueryChangeKind.Remove, state.StoredReference("a"), 3L, null)];
         for (var route = 0; route < 4; route++)
         {
             var cursor = state.OriginalCursor;
@@ -42,7 +42,7 @@ internal static class DocumentLiveProfileClusterPages
     internal static async Task FreshAsync(RequestCqrsClusterCallers reader, DocumentLiveProfileClusterState state, CancellationToken token)
     {
         var expected = new LiveQueryChange(6L, state.Commands[2].Receipt.Token, LiveQueryChangeKind.Upsert,
-            state.Reference("c"), 1L, DocumentLiveProfileClusterState.Row("c", 1L, 5));
+            state.StoredReference("c"), 1L, DocumentLiveProfileClusterState.Row("c", 1L, 5));
         for (var route = 0; route < 4; route++)
         {
             var request = new ReadLiveQueryRequest(state.Query, state.FreshCursor, Limit: 1);

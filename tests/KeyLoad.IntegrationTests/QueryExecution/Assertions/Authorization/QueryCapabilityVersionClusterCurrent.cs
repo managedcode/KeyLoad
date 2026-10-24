@@ -36,7 +36,7 @@ internal static class QueryCapabilityVersionClusterCurrent
         foreach (var input in state.Seed.Mutations.Cast<PutDocument>())
         {
             var reference = new EntityRef(state.Partition, input.Collection, input.Id);
-            var expected = new DocumentReadResult(new(reference, 1L, input.Json, false, []));
+            var expected = new DocumentReadResult(new(state.Stored(input.Id), 1L, input.Json, false, []));
             await SqlClusterProtocol.EqualAsync(expected, await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.GetAsync(reference, token)));
             await SqlClusterProtocol.EqualAsync(expected, (await McpCallerAssertions.SuccessAsync<DocumentReadResult>(
                 await root.Mcp.CallAsync(McpCallerTools.DocumentsGet, new GetDocumentRequest(reference), token))).Value);

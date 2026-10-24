@@ -25,7 +25,7 @@ internal static class ProjectionPublicPolicyCold
             reader.Secret, async caller =>
             {
                 await EventProjectionClusterAssertions.VerifyVectorBothAsync(caller.Sdk, caller.Mcp,
-                    scenario.VectorSearch(), reader.Secret, ProjectionPublicPolicyProtocol.Healthy(), token);
+                    scenario, reader.Secret, ProjectionPublicPolicyProtocol.Healthy(), token);
                 return true;
             }, token);
         await ReplayAsync(fixture, scenario, original, token);
@@ -80,7 +80,7 @@ internal static class ProjectionPublicPolicyCold
                     async caller =>
                     {
                         await EventProjectionClusterAssertions.VerifyVectorBothAsync(caller.Sdk, caller.Mcp,
-                            scenario.VectorSearch(), reader.Secret, ProjectionPublicPolicyProtocol.Healthy(), token);
+                            scenario, reader.Secret, ProjectionPublicPolicyProtocol.Healthy(), token);
                         return true;
                     }, token);
                 var runtimeStatus = await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.StatusAsync(token));

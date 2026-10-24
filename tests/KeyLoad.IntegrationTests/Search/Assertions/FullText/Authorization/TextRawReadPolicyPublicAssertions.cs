@@ -16,8 +16,7 @@ internal static class TextRawReadPolicyPublicAssertions
         string[] redactions = secretVisible
             ? [TextClusterScenario.TextField, TextClusterScenario.VectorField]
             : [TextClusterScenario.TextField, TextClusterScenario.VectorField, TextClusterScenario.SecretField];
-        RankedDocument[] expected = [new(new(new(scenario.Partition, TextClusterScenario.Collection,
-            TextClusterScenario.FirstId), 1L, json, true, [.. redactions]), 1d / 61d)];
+        RankedDocument[] expected = [new(new(scenario.StoredReference(TextClusterScenario.FirstId), 1L, json, true, [.. redactions]), 1d / 61d)];
         for (var repeat = 0; repeat < 2; repeat++)
         {
             foreach (var term in new[] { "needle", "Київ" })
@@ -25,8 +24,7 @@ internal static class TextRawReadPolicyPublicAssertions
                 await PageAsync(reader, scenario.Text(term), expected, token);
             }
         }
-        RankedDocument[] full = [new(new(new(scenario.Partition, TextClusterScenario.Collection,
-            TextClusterScenario.FirstId), 1L,
+        RankedDocument[] full = [new(new(scenario.StoredReference(TextClusterScenario.FirstId), 1L,
             TextClusterScenario.Document("Київ needle needle", TextClusterScenario.OwnerA), false, []), 1d / 61d)];
         await PageAsync(administrator, scenario.Text("Київ"), full, token);
         await SqlClusterProtocol.EqualAsync(before,

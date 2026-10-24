@@ -3,6 +3,7 @@ using KeyLoad.IntegrationTests.ClientApi;
 using KeyLoad.IntegrationTests.Messaging;
 using KeyLoad.IntegrationTests.OrleansExecution;
 using KeyLoad.IntegrationTests.QueryExecution;
+using KeyLoad.IntegrationTests.ResourceExecution;
 using KeyLoad.IntegrationTests.StorageReplication;
 using P = KeyLoad.IntegrationTests.Search.GraphSearchPathPolicyClusterProtocol;
 
@@ -17,10 +18,14 @@ internal static class GraphSearchPathPolicyClusterSetup
             P.Database, P.Domain, Guid.NewGuid().ToString(McpCallerProtocol.GuidFormat));
         ResourceDefinition[] resources = [new(P.Documents, ResourceKind.Collection, P.Domain),
             new(P.Projects, ResourceKind.Collection, P.Domain), new(P.Graph, ResourceKind.Graph, P.Domain)];
+        var lifetimes = ImmutableDictionary.CreateBuilder<string, EntityRefLifetime>(StringComparer.Ordinal);
         foreach (var resource in resources)
         {
+            var creationId = Guid.NewGuid();
+            var creation = new ConfigureResourceRequest(partition.TenantId, P.Database, resource);
             await SqlClusterProtocol.EqualAsync(resource, await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.ConfigureResourceAsync(
-                Guid.NewGuid(), new(partition.TenantId, P.Database, resource), token)));
+                creationId, creation, token)));
+            lifetimes.Add(resource.Name, ResourceCreationLifetime.Create(creationId, creation));
         }
         var seed = GraphSearchPathPolicyClusterRecipe.Seed(partition);
         var receipt = await CommitAsync(root, seed, GraphSearchPathPolicyClusterRecipe.SeedReceipts, token);
@@ -30,7 +35,7 @@ internal static class GraphSearchPathPolicyClusterSetup
             [new(P.Database, P.Documents, Capability.Query | Capability.DocumentsRead),
              new(P.Database, P.Projects, Capability.Query | Capability.DocumentsRead),
              new(P.Database, P.Graph, Capability.GraphRead)], [], false, token);
-        var state = new GraphSearchPathPolicyClusterState(partition, identity, seed, receipt, outbox);
+        var state = new GraphSearchPathPolicyClusterState(partition, identity, seed, receipt, outbox, lifetimes.ToImmutable());
         return await PolicyAsync(root, state, true, token);
     }
 

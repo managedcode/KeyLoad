@@ -46,13 +46,15 @@ internal static class TypedEndpointJoinAssertions
             sources.ToImmutable(), graph, hiddenGraph, missingGraph, malformed);
     }
 
-    internal static async Task LiteralAsync(TypedEndpointJoinModels models, PartitionRef partition,
+    internal static async Task LiteralAsync(TypedEndpointJoinModels models, TypedEndpointJoinSeed seed,
         bool continued, bool joined)
     {
-        await RowAsync(models.First, TypedEndpointJoinProtocol.From(partition), TypedEndpointJoinProtocol.FirstJson);
-        await RowAsync(models.Second, TypedEndpointJoinProtocol.To(partition), TypedEndpointJoinProtocol.SecondJson);
-        await RowAsync(models.Hidden, new(partition, TypedEndpointJoinProtocol.FromCollection, TypedEndpointJoinProtocol.Hidden),
-            TypedEndpointJoinProtocol.HiddenJson);
+        var partition = seed.Partition;
+        var from = seed.StoredFrom(TypedEndpointJoinProtocol.First);
+        var to = seed.StoredTo(TypedEndpointJoinProtocol.Second);
+        await RowAsync(models.First, from, TypedEndpointJoinProtocol.FirstJson);
+        await RowAsync(models.Second, to, TypedEndpointJoinProtocol.SecondJson);
+        await RowAsync(models.Hidden, seed.StoredFrom(TypedEndpointJoinProtocol.Hidden), TypedEndpointJoinProtocol.HiddenJson);
         await MalformedSourceAsync(models, partition, continued);
         await Assert.That(models.Sources.Length).IsEqualTo(TypedEndpointJoinProtocol.SourceCount);
         for (var index = 0; index < TypedEndpointJoinProtocol.Messages.Length; index++)
@@ -77,8 +79,6 @@ internal static class TypedEndpointJoinAssertions
                 TypedEndpointJoinProtocol.To(partition), TypedEndpointJoinProtocol.Label, TypedEndpointJoinProtocol.Attributes);
             await Assert.That(source.PayloadJson).IsEqualTo(DatabaseCompositionClusterPayload.Golden(link));
         }
-        var from = TypedEndpointJoinProtocol.From(partition);
-        var to = TypedEndpointJoinProtocol.To(partition);
         var edges = ImmutableArray.CreateBuilder<EdgeRecord>();
         if (continued)
         {
@@ -91,10 +91,10 @@ internal static class TypedEndpointJoinAssertions
         await SqlClusterProtocol.EqualAsync(new global::KeyLoad.GraphTraversal(
             joined ? [from, to] : [from], edges.ToImmutable()), models.Graph);
         await SqlClusterProtocol.EqualAsync(new global::KeyLoad.GraphTraversal(
-            [new(partition, TypedEndpointJoinProtocol.FromCollection, TypedEndpointJoinProtocol.Hidden)], []), models.HiddenGraph);
+            [seed.StoredFrom(TypedEndpointJoinProtocol.Hidden)], []), models.HiddenGraph);
         if (continued)
         {
-            var missing = new EntityRef(partition, TypedEndpointJoinProtocol.FromCollection, TypedEndpointJoinProtocol.Missing);
+            var missing = seed.StoredFrom(TypedEndpointJoinProtocol.Missing);
             await Assert.That(models.Missing).IsNotNull();
             await RowAsync(models.Missing!, missing, MissingJson);
             await SqlClusterProtocol.EqualAsync(new global::KeyLoad.GraphTraversal([missing, to],

@@ -1,5 +1,7 @@
+using System.Collections.Immutable;
 using KeyLoad.IntegrationTests.ClientApi;
 using KeyLoad.IntegrationTests.OrleansExecution;
+using KeyLoad.IntegrationTests.ResourceExecution;
 
 namespace KeyLoad.IntegrationTests.QueryExecution;
 
@@ -14,11 +16,15 @@ internal static class QueryRuleOptimizationClusterSetup
         bool includeNull, bool includeMissing, CancellationToken token)
     {
         var partition = new PartitionRef("rule-optimization-" + Guid.NewGuid().ToString("N"), "database", "domain", Guid.NewGuid().ToString("N"));
+        var lifetimes = ImmutableDictionary.CreateBuilder<string, EntityRefLifetime>(StringComparer.Ordinal);
         for (var collection = 0; collection < QueryRuleOptimizationClusterData.Collections.Length; collection++)
         {
             var definition = QueryRuleOptimizationClusterData.Resource(partition, collection, includeNull, includeMissing);
+            var creationId = Guid.NewGuid();
+            var creation = new ConfigureResourceRequest(partition.TenantId, partition.DatabaseId, definition);
             await SqlClusterProtocol.EqualAsync(definition, await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.ConfigureResourceAsync(
-                Guid.NewGuid(), new(partition.TenantId, partition.DatabaseId, definition), token)));
+                creationId, creation, token)));
+            lifetimes.Add(definition.Name, ResourceCreationLifetime.Create(creationId, creation));
         }
         var originals = new List<(CommandRequest Command, CommitReceipt Receipt)>();
         foreach (var command in new[] { QueryRuleOptimizationClusterData.Seed(partition), QueryRuleOptimizationClusterData.Update(partition) })
@@ -42,7 +48,8 @@ internal static class QueryRuleOptimizationClusterSetup
         await Assert.That(outbox.Head.StoredRecords).IsEqualTo(InitialOutboxRecords);
         await Assert.That(outbox.Head.StoredBytes).IsGreaterThan(0L);
         await Assert.That(outbox.Consumers).IsEmpty();
-        var state = new QueryRuleOptimizationClusterState(partition, includeNull, includeMissing, reader, outbox, originals.ToArray());
+        var state = new QueryRuleOptimizationClusterState(partition, includeNull, includeMissing, reader, outbox, originals.ToArray(),
+            lifetimes.ToImmutable());
         await PolicyAsync(root, state, InitialPolicyEpoch, true, token);
         await QueryRuleOptimizationClusterCurrent.CheckAsync(root, state, token);
         return state;

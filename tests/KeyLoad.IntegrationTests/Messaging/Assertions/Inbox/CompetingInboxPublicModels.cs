@@ -25,7 +25,7 @@ internal static class CompetingInboxPublicModels
     {
         var failures = new List<Exception>();
         var reference = new EntityRef(state.Partition, CompetingInboxPublicProtocol.Documents, effect);
-        var expected = new DocumentReadResult(new(reference, 1L, json, false, []));
+        var expected = new DocumentReadResult(new(state.StoredDocument(effect), 1L, json, false, []));
         await ServerFailureObserver.ObserveAsync(async () => await CompetingInboxPublicValues.EqualAsync(expected,
             await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.GetAsync(reference, state.Winner.Token, token))), failures);
         await ServerFailureObserver.ObserveAsync(async () => await CompetingInboxPublicValues.EqualAsync(expected,

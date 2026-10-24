@@ -31,7 +31,7 @@ internal static class CapabilityOutputClusterAssertions
                 var reference = new EntityRef(seed.Command.Partition, CapabilityOutputClusterProtocol.Collection, id);
                 var actual = await McpCallerAssertions.SdkSuccessAsync(await root.GetAsync(reference, seed.Receipt.Token, token));
                 documents.Add(actual);
-                await SqlClusterProtocol.EqualAsync(new DocumentReadResult(new(reference, 1L,
+                await SqlClusterProtocol.EqualAsync(new DocumentReadResult(new(state.Stored(id), 1L,
                     CapabilityOutputClusterProtocol.Json(id), false, [])), actual);
             }, failures);
         }

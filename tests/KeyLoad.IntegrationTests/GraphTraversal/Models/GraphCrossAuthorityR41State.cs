@@ -38,6 +38,6 @@ internal sealed class GraphCrossAuthorityR41State(GraphIncomingClusterSeed seed)
         }
         var vertices = edges.Select(edge => edge.To).Append(Seed.LocalSource).Distinct()
             .OrderBy(vertex => vertex.Collection, StringComparer.Ordinal).ThenBy(vertex => vertex.Id, StringComparer.Ordinal);
-        return new([.. vertices], [.. edges]);
+        return Seed.StoredTraversal(new([.. vertices], [.. edges]));
     }
 }

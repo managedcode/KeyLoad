@@ -55,7 +55,7 @@ internal static class GraphPathClusterSiloRestart
         var request = GraphPathClusterScenario.Request(seed, labels: ImmutableArray.Create(GraphPathClusterScenario.Label));
         var result = await McpCallerAssertions.SdkSuccessAsync(await reader.ShortestPathAsync(request, cancellationToken));
         await GraphPathClusterAssertions.AssertPathAsync(result,
-            [seed.Source, seed.FirstBranch, seed.Target], ["a-branch-a", "a-end-a"], GraphPathClusterScenario.Label);
+            seed.StoredVertices([seed.Source, seed.FirstBranch, seed.Target]), ["a-branch-a", "a-end-a"], GraphPathClusterScenario.Label);
     }
 
     private static async Task<int> SelectSiloIndexAsync(KeyLoadClient[] administrators,
@@ -99,8 +99,8 @@ internal static class GraphPathClusterSiloRestart
         var request = GraphPathClusterScenario.Request(seed, labels: ImmutableArray.Create(GraphPathClusterScenario.Label));
         var result = await McpCallerAssertions.SdkSuccessAsync(await clients.Readers[survivor]
             .ShortestPathAsync(request, cancellationToken));
-        await GraphPathClusterCommandReconciliation.AssertShortcutAsync(result, command);
-        await GraphPathClusterAssertions.AssertPathAsync(result, [seed.Source, seed.Target], [NewEdgeId],
+        await GraphPathClusterCommandReconciliation.AssertShortcutAsync(result, seed, command);
+        await GraphPathClusterAssertions.AssertPathAsync(result, seed.StoredVertices([seed.Source, seed.Target]), [NewEdgeId],
             GraphPathClusterScenario.Label, receipt.Token.Position);
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, GraphPathClusterNodeClients.Nodes[survivor],
             seed.Reader.Secret, cancellationToken);
@@ -142,15 +142,15 @@ internal static class GraphPathClusterSiloRestart
             var result = await McpCallerAssertions.SdkSuccessAsync(await clients.Readers[nodeIndex]
                 .ShortestPathAsync(request, cancellationToken));
             await GraphPathClusterCommandReconciliation.AssertShortcutAsync(result, seed, NewEdgeId);
-            await GraphPathClusterAssertions.AssertPathAsync(result, [seed.Source, seed.Target], [NewEdgeId],
+            await GraphPathClusterAssertions.AssertPathAsync(result, seed.StoredVertices([seed.Source, seed.Target]), [NewEdgeId],
                 GraphPathClusterScenario.Label, committedToken.Position);
         }
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, restartedNode,
             seed.Reader.Secret, cancellationToken);
         var official = await McpCallerAssertions.SuccessAsync<GraphShortestPathResult>(await mcp.CallAsync(
             GraphPathClusterScenario.DirectTool, request, cancellationToken));
-        await GraphPathClusterAssertions.AssertPathAsync(official.Value, [seed.Source, seed.Target], [NewEdgeId],
-            GraphPathClusterScenario.Label, committedToken.Position);
+        await GraphPathClusterAssertions.AssertPathAsync(official.Value, seed.StoredVertices([seed.Source, seed.Target]),
+            [NewEdgeId], GraphPathClusterScenario.Label, committedToken.Position);
         await GraphPathClusterCommandReconciliation.AssertShortcutAsync(official.Value, seed, NewEdgeId);
     }
 

@@ -7,4 +7,9 @@ internal sealed record ProjectionPublicState(PartitionRef Partition, McpPersiste
     ProjectionConsumerDefinition Definition, ConfigureProjectionConsumerRequest Configure,
     ProjectionConsumerInfo Configured, ProjectionBatch OriginalBatch,
     CommitProjectionBatchRequest Complete, ProjectionBatchResult Completed,
-    CommitProjectionBatchRequest Filtered, ProjectionBatchResult Advanced);
+    CommitProjectionBatchRequest Filtered, ProjectionBatchResult Advanced,
+    EntityRefLifetime SourceLifetime, EntityRefLifetime TargetLifetime)
+{
+    internal EntityRef StoredSource(string id) => new(Partition, ProjectionPublicProtocol.Source, id) { Lifetime = SourceLifetime };
+    internal EntityRef StoredTarget(string id) => new(Partition, ProjectionPublicProtocol.Target, id) { Lifetime = TargetLifetime };
+}

@@ -22,7 +22,7 @@ internal static class SqlOffsetClusterSources
             var reference = new EntityRef(state.Partition, collection, id);
             var actual = await PublicReadAssertions.DocumentAsync(await callers.Sdk.GetAsync(reference, state.Receipt.Token, token))
                 ?? throw new InvalidOperationException("The literal OFFSET source is absent.");
-            var expected = new DocumentResult(reference, SqlOffsetClusterProtocol.InitialRevision, json, false, []);
+            var expected = new DocumentResult(state.Stored(collection, id), SqlOffsetClusterProtocol.InitialRevision, json, false, []);
             await SqlClusterProtocol.EqualAsync(expected, actual);
             var officialDocument = (await McpCallerAssertions.SuccessAsync<DocumentReadResult>(await callers.Mcp.CallAsync(
                 McpCallerTools.DocumentsGet, new GetDocumentRequest(reference, state.Receipt.Token), token))).Value;

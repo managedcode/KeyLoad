@@ -12,6 +12,7 @@ namespace KeyLoad.IntegrationTests.Authorization;
 internal static class CredentialAuthorityFlow
 {
     private const string MissingRepairResult = "Original acknowledged credential repair is absent.";
+    private const string UnsupportedSql = "The unified SQL version, statement or target operation is unsupported.";
 
     internal static async Task RunAsync(ClusterFixture fixture, CredentialAuthorityState state, bool expire, CancellationToken token)
     {
@@ -53,8 +54,10 @@ internal static class CredentialAuthorityFlow
         var request = new ConfigureApiKeyRequest(state.Document.Identity.Credential);
         var call = SqlClusterProtocol.Call(state.Document.Scenario.Partition, McpCallerTools.CredentialsConfigure,
             request, state.RepairCommandId);
-        var sql = await McpCallerAssertions.SdkSuccessAsync(await root.ExecuteSqlAsync(call, token));
-        await Assert.That(sql.ValueKind).IsEqualTo(JsonValueKind.Null);
+        var sql = await root.ExecuteSqlAsync(call, token);
+        await Assert.That(sql.IsFailed).IsTrue();
+        await Assert.That(sql.Value.ValueKind).IsEqualTo(JsonValueKind.Undefined);
+        await SqlClusterProtocol.EqualAsync(Errors.Problem(ErrorCode.UnsupportedCapability, UnsupportedSql), sql.Problem);
         var failures = new List<Exception>();
         try
         {
@@ -63,10 +66,10 @@ internal static class CredentialAuthorityFlow
             {
                 var arguments = McpOfficialClient.Arguments(request);
                 arguments.Add(McpCallerProtocol.CommandId, state.RepairCommandId);
-                var direct = await McpCallerAssertions.StatusAsync(await administrator.Client.InvokeKeyLoadToolAsync(
+                await McpCallerAssertions.StatusAsync(await administrator.Client.InvokeKeyLoadToolAsync(
                     McpCallerTools.CredentialsConfigure, arguments, token));
-                var q1 = await McpCallerAssertions.StatusAsync(await administrator.CallAsync(SqlOperationProtocol.ToolName, call, token));
-                await Assert.That(q1).IsNotEqualTo(direct);
+                await McpCallerAssertions.ErrorAsync(await administrator.CallAsync(SqlOperationProtocol.ToolName, call, token),
+                    ErrorCode.UnsupportedCapability, dispatched: false);
             }
             catch (Exception original) when (CqrsBoundaryErrors.IsNonFatal(original)) { failures.Add(original); }
             catch (Exception original) when (!CqrsBoundaryErrors.IsNonFatal(original)) { failures.Add(original); }

@@ -44,8 +44,8 @@ internal static class GraphPathFieldUseR43Reads
         await Assert.That(result.Version).IsEqualTo(1);
         await Assert.That(result.Found).IsTrue();
         await Assert.That(result.Hops).IsEqualTo(2);
-        await SqlClusterProtocol.EqualAsync(state.Vertices, result.Vertices.ToArray());
-        await SqlClusterProtocol.EqualAsync(state.ProjectedEdges, result.Edges.ToArray());
+        await SqlClusterProtocol.EqualAsync(state.StoredVertices, result.Vertices.ToArray());
+        await SqlClusterProtocol.EqualAsync(state.StoredProjectedEdges, result.Edges.ToArray());
         await Assert.That(result.CutPosition).IsGreaterThan(0L);
     }
 }

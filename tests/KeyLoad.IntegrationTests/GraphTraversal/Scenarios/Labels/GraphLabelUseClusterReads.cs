@@ -12,14 +12,14 @@ internal static class GraphLabelUseClusterReads
         foreach (var labels in new string[]?[] { null, [] })
         {
             await HealthyAsync(reader, GraphLabelUseClusterProtocol.Request(state.Seed.Partition, labels),
-                GraphLabelUseClusterProtocol.Expected(state.Seed.Partition, labels), token);
+                state.Expected(labels), token);
         }
         foreach (var labels in new[] { new[] { "route" }, new[] { "unmatched" } })
         {
             var request = GraphLabelUseClusterProtocol.Request(state.Seed.Partition, labels);
             if (allow)
             {
-                await HealthyAsync(reader, request, GraphLabelUseClusterProtocol.Expected(state.Seed.Partition, labels), token);
+                await HealthyAsync(reader, request, state.Expected(labels), token);
             }
             else
             {

@@ -8,20 +8,20 @@ namespace KeyLoad.IntegrationTests.StorageReplication;
 internal static class DocumentSessionReadClusterAssertions
 {
     internal static async Task HealthyAsync(KeyLoadClient sdk, McpOfficialClient mcp, EntityRef reference,
-        CommitToken minimum, string json, long revision, CancellationToken token)
+        EntityRef stored, CommitToken minimum, string json, long revision, CancellationToken token)
     {
         var actual = await PublicReadAssertions.DocumentAsync(await sdk.GetAsync(reference, minimum, token));
         var official = await PublicReadAssertions.DocumentAsync(await mcp.CallAsync(
             McpCallerTools.DocumentsGet, new GetDocumentRequest(reference, minimum), token));
-        await LiteralAsync(actual, reference, json, revision);
-        await LiteralAsync(official.Value, reference, json, revision);
+        await LiteralAsync(actual, stored, json, revision);
+        await LiteralAsync(official.Value, stored, json, revision);
         var call = SqlClusterProtocol.Call(reference.Partition, McpCallerTools.DocumentsGet, new GetDocumentRequest(reference, minimum));
-        await LiteralAsync((await SqlClusterProtocol.SdkAsync<DocumentReadResult>(sdk, call, token)).Document, reference, json, revision);
-        await LiteralAsync((await SqlClusterProtocol.McpAsync<DocumentReadResult>(mcp, call, token)).Document, reference, json, revision);
+        await LiteralAsync((await SqlClusterProtocol.SdkAsync<DocumentReadResult>(sdk, call, token)).Document, stored, json, revision);
+        await LiteralAsync((await SqlClusterProtocol.McpAsync<DocumentReadResult>(mcp, call, token)).Document, stored, json, revision);
     }
 
     internal static async Task RejectedAsync(KeyLoadClient sdk, McpOfficialClient mcp, EntityRef reference,
-        CommitToken minimum, string credential, CancellationToken token)
+        EntityRef stored, CommitToken minimum, string credential, CancellationToken token)
     {
         (CommitToken Token, string Detail)[] invalid =
         [
@@ -55,7 +55,7 @@ internal static class DocumentSessionReadClusterAssertions
             await Assert.That(sqlOfficial.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error)
                 .GetProperty(McpCallerProtocol.ProblemDetail).GetString()).IsEqualTo(failure.Detail);
             await McpCallerAssertions.DoesNotDiscloseAsync(sqlOfficial, credential, FirstJson);
-            await HealthyAsync(sdk, mcp, reference, minimum, FirstJson, First, token);
+            await HealthyAsync(sdk, mcp, reference, stored, minimum, FirstJson, First, token);
         }
     }
 

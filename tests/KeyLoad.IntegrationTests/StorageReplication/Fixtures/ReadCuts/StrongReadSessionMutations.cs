@@ -23,7 +23,7 @@ internal static class StrongReadSessionMutations
         var next = state with
         {
             Commits = [.. state.Commits, new(command, receipt)],
-            Target = delete ? null : new(new(state.Partition, Collection, TargetId), CreatedRevision, TargetJson, false, []),
+            Target = delete ? null : new(state.Stored(TargetId), CreatedRevision, TargetJson, false, []),
             Outbox = await QueryCursorRequestIdentityR47Current.OutboxAsync(root, state.Partition, token)
         };
         await StrongReadSessionCurrent.CheckAsync(root, next, token);

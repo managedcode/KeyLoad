@@ -11,13 +11,13 @@ internal static class GraphPathRawReadR43Current
     {
         foreach (var vertex in state.Vertices)
         {
-            var expected = new DocumentResult(vertex, 1L, "{}", false, []);
+            var expected = new DocumentResult(state.Seed.Stored(vertex), 1L, "{}", false, []);
             await SqlClusterProtocol.EqualAsync(expected, await PublicReadAssertions.DocumentAsync(await admin.Sdk.GetAsync(vertex, token)));
             await SqlClusterProtocol.EqualAsync(expected, (await PublicReadAssertions.DocumentAsync(
                 await admin.Mcp.CallAsync(McpCallerTools.DocumentsGet, new GetDocumentRequest(vertex), token))).Value);
         }
         var request = new TraverseRequest(state.Seed.Partition, GraphPathClusterScenario.Graph, state.Source, 2, 3, 2);
-        var expectedGraph = new global::KeyLoad.GraphTraversal([state.Middle, state.Source, state.Target], [.. state.Edges]);
+        var expectedGraph = state.Seed.StoredTraversal(new([state.Middle, state.Source, state.Target], [.. state.Edges]));
         await SqlClusterProtocol.EqualAsync(expectedGraph, await McpCallerAssertions.SdkSuccessAsync(
             await admin.Sdk.TraverseAsync(request, token)));
         await SqlClusterProtocol.EqualAsync(expectedGraph, (await McpCallerAssertions.SuccessAsync<global::KeyLoad.GraphTraversal>(

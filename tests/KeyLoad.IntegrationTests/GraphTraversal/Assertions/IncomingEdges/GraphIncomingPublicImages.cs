@@ -41,7 +41,7 @@ internal static class GraphIncomingPublicImages
     {
         foreach (var reference in new[] { seed.Target, seed.LocalSource, seed.FirstSource, seed.SecondSource })
         {
-            var expected = new DocumentResult(reference, reference == seed.LocalSource ? localRevision
+            var expected = new DocumentResult(seed.Stored(reference), reference == seed.LocalSource ? localRevision
                 : GraphIncomingPublicPolicy.InitialRevision, GraphIncomingClusterScenario.EmptyJson, false, []);
             await SqlClusterProtocol.EqualAsync(expected,
                 await PublicReadAssertions.DocumentAsync(await administrator.GetAsync(reference, token)));

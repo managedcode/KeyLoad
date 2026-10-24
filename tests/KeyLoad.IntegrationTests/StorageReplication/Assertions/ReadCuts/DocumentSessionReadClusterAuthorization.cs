@@ -10,7 +10,7 @@ namespace KeyLoad.IntegrationTests.StorageReplication;
 internal static class DocumentSessionReadClusterAuthorization
 {
     internal static async Task VerifyAsync(KeyLoadClient admin, KeyLoadClient sdk, McpOfficialClient mcp,
-        EntityRef reference, CommitToken minimum, McpPersistedIdentity identity, CancellationToken token)
+        EntityRef reference, EntityRef stored, CommitToken minimum, McpPersistedIdentity identity, CancellationToken token)
     {
         var revoked = identity.Principal with
         {
@@ -23,7 +23,7 @@ internal static class DocumentSessionReadClusterAuthorization
         };
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(() => DeniedAsync(admin, sdk, mcp,
-            reference, minimum, identity, revoked, token), failures);
+            reference, stored, minimum, identity, revoked, token), failures);
         var repaired = false;
         using (var cleanup = new CancellationTokenSource(RequestCqrsClusterProtocol.CleanupDeadline, TimeProvider.System))
         {
@@ -38,13 +38,13 @@ internal static class DocumentSessionReadClusterAuthorization
         if (repaired)
         {
             await ServerFailureObserver.ObserveAsync(() => DocumentSessionReadClusterAssertions.HealthyAsync(
-                sdk, mcp, reference, minimum, FirstJson, First, token), failures);
+                sdk, mcp, reference, stored, minimum, FirstJson, First, token), failures);
         }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
     private static async Task DeniedAsync(KeyLoadClient admin, KeyLoadClient sdk, McpOfficialClient mcp,
-        EntityRef reference, CommitToken minimum, McpPersistedIdentity identity, PrincipalRecord revoked,
+        EntityRef reference, EntityRef stored, CommitToken minimum, McpPersistedIdentity identity, PrincipalRecord revoked,
         CancellationToken token)
     {
         await McpCallerAssertions.SdkSuccessAsync(await admin.ConfigurePrincipalAsync(Guid.NewGuid(), revoked, token));
@@ -67,7 +67,7 @@ internal static class DocumentSessionReadClusterAuthorization
         await McpCallerAssertions.ErrorAsync(sqlOfficial, ErrorCode.PermissionDenied, dispatched: true);
         await McpCallerAssertions.DoesNotDiscloseAsync(sqlOfficial, identity.Secret, FirstJson);
         var unchanged = await PublicReadAssertions.DocumentAsync(await admin.GetAsync(reference, minimum, token));
-        var expected = new DocumentResult(reference, First, FirstJson, false, []);
+        var expected = new DocumentResult(stored, First, FirstJson, false, []);
         await Assert.That(JsonDefaults.Serialize(unchanged).SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
     }
 }

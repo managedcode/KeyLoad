@@ -1,5 +1,6 @@
 using KeyLoad.IntegrationTests.ClientApi;
 using KeyLoad.IntegrationTests.OrleansExecution;
+using KeyLoad.IntegrationTests.ResourceExecution;
 
 namespace KeyLoad.IntegrationTests.Messaging;
 
@@ -24,15 +25,19 @@ internal static class QueueTerminalPolicyClusterSeed
         var id = Guid.NewGuid();
         var configured = await McpCallerAssertions.SdkSuccessAsync(await admin.Sdk.ConfigureResourceAsync(id, request, token));
         await QueueTerminalPolicyClusterAssertions.EqualAsync(configured, definition);
-        await McpCallerAssertions.SdkSuccessAsync(await admin.Sdk.ConfigureResourceAsync(Guid.NewGuid(),
-            new(partition.TenantId, partition.DatabaseId, new(QueueTerminalPolicyClusterProtocol.Collection,
-                ResourceKind.Collection, partition.TransactionDomainId)), token));
+        var collectionId = Guid.NewGuid();
+        var collection = new ConfigureResourceRequest(partition.TenantId, partition.DatabaseId, new(QueueTerminalPolicyClusterProtocol.Collection,
+            ResourceKind.Collection, partition.TransactionDomainId));
+        await McpCallerAssertions.SdkSuccessAsync(await admin.Sdk.ConfigureResourceAsync(collectionId, collection, token));
         var identity = await MessagingClusterIdentity.CreateAsync(fixture, partition.TenantId,
             [new(partition.DatabaseId, QueueTerminalPolicyClusterProtocol.Queue, Capability.QueuePublish | Capability.QueueConsume |
                 Capability.QueueAck | Capability.QueueInspect | Capability.DeadLettersRead),
              new(partition.DatabaseId, QueueTerminalPolicyClusterProtocol.Collection, Capability.DocumentsRead | Capability.DocumentsWrite)],
             [], false, token);
-        var state = new QueueTerminalPolicyClusterState(partition, definition, identity);
+        var state = new QueueTerminalPolicyClusterState(partition, definition, identity)
+        {
+            CollectionLifetime = ResourceCreationLifetime.Create(collectionId, collection)
+        };
         state.Configurations.Add((id, request, configured));
         return state;
     }

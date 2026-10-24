@@ -2,6 +2,7 @@ using System.Text.Json;
 using KeyLoad.Client;
 using KeyLoad.IntegrationTests.ClientApi;
 using KeyLoad.IntegrationTests.QueryExecution;
+using KeyLoad.IntegrationTests.ResourceExecution;
 
 namespace KeyLoad.IntegrationTests.RelationalStorage;
 
@@ -27,26 +28,28 @@ internal static class RelationalSqlClusterJoinRejectionFlow
     private const string AccessPath = "bounded-primary-key-inner-join";
     private const int ProjectionCount = 3;
 
-    internal static async Task<(RelationalSqlClusterScenario Scenario, long Position)> SeedAsync(KeyLoadClient sdk, CancellationToken cancellationToken)
+    internal static async Task<(RelationalSqlClusterScenario Scenario, long Position, EntityRefLifetime RightLifetime)> SeedAsync(
+        KeyLoadClient sdk, CancellationToken cancellationToken)
     {
         var scenario = await RelationalSqlClusterScenario.CreateAsync(sdk, cancellationToken);
         var resource = new ResourceDefinition(Right, ResourceKind.Collection, scenario.Partition.TransactionDomainId)
         {
             RelationalSchema = new(Id, [new(Id, RelationalColumnType.Text), new(Name, RelationalColumnType.Text)])
         };
+        var rightCommandId = Guid.NewGuid();
+        var rightRequest = new ConfigureResourceRequest(scenario.Partition.TenantId, scenario.Partition.DatabaseId, resource);
         var configured = await SqlClusterProtocol.SdkAsync<ResourceDefinition>(sdk,
-            SqlClusterProtocol.Call(scenario.Partition, McpCallerTools.ResourcesConfigure,
-                new ConfigureResourceRequest(scenario.Partition.TenantId, scenario.Partition.DatabaseId, resource),
-                Guid.NewGuid()), cancellationToken);
+            SqlClusterProtocol.Call(scenario.Partition, McpCallerTools.ResourcesConfigure, rightRequest, rightCommandId),
+            cancellationToken);
         await Assert.That(configured.RelationalSchema!.PrimaryKey).IsEqualTo(Id);
         var committed = await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(scenario.Command(
             new PutDocument(RelationalSqlClusterTokens.Table, OrderId, LeftJson),
             new PutDocument(Right, CustomerId, RightJson)), cancellationToken));
-        return (scenario, committed.Token.Position);
+        return (scenario, committed.Token.Position, ResourceCreationLifetime.Create(rightCommandId, rightRequest));
     }
 
     internal static async Task<(DocumentResult? Left, DocumentResult? Right)> ReadRowsAsync(KeyLoadClient sdk,
-        RelationalSqlClusterScenario scenario, CancellationToken cancellationToken)
+        RelationalSqlClusterScenario scenario, EntityRefLifetime rightLifetime, CancellationToken cancellationToken)
     {
         var left = await PublicReadAssertions.DocumentAsync(await sdk.GetAsync(
             new(scenario.Partition, RelationalSqlClusterTokens.Table, OrderId), cancellationToken));
@@ -54,19 +57,23 @@ internal static class RelationalSqlClusterJoinRejectionFlow
             new(scenario.Partition, Right, CustomerId), cancellationToken));
         await Assert.That(left).IsNotNull();
         await Assert.That(right).IsNotNull();
-        var expectedLeft = new DocumentResult(new(scenario.Partition, RelationalSqlClusterTokens.Table, OrderId),
-            1, LeftJson, false, []);
-        var expectedRight = new DocumentResult(new(scenario.Partition, Right, CustomerId),
-            1, RightJson, false, []);
+        var expectedLeft = new DocumentResult(new(scenario.Partition, RelationalSqlClusterTokens.Table, OrderId)
+        {
+            Lifetime = scenario.TableLifetime
+        }, 1, LeftJson, false, []);
+        var expectedRight = new DocumentResult(new(scenario.Partition, Right, CustomerId)
+        {
+            Lifetime = rightLifetime
+        }, 1, RightJson, false, []);
         await SqlClusterProtocol.EqualAsync(expectedLeft, left!);
         await SqlClusterProtocol.EqualAsync(expectedRight, right!);
         return (left, right);
     }
 
     internal static async Task VerifyRowsAsync(KeyLoadClient sdk, RelationalSqlClusterScenario scenario,
-        (DocumentResult? Left, DocumentResult? Right) before, CancellationToken cancellationToken)
+        EntityRefLifetime rightLifetime, (DocumentResult? Left, DocumentResult? Right) before, CancellationToken cancellationToken)
     {
-        var after = await ReadRowsAsync(sdk, scenario, cancellationToken);
+        var after = await ReadRowsAsync(sdk, scenario, rightLifetime, cancellationToken);
         await SqlClusterProtocol.EqualAsync(before.Left, after.Left);
         await SqlClusterProtocol.EqualAsync(before.Right, after.Right);
     }

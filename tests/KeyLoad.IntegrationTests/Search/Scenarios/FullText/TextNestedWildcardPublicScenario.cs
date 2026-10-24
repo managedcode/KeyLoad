@@ -1,11 +1,12 @@
 using KeyLoad.IntegrationTests.ClientApi;
 using KeyLoad.IntegrationTests.OrleansExecution;
 using KeyLoad.IntegrationTests.QueryExecution;
+using KeyLoad.IntegrationTests.ResourceExecution;
 
 namespace KeyLoad.IntegrationTests.Search;
 
 internal sealed record TextNestedWildcardPublicScenario(PartitionRef Partition,
-    CommandRequest Original, CommitReceipt Receipt, McpPersistedIdentity Identity)
+    CommandRequest Original, CommitReceipt Receipt, McpPersistedIdentity Identity, EntityRefLifetime Lifetime)
 {
     internal const string Collection = "nested-text";
     internal const string Field = "/profile/secret";
@@ -20,6 +21,8 @@ internal sealed record TextNestedWildcardPublicScenario(PartitionRef Partition,
 
     internal SearchRequest Request() => new(Partition, Collection, Field, "needle", Limit: 1);
 
+    internal EntityRef StoredReference(string id) => new(Partition, Collection, id) { Lifetime = Lifetime };
+
     internal static async Task<TextNestedWildcardPublicScenario> CreateAsync(ClusterFixture fixture,
         RequestCqrsClusterCallers administrator, CancellationToken token)
     {
@@ -30,8 +33,9 @@ internal sealed record TextNestedWildcardPublicScenario(PartitionRef Partition,
             FieldPolicies = [new(ProfilePolicy, "nested", RawReadGrant: ProfileRead, RawUseGrant: Use),
                 new(ArrayPolicy, "array", RawReadGrant: ArrayRead, RawUseGrant: "nested.array.use")]
         };
-        await McpCallerAssertions.SdkSuccessAsync(await administrator.Sdk.ConfigureResourceAsync(Guid.NewGuid(),
-            new(partition.TenantId, partition.DatabaseId, resource), token));
+        var creationId = Guid.NewGuid();
+        var creation = new ConfigureResourceRequest(partition.TenantId, partition.DatabaseId, resource);
+        await McpCallerAssertions.SdkSuccessAsync(await administrator.Sdk.ConfigureResourceAsync(creationId, creation, token));
         var original = new CommandRequest(Guid.NewGuid(), partition,
             [new PutDocument(Collection, "a", Full, Access: new("owner-a"))]);
         var receipt = await McpCallerAssertions.SdkSuccessAsync(await administrator.Sdk.CommitAsync(original, token));
@@ -48,6 +52,6 @@ internal sealed record TextNestedWildcardPublicScenario(PartitionRef Partition,
         await Assert.That(receipt.CommandId).IsEqualTo(original.CommandId);
         await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
         await Assert.That(receipt.PersistedCopies).IsEqualTo(3);
-        return new(partition, original, receipt, identity);
+        return new(partition, original, receipt, identity, ResourceCreationLifetime.Create(creationId, creation));
     }
 }

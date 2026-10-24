@@ -1,5 +1,6 @@
 using KeyLoad.IntegrationTests.ClientApi;
 using KeyLoad.IntegrationTests.OrleansExecution;
+using KeyLoad.IntegrationTests.ResourceExecution;
 
 namespace KeyLoad.IntegrationTests.QueryExecution;
 
@@ -12,12 +13,12 @@ internal static class SqlOffsetClusterSetup
         PartitionRef? runtimePartition, CancellationToken token)
     {
         var partition = runtimePartition ?? new PartitionRef("sql-offset-" + Guid.NewGuid().ToString("N"), "database", "domain", Guid.NewGuid().ToString("N"));
-        await ConfigureAsync(callers, partition, new(SqlOffsetClusterProtocol.Left, ResourceKind.Collection, partition.TransactionDomainId)
+        var leftLifetime = await ConfigureAsync(callers, partition, new(SqlOffsetClusterProtocol.Left, ResourceKind.Collection, partition.TransactionDomainId)
         {
             RelationalSchema = new(SqlOffsetClusterProtocol.Order, [new(SqlOffsetClusterProtocol.Order, RelationalColumnType.Text),
             new(SqlOffsetClusterProtocol.Foreign, RelationalColumnType.Text), new(SqlOffsetClusterProtocol.Title, RelationalColumnType.Text)])
         }, token);
-        await ConfigureAsync(callers, partition, new(SqlOffsetClusterProtocol.Right, ResourceKind.Collection, partition.TransactionDomainId)
+        var rightLifetime = await ConfigureAsync(callers, partition, new(SqlOffsetClusterProtocol.Right, ResourceKind.Collection, partition.TransactionDomainId)
         {
             RelationalSchema = new(SqlOffsetClusterProtocol.Id, [new(SqlOffsetClusterProtocol.Id, RelationalColumnType.Text),
             new(SqlOffsetClusterProtocol.Name, RelationalColumnType.Text)])
@@ -38,16 +39,19 @@ internal static class SqlOffsetClusterSetup
         await Assert.That(receipt.PersistedCopies).IsEqualTo(3);
         var identity = await McpPersistedIdentity.CreateAsync(fixture, partition, SqlOffsetClusterProtocol.Left,
             Capability.Query | Capability.DocumentsRead, token);
-        var state = new SqlOffsetClusterState(partition, command, receipt, identity);
+        var state = new SqlOffsetClusterState(partition, command, receipt, identity, leftLifetime, rightLifetime);
         await PolicyAsync(callers, state, epoch: 2, allow: true, token);
         return state;
     }
-    private static async Task ConfigureAsync(RequestCqrsClusterCallers callers, PartitionRef partition,
+    private static async Task<EntityRefLifetime> ConfigureAsync(RequestCqrsClusterCallers callers, PartitionRef partition,
         ResourceDefinition definition, CancellationToken token)
     {
+        var creationId = Guid.NewGuid();
+        var creation = new ConfigureResourceRequest(partition.TenantId, partition.DatabaseId, definition);
         var actual = await SqlClusterProtocol.SdkAsync<ResourceDefinition>(callers.Sdk, SqlClusterProtocol.Call(partition,
-            McpCallerTools.ResourcesConfigure, new ConfigureResourceRequest(partition.TenantId, partition.DatabaseId, definition), Guid.NewGuid()), token);
+            McpCallerTools.ResourcesConfigure, creation, creationId), token);
         await SqlClusterProtocol.EqualAsync(definition, actual);
+        return ResourceCreationLifetime.Create(creationId, creation);
     }
     internal static async Task PolicyAsync(RequestCqrsClusterCallers callers, SqlOffsetClusterState state,
         long epoch, bool allow, CancellationToken token)

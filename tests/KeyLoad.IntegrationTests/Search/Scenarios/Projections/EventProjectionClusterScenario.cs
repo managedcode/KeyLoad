@@ -2,11 +2,12 @@ using System.Security.Cryptography;
 using System.Text;
 using KeyLoad.Client;
 using KeyLoad.IntegrationTests.ClientApi;
+using KeyLoad.IntegrationTests.ResourceExecution;
 
 namespace KeyLoad.IntegrationTests.Search;
 
 internal sealed record EventProjectionClusterScenario(PartitionRef Partition, StreamRef Stream,
-    string WorkerSecret, string ReaderSecret, Guid CommandId, ApplyVectorProjection Projection)
+    string WorkerSecret, string ReaderSecret, Guid CommandId, ApplyVectorProjection Projection, EntityRefLifetime Lifetime)
 {
     internal const string Collection = "event-projection-cluster";
     internal const string StreamSet = "event-projection-cluster-events";
@@ -51,7 +52,7 @@ internal sealed record EventProjectionClusterScenario(PartitionRef Partition, St
         var stream = new StreamRef(partition, StreamSet, StreamId, Generation);
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
         var administrator = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
-        await ConfigureResourcesAsync(administrator, partition, cancellationToken);
+        var lifetime = await ConfigureResourcesAsync(administrator, partition, cancellationToken);
         var worker = await ConfigureWorkerAsync(administrator, partition, cancellationToken);
         var reader = await ConfigureReaderAsync(administrator, partition, false, null, cancellationToken);
         await McpCallerAssertions.SdkSuccessAsync(await administrator.CommitAsync(Seed(partition), cancellationToken));
@@ -59,11 +60,13 @@ internal sealed record EventProjectionClusterScenario(PartitionRef Partition, St
         var projection = new ApplyVectorProjection(stream, Revision, EventId,
             new(partition, Collection, SourceId), Revision, InputField, ReducerId, ReducerVersion,
             Generation, target);
-        return new(partition, stream, worker.Secret, reader.Secret, Guid.NewGuid(), projection);
+        return new(partition, stream, worker.Secret, reader.Secret, Guid.NewGuid(), projection, lifetime);
     }
 
     internal CommandRequest ApplyCommand(Guid? commandId = null, ApplyVectorProjection? projection = null)
         => new(commandId ?? CommandId, Partition, [projection ?? Projection]);
+
+    internal EntityRef StoredReference(string id) => new(Partition, Collection, id) { Lifetime = Lifetime };
 
     internal SearchRequest VectorSearch()
         => new(Partition, Collection, VectorField: VectorField, Vector: [1, 0], Space: Space,
@@ -98,14 +101,16 @@ internal sealed record EventProjectionClusterScenario(PartitionRef Partition, St
         [new PatchDocument(Collection, SourceId,
             [new(InputField, PatchKind.Set, "\"updated source value\"")], Revision)]);
 
-    private static async Task ConfigureResourcesAsync(KeyLoadClient administrator, PartitionRef partition,
+    private static async Task<EntityRefLifetime> ConfigureResourcesAsync(KeyLoadClient administrator, PartitionRef partition,
         CancellationToken cancellationToken)
     {
         var streamSet = new ResourceDefinition(StreamSet, ResourceKind.StreamSet, partition.TransactionDomainId);
         await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigureResourceAsync(Guid.NewGuid(),
             new(partition.TenantId, partition.DatabaseId, streamSet), cancellationToken));
-        await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigureResourceAsync(Guid.NewGuid(),
-            new(partition.TenantId, partition.DatabaseId, Resource(partition, SourceClass)), cancellationToken));
+        var creationId = Guid.NewGuid();
+        var creation = new ConfigureResourceRequest(partition.TenantId, partition.DatabaseId, Resource(partition, SourceClass));
+        await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigureResourceAsync(creationId, creation, cancellationToken));
+        return ResourceCreationLifetime.Create(creationId, creation);
     }
 
     private static ResourceDefinition Resource(PartitionRef partition, string sourceClass)

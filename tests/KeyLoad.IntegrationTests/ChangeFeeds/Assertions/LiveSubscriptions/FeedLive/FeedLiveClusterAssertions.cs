@@ -41,10 +41,10 @@ internal static class FeedLiveClusterAssertions
     {
         await Assert.That(page.Changes.Length).IsEqualTo(FeedLiveClusterProtocol.PageLimit);
         var change = page.Changes.Single();
-        var expected = new DocumentChange(sequence, commit, change.CommittedAt, scenario.Reference, revision, false,
-            updated ? new(scenario.Reference, FeedLiveClusterProtocol.FirstRevision,
+        var expected = new DocumentChange(sequence, commit, change.CommittedAt, scenario.StoredReference, revision, false,
+            updated ? new(scenario.StoredReference, FeedLiveClusterProtocol.FirstRevision,
                 FeedLiveClusterProtocol.FirstProjected, true, [FeedLiveClusterProtocol.SecretField]) : null,
-            new(scenario.Reference, revision, json, true, [FeedLiveClusterProtocol.SecretField]));
+            new(scenario.StoredReference, revision, json, true, [FeedLiveClusterProtocol.SecretField]));
         await SqlClusterProtocol.EqualAsync(expected, change);
         await Assert.That(change.CommittedAt).IsNotEqualTo(default(DateTimeOffset));
         await Assert.That(page.ThroughSequence).IsEqualTo(sequence);

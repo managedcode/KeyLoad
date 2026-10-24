@@ -40,7 +40,7 @@ internal static class QueryRuleOptimizationClusterCurrent
                 await ServerFailureObserver.ObserveAsync(async () =>
                 {
                     var reference = new EntityRef(state.Partition, collection, row.Id);
-                    var expected = new DocumentReadResult(new(reference, row.Revision, row.Json, false, []));
+                    var expected = new DocumentReadResult(new(state.Stored(collection, row.Id), row.Revision, row.Json, false, []));
                     await SqlClusterProtocol.EqualAsync(expected, await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.GetAsync(reference, token)));
                     await SqlClusterProtocol.EqualAsync(expected, (await McpCallerAssertions.SuccessAsync<DocumentReadResult>(
                         await root.Mcp.CallAsync(McpCallerTools.DocumentsGet, new GetDocumentRequest(reference), token))).Value);

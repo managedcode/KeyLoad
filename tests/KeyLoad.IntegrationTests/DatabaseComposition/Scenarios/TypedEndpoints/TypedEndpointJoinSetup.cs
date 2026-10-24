@@ -1,6 +1,7 @@
 using System.Text.Json;
 using KeyLoad.IntegrationTests.ClientApi;
 using KeyLoad.IntegrationTests.OrleansExecution;
+using KeyLoad.IntegrationTests.ResourceExecution;
 
 namespace KeyLoad.IntegrationTests.DatabaseComposition;
 
@@ -24,8 +25,8 @@ internal static class TypedEndpointJoinSetup
             Database, Domain, Guid.NewGuid().ToString(McpCallerProtocol.GuidFormat));
         var from = Definition(partition, TypedEndpointJoinProtocol.FromCollection, TypedEndpointJoinProtocol.UseGrant);
         var to = Definition(partition, TypedEndpointJoinProtocol.ToCollection, TypedEndpointJoinProtocol.BlockedUseGrant);
-        await ConfigureAsync(admin, partition, from, token);
-        await ConfigureAsync(admin, partition, to, token);
+        var fromLifetime = await CreateAsync(admin, partition, from, token);
+        var toLifetime = await CreateAsync(admin, partition, to, token);
         await ConfigureAsync(admin, partition,
             new(TypedEndpointJoinProtocol.Queue, ResourceKind.WorkQueue, partition.TransactionDomainId), token);
         await ConfigureAsync(admin, partition,
@@ -72,8 +73,18 @@ internal static class TypedEndpointJoinSetup
         await Assert.That(receipt.CommandId).IsEqualTo(seed.CommandId);
         await Assert.That(receipt.Mutations.Length).IsEqualTo(TypedEndpointJoinProtocol.SourceCount + TypedEndpointJoinProtocol.SourceCount);
         var models = await TypedEndpointJoinAssertions.CaptureAsync(admin, partition, token);
-        await TypedEndpointJoinAssertions.LiteralAsync(models, partition, continued: false, joined: false);
-        return new(partition, to, identity, principal, models);
+        var result = new TypedEndpointJoinSeed(partition, to, identity, principal, models, fromLifetime, toLifetime);
+        await TypedEndpointJoinAssertions.LiteralAsync(models, result, continued: false, joined: false);
+        return result;
+    }
+
+    private static async Task<EntityRefLifetime> CreateAsync(RequestCqrsClusterCallers admin, PartitionRef partition,
+        ResourceDefinition definition, CancellationToken token)
+    {
+        var creationId = Guid.NewGuid();
+        var creation = new ConfigureResourceRequest(partition.TenantId, partition.DatabaseId, definition);
+        await McpCallerAssertions.SdkSuccessAsync(await admin.Sdk.ConfigureResourceAsync(creationId, creation, token));
+        return ResourceCreationLifetime.Create(creationId, creation);
     }
 
     internal static Task<ResourceDefinition> ConfigureAsync(RequestCqrsClusterCallers admin,

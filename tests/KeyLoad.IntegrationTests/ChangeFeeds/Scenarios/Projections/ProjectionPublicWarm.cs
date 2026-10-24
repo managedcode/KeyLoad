@@ -6,7 +6,8 @@ namespace KeyLoad.IntegrationTests.ChangeFeeds;
 internal static class ProjectionPublicWarm
 {
     internal static async Task<ProjectionPublicState> RunAsync(RequestCqrsClusterCallers root, RequestCqrsClusterCallers caller,
-        PartitionRef partition, McpPersistedIdentity identity, CancellationToken token)
+        PartitionRef partition, McpPersistedIdentity identity, EntityRefLifetime sourceLifetime,
+        EntityRefLifetime targetLifetime, CancellationToken token)
     {
         var source = new CommandRequest(Guid.NewGuid(), partition,
             [new PutDocument(ProjectionPublicProtocol.Source, "input", ProjectionPublicProtocol.InputJson, 0L)]);
@@ -22,7 +23,7 @@ internal static class ProjectionPublicWarm
             await caller.Mcp.CallAsync(McpCallerTools.ProjectionsConfigure, configure, token))).Value);
         var read = new ReadProjectionBatchRequest(consumer);
         var batch = await McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.ReadProjectionAsync(read, token));
-        await ProjectionPublicAssertions.LiteralBatchAsync(batch, consumer, definition, sourceReceipt);
+        await ProjectionPublicAssertions.LiteralBatchAsync(batch, consumer, definition, sourceReceipt, sourceLifetime);
         var mcpBatch = (await McpCallerAssertions.SuccessAsync<ProjectionBatch>(
             await caller.Mcp.CallAsync(McpCallerTools.ProjectionsRead, read, token))).Value;
         await ProjectionPublicAssertions.ExactAsync(batch with
@@ -45,6 +46,6 @@ internal static class ProjectionPublicWarm
         await ProjectionPublicAssertions.LiteralReceiptAsync(filtered.CommandId, advanced.Receipt);
         await ProjectionPublicAssertions.ExactAsync(new ProjectionBatchResult(advanced.Receipt, false, 2L), advanced);
         return new(partition, identity, source, sourceReceipt, consumer, definition, configure,
-            configured, batch, complete, completed, filtered, advanced);
+            configured, batch, complete, completed, filtered, advanced, sourceLifetime, targetLifetime);
     }
 }

@@ -24,6 +24,12 @@ internal sealed class CompetingInboxPublicState(ClusterFixture fixture, bool equ
         get;
         set;
     } = null!;
+    internal EntityRefLifetime DocumentsLifetime
+    {
+        get;
+        set;
+    } = null!;
+    internal EntityRef StoredDocument(string id) => new(Partition, CompetingInboxPublicProtocol.Documents, id) { Lifetime = DocumentsLifetime };
     internal List<(CommandRequest Request, CommitReceipt Receipt)> Producers
     {
         get;

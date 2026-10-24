@@ -26,7 +26,7 @@ internal static class LiveTailClusterAssertions
                 FeedLiveClusterProtocol.FirstRevision, FeedLiveClusterProtocol.FirstProjected, true,
                 [FeedLiveClusterProtocol.SecretField]) }, snapshot.Rows.ToArray());
             await SqlClusterProtocol.EqualAsync(new[] { new LiveQueryChange(FeedLiveClusterProtocol.UpdatedSequence,
-                receipt.Token, LiveQueryChangeKind.Upsert, scenario.Reference, FeedLiveClusterProtocol.UpdatedRevision, UpdatedRow) }, tail.Changes.ToArray());
+                receipt.Token, LiveQueryChangeKind.Upsert, scenario.StoredReference, FeedLiveClusterProtocol.UpdatedRevision, UpdatedRow) }, tail.Changes.ToArray());
         }
         else
         {

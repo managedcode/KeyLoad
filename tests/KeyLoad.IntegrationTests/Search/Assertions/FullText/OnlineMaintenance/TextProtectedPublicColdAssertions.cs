@@ -25,8 +25,7 @@ internal static class TextProtectedPublicColdAssertions
             await Assert.That(result.AppliedToken.AtomicPartitionId).IsEqualTo(state.Deleted.Token.AtomicPartitionId);
             await Assert.That(result.AppliedToken.Position).IsGreaterThanOrEqualTo(state.Deleted.Token.Position);
         }
-        var reference = new EntityRef(state.Scenario.Partition, TextClusterScenario.Collection,
-            TextClusterScenario.FirstId);
+        var reference = state.Scenario.StoredReference(TextClusterScenario.FirstId);
         RankedDocument[] expected = [new(new(reference, 2, "{\"owner\":\"owner-a\"}", true,
             [TextClusterScenario.TextField, TextClusterScenario.VectorField, TextClusterScenario.SecretField]), 1d / 61d)];
         await PageAsync(reader, state.Scenario.Text("fresh"), expected, token);

@@ -13,7 +13,7 @@ internal static class GraphSearchLineageClusterCurrent
         foreach (var put in state.Seed.Mutations.OfType<PutDocument>())
         {
             var reference = new EntityRef(state.Partition, GraphSearchLineageClusterProtocol.Collection, put.Id);
-            var expected = new DocumentResult(reference, 1L, put.Json, false, []);
+            var expected = new DocumentResult(state.StoredVertex(put.Id), 1L, put.Json, false, []);
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 await SqlClusterProtocol.EqualAsync(await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.GetAsync(reference, token)),
@@ -31,11 +31,12 @@ internal static class GraphSearchLineageClusterCurrent
                 GraphSearchLineageClusterRecipe.Vertex(state.Partition, GraphSearchLineageClusterProtocol.Alpha), 2,
                 GraphSearchLineageClusterProtocol.Vertices, GraphSearchLineageClusterProtocol.Edges);
             var edges = state.Seed.Mutations.OfType<UpsertEdge>().Where(edge => edge.Graph == graph)
-                .Select(edge => new EdgeRecord(edge.EdgeId, edge.From, edge.To, edge.Label, edge.AttributesJson, 1L)).ToArray();
+                .Select(edge => new EdgeRecord(edge.EdgeId, state.StoredVertex(edge.From.Id), state.StoredVertex(edge.To.Id),
+                    edge.Label, edge.AttributesJson, 1L)).ToArray();
             var vertices = graph == GraphSearchLineageClusterProtocol.EarlyGraph
                 ? new[] { GraphSearchLineageClusterProtocol.Alpha, GraphSearchLineageClusterProtocol.Beta }
                 : new[] { GraphSearchLineageClusterProtocol.Alpha, GraphSearchLineageClusterProtocol.Beta, GraphSearchLineageClusterProtocol.Context };
-            var expected = new global::KeyLoad.GraphTraversal([.. vertices.Select(id => GraphSearchLineageClusterRecipe.Vertex(state.Partition, id))], [.. edges]);
+            var expected = new global::KeyLoad.GraphTraversal([.. vertices.Select(state.StoredVertex)], [.. edges]);
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 await SqlClusterProtocol.EqualAsync(await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.TraverseAsync(request, token)), expected);

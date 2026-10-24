@@ -8,7 +8,7 @@ internal static class SqlBetweenSymmetricClusterImage
         foreach (var row in SqlBetweenSymmetricClusterState.Rows)
         {
             var reference = new EntityRef(PostgresClusterState.Partition, SqlNullOrderingClusterProtocol.Collection, row.Id);
-            var expected = new DocumentReadResult(new(reference,
+            var expected = new DocumentReadResult(new(state.Seed.Stored(row.Id),
                 row.Id == SqlBetweenSymmetricClusterState.Low ? state.LowRevision : SqlNullOrderingClusterProtocol.SeedRevision,
                 row.Id == SqlBetweenSymmetricClusterState.Low ? state.LowJson : row.Json, false, []));
             var actual = await global::KeyLoad.IntegrationTests.ClientApi.McpCallerAssertions.SdkSuccessAsync(await root.Sdk.GetAsync(reference, state.Current.Token, token));

@@ -82,7 +82,7 @@ internal sealed class EventProjectionClusterSiloRestart(ClusterFixture fixture)
     {
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, node,
             scenario.ReaderSecret, cancellationToken);
-        await EventProjectionClusterAssertions.VerifyVectorBothAsync(reader, mcp, scenario.VectorSearch(),
+        await EventProjectionClusterAssertions.VerifyVectorBothAsync(reader, mcp, scenario,
             scenario.ReaderSecret,
             [(EventProjectionClusterScenario.TargetId, 1d / 61d),
                 (EventProjectionClusterScenario.BaselineId, 1d / 62d)], cancellationToken);

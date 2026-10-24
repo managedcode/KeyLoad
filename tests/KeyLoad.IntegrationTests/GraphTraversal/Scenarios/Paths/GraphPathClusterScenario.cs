@@ -3,6 +3,7 @@ using System.Security.Cryptography;
 using System.Text;
 using KeyLoad.Client;
 using KeyLoad.IntegrationTests.ClientApi;
+using KeyLoad.IntegrationTests.ResourceExecution;
 
 namespace KeyLoad.IntegrationTests.GraphTraversal;
 
@@ -37,14 +38,15 @@ internal static class GraphPathClusterScenario
             "graph-path-database", "graph-path-domain", Guid.NewGuid().ToString("N"));
         using var adminHttp = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
         var admin = new KeyLoadClient(adminHttp, fixture.AdminKey, IntegrationClientOptions.Execution());
-        await ConfigureResourceAsync(admin, partition, CollectionA, ResourceKind.Collection, cancellationToken);
-        await ConfigureResourceAsync(admin, partition, CollectionB, ResourceKind.Collection, cancellationToken);
+        var lifetimes = ImmutableDictionary.Create<string, EntityRefLifetime>(StringComparer.Ordinal)
+            .Add(CollectionA, await ConfigureCollectionAsync(admin, partition, CollectionA, cancellationToken))
+            .Add(CollectionB, await ConfigureCollectionAsync(admin, partition, CollectionB, cancellationToken));
         await ConfigureGraphAsync(admin, partition, cancellationToken);
         var identity = await CreateReaderAsync(admin, partition, cancellationToken);
         var refs = CreateReferences(partition);
         await McpCallerAssertions.SdkSuccessAsync(await admin.CommitAsync(Seed(partition, refs, identity.Principal.Id), cancellationToken));
         return new(partition, refs.Source, refs.FirstBranch, refs.SecondBranch, refs.Target,
-            refs.HiddenSource, refs.HiddenIntermediate, refs.HiddenTarget, refs.Isolated, identity);
+            refs.HiddenSource, refs.HiddenIntermediate, refs.HiddenTarget, refs.Isolated, identity, lifetimes);
     }
 
     internal static GraphShortestPathRequest Request(GraphPathClusterSeed seed, EntityRef? from = null,
@@ -125,12 +127,14 @@ internal static class GraphPathClusterScenario
             new(partition.DatabaseId, Graph, Capability.GraphRead | Capability.Query)
         ];
 
-    private static async Task ConfigureResourceAsync(KeyLoadClient admin, PartitionRef partition,
-        string name, ResourceKind kind, CancellationToken cancellationToken)
+    private static async Task<EntityRefLifetime> ConfigureCollectionAsync(KeyLoadClient admin, PartitionRef partition,
+        string name, CancellationToken cancellationToken)
     {
-        var resource = new ResourceDefinition(name, kind, partition.TransactionDomainId);
-        await McpCallerAssertions.SdkSuccessAsync(await admin.ConfigureResourceAsync(Guid.NewGuid(),
-            new(partition.TenantId, partition.DatabaseId, resource), cancellationToken));
+        var creationId = Guid.NewGuid();
+        var creation = new ConfigureResourceRequest(partition.TenantId, partition.DatabaseId,
+            new(name, ResourceKind.Collection, partition.TransactionDomainId));
+        await McpCallerAssertions.SdkSuccessAsync(await admin.ConfigureResourceAsync(creationId, creation, cancellationToken));
+        return ResourceCreationLifetime.Create(creationId, creation);
     }
 
     private static async Task ConfigureGraphAsync(KeyLoadClient admin, PartitionRef partition,

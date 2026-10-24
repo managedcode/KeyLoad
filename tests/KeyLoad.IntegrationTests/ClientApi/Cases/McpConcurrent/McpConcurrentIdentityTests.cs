@@ -39,8 +39,8 @@ internal sealed class McpConcurrentIdentityTests(ClusterFixture fixture)
         var secondDenied = await McpCallerAssertions.ErrorAsync(calls[SecondDenial], ErrorCode.PermissionDenied, dispatched: true);
         await global::KeyLoad.IntegrationTests.Authorization.ConcurrentPrincipalAuthorityAssertions.LiteralAsync(first, firstRead.Value);
         await global::KeyLoad.IntegrationTests.Authorization.ConcurrentPrincipalAuthorityAssertions.LiteralAsync(second, secondRead.Value);
-        await Assert.That(firstRead.Value.Reference).IsEqualTo(first.Reference);
-        await Assert.That(secondRead.Value.Reference).IsEqualTo(second.Reference);
+        await Assert.That(firstRead.Value.Reference).IsEqualTo(first.StoredReference);
+        await Assert.That(secondRead.Value.Reference).IsEqualTo(second.StoredReference);
         await Assert.That(new Guid?[] { firstRead.RequestId, secondRead.RequestId, firstDenied, secondDenied }.Distinct().Count())
             .IsEqualTo(OperationCount);
         await McpCallerAssertions.DoesNotDiscloseAsync(calls[FirstDenial], firstIdentity.Secret, McpDocumentProtocol.PrivateValue);

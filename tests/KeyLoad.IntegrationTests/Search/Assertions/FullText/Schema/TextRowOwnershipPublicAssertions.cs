@@ -9,8 +9,7 @@ internal static class TextRowOwnershipPublicAssertions
     internal static async Task PagesAsync(RequestCqrsClusterCallers reader, TextClusterScenario scenario,
         long revision, CancellationToken token)
     {
-        RankedDocument[] expected = [new(new(new(scenario.Partition, TextClusterScenario.Collection,
-            TextClusterScenario.FirstId), revision, "{\"owner\":\"owner-a\"}", true,
+        RankedDocument[] expected = [new(new(scenario.StoredReference(TextClusterScenario.FirstId), revision, "{\"owner\":\"owner-a\"}", true,
             [TextClusterScenario.TextField, TextClusterScenario.VectorField,
                 TextClusterScenario.SecretField]), 1d / 61d)];
         foreach (var term in new[] { "needle", "Київ" })

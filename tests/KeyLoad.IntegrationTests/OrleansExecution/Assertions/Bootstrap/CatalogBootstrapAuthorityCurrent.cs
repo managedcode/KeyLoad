@@ -31,7 +31,7 @@ internal static class CatalogBootstrapAuthorityCurrent
             await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, node, state.ReaderKey, async reader =>
             {
                 var reference = new EntityRef(state.Partition, P.Collection, P.Document);
-                DocumentReadResult expectedDocument = new(new(reference,
+                DocumentReadResult expectedDocument = new(new(state.StoredDocument,
                     state.HealthyReceipt is null ? P.OriginalRevision : P.HealthyRevision,
                     state.HealthyReceipt is null ? P.OriginalJson : P.HealthyJson, false, []));
                 await SqlClusterProtocol.EqualAsync(expectedDocument, await McpCallerAssertions.SdkSuccessAsync(

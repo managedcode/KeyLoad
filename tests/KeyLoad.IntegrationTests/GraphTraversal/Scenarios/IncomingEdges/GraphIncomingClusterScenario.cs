@@ -3,6 +3,7 @@ using System.Security.Cryptography;
 using System.Text;
 using KeyLoad.Client;
 using KeyLoad.IntegrationTests.ClientApi;
+using KeyLoad.IntegrationTests.ResourceExecution;
 
 namespace KeyLoad.IntegrationTests.GraphTraversal;
 
@@ -47,9 +48,11 @@ internal static class GraphIncomingClusterScenario
         var secondSource = Vertex(secondSourcePartition, SharedSourceId);
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
         var admin = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
-        await ConfigurePartitionAsync(admin, targetPartition, cancellationToken).ConfigureAwait(false);
-        await ConfigurePartitionAsync(admin, firstSourcePartition, cancellationToken).ConfigureAwait(false);
-        await ConfigurePartitionAsync(admin, secondSourcePartition, cancellationToken).ConfigureAwait(false);
+        var lifetimes = ImmutableDictionary.CreateBuilder<string, EntityRefLifetime>(StringComparer.Ordinal);
+        foreach (var partition in new[] { targetPartition, firstSourcePartition, secondSourcePartition })
+        {
+            lifetimes.Add(partition.DatabaseId, await ConfigurePartitionAsync(admin, partition, cancellationToken).ConfigureAwait(false));
+        }
         await SeedVerticesAsync(admin, targetPartition, [target, localSource], cancellationToken).ConfigureAwait(false);
         await SeedVerticesAsync(admin, firstSourcePartition, [firstSource], cancellationToken).ConfigureAwait(false);
         await SeedVerticesAsync(admin, secondSourcePartition, [secondSource], cancellationToken).ConfigureAwait(false);
@@ -57,7 +60,7 @@ internal static class GraphIncomingClusterScenario
             secondSourcePartition], cancellationToken).ConfigureAwait(false);
         var targetOnly = await CreateReaderAsync(admin, [targetPartition], cancellationToken).ConfigureAwait(false);
         return new(targetPartition, firstSourcePartition, secondSourcePartition, target,
-            localSource, firstSource, secondSource, reader, targetOnly, Graph);
+            localSource, firstSource, secondSource, reader, targetOnly, Graph, lifetimes.ToImmutable());
     }
 
     internal static ReadIncomingGraphEdgesRequest Request(GraphIncomingClusterSeed seed, int limit = 10)
@@ -105,21 +108,22 @@ internal static class GraphIncomingClusterScenario
     private static EntityRef Vertex(PartitionRef partition, string id)
         => new(partition, Collection, id);
 
-    private static async Task ConfigurePartitionAsync(KeyLoadClient admin, PartitionRef partition,
+    private static async Task<EntityRefLifetime> ConfigurePartitionAsync(KeyLoadClient admin, PartitionRef partition,
         CancellationToken cancellationToken)
     {
-        var collection = new ResourceDefinition(Collection, ResourceKind.Collection,
-            partition.TransactionDomainId);
+        var collection = new ConfigureResourceRequest(partition.TenantId, partition.DatabaseId,
+            new(Collection, ResourceKind.Collection, partition.TransactionDomainId));
         var graph = new ResourceDefinition(Graph, ResourceKind.Graph, partition.TransactionDomainId)
         {
             FieldPolicies = [new(SecretPath, "graph-incoming-private", RawReadGrant: SecretGrant,
                 WriteGrant: WriteGrant)]
         };
-        foreach (var resource in new[] { collection, graph })
-        {
-            _ = await McpCallerAssertions.SdkSuccessAsync(await admin.ConfigureResourceAsync(Guid.NewGuid(),
-                new(partition.TenantId, partition.DatabaseId, resource), cancellationToken)).ConfigureAwait(false);
-        }
+        var collectionId = Guid.NewGuid();
+        _ = await McpCallerAssertions.SdkSuccessAsync(await admin.ConfigureResourceAsync(collectionId,
+            collection, cancellationToken)).ConfigureAwait(false);
+        _ = await McpCallerAssertions.SdkSuccessAsync(await admin.ConfigureResourceAsync(Guid.NewGuid(),
+            new(partition.TenantId, partition.DatabaseId, graph), cancellationToken)).ConfigureAwait(false);
+        return ResourceCreationLifetime.Create(collectionId, collection);
     }
 
     private static async Task SeedVerticesAsync(KeyLoadClient admin, PartitionRef partition,

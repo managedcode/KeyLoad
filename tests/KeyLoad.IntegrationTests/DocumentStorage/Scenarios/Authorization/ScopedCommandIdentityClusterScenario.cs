@@ -1,11 +1,12 @@
 using KeyLoad.Client;
 using KeyLoad.IntegrationTests.ClientApi;
+using KeyLoad.IntegrationTests.ResourceExecution;
 
 namespace KeyLoad.IntegrationTests.DocumentStorage;
 
 /// <summary>Owns two independently named logical partitions in one real transaction domain.</summary>
 internal sealed record ScopedCommandIdentityClusterScenario(PartitionRef FirstPartition, PartitionRef SecondPartition,
-    string Collection, string Queue)
+    string Collection, string Queue, EntityRefLifetime Lifetime)
 {
     private const string FirstPartitionKey = "partition-a";
     internal static async Task<ScopedCommandIdentityClusterScenario> CreateAsync(ClusterFixture fixture,
@@ -23,12 +24,13 @@ internal sealed record ScopedCommandIdentityClusterScenario(PartitionRef FirstPa
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
         var administrator = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         var definition = new ResourceDefinition(collection, ResourceKind.Collection, domain);
-        await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigureResourceAsync(Guid.NewGuid(),
-            new(tenant, McpDocumentProtocol.Database, definition), cancellationToken));
+        var creationId = Guid.NewGuid();
+        var creation = new ConfigureResourceRequest(tenant, McpDocumentProtocol.Database, definition);
+        await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigureResourceAsync(creationId, creation, cancellationToken));
         await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigureResourceAsync(Guid.NewGuid(),
             new(tenant, McpDocumentProtocol.Database, new ResourceDefinition(queue, ResourceKind.WorkQueue, domain)),
             cancellationToken));
-        return new(first, second, collection, queue);
+        return new(first, second, collection, queue, ResourceCreationLifetime.Create(creationId, creation));
     }
 
     internal CommandRequest CreateCommand(Guid commandId, PartitionRef partition, string entity, string json)

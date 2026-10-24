@@ -29,9 +29,10 @@ internal sealed class GraphLabelFrontierPublicState(GraphIncomingClusterSeed see
     {
         if (profile >= 5 || (profile == 4 && Replaced))
         {
-            return new([Start], []);
+            return Seed.StoredTraversal(new([Start], []));
         }
-        return new([.. ExpectedVertices(depth, profile)], [.. ExpectedEdgeIndices(depth, profile).Select(index => Edges[index])]);
+        return Seed.StoredTraversal(new([.. ExpectedVertices(depth, profile)],
+            [.. ExpectedEdgeIndices(depth, profile).Select(index => Edges[index])]));
     }
 
     private EntityRef[] ExpectedVertices(int depth, int profile)

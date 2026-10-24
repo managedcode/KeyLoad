@@ -1,14 +1,18 @@
 using KeyLoad.Client;
 using KeyLoad.IntegrationTests.ClientApi;
 using KeyLoad.IntegrationTests.QueryExecution;
+using KeyLoad.IntegrationTests.ResourceExecution;
 
 namespace KeyLoad.IntegrationTests.RelationalStorage;
 
 /// <summary>One canonical atomic partition with typed rows and their existing linked models.</summary>
-internal sealed record RelationalSqlClusterScenario(PartitionRef Partition, ResourceDefinition TableDefinition)
+internal sealed record RelationalSqlClusterScenario(PartitionRef Partition, ResourceDefinition TableDefinition,
+    EntityRefLifetime TableLifetime)
 {
     internal EntityRef First => new(Partition, RelationalSqlClusterTokens.Table, RelationalSqlClusterTokens.FirstId);
     internal EntityRef Second => new(Partition, RelationalSqlClusterTokens.Table, RelationalSqlClusterTokens.SecondId);
+    internal EntityRef StoredFirst => First with { Lifetime = TableLifetime };
+    internal EntityRef StoredSecond => Second with { Lifetime = TableLifetime };
     internal StreamRef Stream => new(Partition, RelationalSqlClusterTokens.Streams, RelationalSqlClusterTokens.StreamId);
     private static VectorSpace Space => new(RelationalSqlClusterTokens.VectorSpace, RelationalSqlClusterTokens.Dimension,
         DistanceMetric.DotProduct, RelationalSqlClusterTokens.VectorModel, RelationalSqlClusterTokens.VectorVersion);
@@ -23,7 +27,8 @@ internal sealed record RelationalSqlClusterScenario(PartitionRef Partition, Reso
             RelationalSchema = new(RelationalSqlClusterTokens.Key, RelationalSqlClusterTokens.Columns),
             Indexes = [new(RelationalSqlClusterTokens.TitleIndex, [RelationalSqlClusterTokens.TitlePath], Unique: true)]
         };
-        var persisted = await ConfigureAsync(administrator, partition, table, cancellationToken);
+        var tableCommandId = Guid.NewGuid();
+        var persisted = await ConfigureAsync(administrator, partition, table, tableCommandId, cancellationToken);
         await Assert.That(persisted.RelationalSchema!.PrimaryKey).IsEqualTo(RelationalSqlClusterTokens.Key);
         await SqlClusterProtocol.EqualAsync(RelationalSqlClusterTokens.Columns, persisted.RelationalSchema.Columns);
         await Assert.That(persisted.Indexes[0].Unique).IsTrue();
@@ -34,9 +39,10 @@ internal sealed record RelationalSqlClusterScenario(PartitionRef Partition, Reso
             (RelationalSqlClusterTokens.SeriesSet, ResourceKind.TimeSeries), (RelationalSqlClusterTokens.Blobs, ResourceKind.BlobStore)
         })
         {
-            await ConfigureAsync(administrator, partition, new(name, kind, partition.TransactionDomainId), cancellationToken);
+            await ConfigureAsync(administrator, partition, new(name, kind, partition.TransactionDomainId), Guid.NewGuid(), cancellationToken);
         }
-        return new(partition, persisted);
+        return new(partition, persisted, ResourceCreationLifetime.Create(tableCommandId,
+            new(partition.TenantId, partition.DatabaseId, table)));
     }
     internal CommandRequest Command(params Mutation[] effects)
         => new(Guid.NewGuid(), Partition, [.. effects]);
@@ -62,8 +68,8 @@ internal sealed record RelationalSqlClusterScenario(PartitionRef Partition, Reso
             StreamId = id
         });
     private static Task<ResourceDefinition> ConfigureAsync(KeyLoadClient administrator, PartitionRef partition,
-        ResourceDefinition definition, CancellationToken cancellationToken)
+        ResourceDefinition definition, Guid commandId, CancellationToken cancellationToken)
         => SqlClusterProtocol.SdkAsync<ResourceDefinition>(administrator, SqlClusterProtocol.Call(partition,
             McpCallerTools.ResourcesConfigure, new ConfigureResourceRequest(partition.TenantId, partition.DatabaseId, definition),
-            Guid.NewGuid()), cancellationToken);
+            commandId), cancellationToken);
 }

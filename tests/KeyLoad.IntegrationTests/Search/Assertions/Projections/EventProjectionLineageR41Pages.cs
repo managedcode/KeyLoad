@@ -21,7 +21,7 @@ internal static class EventProjectionLineageR41Pages
         await observe();
     }
     private static RankedDocument Row(EventProjectionLineageR41State state, string id, double score)
-     => new(new(new(state.Partition, EventProjectionLineageR41Protocol.Collection, id), 1L,
+     => new(new(state.StoredReference(id), 1L,
       id == EventProjectionLineageR41Protocol.Target ? EventProjectionLineageR41Protocol.TargetJson : EventProjectionLineageR41Protocol.BaselineJson,
       true, [EventProjectionLineageR41Protocol.Input, EventProjectionLineageR41Protocol.Vector]), score);
 }

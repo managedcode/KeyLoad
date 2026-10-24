@@ -9,8 +9,7 @@ internal static class AtomicTriadStagedClusterCurrent
     internal static async Task RunAsync(RequestCqrsClusterCallers root, RequestCqrsClusterCallers reader,
         AtomicTriadStagedClusterState state, CancellationToken token)
     {
-        DocumentResult? document = state.HealthyCommitted ? new(new(state.Partition, AtomicTriadStagedClusterProtocol.Collection,
-            AtomicTriadStagedClusterProtocol.Entity), 2L, AtomicTriadStagedClusterProtocol.SecondJson, false, []) : null;
+        DocumentResult? document = state.HealthyCommitted ? new(state.StoredEntity, 2L, AtomicTriadStagedClusterProtocol.SecondJson, false, []) : null;
         var request = new GetDocumentRequest(new(state.Partition, AtomicTriadStagedClusterProtocol.Collection, AtomicTriadStagedClusterProtocol.Entity));
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () => await QueueProducerClusterAssertions.EqualAsync(

@@ -35,12 +35,12 @@ internal sealed class ThreeWayHybridClusterTests(ClusterFixture fixture)
         var official = await McpCallerAssertions.SuccessAsync<GraphSearchResult>(await mcp.CallAsync(
             ThreeWayHybridClusterScenario.SearchGraphTool, request, deadline.Token));
         var call = SqlClusterProtocol.Call(scenario.Partition, ThreeWayHybridClusterScenario.SearchGraphTool, request);
-        await HybridExplainClusterAssertions.LiteralAsync(direct, scenario.Partition, restricted);
-        await HybridExplainClusterAssertions.LiteralAsync(official.Value, scenario.Partition, restricted);
+        await HybridExplainClusterAssertions.LiteralAsync(direct, scenario, restricted);
+        await HybridExplainClusterAssertions.LiteralAsync(official.Value, scenario, restricted);
         await HybridExplainClusterAssertions.LiteralAsync(await SqlClusterProtocol.SdkAsync<GraphSearchResult>(
-            sdk, call, deadline.Token), scenario.Partition, restricted);
+            sdk, call, deadline.Token), scenario, restricted);
         await HybridExplainClusterAssertions.LiteralAsync(await SqlClusterProtocol.McpAsync<GraphSearchResult>(
-            mcp, call, deadline.Token), scenario.Partition, restricted);
+            mcp, call, deadline.Token), scenario, restricted);
     }
 
     [Test]

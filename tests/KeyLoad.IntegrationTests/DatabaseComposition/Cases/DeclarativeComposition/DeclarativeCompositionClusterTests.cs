@@ -119,8 +119,8 @@ internal sealed class DeclarativeCompositionClusterTests(ClusterFixture fixture)
         var graph = await McpCallerAssertions.SdkSuccessAsync(await sdk.TraverseAsync(traversal, cancellationToken));
         await Assert.That(graph.Edges).HasSingleItem();
         await Assert.That(graph.Edges[0].Id).IsEqualTo(EdgePrefix + Message);
-        await Assert.That(graph.Edges[0].From).IsEqualTo(scenario.First);
-        await Assert.That(graph.Edges[0].To).IsEqualTo(scenario.Second);
+        await Assert.That(graph.Edges[0].From).IsEqualTo(scenario.StoredFirst);
+        await Assert.That(graph.Edges[0].To).IsEqualTo(scenario.StoredSecond);
         await SqlClusterProtocol.EqualAsync(graph, await SqlClusterProtocol.McpAsync<global::KeyLoad.GraphTraversal>(mcp,
             SqlClusterProtocol.Call(scenario.Partition, McpCallerTools.GraphTraverse, traversal), cancellationToken));
         var source = await PublicReadAssertions.MessageAsync(await sdk.InspectAsync(scenario.Inspect(Message), cancellationToken));
@@ -139,6 +139,11 @@ internal sealed class DeclarativeCompositionClusterTests(ClusterFixture fixture)
         await Assert.That(state.Derived.Metadata.State).IsEqualTo(MessageState.Ready);
         await Assert.That(state.Derived.Metadata.Attempts).IsEqualTo(RelationalSqlClusterTokens.NoResults);
         await Assert.That(state.Derived.Metadata.LeaseOwner).IsNull();
-        await Assert.That(JsonSerializer.Deserialize<QueueGraphLink>(state.Derived.PayloadJson!, JsonDefaults.Options)).IsEqualTo(link);
+        var storedLink = link with
+        {
+            From = state.Scenario.StoredFirst,
+            To = state.Scenario.StoredSecond
+        };
+        await Assert.That(JsonSerializer.Deserialize<QueueGraphLink>(state.Derived.PayloadJson!, JsonDefaults.Options)).IsEqualTo(storedLink);
     }
 }

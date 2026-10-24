@@ -31,7 +31,7 @@ internal static class QueryCursorRequestIdentityR47Seed
             new(original.Partition.TenantId, original.Partition.DatabaseId), token));
         return new(original.Identity.Secret, original.Partition,
             SqlOffsetClusterProtocol.ScalarRequest(original.Partition), changedRequest, complete,
-            Rows(), Documents(original.Partition),
+            Rows(), Documents(original),
             [resources.Items.Single(item => item.Name == SqlOffsetClusterProtocol.Left),
              resources.Items.Single(item => item.Name == SqlOffsetClusterProtocol.Right)],
             "bounded-full-scan", [original.Seed], [original.Receipt],
@@ -46,15 +46,15 @@ internal static class QueryCursorRequestIdentityR47Seed
         new("d", 1, """{"title":"fourth"}""", false, [])
     ];
 
-    private static DocumentResult[] Documents(PartitionRef partition) =>
+    private static DocumentResult[] Documents(SqlOffsetClusterState original) =>
     [
-        new(new(partition, SqlOffsetClusterProtocol.Left, "a"), 1, """{"order_id":"a","customer_id":"c1","title":"first"}""", false, []),
-        new(new(partition, SqlOffsetClusterProtocol.Left, "b"), 1, """{"order_id":"b","customer_id":"c2","title":"second"}""", false, []),
-        new(new(partition, SqlOffsetClusterProtocol.Left, "c"), 1, """{"order_id":"c","customer_id":"c3","title":"third"}""", false, []),
-        new(new(partition, SqlOffsetClusterProtocol.Left, "d"), 1, """{"order_id":"d","customer_id":"c4","title":"fourth"}""", false, []),
-        new(new(partition, SqlOffsetClusterProtocol.Right, "c1"), 1, """{"id":"c1","name":"Aye"}""", false, []),
-        new(new(partition, SqlOffsetClusterProtocol.Right, "c2"), 1, """{"id":"c2","name":"Bee"}""", false, []),
-        new(new(partition, SqlOffsetClusterProtocol.Right, "c3"), 1, """{"id":"c3","name":"See"}""", false, []),
-        new(new(partition, SqlOffsetClusterProtocol.Right, "c4"), 1, """{"id":"c4","name":"Dee"}""", false, [])
+        new(original.Stored(SqlOffsetClusterProtocol.Left, "a"), 1, """{"order_id":"a","customer_id":"c1","title":"first"}""", false, []),
+        new(original.Stored(SqlOffsetClusterProtocol.Left, "b"), 1, """{"order_id":"b","customer_id":"c2","title":"second"}""", false, []),
+        new(original.Stored(SqlOffsetClusterProtocol.Left, "c"), 1, """{"order_id":"c","customer_id":"c3","title":"third"}""", false, []),
+        new(original.Stored(SqlOffsetClusterProtocol.Left, "d"), 1, """{"order_id":"d","customer_id":"c4","title":"fourth"}""", false, []),
+        new(original.Stored(SqlOffsetClusterProtocol.Right, "c1"), 1, """{"id":"c1","name":"Aye"}""", false, []),
+        new(original.Stored(SqlOffsetClusterProtocol.Right, "c2"), 1, """{"id":"c2","name":"Bee"}""", false, []),
+        new(original.Stored(SqlOffsetClusterProtocol.Right, "c3"), 1, """{"id":"c3","name":"See"}""", false, []),
+        new(original.Stored(SqlOffsetClusterProtocol.Right, "c4"), 1, """{"id":"c4","name":"Dee"}""", false, [])
     ];
 }

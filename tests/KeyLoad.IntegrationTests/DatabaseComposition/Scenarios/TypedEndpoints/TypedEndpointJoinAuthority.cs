@@ -44,7 +44,7 @@ internal static class TypedEndpointJoinAuthority
         await Assert.That(receipt.Mutations.Length).IsEqualTo(JoinedEffects);
         await TypedEndpointJoinAssertions.ReplayAsync(callers, healthy, receipt, token);
         var models = await TypedEndpointJoinAssertions.CaptureAsync(admin, seed.Partition, token);
-        await TypedEndpointJoinAssertions.LiteralAsync(models, seed.Partition, continued: false, joined: true);
+        await TypedEndpointJoinAssertions.LiteralAsync(models, seed, continued: false, joined: true);
         var state = new TypedEndpointJoinState(repairedSeed, denied, originalProblem, healthy, receipt, emptyHealthy, emptyReceipt, models);
         await TypedEndpointJoinRefusals.RunAsync(admin, callers, state, token);
         return state;

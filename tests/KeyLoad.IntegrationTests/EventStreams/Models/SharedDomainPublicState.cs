@@ -8,6 +8,7 @@ internal sealed class SharedDomainPublicState(ImmutableArray<SharedDomainScope> 
 {
     internal ImmutableArray<SharedDomainScope> Scopes { get; } = scopes;
     internal MessagingClusterIdentity Identity { get; set; } = identity;
+    internal Dictionary<string, EntityRefLifetime> Lifetimes { get; } = new(StringComparer.Ordinal);
     internal List<(CommandRequest Command, CommitReceipt Receipt)> Originals { get; } = [];
     internal List<(CommandRequest Command, CommitReceipt Receipt)> Healthy { get; } = [];
     internal Dictionary<string, EventRecord[]> RecordedEvents { get; } = new(StringComparer.Ordinal);

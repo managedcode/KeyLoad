@@ -38,8 +38,8 @@ internal static class SqlFetchCountClusterAssertions
         var documents = new List<DocumentReadResult>();
         foreach (var row in SqlFetchCountClusterState.Rows)
         {
-            var reference = new EntityRef(PostgresClusterState.Partition, SqlFetchCountClusterProtocol.Collection, row.Id);
-            var expected = new DocumentReadResult(new(reference, SqlFetchCountClusterProtocol.SeedRevision, row.Json, false, []));
+            var reference = SqlFetchCountClusterState.Reference(row.Id);
+            var expected = new DocumentReadResult(new(state.Stored(row.Id), SqlFetchCountClusterProtocol.SeedRevision, row.Json, false, []));
             var actual = await McpCallerAssertions.SdkSuccessAsync(await root.GetAsync(reference, state.Receipt.Token, token));
             await SqlClusterProtocol.EqualAsync(expected, actual);
             documents.Add(actual);

@@ -1,6 +1,7 @@
 using KeyLoad.IntegrationTests.ClientApi;
 using KeyLoad.IntegrationTests.OrleansExecution;
 using KeyLoad.IntegrationTests.QueryExecution;
+using KeyLoad.IntegrationTests.ResourceExecution;
 
 namespace KeyLoad.IntegrationTests.GraphTraversal;
 
@@ -10,6 +11,7 @@ internal static class GraphLabelUseClusterSetup
         => RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey, async admin =>
         {
             var partition = PostgresClusterState.Partition;
+            var lifetimes = new Dictionary<string, EntityRefLifetime>(StringComparer.Ordinal);
             foreach (var name in new[] { GraphLabelUseClusterProtocol.Collection, GraphLabelUseClusterProtocol.Graph })
             {
                 var graph = name == GraphLabelUseClusterProtocol.Graph;
@@ -19,8 +21,11 @@ internal static class GraphLabelUseClusterSetup
                     FieldPolicies = graph ? [new("/label", "private", GraphLabelUseClusterProtocol.ReadGrant,
                         GraphLabelUseClusterProtocol.UseGrant)] : []
                 };
+                var creationId = Guid.NewGuid();
+                var creation = new ConfigureResourceRequest(partition.TenantId, partition.DatabaseId, resource);
                 await SqlClusterProtocol.EqualAsync(resource, await McpCallerAssertions.SdkSuccessAsync(
-                    await admin.Sdk.ConfigureResourceAsync(Guid.NewGuid(), new(partition.TenantId, partition.DatabaseId, resource), token)));
+                    await admin.Sdk.ConfigureResourceAsync(creationId, creation, token)));
+                lifetimes.Add(name, ResourceCreationLifetime.Create(creationId, creation));
             }
             var identity = await McpPersistedIdentity.CreateAsync(fixture, partition, GraphLabelUseClusterProtocol.Graph,
                 Capability.GraphRead | Capability.Query, token);
@@ -44,6 +49,6 @@ internal static class GraphLabelUseClusterSetup
             return new GraphLabelUseClusterState(identity with
             {
                 Principal = persisted
-            }, command, receipt);
+            }, command, receipt, lifetimes[GraphLabelUseClusterProtocol.Collection]);
         }, token);
 }

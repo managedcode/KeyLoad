@@ -6,9 +6,12 @@ namespace KeyLoad.IntegrationTests.Messaging;
 internal static class LocalProcessingLateR53Warm
 {
     internal static async Task<LocalProcessingLateR53State> RunAsync(ClusterFixture fixture, QueueLaneRef lane,
-        MessagingClusterIdentity identity, CancellationToken token)
+        MessagingClusterIdentity identity, EntityRefLifetime collectionLifetime, CancellationToken token)
     {
-        var state = new LocalProcessingLateR53State(lane, identity);
+        var state = new LocalProcessingLateR53State(lane, identity)
+        {
+            CollectionLifetime = collectionLifetime
+        };
         await LocalProcessingLateR53Callers.RunAsync(fixture, state, async (sdk, mcp, admin, official) =>
         {
             var seed = new CommandRequest(Guid.NewGuid(), lane.Partition,
@@ -84,7 +87,7 @@ internal static class LocalProcessingLateR53Warm
             LeaseUntil = null
         }, null, null);
         state.OutputImage = new(new(LocalProcessingLateR53Protocol.Message, MessageState.Ready, 0, 1, 2, null, null), InboxProcessingClusterProtocol.Payload, "{}");
-        state.DocumentImage = new(state.Document, 1, InboxProcessingClusterProtocol.Payload, false, []);
+        state.DocumentImage = new(state.StoredDocument, 1, InboxProcessingClusterProtocol.Payload, false, []);
         await LocalProcessingLateR53Current.OutboxAsync(state, admin, official, token);
         await LocalProcessingLateR53Current.RunAsync(state, sdk, mcp, admin, official, token);
         await InboxProcessingClusterAssertions.EqualAsync((await McpCallerAssertions.SuccessAsync<CommitReceipt>(

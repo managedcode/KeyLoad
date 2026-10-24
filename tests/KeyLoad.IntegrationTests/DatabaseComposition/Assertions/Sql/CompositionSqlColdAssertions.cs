@@ -66,8 +66,8 @@ internal static class CompositionSqlColdAssertions
         foreach (var edge in graph.Edges)
         {
             await Assert.That(expectedIds.Contains(edge.Id, StringComparer.Ordinal)).IsTrue();
-            await Assert.That(edge.From).IsEqualTo(state.Scenario.First);
-            await Assert.That(edge.To).IsEqualTo(state.Scenario.Second);
+            await Assert.That(edge.From).IsEqualTo(state.Scenario.StoredFirst);
+            await Assert.That(edge.To).IsEqualTo(state.Scenario.StoredSecond);
             await Assert.That(edge.Label).IsEqualTo(RelationalSqlClusterTokens.EdgeLabel);
         }
     }

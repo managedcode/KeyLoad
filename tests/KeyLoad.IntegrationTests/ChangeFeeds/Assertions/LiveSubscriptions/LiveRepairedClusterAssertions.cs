@@ -18,7 +18,7 @@ internal static class LiveRepairedClusterAssertions
         var page = await McpCallerAssertions.SdkSuccessAsync(await reader.Sdk.ReadLiveQueryAsync(request, token));
         await LiveQueryCutClusterAssertions.BoundsAsync(before, page.CutPosition, await observeCut());
         await SqlClusterProtocol.EqualAsync(new[] { new LiveQueryChange(FeedLiveClusterProtocol.RepairedSequence,
-            receipt.Token, LiveQueryChangeKind.Upsert, scenario.Reference,
+            receipt.Token, LiveQueryChangeKind.Upsert, scenario.StoredReference,
             FeedLiveClusterProtocol.RepairedRevision, Row) }, page.Changes.ToArray());
         await Assert.That(page.ThroughSequence).IsEqualTo(FeedLiveClusterProtocol.RepairedSequence);
         await Assert.That(page.HasMore).IsFalse();

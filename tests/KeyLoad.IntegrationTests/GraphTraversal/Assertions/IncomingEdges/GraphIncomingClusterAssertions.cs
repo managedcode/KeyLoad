@@ -19,13 +19,14 @@ internal static class GraphIncomingClusterAssertions
         await Assert.That(page.Projection).IsEqualTo(Projection);
         await Assert.That(page.Rows.Length).IsEqualTo(3);
         await Assert.That(page.Rows.Select(row => row.Edge.From).SequenceEqual(
-            [seed.FirstSource, seed.SecondSource, seed.LocalSource])).IsTrue();
+            [seed.Stored(seed.FirstSource), seed.Stored(seed.SecondSource), seed.Stored(seed.LocalSource)])).IsTrue();
         var rows = page.Rows.ToArray();
-        await AssertRowAsync(rows[0], seed.FirstSource, seed.Target, CrossEdgeId, 1, 1,
+        var target = seed.Stored(seed.Target);
+        await AssertRowAsync(rows[0], seed.Stored(seed.FirstSource), target, CrossEdgeId, 1, 1,
             GraphIncomingClusterScenario.PublicMarker + "-first");
-        await AssertRowAsync(rows[1], seed.SecondSource, seed.Target, CrossEdgeId, 1, 1,
+        await AssertRowAsync(rows[1], seed.Stored(seed.SecondSource), target, CrossEdgeId, 1, 1,
             GraphIncomingClusterScenario.PublicMarker + "-second");
-        await AssertRowAsync(rows[2], seed.LocalSource, seed.Target, LocalEdgeId, 1, 0,
+        await AssertRowAsync(rows[2], seed.Stored(seed.LocalSource), target, LocalEdgeId, 1, 0,
             GraphIncomingClusterScenario.PublicMarker + "-local");
     }
 
@@ -47,7 +48,7 @@ internal static class GraphIncomingClusterAssertions
     {
         await Assert.That(page.Projection).IsEqualTo(Projection);
         await Assert.That(page.Rows.Length).IsEqualTo(1);
-        await AssertRowAsync(page.Rows[0], seed.LocalSource, seed.Target, LocalEdgeId, 1, 0,
+        await AssertRowAsync(page.Rows[0], seed.Stored(seed.LocalSource), seed.Stored(seed.Target), LocalEdgeId, 1, 0,
             GraphIncomingClusterScenario.PublicMarker + "-local");
     }
 

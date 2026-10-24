@@ -1,6 +1,7 @@
 using KeyLoad.IntegrationTests.ClientApi;
 using KeyLoad.IntegrationTests.OrleansExecution;
 using KeyLoad.IntegrationTests.QueryExecution;
+using KeyLoad.IntegrationTests.ResourceExecution;
 
 namespace KeyLoad.IntegrationTests.Search;
 
@@ -17,8 +18,10 @@ internal static class EventProjectionLineageR41Seed
     new(EventProjectionLineageR41Protocol.Vector, EventProjectionLineageR41Protocol.Class,
      RawUseGrant: EventProjectionLineageR41Protocol.VectorUse, WriteGrant: EventProjectionLineageR41Protocol.VectorWrite)]
         };
+        var creationId = Guid.NewGuid();
+        var creation = new ConfigureResourceRequest(p.TenantId, p.DatabaseId, resource);
         await SqlClusterProtocol.EqualAsync(resource, await McpCallerAssertions.SdkSuccessAsync(await admin.Sdk.ConfigureResourceAsync(
-         Guid.NewGuid(), new(p.TenantId, p.DatabaseId, resource), token)));
+         creationId, creation, token)));
         var events = new ResourceDefinition(EventProjectionLineageR41Protocol.Events, ResourceKind.StreamSet, p.TransactionDomainId);
         await SqlClusterProtocol.EqualAsync(events, await McpCallerAssertions.SdkSuccessAsync(await admin.Sdk.ConfigureResourceAsync(
          Guid.NewGuid(), new(p.TenantId, p.DatabaseId, events), token)));
@@ -34,7 +37,10 @@ internal static class EventProjectionLineageR41Seed
         {
             PolicyEpoch = 1L
         }, token);
-        var state = new EventProjectionLineageR41State(p, worker, reader);
+        var state = new EventProjectionLineageR41State(p, worker, reader)
+        {
+            Lifetime = ResourceCreationLifetime.Create(creationId, creation)
+        };
         var seed = Seed(p);
         var receipt = await McpCallerAssertions.SdkSuccessAsync(await admin.Sdk.CommitAsync(seed, token));
         await EventProjectionLineageR41Operations.ReceiptAsync(state, seed, receipt,

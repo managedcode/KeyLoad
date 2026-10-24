@@ -19,7 +19,7 @@ internal static class SqlParserAdmissionClusterCurrent
         foreach (var input in state.Original.Seed.Mutations.Cast<PutDocument>())
         {
             var reference = new EntityRef(state.Partition, input.Collection, input.Id);
-            var expected = new DocumentReadResult(new(reference, 1L, input.Json, false, []));
+            var expected = new DocumentReadResult(new(state.Original.Stored(input.Collection, input.Id), 1L, input.Json, false, []));
             await ServerFailureObserver.ObserveAsync(async () =>
                 await SqlClusterProtocol.EqualAsync(expected, await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.GetAsync(reference, token))), failures);
             await ServerFailureObserver.ObserveAsync(async () =>
@@ -28,10 +28,10 @@ internal static class SqlParserAdmissionClusterCurrent
         }
         var typed = new EntityRef(state.Partition, SqlParserAdmissionClusterState.Table, "typed-row");
         await ServerFailureObserver.ObserveAsync(async () =>
-            await SqlClusterProtocol.EqualAsync(new DocumentReadResult(new(typed, 1L, SqlParserAdmissionClusterState.TypedJson, false, [])),
+            await SqlClusterProtocol.EqualAsync(new DocumentReadResult(new(state.StoredTyped(typed.Id), 1L, SqlParserAdmissionClusterState.TypedJson, false, [])),
                 await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.GetAsync(typed, token))), failures);
         await ServerFailureObserver.ObserveAsync(async () =>
-            await SqlClusterProtocol.EqualAsync(new DocumentReadResult(new(typed, 1L, SqlParserAdmissionClusterState.TypedJson, false, [])),
+            await SqlClusterProtocol.EqualAsync(new DocumentReadResult(new(state.StoredTyped(typed.Id), 1L, SqlParserAdmissionClusterState.TypedJson, false, [])),
                 (await McpCallerAssertions.SuccessAsync<DocumentReadResult>(await root.Mcp.CallAsync(McpCallerTools.DocumentsGet, new GetDocumentRequest(typed), token))).Value), failures);
         await ServerFailureObserver.ObserveAsync(async () =>
         {

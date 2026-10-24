@@ -1,5 +1,6 @@
 using KeyLoad.Client;
 using KeyLoad.IntegrationTests.ClientApi;
+using KeyLoad.IntegrationTests.ResourceExecution;
 
 namespace KeyLoad.IntegrationTests.Messaging;
 
@@ -19,12 +20,13 @@ internal static class QueueProducerClusterSetup
             {
                 QueuePolicy = new() { MaxStoredMessages = QueueProducerClusterProtocol.StoredMessageCapacity }
             }), token));
-        await McpCallerAssertions.SdkSuccessAsync(await root.ConfigureResourceAsync(Guid.NewGuid(),
-            new(tenant, partition.DatabaseId, new ResourceDefinition(QueueProducerClusterProtocol.Collection,
-                ResourceKind.Collection, partition.TransactionDomainId)
-            {
-                Indexes = [new(AtomicProducerClusterIndex.Name, [AtomicProducerClusterIndex.Field], true)]
-            }), token));
+        var collectionId = Guid.NewGuid();
+        var collection = new ConfigureResourceRequest(tenant, partition.DatabaseId, new ResourceDefinition(QueueProducerClusterProtocol.Collection,
+            ResourceKind.Collection, partition.TransactionDomainId)
+        {
+            Indexes = [new(AtomicProducerClusterIndex.Name, [AtomicProducerClusterIndex.Field], true)]
+        });
+        await McpCallerAssertions.SdkSuccessAsync(await root.ConfigureResourceAsync(collectionId, collection, token));
         foreach (var resource in new[]
         { new ResourceDefinition(QueueProducerClusterProtocol.StreamSet, ResourceKind.StreamSet, partition.TransactionDomainId),
           new ResourceDefinition(QueueProducerClusterProtocol.ForeignStreamSet, ResourceKind.StreamSet, QueueProducerClusterProtocol.ForeignDomain) })
@@ -43,7 +45,7 @@ internal static class QueueProducerClusterSetup
              Event(QueueProducerClusterProtocol.Original, QueueProducerClusterProtocol.Payload),
              new EnqueueMessage(lane.Queue, QueueProducerClusterProtocol.Original, QueueProducerClusterProtocol.Payload, QueueProducerClusterProtocol.Headers),
              new EnqueueMessage(lane.Queue, QueueProducerClusterProtocol.Scheduled, QueueProducerClusterProtocol.Payload, QueueProducerClusterProtocol.Headers, NotBefore: due)]);
-        return new(lane, identity, original, due);
+        return new(lane, identity, original, due, ResourceCreationLifetime.Create(collectionId, collection));
     }
     internal static CommandRequest Fresh(QueueProducerClusterSeed seed, string document, string message)
         => new(Guid.NewGuid(), seed.Lane.Partition,

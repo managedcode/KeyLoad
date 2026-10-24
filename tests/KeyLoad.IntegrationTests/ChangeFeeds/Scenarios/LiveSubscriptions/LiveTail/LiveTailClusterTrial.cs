@@ -32,7 +32,7 @@ internal static class LiveTailClusterTrial
         var deleted = await McpCallerAssertions.SdkSuccessAsync(await reader.Sdk.ReadLiveQueryAsync(deletedRequest, token));
         await LiveQueryCutClusterAssertions.BoundsAsync(deletionBefore, deleted.CutPosition, await deletedCut());
         await SqlClusterProtocol.EqualAsync(new[] { new LiveQueryChange(FeedLiveClusterProtocol.DeletedSequence,
-            deletion.Token, LiveQueryChangeKind.Remove, scenario.Reference, FeedLiveClusterProtocol.DeletedRevision, null) }, deleted.Changes.ToArray());
+            deletion.Token, LiveQueryChangeKind.Remove, scenario.StoredReference, FeedLiveClusterProtocol.DeletedRevision, null) }, deleted.Changes.ToArray());
         await Assert.That(deleted.ThroughSequence).IsEqualTo(FeedLiveClusterProtocol.DeletedSequence);
         await Assert.That(deleted.HasMore).IsFalse();
         await LiveTailUnrelatedCommitClusterControl.RequireAsync(administrator, reader, scenario, deletion, token);

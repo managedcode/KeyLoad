@@ -1,13 +1,14 @@
 using System.Collections.Immutable;
 using KeyLoad.Client;
 using KeyLoad.IntegrationTests.ClientApi;
+using KeyLoad.IntegrationTests.ResourceExecution;
 using KeyLoad.Query;
 
 namespace KeyLoad.IntegrationTests.Authorization;
 
 /// <summary>Owns the actual persisted Orleans partition, scoped reader and public update calls.</summary>
 internal sealed record ResourcePolicyUpdateClusterScenario(PartitionRef Partition, EntityRef Reference,
-    ResourceDefinition InitialDefinition, McpPersistedIdentity Reader, long DocumentRevision)
+    ResourceDefinition InitialDefinition, McpPersistedIdentity Reader, long DocumentRevision, EntityRefLifetime Lifetime)
 {
     private const string TenantPrefix = "resource-policy-cluster-tenant-";
     private const string DatabaseId = "resource-policy-cluster-database";
@@ -22,8 +23,10 @@ internal sealed record ResourcePolicyUpdateClusterScenario(PartitionRef Partitio
             ResourcePolicyUpdateClusterProtocol.InitialUseGrant);
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
         var admin = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
-        var persistedDefinition = await McpCallerAssertions.SdkSuccessAsync(await admin.ConfigureResourceAsync(Guid.NewGuid(),
-            new(partition.TenantId, partition.DatabaseId, definition), cancellationToken));
+        var creationId = Guid.NewGuid();
+        var creation = new ConfigureResourceRequest(partition.TenantId, partition.DatabaseId, definition);
+        var persistedDefinition = await McpCallerAssertions.SdkSuccessAsync(await admin.ConfigureResourceAsync(creationId,
+            creation, cancellationToken));
         await McpCallerAssertions.SdkSuccessAsync(await admin.CommitAsync(Seed(partition), cancellationToken));
         var identity = await McpPersistedIdentity.CreateAsync(fixture, partition,
             ResourcePolicyUpdateClusterProtocol.Collection,
@@ -33,8 +36,12 @@ internal sealed record ResourcePolicyUpdateClusterScenario(PartitionRef Partitio
         var reference = new EntityRef(partition, ResourcePolicyUpdateClusterProtocol.Collection,
             ResourcePolicyUpdateClusterProtocol.DocumentId);
         var document = await PublicReadAssertions.DocumentAsync(await admin.GetAsync(reference, cancellationToken));
-        return new(partition, reference, persistedDefinition, reader, document!.Revision);
+        return new(partition, reference, persistedDefinition, reader, document!.Revision,
+            ResourceCreationLifetime.Create(creationId, creation));
     }
+
+    internal EntityRef StoredReference(string id)
+        => new(Partition, ResourcePolicyUpdateClusterProtocol.Collection, id) { Lifetime = Lifetime };
 
     internal static async Task<McpPersistedIdentity> ReplaceReaderGrantsAsync(KeyLoadClient administrator,
         McpPersistedIdentity identity, ImmutableArray<string> grants, CancellationToken cancellationToken)

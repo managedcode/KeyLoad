@@ -28,7 +28,7 @@ internal sealed class EventProjectionClusterTests(ClusterFixture fixture)
         await EventProjectionClusterAssertions.AssertReceiptAsync(first, scenario);
         await VerifyOfficialReplayAsync(workerMcp, scenario, first, deadline.Token);
         await EventProjectionClusterAssertions.VerifyVectorBothAsync(clients.Readers[1], readerMcp,
-            scenario.VectorSearch(), scenario.ReaderSecret, InitialResults(), deadline.Token);
+            scenario, scenario.ReaderSecret, InitialResults(), deadline.Token);
         await VerifyChangedOutputAsync(clients, workerMcp, readerMcp, scenario, deadline.Token);
         await McpCallerAssertions.SdkSuccessAsync(await clients.Administrators[0].CommitAsync(
             scenario.ChangeSourceCommand(), deadline.Token));
@@ -71,7 +71,7 @@ internal sealed class EventProjectionClusterTests(ClusterFixture fixture)
                         restricted.Secret, cancellationToken);
                     await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
                     {
-                        await EventProjectionClusterAssertions.VerifyVectorBothAsync(caller, mcp, scenario.VectorSearch(),
+                        await EventProjectionClusterAssertions.VerifyVectorBothAsync(caller, mcp, scenario,
                             restricted.Secret, BaselineOnly(), cancellationToken);
                         result = (original, restricted);
                     }, failures);
@@ -127,7 +127,7 @@ internal sealed class EventProjectionClusterTests(ClusterFixture fixture)
         await McpCallerAssertions.DoesNotDiscloseAsync(response, scenario.WorkerSecret,
             EventProjectionClusterScenario.Secret);
         await EventProjectionClusterAssertions.VerifyVectorBothAsync(clients.Readers[1], readerMcp,
-            scenario.VectorSearch(), scenario.ReaderSecret, InitialResults(), cancellationToken);
+            scenario, scenario.ReaderSecret, InitialResults(), cancellationToken);
     }
 
     private static async Task VerifyStaleSourceAsync(KeyLoadClient worker, KeyLoadClient reader,
@@ -144,7 +144,7 @@ internal sealed class EventProjectionClusterTests(ClusterFixture fixture)
         await McpCallerAssertions.ErrorAsync(await workerMcp.CallAsync(McpCallerTools.DocumentsCommit,
             stale, cancellationToken), ErrorCode.RevisionConflict, dispatched: true);
         await EventProjectionClusterAssertions.VerifyVectorBothAsync(reader, readerMcp,
-            scenario.VectorSearch(), scenario.ReaderSecret, BaselineOnly(), cancellationToken);
+            scenario, scenario.ReaderSecret, BaselineOnly(), cancellationToken);
     }
 
     private static async Task VerifyReclassifiedSourceAsync(KeyLoadClient worker, KeyLoadClient reader,
@@ -156,7 +156,7 @@ internal sealed class EventProjectionClusterTests(ClusterFixture fixture)
         await McpCallerAssertions.ErrorAsync(await workerMcp.CallAsync(McpCallerTools.DocumentsCommit,
             scenario.ApplyCommand(), cancellationToken), ErrorCode.PermissionDenied, dispatched: true);
         await EventProjectionClusterAssertions.VerifyVectorBothAsync(reader, readerMcp,
-            scenario.VectorSearch(), scenario.ReaderSecret, BaselineOnly(), cancellationToken);
+            scenario, scenario.ReaderSecret, BaselineOnly(), cancellationToken);
     }
 
     private static (string Id, double Score)[] InitialResults() =>

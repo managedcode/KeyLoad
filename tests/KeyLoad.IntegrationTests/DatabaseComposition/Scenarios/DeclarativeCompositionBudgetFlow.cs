@@ -60,8 +60,8 @@ internal static class DeclarativeCompositionBudgetFlow
         await Assert.That(graph.Edges.Select(edge => edge.Id).SequenceEqual(new[] { Prefix + First, Prefix + Second })).IsTrue();
         foreach (var edge in graph.Edges)
         {
-            await Assert.That(edge.From).IsEqualTo(link.From);
-            await Assert.That(edge.To).IsEqualTo(link.To);
+            await Assert.That(edge.From).IsEqualTo(scenario.StoredFirst);
+            await Assert.That(edge.To).IsEqualTo(scenario.StoredSecond);
             await Assert.That(edge.Label).IsEqualTo(link.Label);
             await Assert.That(edge.AttributesJson).IsEqualTo(link.AttributesJson);
             await Assert.That(edge.Revision).IsEqualTo(InitialRevision);

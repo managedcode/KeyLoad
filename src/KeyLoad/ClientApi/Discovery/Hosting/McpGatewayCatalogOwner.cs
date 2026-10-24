@@ -86,6 +86,11 @@ internal sealed class McpGatewayCatalogOwner : IAsyncDisposable
         var result = await lease.Instance.Gateway.InvokeAsync(
             new McpGatewayInvokeRequest(ToolId: toolId, Arguments: arguments), cancellationToken);
         cancellationToken.ThrowIfCancellationRequested();
+        if (result.Outcome == McpGatewayInvocationOutcome.InvalidArguments)
+        {
+            // The gateway refused the arguments against the tool's closed input schema before any execution.
+            throw Errors.Fail(ErrorCode.Validation, McpCatalogProtocol.InvalidArguments);
+        }
         if (!result.IsSuccess || result.McpResult is null)
         {
             throw Errors.Fail(ErrorCode.RecoveryRequired, InvocationFailure);

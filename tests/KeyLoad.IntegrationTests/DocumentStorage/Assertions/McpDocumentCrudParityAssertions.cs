@@ -48,8 +48,8 @@ internal static class McpDocumentCrudParityAssertions
         await Assert.That(mcpValue.Revision).IsEqualTo(expectedRevision.Value);
         await Assert.That(sdkValue.Json).IsEqualTo(expectedJson);
         await Assert.That(mcpValue.Json).IsEqualTo(expectedJson);
-        await Assert.That(sdkValue.Reference).IsEqualTo(scenario.Reference);
-        await Assert.That(mcpValue.Reference).IsEqualTo(scenario.Reference);
+        await Assert.That(sdkValue.Reference).IsEqualTo(scenario.StoredReference);
+        await Assert.That(mcpValue.Reference).IsEqualTo(scenario.StoredReference);
         await Assert.That(JsonDefaults.Serialize(sdkValue).AsSpan()
             .SequenceEqual(JsonDefaults.Serialize(mcpValue))).IsTrue();
     }

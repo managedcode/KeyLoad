@@ -87,8 +87,8 @@ internal static class TypedEndpointJoinReverseAssertions
             await Assert.That(official).IsNull();
             return;
         }
-        var link = new QueueGraphLink(TypedEndpointJoinProtocol.From(state.Seed.Partition),
-            TypedEndpointJoinProtocol.To(state.Seed.Partition), TypedEndpointJoinProtocol.Label, TypedEndpointJoinProtocol.Attributes);
+        var link = new QueueGraphLink(state.Seed.StoredFrom(TypedEndpointJoinProtocol.First),
+            state.Seed.StoredTo(TypedEndpointJoinProtocol.Second), TypedEndpointJoinProtocol.Label, TypedEndpointJoinProtocol.Attributes);
         var expected = new MessageInspection(new MessageMetadata(id, MessageState.Ready, NoAttempts,
             InitialVersion, sequence, null, null),
             DatabaseCompositionClusterPayload.Golden(link), TypedEndpointJoinProtocol.Attributes);

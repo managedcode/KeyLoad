@@ -12,9 +12,10 @@ internal static class SqlNullOrderingClusterSetup
             var partition = PostgresClusterState.Partition;
             var resource = new ResourceDefinition(SqlNullOrderingClusterProtocol.Collection, ResourceKind.Collection,
                 partition.TransactionDomainId);
+            var creationId = Guid.NewGuid();
+            var creation = new ConfigureResourceRequest(partition.TenantId, partition.DatabaseId, resource);
             var actual = await SqlClusterProtocol.SdkAsync<ResourceDefinition>(root.Sdk,
-                SqlClusterProtocol.Call(partition, McpCallerTools.ResourcesConfigure,
-                    new ConfigureResourceRequest(partition.TenantId, partition.DatabaseId, resource), Guid.NewGuid()), token);
+                SqlClusterProtocol.Call(partition, McpCallerTools.ResourcesConfigure, creation, creationId), token);
             await SqlClusterProtocol.EqualAsync(resource, actual);
             var writer = await PostgresClusterSeed.IdentityAsync(root.Sdk, SqlNullOrderingClusterProtocol.WriterMarker,
                 Capability.DocumentsRead | Capability.DocumentsWrite | Capability.Query, token, resource.Name);
@@ -29,7 +30,8 @@ internal static class SqlNullOrderingClusterSetup
                 await SqlNullOrderingClusterAssertions.ReceiptAsync(seed, committed);
                 return committed;
             }, token);
-            return new SqlNullOrderingClusterState(writer, reader, seed, receipt);
+            return new SqlNullOrderingClusterState(writer, reader, seed, receipt,
+                global::KeyLoad.IntegrationTests.ResourceExecution.ResourceCreationLifetime.Create(creationId, creation));
         }, token);
     }
 }

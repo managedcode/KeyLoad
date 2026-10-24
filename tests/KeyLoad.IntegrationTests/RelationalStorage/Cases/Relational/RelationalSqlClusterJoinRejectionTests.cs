@@ -36,7 +36,7 @@ internal sealed class RelationalSqlClusterJoinRejectionTests(ClusterFixture fixt
         var scenario = seed.Scenario;
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node2,
             fixture.AdminKey, deadline.Token);
-        var rows = await RelationalSqlClusterJoinRejectionFlow.ReadRowsAsync(sdk, scenario, deadline.Token);
+        var rows = await RelationalSqlClusterJoinRejectionFlow.ReadRowsAsync(sdk, scenario, seed.RightLifetime, deadline.Token);
         var healthy = await RelationalSqlClusterJoinRejectionFlow.ReadHealthyAsync(sdk, mcp, scenario.Partition, deadline.Token);
         await Assert.That(healthy.CutPosition).IsGreaterThanOrEqualTo(seed.Position);
         var query = new QueryRequest(scenario.Partition, text, AllowFullScan: true, QueryDialectVersion: dialect);
@@ -55,7 +55,7 @@ internal sealed class RelationalSqlClusterJoinRejectionTests(ClusterFixture fixt
         await McpCallerAssertions.ErrorAsync(officialSql, code, dispatched: true);
         await McpCallerAssertions.DoesNotDiscloseAsync(officialQuery, fixture.AdminKey, RelationalSqlClusterJoinRejectionFlow.PrivateName);
         await McpCallerAssertions.DoesNotDiscloseAsync(officialSql, fixture.AdminKey, RelationalSqlClusterJoinRejectionFlow.PrivateName);
-        await RelationalSqlClusterJoinRejectionFlow.VerifyRowsAsync(sdk, scenario, rows, deadline.Token);
+        await RelationalSqlClusterJoinRejectionFlow.VerifyRowsAsync(sdk, scenario, seed.RightLifetime, rows, deadline.Token);
         var after = await RelationalSqlClusterJoinRejectionFlow.ReadHealthyAsync(sdk, mcp, scenario.Partition, deadline.Token);
         await RelationalSqlClusterJoinPageAssertions.SameRowsAsync(healthy, after);
     }

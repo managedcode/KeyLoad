@@ -1,6 +1,7 @@
 using KeyLoad.Client;
 using KeyLoad.IntegrationTests.ClientApi;
 using KeyLoad.IntegrationTests.QueryExecution;
+using KeyLoad.IntegrationTests.ResourceExecution;
 using TUnit.Assertions.Enums;
 
 namespace KeyLoad.IntegrationTests.Search;
@@ -43,27 +44,29 @@ internal static class ConfiguredVectorProfileClusterFlow
         {
             VectorProfiles = [new(Field, Space)]
         };
+        var creationId = Guid.NewGuid();
+        var creation = new ConfigureResourceRequest(partition.TenantId, partition.DatabaseId, definition);
         var configured = await SqlClusterProtocol.SdkAsync<ResourceDefinition>(sdk, SqlClusterProtocol.Call(partition,
-            McpCallerTools.ResourcesConfigure, new ConfigureResourceRequest(partition.TenantId, partition.DatabaseId, definition),
-            Guid.NewGuid()), token);
+            McpCallerTools.ResourcesConfigure, creation, creationId), token);
+        var lifetime = ResourceCreationLifetime.Create(creationId, creation);
         await Assert.That(OrleansSerialization.Serialize(configured).SequenceEqual(OrleansSerialization.Serialize(definition))).IsTrue();
         var seed = new CommandRequest(Guid.NewGuid(), partition, [new PutDocument(Collection, Target, OriginalJson),
             new PutDocument(Collection, Rival, OriginalJson), new PutVector(Collection, Target, Field, [1, 0], Space, InitialRevision),
             new PutVector(Collection, Rival, Field, [0.5f, 0.5f], Space, InitialRevision)]);
         await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(seed, token));
-        await VerifyAsync(sdk, mcp, partition, changed: false, token);
+        await VerifyAsync(sdk, mcp, partition, lifetime, changed: false, token);
         var wrong = Command(partition, Space with
         {
             Model = WrongModel
         });
         await RejectAsync(sdk, mcp, path, wrong, token);
         await RejectAsync(sdk, mcp, path, wrong, token);
-        await VerifyAsync(sdk, mcp, partition, changed: false, token);
+        await VerifyAsync(sdk, mcp, partition, lifetime, changed: false, token);
         var healthy = Command(partition, Space);
         var receipt = await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(healthy, token));
         var replay = await McpCallerAssertions.SuccessAsync<CommitReceipt>(await mcp.CallAsync(McpCallerTools.DocumentsCommit, healthy, token));
         await Assert.That(OrleansSerialization.Serialize(replay.Value).SequenceEqual(OrleansSerialization.Serialize(receipt))).IsTrue();
-        await VerifyAsync(sdk, mcp, partition, changed: true, token);
+        await VerifyAsync(sdk, mcp, partition, lifetime, changed: true, token);
     }
     private static CommandRequest Command(PartitionRef partition, VectorSpace space)
         => new(Guid.NewGuid(), partition, [new PutDocument(Collection, Target, UpdatedJson, InitialRevision),
@@ -107,8 +110,8 @@ internal static class ConfiguredVectorProfileClusterFlow
         }
         throw new InvalidOperationException("The configured-profile public path is undefined.");
     }
-    private static async Task VerifyAsync(KeyLoadClient sdk, McpOfficialClient mcp, PartitionRef partition, bool changed,
-        CancellationToken token)
+    private static async Task VerifyAsync(KeyLoadClient sdk, McpOfficialClient mcp, PartitionRef partition,
+        EntityRefLifetime lifetime, bool changed, CancellationToken token)
     {
         var request = new SearchRequest(partition, Collection, VectorField: Field, Vector: [1, 0], Space: Space);
         var rows = await McpCallerAssertions.SdkSuccessAsync(await sdk.SearchAsync(request, token));
@@ -120,7 +123,7 @@ internal static class ConfiguredVectorProfileClusterFlow
         foreach (var row in rows)
         {
             var updated = changed && row.Document.Reference.Id == Target;
-            var expected = new DocumentResult(new(partition, Collection, row.Document.Reference.Id),
+            var expected = new DocumentResult(new(partition, Collection, row.Document.Reference.Id) { Lifetime = lifetime },
                 updated ? UpdatedRevision : InitialRevision, updated ? UpdatedJson : OriginalJson, false, []);
             await Assert.That(OrleansSerialization.Serialize(row.Document).SequenceEqual(OrleansSerialization.Serialize(expected))).IsTrue();
         }

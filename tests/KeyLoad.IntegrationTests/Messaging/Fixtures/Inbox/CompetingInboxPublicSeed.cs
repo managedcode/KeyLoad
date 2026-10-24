@@ -1,5 +1,6 @@
 using KeyLoad.IntegrationTests.ClientApi;
 using KeyLoad.IntegrationTests.OrleansExecution;
+using KeyLoad.IntegrationTests.ResourceExecution;
 namespace KeyLoad.IntegrationTests.Messaging;
 
 internal static class CompetingInboxPublicSeed
@@ -19,8 +20,14 @@ internal static class CompetingInboxPublicSeed
                 FieldPolicies = name == CompetingInboxPublicProtocol.Input ? [Required()] : [],
                 HeaderPolicies = name == CompetingInboxPublicProtocol.Input ? [Required()] : []
             };
+            var creationId = Guid.NewGuid();
+            var creation = new ConfigureResourceRequest(state.Partition.TenantId, state.Partition.DatabaseId, resource);
             await CompetingInboxPublicValues.EqualAsync(resource, await McpCallerAssertions.SdkSuccessAsync(
-                await root.Sdk.ConfigureResourceAsync(Guid.NewGuid(), new(state.Partition.TenantId, state.Partition.DatabaseId, resource), token)));
+                await root.Sdk.ConfigureResourceAsync(creationId, creation, token)));
+            if (kind == ResourceKind.Collection)
+            {
+                state.DocumentsLifetime = ResourceCreationLifetime.Create(creationId, creation);
+            }
         }
         state.Identity = await MessagingClusterIdentity.CreateAsync(state.Fixture, state.Partition.TenantId,
             [new(state.Partition.DatabaseId, CompetingInboxPublicProtocol.Input, Capability.QueueConsume | Capability.QueueAck | Capability.QueueInspect),

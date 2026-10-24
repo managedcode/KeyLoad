@@ -1,6 +1,7 @@
 using KeyLoad.IntegrationTests.ClientApi;
 using KeyLoad.IntegrationTests.OrleansExecution;
 using KeyLoad.IntegrationTests.QueryExecution;
+using KeyLoad.IntegrationTests.ResourceExecution;
 using static KeyLoad.IntegrationTests.StorageReplication.StrongReadSessionProtocol;
 
 namespace KeyLoad.IntegrationTests.StorageReplication;
@@ -13,8 +14,10 @@ internal static class StrongReadSessionSetup
         var partition = new PartitionRef(TenantPrefix + Guid.NewGuid().ToString(McpCallerProtocol.GuidFormat),
             Database, Domain, Guid.NewGuid().ToString(McpCallerProtocol.GuidFormat));
         var definition = new ResourceDefinition(Collection, ResourceKind.Collection, Domain);
+        var creationId = Guid.NewGuid();
+        var creation = new ConfigureResourceRequest(partition.TenantId, Database, definition);
         await SqlClusterProtocol.EqualAsync(definition, await McpCallerAssertions.SdkSuccessAsync(
-            await root.Sdk.ConfigureResourceAsync(Guid.NewGuid(), new(partition.TenantId, Database, definition), token)));
+            await root.Sdk.ConfigureResourceAsync(creationId, creation, token)));
         var command = new CommandRequest(Guid.NewGuid(), partition, [new PutDocument(Collection, SentinelId, SentinelJson)]);
         var receipt = await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.CommitAsync(command, token));
         await Assert.That(receipt.Token.Position).IsGreaterThan(InvalidCut);
@@ -24,7 +27,8 @@ internal static class StrongReadSessionSetup
             [new(PutKind, Collection, SentinelId, CreatedRevision)], DurabilityProfile.ProcessDurable, 3), receipt);
         var outbox = await QueryCursorRequestIdentityR47Current.OutboxAsync(root, partition, token);
         var identity = await McpPersistedIdentity.CreateAsync(fixture, partition, Collection, Capability.DocumentsRead, token);
-        var state = new StrongReadSessionState(partition, identity, [new(command, receipt)], outbox, null);
+        var state = new StrongReadSessionState(partition, identity, [new(command, receipt)], outbox, null,
+            ResourceCreationLifetime.Create(creationId, creation));
         await StrongReadSessionCurrent.CheckAsync(root, state, token);
         return state;
     }

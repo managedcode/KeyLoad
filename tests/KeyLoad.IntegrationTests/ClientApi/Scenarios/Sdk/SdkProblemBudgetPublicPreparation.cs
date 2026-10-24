@@ -1,6 +1,7 @@
 using KeyLoad.IntegrationTests.DocumentStorage;
 using KeyLoad.IntegrationTests.OrleansExecution;
 using KeyLoad.IntegrationTests.QueryExecution;
+using KeyLoad.IntegrationTests.ResourceExecution;
 
 namespace KeyLoad.IntegrationTests.ClientApi;
 
@@ -19,9 +20,10 @@ internal static class SdkProblemBudgetPublicPreparation
         var scenario = await McpDocumentScenario.CreateAsync(fixture, token);
         var resource = new ResourceDefinition(DeniedCollection, ResourceKind.Collection,
             scenario.Partition.TransactionDomainId);
+        var creationId = Guid.NewGuid();
+        var creation = new ConfigureResourceRequest(scenario.Partition.TenantId, scenario.Partition.DatabaseId, resource);
         await SqlClusterProtocol.EqualAsync(resource, await McpCallerAssertions.SdkSuccessAsync(
-            await administrator.Sdk.ConfigureResourceAsync(Guid.NewGuid(), new(scenario.Partition.TenantId,
-                scenario.Partition.DatabaseId, resource), token)));
+            await administrator.Sdk.ConfigureResourceAsync(creationId, creation, token)));
         var identity = await McpPersistedIdentity.CreateAsync(fixture, scenario.Partition,
             Capability.DocumentsRead | Capability.DocumentsWrite, token);
         var seed = new CommandRequest(Guid.NewGuid(), scenario.Partition,
@@ -35,7 +37,8 @@ internal static class SdkProblemBudgetPublicPreparation
             [new PutDocument(McpDocumentProtocol.Collection, Entity, HealthyJson, 1L)]);
         var outbox = await McpCallerAssertions.SdkSuccessAsync(await administrator.Sdk.OutboxStatusAsync(scenario.Partition, token));
         var status = await McpCallerAssertions.SdkSuccessAsync(await administrator.Sdk.StatusAsync(token));
-        var state = new SdkProblemBudgetPublicState(identity, seed, receipt, denied, healthy, outbox, status);
+        var state = new SdkProblemBudgetPublicState(identity, seed, receipt, denied, healthy, outbox, status,
+            scenario.Lifetime, ResourceCreationLifetime.Create(creationId, creation));
         await SdkProblemBudgetPublicAssertions.CurrentAsync(administrator, state, token);
         return state;
     }

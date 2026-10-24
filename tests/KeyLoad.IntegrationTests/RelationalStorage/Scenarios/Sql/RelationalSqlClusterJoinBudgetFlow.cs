@@ -41,12 +41,12 @@ internal static class RelationalSqlClusterJoinBudgetFlow
         var sdk = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         var rejected = await PrepareAsync(sdk, kind, false, deadline.Token);
         var healthy = await PrepareAsync(sdk, kind, true, deadline.Token);
-        var before = await SnapshotAsync(sdk, rejected.Sources, deadline.Token);
+        var before = await SnapshotAsync(sdk, rejected, deadline.Token);
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, NodeForMcp,
             fixture.AdminKey, deadline.Token);
 
         await RejectBothCallersAsync(sdk, mcp, rejected.Partition, deadline.Token);
-        var after = await SnapshotAsync(sdk, rejected.Sources, deadline.Token);
+        var after = await SnapshotAsync(sdk, rejected, deadline.Token);
         await AssertUnchangedAsync(before, after);
         await VerifyHealthyBothCallersAsync(sdk, mcp, healthy, deadline.Token);
     }
@@ -55,8 +55,8 @@ internal static class RelationalSqlClusterJoinBudgetFlow
         bool healthy, CancellationToken token)
     {
         var partition = RelationalSqlClusterJoinBudgetData.Partition(healthy ? "healthy" : "rejected");
-        await RelationalSqlClusterJoinBudgetData.ConfigureAsync(sdk, partition, token);
-        return await RelationalSqlClusterJoinBudgetData.SeedAsync(sdk, partition, kind, healthy, token);
+        var lifetimes = await RelationalSqlClusterJoinBudgetData.ConfigureAsync(sdk, partition, token);
+        return await RelationalSqlClusterJoinBudgetData.SeedAsync(sdk, partition, lifetimes, kind, healthy, token);
     }
 
     private static async Task RejectBothCallersAsync(KeyLoadClient sdk, McpOfficialClient mcp,
@@ -97,14 +97,14 @@ internal static class RelationalSqlClusterJoinBudgetFlow
     }
 
     private static async Task<ImmutableArray<StoredSource>> SnapshotAsync(KeyLoadClient sdk,
-        ImmutableArray<EntityRef> references, CancellationToken token)
+        JoinBudgetSeed seed, CancellationToken token)
     {
-        var snapshots = ImmutableArray.CreateBuilder<StoredSource>(references.Length);
-        foreach (var reference in references)
+        var snapshots = ImmutableArray.CreateBuilder<StoredSource>(seed.Sources.Length);
+        for (var index = 0; index < seed.Sources.Length; index++)
         {
-            var document = await PublicReadAssertions.DocumentAsync(await sdk.GetAsync(reference, token));
+            var document = await PublicReadAssertions.DocumentAsync(await sdk.GetAsync(seed.Sources[index], token));
             var stored = document ?? throw new InvalidOperationException(MissingDocument);
-            await Assert.That(stored.Reference).IsEqualTo(reference);
+            await Assert.That(stored.Reference).IsEqualTo(seed.StoredSources[index]);
             snapshots.Add(new(stored.Reference, stored.Revision, stored.Json));
         }
         return snapshots.MoveToImmutable();

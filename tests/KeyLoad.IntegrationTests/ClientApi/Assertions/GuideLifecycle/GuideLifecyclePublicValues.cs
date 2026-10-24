@@ -9,7 +9,7 @@ internal static class GuideLifecyclePublicValues
         GuideLifecyclePublicState state, CancellationToken token)
     {
         var minimum = state.HealthyReceipt?.Token ?? state.SeedReceipt.Token;
-        var expected = new DocumentResult(state.Scenario.Reference, state.HealthyReceipt is null ? 1L : 2L,
+        var expected = new DocumentResult(state.Scenario.StoredReference, state.HealthyReceipt is null ? 1L : 2L,
             state.HealthyReceipt is null ? GuideLifecyclePublicPreparation.InitialJson
                 : GuideLifecyclePublicPreparation.HealthyJson, false, []);
         var actual = await PublicReadAssertions.DocumentAsync(await callers.Sdk.GetAsync(state.Scenario.Reference, minimum, token));

@@ -11,7 +11,7 @@ internal static class GraphCycleFrontierPublicCurrent
     {
         foreach (var vertex in state.Vertices)
         {
-            var expected = new DocumentResult(vertex, vertex == state.A ? state.BranchRevision : 1L, "{}", false, []);
+            var expected = new DocumentResult(state.Seed.Stored(vertex), vertex == state.A ? state.BranchRevision : 1L, "{}", false, []);
             await SqlClusterProtocol.EqualAsync(expected, await PublicReadAssertions.DocumentAsync(await admin.Sdk.GetAsync(vertex, token)));
             await SqlClusterProtocol.EqualAsync(expected, (await PublicReadAssertions.DocumentAsync(
                 await admin.Mcp.CallAsync(McpCallerTools.DocumentsGet, new GetDocumentRequest(vertex), token))).Value);

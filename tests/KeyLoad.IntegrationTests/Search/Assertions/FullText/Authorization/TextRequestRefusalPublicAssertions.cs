@@ -21,8 +21,7 @@ internal static class TextRequestRefusalPublicAssertions
     internal static async Task HealthyAsync(RequestCqrsClusterCallers reader,
         TextClusterScenario scenario, CancellationToken token)
     {
-        RankedDocument[] expected = [new(new(new(scenario.Partition, TextClusterScenario.Collection,
-            TextRequestRefusalPublicTrial.Id), 1L, "{\"owner\":\"owner-a\"}", true,
+        RankedDocument[] expected = [new(new(scenario.StoredReference(TextRequestRefusalPublicTrial.Id), 1L, "{\"owner\":\"owner-a\"}", true,
             [TextClusterScenario.TextField, TextClusterScenario.VectorField, TextClusterScenario.SecretField]), 1d / 61d)];
         var request = scenario.Text(TextRequestRefusalPublicTrial.Term);
         await SqlClusterProtocol.EqualAsync(expected,

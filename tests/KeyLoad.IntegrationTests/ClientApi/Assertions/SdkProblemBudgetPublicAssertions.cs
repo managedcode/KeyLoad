@@ -33,7 +33,7 @@ internal static class SdkProblemBudgetPublicAssertions
     }
 
     internal static DocumentResult Allowed(SdkProblemBudgetPublicState state)
-        => new(state.Allowed, state.HealthyReceipt is null ? 1L : 2L,
+        => new(state.StoredAllowed, state.HealthyReceipt is null ? 1L : 2L,
             state.HealthyReceipt is null ? SdkProblemBudgetPublicPreparation.AllowedJson
                 : SdkProblemBudgetPublicPreparation.HealthyJson, false, []);
 
@@ -42,7 +42,7 @@ internal static class SdkProblemBudgetPublicAssertions
     {
         var minimum = state.HealthyReceipt?.Token ?? state.SeedReceipt.Token;
         await DocumentAsync(administrator.Sdk, administrator.Mcp, state.Allowed, minimum, Allowed(state), token);
-        var forbidden = new DocumentResult(state.Forbidden, 1L, SdkProblemBudgetPublicPreparation.ForbiddenJson, false, []);
+        var forbidden = new DocumentResult(state.StoredForbidden, 1L, SdkProblemBudgetPublicPreparation.ForbiddenJson, false, []);
         await DocumentAsync(administrator.Sdk, administrator.Mcp, state.Forbidden, minimum, forbidden, token);
         await SqlClusterProtocol.EqualAsync(state.Outbox, await McpCallerAssertions.SdkSuccessAsync(
             await administrator.Sdk.OutboxStatusAsync(state.Seed.Partition, token)));

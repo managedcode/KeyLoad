@@ -3,11 +3,13 @@ using System.Security.Cryptography;
 using System.Text;
 using KeyLoad.Client;
 using KeyLoad.IntegrationTests.ClientApi;
+using KeyLoad.IntegrationTests.ResourceExecution;
 
 namespace KeyLoad.IntegrationTests.Search;
 
 /// <summary>Persists the canonical three-document text/vector corpus through the actual SDK.</summary>
-internal sealed record TextClusterScenario(PartitionRef Partition, ResourceDefinition Resource, CommitToken SeedToken)
+internal sealed record TextClusterScenario(PartitionRef Partition, ResourceDefinition Resource, CommitToken SeedToken,
+    EntityRefLifetime Lifetime)
 {
     internal const string Collection = "execution-text";
     internal const string TextField = "/text";
@@ -47,10 +49,12 @@ internal sealed record TextClusterScenario(PartitionRef Partition, ResourceDefin
         };
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
         var administrator = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
-        var persistedResource = await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigureResourceAsync(Guid.NewGuid(),
-            new(partition.TenantId, partition.DatabaseId, resource), cancellationToken));
+        var creationId = Guid.NewGuid();
+        var creation = new ConfigureResourceRequest(partition.TenantId, partition.DatabaseId, resource);
+        var persistedResource = await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigureResourceAsync(creationId,
+            creation, cancellationToken));
         var receipt = await McpCallerAssertions.SdkSuccessAsync(await administrator.CommitAsync(SeedCommand(partition), cancellationToken));
-        return new(partition, persistedResource, receipt.Token);
+        return new(partition, persistedResource, receipt.Token, ResourceCreationLifetime.Create(creationId, creation));
     }
 
     internal static CommandRequest SeedCommand(PartitionRef partition)
@@ -66,6 +70,8 @@ internal sealed record TextClusterScenario(PartitionRef Partition, ResourceDefin
             new PutVector(Collection, SecondId, VectorField, [0.8f, 0.6f], SpaceFor(), FirstRevision),
             new PutVector(Collection, ThirdId, VectorField, [0, 1], SpaceFor(), FirstRevision)
         ]);
+
+    internal EntityRef StoredReference(string id) => new(Partition, Collection, id) { Lifetime = Lifetime };
 
     internal SearchRequest Hybrid(string text = "needle", int limit = CorpusCount)
         => new(Partition, Collection, TextField, text, VectorField, [1, 0], SpaceFor(), limit,

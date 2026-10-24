@@ -16,6 +16,8 @@ internal static class QueueProducerClusterAssertions
     }
     internal static EntityRef Document(QueueProducerClusterSeed seed, string id)
         => new(seed.Lane.Partition, QueueProducerClusterProtocol.Collection, id);
+    internal static EntityRef StoredDocument(QueueProducerClusterSeed seed, string id)
+        => Document(seed, id) with { Lifetime = seed.CollectionLifetime };
     internal static async Task<QueueProducerClusterImage> ImageAsync(KeyLoadClient client, QueueProducerClusterSeed seed,
         string id, CancellationToken token)
     {

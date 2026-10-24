@@ -21,7 +21,7 @@ internal static class CapturedPolicyClusterCurrent
         var reply = await reader.Mcp.CallAsync(McpCallerTools.QueryAst, scenario.Query, token);
         await McpCallerAssertions.DoesNotDiscloseAsync(reply, scenario.Identity.Secret, FeedLiveClusterProtocol.Secret);
         await PageAsync((await McpCallerAssertions.SuccessAsync<QueryPage>(reply)).Value, expected);
-        var document = new DocumentResult(scenario.Reference, revision, json, true, [FeedLiveClusterProtocol.SecretField]);
+        var document = new DocumentResult(scenario.StoredReference, revision, json, true, [FeedLiveClusterProtocol.SecretField]);
         var found = await McpCallerAssertions.SdkSuccessAsync(await reader.Sdk.GetAsync(scenario.Reference,
             scenario.Receipt.Token, token));
         await SqlClusterProtocol.EqualAsync(document, found.Document);

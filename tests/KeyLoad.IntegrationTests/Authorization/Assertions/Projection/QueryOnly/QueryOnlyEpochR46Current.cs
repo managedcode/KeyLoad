@@ -43,7 +43,7 @@ internal static class QueryOnlyEpochR46Current
             (PolicyEpochPublicProtocol.SecondId, PolicyEpochPublicProtocol.SecondJson) })
         {
             var reference = new EntityRef(scenario.Partition, ResourcePolicyUpdateClusterProtocol.Collection, item.Item1);
-            var expected = new DocumentResult(reference, 1L, item.Item2, false, []);
+            var expected = new DocumentResult(scenario.StoredReference(item.Item1), 1L, item.Item2, false, []);
             await SqlClusterProtocol.EqualAsync(expected, await PublicReadAssertions.DocumentAsync(
                 await caller.Sdk.GetAsync(reference, token)));
             await SqlClusterProtocol.EqualAsync(expected, (await PublicReadAssertions.DocumentAsync(

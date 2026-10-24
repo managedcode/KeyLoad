@@ -8,14 +8,15 @@ namespace KeyLoad.IntegrationTests.Authorization;
 internal static class SqlLabelAuthorityResults
 {
     internal static async Task HealthyAsync(KeyLoadClient sdk, McpOfficialClient session,
-        PartitionRef partition, CancellationToken token)
+        GraphSearchClusterScenario scenario, CancellationToken token)
     {
+        var partition = scenario.Partition;
         var expected = new GraphSearchResult([
-            new(new(new(partition, GraphSearchClusterScenario.Documents, GraphSearchClusterScenario.Alpha),
+            new(new(scenario.StoredVertex(GraphSearchClusterScenario.Documents, GraphSearchClusterScenario.Alpha),
                 McpCallerProtocol.FirstRevision, "{\"name\":\"alpha\"}", false, []), 1d / SqlLabelAuthorityProtocol.AlphaDenominator),
-            new(new(new(partition, GraphSearchClusterScenario.Documents, GraphSearchClusterScenario.Beta),
+            new(new(scenario.StoredVertex(GraphSearchClusterScenario.Documents, GraphSearchClusterScenario.Beta),
                 McpCallerProtocol.FirstRevision, "{\"name\":\"beta\"}", false, []), 1d / SqlLabelAuthorityProtocol.BetaDenominator),
-            new(new(new(partition, GraphSearchClusterScenario.Documents, GraphSearchClusterScenario.Gamma),
+            new(new(scenario.StoredVertex(GraphSearchClusterScenario.Documents, GraphSearchClusterScenario.Gamma),
                 McpCallerProtocol.FirstRevision, "{\"name\":\"gamma\"}", false, []), 1d / SqlLabelAuthorityProtocol.GammaDenominator)]);
         await RoutesAsync(sdk, session, partition, SqlGraphSearchClusterScenario.LabeledStatement, expected, token);
         await RoutesAsync(sdk, session, partition, SqlGraphSearchClusterScenario.EmptyStatement, new([]), token);

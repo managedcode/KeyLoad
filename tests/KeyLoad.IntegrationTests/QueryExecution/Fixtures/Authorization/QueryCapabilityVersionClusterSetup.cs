@@ -1,5 +1,6 @@
 using KeyLoad.IntegrationTests.ClientApi;
 using KeyLoad.IntegrationTests.OrleansExecution;
+using KeyLoad.IntegrationTests.ResourceExecution;
 
 namespace KeyLoad.IntegrationTests.QueryExecution;
 
@@ -9,9 +10,10 @@ internal static class QueryCapabilityVersionClusterSetup
     {
         var partition = new PartitionRef("query-versions-" + Guid.NewGuid().ToString("N"), "database", "domain", Guid.NewGuid().ToString("N"));
         var definition = new ResourceDefinition(QueryCapabilityVersionClusterRequests.Collection, ResourceKind.Collection, partition.TransactionDomainId);
+        var creationId = Guid.NewGuid();
+        var creation = new ConfigureResourceRequest(partition.TenantId, partition.DatabaseId, definition);
         await SqlClusterProtocol.EqualAsync(definition, await SqlClusterProtocol.SdkAsync<ResourceDefinition>(root.Sdk,
-            SqlClusterProtocol.Call(partition, McpCallerTools.ResourcesConfigure,
-                new ConfigureResourceRequest(partition.TenantId, partition.DatabaseId, definition), Guid.NewGuid()), token));
+            SqlClusterProtocol.Call(partition, McpCallerTools.ResourcesConfigure, creation, creationId), token));
         var seed = QueryCapabilityVersionClusterRequests.Seed(partition);
         var receipt = await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.CommitAsync(seed, token));
         var reader = await McpPersistedIdentity.CreateAsync(fixture, partition, QueryCapabilityVersionClusterRequests.Collection,
@@ -22,7 +24,7 @@ internal static class QueryCapabilityVersionClusterSetup
         await Assert.That(outbox.Head.StoredRecords).IsEqualTo(4L);
         await Assert.That(outbox.Head.StoredBytes).IsGreaterThan(0L);
         await Assert.That(outbox.Consumers).IsEmpty();
-        var state = new QueryCapabilityVersionClusterState(seed, receipt, reader, outbox);
+        var state = new QueryCapabilityVersionClusterState(seed, receipt, reader, outbox, ResourceCreationLifetime.Create(creationId, creation));
         await QueryCapabilityVersionClusterCurrent.CheckAsync(root, state, token);
         return state;
     }

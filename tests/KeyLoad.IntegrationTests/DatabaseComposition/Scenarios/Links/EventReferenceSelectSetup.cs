@@ -1,5 +1,6 @@
 using KeyLoad.IntegrationTests.ClientApi;
 using KeyLoad.IntegrationTests.OrleansExecution;
+using KeyLoad.IntegrationTests.ResourceExecution;
 
 namespace KeyLoad.IntegrationTests.DatabaseComposition;
 
@@ -16,7 +17,7 @@ internal static class EventReferenceSelectSetup
                 FieldPolicies = [new("/to", "reference", RawReadGrant: EventReferenceSelectProtocol.RefRead, RawUseGrant: EventReferenceSelectProtocol.RefUse)]
             }, token);
         }
-        await ConfigureAsync(admin, partition, new(EventReferenceSelectProtocol.Target, ResourceKind.Collection, partition.TransactionDomainId)
+        var targetLifetime = await ConfigureAsync(admin, partition, new(EventReferenceSelectProtocol.Target, ResourceKind.Collection, partition.TransactionDomainId)
         {
             RelationalSchema = new(EventReferenceSelectProtocol.PrimaryKeyColumn, [new(EventReferenceSelectProtocol.PrimaryKeyColumn, RelationalColumnType.Text), new("name", RelationalColumnType.Text)]),
             FieldPolicies = [new("/name", "private", RawReadGrant: EventReferenceSelectProtocol.NameRead)]
@@ -42,7 +43,7 @@ internal static class EventReferenceSelectSetup
             new(new(partition, EventReferenceSelectProtocol.StreamSet, EventReferenceSelectProtocol.Stream, 1)), token));
         var invalid = await McpCallerAssertions.SdkSuccessAsync(await admin.Sdk.ReadStreamAsync(
             new(new(partition, EventReferenceSelectProtocol.InvalidStreamSet, EventReferenceSelectProtocol.Stream, 1)), token));
-        var state = new EventReferenceSelectState(partition, identity, command, receipt, source, invalid);
+        var state = new EventReferenceSelectState(partition, identity, command, receipt, source, invalid, targetLifetime);
         await PolicyAsync(admin, state, 2, allow: false, names: false, token);
         await EventReferenceSelectSources.VerifyAsync(admin, state, token);
         return state;
@@ -73,8 +74,12 @@ internal static class EventReferenceSelectSetup
         await McpCallerAssertions.SdkSuccessAsync(await admin.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(), principal, token));
     }
 
-    private static async Task ConfigureAsync(RequestCqrsClusterCallers admin, PartitionRef partition,
+    private static async Task<EntityRefLifetime> ConfigureAsync(RequestCqrsClusterCallers admin, PartitionRef partition,
         ResourceDefinition definition, CancellationToken token)
-        => await McpCallerAssertions.SdkSuccessAsync(await admin.Sdk.ConfigureResourceAsync(Guid.NewGuid(),
-            new(partition.TenantId, partition.DatabaseId, definition), token));
+    {
+        var creationId = Guid.NewGuid();
+        var creation = new ConfigureResourceRequest(partition.TenantId, partition.DatabaseId, definition);
+        await McpCallerAssertions.SdkSuccessAsync(await admin.Sdk.ConfigureResourceAsync(creationId, creation, token));
+        return ResourceCreationLifetime.Create(creationId, creation);
+    }
 }

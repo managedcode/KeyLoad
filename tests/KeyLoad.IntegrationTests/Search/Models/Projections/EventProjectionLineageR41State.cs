@@ -14,6 +14,8 @@ internal sealed class EventProjectionLineageR41State(PartitionRef partition,
     internal CommandRequest FreshProjection { get; set; } = null!;
     internal EventRecord OriginalEvent { get; set; } = null!;
     internal OutboxStatus Outbox { get; set; } = null!;
+    internal EntityRefLifetime Lifetime { get; set; } = null!;
+    internal EntityRef StoredReference(string id) => new(Partition, EventProjectionLineageR41Protocol.Collection, id) { Lifetime = Lifetime };
     internal bool Deleted
     {
         get; set;

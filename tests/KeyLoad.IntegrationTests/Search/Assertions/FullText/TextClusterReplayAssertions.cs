@@ -42,7 +42,7 @@ internal static class TextClusterReplayAssertions
     }
 
     internal static async Task ReplayAsync(ClusterFixture fixture, string node, KeyLoadClient administrator,
-        CommandRequest command, CommitReceipt original, CancellationToken token)
+        CommandRequest command, CommitReceipt original, EntityRefLifetime lifetime, CancellationToken token)
     {
         var before = await McpCallerAssertions.SdkSuccessAsync(await administrator.StatusAsync(token));
         var history = await TextClusterReplayHistory.CaptureAsync(administrator, command.Partition, token);
@@ -57,8 +57,10 @@ internal static class TextClusterReplayAssertions
         await TextClusterReplayHistory.RequireAsync(administrator, command.Partition, history, token);
         var first = await PublicReadAssertions.DocumentAsync(await administrator.GetAsync(
             new(command.Partition, TextClusterScenario.Collection, TextClusterScenario.FirstId), token));
-        await DocumentAsync(first, command.Partition, TextClusterScenario.FirstId,
-            TextClusterScenario.UpdatedRevision, UpdatedJson, false);
+        await DocumentAsync(first, new(command.Partition, TextClusterScenario.Collection, TextClusterScenario.FirstId)
+        {
+            Lifetime = lifetime
+        }, TextClusterScenario.UpdatedRevision, UpdatedJson, false);
         var deleted = await PublicReadAssertions.DocumentAsync(await administrator.GetAsync(
             new(command.Partition, TextClusterScenario.Collection, TextClusterScenario.SecondId), token));
         await Assert.That(deleted).IsNull();
@@ -71,11 +73,9 @@ internal static class TextClusterReplayAssertions
         {
             await SearchAsync(scenario.Text(text), [], sdk, mcp, token);
         }
-        var first = new DocumentResult(new(scenario.Partition, TextClusterScenario.Collection,
-            TextClusterScenario.FirstId), TextClusterScenario.UpdatedRevision, ProjectedFirst, true,
+        var first = new DocumentResult(scenario.StoredReference(TextClusterScenario.FirstId), TextClusterScenario.UpdatedRevision, ProjectedFirst, true,
             [TextClusterScenario.TextField, TextClusterScenario.VectorField, TextClusterScenario.SecretField]);
-        var third = new DocumentResult(new(scenario.Partition, TextClusterScenario.Collection,
-            TextClusterScenario.ThirdId), TextClusterScenario.FirstRevision, ProjectedThird, true,
+        var third = new DocumentResult(scenario.StoredReference(TextClusterScenario.ThirdId), TextClusterScenario.FirstRevision, ProjectedThird, true,
             [TextClusterScenario.TextField, TextClusterScenario.VectorField, TextClusterScenario.SecretField]);
         await SearchAsync(scenario.Text(English), [new(first, 1d / FirstRankDenominator)], sdk, mcp, token);
         await SearchAsync(scenario.Hybrid(English),
@@ -95,12 +95,11 @@ internal static class TextClusterReplayAssertions
             .Because(TextClusterResultDiagnostic.Describe("MCP", official.Value, expected));
     }
 
-    private static async Task DocumentAsync(DocumentResult? actual, PartitionRef partition, string id,
+    private static async Task DocumentAsync(DocumentResult? actual, EntityRef stored,
         long revision, string json, bool redacted)
     {
         await Assert.That(actual).IsNotNull();
-        var expected = new DocumentResult(new(partition, TextClusterScenario.Collection, id), revision,
-            json, redacted, []);
+        var expected = new DocumentResult(stored, revision, json, redacted, []);
         await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
     }
 }

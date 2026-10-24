@@ -37,7 +37,7 @@ internal sealed class GraphIncomingClusterSiloRestartTests(ClusterFixture fixtur
         {
             var page = await McpCallerAssertions.SdkSuccessAsync(await reader.IncomingEdgesAsync(
                 Request(seed), deadline.Token));
-            await AssertDeliveredRowAsync(page, seed.Target, source);
+            await AssertDeliveredRowAsync(page, seed.Stored(seed.Target), seed.Stored(source));
         }
         await VerifyOfficialMcpAsync(seed, source, deadline.Token);
     }
@@ -97,7 +97,7 @@ internal sealed class GraphIncomingClusterSiloRestartTests(ClusterFixture fixtur
             seed.Reader.Secret, cancellationToken);
         var reply = await mcp.CallAsync(GraphIncomingClusterScenario.Tool, Request(seed), cancellationToken);
         var result = await McpCallerAssertions.SuccessAsync<GraphIncomingEdgesPage>(reply);
-        await AssertDeliveredRowAsync(result.Value, seed.Target, source);
+        await AssertDeliveredRowAsync(result.Value, seed.Stored(seed.Target), seed.Stored(source));
         await GraphIncomingClusterAssertions.AssertNoPrivatePayloadAsync(reply, seed.Reader.Secret);
     }
 }

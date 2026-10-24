@@ -48,7 +48,7 @@ internal static class LiveReadBackpressureR49
         {
             delivered = await ReadAsync(reader, scenario, original, useMcp, token);
             await PageAsync(delivered, [new(FeedLiveClusterProtocol.DeletedSequence, deletion.Token,
-                LiveQueryChangeKind.Remove, scenario.Reference, FeedLiveClusterProtocol.DeletedRevision, null)]);
+                LiveQueryChangeKind.Remove, scenario.StoredReference, FeedLiveClusterProtocol.DeletedRevision, null)]);
         }, token);
         var consumed = original with
         {

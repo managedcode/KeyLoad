@@ -35,7 +35,7 @@ internal static class GraphLabelUseClusterAssertions
                 var reference = GraphLabelUseClusterProtocol.Vertex(state.Seed.Partition, id);
                 var actual = await McpCallerAssertions.SdkSuccessAsync(await admin.Sdk.GetAsync(reference, state.Receipt.Token, token));
                 documents.Add(actual);
-                await SqlClusterProtocol.EqualAsync(new DocumentReadResult(new(reference, 1L, "{}", false, [])), actual);
+                await SqlClusterProtocol.EqualAsync(new DocumentReadResult(new(state.Stored(reference), 1L, "{}", false, [])), actual);
             }, failures);
         }
         global::KeyLoad.GraphTraversal? graph = null;
@@ -43,7 +43,7 @@ internal static class GraphLabelUseClusterAssertions
         {
             graph = await McpCallerAssertions.SdkSuccessAsync(await admin.Sdk.TraverseAsync(
                 GraphLabelUseClusterProtocol.Request(state.Seed.Partition, null), token));
-            await SqlClusterProtocol.EqualAsync(GraphLabelUseClusterProtocol.Expected(state.Seed.Partition, null), graph);
+            await SqlClusterProtocol.EqualAsync(state.Expected(null), graph);
         }, failures);
         OutboxStatus? outbox = null;
         await ServerFailureObserver.ObserveAsync(async () =>

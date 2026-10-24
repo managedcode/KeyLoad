@@ -73,7 +73,7 @@ internal static class AuthorizedQueryScenario
         CancellationToken cancellationToken)
     {
         var manifest = Success(await client.QueryCapabilitiesAsync(cancellationToken));
-        await Assert.That(manifest.AstVersion).IsEqualTo(2);
+        await Assert.That(manifest.AstVersion).IsEqualTo(SqlOperationProtocol.DefaultQueryDialectVersion);
         await Assert.That(manifest.ReadOnly).IsTrue();
         await Assert.That(manifest.Adapters).Contains("JSON");
         const string sql = "SELECT TOP (1) * FROM \"query-adapters\" q WHERE q.status = 'open' ORDER BY q.number";

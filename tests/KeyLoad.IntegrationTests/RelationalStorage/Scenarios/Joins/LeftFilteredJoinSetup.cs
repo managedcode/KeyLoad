@@ -1,6 +1,7 @@
 using KeyLoad.Client;
 using KeyLoad.IntegrationTests.ClientApi;
 using KeyLoad.IntegrationTests.QueryExecution;
+using KeyLoad.IntegrationTests.ResourceExecution;
 
 namespace KeyLoad.IntegrationTests.RelationalStorage;
 
@@ -27,12 +28,8 @@ internal static class LeftFilteredJoinSetup
             RelationalSchema = new(IdFieldKey, [new(IdFieldKey, RelationalColumnType.Text), new("name", RelationalColumnType.Text)]),
             FieldPolicies = [new("/name", "private", RawReadGrant: LeftFilteredJoinProtocol.NameReadGrant)]
         };
-        foreach (var definition in new[] { left, right })
-        {
-            await SqlClusterProtocol.SdkAsync<ResourceDefinition>(sdk, SqlClusterProtocol.Call(partition,
-                McpCallerTools.ResourcesConfigure, new ConfigureResourceRequest(partition.TenantId,
-                    partition.DatabaseId, definition), Guid.NewGuid()), token);
-        }
+        var leftLifetime = await ConfigureAsync(sdk, partition, left, token);
+        var rightLifetime = await ConfigureAsync(sdk, partition, right, token);
         var command = new CommandRequest(Guid.NewGuid(), partition,
             [new PutDocument(LeftFilteredJoinProtocol.Left, "a", LeftFilteredJoinProtocol.LeftA),
                 new PutDocument(LeftFilteredJoinProtocol.Left, "b", LeftFilteredJoinProtocol.LeftB),
@@ -41,9 +38,19 @@ internal static class LeftFilteredJoinSetup
         var receipt = await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(command, token));
         var identity = await McpPersistedIdentity.CreateAsync(fixture, partition,
             LeftFilteredJoinProtocol.Left, Capability.Query | Capability.DocumentsRead, token);
-        var state = new LeftFilteredJoinState(partition, command, receipt, identity);
+        var state = new LeftFilteredJoinState(partition, command, receipt, identity, leftLifetime, rightLifetime);
         await RepairAsync(sdk, state, InitialScopedPolicyEpoch, allowPredicate: false, readName: false, token);
         return state;
+    }
+
+    private static async Task<EntityRefLifetime> ConfigureAsync(KeyLoadClient sdk, PartitionRef partition,
+        ResourceDefinition definition, CancellationToken token)
+    {
+        var commandId = Guid.NewGuid();
+        var request = new ConfigureResourceRequest(partition.TenantId, partition.DatabaseId, definition);
+        await SqlClusterProtocol.SdkAsync<ResourceDefinition>(sdk, SqlClusterProtocol.Call(partition,
+            McpCallerTools.ResourcesConfigure, request, commandId), token);
+        return ResourceCreationLifetime.Create(commandId, request);
     }
 
     internal static async Task RepairAsync(KeyLoadClient sdk, LeftFilteredJoinState state,

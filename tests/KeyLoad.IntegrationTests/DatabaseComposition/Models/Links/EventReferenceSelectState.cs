@@ -3,4 +3,8 @@ using KeyLoad.IntegrationTests.ClientApi;
 namespace KeyLoad.IntegrationTests.DatabaseComposition;
 
 internal sealed record EventReferenceSelectState(PartitionRef Partition, McpPersistedIdentity Identity,
-    CommandRequest Seed, CommitReceipt Receipt, StreamPage OriginalStream, StreamPage OriginalInvalid, CommandRequest? Repair = null, CommitReceipt? RepairReceipt = null);
+    CommandRequest Seed, CommitReceipt Receipt, StreamPage OriginalStream, StreamPage OriginalInvalid, EntityRefLifetime TargetLifetime,
+    CommandRequest? Repair = null, CommitReceipt? RepairReceipt = null)
+{
+    internal EntityRef StoredTarget(string id) => new(Partition, EventReferenceSelectProtocol.Target, id) { Lifetime = TargetLifetime };
+}

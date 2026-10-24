@@ -48,7 +48,7 @@ internal static class GraphSearchLineageClusterCalls
     }
 
     private static GraphSearchResult Expected(GraphSearchLineageClusterState state)
-        => GraphSearchLineageClusterRecipe.Expected(state.Partition, state.Expansion, state.EmptyLabels);
+        => GraphSearchLineageClusterRecipe.Expected(state.Partition, state.Expansion, state.EmptyLabels, state.Lifetime);
 
     private static string Detail(ErrorCode code, bool official) => code == ErrorCode.PermissionDenied
         ? official ? GraphSearchLineageClusterProtocol.SafeDenied : GraphSearchLineageClusterProtocol.Denied

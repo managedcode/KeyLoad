@@ -51,7 +51,7 @@ internal sealed class TextClusterSiloRestartTests(ClusterFixture fixture)
                 WaitBehavior.WaitOnResourceUnavailable, cancellationToken);
             await WaitForClusterAsync(nodes, clients.Administrators, cancellationToken);
             await TextClusterReplayAssertions.ReplayAsync(fixture, nodes[survivorIndex],
-                clients.Administrators[survivorIndex], update.Command, update.Receipt, cancellationToken);
+                clients.Administrators[survivorIndex], update.Command, update.Receipt, scenario.Lifetime, cancellationToken);
             await VerifyAllNodesAsync(scenario, nodes, clients, cancellationToken);
         }
         catch (Exception failure) when (ClusterReplicationTestSupport.IsNonFatalCleanupFailure(failure))

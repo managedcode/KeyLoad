@@ -46,7 +46,7 @@ internal static class CapturedPolicyClusterPages
     {
         var row = LiveTailClusterAssertions.UpdatedRow;
         var changes = new[] { new LiveQueryChange(FeedLiveClusterProtocol.UpdatedSequence, receipt.Token,
-            LiveQueryChangeKind.Upsert, scenario.Reference, FeedLiveClusterProtocol.UpdatedRevision, row) };
+            LiveQueryChangeKind.Upsert, scenario.StoredReference, FeedLiveClusterProtocol.UpdatedRevision, row) };
         await RouteAsync(async value => await McpCallerAssertions.SdkSuccessAsync(
             await reader.Sdk.ReadLiveQueryAsync(value, token)));
         await RouteAsync(async value => (await McpCallerAssertions.SuccessAsync<LiveQueryPage>(
@@ -96,10 +96,10 @@ internal static class CapturedPolicyClusterPages
                 await Assert.That(result.Changes.Length).IsEqualTo(1);
                 var change = result.Changes.Single();
                 var expected = new DocumentChange(FeedLiveClusterProtocol.UpdatedSequence, receipt.Token,
-                    change.CommittedAt, scenario.Reference, FeedLiveClusterProtocol.UpdatedRevision, false,
-                    new(scenario.Reference, FeedLiveClusterProtocol.FirstRevision,
+                    change.CommittedAt, scenario.StoredReference, FeedLiveClusterProtocol.UpdatedRevision, false,
+                    new(scenario.StoredReference, FeedLiveClusterProtocol.FirstRevision,
                         FeedLiveClusterProtocol.FirstProjected, true, [FeedLiveClusterProtocol.SecretField]),
-                    new(scenario.Reference, FeedLiveClusterProtocol.UpdatedRevision,
+                    new(scenario.StoredReference, FeedLiveClusterProtocol.UpdatedRevision,
                         FeedLiveClusterProtocol.UpdatedProjected, true, [FeedLiveClusterProtocol.SecretField]));
                 await Assert.That(change.CommittedAt).IsNotEqualTo(default(DateTimeOffset));
                 await SqlClusterProtocol.EqualAsync(expected, change);

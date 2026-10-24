@@ -32,7 +32,7 @@ internal static class GraphSearchClusterSurvivorReadiness
             }
             var document = await PublicReadAssertions.DocumentAsync(probe);
             await Assert.That(document).IsNotNull();
-            await Assert.That(document!.Reference).IsEqualTo(scenario.Vertex(GraphSearchClusterScenario.Projects, GraphSearchClusterScenario.SecondSeed));
+            await Assert.That(document!.Reference).IsEqualTo(scenario.StoredVertex(GraphSearchClusterScenario.Projects, GraphSearchClusterScenario.SecondSeed));
             await Assert.That(document.Revision).IsEqualTo(1L);
             await Assert.That(document.Json).IsEqualTo("""{"name":"second"}""");
             await Assert.That(document.Redacted).IsFalse();

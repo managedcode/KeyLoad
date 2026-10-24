@@ -22,7 +22,7 @@ internal static class LiveQueryCutClusterAssertions
             await OwnerAsync(before, owner, receipt);
             var document = await McpCallerAssertions.SdkSuccessAsync(
                 await reader.Sdk.GetAsync(scenario.Reference, receipt.Token, token));
-            DocumentResult? expected = rows.IsEmpty ? null : new(scenario.Reference,
+            DocumentResult? expected = rows.IsEmpty ? null : new(scenario.StoredReference,
                 rows.Single().Revision, rows.Single().Json, rows.Single().Redacted,
                 [FeedLiveClusterProtocol.SecretField]);
             await SqlClusterProtocol.EqualAsync(expected, document.Document);

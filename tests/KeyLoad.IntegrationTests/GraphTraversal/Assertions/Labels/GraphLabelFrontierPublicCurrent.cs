@@ -11,7 +11,7 @@ internal static class GraphLabelFrontierPublicCurrent
     {
         foreach (var vertex in state.Vertices)
         {
-            var expected = new DocumentResult(vertex, 1L, "{}", false, []);
+            var expected = new DocumentResult(state.Seed.Stored(vertex), 1L, "{}", false, []);
             await SqlClusterProtocol.EqualAsync(expected, await PublicReadAssertions.DocumentAsync(await admin.Sdk.GetAsync(vertex, token)));
             await SqlClusterProtocol.EqualAsync(expected, (await PublicReadAssertions.DocumentAsync(
                 await admin.Mcp.CallAsync(McpCallerTools.DocumentsGet, new GetDocumentRequest(vertex), token))).Value);

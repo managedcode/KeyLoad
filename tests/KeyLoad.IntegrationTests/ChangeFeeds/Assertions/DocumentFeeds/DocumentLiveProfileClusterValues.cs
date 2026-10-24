@@ -36,7 +36,7 @@ internal static class DocumentLiveProfileClusterValues
                     _ => 99
                 };
                 var present = id == "hidden" || (id == "a" ? phase == 0 : id == "b" ? phase >= 1 : phase == 2);
-                var expected = new DocumentReadResult(present ? new(state.Reference(id), 1L, DocumentLiveProfileClusterState.Json(value), false, []) : null);
+                var expected = new DocumentReadResult(present ? new(state.StoredReference(id), 1L, DocumentLiveProfileClusterState.Json(value), false, []) : null);
                 await SqlClusterProtocol.EqualAsync(expected, result);
                 documents.Add(result);
             }, failures);

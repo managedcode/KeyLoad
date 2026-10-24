@@ -1,5 +1,6 @@
 using KeyLoad.IntegrationTests.ClientApi;
 using KeyLoad.IntegrationTests.OrleansExecution;
+using KeyLoad.IntegrationTests.ResourceExecution;
 namespace KeyLoad.IntegrationTests.QueryExecution;
 
 internal static class SqlFetchCountClusterSetup
@@ -12,9 +13,10 @@ internal static class SqlFetchCountClusterSetup
             var partition = PostgresClusterState.Partition;
             var resource = new ResourceDefinition(SqlFetchCountClusterProtocol.Collection, ResourceKind.Collection,
                 partition.TransactionDomainId);
+            var creationId = Guid.NewGuid();
+            var creation = new ConfigureResourceRequest(partition.TenantId, partition.DatabaseId, resource);
             var actual = await SqlClusterProtocol.SdkAsync<ResourceDefinition>(root.Sdk,
-                SqlClusterProtocol.Call(partition, McpCallerTools.ResourcesConfigure,
-                    new ConfigureResourceRequest(partition.TenantId, partition.DatabaseId, resource), Guid.NewGuid()), token);
+                SqlClusterProtocol.Call(partition, McpCallerTools.ResourcesConfigure, creation, creationId), token);
             await SqlClusterProtocol.EqualAsync(resource, actual);
             var writer = await PostgresClusterSeed.IdentityAsync(root.Sdk, SqlFetchCountClusterProtocol.WriterMarker,
                 Capability.DocumentsRead | Capability.DocumentsWrite | Capability.Query, token, resource.Name);
@@ -29,7 +31,7 @@ internal static class SqlFetchCountClusterSetup
                 await SqlFetchCountClusterAssertions.ReceiptAsync(seed, committed);
                 return committed;
             }, token);
-            return new SqlFetchCountClusterState(writer, reader, seed, receipt);
+            return new SqlFetchCountClusterState(writer, reader, seed, receipt, ResourceCreationLifetime.Create(creationId, creation));
         }, token);
     }
 }

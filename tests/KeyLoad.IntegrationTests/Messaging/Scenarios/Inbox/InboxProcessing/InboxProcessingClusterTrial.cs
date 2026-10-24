@@ -21,7 +21,7 @@ internal static class InboxProcessingClusterTrial
                 using var workerHttp = McpCallerHttp.Create(fixture, McpCallerProtocol.Node2);
                 var worker = new KeyLoadClient(workerHttp, seed.Identity.Secret, IntegrationClientOptions.Execution());
                 var state = await InboxProcessingClusterOriginal.ExecuteAsync(worker, seed.Lane, seed.Identity, deadline.Token);
-                var late = await LocalProcessingLateR53Warm.RunAsync(fixture, seed.Lane, seed.Identity, deadline.Token);
+                var late = await LocalProcessingLateR53Warm.RunAsync(fixture, seed.Lane, seed.Identity, seed.CollectionLifetime, deadline.Token);
                 await InboxProcessingClusterCold.RestartAsync(fixture, deadline.Token);
                 await LocalProcessingLateR53Flow.FirstColdAsync(fixture, late, deadline.Token);
                 await ReconcileAndRestoreAsync(fixture, worker, state, deadline.Token);

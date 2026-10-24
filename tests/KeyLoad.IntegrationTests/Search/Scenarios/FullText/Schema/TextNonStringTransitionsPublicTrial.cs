@@ -2,6 +2,7 @@ using KeyLoad.Client;
 using KeyLoad.IntegrationTests.ClientApi;
 using KeyLoad.IntegrationTests.OrleansExecution;
 using KeyLoad.IntegrationTests.QueryExecution;
+using KeyLoad.IntegrationTests.ResourceExecution;
 
 namespace KeyLoad.IntegrationTests.Search;
 
@@ -18,8 +19,11 @@ internal static class TextNonStringTransitionsPublicTrial
             {
                 var partition = TextMaintenanceClusterScenario.CreatePartition();
                 var resource = new ResourceDefinition(Collection, ResourceKind.Collection, partition.TransactionDomainId);
+                var creationId = Guid.NewGuid();
+                var creation = new ConfigureResourceRequest(partition.TenantId, partition.DatabaseId, resource);
                 await SqlClusterProtocol.EqualAsync(resource, await McpCallerAssertions.SdkSuccessAsync(
-                    await caller.Sdk.ConfigureResourceAsync(Guid.NewGuid(), new(partition.TenantId, partition.DatabaseId, resource), token)));
+                    await caller.Sdk.ConfigureResourceAsync(creationId, creation, token)));
+                var lifetime = ResourceCreationLifetime.Create(creationId, creation);
                 originals.Add(await CommitAsync(caller, new(Guid.NewGuid(), partition,
                     [new PutDocument(Collection, "a", "{\"text\":\"needle\"}", 0L),
                      new PutDocument(Collection, "b", "{\"text\":null}", 0L),
@@ -27,12 +31,12 @@ internal static class TextNonStringTransitionsPublicTrial
                      new PutDocument(Collection, "d", "{\"other\":\"needle\"}", 0L)]),
                     [new("putDocument", Collection, "a", 1L), new("putDocument", Collection, "b", 1L),
                      new("putDocument", Collection, "c", 1L), new("putDocument", Collection, "d", 1L)], token));
-                await TextNonStringTransitionsPublicAssertions.CheckAsync(caller, partition, originals, 0, token);
+                await TextNonStringTransitionsPublicAssertions.CheckAsync(caller, partition, lifetime, originals, 0, token);
                 originals.Add(await CommitAsync(caller, new(Guid.NewGuid(), partition,
                     [new PutDocument(Collection, "b", "{\"text\":\"needle needle\"}", 1L)]),
                     [new("putDocument", Collection, "b", 2L)], token));
-                var outbox = await TextNonStringTransitionsPublicAssertions.CheckAsync(caller, partition, originals, 1, token);
-                return (Partition: partition, Outbox: outbox,
+                var outbox = await TextNonStringTransitionsPublicAssertions.CheckAsync(caller, partition, lifetime, originals, 1, token);
+                return (Partition: partition, Lifetime: lifetime, Outbox: outbox,
                     Status: await McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.StatusAsync(token)));
             }, token);
         for (var cycle = 0; cycle < 2; cycle++)
@@ -47,7 +51,7 @@ internal static class TextNonStringTransitionsPublicTrial
                     await Assert.That(current.Position).IsGreaterThanOrEqualTo(prepared.Status.Position);
                     await Assert.That(current.ReadGeneration).IsGreaterThanOrEqualTo(prepared.Status.ReadGeneration);
                     await TextNonStringTransitionsPublicAssertions.ReplayAsync(caller, prepared.Partition,
-                        originals, 1, prepared.Outbox, token);
+                        prepared.Lifetime, originals, 1, prepared.Outbox, token);
                     return true;
                 }, token);
         }
@@ -55,10 +59,10 @@ internal static class TextNonStringTransitionsPublicTrial
         {
             originals.Add(await CommitAsync(caller, new(Guid.NewGuid(), prepared.Partition,
                 [new PutDocument(Collection, "a", "{\"text\":0}", 1L)]), [new("putDocument", Collection, "a", 2L)], token));
-            await TextNonStringTransitionsPublicAssertions.CheckAsync(caller, prepared.Partition, originals, 2, token);
+            await TextNonStringTransitionsPublicAssertions.CheckAsync(caller, prepared.Partition, prepared.Lifetime, originals, 2, token);
             originals.Add(await CommitAsync(caller, new(Guid.NewGuid(), prepared.Partition,
                 [new DeleteDocument(Collection, "b", 2L)]), [new("deleteDocument", Collection, "b", 3L)], token));
-            await TextNonStringTransitionsPublicAssertions.CheckAsync(caller, prepared.Partition, originals, 3, token);
+            await TextNonStringTransitionsPublicAssertions.CheckAsync(caller, prepared.Partition, prepared.Lifetime, originals, 3, token);
             return true;
         }, token);
     }

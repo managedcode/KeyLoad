@@ -45,8 +45,8 @@ internal sealed class SqlClusterModelParityTests(ClusterFixture fixture)
         var officialGraph = await SqlClusterProtocol.McpAsync<global::KeyLoad.GraphTraversal>(mcp,
             SqlClusterProtocol.Call(scenario.Partition, McpCallerTools.GraphTraverse, traverse), deadline.Token);
         await Assert.That(runtimeGraph.Vertices.Length).IsEqualTo(RelationalSqlClusterTokens.RootAndNeighbor);
-        await Assert.That(runtimeGraph.Vertices).Contains(scenario.First);
-        await Assert.That(runtimeGraph.Vertices).Contains(scenario.Second);
+        await Assert.That(runtimeGraph.Vertices).Contains(scenario.StoredFirst);
+        await Assert.That(runtimeGraph.Vertices).Contains(scenario.StoredSecond);
         await Assert.That(runtimeGraph.Edges).HasSingleItem();
         await SqlClusterProtocol.EqualAsync(runtimeGraph, sqlGraph);
         await SqlClusterProtocol.EqualAsync(runtimeGraph, officialGraph);
@@ -127,7 +127,7 @@ internal sealed class SqlClusterModelParityTests(ClusterFixture fixture)
             var official = await SqlClusterProtocol.McpAsync<RankedDocument[]>(mcp,
                 SqlClusterProtocol.Call(scenario.Partition, McpCallerTools.SearchExecute, request), cancellationToken);
             await Assert.That(expected).HasSingleItem();
-            await Assert.That(expected[0].Document.Reference).IsEqualTo(scenario.First);
+            await Assert.That(expected[0].Document.Reference).IsEqualTo(scenario.StoredFirst);
             await SqlClusterProtocol.EqualAsync(expected, actual);
             await SqlClusterProtocol.EqualAsync(expected, official);
         }

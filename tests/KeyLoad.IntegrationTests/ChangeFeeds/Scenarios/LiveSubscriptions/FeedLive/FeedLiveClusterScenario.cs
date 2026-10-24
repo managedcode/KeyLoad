@@ -1,15 +1,17 @@
 using KeyLoad.Client;
 using KeyLoad.IntegrationTests.ClientApi;
 using KeyLoad.IntegrationTests.OrleansExecution;
+using KeyLoad.IntegrationTests.ResourceExecution;
 using KeyLoad.IntegrationTests.Search;
 using KeyLoad.Query;
 
 namespace KeyLoad.IntegrationTests.ChangeFeeds;
 
 internal sealed record FeedLiveClusterScenario(PartitionRef Partition, McpPersistedIdentity Identity,
-    CommandRequest Original, CommitReceipt Receipt)
+    CommandRequest Original, CommitReceipt Receipt, EntityRefLifetime Lifetime)
 {
     internal EntityRef Reference => new(Partition, FeedLiveClusterProtocol.Collection, FeedLiveClusterProtocol.First);
+    internal EntityRef StoredReference => Reference with { Lifetime = Lifetime };
     internal ReadChangeFeedRequest Feed => new(Partition, FeedLiveClusterProtocol.Collection,
         Limit: FeedLiveClusterProtocol.PageLimit);
     internal AstQueryRequest Query => KeyLoadQuery.From<FeedLiveOrder>(Partition,
@@ -26,8 +28,9 @@ internal sealed record FeedLiveClusterScenario(PartitionRef Partition, McpPersis
         {
             FieldPolicies = [new(FeedLiveClusterProtocol.SecretField, FeedLiveClusterProtocol.SecretTag, RawReadGrant: FeedLiveClusterProtocol.SecretGrant)]
         };
-        await McpCallerAssertions.SdkSuccessAsync(await administrator.Sdk.ConfigureResourceAsync(Guid.NewGuid(),
-            new(partition.TenantId, partition.DatabaseId, resource), token));
+        var creationId = Guid.NewGuid();
+        var creation = new ConfigureResourceRequest(partition.TenantId, partition.DatabaseId, resource);
+        await McpCallerAssertions.SdkSuccessAsync(await administrator.Sdk.ConfigureResourceAsync(creationId, creation, token));
         var principal = new PrincipalRecord(FeedLiveClusterProtocol.PrincipalPrefix + Guid.NewGuid().ToString("N"), partition.TenantId,
             [new(partition.DatabaseId, FeedLiveClusterProtocol.Collection,
                 Capability.Query | Capability.DocumentsRead | Capability.ChangesRead)], [])
@@ -42,7 +45,7 @@ internal sealed record FeedLiveClusterScenario(PartitionRef Partition, McpPersis
          new PutDocument(FeedLiveClusterProtocol.Collection, FeedLiveClusterProtocol.Hidden,
             FeedLiveClusterProtocol.FirstJson, Access: new(FeedLiveClusterProtocol.OtherOwner))]);
         var receipt = await McpCallerAssertions.SdkSuccessAsync(await administrator.Sdk.CommitAsync(original, token));
-        return new(partition, identity, original, receipt);
+        return new(partition, identity, original, receipt, ResourceCreationLifetime.Create(creationId, creation));
     }
 
     internal async Task<CommitReceipt> UpdateAsync(RequestCqrsClusterCallers administrator, CancellationToken token)

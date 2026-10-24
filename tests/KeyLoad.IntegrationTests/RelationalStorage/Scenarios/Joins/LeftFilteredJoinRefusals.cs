@@ -51,7 +51,7 @@ internal static class LeftFilteredJoinRefusals
         {
             var actual = await PublicReadAssertions.DocumentAsync(await sdk.GetAsync(new(state.Partition, collection, id), token))
                 ?? throw new InvalidOperationException("The original typed source row is missing.");
-            await SqlClusterProtocol.EqualAsync(new DocumentResult(new(state.Partition, collection, id), 1, json, false, []), actual);
+            await SqlClusterProtocol.EqualAsync(new DocumentResult(state.Stored(collection, id), 1, json, false, []), actual);
         }
         await SqlClusterProtocol.EqualAsync(state.Receipt,
             await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(state.Seed, token)));

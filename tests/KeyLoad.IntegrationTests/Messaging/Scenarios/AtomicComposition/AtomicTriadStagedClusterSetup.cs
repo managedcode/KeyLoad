@@ -1,5 +1,6 @@
 using KeyLoad.IntegrationTests.ClientApi;
 using KeyLoad.IntegrationTests.OrleansExecution;
+using KeyLoad.IntegrationTests.ResourceExecution;
 
 namespace KeyLoad.IntegrationTests.Messaging;
 
@@ -17,16 +18,21 @@ internal static class AtomicTriadStagedClusterSetup
         },
          new(AtomicTriadStagedClusterProtocol.Streams, ResourceKind.StreamSet, partition.TransactionDomainId),
          new(AtomicTriadStagedClusterProtocol.Queue, ResourceKind.WorkQueue, partition.TransactionDomainId)];
+        var lifetimes = new Dictionary<string, EntityRefLifetime>(StringComparer.Ordinal);
         foreach (var resource in resources)
         {
+            var creationId = Guid.NewGuid();
+            var creation = new ConfigureResourceRequest(tenant, partition.DatabaseId, resource);
             await QueueProducerClusterAssertions.EqualAsync(await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.ConfigureResourceAsync(
-                Guid.NewGuid(), new(tenant, partition.DatabaseId, resource), token)), resource);
+                creationId, creation, token)), resource);
+            lifetimes.Add(resource.Name, ResourceCreationLifetime.Create(creationId, creation));
         }
         var identity = await MessagingClusterIdentity.CreateAsync(fixture, tenant,
             [new(partition.DatabaseId, AtomicTriadStagedClusterProtocol.Collection, Capability.DocumentsRead | Capability.DocumentsWrite | Capability.Query),
              new(partition.DatabaseId, AtomicTriadStagedClusterProtocol.Streams, Capability.EventsRead | Capability.EventsAppend),
              new(partition.DatabaseId, AtomicTriadStagedClusterProtocol.Queue, Capability.QueuePublish | Capability.QueueInspect)], [], false, token);
-        return new(partition, identity, AtomicTriadStagedClusterRecipe.Command(partition, true));
+        return new(partition, identity, AtomicTriadStagedClusterRecipe.Command(partition, true),
+            lifetimes[AtomicTriadStagedClusterProtocol.Collection]);
     }
 
     internal static Task PolicyAsync(ClusterFixture fixture, AtomicTriadStagedClusterState state, long epoch, bool publish, CancellationToken token)

@@ -14,8 +14,7 @@ internal static class QueueTerminalPolicyClusterAssertions
         await MessageAsync(worker, state.Lane, QueueTerminalPolicyClusterProtocol.Message, state.Original, token);
         await MessageAsync(worker, state.Lane, QueueTerminalPolicyClusterProtocol.Healthy, state.Healthy, token);
         await DocumentAsync(worker, state, QueueTerminalPolicyClusterProtocol.Refused, null, token);
-        DocumentResult? expected = state.Healthy is null ? null : new(new(state.Partition,
-            QueueTerminalPolicyClusterProtocol.Collection, QueueTerminalPolicyClusterProtocol.Healthy), 1L,
+        DocumentResult? expected = state.Healthy is null ? null : new(state.StoredDocument(QueueTerminalPolicyClusterProtocol.Healthy), 1L,
             QueueTerminalPolicyClusterProtocol.Payload, false, []);
         await DocumentAsync(worker, state, QueueTerminalPolicyClusterProtocol.Healthy, expected, token);
     }

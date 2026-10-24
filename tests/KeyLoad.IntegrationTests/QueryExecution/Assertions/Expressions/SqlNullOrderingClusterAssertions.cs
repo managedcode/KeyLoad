@@ -31,7 +31,7 @@ internal static class SqlNullOrderingClusterAssertions
         foreach (var row in SqlNullOrderingClusterState.Rows)
         {
             var reference = new EntityRef(PostgresClusterState.Partition, SqlNullOrderingClusterProtocol.Collection, row.Id);
-            var expected = new DocumentReadResult(new(reference, SqlNullOrderingClusterProtocol.SeedRevision, row.Json, false, []));
+            var expected = new DocumentReadResult(new(state.Stored(row.Id), SqlNullOrderingClusterProtocol.SeedRevision, row.Json, false, []));
             var actual = await McpCallerAssertions.SdkSuccessAsync(await root.GetAsync(reference, state.Receipt.Token, token));
             await SqlClusterProtocol.EqualAsync(expected, actual);
             documents.Add(actual);

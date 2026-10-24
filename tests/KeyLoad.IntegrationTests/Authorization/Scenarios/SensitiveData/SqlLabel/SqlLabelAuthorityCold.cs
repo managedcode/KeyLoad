@@ -52,7 +52,7 @@ internal static class SqlLabelAuthorityCold
         SqlLabelAuthorityState state, CancellationToken token)
     {
         return await AdversarialAuthorityTrial.WithRootAsync(fixture, McpCallerProtocol.Node1,
-            root => SqlLabelAuthorityImage.CaptureAsync(root, state.Scenario.Partition, token));
+            root => SqlLabelAuthorityImage.CaptureAsync(root, state.Scenario, token));
     }
 
     private static async Task<Dictionary<string, NodeStatus>> StatusAsync(ClusterFixture fixture, CancellationToken token)

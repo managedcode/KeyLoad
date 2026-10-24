@@ -35,9 +35,9 @@ internal sealed class AdminBackupClientParityTests(ClusterFixture fixture)
         await VerifyReceiptAsync(sdkReceipt);
         await VerifyReceiptAsync(mcpReceipt.Value);
         await Assert.That(sdkReceipt.Id).IsNotEqualTo(mcpReceipt.Value.Id);
-        await AdminBackupArchiveVerifier.VerifyRestoreAsync(fixture, sdkReceipt, scenario.Reference,
+        await AdminBackupArchiveVerifier.VerifyRestoreAsync(fixture, sdkReceipt, scenario.StoredReference,
             McpDocumentProtocol.InitialJson, seededMutation.Revision, local.Position, deadline.Token);
-        await AdminBackupArchiveVerifier.VerifyRestoreAsync(fixture, mcpReceipt.Value, scenario.Reference,
+        await AdminBackupArchiveVerifier.VerifyRestoreAsync(fixture, mcpReceipt.Value, scenario.StoredReference,
             McpDocumentProtocol.InitialJson, seededMutation.Revision, local.Position, deadline.Token);
     }
 

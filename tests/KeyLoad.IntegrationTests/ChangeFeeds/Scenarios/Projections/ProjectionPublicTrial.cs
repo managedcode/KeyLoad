@@ -14,7 +14,8 @@ internal static class ProjectionPublicTrial
                 return await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, setup.Identity.Secret,
                     async caller =>
                     {
-                        var state = await ProjectionPublicWarm.RunAsync(root, caller, setup.Partition, setup.Identity, token);
+                        var state = await ProjectionPublicWarm.RunAsync(root, caller, setup.Partition, setup.Identity,
+                            setup.SourceLifetime, setup.TargetLifetime, token);
                         return await ProjectionPublicPolicy.RunAsync(root, caller, state, token);
                     }, token);
             }, token);

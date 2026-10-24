@@ -61,9 +61,10 @@ internal static class ScopedCommandIdentityClusterAssertions
     private static async Task AssertDocumentAsync(KeyLoadClient sdk, McpOfficialClient mcp,
         DocumentResult expected, CommitToken minimum, CancellationToken cancellationToken)
     {
-        var sdkDocument = await PublicReadAssertions.DocumentAsync(await sdk.GetAsync(expected.Reference, minimum, cancellationToken));
+        var name = expected.Reference with { Lifetime = null };
+        var sdkDocument = await PublicReadAssertions.DocumentAsync(await sdk.GetAsync(name, minimum, cancellationToken));
         var mcpDocument = await PublicReadAssertions.DocumentAsync(await mcp.CallAsync(
-            McpCallerTools.DocumentsGet, new GetDocumentRequest(expected.Reference, minimum), cancellationToken));
+            McpCallerTools.DocumentsGet, new GetDocumentRequest(name, minimum), cancellationToken));
         await ScopedCommandIdentityClusterOracle.EqualAsync<DocumentResult?>(expected, sdkDocument);
         await ScopedCommandIdentityClusterOracle.EqualAsync<DocumentResult?>(expected, mcpDocument.Value);
     }

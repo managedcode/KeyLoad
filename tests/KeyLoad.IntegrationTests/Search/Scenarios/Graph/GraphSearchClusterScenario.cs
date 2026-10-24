@@ -3,11 +3,13 @@ using System.Security.Cryptography;
 using System.Text;
 using KeyLoad.Client;
 using KeyLoad.IntegrationTests.ClientApi;
+using KeyLoad.IntegrationTests.ResourceExecution;
 
 namespace KeyLoad.IntegrationTests.Search;
 
 /// <summary>Seeds an independently specified multi-collection graph for public Orleans search tests.</summary>
-internal sealed record GraphSearchClusterScenario(PartitionRef Partition)
+internal sealed record GraphSearchClusterScenario(PartitionRef Partition, EntityRefLifetime DocumentsLifetime,
+    EntityRefLifetime ProjectsLifetime)
 {
     internal const string Documents = "graphdocs";
     internal const string Projects = "graphprojects";
@@ -34,11 +36,11 @@ internal sealed record GraphSearchClusterScenario(PartitionRef Partition)
             "graph-cluster-database", "graph-cluster-domain", Guid.NewGuid().ToString("N"));
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
         var admin = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
-        await ConfigureResourceAsync(admin, partition, Documents, ResourceKind.Collection, cancellationToken);
-        await ConfigureResourceAsync(admin, partition, Projects, ResourceKind.Collection, cancellationToken);
+        var documents = await ConfigureResourceAsync(admin, partition, Documents, ResourceKind.Collection, cancellationToken);
+        var projects = await ConfigureResourceAsync(admin, partition, Projects, ResourceKind.Collection, cancellationToken);
         await ConfigureGraphAsync(admin, partition, cancellationToken);
         await McpCallerAssertions.SdkSuccessAsync(await admin.CommitAsync(Seed(partition), cancellationToken));
-        return new(partition);
+        return new(partition, documents, projects);
     }
 
     internal static GraphSearchRequest Request(PartitionRef partition, int limit = 10,
@@ -96,12 +98,19 @@ internal sealed record GraphSearchClusterScenario(PartitionRef Partition)
 
     internal EntityRef Vertex(string collection, string id) => new(Partition, collection, id);
 
-    private static async Task ConfigureResourceAsync(KeyLoadClient admin, PartitionRef partition,
+    internal EntityRef StoredVertex(string collection, string id) => Vertex(collection, id) with
+    {
+        Lifetime = collection == Documents ? DocumentsLifetime : ProjectsLifetime
+    };
+
+    private static async Task<EntityRefLifetime> ConfigureResourceAsync(KeyLoadClient admin, PartitionRef partition,
         string name, ResourceKind kind, CancellationToken cancellationToken)
     {
         var resource = new ResourceDefinition(name, kind, partition.TransactionDomainId);
-        await McpCallerAssertions.SdkSuccessAsync(await admin.ConfigureResourceAsync(Guid.NewGuid(),
-            new(partition.TenantId, partition.DatabaseId, resource), cancellationToken));
+        var creationId = Guid.NewGuid();
+        var creation = new ConfigureResourceRequest(partition.TenantId, partition.DatabaseId, resource);
+        await McpCallerAssertions.SdkSuccessAsync(await admin.ConfigureResourceAsync(creationId, creation, cancellationToken));
+        return ResourceCreationLifetime.Create(creationId, creation);
     }
 
     private static async Task ConfigureGraphAsync(KeyLoadClient admin, PartitionRef partition,

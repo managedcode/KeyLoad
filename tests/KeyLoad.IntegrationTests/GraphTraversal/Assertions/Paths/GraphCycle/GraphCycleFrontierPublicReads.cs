@@ -57,7 +57,7 @@ internal static class GraphCycleFrontierPublicReads
         var request = new ReadIncomingGraphEdgesRequest(1, vertex, state.Seed.Graph, 7);
         var expected = state.Edges.Where(edge => edge.To == vertex && (!state.Hidden || edge.From != state.A))
             .OrderBy(edge => edge.From.Collection, StringComparer.Ordinal).ThenBy(edge => edge.From.Id, StringComparer.Ordinal)
-            .ThenBy(edge => edge.Id, StringComparer.Ordinal).Select(edge => new GraphIncomingEdgeRow(edge, 0L)).ToArray();
+            .ThenBy(edge => edge.Id, StringComparer.Ordinal).Select(edge => new GraphIncomingEdgeRow(state.Seed.StoredEdge(edge), 0L)).ToArray();
         var sdk = await McpCallerAssertions.SdkSuccessAsync(await global::KeyLoad.Client.GraphIncomingEdgesClient.IncomingEdgesAsync(
             reader.Sdk, request, token));
         await PageAsync(sdk, expected);

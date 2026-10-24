@@ -11,7 +11,7 @@ internal static class GraphCrossAuthorityR41Assertions
         foreach (var reference in new[] { state.Seed.Target, state.Seed.LocalSource, state.Seed.FirstSource,
             state.Seed.SecondSource, state.Collision })
         {
-            var expected = new DocumentResult(reference, 1L, "{}", false, []);
+            var expected = new DocumentResult(state.Seed.Stored(reference), 1L, "{}", false, []);
             await SqlClusterProtocol.EqualAsync(expected, await PublicReadAssertions.DocumentAsync(
                 await administrator.Sdk.GetAsync(reference, token)));
             await SqlClusterProtocol.EqualAsync(expected, (await PublicReadAssertions.DocumentAsync(
@@ -19,7 +19,7 @@ internal static class GraphCrossAuthorityR41Assertions
         }
         await TraversalAsync(administrator, state.Request(), state.Expected(false), state.Seed.Reader.Secret, null, token);
         var collision = new TraverseRequest(state.Seed.TargetPartition, state.Seed.Graph, state.Collision, 3, 2, 1);
-        var expectedCollision = new global::KeyLoad.GraphTraversal([state.Collision, state.Seed.Target], [state.Colliding]);
+        var expectedCollision = state.Seed.StoredTraversal(new([state.Collision, state.Seed.Target], [state.Colliding]));
         await TraversalAsync(administrator, collision, expectedCollision, state.Seed.Reader.Secret, null, token);
         await SqlClusterProtocol.EqualAsync(state.Outbox, await OutboxAsync(administrator, state, token));
     }

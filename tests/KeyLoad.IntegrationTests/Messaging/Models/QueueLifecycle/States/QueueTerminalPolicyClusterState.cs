@@ -18,6 +18,9 @@ internal sealed class QueueTerminalPolicyClusterState(PartitionRef partition, Re
         get; set;
     }
     internal OutboxStatus Baseline { get; set; } = null!;
+    internal EntityRefLifetime CollectionLifetime { get; set; } = null!;
+    internal EntityRef StoredDocument(string id)
+        => new(Partition, QueueTerminalPolicyClusterProtocol.Collection, id) { Lifetime = CollectionLifetime };
     internal List<(CommandRequest Request, CommitReceipt Result)> Producers { get; } = [];
     internal List<(ReceiveRequest Request, ReceiveResult Result)> Claims { get; } = [];
     internal List<(DeliveryCommand Request, CommitReceipt Result)> Completions { get; } = [];

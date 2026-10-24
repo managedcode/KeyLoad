@@ -1,5 +1,6 @@
 using KeyLoad.IntegrationTests.ClientApi;
 using KeyLoad.IntegrationTests.OrleansExecution;
+using KeyLoad.IntegrationTests.ResourceExecution;
 
 namespace KeyLoad.IntegrationTests.DatabaseComposition;
 
@@ -17,7 +18,7 @@ internal static class QueueReferenceSelectSetup
                 FieldPolicies = [new("/to", "reference", RawReadGrant: QueueReferenceSelectProtocol.RefRead, RawUseGrant: QueueReferenceSelectProtocol.RefUse)]
             }, token);
         }
-        await ConfigureAsync(admin, partition, new(QueueReferenceSelectProtocol.Target, ResourceKind.Collection, partition.TransactionDomainId)
+        var targetLifetime = await ConfigureAsync(admin, partition, new(QueueReferenceSelectProtocol.Target, ResourceKind.Collection, partition.TransactionDomainId)
         {
             RelationalSchema = new(IdFieldKey, [new(IdFieldKey, RelationalColumnType.Text), new("name", RelationalColumnType.Text)]),
             FieldPolicies = [new("/name", "private", RawReadGrant: QueueReferenceSelectProtocol.NameRead)]
@@ -37,7 +38,7 @@ internal static class QueueReferenceSelectSetup
                 QueueReferenceSelectProtocol.Payload(partition with { PartitionKey = "foreign" }, "c1", 7))
         ]);
         var receipt = await McpCallerAssertions.SdkSuccessAsync(await admin.Sdk.CommitAsync(command, token));
-        var state = new QueueReferenceSelectState(partition, identity, command, receipt);
+        var state = new QueueReferenceSelectState(partition, identity, command, receipt, targetLifetime);
         await PolicyAsync(admin, state, 2, allow: false, names: false, token);
         await QueueReferenceSelectSources.VerifyAsync(admin, state, token);
         return state;
@@ -68,8 +69,12 @@ internal static class QueueReferenceSelectSetup
         await McpCallerAssertions.SdkSuccessAsync(await admin.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(), principal, token));
     }
 
-    private static async Task ConfigureAsync(RequestCqrsClusterCallers admin, PartitionRef partition,
+    private static async Task<EntityRefLifetime> ConfigureAsync(RequestCqrsClusterCallers admin, PartitionRef partition,
         ResourceDefinition definition, CancellationToken token)
-        => await McpCallerAssertions.SdkSuccessAsync(await admin.Sdk.ConfigureResourceAsync(Guid.NewGuid(),
-            new(partition.TenantId, partition.DatabaseId, definition), token));
+    {
+        var creationId = Guid.NewGuid();
+        var creation = new ConfigureResourceRequest(partition.TenantId, partition.DatabaseId, definition);
+        await McpCallerAssertions.SdkSuccessAsync(await admin.Sdk.ConfigureResourceAsync(creationId, creation, token));
+        return ResourceCreationLifetime.Create(creationId, creation);
+    }
 }

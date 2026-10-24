@@ -22,7 +22,7 @@ internal static class StrongReadSessionReads
         StrongReadSessionState state, EntityRef reference, CommitToken minimum, CancellationToken token)
     {
         var expected = reference.Id == SentinelId
-            ? new DocumentResult(reference, CreatedRevision, SentinelJson, false, [])
+            ? new DocumentResult(state.Stored(SentinelId), CreatedRevision, SentinelJson, false, [])
             : reference.Id == TargetId ? state.Target : null;
         foreach (var route in Enum.GetValues<StrongReadSessionRoute>())
         {

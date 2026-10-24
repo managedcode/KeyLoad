@@ -16,9 +16,11 @@ internal static class GraphVertexPublicAssertions
     {
         foreach (var start in new[] { state.Seed.LocalSource, state.NewVertex, state.Seed.Target })
         {
-            var expectedEdges = state.Edges.Where(edge => edge.From == start).OrderBy(edge => edge.Id, StringComparer.Ordinal).ToArray();
-            var expectedVertices = expectedEdges.Select(edge => edge.To).Append(start).Distinct()
-                .OrderBy(vertex => vertex.Collection, StringComparer.Ordinal).ThenBy(vertex => vertex.Id, StringComparer.Ordinal).ToArray();
+            var outgoing = state.Edges.Where(edge => edge.From == start).OrderBy(edge => edge.Id, StringComparer.Ordinal).ToArray();
+            var expectedEdges = outgoing.Select(state.Seed.StoredEdge).ToArray();
+            var expectedVertices = outgoing.Select(edge => edge.To).Append(start).Distinct()
+                .OrderBy(vertex => vertex.Collection, StringComparer.Ordinal).ThenBy(vertex => vertex.Id, StringComparer.Ordinal)
+                .Select(state.Seed.Stored).ToArray();
             var request = new TraverseRequest(start.Partition, state.Seed.Graph, start, Depth, MaximumVertices, MaximumEdges);
             var sdk = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.TraverseAsync(request, token));
             var mcp = (await McpCallerAssertions.SuccessAsync<global::KeyLoad.GraphTraversal>(
@@ -30,7 +32,7 @@ internal static class GraphVertexPublicAssertions
             var incoming = await McpCallerAssertions.SdkSuccessAsync(await global::KeyLoad.Client.GraphIncomingEdgesClient.IncomingEdgesAsync(callers.Sdk, incomingRequest, token));
             var expectedIncoming = state.Edges.Where(edge => edge.To == start).OrderBy(edge => edge.From.Collection, StringComparer.Ordinal)
                 .ThenBy(edge => edge.From.Id, StringComparer.Ordinal).ThenBy(edge => edge.Id, StringComparer.Ordinal)
-                .Select(edge => new GraphIncomingEdgeRow(edge, 0L)).ToArray();
+                .Select(edge => new GraphIncomingEdgeRow(state.Seed.StoredEdge(edge), 0L)).ToArray();
             await Assert.That(incoming.Rows.SequenceEqual(expectedIncoming)).IsTrue();
             var mcpIncoming = (await McpCallerAssertions.SuccessAsync<GraphIncomingEdgesPage>(
                 await callers.Mcp.CallAsync(McpCallerTools.GraphIncomingEdges, incomingRequest, token))).Value;

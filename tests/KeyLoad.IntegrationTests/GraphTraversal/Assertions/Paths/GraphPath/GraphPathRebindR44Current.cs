@@ -11,14 +11,15 @@ internal static class GraphPathRebindR44Current
     {
         foreach (var vertex in state.Vertices)
         {
-            var document = new DocumentResult(vertex, 1L, "{}", false, []);
+            var document = new DocumentResult(state.Seed.Stored(vertex), 1L, "{}", false, []);
             await SqlClusterProtocol.EqualAsync(document, await PublicReadAssertions.DocumentAsync(await admin.Sdk.GetAsync(vertex, token)));
             await SqlClusterProtocol.EqualAsync(document, (await PublicReadAssertions.DocumentAsync(
                 await admin.Mcp.CallAsync(McpCallerTools.DocumentsGet, new GetDocumentRequest(vertex), token))).Value);
             var request = new TraverseRequest(state.Seed.Partition, GraphPathClusterScenario.Graph, vertex, 1, 4, 4);
-            await SqlClusterProtocol.EqualAsync(state.Outgoing(vertex), await McpCallerAssertions.SdkSuccessAsync(
+            var outgoing = state.Seed.StoredTraversal(state.Outgoing(vertex));
+            await SqlClusterProtocol.EqualAsync(outgoing, await McpCallerAssertions.SdkSuccessAsync(
                 await admin.Sdk.TraverseAsync(request, token)));
-            await SqlClusterProtocol.EqualAsync(state.Outgoing(vertex), (await McpCallerAssertions.SuccessAsync<global::KeyLoad.GraphTraversal>(
+            await SqlClusterProtocol.EqualAsync(outgoing, (await McpCallerAssertions.SuccessAsync<global::KeyLoad.GraphTraversal>(
                 await admin.Mcp.CallAsync(McpCallerTools.GraphTraverse, request, token))).Value);
             await IncomingAsync(admin, state, vertex, token);
         }
@@ -31,7 +32,7 @@ internal static class GraphPathRebindR44Current
         var request = new ReadIncomingGraphEdgesRequest(1, vertex, GraphPathClusterScenario.Graph, 4);
         var rows = state.Edges.Where(edge => edge.To == vertex).OrderBy(edge => edge.From.Collection, StringComparer.Ordinal)
             .ThenBy(edge => edge.From.Id, StringComparer.Ordinal).ThenBy(edge => edge.Id, StringComparer.Ordinal)
-            .Select(edge => new GraphIncomingEdgeRow(edge, 0L)).ToArray();
+            .Select(edge => new GraphIncomingEdgeRow(state.Seed.StoredEdge(edge), 0L)).ToArray();
         await PageAsync(await McpCallerAssertions.SdkSuccessAsync(await global::KeyLoad.Client.GraphIncomingEdgesClient.IncomingEdgesAsync(
             admin.Sdk, request, token)), rows);
         await PageAsync((await McpCallerAssertions.SuccessAsync<GraphIncomingEdgesPage>(await admin.Mcp.CallAsync(

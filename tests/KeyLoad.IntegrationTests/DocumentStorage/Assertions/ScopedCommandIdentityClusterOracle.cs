@@ -8,7 +8,8 @@ internal static class ScopedCommandIdentityClusterOracle
 {
     internal static DocumentResult Document(ScopedCommandIdentityClusterScenario scenario, bool first)
         => new(new(first ? scenario.FirstPartition : scenario.SecondPartition, scenario.Collection,
-            first ? "partition-a-document" : "partition-b-document"), 1,
+            first ? "partition-a-document" : "partition-b-document")
+        { Lifetime = scenario.Lifetime }, 1,
             first ? "{\"value\":\"partition-a-original\"}" : "{\"value\":\"partition-b-original\"}", false, []);
 
     internal static MessageInspection Message(bool first)

@@ -1,7 +1,12 @@
 namespace KeyLoad.IntegrationTests.Messaging;
 
-internal sealed record AtomicTriadStagedClusterState(PartitionRef Partition, MessagingClusterIdentity Identity, CommandRequest Failed)
+internal sealed record AtomicTriadStagedClusterState(PartitionRef Partition, MessagingClusterIdentity Identity, CommandRequest Failed,
+    EntityRefLifetime CollectionLifetime)
 {
+    internal EntityRef StoredEntity => new(Partition, AtomicTriadStagedClusterProtocol.Collection, AtomicTriadStagedClusterProtocol.Entity)
+    {
+        Lifetime = CollectionLifetime
+    };
     internal CommandRequest Healthy
     {
         get;

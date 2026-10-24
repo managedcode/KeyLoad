@@ -45,7 +45,7 @@ internal sealed class GraphPathClusterAuthorizationTests(ClusterFixture fixture)
         var request = GraphPathClusterScenario.Request(seed, labels: ImmutableArray.Create(GraphPathClusterScenario.Label));
         var initial = await McpCallerAssertions.SdkSuccessAsync(await sdk.ShortestPathAsync(request, deadline.Token));
         await GraphPathClusterAssertions.AssertPathAsync(initial,
-            [seed.Source, seed.FirstBranch, seed.Target], ["a-branch-a", "a-end-a"], GraphPathClusterScenario.Label);
+            seed.StoredVertices([seed.Source, seed.FirstBranch, seed.Target]), ["a-branch-a", "a-end-a"], GraphPathClusterScenario.Label);
 
         var deniedGrants = GraphPathClusterScenario.FullGraphGrants(seed.Partition)
             .Select(grant => grant.Resource == GraphPathClusterScenario.Graph
@@ -62,7 +62,7 @@ internal sealed class GraphPathClusterAuthorizationTests(ClusterFixture fixture)
             GraphPathClusterScenario.FullGraphGrants(seed.Partition), [GraphPathClusterScenario.LabelUseGrant, GraphPathClusterScenario.LabelReadGrant], deadline.Token);
         var recovered = await McpCallerAssertions.SdkSuccessAsync(await sdk.ShortestPathAsync(request, deadline.Token));
         await GraphPathClusterAssertions.AssertPathAsync(recovered,
-            [seed.Source, seed.FirstBranch, seed.Target], ["a-branch-a", "a-end-a"], GraphPathClusterScenario.Label);
+            seed.StoredVertices([seed.Source, seed.FirstBranch, seed.Target]), ["a-branch-a", "a-end-a"], GraphPathClusterScenario.Label);
         await Assert.That(recovered.CutPosition).IsGreaterThan(initial.CutPosition);
         var mcpRecovered = await McpCallerAssertions.SuccessAsync<GraphShortestPathResult>(await mcp.CallAsync(
             GraphPathClusterScenario.DirectTool, request, deadline.Token));
@@ -96,7 +96,7 @@ internal sealed class GraphPathClusterAuthorizationTests(ClusterFixture fixture)
         var mcpResult = await McpCallerAssertions.SuccessAsync<GraphShortestPathResult>(await mcp.CallAsync(
             GraphPathClusterScenario.DirectTool, request, cancellationToken));
         await GraphPathClusterAssertions.AssertPathAsync(sdkResult,
-            [seed.Source, seed.FirstBranch, seed.Target], ["a-branch-a", "a-end-a"], GraphPathClusterScenario.Label);
+            seed.StoredVertices([seed.Source, seed.FirstBranch, seed.Target]), ["a-branch-a", "a-end-a"], GraphPathClusterScenario.Label);
         await GraphPathClusterAssertions.AssertProjectedAsync(sdkResult);
         await GraphPathClusterAssertions.AssertEquivalentAsync(sdkResult, mcpResult.Value);
         var sql = GraphPathClusterScenario.SqlRequest(seed, label: GraphPathClusterScenario.Label);

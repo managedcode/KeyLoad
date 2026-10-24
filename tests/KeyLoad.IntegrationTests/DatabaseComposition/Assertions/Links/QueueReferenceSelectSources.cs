@@ -12,11 +12,11 @@ internal static class QueueReferenceSelectSources
         {
             var reference = new EntityRef(state.Partition, QueueReferenceSelectProtocol.Target, id);
             var actual = await PublicReadAssertions.DocumentAsync(await admin.Sdk.GetAsync(reference, token));
-            await SqlClusterProtocol.EqualAsync(new DocumentResult(reference, 1, json, false, []), actual);
+            await SqlClusterProtocol.EqualAsync(new DocumentResult(state.StoredTarget(id), 1, json, false, []), actual);
         }
         var missing = new EntityRef(state.Partition, QueueReferenceSelectProtocol.Target, "m");
         var repaired = await PublicReadAssertions.DocumentAsync(await admin.Sdk.GetAsync(missing, token));
-        await SqlClusterProtocol.EqualAsync(state.Repair is null ? null : new DocumentResult(missing, 1,
+        await SqlClusterProtocol.EqualAsync(state.Repair is null ? null : new DocumentResult(state.StoredTarget(missing.Id), 1,
             QueueReferenceSelectProtocol.RepairedJson, false, []), repaired);
         var payloads = new[] { ExpectedPayload(state.Partition, "c1", 7),
             ExpectedPayload(state.Partition, "m", 7),

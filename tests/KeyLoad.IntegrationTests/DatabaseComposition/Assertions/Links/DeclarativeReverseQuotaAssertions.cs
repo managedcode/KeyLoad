@@ -39,14 +39,14 @@ internal static class DeclarativeReverseQuotaAssertions
         var traversal = new TraverseRequest(state.Scenario.Partition, DeclarativeReverseQuotaFlow.Graph, state.Scenario.First);
         await SqlClusterProtocol.EqualAsync(state.Source.Graph, await SqlClusterProtocol.McpAsync<global::KeyLoad.GraphTraversal>(
             callers.Mcp, SqlClusterProtocol.Call(state.Scenario.Partition, McpCallerTools.GraphTraverse, traversal), token));
-        foreach (var (reference, json, original) in new[] {
-            (state.Scenario.First, RelationalSqlClusterTokens.FirstRow, state.FirstDocument),
-            (state.Scenario.Second, RelationalSqlClusterTokens.SecondRow, state.SecondDocument) })
+        foreach (var (reference, stored, json, original) in new[] {
+            (state.Scenario.First, state.Scenario.StoredFirst, RelationalSqlClusterTokens.FirstRow, state.FirstDocument),
+            (state.Scenario.Second, state.Scenario.StoredSecond, RelationalSqlClusterTokens.SecondRow, state.SecondDocument) })
         {
             var actual = await PublicReadAssertions.DocumentAsync(await callers.Sdk.GetAsync(reference, token));
             await SqlClusterProtocol.EqualAsync(original, actual);
             await Assert.That(actual).IsNotNull();
-            await Assert.That(actual!.Reference).IsEqualTo(reference);
+            await Assert.That(actual!.Reference).IsEqualTo(stored);
             await Assert.That(actual.Json).IsEqualTo(json);
             await Assert.That(actual.Revision).IsEqualTo(InitialVersion);
             await Assert.That(actual.Redacted).IsFalse();
@@ -74,7 +74,7 @@ internal static class DeclarativeReverseQuotaAssertions
             await Assert.That(official).IsNull();
             return;
         }
-        var link = new QueueGraphLink(state.Scenario.First, state.Scenario.Second, RelationalSqlClusterTokens.EdgeLabel);
+        var link = new QueueGraphLink(state.Scenario.StoredFirst, state.Scenario.StoredSecond, RelationalSqlClusterTokens.EdgeLabel);
         var expected = new MessageInspection(new MessageMetadata(id, MessageState.Ready, NoAttempts,
             InitialVersion, sequence, null, null), DatabaseCompositionClusterPayload.Golden(link), Headers);
         await SqlClusterProtocol.EqualAsync(expected, actual);

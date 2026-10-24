@@ -4,10 +4,11 @@ using System.Text;
 using System.Text.Json;
 using KeyLoad.Client;
 using KeyLoad.IntegrationTests.ClientApi;
+using KeyLoad.IntegrationTests.ResourceExecution;
 
 namespace KeyLoad.IntegrationTests.Search;
 
-internal sealed record ThreeWayHybridClusterScenario(PartitionRef Partition)
+internal sealed record ThreeWayHybridClusterScenario(PartitionRef Partition, EntityRefLifetime DocumentsLifetime)
 {
     internal const string Documents = "three-way-documents";
     internal const string Projects = "three-way-projects";
@@ -45,12 +46,12 @@ internal sealed record ThreeWayHybridClusterScenario(PartitionRef Partition)
             "three-way-database", "three-way-domain", Guid.NewGuid().ToString("N"));
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
         var admin = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
-        await ConfigureAsync(admin, partition, DocumentsResource(), cancellationToken);
+        var documents = await ConfigureAsync(admin, partition, DocumentsResource(), cancellationToken);
         await ConfigureAsync(admin, partition, new(Projects, ResourceKind.Collection, partition.TransactionDomainId), cancellationToken);
         await ConfigureAsync(admin, partition, GraphResource(), cancellationToken);
         await ConfigureAsync(admin, partition, new(ExpansionGraph, ResourceKind.Graph, partition.TransactionDomainId), cancellationToken);
         await McpCallerAssertions.SdkSuccessAsync(await admin.CommitAsync(ThreeWayHybridClusterSeed.Create(partition), cancellationToken));
-        return new(partition);
+        return new(partition, documents);
     }
 
     internal GraphSearchRequest Request(bool restricted = false, bool expansion = true, bool allZero = false, bool labeled = false)
@@ -150,10 +151,16 @@ internal sealed record ThreeWayHybridClusterScenario(PartitionRef Partition)
         ]
     };
 
-    private static async Task ConfigureAsync(KeyLoadClient admin, PartitionRef partition,
+    internal EntityRef StoredDocument(string id) => new(Partition, Documents, id) { Lifetime = DocumentsLifetime };
+
+    private static async Task<EntityRefLifetime> ConfigureAsync(KeyLoadClient admin, PartitionRef partition,
         ResourceDefinition resource, CancellationToken cancellationToken)
-        => await McpCallerAssertions.SdkSuccessAsync(await admin.ConfigureResourceAsync(Guid.NewGuid(),
-            new(partition.TenantId, partition.DatabaseId, resource), cancellationToken));
+    {
+        var creationId = Guid.NewGuid();
+        var creation = new ConfigureResourceRequest(partition.TenantId, partition.DatabaseId, resource);
+        await McpCallerAssertions.SdkSuccessAsync(await admin.ConfigureResourceAsync(creationId, creation, cancellationToken));
+        return ResourceCreationLifetime.Create(creationId, creation);
+    }
 
     private GraphWalkSpec Walk(string root, int depth)
         => new(Graph, [new(Partition, Projects, root)], depth, MaxVertices: 30, MaxEdges: 60);

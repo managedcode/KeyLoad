@@ -2,6 +2,7 @@ using KeyLoad.Core;
 using KeyLoad.IntegrationTests.ClientApi;
 using KeyLoad.IntegrationTests.OrleansExecution;
 using KeyLoad.IntegrationTests.QueryExecution;
+using KeyLoad.IntegrationTests.ResourceExecution;
 
 namespace KeyLoad.IntegrationTests.ChangeFeeds;
 
@@ -16,8 +17,10 @@ internal static class DocumentLiveProfileClusterSetup
         {
             FieldPolicies = [new("/secret", "private", "private.read", "private.use")]
         };
-        await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.ConfigureResourceAsync(Guid.NewGuid(),
-            new(state.Partition.TenantId, state.Partition.DatabaseId, resource), token));
+        var creationId = Guid.NewGuid();
+        var creation = new ConfigureResourceRequest(state.Partition.TenantId, state.Partition.DatabaseId, resource);
+        await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.ConfigureResourceAsync(creationId, creation, token));
+        state.Lifetime = ResourceCreationLifetime.Create(creationId, creation);
         await PrincipalAsync(root, state, 1L, true, false, token);
         await McpCallerAssertions.SdkStatusAsync(await root.Sdk.ConfigureApiKeyAsync(Guid.NewGuid(),
             AuthorizationExecution.Credential(state.Key.Split('.')[0], state.PrincipalId, state.Key), token));

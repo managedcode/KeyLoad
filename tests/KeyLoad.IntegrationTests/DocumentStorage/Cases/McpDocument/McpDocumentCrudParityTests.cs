@@ -13,7 +13,7 @@ internal sealed class McpDocumentCrudParityTests(ClusterFixture fixture)
     {
         using var deadline = McpCallerDeadline.Create();
         var source = await McpDocumentScenario.CreateAsync(fixture, deadline.Token);
-        var scenario = new McpDocumentCrudParityScenario(source.Partition);
+        var scenario = new McpDocumentCrudParityScenario(source.Partition, source.Lifetime);
         var identity = await McpPersistedIdentity.CreateAsync(fixture, source.Partition,
             Capability.DocumentsRead | Capability.DocumentsWrite, deadline.Token);
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
@@ -29,7 +29,7 @@ internal sealed class McpDocumentCrudParityTests(ClusterFixture fixture)
     {
         using var deadline = McpCallerDeadline.Create();
         var source = await McpDocumentScenario.CreateAsync(fixture, deadline.Token);
-        var scenario = new McpDocumentCrudParityScenario(source.Partition);
+        var scenario = new McpDocumentCrudParityScenario(source.Partition, source.Lifetime);
         var identity = await McpPersistedIdentity.CreateAsync(fixture, source.Partition,
             Capability.DocumentsRead | Capability.DocumentsWrite, deadline.Token);
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
@@ -45,7 +45,7 @@ internal sealed class McpDocumentCrudParityTests(ClusterFixture fixture)
     {
         using var deadline = McpCallerDeadline.Create();
         var source = await McpDocumentScenario.CreateAsync(fixture, deadline.Token);
-        var scenario = new McpDocumentCrudParityScenario(source.Partition);
+        var scenario = new McpDocumentCrudParityScenario(source.Partition, source.Lifetime);
         var identity = await McpPersistedIdentity.CreateAsync(fixture, source.Partition,
             Capability.DocumentsRead | Capability.DocumentsWrite, deadline.Token);
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);

@@ -97,7 +97,7 @@ internal sealed class GraphIncomingClusterTests(ClusterFixture fixture)
         var reader = new KeyLoadClient(readerHttp, seed.Reader.Secret, IntegrationClientOptions.Execution());
         var afterDelete = await McpCallerAssertions.SdkSuccessAsync(await reader.IncomingEdgesAsync(
             GraphIncomingClusterScenario.Request(seed), deadline.Token));
-        await Assert.That(afterDelete.Rows.Any(row => row.Edge.From == seed.FirstSource)).IsFalse();
+        await Assert.That(afterDelete.Rows.Any(row => row.Edge.From == seed.Stored(seed.FirstSource))).IsFalse();
         var reinserted = await GraphIncomingClusterScenario.CommitAsync(admin, seed.FirstSourcePartition,
             deadline.Token, GraphIncomingClusterScenario.Edge(FirstEdgeId, seed.FirstSource, seed.Target,
                 marker: UpdatedMarker, expectedRevision: 3));
@@ -109,8 +109,8 @@ internal sealed class GraphIncomingClusterTests(ClusterFixture fixture)
                 seed.Target, 3));
         var current = await McpCallerAssertions.SdkSuccessAsync(await reader.IncomingEdgesAsync(
             GraphIncomingClusterScenario.Request(seed), deadline.Token));
-        await GraphIncomingClusterAssertions.AssertExpectedRowAsync(current, seed.FirstSource, seed.Target, FirstEdgeId,
-            4, 4, UpdatedMarker);
+        await GraphIncomingClusterAssertions.AssertExpectedRowAsync(current, seed.Stored(seed.FirstSource),
+            seed.Stored(seed.Target), FirstEdgeId, 4, 4, UpdatedMarker);
         await AssertSecondSourceAndLocalRemainAsync(current, seed);
     }
 
@@ -164,18 +164,18 @@ internal sealed class GraphIncomingClusterTests(ClusterFixture fixture)
         var reader = new KeyLoadClient(http, seed.Reader.Secret, IntegrationClientOptions.Execution());
         var page = await McpCallerAssertions.SdkSuccessAsync(await reader.IncomingEdgesAsync(
             GraphIncomingClusterScenario.Request(seed), cancellationToken));
-        await Assert.That(page.Rows.Any(row => row.Edge.From == seed.FirstSource)).IsFalse();
-        await Assert.That(page.Rows.Any(row => row.Edge.From == seed.SecondSource)).IsTrue();
-        await Assert.That(page.Rows.Any(row => row.Edge.From == seed.LocalSource)).IsTrue();
+        await Assert.That(page.Rows.Any(row => row.Edge.From == seed.Stored(seed.FirstSource))).IsFalse();
+        await Assert.That(page.Rows.Any(row => row.Edge.From == seed.Stored(seed.SecondSource))).IsTrue();
+        await Assert.That(page.Rows.Any(row => row.Edge.From == seed.Stored(seed.LocalSource))).IsTrue();
     }
 
     private static async Task AssertSecondSourceAndLocalRemainAsync(GraphIncomingEdgesPage page,
         GraphIncomingClusterSeed seed)
     {
-        await GraphIncomingClusterAssertions.AssertExpectedRowAsync(page, seed.SecondSource,
-            seed.Target, FirstEdgeId, 1, 1, GraphIncomingClusterScenario.PublicMarker + "-second");
-        await GraphIncomingClusterAssertions.AssertExpectedRowAsync(page, seed.LocalSource,
-            seed.Target, LocalEdgeId, 1, 0, GraphIncomingClusterScenario.PublicMarker + "-local");
+        await GraphIncomingClusterAssertions.AssertExpectedRowAsync(page, seed.Stored(seed.SecondSource),
+            seed.Stored(seed.Target), FirstEdgeId, 1, 1, GraphIncomingClusterScenario.PublicMarker + "-second");
+        await GraphIncomingClusterAssertions.AssertExpectedRowAsync(page, seed.Stored(seed.LocalSource),
+            seed.Stored(seed.Target), LocalEdgeId, 1, 0, GraphIncomingClusterScenario.PublicMarker + "-local");
     }
 
     private static async Task AssertTargetGraphDeniedAsync(ClusterFixture fixture, KeyLoadClient admin,

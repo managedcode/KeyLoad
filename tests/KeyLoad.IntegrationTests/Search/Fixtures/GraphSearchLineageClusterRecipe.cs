@@ -5,6 +5,8 @@ namespace KeyLoad.IntegrationTests.Search;
 internal static class GraphSearchLineageClusterRecipe
 {
     internal static EntityRef Vertex(PartitionRef partition, string id) => new(partition, GraphSearchLineageClusterProtocol.Collection, id);
+    internal static EntityRef StoredVertex(PartitionRef partition, string id, EntityRefLifetime lifetime)
+        => Vertex(partition, id) with { Lifetime = lifetime };
     internal static CommandRequest Seed(PartitionRef partition)
         => new(Guid.NewGuid(), partition,
         [new PutDocument(GraphSearchLineageClusterProtocol.Collection, GraphSearchLineageClusterProtocol.Alpha, GraphSearchLineageClusterProtocol.AlphaJson),
@@ -48,14 +50,15 @@ internal static class GraphSearchLineageClusterRecipe
                 GraphSearchLineageClusterProtocol.Vertices, GraphSearchLineageClusterProtocol.Edges, labels) : null);
     }
 
-    internal static GraphSearchResult Expected(PartitionRef partition, bool expansion, bool emptyLabels)
+    internal static GraphSearchResult Expected(PartitionRef partition, bool expansion, bool emptyLabels,
+        EntityRefLifetime lifetime)
     {
         var firstBranches = expansion ? 1d : 2d;
         var secondBranches = expansion || emptyLabels ? 1d : 2d;
         return new(
-            [new(new(Vertex(partition, GraphSearchLineageClusterProtocol.Alpha), 1L, GraphSearchLineageClusterProtocol.AlphaJson, false, []), firstBranches / 61d),
-             new(new(Vertex(partition, GraphSearchLineageClusterProtocol.Beta), 1L, GraphSearchLineageClusterProtocol.BetaJson, false, []), secondBranches / 62d)],
-            expansion ? new(emptyLabels ? [] : [new(new(Vertex(partition, GraphSearchLineageClusterProtocol.Context), 1L,
+            [new(new(StoredVertex(partition, GraphSearchLineageClusterProtocol.Alpha, lifetime), 1L, GraphSearchLineageClusterProtocol.AlphaJson, false, []), firstBranches / 61d),
+             new(new(StoredVertex(partition, GraphSearchLineageClusterProtocol.Beta, lifetime), 1L, GraphSearchLineageClusterProtocol.BetaJson, false, []), secondBranches / 62d)],
+            expansion ? new(emptyLabels ? [] : [new(new(StoredVertex(partition, GraphSearchLineageClusterProtocol.Context, lifetime), 1L,
                 GraphSearchLineageClusterProtocol.ContextJson, false, []), 1)], GraphExpansionCompleteness.SelectedHits) : null);
     }
 }

@@ -34,7 +34,7 @@ internal static class EventProjectionLineageR41Canonical
             var reference = new EntityRef(state.Partition, EventProjectionLineageR41Protocol.Collection, id);
             var json = id == EventProjectionLineageR41Protocol.Source ? EventProjectionLineageR41Protocol.SourceJson :
              id == EventProjectionLineageR41Protocol.Target ? EventProjectionLineageR41Protocol.TargetJson : EventProjectionLineageR41Protocol.BaselineJson;
-            DocumentResult? expected = state.Deleted && id == EventProjectionLineageR41Protocol.Source ? null : new(reference, 1L, json, false, []);
+            DocumentResult? expected = state.Deleted && id == EventProjectionLineageR41Protocol.Source ? null : new(state.StoredReference(id), 1L, json, false, []);
             await SqlClusterProtocol.EqualAsync(expected, await PublicReadAssertions.DocumentAsync(await admin.Sdk.GetAsync(reference, token)));
             await SqlClusterProtocol.EqualAsync(expected, (await PublicReadAssertions.DocumentAsync(await admin.Mcp.CallAsync(
              McpCallerTools.DocumentsGet, new GetDocumentRequest(reference), token))).Value);

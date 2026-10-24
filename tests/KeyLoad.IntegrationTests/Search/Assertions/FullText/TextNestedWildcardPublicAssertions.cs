@@ -46,7 +46,7 @@ internal static class TextNestedWildcardPublicAssertions
     private static async Task PageAsync(RequestCqrsClusterCallers callers, TextNestedWildcardPublicScenario state,
         string json, string[] hidden, CancellationToken token)
     {
-        RankedDocument[] expected = [new(new(new(state.Partition, TextNestedWildcardPublicScenario.Collection, "a"),
+        RankedDocument[] expected = [new(new(state.StoredReference("a"),
             1L, json, hidden.Length != 0, [.. hidden]), 1d / 61d)];
         await SqlClusterProtocol.EqualAsync(expected, await McpCallerAssertions.SdkSuccessAsync(
             await callers.Sdk.SearchAsync(state.Request(), token)));

@@ -43,7 +43,7 @@ internal static class ProjectionPublicPolicyFlow
         };
         await PersistAsync(root, repaired, token);
         await EventProjectionClusterAssertions.VerifyVectorBothAsync(caller.Sdk, caller.Mcp,
-            scenario.VectorSearch(), reader.Secret, ProjectionPublicPolicyProtocol.Healthy(), token);
+            scenario, reader.Secret, ProjectionPublicPolicyProtocol.Healthy(), token);
         await ProjectionPublicPolicyImage.ReadAsync(root, scenario, token);
         return reader with
         {

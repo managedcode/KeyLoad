@@ -30,8 +30,8 @@ internal static class GraphSearchPathPolicyClusterRecipe
         var partition = state.Partition;
         var walk = Walk(partition);
         var search = new SearchRequest(partition, P.Documents, Limit: P.Results, FusionConstant: P.Fusion);
-        var direct = new RankedDocument(Document(partition, P.Documents, P.Direct, P.DirectJson), 1d / 61d);
-        var target = new RankedDocument(Document(partition, P.Documents, P.Target, P.TargetJson), 1d / 62d);
+        var direct = new RankedDocument(Document(state, P.Documents, P.Direct, P.DirectJson), 1d / 61d);
+        var target = new RankedDocument(Document(state, P.Documents, P.Target, P.TargetJson), 1d / 62d);
         var scopeSearch = search with
         {
             AllowedIds = [P.Target]
@@ -41,7 +41,7 @@ internal static class GraphSearchPathPolicyClusterRecipe
             Collection = P.Projects
         };
         var context = new GraphExpansionResult(visible
-            ? [new(direct.Document, 1), new(Document(partition, P.Projects, P.Middle, P.MiddleJson, state.MiddleRevision), 1),
+            ? [new(direct.Document, 1), new(Document(state, P.Projects, P.Middle, P.MiddleJson, state.MiddleRevision), 1),
                new(target.Document, 2)] : [new(direct.Document, 1)], GraphExpansionCompleteness.SelectedHits);
         return
         [(new(P.Version, search, Retriever: new(walk)), new(visible ? [direct, target] : [direct], null)),
@@ -49,19 +49,20 @@ internal static class GraphSearchPathPolicyClusterRecipe
              new(visible ? [target with { Score = 1d / 61d }] : [], null)),
          (new(P.Version, rootSearch, Retriever: new(walk with { MaxDepth = 0 }),
              Expansion: new(P.Graph, P.Depth, P.Vertices, P.Edges)),
-             new([new(Document(partition, P.Projects, P.Root, P.RootJson), 1d / 61d)], context))];
+             new([new(Document(state, P.Projects, P.Root, P.RootJson), 1d / 61d)], context))];
     }
 
     internal static GraphSearchRequest HiddenSeed(PartitionRef partition, string id)
         => new(P.Version, new(partition, P.Documents, Limit: P.Results, FusionConstant: P.Fusion), Retriever: new(Walk(partition, id)));
 
-    internal static DocumentResult Document(PartitionRef partition, string collection, string id, string json, long revision = 1L)
-        => new(Vertex(partition, collection, id), revision, json, false, []);
+    internal static DocumentResult Document(GraphSearchPathPolicyClusterState state, string collection, string id, string json,
+        long revision = 1L)
+        => new(state.StoredVertex(collection, id), revision, json, false, []);
 
-    internal static global::KeyLoad.GraphTraversal Graph(PartitionRef partition) => new(
-        [Vertex(partition, P.Documents, P.Direct), Vertex(partition, P.Documents, P.Target),
-         Vertex(partition, P.Projects, P.Middle), Vertex(partition, P.Projects, P.Root)],
-        [new(P.MiddleTarget, Vertex(partition, P.Projects, P.Middle), Vertex(partition, P.Documents, P.Target), P.Label, "{}", 1L),
-         new(P.RootDirect, Vertex(partition, P.Projects, P.Root), Vertex(partition, P.Documents, P.Direct), P.Label, "{}", 1L),
-         new(P.RootMiddle, Vertex(partition, P.Projects, P.Root), Vertex(partition, P.Projects, P.Middle), P.Label, "{}", 1L)]);
+    internal static global::KeyLoad.GraphTraversal Graph(GraphSearchPathPolicyClusterState state) => new(
+        [state.StoredVertex(P.Documents, P.Direct), state.StoredVertex(P.Documents, P.Target),
+         state.StoredVertex(P.Projects, P.Middle), state.StoredVertex(P.Projects, P.Root)],
+        [new(P.MiddleTarget, state.StoredVertex(P.Projects, P.Middle), state.StoredVertex(P.Documents, P.Target), P.Label, "{}", 1L),
+         new(P.RootDirect, state.StoredVertex(P.Projects, P.Root), state.StoredVertex(P.Documents, P.Direct), P.Label, "{}", 1L),
+         new(P.RootMiddle, state.StoredVertex(P.Projects, P.Root), state.StoredVertex(P.Projects, P.Middle), P.Label, "{}", 1L)]);
 }

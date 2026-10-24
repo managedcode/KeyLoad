@@ -28,14 +28,15 @@ internal static class GraphPathClusterCommandReconciliation
         return receipt;
     }
 
-    internal static Task AssertShortcutAsync(GraphShortestPathResult result, CommandRequest command)
+    internal static Task AssertShortcutAsync(GraphShortestPathResult result, GraphPathClusterSeed seed, CommandRequest command)
     {
         var edge = (UpsertEdge)command.Mutations.Single();
-        return AssertShortcutAsync(result, new EdgeRecord(edge.EdgeId, edge.From, edge.To, edge.Label, "{}", 1));
+        return AssertShortcutAsync(result, seed.StoredEdge(new EdgeRecord(edge.EdgeId, edge.From, edge.To, edge.Label, "{}", 1)));
     }
 
     internal static Task AssertShortcutAsync(GraphShortestPathResult result, GraphPathClusterSeed seed, string edgeId)
-        => AssertShortcutAsync(result, new EdgeRecord(edgeId, seed.Source, seed.Target, GraphPathClusterScenario.Label, "{}", 1));
+        => AssertShortcutAsync(result, seed.StoredEdge(new EdgeRecord(edgeId, seed.Source, seed.Target,
+            GraphPathClusterScenario.Label, "{}", 1)));
 
     private static async Task AssertShortcutAsync(GraphShortestPathResult result, EdgeRecord expected)
     {

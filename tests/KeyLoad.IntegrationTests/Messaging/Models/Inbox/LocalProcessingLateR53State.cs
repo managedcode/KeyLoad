@@ -6,6 +6,8 @@ internal sealed class LocalProcessingLateR53State(QueueLaneRef lane, MessagingCl
     internal MessagingClusterIdentity Identity { get; } = identity;
     internal QueueLaneRef Output => new(Lane.Partition, InboxProcessingClusterProtocol.Output);
     internal EntityRef Document => new(Lane.Partition, InboxProcessingClusterProtocol.Collection, LocalProcessingLateR53Protocol.Document);
+    internal EntityRefLifetime CollectionLifetime { get; set; } = null!;
+    internal EntityRef StoredDocument => Document with { Lifetime = CollectionLifetime };
     internal ProcessingRequest Failed { get; set; } = null!;
     internal ManagedCode.Communication.Result<CommitReceipt> OriginalFailure
     {

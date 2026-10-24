@@ -45,11 +45,12 @@ internal static class QueryCursorRequestIdentityR47Current
     {
         foreach (var expected in state.Documents)
         {
+            var reference = expected.Reference with { Lifetime = null };
             await SqlClusterProtocol.EqualAsync(expected, await PublicReadAssertions.DocumentAsync(
-                await caller.Sdk.GetAsync(expected.Reference, token)));
+                await caller.Sdk.GetAsync(reference, token)));
             await SqlClusterProtocol.EqualAsync(expected, (await PublicReadAssertions.DocumentAsync(
                 await caller.Mcp.CallAsync(McpCallerTools.DocumentsGet,
-                    new GetDocumentRequest(expected.Reference), token))).Value);
+                    new GetDocumentRequest(reference), token))).Value);
         }
     }
 }

@@ -14,6 +14,7 @@ internal sealed class DocumentLiveProfileClusterState(PartitionRef partition, st
     internal List<(CommandRequest Command, CommitReceipt Receipt)> Commands { get; } = [];
     internal string OriginalCursor { get; set; } = string.Empty;
     internal string FreshCursor { get; set; } = string.Empty;
+    internal EntityRefLifetime Lifetime { get; set; } = null!;
     internal AstQueryRequest Query => new(Partition, new(Collection, null, [new("*", "*")],
         new Comparison(new FieldOperand("/value"), ">", ValueOperand.Create(0)), [], 10), AllowFullScan: true);
     internal AstQueryRequest Model(ModelQuerySourceKind kind) => Query with
@@ -24,6 +25,7 @@ internal sealed class DocumentLiveProfileClusterState(PartitionRef partition, st
         }
     };
     internal EntityRef Reference(string id) => new(Partition, Collection, id);
+    internal EntityRef StoredReference(string id) => Reference(id) with { Lifetime = Lifetime };
     internal static string Json(int value) => "{\"value\":" + value.ToString(System.Globalization.CultureInfo.InvariantCulture)
         + ",\"secret\":\"" + Secret + "\"}";
     internal static QueryRow Row(string id, long revision, int value) => new(id, revision,

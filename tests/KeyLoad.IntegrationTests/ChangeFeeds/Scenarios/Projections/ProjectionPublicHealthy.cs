@@ -28,7 +28,7 @@ internal static class ProjectionPublicHealthy
         await global::TUnit.Assertions.Assert.That(batch.Entries.Length).IsEqualTo(1);
         var original = batch.Entries.Single();
         var expected = new OutboxEntry(3L, 0, receipt.Token, original.CommittedAt, source.Mutations.Single(),
-            receipt.Mutations.Single(), null, new(new(state.Partition, ProjectionPublicProtocol.Source, "next"),
+            receipt.Mutations.Single(), null, new(state.StoredSource("next"),
                 1L, ProjectionPublicProtocol.InputJson, new RowAccess(), original.CommittedAt));
         await ProjectionPublicAssertions.ExactAsync(new ProjectionBatch(configured, [expected], 3L, batch.Token, false), batch);
         var effect = new CommitProjectionBatchRequest(Guid.NewGuid(), consumer, batch.Token,
@@ -55,7 +55,7 @@ internal static class ProjectionPublicHealthy
         await ProjectionPublicAssertions.ExactAsync(status, (await McpCallerAssertions.SuccessAsync<OutboxStatus>(
             await root.Mcp.CallAsync(McpCallerTools.OutboxStatus, state.Partition, token))).Value);
         var document = new GetDocumentRequest(new(state.Partition, ProjectionPublicProtocol.Target, "healthy"), completed.Receipt.Token);
-        var expectedDocument = new DocumentReadResult(new(document.Reference, 1L, ProjectionPublicProtocol.EffectJson, false, []));
+        var expectedDocument = new DocumentReadResult(new(state.StoredTarget("healthy"), 1L, ProjectionPublicProtocol.EffectJson, false, []));
         await ProjectionPublicAssertions.ExactAsync(expectedDocument,
             await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.GetAsync(document.Reference, completed.Receipt.Token, token)));
         await ProjectionPublicAssertions.ExactAsync(expectedDocument, (await McpCallerAssertions.SuccessAsync<DocumentReadResult>(

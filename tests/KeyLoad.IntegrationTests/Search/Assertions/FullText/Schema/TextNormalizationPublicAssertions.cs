@@ -47,7 +47,7 @@ internal static class TextNormalizationPublicAssertions
     }
 
     private static RankedDocument Row(TextClusterScenario scenario, string id, long revision, string json, double score)
-        => new(new(new(scenario.Partition, TextClusterScenario.Collection, id), revision, json, false, []), score, null);
+        => new(new(scenario.StoredReference(id), revision, json, false, []), score, null);
 
     private static async Task PageAsync(RequestCqrsClusterCallers caller, SearchRequest request,
         RankedDocument[] expected, CancellationToken token)

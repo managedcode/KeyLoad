@@ -21,7 +21,7 @@ internal static class TypedEndpointJoinColdFlow
             await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, continued.Seed.Identity.Secret, async callers =>
         {
             await AssertOriginalAsync(fixture, admin, callers, continued, token);
-            await TypedEndpointJoinAssertions.LiteralAsync(continued.Models, continued.Seed.Partition, continued: true, joined: true);
+            await TypedEndpointJoinAssertions.LiteralAsync(continued.Models, continued.Seed, continued: true, joined: true);
             return true;
         }, token), token);
     }
@@ -62,7 +62,7 @@ internal static class TypedEndpointJoinColdFlow
         await Assert.That(receipt.Mutations.Length).IsEqualTo(ContinuationEffects);
         await TypedEndpointJoinAssertions.ReplayAsync(callers, continuation, receipt, token);
         var models = await TypedEndpointJoinAssertions.CaptureAsync(admin, state.Seed.Partition, token);
-        await TypedEndpointJoinAssertions.LiteralAsync(models, state.Seed.Partition, continued: true, joined: true);
+        await TypedEndpointJoinAssertions.LiteralAsync(models, state.Seed, continued: true, joined: true);
         return state with
         {
             Models = models,

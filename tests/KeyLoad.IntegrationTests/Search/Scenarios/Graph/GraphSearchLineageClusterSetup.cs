@@ -2,6 +2,7 @@ using KeyLoad.IntegrationTests.ClientApi;
 using KeyLoad.IntegrationTests.Messaging;
 using KeyLoad.IntegrationTests.OrleansExecution;
 using KeyLoad.IntegrationTests.QueryExecution;
+using KeyLoad.IntegrationTests.ResourceExecution;
 
 namespace KeyLoad.IntegrationTests.Search;
 
@@ -21,10 +22,14 @@ internal static class GraphSearchLineageClusterSetup
              FieldPolicies = [new(GraphSearchLineageClusterProtocol.LabelPath, GraphSearchLineageClusterProtocol.Classification,
                  GraphSearchLineageClusterProtocol.LabelRead, GraphSearchLineageClusterProtocol.LabelUse)]
          }];
+        var lifetimes = new Dictionary<string, EntityRefLifetime>(StringComparer.Ordinal);
         foreach (var resource in resources)
         {
+            var creationId = Guid.NewGuid();
+            var creation = new ConfigureResourceRequest(tenant, partition.DatabaseId, resource);
             await SqlClusterProtocol.EqualAsync(await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.ConfigureResourceAsync(
-                Guid.NewGuid(), new(tenant, partition.DatabaseId, resource), token)), resource);
+                creationId, creation, token)), resource);
+            lifetimes.Add(resource.Name, ResourceCreationLifetime.Create(creationId, creation));
         }
         var seed = GraphSearchLineageClusterRecipe.Seed(partition);
         var receipt = await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.CommitAsync(seed, token));
@@ -39,7 +44,8 @@ internal static class GraphSearchLineageClusterSetup
             [new(partition.DatabaseId, GraphSearchLineageClusterProtocol.Collection, Capability.Query | Capability.DocumentsRead | Capability.VectorSearch),
              new(partition.DatabaseId, GraphSearchLineageClusterProtocol.EarlyGraph, Capability.GraphRead),
              new(partition.DatabaseId, GraphSearchLineageClusterProtocol.LateGraph, Capability.GraphRead)], [], false, token);
-        return new(partition, identity, seed, receipt, outbox, expansion, emptyLabels);
+        return new(partition, identity, seed, receipt, outbox, expansion, emptyLabels,
+            lifetimes[GraphSearchLineageClusterProtocol.Collection]);
     }
     internal static Task PolicyAsync(ClusterFixture fixture, GraphSearchLineageClusterState state,
         long epoch, bool allow, CancellationToken token)

@@ -32,7 +32,7 @@ internal sealed class GraphCycleFrontierPublicState(GraphIncomingClusterSeed see
         int[] indices = depth == 1 ? hidden ? [0, 2] : [0, 1, 2]
             : hidden ? depth == 2 ? [0, 2, 4] : [0, 2, 4, 5]
             : depth == 2 ? [0, 1, 2, 3, 4, 6] : [0, 1, 2, 3, 4, 5, 6];
-        return new([.. vertices], [.. indices.Select(index => Edges[index])]);
+        return Seed.StoredTraversal(new([.. vertices], [.. indices.Select(index => Edges[index])]));
     }
 
     internal TraverseRequest Request(int depth, int vertices, int edges)

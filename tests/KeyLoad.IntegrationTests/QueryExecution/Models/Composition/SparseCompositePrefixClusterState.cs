@@ -1,6 +1,11 @@
+using System.Collections.Immutable;
 using KeyLoad.IntegrationTests.ClientApi;
 
 namespace KeyLoad.IntegrationTests.QueryExecution;
 
 internal sealed record SparseCompositePrefixClusterState(PartitionRef Partition, bool IncludeNull, bool IncludeMissing,
-    CommandRequest Seed, CommitReceipt Receipt, McpPersistedIdentity Identity, OutboxStatus Outbox);
+    CommandRequest Seed, CommitReceipt Receipt, McpPersistedIdentity Identity, OutboxStatus Outbox,
+    ImmutableDictionary<string, EntityRefLifetime> Lifetimes)
+{
+    internal EntityRef Stored(string collection, string id) => new(Partition, collection, id) { Lifetime = Lifetimes[collection] };
+}

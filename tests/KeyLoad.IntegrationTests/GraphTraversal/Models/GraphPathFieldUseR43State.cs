@@ -16,6 +16,7 @@ internal sealed class GraphPathFieldUseR43State(GraphPathClusterSeed seed)
     internal EntityRef Middle => Ref(GraphPathClusterScenario.CollectionA, "r43-field-m");
     internal EntityRef Target => Ref(GraphPathClusterScenario.CollectionB, "r43-field-t");
     internal EntityRef[] Vertices => [Source, Middle, Target];
+    internal EntityRef[] StoredVertices => Seed.StoredVertices(Vertices);
     internal EdgeRecord[] Edges =>
     [
         new("r43-field-0", Source, Middle, GraphPathClusterScenario.Label, GraphPathClusterScenario.PublicAttributes, 1L),
@@ -26,6 +27,7 @@ internal sealed class GraphPathFieldUseR43State(GraphPathClusterSeed seed)
         new("r43-field-0", Source, Middle, GraphPathClusterScenario.Label, "{\"public\":\"visible\"}", 1L),
         new("r43-field-1", Middle, Target, GraphPathClusterScenario.Label, "{\"public\":\"visible\"}", 1L)
     ];
+    internal EdgeRecord[] StoredProjectedEdges => [.. ProjectedEdges.Select(Seed.StoredEdge)];
     internal CommandRequest Command { get; set; } = null!;
     internal CommitReceipt Receipt { get; set; } = null!;
     internal OutboxStatus Outbox { get; set; } = null!;

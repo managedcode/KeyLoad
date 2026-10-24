@@ -1,5 +1,6 @@
 using KeyLoad.IntegrationTests.ClientApi;
 using KeyLoad.IntegrationTests.OrleansExecution;
+using KeyLoad.IntegrationTests.ResourceExecution;
 
 namespace KeyLoad.IntegrationTests.QueryExecution;
 
@@ -10,20 +11,14 @@ internal static class SqlParserAdmissionClusterSetup
     {
         var original = await SqlOffsetClusterSetup.RunAsync(fixture, root, token);
         var partition = original.Partition;
-        foreach (var definition in new ResourceDefinition[]
-        {
-            new(SqlParserAdmissionClusterState.EventResource, ResourceKind.StreamSet, partition.TransactionDomainId),
+        await ConfigureAsync(root, partition,
+            new(SqlParserAdmissionClusterState.EventResource, ResourceKind.StreamSet, partition.TransactionDomainId), token);
+        var tableLifetime = await ConfigureAsync(root, partition,
             new(SqlParserAdmissionClusterState.Table, ResourceKind.Collection, partition.TransactionDomainId)
             {
                 Authority = DocumentAuthority.Document,
                 RelationalSchema = new(IdColumn, [new(IdColumn, RelationalColumnType.Text), new("title", RelationalColumnType.Text), new("amount", RelationalColumnType.WholeNumber)])
-            }
-        })
-        {
-            await SqlClusterProtocol.EqualAsync(definition, await SqlClusterProtocol.SdkAsync<ResourceDefinition>(root.Sdk,
-                SqlClusterProtocol.Call(partition, McpCallerTools.ResourcesConfigure,
-                    new ConfigureResourceRequest(partition.TenantId, partition.DatabaseId, definition), Guid.NewGuid()), token));
-        }
+            }, token);
         var events = new CommandRequest(Guid.NewGuid(), partition,
             [new AppendEvents(SqlParserAdmissionClusterState.EventResource, "source",
                 [new("created", "Created", "{\"value\":1}", "{}"), new("updated", "Updated", "{\"value\":2}", "{}")], ExpectedStreamRevision.NoStream)]);
@@ -45,10 +40,19 @@ internal static class SqlParserAdmissionClusterSetup
             {
                 CutPosition = 0L,
                 SnapshotCutPosition = 0L
-            }, outbox, fixture.AdminKey);
+            }, outbox, fixture.AdminKey, tableLifetime);
         await PolicyAsync(root, state, 3L, true, token);
         await SqlParserAdmissionClusterCurrent.CheckAsync(root, state, token);
         return state;
+    }
+    private static async Task<EntityRefLifetime> ConfigureAsync(RequestCqrsClusterCallers root, PartitionRef partition,
+        ResourceDefinition definition, CancellationToken token)
+    {
+        var creationId = Guid.NewGuid();
+        var creation = new ConfigureResourceRequest(partition.TenantId, partition.DatabaseId, definition);
+        await SqlClusterProtocol.EqualAsync(definition, await SqlClusterProtocol.SdkAsync<ResourceDefinition>(root.Sdk,
+            SqlClusterProtocol.Call(partition, McpCallerTools.ResourcesConfigure, creation, creationId), token));
+        return ResourceCreationLifetime.Create(creationId, creation);
     }
     internal static async Task PolicyAsync(RequestCqrsClusterCallers root, SqlParserAdmissionClusterState state, long epoch, bool allow, CancellationToken token)
     {

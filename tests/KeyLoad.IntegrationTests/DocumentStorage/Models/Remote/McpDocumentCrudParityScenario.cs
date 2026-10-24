@@ -1,7 +1,9 @@
 namespace KeyLoad.IntegrationTests.DocumentStorage;
 
 /// <summary>Frozen caller-visible document values and commands for the real Orleans CRUD parity cases.</summary>
-internal sealed record McpDocumentCrudParityScenario(PartitionRef Partition)
+/// <param name="Partition">The newly configured actual partition identity.</param>
+/// <param name="Lifetime">The identity derived from the original resource creation command.</param>
+internal sealed record McpDocumentCrudParityScenario(PartitionRef Partition, EntityRefLifetime Lifetime)
 {
     internal const long CreatedRevision = 1;
     internal const long ReplacedRevision = 2;
@@ -13,6 +15,8 @@ internal sealed record McpDocumentCrudParityScenario(PartitionRef Partition)
     internal const string StaleJson = "{\"state\":\"stale\"}";
 
     internal EntityRef Reference => new(Partition, McpDocumentProtocol.Collection, McpDocumentProtocol.Entity);
+
+    internal EntityRef StoredReference => Reference with { Lifetime = Lifetime };
 
     internal CommandRequest CreateCommand(Guid commandId)
         => Command(commandId, new PutDocument(McpDocumentProtocol.Collection, McpDocumentProtocol.Entity,

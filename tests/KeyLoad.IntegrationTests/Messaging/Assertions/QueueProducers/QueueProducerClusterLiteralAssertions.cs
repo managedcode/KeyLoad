@@ -27,7 +27,7 @@ internal static class QueueProducerClusterLiteralAssertions
         await QueueProducerClusterAssertions.EqualAsync(image.Scheduled,
             new MessageInspection(new(QueueProducerClusterProtocol.Scheduled, MessageState.Scheduled, QueueProducerClusterProtocol.InitialAttempts, QueueProducerClusterProtocol.InitialRevision, QueueProducerClusterProtocol.ScheduledReadySequence, seed.Due, null),
                 QueueProducerClusterProtocol.Payload, QueueProducerClusterProtocol.Headers));
-        await Assert.That(image.Document.Reference).IsEqualTo(QueueProducerClusterAssertions.Document(seed, id));
+        await Assert.That(image.Document.Reference).IsEqualTo(QueueProducerClusterAssertions.StoredDocument(seed, id));
         await Assert.That(image.Document.Json).IsEqualTo(payload);
         await Assert.That(image.Document.Revision).IsEqualTo(QueueProducerClusterProtocol.InitialRevision);
         await Assert.That(image.Document.Redacted).IsFalse();

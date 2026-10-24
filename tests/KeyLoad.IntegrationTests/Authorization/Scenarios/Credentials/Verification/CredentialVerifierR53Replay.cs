@@ -7,6 +7,8 @@ namespace KeyLoad.IntegrationTests.Authorization;
 
 internal static class CredentialVerifierR53Replay
 {
+    private const string UnsupportedSql = "The unified SQL version, statement or target operation is unsupported.";
+
     internal static async Task RunAsync(KeyLoadClient root, McpOfficialClient administrator,
         CredentialSubjectReplacementState state, CredentialVerifierR53State verifier,
         Func<Task> afterResult, CancellationToken token)
@@ -45,10 +47,13 @@ internal static class CredentialVerifierR53Replay
             McpCallerTools.CredentialsConfigure, arguments, token));
         await afterResult();
         var call = SqlClusterProtocol.Call(partition, McpCallerTools.CredentialsConfigure, request, id);
-        var sql = await McpCallerAssertions.SdkSuccessAsync(await root.ExecuteSqlAsync(call, token));
-        await Assert.That(sql.ValueKind).IsEqualTo(JsonValueKind.Null);
+        var sql = await root.ExecuteSqlAsync(call, token);
+        await Assert.That(sql.IsFailed).IsTrue();
+        await Assert.That(sql.Value.ValueKind).IsEqualTo(JsonValueKind.Undefined);
+        await SqlClusterProtocol.EqualAsync(Errors.Problem(ErrorCode.UnsupportedCapability, UnsupportedSql), sql.Problem);
         await afterResult();
-        await McpCallerAssertions.StatusAsync(await administrator.CallAsync(SqlOperationProtocol.ToolName, call, token));
+        await McpCallerAssertions.ErrorAsync(await administrator.CallAsync(SqlOperationProtocol.ToolName, call, token),
+            ErrorCode.UnsupportedCapability, dispatched: false);
         await afterResult();
     }
 }

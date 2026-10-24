@@ -35,10 +35,8 @@ internal static class TextWaitClusterAssertions
     internal static async Task LiteralAsync(TextClusterScenario scenario, KeyLoadClient sdk, McpOfficialClient official,
         bool deleted, CancellationToken token)
     {
-        var first = new RankedDocument(new(new(scenario.Partition, TextClusterScenario.Collection,
-            TextClusterScenario.FirstId), Revision, FirstJson, true, [TextClusterScenario.TextField, TextClusterScenario.VectorField, TextClusterScenario.SecretField]), 1d / FirstDenominator);
-        var second = new RankedDocument(new(new(scenario.Partition, TextClusterScenario.Collection,
-            TextClusterScenario.SecondId), Revision, SecondJson, true, [TextClusterScenario.TextField, TextClusterScenario.VectorField, TextClusterScenario.SecretField]), 1d / SecondDenominator);
+        var first = new RankedDocument(new(scenario.StoredReference(TextClusterScenario.FirstId), Revision, FirstJson, true, [TextClusterScenario.TextField, TextClusterScenario.VectorField, TextClusterScenario.SecretField]), 1d / FirstDenominator);
+        var second = new RankedDocument(new(scenario.StoredReference(TextClusterScenario.SecondId), Revision, SecondJson, true, [TextClusterScenario.TextField, TextClusterScenario.VectorField, TextClusterScenario.SecretField]), 1d / SecondDenominator);
         RankedDocument[] expected = deleted ? [first] : [first, second];
         var request = scenario.Text(Query);
         var actual = await TextPublicOutcomeAssertions.SdkSuccessAsync(await sdk.SearchAsync(request, token));

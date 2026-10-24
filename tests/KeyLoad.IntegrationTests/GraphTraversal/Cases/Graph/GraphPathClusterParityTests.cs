@@ -30,7 +30,7 @@ internal sealed class GraphPathClusterParityTests(ClusterFixture fixture)
             var sdkSql = await McpCallerAssertions.SdkSuccessAsync(await sdk.ShortestPathSqlAsync(sql, deadline.Token));
             var mcpSql = await McpCallerAssertions.SuccessAsync<GraphShortestPathResult>(await mcp.CallAsync(
                 GraphPathClusterScenario.SqlTool, sql, deadline.Token));
-            var vertices = new[] { seed.Source, seed.FirstBranch, seed.Target };
+            var vertices = seed.StoredVertices([seed.Source, seed.FirstBranch, seed.Target]);
             var edges = new[] { "a-branch-a", "a-end-a" };
 
             await GraphPathClusterAssertions.AssertPathAsync(sdkDirect, vertices, edges, GraphPathClusterScenario.Label);
@@ -55,7 +55,8 @@ internal sealed class GraphPathClusterParityTests(ClusterFixture fixture)
         var sdkResult = await McpCallerAssertions.SdkSuccessAsync(await sdk.ShortestPathAsync(direct, deadline.Token));
         var mcpResult = await McpCallerAssertions.SuccessAsync<GraphShortestPathResult>(await mcp.CallAsync(
             GraphPathClusterScenario.DirectTool, direct, deadline.Token));
-        await GraphPathClusterAssertions.AssertPathAsync(sdkResult, [seed.Source, seed.Target], ["z-shortcut"], "shortcut");
+        await GraphPathClusterAssertions.AssertPathAsync(sdkResult, seed.StoredVertices([seed.Source, seed.Target]),
+            ["z-shortcut"], "shortcut");
         await GraphPathClusterAssertions.AssertEquivalentAsync(sdkResult, mcpResult.Value);
         var sql = GraphPathClusterScenario.SqlRequest(seed);
         var sqlSdk = await McpCallerAssertions.SdkSuccessAsync(await sdk.ShortestPathSqlAsync(sql, deadline.Token));
@@ -70,7 +71,7 @@ internal sealed class GraphPathClusterParityTests(ClusterFixture fixture)
             GraphPathClusterScenario.DirectTool, zero, deadline.Token));
         await Assert.That(zeroSdk.Found).IsTrue();
         await Assert.That(zeroSdk.Hops).IsEqualTo(0);
-        await Assert.That(zeroSdk.Vertices.SequenceEqual([seed.Source])).IsTrue();
+        await Assert.That(zeroSdk.Vertices.SequenceEqual([seed.Stored(seed.Source)])).IsTrue();
         await Assert.That(zeroSdk.Edges).IsEmpty();
         await GraphPathClusterAssertions.AssertEquivalentAsync(zeroSdk, zeroMcp.Value);
         var zeroSql = GraphPathClusterScenario.SqlRequest(seed, seed.Source, seed.Source, maxDepth: 0);

@@ -51,7 +51,7 @@ internal static class TextClusterReplayHistory
         foreach (var expected in SeedDocuments(scenario))
         {
             var response = await McpCallerAssertions.SdkSuccessAsync(
-                await administrator.GetAsync(expected.Reference, token));
+                await administrator.GetAsync(new(scenario.Partition, TextClusterScenario.Collection, expected.Reference.Id), token));
             await SqlClusterProtocol.EqualAsync(expected, response.Document);
         }
     }
@@ -68,11 +68,11 @@ internal static class TextClusterReplayHistory
     private static DocumentResult[] SeedDocuments(TextClusterScenario scenario)
         =>
         [
-            new(new(scenario.Partition, TextClusterScenario.Collection, TextClusterScenario.FirstId),
+            new(scenario.StoredReference(TextClusterScenario.FirstId),
                 InitialRevision, TextClusterScenario.Document("Київ needle needle", TextClusterScenario.OwnerA), false, []),
-            new(new(scenario.Partition, TextClusterScenario.Collection, TextClusterScenario.SecondId),
+            new(scenario.StoredReference(TextClusterScenario.SecondId),
                 InitialRevision, TextClusterScenario.Document("needle plain", TextClusterScenario.OwnerB), false, []),
-            new(new(scenario.Partition, TextClusterScenario.Collection, TextClusterScenario.ThirdId),
+            new(scenario.StoredReference(TextClusterScenario.ThirdId),
                 InitialRevision, TextClusterScenario.Document("other", TextClusterScenario.OwnerB), false, [])
         ];
 

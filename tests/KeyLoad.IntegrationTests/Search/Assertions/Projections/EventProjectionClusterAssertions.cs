@@ -7,14 +7,15 @@ namespace KeyLoad.IntegrationTests.Search;
 internal static class EventProjectionClusterAssertions
 {
     internal static async Task VerifyVectorBothAsync(KeyLoadClient sdk, McpOfficialClient mcp,
-        SearchRequest request, string readerSecret, (string Id, double Score)[] expected,
+        EventProjectionClusterScenario scenario, string readerSecret, (string Id, double Score)[] expected,
         CancellationToken cancellationToken)
     {
+        var request = scenario.VectorSearch();
         var actual = await McpCallerAssertions.SdkSuccessAsync(await sdk.SearchAsync(request, cancellationToken));
         var response = await mcp.CallAsync(McpCallerTools.SearchExecute, request, cancellationToken);
         var official = await McpCallerAssertions.SuccessAsync<RankedDocument[]>(response);
         var literal = expected.Select(hit => new RankedDocument(
-            new(new(request.Partition, EventProjectionClusterScenario.Collection, hit.Id),
+            new(scenario.StoredReference(hit.Id),
                 EventProjectionClusterScenario.Revision, ExpectedDocumentJson(hit.Id), true,
                 [EventProjectionClusterScenario.InputField, EventProjectionClusterScenario.VectorField]),
             hit.Score)).ToArray();

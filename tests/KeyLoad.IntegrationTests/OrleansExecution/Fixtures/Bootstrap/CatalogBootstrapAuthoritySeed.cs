@@ -1,6 +1,7 @@
 using KeyLoad.Core;
 using KeyLoad.IntegrationTests.ClientApi;
 using KeyLoad.IntegrationTests.QueryExecution;
+using KeyLoad.IntegrationTests.ResourceExecution;
 using P = KeyLoad.IntegrationTests.OrleansExecution.CatalogBootstrapAuthorityProtocol;
 
 namespace KeyLoad.IntegrationTests.OrleansExecution;
@@ -21,8 +22,9 @@ internal static class CatalogBootstrapAuthoritySeed
         var administratorKey = administrator.Id + P.SecretSeparator + Guid.NewGuid().ToString(P.GuidFormat);
         var readerKey = reader.Id + P.SecretSeparator + Guid.NewGuid().ToString(P.GuidFormat);
         ResourceDefinition resource = new(P.Collection, ResourceKind.Collection, partition.TransactionDomainId);
-        var configured = await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.ConfigureResourceAsync(Guid.NewGuid(),
-            new(partition.TenantId, partition.DatabaseId, resource), token));
+        var creationId = Guid.NewGuid();
+        var creation = new ConfigureResourceRequest(partition.TenantId, partition.DatabaseId, resource);
+        var configured = await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.ConfigureResourceAsync(creationId, creation, token));
         await SqlClusterProtocol.EqualAsync(resource, configured);
         await PrincipalAsync(root, administrator, administratorKey, token);
         await PrincipalAsync(root, reader, readerKey, token);
@@ -32,7 +34,8 @@ internal static class CatalogBootstrapAuthoritySeed
                 [new PutDocument(P.Collection, P.Document, P.OriginalJson, P.EmptyRevision)]);
             var receipt = await McpCallerAssertions.SdkSuccessAsync(await survivor.Sdk.CommitAsync(command, token));
             await CatalogBootstrapAuthorityCurrent.ReceiptAsync(command, receipt, P.OriginalRevision);
-            return new CatalogBootstrapAuthorityState(partition, administrator, administratorKey, reader, readerKey, command, receipt);
+            return new CatalogBootstrapAuthorityState(partition, administrator, administratorKey, reader, readerKey, command, receipt,
+                ResourceCreationLifetime.Create(creationId, creation));
         }, token);
     }
 

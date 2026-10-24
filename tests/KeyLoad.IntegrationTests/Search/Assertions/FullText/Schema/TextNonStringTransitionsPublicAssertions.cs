@@ -7,37 +7,39 @@ namespace KeyLoad.IntegrationTests.Search;
 internal static class TextNonStringTransitionsPublicAssertions
 {
     internal static async Task<OutboxStatus> CheckAsync(RequestCqrsClusterCallers caller, PartitionRef partition,
-        IReadOnlyList<TextNonStringTransitionsPublicTrial.Original> originals, int stage, CancellationToken token)
+        EntityRefLifetime lifetime, IReadOnlyList<TextNonStringTransitionsPublicTrial.Original> originals, int stage,
+        CancellationToken token)
     {
-        await PagesAsync(caller, partition, stage, token);
+        await PagesAsync(caller, partition, lifetime, stage, token);
         var baseline = await McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.OutboxStatusAsync(partition, token));
-        await ReplayAsync(caller, partition, originals, stage, baseline, token);
+        await ReplayAsync(caller, partition, lifetime, originals, stage, baseline, token);
         return baseline;
     }
 
     internal static async Task ReplayAsync(RequestCqrsClusterCallers caller, PartitionRef partition,
-        IReadOnlyList<TextNonStringTransitionsPublicTrial.Original> originals, int stage,
+        EntityRefLifetime lifetime, IReadOnlyList<TextNonStringTransitionsPublicTrial.Original> originals, int stage,
         OutboxStatus baseline, CancellationToken token)
     {
-        await PagesAsync(caller, partition, stage, token);
+        await PagesAsync(caller, partition, lifetime, stage, token);
         foreach (var original in originals)
         {
             await SqlClusterProtocol.EqualAsync(original.Receipt, await McpCallerAssertions.SdkSuccessAsync(
                 await caller.Sdk.CommitAsync(original.Command, token)));
-            await PagesAsync(caller, partition, stage, token);
+            await PagesAsync(caller, partition, lifetime, stage, token);
             await TextSelectedSchemaPublicAssertions.OutboxAsync(caller, partition, baseline, token);
             await SqlClusterProtocol.EqualAsync(original.Receipt, (await McpCallerAssertions.SuccessAsync<CommitReceipt>(
                 await caller.Mcp.CallAsync(McpCallerTools.DocumentsCommit, original.Command, token))).Value);
-            await PagesAsync(caller, partition, stage, token);
+            await PagesAsync(caller, partition, lifetime, stage, token);
             await TextSelectedSchemaPublicAssertions.OutboxAsync(caller, partition, baseline, token);
         }
     }
 
-    private static async Task PagesAsync(RequestCqrsClusterCallers caller, PartitionRef partition, int stage, CancellationToken token)
+    private static async Task PagesAsync(RequestCqrsClusterCallers caller, PartitionRef partition, EntityRefLifetime lifetime,
+        int stage, CancellationToken token)
     {
         var collection = TextNonStringTransitionsPublicTrial.Collection;
         RankedDocument Row(string id, long revision, string json, double score)
-            => new(new(new(partition, collection, id), revision, json, false, []), score, null);
+            => new(new(new(partition, collection, id) { Lifetime = lifetime }, revision, json, false, []), score, null);
         RankedDocument[] expected = stage switch
         {
             0 => [Row("a", 1L, "{\"text\":\"needle\"}", 1d / 61d)],

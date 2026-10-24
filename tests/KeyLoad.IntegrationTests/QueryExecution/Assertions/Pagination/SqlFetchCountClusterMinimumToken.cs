@@ -8,8 +8,8 @@ internal static class SqlFetchCountClusterMinimumToken
     {
         foreach (var row in SqlFetchCountClusterState.Rows)
         {
-            var reference = new EntityRef(PostgresClusterState.Partition, SqlFetchCountClusterProtocol.Collection, row.Id);
-            var expected = new DocumentReadResult(new(reference, SqlFetchCountClusterProtocol.SeedRevision, row.Json, false, []));
+            var reference = SqlFetchCountClusterState.Reference(row.Id);
+            var expected = new DocumentReadResult(new(state.Stored(row.Id), SqlFetchCountClusterProtocol.SeedRevision, row.Json, false, []));
             var sdk = await McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.GetAsync(reference, state.Receipt.Token, token));
             var mcp = (await McpCallerAssertions.SuccessAsync<DocumentReadResult>(
                 await caller.Mcp.CallAsync(McpCallerTools.DocumentsGet, new GetDocumentRequest(reference, state.Receipt.Token), token))).Value;

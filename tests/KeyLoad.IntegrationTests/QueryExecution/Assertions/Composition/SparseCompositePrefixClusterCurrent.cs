@@ -36,7 +36,7 @@ internal static class SparseCompositePrefixClusterCurrent
                 await ServerFailureObserver.ObserveAsync(async () =>
                 {
                     var reference = new EntityRef(state.Partition, collection, row.Id);
-                    var expected = new DocumentResult(reference, 1L, row.Json, false, []);
+                    var expected = new DocumentResult(state.Stored(collection, row.Id), 1L, row.Json, false, []);
                     await SqlClusterProtocol.EqualAsync(expected, await PublicReadAssertions.DocumentAsync(
                         await root.Sdk.GetAsync(reference, state.Receipt.Token, token)));
                     await SqlClusterProtocol.EqualAsync(new DocumentReadResult(expected),

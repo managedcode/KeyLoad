@@ -1,5 +1,6 @@
 using KeyLoad.IntegrationTests.ClientApi;
 using KeyLoad.IntegrationTests.OrleansExecution;
+using KeyLoad.IntegrationTests.ResourceExecution;
 
 namespace KeyLoad.IntegrationTests.QueryExecution;
 
@@ -11,8 +12,9 @@ internal static class CapabilityOutputClusterSetup
             var partition = PostgresClusterState.Partition;
             var definition = new ResourceDefinition(CapabilityOutputClusterProtocol.Collection, ResourceKind.Collection,
                 partition.TransactionDomainId);
-            var resource = await McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.ConfigureResourceAsync(Guid.NewGuid(),
-                new ConfigureResourceRequest(partition.TenantId, partition.DatabaseId, definition), token));
+            var creationId = Guid.NewGuid();
+            var creation = new ConfigureResourceRequest(partition.TenantId, partition.DatabaseId, definition);
+            var resource = await McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.ConfigureResourceAsync(creationId, creation, token));
             await SqlClusterProtocol.EqualAsync(definition, resource);
             var reader = await PostgresClusterSeed.IdentityAsync(caller.Sdk, "capability-output-",
                 Capability.DocumentsRead | Capability.Query, token, definition.Name);
@@ -26,6 +28,6 @@ internal static class CapabilityOutputClusterSetup
                 seeds.Add((command, receipt));
             }
             var manifest = await McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.QueryCapabilitiesAsync(token));
-            return new CapabilityOutputClusterState(reader, [.. seeds], manifest);
+            return new CapabilityOutputClusterState(reader, [.. seeds], manifest, ResourceCreationLifetime.Create(creationId, creation));
         }, token);
 }

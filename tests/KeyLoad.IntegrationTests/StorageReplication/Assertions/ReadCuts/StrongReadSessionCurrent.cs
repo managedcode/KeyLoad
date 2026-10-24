@@ -23,7 +23,7 @@ internal static class StrongReadSessionCurrent
         if (state.Target is { } target)
         {
             rows.Add(new(TargetId, CreatedRevision, TargetJson, RedactedFields: []));
-            await SqlClusterProtocol.EqualAsync(new DocumentResult(new(state.Partition, Collection, TargetId),
+            await SqlClusterProtocol.EqualAsync(new DocumentResult(state.Stored(TargetId),
                 CreatedRevision, TargetJson, false, []), target);
         }
         var request = new AstQueryRequest(state.Partition,

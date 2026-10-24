@@ -3,8 +3,11 @@ using KeyLoad.IntegrationTests.Messaging;
 namespace KeyLoad.IntegrationTests.Search;
 
 internal sealed record GraphSearchLineageClusterState(PartitionRef Partition, MessagingClusterIdentity Identity,
-    CommandRequest Seed, CommitReceipt Receipt, OutboxStatus Outbox, bool Expansion, bool EmptyLabels)
+    CommandRequest Seed, CommitReceipt Receipt, OutboxStatus Outbox, bool Expansion, bool EmptyLabels,
+    EntityRefLifetime Lifetime)
 {
+    internal EntityRef StoredVertex(string id) => GraphSearchLineageClusterRecipe.Vertex(Partition, id) with { Lifetime = Lifetime };
+
     internal GraphSearchRequest Request => GraphSearchLineageClusterRecipe.Request(Partition, Expansion,
         EmptyLabels ? [] : [GraphSearchLineageClusterProtocol.Label]);
     internal GraphSearchRequest MissingRequest
