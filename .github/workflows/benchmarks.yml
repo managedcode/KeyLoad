@@ -37,8 +37,9 @@ jobs:
         uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68
         with:
           global-json-file: global.json
-      - name: Restore .NET packages once
-        run: dotnet restore KeyLoad.slnx
+      # KeyLoad cells run the released server image; this job compiles only the comparison harness.
+      - name: Restore the comparison harness packages
+        run: dotnet restore benchmarks/KeyLoad.ComparisonHost/KeyLoad.ComparisonHost.csproj
       - name: Prepare the pinned Aspire runtime inside the archive inputs
         shell: bash
         run: |
@@ -51,12 +52,8 @@ jobs:
           test -x "$aspire_cli/bundle/dcp/dcp"
           test -x "$aspire_cli/bundle/dashboard/Aspire.Dashboard"
           printf 'AspireCliBundlePath=%s/bundle\n' "$aspire_cli" >> "$GITHUB_ENV"
-      - name: Build the complete solution once
-        run: dotnet build KeyLoad.slnx --no-restore --configuration Release -p:AspireCliInvocationMode=DnxPinned -warnaserror
-      - name: Build current Debug analyzer for execution formatting
-        run: dotnet build analyzers/KeyLoad.Analyzers/KeyLoad.Analyzers.csproj --no-restore --configuration Debug -warnaserror
-      - name: Check code formatting
-        run: dotnet format KeyLoad.slnx --verify-no-changes --no-restore
+      - name: Build the comparison harness
+        run: dotnet build benchmarks/KeyLoad.ComparisonHost/KeyLoad.ComparisonHost.csproj --no-restore --configuration Release -p:AspireCliInvocationMode=DnxPinned -warnaserror
       - name: Check repository rules
         run: node scripts/Features/RepositoryGovernance/verify.mjs
       - name: Plan the shared database sessions

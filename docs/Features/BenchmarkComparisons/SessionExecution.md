@@ -125,7 +125,13 @@ matrix, restarts or separate benchmark scenario.
 
 ## Shared preparation and measurement
 
-- The exact-source test runner, both AppHosts and workload client are built
+- The preparation job restores and builds only the comparison harness
+  (`benchmarks/KeyLoad.ComparisonHost` and its project references, in Release), never
+  the whole solution, and runs no format gate: the solution build, analyzers and
+  formatting belong to Build and Tests. The harness still compiles the KeyLoad server
+  project transitively, because `build/KeyLoad.AppHost`, whose test-hosting helpers the
+  harness uses, references it; the KeyLoad cells never run that build. The exact-source
+  test runner, both AppHosts and workload client are built
   once. The immutable runtime bundle retains source, DLL/PDB, package assets and
   Aspire tool identities; workers validate and import it without a repeated
   solution restore/build. The same preparation job resolves the Release-published
