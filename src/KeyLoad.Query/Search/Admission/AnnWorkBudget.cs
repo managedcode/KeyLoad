@@ -45,9 +45,10 @@ internal sealed class AnnWorkBudget
 
     internal void Check() => readBudget.Check();
 
+    // Charges only count work: cancellation and the deadline are checked when a build or search starts and before
+    // it returns, because reading the clock for every edge and distance took most of a build's time.
     internal void Charge(long units)
     {
-        Check();
         if (units < InitialSequence)
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidCharge);

@@ -61,7 +61,6 @@ internal static class PackedAnnLayerSearch
         buffers.MarkVisited(entry);
         while (true)
         {
-            budget.Check();
             var best = PackedAnnCandidateHeaps.PopBest(buffers, budget);
             if (best < EmptyElementCount)
             {

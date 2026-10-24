@@ -32,7 +32,6 @@ internal static class PackedAnnNeighborSelection
         var selected = EmptyElementCount;
         for (var index = FirstElementIndex; index < candidateCount && selected < maximum; index++)
         {
-            budget.Check();
             var candidate = nodes[index];
             budget.Charge(dimension);
             var similarity = PreparedPackedSimilarity.Create(vectors, candidate, metric);
@@ -50,7 +49,6 @@ internal static class PackedAnnNeighborSelection
     {
         for (var index = FirstElementIndex; index < selectedCount; index++)
         {
-            budget.Check();
             var pairScore = PackedAnnLayerSearch.Score(vectors, selectedNodes[index], similarity, dimension, budget);
             if (pairScore >= sourceScore)
             {
@@ -83,7 +81,6 @@ internal static class PackedAnnNeighborSelection
     {
         for (var index = FirstElementIndex; index < count; index++)
         {
-            budget.Check();
             var target = neighbors[index];
             var existing = graph.NeighborCount(target, layer, budget);
             // Ascending insertion means no prior target can already link to this new source.

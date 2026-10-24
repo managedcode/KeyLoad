@@ -19,7 +19,6 @@ internal static class PackedAnnApproximateSearch
         var expansionPasses = EmptyElementCount;
         while (true)
         {
-            budget.Check();
             var found = PackedAnnLayerSearch.SearchLayer(state.Graph, state.Vectors, similarity,
                 current, EmptyElementCount, breadth, state.Space.Dimension, buffers, budget);
             expansionPasses++;
@@ -72,7 +71,6 @@ internal static class PackedAnnApproximateSearch
         var copied = EmptyElementCount;
         for (var index = FirstElementIndex; index < found && copied < limit; index++)
         {
-            budget.Check();
             var ordinal = buffers.Nodes[index];
             budget.Charge(SingleWorkUnit);
             if (PackedAnnExactSearch.IsEligible(ordinal, eligibility))

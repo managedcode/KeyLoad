@@ -17,7 +17,6 @@ internal sealed class PackedAnnBuildScratch
         NeighborScores = new double[degree + AdjacentElementOffset];
         SelectedNeighbors = new int[degree];
         ConnectionTargets = new int[degree];
-        budget.Check();
     }
 
     internal PackedAnnLayerBuffers Layer

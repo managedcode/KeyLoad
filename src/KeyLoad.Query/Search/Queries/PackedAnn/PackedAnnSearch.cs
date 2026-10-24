@@ -20,6 +20,7 @@ internal static class PackedAnnSearch
     {
         ArgumentNullException.ThrowIfNull(state);
         ArgumentNullException.ThrowIfNull(budget);
+        budget.Check();
         var startedWork = budget.WorkUnits;
         var startedDistances = budget.DistanceEvaluations;
         var startedEdges = budget.EdgeVisits;
@@ -120,7 +121,6 @@ internal static class PackedAnnSearch
         var eligible = EmptyElementCount;
         for (var index = FirstElementIndex; index < bitmap.Length; index++)
         {
-            budget.Check();
             var bits = bitmap[index];
             budget.Charge(sizeof(ulong));
             var remainder = count & BitmapRemainderMask;
@@ -136,11 +136,14 @@ internal static class PackedAnnSearch
     private static AnnSearchResult Result(AnnCandidate[] candidates, AnnSearchMode mode, long reservation,
         FilteredVectorPlan plan, int expansionPasses, AnnWorkBudget budget,
         long startedWork, long startedDistances, long startedEdges)
-        => new(candidates, mode, checked(budget.WorkUnits - startedWork),
+    {
+        budget.Check();
+        return new(candidates, mode, checked(budget.WorkUnits - startedWork),
             checked(budget.DistanceEvaluations - startedDistances), checked(budget.EdgeVisits - startedEdges))
         {
             ScratchBytesUpperBound = reservation,
             EligibleCount = plan.EligibleCount,
             ExpansionPasses = expansionPasses
         };
+    }
 }

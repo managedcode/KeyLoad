@@ -27,6 +27,7 @@ internal static class PackedAnnBuilder
         ArgumentNullException.ThrowIfNull(configuredOptions);
         var options = configuredOptions.Value;
         ArgumentNullException.ThrowIfNull(budget);
+        budget.Check();
         PackedAnnAdmission.ValidateOptions(options);
         PackedAnnAdmission.ValidateRecordCount(records.Count, options);
         PackedAnnAdmission.ValidateSpace(space, budget);
@@ -49,11 +50,11 @@ internal static class PackedAnnBuilder
         var scratch = new PackedAnnBuildScratch(plan.Count, options.Connections, options.EfConstruction, budget);
         for (var ordinal = FirstElementIndex; ordinal < plan.Count; ordinal++)
         {
-            budget.Check();
             var level = levels[ordinal];
             PackedAnnConstruction.Insert(graph, vectors, ownedSpace, ordinal, level,
                 ref entryPoint, ref maximumLevel, scratch, budget);
         }
+        budget.Check();
         return new(ownedSpace, ids, revisions, levels, graph, vectors, entryPoint, maximumLevel, configuredOptions,
             plan.RetainedBytes, plan.BuildScratchBytes);
     }
@@ -84,7 +85,6 @@ internal static class PackedAnnBuilder
         string? field = null;
         for (var ordinal = FirstElementIndex; ordinal < records.Count; ordinal++)
         {
-            budget.Check();
             var record = records[ordinal] ?? throw Errors.Fail(ErrorCode.Validation, InvalidRecords);
             budget.Charge(checked((long)space.Id.Length + space.Model.Length + space.Version.Length + VectorSpaceIdentityPartCount));
             if (record.Values.IsDefault || record.Space != space || record.DocumentRevision <= InitialSequence
@@ -154,7 +154,6 @@ internal static class PackedAnnBuilder
         var ids = new string[records.Count];
         for (var ordinal = FirstElementIndex; ordinal < ids.Length; ordinal++)
         {
-            budget.Check();
             ids[ordinal] = new(records[ordinal].DocumentId.AsSpan());
         }
         return ids;
@@ -178,7 +177,6 @@ internal static class PackedAnnBuilder
         var revisions = new long[records.Count];
         for (var ordinal = FirstElementIndex; ordinal < revisions.Length; ordinal++)
         {
-            budget.Check();
             revisions[ordinal] = records[ordinal].DocumentRevision;
         }
         return revisions;

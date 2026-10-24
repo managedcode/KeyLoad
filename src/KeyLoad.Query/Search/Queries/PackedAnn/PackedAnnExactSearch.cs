@@ -56,7 +56,6 @@ internal static class PackedAnnExactSearch
             var bits = eligibility[wordIndex];
             while (bits != EmptyElementCount)
             {
-                budget.Check();
                 var bit = System.Numerics.BitOperations.TrailingZeroCount(bits);
                 var ordinal = checked(wordIndex * BitmapWordBits + bit);
                 budget.Charge(SingleWorkUnit);

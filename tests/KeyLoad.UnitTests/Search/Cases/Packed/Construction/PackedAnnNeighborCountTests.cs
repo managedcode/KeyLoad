@@ -30,13 +30,13 @@ internal sealed class PackedAnnNeighborCountTests
         var measuredGraph = PackedAnnAdjacencyAssertions.Snapshot(measured, PackedAnnIndexTestSupport.Budget(database));
         var slots = await AssertShapeAsync(measured, measuredGraph);
         await AssertReplaceClearRestoreAsync(measured, measuredGraph, slots, database);
-        await AssertCountBudgetAndCancellationAsync(measured,
+        await AssertCountBudgetAsync(measured,
             (slots.PartialUpperSource, slots.PartialUpperLayer), database);
         var replay = PackedAnnBuilder.Build(space, records, UnitExecutionOptions.PackedAnn(options),
             PackedAnnIndexTestSupport.Budget(database, measuredBudget.WorkUnits));
         await PackedAnnAdjacencyAssertions.AssertSameAsync(measuredGraph,
             PackedAnnAdjacencyAssertions.Snapshot(replay, PackedAnnIndexTestSupport.Budget(database)));
-        await AssertOneUnderBuildLimitAsync(space, records, options, measuredBudget.WorkUnits, database);
+        await AssertBuildLimitAndCancellationAsync(space, records, options, measuredBudget.WorkUnits, database);
         await PackedAnnNeighborCandidateAssertions.VerifyAsync(measured, measuredGraph, space, records, options, metric, database);
     }
 
@@ -131,7 +131,7 @@ internal sealed class PackedAnnNeighborCountTests
         }
     }
 
-    private static async Task AssertCountBudgetAndCancellationAsync(PackedAnnState state,
+    private static async Task AssertCountBudgetAsync(PackedAnnState state,
         (int Source, int Layer) slot, TestDatabase database)
     {
         var measured = PackedAnnIndexTestSupport.Budget(database);
@@ -147,19 +147,22 @@ internal sealed class PackedAnnNeighborCountTests
         var failure = Assert.ThrowsExactly<KeyLoadException>(() =>
             state.Graph.NeighborCount(slot.Source, slot.Layer, below));
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
-        using var cancellation = new CancellationTokenSource();
-        await cancellation.CancelAsync();
-        var canceled = new AnnWorkBudget(new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits),
-            TimeProvider.System, cancellation.Token), PackedAnnIndexTestSupport.GenerousWorkLimit);
-        Assert.ThrowsExactly<OperationCanceledException>(() => state.Graph.NeighborCount(slot.Source, slot.Layer, canceled));
     }
 
-    private static async Task AssertOneUnderBuildLimitAsync(VectorSpace space, VectorRecord[] records,
+    // Charges only count work; cancellation is observed where the build starts and before it returns.
+    private static async Task AssertBuildLimitAndCancellationAsync(VectorSpace space, VectorRecord[] records,
         PackedAnnOptions options, long work, TestDatabase database)
     {
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => PackedAnnBuilder.Build(space, records,
             UnitExecutionOptions.PackedAnn(options), PackedAnnIndexTestSupport.Budget(database, work - 1)));
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
+        using var cancellation = new CancellationTokenSource();
+        await cancellation.CancelAsync();
+        var canceled = new AnnWorkBudget(new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits),
+            TimeProvider.System, cancellation.Token), PackedAnnIndexTestSupport.GenerousWorkLimit);
+        Assert.ThrowsExactly<OperationCanceledException>(() => PackedAnnBuilder.Build(space, records,
+            UnitExecutionOptions.PackedAnn(options), canceled));
+        await Assert.That(canceled.WorkUnits).IsEqualTo(0L);
     }
 
     private static (int Source, int Layer) Find(PackedAnnState state, int[][][] adjacency,
