@@ -12,7 +12,7 @@ internal sealed record FileStorageOptions
     private const int TimeoutMinutes = 10;
     private const int EmptyCount = 0;
     private const int SingleSilo = 1;
-    private const string FilesDirectory = "files";
+    internal const string FilesDirectory = "files";
     public string RootDirectory { get; init; } = string.Empty;
     public bool SharedDirectory { get; init; }
     public int MaximumTransfers { get; init; } = DefaultTransfers;

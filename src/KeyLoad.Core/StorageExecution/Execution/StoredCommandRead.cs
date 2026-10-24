@@ -23,9 +23,16 @@ public static class StoredCommandRead
         return engine.Store.Read<StoredCommand?>(view =>
         {
             cancellationToken.ThrowIfCancellationRequested();
+            var scope = CommandOutcomePartitionIdentity.Resolve(original);
+            if (CommandOutcomeKeyResolver.IsUnstored(view, original.UserId!, original.CommandId, scope))
+            {
+                // A new command is authorized when it is applied, so a denial persists its outcome exactly once and a
+                // retry after a policy change replays that denial instead of running as a new command.
+                return null;
+            }
+
             var principal = engine.Principal(view, original.UserId!, engine.Clock.GetUtcNow());
             engine.AuthorizeOperation(view, principal, original);
-            var scope = CommandOutcomePartitionIdentity.Resolve(original);
             var selected = CommandOutcomeKeyResolver.Select(view, original.UserId!, original.CommandId, scope);
             if (selected.Outcome is not { } outcome)
             {

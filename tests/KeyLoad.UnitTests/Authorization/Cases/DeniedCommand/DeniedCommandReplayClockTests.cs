@@ -14,6 +14,7 @@ internal sealed class DeniedCommandReplayClockTests
     private const string Json = "{\"healthy\":true}";
     private const string ScopeDenied = "The principal cannot perform this operation in this scope.";
     private const string AdministrationRequired = "Cluster administration is required.";
+    private const string PolicyChanged = "The principal policy changed since this command was evaluated.";
     private const int MaximumRecords = 4_096;
     private const string Overflow = "The denied-command replay fixture exceeded its fixed execution inventory.";
     private const string Separator = ":";
@@ -90,6 +91,40 @@ internal sealed class DeniedCommandReplayClockTests
         await Assert.That(fixture.Database.GetDocument("root", new(fixture.Partition, Collection, Healthy))!.Revision)
             .IsEqualTo(2L);
         await DeniedCommandRepairContinuation.RunAsync(fixture, writer, original, outcome, expectedReference);
+    }
+
+    [Test]
+    public async Task AcAuthReplay001ClusterPreparationPersistsANewDenialOnceAndReplaysItAfterAGrant()
+    {
+        using var fixture = new TestDatabase();
+        var reader = fixture.Submit(OperationKind.ConfigurePrincipal,
+            new ConfigurePrincipalRequest(new(Reader, fixture.Partition.TenantId, [], []))).Get<PrincipalRecord>();
+        var original = fixture.Database.CreateCommand(OperationKind.SetDispatch, Guid.NewGuid(), Reader,
+            fixture.Database.EvaluationClock.GetUtcNow(), JsonSerializer.Serialize(false, JsonDefaults.Options));
+        var token = TestContext.Current!.Execution.CancellationToken;
+        var sequence = fixture.Database.LastApplied;
+
+        var prepared = fixture.Database.PrepareStorageOperations([original], token);
+        var denied = fixture.Database.ApplyStorageOperations(prepared, sequence + 1, token).Applied.Single();
+
+        await Assert.That(Errors.Code(denied.Result.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(denied.Sequence).IsEqualTo(sequence + 1);
+        await Assert.That(fixture.Database.LastApplied).IsEqualTo(sequence + 1);
+        fixture.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(reader with
+        {
+            ClusterAdministrator = true,
+            PolicyEpoch = reader.PolicyEpoch + 1
+        })).Get<PrincipalRecord>();
+        var position = fixture.Store.Position;
+        var applied = fixture.Database.LastApplied;
+
+        // The retained denial was evaluated under the earlier policy epoch, so the retry is fenced before any effect.
+        var fenced = Assert.ThrowsExactly<KeyLoadException>(() => fixture.Database.PrepareStorageOperations([original], token));
+
+        await Assert.That(fenced.Code).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(fenced.Message).IsEqualTo(PolicyChanged);
+        await Assert.That(fixture.Database.LastApplied).IsEqualTo(applied);
+        await Assert.That(fixture.Store.Position).IsEqualTo(position);
     }
 
     private static async Task<DateTimeOffset> VerifyReplicaApplyAsync(TestDatabase fixture, Result<object> expected,

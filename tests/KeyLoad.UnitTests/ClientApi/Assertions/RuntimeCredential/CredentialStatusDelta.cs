@@ -5,7 +5,7 @@ namespace KeyLoad.UnitTests.ClientApi;
 internal static class CredentialStatusDelta
 {
     internal static async Task RequireAsync(CredentialStatusState state, CredentialStatusCut before,
-        Guid id, PrincipalRecord principal, ApiKeyRecord credential, StoredOutcome expectedOutcome)
+        Guid id, PrincipalRecord principal, ApiKeyRecord credential, StoredOutcome expectedOutcome, bool stored = true)
     {
         var database = state.Scenario.Fixture.Database;
         var entry = database.ReadStoredOutcome(id);
@@ -16,7 +16,10 @@ internal static class CredentialStatusDelta
         Put(rows, KeySpace.LastCommandBytes, OrleansSerialization.Serialize(OutcomeStoreOracle.GlobalKey(principal.Id, id)));
         Put(rows, KeySpace.ClockBytes, OrleansSerialization.Serialize(
             new DateTimeOffset(operation.Timestamp) >= before.Clock ? new DateTimeOffset(operation.Timestamp) : before.Clock));
-        Put(rows, KeySpace.ApiKey(credential.Id), OrleansSerialization.Serialize(credential));
+        if (stored)
+        {
+            Put(rows, KeySpace.ApiKey(credential.Id), OrleansSerialization.Serialize(credential));
+        }
         var actual = CredentialStatusAssertions.Capture(state);
         await CredentialStatusAssertions.RequireRowsAsync(rows, actual.RowHashes);
         await Assert.That(actual.Cut.AppliedPosition).IsEqualTo(checked(before.Cut.AppliedPosition + P.First));

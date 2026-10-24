@@ -143,7 +143,7 @@ internal sealed class OrleansRpcFailureTests
             await Assert.That(rejected.Message).DoesNotContain(PrivateCanary);
             await Assert.That(CqrsBoundaryErrors.IsNonFatal(original)).IsFalse();
         }
-        await Assert.That(capture.Text).IsEqualTo(string.Empty);
+        await Assert.That(capture.TextFrom(nameof(GrainFailureDiagnosticsTests))).IsEqualTo(string.Empty);
     }
 
     private static IEnumerable<(Exception Error, string Category)> RuntimeFailures()

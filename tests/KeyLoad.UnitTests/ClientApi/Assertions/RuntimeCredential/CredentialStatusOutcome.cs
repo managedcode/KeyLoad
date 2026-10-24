@@ -10,7 +10,7 @@ namespace KeyLoad.UnitTests.ClientApi;
 internal static class CredentialStatusOutcome
 {
     internal static async Task<StoredOutcome> RequireAsync(CredentialStatusState state, Guid id, PrincipalRecord principal,
-        ApiKeyRecord credential, long expectedIndex)
+        ApiKeyRecord credential, long expectedIndex, Problem? refusal = null)
     {
         var database = state.Scenario.Fixture.Database;
         var entry = database.ReadStoredOutcome(id);
@@ -26,7 +26,7 @@ internal static class CredentialStatusOutcome
         var fingerprint = DatabaseCommandFingerprint.Compute(id, OperationKind.ConfigureApiKey, principal.Id, payload);
         await Assert.That(entry.Fingerprint).IsEqualTo(fingerprint);
         await Assert.That(operation.Value!.Fingerprint).IsEqualTo(fingerprint);
-        var result = Result<object>.Succeed(true);
+        var result = refusal is null ? Result<object>.Succeed(true) : Result<object>.Fail(refusal);
         var expectedOperation = database.Database.OwnCommand(operation);
         expectedOperation.Value = expectedOperation.Value! with { Fingerprint = fingerprint };
         var expected = new StoredOutcome(fingerprint, database.Store.Identity.Incarnation, principal.PolicyEpoch, result, expectedOperation)

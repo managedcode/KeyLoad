@@ -49,8 +49,12 @@ Concurrent canonical commands share one commit and one journal flush per copy.
   If the copies disagree from some command on, that command and every later one in
   the batch fail with `UnknownWriteOutcome`, and the owners' cuts are read again.
   The rules for a failed batch:
-  - A transport failure, cancellation, or an apply that some copy acknowledged
-    makes every command the copies received uncertain.
+  - Before the copies are sent the batch to apply (owner selection, completing a
+    lagging copy, preparation), no command was applied: a transport failure or an
+    uncertain owner fails every command with `OwnershipLost`, so retrying the same
+    command is safe.
+  - Once the batch was sent, a transport failure, cancellation, or an apply that
+    some copy acknowledged makes every command the copies received uncertain.
   - A failure that every copy raised before any effect belongs to the first command.
   - Commands that no copy applied are queued again, ahead of newer commands.
   - A caller that cancels before its command joins a batch sees cancellation. After

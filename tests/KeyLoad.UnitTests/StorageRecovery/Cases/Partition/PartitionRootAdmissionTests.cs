@@ -7,6 +7,9 @@ internal sealed class PartitionRootAdmissionTests
     private const string CanonicalDirectoryName = "database";
     private const string OwnerLockName = "node.owner.lock";
     private const string UnsupportedLayoutDetail = "The physical node directory is not a supported current layout.";
+    private const string FileChunkDirectoryName = "file-chunks";
+    private const string LocalFilesDirectoryName = "files";
+    private const string RetainedFileName = "retained-payload";
 
     [Test]
     public async Task UnknownFileRejectsUnchangedThenCurrentWriteReopens()
@@ -16,6 +19,23 @@ internal sealed class PartitionRootAdmissionTests
     public async Task UnknownDirectoryRejectsUnchangedThenCurrentWriteReopens()
         => await AssertRejectedThenHealthyAsync(UnknownEntryName, PartitionRootDirectoryOperations.Create, PartitionRootDirectoryOperations.VerifyAsync,
             path => Directory.Delete(path, recursive: true));
+
+    [Test]
+    [Arguments(FileChunkDirectoryName)]
+    [Arguments(LocalFilesDirectoryName)]
+    public async Task FileStorageDirectoryIsAdmittedAndTheNodeReopens(string directoryName)
+        => await PartitionRootAdmissionFixture.RunAsync(async fixture =>
+        {
+            fixture.CreateExistingRoot();
+            var path = Path.Combine(fixture.Root, directoryName);
+            Directory.CreateDirectory(path);
+            await File.WriteAllTextAsync(Path.Combine(path, RetainedFileName), RetainedFileName);
+
+            await fixture.OpenAndDisposeHostAsync();
+            await fixture.AssertHealthyWriteReopenAsync();
+
+            await Assert.That(await File.ReadAllTextAsync(Path.Combine(path, RetainedFileName))).IsEqualTo(RetainedFileName);
+        }).ConfigureAwait(false);
 
     [Test]
     public async Task UnownedLinkRejectsUnchangedThenCurrentWriteReopens()

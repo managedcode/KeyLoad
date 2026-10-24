@@ -76,8 +76,10 @@ internal sealed class SdkProblemBoundaryScenario(ConnectionScenario execution, S
         var beforeRefusal = SdkProblemBoundaryAssertions.Capture(this);
         var refusal = await CommandAsync(Denied, token);
         await SdkProblemBoundaryAssertions.RefusalAsync(refusal);
-        await SdkProblemBoundaryAssertions.UncommittedRefusalAsync(this);
-        await SdkProblemBoundaryAssertions.SameAsync(this, beforeRefusal);
+        await SdkProblemBoundaryAssertions.RetainedRefusalAsync(this);
+        await SdkProblemBoundaryAssertions.CurrentAsync(this);
+        await Assert.That(SdkProblemBoundaryAssertions.Capture(this).Cut.AppliedPosition)
+            .IsEqualTo(checked(beforeRefusal.Cut.AppliedPosition + P.FirstSequence));
     }
 
     private async Task ConfigureAllowedAsync()

@@ -11,13 +11,19 @@ internal sealed class EventSourceLogCapture : EventListener
     private const string FilterSpecsKey = "FilterSpecs";
     private const string LoggerFilter = "GrainFailureDiagnosticsTests:Warning;McpTransportDiagnosticsTests:Warning;KeyLoad.Clustering.ConnectionGrain:Warning";
     private const string FormattedMessageEvent = "FormattedMessage";
-    private readonly ConcurrentQueue<string> messages = new();
+    private const string LoggerNameField = "LoggerName";
+    private readonly ConcurrentQueue<(string? Logger, string Row)> messages = new();
 
     /// <summary>Gets all formatted log event payload fields captured during the observation.</summary>
-    internal string Text => string.Join(" ", messages);
+    internal string Text => string.Join(" ", messages.Select(message => message.Row));
 
     /// <summary>Gets complete original provider rows for request-specific correlation.</summary>
-    internal IReadOnlyList<string> Messages => messages.ToArray();
+    internal IReadOnlyList<string> Messages => [.. messages.Select(message => message.Row)];
+
+    /// <summary>Gets the rows one logger wrote. The provider is process-wide, so parallel tests' loggers also appear
+    /// in <see cref="Text"/>.</summary>
+    internal string TextFrom(string logger)
+        => string.Join(" ", messages.Where(message => message.Logger == logger).Select(message => message.Row));
 
     /// <inheritdoc />
     protected override void OnEventSourceCreated(EventSource eventSource)
@@ -34,7 +40,9 @@ internal sealed class EventSourceLogCapture : EventListener
     {
         if (eventData.EventName == FormattedMessageEvent && eventData.Payload is { } payload)
         {
-            messages.Enqueue(string.Join(" ", payload));
+            var logger = eventData.PayloadNames?.IndexOf(LoggerNameField) is >= 0 and var index
+                ? payload[index] as string : null;
+            messages.Enqueue((logger, string.Join(" ", payload)));
         }
     }
 }

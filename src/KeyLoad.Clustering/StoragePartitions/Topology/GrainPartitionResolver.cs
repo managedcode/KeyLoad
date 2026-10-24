@@ -25,7 +25,7 @@ internal static class GrainPartitionResolver
         OperationKind.ReleaseProjectionConsumer => Route<ReleaseProjectionConsumerRequest>(request, value => (value.CommandId, value.Consumer.Partition)),
         OperationKind.PurgeOutbox => Route<PurgeOutboxRequest>(request, value => (value.CommandId, value.Partition)),
         OperationKind.ConfigureResource or OperationKind.CreateTable or OperationKind.DropTable or OperationKind.SetDispatch
-            or OperationKind.RuntimeJournal
+            or OperationKind.SetQueueDispatch or OperationKind.RuntimeJournal
             => GrainRoutingProtocol.CatalogPartition,
         OperationKind.ConfigurePrincipal or OperationKind.ConfigureApiKey => GrainRoutingProtocol.AuthorizationPartition,
         _ => throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest)

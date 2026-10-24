@@ -34,14 +34,18 @@ internal static class CredentialStatusStages
     {
         var before = CredentialStatusAssertions.Capture(state);
         await CredentialStatusAssertions.AbsentDeniedOutcomeAsync(state);
+        var next = checked(before.Cut.AppliedPosition + P.First);
         var denied = await CompleteAsync(state, endpoint, ordinary.ConfigureApiKeyAsync(state.DeniedId, state.Denied, token),
             CredentialStatusStep.OrdinaryDenied, token);
         await Assert.That(denied.IsFailed).IsTrue();
         await CredentialStatusAssertions.ProblemAsync(denied.Problem, ErrorCode.PermissionDenied, P.DeniedDetail);
-        await CredentialStatusAssertions.UnchangedAsync(state, before, healthy: false);
-        await CredentialStatusAssertions.AbsentDeniedOutcomeAsync(state);
+        // The refusal is a stored outcome at the next canonical sequence; it adds no credential.
+        var refusal = await CredentialStatusOutcome.RequireAsync(state, state.DeniedId, state.Ordinary, state.Denied, next,
+            Errors.Problem(ErrorCode.PermissionDenied, P.DeniedDetail));
+        await CredentialStatusDelta.RequireAsync(state, before, state.DeniedId, state.Ordinary, state.Denied, refusal, stored: false);
+        await CredentialStatusAssertions.CurrentAsync(state, original: true, healthy: false);
         before = CredentialStatusAssertions.Capture(state);
-        var next = checked(before.Cut.AppliedPosition + P.First);
+        next = checked(before.Cut.AppliedPosition + P.First);
         var healthy = await CompleteAsync(state, endpoint, admin.ConfigureApiKeyAsync(state.HealthyId, state.Healthy, token),
             CredentialStatusStep.Healthy, token);
         await SuccessAsync(healthy);

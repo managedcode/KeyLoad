@@ -45,10 +45,15 @@ internal static class SdkProblemBoundaryAssertions
             state.HealthyReceipt is null ? P.SeedJson : P.HealthyJson, false, []), db.Database.GetDocument(P.Root, state.Allowed));
         await SdkProblemBoundaryOutbox.RequireAsync(state);
     }
-    internal static async Task UncommittedRefusalAsync(SdkProblemBoundaryScenario state)
+    // The denied command is applied as a failed outcome: its effects are reset and the refusal itself is retained.
+    internal static async Task RetainedRefusalAsync(SdkProblemBoundaryScenario state)
     {
         var db = state.Execution.Fixture.Database;
-        await Assert.That(OutcomeStoreOracle.ReadPartition(db.Store, db.Partition, state.Principal.Id, state.Denied.CommandId)).IsNull();
+        var outcome = OutcomeStoreOracle.ReadPartition(db.Store, db.Partition, state.Principal.Id, state.Denied.CommandId)
+            ?? throw new InvalidOperationException(P.Failure);
+        await Assert.That(outcome.IsFailed).IsTrue();
+        await Assert.That(outcome.Value).IsNull();
+        await EqualAsync(Errors.Problem(ErrorCode.PermissionDenied, P.Denied), outcome.Problem);
         await Assert.That(db.Store.Read(view => view.ReadOwnedValue(
             OutcomeStoreOracle.UnknownKey(state.Principal.Id, state.Denied.CommandId)))).IsNull();
         await Assert.That(db.Store.Read(view => view.ReadOwnedValue(
@@ -69,7 +74,7 @@ internal static class SdkProblemBoundaryAssertions
     internal static async Task SameAsync(SdkProblemBoundaryScenario state, SdkProblemBoundaryCut expected)
     {
         await CurrentAsync(state);
-        await UncommittedRefusalAsync(state);
+        await RetainedRefusalAsync(state);
         var actual = Capture(state);
         await Assert.That(actual.Rows.SequenceEqual(expected.Rows)).IsTrue();
         await Assert.That(actual.Position).IsEqualTo(expected.Position);

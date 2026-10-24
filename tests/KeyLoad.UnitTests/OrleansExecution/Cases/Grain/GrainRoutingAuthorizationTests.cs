@@ -104,6 +104,21 @@ internal sealed class GrainRoutingAuthorizationTests
         await Assert.That(OutcomeStoreOracle.ReadPartition(fixture.Store, fixture.Partition, Root, commandId)).IsNull();
     }
 
+    /// <summary>AC-ROUTE-001: queue dispatch control is a catalog command, so it routes to the catalog partition.</summary>
+    [Test]
+    public async Task QueueDispatchControlRoutesToTheCatalogPartition()
+    {
+        using var fixture = new TestDatabase();
+        var codec = new GrainRequestCodec(fixture.Database.Store.Identity.Incarnation,
+            fixture.Database.OperationLimitsOptions, TimeProvider.System, UnitRoutingOptions.Routing());
+        var control = new QueueDispatchControlRequest(fixture.Partition.TenantId, fixture.Partition.DatabaseId, Collection,
+            FirstRevision, true);
+        var request = codec.Decode(codec.CreateCommand(Guid.NewGuid(), Root, OperationKind.SetQueueDispatch, Guid.NewGuid(),
+            OrleansSerialization.Serialize(control)));
+
+        await Assert.That(GrainPartitionResolver.Resolve(request)).IsEqualTo(GrainRoutingProtocol.CatalogPartition);
+    }
+
     /// <summary>AC-ROUTE-001: envelope and embedded command IDs cannot disagree, even with a genuine signature.</summary>
     [Test]
     public async Task EmbeddedWriteIdentityAndCancellationAreCheckedBeforeEffects()

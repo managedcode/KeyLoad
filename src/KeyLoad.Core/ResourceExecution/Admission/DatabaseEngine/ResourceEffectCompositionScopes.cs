@@ -32,15 +32,19 @@ public static class ResourceEffectCompositionScopes
         completion.RequireCompleteResourceEffects();
     }
 
+    /// <summary>Requires the current read grant on an admitted endpoint collection in that collection's own scope.</summary>
+    /// <remarks>A cross-partition edge endpoint can belong to another database or transaction domain than the command
+    /// partition, so its grant is checked where the collection lives, exactly as the edge execution checks the endpoint
+    /// vertex.</remarks>
     internal static void RequireCompositionEndpointPolicy(this DatabaseEngine engine, PrincipalRecord principal, Command<DatabaseCommand> operation, ResourceLifetime lifetime)
     {
-        var partition = OperationProtocol.Payload<CommandRequest>(operation).Partition;
-        if (lifetime.TenantId != partition.TenantId || lifetime.DatabaseId != partition.DatabaseId || lifetime.TransactionDomainId != partition.TransactionDomainId)
+        var endpoint = OperationProtocol.Payload<CommandRequest>(operation).Partition with
         {
-            throw Errors.Fail(ErrorCode.Corruption, ResourceEffectAdmissionProtocol.Invalid);
-        }
-
-        engine.Authorization.Require(principal, partition, lifetime.ResourceName, Capability.DocumentsRead);
+            TenantId = lifetime.TenantId,
+            DatabaseId = lifetime.DatabaseId,
+            TransactionDomainId = lifetime.TransactionDomainId
+        };
+        engine.Authorization.Require(principal, endpoint, lifetime.ResourceName, Capability.DocumentsRead);
     }
 
     internal static void ObserveCompositionPrefix(this DatabaseEngine engine, ResourceEffectPreparationTransaction transaction, PrincipalRecord principal, Command<DatabaseCommand> operation, long position, bool preserveBudgetFailure)

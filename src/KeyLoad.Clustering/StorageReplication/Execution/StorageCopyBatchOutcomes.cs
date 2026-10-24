@@ -31,23 +31,31 @@ internal static class StorageCopyBatchOutcomes
         return true;
     }
 
-    /// <summary>Assigns a batch failure: an uncertain write fails every command the copies may have applied, and a
-    /// failure every copy raised before any effect belongs to the first command or, when the batch could not start,
-    /// to every command. Commands no copy could have applied stay undecided.</summary>
+    /// <summary>Assigns a batch failure. Before the copies receive the batch, no command was applied: a transport
+    /// failure or an uncertain owner leaves every command with OwnershipLost, so a retry of the same command is safe.
+    /// Once the copies received it, an uncertain write fails every command they received. A failure every copy raised
+    /// before any effect belongs to the first command or, when the batch could not start, to every command. Commands no
+    /// copy could have applied stay undecided.</summary>
     /// <param name="outcomes">The batch's command outcomes.</param>
     /// <param name="sent">The number of commands the copies received.</param>
     /// <param name="error">The original failure.</param>
     /// <param name="persisted">Whether at least one copy acknowledged its commit.</param>
-    /// <param name="started">Whether the failure arose after the copies began preparing or applying the batch.</param>
-    internal static void Fail(StorageCopyOutcome[] outcomes, int sent, Exception error, bool persisted, bool started)
+    /// <param name="started">Whether the failure arose after the copies began preparing the batch.</param>
+    /// <param name="applying">Whether the copies were sent the batch to apply.</param>
+    internal static void Fail(StorageCopyOutcome[] outcomes, int sent, Exception error, bool persisted, bool started,
+        bool applying)
     {
-        var uncertain = error is KeyLoadException { Code: ErrorCode.UnknownWriteOutcome } ? error
-            : persisted || error is OperationCanceledException or OrleansException or TimeoutException
-                ? Errors.Fail(ErrorCode.UnknownWriteOutcome, StorageCopyContract.WriteUncertain, error) : null;
-        var failed = uncertain is not null ? sent : started ? StorageCopyContract.MinimumCount : outcomes.Length;
+        var transport = error is OperationCanceledException or OrleansException or TimeoutException;
+        var unknown = error is KeyLoadException { Code: ErrorCode.UnknownWriteOutcome };
+        var replacement = !applying
+            ? transport || unknown ? Errors.Fail(ErrorCode.OwnershipLost, StorageCopyContract.OwnersUnavailable, error) : null
+            : unknown ? error
+                : persisted || transport ? Errors.Fail(ErrorCode.UnknownWriteOutcome, StorageCopyContract.WriteUncertain, error) : null;
+        var failed = replacement is not null ? applying ? sent : outcomes.Length
+            : started ? StorageCopyContract.MinimumCount : outcomes.Length;
         for (var index = StorageCopyContract.FirstOwner; index < failed; index++)
         {
-            outcomes[index] = StorageCopyOutcome.Failed(uncertain ?? error);
+            outcomes[index] = StorageCopyOutcome.Failed(replacement ?? error);
         }
     }
 

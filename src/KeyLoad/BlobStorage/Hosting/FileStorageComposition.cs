@@ -10,7 +10,7 @@ namespace KeyLoad.Server;
 [ConfigurationBinding]
 internal static class FileStorageComposition
 {
-    private const string ChunkDirectory = "file-chunks";
+    internal const string ChunkDirectory = "file-chunks";
 
     internal static void Register(WebApplicationBuilder builder)
     {

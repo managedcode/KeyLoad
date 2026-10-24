@@ -26,6 +26,7 @@ internal sealed class SiloStorageCopyExecution(SiloDatabaseClient storage, IClus
         var outcomes = new StorageCopyOutcome[operations.Length];
         var sent = operations.Length;
         var started = false;
+        var applying = false;
         var persisted = false;
         var completed = false;
         try
@@ -40,6 +41,7 @@ internal sealed class SiloStorageCopyExecution(SiloDatabaseClient storage, IClus
             // Every owner applies the same prepared commands from the same cut in one commit, so the copies persist
             // concurrently and the next batch starts only after all of them.
             var applies = new Task<StorageBatchResult>[owners.Length];
+            applying = true;
             for (var index = StorageCopyContract.FirstOwner; index < owners.Length; index++)
             {
                 applies[index] = storage.On(owners[index].Address)
@@ -62,7 +64,7 @@ internal sealed class SiloStorageCopyExecution(SiloDatabaseClient storage, IClus
         }
         catch (Exception error) when (CqrsRuntimeFailures.FindFatal(error) is null)
         {
-            StorageCopyBatchOutcomes.Fail(outcomes, sent, error, persisted, started);
+            StorageCopyBatchOutcomes.Fail(outcomes, sent, error, persisted, started, applying);
         }
         finally
         {
@@ -81,7 +83,10 @@ internal sealed class SiloStorageCopyExecution(SiloDatabaseClient storage, IClus
     internal async Task<SiloAddress> GetReadOwnerAsync(SiloAddress preferredSilo, CancellationToken cancellationToken)
         => (await ReadAvailableAsync(cancellationToken, preferredSilo).ConfigureAwait(true)).Address;
 
-    private async Task<AvailableCopy[]> OwnersAsync(CancellationToken cancellationToken)
+    /// <summary>Selects up to ReplicaCount of the most advanced reachable copies. A batch requires the complete owner
+    /// set; a read takes the most advanced reachable copy, so surviving copies keep serving every acknowledged write
+    /// after a silo loss. Only a complete owner set is cached.</summary>
+    private async Task<AvailableCopy[]> OwnersAsync(CancellationToken cancellationToken, bool requireComplete = true)
     {
         var settings = options.Value;
         settings.Validate();
@@ -95,11 +100,11 @@ internal sealed class SiloStorageCopyExecution(SiloDatabaseClient storage, IClus
         var available = await ReadAvailableCopiesAsync(cancellationToken).ConfigureAwait(true);
         var owners = available.OrderByDescending(copy => copy.Cut.Position)
             .ThenBy(copy => copy.Name, StringComparer.Ordinal).Take(settings.ReplicaCount).ToArray();
-        if (owners.Length != settings.ReplicaCount)
+        if (requireComplete && owners.Length != settings.ReplicaCount)
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, StorageCopyContract.OwnersUnavailable);
         }
-        if (epoch == ownersEpoch && (cachedOwners is null || !cachedVersion.Equals(version)))
+        if (owners.Length == settings.ReplicaCount && epoch == ownersEpoch && (cachedOwners is null || !cachedVersion.Equals(version)))
         {
             cachedOwners = owners;
             cachedVersion = version;
@@ -163,7 +168,7 @@ internal sealed class SiloStorageCopyExecution(SiloDatabaseClient storage, IClus
     private async Task<AvailableCopy> ReadAvailableAsync(CancellationToken cancellationToken, SiloAddress? preferredSilo = null)
     {
         AvailableCopy? selected = null;
-        foreach (var copy in await OwnersAsync(cancellationToken).ConfigureAwait(true))
+        foreach (var copy in await OwnersAsync(cancellationToken, requireComplete: false).ConfigureAwait(true))
         {
             if (selected is not { } current || copy.Cut.Position > current.Cut.Position
                 || copy.Cut.Position == current.Cut.Position && copy.Address.Equals(preferredSilo))

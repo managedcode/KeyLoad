@@ -107,10 +107,12 @@ internal static class PartitionRootAdmission
         }
     }
 
+    // File payload chunks and the default local file root are created by file storage inside the node root.
     private static bool IsCurrentDirectory(string name) => name is PartitionStoreProtocol.CanonicalDirectory
         or SearchIndexDirectory or AnnIndexDirectory or TextIncrementalProtocol.RootDirectory or BackupDirectory
             or KeyLoad.Server.Search.TextOnlineRoot.DirectoryName
-            or UserAnalyticsGenerationPaths.DirectoryName;
+            or UserAnalyticsGenerationPaths.DirectoryName
+            or FileStorageComposition.ChunkDirectory or FileStorageOptions.FilesDirectory;
 
     private static KeyLoadException Unsupported() => Errors.Fail(ErrorCode.FormatUnsupported, InvalidLayout);
 }

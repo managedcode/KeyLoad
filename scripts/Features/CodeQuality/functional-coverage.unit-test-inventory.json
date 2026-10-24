@@ -1693,9 +1693,9 @@
       "methodName": "AcAuthReplay001DeniedSameIdRetainsOneClockCutThroughCanonicalReplay",
       "instanceName": "AcAuthReplay001DeniedSameIdRetainsOneClockCutThroughCanonicalReplay(False)",
       "sourcePath": "tests/KeyLoad.UnitTests/Authorization/Cases/DeniedCommand/DeniedCommandReplayClockTests.cs",
-      "sourceSha256": "97369d25aa9dba6d1e676e06f2546e3b3847d49267b856d0eb0c937ab0503b4c",
-      "lineNumber": 21,
-      "endLineNumber": 51,
+      "sourceSha256": "849d251b8f55fb9fcc692a240998c6a3f584efe93d3843af29f3b1e13839b002",
+      "lineNumber": 22,
+      "endLineNumber": 52,
       "classification": "functional",
       "exclusionReason": null,
       "requirements": [
@@ -1711,9 +1711,9 @@
       "methodName": "AcAuthReplay001DeniedSameIdRetainsOneClockCutThroughCanonicalReplay",
       "instanceName": "AcAuthReplay001DeniedSameIdRetainsOneClockCutThroughCanonicalReplay(True)",
       "sourcePath": "tests/KeyLoad.UnitTests/Authorization/Cases/DeniedCommand/DeniedCommandReplayClockTests.cs",
-      "sourceSha256": "97369d25aa9dba6d1e676e06f2546e3b3847d49267b856d0eb0c937ab0503b4c",
-      "lineNumber": 21,
-      "endLineNumber": 51,
+      "sourceSha256": "849d251b8f55fb9fcc692a240998c6a3f584efe93d3843af29f3b1e13839b002",
+      "lineNumber": 22,
+      "endLineNumber": 52,
       "classification": "functional",
       "exclusionReason": null,
       "requirements": [
@@ -1729,9 +1729,9 @@
       "methodName": "AcAuthReplay001RemovedGrantRejectsCachedSuccessWithoutChangingItsReceiptOrClock",
       "instanceName": "AcAuthReplay001RemovedGrantRejectsCachedSuccessWithoutChangingItsReceiptOrClock",
       "sourcePath": "tests/KeyLoad.UnitTests/Authorization/Cases/DeniedCommand/DeniedCommandReplayClockTests.cs",
-      "sourceSha256": "97369d25aa9dba6d1e676e06f2546e3b3847d49267b856d0eb0c937ab0503b4c",
-      "lineNumber": 53,
-      "endLineNumber": 93,
+      "sourceSha256": "849d251b8f55fb9fcc692a240998c6a3f584efe93d3843af29f3b1e13839b002",
+      "lineNumber": 54,
+      "endLineNumber": 94,
       "classification": "functional",
       "exclusionReason": null,
       "requirements": [
@@ -13892,7 +13892,7 @@
       "methodName": "AcCrs005CallerCancellationPreservesWriteUncertaintyAndDistinctReadCancellation",
       "instanceName": "AcCrs005CallerCancellationPreservesWriteUncertaintyAndDistinctReadCancellation(False)",
       "sourcePath": "tests/KeyLoad.UnitTests/OrleansExecution/Cases/Orleans/OrleansRpcFailureTests.cs",
-      "sourceSha256": "9fc5cfed2313a6edece4e0632993b13e642655b55429caa0e2bda60a3cd4e660",
+      "sourceSha256": "14a222fe51074fd12a9ea4711b49b85f3bf391a8ec56a0087a0fb24d0c35ebac",
       "lineNumber": 77,
       "endLineNumber": 103,
       "classification": "functional",
@@ -13911,7 +13911,7 @@
       "methodName": "AcCrs005CallerCancellationPreservesWriteUncertaintyAndDistinctReadCancellation",
       "instanceName": "AcCrs005CallerCancellationPreservesWriteUncertaintyAndDistinctReadCancellation(True)",
       "sourcePath": "tests/KeyLoad.UnitTests/OrleansExecution/Cases/Orleans/OrleansRpcFailureTests.cs",
-      "sourceSha256": "9fc5cfed2313a6edece4e0632993b13e642655b55429caa0e2bda60a3cd4e660",
+      "sourceSha256": "14a222fe51074fd12a9ea4711b49b85f3bf391a8ec56a0087a0fb24d0c35ebac",
       "lineNumber": 77,
       "endLineNumber": 103,
       "classification": "functional",
@@ -13930,7 +13930,7 @@
       "methodName": "AcCrs005UnvalidatedStreamFailuresDoNotExposeArbitraryExceptionDetails",
       "instanceName": "AcCrs005UnvalidatedStreamFailuresDoNotExposeArbitraryExceptionDetails",
       "sourcePath": "tests/KeyLoad.UnitTests/OrleansExecution/Cases/Orleans/OrleansRpcFailureTests.cs",
-      "sourceSha256": "9fc5cfed2313a6edece4e0632993b13e642655b55429caa0e2bda60a3cd4e660",
+      "sourceSha256": "14a222fe51074fd12a9ea4711b49b85f3bf391a8ec56a0087a0fb24d0c35ebac",
       "lineNumber": 45,
       "endLineNumber": 75,
       "classification": "functional",
@@ -13949,7 +13949,7 @@
       "methodName": "AcCrs006TranslatorRejectsFatalRuntimeFailuresWithoutConversionOrLogging",
       "instanceName": "AcCrs006TranslatorRejectsFatalRuntimeFailuresWithoutConversionOrLogging",
       "sourcePath": "tests/KeyLoad.UnitTests/OrleansExecution/Cases/Orleans/OrleansRpcFailureTests.cs",
-      "sourceSha256": "9fc5cfed2313a6edece4e0632993b13e642655b55429caa0e2bda60a3cd4e660",
+      "sourceSha256": "14a222fe51074fd12a9ea4711b49b85f3bf391a8ec56a0087a0fb24d0c35ebac",
       "lineNumber": 129,
       "endLineNumber": 147,
       "classification": "functional",
@@ -13968,7 +13968,7 @@
       "methodName": "AcRoute009ForeignCancellationKeepsReadOrCommandOutcomeWithAnActiveCaller",
       "instanceName": "AcRoute009ForeignCancellationKeepsReadOrCommandOutcomeWithAnActiveCaller(False)",
       "sourcePath": "tests/KeyLoad.UnitTests/OrleansExecution/Cases/Orleans/OrleansRpcFailureTests.cs",
-      "sourceSha256": "9fc5cfed2313a6edece4e0632993b13e642655b55429caa0e2bda60a3cd4e660",
+      "sourceSha256": "14a222fe51074fd12a9ea4711b49b85f3bf391a8ec56a0087a0fb24d0c35ebac",
       "lineNumber": 105,
       "endLineNumber": 127,
       "classification": "functional",
@@ -13987,7 +13987,7 @@
       "methodName": "AcRoute009ForeignCancellationKeepsReadOrCommandOutcomeWithAnActiveCaller",
       "instanceName": "AcRoute009ForeignCancellationKeepsReadOrCommandOutcomeWithAnActiveCaller(True)",
       "sourcePath": "tests/KeyLoad.UnitTests/OrleansExecution/Cases/Orleans/OrleansRpcFailureTests.cs",
-      "sourceSha256": "9fc5cfed2313a6edece4e0632993b13e642655b55429caa0e2bda60a3cd4e660",
+      "sourceSha256": "14a222fe51074fd12a9ea4711b49b85f3bf391a8ec56a0087a0fb24d0c35ebac",
       "lineNumber": 105,
       "endLineNumber": 127,
       "classification": "functional",
@@ -14006,7 +14006,7 @@
       "methodName": "AcRoute009FrameworkFailuresUseFixedReadOrCommandOutcomes",
       "instanceName": "AcRoute009FrameworkFailuresUseFixedReadOrCommandOutcomes(False)",
       "sourcePath": "tests/KeyLoad.UnitTests/OrleansExecution/Cases/Orleans/OrleansRpcFailureTests.cs",
-      "sourceSha256": "9fc5cfed2313a6edece4e0632993b13e642655b55429caa0e2bda60a3cd4e660",
+      "sourceSha256": "14a222fe51074fd12a9ea4711b49b85f3bf391a8ec56a0087a0fb24d0c35ebac",
       "lineNumber": 20,
       "endLineNumber": 43,
       "classification": "functional",
@@ -14025,7 +14025,7 @@
       "methodName": "AcRoute009FrameworkFailuresUseFixedReadOrCommandOutcomes",
       "instanceName": "AcRoute009FrameworkFailuresUseFixedReadOrCommandOutcomes(True)",
       "sourcePath": "tests/KeyLoad.UnitTests/OrleansExecution/Cases/Orleans/OrleansRpcFailureTests.cs",
-      "sourceSha256": "9fc5cfed2313a6edece4e0632993b13e642655b55429caa0e2bda60a3cd4e660",
+      "sourceSha256": "14a222fe51074fd12a9ea4711b49b85f3bf391a8ec56a0087a0fb24d0c35ebac",
       "lineNumber": 20,
       "endLineNumber": 43,
       "classification": "functional",
@@ -53670,9 +53670,9 @@
       "methodName": "ExistingRegularOwnerLockStillExcludesSecondHost",
       "instanceName": "ExistingRegularOwnerLockStillExcludesSecondHost",
       "sourcePath": "tests/KeyLoad.UnitTests/StorageRecovery/Cases/Partition/PartitionRootAdmissionTests.cs",
-      "sourceSha256": "d2ea65fb5f78aa097e413304010670ff239e793c07e4019abbd8753c4de8eb33",
-      "lineNumber": 129,
-      "endLineNumber": 151,
+      "sourceSha256": "5d1d5a93552f0cb93dce173ee13cb4140c838032b90799da2f7d39cb3aae947d",
+      "lineNumber": 149,
+      "endLineNumber": 171,
       "classification": "functional",
       "exclusionReason": null,
       "requirements": [
@@ -53688,9 +53688,9 @@
       "methodName": "NonDirectoryNodeRootRejectsUnchangedThenFreshRootReopens",
       "instanceName": "NonDirectoryNodeRootRejectsUnchangedThenFreshRootReopens",
       "sourcePath": "tests/KeyLoad.UnitTests/StorageRecovery/Cases/Partition/PartitionRootAdmissionTests.cs",
-      "sourceSha256": "d2ea65fb5f78aa097e413304010670ff239e793c07e4019abbd8753c4de8eb33",
-      "lineNumber": 67,
-      "endLineNumber": 92,
+      "sourceSha256": "5d1d5a93552f0cb93dce173ee13cb4140c838032b90799da2f7d39cb3aae947d",
+      "lineNumber": 87,
+      "endLineNumber": 112,
       "classification": "functional",
       "exclusionReason": null,
       "requirements": [
@@ -53706,9 +53706,9 @@
       "methodName": "RootLinkRejectsWithoutTouchingTargetThenFreshRootReopens",
       "instanceName": "RootLinkRejectsWithoutTouchingTargetThenFreshRootReopens",
       "sourcePath": "tests/KeyLoad.UnitTests/StorageRecovery/Cases/Partition/PartitionRootAdmissionTests.cs",
-      "sourceSha256": "d2ea65fb5f78aa097e413304010670ff239e793c07e4019abbd8753c4de8eb33",
-      "lineNumber": 94,
-      "endLineNumber": 127,
+      "sourceSha256": "5d1d5a93552f0cb93dce173ee13cb4140c838032b90799da2f7d39cb3aae947d",
+      "lineNumber": 114,
+      "endLineNumber": 147,
       "classification": "functional",
       "exclusionReason": null,
       "requirements": [
@@ -53724,9 +53724,9 @@
       "methodName": "UnknownDirectoryRejectsUnchangedThenCurrentWriteReopens",
       "instanceName": "UnknownDirectoryRejectsUnchangedThenCurrentWriteReopens",
       "sourcePath": "tests/KeyLoad.UnitTests/StorageRecovery/Cases/Partition/PartitionRootAdmissionTests.cs",
-      "sourceSha256": "d2ea65fb5f78aa097e413304010670ff239e793c07e4019abbd8753c4de8eb33",
-      "lineNumber": 15,
-      "endLineNumber": 18,
+      "sourceSha256": "5d1d5a93552f0cb93dce173ee13cb4140c838032b90799da2f7d39cb3aae947d",
+      "lineNumber": 18,
+      "endLineNumber": 21,
       "classification": "functional",
       "exclusionReason": null,
       "requirements": [
@@ -53742,9 +53742,9 @@
       "methodName": "UnknownFileRejectsUnchangedThenCurrentWriteReopens",
       "instanceName": "UnknownFileRejectsUnchangedThenCurrentWriteReopens",
       "sourcePath": "tests/KeyLoad.UnitTests/StorageRecovery/Cases/Partition/PartitionRootAdmissionTests.cs",
-      "sourceSha256": "d2ea65fb5f78aa097e413304010670ff239e793c07e4019abbd8753c4de8eb33",
-      "lineNumber": 11,
-      "endLineNumber": 13,
+      "sourceSha256": "5d1d5a93552f0cb93dce173ee13cb4140c838032b90799da2f7d39cb3aae947d",
+      "lineNumber": 14,
+      "endLineNumber": 16,
       "classification": "functional",
       "exclusionReason": null,
       "requirements": [
@@ -53760,9 +53760,9 @@
       "methodName": "UnownedLinkRejectsUnchangedThenCurrentWriteReopens",
       "instanceName": "UnownedLinkRejectsUnchangedThenCurrentWriteReopens",
       "sourcePath": "tests/KeyLoad.UnitTests/StorageRecovery/Cases/Partition/PartitionRootAdmissionTests.cs",
-      "sourceSha256": "d2ea65fb5f78aa097e413304010670ff239e793c07e4019abbd8753c4de8eb33",
-      "lineNumber": 20,
-      "endLineNumber": 22,
+      "sourceSha256": "5d1d5a93552f0cb93dce173ee13cb4140c838032b90799da2f7d39cb3aae947d",
+      "lineNumber": 40,
+      "endLineNumber": 42,
       "classification": "functional",
       "exclusionReason": null,
       "requirements": [
@@ -53778,9 +53778,9 @@
       "methodName": "WrongKnownEntryKindsRejectBeforeMutation",
       "instanceName": "WrongKnownEntryKindsRejectBeforeMutation",
       "sourcePath": "tests/KeyLoad.UnitTests/StorageRecovery/Cases/Partition/PartitionRootAdmissionTests.cs",
-      "sourceSha256": "d2ea65fb5f78aa097e413304010670ff239e793c07e4019abbd8753c4de8eb33",
-      "lineNumber": 51,
-      "endLineNumber": 65,
+      "sourceSha256": "5d1d5a93552f0cb93dce173ee13cb4140c838032b90799da2f7d39cb3aae947d",
+      "lineNumber": 71,
+      "endLineNumber": 85,
       "classification": "functional",
       "exclusionReason": null,
       "requirements": [
@@ -58966,7 +58966,7 @@
       "methodName": "AuthenticationReloadsPersistedPrincipalAndRevocationIsImmediate",
       "instanceName": "AuthenticationReloadsPersistedPrincipalAndRevocationIsImmediate",
       "sourcePath": "tests/KeyLoad.UnitTests/OrleansExecution/Cases/Grain/GrainRoutingAuthorizationTests.cs",
-      "sourceSha256": "ec882b1c66bbb869766a56e57a53e999c81f2e41c9c6325db2d606ac20993b50",
+      "sourceSha256": "00d9a42b5d91e9b771f8fae06b0c2b62a28c88a3aa3a77c3fa72cda8d146c503",
       "lineNumber": 25,
       "endLineNumber": 39,
       "classification": "functional",
@@ -58986,9 +58986,9 @@
       "methodName": "EmbeddedWriteIdentityAndCancellationAreCheckedBeforeEffects",
       "instanceName": "EmbeddedWriteIdentityAndCancellationAreCheckedBeforeEffects",
       "sourcePath": "tests/KeyLoad.UnitTests/OrleansExecution/Cases/Grain/GrainRoutingAuthorizationTests.cs",
-      "sourceSha256": "ec882b1c66bbb869766a56e57a53e999c81f2e41c9c6325db2d606ac20993b50",
-      "lineNumber": 108,
-      "endLineNumber": 124,
+      "sourceSha256": "00d9a42b5d91e9b771f8fae06b0c2b62a28c88a3aa3a77c3fa72cda8d146c503",
+      "lineNumber": 123,
+      "endLineNumber": 139,
       "classification": "functional",
       "exclusionReason": null,
       "requirements": [
@@ -59006,9 +59006,9 @@
       "methodName": "ExactMarkerAndBoundedRepliesPreserveTypedValues",
       "instanceName": "ExactMarkerAndBoundedRepliesPreserveTypedValues",
       "sourcePath": "tests/KeyLoad.UnitTests/OrleansExecution/Cases/Grain/GrainRoutingAuthorizationTests.cs",
-      "sourceSha256": "ec882b1c66bbb869766a56e57a53e999c81f2e41c9c6325db2d606ac20993b50",
-      "lineNumber": 127,
-      "endLineNumber": 141,
+      "sourceSha256": "00d9a42b5d91e9b771f8fae06b0c2b62a28c88a3aa3a77c3fa72cda8d146c503",
+      "lineNumber": 142,
+      "endLineNumber": 156,
       "classification": "functional",
       "exclusionReason": null,
       "requirements": [
@@ -59026,7 +59026,7 @@
       "methodName": "FreshRequestActorsKeepOneStableWriteOutcomeAndRejectWrongPartition",
       "instanceName": "FreshRequestActorsKeepOneStableWriteOutcomeAndRejectWrongPartition",
       "sourcePath": "tests/KeyLoad.UnitTests/OrleansExecution/Cases/Grain/GrainRoutingAuthorizationTests.cs",
-      "sourceSha256": "ec882b1c66bbb869766a56e57a53e999c81f2e41c9c6325db2d606ac20993b50",
+      "sourceSha256": "00d9a42b5d91e9b771f8fae06b0c2b62a28c88a3aa3a77c3fa72cda8d146c503",
       "lineNumber": 55,
       "endLineNumber": 80,
       "classification": "functional",
@@ -59046,7 +59046,7 @@
       "methodName": "MissingPrincipalAndUnprivilegedAdministrationFailClosed",
       "instanceName": "MissingPrincipalAndUnprivilegedAdministrationFailClosed",
       "sourcePath": "tests/KeyLoad.UnitTests/OrleansExecution/Cases/Grain/GrainRoutingAuthorizationTests.cs",
-      "sourceSha256": "ec882b1c66bbb869766a56e57a53e999c81f2e41c9c6325db2d606ac20993b50",
+      "sourceSha256": "00d9a42b5d91e9b771f8fae06b0c2b62a28c88a3aa3a77c3fa72cda8d146c503",
       "lineNumber": 42,
       "endLineNumber": 52,
       "classification": "functional",
@@ -59066,7 +59066,7 @@
       "methodName": "IssuedWriteReloadsPersistedRevocationBeforeCommit",
       "instanceName": "IssuedWriteReloadsPersistedRevocationBeforeCommit",
       "sourcePath": "tests/KeyLoad.UnitTests/OrleansExecution/Cases/Grain/GrainRoutingAuthorizationTests.cs",
-      "sourceSha256": "ec882b1c66bbb869766a56e57a53e999c81f2e41c9c6325db2d606ac20993b50",
+      "sourceSha256": "00d9a42b5d91e9b771f8fae06b0c2b62a28c88a3aa3a77c3fa72cda8d146c503",
       "lineNumber": 83,
       "endLineNumber": 105,
       "classification": "functional",
@@ -59314,6 +59314,96 @@
       ],
       "acceptance": [
         "AC-QUERY-009"
+      ]
+    },
+    {
+      "className": "KeyLoad.UnitTests.StorageRecovery.PartitionRootAdmissionTests",
+      "reportClassName": "KeyLoad.UnitTests.StorageRecovery.PartitionRootAdmissionTests",
+      "methodName": "FileStorageDirectoryIsAdmittedAndTheNodeReopens",
+      "instanceName": "FileStorageDirectoryIsAdmittedAndTheNodeReopens(\"file-chunks\")",
+      "sourcePath": "tests/KeyLoad.UnitTests/StorageRecovery/Cases/Partition/PartitionRootAdmissionTests.cs",
+      "sourceSha256": "5d1d5a93552f0cb93dce173ee13cb4140c838032b90799da2f7d39cb3aae947d",
+      "lineNumber": 23,
+      "endLineNumber": 29,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-EXECUTION-007"
+      ],
+      "acceptance": [
+        "AC-EXECUTION-007"
+      ]
+    },
+    {
+      "className": "KeyLoad.UnitTests.StorageRecovery.PartitionRootAdmissionTests",
+      "reportClassName": "KeyLoad.UnitTests.StorageRecovery.PartitionRootAdmissionTests",
+      "methodName": "FileStorageDirectoryIsAdmittedAndTheNodeReopens",
+      "instanceName": "FileStorageDirectoryIsAdmittedAndTheNodeReopens(\"files\")",
+      "sourcePath": "tests/KeyLoad.UnitTests/StorageRecovery/Cases/Partition/PartitionRootAdmissionTests.cs",
+      "sourceSha256": "5d1d5a93552f0cb93dce173ee13cb4140c838032b90799da2f7d39cb3aae947d",
+      "lineNumber": 23,
+      "endLineNumber": 29,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-EXECUTION-007"
+      ],
+      "acceptance": [
+        "AC-EXECUTION-007"
+      ]
+    },
+    {
+      "className": "KeyLoad.UnitTests.GrainRoutingAuthorizationTests",
+      "reportClassName": "KeyLoad.UnitTests.GrainRoutingAuthorizationTests",
+      "methodName": "QueueDispatchControlRoutesToTheCatalogPartition",
+      "instanceName": "QueueDispatchControlRoutesToTheCatalogPartition",
+      "sourcePath": "tests/KeyLoad.UnitTests/OrleansExecution/Cases/Grain/GrainRoutingAuthorizationTests.cs",
+      "sourceSha256": "00d9a42b5d91e9b771f8fae06b0c2b62a28c88a3aa3a77c3fa72cda8d146c503",
+      "lineNumber": 108,
+      "endLineNumber": 120,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-ROUTE-001"
+      ],
+      "acceptance": [
+        "AC-ROUTE-001"
+      ]
+    },
+    {
+      "className": "KeyLoad.UnitTests.Authorization.DeniedCommandReplayClockTests",
+      "reportClassName": "KeyLoad.UnitTests.Authorization.DeniedCommandReplayClockTests",
+      "methodName": "AcAuthReplay001ClusterPreparationPersistsANewDenialOnceAndReplaysItAfterAGrant",
+      "instanceName": "AcAuthReplay001ClusterPreparationPersistsANewDenialOnceAndReplaysItAfterAGrant",
+      "sourcePath": "tests/KeyLoad.UnitTests/Authorization/Cases/DeniedCommand/DeniedCommandReplayClockTests.cs",
+      "sourceSha256": "849d251b8f55fb9fcc692a240998c6a3f584efe93d3843af29f3b1e13839b002",
+      "lineNumber": 96,
+      "endLineNumber": 128,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-AUTH-008"
+      ],
+      "acceptance": [
+        "AC-AUTH-REPLAY-001"
+      ]
+    },
+    {
+      "className": "KeyLoad.UnitTests.GraphTraversal.GraphCrossDatabaseEndpointTests",
+      "reportClassName": "KeyLoad.UnitTests.GraphTraversal.GraphCrossDatabaseEndpointTests",
+      "methodName": "EdgeToAnotherDatabaseCommitsDeliversAndDeletes",
+      "instanceName": "EdgeToAnotherDatabaseCommitsDeliversAndDeletes",
+      "sourcePath": "tests/KeyLoad.UnitTests/GraphTraversal/Cases/Graph/GraphCross/GraphCrossDatabaseEndpointTests.cs",
+      "sourceSha256": "4b812df7725bcec6e8b0e73f392b5440bcad66f41500dbb6118ebd49cb33cb0b",
+      "lineNumber": 11,
+      "endLineNumber": 40,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-GRAPH-XPART-003"
+      ],
+      "acceptance": [
+        "AC-GRAPH-XPART-003"
       ]
     }
   ],
@@ -70390,7 +70480,8 @@
         "KeyLoad.UnitTests.GrainRoutingAuthorizationTests|ExactMarkerAndBoundedRepliesPreserveTypedValues|ExactMarkerAndBoundedRepliesPreserveTypedValues",
         "KeyLoad.UnitTests.GrainRoutingAuthorizationTests|FreshRequestActorsKeepOneStableWriteOutcomeAndRejectWrongPartition|FreshRequestActorsKeepOneStableWriteOutcomeAndRejectWrongPartition",
         "KeyLoad.UnitTests.GrainRoutingAuthorizationTests|MissingPrincipalAndUnprivilegedAdministrationFailClosed|MissingPrincipalAndUnprivilegedAdministrationFailClosed",
-        "KeyLoad.UnitTests.GrainRoutingAuthorizationTests|IssuedWriteReloadsPersistedRevocationBeforeCommit|IssuedWriteReloadsPersistedRevocationBeforeCommit"
+        "KeyLoad.UnitTests.GrainRoutingAuthorizationTests|IssuedWriteReloadsPersistedRevocationBeforeCommit|IssuedWriteReloadsPersistedRevocationBeforeCommit",
+        "KeyLoad.UnitTests.GrainRoutingAuthorizationTests|QueueDispatchControlRoutesToTheCatalogPartition|QueueDispatchControlRoutesToTheCatalogPartition"
       ]
     },
     {
@@ -71241,7 +71332,8 @@
         "KeyLoad.UnitTests.TimeSeries.SampleRollupIntegrityTests|AcSeries023UnsupportedBucketFailsClosedWithoutReadEffectsAndRestoredReadIsHealthy|AcSeries023UnsupportedBucketFailsClosedWithoutReadEffectsAndRestoredReadIsHealthy",
         "KeyLoad.UnitTests.TimeSeries.SampleRollupPolicyTests|AcSeries021EmptyOffsetEquivalentBucketAndInvalidRangeAreStrict|AcSeries021EmptyOffsetEquivalentBucketAndInvalidRangeAreStrict",
         "KeyLoad.UnitTests.TimeSeries.SampleRollupPolicyTests|AcSeries022RetentionInvalidatesBucketAndRejectsExpiredRebuildWithoutEffects|AcSeries022RetentionInvalidatesBucketAndRejectsExpiredRebuildWithoutEffects",
-        "KeyLoad.UnitTests.TimeSeries.SampleRollupPolicyTests|AcSeries023FreshAuthorizationDenialRetainsRawStatsAndHealthyOwner|AcSeries023FreshAuthorizationDenialRetainsRawStatsAndHealthyOwner"
+        "KeyLoad.UnitTests.TimeSeries.SampleRollupPolicyTests|AcSeries023FreshAuthorizationDenialRetainsRawStatsAndHealthyOwner|AcSeries023FreshAuthorizationDenialRetainsRawStatsAndHealthyOwner",
+        "KeyLoad.UnitTests.Authorization.DeniedCommandReplayClockTests|AcAuthReplay001ClusterPreparationPersistsANewDenialOnceAndReplaysItAfterAGrant|AcAuthReplay001ClusterPreparationPersistsANewDenialOnceAndReplaysItAfterAGrant"
       ]
     },
     {
@@ -72022,7 +72114,7 @@
     },
     {
       "groupId": "unit-functional-05",
-      "selector": "/KeyLoad.UnitTests/*/(Ac*)|(AdminHttpMetricsM*)|(AdminS*)|(AggregateReplayWorkerV*)|(AggregateS*)|(AnalyticsBounds*)|(AnalyticsComm*)|(AnalyticsStoreT*)|(AnalyticsT*)|(AnnLifetimeA*)|(AnnProjectionPinC*)|(AnnPublicPr*)|(AnnSeedB*)|(AtomicPartitionRosterReg*)|(Authe*)|(BackupCr*)|(CacheP*)|(CanonicalJsonT*)|(CanonicalK*)|(CanonicalV*)|(CatalogA*)|(ChunkManifestC*)|(ChunkMultiblockB*)|(ChunkMultiblockR*)|(ChunkSelectedI*)|(CliBackupE*)|(CliBackupRestoreF*)|(ClusterStartupE*)|(CommandObservedP*)|(CommandOutcomeP*)|(ConnectionA*)|(ConnectionG*)|(ConnectionPo*)|(CoreS*)|(CqrsI*)|(CurrentS*)|(Curs*)|(DatabaseCompositionC*)|(DatabasePhaseB*)|(DocumentD*)|(DocumentLiv*)|(DocumentMutationImageF*)|(DocumentR*)|(DueWorkK*)|(EqualityAccessPathT*)|(Ge*)|(GraphCrossPartitionD*)|(GraphP*)|(GraphSearchO*)|(GraphSearchR*)|(GraphShortestPathI*)|(GraphTraversalD*)|(Gro*)|(KeyCodecG*)|(KeyCodecTy*)|(McpCommandD*)|(McpGatewayA*)|(McpRep*)|(McpU*)|(MetadataFormatF*)|(Mo*)|(N*)|(OrleansWalL*)|(OutboxP*)|(PackedAnnN*)|(PackedAnnRec*)|(Pai*)|(PartitionQueryG*)|(PartitionQueryPublicB*)|(PartitionRecordV*)|(PartitionRo*)|(PartitionStorageT*)|(Prepare*)|(ProjectionCh*)|(ProjectionD*)|(ProjectionE*)|(PublicR*)|(Q2*)|(QueryK*)|(QueueDeadLetterS*)|(QueueEx*)|(QueueLifecycleI*)|(QueuePo*)|(QueueRea*)|(QueueV*)|(ReadCutL*)|(ReadG*)|(RequestCqrsAnnEnrollmentA*)|(RequestCqrsR*)|(RequestF*)|(ResourcePolicyUpdateR*)|(Resp*)|(RetainedA*)|(Revo*)|(RowRevisionB*)|(SagaTimeoutA*)|(SampleAggregateB*)|(SampleChunkExe*)|(SampleChunkPe*)|(SampleRetentionL*)|(SampleRetentionReadB*)|(SampleRollupL*)|(SdkPo*)|(SearchT*)|(SqlClientP*)|(SqlComm*)|(SqlGraphPathO*)|(SqlGraphSearchP*)|(SqlInnerJoinE*)|(SqlOf*)|(SqlParserA*)|(SqlTo*)|(StreamR*)|(SubscriptionD*)|(SubscriptionPe*)|(Tea*)|(Ten*)|(TextA*)|(TextCapturedC*)|(TextG*)|(TextProjectionL*)|(Th*)|(TopicRetentionBo*)|(TopicRetentionP*)|(TransactionT*)|(ValueH*)|(W*)|(ZoneTreeCoordinatedPointCacheB*)|(ZoneTreeE*)|(ZoneTreePointCacheL*)|(ZoneTreePointCacheOwnerP*)|(ZoneTreeS*)/(*)&(!AcRoc002CanonicalSystemKeysKeepExactBytesThroughReadOnlyPublicProperties*)&(!CapabilityManifestAdvertisesSearchProfileWithoutChangingQ1Dialect*)&(!CountOnlyShapeDefaultsDepthToZero*)&(!EnabledBankStartsWithTheExactEmptyFixedSchema*)&(!MarkerValuesAreSharedClosedEnumsAndSuccessHasNoDiagnosticAllocation*)&(!NonAnalyticsIssuanceRetainsPublicIdentityInFrozenFingerprint*)&(!SelectedTextMismatchHasClosedWriterParityAndHealthyContinuation*)&(!UniqueIndexConflictHasClosedWriterParityAndHealthyContinuation*)",
+      "selector": "/KeyLoad.UnitTests/*/(Ac*)|(AdminHttpMetricsM*)|(AdminS*)|(AggregateReplayWorkerV*)|(AggregateS*)|(AnalyticsBounds*)|(AnalyticsComm*)|(AnalyticsStoreT*)|(AnalyticsT*)|(AnnLifetimeA*)|(AnnProjectionPinC*)|(AnnPublicPr*)|(AnnSeedB*)|(AtomicPartitionRosterReg*)|(Authe*)|(BackupCr*)|(CacheP*)|(CanonicalJsonT*)|(CanonicalK*)|(CanonicalV*)|(CatalogA*)|(ChunkManifestC*)|(ChunkMultiblockB*)|(ChunkMultiblockR*)|(ChunkSelectedI*)|(CliBackupE*)|(CliBackupRestoreF*)|(ClusterStartupE*)|(CommandObservedP*)|(CommandOutcomeP*)|(ConnectionA*)|(ConnectionG*)|(ConnectionPo*)|(CoreS*)|(CqrsI*)|(CurrentS*)|(Curs*)|(DatabaseCompositionC*)|(DatabasePhaseB*)|(DocumentD*)|(DocumentLiv*)|(DocumentMutationImageF*)|(DocumentR*)|(DueWorkK*)|(EqualityAccessPathT*)|(Ge*)|(GraphCrossD*)|(GraphCrossPartitionD*)|(GraphP*)|(GraphSearchO*)|(GraphSearchR*)|(GraphShortestPathI*)|(GraphTraversalD*)|(Gro*)|(KeyCodecG*)|(KeyCodecTy*)|(McpCommandD*)|(McpGatewayA*)|(McpRep*)|(McpU*)|(MetadataFormatF*)|(Mo*)|(N*)|(OrleansWalL*)|(OutboxP*)|(PackedAnnN*)|(PackedAnnRec*)|(Pai*)|(PartitionQueryG*)|(PartitionQueryPublicB*)|(PartitionRecordV*)|(PartitionRo*)|(PartitionStorageT*)|(Prepare*)|(ProjectionCh*)|(ProjectionD*)|(ProjectionE*)|(PublicR*)|(Q2*)|(QueryK*)|(QueueDeadLetterS*)|(QueueEx*)|(QueueLifecycleI*)|(QueuePo*)|(QueueRea*)|(QueueV*)|(ReadCutL*)|(ReadG*)|(RequestCqrsAnnEnrollmentA*)|(RequestCqrsR*)|(RequestF*)|(ResourcePolicyUpdateR*)|(Resp*)|(RetainedA*)|(Revo*)|(RowRevisionB*)|(SagaTimeoutA*)|(SampleAggregateB*)|(SampleChunkExe*)|(SampleChunkPe*)|(SampleRetentionL*)|(SampleRetentionReadB*)|(SampleRollupL*)|(SdkPo*)|(SearchT*)|(SqlClientP*)|(SqlComm*)|(SqlGraphPathO*)|(SqlGraphSearchP*)|(SqlInnerJoinE*)|(SqlOf*)|(SqlParserA*)|(SqlTo*)|(StreamR*)|(SubscriptionD*)|(SubscriptionPe*)|(Tea*)|(Ten*)|(TextA*)|(TextCapturedC*)|(TextG*)|(TextProjectionL*)|(Th*)|(TopicRetentionBo*)|(TopicRetentionP*)|(TransactionT*)|(ValueH*)|(W*)|(ZoneTreeCoordinatedPointCacheB*)|(ZoneTreeE*)|(ZoneTreePointCacheL*)|(ZoneTreePointCacheOwnerP*)|(ZoneTreeS*)/(*)&(!AcRoc002CanonicalSystemKeysKeepExactBytesThroughReadOnlyPublicProperties*)&(!CapabilityManifestAdvertisesSearchProfileWithoutChangingQ1Dialect*)&(!CountOnlyShapeDefaultsDepthToZero*)&(!EnabledBankStartsWithTheExactEmptyFixedSchema*)&(!MarkerValuesAreSharedClosedEnumsAndSuccessHasNoDiagnosticAllocation*)&(!NonAnalyticsIssuanceRetainsPublicIdentityInFrozenFingerprint*)&(!SelectedTextMismatchHasClosedWriterParityAndHealthyContinuation*)&(!UniqueIndexConflictHasClosedWriterParityAndHealthyContinuation*)",
       "classNames": [
         "KeyLoad.UnitTests.AdminDashboard.AdminHttpMetricsMiddlewareTests",
         "KeyLoad.UnitTests.AdminDashboard.AdminStorageObservationTests",
@@ -72178,7 +72270,8 @@
         "KeyLoad.UnitTests.StorageRecovery.KeyCodecTypedComponentTests",
         "KeyLoad.UnitTests.StorageReplication.GroupCommitTests",
         "KeyLoad.UnitTests.StorageRecovery.ActionStagingTests",
-        "KeyLoad.UnitTests.QueryExecution.QueryKeysetPagingTests"
+        "KeyLoad.UnitTests.QueryExecution.QueryKeysetPagingTests",
+        "KeyLoad.UnitTests.GraphTraversal.GraphCrossDatabaseEndpointTests"
       ],
       "excludedMethodNames": [
         "AcRoc002CanonicalSystemKeysKeepExactBytesThroughReadOnlyPublicProperties",
@@ -72748,7 +72841,10 @@
         "KeyLoad.UnitTests.StorageRecovery.ActionStagingTests|AcRep008ResetDiscardsOnlyTheCurrentActionAndEveryActionCommitsInOneFrame|AcRep008ResetDiscardsOnlyTheCurrentActionAndEveryActionCommitsInOneFrame",
         "KeyLoad.UnitTests.StorageRecovery.ActionStagingTests|AcRep008ActionFrameBudgetIgnoresEarlierActionsWhileTheSharedFrameReportsTheUnion|AcRep008ActionFrameBudgetIgnoresEarlierActionsWhileTheSharedFrameReportsTheUnion",
         "KeyLoad.UnitTests.QueryExecution.QueryKeysetPagingTests|AcQuery009IdOrderedPagesReadEveryDocumentOnceWithAScanBudgetSmallerThanTheCollection|AcQuery009IdOrderedPagesReadEveryDocumentOnceWithAScanBudgetSmallerThanTheCollection",
-        "KeyLoad.UnitTests.QueryExecution.QueryKeysetPagingTests|AcQuery009ScanBudgetAboveTheStorageRangeMaximumStillServesFullScans|AcQuery009ScanBudgetAboveTheStorageRangeMaximumStillServesFullScans"
+        "KeyLoad.UnitTests.QueryExecution.QueryKeysetPagingTests|AcQuery009ScanBudgetAboveTheStorageRangeMaximumStillServesFullScans|AcQuery009ScanBudgetAboveTheStorageRangeMaximumStillServesFullScans",
+        "KeyLoad.UnitTests.StorageRecovery.PartitionRootAdmissionTests|FileStorageDirectoryIsAdmittedAndTheNodeReopens|FileStorageDirectoryIsAdmittedAndTheNodeReopens(\"file-chunks\")",
+        "KeyLoad.UnitTests.StorageRecovery.PartitionRootAdmissionTests|FileStorageDirectoryIsAdmittedAndTheNodeReopens|FileStorageDirectoryIsAdmittedAndTheNodeReopens(\"files\")",
+        "KeyLoad.UnitTests.GraphTraversal.GraphCrossDatabaseEndpointTests|EdgeToAnotherDatabaseCommitsDeliversAndDeletes|EdgeToAnotherDatabaseCommitsDeliversAndDeletes"
       ]
     }
   ]
