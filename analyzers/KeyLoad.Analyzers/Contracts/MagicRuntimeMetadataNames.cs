@@ -1,4 +1,4 @@
-namespace KeyLoad.Analyzers.Features.CodeQuality;
+namespace KeyLoad.Analyzers.CodeQuality;
 
 internal static class MagicRuntimeMetadataNames
 {
@@ -18,8 +18,4 @@ internal static class MagicRuntimeMetadataNames
     internal const string Timer = "System.Threading.Timer";
     internal const string PeriodicTimer = "System.Threading.PeriodicTimer";
     internal const string TimeProvider = "System.TimeProvider";
-
-    /// <summary>Members of these types take durations, timeouts, counts of time units or calendar components.</summary>
-    internal static readonly string[] TemporalTypes =
-        [TimeSpan, Task, GenericTask, Semaphore, CancellationSource, DateTime, DateTimeOffset, Timer, PeriodicTimer, TimeProvider];
 }

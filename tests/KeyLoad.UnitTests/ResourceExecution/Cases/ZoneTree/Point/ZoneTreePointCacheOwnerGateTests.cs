@@ -1,7 +1,7 @@
 using KeyLoad.Storage.ZoneTree;
-using KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
+using KeyLoad.Storage.ZoneTree.ResourceExecution;
 
-namespace KeyLoad.UnitTests.Features.ResourceExecution;
+namespace KeyLoad.UnitTests.ResourceExecution;
 
 internal sealed class ZoneTreePointCacheOwnerGateTests
 {
@@ -15,27 +15,28 @@ internal sealed class ZoneTreePointCacheOwnerGateTests
         await fixture.RunAsync(async () =>
         {
             using var permit = ZoneTreeCoordinatedPointCacheTestSupport.CreateAcceptedPermit(1, out _, out _);
-            var store = fixture.OpenStore();
+            var writerHold = new ZoneTreePointCacheOwnerGateHold();
+            var store = fixture.OpenStore(faultObserver: writerHold.StageObserver);
             ZoneTreeCoordinatedPointCacheTestSupport.Put(store, Key, Value);
             var control = ZoneTreeCoordinatedPointCacheTestSupport.CreateControl(store, fixture, permit);
             var expected = new ZoneTreePointCacheOwnerIdentity(store.Identity.NodeId, store.Identity.Incarnation,
                 control.RuntimeId);
 
-            await VerifyForeignWriterAsync(store, control);
+            await VerifyForeignWriterAsync(store, control, writerHold);
             await VerifyForeignReaderAsync(store, control, expected);
         });
     }
 
-    private static async Task VerifyForeignWriterAsync(ZoneTreeStore store, ZoneTreePointCacheControl control)
+    private static async Task VerifyForeignWriterAsync(ZoneTreeStore store, ZoneTreePointCacheControl control,
+        ZoneTreePointCacheOwnerGateHold hold)
     {
         var failures = new List<Exception>();
-        ZoneTreePointCacheOwnerGateHold? hold = null;
         ZoneTreePointCacheOwnerProbe? probe = null;
         try
         {
             await ZoneTreeCoordinatedPointCacheTestSupport.CollectFailureAsync(async () =>
             {
-                hold = new ZoneTreePointCacheOwnerGateHold(store, write: true);
+                hold.Start(store, write: true);
                 await hold.WaitUntilEnteredAsync();
                 probe = new ZoneTreePointCacheOwnerProbe();
                 probe.Start(control);
@@ -47,15 +48,12 @@ internal sealed class ZoneTreePointCacheOwnerGateTests
         }
         finally
         {
-            hold?.Release();
+            hold.Release();
             if (probe is not null)
             {
                 await probe.JoinAsync(failures);
             }
-            if (hold is not null)
-            {
-                await hold.JoinHolderAsync(failures);
-            }
+            await hold.JoinHolderAsync(failures);
         }
 
         ZoneTreeCoordinatedPointCacheTestSupport.ThrowFailures(failures);
@@ -71,7 +69,8 @@ internal sealed class ZoneTreePointCacheOwnerGateTests
         {
             await ZoneTreeCoordinatedPointCacheTestSupport.CollectFailureAsync(async () =>
             {
-                hold = new ZoneTreePointCacheOwnerGateHold(store, write: false);
+                hold = new ZoneTreePointCacheOwnerGateHold();
+                hold.Start(store, write: false);
                 await hold.WaitUntilEnteredAsync();
                 probe = new ZoneTreePointCacheOwnerProbe();
                 probe.Start(control);

@@ -1,6 +1,6 @@
-using KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
+using KeyLoad.Storage.ZoneTree.ResourceExecution;
 
-namespace KeyLoad.UnitTests.Features.ResourceExecution;
+namespace KeyLoad.UnitTests.ResourceExecution;
 
 internal sealed class ZoneTreePointCacheOwnerClosureTests
 {
@@ -47,7 +47,8 @@ internal sealed class ZoneTreePointCacheOwnerClosureTests
         {
             await ZoneTreeCoordinatedPointCacheTestSupport.CollectFailureAsync(async () =>
             {
-                hold = new ZoneTreePointCacheOwnerGateHold(store, write: false);
+                hold = new ZoneTreePointCacheOwnerGateHold();
+                hold.Start(store, write: false);
                 await hold.WaitUntilEnteredAsync();
                 var closing = ZoneTreeCoordinatedPointCacheTestSupport.StartLongRunning(() =>
                 {

@@ -4,10 +4,19 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 
-namespace KeyLoad.Analyzers.Features.CodeQuality;
+namespace KeyLoad.Analyzers.CodeQuality;
 
 internal static class LiteralDeclarationOwnership
 {
+    /// <summary>Members of these types take durations, timeouts, counts of time units or calendar components.</summary>
+    private static readonly string[] TemporalTypes =
+    [
+        MagicRuntimeMetadataNames.TimeSpan, MagicRuntimeMetadataNames.Task, MagicRuntimeMetadataNames.GenericTask,
+        MagicRuntimeMetadataNames.Semaphore, MagicRuntimeMetadataNames.CancellationSource, MagicRuntimeMetadataNames.DateTime,
+        MagicRuntimeMetadataNames.DateTimeOffset, MagicRuntimeMetadataNames.Timer, MagicRuntimeMetadataNames.PeriodicTimer,
+        MagicRuntimeMetadataNames.TimeProvider
+    ];
+
     internal static bool IsNamedConstant(SyntaxNode node)
     {
         foreach (var ancestor in node.Ancestors())
@@ -40,7 +49,7 @@ internal static class LiteralDeclarationOwnership
         }
 
         var owner = method.ContainingType;
-        return MagicRuntimeMetadataNames.TemporalTypes.Any(name =>
+        return TemporalTypes.Any(name =>
             MagicRuntimeOperations.IsType(context.Compilation, owner, name));
     }
 

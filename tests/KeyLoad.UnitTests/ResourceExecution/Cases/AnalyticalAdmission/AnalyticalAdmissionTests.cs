@@ -1,6 +1,6 @@
 using KeyLoad.Query;
 
-namespace KeyLoad.UnitTests.Features.ResourceExecution;
+namespace KeyLoad.UnitTests.ResourceExecution;
 
 internal sealed class AnalyticalAdmissionTests
 {
@@ -37,10 +37,12 @@ internal sealed class AnalyticalAdmissionTests
     [Test]
     public async Task AcMp004_RealStoreWaitSharesOneAdmissionAcrossAllAnalyticalEntries()
     {
+        var held = new RealZoneTreeWriteGateHold();
         using var db = new TestDatabase(new()
         {
             MaxConcurrentQueries = 1
-        });
+        }, storeFaultObserver: held.Observer);
+        await using var heldLifetime = held;
         using var independent = new TestDatabase(new()
         {
             MaxConcurrentQueries = 1
@@ -51,7 +53,7 @@ internal sealed class AnalyticalAdmissionTests
         var request = new SearchRequest(db.Partition, Collection, SearchField, SearchTerm);
         var tasks = new AnalyticalAdmissionTaskLifetime(CoordinationTimeout);
         Task<RankedDocument[]>? admitted = null;
-        await using var held = new RealZoneTreeWriteGateHold(db.Store);
+        held.Start(db.Store);
         await held.WaitUntilEnteredAsync();
         await tasks.RunWithCleanupAsync(async () =>
         {
@@ -92,17 +94,19 @@ internal sealed class AnalyticalAdmissionTests
     [Test]
     public async Task AcMp012_InFlightCancellationAtRealStoreGateReleasesAdmission()
     {
+        var held = new RealZoneTreeWriteGateHold();
         using var db = new TestDatabase(new()
         {
             MaxConcurrentQueries = 1
-        });
+        }, storeFaultObserver: held.Observer);
+        await using var heldLifetime = held;
         db.Configure(Collection, ResourceKind.Collection);
         var search = new SearchEngine(db.Database, UnitExecutionOptions.QueryExecution());
         var request = new SearchRequest(db.Partition, Collection, SearchField, SearchTerm);
         using var cancellation = new CancellationTokenSource();
         var tasks = new AnalyticalAdmissionTaskLifetime(CoordinationTimeout);
         Task<RankedDocument[]>? admitted = null;
-        await using var held = new RealZoneTreeWriteGateHold(db.Store);
+        held.Start(db.Store);
         await held.WaitUntilEnteredAsync();
         await tasks.RunWithCleanupAsync(async () =>
         {

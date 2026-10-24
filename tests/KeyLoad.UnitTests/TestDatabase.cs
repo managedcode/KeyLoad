@@ -1,5 +1,5 @@
 using System.Text.Json;
-using KeyLoad.RecoveryTests.Features.StorageRecovery;
+using KeyLoad.RecoveryTests.StorageRecovery;
 using KeyLoad.Storage.ZoneTree;
 using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
@@ -32,7 +32,8 @@ internal sealed class TestDatabase : IDisposable
 
     public TestDatabase(DatabaseLimits? limits = null, string? directory = null,
         ClaimsExecutionOptions? claimsExecution = null,
-        TimeProvider? timeProvider = null, TimeSeriesExecutionOptions? timeSeriesExecution = null)
+        TimeProvider? timeProvider = null, TimeSeriesExecutionOptions? timeSeriesExecution = null,
+        Action<CommitStage, long, int>? storeFaultObserver = null)
     {
         Directory = directory ?? Path.Combine(StorageTrialDirectory.ResolveExistingDirectory(new(AppContext.BaseDirectory)),
             DirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
@@ -44,7 +45,7 @@ internal sealed class TestDatabase : IDisposable
         try
         {
             var clock = timeProvider ?? TimeProvider.System;
-            Store = acquired = new(new(Directory), StorageExecution, UnitExecutionOptions.PointCacheExecution(), timeProvider: clock);
+            Store = acquired = new(new(Directory) { FaultObserver = storeFaultObserver }, StorageExecution, UnitExecutionOptions.PointCacheExecution(), timeProvider: clock);
             this.limits = UnitExecutionOptions.DatabaseLimits(limits);
             createDatabase = TestDatabaseEngineFactory.Capture(this.limits, UnitExecutionOptions.RuntimeClaimsExecution(claimsExecution), timeSeriesExecution, clock);
             Database = createDatabase(Store);
