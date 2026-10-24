@@ -16,6 +16,6 @@ internal sealed class RequestWorkKernelTests(RequestCqrsHostedRuntimeFixture fix
         => RequestWorkKernelCases.AssertCallbackFailureJoinAsync(fixture);
 
     [Test]
-    public Task AcCrsWork001RejectedAdmissionStillSettlesTheRealActivation()
-        => RequestWorkKernelCases.AssertRejectedAdmissionSettlesAsync(fixture);
+    public Task AcCrsWork001DuplicateIdentityStillSettlesTheRealActivation()
+        => RequestWorkKernelCases.AssertDuplicateIdentitySettlesAsync(fixture);
 }

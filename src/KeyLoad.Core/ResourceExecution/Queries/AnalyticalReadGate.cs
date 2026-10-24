@@ -1,42 +1,18 @@
 namespace KeyLoad.Core.ResourceExecution;
 
-/// <summary>Admits a fixed number of analytical reads without a wait queue.</summary>
+/// <summary>Counts in-flight analytical reads so their owners can prove release; it never refuses a read.</summary>
 internal sealed class AnalyticalReadGate
 {
-    private const int AdjacentElementOffset = 1;
-
-    private const string Exhausted = "The query concurrency budget is exhausted.";
-    private readonly int capacity;
     private int inFlight;
-
-    /// <summary>Creates a gate with a strictly positive allowance.</summary>
-    internal AnalyticalReadGate(int capacity)
-    {
-        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(capacity);
-        this.capacity = capacity;
-    }
 
     /// <summary>Gets the current number of owned reservations.</summary>
     internal int InFlight => Volatile.Read(ref inFlight);
 
-    /// <summary>Atomically reserves one read or rejects saturation immediately.</summary>
+    /// <summary>Records one read until the returned reservation is disposed.</summary>
     internal IDisposable Admit(CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        while (true)
-        {
-            var count = Volatile.Read(ref inFlight);
-            if (count >= capacity)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-                throw Errors.Fail(ErrorCode.ResourceExhausted, Exhausted);
-            }
-            if (Interlocked.CompareExchange(ref inFlight, count + AdjacentElementOffset, count) == count)
-            {
-                break;
-            }
-            cancellationToken.ThrowIfCancellationRequested();
-        }
+        Interlocked.Increment(ref inFlight);
         try
         {
             cancellationToken.ThrowIfCancellationRequested();

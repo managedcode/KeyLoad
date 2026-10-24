@@ -53,10 +53,6 @@ internal sealed class ServerConnectionFeature : IAsyncDisposable
             {
                 throw Errors.Fail(ErrorCode.Cancelled, ServerConnectionProtocol.Closed);
             }
-            if (active >= settings.MaximumConnectionOperations)
-            {
-                throw Errors.Fail(ErrorCode.ResourceExhausted, ServerConnectionProtocol.Capacity);
-            }
             var operation = new ServerConnectionOperation(this, cancellationToken, closed.Token);
             ++active;
             used = true;

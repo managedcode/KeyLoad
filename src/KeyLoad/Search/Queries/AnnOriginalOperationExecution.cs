@@ -20,7 +20,7 @@ internal static class AnnOriginalOperationExecution
         (AnnMaintenanceResult? Result, CommitProjectionBatchRequest? Intent) result = default;
         try
         {
-            using var operation = admission.Enter(configured.GrainRouting.Value.MaximumRequestProducers);
+            using var operation = admission.Enter();
             try
             {
                 AnnMaintenanceAdmission.Request(request, request.CommandId, database.Store.Identity.NodeId);

@@ -73,7 +73,6 @@ internal sealed class ProjectionProcessRecoveryTests
         await Assert.That(status.Head.Tail).IsEqualTo(checkpoint + 1);
         await Assert.That(database.Store.Read(view => view.ReadOwnedValue(KeySpace.PartitionOutcome(ProjectionCrashScenario.Partition,
             "root", ProjectionCrashScenario.CommandId))) is null).IsEqualTo(checkpoint == 0);
-        await Assert.That(status.Consumers.Single().LastProgressReservationCut).IsEqualTo(checkpoint == 0 ? -1 : 1);
         if (stage >= CommitStage.JournalFlushed)
         {
             await Assert.That(checkpoint).IsEqualTo(1);
@@ -102,7 +101,6 @@ internal sealed class ProjectionProcessRecoveryTests
         await Assert.That(retried.AlreadyProcessed).IsTrue();
         await Assert.That(retried.Receipt.Token).IsEqualTo(recovered.Receipt.Token);
         await Assert.That(status.Consumers.Single().Checkpoint).IsEqualTo(1);
-        await Assert.That(status.Consumers.Single().LastProgressReservationCut).IsEqualTo(1);
         await Assert.That(status.Head.Tail).IsEqualTo(2);
         await Assert.That(database.GetDocument("root", new(ProjectionCrashScenario.Partition, "projection", "effect"))!.Revision).IsEqualTo(1);
     }

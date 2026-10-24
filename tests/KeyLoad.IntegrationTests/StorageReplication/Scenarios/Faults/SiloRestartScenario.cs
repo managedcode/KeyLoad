@@ -139,7 +139,7 @@ internal static class SiloRestartScenario
                 await EventuallyAsync(async () =>
                 {
                     var status = await client.StatusAsync(recoveryTimeout.Token);
-                    return status.IsSuccess && status.Value!.RoutingReady;
+                    return status.IsSuccess && status.Value.RoutingReady;
                 }, recoveryTimeout.Token);
             }
             catch (Exception readinessFailure) when (IsNonFatalCleanupFailure(readinessFailure))

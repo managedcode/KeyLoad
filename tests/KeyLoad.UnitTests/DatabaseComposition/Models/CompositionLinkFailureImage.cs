@@ -39,6 +39,9 @@ internal sealed record CompositionLinkFailureImage(long Position, long Applied, 
         var locator = owner.Store.Read(view => view.ReadOwnedValue(
             KeySpace.OutcomeLocator(owner.Source.Partition, operation.UserId!, operation.CommandId)));
         await Assert.That(locator is not null && locator.AsSpan().SequenceEqual(key)).IsTrue();
+        var lastCommand = owner.Store.Read(view => OrleansSerialization.Deserialize<byte[]>(
+            view.ReadOwnedValue(KeySpace.LastCommandBytes)!));
+        await Assert.That(lastCommand.AsSpan().SequenceEqual(key)).IsTrue();
         var clock = owner.Store.Read(view => OrleansSerialization.Deserialize<DateTimeOffset>(
             view.ReadOwnedValue(KeySpace.ClockBytes)!));
         await Assert.That(clock).IsEqualTo(new DateTimeOffset(operation.Timestamp));
@@ -51,6 +54,7 @@ internal sealed record CompositionLinkFailureImage(long Position, long Applied, 
             KeySpace.PartitionOutcome(owner.Source.Partition, operation.UserId!, operation.CommandId),
             KeySpace.OutcomeLocator(owner.Source.Partition, operation.UserId!, operation.CommandId),
             KeySpace.AppliedBytes,
+            KeySpace.LastCommandBytes,
             KeySpace.ClockBytes
         }.Select(key => Convert.ToHexString(key) + ":").ToArray();
         return CanonicalStoreImage.Bytes(owner.Store)

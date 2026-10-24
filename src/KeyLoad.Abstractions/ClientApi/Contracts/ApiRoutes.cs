@@ -79,8 +79,6 @@ public static class ApiRoutes
     public const string AdminDispatch = "/admin/dispatch";
     /// <summary>The "/status" route.</summary>
     public const string Status = "/status";
-    /// <summary>The "/admin/admission" route.</summary>
-    public const string AdmissionStatus = "/admin/admission";
     /// <summary>The query-string prefix that selects the paused dispatch state.</summary>
     public const string DispatchPausedQuery = "?paused=";
 }

@@ -41,8 +41,9 @@ membership, transport, placement or movement mechanism of its own.
 
 - **Connection grain.** Every connected client has one Orleans grain
   ([ADR-125](../ADR/ADR-125-connection-owned-execution.md)). Every operation gets
-  fresh persisted authorization, bounded admission, cancellation and an
-  idempotent command outcome; clients never supply trusted roles.
+  fresh persisted authorization, per-operation data bounds, cancellation and an
+  idempotent command outcome; clients never supply trusted roles. The server
+  does not throttle callers ([ADR-145](../ADR/ADR-145-no-request-throttling.md)).
 - **Partition grains.** A logical partition grain is an ordinary Orleans grain
   that serializes and routes the commands of one logical (atomic) partition.
 - **Physical storage owner.** A silo-local Grain Service owns open ZoneTree
@@ -153,7 +154,7 @@ RRF merges ranked results from different retrievers. It is a suitable starting s
 .NET SDK / HTTP API / MCP / SQL
                  │
      Connection grain (one per client)
-   auth, validation, admission, limits
+   auth, validation, operation limits
                  │
      ┌───────────┴───────────────────────┐
      │                                   │
@@ -180,7 +181,7 @@ version + checkpoint               version + checkpoint
 
 ### Responsibilities
 
-`Connection grain`: one Orleans grain per connected client ([ADR-125](../ADR/ADR-125-connection-owned-execution.md)). It runs the client's independent operations with bounded admission, cancellation and fresh persisted authorization for every operation; it stores no trusted roles, completed-request history or storage handles.
+`Connection grain`: one Orleans grain per connected client ([ADR-125](../ADR/ADR-125-connection-owned-execution.md)). It runs the client's independent operations with per-operation data bounds, cancellation and fresh persisted authorization for every operation; it stores no trusted roles, completed-request history or storage handles.
 
 `Partition grain`: an ordinary Orleans grain that serializes and routes the commands of one logical partition to the ZoneTree owners on `ReplicaCount` silos. The number of grains follows the number of operational partitions. A per-document grain may be an optional facade; the base data path works with partition batches. The base architecture creates no grain per edge, sample or ANN node. Orleans may migrate a partition grain; migration does not move files.
 
@@ -262,7 +263,7 @@ Comparers and serializers are part of the persisted data format. There is one cu
 ### Single-node apply
 
 1. The connection grain checks auth scope, JSON, schema, size and command identity.
-2. A writer queue serializes the partition's commands; the bounded queue provides backpressure.
+2. The partition owner's ordered apply gate serializes the partition's commands; callers wait for their turn instead of being refused.
 3. A dedup lookup runs; a repeat with the same ID and a different payload ends in an explicit conflict.
 4. In one transaction: all preconditions are checked, index deltas are built, canonical records change, domain events/queue state/inbox receipt are added when the command has them, the outbox event is added, and the outcome and `lastApplied` are written. A shared TransactionDomain is checked before apply.
 5. Acknowledgement depends on the declared durability profile and a verified flush barrier.
@@ -480,9 +481,9 @@ Tenant isolation starts in KeyCodec, routing and query planning. Transport authe
 
 Request limits: document/request size, number of batch operations, fan-out, scanned records, top-k, vector dimensions, graph traversal, query memory, deadline. Reaching a limit yields an explicit outcome. An expensive full scan requires explicit opt-in or an administrative policy.
 
-Node budgets: total managed/memory, WAL backlog, projection lag, compaction work, free disk headroom, open files, pending write queue, CPU concurrency. Admission control engages before OOM or a full disk. Every maintainer registers with the node-level scheduler.
+Node resources: total managed/memory, WAL backlog, projection lag, compaction work, free disk headroom, open files, pending write queue, CPU concurrency. Engines plan their own memory and disk (cache memory budgets, ANN resident and disk planning, text-search reader leases); callers are not throttled by request count or reserved bytes, so overload appears as latency and operators size hardware for their load. Every maintainer registers with the node-level scheduler.
 
-Observability: end-to-end p50/p95/p99, allocs/op, GC pause, CPU, RSS/memory, bytes read/written, compaction amplification, copy lag, apply lag, projection lag, retry/conflict rate, recovery time and corruption indicators. By default, logs must not contain document/event/message payloads, raw sensitive headers or secrets. ACK/renew and delivery have resource reservations; messaging quotas complement query limits.
+Observability: end-to-end p50/p95/p99, allocs/op, GC pause, CPU, RSS/memory, bytes read/written, compaction amplification, copy lag, apply lag, projection lag, retry/conflict rate, recovery time and corruption indicators. By default, logs must not contain document/event/message payloads, raw sensitive headers or secrets. Messaging quotas complement query limits.
 
 Offline backup: stop admission → drain transactions/jobs → flush → close engine/maintainer → copy all authoritative files → manifest/checksum → reopen. Restore is tested into a clean directory, verifying canonical records and index invariants. A replicated cluster is backed up by the same local backup on each silo; a globally consistent cut across silos is not part of the current design.
 
@@ -538,7 +539,7 @@ KeyLoad's base configuration is managed-first: storage, query planner, permissio
 
 ### 21.2. What we build on
 
-The server consists of ASP.NET Core, Orleans, the silo-local ZoneTree owner, KeyLoad's own planner/executor, a local policy catalog and a bounded resource governor. Scalar SQL, graph, time-series and search operators all run on this same executor.
+The server consists of ASP.NET Core, Orleans, the silo-local ZoneTree owner, KeyLoad's own planner/executor, a local policy catalog and per-operation resource bounds. Scalar SQL, graph, time-series and search operators all run on this same executor.
 
 KeyLoad-owned parts: the identity model, the atomic partition contract, query semantics, the security binder, deterministic command apply, partition routing, projection lifecycle and operational guarantees. Reused components: Microsoft.SqlServer.TransactSql.ScriptDom for T-SQL syntax and ZoneTree.FullTextSearch as the text index, with KeyLoad computing BM25 ranking on top of it. A managed HNSW implementation is a reuse candidate. Each reused component gets capability tests; the availability of a NuGet package does not close acceptance of its integration.
 
@@ -811,7 +812,7 @@ Writes to one logical partition are ordered by its partition grain and the ZoneT
 
 The main sources of parallelism are independent client requests, independent partitions, independent text/vector branches, multiple CPU blocks of an exact-vector scan and separate background maintenance jobs. All of them draw on a shared node-level budget. Creating a Task per document, edge or vector distance is forbidden.
 
-`Task.Run` alone does not guarantee isolation. Heavy scoring goes through an admission semaphore/queue with bounded concurrency. Control work has its own budget and priority. Code moved off the grain scheduler receives immutable inputs and works through a thread-safe storage adapter; it must not access mutable grain state.
+`Task.Run` alone does not guarantee isolation. Heavy scoring runs under its operation's read budget; no control work has a separate budget or priority lane. Code moved off the grain scheduler receives immutable inputs and works through a thread-safe storage adapter; it must not access mutable grain state.
 
 ### 25.6. Explain/Profile
 
@@ -1066,7 +1067,7 @@ Row ACL mutations live in the canonical data scope. A query that uses a cached a
 
 All lookup keys, caches, cursors, jobs and outbox subscriptions include the tenant scope. A cross-tenant key lookup must end with a generic not-found/denied outcome under a fixed documented policy, without confirming that another tenant's ID exists.
 
-Tenant quotas cover the number of collections/indexes, storage size, active series, vector dimensions/count, document size, query CPU/memory, concurrent queries, graph fan-out, bulk batch bytes and background reindex quota. The node governor applies overall limits across all tenants; one tenant cannot consume the sum of all per-query maximums up to OOM.
+Tenant quotas cover the number of collections/indexes, storage size, active series, vector dimensions/count, document size, query CPU/memory, graph fan-out, bulk batch bytes and background reindex quota. No node-wide request governor or tenant request-count throttle exists; per-operation bounds limit each request, and operators size hardware for the aggregate load across tenants.
 
 ## 30. Sensitive/PII fields and masking
 
@@ -1208,7 +1209,7 @@ For 32 shards × 200 candidates × 3 branches × an assumed 80 bytes per candida
 
 Node budget = canonical memtables/cache + graph/index structures + query working sets + compaction/rebuild reserves + runtime + WAL/journals. Individual caches must not each treat all RAM as their own limit.
 
-The copy count multiplies canonical storage; durable logs, projection snapshots and compaction have their own write amplification. Rebuilding two index generations at once is counted in admission. Low free disk moves the node into controlled throttling, read-only or fail-stop before any false durable ACK.
+The copy count multiplies canonical storage; durable logs, projection snapshots and compaction have their own write amplification. Rebuilding two index generations at once is counted in ANN and text disk planning. Low free disk moves the node into read-only or fail-stop before any false durable ACK.
 
 A public QPS figure without document size, index count, durability, hardware, concurrency, recall and filter distribution is not used as performance evidence. Recording these dimensions is part of the benchmark artifact.
 
@@ -1334,7 +1335,7 @@ Answering these questions requires targeted prototypes and actual measurements.
 
 ### 37.1. Product model
 
-KeyLoad combines document/KV storage, scalar indexes, a property graph, time series, vector/text/hybrid search, an Event Store and durable messaging. Shared components: the catalog, transaction domains, authorization, ordered commit, replication, recovery, the SDK and the resource governor. Capabilities are enabled through a capability manifest; a queue-only configuration can run without text/ANN indexes.
+KeyLoad combines document/KV storage, scalar indexes, a property graph, time series, vector/text/hybrid search, an Event Store and durable messaging. Shared components: the catalog, transaction domains, authorization, ordered commit, replication, recovery, the SDK and per-operation resource bounds. Capabilities are enabled through a capability manifest; a queue-only configuration can run without text/ANN indexes.
 
 The main cross-cutting contract: **change a document, append a business event and enqueue a message in a co-located queue lane in one atomic commit**. All operations must resolve to the same AtomicPartitionId through the catalog binding in Section 41. For a destination in another atomic partition, the source commit stores a transfer intent, and delivery has its own status.
 
@@ -1487,7 +1488,7 @@ An OrderingKey routes to one lane. The StrictPerKey profile allows one active me
 
 For millions of messages/buckets, large immutable event/queue payloads could move into sealed segments; that option requires versioned blob references, checksummed manifests, atomic publication, integration with copying through Orleans and crash-safe GC. The current design uses the shared transactional engine with separate body/state keys.
 
-Queue quotas bound stored bytes/messages, inflight bytes/count, receive waiters, attempts and DLQ storage. Control traffic, ACK and renew get a resource reserve. RabbitMQ quorum queues are a specialized benchmark for replication/delivery and large-backlog behavior; KeyLoad's own semantics are defined independently. [S51]
+Queue quotas bound stored bytes/messages, inflight bytes/count, receive waiters, attempts and DLQ storage. RabbitMQ quorum queues are a specialized benchmark for replication/delivery and large-backlog behavior; KeyLoad's own semantics are defined independently. [S51]
 
 ## 40. Topics, consumer groups and subscriptions
 
@@ -1595,7 +1596,7 @@ API / C# SDK
       ↓
 Event/Queue Commands + Query Frontends
       ↓
-Authorization + Domain Resolver + Resource Governor
+Authorization + Domain Resolver + Operation Bounds
       ↓
 Connection grain → partition grains (Orleans)
       ↓
@@ -1630,7 +1631,7 @@ An ExpireLease command carries the expected lease version and state revision/dea
 
 ### 42.4. Resource isolation and modular deployment
 
-Control plane, commit, ACK/renew, delivery, queries, reindex and compaction have separate concurrency/IO budgets. Prefetch has a strict memory budget. Backlog stays on disk; the active window is bounded. When backlog exceeds its quota, the producer receives ResourceExhausted before commit.
+Control plane, commit, ACK/renew, delivery and queries share the node without separate request concurrency budgets ([ADR-145](../ADR/ADR-145-no-request-throttling.md)); reindex and compaction keep their own engine disk and memory planning. Prefetch has a strict memory budget. Backlog stays on disk; the active window is bounded. When backlog exceeds its quota, the producer receives ResourceExhausted before commit.
 
 A single-node all-in-one deployment is one shared failure domain. Separating resources that share an atomic domain requires an explicit switch to the transfer protocol.
 
@@ -1812,7 +1813,7 @@ The numbers are test configurations, not measured capacities. Open-loop load, ti
 | ADR-028 | Persisted scheduling; logged time evaluation in StatelessWorker batches | Copies and restarts produce identical transition outcomes |
 | ADR-029 | Event/message classification, required-input grants, safe diagnostics | PII/token canaries, denial before unsafe replay |
 | ADR-030 | Retention pins and paused restore with a new incarnation | No automatic external redelivery after restoring an older cut |
-| ADR-031 | Modular all-in-one deployment, reserved control resources | Mixed-load liveness and an honest capability/protocol manifest |
+| ADR-031 | Modular all-in-one deployment and capability manifest | Mixed-load liveness and an honest capability/protocol manifest |
 
 ### Summary
 

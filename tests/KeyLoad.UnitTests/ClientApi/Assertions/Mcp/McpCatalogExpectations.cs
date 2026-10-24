@@ -68,8 +68,6 @@ internal static class McpCatalogExpectations
     private const string SearchGraphRoute = "/search/graph";
     internal const string AdminBackup = "keyload_admin_backup";
     private const string AdminBackupRoute = "/admin/backup";
-    internal const string AdminAdmission = "keyload_admin_admission";
-    private const string AdminAdmissionRoute = "/admin/admission";
     internal const string AdminStatus = "keyload_admin_status";
     private const string AdminStatusRoute = "/status";
     internal const string DocumentsCommit = "keyload_documents_commit";
@@ -111,7 +109,7 @@ internal static class McpCatalogExpectations
     internal const string OutboxPurge = "keyload_outbox_purge";
     private const string OutboxPurgeRoute = "/admin/outbox/purge";
 
-    internal const int Count = 71;
+    internal const int Count = 70;
     internal static ImmutableArray<(string Name, string Route, GrainReadKind? ReadKind, OperationKind? CommandKind)> Entries
     {
         get;
@@ -153,7 +151,6 @@ internal static class McpCatalogExpectations
         (WaitForAnnIndexProtocol.Tool, WaitForAnnIndexProtocol.Route, GrainReadKind.WaitForAnnIndex, null),
         (McpOnlineTextCatalogExpectations.OnlineTextMaintenance, McpOnlineTextCatalogExpectations.OnlineTextMaintenanceRoute, null, OperationKind.MaintainOnlineTextIndex),
         (AdminBackup, AdminBackupRoute, GrainReadKind.Backup, null),
-        (AdminAdmission, AdminAdmissionRoute, GrainReadKind.Admission, null),
         (AdminStatus, AdminStatusRoute, GrainReadKind.NodeStatus, null),
         (DocumentsCommit, DocumentsCommitRoute, null, OperationKind.Batch),
         ("keyload_messages_receive_across_lanes", "/queues/receive-across-lanes", null, OperationKind.ReceiveAcrossLanes),

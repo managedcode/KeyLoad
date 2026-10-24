@@ -1,6 +1,6 @@
 # ResourceExecution
 
-ResourceExecution owns bounded operation admission, canonical resource lifetimes,
+ResourceExecution owns per-operation data bounds, canonical resource lifetimes,
 shared result retention and joined ownership. Orleans owns cluster and activation
 lifecycle; the silo-local ZoneTree owner retains files and engine handles.
 [AnalyticsStore](AnalyticsStore.md) owns user analytics requirements and its
@@ -161,9 +161,6 @@ qualify the current delivered source.
 
 | Existing requirement / AC | Exact source families or method identities | Observed contribution and boundary |
 |---|---|---|
-| REQ-RESOURCE-001 / AC-RESOURCE-001; REQ-ADM-001 / AC-ADM-001 | `CommandAdmissionGovernorTests.CancellationBeforeAdmissionDoesNotConsumeCapacity`; `HttpAdmissionGovernorTests`; `AdmissionOwnershipTests.HttpAdmissionRejectsInvalidPathFramingAndPrincipalBeforeReservation`; current command-governor cases named in the requirement table above | Real governor reservations check bounded node/data/control lanes, verified scope binding, rejection/cancellation accounting and release. Unit admission is not the planned mixed-load cluster profile. |
-| REQ-ADM-001 / AC-ADM-001 | `AdmissionOwnershipTests.InvalidCommandReservationArgumentsLeaveEveryCounterUnchanged`; `DisposingUnresolvedDispatchedCommandReportsUnknownOutcomeAndReleasesOnce` | Actual invalid reservations leave counters unchanged; unresolved admitted command publishes UnknownWriteOutcome and releases its reservation once. This does not establish current caller integration or AC-ADM-003. |
-| REQ-ADM-002 / AC-ADM-002 | `AdmissionOwnershipTests.InboxRejectsConcurrentReaderWithoutConsumingTheQueuedSignal`; `AsyncDisposalStopsAndDrainsRegisteredReaderBeforeRejectingFutureWork`; `PreCancelledReadIsRejectedBeforeReaderOwnershipEvenAfterStop`; `AdmittedCommandInboxTests` | Real inbox single-reader, cancellation, FIFO, control-burst fairness, stop/drain, response cancellation, queue release and bounded reader behavior. `AdmittedCommandReadAllocationTests.WarmedPrefilledInboxReadsWithinSmallAllocationWindow` is an allocation control, not an AC-ADM-002 numeric criterion. |
 | REQ-MP-002 / AC-MP-004, AC-MP-005 | `AnalyticalAdmissionTests`; `BudgetedReadViewTests`; `ReadBudgetAllocationTests`; `ReadExecutionBudgetGrant*Tests`; `ReadExecutionTests` | Real engine/store reservation, shared read-byte/record debit, limits before reader/callback/materialization, read cancellation and healthy-follow-up subflows. Allocation assertions are scoped observations, not RSS/physical-I/O or performance qualification. |
 | REQ-MP-006 / AC-MP-006; REQ-MP-002 / AC-MP-003 | `CanonicalJsonTests`; `CanonicalJsonAllocationTests`; `JsonPathTests`; `JsonTextProtocolTests`; `JsonTextAllocationTests`; `PreparedScalarTests` | Exact canonical bytes/fingerprints, pointer/scalar behavior, strict text/byte decoding, malformed-input cleanup, persisted retry and bounded allocation cases. These cover named serializer paths, not all public API transports. |
 | REQ-MP-006 / AC-MP-006; REQ-MSG-001 / AC-MSG-001; REQ-MSG-003 / AC-MSG-003 | `JsonTextQueueReplayTests` and `JsonTextSubscriptionReplayTests` | Actual receive/replay preserves delivery identity, rejects changed raw request/result data, rechecks current principal or subscription generation, and rejects stale lease/token use. This is a replay/lease subset, not the full messaging API or official-client proof. |
@@ -171,7 +168,7 @@ qualify the current delivered source.
 | REQ-CACHE-001..004 / AC-CACHE-001..008, AC-CACHE-011 (only per-method subset) | `CacheMemoryBudget*Tests`; `CacheReadPermit*Tests`; `ZoneTreeCoordinatedPointCache*Tests`; `ZoneTreePointCache*Tests` | Actual budget, permit, ZoneTree cache, owner-gate, coherence, authorization and pin/retirement subflows as enumerated per case. No unit case here proves cross-node cache enablement on a replicated cluster, AC-CACHE-009 measured benefit or AC-CACHE-010 full qualification. |
 | REQ-RESOURCE-003/004 / AC-DBPROF-001..004 | `DatabasePhaseSchemaTests`; `DatabasePhaseBankTests`; `DatabasePhaseBankConcurrencyTests`; `DatabasePhaseArithmeticTests`; `DatabasePhaseAllocationTests` | Fixed bank shape, independent lanes, bounded arithmetic/contention/saturation, detached snapshots and configured primitive allocation. These do not prove all production phase boundaries, private capture or overhead/benefit (AC-DBPROF-005..008). |
 | REQ-RESOURCE-003 / REQ-CQ-013; AC-DBPROF-002 / AC-CQ-034/035 | `DatabasePhaseExecutionOptionsTests` | Actual central options binding/validation and bank-construction ordering, including malformed/unknown/scalar settings and allowed bounds. This does not qualify enabled production startup or profiling output. |
-| REQ-AISQL-003 / AC-AISQL-007 | `SqlAdmissionTests` | Actual HTTP governor treats SQL as heavy data work, reserves before verified-scope binding, preserves direct-control progress during data saturation and exposes nonrecursive dynamic-effect discovery. Unit evidence does not replace the official .NET/MCP cluster flow. |
+| REQ-AISQL-003 / AC-AISQL-007 | `SqlToolDiscoveryTests.AcAiSql007SqlDiscoveryReportsDynamicEffectsAndCannotBeCalledRecursively` | The generic SQL tool is a catalog adapter with no fixed read or command kind, reports non-read-only, non-idempotent and destructive hints, and cannot be resolved as a canonical operation that SQL could call recursively. Unit evidence does not replace the official .NET/MCP cluster flow. |
 | REQ-DSTORE-001/002/004; REQ-EVENT-004; REQ-MSG-005; REQ-ROUTE-004; REQ-AUTH-004/005 | `TransactionTests.DocumentEventAndQueueCommitTogetherAndCommandRetryDoesNotRepeatEffects`; `UniqueConflictRollsBackDocumentIndexEventAndEnqueue`; `ConcurrentCompareAndSwapHasOneWinner`; `SameLiteralPartitionKeyCannotCrossTransactionDomains`; `TransactionAuthorizationTests` | Preserve the existing many-to-many associations in DocumentStorage, EventStreams, Messaging, OrleansExecution and Authorization. These are actual single-partition DatabaseEngine operations with narrow effects/denial assertions; they do not prove cross-partition atomicity or cluster. `TransactionProtocolTests.MalformedMutationElementsBecomePersistedRejectionsRatherThanApplyExceptions` has per-argument candidate rows for document patch, event revision, topic, and sample negatives in the JSON sidecar; each is a narrow malformed-input persisted-rejection subflow, not its owning feature’s complete AC. The null generic mutation and oversized-frame scenario retain their separate proposals/unmapped reason. |
 
 The following cases remain deliberately unmapped: core null-argument guards without a
@@ -181,7 +178,7 @@ AC; `ReadGateLifetimeTests.AcCq016_DisposalObservesRealGateBeforeLaterStoreUse`
 `ResourceProtocolFailureTests.AcRoc003*` (the body tests persisted invalid-resource
 outcome/replay, while AC-ROC-003 governs owned results/dense-vector efficiency).
 Do not resolve these by prefix or filename inference. The AC-RESOURCE-002 measured
-operation/resource requirement, cache-on benefit, full cluster admission, DB phase
+operation/resource requirement, cache-on benefit, DB phase
 capture and all full delivered-source qualification remain open even when their
 unit subflows pass.
 
@@ -205,8 +202,8 @@ keep their meaning. See ADR-041 for exact ownership and join conditions.
 
 ```mermaid
 flowchart LR
-    Caller[SDK or MCP caller] --> Admission[Node resource admission]
-    Admission --> ReadCut[Node local consistent read cut]
+    Caller[SDK or MCP caller] --> Body[Server-wide request body limit]
+    Body --> ReadCut[Node local consistent read cut]
     ReadCut --> Work[Budgeted scan and point reads]
     Work --> Selection[Bounded feature selection]
     Selection --> Response[Bounded typed streaming response]
@@ -214,10 +211,10 @@ flowchart LR
     Counters --> CI[GitHub correctness and resource evidence]
 ```
 
-Admission/inbox ownership and the related CLR type migration are governed by
-[ADR-042](../ADR/ADR-042-admission-resource-ownership.md): REQ-ADM-001..003 and
-AC-ADM-001..003 extend REQ-RESOURCE-001 / AC-RESOURCE-001 and AC-MP-006/012.
-Semaphore disposal must follow registered-reader drain.
+[ADR-145](../ADR/ADR-145-no-request-throttling.md) removes request throttling: no
+node, tenant, principal or connection pool counts requests, commands or reserved
+bytes. The server-wide request body limit and the per-operation data bounds this
+slice owns are the only request limits; otherwise overload appears as latency.
 
 No cache may outlive its authority/read cut without explicit invalidation. Mutable
 storage arrays cannot escape through a borrowing optimization. Cancellation and
@@ -278,32 +275,28 @@ producer input and expects ordinal canonical stored JSON under ADR-047 / AC-EM-0
 Topic quota comparisons use Int64 operands without changing exact-byte,
 one-byte-short or rollback checks.
 
-## Admission, operations and observability
+## Operations and observability
 
-### Analytical-read admission
+### Analytical-read accounting
 
-REQ-MP-002/005 and AC-MP-003/004/011/012 require one fail-fast analytical-read
-allowance per DatabaseEngine for SQL, AST, both live-query calls and text/vector/
-hybrid search. The configured MaxConcurrentQueries must be positive. A new shared
-Core/Features/ResourceExecution gate uses one bounded atomic count, no wait queue
-or per-caller dictionary. DatabaseEngine exposes an owned IDisposable reservation
-and an observational current reservation count through a new partial source file.
+REQ-MP-002/005 and AC-MP-003/004/011/012 require SQL, AST, both live-query calls
+and text/vector/hybrid search to hold one counted reservation on their
+DatabaseEngine for the whole read. The count never refuses or queues a read; it
+lets owners and tests prove that every completed, failed or cancelled read released
+its reservation. DatabaseEngine exposes an owned IDisposable reservation and an
+observational current reservation count.
 
-Acquire checks cancellation before reserving, rejects saturation with the existing
-ResourceExhausted query-concurrency detail, and compensates if cancellation or
-allocation fails immediately after the atomic reservation. Dispose releases exactly
-once. Each operation keeps the reservation across adaptation, authorization, store
-gate wait, scanning/ranking and final result validation. Existing public result,
-fingerprint, storage and cancellation contracts stay unchanged; no host clock change.
+Acquire checks cancellation before and after counting and compensates if the second
+check fails. Dispose releases exactly once. Each operation keeps the reservation
+across adaptation, authorization, store gate wait, scanning/ranking and final result
+validation. Existing public result, fingerprint, storage and cancellation contracts
+stay unchanged.
 
-
-Tests use real ZoneTree read-gate coordination to hold an actual admitted
-search while SQL/AST/live/search requests and a second engine instance are rejected
-before storage work. Independent databases remain independent. Direct reservation
-disposal, invalid limits, pre-/in-flight cancellation, validation/budget errors and
-a successful following call prove release. Coordination timeouts detect hangs and
-are not throughput measurements. Tests run in GitHub only; source rollback changes
-no persisted format or wire and removes the new method/joins together.
+Tests take hundreds of concurrent reservations and still run a query and a search,
+hold an actual search at the real ZoneTree read gate while it is cancelled, and
+prove pre-/in-flight cancellation, validation/budget errors and repeated disposal
+release the count before a successful following call. Coordination timeouts detect
+hangs and are not throughput measurements.
 
 ### Provider diagnostics
 
@@ -349,14 +342,14 @@ range overwrite/tombstone/prefetch/lookahead/bounds, pre- and mid-cancellation,
 provider budget failure and healthy subsequent reads. GitHub executes them; no
 measurement claim follows from authored counters or local static validation.
 
-Actors: the data caller, the trusted control caller, the operator and the CI observer. Actual entry points: [CommandAdmissionGovernor](../../src/KeyLoad.Core/ResourceExecution/Commands/CommandAdmission/CommandAdmissionGovernor.cs), [HTTP admission](../../src/KeyLoad/ClientApi/Transport/ApiEndpoints.cs), [ServiceDefaults telemetry](../../src/KeyLoad.ServiceDefaults), Aspire composition; shared resource contracts in [CommandAdmissionLimits](../../src/KeyLoad.Abstractions/ResourceExecution/Contracts/CommandAdmissionLimits.cs) and [HttpAdmissionLimits](../../src/KeyLoad.Abstractions/ResourceExecution/Contracts/HttpAdmissionLimits.cs). Public UI is N/A; benchmark views belong to BenchmarkComparisons.
+Actors: the caller, the operator and the CI observer. Actual entry points: the request body limit in [ServerExecutionOptions](../../src/KeyLoad/ClientApi/Configuration/ServerExecutionOptions.cs), reply and stream ceilings in [GrainRoutingOptions](../../src/KeyLoad.Clustering/RequestExecution/Configuration/GrainRoutingOptions.cs), [ReadExecutionBudget](../../src/KeyLoad.Core/ResourceExecution/Execution/ReadExecution/ReadExecutionBudget.cs), [AnalyticalReadGate](../../src/KeyLoad.Core/ResourceExecution/Queries/AnalyticalReadGate.cs), [ServiceDefaults telemetry](../../src/KeyLoad.ServiceDefaults), Aspire composition; the shared resource contract is [DatabaseLimits](../../src/KeyLoad.Abstractions/ResourceExecution/Contracts/DatabaseLimits.cs). Public UI is N/A; benchmark views belong to BenchmarkComparisons.
 
 | Requirement | Acceptance / flows | Test mapping |
 |---|---|---|
-| REQ-RESOURCE-001: node/tenant/principal admission has bounded data lanes and an independent control reserve | AC-RESOURCE-001: concurrent admissions never exceed the ceilings; quota/cancel/auth rejection releases its reservation exactly once; several API keys cannot bypass the principal cap; full data traffic does not exhaust the bounded control capacity | Existing `BytesAndScopesAreReservedAtomicallyAndReleasedExactlyOnce`, `TenantAndPrincipalCapsCannotBeEvadedWithMoreApiKeys`, `FullDataAdmissionPreservesBoundedControlCapacity`, `ConcurrentLoadCannotExceedTheNodeCeilingAndReleasedScopesDoNotAccumulate` in [CommandAdmissionGovernorTests](../../tests/KeyLoad.UnitTests/ResourceExecution/Cases/Command/CommandAdmissionGovernorTests.cs); [HttpAdmissionGovernorTests](../../tests/KeyLoad.UnitTests/ResourceExecution/Cases/HttpAdmission/HttpAdmissionGovernorTests.cs); real cluster mixed-load expansion PLANNED |
-| REQ-RESOURCE-002: operations/telemetry show the actual guarantees and bounded work without secrets | AC-RESOURCE-002: every advertised operation family has an exact workload, topology, read/acknowledgement semantics, an explicit numeric resource/latency/throughput budget and a measured result; bounded low-cardinality counters/timings cover admission, Orleans hops, configured-copy apply wait and logical reads/bytes/scans where applicable; no PII, keys, tokens or request IDs appear; logical bytes, managed allocations/GC, client working set and per-node CPU/RAM have separate names and provenance; unknown measurements are reported unavailable, not zero | Source counters alone do not pass. TUnit proves metric names/labels/privacy and configured thresholds; real Docker/Aspire cluster profiles exercise successful, saturated, rejected, cancelled and slow-consumer/backpressure cases through the .NET SDK and official MCP client. Repeated exact-SHA baseline/candidate JSON must use identical workload, topology and acknowledgement/read guarantees; thresholds are derived from that evidence under AC-MP-011. |
+| REQ-RESOURCE-001: requests are limited only by the server-wide request body limit and per-operation data bounds; no node, tenant, principal or connection pool throttles callers ([ADR-145](../ADR/ADR-145-no-request-throttling.md)) | AC-RESOURCE-001: a declared or chunked body above `KeyLoad:ServerExecution:MaximumBodyBytes` returns `ResourceExhausted` (HTTP 429) before the command claims its ID, and a control command then commits under that same ID; a second command on one connection succeeds while the first is held; per-operation bounds reject excess work with their typed errors and a following operation succeeds | [RequestBodyLimitClusterTests](../../tests/KeyLoad.IntegrationTests/ResourceExecution/Cases/RequestBodyLimitClusterTests.cs) `OversizedDeclaredAndChunkedBodiesAreRejectedBeforeCommandsClaimTheirIds`; `ConnectionFailureTests.AcCrs053ConnectionRunsAnotherOperationWhileTheFirstIsHeld`; the per-operation bound cases in the traceability table above; real cluster mixed-load expansion PLANNED |
+| REQ-RESOURCE-002: operations/telemetry show the actual guarantees and bounded work without secrets | AC-RESOURCE-002: every advertised operation family has an exact workload, topology, read/acknowledgement semantics, an explicit numeric resource/latency/throughput budget and a measured result; bounded low-cardinality counters/timings cover Orleans hops, configured-copy apply wait and logical reads/bytes/scans where applicable; no PII, keys, tokens or request IDs appear; logical bytes, managed allocations/GC, client working set and per-node CPU/RAM have separate names and provenance; unknown measurements are reported unavailable, not zero | Source counters alone do not pass. TUnit proves metric names/labels/privacy and configured thresholds; real Docker/Aspire cluster profiles exercise successful, overloaded, bound-rejected, cancelled and slow-consumer/backpressure cases through the .NET SDK and official MCP client. Repeated exact-SHA baseline/candidate JSON must use identical workload, topology and acknowledgement/read guarantees; thresholds are derived from that evidence under AC-MP-011. |
 
-Decisions: [ADR-010](../ADR/ADR-010-query-budgets-security.md), [ADR-028 scheduling time](../ADR/ADR-028-persisted-scheduling-time.md), [ADR-031 modular resource isolation](../ADR/ADR-031-modular-all-in-one-resource-isolation.md), ADR-035. TimeProvider.System remains the host/Orleans clock; an operation clock does not freeze the cluster runtime. Mixed query/search/graph/event/queue workloads need real correctness and liveness tests, not separate synthetic doubles.
+Decisions: [ADR-010](../ADR/ADR-010-query-budgets-security.md), [ADR-028 scheduling time](../ADR/ADR-028-persisted-scheduling-time.md), [ADR-031 modular deployment](../ADR/ADR-031-modular-all-in-one-resource-isolation.md), ADR-035, [ADR-145 no request throttling](../ADR/ADR-145-no-request-throttling.md). TimeProvider.System remains the host/Orleans clock; an operation clock does not freeze the cluster runtime. Mixed query/search/graph/event/queue workloads need real correctness and liveness tests, not separate synthetic doubles.
 
 Business work and the matching tests stay in the owning `<SliceName>/` slice. Configuration validation, invalid bounds, zero/empty work, overflow, cancellation/deadline and a healthy follow-up are part of the AC. A local document review proves no numeric coverage, memory ceiling or performance gain; metrics are published only from successful GitHub JSON.
 
@@ -366,7 +359,7 @@ REQ-QUERY-007 / AC-QUERY-007-JOIN-001 and AC-REL-004-JOIN-004/006 require the li
 
 QueryExecutionOptions.MaximumResultBytes is nullable and positive; null applies the existing MaxBatchBytes ceiling, explicit values add a ceiling min(configured, MaxBatchBytes), never expand it. This is server-owned typed query/read output configuration, not a caller request field, command budget or persisted format. Existing Core ReadExecutionBudget adds a monotonic result-byte constraint over its original captured limits, cancellation and deadline. It changes only bounded exact UTF8 output counting; it does not restart a clock, read/work grant, admission lease, authorization or read cut. Default null preserves original calls and clock checks. Callback/page state and complete response accounting remain shared across SQL/AST/SDK/official MCP execution.
 
-All existing output owners share one bound: QueryEngine scalar/Q2/model/explain and GraphPath SQL, live-query snapshot/delta, partition query plan/leaf retained grants/merge/public mapping, SearchEngine text/vector/hybrid/graph results and SQL graph search consume the same bound. Existing cumulative selected-result/retained byte checks use the constrained budget; store scanned-byte/record limits remain unchanged. Exact final serializer accounting includes response metadata and must throw existing BudgetExceeded without a successful partial result. No serialization alias/field IDs, policy/authority, cursors, journal limits, HTTP input admission or database MaxBatchBytes changes. Existing server QueryExecutionOptions binding/Validate remains configuration authority.
+All existing output owners share one bound: QueryEngine scalar/Q2/model/explain and GraphPath SQL, live-query snapshot/delta, partition query plan/leaf retained grants/merge/public mapping, SearchEngine text/vector/hybrid/graph results and SQL graph search consume the same bound. Existing cumulative selected-result/retained byte checks use the constrained budget; store scanned-byte/record limits remain unchanged. Exact final serializer accounting includes response metadata and must throw existing BudgetExceeded without a successful partial result. No serialization alias/field IDs, policy/authority, cursors, journal limits, HTTP request body limit or database MaxBatchBytes changes. Existing server QueryExecutionOptions binding/Validate remains configuration authority.
 
 Core ReadExecutionBudget owns the monotonic counter constraint; Query QueryExecution/Validation/QuerySemantics/QueryResultBudgetPolicy.cs resolves and composes the typed ceiling; existing feature execution owners consume it. The Aspire test fixture accepts an explicitly validated query-options overload and applies only the explicit MaximumResultBytes environment setting to every owned node. Existing twenty DatabaseLimits properties are unchanged. The result-budget replicated-cluster case keeps 4096 and all original source/payload/no-effect/error/healthy SDK/official MCP assertions, configuring only the independent query cap with default valid batch/journal limits. Existing work/read-byte cases remain unchanged.
 
@@ -391,55 +384,47 @@ REQ-RESOURCE-003/004 and AC-DBPROF-002 map `DatabasePhaseExecutionOptionsTests.S
 After both real rejected constructions, centrally bound valid disabled/enabled banks execute Begin/End and RecordBusy and capture concrete counters: disabled remains empty/unavailable; enabled records exactly one completed scope and one admission rejection in the actual phase, with unchanged quality and detached cumulative capture. This is the invalid-to-healthy bank subflow only, not production startup, cluster, measured overhead or full AC qualification. ADR-063/113 retain the original ownership and fixed bounds.
 
 
-## Bounded tenant admission
-
-REQ-RESOURCE-TENANT-001 / AC-RESOURCE-TENANT-001 requires the node-local
-`CommandAdmissionGovernor` to enforce its configured node, tenant, principal and
-retained-byte ceilings atomically. A reservation uses the current persisted
-principal and its tenant. Refused or already-cancelled admission preserves the
-complete capacity snapshot, canonical records and journal cut. Each
-accepted lease remains owned until its actual operation settles and the owner
-disposes that lease. Disposing a lease again releases no additional capacity.
-Orleans owns activation scheduling and request execution.
-
-`TenantAdmissionWholeFlowTests.TenantBoundsRefusalCancellationReleaseReplayAndSameRootColdPreserveOriginalOutcomes`
-uses real persisted A/B principals and two actual tenant partitions. Its explicit
-node capacity is five and its per-tenant and per-principal capacities are three.
-Three A reservations and one B reservation coexist. A further A reservation is
-refused with `ResourceExhausted`; a pre-cancelled B reservation throws the original
-`OperationCanceledException`. Both failures preserve the full governor snapshot,
-raw canonical image and applied/store positions and leave their documents absent.
-The original four commands then commit under their owned leases; releasing
-them admits a healthy subsequent command and returns every reservation counter
-to zero. These are bounds and effect oracles, not a measured scheduling guarantee.
-
-The receipt oracle independently checks every mutation field:
-Kind/Resource/Id/Revision and complete CompositionReferences. Document results and
-canonical records retain their complete Reference/Revision/Json, redaction and
-access fields, command timestamp and deletion state. The exact commit
-token, durability and persisted copy count are checked against the owning execution
-store. The stored prepared command retains its stable ID, subject, input bytes and
-fingerprint. Same-ID replay preserves the original full receipt and canonical
-image without advancing the physical position. Failures retain their original
-problem before any result-value assertion.
+## Owner shutdown and command outcome
 
 REQ-RESOURCE-TENANT-SHUTDOWN-001 / AC-RESOURCE-TENANT-SHUTDOWN-001 requires the
-operation owner to settle all accepted commands, dispose their leases and
-join the actual storage owner before reopening that same root. The same existing
-case checks a zero governor snapshot, verifies complete warm replay, calls
-`TestDatabase.JoinOwnedResources`, then opens a new store at the original
-path. Complete original receipts, literal A/B documents and immutable replay
-survive that close/reopen, and a fresh command commits a healthy literal document.
-No public contract, capacity value, deadline or persisted format is changed by
+silo-local request-work owner to cancel selected work on shutdown, refuse new
+work, and join every acquired lease before the same storage root is reopened. A
+command refused during shutdown leaves no effect; the same command can then
+commit and replay with an unchanged outcome. Orleans owns activation scheduling
+and request execution.
+
+`TenantShutdownWholeFlowTests.OwnerShutdownCancelsSelectedWorkThenOriginalCommandReplayAndSameRootColdPreserveOutcome`
+uses a real persisted principal and an actual tenant partition. It holds one
+command lease in a `RequestWorkOwner` and starts the owner drain. Shutdown
+cancels the selected work: submitting the original command under that cancelled
+token throws the original `OperationCanceledException`, and a new acquisition
+fails with `OwnershipLost`. Both failures preserve the raw canonical image and
+the applied/store positions and leave the document absent. The drain completes
+only after the held lease is disposed, and the owner then reports joined.
+
+The original command then commits under a fresh token. The receipt oracle
+independently checks every mutation field: Kind/Resource/Id/Revision and complete
+CompositionReferences. Document results and canonical records retain their
+complete Reference/Revision/Json, redaction and access fields, command timestamp
+and deletion state. The exact commit token, durability and persisted copy count
+are checked against the owning execution store. The stored prepared command
+retains its stable ID, subject, input bytes and fingerprint. Same-ID replay
+preserves the original full receipt and canonical image without advancing the
+physical position. Failures retain their original problem before any
+result-value assertion.
+
+The same case then calls `TestDatabase.JoinOwnedResources` and opens a new store
+at the original path. The complete original receipt, the literal document and
+immutable replay survive that close/reopen, and a fresh command commits a healthy
+literal document. No public contract, deadline or persisted format is changed by
 this ownership contract.
 
-The source maps these oracles to `TenantAdmissionWholeFlow`,
-`TenantAdmissionRefusals`, `TenantAdmissionAssertions` and `TenantAdmissionCold`.
-An actual run is required to qualify them. Sustained SDK/MCP overload,
-Orleans request shutdown under in-flight distributed work, physical CPU/RSS/disk
-liveness and delivered-source qualification remain open; this focused local
-operation alone establishes none of those gates. Modeled retained bytes are not
-process RSS.
+The source maps these oracles to `TenantShutdownWholeFlow`,
+`TenantAdmissionOperations`, `TenantAdmissionAssertions` and
+`TenantAdmissionCold`. An actual run is required to qualify them. Sustained
+SDK/MCP overload, Orleans request shutdown under in-flight distributed work,
+physical CPU/RSS/disk liveness and delivered-source qualification remain open;
+this focused local operation alone establishes none of those gates.
 
 
 ## failed-reader grant settlement
@@ -447,7 +432,7 @@ process RSS.
 REQ-MP-002/005, AC-MP-004/005/012.
 The original scoped grant retains its unused bytes/records while the real borrowed callback and scope own the read. CompleteSettledReadGrant rejects an active scope without mutation. A consumer IOException retains its original identity; accepted bytes/record stay charged. After the original scope has exited, original caller cancellation rejects ordinary completion; cancellation-independent settled completion returns only the actual unused reservation, once. A fresh independent operation reads both original literal records under its unchanged aggregate ceiling. Full raw image and committed position remain unchanged throughout refusal/cleanup/healthy reads and same-root cold reopen.
 
-This is one complete Unit ZoneTree read/lifetime acceptance flow, not a new governor policy or proven production defect. No cancellation reset, deadline renewal, quota change, storage mutation, wire/schema/alias/API change, public transport, cluster or physical-memory claim. Cross-owner ordinary CompleteReadGrant active-scope semantics remain untouched.
+This is one complete Unit ZoneTree read/lifetime acceptance flow, not a new resource policy or proven production defect. No cancellation reset, deadline renewal, quota change, storage mutation, wire/schema/alias/API change, public transport, cluster or physical-memory claim. Cross-owner ordinary CompleteReadGrant active-scope semantics remain untouched.
 
 
 declaration: `ReadExecutionBudgetSettledGrantTests.AcMp004005012FailedBorrowedReaderSettlesOnlyAfterScopeExitThenCancelledCleanupAndColdHealthyRead`; the existing three settled-grant cases and all cancellation/scoped-grant cases remain mandatory.
@@ -462,22 +447,27 @@ REQ-MP-002 / AC-MP-004/012: the original AcMp012_ReadBudgetFailureReleasesAllowa
 REQ-MP-002/005 and AC-MP-004/011/012, with REQ/AC-TSQL-001/002/006, require the existing AcMp004_RealStoreWaitSharesOneAdmissionAcrossAllAnalyticalEntries healthy SQL continuation to use selected T-SQL: SELECT TOP (1) * FROM orders. The original malformed SQL used during saturation remains unchanged, so admission still refuses before parsing/storage while the actual held search owns the reservation. All six saturated entries, complete read diagnostics, independent database, original gate release and worker joins, zero final reservations, empty healthy result and ten-second coordination limit remain unchanged. LIMIT is retired syntax, so the healthy query uses T-SQL TOP; this is a fixture language choice, not an admission or parser workaround. Original test declaration and arguments remain.
 
 
-## Complete typed HTTP admission projection
+## Server request body limit
 
-REQ-HTTP-FIXTURE-PROJECTION-001: when ClusterFixture receives an HttpAdmissionLimits snapshot, validate it with the existing HttpAdmissionLimits.Validate contract and project all twelve numeric properties to each of the same three actual Aspire ContainerResources. Keep the existing late WithEnvironment seam: AppHost construction has already captured its own options and emitted its initial node environment. Do not replace the supplied snapshot with production defaults, mutate the cached AppHost options, use reflection, add another options provider or change governor policy.
+AC-RESOURCE-001 covers the one server-wide request body limit. Kestrel applies
+`KeyLoad:ServerExecution:MaximumBodyBytes` (default and maximum 33,554,432 bytes)
+to every public route, including MCP; no route has a separate body cap. A
+declared `Content-Length` above the limit and a chunked body that grows past it
+are rejected while the body is read, and the identity middleware rewrites the
+Kestrel 413 into a `ResourceExhausted` problem (HTTP 429). An MCP POST whose
+declared length exceeds the limit is rejected before the body is read.
 
-AC-HTTP-FIXTURE-PROJECTION-001 maps to the existing `SlowBodyAdmissionReturnTests.CanceledAndDisconnectedSlowBodiesReturnCapacityThenBothCallersAndTwoCold`. The complete genuine cluster operation must reach its first resource configuration and seed, both caller-cancellation and actual physical-disconnect slow-body modes, exact complete admission counters, fresh persisted authorization, original outcomes/replay, healthy SDK/official MCP continuation and both original cold stages, with every original producer/caller/socket/fixture cleanup retained. Preserve its supplied MaxReservedBytes=130000, OtherReservedBytes=0, ReservedControlBytes=20000 and all other supplied values. No limit, timeout, policy, case or oracle is relaxed.
-
-The fixture must project all twelve properties: omitting OtherReservedBytes and ReservedControlBytes would leave the earlier AppHost snapshot values, and under the default OtherReservedBytes=8388608 even a zero-body ordinary request needs at least 8392704 reserved bytes including the envelope, exceeding the supplied 130000 ceiling.
+`RequestBodyLimitClusterTests.OversizedDeclaredAndChunkedBodiesAreRejectedBeforeCommandsClaimTheirIds`
+starts a real Aspire cluster through `ClusterFixture(maximumBodyBytes: 1024)`,
+which sets `KeyLoad__ServerExecution__MaximumBodyBytes` on every node. For a
+declared and then a chunked delivery body above that limit, the node returns HTTP
+429 with `ResourceExhausted`, and a body-free `/admin/dispatch` control command
+then commits under the rejected command ID, so the rejected request claimed no
+command identity.
 
 ```mermaid
 flowchart TD
-    A[AppHost captures validated production options] --> B[Original three node environment]
-    B --> C[Fixture validates supplied HTTP snapshot]
-    C --> D[Project all twelve exact numeric fields]
-    D --> E[node options and unchanged governors]
-    E --> F[Original seed and slow-body whole flow]
-    F --> G[Both original cold stages and healthy replay]
+    A[ClusterFixture sets the body limit on every node] --> B[Declared or chunked body above the limit]
+    B --> C[Kestrel 413 rewritten to ResourceExhausted 429]
+    C --> D[Control command commits under the rejected command ID]
 ```
-
-The adjacent existing `AdmissionClusterTests.OversizedDeclaredAndChunkedBodiesAreRejectedBeforeCommandsClaimTheirIds` remains mandatory regression coverage for declared/chunked rejection, unchanged command identity and healthy control admission. Production HttpAdmissionLimits defaults, HttpAdmissionGovernor, CommandAdmissionGovernor, AppHost global projection, public/serializer contracts, persisted authority and cluster ownership remain unchanged.

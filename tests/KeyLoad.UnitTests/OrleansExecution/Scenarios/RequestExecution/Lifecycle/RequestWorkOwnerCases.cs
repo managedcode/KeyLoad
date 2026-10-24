@@ -5,45 +5,39 @@ namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal static class RequestWorkOwnerCases
 {
-    private const int RequestProducerLimit = 64;
-    private const int TotalWorkLimit = 128;
-    private const int OtherCapabilityCount = TotalWorkLimit - RequestProducerLimit;
+    private const int ProducerCount = 256;
+    private const int CapabilityCount = 256;
     private static readonly TimeSpan DrainBound = TimeSpan.FromSeconds(10);
 
-    internal static async Task AssertCapacityAndReleaseAsync()
+    internal static async Task AssertUnlimitedWorkAndDuplicateIdentityAsync()
     {
-        await using var owner = new RequestWorkOwner(UnitRoutingOptions.Routing());
+        await using var owner = new RequestWorkOwner();
         var leases = new List<IDisposable>();
         try
         {
-            var emptyIdentity = AssertCapacityFailure(
+            var emptyIdentity = AssertAcquireFailure(
                 owner, Guid.Empty, RequestWorkKind.RequestProducer);
             await Assert.That(emptyIdentity.Code).IsEqualTo(ErrorCode.Validation);
-            var unknownKind = AssertCapacityFailure(
+            var unknownKind = AssertAcquireFailure(
                 owner, Guid.NewGuid(), (RequestWorkKind)255);
             await Assert.That(unknownKind.Code).IsEqualTo(ErrorCode.Validation);
 
             var firstId = Guid.NewGuid();
             leases.Add(owner.Acquire(firstId, RequestWorkKind.RequestProducer));
-            AddLeases(owner, RequestWorkKind.RequestProducer, RequestProducerLimit - 1, leases);
-            var duplicate = AssertCapacityFailure(owner, firstId, RequestWorkKind.RequestProducer);
-            await Assert.That(duplicate.Code).IsEqualTo(ErrorCode.ResourceExhausted);
-            var producerExcess = AssertCapacityFailure(owner, Guid.NewGuid(), RequestWorkKind.RequestProducer);
-            await Assert.That(producerExcess.Code).IsEqualTo(ErrorCode.ResourceExhausted);
-
-            AddLeases(owner, RequestWorkKind.ReadCapability, OtherCapabilityCount - 1, leases);
-            AddLeases(owner, RequestWorkKind.CommandCapability, 1, leases);
-            var totalExcess = AssertCapacityFailure(owner, Guid.NewGuid(), RequestWorkKind.CommandCapability);
-            await Assert.That(totalExcess.Code).IsEqualTo(ErrorCode.ResourceExhausted);
+            AddLeases(owner, RequestWorkKind.RequestProducer, ProducerCount, leases);
+            AddLeases(owner, RequestWorkKind.ReadCapability, CapabilityCount, leases);
+            AddLeases(owner, RequestWorkKind.CommandCapability, CapabilityCount, leases);
+            var duplicate = AssertAcquireFailure(owner, firstId, RequestWorkKind.RequestProducer);
+            await Assert.That(duplicate.Code).IsEqualTo(ErrorCode.Conflict);
+            leases.Add(owner.Acquire(firstId, RequestWorkKind.ReadCapability));
 
             var released = leases[0];
             leases.RemoveAt(0);
             released.Dispose();
             released.Dispose();
-            leases.Add(owner.Acquire(Guid.NewGuid(), RequestWorkKind.RequestProducer));
-            var doubleReleaseExcess = AssertCapacityFailure(
-                owner, Guid.NewGuid(), RequestWorkKind.CommandCapability);
-            await Assert.That(doubleReleaseExcess.Code).IsEqualTo(ErrorCode.ResourceExhausted);
+            leases.Add(owner.Acquire(firstId, RequestWorkKind.RequestProducer));
+            var reacquiredDuplicate = AssertAcquireFailure(owner, firstId, RequestWorkKind.RequestProducer);
+            await Assert.That(reacquiredDuplicate.Code).IsEqualTo(ErrorCode.Conflict);
         }
         finally
         {
@@ -56,7 +50,7 @@ internal static class RequestWorkOwnerCases
 
     internal static async Task AssertDrainAndClosedAdmissionAsync()
     {
-        var owner = new RequestWorkOwner(UnitRoutingOptions.Routing());
+        var owner = new RequestWorkOwner();
         var lease = owner.Acquire(Guid.NewGuid(), RequestWorkKind.ReadCapability);
         var cancellationObserved = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var cancellationRegistration = owner.ShutdownToken.Register(() => cancellationObserved.TrySetResult());
@@ -89,7 +83,7 @@ internal static class RequestWorkOwnerCases
 
     internal static async Task AssertCallbackFailureJoinsLiveLeaseAsync()
     {
-        var owner = new RequestWorkOwner(UnitRoutingOptions.Routing());
+        var owner = new RequestWorkOwner();
         var lease = owner.Acquire(Guid.NewGuid(), RequestWorkKind.ReadCapability);
         var callbackEntered = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var callbackFailure = new InvalidOperationException("The owner shutdown callback failed.");
@@ -139,7 +133,7 @@ internal static class RequestWorkOwnerCases
         }
     }
 
-    private static KeyLoadException AssertCapacityFailure(
+    private static KeyLoadException AssertAcquireFailure(
         RequestWorkOwner owner, Guid requestId, RequestWorkKind kind)
         => Assert.ThrowsExactly<KeyLoadException>(() => owner.Acquire(requestId, kind));
 

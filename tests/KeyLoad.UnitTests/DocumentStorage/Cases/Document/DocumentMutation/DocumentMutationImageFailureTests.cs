@@ -1,5 +1,3 @@
-using System.Text.Json;
-using KeyLoad.Core.Authorization;
 using ManagedCode.Communication;
 
 namespace KeyLoad.UnitTests.DocumentStorage;
@@ -30,25 +28,6 @@ internal sealed class DocumentMutationImageFailureTests
     }
 
     [Test]
-    public async Task AcDstore005OutboxQuotaRollsBackImagesAndAllowsFollowingWriteAfterFailedBatch()
-    {
-        using var db = new TestDatabase();
-        db.Configure(Collection, ResourceKind.Collection);
-        var bounded = new DatabaseEngine(db.Store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(new()
-        {
-            MaxOutboxRecords = 1
-        }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
-        var failed = Apply(bounded, db, new PutDocument(Collection, FirstId, FirstJson),
-            new PutDocument(Collection, SecondId, OtherJson));
-
-        await Assert.That(Errors.Code(failed.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
-        await Assert.That(db.Database.GetOutboxStatus(RootId, db.Partition).Head.Tail).IsEqualTo(0);
-        await Assert.That(db.Database.GetDocument(RootId, new(db.Partition, Collection, FirstId))).IsNull();
-        Apply(bounded, db, new PutDocument(Collection, FirstId, FirstJson)).Get<CommitReceipt>();
-        await Assert.That(db.Database.GetOutboxStatus(RootId, db.Partition).Head.Tail).IsEqualTo(1);
-    }
-
-    [Test]
     public async Task AcDstore005UnauthorizedWriteDoesNotStageImageAndRootCanStillWrite()
     {
         using var db = new TestDatabase();
@@ -67,12 +46,5 @@ internal sealed class DocumentMutationImageFailureTests
     {
         var id = Guid.NewGuid();
         return db.Submit(OperationKind.Batch, new CommandRequest(id, db.Partition, [mutation]), principal, id);
-    }
-
-    private static Result<object> Apply(DatabaseEngine engine, TestDatabase db, params Mutation[] mutations)
-    {
-        var id = Guid.NewGuid();
-        var request = new CommandRequest(id, db.Partition, [.. mutations]);
-        return engine.Apply(engine.CreateCommand(OperationKind.Batch, id, RootId, TimeProvider.System.GetUtcNow(), JsonSerializer.Serialize(request, JsonDefaults.Options)));
     }
 }

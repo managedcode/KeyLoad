@@ -34,7 +34,7 @@ internal static class RowRevisionInferenceAssertions
         await Assert.That(stored.Incarnation).IsEqualTo(store.Identity.Incarnation);
         await Assert.That(JsonDefaults.Serialize(stored.Result).AsSpan().SequenceEqual(JsonDefaults.Serialize(result))).IsTrue();
         await Assert.That(store.Read(view => view.ReadOwnedValue(locatorKey))!.AsSpan().SequenceEqual(outcomeKey)).IsTrue();
-        string[] allowed = [Convert.ToHexString(outcomeKey), Convert.ToHexString(locatorKey), Convert.ToHexString(KeySpace.ClockBytes), Convert.ToHexString(KeySpace.AppliedBytes)];
+        string[] allowed = [Convert.ToHexString(outcomeKey), Convert.ToHexString(locatorKey), Convert.ToHexString(KeySpace.ClockBytes), Convert.ToHexString(KeySpace.AppliedBytes), Convert.ToHexString(KeySpace.LastCommandBytes)];
         await Assert.That(Filter(before, allowed).SequenceEqual(Filter(TeamRowPolicyAssertions.Image(store), allowed))).IsTrue();
         await Assert.That(store.Read(view => view.ReadOwnedValue(KeySpace.AppliedBytes))!
             .AsSpan().SequenceEqual(OrleansSerialization.Serialize(expectedApplied))).IsTrue();

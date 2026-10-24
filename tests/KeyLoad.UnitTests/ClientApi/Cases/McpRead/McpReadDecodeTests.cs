@@ -14,7 +14,7 @@ internal sealed class McpReadDecodeTests
     private const string PrivateMarker = "private-value-that-must-not-appear-in-an-error";
     private static readonly ImmutableArray<string> NoBodyNames =
         [McpCatalogExpectations.QueryCapabilities, McpCatalogExpectations.AdminBackup,
-         McpCatalogExpectations.AdminAdmission, McpCatalogExpectations.AdminStatus];
+         McpCatalogExpectations.AdminStatus];
 
     /// <summary>Exercises the canonical body-bearing read DTO corpus without creating write identities.</summary>
     [Test]

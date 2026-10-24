@@ -88,18 +88,27 @@ internal static class QueueGraphIdentityAssertions
         await ModelsAsync(state, engine, store, healthy: true);
     }
 
+    // Independent golden in the server's link field order; the production link type is not serialized.
     internal static string Payload(QueueGraphLink link) => JsonSerializer.Serialize(new
     {
-        attributesJson = link.AttributesJson,
         from = Reference(link.From),
+        to = Reference(link.To),
         label = link.Label,
-        to = Reference(link.To)
+        attributesJson = link.AttributesJson
     }, JsonDefaults.Options);
 
     private static Dictionary<string, object> Reference(EntityRef reference)
     {
         var result = new Dictionary<string, object>(StringComparer.Ordinal)
         {
+            [PartitionKey] = new
+            {
+                tenantId = reference.Partition.TenantId,
+                databaseId = reference.Partition.DatabaseId,
+                transactionDomainId = reference.Partition.TransactionDomainId,
+                partitionKey = reference.Partition.PartitionKey,
+                atomicPartitionId = reference.Partition.AtomicPartitionId
+            },
             [CollectionKey] = reference.Collection,
             [IdKey] = reference.Id
         };
@@ -107,15 +116,6 @@ internal static class QueueGraphIdentityAssertions
         {
             result.Add(LifetimeKey, lifetime);
         }
-
-        result.Add(PartitionKey, new
-        {
-            atomicPartitionId = reference.Partition.AtomicPartitionId,
-            databaseId = reference.Partition.DatabaseId,
-            partitionKey = reference.Partition.PartitionKey,
-            tenantId = reference.Partition.TenantId,
-            transactionDomainId = reference.Partition.TransactionDomainId
-        });
         return result;
     }
 }

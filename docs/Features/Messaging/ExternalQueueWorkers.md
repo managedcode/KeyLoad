@@ -74,7 +74,7 @@ A first-renewal signed probe must actually capture the preallocated original GUI
 
 ## Server coordination
 
-The stable `ConnectionGrain` owns bounded CQRS streams and close joins their lifetimes. admission permits eight concurrent operations per connection; long application callbacks happen after Receive's own stream has settled. The connection routes through `CommandPartitionGrain` to the node-local ZoneTree owner. The `[StatelessWorker]` due-work grains described in [DueCoordination](DueCoordination.md) and the subscription paths own scheduler, queue and group effects; they are not cluster singletons and check no leadership.
+The stable `ConnectionGrain` owns bounded CQRS streams and close joins their lifetimes. A connection runs concurrent operations without a count limit; long application callbacks happen after Receive's own stream has settled. The connection routes through `CommandPartitionGrain` to the node-local ZoneTree owner. The `[StatelessWorker]` due-work grains described in [DueCoordination](DueCoordination.md) and the subscription paths own scheduler, queue and group effects; they are not cluster singletons and check no leadership.
 
 Queue `ReceiveRequest` currently has fields 0..4 and no wait/resume policy. Its API dispatches a single Receive command. The existing EventFeed advisory subscription has bounded recheck and joined unsubscribe, but is not queue long polling. Finite client `EmptyPollDelay` does not satisfy server bounded long polling. Server-side long-poll/resume remains a separate reviewed connection-lifetime contract. This helper does not add server-side long polling.
 

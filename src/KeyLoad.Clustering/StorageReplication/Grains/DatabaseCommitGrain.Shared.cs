@@ -70,10 +70,6 @@ public sealed partial class DatabaseCommitGrain
         => Shared.ReadStatusAsync(cancellationToken);
 
     /// <inheritdoc />
-    public Task<NodeAdmissionStatus> ReadSharedAdmissionAsync(CancellationToken cancellationToken)
-        => Shared.ReadAdmissionAsync(cancellationToken);
-
-    /// <inheritdoc />
     public Task<AdminNodeSnapshot> ReadSharedDashboardAsync(CancellationToken cancellationToken)
         => Shared.ReadDashboardAsync(cancellationToken);
 

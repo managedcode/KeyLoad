@@ -12,7 +12,7 @@ internal static class RequestWorkKernelCases
 
     internal static async Task AssertLazyStreamAsync(RequestCqrsHostedRuntimeFixture fixture)
     {
-        var owner = new RequestWorkOwner(UnitRoutingOptions.Routing());
+        var owner = new RequestWorkOwner();
         var requestId = Guid.NewGuid();
         var probe = new RequestWorkProbe();
         var enumerator = CreateStream(fixture, owner, requestId, probe).GetAsyncEnumerator();
@@ -31,7 +31,7 @@ internal static class RequestWorkKernelCases
 
     internal static async Task AssertHeldProducerJoinAsync(RequestCqrsHostedRuntimeFixture fixture)
     {
-        var owner = new RequestWorkOwner(UnitRoutingOptions.Routing());
+        var owner = new RequestWorkOwner();
         var requestId = Guid.NewGuid();
         var probe = new RequestWorkProbe();
         var enumerator = CreateStream(fixture, owner, requestId, probe).GetAsyncEnumerator();
@@ -72,7 +72,7 @@ internal static class RequestWorkKernelCases
 
     internal static async Task AssertCallbackFailureJoinAsync(RequestCqrsHostedRuntimeFixture fixture)
     {
-        var owner = new RequestWorkOwner(UnitRoutingOptions.Routing());
+        var owner = new RequestWorkOwner();
         var requestId = Guid.NewGuid();
         var probe = new RequestWorkProbe();
         var enumerator = CreateStream(fixture, owner, requestId, probe, throwOnCancellation: true)
@@ -115,9 +115,9 @@ internal static class RequestWorkKernelCases
             owner, probe, enumerator, firstMove, disposal, drain, observed));
     }
 
-    internal static async Task AssertRejectedAdmissionSettlesAsync(RequestCqrsHostedRuntimeFixture fixture)
+    internal static async Task AssertDuplicateIdentitySettlesAsync(RequestCqrsHostedRuntimeFixture fixture)
     {
-        var owner = new RequestWorkOwner(UnitRoutingOptions.Routing());
+        var owner = new RequestWorkOwner();
         var held = new List<IDisposable>();
         var requestId = Guid.NewGuid();
         var probe = new RequestWorkProbe();
@@ -126,17 +126,14 @@ internal static class RequestWorkKernelCases
         var observed = new HashSet<Task>();
         await CqrsTestSupport.RunWithCleanupAsync(async () =>
         {
-            for (var index = 0; index < RequestWorkTestLimits.RequestProducerCapacity; index++)
-            {
-                held.Add(owner.Acquire(Guid.NewGuid(), RequestWorkKind.RequestProducer));
-            }
+            held.Add(owner.Acquire(requestId, RequestWorkKind.RequestProducer));
 
             var move = enumerator.MoveNextAsync().AsTask();
             firstMove = move;
             var failure = (await Assert.ThrowsExactlyAsync<KeyLoadException>(
                 () => move.WaitAsync(SettlementBound, TimeProvider.System)))!;
             observed.Add(move);
-            await Assert.That(failure.Code).IsEqualTo(ErrorCode.ResourceExhausted);
+            await Assert.That(failure.Code).IsEqualTo(ErrorCode.Conflict);
             await probe.ActivationSettled.WaitAsync(SettlementBound, TimeProvider.System);
             await Assert.That(probe.HandlerEntered.IsCompleted).IsFalse();
             await Assert.That(probe.ProducerSettled.IsCompleted).IsFalse();

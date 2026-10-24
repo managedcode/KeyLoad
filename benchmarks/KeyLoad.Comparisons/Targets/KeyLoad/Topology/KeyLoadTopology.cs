@@ -7,5 +7,5 @@ public sealed partial class KeyLoadTarget
     private const string BenchmarkTopologyMismatch = "KeyLoadBenchmarkTopologyMismatch";
     private async Task ObserveCopiesAsync(CancellationToken token)
         => Profile = await KeyLoadTopologyObserver.ObserveAsync(peerClients, credential, clientOptions,
-            expectedNodeCount, timeProvider, lifecycle, admissionObservations, Profile, token).ConfigureAwait(false);
+            expectedNodeCount, timeProvider, lifecycle, Profile, token).ConfigureAwait(false);
 }

@@ -6,21 +6,14 @@ internal sealed class TextIncrementalSessions
     private readonly Lock gate = new();
     private readonly Dictionary<Guid, TextIncrementalSession> sessions = [];
     private readonly Dictionary<Guid, MaintenanceSessionWork> work = [];
-    private readonly int maximumSessions;
     private bool closed;
-
-    internal TextIncrementalSessions(int maximumSessions)
-    {
-        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(maximumSessions);
-        this.maximumSessions = maximumSessions;
-    }
 
     internal void BeginWork(Guid id, MaintenanceSessionWork original)
     {
         lock (gate)
         {
             ObjectDisposedException.ThrowIf(closed, this);
-            if (work.Count >= maximumSessions || !work.TryAdd(id, original))
+            if (!work.TryAdd(id, original))
             {
                 throw TextErrors.BoundExceeded();
             }
@@ -55,7 +48,7 @@ internal sealed class TextIncrementalSessions
             {
                 throw TextErrors.Mismatch();
             }
-            if (sessions.Count > maximumSessions || sessions.Values.Any(current => !ReferenceEquals(current, actual) &&
+            if (sessions.Values.Any(current => !ReferenceEquals(current, actual) &&
                 string.Equals(current.GenerationLeaf, actual.GenerationLeaf, StringComparison.Ordinal)))
             {
                 throw TextErrors.BoundExceeded();

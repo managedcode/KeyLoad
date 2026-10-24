@@ -32,7 +32,7 @@ internal static class AtomicTriadStagedClusterWarm
         state.Healthy = AtomicTriadStagedClusterRecipe.Command(state.Partition, false);
         var result = await caller.Sdk.CommitAsync(state.Healthy, token);
         state.Returned.Add(state.Healthy.CommandId);
-        state.HealthyCommitted = result.IsSuccess && result.Value is not null;
+        state.HealthyCommitted = result.IsSuccess;
         var receipt = await McpCallerAssertions.SdkSuccessAsync(result);
         state.Receipt = new(state.Healthy.CommandId, new(receipt.Token.Incarnation, state.Partition.AtomicPartitionId,
             receipt.Token.Position), AtomicTriadStagedClusterRecipe.Receipts, DurabilityProfile.ProcessDurable, 3);

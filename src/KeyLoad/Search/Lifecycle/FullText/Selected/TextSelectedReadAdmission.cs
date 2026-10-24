@@ -1,7 +1,7 @@
 namespace KeyLoad.Server.Search;
 
 /// <summary>Orders execution reader ownership before maintenance canonical-view admission.</summary>
-internal sealed class TextSelectedReadAdmission(int maximumReaders, TextResourceOwnership? resources = null)
+internal sealed class TextSelectedReadAdmission(TextResourceOwnership? resources = null)
 {
     private const int Empty = 0;
     private readonly Lock gate = new();
@@ -20,7 +20,7 @@ internal sealed class TextSelectedReadAdmission(int maximumReaders, TextResource
             {
                 throw new AggregateException(retainedFailure);
             }
-            if (writer || readers >= maximumReaders)
+            if (writer)
             {
                 throw TextErrors.BoundExceeded();
             }

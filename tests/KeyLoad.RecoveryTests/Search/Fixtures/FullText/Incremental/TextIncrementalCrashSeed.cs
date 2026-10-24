@@ -21,7 +21,7 @@ internal static class TextIncrementalCrashSeed
         var creation = runtime.Store.Read(view => view.GetRecord<StoredOutcome>(
             OutcomeStoreOracle.GlobalKey(CrashFixtureValues.Principal, creationId)))
             ?? throw new InvalidOperationException(TextIncrementalCrashProtocol.Invalid);
-        if (!creation.Result.IsSuccess || creation.PreparedCommand.CommandId != creationId)
+        if (creation.Result.IsFailed || creation.PreparedCommand.CommandId != creationId)
         {
             throw new InvalidOperationException(TextIncrementalCrashProtocol.Invalid);
         }

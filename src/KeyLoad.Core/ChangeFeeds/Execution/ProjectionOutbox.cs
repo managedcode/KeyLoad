@@ -27,11 +27,9 @@ public static class ProjectionOutbox
     internal const string ProjectionBatchTokenPurpose = "projection-batch";
     internal static byte[] OutboxKey(PartitionRef partition, long sequence) => KeySpace.Partition(OutboxEntrySpace, partition, sequence);
     internal static byte[] ConsumerKey(ProjectionConsumerRef consumer) => KeySpace.Partition(ProjectionConsumerSpace, consumer.Partition, consumer.Name);
-    internal static void AppendOutbox(this DatabaseEngine engine, IAtomicTransaction tx, PartitionRef partition, OutboxEntry entry, bool allowProgressReserve)
+    internal static void AppendOutbox(this DatabaseEngine engine, IAtomicTransaction tx, PartitionRef partition, OutboxEntry entry)
     {
         const int TailStep = 1;
-        const int NoProgressReserveRecords = 0;
-        const string AppendOutboxDetailText = "The committed outbox quota is exhausted; advance consumers and reclaim retained entries.";
         const string AppendOutboxSpaceText = "outbox-head";
         const int AppendedRecordCount = 1;
         var head = engine.ReadOutboxHead(tx, partition);
@@ -40,13 +38,6 @@ public static class ProjectionOutbox
             Sequence = checked(head.Tail + TailStep)
         };
         var payload = OrleansSerialization.Serialize(entry);
-        var maxRecords = checked(engine.Limits.MaxOutboxRecords + (allowProgressReserve ? engine.Limits.ReservedOutboxRecords : NoProgressReserveRecords));
-        var maxBytes = checked(engine.Limits.MaxOutboxBytes + (allowProgressReserve ? engine.Limits.ReservedOutboxBytes : NoProgressReserveRecords));
-        if (head.StoredRecords >= maxRecords || payload.Length > maxBytes - head.StoredBytes)
-        {
-            throw Errors.Fail(ErrorCode.ResourceExhausted, AppendOutboxDetailText);
-        }
-
         tx.Put(OutboxKey(partition, entry.Sequence), payload);
         tx.PutRecord(KeySpace.Partition(AppendOutboxSpaceText, partition), head with { Tail = entry.Sequence, StoredRecords = head.StoredRecords + AppendedRecordCount, StoredBytes = head.StoredBytes + payload.Length });
     }

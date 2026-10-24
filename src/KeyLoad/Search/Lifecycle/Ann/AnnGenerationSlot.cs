@@ -18,15 +18,11 @@ internal sealed class AnnGenerationSlot(AnnGenerationOwner owner, AnnManifest ma
         get; private set;
     }
 
-    internal AnnIndexLease Acquire(int maximumReaders)
+    internal AnnIndexLease Acquire()
     {
         if (Retired)
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, AnnProtocol.Stale);
-        }
-        if (Readers == maximumReaders)
-        {
-            throw Errors.Fail(ErrorCode.ResourceExhausted, AnnProtocol.Bound);
         }
         var lease = new AnnIndexLease(this);
         Readers += Step;

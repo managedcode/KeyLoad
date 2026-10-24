@@ -38,15 +38,7 @@ internal static class CompositionBoundReferenceReads
         }
         await A.EqualAsync(new global::KeyLoad.GraphTraversal([state.From], []),
             owner.Database.Traverse(D.Root, owner.Source.Partition, D.EmptyGraph, state.From, cancellationToken: token));
-        var plainFrom = state.From with
-        {
-            Lifetime = null
-        };
-        var plainTo = state.To with
-        {
-            Lifetime = null
-        };
-        await MessageAsync(owner, D.Queue, D.Message, D.Payload(plainFrom, plainTo));
+        await MessageAsync(owner, D.Queue, D.Message, state.CallerPayload);
         await MessageAsync(owner, D.ReverseQueue, D.DerivedId, D.Payload(state.From, state.To));
     }
 

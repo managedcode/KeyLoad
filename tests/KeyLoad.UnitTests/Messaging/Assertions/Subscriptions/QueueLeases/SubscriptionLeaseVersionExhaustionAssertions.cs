@@ -49,10 +49,12 @@ internal static class SubscriptionLeaseVersionExhaustionAssertions
         var locator = Convert.ToHexString(KeySpace.OutcomeLocator(request.Subscription.Source.Partition, Subject, request.RequestId));
         var clock = Convert.ToHexString(KeySpace.ClockBytes);
         var applied = Convert.ToHexString(KeySpace.AppliedBytes);
+        var lastCommand = Convert.ToHexString(KeySpace.LastCommandBytes);
         return QueueWholeFlowStorage.Bytes(store).Where(row => !row.StartsWith(outcome + ":", StringComparison.Ordinal)
             && !row.StartsWith(locator + ":", StringComparison.Ordinal)
             && !row.StartsWith(clock + ":", StringComparison.Ordinal)
-            && !row.StartsWith(applied + ":", StringComparison.Ordinal)).ToArray();
+            && !row.StartsWith(applied + ":", StringComparison.Ordinal)
+            && !row.StartsWith(lastCommand + ":", StringComparison.Ordinal)).ToArray();
     }
 
     private static async Task RequireLocatorAsync(ZoneTreeStore store, ReceiveSubscriptionRequest request)

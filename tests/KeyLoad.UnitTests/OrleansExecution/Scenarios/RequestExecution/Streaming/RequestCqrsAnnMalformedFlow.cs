@@ -18,7 +18,7 @@ internal static class RequestCqrsAnnMalformedFlow
             .GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>();
         var stream = CqrsStreamLifetime.RunWithPurpose(
             execution => RequestCqrsAnnProducer.Run(id, original, fault, producer,
-                fixture.RoutingOptions.Value.MaximumTotalFrames, execution), serializer, id, fixture.Clock,
+                fixture.RoutingOptions.Value.MaximumStreamFrames, execution), serializer, id, fixture.Clock,
             producer.MarkActivationSettled, fixture.RoutingOptions, null,
             new CqrsStreamPurpose(() => fixture.Codec.DecodeRequest(envelope, id)), token);
         KeyLoadException? failure = null;

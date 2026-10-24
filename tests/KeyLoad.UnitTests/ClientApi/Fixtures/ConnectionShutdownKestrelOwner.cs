@@ -16,7 +16,6 @@ namespace KeyLoad.UnitTests.ClientApi;
 
 internal sealed class ConnectionShutdownKestrelOwner : IAsyncDisposable
 {
-    private const int MaximumConnections = 1;
     private const int IdleTimeoutSeconds = 20;
     private const string GuidFormat = "D";
     private readonly WebApplication app;
@@ -86,7 +85,6 @@ internal sealed class ConnectionShutdownKestrelOwner : IAsyncDisposable
         builder.Logging.ClearProviders();
         var settings = new GrainRoutingOptions
         {
-            MaximumConnections = MaximumConnections,
             ConnectionIdleTimeout = TimeSpan.FromSeconds(IdleTimeoutSeconds)
         };
         settings.Validate();

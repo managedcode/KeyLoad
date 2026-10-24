@@ -10,10 +10,7 @@ internal static class AnalyticalReadBudgetFailureFlow
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            using var fixture = new TestDatabase(new()
-            {
-                MaxConcurrentQueries = 1
-            });
+            using var fixture = new TestDatabase();
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 fixture.Configure(Collection, ResourceKind.Collection);

@@ -68,15 +68,11 @@ internal sealed class AnnMaintenanceAdmissions
         }
     }
 
-    internal AnnMaintenanceAdmissionLease Enter(int maximum)
+    internal AnnMaintenanceAdmissionLease Enter()
     {
         lock (gate)
         {
             ObjectDisposedException.ThrowIf(closed, this);
-            if (active >= maximum)
-            {
-                throw Errors.Fail(ErrorCode.ResourceExhausted, AnnProtocol.Bound);
-            }
             var lease = new AnnMaintenanceAdmissionLease(this);
             active++;
             return lease;

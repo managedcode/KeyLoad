@@ -31,8 +31,8 @@ is not a canonical identity. Unsupported application/storage versions fail befor
 effects. No previous-format reader or automatic data conversion is introduced.
 
 MCP authentication uses the decoded generated `PrincipalRecord`. Existing byte
-limits, ingress reservations, structural projection limits, cancellation and
-fresh persisted authorization remain enforced. It does not decode Orleans fields
+limits, structural projection limits, cancellation and fresh persisted
+authorization remain enforced. It does not decode Orleans fields
 or construct an alternative principal from wire references.
 
 ## Acceptance

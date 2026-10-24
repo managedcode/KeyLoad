@@ -118,12 +118,6 @@ flowchart LR
  Windows --> Result
 ```
 
-AC-SERIES-011 ingress proof: TimeSeriesHttpAdmissionTests competes each new
-canonical route with an existing heavy query using the real shared admission
-governor, checks rejection leaves the reservation unchanged and confirms healthy
-admission after release. HttpAdmissionGovernor is a serialized root join; HTTP
-and MCP route classification share the existing working-set ceilings.
-
 ## Lossless chunk codec qualification — ADR-079
 
 [ADR-079](../ADR/ADR-079-lossless-series-chunk-codecs.md) freezes a private,

@@ -12,7 +12,7 @@ internal static class KeyLoadTopologyObserver
     private const string InvalidCluster = "KeyLoadClusterReceiptMissing";
     internal static async Task<TargetProfile> ObserveAsync(HttpClient[] peerClients, string credential,
         IOptions<KeyLoadClientExecutionOptions> clientOptions, int expectedNodeCount, TimeProvider timeProvider,
-        ComparisonLifecycleOptions lifecycle, string[] admissionObservations, TargetProfile profile, CancellationToken cancellationToken)
+        ComparisonLifecycleOptions lifecycle, TargetProfile profile, CancellationToken cancellationToken)
     {
         if (peerClients.Length != expectedNodeCount
             || peerClients.Select(peer => peer.BaseAddress).Distinct().Count() != expectedNodeCount)
@@ -36,7 +36,7 @@ internal static class KeyLoadTopologyObserver
             Topology = description,
             Cluster = new(expectedNodeCount, expectedNodeCount, description, ImmutableCollectionsMarshal.AsImmutableArray(receipts.Select(status =>
                 $"{status.NodeId}{ObserveCopiesAsyncReadyIncarnationText}{status.Incarnation}{ObserveCopiesAsyncPositionText}{status.Position}")
-                .Concat(admissionObservations).ToArray()))
+                .ToArray()))
         };
     }
 

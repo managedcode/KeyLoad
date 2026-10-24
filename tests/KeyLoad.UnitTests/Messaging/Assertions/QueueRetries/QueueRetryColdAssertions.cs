@@ -18,7 +18,7 @@ internal static class QueueRetryColdAssertions
         int attempt, long sequence, long version, DateTimeOffset time)
     {
         await Assert.That(actual.Id).IsEqualTo(QueueRetryColdProtocol.Retry);
-        await Assert.That(actual.PayloadJson).IsEqualTo(QueueRetryColdProtocol.CallerPayload);
+        await Assert.That(actual.PayloadJson).IsEqualTo(QueueRetryColdProtocol.Payload);
         await Assert.That(actual.HeadersJson).IsEqualTo(QueueRetryColdProtocol.Headers);
         await Assert.That(actual.Attempt).IsEqualTo(attempt);
         await Assert.That(actual.LeaseVersion).IsEqualTo((long)attempt);
@@ -50,13 +50,13 @@ internal static class QueueRetryColdAssertions
     {
         var actual = database.InspectMessage(QueueRetryColdProtocol.Root, state.Lane, QueueRetryColdProtocol.Retry)!;
         await Assert.That(actual.Metadata).IsEqualTo(expected);
-        await Assert.That(actual.PayloadJson).IsEqualTo(QueueRetryColdProtocol.CallerPayload);
+        await Assert.That(actual.PayloadJson).IsEqualTo(QueueRetryColdProtocol.Payload);
         await Assert.That(actual.HeadersJson).IsEqualTo(QueueRetryColdProtocol.Headers);
         var body = database.Store.Read(view => view.GetRecord<MessageBody>(KeySpace.Partition(QueueRetryColdProtocol.Body,
             state.Lane.Partition, state.Lane.Queue, QueueRetryColdProtocol.Retry)));
         var expectedMutation = new EnqueueMessage(state.Lane.Queue, QueueRetryColdProtocol.Retry,
             QueueRetryColdProtocol.Payload, QueueRetryColdProtocol.Headers, OrderingKey: QueueRetryColdProtocol.OrderingKey);
-        await Assert.That(body).IsEqualTo(new MessageBody(QueueRetryColdProtocol.Retry, QueueRetryColdProtocol.CallerPayload,
+        await Assert.That(body).IsEqualTo(new MessageBody(QueueRetryColdProtocol.Retry, QueueRetryColdProtocol.Payload,
             QueueRetryColdProtocol.Headers, QueueRetryColdProtocol.OrderingKey, JsonData.Fingerprint(expectedMutation)));
     }
 

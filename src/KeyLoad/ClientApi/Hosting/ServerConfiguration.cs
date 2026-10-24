@@ -207,10 +207,6 @@ internal static class ServerConfiguration
         services.AddSingleton<ServerConnectionRegistry>();
         services.AddSingleton<AdminHttpMetrics>();
         services.AddSingleton<IAuthorizationPolicy, AuthorizationPolicy>();
-        services.AddSingleton(provider => new CommandAdmissionGovernor(
-            provider.GetRequiredService<IOptions<CommandAdmissionLimits>>()));
-        services.AddSingleton(provider => new HttpAdmissionGovernor(
-            provider.GetRequiredService<IOptions<HttpAdmissionLimits>>()));
         services.AddSingleton<PartitionHostApplicationOwner>();
         services.AddSingleton(provider => ActivatorUtilities.CreateInstance<OrleansNode>(provider));
     }

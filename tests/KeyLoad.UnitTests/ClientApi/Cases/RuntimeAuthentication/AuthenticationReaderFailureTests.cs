@@ -6,7 +6,6 @@ namespace KeyLoad.UnitTests.ClientApi;
 internal sealed class AuthenticationReaderFailureTests
 {
     private const string PrivateMarker = "execution-auth-truncated-private-marker";
-    private const int RequestCapacity = 16_384;
 
     [Test]
     public async Task GenuinePrincipalReplyRetainsTypedIdentityAndAuthorityFields()
@@ -51,7 +50,7 @@ internal sealed class AuthenticationReaderFailureTests
     }
 
     [Test]
-    public async Task OneByteTruncationReleasesAllRequestPoolsAfterAuthenticationFailure()
+    public async Task OneByteTruncationFailsAuthenticationWithoutPrivateDetail()
     {
         using var database = new TestDatabase();
         var principal = McpAuthenticationTests.Principal(database) with
@@ -60,35 +59,23 @@ internal sealed class AuthenticationReaderFailureTests
         };
         var valid = OrleansSerialization.Serialize(new GrainValue(principal));
         var truncated = valid[..^1];
-        var limits = new McpMemoryLimits();
-        var memory = new McpMemoryBudget(Microsoft.Extensions.Options.Options.Create(new KeyLoad.Server.McpMemoryLimits { DataBytes = limits.DataBytes, ControlBytes = limits.ControlBytes, IngressBytes = limits.IngressBytes }));
 
-        using (var state = new McpRequestState(new HttpAdmissionGovernor(UnitAdmissionOptions.Http()), memory, RequestCapacity, UnitMcpOptions.Execution(), CancellationToken.None))
-        {
-            await AssertSafeValidationAsync(() => state.Authenticate(truncated, CancellationToken.None));
-        }
-
-        McpAuthenticationTests.AssertFullPools(memory, limits);
+        using var state = new McpRequestState(McpFramingProtocol.MaximumDataReplyBytes, UnitMcpOptions.Execution());
+        await AssertSafeValidationAsync(() => state.Authenticate(truncated, CancellationToken.None));
     }
 
     [Test]
-    public async Task PreCancelledAuthenticationRemainsCancellationAndReleasesAllPools()
+    public async Task PreCancelledAuthenticationRemainsCancellation()
     {
         using var database = new TestDatabase();
         var payload = OrleansSerialization.Serialize(new GrainValue(McpAuthenticationTests.Principal(database)));
         using var cancelled = new CancellationTokenSource();
         await cancelled.CancelAsync();
-        var limits = new McpMemoryLimits();
-        var memory = new McpMemoryBudget(Microsoft.Extensions.Options.Options.Create(new KeyLoad.Server.McpMemoryLimits { DataBytes = limits.DataBytes, ControlBytes = limits.ControlBytes, IngressBytes = limits.IngressBytes }));
 
         await AssertCancelledAsync(() => McpAuthentication.Inspect(payload, UnitMcpOptions.Execution(), cancelled.Token));
         await AssertCancelledAsync(() => McpAuthentication.ReadPrincipal(payload, UnitMcpOptions.Execution(), cancelled.Token));
-        using (var state = new McpRequestState(new HttpAdmissionGovernor(UnitAdmissionOptions.Http()), memory, RequestCapacity, UnitMcpOptions.Execution(), CancellationToken.None))
-        {
-            await AssertCancelledAsync(() => state.Authenticate(payload, cancelled.Token));
-        }
-
-        McpAuthenticationTests.AssertFullPools(memory, limits);
+        using var state = new McpRequestState(McpFramingProtocol.MaximumDataReplyBytes, UnitMcpOptions.Execution());
+        await AssertCancelledAsync(() => state.Authenticate(payload, cancelled.Token));
     }
 
     private static async Task AssertSafeValidationAsync(Action operation)

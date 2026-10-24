@@ -33,7 +33,7 @@ source artifacts own those checks.
 | [ADR-028: Persisted scheduling with logged evaluation time](ADR-028-persisted-scheduling-time.md) |
 | [ADR-029: Event and message classification with safe diagnostics](ADR-029-event-message-classification.md) |
 | [ADR-030: Retention pins and paused restore of an older cut](ADR-030-retention-paused-restore.md) |
-| [ADR-031: Modular all-in-one deployment with reserved control resources](ADR-031-modular-all-in-one-resource-isolation.md) |
+| [ADR-031: Modular all-in-one deployment and capability manifest](ADR-031-modular-all-in-one-resource-isolation.md) |
 | [ADR-032: Current repository governance](ADR-032-mcaf-governance.md) |
 | [ADR-033: source-owned code quality and evidence gates](ADR-033-code-quality.md) |
 | [ADR-034: database comparisons and authenticated results](ADR-034-cluster-comparisons.md) |
@@ -44,7 +44,6 @@ source artifacts own those checks.
 | [ADR-039: Official MCP SDK and agent access to canonical operations](ADR-039-official-mcp-agent-api.md) |
 | [ADR-040: static product website, conceptual Three.js and qualified evidence](ADR-040-static-site-threejs-evidence.md) |
 | [ADR-041: read-only public collections with stable wire bytes](ADR-041-read-only-public-collections.md) |
-| [ADR-042: explicit command admission and inbox resource ownership](ADR-042-admission-resource-ownership.md) |
 | [ADR-043: Comparison library and executable host](ADR-043-comparison-library-host.md) |
 | [ADR-044: immutable comparative harness contracts](ADR-044-benchmark-immutable-contracts.md) |
 | [ADR-045: Owned PostgreSQL comparison schemas and constant commands](ADR-045-postgres-schema-ownership.md) |
@@ -128,3 +127,4 @@ source artifacts own those checks.
 | [ADR-142: One live benchmark session per database and topology](ADR-142-shared-live-benchmark-sessions.md) |
 | [ADR-143: Silo count and replica count](ADR-143-independent-silo-replica-topology.md) |
 | [ADR-144: Typed Orleans request envelopes](ADR-144-typed-request-envelopes.md) |
+| [ADR-145: No request throttling](ADR-145-no-request-throttling.md) |

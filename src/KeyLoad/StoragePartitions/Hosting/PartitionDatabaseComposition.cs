@@ -7,11 +7,10 @@ namespace KeyLoad.Server;
 internal static class PartitionDatabaseComposition
 {
     internal static void ValidateHostInputs(NodeOptions options, IAuthorizationPolicy authorization,
-        CommandAdmissionGovernor admission, TimeProvider clock, global::Microsoft.Extensions.Logging.ILogger<PartitionHost> logger, IGrainFactory grains)
+        TimeProvider clock, global::Microsoft.Extensions.Logging.ILogger<PartitionHost> logger, IGrainFactory grains)
     {
         ArgumentNullException.ThrowIfNull(options);
         ArgumentNullException.ThrowIfNull(authorization);
-        ArgumentNullException.ThrowIfNull(admission);
         ArgumentNullException.ThrowIfNull(clock);
         ArgumentNullException.ThrowIfNull(logger);
         ArgumentNullException.ThrowIfNull(grains);

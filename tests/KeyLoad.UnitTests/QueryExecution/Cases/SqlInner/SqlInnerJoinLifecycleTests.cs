@@ -21,6 +21,7 @@ internal sealed class SqlInnerJoinLifecycleTests
     private const int FirstCommittedGeneration = InitialGeneration + 1;
     private const int FinalGeneration = 33;
     private const int ReadOperationCount = 32;
+    private const int ReaderWorkerCount = 16;
     private const string Sql = "SELECT TOP (10) l.order_id AS order_id, r.name AS name, l.total AS generation "
         + "FROM orders AS l INNER JOIN customers AS r ON l.customer_id = r.id "
         + "ORDER BY l.order_id ASC";
@@ -34,7 +35,7 @@ internal sealed class SqlInnerJoinLifecycleTests
             new PutDocument(Right, "c1", RightRow(InitialGeneration)));
         var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
         var start = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
-        var readerWorkerCount = Math.Min(ReadOperationCount, database.Database.Limits.MaxConcurrentQueries);
+        var readerWorkerCount = ReaderWorkerCount;
         var pages = new QueryPage[ReadOperationCount];
         var writer = Task.Run(async () =>
         {

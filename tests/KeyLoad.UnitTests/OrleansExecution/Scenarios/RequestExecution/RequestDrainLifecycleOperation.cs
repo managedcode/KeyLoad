@@ -97,7 +97,7 @@ internal static class RequestDrainLifecycleOperation
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            await using var healthy = new RequestWorkOwner(UnitRoutingOptions.Routing());
+            await using var healthy = new RequestWorkOwner();
             await ServerFailureObserver.ObserveAsync(() => HealthyAsync(state, healthy, failures), failures);
         }, failures);
         ServerFailureObserver.ThrowIfAny(failures);

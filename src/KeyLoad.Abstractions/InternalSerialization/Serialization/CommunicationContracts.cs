@@ -44,8 +44,7 @@ internal static class CommunicationContracts
 
     private static ResultTSurrogate<object> ProjectResult(Result<object> result)
     {
-        if (result.IsSuccess ? result.Value is null || result.Problem is not null
-            : result.Value is not null || result.Problem is null)
+        if (result.IsSuccess ? result.Problem is not null : result.Value is not null)
         {
             throw Errors.Fail(ErrorCode.Corruption, PayloadVersion.InvalidPayload);
         }

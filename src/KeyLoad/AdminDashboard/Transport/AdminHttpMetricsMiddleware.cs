@@ -33,7 +33,6 @@ internal sealed class AdminHttpMetricsMiddleware(RequestDelegate next, TimeProvi
         AdminOutboxPrefix, AdminProjectionsPrefix, AdminDispatchPrefix, AdminBackupPrefix, AdminTablesPrefix, ChangesPrefix, AnalyticsPrefix
     ];
     private const string McpPrefix = "/mcp";
-    private const string AdmissionPath = ApiRoutes.AdmissionStatus;
     private const string StatusPath = ApiRoutes.Status;
     private const int ErrorStatus = 400;
 
@@ -66,7 +65,6 @@ internal sealed class AdminHttpMetricsMiddleware(RequestDelegate next, TimeProvi
     internal static bool Included(PathString path) =>
         (ApiPrefixes.Any(prefix => path.StartsWithSegments(prefix, StringComparison.OrdinalIgnoreCase)) || path.StartsWithSegments(McpPrefix, StringComparison.OrdinalIgnoreCase))
         && !path.StartsWithSegments(AdminDashboardProtocol.SnapshotPath, StringComparison.OrdinalIgnoreCase)
-        && !path.Equals(new PathString(AdmissionPath), StringComparison.OrdinalIgnoreCase)
         && !path.Equals(new PathString(StatusPath), StringComparison.OrdinalIgnoreCase);
 
     private static AdminHttpFailureDetail? Describe(HttpContext context, bool faulted)

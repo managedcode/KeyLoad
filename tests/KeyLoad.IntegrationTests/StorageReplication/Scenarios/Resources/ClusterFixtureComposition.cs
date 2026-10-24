@@ -34,10 +34,10 @@ internal static class ClusterFixtureComposition
         finally { pending?.Dispose(); }
     }
 
-    internal static void ConfigureCommandAdmission(IDistributedApplicationTestingBuilder builder, long? commandBytes)
+    internal static void ConfigureBodyLimit(IDistributedApplicationTestingBuilder builder, int? maximumBodyBytes)
     {
         ArgumentNullException.ThrowIfNull(builder);
-        if (commandBytes is not { } bytes)
+        if (maximumBodyBytes is not { } bytes)
         {
             return;
         }
@@ -46,57 +46,16 @@ internal static class ClusterFixtureComposition
         {
             var node = builder.CreateResourceBuilder(builder.Resources.OfType<ProjectResource>()
                 .Single(resource => resource.Name == ClusterFixtureProtocol.NodeName(number)));
-            node.WithEnvironment(ClusterFixtureProtocol.CommandBytesSetting,
+            node.WithEnvironment(ClusterFixtureProtocol.BodyBytesSetting,
                 bytes.ToString(System.Globalization.CultureInfo.InvariantCulture));
         }
     }
 
-    internal static void ConfigureHttpAdmission(IDistributedApplicationTestingBuilder builder, HttpAdmissionLimits? httpAdmission)
+    internal static void ConfigureTestOverrides(IDistributedApplicationTestingBuilder builder, int? maximumBodyBytes,
+        DatabaseLimits? databaseLimits, QueryExecutionOptions? queryExecution = null)
     {
         ArgumentNullException.ThrowIfNull(builder);
-        if (httpAdmission is not { } limits)
-        {
-            return;
-        }
-
-        limits.Validate();
-        foreach (var number in Enumerable.Range(ClusterFixtureProtocol.FirstNodeNumber, ClusterFixtureProtocol.NodeCount))
-        {
-            var node = builder.CreateResourceBuilder(builder.Resources.OfType<ProjectResource>()
-                .Single(resource => resource.Name == ClusterFixtureProtocol.NodeName(number)));
-            node.WithEnvironment(ClusterFixtureProtocol.HttpBodyBytesSetting,
-                limits.MaxBodyBytes.ToString(System.Globalization.CultureInfo.InvariantCulture));
-            node.WithEnvironment(ClusterFixtureProtocol.HttpControlBodyBytesSetting,
-                limits.MaxControlBodyBytes.ToString(System.Globalization.CultureInfo.InvariantCulture));
-            node.WithEnvironment(ClusterFixtureProtocol.HttpReservedBytesSetting,
-                limits.MaxReservedBytes.ToString(System.Globalization.CultureInfo.InvariantCulture));
-            node.WithEnvironment(ClusterFixtureProtocol.HttpHeavyReadBytesSetting,
-                limits.HeavyReadReservedBytes.ToString(System.Globalization.CultureInfo.InvariantCulture));
-            node.WithEnvironment(ClusterFixtureProtocol.HttpRequestsSetting,
-                limits.MaxRequests.ToString(System.Globalization.CultureInfo.InvariantCulture));
-            node.WithEnvironment(ClusterFixtureProtocol.HttpTenantRequestsSetting,
-                limits.MaxTenantRequests.ToString(System.Globalization.CultureInfo.InvariantCulture));
-            node.WithEnvironment(ClusterFixtureProtocol.HttpPrincipalRequestsSetting,
-                limits.MaxPrincipalRequests.ToString(System.Globalization.CultureInfo.InvariantCulture));
-            node.WithEnvironment(ClusterFixtureProtocol.HttpControlRequestsSetting,
-                limits.ReservedControlRequests.ToString(System.Globalization.CultureInfo.InvariantCulture));
-            node.WithEnvironment(ClusterFixtureProtocol.HttpControlReservedBytesSetting,
-                limits.ReservedControlBytes.ToString(System.Globalization.CultureInfo.InvariantCulture));
-            node.WithEnvironment(ClusterFixtureProtocol.HttpTenantControlRequestsSetting,
-                limits.MaxTenantControlRequests.ToString(System.Globalization.CultureInfo.InvariantCulture));
-            node.WithEnvironment(ClusterFixtureProtocol.HttpPrincipalControlRequestsSetting,
-                limits.MaxPrincipalControlRequests.ToString(System.Globalization.CultureInfo.InvariantCulture));
-            node.WithEnvironment(ClusterFixtureProtocol.HttpOtherReservedBytesSetting,
-                limits.OtherReservedBytes.ToString(System.Globalization.CultureInfo.InvariantCulture));
-        }
-    }
-
-    internal static void ConfigureTestOverrides(IDistributedApplicationTestingBuilder builder, long? commandBytes,
-        HttpAdmissionLimits? httpAdmission, DatabaseLimits? databaseLimits, QueryExecutionOptions? queryExecution = null)
-    {
-        ArgumentNullException.ThrowIfNull(builder);
-        ConfigureCommandAdmission(builder, commandBytes);
-        ConfigureHttpAdmission(builder, httpAdmission);
+        ConfigureBodyLimit(builder, maximumBodyBytes);
         ClusterFixtureQueryResultLimits.Configure(builder, queryExecution);
         if (databaseLimits is not null)
         {

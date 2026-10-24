@@ -50,7 +50,7 @@ internal static class SubscriptionGroupSiloRestartFlow
                 using var http = McpCallerHttp.Create(fixture, node);
                 var sdk = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
                 var result = await sdk.StatusAsync(token);
-                if (!result.IsSuccess || result.Value is not { RoutingReady: true } status ||
+                if (result.IsFailed || result.Value is not { RoutingReady: true } status ||
                     status.SiloCount != SubscriptionFilterClusterProtocol.Nodes.Length)
                 {
                     return false;

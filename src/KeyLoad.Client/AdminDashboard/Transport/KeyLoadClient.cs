@@ -37,9 +37,4 @@ public sealed partial class KeyLoadClient
     /// <returns>The node status.</returns>
     public Task<Result<NodeStatus>> StatusAsync(CancellationToken cancellationToken = default)
         => Send<NodeStatus>(ApiRoutes.Status, null, false, null, cancellationToken);
-    /// <summary>Reads operator-visible node admission status.</summary>
-    /// <param name="cancellationToken">Token that cancels the HTTP operation.</param>
-    /// <returns>The node admission status.</returns>
-    public Task<Result<NodeAdmissionStatus>> AdmissionStatusAsync(CancellationToken cancellationToken = default)
-        => Send<NodeAdmissionStatus>(ApiRoutes.AdmissionStatus, null, false, null, cancellationToken);
 }

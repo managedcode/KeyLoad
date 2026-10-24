@@ -20,7 +20,7 @@ internal static class AnnProjectionPublicationRead
         AnnProjectionPublication? result = null;
         try
         {
-            using var operation = admissions.Enter(configured.GrainRouting.Value.MaximumRequestProducers);
+            using var operation = admissions.Enter();
             try
             {
                 result = await ReadOwnedAsync(database, principal, request, configured, clock, owningRoot, token, originalBudget, binding);
@@ -72,8 +72,7 @@ internal static class AnnProjectionPublicationRead
                     : database.ReadProjectionMaintenanceEligibilityBound(request.Consumer, request.IndexGeneration, read, binding);
                 RequireCaller(current, principal, request);
                 if (current.MaintenanceAuthority != eligible.MaintenanceAuthority
-                    || current.Checkpoint != eligible.Checkpoint
-                    || current.LastProgressReservationCut != eligible.LastProgressReservationCut)
+                    || current.Checkpoint != eligible.Checkpoint)
                 {
                     throw Errors.Fail(ErrorCode.TokenInvalidated, AnnProtocol.InvalidSource);
                 }

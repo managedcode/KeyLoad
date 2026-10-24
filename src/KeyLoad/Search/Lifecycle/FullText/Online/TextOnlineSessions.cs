@@ -3,7 +3,7 @@ using KeyLoad.Core;
 
 namespace KeyLoad.Server.Search;
 
-internal sealed class TextOnlineSessions(int maximumSessions)
+internal sealed class TextOnlineSessions
 {
     private readonly Lock gate = new();
     private readonly Dictionary<Guid, TextOnlineSession> sessions = [];
@@ -15,7 +15,7 @@ internal sealed class TextOnlineSessions(int maximumSessions)
         lock (gate)
         {
             ObjectDisposedException.ThrowIf(closed, this);
-            if (maximumSessions <= 0 || work.Count >= maximumSessions || !work.TryAdd(id, original))
+            if (!work.TryAdd(id, original))
             {
                 throw TextErrors.Busy();
             }

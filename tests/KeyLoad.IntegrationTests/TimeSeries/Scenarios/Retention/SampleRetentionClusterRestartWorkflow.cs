@@ -147,7 +147,7 @@ internal static class SampleRetentionClusterRestartWorkflow
         await ClusterReplicationTestSupport.EventuallyAsync(async () =>
         {
             var status = await context.Clients[context.SelectedSilo].StatusAsync(cancellationToken);
-            return status.IsSuccess && status.Value!.RoutingReady && status.Value.SiloCount == NodeCount;
+            return status.IsSuccess && status.Value.RoutingReady && status.Value.SiloCount == NodeCount;
         }, cancellationToken);
     }
 

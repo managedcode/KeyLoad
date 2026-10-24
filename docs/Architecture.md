@@ -65,7 +65,9 @@ own; scaling means adding silos to the Orleans cluster.
   ([ADR-125](ADR/ADR-125-connection-owned-execution.md),
   [connection ownership](Features/ClientApi.md#persistent-connection-ownership)).
   Each operation carries its own verified identity, fresh persisted
-  authorization, bounded admission, cancellation and idempotent command outcome.
+  authorization, per-operation data bounds, cancellation and idempotent command
+  outcome. No node, tenant, principal or connection pool throttles callers
+  ([ADR-145](ADR/ADR-145-no-request-throttling.md)).
   The connection grain never caches trusted roles and never owns storage.
 - **Partition grains.** A logical partition grain is an ordinary Orleans grain
   that serializes and routes the commands of one logical (atomic) partition.
@@ -218,7 +220,7 @@ NuGet publication follow root policy.
 | build/KeyLoad.AppHost | Program.cs, Hosting/, OrleansHosting/Resources/ClusterTelemetryResources.cs, TestInfrastructure/ | Aspire owns cluster resources, readiness, test dependencies, scoped process faults and joined shutdown. |
 | tests/KeyLoad.UnitTests | TestDatabase.cs and `<SliceName>/` folders | Matching product slices; contract and engine regressions. |
 | tests/KeyLoad.RecoveryTests | Program.cs, StorageRecovery/Cases/, feature-owned Processes/ and Execution/ | TUnit recovery tests and their real child-process scenarios in the same test assembly. |
-| tests/KeyLoad.IntegrationTests | ClusterFixture.cs, StorageReplication/Cases/Cluster/ClusterTests.cs, ResourceExecution/Cases/AdmissionClusterTests.cs | Aspire-owned cluster fixtures; business cases mirror their owning slices through the real .NET SDK and official MCP client. |
+| tests/KeyLoad.IntegrationTests | ClusterFixture.cs, StorageReplication/Cases/Cluster/ClusterTests.cs, ResourceExecution/Cases/RequestBodyLimitClusterTests.cs | Aspire-owned cluster fixtures; business cases mirror their owning slices through the real .NET SDK and official MCP client. |
 | benchmarks/KeyLoad.ComparisonHost | Session/, Orchestration/ | Selected live benchmark topology, measured workloads and original result artifacts. |
 | benchmarks/KeyLoad.Benchmarks | Program.cs | BenchmarkComparisons; embedded microbenchmark development, no public claim without CI evidence. |
 | benchmarks/KeyLoad.BenchmarkScenarios | Benchmarks/EmbeddedBenchmarks.cs | BenchmarkComparisons; [ADR-047](ADR/ADR-047-embedded-benchmark-host.md) public fixture library for the external generated consumer. |
@@ -274,8 +276,7 @@ navigation are in the [Feature index](README.md). Shared entry points,
 composition roots, truly shared contracts and global infrastructure may remain
 outside slice folders. A non-applicable surface is recorded as N/A with its
 reason in the feature spec. Shared atomic commit and outcome dispatch stay
-outside slice folders because they join multiple mutation families
-([ADR-042](ADR/ADR-042-admission-resource-ownership.md)).
+outside slice folders because they join multiple mutation families.
 
 ## Shared request contracts
 
@@ -396,9 +397,9 @@ unsupported or corrupt versions before effects
 tests do not prove power-loss durability.
 
 Document CRUD handlers and transaction-scoped image carriers belong to
-`Core/DocumentStorage/`; admission and inbox ownership belong to
-`Core/ResourceExecution/`. `DatabaseEngine` holds the shared storage context,
-validated policy snapshots and node-local admission state. Feature-owned static
+`Core/DocumentStorage/`; read budgets, the analytical-read gate and cache
+reservations belong to `Core/ResourceExecution/`. `DatabaseEngine` holds the
+shared storage context, validated policy snapshots and its analytical-read gate. Feature-owned static
 operation components contain the command, query and validation implementations;
 extension methods pass that same context explicitly. They preserve the existing
 atomic transaction and persisted authorization boundary. Local numeric checks

@@ -18,24 +18,33 @@ internal static class AnnPinnedLifetimeAssertions
         AnnMaintenanceRequest request, AnnSeed seed)
     {
         AnnIndexLease? lease = null;
+        AnnIndexLease? concurrent = null;
         Task? disposal = null;
         var failures = new List<Exception>();
         try
         {
             lease = owner.Acquire(request, seed);
+            concurrent = owner.Acquire(request, seed);
             var actual = lease;
+            var second = concurrent;
             await ServerFailureObserver.ObserveAsync(async () =>
             {
-                var exhausted = Assert.ThrowsExactly<KeyLoadException>(() => AcquireUnexpected(owner, request, seed));
-                await Assert.That(exhausted.Code).IsEqualTo(ErrorCode.ResourceExhausted);
+                await AssertLiteralSearchAsync(database, second);
                 disposal = owner.DisposeAsync().AsTask();
                 await Assert.That(disposal.IsCompleted).IsFalse();
                 _ = Assert.ThrowsExactly<ObjectDisposedException>(() => AcquireUnexpected(owner, request, seed));
+                second.Dispose();
+                concurrent = null;
+                await Assert.That(disposal.IsCompleted).IsFalse();
                 await AssertLiteralSearchAsync(database, actual);
             }, failures);
         }
         finally
         {
+            if (concurrent is not null)
+            {
+                ServerFailureObserver.Observe(() => concurrent.Dispose(), failures);
+            }
             if (lease is not null)
             {
                 ServerFailureObserver.Observe(() => lease.Dispose(), failures);

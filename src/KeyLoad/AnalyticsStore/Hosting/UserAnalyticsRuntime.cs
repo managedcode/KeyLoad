@@ -10,7 +10,6 @@ internal sealed class UserAnalyticsRuntime(IOptions<DatabaseLimits> options) : I
 {
     private const int NoCleanupFailures = 0;
     private const string Unavailable = "The user analytics physical owner is unavailable.";
-    private const string Busy = "The user analytics generation allowance is exhausted.";
     private readonly Lock lifecycle = new();
     private readonly List<Work> operations = [];
     private PartitionHost? host;
@@ -60,10 +59,6 @@ internal sealed class UserAnalyticsRuntime(IOptions<DatabaseLimits> options) : I
             if (operations.Any(work => work.Original.IsCompleted && work.Execution.HasUnjoinedEngine))
             {
                 throw Errors.Fail(ErrorCode.OwnershipLost, Unavailable);
-            }
-            if (operations.Count >= options.Value.MaxConcurrentQueries)
-            {
-                throw Errors.Fail(ErrorCode.ResourceExhausted, Busy);
             }
             execution = new(physical);
             operations.Add(new(execution, completion.Task));

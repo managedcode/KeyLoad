@@ -30,6 +30,7 @@ internal static class SubscriptionOldCutSavedFailure
         expected.Add(Convert.ToHexString(KeySpace.OutcomeLocator(partition, operation.UserId!, operation.CommandId)),
             Convert.ToHexString(outcomeKey));
         expected[Convert.ToHexString(KeySpace.AppliedBytes)] = Convert.ToHexString(OrleansSerialization.Serialize(next));
+        expected[Convert.ToHexString(KeySpace.LastCommandBytes)] = Convert.ToHexString(OrleansSerialization.Serialize(outcomeKey));
         expected[Convert.ToHexString(KeySpace.ClockBytes)] = Convert.ToHexString(OrleansSerialization.Serialize(new DateTimeOffset(operation.Timestamp)));
         var failures = new List<Exception>();
         byte[]? raw = null;

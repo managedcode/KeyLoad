@@ -68,7 +68,7 @@ internal static class SiloRestartRecoveryScenario
             await ClusterReplicationTestSupport.EventuallyAsync(async () =>
             {
                 var current = await state.Clients[index].StatusAsync(cancellationToken);
-                return current.IsSuccess && current.Value!.RoutingReady;
+                return current.IsSuccess && current.Value.RoutingReady;
             }, cancellationToken);
             await fixture.App.ResourceNotifications.WaitForResourceHealthyAsync(
                 ClusterReplicationTestSupport.NodeName(index + 1), WaitBehavior.WaitOnResourceUnavailable, cancellationToken);

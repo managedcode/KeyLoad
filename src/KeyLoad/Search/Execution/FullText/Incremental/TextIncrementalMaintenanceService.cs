@@ -36,8 +36,8 @@ internal sealed class TextIncrementalMaintenanceService : ITextMaintenance, ISel
         this.configured = configured;
         this.clock = clock;
         this.faultObserver = faultObserver;
-        sessions = new(configured.RuntimeText.Value.MaximumActiveLeases);
-        selectedAdmission = new(configured.RuntimeText.Value.MaximumActiveLeases);
+        sessions = new();
+        selectedAdmission = new();
         try
         {
             root = TextIncrementalRoot.Initialize(Path.Combine(directory, TextIncrementalProtocol.RootDirectory),

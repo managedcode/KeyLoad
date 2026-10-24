@@ -6,7 +6,7 @@ namespace KeyLoad.Server;
 
 /// <summary>Silo-local original physical opening and shutdown; execution service initialization publishes the one owner.</summary>
 internal sealed class PartitionHostApplicationOwner(ServerRuntimeOptions options, IAuthorizationPolicy authorization,
-    CommandAdmissionGovernor admission, TimeProvider clock, ILogger<PartitionHost> logger, IGrainFactory grains, OrleansNode? node = null,
+    TimeProvider clock, ILogger<PartitionHost> logger, IGrainFactory grains, OrleansNode? node = null,
     ServerConnectionRegistry? connections = null, IServiceScopeFactory? scopeFactory = null)
     : IPartitionStoragePublication, ILocalDatabaseRuntime, IAsyncDisposable
 {
@@ -98,7 +98,7 @@ internal sealed class PartitionHostApplicationOwner(ServerRuntimeOptions options
         {
             session = physical;
         }
-        await physical.OpenAsync(options, authorization, admission, clock, logger, grains, scopeFactory, context);
+        await physical.OpenAsync(options, authorization, clock, logger, grains, scopeFactory, context);
         lock (lifecycle)
         {
             published = true;

@@ -135,7 +135,7 @@ Rule behaviour follows these constraints:
 
 - Use `nameof` for an existing symbol. Immutable protocol, format and mathematical
   identities use meaningful feature-owned constants. Timeouts, deadlines, retries,
-  capacities, buffer sizes and admission limits are options, never per-class
+  capacities, buffer sizes and operation limits are options, never per-class
   constants. Serializer field IDs and protocol bytes are not deployment policy.
 - A literal or policy value hidden behind a constant, a default parameter, a
   getter or an options clone that overwrites policy is still reported.

@@ -82,13 +82,13 @@ internal sealed class KeyLoadTimeSeriesTarget(HttpClient http, string apiKey, IO
         var request = new ReadSamplesRequest(workload.Partition, workload.SetName, workload.SeriesId,
             range.From, range.Until, execution.KeyLoadTimeSeriesReadLimit);
         var result = await client.ReadSamplesAsync(request, cancellationToken).ConfigureAwait(false);
-        if (!result.IsSuccess)
+        if (result.IsFailed)
         {
             return new(false, ImmutableArray<TimeSeriesSamplePoint>.Empty,
-                result.Problem?.ErrorCode.ToString() ?? KeyLoadReadFailedToken);
+                result.Problem.ErrorCode ?? KeyLoadReadFailedToken);
         }
 
-        var samples = result.Value!.Select(record => new TimeSeriesSamplePoint(record.Sample.EventId,
+        var samples = result.Value.Select(record => new TimeSeriesSamplePoint(record.Sample.EventId,
             record.Sample.Timestamp.ToUniversalTime(), record.Sample.Value, record.Sequence, record.TagsJson)).ToImmutableArray();
         return new(true, samples, null);
     }
@@ -111,11 +111,11 @@ internal sealed class KeyLoadTimeSeriesTarget(HttpClient http, string apiKey, IO
 
     private static T RequireSuccess<T>(Result<T> result, string errorCode)
     {
-        if (!result.IsSuccess)
+        if (result.IsFailed)
         {
             throw TimeSeriesComparisonTargetErrors.Create(errorCode);
         }
 
-        return result.Value!;
+        return result.Value;
     }
 }

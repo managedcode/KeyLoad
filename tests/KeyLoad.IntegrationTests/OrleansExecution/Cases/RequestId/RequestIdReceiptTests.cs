@@ -33,9 +33,9 @@ internal sealed class RequestIdReceiptTests(ClusterFixture fixture)
     {
         var configured = await client.ConfigureResourceAsync(Guid.NewGuid(), new(partition.TenantId, partition.DatabaseId,
             new("orders", ResourceKind.Collection, "request-routing")), cancellationToken);
-        if (!configured.IsSuccess)
+        if (configured.IsFailed)
         {
-            Assert.Fail(configured.Problem?.Detail ?? "The resource configuration call failed.");
+            Assert.Fail(configured.Problem.Detail ?? "The resource configuration call failed.");
         }
     }
 
@@ -46,16 +46,16 @@ internal sealed class RequestIdReceiptTests(ClusterFixture fixture)
         var command = new CommandRequest(stableCommandId, partition,
             [new PutDocument("orders", "order-1", "{\"value\":1}", 0)]);
         var first = await client.CommitAsync(command, cancellationToken);
-        if (!first.IsSuccess)
+        if (first.IsFailed)
         {
-            Assert.Fail(first.Problem?.Detail ?? "The initial SDK write failed.");
+            Assert.Fail(first.Problem.Detail ?? "The initial SDK write failed.");
         }
         var firstReceipt = recorder.Snapshot().Last();
 
         var retry = await client.CommitAsync(command, cancellationToken);
-        if (!retry.IsSuccess)
+        if (retry.IsFailed)
         {
-            Assert.Fail(retry.Problem?.Detail ?? "The stable-command SDK retry failed.");
+            Assert.Fail(retry.Problem.Detail ?? "The stable-command SDK retry failed.");
         }
         var retryReceipt = recorder.Snapshot().Last();
         await Assert.That(retry.Value!.Token).IsEqualTo(first.Value!.Token);
@@ -71,9 +71,9 @@ internal sealed class RequestIdReceiptTests(ClusterFixture fixture)
             .Select(_ => client.GetAsync(new(partition, "orders", "order-1"), cancellationToken)));
         foreach (var read in reads)
         {
-            if (!read.IsSuccess)
+            if (read.IsFailed)
             {
-                Assert.Fail(read.Problem?.Detail ?? "A parallel SDK read failed.");
+                Assert.Fail(read.Problem.Detail ?? "A parallel SDK read failed.");
             }
             await Assert.That(read.Value!.Document).IsNotNull();
             await Assert.That(read.Value.Document!.Revision).IsEqualTo(1);

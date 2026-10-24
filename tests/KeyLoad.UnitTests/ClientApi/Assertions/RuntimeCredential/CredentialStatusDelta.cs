@@ -13,6 +13,7 @@ internal static class CredentialStatusDelta
         var rows = before.RowHashes.ToDictionary(row => row.Key, row => row.Value, StringComparer.Ordinal);
         Put(rows, OutcomeStoreOracle.GlobalKey(principal.Id, id), OrleansSerialization.Serialize(expectedOutcome));
         Put(rows, KeySpace.AppliedBytes, OrleansSerialization.Serialize(entry.CanonicalSequence));
+        Put(rows, KeySpace.LastCommandBytes, OrleansSerialization.Serialize(OutcomeStoreOracle.GlobalKey(principal.Id, id)));
         Put(rows, KeySpace.ClockBytes, OrleansSerialization.Serialize(
             new DateTimeOffset(operation.Timestamp) >= before.Clock ? new DateTimeOffset(operation.Timestamp) : before.Clock));
         Put(rows, KeySpace.ApiKey(credential.Id), OrleansSerialization.Serialize(credential));

@@ -119,7 +119,7 @@ internal static class GraphPathClusterSiloRestart
             await ClusterReplicationTestSupport.EventuallyAsync(async () =>
             {
                 var reply = await administrator.StatusAsync(cancellationToken);
-                return reply.IsSuccess && reply.Value!.RoutingReady
+                return reply.IsSuccess && reply.Value.RoutingReady
                     && reply.Value.SiloCount == GraphPathClusterNodeClients.Nodes.Length;
             }, cancellationToken);
         }

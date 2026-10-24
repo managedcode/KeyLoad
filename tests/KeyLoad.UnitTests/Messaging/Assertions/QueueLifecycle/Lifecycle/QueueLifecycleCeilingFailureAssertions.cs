@@ -70,10 +70,12 @@ internal static class QueueLifecycleCeilingFailureAssertions
         var outcome = Convert.ToHexString(KeySpace.PartitionOutcome(rows.Lane.Partition, principal, rows.Request.CommandId));
         var clock = Convert.ToHexString(KeySpace.ClockBytes);
         var applied = Convert.ToHexString(KeySpace.AppliedBytes);
+        var lastCommand = Convert.ToHexString(KeySpace.LastCommandBytes);
         var locator = Convert.ToHexString(KeySpace.OutcomeLocator(rows.Lane.Partition, principal, rows.Request.CommandId));
         return QueueWholeFlowStorage.Bytes(store).Where(row => !row.StartsWith(outcome + Separator, StringComparison.Ordinal)
             && !row.StartsWith(clock + Separator, StringComparison.Ordinal)
             && !row.StartsWith(applied + Separator, StringComparison.Ordinal)
+            && !row.StartsWith(lastCommand + Separator, StringComparison.Ordinal)
             && !row.StartsWith(locator + Separator, StringComparison.Ordinal)).ToArray();
     }
 }

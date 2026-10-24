@@ -17,16 +17,6 @@ internal static class ProjectionProgressOperations
         return db.Submit(OperationKind.CommitProjectionBatch,
             new CommitProjectionBatchRequest(id, consumer, batch.Token, [.. effects]), id: id);
     }
-    internal static Result<object> Write(TestDatabase db, params Mutation[] effects)
-    {
-        var id = Guid.NewGuid();
-        return db.Submit(OperationKind.Batch, new CommandRequest(id, db.Partition, [.. effects]), id: id);
-    }
-    internal static OutboxHead Purge(TestDatabase db, long through)
-    {
-        var id = Guid.NewGuid();
-        return db.Submit(OperationKind.PurgeOutbox, new PurgeOutboxRequest(id, db.Partition, through), id: id).Get<OutboxHead>();
-    }
     internal static void ConfigureResources(TestDatabase db)
     {
         db.Configure("orders", ResourceKind.Collection);

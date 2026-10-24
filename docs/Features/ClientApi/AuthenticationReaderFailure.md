@@ -1,12 +1,12 @@
 # authentication reader failure
 
-Canonical slice: ClientApi. Existing [ADR-060](../../ADR/ADR-060-internal-serialization.md), AC-IS-002/005/006, already defines malformed errors and pool safety. ADR: N/A for a new decision because this correction preserves formats, public APIs, limits, authority, dependencies and topology.
+Canonical slice: ClientApi. Existing [ADR-060](../../ADR/ADR-060-internal-serialization.md), AC-IS-002/005/006, already defines malformed errors and byte bounds. ADR: N/A for a new decision because this correction preserves formats, public APIs, limits, authority, dependencies and topology.
 
 | Requirement | Acceptance | Observable contract and test |
 | --- | --- | --- |
 | REQ-NAR-001 | AC-NAR-001 | Removing the last byte from a genuine generated principal reply returns safe Validation from Inspect and ReadPrincipal; AuthenticationReaderFailureTests and the existing wrong-root/trailing-frame test. |
-| REQ-NAR-002 | AC-NAR-002 | Actual request-state authentication rejects that frame and releases every ingress/data/control reservation; genuine state and full-pool assertions. |
-| REQ-NAR-003 | AC-NAR-003 | Valid generated replies remain valid and caller cancellation remains cancellation. Only the existing pinned Reader throw-site predicate joins malformed classification. |
+| REQ-NAR-002 | AC-NAR-002 | Actual request-state authentication rejects that frame with the same safe Validation and no private detail; `AuthenticationReaderFailureTests.OneByteTruncationFailsAuthenticationWithoutPrivateDetail`. |
+| REQ-NAR-003 | AC-NAR-003 | Valid generated replies remain valid and caller cancellation remains cancellation (`PreCancelledAuthenticationRemainsCancellation`). Only the existing pinned Reader throw-site predicate joins malformed classification. |
 | REQ-NAR-004 | AC-NAR-004 | Scoped source review, full Release/formatter and focused normal/scalar retain actual evidence; broader failing suites, coverage and cluster remain open. |
 
 ```mermaid
@@ -15,12 +15,12 @@ flowchart LR
     Scan --> Valid[Valid principal]
     Scan --> Truncated[Exact reader exhaustion]
     Truncated --> Deny[Safe Validation error]
-    Deny --> Release[Request disposal returns all pools]
+    Deny --> Dispose[Request state disposal]
 ```
 
 Server owns the existing McpAuthentication.Malformed predicate; UnitTests owns only the new ClientApi regression file. Backend domain, shared binary codecs, public contracts, frontend, storage and deployment changes are N/A because this fixes one existing denial path. Other execution, SQL and benchmark owners retain their scopes.
 
-Local tests use .NET 10, TUnit and Microsoft.Testing.Platform; the owner permits development checks. Focused command: dotnet test --project tests/KeyLoad.UnitTests --no-build --no-restore --treenode-filter '/*/*/AuthenticationReaderFailureTests/*', repeated with DOTNET_EnableHWIntrinsic=0. Preserve the existing complete wrong-root/trailing/pool assertions.
+Local tests use .NET 10, TUnit and Microsoft.Testing.Platform; the owner permits development checks. Focused command: dotnet test --project tests/KeyLoad.UnitTests --no-build --no-restore --treenode-filter '/*/*/AuthenticationReaderFailureTests/*', repeated with DOTNET_EnableHWIntrinsic=0. Preserve the existing complete wrong-root/trailing assertions.
 
 No new migration is needed; reverting this predicate restores previous error mapping without modifying data. No broad InvalidOperationException catch, replacement reader, fake exception or grant of authority is permitted. Unforced programming/session failures remain a source-review exception; numeric coverage, full suites, fault/endurance and performance gains are unqualified until their authentic gates exist.
 

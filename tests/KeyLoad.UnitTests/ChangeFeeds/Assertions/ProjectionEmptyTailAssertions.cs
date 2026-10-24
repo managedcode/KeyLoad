@@ -46,7 +46,7 @@ internal static class ProjectionEmptyTailAssertions
         await Assert.That(after.Count(row => row.StartsWith(locatorPrefix, StringComparison.Ordinal))).IsEqualTo(1);
         var locator = store.Read(view => view.ReadOwnedValue(locatorKey)) ?? throw new InvalidOperationException(MissingEntry);
         await Assert.That(locator.AsSpan().SequenceEqual(key)).IsTrue();
-        var metadata = new[] { KeySpace.AppliedBytes, KeySpace.ClockBytes }
+        var metadata = new[] { KeySpace.AppliedBytes, KeySpace.LastCommandBytes, KeySpace.ClockBytes }
             .Select(value => Convert.ToHexString(value) + ":").ToArray();
         var retained = after.Where(row => !row.StartsWith(prefix, StringComparison.Ordinal)
             && !row.StartsWith(locatorPrefix, StringComparison.Ordinal));

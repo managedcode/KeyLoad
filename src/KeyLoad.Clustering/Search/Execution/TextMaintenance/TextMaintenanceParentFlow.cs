@@ -45,7 +45,7 @@ internal static class TextMaintenanceParentFlow
             checkpoint = recovered.Checkpoint;
         }
         var maximumPages = Math.Min(options.MaximumReplayPages,
-            (routing.MaximumTotalFrames - ReservedFrames) / FramesPerPage);
+            (routing.MaximumStreamFrames - ReservedFrames) / FramesPerPage);
         if (maximumPages <= EmptyPages)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, GrainRoutingProtocol.ReplyBudgetExceeded);

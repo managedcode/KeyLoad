@@ -24,7 +24,7 @@ internal static class AtomicTriadStagedWarm
     }
     private static async Task FailedAsync(AtomicTriadStagedFixture state)
     {
-        var before = AtomicTriadOutboxImage.Domain(state.Store, state.Partition);
+        var before = AtomicTriadStagedImage.Domain(state.Store, state.Partition);
         var operation = state.Operation(state.Failed);
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
@@ -34,7 +34,7 @@ internal static class AtomicTriadStagedWarm
             await AtomicTriadStagedCurrent.EqualAsync(result,
                 Result<object>.Fail(Errors.Problem(ErrorCode.Conflict, AtomicTriadStagedProtocol.DuplicateDetail)));
         }, failures);
-        await ServerFailureObserver.ObserveAsync(async () => await Assert.That(AtomicTriadOutboxImage.Domain(state.Store, state.Partition))
+        await ServerFailureObserver.ObserveAsync(async () => await Assert.That(AtomicTriadStagedImage.Domain(state.Store, state.Partition))
             .IsEquivalentTo(before, TUnit.Assertions.Enums.CollectionOrdering.Matching), failures);
         await ServerFailureObserver.ObserveAsync(() => AtomicTriadStagedCurrent.EmptyAsync(state), failures);
         ServerFailureObserver.ThrowIfAny(failures);

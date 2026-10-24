@@ -61,7 +61,6 @@ public static class ProjectionBatchExecution
         const string ConflictingProjectionEffectsDetail = "The projection batch was completed with different effects.";
         const string ChangedProjectionCheckpointDetail = "The projection checkpoint changed; reread the next batch.";
         const int EmptyEffectsLength = 0;
-        const int EffectsLengthValidationBoundary = 0;
         var claims = engine.ProjectionClaims(tx, request, now, allowExpiredReceipt: true);
         engine.AuthorizeBatch(tx, principal, new(request.CommandId, request.Consumer.Partition, request.Effects), allowEmpty: true);
         engine.ReauthorizeEffects(tx, principal, request.Consumer.Partition, request.Effects);
@@ -113,11 +112,9 @@ public static class ProjectionBatchExecution
             return new(emptyReceipt, false, state.Checkpoint);
         }
 
-        var effects = engine.ApplyMutations(tx, principal, request.Consumer.Partition, request.Effects, now, position, allowOutboxProgressReserve: state.LastProgressReservationCut != head.FirstAvailable);
+        var effects = engine.ApplyMutations(tx, principal, request.Consumer.Partition, request.Effects, now, position);
         var receipt = new CommitReceipt(request.CommandId, engine.Token(tx, request.Consumer.Partition, position), effects, engine.Durability, engine.AcknowledgedPersistedCopies);
-        var after = engine.ReadOutboxHead(tx, request.Consumer.Partition);
-        var usedReserve = effects.Length > EffectsLengthValidationBoundary && (after.StoredRecords > engine.Limits.MaxOutboxRecords || after.StoredBytes > engine.Limits.MaxOutboxBytes);
-        tx.PutRecord(ProjectionOutbox.ConsumerKey(request.Consumer), state with { Checkpoint = claims.Through, LastProgressReservationCut = usedReserve ? head.FirstAvailable : state.LastProgressReservationCut });
+        tx.PutRecord(ProjectionOutbox.ConsumerKey(request.Consumer), state with { Checkpoint = claims.Through });
         tx.PutRecord(key, new ProjectionReceipt(fingerprint, receipt, claims.Through));
         return new(receipt, false, claims.Through);
     }

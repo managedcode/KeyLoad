@@ -32,7 +32,7 @@ internal sealed class CqrsStreamAdmission(
             purpose?.ResolveProgress();
         }
         var nextCount = checked(count + CountStep);
-        if (nextCount > (purpose?.HasLongProfile == true ? options.Value.MaximumTotalFrames : GrainRequestStreamProtocol.MaximumChunks))
+        if (nextCount > (purpose?.HasLongProfile == true ? options.Value.MaximumStreamFrames : GrainRequestStreamProtocol.MaximumChunks))
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, GrainRoutingProtocol.ReplyBudgetExceeded);
         }

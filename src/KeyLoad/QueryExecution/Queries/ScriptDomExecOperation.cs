@@ -13,7 +13,7 @@ internal static class ScriptDomExecOperation
     /// <summary>Cluster administration and credential tools stay outside the SQL surface; the SDK and MCP own them.</summary>
     private static readonly HashSet<string> AdministrationTools = new(StringComparer.Ordinal)
     {
-        McpToolNames.AdminBackup, McpToolNames.AdminAdmission, McpToolNames.AdminStatus, McpToolNames.AdminDispatch,
+        McpToolNames.AdminBackup, McpToolNames.AdminStatus, McpToolNames.AdminDispatch,
         McpToolNames.PrincipalsConfigure, McpToolNames.CredentialsConfigure
     };
 

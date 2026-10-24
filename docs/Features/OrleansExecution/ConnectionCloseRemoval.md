@@ -6,7 +6,7 @@ REQ-CONNECTION-CLOSE-001 / AC-CONNECTION-CLOSE-001: every independently created 
 
 REQ-CONNECTION-CLOSE-002 / AC-CONNECTION-CLOSE-002: when the exact activation count assertion fails, preserve that same assertion exception and record one bounded ownership witness: expected/actual count, whether the management set contains the scenario's server-owned connection GrainId, and whether primary close was joined. Do not disclose caller principal, credentials, document payload, signed envelope or arbitrary exception text. Diagnostic failures stay secondary to the original assertion through the existing failure observer.
 
-REQ-CONNECTION-CLOSE-003 / AC-CONNECTION-CLOSE-003: preserve the held callback charge, second-principal admission refusal, cancellation, store position/outcome absence, fresh-owner commands/replays and all primary/cleanup joins. Only the direct fresh-close to immediate count-zero gap is fixed, with the existing barrier.
+REQ-CONNECTION-CLOSE-003 / AC-CONNECTION-CLOSE-003: preserve the held callback charge, the second-principal command that commits while the callback is held, the pre-cancelled command's unchanged store position and outcome absence, fresh-owner commands/replays and all primary/cleanup joins. Only the direct fresh-close to immediate count-zero gap is fixed, with the existing barrier.
 
 ```mermaid
 flowchart TD

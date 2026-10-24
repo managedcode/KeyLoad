@@ -11,7 +11,7 @@ internal static class ConnectionAwaitedSettlementAssertions
             using var duplicate = owner.Acquire(requestId, RequestWorkKind.RequestProducer);
             return Task.CompletedTask;
         });
-        await Assert.That(failure!.Code).IsEqualTo(ErrorCode.ResourceExhausted);
+        await Assert.That(failure!.Code).IsEqualTo(ErrorCode.Conflict);
     }
 
     internal static async Task ReleasedAsync(RequestWorkOwner owner, Guid requestId, CancellationToken token)
@@ -25,7 +25,7 @@ internal static class ConnectionAwaitedSettlementAssertions
                 using var exact = owner.Acquire(requestId, RequestWorkKind.RequestProducer);
                 return;
             }
-            catch (KeyLoadException error) when (error.Code == ErrorCode.ResourceExhausted)
+            catch (KeyLoadException error) when (error.Code == ErrorCode.Conflict)
             {
                 await Task.Delay(timing.PollInterval, token);
             }

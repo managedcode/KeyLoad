@@ -44,7 +44,7 @@ internal sealed class SqlOperationCompilerTests
 
     internal static readonly HashSet<string> AdministrationTools = new(StringComparer.Ordinal)
     {
-        McpCatalogExpectations.AdminBackup, McpCatalogExpectations.AdminAdmission, McpCatalogExpectations.AdminStatus,
+        McpCatalogExpectations.AdminBackup, McpCatalogExpectations.AdminStatus,
         McpCatalogExpectations.AdminDispatch, McpCatalogExpectations.PrincipalsConfigure, McpCatalogExpectations.CredentialsConfigure
     };
 
@@ -76,8 +76,7 @@ internal sealed class SqlOperationCompilerTests
         var request = SqlOperationTestData.Call(McpCatalogExpectations.QueryCapabilities);
         await SqlOperationTestData.Same(SqlOperationTestData.Compile(request),
             SqlOperationTestData.Find(McpCatalogExpectations.QueryCapabilities).Decode(null));
-        foreach (var name in new[] { McpCatalogExpectations.AdminBackup, McpCatalogExpectations.AdminAdmission,
-                     McpCatalogExpectations.AdminStatus })
+        foreach (var name in new[] { McpCatalogExpectations.AdminBackup, McpCatalogExpectations.AdminStatus })
         {
             await SqlOperationTestData.Reject(SqlOperationTestData.Call(name), ErrorCode.UnsupportedCapability);
         }

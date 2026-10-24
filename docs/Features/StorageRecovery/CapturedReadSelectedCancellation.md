@@ -1,6 +1,6 @@
 # Frozen scoped-read selected cancellation
 
-Parent: [StorageRecovery](../StorageRecovery.md). Applicable cut and frozen-closure contract: [ADR-097](../../ADR/ADR-097-read-cut-leases.md); owner refactor: [ADR-046](../../ADR/ADR-046-storage-private-owners.md); test entry: [ADR-117](../../ADR/ADR-117-tunit-ci-entry.md). Applies to the existing captured-read contract; no storage format, public API, clock, admission limit or dependency change.
+Parent: [StorageRecovery](../StorageRecovery.md). Applicable cut and frozen-closure contract: [ADR-097](../../ADR/ADR-097-read-cut-leases.md); owner refactor: [ADR-046](../../ADR/ADR-046-storage-private-owners.md); test entry: [ADR-117](../../ADR/ADR-117-tunit-ci-entry.md). Applies to the existing captured-read contract; no storage format, public API, clock, limit or dependency change.
 
 REQ-CUT-004: A frozen forward/reverse traversal observes the original supplied cancellation token after each external observer and visitor callback. A callback selecting cancellation cannot authorize delivery of another row or return a successful early-stop result.
 

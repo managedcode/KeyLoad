@@ -32,12 +32,9 @@ internal sealed class TextAsyncAdmissionTests
     }
 
     [Test]
-    public async Task AcFts007PostingPauseKeepsAdmissionUntilCancellationCleanupJoins()
+    public async Task AcFts007PostingPauseKeepsItsReservationWithoutRefusingOthersUntilCleanupJoins()
     {
-        using var database = CreateDatabase(new()
-        {
-            MaxConcurrentQueries = 1
-        });
+        using var database = CreateDatabase();
         var postingObserved = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var releasePosting = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var pauseOnce = 1;
@@ -59,7 +56,7 @@ internal sealed class TextAsyncAdmissionTests
             active = Task.Run(() => search.SearchAsync("root", Request(database), cancellation.Token), CancellationToken.None);
             await postingObserved.Task.WaitAsync(CoordinationTimeout, TimeProvider.System);
             await Assert.That(database.Database.QueryReadsInFlight).IsEqualTo(1);
-            await AssertSaturatedSearchRejectedWithoutReadsAsync(database, search);
+            await AssertConcurrentReservationAdmittedAsync(database);
             await cancellation.CancelAsync();
             await Assert.That(database.Database.QueryReadsInFlight).IsEqualTo(1);
         }, cancellation.CancelAsync, () => ReleasePostingAsync(releasePosting),
@@ -72,14 +69,12 @@ internal sealed class TextAsyncAdmissionTests
         await Assert.That(healthy[0].Document.Reference.Id).IsEqualTo(DocumentId);
     }
 
-    private static async Task AssertSaturatedSearchRejectedWithoutReadsAsync(TestDatabase database,
-        SearchEngine search)
+    private static async Task AssertConcurrentReservationAdmittedAsync(TestDatabase database)
     {
-        var before = database.Store.GetReadDiagnostics();
-        var failure = await Assert.ThrowsExactlyAsync<KeyLoadException>(() =>
-            search.SearchAsync("root", Request(database), TestToken()));
-        await Assert.That(failure!.Code).IsEqualTo(ErrorCode.ResourceExhausted);
-        await Assert.That(database.Store.GetReadDiagnostics()).IsEqualTo(before);
+        using (database.Database.AdmitQuery(TestToken()))
+        {
+            await Assert.That(database.Database.QueryReadsInFlight).IsEqualTo(2);
+        }
         await Assert.That(database.Database.QueryReadsInFlight).IsEqualTo(1);
     }
 
@@ -98,9 +93,9 @@ internal sealed class TextAsyncAdmissionTests
         return Task.CompletedTask;
     }
 
-    private static TestDatabase CreateDatabase(DatabaseLimits? limits = null)
+    private static TestDatabase CreateDatabase()
     {
-        var database = new TestDatabase(limits);
+        var database = new TestDatabase();
         database.Configure(Collection, ResourceKind.Collection);
         database.Commit(new PutDocument(Collection, DocumentId, "{\"text\":\"needle\"}"));
         return database;

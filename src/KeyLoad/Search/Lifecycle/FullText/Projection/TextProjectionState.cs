@@ -5,6 +5,9 @@ namespace KeyLoad.Server.Search;
 
 internal sealed class TextProjectionState
 {
+    // Each bootstrap generation slot has one reader; the current and the retired slot hold the only two leases
+    // while a replacement publishes, so a third lease would let a build overlap both live generations.
+    private const int SlotLeaseBound = 2;
     private readonly IOptions<TextExecutionOptions> executionOptions;
 
     private readonly Lock sync = new();
@@ -35,7 +38,7 @@ internal sealed class TextProjectionState
                 ReserveLease(existing);
                 return new(existing, false);
             }
-            if (slots.Building || work.ActiveLeases >= executionOptions.Value.MaximumActiveLeases || slots.HasUnleasedRetired
+            if (slots.Building || work.ActiveLeases >= SlotLeaseBound || slots.HasUnleasedRetired
                 || slots.Count >= executionOptions.Value.MaximumGenerations)
             {
                 throw TextErrors.Busy();
@@ -165,7 +168,7 @@ internal sealed class TextProjectionState
 
     private void ReserveLease(TextGenerationSlot slot)
     {
-        if (slot.LeaseActive || slot.Unsettled || work.ActiveLeases >= executionOptions.Value.MaximumActiveLeases)
+        if (slot.LeaseActive || slot.Unsettled || work.ActiveLeases >= SlotLeaseBound)
         {
             throw slot.Unsettled ? TextErrors.Corrupt() : TextErrors.Busy();
         }

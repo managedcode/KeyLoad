@@ -109,7 +109,6 @@ internal static class McpCatalogExpectations
             "vectorField", "space", McpDiscoveryProtocol.Consumer, AnnIndexGenerationProperty, MinimumTokenProperty],
             [IndexedTokenProperty, AnnIndexGenerationProperty, SchemaVersionProperty, PolicyEpochProperty]),
         new(McpCallerTools.AdminBackup, false, false, false, McpExpectedBody.None, false, []),
-        Empty(McpCallerTools.AdminAdmission),
         Empty(McpCallerTools.AdminStatus),
         Empty(DashboardName),
         Read(ResourcesListName, [McpDiscoveryProtocol.TenantId, McpDiscoveryProtocol.DatabaseId]),

@@ -17,7 +17,6 @@ internal sealed class TextExecutionOptions
     private const int MaximumFileBufferByteCeiling = 4_096;
     private const int MaximumGenerationCeiling = 3;
     private const int MaximumOwnerReceiptByteCeiling = 65_536;
-    private const int MaximumActiveLeaseCeiling = 2;
     private const int MaximumPostingsCheckInterval = 64;
 
     public int MaximumFiles { get; set; } = MaximumFileCeiling;
@@ -30,7 +29,6 @@ internal sealed class TextExecutionOptions
     public int MaximumGenerations { get; set; } = MaximumGenerationCeiling;
     public int MaximumOwnerReceiptBytes { get; set; } = MaximumOwnerReceiptByteCeiling;
     public int PostingsBoundCheckInterval { get; set; } = MaximumPostingsCheckInterval;
-    public int MaximumActiveLeases { get; set; } = MaximumActiveLeaseCeiling;
     internal int MaximumEntries => checked(MaximumFiles + MaximumDirectories);
 
     internal bool IsValid() => MaximumFiles is >= 1 and <= MaximumFileCeiling
@@ -42,7 +40,6 @@ internal sealed class TextExecutionOptions
         && FileBufferBytes is >= 1 and <= MaximumFileBufferByteCeiling
         && MaximumGenerations is >= 1 and <= MaximumGenerationCeiling
         && MaximumOwnerReceiptBytes is >= 1 and <= MaximumOwnerReceiptByteCeiling
-        && MaximumActiveLeases is >= 1 and <= MaximumActiveLeaseCeiling
         && PostingsBoundCheckInterval is >= 1 and <= MaximumPostingsCheckInterval;
 
     internal void Validate()

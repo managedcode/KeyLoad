@@ -37,8 +37,8 @@ internal sealed class HeavyDocumentLoadScenario(ClusterFixture fixture) : IAsync
             var lane = writer;
             work.Add(GuardAsync(() => WriteAsync(writers[lane], source.Partition, lane, ownedLifetime.Token), ownedLifetime));
         }
-        work.Add(GuardAsync(() => ReadSdkAsync(reader, source.Partition, ownedLifetime.Token), ownedLifetime));
-        work.Add(GuardAsync(() => ReadMcpAsync(mcpReader, source.Partition, ownedLifetime.Token), ownedLifetime));
+        work.Add(GuardAsync(() => ReadSdkAsync(reader, source, ownedLifetime.Token), ownedLifetime));
+        work.Add(GuardAsync(() => ReadMcpAsync(mcpReader, source, ownedLifetime.Token), ownedLifetime));
         work.Add(GuardAsync(() => QueryMcpAsync(mcpQuery, source.Partition, ownedLifetime.Token), ownedLifetime));
         // Guard cancellation stops admission; WhenAll settles every original caller before cleanup.
         var joined = Task.WhenAll(work);
@@ -113,35 +113,35 @@ internal sealed class HeavyDocumentLoadScenario(ClusterFixture fixture) : IAsync
         }
         overlap.CompleteWriter();
     }
-    private async Task ReadSdkAsync(KeyLoadClient client, PartitionRef partition, CancellationToken token)
+    private async Task ReadSdkAsync(KeyLoadClient client, McpDocumentScenario source, CancellationToken token)
     {
         await overlap.ArriveAsync(token).ConfigureAwait(false);
         while (!overlap.WritersDone)
         {
             token.ThrowIfCancellationRequested();
-            var original = client.GetAsync(HeavyDocumentLoadReadback.Sentinel(partition), token);
+            var original = client.GetAsync(HeavyDocumentLoadReadback.Sentinel(source.Partition), token);
             // Completion is monotonic: a later incomplete read also existed at the observed incomplete write.
             var concurrent = overlap.HasIncompleteOriginal() && !original.IsCompleted;
             var result = await PublicReadAssertions.DocumentAsync(await original.ConfigureAwait(false)).ConfigureAwait(false);
-            await HeavyDocumentLoadReadback.VerifySentinelAsync(result, partition).ConfigureAwait(false);
+            await HeavyDocumentLoadReadback.VerifySentinelAsync(result, source).ConfigureAwait(false);
             if (concurrent)
             {
                 overlap.ReadOverlapped(0);
             }
         }
     }
-    private async Task ReadMcpAsync(McpOfficialClient owner, PartitionRef partition, CancellationToken token)
+    private async Task ReadMcpAsync(McpOfficialClient owner, McpDocumentScenario source, CancellationToken token)
     {
         await overlap.ArriveAsync(token).ConfigureAwait(false);
         while (!overlap.WritersDone)
         {
             token.ThrowIfCancellationRequested();
             var original = owner.CallAsync(McpCallerTools.DocumentsGet,
-                new GetDocumentRequest(HeavyDocumentLoadReadback.Sentinel(partition)), token);
+                new GetDocumentRequest(HeavyDocumentLoadReadback.Sentinel(source.Partition)), token);
             var concurrent = overlap.HasIncompleteOriginal() && !original.IsCompleted;
             var result = await PublicReadAssertions.DocumentAsync(await original.ConfigureAwait(false))
                 .ConfigureAwait(false);
-            await HeavyDocumentLoadReadback.VerifySentinelAsync(result.Value, partition).ConfigureAwait(false);
+            await HeavyDocumentLoadReadback.VerifySentinelAsync(result.Value, source).ConfigureAwait(false);
             if (concurrent)
             {
                 overlap.ReadOverlapped(1);

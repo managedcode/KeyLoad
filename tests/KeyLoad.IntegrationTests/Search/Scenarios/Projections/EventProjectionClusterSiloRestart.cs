@@ -114,7 +114,7 @@ internal sealed class EventProjectionClusterSiloRestart(ClusterFixture fixture)
         => await ClusterReplicationTestSupport.EventuallyAsync(async () =>
         {
             var status = await administrator.StatusAsync(cancellationToken);
-            return status.IsSuccess && status.Value!.RoutingReady;
+            return status.IsSuccess && status.Value.RoutingReady;
         }, cancellationToken);
 
     private async Task RestoreStoppedNodeAsync(string stoppedNode, string[] nodes,

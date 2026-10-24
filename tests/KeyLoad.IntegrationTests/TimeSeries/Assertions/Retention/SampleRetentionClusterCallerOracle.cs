@@ -16,12 +16,12 @@ internal static class SampleRetentionClusterCallerOracle
         await ClusterReplicationTestSupport.EventuallyAsync(async () =>
         {
             var progress = await client.ReadSampleRetentionAsync(RetentionRequest(scenario), cancellationToken);
-            if (!progress.IsSuccess || progress.Value != expected)
+            if (progress.IsFailed || progress.Value != expected)
             {
                 return false;
             }
             var range = await client.ReadSamplesAsync(ReadRequest(scenario), cancellationToken);
-            return range.IsSuccess && range.Value!.Select(row => row.Sample.EventId)
+            return range.IsSuccess && range.Value.Select(row => row.Sample.EventId)
                 .SequenceEqual(expectedIds, StringComparer.Ordinal);
         }, cancellationToken);
     }

@@ -73,7 +73,7 @@ internal sealed class TextOnlineGeneration(string root, OnlineTextCurrentPublica
     }
 
     private void AdmitReaderLedger(ReadExecutionBudget budget, TextSelectedProjectionLease reader)
-        => readers = TextOnlineReaderLedger.Admit(readers, budget, reader, options);
+        => readers = TextOnlineReaderLedger.Admit(readers, budget, reader);
 
     private void SettleFailedReader(Exception primary, TextSelectedProjectionLease reader, List<Exception> failures)
     {

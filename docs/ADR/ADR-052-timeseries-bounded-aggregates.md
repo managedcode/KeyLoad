@@ -76,9 +76,10 @@ operations require current persisted SeriesRead, including empty results. Check
 cancellation/deadline during metadata, traversal, window fill and result writing.
 Check the exact complete JSON output under the same configured MaxBatchBytes.
 All result collections are immutable and retain ADR-041 array serialization.
-The new HTTP and MCP canonical routes reserve the existing heavy-read ingress
-working set under AC-SERIES-011, sharing capacity with query/search/range reads.
-HttpAdmissionGovernor and its new TimeSeriesHttpAdmissionTests keep the existing admission ceilings and release semantics are unchanged.
+The new HTTP and MCP canonical routes have no request-count or reserved-byte
+admission ([ADR-145](ADR-145-no-request-throttling.md)); the server-wide request
+body limit bounds their input and the AC-SERIES-011 operation budget bounds their
+work.
 
 ## Shared reverse storage contract
 

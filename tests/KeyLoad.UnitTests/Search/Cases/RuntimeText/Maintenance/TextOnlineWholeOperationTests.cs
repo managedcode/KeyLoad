@@ -6,6 +6,7 @@ namespace KeyLoad.UnitTests.Search;
 internal sealed class TextOnlineWholeOperationTests
 {
     private const int TrackedBilingualRecords = 2;
+    private const int CompetingSessions = 3;
     [Test]
     public async Task OrderedPublicationPreservesFullOriginalReceiptAndSameViewBilingualReads()
     {
@@ -42,7 +43,7 @@ internal sealed class TextOnlineWholeOperationTests
         await TextBilingualAudit.VerifyAsync(runtime.Search, fixture, token);
     }
     [Test]
-    public async Task GenuineCompetingCapturedMaintenanceRefusesAtSharedLeaseCeilingThenJoinedAbortAllowsFullHealthyPublication()
+    public async Task GenuineCompetingSessionsAreAdmittedWhileOnlyOneCaptureIsLiveThenJoinedAbortAllowsFullHealthyPublication()
     {
         using var fixture = new TestDatabase();
         var token = TestContext.Current!.Execution.CancellationToken;
@@ -55,7 +56,7 @@ internal sealed class TextOnlineWholeOperationTests
         var failures = new List<Exception>();
         await KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
         {
-            for (var index = 0; index < runtime.Options.RuntimeText.Value.MaximumActiveLeases; index++)
+            for (var index = 0; index < CompetingSessions; index++)
             {
                 var id = Guid.NewGuid();
                 owners.Add(id);
@@ -75,9 +76,6 @@ internal sealed class TextOnlineWholeOperationTests
                     await Assert.That((refused ?? throw new InvalidOperationException()).Code).IsEqualTo(ErrorCode.ResourceExhausted);
                 }
             }
-            var error = await Assert.ThrowsAsync<KeyLoadException>(() => runtime.PhaseAsync(fixture,
-                Guid.NewGuid(), request, OnlineTextCapabilityKind.ResolveOriginal, expiry, token));
-            await Assert.That((error ?? throw new InvalidOperationException()).Code).IsEqualTo(ErrorCode.BudgetExceeded);
         }, failures);
         foreach (var id in owners)
         {

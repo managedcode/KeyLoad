@@ -67,7 +67,6 @@ internal sealed class BenchmarkSessionFixture : IAsyncInitializer, IAsyncDisposa
         {
             owner = new(ComparisonExecutionRegistration.Read(input),
                 ComparisonExecutionRegistration.ReadDiagnostics(input),
-                ComparisonExecutionRegistration.ReadIsolatedAdmission(input),
                 ComparisonExecutionRegistration.ReadLifecycle(input),
                 ComparisonExecutionRegistration.ReadClient(input),
                 ComparisonExecutionRegistration.ReadTranslation(input), TimeProvider.System);

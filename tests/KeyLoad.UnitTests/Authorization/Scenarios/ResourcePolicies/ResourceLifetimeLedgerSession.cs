@@ -24,7 +24,7 @@ internal static class ResourceLifetimeLedgerSession
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            workOwner = new(UnitRoutingOptions.Routing());
+            workOwner = new();
             retention = new(owner.Database.OperationLimitsOptions);
             parent = workOwner.Acquire(Guid.NewGuid(), RequestWorkKind.RequestProducer);
             parent.AttachResultRetention(retention);

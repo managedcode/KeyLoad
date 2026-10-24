@@ -25,7 +25,7 @@ internal static class CompositionPrefixPrepareScenarios
                 CompositionPrefixPrepareSeed.Bound(owner, D.From, D.First), D.FirstRevision, D.Json, false, []),
                 owner.Database.GetDocument(D.Root, CompositionPrefixPrepareSeed.Fresh(owner, D.From, D.First)));
             await Assert.That(owner.Database.InspectMessage(D.Root, new(owner.Source.Partition, D.Queue), D.Message)!.PayloadJson)
-                .IsEqualTo(CompositionPrefixPrepareExpectedPayload.Link(owner));
+                .IsEqualTo(payload);
         });
     }
 

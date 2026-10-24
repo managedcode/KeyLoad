@@ -170,7 +170,7 @@ internal sealed class AggregateReplayClusterSiloRestartTests(ClusterFixture fixt
         => await ClusterReplicationTestSupport.EventuallyAsync(async () =>
         {
             var status = await client.StatusAsync(cancellationToken);
-            return status.IsSuccess && status.Value!.RoutingReady;
+            return status.IsSuccess && status.Value.RoutingReady;
         }, cancellationToken);
 
     private static async Task WaitForClusterReadyAsync(string[] nodes, KeyLoadClient[] clients,

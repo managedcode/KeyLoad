@@ -17,9 +17,9 @@ internal sealed class ServerConnectionRegistry(IServiceProvider services,
         ServerConnectionFeature feature;
         lock (gate)
         {
-            if (closing || connections.Count >= options.Value.MaximumConnections)
+            if (closing)
             {
-                transport.Abort(new ConnectionAbortedException(ServerConnectionProtocol.Capacity));
+                transport.Abort(new ConnectionAbortedException(ServerConnectionProtocol.Closed));
                 return;
             }
             feature = new(transport, services, options, clock);

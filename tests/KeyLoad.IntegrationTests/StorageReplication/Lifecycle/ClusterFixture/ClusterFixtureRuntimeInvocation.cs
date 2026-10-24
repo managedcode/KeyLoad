@@ -17,10 +17,4 @@ internal static class ClusterFixtureRuntimeInvocation
         ArgumentException.ThrowIfNullOrWhiteSpace(resourceName);
         return requireRuntime().RestartAsync(resourceName, cancellationToken);
     }
-
-    internal static HttpAdmissionLimits RequireAdmission(HttpAdmissionLimits httpAdmission)
-    {
-        ArgumentNullException.ThrowIfNull(httpAdmission);
-        return httpAdmission;
-    }
 }

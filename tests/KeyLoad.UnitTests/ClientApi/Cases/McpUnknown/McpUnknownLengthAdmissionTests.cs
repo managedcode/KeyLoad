@@ -5,7 +5,7 @@ using KeyLoad.Storage;
 
 namespace KeyLoad.UnitTests.ClientApi;
 
-/// <summary>AC-CLIENT-009: actual persisted identities and unknown-length frames fit unchanged MCP admission pools.</summary>
+/// <summary>AC-CLIENT-009: actual persisted identities and unknown-length frames are decoded, framed and replayed exactly.</summary>
 internal sealed class McpUnknownLengthAdmissionTests
 {
     private const string RootPrincipalId = "root";
@@ -14,39 +14,29 @@ internal sealed class McpUnknownLengthAdmissionTests
     private const int UnknownLengthLimitBytes = 16_421;
     private const string DiscoveryFrame = "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"server/discover\",\"params\":{\"_meta\":{\"io.modelcontextprotocol/protocolVersion\":\"2026-07-28\"},\"clientInfo\":{\"name\":\"unit\",\"version\":\"1\"},\"clientCapabilities\":{}}}";
 
-    /// <summary>A real persisted administrator and unknown-length discovery frame admit and fully release default pools.</summary>
+    /// <summary>A real persisted administrator and unknown-length discovery frame select the control reply ceiling.</summary>
     [Test]
-    public async Task SmallUnknownLengthDiscoveryAdmitsAndReleasesDefaultMemoryAndExecutionLeases()
+    public async Task SmallUnknownLengthDiscoveryAuthenticatesAndSelectsTheControlReplyCeiling()
     {
         using var database = new TestDatabase();
         var principal = database.Store.Read(view => view.GetRecord<PrincipalRecord>(KeySpace.Principal(RootPrincipalId)))!;
         var principalBytes = OrleansSerialization.Serialize(new GrainValue(principal));
-        var limits = new McpMemoryLimits();
-        var memory = new McpMemoryBudget(Microsoft.Extensions.Options.Options.Create(new KeyLoad.Server.McpMemoryLimits { DataBytes = limits.DataBytes, ControlBytes = limits.ControlBytes, IngressBytes = limits.IngressBytes }));
-        var governor = new HttpAdmissionGovernor(UnitAdmissionOptions.Http());
         var wire = Encoding.UTF8.GetBytes(DiscoveryFrame);
 
-        using (var state = new McpRequestState(governor, memory, DefaultHttpBodyLimitBytes, UnitMcpOptions.Execution(), CancellationToken.None))
-        {
-            state.Authenticate(principalBytes, CancellationToken.None);
-            using var source = new MemoryStream(wire, writable: false);
-            using var body = await McpFrameBody.ReadAsync(source, null, DefaultHttpBodyLimitBytes, UnitMcpOptions.Execution());
-            await Assert.That(body.WireBytes).IsEqualTo(wire.Length);
-            await Assert.That(body.RetainedCapacity).IsLessThanOrEqualTo(InitialFrameCapacityBytes);
-            await Assert.That(body.RetainedCapacity).IsLessThan(DefaultHttpBodyLimitBytes);
-            state.Attach(body);
+        using var state = new McpRequestState(DefaultHttpBodyLimitBytes, UnitMcpOptions.Execution());
+        state.Authenticate(principalBytes, CancellationToken.None);
+        using var source = new MemoryStream(wire, writable: false);
+        using var body = await McpFrameBody.ReadAsync(source, null, DefaultHttpBodyLimitBytes, UnitMcpOptions.Execution());
+        await Assert.That(body.WireBytes).IsEqualTo(wire.Length);
+        await Assert.That(body.RetainedCapacity).IsLessThanOrEqualTo(InitialFrameCapacityBytes);
+        await Assert.That(body.RetainedCapacity).IsLessThan(DefaultHttpBodyLimitBytes);
+        state.Attach(body);
 
-            state.Admit(default, CancellationToken.None);
+        state.Admit(default);
 
-            await Assert.That(state.MaximumPayloadBytes).IsEqualTo(new HttpAdmissionLimits().MaxControlBodyBytes);
-            await Assert.That(state.MaximumReplyBytes).IsEqualTo(McpFramingProtocol.MaximumControlReplyBytes);
-        }
-
-        var status = governor.Status();
-        await Assert.That(status.Node.ControlCommands).IsEqualTo(0);
-        await Assert.That(status.VerifiedScopes.ControlCommands).IsEqualTo(0);
-        AssertFullMemoryPoolsCanBeReserved(memory, limits);
-        AssertFullMemoryPoolsCanBeReserved(memory, limits);
+        await Assert.That(state.Principal.Id).IsEqualTo(RootPrincipalId);
+        await Assert.That(state.MaximumPayloadBytes).IsEqualTo(DefaultHttpBodyLimitBytes);
+        await Assert.That(state.MaximumReplyBytes).IsEqualTo(McpFramingProtocol.MaximumControlReplyBytes);
     }
 
     /// <summary>A small unknown-length frame retains only the bounded initial buffer and replays exact bytes.</summary>
@@ -83,12 +73,5 @@ internal sealed class McpUnknownLengthAdmissionTests
         await Assert.That(body.RetainedCapacity).IsGreaterThan(InitialFrameCapacityBytes);
         await Assert.That(body.RetainedCapacity).IsLessThanOrEqualTo(UnknownLengthLimitBytes);
         await Assert.That(body.Bytes.Span.SequenceEqual(wire)).IsTrue();
-    }
-
-    private static void AssertFullMemoryPoolsCanBeReserved(McpMemoryBudget memory, McpMemoryLimits limits)
-    {
-        using var data = memory.Reserve(McpMemoryLane.Data, limits.DataBytes);
-        using var control = memory.Reserve(McpMemoryLane.Control, limits.ControlBytes);
-        using var ingress = memory.Reserve(McpMemoryLane.Ingress, limits.IngressBytes);
     }
 }

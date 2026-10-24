@@ -27,13 +27,13 @@ internal static class CompositionBoundReferenceData
     internal const string DerivedId = ReversePrefix + EdgeId;
     internal const string RoundEdgeId = RoundPrefix + DerivedId;
 
-    // Independent fixed-shape golden property order; production serializers/canonicalizers are not invoked.
+    // Independent fixed-shape golden in the server's link field order; production link types are not serialized.
     internal static string Payload(EntityRef from, EntityRef to) => JsonSerializer.Serialize(new
     {
-        attributesJson = Attributes,
         from = Reference(from),
+        to = Reference(to),
         label = Label,
-        to = Reference(to)
+        attributesJson = Attributes
     }, JsonDefaults.Options);
 
     internal static string OpaquePayload(EntityRef from, EntityRef to)
@@ -45,28 +45,28 @@ internal static class CompositionBoundReferenceData
     {
         var partition = new
         {
-            atomicPartitionId = reference.Partition.AtomicPartitionId,
-            databaseId = reference.Partition.DatabaseId,
-            partitionKey = reference.Partition.PartitionKey,
             tenantId = reference.Partition.TenantId,
-            transactionDomainId = reference.Partition.TransactionDomainId
+            databaseId = reference.Partition.DatabaseId,
+            transactionDomainId = reference.Partition.TransactionDomainId,
+            partitionKey = reference.Partition.PartitionKey,
+            atomicPartitionId = reference.Partition.AtomicPartitionId
         };
         return reference.Lifetime is { } lifetime
             ? new
             {
+                partition,
                 collection = reference.Collection,
                 id = reference.Id,
                 lifetime = new
                 {
                     incarnation = lifetime.Incarnation
-                },
-                partition
+                }
             }
             : (object)new
             {
+                partition,
                 collection = reference.Collection,
-                id = reference.Id,
-                partition
+                id = reference.Id
             };
     }
 }

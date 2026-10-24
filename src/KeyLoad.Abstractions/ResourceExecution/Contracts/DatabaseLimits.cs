@@ -10,7 +10,7 @@ public sealed record DatabaseLimits
     /// <summary>The section bound by the server composition root.</summary>
     public const string SectionName = "KeyLoad:DatabaseLimits";
     /// <summary>Safe startup rejection for invalid operation budgets.</summary>
-    public const string ValidationMessage = "Database execution limits must be positive; reserved outbox budgets cannot be negative.";
+    public const string ValidationMessage = "Database execution limits must be positive.";
     private const uint QueueTransferAttemptCeilingField = 20;
     private const uint QueueTransferRepairCeilingField = 21;
     private const int DefaultMaxDocumentBytes = 1_048_576;
@@ -19,18 +19,12 @@ public sealed record DatabaseLimits
     private const int DefaultMaxBatchBytes = 8_388_608;
     private const int DefaultMaxScanRecords = 10_000;
     private const int DefaultMaxResults = 1_000;
-    private const int DefaultWriterQueueCapacity = 256;
-    private const int DefaultMaxConcurrentQueries = 16;
     private const int DefaultMaxQueryBytes = 65_536;
     private const int DefaultMaxQueryDepth = 32;
     private const int DefaultMaxQueryTokens = 2_048;
     private const int DefaultQueryDeadlineSeconds = 30;
     private const long DefaultMaxQueryReadBytes = 67_108_864;
     private const long DefaultMaxSearchTextTokens = 1_048_576;
-    private const long DefaultMaxOutboxRecords = 100_000;
-    private const long DefaultMaxOutboxBytes = 1_073_741_824;
-    private const long DefaultReservedOutboxRecords = 16_384;
-    private const long DefaultReservedOutboxBytes = 2_147_483_648;
     private const int DefaultMaxProjectionConsumers = 64;
     private const int DefaultMaxProjectionBatchBytes = 16_777_216;
 
@@ -52,12 +46,6 @@ public sealed record DatabaseLimits
     /// <summary>Gets or sets the max results value.</summary>
     [Orleans.Id(5)]
     public int MaxResults { get; init; } = DefaultMaxResults;
-    /// <summary>Gets or sets the writer queue capacity value.</summary>
-    [Orleans.Id(6)]
-    public int WriterQueueCapacity { get; init; } = DefaultWriterQueueCapacity;
-    /// <summary>Gets or sets the max concurrent queries value.</summary>
-    [Orleans.Id(7)]
-    public int MaxConcurrentQueries { get; init; } = DefaultMaxConcurrentQueries;
     /// <summary>Gets or sets the max query bytes value.</summary>
     [Orleans.Id(8)]
     public int MaxQueryBytes { get; init; } = DefaultMaxQueryBytes;
@@ -76,18 +64,6 @@ public sealed record DatabaseLimits
     /// <summary>Gets or sets the max search text tokens value.</summary>
     [Orleans.Id(13)]
     public long MaxSearchTextTokens { get; init; } = DefaultMaxSearchTextTokens;
-    /// <summary>Gets or sets the max outbox records value.</summary>
-    [Orleans.Id(14)]
-    public long MaxOutboxRecords { get; init; } = DefaultMaxOutboxRecords;
-    /// <summary>Gets or sets the max outbox bytes value.</summary>
-    [Orleans.Id(15)]
-    public long MaxOutboxBytes { get; init; } = DefaultMaxOutboxBytes;
-    /// <summary>Gets or sets the reserved outbox records value.</summary>
-    [Orleans.Id(16)]
-    public long ReservedOutboxRecords { get; init; } = DefaultReservedOutboxRecords;
-    /// <summary>Gets or sets the reserved outbox bytes value.</summary>
-    [Orleans.Id(17)]
-    public long ReservedOutboxBytes { get; init; } = DefaultReservedOutboxBytes;
     /// <summary>Gets or sets the max projection consumers value.</summary>
     [Orleans.Id(18)]
     public int MaxProjectionConsumers { get; init; } = DefaultMaxProjectionConsumers;
@@ -109,7 +85,7 @@ public sealed record DatabaseLimits
         get; init;
     }
 
-    /// <summary>Checks that execution budgets are positive and optional reserved budgets are nonnegative.</summary>
+    /// <summary>Checks that execution budgets are positive.</summary>
     /// <returns>Whether the configured budgets are valid.</returns>
     public bool IsValid() => MaxDocumentBytes >= 1
         && MaxJsonDepth >= 1
@@ -117,18 +93,12 @@ public sealed record DatabaseLimits
         && MaxBatchBytes >= 1
         && MaxScanRecords >= 1
         && MaxResults >= 1
-        && WriterQueueCapacity >= 1
-        && MaxConcurrentQueries >= 1
         && MaxQueryBytes >= 1
         && MaxQueryDepth >= 1
         && MaxQueryTokens >= 1
         && QueryDeadlineSeconds >= 1
         && MaxQueryReadBytes >= 1
         && MaxSearchTextTokens >= 1
-        && MaxOutboxRecords >= 1
-        && MaxOutboxBytes >= 1
-        && ReservedOutboxRecords >= 0
-        && ReservedOutboxBytes >= 0
         && MaxProjectionConsumers >= 1
         && MaxProjectionBatchBytes >= 1
         && (MaxQueueTransferAcceptAttempts is null || MaxQueueTransferAcceptAttempts >= 1

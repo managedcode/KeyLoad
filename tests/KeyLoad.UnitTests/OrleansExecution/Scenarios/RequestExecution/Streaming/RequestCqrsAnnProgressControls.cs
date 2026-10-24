@@ -36,7 +36,7 @@ internal static class RequestCqrsAnnProgressControls
             .GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>();
         var stream = CqrsStreamLifetime.RunWithPurpose(
             execution => RequestCqrsAnnProducer.Run(id, genuineReply, null, observed,
-                fixture.RoutingOptions.Value.MaximumTotalFrames, execution, replayCount),
+                fixture.RoutingOptions.Value.MaximumStreamFrames, execution, replayCount),
             serializer, id, fixture.Clock, observed.MarkActivationSettled, fixture.RoutingOptions, null,
             new CqrsStreamPurpose(() => fixture.Codec.DecodeRequest(envelope, id)), token);
         var reply = await GrainRequestStreamConsumer.DrainWithPurposeAsync(

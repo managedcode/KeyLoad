@@ -7,8 +7,8 @@ internal sealed class FixtureLifetimeTests
 {
     private const string DirectoryPrefix = "keyload-fixture-lifetime-";
     private const string GuidFormat = "N";
-    private const int ZeroConcurrency = 0;
-    private const int NegativeConcurrency = -1;
+    private const int ZeroScanRecords = 0;
+    private const int NegativeScanRecords = -1;
     private const string DirectoryParameter = "directory";
     private const string SentinelFileName = "existing-owner.txt";
     private const string SentinelContent = "Preserve the existing owner and its files.";
@@ -17,16 +17,16 @@ internal sealed class FixtureLifetimeTests
     private const long ExistingPosition = 1;
 
     [Test]
-    [Arguments(ZeroConcurrency)]
-    [Arguments(NegativeConcurrency)]
-    public async Task AcTest006_FailedFixtureSetupReleasesStoreAndOwnedDirectory(int concurrency)
+    [Arguments(ZeroScanRecords)]
+    [Arguments(NegativeScanRecords)]
+    public async Task AcTest006_FailedFixtureSetupReleasesStoreAndOwnedDirectory(int scanRecords)
     {
         var directory = NewDirectory();
         var failure = Assert.ThrowsExactly<InvalidOperationException>(() =>
         {
             using var unexpected = new TestDatabase(new()
             {
-                MaxConcurrentQueries = concurrency
+                MaxScanRecords = scanRecords
             }, directory);
         });
         await Assert.That(failure.Message).IsEqualTo(DatabaseLimits.ValidationMessage);
@@ -94,7 +94,7 @@ internal sealed class FixtureLifetimeTests
             {
                 using var unexpected = new TestDatabase(new()
                 {
-                    MaxConcurrentQueries = ZeroConcurrency
+                    MaxScanRecords = ZeroScanRecords
                 }, directory);
             });
             await Assert.That(error.ParamName).IsEqualTo(DirectoryParameter);

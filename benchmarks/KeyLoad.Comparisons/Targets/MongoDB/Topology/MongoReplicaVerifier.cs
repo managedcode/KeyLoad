@@ -7,7 +7,7 @@ namespace KeyLoad.Comparisons.Targets;
 
 internal static class MongoReplicaVerifier
 {
-    public static async Task<MongoReplicaProof> VerifyAsync(string connectionString, IMongoDatabase adminDatabase, IMongoDatabase database, IMongoCollection<BsonDocument> documents, ComparisonTopology topology, IComparisonCorpus dataset, IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<ComparisonExecutionOptions> executionOptions, TimeProvider timeProvider, CancellationToken cancellationToken)
+    public static async Task<MongoReplicaProof> VerifyAsync(string connectionString, MongoMemberAddresses memberAddresses, IMongoDatabase adminDatabase, IMongoDatabase database, IMongoCollection<BsonDocument> documents, ComparisonTopology topology, IComparisonCorpus dataset, IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<ComparisonExecutionOptions> executionOptions, TimeProvider timeProvider, CancellationToken cancellationToken)
     {
         const int SingleItemCount = 1;
         const int FirstElementIndex = 0;
@@ -17,14 +17,14 @@ internal static class MongoReplicaVerifier
         var status = await adminDatabase.RunCommandAsync<BsonDocument>(
             new BsonDocument(MongoSchema.ReplicaSetStatusCommand, MongoSchema.CommandEnabledValue),
             ReadPreference.Primary, cancellationToken);
-        var settings = MongoTarget.CreateSettings(connectionString, SingleItemCount, executionOptions);
+        var settings = MongoProfileFactory.CreateSettings(connectionString, SingleItemCount, executionOptions);
         var members = ValidateMembers(status, topology, settings.ReplicaSetName);
         var secondaries = members.Where(MongoReplicaMembers.IsSecondary).ToArray();
 
         var clients = new List<IMongoClient>(secondaries.Length);
         try
         {
-            clients.AddRange(secondaries.Select(member => CreateSecondaryClient(connectionString, member)));
+            clients.AddRange(secondaries.Select(member => CreateSecondaryClient(connectionString, memberAddresses, member)));
             var versions = new List<string>(members.Length);
             for (var index = FirstElementIndex; index < clients.Count; index++)
             {
@@ -75,16 +75,15 @@ internal static class MongoReplicaVerifier
         }
     }
 
-    private static MongoClient CreateSecondaryClient(string connectionString, BsonDocument member)
+    private static MongoClient CreateSecondaryClient(string connectionString, MongoMemberAddresses memberAddresses, BsonDocument member)
     {
         var host = member.GetValue(MongoSchema.MemberHostField).AsString;
         if (!Uri.TryCreate(MongoSchema.ConnectionPrefix + host, UriKind.Absolute, out var endpoint))
         {
             throw new ComparisonFailureException(MongoSchema.FailureMemberAddress);
         }
-        var settings = MongoClientSettings.FromConnectionString(connectionString);
-        settings.Servers = [new MongoServerAddress(endpoint.Host, endpoint.Port)];
-        settings.DirectConnection = true;
+        var settings = memberAddresses.ApplyMember(MongoClientSettings.FromConnectionString(connectionString),
+            endpoint.Host, endpoint.Port);
         settings.ReadPreference = ReadPreference.Secondary;
         settings.ReadConcern = ReadConcern.Majority;
         settings.WriteConcern = MongoSchema.MajorityJournalWriteConcern;

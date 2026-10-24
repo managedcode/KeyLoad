@@ -28,7 +28,7 @@ internal sealed class McpGatewayCatalogAdapterTests
 
         var failure = await Assert.ThrowsExactlyAsync<KeyLoadException>(() => host.Owner.InvokeAsync(
             DocumentGet,
-            new Dictionary<string, object?>(),
+            new Dictionary<string, System.Text.Json.JsonElement>(),
             CancellationToken.None));
         await Assert.That(failure).IsNotNull();
         await Assert.That(failure!.Code).IsEqualTo(ErrorCode.RecoveryRequired);

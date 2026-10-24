@@ -39,7 +39,6 @@ internal static class McpToolDescriptions
     private const string SearchExecute = "Search authorized documents with lexical, vector or hybrid ranking and explicit result limits.";
     private const string SearchGraph = "Search with versioned graph scope and shortest-hop retrieval in one authorized read cut; optional bounded context is expanded only from selected hits.";
     private const string AdminBackup = "Create an administrator-authorized physical node backup. Retrying can create another archive; this operation has filesystem side effects.";
-    private const string AdminAdmission = "Read administrator-authorized admission limits and actual node usage.";
     private const string AdminStatus = "Read administrator-authorized physical node identity, readiness and replication progress.";
     private const string DocumentsCommit = "Commit one authorized atomic batch of supported canonical mutations. Put each mutation kind before other object fields.";
     private const string MessagesReceiveAcrossLanes = "Receive ordered independent queue lane outcomes. Retain each original request.requests receive requestId and payload for retry; there is no group transaction, receipt or shared read cut. Unknown stops later dispatch; cancellation may leave committed leases.";
@@ -93,7 +92,7 @@ internal static class McpToolDescriptions
         AnnSearchProtocol.Tool => AnnSearchProtocol.Description,
         McpToolNames.SearchExecute => SearchExecute,
         McpToolNames.SearchGraph => SearchGraph,
-        McpToolNames.AdminBackup or McpToolNames.AdminAdmission or McpToolNames.AdminStatus
+        McpToolNames.AdminBackup or McpToolNames.AdminStatus
             => AdminDescription(name),
         McpToolNames.DocumentsCommit => DocumentsCommit,
         McpToolNames.SearchAnnMaintain => AnnMaintenanceProtocol.Description,
@@ -131,7 +130,6 @@ internal static class McpToolDescriptions
     private static string AdminDescription(string name) => name switch
     {
         McpToolNames.AdminBackup => AdminBackup,
-        McpToolNames.AdminAdmission => AdminAdmission,
         McpToolNames.AdminStatus => AdminStatus,
         _ => throw new ArgumentOutOfRangeException(nameof(name))
     };

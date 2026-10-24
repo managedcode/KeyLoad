@@ -1,16 +1,13 @@
 using System.Collections.Immutable;
-using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Clustering;
 
 /// <summary>Stores the existing owner's active admissions; every access requires that owner's gate.</summary>
-internal sealed class RequestWorkAdmissions(IOptions<GrainRoutingOptions> options)
+internal sealed class RequestWorkAdmissions
 {
     private readonly Dictionary<(Guid RequestId, RequestWorkKind Kind), RequestWorkLease> active = [];
-    private readonly GrainRoutingOptions settings = options.Value;
     private long admissionGeneration;
     private long publicationGeneration;
-    private int requestProducers;
 
     internal int Count => active.Count;
     internal Task<RequestWorkOriginalSettlement>[] Settlements
@@ -19,17 +16,12 @@ internal sealed class RequestWorkAdmissions(IOptions<GrainRoutingOptions> option
     internal RequestWorkLease Acquire(RequestWorkOwner owner, Guid id, RequestWorkKind kind)
     {
         var key = (id, kind);
-        if (active.ContainsKey(key) || active.Count >= settings.MaximumTotalFrames
-            || kind == RequestWorkKind.RequestProducer && requestProducers >= settings.MaximumRequestProducers)
+        if (active.ContainsKey(key))
         {
-            throw Errors.Fail(ErrorCode.ResourceExhausted, RequestWorkLimits.CapacityMessage);
+            throw Errors.Fail(ErrorCode.Conflict, RequestWorkLimits.DuplicateMessage);
         }
         var lease = new RequestWorkLease(owner, id, kind, checked(++admissionGeneration));
         active.Add(key, lease);
-        if (kind == RequestWorkKind.RequestProducer)
-        {
-            requestProducers++;
-        }
         return lease;
     }
 
@@ -37,10 +29,6 @@ internal sealed class RequestWorkAdmissions(IOptions<GrainRoutingOptions> option
     {
         RequireActive(lease);
         active.Remove((lease.RequestId, lease.Kind));
-        if (lease.Kind == RequestWorkKind.RequestProducer)
-        {
-            requestProducers--;
-        }
     }
 
     internal void Bind(RequestWorkLease lease, ImmutableArray<ResourceLifetime> lifetimes)

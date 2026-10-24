@@ -30,7 +30,7 @@ internal static class ExternalQueueWorkerCrashScenario
             ExternalQueueWorkerCrashProtocol.ClaimAttempt, ExternalQueueWorkerCrashProtocol.LeasedVersion,
             ExternalQueueWorkerCrashProtocol.ReadySequence, null, null, input.PrincipalId, ExternalQueueWorkerCrashProtocol.LeaseVersion,
             context.Delivery.LeaseUntil, DeliveryGeneration: ExternalQueueWorkerCrashProtocol.DeliveryGeneration), ExternalQueueWorkerCrashProtocol.Payload, ExternalQueueWorkerCrashProtocol.Headers);
-        if (!observed.IsSuccess || !JsonDefaults.Serialize(observed.Value!.Message).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected)))
+        if (observed.IsFailed || !JsonDefaults.Serialize(observed.Value.Message).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected)))
         {
             throw new InvalidOperationException(ExternalQueueWorkerCrashProtocol.InvalidInput);
         }

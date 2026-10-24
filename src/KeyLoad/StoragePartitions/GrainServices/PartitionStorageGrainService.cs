@@ -55,11 +55,6 @@ internal sealed partial class PartitionStorageGrainService(GrainId grainId, Silo
     public Task<NodeStatus> ReadStatusAsync(CancellationToken cancellationToken)
         => UsesSharedVolume ? Shared.ReadSharedStatusAsync(cancellationToken) : Isolated.ReadStatusAsync(cancellationToken);
 
-    public Task<NodeAdmissionStatus> ReadAdmissionAsync(CancellationToken cancellationToken)
-    {
-        return UsesSharedVolume ? Shared.ReadSharedAdmissionAsync(cancellationToken) : Isolated.ReadAdmissionAsync(cancellationToken);
-    }
-
     public Task<AdminNodeSnapshot> ReadDashboardAsync(CancellationToken cancellationToken)
         => UsesSharedVolume ? Shared.ReadSharedDashboardAsync(cancellationToken) : Isolated.ReadDashboardAsync(cancellationToken);
 

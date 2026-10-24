@@ -20,9 +20,9 @@ internal static class KeyLoadDocumentOperations
         Scenario scenario, BenchmarkDocument document, int expectedCopies, CancellationToken token, bool classifyMissingUpdate = true)
     {
         var result = await client.CommitAsync(new(Guid.NewGuid(), partition, [CreateMutation(scenario, document)]), token);
-        if (!result.IsSuccess)
+        if (result.IsFailed)
         {
-            var code = result.Problem?.ErrorCode;
+            var code = result.Problem.ErrorCode;
             if (scenario == Scenario.DocumentWrite && code == nameof(ErrorCode.RevisionConflict))
             {
                 throw new ComparisonFailureException(ComparisonMutationFailures.CreateConflict);
@@ -31,7 +31,7 @@ internal static class KeyLoadDocumentOperations
             {
                 var observed = await client.GetAsync(
                     new(partition, ComparisonIdentities.DocumentsCollection, document.Id), token);
-                if (observed.IsSuccess && observed.Value is null)
+                if (observed.IsSuccess && observed.Value.Document is null)
                 {
                     throw new ComparisonFailureException(ComparisonMutationFailures.UpdateMissing);
                 }

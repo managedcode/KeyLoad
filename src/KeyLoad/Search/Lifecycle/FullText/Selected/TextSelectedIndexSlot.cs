@@ -35,7 +35,7 @@ internal sealed class TextSelectedIndexSlot(string root, string leaf, Guid node,
                 budget.ChargeBytes(checked(TextIncrementalSourceProtocol.MapSlotBytes
                     + (long)ReferenceLedgerCapacity * (sizeof(int)
                     + Unsafe.SizeOf<(int Hash, int Next, TextSelectedProjectionLease Reader)>())));
-                readers = new(options.Value.MaximumActiveLeases, ReferenceEqualityComparer.Instance);
+                readers = new(ReferenceEqualityComparer.Instance);
             }
             if (!readers.Add(reader))
             {

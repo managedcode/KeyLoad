@@ -23,11 +23,10 @@ methods, compose multiple statements, or allow SQL to call itself recursively.
 
 SQL is a language adapter, never a parallel execution/authorization engine. Its
 CALL result has the actual target operation type. Generic SQL MCP discovery uses
-conservative non-read-only/non-idempotent/destructive hints. HTTP/MCP SQL wrapper
-reserves the existing conservative heavy-read DATA lane before deserialize;
-control CALLs may be rejected when it is saturated. Direct fenced control APIs
-retain the reserved control lane. Exact target-route admission is a future
-ingress-transfer optimization requiring bounded preclassification and qualification.
+conservative non-read-only/non-idempotent/destructive hints. The HTTP/MCP SQL
+wrapper has no request-count or reserved-byte admission
+([ADR-145](ADR-145-no-request-throttling.md)); the server-wide request body limit
+bounds its input and the target operation's own bounds limit its work.
 
 This first stage supplies procedural SQL for all implemented capabilities;
 declarative multi-model SELECT sources/JOIN/fusion are required later contracts,
@@ -53,6 +52,6 @@ QueryExecution owns language, existing model slices own effects. The ordered con
 
 The shared SQL operation contracts live in Abstractions/Features/QueryExecution/SqlOperationContracts.cs; the compiler helpers and matching SqlOperation* unit files are new Server/Features/QueryExecution/Sql* files; the server query/catalog/admission joins and Client/Features/QueryExecution/ complete the surface. Existing DTOs/route values retain semantics. The adapter rejects unsupported versions and invalid CALL grammar, targets or argument envelopes before routing. SELECT/EXPLAIN grammar is validated once by the authorized Q1 request path before a scan or effect; the adapter does not repeat parsing. Deployment is additive; rollback removes advertisement/new route, existing Q1 remains.
 
-Dependencies: ADR-010/012/013/014/020/035/036/039/055. Tests: strict syntax/version/parameter/name/recursion rejection; Q1 equality; actual SDK/MCP read/write/error/retry/permission/cancellation/admission flows on the replicated cluster; comparison measurements. GitHub exact-SHA proof and artifacts are required. No acceleration, full SQL compatibility or production claim before qualification.
+Dependencies: ADR-010/012/013/014/020/035/036/039/055. Tests: strict syntax/version/parameter/name/recursion rejection; Q1 equality; actual SDK/MCP read/write/error/retry/permission/cancellation flows on the replicated cluster; comparison measurements. GitHub exact-SHA proof and artifacts are required. No acceleration, full SQL compatibility or production claim before qualification.
 
-Typed blob SDK methods are feature-owned public extension methods in BlobClientExtensions, invoking the same assembly-internal Send transport with unchanged route/type/command ID/write classification; client and request are validated (null guards) before transport, with no second HttpClient or retry path. REQ-AISQL-003 and AC-AISQL-007 (under AC-DBHP-012) require the SQL admission case to observe both node and verified-scope control counts through genuine SDK admission calls with a caller-linked deadline and short polls: a received MCP result is not a server-drain barrier, and completion still requires both counts to be exactly zero. Budget, rejection, unchanged command-ID reuse, direct-control success and routing assertions stay; SDK errors and cancellation remain failures.
+Typed blob SDK methods are feature-owned public extension methods in BlobClientExtensions, invoking the same assembly-internal Send transport with unchanged route/type/command ID/write classification; client and request are validated (null guards) before transport, with no second HttpClient or retry path. REQ-AISQL-003 and AC-AISQL-007 (under AC-DBHP-012) require the generic SQL tool to report dynamic, non-read-only, non-idempotent and destructive effects and to be unreachable as a canonical operation that SQL could call recursively (`SqlToolDiscoveryTests.AcAiSql007SqlDiscoveryReportsDynamicEffectsAndCannotBeCalledRecursively`).

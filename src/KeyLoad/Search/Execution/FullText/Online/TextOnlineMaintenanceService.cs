@@ -28,7 +28,7 @@ internal sealed partial class TextOnlineMaintenanceService : IOnlineTextMaintena
         this.options = options;
         this.clock = clock;
         this.resources = resources;
-        sessions = new(options.RuntimeText.Value.MaximumActiveLeases);
+        sessions = new();
         try
         {
             root = new(directory, nodeId, options.RuntimeText, resources);

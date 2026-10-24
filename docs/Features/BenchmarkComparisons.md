@@ -50,6 +50,8 @@ evidence contracts.
 
 [ADR-021](../ADR/ADR-021-comparable-postgres-baseline.md) owns PostgreSQL as the primary general-purpose baseline and the equivalent workload/guarantee contract; specialized engines remain separate workload arms. Neither decision establishes a performance winner without successful matched GitHub evidence.
 
+KeyLoad nodes in a comparison run with no request throttling and no admission profile ([ADR-145](../ADR/ADR-145-no-request-throttling.md)), the same as the other databases' clients. Overload therefore appears in the measured latency, not as KeyLoad refusals.
+
 | Requirement | Type / priority | Behavior and rationale | Acceptance |
 |---|---|---|---|
 | REQ-BC-001 | Correctness / P0 | Use one deterministic dataset and exact caller-visible correctness oracle for every supported equivalent workload. | AC-BC-001; stable hash and verified documents/vectors/graph/events. |
@@ -435,9 +437,27 @@ VectorExact jobs must prove the strategy and resource bounds.
 OpenSearch note for the session index case: OpenSearch 3.6.0 answers a synchronous
 `_update_by_query` with one `TASK_RESOURCE_USAGE` response header per scroll batch, so
 the one-million-document backfill returns about 1,000 headers (roughly 230 KB), above
-the .NET default 64 KB response-header bound. The document HTTP client therefore
-declares `DocumentClientMaxResponseHeadersKilobytes` (1024) as recorded policy instead
-of changing the server's task resource tracking.
+the .NET default 64 KB response-header bound. The backfill runs on the target's own
+HTTP client, not on a document session client, so every target and document HTTP
+client the comparison host creates declares `DocumentClientMaxResponseHeadersKilobytes`
+(1024) as recorded policy instead of changing the server's task resource tracking.
+
+The workload client runs on the runner host, while Aspire starts every database as a
+container on its session network. Database topology stays real inside that network:
+MongoDB replica-set members advertise their container names (`isolated-mongo-N:27017`)
+so they replicate to each other. Those names do not resolve on the host, so the MongoDB
+client connects directly (`directConnection`) to the endpoint Aspire publishes for the
+bootstrap's preferred primary (the first member), and the replica verifier connects
+directly to each secondary's published endpoint.
+
+Namespace cleanup after measurement behaves like an application purging a large data
+set, not like one giant operation. Neo4j deletes the run's nodes in bounded transactions
+(10,000 nodes each) within `ComparisonLifecycleOptions.Neo4jCleanupTimeout` (10 minutes,
+the lifecycle maximum); deleting a million nodes in one transaction exceeds the server's
+transaction memory pool. KeyLoad keeps deleted documents as tombstones in the collection
+range, so its cleanup reads every identifier in one cursor pass before writing anything
+and then deletes them in batches of `KeyLoadDocumentSeedBatchSize`; re-querying from the
+start after each batch would re-read every earlier tombstone.
 
 ```mermaid
 flowchart LR

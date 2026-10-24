@@ -8,13 +8,13 @@ internal static class AnnOwnership
 {
     internal static AnnGenerationOwner Create(string directory, StoreIdentity identity,
         IOptions<AnnExecutionOptions> configured, IOptions<PackedAnnOptions> policy,
-        IOptions<PackedAnnStorageOptions> storage, int maximumReaders)
+        IOptions<PackedAnnStorageOptions> storage)
     {
         AnnRootLease? lease = null;
         try
         {
             lease = AnnRootLease.Open(directory, identity.NodeId, identity.Incarnation, configured.Value);
-            var owner = new AnnGenerationOwner(lease, configured, policy, storage, maximumReaders);
+            var owner = new AnnGenerationOwner(lease, configured, policy, storage);
             lease = null;
             return owner;
         }

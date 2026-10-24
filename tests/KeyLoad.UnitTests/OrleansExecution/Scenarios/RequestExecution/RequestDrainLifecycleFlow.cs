@@ -13,7 +13,7 @@ internal static class RequestDrainLifecycleFlow
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             var clock = TimeProvider.System;
-            var requests = new RequestWorkOwner(UnitRoutingOptions.Routing());
+            var requests = new RequestWorkOwner();
             RequestDrainLifecycleState state;
             try
             {

@@ -1,5 +1,3 @@
-using KeyLoad.Clustering;
-
 namespace KeyLoad.UnitTests.OrleansExecution;
 
 internal sealed class ConnectionCloseAdmissionTests
@@ -19,7 +17,6 @@ internal sealed class ConnectionCloseAdmissionTests
                 await ConnectionCloseAdmissionFlow.RunAsync(scenario, observer!, caller.Token);
             }
             finally { observer?.ReleaseAll(); }
-        }, new GrainRoutingOptions { MaximumConnectionOperations = 1 },
-            phaseObserver: original => observer = new(original));
+        }, phaseObserver: original => observer = new(original));
     }
 }

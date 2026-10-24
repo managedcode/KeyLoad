@@ -19,7 +19,7 @@ internal static class FileDownloadExecution
         {
             throw Errors.Fail(ErrorCode.Corruption, FileStorageProtocol.Invalid);
         }
-        await using var source = physical.Value!;
+        await using var source = physical.Value;
         var snapshot = await VerifiedContentSnapshot.CreateAsync(source, entry.Length, entry.Sha256, token)
             ?? throw Errors.Fail(ErrorCode.Corruption, FileStorageProtocol.Invalid);
         try

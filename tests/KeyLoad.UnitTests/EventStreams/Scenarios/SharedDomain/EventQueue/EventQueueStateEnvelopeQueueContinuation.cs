@@ -91,11 +91,13 @@ internal static class EventQueueStateEnvelopeQueueContinuation
         var locator = Convert.ToHexString(KeySpace.OutcomeLocator(fixture.Partition, Root, id)) + RowSeparator;
         var clock = Convert.ToHexString(KeySpace.Clock.Span) + RowSeparator;
         var applied = Convert.ToHexString(KeySpace.AppliedBytes) + RowSeparator;
+        var lastCommand = Convert.ToHexString(KeySpace.LastCommandBytes) + RowSeparator;
         return KeyLoad.UnitTests.Messaging.QueueWholeFlowStorage.Bytes(fixture.Store)
             .Where(row => !row.StartsWith(outcome, StringComparison.Ordinal)
                 && !row.StartsWith(locator, StringComparison.Ordinal)
                 && !row.StartsWith(clock, StringComparison.Ordinal)
-                && !row.StartsWith(applied, StringComparison.Ordinal)).ToArray();
+                && !row.StartsWith(applied, StringComparison.Ordinal)
+                && !row.StartsWith(lastCommand, StringComparison.Ordinal)).ToArray();
     }
 
     internal static void ConsumeReceive(EventQueueStateEnvelopeState state, Guid id)

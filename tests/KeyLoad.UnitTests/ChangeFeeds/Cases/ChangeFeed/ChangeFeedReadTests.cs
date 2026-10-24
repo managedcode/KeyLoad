@@ -1,7 +1,6 @@
 using System.Text.Json;
 using KeyLoad.Core.Authorization;
 using KeyLoad.Storage.ZoneTree;
-using ManagedCode.Communication;
 using static KeyLoad.UnitTests.ChangeFeeds.ChangeFeedTestActions;
 
 namespace KeyLoad.UnitTests.ChangeFeeds;
@@ -9,30 +8,6 @@ namespace KeyLoad.UnitTests.ChangeFeeds;
 internal sealed class ChangeFeedReadTests
 {
     private const string OtherPartitionKey = "other";
-    [Test]
-    public async Task OutboxQuotaRollsBackTheEntireProducerAndPurgeReleasesCapacity()
-    {
-        using var db = new TestDatabase();
-        db.Configure("orders", ResourceKind.Collection);
-        var engine = new DatabaseEngine(db.Store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(new()
-        {
-            MaxOutboxRecords = 1
-        }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
-        Result<object> Write(params Mutation[] mutations)
-        {
-            var id = Guid.NewGuid();
-            return engine.Apply(engine.CreateCommand(OperationKind.Batch, id, "root", TimeProvider.System.GetUtcNow(), JsonSerializer.Serialize(new CommandRequest(id, db.Partition, [.. mutations]), JsonDefaults.Options)));
-        }
-        await Assert.That(Errors.Code(Write(new PutDocument("orders", "a", "{}"), new PutDocument("orders", "b", "{}")).Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
-        await Assert.That(engine.GetOutboxStatus("root", db.Partition).Head.Tail).IsEqualTo(0);
-        await Assert.That(engine.GetDocument("root", new(db.Partition, "orders", "a"))).IsNull();
-        Write(new PutDocument("orders", "a", "{}")).Get<CommitReceipt>();
-        await Assert.That(Errors.Code(Write(new PutDocument("orders", "b", "{}")).Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
-        var purgeId = Guid.NewGuid();
-        db.Submit(OperationKind.PurgeOutbox, new PurgeOutboxRequest(purgeId, db.Partition, 1), id: purgeId).Get<OutboxHead>();
-        Write(new PutDocument("orders", "b", "{}")).Get<CommitReceipt>();
-        await Assert.That(engine.GetOutboxStatus("root", db.Partition).Head.Tail).IsEqualTo(2);
-    }
     [Test]
     public async Task FeedResumesAnEmptyTailProjectsPiiAndRetainsDeletionMetadata()
     {

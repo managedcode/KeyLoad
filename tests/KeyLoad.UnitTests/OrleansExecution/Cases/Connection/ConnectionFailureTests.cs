@@ -1,4 +1,3 @@
-using KeyLoad.Clustering;
 using KeyLoad.UnitTests.TestInfrastructure;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -58,9 +57,8 @@ internal sealed class ConnectionFailureTests
     }
 
     [Test]
-    public Task AcCrs053OperationCapacityRejectsWithoutQueueAndRecoversAfterSettlement()
+    public Task AcCrs053ConnectionRunsAnotherOperationWhileTheFirstIsHeld()
     {
-        var routing = new GrainRoutingOptions { MaximumConnectionOperations = 1 };
         return ConnectionScenario.RunAsync(async scenario =>
         {
             using var timeout = new CancellationTokenSource(scenario.Timing.StartupTimeout, TimeProvider.System);
@@ -72,27 +70,21 @@ internal sealed class ConnectionFailureTests
             var principal = scenario.Principal();
             var heldId = Guid.NewGuid();
             var held = scenario.Observation.Hold(heldId);
-            var original = scenario.Command("capacity-original");
+            var original = scenario.Command("held-original");
             var first = scenario.CommandAsync(principal, heldId, original, token);
             await held.Arrived.Task.WaitAsync(token);
-            var rejected = scenario.Command("capacity-rejected");
-            var failure = await Assert.ThrowsAsync<KeyLoadException>(
-                () => scenario.CommandAsync(principal, Guid.NewGuid(), rejected, token));
-            await Assert.That(failure).IsNotNull();
-            await Assert.That(failure!.Code).IsEqualTo(ErrorCode.ResourceExhausted);
+            var concurrentId = Guid.NewGuid();
+            var concurrent = await scenario.CommandAsync(principal, concurrentId, scenario.Command("concurrent-second"), token);
+            await Assert.That(concurrent.Error).IsNull();
             await Assert.That(first.IsCompleted).IsFalse();
-            await ConnectionAssertions.MissingOutcomeAsync(scenario, principal, rejected, "capacity-rejected");
+            await ConnectionAssertions.StoredAsync(scenario, "concurrent-second", 1, ConnectionProtocol.FirstJson);
             held.Release.TrySetResult();
             await Assert.That((await first).Error).IsNull();
             await scenario.Observation.Read(heldId).Disposed.Task.WaitAsync(token);
-            var recoveredId = Guid.NewGuid();
-            var recovered = await scenario.CommandAsync(principal, recoveredId, rejected, token);
-            await Assert.That(recovered.Error).IsNull();
-            await ConnectionAssertions.StoredAsync(scenario, "capacity-original", 1, ConnectionProtocol.FirstJson);
-            await ConnectionAssertions.StoredAsync(scenario, "capacity-rejected", 1, ConnectionProtocol.FirstJson);
-            await ConnectionAssertions.SameOwnerAsync(scenario, heldId, recoveredId, token);
+            await ConnectionAssertions.StoredAsync(scenario, "held-original", 1, ConnectionProtocol.FirstJson);
+            await ConnectionAssertions.SameOwnerAsync(scenario, heldId, concurrentId, token);
             await scenario.CloseAsync(token);
-        }, routing);
+        });
     }
 
     [Test]

@@ -8,14 +8,12 @@ internal static class KeyLoadTimeSeriesIntensiveResult
 {
     internal static T Value<T>(Result<T> result)
     {
-        if (!result.IsSuccess)
+        if (result.IsFailed)
         {
             throw Problem(result.Problem);
         }
 
-        return result.Value is null
-            ? throw new KeyLoadTimeSeriesIntensiveReplyException((long?)null)
-            : result.Value!;
+        return result.Value;
     }
 
     internal static ImmutableArray<SampleRecord> Raw(Result<SampleRecord[]> result)

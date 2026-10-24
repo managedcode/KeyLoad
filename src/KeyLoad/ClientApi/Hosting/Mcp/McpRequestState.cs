@@ -1,4 +1,3 @@
-using KeyLoad.Core;
 using Microsoft.Extensions.Options;
 using ModelContextProtocol.Protocol;
 
@@ -7,22 +6,21 @@ namespace KeyLoad.Server;
 /// <summary>Owns one stateless HTTP body, current identity and borrowed structured reply through execution draining.</summary>
 internal sealed class McpRequestState : IDisposable
 {
-    private readonly McpRequestAdmission admission;
-    private readonly int capacity;
     private readonly IOptions<McpExecutionOptions> options;
     private readonly McpExecutionOptions settings;
+    private readonly int maximumBodyBytes;
     private readonly List<McpReplyOwner> replies = [];
-    private ReadOnlyMemory<byte> authentication;
-    private McpFrameShape authenticationShape;
     private McpFrameBody? body;
+    private bool admitted;
     private bool disposed;
 
-    internal McpRequestState(HttpAdmissionGovernor governor, McpMemoryBudget memory, int capacity, IOptions<McpExecutionOptions> options, CancellationToken cancellationToken)
+    internal McpRequestState(int maximumBodyBytes, IOptions<McpExecutionOptions> options)
     {
-        this.capacity = capacity;
+        this.maximumBodyBytes = maximumBodyBytes;
         this.options = options;
         settings = options.Value;
-        admission = new(governor: governor, memory: memory, capacity: capacity, cancellationToken: cancellationToken, options: options);
+        settings.Validate();
+        MaximumReplyBytes = settings.MaximumControlReplyBytes;
     }
 
     /// <summary>Gets the current database-resolved principal; execution sessions cannot cache it.</summary>
@@ -37,25 +35,23 @@ internal sealed class McpRequestState : IDisposable
     {
         get; private set;
     }
-    /// <summary>Gets the canonical payload ceiling after admission.</summary>
-    internal int MaximumPayloadBytes => admission.MaximumPayloadBytes;
-    /// <summary>Gets the classified canonical result bound.</summary>
-    internal int MaximumReplyBytes => admission.MaximumReplyBytes;
+    /// <summary>Gets the canonical payload ceiling once the request selected its operation.</summary>
+    internal int MaximumPayloadBytes => admitted ? maximumBodyBytes
+        : throw new InvalidOperationException(McpCatalogProtocol.InvalidOperation);
+    /// <summary>Gets the classified canonical result bound; unclassified failures use the control ceiling.</summary>
+    internal int MaximumReplyBytes
+    {
+        get; private set;
+    }
     internal IOptions<McpExecutionOptions> ExecutionOptions => options;
 
-    /// <summary>Grows authentication ownership before creating the actual persisted principal DTO.</summary>
+    /// <summary>Decodes the actual persisted principal returned by authentication.</summary>
     internal void Authenticate(ReadOnlyMemory<byte> reply, CancellationToken cancellationToken)
     {
-        admission.CoverAuthenticationScan(capacity, reply.Length, cancellationToken);
         var principal = McpAuthentication.ReadPrincipal(payload: reply.Span, cancellationToken: cancellationToken, options: options);
-        authenticationShape = McpAuthentication.Inspect(principal, options, cancellationToken);
-        admission.CoverAuthentication(capacity, reply.Length, authenticationShape, cancellationToken);
-        authentication = reply;
+        _ = McpAuthentication.Inspect(principal, options, cancellationToken);
         Principal = principal;
     }
-
-    internal McpMemoryLease ReserveProgress(int bytes, CancellationToken cancellationToken)
-        => admission.ReserveProgress(bytes, cancellationToken);
 
     /// <summary>Takes exclusive replay-body lifetime ownership.</summary>
     internal void Attach(McpFrameBody ownedBody)
@@ -69,27 +65,28 @@ internal sealed class McpRequestState : IDisposable
         body = ownedBody;
     }
 
-    /// <summary>Admits one raw execution message before typed parameter conversion.</summary>
-    internal void Admit(McpGatewayMetaSelection selection, CancellationToken cancellationToken)
+    /// <summary>Selects one raw execution message and its reply class before typed parameter conversion.</summary>
+    internal void Admit(McpGatewayMetaSelection selection)
     {
-        const int BodyWireBytesValidationBoundary = 0;
-        const int NoRetainedMetadataBytes = 0;
-
+        ObjectDisposedException.ThrowIf(disposed, this);
+        if (admitted)
+        {
+            throw new InvalidOperationException(McpCatalogProtocol.InvalidOperation);
+        }
         var descriptor = selection.CanonicalOperation;
-        var input = new McpInputMemory(body?.RetainedCapacity ?? capacity, body?.WireBytes ?? BodyWireBytesValidationBoundary,
-            body?.Shape ?? default,
-            NoRetainedMetadataBytes, authentication.Length, authenticationShape);
-        admission.Acquire(Principal, descriptor, input, cancellationToken);
+        var route = descriptor?.Route ?? McpToolRoutes.AdminDispatch;
+        MaximumReplyBytes = IsControlRoute(route) ? settings.MaximumControlReplyBytes : settings.MaximumDataReplyBytes;
+        admitted = true;
         Operation = descriptor;
         MetaOperation = selection.Operation;
     }
 
-    /// <summary>Grows before creating a canonical success wrapper and retains its borrowed execution element.</summary>
+    /// <summary>Validates the canonical success reply and retains its borrowed execution element.</summary>
     internal CallToolResult Success(DispatchedOperationReply reply, CancellationToken cancellationToken)
     {
-        admission.CoverReplyScan(reply.Payload.Length, cancellationToken);
-        var shape = McpFrameBounds.InspectReply(reply.Payload.Span, MaximumReplyBytes, options);
-        admission.CoverReply(reply.Payload.Length, shape, cancellationToken);
+        RequireReplyBytes(reply.Payload.Length);
+        _ = McpFrameBounds.InspectReply(reply.Payload.Span, MaximumReplyBytes, options);
+        cancellationToken.ThrowIfCancellationRequested();
         var owner = McpReplyOwner.Success(reply.Payload, reply.RequestId,
             checked(reply.Payload.Length + settings.EnvelopeAllowanceBytes), options);
         replies.Add(owner);
@@ -102,9 +99,9 @@ internal sealed class McpRequestState : IDisposable
         ArgumentNullException.ThrowIfNull(canonical);
         try
         {
-            admission.CoverReplyScan(canonical.Length, cancellationToken);
-            var shape = McpFrameBounds.InspectReply(canonical, MaximumReplyBytes, options);
-            admission.CoverReply(canonical.Length, shape, cancellationToken);
+            RequireReplyBytes(canonical.Length);
+            _ = McpFrameBounds.InspectReply(canonical, MaximumReplyBytes, options);
+            cancellationToken.ThrowIfCancellationRequested();
             var owner = McpReplyOwner.Success(canonical, null,
                 checked(canonical.Length + settings.EnvelopeAllowanceBytes), options);
             var retained = false;
@@ -136,7 +133,7 @@ internal sealed class McpRequestState : IDisposable
         return owner.ToolResult();
     }
 
-    /// <summary>Disposes payload owners before returning their complete memory and execution reservations.</summary>
+    /// <summary>Disposes payload owners and the replay body.</summary>
     public void Dispose()
     {
         if (disposed)
@@ -149,7 +146,17 @@ internal sealed class McpRequestState : IDisposable
             reply.Dispose();
         }
         body?.Dispose();
-        authentication = default;
-        admission.Dispose();
     }
+
+    private void RequireReplyBytes(int bytes)
+    {
+        ObjectDisposedException.ThrowIf(disposed, this);
+        if (bytes > MaximumReplyBytes)
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, McpFramingProtocol.FrameBudgetExceeded);
+        }
+    }
+
+    private static bool IsControlRoute(string route) => route is McpToolRoutes.MessagesComplete
+        or McpToolRoutes.SubscriptionsComplete or McpToolRoutes.AdminDispatch;
 }

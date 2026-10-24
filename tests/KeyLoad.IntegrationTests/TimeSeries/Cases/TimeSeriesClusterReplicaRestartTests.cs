@@ -67,7 +67,7 @@ internal sealed class TimeSeriesClusterReplicaRestartTests(ClusterFixture fixtur
             await ClusterReplicationTestSupport.EventuallyAsync(async () =>
             {
                 var status = await clients[selectedIndex].StatusAsync(deadline.Token);
-                return status.IsSuccess && status.Value!.RoutingReady;
+                return status.IsSuccess && status.Value.RoutingReady;
             }, deadline.Token);
             await Assert.That(Directory.Exists(Path.Combine(fixture.Root, stoppedNode))).IsTrue();
             var committed = ClusterReplicationTestSupport.Success(await clients[survivorIndex].CommitAsync(command, deadline.Token));
@@ -155,7 +155,7 @@ internal sealed class TimeSeriesClusterReplicaRestartTests(ClusterFixture fixtur
             await ClusterReplicationTestSupport.EventuallyAsync(async () =>
             {
                 var status = await clients[index].StatusAsync(recovery.Token);
-                return status.IsSuccess && status.Value!.RoutingReady;
+                return status.IsSuccess && status.Value.RoutingReady;
             }, recovery.Token);
         }
         catch (Exception recoveryFailure) when (ClusterReplicationTestSupport.IsNonFatalCleanupFailure(recoveryFailure))

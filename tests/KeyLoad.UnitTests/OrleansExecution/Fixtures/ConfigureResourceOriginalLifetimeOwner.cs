@@ -13,7 +13,7 @@ internal static class ConfigureResourceOriginalLifetimeOwner
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            await using var owner = new RequestWorkOwner(UnitRoutingOptions.Routing());
+            await using var owner = new RequestWorkOwner();
             token.ThrowIfCancellationRequested();
             await ServerFailureObserver.ObserveAsync(() => body(fixture, owner), failures);
         }, failures);

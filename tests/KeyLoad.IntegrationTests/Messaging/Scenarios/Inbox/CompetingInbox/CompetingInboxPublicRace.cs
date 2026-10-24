@@ -33,7 +33,7 @@ internal static class CompetingInboxPublicRace
             else
             {
                 await Assert.That(actual.IsSuccess != officialSuccess).IsTrue();
-                state.Winner = actual.IsSuccess ? actual.Value!
+                state.Winner = actual.IsSuccess ? actual.Value
                     : (await McpCallerAssertions.SuccessAsync<CommitReceipt>(other)).Value;
                 if (actual.IsSuccess)
                 {

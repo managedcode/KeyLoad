@@ -1,6 +1,6 @@
 # Bounded search and graph reads
 
-Public query, search, graph and bulk-read requests share the node's HTTP admission pool described in `command-admission.md`. That pool reserves modeled working bytes and verified tenant/principal request counts before executing the read. Inside a search or graph read, `ReadExecutionBudget` additionally enforces one deadline, cancellation token and cumulative raw-read byte budget across the whole storage cut.
+Public query, search, graph and bulk-read requests are not throttled by request count or reserved bytes ([ADR-145](../ADR/ADR-145-no-request-throttling.md)); the server-wide request body limit bounds their input. Inside a search or graph read, `ReadExecutionBudget` enforces one deadline, cancellation token and cumulative raw-read byte budget across the whole storage cut.
 
 The default cumulative budget is 64 MiB (`DatabaseLimits.MaxQueryReadBytes`) and the execution deadline is 30 seconds (`QueryDeadlineSeconds`). Accounting includes returned raw keys/values from scans and point reads. Vector sidecar scans charge their referenced canonical documents too; graph adjacency scans charge edge and vertex dereferences. Missing, hidden, stale and filtered records still consume the work needed to examine them. Text and vector branches share the same budget and the same authorized read gate. HTTP request cancellation reaches search and graph execution; checks occur between reads, scores, projections and text-token batches. An in-progress synchronous storage lock or serialization is not preempted.
 

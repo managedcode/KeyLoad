@@ -51,8 +51,10 @@ internal static class QueueDeadlineCapacityRefusal
             operation.CommandId)) + QueueDeadlineCapacityProtocol.ByteSeparator;
         var clock = Convert.ToHexString(KeySpace.ClockBytes) + QueueDeadlineCapacityProtocol.ByteSeparator;
         var applied = Convert.ToHexString(KeySpace.AppliedBytes) + QueueDeadlineCapacityProtocol.ByteSeparator;
+        var lastCommand = Convert.ToHexString(KeySpace.LastCommandBytes) + QueueDeadlineCapacityProtocol.ByteSeparator;
         return QueueWholeFlowStorage.Bytes(store).Where(row => !row.StartsWith(outcome, StringComparison.Ordinal)
             && !row.StartsWith(clock, StringComparison.Ordinal)
-            && !row.StartsWith(applied, StringComparison.Ordinal) && !row.StartsWith(locator, StringComparison.Ordinal)).ToArray();
+            && !row.StartsWith(applied, StringComparison.Ordinal) && !row.StartsWith(lastCommand, StringComparison.Ordinal)
+            && !row.StartsWith(locator, StringComparison.Ordinal)).ToArray();
     }
 }

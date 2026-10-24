@@ -1148,21 +1148,19 @@
     },
     {
       "suite": "unit",
-      "className": "KeyLoad.UnitTests.ResourceExecution.TenantAdmissionWholeFlowTests",
-      "methodName": "TenantBoundsRefusalCancellationReleaseReplayAndSameRootColdPreserveOriginalOutcomes",
-      "instanceName": "TenantBoundsRefusalCancellationReleaseReplayAndSameRootColdPreserveOriginalOutcomes",
+      "className": "KeyLoad.UnitTests.ResourceExecution.TenantShutdownWholeFlowTests",
+      "methodName": "OwnerShutdownCancelsSelectedWorkThenOriginalCommandReplayAndSameRootColdPreserveOutcome",
+      "instanceName": "OwnerShutdownCancelsSelectedWorkThenOriginalCommandReplayAndSameRootColdPreserveOutcome",
       "requirements": [
-        "REQ-RESOURCE-TENANT-001",
         "REQ-RESOURCE-TENANT-SHUTDOWN-001"
       ],
       "acceptance": [
-        "AC-RESOURCE-TENANT-001",
         "AC-RESOURCE-TENANT-SHUTDOWN-001"
       ],
       "executedModules": [
         "KeyLoad.Core"
       ],
-      "operationOutcomeAndState": "Actual bounded tenant/principal/node admission with fresh persisted principals and execution canonical commits; capacity and cancellation refusals preserve complete state/cuts/reservations, released leases admit healthy work, literal receipts/models and same-ID replay survive joined execution owner close and same-root cold continuation."
+      "operationOutcomeAndState": "Actual request-work owner shutdown cancels the selected command before effects, leaves the canonical store unchanged and joins; the original command then commits once with its exact receipt, replays without a second effect and survives same-root cold reopen."
     }
   ]
 }

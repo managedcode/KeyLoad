@@ -1,3 +1,4 @@
+using System.Text.Json;
 using ManagedCode.MCPGateway;
 using ManagedCode.MCPGateway.Abstractions;
 using Microsoft.Extensions.AI;
@@ -72,7 +73,7 @@ internal sealed class McpGatewayCatalogOwner : IAsyncDisposable
 
     internal async Task<McpGatewayInvokeResult> InvokeAsync(
         string toolId,
-        IReadOnlyDictionary<string, object?> arguments,
+        IReadOnlyDictionary<string, JsonElement> arguments,
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(arguments);

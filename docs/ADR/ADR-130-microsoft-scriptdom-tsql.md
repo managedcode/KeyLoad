@@ -8,7 +8,7 @@ Current integration: package 180.140.0 is centrally referenced and restored. syn
 
 SQL syntax is T-SQL parsed by Microsoft ScriptDOM. Use centrally pinned `Microsoft.SqlServer.TransactSql.ScriptDom` **180.140.0**, published on NuGet on 2026-10-12, under its original MIT license. The package includes a .NET8 asset usable by .NET10 and declares no runtime dependencies. Verify the actual restored package identity and API before compiling the adapter. SQL Server's standalone T-SQL grammar is the selected syntax target; other engine profiles are not selected.
 
-ScriptDOM owns lexical and syntactic parsing. KeyLoad owns a closed adapter from its AST to existing typed database plans, catalog binding, fresh persisted authorization, admission, cancellation, resource charging, connection-owned Orleans execution, node-local ZoneTree storage and acknowledgement from every configured copy. Parsing a statement does not mean KeyLoad can execute it. Valid unimplemented statements return the existing `UnsupportedCapability`; malformed syntax returns the existing bounded `Validation` diagnostic without raw SQL or parser messages.
+ScriptDOM owns lexical and syntactic parsing. KeyLoad owns a closed adapter from its AST to existing typed database plans, catalog binding, fresh persisted authorization, cancellation, resource charging, connection-owned Orleans execution, node-local ZoneTree storage and acknowledgement from every configured copy. Parsing a statement does not mean KeyLoad can execute it. Valid unimplemented statements return the existing `UnsupportedCapability`; malformed syntax returns the existing bounded `Validation` diagnostic without raw SQL or parser messages.
 
 There is no handwritten-parser fallback, syntax-rewriting compatibility or persisted-data migration. Operation tests express their scenarios in the selected language and keep their state, authority, receipt, cancellation, recovery and fault assertions.
 
@@ -35,7 +35,7 @@ flowchart LR
 
 ## Resource and cancellation contract
 
-Retain the original UTF8 source, token, depth, parameter, examined-record, read-byte, result, memory, deadline and admission limits. ScriptDOM is synchronous: its `Parse(TextReader)` tokenizes before parsing the token collection. A cancellation-aware reader covers lexing only. Verify a bounded read-only token-list access boundary against the restored parser so its accesses also observe the original cancellation and budget; gate structural depth before parsing and bound AST lowering. Check the original token before and after each owned phase and join parser work before returning cancellation. Do not abandon a task/thread or invent hard preemption. Input limits and runtime cancellation/resource proof remain acceptance requirements.
+Retain the original UTF8 source, token, depth, parameter, examined-record, read-byte, result, memory and deadline limits. ScriptDOM is synchronous: its `Parse(TextReader)` tokenizes before parsing the token collection. A cancellation-aware reader covers lexing only. Verify a bounded read-only token-list access boundary against the restored parser so its accesses also observe the original cancellation and budget; gate structural depth before parsing and bound AST lowering. Check the original token before and after each owned phase and join parser work before returning cancellation. Do not abandon a task/thread or invent hard preemption. Input limits and runtime cancellation/resource proof remain acceptance requirements.
 
 ## Alternatives and risks
 

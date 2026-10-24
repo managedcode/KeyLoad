@@ -34,18 +34,12 @@ internal static class ClusterFixtureDatabaseLimits
         Set(node, nameof(DatabaseLimits.MaxBatchBytes), limits.MaxBatchBytes);
         Set(node, nameof(DatabaseLimits.MaxScanRecords), limits.MaxScanRecords);
         Set(node, nameof(DatabaseLimits.MaxResults), limits.MaxResults);
-        Set(node, nameof(DatabaseLimits.WriterQueueCapacity), limits.WriterQueueCapacity);
-        Set(node, nameof(DatabaseLimits.MaxConcurrentQueries), limits.MaxConcurrentQueries);
         Set(node, nameof(DatabaseLimits.MaxQueryBytes), limits.MaxQueryBytes);
         Set(node, nameof(DatabaseLimits.MaxQueryDepth), limits.MaxQueryDepth);
         Set(node, nameof(DatabaseLimits.MaxQueryTokens), limits.MaxQueryTokens);
         Set(node, nameof(DatabaseLimits.QueryDeadlineSeconds), limits.QueryDeadlineSeconds);
         Set(node, nameof(DatabaseLimits.MaxQueryReadBytes), limits.MaxQueryReadBytes);
         Set(node, nameof(DatabaseLimits.MaxSearchTextTokens), limits.MaxSearchTextTokens);
-        Set(node, nameof(DatabaseLimits.MaxOutboxRecords), limits.MaxOutboxRecords);
-        Set(node, nameof(DatabaseLimits.MaxOutboxBytes), limits.MaxOutboxBytes);
-        Set(node, nameof(DatabaseLimits.ReservedOutboxRecords), limits.ReservedOutboxRecords);
-        Set(node, nameof(DatabaseLimits.ReservedOutboxBytes), limits.ReservedOutboxBytes);
         Set(node, nameof(DatabaseLimits.MaxProjectionConsumers), limits.MaxProjectionConsumers);
         Set(node, nameof(DatabaseLimits.MaxProjectionBatchBytes), limits.MaxProjectionBatchBytes);
     }

@@ -32,9 +32,7 @@ internal sealed class ResourcePairBindingState(TestDatabase source, ResourcePair
     internal const string LifetimeSpace = "resource-lifetime";
     internal const string DocumentJson = """{ "amount": 17, "raw": "\u0061" }""";
     internal const string EventJson = """{"kind":"Created","amount":17}""";
-    internal const string StoredEventJson = """{"amount":17,"kind":"Created"}""";
     internal const string QueueJson = """{"job":"pair","amount":17}""";
-    internal const string StoredQueueJson = """{"amount":17,"job":"pair"}""";
     internal const string EventType = "Created";
     internal const string Headers = "{}";
     internal const string PutKind = "putDocument";

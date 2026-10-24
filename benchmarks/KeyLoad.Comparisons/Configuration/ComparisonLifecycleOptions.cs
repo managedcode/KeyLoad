@@ -21,7 +21,7 @@ public sealed class ComparisonLifecycleOptions
     private const int DiagnosticSeconds = 2;
     private const int ReceiptSeconds = 3;
     private const int ProbeExpiryMinutes = 2;
-    private const int Neo4jCleanupSeconds = 15;
+    private const int Neo4jCleanupSeconds = 600;
     private const int MongoCleanupSeconds = 15;
     private const int QdrantCleanupSeconds = 10;
     private const int OpenSearchCleanupSeconds = 10;

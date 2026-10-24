@@ -1,3 +1,5 @@
+using System.Text.Json;
+
 namespace KeyLoad.Server;
 
 /// <summary>Owned bounded arguments for one gateway meta operation.</summary>
@@ -9,4 +11,4 @@ internal sealed record McpGatewayMetaRequest(
     int ToolsPerCategory = McpGatewayMetaProtocol.DefaultRouteLimit,
     bool? PreferReadOnly = null,
     string? ToolId = null,
-    IReadOnlyDictionary<string, object?>? Arguments = null);
+    IReadOnlyDictionary<string, JsonElement>? Arguments = null);

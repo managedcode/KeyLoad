@@ -26,7 +26,7 @@ internal static class GraphSearchClusterSurvivorReadiness
             var selectedIndex = survivors[0];
             var probe = await administrators[selectedIndex].GetAsync(
                 new(scenario.Partition, GraphSearchClusterScenario.Projects, GraphSearchClusterScenario.SecondSeed), token);
-            if (!probe.IsSuccess && probe.Problem?.ErrorCode == nameof(ErrorCode.OwnershipLost))
+            if (probe.IsFailed && probe.Problem.ErrorCode == nameof(ErrorCode.OwnershipLost))
             {
                 return false;
             }

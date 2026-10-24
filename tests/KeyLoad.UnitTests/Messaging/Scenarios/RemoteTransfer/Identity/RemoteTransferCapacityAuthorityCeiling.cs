@@ -85,9 +85,10 @@ internal static class RemoteTransferCapacityAuthorityCeiling
         var locator = Convert.ToHexString(KeySpace.OutcomeLocator(fixture.SourcePartition, RemoteTransferDatabase.RootPrincipal, id)) + ":";
         var clock = Convert.ToHexString(KeySpace.ClockBytes) + ":";
         var applied = Convert.ToHexString(KeySpace.AppliedBytes) + ":";
+        var lastCommand = Convert.ToHexString(KeySpace.LastCommandBytes) + ":";
         return RemoteTransferCapacityAuthorityStorage.Capture(fixture).Where(row => !row.StartsWith(outcome, StringComparison.Ordinal)
             && !row.StartsWith(locator, StringComparison.Ordinal) && !row.StartsWith(clock, StringComparison.Ordinal)
-            && !row.StartsWith(applied, StringComparison.Ordinal)).ToArray();
+            && !row.StartsWith(applied, StringComparison.Ordinal) && !row.StartsWith(lastCommand, StringComparison.Ordinal)).ToArray();
     }
 
     private static async Task RequireLocatorAsync(RemoteTransferDatabase fixture, Guid id)

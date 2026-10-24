@@ -11,7 +11,6 @@ namespace KeyLoad.Comparisons.Targets;
 /// <param name="lifecycleOptions">Centrally validated execution lifecycle policy.</param>
 /// <param name="runtimeExecutionOptions">Centrally validated execution adapter execution policy.</param>
 /// <param name="diagnosticOptions">Centrally validated privacy-preserving diagnostic bounds.</param>
-/// <param name="admissionOptions">Centrally validated isolated node and observer admission profile.</param>
 /// <param name="clientOptions">Centrally validated SDK transport budget.</param>
 /// <param name="translationOptions">Centrally validated SDK expression budgets.</param>
 /// <param name="image">Optional database image reference included in the initial target profile.</param>
@@ -21,7 +20,7 @@ namespace KeyLoad.Comparisons.Targets;
 public sealed partial class KeyLoadTarget(HttpClient http, string apiKey, string runId,
     IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<ComparisonExecutionOptions> runtimeExecutionOptions,
     IOptions<ComparisonDiagnosticOptions> diagnosticOptions,
-    IOptions<IsolatedKeyLoadAdmissionOptions> admissionOptions, IOptions<KeyLoadClientExecutionOptions> clientOptions,
+    IOptions<KeyLoadClientExecutionOptions> clientOptions,
     IOptions<QueryTranslationOptions> translationOptions, string? image = null,
     HttpClient[]? peers = null, int expectedNodes = KeyLoadTarget.ExpectedNodesDefault, TimeProvider? provider = null) : IDocumentComparisonTarget
 {
@@ -45,7 +44,6 @@ public sealed partial class KeyLoadTarget(HttpClient http, string apiKey, string
 
     private readonly ComparisonExecutionOptions execution = ComparisonExecutionOptions.Require(runtimeExecutionOptions).Value;
 
-    private readonly IOptions<HttpAdmissionLimits> httpAdmissionOptions = IsolatedKeyLoadAdmissionOptions.CreateHttpOptions(admissionOptions);
     private const string TransactionDomainId = "shared";
     private readonly ComparisonLifecycleOptions lifecycle = lifecycleOptions.Value;
     private readonly int expectedNodeCount = KeyLoadTopologyProfile.ValidateExpectedNodes(expectedNodes);
@@ -58,11 +56,6 @@ public sealed partial class KeyLoadTarget(HttpClient http, string apiKey, string
     private VectorSpace space = null!;
     private int topK;
     private int graphDepth, graphVertices, graphEdges, expectedCorpusCount;
-    private string[] admissionObservations = [];
-    internal bool RequireIsolatedAdmission
-    {
-        get; init;
-    }
     /// <summary>Gets the declared copy acknowledgement, durability, API and authorization contract before runtime observation.</summary>
     public TargetProfile Profile { get; private set; } = KeyLoadTopologyProfile.CreateProfile(expectedNodes, image);
     /// <summary>Reports support for document, vector, queue, graph, and event-stream comparison scenarios.</summary>
@@ -78,8 +71,6 @@ public sealed partial class KeyLoadTarget(HttpClient http, string apiKey, string
     public async Task InitializeAsync(IComparisonCorpus dataset, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(dataset);
-        admissionObservations = await KeyLoadAdmissionObserver.ObserveAsync(RequireIsolatedAdmission,
-            peerClients, credential, clientOptions, httpAdmissionOptions, cancellationToken).ConfigureAwait(false);
         var status = KeyLoadClientResults.Success(await client.StatusAsync(cancellationToken), InitializeAsyncStatusText);
         if (status.SiloCount != expectedNodeCount || status.ReplicaCount != expectedNodeCount ||
             status.Durability != DurabilityProfile.ProcessDurable)

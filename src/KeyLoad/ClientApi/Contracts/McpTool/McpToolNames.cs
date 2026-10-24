@@ -36,7 +36,6 @@ internal static class McpToolNames
     internal const string SearchExecute = "keyload_search_execute";
     internal const string SearchGraph = "keyload_search_graph";
     internal const string AdminBackup = "keyload_admin_backup";
-    internal const string AdminAdmission = "keyload_admin_admission";
     internal const string AdminStatus = "keyload_admin_status";
     internal const string DocumentsCommit = "keyload_documents_commit";
     internal const string SearchAnnMaintain = AnnMaintenanceProtocol.ToolName;

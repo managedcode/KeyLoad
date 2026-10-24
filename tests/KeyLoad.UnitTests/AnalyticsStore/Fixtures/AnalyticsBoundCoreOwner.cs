@@ -16,7 +16,7 @@ internal static class AnalyticsBoundCoreOwner
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            await using var owner = new RequestWorkOwner(UnitRoutingOptions.Routing());
+            await using var owner = new RequestWorkOwner();
             await ServerFailureObserver.ObserveAsync(() => body(fixture, owner, token), failures);
         }, failures);
         ServerFailureObserver.ThrowIfAny(failures);

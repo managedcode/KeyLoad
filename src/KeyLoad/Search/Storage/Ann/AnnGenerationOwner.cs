@@ -27,7 +27,7 @@ internal sealed class AnnGenerationOwner : IAsyncDisposable
     private Task? disposal;
 
     internal AnnGenerationOwner(AnnRootLease root, IOptions<AnnExecutionOptions> configured,
-        IOptions<PackedAnnOptions> policy, IOptions<PackedAnnStorageOptions> storage, int maximumReaders)
+        IOptions<PackedAnnOptions> policy, IOptions<PackedAnnStorageOptions> storage)
     {
         this.root = root;
         stages = new(root, configured, policy, storage);
@@ -35,14 +35,10 @@ internal sealed class AnnGenerationOwner : IAsyncDisposable
         options.Validate();
         policy.Value.Validate();
         storage.Value.Validate();
-        if (maximumReaders <= Empty)
-        {
-            throw Errors.Fail(ErrorCode.Validation, AnnProtocol.Bound);
-        }
         this.policy = policy;
         this.storage = storage;
         configuredOptions = configured;
-        readLifetime = new(gate, maximumReaders);
+        readLifetime = new(gate);
         MaintenanceMemory = new(gate, slots, configured, publicReads);
     }
 

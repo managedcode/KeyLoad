@@ -45,7 +45,7 @@ flowchart LR
 | [Authorization](Features/Authorization.md) | Persisted credentials and grants, row and field policy, policy epochs |
 | [ClientApi](Features/ClientApi.md) | .NET SDK, CLI and the official MCP server with on-demand tool discovery |
 | [AdminDashboard](Features/AdminDashboard.md) | Read-only admin console |
-| [ResourceExecution](Features/ResourceExecution.md) | Bounded work, memory, admission and telemetry |
+| [ResourceExecution](Features/ResourceExecution.md) | Per-operation data bounds, memory, resource lifetimes and telemetry; no request throttling |
 | [CodeQuality](Features/CodeQuality.md) | Analyzers, formatting, maintainability limits and functional coverage |
 | [TestInfrastructure](Features/TestInfrastructure.md) | TUnit with Aspire-owned Docker clusters, real .NET SDK and official MCP clients |
 | [BenchmarkComparisons](Features/BenchmarkComparisons.md) | Equal-workload comparisons with other databases; published figures only from GitHub Actions JSON |
@@ -57,6 +57,6 @@ flowchart LR
 - [ADR index](ADR/README.md): every architecture decision. *Accepted* means the decision is in force; implementation and qualification are tracked in the feature specs.
 - [Current status](implementation/status.json): a short record of the product state and the open qualification gates.
 - [Durability audit](implementation/durability-audit.md) and [benchmark principles](implementation/comparative-benchmarks.md).
-- Designs: [Q1 queries](design/query-q1.md), [command admission](design/command-admission.md), [bounded reads](design/bounded-reads.md), [change feeds](design/change-feeds.md).
+- Designs: [Q1 queries](design/query-q1.md), [bounded reads](design/bounded-reads.md), [change feeds](design/change-feeds.md).
 
 Qualification evidence comes only from GitHub Actions runs and their original artifacts for the exact source. A document review proves no speed, power-loss durability, coverage or production readiness.

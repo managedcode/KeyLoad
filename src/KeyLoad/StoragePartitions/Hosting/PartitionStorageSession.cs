@@ -29,7 +29,7 @@ internal sealed class PartitionStorageSession : ISharedDatabaseSession, IAsyncDi
     }
 
     internal async Task OpenAsync(ServerRuntimeOptions options, IAuthorizationPolicy authorization,
-        CommandAdmissionGovernor admission, TimeProvider clock, ILogger<PartitionHost> logger,
+        TimeProvider clock, ILogger<PartitionHost> logger,
         IGrainFactory grains, IServiceScopeFactory? scopeFactory, PartitionStorageOwnerContext context)
     {
         ownerContext = context;
@@ -38,8 +38,8 @@ internal sealed class PartitionStorageSession : ISharedDatabaseSession, IAsyncDi
         {
             throw new InvalidOperationException(OwnerContextRequired);
         }
-        host = await PartitionHost.OpenAsync(options, authorization, admission, clock, logger, grains, ownership);
-        work = new(options.GrainRouting);
+        host = await PartitionHost.OpenAsync(options, authorization, clock, logger, grains, ownership);
+        work = new();
         if (scopeFactory is not null)
         {
             scope = scopeFactory.CreateAsyncScope();
@@ -106,12 +106,6 @@ internal sealed class PartitionStorageSession : ISharedDatabaseSession, IAsyncDi
 
     public Task<NodeStatus> ReadStatusAsync(CancellationToken cancellationToken)
         => Services.GetRequiredService<INodeAdministration>().StatusAsync(cancellationToken);
-
-    public Task<NodeAdmissionStatus> ReadAdmissionAsync(CancellationToken cancellationToken)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-        return Task.FromResult(Services.GetRequiredService<INodeAdministration>().Admission());
-    }
 
     public Task<AdminNodeSnapshot> ReadDashboardAsync(CancellationToken cancellationToken)
         => Services.GetRequiredService<INodeAdministration>().DashboardAsync(cancellationToken);

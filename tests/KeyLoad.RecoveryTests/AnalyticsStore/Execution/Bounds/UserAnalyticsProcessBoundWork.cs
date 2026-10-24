@@ -3,7 +3,6 @@ using KeyLoad.Core;
 using KeyLoad.Core.ResourceExecution;
 using KeyLoad.RecoveryTests.ResourceExecution;
 using KeyLoad.Server;
-using Microsoft.Extensions.Options;
 
 namespace KeyLoad.RecoveryTests.AnalyticsStore;
 
@@ -12,12 +11,12 @@ internal sealed class UserAnalyticsProcessBoundWork : IAsyncDisposable
 {
     private readonly RequestWorkOwner owner;
 
-    private UserAnalyticsProcessBoundWork(IOptions<GrainRoutingOptions> routing)
-        => owner = new RequestWorkOwner(routing);
+    private UserAnalyticsProcessBoundWork()
+        => owner = new RequestWorkOwner();
 
-    internal static async Task<UserAnalyticsProcessBoundWork> OpenAsync(IOptions<GrainRoutingOptions> routing, CancellationToken token)
+    internal static async Task<UserAnalyticsProcessBoundWork> OpenAsync(CancellationToken token)
     {
-        var work = new UserAnalyticsProcessBoundWork(routing);
+        var work = new UserAnalyticsProcessBoundWork();
         try
         {
             token.ThrowIfCancellationRequested();

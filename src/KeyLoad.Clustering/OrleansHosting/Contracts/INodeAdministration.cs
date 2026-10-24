@@ -13,10 +13,6 @@ public interface INodeAdministration
     /// <returns>Backup identifier and materialized cut.</returns>
     Task<BackupReceipt> BackupAsync(CancellationToken cancellationToken);
 
-    /// <summary>Read bounded command and HTTP admission diagnostics for this node.</summary>
-    /// <returns>Configured limits and current counters.</returns>
-    NodeAdmissionStatus Admission();
-
     /// <summary>Read this node's replica, materialization and routing status.</summary>
     /// <param name="cancellationToken">Cancellation of status acquisition.</param>
     /// <returns>The actual physical node's identity and status.</returns>

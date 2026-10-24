@@ -1,6 +1,5 @@
 using System.Runtime.CompilerServices;
 using KeyLoad.Core;
-using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server.Search;
 
@@ -12,8 +11,7 @@ internal static class TextOnlineReaderLedger
         (TextOnlineGenerationPin Pin, TextResourceReservation Grant, bool IndexExited)> Admit(
         Dictionary<TextSelectedProjectionLease,
             (TextOnlineGenerationPin Pin, TextResourceReservation Grant, bool IndexExited)>? readers,
-        ReadExecutionBudget budget, TextSelectedProjectionLease reader,
-        IOptions<TextExecutionOptions> options)
+        ReadExecutionBudget budget, TextSelectedProjectionLease reader)
     {
         budget.Check();
         if (readers?.ContainsKey(reader) == true)
@@ -28,6 +26,6 @@ internal static class TextOnlineReaderLedger
             + (long)ReferenceLedgerCapacity * (sizeof(int)
             + Unsafe.SizeOf<(int Hash, int Next, TextSelectedProjectionLease Reader,
                 TextOnlineGenerationPin Pin, TextResourceReservation Grant, bool IndexExited)>())));
-        return new(options.Value.MaximumActiveLeases, ReferenceEqualityComparer.Instance);
+        return new(ReferenceEqualityComparer.Instance);
     }
 }

@@ -36,7 +36,6 @@ internal static class McpToolRoutes
     internal const string SearchExecute = ApiRoutes.Search;
     internal const string SearchGraph = "/search/graph";
     internal const string AdminBackup = ApiRoutes.AdminBackup;
-    internal const string AdminAdmission = ApiRoutes.AdmissionStatus;
     internal const string AdminStatus = ApiRoutes.Status;
     internal const string DocumentsCommit = ApiRoutes.Commands;
     internal const string SearchAnnMaintain = AnnMaintenanceProtocol.Route;

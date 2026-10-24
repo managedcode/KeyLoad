@@ -30,12 +30,12 @@ internal static class ModelHeadAuthorityOperations
         {
             var source = fixture.Source;
             var expected = new AggregateReplayPage(source, new(2L, 1L, 1L), null,
-                [new(source, 1L, 1L, new("created", "Created", ModelHeadAuthorityFixture.StoredPayload("first"), ModelHeadAuthorityFixture.StoredHeaders), ModelHeadAuthorityFixture.Epoch),
-                 new(source, 2L, 2L, new("paid", "Paid", ModelHeadAuthorityFixture.StoredPayload("second"), ModelHeadAuthorityFixture.StoredHeaders), ModelHeadAuthorityFixture.Epoch)], store.Position);
+                [new(source, 1L, 1L, new("created", "Created", ModelHeadAuthorityFixture.Payload("first"), ModelHeadAuthorityFixture.Headers), ModelHeadAuthorityFixture.Epoch),
+                 new(source, 2L, 2L, new("paid", "Paid", ModelHeadAuthorityFixture.Payload("second"), ModelHeadAuthorityFixture.Headers), ModelHeadAuthorityFixture.Epoch)], store.Position);
             await EqualAsync(database.ReadAggregateReplay("root", new(source, "model-head", FromBeginning: true, MaximumEvents: 2), token), expected);
             await EqualAsync(database.InspectMessage("root", new(fixture.Harness.Partition, ModelHeadAuthorityFixture.Queue), "ready"),
                 new MessageInspection(new("ready", MessageState.Ready, 0, 1L, 1L, ModelHeadAuthorityFixture.Epoch, null),
-                    ModelHeadAuthorityFixture.StoredPayload("queue"), ModelHeadAuthorityFixture.StoredHeaders));
+                    ModelHeadAuthorityFixture.Payload("queue"), ModelHeadAuthorityFixture.Headers));
         });
     internal static async Task RefuseAsync(DatabaseEngine database, ZoneTreeStore store, PartitionRef partition,
         string subject, ErrorCode code, string detail, long generation, CancellationToken token)

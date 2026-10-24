@@ -17,7 +17,7 @@ internal sealed class McpSessionPipeline(HttpContext context, McpRequestState st
         var tool = request?.Method == RequestMethods.ToolsCall;
         try
         {
-            state.Admit(tool ? McpGatewayMetaArgumentReader.Select(request!) : default, cancellationToken);
+            state.Admit(tool ? McpGatewayMetaArgumentReader.Select(request!) : default);
         }
         catch (KeyLoadException error)
         {

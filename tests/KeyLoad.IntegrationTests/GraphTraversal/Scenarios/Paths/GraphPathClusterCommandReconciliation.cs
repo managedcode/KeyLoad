@@ -9,7 +9,7 @@ internal static class GraphPathClusterCommandReconciliation
         CancellationToken cancellationToken)
     {
         var observed = await administrator.CommitAsync(command, cancellationToken).ConfigureAwait(false);
-        if (!observed.IsSuccess && observed.Problem?.ErrorCode == nameof(ErrorCode.UnknownWriteOutcome))
+        if (observed.IsFailed && observed.Problem.ErrorCode == nameof(ErrorCode.UnknownWriteOutcome))
         {
             cancellationToken.ThrowIfCancellationRequested();
             observed = await administrator.CommitAsync(command, cancellationToken).ConfigureAwait(false);

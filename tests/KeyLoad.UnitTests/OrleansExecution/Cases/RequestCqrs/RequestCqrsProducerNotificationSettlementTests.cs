@@ -1,5 +1,4 @@
 using KeyLoad.Clustering;
-using Microsoft.Extensions.Options;
 
 namespace KeyLoad.UnitTests.OrleansExecution;
 
@@ -9,7 +8,7 @@ internal sealed class RequestCqrsProducerNotificationSettlementTests
     [Test]
     public async Task AwaitedOriginalSettlementKeepsExactProducerLeaseUntilNotificationJoins()
     {
-        await using var owner = new RequestWorkOwner(Options.Create(new GrainRoutingOptions()));
+        await using var owner = new RequestWorkOwner();
         var lease = owner.Acquire(Guid.NewGuid(), RequestWorkKind.RequestProducer);
         var arrived = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var release = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -41,7 +40,7 @@ internal sealed class RequestCqrsProducerNotificationSettlementTests
     [Test]
     public async Task OriginalFailureAndAwaitedNotificationFailureRemainExactBeforeLeaseRelease()
     {
-        await using var owner = new RequestWorkOwner(Options.Create(new GrainRoutingOptions()));
+        await using var owner = new RequestWorkOwner();
         var lease = owner.Acquire(Guid.NewGuid(), RequestWorkKind.RequestProducer);
         var primary = new IOException("original-producer");
         var notification = new IOException("original-notification");

@@ -21,9 +21,9 @@ internal static class BudgetedQueueReceiveOutcomeAssertions
         await Assert.That(appended.Value!.Kind).IsEqualTo(operation.Value!.Kind);
         await Assert.That(appended.UserId!).IsEqualTo(operation.UserId!);
         await Assert.That(appended.Value!.Input.Span.SequenceEqual(operation.Value!.Input.Span)).IsTrue();
-        await Assert.That(delivery.HeadersJson).IsEqualTo(P.CanonicalHeaders);
+        await Assert.That(delivery.HeadersJson).IsEqualTo(P.Headers);
         var expected = new ReceiveResult(operation.CommandId,
-            [new(messageId, P.Payload, P.CanonicalHeaders, delivery.Token, P.Initial,
+            [new(messageId, P.Payload, P.Headers, delivery.Token, P.Initial,
                 new DateTimeOffset(appended.Timestamp).AddSeconds(fixture.Resource.QueuePolicy.MaxLeaseSeconds),
                 (int)P.Initial, P.Initial)],
             new(fixture.Database.Store.Identity.Incarnation, fixture.Database.Partition.AtomicPartitionId,

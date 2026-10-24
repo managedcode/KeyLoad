@@ -46,7 +46,7 @@ internal static class RequestCqrsTextMaintenanceFlow
         ReadOnlyMemory<byte> final = default;
         Exception? failure = null;
         var stream = CqrsStreamLifetime.RunWithPurpose(
-            execution => RequestCqrsTextProducer.Run(id, payload, fault, producer, fixture.RoutingOptions.Value.MaximumTotalFrames, execution),
+            execution => RequestCqrsTextProducer.Run(id, payload, fault, producer, fixture.RoutingOptions.Value.MaximumStreamFrames, execution),
             fixture.Services.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>(),
             id, fixture.Clock, producer.MarkActivationSettled, fixture.RoutingOptions, null, purpose, token);
         try

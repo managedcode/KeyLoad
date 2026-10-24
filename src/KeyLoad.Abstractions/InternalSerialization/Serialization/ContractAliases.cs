@@ -35,8 +35,6 @@ internal static class ContractAliases
     internal const string AstQueryRequest = "keyload.contract.ast-query-request";
     internal const string BackupReceipt = "keyload.contract.backup-receipt";
     internal const string ChangeFeedPage = "keyload.contract.change-feed-page";
-    internal const string CommandAdmissionLimits = "keyload.contract.command-admission-limits";
-    internal const string CommandAdmissionSnapshot = "keyload.contract.command-admission-snapshot";
     internal const string CommandOutcome = "keyload.contract.command-outcome";
     internal const string CommandRequest = "keyload.contract.command-request";
     internal const string CommitProjectionBatchRequest = "keyload.contract.commit-projection-batch-request";
@@ -73,8 +71,6 @@ internal static class ContractAliases
     internal const string GetOutboxStatusRequest = "keyload.contract.get-outbox-status-request";
     internal const string GetSubscriptionRequest = "keyload.contract.get-subscription-request";
     internal const string GraphTraversal = "keyload.contract.graph-traversal";
-    internal const string HttpAdmissionLimits = "keyload.contract.http-admission-limits";
-    internal const string HttpAdmissionStatus = "keyload.contract.http-admission-status";
     internal const string InPredicate = "keyload.contract.in-predicate";
     internal const string InnerJoinClause = "keyload.contract.inner-join-clause";
     internal const string IndexDefinition = "keyload.contract.index-definition";
@@ -91,7 +87,6 @@ internal static class ContractAliases
     internal const string Mutation = "keyload.contract.mutation";
     internal const string MutationReceipt = "keyload.contract.mutation-receipt";
     internal const string Negation = "keyload.contract.negation";
-    internal const string NodeAdmissionStatus = "keyload.contract.node-admission-status";
     internal const string NodeStatus = "keyload.contract.node-status";
     internal const string NullTest = "keyload.contract.null-test";
     internal const string Operand = "keyload.contract.operand";

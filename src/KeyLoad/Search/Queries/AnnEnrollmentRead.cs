@@ -20,7 +20,7 @@ internal static class AnnEnrollmentRead
         AnnProjectionEnrollment? result = null;
         try
         {
-            using var operation = admissions.Enter(configured.GrainRouting.Value.MaximumRequestProducers);
+            using var operation = admissions.Enter();
             try
             {
                 AnnMaintenanceAdmission.Request(original, original.CommandId, database.Store.Identity.NodeId);
@@ -83,8 +83,7 @@ internal static class AnnEnrollmentRead
                     : database.ReadProjectionMaintenanceEligibilityBound(original.Consumer, original.IndexGeneration, read, binding);
                 RequireReservation(current, fresh, original);
                 if (current.MaintenanceAuthority != eligible.MaintenanceAuthority
-                    || current.Checkpoint != eligible.Checkpoint
-                    || current.LastProgressReservationCut != eligible.LastProgressReservationCut)
+                    || current.Checkpoint != eligible.Checkpoint)
                 {
                     throw Errors.Fail(ErrorCode.TokenInvalidated, AnnProtocol.InvalidSource);
                 }

@@ -10,7 +10,6 @@ namespace KeyLoad.ComparisonHost.BenchmarkComparisons;
 /// <summary>Owns only one execution target and tracks partial HTTP construction until ownership transfers.</summary>
 internal sealed class IsolatedHostTargetOwner(IOptions<ComparisonExecutionOptions> executionOptions,
     IOptions<ComparisonDiagnosticOptions> diagnosticOptions,
-    IOptions<IsolatedKeyLoadAdmissionOptions> admissionOptions,
     IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<KeyLoadClientExecutionOptions> clientOptions, IOptions<QueryTranslationOptions> translationOptions, TimeProvider? provider = null) : IAsyncDisposable
 {
     private const string ExternalImageRequired = "An external database comparison requires its configured container image.";
@@ -20,6 +19,7 @@ internal sealed class IsolatedHostTargetOwner(IOptions<ComparisonExecutionOption
     private ComparisonExecutionOptions Policy => execution.Value;
     internal IOptions<ComparisonExecutionOptions> ExecutionOptions => execution;
     private readonly List<HttpClient> unownedClients = [];
+    private readonly List<SocketsHttpHandler> clientHandlers = [];
     private IComparisonTarget? target;
 
     internal TargetProfile? ObservedProfile => target?.Profile;
@@ -56,7 +56,7 @@ internal sealed class IsolatedHostTargetOwner(IOptions<ComparisonExecutionOption
             IsolatedHostConstants.Rabbit => new RabbitTarget(execution.Connection!, settings.RunId, RequireExternalImage(execution), lifecycleOptions, topology, CreateClient(execution, PrimaryEndpointIndex), provider: Clock),
             IsolatedHostConstants.Redis => new RedisTarget(execution.Connection!, settings.RunId, RequireExternalImage(execution), lifecycleOptions, executionOptions, diagnostics, topology, [.. execution.Replicas], provider: Clock),
             IsolatedHostConstants.Neo4j => new Neo4jTarget(CreateClient(execution, PrimaryEndpointIndex), settings.RunId, RequireExternalImage(execution), lifecycleOptions, executionOptions, provider: Clock),
-            IsolatedHostConstants.Mongo => new MongoTarget(execution.Connection!, settings.RunId, RequireExternalImage(execution), topology, lifecycleOptions, executionOptions, provider: Clock),
+            IsolatedHostConstants.Mongo => new MongoTarget(execution.Connection!, execution.Endpoints, settings.RunId, RequireExternalImage(execution), topology, lifecycleOptions, executionOptions, provider: Clock),
             IsolatedHostConstants.OpenSearch => new OpenSearchTarget(CreateClient(execution, PrimaryEndpointIndex), settings.RunId, RequireExternalImage(execution), topology, lifecycleOptions, executionOptions, provider: Clock),
             IsolatedHostConstants.Kurrent => new KurrentTarget(execution.Connection!, CreateClients(execution), settings.RunId, RequireExternalImage(execution), topology, lifecycleOptions, diagnostics, provider: Clock),
             _ => throw new InvalidOperationException(IsolatedHostConstants.Failure)
@@ -73,10 +73,7 @@ internal sealed class IsolatedHostTargetOwner(IOptions<ComparisonExecutionOption
         const int ClientsFirstIndex = 0;
 
         var clients = CreateClients(execution);
-        return new(clients[ClientsFirstIndex], execution.AdminKey!, settings.RunId, lifecycleOptions, executionOptions, diagnostics, admissionOptions, clientOptions, translationOptions, execution.Image, clients, settings.Selection.NodeCount, provider: Clock)
-        {
-            RequireIsolatedAdmission = true
-        };
+        return new(clients[ClientsFirstIndex], execution.AdminKey!, settings.RunId, lifecycleOptions, executionOptions, diagnostics, clientOptions, translationOptions, execution.Image, clients, settings.Selection.NodeCount, provider: Clock);
     }
 
     private QdrantTarget CreateQdrant(IsolatedHostSettings settings, RuntimeIsolatedHostSettings execution)
@@ -101,7 +98,16 @@ internal sealed class IsolatedHostTargetOwner(IOptions<ComparisonExecutionOption
 
     private HttpClient CreateClient(RuntimeIsolatedHostSettings execution, int index)
     {
-        var client = new HttpClient { BaseAddress = execution.Endpoints[index], Timeout = Timeout.InfiniteTimeSpan };
+        var handler = new SocketsHttpHandler
+        {
+            MaxResponseHeadersLength = this.execution.Value.DocumentClientMaxResponseHeadersKilobytes
+        };
+        clientHandlers.Add(handler);
+        var client = new HttpClient(handler, disposeHandler: false)
+        {
+            BaseAddress = execution.Endpoints[index],
+            Timeout = Timeout.InfiniteTimeSpan
+        };
         unownedClients.Add(client);
         if (execution.User is not null)
         {
@@ -134,6 +140,11 @@ internal sealed class IsolatedHostTargetOwner(IOptions<ComparisonExecutionOption
                 client.Dispose();
             }
             unownedClients.Clear();
+            foreach (var handler in clientHandlers)
+            {
+                handler.Dispose();
+            }
+            clientHandlers.Clear();
         }
     }
 

@@ -31,10 +31,10 @@ internal static class HeavyDocumentLoadReadback
         await Assert.That(receipt.Mutations[0].Id).IsEqualTo(HeavyDocumentLoadProtocol.Id(ordinal));
         await Assert.That(receipt.Mutations[0].Revision).IsEqualTo(HeavyDocumentLoadProtocol.CreatedRevision);
     }
-    internal static async Task VerifySentinelAsync(DocumentResult? actual, PartitionRef partition)
+    internal static async Task VerifySentinelAsync(DocumentResult? actual, McpDocumentScenario source)
     {
         await Assert.That(actual).IsNotNull();
-        await Assert.That(actual!.Reference).IsEqualTo(Sentinel(partition));
+        await Assert.That(actual!.Reference).IsEqualTo(Sentinel(source.Partition) with { Lifetime = source.Lifetime });
         await Assert.That(actual.Revision).IsEqualTo(HeavyDocumentLoadProtocol.CreatedRevision);
         await Assert.That(actual.Json).IsEqualTo(HeavyDocumentLoadProtocol.Json(0));
     }

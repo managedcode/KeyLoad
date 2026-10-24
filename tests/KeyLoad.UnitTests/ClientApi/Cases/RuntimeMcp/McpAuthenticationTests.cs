@@ -12,7 +12,6 @@ internal sealed class McpAuthenticationTests
     internal const string PrincipalId = "root";
     internal const string SharedValue = "execution-auth-shared-value";
     private const string UnicodePrincipal = "principal-ї-漢-🧭-e\u0301";
-    private const int RequestCapacity = 16_384;
     private const string LegacyPrincipalJson = "{\"id\":\"root\"}";
     private static readonly uint[] PrincipalIds = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
     private static readonly uint[] GrantIds = [0, 1, 2];
@@ -46,7 +45,7 @@ internal sealed class McpAuthenticationTests
     }
 
     [Test]
-    public async Task PersistedPrincipalAdmissionOwnsDecodedValuesAndReturnsEveryReservation()
+    public async Task PersistedPrincipalAuthenticationOwnsDecodedValues()
     {
         using var database = new TestDatabase();
         var requested = Principal(database) with
@@ -62,32 +61,23 @@ internal sealed class McpAuthenticationTests
         await Assert.That(JsonDefaults.Serialize(principal).AsSpan().SequenceEqual(JsonDefaults.Serialize(requested))).IsTrue();
         var expected = JsonDefaults.Serialize(requested);
         var payload = OrleansSerialization.Serialize(new GrainValue(principal));
-        var limits = new McpMemoryLimits();
-        var memory = new McpMemoryBudget(Microsoft.Extensions.Options.Options.Create(new KeyLoad.Server.McpMemoryLimits { DataBytes = limits.DataBytes, ControlBytes = limits.ControlBytes, IngressBytes = limits.IngressBytes }));
-        var governor = new HttpAdmissionGovernor(UnitAdmissionOptions.Http());
-        using (var state = new McpRequestState(governor, memory, RequestCapacity, UnitMcpOptions.Execution(), CancellationToken.None))
+        using (var state = new McpRequestState(McpFramingProtocol.MaximumDataReplyBytes, UnitMcpOptions.Execution()))
         {
             state.Authenticate(payload, CancellationToken.None);
             await Assert.That(JsonDefaults.Serialize(state.Principal).AsSpan().SequenceEqual(expected)).IsTrue();
             Array.Clear(payload);
             await Assert.That(JsonDefaults.Serialize(state.Principal).AsSpan().SequenceEqual(expected)).IsTrue();
         }
-        AssertFullPools(memory, limits);
         using var cancelled = new CancellationTokenSource();
         await cancelled.CancelAsync();
         var fresh = OrleansSerialization.Serialize(new GrainValue(principal));
-        using (var denied = new McpRequestState(governor, memory, RequestCapacity, UnitMcpOptions.Execution(), CancellationToken.None))
+        using (var denied = new McpRequestState(McpFramingProtocol.MaximumDataReplyBytes, UnitMcpOptions.Execution()))
         {
             Assert.ThrowsExactly<OperationCanceledException>(() => denied.Authenticate(fresh, cancelled.Token));
         }
-        AssertFullPools(memory, limits);
-        using (var healthy = new McpRequestState(governor, memory, RequestCapacity, UnitMcpOptions.Execution(), CancellationToken.None))
-        {
-            healthy.Authenticate(fresh, CancellationToken.None);
-            await Assert.That(JsonDefaults.Serialize(healthy.Principal).AsSpan().SequenceEqual(expected)).IsTrue();
-        }
-        AssertFullPools(memory, limits);
-        await Assert.That(governor.Status().Node.ControlCommands).IsEqualTo(0);
+        using var healthy = new McpRequestState(McpFramingProtocol.MaximumDataReplyBytes, UnitMcpOptions.Execution());
+        healthy.Authenticate(fresh, CancellationToken.None);
+        await Assert.That(JsonDefaults.Serialize(healthy.Principal).AsSpan().SequenceEqual(expected)).IsTrue();
     }
 
     [Test]
@@ -115,13 +105,6 @@ internal sealed class McpAuthenticationTests
 
     internal static PrincipalRecord Principal(TestDatabase database)
         => database.Store.Read(view => view.GetRecord<PrincipalRecord>(KeySpace.Principal(PrincipalId)))!;
-
-    internal static void AssertFullPools(McpMemoryBudget memory, McpMemoryLimits limits)
-    {
-        using var data = memory.Reserve(McpMemoryLane.Data, limits.DataBytes);
-        using var control = memory.Reserve(McpMemoryLane.Control, limits.ControlBytes);
-        using var ingress = memory.Reserve(McpMemoryLane.Ingress, limits.IngressBytes);
-    }
 
     private static async Task AssertIdsAsync(Type type, uint[] expected)
     {

@@ -11,7 +11,8 @@ internal static class SharedDomainRefusalImage
     internal static string[] Capture(IAtomicStore store, PartitionRef partition, Guid id)
     {
         var ignored = new[] { KeySpace.PartitionOutcome(partition, Writer, id),
-            KeySpace.OutcomeLocator(partition, Writer, id), KeySpace.Clock.ToArray(), KeySpace.AppliedBytes.ToArray() }
+            KeySpace.OutcomeLocator(partition, Writer, id), KeySpace.Clock.ToArray(), KeySpace.AppliedBytes.ToArray(),
+            KeySpace.LastCommandBytes.ToArray() }
             .Select(key => Convert.ToHexString(key) + Separator).ToArray();
         return SharedDomainImage.Capture(store).Where(row => !ignored.Any(prefix => row.StartsWith(prefix, StringComparison.Ordinal))).ToArray();
     }

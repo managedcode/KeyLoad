@@ -96,7 +96,8 @@ internal static class ConfiguredVectorProfileFlow
         return page.Records.Where(record => !record.Key.Span.SequenceEqual(outcome)
             && (locator is null || !record.Key.Span.SequenceEqual(locator))
             && !record.Key.Span.SequenceEqual(KeySpace.ClockBytes)
-            && !record.Key.Span.SequenceEqual(KeySpace.AppliedBytes)).Select(record => Convert.ToHexString(record.Key.Span)
+            && !record.Key.Span.SequenceEqual(KeySpace.AppliedBytes)
+            && !record.Key.Span.SequenceEqual(KeySpace.LastCommandBytes)).Select(record => Convert.ToHexString(record.Key.Span)
                 + ":" + Convert.ToHexString(record.Value.Span)).ToArray();
     });
     internal static async Task HealthyAsync(DatabaseEngine owner, TestDatabase provenance, CancellationToken token)

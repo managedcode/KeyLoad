@@ -12,7 +12,7 @@ internal static class SubscriptionProcessingAtomicAssertions
     internal static string[] DomainImage(ZoneTreeStore store, SubscriptionRef group, Guid id)
     {
         var own = new[] { KeySpace.PartitionOutcome(group.Source.Partition, "root", id),
-            KeySpace.OutcomeLocator(group.Source.Partition, "root", id), KeySpace.ClockBytes, KeySpace.AppliedBytes }
+            KeySpace.OutcomeLocator(group.Source.Partition, "root", id), KeySpace.ClockBytes, KeySpace.AppliedBytes, KeySpace.LastCommandBytes }
             .Select(key => Convert.ToHexString(key) + ":").ToArray();
         return QueueWholeFlowStorage.Bytes(store).Where(row =>
             !own.Any(key => row.StartsWith(key, StringComparison.Ordinal))).ToArray();

@@ -118,7 +118,7 @@ internal static class McpGatewayMetaArgumentReader
             throw Errors.Fail(ErrorCode.UnsupportedCapability, McpCatalogProtocol.InvalidOperation);
         }
         var values = arguments.TryGetValue(McpGatewayMetaProtocol.Arguments, out var nested)
-            ? ReadObject(nested) : new Dictionary<string, object?>(StringComparer.Ordinal);
+            ? ReadObject(nested) : new Dictionary<string, JsonElement>(StringComparer.Ordinal);
         return new(McpGatewayMetaOperation.Invoke, ToolId: toolId, Arguments: values);
     }
 
@@ -172,13 +172,13 @@ internal static class McpGatewayMetaArgumentReader
         throw InvalidArguments();
     }
 
-    private static Dictionary<string, object?> ReadObject(JsonElement value)
+    private static Dictionary<string, JsonElement> ReadObject(JsonElement value)
     {
         if (value.ValueKind != JsonValueKind.Object)
         {
             throw InvalidArguments();
         }
-        var result = new Dictionary<string, object?>(StringComparer.Ordinal);
+        var result = new Dictionary<string, JsonElement>(StringComparer.Ordinal);
         foreach (var property in value.EnumerateObject())
         {
             if (!result.TryAdd(property.Name, property.Value.Clone()))

@@ -3,7 +3,7 @@
 ## Purpose, entry points and ownership
 
 - Owns public, implementation-independent contracts shared by KeyLoad clients and services.
-- Main contract sources: `Contracts.cs`, `<SliceName>/Contracts/` (individual request/result records), `QueryExecution/Contracts/QueryAst.cs`, `ChangeFeeds/Contracts/ChangeFeeds.cs`, `EventStreams/Contracts/Subscriptions.cs`, `ResourceExecution/Contracts/Admission.cs`, `ResourceExecution/Contracts/HttpAdmission.cs`; storage contracts and key encoding are under `Storage/Contracts/StorageContracts.cs` and `Storage/Serialization/KeyCodec.cs`.
+- Main contract sources: `Contracts.cs`, `<SliceName>/Contracts/` (individual request/result records), `QueryExecution/Contracts/QueryAst.cs`, `ChangeFeeds/Contracts/ChangeFeeds.cs`, `EventStreams/Contracts/Subscriptions.cs`, `ResourceExecution/Contracts/DatabaseLimits.cs`; storage contracts and key encoding are under `Storage/Contracts/StorageContracts.cs` and `Storage/Serialization/KeyCodec.cs`.
 - Place feature-owned public contracts under `<SliceName>/` using the canonical name in `docs/Features/<SliceName>.md`; keep truly shared primitives here only when multiple slices require them.
 - Contracts define caller-visible shapes, not persistence, authorization decisions, cluster execution, Orleans routing, or server implementation.
 - Use the installed Orleans skill for runtime design and serialization decisions.

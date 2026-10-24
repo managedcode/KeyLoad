@@ -3,7 +3,7 @@ using Microsoft.Extensions.Options;
 namespace KeyLoad.Server.Search;
 
 /// <summary>Retains actual reader completion and retirement failure under the owning generation gate.</summary>
-internal sealed class AnnGenerationReadLifetime(Lock gate, int maximumReaders)
+internal sealed class AnnGenerationReadLifetime(Lock gate)
 {
     private const int Empty = 0;
     private TaskCompletionSource? noReaders;
@@ -25,12 +25,8 @@ internal sealed class AnnGenerationReadLifetime(Lock gate, int maximumReaders)
     {
         lock (gate)
         {
-            if (readers == maximumReaders)
-            {
-                throw Errors.Fail(ErrorCode.ResourceExhausted, AnnProtocol.Bound);
-            }
             var pendingZero = readers == Empty ? new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously) : noReaders;
-            var lease = slot.Acquire(maximumReaders);
+            var lease = slot.Acquire();
             noReaders = pendingZero;
             readers++;
             return lease;

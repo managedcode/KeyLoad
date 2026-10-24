@@ -13,6 +13,6 @@ public sealed partial class MongoTarget
     }
     /// <inheritdoc/>
     public Task<IDocumentComparisonSession> OpenDocumentSessionAsync(CancellationToken token)
-        => DocumentMongoClient.OpenAsync(this, CreateSettings(connectionString, DocumentMeasurementValues.SingleItemCount, executionOptions),
+        => DocumentMongoClient.OpenAsync(this, CreateSettings(DocumentMeasurementValues.SingleItemCount),
             databaseName, graphDepth, executionOptions, token);
 }

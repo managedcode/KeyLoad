@@ -17,5 +17,5 @@ internal static class QueueWorkerObservations
         => new(null, command, null, [], result, null);
 
     internal static bool Unknown<T>(Result<T> result)
-        => result.IsFailed && result.Problem?.ErrorCode == QueueWorkerProtocol.Unknown;
+        => result.IsFailed && result.Problem.ErrorCode == QueueWorkerProtocol.Unknown;
 }

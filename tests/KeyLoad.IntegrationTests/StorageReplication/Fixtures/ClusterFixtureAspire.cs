@@ -24,7 +24,7 @@ internal sealed partial class ClusterFixture
 
     protected override void ConfigureBuilder(IDistributedApplicationTestingBuilder builder)
     {
-        ClusterFixtureComposition.ConfigureTestOverrides(builder, commandBytes, httpAdmission, databaseLimits, queryExecution);
+        ClusterFixtureComposition.ConfigureTestOverrides(builder, maximumBodyBytes, databaseLimits, queryExecution);
         queueDeadline?.Configure(builder);
         runtimeSql.Configure(builder, Root);
         RemoteTransferCoordinatorFixtureConfiguration.Configure(builder, transferCoordinator);

@@ -11,10 +11,7 @@ internal static class OutboxHeadAuthorityFlow
         var failures = new List<Exception>();
         await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
         {
-            using var database = new TestDatabase(limits: new()
-            {
-                MaxOutboxRecords = 2
-            }, timeProvider: new FeedAuthorityClock());
+            using var database = new TestDatabase(timeProvider: new FeedAuthorityClock());
             await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => ExecuteAsync(database, fault), failures);
         }, failures);
         global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
@@ -25,7 +22,6 @@ internal static class OutboxHeadAuthorityFlow
         var token = TestContext.Current!.Execution.CancellationToken;
         var state = await OutboxHeadAuthorityFixture.SeedAsync(database, token);
         await OutboxHeadAuthorityAssertions.ReplayAsync(database.Database, database.Store, state.Seed, state.SeedResult, token);
-        await OutboxHeadAuthorityAssertions.ReplayAsync(database.Database, database.Store, state.QuotaWrite, state.QuotaFailure, token);
         OutboxHeadAuthorityFixture.Damage(database, state, fault);
         await OutboxHeadAuthorityAssertions.RefuseAsync(database.Database, database.Store, state, fault, token);
         await OutboxHeadAuthorityAssertions.DocumentsAsync(database.Database, state, false);
@@ -43,7 +39,6 @@ internal static class OutboxHeadAuthorityFlow
             await OutboxHeadAuthorityAssertions.ExactAsync(owner.GetOutboxStatus(OutboxHeadAuthorityFixture.Root, state.Partition).Head,
                 new OutboxHead(3L, 3L, 1L, entry.LongLength));
             await OutboxHeadAuthorityAssertions.ReplayAsync(owner, cold, state.Seed, state.SeedResult, token);
-            await OutboxHeadAuthorityAssertions.ReplayAsync(owner, cold, state.QuotaWrite, state.QuotaFailure, token);
             await OutboxHeadAuthorityAssertions.ReplayAsync(owner, cold, state.Purge, continued.Purged, token);
             await OutboxHeadAuthorityAssertions.ReplayAsync(owner, cold, continued.Healthy, continued.HealthyResult, token);
             return continued;
@@ -68,7 +63,6 @@ internal static class OutboxHeadAuthorityFlow
         await OutboxHeadAuthorityAssertions.DocumentsAsync(owner, state, false);
         await Assert.That(cold.Read(view => view.ReadOwnedValue(KeySpace.Partition(OutboxHeadAuthorityFixture.EntrySpace, state.Partition, 1L)))).IsNull();
         await Assert.That(cold.Read(view => view.ReadOwnedValue(KeySpace.Partition(OutboxHeadAuthorityFixture.EntrySpace, state.Partition, 2L)))).IsNull();
-        await OutboxHeadAuthorityAssertions.ReplayAsync(owner, cold, state.QuotaWrite, state.QuotaFailure, token);
         await OutboxHeadAuthorityAssertions.ReplayAsync(owner, cold, state.Purge, purged, token);
         var healthy = OutboxHeadAuthorityFixture.Write(owner, state.Partition, "c");
         var result = owner.ApplyEmbedded(healthy, token);

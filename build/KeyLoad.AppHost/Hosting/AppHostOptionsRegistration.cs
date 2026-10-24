@@ -21,10 +21,8 @@ internal static class AppHostOptionsRegistration
         var startup = Bind<AppHostStartupOptions>(builder.Configuration, options => options.IsValid(),
             AppHostStartupOptions.ValidationMessage);
         var cluster = Bind<ClusterDeploymentOptions>(builder.Configuration, value => value.IsValid(), ClusterDeploymentOptions.ValidationMessage);
-        var command = Bind<CommandAdmissionLimits>(builder.Configuration.GetSection(CommandAdmissionLimits.SectionName), value => Validate(value.Validate), CommandAdmissionLimits.ValidationMessage);
-        var http = Bind<HttpAdmissionLimits>(builder.Configuration.GetSection(HttpAdmissionLimits.SectionName), value => Validate(value.Validate), HttpAdmissionLimits.ValidationMessage);
         var control = AppHostControlOptionsRegistration.Bind(builder.Configuration);
-        var runtime = new AppHostRuntimeOptions(execution, startup, control, cluster, command, http);
+        var runtime = new AppHostRuntimeOptions(execution, startup, control, cluster);
         Register(builder.Services, runtime);
         return runtime;
     }
@@ -32,8 +30,6 @@ internal static class AppHostOptionsRegistration
     private static void Register(IServiceCollection services, AppHostRuntimeOptions runtime)
     {
         services.AddSingleton(runtime.Cluster);
-        services.AddSingleton(runtime.CommandAdmission);
-        services.AddSingleton(runtime.HttpAdmission);
         services.AddSingleton(runtime.Control);
         services.AddSingleton(runtime.TestExecution);
         services.AddSingleton(runtime.Startup);
@@ -51,17 +47,6 @@ internal static class AppHostOptionsRegistration
     internal static IOptions<TestExecutionOptions> BindTestExecution(IConfiguration configuration) =>
         Bind<TestExecutionOptions>(configuration.GetSection(TestExecutionOptions.SectionName),
             options => options.IsValid(), TestExecutionOptions.ValidationMessage);
-
-    private static bool Validate(Action validate)
-    {
-        try
-        {
-            validate();
-            return true;
-        }
-        catch (ArgumentException) { return false; }
-        catch (InvalidOperationException) { return false; }
-    }
 
     internal static OptionsManager<T> Bind<T>(IConfiguration configuration, Func<T, bool> predicate, string message) where T : class, new()
     {

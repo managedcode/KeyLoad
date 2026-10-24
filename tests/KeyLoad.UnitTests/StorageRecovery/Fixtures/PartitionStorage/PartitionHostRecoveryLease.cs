@@ -22,7 +22,7 @@ internal sealed class PartitionHostRecoveryLease(PartitionHostRecoveryAttempt at
             execution = new();
             await execution.InitializeAsync(TestContext.Current!.Execution.CancellationToken).ConfigureAwait(false);
             host = await PartitionHost.OpenAsync(ServerRuntimeTestOptions.Runtime(options), new AuthorizationPolicy(),
-                new CommandAdmissionGovernor(UnitAdmissionOptions.Command(options.CommandAdmission)), TimeProvider.System,
+                TimeProvider.System,
                 logger, execution.Grains, attempt.Ownership).ConfigureAwait(false);
         }
         catch (Exception failure)

@@ -39,10 +39,8 @@ public enum GrainReadKind
     Search,
     /// <summary>Create an administrator-authorized node backup.</summary>
     Backup,
-    /// <summary>Read administrator-authorized node admission diagnostics.</summary>
-    Admission,
     /// <summary>Read administrator-authorized physical node status.</summary>
-    NodeStatus,
+    NodeStatus = 19,
     /// <summary>Read administrator-authorized physical node observations.</summary>
     AdminDashboard = 24,
     /// <summary>Read a bounded administrator-authorized resource metadata page.</summary>

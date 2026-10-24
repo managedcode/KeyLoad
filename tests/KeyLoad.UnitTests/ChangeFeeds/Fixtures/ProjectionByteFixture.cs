@@ -25,11 +25,7 @@ internal static class ProjectionByteFixture
 
     private static (long Input, long Effect) Measure(PutDocument effect)
     {
-        using var database = new TestDatabase(new()
-        {
-            MaxOutboxBytes = long.MaxValue,
-            ReservedOutboxBytes = 0
-        });
+        using var database = new TestDatabase();
         database.Configure(InputResource, ResourceKind.Collection);
         database.Configure(EffectResource, ResourceKind.Collection);
         database.Commit(new PutDocument(InputResource, "input", "{}"));

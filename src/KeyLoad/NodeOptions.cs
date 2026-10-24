@@ -42,22 +42,10 @@ internal sealed record NodeOptions
     public int SiloPort { get; init; } = DefaultSiloPort;
     /// <summary>Routable execution silo address.</summary>
     public string SiloAddress { get; init; } = LoopbackAddress;
-    /// <summary>Bounded command admission.</summary>
-    public CommandAdmissionLimits CommandAdmission { get; init; } = new();
-    /// <summary>Bounded public HTTP admission.</summary>
-    public HttpAdmissionLimits HttpAdmission { get; init; } = new();
-    /// <summary>Bounded MCP request, serialization and retained output pools.</summary>
-    public McpMemoryLimits McpMemory { get; init; } = new();
 
     /// <summary>Rejects invalid startup settings before opening files.</summary>
     public void Validate()
     {
-        ArgumentNullException.ThrowIfNull(CommandAdmission);
-        ArgumentNullException.ThrowIfNull(HttpAdmission);
-        ArgumentNullException.ThrowIfNull(McpMemory);
-        CommandAdmission.Validate();
-        HttpAdmission.Validate();
-        McpMemory.Validate();
         Span<byte> secret = stackalloc byte[SigningKeyBytes];
         if (Incarnation == Guid.Empty || string.IsNullOrWhiteSpace(DataDirectory)
             || SiloCount < InitialCount || ReplicaCount < InitialCount || ReplicaCount > SiloCount

@@ -13,7 +13,7 @@ internal static class RequestCqrsClusterCurrentWriteReconciliation
     {
         var original = await administrator.CommitAsync(command, cancellationToken).ConfigureAwait(false);
         var observed = original;
-        if (!observed.IsSuccess && observed.Problem?.ErrorCode == nameof(ErrorCode.UnknownWriteOutcome))
+        if (observed.IsFailed && observed.Problem.ErrorCode == nameof(ErrorCode.UnknownWriteOutcome))
         {
             TestContext.Current?.Output.WriteLine(UnknownObservation + command.CommandId.ToString("D"));
             cancellationToken.ThrowIfCancellationRequested();

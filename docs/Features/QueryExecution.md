@@ -57,7 +57,7 @@ Q1/SELECT/CALL is a stage; full SQL and protocol remain pending.
 | REQ-SQLC-005: conservative SQL transport outcomes | AC-SQLC-005 | Exact commented/unknown-root write outcomes over genuine Kestrel |
 | REQ-SQLC-009/010: honest performance and search choice | AC-SQLC-009/010 | Pinned ZoneTree.FullTextSearch review, then genuine correctness/fault/isolated workloads |
 | REQ-AISQL-001: one server supports linked model operations with SQL central | AC-AISQL-001/005/006 | Strict compiler and real SDK/official MCP cluster differential cases |
-| REQ-AISQL-003: versioned single-statement SQL preserves canonical authority and resources | AC-AISQL-005-007/011 | Rejection/ID/retry/permission/cancellation/admission/metadata and initial-RPC failure cases |
+| REQ-AISQL-003: versioned single-statement SQL preserves canonical authority and resources | AC-AISQL-005-007/011 | Rejection/ID/retry/permission/cancellation/metadata and initial-RPC failure cases |
 | REQ-AISQL-004: indexed work and honest comparable performance | AC-AISQL-008-010 | Reversed equality real-store regressions and the Linux comparison workloads |
 
 SQL is the central language for one linked AI database. [ADR-054](../ADR/ADR-054-central-sql.md) adds a versioned unified SQL operation envelope: existing Q1 SELECT plus CALL into the sole canonical public operation catalog. [RelationalStorage](RelationalStorage.md)/ADR-055 supplies typed rows using those same document query/index paths. This is the first invocation stage; declarative model sources, arbitrary JOIN and FK remain required pending product stages.

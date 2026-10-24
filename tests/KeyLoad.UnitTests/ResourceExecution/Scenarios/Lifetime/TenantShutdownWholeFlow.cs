@@ -9,13 +9,11 @@ internal static class TenantShutdownWholeFlow
     {
         using var fixture = new TestDatabase();
         TenantAdmissionOperations.Provision(fixture);
-        var governor = new CommandAdmissionGovernor(UnitAdmissionOptions.Command());
         var original = TenantAdmissionOperations.Create(fixture, TenantAdmissionOperations.PrincipalA, "a1");
         var state = TenantAdmissionAssertions.State(fixture.Store);
         var cut = fixture.ReadCanonicalCut();
-        await using var owner = new RequestWorkOwner(UnitRoutingOptions.Routing());
+        await using var owner = new RequestWorkOwner();
         await using var selected = owner.Acquire(original.CommandId, RequestWorkKind.CommandCapability);
-        using var admission = TenantAdmissionOperations.Reserve(fixture, governor, original, token);
         var cancelled = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         using var execution = CancellationTokenSource.CreateLinkedTokenSource(owner.ShutdownToken, selected.Cancellation);
         using var registration = execution.Token.Register(() => cancelled.TrySetResult());
@@ -32,9 +30,6 @@ internal static class TenantShutdownWholeFlow
         await selected.DisposeAsync();
         await drain.WaitAsync(new RuntimeTestOptions().CompletionTimeout, token);
         await Assert.That(owner.IsJoined).IsTrue();
-        admission.Dispose();
-        admission.Dispose();
-        await Assert.That(governor.Snapshot()).IsEqualTo(new CommandAdmissionSnapshot(0, 0, 0, 0, 0, 0));
         var result = fixture.SubmitIssuedEmbedded(original, token);
         var committed = await TenantAdmissionAssertions.CommittedAsync(fixture, original);
         var expectedToken = new CommitToken(fixture.Store.Identity.Incarnation,

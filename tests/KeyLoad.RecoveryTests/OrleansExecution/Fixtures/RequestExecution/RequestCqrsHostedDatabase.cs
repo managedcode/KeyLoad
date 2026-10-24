@@ -66,7 +66,7 @@ internal sealed class RequestCqrsHostedDatabase(PartitionHost owner)
         var fingerprint = DatabaseCommandFingerprint.Compute(creation, OperationKind.ConfigureResource,
             RequestCqrsHostedProfile.Root, JsonSerializer.Serialize(expected, JsonDefaults.Options));
         var body = OrleansSerialization.Deserialize<ConfigureResourceRequest>(payload.Input.Span);
-        if (!retained.Result.IsSuccess || original.CommandId != creation || payload.Kind != OperationKind.ConfigureResource
+        if (retained.Result.IsFailed || original.CommandId != creation || payload.Kind != OperationKind.ConfigureResource
             || original.UserId != RequestCqrsHostedProfile.Root || payload.Fingerprint != fingerprint
             || retained.Fingerprint != fingerprint
             || !JsonDefaults.Serialize(body).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected)))

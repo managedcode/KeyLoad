@@ -61,7 +61,7 @@ public sealed class DatabaseEngine
         Store = store;
         Authorization = authorization;
         Limits = operationLimits;
-        analyticalReadGate = new(operationLimits.MaxConcurrentQueries);
+        analyticalReadGate = new();
         DueDiscoveryDeadline = dueExecution.DiscoveryDeadline;
         eventSourceCursorLifetime = eventSourceExecution.CursorLifetime;
         Clock = timeProvider ?? TimeProvider.System;

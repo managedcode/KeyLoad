@@ -138,12 +138,6 @@ internal static class CrashExecutionOptions
         settings.Validate();
         return Compose(settings, static value => value.Validate());
     }
-    internal static IOptions<DatabaseLimits> DatabaseLimits(bool boundOutbox)
-    {
-        const int BoundOutboxRecords = 1;
-        return DatabaseLimits(boundOutbox ? new DatabaseLimits { MaxOutboxRecords = BoundOutboxRecords } : null);
-    }
-
     internal static IOptions<NodeOptions> Node(NodeOptions selected)
         => Compose(selected, static value => value.Validate());
 

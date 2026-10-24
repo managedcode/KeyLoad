@@ -2,8 +2,8 @@
 
 ## Purpose, entry points and ownership
 
-- Owns focused TUnit tests for contracts and feature behavior, including queries, transactions, storage codecs, admission, change feeds, subscriptions, search, messaging and artifacts.
-- Test sources include `QueryExecution/Cases/QueryAdapter/QueryAdapterTests.cs`, `ResourceExecution/Cases/Transaction/TransactionTests.cs`, `StorageRecovery/Cases/KeyCodec/KeyCodecTests.cs`, `ResourceExecution/Cases/Command/CommandAdmissionGovernorTests.cs`, `GraphTraversal/Cases/Graph/GraphTraversalTests.cs` and `Search/Cases/SearchResource/SearchResourceTests.cs`, `TestDatabase.cs` and the other feature-named test files in this project.
+- Owns focused TUnit tests for contracts and feature behavior, including queries, transactions, storage codecs, operation bounds, change feeds, subscriptions, search, messaging and artifacts.
+- Test sources include `QueryExecution/Cases/QueryAdapter/QueryAdapterTests.cs`, `ResourceExecution/Cases/Transaction/TransactionTests.cs`, `StorageRecovery/Cases/KeyCodec/KeyCodecTests.cs`, `ResourceExecution/Cases/BudgetedRead/BudgetedReadViewTests.cs`, `GraphTraversal/Cases/Graph/GraphTraversalTests.cs` and `Search/Cases/SearchResource/SearchResourceTests.cs`, `TestDatabase.cs` and the other feature-named test files in this project.
 - Organize feature-owned tests under the same canonical `<SliceName>/` used by implementation and `docs/Features/<SliceName>.md`; shared test infrastructure may remain outside slices.
 - Tests must derive from acceptance criteria and prove observable behavior. Do not add mocks, fakes or stubs, weaken assertions, or treat these unit tests as cluster, real-process recovery or production proof.
 - Use the installed Orleans skill for Orleans decisions and the relevant installed skill for formatting, Aspire or diagnostics. Follow the owner's explicit installation and dependency scope.

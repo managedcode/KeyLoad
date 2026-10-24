@@ -79,7 +79,7 @@ internal static class QueueWorkerExecution
                     ? QueueWorkerStopReason.ReceiveUncertain : QueueWorkerStopReason.ReceiveRefused);
                 return QueueWorkerStopReason.ReceiveRefused;
             }
-            var page = result.Value!;
+            var page = result.Value;
             var bodyBytes = page.Deliveries.Sum(value => checked((long)Encoding.UTF8.GetByteCount(value.PayloadJson)
                 + Encoding.UTF8.GetByteCount(value.HeadersJson)));
             if (page.RequestId != request.RequestId || page.Deliveries.Length > request.MaxMessages

@@ -15,7 +15,7 @@ public static class CommandResultExtensions
     {
         if (result.IsFailed)
         {
-            var problem = result.Problem!;
+            var problem = result.Problem;
             throw Errors.Fail(Errors.Code(problem)!.Value, problem.Detail!);
         }
         if (result.Value is T value)

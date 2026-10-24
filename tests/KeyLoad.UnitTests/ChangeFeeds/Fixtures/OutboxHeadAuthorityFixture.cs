@@ -1,5 +1,4 @@
 using KeyLoad.Storage;
-using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.UnitTests.ChangeFeeds;
@@ -13,7 +12,6 @@ internal static class OutboxHeadAuthorityFixture
     internal const string MissingRow = "The complete outbox operation requires its original committed row.";
     internal const string HeadDetail = "The committed outbox head does not match its canonical retained range.";
     internal const string BytesDetail = "The committed outbox byte accounting does not match the reclaimed entry.";
-    internal const string QuotaDetail = "The committed outbox quota is exhausted; advance consumers and reclaim retained entries.";
 
     internal static Command<DatabaseCommand> Operation<T>(DatabaseEngine owner, OperationKind kind, Guid id, T request)
         => owner.CreateCommand(kind, id, Root, owner.EvaluationClock.GetUtcNow(), OrleansSerialization.Serialize(request));
@@ -45,14 +43,10 @@ internal static class OutboxHeadAuthorityFixture
             ?? throw new InvalidOperationException(MissingRow);
         await OutboxHeadAuthorityAssertions.ExactAsync(database.Database.GetOutboxStatus(Root, database.Partition).Head,
             new OutboxHead(2L, 1L, 2L, first.LongLength + second.LongLength));
-        var quota = Write(database.Database, database.Partition, "c");
-        var failure = database.Database.ApplyEmbedded(quota, token);
-        await OutboxHeadAuthorityAssertions.ExactAsync(failure,
-            Result<object>.Fail(Errors.Problem(ErrorCode.ResourceExhausted, QuotaDetail)));
         await Assert.That(database.Database.GetDocument(Root, new(database.Partition, Collection, "c"), cancellationToken: token)).IsNull();
         var purgeId = Guid.NewGuid();
         var purge = Operation(database.Database, OperationKind.PurgeOutbox, purgeId, new PurgeOutboxRequest(purgeId, database.Partition, 2L));
-        return new(database, database.Partition, seed, receipt, seedResult, quota, failure, purge, key, original, first.LongLength + second.LongLength, first.LongLength);
+        return new(database, database.Partition, seed, receipt, seedResult, purge, key, original, first.LongLength + second.LongLength, first.LongLength);
     }
 
     internal static void Damage(TestDatabase database, OutboxHeadAuthorityState state, int fault)

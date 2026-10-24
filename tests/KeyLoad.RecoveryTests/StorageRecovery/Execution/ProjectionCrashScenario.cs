@@ -18,7 +18,7 @@ internal static class ProjectionCrashScenario
         const int ExpectedRevisionEmptyCount = 0;
         const int PositionStep = 1;
 
-        var database = CrashDatabase.Create(store, boundOutbox: true);
+        var database = CrashDatabase.Create(store);
         Configure(database);
         var batch = database.ReadProjectionBatch(CrashFixtureValues.Principal, new(Consumer));
         var request = new CommitProjectionBatchRequest(CommandId, Consumer, batch.Token,

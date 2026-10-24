@@ -1,3 +1,5 @@
+using System.Globalization;
+
 namespace KeyLoad.Comparisons.Targets;
 
 internal static class Neo4jQueryRequests
@@ -11,7 +13,8 @@ internal static class Neo4jQueryRequests
     private const string InitializeAsyncIdEFromBText = " {id:e.from}),(b:";
     private const string InitializeAsyncIdEToCREATEALINKSBText = " {id:e.to}) CREATE (a)-[:LINKS]->(b)";
     private const string DisposeAsyncMATCHNText = "MATCH (n:";
-    private const string DisposeAsyncDETACHDELETENText = ") DETACH DELETE n";
+    private const string DisposeAsyncWITHNLIMITText = ") WITH n LIMIT ";
+    private const string DisposeAsyncDETACHDELETENRETURNCountText = " DETACH DELETE n RETURN count(*)";
     private const string DisposeAsyncDROPCONSTRAINTText = "DROP CONSTRAINT ";
     private const string DisposeAsyncIdIFEXISTSText = "_id IF EXISTS";
 
@@ -24,8 +27,8 @@ internal static class Neo4jQueryRequests
     internal static string Edges(string label)
         => $"{InitializeAsyncUNWINDEdgesASEMATCHAText}{label}{InitializeAsyncIdEFromBText}{label}{InitializeAsyncIdEToCREATEALINKSBText}";
 
-    internal static string DeleteNodes(string label)
-        => $"{DisposeAsyncMATCHNText}{label}{DisposeAsyncDETACHDELETENText}";
+    internal static string DeleteNodeBatch(string label, int batch)
+        => $"{DisposeAsyncMATCHNText}{label}{DisposeAsyncWITHNLIMITText}{batch.ToString(CultureInfo.InvariantCulture)}{DisposeAsyncDETACHDELETENRETURNCountText}";
 
     internal static string DropConstraint(string label)
         => $"{DisposeAsyncDROPCONSTRAINTText}{label}{DisposeAsyncIdIFEXISTSText}";

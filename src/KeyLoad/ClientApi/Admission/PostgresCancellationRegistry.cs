@@ -1,13 +1,12 @@
 using System.Buffers.Binary;
 using System.Security.Cryptography;
-using KeyLoad.Clustering;
-using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
 
-internal sealed class PostgresCancellationRegistry(IOptions<GrainRoutingOptions> limits)
+internal sealed class PostgresCancellationRegistry
 {
     private readonly Lock gate = new();
+    private const string IdentityInUse = "The Postgres cancellation identity is already registered.";
     private readonly Dictionary<int, Registration> registrations = [];
     private int nextId;
 
@@ -15,14 +14,10 @@ internal sealed class PostgresCancellationRegistry(IOptions<GrainRoutingOptions>
     {
         lock (gate)
         {
-            if (registrations.Count >= limits.Value.MaximumConnections)
-            {
-                throw Errors.Fail(ErrorCode.ResourceExhausted, ServerConnectionProtocol.Capacity);
-            }
             var id = unchecked(++nextId);
             if (id == PostgresProtocol.AllRows || registrations.ContainsKey(id))
             {
-                throw Errors.Fail(ErrorCode.ResourceExhausted, ServerConnectionProtocol.Capacity);
+                throw Errors.Fail(ErrorCode.Conflict, IdentityInUse);
             }
             var secret = RandomNumberGenerator.GetBytes(sizeof(int));
             var registration = new Registration(id, secret, new PostgresCancellationSession());

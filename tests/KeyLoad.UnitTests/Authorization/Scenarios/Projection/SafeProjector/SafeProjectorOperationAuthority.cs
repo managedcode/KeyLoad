@@ -20,7 +20,8 @@ internal static class SafeProjectorOperationAuthority
             KeySpace.Principal(SafeProjectorOperationProtocol.Reader),
             KeySpace.GlobalOutcome(SafeProjectorOperationProtocol.Root, id),
             KeySpace.ClockBytes,
-            KeySpace.AppliedBytes
+            KeySpace.AppliedBytes,
+            KeySpace.LastCommandBytes
         };
         var before = SafeProjectorOperationImages.Without(owner, excluded);
         var command = SafeProjectorOperationSeed.Issue(owner, OperationKind.ConfigurePrincipal, id,

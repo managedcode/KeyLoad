@@ -61,7 +61,7 @@ internal static class AnnLineageColdContinuation
         {
             await using var owner = AnnOwnership.Create(directory, store.Identity,
                 Options.Create(new AnnExecutionOptions()), UnitExecutionOptions.PackedAnn(),
-                Options.Create(new PackedAnnStorageOptions()), 1);
+                Options.Create(new PackedAnnStorageOptions()));
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 var seeds = new AnnSeedOptions();

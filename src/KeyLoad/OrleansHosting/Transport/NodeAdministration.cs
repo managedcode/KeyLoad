@@ -1,12 +1,11 @@
 using KeyLoad.Clustering;
-using KeyLoad.Core;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
 
 /// <summary>Observes the addressed silo and joins physical backups before its storage owner closes.</summary>
-internal sealed class NodeAdministration(PartitionHost partition, CommandAdmissionGovernor commands,
-    HttpAdmissionGovernor http, IServiceProvider services) : INodeAdministration, IAsyncDisposable
+internal sealed class NodeAdministration(PartitionHost partition, IServiceProvider services)
+    : INodeAdministration, IAsyncDisposable
 {
     private const string BackupDirectory = "backups";
     private const string BackupBusy = "The node already has a backup in progress.";
@@ -43,9 +42,6 @@ internal sealed class NodeAdministration(PartitionHost partition, CommandAdmissi
             cancellationToken);
         return new(id, position);
     }
-
-    /// <inheritdoc />
-    public NodeAdmissionStatus Admission() => new(commands.Limits, commands.Snapshot()) { Http = http.Status() };
 
     /// <inheritdoc />
     public Task<AdminNodeSnapshot> DashboardAsync(CancellationToken cancellationToken)

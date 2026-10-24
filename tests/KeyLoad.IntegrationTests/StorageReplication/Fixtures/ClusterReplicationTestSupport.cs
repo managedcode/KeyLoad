@@ -18,9 +18,9 @@ internal static class ClusterReplicationTestSupport
 
     internal static T Success<T>(Result<T> result)
     {
-        if (!result.IsSuccess)
+        if (result.IsFailed)
         {
-            Assert.Fail($"{result.Problem?.ErrorCode ?? "MissingProblem"}: {result.Problem?.Detail ?? "The client operation failed."}");
+            Assert.Fail($"{result.Problem.ErrorCode ?? "MissingProblem"}: {result.Problem.Detail ?? "The client operation failed."}");
         }
 
         return result.Value!;
@@ -28,9 +28,9 @@ internal static class ClusterReplicationTestSupport
 
     internal static Result Success(Result result)
     {
-        if (!result.IsSuccess)
+        if (result.IsFailed)
         {
-            Assert.Fail($"{result.Problem?.ErrorCode ?? "MissingProblem"}: {result.Problem?.Detail ?? "The client operation failed."}");
+            Assert.Fail($"{result.Problem.ErrorCode ?? "MissingProblem"}: {result.Problem.Detail ?? "The client operation failed."}");
         }
         return result;
     }
@@ -53,9 +53,9 @@ internal static class ClusterReplicationTestSupport
             {
                 return result;
             }
-            var code = result.Problem?.ErrorCode ?? "MissingProblem";
+            var code = result.Problem.ErrorCode ?? "MissingProblem";
             await Assert.That(new[] { nameof(ErrorCode.UnknownWriteOutcome), nameof(ErrorCode.OwnershipLost) }).Contains(code)
-                .Because($"Unexpected silo recovery retry result: {code}; {result.Problem?.Detail ?? "No safe detail."}");
+                .Because($"Unexpected silo recovery retry result: {code}; {result.Problem.Detail ?? "No safe detail."}");
             await Task.Delay(TimeSpan.FromMilliseconds(250), TimeProvider.System, cancellationToken);
         }
     }
@@ -80,9 +80,9 @@ internal static class ClusterReplicationTestSupport
                 return result;
             }
 
-            var code = result.Problem?.ErrorCode ?? "MissingProblem";
+            var code = result.Problem.ErrorCode ?? "MissingProblem";
             await Assert.That(new[] { nameof(ErrorCode.UnknownWriteOutcome), nameof(ErrorCode.OwnershipLost) }).Contains(code)
-                .Because($"Unexpected silo recovery retry result: {code}; {result.Problem?.Detail ?? "No safe detail."}");
+                .Because($"Unexpected silo recovery retry result: {code}; {result.Problem.Detail ?? "No safe detail."}");
             await Task.Delay(TimeSpan.FromMilliseconds(250), TimeProvider.System, cancellationToken);
         }
     }

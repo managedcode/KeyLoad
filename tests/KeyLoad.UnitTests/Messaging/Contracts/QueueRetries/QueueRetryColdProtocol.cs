@@ -11,7 +11,6 @@ internal static class QueueRetryColdProtocol
     internal const string Healthy = "healthy-after-expiry";
     internal const string Refused = "refused-producer";
     internal const string Payload = "{\"work\":1,\"text\":\"повтор\"}";
-    internal const string CallerPayload = "{\"text\":\"\\u043F\\u043E\\u0432\\u0442\\u043E\\u0440\",\"work\":1}";
     internal const string ExpiryPayload = "{\"work\":2}";
     internal const string HealthyPayload = "{\"work\":3}";
     internal const string Headers = "{\"kind\":\"bounded-retry\"}";

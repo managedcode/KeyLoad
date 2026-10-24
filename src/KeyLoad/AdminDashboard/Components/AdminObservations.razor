@@ -16,15 +16,6 @@
             else { <p>Two live observations unlock the chart.</p> }
         </div>
     </FluentCard>
-    <FluentCard>
-        <h2>Admission capacity</h2><p>Current occupancy, not throughput.</p>
-        <div id="perf-admission" class="metrics">
-            @foreach (var pair in Admission)
-            {
-                <div class="meter-track"><label>@pair.Label: @pair.Value / @pair.Limit</label><progress value="@pair.Value" max="@pair.Limit"></progress></div>
-            }
-        </div>
-    </FluentCard>
 }
 @if (View == "errors")
 {
@@ -106,11 +97,6 @@
         ("Canonical database", Snapshot.Storage.CanonicalBytes?.ToString(CultureInfo.InvariantCulture) ?? "Unavailable", "Physical bytes on this node"),
         ("Lifetime requests", Snapshot.Http.CompletedRequests.ToString(CultureInfo.InvariantCulture), "Since server process start"),
         ("Started", Snapshot.Http.StartedAt.ToString("u", CultureInfo.InvariantCulture), "Server process")];
-    private (string Label, long Value, long Limit)[] Admission => [
-        ("Commands", Snapshot.Admission.Usage.Commands, Snapshot.Admission.Limits.MaxCommands),
-        ("Retained bytes", Snapshot.Admission.Usage.RetainedBytes, Snapshot.Admission.Limits.MaxRetainedBytes),
-        ("Control commands", Snapshot.Admission.Usage.ControlCommands, Snapshot.Admission.Limits.ReservedControlCommands),
-        ("Control bytes", Snapshot.Admission.Usage.ControlRetainedBytes, Snapshot.Admission.Limits.ReservedControlBytes)];
     private static string Number(double? value) => value?.ToString("N1", CultureInfo.InvariantCulture) ?? "Awaiting observations";
     private string RatePath => string.Join(" ", Rates.Select((value, index) => FormattableString.Invariant(
         $"{(index == 0 ? "M" : "L")}{index * 600.0 / Math.Max(1, Rates.Count - 1):F2},{150 - value * 140 / Math.Max(1, Rates.Max()):F2}")));

@@ -7,35 +7,11 @@ internal sealed class AnalyticalAdmissionTaskLifetime(TimeSpan timeout)
 
     private readonly Dictionary<Task, bool> observations = [];
 
-    internal Task<TResult> StartWorker<TResult>(Func<TResult> work)
-        => StartWorker(work, expectCancellation: false);
-
     internal Task<TResult> StartExpectedCancellation<TResult>(Func<TResult> work)
         => StartWorker(work, expectCancellation: true);
 
     internal Task<bool> StartAdmissionWait(DatabaseEngine database)
-        => StartWorker(() => SpinWait.SpinUntil(() => database.QueryReadsInFlight == 1, timeout));
-
-    internal Task<KeyLoadException>[] StartRejectedRequests(params Action[] requests)
-    {
-        var workers = new Task<KeyLoadException>[requests.Length];
-        for (var index = 0; index < requests.Length; index++)
-        {
-            var request = requests[index];
-            workers[index] = StartWorker(() => Assert.ThrowsExactly<KeyLoadException>(request));
-        }
-
-        return workers;
-    }
-
-    internal async Task AssertRejectedAsync(Task<KeyLoadException>[] workers)
-    {
-        foreach (var worker in workers)
-        {
-            var error = await worker.WaitAsync(timeout, TimeProvider.System);
-            await Assert.That(error.Code).IsEqualTo(ErrorCode.ResourceExhausted);
-        }
-    }
+        => StartWorker(() => SpinWait.SpinUntil(() => database.QueryReadsInFlight == 1, timeout), expectCancellation: false);
 
     internal async Task AssertWorkerCompletesAsync<TResult>(Task<TResult> worker)
     {

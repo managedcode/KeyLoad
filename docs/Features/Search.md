@@ -19,7 +19,7 @@ Decision: [ADR-035](../ADR/ADR-035-memory-performance.md). Scope: exact persiste
 | REQ-SR-003 | AC-MP-003/004: scans consume scoped borrowed records; retained rank state contains identity/statistics/scores rather than full corpus JSON/vector arrays | Real large-payload rank cases, bounded read failures and allocation/resource artifacts |
 | REQ-SR-004 | AC-MP-004/005: branch ranks and text-then-vector RRF accumulation are unchanged; at most Limit results are selected before decoding/projecting final payloads and the actual final point reads are accounted | Exact text/vector/hybrid ranks, ties/weights, shared-budget and output boundary cases |
 | REQ-SR-005 | AC-MP-004/012: cancellation/work/result exhaustion leaves the committed position unchanged and a following call succeeds; no unbounded gate/iterator lifetime | Real persisted-policy cancellation/overflow/healthy-following-call tests; SDK/MCP integration |
-| REQ-SR-006 | AC-MP-003/004/011/012: all analytical engines on one DatabaseEngine obey one positive MaxConcurrentQueries ceiling; saturated/cancelled calls cannot perform ranking or storage work | Real-store mixed-entry admission/release cases in UnitTests/Features/ResourceExecution |
+| REQ-SR-006 | AC-MP-003/004/011/012: all analytical engines on one DatabaseEngine hold one counted reservation that never refuses a read; cancelled calls perform no ranking or storage work and release their reservation | Real-store mixed-entry admission/release cases in UnitTests/Features/ResourceExecution |
 
 ```mermaid
 flowchart LR

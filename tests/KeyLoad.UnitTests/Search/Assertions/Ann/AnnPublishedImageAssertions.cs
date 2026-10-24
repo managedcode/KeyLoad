@@ -10,7 +10,6 @@ namespace KeyLoad.UnitTests.Search;
 internal static class AnnPublishedImageAssertions
 {
     private const int Count = 3;
-    private const int Readers = 1;
     private const long Revision = 1;
     private static readonly string[] Ids = ["seed-00000", "seed-00001", "seed-00002"];
     private static readonly float[][] Values = [[0.25f, 1f, -0.5f], [1.25f, 1f, -0.5f], [2.25f, 1f, -0.5f]];
@@ -24,7 +23,7 @@ internal static class AnnPublishedImageAssertions
         {
             await using var owner = AnnOwnership.Create(database.Directory, database.Store.Identity,
                 Options.Create(new AnnExecutionOptions()), UnitExecutionOptions.PackedAnn(),
-                Options.Create(new PackedAnnStorageOptions()), Readers);
+                Options.Create(new PackedAnnStorageOptions()));
             var actual = owner;
             await ServerFailureObserver.ObserveAsync(async () =>
             {

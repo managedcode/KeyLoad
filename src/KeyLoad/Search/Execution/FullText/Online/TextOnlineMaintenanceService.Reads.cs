@@ -6,7 +6,7 @@ namespace KeyLoad.Server.Search;
 
 internal sealed partial class TextOnlineCatalogOwner
 {
-    private readonly TextSelectedReadAdmission onlineReadAdmission = new(options.RuntimeText.Value.MaximumActiveLeases);
+    private readonly TextSelectedReadAdmission onlineReadAdmission = new();
     internal TextSelectedReadAdmission OnlineReadAdmission => onlineReadAdmission;
 
     internal TextSelectedProjectionLease? AcquireCurrent(IKeyValueView view, PrincipalRecord principal,

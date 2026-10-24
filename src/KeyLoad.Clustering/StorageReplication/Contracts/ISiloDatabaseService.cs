@@ -27,8 +27,6 @@ public partial interface ISiloDatabaseService : IGrainService
         CancellationToken cancellationToken);
     /// <summary>Observes the exact addressed silo after the caller verified current administrator authority.</summary>
     Task<NodeStatus> ReadStatusAsync(CancellationToken cancellationToken);
-    /// <summary>Reads the addressed silo's bounded admission counters.</summary>
-    Task<NodeAdmissionStatus> ReadAdmissionAsync(CancellationToken cancellationToken);
     /// <summary>Reads the addressed silo's actual files and process observation.</summary>
     Task<AdminNodeSnapshot> ReadDashboardAsync(CancellationToken cancellationToken);
     /// <summary>Creates a backup at the addressed silo's synchronous storage boundary.</summary>

@@ -50,7 +50,7 @@ internal sealed partial class FileStorageController
                 KeepMergedFile = false
             };
             var result = await base.CompleteChunksAsync(complete, token);
-            if (result.IsFailed || result.Value?.Metadata is null)
+            if (result.IsFailed || result.Value.Metadata is null)
             {
                 throw Errors.Fail(ErrorCode.OwnershipLost, FileStorageProtocol.Invalid);
             }

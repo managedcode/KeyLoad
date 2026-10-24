@@ -12,8 +12,7 @@ internal sealed class AnnMaintenanceService(string directory, DatabaseEngine dat
     private readonly AnnMaintenanceAdmissions admitted = new();
     private readonly CancellationTokenSource shutdown = new();
     private readonly AnnMaintenanceState state = new(() => AnnOwnership.Create(directory,
-        database.Store.Identity, configured.RuntimeAnn, configured.Core.PackedAnn, configured.Core.PackedAnnStorage,
-        configured.GrainRouting.Value.MaximumRequestProducers));
+        database.Store.Identity, configured.RuntimeAnn, configured.Core.PackedAnn, configured.Core.PackedAnnStorage));
 
     public Task<AnnProjectionEnrollment?> ReadEnrollmentAsync(PrincipalRecord principal,
         AnnMaintenanceRequest initialRequest, CancellationToken cancellationToken)
@@ -65,7 +64,7 @@ internal sealed class AnnMaintenanceService(string directory, DatabaseEngine dat
 
     public IAnnProjectionLease Acquire(IKeyValueView view, AnnProjectionSelection request, ReadExecutionBudget budget)
     {
-        using var originalOperation = admitted.Enter(configured.GrainRouting.Value.MaximumRequestProducers);
+        using var originalOperation = admitted.Enter();
         budget.Check();
         return AnnPublicAcquisition.Acquire(database, view, state.RequirePublicOwner(), request, configured, budget);
     }
@@ -115,7 +114,7 @@ internal sealed class AnnMaintenanceService(string directory, DatabaseEngine dat
         {
             return await AnnOriginalCapabilityExecution.ExecuteAsync(this, principal, request, token, work.Budget);
         }
-        using var originalOperation = admitted.Enter(configured.GrainRouting.Value.MaximumRequestProducers);
+        using var originalOperation = admitted.Enter();
         token.ThrowIfCancellationRequested();
         if (!principal.ClusterAdministrator || principal.Revoked)
         {

@@ -21,7 +21,6 @@ internal sealed class PartitionHostApplicationSession : IAsyncDisposable
         {
             await session.execution.InitializeAsync(TestContext.Current!.Execution.CancellationToken).ConfigureAwait(false);
             session.owner = new(ServerRuntimeTestOptions.Runtime(options), new AuthorizationPolicy(),
-                new CommandAdmissionGovernor(UnitAdmissionOptions.Command(options.CommandAdmission)),
                 TimeProvider.System, NullLogger<PartitionHost>.Instance, session.execution.Grains);
             return session;
         }

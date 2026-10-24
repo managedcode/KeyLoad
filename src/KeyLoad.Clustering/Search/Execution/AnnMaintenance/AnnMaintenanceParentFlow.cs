@@ -43,7 +43,7 @@ internal static class AnnMaintenanceParentFlow
             }
             state = await children.CapabilityAsync(request, AnnMaintenanceCapabilityKind.Load, token).ConfigureAwait(true);
         }
-        var maximumPages = Math.Min(options.MaximumReplayPages, routing.MaximumTotalFrames - ReservedFrames);
+        var maximumPages = Math.Min(options.MaximumReplayPages, routing.MaximumStreamFrames - ReservedFrames);
         if (maximumPages <= EmptyCount)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, GrainRoutingProtocol.ReplyBudgetExceeded);

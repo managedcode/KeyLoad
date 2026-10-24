@@ -70,7 +70,7 @@ internal static class UserAnalyticsProcessScenario
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 ownedRuntime.Open(host);
-                await using var work = await UserAnalyticsProcessBoundWork.OpenAsync(options.GrainRouting, token);
+                await using var work = await UserAnalyticsProcessBoundWork.OpenAsync(token);
                 RequireEmpty(host, ownedRuntime);
                 token.ThrowIfCancellationRequested();
                 var replay = host.Database.Apply(cut.Operation).Get<CommitReceipt>();

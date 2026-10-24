@@ -2,7 +2,7 @@ namespace KeyLoad.Core;
 /// <summary>Executes ResourceExecutionQueries operations against the caller's database context.</summary>
 public static class ResourceExecutionQueries
 {
-    /// <summary>Reserves one shared analytical-read allowance until the returned lease is disposed.</summary>
+    /// <summary>Counts one analytical read until the returned lease is disposed; it never refuses the read.</summary>
     /// <param name = "cancellationToken">Caller cancellation checked before and after reservation.</param>
     /// <returns>An owned, idempotent reservation.</returns>
 

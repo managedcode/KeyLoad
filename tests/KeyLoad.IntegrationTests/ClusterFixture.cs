@@ -20,11 +20,10 @@ namespace KeyLoad.IntegrationTests;
 internal sealed partial class ClusterFixture : AspireFixture<Projects.KeyLoad_AppHost>, IKeyedDataSource
 {
     private readonly RemoteTransferCoordinatorFixtureSelection? transferCoordinator;
-    private readonly long? commandBytes;
+    private readonly int? maximumBodyBytes;
     private readonly Authorization.FoundationOtlpClusterSelection? telemetry;
     private readonly Messaging.QueueDeadlineClusterSelection? queueDeadline;
     private readonly QueryExecution.PostgresClusterFixtureOwnership runtimeSql = new();
-    private readonly HttpAdmissionLimits? httpAdmission;
     private readonly DatabaseLimits? databaseLimits;
     private readonly QueryExecutionOptions? queryExecution;
     private ClusterFixtureDiagnostics? diagnostics;
@@ -51,14 +50,10 @@ internal sealed partial class ClusterFixture : AspireFixture<Projects.KeyLoad_Ap
     internal ClusterFixture(QueryExecution.PostgresClusterSelection selection)
         => runtimeSql = new(selection);
 
-    /// <summary>Creates an Orleans fixture with a smaller command admission budget.</summary>
-    /// <param name="commandBytes">The per-node retained command byte limit.</param>
-    internal ClusterFixture(long commandBytes) => this.commandBytes = commandBytes;
-
-    /// <summary>Creates an Orleans fixture with explicit HTTP admission bounds.</summary>
-    /// <param name="httpAdmission">The HTTP body and control-body limits for each node.</param>
-    internal ClusterFixture(HttpAdmissionLimits httpAdmission)
-        => this.httpAdmission = ClusterFixtureRuntimeInvocation.RequireAdmission(httpAdmission);
+    /// <summary>Creates an Orleans fixture whose nodes accept request bodies up to the given size.</summary>
+    /// <param name="maximumBodyBytes">The server request-body limit for each node.</param>
+    internal ClusterFixture(int maximumBodyBytes)
+        => this.maximumBodyBytes = maximumBodyBytes;
 
     /// <summary>Creates an Orleans fixture with the server's typed database execution limits.</summary>
     /// <param name="databaseLimits">The validated limits applied to every Aspire Orleans node.</param>
@@ -69,11 +64,6 @@ internal sealed partial class ClusterFixture : AspireFixture<Projects.KeyLoad_Ap
     internal ClusterFixture(DatabaseLimits databaseLimits, QueryExecutionOptions queryExecution)
         : this(databaseLimits)
         => this.queryExecution = ClusterFixtureQueryResultLimits.Validate(queryExecution);
-
-    /// <summary>Composes validated HTTP admission and query capabilities in the same Aspire Orleans cluster.</summary>
-    internal ClusterFixture(HttpAdmissionLimits httpAdmission, DatabaseLimits databaseLimits, QueryExecutionOptions queryExecution)
-        : this(databaseLimits, queryExecution)
-        => this.httpAdmission = ClusterFixtureRuntimeInvocation.RequireAdmission(httpAdmission);
 
     /// <summary>Gets the unique private host directory used by the Aspire application.</summary>
     public string Root

@@ -11,6 +11,6 @@ internal sealed class OutboxHeadAuthorityWholeFlowTests
     [Arguments(5)]
     [Arguments(6)]
     [Arguments(7)]
-    public Task CorruptRetainedHeadRefusesWholeProducerOrPurgeThenExactRepairOriginalReceiptsAndQuotaReleaseSurviveTwoColdCuts(int fault)
+    public Task CorruptRetainedHeadRefusesWholeProducerOrPurgeThenExactRepairAndOriginalReceiptsSurviveTwoColdCuts(int fault)
         => OutboxHeadAuthorityFlow.RunAsync(fault);
 }

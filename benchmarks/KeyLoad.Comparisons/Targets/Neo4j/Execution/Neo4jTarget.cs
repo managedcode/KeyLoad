@@ -137,7 +137,7 @@ public sealed partial class Neo4jTarget(HttpClient http, string runId, string im
         {
             if (ownsConstraint)
             {
-                await ExecuteAsync(Neo4jQueryRequests.DeleteNodes(label), null, timeout.Token);
+                await Neo4jNamespaceCleanup.DeleteNodesAsync(QueryAsync, label, timeout.Token);
                 await ExecuteAsync(Neo4jQueryRequests.DropConstraint(label), null, timeout.Token);
             }
         }

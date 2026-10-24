@@ -9,7 +9,6 @@ namespace KeyLoad.UnitTests.Search;
 internal static class AnnPublicReservationFlow
 {
     private const long ResidentBytes = 1_048_576;
-    private const int Readers = 2;
     private const long OneByte = 1;
     private const long NoBytes = 0;
     private const int Split = 2;
@@ -38,7 +37,7 @@ internal static class AnnPublicReservationFlow
                 await Assert.That(page.ThroughSequence).IsEqualTo(source.Cut.OutboxTail);
                 var intent = AnnMaintenanceTestData.Intent(page);
                 await using var owner = AnnOwnership.Create(database.Directory, database.Store.Identity,
-                    Options.Create(options), policy, Options.Create(new PackedAnnStorageOptions()), Readers);
+                    Options.Create(options), policy, Options.Create(new PackedAnnStorageOptions()));
                 await ServerFailureObserver.ObserveAsync(async () =>
                 {
                     _ = await owner.RunAsync(_ => owner.BuildAndPublish(pin, source, intent,

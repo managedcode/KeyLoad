@@ -19,7 +19,6 @@ internal sealed class ModelHeadAuthorityFixture : IDisposable
     internal StreamRef Source => new(Harness.Partition, Events, Stream, 1L);
     internal static string Payload(string visible) => "{\"visible\":\"" + visible + "\",\"secret\":\"" + Secret + "\"}";
     internal static string Headers => "{\"trace\":\"source\",\"privateHeader\":\"" + Secret + "\"}";
-    internal static string StoredPayload(string visible) => "{\"secret\":\"" + Secret + "\",\"visible\":\"" + visible + "\"}";
     internal static string StoredHeaders => "{\"privateHeader\":\"" + Secret + "\",\"trace\":\"source\"}";
     internal async Task InitializeAsync()
     {

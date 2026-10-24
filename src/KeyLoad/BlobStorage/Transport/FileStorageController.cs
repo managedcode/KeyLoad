@@ -56,7 +56,7 @@ internal sealed partial class FileStorageController(IFileSystemStorage storage, 
         var metadata = await FileUploadPublication.ExecuteAsync(Files, reserved, async (staged, token) =>
         {
             var result = await base.UploadStreamAsync(FilePhysicalIdentity.Object(staged.ObjectId), staged.ContentType, null, token);
-            return result.IsSuccess ? result.Value! : throw Errors.Fail(ErrorCode.OwnershipLost, FileStorageProtocol.Invalid);
+            return result.IsSuccess ? result.Value : throw Errors.Fail(ErrorCode.OwnershipLost, FileStorageProtocol.Invalid);
         }, cancellationToken);
         return Result<BlobMetadata>.Succeed(metadata);
     }

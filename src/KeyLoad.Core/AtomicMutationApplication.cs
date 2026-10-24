@@ -14,7 +14,7 @@ public static class AtomicMutationApplication
     internal const int AtomicMutationApplicationEmptyElementCount = 0;
     internal const string UnsupportedMutationMessage = "The mutation is unsupported.";
     internal const string DocumentEpochSpace = "document-epoch";
-    internal static ImmutableArray<MutationReceipt> ApplyMutations(this DatabaseEngine engine, IAtomicTransaction tx, PrincipalRecord principal, PartitionRef partition, ImmutableArray<Mutation> mutations, DateTimeOffset now, long position, bool allowOutboxProgressReserve = false, CommitToken? commitToken = null, Command<DatabaseCommand>? operation = null, bool preparingComposition = false, ReadExecutionBudget? compositionBudget = null)
+    internal static ImmutableArray<MutationReceipt> ApplyMutations(this DatabaseEngine engine, IAtomicTransaction tx, PrincipalRecord principal, PartitionRef partition, ImmutableArray<Mutation> mutations, DateTimeOffset now, long position, CommitToken? commitToken = null, Command<DatabaseCommand>? operation = null, bool preparingComposition = false, ReadExecutionBudget? compositionBudget = null)
     {
         var token = commitToken ?? engine.Token(tx, partition, position);
         var receipts = ImmutableArray.CreateBuilder<MutationReceipt>(mutations.Length);
@@ -57,7 +57,7 @@ public static class AtomicMutationApplication
 
             receipts.Add(receipt);
             var after = image?.After;
-            engine.AppendOutbox(tx, partition, new(AtomicMutationApplicationInitialSequence, receipts.Count - AtomicMutationApplicationAdjacentElementOffset, token, now, mutation, receipt, before, after), allowOutboxProgressReserve);
+            engine.AppendOutbox(tx, partition, new(AtomicMutationApplicationInitialSequence, receipts.Count - AtomicMutationApplicationAdjacentElementOffset, token, now, mutation, receipt, before, after));
             if (before is not null && after is not null && before.Access != after.Access)
             {
                 ChangeFeedsExecutionChangeFeeds.AdvanceVisibilityEpoch(tx, partition, mutation.Resource);

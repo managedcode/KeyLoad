@@ -13,7 +13,6 @@ internal static class BudgetedQueueReceiveOutcomeProtocol
     internal const string AfterGrant = "queue-secret-after";
     internal const string Payload = "{\"public\":\"visible\",\"secret\":\"private-payload\"}";
     internal const string Headers = "{\"trace\":\"visible\",\"secret\":\"private-header\"}";
-    internal const string CanonicalHeaders = "{\"secret\":\"private-header\",\"trace\":\"visible\"}";
     internal const string EnqueueKind = "enqueue";
     internal const string AckKind = "Ack";
     internal const string Refusal = "The current resource policy protects data retained in the original delivery.";

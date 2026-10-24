@@ -112,7 +112,8 @@ internal static class SafeProjectorOperationMutations
             KeySpace.PartitionOutcome(owner.Source.Partition, SafeProjectorOperationProtocol.Reader, id),
             KeySpace.OutcomeLocator(owner.Source.Partition, SafeProjectorOperationProtocol.Reader, id),
             KeySpace.ClockBytes,
-            KeySpace.AppliedBytes
+            KeySpace.AppliedBytes,
+            KeySpace.LastCommandBytes
         }.Select(key => Convert.ToHexString(key) + Separator).ToArray();
         return TeamRowPolicyAssertions.Image(owner.Store).Where(row =>
             !excluded.Any(key => row.StartsWith(key, StringComparison.Ordinal))).ToArray();

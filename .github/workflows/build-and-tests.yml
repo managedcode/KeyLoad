@@ -27,13 +27,21 @@ jobs:
         shell: pwsh
         run: tests/KeyLoad.IntegrationTests/bin/Debug/net10.0/playwright.ps1 install --with-deps chromium
       - name: Test code analyzers
-        run: dotnet test --project tests/KeyLoad.Analyzers.Tests/KeyLoad.Analyzers.Tests.csproj --no-build --output Detailed
+        run: dotnet test --project tests/KeyLoad.Analyzers.Tests/KeyLoad.Analyzers.Tests.csproj --no-build --output Detailed --report-trx --results-directory "$GITHUB_WORKSPACE/TestResults/analyzers"
       - name: Test units
         if: ${{ !cancelled() }}
-        run: dotnet test --project tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj --no-build --output Detailed --maximum-parallel-tests "$(nproc)"
+        run: dotnet test --project tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj --no-build --output Detailed --maximum-parallel-tests "$(nproc)" --report-trx --results-directory "$GITHUB_WORKSPACE/TestResults/units"
       - name: Test process recovery
         if: ${{ !cancelled() }}
-        run: dotnet test --project tests/KeyLoad.RecoveryTests/KeyLoad.RecoveryTests.csproj --no-build --output Detailed
+        run: dotnet test --project tests/KeyLoad.RecoveryTests/KeyLoad.RecoveryTests.csproj --no-build --output Detailed --report-trx --results-directory "$GITHUB_WORKSPACE/TestResults/recovery"
       - name: Test Aspire topology
         if: ${{ !cancelled() }}
-        run: dotnet test --project tests/KeyLoad.IntegrationTests/KeyLoad.IntegrationTests.csproj --no-build --output Detailed --treenode-filter '/*/*/*/*[Category!=HeavyLoad]'
+        run: dotnet test --project tests/KeyLoad.IntegrationTests/KeyLoad.IntegrationTests.csproj --no-build --output Detailed --treenode-filter '/*/*/*/*[Category!=HeavyLoad]' --timeout 100m --report-trx --results-directory "$GITHUB_WORKSPACE/TestResults/integration"
+      - name: Save test results
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: build-and-tests-results
+          path: TestResults/**
+          if-no-files-found: warn
+          retention-days: 30

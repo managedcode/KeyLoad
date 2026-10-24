@@ -4,14 +4,16 @@ namespace KeyLoad.RecoveryTests.OrleansExecution;
 [ConfigurationOptions]
 internal sealed record RuntimeTestOptions
 {
-    private const int StartupSeconds = 30;
+    // A host start builds the MCP tool-search graph; full-text indexing in that graph is serialized process-wide,
+    // so parallel host starts queue behind each other.
+    private const int StartupSeconds = 60;
     private const int ShutdownSeconds = 30;
     private const int CompletionSeconds = 20;
     private const int PollMilliseconds = 25;
     private const int RetryMilliseconds = 50;
-    private const int RestartHeldJobSeconds = 90;
+    private const int RestartHeldJobSeconds = 110;
     private const int MaximumTimeoutSeconds = 60;
-    private const int MaximumRestartTimeoutSeconds = 120;
+    private const int MaximumRestartTimeoutSeconds = 130;
 
     internal TimeSpan StartupTimeout { get; init; } = TimeSpan.FromSeconds(StartupSeconds);
     internal TimeSpan ShutdownTimeout { get; init; } = TimeSpan.FromSeconds(ShutdownSeconds);

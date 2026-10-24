@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -6,16 +7,18 @@ namespace KeyLoad.Comparisons.Targets;
 
 /// <summary>Runs the comparison workload against an owned MongoDB database.</summary>
 /// <param name="connectionString">MongoDB connection string for the selected topology.</param>
+/// <param name="memberEndpoints">Published client endpoints of the replica-set members, in seed-list order.</param>
 /// <param name="runId">Stable run identifier used to isolate the benchmark database.</param>
 /// <param name="image">Server image recorded in comparison provenance.</param>
 /// <param name="topology">Requested one, two or three execution members.</param>
 /// <param name="lifecycleOptions">Centrally validated execution lifecycle policy.</param>
 /// <param name="runtimeExecutionOptions">Centrally validated execution adapter execution policy.</param>
 /// <param name="provider">Borrowed clock; defaults to the system provider.</param>
-public sealed partial class MongoTarget(string connectionString, string runId, string image, ComparisonTopology topology,
+public sealed partial class MongoTarget(string connectionString, ImmutableArray<Uri> memberEndpoints, string runId, string image, ComparisonTopology topology,
     IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<ComparisonExecutionOptions> runtimeExecutionOptions, TimeProvider? provider = null) : IDocumentComparisonTarget
 {
     private readonly TimeProvider timeProvider = provider ?? TimeProvider.System;
+    private readonly MongoMemberAddresses memberAddresses = MongoMemberAddresses.Create(connectionString, memberEndpoints);
     private readonly IOptions<ComparisonExecutionOptions> executionOptions = ComparisonExecutionOptions.Require(runtimeExecutionOptions);
 
     private readonly string databaseName = MongoSchema.DatabasePrefix + Guid.Parse(runId).ToString(MongoSchema.InvariantFormat);
@@ -57,7 +60,7 @@ public sealed partial class MongoTarget(string connectionString, string runId, s
             };
         }
         corpusCount = dataset.Documents.Count;
-        var settings = CreateSettings(connectionString, dataset.Settings.Concurrency, executionOptions);
+        var settings = CreateSettings(dataset.Settings.Concurrency);
         primaryClient = new MongoClient(settings);
         ownedClients.Add(primaryClient);
         database = primaryClient.GetDatabase(databaseName);
@@ -87,7 +90,7 @@ public sealed partial class MongoTarget(string connectionString, string runId, s
         };
         if (ComparisonTopologies.NodeCount(topology) > SingleItemCount)
         {
-            var proof = await MongoReplicaVerifier.VerifyAsync(connectionString: connectionString,
+            var proof = await MongoReplicaVerifier.VerifyAsync(connectionString: connectionString, memberAddresses: memberAddresses,
                 adminDatabase: primaryClient.GetDatabase(MongoSchema.AdminDatabase), database: database, documents: documents,
                 topology: topology, dataset: dataset, cancellationToken: cancellationToken, lifecycleOptions: lifecycleOptions,
                 executionOptions: executionOptions, timeProvider: timeProvider);
@@ -155,9 +158,8 @@ public sealed partial class MongoTarget(string connectionString, string runId, s
     internal string StreamName(BenchmarkDocument document)
         => MongoSchema.DatabasePrefix + databaseName + MongoSchema.DatabaseSeparator + document.Id;
 
-    internal static MongoClientSettings CreateSettings(string connectionString, int concurrency,
-        IOptions<ComparisonExecutionOptions> executionOptions)
-        => MongoProfileFactory.CreateSettings(connectionString, concurrency, executionOptions);
+    internal MongoClientSettings CreateSettings(int concurrency)
+        => memberAddresses.Apply(MongoProfileFactory.CreateSettings(connectionString, concurrency, executionOptions));
 
     private async Task CreateIndexesAsync(CancellationToken cancellationToken)
     {

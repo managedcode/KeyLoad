@@ -12,9 +12,6 @@ internal sealed record ServerRuntimeOptions(
     IOptions<ReplicaCopyOptions> Copies,
     IOptions<DueCoordinationOptions> DueCoordination,
     IOptions<RuntimeDurableJobOptions> DurableJobs,
-    IOptions<CommandAdmissionLimits> CommandAdmission,
-    IOptions<HttpAdmissionLimits> HttpAdmission,
-    IOptions<McpMemoryLimits> McpMemory,
     IOptions<McpExecutionOptions> McpExecution,
     IOptions<ZoneTreeStorageExecutionOptions> StorageExecution,
     IOptions<ZoneTreePointCacheExecutionOptions> PointCache,
@@ -32,9 +29,6 @@ internal sealed record ServerRuntimeOptions(
         Copies.Value.Validate();
         _ = DueCoordination.Value;
         _ = DurableJobs.Value;
-        _ = CommandAdmission.Value;
-        _ = HttpAdmission.Value;
-        _ = McpMemory.Value;
         _ = McpExecution.Value;
         _ = StorageExecution.Value;
         _ = PointCache.Value;

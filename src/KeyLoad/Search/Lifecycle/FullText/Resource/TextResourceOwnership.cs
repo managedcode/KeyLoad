@@ -51,10 +51,6 @@ internal sealed partial class TextResourceOwnership(IOptions<TextExecutionOption
         {
             budget?.Check();
             Check(budget);
-            if (leases >= options.Value.MaximumActiveLeases)
-            {
-                throw TextErrors.Busy();
-            }
             leases++;
             return new(this, null);
         }

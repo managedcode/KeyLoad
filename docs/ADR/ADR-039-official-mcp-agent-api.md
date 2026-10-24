@@ -71,7 +71,6 @@ request.CommandId. MCP request IDs and Orleans actor IDs never replace them.
 | keyload_projections_read | ReadProjectionBatchRequest | ProjectionBatch | /admin/projections/read; ProjectionBatch |
 | keyload_search_execute | SearchRequest | RankedDocument array | /search; Search |
 | keyload_admin_backup | none | BackupReceipt | /admin/backup; Backup |
-| keyload_admin_admission | none | NodeAdmissionStatus | /admin/admission; Admission |
 | keyload_admin_status | none | NodeStatus | /status; NodeStatus |
 | keyload_documents_commit | CommandRequest | CommitReceipt | /commands; Batch |
 | keyload_messages_receive | ReceiveRequest | ReceiveResult | /queues/receive; Receive |
@@ -113,26 +112,23 @@ and nullable/array/primitive canonical values. TextContent is a short summary,
 never a second full serialized result. The total MCP response has its own explicit
 bounded envelope limit above the existing 16 MiB canonical reply limit.
 
-## Admission, cancellation and resources
+## Request bounds, cancellation and resources
 
-Before SDK parsing, a separate bounded ingress lease reserves the framed
-body and parse working set. A strict UTF8/JSON resource preflight bounds
-depth/tokens/properties and rejects duplicate names in a private bounded wire
-buffer; it does not implement the MCP protocol. Incoming SDK filters then acquire
-the existing HttpAdmissionGovernor using the actual catalog route and full frame
-byte count, binding the fresh principal before typed arguments allocation.
-Whitespace and RPC metadata count toward the existing body ceiling, including the
-64KiB default control-frame ceiling. A memory-only supplement covers retained
-frame/output transformations; it adds no command/authority quotas.
-Only after canonical plus supplemental coverage replaces ingress may ingress
-release. It does not wait for database execution. Delivery/SubscriptionDelivery/
-SetDispatch preserve the control reserve and heavy reads preserve their working
-set. Control replies are bounded64KiB; data replies retain the existing16MiB
-canonical ceiling. Owned body/result documents and leases survive execution
-SerializeToNode/SSE writes until the middleware pipeline and actual session drain
-finish. Exact named component accounting is in the plan; source reservations are
-not a measured heap guarantee. Ingress exhaustion fails closed for all callers;
-the control-progress guarantee applies to execution data saturation.
+The MCP POST body is bounded by the server-wide request body limit
+(`KeyLoad:ServerExecution:MaximumBodyBytes`), the same limit as every other route;
+a declared `Content-Length` above it is rejected before the body is read. A strict
+UTF8/JSON resource preflight bounds depth/tokens/properties and rejects duplicate
+names in a private bounded wire buffer; it does not implement the MCP protocol.
+Incoming SDK filters then authenticate the fresh persisted principal and select the
+actual catalog operation before typed arguments allocation. The canonical payload
+ceiling equals the server body limit; whitespace and RPC metadata count toward it.
+Delivery/SubscriptionDelivery/SetDispatch replies use the control reply ceiling
+(`McpExecutionOptions.MaximumControlReplyBytes`, default 64 KiB); other replies use
+the data reply ceiling (`MaximumDataReplyBytes`, the existing 16 MiB canonical
+ceiling). Owned body/result documents survive execution SerializeToNode/SSE writes
+until the middleware pipeline and actual session drain finish. No request-count,
+concurrency or retained-memory pool applies to MCP callers
+([ADR-145](ADR-145-no-request-throttling.md)).
 
 Stateless calls pass handler cancellation and RequestAborted. Cancellation
 notifications on another stateless HTTP request cannot target an earlier call.

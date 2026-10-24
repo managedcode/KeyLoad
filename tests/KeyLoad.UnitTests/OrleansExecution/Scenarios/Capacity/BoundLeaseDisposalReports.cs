@@ -25,7 +25,7 @@ internal static class BoundLeaseDisposalReports
         {
             var failure = Assert.ThrowsExactly<KeyLoadException>(() =>
                 unexpected = owner.Acquire(requestId, RequestWorkKind.RequestProducer));
-            await Assert.That(failure.Code).IsEqualTo(ErrorCode.ResourceExhausted);
+            await Assert.That(failure.Code).IsEqualTo(ErrorCode.Conflict);
         }
         finally
         {

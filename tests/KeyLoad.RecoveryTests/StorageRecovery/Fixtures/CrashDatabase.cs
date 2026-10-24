@@ -10,10 +10,10 @@ namespace KeyLoad.RecoveryTests;
 
 internal static class CrashDatabase
 {
-    internal static DatabaseEngine Create(ZoneTreeStore store, bool boundOutbox = false,
+    internal static DatabaseEngine Create(ZoneTreeStore store,
         string tenantId = CrashFixtureValues.System, DatabaseLimits? configuredLimits = null)
     {
-        var database = new DatabaseEngine(store, new AuthorizationPolicy(), configuredLimits is null ? CrashExecutionOptions.DatabaseLimits(boundOutbox) : CrashExecutionOptions.DatabaseLimits(configuredLimits),
+        var database = new DatabaseEngine(store, new AuthorizationPolicy(), CrashExecutionOptions.DatabaseLimits(configuredLimits),
             CrashExecutionOptions.DueWork(), CrashExecutionOptions.EventSource(), CrashExecutionOptions.Messaging(),
             CrashExecutionOptions.GraphExecution(), CrashExecutionOptions.ChangeFeedExecution(), CrashExecutionOptions.RuntimeClaimsExecution(), CrashExecutionOptions.TimeSeriesExecution());
         database.Bootstrap(new(CrashFixtureValues.Principal, tenantId,

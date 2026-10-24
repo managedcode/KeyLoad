@@ -61,14 +61,6 @@ configuration reads, policy sinks or execution owner injection, and adds no JSON
 field or serializer behavior. Calculated workload selections instead expose the
 actual factory's IOptions.Value; their execution path consumes that wrapper.
 
-Benchmark composition also binds the isolated HTTP admission scenario and its
-replay pools before container creation. The same configured HTTP scenario
-values are forwarded to the runner and derived into node and observer options;
-replay pools are bound independently from ordinary production defaults. Existing
-32-slot/2-GiB HTTP and 835,584-nonce defaults remain unchanged. Actual configured
-values must reach the generated resource environments and matching runtime
-observers; the real admission/replay regressions cover rejection and cleanup.
-
 AppHost resource observation binds ScaleServerResourceOptions before graph
 composition and shares the same wrapper through collector/process/helper joins.
 Configured sampling, cleanup, file/output and work budgets must retain their actual
@@ -102,7 +94,7 @@ contracts define runtime policy ownership and do not add database features.
 
 The registries group actual owners: Core database/due-work/messaging/query/
 graph/change-feed/time-series/search/cache execution; Server node-derived authority,
-replication/transport/routing/admission/MCP/probe/text/restore/admin
+replication/transport/routing/MCP/probe/text/restore/admin
 execution; AppHost startup/selectors/test/process/image/profile/cluster composition/
 benchmark deployment and observation. CLI and comparison hosts use execution
 OptionsFactory/OptionsManager before client or file construction. Strict immutable
@@ -148,13 +140,7 @@ same-named source types must not impersonate those framework symbols.
 The options groups also own grain reply initial reservation, administrator
 failure-log retention and Mongo/KeyLoad/Redis/OpenSearch seed batches. Preserve
 defaults 4096/50/256/100/256/64 and their
-inclusive ceilings. Actual allocation and chunking owners consume the snapshot;
-command inbox scheduling uses its
-own nonserialized `KeyLoad:CommandInboxExecution` group, with configurable
-MaximumControlBurst 1..8 and the original default 8. Keep the immutable fairness
-ceiling 8 and every existing admission Id/JSON contract; central server binding,
-borrowed silo registration and physical coordinator construction share the same
-validated wrapper. Configured lower-burst tests verify actual dequeue ordering.
+inclusive ceilings. Actual allocation and chunking owners consume the snapshot.
 
 MongoDB replica-probe and seeded-copy verification consume the same centrally
 bound ComparisonExecutionOptions.OperationTimeout as their target;

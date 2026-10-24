@@ -72,7 +72,7 @@ internal static class GraphReferenceLifetimeRefusals
     {
         byte[][] journal = [KeySpace.PartitionOutcome(DropRuntimeProtocol.Partition, PartitionStoreProtocol.AdministratorId, id),
             KeySpace.OutcomeLocator(DropRuntimeProtocol.Partition, PartitionStoreProtocol.AdministratorId, id),
-            KeySpace.Clock.ToArray(), KeySpace.AppliedBytes];
+            KeySpace.Clock.ToArray(), KeySpace.AppliedBytes, KeySpace.LastCommandBytes];
         var prefixes = journal.Select(key => Convert.ToHexString(key) + ":").ToArray();
         return QueueWholeFlowStorage.Bytes(profile.Source.Store)
             .Where(row => !prefixes.Any(prefix => row.StartsWith(prefix, StringComparison.Ordinal))).ToArray();

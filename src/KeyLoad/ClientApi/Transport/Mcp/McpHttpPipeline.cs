@@ -1,4 +1,3 @@
-using KeyLoad.Core;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Options;
 
@@ -12,11 +11,10 @@ internal static class McpHttpPipeline
     /// <summary>Owns the private replay and all leases until the execution endpoint has finished draining.</summary>
     internal static async Task RunAsync(HttpContext context, RequestDelegate next)
     {
-        var governor = context.RequestServices.GetRequiredService<HttpAdmissionGovernor>();
         var executionOptions = context.RequestServices.GetRequiredService<IOptions<McpExecutionOptions>>();
-        var capacity = Capacity(context.Request, governor.Limits.MaxBodyBytes);
-        using var state = new McpRequestState(governor: governor, memory: context.RequestServices.GetRequiredService<McpMemoryBudget>(),
-            capacity: capacity, cancellationToken: context.RequestAborted, options: executionOptions);
+        var maximumBodyBytes = context.RequestServices.GetRequiredService<IOptions<ServerExecutionOptions>>().Value.MaximumBodyBytes;
+        RequireBodyLength(context.Request, maximumBodyBytes);
+        using var state = new McpRequestState(maximumBodyBytes, executionOptions);
         var originalBody = context.Request.Body;
         McpFrameBody? pendingBody = null;
         try
@@ -27,9 +25,9 @@ internal static class McpHttpPipeline
             context.Items[ServerProtocol.PrincipalItem] = state.Principal;
             if (HttpMethods.IsPost(context.Request.Method))
             {
-                SetBodyLimit(context, governor.Limits.MaxBodyBytes);
+                SetBodyLimit(context, maximumBodyBytes);
                 pendingBody = await McpFrameBody.ReadAsync(originalBody, context.Request.ContentLength,
-                    governor.Limits.MaxBodyBytes, executionOptions, context.RequestAborted);
+                    maximumBodyBytes, executionOptions, context.RequestAborted);
                 McpTransportGuard.Inspect(pendingBody.Bytes, headers);
                 context.Request.Body = pendingBody.OpenReader();
                 state.Attach(pendingBody);
@@ -37,7 +35,7 @@ internal static class McpHttpPipeline
             }
             else
             {
-                state.Admit(default, context.RequestAborted);
+                state.Admit(default);
             }
             await next(context);
         }
@@ -56,17 +54,12 @@ internal static class McpHttpPipeline
         }
     }
 
-    private static int Capacity(HttpRequest request, int maximumBytes)
+    private static void RequireBodyLength(HttpRequest request, int maximumBytes)
     {
-        if (!HttpMethods.IsPost(request.Method))
-        {
-            return 0;
-        }
-        if (request.ContentLength is < 0 || request.ContentLength > maximumBytes)
+        if (HttpMethods.IsPost(request.Method) && (request.ContentLength is < 0 || request.ContentLength > maximumBytes))
         {
             throw Errors.Fail(ErrorCode.ResourceExhausted, ServerProtocol.BodyExceeded);
         }
-        return checked((int)(request.ContentLength ?? maximumBytes));
     }
 
     private static void SetBodyLimit(HttpContext context, int maximumBytes)

@@ -2,7 +2,6 @@ using KeyLoad.Clustering;
 using KeyLoad.Core.ResourceExecution;
 using KeyLoad.RecoveryTests.ResourceExecution;
 using KeyLoad.Server;
-using Microsoft.Extensions.Options;
 
 namespace KeyLoad.UnitTests.StorageRecovery;
 
@@ -15,12 +14,12 @@ internal sealed class UserAnalyticsHostBoundWork : IAsyncDisposable
 
     private readonly RequestWorkOwner owner;
 
-    private UserAnalyticsHostBoundWork(IOptions<GrainRoutingOptions> routing)
-        => owner = new RequestWorkOwner(routing);
+    private UserAnalyticsHostBoundWork()
+        => owner = new RequestWorkOwner();
 
-    internal static async Task<UserAnalyticsHostBoundWork> OpenAsync(IOptions<GrainRoutingOptions> routing, CancellationToken token)
+    internal static async Task<UserAnalyticsHostBoundWork> OpenAsync(CancellationToken token)
     {
-        var work = new UserAnalyticsHostBoundWork(routing);
+        var work = new UserAnalyticsHostBoundWork();
         try
         {
             token.ThrowIfCancellationRequested();

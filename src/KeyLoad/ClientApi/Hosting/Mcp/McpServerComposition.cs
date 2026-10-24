@@ -29,7 +29,6 @@ internal static class McpServerComposition
             services.GetRequiredService<IOptions<McpExecutionOptions>>()));
         builder.Services.AddHostedService(services => new McpGatewayCatalogWarmup(
             services.GetRequiredService<McpGatewayCatalogOwner>()));
-        builder.Services.AddSingleton<McpMemoryBudget>();
         builder.Services.AddMcpServer(options =>
         {
             options.ProtocolVersion = McpTransportProtocol.Revision;

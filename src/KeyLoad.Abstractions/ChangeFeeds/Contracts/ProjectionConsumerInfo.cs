@@ -10,12 +10,6 @@ namespace KeyLoad;
 public sealed record ProjectionConsumerInfo([property: Orleans.Id(0)] ProjectionConsumerRef Consumer, [property: Orleans.Id(1)] ProjectionConsumerDefinition Definition,
     [property: Orleans.Id(2)] long Checkpoint, [property: Orleans.Id(3)] bool Released)
 {
-    private const int NoProgressReservationCut = -1;
-
-    /// <summary>Gets the latest reserve-using commit cut recorded for this consumer.</summary>
-    [Orleans.Id(4)]
-    public long LastProgressReservationCut { get; init; } = NoProgressReservationCut;
-
     /// <summary>Gets the authenticated immutable original maintenance configuration authority.</summary>
     [Orleans.Id(5), System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public ProjectionMaintenanceAuthority? MaintenanceAuthority

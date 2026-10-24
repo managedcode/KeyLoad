@@ -38,7 +38,7 @@ internal sealed record FunctionalGateContext(
         if (observed.IsFailed)
         {
             await Assert.That(observed.IsSuccess).IsTrue().Because(
-                $"SDK failed with {observed.Problem?.ErrorCode}: {BoundedDetail(observed.Problem?.Detail)}");
+                $"SDK failed with {observed.Problem.ErrorCode}: {BoundedDetail(observed.Problem.Detail)}");
         }
         var value = await McpCallerAssertions.SdkSuccessAsync(observed);
         Interlocked.Increment(ref sdkOperations);
@@ -51,7 +51,7 @@ internal sealed record FunctionalGateContext(
         if (observed.IsFailed)
         {
             await Assert.That(observed.IsSuccess).IsTrue().Because(
-                $"SDK failed with {observed.Problem?.ErrorCode}: {BoundedDetail(observed.Problem?.Detail)}");
+                $"SDK failed with {observed.Problem.ErrorCode}: {BoundedDetail(observed.Problem.Detail)}");
         }
         await McpCallerAssertions.SdkStatusAsync(observed);
         Interlocked.Increment(ref sdkOperations);

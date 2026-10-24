@@ -59,7 +59,7 @@ internal static class PartitionQueryClusterSiloRestart
         await ClusterReplicationTestSupport.EventuallyAsync(async () =>
         {
             var status = await sdk.StatusAsync(cancellationToken).ConfigureAwait(false);
-            return status.IsSuccess && status.Value!.RoutingReady;
+            return status.IsSuccess && status.Value.RoutingReady;
         }, cancellationToken).ConfigureAwait(false);
         var target = scenario.Partitions[1];
         var row = new PartitionQueryClusterInputRow(target, AddedId, 0, AddedValue);
@@ -122,7 +122,7 @@ internal static class PartitionQueryClusterSiloRestart
             await ClusterReplicationTestSupport.EventuallyAsync(async () =>
             {
                 var status = await sdk.StatusAsync(cancellationToken).ConfigureAwait(false);
-                return status.IsSuccess && status.Value!.RoutingReady;
+                return status.IsSuccess && status.Value.RoutingReady;
             }, cancellationToken).ConfigureAwait(false);
         }
     }

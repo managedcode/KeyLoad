@@ -7,7 +7,6 @@ internal sealed class ConnectionOperationOwner : IAsyncDisposable
 {
     private readonly CancellationTokenSource shutdown = new();
     private readonly HashSet<Guid> active = [];
-    private readonly int maximumOperations;
     private TaskCompletionSource? drained;
     private Task? closing;
     private Task? disposal;
@@ -17,7 +16,6 @@ internal sealed class ConnectionOperationOwner : IAsyncDisposable
     {
         ArgumentNullException.ThrowIfNull(options);
         options.Value.Validate();
-        maximumOperations = options.Value.MaximumConnectionOperations;
     }
 
     internal CancellationToken ShutdownToken => shutdown.Token;
@@ -42,9 +40,9 @@ internal sealed class ConnectionOperationOwner : IAsyncDisposable
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, RequestWorkLimits.AdmissionClosedMessage);
         }
-        if (active.Count >= maximumOperations || active.Contains(requestId))
+        if (active.Contains(requestId))
         {
-            throw Errors.Fail(ErrorCode.ResourceExhausted, RequestWorkLimits.CapacityMessage);
+            throw Errors.Fail(ErrorCode.Conflict, RequestWorkLimits.DuplicateMessage);
         }
         active.Add(requestId);
         return new(this, requestId);

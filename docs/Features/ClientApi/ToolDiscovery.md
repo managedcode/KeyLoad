@@ -59,10 +59,12 @@ flowchart LR
   targets and direct calls to the removed public operation-tool names fail
   before effects. The invocation cannot recursively target a gateway meta tool.
 - The incoming message filter selects the inner canonical descriptor
-  before typed argument conversion. One original route-specific HTTP admission
-  lease charges the entire outer frame and authenticated identity. Control
-  search/route/list calls retain the existing control lane. The outer meta call
-  never downgrades a write, delivery, backup or blob call into a discovery lane.
+  before typed argument conversion. The server-wide request body limit bounds the
+  entire outer frame, and the persisted identity is authenticated once per
+  request. Gateway search/route/list calls use the control reply ceiling; an
+  invocation uses the reply class of its inner canonical operation. The outer meta
+  call never downgrades a write, delivery, backup or blob call into a discovery
+  reply class.
 - Register one immutable bounded metadata catalog through `IMcpGatewayFactory`
   and normal `McpGatewayOptions.AddTool`, using real local `AIFunction` adapters.
   Each adapter observes the current HttpContext and admitted descriptor; it
@@ -105,8 +107,8 @@ how to search/route relevant tools, inspect the returned schema/effect hints,
 invoke with exact arguments, paginate reads and retain a write identity for
 uncertain outcomes. Include one valid search and no-body invocation example;
 do not invent typed data mutations or advertise unfinished conformance.
-Fresh persisted authentication and the existing control admission/reply budgets
-apply to list/read/get on every request. These static surfaces expose no data,
+Fresh persisted authentication and the control reply ceiling apply to
+list/read/get on every request. These static surfaces expose no data,
 resource inventories, credentials or principal context, and introduce no extra
 operation tool. Return fresh resource/prompt objects; terminal list cursors
 are null. Reject nonempty cursors, unknown URI/name, and prompt arguments before
@@ -120,8 +122,8 @@ The metadata index admits at most 256 canonical operations and at most 4 MiB of
 serialized immutable operation metadata before graph construction. Execution
 descriptor search text is at most 4096 characters. These bound inputs and catalog
 growth; measured total graph allocation/peak RAM is a separate acceptance gate,
-not inferred from a result-count setting. Node control/data/ingress budgets,
-payload/reply bounds, concurrency, scope quotas and cancellation remain intact.
+not inferred from a result-count setting. The server request body limit,
+payload/reply bounds and cancellation remain intact.
 
 Warm the real graph once as host-owned startup work; failure fails
 startup/readiness instead of publishing a healthy empty index. Rebuild after
@@ -151,7 +153,7 @@ failed graph index is a failure, never permission to revive the previous route.
 | REQ-MCPGW-001 compact official discovery | AC-MCPGW-001: real official client lists exactly the three names, valid strict schemas/hints, no canonical tool page; nonempty cursor and direct/recursive/unknown invocation fail before effects | UnitTests ClientApi gateway catalog/oracles; IntegrationTests ClientApi real discovery |
 | REQ-MCPGW-002 graph relevance | AC-MCPGW-002: actual graph index resolves exact names and document/graph/blob/queue/series/SQL tasks to actual relevant canonical tools; unique bounded output, exact schemas and effect hints; no invented operation or numeric score; malformed/oversized query/limits reject | gateway graph cases over real canonical metadata; official search-to-invoke scenarios |
 | REQ-MCPGW-003 fresh persisted authority | AC-MCPGW-003: invalid/revoked/expired credentials fail; caller role/context fields cannot elevate; existing policy/row/field denials remain; grants revoked between discovery and invoke take effect; discovery exposes no data/resource/identity | Aspire cluster official SDK grant/credential/revocation and canary cases |
-| REQ-MCPGW-004 one canonical execution | AC-MCPGW-004: every inner route uses original admission/quotas and a fresh signed connection-grain operation; typed success/error/requestId unchanged; same-ID write replay/conflict/unknown-outcome semantics preserved; SDK and gateway effects/results agree | Unit admission/selection/result-owner assertions; real .NET/MCP cluster reads/writes/backup/blob/SQL |
+| REQ-MCPGW-004 one canonical execution | AC-MCPGW-004: every inner route uses its original body and reply bounds and a fresh signed connection-grain operation; typed success/error/requestId unchanged; same-ID write replay/conflict/unknown-outcome semantics preserved; SDK and gateway effects/results agree | Unit selection/reply-ceiling/result-owner assertions; real .NET/MCP cluster reads/writes/backup/blob/SQL |
 | REQ-MCPGW-005 bounded graph and lifecycle | AC-MCPGW-005: catalog/query/count/reply thresholds pass exact limit and reject excess before unsafe allocation/effect; startup index failure is fatal; cancellation drains and releases owners with healthy follow-up; concurrent identities do not cross; cold restart rebuilds metadata and preserves data | Real index/owner/bounds cases; Aspire cluster cancellation/concurrency/restart; measured index allocation/RAM retained separately |
 | REQ-MCPGW-006 privacy and delivery | AC-MCPGW-006: provider/search exceptions produce safe existing failures; diagnostic canaries never appear; only published centrally pinned packages are consumed; Release build/analyzers/formatter, full relevant normal/scalar/recovery and genuine cluster pass with exact source evidence | Source/privacy review, EventSource/Kestrel cases, actual NuGet restore and Linux CI artifacts |
 | REQ-MCPGW-007 agent orientation | AC-MCPGW-007: official SDK lists exactly one guide and one no-argument prompt, reads/gets identical valid Markdown <=8192 UTF8 bytes with actual discovery/invocation instructions; fresh authentication, safe unknown/cursor/argument rejection, cancellation and mutable-object isolation pass | UnitTests ClientApi guidance cases; IntegrationTests ClientApi official resource/prompt and credential cases |

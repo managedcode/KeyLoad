@@ -1,9 +1,8 @@
 using System.Collections.Immutable;
-using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Clustering;
 
-/// <summary>Owns bounded active execution request producers and verified capability frames for one silo.</summary>
+/// <summary>Owns active execution request producers and verified capability frames for one silo.</summary>
 public sealed class RequestWorkOwner : IAsyncDisposable
 {
     private const int GetIsJoinedEmptyRead = 0;
@@ -19,11 +18,9 @@ public sealed class RequestWorkOwner : IAsyncDisposable
     private int isJoined;
 
     /// <summary>Creates an empty silo-local work registry.</summary>
-    /// <param name="options">The centrally validated request and capability admission limits.</param>
-    public RequestWorkOwner(IOptions<GrainRoutingOptions> options)
+    public RequestWorkOwner()
     {
-        ArgumentNullException.ThrowIfNull(options);
-        admissions = new(options);
+        admissions = new();
         shutdownToken = shutdown.Token;
     }
 

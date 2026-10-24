@@ -5,7 +5,6 @@ namespace KeyLoad.Server;
 /// <summary>Composes version-one typed feature routes through distinct Orleans request actors.</summary>
 internal static class ApiEndpoints
 {
-    private const string AdmissionPath = ApiRoutes.AdmissionStatus;
     private const string BackupPath = ApiRoutes.AdminBackup;
     private const string StatusPath = ApiRoutes.Status;
 
@@ -28,8 +27,6 @@ internal static class ApiEndpoints
         ChangeFeedApi.Map(app);
         AuthorizationApi.Map(app);
         AdminDashboardApi.Map(app);
-        app.MapGet(AdmissionPath, (Func<HttpContext, Task<IResult>>)(context =>
-            ApiGrainDispatch.ReadAsync(context, GrainReadKind.Admission)));
         app.MapPost(BackupPath, (Func<HttpContext, Task<IResult>>)(context =>
             ApiGrainDispatch.ReadAsync(context, GrainReadKind.Backup)));
         app.MapGet(StatusPath, (Func<HttpContext, Task<IResult>>)(context =>

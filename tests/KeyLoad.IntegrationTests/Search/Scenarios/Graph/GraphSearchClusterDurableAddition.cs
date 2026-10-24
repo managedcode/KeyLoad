@@ -17,7 +17,7 @@ internal static class GraphSearchClusterDurableAddition
     internal static async Task<CommitReceipt> CommitAsync(KeyLoadClient administrator, CommandRequest command, CancellationToken token)
     {
         var observed = await administrator.CommitAsync(command, token);
-        if (!observed.IsSuccess && observed.Problem?.ErrorCode == nameof(ErrorCode.UnknownWriteOutcome))
+        if (observed.IsFailed && observed.Problem.ErrorCode == nameof(ErrorCode.UnknownWriteOutcome))
         {
             TestContext.Current?.Output.WriteLine(UnknownObservation + command.CommandId.ToString("D"));
             token.ThrowIfCancellationRequested();

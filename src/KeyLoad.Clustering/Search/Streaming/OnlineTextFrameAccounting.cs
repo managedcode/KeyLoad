@@ -4,7 +4,7 @@ namespace KeyLoad.Clustering;
 
 internal sealed class OnlineTextFrameAccounting(IOptions<GrainRoutingOptions> options)
 {
-    private readonly int maximumFrames = options.Value.MaximumTotalFrames;
+    private readonly int maximumFrames = options.Value.MaximumStreamFrames;
     // The connected grain awaited its actual StartedAsync before dispatching this parent body.
     private int observed = 1;
     private const int TaskExchangeMessages = 2;

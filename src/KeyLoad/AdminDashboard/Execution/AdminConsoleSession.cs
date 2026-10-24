@@ -113,9 +113,9 @@ internal sealed class AdminConsoleSession(AdminConsoleConnection connection, IOp
     {
         if (result.IsSuccess)
         {
-            return result.Value!;
+            return result.Value;
         }
-        if (result.Problem?.ErrorCode is nameof(ErrorCode.Unauthenticated) or nameof(ErrorCode.PermissionDenied))
+        if (result.Problem.ErrorCode is nameof(ErrorCode.Unauthenticated) or nameof(ErrorCode.PermissionDenied))
         {
             throw new UnauthorizedAccessException(AdminConsoleText.ReadFailed);
         }

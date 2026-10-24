@@ -3,7 +3,7 @@
 ## Purpose, entry points and ownership
 
 - Owns caller-visible cluster and service integration tests.
-- Main suite files: `StorageReplication/Cases/Cluster/ClusterTests.cs`, `ResourceExecution/Cases/AdmissionClusterTests.cs`; topology fixture: `ClusterFixture.cs`.
+- Main suite files: `StorageReplication/Cases/Cluster/ClusterTests.cs`, `ResourceExecution/Cases/RequestBodyLimitClusterTests.cs`; topology fixture: `ClusterFixture.cs`.
 - Test cases belong under canonical `<SliceName>/` paths; shared cluster fixtures and required infrastructure containers remain test infrastructure. Keep each feature's tests aligned with its docs and public contracts.
 - Preserve node-local ZoneTree ownership (files never move with activations); use real Orleans routing and membership (ADR-136). Do not replace external dependencies with mocks, fakes or in-memory/single-node proofs.
 - Apply the installed Orleans skill for runtime decisions and the Aspire skill for fixture resource composition and lifecycle.

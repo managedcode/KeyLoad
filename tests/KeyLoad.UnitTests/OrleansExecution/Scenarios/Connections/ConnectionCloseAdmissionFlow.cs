@@ -22,7 +22,7 @@ internal static class ConnectionCloseAdmissionFlow
             await callback.Arrived.Task.WaitAsync(token);
             await ConnectionAwaitedSettlementAssertions.ChargedAsync(scenario.Observation.Read(requestId).WorkOwner, requestId);
             await Assert.That(original.IsCompleted).IsFalse();
-            await RefusalsAsync(scenario, second, token);
+            await ConcurrentAsync(scenario, second, token);
             await Assert.That(callback.AdmissionClosed.Task.IsCompleted).IsFalse();
             close = scenario.Connection.CloseAsync(
                 scenario.Fixture.Codec.CreateConnectionClose(scenario.Fixture.ConnectionId), token);
@@ -64,21 +64,22 @@ internal static class ConnectionCloseAdmissionFlow
         KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    private static async Task RefusalsAsync(ConnectionScenario scenario, PrincipalRecord second,
+    private static async Task ConcurrentAsync(ConnectionScenario scenario, PrincipalRecord second,
         CancellationToken token)
     {
-        var command = scenario.Command("close-admission-refused");
+        var concurrent = scenario.Command("close-admission-concurrent");
+        var reply = await ConnectionAwaitedSettlementCalls.CommandAsync(scenario, second, Guid.NewGuid(), concurrent, token);
+        await Assert.That(reply.Error).IsNull();
+        await ConnectionAssertions.StoredAsync(scenario, "close-admission-concurrent", InitialRevision,
+            ConnectionProtocol.FirstJson);
+        var command = scenario.Command("close-admission-cancelled");
         var position = scenario.Fixture.Database.Store.Position;
-        var refused = await Assert.ThrowsAsync<KeyLoadException>(() =>
-            ConnectionAwaitedSettlementCalls.CommandAsync(scenario, second, Guid.NewGuid(), command, token));
-        await Assert.That(refused).IsNotNull();
-        await Assert.That(refused!.Code).IsEqualTo(ErrorCode.ResourceExhausted);
         using var cancelled = CancellationTokenSource.CreateLinkedTokenSource(token);
         await cancelled.CancelAsync();
         await ConnectionAssertions.CancelledAsync(ConnectionAwaitedSettlementCalls.CommandAsync(
             scenario, second, Guid.NewGuid(), command, cancelled.Token));
         await Assert.That(scenario.Fixture.Database.Store.Position).IsEqualTo(position);
-        await ConnectionAssertions.MissingOutcomeAsync(scenario, second, command, "close-admission-refused");
+        await ConnectionAssertions.MissingOutcomeAsync(scenario, second, command, "close-admission-cancelled");
     }
 
     private static async Task ClosedAdmissionAsync(ConnectionScenario scenario,

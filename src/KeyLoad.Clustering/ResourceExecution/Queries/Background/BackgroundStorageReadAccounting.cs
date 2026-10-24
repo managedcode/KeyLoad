@@ -88,7 +88,7 @@ internal static class BackgroundStorageReadAccounting
             || response.ReadBytes > bounds.MaximumReadBytes || response.ExaminedRecords > bounds.MaximumRecords
             || response.Lifetimes.IsEmpty || response.Lifetimes.Length > bounds.MaximumResultBytes
             || response.Result.IsFailed && (Errors.Code(response.Result.Problem) is null
-                || string.IsNullOrEmpty(response.Result.Problem?.Detail))
+                || string.IsNullOrEmpty(response.Result.Problem.Detail))
             || response.Result.IsSuccess && response.Result.Problem is not null
             || OrleansSerialization.Measure(response) > bounds.MaximumResultBytes)
         {

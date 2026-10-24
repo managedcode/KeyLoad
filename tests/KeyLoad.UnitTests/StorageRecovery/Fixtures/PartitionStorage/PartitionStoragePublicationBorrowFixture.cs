@@ -52,7 +52,7 @@ internal sealed class PartitionStoragePublicationBorrowFixture : IAsyncDisposabl
             await execution.InitializeAsync(TestContext.Current!.Execution.CancellationToken).ConfigureAwait(false);
         }
         var runtime = ServerRuntimeTestOptions.Runtime(options);
-        owner = new(runtime, new AuthorizationPolicy(), new CommandAdmissionGovernor(runtime.CommandAdmission),
+        owner = new(runtime, new AuthorizationPolicy(),
             TimeProvider.System, NullLogger<PartitionHost>.Instance, execution.Grains);
         await owner.OpenAsync(execution.Services.GetRequiredService<PartitionHostApplicationOwner>().Session.OwnerContext.Context).ConfigureAwait(false);
     }

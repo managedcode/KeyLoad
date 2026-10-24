@@ -12,10 +12,7 @@ public sealed class GrainRoutingOptions
     public const string ValidationMessage = "Grain request lifetimes must be positive, at most two minutes, and issuance must fit the accepted future window.";
 
     private const int MaximumFutureMinutes = 2;
-    private const int MaximumProducerCount = 64;
     private const int MaximumFrameCount = 128;
-    private const int MaximumConnectionCount = 4_096;
-    private const int MaximumOperationsPerConnection = 8;
     private const int MaximumReplyBytesCeiling = 16_777_216;
     private const int MaximumInitialReplyBufferBytes = 4_096;
     private const int MaximumStartedBytesCeiling = 8_192;
@@ -35,15 +32,9 @@ public sealed class GrainRoutingOptions
     public TimeSpan MaximumFuture { get; set; } = TimeSpan.FromMinutes(MaximumFutureMinutes);
     /// <summary>Gets or sets the cancellation lifetime shared by execution stream producers and consumers.</summary>
     public TimeSpan ExecutionLifetime { get; set; } = TimeSpan.FromMinutes(1);
-    /// <summary>Gets or sets the maximum active request stream producers admitted by one silo.</summary>
-    public int MaximumRequestProducers { get; set; } = MaximumProducerCount;
-    /// <summary>Gets or sets the maximum active request and capability frames admitted by one silo.</summary>
-    public int MaximumTotalFrames { get; set; } = MaximumFrameCount;
+    /// <summary>Gets or sets the frames one long-running response stream can carry, including progress and its terminal frame.</summary>
+    public int MaximumStreamFrames { get; set; } = MaximumFrameCount;
 
-    /// <summary>Gets or sets the admitted physical connections per server node.</summary>
-    public int MaximumConnections { get; set; } = MaximumConnectionCount;
-    /// <summary>Gets or sets the independently executing operations per connection.</summary>
-    public int MaximumConnectionOperations { get; set; } = MaximumOperationsPerConnection;
     /// <summary>Gets or sets idle physical transport expiry while no operation is active.</summary>
     public TimeSpan ConnectionIdleTimeout { get; set; } = MaximumDuration;
 
@@ -84,11 +75,7 @@ public sealed class GrainRoutingOptions
     /// <returns>Whether every configured interval preserves the accepted expiry bounds.</returns>
     public bool IsValid() => IsBounded(RequestLifetime) && IsBounded(MaximumFuture) && IsBounded(ExecutionLifetime)
         && RequestLifetime <= MaximumFuture
-        && MaximumRequestProducers is >= 1 and <= MaximumProducerCount
-        && MaximumTotalFrames is >= 1 and <= MaximumFrameCount
-        && MaximumRequestProducers <= MaximumTotalFrames
-        && MaximumConnections is >= 1 and <= MaximumConnectionCount
-        && MaximumConnectionOperations is >= 1 and <= MaximumOperationsPerConnection
+        && MaximumStreamFrames is >= 1 and <= MaximumFrameCount
         && IsBounded(ConnectionIdleTimeout)
         && MaximumReplyBytes is >= 1 and <= MaximumReplyBytesCeiling
         && InitialReplyBufferBytes is >= 1 and <= MaximumInitialReplyBufferBytes

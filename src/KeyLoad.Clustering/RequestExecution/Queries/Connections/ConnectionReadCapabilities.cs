@@ -125,7 +125,7 @@ internal sealed class ConnectionReadCapabilities(DatabaseEngine localDatabase, I
     private async Task<object?> ReadQueryOrAdministrationAsync(GrainReadKind kind, PrincipalRecord principal,
         DecodedGrainRequest request, IResourceLifetimeWorkBinding binding, CancellationToken cancellationToken)
     {
-        if (kind is not (GrainReadKind.Backup or GrainReadKind.Admission or GrainReadKind.NodeStatus))
+        if (kind is not (GrainReadKind.Backup or GrainReadKind.NodeStatus))
         {
             using var observation = codec.HasPhaseObserver
                 ? TextPostingObservation.Enter(token => codec.ObservePhaseAsync(request,
@@ -145,7 +145,6 @@ internal sealed class ConnectionReadCapabilities(DatabaseEngine localDatabase, I
         object result = kind switch
         {
             GrainReadKind.Backup => await Administration.CreateBackupAsync(cancellationToken).ConfigureAwait(true),
-            GrainReadKind.Admission => await Administration.ReadAdmissionAsync(cancellationToken).ConfigureAwait(true),
             GrainReadKind.NodeStatus => await Administration.ReadStatusAsync(cancellationToken).ConfigureAwait(true),
             _ => throw Errors.Fail(ErrorCode.UnsupportedCapability, GrainRoutingProtocol.InvalidRequest)
         };

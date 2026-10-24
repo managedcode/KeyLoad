@@ -18,19 +18,19 @@ internal sealed class PartitionHost : IAsyncDisposable
     private PartitionHost(PartitionHostOwnership ownership) => this.ownership = ownership;
 
     internal static async Task<PartitionHost> OpenAsync(ServerRuntimeOptions runtimeOptions,
-        IAuthorizationPolicy authorization, CommandAdmissionGovernor admission, TimeProvider clock,
+        IAuthorizationPolicy authorization, TimeProvider clock,
         ILogger<PartitionHost> logger, IGrainFactory grains, PartitionHostOwnership? ownership = null)
     {
         var host = new PartitionHost(ownership ?? new());
-        await host.InitializeAsync(runtimeOptions, authorization, admission, clock, logger, grains);
+        await host.InitializeAsync(runtimeOptions, authorization, clock, logger, grains);
         return host;
     }
 
     private async Task InitializeAsync(ServerRuntimeOptions runtimeOptions, IAuthorizationPolicy authorization,
-        CommandAdmissionGovernor admission, TimeProvider clock, ILogger<PartitionHost> logger, IGrainFactory grains)
+        TimeProvider clock, ILogger<PartitionHost> logger, IGrainFactory grains)
     {
         var options = runtimeOptions.Node.Value;
-        PartitionDatabaseComposition.ValidateHostInputs(options, authorization, admission, clock, logger, grains);
+        PartitionDatabaseComposition.ValidateHostInputs(options, authorization, clock, logger, grains);
         DirectoryPath = Path.GetFullPath(options.DataDirectory);
 
         try

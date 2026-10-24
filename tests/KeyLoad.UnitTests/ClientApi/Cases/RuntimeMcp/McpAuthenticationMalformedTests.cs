@@ -6,7 +6,6 @@ namespace KeyLoad.UnitTests.ClientApi;
 internal sealed class McpAuthenticationMalformedTests
 {
     private const byte TrailingByte = 0;
-    private const int RequestCapacity = 16_384;
     private const string WrongValue = "a principal reply cannot be a string";
 
     [Test]
@@ -35,7 +34,7 @@ internal sealed class McpAuthenticationMalformedTests
     }
 
     [Test]
-    public async Task WrongRootsDefaultCollectionsAndTrailingBytesReleaseEveryIngressReservation()
+    public async Task WrongRootsDefaultCollectionsAndTrailingBytesAreRejected()
     {
         using var database = new TestDatabase();
         var principal = McpAuthenticationTests.Principal(database);
@@ -47,18 +46,13 @@ internal sealed class McpAuthenticationMalformedTests
             McpAuthenticationMalformedFixture.DefaultTeams(principal),
             [.. valid, TrailingByte], valid[..^1]
         ];
-        var limits = new McpMemoryLimits();
-        var memory = new McpMemoryBudget(Microsoft.Extensions.Options.Options.Create(new KeyLoad.Server.McpMemoryLimits { DataBytes = limits.DataBytes, ControlBytes = limits.ControlBytes, IngressBytes = limits.IngressBytes }));
         foreach (var payload in malformed)
         {
             await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => McpAuthentication.ReadPrincipal(payload, UnitMcpOptions.Execution(), CancellationToken.None)).Code)
                 .IsEqualTo(ErrorCode.Validation);
-            using (var state = new McpRequestState(new HttpAdmissionGovernor(UnitAdmissionOptions.Http()), memory, RequestCapacity, UnitMcpOptions.Execution(), CancellationToken.None))
-            {
-                await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => state.Authenticate(payload, CancellationToken.None)).Code)
-                    .IsEqualTo(ErrorCode.Validation);
-            }
-            McpAuthenticationTests.AssertFullPools(memory, limits);
+            using var state = new McpRequestState(McpFramingProtocol.MaximumDataReplyBytes, UnitMcpOptions.Execution());
+            await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => state.Authenticate(payload, CancellationToken.None)).Code)
+                .IsEqualTo(ErrorCode.Validation);
         }
     }
 }

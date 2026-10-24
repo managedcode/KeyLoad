@@ -128,7 +128,7 @@ internal sealed class GraphSearchClusterSiloRestartTests(ClusterFixture fixture)
         => await ClusterReplicationTestSupport.EventuallyAsync(async () =>
         {
             var status = await administrator.StatusAsync(cancellationToken);
-            return status.IsSuccess && status.Value!.RoutingReady && status.Value.SiloCount == Nodes.Length;
+            return status.IsSuccess && status.Value.RoutingReady && status.Value.SiloCount == Nodes.Length;
         }, cancellationToken);
 
     private async Task RestoreNodeAsync(string node, KeyLoadClient[] administrators, Exception? primary)

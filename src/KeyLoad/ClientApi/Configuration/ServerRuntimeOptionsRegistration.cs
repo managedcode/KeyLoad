@@ -79,18 +79,6 @@ internal static class ServerRuntimeOptionsRegistration
         services.AddOptions<NodeOptions>().Bind(configuration.GetSection(ServerProtocol.ConfigurationSection))
             .PostConfigure(ConfigureNode).ValidateOnStart();
         services.AddSingleton<IValidateOptions<NodeOptions>, NodeOptionsValidator>();
-        services.AddOptions<CommandAdmissionLimits>();
-        services.AddSingleton<IOptionsFactory<CommandAdmissionLimits>>(provider =>
-            new NodeOptionsProjectionFactory<CommandAdmissionLimits>(provider.GetRequiredService<IOptions<NodeOptions>>(),
-                node => node.CommandAdmission));
-        services.AddOptions<HttpAdmissionLimits>();
-        services.AddSingleton<IOptionsFactory<HttpAdmissionLimits>>(provider =>
-            new NodeOptionsProjectionFactory<HttpAdmissionLimits>(provider.GetRequiredService<IOptions<NodeOptions>>(),
-                node => node.HttpAdmission));
-        services.AddOptions<McpMemoryLimits>();
-        services.AddSingleton<IOptionsFactory<McpMemoryLimits>>(provider =>
-            new NodeOptionsProjectionFactory<McpMemoryLimits>(provider.GetRequiredService<IOptions<NodeOptions>>(),
-                node => node.McpMemory));
     }
 
     internal static IServiceCollection AddDueCoordinationOptions(this IServiceCollection services, IConfiguration configuration)

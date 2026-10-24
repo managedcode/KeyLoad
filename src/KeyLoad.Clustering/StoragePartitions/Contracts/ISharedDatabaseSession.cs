@@ -28,9 +28,6 @@ public interface ISharedDatabaseSession
     /// <summary>Observes the actual physical owner after current administrator admission.</summary>
     Task<NodeStatus> ReadStatusAsync(CancellationToken cancellationToken);
 
-    /// <summary>Observes the physical owner's bounded admission pools.</summary>
-    Task<NodeAdmissionStatus> ReadAdmissionAsync(CancellationToken cancellationToken);
-
     /// <summary>Observes the actual physical files and their owner.</summary>
     Task<AdminNodeSnapshot> ReadDashboardAsync(CancellationToken cancellationToken);
 
