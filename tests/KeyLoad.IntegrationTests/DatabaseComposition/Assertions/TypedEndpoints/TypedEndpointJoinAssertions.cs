@@ -75,7 +75,7 @@ internal static class TypedEndpointJoinAssertions
             };
             var link = new QueueGraphLink(new(partition, TypedEndpointJoinProtocol.FromCollection, fromId),
                 TypedEndpointJoinProtocol.To(partition), TypedEndpointJoinProtocol.Label, TypedEndpointJoinProtocol.Attributes);
-            await Assert.That(source.PayloadJson).IsEqualTo(DatabaseCompositionClusterPayload.OrdinalGolden(link));
+            await Assert.That(source.PayloadJson).IsEqualTo(DatabaseCompositionClusterPayload.Golden(link));
         }
         var from = TypedEndpointJoinProtocol.From(partition);
         var to = TypedEndpointJoinProtocol.To(partition);
@@ -152,7 +152,7 @@ internal static class TypedEndpointJoinAssertions
         await Assert.That(actual.Metadata.SafeFailureCode).IsNull();
         await Assert.That(actual.HeadersJson).IsEqualTo(TypedEndpointJoinProtocol.Attributes);
         var to = TypedEndpointJoinProtocol.To(partition);
-        await Assert.That(actual.PayloadJson).IsEqualTo(DatabaseCompositionClusterPayload.OrdinalGolden(
+        await Assert.That(actual.PayloadJson).IsEqualTo(DatabaseCompositionClusterPayload.Golden(
             new QueueGraphLink(to, to, TypedEndpointJoinProtocol.Label, TypedEndpointJoinProtocol.Attributes)));
     }
 }

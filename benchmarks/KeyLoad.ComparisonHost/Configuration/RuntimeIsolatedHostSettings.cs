@@ -23,7 +23,8 @@ internal sealed record RuntimeIsolatedHostSettings(string? Image, string? Connec
         var endpoints = target is IsolatedHostConstants.KeyLoad or IsolatedHostConstants.Qdrant or IsolatedHostConstants.Rabbit
             or IsolatedHostConstants.Neo4j or IsolatedHostConstants.OpenSearch or IsolatedHostConstants.Kurrent
             or IsolatedHostConstants.SurrealDb or IsolatedHostConstants.HelixDb
-            ? ReadEndpoints(configuration, selection.NodeCount) : ImmutableArray<Uri>.Empty;
+            ? ReadEndpoints(configuration, selection.NodeCount, tcp: false)
+            : target == IsolatedHostConstants.Mongo ? ReadEndpoints(configuration, selection.NodeCount, tcp: true) : ImmutableArray<Uri>.Empty;
         var replicas = target == IsolatedHostConstants.Redis
             ? ReadArray(configuration, IsolatedHostConstants.ReplicaConnections, selection.NodeCount - PrimaryReplicaCount) : ImmutableArray<string>.Empty;
         var authenticated = target is IsolatedHostConstants.Rabbit or IsolatedHostConstants.Neo4j or IsolatedHostConstants.SurrealDb;
@@ -39,7 +40,8 @@ internal sealed record RuntimeIsolatedHostSettings(string? Image, string? Connec
         return new(image, connection, endpoints, replicas, user, password, apiKey, admin);
     }
 
-    private static ImmutableArray<Uri> ReadEndpoints(IConfiguration configuration, int count)
+    // MongoDB members publish raw TCP endpoints; every other endpoint-bound target is an HTTP(S) origin.
+    private static ImmutableArray<Uri> ReadEndpoints(IConfiguration configuration, int count, bool tcp)
     {
         const int EmptyUserInfoLength = 0;
         const int EmptyQueryLength = 0;
@@ -50,7 +52,8 @@ internal sealed record RuntimeIsolatedHostSettings(string? Image, string? Connec
         foreach (var value in values)
         {
             if (!Uri.TryCreate(value, UriKind.Absolute, out var endpoint)
-                || endpoint.Scheme is not (IsolatedHostConstants.Http or IsolatedHostConstants.Https)
+                || (tcp ? endpoint.Scheme != IsolatedHostConstants.Tcp
+                    : endpoint.Scheme is not (IsolatedHostConstants.Http or IsolatedHostConstants.Https))
                 || string.IsNullOrWhiteSpace(endpoint.Host) || endpoint.UserInfo.Length != EmptyUserInfoLength
                 || endpoint.Query.Length != EmptyQueryLength || endpoint.Fragment.Length != EmptyFragmentLength || endpoint.AbsolutePath != IsolatedHostConstants.RootPath)
             {

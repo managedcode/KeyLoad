@@ -22,7 +22,7 @@ internal static class CompositionSqlColdAssertions
         await Assert.That(actual.Derived.Metadata.State).IsEqualTo(MessageState.Ready);
         await Assert.That(actual.Derived.Metadata.Attempts).IsEqualTo(RelationalSqlClusterTokens.NoResults);
         await Assert.That(actual.Derived.Metadata.LeaseOwner).IsNull();
-        await Assert.That(actual.Source.PayloadJson).IsEqualTo(DatabaseCompositionClusterPayload.OrdinalGolden(state.Link));
+        await Assert.That(actual.Source.PayloadJson).IsEqualTo(DatabaseCompositionClusterPayload.Golden(state.Link));
         var traversal = new TraverseRequest(state.Scenario.Partition, RelationalSqlClusterTokens.Graph, state.Scenario.First);
         await SqlClusterProtocol.EqualAsync(state.Graph, (await McpCallerAssertions.SuccessAsync<global::KeyLoad.GraphTraversal>(
             await callers.Mcp.CallAsync(McpCallerTools.GraphTraverse, traversal, token))).Value);

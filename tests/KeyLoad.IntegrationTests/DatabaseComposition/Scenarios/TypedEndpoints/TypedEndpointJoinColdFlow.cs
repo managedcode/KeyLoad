@@ -97,7 +97,7 @@ internal static class TypedEndpointJoinColdFlow
         RequestCqrsClusterCallers callers, TypedEndpointJoinState state, CancellationToken token)
     {
         var to = TypedEndpointJoinProtocol.To(state.Seed.Partition);
-        var payload = DatabaseCompositionClusterPayload.OrdinalGolden(new QueueGraphLink(to, to,
+        var payload = DatabaseCompositionClusterPayload.Golden(new QueueGraphLink(to, to,
             TypedEndpointJoinProtocol.Label, TypedEndpointJoinProtocol.Attributes));
         var seed = new CommandRequest(Guid.NewGuid(), state.Seed.Partition,
             [new EnqueueMessage(TypedEndpointJoinProtocol.EmptyQueue, TypedEndpointJoinProtocol.MalformedMessage, payload)]);

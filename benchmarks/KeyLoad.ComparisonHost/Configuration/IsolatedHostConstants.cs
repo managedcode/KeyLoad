@@ -26,6 +26,7 @@ internal static class IsolatedHostConstants
     internal const string HelixDb = "HelixDB";
     internal const string Http = "http";
     internal const string Https = "https";
+    internal const string Tcp = "tcp";
     internal const string RootPath = "/";
     internal const string Basic = "Basic";
     internal const string CredentialSeparator = ":";

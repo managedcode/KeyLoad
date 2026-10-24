@@ -126,7 +126,7 @@ internal sealed class DeclarativeCompositionClusterTests(ClusterFixture fixture)
         var source = await PublicReadAssertions.MessageAsync(await sdk.InspectAsync(scenario.Inspect(Message), cancellationToken));
         await Assert.That(source!.Metadata.State).IsEqualTo(MessageState.Ready);
         await Assert.That(source.Metadata.Attempts).IsEqualTo(RelationalSqlClusterTokens.NoResults);
-        await Assert.That(source.PayloadJson).IsEqualTo(DatabaseCompositionClusterPayload.OrdinalGolden(link));
+        await Assert.That(source.PayloadJson).IsEqualTo(DatabaseCompositionClusterPayload.Golden(link));
         await Assert.That(JsonSerializer.Deserialize<QueueGraphLink>(source.PayloadJson!, JsonDefaults.Options)).IsEqualTo(link);
     }
 

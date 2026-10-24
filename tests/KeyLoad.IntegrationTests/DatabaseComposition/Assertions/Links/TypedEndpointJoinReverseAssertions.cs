@@ -91,7 +91,7 @@ internal static class TypedEndpointJoinReverseAssertions
             TypedEndpointJoinProtocol.To(state.Seed.Partition), TypedEndpointJoinProtocol.Label, TypedEndpointJoinProtocol.Attributes);
         var expected = new MessageInspection(new MessageMetadata(id, MessageState.Ready, NoAttempts,
             InitialVersion, sequence, null, null),
-            DatabaseCompositionClusterPayload.OrdinalGolden(link), TypedEndpointJoinProtocol.Attributes);
+            DatabaseCompositionClusterPayload.Golden(link), TypedEndpointJoinProtocol.Attributes);
         await SqlClusterProtocol.EqualAsync(expected, actual);
         await SqlClusterProtocol.EqualAsync(expected, official);
     }

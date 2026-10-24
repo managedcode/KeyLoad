@@ -17,7 +17,7 @@ internal static class FunctionalGateQueueGraph
         var returnedId = returnPrefix + edgeId;
         var source = new QueueLaneRef(ctx.Partition, FunctionalGateQueues.Queue(P.SourceQueue));
         var target = new QueueLaneRef(ctx.Partition, FunctionalGateQueues.Queue(P.TargetQueue));
-        var payload = DatabaseCompositionClusterPayload.OrdinalGolden(link);
+        var payload = DatabaseCompositionClusterPayload.Golden(link);
         await SeedAsync(ctx, link, source, sourceId, payload, token);
         var original = await FunctionalGateQueueGraphQueue.ReadyAsync(ctx, source, sourceId, payload, token);
         await ForwardAsync(ctx, source, edgePrefix, edgeId, token);

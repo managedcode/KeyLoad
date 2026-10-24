@@ -76,7 +76,7 @@ internal static class DeclarativeReverseQuotaAssertions
         }
         var link = new QueueGraphLink(state.Scenario.First, state.Scenario.Second, RelationalSqlClusterTokens.EdgeLabel);
         var expected = new MessageInspection(new MessageMetadata(id, MessageState.Ready, NoAttempts,
-            InitialVersion, sequence, null, null), DatabaseCompositionClusterPayload.OrdinalGolden(link), Headers);
+            InitialVersion, sequence, null, null), DatabaseCompositionClusterPayload.Golden(link), Headers);
         await SqlClusterProtocol.EqualAsync(expected, actual);
         await SqlClusterProtocol.EqualAsync(expected, official);
     }
