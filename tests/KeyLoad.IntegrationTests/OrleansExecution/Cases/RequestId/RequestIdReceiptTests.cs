@@ -1,5 +1,6 @@
 using Aspire.Hosting.Testing;
 using KeyLoad.Client;
+using KeyLoad.IntegrationTests.ClientApi;
 
 namespace KeyLoad.IntegrationTests.OrleansExecution;
 
@@ -13,8 +14,7 @@ internal sealed class RequestIdReceiptTests(ClusterFixture fixture)
     [Test]
     public async Task SdkResponsesCarryUniqueActorRequestIdsAcrossStableWriteRetryAndParallelReads()
     {
-        using var timeoutTimeout = new CancellationTokenSource(TimeSpan.FromMinutes(2), TimeProvider.System);
-        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current!.Execution.CancellationToken, timeoutTimeout.Token);
+        using var timeout = McpCallerDeadline.Create();
         using var recorder = new RequestIdResponseRecorder();
         using var http = new HttpClient(recorder, disposeHandler: false)
         {

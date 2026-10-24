@@ -2,6 +2,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using KeyLoad.Client;
+using KeyLoad.IntegrationTests.ClientApi;
 using KeyLoad.Query;
 using static KeyLoad.IntegrationTests.StorageReplication.ClusterReplicationTestSupport;
 
@@ -14,7 +15,7 @@ internal static class AuthorizedQueryScenario
 
     internal static async Task RunAsync(ClusterFixture fixture)
     {
-        using var timeout = new CancellationTokenSource(TimeSpan.FromMinutes(2), TimeProvider.System);
+        using var timeout = McpCallerDeadline.Create();
         var administrator = fixture.Client("node1");
         var partition = new PartitionRef("integration", "database", "query-adapters", Guid.NewGuid().ToString("N"));
         try

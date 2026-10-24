@@ -54,6 +54,5 @@ internal static class McpCallerProtocol
     internal const int EpochIncrement = 1;
     internal const int SummaryByteLimit = 1_024;
     internal const int ErrorByteLimit = 65_536;
-    internal static readonly TimeSpan Deadline = TimeSpan.FromMinutes(2);
     internal static readonly TimeSpan ExpiredOffset = TimeSpan.FromMinutes(1);
 }

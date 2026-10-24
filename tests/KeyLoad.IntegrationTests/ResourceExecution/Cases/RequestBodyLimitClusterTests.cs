@@ -1,6 +1,7 @@
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using Aspire.Hosting.Testing;
+using KeyLoad.IntegrationTests.ClientApi;
 
 namespace KeyLoad.IntegrationTests;
 
@@ -15,8 +16,7 @@ internal sealed class RequestBodyLimitClusterTests
     public async Task OversizedDeclaredAndChunkedBodiesAreRejectedBeforeCommandsClaimTheirIds()
     {
         var fixture = new ClusterFixture(maximumBodyBytes: MaximumBodyBytes);
-        using var timeoutTimeout = new CancellationTokenSource(TimeSpan.FromMinutes(2), TimeProvider.System);
-        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current!.Execution.CancellationToken, timeoutTimeout.Token);
+        using var timeout = McpCallerDeadline.Create();
         try
         {
             await fixture.InitializeAsync();

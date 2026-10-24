@@ -24,13 +24,12 @@ internal sealed class TimeSeriesClusterReplicaRestartTests(ClusterFixture fixtur
     private const int ReadinessSeconds = 45;
     private static readonly CompositeFormat LatestFailureFormat = CompositeFormat.Parse(LatestFailureMessage);
     private static readonly CompositeFormat WindowsFailureFormat = CompositeFormat.Parse(WindowsFailureMessage);
-    private static readonly TimeSpan OriginalTestLifetime = TimeSpan.FromMinutes(2);
     private static readonly TimeSpan ReadinessLifetime = TimeSpan.FromSeconds(ReadinessSeconds);
 
     [Test]
     public async Task AcSeries012SiloRestartRetainsLatestAndWindowValuesOnEveryReplica()
     {
-        using var deadline = new CancellationTokenSource(OriginalTestLifetime, TimeProvider.System);
+        using var deadline = McpCallerDeadline.Create();
         using var firstHttp = McpCallerHttp.Create(fixture, TimeSeriesClusterScenario.Node1);
         using var secondHttp = McpCallerHttp.Create(fixture, TimeSeriesClusterScenario.Node2);
         using var thirdHttp = McpCallerHttp.Create(fixture, TimeSeriesClusterScenario.Node3);

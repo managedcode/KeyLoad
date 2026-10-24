@@ -1,6 +1,7 @@
 using KeyLoad.Client;
 using KeyLoad.IntegrationTests.ClientApi;
 using KeyLoad.IntegrationTests.DocumentStorage;
+using KeyLoad.IntegrationTests.OrleansExecution;
 using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Messaging;
@@ -36,7 +37,7 @@ internal sealed class AdminDispatchClientParityTests(ClusterFixture fixture)
             await McpDiscoveryAssertions.VerifyAsync(tool);
             await RunParityFlowAsync(sdk, mcp, scenario, lane, deadline.Token);
         }, failures);
-        using var cleanupDeadline = new CancellationTokenSource(McpCallerProtocol.Deadline, TimeProvider.System);
+        using var cleanupDeadline = new CancellationTokenSource(RequestCqrsClusterProtocol.CleanupDeadline, TimeProvider.System);
         await ServerFailureObserver.ObserveAsync(() => RestoreDispatchAsync(sdk, cleanupDeadline.Token), failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }

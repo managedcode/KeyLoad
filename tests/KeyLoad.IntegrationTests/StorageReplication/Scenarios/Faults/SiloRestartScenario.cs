@@ -1,4 +1,5 @@
 using KeyLoad.Client;
+using KeyLoad.IntegrationTests.ClientApi;
 using KeyLoad.Query;
 using TUnit.Assertions.Enums;
 using static KeyLoad.IntegrationTests.StorageReplication.ClusterReplicationTestSupport;
@@ -18,7 +19,7 @@ internal static class SiloRestartScenario
 
     internal static async Task RunAsync(ClusterFixture fixture)
     {
-        using var timeout = new CancellationTokenSource(TimeSpan.FromMinutes(2), TimeProvider.System);
+        using var timeout = McpCallerDeadline.Create();
         var stoppedProcesses = new HashSet<string>(StringComparer.Ordinal);
         SiloRestartRunState? state = null;
         try
