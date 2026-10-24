@@ -1,10 +1,10 @@
 # BenchmarkComparisons
 
-BenchmarkComparisons compares KeyLoad with ten other databases on the same corpora,
+BenchmarkComparisons compares KeyLoad with fifteen other databases on the same corpora,
 oracles and acknowledgement/durability contracts. Every engine, node count and scenario
 cell runs on its own isolated Linux runner with a one-node and three-node
 topology, and website figures come exclusively from authenticated GitHub Actions JSON.
-This document holds the stable requirements (`REQ-*`) and acceptance criteria (`AC-*`);
+The [additional database contract](BenchmarkComparisons/AdditionalDatabases.md) records the SQL/analytical targets and current deployment limits. This document holds the stable requirements (`REQ-*`) and acceptance criteria (`AC-*`);
 the linked ADRs own the implementation decisions, and measured values, run identities
 and qualification receipts live in the original GitHub artifacts rather than here.
 
@@ -222,7 +222,7 @@ only build/CLI ownership.
 REQ-PIPE-005/006 and AC-UB-001..006 under
 [ADR-064](../ADR/ADR-064-workflow-release-delivery.md) repair orchestration:
 one preparation builds and source-binds the runtime and runs shared
-contracts. The current22 topology sessions import its authenticated bundle
+contracts. The current 32 topology sessions import its authenticated bundle
 without rebuilding; independent database groups run without an arbitrary cap.
 Every authored job/step has a concrete readable name. Exact-source display-name
 validators and independent test oracles change together, preserving internal job
@@ -333,7 +333,7 @@ selection and independent Website publication.
 
 | Requirement | Measurable acceptance | Tests and evidence |
 |---|---|---|
-| REQ-BC-CURRENT-001: the complete current cohort is the sole live producer | AC-BC-CURRENT-001: session accounts for22 workers across11 databases x node counts[1,3], each with seven original TUnit case outcomes on one live topology. One preparation job builds the exact-source compiled client runtime once and resolves the released KeyLoad image to one digest; workers import those authenticated bundles and run KeyLoad from that digest. Initial1m loading is measured, each applicable operation lane has100k attempts, and no warmup/reset/reseeding occurs between cases. Retain actual failures/null metrics and genuine unavailable outcomes with the original source/run/attempt/job/TRX/report, client DLL/PDB/process and server image digest identity. Missing, malformed, expired, mixed, skipped, unaccounted or mismatched evidence rejects; publication requires every applicable correctness/fairness/provenance/resource/functional gate. Seven document cases do not qualify remaining model families or physical100k-corpus coverage | SessionCohortContractTests, CompiledBenchmarkRuntimeBundleTests, current session/aggregate/site gates and original authenticated GitHub archives |
+| REQ-BC-CURRENT-001: the complete current cohort is the sole live producer | AC-BC-CURRENT-001: session accounts for 32 workers across 16 databases x node counts[1,3], each with seven original TUnit case outcomes on one live topology. One preparation job builds the exact-source compiled client runtime once and resolves the released KeyLoad image to one digest; workers import those authenticated bundles and run KeyLoad from that digest. Initial1m loading is measured, each applicable operation lane has100k attempts, and no warmup/reset/reseeding occurs between cases. Retain actual failures/null metrics and genuine unavailable outcomes with the original source/run/attempt/job/TRX/report, client DLL/PDB/process and server image digest identity. Missing, malformed, expired, mixed, skipped, unaccounted or mismatched evidence rejects; publication requires every applicable correctness/fairness/provenance/resource/functional gate. Seven document cases do not qualify remaining model families or physical100k-corpus coverage | SessionCohortContractTests, CompiledBenchmarkRuntimeBundleTests, current session/aggregate/site gates and original authenticated GitHub archives |
 | REQ-BC-CURRENT-002: one collector, one archive set and one current-profile asset set | AC-BC-CURRENT-002: no active comparison-smoke/comparison-suite collector, twelve-file precondition or three-profile current renderer remains; replacement retains all applicable safety, accessibility, vendor, arithmetic and browser criteria | scoped dependency inventory, workflow source tests and standalone isolated site/browser tests |
 | REQ-BC-CURRENT-003: preserve unchanged qualified authority around final build | AC-BC-CURRENT-003: bounded immutable receipt, original archives and every file in the current composite plan/proof inventory match before/after builder; emitted aggregate bytes match; every remaining coverage/no-skip/source-closure gate passes | SiteIsolatedGitHub integrity/build/coverage tests, original TRX/Cobertura/Node/browser artifacts and the current source-bound publication receipt |
 | REQ-BC-CURRENT-004: deploy only fresh exact-source evidence | AC-BC-CURRENT-004: current main and exact original producer tuple match immediately before needs-gated least-privilege Pages delivery; altered source/attempt/artifact rejects and actual provider receipt records outcome | SiteIsolatedGitHubFreshnessTests, workflow source tests, genuine same-run qualification and Pages provider receipt |
@@ -489,7 +489,7 @@ flowchart LR
 
 ## Database job groups
 
-REQ-BC-GROUP-001 maps to AC-BC-GROUP-001: Benchmarks exposes eleven separately named
+REQ-BC-GROUP-001 maps to AC-BC-GROUP-001: Benchmarks exposes sixteen separately named
 database job matrices matching the current target inventory. Each matrix contains its
 target's preflight checks and canonical node/scenario workloads. Every cell retains its
 own Linux runner. Database groups run concurrently with only runtime/plan dependencies;
@@ -893,7 +893,7 @@ The current QualifySite action (AC-BC-CURRENT-001..004 and AC-BC-WEB-002/004/006
 validates the complete executed dependency manifest derived by
 session-source-closure.mjs; there is no inherited fixed path count. Regular-path,
 byte/hash, archive, source, coverage and freshness checks remain strict. Current readers
-admit only the session cohort: 22 workers (11 databases x 1/3), seven
+admit only the session cohort: 32 workers (16 databases x 1/3), seven
 source-bound case outcomes per shared live topology, common compiled
 runtime built once, measured initial 1m loading and no warmup/reset/reseeding.
 Every original report, TRX, process/runtime identity and resource observation

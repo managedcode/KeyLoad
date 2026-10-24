@@ -150,6 +150,9 @@ jobs:
         with:
           runtime-artifact-id: ${{ needs.comparison-runtime.outputs.runtime-artifact-id }}
           keyload-image: ${{ matrix.target == 'KeyLoad' && needs.comparison-runtime.outputs.keyload-image || '' }}
+      - name: Test selected database adapter against real infrastructure
+        if: matrix.nodeCount == 1 && contains(fromJSON('["TimescaleDB","SQL Server","MySQL","ClickHouse","InfluxDB"]'), matrix.target)
+        run: dotnet benchmarks/KeyLoad.ComparisonHost/bin/Release/net10.0/KeyLoad.ComparisonHost.dll --output Detailed --github-reporter-style full --maximum-parallel-tests 1 --minimum-expected-tests 1 --treenode-filter '/*/*/AdditionalDatabaseTests/*' --results-directory "$KEYLOAD_COMPARISON_EVIDENCE_DIRECTORY/AdapterTestResults" --report-trx --timeout 15m
       - name: Run database workload
         id: workload
         run: dotnet benchmarks/KeyLoad.ComparisonHost/bin/Release/net10.0/KeyLoad.ComparisonHost.dll --output Detailed --github-reporter-style full --maximum-parallel-tests 1 --minimum-expected-tests 1 --treenode-filter '/*/*/BenchmarkSessionTests/*' --results-directory "$KEYLOAD_COMPARISON_EVIDENCE_DIRECTORY/TestResults" --report-trx --timeout 210m
@@ -281,6 +284,61 @@ jobs:
       matrix: ${{ fromJSON(needs.comparison-runtime.outputs.databases).helixdb }}
     env: *database-environment
     steps: *database-steps
+  comparison-timescaledb:
+    name: ${{ matrix.jobName }}
+    if: (github.event_name == 'push' || inputs.mode == 'full')
+    needs: [comparison-runtime]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.comparison-runtime.outputs.databases).timescaledb }}
+    env: *database-environment
+    steps: *database-steps
+  comparison-sqlserver:
+    name: ${{ matrix.jobName }}
+    if: (github.event_name == 'push' || inputs.mode == 'full')
+    needs: [comparison-runtime]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.comparison-runtime.outputs.databases).sqlserver }}
+    env: *database-environment
+    steps: *database-steps
+  comparison-mysql:
+    name: ${{ matrix.jobName }}
+    if: (github.event_name == 'push' || inputs.mode == 'full')
+    needs: [comparison-runtime]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.comparison-runtime.outputs.databases).mysql }}
+    env: *database-environment
+    steps: *database-steps
+  comparison-clickhouse:
+    name: ${{ matrix.jobName }}
+    if: (github.event_name == 'push' || inputs.mode == 'full')
+    needs: [comparison-runtime]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.comparison-runtime.outputs.databases).clickhouse }}
+    env: *database-environment
+    steps: *database-steps
+  comparison-influxdb:
+    name: ${{ matrix.jobName }}
+    if: (github.event_name == 'push' || inputs.mode == 'full')
+    needs: [comparison-runtime]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.comparison-runtime.outputs.databases).influxdb }}
+    env: *database-environment
+    steps: *database-steps
   keyload-functional-heavy-load:
     name: KeyLoad functional CLUSTER million-record ingestion
     if: (github.event_name == 'push' || inputs.mode == 'full')
@@ -309,7 +367,7 @@ jobs:
           retention-days: 90
   comparison-aggregate:
     name: Combine benchmark results
-    needs: [comparison-runtime, comparison-keyload, comparison-postgresql, comparison-qdrant, comparison-rabbitmq, comparison-redis, comparison-neo4j, comparison-mongodb, comparison-opensearch, comparison-kurrentdb, comparison-surrealdb, comparison-helixdb, keyload-functional-heavy-load]
+    needs: [comparison-runtime, comparison-keyload, comparison-postgresql, comparison-qdrant, comparison-rabbitmq, comparison-redis, comparison-neo4j, comparison-mongodb, comparison-opensearch, comparison-kurrentdb, comparison-surrealdb, comparison-helixdb, comparison-timescaledb, comparison-sqlserver, comparison-mysql, comparison-clickhouse, comparison-influxdb, keyload-functional-heavy-load]
     if: ${{ always() && !cancelled() && (github.event_name == 'push' || inputs.mode == 'full') && needs.comparison-runtime.result == 'success' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 150
@@ -342,7 +400,7 @@ jobs:
           retention-days: 90
   website-trigger:
     name: Trigger Website
-    needs: [comparison-runtime, comparison-keyload, comparison-postgresql, comparison-qdrant, comparison-rabbitmq, comparison-redis, comparison-neo4j, comparison-mongodb, comparison-opensearch, comparison-kurrentdb, comparison-surrealdb, comparison-helixdb, keyload-functional-heavy-load, comparison-aggregate]
+    needs: [comparison-runtime, comparison-keyload, comparison-postgresql, comparison-qdrant, comparison-rabbitmq, comparison-redis, comparison-neo4j, comparison-mongodb, comparison-opensearch, comparison-kurrentdb, comparison-surrealdb, comparison-helixdb, comparison-timescaledb, comparison-sqlserver, comparison-mysql, comparison-clickhouse, comparison-influxdb, keyload-functional-heavy-load, comparison-aggregate]
     if: >-
       always() && !cancelled() &&
       (github.event_name == 'push' || inputs.mode == 'full') &&

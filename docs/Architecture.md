@@ -705,9 +705,11 @@ classDiagram
 
 [Shared benchmark sessions](Features/BenchmarkComparisons/SessionExecution.md)
 under [ADR-142](ADR/ADR-142-shared-live-benchmark-sessions.md) run exactly two
-measurement jobs per database: one node and three nodes. Each job
+measurement jobs per database: one node and three nodes. The current cohort has
+16 systems and 32 topology rows; the [additional database contract](Features/BenchmarkComparisons/AdditionalDatabases.md) records native one-node adapters and open replicated deployment work. An admitted job
 owns one live Aspire topology and runs separate real TUnit cases against
-it, starting with a measured million-record load. Original per-case outcomes,
+it, starting with a measured million-record load. Declared unavailable topologies
+retain explicit unavailable results without allocating standalone substitutes. Original per-case outcomes,
 TRX, runtime/image identities and resource observations feed one
 authenticated complete-cohort aggregation; failed or incomplete cohorts cannot
 refresh published metrics. Scales are exactly 100,000 and 1,000,000 records

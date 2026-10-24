@@ -4,7 +4,7 @@ import { uniqueNamed, validateArtifact, validateSuccessfulJob } from './isolated
 import { SESSION, requireSession, validateSessionCohort } from './session-contract.mjs';
 import { selectSessionEvidence } from './session-github-selection.mjs';
 
-export const SESSION_SITE = Object.freeze({ provider: 'comparison-session-provider-evidence', suiteBytes: 12_884_901_888,
+export const SESSION_SITE = Object.freeze({ provider: 'comparison-session-provider-evidence', suiteBytes: 18_253_611_008,
   providerBytes: 134_217_728, aggregateSteps: ['Check complete session accounting', 'Save combined benchmark results', 'Save GitHub result verification'] });
 export function validateSessionProducer(run, workflow, mode = 'validate') {
   requireSession(['publish', 'validate'].includes(mode) && (mode !== 'publish' || run?.conclusion === 'success'));

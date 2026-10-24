@@ -10,9 +10,9 @@ AC-HOST-001–007 and AC-KLEVENT-001–003 in
 ## Decision
 
 The canonical comparison targets are KeyLoad, PostgreSQL + pgvector, Qdrant,
-RabbitMQ, Redis, Neo4j, MongoDB, OpenSearch, KurrentDB, SurrealDB and HelixDB.
-[ADR-142](ADR-142-shared-live-benchmark-sessions.md) owns the current 22 shared
-sessions: eleven databases at one/three-node topologies. Active scale
+RabbitMQ, Redis, Neo4j, MongoDB, OpenSearch, KurrentDB, SurrealDB, HelixDB, TimescaleDB, SQL Server, MySQL, ClickHouse and InfluxDB.
+[ADR-142](ADR-142-shared-live-benchmark-sessions.md) owns the current 32 shared
+sessions: sixteen databases at one/three-node topologies. Active scale
 requirements retain 100,000 and 1,000,000 actual records and at least 100,000
 measured operations per applicable workload. The document session starts with a
 measured million-record corpus; it does not complete remaining model-family or

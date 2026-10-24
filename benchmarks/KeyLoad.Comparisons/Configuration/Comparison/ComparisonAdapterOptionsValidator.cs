@@ -8,7 +8,8 @@ internal static class ComparisonAdapterOptionsValidator
 
     internal static void Validate(ComparisonExecutionOptions options)
     {
-        if (options.KeyLoadGraphSeedBatchSize is <= Zero or > ComparisonExecutionOptions.DefaultKeyLoadGraphSeedBatchSize
+        if (options.ClickHouseInsertFlushMilliseconds is <= Zero or > ComparisonExecutionOptions.DefaultClickHouseInsertFlushMilliseconds
+            || options.KeyLoadGraphSeedBatchSize is <= Zero or > ComparisonExecutionOptions.DefaultKeyLoadGraphSeedBatchSize
             || options.Neo4jSeedBatchSize is <= Zero or > ComparisonExecutionOptions.DefaultNeo4jSeedBatchSize
             || options.Neo4jMaximumExecutionTimeSeconds is <= Zero or > ComparisonExecutionOptions.DefaultNeo4jMaximumExecutionTimeSeconds
             || options.TimeSeriesInitialReadCapacity is <= Zero or > ComparisonExecutionOptions.DefaultTimeSeriesInitialReadCapacity

@@ -17,10 +17,10 @@ separate operation tests and mixed workloads in groups of 100,000. **The load ti
 the initial million is a separate measurement result.** Operation type and operation
 count do not create jobs.
 
-The 11 databases give **22 measurement jobs**. One shared preparation, one aggregation
-and a separate Website dispatch give **25 jobs in the comparison flow**. One existing
+The 16 databases give **32 measurement jobs**. One shared preparation, one aggregation
+and a separate Website dispatch give **35 jobs in the comparison flow**. One existing
 functional replicated-cluster heavy-load gate is also kept until it moves to Build and
-Tests; it is a correctness gate, so the measurement jobs stay exactly 22. Real execution
+Tests; it is a correctness gate, so the measurement jobs stay exactly 32. Real execution
 topologies, separate Linux runners between databases/topologies and their resource
 contracts are kept. An unavailable topology gets an explicit unavailable result.
 
@@ -35,7 +35,7 @@ streams of 100,000 operations.
 
 ```mermaid
 flowchart LR
-    Prepare[One build and harness checks] --> Packages[22 jobs: database and 1 or 3 nodes]
+    Prepare[One build and harness checks] --> Packages[32 jobs: database and 1 or 3 nodes]
     Packages --> LoadMillion[Load the base million]
     LoadMillion --> Reads[Separate read search index and query tests]
     Reads --> Mixed[Concurrent add delete update read and search tests]
@@ -152,7 +152,7 @@ measured workload reports do not close that independent gate.
 
 ## Runs and results
 
-A push to main automatically runs the complete set of 22 measurement jobs. A manual run
+A push to main automatically runs the complete set of 32 measurement jobs. A manual run
 chooses the complete set or only the build/harness contracts. Preflight, cancellation,
 malformed-input, permission and provenance checks are TUnit contracts of Benchmarks
 and do not multiply the measurement matrix. The selected load profiles use the same
@@ -178,7 +178,7 @@ follow the real results.
 
 | Requirement | Completion gate |
 | --- | --- |
-| REQ-BSESSION-001: two jobs per database, one topology per job. | AC-BSESSION-001: the canonical planner forms 22 workers; all 11 database groups have only 1/3-node rows. |
+| REQ-BSESSION-001: two jobs per database, one topology per job. | AC-BSESSION-001: the canonical planner forms 32 workers; all 16 database groups have only 1/3-node rows. |
 | REQ-BSESSION-002: several TUnit tests share one infrastructure. | AC-BSESSION-002: the original discovery/TRX shows separate load/read/search/mixed cases; resource identities stay the same between cases; Aspire starts the topology once. |
 | REQ-BSESSION-003: the initial million is measured. | AC-BSESSION-003: the report contains actual attempted/ACKed/verified record counts, elapsed/throughput and the original load case outcome; setup does not hide inserts. |
 | REQ-BSESSION-004: separate operation tests and a genuine mixed workload. | AC-BSESSION-004: at least 100k measured operations per applicable case; mixed create/delete of 100k each genuinely overlap in time; a deterministic final oracle verifies the records and results. |

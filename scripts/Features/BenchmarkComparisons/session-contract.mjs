@@ -1,7 +1,7 @@
 // Current session cohort only. Physical isolation is database × execution topology.
 export const SESSION = Object.freeze({
   schema: 'session', profile: 'session', repository: 'managedcode/KeyLoad',
-  ref: 'refs/heads/main', workflow: 'Benchmarks', workers: 22,
+  ref: 'refs/heads/main', workflow: 'Benchmarks', workers: 32,
   records: 1_000_000, operations: 100_000, concurrency: 16, warmup: 0,
   caseIds: Object.freeze(['load-million', 'index', 'sequential-read', 'random-read', 'search', 'mixed', 'verify-final']),
   nodes: Object.freeze([1, 3]), artifactPrefix: 'comparison-session-', aggregateArtifact: 'comparison-session-suite',
@@ -12,15 +12,17 @@ export const SESSION = Object.freeze({
     'Verify GitHub job identity', 'Save compiled runtime identities', 'Save the compiled benchmark runtime']),
   workerSteps: Object.freeze(['Run database workload', 'Save benchmark results']),
   reportBytes: 268_435_456, runtimeBytesCore: 16_777_216, sessionBytes: 4_194_304,
-  aggregateBytes: 33_554_432, archiveBytes: 536_870_912, allArchiveBytes: 11_811_160_064,
+  aggregateBytes: 33_554_432, archiveBytes: 536_870_912, allArchiveBytes: 17_179_869_184,
   capabilitiesUnavailable: 'SessionCapabilitiesUnavailable', topologyUnavailable: 'RuntimeTopologyUnavailable',
-  unavailableTopologyTargets: Object.freeze(['Neo4j','SurrealDB','HelixDB']),
+  unavailableTopologyTargets: Object.freeze(['Neo4j','SurrealDB','HelixDB','TimescaleDB','SQL Server','MySQL','ClickHouse','InfluxDB']),
   failure: 'Benchmark session evidence rejected.',
 });
 export const SESSION_TARGETS = Object.freeze([
   ['keyload', 'KeyLoad'], ['postgresql', 'PostgreSQL + pgvector'], ['qdrant', 'Qdrant'],
   ['rabbitmq', 'RabbitMQ'], ['redis', 'Redis'], ['neo4j', 'Neo4j'], ['mongodb', 'MongoDB'],
   ['opensearch', 'OpenSearch'], ['kurrentdb', 'KurrentDB'], ['surrealdb', 'SurrealDB'], ['helixdb', 'HelixDB'],
+  ['timescaledb', 'TimescaleDB'], ['sqlserver', 'SQL Server'], ['mysql', 'MySQL'],
+  ['clickhouse', 'ClickHouse'], ['influxdb', 'InfluxDB'],
 ].map(([key, name]) => Object.freeze({ key, name })));
 export const requireSession = condition => { if (!condition) throw new Error(SESSION.failure); };
 export const exactSession = (value, keys) => value !== null && typeof value === 'object' && !Array.isArray(value)

@@ -59,6 +59,10 @@ internal sealed class IsolatedHostTargetOwner(IOptions<ComparisonExecutionOption
             IsolatedHostConstants.Mongo => new MongoTarget(execution.Connection!, execution.Endpoints, settings.RunId, RequireImage(execution), topology, lifecycleOptions, executionOptions, provider: Clock),
             IsolatedHostConstants.OpenSearch => new OpenSearchTarget(CreateClient(execution, PrimaryEndpointIndex), settings.RunId, RequireImage(execution), topology, lifecycleOptions, executionOptions, provider: Clock),
             IsolatedHostConstants.Kurrent => new KurrentTarget(execution.Connection!, CreateClients(execution), settings.RunId, RequireImage(execution), topology, lifecycleOptions, diagnostics, provider: Clock),
+            BenchmarkAdditionalTargets.Timescale or BenchmarkAdditionalTargets.SqlServer or BenchmarkAdditionalTargets.MySql
+                => RelationalComparisonTargets.Create(settings.Selection.Target, execution.Connection!, settings.RunId, RequireImage(execution), executionOptions),
+            BenchmarkAdditionalTargets.ClickHouse or BenchmarkAdditionalTargets.InfluxDb
+                => HttpComparisonTargets.Create(settings.Selection.Target, CreateClient(execution, PrimaryEndpointIndex), settings.RunId, RequireImage(execution), executionOptions),
             _ => throw new InvalidOperationException(IsolatedHostConstants.Failure)
         };
         unownedClients.Clear();

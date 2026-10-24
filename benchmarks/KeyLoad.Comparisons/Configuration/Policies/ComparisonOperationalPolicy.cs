@@ -37,6 +37,7 @@ internal static class ComparisonOperationalPolicy
         DocumentPolicy.Record(options, parameters);
         parameters[nameof(options.PostgresMinimumPoolSize)] = options.PostgresMinimumPoolSize.ToString(CultureInfo.InvariantCulture);
         parameters[nameof(options.PostgresMaxPoolSize)] = options.PostgresMaxPoolSize.ToString(CultureInfo.InvariantCulture);
+        parameters[nameof(options.ClickHouseInsertFlushMilliseconds)] = options.ClickHouseInsertFlushMilliseconds.ToString(CultureInfo.InvariantCulture);
         parameters[nameof(options.PostgresMaxAutoPrepare)] = options.PostgresMaxAutoPrepare.ToString(CultureInfo.InvariantCulture);
         parameters[nameof(options.PostgresAutoPrepareMinUsages)] = options.PostgresAutoPrepareMinUsages.ToString(CultureInfo.InvariantCulture);
         parameters[nameof(options.ReadBufferBytes)] = options.ReadBufferBytes.ToString(CultureInfo.InvariantCulture);

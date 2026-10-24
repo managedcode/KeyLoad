@@ -43,14 +43,15 @@ internal sealed class BenchmarkSessionDocumentWorkload(BenchmarkSessionContext c
     internal async Task<BenchmarkSessionCaseReport> VerifyAsync(CancellationToken token)
     {
         var state = context.State;
-        if (!state.Ready || !state.Mixed)
+        var afterMixed = context.Target.Supports(Scenario.DocumentDelete);
+        if (!state.Ready || afterMixed && !state.Mixed)
         {
             return state.Prerequisite(BenchmarkSessionProtocol.VerifyFinal);
         }
         var timer = new BenchmarkSessionTimer(context.Clock);
         try
         {
-            var proof = await context.Verification.VerifyAsync(true, token).ConfigureAwait(false);
+            var proof = await context.Verification.VerifyAsync(afterMixed, token).ConfigureAwait(false);
             return state.Report(BenchmarkSessionProtocol.VerifyFinal, BenchmarkSessionProtocol.Measured, null, proof.Records, [], timer.Elapsed.TotalSeconds);
         }
         catch (Exception error) when (BenchmarkSessionFailure.IsNonfatal(error))

@@ -26,7 +26,7 @@ if (scenario === 'plan') {
   const plan = planner.createSessionPlan();
   planner.validateSessionPlan(plan);
   const matrices = planner.sessionMatrices();
-  accepted = plan.workers.length === 22 && Object.keys(matrices).length === 11
+  accepted = plan.workers.length === 32 && Object.keys(matrices).length === 16
     && Object.values(matrices).every(matrix => matrix.include.length === 2
       && matrix.include[0].nodeCount === 1 && matrix.include[1].nodeCount === 3);
   for (const change of [value => value.workers.pop(), value => value.workers.push(value.workers[0]),
@@ -271,7 +271,7 @@ if (scenario === 'plan') {
     artifacts:rows.map((row,index) => artifact(index+100,row.artifactName))};
   capture.jobs.push(job(99,contract.SESSION.prepareJob,contract.SESSION.prepareSteps));
   capture.artifacts.push(artifact(201,'comparison-compiled-test-bundle'),artifact(202,'comparison-compiled-runtime-identity'));
-  accepted = selection.selectSessionEvidence(capture,cohort).workers.length === 22;
+  accepted = selection.selectSessionEvidence(capture,cohort).workers.length === 32;
   for (const change of [value => value.jobs.shift(),value => value.jobs[0].head_sha='c'.repeat(40),
     value => value.jobs[0].run_attempt=1,value => value.artifacts[0].expired=true,
     value => value.artifacts.push(value.artifacts[0]),value => value.artifacts[0].workflow_run.id++,

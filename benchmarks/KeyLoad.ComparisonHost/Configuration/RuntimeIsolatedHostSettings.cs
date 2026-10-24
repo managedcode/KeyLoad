@@ -19,15 +19,18 @@ internal sealed record RuntimeIsolatedHostSettings(string? Image, string? Connec
         var target = selection.Target;
         var connection = target is IsolatedHostConstants.Postgres or IsolatedHostConstants.Redis or IsolatedHostConstants.Rabbit
             or IsolatedHostConstants.Mongo or IsolatedHostConstants.Kurrent
+            or BenchmarkAdditionalTargets.Timescale or BenchmarkAdditionalTargets.SqlServer or BenchmarkAdditionalTargets.MySql
             ? IsolatedHostSettings.Required(configuration, IsolatedHostConstants.Connection) : null;
         var endpoints = target is IsolatedHostConstants.KeyLoad or IsolatedHostConstants.Qdrant or IsolatedHostConstants.Rabbit
             or IsolatedHostConstants.Neo4j or IsolatedHostConstants.OpenSearch or IsolatedHostConstants.Kurrent
             or IsolatedHostConstants.SurrealDb or IsolatedHostConstants.HelixDb
+            or BenchmarkAdditionalTargets.ClickHouse or BenchmarkAdditionalTargets.InfluxDb
             ? ReadEndpoints(configuration, selection.NodeCount, tcp: false)
             : target == IsolatedHostConstants.Mongo ? ReadEndpoints(configuration, selection.NodeCount, tcp: true) : ImmutableArray<Uri>.Empty;
         var replicas = target == IsolatedHostConstants.Redis
             ? ReadArray(configuration, IsolatedHostConstants.ReplicaConnections, selection.NodeCount - PrimaryReplicaCount) : ImmutableArray<string>.Empty;
-        var authenticated = target is IsolatedHostConstants.Rabbit or IsolatedHostConstants.Neo4j or IsolatedHostConstants.SurrealDb;
+        var authenticated = target is IsolatedHostConstants.Rabbit or IsolatedHostConstants.Neo4j or IsolatedHostConstants.SurrealDb
+            or BenchmarkAdditionalTargets.ClickHouse;
         var user = authenticated ? IsolatedHostSettings.Required(configuration, IsolatedHostConstants.User)
             : target == IsolatedHostConstants.OpenSearch ? configuration[IsolatedHostConstants.User] : null;
         var password = authenticated ? IsolatedHostSettings.Required(configuration, IsolatedHostConstants.Password)

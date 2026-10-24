@@ -449,7 +449,7 @@ A special thanks to **[ZoneTree](https://github.com/ZoneTree/ZoneTree)** and **[
 | [Roslyn](https://github.com/dotnet/roslyn) · [BenchmarkDotNet](https://github.com/dotnet/BenchmarkDotNet) | Repository analyzers and microbenchmarks |
 | [Three.js](https://github.com/mrdoob/three.js) | Website cluster illustration |
 
-The comparison suite uses free community editions and real clients:
+The comparison suite uses native clients and isolated nonproduction database deployments:
 
 | Workload family | Comparison projects | Client projects |
 |---|---|---|
@@ -457,9 +457,11 @@ The comparison suite uses free community editions and real clients:
 | Vectors & text | [pgvector](https://github.com/pgvector/pgvector), [Qdrant](https://github.com/qdrant/qdrant), [OpenSearch](https://github.com/opensearch-project/OpenSearch) | — |
 | Queues & events | [RabbitMQ](https://github.com/rabbitmq/rabbitmq-server), [KurrentDB](https://github.com/kurrent-io/KurrentDB) | [RabbitMQ .NET Client](https://github.com/rabbitmq/rabbitmq-dotnet-client), [KurrentDB .NET Client](https://github.com/kurrent-io/KurrentDB-Client-Dotnet) |
 | Graphs & connected models | [Neo4j](https://github.com/neo4j/neo4j), [SurrealDB](https://github.com/surrealdb/surrealdb), [HelixDB](https://github.com/helixdb/helix-db) | — |
-| Time series | [TimescaleDB](https://github.com/timescale/timescaledb) | — |
+| SQL additions | [SQL Server](https://learn.microsoft.com/sql/sql-server/), [MySQL](https://github.com/mysql/mysql-server) | [Microsoft.Data.SqlClient](https://github.com/dotnet/SqlClient), [MySqlConnector](https://github.com/mysql-net/MySqlConnector) |
+| Columnar records | [ClickHouse](https://github.com/ClickHouse/ClickHouse) | Native HTTP |
+| Time series | [TimescaleDB](https://github.com/timescale/timescaledb), [InfluxDB](https://github.com/influxdata/influxdb) | Npgsql / native HTTP |
 
-Active scale: **100,000 and 1,000,000 records**, at **1 or 3 nodes** where supported. New adapters remain under qualification. The [vector comparison contract](docs/Features/BenchmarkComparisons/VectorQualification.md) defines accuracy, latency, index cost and memory checks; only qualified original GitHub results become public figures.
+Active scale: **100,000 and 1,000,000 records**, at **1 or 3 nodes** where supported. The current cohort contains 16 systems and 32 topology rows. The [five added targets](docs/Features/BenchmarkComparisons/AdditionalDatabases.md) currently implement one-node document sessions; their three-node deployments and separate time-series/analytics qualification remain open. SQL Server uses Developer edition for nonproduction benchmarks. New adapters remain under qualification. The [vector comparison contract](docs/Features/BenchmarkComparisons/VectorQualification.md) defines accuracy, latency, index cost and memory checks; only qualified original GitHub results become public figures.
 
 ---
 

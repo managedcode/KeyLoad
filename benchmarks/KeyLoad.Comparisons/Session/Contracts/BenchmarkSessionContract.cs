@@ -43,7 +43,9 @@ public static class BenchmarkSessionContract
         OverrideDocuments, OverrideOperations, OverrideWarmup, OverrideRepetitions, OverrideConcurrency, OverridePayloadBytes, OverrideSeed, OverrideDimensions, OverrideTopK, OverrideTimeoutSeconds, OverrideScaleProfile, OverrideVectorProfile, OverrideOpenLoopRate, OverrideDocumentScenario, OverrideDocumentRecords, OverrideDocumentClients, OverrideGraphVertices, OverrideGraphFanOut, OverrideGraphDepth, OverrideScenario, OverrideProfile
     ];
     /// <summary>The exact databases participating in the session cohort.</summary>
-    public static ImmutableArray<string> Targets { get; } = [KeyLoad, PostgreSql, Qdrant, RabbitMq, Redis, Neo4j, Mongo, OpenSearch, Kurrent, Surreal, Helix];
+    public static ImmutableArray<string> Targets { get; } = [KeyLoad, PostgreSql, Qdrant, RabbitMq, Redis, Neo4j, Mongo, OpenSearch, Kurrent, Surreal, Helix,
+        BenchmarkAdditionalTargets.Timescale, BenchmarkAdditionalTargets.SqlServer, BenchmarkAdditionalTargets.MySql,
+        BenchmarkAdditionalTargets.ClickHouse, BenchmarkAdditionalTargets.InfluxDb];
     /// <summary>Execution deployment limitations; an operational failure never becomes an unavailable topology.</summary>
     public static ImmutableArray<BenchmarkSessionUnsupportedTopology> UnsupportedTopologies
     {
@@ -52,8 +54,15 @@ public static class BenchmarkSessionContract
     [
         new(Neo4j, [BenchmarkSessionLimits.ReplicatedNodeCount], Neo4jUnavailable),
         new(Surreal, [BenchmarkSessionLimits.ReplicatedNodeCount], SurrealUnavailable),
-        new(Helix, [BenchmarkSessionLimits.ReplicatedNodeCount], HelixUnavailable)
+        new(Helix, [BenchmarkSessionLimits.ReplicatedNodeCount], HelixUnavailable),
+        new(BenchmarkAdditionalTargets.Timescale, [BenchmarkSessionLimits.ReplicatedNodeCount], AdditionalTopology),
+        new(BenchmarkAdditionalTargets.SqlServer, [BenchmarkSessionLimits.ReplicatedNodeCount], AdditionalTopology),
+        new(BenchmarkAdditionalTargets.MySql, [BenchmarkSessionLimits.ReplicatedNodeCount], AdditionalTopology),
+        new(BenchmarkAdditionalTargets.ClickHouse, [BenchmarkSessionLimits.ReplicatedNodeCount], AdditionalTopology),
+        new(BenchmarkAdditionalTargets.InfluxDb, [BenchmarkSessionLimits.ReplicatedNodeCount], InfluxTopology)
     ];
+    private const string AdditionalTopology = "The current benchmark deployment implements one node only; no three-node replication or acknowledgement contract is implemented or qualified.";
+    private const string InfluxTopology = "InfluxDB 3 Core is a single-node engine; Enterprise multi-node deployments are outside this benchmark.";
     /// <summary>Creates the existing execution document topology selection without initializing or loading its data.</summary>
     public static BenchmarkSessionSelection ResourceSelection(string target, int nodeCount)
     {

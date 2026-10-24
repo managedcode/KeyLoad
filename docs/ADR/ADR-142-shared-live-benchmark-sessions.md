@@ -40,7 +40,7 @@ owned lifecycle removes only its own resources, including anonymous volumes.
 SDK container publication remains explicit release work.
 
 The preparation and each worker retain original reports. Aggregation requires
-all 22 database/topology workers, test outcomes, artifact identities,
+all 32 database/topology workers, test outcomes, artifact identities,
 source identity, measured counts and matching operation statistics. Failed
 original cases retain null metrics; missing or corrupted originals fail closed.
 Website remains an independently qualified downstream consumer.
@@ -58,8 +58,8 @@ identity or resource observation may stand in for a server process.
 
 ## Consequences and qualification
 
-The measurement matrix is 11 databases × two topologies = 22 jobs. Shared
-preparation, aggregation and Website dispatch make 25 comparison-flow jobs. The
+The measurement matrix is 16 databases × two topologies = 32 jobs. Shared
+preparation, aggregation and Website dispatch make 35 comparison-flow jobs. The
 existing functional cluster heavy-load correctness job remains separately present
 until its owner moves it without losing acceptance coverage. A job failure may
 leave later prerequisites failed; original case outcomes must show this honestly.
