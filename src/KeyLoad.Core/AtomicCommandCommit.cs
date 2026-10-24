@@ -24,6 +24,10 @@ public static class AtomicCommandCommit
     /// <param name = "operation">The operation.</param>
     /// <param name = "cancellationToken">The cancellation Token.</param>
     public static Command<DatabaseCommand> PrepareStorageOperation(this DatabaseEngine engine, Command<DatabaseCommand> operation, CancellationToken cancellationToken)
+        => engine.PrepareStorageOperation(operation, null, cancellationToken);
+
+    /// <summary>Prepares one operation at a business time no earlier than the committed clock or <paramref name="notBefore"/>.</summary>
+    internal static Command<DatabaseCommand> PrepareStorageOperation(this DatabaseEngine engine, Command<DatabaseCommand> operation, DateTimeOffset? notBefore, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(engine);
         cancellationToken.ThrowIfCancellationRequested();
@@ -36,6 +40,11 @@ public static class AtomicCommandCommit
             {
                 var committed = OrleansSerialization.Deserialize<DateTimeOffset>(encoded);
                 now = now < committed ? committed : now;
+            }
+
+            if (notBefore is { } floor && now < floor)
+            {
+                now = floor;
             }
 
             return engine.PrepareQueueRetryInView(view, engine.EvaluateCommand(verified, now));

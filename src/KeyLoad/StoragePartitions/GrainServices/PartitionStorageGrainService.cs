@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using KeyLoad.Clustering;
 using KeyLoad.Core;
 using ManagedCode.Communication.Commands;
@@ -28,17 +29,16 @@ internal sealed partial class PartitionStorageGrainService(GrainId grainId, Silo
         return UsesSharedVolume ? Shared.ReadCutAsync(cancellationToken) : Task.FromResult(Isolated.ReadCut(cancellationToken));
     }
 
-    public Task<Command<DatabaseCommand>> PrepareAsync(Command<DatabaseCommand> operation, CancellationToken cancellationToken)
-        => Task.FromResult(Isolated.Host.Database.PrepareStorageOperation(operation, cancellationToken));
+    public Task<ImmutableArray<Command<DatabaseCommand>>> PrepareBatchAsync(ImmutableArray<Command<DatabaseCommand>> operations,
+        CancellationToken cancellationToken)
+        => Task.FromResult(Isolated.Host.Database.PrepareStorageOperations(operations, cancellationToken));
 
-    public Task<StoredCommand?> ReadStoredCommandAsync(Command<DatabaseCommand> operation, CancellationToken cancellationToken)
-        => Task.FromResult(Isolated.Host.Database.ReadStoredCommand(operation, cancellationToken));
+    public Task<ImmutableArray<StoredCommand>> ReadLastCommittedCommandsAsync(CancellationToken cancellationToken)
+        => Task.FromResult(Isolated.Host.Database.ReadLastCommittedCommands(cancellationToken));
 
-    public Task<StoredCommand?> ReadLastCommittedCommandAsync(CancellationToken cancellationToken)
-        => Task.FromResult(Isolated.Host.Database.ReadLastCommittedCommand(cancellationToken));
-
-    public Task<StorageOperationResult> ApplyAsync(Command<DatabaseCommand> operation, long sequence, CancellationToken cancellationToken)
-        => Task.FromResult(Isolated.Host.Database.ApplyStorageOperation(operation, sequence, cancellationToken));
+    public Task<StorageBatchResult> ApplyBatchAsync(ImmutableArray<Command<DatabaseCommand>> operations, long firstSequence,
+        CancellationToken cancellationToken)
+        => Task.FromResult(Isolated.Host.Database.ApplyStorageOperations(operations, firstSequence, cancellationToken));
 
     public Task<GrainOperationReply> ExecuteAsync(GrainRequestEnvelope envelope, CancellationToken cancellationToken)
         => UsesSharedVolume ? Shared.ExecuteSharedAsync(envelope, null, cancellationToken)

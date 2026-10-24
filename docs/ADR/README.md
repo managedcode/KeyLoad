@@ -128,3 +128,4 @@ source artifacts own those checks.
 | [ADR-143: Silo count and replica count](ADR-143-independent-silo-replica-topology.md) |
 | [ADR-144: Typed Orleans request envelopes](ADR-144-typed-request-envelopes.md) |
 | [ADR-145: No request throttling](ADR-145-no-request-throttling.md) |
+| [ADR-146: Group commit](ADR-146-group-commit.md) |

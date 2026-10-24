@@ -30,17 +30,7 @@ public static class StorageOperationApply
 
     /// <param name = "engine">The shared database execution context.</param>
     public static StorageOperationResult ApplyStorageOperation(this DatabaseEngine engine, Command<DatabaseCommand> operation, long sequence, CancellationToken cancellationToken)
-    {
-        ArgumentNullException.ThrowIfNull(engine);
-        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(sequence);
-        var verified = engine.OwnCommand(operation);
-        if (engine.IsSiloLocalOperation(verified))
-        {
-            throw Errors.Fail(ErrorCode.Validation, InvalidStorageOperationScope);
-        }
-
-        return engine.ApplyCore(verified, sequence, selectEmbeddedClock: false, cancellationToken);
-    }
+        => engine.ApplyStorageOperations([operation], sequence, cancellationToken).Applied[0];
 
     /// <summary>Applies node-bound derived work without advancing the canonical database read cut.</summary>
     /// <param name = "operation">The original verified node-bound operation.</param>

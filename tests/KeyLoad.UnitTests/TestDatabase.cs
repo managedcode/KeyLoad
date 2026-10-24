@@ -33,7 +33,7 @@ internal sealed class TestDatabase : IDisposable
     public TestDatabase(DatabaseLimits? limits = null, string? directory = null,
         ClaimsExecutionOptions? claimsExecution = null,
         TimeProvider? timeProvider = null, TimeSeriesExecutionOptions? timeSeriesExecution = null,
-        Action<CommitStage, long, int>? storeFaultObserver = null)
+        Action<CommitStage, long, int>? storeFaultObserver = null, int? maxFrameBytes = null)
     {
         Directory = directory ?? Path.Combine(StorageTrialDirectory.ResolveExistingDirectory(new(AppContext.BaseDirectory)),
             DirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
@@ -45,7 +45,12 @@ internal sealed class TestDatabase : IDisposable
         try
         {
             var clock = timeProvider ?? TimeProvider.System;
-            Store = acquired = new(new(Directory) { FaultObserver = storeFaultObserver }, StorageExecution, UnitExecutionOptions.PointCacheExecution(), timeProvider: clock);
+            var storeOptions = new ZoneTreeStoreOptions(Directory) { FaultObserver = storeFaultObserver };
+            if (maxFrameBytes is { } frameBytes)
+            {
+                storeOptions = storeOptions with { MaxFrameBytes = frameBytes };
+            }
+            Store = acquired = new(storeOptions, StorageExecution, UnitExecutionOptions.PointCacheExecution(), timeProvider: clock);
             this.limits = UnitExecutionOptions.DatabaseLimits(limits);
             createDatabase = TestDatabaseEngineFactory.Capture(this.limits, UnitExecutionOptions.RuntimeClaimsExecution(claimsExecution), timeSeriesExecution, clock);
             Database = createDatabase(Store);

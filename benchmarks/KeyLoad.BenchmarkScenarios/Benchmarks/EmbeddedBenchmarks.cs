@@ -1,8 +1,6 @@
 using BenchmarkDotNet.Attributes;
 using KeyLoad.Core;
-using KeyLoad.Core.Authorization;
 using KeyLoad.Query;
-using KeyLoad.Storage.ZoneTree;
 
 namespace KeyLoad.BenchmarkScenarios.BenchmarkComparisons;
 
@@ -18,15 +16,9 @@ public class EmbeddedBenchmarks : IDisposable
     private const int SecondVectorCoordinate = 2;
     private const int ThirdVectorCoordinate = 3;
 
-    private const string TemporaryDirectoryPrefix = "keyload-benchmark-";
-    private const string TenantId = "benchmark";
     private const string DatabaseId = "database";
     private const string CollectionId = "documents";
     private const string BenchmarkRecordId = "1";
-    private const string PrincipalId = "root";
-    private const string PrincipalScope = "system";
-    private const string Wildcard = "*";
-    private const string BenchmarkCredential = "root.benchmark-credential-32-characters";
     private const string DocumentJson = "{\"text\":\"clustered document database\",\"number\":42}";
     private const string TenantKeyPart = "tenant";
     private const string PartitionKeyPart = "partition";
@@ -35,8 +27,9 @@ public class EmbeddedBenchmarks : IDisposable
     private const string ActiveSetupMessage = "The benchmark fixture already has an active setup.";
 
     private readonly TimeProvider timeProvider;
-    private readonly PartitionRef partition = new(TenantId, DatabaseId, CollectionId, BenchmarkRecordId);
-    private EmbeddedBenchmarkResources? resources;
+    private readonly PartitionRef partition = new(EmbeddedBenchmarkDatabase.TenantId, EmbeddedBenchmarkDatabase.DatabaseId,
+        CollectionId, BenchmarkRecordId);
+    private EmbeddedBenchmarkDatabase? resources;
     private bool disposed;
 
     /// <summary>Initializes a fresh embedded fixture for BenchmarkDotNet or a real caller.</summary>
@@ -61,11 +54,12 @@ public class EmbeddedBenchmarks : IDisposable
             throw new InvalidOperationException(ActiveSetupMessage);
         }
 
-        var candidate = new EmbeddedBenchmarkResources(EmbeddedBenchmarkRuntimeRegistration.Read(), timeProvider);
+        var candidate = new EmbeddedBenchmarkDatabase(EmbeddedBenchmarkRuntimeRegistration.Read(), timeProvider);
         var initialized = false;
         try
         {
-            candidate.Initialize(partition);
+            candidate.Initialize(CollectionId);
+            candidate.Commit(partition, new PutDocument(CollectionId, BenchmarkRecordId, DocumentJson));
             resources = candidate;
             initialized = true;
         }
@@ -81,7 +75,7 @@ public class EmbeddedBenchmarks : IDisposable
     /// <summary>Reads the exact document seeded during global setup.</summary>
     [Benchmark]
     public DocumentResult? PointRead()
-        => RequireResources().Database.GetDocument(PrincipalId, new(partition, CollectionId, BenchmarkRecordId));
+        => RequireResources().Database.GetDocument(EmbeddedBenchmarkDatabase.PrincipalId, new(partition, CollectionId, BenchmarkRecordId));
 
     /// <summary>Encodes the existing five-component composite-key input.</summary>
     [Benchmark]
@@ -121,83 +115,6 @@ public class EmbeddedBenchmarks : IDisposable
         }
     }
 
-    private EmbeddedBenchmarkResources RequireResources()
-        => resources ?? throw new InvalidOperationException(EmbeddedBenchmarkResources.InactiveFixtureMessage);
-
-    private sealed class EmbeddedBenchmarkResources(EmbeddedBenchmarkRuntimeOptions options, TimeProvider timeProvider) : IDisposable
-    {
-        internal const string InactiveFixtureMessage = "The benchmark fixture is not initialized.";
-        private const string GuidFormat = "N";
-        private readonly string directory = Path.Combine(AppContext.BaseDirectory,
-            TemporaryDirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
-        private ZoneTreeStore? store;
-        private DatabaseEngine? database;
-        private bool disposed;
-
-        internal DatabaseEngine Database
-            => database ?? throw new InvalidOperationException(InactiveFixtureMessage);
-
-        internal void Initialize(PartitionRef partition)
-        {
-            store = new(new(directory), options.Storage, options.PointCache, timeProvider);
-            database = new(store, new AuthorizationPolicy(), options.Database, options.DueWork, options.EventSource,
-                options.Messaging, options.GraphExecution, options.ChangeFeedExecution, options.RuntimeClaimsExecution, options.TimeSeriesExecution, timeProvider);
-            database.Bootstrap(new(PrincipalId, PrincipalScope,
-                [new(Wildcard, Wildcard, Capability.All)], [Wildcard])
-            {
-                ClusterAdministrator = true
-            },
-                AuthorizationExecution.Credential(PrincipalId, PrincipalId, BenchmarkCredential));
-            Submit(OperationKind.ConfigureResource,
-                new ConfigureResourceRequest(TenantId, DatabaseId,
-                    new(CollectionId, ResourceKind.Collection, CollectionId)));
-            Submit(OperationKind.Batch,
-                new CommandRequest(Guid.NewGuid(), partition,
-                    [new PutDocument(CollectionId, BenchmarkRecordId, DocumentJson)]));
-        }
-
-        public void Dispose()
-        {
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
-        }
-
-        private void Dispose(bool disposing)
-        {
-            if (disposed)
-            {
-                return;
-            }
-
-            disposed = true;
-            try
-            {
-                if (disposing)
-                {
-                    store?.Dispose();
-                }
-            }
-            finally
-            {
-                store = null;
-                database = null;
-                if (Directory.Exists(directory))
-                {
-                    Directory.Delete(directory, recursive: true);
-                }
-            }
-        }
-
-        private void Submit<T>(OperationKind kind, T payload)
-        {
-            var commandId = payload is CommandRequest command ? command.CommandId : Guid.NewGuid();
-            var operation = Database.CreateCommand(kind, commandId, PrincipalId, timeProvider.GetUtcNow(),
-                System.Text.Json.JsonSerializer.Serialize(payload, JsonDefaults.Options));
-            var result = Database.Apply(operation);
-            if (result.IsFailed)
-            {
-                throw Errors.Fail(Errors.Code(result.Problem)!.Value, result.Problem.Detail!);
-            }
-        }
-    }
+    private EmbeddedBenchmarkDatabase RequireResources()
+        => resources ?? throw new InvalidOperationException(EmbeddedBenchmarkDatabase.InactiveFixtureMessage);
 }

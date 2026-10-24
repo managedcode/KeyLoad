@@ -22,7 +22,7 @@ internal static class ZoneTreeStorePreparationExecution
         {
             runtime.Check();
             var position = checked(runtime.Position + NextPosition);
-            return Fork(runtime, [], child => prepare(child, position));
+            return Fork(runtime, [], [], child => prepare(child, position));
         }
         finally
         {
@@ -30,8 +30,14 @@ internal static class ZoneTreeStorePreparationExecution
         }
     }
 
-    internal static T Fork<T>(ZoneTreeStoreRuntime runtime, IEnumerable<ZoneTreeStagedEntry> inherited,
-        Func<IAtomicTransaction, T> prepare, bool requireCommitGate = false)
+    /// <summary>Runs discard-only preparation over the parent's staged image.</summary>
+    /// <param name="runtime">The owning store runtime.</param>
+    /// <param name="earlier">Entries of the parent's earlier actions, visible but outside the child's frame budget.</param>
+    /// <param name="action">The parent's current action entries, which the child's frame budget includes.</param>
+    /// <param name="prepare">The synchronous preparation callback.</param>
+    /// <param name="requireCommitGate">Whether the caller must hold the commit gate.</param>
+    internal static T Fork<T>(ZoneTreeStoreRuntime runtime, IEnumerable<ZoneTreeStagedEntry> earlier,
+        IEnumerable<ZoneTreeStagedEntry> action, Func<IAtomicTransaction, T> prepare, bool requireCommitGate = false)
     {
         ArgumentNullException.ThrowIfNull(prepare);
         var commitHeld = runtime.Gate.IsUpgradeableReadLockHeld || runtime.Gate.IsWriteLockHeld;
@@ -40,6 +46,6 @@ internal static class ZoneTreeStorePreparationExecution
             throw new InvalidOperationException(MissingGate);
         }
         runtime.Check();
-        return new ZoneTreePreparationTransaction(runtime, inherited).Run(prepare);
+        return new ZoneTreePreparationTransaction(runtime, earlier, action).Run(prepare);
     }
 }

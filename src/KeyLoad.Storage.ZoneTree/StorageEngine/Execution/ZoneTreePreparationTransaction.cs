@@ -10,12 +10,20 @@ internal sealed class ZoneTreePreparationTransaction : IAtomicTransaction, IAtom
     private readonly int thread = Environment.CurrentManagedThreadId;
     private bool active = true;
 
-    internal ZoneTreePreparationTransaction(ZoneTreeStoreRuntime runtime, IEnumerable<ZoneTreeStagedEntry> inherited)
+    internal ZoneTreePreparationTransaction(ZoneTreeStoreRuntime runtime, IEnumerable<ZoneTreeStagedEntry> earlier,
+        IEnumerable<ZoneTreeStagedEntry> action)
     {
         this.runtime = runtime;
         transaction = new(runtime, preparing: true);
-        this.inherited = inherited.Select(row => new ZoneTreeStagedEntry(row.Key.ToArray(), row.Value?.ToArray())).ToArray();
-        RestoreInherited();
+        var shared = earlier.Select(Copy).ToArray();
+        inherited = [.. action.Select(Copy)];
+        if (shared.Length > 0)
+        {
+            Restore(shared);
+            Array.Clear(shared);
+            transaction.BeginAction();
+        }
+        Restore(inherited);
     }
 
     internal T Run<T>(Func<IAtomicTransaction, T> prepare)
@@ -55,7 +63,8 @@ internal sealed class ZoneTreePreparationTransaction : IAtomicTransaction, IAtom
     public T Prepare<T>(Func<IAtomicTransaction, T> prepare)
     {
         Check();
-        return ZoneTreeStorePreparationExecution.Fork(runtime, transaction.Changes, prepare);
+        var (earlier, action) = transaction.Inheritance;
+        return ZoneTreeStorePreparationExecution.Fork(runtime, earlier, action, prepare);
     }
 
     public byte[]? ReadOwnedValue(byte[] key)
@@ -108,12 +117,14 @@ internal sealed class ZoneTreePreparationTransaction : IAtomicTransaction, IAtom
     {
         Check();
         transaction.Reset();
-        RestoreInherited();
+        Restore(inherited);
     }
 
-    private void RestoreInherited()
+    private static ZoneTreeStagedEntry Copy(ZoneTreeStagedEntry row) => new(row.Key.ToArray(), row.Value?.ToArray());
+
+    private void Restore(ZoneTreeStagedEntry[] rows)
     {
-        foreach (var row in inherited)
+        foreach (var row in rows)
         {
             if (row.Value is { } value)
             {

@@ -5,7 +5,8 @@ process recovery, Aspire SDK/MCP, coverage and endurance qualification remain
 open in [status.json](../implementation/status.json).
 
 Decisions: [ADR-136](../ADR/ADR-136-orleans-partition-ownership.md),
-[ADR-143](../ADR/ADR-143-independent-silo-replica-topology.md) and
+[ADR-143](../ADR/ADR-143-independent-silo-replica-topology.md),
+[ADR-146](../ADR/ADR-146-group-commit.md) and
 [ADR-003](../ADR/ADR-003-durability-ack-barrier.md).
 
 ## Ownership and execution
@@ -17,8 +18,11 @@ ordered apply gate. Grains call those services through typed Orleans calls;
 moving an activation never moves a file or open storage handle.
 
 The public API enters one connection grain per connected client. Database grains
-order canonical commands and request operations from the required silo-local
-owners. Intensive reads and background batches use stateless workers.
+order canonical commands into batches and request operations from the required
+silo-local owners. Every queued command joins the next batch. Each owner applies a
+batch as one atomic commit with one journal flush, so concurrent writers share
+that flush. Each command keeps its own canonical sequence and the outcome it would
+have alone. Intensive reads and background batches use stateless workers.
 Every operation retains fresh persisted authorization, bounded resources,
 cancellation and joined cleanup.
 
@@ -44,9 +48,11 @@ atomic transaction. A retry must match the original authorized operation and
 keeps its original result and sequence. A timeout after effects may have started
 is an unknown outcome, resolved using that same command ID.
 
-If one unfinished command is present on only some copies, retrying that original
-command can complete the missing applications. Unrelated divergent prefixes
-return `RecoveryRequired`; a successful response never hides that condition.
+If an unfinished batch is present on only some copies, the next write completes the
+missing commands from the last batch that the newest copy retained. Retrying an original
+command also completes its missing applications. Gaps larger than the last batch
+and unrelated divergent prefixes return `RecoveryRequired`; a successful response
+never hides that condition.
 General restoration of an empty or lagging data copy is not qualified by this
 implementation.
 
@@ -67,6 +73,7 @@ does not prove equal data or a distributed snapshot.
 | REQ-REP-005: every serving owner enforces current persisted authorization. | AC-REP-005: unauthorized and protected-field SDK/MCP reads refuse before and after restart, with unchanged records and healthy follow-up. | [Authorization](Authorization.md) owns these assertions. |
 | REQ-REP-006: admission, cancellation and shutdown bound all admitted work. | AC-REP-006: saturation explicitly refuses excess work; cancellation settles retained identities, joins producers and preserves earlier acknowledged data. | Unit ownership mechanisms and real cluster fault flows remain distinct. |
 | REQ-REP-007: startup validates independent positive silo/copy counts without an artificial maximum. | AC-REP-007: 1/1, 2/1, 2/2, 3/2, 5/3 and 5/5 are valid counts; zero counts and copies exceeding silos refuse before resources start. | Configuration acceptance does not qualify a topology's runtime or durability. |
+| REQ-REP-008: concurrent canonical commands share one commit and one journal flush per copy. | AC-REP-008: commands of one batch receive their own ordered sequences and the outcomes they would have alone. A retry inside a batch replays the first outcome without another sequence. A command that overflows the shared frame commits next. Business time never decreases along a batch. Reset discards only the current command's writes. A copy that missed the last batch completes from its retained commands. | `GroupCommitTests` and `ActionStagingTests` own the engine and store contracts; the cluster batch path and its throughput are qualified by the Aspire suites and the benchmark cells. |
 
 ## Source and verification
 

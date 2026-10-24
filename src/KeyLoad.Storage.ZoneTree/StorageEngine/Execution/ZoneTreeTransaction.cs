@@ -3,17 +3,24 @@ using static KeyLoad.Storage.ZoneTree.ZoneTreePersistenceFormat;
 
 namespace KeyLoad.Storage.ZoneTree;
 
-internal sealed class ZoneTreeTransaction(ZoneTreeStoreRuntime runtime, bool preparing = false) : IAtomicTransaction, IAtomicCommitCandidateValidation
+internal sealed class ZoneTreeTransaction(ZoneTreeStoreRuntime runtime, bool preparing = false)
+    : IAtomicTransaction, IAtomicCommitCandidateValidation, IAtomicActionStaging
 {
+    private const long NoPreparedVersion = -1;
+    private readonly ZoneTreeTransactionStaging staging = new(runtime.Options.MaxFrameBytes);
     private StorageMutation[]? preparedChanges;
     private byte[]? preparedPayload;
-    private long stagedBytes;
+    private long preparedVersion = NoPreparedVersion;
     private readonly int preparationThread = Environment.CurrentManagedThreadId;
     private bool preparationContextOpen = true;
 
-    internal SortedSet<ZoneTreeStagedEntry> Changes { get; } = new(ZoneTreeStagedEntryComparer.Instance);
+    internal SortedSet<ZoneTreeStagedEntry> Changes => staging.Entries;
 
     public int MaximumRangeRecords => runtime.Options.MaximumRangeRecords;
+
+    public bool FitsOneFrame => staging.FitsOneFrame;
+
+    public void BeginAction() => staging.BeginAction();
 
     public T Prepare<T>(Func<IAtomicTransaction, T> prepare)
     {
@@ -21,8 +28,13 @@ internal sealed class ZoneTreeTransaction(ZoneTreeStoreRuntime runtime, bool pre
         {
             throw new InvalidOperationException(ZoneTreeStorePreparationExecution.OutsideTransactionCallback);
         }
-        return ZoneTreeStorePreparationExecution.Fork(runtime, Changes, prepare, requireCommitGate: true);
+        var (earlier, action) = Inheritance;
+        return ZoneTreeStorePreparationExecution.Fork(runtime, earlier, action, prepare, requireCommitGate: true);
     }
+
+    /// <summary>Gets the current action's own entries and the entries of earlier actions it builds on.</summary>
+    internal (IEnumerable<ZoneTreeStagedEntry> Earlier, IEnumerable<ZoneTreeStagedEntry> Action) Inheritance
+        => (staging.EarlierEntries(), staging.ActionEntries());
 
     internal void EndPreparationContext() => preparationContextOpen = false;
 
@@ -63,44 +75,28 @@ internal sealed class ZoneTreeTransaction(ZoneTreeStoreRuntime runtime, bool pre
     private static long MutationBytes(byte[] key, byte[]? value)
         => key.LongLength + (value?.LongLength ?? 0);
 
-    private void Stage(byte[] key, byte[]? value)
+    public void Put(byte[] key, byte[] value) => staging.Stage(key, value);
+    public void Delete(byte[] key) => staging.Stage(key, null);
+
+    /// <summary>Discards the current action's staged writes; earlier actions keep theirs.</summary>
+    public void Reset() => staging.ResetAction();
+
+    public void ValidateCommit()
     {
-        var replacing = Changes.TryGetValue(new(key, null), out var previous);
-        var bytes = stagedBytes - (replacing ? MutationBytes(key, previous!.Value) : 0)
-            + MutationBytes(key, value);
-        if (bytes > runtime.Options.MaxFrameBytes)
+        if (!staging.SharesFrame)
         {
-            throw Errors.Fail(ErrorCode.ResourceExhausted, TransactionFrameLimitExceeded);
+            _ = PreparePayload();
+            return;
         }
 
-        preparedPayload = null;
-        preparedChanges = null;
-        stagedBytes = bytes;
-        if (replacing)
-        {
-            Changes.Remove(previous!);
-        }
-
-        Changes.Add(new(key.ToArray(), value?.ToArray()));
+        _ = ZoneTreeJournalCodec.Serialize(ZoneTreeTransactionStaging.Mutations(staging.ActionEntries()),
+            runtime.Options.MaxFrameBytes, preparing ? null : runtime.Options.FaultObserver);
     }
-
-    public void Put(byte[] key, byte[] value) => Stage(key, value);
-    public void Delete(byte[] key) => Stage(key, null);
-
-    public void Reset()
-    {
-        preparedPayload = null;
-        preparedChanges = null;
-        stagedBytes = 0;
-        Changes.Clear();
-    }
-
-    public void ValidateCommit() => _ = PreparePayload();
 
     public void ValidateCandidate(IReadOnlyList<StorageMutation> mutations)
     {
         ArgumentNullException.ThrowIfNull(mutations);
-        var candidate = new SortedSet<ZoneTreeStagedEntry>(Changes, ZoneTreeStagedEntryComparer.Instance);
+        var candidate = new SortedSet<ZoneTreeStagedEntry>(staging.ActionEntries(), ZoneTreeStagedEntryComparer.Instance);
         foreach (var mutation in mutations)
         {
             ArgumentNullException.ThrowIfNull(mutation);
@@ -135,18 +131,34 @@ internal sealed class ZoneTreeTransaction(ZoneTreeStoreRuntime runtime, bool pre
         _ = ZoneTreeJournalCodec.Serialize(records, runtime.Options.MaxFrameBytes);
     }
 
+    /// <summary>Returns every staged write of all actions, in key order, for the one commit frame.</summary>
     internal StorageMutation[] PrepareChanges()
-        => preparedChanges ??= Changes.Select(pair => new StorageMutation(pair.Key,
-            pair.Value is null ? (ReadOnlyMemory<byte>?)null : new ReadOnlyMemory<byte>(pair.Value))).ToArray();
+    {
+        RetainPreparedVersion();
+        return preparedChanges ??= ZoneTreeTransactionStaging.Mutations(Changes);
+    }
 
     internal byte[] PreparePayload()
     {
+        RetainPreparedVersion();
         if (preparedPayload is not null)
         {
             return preparedPayload;
         }
 
         return preparedPayload = ZoneTreeJournalCodec.Serialize(PrepareChanges(), runtime.Options.MaxFrameBytes, preparing ? null : runtime.Options.FaultObserver);
+    }
+
+    private void RetainPreparedVersion()
+    {
+        if (preparedVersion == staging.Version)
+        {
+            return;
+        }
+
+        preparedChanges = null;
+        preparedPayload = null;
+        preparedVersion = staging.Version;
     }
 
     public ScanPage Scan(byte[] prefix, int maxRecords, byte[]? afterKey = null)

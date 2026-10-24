@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using KeyLoad.Core.CommandOutcomes.Execution;
 using KeyLoad.Core.CommandOutcomes.Identity;
 using KeyLoad.Storage;
@@ -45,38 +46,65 @@ public static class StoredCommandRead
         });
     }
 
-    /// <summary>Reads the last canonical command committed here so a later writer can complete a one-position copy gap.</summary>
+    /// <summary>Reads the commands of the last canonical commit here so a later writer can complete a copy that missed it.</summary>
     /// <param name = "engine">The shared database execution context.</param>
     /// <param name = "cancellationToken">Bounds the synchronous retained lookup.</param>
-    /// <returns>The owned last canonical command and its sequence, or null when no canonical command recorded its outcome key.</returns>
-    public static StoredCommand? ReadLastCommittedCommand(this DatabaseEngine engine, CancellationToken cancellationToken)
+    /// <returns>The owned commands of the last commit in sequence order, ending at the committed sequence; one command
+    /// when that commit persisted one outcome, and none when no canonical command recorded its outcome key.</returns>
+    public static ImmutableArray<StoredCommand> ReadLastCommittedCommands(this DatabaseEngine engine, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(engine);
-        return engine.Store.Read<StoredCommand?>(view =>
+        return engine.Store.Read(view =>
         {
             cancellationToken.ThrowIfCancellationRequested();
             var applied = StorageOperationApply.ReadCanonicalSequence(view);
             if (applied == StorageOperationApply.InitialCanonicalSequence
                 || view.GetRecord<byte[]>(KeySpace.LastCommandBytes) is not { } outcomeKey)
             {
-                return null;
+                return [];
             }
 
-            var outcome = view.GetRecord<StoredOutcome>(outcomeKey)
-                ?? throw Errors.Fail(ErrorCode.Corruption, LastCommandScopeInvalid);
-            if (outcome.CanonicalSequence != applied)
-            {
-                throw Errors.Fail(ErrorCode.Corruption, LastCommandScopeInvalid);
-            }
-
-            var retained = engine.OwnCommand(outcome.PreparedCommand);
-            if (retained.Value!.Fingerprint != outcome.Fingerprint)
-            {
-                throw Errors.Fail(ErrorCode.Corruption, StoredCommandScopeInvalid);
-            }
-
+            var commands = view.GetRecord<byte[][]>(KeySpace.LastBatchBytes) is { } batch
+                ? engine.ReadLastBatch(view, batch, outcomeKey, applied) : [];
             cancellationToken.ThrowIfCancellationRequested();
-            return new StoredCommand(applied, retained);
+            return commands.IsEmpty ? [engine.ReadCommitted(view, outcomeKey, applied)] : commands;
         });
+    }
+
+    /// <summary>Reads the retained batch only when it is the last commit: its final outcome is the last command.</summary>
+    private static ImmutableArray<StoredCommand> ReadLastBatch(this DatabaseEngine engine, IKeyValueView view,
+        byte[][] outcomeKeys, byte[] lastOutcomeKey, long applied)
+    {
+        if (outcomeKeys.Length == 0 || !outcomeKeys[^1].AsSpan().SequenceEqual(lastOutcomeKey))
+        {
+            return [];
+        }
+
+        var commands = ImmutableArray.CreateBuilder<StoredCommand>(outcomeKeys.Length);
+        var sequence = applied - outcomeKeys.Length;
+        foreach (var outcomeKey in outcomeKeys)
+        {
+            commands.Add(engine.ReadCommitted(view, outcomeKey, ++sequence));
+        }
+
+        return commands.MoveToImmutable();
+    }
+
+    private static StoredCommand ReadCommitted(this DatabaseEngine engine, IKeyValueView view, byte[] outcomeKey, long sequence)
+    {
+        var outcome = view.GetRecord<StoredOutcome>(outcomeKey)
+            ?? throw Errors.Fail(ErrorCode.Corruption, LastCommandScopeInvalid);
+        if (outcome.CanonicalSequence != sequence)
+        {
+            throw Errors.Fail(ErrorCode.Corruption, LastCommandScopeInvalid);
+        }
+
+        var retained = engine.OwnCommand(outcome.PreparedCommand);
+        if (retained.Value!.Fingerprint != outcome.Fingerprint)
+        {
+            throw Errors.Fail(ErrorCode.Corruption, StoredCommandScopeInvalid);
+        }
+
+        return new StoredCommand(sequence, retained);
     }
 }
