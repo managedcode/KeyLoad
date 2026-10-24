@@ -1,4 +1,3 @@
-import { verifyDocumentFunctionalGate } from './document-functional-gate.mjs';
 import { verifySessionOriginalArchive } from './session-original-archives.mjs';
 import path from 'node:path';
 import { link, readdir } from 'node:fs/promises';
@@ -86,7 +85,7 @@ async function authenticateProof(input, proof) {
     const { sessionSha256, ...metadata } = worker;
     require(sessionHash(sessionSha256) && isDeepStrictEqual(metadata, expected[index]));
   }
-  require(exact(proof.preparation, ['job', 'compiledArtifact', 'runtimeIdentity', 'functional'])
+  require(exact(proof.preparation, ['job', 'compiledArtifact', 'runtimeIdentity'])
     && isDeepStrictEqual(proof.preparation.job, projectJob(selected.preparation, proof.cohort, SESSION.prepareSteps))
     && isDeepStrictEqual(proof.preparation.compiledArtifact, projectArtifact(selected.compiledArtifact)));
   const runtime = proof.preparation.runtimeIdentity;
@@ -99,7 +98,6 @@ async function authenticateProof(input, proof) {
     && runtime.files.every((file,index) => exact(file,['path','bytes','sha256'])
       && file.path === ['github/runtime/benchmark-runtime.json','github/runtime/benchmark-runtime-files.json'][index]
       && file.sha256 === [identity.descriptorSha256,identity.inventorySha256][index]));
-  await verifyDocumentFunctionalGate(input, proof.preparation.functional, capture, proof.cohort, identity);
   await verifySessionOriginalArchive(input, path.join(input, runtime.archive.path), runtime.artifact,
     runtime.files.map(file => ({...file,entry:path.basename(file.path),maximum:67_108_864})), 134_217_728);
   return identity;

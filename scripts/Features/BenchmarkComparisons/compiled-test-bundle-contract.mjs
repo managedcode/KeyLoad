@@ -12,7 +12,6 @@ export const runtimeBundle = Object.freeze({
   assemblies: Object.freeze([
     ['apphost', 'build/KeyLoad.AppHost/bin/Release/net10.0/KeyLoad.AppHost'],
     ['load-apphost', 'build/KeyLoad.LoadTests.AppHost/bin/Release/net10.0/KeyLoad.LoadTests.AppHost'],
-    ['server', 'src/KeyLoad/bin/Release/net10.0/KeyLoad'],
     ['comparison-client', 'benchmarks/KeyLoad.ComparisonHost/bin/Release/net10.0/KeyLoad.ComparisonHost'],
     ['comparisons', 'benchmarks/KeyLoad.Comparisons/bin/Release/net10.0/KeyLoad.Comparisons'],
   ]),

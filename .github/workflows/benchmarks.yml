@@ -336,35 +336,9 @@ jobs:
       matrix: ${{ fromJSON(needs.comparison-runtime.outputs.databases).influxdb }}
     env: *database-environment
     steps: *database-steps
-  keyload-functional-heavy-load:
-    name: KeyLoad functional CLUSTER million-record ingestion
-    if: (github.event_name == 'push' || inputs.mode == 'full')
-    needs: [comparison-runtime]
-    runs-on: ubuntu-24.04
-    timeout-minutes: 180
-    steps:
-      - name: Download source code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-      - name: Prepare real functional CLUSTER ingestion
-        uses: ./.github/workflows/Features/BenchmarkComparisons/FunctionalHeavyLoadSetup
-      - name: Test exclusive heavy-load admission
-        run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=cluster '--KeyLoadTests:Filter=/*/*/HeavyDocumentLoadAdmissionTests/*' --KeyLoadTests:ResultsDirectory=TestResults/cluster-heavy-admission --KeyLoadTests:ReportTrx=true
-      - name: Test ingestion while SDK and MCP reads are active
-        run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=cluster '--KeyLoadTests:Filter=/*/*/HeavyDocumentLoadClusterTests/*' --KeyLoadTests:HeavyLoad:Enabled=true --KeyLoadTests:TimeoutMinutes=140 --KeyLoadTests:ResultsDirectory=TestResults/cluster-heavy-load --KeyLoadTests:ReportTrx=true
-      - name: Save original functional load results and execution process receipts
-        if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
-        with:
-          name: keyload-functional-heavy-load
-          path: |
-            TestResults/cluster-heavy-admission/**
-            TestResults/cluster-heavy-load/**
-            artifacts/code-quality/**
-          if-no-files-found: error
-          retention-days: 90
   comparison-aggregate:
     name: Combine benchmark results
-    needs: [comparison-runtime, comparison-keyload, comparison-postgresql, comparison-qdrant, comparison-rabbitmq, comparison-redis, comparison-neo4j, comparison-mongodb, comparison-opensearch, comparison-kurrentdb, comparison-surrealdb, comparison-helixdb, comparison-timescaledb, comparison-sqlserver, comparison-mysql, comparison-clickhouse, comparison-influxdb, keyload-functional-heavy-load]
+    needs: [comparison-runtime, comparison-keyload, comparison-postgresql, comparison-qdrant, comparison-rabbitmq, comparison-redis, comparison-neo4j, comparison-mongodb, comparison-opensearch, comparison-kurrentdb, comparison-surrealdb, comparison-helixdb, comparison-timescaledb, comparison-sqlserver, comparison-mysql, comparison-clickhouse, comparison-influxdb]
     if: ${{ always() && !cancelled() && (github.event_name == 'push' || inputs.mode == 'full') && needs.comparison-runtime.result == 'success' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 150
@@ -397,7 +371,7 @@ jobs:
           retention-days: 90
   website-trigger:
     name: Trigger Website
-    needs: [comparison-runtime, comparison-keyload, comparison-postgresql, comparison-qdrant, comparison-rabbitmq, comparison-redis, comparison-neo4j, comparison-mongodb, comparison-opensearch, comparison-kurrentdb, comparison-surrealdb, comparison-helixdb, comparison-timescaledb, comparison-sqlserver, comparison-mysql, comparison-clickhouse, comparison-influxdb, keyload-functional-heavy-load, comparison-aggregate]
+    needs: [comparison-runtime, comparison-keyload, comparison-postgresql, comparison-qdrant, comparison-rabbitmq, comparison-redis, comparison-neo4j, comparison-mongodb, comparison-opensearch, comparison-kurrentdb, comparison-surrealdb, comparison-helixdb, comparison-timescaledb, comparison-sqlserver, comparison-mysql, comparison-clickhouse, comparison-influxdb, comparison-aggregate]
     if: >-
       always() && !cancelled() &&
       (github.event_name == 'push' || inputs.mode == 'full') &&

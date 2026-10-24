@@ -7,7 +7,7 @@ export function validateSessionAggregate(value) {
     && value.schemaVersion === SESSION.schema);
   validateSessionCohort(value.cohort);
   validateSessionPlan(value.plan);
-  require(exact(value.preparation, ['job', 'compiledArtifact', 'runtimeIdentity', 'functional'])
+  require(exact(value.preparation, ['job', 'compiledArtifact', 'runtimeIdentity'])
     && Array.isArray(value.workers) && value.workers.length === SESSION.workers);
   const jobs = new Set(), artifacts = new Set(), sessions = new Set();
   for (const [index, worker] of value.workers.entries()) {

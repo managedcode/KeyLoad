@@ -1,4 +1,3 @@
-import { selectDocumentFunctionalGate } from './document-functional-gate.mjs';
 import { GH } from './isolated-github-contract.mjs';
 import { uniqueNamed, validateArtifact, validateSuccessfulJob } from './isolated-github-validation.mjs';
 import { SESSION, requireSession, validateSessionCohort } from './session-contract.mjs';
@@ -33,7 +32,7 @@ export function selectSessionSiteProducer(capture, workflow, mode = 'validate') 
     job, SESSION.aggregateArtifact, SESSION_SITE.suiteBytes);
   const provider = validateArtifact(uniqueNamed(capture.artifacts, SESSION_SITE.provider), capture.run,
     job, SESSION_SITE.provider, SESSION_SITE.providerBytes);
-  return { cohort, job, suite, provider, functional:selectDocumentFunctionalGate(capture,cohort), execution: selectSessionEvidence(capture, cohort) };
+  return { cohort, job, suite, provider, execution: selectSessionEvidence(capture, cohort) };
 }
 
 // Called after complete aggregate validation; failed originals remain reviewable in validate mode only.

@@ -16,22 +16,6 @@ internal static class SiteSessionPreparationArchives
         var runtime = provider.Where(item => item.File.Path.StartsWith(Runtime, StringComparison.Ordinal))
             .ToDictionary(item => item.File.Path[Runtime.Length..], item => item.File.Sha256, StringComparer.Ordinal);
         await VerifyArchiveAsync(capture, metadata[SiteIsolatedFields.RuntimeIdentity]!.AsObject(), runtime, SmallArchiveBytes, token);
-        var proofEntry = provider.Single(item => item.File.Path == "proof.json");
-        await using var proofStream = await proofEntry.Entry.OpenAsync(token);
-        var proof = (await JsonNode.ParseAsync(proofStream, cancellationToken: token))!.AsObject();
-        var functional = proof[SiteIsolatedFields.Preparation]![SiteIsolatedFields.Functional]!;
-        var expected = functional[SiteIsolatedFields.Files]!.AsArray().ToDictionary(
-            item => item![SiteIsolatedFields.Entry]!.GetValue<string>(), item => item![SiteIsolatedFields.Sha256]!.GetValue<string>(), StringComparer.Ordinal);
-        foreach (var file in functional[SiteIsolatedFields.Files]!.AsArray())
-        {
-            if (provider.Single(item => item.File.Path == file![SiteIsolatedFields.Path]!.GetValue<string>()).File.Sha256
-                != file![SiteIsolatedFields.Sha256]!.GetValue<string>())
-            {
-                throw new InvalidDataException(SiteIsolatedGitHubTokens.Changed);
-            }
-        }
-
-        await VerifyArchiveAsync(capture, metadata[SiteIsolatedFields.Functional]!.AsObject(), expected, SmallArchiveBytes, token);
     }
 
     private static async Task VerifyArchiveAsync(string capture, JsonObject selection,

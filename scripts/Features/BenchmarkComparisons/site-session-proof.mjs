@@ -1,4 +1,3 @@
-import { verifyDocumentFunctionalGate } from './document-functional-gate.mjs';
 import path from 'node:path';
 import { isDeepStrictEqual } from 'node:util';
 import { readJson, hashRegularFile } from './isolated-github-files.mjs';
@@ -28,7 +27,7 @@ export async function verifySessionSiteInputs({ input, receipt: receiptPath }) {
   await verifyFiles(input, receipt.metadataFiles);
   await verifyFiles(input, Object.values(receipt.archives));
   await verifyFiles(input, receipt.workerArchives);
-  await verifyFiles(input, [receipt.runtimeIdentity.archive, receipt.functional.archive]);
+  await verifyFiles(input, [receipt.runtimeIdentity.archive]);
   await verifyFiles(input, receipt.inputFiles);
   const metadata = validateSessionSiteReceipt(await readJson(path.join(input, 'metadata-proof.json')));
   requireSession(isDeepStrictEqual({ ...receipt, state: 'metadata_verified', archives: null, inputFiles: null }, metadata));
@@ -66,10 +65,6 @@ export async function verifySessionSiteInputs({ input, receipt: receiptPath }) {
     validateSessionRuntimeImport(await readJson(file, SESSION.sessionBytes), receipt.cohort, runtimeIdentity);
     validateSessionProcesses(worker.session.processes, runtimeIdentity);
   }
-  const functional = aggregate.preparation.functional;
-  requireSession(isDeepStrictEqual(receipt.functional.artifact, functional.artifact));
-  // Verify against the original archive in the capture root; provider files remain extracted originals.
-  await verifyDocumentFunctionalGate(input, functional, capture, receipt.cohort, runtimeIdentity, input, providerRoot);
   await produceIsolatedProjection({ input: path.join(input, 'input', 'aggregate') });
   const proof = await readJson(path.join(input, 'input', 'provider', 'proof.json'));
   requireSession(isDeepStrictEqual(proof.cohort, aggregate.cohort)
@@ -83,8 +78,7 @@ function identity(receipt) {
     providerArtifactId: receipt.artifacts?.provider.id ?? receipt.providerArtifactId,
     preparation: receipt.preparation?.job ? {jobId:receipt.preparation.job.id,runtimeArtifactId:receipt.runtimeIdentity.artifact.id,
       runtimeDigest:receipt.runtimeIdentity.artifact.digest,compiledArtifactId:receipt.preparation.compiledArtifact.id,
-      compiledDigest:receipt.preparation.compiledArtifact.digest,functionalArtifactId:receipt.functional.artifact.id,
-      functionalDigest:receipt.functional.artifact.digest} : receipt.preparation,
+      compiledDigest:receipt.preparation.compiledArtifact.digest} : receipt.preparation,
     workers: receipt.workers.map(worker => ({ id: worker.id, jobId: worker.job?.id ?? worker.jobId,
       artifactId: worker.artifact?.id ?? worker.artifactId, digest: worker.artifact?.digest ?? worker.digest })) };
 }

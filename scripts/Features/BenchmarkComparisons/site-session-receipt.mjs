@@ -2,7 +2,7 @@ import { SESSION, exactSession as exact, requireSession as require, sessionHash,
   sessionRows, sessionPositive, sessionCount, validateSessionCohort } from './session-contract.mjs';
 
 const common = ['schemaVersion', 'state', 'mode', 'publishEligible', 'source', 'producer', 'metadataFiles'];
-const selected = ['repository', 'workflow', 'run', 'cohort', 'aggregateJob', 'artifacts', 'workers', 'preparation', 'runtimeIdentity', 'functional',
+const selected = ['repository', 'workflow', 'run', 'cohort', 'aggregateJob', 'artifacts', 'workers', 'preparation', 'runtimeIdentity',
   'suiteFiles', 'workerArchives', 'archives', 'inputFiles'];
 export function validateSessionSiteReceipt(value) {
   require(value?.schemaVersion === SESSION.schema && ['publish', 'validate'].includes(value.mode)
@@ -26,7 +26,7 @@ export function validateSessionSiteReceipt(value) {
   validateJobProof(value.aggregateJob, value.cohort, ['Check complete session accounting', 'Save combined benchmark results', 'Save GitHub result verification'], false);
   require(exact(value.preparation, ['job', 'compiledArtifact']) && value.preparation.job?.name === SESSION.prepareJob
     && value.preparation.compiledArtifact?.name === 'comparison-compiled-test-bundle');
-  for (const artifact of [value.preparation.compiledArtifact, value.runtimeIdentity.artifact, value.functional.artifact]) validateArtifactIdentity(artifact);
+  for (const artifact of [value.preparation.compiledArtifact, value.runtimeIdentity.artifact]) validateArtifactIdentity(artifact);
   validateJobProof(value.preparation.job, value.cohort, SESSION.prepareSteps, false);
   const seenJobs = new Set(), seenArtifacts = new Set();
   for (const [index, row] of sessionRows().entries()) {
@@ -58,11 +58,6 @@ export function validateSessionSiteReceipt(value) {
     && sessionPositive(value.runtimeIdentity.archive.bytes)
     && value.runtimeIdentity.archive.bytes === value.runtimeIdentity.artifact.sizeInBytes
     && 'sha256:' + value.runtimeIdentity.archive.sha256 === value.runtimeIdentity.artifact.digest);
-  require(exact(value.functional, ['artifact', 'archive']) && value.functional.artifact.name === 'keyload-functional-heavy-load'
-    && exact(value.functional.archive, ['path', 'bytes', 'sha256'])
-    && value.functional.archive.path === 'archives/keyload-functional-heavy-load.zip'
-    && value.functional.archive.bytes === value.functional.artifact.sizeInBytes
-    && 'sha256:' + value.functional.archive.sha256 === value.functional.artifact.digest);
   if (value.state === 'metadata_verified') require(value.archives === null && value.inputFiles === null);
   else {
     require(exact(value.archives, ['suite', 'provider']) && Array.isArray(value.inputFiles));

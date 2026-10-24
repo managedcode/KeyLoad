@@ -37,7 +37,7 @@ internal static class SiteIsolatedGitHubArchiveAssertions
             SiteIsolatedGitHubTokens.Source, SiteIsolatedGitHubFields.Repository, SiteIsolatedGitHubFields.WorkflowKey,
             SiteIsolatedGitHubTokens.Run, SiteIsolatedGitHubTokens.Cohort, SiteIsolatedGitHubTokens.AggregateJob,
             SiteIsolatedGitHubTokens.Artifacts, SiteIsolatedGitHubTokens.Workers, SiteIsolatedGitHubFields.Preparation,
-            SiteIsolatedFields.RuntimeIdentity, SiteIsolatedFields.Functional,
+            SiteIsolatedFields.RuntimeIdentity,
         ];
         foreach (var field in fields)
         {

@@ -1,4 +1,3 @@
-import { collectDocumentFunctionalGate } from './document-functional-gate.mjs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { createDirectory } from './files.mjs';
@@ -58,12 +57,11 @@ export async function collectSessionEvidence(environment = process.env, argv = p
   const selected = selectSessionEvidence(capture, context.cohort);
   const runtimeIdentity = await collectSessionRuntimeIdentity(input, selected.runtimeArtifact, context);
   const identity = await readSessionRuntimeIdentity(path.join(input, 'github', 'runtime'), context.cohort);
-  const functional = await collectDocumentFunctionalGate(input, capture, context, identity);
   const workers = [];
   for (const worker of selected.workers) workers.push(await collectSessionWorker(input, worker, context, identity));
   const proof = { schemaVersion: SESSION.schema, cohort: context.cohort, workers,
     preparation: { job: projectJob(selected.preparation, context.cohort, SESSION.prepareSteps),
-      compiledArtifact: projectArtifact(selected.compiledArtifact), runtimeIdentity, functional } };
+      compiledArtifact: projectArtifact(selected.compiledArtifact), runtimeIdentity } };
   await writeJson(path.join(input, 'proof.json'), proof);
   return { schemaVersion: SESSION.schema, workers: workers.length };
 }

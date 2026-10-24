@@ -15,7 +15,7 @@ internal static class SiteIsolatedGitHubNodeProgram
           (await load('receipt')).validateSiteIsolatedReceipt(receipt);
           await mkdir(output, {recursive:false});
           const files = [...receipt.metadataFiles,...Object.values(receipt.archives),...receipt.inputFiles,
-            ...receipt.workerArchives,receipt.runtimeIdentity.archive,receipt.functional.archive];
+            ...receipt.workerArchives,receipt.runtimeIdentity.archive];
           for (const file of files) {
             const source = path.join(actual,file.path), target = path.join(output,file.path);
             const info = await lstat(source);

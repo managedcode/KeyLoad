@@ -90,13 +90,15 @@ filtered/concurrent-update and recall requirements where ly supported.
 batching, index build and accuracy are declared explicitly. Closed-loop
 request timings do not prove scheduled-arrival/open-loop or endurance behavior.
 
-The existing exclusive functional cluster million-record ingestion gate remains
-mandatory and separate from numerical benchmark publication. Its actual .NET
-SDK and official MCP callers operate while ingestion is active. Heavy-load
-admission still requires explicit enabled settings, the exact class
-filter, one-test parallelism and disabled coverage; missing/false/broad/duplicate
-filters, coverage or wrong parallelism fail before resources are acquired.
-Normal functional concurrency and all process-recovery/cluster gates are unchanged.
+Benchmarks takes every database, KeyLoad included, from its Docker image and
+compiles no KeyLoad server, so the source-built functional cluster million-record
+ingestion tests (`HeavyDocumentLoadClusterTests`) are not part of Benchmarks or of
+numerical publication; the KeyLoad 1-node and 3-node session cells are the KeyLoad
+ingestion measurement. Wherever those functional tests are selected, heavy-load
+admission still requires explicit enabled settings, the exact class filter,
+one-test parallelism and disabled coverage; missing/false/broad/duplicate filters,
+coverage or wrong parallelism fail before resources are acquired. Normal functional
+concurrency and all process-recovery/cluster gates are unchanged.
 
 ## Original results, resources and failure
 

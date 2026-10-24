@@ -13,9 +13,7 @@ internal static class SiteIsolatedGitHubArchivePaths
     private static readonly string[] ProviderFiles =
     [
         "proof.json", "github/workflow.json", "github/run-attempt.json", "github/jobs-pages.json",
-        "github/artifacts-pages.json", "github/runtime/benchmark-runtime.json", "github/runtime/benchmark-runtime-files.json",
-        "github/functional/original.trx", "github/functional/execution-process-startup.json",
-        "github/functional/execution-process-before-shutdown.json", "github/functional/execution-process-shutdown.json"
+        "github/artifacts-pages.json", "github/runtime/benchmark-runtime.json", "github/runtime/benchmark-runtime-files.json"
     ];
 
     public static HashSet<string> ExpectedSuite(JsonObject metadata)
@@ -44,7 +42,7 @@ internal static class SiteIsolatedGitHubArchivePaths
 
     public static bool IsProviderCapture(string value, IReadOnlySet<string>? cellIds)
     {
-        if (ProviderFiles.Contains(value, StringComparer.Ordinal) || value is "github/gh-api-help.txt" or "github/runtime-identity-inventory.txt" or "github/functional-inventory.txt")
+        if (ProviderFiles.Contains(value, StringComparer.Ordinal) || value is "github/gh-api-help.txt" or "github/runtime-identity-inventory.txt")
         {
             return true;
         }

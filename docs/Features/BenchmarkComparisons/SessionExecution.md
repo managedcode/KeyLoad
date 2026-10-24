@@ -18,9 +18,10 @@ the initial million is a separate measurement result.** Operation type and opera
 count do not create jobs.
 
 The 16 databases give **32 measurement jobs**. One shared preparation, one aggregation
-and a separate Website dispatch give **35 jobs in the comparison flow**. One existing
-functional replicated-cluster heavy-load gate is also kept until it moves to Build and
-Tests; it is a correctness gate, so the measurement jobs stay exactly 32. Real execution
+and a separate Website dispatch give **35 jobs in the comparison flow**. Benchmarks
+compiles no KeyLoad server and runs no source-built KeyLoad job: every database cell,
+KeyLoad included, starts its Docker image through the same procedure, and the KeyLoad
+1-node and 3-node session cells are the KeyLoad ingestion measurement. Real execution
 topologies, separate Linux runners between databases/topologies and their resource
 contracts are kept. An unavailable topology gets an explicit unavailable result.
 
@@ -160,7 +161,7 @@ server image with SDK `PublishContainer`.
 
 Local execution retains the actual client binary/source/process identity with no
 invented GitHub provenance; every database server, KeyLoad included, is identified
-by its image reference and digest. Session, heavy-load and aggregation jobs declare the
+by its image reference and digest. Session and aggregation jobs declare the
 explicit `ubuntu-24.04` runner: the `ubuntu-latest` image moved to Ubuntu 26.04 with a
 7.0 kernel that the pinned MongoDB server refuses to start on. It cannot authorize public figures. External
 advertised-endpoint reachability remains open until actual execution proves it;

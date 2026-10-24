@@ -2,10 +2,7 @@ scripts/Features/BenchmarkComparisons/aggregate-contracts.mjs
 scripts/Features/BenchmarkComparisons/aggregate-files.mjs
 scripts/Features/BenchmarkComparisons/aggregate-json.mjs
 scripts/Features/BenchmarkComparisons/compiled-test-bundle-contract.mjs
-scripts/Features/BenchmarkComparisons/document-functional-gate.mjs
-scripts/Features/BenchmarkComparisons/document-functional-trx.ps1
 scripts/Features/BenchmarkComparisons/files.mjs
-scripts/Features/BenchmarkComparisons/functional-process-evidence.mjs
 scripts/Features/BenchmarkComparisons/isolated-github-api.mjs
 scripts/Features/BenchmarkComparisons/isolated-github-contract.mjs
 scripts/Features/BenchmarkComparisons/isolated-github-files.mjs
@@ -36,9 +33,6 @@ scripts/Features/BenchmarkComparisons/site-session-github.mjs
 scripts/Features/BenchmarkComparisons/site-session-proof.mjs
 scripts/Features/BenchmarkComparisons/site-session-receipt.mjs
 scripts/Features/BenchmarkComparisons/site-session-selection.mjs
-scripts/Features/CodeQuality/functional-coverage.execution-merge.trx.ps1
-scripts/Features/CodeQuality/functional-coverage.parse.ps1
-scripts/Features/CodeQuality/functional-coverage.shared.ps1
 site/Features/BenchmarkComparisons/bootstrap.mjs
 site/Features/BenchmarkComparisons/build-site.mjs
 site/Features/BenchmarkComparisons/cluster-scene.mjs

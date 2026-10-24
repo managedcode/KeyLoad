@@ -59,9 +59,9 @@ identity or resource observation may stand in for a server process.
 ## Consequences and qualification
 
 The measurement matrix is 16 databases × two topologies = 32 jobs. Shared
-preparation, aggregation and Website dispatch make 35 comparison-flow jobs. The
-existing functional cluster heavy-load correctness job remains separately present
-until its owner moves it without losing acceptance coverage. A job failure may
+preparation, aggregation and Website dispatch make 35 comparison-flow jobs.
+Benchmarks runs no source-built KeyLoad job; the KeyLoad cells start the released
+image like every other database's. A job failure may
 leave later prerequisites failed; original case outcomes must show this honestly.
 
 [SessionExecution](../Features/BenchmarkComparisons/SessionExecution.md) owns

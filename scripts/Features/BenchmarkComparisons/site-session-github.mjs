@@ -97,8 +97,7 @@ export async function captureSessionSite({ environment = process.env, args, down
       providerArtifactId: selected.provider.id,
       preparation: {jobId:selected.execution.preparation.id,runtimeArtifactId:selected.execution.runtimeArtifact.id,
         runtimeDigest:selected.execution.runtimeArtifact.digest,compiledArtifactId:selected.execution.compiledArtifact.id,
-        compiledDigest:selected.execution.compiledArtifact.digest,functionalArtifactId:selected.functional.artifact.id,
-        functionalDigest:selected.functional.artifact.digest},
+        compiledDigest:selected.execution.compiledArtifact.digest},
       workers: selected.execution.workers.map(({row,job,artifact}) => ({id:row.id,jobId:job.id,artifactId:artifact.id,digest:artifact.digest})),
       metadataFiles: await snapshotFiles(input) };
     await writeJson(path.join(input, 'metadata-proof.json'), fresh);
@@ -107,9 +106,6 @@ export async function captureSessionSite({ environment = process.env, args, down
   await createDirectory(path.join(input, 'archives'));
   const suite = await downloadOriginal(selected.suite, input, SESSION.aggregateArtifact + '.zip', SESSION_SITE.suiteBytes, context);
   await downloadOriginal(selected.provider, input, SESSION_SITE.provider + '.zip', SESSION_SITE.providerBytes, context);
-  const functionalSelection = selected.functional;
-  const functionalArchive = await downloadOriginal(functionalSelection.artifact, input,
-    'keyload-functional-heavy-load.zip', GH.workerZipBytes, context);
   const runtimeArchive = await downloadOriginal(selected.execution.runtimeArtifact, input,
     'comparison-compiled-runtime-identity.zip', 134_217_728, context);
   await inspectZip(path.join(input, suite.path), ['aggregate.json'], path.join(metadata, 'suite-inventory.txt'), context);
@@ -138,7 +134,6 @@ export async function captureSessionSite({ environment = process.env, args, down
     artifacts: { suite: projectArtifact(selected.suite), provider: projectArtifact(selected.provider) }, workers,
     preparation: { job: projectJob(selected.execution.preparation, selected.cohort, SESSION.prepareSteps),
       compiledArtifact: projectArtifact(selected.execution.compiledArtifact) },
-    functional: { artifact: projectArtifact(functionalSelection.artifact), archive: functionalArchive },
     runtimeIdentity: { artifact: projectArtifact(selected.execution.runtimeArtifact), archive: runtimeArchive },
     suiteFiles: sessionSuiteFiles(aggregate, aggregateRaw.sha256), workerArchives,
     archives: null, inputFiles: null, metadataFiles: await snapshotFiles(input) });
