@@ -28,19 +28,25 @@ flowchart LR
 ```
 
 Delivery uses four independent workflows: Build and Tests, Benchmarks, Website
-and Release. Release is manual and only builds downloadable applications and
-Docker image archives through the .NET SDK.
+and Release. Release is manual. It builds downloadable applications, publishes
+the server container image to GitHub Container Registry and builds the benchmark
+image archive, all through the .NET SDK.
 
 - REQ-REL-001 / AC-REL-001: `dotnet publish --self-contained true` builds the server
   and CLI for `linux-x64`, `linux-arm64`, `win-x64`, `win-arm64`, `osx-x64` and
   `osx-arm64`. Each runtime has one downloadable archive containing both applications,
   their .NET runtime, configuration files and license notices.
-- REQ-REL-002 / AC-REL-002: SDK `PublishContainer` builds the server and benchmark
-  Linux x64 images into downloadable Docker archives. Images use the source SHA
-  as their tag and retain the centrally configured base image and non-root user.
-- REQ-REL-003 / AC-REL-003: Release uses read-only repository permissions. Source
-  package and assembly versions remain centrally configured. The workflow does
-  not create tags, GitHub Releases, registry publications or NuGet packages.
+- REQ-REL-002 / AC-REL-002: SDK `PublishContainer` publishes the Linux x64 server
+  image to `ghcr.io/managedcode/keyload` with the source SHA tag and the moving
+  `latest` tag, and retains the centrally configured base image and non-root user.
+  The job verifies that both tags resolve to one digest and records
+  `ghcr.io/managedcode/keyload:<sha>@sha256:<digest>` in the job summary and the
+  `keyload-server-image` artifact. Benchmarks measures the image `latest` resolves to.
+  The benchmark image remains a downloadable Docker archive tagged with the source SHA.
+- REQ-REL-003 / AC-REL-003: Release uses read-only repository permissions; only the
+  server image job receives `packages: write`. Source package and assembly versions
+  remain centrally configured. The workflow does not create tags, GitHub Releases or
+  NuGet packages.
 
 Canonical implementation: [release.yml](../../.github/workflows/release.yml),
 [Directory.Build.props](../../Directory.Build.props) and

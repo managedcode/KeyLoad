@@ -32,18 +32,49 @@ jobs:
           name: keyload-${{ matrix.runtime }}
           path: artifacts/keyload-${{ matrix.runtime }}.tar.gz
           if-no-files-found: error
-  docker:
-    name: Build Docker image (${{ matrix.image }})
+  server-image:
+    name: Publish server container image
     runs-on: ubuntu-24.04
     timeout-minutes: 60
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - image: server
-            project: src/KeyLoad/KeyLoad.csproj
-          - image: benchmarks
-            project: benchmarks/KeyLoad.ComparisonHost/KeyLoad.ComparisonHost.csproj
+    permissions:
+      contents: read
+      packages: write
+    env:
+      IMAGE_REGISTRY: ghcr.io
+      IMAGE_REPOSITORY: managedcode/keyload
+    steps:
+      - name: Download source code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Set up .NET
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: global.json
+      - name: Sign in to GitHub Container Registry
+        env:
+          REGISTRY_TOKEN: ${{ github.token }}
+        run: printf '%s' "$REGISTRY_TOKEN" | docker login "$IMAGE_REGISTRY" --username "$GITHUB_ACTOR" --password-stdin
+      - name: Publish the server image with commit and latest tags
+        run: dotnet publish src/KeyLoad/KeyLoad.csproj /t:PublishContainer --configuration Release --runtime linux-x64 -warnaserror -p:ContainerRegistry="$IMAGE_REGISTRY" -p:ContainerRepository="$IMAGE_REPOSITORY" "-p:ContainerImageTags=\"$GITHUB_SHA;latest\""
+      - name: Record the published image digest
+        shell: bash
+        run: |
+          image="$IMAGE_REGISTRY/$IMAGE_REPOSITORY"
+          digest=$(docker buildx imagetools inspect "$image:$GITHUB_SHA" --format '{{json .Manifest}}' | jq -er '.digest')
+          latest=$(docker buildx imagetools inspect "$image:latest" --format '{{json .Manifest}}' | jq -er '.digest')
+          [[ "$digest" =~ ^sha256:[0-9a-f]{64}$ && "$digest" == "$latest" ]]
+          mkdir -p artifacts
+          printf '%s:%s@%s\n' "$image" "$GITHUB_SHA" "$digest" > artifacts/keyload-server-image.txt
+          printf 'Server image: `%s:%s@%s` (also tagged `latest`)\n' "$image" "$GITHUB_SHA" "$digest" >> "$GITHUB_STEP_SUMMARY"
+      - name: Save the image reference
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: keyload-server-image
+          path: artifacts/keyload-server-image.txt
+          if-no-files-found: error
+  benchmark-image:
+    name: Build benchmark Docker image
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
     steps:
       - name: Download source code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -52,13 +83,10 @@ jobs:
         with:
           global-json-file: global.json
       - name: Build Docker image
-        env:
-          PROJECT: ${{ matrix.project }}
-          IMAGE: ${{ matrix.image }}
-        run: dotnet publish "$PROJECT" /t:PublishContainer --configuration Release --runtime linux-x64 -warnaserror -p:ContainerRepository="keyload/$IMAGE" -p:ContainerImageTag="$GITHUB_SHA" -p:ContainerArchiveOutputPath="$GITHUB_WORKSPACE/keyload-$IMAGE.tar"
+        run: dotnet publish benchmarks/KeyLoad.ComparisonHost/KeyLoad.ComparisonHost.csproj /t:PublishContainer --configuration Release --runtime linux-x64 -warnaserror -p:ContainerRepository="keyload/benchmarks" -p:ContainerImageTag="$GITHUB_SHA" -p:ContainerArchiveOutputPath="$GITHUB_WORKSPACE/keyload-benchmarks.tar"
       - name: Save Docker image
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: keyload-docker-${{ matrix.image }}
-          path: keyload-${{ matrix.image }}.tar
+          name: keyload-docker-benchmarks
+          path: keyload-benchmarks.tar
           if-no-files-found: error
