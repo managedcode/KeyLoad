@@ -123,6 +123,8 @@ internal static class ServerConfiguration
             branch =>
             {
                 branch.UseRouting();
+                // The public console shell is a Razor component endpoint, which carries antiforgery metadata.
+                branch.UseAntiforgery();
                 branch.UseEndpoints(_ =>
                 {
                 });
