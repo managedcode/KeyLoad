@@ -7,11 +7,12 @@ Own exactly the infrastructure for one selected database and topology.
 The ordinary development and functional-test host is `../KeyLoad.AppHost`.
 Do not introduce another AppHost, resource runner or forwarding project.
 
-External databases use the selected pinned images and their entry points.
-KeyLoad uses execution `AddProject<KeyLoad>` processes with the published
-in-memory RapidMembership Orleans provider. Ordinary build, startup, functional tests and load execution
-never publish or start a KeyLoad server or workload image. Execution .NET SDK
-`PublishContainer` belongs only to explicit release/publication.
+Every database uses its selected pinned image and entry point. KeyLoad runs the
+Release-published `ghcr.io/managedcode/keyload` server image pinned to the digest
+in `Benchmarks:KeyLoadImage`, with the published in-memory RapidMembership Orleans
+provider discovering silos on the Aspire container network. This host never builds
+or publishes a KeyLoad server or workload image; the Release workflow alone
+publishes the server image with .NET SDK `PublishContainer`.
 
 Aspire exposes actual selected endpoints, readiness and completion barriers to the
 separate workload client. The client owns corpus loading, measured
@@ -26,15 +27,14 @@ lifetime and writable anonymous volumes; image-user defaults own
 their storage. Retain readonly bootstrap/configuration mounts where required.
 On completion or failure, join the original client and observers, dispose the
 actual Aspire application, and remove only run-owned resources. Preserve unrelated
-Docker resources and original primary/cleanup failures. An abrupt process fault
-uses the AppHost-owned PID plus Aspire/OS start identity command and joined actual
-exit; graceful stop is not abrupt-fault evidence.
+Docker resources and original primary/cleanup failures.
 
-Capture actual source/DLL/PDB/process identities without substituting image fields.
+Record each server's image reference and digest; never present an image as a
+process identity or a process as an image.
 Local execution has no invented GitHub provenance and cannot authorize public
 figures. Publication independently requires authenticated original GitHub
 source/run/attempt/job artifacts, matched resources and complete workload/result
-oracles. process resource equivalence and external advertised-endpoint
+oracles. Matched resource equivalence and external advertised-endpoint
 reachability require real qualification; never weaken gates to describe them as
 complete. Keep current qualification limits explicit.
 

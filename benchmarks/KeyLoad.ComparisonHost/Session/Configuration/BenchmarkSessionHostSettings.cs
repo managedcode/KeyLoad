@@ -44,11 +44,10 @@ internal sealed record BenchmarkSessionHostSettings(string SessionId, IsolatedHo
         var output = IsolatedHostSettings.Required(configuration, ComparisonHostConstants.Output);
         var unsupported = BenchmarkSessionContract.UnsupportedTopologies
             .SingleOrDefault(item => item.Target == target && item.NodeCounts.Contains(nodes))?.Reason;
-        var image = target == IsolatedHostConstants.KeyLoad || unsupported is not null ? null
-            : IsolatedHostSettings.Required(configuration, IsolatedHostConstants.Image);
+        var image = unsupported is not null ? null : IsolatedHostSettings.Required(configuration, IsolatedHostConstants.Image);
         var execution = ComparisonExecutionRegistration.ReadHost(configuration);
         if (job is <= 0 || !Path.IsPathFullyQualified(output)
-            || target != IsolatedHostConstants.KeyLoad && unsupported is null && !ComparisonExecutionIdentityImageReference.IsValid(image!, execution))
+            || unsupported is null && !ComparisonExecutionIdentityImageReference.IsValid(image!, execution))
         {
             throw new InvalidOperationException(Profile);
         }

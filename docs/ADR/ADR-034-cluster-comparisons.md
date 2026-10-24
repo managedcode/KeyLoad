@@ -70,22 +70,23 @@ readback fails AC-KLEVENT-001–003 / AC-PERF-004.
 ## infrastructure, source and publication contracts
 
 The primary KeyLoad AppHost runs server project processes with in-memory
-RapidMembership for Orleans membership. A separate LoadTests AppHost owns selected comparison database
-infrastructure, readiness, discovered endpoints and joined cleanup. The workload
-client runs as a process outside that graph. External databases use pinned
-images, image entry points/users and anonymous session volumes. Remove
-only resources owned by that execution. Ordinary build/start/test/load does not
-publish or run KeyLoad or workload-client images; SDK `PublishContainer` belongs
-to explicit release/publication.
+RapidMembership for Orleans membership for development and functional tests. A
+separate LoadTests AppHost owns selected comparison database infrastructure,
+readiness, discovered endpoints and joined cleanup. The workload client runs as a
+process outside that graph. Every compared database, KeyLoad included, runs from a
+digest-pinned image with its entry point/user and anonymous session volumes.
+KeyLoad runs the image the manual Release workflow published to
+`ghcr.io/managedcode/keyload`; Benchmarks resolves `latest` to one digest per run
+and never builds or publishes an image. Remove only resources owned by that
+execution.
 
-The compiled runtime and actual process observations bind server/client DLL/PDB,
-source composition and process start identities. A deliberate fault uses the
-AppHost-owned identity-checked process command and awaits actual exit.
-Graceful shutdown is not abrupt-fault proof. Local sessions have absent GitHub
-provenance; public aggregation independently requires authenticated original
-source/run/attempt/job/artifact evidence. Matched resource qualification for
-server processes remains open and must not be inferred from Docker stats
-or a successful workload.
+The compiled runtime and actual process observation bind the workload client's
+DLL/PDB, source composition and process start identity; each server is identified
+by its image reference and digest, with container resource evidence. Local
+sessions have absent GitHub provenance; public aggregation independently requires
+authenticated original source/run/attempt/job/artifact evidence. Resource
+evidence from one container sample set does not by itself prove matched resource
+equivalence or a successful workload.
 
 Validate the distinct KeyLoad HTTP(S) node origins (three in the default topology), with the primary
 matching index zero, before client allocation. Bind these discovered resource

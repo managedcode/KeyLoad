@@ -115,12 +115,14 @@ matrix, restarts or separate benchmark scenario.
 
 ## Shared preparation and measurement
 
-- The exact-source test runner, both AppHosts, server and workload client
-  are built once. The immutable runtime bundle retains source, DLL/PDB, package
-  assets and Aspire tool identities; workers validate and import it without a
-  repeated solution restore/build. KeyLoad is a project process; external
-  databases use pinned images. Ordinary build/start/load never publishes a
-  KeyLoad or workload-client container.
+- The exact-source test runner, both AppHosts and workload client are built
+  once. The immutable runtime bundle retains source, DLL/PDB, package assets and
+  Aspire tool identities; workers validate and import it without a repeated
+  solution restore/build. The same preparation job resolves the Release-published
+  `ghcr.io/managedcode/keyload:latest` image to one digest; both KeyLoad workers
+  pull that digest and run their nodes as containers, and the other databases use
+  their pinned images. Benchmarks never builds or publishes a KeyLoad or
+  workload-client container.
 - Contract tests, the actual matrix-to-C# selection and startup verification
   run before the fan-out. Inside a package readiness belongs to Aspire; setup is not
   part of operation latency.
@@ -136,22 +138,17 @@ server project processes with in-memory RapidMembership. `KeyLoad.LoadTests.AppH
 selected load infrastructure. It awaits readiness, exposes discovered endpoints to
 `KeyLoad.ComparisonHost`, and joins cleanup after the client-owned workload. The
 client remains outside the resource graph. Only run-owned Docker resources are
-removed; image user defaults and anonymous session volumes own external DB
-files. SDK `PublishContainer` is explicit release/publication work.
+removed; image user defaults and anonymous session volumes own every database's
+files, KeyLoad included. The manual Release workflow alone publishes the KeyLoad
+server image with SDK `PublishContainer`.
 
-Local execution retains actual binary/source/process identities with no
-invented GitHub provenance. A KeyLoad workload client re-verifies each server
-process recorded by the bootstrap: same PID, executable path and compiled-file
-hashes, with the operating-system start time inside the configured observer
-window (`KeyLoadTests:Execution:ProcessStartTimeObserverWindow`, one second by
-default), because Linux derives `Process.StartTime` from a boot-time estimate
-cached once per observing process and two processes can therefore disagree by
-the coarse clock granularity. Session, heavy-load and aggregation jobs declare the
+Local execution retains the actual client binary/source/process identity with no
+invented GitHub provenance; every database server, KeyLoad included, is identified
+by its image reference and digest. Session, heavy-load and aggregation jobs declare the
 explicit `ubuntu-24.04` runner: the `ubuntu-latest` image moved to Ubuntu 26.04 with a
-7.0 kernel that the pinned MongoDB server refuses to start on. It cannot authorize public figures. Matched resource
-qualification for KeyLoad processes and external advertised-endpoint
-reachability remain open until actual execution proves them; measured workload
-reports do not close these independent gates.
+7.0 kernel that the pinned MongoDB server refuses to start on. It cannot authorize public figures. External
+advertised-endpoint reachability remains open until actual execution proves it;
+measured workload reports do not close that independent gate.
 
 ## Runs and results
 

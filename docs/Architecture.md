@@ -806,10 +806,12 @@ aggregation and ends with a bounded dispatch of `website.yml` (`Website`).
 Website publishes independently on trusted main changes or manual dispatch and
 uses the newest ready authenticated benchmark aggregate when one exists
 ([ADR-112](ADR/ADR-112-independent-website-publication.md)). `release.yml`
-(`Release`) stays manual ([ReleaseDelivery](Features/ReleaseDelivery.md)): an
-immutable UTC version `vM.m.yyMMdd.N`, packages, self-contained server/CLI
-distribution and versioned images built by the .NET SDK `PublishContainer`
-target. Packaging does not establish runtime or endurance qualification.
+(`Release`) stays manual ([ReleaseDelivery](Features/ReleaseDelivery.md)):
+self-contained server/CLI archives, the server image published by the .NET SDK
+`PublishContainer` target to `ghcr.io/managedcode/keyload` under the commit SHA and
+`latest` tags, and the benchmark image archive. Benchmarks runs its KeyLoad cells
+from the image `latest` resolves to, pinned by digest. Packaging does not establish
+runtime or endurance qualification.
 
 ```mermaid
 flowchart LR
@@ -819,11 +821,9 @@ flowchart LR
     Aggregate --> Dispatch[Settled final Website dispatch]
     Dispatch --> Site[Website gates and Pages publication]
     Main --> Site
-    Manual[Manual main release] --> Reserve[UTC date and daily number]
-    Reserve --> Build[Packages database distribution images]
-    CI --> Gate[Successful exact source proof]
-    Build --> Publish[Immutable tag GHCR and GitHub Release]
-    Gate --> Publish
+    Manual[Manual main release] --> Build[Self-contained archives and images]
+    Build --> Registry[GHCR server image SHA and latest]
+    Registry --> Benchmarks
 ```
 
 ```mermaid

@@ -10,6 +10,9 @@ const measurementFields = ['attempts', 'successes', 'failures', 'elapsedSeconds'
 const finite = value => typeof value === 'number' && Number.isFinite(value) && value >= 0;
 const close = (left, right) => Math.abs(left - right) <= Math.max(1, Math.abs(right)) * 1e-8;
 const image = value => typeof value === 'string' && /(?:@sha256:|^sha256:)[a-f0-9]{64}$/.test(value);
+// KeyLoad cells run the Release-published server image, pinned to the digest resolved for the run.
+const keyLoadImage = value => typeof value === 'string'
+  && /^ghcr\.io\/managedcode\/keyload:[A-Za-z0-9_][A-Za-z0-9_.-]{0,127}@sha256:[a-f0-9]{64}$/.test(value);
 const runtimeNames = Object.freeze({ 'load-million': 'LoadMillion', index: 'BuildIndexes',
   'sequential-read': 'SequentialRead', 'random-read': 'RandomRead', search: 'Search', mixed: 'Mixed',
   'verify-final': 'VerifyFinalState' });
@@ -115,11 +118,11 @@ export function validateSessionEnvelope(value, row, cohort, jobId, runtimeIdenti
   require(value.outcome === 'success' ? value.reason === null : sessionText(value.reason));
   const topologyFailure = sessionUnavailableTopology(row) && value.outcome === 'failure'
     && value.reason === 'SessionTestFailure' && value.targetProfile === null;
-  validateSessionProcesses(value.processes, row, runtimeIdentity);
+  validateSessionProcesses(value.processes, runtimeIdentity);
   require(exact(value.images, ['server'])
-    && (row.target === 'KeyLoad' ? value.images.server === null : value.images.server === null ? value.targetProfile === null && (topologyFailure
+    && (value.images.server === null ? value.targetProfile === null && (topologyFailure
       || value.outcome === 'unavailable' && value.reason === SESSION.topologyUnavailable && sessionUnavailableTopology(row))
-      : image(value.images.server)));
+      : image(value.images.server) && (row.target !== 'KeyLoad' || keyLoadImage(value.images.server))));
   require(exact(value.runtime, ['operatingSystem', 'architecture', 'logicalProcessors', 'framework', 'storage'])
     && /Linux|Ubuntu/i.test(value.runtime.operatingSystem ?? '') && sessionPositive(value.runtime.logicalProcessors)
     && ['architecture', 'framework', 'storage'].every(key => sessionText(value.runtime[key])));
@@ -136,7 +139,7 @@ export function validateSessionEnvelope(value, row, cohort, jobId, runtimeIdenti
       && sessionText(profile.cluster.state) && Array.isArray(profile.cluster.observations)
       && profile.cluster.observations.length <= 128 && profile.cluster.observations.every(sessionText));
   }
-  if (value.resourceReport === null) require(row.target === 'KeyLoad' || value.images.server === null && value.targetProfile === null
+  if (value.resourceReport === null) require(value.images.server === null && value.targetProfile === null
     && (topologyFailure || value.outcome === 'unavailable' && value.reason === SESSION.topologyUnavailable
       && sessionUnavailableTopology(row)));
   else require(validateSessionReference(value.resourceReport).path === 'session-resource-evidence.json'
@@ -177,8 +180,7 @@ export function validateSessionProfileAccounting(session, reports, execution, qu
       && reports.every(report => report.status === 'unavailable' && report.lanes.length === 0
         && report.elapsedSeconds === 0 && report.verifiedRecords === 0)
       && execution.length === SESSION.caseIds.length && execution.every(test => test.outcome === 'Passed'));
-    else require((session.target === 'KeyLoad' ? session.images.server === null && session.resourceReport === null
-      : image(session.images.server) && session.resourceReport !== null)
+    else require(image(session.images.server) && session.resourceReport !== null
       && (qualification.runtimeExitCode !== 0 || qualification.status === 'failed'));
     return session;
   }
@@ -221,20 +223,15 @@ export function validateSessionQualification(value, session, execution) {
     : value.status === 'notExecuted' && session.outcome === 'failure' && session.reason === 'SessionTestFailure');
   if (value.status === 'notApplicable') require(session.targetProfile === null && value.steps.length === 0 && value.reason === 'RuntimeTopologyUnavailable');
   else if (value.status === 'notExecuted') require(value.runtimeExitCode !== 0
-    && value.steps.length === (session.target === 'KeyLoad' ? 1 : 0) && value.reason === 'ClientFailed');
+    && value.steps.length === 0 && value.reason === 'ClientFailed');
   else {
     const actual = value.steps.slice(0, 1);
-    require(value.steps.length === (session.target === 'KeyLoad' ? 2 : 1) && actual.every(step => exact(step, ['id', 'status', 'failureType'])
+    require(value.steps.length === 1 && actual.every(step => exact(step, ['id', 'status', 'failureType'])
       && step.id === 'execution-correctness'
       && ['passed', 'failed', 'notApplicable'].includes(step.status)
       && (step.status === 'failed' ? sessionText(step.failureType) : step.failureType === null)));
     require(actual.every(step => step.status !== 'notApplicable'));
     require(value.status === (actual.some(step => step.status === 'failed') ? 'failed' : 'passed'));
-  }
-  if (session.target === 'KeyLoad') {
-    const pending = value.steps.at(-1);
-    require(exact(pending, ['id', 'status', 'failureType']) && pending.id === 'matched-execution-process-resources'
-      && pending.status === 'notExecuted' && pending.failureType === 'MatchedProcessResourceQualificationOpen');
   }
   if (value.status === 'failed') require(value.reason === 'SessionQualificationFailed'
     && session.outcome === 'failure' && session.reason === 'SessionQualificationFailed');

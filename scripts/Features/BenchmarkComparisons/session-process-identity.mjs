@@ -35,17 +35,9 @@ export function validateProcess(value, role, expectedName, runtimeIdentity = nul
   return value;
 }
 
-export function validateSessionProcesses(value, row, runtimeIdentity = null) {
-  require(exact(value, ['client', 'servers']) && Array.isArray(value.servers)
-    && value.servers.length === (row.target === 'KeyLoad' ? row.nodeCount : 0));
+// Every database server, KeyLoad included, is a digest-pinned container identified by its image, not a host process.
+export function validateSessionProcesses(value, runtimeIdentity = null) {
+  require(exact(value, ['client']));
   validateProcess(value.client, 'comparison-client', 'comparison-client', runtimeIdentity);
-  const pids = new Set([value.client.processId]);
-  for (const [index, server] of value.servers.entries()) {
-    validateProcess(server, 'server', 'node' + (index + 1), runtimeIdentity);
-    require(server.aspireStartedAtUtc !== null && !pids.has(server.processId) && !pids.has(server.aspireProcessId)
-      && Date.parse(server.startedAtUtc) <= Date.parse(value.client.startedAtUtc));
-    pids.add(server.processId);
-    pids.add(server.aspireProcessId);
-  }
   return value;
 }

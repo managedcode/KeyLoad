@@ -55,7 +55,7 @@ KeyLoad nodes in a comparison run with no request throttling and no admission pr
 | Requirement | Type / priority | Behavior and rationale | Acceptance |
 |---|---|---|---|
 | REQ-BC-001 | Correctness / P0 | Use one deterministic dataset and exact caller-visible correctness oracle for every supported equivalent workload. | AC-BC-001; stable hash and verified documents/vectors/graph/events. |
-| REQ-BC-002 | Topology / P0 | Use KeyLoad project processes and a client-owned workload outside the selected LoadTests AppHost infrastructure; external databases use pinned containers. Preserve real cluster and SDK calls. | AC-BC-002; actual project/container graph, process identities, endpoints and joined runtime evidence. |
+| REQ-BC-002 | Topology / P0 | Run every database, KeyLoad included, as digest-pinned containers and keep the workload client outside the selected LoadTests AppHost infrastructure. KeyLoad runs the latest Release-published server image, resolved once per run to one digest. Preserve real cluster and SDK calls. | AC-BC-002; actual container graph, image references with digests, endpoints and joined runtime evidence. |
 | REQ-BC-003 | Replication / P0 | Add replicated engine groups with observed membership/copy/acknowledgement state. | AC-BC-003; real connected cluster proof before timing. |
 | REQ-BC-004 | Engine coverage / P0 | Compare the canonical 11-target inventory: KeyLoad, PostgreSQL + pgvector, Qdrant, RabbitMQ, Redis, Neo4j, MongoDB, OpenSearch, KurrentDB, SurrealDB and HelixDB. Preserve actual topology support and explicit unsupported profiles. | AC-BC-004; complete current plan and honest support matrix. |
 | REQ-BC-005 | Event streams / P0 | Add expected-no-stream single-event append and bounded single-event read with identity/revision/cardinality/payload validation. | AC-BC-005; four supported engine implementations and readback. |
@@ -86,15 +86,31 @@ The primary `build/KeyLoad.AppHost` owns development and functional-test KeyLoad
 server projects with in-memory RapidMembership for Orleans membership. The separate
 `build/KeyLoad.LoadTests.AppHost` owns the selected database infrastructure,
 readiness, discovered endpoints and cleanup. `KeyLoad.ComparisonHost` runs the
-client-owned workload outside that resource graph. Ordinary build/start/test/load
-has no KeyLoad or workload-client image publication prerequisite; SDK
-`PublishContainer` is reserved for explicit release/publication.
+client-owned workload outside that resource graph.
 
-REQ-BC-001/002/003/005/009/019/021 and AC-PERF-006/009 require real source/DLL/PDB
-and process start identities, original outcomes and bounded joined cleanup.
-External databases retain their pinned images, entry points/users,
-readonly bootstrap files and anonymous writable session volumes. Only resources
-owned by that selected execution may be removed.
+The manual Release workflow publishes the KeyLoad server image with the SDK
+`PublishContainer` target to `ghcr.io/managedcode/keyload`, tagged with the commit
+SHA and the moving `latest` tag. Benchmarks measures that released image, not the
+source built inside the benchmark run: its preparation job resolves `latest` to one
+immutable digest, both KeyLoad cells pull `ghcr.io/managedcode/keyload:latest@sha256:…`
+and receive it as `Benchmarks__KeyLoadImage`, and the LoadTests AppHost starts each
+KeyLoad node as an Aspire container from that digest. KeyLoad nodes keep the image
+user, write their ZoneTree data to an anonymous session volume under the image
+user's home, reach each other by their Aspire network aliases and form the Orleans
+cluster with in-memory RapidMembership discovery on the container network. Single
+node cells store files under the node's data directory; the three-node cells
+configure no shared file root because the workload uses no file storage. Local
+benchmark sessions supply `Benchmarks__KeyLoadImage` explicitly in the same
+`ghcr.io/managedcode/keyload:<tag>@sha256:<digest>` form. Ordinary builds and
+functional tests never build or publish a KeyLoad image.
+
+REQ-BC-001/002/003/005/009/019/021 and AC-PERF-006/009 require original outcomes,
+the real workload-client source/DLL/PDB and process start identity, and bounded
+joined cleanup. Every database server, KeyLoad included, is identified by its image
+reference and digest in `images.server` and the target profile, with container
+resource evidence in `session-resource-evidence.json`. Databases retain their pinned
+images, entry points/users, readonly bootstrap files and anonymous writable session
+volumes. Only resources owned by that selected execution may be removed.
 
 AC-KLEVENT-001..003 retains existing public SDK event readback, strict cardinality,
 seeded/new/conflicting/cancelled operations and healthy follow-up. Copy counts
@@ -105,16 +121,18 @@ that evidence.
 
 Local sessions preserve actual workload/corpus/result evidence without invented
 GitHub provenance. Public figures additionally require authenticated original
-source/run/attempt/job artifacts and equivalent measured resources. Execution
-KeyLoad process resource qualification and external advertised-endpoint reachability
-remain open until actual execution proves them. A model or source review closes
-neither runtime nor publication qualification.
+source/run/attempt/job artifacts and equivalent measured resources. External
+advertised-endpoint reachability remains open until actual execution proves it. A
+model or source review closes neither runtime nor publication qualification.
 
 ```mermaid
 flowchart LR
-    GitHub[Exact source compiled runtime] --> Host[LoadTests AppHost selected infrastructure]
+    Release[Release workflow] --> Registry[ghcr.io/managedcode/keyload latest]
+    Registry --> Resolve[Benchmarks resolves one digest]
+    GitHub[Exact source compiled client runtime] --> Host[LoadTests AppHost selected infrastructure]
+    Resolve --> Host
     Host --> Client[Discovered endpoints to workload client]
-    Client --> Artifact[Original reports DLL PDB process and resource evidence]
+    Client --> Artifact[Original reports image digests client process and resource evidence]
     Artifact --> Gate[Authenticated complete qualification]
 ```
 
@@ -140,7 +158,7 @@ only transient benchmark lifecycle metadata changes.
 ```mermaid
 flowchart LR
     CI[GitHub Actions measured SHA] --> Aspire[LoadTests AppHost infrastructure]
-    Aspire --> KeyLoad[KeyLoad replicated cluster]
+    Aspire --> KeyLoad[KeyLoad replicated cluster from released image digest]
     Aspire --> Engines[Engine profiles]
     Aspire --> Runner[Endpoints to client outside resource graph]
     Runner --> Oracle[Shared corpus and correctness oracle]
@@ -315,7 +333,7 @@ selection and independent Website publication.
 
 | Requirement | Measurable acceptance | Tests and evidence |
 |---|---|---|
-| REQ-BC-CURRENT-001: the complete current cohort is the sole live producer | AC-BC-CURRENT-001: session accounts for22 workers across11 databases x node counts[1,3], each with seven original TUnit case outcomes on one live topology. One preparation job builds the exact-source compiled runtime once; workers import those authenticated bundles. Initial1m loading is measured, each applicable operation lane has100k attempts, and no warmup/reset/reseeding occurs between cases. Retain actual failures/null metrics and genuine unavailable outcomes with the original source/run/attempt/job/TRX/report/DLL/PDB/process identity. Missing, malformed, expired, mixed, skipped, unaccounted or mismatched evidence rejects; publication requires every applicable correctness/fairness/provenance/resource/functional gate. Seven document cases do not qualify remaining model families or physical100k-corpus coverage | SessionCohortContractTests, CompiledBenchmarkRuntimeBundleTests, current session/aggregate/site gates and original authenticated GitHub archives |
+| REQ-BC-CURRENT-001: the complete current cohort is the sole live producer | AC-BC-CURRENT-001: session accounts for22 workers across11 databases x node counts[1,3], each with seven original TUnit case outcomes on one live topology. One preparation job builds the exact-source compiled client runtime once and resolves the released KeyLoad image to one digest; workers import those authenticated bundles and run KeyLoad from that digest. Initial1m loading is measured, each applicable operation lane has100k attempts, and no warmup/reset/reseeding occurs between cases. Retain actual failures/null metrics and genuine unavailable outcomes with the original source/run/attempt/job/TRX/report, client DLL/PDB/process and server image digest identity. Missing, malformed, expired, mixed, skipped, unaccounted or mismatched evidence rejects; publication requires every applicable correctness/fairness/provenance/resource/functional gate. Seven document cases do not qualify remaining model families or physical100k-corpus coverage | SessionCohortContractTests, CompiledBenchmarkRuntimeBundleTests, current session/aggregate/site gates and original authenticated GitHub archives |
 | REQ-BC-CURRENT-002: one collector, one archive set and one current-profile asset set | AC-BC-CURRENT-002: no active comparison-smoke/comparison-suite collector, twelve-file precondition or three-profile current renderer remains; replacement retains all applicable safety, accessibility, vendor, arithmetic and browser criteria | scoped dependency inventory, workflow source tests and standalone isolated site/browser tests |
 | REQ-BC-CURRENT-003: preserve unchanged qualified authority around final build | AC-BC-CURRENT-003: bounded immutable receipt, original archives and every file in the current composite plan/proof inventory match before/after builder; emitted aggregate bytes match; every remaining coverage/no-skip/source-closure gate passes | SiteIsolatedGitHub integrity/build/coverage tests, original TRX/Cobertura/Node/browser artifacts and the current source-bound publication receipt |
 | REQ-BC-CURRENT-004: deploy only fresh exact-source evidence | AC-BC-CURRENT-004: current main and exact original producer tuple match immediately before needs-gated least-privilege Pages delivery; altered source/attempt/artifact rejects and actual provider receipt records outcome | SiteIsolatedGitHubFreshnessTests, workflow source tests, genuine same-run qualification and Pages provider receipt |
@@ -1030,5 +1048,5 @@ flowchart LR
 The separate benchmark host validates the seven original workload results, case hashes,
 source/run cohort and original TUnit receipt before retaining its session manifest.
 Deleted comparison-test suites do not contribute qualification steps. Product fault,
-durability, endurance and matched-process resource qualification remain separate gates;
-workload evidence does not close them.
+durability and endurance qualification remain separate gates; workload evidence does
+not close them.

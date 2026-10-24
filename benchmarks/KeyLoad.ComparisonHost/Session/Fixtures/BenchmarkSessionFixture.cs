@@ -62,7 +62,7 @@ internal sealed class BenchmarkSessionFixture : IAsyncInitializer, IAsyncDisposa
         input.AddEnvironmentVariables();
         settings = BenchmarkSessionHostSettings.Read(input);
         assemblies = BenchmarkSessionArtifacts.Assemblies();
-        processes = BenchmarkSessionProcessEvidence.Read(input, settings.Execution.Selection);
+        processes = BenchmarkSessionProcesses.ReadCurrent();
         if (settings.Execution.UnsupportedReason is null)
         {
             owner = new(ComparisonExecutionRegistration.Read(input),

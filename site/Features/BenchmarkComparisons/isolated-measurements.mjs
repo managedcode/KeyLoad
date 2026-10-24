@@ -19,8 +19,7 @@ function viewWorker(worker, report) {
     : report.status === 'unavailable' ? topologyUnavailable(worker) ? 'unsupportedTopology' : 'unsupported' : report.status, reason: unqualified ? worker.qualification.status === 'failed' ? worker.session.reason : 'Execution profile or session resource qualification incomplete.' : report.detail,
     report: { hostOs: runtime.operatingSystem, architecture: runtime.architecture, logicalProcessors: runtime.logicalProcessors,
       runtime: runtime.framework, storage: runtime.storage, client: worker.session.processes.client,
-      serverProcesses: worker.session.processes.servers,
-      serverImage: worker.target === 'KeyLoad' ? null : worker.session.images.server ?? notRecorded, targets: [target] } };
+      serverImage: worker.session.images.server ?? notRecorded, targets: [target] } };
 }
 export function selectedIsolatedRows(projection, scenario, nodeCount, repetition, metric, target) {
   const [caseId, laneId] = scenario.split('/');

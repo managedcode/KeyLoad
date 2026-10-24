@@ -12,7 +12,7 @@ internal sealed class IsolatedHostTargetOwner(IOptions<ComparisonExecutionOption
     IOptions<ComparisonDiagnosticOptions> diagnosticOptions,
     IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<KeyLoadClientExecutionOptions> clientOptions, IOptions<QueryTranslationOptions> translationOptions, TimeProvider? provider = null) : IAsyncDisposable
 {
-    private const string ExternalImageRequired = "An external database comparison requires its configured container image.";
+    private const string ImageRequired = "A database comparison requires its configured container image.";
     internal TimeProvider Clock { get; } = provider ?? TimeProvider.System;
     private readonly IOptions<ComparisonDiagnosticOptions> diagnostics = ComparisonDiagnosticOptions.Require(diagnosticOptions);
     private readonly IOptions<ComparisonExecutionOptions> execution = ComparisonExecutionOptions.Require(executionOptions);
@@ -49,31 +49,31 @@ internal sealed class IsolatedHostTargetOwner(IOptions<ComparisonExecutionOption
         target = settings.Selection.Target switch
         {
             IsolatedHostConstants.KeyLoad => CreateKeyLoad(settings, execution),
-            IsolatedHostConstants.SurrealDb => new SurrealDbTarget(CreateClient(execution, PrimaryEndpointIndex), settings.RunId, RequireExternalImage(execution), executionOptions, provider: Clock),
-            IsolatedHostConstants.HelixDb => new HelixDbTarget(CreateClient(execution, PrimaryEndpointIndex), settings.RunId, RequireExternalImage(execution), executionOptions, provider: Clock),
-            IsolatedHostConstants.Postgres => new PostgresTarget(execution.Connection!, settings.RunId, RequireExternalImage(execution), executionOptions, lifecycleOptions, topology, provider: Clock),
+            IsolatedHostConstants.SurrealDb => new SurrealDbTarget(CreateClient(execution, PrimaryEndpointIndex), settings.RunId, RequireImage(execution), executionOptions, provider: Clock),
+            IsolatedHostConstants.HelixDb => new HelixDbTarget(CreateClient(execution, PrimaryEndpointIndex), settings.RunId, RequireImage(execution), executionOptions, provider: Clock),
+            IsolatedHostConstants.Postgres => new PostgresTarget(execution.Connection!, settings.RunId, RequireImage(execution), executionOptions, lifecycleOptions, topology, provider: Clock),
             IsolatedHostConstants.Qdrant => CreateQdrant(settings, execution),
-            IsolatedHostConstants.Rabbit => new RabbitTarget(execution.Connection!, settings.RunId, RequireExternalImage(execution), lifecycleOptions, topology, CreateClient(execution, PrimaryEndpointIndex), provider: Clock),
-            IsolatedHostConstants.Redis => new RedisTarget(execution.Connection!, settings.RunId, RequireExternalImage(execution), lifecycleOptions, executionOptions, diagnostics, topology, [.. execution.Replicas], provider: Clock),
-            IsolatedHostConstants.Neo4j => new Neo4jTarget(CreateClient(execution, PrimaryEndpointIndex), settings.RunId, RequireExternalImage(execution), lifecycleOptions, executionOptions, provider: Clock),
-            IsolatedHostConstants.Mongo => new MongoTarget(execution.Connection!, execution.Endpoints, settings.RunId, RequireExternalImage(execution), topology, lifecycleOptions, executionOptions, provider: Clock),
-            IsolatedHostConstants.OpenSearch => new OpenSearchTarget(CreateClient(execution, PrimaryEndpointIndex), settings.RunId, RequireExternalImage(execution), topology, lifecycleOptions, executionOptions, provider: Clock),
-            IsolatedHostConstants.Kurrent => new KurrentTarget(execution.Connection!, CreateClients(execution), settings.RunId, RequireExternalImage(execution), topology, lifecycleOptions, diagnostics, provider: Clock),
+            IsolatedHostConstants.Rabbit => new RabbitTarget(execution.Connection!, settings.RunId, RequireImage(execution), lifecycleOptions, topology, CreateClient(execution, PrimaryEndpointIndex), provider: Clock),
+            IsolatedHostConstants.Redis => new RedisTarget(execution.Connection!, settings.RunId, RequireImage(execution), lifecycleOptions, executionOptions, diagnostics, topology, [.. execution.Replicas], provider: Clock),
+            IsolatedHostConstants.Neo4j => new Neo4jTarget(CreateClient(execution, PrimaryEndpointIndex), settings.RunId, RequireImage(execution), lifecycleOptions, executionOptions, provider: Clock),
+            IsolatedHostConstants.Mongo => new MongoTarget(execution.Connection!, execution.Endpoints, settings.RunId, RequireImage(execution), topology, lifecycleOptions, executionOptions, provider: Clock),
+            IsolatedHostConstants.OpenSearch => new OpenSearchTarget(CreateClient(execution, PrimaryEndpointIndex), settings.RunId, RequireImage(execution), topology, lifecycleOptions, executionOptions, provider: Clock),
+            IsolatedHostConstants.Kurrent => new KurrentTarget(execution.Connection!, CreateClients(execution), settings.RunId, RequireImage(execution), topology, lifecycleOptions, diagnostics, provider: Clock),
             _ => throw new InvalidOperationException(IsolatedHostConstants.Failure)
         };
         unownedClients.Clear();
     }
 
-    private static string RequireExternalImage(RuntimeIsolatedHostSettings execution)
+    private static string RequireImage(RuntimeIsolatedHostSettings execution)
         => !string.IsNullOrWhiteSpace(execution.Image) ? execution.Image
-            : throw new InvalidOperationException(ExternalImageRequired);
+            : throw new InvalidOperationException(ImageRequired);
 
     private KeyLoadTarget CreateKeyLoad(IsolatedHostSettings settings, RuntimeIsolatedHostSettings execution)
     {
         const int ClientsFirstIndex = 0;
 
         var clients = CreateClients(execution);
-        return new(clients[ClientsFirstIndex], execution.AdminKey!, settings.RunId, lifecycleOptions, executionOptions, diagnostics, clientOptions, translationOptions, execution.Image, clients, settings.Selection.NodeCount, provider: Clock);
+        return new(clients[ClientsFirstIndex], execution.AdminKey!, settings.RunId, lifecycleOptions, executionOptions, diagnostics, clientOptions, translationOptions, RequireImage(execution), clients, settings.Selection.NodeCount, provider: Clock);
     }
 
     private QdrantTarget CreateQdrant(IsolatedHostSettings settings, RuntimeIsolatedHostSettings execution)
@@ -81,7 +81,7 @@ internal sealed class IsolatedHostTargetOwner(IOptions<ComparisonExecutionOption
         const int ClientsFirstIndex = 0;
 
         var clients = CreateClients(execution);
-        return new(clients[ClientsFirstIndex], settings.RunId, RequireExternalImage(execution), executionOptions, lifecycleOptions, settings.Selection.Topology, clients, provider: Clock);
+        return new(clients[ClientsFirstIndex], settings.RunId, RequireImage(execution), executionOptions, lifecycleOptions, settings.Selection.Topology, clients, provider: Clock);
     }
 
     private HttpClient[] CreateClients(RuntimeIsolatedHostSettings execution)

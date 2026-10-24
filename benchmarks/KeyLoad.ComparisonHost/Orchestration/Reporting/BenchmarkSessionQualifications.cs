@@ -12,9 +12,6 @@ namespace KeyLoad.ComparisonHost.BenchmarkOrchestration;
 internal static class BenchmarkSessionQualifications
 {
     private const int EmptyCount = 0;
-    private const string KeyLoadTarget = "KeyLoad";
-    private const string MatchedExecutionProcessResourcesValue = "matched-execution-process-resources";
-    private const string MatchedProcessResourceQualificationOpenValue = "MatchedProcessResourceQualificationOpen";
     private const string PublicationSourceValue = "publication-source";
     private const string LocalExecutionHasNoWorkflowPublicationProvenanceValue = "LocalExecutionHasNoWorkflowPublicationProvenance";
     private const string ClientFailedValue = "ClientFailed";
@@ -42,10 +39,6 @@ internal static class BenchmarkSessionQualifications
         {
             await InvokeAsync(Correctness, applicable: true,
                 () => BenchmarkSessionManifest.ValidateOutputsAsync(evidence, selected, runtimeExit, token), steps, failures);
-        }
-        if (selection.Target == KeyLoadTarget && !unsupported)
-        {
-            steps.Add(new(MatchedExecutionProcessResourcesValue, NotExecuted, MatchedProcessResourceQualificationOpenValue));
         }
         if (!string.Equals(application.Services.GetRequiredService<IOptions<BenchmarkProvenanceOptions>>().Value.Actions, bool.TrueString, StringComparison.OrdinalIgnoreCase))
         {

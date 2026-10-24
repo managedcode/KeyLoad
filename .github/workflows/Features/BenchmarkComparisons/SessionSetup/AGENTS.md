@@ -2,7 +2,7 @@
 
 ## Purpose, entry points and ownership
 
-Owns setup for one database/topology session under ADR-142. Follow root and workflow policies. Authenticate the same-run job, import the verified original compiled server/client/AppHost runtime and preserve original import receipts. Never restore, build, publish images, reset a database, run a workload or manufacture results here. Linux GitHub execution only; the fixture owns selected infrastructure cleanup.
+Owns setup for one database/topology session under ADR-142. Follow root and workflow policies. Authenticate the same-run job, import the verified original compiled client/AppHost runtime, preserve original import receipts and, for KeyLoad cells, pull the Release-published server image at the digest the preparation job resolved. Never restore, build, publish images, reset a database, run a workload or manufacture results here. Linux GitHub execution only; the fixture owns selected infrastructure cleanup.
 
 ## Boundaries and protected risks
 

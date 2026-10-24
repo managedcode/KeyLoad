@@ -245,9 +245,12 @@ auto discovery and an independent shared secret, without external storage. `KeyL
 selected database infrastructure, waits for readiness and exposes endpoints;
 client code owns load execution and measurements. Each AppHost removes its own
 session containers and volumes on joined teardown after success, failure or
-cancellation. Preserve unrelated Docker resources. Normal builds and test startup
-never publish or build a KeyLoad server image. Explicit release delivery packages
-containers with execution .NET SDK `PublishContainer`; maintain no product Dockerfile.
+cancellation. Preserve unrelated Docker resources. Normal builds and functional
+tests never publish or build a KeyLoad server image. The manual Release workflow
+publishes the server image with execution .NET SDK `PublishContainer` to
+`ghcr.io/managedcode/keyload` under the commit SHA and `latest` tags; maintain no
+product Dockerfile. Benchmarks resolves the latest released image to one digest per
+run and runs the KeyLoad cells as Aspire containers from that digest.
 
 Complete solution build, unit tests, real process recovery, actual Aspire cluster
 SDK/MCP operations, coverage and fault/endurance checks remain distinct mandatory

@@ -3,7 +3,6 @@ using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.Testing;
 using KeyLoad.AppHost.Hosting;
-using KeyLoad.AppHost.TestInfrastructure;
 using KeyLoad.Comparisons;
 using KeyLoad.LoadTests.AppHost.BenchmarkComparisons;
 using Microsoft.Extensions.Configuration;
@@ -19,8 +18,6 @@ internal static class BenchmarkSessionAspireFixture
     private const string ComparisonsDirectory = "comparisons";
     private const string SessionsDirectory = "sessions";
     private const string GuidFormat = "N";
-    private const string KeyLoadTarget = "KeyLoad";
-    private const string KeyLoadEphemeralTrueArgument = "--KeyLoad:Ephemeral=true";
     private const int EmptyCount = 0;
 
     private const string Enabled = "--Benchmarks:Enabled=true";
@@ -45,13 +42,8 @@ internal static class BenchmarkSessionAspireFixture
         var execution = AppHostOptionsRegistration.BindTestExecution(configuration);
         using var deadline = new CancellationTokenSource(execution.Value.ScaledTimeout, TimeProvider.System);
         using var lifetime = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, deadline.Token);
-        var arguments = new List<string> { Enabled, Session, Profile, RootArgument + root, OutputArgument + evidence,
-            IdentityArgument + selected.SessionId };
-        if (selected.Target == KeyLoadTarget)
-        {
-            arguments.Add(KeyLoadEphemeralTrueArgument);
-            arguments.Add(ProcessFaultCommandProtocol.EnabledArgument);
-        }
+        string[] arguments = [Enabled, Session, Profile, RootArgument + root, OutputArgument + evidence,
+            IdentityArgument + selected.SessionId];
         await using var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.KeyLoad_LoadTests_AppHost>([.. arguments], lifetime.Token);
         builder.Services.AddLogging(logging => logging.ClearProviders().AddConsole().SetMinimumLevel(LogLevel.Warning));
         var application = await builder.BuildAsync(lifetime.Token);
@@ -70,11 +62,10 @@ internal static class BenchmarkSessionAspireFixture
         {
             await IsolatedReportAssertions.VerifyModelAsync(
                 application.Services.GetRequiredService<DistributedApplicationModel>().Resources, selection, token);
-            work.BeginCapture(application, application.Services.GetRequiredService<DistributedApplicationModel>().Resources
-                .Where(resource => resource is ContainerResource or ProjectResource).Select(resource => resource.Name),
+            work.BeginCapture(application, containers.Select(resource => resource.Name),
                 ComparisonProgressLine.PathForEvidenceDirectory(evidence));
             work.Collector = application.Services.GetService<ScaleServerResourceEvidenceCollector>();
-            if (work.Collector is not null && selection.Target != KeyLoadTarget && !BenchmarkSessionContract.UnsupportedTopologies.Any(item =>
+            if (work.Collector is not null && !BenchmarkSessionContract.UnsupportedTopologies.Any(item =>
                 item.Target == selected.Target && item.NodeCounts.Contains(selected.NodeCount)))
             {
                 work.Observation = work.Collector.StartAsync(containers,
@@ -84,7 +75,7 @@ internal static class BenchmarkSessionAspireFixture
             {
                 work.Collector = null;
             }
-            var exit = await work.RunAsync(lifetime => BenchmarkSessionClientRuntime.RunAsync(application, selection, evidence, lifetime), token);
+            var exit = await work.RunAsync(lifetime => BenchmarkSessionClientRuntime.RunAsync(application, evidence, lifetime), token);
             if (work.Collector is not null)
             {
                 await work.StartSettlement();

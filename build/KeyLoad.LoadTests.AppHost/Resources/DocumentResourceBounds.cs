@@ -11,7 +11,7 @@ internal static class DocumentResourceBounds
     private const string ScanEvidence = "Benchmarks__Deployment__DocumentKeyLoadMaximumScanRecords";
     private const string ReadEvidence = "Benchmarks__Deployment__DocumentKeyLoadMaximumQueryReadBytes";
 
-    internal static void ApplyKeyLoad(IResourceBuilder<ProjectResource> node, BenchmarkDeploymentOptions deployment)
+    internal static void ApplyKeyLoad(IResourceBuilder<ContainerResource> node, BenchmarkDeploymentOptions deployment)
     {
         node.WithEnvironment(ScanRecords, deployment.DocumentKeyLoadMaximumScanRecords.ToString(CultureInfo.InvariantCulture))
             .WithEnvironment(QueryReadBytes, deployment.DocumentKeyLoadMaximumQueryReadBytes.ToString(CultureInfo.InvariantCulture));

@@ -15,13 +15,10 @@ const clone = value => structuredClone(value);
 const binary = { executablePath: '/usr/share/dotnet/dotnet', executableSha256: '1'.repeat(64),
   assemblyPath: '/workspace/runtime.dll', assemblySha256: '2'.repeat(64), pdbPath: '/workspace/runtime.pdb',
   pdbSha256: '3'.repeat(64), sourceCount: 12, sourceCompositionSha256: '4'.repeat(64) };
-const processes = (target, count) => ({ client: { name: 'comparison-client', processId: 500,
+const processes = () => ({ client: { name: 'comparison-client', processId: 500,
   startedAtUtc: '2026-10-09T10:02:00Z', aspireStartedAtUtc: null,
-  aspireProcessId: null, aspireProcessStartedAtUtc: null, binary },
-  servers: target === 'KeyLoad' ? Array.from({length: count}, (_, index) => ({name: 'node' + (index + 1),
-    processId: 100 + index, startedAtUtc: '2026-10-09T10:01:00Z', aspireStartedAtUtc: '2026-10-09T10:00:59Z',
-    aspireProcessId: 200 + index, aspireProcessStartedAtUtc: '2026-10-09T10:00:59Z', binary })) : [] });
-const pendingResources = { id: 'matched-execution-process-resources', status: 'notExecuted', failureType: 'MatchedProcessResourceQualificationOpen' };
+  aspireProcessId: null, aspireProcessStartedAtUtc: null, binary } });
+const keyLoadImage = 'ghcr.io/managedcode/keyload:latest@sha256:' + '5'.repeat(64);
 const cohort = { sourceRevision: 'a'.repeat(40), runId: 12345, attempt: 2,
   repository: contract.SESSION.repository, ref: contract.SESSION.ref,
   workflow: contract.SESSION.workflow, profile: contract.SESSION.profile };
@@ -76,7 +73,7 @@ if (scenario === 'plan') {
   let capabilitySession;
   for(const row of selected) {
     const session={schemaVersion:contract.SESSION.schema,sessionId:row.id,target:row.target,nodeCount:row.nodeCount,
-      ...cohort,jobId:10,images:{server},processes:processes(row.target,row.nodeCount),targetProfile:null,
+      ...cohort,jobId:10,images:{server},processes:processes(),targetProfile:null,
       runtime:{operatingSystem:'Linux',architecture:'X64',logicalProcessors:4,framework:'.NET 10',storage:'execution bound mount'},
       assemblies:[{path:'ComparisonHost.dll',sha256:hash,pdbSha256:hash},{path:'Comparisons.dll',sha256:hash,pdbSha256:hash}],
       cases:contract.SESSION.caseIds.map(id=>({id,path:`reports/${id}.json`,sha256:hash})),
@@ -146,8 +143,8 @@ if (scenario === 'plan') {
   reports.validateSessionQualification(failedQualifier,qualifierFailure,passed);
   reports.validateSessionProfileAccounting(qualifierFailure,originalReports,passed,failedQualifier);
   const row=contract.sessionRows().find(row=>row.target==='KeyLoad'&&row.nodeCount===1);
-  const failure={...capabilitySession,sessionId:row.id,target:row.target,nodeCount:1,targetProfile:null,images:{server:null},processes:processes('KeyLoad',1),
-    resourceReport:null,outcome:'failure',reason:'SessionTestFailure'};
+  const failure={...capabilitySession,sessionId:row.id,target:row.target,nodeCount:1,targetProfile:null,images:{server:keyLoadImage},
+    processes:processes(),outcome:'failure',reason:'SessionTestFailure'};
   const failed=originalReports.map(report=>({...report,status:'failed',detail:'InitializationFailed'}));
   failed[0].elapsedSeconds=1;
   failed[0].lanes=[{id:'create',firstStartedMs:0,lastCompletedMs:1,samples:[
@@ -157,9 +154,12 @@ if (scenario === 'plan') {
       latency:{p50Ms:1,p95Ms:1,p99Ms:1},uniqueCompletedMessages:0,enqueue:null,receive:null,ack:null,clientResources:null}}];
   failed.forEach(report=>reports.validateSessionCase(report,report.caseId));
   reports.validateSessionEnvelope(failure,row,cohort,10);
+  for(const image of [null,server,'docker.io/library/keyload:latest@sha256:'+'5'.repeat(64)])
+    reject(()=>reports.validateSessionEnvelope({...failure,images:{server:image}},row,cohort,10));
+  reject(()=>reports.validateSessionEnvelope({...failure,resourceReport:null},row,cohort,10));
   const execution=reports.validateSessionResults(runtimeXml('Failed'),failed);
   const qualification={schemaVersion:1,sessionId:row.id,target:row.target,nodeCount:1,runtimeExitCode:1,
-    status:'notExecuted',reason:'ClientFailed',steps:[pendingResources]};
+    status:'notExecuted',reason:'ClientFailed',steps:[]};
   reports.validateSessionQualification(qualification,failure,execution);
   reports.validateSessionProfileAccounting(failure,failed,execution,qualification);
   reject(()=>reports.validateSessionProfileAccounting(failure,failed,execution,{...qualification,runtimeExitCode:0,status:'passed'}));

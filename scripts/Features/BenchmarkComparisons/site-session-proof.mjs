@@ -64,7 +64,7 @@ export async function verifySessionSiteInputs({ input, receipt: receiptPath }) {
   for (const worker of aggregate.workers) {
     const file = path.join(input, 'input', 'aggregate', 'workers', worker.id, worker.session.outerRuntime.path);
     validateSessionRuntimeImport(await readJson(file, SESSION.sessionBytes), receipt.cohort, runtimeIdentity);
-    validateSessionProcesses(worker.session.processes, worker, runtimeIdentity);
+    validateSessionProcesses(worker.session.processes, runtimeIdentity);
   }
   const functional = aggregate.preparation.functional;
   requireSession(isDeepStrictEqual(receipt.functional.artifact, functional.artifact));

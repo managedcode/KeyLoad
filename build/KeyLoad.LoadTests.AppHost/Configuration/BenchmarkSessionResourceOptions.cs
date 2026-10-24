@@ -32,6 +32,11 @@ internal sealed class BenchmarkSessionResourceOptions
     {
         get; set;
     }
+    /// <summary>Release-published KeyLoad server image reference pinned to the digest resolved for this run.</summary>
+    public string? KeyLoadImage
+    {
+        get; set;
+    }
 
     [ConfigurationBinding]
     internal static IOptions<BenchmarkSessionResourceOptions> Read(IConfiguration configuration)

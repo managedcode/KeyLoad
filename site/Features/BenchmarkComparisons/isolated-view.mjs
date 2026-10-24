@@ -100,11 +100,7 @@ function renderWorker(document, worker) {
       ['Server version', target.version], ['Execution topology', target.topology],
       ['Data copies', target.cluster.dataCopies], ['Write acknowledgement', target.writeAcknowledgement],
       ['Read contract', target.readContract], ['Transport', target.transport], ['Authorization', target.authorization],
-      ['Execution observations', target.cluster.observations.join('; ')]);
-    if (report.serverProcesses.length > 0) fields.push(['KeyLoad server processes', report.serverProcesses.map(process =>
-      process.name + ': PID ' + process.processId + ', DLL ' + process.binary.assemblySha256
-      + ', PDB ' + process.binary.pdbSha256).join('; ')]);
-    if (report.serverImage !== null) fields.push(['External database image', report.serverImage]);
+      ['Execution observations', target.cluster.observations.join('; ')], ['Server image', report.serverImage]);
   }
   const list = element(document, 'dl');
   for (const [name, value] of fields) list.append(element(document, 'dt', name), element(document, 'dd', String(value)));
