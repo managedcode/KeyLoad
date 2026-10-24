@@ -3,7 +3,8 @@ using Microsoft.AspNetCore.Http;
 
 namespace KeyLoad.UnitTests.ClientApi;
 
-/// <summary>AC-MCPGW-004: local invokers preserve descriptor identity and fail closed without request admission.</summary>
+/// <summary>AC-MCPGW-004: local invokers preserve descriptor identity, fail closed without request admission and refuse
+/// arguments outside the canonical input schema as Validation.</summary>
 internal sealed class McpGatewayCatalogAdapterTests
 {
     private const string DocumentGet = "keyload_documents_get";
@@ -26,11 +27,19 @@ internal sealed class McpGatewayCatalogAdapterTests
         await using var host = McpGatewayCatalogTestHost.Create();
         await host.Owner.InitializeAsync(CancellationToken.None);
 
+        // Schema-valid arguments reach the tool, which refuses because no admitted request owns the call.
+        var admittedShape = new Dictionary<string, System.Text.Json.JsonElement>
+        {
+            [McpCanonicalTestData.RequestKey] = System.Text.Json.JsonSerializer.SerializeToElement(
+                new GetDocumentRequest(McpCanonicalTestData.Reference), JsonDefaults.Options)
+        };
         var failure = await Assert.ThrowsExactlyAsync<KeyLoadException>(() => host.Owner.InvokeAsync(
-            DocumentGet,
-            new Dictionary<string, System.Text.Json.JsonElement>(),
-            CancellationToken.None));
+            DocumentGet, admittedShape, CancellationToken.None));
         await Assert.That(failure).IsNotNull();
         await Assert.That(failure!.Code).IsEqualTo(ErrorCode.RecoveryRequired);
+
+        var malformed = await Assert.ThrowsExactlyAsync<KeyLoadException>(() => host.Owner.InvokeAsync(
+            DocumentGet, new Dictionary<string, System.Text.Json.JsonElement>(), CancellationToken.None));
+        await Assert.That(malformed!.Code).IsEqualTo(ErrorCode.Validation);
     }
 }
