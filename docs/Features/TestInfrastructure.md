@@ -27,7 +27,7 @@ Test report retention (REQ/AC-TEST-001/002/005, AC-MP-012): CI retains the actua
 
 ## Test entry and suite selection
 
-[ADR-117](../ADR/ADR-117-tunit-ci-entry.md) defines the test entry: CI invokes TUnit/Microsoft.Testing.Platform directly after build through `scripts/Features/TestInfrastructure/run-tests.mjs`, and the TUnit fixtures own the Aspire testing builder, resource startup, readiness, discovered endpoints, real clients and joined shutdown. Unit and recovery suites use the same entry without acquiring a cluster topology. The closed suites are `analyzers`, `unit`, `recovery`, `cluster`, `comparison` and `site`.
+[ADR-117](../ADR/ADR-117-tunit-ci-entry.md) defines the test entry: TUnit/Microsoft.Testing.Platform runs directly after build. CI starts it through the shard runner `scripts/Features/TestInfrastructure/ci-test-shards.mjs` ([CI shards and lanes](#ci-shards-and-lanes)), local runs select a closed suite through `scripts/Features/TestInfrastructure/run-tests.mjs`, and the TUnit fixtures own the Aspire testing builder, resource startup, readiness, discovered endpoints, real clients and joined shutdown. Unit and recovery suites use the same entry without acquiring a cluster topology. The closed suites are `analyzers`, `unit`, `recovery`, `cluster`, `comparison` and `site`.
 
 The production ASP.NET Core host uses the `KeyLoad` assembly as its application
 identity, including when an in-process test owns the host lifetime. Static asset
@@ -107,9 +107,7 @@ REQ/AC-TEST-015 requires the local-image lifetime helpers to await already compl
 
 Local image cleanup joins in TestSuiteApplication only after actual AppHost stop and producer/runner settlement, under a separate45-second cleanup token, before output settlement and application disposal. Preparation output is included only for explicit local mode. Default GitHub image selection and the full replicated-cluster gates remain mandatory.
 
-REQ/AC-TEST-010 also requires enough bounded GitHub job time for the sequential unit and recovery suites plus build/format/preflight. A previous30-minute job limit was exhausted after both unit suites failed and recovery was cancelled. The Linux verify job receives120 minutes; no individual suite deadline, required check, artifact or failure predicate is removed. A failed, timed out or cancelled suite remains failed/unqualified.
-
-REQ/AC-TEST-010 also bounds the separate replicated-cluster job. A previous run of that job was canceled near its configured60-minute ceiling and produced no original TRX. The same job must also execute the required instrumented unit/recovery/cluster cohort and source/artifact checks. Allow180 minutes for that aggregate job, preserving every individual deadline, failure/cancellation predicate, required suite and artifact. This budget change does not make an unfinished or failed run qualified or alter workload bounds.
+REQ/AC-TEST-010 also requires bounded GitHub job time. Build and Tests splits the suites into the sharded jobs described in [CI shards and lanes](#ci-shards-and-lanes): each unit shard and the analyzers-and-recovery job has 30 minutes, each Aspire topology shard 35 minutes with a 25-minute deadline per lane process, and the Build job 30 minutes. No individual suite deadline, required check, artifact or failure predicate is removed. A failed, timed out or cancelled suite, lane or shard remains failed/unqualified, and an unfinished shard cannot qualify the run.
 
 AC-TEST-010 requires original per-suite MTP/TRX evidence from every required CI suite. Its Aspire caller explicitly enables `KeyLoadTests:ReportTrx=true`; an omitted report setting, absent report, cancelled suite or failed runner cannot establish qualification. A missing full-suite TRX receipt is an evidence gap, never a pass.
 
@@ -146,6 +144,30 @@ Current descriptor unitCensus has exactly normal, run-status exactly one full no
 All remaining report/TRX UID, source/PDB/image equality, maximumParallelTests50, create-only, file/byte/path/reparse/inventory/refusal/disposal/charged reads and 80/70/90/noDecrease/repeated-input gates remain unchanged. No successful coverage or task acceptance from source/discovery or partial SELECT.
 
 Whole regression: existing ImagesProduceClosedManifestAndRejectTamperingWithoutReplacingEvidence performs prepare/full literal inventory and compile identity checks, failed edited input unchanged, exact repair/healthy verify and create-only refusal. Deepen same operation with actual unsupported scalar contributor/image manifest refusal and unchanged exact repair; no property-only tests. Existing report merge/repeated input/read confinement/process settlement/cluster contributor controls remain in complete selected normal operation set. One complete owning batch compile/normal execution after all edits; root integrates then delivered Linux required. No new scalar runs.
+
+## CI shards and lanes
+
+[ADR-148](../ADR/ADR-148-parallel-ci-shards.md) defines the Build and Tests layout. `scripts/Features/TestInfrastructure/ci-test-shards.json` is the one manifest of shards; `ci-test-shards.mjs` reads it (`matrix`, `run`, `verify`, `inventory`), and its source scan (`ci-test-inventory.mjs`) needs no build. The Release workflow calls Build and Tests through `workflow_call` and publishes only after it succeeds.
+
+| Job | Contents | Filter and concurrency |
+|---|---|---|
+| Build | governance, website source inventory, static shard partition check, `dotnet build KeyLoad.slnx -warnaserror` | none |
+| Units U1–U4 | the namespaces listed for the shard | one process per namespace, `/KeyLoad.UnitTests/<namespace>/*/*`, `--maximum-parallel-tests` = processor count |
+| Analyzers and process recovery | shards AN then RC | `/KeyLoad.Analyzers.Tests/*/*/*` and `/KeyLoad.RecoveryTests/*/*/*` |
+| Aspire topology I01–I12 | two lanes per runner | each lane is its own `dotnet test` process, `--maximum-parallel-tests 1 --timeout 25m`, class or method alternation under `/KeyLoad.IntegrationTests/*/` |
+| Verify test partition | every shard's TRX artifact | `ci-test-shards.mjs verify TestResults` |
+
+Every test job runs `dotnet build KeyLoad.slnx -warnaserror` in the default Debug configuration, because tests read compiled outputs of projects their test project does not reference: ProductionSourceManifestOperationTests reads the image of every solution project, and ColdBootstrapSdkTests launches `src/KeyLoad.Cli/bin/Debug/net10.0/KeyLoad.Cli.dll`. Each job then writes TRX reports to `TestResults/<suite>/<shard>/<lane or namespace>` and uploads them as `test-results-<suite>-<shard>` even when tests fail. The filters pin the assembly segment, so the process recovery tests that the unit host also registers run once, in RC.
+
+A lane runs one test at a time, so it holds at most one 3-node cluster at a time and a 4-vCPU runner holds two. Lane kinds keep that bound: `shared-readers` and `shared-exclusive` lanes use one keyed shared cluster and create no clusters of their own; `own-clusters` and `functional-gate` lanes use no shared key; `isolated-clusters` lanes hold the other keyed clusters and tests without a cluster. Each lane process has its own keyed shared cluster, so a test that kills or restarts nodes affects only its own lane. Playwright is installed only on the shards that the manifest marks `playwright`.
+
+| Requirement | Acceptance and evidence |
+|---|---|
+| REQ-TEST-SHARD-001: every test class of the analyzer, unit, recovery and Aspire topology projects runs in exactly one shard or lane. | AC-TEST-SHARD-001: `verify` (run by Build) rejects a namespace or class in no shard, a class or method listed twice, a listed class or method absent from the source, a non-unique class name (filters match case-insensitively), an excluded `HeavyLoad` class in a lane and a split class with an unassigned method. |
+| REQ-TEST-SHARD-002: a runner holds at most two concurrent clusters. | AC-TEST-SHARD-002: `verify` rejects more than `lanesPerRunner` lanes in a shard, a shared lane with several keys or own clusters, an own-cluster lane with a shared key, and a lane that runs several tests at once while it contains disruptive or own-cluster classes. |
+| REQ-TEST-SHARD-003: the executed reports prove the partition. | AC-TEST-SHARD-003: `verify TestResults` (run by Verify test partition) rejects a test identity in more than one report, an inventory class or split method that never ran, a class that ran in a suite it does not belong to, a class that ran outside its shard or lane, and a suite without reports. |
+
+Add a new test class by naming it in one lane or by placing it in a listed namespace; `inventory <suite>` prints the cluster each class uses, whether it stops, kills or restarts nodes, and its current lane.
 
 ## Build and Tests boundary
 

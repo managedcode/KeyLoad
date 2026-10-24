@@ -1,0 +1,503 @@
+{
+  "description": "Build and Tests shards. Unit shards run one assembly-pinned TUnit process per namespace; integration shards run their lanes as concurrent serial TUnit processes, at most lanesPerRunner cluster lanes per 4-vCPU runner. Add a new test class to exactly one lane or namespace shard; ci-test-shards.mjs verify rejects gaps and overlaps.",
+  "suites": {
+    "units": {
+      "project": "tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj",
+      "sources": "tests/KeyLoad.UnitTests",
+      "assembly": "KeyLoad.UnitTests",
+      "partition": "namespace",
+      "parallelism": "processors",
+      "timeoutMinutes": 20,
+      "shards": [
+        {
+          "id": "U1",
+          "namespaces": [
+            "KeyLoad.UnitTests.StorageRecovery",
+            "KeyLoad.UnitTests.StorageReplication",
+            "KeyLoad.UnitTests.ClientApi",
+            "KeyLoad.UnitTests.AdminDashboard",
+            "KeyLoad.UnitTests.BlobStorage"
+          ]
+        },
+        {
+          "id": "U2",
+          "namespaces": [
+            "KeyLoad.UnitTests.Search",
+            "KeyLoad.UnitTests.GraphTraversal",
+            "KeyLoad.UnitTests.QueryExecution",
+            "KeyLoad.UnitTests.TimeSeries",
+            "KeyLoad.UnitTests.RelationalStorage",
+            "KeyLoad.UnitTests.DocumentStorage"
+          ]
+        },
+        {
+          "id": "U3",
+          "namespaces": [
+            "KeyLoad.UnitTests.ResourceExecution",
+            "KeyLoad.UnitTests.CodeQuality.Cases",
+            "KeyLoad.UnitTests.CodeQuality",
+            "KeyLoad.UnitTests.RepositoryGovernance",
+            "KeyLoad.UnitTests.TestInfrastructure",
+            "KeyLoad.UnitTests.TestInfrastructure.Cases",
+            "KeyLoad.UnitTests"
+          ]
+        },
+        {
+          "id": "U4",
+          "namespaces": [
+            "KeyLoad.UnitTests.OrleansExecution",
+            "KeyLoad.UnitTests.Messaging",
+            "KeyLoad.UnitTests.BackupRestore",
+            "KeyLoad.UnitTests.Authorization",
+            "KeyLoad.UnitTests.AnalyticsStore",
+            "KeyLoad.UnitTests.DatabaseComposition",
+            "KeyLoad.UnitTests.EventStreams",
+            "KeyLoad.UnitTests.ChangeFeeds",
+            "KeyLoad.UnitTests.InternalSerialization"
+          ]
+        }
+      ]
+    },
+    "analyzers": {
+      "project": "tests/KeyLoad.Analyzers.Tests/KeyLoad.Analyzers.Tests.csproj",
+      "sources": "tests/KeyLoad.Analyzers.Tests",
+      "assembly": "KeyLoad.Analyzers.Tests",
+      "partition": "assembly",
+      "timeoutMinutes": 20,
+      "shards": [
+        {
+          "id": "AN"
+        }
+      ]
+    },
+    "recovery": {
+      "project": "tests/KeyLoad.RecoveryTests/KeyLoad.RecoveryTests.csproj",
+      "sources": "tests/KeyLoad.RecoveryTests",
+      "assembly": "KeyLoad.RecoveryTests",
+      "partition": "assembly",
+      "timeoutMinutes": 20,
+      "shards": [
+        {
+          "id": "RC"
+        }
+      ]
+    },
+    "integration": {
+      "project": "tests/KeyLoad.IntegrationTests/KeyLoad.IntegrationTests.csproj",
+      "sources": "tests/KeyLoad.IntegrationTests",
+      "assembly": "KeyLoad.IntegrationTests",
+      "partition": "class",
+      "parallelism": 1,
+      "timeoutMinutes": 25,
+      "lanesPerRunner": 2,
+      "excludedCategories": [
+        "HeavyLoad"
+      ],
+      "shards": [
+        {
+          "id": "I01",
+          "playwright": true,
+          "lanes": [
+            {
+              "id": "L1",
+              "kind": "shared-readers",
+              "classes": [
+                "CompositeUniqueClusterTests",
+                "ConfiguredVectorProfileClusterTests",
+                "CrossTenantClusterWholeFlowTests",
+                "EventAppendClusterWholeFlowTests",
+                "FilteredSearchClusterTests",
+                "GraphIncomingMcpSchemaTests",
+                "GraphSearchClusterTests",
+                "McpAgentGuideClusterTests",
+                "McpCanonicalInputRejectionTests",
+                "McpConcurrentIdentityTests",
+                "McpDiscoveryTests",
+                "McpDocumentCrudParityTests",
+                "McpDocumentParityTests",
+                "McpEventStreamTests",
+                "MultiLaneReceiveClusterTests",
+                "RelationalSqlClusterAtomicityTests",
+                "RelationalSqlClusterAuthorizationTests",
+                "RelationalSqlClusterJoinAuthorizationTests",
+                "RelationalSqlClusterJoinCancellationTests",
+                "RelationalSqlClusterJoinReadCutTests",
+                "RelationalSqlClusterJoinRejectionTests",
+                "RelationalSqlClusterJoinTests",
+                "RelationalSqlClusterRowsTests",
+                "RemoteTransfersClusterTests",
+                "RequestIdReceiptTests",
+                "SampleRetentionClusterTests",
+                "SampleRollupClusterTests",
+                "SqlClusterBetweenTests",
+                "SqlClusterCancellationTests",
+                "SqlClusterCommentTests",
+                "SqlClusterDeliveryTests",
+                "SqlClusterModelParityTests",
+                "SqlModelViewClusterEventAuthorityTests",
+                "SqlModelViewClusterQueueAuthorityTests",
+                "TextClusterTests",
+                "ThreeWayHybridClusterTests",
+                "TimeSeriesClusterAuthorizationTests",
+                "TimeSeriesClusterWindowTests"
+              ]
+            },
+            {
+              "id": "L2",
+              "kind": "isolated-clusters",
+              "classes": [
+                "AdminBrowserLifetimeTests",
+                "BoundedDiagnosticLogTests",
+                "ChunkMultiblockPublicClusterTests",
+                "ClusterFailureReceiptsTests",
+                "ClusterFixtureDiagnosticFailureTests",
+                "ClusterFixtureRootRetentionTests",
+                "EventProjectionLineageR41Tests",
+                "FileStartupDiagnosticTests",
+                "HeavyDocumentLoadAdmissionTests",
+                "PartitionQueryMcpSchemaTests",
+                "PartitionQueryPublicAuthorizationTests",
+                "PartitionQueryPublicClusterTests",
+                "PartitionQueryPublicValidationTests",
+                "ProcessRestartFailureCaptureTests",
+                "RequestCqrsClusterDiagnosticsTests",
+                "RequestCqrsOfflineProcessTests",
+                "SampleChunkLifecycleClusterTests",
+                "SampleChunkRetentionRollupClusterTests",
+                "SampleChunkSubnormalClusterTests",
+                "SdkProblemBudgetPublicTests",
+                "TextDistinctTermsPublicTests",
+                "TextNestedWildcardPublicTests",
+                "TextNonStringTransitionsPublicTests",
+                "TextNormalizationPublicTests",
+                "TextProtectedPublicColdTests",
+                "TextRawReadPolicyPublicTests",
+                "TextRequestRefusalPublicTests",
+                "TextRowOwnershipPublicTests"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "I02",
+          "lanes": [
+            {
+              "id": "L1",
+              "kind": "own-clusters",
+              "classes": [
+                "QueueWorkerSdkClusterTests"
+              ]
+            },
+            {
+              "id": "L2",
+              "kind": "functional-gate",
+              "class": "FunctionalDatabaseColdReopenTests",
+              "methods": [
+                "SingleInstanceColdReopensAllModelsAndReplaysOriginalPublicCommands"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "I03",
+          "lanes": [
+            {
+              "id": "L1",
+              "kind": "own-clusters",
+              "classes": [
+                "CapabilityOutputClusterTests",
+                "GraphSearchPathPolicyClusterTests",
+                "QueueLeaseFencingClusterTests",
+                "SharedDomainPublicClusterTests",
+                "SubscriptionFilterGenerationClusterTests"
+              ]
+            },
+            {
+              "id": "L2",
+              "kind": "functional-gate",
+              "class": "FunctionalDatabaseGateTests",
+              "methods": [
+                "SingleInstanceRunsEveryModelThroughSdkMcpAndSqlWithPersistedUsers"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "I04",
+          "lanes": [
+            {
+              "id": "L1",
+              "kind": "own-clusters",
+              "classes": [
+                "AtomicTriadStagedClusterTests",
+                "AuthenticationExecutionTests",
+                "QueryRuleOptimizationClusterTests",
+                "QueueDeadlineSiloClusterTests",
+                "StrongReadSessionAbsenceClusterTests"
+              ]
+            },
+            {
+              "id": "L2",
+              "kind": "own-clusters",
+              "classes": [
+                "InboxProcessingPublicColdTests",
+                "QueueDeadlineAutonomousClusterTests",
+                "QueueProducerAtomicClusterTests",
+                "QueueViewLeaseIsolationTests"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "I05",
+          "lanes": [
+            {
+              "id": "L1",
+              "kind": "own-clusters",
+              "classes": [
+                "EventingRequiredClaimClusterTests",
+                "GraphSearchLineageClusterTests",
+                "QueryEquivalentIntegerClusterTests",
+                "TargetInboxPublicColdTests",
+                "TimeSeriesChunkQualificationClusterTests"
+              ]
+            },
+            {
+              "id": "L2",
+              "kind": "shared-exclusive",
+              "classes": [
+                "CredentialSubjectReplacementClusterTests",
+                "EventByteBoundPublicTests",
+                "GraphCycleFrontierPublicTests",
+                "GraphPathClusterParityTests",
+                "GraphSearchClusterSiloRestartTests",
+                "SafeProjectorOperationClusterTests",
+                "SeriesFiniteOverflowPublicTests",
+                "SqlModelViewClusterValidationTests",
+                "SqlOffsetClusterWholeFlowTests",
+                "TimeSeriesClusterReadTests"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "I06",
+          "lanes": [
+            {
+              "id": "L1",
+              "kind": "own-clusters",
+              "classes": [
+                "GraphLabelUseClusterTests",
+                "MetamorphicPublicClusterTests",
+                "QueueWorkerProcessClusterTests",
+                "RequiredProcessingPolicyClusterTests",
+                "SqlParserAdmissionClusterWholeFlowTests"
+              ]
+            },
+            {
+              "id": "L2",
+              "kind": "shared-exclusive",
+              "classes": [
+                "AdminBackupClientParityTests",
+                "AggregateReplayClusterSiloRestartTests",
+                "EventCurrentReadAuthorityClusterTests",
+                "EventProjectionClusterTests",
+                "GraphLabelFrontierPublicTests",
+                "GraphVertexPublicWholeFlowTests",
+                "GuideLifecyclePublicTests",
+                "PartitionQueryPublicSiloRestartTests",
+                "RecurringDueClusterTests",
+                "RecurringSchedulePolicyClusterTests",
+                "SagaDueClusterTests",
+                "SagaTimeoutClusterTests",
+                "ScopedCommandIdentityClusterTests",
+                "ScopedSampleIdentityPublicTests",
+                "TextAsyncClusterTests",
+                "TextWaitClusterTests",
+                "TopicRetentionClusterTests",
+                "TopicSqlClusterTests"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "I07",
+          "lanes": [
+            {
+              "id": "L1",
+              "kind": "own-clusters",
+              "classes": [
+                "ModelHeadAuthorityClusterTests",
+                "RemoteTransferRepairClusterTests",
+                "RequestBodyLimitClusterTests",
+                "SubscriptionPhasePublicColdTests"
+              ]
+            },
+            {
+              "id": "L2",
+              "kind": "shared-exclusive",
+              "classes": [
+                "AdminDashboardClusterTests",
+                "AdminDispatchClientParityTests",
+                "AggregateReplayClusterTests",
+                "ClusterTests",
+                "EventReferenceSelectClusterTests",
+                "EventSelectiveAppendAuthorityClusterTests",
+                "LeftFilteredJoinClusterTests",
+                "QueueDeadLetterPublicClusterTests",
+                "RecurringScheduleClusterTests",
+                "SparseCompositePrefixClusterTests",
+                "SqlModelViewClusterParityTests",
+                "TimeSeriesCurrentCapabilityClusterTests"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "I08",
+          "lanes": [
+            {
+              "id": "L1",
+              "kind": "functional-gate",
+              "class": "FunctionalDatabaseGateTests",
+              "methods": [
+                "ThreeNodeClusterRunsSameEveryModelScenarioThroughSdkMcpAndSql"
+              ]
+            },
+            {
+              "id": "L2",
+              "kind": "own-clusters",
+              "classes": [
+                "CompetingInboxPublicTests",
+                "FunctionalFileOwnershipClusterTests",
+                "RemoteTransferAttemptClusterTests",
+                "ResourcePolicyUpdateClusterTests"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "I09",
+          "lanes": [
+            {
+              "id": "L1",
+              "kind": "functional-gate",
+              "class": "FunctionalDatabaseColdReopenTests",
+              "methods": [
+                "ThreeNodeColdReopensAllModelsAndReplaysOriginalPublicCommands"
+              ]
+            },
+            {
+              "id": "L2",
+              "kind": "shared-exclusive",
+              "classes": [
+                "AggregateSnapshotRaceClusterWholeFlowTests",
+                "AspireProcessFaultCommandTests",
+                "ComposedProjectionLineageClusterTests",
+                "DatabaseCompositionClusterTests",
+                "GraphIncomingClusterTests",
+                "McpCredentialLifecycleTests",
+                "McpFieldAuthorizationTests",
+                "McpPersistedAuthorizationTests",
+                "QueueReferenceSelectClusterTests",
+                "TimeSeriesClusterReplicaRestartTests"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "I10",
+          "playwright": true,
+          "lanes": [
+            {
+              "id": "L1",
+              "kind": "own-clusters",
+              "classes": [
+                "DocumentLiveProfileClusterTests",
+                "FoundationOtlpClusterTests",
+                "QueryCapabilityVersionClusterWholeFlowTests",
+                "RemoteTransferThreeStageColdTests",
+                "RowRevisionInferenceClusterTests"
+              ]
+            },
+            {
+              "id": "L2",
+              "kind": "shared-exclusive",
+              "classes": [
+                "AdminDashboardBrowserTests",
+                "CapturedPolicyClusterTests",
+                "DeclarativeCompositionClusterTests",
+                "DocumentSessionReadClusterTests",
+                "GraphPathClusterSiloRestartTests",
+                "QueueOrderedRetryPublicClusterTests",
+                "SqlGraphSearchClusterTests",
+                "StreamCatchupColdClusterTests",
+                "TimeSeriesAggregateScanBoundClusterTests"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "I11",
+          "lanes": [
+            {
+              "id": "L1",
+              "kind": "own-clusters",
+              "classes": [
+                "ColdBootstrapSdkTests",
+                "InitialPrincipalEpochClusterTests",
+                "PostgresDecimalClusterWholeFlowTests",
+                "QueueDispatchCasClusterTests",
+                "RelationalSqlClusterJoinBudgetTests"
+              ]
+            },
+            {
+              "id": "L2",
+              "kind": "shared-exclusive",
+              "classes": [
+                "EventMessageSensitivePublicClusterTests",
+                "EventSchemaCursorPublicTests",
+                "FeedLiveClusterTests",
+                "GraphIncomingClusterSiloRestartTests",
+                "GraphPathClusterAuthorizationTests",
+                "QueueParkedPolicyClusterTests",
+                "SeriesRetentionAtomicPublicTests",
+                "TextClusterSiloRestartTests",
+                "TimeSeriesResourceTagPolicyClusterTests",
+                "TypedEndpointJoinClusterTests"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "I12",
+          "lanes": [
+            {
+              "id": "L1",
+              "kind": "shared-exclusive",
+              "classes": [
+                "DeclarativeCompositionReverseQuotaClusterTests",
+                "ProjectionPublicColdTests",
+                "QueueLifecyclePublicClusterTests",
+                "QueueTerminalPolicyClusterTests",
+                "SampleRetentionClusterRecoveryTests",
+                "StreamTraversalColdClusterTests"
+              ]
+            },
+            {
+              "id": "L2",
+              "kind": "own-clusters",
+              "classes": [
+                "CatalogBootstrapAuthorityClusterTests",
+                "FileStorageHttpTests",
+                "PostgresInt16ClusterWholeFlowTests",
+                "QueueDueDatabaseScopeClusterTests",
+                "RemoteTransferCoordinatorClusterTests"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

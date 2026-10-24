@@ -4,8 +4,12 @@ on:
 permissions:
   contents: read
 jobs:
+  tests:
+    name: Build and Tests
+    uses: ./.github/workflows/build-and-tests.yml
   publish:
     name: Publish ${{ matrix.runtime }}
+    needs: tests
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     strategy:
@@ -34,6 +38,7 @@ jobs:
           if-no-files-found: error
   server-image:
     name: Publish server container image
+    needs: tests
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     permissions:
@@ -73,6 +78,7 @@ jobs:
           if-no-files-found: error
   benchmark-image:
     name: Build benchmark Docker image
+    needs: tests
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:

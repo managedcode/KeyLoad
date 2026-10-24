@@ -4,12 +4,17 @@ on:
     branches: [main]
   pull_request:
   workflow_dispatch:
+  workflow_call:
 permissions:
   contents: read
+# Shards and lanes come from scripts/Features/TestInfrastructure/ci-test-shards.json (ADR-148).
+# Test jobs build the whole solution: unit CodeQuality checks read every project's compiled image and
+# the cold bootstrap topology test launches src/KeyLoad.Cli, which the test projects do not reference.
 jobs:
-  build-and-test:
+  build:
+    name: Build
     runs-on: ubuntu-24.04
-    timeout-minutes: 180
+    timeout-minutes: 30
     steps:
       - name: Download source code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -21,27 +26,135 @@ jobs:
         run: |
           node scripts/Features/RepositoryGovernance/verify.mjs
           node scripts/Features/BenchmarkComparisons/session-source-closure.mjs --verify=scripts/Features/BenchmarkComparisons/site-isolated-dependencies.txt
+      - name: Check test shard partition
+        run: node scripts/Features/TestInfrastructure/ci-test-shards.mjs verify
       - name: Build
         run: dotnet build KeyLoad.slnx -warnaserror
-      - name: Install administration browser
-        shell: pwsh
-        run: tests/KeyLoad.IntegrationTests/bin/Debug/net10.0/playwright.ps1 install --with-deps chromium
-      - name: Test code analyzers
-        run: dotnet test --project tests/KeyLoad.Analyzers.Tests/KeyLoad.Analyzers.Tests.csproj --no-build --output Detailed --report-trx --results-directory "$GITHUB_WORKSPACE/TestResults/analyzers"
+
+  shards:
+    name: Plan test shards
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      units: ${{ steps.plan.outputs.units }}
+      integration: ${{ steps.plan.outputs.integration }}
+    steps:
+      - name: Download source code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Read the shard manifest
+        id: plan
+        run: |
+          echo "units=$(node scripts/Features/TestInfrastructure/ci-test-shards.mjs matrix units)" >> "$GITHUB_OUTPUT"
+          echo "integration=$(node scripts/Features/TestInfrastructure/ci-test-shards.mjs matrix integration)" >> "$GITHUB_OUTPUT"
+
+  units:
+    name: Units ${{ matrix.shard }}
+    needs: shards
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.shards.outputs.units) }}
+    env:
+      SHARD: ${{ matrix.shard }}
+    steps:
+      - name: Download source code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Set up .NET
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: global.json
+      - name: Build
+        run: dotnet build KeyLoad.slnx -warnaserror
       - name: Test units
-        if: ${{ !cancelled() }}
-        run: dotnet test --project tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj --no-build --output Detailed --maximum-parallel-tests "$(nproc)" --report-trx --results-directory "$GITHUB_WORKSPACE/TestResults/units"
-      - name: Test process recovery
-        if: ${{ !cancelled() }}
-        run: dotnet test --project tests/KeyLoad.RecoveryTests/KeyLoad.RecoveryTests.csproj --no-build --output Detailed --report-trx --results-directory "$GITHUB_WORKSPACE/TestResults/recovery"
-      - name: Test Aspire topology
-        if: ${{ !cancelled() }}
-        run: dotnet test --project tests/KeyLoad.IntegrationTests/KeyLoad.IntegrationTests.csproj --no-build --output Detailed --treenode-filter '/*/*/*/*[Category!=HeavyLoad]' --timeout 100m --report-trx --results-directory "$GITHUB_WORKSPACE/TestResults/integration"
+        run: node scripts/Features/TestInfrastructure/ci-test-shards.mjs run "$SHARD" --results-directory "$GITHUB_WORKSPACE/TestResults"
       - name: Save test results
         if: ${{ always() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: build-and-tests-results
-          path: TestResults/**
+          name: test-results-units-${{ matrix.shard }}
+          path: TestResults
           if-no-files-found: warn
           retention-days: 30
+          overwrite: true
+
+  analyzers-recovery:
+    name: Analyzers and process recovery
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Download source code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Set up .NET
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: global.json
+      - name: Build
+        run: dotnet build KeyLoad.slnx -warnaserror
+      - name: Test code analyzers
+        run: node scripts/Features/TestInfrastructure/ci-test-shards.mjs run AN --results-directory "$GITHUB_WORKSPACE/TestResults"
+      - name: Test process recovery
+        if: ${{ !cancelled() }}
+        run: node scripts/Features/TestInfrastructure/ci-test-shards.mjs run RC --results-directory "$GITHUB_WORKSPACE/TestResults"
+      - name: Save test results
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: test-results-analyzers-recovery
+          path: TestResults
+          if-no-files-found: warn
+          retention-days: 30
+          overwrite: true
+
+  integration:
+    name: Aspire topology ${{ matrix.shard }}
+    needs: shards
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.shards.outputs.integration) }}
+    env:
+      SHARD: ${{ matrix.shard }}
+    steps:
+      - name: Download source code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Set up .NET
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: global.json
+      - name: Build
+        run: dotnet build KeyLoad.slnx -warnaserror
+      - name: Install administration browser
+        if: ${{ matrix.playwright }}
+        shell: pwsh
+        run: tests/KeyLoad.IntegrationTests/bin/Debug/net10.0/playwright.ps1 install --with-deps chromium
+      - name: Test Aspire topology lanes
+        run: node scripts/Features/TestInfrastructure/ci-test-shards.mjs run "$SHARD" --results-directory "$GITHUB_WORKSPACE/TestResults"
+      - name: Save test results
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: test-results-integration-${{ matrix.shard }}
+          path: TestResults
+          if-no-files-found: warn
+          retention-days: 30
+          overwrite: true
+
+  verify-partition:
+    name: Verify test partition
+    needs: [units, analyzers-recovery, integration]
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Download source code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Download test results
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          pattern: test-results-*
+          path: TestResults
+          merge-multiple: true
+      - name: Check every test ran exactly once
+        run: node scripts/Features/TestInfrastructure/ci-test-shards.mjs verify TestResults

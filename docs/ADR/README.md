@@ -129,3 +129,5 @@ source artifacts own those checks.
 | [ADR-144: Typed Orleans request envelopes](ADR-144-typed-request-envelopes.md) |
 | [ADR-145: No request throttling](ADR-145-no-request-throttling.md) |
 | [ADR-146: Group commit](ADR-146-group-commit.md) |
+| [ADR-147: Id-ordered query continuation](ADR-147-id-ordered-query-continuation.md) |
+| [ADR-148: Parallel CI shards](ADR-148-parallel-ci-shards.md) |
