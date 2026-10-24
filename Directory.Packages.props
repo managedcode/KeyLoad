@@ -32,7 +32,7 @@
     <PackageVersion Include="ModelContextProtocol.AspNetCore" Version="2.3.0" />
     <PackageVersion Include="ModelContextProtocol.Core" Version="2.3.0" />
     <PackageVersion Include="Microsoft.Orleans.Server" Version="10.4.0" />
-    <PackageVersion Include="ManagedCode.Orleans.RapidMembership" Version="10.4.1" />
+    <PackageVersion Include="ManagedCode.Orleans.RapidMembership" Version="10.4.2" />
     <PackageVersion Include="Microsoft.Orleans.Streaming" Version="10.4.0" />
     <PackageVersion Include="Microsoft.Orleans.Journaling" Version="10.4.0-alpha.1" />
     <PackageVersion Include="Microsoft.Orleans.DurableJobs" Version="10.4.0-alpha.1" />
