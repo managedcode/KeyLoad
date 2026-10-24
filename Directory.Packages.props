@@ -18,7 +18,7 @@
     <PackageVersion Include="ManagedCode.Storage.Server" Version="10.1.5" />
     <PackageVersion Include="ManagedCode.Orleans.Graph" Version="10.4.7" />
     <PackageVersion Include="ManagedCode.Orleans.Identity.Core" Version="10.4.2" />
-    <PackageVersion Include="ManagedCode.MCPGateway" Version="2.3.0" />
+    <PackageVersion Include="ManagedCode.MCPGateway" Version="2.3.1" />
     <PackageVersion Include="ManagedCode.MarkdownLd.Kb" Version="0.2.18" />
     <!-- Central transitive dependency used by Aspire and StreamJsonRpc. -->
     <PackageVersion Include="MessagePack" Version="3.1.12" />
